@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.3 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.9 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * Matrix operation functions for hypre_CSRMatrix class.
@@ -325,7 +345,7 @@ int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
    if (num_rowsA && ! num_colsA)
    {
-      max_col = 0;
+      max_col = -1;
       for (i = 0; i < num_rowsA; ++i)
       {
           for (j = A_i[i]; j < A_i[i+1]; j++)
@@ -376,6 +396,8 @@ int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
    {
       for (j = A_i[i]; j < A_i[i+1]; j++)
       {
+         hypre_assert( AT_i[A_j[j]] >= 0 );
+         hypre_assert( AT_i[A_j[j]] < num_nonzerosAT );
          AT_j[AT_i[A_j[j]]] = i;
          if (data) AT_data[AT_i[A_j[j]]] = A_data[j];
          AT_i[A_j[j]]++;
@@ -398,4 +420,73 @@ int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 }
 
 
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixReorder:
+ * Reorders the column and data arrays of a square CSR matrix, such that the
+ * first entry in each row is the diagonal one.
+ *--------------------------------------------------------------------------*/
 
+int hypre_CSRMatrixReorder(hypre_CSRMatrix *A)
+{
+   int i, j, tempi, row_size;
+   double tempd;
+
+   double *A_data = hypre_CSRMatrixData(A);
+   int    *A_i = hypre_CSRMatrixI(A);
+   int    *A_j = hypre_CSRMatrixJ(A);
+   int     num_rowsA = hypre_CSRMatrixNumRows(A);
+   int     num_colsA = hypre_CSRMatrixNumCols(A);
+
+   /* the matrix should be square */
+   if (num_rowsA != num_colsA)
+      return -1;
+
+   for (i = 0; i < num_rowsA; i++)
+   {
+      row_size = A_i[i+1]-A_i[i];
+
+      for (j = 0; j < row_size; j++)
+      {
+         if (A_j[j] == i)
+         {
+            if (j != 0)
+            {
+               tempi = A_j[0];
+               A_j[0] = A_j[j];
+               A_j[j] = tempi;
+
+               tempd = A_data[0];
+               A_data[0] = A_data[j];
+               A_data[j] = tempd;
+            }
+            break;
+         }
+
+         /* diagonal element is missing */
+         if (j == row_size-1)
+            return -2;
+      }
+
+      A_j    += row_size;
+      A_data += row_size;
+   }
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRMatrixSumElts:
+ * Returns the sum of all matrix elements.
+ *--------------------------------------------------------------------------*/
+
+double hypre_CSRMatrixSumElts( hypre_CSRMatrix *A )
+{
+   double sum = 0;
+   double * data = hypre_CSRMatrixData( A );
+   int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
+   int i;
+
+   for ( i=0; i<num_nonzeros; ++i ) sum += data[i];
+
+   return sum;
+}

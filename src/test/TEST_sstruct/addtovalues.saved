@@ -1,0 +1,476 @@
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 15
+Final Relative Residual Norm = 7.378028e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 15
+Final Relative Residual Norm = 7.378028e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 3
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0     300     7020  0.078    12   33  23.4   2.500e-01   6.840e+00
+ 1      76     3568  0.618    21   71  46.9   2.365e+00   1.344e+01
+ 2       3        9  1.000     3    3   3.0   7.270e+00   7.780e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0   300 x 76      1  10   7.095e-02 4.708e-01 6.079e-01 1.000e+00
+ 1    76 x 3       0   3   4.098e-02 2.046e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.263333
+                operator = 1.509544
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 100
+Final Relative Residual Norm = 4.930951e-05
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 3
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0     300     7020  0.078    12   33  23.4   2.500e-01   6.840e+00
+ 1      76     3568  0.618    21   71  46.9   2.365e+00   1.344e+01
+ 2       3        9  1.000     3    3   3.0   7.270e+00   7.780e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0   300 x 76      1  10   7.095e-02 4.708e-01 6.079e-01 1.000e+00
+ 1    76 x 3       0   3   4.098e-02 2.046e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.263333
+                operator = 1.509544
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 100
+Final Relative Residual Norm = 4.930951e-05
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 7.397039e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 7.397039e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 4
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0     560    13808  0.044    12   33  24.7   2.500e-01   6.840e+00
+ 1     151     9695  0.425    21  108  64.2   1.082e+00   1.344e+01
+ 2      32     1016  0.992    30   32  31.8   1.702e+00   1.264e+01
+ 3       6       36  1.000     6    6   6.0   6.668e+00   8.090e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0   560 x 151     1  12   2.490e-02 4.708e-01 6.079e-01 1.000e+00
+ 1   151 x 32      0   8   2.111e-02 3.352e-01 0.000e+00 1.000e+00
+ 2    32 x 6       0   4   4.383e-02 2.403e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.337500
+                operator = 1.778317
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.060000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.140000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.120000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 100
+Final Relative Residual Norm = 8.401007e-05
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 4
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0     560    13808  0.044    12   33  24.7   2.500e-01   6.840e+00
+ 1     151     9695  0.425    21  108  64.2   1.082e+00   1.344e+01
+ 2      32     1016  0.992    30   32  31.8   1.702e+00   1.264e+01
+ 3       6       36  1.000     6    6   6.0   6.668e+00   8.090e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0   560 x 151     1  12   2.490e-02 4.708e-01 6.079e-01 1.000e+00
+ 1   151 x 32      0   8   2.111e-02 3.352e-01 0.000e+00 1.000e+00
+ 2    32 x 6       0   4   4.383e-02 2.403e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.337500
+                operator = 1.778317
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.130000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.090000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 100
+Final Relative Residual Norm = 8.401007e-05
+

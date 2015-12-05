@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.2 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.5 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * Header info for the hypre_IJMatrix structures
@@ -32,6 +52,14 @@ typedef struct hypre_IJMatrix_struct
                                        for holding additional local info */
    int         assemble_flag;       /* indicates whether matrix has been 
 				       assembled */
+
+   int         global_first_row;    /* these for data items are necessary */
+   int         global_first_col;    /*   to be able to avoind using the global */
+   int         global_num_rows;     /*   global partition */ 
+   int         global_num_cols;
+   
+
+
 } hypre_IJMatrix;
 
 /*--------------------------------------------------------------------------
@@ -48,6 +76,12 @@ typedef struct hypre_IJMatrix_struct
 #define hypre_IJMatrixTranslator(matrix)        ((matrix) -> translator)
 
 #define hypre_IJMatrixAssembleFlag(matrix)      ((matrix) -> assemble_flag)
+
+
+#define hypre_IJMatrixGlobalFirstRow(matrix)      ((matrix) -> global_first_row)
+#define hypre_IJMatrixGlobalFirstCol(matrix)      ((matrix) -> global_first_col)
+#define hypre_IJMatrixGlobalNumRows(matrix)       ((matrix) -> global_num_rows)
+#define hypre_IJMatrixGlobalNumCols(matrix)       ((matrix) -> global_num_cols)
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects

@@ -1,35 +1,77 @@
-#BHEADER***********************************************************************
-# (c) 2000   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# $Revision: 2.26 $
-#EHEADER***********************************************************************
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 2.11 $
+#EHEADER**********************************************************************
 
-include $(top_srcdir)/config/Makefile.config
+include ../config/Makefile.config
 
-HYPRE_BABEL_DIRS =\
+BHYPRE_BABEL_DIRS =\
  bHYPRE \
  bHYPREClient-C\
- bHYPREClient-F
+ bHYPREClient-F\
+ bHYPREClient-CX
 
-all: 
+# bHYPREClient-P
+
+HYPRE_BABEL_RUNTIME_SIDL_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/sidl
+
+###HYPRE_BABEL_RUNTIME_PYTHON_DIR = ${HYPRE_SRC_TOP_DIR}/babel-runtime/python
+###  when python option is enabled, uncomment the following line and move it
+###  to the all and install targets, repsectively, with the other cp commands
+###   cp -fp ${HYPRE_BABEL_RUNTIME_PYTHON_DIR}/*.h ${HYPRE_BUILD_DIR}/include
+###   cp -fp ${HYPRE_BABEL_RUNTIME_PYTHON_DIR}/*.h ${HYPRE_INC_INSTALL}
+
+all:
 	@ \
-	for i in ${HYPRE_BABEL_DIRS}; \
+	for i in ${BHYPRE_BABEL_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
 	    echo "Making $$i ..."; \
-	    (cd $$i && $(MAKE) install); \
+	    (cd $$i && $(MAKE) $@); \
 	  fi; \
-	done;
+	done
+	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_BUILD_DIR}/include
+	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/.libs/libs* ${HYPRE_BUILD_DIR}/lib
+	cp -fp hypre_babel_exception_handler.h ${HYPRE_BUILD_DIR}/include
 
-install: all
+install:
+	@ \
+	for i in ${BHYPRE_BABEL_DIRS}; \
+	do \
+	  if [ -d $$i ]; \
+	  then \
+	    echo "Making $$i ..."; \
+	    (cd $$i && $(MAKE) $@); \
+	  fi; \
+	done
+	cp -fp ${HYPRE_BABEL_RUNTIME_SIDL_DIR}/*.h ${HYPRE_INC_INSTALL}
+	cp -fp hypre_babel_exception_handler.h ${HYPRE_INC_INSTALL}
 
 clean:
 	@ \
-	for i in ${HYPRE_BABEL_DIRS}; \
+	for i in ${BHYPRE_BABEL_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -37,9 +79,9 @@ clean:
 	  fi; \
 	done
 
-veryclean:
+distclean:
 	@ \
-	for i in ${HYPRE_BABEL_DIRS}; \
+	for i in ${BHYPRE_BABEL_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \

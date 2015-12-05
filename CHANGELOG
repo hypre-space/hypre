@@ -1,11 +1,29 @@
-#BHEADER***********************************************************************
-# (c) 2000   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# $Revision: 2.48 $
-#EHEADER***********************************************************************
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 2.73 $
+#EHEADER**********************************************************************
+
 
 #=============================================================================
 #
@@ -14,13 +32,110 @@
 #
 #=============================================================================
 
+Version 1.13.0b released, 2006/10/03.
+
+- Babel-based interface updated to Babel version 1.0.0, plus various improvements,
+  such as an interface to the hypre error handler.  Pre-built interfaces are included
+  for C, Fortran, and C++.  
+
+- Various modifications to BoomerAMG:
+  - Eliminated the possibility to set relaxation on the finest grid
+  - Added various new long-range interpolation algorithms: standard (with and without
+    weight separation), extended and F-F interpolation. These routines will improve
+    convergence for low complexity coarsening algorithms PMIS and HMIS.
+  - Added the possibility to set a maximal number of weights per row <n> when truncating
+    the interpolation operator. When this option is used, only the absolutely largest
+    <n> weights per row are kept. 
+
+- Modifications to the fac user interface to permit easier set up of the problem.
+
+- shared libraries can be built by using the --enable-shared option when configuring.
+  NOTE: the directory where the shared libraries reside MUST be defined in the
+        LD_LIBRARY_PATH variable.
+
+- incorporated GNU Lesser General Public License
+
+- Issure tracking now using ROundup, send email to hypre-support@llnl.gov
+
+********************************************************************
+Version 1.12.0a released, 2006/07/26.
+
+- First release of AMS -- a new solver for (semi)definite Maxwell problems.
+
+- First release of Maxwell, a semi-structured Maxwell solver.
+
+- Modifications to the fac user interface to permit easier set up of the problem.
+********************************************************************
+  
+Version 1.11.1b released, 2006/05/30.
+
+- Corrected FEI build to allow user to specify a system FEI and build internal 
+  HYPRE routines.
+********************************************************************
+
+Version 1.11.0b released, 2006/04/24.
+
+- Added configure option --without-FEI to disable build of internal FEI routines.
+
+- Added a new system for handling error codes in hypre.
+
+- Added configure option --print-errors to enable printing of HYPRE error messages.
+
+- Modified configure to only depend on having a C compiler available.
+
+- Added compatible relaxation on one processor.
+
+- Updated all F90_HYPRE_* files to be consistent with HYPRE_* files.
+
+- Updated ex5.c to include (1) an option to print the system matrix and rhs and 
+  (2) a description of how to read in a matrix and rhs in IJ format for testing 
+  purposes.
+
+- Corrected error that ocurred when more than one Euclid solver object is used
+  at the same time
+
+- Added Maxwell capabilities via Sandia's ML solvers; see details in 
+  FEI_mv/fei-hypre/CHANGELOG.
+
+- Replaced PILUT with Euclid in test code sstruct.c.
+
+********************************************************************
+
+Version 1.10.0b released, 2005/12/19.
+
+- configure updates
+   -- always runs --without-blas --without-lapack unless the user specifies otherwise
+   -- cross-compiling enabled
+   -- added --with-no-global-partition option
+
+- makefile updates
+   -- changed eigensolvers subdirectory to multivector
+
+- Added a set of simple example codes covering the Struct, SStruct and IJ
+  interfaces. See README.html in the examples subdirectory for more details.
+
+- The --with-no-global-partition option was added to reduce storage
+  and improve run times on very large numbers of processors (such as
+  BlueGene/L). Currently only the IJ interface solvers have been
+  optimized.  For small or modest numbers of processors ( typically <
+  1000-5000 depending on the machine), this option is not needed 
+  (and will likely be slower).
+  
+- Added aggressive coarsening, which can be applied to all available 
+  coarsening schemes (via HYPRE_BoomerAMGSetNumAggLevels and 
+  HYPRE_BoomerAMGSetNumPaths) 
+
+- Added multipass interpolation and direct interpolation.
+
+- Added the capability of nodal coarsening for systems AMG.
+
+- expanded coverage of Babel-based interface
+
+********************************************************************
+
 Version 1.9.0b released, 2005/02/10.
 
-- NOTE: Soft links NOT changed until 2/17/05 due to vacation.
-
 - Added updated LOBPCG source code and test files.
-
-- Updated autotest scripts for current set of platforms.
 
 - Added a vector Laplace problem for testing systems AMG.
 
@@ -58,6 +173,9 @@ Version 1.9.0a released, 2005/01/18.
   and vector interfaces.
 
 - Added support to the PFMG solver for matrices with constant coefficients.
+
+- Reverted back to the first approach for setting periodic conditions.  The
+  periodic flag now contains the periodicity value, and is not just a boolean.
 
 ************************
 
@@ -157,7 +275,6 @@ Version 1.7.8b released, 2002/09/25.
   not implemented before anyway).  The new interface allows much more
   flexibility in controlling which parts of the matrix are symmetric.
 
-- PCG: Option to combine relative and absolute tolerance in convergence test.
 
 Version 1.7.7b released, 2002/08/08.
 
@@ -277,7 +394,6 @@ New internal installation: V2000-05-31
 
 - OpenMP threading added to BoomerAMG.
 
-- Changed ParAMG names to BoomerAMG.  Use 'bin/V2000-05-31.hypre_convert'
   to convert code to use the new names.
 
 - Changed default coarsening type for BoomerAMG.  This version does

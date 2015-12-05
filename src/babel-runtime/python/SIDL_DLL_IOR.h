@@ -1,11 +1,11 @@
 /*
- * File:          SIDL_DLL_IOR.h
- * Symbol:        SIDL.DLL-v0.8.2
+ * File:          sidl_DLL_IOR.h
+ * Symbol:        sidl.DLL-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.8.4
- * Release:       $Name: V1-9-0b $
- * Revision:      @(#) $Id: SIDL_DLL_IOR.h,v 1.4 2003/04/07 21:44:24 painter Exp $
- * Description:   Intermediate Object Representation for SIDL.DLL
+ * Babel Version: 1.0.0
+ * Release:       $Name: V1-13-0b $
+ * Revision:      @(#) $Id: sidl_DLL_IOR.h,v 1.5 2006/08/29 22:29:27 painter Exp $
+ * Description:   Intermediate Object Representation for sidl.DLL
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -32,17 +32,17 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.4
  */
 
-#ifndef included_SIDL_DLL_IOR_h
-#define included_SIDL_DLL_IOR_h
+#ifndef included_sidl_DLL_IOR_h
+#define included_sidl_DLL_IOR_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
-#ifndef included_SIDL_BaseClass_IOR_h
-#include "SIDL_BaseClass_IOR.h"
+struct sidl_rmi_InstanceHandle__object;
+#ifndef included_sidl_BaseClass_IOR_h
+#include "sidl_BaseClass_IOR.h"
 #endif
 
 #ifdef __cplusplus
@@ -50,7 +50,7 @@ extern "C" {
 #endif
 
 /*
- * Symbol "SIDL.DLL" (version 0.8.2)
+ * Symbol "sidl.DLL" (version 0.9.15)
  * 
  * The <code>DLL</code> class encapsulates access to a single
  * dynamically linked library.  DLLs are loaded at run-time using
@@ -60,108 +60,218 @@ extern "C" {
  * Class instances are created by <code>createClass</code>.
  */
 
-struct SIDL_DLL__array;
-struct SIDL_DLL__object;
-
-extern struct SIDL_DLL__object*
-SIDL_DLL__new(void);
-
-extern struct SIDL_DLL__object*
-SIDL_DLL__remote(const char *url);
-
-extern void SIDL_DLL__init(
-  struct SIDL_DLL__object* self);
-extern void SIDL_DLL__fini(
-  struct SIDL_DLL__object* self);
-extern void SIDL_DLL__IOR_version(int32_t *major, int32_t *minor);
+struct sidl_DLL__array;
+struct sidl_DLL__object;
 
 /*
  * Forward references for external classes and interfaces.
  */
 
-struct SIDL_BaseInterface__array;
-struct SIDL_BaseInterface__object;
-struct SIDL_ClassInfo__array;
-struct SIDL_ClassInfo__object;
+struct sidl_BaseException__array;
+struct sidl_BaseException__object;
+struct sidl_BaseInterface__array;
+struct sidl_BaseInterface__object;
+struct sidl_ClassInfo__array;
+struct sidl_ClassInfo__object;
+struct sidl_RuntimeException__array;
+struct sidl_RuntimeException__object;
+struct sidl_rmi_Call__array;
+struct sidl_rmi_Call__object;
+struct sidl_rmi_Return__array;
+struct sidl_rmi_Return__object;
 
 /*
  * Declare the method entry point vector.
  */
 
-struct SIDL_DLL__epv {
+struct sidl_DLL__epv {
   /* Implicit builtin methods */
+  /* 0 */
   void* (*f__cast)(
-    struct SIDL_DLL__object* self,
-    const char* name);
+    /* in */ struct sidl_DLL__object* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 1 */
   void (*f__delete)(
-    struct SIDL_DLL__object* self);
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 2 */
+  void (*f__exec)(
+    /* in */ struct sidl_DLL__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_rmi_Call__object* inArgs,
+    /* in */ struct sidl_rmi_Return__object* outArgs,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 3 */
+  char* (*f__getURL)(
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 4 */
+  void (*f__raddRef)(
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 5 */
+  sidl_bool (*f__isRemote)(
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 6 */
+  void (*f__set_hooks)(
+    /* in */ struct sidl_DLL__object* self,
+    /* in */ sidl_bool on,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 7 */
   void (*f__ctor)(
-    struct SIDL_DLL__object* self);
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 8 */
+  void (*f__ctor2)(
+    /* in */ struct sidl_DLL__object* self,
+    /* in */ void* private_data,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 9 */
   void (*f__dtor)(
-    struct SIDL_DLL__object* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 10 */
+  /* 11 */
+  /* 12 */
+  /* 13 */
+  /* Methods introduced in sidl.BaseInterface-v0.9.15 */
   void (*f_addRef)(
-    struct SIDL_DLL__object* self);
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_deleteRef)(
-    struct SIDL_DLL__object* self);
-  SIDL_bool (*f_isSame)(
-    struct SIDL_DLL__object* self,
-    struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInt)(
-    struct SIDL_DLL__object* self,
-    const char* name);
-  SIDL_bool (*f_isType)(
-    struct SIDL_DLL__object* self,
-    const char* name);
-  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
-    struct SIDL_DLL__object* self);
-  /* Methods introduced in SIDL.BaseClass-v0.8.2 */
-  /* Methods introduced in SIDL.DLL-v0.8.2 */
-  SIDL_bool (*f_loadLibrary)(
-    struct SIDL_DLL__object* self,
-    const char* uri);
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isSame)(
+    /* in */ struct sidl_DLL__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isType)(
+    /* in */ struct sidl_DLL__object* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.BaseClass-v0.9.15 */
+  /* Methods introduced in sidl.DLL-v0.9.15 */
+  sidl_bool (*f_loadLibrary)(
+    /* in */ struct sidl_DLL__object* self,
+    /* in */ const char* uri,
+    /* in */ sidl_bool loadGlobally,
+    /* in */ sidl_bool loadLazy,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   char* (*f_getName)(
-    struct SIDL_DLL__object* self);
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isGlobal)(
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isLazy)(
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_unloadLibrary)(
-    struct SIDL_DLL__object* self);
+    /* in */ struct sidl_DLL__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void* (*f_lookupSymbol)(
-    struct SIDL_DLL__object* self,
-    const char* linker_name);
-  struct SIDL_BaseClass__object* (*f_createClass)(
-    struct SIDL_DLL__object* self,
-    const char* sidl_name);
+    /* in */ struct sidl_DLL__object* self,
+    /* in */ const char* linker_name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  struct sidl_BaseClass__object* (*f_createClass)(
+    /* in */ struct sidl_DLL__object* self,
+    /* in */ const char* sidl_name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
 };
 
+/*
+ * Define the controls structure.
+ */
+
+
+struct sidl_DLL__controls {
+  int     use_hooks;
+};
 /*
  * Define the class object structure.
  */
 
-struct SIDL_DLL__object {
-  struct SIDL_BaseClass__object d_sidl_baseclass;
-  struct SIDL_DLL__epv*         d_epv;
+struct sidl_DLL__object {
+  struct sidl_BaseClass__object d_sidl_baseclass;
+  struct sidl_DLL__epv*         d_epv;
   void*                         d_data;
 };
 
-struct SIDL_DLL__external {
-  struct SIDL_DLL__object*
-  (*createObject)(void);
+struct sidl_DLL__external {
+  struct sidl_DLL__object*
+  (*createObject)(void* ddata, struct sidl_BaseInterface__object **_ex);
 
-  struct SIDL_DLL__object*
-  (*createRemote)(const char *url);
-
+  struct sidl_BaseClass__epv*(*getSuperEPV)(void);
+  int d_ior_major_version;
+  int d_ior_minor_version;
 };
 
 /*
  * This function returns a pointer to a static structure of
  * pointers to function entry points.  Its purpose is to provide
  * one-stop shopping for loading DLLs.
- * loading DLLs
  */
 
-const struct SIDL_DLL__external*
-SIDL_DLL__externals(void);
+const struct sidl_DLL__external*
+sidl_DLL__externals(void);
 
-#ifdef __cplusplus
-}
-#endif
-#endif
+extern struct sidl_DLL__object*
+sidl_DLL__new(void* ddata,struct sidl_BaseInterface__object ** _ex);
+
+extern void sidl_DLL__init(
+  struct sidl_DLL__object* self, void* ddata,
+    struct sidl_BaseInterface__object ** _ex);
+extern void sidl_DLL__getEPVs(
+  struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
+  struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
+    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_DLL__epv **s_arg_epv__sidl_dll,
+    struct sidl_DLL__epv **s_arg_epv_hooks__sidl_dll);
+  extern void sidl_DLL__fini(
+    struct sidl_DLL__object* self, struct sidl_BaseInterface__object ** _ex);
+  extern void sidl_DLL__IOR_version(int32_t *major, int32_t *minor);
+
+  struct sidl_BaseClass__object* skel_sidl_DLL_fconnect_sidl_BaseClass(const 
+    char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseClass__object* skel_sidl_DLL_fcast_sidl_BaseClass(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_BaseInterface__object* 
+    skel_sidl_DLL_fconnect_sidl_BaseInterface(const char* url, sidl_bool ar,
+    struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseInterface__object* 
+    skel_sidl_DLL_fcast_sidl_BaseInterface(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_ClassInfo__object* skel_sidl_DLL_fconnect_sidl_ClassInfo(const 
+    char* url, sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_ClassInfo__object* skel_sidl_DLL_fcast_sidl_ClassInfo(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_DLL__object* skel_sidl_DLL_fconnect_sidl_DLL(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_DLL__object* skel_sidl_DLL_fcast_sidl_DLL(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_RuntimeException__object* 
+    skel_sidl_DLL_fconnect_sidl_RuntimeException(const char* url, sidl_bool ar,
+    struct sidl_BaseInterface__object **_ex);
+  struct sidl_RuntimeException__object* 
+    skel_sidl_DLL_fcast_sidl_RuntimeException(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_DLL__remote{
+    int d_refcount;
+    struct sidl_rmi_InstanceHandle__object *d_ih;
+  };
+
+  #ifdef __cplusplus
+  }
+  #endif
+  #endif

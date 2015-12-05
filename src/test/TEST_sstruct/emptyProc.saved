@@ -1,0 +1,3000 @@
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+SysPFMG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+SysPFMG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 22
+Final Relative Residual Norm = 7.955936e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 4
+Final Relative Residual Norm = 2.838665e-08
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 11
+Final Relative Residual Norm = 3.422599e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+SysPFMG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+SysPFMG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 22
+Final Relative Residual Norm = 7.955936e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 4
+Final Relative Residual Norm = 2.838665e-08
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 36
+Final Relative Residual Norm = 9.899649e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 9
+Final Relative Residual Norm = 8.113805e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 33
+Final Relative Residual Norm = 5.533708e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    1000     6400  0.006     4    7   6.4   0.000e+00   3.000e+00
+ 1     500     7760  0.031     7   19  15.5  -1.499e-15   4.000e+00
+ 2     123     3175  0.210    11   40  25.8   1.760e-01   5.199e+00
+ 3      43     1573  0.851    22   43  36.6   2.981e+00   5.273e+00
+ 4      17      289  1.000    17   17  17.0   4.222e+00   6.982e+00
+ 5       1        1  1.000     1    1   1.0   5.135e+00   5.135e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  1000 x 500     1   6   1.667e-01 1.667e-01 5.000e-01 1.000e+00
+ 1   500 x 123     1   6   4.688e-02 3.333e-01 4.063e-01 1.000e+00
+ 2   123 x 43      0  12   1.936e-02 3.174e-01 0.000e+00 1.000e+00
+ 3    43 x 17      0   7   8.327e-03 1.970e-01 0.000e+00 1.000e+00
+ 4    17 x 1       0   1   6.033e-02 1.318e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.684000
+                operator = 2.999687
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 3
+Final Relative Residual Norm = 8.857865e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.060000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 17
+Final Relative Residual Norm = 6.037817e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 33
+Final Relative Residual Norm = 5.533708e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 4
+Final Relative Residual Norm = 2.723161e-08
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 74
+Final Relative Residual Norm = 9.161679e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 11
+Final Relative Residual Norm = 3.422599e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 74
+Final Relative Residual Norm = 9.161679e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    1000     6400  0.006     4    7   6.4   0.000e+00   3.000e+00
+ 1     500     7760  0.031     7   19  15.5  -1.499e-15   4.000e+00
+ 2     123     3175  0.210    11   40  25.8   1.760e-01   5.199e+00
+ 3      43     1573  0.851    22   43  36.6   2.981e+00   5.273e+00
+ 4      17      289  1.000    17   17  17.0   4.222e+00   6.982e+00
+ 5       1        1  1.000     1    1   1.0   5.135e+00   5.135e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  1000 x 500     1   6   1.667e-01 1.667e-01 5.000e-01 1.000e+00
+ 1   500 x 123     1   6   4.688e-02 3.333e-01 4.063e-01 1.000e+00
+ 2   123 x 43      0  12   1.936e-02 3.174e-01 0.000e+00 1.000e+00
+ 3    43 x 17      0   7   8.327e-03 1.970e-01 0.000e+00 1.000e+00
+ 4    17 x 1       0   1   6.033e-02 1.318e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.684000
+                operator = 2.999687
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 3
+Final Relative Residual Norm = 5.655585e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.210000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.210000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 100
+Final Relative Residual Norm = 4.781429e-06
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.689591e+01
+Initial L2 norm of residual: 3.689591e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    5.177528e-03    0.000140   1.403280e-04
+    2    1.255865e-06    0.000243   3.403806e-08
+
+
+Final L2 norm of residual: 1.255865e-06
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 2
+Final Relative Residual Norm = 3.403806e-08
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.689591e+01
+Initial L2 norm of residual: 3.689591e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    3.154352e+00    0.085493   8.549326e-02
+    2    2.181116e-01    0.069146   5.911540e-03
+    3    1.847121e-02    0.084687   5.006304e-04
+    4    1.021516e-03    0.055303   2.768644e-05
+    5    1.342943e-04    0.131466   3.639814e-06
+    6    2.330631e-05    0.173547   6.316774e-07
+
+
+Final L2 norm of residual: 2.330631e-05
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 6
+Final Relative Residual Norm = 6.316774e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.689591e+01
+Initial L2 norm of residual: 3.689591e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    1.137391e+01    0.308270   3.082701e-01
+    2    6.470341e+00    0.568876   1.753674e-01
+    3    4.287912e+00    0.662703   1.162164e-01
+    4    2.925744e+00    0.682324   7.929724e-02
+    5    1.993489e+00    0.681361   5.403008e-02
+    6    1.371877e+00    0.688179   3.718236e-02
+    7    1.009366e+00    0.735756   2.735713e-02
+    8    7.958130e-01    0.788428   2.156914e-02
+    9    6.270541e-01    0.787941   1.699522e-02
+   10    4.634624e-01    0.739111   1.256135e-02
+   11    3.064750e-01    0.661273   8.306476e-03
+   12    1.862576e-01    0.607742   5.048191e-03
+   13    1.097304e-01    0.589132   2.974052e-03
+   14    5.575828e-02    0.508139   1.511232e-03
+   15    2.709133e-02    0.485871   7.342637e-04
+   16    1.253270e-02    0.462609   3.396773e-04
+   17    5.062596e-03    0.403951   1.372129e-04
+   18    2.561008e-03    0.505869   6.941170e-05
+   19    1.337837e-03    0.522387   3.625976e-05
+   20    6.710062e-04    0.501561   1.818647e-05
+   21    3.280323e-04    0.488866   8.890749e-06
+   22    1.768976e-04    0.539269   4.794505e-06
+   23    1.080529e-04    0.610822   2.928588e-06
+   24    6.342813e-05    0.587010   1.719110e-06
+   25    3.354128e-05    0.528808   9.090784e-07
+
+
+Final L2 norm of residual: 3.354128e-05
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 9.090784e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    1000     6400  0.006     4    7   6.4   0.000e+00   3.000e+00
+ 1     500     7760  0.031     7   19  15.5  -1.499e-15   4.000e+00
+ 2     123     3175  0.210    11   40  25.8   1.760e-01   5.199e+00
+ 3      43     1573  0.851    22   43  36.6   2.981e+00   5.273e+00
+ 4      17      289  1.000    17   17  17.0   4.222e+00   6.982e+00
+ 5       1        1  1.000     1    1   1.0   5.135e+00   5.135e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  1000 x 500     1   6   1.667e-01 1.667e-01 5.000e-01 1.000e+00
+ 1   500 x 123     1   6   4.688e-02 3.333e-01 4.063e-01 1.000e+00
+ 2   123 x 43      0  12   1.936e-02 3.174e-01 0.000e+00 1.000e+00
+ 3    43 x 17      0   7   8.327e-03 1.970e-01 0.000e+00 1.000e+00
+ 4    17 x 1       0   1   6.033e-02 1.318e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.684000
+                operator = 2.999687
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.689591e+01
+Initial L2 norm of residual: 3.689591e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    6.555399e-03    0.000178   1.776728e-04
+    2    8.241353e-05    0.012572   2.233676e-06
+    3    1.322061e-06    0.016042   3.583218e-08
+
+
+Final L2 norm of residual: 1.322061e-06
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 3
+Final Relative Residual Norm = 3.583218e-08
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    1000     6400  0.006     4    7   6.4   0.000e+00   3.000e+00
+ 1     500     7760  0.031     7   19  15.5  -1.499e-15   4.000e+00
+ 2     123     3175  0.210    11   40  25.8   1.760e-01   5.199e+00
+ 3      43     1573  0.851    22   43  36.6   2.981e+00   5.273e+00
+ 4      17      289  1.000    17   17  17.0   4.222e+00   6.982e+00
+ 5       1        1  1.000     1    1   1.0   5.135e+00   5.135e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  1000 x 500     1   6   1.667e-01 1.667e-01 5.000e-01 1.000e+00
+ 1   500 x 123     1   6   4.688e-02 3.333e-01 4.063e-01 1.000e+00
+ 2   123 x 43      0  12   1.936e-02 3.174e-01 0.000e+00 1.000e+00
+ 3    43 x 17      0   7   8.327e-03 1.970e-01 0.000e+00 1.000e+00
+ 4    17 x 1       0   1   6.033e-02 1.318e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.684000
+                operator = 2.999687
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 3
+Final Relative Residual Norm = 5.655585e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.210000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.210000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.689591e+01
+Initial L2 norm of residual: 3.689591e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    7.726648e+00    0.209417   2.094174e-01
+    2    3.058143e+00    0.395792   8.288570e-02
+    3    1.320834e+00    0.431907   3.579891e-02
+    4    6.599433e-01    0.499642   1.788662e-02
+    5    3.642000e-01    0.551866   9.871013e-03
+    6    1.553912e-01    0.426665   4.211611e-03
+    7    4.986462e-02    0.320897   1.351494e-03
+    8    2.684075e-02    0.538272   7.274721e-04
+    9    2.087425e-02    0.777707   5.657604e-04
+   10    1.899923e-02    0.910176   5.149413e-04
+   11    2.048491e-02    1.078197   5.552081e-04
+   12    7.029706e+00    343.165111   1.905280e-01
+   13    5.218385e-03    0.000742   1.414353e-04
+   14    4.763285e-03    0.912789   1.291006e-04
+   15    1.414895e-02    2.970419   3.834830e-04
+   16    3.199962e-03    0.226162   8.672943e-05
+   17    3.068207e-03    0.958826   8.315846e-05
+   18    5.563397e-03    1.813240   1.507863e-04
+   19    4.897776e-03    0.880357   1.327458e-04
+   20    3.484702e-03    0.711487   9.444683e-05
+   21    2.817165e-03    0.808438   7.635439e-05
+   22    1.816896e-03    0.644938   4.924383e-05
+   23    3.237709e-04    0.178200   8.775252e-06
+   24    8.836823e-05    0.272934   2.395068e-06
+   25    1.363864e-05    0.154339   3.696518e-07
+
+
+Final L2 norm of residual: 1.363864e-05
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 3.696518e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+Hybrid Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+Hybrid Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 33
+Final Relative Residual Norm = 5.533708e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+SMG Setup:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+SMG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 5
+Final Relative Residual Norm = 1.375560e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PFMG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PFMG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 22
+Final Relative Residual Norm = 7.225984e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PFMG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PFMG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 22
+Final Relative Residual Norm = 7.225984e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 4
+Final Relative Residual Norm = 1.228720e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 15
+Final Relative Residual Norm = 8.186559e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 11
+Final Relative Residual Norm = 5.333915e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+Hybrid Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+Hybrid Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+Hybrid Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+Hybrid Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 4
+Final Relative Residual Norm = 1.175679e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 10
+Final Relative Residual Norm = 7.120212e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 20
+Final Relative Residual Norm = 7.280287e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 50
+Final Relative Residual Norm = 1.501413e-05
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.162278e+01
+Initial L2 norm of residual: 3.162278e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    2.029166e-02    0.000642   6.416786e-04
+    2    5.374457e-06    0.000265   1.699553e-07
+
+
+Final L2 norm of residual: 5.374457e-06
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 2
+Final Relative Residual Norm = 1.699553e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.162278e+01
+Initial L2 norm of residual: 3.162278e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    4.427564e+00    0.140012   1.400119e-01
+    2    2.895050e-01    0.065387   9.154953e-03
+    3    1.488649e-02    0.051420   4.707522e-04
+    4    8.121930e-04    0.054559   2.568380e-05
+    5    3.555030e-05    0.043771   1.124199e-06
+    6    1.550956e-06    0.043627   4.904554e-08
+
+
+Final L2 norm of residual: 1.550956e-06
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 6
+Final Relative Residual Norm = 4.904554e-08
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.162278e+01
+Initial L2 norm of residual: 3.162278e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    1.464427e+01    0.463092   4.630924e-01
+    2    6.276518e+00    0.428599   1.984809e-01
+    3    1.595274e+00    0.254165   5.044699e-02
+    4    1.825443e-01    0.114428   5.772558e-03
+    5    1.041396e-02    0.057049   3.293182e-04
+    6    9.247785e-04    0.088802   2.924406e-05
+    7    3.670349e-05    0.039689   1.160666e-06
+    8    9.444684e-07    0.025732   2.986671e-08
+
+
+Final L2 norm of residual: 9.444684e-07
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 8
+Final Relative Residual Norm = 2.986671e-08
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.162278e+01
+Initial L2 norm of residual: 3.162278e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    1.844895e+01    0.583407   5.834072e-01
+    2    1.176016e+01    0.637443   3.718888e-01
+    3    7.178124e+00    0.610376   2.269922e-01
+    4    3.880696e+00    0.540628   1.227184e-01
+    5    1.750329e+00    0.451035   5.535026e-02
+    6    6.189144e-01    0.353599   1.957179e-02
+    7    2.013573e-01    0.325340   6.367478e-03
+    8    7.527575e-02    0.373842   2.380428e-03
+    9    3.101203e-02    0.411979   9.806864e-04
+   10    1.176051e-02    0.379224   3.719001e-04
+   11    3.411138e-03    0.290050   1.078697e-04
+   12    7.323962e-04    0.214707   2.316040e-05
+   13    1.312436e-04    0.179198   4.150288e-06
+   14    2.030608e-05    0.154721   6.421347e-07
+
+
+Final L2 norm of residual: 2.030608e-05
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 14
+Final Relative Residual Norm = 6.421347e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.210000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.200000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 100
+Final Relative Residual Norm = 4.781429e-06
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 1.844796e+01
+Initial L2 norm of residual: 1.844796e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    2.588764e-03    0.000140   1.403280e-04
+    2    6.279327e-07    0.000243   3.403806e-08
+
+
+Final L2 norm of residual: 6.279327e-07
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 2
+Final Relative Residual Norm = 3.403806e-08
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 1.844796e+01
+Initial L2 norm of residual: 1.844796e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    1.577176e+00    0.085493   8.549326e-02
+    2    1.090558e-01    0.069146   5.911540e-03
+    3    9.235607e-03    0.084687   5.006304e-04
+    4    5.107582e-04    0.055303   2.768644e-05
+    5    6.714714e-05    0.131466   3.639814e-06
+    6    1.165316e-05    0.173547   6.316774e-07
+
+
+Final L2 norm of residual: 1.165316e-05
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 6
+Final Relative Residual Norm = 6.316774e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 1.844796e+01
+Initial L2 norm of residual: 1.844796e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    5.686954e+00    0.308270   3.082701e-01
+    2    3.235170e+00    0.568876   1.753674e-01
+    3    2.143956e+00    0.662703   1.162164e-01
+    4    1.462872e+00    0.682324   7.929724e-02
+    5    9.967445e-01    0.681361   5.403008e-02
+    6    6.859386e-01    0.688179   3.718236e-02
+    7    5.046832e-01    0.735756   2.735713e-02
+    8    3.979065e-01    0.788428   2.156914e-02
+    9    3.135270e-01    0.787941   1.699522e-02
+   10    2.317312e-01    0.739111   1.256135e-02
+   11    1.532375e-01    0.661273   8.306476e-03
+   12    9.312880e-02    0.607742   5.048191e-03
+   13    5.486518e-02    0.589132   2.974052e-03
+   14    2.787914e-02    0.508139   1.511232e-03
+   15    1.354567e-02    0.485871   7.342637e-04
+   16    6.266352e-03    0.462609   3.396773e-04
+   17    2.531298e-03    0.403951   1.372129e-04
+   18    1.280504e-03    0.505869   6.941170e-05
+   19    6.689185e-04    0.522387   3.625976e-05
+   20    3.355031e-04    0.501561   1.818647e-05
+   21    1.640161e-04    0.488866   8.890749e-06
+   22    8.844882e-05    0.539269   4.794505e-06
+   23    5.402646e-05    0.610822   2.928588e-06
+   24    3.171406e-05    0.587010   1.719110e-06
+   25    1.677064e-05    0.528808   9.090784e-07
+
+
+Final L2 norm of residual: 1.677064e-05
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 9.090784e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    1000     6400  0.006     4    7   6.4   0.000e+00   3.000e+00
+ 1     500     7760  0.031     7   19  15.5  -1.499e-15   4.000e+00
+ 2     123     3175  0.210    11   40  25.8   1.760e-01   5.199e+00
+ 3      43     1573  0.851    22   43  36.6   2.981e+00   5.273e+00
+ 4      17      289  1.000    17   17  17.0   4.222e+00   6.982e+00
+ 5       1        1  1.000     1    1   1.0   5.135e+00   5.135e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  1000 x 500     1   6   1.667e-01 1.667e-01 5.000e-01 1.000e+00
+ 1   500 x 123     1   6   4.688e-02 3.333e-01 4.063e-01 1.000e+00
+ 2   123 x 43      0  12   1.936e-02 3.174e-01 0.000e+00 1.000e+00
+ 3    43 x 17      0   7   8.327e-03 1.970e-01 0.000e+00 1.000e+00
+ 4    17 x 1       0   1   6.033e-02 1.318e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.684000
+                operator = 2.999687
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 1.844796e+01
+Initial L2 norm of residual: 1.844796e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    3.277700e-03    0.000178   1.776728e-04
+    2    4.120676e-05    0.012572   2.233676e-06
+    3    6.610305e-07    0.016042   3.583218e-08
+
+
+Final L2 norm of residual: 6.610305e-07
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 3
+Final Relative Residual Norm = 3.583218e-08
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 36
+Final Relative Residual Norm = 9.899649e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.200000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.210000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 1.844796e+01
+Initial L2 norm of residual: 1.844796e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    3.863324e+00    0.209417   2.094174e-01
+    2    1.529072e+00    0.395792   8.288570e-02
+    3    6.604168e-01    0.431907   3.579891e-02
+    4    3.299717e-01    0.499642   1.788662e-02
+    5    1.821000e-01    0.551866   9.871013e-03
+    6    7.769562e-02    0.426665   4.211611e-03
+    7    2.493231e-02    0.320897   1.351494e-03
+    8    1.342037e-02    0.538272   7.274721e-04
+    9    1.043712e-02    0.777707   5.657604e-04
+   10    9.499614e-03    0.910176   5.149413e-04
+   11    1.024245e-02    1.078197   5.552081e-04
+   12    3.514853e+00    343.165111   1.905280e-01
+   13    2.609192e-03    0.000742   1.414353e-04
+   14    2.381643e-03    0.912789   1.291006e-04
+   15    7.074477e-03    2.970419   3.834830e-04
+   16    1.599981e-03    0.226162   8.672943e-05
+   17    1.534104e-03    0.958826   8.315846e-05
+   18    2.781698e-03    1.813240   1.507863e-04
+   19    2.448888e-03    0.880357   1.327458e-04
+   20    1.742351e-03    0.711487   9.444683e-05
+   21    1.408582e-03    0.808438   7.635439e-05
+   22    9.084480e-04    0.644938   4.924383e-05
+   23    1.618855e-04    0.178200   8.775252e-06
+   24    4.418412e-05    0.272934   2.395068e-06
+   25    6.819319e-06    0.154339   3.696518e-07
+
+
+Final L2 norm of residual: 6.819319e-06
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 25
+Final Relative Residual Norm = 3.696518e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+Hybrid Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+Hybrid Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 33
+Final Relative Residual Norm = 5.533708e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+SMG Setup:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+SMG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 5
+Final Relative Residual Norm = 1.375560e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PFMG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PFMG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 22
+Final Relative Residual Norm = 7.225984e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PFMG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PFMG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 22
+Final Relative Residual Norm = 7.225984e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 4
+Final Relative Residual Norm = 1.228720e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 15
+Final Relative Residual Norm = 8.186559e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 11
+Final Relative Residual Norm = 5.333915e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+Hybrid Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+Hybrid Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 9
+Final Relative Residual Norm = 8.113805e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+Hybrid Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+Hybrid Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 4
+Final Relative Residual Norm = 1.175679e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 10
+Final Relative Residual Norm = 7.120212e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 20
+Final Relative Residual Norm = 7.280287e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 50
+Final Relative Residual Norm = 1.501413e-05
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.162278e+01
+Initial L2 norm of residual: 3.162278e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    2.029166e-02    0.000642   6.416786e-04
+    2    5.374457e-06    0.000265   1.699553e-07
+
+
+Final L2 norm of residual: 5.374457e-06
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 2
+Final Relative Residual Norm = 1.699553e-07
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.162278e+01
+Initial L2 norm of residual: 3.162278e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    4.427564e+00    0.140012   1.400119e-01
+    2    2.895050e-01    0.065387   9.154953e-03
+    3    1.488649e-02    0.051420   4.707522e-04
+    4    8.121930e-04    0.054559   2.568380e-05
+    5    3.555030e-05    0.043771   1.124199e-06
+    6    1.550956e-06    0.043627   4.904554e-08
+
+
+Final L2 norm of residual: 1.550956e-06
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 6
+Final Relative Residual Norm = 4.904554e-08
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.162278e+01
+Initial L2 norm of residual: 3.162278e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    1.464427e+01    0.463092   4.630924e-01
+    2    6.276518e+00    0.428599   1.984809e-01
+    3    1.595274e+00    0.254165   5.044699e-02
+    4    1.825443e-01    0.114428   5.772558e-03
+    5    1.041396e-02    0.057049   3.293182e-04
+    6    9.247785e-04    0.088802   2.924406e-05
+    7    3.670349e-05    0.039689   1.160666e-06
+    8    9.444684e-07    0.025732   2.986671e-08
+
+
+Final L2 norm of residual: 9.444684e-07
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 8
+Final Relative Residual Norm = 2.986671e-08
+
+Warning: Invalid number of parts for Struct Solver. Part 0 taken. 
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+BiCGSTAB Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+L2 norm of b: 3.162278e+01
+Initial L2 norm of residual: 3.162278e+01
+=============================================
+
+Iters     resid.norm     conv.rate  rel.res.norm
+-----    ------------    ---------- ------------
+    1    1.844895e+01    0.583407   5.834072e-01
+    2    1.176016e+01    0.637443   3.718888e-01
+    3    7.178124e+00    0.610376   2.269922e-01
+    4    3.880696e+00    0.540628   1.227184e-01
+    5    1.750329e+00    0.451035   5.535026e-02
+    6    6.189144e-01    0.353599   1.957179e-02
+    7    2.013573e-01    0.325340   6.367478e-03
+    8    7.527575e-02    0.373842   2.380428e-03
+    9    3.101203e-02    0.411979   9.806864e-04
+   10    1.176051e-02    0.379224   3.719001e-04
+   11    3.411138e-03    0.290050   1.078697e-04
+   12    7.323962e-04    0.214707   2.316040e-05
+   13    1.312436e-04    0.179198   4.150288e-06
+   14    2.030608e-05    0.154721   6.421347e-07
+
+
+Final L2 norm of residual: 2.030608e-05
+
+=============================================
+Solve phase times:
+=============================================
+BiCGSTAB Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 14
+Final Relative Residual Norm = 6.421347e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 33
+Final Relative Residual Norm = 5.533708e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 6
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 0.900000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    1000     6400  0.006     4    7   6.4   0.000e+00   3.000e+00
+ 1     500     7760  0.031     7   19  15.5  -1.499e-15   4.000e+00
+ 2     123     3175  0.210    11   40  25.8   1.760e-01   5.199e+00
+ 3      43     1573  0.851    22   43  36.6   2.981e+00   5.273e+00
+ 4      17      289  1.000    17   17  17.0   4.222e+00   6.982e+00
+ 5       1        1  1.000     1    1   1.0   5.135e+00   5.135e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  1000 x 500     1   6   1.667e-01 1.667e-01 5.000e-01 1.000e+00
+ 1   500 x 123     1   6   4.688e-02 3.333e-01 4.063e-01 1.000e+00
+ 2   123 x 43      0  12   1.936e-02 3.174e-01 0.000e+00 1.000e+00
+ 3    43 x 17      0   7   8.327e-03 1.970e-01 0.000e+00 1.000e+00
+ 4    17 x 1       0   1   6.033e-02 1.318e-01 0.000e+00 1.000e+00
+
+
+     Complexity:    grid = 1.684000
+                operator = 2.999687
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    1    1     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 3
+Final Relative Residual Norm = 8.857865e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.060000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 17
+Final Relative Residual Norm = 6.037817e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 33
+Final Relative Residual Norm = 5.533708e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+GMRES Setup:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+GMRES Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 4
+Final Relative Residual Norm = 2.723161e-08
+

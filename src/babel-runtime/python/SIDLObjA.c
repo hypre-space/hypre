@@ -1,14 +1,13 @@
 /*
- * File:        SIDLObjA.c
- * Package:     SIDL Python Object Adaptor
+ * File:        sidlObjA.c
+ * Package:     sidl Python Object Adaptor
  * Copyright:   (c) 2001 The Regents of the University of California
- * Release:     $Name: V1-9-0b $
- * Revision:    @(#) $Revision: 1.4 $
- * Date:        $Date: 2003/04/07 21:44:24 $
- * Description: Python extension type written in C for SIDL object/interface
+ * Revision:    @(#) $Revision: 1.5 $
+ * Date:        $Date: 2006/08/29 22:29:27 $
+ * Description: Python extension type written in C for sidl object/interface
  *
  * This is a Python extension type written in C to wrap instances of
- * SIDL objects or interfaces in a Python object.  If this looks
+ * sidl objects or interfaces in a Python object.  If this looks
  * mysterious to you, look at Programming Python and the BABEL
  * documentation. 
  * Copyright (c) 2000-2001, The Regents of the University of Calfornia.
@@ -36,127 +35,67 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#define SIDLOBJA_MODULE 1
-#include "SIDLObjA.h"
-#include "SIDL_BaseClass_IOR.h"
-#include "SIDL_BaseException.h"
+#define sidlOBJA_MODULE 1
+#include "sidlObjA.h"
+#include "sidl_BaseClass_IOR.h"
+#include "sidl_BaseException.h"
+#include "sidl_String.h"
 
 #include <string.h>
 
 /**
- * This defines the Python object wrapper for a SIDL object or interface.
- * This one Python extension type written in C can support an arbitrary
- * class or interface. The peculiarities of a particular class or interface
- * are stored in the d_methods member which defines what the object
- * can do.
- */
-struct SIDLPythonObject {
-  PyObject_HEAD                 /* standard Python object header */
-
-  /* SIDL specific extensions */
-
-  PyMethodDef                         *d_methods;
-  struct SIDL_BaseClass__object *    (*d_getIOR)(struct SIDLPythonObject *);
-  union {
-    struct SIDL_BaseClass__object     *d_ior;
-    struct SIDL_BaseInterface__object *d_abint;
-  }                                    d_sidlobj;
-  int				       d_refType;
-};
-
-/**
- * This <code>typedef</code> is required by PyObject_NEW; otherwise,
- * it is unused.
- */
-typedef struct SIDLPythonObject SPObject;
-
-/**
- * A function to get the independent object representation (IOR) for
- * a wrapped instance of a class.
- */
-static struct SIDL_BaseClass__object *
-SIDLPython_Object_getIOR(struct SIDLPythonObject *sobj) {
-  return sobj->d_sidlobj.d_ior;
-}
-
-/**
- * A function to get the independent object representation (IOR) for
- * a wrapped instance of a interface.
- */
-static struct SIDL_BaseClass__object *
-SIDLPython_Interface_getIOR(struct SIDLPythonObject *sobj) {
-  return sobj->d_sidlobj.d_abint->d_object;
-}
-
-/**
  * Provide a forward declaration of the Python type object used
- * by <code>SIDLPythonObject</code>'s.
+ * by <code>sidlPythonObject</code>'s.
  */
-staticforward PyTypeObject SIDLPythonObjectType;
+staticforward PyTypeObject sidlPythonObjectType;
 
-#define is_SIDLobject(v) ((v)->ob_type == &SIDLPythonObjectType)
+#define is_SIDLobject(v) ((v) && PyType_IsSubtype((v)->ob_type,&sidlPythonObjectType))
 
 /*
  * Exported C API methods
  */
 
-static SIDL_Object_Create_RETURN
-SIDL_Object_Create SIDL_Object_Create_PROTO {
-  PyObject *result = NULL;
-  if (methods) {
-    if (ior) {
-      struct SIDLPythonObject *self = 
-	PyObject_NEW(SPObject, &SIDLPythonObjectType);
-      if (self){
-	self->d_sidlobj.d_ior = ior;
-        if (refType == SIDL_PyNewRef) {
-          (*ior->d_epv->f_addRef)(ior);
-        }
-	self->d_methods = methods;
-	self->d_getIOR = SIDLPython_Object_getIOR;
-        self->d_refType = refType;
-	result = (PyObject *)self;
-      }
-      else {
-        if (refType == SIDL_PyStealRef) {
-          (*(ior->d_epv->f_deleteRef))(ior);
-        }
-      }
+static sidl_Object_Init_RETURN
+sidl_Object_Init sidl_Object_Init_PROTO {
+  if (ior) {
+    sidlObject->d_ior = ior;
+    if (refType == sidl_PyNewRef) {
+      struct sidl_BaseInterface__object *throwaway_exception;
+      (*ior->d_epv->f_addRef)(ior, &throwaway_exception);
     }
-    else {
-      result = Py_None;
-      Py_INCREF(result);
-    }
+    sidlObject->d_refType = refType;
+    return 0;
   }
   else {
     PyErr_SetString(PyExc_AssertionError,
-		    "SIDL object has NULL IOR or vtable");
+		    "sidl object has NULL IOR or vtable");
+    return -1;
   }
-  return result;
 }
 
-static SIDL_Get_IOR_RETURN
-SIDL_Get_IOR SIDL_Get_IOR_PROTO {
+static sidl_Get_IOR_RETURN
+sidl_Get_IOR sidl_Get_IOR_PROTO {
   if (is_SIDLobject(obj)) {
-    return (*((struct SIDLPythonObject *)obj)->d_getIOR)
-      ((struct SIDLPythonObject *)obj);
+    return ((struct sidlPythonObject *)obj)->d_ior;
   }
   return NULL;
 }
 
-static SIDL_Cast_RETURN
-SIDL_Cast SIDL_Cast_PROTO {
-  struct SIDL_BaseClass__object *ior = SIDL_Get_IOR(obj);
-  return (ior) ? ((*(ior->d_epv->f__cast))(ior, name)) : NULL;
+static sidl_Cast_RETURN
+sidl_Cast sidl_Cast_PROTO {
+  struct sidl_BaseInterface__object *ior = sidl_Get_IOR(obj);
+  struct sidl_BaseInterface__object *throwaway_exception;
+  return (ior) ? ((*(ior->d_epv->f__cast))(ior->d_object, name, 
+                                           &throwaway_exception)) : NULL;
 }
 
-static SIDL_Opaque_Create_RETURN
-SIDL_Opaque_Create SIDL_Opaque_Create_PROTO {
+static sidl_Opaque_Create_RETURN
+sidl_Opaque_Create sidl_Opaque_Create_PROTO {
   return PyCObject_FromVoidPtr(opaque_ptr, NULL);
 }
 
-static SIDL_Opaque_Convert_RETURN
-SIDL_Opaque_Convert SIDL_Opaque_Convert_PROTO {
+static sidl_Opaque_Convert_RETURN
+sidl_Opaque_Convert sidl_Opaque_Convert_PROTO {
   if (PyCObject_Check(obj)) {
     *opaque_ptr = PyCObject_AsVoidPtr(obj);
     return 1;
@@ -164,103 +103,192 @@ SIDL_Opaque_Convert SIDL_Opaque_Convert_PROTO {
   return 0;
 }
 
-static SIDL_PyType_RETURN
-SIDL_PyType SIDL_PyType_PROTO {
-  return (PyObject *)&SIDLPythonObjectType;
+static sidl_PyType_RETURN
+sidl_PyType sidl_PyType_PROTO {
+  return (PyTypeObject *)&sidlPythonObjectType;
 }
 
-static SIDL_Interface_Create_RETURN
-SIDL_Interface_Create SIDL_Interface_Create_PROTO {
-  PyObject *result = NULL;
-  if (methods) {
-    if (abint) {
-      struct SIDLPythonObject *self = 
-	PyObject_NEW(SPObject, &SIDLPythonObjectType);
-      if (self){
-	self->d_sidlobj.d_abint = abint;
-        if (refType == SIDL_PyNewRef) {
-          (*abint->d_epv->f_addRef)(abint->d_object);
-        }
-	self->d_methods = methods;
-	self->d_getIOR = SIDLPython_Interface_getIOR;
-        self->d_refType = refType;
-	result = (PyObject *)self;
-      }
-      else {
-        if (refType == SIDL_PyStealRef) {
-          (*abint->d_epv->f_deleteRef)(abint->d_object);
-        }
-      }
-    }
-    else {
-      result = Py_None;
-      Py_INCREF(result);
+static sidl_PyExceptionCast_RETURN
+sidl_PyExceptionCast sidl_PyExceptionCast_PROTO {
+  struct sidl_BaseInterface__object *throwaway_exception;
+  return sidl_BaseInterface__cast2(ex, name, &throwaway_exception);
+}
+
+static void copyValueMsg(PyObject *exc, PyObject *exvalue, PyObject *extype)
+{
+  PyObject *valuestr = PyObject_Str(exvalue);
+  char *msg = sidl_String_strdup("Unexpected Python exception: ");
+
+  if (extype && PyClass_Check(extype)) {
+    char *next = sidl_String_concat4(msg, "(type: ", 
+                                     PyString_AS_STRING(((PyClassObject*)extype)->cl_name),
+                                     ") ");
+    free(msg);
+    msg = next;
+  }
+
+  if (valuestr) {
+    char *next = sidl_String_concat2(msg, PyString_AS_STRING(valuestr));
+    free(msg);
+    msg = next;
+  }
+  PyObject *setNote = PyObject_CallMethod(exc, "setNote", "(s)", msg);
+  if (!setNote) {
+    if (PyErr_Occurred()) {
+      PyErr_Print();
     }
   }
+  free(msg);
+  Py_XDECREF(setNote);
+  Py_DECREF(valuestr);
+}
+
+sidl_AddTrace_RETURN
+sidl_AddTrace sidl_AddTrace_PROTO
+{
+  if (func) {
+    char *msg = sidl_String_concat2("In Python method: ", func);
+    PyObject *addTrace = 
+      PyObject_CallMethod(exc, "addLine", "(s)", msg);
+    if (!addTrace) {
+      if (PyErr_Occurred()) {
+        PyErr_Print();
+      }
+    }
+    Py_XDECREF(addTrace);
+    free(msg);
+  }
+}
+
+/*
+static PyObject *
+getTraceback(PyObject *type, PyObject *value, PyObject *trace)
+{
+  PyObject *result = NULL;
+  PyObject *traceback_module = PyImport_ImportModule("traceback");
+  if (traceback_module) {
+    Py_XINCREF(type); Py_XINCREF(value); Py_XINCREF(trace);
+    PyErr_Restore(type, value, trace);
+    result = PyObject_CallMethod(traceback_module,"format_exc","");
+    if (!(result && PyString_Check(result))) {
+      if (PyErr_Occurred()) {
+        PyErr_Print();
+      }
+      Py_XDECREF(result);
+      result = NULL;
+    }
+    Py_DECREF(traceback_module);
+  }
   else {
-    PyErr_SetString(PyExc_AssertionError,
-		    "SIDL interface has NULL vtable");
+    if (PyErr_Occurred()) {
+      PyErr_Print();
+    }
+  }
+  PyErr_Clear();
+  return result;
+}
+
+*/
+static sidl_Handle_Unexpected_RETURN
+sidl_Handle_Unexpected sidl_Handle_Unexpected_PROTO
+{
+  struct sidl_BaseInterface__object *result = NULL;
+  if (PyErr_Occurred()) {
+    PyObject *value, *type, *trace;
+    PyErr_Fetch(&type,&value,&trace);
+    PyErr_NormalizeException(&type, &value, &trace);
+    /* increment reference so I keep a reference after calling PyErr_Restore */
+    {
+      /*  PyObject *_tracestr = getTraceback(trace, value, trace); */
+      PyObject *_unexpected = 
+        PyImport_ImportModule("sidl.LangSpecificException");
+      if (_unexpected) {
+        PyObject *_unextype = PyObject_GetAttrString(_unexpected,
+                                                     "LangSpecificException");
+        if (_unextype) {
+          PyObject *_unexargs = Py_BuildValue("()");
+          if (_unexargs) {
+            PyObject *_unexobj = PyObject_CallObject(_unextype, _unexargs);
+            if (_unexobj) {
+              copyValueMsg(_unexobj, value, type);
+              sidl_AddTrace(_unexobj, func);
+              /*
+              if (_tracestr) {
+                sidl_AddTrace(_unexobj, PyString_AS_STRING(_tracestr));
+              }
+              */
+              result = sidl_Cast(_unexobj, "sidl.BaseInterface");
+              if (result) {
+                struct sidl_BaseInterface__object *throwaway_exception;
+                (*(result->d_epv->f_addRef))(result->d_object, &throwaway_exception);
+              }
+              Py_DECREF(_unexobj);
+            }
+            else { if (PyErr_Occurred()) PyErr_Print(); }
+            Py_DECREF(_unexargs);
+          }
+          else { if (PyErr_Occurred()) PyErr_Print(); }
+          Py_DECREF(_unextype);
+        }
+        else { if (PyErr_Occurred()) PyErr_Print(); }
+        Py_DECREF(_unexpected);
+      }
+      else { if (PyErr_Occurred()) PyErr_Print(); }
+      /*      Py_XDECREF(_tracestr);*/
+    }
+    Py_XDECREF(value);
+    Py_XDECREF(type);
+    Py_XDECREF(trace);
+    PyErr_Clear();
   }
   return result;
 }
 
-static SIDL_Interface_Check_RETURN
-SIDL_Interface_Check SIDL_Interface_Check_PROTO {
-  if (is_SIDLobject(obj) && 
-      (((struct SIDLPythonObject *)obj)->d_getIOR ==
-       SIDLPython_Interface_getIOR)) {
-    return ((struct SIDLPythonObject *)obj)->d_sidlobj.d_abint;
-  }
-  return NULL;
-}
-
-static SIDL_PyExceptionCast_RETURN
-SIDL_PyExceptionCast SIDL_PyExceptionCast_PROTO {
-  return SIDL_BaseException__cast2(ex, name);
-}
 
 /*
  * BASIC OBJECT METHODS
  */
 
 static PyObject *
-spoa_getattr(struct SIDLPythonObject *self,
-            char *name)
+spoa_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-  if (!strcmp(name, "__members__")){
-    return Py_BuildValue("[]");
+  SPObject *self;
+  self = (SPObject *)type->tp_alloc(type, 0);
+  if (self != NULL) {
+    self->d_ior = NULL;
+    self->d_refType = sidl_PyWeakRef;
   }
-  return Py_FindMethod(self->d_methods, (PyObject *)self, name);
+  return (PyObject *)self;
 }
+
+
 
 static void
-spoa_self_destruct(struct SIDLPythonObject *self)
+spoa_self_destruct(struct sidlPythonObject *self)
 {
-  struct SIDL_BaseClass__object *ior = SIDL_Get_IOR((PyObject *)self);
-  /* remove Python's reference to this SIDL object */
-  if (self->d_refType != SIDL_PyWeakRef) {
-    (*(ior->d_epv->f_deleteRef))(ior);
+  struct sidl_BaseInterface__object *ior = sidl_Get_IOR((PyObject *)self);
+  /* remove Python's reference to this sidl object */
+  if (self->d_refType != sidl_PyWeakRef) {
+    struct sidl_BaseInterface__object *throwaway_exception;
+    (*(ior->d_epv->f_deleteRef))(ior->d_object, &throwaway_exception);
   }
-  self->d_sidlobj.d_ior = NULL;
-  self->d_sidlobj.d_abint = NULL;
-  self->d_getIOR = NULL;
-  self->d_methods = NULL;
-  self->d_refType = SIDL_PyWeakRef;
-  PyMem_DEL(self);
+  self->d_ior = NULL;
+  self->d_refType = sidl_PyWeakRef;
+  self->ob_type->tp_free((PyObject *)self);
 }
 
-static PyTypeObject SIDLPythonObjectType = {
+static PyTypeObject sidlPythonObjectType = {
   /* type header */
   PyObject_HEAD_INIT(NULL)
   0,
-  "SIDLObjA",
-  sizeof(struct SIDLPythonObject),
+  "sidlObjA.BaseWrapper",
+  sizeof(struct sidlPythonObject),
   0,
 
   /* standard methods */
   (destructor) spoa_self_destruct, /* call when reference count == 0 */
   (printfunc) 0,
-  (getattrfunc) spoa_getattr,
+  (getattrfunc) 0,
   (setattrfunc) 0,
   (cmpfunc) 0,
   (reprfunc) 0,
@@ -278,9 +306,26 @@ static PyTypeObject SIDLPythonObjectType = {
   (setattrofunc) 0,
   
   (PyBufferProcs *) 0,
-  0,
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
   /* documentation string */
-  "This is a Python wrapper for a SIDL object or interface."
+  "This is a Python wrapper for a SIDL object or interface.",
+  0,                            /* tp_traverse */
+  0,                            /* tp_clear */
+  0,                            /* tp_richcompare */
+  0,                            /* tp_weaklistoffset */
+  0,                            /* tp_iter */
+  0,                            /* tp_iternext */
+  0,                            /* tp_methods */
+  0,                            /* tp_members */
+  0,                            /* tp_getset */
+  0,                            /* tp_base */
+  0,                            /* tp_dict */
+  0,                            /* tp_descr_get */
+  0,                            /* tp_descr_set */
+  0,                            /* tp_dictoffset */
+  0,                            /* tp_init */
+  0,                            /* tp_alloc */
+  spoa_new,                     /* tp_new */
 };
 
 static struct PyMethodDef spoa_methods[] = {
@@ -289,36 +334,39 @@ static struct PyMethodDef spoa_methods[] = {
 };
 
 #ifdef __cplusplus
-extern "C" void initSIDLObjA(void);
+extern "C" void initsidlObjA(void);
 #else
-extern void initSIDLObjA(void);
+extern void initsidlObjA(void);
 #endif
 
 void
-initSIDLObjA(void)
+initsidlObjA(void)
 {
   PyObject *module, *dict, *c_api;
-  static void *spoa_api[SIDL_API_pointers];
+  static void *spoa_api[sidl_API_pointers];
 
-  SIDLPythonObjectType.ob_type = &PyType_Type;
-
-  module = Py_InitModule("SIDLObjA", spoa_methods);
+  module = Py_InitModule("sidlObjA", spoa_methods);
   dict = PyModule_GetDict(module);
-  spoa_api[SIDL_Object_Create_NUM] = (void *)SIDL_Object_Create;
-  spoa_api[SIDL_Get_IOR_NUM] = (void *)SIDL_Get_IOR;
-  spoa_api[SIDL_Cast_NUM] = (void *)SIDL_Cast;
-  spoa_api[SIDL_Interface_Create_NUM] = (void *)SIDL_Interface_Create;
-  spoa_api[SIDL_Interface_Check_NUM] = (void *)SIDL_Interface_Check;
-  spoa_api[SIDL_Opaque_Create_NUM] = (void *)SIDL_Opaque_Create;
-  spoa_api[SIDL_Opaque_Convert_NUM] = (void *)SIDL_Opaque_Convert;
-  spoa_api[SIDL_PyExceptionCast_NUM] = (void *)SIDL_PyExceptionCast;
-  spoa_api[SIDL_PyType_NUM] = (void *)SIDL_PyType;
+
+  if (PyType_Ready(&sidlPythonObjectType) < 0) return;
+  Py_INCREF(&sidlPythonObjectType);
+  PyModule_AddObject(module, "BaseWrapper", (PyObject *)&sidlPythonObjectType);
+
+  spoa_api[sidl_Object_Init_NUM] = (void *)sidl_Object_Init;
+  spoa_api[sidl_Get_IOR_NUM] = (void *)sidl_Get_IOR;
+  spoa_api[sidl_Cast_NUM] = (void *)sidl_Cast;
+  spoa_api[sidl_Opaque_Create_NUM] = (void *)sidl_Opaque_Create;
+  spoa_api[sidl_Opaque_Convert_NUM] = (void *)sidl_Opaque_Convert;
+  spoa_api[sidl_PyExceptionCast_NUM] = (void *)sidl_PyExceptionCast;
+  spoa_api[sidl_PyType_NUM] = (void *)sidl_PyType;
+  spoa_api[sidl_Handle_Unexpected_NUM] = (void *)sidl_Handle_Unexpected;
+  spoa_api[sidl_AddTrace_NUM] = (void *)sidl_AddTrace;
   c_api = PyCObject_FromVoidPtr((void *)spoa_api, NULL);
   if (c_api) {
     PyDict_SetItemString(dict, "_C_API", c_api);
     Py_DECREF(c_api);
   }
   if (PyErr_Occurred()) {
-    Py_FatalError("Can't initialize module SIDLObjA.");
+    Py_FatalError("Can't initialize module sidlObjA.");
   }
 }

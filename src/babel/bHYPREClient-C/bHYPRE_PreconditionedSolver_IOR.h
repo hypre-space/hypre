@@ -2,24 +2,30 @@
  * File:          bHYPRE_PreconditionedSolver_IOR.h
  * Symbol:        bHYPRE.PreconditionedSolver-v1.0.0
  * Symbol Type:   interface
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:34 PST
- * Generated:     20030401 14:47:39 PST
+ * Babel Version: 1.0.0
  * Description:   Intermediate Object Representation for bHYPRE.PreconditionedSolver
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.2
- * source-line   = 756
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_PreconditionedSolver_IOR_h
 #define included_bHYPRE_PreconditionedSolver_IOR_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
+struct sidl_rmi_InstanceHandle__object;
+#ifndef included_bHYPRE_Operator_IOR_h
+#include "bHYPRE_Operator_IOR.h"
+#endif
+#ifndef included_bHYPRE_Solver_IOR_h
+#include "bHYPRE_Solver_IOR.h"
+#endif
+#ifndef included_sidl_BaseInterface_IOR_h
+#include "sidl_BaseInterface_IOR.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,23 +37,24 @@ extern "C" {
 struct bHYPRE_PreconditionedSolver__array;
 struct bHYPRE_PreconditionedSolver__object;
 
-extern struct bHYPRE_PreconditionedSolver__object*
-bHYPRE_PreconditionedSolver__remote(const char *url);
-
 /*
  * Forward references for external classes and interfaces.
  */
 
-struct SIDL_BaseInterface__array;
-struct SIDL_BaseInterface__object;
-struct SIDL_ClassInfo__array;
-struct SIDL_ClassInfo__object;
-struct bHYPRE_Operator__array;
-struct bHYPRE_Operator__object;
-struct bHYPRE_Solver__array;
-struct bHYPRE_Solver__object;
+struct bHYPRE_MPICommunicator__array;
+struct bHYPRE_MPICommunicator__object;
 struct bHYPRE_Vector__array;
 struct bHYPRE_Vector__object;
+struct sidl_BaseException__array;
+struct sidl_BaseException__object;
+struct sidl_ClassInfo__array;
+struct sidl_ClassInfo__object;
+struct sidl_RuntimeException__array;
+struct sidl_RuntimeException__object;
+struct sidl_rmi_Call__array;
+struct sidl_rmi_Call__object;
+struct sidl_rmi_Return__array;
+struct sidl_rmi_Return__object;
 
 /*
  * Declare the method entry point vector.
@@ -55,101 +62,167 @@ struct bHYPRE_Vector__object;
 
 struct bHYPRE_PreconditionedSolver__epv {
   /* Implicit builtin methods */
+  /* 0 */
   void* (*f__cast)(
-    void* self,
-    const char* name);
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 1 */
   void (*f__delete)(
-    void* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 2 */
+  void (*f__exec)(
+    /* in */ void* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_rmi_Call__object* inArgs,
+    /* in */ struct sidl_rmi_Return__object* outArgs,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 3 */
+  char* (*f__getURL)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 4 */
+  void (*f__raddRef)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 5 */
+  sidl_bool (*f__isRemote)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 6 */
+  void (*f__set_hooks)(
+    /* in */ void* self,
+    /* in */ sidl_bool on,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.BaseInterface-v0.9.15 */
   void (*f_addRef)(
-    void* self);
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_deleteRef)(
-    void* self);
-  SIDL_bool (*f_isSame)(
-    void* self,
-    struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInt)(
-    void* self,
-    const char* name);
-  SIDL_bool (*f_isType)(
-    void* self,
-    const char* name);
-  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
-    void* self);
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isSame)(
+    /* in */ void* self,
+    /* in */ struct sidl_BaseInterface__object* iobj,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isType)(
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   /* Methods introduced in bHYPRE.Operator-v1.0.0 */
   int32_t (*f_SetCommunicator)(
-    void* self,
-    void* mpi_comm);
+    /* in */ void* self,
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_Destroy)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetIntParameter)(
-    void* self,
-    const char* name,
-    int32_t value);
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* in */ int32_t value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetDoubleParameter)(
-    void* self,
-    const char* name,
-    double value);
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* in */ double value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetStringParameter)(
-    void* self,
-    const char* name,
-    const char* value);
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* in */ const char* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetIntArray1Parameter)(
-    void* self,
-    const char* name,
-    struct SIDL_int__array* value);
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* in rarray[nvalues] */ struct sidl_int__array* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetIntArray2Parameter)(
-    void* self,
-    const char* name,
-    struct SIDL_int__array* value);
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* in array<int,2,column-major> */ struct sidl_int__array* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetDoubleArray1Parameter)(
-    void* self,
-    const char* name,
-    struct SIDL_double__array* value);
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* in rarray[nvalues] */ struct sidl_double__array* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetDoubleArray2Parameter)(
-    void* self,
-    const char* name,
-    struct SIDL_double__array* value);
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* in array<double,2,column-major> */ struct sidl_double__array* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_GetIntValue)(
-    void* self,
-    const char* name,
-    int32_t* value);
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* out */ int32_t* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_GetDoubleValue)(
-    void* self,
-    const char* name,
-    double* value);
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* out */ double* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_Setup)(
-    void* self,
-    struct bHYPRE_Vector__object* b,
-    struct bHYPRE_Vector__object* x);
+    /* in */ void* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* in */ struct bHYPRE_Vector__object* x,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_Apply)(
-    void* self,
-    struct bHYPRE_Vector__object* b,
-    struct bHYPRE_Vector__object** x);
+    /* in */ void* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* inout */ struct bHYPRE_Vector__object** x,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_ApplyAdjoint)(
+    /* in */ void* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* inout */ struct bHYPRE_Vector__object** x,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   /* Methods introduced in bHYPRE.Solver-v1.0.0 */
   int32_t (*f_SetOperator)(
-    void* self,
-    struct bHYPRE_Operator__object* A);
+    /* in */ void* self,
+    /* in */ struct bHYPRE_Operator__object* A,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetTolerance)(
-    void* self,
-    double tolerance);
+    /* in */ void* self,
+    /* in */ double tolerance,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetMaxIterations)(
-    void* self,
-    int32_t max_iterations);
+    /* in */ void* self,
+    /* in */ int32_t max_iterations,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetLogging)(
-    void* self,
-    int32_t level);
+    /* in */ void* self,
+    /* in */ int32_t level,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_SetPrintLevel)(
-    void* self,
-    int32_t level);
+    /* in */ void* self,
+    /* in */ int32_t level,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_GetNumIterations)(
-    void* self,
-    int32_t* num_iterations);
+    /* in */ void* self,
+    /* out */ int32_t* num_iterations,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   int32_t (*f_GetRelResidualNorm)(
-    void* self,
-    double* norm);
+    /* in */ void* self,
+    /* out */ double* norm,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   /* Methods introduced in bHYPRE.PreconditionedSolver-v1.0.0 */
   int32_t (*f_SetPreconditioner)(
-    void* self,
-    struct bHYPRE_Solver__object* s);
+    /* in */ void* self,
+    /* in */ struct bHYPRE_Solver__object* s,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_GetPreconditioner)(
+    /* in */ void* self,
+    /* out */ struct bHYPRE_Solver__object** s,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_Clone)(
+    /* in */ void* self,
+    /* out */ struct bHYPRE_PreconditionedSolver__object** x,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
 };
 
 /*
@@ -159,6 +232,212 @@ struct bHYPRE_PreconditionedSolver__epv {
 struct bHYPRE_PreconditionedSolver__object {
   struct bHYPRE_PreconditionedSolver__epv* d_epv;
   void*                                    d_object;
+};
+
+/**
+ * 
+ * 
+ * Anonymous class definition
+ * 
+ * 
+ */
+/*
+ * Symbol "bHYPRE._PreconditionedSolver" (version 1.0)
+ */
+
+struct bHYPRE__PreconditionedSolver__array;
+struct bHYPRE__PreconditionedSolver__object;
+
+/*
+ * Declare the method entry point vector.
+ */
+
+struct bHYPRE__PreconditionedSolver__epv {
+  /* Implicit builtin methods */
+  void* (*f__cast)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__delete)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__exec)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_rmi_Call__object* inArgs,
+    /* in */ struct sidl_rmi_Return__object* outArgs,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  char* (*f__getURL)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__raddRef)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f__isRemote)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__set_hooks)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ sidl_bool on,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__ctor)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__ctor2)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ void* private_data,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__dtor)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.BaseInterface-v0.9.15 */
+  void (*f_addRef)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_deleteRef)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isSame)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isType)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in bHYPRE.Operator-v1.0.0 */
+  int32_t (*f_SetCommunicator)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ struct bHYPRE_MPICommunicator__object* mpi_comm,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_Destroy)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_SetIntParameter)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* name,
+    /* in */ int32_t value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_SetDoubleParameter)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* name,
+    /* in */ double value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_SetStringParameter)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* name,
+    /* in */ const char* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_SetIntArray1Parameter)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* name,
+    /* in rarray[nvalues] */ struct sidl_int__array* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_SetIntArray2Parameter)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* name,
+    /* in array<int,2,column-major> */ struct sidl_int__array* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_SetDoubleArray1Parameter)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* name,
+    /* in rarray[nvalues] */ struct sidl_double__array* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_SetDoubleArray2Parameter)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* name,
+    /* in array<double,2,column-major> */ struct sidl_double__array* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_GetIntValue)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* name,
+    /* out */ int32_t* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_GetDoubleValue)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ const char* name,
+    /* out */ double* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_Setup)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* in */ struct bHYPRE_Vector__object* x,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_Apply)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* inout */ struct bHYPRE_Vector__object** x,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_ApplyAdjoint)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ struct bHYPRE_Vector__object* b,
+    /* inout */ struct bHYPRE_Vector__object** x,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in bHYPRE.Solver-v1.0.0 */
+  int32_t (*f_SetOperator)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ struct bHYPRE_Operator__object* A,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_SetTolerance)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ double tolerance,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_SetMaxIterations)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ int32_t max_iterations,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_SetLogging)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ int32_t level,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_SetPrintLevel)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ int32_t level,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_GetNumIterations)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ int32_t* num_iterations,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_GetRelResidualNorm)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ double* norm,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in bHYPRE.PreconditionedSolver-v1.0.0 */
+  int32_t (*f_SetPreconditioner)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* in */ struct bHYPRE_Solver__object* s,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_GetPreconditioner)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct bHYPRE_Solver__object** s,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  int32_t (*f_Clone)(
+    /* in */ struct bHYPRE__PreconditionedSolver__object* self,
+    /* out */ struct bHYPRE_PreconditionedSolver__object** x,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in bHYPRE._PreconditionedSolver-v1.0 */
+};
+
+/*
+ * Define the class object structure.
+ */
+
+struct bHYPRE__PreconditionedSolver__object {
+  struct bHYPRE_Operator__object             d_bhypre_operator;
+  struct bHYPRE_PreconditionedSolver__object d_bhypre_preconditionedsolver;
+  struct bHYPRE_Solver__object               d_bhypre_solver;
+  struct sidl_BaseInterface__object          d_sidl_baseinterface;
+  struct bHYPRE__PreconditionedSolver__epv*  d_epv;
+  void*                                      d_data;
+};
+
+
+struct bHYPRE__PreconditionedSolver__remote{
+  int d_refcount;
+  struct sidl_rmi_InstanceHandle__object *d_ih;
 };
 
 #ifdef __cplusplus

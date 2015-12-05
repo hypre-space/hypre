@@ -2,23 +2,17 @@
  * File:          bHYPRE_SStructVariable_IOR.h
  * Symbol:        bHYPRE.SStructVariable-v1.0.0
  * Symbol Type:   enumeration
- * Babel Version: 0.8.2
- * SIDL Created:  20030401 14:47:46 PST
- * Generated:     20030401 14:47:49 PST
+ * Babel Version: 1.0.0
  * Description:   Intermediate Object Representation for bHYPRE.SStructVariable
  * 
  * WARNING: Automatically generated; changes will be lost
- * 
- * babel-version = 0.8.2
- * source-line   = 888
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 #ifndef included_bHYPRE_SStructVariable_IOR_h
 #define included_bHYPRE_SStructVariable_IOR_h
 
-#ifndef included_SIDLType_h
-#include "SIDLType.h"
+#ifndef included_sidlType_h
+#include "sidlType.h"
 #endif
 #ifdef __cplusplus
 extern "C" {
@@ -42,13 +36,13 @@ extern "C" {
  * \begin{itemize}
  * \item cell centered variables are aligned with the index;
  * \item node centered variables are aligned with the cell corner
- *       at relative index (1/2, 1/2, 1/2);
+ * at relative index (1/2, 1/2, 1/2);
  * \item x-face, y-face, and z-face centered variables are aligned
- *       with the faces at relative indexes (1/2, 0, 0), (0, 1/2, 0),
- *       and (0, 0, 1/2), respectively;
+ * with the faces at relative indexes (1/2, 0, 0), (0, 1/2, 0),
+ * and (0, 0, 1/2), respectively;
  * \item x-edge, y-edge, and z-edge centered variables are aligned
- *       with the edges at relative indexes (0, 1/2, 1/2), (1/2, 0, 1/2),
- *       and (1/2, 1/2, 0), respectively.
+ * with the edges at relative indexes (0, 1/2, 1/2), (1/2, 0, 1/2),
+ * and (1/2, 1/2, 0), respectively.
  * \end{itemize}
  * 
  * The supported identifiers are:
@@ -70,19 +64,31 @@ extern "C" {
  * boundaries).  Although grid cells are distributed uniquely to
  * different processes, variables may be owned by multiple
  * processes because they may be associated with multiple cells.
- * 
  */
+
+
+/* Opaque forward declaration of array struct */
+struct bHYPRE_SStructVariable__array;
 
 enum bHYPRE_SStructVariable__enum {
   bHYPRE_SStructVariable_UNDEFINED = -1,
+
   bHYPRE_SStructVariable_CELL      = 0,
+
   bHYPRE_SStructVariable_NODE      = 1,
+
   bHYPRE_SStructVariable_XFACE     = 2,
+
   bHYPRE_SStructVariable_YFACE     = 3,
+
   bHYPRE_SStructVariable_ZFACE     = 4,
+
   bHYPRE_SStructVariable_XEDGE     = 5,
+
   bHYPRE_SStructVariable_YEDGE     = 6,
+
   bHYPRE_SStructVariable_ZEDGE     = 7
+
 };
 
 #ifdef __cplusplus

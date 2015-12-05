@@ -1,3 +1,31 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.6 $
+ ***********************************************************************EHEADER*/
+
+
+
 #include "headers.h"
 
 #define AbsStencilShape(stencil, abs_shape) \
@@ -46,10 +74,10 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
    hypre_StructStencil   *stencils;
    int                    stencil_size;
 
-   hypre_Index            refine_factors;
+   hypre_Index            refine_factors, upper_shift;
    hypre_Index            stride;
    hypre_Index            stencil_shape;
-   hypre_Index            index, ilower, iupper;
+   hypre_Index            zero_index, ilower, iupper;
 
    int                    nvars, var1, var2;
    int                    ndim;
@@ -65,11 +93,18 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
 
    int                    ierr = 0;
 
-   hypre_SetIndex(stride, 1, 1, 1);
-
    p_cgrid  = hypre_SStructPMatrixPGrid(Ac);
    nvars    = hypre_SStructPMatrixNVars(Ac);
    ndim     = hypre_SStructPGridNDim(p_cgrid);
+
+   hypre_ClearIndex(zero_index);
+   hypre_ClearIndex(stride);
+   hypre_ClearIndex(upper_shift);
+   for (i= 0; i< ndim; i++)
+   {
+      stride[i]= 1;
+      upper_shift[i]= rfactors[i]-1;
+   }
 
    hypre_CopyIndex(rfactors, refine_factors);
    if (ndim < 3)
@@ -96,11 +131,9 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
       {
           cgrid_box= hypre_BoxArrayBox(cgrid_boxes, ci);
 
-          hypre_ClearIndex(index);
-          hypre_StructMapCoarseToFine(hypre_BoxIMin(cgrid_box), index,
+          hypre_StructMapCoarseToFine(hypre_BoxIMin(cgrid_box), zero_index,
                                       refine_factors, hypre_BoxIMin(&scaled_box));
-          hypre_SubtractIndex(refine_factors, stride, index);
-          hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), index,
+          hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), upper_shift,
                                       refine_factors, hypre_BoxIMax(&scaled_box));
 
           hypre_SubtractIndex(hypre_BoxIMin(&scaled_box), stride,
@@ -142,7 +175,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                          hypre_BoxSetExtents(&fgrid_box, ilower, iupper);
 
                          shift_ibox= hypre_CF_StenBox(&fgrid_box, cgrid_box, stencil_shape, 
-                                                       refine_factors);
+                                                       refine_factors, ndim);
 
                          if ( hypre_BoxVolume(shift_ibox) )
                          {
@@ -181,11 +214,21 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
 /*--------------------------------------------------------------------------
  * hypre_FacZeroFCSten: Zeroes the fine stencil coefficients that reach
  * into a coarse box.
+ * Idea: zero off any stencil connection of a fine box that does not
+ *       connect to a sibling box
  * Algo: For each fbox
  *       {
- *          1) expand by one in each direction
- *          2) boxmap_intersect with the fmap
- *                3) loop over intersection boxes and subtract sibling boxes.
+ *          1) expand by one in each direction so that sibling boxes can be
+ *             reached
+ *          2) boxmap_intersect with the fmap to get all fboxes including
+ *             itself and the siblings
+ *          3) loop over intersection boxes, shift them in the stencil
+ *             direction (now we are off the fbox), and subtract any sibling 
+ *             extents. The remaining chunks (boxes of a box_array) are
+ *             the desired but shifted extents.
+ *          4) shift these shifted extents in the negative stencil direction
+ *             to get back into fbox. Zero-off the matrix over these latter
+ *             extents.
  *       }
  *--------------------------------------------------------------------------*/
 int
@@ -193,6 +236,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                      hypre_SStructGrid     *grid,
                      int                    fine_part)
 {
+   MPI_Comm               comm=   hypre_SStructGridComm(grid); 
    hypre_BoxMap          *fmap;
    hypre_BoxMapEntry    **map_entries;
    int                    nmap_entries;
@@ -231,12 +275,17 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
    int                    myid, proc;
    int                    ierr = 0;
 
-   MPI_Comm_rank(MPI_COMM_WORLD, &myid);
-   hypre_SetIndex(stride, 1, 1, 1);
+   MPI_Comm_rank(comm, &myid);
 
    p_fgrid  = hypre_SStructPMatrixPGrid(A);
    nvars    = hypre_SStructPMatrixNVars(A);
    ndim     = hypre_SStructPGridNDim(p_fgrid);
+
+   hypre_ClearIndex(stride);
+   for (i= 0; i< ndim; i++)
+   {
+      stride[i]= 1;
+   }
 
    tmp_box_array1= hypre_BoxArrayCreate(1);
 
@@ -249,7 +298,8 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
       hypre_ForBoxI(fi, fgrid_boxes)
       {
          fgrid_box= hypre_BoxArrayBox(fgrid_boxes, fi);
-         for (i= 0; i< 3; i++)
+         hypre_ClearIndex(size_ibox);
+         for (i= 0; i< ndim; i++)
          {
             size_ibox[i] = hypre_BoxSizeD(fgrid_box, i) - 1;
          }
@@ -346,7 +396,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                                                                      stencil_shape);
                       hypre_ForBoxI(fj, intersect_boxes)
                       {
-                         intersect_box= *hypre_BoxArrayBox(intersect_boxes, fj);
+                         hypre_CopyBox(hypre_BoxArrayBox(intersect_boxes, fj), &intersect_box);
 
                          hypre_AddIndex(shift_index, hypre_BoxIMin(&intersect_box),
                                         hypre_BoxIMin(&intersect_box));

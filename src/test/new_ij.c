@@ -19,6 +19,8 @@
 #include "krylov.h"
 
 int BuildParFromFile (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
+int BuildParRhsFromFile (int argc , char *argv [], int arg_index , HYPRE_ParVector *b_ptr );
+
 int BuildParLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParSysLaplacian (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
@@ -28,10 +30,16 @@ int BuildFuncsFromOneFile (int argc , char *argv [], int arg_index , HYPRE_ParCS
 int BuildRhsParFromOneFile (int argc , char *argv [], int arg_index , int *partitioning , HYPRE_ParVector *b_ptr );
 int BuildParLaplacian9pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 int BuildParLaplacian27pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-
+int BuildParRotate7pt (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr );
+int BuildParVarDifConv (int argc , char *argv [], int arg_index , HYPRE_ParCSRMatrix *A_ptr , HYPRE_ParVector *rhs_ptr );
 HYPRE_ParCSRMatrix GenerateSysLaplacian (MPI_Comm comm, int nx, int ny, int nz, 
                                          int P, int Q, int R, int p, int q, int r,
                                          int num_fun, double *mtrx, double *value);
+HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, int nx, int ny, int nz, 
+                                         int P, int Q, int R, int p, int q, int r,
+                                         int num_fun, double *mtrx, double *value);
+int SetSysVcoefValues(int num_fun, int nx, int ny, int nz, double vcx, double vcy, double vcz, int mtx_entry, double *values);
+
 
 #define SECOND_TIME 0
  
@@ -56,8 +64,7 @@ main( int   argc,
    int                 poutdat;
    int                 debug_flag;
    int                 ierr = 0;
-   int                 i,j,k; 
-   int                 indx, rest, tms;
+   int                 i,j; 
    int                 max_levels = 25;
    int                 num_iterations; 
    int                 pcg_num_its; 
@@ -93,13 +100,15 @@ main( int   argc,
    int                *col_inds;
    int                *dof_func;
    int		       num_functions = 1;
+   int		       num_paths = 1;
+   int		       agg_num_levels = 0;
+   int		       ns_coarse = 1;
 
    int		       time_index;
    MPI_Comm            comm = MPI_COMM_WORLD;
    int M, N;
    int first_local_row, last_local_row, local_num_rows;
    int first_local_col, last_local_col, local_num_cols;
-   int local_num_vars;
    int variant, overlap, domain_type;
    double schwarz_rlx_weight;
    double *values, val;
@@ -110,13 +119,17 @@ main( int   argc,
    /* parameters for BoomerAMG */
    double   strong_threshold;
    double   trunc_factor;
-   double   S_commpkg_switch;
+   double   jacobi_trunc_threshold;
+   double   S_commpkg_switch = 1.0;
+   double   CR_rate = 0.7;
+   int      P_max_elmts = 0;
    int      cycle_type;
    int      coarsen_type = 6;
    int      measure_type = 0;
    int      num_sweeps = 1;  
+   int      IS_type;   
+   int      num_CR_relax_steps = 2;   
    int      relax_type;   
-   int      relax_fine = -1;   
    int      relax_coarse = -1;   
    int      relax_up = -1;   
    int      relax_down = -1;   
@@ -148,7 +161,8 @@ main( int   argc,
 
    /* parameters for GSMG */
    int      gsmg_samples = 5;
-   int      interp_type  = 200; /* default value */
+   int      interp_type  = 0; /* default value */
+   int      post_interp_type  = 0; /* default value */
 
    int      print_system = 0;
 
@@ -177,6 +191,7 @@ main( int   argc,
    build_funcs_type = 0;
    build_funcs_arg_index = argc;
    relax_type = 3;
+   IS_type = 1;
    debug_flag = 0;
 
    solver_id = 0;
@@ -235,6 +250,18 @@ main( int   argc,
          build_matrix_type      = 5;
          build_matrix_arg_index = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-vardifconv") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 6;
+         build_matrix_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-rotate") == 0 )
+      {
+         arg_index++;
+         build_matrix_type      = 7;
+         build_matrix_arg_index = arg_index;
+      } 
       else if ( strcmp(argv[arg_index], "-funcsfromonefile") == 0 )
       {
          arg_index++;
@@ -277,6 +304,12 @@ main( int   argc,
       {
          arg_index++;
          build_rhs_type      = 1;
+         build_rhs_arg_index = arg_index;
+      }      
+      else if ( strcmp(argv[arg_index], "-rhsparcsrfile") == 0 )
+      {
+         arg_index++;
+         build_rhs_type      = 7;
          build_rhs_arg_index = arg_index;
       }      
       else if ( strcmp(argv[arg_index], "-rhsisone") == 0 )
@@ -358,6 +391,16 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 9;
       }    
+      else if ( strcmp(argv[arg_index], "-cr1") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 98;
+      }    
+      else if ( strcmp(argv[arg_index], "-cr") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 99;
+      }    
       else if ( strcmp(argv[arg_index], "-hmis") == 0 )
       {
          arg_index++;
@@ -403,15 +446,25 @@ main( int   argc,
          arg_index++;
          measure_type      = 1;
       }    
+      else if ( strcmp(argv[arg_index], "-is") == 0 )
+      {
+         arg_index++;
+         IS_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ncr") == 0 )
+      {
+         arg_index++;
+         num_CR_relax_steps = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-crth") == 0 )
+      {
+         arg_index++;
+         CR_rate = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-rlx") == 0 )
       {
          arg_index++;
          relax_type = atoi(argv[arg_index++]);
-      }
-      else if ( strcmp(argv[arg_index], "-rlx_fine") == 0 )
-      {
-         arg_index++;
-         relax_fine = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rlx_coarse") == 0 )
       {
@@ -453,10 +506,25 @@ main( int   argc,
          arg_index++;
          num_functions = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-agg_nl") == 0 )
+      {
+         arg_index++;
+         agg_num_levels = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-np") == 0 )
+      {
+         arg_index++;
+         num_paths = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-ns") == 0 )
       {
          arg_index++;
          num_sweeps = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ns_coarse") == 0 )
+      {
+         arg_index++;
+         ns_coarse = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-sns") == 0 )
       {
@@ -492,7 +560,7 @@ main( int   argc,
    {
    strong_threshold = 0.25;
    trunc_factor = 0.;
-   S_commpkg_switch = 0.05;
+   jacobi_trunc_threshold = 0.01;
    cycle_type = 1;
    relax_wt = 1.;
    outer_wt = 1.;
@@ -599,6 +667,16 @@ main( int   argc,
          arg_index++;
          trunc_factor  = atof(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-Pmx") == 0 )
+      {
+         arg_index++;
+         P_max_elmts  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-jtr") == 0 )
+      {
+         arg_index++;
+         jacobi_trunc_threshold  = atof(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-Ssw") == 0 )
       {
          arg_index++;
@@ -649,6 +727,11 @@ main( int   argc,
          arg_index++;
          interp_type  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-postinterptype") == 0 )
+      {
+         arg_index++;
+         post_interp_type  = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-nodal") == 0 )
       {
          arg_index++;
@@ -682,6 +765,7 @@ main( int   argc,
       printf("matrix read from a single file (CSR format)\n");
       printf("\n");
       printf("  -laplacian [<options>] : build 5pt 2D laplacian problem (default) \n");
+      printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
       printf("  -9pt [<opts>]          : build 9pt 2D laplacian problem\n");
       printf("  -27pt [<opts>]         : build 27pt 3D laplacian problem\n");
       printf("  -difconv [<opts>]      : build convection-diffusion problem\n");
@@ -698,6 +782,8 @@ main( int   argc,
       printf("rhs read from multiple files (IJ format)\n");
       printf("  -rhsfromonefile        : ");
       printf("rhs read from a single file (CSR format)\n");
+      printf("  -rhsparcsrfile        :  ");
+      printf("rhs read from multiple files (ParCSR format)\n");
       printf("  -rhsrand               : rhs is random vector\n");
       printf("  -rhsisone              : rhs is vector with unit components (default)\n");
       printf("  -xisone                : solution of all ones\n");
@@ -734,34 +820,76 @@ main( int   argc,
       printf("  -cljp                 : CLJP coarsening \n");
       printf("  -cljp1                : CLJP coarsening, fixed random \n");
       printf("  -pmis                 : PMIS coarsening \n");
-      printf("  -pmis1                : PMIS coarsening, fixed random \n");
+       printf("  -pmis1                : PMIS coarsening, fixed random \n");
       printf("  -hmis                 : HMIS coarsening \n");
-      printf("  -ruge                 : Ruge coarsening (local)\n");
-      printf("  -ruge1p               : Ruge coarsening 1st pass only(local)\n");
+      printf("  -ruge                 : Ruge-Stueben coarsening (local)\n");
+      printf("  -ruge1p               : Ruge-Stueben coarsening 1st pass only(local)\n");
       printf("  -ruge3                : third pass on boundary\n");
       printf("  -ruge3c               : third pass on boundary, keep c-points\n");
-      printf("  -ruge2b               : 2nd pass is global\n");
-      printf("  -rugerlx              : relaxes special points\n");
-      printf("  -falgout              : local ruge followed by LJP\n");
+      printf("  -falgout              : local Ruge_Stueben followed by CLJP\n");
       printf("  -gm                   : use global measures\n");
+      printf("\n");
+      printf("  -interptype  <val>    : set interpolation type\n");
+      printf("       0=Classical modified interpolation (default)  \n");
+      printf("       1=least squares interpolation (for GSMG only)  \n");
+      printf("       0=Classical modified interpolation for hyperbolic PDEs \n");
+      printf("       3=direct interpolation with separation of weights  \n");
+      printf("       4=multipass interpolation  \n");
+      printf("       5=multipass interpolation with separation of weights  \n");
+      printf("       6=extended interpolation  \n");
+      printf("       7=F-F interpolation  \n");
+      printf("       8=standard interpolation  \n");
+      printf("       9=standard interpolation with separation of weights  \n");
+      printf("      10=classical block interpolation for nodal systems AMG\n");
+      printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
       printf("\n");
       printf("  -rlx  <val>            : relaxation type\n");
       printf("       0=Weighted Jacobi  \n");
       printf("       1=Gauss-Seidel (very slow!)  \n");
-      printf("       3=Hybrid Jacobi/Gauss-Seidel  \n");
+      printf("       3=Hybrid Gauss-Seidel  \n");
+      printf("       4=Hybrid backward Gauss-Seidel  \n");
+      printf("       6=Hybrid symmetric Gauss-Seidel  \n");
+      printf("       9=Gauss elimination (use for coarsest grid only)  \n");
+      printf("       20= Nodal Weighted Jacobi (for systems only) \n");
+      printf("       23= Nodal Hybrid Jacobi/Gauss-Seidel (for systems only) \n");
+      printf("       26= Nodal Hybrid Symmetric Gauss-Seidel  (for systems only)\n");
+      printf("  -rlx_coarse  <val>       : set relaxation type for coarsest grid\n");
+      printf("  -rlx_down    <val>       : set relaxation type for down cycle\n");
+      printf("  -rlx_up      <val>       : set relaxation type for up cycle\n");
+      printf("  -nodal  <val>            : nodal system type\n");
+      printf("       0 = Unknown approach \n");
+      printf("       1 = Frobenius norm  \n");
+      printf("       2 = Sum of Abs.value of elements  \n");
+      printf("       3 = Largest magnitude element (includes its sign)  \n");
+      printf("       4 = Inf. norm \n");
+      printf("       5 = One norm  \n");
       printf("  -ns <val>              : Use <val> sweeps on each level\n");
       printf("                           (default C/F down, F/C up, F/C fine\n");
+      printf("  -ns_coarse  <val>       : set no. of sweeps for coarsest grid\n");
+      printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
+      printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");
       printf("\n"); 
       printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n"); 
       printf("  -th   <val>            : set AMG threshold Theta = val \n");
       printf("  -tr   <val>            : set AMG interpolation truncation factor = val \n");
+      printf("  -Pmx  <val>            : set maximal no. of elmts per row for AMG interpolation \n");
+      printf("  -jtr  <val>            : set truncation threshold for Jacobi interpolation = val \n");
       printf("  -Ssw  <val>            : set S-commpkg-switch = val \n");
       printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
       printf("  -nf <val>              : set number of functions for systems AMG\n");
       printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
-      printf("  -interptype <val>      : set to 1 to get LS interpolation\n");
+      printf("  -interptype <val>      : set to 1 to get LS interpolation (for GSMG only)\n");
       printf("                         : set to 2 to get interpolation for hyperbolic equations\n");
-     
+      printf("                         : set to 3 to get direct interpolation (with weight separation)\n");
+      printf("                         : set to 4 to get multipass interpolation\n");
+      printf("                         : set to 5 to get multipass interpolation with weight separation\n");
+      printf("                         : set to 6 to get extended interpolation\n");
+      printf("                         : set to 7 to get FF interpolation\n");
+      printf("                         : set to 8 to get standard interpolation\n");
+      printf("                         : set to 9 to get standard interpolation with weight separation\n");
+      printf("                         : set to 10 for nodal standard interpolation (for systems only) \n");
+      printf("                         : set to 11 for diagonal nodal standard interpolation (for systems only) \n");
+      printf("  -postinterptype <val>  : invokes <val> no. of Jacobi interpolation steps after main interpolation\n");
       printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
       printf("                         : 1  PCG  (default)\n");
       printf("                         : 2  GMRES\n");
@@ -771,6 +899,8 @@ main( int   argc,
       printf("  -k   <val>             : dimension Krylov space for GMRES\n");
       printf("  -mxl  <val>            : maximum number of levels (AMG, ParaSAILS)\n");
       printf("  -tol  <val>            : set solver convergence tolerance = val\n");
+      printf("  -agg_nl  <val>         : set number of aggressive coarsening levels (default:0)\n");
+      printf("  -np  <val>             : set number of paths of length 2 for aggr. coarsening\n");
       printf("\n");
       printf("  -sai_th   <val>        : set ParaSAILS threshold = val \n");
       printf("  -sai_filt <val>        : set ParaSAILS filter = val \n");
@@ -841,6 +971,16 @@ main( int   argc,
    {
       BuildParDifConv(argc, argv, build_matrix_arg_index, &parcsr_A);
    }
+   else if ( build_matrix_type == 6 )
+   {
+      BuildParVarDifConv(argc, argv, build_matrix_arg_index, &parcsr_A, &b);
+      /*HYPRE_ParCSRMatrixPrint(parcsr_A,"mat100");*/
+   }
+   else if ( build_matrix_type == 7 )
+   {
+      BuildParRotate7pt(argc, argv, build_matrix_arg_index, &parcsr_A);
+   }
+
    else
    {
       printf("You have asked for an unsupported problem with\n");
@@ -920,6 +1060,7 @@ main( int   argc,
 
        for (i=first_local_row; i<= last_local_row; i++)
        {
+          
          ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
                                            &col_inds, &values );
 
@@ -958,6 +1099,7 @@ main( int   argc,
        /* Loop through all locally stored rows and insert them into ij_matrix */
        for (i=first_local_row; i<= last_local_row; i++)
        {
+
          ierr += HYPRE_ParCSRMatrixGetRow( parcsr_A, i, &size,
                                            &col_inds, &values );
 
@@ -1035,6 +1177,7 @@ main( int   argc,
 
    ierr += HYPRE_IJMatrixGetObject( ij_A, &object);
    parcsr_A = (HYPRE_ParCSRMatrix) object;
+     /*HYPRE_ParCSRMatrixPrint(parcsr_A,"rot60");*/
 
    /*-----------------------------------------------------------
     * Set up the RHS and initial guess
@@ -1073,14 +1216,61 @@ main( int   argc,
    }
    else if ( build_rhs_type == 1 )
    {
-      printf("build_rhs_type == 1 not currently implemented\n");
-      return(-1);
 
 #if 0
-/* RHS */
-      BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, part_b, &b);
+      printf("build_rhs_type == 1 not currently implemented\n");
+      return(-1);
+#else
+/* RHS - this has not been tested for multiple processors*/
+      BuildRhsParFromOneFile(argc, argv, build_rhs_arg_index, NULL, &b);
+
+      printf("  Initial guess is 0\n");
+
+      ij_b = NULL;
+
+      /* initial guess */ 
+
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(ij_x);
+      
+      values = hypre_CTAlloc(double, local_num_cols);
+      for (i = 0; i < local_num_cols; i++)
+         values[i] = 0.;
+      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
+      hypre_TFree(values);
+      
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
+
 #endif
    }
+ else if ( build_rhs_type == 7 )
+   {
+
+      /* rhs */ 
+      BuildParRhsFromFile(argc, argv, build_rhs_arg_index, &b);
+
+      printf("  Initial guess is 0\n");
+
+      ij_b = NULL;
+
+      /* initial guess */ 
+
+      HYPRE_IJVectorCreate(MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(ij_x);
+      
+      values = hypre_CTAlloc(double, local_num_cols);
+      for (i = 0; i < local_num_cols; i++)
+         values[i] = 0.;
+      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
+      hypre_TFree(values);
+      
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
+   }
+
    else if ( build_rhs_type == 2 )
    {
       if (myid == 0)
@@ -1413,28 +1603,12 @@ main( int   argc,
       }
       else
       {
-         local_num_vars = local_num_rows;
-         dof_func = hypre_CTAlloc(int,local_num_vars);
          if (myid == 0)
-	    printf (" Number of unknown functions = %d \n", num_functions);
-         rest = first_local_row-((first_local_row/num_functions)*num_functions);
-         indx = num_functions-rest;
-         if (rest == 0) indx = 0;
-         k = num_functions - 1;
-         for (j = indx-1; j > -1; j--)
-	    dof_func[j] = k--;
-         tms = local_num_vars/num_functions;
-         if (tms*num_functions+indx > local_num_vars) tms--;
-         for (j=0; j < tms; j++)
-         {
-	    for (k=0; k < num_functions; k++)
-	       dof_func[indx++] = k;
-         }
-         k = 0;
-         while (indx < local_num_vars)
-	    dof_func[indx++] = k++;
+	    printf (" Number of functions = %d \n", num_functions);
       }
    }
+ 
+
  
    /*-----------------------------------------------------------
     * Print out the system and initial guess
@@ -1443,8 +1617,9 @@ main( int   argc,
    if (print_system)
    {
       HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
-      HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
+      if (!(build_rhs_type ==1 || build_rhs_type ==7)) HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
+
    }
 
    /*-----------------------------------------------------------
@@ -1474,8 +1649,10 @@ main( int   argc,
       HYPRE_ParCSRHybridSetMaxRowSum(amg_solver, max_row_sum);
       HYPRE_ParCSRHybridSetNumSweeps(amg_solver, num_sweeps);
       HYPRE_ParCSRHybridSetRelaxType(amg_solver, relax_type);
-      if (relax_fine > -1)
-         HYPRE_ParCSRHybridSetCycleRelaxType(amg_solver, relax_fine, 0);
+      HYPRE_ParCSRHybridSetAggNumLevels(amg_solver, agg_num_levels);
+      HYPRE_ParCSRHybridSetNumPaths(amg_solver, num_paths);
+      HYPRE_ParCSRHybridSetNumFunctions(amg_solver, num_functions);
+      HYPRE_ParCSRHybridSetNodal(amg_solver, nodal);
       if (relax_down > -1)
          HYPRE_ParCSRHybridSetCycleRelaxType(amg_solver, relax_down, 1);
       if (relax_up > -1)
@@ -1522,6 +1699,31 @@ main( int   argc,
          printf("Final Relative Residual Norm = %e\n", final_res_norm);
          printf("\n");
       }
+      time_index = hypre_InitializeTiming("ParCSR Hybrid Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_ParCSRHybridSolve(amg_solver, parcsr_A, x, b);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_ParCSRHybridGetNumIterations(amg_solver, &num_iterations);
+      HYPRE_ParCSRHybridGetPCGNumIterations(amg_solver, &pcg_num_its);
+      HYPRE_ParCSRHybridGetDSCGNumIterations(amg_solver, &dscg_num_its);
+      HYPRE_ParCSRHybridGetFinalRelativeResidualNorm(amg_solver, 
+	&final_res_norm);
+
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("Iterations = %d\n", num_iterations);
+         printf("PCG_Iterations = %d\n", pcg_num_its);
+         printf("DSCG_Iterations = %d\n", dscg_num_its);
+         printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
       HYPRE_ParCSRHybridDestroy(amg_solver);
    }
    /*-----------------------------------------------------------
@@ -1536,21 +1738,25 @@ main( int   argc,
 
       HYPRE_BoomerAMGCreate(&amg_solver); 
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
+      HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
+      HYPRE_BoomerAMGSetPMaxElmts(amg_solver, P_max_elmts);
+      HYPRE_BoomerAMGSetJacobiTruncThreshold(amg_solver, jacobi_trunc_threshold);
       HYPRE_BoomerAMGSetSCommPkgSwitch(amg_solver, S_commpkg_switch);
 /* note: log is written to standard output, not to file */
       HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log"); 
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
+      HYPRE_BoomerAMGSetISType(amg_solver, IS_type);
+      HYPRE_BoomerAMGSetNumCRRelaxSteps(amg_solver, num_CR_relax_steps);
+      HYPRE_BoomerAMGSetCRRate(amg_solver, CR_rate);
       HYPRE_BoomerAMGSetRelaxType(amg_solver, relax_type);
-      if (relax_fine > -1)
-         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_fine, 0);
       if (relax_down > -1)
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
       if (relax_up > -1)
@@ -1575,7 +1781,10 @@ main( int   argc,
       HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
       HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
+      HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
+      HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
+      HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
       if (num_functions > 1)
 	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
 
@@ -1623,12 +1832,15 @@ main( int   argc,
       HYPRE_BoomerAMGCreate(&amg_solver);
       HYPRE_BoomerAMGSetGSMG(amg_solver, 4); /* specify GSMG */
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
+      HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetTruncFactor(amg_solver, trunc_factor);
+      HYPRE_BoomerAMGSetPMaxElmts(amg_solver, P_max_elmts);
+      HYPRE_BoomerAMGSetJacobiTruncThreshold(amg_solver, jacobi_trunc_threshold);
       HYPRE_BoomerAMGSetSCommPkgSwitch(amg_solver, S_commpkg_switch);
 /* note: log is written to standard output, not to file */
       HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
@@ -1636,8 +1848,6 @@ main( int   argc,
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
       HYPRE_BoomerAMGSetRelaxType(amg_solver, relax_type);
-      if (relax_fine > -1)
-         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_fine, 0);
       if (relax_down > -1)
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
       if (relax_up > -1)
@@ -1662,6 +1872,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetDomainType(amg_solver, domain_type);
       HYPRE_BoomerAMGSetSchwarzRlxWeight(amg_solver, schwarz_rlx_weight);
       HYPRE_BoomerAMGSetNumFunctions(amg_solver, num_functions);
+      HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
+      HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
       if (num_functions > 1)
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
@@ -1728,7 +1940,6 @@ main( int   argc,
    {
       time_index = hypre_InitializeTiming("PCG Setup");
       hypre_BeginTiming(time_index);
-      ioutdat = 2;
  
       HYPRE_ParCSRPCGCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_PCGSetMaxIter(pcg_solver, 1000);
@@ -1743,21 +1954,25 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
@@ -1777,11 +1992,14 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_PCGSetPrecond(pcg_solver,
@@ -1845,21 +2063,25 @@ main( int   argc,
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
@@ -1883,7 +2105,10 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_PCGSetPrecond(pcg_solver,
@@ -1995,7 +2220,6 @@ main( int   argc,
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
  
-      ioutdat = 2;
       HYPRE_ParCSRGMRESCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_GMRESSetKDim(pcg_solver, k_dim);
       HYPRE_GMRESSetMaxIter(pcg_solver, 1000);
@@ -2010,21 +2234,25 @@ main( int   argc,
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
@@ -2044,11 +2272,14 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_GMRESSetPrecond(pcg_solver,
@@ -2102,21 +2333,25 @@ main( int   argc,
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
@@ -2140,7 +2375,10 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_GMRESSetPrecond(pcg_solver,
@@ -2260,7 +2498,6 @@ main( int   argc,
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
  
-      ioutdat = 2;
       HYPRE_ParCSRBiCGSTABCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_BiCGSTABSetMaxIter(pcg_solver, 1000);
       HYPRE_BiCGSTABSetTol(pcg_solver, tol);
@@ -2273,21 +2510,25 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
          HYPRE_BoomerAMGSetMaxIter(pcg_precond, 1);
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
+         HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
+         HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
+         HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
@@ -2307,11 +2548,14 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
          HYPRE_BoomerAMGSetSchwarzRlxWeight(pcg_precond, schwarz_rlx_weight);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_BiCGSTABSetPrecond(pcg_solver,
@@ -2436,7 +2680,6 @@ main( int   argc,
       time_index = hypre_InitializeTiming("CGNR Setup");
       hypre_BeginTiming(time_index);
  
-      ioutdat = 2;
       HYPRE_ParCSRCGNRCreate(MPI_COMM_WORLD, &pcg_solver);
       HYPRE_CGNRSetMaxIter(pcg_solver, 1000);
       HYPRE_CGNRSetTol(pcg_solver, tol);
@@ -2448,12 +2691,15 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-CGNR\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
+         HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
          HYPRE_BoomerAMGSetCoarsenType(pcg_precond, coarsen_type);
          HYPRE_BoomerAMGSetMeasureType(pcg_precond, measure_type);
          HYPRE_BoomerAMGSetStrongThreshold(pcg_precond, strong_threshold);
          HYPRE_BoomerAMGSetTruncFactor(pcg_precond, trunc_factor);
+         HYPRE_BoomerAMGSetPMaxElmts(pcg_precond, P_max_elmts);
+         HYPRE_BoomerAMGSetJacobiTruncThreshold(pcg_precond, jacobi_trunc_threshold);
          HYPRE_BoomerAMGSetSCommPkgSwitch(pcg_precond, S_commpkg_switch);
          HYPRE_BoomerAMGSetPrintLevel(pcg_precond, poutdat);
          HYPRE_BoomerAMGSetPrintFileName(pcg_precond, "driver.out.log");
@@ -2461,8 +2707,6 @@ main( int   argc,
          HYPRE_BoomerAMGSetCycleType(pcg_precond, cycle_type);
          HYPRE_BoomerAMGSetNumSweeps(pcg_precond, num_sweeps);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
-         if (relax_fine > -1)
-            HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_fine, 0);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
          if (relax_up > -1)
@@ -2482,6 +2726,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
+         HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
+         HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
@@ -2565,17 +2811,23 @@ main( int   argc,
    /*-----------------------------------------------------------
     * Print the solution and other info
     *-----------------------------------------------------------*/
-
-   HYPRE_IJVectorGetObjectType(ij_b, &j);
-   /* HYPRE_IJVectorPrint(ij_b, "driver.out.b");
-   HYPRE_IJVectorPrint(ij_x, "driver.out.x"); */
+   if (!(build_rhs_type ==1 || build_rhs_type ==7))
+      HYPRE_IJVectorGetObjectType(ij_b, &j);
+   /* HYPRE_IJVectorPrint(ij_b, "driver.out.b"); */
+   /* HYPRE_IJVectorPrint(ij_x, "driver.out.x");  */
 
    /*-----------------------------------------------------------
     * Finalize things
     *-----------------------------------------------------------*/
 
    HYPRE_IJMatrixDestroy(ij_A);
-   HYPRE_IJVectorDestroy(ij_b);
+
+   /* for build_rhs_type = 1 or 7, we did not create ij_b  - just b*/
+   if (build_rhs_type ==1 || build_rhs_type ==7)
+      HYPRE_ParVectorDestroy(b);
+   else
+      HYPRE_IJVectorDestroy(ij_b);
+
    HYPRE_IJVectorDestroy(ij_x);
 
 /*
@@ -2648,6 +2900,69 @@ BuildParFromFile( int                  argc,
    return (0);
 }
 
+
+/*----------------------------------------------------------------------
+ * Build rhs from file. Expects two files on each processor.
+ * filename.n contains the data and
+ * and filename.INFO.n contains global row
+ * numbers
+ *----------------------------------------------------------------------*/
+
+int
+BuildParRhsFromFile( int                  argc,
+                  char                *argv[],
+                  int                  arg_index,
+                  HYPRE_ParVector      *b_ptr     )
+{
+   char               *filename;
+
+   HYPRE_ParVector b;
+
+   int                 myid;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+
+   if (arg_index < argc)
+   {
+      filename = argv[arg_index];
+   }
+   else
+   {
+      printf("Error: No filename specified \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+ 
+   if (myid == 0)
+   {
+      printf("  RhsFromParFile: %s\n", filename);
+   }
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+ 
+   HYPRE_ParVectorRead(MPI_COMM_WORLD, filename,&b);
+
+   *b_ptr = b;
+
+   return (0);
+}
+
+
+
+
 /*----------------------------------------------------------------------
  * Build standard 7-point laplacian in 3D with grid and anisotropy.
  * Parameters given in command line.
@@ -2670,6 +2985,8 @@ BuildParLaplacian( int                  argc,
    int                 num_fun = 1;
    double             *values;
    double             *mtrx;
+
+   int                 system_vcoef = 0;
 
    /*-----------------------------------------------------------
     * Initialize some stuff
@@ -2725,6 +3042,11 @@ BuildParLaplacian( int                  argc,
       {
          arg_index++;
          num_fun = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-sys_vcoef") == 0 )
+      {
+         arg_index++;
+         system_vcoef = 1;
       }
       else
       {
@@ -2800,6 +3122,15 @@ BuildParLaplacian( int                  argc,
          mtrx[1] = 1;
          mtrx[2] = 1;
          mtrx[3] = 2;
+
+#if 0         
+         mtrx[0] = .01;
+         mtrx[1] = 200; 
+         mtrx[2] = 200;
+         mtrx[3] = .01; 
+#endif
+
+
       }
       else if (num_fun == 3)
       {
@@ -2812,10 +3143,92 @@ BuildParLaplacian( int                  argc,
          mtrx[6] = 0.0;
          mtrx[7] = 1;
          mtrx[8] = 1.01;
-      }
 
-      A = (HYPRE_ParCSRMatrix) GenerateSysLaplacian(MPI_COMM_WORLD, 
-		nx, ny, nz, P, Q, R, p, q, r, num_fun, mtrx, values);
+#if 0
+         mtrx[0] = 3.0;
+         mtrx[1] = 1;
+         mtrx[2] = 0.0;
+         mtrx[3] = 1;
+         mtrx[4] = 4;
+         mtrx[5] = 2;
+         mtrx[6] = 0.0;
+         mtrx[7] = 2;
+         mtrx[8] = .25;
+#endif
+
+      } 
+
+      if (!system_vcoef)
+      {
+         A = (HYPRE_ParCSRMatrix) GenerateSysLaplacian(MPI_COMM_WORLD, 
+                                                       nx, ny, nz, P, Q, 
+                                                       R, p, q, r, num_fun, mtrx, values);
+      }
+      else
+      {
+       
+    
+         double *mtrx_values;
+
+         mtrx_values = hypre_CTAlloc(double, num_fun*num_fun*4);
+
+         if (num_fun == 2)
+         {
+
+            mtrx[0] = 2;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 0, mtrx_values);
+            
+            mtrx[1] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 2.0, 1.0, 1, mtrx_values);
+            
+            mtrx[2] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, 1.0, 0.0, 2, mtrx_values);
+            
+            mtrx[3] = 2;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 3.0, 1.0, 3, mtrx_values);
+
+         }
+         else if (num_fun == 3)
+         {
+            mtrx[0] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, .01, 1, 0, mtrx_values);
+
+            mtrx[1] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 1, mtrx_values);
+
+            mtrx[2] = 0.0;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 2, mtrx_values);
+
+            mtrx[3] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 3, mtrx_values);
+
+            mtrx[4] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 2, .02, 1, 4, mtrx_values);
+
+            mtrx[5] = 2;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 5, mtrx_values);
+
+            mtrx[6] = 0.0;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 6, mtrx_values);
+
+            mtrx[7] = 2;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1, 1, 1, 7, mtrx_values);
+
+            mtrx[8] = 1;
+            SetSysVcoefValues(num_fun, nx, ny, nz, 1.5, .04, 1, 8, mtrx_values);
+
+         }
+
+         A = (HYPRE_ParCSRMatrix) GenerateSysLaplacianVCoef(MPI_COMM_WORLD, 
+                                                       nx, ny, nz, P, Q, 
+                                                       R, p, q, r, num_fun, mtrx, mtrx_values);
+
+
+
+
+
+         hypre_TFree(mtrx_values);
+      }
 
       hypre_TFree(mtrx);
    }
@@ -3508,3 +3921,269 @@ BuildParLaplacian27pt( int                  argc,
 
    return (0);
 }
+
+
+/*----------------------------------------------------------------------
+ * Build 7-point in 2D 
+ * Parameters given in command line.
+ *----------------------------------------------------------------------*/
+
+int
+BuildParRotate7pt( int                  argc,
+                      char                *argv[],
+                      int                  arg_index,
+                      HYPRE_ParCSRMatrix  *A_ptr     )
+{
+   int                 nx, ny;
+   int                 P, Q;
+
+   HYPRE_ParCSRMatrix  A;
+
+   int                 num_procs, myid;
+   int                 p, q;
+   double              eps, alpha;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+
+   nx = 10;
+   ny = 10;
+
+   P  = 1;
+   Q  = num_procs;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-alpha") == 0 )
+      {
+         arg_index++;
+         alpha  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-eps") == 0 )
+      {
+         arg_index++;
+         eps  = atof(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+
+   if (myid == 0)
+   {
+      printf("  Rotate 7pt:\n");
+      printf("    alpha = %f, eps = %f\n", alpha,eps);
+      printf("    (nx, ny) = (%d, %d)\n", nx, ny);
+      printf("    (Px, Py) = (%d, %d)\n", P,  Q);
+   }
+
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q from P,Q and myid */
+   p = myid % P;
+   q = ( myid - p)/P;
+
+   /*-----------------------------------------------------------
+    * Generate the matrix 
+    *-----------------------------------------------------------*/
+
+   A = (HYPRE_ParCSRMatrix) GenerateRotate7pt(MPI_COMM_WORLD,
+                                  nx, ny, P, Q, p, q, alpha, eps);
+
+   *A_ptr = A;
+
+   return (0);
+}
+
+/*----------------------------------------------------------------------
+ * Build standard 7-point difference operator using centered differences
+ *
+ *  eps*(a(x,y,z) ux)x + (b(x,y,z) uy)y + (c(x,y,z) uz)z 
+ *  d(x,y,z) ux + e(x,y,z) uy + f(x,y,z) uz + g(x,y,z) u
+ *
+ *  functions a,b,c,d,e,f,g need to be defined inside par_vardifconv.c
+ *
+ *----------------------------------------------------------------------*/
+
+int
+BuildParVarDifConv( int                  argc,
+                    char                *argv[],
+                    int                  arg_index,
+                    HYPRE_ParCSRMatrix  *A_ptr    ,
+                    HYPRE_ParVector  *rhs_ptr     )
+{
+   int                 nx, ny, nz;
+   int                 P, Q, R;
+
+   HYPRE_ParCSRMatrix  A;
+   HYPRE_ParVector  rhs;
+
+   int                 num_procs, myid;
+   int                 p, q, r;
+   double              eps;
+
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+
+   nx = 10;
+   ny = 10;
+   nz = 10;
+   P  = 1;
+   Q  = num_procs;
+   R  = 1;
+
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+  arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-eps") == 0 )
+      {
+         arg_index++;
+         eps  = atof(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Check a few things
+    *-----------------------------------------------------------*/
+
+   if ((P*Q*R) != num_procs)
+   {
+      printf("Error: Invalid number of processors or processor topology \n");
+      exit(1);
+   }
+
+   /*-----------------------------------------------------------
+    * Print driver parameters
+    *-----------------------------------------------------------*/
+
+   if (myid == 0)
+   {
+      printf("  ell PDE: eps = %f\n", eps);
+      printf("    Dx(aDxu) + Dy(bDyu) + Dz(cDzu) + d Dxu + e Dyu + f Dzu  + g u= f\n");
+      printf("    (nx, ny, nz) = (%d, %d, %d)\n", nx, ny, nz);
+      printf("    (Px, Py, Pz) = (%d, %d, %d)\n", P,  Q,  R);
+   }
+   /*-----------------------------------------------------------
+    * Set up the grid structure
+    *-----------------------------------------------------------*/
+
+   /* compute p,q,r from P,Q,R and myid */
+   p = myid % P;
+   q = (( myid - p)/P) % Q;
+   r = ( myid - p - P*q)/( P*Q );
+
+   /*-----------------------------------------------------------
+    * Generate the matrix
+    *-----------------------------------------------------------*/
+
+   A = (HYPRE_ParCSRMatrix) GenerateVarDifConv(MPI_COMM_WORLD,
+                               nx, ny, nz, P, Q, R, p, q, r, eps, &rhs);
+
+   *A_ptr = A;
+   *rhs_ptr = rhs;
+
+   return (0);
+}
+
+/**************************************************************************/
+
+
+int SetSysVcoefValues(int num_fun, int nx, int ny, int nz, double vcx, 
+                      double vcy, double vcz, int mtx_entry, double *values)
+{
+
+
+   int sz = num_fun*num_fun;
+
+   values[1*sz + mtx_entry] = -vcx;
+   values[2*sz + mtx_entry] = -vcy;
+   values[3*sz + mtx_entry] = -vcz;
+   values[0*sz + mtx_entry] = 0.0;
+
+   if (nx > 1)
+   {
+      values[0*sz + mtx_entry] += 2.0*vcx;
+   }
+   if (ny > 1)
+   {
+      values[0*sz + mtx_entry] += 2.0*vcy;
+   }
+   if (nz > 1)
+   {
+      values[0*sz + mtx_entry] += 2.0*vcz;
+   }
+
+   return 0;
+   
+}
+

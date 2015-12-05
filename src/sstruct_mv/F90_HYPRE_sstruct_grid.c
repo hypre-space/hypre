@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2000   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.1 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.5 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * HYPRE_SStructGrid interface
@@ -82,6 +102,28 @@ hypre_F90_IFACE(hypre_sstructgridsetvariables, HYPRE_SSTRUCTGRIDSETVARIABLES)
 }
 
 /*--------------------------------------------------------------------------
+ *  HYPRE_SStructGridSetVariable
+ *     Like HYPRE_SStructGridSetVariables; except only one variable is done
+ *     at a time; nvars is needed for memory allocation.
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
+                                                          (long int   *grid,
+                                                           int        *part,
+                                                           int        *var,
+                                                           int        *nvars,
+                                                           long int   *vartype,
+                                                           int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructGridSetVariable( (HYPRE_SStructGrid)      *grid,
+                                                (int)                    *part,
+                                                (int)                    *var,
+                                                (int)                    *nvars,
+                                                (HYPRE_SStructVariable)  *vartype ) );
+}
+
+/*--------------------------------------------------------------------------
  *  HYPRE_SStructGridAddVariables
  *--------------------------------------------------------------------------*/
 
@@ -99,6 +141,28 @@ hypre_F90_IFACE(hypre_sstructgridaddvariables, HYPRE_SSTRUCTGRIDADDVARIABLES)
                                                  (int *)                   index,
                                                  (int)                    *nvars,
                                                  (HYPRE_SStructVariable *) vartypes ));
+}
+
+/*--------------------------------------------------------------------------
+ *  HYPRE_SStructGridAddVariable
+ *     Like HYPRE_SStructGridAddVariables; except only one variable is done
+ *     at a time.
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructgridaddvariable, HYPRE_SSTRUCTGRIDADDVARIABLE)
+                                                          (long int   *grid,
+                                                           int        *part,
+                                                           int        *index,
+                                                           int        *var,
+                                                           long int   *vartype,
+                                                           int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructGridAddVariable( (HYPRE_SStructGrid)      *grid,
+                                                (int)                    *part,
+                                                (int *)                   index,
+                                                (int)                    *var,
+                                                (HYPRE_SStructVariable)  *vartype ));
 }
 
 /*--------------------------------------------------------------------------
@@ -125,6 +189,35 @@ hypre_F90_IFACE(hypre_sstructgridsetneighborbox, HYPRE_SSTRUCTGRIDSETNEIGHBORBOX
                                                    (int *)              nbor_ilower,
                                                    (int *)              nbor_iupper,
                                                    (int *)              index_map ) );
+}
+
+/*--------------------------------------------------------------------------
+ * ** TEMPORARY **
+ *  HYPRE_SStructGridSetNeighborBoxZ
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructgridsetneighborboz, HYPRE_SSTRUCTGRIDSETNEIGHBORBOZ)
+                                                          (long int   *grid,
+                                                           int        *part,
+                                                           int        *ilower,
+                                                           int        *iupper,
+                                                           int        *nbor_part,
+                                                           int        *nbor_ilower,
+                                                           int        *nbor_iupper,
+                                                           int        *index_map,
+                                                           int        *primary,
+                                                           int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructGridSetNeighborBoxZ( (HYPRE_SStructGrid) *grid,
+                                                    (int)               *part,
+                                                    (int *)              ilower,
+                                                    (int *)              iupper,
+                                                    (int)               *nbor_part,
+                                                    (int *)              nbor_ilower,
+                                                    (int *)              nbor_iupper,
+                                                    (int *)              index_map,
+                                                    (int)               *primary ) );
 }
 
 /*--------------------------------------------------------------------------

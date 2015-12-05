@@ -1,3 +1,31 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.8 $
+ ***********************************************************************EHEADER*/
+
+
+
 /**************************************************************************
   Module:  LLNL_FEI_Impl.cxx
   Purpose: custom implementation of the FEI
@@ -57,12 +85,18 @@ int LLNL_FEI_Impl::parameters(int numParams, char **paramString)
       sscanf(paramString[i], "%s", param1);
       if ( !strcmp( param1, "externalSolver" ) )
       {
+         printf("LLNL_FEI_Impl::make sure you call externalSolver before ");
+         printf("loading the matrix.\n");
          if ( (solverLibID_ & SOLVERLOCK) == 0 )
          {
             sscanf(paramString[i], "%s %s", param1, param2);
             if ( !strcmp( param2, "HYPRE" ) ) solverLibID_ = 1;
             else                              solverLibID_ = 0;
          }
+      }
+      else if ( !strcmp( param1, "transferSolution" ) )
+      {
+         transferSolution();
       }
    }
    solverLibID_ |= SOLVERLOCK;
@@ -173,11 +207,12 @@ int LLNL_FEI_Impl::solve(int *status)
       lscPtr_->putInitialGuess((const int *) indices, 
                                (const double *) solnVector, localNRows);
       lscPtr_->matrixLoadComplete();
-      lscPtr_->solve(status,&iter);
+      if ((*status) != -9999)
+         lscPtr_->solve(status,&iter);
       lscPtr_->getSolution(solnVector, localNRows);
       if (localNRows > 0) delete [] indices;
    }
-   feiPtr_->disassembleSolnVector();
+   feiPtr_->disassembleSolnVector(solnVector);
    return 0;
 }
 
@@ -193,6 +228,21 @@ int LLNL_FEI_Impl::residualNorm(int whichNorm, int numFields, int *fieldIDs,
    feiPtr_->getSolnVector(&solnVec);
    feiPtr_->getRHSVector(&rhsVec);
    matPtr_->residualNorm(whichNorm,solnVec,rhsVec,norms);
+   return 0;
+}
+
+/**************************************************************************
+ transfer the solution from lsc to the fei mesh so that when getSolution
+ is called to fei, it will fetch the correct data
+ -------------------------------------------------------------------------*/
+int LLNL_FEI_Impl::transferSolution()
+{
+   int    localNRows, *diagIA, *diagJA;
+   double *diagAA, *solnVector;
+   matPtr_->getLocalMatrix(&localNRows, &diagIA, &diagJA, &diagAA);
+   solnVector = new double[localNRows];
+   lscPtr_->getSolution(solnVector, localNRows);
+   feiPtr_->disassembleSolnVector(solnVector);
    return 0;
 }
 

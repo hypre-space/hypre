@@ -1,14 +1,34 @@
-#BHEADER***********************************************************************
-# (c) 2000   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# $Revision: 1.1 $
-#EHEADER***********************************************************************
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 1.5 $
+#EHEADER**********************************************************************
+
+
+
 
 ###  Copy needed header and source files to lib sub-directory to be compiled
-###  and create libHYPRE_mli.a 
+###  and create libHYPRE_mli*
 
 include ../../config/Makefile.config
 
@@ -25,6 +45,7 @@ HEADERS = \
  ./solver/mli_solver_parasails.h\
  ./solver/mli_solver_mls.h\
  ./solver/mli_solver_mli.h\
+ ./solver/mli_solver_amg.h\
  ./solver/mli_solver_chebyshev.h\
  ./solver/mli_solver_cg.h\
  ./solver/mli_solver_gmres.h\
@@ -67,6 +88,7 @@ FILES =\
  ./solver/mli_solver_parasails.cxx\
  ./solver/mli_solver_mls.cxx\
  ./solver/mli_solver_mli.cxx\
+ ./solver/mli_solver_amg.cxx\
  ./solver/mli_solver_chebyshev.cxx\
  ./solver/mli_solver_cg.cxx\
  ./solver/mli_solver_gmres.cxx\

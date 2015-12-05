@@ -1,3 +1,31 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.5 $
+ ***********************************************************************EHEADER*/
+
+
+
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
@@ -15,9 +43,7 @@
 
 int
 hypre_FacZeroCData( void                 *fac_vdata,
-                    hypre_SStructMatrix  *A,
-                    hypre_SStructVector  *b, 
-                    hypre_SStructVector  *x )
+                    hypre_SStructMatrix  *A )
 {
    hypre_FACData         *fac_data      =  fac_vdata;
 
@@ -46,7 +72,7 @@ hypre_FacZeroCData( void                 *fac_vdata,
    int                    max_level     =  fac_data -> max_levels;
    int                   *level_to_part =  fac_data -> level_to_part;
 
-   int                    ndim          =  hypre_SStructVectorNDim(b);
+   int                    ndim          =  hypre_SStructMatrixNDim(A);
    int                    part_crse     =  0;
    int                    part_fine     =  1;
    int                    level;
@@ -87,8 +113,10 @@ hypre_FacZeroCData( void                 *fac_vdata,
              hypre_ClearIndex(temp_index);
              hypre_StructMapCoarseToFine(hypre_BoxIMin(cgrid_box), temp_index,
                                         *refine_factors, hypre_BoxIMin(&scaled_box));
-             hypre_SetIndex(temp_index, (*refine_factors)[0]-1,
-                            (*refine_factors)[1]-1, (*refine_factors)[2]-1);
+             for (i= 0; i< ndim; i++)
+             {
+                temp_index[i]= (*refine_factors)[i]-1;
+             }
              hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), temp_index,
                                         *refine_factors, hypre_BoxIMax(&scaled_box));
 
@@ -141,15 +169,6 @@ hypre_FacZeroCData( void                 *fac_vdata,
                                                       var, 1, &j, values);
                    }
 
-                   HYPRE_SStructVectorSetBoxValues(b, level_to_part[level-1], 
-                                                   hypre_BoxIMin(&intersect_box),
-                                                   hypre_BoxIMax(&intersect_box),
-                                                   var, values);
-
-                   HYPRE_SStructVectorSetBoxValues(x, level_to_part[level-1], 
-                                                   hypre_BoxIMin(&intersect_box),
-                                                   hypre_BoxIMax(&intersect_box),
-                                                   var, values);
                    hypre_TFree(values);
 
                 }  /* if (intersect_size > 0) */

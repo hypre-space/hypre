@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.1 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.5 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 #include "headers.h"
 #include "fortran.h"
@@ -124,6 +144,22 @@ hypre_F90_IFACE(hypre_structhybridsetpcgmaxiter, HYPRE_STRUCTHYBRIDSETPCGMAXITER
                                          (int)                *pcg_max_its ) );
 }
 
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetPCGAbsoluteTolFactor
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structhybridsetpcgabsolut, HYPRE_STRUCTHYBRIDSETPCGABSOLUT)
+                                                ( long int *solver,
+                                                  double   *pcg_atolf,
+                                                  int      *ierr        )
+{
+   *ierr = (int)
+      ( HYPRE_StructHybridSetPCGAbsoluteTolFactor( (HYPRE_StructSolver) *solver,
+                                                   (double)             *pcg_atolf ) );
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_StructHybridSetTwoNorm
  *--------------------------------------------------------------------------*/
@@ -139,22 +175,66 @@ hypre_F90_IFACE(hypre_structhybridsettwonorm, HYPRE_STRUCTHYBRIDSETTWONORM)( lon
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structhybridsetstopcrit, HYPRE_STRUCTHYBRIDSETSTOPCRIT)
+                                             ( long int *solver,
+                                               int      *stop_crit,
+                                               int      *ierr     )
+{
+   *ierr = (int)
+      ( HYPRE_StructHybridSetStopCrit( (HYPRE_StructSolver) *solver,
+                                       (int)                *stop_crit   ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructHybridSetRelChange
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structhybridsetrelchange, HYPRE_STRUCTHYBRIDSETRELCHANGE)( long int *solver,
+hypre_F90_IFACE(hypre_structhybridsetrelchange, HYPRE_STRUCTHYBRIDSETRELCHANGE)
+                                               ( long int *solver,
                                                  int      *rel_change,
                                                  int      *ierr       )
 {
-   *ierr = (int)
-      ( HYPRE_StructHybridSetRelChange(
-         (HYPRE_StructSolver) *solver,
-         (int)                *rel_change    ) );
+   *ierr = (int) 
+           ( HYPRE_StructHybridSetRelChange( (HYPRE_StructSolver) *solver,
+                                             (int)                *rel_change  ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGSetPrecond
+ * HYPRE_StructHybridSetSolverType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structhybridsetsolvertype, HYPRE_STRUCTHYBRIDSETSOLVERTYPE)
+                                             ( long int *solver,
+                                               int      *solver_type,
+                                               int      *ierr     )
+{
+   *ierr = (int)
+      ( HYPRE_StructHybridSetSolverType( (HYPRE_StructSolver) *solver,
+                                         (int)                *solver_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetKDim
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structhybridsetkdim, HYPRE_STRUCTHYBRIDSETKDIM)
+                                               ( long int *solver,
+                                                 int      *k_dim,
+                                                 int      *ierr    )
+{
+   *ierr = (int) (HYPRE_StructHybridSetKDim( (HYPRE_StructSolver) *solver,
+                                             (int)                *k_dim ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructHybridSetPrecond
  *--------------------------------------------------------------------------*/
 
 void
@@ -173,7 +253,7 @@ hypre_F90_IFACE(hypre_structhybridsetprecond, HYPRE_STRUCTHYBRIDSETPRECOND)( lon
    if (*precond_id == 0)
    {
       *ierr = (int)
-         ( HYPRE_StructPCGSetPrecond( (HYPRE_StructSolver) *solver,
+         ( HYPRE_StructHybridSetPrecond( (HYPRE_StructSolver) *solver,
                                       HYPRE_StructSMGSolve,
                                       HYPRE_StructSMGSetup,
                                       (HYPRE_StructSolver) *precond_solver) );
@@ -181,7 +261,7 @@ hypre_F90_IFACE(hypre_structhybridsetprecond, HYPRE_STRUCTHYBRIDSETPRECOND)( lon
    else if (*precond_id == 1)
    {
       *ierr = (int)
-         ( HYPRE_StructPCGSetPrecond( (HYPRE_StructSolver) *solver,
+         ( HYPRE_StructHybridSetPrecond( (HYPRE_StructSolver) *solver,
                                       HYPRE_StructPFMGSolve,
                                       HYPRE_StructPFMGSetup,
                                       (HYPRE_StructSolver) *precond_solver) );

@@ -1,0 +1,7 @@
+Every patch to a named release should include a two line file in this
+directory. The filename should be 14 characters or less and end with
+".txt".  The filename before ".txt" should be a brief name for the patch.
+
+The first line of the file should be a terse description of what the patch
+solves in language that's understandable by Babel end users. The second line
+should be an email address associated with the person issuing the patch.

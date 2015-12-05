@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.10 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.17 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  *****************************************************************************/
@@ -178,7 +198,11 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+        hypre_NewCommPkgCreate(A);
+#else
         hypre_MatvecCommPkgCreate(A);
+#endif
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -960,7 +984,11 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(A);
+#else
         hypre_MatvecCommPkgCreate(A);
+#endif
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -1029,12 +1057,13 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       f_pnt = Z_PT;
       coarsen_type = 1;
    }
-   if (coarsen_type == 11)
+   if (coarsen_type == 10)
    {
       f_pnt = Z_PT;
+      coarsen_type = 11;
    }
 
-   if ((measure_type || coarsen_type != 1 || coarsen_type != 11) 
+   if ((measure_type || (coarsen_type != 1 && coarsen_type != 11)) 
 		&& num_procs > 1)
    {
       if (use_commpkg_A)
@@ -1874,7 +1903,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       hypre_TFree(ci_array);
    }   
    hypre_TFree(graph_array);
-   if ((measure_type || coarsen_type != 1) && num_procs > 1)
+   if ((measure_type || (coarsen_type != 1 && coarsen_type != 11)) 
+		&& num_procs > 1)
    	hypre_CSRMatrixDestroy(S_ext); 
    
    *CF_marker_ptr   = CF_marker;
@@ -1918,7 +1948,7 @@ hypre_BoomerAMGCoarsenHMIS( hypre_ParCSRMatrix    *S,
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 11, debug_flag,
+   ierr += hypre_BoomerAMGCoarsenRuge (S, A, measure_type, 10, debug_flag,
                                 CF_marker_ptr);
 
    ierr += hypre_BoomerAMGCoarsenPMIS (S, A, 1, debug_flag,
@@ -1987,7 +2017,6 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    int		       index, start, my_id, num_procs, jrow, cnt, elmt;
                       
    int                 ierr = 0;
-   int                 use_commpkg_A = 0;
 
    double	    wall_time;
    int   iter = 0;
@@ -2029,13 +2058,16 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    if (!comm_pkg)
    {
-        use_commpkg_A = 1;
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
    if (!comm_pkg)
    {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(A);
+#else
         hypre_MatvecCommPkgCreate(A);
+#endif
         comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
@@ -2107,7 +2139,11 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    /* this augments the measures with a random number between 0 and 1 */
    /* (only for the local part) */
-   hypre_BoomerAMGIndepSetInit(S, measure_array, CF_init);
+   /* this augments the measures */
+   if (CF_init == 2)
+      hypre_BoomerAMGIndepSetInit(S, measure_array, 1);
+   else
+      hypre_BoomerAMGIndepSetInit(S, measure_array, 0);
 
    /*---------------------------------------------------
     * Initialize the graph arrays, and CF_marker arrays

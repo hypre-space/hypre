@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.2 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.8 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * Member functions for hypre_Vector class.
@@ -154,7 +174,7 @@ hypre_SeqVectorRead( char *file_name )
    fclose(fp);
 
    /* multivector code not written yet >>> */
-   assert( hypre_VectorNumVectors(vector) == 1 );
+   hypre_assert( hypre_VectorNumVectors(vector) == 1 );
 
    return vector;
 }
@@ -205,7 +225,7 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
          fprintf(fp, "vector %d\n", j );
          for (i = 0; i < size; i++)
          {
-            fprintf(fp, "%e\n",  data[ j*vecstride + i*idxstride ] );
+            fprintf(fp, "%.14e\n",  data[ j*vecstride + i*idxstride ] );
          }
       }
    }
@@ -213,7 +233,7 @@ hypre_SeqVectorPrint( hypre_Vector *vector,
    {
       for (i = 0; i < size; i++)
       {
-         fprintf(fp, "%e\n", data[i]);
+         fprintf(fp, "%.14e\n", data[i]);
       }
    }
 
@@ -301,6 +321,51 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorCloneDeep
+ * Returns a complete copy of x - a deep copy, with its own copy of the data.
+ *--------------------------------------------------------------------------*/
+
+hypre_Vector *
+hypre_SeqVectorCloneDeep( hypre_Vector *x )
+{
+   int      size   = hypre_VectorSize(x);
+   int      num_vectors   = hypre_VectorNumVectors(x);
+   hypre_Vector * y = hypre_SeqMultiVectorCreate( size, num_vectors );
+
+   hypre_VectorMultiVecStorageMethod(y) = hypre_VectorMultiVecStorageMethod(x);
+   hypre_VectorVectorStride(y) = hypre_VectorVectorStride(x);
+   hypre_VectorIndexStride(y) = hypre_VectorIndexStride(x);
+
+   hypre_SeqVectorInitialize(y);
+   hypre_SeqVectorCopy( x, y );
+
+   return y;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorCloneShallow
+ * Returns a complete copy of x - a shallow copy, pointing the data of x
+ *--------------------------------------------------------------------------*/
+
+hypre_Vector *
+hypre_SeqVectorCloneShallow( hypre_Vector *x )
+{
+   int      size   = hypre_VectorSize(x);
+   int      num_vectors   = hypre_VectorNumVectors(x);
+   hypre_Vector * y = hypre_SeqMultiVectorCreate( size, num_vectors );
+
+   hypre_VectorMultiVecStorageMethod(y) = hypre_VectorMultiVecStorageMethod(x);
+   hypre_VectorVectorStride(y) = hypre_VectorVectorStride(x);
+   hypre_VectorIndexStride(y) = hypre_VectorIndexStride(x);
+
+   hypre_VectorData(y) = hypre_VectorData(x);
+   hypre_SeqVectorSetDataOwner( y, 0 );
+   hypre_SeqVectorInitialize(y);
+
+   return y;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorScale
  *--------------------------------------------------------------------------*/
 
@@ -379,3 +444,19 @@ double   hypre_SeqVectorInnerProd( hypre_Vector *x,
    return result;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_VectorSumElts:
+ * Returns the sum of all vector elements.
+ *--------------------------------------------------------------------------*/
+
+double hypre_VectorSumElts( hypre_Vector *vector )
+{
+   double sum = 0;
+   double * data = hypre_VectorData( vector );
+   int size = hypre_VectorSize( vector );
+   int i;
+
+   for ( i=0; i<size; ++i ) sum += data[i];
+
+   return sum;
+}

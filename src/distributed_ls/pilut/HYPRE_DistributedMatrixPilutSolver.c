@@ -1,3 +1,31 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.3 $
+ ***********************************************************************EHEADER*/
+
+
+
 /* Include headers for problem and solver data structure */
 #include "./DistributedMatrixPilutSolver.h"
 
@@ -15,7 +43,7 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
 
    hypre_DistributedMatrixPilutSolver     *solver;
    hypre_PilutSolverGlobals *globals;
-   int            ierr=0, nprocs, myid;
+   int            nprocs, myid;
    FactorMatType *ldu;
 
    /* Allocate structure for holding solver data */
@@ -96,7 +124,7 @@ int  HYPRE_NewDistributedMatrixPilutSolver(
    /* Return created structure to calling routine */
    *new_solver = ( (HYPRE_DistributedMatrixPilutSolver) solver );
 
-   return( ierr );
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -214,12 +242,11 @@ int HYPRE_DistributedMatrixPilutSolverSetMatrix(
                   HYPRE_DistributedMatrixPilutSolver in_ptr,
                   HYPRE_DistributedMatrix matrix )
 {
-  int ierr=0;
   hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
 
   hypre_DistributedMatrixPilutSolverMatrix( solver ) = matrix;
-  return(ierr);
+  return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -245,7 +272,6 @@ int HYPRE_DistributedMatrixPilutSolverSetNumLocalRow(
                   HYPRE_DistributedMatrixPilutSolver in_ptr,
                   int FirstLocalRow )
 {
-  int ierr=0;
   hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
    hypre_PilutSolverGlobals *globals = hypre_DistributedMatrixPilutSolverGlobals(solver);
@@ -253,7 +279,7 @@ int HYPRE_DistributedMatrixPilutSolverSetNumLocalRow(
   DataDistTypeRowdist(hypre_DistributedMatrixPilutSolverDataDist( solver ))[mype] = 
      FirstLocalRow;
 
-  return(ierr);
+  return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -267,13 +293,12 @@ int HYPRE_DistributedMatrixPilutSolverSetFactorRowSize(
                   HYPRE_DistributedMatrixPilutSolver in_ptr,
                   int size )
 {
-  int ierr=0;
   hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
 
   hypre_DistributedMatrixPilutSolverGmaxnz( solver ) = size;
 
-  return(ierr);
+  return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -284,13 +309,12 @@ int HYPRE_DistributedMatrixPilutSolverSetDropTolerance(
                   HYPRE_DistributedMatrixPilutSolver in_ptr,
                   double tolerance )
 {
-  int ierr=0;
   hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
 
   hypre_DistributedMatrixPilutSolverTol( solver ) = tolerance;
 
-  return(ierr);
+  return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -301,13 +325,12 @@ int HYPRE_DistributedMatrixPilutSolverSetMaxIts(
                   HYPRE_DistributedMatrixPilutSolver in_ptr,
                   int its )
 {
-  int ierr=0;
   hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
 
   hypre_DistributedMatrixPilutSolverMaxIts( solver ) = its;
 
-  return(ierr);
+  return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -316,8 +339,7 @@ int HYPRE_DistributedMatrixPilutSolverSetMaxIts(
 
 int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver in_ptr )
 {
-   int ierr=0;
-   int m, n, nprocs, start, end, *rowdist, col0, coln;
+   int m, n, nprocs, start, end, *rowdist, col0, coln, ierr;
    hypre_DistributedMatrixPilutSolver *solver = 
       (hypre_DistributedMatrixPilutSolver *) in_ptr;
    hypre_PilutSolverGlobals *globals = hypre_DistributedMatrixPilutSolverGlobals(solver);
@@ -325,9 +347,9 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
 
    if(hypre_DistributedMatrixPilutSolverMatrix(solver) == NULL )
    {
-      ierr = -1;
+       hypre_error_in_arg(1);
       /* printf("Cannot call setup to solver until matrix has been set\n");*/
-      return(ierr);
+      return hypre_error_flag;
    }
 
    /* Set up the DataDist structure */
@@ -378,7 +400,11 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
 }
 #endif
 
-   if (ierr) return(ierr);
+   if (ierr) 
+   {
+       hypre_error(HYPRE_ERROR_GENERIC);
+       return hypre_error_flag;
+   }
 
 #ifdef HYPRE_TIMING
 {
@@ -400,7 +426,11 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
 }
 #endif
 
-   if (ierr) return(ierr);
+   if (ierr) 
+   {
+       hypre_error(HYPRE_ERROR_GENERIC);
+       return hypre_error_flag;
+   }
 
 #ifdef HYPRE_DEBUG
    fflush(stdout);
@@ -408,7 +438,7 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
           hypre_DistributedMatrixPilutSolverFactorMat (solver)->nlevels);
 #endif
 
-   return(0);
+   return hypre_error_flag;
 }
 
 
@@ -453,6 +483,6 @@ int HYPRE_DistributedMatrixPilutSolverSolve( HYPRE_DistributedMatrixPilutSolver 
 #endif
 
 
-  return(0);
+  return hypre_error_flag;
 }
 

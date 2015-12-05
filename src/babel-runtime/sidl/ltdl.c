@@ -1,6 +1,6 @@
 /* ltdl.c -- system independent dlopen wrapper
-   Copyright (C) 1998, 1999, 2000 Free Software Foundation, Inc.
-   Originally by Thomas Tanner <tanner@ffii.org>
+    Copyright (C) 1998, 1999, 2000, 2004, 2005  Free Software Foundation, Inc.
+    Originally by Thomas Tanner <tanner@ffii.org>
    This file is part of GNU Libtool.
 
 This library is free software; you can redistribute it and/or
@@ -20,11 +20,21 @@ Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-02111-1307  USA
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+02110-1301  USA
+
 */
 
-#include "babel_config.h"
+/* NOTE:  This file is patched for Babel needs and differs
+   in implementation and API from virgin libtool-1.5.22 distros */
+
+#  include "babel_config.h"
+
+#if defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME)
+
+#if HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
 
 #if HAVE_STDIO_H
 #  include <stdio.h>
@@ -54,11 +64,75 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 #  include <memory.h>
 #endif
 
+#if HAVE_ERRNO_H
+#  include <errno.h>
+#endif
+
+
+#ifndef __WINDOWS__
+#  ifdef __WIN32__
+#    define __WINDOWS__
+#  endif
+#endif
+
+
+#undef LT_USE_POSIX_DIRENT
+#ifdef HAVE_CLOSEDIR
+#  ifdef HAVE_OPENDIR
+#    ifdef HAVE_READDIR
+#      ifdef HAVE_DIRENT_H
+#        define LT_USE_POSIX_DIRENT
+#      endif /* HAVE_DIRENT_H */
+#    endif /* HAVE_READDIR */
+#  endif /* HAVE_OPENDIR */
+#endif /* HAVE_CLOSEDIR */
+
+
+#undef LT_USE_WINDOWS_DIRENT_EMULATION
+#ifndef LT_USE_POSIX_DIRENT
+#  ifdef __WINDOWS__
+#    define LT_USE_WINDOWS_DIRENT_EMULATION
+#  endif /* __WINDOWS__ */
+#endif /* LT_USE_POSIX_DIRENT */
+
+
+#ifdef LT_USE_POSIX_DIRENT
+#  include <dirent.h>
+#  define LT_D_NAMLEN(dirent) (strlen((dirent)->d_name))
+#else
+#  ifdef LT_USE_WINDOWS_DIRENT_EMULATION
+#    define LT_D_NAMLEN(dirent) (strlen((dirent)->d_name))
+#  else
+#    define dirent direct
+#    define LT_D_NAMLEN(dirent) ((dirent)->d_namlen)
+#    if HAVE_SYS_NDIR_H
+#      include <sys/ndir.h>
+#    endif
+#    if HAVE_SYS_DIR_H
+#      include <sys/dir.h>
+#    endif
+#    if HAVE_NDIR_H
+#      include <ndir.h>
+#    endif
+#  endif
+#endif
+
+#if HAVE_ARGZ_H
+#  include <argz.h>
+#endif
+
+#if HAVE_ASSERT_H
+#  include <assert.h>
+#else
+#  define assert(arg)	((void) 0)
+#endif
+
 #include "ltdl.h"
 
-#ifdef __CYGWIN__
-#include <sys/cygwin.h>
+#if WITH_DMALLOC
+#  include <dmalloc.h>
 #endif
+
 
 
 
@@ -79,11 +153,40 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 #  define LT_READTEXT_MODE "r"
 #endif
 
+#ifdef LT_USE_WINDOWS_DIRENT_EMULATION
 
+#include <windows.h>
+
+#define dirent lt_dirent
+#define DIR lt_DIR
+
+struct dirent
+{
+  char d_name[2048];
+  int  d_namlen;
+};
+
+typedef struct _DIR
+{
+  HANDLE hSearch;
+  WIN32_FIND_DATA Win32FindData;
+  BOOL firsttime;
+  struct dirent file_info;
+} DIR;
+
+#endif /* LT_USE_WINDOWS_DIRENT_EMULATION */
 
 
 /* --- MANIFEST CONSTANTS --- */
 
+
+/* Standard libltdl search path environment variable name  */
+#undef  LTDL_SEARCHPATH_VAR
+#define LTDL_SEARCHPATH_VAR	"LTDL_LIBRARY_PATH"
+
+/* Standard libtool archive file extension.  */
+#undef  LTDL_ARCHIVE_EXT
+#define LTDL_ARCHIVE_EXT	".la"
 
 /* max. filename length */
 #ifndef LT_FILENAME_MAX
@@ -97,6 +200,586 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
 /* This accounts for the _LTX_ separator */
 #undef	LT_SYMBOL_OVERHEAD
 #define LT_SYMBOL_OVERHEAD	5
+
+
+
+
+/* --- MEMORY HANDLING --- */
+
+
+/* These are the functions used internally.  In addition to making
+   use of the associated function pointers above, they also perform
+   error handling.  */
+static char   *lt_estrdup	LT_PARAMS((const char *str));
+static lt_ptr lt_emalloc	LT_PARAMS((size_t size));
+static lt_ptr lt_erealloc	LT_PARAMS((lt_ptr addr, size_t size));
+
+static lt_ptr ltrpl_realloc	LT_PARAMS((lt_ptr ptr, size_t size));
+
+/* These are the pointers that can be changed by the caller:  */
+LT_GLOBAL_DATA lt_ptr (*lt_dlmalloc)	LT_PARAMS((size_t size))
+ 			= (lt_ptr (*) LT_PARAMS((size_t))) malloc;
+LT_GLOBAL_DATA lt_ptr (*lt_dlrealloc)	LT_PARAMS((lt_ptr ptr, size_t size))
+ 			= (lt_ptr (*) LT_PARAMS((lt_ptr, size_t))) ltrpl_realloc;
+LT_GLOBAL_DATA void   (*lt_dlfree)	LT_PARAMS((lt_ptr ptr))
+ 			= (void (*) LT_PARAMS((lt_ptr))) free;
+
+/* The following macros reduce the amount of typing needed to cast
+   assigned memory.  */
+#if WITH_DMALLOC
+
+#define LT_DLMALLOC(tp, n)	((tp *) xmalloc ((n) * sizeof(tp)))
+#define LT_DLREALLOC(tp, p, n)	((tp *) xrealloc ((p), (n) * sizeof(tp)))
+#define LT_DLFREE(p)						\
+	LT_STMT_START { if (p) (p) = (xfree (p), (lt_ptr) 0); } LT_STMT_END
+
+#define LT_EMALLOC(tp, n)	((tp *) xmalloc ((n) * sizeof(tp)))
+#define LT_EREALLOC(tp, p, n)	((tp *) xrealloc ((p), (n) * sizeof(tp)))
+
+#else
+
+#define LT_DLMALLOC(tp, n)	((tp *) lt_dlmalloc ((n) * sizeof(tp)))
+#define LT_DLREALLOC(tp, p, n)	((tp *) ltrpl_realloc ((p), (n) * sizeof(tp)))
+#define LT_DLFREE(p)						\
+	LT_STMT_START { if (p) (p) = (lt_dlfree (p), (lt_ptr) 0); } LT_STMT_END
+
+#define LT_EMALLOC(tp, n)	((tp *) lt_emalloc ((n) * sizeof(tp)))
+#define LT_EREALLOC(tp, p, n)	((tp *) lt_erealloc ((p), (n) * sizeof(tp)))
+
+#endif
+
+#define LT_DLMEM_REASSIGN(p, q)			LT_STMT_START {	\
+	if ((p) != (q)) { if (p) lt_dlfree (p); (p) = (q); (q) = 0; }	\
+						} LT_STMT_END
+
+
+/* --- REPLACEMENT FUNCTIONS --- */
+
+
+#undef strdup
+#define strdup rpl_strdup
+
+static char *strdup LT_PARAMS((const char *str));
+
+static char *
+strdup(str)
+     const char *str;
+{
+  char *tmp = 0;
+
+  if (str)
+    {
+      tmp = LT_DLMALLOC (char, 1+ strlen (str));
+      if (tmp)
+	{
+	  strcpy(tmp, str);
+	}
+    }
+
+  return tmp;
+}
+
+
+#if ! HAVE_STRCMP
+
+#undef strcmp
+#define strcmp rpl_strcmp
+
+static int strcmp LT_PARAMS((const char *str1, const char *str2));
+
+static int
+strcmp (str1, str2)
+     const char *str1;
+     const char *str2;
+{
+  if (str1 == str2)
+    return 0;
+  if (str1 == 0)
+    return -1;
+  if (str2 == 0)
+    return 1;
+
+  for (;*str1 && *str2; ++str1, ++str2)
+    {
+      if (*str1 != *str2)
+	break;
+    }
+
+  return (int)(*str1 - *str2);
+}
+#endif
+
+
+#if ! HAVE_STRCHR
+
+#  if HAVE_INDEX
+#    define strchr index
+#  else
+#    define strchr rpl_strchr
+
+static const char *strchr LT_PARAMS((const char *str, int ch));
+
+static const char*
+strchr(str, ch)
+     const char *str;
+     int ch;
+{
+  const char *p;
+
+  for (p = str; *p != (char)ch && *p != LT_EOS_CHAR; ++p)
+    /*NOWORK*/;
+
+  return (*p == (char)ch) ? p : 0;
+}
+
+#  endif
+#endif /* !HAVE_STRCHR */
+
+
+#if ! HAVE_STRRCHR
+
+#  if HAVE_RINDEX
+#    define strrchr rindex
+#  else
+#    define strrchr rpl_strrchr
+
+static const char *strrchr LT_PARAMS((const char *str, int ch));
+
+static const char*
+strrchr(str, ch)
+     const char *str;
+     int ch;
+{
+  const char *p, *q = 0;
+
+  for (p = str; *p != LT_EOS_CHAR; ++p)
+    {
+      if (*p == (char) ch)
+	{
+	  q = p;
+	}
+    }
+
+  return q;
+}
+
+# endif
+#endif
+
+/* NOTE:  Neither bcopy nor the memcpy implementation below can
+          reliably handle copying in overlapping areas of memory.  Use
+          memmove (for which there is a fallback implmentation below)
+	  if you need that behaviour.  */
+#if ! HAVE_MEMCPY
+
+#  if HAVE_BCOPY
+#    define memcpy(dest, src, size)	bcopy (src, dest, size)
+#  else
+#    define memcpy rpl_memcpy
+
+static lt_ptr memcpy LT_PARAMS((lt_ptr dest, const lt_ptr src, size_t size));
+
+static lt_ptr
+memcpy (dest, src, size)
+     lt_ptr dest;
+     const lt_ptr src;
+     size_t size;
+{
+  const char *	s = src;
+  char *	d = dest;
+  size_t i = 0;
+
+  for (i = 0; i < size; ++i)
+    {
+      d[i] = s[i];
+    }
+
+  return dest;
+}
+
+#  endif /* !HAVE_BCOPY */
+#endif   /* !HAVE_MEMCPY */
+
+#if ! HAVE_MEMMOVE
+#  define memmove rpl_memmove
+
+static lt_ptr memmove LT_PARAMS((lt_ptr dest, const lt_ptr src, size_t size));
+
+static lt_ptr
+memmove (dest, src, size)
+     lt_ptr dest;
+     const lt_ptr src;
+     size_t size;
+{
+  const char *	s = src;
+  char *	d = dest;
+  size_t i;
+
+  if (d < s)
+    for (i = 0; i < size; ++i)
+      {
+	d[i] = s[i];
+      }
+  else if (d > s)
+    for (i = size -1; i >= 0; --i)
+      {
+	d[i] = s[i];
+      }
+
+  return dest;
+}
+
+#endif /* !HAVE_MEMMOVE */
+
+#ifdef LT_USE_WINDOWS_DIRENT_EMULATION
+
+static void closedir LT_PARAMS((DIR *entry));
+
+static void
+closedir(entry)
+  DIR *entry;
+{
+  assert(entry != (DIR *) NULL);
+  FindClose(entry->hSearch);
+  lt_dlfree((lt_ptr)entry);
+}
+
+
+static DIR * opendir LT_PARAMS((const char *path));
+
+static DIR*
+opendir (path)
+  const char *path;
+{
+  char file_specification[LT_FILENAME_MAX];
+  DIR *entry;
+
+  assert(path != (char *) NULL);
+  /* allow space for: path + '\\' '\\' '*' '.' '*' + '\0' */
+  (void) strncpy (file_specification, path, LT_FILENAME_MAX-6);
+  file_specification[LT_FILENAME_MAX-6] = LT_EOS_CHAR
+  (void) strcat(file_specification,"\\");
+  entry = LT_DLMALLOC (DIR,sizeof(DIR));
+  if (entry != (DIR *) 0)
+    {
+      entry->firsttime = TRUE;
+      entry->hSearch = FindFirstFile(file_specification,&entry->Win32FindData);
+    }
+  if (entry->hSearch == INVALID_HANDLE_VALUE)
+    {
+      (void) strcat(file_specification,"\\*.*");
+      entry->hSearch = FindFirstFile(file_specification,&entry->Win32FindData);
+      if (entry->hSearch == INVALID_HANDLE_VALUE)
+        {
+          LT_DLFREE (entry);
+          return (DIR *) 0;
+        }
+    }
+  return(entry);
+}
+
+
+static struct dirent *readdir LT_PARAMS((DIR *entry));
+
+static struct dirent *readdir(entry)
+  DIR *entry;
+{
+  int
+    status;
+
+  if (entry == (DIR *) 0)
+    return((struct dirent *) 0);
+  if (!entry->firsttime)
+    {
+      status = FindNextFile(entry->hSearch,&entry->Win32FindData);
+      if (status == 0)
+        return((struct dirent *) 0);
+    }
+  entry->firsttime = FALSE;
+  (void) strncpy(entry->file_info.d_name,entry->Win32FindData.cFileName,
+    LT_FILENAME_MAX-1);
+  entry->file_info.d_name[LT_FILENAME_MAX - 1] = LT_EOS_CHAR;
+  entry->file_info.d_namlen = strlen(entry->file_info.d_name);
+  return(&entry->file_info);
+}
+
+#endif /* LT_USE_WINDOWS_DIRENT_EMULATION */
+
+/* According to Alexandre Oliva <oliva@lsd.ic.unicamp.br>,
+    ``realloc is not entirely portable''
+   In any case we want to use the allocator supplied by the user without
+   burdening them with an lt_dlrealloc function pointer to maintain.
+   Instead implement our own version (with known boundary conditions)
+   using lt_dlmalloc and lt_dlfree. */
+
+  /* You can't (re)define realloc unless you also (re)define malloc.
+     Right now, this code uses the size of the *destination* to decide
+     how much to copy.  That's not right, but you can't know the size
+     of the source unless you know enough about, or wrote malloc.  So
+     this code is disabled... 
+
+     TGWE 6/28/04: I modified this to use the internal realloc. 
+  */
+
+static lt_ptr
+ltrpl_realloc (ptr, size)
+     lt_ptr ptr;
+     size_t size;
+{
+  if (size == 0)
+    {
+      /* For zero or less bytes, free the original memory */
+      if (ptr != 0)
+	{
+	  lt_dlfree (ptr);
+	}
+
+      return (lt_ptr) 0;
+    }
+  else if (ptr == 0)
+    {
+      /* Allow reallocation of a NULL pointer.  */
+      return lt_dlmalloc (size);
+    }
+  else
+    {
+      return realloc(ptr, size);
+    }
+}
+
+
+#if ! HAVE_ARGZ_APPEND
+#  define argz_append rpl_argz_append
+
+static error_t argz_append LT_PARAMS((char **pargz, size_t *pargz_len,
+					const char *buf, size_t buf_len));
+
+static error_t
+argz_append (pargz, pargz_len, buf, buf_len)
+     char **pargz;
+     size_t *pargz_len;
+     const char *buf;
+     size_t buf_len;
+{
+  size_t argz_len;
+  char  *argz;
+
+  assert (pargz);
+  assert (pargz_len);
+  assert ((*pargz && *pargz_len) || (!*pargz && !*pargz_len));
+
+  /* If nothing needs to be appended, no more work is required.  */
+  if (buf_len == 0)
+    return 0;
+
+  /* Ensure there is enough room to append BUF_LEN.  */
+  argz_len = *pargz_len + buf_len;
+  argz = LT_DLREALLOC (char, *pargz, argz_len);
+  if (!argz)
+    return ENOMEM;
+
+  /* Copy characters from BUF after terminating '\0' in ARGZ.  */
+  memcpy (argz + *pargz_len, buf, buf_len);
+
+  /* Assign new values.  */
+  *pargz = argz;
+  *pargz_len = argz_len;
+
+  return 0;
+}
+#endif /* !HAVE_ARGZ_APPEND */
+
+
+#if ! HAVE_ARGZ_CREATE_SEP
+#  define argz_create_sep rpl_argz_create_sep
+
+static error_t argz_create_sep LT_PARAMS((const char *str, int delim,
+					    char **pargz, size_t *pargz_len));
+
+static error_t
+argz_create_sep (str, delim, pargz, pargz_len)
+     const char *str;
+     int delim;
+     char **pargz;
+     size_t *pargz_len;
+{
+  size_t argz_len;
+  char *argz = 0;
+
+  assert (str);
+  assert (pargz);
+  assert (pargz_len);
+
+  /* Make a copy of STR, but replacing each occurrence of
+     DELIM with '\0'.  */
+  argz_len = 1+ LT_STRLEN (str);
+  if (argz_len)
+    {
+      const char *p;
+      char *q;
+
+      argz = LT_DLMALLOC (char, argz_len);
+      if (!argz)
+	return ENOMEM;
+
+      for (p = str, q = argz; *p != LT_EOS_CHAR; ++p)
+	{
+	  if (*p == delim)
+	    {
+	      /* Ignore leading delimiters, and fold consecutive
+		 delimiters in STR into a single '\0' in ARGZ.  */
+	      if ((q > argz) && (q[-1] != LT_EOS_CHAR))
+		*q++ = LT_EOS_CHAR;
+	      else
+		--argz_len;
+	    }
+	  else
+	    *q++ = *p;
+	}
+      /* Copy terminating LT_EOS_CHAR.  */
+      *q = *p;
+    }
+
+  /* If ARGZ_LEN has shrunk to nothing, release ARGZ's memory.  */
+  if (!argz_len)
+    LT_DLFREE (argz);
+
+  /* Assign new values.  */
+  *pargz = argz;
+  *pargz_len = argz_len;
+
+  return 0;
+}
+#endif /* !HAVE_ARGZ_CREATE_SEP */
+
+
+#if ! HAVE_ARGZ_INSERT
+#  define argz_insert rpl_argz_insert
+
+static error_t argz_insert LT_PARAMS((char **pargz, size_t *pargz_len,
+					char *before, const char *entry));
+
+static error_t
+argz_insert (pargz, pargz_len, before, entry)
+     char **pargz;
+     size_t *pargz_len;
+     char *before;
+     const char *entry;
+{
+  assert (pargz);
+  assert (pargz_len);
+  assert (entry && *entry);
+
+  /* No BEFORE address indicates ENTRY should be inserted after the
+     current last element.  */
+  if (!before)
+    return argz_append (pargz, pargz_len, entry, 1+ LT_STRLEN (entry));
+
+  /* This probably indicates a programmer error, but to preserve
+     semantics, scan back to the start of an entry if BEFORE points
+     into the middle of it.  */
+  while ((before > *pargz) && (before[-1] != LT_EOS_CHAR))
+    --before;
+
+  {
+    size_t entry_len	= 1+ LT_STRLEN (entry);
+    size_t argz_len	= *pargz_len + entry_len;
+    size_t offset	= before - *pargz;
+    char   *argz	= LT_DLREALLOC (char, *pargz, argz_len);
+
+    if (!argz)
+      return ENOMEM;
+
+    /* Make BEFORE point to the equivalent offset in ARGZ that it
+       used to have in *PARGZ incase realloc() moved the block.  */
+    before = argz + offset;
+
+    /* Move the ARGZ entries starting at BEFORE up into the new
+       space at the end -- making room to copy ENTRY into the
+       resulting gap.  */
+    memmove (before + entry_len, before, *pargz_len - offset);
+    memcpy  (before, entry, entry_len);
+
+    /* Assign new values.  */
+    *pargz = argz;
+    *pargz_len = argz_len;
+  }
+
+  return 0;
+}
+#endif /* !HAVE_ARGZ_INSERT */
+
+
+#if ! HAVE_ARGZ_NEXT
+#  define argz_next rpl_argz_next
+
+static char *argz_next LT_PARAMS((char *argz, size_t argz_len,
+				    const char *entry));
+
+static char *
+argz_next (argz, argz_len, entry)
+     char *argz;
+     size_t argz_len;
+     const char *entry;
+{
+  assert ((argz && argz_len) || (!argz && !argz_len));
+
+  if (entry)
+    {
+      /* Either ARGZ/ARGZ_LEN is empty, or ENTRY points into an address
+	 within the ARGZ vector.  */
+      assert ((!argz && !argz_len)
+	      || ((argz <= entry) && (entry < (argz + argz_len))));
+
+      /* Move to the char immediately after the terminating
+	 '\0' of ENTRY.  */
+      entry = 1+ strchr (entry, LT_EOS_CHAR);
+
+      /* Return either the new ENTRY, or else NULL if ARGZ is
+	 exhausted.  */
+      return (entry >= argz + argz_len) ? 0 : (char *) entry;
+    }
+  else
+    {
+      /* This should probably be flagged as a programmer error,
+	 since starting an argz_next loop with the iterator set
+	 to ARGZ is safer.  To preserve semantics, handle the NULL
+	 case by returning the start of ARGZ (if any).  */
+      if (argz_len > 0)
+	return argz;
+      else
+	return 0;
+    }
+}
+#endif /* !HAVE_ARGZ_NEXT */
+
+
+
+#if ! HAVE_ARGZ_STRINGIFY
+#  define argz_stringify rpl_argz_stringify
+
+static void argz_stringify LT_PARAMS((char *argz, size_t argz_len,
+				       int sep));
+
+static void
+argz_stringify (argz, argz_len, sep)
+     char *argz;
+     size_t argz_len;
+     int sep;
+{
+  assert ((argz && argz_len) || (!argz && !argz_len));
+
+  if (sep)
+    {
+      --argz_len;		/* don't stringify the terminating EOS */
+      while (--argz_len > 0)
+	{
+	  if (argz[argz_len] == LT_EOS_CHAR)
+	    argz[argz_len] = sep;
+	}
+    }
+}
+#endif /* !HAVE_ARGZ_STRINGIFY */
 
 
 
@@ -117,7 +800,7 @@ typedef struct {
 
 
 /* Extract the diagnostic strings from the error table macro in the same
-   order as the enumberated indices in ltdl.h. */
+   order as the enumerated indices in ltdl.h. */
 
 static const char *lt_dlerror_strings[] =
   {
@@ -166,6 +849,7 @@ struct lt_dlhandle_struct {
 #define LT_DLSTRERROR(name)	lt_dlerror_strings[LT_CONC(LT_ERROR_,name)]
 
 static	const char	objdir[]		= LTDL_OBJDIR;
+static	const char	archive_ext[]		= LTDL_ARCHIVE_EXT;
 #ifdef	LTDL_SHLIB_EXT
 static	const char	shlib_ext[]		= LTDL_SHLIB_EXT;
 #endif
@@ -179,29 +863,33 @@ static	const char	sys_search_path[]	= LTDL_SYSSEARCHPATH;
 /* --- MUTEX LOCKING --- */
 
 
-/* Macros to make it easier to run the lock functions only if they have 
+/* Macros to make it easier to run the lock functions only if they have
    been registered.  The reason for the complicated lock macro is to
-   ensure that the stored error message from the last error is not 
+   ensure that the stored error message from the last error is not
    accidentally erased if the current function doesn't generate an
    error of its own.  */
-#define MUTEX_LOCK()				LT_STMT_START {	\
-	if (mutex_lock) (*mutex_lock)();	} LT_STMT_END
-#define MUTEX_UNLOCK()				LT_STMT_START { \
-	if (mutex_unlock) (*mutex_unlock)();	} LT_STMT_END
-#define MUTEX_SETERROR(errormsg)		LT_STMT_START {	\
-	if (mutex_seterror) (*mutex_seterror) (errormsg);	\
-	else last_error = (errormsg);		} LT_STMT_END
-#define MUTEX_GETERROR(errormsg)		LT_STMT_START {	\
-	if (mutex_seterror) errormsg = (*mutex_geterror)();	\
-	else (errormsg) = last_error;		} LT_STMT_END
+#define LT_DLMUTEX_LOCK()			LT_STMT_START {	\
+	if (lt_dlmutex_lock_func) (*lt_dlmutex_lock_func)();	\
+						} LT_STMT_END
+#define LT_DLMUTEX_UNLOCK()			LT_STMT_START { \
+	if (lt_dlmutex_unlock_func) (*lt_dlmutex_unlock_func)();\
+						} LT_STMT_END
+#define LT_DLMUTEX_SETERROR(errormsg)		LT_STMT_START {	\
+	if (lt_dlmutex_seterror_func)				\
+		(*lt_dlmutex_seterror_func) (errormsg);		\
+	else 	lt_dllast_error = (errormsg);	} LT_STMT_END
+#define LT_DLMUTEX_GETERROR(errormsg)		LT_STMT_START {	\
+	if (lt_dlmutex_seterror_func)				\
+		(errormsg) = (*lt_dlmutex_geterror_func) ();	\
+	else	(errormsg) = lt_dllast_error;	} LT_STMT_END
 
 /* The mutex functions stored here are global, and are necessarily the
    same for all threads that wish to share access to libltdl.  */
-static	lt_dlmutex_lock	    *mutex_lock	    = 0;
-static	lt_dlmutex_unlock   *mutex_unlock   = 0;
-static	lt_dlmutex_seterror *mutex_seterror = 0;
-static	lt_dlmutex_geterror *mutex_geterror = 0;
-static	const char	    *last_error	    = 0;
+static	lt_dlmutex_lock	    *lt_dlmutex_lock_func     = 0;
+static	lt_dlmutex_unlock   *lt_dlmutex_unlock_func   = 0;
+static	lt_dlmutex_seterror *lt_dlmutex_seterror_func = 0;
+static	lt_dlmutex_geterror *lt_dlmutex_geterror_func = 0;
+static	const char	    *lt_dllast_error	      = 0;
 
 
 /* Either set or reset the mutex functions.  Either all the arguments must
@@ -219,18 +907,18 @@ lt_dlmutex_register (lock, unlock, seterror, geterror)
   int		     errors	= 0;
 
   /* Lock using the old lock() callback, if any.  */
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
 
-  if ((lock && unlock && seterror && geterror) 
+  if ((lock && unlock && seterror && geterror)
       || !(lock || unlock || seterror || geterror))
     {
-      mutex_lock     = lock;
-      mutex_unlock   = unlock;
-      mutex_geterror = geterror;
+      lt_dlmutex_lock_func     = lock;
+      lt_dlmutex_unlock_func   = unlock;
+      lt_dlmutex_geterror_func = geterror;
     }
   else
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (INVALID_MUTEX_ARGS));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_MUTEX_ARGS));
       ++errors;
     }
 
@@ -247,29 +935,7 @@ lt_dlmutex_register (lock, unlock, seterror, geterror)
 
 
 
-/* --- MEMORY HANDLING --- */
-
-
-LT_GLOBAL_DATA    lt_ptr	(*lt_dlmalloc)	LT_PARAMS((size_t size))
- 				    = (lt_ptr (*) LT_PARAMS((size_t))) malloc;
-LT_GLOBAL_DATA    void		(*lt_dlfree)	LT_PARAMS((lt_ptr ptr))
- 				    = (void (*) LT_PARAMS((lt_ptr))) free;
-
-static		  lt_ptr	rpl_realloc	LT_PARAMS((lt_ptr ptr,
-							   size_t size));
-
-#define LT_DLMALLOC(tp, n)	((tp *) lt_dlmalloc ((n) * sizeof(tp)))
-#define LT_DLREALLOC(tp, p, n)	((tp *) rpl_realloc ((p), (n) * sizeof(tp)))
-#define LT_DLFREE(p)						\
-	LT_STMT_START { if (p) (p) = (lt_dlfree (p), (lt_ptr) 0); } LT_STMT_END
-
-#define LT_DLMEM_REASSIGN(p, q)			LT_STMT_START {	\
-	if ((p) != (q)) { lt_dlfree (p); (p) = (q); }		\
-						} LT_STMT_END
-
-
-
-/* --- ERROR MESSAGES --- */
+/* --- ERROR HANDLING --- */
 
 
 static	const char    **user_error_strings	= 0;
@@ -279,236 +945,87 @@ int
 lt_dladderror (diagnostic)
      const char *diagnostic;
 {
-  int		index	 = 0;
+  int		errindex = 0;
   int		result	 = -1;
   const char  **temp     = (const char **) 0;
 
-  MUTEX_LOCK ();
+  assert (diagnostic);
 
-  index	 = errorcount - LT_ERROR_MAX;
-  temp = LT_DLREALLOC (const char *, user_error_strings, 1 + index);
-  if (temp == 0)
+  LT_DLMUTEX_LOCK ();
+
+  errindex = errorcount - LT_ERROR_MAX;
+  temp = LT_EREALLOC (const char *, user_error_strings, 1 + errindex);
+  if (temp)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-    }
-  else
-    {
-      user_error_strings	= temp;
-      user_error_strings[index] = diagnostic;
-      result			= errorcount++;
+      user_error_strings		= temp;
+      user_error_strings[errindex]	= diagnostic;
+      result				= errorcount++;
     }
 
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return result;
 }
 
 int
-lt_dlseterror (index)
-     int index;
+lt_dlseterror (errindex)
+     int errindex;
 {
   int		errors	 = 0;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
 
-  if (index >= errorcount || index < 0)
+  if (errindex >= errorcount || errindex < 0)
     {
       /* Ack!  Error setting the error message! */
-      MUTEX_SETERROR (LT_DLSTRERROR (INVALID_ERRORCODE));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_ERRORCODE));
       ++errors;
     }
-  else if (index < LT_ERROR_MAX)
+  else if (errindex < LT_ERROR_MAX)
     {
       /* No error setting the error message! */
-      MUTEX_SETERROR (lt_dlerror_strings[errorcount]);
+      LT_DLMUTEX_SETERROR (lt_dlerror_strings[errindex]);
     }
   else
     {
       /* No error setting the error message! */
-      MUTEX_SETERROR (user_error_strings[errorcount - LT_ERROR_MAX]);
+      LT_DLMUTEX_SETERROR (user_error_strings[errindex - LT_ERROR_MAX]);
     }
 
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return errors;
 }
 
-
-
-
-/* --- REPLACEMENT FUNCTIONS --- */
-
-
-#undef strdup
-#define strdup rpl_strdup
-
-static char *
-strdup(const char *str)
-{
-  char *tmp = 0;
-
-  if (str)
-    {
-      tmp = LT_DLMALLOC (char, 1+ strlen (str));
-      if (tmp)
-	{
-	  strcpy(tmp, str);
-	}
-    }
-
-  return tmp;
-}
-
-
-#if ! HAVE_STRCMP
-
-#undef strcmp
-#define strcmp rpl_strcmp
-
-static int
-strcmp (str1, str2)
-     const char *str1;
-     const char *str2;
-{
-  if (str1 == str2)
-    return 0;
-  if (str1 == 0)
-    return -1;
-  if (str2 == 0)
-    return 1;
-
-  for (;*str1 && *str2; ++str1, ++str2)
-    {
-      if (*str1 != *str2)
-	break;
-    }
-
-  return (int)(*str1 - *str2);
-}
-#endif
-
-
-#if ! HAVE_STRCHR
-
-#  if HAVE_INDEX
-#    define strchr index
-#  else
-#    define strchr rpl_strchr
-
-static const char*
-strchr(str, ch)
-     const char *str;
-     int ch;
-{
-  const char *p;
-
-  for (p = str; *p != (char)ch && *p != '\0'; ++p)
-    /*NOWORK*/;
-
-  return (*p == (char)ch) ? p : 0;
-}
-
-#  endif
-#endif /* !HAVE_STRCHR */
-
-#if ! HAVE_STRRCHR
-
-#  if HAVE_RINDEX
-#    define strrchr rindex
-#  else
-#    define strrchr rpl_strrchr
-
-static const char*
-strrchr(str, ch)
-     const char *str;
-     int ch;
-{
-  const char *p, *q = 0;
-
-  for (p = str; *p != '\0'; ++p)
-    {
-      if (*p == (char) ch)
-	{
-	  q = p;
-	}
-    }
-
-  return q;
-}
-
-# endif
-#endif
-
-/* NOTE:  Neither bcopy nor the memcpy implementation below can
-          reliably handle copying in overlapping areas of memory, so
-          do not rely on this behaviour when invoking memcpy later.  */
-#if ! HAVE_MEMCPY
-
-#  if HAVE_BCOPY
-#    define memcpy(dest, src, size)	bcopy (src, dest, size)
-#  else
-#    define memcpy rpl_memcpy
-
-static char *
-memcpy (dest, src, size)
-     char *dest;
-     const char *src;
-     size_t size;
-{
-  size_t i = 0;
-
-  for (i = 0; i < size; ++i)
-    {
-      dest[i] = src[i];
-    }
-
-  return dest;
-}
-
-#  endif
-#endif
-
-/* According to Alexandre Oliva <oliva@lsd.ic.unicamp.br>,
-    ``realloc is not entirely portable''
-   In any case we want to use the allocator supplied by the user without
-   burdening them with an lt_dlrealloc function pointer to maintain.
-   Instead implement our own version (with known boundary conditions)
-   using lt_dlmalloc and lt_dlfree. */
 static lt_ptr
-rpl_realloc (ptr, size)
-     lt_ptr ptr;
+lt_emalloc (size)
      size_t size;
 {
-  if (size < 1)
-    {
-      /* For zero or less bytes, free the original memory */
-      if (ptr != 0)
-	{
-	  lt_dlfree (ptr);
-	}
+  lt_ptr mem = lt_dlmalloc (size);
+  if (size && !mem)
+    LT_DLMUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
+  return mem;
+}
 
-      return (lt_ptr) 0;
-    }
-  else if (ptr == 0)
-    {
-      /* Allow reallocation of a NULL pointer.  */
-      return lt_dlmalloc (size);
-    }
-  else
-    {
-      /* Allocate a new block, copy and free the old block.  */
-      lt_ptr mem = lt_dlmalloc (size);
+static lt_ptr
+lt_erealloc (addr, size)
+     lt_ptr addr;
+     size_t size;
+{
+  lt_ptr mem = ltrpl_realloc (addr, size);
+  if (size && !mem)
+    LT_DLMUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
+  return mem;
+}
 
-      if (mem)
-	{
-	  memcpy (mem, ptr, size);
-	  lt_dlfree (ptr);
-	}
-
-      /* Note that the contents of PTR are not damaged if there is
-	 insufficient memory to realloc.  */
-      return mem;
-    }
+static char *
+lt_estrdup (str)
+     const char *str;
+{
+  char *copy = strdup (str);
+  if (LT_STRLEN (str) && !copy)
+    LT_DLMUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
+  return copy;
 }
 
 
@@ -517,11 +1034,7 @@ rpl_realloc (ptr, size)
 /* --- DLOPEN() INTERFACE LOADER --- */
 
 
-/* The Cygwin dlopen implementation prints a spurious error message to
-   stderr if its call to LoadLibrary() fails for any reason.  We can
-   mitigate this by not using the Cygwin implementation, and falling
-   back to our own LoadLibrary() wrapper. */
-#if HAVE_LIBDL && !defined(__CYGWIN__)
+#if HAVE_LIBDL
 
 /* dynamic linking with dlopen/dlsym */
 
@@ -544,29 +1057,41 @@ rpl_realloc (ptr, size)
 #  define LT_GLOBAL		0
 #endif /* !LT_GLOBAL */
 
+#ifdef RTLD_LOCAL
+#  define LT_LOCAL		RTLD_LOCAL
+#else
+#  ifdef DL_LOCAL
+#    define LT_LOCAL		DL_LOCAL
+#  endif
+#endif /* !RTLD_LOCAL */
+#ifndef LT_LOCAL
+#  define LT_LOCAL		0
+#endif /* !LT_LOCAL */
+
 /* We may have to define LT_LAZY_OR_NOW in the command line if we
    find out it does not work in some platform. */
-#ifndef LT_LAZY_OR_NOW
+#ifndef LT_LAZY
 #  ifdef RTLD_LAZY
-#    define LT_LAZY_OR_NOW	RTLD_LAZY
+#    define LT_LAZY	RTLD_LAZY
 #  else
 #    ifdef DL_LAZY
-#      define LT_LAZY_OR_NOW	DL_LAZY
+#      define LT_LAZY	DL_LAZY
+#    else
+#      define LT_LAZY   0
 #    endif
 #  endif /* !RTLD_LAZY */
 #endif
-#ifndef LT_LAZY_OR_NOW
+#ifndef LT_NOW
 #  ifdef RTLD_NOW
-#    define LT_LAZY_OR_NOW	RTLD_NOW
+#    define LT_NOW RTLD_NOW
 #  else
 #    ifdef DL_NOW
-#      define LT_LAZY_OR_NOW	DL_NOW
+#      define LT_NOW DL_NOW
+#    else
+#      define LT_NOW 0
 #    endif
-#  endif /* !RTLD_NOW */
+#  endif
 #endif
-#ifndef LT_LAZY_OR_NOW
-#  define LT_LAZY_OR_NOW	0
-#endif /* !LT_LAZY_OR_NOW */
 
 #if HAVE_DLERROR
 #  define DLERROR(arg)	dlerror ()
@@ -575,37 +1100,35 @@ rpl_realloc (ptr, size)
 #endif
 
 static lt_module
-sys_dl_open(lt_user_data loader_data, const char *filename)
+sys_dl_open (loader_data, filename, use_global, load_lazy)
+     lt_user_data loader_data;
+     const char *filename;
+     const int use_global;
+     const int load_lazy;
 {
-#if 0
-  lt_module   module   = dlopen (filename, LT_GLOBAL | LT_LAZY_OR_NOW);
-#else
-  /*
-   * HACK - change the default open mode to local.
-   */
-#ifdef RTLD_LOCAL
-  lt_module   module   = dlopen (filename, RTLD_LOCAL | LT_LAZY_OR_NOW);
-#else
-  lt_module   module   = dlopen (filename, LT_LAZY_OR_NOW);
-#endif
-#endif
+  lt_module   module   = 
+    dlopen (filename, 
+            (use_global ? (LT_GLOBAL) : (LT_LOCAL)) | 
+            (load_lazy ? (LT_LAZY) : (LT_NOW)));
 
   if (!module)
     {
-      MUTEX_SETERROR (DLERROR (CANNOT_OPEN));
+      LT_DLMUTEX_SETERROR (DLERROR (CANNOT_OPEN));
     }
 
   return module;
 }
 
 static int
-sys_dl_close(lt_user_data loader_data, lt_module module)
+sys_dl_close (loader_data, module)
+     lt_user_data loader_data;
+     lt_module module;
 {
   int errors = 0;
 
   if (dlclose (module) != 0)
     {
-      MUTEX_SETERROR (DLERROR (CANNOT_CLOSE));
+      LT_DLMUTEX_SETERROR (DLERROR (CANNOT_CLOSE));
       ++errors;
     }
 
@@ -613,13 +1136,16 @@ sys_dl_close(lt_user_data loader_data, lt_module module)
 }
 
 static lt_ptr
-sys_dl_sym (lt_user_data loader_data, lt_module module, const char *symbol)
+sys_dl_sym (loader_data, module, symbol)
+     lt_user_data loader_data;
+     lt_module module;
+     const char *symbol;
 {
   lt_ptr address = dlsym (module, symbol);
 
   if (!address)
     {
-      MUTEX_SETERROR (DLERROR (SYMBOL_NOT_FOUND));
+      LT_DLMUTEX_SETERROR (DLERROR (SYMBOL_NOT_FOUND));
     }
 
   return address;
@@ -690,15 +1216,17 @@ static struct lt_user_dlloader sys_dl =
 #define	LT_BIND_FLAGS	(BIND_IMMEDIATE | BIND_NONFATAL | DYNAMIC_PATH)
 
 static lt_module
-sys_shl_open (loader_data, filename)
+sys_shl_open (loader_data, filename, use_global, load_lazy)
      lt_user_data loader_data;
      const char *filename;
+     const int use_global;
+     const int load_lazy;
 {
   static shl_t self = (shl_t) 0;
   lt_module module = shl_load (filename, LT_BIND_FLAGS, 0L);
-  
+
   /* Since searching for a symbol against a NULL module handle will also
-     look in everything else that was already loaded and exported with 
+     look in everything else that was already loaded and exported with
      the -E compiler flag, we always cache a handle saved before any
      modules are loaded.  */
   if (!self)
@@ -706,7 +1234,7 @@ sys_shl_open (loader_data, filename)
       lt_ptr address;
       shl_findsym (&self, "main", TYPE_UNDEFINED, &address);
     }
-  
+
   if (!filename)
     {
       module = self;
@@ -717,10 +1245,10 @@ sys_shl_open (loader_data, filename)
 
       if (!module)
 	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (CANNOT_OPEN));
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (CANNOT_OPEN));
 	}
     }
-  
+
   return module;
 }
 
@@ -733,7 +1261,7 @@ sys_shl_close (loader_data, module)
 
   if (module && (shl_unload ((shl_t) (module)) != 0))
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (CANNOT_CLOSE));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (CANNOT_CLOSE));
       ++errors;
     }
 
@@ -751,16 +1279,16 @@ sys_shl_sym (loader_data, module, symbol)
   /* sys_shl_open should never return a NULL module handle */
   if (module == (lt_module) 0)
   {
-    MUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
+    LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
   }
   else if (!shl_findsym((shl_t*) &module, symbol, TYPE_UNDEFINED, &address))
     {
       if (!address)
 	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
 	}
     }
-  
+
   return address;
 }
 
@@ -785,18 +1313,18 @@ static struct lt_user_dlloader sys_shl = {
 static lt_dlhandle handles;
 
 static lt_module
-sys_wll_open(lt_user_data loader_data, const char *filename)
+sys_wll_open (loader_data, filename, use_global, load_lazy)
+     lt_user_data loader_data;
+     const char *filename;
+     const int use_global;
+     const int load_lazy;
 {
-#if 0
   lt_dlhandle	cur;
-#endif
   lt_module	module	   = 0;
   const char   *errormsg   = 0;
   char	       *searchname = 0;
   char	       *ext;
   char		self_name_buf[MAX_PATH];
-
-  (void) errormsg;
 
   if (!filename)
     {
@@ -813,34 +1341,42 @@ sys_wll_open(lt_user_data loader_data, const char *filename)
   if (ext)
     {
       /* FILENAME already has an extension. */
-      searchname = strdup (filename);
+      searchname = lt_estrdup (filename);
     }
   else
     {
       /* Append a `.' to stop Windows from adding an
 	 implicit `.dll' extension. */
-      searchname = LT_DLMALLOC (char, 2+ strlen (filename));
-      if (!searchname)
-	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	  return 0;
-	}
-      strcpy (searchname, filename);
-      strcat (searchname, ".");
+      searchname = LT_EMALLOC (char, 2+ LT_STRLEN (filename));
+      if (searchname)
+	sprintf (searchname, "%s.", filename);
     }
+  if (!searchname)
+    return 0;
 
-#if __CYGWIN__
   {
-    char wpath[MAX_PATH];
-    cygwin_conv_to_full_win32_path(searchname, wpath);
-    module = LoadLibrary(wpath);
-  }
+    /* Silence dialog from LoadLibrary on some failures.
+       No way to get the error mode, but to set it,
+       so set it twice to preserve any previous flags. */
+    UINT errormode = SetErrorMode(SEM_FAILCRITICALERRORS);
+    SetErrorMode(errormode | SEM_FAILCRITICALERRORS);
+
+#if defined(__CYGWIN__)
+    {
+      char wpath[MAX_PATH];
+      cygwin_conv_to_full_win32_path (searchname, wpath);
+      module = LoadLibrary (wpath);
+    }
 #else
-  module = LoadLibrary (searchname);
+    module = LoadLibrary (searchname);
 #endif
+
+    /* Restore the error mode. */
+    SetErrorMode(errormode);
+  }
+
   LT_DLFREE (searchname);
 
-#if 0
   /* libltdl expects this function to fail if it is unable
      to physically load the library.  Sadly, LoadLibrary
      will search the loaded libraries for a match and return
@@ -849,7 +1385,7 @@ sys_wll_open(lt_user_data loader_data, const char *filename)
      We check whether LoadLibrary is returning a handle to
      an already loaded module, and simulate failure if we
      find one. */
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
   cur = handles;
   while (cur)
     {
@@ -866,26 +1402,27 @@ sys_wll_open(lt_user_data loader_data, const char *filename)
 
       cur = cur->next;
   }
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   if (cur || !module)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (CANNOT_OPEN));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (CANNOT_OPEN));
       module = 0;
     }
-#endif
 
   return module;
 }
 
 static int
-sys_wll_close(lt_user_data loader_data, lt_module module)
+sys_wll_close (loader_data, module)
+     lt_user_data loader_data;
+     lt_module module;
 {
   int	      errors   = 0;
 
   if (FreeLibrary(module) == 0)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (CANNOT_CLOSE));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (CANNOT_CLOSE));
       ++errors;
     }
 
@@ -893,13 +1430,16 @@ sys_wll_close(lt_user_data loader_data, lt_module module)
 }
 
 static lt_ptr
-sys_wll_sym(lt_user_data loader_data, lt_module module, const char *symbol)
+sys_wll_sym (loader_data, module, symbol)
+     lt_user_data loader_data;
+     lt_module module;
+     const char *symbol;
 {
   lt_ptr      address  = GetProcAddress (module, symbol);
 
   if (!address)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
     }
 
   return address;
@@ -924,9 +1464,11 @@ static struct lt_user_dlloader sys_wll = {
 #include <kernel/image.h>
 
 static lt_module
-sys_bedl_open (loader_data, filename)
+sys_bedl_open (loader_data, filename, use_global, load_lazy)
      lt_user_data loader_data;
      const char *filename;
+     const int use_global;
+     const int load_lazy;
 {
   image_id image = 0;
 
@@ -944,7 +1486,7 @@ sys_bedl_open (loader_data, filename)
 
   if (image <= 0)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (CANNOT_OPEN));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (CANNOT_OPEN));
       image = 0;
     }
 
@@ -960,7 +1502,7 @@ sys_bedl_close (loader_data, module)
 
   if (unload_add_on ((image_id) module) != B_OK)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (CANNOT_CLOSE));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (CANNOT_CLOSE));
       ++errors;
     }
 
@@ -978,7 +1520,7 @@ sys_bedl_sym (loader_data, module, symbol)
 
   if (get_image_symbol (image, symbol, B_SYMBOL_TYPE_ANY, address) != B_OK)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
       address = 0;
     }
 
@@ -1006,20 +1548,17 @@ static struct lt_user_dlloader sys_bedl = {
 #endif
 
 static lt_module
-sys_dld_open (loader_data, filename)
+sys_dld_open (loader_data, filename, use_global, load_lazy)
      lt_user_data loader_data;
      const char *filename;
+     const int use_global;
+     const int load_lazy;
 {
   lt_module module = strdup (filename);
 
-  if (!module)
+  if (dld_link (filename) != 0)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-      module = 0;
-    }
-  else if (dld_link (filename) != 0)
-    {
-      MUTEX_SETERROR (LT_DLSTRERROR (CANNOT_OPEN));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (CANNOT_OPEN));
       LT_DLFREE (module);
       module = 0;
     }
@@ -1036,7 +1575,7 @@ sys_dld_close (loader_data, module)
 
   if (dld_unlink_by_file ((char*)(module), 1) != 0)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (CANNOT_CLOSE));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (CANNOT_CLOSE));
       ++errors;
     }
   else
@@ -1057,7 +1596,7 @@ sys_dld_sym (loader_data, module, symbol)
 
   if (!address)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
     }
 
   return address;
@@ -1069,7 +1608,352 @@ static struct lt_user_dlloader sys_dld = {
 
 #endif /* HAVE_DLD */
 
+/* --- DYLD() MACOSX/DARWIN INTERFACE LOADER --- */
+#if HAVE_DYLD
 
+
+#if HAVE_MACH_O_DYLD_H
+#if !defined(__APPLE_CC__) && !defined(__MWERKS__) && !defined(__private_extern__)
+/* Is this correct? Does it still function properly? */
+#define __private_extern__ extern
+#endif
+# include <mach-o/dyld.h>
+#endif
+#include <mach-o/getsect.h>
+
+/* We have to put some stuff here that isn't in older dyld.h files */
+#ifndef ENUM_DYLD_BOOL
+# define ENUM_DYLD_BOOL
+# undef FALSE
+# undef TRUE
+ enum DYLD_BOOL {
+    FALSE,
+    TRUE
+ };
+#endif
+#ifndef LC_REQ_DYLD
+# define LC_REQ_DYLD 0x80000000
+#endif
+#ifndef LC_LOAD_WEAK_DYLIB
+# define LC_LOAD_WEAK_DYLIB (0x18 | LC_REQ_DYLD)
+#endif
+static const struct mach_header * (*ltdl_NSAddImage)(const char *image_name, unsigned long options) = 0;
+static NSSymbol (*ltdl_NSLookupSymbolInImage)(const struct mach_header *image,const char *symbolName, unsigned long options) = 0;
+static enum DYLD_BOOL (*ltdl_NSIsSymbolNameDefinedInImage)(const struct mach_header *image, const char *symbolName) = 0;
+static enum DYLD_BOOL (*ltdl_NSMakePrivateModulePublic)(NSModule module) = 0;
+
+#ifndef NSADDIMAGE_OPTION_NONE
+#define NSADDIMAGE_OPTION_NONE                          0x0
+#endif
+#ifndef NSADDIMAGE_OPTION_RETURN_ON_ERROR
+#define NSADDIMAGE_OPTION_RETURN_ON_ERROR               0x1
+#endif
+#ifndef NSADDIMAGE_OPTION_WITH_SEARCHING
+#define NSADDIMAGE_OPTION_WITH_SEARCHING                0x2
+#endif
+#ifndef NSADDIMAGE_OPTION_RETURN_ONLY_IF_LOADED
+#define NSADDIMAGE_OPTION_RETURN_ONLY_IF_LOADED         0x4
+#endif
+#ifndef NSADDIMAGE_OPTION_MATCH_FILENAME_BY_INSTALLNAME
+#define NSADDIMAGE_OPTION_MATCH_FILENAME_BY_INSTALLNAME 0x8
+#endif
+#ifndef NSLOOKUPSYMBOLINIMAGE_OPTION_BIND
+#define NSLOOKUPSYMBOLINIMAGE_OPTION_BIND            0x0
+#endif
+#ifndef NSLOOKUPSYMBOLINIMAGE_OPTION_BIND_NOW
+#define NSLOOKUPSYMBOLINIMAGE_OPTION_BIND_NOW        0x1
+#endif
+#ifndef NSLOOKUPSYMBOLINIMAGE_OPTION_BIND_FULLY
+#define NSLOOKUPSYMBOLINIMAGE_OPTION_BIND_FULLY      0x2
+#endif
+#ifndef NSLOOKUPSYMBOLINIMAGE_OPTION_RETURN_ON_ERROR
+#define NSLOOKUPSYMBOLINIMAGE_OPTION_RETURN_ON_ERROR 0x4
+#endif
+
+
+static const char *
+lt_int_dyld_error(othererror)
+	char* othererror;
+{
+/* return the dyld error string, or the passed in error string if none */
+	NSLinkEditErrors ler;
+	int lerno;
+	const char *errstr;
+	const char *file;
+	NSLinkEditError(&ler,&lerno,&file,&errstr);
+	if (!errstr || !strlen(errstr)) errstr = othererror;
+	return errstr;
+}
+
+static const struct mach_header *
+lt_int_dyld_get_mach_header_from_nsmodule(module)
+	NSModule module;
+{
+/* There should probably be an apple dyld api for this */
+	int i=_dyld_image_count();
+	int j;
+	const char *modname=NSNameOfModule(module);
+	const struct mach_header *mh=NULL;
+	if (!modname) return NULL;
+	for (j = 0; j < i; j++)
+	{
+		if (!strcmp(_dyld_get_image_name(j),modname))
+		{
+			mh=_dyld_get_image_header(j);
+			break;
+		}
+	}
+	return mh;
+}
+
+static const char* lt_int_dyld_lib_install_name(mh)
+	const struct mach_header *mh;
+{
+/* NSAddImage is also used to get the loaded image, but it only works if the lib
+   is installed, for uninstalled libs we need to check the install_names against
+   each other. Note that this is still broken if DYLD_IMAGE_SUFFIX is set and a
+   different lib was loaded as a result
+*/
+	int j;
+	struct load_command *lc;
+	unsigned long offset = sizeof(struct mach_header);
+	const char* retStr=NULL;
+	for (j = 0; j < mh->ncmds; j++)
+	{
+		lc = (struct load_command*)(((unsigned long)mh) + offset);
+		if (LC_ID_DYLIB == lc->cmd)
+		{
+			retStr=(char*)(((struct dylib_command*)lc)->dylib.name.offset +
+									(unsigned long)lc);
+		}
+		offset += lc->cmdsize;
+	}
+	return retStr;
+}
+
+static const struct mach_header *
+lt_int_dyld_match_loaded_lib_by_install_name(const char *name)
+{
+	int i=_dyld_image_count();
+	int j;
+	const struct mach_header *mh=NULL;
+	const char *id=NULL;
+	for (j = 0; j < i; j++)
+	{
+		id=lt_int_dyld_lib_install_name(_dyld_get_image_header(j));
+		if ((id) && (!strcmp(id,name)))
+		{
+			mh=_dyld_get_image_header(j);
+			break;
+		}
+	}
+	return mh;
+}
+
+static NSSymbol
+lt_int_dyld_NSlookupSymbolInLinkedLibs(symbol,mh)
+	const char *symbol;
+	const struct mach_header *mh;
+{
+	/* Safe to assume our mh is good */
+	int j;
+	struct load_command *lc;
+	unsigned long offset = sizeof(struct mach_header);
+	NSSymbol retSym = 0;
+	const struct mach_header *mh1;
+	if ((ltdl_NSLookupSymbolInImage) && NSIsSymbolNameDefined(symbol) )
+	{
+		for (j = 0; j < mh->ncmds; j++)
+		{
+			lc = (struct load_command*)(((unsigned long)mh) + offset);
+			if ((LC_LOAD_DYLIB == lc->cmd) || (LC_LOAD_WEAK_DYLIB == lc->cmd))
+			{
+				mh1=lt_int_dyld_match_loaded_lib_by_install_name((char*)(((struct dylib_command*)lc)->dylib.name.offset +
+										(unsigned long)lc));
+				if (!mh1)
+				{
+					/* Maybe NSAddImage can find it */
+					mh1=ltdl_NSAddImage((char*)(((struct dylib_command*)lc)->dylib.name.offset +
+										(unsigned long)lc),
+										NSADDIMAGE_OPTION_RETURN_ONLY_IF_LOADED +
+										NSADDIMAGE_OPTION_WITH_SEARCHING +
+										NSADDIMAGE_OPTION_RETURN_ON_ERROR );
+				}
+				if (mh1)
+				{
+					retSym = ltdl_NSLookupSymbolInImage(mh1,
+											symbol,
+											NSLOOKUPSYMBOLINIMAGE_OPTION_BIND_NOW
+											| NSLOOKUPSYMBOLINIMAGE_OPTION_RETURN_ON_ERROR
+											);
+					if (retSym) break;
+				}
+			}
+			offset += lc->cmdsize;
+		}
+	}
+	return retSym;
+}
+
+static int
+sys_dyld_init()
+{
+	int retCode = 0;
+	int err = 0;
+	if (!_dyld_present()) {
+		retCode=1;
+	}
+	else {
+      err = _dyld_func_lookup("__dyld_NSAddImage",(unsigned long*)&ltdl_NSAddImage);
+      err = _dyld_func_lookup("__dyld_NSLookupSymbolInImage",(unsigned long*)&ltdl_NSLookupSymbolInImage);
+      err = _dyld_func_lookup("__dyld_NSIsSymbolNameDefinedInImage",(unsigned long*)&ltdl_NSIsSymbolNameDefinedInImage);
+      err = _dyld_func_lookup("__dyld_NSMakePrivateModulePublic",(unsigned long*)&ltdl_NSMakePrivateModulePublic);
+    }
+ return retCode;
+}
+
+static lt_module
+sys_dyld_open (loader_data, filename, use_global, load_lazy)
+     lt_user_data loader_data;
+     const char *filename;
+     const int use_global;
+     const int load_lazy;
+{
+	lt_module   module   = 0;
+	NSObjectFileImage ofi = 0;
+	NSObjectFileImageReturnCode ofirc;
+
+  	if (!filename)
+  		return (lt_module)-1;
+	ofirc = NSCreateObjectFileImageFromFile(filename, &ofi);
+	switch (ofirc)
+	{
+		case NSObjectFileImageSuccess:
+			module = NSLinkModule(ofi, filename,
+						NSLINKMODULE_OPTION_RETURN_ON_ERROR
+						 | NSLINKMODULE_OPTION_PRIVATE
+						 | NSLINKMODULE_OPTION_BINDNOW);
+			NSDestroyObjectFileImage(ofi);
+			if (module)
+				ltdl_NSMakePrivateModulePublic(module);
+			break;
+		case NSObjectFileImageInappropriateFile:
+		    if (ltdl_NSIsSymbolNameDefinedInImage && ltdl_NSLookupSymbolInImage)
+		    {
+				module = (lt_module)ltdl_NSAddImage(filename, NSADDIMAGE_OPTION_RETURN_ON_ERROR);
+				break;
+			}
+		default:
+			LT_DLMUTEX_SETERROR (lt_int_dyld_error(LT_DLSTRERROR(CANNOT_OPEN)));
+			return 0;
+	}
+	if (!module) LT_DLMUTEX_SETERROR (lt_int_dyld_error(LT_DLSTRERROR(CANNOT_OPEN)));
+  return module;
+}
+
+static int
+sys_dyld_close (loader_data, module)
+     lt_user_data loader_data;
+     lt_module module;
+{
+	int retCode = 0;
+	int flags = 0;
+	if (module == (lt_module)-1) return 0;
+#ifdef __BIG_ENDIAN__
+  	if (((struct mach_header *)module)->magic == MH_MAGIC)
+#else
+    if (((struct mach_header *)module)->magic == MH_CIGAM)
+#endif
+	{
+	  LT_DLMUTEX_SETERROR("Can not close a dylib");
+	  retCode = 1;
+	}
+	else
+	{
+#if 1
+/* Currently, if a module contains c++ static destructors and it is unloaded, we
+   get a segfault in atexit(), due to compiler and dynamic loader differences of
+   opinion, this works around that.
+*/
+		if ((const struct section *)NULL !=
+		   getsectbynamefromheader(lt_int_dyld_get_mach_header_from_nsmodule(module),
+		   "__DATA","__mod_term_func"))
+		{
+			flags += NSUNLINKMODULE_OPTION_KEEP_MEMORY_MAPPED;
+		}
+#endif
+#ifdef __ppc__
+			flags += NSUNLINKMODULE_OPTION_RESET_LAZY_REFERENCES;
+#endif
+		if (!NSUnLinkModule(module,flags))
+		{
+			retCode=1;
+			LT_DLMUTEX_SETERROR (lt_int_dyld_error(LT_DLSTRERROR(CANNOT_CLOSE)));
+		}
+	}
+
+ return retCode;
+}
+
+static lt_ptr
+sys_dyld_sym (loader_data, module, symbol)
+     lt_user_data loader_data;
+     lt_module module;
+     const char *symbol;
+{
+	lt_ptr address = 0;
+  	NSSymbol *nssym = 0;
+  	void *unused;
+  	const struct mach_header *mh=NULL;
+  	char saveError[256] = "Symbol not found";
+  	if (module == (lt_module)-1)
+  	{
+  		_dyld_lookup_and_bind(symbol,(unsigned long*)&address,&unused);
+  		return address;
+  	}
+#ifdef __BIG_ENDIAN__
+  	if (((struct mach_header *)module)->magic == MH_MAGIC)
+#else
+    if (((struct mach_header *)module)->magic == MH_CIGAM)
+#endif
+  	{
+  	    if (ltdl_NSIsSymbolNameDefinedInImage && ltdl_NSLookupSymbolInImage)
+  	    {
+  	    	mh=module;
+			if (ltdl_NSIsSymbolNameDefinedInImage((struct mach_header*)module,symbol))
+			{
+				nssym = ltdl_NSLookupSymbolInImage((struct mach_header*)module,
+											symbol,
+											NSLOOKUPSYMBOLINIMAGE_OPTION_BIND_NOW
+											| NSLOOKUPSYMBOLINIMAGE_OPTION_RETURN_ON_ERROR
+											);
+			}
+	    }
+
+  	}
+  else {
+	nssym = NSLookupSymbolInModule(module, symbol);
+	}
+	if (!nssym)
+	{
+		strncpy(saveError, lt_int_dyld_error(LT_DLSTRERROR(SYMBOL_NOT_FOUND)), 255);
+		saveError[255] = 0;
+		if (!mh) mh=lt_int_dyld_get_mach_header_from_nsmodule(module);
+		nssym = lt_int_dyld_NSlookupSymbolInLinkedLibs(symbol,mh);
+	}
+	if (!nssym)
+	{
+		LT_DLMUTEX_SETERROR (saveError);
+		return NULL;
+	}
+	return NSAddressOfSymbol(nssym);
+}
+
+static struct lt_user_dlloader sys_dyld =
+  { "_", sys_dyld_open, sys_dyld_close, sys_dyld_sym, 0, 0 };
+
+
+#endif /* HAVE_DYLD */
 
 
 /* --- DLPREOPEN() INTERFACE LOADER --- */
@@ -1087,11 +1971,12 @@ static	const lt_dlsymlist     *default_preloaded_symbols	= 0;
 static	lt_dlsymlists_t	       *preloaded_symbols		= 0;
 
 static int
-presym_init(lt_user_data loader_data)
+presym_init (loader_data)
+     lt_user_data loader_data;
 {
   int errors = 0;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
 
   preloaded_symbols = 0;
   if (default_preloaded_symbols)
@@ -1099,17 +1984,17 @@ presym_init(lt_user_data loader_data)
       errors = lt_dlpreload (default_preloaded_symbols);
     }
 
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return errors;
 }
 
 static int
-presym_free_symlists(void)
+presym_free_symlists ()
 {
   lt_dlsymlists_t *lists;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
 
   lists = preloaded_symbols;
   while (lists)
@@ -1121,26 +2006,28 @@ presym_free_symlists(void)
     }
   preloaded_symbols = 0;
 
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return 0;
 }
 
 static int
-presym_exit(lt_user_data loader_data)
+presym_exit (loader_data)
+     lt_user_data loader_data;
 {
   presym_free_symlists ();
   return 0;
 }
 
 static int
-presym_add_symlist(const lt_dlsymlist *preloaded)
+presym_add_symlist (preloaded)
+     const lt_dlsymlist *preloaded;
 {
   lt_dlsymlists_t *tmp;
   lt_dlsymlists_t *lists;
   int		   errors   = 0;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
 
   lists = preloaded_symbols;
   while (lists)
@@ -1152,39 +2039,47 @@ presym_add_symlist(const lt_dlsymlist *preloaded)
       lists = lists->next;
     }
 
-  tmp = LT_DLMALLOC (lt_dlsymlists_t, 1);
+  tmp = LT_EMALLOC (lt_dlsymlists_t, 1);
   if (tmp)
     {
+      memset (tmp, 0, sizeof(lt_dlsymlists_t));
       tmp->syms = preloaded;
       tmp->next = preloaded_symbols;
       preloaded_symbols = tmp;
     }
   else
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
       ++errors;
     }
 
  done:
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
   return errors;
 }
 
 static lt_module
-presym_open(lt_user_data loader_data, const char *filename)
+presym_open (loader_data, filename, use_global, load_lazy)
+     lt_user_data loader_data;
+     const char *filename;
+     const int use_global;
+     const int load_lazy;
 {
   lt_dlsymlists_t *lists;
   lt_module	   module = (lt_module) 0;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
   lists = preloaded_symbols;
 
   if (!lists)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (NO_SYMBOLS));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (NO_SYMBOLS));
       goto done;
     }
 
+  /* Can't use NULL as the reflective symbol header, as NULL is
+     used to mark the end of the entire symbol list.  Self-dlpreopened
+     symbols follow this magic number, chosen to be an unlikely
+     clash with a real module name.  */
   if (!filename)
     {
       filename = "@PROGRAM@";
@@ -1207,15 +2102,17 @@ presym_open(lt_user_data loader_data, const char *filename)
       lists = lists->next;
     }
 
-  MUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
+  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
 
  done:
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
   return module;
 }
 
 static int
-presym_close(lt_user_data loader_data, lt_module module)
+presym_close (loader_data, module)
+     lt_user_data loader_data;
+     lt_module module;
 {
   /* Just to silence gcc -Wall */
   module = 0;
@@ -1223,7 +2120,10 @@ presym_close(lt_user_data loader_data, lt_module module)
 }
 
 static lt_ptr
-presym_sym(lt_user_data loader_data, lt_module module, const char *symbol)
+presym_sym (loader_data, module, symbol)
+     lt_user_data loader_data;
+     lt_module module;
+     const char *symbol;
 {
   lt_dlsymlist *syms = (lt_dlsymlist*) module;
 
@@ -1238,7 +2138,7 @@ presym_sym(lt_user_data loader_data, lt_module module, const char *symbol)
     ++syms;
   }
 
-  MUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
+  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
 
   return 0;
 }
@@ -1254,6 +2154,92 @@ static struct lt_user_dlloader presym = {
 /* --- DYNAMIC MODULE LOADING --- */
 
 
+/* The type of a function used at each iteration of  foreach_dirinpath().  */
+typedef int	foreach_callback_func LT_PARAMS((char *filename, lt_ptr data1,
+						 lt_ptr data2,
+                                                 const int use_global,
+                                                 const int load_lazy));
+
+static	int	foreach_dirinpath     LT_PARAMS((const char *search_path,
+						 const char *base_name,
+						 foreach_callback_func *func,
+						 lt_ptr data1, lt_ptr data2,
+                                                 const int use_global,
+                                                 const int load_lazy));
+
+static	int	find_file_callback    LT_PARAMS((char *filename, lt_ptr data,
+						 lt_ptr ignored,
+                                                 const int use_global,
+                                                 const int load_lazy));
+static	int	find_handle_callback  LT_PARAMS((char *filename, lt_ptr data,
+						 lt_ptr ignored,
+                                                 const int use_global,
+                                                 const int load_lazy));
+static	int	foreachfile_callback  LT_PARAMS((char *filename, lt_ptr data1,
+						 lt_ptr data2,
+                                                 const int use_global,
+                                                 const int load_lazy));
+
+
+static	int     canonicalize_path     LT_PARAMS((const char *path,
+						 char **pcanonical));
+static	int	argzize_path 	      LT_PARAMS((const char *path,
+						 char **pargz,
+						 size_t *pargz_len));
+static	FILE   *find_file	      LT_PARAMS((const char *search_path,
+						 const char *base_name,
+						 char **pdir,
+                                                 const int use_global,
+                                                 const int load_lazy));
+static	lt_dlhandle *find_handle      LT_PARAMS((const char *search_path,
+						 const char *base_name,
+						 lt_dlhandle *handle,
+                                                 const int use_global,
+                                                 const int load_lazy));
+static	int	find_module	      LT_PARAMS((lt_dlhandle *handle,
+						 const char *dir,
+						 const char *libdir,
+						 const char *dlname,
+						 const char *old_name,
+						 int installed,
+                                                 const int   use_global,
+                                                 const int   load_lazy));
+static	int	free_vars	      LT_PARAMS((char *dlname, char *oldname,
+						 char *libdir, char *deplibs));
+static	int	load_deplibs	      LT_PARAMS((lt_dlhandle handle,
+						 char *deplibs,
+                                                 const int use_global,
+                                                 const int load_lazy));
+static	int	trim		      LT_PARAMS((char **dest,
+						 const char *str));
+static	int	try_dlopen	      LT_PARAMS((lt_dlhandle *handle,
+						 const char *filename,
+                                                 const int   use_global,
+                                                 const int   load_lazy));
+static	int	tryall_dlopen	      LT_PARAMS((lt_dlhandle *handle,
+						 const char *filename,
+                                                 const int use_global,
+                                                 const int load_lazy));
+static	int	unload_deplibs	      LT_PARAMS((lt_dlhandle handle));
+static	int	lt_argz_insert	      LT_PARAMS((char **pargz,
+						 size_t *pargz_len,
+						 char *before,
+						 const char *entry));
+static	int	lt_argz_insertinorder LT_PARAMS((char **pargz,
+						 size_t *pargz_len,
+						 const char *entry));
+static	int	lt_argz_insertdir     LT_PARAMS((char **pargz,
+						 size_t *pargz_len,
+						 const char *dirnam,
+						 struct dirent *dp));
+static	int	lt_dlpath_insertdir   LT_PARAMS((char **ppath,
+						 char *before,
+						 const char *dir));
+static	int	list_files_by_dir     LT_PARAMS((const char *dirnam,
+						 char **pargz,
+						 size_t *pargz_len));
+static	int	file_not_found	      LT_PARAMS((void));
+
 static	char	       *user_search_path= 0;
 static	lt_dlloader    *loaders		= 0;
 static	lt_dlhandle	handles 	= 0;
@@ -1265,7 +2251,7 @@ lt_dlinit ()
 {
   int	      errors   = 0;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
 
   /* Initialize only at first call. */
   if (++initialized == 1)
@@ -1273,7 +2259,7 @@ lt_dlinit ()
       handles = 0;
       user_search_path = 0; /* empty search path */
 
-#if HAVE_LIBDL && !defined(__CYGWIN__)
+#if HAVE_LIBDL
       errors += lt_dlloader_add (lt_dlloader_next (0), &sys_dl, "dlopen");
 #endif
 #if HAVE_SHL_LOAD
@@ -1288,21 +2274,25 @@ lt_dlinit ()
 #if HAVE_DLD
       errors += lt_dlloader_add (lt_dlloader_next (0), &sys_dld, "dld");
 #endif
+#if HAVE_DYLD
+       errors += lt_dlloader_add (lt_dlloader_next (0), &sys_dyld, "dyld");
+       errors += sys_dyld_init();
+#endif
       errors += lt_dlloader_add (lt_dlloader_next (0), &presym, "dlpreload");
 
       if (presym_init (presym.dlloader_data))
 	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (INIT_LOADER));
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INIT_LOADER));
 	  ++errors;
 	}
       else if (errors != 0)
 	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (DLOPEN_NOT_SUPPORTED));
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (DLOPEN_NOT_SUPPORTED));
 	  ++errors;
 	}
     }
 
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return errors;
 }
@@ -1319,17 +2309,14 @@ lt_dlpreload (preloaded)
     }
   else
     {
-      const char *errormsg = 0;
-      (void) errormsg;
-
       presym_free_symlists();
-  
-      MUTEX_LOCK ();
+
+      LT_DLMUTEX_LOCK ();
       if (default_preloaded_symbols)
 	{
 	  errors = lt_dlpreload (default_preloaded_symbols);
 	}
-      MUTEX_UNLOCK ();
+      LT_DLMUTEX_UNLOCK ();
     }
 
   return errors;
@@ -1339,9 +2326,9 @@ int
 lt_dlpreload_default (preloaded)
      const lt_dlsymlist *preloaded;
 {
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
   default_preloaded_symbols = preloaded;
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
   return 0;
 }
 
@@ -1350,17 +2337,14 @@ lt_dlexit ()
 {
   /* shut down libltdl */
   lt_dlloader *loader;
-  const char  *errormsg;
   int	       errors   = 0;
 
-  (void) errormsg;
-
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
   loader = loaders;
 
   if (!initialized)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (SHUTDOWN));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (SHUTDOWN));
       ++errors;
       goto done;
     }
@@ -1416,20 +2400,24 @@ lt_dlexit ()
     }
 
  done:
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
   return errors;
 }
 
 static int
-tryall_dlopen(lt_dlhandle *handle, const char *filename)
+tryall_dlopen (handle, filename, use_global, load_lazy)
+     lt_dlhandle *handle;
+     const char *filename;
+     const int use_global;
+     const int load_lazy;
 {
   lt_dlhandle	 cur;
   lt_dlloader   *loader;
   const char	*saved_error;
   int		 errors		= 0;
 
-  MUTEX_GETERROR (saved_error);
-  MUTEX_LOCK ();
+  LT_DLMUTEX_GETERROR (saved_error);
+  LT_DLMUTEX_LOCK ();
 
   cur	 = handles;
   loader = loaders;
@@ -1462,10 +2450,21 @@ tryall_dlopen(lt_dlhandle *handle, const char *filename)
   cur = *handle;
   if (filename)
     {
-      cur->info.filename = strdup (filename);
+      /* Comment out the check of file permissions using access.
+	 This call seems to always return -1 with error EACCES.
+      */
+      /* We need to catch missing file errors early so that
+	 file_not_found() can detect what happened.
+      if (access (filename, R_OK) != 0)
+	{
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
+	  ++errors;
+	  goto done;
+	} */
+
+      cur->info.filename = lt_estrdup (filename);
       if (!cur->info.filename)
 	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
 	  ++errors;
 	  goto done;
 	}
@@ -1479,7 +2478,7 @@ tryall_dlopen(lt_dlhandle *handle, const char *filename)
     {
       lt_user_data data = loader->dlloader_data;
 
-      cur->module = loader->module_open (data, filename);
+      cur->module = loader->module_open (data, filename, use_global, load_lazy);
 
       if (cur->module != 0)
 	{
@@ -1496,266 +2495,393 @@ tryall_dlopen(lt_dlhandle *handle, const char *filename)
     }
 
   cur->loader	= loader;
-  last_error	= saved_error;
-  
+  LT_DLMUTEX_SETERROR (saved_error);
+
  done:
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return errors;
 }
 
 static int
-find_module(
-  lt_dlhandle *handle,
-  const char *dir,
-  const char *libdir,
-  const char *dlname,
-  const char *old_name,
-  int installed)
+tryall_dlopen_module (handle, prefix, dirname, dlname, use_global, load_lazy)
+     lt_dlhandle *handle;
+     const char *prefix;
+     const char *dirname;
+     const char *dlname;
+     const int   use_global;
+     const int   load_lazy;
 {
-  int	error;
-  char	*filename;
+  int      error	= 0;
+  char     *filename	= 0;
+  size_t   filename_len	= 0;
+  size_t   dirname_len	= LT_STRLEN (dirname);
 
-  /* try to open the old library first; if it was dlpreopened,
+  assert (handle);
+  assert (dirname);
+  assert (dlname);
+#ifdef LT_DIRSEP_CHAR
+  /* Only canonicalized names (i.e. with DIRSEP chars already converted)
+     should make it into this function:  */
+  assert (strchr (dirname, LT_DIRSEP_CHAR) == 0);
+#endif
+
+  if (dirname_len > 0)
+    if (dirname[dirname_len -1] == '/')
+      --dirname_len;
+  filename_len = dirname_len + 1 + LT_STRLEN (dlname);
+
+  /* Allocate memory, and combine DIRNAME and MODULENAME into it.
+     The PREFIX (if any) is handled below.  */
+  filename  = LT_EMALLOC (char, dirname_len + 1 + filename_len + 1);
+  if (!filename)
+    return 1;
+
+  sprintf (filename, "%.*s/%s", (int) dirname_len, dirname, dlname);
+
+  /* Now that we have combined DIRNAME and MODULENAME, if there is
+     also a PREFIX to contend with, simply recurse with the arguments
+     shuffled.  Otherwise, attempt to open FILENAME as a module.  */
+  if (prefix)
+    {
+      error += tryall_dlopen_module (handle,
+				     (const char *) 0, prefix, filename,
+                                     use_global, load_lazy);
+    }
+  else if (tryall_dlopen (handle, filename, use_global, load_lazy) != 0)
+    {
+      ++error;
+    }
+
+  LT_DLFREE (filename);
+  return error;
+}
+
+static int
+find_module (handle, dir, libdir, dlname, old_name, installed, use_global, load_lazy)
+     lt_dlhandle *handle;
+     const char *dir;
+     const char *libdir;
+     const char *dlname;
+     const char *old_name;
+     int installed;
+     const int   use_global;
+     const int   load_lazy;
+{
+  /* Try to open the old library first; if it was dlpreopened,
      we want the preopened version of it, even if a dlopenable
-     module is available */
-  if (old_name && tryall_dlopen(handle, old_name) == 0)
+     module is available.  */
+  if (old_name && tryall_dlopen (handle, old_name, use_global, load_lazy) == 0)
     {
       return 0;
     }
 
-  /* try to open the dynamic library */
+  /* Try to open the dynamic library.  */
   if (dlname)
     {
-      size_t len;
-
       /* try to open the installed module */
       if (installed && libdir)
 	{
-	  len	    = strlen (libdir) + 1 + strlen (dlname);
-	  filename  = LT_DLMALLOC (char, 1+ len);
-
-	  if (!filename)
-	    {
-	      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	      return 1;
-	    }
-
-	  sprintf (filename, "%s/%s", libdir, dlname);
-	  error = (tryall_dlopen (handle, filename) != 0);
-	  LT_DLFREE (filename);
-
-	  if (!error)
-	    {
-	      return 0;
-	    }
+	  if (tryall_dlopen_module (handle,
+				    (const char *) 0, libdir, dlname,
+                                    use_global, load_lazy) == 0)
+	    return 0;
 	}
 
       /* try to open the not-installed module */
       if (!installed)
 	{
-	  len = (dir ? strlen (dir) : 0) + strlen (objdir) + strlen (dlname);
-	  filename = LT_DLMALLOC (char, 1+ len);
-
-	  if (!filename)
-	    {
-	      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	      return 1;
-	    }
-
-	  if (dir)
-	    {
-	      strcpy (filename, dir);
-	    }
-	  else
-	    {
-	      *filename = 0;
-	    }
-	  strcat(filename, objdir);
-	  strcat(filename, dlname);
-
-	  error = tryall_dlopen (handle, filename) != 0;
-	  LT_DLFREE (filename);
-	  if (!error)
-	    {
-	      return 0;
-	    }
+	  if (tryall_dlopen_module (handle, dir, objdir, dlname,
+                                    use_global, load_lazy) == 0)
+	    return 0;
 	}
 
       /* maybe it was moved to another directory */
       {
-	len	 = (dir ? strlen (dir) : 0) + strlen (dlname);
-	filename = LT_DLMALLOC (char, 1+ len);
-
-	if (dir)
-	  {
-	    strcpy (filename, dir);
-	  }
-	else
-	  {
-	    *filename = 0;
-	  }
-	strcat(filename, dlname);
-
-	error = (tryall_dlopen (handle, filename) != 0);
-	LT_DLFREE (filename);
-	if (!error)
-	  {
+	  if (dir && tryall_dlopen_module (handle,
+				    (const char *) 0, dir, dlname,
+                                    use_global, load_lazy) == 0)
 	    return 0;
-	  }
       }
     }
 
   return 1;
 }
 
-static char*
-canonicalize_path(const char *path)
+
+static int
+canonicalize_path (path, pcanonical)
+     const char *path;
+     char **pcanonical;
 {
   char *canonical = 0;
 
-  if (path && *path)
-    {
-      char *ptr = strdup (path);
-      canonical = ptr;
+  assert (path && *path);
+  assert (pcanonical);
 
+  canonical = LT_EMALLOC (char, 1+ LT_STRLEN (path));
+  if (!canonical)
+    return 1;
+
+  {
+    size_t dest = 0;
+    size_t src;
+    for (src = 0; path[src] != LT_EOS_CHAR; ++src)
+      {
+	/* Path separators are not copied to the beginning or end of
+	   the destination, or if another separator would follow
+	   immediately.  */
+	if (path[src] == LT_PATHSEP_CHAR)
+	  {
+	    if ((dest == 0)
+		|| (path[1+ src] == LT_PATHSEP_CHAR)
+		|| (path[1+ src] == LT_EOS_CHAR))
+	      continue;
+	  }
+
+	/* Anything other than a directory separator is copied verbatim.  */
+	if ((path[src] != '/')
 #ifdef LT_DIRSEP_CHAR
-      /* Avoid this overhead where '/' is the only separator. */
-      while (ptr = strchr (ptr, LT_DIRSEP_CHAR))
-	{
-	  *ptr++ = '/';
-	}
+	    && (path[src] != LT_DIRSEP_CHAR)
 #endif
-    }
+	    )
+	  {
+	    canonical[dest++] = path[src];
+	  }
+	/* Directory separators are converted and copied only if they are
+	   not at the end of a path -- i.e. before a path separator or
+	   NULL terminator.  */
+	else if ((path[1+ src] != LT_PATHSEP_CHAR)
+		 && (path[1+ src] != LT_EOS_CHAR)
+#ifdef LT_DIRSEP_CHAR
+		 && (path[1+ src] != LT_DIRSEP_CHAR)
+#endif
+		 && (path[1+ src] != '/'))
+	  {
+	    canonical[dest++] = '/';
+	  }
+      }
 
-  return canonical;
+    /* Add an end-of-string marker at the end.  */
+    canonical[dest] = LT_EOS_CHAR;
+  }
+
+  /* Assign new value.  */
+  *pcanonical = canonical;
+
+  return 0;
 }
 
-static lt_ptr
-find_file(
-  const char *basename,
-  const char *search_path,
-  char **pdir,
-  lt_dlhandle *handle)
+static int
+argzize_path (path, pargz, pargz_len)
+     const char *path;
+     char **pargz;
+     size_t *pargz_len;
 {
-  /* When handle != NULL search a library, otherwise a file
-     return NULL on failure, otherwise the file/handle.  */
+  error_t error;
 
-  lt_ptr    result	= 0;
-  char	   *filename	= 0;
-  int	    filenamesize= 0;
-  int	    lenbase	= strlen (basename);
-  char	   *canonical	= 0;
-  char	   *next	= 0;
+  assert (path);
+  assert (pargz);
+  assert (pargz_len);
 
-  MUTEX_LOCK ();
+  if ((error = argz_create_sep (path, LT_PATHSEP_CHAR, pargz, pargz_len)))
+    {
+      switch (error)
+	{
+	case ENOMEM:
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
+	  break;
+	default:
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (UNKNOWN));
+	  break;
+	}
+
+      return 1;
+    }
+
+  return 0;
+}
+
+/* Repeatedly call FUNC with each LT_PATHSEP_CHAR delimited element
+   of SEARCH_PATH and references to DATA1 and DATA2, until FUNC returns
+   non-zero or all elements are exhausted.  If BASE_NAME is non-NULL,
+   it is appended to each SEARCH_PATH element before FUNC is called.  */
+static int
+foreach_dirinpath (search_path, base_name, func, data1, data2, use_global, load_lazy)
+     const char *search_path;
+     const char *base_name;
+     foreach_callback_func *func;
+     lt_ptr data1;
+     lt_ptr data2;
+     const int use_global;
+     const int load_lazy;
+{
+  int	 result		= 0;
+  int	 filenamesize	= 0;
+  size_t lenbase	= LT_STRLEN (base_name);
+  size_t argz_len	= 0;
+  char *argz		= 0;
+  char *filename	= 0;
+  char *canonical	= 0;
+
+  LT_DLMUTEX_LOCK ();
 
   if (!search_path || !*search_path)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
       goto cleanup;
     }
 
-  canonical = canonicalize_path (search_path);
-  if (!canonical)
-    {
-      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-      goto cleanup;
-    }
+  if (canonicalize_path (search_path, &canonical) != 0)
+    goto cleanup;
 
-  next = canonical;
-  while (next)
-    {
-      int lendir;
-      char *cur = next;
+  if (argzize_path (canonical, &argz, &argz_len) != 0)
+    goto cleanup;
 
-      next = strchr (cur, LT_PATHSEP_CHAR);
-      if (!next)
-	{
-	  next = cur + strlen (cur);
-	}
+  {
+    char *dir_name = 0;
+    while ((dir_name = argz_next (argz, argz_len, dir_name)))
+      {
+	size_t lendir = LT_STRLEN (dir_name);
 
-      lendir = next - cur;
-      if (*next == LT_PATHSEP_CHAR)
-	{
-	  ++next;
-	}
-      else
-	{
-	  next = 0;
-	}
-
-      if (lendir == 0)
-	{
-	  continue;
-	}
-
-      if (lendir + 1 + lenbase >= filenamesize)
+	if (lendir +1 +lenbase >= filenamesize)
 	{
 	  LT_DLFREE (filename);
-	  filenamesize = lendir + 1 + lenbase + 1;
-	  filename = LT_DLMALLOC (char, filenamesize);
-
+	  filenamesize	= lendir +1 +lenbase +1; /* "/d" + '/' + "f" + '\0' */
+	  filename	= LT_EMALLOC (char, filenamesize);
 	  if (!filename)
-	    {
-	      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	      goto cleanup;
-	    }
+	    goto cleanup;
 	}
 
-      strncpy(filename, cur, lendir);
-      if (filename[lendir-1] != '/')
-	{
-	  filename[lendir++] = '/';
-	}
-      strcpy(filename+lendir, basename);
-      if (handle)
-	{
-	  if (tryall_dlopen (handle, filename) == 0)
-	    {
-	      result = (lt_ptr) handle;
-	      goto cleanup;
-	    }
-	}
-      else
-	{
-	  FILE *file = fopen (filename, LT_READTEXT_MODE);
-	  if (file)
-	    {
-	      LT_DLFREE (*pdir);
+	assert (filenamesize > lendir);
+	strcpy (filename, dir_name);
 
-	      filename[lendir] = '\0';
-	      *pdir = strdup(filename);
-	      if (!*pdir)
-		{
-		  /* We could have even avoided the strdup,
-		     but there would be some memory overhead. */
-		  *pdir = filename;
-		  filename = 0;
-		}
+	if (base_name && *base_name)
+	  {
+	    if (filename[lendir -1] != '/')
+	      filename[lendir++] = '/';
+	    strcpy (filename +lendir, base_name);
+	  }
 
-	      result = (lt_ptr) file;
-	      goto cleanup;
-	    }
-	}
-    }
-
-  MUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
+	if ((result = (*func) (filename, data1, data2, use_global, load_lazy)))
+	  {
+	    break;
+	  }
+      }
+  }
 
  cleanup:
-  LT_DLFREE (filename);
+  LT_DLFREE (argz);
   LT_DLFREE (canonical);
+  LT_DLFREE (filename);
 
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return result;
 }
 
+/* If FILEPATH can be opened, store the name of the directory component
+   in DATA1, and the opened FILE* structure address in DATA2.  Otherwise
+   DATA1 is unchanged, but DATA2 is set to a pointer to NULL.  */
 static int
-load_deplibs(lt_dlhandle handle, char *deplibs)
+find_file_callback (filename, data1, data2, use_global, load_lazy)
+     char *filename;
+     lt_ptr data1;
+     lt_ptr data2;
+     const int use_global;
+     const int load_lazy;
+{
+  char	     **pdir	= (char **) data1;
+  FILE	     **pfile	= (FILE **) data2;
+  int	     is_done	= 0;
+
+  assert (filename && *filename);
+  assert (pdir);
+  assert (pfile);
+
+  if ((*pfile = fopen (filename, LT_READTEXT_MODE)))
+    {
+      char *dirend = strrchr (filename, '/');
+
+      if (dirend > filename)
+	*dirend   = LT_EOS_CHAR;
+
+      LT_DLFREE (*pdir);
+      *pdir   = lt_estrdup (filename);
+      is_done = (*pdir == 0) ? -1 : 1;
+    }
+
+  return is_done;
+}
+
+static FILE *
+find_file (search_path, base_name, pdir, use_global, load_lazy)
+     const char *search_path;
+     const char *base_name;
+     char **pdir;
+     const int use_global;
+     const int load_lazy;
+{
+  FILE *file = 0;
+
+  foreach_dirinpath (search_path, base_name, find_file_callback, pdir,
+                     &file, use_global, load_lazy);
+
+  return file;
+}
+
+static int
+find_handle_callback (filename, data, ignored, use_global, load_lazy)
+     char *filename;
+     lt_ptr data;
+     lt_ptr ignored;
+     const int use_global;
+     const int load_lazy;
+{
+  lt_dlhandle  *handle		= (lt_dlhandle *) data;
+  int		notfound	= access (filename, R_OK);
+
+  /* Bail out if file cannot be read...  */
+  if (notfound)
+    return 0;
+
+  /* Try to dlopen the file, but do not continue searching in any
+     case.  */
+  if (tryall_dlopen (handle, filename, use_global, load_lazy) != 0)
+    *handle = 0;
+
+  return 1;
+}
+
+/* If HANDLE was found return it, otherwise return 0.  If HANDLE was
+   found but could not be opened, *HANDLE will be set to 0.  */
+static lt_dlhandle *
+find_handle (search_path, base_name, handle, use_global, load_lazy)
+     const char *search_path;
+     const char *base_name;
+     lt_dlhandle *handle;
+     const int use_global;
+     const int load_lazy;
+{
+  if (!search_path)
+    return 0;
+
+  if (!foreach_dirinpath (search_path, base_name, find_handle_callback,
+			  handle, 0, use_global, load_lazy))
+    return 0;
+
+  return handle;
+}
+
+static int
+load_deplibs (handle, deplibs, use_global, load_lazy)
+     lt_dlhandle handle;
+     char *deplibs;
+     const int use_global;
+     const int load_lazy;
 {
 #if LTDL_DLOPEN_DEPLIBS
-  char	*p, *save_search_path;
+  char	*p, *save_search_path = 0;
   int   depcount = 0;
   int	i;
   char	**names = 0;
@@ -1771,12 +2897,12 @@ load_deplibs(lt_dlhandle handle, char *deplibs)
     }
   ++errors;
 
-  MUTEX_LOCK ();
-  save_search_path = strdup (user_search_path);
-  if (user_search_path && !save_search_path)
+  LT_DLMUTEX_LOCK ();
+  if (user_search_path)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-      goto cleanup;
+      save_search_path = lt_estrdup (user_search_path);
+      if (!save_search_path)
+	goto cleanup;
     }
 
   /* extract search paths and count deplibs */
@@ -1814,23 +2940,15 @@ load_deplibs(lt_dlhandle handle, char *deplibs)
 	}
     }
 
-  /* restore the old search path */
-  LT_DLFREE (user_search_path);
-  user_search_path = save_search_path;
-
-  MUTEX_UNLOCK ();
-
   if (!depcount)
     {
       errors = 0;
       goto cleanup;
     }
 
-  names = LT_DLMALLOC (char *, depcount * sizeof (char*));
+  names = LT_EMALLOC (char *, depcount * sizeof (char*));
   if (!names)
-    {
-      goto cleanup;
-    }
+    goto cleanup;
 
   /* now only extract the actual deplibs */
   depcount = 0;
@@ -1856,25 +2974,18 @@ load_deplibs(lt_dlhandle handle, char *deplibs)
 	      *end = 0; /* set a temporary string terminator */
 	      if (strncmp(p, "-l", 2) == 0)
 		{
-		  name = LT_DLMALLOC (char, 3+ /* "lib" */ strlen (p+2) + 1);
+		  size_t name_len = 3+ /* "lib" */ LT_STRLEN (p + 2);
+		  name = LT_EMALLOC (char, 1+ name_len);
 		  if (name)
-		    {
-		      sprintf (name, "lib%s", p+2);
-		    }
+		    sprintf (name, "lib%s", p+2);
 		}
 	      else
-		{
-		  name = strdup(p);
-		}
+		name = lt_estrdup(p);
 
-	      if (name)
-		{
-		  names[depcount++] = name;
-		}
-	      else
-		{
-		  goto cleanup_names;
-		}
+	      if (!name)
+		goto cleanup_names;
+
+	      names[depcount++] = name;
 	      *end = save;
 	    }
 	  p = end;
@@ -1890,15 +3001,13 @@ load_deplibs(lt_dlhandle handle, char *deplibs)
     {
       int	j = 0;
 
-      handle->deplibs = (lt_dlhandle*) LT_DLMALLOC (lt_dlhandle *, depcount);
+      handle->deplibs = (lt_dlhandle*) LT_EMALLOC (lt_dlhandle *, depcount);
       if (!handle->deplibs)
-	    {
-	  goto cleanup;
-	    }
+	goto cleanup;
 
       for (i = 0; i < depcount; ++i)
 	{
-	  handle->deplibs[j] = lt_dlopenext(names[depcount-1-i]);
+	  handle->deplibs[j] = lt_dlopenext(names[depcount-1-i], use_global, load_lazy);
 	  if (handle->deplibs[j])
 	    {
 	      ++j;
@@ -1917,13 +3026,21 @@ load_deplibs(lt_dlhandle handle, char *deplibs)
 
  cleanup:
   LT_DLFREE (names);
+  /* restore the old search path */
+  if (user_search_path) {
+    LT_DLFREE (user_search_path);
+    user_search_path = save_search_path;
+  }
+  LT_DLMUTEX_UNLOCK ();
+
 #endif
 
   return errors;
 }
 
 static int
-unload_deplibs(lt_dlhandle handle)
+unload_deplibs (handle)
+     lt_dlhandle handle;
 {
   int i;
   int errors = 0;
@@ -1943,27 +3060,29 @@ unload_deplibs(lt_dlhandle handle)
 }
 
 static int
-trim (char **dest, const char *str)
+trim (dest, str)
+     char **dest;
+     const char *str;
 {
   /* remove the leading and trailing "'" from str
      and store the result in dest */
   const char *end   = strrchr (str, '\'');
-  int	len	    = strlen  (str);
+  size_t len	    = LT_STRLEN (str);
   char *tmp;
 
   LT_DLFREE (*dest);
 
+  if (!end)
+    return 1;
+
   if (len > 3 && str[0] == '\'')
     {
-      tmp = LT_DLMALLOC (char, end - str);
+      tmp = LT_EMALLOC (char, end - str);
       if (!tmp)
-	{
-	  last_error = LT_DLSTRERROR (NO_MEMORY);
-	  return 1;
-	}
+	return 1;
 
       strncpy(tmp, &str[1], (end - str) - 1);
-      tmp[len-3] = '\0';
+      tmp[len-3] = LT_EOS_CHAR;
       *dest = tmp;
     }
   else
@@ -1975,11 +3094,11 @@ trim (char **dest, const char *str)
 }
 
 static int
-free_vars(
-  char *dlname,
-  char *oldname,
-  char *libdir,
-  char *deplibs)
+free_vars (dlname, oldname, libdir, deplibs)
+     char *dlname;
+     char *oldname;
+     char *libdir;
+     char *deplibs;
 {
   LT_DLFREE (dlname);
   LT_DLFREE (oldname);
@@ -1989,86 +3108,95 @@ free_vars(
   return 0;
 }
 
-lt_dlhandle
-lt_dlopen (filename)
+static int
+try_dlopen (phandle, filename, use_global, load_lazy)
+     lt_dlhandle *phandle;
      const char *filename;
+     const int   use_global;
+     const int   load_lazy;
 {
-  lt_dlhandle handle = 0, newhandle;
-  const char *ext;
-  const char *saved_error;
-  char	*canonical = 0, *basename = 0, *dir = 0, *name = 0;
+  const char *	ext		= 0;
+  const char *	saved_error	= 0;
+  char *	canonical	= 0;
+  char *	base_name	= 0;
+  char *	dir		= 0;
+  char *	name		= 0;
+  int		errors		= 0;
+  lt_dlhandle	newhandle;
 
-  MUTEX_GETERROR (saved_error);
+  assert (phandle);
+  assert (*phandle == 0);
+
+  LT_DLMUTEX_GETERROR (saved_error);
 
   /* dlopen self? */
   if (!filename)
     {
-      handle = (lt_dlhandle) LT_DLMALLOC (struct lt_dlhandle_struct, 1);
-      if (!handle)
-	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	  return 0;
-	}
+      *phandle = (lt_dlhandle) LT_EMALLOC (struct lt_dlhandle_struct, 1);
+      if (*phandle == 0)
+	return 1;
 
-      handle->info.ref_count	= 0;
-      handle->depcount		= 0;
-      handle->deplibs		= 0;
-      handle->caller_data	= 0;
-      newhandle			= handle;
+      memset (*phandle, 0, sizeof(struct lt_dlhandle_struct));
+      newhandle	= *phandle;
 
       /* lt_dlclose()ing yourself is very bad!  Disallow it.  */
-      LT_DLSET_FLAG (handle, LT_DLRESIDENT_FLAG);
+      LT_DLSET_FLAG (*phandle, LT_DLRESIDENT_FLAG);
 
-      if (tryall_dlopen (&newhandle, 0) != 0)
+      if (tryall_dlopen (&newhandle, 0, use_global, load_lazy) != 0)
 	{
-	  LT_DLFREE (handle);
-	  return 0;
+	  LT_DLFREE (*phandle);
+	  return 1;
 	}
+
       goto register_handle;
     }
 
-  canonical = canonicalize_path (filename);
-  if (!canonical)
+  assert (filename && *filename);
+
+  /* Doing this immediately allows internal functions to safely
+     assume only canonicalized paths are passed.  */
+  if (canonicalize_path (filename, &canonical) != 0)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-      LT_DLFREE (handle);
-      return 0;
+      ++errors;
+      goto cleanup;
     }
 
   /* If the canonical module name is a path (relative or absolute)
      then split it into a directory part and a name part.  */
-  basename = strrchr (canonical, '/');
-  if (basename)
+  base_name = strrchr (canonical, '/');
+  if (base_name)
     {
-      ++basename;
-      dir = LT_DLMALLOC (char, basename - canonical + 1);
+      size_t dirlen = (1+ base_name) - canonical;
+
+      dir = LT_EMALLOC (char, 1+ dirlen);
       if (!dir)
 	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	  handle = 0;
+	  ++errors;
 	  goto cleanup;
 	}
 
-      strncpy (dir, canonical, basename - canonical);
-      dir[basename - canonical] = '\0';
+      strncpy (dir, canonical, dirlen);
+      dir[dirlen] = LT_EOS_CHAR;
+
+      ++base_name;
     }
   else
-    {
-      basename = canonical;
-    }
+    base_name = canonical;
+
+  assert (base_name && *base_name);
 
   /* Check whether we are opening a libtool module (.la extension).  */
-  ext = strrchr(basename, '.');
-  if (ext && strcmp(ext, ".la") == 0)
+  ext = strrchr (base_name, '.');
+  if (ext && strcmp (ext, archive_ext) == 0)
     {
       /* this seems to be a libtool module */
-      FILE     *file = 0;
-      int	i;
-      char     *dlname = 0, *old_name = 0;
-      char     *libdir = 0, *deplibs = 0;
-      char     *line;
+      FILE *	file	 = 0;
+      char *	dlname	 = 0;
+      char *	old_name = 0;
+      char *	libdir	 = 0;
+      char *	deplibs	 = 0;
+      char *    line	 = 0;
       size_t	line_len;
-      int	error = 0;
 
       /* if we can't find the installed flag, it is probably an
 	 installed libtool archive, produced with an old version
@@ -2076,53 +3204,63 @@ lt_dlopen (filename)
       int	installed = 1;
 
       /* extract the module name from the file name */
-      name = LT_DLMALLOC (char, ext - basename + 1);
+      name = LT_EMALLOC (char, ext - base_name + 1);
       if (!name)
 	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	  handle = 0;
+	  ++errors;
 	  goto cleanup;
 	}
 
       /* canonicalize the module name */
-      for (i = 0; i < ext - basename; ++i)
-	{
-	  if (isalnum ((int)(basename[i])))
-	    {
-	      name[i] = basename[i];
-	    }
-	  else
-	    {
-	      name[i] = '_';
-	    }
-	}
+      {
+        size_t i;
+        for (i = 0; i < ext - base_name; ++i)
+	  {
+	    if (isalnum ((int)(base_name[i])))
+	      {
+	        name[i] = base_name[i];
+	      }
+	    else
+	      {
+	        name[i] = '_';
+	      }
+	  }
+        name[ext - base_name] = LT_EOS_CHAR;
+      }
 
-      name[ext - basename] = '\0';
-
-    /* Now try to open the .la file.  If there is no directory name
-       component, try to find it first in user_search_path and then other
-       prescribed paths.  Otherwise (or in any case if the module was not
-       yet found) try opening just the module name as passed.  */
+      /* Now try to open the .la file.  If there is no directory name
+         component, try to find it first in user_search_path and then other
+         prescribed paths.  Otherwise (or in any case if the module was not
+         yet found) try opening just the module name as passed.  */
       if (!dir)
 	{
-	  file = (FILE*) find_file(basename, user_search_path, &dir, 0);
+	  const char *search_path;
+
+	  LT_DLMUTEX_LOCK ();
+	  search_path = user_search_path;
+	  if (search_path)
+	    file = find_file (user_search_path, base_name, &dir, use_global, load_lazy);
+	  LT_DLMUTEX_UNLOCK ();
+
 	  if (!file)
 	    {
-	      file = (FILE*) find_file(basename, getenv("LTDL_LIBRARY_PATH"),
-				       &dir, 0);
+	      search_path = getenv (LTDL_SEARCHPATH_VAR);
+	      if (search_path)
+		file = find_file (search_path, base_name, &dir, use_global, load_lazy);
 	    }
 
 #ifdef LTDL_SHLIBPATH_VAR
 	  if (!file)
 	    {
-	      file = (FILE*) find_file(basename, getenv(LTDL_SHLIBPATH_VAR),
-				       &dir, 0);
+	      search_path = getenv (LTDL_SHLIBPATH_VAR);
+	      if (search_path)
+		file = find_file (search_path, base_name, &dir, use_global, load_lazy);
 	    }
 #endif
 #ifdef LTDL_SYSSEARCHPATH
-	  if (!file)
+	  if (!file && sys_search_path)
 	    {
-	      file = (FILE*) find_file(basename, sys_search_path, &dir, 0);
+	      file = find_file (sys_search_path, base_name, &dir, use_global, load_lazy);
 	    }
 #endif
 	}
@@ -2130,42 +3268,39 @@ lt_dlopen (filename)
 	{
 	  file = fopen (filename, LT_READTEXT_MODE);
 	}
-      if (!file)
-	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
-	}
 
+      /* If we didn't find the file by now, it really isn't there.  Set
+	 the status flag, and bail out.  */
       if (!file)
 	{
-	  handle = 0;
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
+	  ++errors;
 	  goto cleanup;
 	}
 
       line_len = LT_FILENAME_MAX;
-      line = LT_DLMALLOC (char, line_len);
+      line = LT_EMALLOC (char, line_len);
       if (!line)
 	{
 	  fclose (file);
-	  MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	  handle = 0;
+	  ++errors;
 	  goto cleanup;
 	}
 
       /* read the .la file */
-      while (!feof(file))
+      while (!feof (file))
 	{
-	  if (!fgets (line, line_len, file))
+	  if (!fgets (line, (int) line_len, file))
 	    {
 	      break;
 	    }
 
-
-	  /* Handle the case where we occasionally need to read a line 
+	  /* Handle the case where we occasionally need to read a line
 	     that is longer than the initial buffer size.  */
-	  while (line[strlen(line) -1] != '\n')
+	  while ((line[LT_STRLEN(line) -1] != '\n') && (!feof (file)))
 	    {
 	      line = LT_DLREALLOC (char, line, line_len *2);
-	      if (!fgets (&line[line_len -1], line_len +1, file))
+	      if (!fgets (&line[line_len -1], (int) line_len +1, file))
 		{
 		  break;
 		}
@@ -2181,7 +3316,7 @@ lt_dlopen (filename)
 #define STR_DLNAME	"dlname="
 	  if (strncmp (line, STR_DLNAME, sizeof (STR_DLNAME) - 1) == 0)
 	    {
-	      error = trim (&dlname, &line[sizeof (STR_DLNAME) - 1]);
+	      errors += trim (&dlname, &line[sizeof (STR_DLNAME) - 1]);
 	    }
 
 #undef  STR_OLD_LIBRARY
@@ -2189,13 +3324,13 @@ lt_dlopen (filename)
 	  else if (strncmp (line, STR_OLD_LIBRARY,
 			    sizeof (STR_OLD_LIBRARY) - 1) == 0)
 	    {
-	      error = trim (&old_name, &line[sizeof (STR_OLD_LIBRARY) - 1]);
+	      errors += trim (&old_name, &line[sizeof (STR_OLD_LIBRARY) - 1]);
 	    }
 #undef  STR_LIBDIR
 #define STR_LIBDIR	"libdir="
 	  else if (strncmp (line, STR_LIBDIR, sizeof (STR_LIBDIR) - 1) == 0)
 	    {
-	      error = trim (&libdir, &line[sizeof(STR_LIBDIR) - 1]);
+	      errors += trim (&libdir, &line[sizeof(STR_LIBDIR) - 1]);
 	    }
 
 #undef  STR_DL_DEPLIBS
@@ -2203,7 +3338,7 @@ lt_dlopen (filename)
 	  else if (strncmp (line, STR_DL_DEPLIBS,
 			    sizeof (STR_DL_DEPLIBS) - 1) == 0)
 	    {
-	      error = trim (&deplibs, &line[sizeof (STR_DL_DEPLIBS) - 1]);
+	      errors += trim (&deplibs, &line[sizeof (STR_DL_DEPLIBS) - 1]);
 	    }
 	  else if (strcmp (line, "installed=yes\n") == 0)
 	    {
@@ -2220,208 +3355,513 @@ lt_dlopen (filename)
 					sizeof (STR_LIBRARY_NAMES) - 1) == 0)
 	    {
 	      char *last_libname;
-	      error = trim (&dlname, &line[sizeof (STR_LIBRARY_NAMES) - 1]);
-	      if (! error && dlname &&
-		  (last_libname = strrchr (dlname, ' ')) != NULL)
+	      errors += trim (&dlname, &line[sizeof (STR_LIBRARY_NAMES) - 1]);
+	      if (!errors
+		  && dlname
+		  && (last_libname = strrchr (dlname, ' ')) != 0)
 		{
-		  last_libname = strdup (last_libname + 1);
+		  last_libname = lt_estrdup (last_libname + 1);
+		  if (!last_libname)
+		    {
+		      ++errors;
+		      goto cleanup;
+		    }
 		  LT_DLMEM_REASSIGN (dlname, last_libname);
 		}
 	    }
 
-	  if (error)
-	    {
-	      break;
-	    }
+	  if (errors)
+	    break;
 	}
 
       fclose (file);
       LT_DLFREE (line);
 
       /* allocate the handle */
-      handle = (lt_dlhandle) LT_DLMALLOC (struct lt_dlhandle_struct, 1);
-      if (!handle || error)
-	{
-	  LT_DLFREE (handle);
-	  if (!error)
-	    {
-	      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	    }
+      *phandle = (lt_dlhandle) LT_EMALLOC (struct lt_dlhandle_struct, 1);
+      if (*phandle == 0)
+	++errors;
 
+      if (errors)
+	{
 	  free_vars (dlname, old_name, libdir, deplibs);
-	  /* handle is already set to 0 */
+	  LT_DLFREE (*phandle);
 	  goto cleanup;
 	}
 
-      handle->info.ref_count = 0;
-      if (load_deplibs (handle, deplibs) == 0)
+      assert (*phandle);
+
+      memset (*phandle, 0, sizeof(struct lt_dlhandle_struct));
+      if (load_deplibs (*phandle, deplibs, use_global, load_lazy) == 0)
 	{
-	  newhandle = handle;
+	  newhandle = *phandle;
 	  /* find_module may replace newhandle */
-	  if (find_module (&newhandle, dir, libdir, dlname, old_name, installed))
+	  if (find_module (&newhandle, dir, libdir, dlname, old_name,
+                           installed, use_global, load_lazy))
 	    {
-	      unload_deplibs (handle);
-	      error = 1;
+	      unload_deplibs (*phandle);
+	      ++errors;
 	    }
 	}
       else
 	{
-	  error = 1;
+	  ++errors;
 	}
 
       free_vars (dlname, old_name, libdir, deplibs);
-      if (error)
+      if (errors)
 	{
-	  LT_DLFREE (handle);
+	  LT_DLFREE (*phandle);
 	  goto cleanup;
 	}
 
-      if (handle != newhandle)
+      if (*phandle != newhandle)
 	{
-	  unload_deplibs (handle);
+	  unload_deplibs (*phandle);
 	}
     }
   else
     {
       /* not a libtool module */
-      handle = (lt_dlhandle) LT_DLMALLOC (struct lt_dlhandle_struct, 1);
-      if (!handle)
+      *phandle = (lt_dlhandle) LT_EMALLOC (struct lt_dlhandle_struct, 1);
+      if (*phandle == 0)
 	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	  /* handle is already set to 0 */
+	  ++errors;
 	  goto cleanup;
 	}
-      handle->info.ref_count = 0;
-      /* non-libtool modules don't have dependencies */
-      handle->depcount    = 0;
-      handle->deplibs	  = 0;
-      newhandle	    	  = handle;
+
+      memset (*phandle, 0, sizeof (struct lt_dlhandle_struct));
+      newhandle = *phandle;
 
       /* If the module has no directory name component, try to find it
 	 first in user_search_path and then other prescribed paths.
 	 Otherwise (or in any case if the module was not yet found) try
 	 opening just the module name as passed.  */
-      if ((dir || (!find_file (basename, user_search_path, 0, &newhandle)
-		   && !find_file (basename, getenv ("LTDL_LIBRARY_PATH"),
-				  0, &newhandle)
+      if ((dir || (!find_handle (user_search_path, base_name, &newhandle,
+                                 use_global, load_lazy)
+		   && !find_handle (getenv (LTDL_SEARCHPATH_VAR), base_name,
+				    &newhandle, use_global, load_lazy)
 #ifdef LTDL_SHLIBPATH_VAR
-		   && !find_file (basename, getenv (LTDL_SHLIBPATH_VAR),
-				  0, &newhandle)
+		   && !find_handle (getenv (LTDL_SHLIBPATH_VAR), base_name,
+				    &newhandle, use_global, load_lazy)
 #endif
 #ifdef LTDL_SYSSEARCHPATH
-		   && !find_file (basename, sys_search_path, 0, &newhandle)
+		   && !find_handle (sys_search_path, base_name, &newhandle,
+                                    use_global, load_lazy)
 #endif
-		   )) && tryall_dlopen (&newhandle, filename))
+		   )))
 	{
-	  LT_DLFREE (handle);
+          if (tryall_dlopen (&newhandle, filename, use_global, load_lazy) != 0)
+            {
+              newhandle = NULL;
+            }
+	}
+
+      if (!newhandle)
+	{
+	  LT_DLFREE (*phandle);
+	  ++errors;
 	  goto cleanup;
 	}
     }
 
  register_handle:
-  LT_DLMEM_REASSIGN (handle, newhandle);
+  LT_DLMEM_REASSIGN (*phandle, newhandle);
 
-  if (handle->info.ref_count == 0)
+  if ((*phandle)->info.ref_count == 0)
     {
-      handle->info.ref_count	= 1;
-      handle->info.name		= name;
-      handle->next		= handles;
+      (*phandle)->info.ref_count	= 1;
+      LT_DLMEM_REASSIGN ((*phandle)->info.name, name);
 
-      MUTEX_LOCK ();
-      handles			= handle;
-      MUTEX_UNLOCK ();
-
-      name = 0;	/* don't free this during `cleanup' */
+      LT_DLMUTEX_LOCK ();
+      (*phandle)->next		= handles;
+      handles			= *phandle;
+      LT_DLMUTEX_UNLOCK ();
     }
 
-  MUTEX_SETERROR (saved_error);
+  LT_DLMUTEX_SETERROR (saved_error);
 
  cleanup:
   LT_DLFREE (dir);
   LT_DLFREE (name);
   LT_DLFREE (canonical);
 
-  return handle;
+  return errors;
 }
 
 lt_dlhandle
-lt_dlopenext (filename)
+lt_dlopen (filename, use_global, load_lazy)
      const char *filename;
+     const int   use_global;
+     const int   load_lazy;
 {
-  lt_dlhandle handle;
-  char	*tmp;
-  int	len;
-  const char *saved_error;
+  lt_dlhandle handle = 0;
 
-  MUTEX_GETERROR (saved_error);
+  /* Just incase we missed a code path in try_dlopen() that reports
+     an error, but forgets to reset handle... */
+  if (try_dlopen (&handle, filename, use_global, load_lazy) != 0)
+    return 0;
+
+  return handle;
+}
+
+/* If the last error messge store was `FILE_NOT_FOUND', then return
+   non-zero.  */
+static int
+file_not_found ()
+{
+  const char *error = 0;
+
+  LT_DLMUTEX_GETERROR (error);
+  if (error == LT_DLSTRERROR (FILE_NOT_FOUND))
+    return 1;
+
+  return 0;
+}
+
+/* If FILENAME has an ARCHIVE_EXT or SHLIB_EXT extension, try to
+   open the FILENAME as passed.  Otherwise try appending ARCHIVE_EXT,
+   and if a file is still not found try again with SHLIB_EXT appended
+   instead.  */
+lt_dlhandle
+lt_dlopenext (filename, use_global, load_lazy)
+     const char *filename;
+     const int   use_global;
+     const int   load_lazy;
+{
+  lt_dlhandle	handle		= 0;
+  char *	tmp		= 0;
+  char *	ext		= 0;
+  size_t	len;
+  int		errors		= 0;
 
   if (!filename)
     {
-      return lt_dlopen (filename);
+      return lt_dlopen (filename, use_global, load_lazy);
     }
 
-  len = strlen (filename);
-  if (!len)
+  assert (filename);
+
+  len = LT_STRLEN (filename);
+  ext = strrchr (filename, '.');
+
+  /* If FILENAME already bears a suitable extension, there is no need
+     to try appending additional extensions.  */
+  if (ext && ((strcmp (ext, archive_ext) == 0)
+#ifdef LTDL_SHLIB_EXT
+	      || (strcmp (ext, shlib_ext) == 0)
+#endif
+      ))
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
-      return 0;
+      return lt_dlopen (filename, use_global, load_lazy);
     }
 
-  /* try "filename.la" */
-  tmp = LT_DLMALLOC (char, len+4);
+  /* First try appending ARCHIVE_EXT.  */
+  tmp = LT_EMALLOC (char, len + LT_STRLEN (archive_ext) + 1);
   if (!tmp)
-    {
-      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-      return 0;
-    }
+    return 0;
+
   strcpy (tmp, filename);
-  strcat (tmp, ".la");
-  handle = lt_dlopen (tmp);
-  if (handle)
+  strcat (tmp, archive_ext);
+  errors = try_dlopen (&handle, tmp, use_global, load_lazy);
+
+  /* If we found FILENAME, stop searching -- whether we were able to
+     load the file as a module or not.  If the file exists but loading
+     failed, it is better to return an error message here than to
+     report FILE_NOT_FOUND when the alternatives (foo.so etc) are not
+     in the module search path.  */
+  if (handle || ((errors > 0) && !file_not_found ()))
     {
-      MUTEX_SETERROR (saved_error);
       LT_DLFREE (tmp);
       return handle;
     }
 
 #ifdef LTDL_SHLIB_EXT
-  /* try "filename.EXT" */
-  if (strlen(shlib_ext) > 3)
+  /* Try appending SHLIB_EXT.   */
+  if (LT_STRLEN (shlib_ext) > LT_STRLEN (archive_ext))
     {
       LT_DLFREE (tmp);
-      tmp = LT_DLMALLOC (char, len + strlen (shlib_ext) + 1);
+      tmp = LT_EMALLOC (char, len + LT_STRLEN (shlib_ext) + 1);
       if (!tmp)
-	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	  return 0;
-	}
+	return 0;
+
       strcpy (tmp, filename);
     }
   else
     {
-      tmp[len] = '\0';
+      tmp[len] = LT_EOS_CHAR;
     }
 
   strcat(tmp, shlib_ext);
-  handle = lt_dlopen (tmp);
-  if (handle)
+  errors = try_dlopen (&handle, tmp, use_global, load_lazy);
+
+  /* As before, if the file was found but loading failed, return now
+     with the current error message.  */
+  if (handle || ((errors > 0) && !file_not_found ()))
     {
-      MUTEX_SETERROR (saved_error);
       LT_DLFREE (tmp);
       return handle;
     }
 #endif
 
-  /* try the normal file name */
-  handle = lt_dlopen (filename);
-  if (handle)
-    {
-      return handle;
-    }
-
-  MUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
+  /* Still here?  Then we really did fail to locate any of the file
+     names we tried.  */
+  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (FILE_NOT_FOUND));
   LT_DLFREE (tmp);
   return 0;
+}
+
+
+static int
+lt_argz_insert (pargz, pargz_len, before, entry)
+     char **pargz;
+     size_t *pargz_len;
+     char *before;
+     const char *entry;
+{
+  error_t error;
+
+  /* Prior to Sep 8, 2005, newlib had a bug where argz_insert(pargz,
+     pargz_len, NULL, entry) failed with EINVAL.  */
+  if (before)
+    error = argz_insert (pargz, pargz_len, before, entry);
+  else
+    error = argz_append (pargz, pargz_len, entry, 1 + LT_STRLEN (entry));
+  if (error)
+    {
+      switch (error)
+	{
+	case ENOMEM:
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
+	  break;
+	default:
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (UNKNOWN));
+	  break;
+	}
+      return 1;
+    }
+
+  return 0;
+}
+
+static int
+lt_argz_insertinorder (pargz, pargz_len, entry)
+     char **pargz;
+     size_t *pargz_len;
+     const char *entry;
+{
+  char *before = 0;
+
+  assert (pargz);
+  assert (pargz_len);
+  assert (entry && *entry);
+
+  if (*pargz)
+    while ((before = argz_next (*pargz, *pargz_len, before)))
+      {
+	int cmp = strcmp (entry, before);
+
+	if (cmp < 0)  break;
+	if (cmp == 0) return 0;	/* No duplicates! */
+      }
+
+  return lt_argz_insert (pargz, pargz_len, before, entry);
+}
+
+static int
+lt_argz_insertdir (pargz, pargz_len, dirnam, dp)
+     char **pargz;
+     size_t *pargz_len;
+     const char *dirnam;
+     struct dirent *dp;
+{
+  char   *buf	    = 0;
+  size_t buf_len    = 0;
+  char   *end	    = 0;
+  size_t end_offset = 0;
+  size_t dir_len    = 0;
+  int    errors	    = 0;
+
+  assert (pargz);
+  assert (pargz_len);
+  assert (dp);
+
+  dir_len = LT_STRLEN (dirnam);
+  end     = dp->d_name + LT_D_NAMLEN(dp);
+
+  /* Ignore version numbers.  */
+  {
+    char *p;
+    for (p = end; p -1 > dp->d_name; --p)
+      if (strchr (".0123456789", p[-1]) == 0)
+	break;
+
+    if (*p == '.')
+      end = p;
+  }
+
+  /* Ignore filename extension.  */
+  {
+    char *p;
+    for (p = end -1; p > dp->d_name; --p)
+      if (*p == '.')
+	{
+	  end = p;
+	  break;
+	}
+  }
+
+  /* Prepend the directory name.  */
+  end_offset	= end - dp->d_name;
+  buf_len	= dir_len + 1+ end_offset;
+  buf		= LT_EMALLOC (char, 1+ buf_len);
+  if (!buf)
+    return ++errors;
+
+  assert (buf);
+
+  strcpy  (buf, dirnam);
+  strcat  (buf, "/");
+  strncat (buf, dp->d_name, end_offset);
+  buf[buf_len] = LT_EOS_CHAR;
+
+  /* Try to insert (in order) into ARGZ/ARGZ_LEN.  */
+  if (lt_argz_insertinorder (pargz, pargz_len, buf) != 0)
+    ++errors;
+
+  LT_DLFREE (buf);
+
+  return errors;
+}
+
+static int
+list_files_by_dir (dirnam, pargz, pargz_len)
+     const char *dirnam;
+     char **pargz;
+     size_t *pargz_len;
+{
+  DIR	*dirp	  = 0;
+  int    errors	  = 0;
+
+  assert (dirnam && *dirnam);
+  assert (pargz);
+  assert (pargz_len);
+  assert (dirnam[LT_STRLEN(dirnam) -1] != '/');
+
+  dirp = opendir (dirnam);
+  if (dirp)
+    {
+      struct dirent *dp	= 0;
+
+      while ((dp = readdir (dirp)))
+	if (dp->d_name[0] != '.')
+	  if (lt_argz_insertdir (pargz, pargz_len, dirnam, dp))
+	    {
+	      ++errors;
+	      break;
+	    }
+
+      closedir (dirp);
+    }
+  else
+    ++errors;
+
+  return errors;
+}
+
+
+/* If there are any files in DIRNAME, call the function passed in
+   DATA1 (with the name of each file and DATA2 as arguments).  */
+static int
+foreachfile_callback (dirname, data1, data2, use_global, load_lazy)
+     char *dirname;
+     lt_ptr data1;
+     lt_ptr data2;
+     const int use_global;
+     const int load_lazy;
+{
+  int (*func) LT_PARAMS((const char *filename, lt_ptr data))
+	= (int (*) LT_PARAMS((const char *filename, lt_ptr data))) data1;
+
+  int	  is_done  = 0;
+  char   *argz     = 0;
+  size_t  argz_len = 0;
+
+  if (list_files_by_dir (dirname, &argz, &argz_len) != 0)
+    goto cleanup;
+  if (!argz)
+    goto cleanup;
+
+  {
+    char *filename = 0;
+    while ((filename = argz_next (argz, argz_len, filename)))
+      if ((is_done = (*func) (filename, data2)))
+	break;
+  }
+
+ cleanup:
+  LT_DLFREE (argz);
+
+  return is_done;
+}
+
+
+/* Call FUNC for each unique extensionless file in SEARCH_PATH, along
+   with DATA.  The filenames passed to FUNC would be suitable for
+   passing to lt_dlopenext.  The extensions are stripped so that
+   individual modules do not generate several entries (e.g. libfoo.la,
+   libfoo.so, libfoo.so.1, libfoo.so.1.0.0).  If SEARCH_PATH is NULL,
+   then the same directories that lt_dlopen would search are examined.  */
+int
+lt_dlforeachfile (search_path, func, data, use_global, load_lazy)
+     const char *search_path;
+     int (*func) LT_PARAMS ((const char *filename, lt_ptr data));
+     lt_ptr data;
+     const int use_global;
+     const int load_lazy;
+{
+  int is_done = 0;
+
+  if (search_path)
+    {
+      /* If a specific path was passed, search only the directories
+	 listed in it.  */
+      is_done = foreach_dirinpath (search_path, 0,
+				   foreachfile_callback, func, data, 
+                                   use_global, load_lazy);
+    }
+  else
+    {
+      /* Otherwise search the default paths.  */
+      is_done = foreach_dirinpath (user_search_path, 0,
+				   foreachfile_callback, func, data,
+                                   use_global, load_lazy);
+      if (!is_done)
+	{
+	  is_done = foreach_dirinpath (getenv("LTDL_LIBRARY_PATH"), 0,
+				       foreachfile_callback, func, data,
+                                       use_global, load_lazy);
+	}
+
+#ifdef LTDL_SHLIBPATH_VAR
+      if (!is_done)
+	{
+	  is_done = foreach_dirinpath (getenv(LTDL_SHLIBPATH_VAR), 0,
+				       foreachfile_callback, func, data,
+                                       use_global, load_lazy);
+	}
+#endif
+#ifdef LTDL_SYSSEARCHPATH
+      if (!is_done)
+	{
+	  is_done = foreach_dirinpath (getenv(LTDL_SYSSEARCHPATH), 0,
+				       foreachfile_callback, func, data,
+                                       use_global, load_lazy);
+	}
+#endif
+    }
+
+  return is_done;
 }
 
 int
@@ -2431,7 +3871,7 @@ lt_dlclose (handle)
   lt_dlhandle cur, last;
   int errors = 0;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
 
   /* check whether the handle is valid */
   last = cur = handles;
@@ -2443,7 +3883,7 @@ lt_dlclose (handle)
 
   if (!cur)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
       ++errors;
       goto done;
     }
@@ -2470,6 +3910,9 @@ lt_dlclose (handle)
       errors += handle->loader->module_close (data, handle->module);
       errors += unload_deplibs(handle);
 
+      /* It is up to the callers to free the data itself.  */
+      LT_DLFREE (handle->caller_data);
+
       LT_DLFREE (handle->info.filename);
       LT_DLFREE (handle->info.name);
       LT_DLFREE (handle);
@@ -2479,12 +3922,12 @@ lt_dlclose (handle)
 
   if (LT_DLIS_RESIDENT (handle))
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (CLOSE_RESIDENT_MODULE));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (CLOSE_RESIDENT_MODULE));
       ++errors;
     }
 
  done:
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return errors;
 }
@@ -2494,7 +3937,7 @@ lt_dlsym (handle, symbol)
      lt_dlhandle handle;
      const char *symbol;
 {
-  int	lensym;
+  size_t lensym;
   char	lsym[LT_SYMBOL_LENGTH];
   char	*sym;
   lt_ptr address;
@@ -2502,26 +3945,18 @@ lt_dlsym (handle, symbol)
 
   if (!handle)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
       return 0;
     }
 
   if (!symbol)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (SYMBOL_NOT_FOUND));
       return 0;
     }
 
-  lensym = strlen(symbol);
-  if (handle->loader->sym_prefix)
-    {
-      lensym += strlen(handle->loader->sym_prefix);
-    }
-
-  if (handle->info.name)
-    {
-      lensym += strlen(handle->info.name);
-    }
+  lensym = LT_STRLEN (symbol) + LT_STRLEN (handle->loader->sym_prefix)
+					+ LT_STRLEN (handle->info.name);
 
   if (lensym + LT_SYMBOL_OVERHEAD < LT_SYMBOL_LENGTH)
     {
@@ -2529,13 +3964,12 @@ lt_dlsym (handle, symbol)
     }
   else
     {
-      sym = LT_DLMALLOC (char, lensym + LT_SYMBOL_OVERHEAD + 1);
-    }
-
-  if (!sym)
-    {
-      MUTEX_SETERROR (LT_DLSTRERROR (BUFFER_OVERFLOW));
-      return 0;
+      sym = LT_EMALLOC (char, lensym + LT_SYMBOL_OVERHEAD + 1);
+      if (!sym)
+	{
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (BUFFER_OVERFLOW));
+	  return 0;
+	}
     }
 
   data = handle->loader->dlloader_data;
@@ -2543,7 +3977,7 @@ lt_dlsym (handle, symbol)
     {
       const char *saved_error;
 
-      MUTEX_GETERROR (saved_error);
+      LT_DLMUTEX_GETERROR (saved_error);
 
       /* this is a libtool module */
       if (handle->loader->sym_prefix)
@@ -2569,7 +4003,7 @@ lt_dlsym (handle, symbol)
 	    }
 	  return address;
 	}
-      MUTEX_SETERROR (saved_error);
+      LT_DLMUTEX_SETERROR (saved_error);
     }
 
   /* otherwise try "symbol" */
@@ -2597,10 +4031,82 @@ lt_dlerror ()
 {
   const char *error;
 
-  MUTEX_GETERROR (error);
-  MUTEX_SETERROR (0);
+  LT_DLMUTEX_GETERROR (error);
+  LT_DLMUTEX_SETERROR (0);
 
-  return error;
+  return error ? error : NULL;
+}
+
+static int
+lt_dlpath_insertdir (ppath, before, dir)
+     char **ppath;
+     char *before;
+     const char *dir;
+{
+  int    errors		= 0;
+  char  *canonical	= 0;
+  char  *argz		= 0;
+  size_t argz_len	= 0;
+
+  assert (ppath);
+  assert (dir && *dir);
+
+  if (canonicalize_path (dir, &canonical) != 0)
+    {
+      ++errors;
+      goto cleanup;
+    }
+
+  assert (canonical && *canonical);
+
+  /* If *PPATH is empty, set it to DIR.  */
+  if (*ppath == 0)
+    {
+      assert (!before);		/* BEFORE cannot be set without PPATH.  */
+      assert (dir);		/* Without DIR, don't call this function!  */
+
+      *ppath = lt_estrdup (dir);
+      if (*ppath == 0)
+	++errors;
+
+      return errors;
+    }
+
+  assert (ppath && *ppath);
+
+  if (argzize_path (*ppath, &argz, &argz_len) != 0)
+    {
+      ++errors;
+      goto cleanup;
+    }
+
+  /* Convert BEFORE into an equivalent offset into ARGZ.  This only works
+     if *PPATH is already canonicalized, and hence does not change length
+     with respect to ARGZ.  We canonicalize each entry as it is added to
+     the search path, and don't call this function with (uncanonicalized)
+     user paths, so this is a fair assumption.  */
+  if (before)
+    {
+      assert (*ppath <= before);
+      assert (before - *ppath <= strlen (*ppath));
+
+      before = before - *ppath + argz;
+    }
+
+  if (lt_argz_insert (&argz, &argz_len, before, dir) != 0)
+    {
+      ++errors;
+      goto cleanup;
+    }
+
+  argz_stringify (argz, argz_len, LT_PATHSEP_CHAR);
+  LT_DLMEM_REASSIGN (*ppath,  argz);
+
+ cleanup:
+  LT_DLFREE (canonical);
+  LT_DLFREE (argz);
+
+  return errors;
 }
 
 int
@@ -2609,40 +4115,47 @@ lt_dladdsearchdir (search_dir)
 {
   int errors = 0;
 
-  if (!search_dir || !strlen(search_dir))
+  if (search_dir && *search_dir)
     {
-      return errors;
+      LT_DLMUTEX_LOCK ();
+      if (lt_dlpath_insertdir (&user_search_path, 0, search_dir) != 0)
+	++errors;
+      LT_DLMUTEX_UNLOCK ();
     }
 
-  MUTEX_LOCK ();
-  if (!user_search_path)
+  return errors;
+}
+
+int
+lt_dlinsertsearchdir (before, search_dir)
+     const char *before;
+     const char *search_dir;
+{
+  int errors = 0;
+
+  if (before)
     {
-      user_search_path = strdup (search_dir);
-      if (!user_search_path)
+      LT_DLMUTEX_LOCK ();
+      if ((before < user_search_path)
+	  || (before >= user_search_path + LT_STRLEN (user_search_path)))
 	{
-	  last_error = LT_DLSTRERROR (NO_MEMORY);
+	  LT_DLMUTEX_UNLOCK ();
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_POSITION));
+	  return 1;
+	}
+      LT_DLMUTEX_UNLOCK ();
+    }
+
+  if (search_dir && *search_dir)
+    {
+      LT_DLMUTEX_LOCK ();
+      if (lt_dlpath_insertdir (&user_search_path,
+			       (char *) before, search_dir) != 0)
+	{
 	  ++errors;
 	}
+      LT_DLMUTEX_UNLOCK ();
     }
-  else
-    {
-      size_t len = strlen (user_search_path) + 1 + strlen (search_dir);
-      char  *new_search_path = LT_DLMALLOC (char, 1+ len);
-
-      if (!new_search_path)
-	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	  ++errors;
-	}
-      else
-	{
-	  sprintf (new_search_path, "%s%c%s", user_search_path,
-		   LT_PATHSEP_CHAR, search_dir);
-
-	  LT_DLMEM_REASSIGN (user_search_path, new_search_path);
-	}
-    }
-  MUTEX_UNLOCK ();
 
   return errors;
 }
@@ -2651,24 +4164,21 @@ int
 lt_dlsetsearchpath (search_path)
      const char *search_path;
 {
-  int errors = 0;
+  int   errors	    = 0;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
   LT_DLFREE (user_search_path);
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
-  if (!search_path || !strlen (search_path))
+  if (!search_path || !LT_STRLEN (search_path))
     {
       return errors;
     }
 
-  MUTEX_LOCK ();
-  user_search_path = strdup (search_path);
-  if (!user_search_path)
-    {
-      ++errors;
-    }
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_LOCK ();
+  if (canonicalize_path (search_path, &user_search_path) != 0)
+    ++errors;
+  LT_DLMUTEX_UNLOCK ();
 
   return errors;
 }
@@ -2678,9 +4188,9 @@ lt_dlgetsearchpath ()
 {
   const char *saved_path;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
   saved_path = user_search_path;
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return saved_path;
 }
@@ -2693,7 +4203,7 @@ lt_dlmakeresident (handle)
 
   if (!handle)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
       ++errors;
     }
   else
@@ -2710,7 +4220,7 @@ lt_dlisresident	(handle)
 {
   if (!handle)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
       return -1;
     }
 
@@ -2728,7 +4238,7 @@ lt_dlgetinfo (handle)
 {
   if (!handle)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_HANDLE));
       return 0;
     }
 
@@ -2739,7 +4249,7 @@ lt_dlhandle
 lt_dlhandle_next (place)
      lt_dlhandle place;
 {
-  return place ? place->next : (lt_dlhandle) 0;
+  return place ? place->next : handles;
 }
 
 int
@@ -2750,7 +4260,7 @@ lt_dlforeach (func, data)
   int errors = 0;
   lt_dlhandle cur;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
 
   cur = handles;
   while (cur)
@@ -2765,7 +4275,7 @@ lt_dlforeach (func, data)
 	}
     }
 
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return errors;
 }
@@ -2773,17 +4283,15 @@ lt_dlforeach (func, data)
 lt_dlcaller_id
 lt_dlcaller_register ()
 {
-  static int last_caller_id = -1;
+  static lt_dlcaller_id last_caller_id = 0;
   int result;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
   result = ++last_caller_id;
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return result;
 }
-
-#define N_ELEMENTS(a)	(sizeof(a) / sizeof(*(a)))
 
 lt_ptr
 lt_dlcaller_set_data (key, handle, data)
@@ -2797,10 +4305,11 @@ lt_dlcaller_set_data (key, handle, data)
 
   /* This needs to be locked so that the caller data can be updated
      simultaneously by different threads.  */
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
 
   if (handle->caller_data)
-    n_elements = N_ELEMENTS (handle->caller_data);
+    while (handle->caller_data[n_elements].key)
+      ++n_elements;
 
   for (i = 0; i < n_elements; ++i)
     {
@@ -2812,31 +4321,29 @@ lt_dlcaller_set_data (key, handle, data)
     }
 
   /* Ensure that there is enough room in this handle's caller_data
-     array to accept a new element.  */
+     array to accept a new element (and an empty end marker).  */
   if (i == n_elements)
     {
       lt_caller_data *temp
-	= LT_DLREALLOC (lt_caller_data, handle->caller_data, 1+ n_elements);
+	= LT_DLREALLOC (lt_caller_data, handle->caller_data, 2+ n_elements);
 
-      if (temp == 0)
+      if (!temp)
 	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-	  stale =  (lt_ptr) 0;
+	  stale = 0;
 	  goto done;
 	}
-      else
-	{
-	  handle->caller_data = temp;
-	}
+
+      handle->caller_data = temp;
 
       /* We only need this if we needed to allocate a new caller_data.  */
       handle->caller_data[i].key  = key;
+      handle->caller_data[1+ i].key = 0;
     }
 
   handle->caller_data[i].data = data;
 
  done:
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return stale;
 }
@@ -2847,19 +4354,15 @@ lt_dlcaller_get_data  (key, handle)
      lt_dlhandle handle;
 {
   lt_ptr result = (lt_ptr) 0;
-  int n_elements = 0;
 
   /* This needs to be locked so that the caller data isn't updated by
      another thread part way through this function.  */
-  MUTEX_LOCK ();
-
-  if (handle->caller_data)
-    n_elements = N_ELEMENTS (handle->caller_data);
+  LT_DLMUTEX_LOCK ();
 
   /* Locate the index of the element with a matching KEY.  */
   {
     int i;
-    for (i = 0; i < n_elements; ++i)
+    for (i = 0; handle->caller_data[i].key; ++i)
       {
 	if (handle->caller_data[i].key == key)
 	  {
@@ -2869,7 +4372,7 @@ lt_dlcaller_get_data  (key, handle)
       }
   }
 
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return result;
 }
@@ -2893,17 +4396,14 @@ lt_dlloader_add (place, dlloader, loader_name)
       || (dlloader->module_close == 0)
       || (dlloader->find_sym == 0))
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (INVALID_LOADER));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_LOADER));
       return 1;
     }
 
   /* Create a new dlloader node with copies of the user callbacks.  */
-  node = LT_DLMALLOC (lt_dlloader, 1);
-  if (node == 0)
-    {
-      MUTEX_SETERROR (LT_DLSTRERROR (NO_MEMORY));
-      return 1;
-    }
+  node = LT_EMALLOC (lt_dlloader, 1);
+  if (!node)
+    return 1;
 
   node->next		= 0;
   node->loader_name	= loader_name;
@@ -2914,7 +4414,7 @@ lt_dlloader_add (place, dlloader, loader_name)
   node->find_sym	= dlloader->find_sym;
   node->dlloader_data	= dlloader->dlloader_data;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
   if (!loaders)
     {
       /* If there are no loaders, NODE becomes the list! */
@@ -2947,7 +4447,7 @@ lt_dlloader_add (place, dlloader, loader_name)
 
       if (ptr->next != place)
 	{
-	  last_error = LT_DLSTRERROR (INVALID_LOADER);
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_LOADER));
 	  ++errors;
 	}
       else
@@ -2958,7 +4458,7 @@ lt_dlloader_add (place, dlloader, loader_name)
 	}
     }
 
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return errors;
 }
@@ -2973,18 +4473,18 @@ lt_dlloader_remove (loader_name)
 
   if (!place)
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (INVALID_LOADER));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_LOADER));
       return 1;
     }
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
 
   /* Fail if there are any open modules which use this loader. */
   for  (handle = handles; handle; handle = handle->next)
     {
       if (handle->loader == place)
 	{
-	  MUTEX_SETERROR (LT_DLSTRERROR (REMOVE_LOADER));
+	  LT_DLMUTEX_SETERROR (LT_DLSTRERROR (REMOVE_LOADER));
 	  ++errors;
 	  goto done;
 	}
@@ -3019,7 +4519,7 @@ lt_dlloader_remove (loader_name)
   LT_DLFREE (place);
 
  done:
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return errors;
 }
@@ -3030,9 +4530,9 @@ lt_dlloader_next (place)
 {
   lt_dlloader *next;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
   next = place ? place->next : loaders;
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return next;
 }
@@ -3045,13 +4545,13 @@ lt_dlloader_name (place)
 
   if (place)
     {
-      MUTEX_LOCK ();
+      LT_DLMUTEX_LOCK ();
       name = place ? place->loader_name : 0;
-      MUTEX_UNLOCK ();
+      LT_DLMUTEX_UNLOCK ();
     }
   else
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (INVALID_LOADER));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_LOADER));
     }
 
   return name;
@@ -3065,13 +4565,13 @@ lt_dlloader_data (place)
 
   if (place)
     {
-      MUTEX_LOCK ();
+      LT_DLMUTEX_LOCK ();
       data = place ? &(place->dlloader_data) : 0;
-      MUTEX_UNLOCK ();
+      LT_DLMUTEX_UNLOCK ();
     }
   else
     {
-      MUTEX_SETERROR (LT_DLSTRERROR (INVALID_LOADER));
+      LT_DLMUTEX_SETERROR (LT_DLSTRERROR (INVALID_LOADER));
     }
 
   return data;
@@ -3083,7 +4583,7 @@ lt_dlloader_find (loader_name)
 {
   lt_dlloader *place = 0;
 
-  MUTEX_LOCK ();
+  LT_DLMUTEX_LOCK ();
   for (place = loaders; place; place = place->next)
     {
       if (strcmp (place->loader_name, loader_name) == 0)
@@ -3091,7 +4591,9 @@ lt_dlloader_find (loader_name)
 	  break;
 	}
     }
-  MUTEX_UNLOCK ();
+  LT_DLMUTEX_UNLOCK ();
 
   return place;
 }
+
+#endif /* defined(PIC) || !defined(SIDL_PURE_STATIC_RUNTIME) */

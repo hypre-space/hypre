@@ -1,0 +1,485 @@
+<html>
+<head>
+  <title>../ex5bxx.cxx</title>
+</head>
+<body bgcolor="#ffffff" text="#000000">
+<a href="../ex5bxx.cxx">download the original source code</a>.
+<pre>
+<a name="line1">  1</a> <font color="#444444">/*
+<a name="line2">  2</a>    Example 5
+<a name="line3">  3</a> 
+<a name="line4">  4</a>    Interface:    Linear-Algebraic (IJ), Babel-based version
+<a name="line5">  5</a> 
+<a name="line6">  6</a>    Compile with: make ex5bxx
+<a name="line7">  7</a> 
+<a name="line8">  8</a>    Sample run:   mpirun -np 4 ex5bxx
+<a name="line9">  9</a> 
+<a name="line10"> 10</a>    Description:  This example solves the 2-D
+<a name="line11"> 11</a>                  Laplacian problem with zero boundary conditions
+<a name="line12"> 12</a>                  on an nxn grid.  The number of unknowns is N=n^2.
+<a name="line13"> 13</a>                  The standard 5-point stencil is used, and we solve
+<a name="line14"> 14</a>                  for the interior nodes only.
+<a name="line15"> 15</a> 
+<a name="line16"> 16</a>                  This example solves the same problem as Example 3.
+<a name="line17"> 17</a>                  Available solvers are AMG, PCG, and PCG with AMG or
+<a name="line18"> 18</a>                  Parasails preconditioners.
+<a name="line19"> 19</a> 
+<a name="line20"> 20</a> */</font>
+<a name="line21"> 21</a> 
+<a name="line22"> 22</a> <font color="0000ff"><strong>#include <font color="#008000">&lt;math.h&gt;</font></strong></font>
+<a name="line23"> 23</a> <font color="0000ff"><strong>#include <font color="#008000">&lt;assert.h&gt;</font></strong></font>
+<a name="line24"> 24</a> <font color="0000ff"><strong>#include <font color="#008000">&quot;utilities.h&quot;</font></strong></font>
+<a name="line25"> 25</a> <font color="0000ff"><strong>#include <font color="#008000">&quot;krylov.h&quot;</font></strong></font>
+<a name="line26"> 26</a> <font color="0000ff"><strong>#include <font color="#008000">&quot;HYPRE.h&quot;</font></strong></font>
+<a name="line27"> 27</a> <font color="0000ff"><strong>#include <font color="#008000">&quot;HYPRE_parcsr_ls.h&quot;</font></strong></font>
+<a name="line28"> 28</a> 
+<a name="line29"> 29</a> <font color="#444444">/* Babel interface headers */</font>
+<a name="line30"> 30</a> <font color="0000ff"><strong>#include <font color="#008000">&quot;bHYPRE.hxx&quot;</font></strong></font>
+<a name="line31"> 31</a> <font color="0000ff"><strong>#include <font color="#008000">&quot;bHYPRE_Vector.h&quot;</font></strong></font>
+<a name="line32"> 32</a> <font color="0000ff"><strong>#include <font color="#008000">&quot;bHYPRE_IJParCSRMatrix.h&quot;</font></strong></font>
+<a name="line33"> 33</a> <font color="0000ff"><strong>#include <font color="#008000">&quot;bHYPRE_IJParCSRVector.h&quot;</font></strong></font>
+<a name="line34"> 34</a> <font color="0000ff"><strong>#include <font color="#008000">&quot;bHYPRE_ParCSRDiagScale.h&quot;</font></strong></font>
+<a name="line35"> 35</a> <font color="0000ff"><strong>#include <font color="#008000">&quot;bHYPRE_BoomerAMG.h&quot;</font></strong></font>
+<a name="line36"> 36</a> 
+<a name="line37"> 37</a> <strong>int</strong> <font color="#2040a0">main</font> <font color="4444FF">(</font><strong>int</strong> <font color="#2040a0">argc</font>, <strong>char</strong> <font color="4444FF">*</font><font color="#2040a0">argv</font><font color="4444FF">[</font><font color="4444FF">]</font><font color="4444FF">)</font>
+<a name="line38"> 38</a> <font color="4444FF"><strong>{</strong></font>
+<a name="line39"> 39</a>    <strong>using</strong> <strong>namespace</strong> <font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">bHYPRE</font><font color="4444FF">;</font>
+<a name="line40"> 40</a>    <strong>int</strong> <font color="#2040a0">i</font><font color="4444FF">;</font>
+<a name="line41"> 41</a>    <strong>int</strong> <font color="#2040a0">myid</font>, <font color="#2040a0">num_procs</font><font color="4444FF">;</font>
+<a name="line42"> 42</a>    <strong>int</strong> <font color="#2040a0">N</font>, <font color="#2040a0">n</font><font color="4444FF">;</font>
+<a name="line43"> 43</a> 
+<a name="line44"> 44</a>    <strong>int</strong> <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font><font color="4444FF">;</font>
+<a name="line45"> 45</a>    <strong>int</strong> <font color="#2040a0">local_size</font>, <font color="#2040a0">extra</font><font color="4444FF">;</font>
+<a name="line46"> 46</a> 
+<a name="line47"> 47</a>    <strong>int</strong> <font color="#2040a0">solver_id</font><font color="4444FF">;</font>
+<a name="line48"> 48</a>    <strong>int</strong> <font color="#2040a0">print_solution</font><font color="4444FF">;</font>
+<a name="line49"> 49</a> 
+<a name="line50"> 50</a>    <strong>double</strong> <font color="#2040a0">h</font>, <font color="#2040a0">h2</font><font color="4444FF">;</font>
+<a name="line51"> 51</a>    <font color="#2040a0">MPI_Comm</font> <font color="#2040a0">mpicommworld</font> <font color="4444FF">=</font> <font color="#2040a0">MPI_COMM_WORLD</font><font color="4444FF">;</font>
+<a name="line52"> 52</a> 
+<a name="line53"> 53</a>    <strong>int</strong> <font color="#2040a0">ierr</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line54"> 54</a>    <font color="#444444">/* If this gets set to anything else, it's an error.
+<a name="line55"> 55</a>     Most functions return error flags, 0 unless there's an error.
+<a name="line56"> 56</a>     For clarity, they aren't checked much in this file. */</font>
+<a name="line57"> 57</a> 
+<a name="line58"> 58</a>    <font color="#2040a0">MPICommunicator</font> <font color="#2040a0">mpi_comm</font><font color="4444FF">;</font>
+<a name="line59"> 59</a>    <font color="#2040a0">IJParCSRMatrix</font> <font color="#2040a0">parcsr_A</font><font color="4444FF">;</font>
+<a name="line60"> 60</a>    <font color="#2040a0">Operator</font>  <font color="#2040a0">op_A</font><font color="4444FF">;</font>
+<a name="line61"> 61</a>    <font color="#2040a0">IJParCSRVector</font> <font color="#2040a0">par_b</font><font color="4444FF">;</font>
+<a name="line62"> 62</a>    <font color="#2040a0">IJParCSRVector</font> <font color="#2040a0">par_x</font><font color="4444FF">;</font>
+<a name="line63"> 63</a> 
+<a name="line64"> 64</a>    <font color="#2040a0">BoomerAMG</font> <font color="#2040a0">amg_solver</font><font color="4444FF">;</font>
+<a name="line65"> 65</a>    <font color="#2040a0">ParaSails</font> <font color="#2040a0">ps_solver</font><font color="4444FF">;</font>
+<a name="line66"> 66</a>    <font color="#2040a0">PCG</font> <font color="#2040a0">pcg_solver</font><font color="4444FF">;</font>
+<a name="line67"> 67</a>    <font color="#2040a0">IdentitySolver</font> <font color="#2040a0">identity</font><font color="4444FF">;</font>
+<a name="line68"> 68</a> 
+<a name="line69"> 69</a>    <font color="#444444">/* Initialize MPI */</font>
+<a name="line70"> 70</a>    <font color="#2040a0">MPI_Init</font><font color="4444FF">(</font><font color="4444FF">&amp;</font><font color="#2040a0">argc</font>, <font color="4444FF">&amp;</font><font color="#2040a0">argv</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line71"> 71</a>    <font color="#2040a0">MPI_Comm_rank</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="4444FF">&amp;</font><font color="#2040a0">myid</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line72"> 72</a>    <font color="#2040a0">MPI_Comm_size</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="4444FF">&amp;</font><font color="#2040a0">num_procs</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line73"> 73</a>    <font color="#2040a0">mpi_comm</font> <font color="4444FF">=</font> <font color="#2040a0">MPICommunicator</font><font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">CreateC</font><font color="4444FF">(</font> <font color="4444FF">&amp;</font><font color="#2040a0">mpicommworld</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line74"> 74</a> 
+<a name="line75"> 75</a>    <font color="#444444">/* Default problem parameters */</font>
+<a name="line76"> 76</a>    <font color="#2040a0">n</font> <font color="4444FF">=</font> <font color="#FF0000">33</font><font color="4444FF">;</font>
+<a name="line77"> 77</a>    <font color="#2040a0">solver_id</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line78"> 78</a>    <font color="#2040a0">print_solution</font>  <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line79"> 79</a> 
+<a name="line80"> 80</a>    <font color="#444444">/* Parse command line */</font>
+<a name="line81"> 81</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line82"> 82</a>       <strong>int</strong> <font color="#2040a0">arg_index</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line83"> 83</a>       <strong>int</strong> <font color="#2040a0">print_usage</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line84"> 84</a> 
+<a name="line85"> 85</a>       <strong>while</strong> <font color="4444FF">(</font><font color="#2040a0">arg_index</font> <font color="4444FF">&lt;</font> <font color="#2040a0">argc</font><font color="4444FF">)</font>
+<a name="line86"> 86</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line87"> 87</a>          <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">strcmp</font><font color="4444FF">(</font><font color="#2040a0">argv</font><font color="4444FF">[</font><font color="#2040a0">arg_index</font><font color="4444FF">]</font>, <font color="#008000">&quot;-n&quot;</font><font color="4444FF">)</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font> <font color="4444FF">)</font>
+<a name="line88"> 88</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line89"> 89</a>             <font color="#2040a0">arg_index</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">;</font>
+<a name="line90"> 90</a>             <font color="#2040a0">n</font> <font color="4444FF">=</font> <font color="#2040a0">atoi</font><font color="4444FF">(</font><font color="#2040a0">argv</font><font color="4444FF">[</font><font color="#2040a0">arg_index</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">]</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line91"> 91</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line92"> 92</a>          <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">strcmp</font><font color="4444FF">(</font><font color="#2040a0">argv</font><font color="4444FF">[</font><font color="#2040a0">arg_index</font><font color="4444FF">]</font>, <font color="#008000">&quot;-solver&quot;</font><font color="4444FF">)</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font> <font color="4444FF">)</font>
+<a name="line93"> 93</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line94"> 94</a>             <font color="#2040a0">arg_index</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">;</font>
+<a name="line95"> 95</a>             <font color="#2040a0">solver_id</font> <font color="4444FF">=</font> <font color="#2040a0">atoi</font><font color="4444FF">(</font><font color="#2040a0">argv</font><font color="4444FF">[</font><font color="#2040a0">arg_index</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">]</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line96"> 96</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line97"> 97</a>          <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">strcmp</font><font color="4444FF">(</font><font color="#2040a0">argv</font><font color="4444FF">[</font><font color="#2040a0">arg_index</font><font color="4444FF">]</font>, <font color="#008000">&quot;-print_solution&quot;</font><font color="4444FF">)</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font> <font color="4444FF">)</font>
+<a name="line98"> 98</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line99"> 99</a>             <font color="#2040a0">arg_index</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">;</font>
+<a name="line100">100</a>             <font color="#2040a0">print_solution</font> <font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">;</font>
+<a name="line101">101</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line102">102</a>          <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font> <font color="#2040a0">strcmp</font><font color="4444FF">(</font><font color="#2040a0">argv</font><font color="4444FF">[</font><font color="#2040a0">arg_index</font><font color="4444FF">]</font>, <font color="#008000">&quot;-help&quot;</font><font color="4444FF">)</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font> <font color="4444FF">)</font>
+<a name="line103">103</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line104">104</a>             <font color="#2040a0">print_usage</font> <font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">;</font>
+<a name="line105">105</a>             <strong>break</strong><font color="4444FF">;</font>
+<a name="line106">106</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line107">107</a>          <strong>else</strong>
+<a name="line108">108</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line109">109</a>             <font color="#2040a0">arg_index</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">;</font>
+<a name="line110">110</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line111">111</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line112">112</a> 
+<a name="line113">113</a>       <strong>if</strong> <font color="4444FF">(</font><font color="4444FF">(</font><font color="#2040a0">print_usage</font><font color="4444FF">)</font> <font color="4444FF">&amp;</font><font color="4444FF">&amp;</font> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font><font color="4444FF">)</font>
+<a name="line114">114</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line115">115</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line116">116</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Usage: %s [&lt;options&gt;]<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">argv</font><font color="4444FF">[</font><font color="#FF0000">0</font><font color="4444FF">]</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line117">117</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line118">118</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;  -n &lt;n&gt;              : problem size in each direction (default: 33)<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line119">119</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;  -solver &lt;ID&gt;        : solver ID<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line120">120</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;                        0  - AMG (default) <font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line121">121</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;                        1  - AMG-PCG<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line122">122</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;                        8  - ParaSails-PCG<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line123">123</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;                        50 - PCG<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line124">124</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;  -print_solution     : print the solution vector<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line125">125</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line126">126</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line127">127</a> 
+<a name="line128">128</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">print_usage</font><font color="4444FF">)</font>
+<a name="line129">129</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line130">130</a>          <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line131">131</a>          <strong>return</strong> <font color="4444FF">(</font><font color="#FF0000">0</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line132">132</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line133">133</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line134">134</a> 
+<a name="line135">135</a>    <font color="#444444">/* Preliminaries: want at least one processor per row */</font>
+<a name="line136">136</a>    <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">n</font><font color="4444FF">*</font><font color="#2040a0">n</font> <font color="4444FF">&lt;</font> <font color="#2040a0">num_procs</font><font color="4444FF">)</font> <font color="#2040a0">n</font> <font color="4444FF">=</font> <strong>int</strong><font color="4444FF">(</font><font color="#2040a0">sqrt</font><font color="4444FF">(</font><font color="#2040a0">num_procs</font><font color="4444FF">)</font><font color="4444FF">)</font> <font color="4444FF">+</font> <font color="#FF0000">1</font><font color="4444FF">;</font>
+<a name="line137">137</a>    <font color="#2040a0">N</font> <font color="4444FF">=</font> <font color="#2040a0">n</font><font color="4444FF">*</font><font color="#2040a0">n</font><font color="4444FF">;</font> <font color="#444444">/* global number of rows */</font>
+<a name="line138">138</a>    <font color="#2040a0">h</font> <font color="4444FF">=</font> <font color="#FF0000">1.0</font>/<font color="4444FF">(</font><font color="#2040a0">n</font><font color="4444FF">+</font><font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* mesh size*/</font>
+<a name="line139">139</a>    <font color="#2040a0">h2</font> <font color="4444FF">=</font> <font color="#2040a0">h</font><font color="4444FF">*</font><font color="#2040a0">h</font><font color="4444FF">;</font>
+<a name="line140">140</a> 
+<a name="line141">141</a>    <font color="#444444">/* Each processor knows only of its own rows - the range is denoted by ilower
+<a name="line142">142</a>       and upper.  Here we partition the rows. We account for the fact that
+<a name="line143">143</a>       N may not divide evenly by the number of processors. */</font>
+<a name="line144">144</a>    <font color="#2040a0">local_size</font> <font color="4444FF">=</font> <font color="#2040a0">N</font>/<font color="#2040a0">num_procs</font><font color="4444FF">;</font>
+<a name="line145">145</a>    <font color="#2040a0">extra</font> <font color="4444FF">=</font> <font color="#2040a0">N</font> <font color="4444FF">-</font> <font color="#2040a0">local_size</font><font color="4444FF">*</font><font color="#2040a0">num_procs</font><font color="4444FF">;</font>
+<a name="line146">146</a> 
+<a name="line147">147</a>    <font color="#2040a0">ilower</font> <font color="4444FF">=</font> <font color="#2040a0">local_size</font><font color="4444FF">*</font><font color="#2040a0">myid</font><font color="4444FF">;</font>
+<a name="line148">148</a>    <font color="#2040a0">ilower</font> <font color="4444FF">+</font><font color="4444FF">=</font> <font color="#2040a0">hypre_min</font><font color="4444FF">(</font><font color="#2040a0">myid</font>, <font color="#2040a0">extra</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line149">149</a> 
+<a name="line150">150</a>    <font color="#2040a0">iupper</font> <font color="4444FF">=</font> <font color="#2040a0">local_size</font><font color="4444FF">*</font><font color="4444FF">(</font><font color="#2040a0">myid</font><font color="4444FF">+</font><font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line151">151</a>    <font color="#2040a0">iupper</font> <font color="4444FF">+</font><font color="4444FF">=</font> <font color="#2040a0">hypre_min</font><font color="4444FF">(</font><font color="#2040a0">myid</font><font color="4444FF">+</font><font color="#FF0000">1</font>, <font color="#2040a0">extra</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line152">152</a>    <font color="#2040a0">iupper</font> <font color="4444FF">=</font> <font color="#2040a0">iupper</font> <font color="4444FF">-</font> <font color="#FF0000">1</font><font color="4444FF">;</font>
+<a name="line153">153</a> 
+<a name="line154">154</a>    <font color="#444444">/* How many rows do I have? */</font>
+<a name="line155">155</a>    <font color="#2040a0">local_size</font> <font color="4444FF">=</font> <font color="#2040a0">iupper</font> <font color="4444FF">-</font> <font color="#2040a0">ilower</font> <font color="4444FF">+</font> <font color="#FF0000">1</font><font color="4444FF">;</font>
+<a name="line156">156</a> 
+<a name="line157">157</a>    <font color="#444444">/* Create the matrix.
+<a name="line158">158</a>       Note that this is a square matrix, so we indicate the row partition
+<a name="line159">159</a>       size twice (since number of rows = number of cols) */</font>
+<a name="line160">160</a>    <font color="#2040a0">parcsr_A</font> <font color="4444FF">=</font> <font color="#2040a0">IJParCSRMatrix</font><font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">Create</font><font color="4444FF">(</font> <font color="#2040a0">mpi_comm</font>,
+<a name="line161">161</a>                                         <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line162">162</a> 
+<a name="line163">163</a>    <font color="#2040a0">op_A</font> <font color="4444FF">=</font> <font color="#2040a0">parcsr_A</font><font color="4444FF">;</font> <font color="#444444">/* we can eliminate op_A later, it's really needed only in C */</font>
+<a name="line164">164</a> 
+<a name="line165">165</a>    <font color="#444444">/* Choose a parallel csr format storage (see the User's Manual) */</font>
+<a name="line166">166</a>    <font color="#444444">/* Note: Here the HYPRE interface requires a SetObjectType call.
+<a name="line167">167</a>       I am using the bHYPRE interface in a way which does not because
+<a name="line168">168</a>       the object type is already specified through the class name. */</font>
+<a name="line169">169</a> 
+<a name="line170">170</a>    <font color="#444444">/* Initialize before setting coefficients */</font>
+<a name="line171">171</a>    <font color="#2040a0">parcsr_A</font>.<font color="#2040a0">Initialize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line172">172</a> 
+<a name="line173">173</a>    <font color="#444444">/* Now go through my local rows and set the matrix entries.
+<a name="line174">174</a>       Each row has at most 5 entries. For example, if n=3:
+<a name="line175">175</a> 
+<a name="line176">176</a>       A = [M -I 0; -I M -I; 0 -I M]
+<a name="line177">177</a>       M = [4 -1 0; -1 4 -1; 0 -1 4]
+<a name="line178">178</a> 
+<a name="line179">179</a>       Note that here we are setting one row at a time, though
+<a name="line180">180</a>       one could set all the rows together (see the User's Manual).
+<a name="line181">181</a>    */</font>
+<a name="line182">182</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line183">183</a>       <strong>int</strong> <font color="#2040a0">nnz</font><font color="4444FF">;</font>
+<a name="line184">184</a>       <strong>double</strong> <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#FF0000">5</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line185">185</a>       <strong>int</strong> <font color="#2040a0">cols</font><font color="4444FF">[</font><font color="#FF0000">5</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line186">186</a> 
+<a name="line187">187</a>       <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font> <font color="4444FF">=</font> <font color="#2040a0">ilower</font><font color="4444FF">;</font> <font color="#2040a0">i</font> <font color="4444FF">&lt;</font><font color="4444FF">=</font> <font color="#2040a0">iupper</font><font color="4444FF">;</font> <font color="#2040a0">i</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line188">188</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line189">189</a>          <font color="#2040a0">nnz</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
+<a name="line190">190</a> 
+<a name="line191">191</a>          <font color="#444444">/* The left identity block:position i-n */</font>
+<a name="line192">192</a>          <strong>if</strong> <font color="4444FF">(</font><font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">-</font><font color="#2040a0">n</font><font color="4444FF">)</font><font color="4444FF">&gt;</font><font color="4444FF">=</font><font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line193">193</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line194">194</a> 	    <font color="#2040a0">cols</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">i</font><font color="4444FF">-</font><font color="#2040a0">n</font><font color="4444FF">;</font>
+<a name="line195">195</a> 	    <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
+<a name="line196">196</a> 	    <font color="#2040a0">nnz</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">;</font>
+<a name="line197">197</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line198">198</a> 
+<a name="line199">199</a>          <font color="#444444">/* The left -1: position i-1 */</font>
+<a name="line200">200</a>          <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">%</font><font color="#2040a0">n</font><font color="4444FF">)</font>
+<a name="line201">201</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line202">202</a>             <font color="#2040a0">cols</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">i</font><font color="4444FF">-</font><font color="#FF0000">1</font><font color="4444FF">;</font>
+<a name="line203">203</a>             <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
+<a name="line204">204</a>             <font color="#2040a0">nnz</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">;</font>
+<a name="line205">205</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line206">206</a> 
+<a name="line207">207</a>          <font color="#444444">/* Set the diagonal: position i */</font>
+<a name="line208">208</a>          <font color="#2040a0">cols</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">i</font><font color="4444FF">;</font>
+<a name="line209">209</a>          <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">4.0</font><font color="4444FF">;</font>
+<a name="line210">210</a>          <font color="#2040a0">nnz</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">;</font>
+<a name="line211">211</a> 
+<a name="line212">212</a>          <font color="#444444">/* The right -1: position i+1 */</font>
+<a name="line213">213</a>          <strong>if</strong> <font color="4444FF">(</font><font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">+</font><font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">%</font><font color="#2040a0">n</font><font color="4444FF">)</font>
+<a name="line214">214</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line215">215</a>             <font color="#2040a0">cols</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">i</font><font color="4444FF">+</font><font color="#FF0000">1</font><font color="4444FF">;</font>
+<a name="line216">216</a>             <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
+<a name="line217">217</a>             <font color="#2040a0">nnz</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">;</font>
+<a name="line218">218</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line219">219</a> 
+<a name="line220">220</a>          <font color="#444444">/* The right identity block:position i+n */</font>
+<a name="line221">221</a>          <strong>if</strong> <font color="4444FF">(</font><font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">+</font><font color="#2040a0">n</font><font color="4444FF">)</font><font color="4444FF">&lt;</font> <font color="#2040a0">N</font><font color="4444FF">)</font>
+<a name="line222">222</a>          <font color="4444FF"><strong>{</strong></font>
+<a name="line223">223</a>             <font color="#2040a0">cols</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">i</font><font color="4444FF">+</font><font color="#2040a0">n</font><font color="4444FF">;</font>
+<a name="line224">224</a>             <font color="#2040a0">values</font><font color="4444FF">[</font><font color="#2040a0">nnz</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="4444FF">-</font><font color="#FF0000">1.0</font><font color="4444FF">;</font>
+<a name="line225">225</a>             <font color="#2040a0">nnz</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">;</font>
+<a name="line226">226</a>          <font color="4444FF"><strong>}</strong></font>
+<a name="line227">227</a> 
+<a name="line228">228</a>          <font color="#444444">/* Set the values for row i */</font>
+<a name="line229">229</a>          <font color="#2040a0">parcsr_A</font>.<font color="#2040a0">SetValues</font><font color="4444FF">(</font> <font color="#FF0000">1</font>, <font color="4444FF">&amp;</font><font color="#2040a0">nnz</font>, <font color="4444FF">&amp;</font><font color="#2040a0">i</font>, <font color="#2040a0">cols</font>, <font color="#2040a0">values</font>, <font color="#FF0000">5</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line230">230</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line231">231</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line232">232</a> 
+<a name="line233">233</a>    <font color="#444444">/* Assemble after setting the coefficients */</font>
+<a name="line234">234</a>    <font color="#2040a0">parcsr_A</font>.<font color="#2040a0">Assemble</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line235">235</a> 
+<a name="line236">236</a>    <font color="#444444">/* Create the rhs and solution */</font>
+<a name="line237">237</a>    <font color="#2040a0">par_b</font> <font color="4444FF">=</font> <font color="#2040a0">IJParCSRVector</font><font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">Create</font><font color="4444FF">(</font> <font color="#2040a0">mpi_comm</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line238">238</a> 
+<a name="line239">239</a>    <font color="#2040a0">par_b</font>.<font color="#2040a0">Initialize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line240">240</a> 
+<a name="line241">241</a>    <font color="#2040a0">par_x</font> <font color="4444FF">=</font> <font color="#2040a0">IJParCSRVector</font><font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">Create</font><font color="4444FF">(</font> <font color="#2040a0">mpi_comm</font>, <font color="#2040a0">ilower</font>, <font color="#2040a0">iupper</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line242">242</a> 
+<a name="line243">243</a>    <font color="#2040a0">par_x</font>.<font color="#2040a0">Initialize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line244">244</a> 
+<a name="line245">245</a>    <font color="#444444">/* Set the rhs values to h^2 and the solution to zero */</font>
+<a name="line246">246</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line247">247</a>       <strong>double</strong> <font color="4444FF">*</font><font color="#2040a0">rhs_values</font>, <font color="4444FF">*</font><font color="#2040a0">x_values</font><font color="4444FF">;</font>
+<a name="line248">248</a>       <strong>int</strong>    <font color="4444FF">*</font><font color="#2040a0">rows</font><font color="4444FF">;</font>
+<a name="line249">249</a> 
+<a name="line250">250</a>       <font color="#2040a0">rhs_values</font> <font color="4444FF">=</font> <strong>new</strong> <strong>double</strong><font color="4444FF">[</font><font color="#2040a0">local_size</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line251">251</a>       <font color="#2040a0">x_values</font> <font color="4444FF">=</font> <strong>new</strong> <strong>double</strong><font color="4444FF">[</font><font color="#2040a0">local_size</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line252">252</a>       <font color="#2040a0">rows</font> <font color="4444FF">=</font> <strong>new</strong> <strong>int</strong><font color="4444FF">[</font><font color="#2040a0">local_size</font><font color="4444FF">]</font><font color="4444FF">;</font>
+<a name="line253">253</a> 
+<a name="line254">254</a>       <strong>for</strong> <font color="4444FF">(</font><font color="#2040a0">i</font><font color="4444FF">=</font><font color="#FF0000">0</font><font color="4444FF">;</font> <font color="#2040a0">i</font><font color="4444FF">&lt;</font><font color="#2040a0">local_size</font><font color="4444FF">;</font> <font color="#2040a0">i</font><font color="4444FF">+</font><font color="4444FF">+</font><font color="4444FF">)</font>
+<a name="line255">255</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line256">256</a>          <font color="#2040a0">rhs_values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">h2</font><font color="4444FF">;</font>
+<a name="line257">257</a>          <font color="#2040a0">x_values</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#FF0000">0.0</font><font color="4444FF">;</font>
+<a name="line258">258</a>          <font color="#2040a0">rows</font><font color="4444FF">[</font><font color="#2040a0">i</font><font color="4444FF">]</font> <font color="4444FF">=</font> <font color="#2040a0">ilower</font> <font color="4444FF">+</font> <font color="#2040a0">i</font><font color="4444FF">;</font>
+<a name="line259">259</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line260">260</a> 
+<a name="line261">261</a>       <font color="#2040a0">par_b</font>.<font color="#2040a0">SetValues</font><font color="4444FF">(</font> <font color="#2040a0">local_size</font>, <font color="#2040a0">rows</font>, <font color="#2040a0">rhs_values</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line262">262</a>       <font color="#2040a0">par_x</font>.<font color="#2040a0">SetValues</font><font color="4444FF">(</font> <font color="#2040a0">local_size</font>, <font color="#2040a0">rows</font>, <font color="#2040a0">x_values</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line263">263</a> 
+<a name="line264">264</a>       <strong>delete</strong><font color="4444FF">[</font><font color="4444FF">]</font> <font color="#2040a0">x_values</font><font color="4444FF">;</font>
+<a name="line265">265</a>       <strong>delete</strong><font color="4444FF">[</font><font color="4444FF">]</font> <font color="#2040a0">rhs_values</font><font color="4444FF">;</font>
+<a name="line266">266</a>       <strong>delete</strong><font color="4444FF">[</font><font color="4444FF">]</font> <font color="#2040a0">rows</font><font color="4444FF">;</font>
+<a name="line267">267</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line268">268</a> 
+<a name="line269">269</a>    <font color="#2040a0">par_b</font>.<font color="#2040a0">Assemble</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line270">270</a>    <font color="#2040a0">par_x</font>.<font color="#2040a0">Assemble</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line271">271</a> 
+<a name="line272">272</a>    <font color="#444444">/* Choose a solver and solve the system */</font>
+<a name="line273">273</a> 
+<a name="line274">274</a>    <font color="#444444">/* AMG */</font>
+<a name="line275">275</a>    <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">solver_id</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line276">276</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line277">277</a>       <strong>int</strong> <font color="#2040a0">num_iterations</font><font color="4444FF">;</font>
+<a name="line278">278</a>       <strong>double</strong> <font color="#2040a0">final_res_norm</font><font color="4444FF">;</font>
+<a name="line279">279</a> 
+<a name="line280">280</a>       <font color="#444444">/* Create solver */</font>
+<a name="line281">281</a>       <font color="#2040a0">amg_solver</font> <font color="4444FF">=</font> <font color="#2040a0">BoomerAMG</font><font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">Create</font><font color="4444FF">(</font> <font color="#2040a0">mpi_comm</font>, <font color="#2040a0">parcsr_A</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line282">282</a> 
+<a name="line283">283</a>       <font color="#444444">/* Set some parameters (See Reference Manual for more parameters) */</font>
+<a name="line284">284</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;PrintLevel&quot;</font>, <font color="#FF0000">3</font> <font color="4444FF">)</font><font color="4444FF">;</font>  <font color="#444444">/* print solve info + parameters */</font>
+<a name="line285">285</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;CoarsenType&quot;</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* Falgout coarsening */</font>
+<a name="line286">286</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;RelaxType&quot;</font>, <font color="#FF0000">3</font><font color="4444FF">)</font><font color="4444FF">;</font>   <font color="#444444">/* G-S/Jacobi hybrid relaxation */</font>
+<a name="line287">287</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;NumSweeps&quot;</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>   <font color="#444444">/* Sweeeps on each level */</font>
+<a name="line288">288</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;MaxLevels&quot;</font>, <font color="#FF0000">20</font><font color="4444FF">)</font><font color="4444FF">;</font>  <font color="#444444">/* maximum number of levels */</font>
+<a name="line289">289</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetDoubleParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Tolerance&quot;</font>, <font color="#FF0000">1e-7</font><font color="4444FF">)</font><font color="4444FF">;</font>      <font color="#444444">/* conv. tolerance */</font>
+<a name="line290">290</a> 
+<a name="line291">291</a>       <font color="#444444">/* Now setup and solve! */</font>
+<a name="line292">292</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">Setup</font><font color="4444FF">(</font> <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line293">293</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">Apply</font><font color="4444FF">(</font> <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line294">294</a> 
+<a name="line295">295</a>       <font color="#444444">/* Run info - needed logging turned on */</font>
+<a name="line296">296</a> 
+<a name="line297">297</a>       <font color="#2040a0">ierr</font> <font color="4444FF">+</font><font color="4444FF">=</font> <font color="#2040a0">amg_solver</font>.<font color="#2040a0">GetIntValue</font><font color="4444FF">(</font> <font color="#008000">&quot;NumIterations&quot;</font>, <font color="#2040a0">num_iterations</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line298">298</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">GetDoubleValue</font><font color="4444FF">(</font> <font color="#008000">&quot;RelResidualNorm&quot;</font>, <font color="#2040a0">final_res_norm</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line299">299</a> 
+<a name="line300">300</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line301">301</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line302">302</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line303">303</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Iterations = %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">num_iterations</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line304">304</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Final Relative Residual Norm = %e<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line305">305</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line306">306</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line307">307</a> 
+<a name="line308">308</a>       <font color="#444444">/* Destroy solver */</font>
+<a name="line309">309</a>       <font color="#444444">/* In C++, unlike C, deleteRef of amg_solver is not needed here -
+<a name="line310">310</a>          it happens automatically. */</font>
+<a name="line311">311</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line312">312</a> 
+<a name="line313">313</a>    <font color="#444444">/* PCG */</font>
+<a name="line314">314</a>    <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">solver_id</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">50</font><font color="4444FF">)</font>
+<a name="line315">315</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line316">316</a>       <strong>int</strong> <font color="#2040a0">num_iterations</font><font color="4444FF">;</font>
+<a name="line317">317</a>       <strong>double</strong> <font color="#2040a0">final_res_norm</font><font color="4444FF">;</font>
+<a name="line318">318</a> 
+<a name="line319">319</a>       <font color="#444444">/* Create solver */</font>
+<a name="line320">320</a>       <font color="#2040a0">pcg_solver</font> <font color="4444FF">=</font> <font color="#2040a0">PCG</font><font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">Create</font><font color="4444FF">(</font> <font color="#2040a0">mpi_comm</font>, <font color="#2040a0">op_A</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line321">321</a> 
+<a name="line322">322</a>       <font color="#444444">/* Set some parameters (See Reference Manual for more parameters) */</font>
+<a name="line323">323</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;MaxIter&quot;</font>, <font color="#FF0000">1000</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* max iterations */</font>
+<a name="line324">324</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetDoubleParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Tolerance&quot;</font>, <font color="#FF0000">1e-7</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* conv. tolerance */</font>
+<a name="line325">325</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;TwoNorm&quot;</font>, <font color="#FF0000">1</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* use the two norm as the stopping criteria */</font>
+<a name="line326">326</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;PrintLevel&quot;</font>, <font color="#FF0000">2</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* prints out the iteration info */</font>
+<a name="line327">327</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Logging&quot;</font>, <font color="#FF0000">1</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* needed to get run info later */</font>
+<a name="line328">328</a> 
+<a name="line329">329</a>       <font color="#2040a0">identity</font> <font color="4444FF">=</font> <font color="#2040a0">IdentitySolver</font><font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">Create</font><font color="4444FF">(</font> <font color="#2040a0">mpi_comm</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line330">330</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetPreconditioner</font><font color="4444FF">(</font> <font color="#2040a0">identity</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line331">331</a> 
+<a name="line332">332</a>       <font color="#444444">/* Now setup and solve! */</font>
+<a name="line333">333</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">Setup</font><font color="4444FF">(</font> <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line334">334</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">Apply</font><font color="4444FF">(</font> <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line335">335</a> 
+<a name="line336">336</a>       <font color="#444444">/* Run info - needed logging turned on */</font>
+<a name="line337">337</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">GetIntValue</font><font color="4444FF">(</font> <font color="#008000">&quot;NumIterations&quot;</font>, <font color="#2040a0">num_iterations</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line338">338</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">GetDoubleValue</font><font color="4444FF">(</font> <font color="#008000">&quot;RelResidualNorm&quot;</font>, <font color="#2040a0">final_res_norm</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line339">339</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line340">340</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line341">341</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line342">342</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Iterations = %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">num_iterations</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line343">343</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Final Relative Residual Norm = %e<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line344">344</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line345">345</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line346">346</a> 
+<a name="line347">347</a>       <font color="#444444">/* Destroy solvers */</font>
+<a name="line348">348</a>       <font color="#444444">/* In C++, unlike C, deleteRef's of solvers are not needed here -
+<a name="line349">349</a>          it happens automatically. */</font>
+<a name="line350">350</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line351">351</a>    <font color="#444444">/* PCG with AMG preconditioner */</font>
+<a name="line352">352</a>    <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">solver_id</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">)</font>
+<a name="line353">353</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line354">354</a>       <strong>int</strong> <font color="#2040a0">num_iterations</font><font color="4444FF">;</font>
+<a name="line355">355</a>       <strong>double</strong> <font color="#2040a0">final_res_norm</font><font color="4444FF">;</font>
+<a name="line356">356</a> 
+<a name="line357">357</a>       <font color="#444444">/* Create solver */</font>
+<a name="line358">358</a>       <font color="#2040a0">pcg_solver</font> <font color="4444FF">=</font> <font color="#2040a0">PCG</font><font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">Create</font><font color="4444FF">(</font> <font color="#2040a0">mpi_comm</font>, <font color="#2040a0">op_A</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line359">359</a> 
+<a name="line360">360</a>       <font color="#444444">/* Set some parameters (See Reference Manual for more parameters) */</font>
+<a name="line361">361</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;MaxIter&quot;</font>, <font color="#FF0000">1000</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* max iterations */</font>
+<a name="line362">362</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetDoubleParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Tolerance&quot;</font>, <font color="#FF0000">1e-7</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* conv. tolerance */</font>
+<a name="line363">363</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;TwoNorm&quot;</font>, <font color="#FF0000">1</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* use the two norm as the stopping criteria */</font>
+<a name="line364">364</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;PrintLevel&quot;</font>, <font color="#FF0000">2</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* prints out the iteration info */</font>
+<a name="line365">365</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Logging&quot;</font>, <font color="#FF0000">1</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* needed to get run info later */</font>
+<a name="line366">366</a> 
+<a name="line367">367</a>       <font color="#444444">/* Now set up the AMG preconditioner and specify any parameters */</font>
+<a name="line368">368</a>       <font color="#2040a0">amg_solver</font> <font color="4444FF">=</font> <font color="#2040a0">BoomerAMG</font><font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">Create</font><font color="4444FF">(</font> <font color="#2040a0">mpi_comm</font>, <font color="#2040a0">parcsr_A</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line369">369</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;PrintLevel&quot;</font>, <font color="#FF0000">1</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* print amg solution info*/</font>
+<a name="line370">370</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;CoarsenType&quot;</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* Falgout coarsening */</font>
+<a name="line371">371</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;RelaxType&quot;</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font>   <font color="#444444">/* Sym G-S/Jacobi hybrid relaxation */</font>
+<a name="line372">372</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;NumSweeps&quot;</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>   <font color="#444444">/* Sweeeps on each level */</font>
+<a name="line373">373</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetDoubleParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Tolerance&quot;</font>, <font color="#FF0000">1e-3</font><font color="4444FF">)</font><font color="4444FF">;</font>      <font color="#444444">/* conv. tolerance */</font>
+<a name="line374">374</a>       <font color="#2040a0">amg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;MaxIter&quot;</font>, <font color="#FF0000">1</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* do only one iteration! */</font>
+<a name="line375">375</a> 
+<a name="line376">376</a>       <font color="#444444">/* Set the PCG preconditioner */</font>
+<a name="line377">377</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetPreconditioner</font><font color="4444FF">(</font> <font color="#2040a0">amg_solver</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line378">378</a> 
+<a name="line379">379</a>       <font color="#444444">/* Now setup and solve! */</font>
+<a name="line380">380</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">Setup</font><font color="4444FF">(</font> <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line381">381</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">Apply</font><font color="4444FF">(</font> <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line382">382</a> 
+<a name="line383">383</a>       <font color="#444444">/* Run info - needed logging turned on */</font>
+<a name="line384">384</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">GetIntValue</font><font color="4444FF">(</font> <font color="#008000">&quot;NumIterations&quot;</font>, <font color="#2040a0">num_iterations</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line385">385</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">GetDoubleValue</font><font color="4444FF">(</font> <font color="#008000">&quot;RelResidualNorm&quot;</font>, <font color="#2040a0">final_res_norm</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line386">386</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line387">387</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line388">388</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line389">389</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Iterations = %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">num_iterations</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line390">390</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Final Relative Residual Norm = %e<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line391">391</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line392">392</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line393">393</a> 
+<a name="line394">394</a>       <font color="#444444">/* Destroy solver and preconditioner */</font>
+<a name="line395">395</a>       <font color="#444444">/* In C++, unlike C, deleteRef's of solvers are not needed here -
+<a name="line396">396</a>          it happens automatically. */</font>
+<a name="line397">397</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line398">398</a> 
+<a name="line399">399</a>    <font color="#444444">/* PCG with Parasails Preconditioner */</font>
+<a name="line400">400</a>    <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">solver_id</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">8</font><font color="4444FF">)</font>
+<a name="line401">401</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line402">402</a>       <strong>int</strong>    <font color="#2040a0">num_iterations</font><font color="4444FF">;</font>
+<a name="line403">403</a>       <strong>double</strong> <font color="#2040a0">final_res_norm</font><font color="4444FF">;</font>
+<a name="line404">404</a> 
+<a name="line405">405</a>       <strong>int</strong>      <font color="#2040a0">sai_max_levels</font> <font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">;</font>
+<a name="line406">406</a>       <strong>double</strong>   <font color="#2040a0">sai_threshold</font> <font color="4444FF">=</font> <font color="#FF0000">0.1</font><font color="4444FF">;</font>
+<a name="line407">407</a>       <strong>double</strong>   <font color="#2040a0">sai_filter</font> <font color="4444FF">=</font> <font color="#FF0000">0.05</font><font color="4444FF">;</font>
+<a name="line408">408</a>       <strong>int</strong>      <font color="#2040a0">sai_sym</font> <font color="4444FF">=</font> <font color="#FF0000">1</font><font color="4444FF">;</font>
+<a name="line409">409</a> 
+<a name="line410">410</a>       <font color="#444444">/* Create solver */</font>
+<a name="line411">411</a>       <font color="#2040a0">pcg_solver</font> <font color="4444FF">=</font> <font color="#2040a0">PCG</font><font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">Create</font><font color="4444FF">(</font> <font color="#2040a0">mpi_comm</font>, <font color="#2040a0">op_A</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line412">412</a> 
+<a name="line413">413</a>       <font color="#444444">/* Set some parameters (See Reference Manual for more parameters) */</font>
+<a name="line414">414</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;MaxIter&quot;</font>, <font color="#FF0000">1000</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* max iterations */</font>
+<a name="line415">415</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetDoubleParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Tolerance&quot;</font>, <font color="#FF0000">1e-7</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* conv. tolerance */</font>
+<a name="line416">416</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;TwoNorm&quot;</font>, <font color="#FF0000">1</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* use the two norm as the stopping criteria */</font>
+<a name="line417">417</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;PrintLevel&quot;</font>, <font color="#FF0000">2</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* prints out the iteration info */</font>
+<a name="line418">418</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Logging&quot;</font>, <font color="#FF0000">1</font> <font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* needed to get run info later */</font>
+<a name="line419">419</a> 
+<a name="line420">420</a>       <font color="#444444">/* Now set up the ParaSails preconditioner and specify any parameters */</font>
+<a name="line421">421</a>       <font color="#2040a0">ps_solver</font> <font color="4444FF">=</font> <font color="#2040a0">ParaSails</font><font color="4444FF">:</font><font color="4444FF">:</font><font color="#2040a0">Create</font><font color="4444FF">(</font> <font color="#2040a0">mpi_comm</font>, <font color="#2040a0">parcsr_A</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line422">422</a> 
+<a name="line423">423</a>       <font color="#444444">/* Set some parameters (See Reference Manual for more parameters) */</font>
+<a name="line424">424</a>       <font color="#2040a0">ps_solver</font>.<font color="#2040a0">SetDoubleParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Thresh&quot;</font>, <font color="#2040a0">sai_threshold</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line425">425</a>       <font color="#2040a0">ps_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Nlevels&quot;</font>, <font color="#2040a0">sai_max_levels</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line426">426</a>       <font color="#2040a0">ps_solver</font>.<font color="#2040a0">SetDoubleParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Filter&quot;</font>, <font color="#2040a0">sai_filter</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line427">427</a>       <font color="#2040a0">ps_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Sym&quot;</font>, <font color="#2040a0">sai_sym</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line428">428</a>       <font color="#2040a0">ps_solver</font>.<font color="#2040a0">SetIntParameter</font><font color="4444FF">(</font> <font color="#008000">&quot;Logging&quot;</font>, <font color="#FF0000">3</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line429">429</a> 
+<a name="line430">430</a>       <font color="#444444">/* Set the PCG preconditioner */</font>
+<a name="line431">431</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">SetPreconditioner</font><font color="4444FF">(</font> <font color="#2040a0">ps_solver</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line432">432</a> 
+<a name="line433">433</a>       <font color="#444444">/* Now setup and solve! */</font>
+<a name="line434">434</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">Setup</font><font color="4444FF">(</font> <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line435">435</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">Apply</font><font color="4444FF">(</font> <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line436">436</a> 
+<a name="line437">437</a> 
+<a name="line438">438</a>       <font color="#444444">/* Run info - needed logging turned on */</font>
+<a name="line439">439</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">GetIntValue</font><font color="4444FF">(</font> <font color="#008000">&quot;NumIterations&quot;</font>, <font color="#2040a0">num_iterations</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line440">440</a>       <font color="#2040a0">pcg_solver</font>.<font color="#2040a0">GetDoubleValue</font><font color="4444FF">(</font> <font color="#008000">&quot;RelResidualNorm&quot;</font>, <font color="#2040a0">final_res_norm</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line441">441</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line442">442</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line443">443</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line444">444</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Iterations = %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">num_iterations</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line445">445</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Final Relative Residual Norm = %e<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line446">446</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line447">447</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line448">448</a> 
+<a name="line449">449</a>       <font color="#444444">/* Destroy solver and preconditioner */</font>
+<a name="line450">450</a>       <font color="#444444">/* In C++, unlike C, deleteRef's of solvers are not needed here -
+<a name="line451">451</a>          it happens automatically. */</font>
+<a name="line452">452</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line453">453</a>    <strong>else</strong>
+<a name="line454">454</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line455">455</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font><font color="#FF0000">0</font><font color="4444FF">)</font> <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Invalid solver id specified.<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line456">456</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line457">457</a> 
+<a name="line458">458</a>    <font color="#444444">/* Print the solution */</font>
+<a name="line459">459</a>    <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">print_solution</font><font color="4444FF">)</font>
+<a name="line460">460</a>       <font color="#2040a0">par_x</font>.<font color="#2040a0">Print</font><font color="4444FF">(</font> <font color="#008000">&quot;ij.out.x&quot;</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line461">461</a> 
+<a name="line462">462</a>    <font color="#444444">/* Clean up */</font>
+<a name="line463">463</a>    <font color="#444444">/* In C++, unlike C, deleteRef gets called automatically, so we don't
+<a name="line464">464</a>       need any explicit cleanup. */</font>
+<a name="line465">465</a> 
+<a name="line466">466</a>    <font color="#2040a0">hypre_assert</font><font color="4444FF">(</font> <font color="#2040a0">ierr</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font> <font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line467">467</a> 
+<a name="line468">468</a>    <font color="#444444">/* Finalize MPI*/</font>
+<a name="line469">469</a>    <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line470">470</a> 
+<a name="line471">471</a>    <strong>return</strong><font color="4444FF">(</font><font color="#FF0000">0</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line472">472</a> <font color="4444FF"><strong>}</strong></font>
+
+</pre>
+<hr>
+syntax highlighted by <a href="http://www.palfrader.org/code2html">Code2HTML</a>, v. 0.9.1
+</body>
+</html>

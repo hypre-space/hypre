@@ -1,6 +1,6 @@
 <html><head><TITLE>bHYPRE_IJParCSRVector_Clone</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_IJParCSRVector_Clone ( bHYPRE_IJParCSRVector self, bHYPRE_Vector* x) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> SIDL_C_INLINE_DECL  int32_t  bHYPRE_IJParCSRVector_Clone (  bHYPRE_IJParCSRVector self,  bHYPRE_Vector* x,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>) </H2><BLOCKQUOTE>
 
 Create an <TT>x</tt> compatible with <TT>self</tt>
 </BLOCKQUOTE>
@@ -9,10 +9,10 @@ Create an <TT>x</tt> compatible with <TT>self</tt>
  <h2> Documentation </h2>
 <BLOCKQUOTE>
 
-Create an <TT>x</tt> compatible with <TT>self</tt>.<P>NOTE: When this method is used in an inherited class, the
+Create an <TT>x</tt> compatible with <TT>self</tt>.
+The new vector's data is not specified.<P>NOTE: When this method is used in an inherited class, the
 cloned <TT>Vector</tt> object can be cast to an object with the
 inherited class type.
-
 
 </BLOCKQUOTE>
 <DL>

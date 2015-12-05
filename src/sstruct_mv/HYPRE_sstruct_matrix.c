@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2000   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.15 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.21 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * HYPRE_SStructMatrix interface
@@ -392,7 +412,6 @@ HYPRE_SStructMatrixSetBoxValues( HYPRE_SStructMatrix  matrix,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-
 int
 HYPRE_SStructMatrixGetValues( HYPRE_SStructMatrix  matrix,
                               int                  part,
@@ -866,6 +885,46 @@ HYPRE_SStructMatrixGetObject( HYPRE_SStructMatrix   matrix,
  *--------------------------------------------------------------------------*/
 
 int
+HYPRE_SStructMatrixGetObject2( HYPRE_SStructMatrix   matrix,
+                               void                **object )
+{
+   int ierr = 0;
+
+   int            type     = hypre_SStructMatrixObjectType(matrix);
+   HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
+   hypre_SStructPMatrix *pA;
+   hypre_StructMatrix   *sA;
+   int                   part, var;
+ 
+
+   if (type == HYPRE_PARCSR)
+   {
+      /* only difference from ..GetObject: here returns an IJMatrix, not a ParCSRMatrix */
+      *object = ijmatrix;
+   }
+
+   else if (type == HYPRE_SSTRUCT)
+   {
+      *object= matrix;
+   }
+
+   else if (type == HYPRE_STRUCT)
+   {
+      /* only one part & one variable */
+      part= 0;
+      pA  = hypre_SStructMatrixPMatrix(matrix, part);
+      var = 0;
+      sA  = hypre_SStructPMatrixSMatrix(pA, var, var);
+     *object= sA;
+   }
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+int
 HYPRE_SStructMatrixPrint( const char          *filename,
                           HYPRE_SStructMatrix  matrix,
                           int                  all )
@@ -888,5 +947,21 @@ HYPRE_SStructMatrixPrint( const char          *filename,
    HYPRE_IJMatrixPrint(hypre_SStructMatrixIJMatrix(matrix), new_filename);
 
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixMatvec
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructMatrixMatvec( double alpha,
+                           HYPRE_SStructMatrix A,
+                           HYPRE_SStructVector x,
+                           double beta,
+                           HYPRE_SStructVector y     )
+{
+   return ( hypre_SStructMatvec( alpha, (hypre_SStructMatrix *) A,
+                                 (hypre_SStructVector *) x, beta,
+                                 (hypre_SStructVector *) y) );
 }
 

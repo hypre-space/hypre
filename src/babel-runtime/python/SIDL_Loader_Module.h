@@ -1,10 +1,10 @@
 /*
- * File:          SIDL_Loader_Module.h
- * Symbol:        SIDL.Loader-v0.8.2
+ * File:          sidl_Loader_Module.h
+ * Symbol:        sidl.Loader-v0.9.15
  * Symbol Type:   class
- * Babel Version: 0.8.4
- * Release:       $Name: V1-9-0b $
- * Revision:      @(#) $Id: SIDL_Loader_Module.h,v 1.4 2003/04/07 21:44:24 painter Exp $
+ * Babel Version: 1.0.0
+ * Release:       $Name: V1-13-0b $
+ * Revision:      @(#) $Id: sidl_Loader_Module.h,v 1.5 2006/08/29 22:29:27 painter Exp $
  * Description:   expose a constructor for the Python wrapper
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
@@ -32,7 +32,6 @@
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.4
  */
 
 /*
@@ -40,183 +39,236 @@
  * COMPILER. DO NOT EDIT THIS!
  * 
  * External clients need an entry point to wrap a pointer
- * to an instance of SIDL.Loader.
+ * to an instance of sidl.Loader.
  * This header files defines two methods that such clients
  * will need.
- *     SIDL_Loader__import
+ *     sidl_Loader__import
  *         This should be called in the client's init
  *         module method.
- *     SIDL_Loader__wrap
+ *     sidl_Loader__wrap
  *         This will wrap an IOR in a Python object.
  */
 
-#ifndef included_SIDL_Loader_MODULE
-#define included_SIDL_Loader_MODULE
+#ifndef included_sidl_Loader_MODULE
+#define included_sidl_Loader_MODULE
 
-#include "babel_config.h"
 #include <Python.h>
+#include "sidlType.h"
+#ifdef HAVE_PTHREAD
+#include <pthread.h>
+#endif /* HAVE_PTHREAD */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+struct sidl__array;
 
 /* Forward declaration of IOR structure */
-struct SIDL_Loader__object;
-struct SIDL_Loader__array;
+struct sidl_Loader__object;
+struct sidl_Loader__array;
+struct sidl_BaseInterface__object;
 
-#define SIDL_Loader__wrap_NUM 0
-#define SIDL_Loader__wrap_RETURN PyObject *
-#define SIDL_Loader__wrap_PROTO (struct SIDL_Loader__object *sidlobj)
+#define sidl_Loader__wrap_NUM 0
+#define sidl_Loader__wrap_RETURN PyObject *
+#define sidl_Loader__wrap_PROTO (struct sidl_Loader__object *sidlobj)
 
-#define SIDL_Loader__convert_NUM 1
-#define SIDL_Loader__convert_RETURN int
-#define SIDL_Loader__convert_PROTO (PyObject *obj, struct SIDL_Loader__object **sidlobj)
+#define sidl_Loader__convert_NUM 1
+#define sidl_Loader__convert_RETURN int
+#define sidl_Loader__convert_PROTO (PyObject *obj, struct sidl_Loader__object **sidlobj)
 
-#define SIDL_Loader__convert_python_array_NUM 2
-#define SIDL_Loader__convert_python_array_RETURN int
-#define SIDL_Loader__convert_python_array_PROTO (PyObject *obj, struct SIDL_Loader__array **sidlarray)
+#define sidl_Loader__convert_python_array_NUM 2
+#define sidl_Loader__convert_python_array_RETURN int
+#define sidl_Loader__convert_python_array_PROTO (PyObject *obj, struct sidl_Loader__array **sidlarray)
 
-#define SIDL_Loader__convert_sidl_array_NUM 3
-#define SIDL_Loader__convert_sidl_array_RETURN PyObject *
-#define SIDL_Loader__convert_sidl_array_PROTO (struct SIDL_Loader__array *sidlarray)
+#define sidl_Loader__convert_sidl_array_NUM 3
+#define sidl_Loader__convert_sidl_array_RETURN PyObject *
+#define sidl_Loader__convert_sidl_array_PROTO (struct sidl__array *sidlarray)
 
-#define SIDL_Loader__destroy_sidl_array_NUM 4
-#define SIDL_Loader__destroy_sidl_array_RETURN void
-#define SIDL_Loader__destroy_sidl_array_PROTO (struct SIDL_Loader__array *sidlarray)
+#define sidl_Loader__weakRef_NUM 4
+#define sidl_Loader__weakRef_RETURN PyObject *
+#define sidl_Loader__weakRef_PROTO (struct sidl_Loader__object *sidlobj)
 
-#define SIDL_Loader__weakRef_NUM 5
-#define SIDL_Loader__weakRef_RETURN PyObject *
-#define SIDL_Loader__weakRef_PROTO (struct SIDL_Loader__object *sidlobj)
+#define sidl_Loader_deref_NUM 5
+#define sidl_Loader_deref_RETURN void
+#define sidl_Loader_deref_PROTO (struct sidl_Loader__object *sidlobj)
 
-#define SIDL_Loader_deref_NUM 6
-#define SIDL_Loader_deref_RETURN void
-#define SIDL_Loader_deref_PROTO (struct SIDL_Loader__object *sidlobj)
+#define sidl_Loader__newRef_NUM 6
+#define sidl_Loader__newRef_RETURN PyObject *
+#define sidl_Loader__newRef_PROTO (struct sidl_Loader__object *sidlobj)
 
-#define SIDL_Loader__newRef_NUM 7
-#define SIDL_Loader__newRef_RETURN PyObject *
-#define SIDL_Loader__newRef_PROTO (struct SIDL_Loader__object *sidlobj)
+#define sidl_Loader__addRef_NUM 7
+#define sidl_Loader__addRef_RETURN void
+#define sidl_Loader__addRef_PROTO (struct sidl_Loader__object *sidlobj)
 
-#define SIDL_Loader__addRef_NUM 8
-#define SIDL_Loader__addRef_RETURN void
-#define SIDL_Loader__addRef_PROTO (struct SIDL_Loader__object *sidlobj)
+#define sidl_Loader_PyType_NUM 8
+#define sidl_Loader_PyType_RETURN PyTypeObject *
+#define sidl_Loader_PyType_PROTO (void)
 
-#define SIDL_Loader__API_NUM 9
+#define sidl_Loader__connectI_NUM 9
+#define sidl_Loader__connectI_RETURN struct sidl_Loader__object* 
+#define sidl_Loader__connectI_PROTO (const char* url, sidl_bool ar, struct sidl_BaseInterface__object ** _ex)
 
-#ifdef SIDL_Loader_INTERNAL
+#define sidl_Loader__rmicast_NUM 10
+#define sidl_Loader__rmicast_RETURN struct sidl_Loader__object* 
+#define sidl_Loader__rmicast_PROTO (void* bi, struct sidl_BaseInterface__object ** _ex)
+
+#define sidl_Loader__API_NUM 11
+
+#ifdef sidl_Loader_INTERNAL
+
+#define sidl_Loader__import() ;
+
 
 /*
  * This declaration is not for clients.
  */
 
-static SIDL_Loader__wrap_RETURN
-SIDL_Loader__wrap
-SIDL_Loader__wrap_PROTO;
+static sidl_Loader__wrap_RETURN
+sidl_Loader__wrap
+sidl_Loader__wrap_PROTO;
 
-static SIDL_Loader__convert_RETURN
-SIDL_Loader__convert
-SIDL_Loader__convert_PROTO;
+static sidl_Loader__convert_RETURN
+sidl_Loader__convert
+sidl_Loader__convert_PROTO;
 
-static SIDL_Loader__convert_python_array_RETURN
-SIDL_Loader__convert_python_array
-SIDL_Loader__convert_python_array_PROTO;
+static sidl_Loader__convert_python_array_RETURN
+sidl_Loader__convert_python_array
+sidl_Loader__convert_python_array_PROTO;
 
-static SIDL_Loader__convert_sidl_array_RETURN
-SIDL_Loader__convert_sidl_array
-SIDL_Loader__convert_sidl_array_PROTO;
+static sidl_Loader__convert_sidl_array_RETURN
+sidl_Loader__convert_sidl_array
+sidl_Loader__convert_sidl_array_PROTO;
 
-static SIDL_Loader__destroy_sidl_array_RETURN
-SIDL_Loader__destroy_sidl_array
-SIDL_Loader__destroy_sidl_array_PROTO;
+static sidl_Loader__weakRef_RETURN
+sidl_Loader__weakRef
+sidl_Loader__weakRef_PROTO;
 
-static SIDL_Loader__weakRef_RETURN
-SIDL_Loader__weakRef
-SIDL_Loader__weakRef_PROTO;
+static sidl_Loader_deref_RETURN
+sidl_Loader_deref
+sidl_Loader_deref_PROTO;
 
-static SIDL_Loader_deref_RETURN
-SIDL_Loader_deref
-SIDL_Loader_deref_PROTO;
+static sidl_Loader__newRef_RETURN
+sidl_Loader__newRef
+sidl_Loader__newRef_PROTO;
 
-static SIDL_Loader__newRef_RETURN
-SIDL_Loader__newRef
-SIDL_Loader__newRef_PROTO;
+static sidl_Loader__addRef_RETURN
+sidl_Loader__addRef
+sidl_Loader__addRef_PROTO;
 
-static SIDL_Loader__addRef_RETURN
-SIDL_Loader__addRef
-SIDL_Loader__addRef_PROTO;
+static sidl_Loader_PyType_RETURN
+sidl_Loader_PyType
+sidl_Loader_PyType_PROTO;
 
 #else
 
-static void **SIDL_Loader__API;
+static void **sidl_Loader__API = NULL;
 
-#define SIDL_Loader__wrap \
-  (*((SIDL_Loader__wrap_RETURN (*) \
-  SIDL_Loader__wrap_PROTO) \
-  (SIDL_Loader__API \
-  [SIDL_Loader__wrap_NUM])))
+#define sidl_Loader__wrap \
+  (*((sidl_Loader__wrap_RETURN (*) \
+  sidl_Loader__wrap_PROTO) \
+  (sidl_Loader__API \
+  [sidl_Loader__wrap_NUM])))
 
-#define SIDL_Loader__convert \
-  (*((SIDL_Loader__convert_RETURN (*) \
-  SIDL_Loader__convert_PROTO) \
-  (SIDL_Loader__API \
-  [SIDL_Loader__convert_NUM])))
+#define sidl_Loader__convert \
+  (*((sidl_Loader__convert_RETURN (*) \
+  sidl_Loader__convert_PROTO) \
+  (sidl_Loader__API \
+  [sidl_Loader__convert_NUM])))
 
-#define SIDL_Loader__convert_python_array \
-  (*((SIDL_Loader__convert_python_array_RETURN (*) \
-  SIDL_Loader__convert_python_array_PROTO) \
-  (SIDL_Loader__API \
-  [SIDL_Loader__convert_python_array_NUM])))
+#define sidl_Loader__convert_python_array \
+  (*((sidl_Loader__convert_python_array_RETURN (*) \
+  sidl_Loader__convert_python_array_PROTO) \
+  (sidl_Loader__API \
+  [sidl_Loader__convert_python_array_NUM])))
 
-#define SIDL_Loader__convert_sidl_array \
-  (*((SIDL_Loader__convert_sidl_array_RETURN (*) \
-  SIDL_Loader__convert_sidl_array_PROTO) \
-  (SIDL_Loader__API \
-  [SIDL_Loader__convert_sidl_array_NUM])))
+#define sidl_Loader__convert_sidl_array \
+  (*((sidl_Loader__convert_sidl_array_RETURN (*) \
+  sidl_Loader__convert_sidl_array_PROTO) \
+  (sidl_Loader__API \
+  [sidl_Loader__convert_sidl_array_NUM])))
 
-#define SIDL_Loader__destroy_sidl_array \
-  (*((SIDL_Loader__destroy_sidl_array_RETURN (*) \
-  SIDL_Loader__destroy_sidl_array_PROTO) \
-  (SIDL_Loader__API \
-  [SIDL_Loader__destroy_sidl_array_NUM])))
+#define sidl_Loader__weakRef \
+  (*((sidl_Loader__weakRef_RETURN (*) \
+  sidl_Loader__weakRef_PROTO) \
+  (sidl_Loader__API \
+  [sidl_Loader__weakRef_NUM])))
 
-#define SIDL_Loader__weakRef \
-  (*((SIDL_Loader__weakRef_RETURN (*) \
-  SIDL_Loader__weakRef_PROTO) \
-  (SIDL_Loader__API \
-  [SIDL_Loader__weakRef_NUM])))
+#define sidl_Loader_deref \
+  (*((sidl_Loader_deref_RETURN (*) \
+  sidl_Loader_deref_PROTO) \
+  (sidl_Loader__API \
+  [sidl_Loader_deref_NUM])))
 
-#define SIDL_Loader_deref \
-  (*((SIDL_Loader_deref_RETURN (*) \
-  SIDL_Loader_deref_PROTO) \
-  (SIDL_Loader__API \
-  [SIDL_Loader_deref_NUM])))
+#define sidl_Loader__newRef \
+  (*((sidl_Loader__newRef_RETURN (*) \
+  sidl_Loader__newRef_PROTO) \
+  (sidl_Loader__API \
+  [sidl_Loader__newRef_NUM])))
 
-#define SIDL_Loader__newRef \
-  (*((SIDL_Loader__newRef_RETURN (*) \
-  SIDL_Loader__newRef_PROTO) \
-  (SIDL_Loader__API \
-  [SIDL_Loader__newRef_NUM])))
+#define sidl_Loader__addRef \
+  (*((sidl_Loader__addRef_RETURN (*) \
+  sidl_Loader__addRef_PROTO) \
+  (sidl_Loader__API \
+  [sidl_Loader__addRef_NUM])))
 
-#define SIDL_Loader__addRef \
-  (*((SIDL_Loader__addRef_RETURN (*) \
-  SIDL_Loader__addRef_PROTO) \
-  (SIDL_Loader__API \
-  [SIDL_Loader__addRef_NUM])))
+#define sidl_Loader_PyType \
+  (*((sidl_Loader_PyType_RETURN (*) \
+  sidl_Loader_PyType_PROTO) \
+  (sidl_Loader__API \
+  [sidl_Loader_PyType_NUM])))
 
-#define SIDL_Loader__import() \
+#define sidl_Loader__connectI \
+  (*((sidl_Loader__connectI_RETURN (*) \
+  sidl_Loader__connectI_PROTO) \
+  (sidl_Loader__API \
+  [sidl_Loader__connectI_NUM])))
+
+#define sidl_Loader__rmicast \
+  (*((sidl_Loader__rmicast_RETURN (*) \
+  sidl_Loader__rmicast_PROTO) \
+  (sidl_Loader__API \
+  [sidl_Loader__rmicast_NUM])))
+
+#ifdef HAVE_PTHREAD
+#define sidl_Loader__import() \
 { \
-  PyObject *module = PyImport_ImportModule("SIDL.Loader"); \
+  pthread_mutex_t __sidl_pyapi_mutex = PTHREAD_MUTEX_INITIALIZER; \
+  pthread_mutex_lock(&__sidl_pyapi_mutex); \
+  if (!sidl_Loader__API) { \
+    PyObject *module = PyImport_ImportModule("sidl.Loader"); \
+    if (module != NULL) { \
+      PyObject *module_dict = PyModule_GetDict(module); \
+      PyObject *c_api_object = \
+        PyDict_GetItemString(module_dict, "_C_API"); \
+      if (c_api_object && PyCObject_Check(c_api_object)) { \
+        sidl_Loader__API = \
+          (void **)PyCObject_AsVoidPtr(c_api_object); \
+      } \
+      else { fprintf(stderr, "babel: sidl_Loader__import failed to lookup _C_API (%p %p %s).\n", c_api_object, c_api_object ? c_api_object->ob_type : NULL, c_api_object ? c_api_object->ob_type->tp_name : ""); }\
+      Py_DECREF(module); \
+    } else { fprintf(stderr, "babel: sidl_Loader__import failed to import its module.\n"); }\
+  }\
+  pthread_mutex_unlock(&__sidl_pyapi_mutex); \
+  pthread_mutex_destroy(&__sidl_pyapi_mutex); \
+}
+#else /* !HAVE_PTHREAD */
+#define sidl_Loader__import() \
+if (!sidl_Loader__API) { \
+  PyObject *module = PyImport_ImportModule("sidl.Loader"); \
   if (module != NULL) { \
     PyObject *module_dict = PyModule_GetDict(module); \
     PyObject *c_api_object = \
       PyDict_GetItemString(module_dict, "_C_API"); \
-    if (PyCObject_Check(c_api_object)) { \
-      SIDL_Loader__API = \
+    if (c_api_object && PyCObject_Check(c_api_object)) { \
+      sidl_Loader__API = \
         (void **)PyCObject_AsVoidPtr(c_api_object); \
     } \
+    else { fprintf(stderr, "babel: sidl_Loader__import failed to lookup _C_API (%p %p %s).\n", c_api_object, c_api_object ? c_api_object->ob_type : NULL, c_api_object ? c_api_object->ob_type->tp_name : ""); }\
     Py_DECREF(module); \
-  } \
+  } else { fprintf(stderr, "babel: sidl_Loader__import failed to import its module.\n"); }\
 }
+#endif /* HAVE_PTHREAD */
 
 #endif
 

@@ -1,539 +1,157 @@
-#BHEADER***********************************************************************
-# (c) 2000   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# $Revision: 1.3 $
-#EHEADER***********************************************************************
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 1.24 $
+#EHEADER**********************************************************************
+
+
+
 
 include ../config/Makefile.config
 
  
-#BLASFILES =\
-#$(top_srcdir)/blas/dasum.o\
-#$(top_srcdir)/blas/daxpy.o\
-#$(top_srcdir)/blas/dcopy.o\
-#$(top_srcdir)/blas/ddot.o\
-#$(top_srcdir)/blas/dgemm.o\
-#$(top_srcdir)/blas/dgemv.o\
-#$(top_srcdir)/blas/dger.o\
-#$(top_srcdir)/blas/dnrm2.o\
-#$(top_srcdir)/blas/drot.o\
-#$(top_srcdir)/blas/dscal.o\
-#$(top_srcdir)/blas/dsymv.o\
-#$(top_srcdir)/blas/dsyr2.o\
-#$(top_srcdir)/blas/dsyr2k.o\
-#$(top_srcdir)/blas/dsyrk.o\
-#$(top_srcdir)/blas/dtrmm.o\
-#$(top_srcdir)/blas/dtrmv.o\
-#$(top_srcdir)/blas/dtrsm.o\
-#$(top_srcdir)/blas/dtrsv.o\
-#$(top_srcdir)/blas/idamax.o\
-#$(top_srcdir)/blas/blas_utils.o
+SUPERLUFILES = ${HYPRE_FEI_SUPERLU_FILES}
+FEIHYPREFILES = ${HYPRE_FEI_HYPRE_FILES}
+FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
+IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o
+EUCLIDFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/Euclid/*.o
+PARASAILSFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/ParaSails/*.o
+PILUTFILES = ${HYPRE_SRC_TOP_DIR}/distributed_ls/pilut/*.o
+DISTMATRIXFILES = ${HYPRE_SRC_TOP_DIR}/distributed_matrix/*.o
+KRYLOVFILES = ${HYPRE_SRC_TOP_DIR}/krylov/*.o
+MATMATFILES = ${HYPRE_SRC_TOP_DIR}/matrix_matrix/*.o
+MULTIVECFILES = ${HYPRE_SRC_TOP_DIR}/multivector/*.o
+PARCSRLSFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_ls/*.o
+PARCSRMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_mv/*.o
+PARCSRBLOCKMVFILES = ${HYPRE_SRC_TOP_DIR}/parcsr_block_mv/*.o
+SEQMVFILES = ${HYPRE_SRC_TOP_DIR}/seq_mv/*.o
+SSTRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_ls/*.o
+SSTRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/sstruct_mv/*.o
+STRUCTLSFILES = ${HYPRE_SRC_TOP_DIR}/struct_ls/*.o
+STRUCTMVFILES = ${HYPRE_SRC_TOP_DIR}/struct_mv/*.o
+UTILITIESFILES = ${HYPRE_SRC_TOP_DIR}/utilities/*.o
 
+UTILFILES = \
+ ${HYPRE_SRC_TOP_DIR}/utilities/amg_linklist.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/exchange_data.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/fortran_matrix.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_memory.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_qsort.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/memory_dmalloc.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/mpistubs.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/qsplit.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/random.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/thread_mpistubs.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/threading.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/timer.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/timing.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/umalloc_local.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_mpi_comm_f2c.*o\
+ ${HYPRE_SRC_TOP_DIR}/utilities/hypre_error.*o
 
-#LAPACKFILES = \
-#$(top_srcdir)/lapack/dbdsqr.o\
-#$(top_srcdir)/lapack/dgebd2.o\
-#$(top_srcdir)/lapack/dgebrd.o\
-#$(top_srcdir)/lapack/dgelq2.o\
-#$(top_srcdir)/lapack/dgelqf.o\
-#$(top_srcdir)/lapack/dgels.o\
-#$(top_srcdir)/lapack/dgeqr2.o\
-#$(top_srcdir)/lapack/dgeqrf.o\
-#$(top_srcdir)/lapack/dgesvd.o\
-#$(top_srcdir)/lapack/dlabad.o\
-#$(top_srcdir)/lapack/dlabrd.o\
-#$(top_srcdir)/lapack/dlacpy.o\
-#$(top_srcdir)/lapack/dlae2.o\
-#$(top_srcdir)/lapack/dlaev2.o\
-#$(top_srcdir)/lapack/dlamch.o\
-#$(top_srcdir)/lapack/dlange.o\
-#$(top_srcdir)/lapack/dlanst.o\
-#$(top_srcdir)/lapack/dlansy.o\
-#$(top_srcdir)/lapack/dlapy2.o\
-#$(top_srcdir)/lapack/dlarf.o\
-#$(top_srcdir)/lapack/dlarfb.o\
-#$(top_srcdir)/lapack/dlarfg.o\
-#$(top_srcdir)/lapack/dlarft.o\
-#$(top_srcdir)/lapack/dlartg.o\
-#$(top_srcdir)/lapack/dlas2.o\
-#$(top_srcdir)/lapack/dlascl.o\
-#$(top_srcdir)/lapack/dlaset.o\
-#$(top_srcdir)/lapack/dlasq1.o\
-#$(top_srcdir)/lapack/dlasq2.o\
-#$(top_srcdir)/lapack/dlasq3.o\
-#$(top_srcdir)/lapack/dlasq4.o\
-#$(top_srcdir)/lapack/dlasq5.o\
-#$(top_srcdir)/lapack/dlasq6.o\
-#$(top_srcdir)/lapack/dlasr.o\
-#$(top_srcdir)/lapack/dlasrt.o\
-#$(top_srcdir)/lapack/dlassq.o\
-#$(top_srcdir)/lapack/dlasv2.o\
-#$(top_srcdir)/lapack/dlatrd.o\
-#$(top_srcdir)/lapack/dorg2l.o\
-#$(top_srcdir)/lapack/dorg2r.o\
-#$(top_srcdir)/lapack/dorgbr.o\
-#$(top_srcdir)/lapack/dorgl2.o\
-#$(top_srcdir)/lapack/dorglq.o\
-#$(top_srcdir)/lapack/dorgql.o\
-#$(top_srcdir)/lapack/dorgqr.o\
-#$(top_srcdir)/lapack/dorgtr.o\
-#$(top_srcdir)/lapack/dorm2r.o\
-#$(top_srcdir)/lapack/dormbr.o\
-#$(top_srcdir)/lapack/dorml2.o\
-#$(top_srcdir)/lapack/dormlq.o\
-#$(top_srcdir)/lapack/dormqr.o\
-#$(top_srcdir)/lapack/dpotf2.o\
-#$(top_srcdir)/lapack/dpotrf.o\
-#$(top_srcdir)/lapack/dpotrs.o\
-#$(top_srcdir)/lapack/dsteqr.o\
-#$(top_srcdir)/lapack/dsterf.o\
-#$(top_srcdir)/lapack/dsyev.o\
-#$(top_srcdir)/lapack/dsygs2.o\
-#$(top_srcdir)/lapack/dsygst.o\
-#$(top_srcdir)/lapack/dsygv.o\
-#$(top_srcdir)/lapack/dsytd2.o\
-#$(top_srcdir)/lapack/dsytrd.o\
-#$(top_srcdir)/lapack/ieeeck.o\
-#$(top_srcdir)/lapack/ilaenv.o\
-#$(top_srcdir)/lapack/lapack_utils.o\
-#$(top_srcdir)/lapack/lsame.o\
-#$(top_srcdir)/lapack/xerbla.o
+FILES1 = \
+$(SUPERLUFILES)\
+$(FEIHYPREFILES)\
+$(FEMLIFILES)\
+$(IJMVFILES)\
+$(EUCLIDFILES)\
+$(PARASAILSFILES)\
+$(PILUTFILES)\
+$(DISTMATRIXFILES)\
+$(KRYLOVFILES)\
+$(MATMATFILES)
 
-SUPERLUFILES = \
- $(top_srcdir)/FEI_mv/SuperLU/colamd.o\
- $(top_srcdir)/FEI_mv/SuperLU/dcolumn_bmod.o\
- $(top_srcdir)/FEI_mv/SuperLU/dcolumn_dfs.o\
- $(top_srcdir)/FEI_mv/SuperLU/dcopy_to_ucol.o\
- $(top_srcdir)/FEI_mv/SuperLU/dgscon.o\
- $(top_srcdir)/FEI_mv/SuperLU/dgsequ.o\
- $(top_srcdir)/FEI_mv/SuperLU/dgsrfs.o\
- $(top_srcdir)/FEI_mv/SuperLU/dgssv.o\
- $(top_srcdir)/FEI_mv/SuperLU/dgssvx.o\
- $(top_srcdir)/FEI_mv/SuperLU/dgstrf.o\
- $(top_srcdir)/FEI_mv/SuperLU/dgstrs.o\
- $(top_srcdir)/FEI_mv/SuperLU/dlacon.o\
- $(top_srcdir)/FEI_mv/SuperLU/dlangs.o\
- $(top_srcdir)/FEI_mv/SuperLU/dlaqgs.o\
- $(top_srcdir)/FEI_mv/SuperLU/dmemory.o\
- $(top_srcdir)/FEI_mv/SuperLU/dpanel_bmod.o\
- $(top_srcdir)/FEI_mv/SuperLU/dpanel_dfs.o\
- $(top_srcdir)/FEI_mv/SuperLU/dpivotL.o\
- $(top_srcdir)/FEI_mv/SuperLU/dpivotgrowth.o\
- $(top_srcdir)/FEI_mv/SuperLU/dpruneL.o\
- $(top_srcdir)/FEI_mv/SuperLU/dreadhb.o\
- $(top_srcdir)/FEI_mv/SuperLU/dsnode_bmod.o\
- $(top_srcdir)/FEI_mv/SuperLU/dsnode_dfs.o\
- $(top_srcdir)/FEI_mv/SuperLU/dsp_blas2.o\
- $(top_srcdir)/FEI_mv/SuperLU/dsp_blas3.o\
- $(top_srcdir)/FEI_mv/SuperLU/dutil.o\
- $(top_srcdir)/FEI_mv/SuperLU/get_perm_c.o\
- $(top_srcdir)/FEI_mv/SuperLU/mmd.o\
- $(top_srcdir)/FEI_mv/SuperLU/relax_snode.o\
- $(top_srcdir)/FEI_mv/SuperLU/sp_coletree.o\
- $(top_srcdir)/FEI_mv/SuperLU/sp_ienv.o\
- $(top_srcdir)/FEI_mv/SuperLU/sp_preorder.o\
- $(top_srcdir)/FEI_mv/SuperLU/superlu_memory.o\
- $(top_srcdir)/FEI_mv/SuperLU/superlu_timer.o\
- $(top_srcdir)/FEI_mv/SuperLU/superlu_util.o
+FILES2 = \
+$(MULTIVECFILES)\
+$(PARCSRLSFILES)\
+$(PARCSRMVFILES)\
+$(PARCSRBLOCKMVFILES)\
+$(SEQMVFILES)\
+$(SSTRUCTLSFILES)\
+$(SSTRUCTMVFILES)\
+$(STRUCTLSFILES)\
+$(STRUCTMVFILES)\
+$(UTILITIESFILES)
 
-MOSTFILES = \
- $(top_srcdir)/FEI_mv/fei-hypre/bicgs.o\
- $(top_srcdir)/FEI_mv/fei-hypre/bicgstabl.o\
- $(top_srcdir)/FEI_mv/fei-hypre/FEI_HYPRE_Impl.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSC_aux.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_Dsuperlu.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_UZAWA.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_blkprec.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_ddict.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_ddilut.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_ml.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_mli.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_poly.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LSI_schwarz.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_LinSysCore.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_SlideReduction.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_TFQmr.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_bicgs.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_bicgstabl.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_fgmres.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_lsicg.o\
- $(top_srcdir)/FEI_mv/fei-hypre/HYPRE_parcsr_symqmr.o\
- $(top_srcdir)/FEI_mv/fei-hypre/SymQMR.o\
- $(top_srcdir)/FEI_mv/fei-hypre/TFQmr.o\
- $(top_srcdir)/FEI_mv/fei-hypre/cfei_hypre.o\
- $(top_srcdir)/FEI_mv/fei-hypre/fgmres.o\
- $(top_srcdir)/FEI_mv/fei-hypre/hypre_lsi_amge.o\
- $(top_srcdir)/FEI_mv/fei-hypre/hypre_lsi_ddamg.o\
- $(top_srcdir)/FEI_mv/fei-hypre/hypre_lsi_misc.o\
- $(top_srcdir)/FEI_mv/fei-hypre/hypre_schur_reduce.o\
- $(top_srcdir)/FEI_mv/fei-hypre/hypre_slide_reduce.o\
- $(top_srcdir)/FEI_mv/fei-hypre/lsicg.o\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Fei.o\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Impl.o\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_LSCore.o\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Matrix.o\
- $(top_srcdir)/FEI_mv/fei-hypre/LLNL_FEI_Solver.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_utils.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_amgsa_calib.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_amgsa_coarsen1.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_amgsa_dd_fedata.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_amgsa_dd_sfei.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_method.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_method_amgcr.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_method_amgrs.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_method_amgsa.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_oneLevel.o\
- $(top_srcdir)/FEI_mv/femli/lib/cmli.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_febase.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_fedata.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_fedata_utils.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_sfei.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_mapper.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_matrix.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_matrix_mult.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_matrix_utils.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_arpacksuperlu.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_bjacobi.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_bsgs.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_cg.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_chebyshev.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_gmres.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_gs.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_hschwarz.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_hsgs.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_jacobi.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_kaczmarz.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_mls.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_mli.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_parasails.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_seqsuperlu.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_sgs.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_solver_superlu.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_vector.o\
- $(top_srcdir)/FEI_mv/femli/lib/mli_utils_fortran.o\
- $(top_srcdir)/IJ_mv/F90_HYPRE_IJMatrix.o\
- $(top_srcdir)/IJ_mv/F90_HYPRE_IJVector.o\
- $(top_srcdir)/IJ_mv/F90_IJMatrix.o\
- $(top_srcdir)/IJ_mv/HYPRE_IJMatrix.o\
- $(top_srcdir)/IJ_mv/HYPRE_IJVector.o\
- $(top_srcdir)/IJ_mv/IJMatrix.o\
- $(top_srcdir)/IJ_mv/IJMatrix_parcsr.o\
- $(top_srcdir)/IJ_mv/IJVector.o\
- $(top_srcdir)/IJ_mv/IJVector_parcsr.o\
- $(top_srcdir)/IJ_mv/aux_parcsr_matrix.o\
- $(top_srcdir)/IJ_mv/aux_par_vector.o\
- $(top_srcdir)/distributed_ls/Euclid/Euclid_apply.o\
- $(top_srcdir)/distributed_ls/Euclid/Euclid_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/ExternalRows_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/Factor_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/Hash_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/Hash_i_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/MatGenFD.o\
- $(top_srcdir)/distributed_ls/Euclid/Mat_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/Mem_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/Numbering_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/Parser_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/SortedList_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/SortedSet_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/SubdomainGraph_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/TimeLog_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/Timer_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/Vec_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/blas_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/getRow_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/globalObjects.o\
- $(top_srcdir)/distributed_ls/Euclid/ilu_mpi_bj.o\
- $(top_srcdir)/distributed_ls/Euclid/ilu_mpi_pilu.o\
- $(top_srcdir)/distributed_ls/Euclid/ilu_seq.o\
- $(top_srcdir)/distributed_ls/Euclid/io_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/krylov_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/mat_dh_private.o\
- $(top_srcdir)/distributed_ls/Euclid/shellSort_dh.o\
- $(top_srcdir)/distributed_ls/Euclid/sig_dh.o\
- $(top_srcdir)/distributed_ls/ParaSails/ConjGrad.o\
- $(top_srcdir)/distributed_ls/ParaSails/DiagScale.o\
- $(top_srcdir)/distributed_ls/ParaSails/FlexGmres.o\
- $(top_srcdir)/distributed_ls/ParaSails/Hash.o\
- $(top_srcdir)/distributed_ls/ParaSails/LoadBal.o\
- $(top_srcdir)/distributed_ls/ParaSails/Matrix.o\
- $(top_srcdir)/distributed_ls/ParaSails/Mem.o\
- $(top_srcdir)/distributed_ls/ParaSails/Numbering.o\
- $(top_srcdir)/distributed_ls/ParaSails/OrderStat.o\
- $(top_srcdir)/distributed_ls/ParaSails/ParaSails.o\
- $(top_srcdir)/distributed_ls/ParaSails/PrunedRows.o\
- $(top_srcdir)/distributed_ls/ParaSails/RowPatt.o\
- $(top_srcdir)/distributed_ls/ParaSails/StoredRows.o\
- $(top_srcdir)/distributed_ls/ParaSails/hypre_ParaSails.o\
- $(top_srcdir)/distributed_ls/pilut/comm.o\
- $(top_srcdir)/distributed_ls/pilut/HYPRE_DistributedMatrixPilutSolver.o\
- $(top_srcdir)/distributed_ls/pilut/debug.o\
- $(top_srcdir)/distributed_ls/pilut/distributed_qsort.o\
- $(top_srcdir)/distributed_ls/pilut/distributed_qsort_si.o\
- $(top_srcdir)/distributed_ls/pilut/ilut.o\
- $(top_srcdir)/distributed_ls/pilut/parilut.o\
- $(top_srcdir)/distributed_ls/pilut/parutil.o\
- $(top_srcdir)/distributed_ls/pilut/pblas1.o\
- $(top_srcdir)/distributed_ls/pilut/serilut.o\
- $(top_srcdir)/distributed_ls/pilut/trifactor.o\
- $(top_srcdir)/distributed_ls/pilut/util.o\
- $(top_srcdir)/distributed_matrix/HYPRE_distributed_matrix.o\
- $(top_srcdir)/distributed_matrix/distributed_matrix.o\
- $(top_srcdir)/distributed_matrix/distributed_matrix_ISIS.o\
- $(top_srcdir)/distributed_matrix/distributed_matrix_PETSc.o\
- $(top_srcdir)/distributed_matrix/distributed_matrix_parcsr.o\
- $(top_srcdir)/krylov/HYPRE_bicgstab.o\
- $(top_srcdir)/krylov/HYPRE_cgnr.o\
- $(top_srcdir)/krylov/HYPRE_gmres.o\
- $(top_srcdir)/krylov/HYPRE_pcg.o\
- $(top_srcdir)/krylov/bicgstab.o\
- $(top_srcdir)/krylov/cgnr.o\
- $(top_srcdir)/krylov/gmres.o\
- $(top_srcdir)/krylov/pcg.o\
- $(top_srcdir)/matrix_matrix/HYPRE_ConvertPETScMatrixToDistributedMatrix.o\
- $(top_srcdir)/matrix_matrix/HYPRE_ConvertParCSRMatrixToDistributedMatrix.o\
- $(top_srcdir)/eigensolvers/lib/HYPRE_lobpcg.o\
- $(top_srcdir)/eigensolvers/lib/lobpcg.o\
- $(top_srcdir)/eigensolvers/lib/multivector.o\
- $(top_srcdir)/eigensolvers/lib/temp_multivector.o\
- $(top_srcdir)/eigensolvers/lib/HYPRE_parcsr_int.o\
- $(top_srcdir)/eigensolvers/lib/HYPRE_struct_int.o\
- $(top_srcdir)/eigensolvers/lib/HYPRE_sstruct_int.o\
- $(top_srcdir)/eigensolvers/lib/fortran_matrix.o\
- $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_ParaSails.o\
- $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_amg.o\
- $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_bicgstab.o\
- $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_cgnr.o\
- $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_gmres.o\
- $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_pcg.o\
- $(top_srcdir)/parcsr_ls/F90_HYPRE_parcsr_pilut.o\
- $(top_srcdir)/parcsr_ls/F90_hypre_laplace.o\
- $(top_srcdir)/parcsr_ls/HYPRE_parcsr_Euclid.o\
- $(top_srcdir)/parcsr_ls/HYPRE_parcsr_ParaSails.o\
- $(top_srcdir)/parcsr_ls/HYPRE_parcsr_amg.o\
- $(top_srcdir)/parcsr_ls/HYPRE_parcsr_bicgstab.o\
- $(top_srcdir)/parcsr_ls/HYPRE_parcsr_cgnr.o\
- $(top_srcdir)/parcsr_ls/HYPRE_parcsr_gmres.o\
- $(top_srcdir)/parcsr_ls/HYPRE_parcsr_hybrid.o\
- $(top_srcdir)/parcsr_ls/HYPRE_parcsr_pcg.o\
- $(top_srcdir)/parcsr_ls/HYPRE_parcsr_pilut.o\
- $(top_srcdir)/parcsr_ls/HYPRE_parcsr_schwarz.o\
- $(top_srcdir)/parcsr_ls/amg_hybrid.o\
- $(top_srcdir)/parcsr_ls/par_amg.o\
- $(top_srcdir)/parcsr_ls/par_amg_setup.o\
- $(top_srcdir)/parcsr_ls/par_amg_solve.o\
- $(top_srcdir)/parcsr_ls/par_amg_solveT.o\
- $(top_srcdir)/parcsr_ls/par_cg_relax_wt.o\
- $(top_srcdir)/parcsr_ls/par_coarse_parms.o\
- $(top_srcdir)/parcsr_ls/par_coarsen.o\
- $(top_srcdir)/parcsr_ls/par_cycle.o\
- $(top_srcdir)/parcsr_ls/par_difconv.o\
- $(top_srcdir)/parcsr_ls/par_gsmg.o\
- $(top_srcdir)/parcsr_ls/par_indepset.o\
- $(top_srcdir)/parcsr_ls/par_interp.o\
- $(top_srcdir)/parcsr_ls/par_laplace.o\
- $(top_srcdir)/parcsr_ls/par_laplace_27pt.o\
- $(top_srcdir)/parcsr_ls/par_laplace_9pt.o\
- $(top_srcdir)/parcsr_ls/par_nodal_systems.o\
- $(top_srcdir)/parcsr_ls/par_rap.o\
- $(top_srcdir)/parcsr_ls/par_rap_communication.o\
- $(top_srcdir)/parcsr_ls/par_relax.o\
- $(top_srcdir)/parcsr_ls/par_relax_interface.o\
- $(top_srcdir)/parcsr_ls/par_scaled_matnorm.o\
- $(top_srcdir)/parcsr_ls/par_schwarz.o\
- $(top_srcdir)/parcsr_ls/par_stats.o\
- $(top_srcdir)/parcsr_ls/par_strength.o\
- $(top_srcdir)/parcsr_ls/pcg_par.o\
- $(top_srcdir)/parcsr_ls/schwarz.o\
- $(top_srcdir)/parcsr_mv/F90_HYPRE_parcsr_matrix.o\
- $(top_srcdir)/parcsr_mv/F90_HYPRE_parcsr_vector.o\
- $(top_srcdir)/parcsr_mv/F90_par_vector.o\
- $(top_srcdir)/parcsr_mv/F90_parcsr_matrix.o\
- $(top_srcdir)/parcsr_mv/HYPRE_parcsr_matrix.o\
- $(top_srcdir)/parcsr_mv/HYPRE_parcsr_vector.o\
- $(top_srcdir)/parcsr_mv/communicationT.o\
- $(top_srcdir)/parcsr_mv/numbers.o\
- $(top_srcdir)/parcsr_mv/par_csr_aat.o\
- $(top_srcdir)/parcsr_mv/par_csr_bool_matop.o\
- $(top_srcdir)/parcsr_mv/par_csr_bool_matrix.o\
- $(top_srcdir)/parcsr_mv/par_csr_communication.o\
- $(top_srcdir)/parcsr_mv/par_csr_matop.o\
- $(top_srcdir)/parcsr_mv/par_csr_matrix.o\
- $(top_srcdir)/parcsr_mv/par_csr_matvec.o\
- $(top_srcdir)/parcsr_mv/par_vector.o\
- $(top_srcdir)/seq_mv/HYPRE_csr_matrix.o\
- $(top_srcdir)/seq_mv/HYPRE_mapped_matrix.o\
- $(top_srcdir)/seq_mv/HYPRE_vector.o\
- $(top_srcdir)/seq_mv/HYPRE_multiblock_matrix.o\
- $(top_srcdir)/seq_mv/csr_matop.o\
- $(top_srcdir)/seq_mv/csr_matrix.o\
- $(top_srcdir)/seq_mv/csr_matvec.o\
- $(top_srcdir)/seq_mv/genpart.o\
- $(top_srcdir)/seq_mv/mapped_matrix.o\
- $(top_srcdir)/seq_mv/multiblock_matrix.o\
- $(top_srcdir)/seq_mv/vector.o\
- $(top_srcdir)/sstruct_ls/HYPRE_sstruct_bicgstab.o\
- $(top_srcdir)/sstruct_ls/HYPRE_sstruct_gmres.o\
- $(top_srcdir)/sstruct_ls/HYPRE_sstruct_pcg.o\
- $(top_srcdir)/sstruct_ls/HYPRE_sstruct_split.o\
- $(top_srcdir)/sstruct_ls/HYPRE_sstruct_sys_pfmg.o\
- $(top_srcdir)/sstruct_ls/krylov.o\
- $(top_srcdir)/sstruct_ls/krylov_sstruct.o\
- $(top_srcdir)/sstruct_ls/node_relax.o\
- $(top_srcdir)/sstruct_ls/sys_pfmg.o\
- $(top_srcdir)/sstruct_ls/sys_pfmg_relax.o\
- $(top_srcdir)/sstruct_ls/sys_pfmg_setup.o\
- $(top_srcdir)/sstruct_ls/sys_pfmg_setup_interp.o\
- $(top_srcdir)/sstruct_ls/sys_pfmg_setup_rap.o\
- $(top_srcdir)/sstruct_ls/sys_pfmg_solve.o\
- $(top_srcdir)/sstruct_ls/sys_semi_interp.o\
- $(top_srcdir)/sstruct_ls/sys_semi_restrict.o\
- $(top_srcdir)/sstruct_mv/HYPRE_sstruct_graph.o\
- $(top_srcdir)/sstruct_mv/HYPRE_sstruct_grid.o\
- $(top_srcdir)/sstruct_mv/HYPRE_sstruct_matrix.o\
- $(top_srcdir)/sstruct_mv/HYPRE_sstruct_stencil.o\
- $(top_srcdir)/sstruct_mv/HYPRE_sstruct_vector.o\
- $(top_srcdir)/sstruct_mv/box_map.o\
- $(top_srcdir)/sstruct_mv/sstruct_axpy.o\
- $(top_srcdir)/sstruct_mv/sstruct_copy.o\
- $(top_srcdir)/sstruct_mv/sstruct_graph.o\
- $(top_srcdir)/sstruct_mv/sstruct_grid.o\
- $(top_srcdir)/sstruct_mv/sstruct_innerprod.o\
- $(top_srcdir)/sstruct_mv/sstruct_matrix.o\
- $(top_srcdir)/sstruct_mv/sstruct_matvec.o\
- $(top_srcdir)/sstruct_mv/sstruct_scale.o\
- $(top_srcdir)/sstruct_mv/sstruct_stencil.o\
- $(top_srcdir)/sstruct_mv/sstruct_vector.o\
- $(top_srcdir)/struct_ls/F90_HYPRE_struct_hybrid.o\
- $(top_srcdir)/struct_ls/F90_HYPRE_struct_pcg.o\
- $(top_srcdir)/struct_ls/F90_HYPRE_struct_pfmg.o\
- $(top_srcdir)/struct_ls/F90_HYPRE_struct_smg.o\
- $(top_srcdir)/struct_ls/HYPRE_struct_bicgstab.o\
- $(top_srcdir)/struct_ls/HYPRE_struct_gmres.o\
- $(top_srcdir)/struct_ls/HYPRE_struct_hybrid.o\
- $(top_srcdir)/struct_ls/HYPRE_struct_jacobi.o\
- $(top_srcdir)/struct_ls/HYPRE_struct_pcg.o\
- $(top_srcdir)/struct_ls/HYPRE_struct_pfmg.o\
- $(top_srcdir)/struct_ls/HYPRE_struct_smg.o\
- $(top_srcdir)/struct_ls/HYPRE_struct_sparse_msg.o\
- $(top_srcdir)/struct_ls/coarsen.o\
- $(top_srcdir)/struct_ls/cyclic_reduction.o\
- $(top_srcdir)/struct_ls/general.o\
- $(top_srcdir)/struct_ls/hybrid.o\
- $(top_srcdir)/struct_ls/jacobi.o\
- $(top_srcdir)/struct_ls/pcg_struct.o\
- $(top_srcdir)/struct_ls/pfmg.o\
- $(top_srcdir)/struct_ls/pfmg2_setup_rap.o\
- $(top_srcdir)/struct_ls/pfmg3_setup_rap.o\
- $(top_srcdir)/struct_ls/pfmg_relax.o\
- $(top_srcdir)/struct_ls/pfmg_setup.o\
- $(top_srcdir)/struct_ls/pfmg_setup_interp.o\
- $(top_srcdir)/struct_ls/pfmg_setup_rap.o\
- $(top_srcdir)/struct_ls/pfmg_setup_rap5.o\
- $(top_srcdir)/struct_ls/pfmg_setup_rap7.o\
- $(top_srcdir)/struct_ls/pfmg_solve.o\
- $(top_srcdir)/struct_ls/point_relax.o\
- $(top_srcdir)/struct_ls/semi_interp.o\
- $(top_srcdir)/struct_ls/semi_restrict.o\
- $(top_srcdir)/struct_ls/semi_setup_rap.o\
- $(top_srcdir)/struct_ls/smg.o\
- $(top_srcdir)/struct_ls/smg2_setup_rap.o\
- $(top_srcdir)/struct_ls/smg3_setup_rap.o\
- $(top_srcdir)/struct_ls/smg_axpy.o\
- $(top_srcdir)/struct_ls/smg_relax.o\
- $(top_srcdir)/struct_ls/smg_residual.o\
- $(top_srcdir)/struct_ls/smg_setup.o\
- $(top_srcdir)/struct_ls/smg_setup_interp.o\
- $(top_srcdir)/struct_ls/smg_setup_rap.o\
- $(top_srcdir)/struct_ls/smg_setup_restrict.o\
- $(top_srcdir)/struct_ls/smg_solve.o\
- $(top_srcdir)/struct_ls/sparse_msg.o\
- $(top_srcdir)/struct_ls/sparse_msg2_setup_rap.o\
- $(top_srcdir)/struct_ls/sparse_msg3_setup_rap.o\
- $(top_srcdir)/struct_ls/sparse_msg_filter.o\
- $(top_srcdir)/struct_ls/sparse_msg_interp.o\
- $(top_srcdir)/struct_ls/sparse_msg_restrict.o\
- $(top_srcdir)/struct_ls/sparse_msg_setup.o\
- $(top_srcdir)/struct_ls/sparse_msg_setup_rap.o\
- $(top_srcdir)/struct_ls/sparse_msg_solve.o\
- $(top_srcdir)/struct_mv/F90_HYPRE_struct_grid.o\
- $(top_srcdir)/struct_mv/F90_HYPRE_struct_matrix.o\
- $(top_srcdir)/struct_mv/F90_HYPRE_struct_stencil.o\
- $(top_srcdir)/struct_mv/F90_HYPRE_struct_vector.o\
- $(top_srcdir)/struct_mv/HYPRE_struct_grid.o\
- $(top_srcdir)/struct_mv/HYPRE_struct_matrix.o\
- $(top_srcdir)/struct_mv/HYPRE_struct_stencil.o\
- $(top_srcdir)/struct_mv/HYPRE_struct_vector.o\
- $(top_srcdir)/struct_mv/box.o\
- $(top_srcdir)/struct_mv/box_algebra.o\
- $(top_srcdir)/struct_mv/box_alloc.o\
- $(top_srcdir)/struct_mv/box_boundary.o\
- $(top_srcdir)/struct_mv/box_neighbors.o\
- $(top_srcdir)/struct_mv/grow.o\
- $(top_srcdir)/struct_mv/communication_info.o\
- $(top_srcdir)/struct_mv/computation.o\
- $(top_srcdir)/struct_mv/project.o\
- $(top_srcdir)/struct_mv/struct_axpy.o\
- $(top_srcdir)/struct_mv/struct_communication.o\
- $(top_srcdir)/struct_mv/struct_copy.o\
- $(top_srcdir)/struct_mv/struct_grid.o\
- $(top_srcdir)/struct_mv/struct_io.o\
- $(top_srcdir)/struct_mv/struct_innerprod.o\
- $(top_srcdir)/struct_mv/struct_matrix.o\
- $(top_srcdir)/struct_mv/struct_matrix_mask.o\
- $(top_srcdir)/struct_mv/struct_matvec.o\
- $(top_srcdir)/struct_mv/struct_scale.o\
- $(top_srcdir)/struct_mv/struct_stencil.o\
- $(top_srcdir)/struct_mv/struct_vector.o\
- $(top_srcdir)/utilities/amg_linklist.o\
- $(top_srcdir)/utilities/binsearch.o\
- $(top_srcdir)/utilities/hypre_memory.o\
- $(top_srcdir)/utilities/hypre_qsort.o\
- $(top_srcdir)/utilities/memory_dmalloc.o\
- $(top_srcdir)/utilities/mpistubs.o\
- $(top_srcdir)/utilities/qsplit.o\
- $(top_srcdir)/utilities/random.o\
- $(top_srcdir)/utilities/thread_mpistubs.o\
- $(top_srcdir)/utilities/threading.o\
- $(top_srcdir)/utilities/timer.o\
- $(top_srcdir)/utilities/timing.o\
- $(top_srcdir)/utilities/umalloc_local.o
-
-FILES = \
- $(SUPERLUFILES)\
- $(MOSTFILES)\
- $(BLASFILES)\
- $(LAPACKFILES)
-
-FILES_LSI = $(MOSTFILES)
+FILES_LSI = \
+$(FEIHYPREFILES)\
+$(FEMLIFILES)\
+$(IJMVFILES)\
+$(EUCLIDFILES)\
+$(PARASAILSFILES)\
+$(PILUTFILES)\
+$(DISTMATRIXFILES)\
+$(KRYLOVFILES)\
+$(MATMATFILES)\
+$(MULTIVECFILES)\
+$(PARCSRLSFILES)\
+$(PARCSRMVFILES)\
+$(PARCSRBLOCKMVFILES)\
+$(SEQMVFILES)\
+$(SSTRUCTLSFILES)\
+$(SSTRUCTMVFILES)\
+$(STRUCTLSFILES)\
+$(STRUCTMVFILES)\
+$(UTILFILES)
 
 ##################################################################
 # Targets
 ##################################################################
 
-all:
-	@\
-	for file in ${FILES}; \
-	do \
-	  (cp -fp $$file .); \
-	done
-	@echo  "Building libHYPRE.a ... "
-	${AR} libHYPRE.a ${FILES}
-	${RANLIB} libHYPRE.a
-	@echo  "Building libHYPRE_LSI.a ... "
-	${AR} libHYPRE_LSI.a ${FILES_LSI}
-	${RANLIB} libHYPRE_LSI.a
-	cp -fp libHYPRE* ${HYPRE_BUILD_DIR}/lib/.
+all: libHYPRE${HYPRE_LIB_SUFFIX} libHYPRE_LSI${HYPRE_LIB_SUFFIX}
+	cp -fp libHYPRE* ${HYPRE_BUILD_DIR}/lib
 
 install: all
-	cp -fp libHYPRE* ${HYPRE_LIB_INSTALL}/.
+	cp -fp libHYPRE* ${HYPRE_LIB_INSTALL}
 
 clean:
-	rm -f *.o lib*.a
+	rm -f *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
-	rm -f Makefile
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE.a: ${FILES1} ${FILES2}
+	@echo  "Building libHYPRE ... "
+	cp -fp ${FILES1} .
+	cp -fp ${FILES2} .
+	${AR} $@ *.o
+	${RANLIB} $@
+
+libHYPRE.so: ${FILES1} ${FILES2}
+	@echo  "Building libHYPRE ... "
+	cp -fp ${FILES1} .
+	cp -fp ${FILES2} .
+	${BUILD_CC_SHARED} -o $@ *.o
+
+libHYPRE_LSI.a: ${FILES_LSI}
+	@echo  "Building libHYPRE_LSI ... "
+	${AR} $@ ${FILES_LSI}
+	${RANLIB} $@
+
+libHYPRE_LSI.so: ${FILES_LSI}
+	@echo  "Building libHYPRE_LSI ... "
+	${BUILD_CC_SHARED} -o $@ ${FILES_LSI}

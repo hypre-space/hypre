@@ -1,12 +1,31 @@
 #!/bin/sh
-#BHEADER***********************************************************************
-# (c) 1998   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# $Revision: 2.0 $
-#EHEADER***********************************************************************
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 2.5 $
+#EHEADER**********************************************************************
+
+
 
 INTERNAL_HEADER=parcsr_ls.h
 
@@ -27,10 +46,16 @@ cat > $INTERNAL_HEADER <<@
 #include "krylov.h"
 #include "seq_mv.h"
 #include "parcsr_mv.h"
+#include "temp_multivector.h"
+ /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
+#include "HYPRE_MatvecFunctions.h"
+ /* ... needed to make sense of functions in HYPRE_parcsr_int.c */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+typedef struct { int prev; int next; } Link;
 
 @
 

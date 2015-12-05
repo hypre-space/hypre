@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 0   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.9 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.14 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * BiCGSTAB bicgstab
@@ -104,10 +124,8 @@ hypre_BiCGSTABDestroy( void *bicgstab_vdata )
  
    if (bicgstab_data)
    {
-      if ((bicgstab_data -> logging) > 0)
-      {
-         hypre_TFree(bicgstab_data -> norms);
-      }
+      if ( (bicgstab_data -> norms) != NULL )
+            hypre_TFree(bicgstab_data -> norms);
  
       (*(bicgstab_functions->MatvecDestroy))(bicgstab_data -> matvec_data);
  
@@ -174,10 +192,13 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
     * Allocate space for log info
     *-----------------------------------------------------*/
  
-   if ((bicgstab_data -> logging) > 0)
+   if ((bicgstab_data->logging)>0 || (bicgstab_data->print_level) > 0)
    {
       if ((bicgstab_data -> norms) == NULL)
          (bicgstab_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
+   }
+   if ((bicgstab_data -> print_level) > 0)
+   {
       if ((bicgstab_data -> log_file_name) == NULL)
          (bicgstab_data -> log_file_name) = "bicgstab.out.log";
    }
@@ -233,8 +254,10 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    double     weight;
    double     r_norm_0;
 
+   (bicgstab_data -> converged) = 0;
+
    (*(bicgstab_functions->CommInfo))(A,&my_id,&num_procs);
-   if (logging > 0)
+   if (logging > 0 || print_level > 0)
    {
       norms          = (bicgstab_data -> norms);
       /* log_file_name  = (bicgstab_data -> log_file_name);
@@ -262,7 +285,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
-      if (print_level > 0)
+      if (logging > 0 || print_level > 0)
       {
         printf("\n\nERROR detected by Hypre ...  BEGIN\n");
         printf("ERROR -- hypre_BiCGSTABSolve: INFs and/or NaNs detected in input.\n");
@@ -288,7 +311,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
-      if (print_level > 0)
+      if (logging > 0 || print_level > 0)
       {
         printf("\n\nERROR detected by Hypre ...  BEGIN\n");
         printf("ERROR -- hypre_BiCGSTABSolve: INFs and/or NaNs detected in input.\n");
@@ -300,7 +323,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
       return ierr;
    }
 
-   if (logging > 0)
+   if (logging > 0 || print_level > 0)
    {
       norms[0] = r_norm;
       if (print_level > 0 && my_id == 0)
@@ -310,7 +333,6 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
             printf("Rel_resid_norm actually contains the residual norm\n");
          printf("Initial L2 norm of residual: %e\n", r_norm);
       }
-      
    }
    iter = 0;
 
@@ -392,7 +414,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
            cf_ave_1 = pow( r_norm / r_norm_0, 1.0/(2.0*iter));
 
            weight   = fabs(cf_ave_1 - cf_ave_0);
-           weight   = weight / max(cf_ave_1, cf_ave_0);
+           weight   = weight / hypre_max(cf_ave_1, cf_ave_0);
            weight   = 1.0 - weight;
 #if 0
            printf("I = %d: cf_new = %e, cf_old = %e, weight = %e\n",
@@ -441,7 +463,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 	(*(bicgstab_functions->Axpy))(1.0,r,p);
 
 	r_norm = sqrt((*(bicgstab_functions->InnerProd))(r,r));
-	if (logging > 0)
+	if (logging > 0 || print_level > 0)
 	{
 	   norms[iter] = r_norm;
 	}

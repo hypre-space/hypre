@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2000   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.0 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.3 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * SStruct inner product routine
@@ -57,14 +77,38 @@ hypre_SStructInnerProd( hypre_SStructVector *x,
    double presult;
    int    part;
 
-   result = 0.0;
-   for (part = 0; part < nparts; part++)
+   int    x_object_type= hypre_SStructVectorObjectType(x);
+   int    y_object_type= hypre_SStructVectorObjectType(y);
+   
+   if (x_object_type != y_object_type)
    {
-      hypre_SStructPInnerProd(hypre_SStructVectorPVector(x, part),
-                              hypre_SStructVectorPVector(y, part), &presult);
-      result += presult;
+       printf("vector object types different- cannot compute inner product\n");
+       return ierr;
    }
 
+   result = 0.0;
+
+   if (x_object_type == HYPRE_SSTRUCT)
+   {
+      for (part = 0; part < nparts; part++)
+      {
+         hypre_SStructPInnerProd(hypre_SStructVectorPVector(x, part),
+                                 hypre_SStructVectorPVector(y, part), &presult);
+         result += presult;
+      }
+   }
+
+   else if (x_object_type == HYPRE_PARCSR)
+   {
+      hypre_ParVector  *x_par;
+      hypre_ParVector  *y_par;
+
+      hypre_SStructVectorConvert(x, &x_par);
+      hypre_SStructVectorConvert(y, &y_par);
+
+      result= hypre_ParVectorInnerProd(x_par, y_par);
+   }
+                                                                                                                
    *result_ptr = result;
 
    return ierr;

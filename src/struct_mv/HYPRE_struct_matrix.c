@@ -1,11 +1,30 @@
 /*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.5 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.11 $
+ ***********************************************************************EHEADER*/
+
+
 /******************************************************************************
  *
  * HYPRE_StructMatrix interface
@@ -308,9 +327,11 @@ HYPRE_StructMatrixSetSymmetric( HYPRE_StructMatrix  matrix,
 
 /*--------------------------------------------------------------------------
  * HYPRE_StructMatrixSetConstantEntries
+ * Call this function to declare that certain stencil points are constant
+ * throughout the mesh.
  * - nentries is the number of array entries
  * - Each int entries[i] is an index into the shape array of the stencil of the
- * matrix
+ * matrix.
  * In the present version, only three possibilites are recognized:
  * - no entries constant                 (constant_coefficient==0)
  * - all entries constant                (constant_coefficient==1)
@@ -337,5 +358,20 @@ HYPRE_StructMatrixPrint( const char         *filename,
                          int                 all )
 {
    return ( hypre_StructMatrixPrint(filename, matrix, all) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructMatrixMatvec
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructMatrixMatvec( double alpha,
+                          HYPRE_StructMatrix A,
+                          HYPRE_StructVector x,
+                          double beta,
+                          HYPRE_StructVector y     )
+{
+   return ( hypre_StructMatvec( alpha, (hypre_StructMatrix *) A,
+                                (hypre_StructVector *) x, beta, (hypre_StructVector *) y) );
 }
 

@@ -1,11 +1,30 @@
 /*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.1 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.6 $
+ ***********************************************************************EHEADER*/
+
+
 /******************************************************************************
  *
  * HYPRE_StructVector interface
@@ -48,6 +67,16 @@ int
 HYPRE_StructVectorInitialize( HYPRE_StructVector vector )
 {
    return ( hypre_StructVectorInitialize(vector) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorClearGhostValues
+ *--------------------------------------------------------------------------*/
+                                                                                                      
+int
+HYPRE_StructVectorClearGhostValues( HYPRE_StructVector vector )
+{
+   return ( hypre_StructVectorClearGhostValues(vector) );
 }
 
 /*--------------------------------------------------------------------------
@@ -169,6 +198,17 @@ HYPRE_StructVectorAddToBoxValues( HYPRE_StructVector  vector,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructVectorScaleValues
+ *--------------------------------------------------------------------------*/
+
+int 
+HYPRE_StructVectorScaleValues( HYPRE_StructVector  vector,
+                               double              factor )
+{
+   return hypre_StructVectorScaleValues( vector, factor );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructVectorGetValues
  *--------------------------------------------------------------------------*/
 
@@ -258,6 +298,19 @@ HYPRE_StructVectorSetNumGhost( HYPRE_StructVector  vector,
                                int                *num_ghost )
 {
    return ( hypre_StructVectorSetNumGhost(vector, num_ghost) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorCopy
+ * copies data from x to y
+ * y has its own data array, so this is a deep copy in that sense.
+ * The grid and other size information are not copied - they are
+ * assumed to be consistent already.
+ *--------------------------------------------------------------------------*/
+int
+HYPRE_StructVectorCopy( HYPRE_StructVector x, HYPRE_StructVector y )
+{
+   return( hypre_StructVectorCopy( x, y ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -1,11 +1,11 @@
 /*
- * File:          SIDL_BaseInterface_IOR.h
- * Symbol:        SIDL.BaseInterface-v0.8.2
+ * File:          sidl_BaseInterface_IOR.h
+ * Symbol:        sidl.BaseInterface-v0.9.15
  * Symbol Type:   interface
- * Babel Version: 0.8.4
- * Release:       $Name: V1-9-0b $
- * Revision:      @(#) $Id: SIDL_BaseInterface_IOR.h,v 1.4 2003/04/07 21:44:24 painter Exp $
- * Description:   Intermediate Object Representation for SIDL.BaseInterface
+ * Babel Version: 1.0.0
+ * Release:       $Name: V1-13-0b $
+ * Revision:      @(#) $Id: sidl_BaseInterface_IOR.h,v 1.5 2006/08/29 22:29:27 painter Exp $
+ * Description:   Intermediate Object Representation for sidl.BaseInterface
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -32,76 +32,204 @@
  * 
  * WARNING: Automatically generated; changes will be lost
  * 
- * babel-version = 0.8.4
  */
 
-#ifndef included_SIDL_BaseInterface_IOR_h
-#define included_SIDL_BaseInterface_IOR_h
+#ifndef included_sidl_BaseInterface_IOR_h
+#define included_sidl_BaseInterface_IOR_h
 
-#ifndef included_SIDL_header_h
-#include "SIDL_header.h"
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
 #endif
+struct sidl_rmi_InstanceHandle__object;
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /*
- * Symbol "SIDL.BaseInterface" (version 0.8.2)
+ * Symbol "sidl.BaseInterface" (version 0.9.15)
  * 
- * Every interface in <code>SIDL</code> implicitly inherits
+ * Every interface in <code>sidl</code> implicitly inherits
  * from <code>BaseInterface</code>, and it is implemented
  * by <code>BaseClass</code> below.
  */
 
-struct SIDL_BaseInterface__array;
-struct SIDL_BaseInterface__object;
-
-extern struct SIDL_BaseInterface__object*
-SIDL_BaseInterface__remote(const char *url);
+struct sidl_BaseInterface__array;
+struct sidl_BaseInterface__object;
 
 /*
  * Forward references for external classes and interfaces.
  */
 
-struct SIDL_ClassInfo__array;
-struct SIDL_ClassInfo__object;
+struct sidl_BaseException__array;
+struct sidl_BaseException__object;
+struct sidl_ClassInfo__array;
+struct sidl_ClassInfo__object;
+struct sidl_RuntimeException__array;
+struct sidl_RuntimeException__object;
+struct sidl_rmi_Call__array;
+struct sidl_rmi_Call__object;
+struct sidl_rmi_Return__array;
+struct sidl_rmi_Return__object;
 
 /*
  * Declare the method entry point vector.
  */
 
-struct SIDL_BaseInterface__epv {
+struct sidl_BaseInterface__epv {
   /* Implicit builtin methods */
+  /* 0 */
   void* (*f__cast)(
-    void* self,
-    const char* name);
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 1 */
   void (*f__delete)(
-    void* self);
-  /* Methods introduced in SIDL.BaseInterface-v0.8.2 */
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 2 */
+  void (*f__exec)(
+    /* in */ void* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_rmi_Call__object* inArgs,
+    /* in */ struct sidl_rmi_Return__object* outArgs,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 3 */
+  char* (*f__getURL)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 4 */
+  void (*f__raddRef)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 5 */
+  sidl_bool (*f__isRemote)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 6 */
+  void (*f__set_hooks)(
+    /* in */ void* self,
+    /* in */ sidl_bool on,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.BaseInterface-v0.9.15 */
   void (*f_addRef)(
-    void* self);
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
   void (*f_deleteRef)(
-    void* self);
-  SIDL_bool (*f_isSame)(
-    void* self,
-    struct SIDL_BaseInterface__object* iobj);
-  struct SIDL_BaseInterface__object* (*f_queryInt)(
-    void* self,
-    const char* name);
-  SIDL_bool (*f_isType)(
-    void* self,
-    const char* name);
-  struct SIDL_ClassInfo__object* (*f_getClassInfo)(
-    void* self);
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isSame)(
+    /* in */ void* self,
+    /* in */ struct sidl_BaseInterface__object* iobj,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isType)(
+    /* in */ void* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
+    /* in */ void* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
 };
 
 /*
  * Define the interface object structure.
  */
 
-struct SIDL_BaseInterface__object {
-  struct SIDL_BaseInterface__epv* d_epv;
+struct sidl_BaseInterface__object {
+  struct sidl_BaseInterface__epv* d_epv;
   void*                           d_object;
+};
+
+/**
+ * 
+ * 
+ * Anonymous class definition
+ * 
+ * 
+ */
+/*
+ * Symbol "sidl._BaseInterface" (version 1.0)
+ */
+
+struct sidl__BaseInterface__array;
+struct sidl__BaseInterface__object;
+
+/*
+ * Declare the method entry point vector.
+ */
+
+struct sidl__BaseInterface__epv {
+  /* Implicit builtin methods */
+  void* (*f__cast)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__delete)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__exec)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_rmi_Call__object* inArgs,
+    /* in */ struct sidl_rmi_Return__object* outArgs,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  char* (*f__getURL)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__raddRef)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f__isRemote)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__set_hooks)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* in */ sidl_bool on,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__ctor)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__ctor2)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* in */ void* private_data,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f__dtor)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.BaseInterface-v0.9.15 */
+  void (*f_addRef)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_deleteRef)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isSame)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isType)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
+    /* in */ struct sidl__BaseInterface__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl._BaseInterface-v1.0 */
+};
+
+/*
+ * Define the class object structure.
+ */
+
+struct sidl__BaseInterface__object {
+  struct sidl_BaseInterface__object d_sidl_baseinterface;
+  struct sidl__BaseInterface__epv*  d_epv;
+  void*                             d_data;
+};
+
+
+struct sidl__BaseInterface__remote{
+  int d_refcount;
+  struct sidl_rmi_InstanceHandle__object *d_ih;
 };
 
 #ifdef __cplusplus

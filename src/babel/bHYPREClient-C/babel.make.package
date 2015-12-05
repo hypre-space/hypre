@@ -1,0 +1,2 @@
+BABEL_MAKEFILE_NAME = babel.make
+STUB_SRC_DIRS = bHYPREClient-C/

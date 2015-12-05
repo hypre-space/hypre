@@ -1,10 +1,28 @@
 /*BHEADER**********************************************************************
- * (c) 2001   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.42 $
+ ***********************************************************************EHEADER*/
 
 //***************************************************************************
 // system includes
@@ -43,6 +61,7 @@
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
 #include "HYPRE_LSI_Uzawa_c.h"
+#include "HYPRE_MLMaxwell.h"
 #include "HYPRE_SlideReduction.h"
 
 //***************************************************************************
@@ -86,6 +105,11 @@ extern "C" {
 #ifdef HAVE_ML
    int   HYPRE_LSI_MLCreate( MPI_Comm, HYPRE_Solver *);
    int   HYPRE_LSI_MLDestroy( HYPRE_Solver );
+#endif
+
+#ifdef HAVE_MLMAXWELL
+   int   HYPRE_LSI_MLMaxwellCreate(MPI_Comm, HYPRE_Solver *);
+   int   HYPRE_LSI_MLMaxwellDestroy(HYPRE_Solver );
 #endif
 
 #ifdef HAVE_AMGE
@@ -132,6 +156,8 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   numGlobalRows_(0),
                   localStartRow_(0),
                   localEndRow_(-1),
+                  localStartCol_(-1),
+                  localEndCol_(-1),
                   rowLengths_(NULL),
                   colIndices_(NULL),
                   colValues_(NULL),
@@ -230,7 +256,8 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amgSmoothNumSweeps_ = 1;    // no. of sweeps for non point smoothers
    amgCGSmoothNumSweeps_ = 0;  // no. of sweeps for preconditioned CG smoother
    amgSchwarzRelaxWt_  = 1.0;  // relaxation weight for Schwarz smoother
-   amgSchwarzVariant_  = 0;    // hybrid multiplicative Schwarz no overlap across processor boundaries
+   amgSchwarzVariant_  = 0;    // hybrid multiplicative Schwarz with
+                               // no overlap across processor boundaries
    amgSchwarzOverlap_  = 1;    // minimal overlap
    amgSchwarzDomainType_ = 2;  // domain through agglomeration
    amgUseGSMG_         = 0;
@@ -300,6 +327,13 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    MLI_Hybrid_MaxIter_  = 100;
    MLI_Hybrid_ConvRate_ = 0.95;
    MLI_Hybrid_NTrials_  = 5;
+
+   //-------------------------------------------------------------------
+   // parameters ML Maxwell solver
+   //-------------------------------------------------------------------
+
+   maxwellANN_ = NULL;
+   maxwellGEN_ = NULL;
 }
 
 //***************************************************************************
@@ -449,8 +483,16 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
       else if ( HYPreconID_ == HYML )
          HYPRE_LSI_MLDestroy( HYPrecon_ );
 #endif
+
+#ifdef HAVE_MLMAXWELL
+      else if ( HYPreconID_ == HYMLMAXWELL )
+         HYPRE_LSI_MLMaxwellDestroy( HYPrecon_ );
+#endif
       else if ( HYPreconID_ == HYMLI )
          HYPRE_LSI_MLIDestroy( HYPrecon_ );
+
+      else if ( HYPreconID_ == HYAMS )
+         HYPRE_AMSDestroy( HYPrecon_ );
 
       HYPrecon_ = NULL;
    }
@@ -495,6 +537,19 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    if ( MLI_NodalCoord_ != NULL ) delete [] MLI_NodalCoord_;
    if ( MLI_EqnNumbers_ != NULL ) delete [] MLI_EqnNumbers_;
 #endif
+
+   if (maxwellANN_ != NULL)
+   {
+      HYPRE_ParCSRMatrixDestroy(maxwellANN_);
+      maxwellANN_ = NULL;
+   }
+   // Users who copy this matrix in should be responsible for
+   // destroying this
+   //if (maxwellGEN_ != NULL)
+   //{
+   //   HYPRE_ParCSRMatrixDestroy(maxwellGEN_);
+   //   maxwellGEN_ = NULL;
+   //}
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -641,13 +696,17 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    }
 
    //-------------------------------------------------------------------
-   // instantiate the matrix
+   // instantiate the matrix (can also handle rectangular matrix)
    //-------------------------------------------------------------------
    
-   ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
-                               localStartRow_-1,localEndRow_-1, &HYA_);
+   if (localStartCol_ == -1)
+      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
+                                  localStartRow_-1,localEndRow_-1, &HYA_);
+   else
+      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
+                                  localStartCol_,localEndCol_, &HYA_);
    ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   assert(!ierr);
+   //assert(!ierr);
 
    //-------------------------------------------------------------------
    // instantiate the right hand vectors
@@ -661,7 +720,7 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
       ierr = HYPRE_IJVectorSetObjectType(HYbs_[i], HYPRE_PARCSR);
       ierr = HYPRE_IJVectorInitialize(HYbs_[i]);
       ierr = HYPRE_IJVectorAssemble(HYbs_[i]);
-      assert(!ierr);
+      //assert(!ierr);
    }
    HYb_ = HYbs_[0];
 
@@ -669,11 +728,14 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    // instantiate the solution vector
    //-------------------------------------------------------------------
 
-   ierr = HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1, &HYx_);
+   if (localStartCol_ == -1)
+      ierr = HYPRE_IJVectorCreate(comm_,localStartRow_-1,localEndRow_-1,&HYx_);
+   else
+      ierr = HYPRE_IJVectorCreate(comm_,localStartCol_,localEndCol_,&HYx_);
    ierr = HYPRE_IJVectorSetObjectType(HYx_, HYPRE_PARCSR);
    ierr = HYPRE_IJVectorInitialize(HYx_);
    ierr = HYPRE_IJVectorAssemble(HYx_);
-   assert(!ierr);
+   //assert(!ierr);
 
    //-------------------------------------------------------------------
    // reset fedata
@@ -712,7 +774,7 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    ierr = HYPRE_IJVectorSetObjectType(HYr_, HYPRE_PARCSR);
    ierr = HYPRE_IJVectorInitialize(HYr_);
    ierr = HYPRE_IJVectorAssemble(HYr_);
-   assert(!ierr);
+   //assert(!ierr);
    matrixVectorsCreated_ = 1;
    schurReductionCreated_ = 0;
    systemAssembled_ = 0;
@@ -1097,7 +1159,7 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double setValue)
    ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
                                localStartRow_-1, localEndRow_-1, &HYA_);
    ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   assert(!ierr);
+   //assert(!ierr);
 
    //-------------------------------------------------------------------
    // clean the reduction stuff
@@ -1199,10 +1261,14 @@ int HYPRE_LinSysCore::resetMatrix(double setValue)
 
    if ( HYA_ != NULL ) HYPRE_IJMatrixDestroy(HYA_);
    size = localEndRow_ - localStartRow_ + 1;
-   ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
-                               localStartRow_-1, localEndRow_-1, &HYA_);
+   if (localStartCol_ == -1)
+      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
+                                  localStartRow_-1, localEndRow_-1, &HYA_);
+   else
+      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
+                                  localStartCol_, localEndCol_, &HYA_);
    ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   assert(!ierr);
+   //assert(!ierr);
 
    //-------------------------------------------------------------------
    // allocate space for storing the matrix coefficient
@@ -1280,11 +1346,6 @@ int HYPRE_LinSysCore::resetRHSVector(double setValue)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering resetRHSVector.\n",mypid_);
-   if ( setValue != 0.0 && mypid_ == 0 )
-   {
-      printf("resetRHSVector ERROR : cannot take nonzeros.\n");
-      exit(1);
-   }
 
    //-------------------------------------------------------------------
    // reset right hand side vectors
@@ -1298,7 +1359,7 @@ int HYPRE_LinSysCore::resetRHSVector(double setValue)
       for (i = 0; i < localNRows; i++)
       {
          cols[i] = localStartRow_ + i - 1;
-         vals[i] = 0.0;
+         vals[i] = setValue;
       }    
       for (i = 0; i < numRHSs_; i++) 
          if ( HYbs_[i] != NULL ) 
@@ -1809,7 +1870,7 @@ int HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
 
    ierr = HYPRE_IJVectorAddToValues(HYb_, num, (const int *) localInds, 
                                     (const double *) values);
-   assert(!ierr);
+   //assert(!ierr);
 
    delete [] localInds;
 
@@ -1922,7 +1983,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 
       ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
       ierr = HYPRE_IJMatrixInitialize(HYA_);
-      assert(!ierr);
+      //assert(!ierr);
 
       //----------------------------------------------------------------
       // load the matrix stored locally to a HYPRE matrix
@@ -2144,8 +2205,18 @@ This should ultimately be taken out even for newer ale3d implementation
          }
          delete [] eqnNumbers;
          delete [] newData;
-      }    
-   }    
+      }
+      else
+      {
+         if (nodeNumbers != NULL && numNodes != 0)
+         {
+            printf("putNodalFieldData WARNING : \n");
+            printf("    set nodeNumbers = NULL, set numNodes = 0.\n");
+         }
+         MLI_NodalCoord_ = new double[localEndRow_-localStartRow_+1];
+         for (i=0; i<nRows; i++) MLI_NodalCoord_[i] = data[i];
+      }
+   }
 
    //-------------------------------------------------------------------
    // this is needed to set up the correct node equation map
@@ -2584,10 +2655,24 @@ int HYPRE_LinSysCore::getMatrixPtr(Data& data)
 #ifndef NOFEI
 int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data) 
 {
+   char *name;
+
    (void) scalar;
-   (void) data;
-   printf("%4d : HYPRE_LSC::copyInMatrix ERROR - not implemented.\n",mypid_);
-   exit(1);
+
+   name  = data.getTypeName();
+   if (!strcmp(name, "ANN"))
+   {
+      maxwellANN_ = (HYPRE_ParCSRMatrix) data.getDataPtr();
+   }
+   else if (!strcmp(name, "GEN"))
+   {
+      maxwellGEN_ = (HYPRE_ParCSRMatrix) data.getDataPtr();
+   }
+   else
+   {
+      printf("%4d : HYPRE_LSC::copyInMatrix ERROR - invalid data.\n",mypid_);
+      exit(1);
+   }
    return (0);
 }
 #endif
@@ -2664,9 +2749,10 @@ int HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::entering copyInRHSVector.\n",mypid_);
-   if (strcmp("IJ_Vector", data.getTypeName()))
+   if (strcmp("IJ_Vector", data.getTypeName()) &&
+       strcmp("Sol_Vector", data.getTypeName()))
    {
-      printf("copyInRHSVector: data's type string not 'IJ_Vector'.\n");
+      printf("copyInRHSVector: data's type string not compatible.\n");
       exit(1);
    }
 
@@ -2678,12 +2764,16 @@ int HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
    HYPRE_ParVector srcVec;
    HYPRE_ParVector destVec;
    HYPRE_IJVectorGetObject(inVec, (void **) &srcVec);
-   HYPRE_IJVectorGetObject(HYb_, (void **) &destVec);
+   if (!strcmp("Sol_Vector", data.getTypeName()))
+      HYPRE_IJVectorGetObject(HYb_, (void **) &destVec);
+   else
+      HYPRE_IJVectorGetObject(HYx_, (void **) &destVec);
  
-   HYPRE_ParVectorCopy( srcVec, destVec);
+   HYPRE_ParVectorCopy(srcVec, destVec);
  
    if ( scalar != 1.0 ) HYPRE_ParVectorScale( scalar, destVec);
-   HYPRE_IJVectorDestroy(inVec);
+   // do not destroy the incoming vector
+   //HYPRE_IJVectorDestroy(inVec);
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -2721,7 +2811,7 @@ int HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data)
    ierr = HYPRE_IJVectorSetObjectType(newVector, HYPRE_PARCSR);
    ierr = HYPRE_IJVectorInitialize(newVector);
    ierr = HYPRE_IJVectorAssemble(newVector);
-   assert(!ierr);
+   //assert(!ierr);
 
    HYPRE_ParVector Vec1;
    HYPRE_ParVector Vec2;
@@ -3003,7 +3093,7 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
    }
    ierr = HYPRE_IJVectorSetValues(HYx_, leng, (const int *) localInds,
                                   (const double *) values);
-   assert(!ierr);
+   //assert(!ierr);
 
    delete [] localInds;
 
@@ -3037,7 +3127,7 @@ int HYPRE_LinSysCore::getSolution(double* answers,int leng)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       printf("%4d : HYPRE_LSC::entering getSolution.\n",mypid_);
-   if (leng != (localEndRow_-localStartRow_+1))
+   if (localStartCol_ == -1 && leng != (localEndRow_-localStartRow_+1))
    {
       printf("%4d : HYPRE_LSC ERROR : getSolution: leng != numLocalRows.\n",
              mypid_);
@@ -3049,10 +3139,13 @@ int HYPRE_LinSysCore::getSolution(double* answers,int leng)
    //-------------------------------------------------------------------
 
    equations = new int[leng];
-   for ( i = 0; i < leng; i++ ) equations[i] = localStartRow_ + i - 1;
+   if (localStartCol_ == -1)
+      for ( i = 0; i < leng; i++ ) equations[i] = localStartRow_ + i - 1;
+   else
+      for ( i = 0; i < leng; i++ ) equations[i] = localStartCol_ + i;
 
    ierr = HYPRE_IJVectorGetValues(HYx_,leng,equations,answers);
-   assert(!ierr);
+   //assert(!ierr);
 
    delete [] equations;
 
@@ -3087,7 +3180,8 @@ int HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
 
    equation = eqnNumber; // incoming 0-based index
 
-   if ( equation < localStartRow_-1 && equation > localEndRow_ )
+   if (localStartCol_ == -1 &&  equation < localStartRow_-1 && 
+       equation > localEndRow_ )
    {
       printf("%d : getSolnEntry ERROR - index out of range = %d.\n", mypid_, 
                    eqnNumber);
@@ -3095,7 +3189,7 @@ int HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
    }
 
    ierr = HYPRE_IJVectorGetValues(HYx_,1,&equation,&val);
-   assert(!ierr);
+   //assert(!ierr);
    answer = val;
 
    //-------------------------------------------------------------------
@@ -3306,7 +3400,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
       printf("%4d : HYPRE_LSC::entering selectPreconditioner = %s.\n",
              mypid_, name);
 
@@ -3318,147 +3412,167 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    parasailsReuse_ = 0;
    if ( HYPrecon_ != NULL )
    {
-      if ( HYPreconID_ == HYPILUT )
-         HYPRE_ParCSRPilutDestroy( HYPrecon_ );
+      if (HYPreconID_ == HYPILUT)
+         HYPRE_ParCSRPilutDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYPARASAILS )
-         HYPRE_ParCSRParaSailsDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYPARASAILS)
+         HYPRE_ParCSRParaSailsDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYBOOMERAMG )
-         HYPRE_BoomerAMGDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYBOOMERAMG)
+         HYPRE_BoomerAMGDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYDDILUT )
-         HYPRE_LSI_DDIlutDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYDDILUT)
+         HYPRE_LSI_DDIlutDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYSCHWARZ )
-         HYPRE_LSI_SchwarzDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYSCHWARZ)
+         HYPRE_LSI_SchwarzDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYDDICT )
-         HYPRE_LSI_DDICTDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYDDICT)
+         HYPRE_LSI_DDICTDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYPOLY )
-         HYPRE_LSI_PolyDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYPOLY)
+         HYPRE_LSI_PolyDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYEUCLID )
-         HYPRE_EuclidDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYEUCLID)
+         HYPRE_EuclidDestroy(HYPrecon_);
 
-      else if ( HYPreconID_ == HYBLOCK )
-         HYPRE_LSI_BlockPrecondDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYBLOCK)
+         HYPRE_LSI_BlockPrecondDestroy(HYPrecon_);
 
 #ifdef HAVE_ML
-      else if ( HYPreconID_ == HYML )
-         HYPRE_LSI_MLDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYML)
+         HYPRE_LSI_MLDestroy(HYPrecon_);
 #endif
 #ifdef HAVE_MLI
-      else if ( HYPreconID_ == HYMLI )
-         HYPRE_LSI_MLIDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYMLI)
+         HYPRE_LSI_MLIDestroy(HYPrecon_);
 #endif
-      else if ( HYPreconID_ == HYUZAWA)   
-         HYPRE_LSI_UzawaDestroy( HYPrecon_ );
+      else if (HYPreconID_ == HYUZAWA)   
+         HYPRE_LSI_UzawaDestroy(HYPrecon_);
    }
 
    //-------------------------------------------------------------------
    // check for the validity of the preconditioner name
    //-------------------------------------------------------------------
 
-   if ( !strcmp(name, "identity"  ) )
+   if (!strcmp(name, "identity"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYIDENTITY;
    }
-   else if ( !strcmp(name, "diagonal"  ) )
+   else if (!strcmp(name, "diagonal"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYDIAGONAL;
    }
-   else if ( !strcmp(name, "pilut") )
+   else if (!strcmp(name, "pilut"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYPILUT;
    }
-   else if ( !strcmp(name, "parasails") )
+   else if (!strcmp(name, "parasails"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYPARASAILS;
    }
-   else if ( !strcmp(name, "boomeramg") )
+   else if (!strcmp(name, "boomeramg"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYBOOMERAMG;
    }
-   else if ( !strcmp(name, "ddilut") )
+   else if (!strcmp(name, "ddilut"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYDDILUT;
    }
-   else if ( !strcmp(name, "schwarz") )
+   else if (!strcmp(name, "schwarz"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYSCHWARZ;
    }
-   else if ( !strcmp(name, "ddict") )
+   else if (!strcmp(name, "ddict"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYDDICT;
    }
-   else if ( !strcmp(name, "poly") )
+   else if (!strcmp(name, "poly"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYPOLY;
    }
-   else if ( !strcmp(name, "euclid") )
+   else if (!strcmp(name, "euclid"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYEUCLID;
    }
-   else if ( !strcmp(name, "blockP") )
+   else if (!strcmp(name, "blockP"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYBLOCK;
    }
-   else if ( !strcmp(name, "ml") )
+   else if (!strcmp(name, "ml"))
    {
 #ifdef HAVE_ML
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYML;
 #else
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
       {
-         printf("selectPreconditioner - MLPACK not declared.\n");
+         printf("selectPreconditioner - ML not available.\n");
          printf("                       set default to diagonal.\n");
       }
-      strcpy( HYPreconName_, "diagonal" );
+      strcpy(HYPreconName_, "diagonal");
       HYPreconID_ = HYDIAGONAL;
 #endif
    }
-   else if ( !strcmp(name, "mli") )
+   else if (!strcmp(name, "mlmaxwell"))
+   {
+#ifdef HAVE_MLMAXWELL
+      strcpy(HYPreconName_, name);
+      HYPreconID_ = HYMLMAXWELL;
+#else
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
+      {
+         printf("selectPreconditioner - MLMaxwell not available.\n");
+         printf("                       set default to diagonal.\n");
+      }
+      strcpy(HYPreconName_, "diagonal");
+      HYPreconID_ = HYDIAGONAL;
+#endif
+   }
+   else if (!strcmp(name, "mli"))
    {
 #ifdef HAVE_MLI
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYMLI;
 #else
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
       {
-         printf("selectPreconditioner - MLI not declared.\n");
+         printf("selectPreconditioner - MLI not available.\n");
          printf("                       set default to diagonal.\n");
       }
-      strcpy( HYPreconName_, "diagonal" );
+      strcpy(HYPreconName_, "diagonal");
       HYPreconID_ = HYDIAGONAL;
 #endif
    }
-   else if ( !strcmp(name, "uzawa") )
+   else if (!strcmp(name, "ams"))
    {
-      strcpy( HYPreconName_, name );
+      strcpy(HYPreconName_, name);
+      HYPreconID_ = HYAMS;
+   }
+   else if (!strcmp(name, "uzawa"))
+   {
+      strcpy(HYPreconName_, name);
       HYPreconID_ = HYUZAWA;
    }
    else
    {
-      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+      if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
       {
          printf("selectPreconditioner error : invalid option.\n");
          printf("                     use default = diagonal.\n");
       }
-      strcpy( HYPreconName_, "diagonal" );
+      strcpy(HYPreconName_, "diagonal");
       HYPreconID_ = HYDIAGONAL;
    }
 
@@ -3466,7 +3580,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    // instantiate preconditioner
    //-------------------------------------------------------------------
 
-   switch ( HYPreconID_ )
+   switch (HYPreconID_)
    {
       case HYIDENTITY :
            HYPrecon_ = NULL;
@@ -3477,14 +3591,14 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
            break;
 
       case HYPILUT :
-           ierr = HYPRE_ParCSRPilutCreate( comm_, &HYPrecon_ );
-           assert( !ierr );
-           HYPRE_ParCSRPilutSetMaxIter( HYPrecon_, 1 );
+           ierr = HYPRE_ParCSRPilutCreate(comm_, &HYPrecon_);
+           //assert(!ierr);
+           HYPRE_ParCSRPilutSetMaxIter(HYPrecon_, 1);
            break;
 
       case HYPARASAILS :
-           ierr = HYPRE_ParCSRParaSailsCreate( comm_, &HYPrecon_ );
-           assert( !ierr );
+           ierr = HYPRE_ParCSRParaSailsCreate(comm_, &HYPrecon_);
+           //assert(!ierr);
            break;
 
       case HYBOOMERAMG :
@@ -3496,51 +3610,61 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
            break;
 
       case HYDDILUT :
-           ierr = HYPRE_LSI_DDIlutCreate( comm_, &HYPrecon_ );
-           assert( !ierr );
+           ierr = HYPRE_LSI_DDIlutCreate(comm_, &HYPrecon_);
+           //assert( !ierr );
            break;
 
       case HYSCHWARZ :
-           ierr = HYPRE_LSI_SchwarzCreate( comm_, &HYPrecon_ );
-           assert( !ierr );
+           ierr = HYPRE_LSI_SchwarzCreate(comm_, &HYPrecon_);
+           //assert( !ierr );
            break;
 
       case HYDDICT :
-           ierr = HYPRE_LSI_DDICTCreate( comm_, &HYPrecon_ );
-           assert( !ierr );
+           ierr = HYPRE_LSI_DDICTCreate(comm_, &HYPrecon_);
+           //assert( !ierr );
            break;
 
       case HYPOLY :
-           ierr = HYPRE_LSI_PolyCreate( comm_, &HYPrecon_ );
-           assert( !ierr );
+           ierr = HYPRE_LSI_PolyCreate(comm_, &HYPrecon_);
+           //assert( !ierr );
            break;
 
       case HYEUCLID :
-           ierr = HYPRE_EuclidCreate( comm_, &HYPrecon_ );
-           assert( !ierr );
+           ierr = HYPRE_EuclidCreate(comm_, &HYPrecon_);
+           //assert( !ierr );
            break;
 
       case HYBLOCK :
-           ierr = HYPRE_LSI_BlockPrecondCreate( comm_, &HYPrecon_ );
-           assert( !ierr );
+           ierr = HYPRE_LSI_BlockPrecondCreate(comm_, &HYPrecon_);
+           //assert( !ierr );
            break;
 
       case HYML :
 #ifdef HAVE_ML
-           ierr = HYPRE_LSI_MLCreate( comm_, &HYPrecon_ );
+           ierr = HYPRE_LSI_MLCreate(comm_, &HYPrecon_);
 #else
            printf("HYPRE_LSC::selectPreconditioner - ML not supported.\n");
 #endif
            break;
       case HYMLI :
 #ifdef HAVE_MLI
-           ierr = HYPRE_LSI_MLICreate( comm_, &HYPrecon_ );
+           ierr = HYPRE_LSI_MLICreate(comm_, &HYPrecon_);
 #else
            printf("HYPRE_LSC::selectPreconditioner - MLI not supported.\n");
 #endif
            break;
+      case HYMLMAXWELL :
+#ifdef HAVE_MLMAXWELL
+           ierr = HYPRE_LSI_MLMaxwellCreate(comm_, &HYPrecon_);
+#else
+           printf("HYPRE_LSC::selectPreconditioner-MLMaxwell unsupported.\n");
+#endif
+           break;
+      case HYAMS :
+           ierr = HYPRE_AMSCreate(&HYPrecon_);
+           break;
       case HYUZAWA :
-           HYPRE_LSI_UzawaCreate( comm_, &HYPrecon_ );
+           HYPRE_LSI_UzawaCreate(comm_, &HYPrecon_);
            break;
    }
 
@@ -3548,7 +3672,7 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    // diagnostic message
    //-------------------------------------------------------------------
 
-   if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
       printf("%4d : HYPRE_LSC::leaving  selectPreconditioner.\n",mypid_);
 }
 
@@ -3744,7 +3868,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,
 		 localEndRow_-1, localStartRow_-1, localEndRow_-1,&IJI);
          ierr += HYPRE_IJMatrixSetObjectType(IJI, HYPRE_PARCSR);
-         assert(!ierr);
+         //assert(!ierr);
          localNRows = localEndRow_ - localStartRow_ + 1;
          matSizes = new int[localNRows];
          rowInd   = new int[localNRows];
@@ -3762,7 +3886,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          ierr += HYPRE_IJMatrixSetValues(IJI, localNRows, matSizes,
                    (const int *) rowInd, (const int *) colInd,
                    (const double *) colVal);
-         assert(!ierr);
+         //assert(!ierr);
          delete [] rowInd;
          delete [] colInd;
          delete [] colVal;
@@ -3775,7 +3899,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,
 		 localEndRow_-1, localStartRow_-1, localEndRow_-1,&HYnormalA_);
          ierr += HYPRE_IJMatrixSetObjectType(HYnormalA_, HYPRE_PARCSR);
-         assert(!ierr);
+         //assert(!ierr);
          for ( i = localStartRow_-1; i < localEndRow_; i++ )
          {
             HYPRE_ParCSRMatrixGetRow(normalA_csr,i,&rowSize,NULL,NULL);
@@ -3956,7 +4080,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          }
       }
       MLI_NumNodes_ = ncount;
-      assert((MLI_NumNodes_*MLI_FieldSize_) == (localEndRow_-localStartRow_+1));
+      //assert((MLI_NumNodes_*MLI_FieldSize_)==(localEndRow_-localStartRow_+1));
       delete [] tempNodalCoord;
       delete [] iArray;
       for (i = 0; i < MLI_NumNodes_; i++) 
@@ -4886,5 +5010,90 @@ int HYPRE_LinSysCore::writeSystem(const char *name)
 {
    printf("HYPRE_LinsysCore : writeSystem not implemented.\n");
    return (0);
+}
+
+//***************************************************************************
+// this function computes matrix vector product
+//---------------------------------------------------------------------------
+
+int HYPRE_LinSysCore::HYPRE_LSC_Matvec(void *x, void *y)
+{
+   HYPRE_ParCSRMatrix A_csr;
+   HYPRE_ParVector    x_csr = (HYPRE_ParVector)    x;
+   HYPRE_ParVector    y_csr = (HYPRE_ParVector)    y;
+   HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+   HYPRE_ParCSRMatrixMatvec(1.0, A_csr, x_csr, 0.0, y_csr);
+   return (0);
+}
+
+//***************************************************************************
+// this function computes vector multiply and add
+//---------------------------------------------------------------------------
+
+int HYPRE_LinSysCore::HYPRE_LSC_Axpby(double a, void *x, double b, void *y)
+{
+   HYPRE_ParVector x_csr = (HYPRE_ParVector) x;
+   HYPRE_ParVector y_csr = (HYPRE_ParVector) y;
+   if ( b != 1.0 ) HYPRE_ParVectorScale( b, y_csr);
+   hypre_ParVectorAxpy(a, (hypre_ParVector*) x_csr, (hypre_ParVector*) y_csr);
+   return (0);
+}
+
+//***************************************************************************
+// this function fetches the right hand side vector
+//---------------------------------------------------------------------------
+
+void *HYPRE_LinSysCore::HYPRE_LSC_GetRHSVector()
+{
+   HYPRE_ParVector b_csr;
+   HYPRE_IJVectorGetObject(HYb_, (void **) &b_csr);
+   return (void *) b_csr;
+}
+
+//***************************************************************************
+// this function fetches the solution vector
+//---------------------------------------------------------------------------
+
+void *HYPRE_LinSysCore::HYPRE_LSC_GetSolVector()
+{
+   HYPRE_ParVector x_csr;
+   HYPRE_IJVectorGetObject(HYx_, (void **) &x_csr);
+   return (void *) x_csr;
+}
+
+//***************************************************************************
+// this function fetches the matrix 
+//---------------------------------------------------------------------------
+
+void *HYPRE_LinSysCore::HYPRE_LSC_GetMatrix()
+{
+   HYPRE_ParCSRMatrix A_csr;
+   HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+   return (void *) A_csr;
+}
+
+//***************************************************************************
+// this function set column ranges
+//---------------------------------------------------------------------------
+
+void *HYPRE_LinSysCore::HYPRE_LSC_SetColMap(int start, int end)
+{
+   localStartCol_ = start;
+   localEndCol_ = end;
+   return (void *) NULL;
+}
+
+//***************************************************************************
+// this function set column ranges
+//---------------------------------------------------------------------------
+
+void *HYPRE_LinSysCore::HYPRE_LSC_MatMatMult(void *inMat)
+{
+   HYPRE_ParCSRMatrix A_csr;
+   hypre_ParCSRMatrix *B_csr, *C_csr;
+   HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+   B_csr = (hypre_ParCSRMatrix *) inMat;
+   C_csr = hypre_ParMatmul((hypre_ParCSRMatrix *)A_csr,B_csr);
+   return (void *) C_csr;
 }
 

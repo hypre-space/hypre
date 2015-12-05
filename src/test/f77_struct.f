@@ -455,7 +455,7 @@ c        call HYPRE_StructPFMGSetDxyz(solver, dxyz, ierr)
          call HYPRE_StructPFMGGetFinalRelativ(solver, final_res_norm,
      & ierr)
          call HYPRE_StructPFMGDestroy(solver, ierr)
-      elseif ((solver_id .gt. 9) .and. (solver_id .le. 20)) then
+      elseif ((solver_id .gt. 9) .and. (solver_id .lt. 20)) then
 c        Solve the system using CG
 
          precond_id = -1

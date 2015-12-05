@@ -1,22 +1,41 @@
-#BHEADER***********************************************************************
-# (c) 1998   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# $Revision: 1.11 $
-#EHEADER***********************************************************************
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 1.49 $
+#EHEADER**********************************************************************
+
+
 
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
-CDEFS = -DHYPRE_TIMING
+CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
 C_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
- -I${HYPRE_BUILD_DIR}/include\
+ -I${HYPRE_LINK_DIR}/include\
  ${CINCLUDES}\
  ${CDEFS}
 
@@ -24,29 +43,30 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
- -I${HYPRE_BUILD_DIR}/include\
+ -I${HYPRE_LINK_DIR}/include\
  ${CINCLUDES}\
  ${CXXDEFS}
 
 F77_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
- -I${HYPRE_BUILD_DIR}/include\
+ -I${HYPRE_LINK_DIR}/include\
  ${CINCLUDES}
  
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS} 
-LIBFLAGS = ${LIBDIRS} ${LIBS}
-LDLIBFLAGS = ${LDLIBDIRS} ${LDLIBS} ${LIBM}
+LIBFLAGS = ${LIBDIRS} ${LIBS} 
+LDLIBFLAGS = ${LDLIBDIRS} ${LDLIBS} ${LIBM} ${LDFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 
 LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_sstruct_ls\
  -lHYPRE_sstruct_mv\
  -lHYPRE_struct_ls\
  -lHYPRE_struct_mv\
  -lHYPRE_parcsr_ls\
+ -lHYPRE_parcsr_block_mv\
  -lHYPRE_DistributedMatrixPilutSolver \
  -lHYPRE_ParaSails \
  -lHYPRE_Euclid \
@@ -56,38 +76,40 @@ LFLAGS =\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
+ -lHYPRE_multivector\
  -lHYPRE_utilities\
  ${LAPACKLIBFLAGS} \
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
 
+BABELLIBFLAGS =\
+ -L${HYPRE_LINK_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/../babel-runtime/sidl/.libs\
+ -lbHYPRE\
+ -lbHYPREClient-C\
+ -lbHYPREClient-F\
+ -lbHYPRE\
+ -lsidl -ldl -lxml2
+
 ###########################################
 # Commpkg definitions
 ###########################################
 COMMPKG_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_utilities\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
+ ${LAPACKLIBFLAGS} \
+ ${BLASLIBFLAGS} \
+ ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
+
 
 ###########################################
 # Struct definitions
 ###########################################
 STRUCT_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -lHYPRE_struct_ls\
- -lHYPRE_struct_mv\
- -lHYPRE_krylov\
- -lHYPRE_utilities\
- ${MPILIBFLAGS} ${LIBFLAGS} ${LDLIBFLAGS}
-
-###########################################
-# Struct_es definitions
-###########################################
-STRUCT_ES_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_struct_ls\
  -lHYPRE_struct_mv\
  -lHYPRE_parcsr_ls\
@@ -97,11 +119,12 @@ STRUCT_ES_LFLAGS =\
  -lHYPRE_MatrixMatrix \
  -lHYPRE_DistributedMatrix \
  -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_block_mv\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
+ -lHYPRE_multivector \
  -lHYPRE_utilities\
- -lHYPRE_lobpcg \
  ${LAPACKLIBFLAGS} \
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
@@ -110,7 +133,7 @@ STRUCT_ES_LFLAGS =\
 # Sstruct definitions
 ###########################################
 SSTRUCT_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_sstruct_ls\
  -lHYPRE_sstruct_mv\
  -lHYPRE_struct_ls\
@@ -122,35 +145,12 @@ SSTRUCT_LFLAGS =\
  -lHYPRE_MatrixMatrix \
  -lHYPRE_DistributedMatrix \
  -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_block_mv\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
+ -lHYPRE_multivector\
  -lHYPRE_utilities\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
-
-###########################################
-# Sstruct_es definitions
-###########################################
-SSTRUCT_ES_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -lHYPRE_sstruct_ls\
- -lHYPRE_sstruct_mv\
- -lHYPRE_struct_ls\
- -lHYPRE_struct_mv\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_utilities\
- -lHYPRE_lobpcg\
  ${LAPACKLIBFLAGS} \
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
@@ -159,7 +159,7 @@ SSTRUCT_ES_LFLAGS =\
 # IJ definitions
 ###########################################
 IJ_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_DistributedMatrixPilutSolver \
  -lHYPRE_ParaSails \
@@ -167,31 +167,12 @@ IJ_LFLAGS =\
  -lHYPRE_MatrixMatrix \
  -lHYPRE_DistributedMatrix \
  -lHYPRE_IJ_mv\
+ -lHYPRE_parcsr_block_mv\
  -lHYPRE_parcsr_mv\
  -lHYPRE_seq_mv\
  -lHYPRE_krylov\
+ -lHYPRE_multivector\
  -lHYPRE_utilities\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
-
-###########################################
-# IJ_ES definitions
-###########################################
-IJ_ES_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -lHYPRE_parcsr_ls\
- -lHYPRE_DistributedMatrixPilutSolver \
- -lHYPRE_ParaSails \
- -lHYPRE_Euclid \
- -lHYPRE_MatrixMatrix \
- -lHYPRE_DistributedMatrix \
- -lHYPRE_IJ_mv\
- -lHYPRE_parcsr_mv\
- -lHYPRE_seq_mv\
- -lHYPRE_krylov\
- -lHYPRE_utilities\
- -lHYPRE_lobpcg\
  ${LAPACKLIBFLAGS} \
  ${BLASLIBFLAGS} \
  ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
@@ -200,7 +181,7 @@ IJ_ES_LFLAGS =\
 # IJ_MV definitions
 ###########################################
 IJ_MV_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_parcsr_ls\
  -lHYPRE_IJ_mv\
  -lHYPRE_parcsr_mv\
@@ -212,7 +193,7 @@ IJ_MV_LFLAGS =\
 # FEI definitions
 ###########################################
 FEICXX_LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_LINK_DIR}/lib\
  -lHYPRE_LSI\
  -lHYPRE_superlu\
  ${LAPACKLIBFLAGS} \
@@ -222,25 +203,32 @@ FEICXX_LFLAGS =\
 ##################################################################
 # Targets
 ##################################################################
-HYPRE_STANDARD_DRIVERS =\
+HYPRE_DRIVERS =\
  ij.c\
- ij_es.c\
  ij_mv.c\
  new_ij.c\
  sstruct.c\
- sstruct_es.c\
  sstruct_fac.c\
  struct.c\
- struct_es.c
+ maxwell_unscaled.c\
+ ams_driver.c
 
 HYPRE_BABEL_DRIVERS =\
  struct_b.c\
+ sstruct_b.c\
  ij_b.c
 
 HYPRE_FEI_DRIVERS_CXX =\
  fei.cxx
 
-HYPRE_STANDARD_DRIVERS_F77 =\
+HYPRE_F77_EXAMPLES_DRIVERS =\
+ ex1_for.c\
+ ex3_for.c\
+ ex5_for.c\
+ ex6_for.c\
+ ex7_for.c
+
+HYPRE_DRIVERS_F77 =\
  f77_ij.f\
  f77_ij_mv.f\
  f77_struct.f
@@ -251,20 +239,9 @@ HYPRE_BABEL_DRIVERS_F77 =\
  f77_ij_b.f\
  f77_struct_b.f
 
-#ifndef is gmake only, can't be used...
-#ifndef BABELLIBFLAGS
- HYPRE_DRIVERS = ${HYPRE_STANDARD_DRIVERS}
- HYPRE_DRIVERS_F77 = ${HYPRE_STANDARD_DRIVERS_F77}
-#else
-# HYPRE_DRIVERS = ${HYPRE_STANDARD_DRIVERS} ${HYPRE_BABEL_DRIVERS}
-# HYPRE_DRIVERS_F77 = ${HYPRE_STANDARD_DRIVERS_F77} ${HYPRE_BABEL_DRIVERS_F77}
-#endif
-
-HYPRE_DRIVER_OBJS=${HYPRE_DRIVERS:.c=.o}
-HYPRE_DRIVER_F77_OBJS=${HYPRE_DRIVERS_F77:.f=.o}
-HYPRE_FEI_DRIVER_CXX_OBJS=${HYPRE_FEI_DRIVERS_CXX:.cxx=.o}
 
 HYPRE_DRIVER_EXECS=${HYPRE_DRIVERS:.c=}
+HYPRE_F77_EXAMPLES_DRIVER_EXECS=${HYPRE_F77_EXAMPLES_DRIVERS:.c=}
 HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
 HYPRE_FEI_DRIVER_CXX_EXECS=${HYPRE_FEI_DRIVERS_CXX:.cxx=}
 
@@ -288,62 +265,129 @@ install:
 
 clean:
 	rm -f *.o
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 	rm -f ${HYPRE_DRIVER_EXECS}
+	rm -f ${HYPRE_F77_EXAMPLES_DRIVER_EXECS}
 	rm -f ${HYPRE_DRIVER_F77_EXECS}
 	rm -f ${HYPRE_BABEL_DRIVER_EXECS}
 	rm -f ${HYPRE_BABEL_DRIVER_CXX_EXECS}
 	rm -f ${HYPRE_BABEL_DRIVER_F77_EXECS}
 	rm -f ${HYPRE_FEI_DRIVER_CXX_EXECS}
+	rm -f TEST_examples/*.out*
+	rm -f TEST_examples/*.err*
+	rm -f TEST_fac/*.out*
+	rm -f TEST_fac/*.err*
+	rm -f TEST_ij/*.out*
+	rm -f TEST_ij/*.err*
+	rm -f TEST_ij/*.txt*
+	rm -f TEST_ij/vectors.*
+	rm -f TEST_sstruct/*.out*
+	rm -f TEST_sstruct/*.err*
+	rm -f TEST_struct/*.out*
+	rm -f TEST_struct/*.err*
+	rm -f ex1 ex2 ex3 ex4 ex5 ex5b ex5b77 ex6 ex7 ex8 ex9
 
 ##################################################################
 # Rules
 ##################################################################
-PURIFY = purify
-PURIFY_TO_FILE = purify \
- -log-file=struct_linear_solvers.purify \
- -append-logfile=yes
 
 struct: struct.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${STRUCT_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${STRUCT_LFLAGS}
 
-struct_es: struct_es.o
+fij_mv: fij_mv.f
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${STRUCT_ES_LFLAGS}
+	${F77} -c $@  ${FFLAGS}
+
+fparcsr_ls: fparcsr_ls.f
+	@echo  "Building" $@ "... "
+	${F77} -c $@  ${FFLAGS}
+
+fparcsr_mv: fparcsr_mv.f
+	@echo  "Building" $@ "... "
+	${F77} -c $@  ${FFLAGS}
+
+fsstruct_ls: fsstruct_ls.f
+	@echo  "Building" $@ "... "
+	${F77} -c $@  ${FFLAGS}
+
+fsstruct_mv: fsstruct_mv.f
+	@echo  "Building" $@ "... "
+	${F77} -c $@  ${FFLAGS}
+
+fstruct_ls: fstruct_ls.f
+	@echo  "Building" $@ "... "
+	${F77} -c $@  ${FFLAGS}
+
+fstruct_mv: fstruct_mv.f
+	@echo  "Building" $@ "... "
+	${F77} -c $@  ${FFLAGS}
+
+struct_for: fstruct_mv.o fstruct_ls.o struct_for.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+
+ex1_for: fstruct_mv.o fstruct_ls.o ex1_for.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+
+ex3_for: fstruct_mv.o fstruct_ls.o ex3_for.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o $@.o ${FFLAGS} ${STRUCT_LFLAGS}
+
+ex5_for: fij_mv.o fparcsr_mv.o fparcsr_ls.o ex5_for.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ fij_mv.o fparcsr_mv.o fparcsr_ls.o $@.o ${FFLAGS} ${LFLAGS}
+
+ex6_for: fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o ex6_for.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
+
+ex7_for: fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o ex7_for.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ fstruct_mv.o fstruct_ls.o fsstruct_mv.o fsstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
+
+for_maxwell: fparcsr_mv.o fsstruct_mv.o fsstruct_ls.o for_maxwell.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ fparcsr_mv.o fsstruct_mv.o fsstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
+
+maxwell_unscaled: maxwell_unscaled.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
 
 sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${SSTRUCT_LFLAGS}
 
-sstruct_es: sstruct_es.o
+hypre_set_precond: hypre_set_precond.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${SSTRUCT_ES_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
+
+test_ij: hypre_set_precond.o test_ij.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ hypre_set_precond.o $@.o ${IJ_LFLAGS}
 
 ij: ij.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${IJ_LFLAGS}
-
-ij_es: ij_es.o
-	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${IJ_ES_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
 
 ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${IJ_MV_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
 
 new_ij: new_ij.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${IJ_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${IJ_LFLAGS}
 
 fei: fei.o
 	@echo  "Building" $@ "... "
-	${CXX} -o $@ $@.o ${FEICXX_LFLAGS}
+	${LINK_CXX} -o $@ $@.o ${FEICXX_LFLAGS}
 
 f77_struct: f77_struct.o
 	@echo  "Building" $@ "... "
@@ -359,15 +403,19 @@ f77_ij_mv: f77_ij_mv.o
 
 driver_commpkg: driver_commpkg.o
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${COMMPKG_LFLAGS}
+	${LINK_CC} -o $@ $@.o ${COMMPKG_LFLAGS}
+
+ams_driver: ams_driver.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 ##################################################################
 # Babel version of above
 ##################################################################
 ${HYPRE_BABEL_DRIVER_EXECS}: ${HYPRE_BABEL_DRIVER_OBJS}
 	@echo  "Building" $@ "... "
-	${CC} -o $@ $@.o ${BABELLIBFLAGS} ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${BABELLIBFLAGS} ${LFLAGS}
 
 ${HYPRE_BABEL_DRIVER_F77_EXECS}: ${HYPRE_BABEL_DRIVER_F77_OBJS}
 	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+	${F77} -o $@ $@.o ${BABELLIBFLAGS} ${FFLAGS} ${LFLAGS}

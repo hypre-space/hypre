@@ -1,10 +1,28 @@
-# (c) 1997   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team, UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer and the GNU Lesser General Public License.
 #
-# $Revision: 2.2 $
-#EHEADER***********************************************************************
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 2.21 $
+#EHEADER**********************************************************************
 
 include ../config/Makefile.config
 
@@ -19,113 +37,13 @@ C_COMPILE_FLAGS =\
    ${CDEFS}
 
 ##################################################################
-# Lapack Header & Object Files
-##################################################################
-#LAPACK_HEADERS = hypre_lapack.h f2c.h
-#LAPACK_FILES = \
-#dbdsqr.o\
-#dgebd2.o\
-#dgebrd.o\
-#dgelq2.o\
-#dgelqf.o\
-#dgels.o\
-#dgeqr2.o\
-#dgeqrf.o\
-#dgesvd.o\
-#dlabad.o\
-#dlabrd.o\
-#dlacpy.o\
-#dlae2.o\
-#dlaev2.o\
-#dlamch.o\
-#dlange.o\
-#dlanst.o\
-#dlansy.o\
-#dlapy2.o\
-#dlarfb.o\
-#dlarf.o\
-#dlarfg.o\
-#dlarft.o\
-#dlartg.o\
-#dlas2.o\
-#dlascl.o\
-#dlaset.o\
-#dlasq1.o\
-#dlasq2.o\
-#dlasq3.o\
-#dlasq4.o\
-#dlasq5.o\
-#dlasq6.o\
-#dlasr.o\
-#dlasrt.o\
-#dlassq.o\
-#dlasv2.o\
-#dlatrd.o\
-#dorg2l.o\
-#dorg2r.o\
-#dorgbr.o\
-#dorgl2.o\
-#dorglq.o\
-#dorgql.o\
-#dorgqr.o\
-#dorgtr.o\
-#dorm2r.o\
-#dormbr.o\
-#dorml2.o\
-#dormlq.o\
-#dormqr.o\
-#dpotf2.o\
-#dpotrf.o\
-#dpotrs.o\
-#dsteqr.o\
-#dsterf.o\
-#dsyev.o\
-#dsygs2.o\
-#dsygst.o\
-#dsygv.o\
-#dsytd2.o\
-#dsytrd.o\
-#ieeeck.o\
-#ilaenv.o\
-#lapack_utils.o\
-#lsame.o\
-#xerbla.o
-
-##################################################################
-# Blas Header & Object Files
-##################################################################
-#BLAS_HEADERS = hypre_blas.h f2c.h
-#BLAS_FILES = \
-#blas_utils.o\
-#dasum.o\
-#daxpy.o\
-#dcopy.o\
-#ddot.o\
-#dgemm.o\
-#dgemv.o\
-#dger.o\
-#dnrm2.o\
-#drot.o\
-#dscal.o\
-#dswap.o\
-#dsymm.o\
-#dsymv.o\
-#dsyr2.o\
-#dsyr2k.o\
-#dsyrk.o\
-#dtrmm.o\
-#dtrmv.o\
-#dtrsm.o\
-#dtrsv.o\
-#idamax.o
-
-##################################################################
 # Utilities Header Files
 ##################################################################
 HEADERS =\
  amg_linklist.h\
  exchange_data.h\
  fortran.h\
+ fortran_matrix.h\
  general.h\
  hypre_memory.h\
  hypre_smp_forloop.h\
@@ -144,6 +62,7 @@ FILES =\
  amg_linklist.c\
  binsearch.c\
  exchange_data.c\
+ fortran_matrix.c\
  hypre_memory.c\
  hypre_qsort.c\
  memory_dmalloc.c\
@@ -154,7 +73,10 @@ FILES =\
  thread_mpistubs.c\
  timer.c\
  timing.c\
- umalloc_local.c
+ umalloc_local.c\
+ hypre_mpi_comm_f2c.c\
+ hypre_error.c\
+ F90_HYPRE_error.c
 
 OBJS = ${FILES:.c=.o}
 
@@ -162,26 +84,23 @@ OBJS = ${FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_utilities.a 
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp $(srcdir)/utilities.h $(HYPRE_BUILD_DIR)/include/.
-	#cp -fp ${BLAS_HEADERS} $(HYPRE_BUILD_DIR)/include/.
-	#cp -fp ${LAPACK_HEADERS} $(HYPRE_BUILD_DIR)/include/.
-	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
+all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/utilities.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
+	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_utilities.a 
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(srcdir)/utilities.h $(HYPRE_INC_INSTALL)/.
-	#cp -fp ${BLAS_HEADERS} $(HYPRE_INC_INSTALL)/.
-	#cp -fp ${LAPACK_HEADERS} $(HYPRE_INC_INSTALL)/.
-	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
+install: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/utilities.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/fortran*.h $(HYPRE_INC_INSTALL)
+	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
-	rm -f *.o lib*.a ${BLAS_HEADERS} ${LAPACK_HEADERS} 
+	rm -f *.o libHYPRE* f2c.h *blas.h *lapack.h 
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
-	rm -r Makefile
-
 
 ##################################################################
 # Rules
@@ -189,10 +108,11 @@ distclean: clean
  
 libHYPRE_utilities.a: ${OBJS}
 	@echo  "Building $@ ... "
-	${AR} $@ ${OBJS} ${LAPACK_FILES} ${BLAS_FILES}
+	${AR} $@ *.o
 	${RANLIB} $@
+ 
+libHYPRE_utilities.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ *.o
 
 ${OBJS}: ${HEADERS}
-
-timer.o: timer.c
-	${CC} -D_POSIX_SOURCE -o $@ -c ${C_FLAGS} $<

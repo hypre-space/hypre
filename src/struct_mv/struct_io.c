@@ -1,11 +1,30 @@
 /*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.6 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.9 $
+ ***********************************************************************EHEADER*/
+
+
 /******************************************************************************
  *
  * Functions for scanning and printing "box-dimensioned" data.
@@ -69,7 +88,7 @@ hypre_PrintBoxArrayData( FILE            *file,
             {
                for (j = 0; j < num_values; j++)
                {
-		  fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
+		  fprintf(file, "%d: (%d, %d, %d; %d) %.14e\n",
                           i,
                           hypre_IndexX(start) + loopi,
                           hypre_IndexY(start) + loopj,
@@ -127,7 +146,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
    {
       if (symm_elements[j] < 0 && j!=center_rank )
       {
-         fprintf( file, "*: (*, *, *; %d) %e\n",
+         fprintf( file, "*: (*, *, *; %d) %.14e\n",
                   j, data[0] );
       }
       ++data;
@@ -151,7 +170,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
 #include "hypre_box_smp_forloop.h"
          hypre_BoxLoop1For(loopi, loopj, loopk, datai)
             {
-               fprintf(file, "%d: (%d, %d, %d; %d) %e\n",
+               fprintf(file, "%d: (%d, %d, %d; %d) %.14e\n",
                        i,
                        hypre_IndexX(start) + loopi,
                        hypre_IndexY(start) + loopj,
@@ -202,7 +221,7 @@ hypre_PrintCCBoxArrayData( FILE            *file,
 
          for (j = 0; j < num_values; j++)
          {
-         fprintf( file, "*: (*, *, *; %d) %e\n",
+         fprintf( file, "*: (*, *, *; %d) %.14e\n",
                   j, data[datai + j] );
          }
 

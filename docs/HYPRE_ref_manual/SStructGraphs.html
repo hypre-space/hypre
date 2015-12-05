@@ -6,8 +6,7 @@
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>typedef struct   hypre_SStructGraph_struct*  <B>HYPRE_SStructGraph</B>
  <DD><I>
-The graph object is used to describe the nonzero structure of a
-matrix</I>
+The graph object is used to describe the nonzero structure of a matrix</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGraphCreate</B>(MPI_Comm comm, <!1><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> grid, <!2><A HREF="SStructGraphs.html#DOC.2.3.3">HYPRE_SStructGraph</A> *graph)
  <DD><I>
@@ -27,8 +26,7 @@ Add a non-stencil graph entry at a particular index</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGraphSetObjectType.html><B>HYPRE_SStructGraphSetObjectType</B></A> 
  <DD><I>
-It is used before AddEntries and Assemble
-to compute the right ranks in the graph</I>
+Set the storage type of the associated matrix object</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGraphAssemble</B>(<!2><A HREF="SStructGraphs.html#DOC.2.3.3">HYPRE_SStructGraph</A> graph)
  <DD><I>

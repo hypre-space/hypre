@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.5 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.10 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  *
@@ -210,16 +230,16 @@ hypre_PFMG3BuildRAPSym( hypre_StructMatrix *A,
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(RAP);
    constant_coefficient_A = hypre_StructMatrixConstantCoefficient(A);
-   assert( constant_coefficient==0 || constant_coefficient==1 );
-   assert( hypre_StructMatrixConstantCoefficient(R) == constant_coefficient );
-   assert( hypre_StructMatrixConstantCoefficient(P) == constant_coefficient );
+   hypre_assert( constant_coefficient==0 || constant_coefficient==1 );
+   hypre_assert( hypre_StructMatrixConstantCoefficient(R) == constant_coefficient );
+   hypre_assert( hypre_StructMatrixConstantCoefficient(P) == constant_coefficient );
    if (constant_coefficient==1 )
    {
-      assert( constant_coefficient_A==1 );
+      hypre_assert( constant_coefficient_A==1 );
    }
    else
    {
-      assert( constant_coefficient_A==0 || constant_coefficient_A==2 );
+      hypre_assert( constant_coefficient_A==0 || constant_coefficient_A==2 );
    }
 
    fi = 0;
@@ -547,7 +567,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
@@ -1327,7 +1347,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
@@ -2365,7 +2385,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
@@ -2521,6 +2541,12 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
       a_cne_offdm1 = a_cne[iA_offdm1];
       a_cnw_offdm1 = a_cnw[iA_offdm1];
       a_ce_offdm1 = a_ce[iA_offdm1];
+      a_ac_offd = a_ac[iA_offd];
+      a_ac_offdm1 = a_ac[iA_offdm1];
+      a_as_offd = a_as[iA_offd];
+      a_as_offdm1 = a_as[iA_offdm1];
+      a_aw_offd = a_aw[iA_offd];
+      a_aw_offdm1 = a_aw[iA_offdm1];
       a_asw_offd = a_asw[iA_offd];
       a_asw_offdm1 = a_asw[iA_offdm1];
       a_ase_offd = a_ase[iA_offd];
@@ -3159,16 +3185,16 @@ hypre_PFMG3BuildRAPNoSym( hypre_StructMatrix *A,
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(RAP);
    constant_coefficient_A = hypre_StructMatrixConstantCoefficient(A);
-   assert( constant_coefficient==0 || constant_coefficient==1 );
-   assert( hypre_StructMatrixConstantCoefficient(R) == constant_coefficient );
-   assert( hypre_StructMatrixConstantCoefficient(P) == constant_coefficient );
+   hypre_assert( constant_coefficient==0 || constant_coefficient==1 );
+   hypre_assert( hypre_StructMatrixConstantCoefficient(R) == constant_coefficient );
+   hypre_assert( hypre_StructMatrixConstantCoefficient(P) == constant_coefficient );
    if (constant_coefficient==1 )
    {
-      assert( constant_coefficient_A==1 );
+      hypre_assert( constant_coefficient_A==1 );
    }
    else
    {
-      assert( constant_coefficient_A==0 || constant_coefficient_A==2 );
+      hypre_assert( constant_coefficient_A==0 || constant_coefficient_A==2 );
    }
 
    fi = 0;
@@ -3300,7 +3326,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
    double                a_cn_offd, a_cn_offdm1, a_cn_offdp1;
    double                a_ce_offd, a_ce_offdm1, a_ce_offdp1;
    double                a_cs_offdp1, a_cw_offdp1;
-   double                a_ac_offdp1;
+   double                a_ac_offd, a_ac_offdp1;
    double               *rap_ce, *rap_cn;
    double               *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
    double               *rap_cnw, *rap_cne;
@@ -3473,7 +3499,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
@@ -3561,6 +3587,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
       a_ce_offdp1 = a_ce[iA_offdp1];
       a_cs_offdp1 = a_cs[iA_offdp1];
       a_cw_offdp1 = a_cw[iA_offdp1];
+      a_ac_offd   = a_ac[iA_offd];
       a_ac_offdp1 = a_ac[iA_offdp1];
 
       hypre_BoxLoop4Begin(loop_size,
@@ -3582,7 +3609,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
             rap_ae[iAc] = ra[iR] * a_ce_offdp1 * pb[iP1];
  
             iP1 = iP + zOffsetP; 
-            rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
+            rap_ac[iAc] =          a_ac_offd   * pb[iP1]
                +          ra[iR] * a_cc[iAp1] * pb[iP1]
                +          ra[iR] * a_ac_offdp1;
  
@@ -4192,7 +4219,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 
@@ -5174,7 +5201,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
    }
    else
    {
-      zOffsetA_diag = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
       zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
    }
 

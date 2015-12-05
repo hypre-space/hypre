@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.3 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.6 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * HYPRE_StructPFMG interface
@@ -69,7 +89,7 @@ HYPRE_StructPFMGSolve( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetTol
+ * HYPRE_StructPFMGSetTol, HYPRE_StructPFMGGetTol
  *--------------------------------------------------------------------------*/
 
 int
@@ -79,8 +99,15 @@ HYPRE_StructPFMGSetTol( HYPRE_StructSolver solver,
    return( hypre_PFMGSetTol( (void *) solver, tol ) );
 }
 
+int
+HYPRE_StructPFMGGetTol( HYPRE_StructSolver solver,
+                        double           * tol    )
+{
+   return( hypre_PFMGGetTol( (void *) solver, tol ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetMaxIter
+ * HYPRE_StructPFMGSetMaxIter, HYPRE_StructPFMGGetMaxIter
  *--------------------------------------------------------------------------*/
 
 int
@@ -90,8 +117,15 @@ HYPRE_StructPFMGSetMaxIter( HYPRE_StructSolver solver,
    return( hypre_PFMGSetMaxIter( (void *) solver, max_iter ) );
 }
 
+int
+HYPRE_StructPFMGGetMaxIter( HYPRE_StructSolver solver,
+                            int              * max_iter  )
+{
+   return( hypre_PFMGGetMaxIter( (void *) solver, max_iter ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetMaxLevels
+ * HYPRE_StructPFMGSetMaxLevels, HYPRE_StructPFMGGetMaxLevels
  *--------------------------------------------------------------------------*/
 
 int
@@ -101,8 +135,15 @@ HYPRE_StructPFMGSetMaxLevels( HYPRE_StructSolver solver,
    return( hypre_PFMGSetMaxLevels( (void *) solver, max_levels ) );
 }
 
+int
+HYPRE_StructPFMGGetMaxLevels( HYPRE_StructSolver solver,
+                              int              * max_levels  )
+{
+   return( hypre_PFMGGetMaxLevels( (void *) solver, max_levels ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetRelChange
+ * HYPRE_StructPFMGSetRelChange, HYPRE_StructPFMGGetRelChange
  *--------------------------------------------------------------------------*/
 
 int
@@ -112,14 +153,28 @@ HYPRE_StructPFMGSetRelChange( HYPRE_StructSolver solver,
    return( hypre_PFMGSetRelChange( (void *) solver, rel_change ) );
 }
 
+int
+HYPRE_StructPFMGGetRelChange( HYPRE_StructSolver solver,
+                              int              * rel_change  )
+{
+   return( hypre_PFMGGetRelChange( (void *) solver, rel_change ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetZeroGuess
+ * HYPRE_StructPFMGSetZeroGuess, HYPRE_StructPFMGGetZeroGuess
  *--------------------------------------------------------------------------*/
  
 int
 HYPRE_StructPFMGSetZeroGuess( HYPRE_StructSolver solver )
 {
    return( hypre_PFMGSetZeroGuess( (void *) solver, 1 ) );
+}
+
+int
+HYPRE_StructPFMGGetZeroGuess( HYPRE_StructSolver solver,
+                              int * zeroguess )
+{
+   return( hypre_PFMGGetZeroGuess( (void *) solver, zeroguess ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -133,7 +188,7 @@ HYPRE_StructPFMGSetNonZeroGuess( HYPRE_StructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetRelaxType
+ * HYPRE_StructPFMGSetRelaxType, HYPRE_StructPFMGGetRelaxType
  *--------------------------------------------------------------------------*/
 
 int
@@ -143,8 +198,15 @@ HYPRE_StructPFMGSetRelaxType( HYPRE_StructSolver solver,
    return( hypre_PFMGSetRelaxType( (void *) solver, relax_type) );
 }
 
+int
+HYPRE_StructPFMGGetRelaxType( HYPRE_StructSolver solver,
+                              int              * relax_type )
+{
+   return( hypre_PFMGGetRelaxType( (void *) solver, relax_type) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetRAPType
+ * HYPRE_StructPFMGSetRAPType, HYPRE_StructPFMGGetRAPType
  *--------------------------------------------------------------------------*/
 
 int
@@ -154,8 +216,15 @@ HYPRE_StructPFMGSetRAPType( HYPRE_StructSolver solver,
    return( hypre_PFMGSetRAPType( (void *) solver, rap_type) );
 }
 
+int
+HYPRE_StructPFMGGetRAPType( HYPRE_StructSolver solver,
+                            int              * rap_type )
+{
+   return( hypre_PFMGGetRAPType( (void *) solver, rap_type) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetNumPreRelax
+ * HYPRE_StructPFMGSetNumPreRelax, HYPRE_StructPFMGGetNumPreRelax
  *--------------------------------------------------------------------------*/
 
 int
@@ -165,8 +234,15 @@ HYPRE_StructPFMGSetNumPreRelax( HYPRE_StructSolver solver,
    return( hypre_PFMGSetNumPreRelax( (void *) solver, num_pre_relax) );
 }
 
+int
+HYPRE_StructPFMGGetNumPreRelax( HYPRE_StructSolver solver,
+                                int              * num_pre_relax )
+{
+   return( hypre_PFMGGetNumPreRelax( (void *) solver, num_pre_relax) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetNumPostRelax
+ * HYPRE_StructPFMGSetNumPostRelax, HYPRE_StructPFMGGetNumPostRelax
  *--------------------------------------------------------------------------*/
 
 int
@@ -176,8 +252,15 @@ HYPRE_StructPFMGSetNumPostRelax( HYPRE_StructSolver solver,
    return( hypre_PFMGSetNumPostRelax( (void *) solver, num_post_relax) );
 }
 
+int
+HYPRE_StructPFMGGetNumPostRelax( HYPRE_StructSolver solver,
+                                 int              * num_post_relax )
+{
+   return( hypre_PFMGGetNumPostRelax( (void *) solver, num_post_relax) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetSkipRelax
+ * HYPRE_StructPFMGSetSkipRelax, HYPRE_StructPFMGGetSkipRelax
  *--------------------------------------------------------------------------*/
 
 int
@@ -187,8 +270,15 @@ HYPRE_StructPFMGSetSkipRelax( HYPRE_StructSolver solver,
    return( hypre_PFMGSetSkipRelax( (void *) solver, skip_relax) );
 }
 
+int
+HYPRE_StructPFMGGetSkipRelax( HYPRE_StructSolver solver,
+                              int              * skip_relax )
+{
+   return( hypre_PFMGGetSkipRelax( (void *) solver, skip_relax) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetDxyz
+ * HYPRE_StructPFMGSetDxyz, HYPRE_StructPFMGGetDxyz
  *--------------------------------------------------------------------------*/
 
 int
@@ -199,7 +289,7 @@ HYPRE_StructPFMGSetDxyz( HYPRE_StructSolver  solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetLogging
+ * HYPRE_StructPFMGSetLogging, HYPRE_StructPFMGGetLogging
  *--------------------------------------------------------------------------*/
 
 int
@@ -209,8 +299,15 @@ HYPRE_StructPFMGSetLogging( HYPRE_StructSolver solver,
    return( hypre_PFMGSetLogging( (void *) solver, logging) );
 }
 
+int
+HYPRE_StructPFMGGetLogging( HYPRE_StructSolver solver,
+                            int              * logging )
+{
+   return( hypre_PFMGGetLogging( (void *) solver, logging) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetPrintLevel
+ * HYPRE_StructPFMGSetPrintLevel, HYPRE_StructPFMGGetPrintLevel
  *--------------------------------------------------------------------------*/
 
 int
@@ -218,6 +315,13 @@ HYPRE_StructPFMGSetPrintLevel( HYPRE_StructSolver solver,
                             int                  print_level )
 {
    return( hypre_PFMGSetPrintLevel( (void *) solver, print_level) );
+}
+
+int
+HYPRE_StructPFMGGetPrintLevel( HYPRE_StructSolver solver,
+                            int                * print_level )
+{
+   return( hypre_PFMGGetPrintLevel( (void *) solver, print_level) );
 }
 
 /*--------------------------------------------------------------------------

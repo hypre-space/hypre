@@ -1,10 +1,9 @@
 //
 // File:	BaseInterface.java
 // Package:	gov.llnl.sidl
-// Release:	$Name: V1-9-0b $
-// Revision:	$Revision: 1.4 $
-// Modified:	$Date: 2003/04/07 21:44:22 $
-// Description:	base interface for the SIDL Java runtime system
+// Revision:	$Revision: 1.10 $
+// Modified:	$Date: 2006/08/29 22:29:18 $
+// Description:	base interface for the sidl Java runtime system
 //
 // Copyright (c) 2000-2001, The Regents of the University of Calfornia.
 // Produced at the Lawrence Livermore National Laboratory.
@@ -33,26 +32,48 @@
 package gov.llnl.sidl;
 
 /**
- * Interface <code>BaseInterface</code> is the base interface for all SIDL
+ * Interface <code>BaseInterface</code> is the base interface for all sidl
  * Java classes in the run-time system.  This class provides support for
  * obtaining the IOR pointer using the <code>_get_ior</code> method.
  */
 public interface BaseInterface {
   /**
-   * Return a long reference to the SIDL IOR object.
+   * Return a long reference to the sidl IOR object.
    */
   abstract public long _get_ior();
 
   /**
-   * Cast this object to the specified SIDL name.  If the cast is invalid,
+   * Cast this object to the specified sidl name.  If the cast is invalid,
    * then return null.  If the cast is successful, then the returned object
    * can be cast to the proper Java type using a standard Java cast.
    */
-  abstract public BaseInterface _cast(String name);
+  abstract public BaseInterface _cast2(String name);
 
   /**
-   * The <code>addRef</code> method will be implemented by the SIDL
+   * The <code>addRef</code> method will be implemented by the sidl
    * base object class.
    */
   public abstract void addRef();
+
+  /**
+   * Returns the URL of this object
+   */
+  public abstract String _getURL();
+
+  /**
+   * Returns true if this object is remotely implemented, false otherwise
+   */
+  public abstract boolean _isRemote();
+
+  /**
+   * Returns true if this object is locally implemented, false otherwise
+   */
+  public abstract boolean _isLocal();
+
+  /**
+   * calls a method by name
+   */
+  //public abstract void _exec(String methodName, sidl.rmi.Call inArgs, sidl.rmi.Return outArgs);
+
+
 }

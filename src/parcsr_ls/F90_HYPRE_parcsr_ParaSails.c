@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.1 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.5 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * HYPRE_ParaSails Fortran interface
@@ -96,7 +116,57 @@ hypre_F90_IFACE(hypre_parasailssetparams, HYPRE_PARASAILSSETPARAMS)(
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsSetFilter
+ * HYPRE_ParaSailsSetThresh,  HYPRE_ParaSailsGetThresh
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_parasailssetthresh, HYPRE_PARASAILSSETTHRESH)(
+                                                 long int *solver,
+                                                 double   *thresh,
+                                                 int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParaSailsSetThresh( (HYPRE_Solver) *solver, 
+                                             (double)       *thresh ) );
+}
+
+
+void 
+hypre_F90_IFACE(hypre_parasailsgetthresh, HYPRE_PARASAILSGETTHRESH)(
+                                                 long int *solver,
+                                                 double   *thresh,
+                                                 int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParaSailsGetThresh( (HYPRE_Solver) *solver, 
+                                             (double *)      thresh ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsSetNlevels,  HYPRE_ParaSailsGetNlevels
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_parasailssetnlevels, HYPRE_PARASAILSSETNLEVELS)(
+                                                 long int *solver,
+                                                 int      *nlevels,
+                                                 int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParaSailsSetNlevels( (HYPRE_Solver) *solver, 
+                                              (int)          *nlevels) );
+}
+
+
+void 
+hypre_F90_IFACE(hypre_parasailsgetnlevels, HYPRE_PARASAILSGETNLEVELS)(
+                                                 long int *solver,
+                                                 int      *nlevels,
+                                                 int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParaSailsGetNlevels( (HYPRE_Solver) *solver, 
+                                              (int *)         nlevels) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsSetFilter, HYPRE_ParaSailsGetFilter
  *--------------------------------------------------------------------------*/
 
 void
@@ -109,8 +179,19 @@ hypre_F90_IFACE(hypre_parasailssetfilter, HYPRE_PARASAILSSETFILTER)(
                                              (double)       *filter  ) );
 }
 
+
+void
+hypre_F90_IFACE(hypre_parasailsgetfilter, HYPRE_PARASAILSGETFILTER)(
+                                                 long int *solver,
+                                                 double   *filter,
+                                                 int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParaSailsGetFilter( (HYPRE_Solver) *solver, 
+                                             (double *)      filter  ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_ParaSailsSetSym
+ * HYPRE_ParaSailsSetSym, HYPRE_ParaSailsGetSym
  *--------------------------------------------------------------------------*/
 
 void
@@ -122,8 +203,67 @@ hypre_F90_IFACE(hypre_parasailssetsym, HYPRE_PARASAILSSETSYM)(
    *ierr = (int) ( HYPRE_ParaSailsSetSym( (HYPRE_Solver) *solver, 
                                           (int)          *sym     ) );
 }
+
+void
+hypre_F90_IFACE(hypre_parasailsgetsym, HYPRE_PARASAILSGETSYM)(
+                                              long int *solver,
+                                              int      *sym,
+                                              int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParaSailsGetSym( (HYPRE_Solver) *solver, 
+                                          (int *)         sym     ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_ParaSailsSetLogging
+ * HYPRE_ParaSailsSetLoadbal, HYPRE_ParaSailsGetLoadbal
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parasailssetloadbal, HYPRE_PARASAILSSETLOADBAL)(
+                                              long int *solver,
+                                              double   *loadbal,
+                                              int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParaSailsSetLoadbal( (HYPRE_Solver) *solver, 
+                                              (double)       *loadbal ) );
+}
+
+void
+hypre_F90_IFACE(hypre_parasailsgetloadbal, HYPRE_PARASAILSGETLOADBAL)(
+                                              long int *solver,
+                                              double   *loadbal,
+                                              int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParaSailsGetLoadbal( (HYPRE_Solver) *solver, 
+                                              (double *)      loadbal ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsSetReuse, HYPRE_ParaSailsGetReuse
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parasailssetreuse, HYPRE_PARASAILSSETREUSE)(
+                                              long int *solver,
+                                              int      *reuse,
+                                              int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParaSailsSetReuse( (HYPRE_Solver) *solver, 
+                                              (int)          *reuse ) );
+}
+
+void
+hypre_F90_IFACE(hypre_parasailsgetreuse, HYPRE_PARASAILSGETREUSE)(
+                                              long int *solver,
+                                              int      *reuse,
+                                              int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParaSailsGetReuse( (HYPRE_Solver) *solver, 
+                                              (int *)         reuse ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsSetLogging, HYPRE_ParaSailsGetLogging
  *--------------------------------------------------------------------------*/
 
 void
@@ -134,4 +274,14 @@ hypre_F90_IFACE(hypre_parasailssetlogging, HYPRE_PARASAILSSETLOGGING)(
 {
    *ierr = (int) ( HYPRE_ParaSailsSetLogging( (HYPRE_Solver) *solver, 
                                               (int)          *logging ) );
+}
+
+void
+hypre_F90_IFACE(hypre_parasailsgetlogging, HYPRE_PARASAILSGETLOGGING)(
+                                              long int *solver,
+                                              int      *logging,
+                                              int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParaSailsGetLogging( (HYPRE_Solver) *solver, 
+                                              (int *)         logging ) );
 }

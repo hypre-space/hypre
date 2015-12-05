@@ -1,11 +1,10 @@
 /*
- * File:        SIDLObjA.h
- * Package:     SIDL Python Object Adaptor
+ * File:        sidlObjA.h
+ * Package:     sidl Python Object Adaptor
  * Copyright:   (c) 2001 The Regents of the University of California
- * Release:     $Name: V1-9-0b $
- * Revision:    @(#) $Revision: 1.4 $
- * Date:        $Date: 2003/04/07 21:44:24 $
- * Description: A Python C extension type to wrap up SIDL objects/interfaces
+ * Revision:    @(#) $Revision: 1.5 $
+ * Date:        $Date: 2006/08/29 22:29:27 $
+ * Description: A Python C extension type to wrap up sidl objects/interfaces
  *
  * Copyright (c) 2000-2001, The Regents of the University of Calfornia.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -32,139 +31,153 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef included_SIDLObjA_h
-#define included_SIDLObjA_h
+#ifndef included_sidlObjA_h
+#define included_sidlObjA_h
 
 /**
  * This header defines the external API for a Python
  * (c.f. http://www.python.org/ ) C extension types to expose
- * instances of SIDL classes and interfaces in Python. The C extension
- * type essentially wraps the SIDL class/interface in a Python object,
+ * instances of sidl classes and interfaces in Python. The C extension
+ * type essentially wraps the sidl class/interface in a Python object,
  * so it can be manipulated by a Python program.
  *
  * Here is a brief summary of the methods that external clients are
  * allowed to use: 
- *   SIDL_Object_Create    create a Python object to wrap an instance
- *                         of a SIDL class
- *   SIDL_Interface_Create create a Python object to wrap a SIDL
- *                         interface
- *   SIDL_Interface_Check  get abstract interface pointer or check if
- *                         SIDL interface 
- *   SIDL_Get_IOR          get the IOR (independent object
- *                         representation) pointer for an SIDL object
+ *   sidl_Object_Init      initialize a Python object to wrap an instance
+ *                         of a sidl class
+ *   sidl_Get_IOR          get the IOR (independent object
+ *                         representation) pointer for an sidl object
  *                         or interface. This can also be used to make
  *                         a quick check whether a Python object is
- *                         a wrapped SIDL object or interface.
- *   SIDL_Cast             see if a Python object/interface is
- *                         castable to a particular SIDL
+ *                         a wrapped sidl object or interface.
+ *   sidl_Cast             see if a Python object/interface is
+ *                         castable to a particular sidl
  *                         object/interface.
- *   SIDL_Opaque_Create    create a PyCObject to wrap an SIDL
+ *   sidl_Opaque_Create    create a PyCObject to wrap an sidl
  *                         <code>opaque</code> type. The signature
  *                         of this method matches the signature
  *                         needed for a "O&" in a Py_BuildValue
  *                         call.
- *   SIDL_Opaque_Convert   convert a PyCObject to a void * with
+ *   sidl_Opaque_Convert   convert a PyCObject to a void * with
  *                         a signature compatible for "O&" in
  *                         PyArg_ParseTuple call.
- *   SIDL_PyExceptionCast  a wrapper for SIDL_BaseException__cast.
+ *   sidl_PyExceptionCast  a wrapper for sidl_BaseInterface__cast.
  *                         It's defined to minimize the headers
  *                         that a Python module needs.
  *
  */
 
-#include "babel_config.h"
 #include <Python.h>
+#include "babel_config.h"
 
 /* forward declarations of structures */
-struct SIDL_BaseClass__object;
-struct SIDL_BaseInterface__object;
-struct SIDL_BaseException__object;
+struct sidl_BaseInterface__object;
 
-enum SIDL_PyRefTypes {
-  SIDL_PyStealRef,
-  SIDL_PyWeakRef,
-  SIDL_PyNewRef
+enum sidl_PyRefTypes {
+  sidl_PyStealRef,
+  sidl_PyWeakRef,
+  sidl_PyNewRef
 };
 
+/**
+ * This defines the Python object wrapper for a sidl object or interface.
+ * This one Python extension type written in C can support an arbitrary
+ * class or interface. The peculiarities of a particular class or interface
+ * are stored in the d_methods member which defines what the object
+ * can do.
+ */
+struct sidlPythonObject {
+  PyObject_HEAD                 /* standard Python object header */
+
+  /* sidl specific extensions */
+  struct sidl_BaseInterface__object   *d_ior;
+  int				       d_refType;
+};
+
+/**
+ * This <code>typedef</code> is required by PyObject_NEW; otherwise,
+ * it is unused.
+ */
+typedef struct sidlPythonObject SPObject;
+
 /* C API Functions */
-#define SIDL_Interface_Create_NUM 0
-#define SIDL_Interface_Create_RETURN PyObject *
-#define SIDL_Interface_Create_PROTO \
-  (struct SIDL_BaseInterface__object *abint, \
-   PyMethodDef *methods, \
-   int refType)
-
-#define SIDL_Interface_Check_NUM 1
-#define SIDL_Interface_Check_RETURN struct SIDL_BaseInterface__object *
-#define SIDL_Interface_Check_PROTO (PyObject *obj)
-
-#define SIDL_Object_Create_NUM 2
-#define SIDL_Object_Create_RETURN PyObject *
-#define SIDL_Object_Create_PROTO \
-   (struct SIDL_BaseClass__object *ior, \
-    PyMethodDef *methods, \
+#define sidl_Object_Init_NUM 0
+#define sidl_Object_Init_RETURN int
+#define sidl_Object_Init_PROTO \
+   (SPObject *sidlObject, \
+    struct sidl_BaseInterface__object *ior, \
     int refType)
 
-#define SIDL_Get_IOR_NUM 3
-#define SIDL_Get_IOR_RETURN struct SIDL_BaseClass__object *
-#define SIDL_Get_IOR_PROTO (PyObject *obj)
+#define sidl_Get_IOR_NUM 1
+#define sidl_Get_IOR_RETURN struct sidl_BaseInterface__object *
+#define sidl_Get_IOR_PROTO (PyObject *obj)
 
-#define SIDL_Cast_NUM 4
-#define SIDL_Cast_RETURN void *
-#define SIDL_Cast_PROTO (PyObject *obj, char *name)
+#define sidl_Cast_NUM 2
+#define sidl_Cast_RETURN void *
+#define sidl_Cast_PROTO (PyObject *obj, char *name)
 
-#define SIDL_Opaque_Create_NUM 5
-#define SIDL_Opaque_Create_RETURN PyObject *
-#define SIDL_Opaque_Create_PROTO (void *opaque_ptr)
+#define sidl_Opaque_Create_NUM 3
+#define sidl_Opaque_Create_RETURN PyObject *
+#define sidl_Opaque_Create_PROTO (void *opaque_ptr)
 
-#define SIDL_Opaque_Convert_NUM 6
-#define SIDL_Opaque_Convert_RETURN int
-#define SIDL_Opaque_Convert_PROTO (PyObject *obj, void **opaque_ptr)
+#define sidl_Opaque_Convert_NUM 4
+#define sidl_Opaque_Convert_RETURN int
+#define sidl_Opaque_Convert_PROTO (PyObject *obj, void **opaque_ptr)
 
-#define SIDL_PyExceptionCast_NUM 7
-#define SIDL_PyExceptionCast_RETURN void *
-#define SIDL_PyExceptionCast_PROTO \
-  (struct SIDL_BaseException__object *ex, const char *name)
+#define sidl_PyExceptionCast_NUM 5
+#define sidl_PyExceptionCast_RETURN void *
+#define sidl_PyExceptionCast_PROTO \
+  (struct sidl_BaseInterface__object *ex, const char *name)
 
-#define SIDL_PyType_NUM 8
-#define SIDL_PyType_RETURN PyObject *
-#define SIDL_PyType_PROTO \
+#define sidl_PyType_NUM 6
+#define sidl_PyType_RETURN PyTypeObject *
+#define sidl_PyType_PROTO \
   (void)
 
-#define SIDL_API_pointers 9
+#define sidl_Handle_Unexpected_NUM 7
+#define sidl_Handle_Unexpected_RETURN struct sidl_BaseInterface__object *
+#define sidl_Handle_Unexpected_PROTO \
+  (const char *func)
 
-#ifdef SIDLOBJA_MODULE
+#define sidl_AddTrace_NUM 8
+#define sidl_AddTrace_RETURN void
+#define sidl_AddTrace_PROTO \
+  (PyObject *exc, const char *func)
+
+#define sidl_API_pointers 9
+
+#ifdef sidlOBJA_MODULE
 /*
- * This branch should only be taken in the implementation of SIDLObjA.h in
- * SIDLObjA.c. No clients should define SIDLOBJA_MODULE!
+ * This branch should only be taken in the implementation of sidlObjA.h in
+ * sidlObjA.c. No clients should define sidlOBJA_MODULE!
  *
  */
-static SIDL_Object_Create_RETURN
-SIDL_Object_Create SIDL_Object_Create_PROTO;
+static sidl_Object_Init_RETURN
+sidl_Object_Init sidl_Object_Init_PROTO;
 
-static SIDL_Get_IOR_RETURN
-SIDL_Get_IOR SIDL_Get_IOR_PROTO;
+static sidl_Get_IOR_RETURN
+sidl_Get_IOR sidl_Get_IOR_PROTO;
 
-static SIDL_Interface_Create_RETURN
-SIDL_Interface_Create SIDL_Interface_Create_PROTO;
+static sidl_Cast_RETURN
+sidl_Cast sidl_Cast_PROTO;
 
-static SIDL_Interface_Check_RETURN
-SIDL_Interface_Check  SIDL_Interface_Check_PROTO;
+static sidl_Opaque_Create_RETURN
+sidl_Opaque_Create sidl_Opaque_Create_PROTO;
 
-static SIDL_Cast_RETURN
-SIDL_Cast SIDL_Cast_PROTO;
+static sidl_Opaque_Convert_RETURN
+sidl_Opaque_Convert sidl_Opaque_Convert_PROTO;
 
-static SIDL_Opaque_Create_RETURN
-SIDL_Opaque_Create SIDL_Opaque_Create_PROTO;
+static sidl_PyExceptionCast_RETURN
+sidl_PyExceptionCast sidl_PyExceptionCast_PROTO;
 
-static SIDL_Opaque_Convert_RETURN
-SIDL_Opaque_Convert SIDL_Opaque_Convert_PROTO;
+static sidl_PyType_RETURN
+sidl_PyType sidl_PyType_PROTO;
 
-static SIDL_PyExceptionCast_RETURN
-SIDL_PyExceptionCast SIDL_PyExceptionCast_PROTO;
+static sidl_Handle_Unexpected_RETURN
+sidl_Handle_Unexpected sidl_Handle_Unexpected_PROTO;
 
-static SIDL_PyType_RETURN
-SIDL_PyType SIDL_PyType_PROTO;
+static sidl_AddTrace_RETURN
+sidl_AddTrace sidl_AddTrace_PROTO;
 
 #else
 /*
@@ -172,160 +185,127 @@ SIDL_PyType SIDL_PyType_PROTO;
  *
  */
 
-static void **SIDL_Object_Adaptor_API;
+static void **sidl_Object_Adaptor_API;
 
 /**
  * PyObject *
- * SIDL_Object_Create(struct SIDL_BaseClass__object *ior,
- *                    PyMethodDef *methods,
+ * sidl_Object_Init(struct sidl_BaseInterface__object *ior,
  *                    int refType)
  *
- * This macro creates a wrapper object for a non-NULL SIDL ior.
+ * This macro creates a wrapper object for a non-NULL sidl ior.
  * If <code>methods</code> is NULL, it will return NULL and set
  * a Python AssertionError exception.
  * If <code>ior</code> is NULL, Py_None is returned.
  *
- * If <code>refType</code> is SIDL_PyStealRef, this takes ownership of one
+ * If <code>refType</code> is sidl_PyStealRef, this takes ownership of one
  * reference to <code>ior</code>.  If <code>ior</code> is non-NULL and the
  * create fails for any reason, it will delete its reference to
  * <code>ior</code>. 
  *
- * If <code>refType</code> is SIDL_PyWeakRef, this function will borrow a
+ * If <code>refType</code> is sidl_PyWeakRef, this function will borrow a
  * reference.  It will not increase or decrease the reference count of
  * <code>ior</code> under any circumstance (even when the Python object is
  * garbage collected). This behavior is needed primarily for server side
  * Python which provides a Python wrapper for its  own IOR pointer. 
  *
- * If <code>refType</code> is SIDL_PyNewRef, this function will increment
+ * If <code>refType</code> is sidl_PyNewRef, this function will increment
  * the reference count of <code>ior</code> if the wrapper can be created.
  * When the Python object is garbage collected, it will delete this
  * reference.
  */
-#define SIDL_Object_Create \
-(*(SIDL_Object_Create_RETURN (*)SIDL_Object_Create_PROTO) \
-SIDL_Object_Adaptor_API[SIDL_Object_Create_NUM])
+#define sidl_Object_Init \
+(*(sidl_Object_Init_RETURN (*)sidl_Object_Init_PROTO) \
+sidl_Object_Adaptor_API[sidl_Object_Init_NUM])
 
 /**
- * struct SIDL_BaseClass__object *
- * SIDL_Get_IOR(PyObject *obj)
- * If obj is an instance of the SIDL object/interface C extension
+ * struct sidl_BaseInterface__object *
+ * sidl_Get_IOR(PyObject *obj)
+ * If obj is an instance of the sidl object/interface C extension
  * class, return a non-NULL IOR pointer; otherwise, return NULL. This
- * is a safe and quick way to check if this is a wrapped SIDL object
+ * is a safe and quick way to check if this is a wrapped sidl object
  * or interface. 
  */
-#define SIDL_Get_IOR \
-(*(SIDL_Get_IOR_RETURN (*)SIDL_Get_IOR_PROTO) \
-SIDL_Object_Adaptor_API[SIDL_Get_IOR_NUM])
-
-/**
- * PyObject *
- * SIDL_Interface_Create(struct SIDL_BaseClass__object *abint,
- *                       PyMethodDef *methods,
- *                       int refType)
- *
- * This macro creates a wrapper object for a non-NULL SIDL abstract
- * interface. If methods is NULL, it will return NULL and set a 
- * Python AssertionError exception. If abint is NULL, Py_None is
- * returned.
- * 
- * If <code>refType</code> is SIDL_PyStealRef, this takes ownership of one
- * reference to <code>abint</code>.  If <code>abint</code> is non-NULL and
- * the create fails for any reason, it will delete its reference to
- * <code>abint</code>. 
- *
- * If <code>refType</code> is SIDL_PyWeakRef, this function will borrow a
- * reference.  It will not increase or decrease the reference count of
- * <code>abint</code> under any circumstance (even when the Python object is
- * garbage collected). This behavior is needed primarily for server side
- * Python which provides a Python wrapper for its  own IOR pointer. 
- *
- * If <code>refType</code> is SIDL_PyNewRef, this function will increment
- * the reference count of <code>abint</code> if the wrapper can be created.
- * When the Python object is garbage collected, it will delete this
- * reference.
- */
-#define SIDL_Interface_Create \
-(*(SIDL_Interface_Create_RETURN (*)SIDL_Interface_Create_PROTO) \
-SIDL_Object_Adaptor_API[SIDL_Interface_Create_NUM])
-
-/**
- * struct SIDL_BaseInterface__object *
- * SIDL_Interface_Check(PyObject *obj)
- * If obj is an instance of the SIDL object C extension class and it
- * wraps an interface, return a non-NULL IOR pointer; 
- * otherwise, return NULL.
- */
-#define SIDL_Interface_Check \
-(*(SIDL_Interface_Check_RETURN (*)SIDL_Interface_Check_PROTO) \
-SIDL_Object_Adaptor_API[SIDL_Interface_Check_NUM])
+#define sidl_Get_IOR \
+(*(sidl_Get_IOR_RETURN (*)sidl_Get_IOR_PROTO) \
+sidl_Object_Adaptor_API[sidl_Get_IOR_NUM])
 
 /**
  * void *
- * SIDL_Cast(PyObject *obj, const char *typename)
+ * sidl_Cast(PyObject *obj, const char *typename)
  * If obj is an instance of the BABEL object C extension class and it is
  * castable to typename, return the IOR or interface pointer. The client
  * is expected to know to what the return value should be cast.
- * If obj is not an instance of a SIDL object C extension class or it
+ * If obj is not an instance of a sidl object C extension class or it
  * is not castable to typename, NULL is returned.
  */
-#define SIDL_Cast \
-(*(SIDL_Cast_RETURN (*)SIDL_Cast_PROTO) \
-SIDL_Object_Adaptor_API[SIDL_Cast_NUM])
+#define sidl_Cast \
+(*(sidl_Cast_RETURN (*)sidl_Cast_PROTO) \
+sidl_Object_Adaptor_API[sidl_Cast_NUM])
 
 /**
  * PyObject *
- * SIDL_Opaque_Create(void *opaque_ptr)
- * Create a PyCObject to hold this SIDL opaque pointer. This function
+ * sidl_Opaque_Create(void *opaque_ptr)
+ * Create a PyCObject to hold this sidl opaque pointer. This function
  * is intended for use in a Py_BuildValue call associated with a "O&"
  * format element.
  */
-#define SIDL_Opaque_Create \
-(*(SIDL_Opaque_Create_RETURN (*)SIDL_Opaque_Create_PROTO) \
-SIDL_Object_Adaptor_API[SIDL_Opaque_Create_NUM])
+#define sidl_Opaque_Create \
+(*(sidl_Opaque_Create_RETURN (*)sidl_Opaque_Create_PROTO) \
+sidl_Object_Adaptor_API[sidl_Opaque_Create_NUM])
 
 /**
  * int
- * SIDL_Opaque_Convert(PyObject *obj, void **opaque_ptr)
+ * sidl_Opaque_Convert(PyObject *obj, void **opaque_ptr)
  * If obj is a PyCObject, put the void * from the PyCObject into
  * *opaque_ptr. If this succeeds, 1 is returned. If obj is not a
  * PyCObject is not a PyCObject, 0 is returned.
  */
-#define SIDL_Opaque_Convert \
-(*(SIDL_Opaque_Convert_RETURN (*)SIDL_Opaque_Convert_PROTO) \
-SIDL_Object_Adaptor_API[SIDL_Opaque_Convert_NUM])
+#define sidl_Opaque_Convert \
+(*(sidl_Opaque_Convert_RETURN (*)sidl_Opaque_Convert_PROTO) \
+sidl_Object_Adaptor_API[sidl_Opaque_Convert_NUM])
 
 /**
  * void *
- * SIDL_PyExceptionCast(struct SIDL_BaseException__object *obj,
+ * sidl_PyExceptionCast(struct sidl_BaseInterface__object *obj,
  *                      const char *name)
- * This is a wrapper for the SIDL_BaseException__cast method.
+ * This is a wrapper for the sidl_BaseInterface__cast method.
  * This will try to case obj to type name.  A NULL return value
  * means the cast was unsuccessful; a non-NULL return value
  * means the cast was successful.
  * 
  * It's defined to minimize the headers that a Python module needs.
  */
-#define SIDL_PyExceptionCast \
-(*(SIDL_PyExceptionCast_RETURN (*)SIDL_PyExceptionCast_PROTO) \
-SIDL_Object_Adaptor_API[SIDL_PyExceptionCast_NUM])
+#define sidl_PyExceptionCast \
+(*(sidl_PyExceptionCast_RETURN (*)sidl_PyExceptionCast_PROTO) \
+sidl_Object_Adaptor_API[sidl_PyExceptionCast_NUM])
 
-#define SIDL_PyType \
-(*(SIDL_PyType_RETURN (*)SIDL_PyType_PROTO) \
-SIDL_Object_Adaptor_API[SIDL_PyType_NUM])
+#define sidl_PyType \
+(*(sidl_PyType_RETURN (*)sidl_PyType_PROTO) \
+sidl_Object_Adaptor_API[sidl_PyType_NUM])
+
+#define sidl_Handle_Unexpected \
+(*(sidl_Handle_Unexpected_RETURN (*)sidl_Handle_Unexpected_PROTO) \
+sidl_Object_Adaptor_API[sidl_Handle_Unexpected_NUM])
+
+#define sidl_AddTrace \
+(*(sidl_AddTrace_RETURN (*)sidl_AddTrace_PROTO) \
+sidl_Object_Adaptor_API[sidl_AddTrace_NUM])
 
 
 #define import_SIDLObjA() \
 { \
-  PyObject *module = PyImport_ImportModule("SIDLObjA"); \
+  PyObject *module = PyImport_ImportModule("sidlObjA"); \
   if (module != NULL) { \
     PyObject *module_dict = PyModule_GetDict(module); \
     PyObject *c_api_object = PyDict_GetItemString(module_dict, "_C_API"); \
     if (PyCObject_Check(c_api_object)) { \
-       SIDL_Object_Adaptor_API = (void **)PyCObject_AsVoidPtr(c_api_object); \
+       sidl_Object_Adaptor_API = (void **)PyCObject_AsVoidPtr(c_api_object); \
     } \
+    else { fprintf(stderr, "babel: import_sidlObjA failed to lookup _C_API (%p).\n", c_api_object); }\
     Py_DECREF(module); \
   } \
+  else { fprintf(stderr, "babel: import_sidlObjA failed to import its module.\n"); }\
 }
 #endif
 
-#endif /*  included_SIDLObjA_h */
+#endif /*  included_sidlObjA_h */

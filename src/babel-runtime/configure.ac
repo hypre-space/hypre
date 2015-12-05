@@ -22,7 +22,7 @@
 #  Libtool Options
 #  Cygwin conditional Makefile Support
 #  Shared/Dynamic Library Details
-#  babel_config.h headers and footers
+#  babel_internal.h headers and footers
 #  File Generation
 
 ############################################################
@@ -43,26 +43,19 @@ msgs="
 #
 # Basic startup stuff
 #
-AC_INIT(babel-runtime, 0.8.4, components@llnl.gov)
-AC_CONFIG_SRCDIR([sidl/SIDLArray.h])
+AC_INIT([babel-runtime],[1.0.0],[babel-bugs@cca-forum.org])
+AC_CONFIG_SRCDIR([sidl/sidlArray.h])
 AC_CONFIG_AUX_DIR([config])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_TARGET
 
-AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER([sidl/babel_config.h])
+AM_INIT_AUTOMAKE([foreign no-dependencies no-installinfo no-installman no-texinfo.tex 1.8])
+AC_CONFIG_HEADERS([sidl/babel_internal.h])
+AC_DEFINE([BABEL_VERSION_HEX],[0x01000000],
+	[Hexified form of release number: 2 hex digits each for major, minor, bugfix, and alpha/beta/candidate/distributed ])
 
-LLNL_CHECK_AUTOMAKE(1.7.1)
-LLNL_CHECK_AUTOCONF(2.54)
-
-
-############################################################
-#
-# Additions for hypre
-#
-AC_PREFIX_DEFAULT(`pwd`/../hypre)
-with_fortran90=no
-# ... was with_fortran90=yes    which doesn't work on frost
-enable_shared=no
+LLNL_CHECK_AUTOMAKE(1.9.6)
+LLNL_CHECK_AUTOCONF(2.59)
 
 
 ############################################################
@@ -71,22 +64,50 @@ enable_shared=no
 #
 AM_CONDITIONAL(BABEL_RUNTIME_ONLY, ! ((grep UCRL-CODE-2002-054 $srcdir/../COPYRIGHT > /dev/null 2>&1) && (test -e ../bin/babel) ))
 
+AC_PROG_CC
+############################################################
+#
+# F90 Compiler
+#
+LLNL_CONFIRM_BABEL_F90_SUPPORT
+if test "X$enable_fortran90" = "Xyes"; then #begin real F90 checking
+LLNL_CONFIRM_BABEL_F90_SUPPORT2 
+fi #end real F90 checking
+LLNL_CONFIRM_BABEL_F90_SUPPORT3
+
+# XML
+LLNL_LIBXML_CONFIG
+LLNL_PROG_TEST_EF
+AC_PROG_LD
+
+# CCA
+CCA_BUNDLE_TAG
+
+############################################################
+#
+# Python Support.
+#
+LLNL_CONFIRM_BABEL_PYTHON_SUPPORT
+
 ############################################################
 #
 # Critical applications.
 #
 AC_PROG_INSTALL
-AC_PROG_AWK
 AC_PROG_CPP
+AC_PROG_AWK
 AC_PROG_LD
 AC_PROG_LN_S
-AC_CHECK_PROGS(PERL, perl /bin/perl /usr/bin/perl /usr/local/bin/perl)
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
 
 ############################################################
 #
 # C Compiler
 #
 LLNL_CONFIRM_BABEL_C_SUPPORT
+
+ACX_PTHREAD([],[])
 
 ############################################################
 #
@@ -107,17 +128,6 @@ LLNL_CONFIRM_BABEL_CXX_SUPPORT2
 #
 LLNL_CONFIRM_BABEL_JAVA_SUPPORT
 
-############################################################
-#
-# Python Support.
-#
-LLNL_CONFIRM_BABEL_PYTHON_SUPPORT
-
-############################################################
-#
-# F90 Compiler
-#
-LLNL_CONFIRM_BABEL_F90_SUPPORT
 ############################################################
 #
 # Libtool Options
@@ -142,14 +152,13 @@ AM_CONDITIONAL(SUPPORT_CYGWIN, test "X$CYGWIN" = "Xyes")
 #
 # Shared/Dynamic Library Details.
 #
-
-AM_CONDITIONAL(SUPPORT_STATIC, test "X$enable_static" != "Xno")
-if test "X$enable_shared" = "Xno"; then
+LLNL_PURE_STATIC_RUNTIME
+AM_CONDITIONAL(SUPPORT_STATIC, test "X$enable_static" = "Xyes")
+AM_CONDITIONAL(SUPPORT_SHARED, test "X$enable_shared" = "Xyes" -a "X$XML2_CONFIG" != "Xno")
+if test "X$enable_shared" != "Xyes" -o "X$XML2_CONFIG" = "Xno"; then
   AC_DEFINE(SIDL_STATIC_LIBRARY, 1, [Define SIDL_STATIC_LIBRARY to force static loading of libraries])
 fi
-
-AM_CONDITIONAL(SUPPORT_SHARED, test "X$enable_shared" != "Xno")
-if test "X$enable_static" = "Xno"; then
+if test "X$enable_static" != "Xyes" -a "X$XML2_CONFIG" != "Xno"; then
   AC_DEFINE(SIDL_DYNAMIC_LIBRARY, 1, [Define SIDL_DYNAMIC_LIBRARY to force dynamic loading of libraries])
 fi
 
@@ -157,19 +166,26 @@ fi
 #
 # Experimental sidl extensions
 #
-if test -z "$with_sidlx"; then
-  with_sidlx=no
-fi
-AC_ARG_WITH(sidlx,   [  --with-sidlx            enable experimental (undocumented) libsidlx.{a,so}])
+#if test -z "$with_sidlx"; then
+  with_sidlx=yes
+#fi
+#AC_ARG_WITH(sidlx,   [  --without-sidlx         disable experimental (undocumented) libsidlx.{a,so}])
 AM_CONDITIONAL(WITH_SIDLX, test "X$with_sidlx" != "Xno" )
 
 ############################################################
 #
-# babel_config.h headers and footers
+# Experimental MPI extensions
+#
+
+LLNL_PROG_MPI
+
+############################################################
+#
+# babel_internal.h headers and footers
 #
 AH_TOP([
-#ifndef included_babel_config_h
-#define included_babel_config_h
+#ifndef included_babel_internal_h
+#define included_babel_internal_h
 ])
 
 AH_BOTTOM([
@@ -197,6 +213,9 @@ AH_BOTTOM([
 #error Must define one of SIDL_STATIC_LIBRARY or SIDL_DYNAMIC_LIBRARY
 #endif
 
+#define UCXX
+#define UCXX_LOCAL
+
 /*
  * The USE_DL_IMPORT flag is required for proper Python linking under CYGWIN.
  */
@@ -208,14 +227,37 @@ AH_BOTTOM([
 ])
 
 ############################################################
+# 
+# Increase warning level for libraries.  We cannot do this earlier in the
+# configure, since it may cause problems with the autoconf tests.
+#
+
+if test "X$GCC" = "Xyes"; then
+  CFLAGS="$CFLAGS -Wall -Wstrict-prototypes"
+fi
+if test "X$GXX" = "Xyes"; then
+  CXXFLAGS="$CXXFLAGS -Wall"
+fi
+# Always use the PTHREAD flags if any
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+LIBS="$PTHREAD_LIBS $LIBS"
+CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"
+
+############################################################
 #
 # File Generation
 #
 AC_CONFIG_FILES([Makefile
+                 m4/Makefile
 		 bin/Makefile
 		 config/Makefile
                  java/Makefile
-                 sidl/Makefile])
+                 sidl/Makefile
+		 sidlx/Makefile])
 AC_OUTPUT
 echo "$msgs
+" >&5
+echo "$msgs
 "
+echo "When reporting issues to $PACKAGE_BUGREPORT, please include the"
+echo "output from babel-config --version-full."

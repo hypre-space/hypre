@@ -1,10 +1,10 @@
 #
 # File:          __init__.py
-# Symbol:        SIDL-v0.8.2
+# Symbol:        sidl-v0.9.15
 # Symbol Type:   package
-# Babel Version: 0.8.4
-# Release:       $Name: V1-9-0b $
-# Revision:      @(#) $Id: __init__.py,v 1.4 2003/04/07 21:44:28 painter Exp $
+# Babel Version: 1.0.0
+# Release:       $Name: V1-13-0b $
+# Revision:      @(#) $Id: __init__.py,v 1.4 2006/08/29 22:29:30 painter Exp $
 # Description:   package initialization code
 # 
 # Copyright (c) 2000-2002, The Regents of the University of California.
@@ -32,23 +32,42 @@
 # 
 # WARNING: Automatically generated; changes will be lost
 # 
-# babel-version = 0.8.4
 #
 
 
-"""The <code>SIDL</code> package contains the fundamental type and interface
-definitions for the <code>SIDL</code> interface definition language.  It
+"""The <code>sidl</code> package contains the fundamental type and interface
+definitions for the <code>sidl</code> interface definition language.  It
 defines common run-time libraries and common base classes and interfaces.
-Every interface implicitly inherits from <code>SIDL.BaseInterface</code>
-and every class implicitly inherits from <code>SIDL.BaseClass</code>.
-
+Every interface implicitly inherits from <code>sidl.BaseInterface</code>
+and every class implicitly inherits from <code>sidl.BaseClass</code>.
 """
 
-all = [
+__all__ = [
+   "BaseClass",
    "BaseException",
    "BaseInterface",
-   "BaseClass",
+   "CastException",
    "ClassInfo",
-   "DLL",
    "ClassInfoI",
-   "Loader" ]
+   "DFinder",
+   "DLL",
+   "Finder",
+   "InvViolation",
+   "LangSpecificException",
+   "Loader",
+   "MemoryAllocationException",
+   "NotImplementedException",
+   "PostViolation",
+   "PreViolation",
+   "Resolve",
+   "RuntimeException",
+   "SIDLException",
+   "Scope",
+   "io",
+   "rmi" ]
+
+try:
+  from pkgutil import extend_path
+  __path__ = extend_path(__path__, __name__)
+except: # ignore all exceptions
+  pass

@@ -1,3 +1,31 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.5 $
+ ***********************************************************************EHEADER*/
+
+
+
 #include "headers.h"
 
 #define AbsStencilShape(stencil, abs_shape) \
@@ -32,10 +60,15 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
    int                    stencil_size;
    int                    abs_stencil;
 
+   int                    ndim= hypre_StructStencilDim(stencils);
    int                    i, j;
     
    hypre_ClearIndex(zero_index);
-   hypre_SetIndex(neg_index, -1 , -1, -1);
+   hypre_ClearIndex(neg_index);
+   for (i= 0; i< ndim; i++)
+   {
+      neg_index[i]= -1;
+   }
    hypre_CopyIndex(hypre_BoxIMin(cgrid_box), cstart);
 
    stencil_size       = hypre_StructStencilSize(stencils);
@@ -49,13 +82,14 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
 
        if (abs_stencil)  /* only do if not the centre stencil */
        {
-          cfine_box= hypre_CF_StenBox(fgrid_box, cgrid_box, stencil_shape, rfactors);
+          cfine_box= hypre_CF_StenBox(fgrid_box, cgrid_box, stencil_shape, rfactors,
+                                      ndim);
 
           if ( hypre_BoxVolume(cfine_box) )
           {
              hypre_AppendBox(cfine_box, union_boxes);
              hypre_CopyBox(cfine_box, hypre_BoxArrayBox(stencil_box_extents, i));
-             for (j= 0; j< 3; j++)
+             for (j= 0; j< ndim; j++)
              {
                 hypre_BoxIMin(cfine_box)[j]-=  cstart[j];
                 hypre_BoxIMax(cfine_box)[j]-=  cstart[j];
@@ -98,7 +132,7 @@ hypre_CFInterfaceExtents( hypre_Box              *fgrid_box,
    for (i= stencil_size; i< hypre_BoxArraySize(stencil_box_extents); i++)
    {
       box= hypre_BoxArrayBox(stencil_box_extents, i);
-      for (j= 0; j< 3; j++)
+      for (j= 0; j< ndim; j++)
       {
          hypre_BoxIMin(box)[j]-=  cstart[j];
          hypre_BoxIMax(box)[j]-=  cstart[j];
@@ -120,16 +154,21 @@ hypre_CFInterfaceExtents2( hypre_Box              *fgrid_box,
    hypre_BoxArray        *union_boxes;
    hypre_Box             *cfine_box;
 
-   hypre_Index            stencil_shape, cstart, zero_index, neg_index;
+   hypre_Index            stencil_shape, zero_index, neg_index;
    int                    stencil_size;
    int                    abs_stencil;
+
+   int                    ndim= hypre_StructStencilDim(stencils);
 
    int                    i;
    int                    ierr= 0;
     
    hypre_ClearIndex(zero_index);
-   hypre_SetIndex(neg_index, -1 , -1, -1);
-   hypre_CopyIndex(hypre_BoxIMin(cgrid_box), cstart);
+   hypre_ClearIndex(neg_index);
+   for (i= 0; i< ndim; i++)
+   {
+      neg_index[i]= -1;
+   }
 
    stencil_size       = hypre_StructStencilSize(stencils);
    stencil_box_extents= hypre_BoxArrayCreate(stencil_size);
@@ -142,7 +181,8 @@ hypre_CFInterfaceExtents2( hypre_Box              *fgrid_box,
 
        if (abs_stencil)  /* only do if not the centre stencil */
        {
-          cfine_box= hypre_CF_StenBox(fgrid_box, cgrid_box, stencil_shape, rfactors);
+          cfine_box= hypre_CF_StenBox(fgrid_box, cgrid_box, stencil_shape, 
+                                      rfactors, ndim);
 
           if ( hypre_BoxVolume(cfine_box) )
           {

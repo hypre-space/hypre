@@ -1,6 +1,6 @@
 <html><head><TITLE>bHYPRE_IJParCSRMatrix_AddToValues</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_IJParCSRMatrix_AddToValues ( bHYPRE_IJParCSRMatrix self, int32_t nrows, struct SIDL_int__array* ncols, struct SIDL_int__array* rows, struct SIDL_int__array* cols, struct SIDL_double__array* values) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_IJParCSRMatrix_AddToValues (  bHYPRE_IJParCSRMatrix self,  int32_t nrows,  int32_t* ncols,  int32_t* rows,  int32_t* cols,  double* values,  int32_t nnonzeros,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>) </H2><BLOCKQUOTE>
 
 Adds to values for <TT>nrows</tt> of the matrix
 </BLOCKQUOTE>
@@ -13,7 +13,6 @@ Adds to values for <TT>nrows</tt> of the matrix.  Usage details
 are analogous to <TT>SetValues</tt>.  Adds to any previous
 values at the specified locations, or, if there was no value
 there before, inserts a new one.<P>Not collective.
-
 
 </BLOCKQUOTE>
 <DL>

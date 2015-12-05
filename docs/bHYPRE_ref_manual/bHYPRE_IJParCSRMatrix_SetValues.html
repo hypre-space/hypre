@@ -1,6 +1,6 @@
 <html><head><TITLE>bHYPRE_IJParCSRMatrix_SetValues</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_IJParCSRMatrix_SetValues ( bHYPRE_IJParCSRMatrix self, int32_t nrows, struct SIDL_int__array* ncols, struct SIDL_int__array* rows, struct SIDL_int__array* cols, struct SIDL_double__array* values) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_IJParCSRMatrix_SetValues (  bHYPRE_IJParCSRMatrix self,  int32_t nrows,  int32_t* ncols,  int32_t* rows,  int32_t* cols,  double* values,  int32_t nnonzeros,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>) </H2><BLOCKQUOTE>
 
 Sets values for <TT>nrows</tt> of the matrix
 </BLOCKQUOTE>
@@ -15,11 +15,12 @@ contain the number of columns in each row and the row
 indices, respectively.  The array <TT>cols</tt> contains the
 column indices for each of the <TT>rows</tt>, and is ordered by
 rows.  The data in the <TT>values</tt> array corresponds
-directly to the column entries in <TT>cols</tt>.  Erases any
-previous values at the specified locations and replaces them
-with new ones, or, if there was no value there before,
+directly to the column entries in <TT>cols</tt>.  The last argument
+is the size of the cols and values arrays, i.e. the total number
+of nonzeros being provided, i.e. the sum of all values in ncols.
+This functin erases any previous values at the specified locations and
+replaces them with new ones, or, if there was no value there before,
 inserts a new one.<P>Not collective.
-
 
 </BLOCKQUOTE>
 <DL>

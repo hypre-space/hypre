@@ -1,11 +1,30 @@
 /*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.2 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.5 $
+ ***********************************************************************EHEADER*/
+
+
 
 #ifndef hypre_COMMUNICATION_HEADER
 #define hypre_COMMUNICATION_HEADER
@@ -23,6 +42,7 @@ typedef struct hypre_CommInfo_struct
    int                  **send_processes;
    int                  **recv_processes;
    int                  **send_rboxnums;
+   int                  **recv_rboxnums; /* required for "inverse" communication */
    hypre_BoxArrayArray   *send_rboxes;
 
 } hypre_CommInfo;
@@ -119,6 +139,7 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommInfoSendProcesses(info) (info -> send_processes)
 #define hypre_CommInfoRecvProcesses(info) (info -> recv_processes)
 #define hypre_CommInfoSendRBoxnums(info)  (info -> send_rboxnums)
+#define hypre_CommInfoRecvRBoxnums(info)  (info -> recv_rboxnums)
 #define hypre_CommInfoSendRBoxes(info)    (info -> send_rboxes)
 
 /*--------------------------------------------------------------------------

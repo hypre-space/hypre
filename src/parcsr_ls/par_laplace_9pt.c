@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.1 $
-*********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.4 $
+ ***********************************************************************EHEADER*/
+
+
+
  
 #include "headers.h"
  
@@ -445,6 +465,22 @@ GenerateLaplacian9pt( MPI_Comm comm,
 
       hypre_TFree(work);
    }
+
+
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+/* ideally we would use less storage earlier in this function, but this is fine
+   for testing */
+   {
+      int tmp1, tmp2;
+      tmp1 = global_part[my_id];
+      tmp2 = global_part[my_id + 1];
+      hypre_TFree(global_part);
+      global_part = hypre_CTAlloc(int, 2);
+      global_part[0] = tmp1;
+      global_part[1] = tmp2;
+   }
+#endif
 
    A = hypre_ParCSRMatrixCreate(comm, grid_size, grid_size,
                                 global_part, global_part, num_cols_offd,

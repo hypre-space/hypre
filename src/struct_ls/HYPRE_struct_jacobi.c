@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.0 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.3 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * HYPRE_StructJacobi interface
@@ -81,6 +101,17 @@ HYPRE_StructJacobiSetTol( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructJacobiGetTol
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructJacobiGetTol( HYPRE_StructSolver solver,
+                          double           * tol    )
+{
+   return( hypre_JacobiGetTol( (void *) solver, tol ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructJacobiSetMaxIter
  *--------------------------------------------------------------------------*/
 
@@ -92,6 +123,17 @@ HYPRE_StructJacobiSetMaxIter( HYPRE_StructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructJacobiGetMaxIter
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_StructJacobiGetMaxIter( HYPRE_StructSolver solver,
+                              int              * max_iter  )
+{
+   return( hypre_JacobiGetMaxIter( (void *) solver, max_iter ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructJacobiSetZeroGuess
  *--------------------------------------------------------------------------*/
  
@@ -99,6 +141,17 @@ int
 HYPRE_StructJacobiSetZeroGuess( HYPRE_StructSolver solver )
 {
    return( hypre_JacobiSetZeroGuess( (void *) solver, 1 ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructJacobiGetZeroGuess
+ *--------------------------------------------------------------------------*/
+ 
+int
+HYPRE_StructJacobiGetZeroGuess( HYPRE_StructSolver solver,
+                                int * zeroguess )
+{
+   return( hypre_JacobiGetZeroGuess( (void *) solver, zeroguess ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -125,10 +178,7 @@ int
 HYPRE_StructJacobiGetNumIterations( HYPRE_StructSolver  solver,
                                     int                *num_iterations )
 {
-#if 0
    return( hypre_JacobiGetNumIterations( (void *) solver, num_iterations ) );
-#endif
-   return 0;
 }
 
 /*--------------------------------------------------------------------------

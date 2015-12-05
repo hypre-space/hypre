@@ -1,14 +1,39 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.17 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.27 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 #ifndef hypre_ParAMG_DATA_HEADER
 #define hypre_ParAMG_DATA_HEADER
+
+#define CUMNUMIT
+
+#include "../parcsr_block_mv/par_csr_block_matrix.h"
+
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData
@@ -22,12 +47,21 @@ typedef struct
    double   strong_threshold;
    double   max_row_sum;
    double   trunc_factor;
+   double   jacobi_trunc_threshold;
    double   S_commpkg_switch;
+   double   CR_rate;
    int      measure_type;
    int      setup_type;
    int      coarsen_type;
+   int      P_max_elmts;
    int      interp_type;
    int      restr_par;
+   int      agg_num_levels;
+   int      num_paths;
+   int      post_interp_type;
+   int      num_CR_relax_steps;
+   int      IS_type;
+   int      CR_use_CG;
 
    /* solve params */
    int      max_iter;
@@ -64,6 +98,14 @@ typedef struct
    int                **point_dof_map_array;
    int                  num_levels;
 
+
+   /* Block data */
+   hypre_ParCSRBlockMatrix **A_block_array;
+   hypre_ParCSRBlockMatrix **P_block_array;
+   hypre_ParCSRBlockMatrix **R_block_array;
+
+   int block_mode;
+
    /* data for more complex smoothers */
    int                  smooth_num_levels;
    int                  smooth_type;
@@ -85,7 +127,7 @@ typedef struct
    hypre_ParVector   *Vtemp;
    hypre_Vector      *Vtemp_local;
    double            *Vtemp_local_data;
-   int                cycle_op_count;
+   double             cycle_op_count;
    hypre_ParVector   *Rtemp;
    hypre_ParVector   *Ptemp;
    hypre_ParVector   *Ztemp;
@@ -97,6 +139,9 @@ typedef struct
    /* log info */
    int      logging;
    int      num_iterations;
+#ifdef CUMNUMIT
+   int      cum_num_iterations;
+#endif
    double   rel_resid_norm;
    hypre_ParVector *residual; /* available if logging>1 */
 
@@ -119,11 +164,20 @@ typedef struct
 ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataMaxRowSum(amg_data) ((amg_data)->max_row_sum)
 #define hypre_ParAMGDataTruncFactor(amg_data) ((amg_data)->trunc_factor)
+#define hypre_ParAMGDataJacobiTruncThreshold(amg_data) ((amg_data)->jacobi_trunc_threshold)
 #define hypre_ParAMGDataSCommPkgSwitch(amg_data) ((amg_data)->S_commpkg_switch)
 #define hypre_ParAMGDataInterpType(amg_data) ((amg_data)->interp_type)
 #define hypre_ParAMGDataCoarsenType(amg_data) ((amg_data)->coarsen_type)
 #define hypre_ParAMGDataMeasureType(amg_data) ((amg_data)->measure_type)
 #define hypre_ParAMGDataSetupType(amg_data) ((amg_data)->setup_type)
+#define hypre_ParAMGDataPMaxElmts(amg_data) ((amg_data)->P_max_elmts)
+#define hypre_ParAMGDataNumPaths(amg_data) ((amg_data)->num_paths)
+#define hypre_ParAMGDataAggNumLevels(amg_data) ((amg_data)->agg_num_levels)
+#define hypre_ParAMGDataPostInterpType(amg_data) ((amg_data)->post_interp_type)
+#define hypre_ParAMGDataNumCRRelaxSteps(amg_data) ((amg_data)->num_CR_relax_steps)
+#define hypre_ParAMGDataCRRate(amg_data) ((amg_data)->CR_rate)
+#define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
+#define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 
 /* solve params */
 
@@ -180,6 +234,14 @@ typedef struct
 #define hypre_ParAMGDataDropTol(amg_data) ((amg_data)->drop_tol)	
 #define hypre_ParAMGDataEuclidFile(amg_data) ((amg_data)->euclidfile)	
 
+/* block */
+#define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)
+#define hypre_ParAMGDataPBlockArray(amg_data) ((amg_data)->P_block_array)
+#define hypre_ParAMGDataRBlockArray(amg_data) ((amg_data)->R_block_array)
+
+#define hypre_ParAMGDataBlockMode(amg_data) ((amg_data)->block_mode)
+
+
 /* data generated in the solve phase */
 #define hypre_ParAMGDataVtemp(amg_data) ((amg_data)->Vtemp)
 #define hypre_ParAMGDataVtempLocal(amg_data) ((amg_data)->Vtemp_local)
@@ -196,6 +258,9 @@ typedef struct
 /* log info data */
 #define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
+#ifdef CUMNUMIT
+#define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
+#endif
 #define hypre_ParAMGDataRelativeResidualNorm(amg_data) ((amg_data)->rel_resid_norm)
 #define hypre_ParAMGDataResidual(amg_data) ((amg_data)->residual)
 

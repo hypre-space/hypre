@@ -1,11 +1,30 @@
 /*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.1 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.7 $
+ ***********************************************************************EHEADER*/
+
+
 /******************************************************************************
  *
  * HYPRE_StructVector interface
@@ -109,7 +128,7 @@ hypre_F90_IFACE(hypre_structvectoraddtovalues, HYPRE_STRUCTVECTORADDTOVALUES)( l
  *--------------------------------------------------------------------------*/
 
 void 
-hypre_F90_IFACE(hypre_structvectoraddtoboxvalues, HYPRE_STRUCTVECTORADDTOBOXVALUES)( long int *vector,
+hypre_F90_IFACE(hypre_structvectoraddtoboxvalue, HYPRE_STRUCTVECTORADDTOBOXVALUE)( long int *vector,
                                                    int      *ilower,
                                                    int      *iupper,
                                                    double   *values,
@@ -120,6 +139,21 @@ hypre_F90_IFACE(hypre_structvectoraddtoboxvalues, HYPRE_STRUCTVECTORADDTOBOXVALU
                                           (int *)              ilower,
                                           (int *)              iupper,
                                           (double *)           values  ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructVectorScaleValues
+ *--------------------------------------------------------------------------*/
+
+void 
+hypre_F90_IFACE(hypre_structvectorscalevalues, HYPRE_STRUCTVECTORSCALEVALUES)
+                                             ( long int *vector,
+                                               double   *factor,
+                                               int      *ierr       )
+{
+   *ierr = (int)
+      ( HYPRE_StructVectorScaleValues( (HYPRE_StructVector) *vector,
+                                       (double)             *factor ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -183,11 +217,26 @@ hypre_F90_IFACE(hypre_structvectorsetnumghost, HYPRE_STRUCTVECTORSETNUMGHOST)( l
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_StructVectorCopy
+ *--------------------------------------------------------------------------*/
+ 
+void
+hypre_F90_IFACE(hypre_structvectorcopy, HYPRE_STRUCTVECTORCOPY)
+                                              ( long int *x,
+                                                long int *y,
+                                                int      *ierr )
+{
+   *ierr = (int) ( HYPRE_StructVectorCopy( (HYPRE_StructVector) *x,
+                                           (HYPRE_StructVector) *y ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_StructVectorSetConstantValues
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_structvectorsetconstantva, HYPRE_STRUCTVECTORSETCONSTANTVA)( long int *vector,
+hypre_F90_IFACE(hypre_structvectorsetconstantva, HYPRE_STRUCTVECTORSETCONSTANTVA)
+                                               ( long int *vector,
                                                   double   *values,
                                                   int      *ierr   )
 {

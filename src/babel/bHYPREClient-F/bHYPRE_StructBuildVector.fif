@@ -2,16 +2,12 @@ C
 C       File:          bHYPRE_StructBuildVector_Impl.f
 C       Symbol:        bHYPRE.StructBuildVector-v1.0.0
 C       Symbol Type:   interface
-C       Babel Version: 0.8.2
-C       SIDL Created:  20030401 14:47:45 PST
-C       Generated:     20030401 14:48:11 PST
+C       Babel Version: 0.10.8
 C       Description:   Client-side documentation text for bHYPRE.StructBuildVector
 C       
 C       WARNING: Automatically generated; changes will be lost
 C       
-C       babel-version = 0.8.2
-C       source-line   = 568
-C       source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
+C       babel-version = 0.10.8
 C       
 
         THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
@@ -54,7 +50,7 @@ C       out opaque retval
 C       
 C       <p>
 C       Add one to the intrinsic reference count in the underlying object.
-C       Object in <code>SIDL</code> have an intrinsic reference count.
+C       Object in <code>sidl</code> have an intrinsic reference count.
 C       Objects continue to exist as long as the reference count is
 C       positive. Clients should call this method whenever they
 C       create another ongoing reference to an object or interface.
@@ -76,7 +72,7 @@ C       in bHYPRE.StructBuildVector self
 C       
 C       Decrease by one the intrinsic reference count in the underlying
 C       object, and delete the object if the reference is non-positive.
-C       Objects in <code>SIDL</code> have an intrinsic reference count.
+C       Objects in <code>sidl</code> have an intrinsic reference count.
 C       Clients should call this method whenever they remove a
 C       reference to an object or interface.
 C       
@@ -97,7 +93,7 @@ C
         implicit none
 C       in bHYPRE.StructBuildVector self
         integer*8 self
-C       in SIDL.BaseInterface iobj
+C       in sidl.BaseInterface iobj
         integer*8 iobj
 C       out bool retval
         logical retval
@@ -106,7 +102,7 @@ C       out bool retval
 
 C       
 C       Check whether the object can support the specified interface or
-C       class.  If the <code>SIDL</code> type name in <code>name</code>
+C       class.  If the <code>sidl</code> type name in <code>name</code>
 C       is supported, then a reference to that object is returned with the
 C       reference count incremented.  The callee will be responsible for
 C       calling <code>deleteRef</code> on the returned object.  If
@@ -121,14 +117,14 @@ C       in bHYPRE.StructBuildVector self
         integer*8 self
 C       in string name
         character*(*) name
-C       out SIDL.BaseInterface retval
+C       out sidl.BaseInterface retval
         integer*8 retval
         end
 
 
 C       
 C       Return whether this object is an instance of the specified type.
-C       The string name must be the <code>SIDL</code> type name.  This
+C       The string name must be the <code>sidl</code> type name.  This
 C       routine will return <code>true</code> if and only if a cast to
 C       the string type name would succeed.
 C       
@@ -152,13 +148,13 @@ C
         implicit none
 C       in bHYPRE.StructBuildVector self
         integer*8 self
-C       out SIDL.ClassInfo retval
+C       out sidl.ClassInfo retval
         integer*8 retval
         end
 
 
 C       
-C       Set the MPI Communicator.
+C       Set the MPI Communicator.  DEPRECATED, Use Create()
 C       
 C       
 
@@ -214,7 +210,7 @@ C       information, e.g. a matrix. To perform subsequent operations
 C       with that object, it must be returned from the problem
 C       definition object. {\tt GetObject} performs this function.
 C       At compile time, the type of the returned object is unknown.
-C       Thus, the returned type is a SIDL.BaseInterface.
+C       Thus, the returned type is a sidl.BaseInterface.
 C       QueryInterface or Cast must be used on the returned object to
 C       convert it into a known type.
 C       
@@ -224,7 +220,7 @@ C
         implicit none
 C       in bHYPRE.StructBuildVector self
         integer*8 self
-C       out SIDL.BaseInterface A
+C       out sidl.BaseInterface A
         integer*8 A
 C       out int retval
         integer*4 retval
@@ -248,18 +244,18 @@ C       out int retval
 
 
 C       
-C       Method:  SetStencil[]
+C       Method:  SetNumGhost[]
 C       
 
-        subroutine bHYPRE_StructBuildVector_SetStencil_f(self, stencil,
-     &     retval)
+        subroutine bHYPRE_StructBuildVector_SetNumGhost_f(self,
+     &     num_ghost, retval)
         implicit none
 C       in bHYPRE.StructBuildVector self
         integer*8 self
-C       in bHYPRE.StructStencil stencil
-        integer*8 stencil
 C       out int retval
         integer*4 retval
+C       in rarray<int> num_ghost(dim2)
+        integer*4 num_ghost(0:dim2-1)
         end
 
 
@@ -272,12 +268,12 @@ C
         implicit none
 C       in bHYPRE.StructBuildVector self
         integer*8 self
-C       in array<int,column-major> grid_index
-        integer*8 grid_index
 C       in double value
         double precision value
 C       out int retval
         integer*4 retval
+C       in rarray<int> grid_index(dim)
+        integer*4 grid_index(0:dim-1)
         end
 
 
@@ -290,12 +286,12 @@ C
         implicit none
 C       in bHYPRE.StructBuildVector self
         integer*8 self
-C       in array<int,column-major> ilower
-        integer*8 ilower
-C       in array<int,column-major> iupper
-        integer*8 iupper
-C       in array<double,column-major> values
-        integer*8 values
 C       out int retval
         integer*4 retval
+C       in rarray<int> ilower(dim)
+        integer*4 ilower(0:dim-1)
+C       in rarray<int> iupper(dim)
+        integer*4 iupper(0:dim-1)
+C       in rarray<double> values(nvalues)
+        double precision values(0:nvalues-1)
         end

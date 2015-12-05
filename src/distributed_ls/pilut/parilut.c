@@ -1,3 +1,31 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.6 $
+ ***********************************************************************EHEADER*/
+
+
+
 /*
  * parilut.c
  *
@@ -84,7 +112,7 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
   /* Copy the old perm into new perm vectors at the begining.
    * After that this is done more or less automatically */
   newperm  = hypre_idx_malloc(lnrows, "hypre_ParILUT: newperm");
-  newiperm = hypre_idx_malloc(lnrows, "hypre_ParILUT: newiperm"); 
+  newiperm = hypre_idx_malloc(lnrows, "hypre_ParILUT: newiperm");
 
   hypre_memcpy_idx(newperm,   perm, lnrows);
   hypre_memcpy_idx(newiperm, iperm, lnrows);
@@ -130,11 +158,11 @@ void hypre_ParILUT(DataDistType *ddist, FactorMatType *ldu,
   ldu->nlevels = nlevel;
 
   /*hypre_free_multi(jr, jw, lr, w, map,
-	     nrmat.rmat_rnz,        nrmat.rmat_rrowlen,  nrmat.rmat_rcolind,   
+	     nrmat.rmat_rnz,        nrmat.rmat_rrowlen,  nrmat.rmat_rcolind,
              nrmat.rmat_rvalues,
-	     cinfo.gatherbuf,  cinfo.rrowind,  cinfo.rnbrind,   cinfo.rnbrptr, 
-	     cinfo.snbrind, cinfo.srowind, cinfo.snbrptr,  
-             cinfo.incolind,  cinfo.invalues, 
+	     cinfo.gatherbuf,  cinfo.rrowind,  cinfo.rnbrind,   cinfo.rnbrptr,
+	     cinfo.snbrind, cinfo.srowind, cinfo.snbrptr,
+             cinfo.incolind,  cinfo.invalues,
              newperm, newiperm, vrowdist, -1);*/
   hypre_TFree(jr);
   hypre_TFree(jw);
@@ -308,7 +336,7 @@ void hypre_ComputeCommInfo(ReduceMatType *rmat, CommInfoType *cinfo, int *rowdis
 	      rnbrind[i], TAG_Comm_rrowind, pilut_comm );
   }
 
-  /* finalize  recieves */
+  /* finalize  receives */
   for (i=0; i<snnbr; i++) {
     MPI_Wait( &index_requests[i], &Status ) ;
   }
@@ -547,7 +575,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 
     MPI_Wait( &index_requests[i], &Status);
 
-    /* save where each row is recieved into the map */
+    /* save where each row is received into the map */
     MPI_Get_count( &Status, MPI_INT, &inCnt );
     rnbrptr[i] = inCnt;
     for (k=0; k<inCnt; k += global_maxnz+2)
@@ -1290,7 +1318,7 @@ void hypre_EraseMap(CommInfoType *cinfo, int *newperm, int nmis,
   for (i=ndone; i<ndone+nmis; i++) 
     pilut_map[newperm[i]+firstrow] = 0;
 
-  /* clear map of all recieved rows. see hypre_SendFactoredRows code */
+  /* clear map of all received rows. see hypre_SendFactoredRows code */
   j = 1;  /* row index in [1] */
   cnt = (cinfo->maxntogo)*(global_maxnz+2) ;
   for (i=0; i<rnnbr; i++) {

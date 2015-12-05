@@ -9,14 +9,13 @@ Define symmetry properties for the stencil entries in the matrix
  <h2> Documentation </h2>
 <BLOCKQUOTE>
 
-Define symmetry properties for the stencil entries in the matrix.
-The boolean argument <TT>symmetric</tt> is applied to stencil entries
-on part <TT>part</tt> that couple variable <TT>var</tt> to variable <TT>
-to_var</tt>.  A value of -1 may be used for <TT>part</tt>, <TT>var</tt>, or
-<TT>to_var</tt> to specify ``all''.  For example, if <TT>part</tt> and
-<TT>to_var</tt> are set to -1, then the boolean is applied to stencil
-entries on all parts that couple variable <TT>var</tt> to all other
-variables.<P>By default, matrices are assumed to be nonsymmetric.  Significant
+Define symmetry properties for the stencil entries in the matrix.  The
+boolean argument <TT>symmetric</tt> is applied to stencil entries on part <TT>
+part</tt> that couple variable <TT>var</tt> to variable <TT>to_var</tt>.  A value of
+-1 may be used for <TT>part</tt>, <TT>var</tt>, or <TT>to_var</tt> to specify
+``all''.  For example, if <TT>part</tt> and <TT>to_var</tt> are set to -1, then
+the boolean is applied to stencil entries on all parts that couple variable
+<TT>var</tt> to all other variables.<P>By default, matrices are assumed to be nonsymmetric.  Significant
 storage savings can be made if the matrix is symmetric.
 
 </BLOCKQUOTE>

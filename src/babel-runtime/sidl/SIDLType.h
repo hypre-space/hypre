@@ -1,10 +1,9 @@
 /*
- * File:        SIDLType.h
+ * File:        sidlType.h
  * Copyright:   (c) 2001 The Regents of the University of California
- * Release:     $Name: V1-9-0b $
- * Revision:    @(#) $Revision: 1.4 $
- * Date:        $Date: 2003/04/07 21:44:31 $
- * Description: Define the fundamental types for SIDL
+ * Revision:    @(#) $Revision: 1.7 $
+ * Date:        $Date: 2006/08/29 22:29:48 $
+ * Description: Define the fundamental types for sidl
  *
  * Copyright (c) 2000-2001, The Regents of the University of Calfornia.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -31,8 +30,8 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef included_SIDLType_h
-#define included_SIDLType_h
+#ifndef included_sidlType_h
+#define included_sidlType_h
 
 #ifndef included_babel_config_h
 #include "babel_config.h"
@@ -46,9 +45,9 @@
 
 
 /*
- * SIDL boolean type (an integer)
+ * sidl boolean type (an integer)
  */
-typedef int SIDL_bool;
+typedef int sidl_bool;
 
 #ifndef FALSE
 #define FALSE 0
@@ -58,16 +57,16 @@ typedef int SIDL_bool;
 #endif
 
 /*
- * SIDL structures for float and double complex
+ * sidl structures for float and double complex
  */
-struct SIDL_dcomplex {
+struct sidl_dcomplex {
   double real;
   double imaginary;
 };
 
-struct SIDL_fcomplex {
+struct sidl_fcomplex {
   float real;
   float imaginary;
 };
 
-#endif /* included_SIDLType_h */
+#endif /* included_sidlType_h */

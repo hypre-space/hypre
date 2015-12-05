@@ -6,18 +6,18 @@
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGrid.html><B>HYPRE_SStructGrid</B></A> 
  <DD><I>
-A grid object is constructed out of several structured ``parts''
-and an optional unstructured ``part''</I>
+A grid object is constructed out of several structured ``parts'' and an
+optional unstructured ``part''</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructVariable.html><B>HYPRE_SStructVariable</B></A> 
  <DD><I>
-An enumerated type that supports cell centered, node centered, face
-centered, and edge centered variables</I>
+An enumerated type that supports cell centered, node centered, face centered,
+and edge centered variables</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGridCreate</B>(MPI_Comm comm, int ndim, int nparts, <!1><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> *grid)
  <DD><I>
-Create an <TT>ndim</tt>-dimensional grid object with <TT>nparts</tt>
-structured parts</I>
+Create an <TT>ndim</tt>-dimensional grid object with <TT>nparts</tt> structured
+parts</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGridDestroy.html><B>HYPRE_SStructGridDestroy</B></A> 
  <DD><I>
@@ -49,7 +49,7 @@ Finalize the construction of the grid before using</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGridSetPeriodic</B>(<!1><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> grid, int part, int *periodic)
  <DD><I>
-(Optional) Set periodic for a particular part</I>
+Set periodic for a particular part</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGridSetNumGhost</B>(<!1><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> grid, int *num_ghost)
  <DD><I>

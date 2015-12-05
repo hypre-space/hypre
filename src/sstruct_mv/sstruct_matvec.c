@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2000   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.2 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.7 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * SStruct matrix-vector multiply routine
@@ -124,7 +144,7 @@ hypre_SStructPMatvecCompute( void                 *pmatvec_vdata,
       }
       else
       {
-         hypre_StructAxpy(beta, sy, sy);
+         hypre_StructScale(beta, sy);
       }
 
       /* off-diagonal block computation */
@@ -292,37 +312,60 @@ hypre_SStructMatvecCompute( void                *matvec_vdata,
    hypre_ParVector          *pary;
 
    int                       part;
+   int                       x_object_type= hypre_SStructVectorObjectType(x);
+   int                       A_object_type= hypre_SStructMatrixObjectType(A);
 
-  
-  /* do S-matrix computations */
-   for (part = 0; part < nparts; part++)
+   if (x_object_type != A_object_type)
    {
-      pdata = pmatvec_data[part];
-      pA = hypre_SStructMatrixPMatrix(A, part);
-      px = hypre_SStructVectorPVector(x, part);
-      py = hypre_SStructVectorPVector(y, part);
-      hypre_SStructPMatvecCompute(pdata, alpha, pA, px, beta, py);
+      printf("possible error: A and x are different object types\n");
    }
 
-   /* do U-matrix computations */
+   if (x_object_type == HYPRE_SSTRUCT)
+   {
+     /* do S-matrix computations */
+      for (part = 0; part < nparts; part++)
+      {
+         pdata = pmatvec_data[part];
+         pA = hypre_SStructMatrixPMatrix(A, part);
+         px = hypre_SStructVectorPVector(x, part);
+         py = hypre_SStructVectorPVector(y, part);
+         hypre_SStructPMatvecCompute(pdata, alpha, pA, px, beta, py);
+      }
 
-  /* GEC1002 the data chunk pointed by the local-parvectors 
-    *  inside the semistruct vectors x and y is now identical to the
-    *  data chunk of the structure vectors x and y. The role of the function
-    *  convert is to pass the addresses of the data chunk
-    *  to the parx and pary. */  
+     /* do U-matrix computations */
 
-       hypre_SStructVectorConvert(x, &parx);
-       hypre_SStructVectorConvert(y, &pary); 
+     /* GEC1002 the data chunk pointed by the local-parvectors 
+      *  inside the semistruct vectors x and y is now identical to the
+      *  data chunk of the structure vectors x and y. The role of the function
+      *  convert is to pass the addresses of the data chunk
+      *  to the parx and pary. */  
 
-       hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary);
+      hypre_SStructVectorConvert(x, &parx);
+      hypre_SStructVectorConvert(y, &pary); 
 
-       /* dummy functions since there is nothing to restore  */
+      hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, 1.0, pary);
 
-       hypre_SStructVectorRestore(x, NULL);
-       hypre_SStructVectorRestore(y, pary); 
+      /* dummy functions since there is nothing to restore  */
 
-   parx = NULL; 
+      hypre_SStructVectorRestore(x, NULL);
+      hypre_SStructVectorRestore(y, pary); 
+
+      parx = NULL; 
+
+  }
+
+  else if (x_object_type == HYPRE_PARCSR)
+  {
+      hypre_SStructVectorConvert(x, &parx);
+      hypre_SStructVectorConvert(y, &pary);
+
+      hypre_ParCSRMatrixMatvec(alpha, parcsrA, parx, beta, pary);
+
+      hypre_SStructVectorRestore(x, NULL);
+      hypre_SStructVectorRestore(y, pary); 
+
+      parx = NULL; 
+   }
 
    return ierr;
 }

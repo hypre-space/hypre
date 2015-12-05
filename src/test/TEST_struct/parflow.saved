@@ -1,0 +1,282 @@
+Running with these driver parameters:
+  (nx, ny, nz)    = (16, 16, 16)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (1, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (16, 16, 0)
+  (cx, cy, cz)    = (2.000000, 3.000000, 40.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 1
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PFMG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PFMG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 11
+Final Relative Residual Norm = 9.876728e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (8, 8, 8)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 2, 2)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (16, 16, 0)
+  (cx, cy, cz)    = (2.000000, 3.000000, 40.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 1
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.830000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.630000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PFMG Setup:
+  wall clock time = 0.100000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PFMG Solve:
+  wall clock time = 0.230000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.070000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 11
+Final Relative Residual Norm = 9.876728e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (4, 4, 4)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 2, 2)
+  (bx, by, bz)    = (2, 2, 2)
+  (px, py, pz)    = (16, 16, 0)
+  (cx, cy, cz)    = (2.000000, 3.000000, 40.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 1
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 3.620000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 3.400000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PFMG Setup:
+  wall clock time = 0.170000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.070000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PFMG Solve:
+  wall clock time = 0.290000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.080000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 11
+Final Relative Residual Norm = 9.876728e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (80, 80, 1)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (1, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 2
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 1
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PFMG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PFMG Solve:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 15
+Final Relative Residual Norm = 5.501781e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 80, 1)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (8, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 2
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 1
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PFMG Setup:
+  wall clock time = 0.060000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PFMG Solve:
+  wall clock time = 0.150000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 15
+Final Relative Residual Norm = 5.501781e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 1)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 2, 1)
+  (bx, by, bz)    = (4, 4, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 2
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 1
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PFMG Setup:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PFMG Solve:
+  wall clock time = 0.160000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.060000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 15
+Final Relative Residual Norm = 5.501781e-07
+

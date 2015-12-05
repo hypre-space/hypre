@@ -1,0 +1,51 @@
+#!/bin/ksh
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
+#
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 1.6 $
+#EHEADER**********************************************************************
+
+
+
+#=============================================================================
+# Run each example 
+#=============================================================================
+
+
+mpirun -np 2 ./ex1 > default.out.1
+
+mpirun -np 2 ./ex2 > default.out.2
+
+mpirun -np 16 ./ex3 -n 33 -solver 0 -v 1 1 > default.out.3
+
+mpirun -np 16 ./ex4 -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > default.out.4
+
+mpirun -np 4 ./ex5 > default.out.5
+
+mpirun -np 2 ./ex6 > default.out.6
+
+mpirun -np 16 ./ex7 -n 33 -solver 10 -K 3 -B 0 -C 1 -UO 2 -F 4 > default.out.7
+
+mpirun -np 2 ./ex8 > default.out.8
+
+mpirun -np 16 ./ex9 -n 33 -solver 0 -v 1 1 > default.out.9

@@ -1,12 +1,31 @@
-#!/bin/ksh 
-#BHEADER***********************************************************************
-# (c) 1998   The Regents of the University of California
+#!/bin/ksh
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# $Revision: 1.4 $
-#EHEADER***********************************************************************
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 1.9 $
+#EHEADER**********************************************************************
+
+
 
 #=============================================================================
 # ij: Run default case with different solvers
@@ -19,6 +38,18 @@
 #    7: PILUT_GMRES
 #    8: ParaSails_PCG
 #   20: Hybrid_PCG
+#
+# lobpcg: Run default case with all available PCG preconditioners
+#    1: BoomerAMG_PCG
+#    2: DS_PCG
+#    8: ParaSails_PCG
+#   12: Schwarz_PCG
+#   43: Euclid_PCG
+#
+# new_ij: test systems AMG
+#	  unknown approach
+#	  hybrid approach with block smoother
+# 	  nodal approach
 #=============================================================================
 
 mpirun -np 2 ./ij -solver 1 -rhsrand > solvers.out.0
@@ -34,3 +65,33 @@ mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand > solvers.out.9
 mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand -solver_type 2 > solvers.out.10
 mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand -solver_type 3 > solvers.out.11
 
+
+#PCG run ...LOBPCG run for one eigenpair...LOBPCG for 5 eigenpairs
+mpirun -np 2 ./ij -solver 1 -tol 1.e-6  > solvers.out.1.lobpcg
+mpirun -np 2 ./ij -lobpcg -solver 1 -tol 1.e-6 -pcgitr 0 -seed 1 -vrand 1 > solvers.out.1.lobpcg.1
+mpirun -np 2 ./ij -lobpcg -solver 1 -tol 1.e-6 -pcgitr 0  -seed 1 -vrand 5 > solvers.out.1.lobpcg.5
+
+#PCG run ...LOBPCG run for one eigenpair...LOBPCG for 5 eigenpairs
+mpirun -np 2 ./ij -solver 2 -tol 1.e-6  > solvers.out.2.lobpcg
+mpirun -np 2 ./ij -lobpcg -solver 2 -tol 1.e-6  -pcgitr 20 -seed 1 -vrand 1 > solvers.out.2.lobpcg.1
+mpirun -np 2 ./ij -lobpcg -solver 2 -tol 1.e-6  -pcgitr 20 -seed 1 -vrand 5 > solvers.out.2.lobpcg.5
+
+#PCG run ...LOBPCG run for one eigenpair...LOBPCG for 5 eigenpairs
+mpirun -np 2 ./ij -solver 8 -tol 1.e-6  > solvers.out.8.lobpcg
+mpirun -np 2 ./ij -lobpcg -solver 8 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 1 > solvers.out.8.lobpcg.1
+mpirun -np 2 ./ij -lobpcg -solver 8 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 5 > solvers.out.8.lobpcg.5
+
+#PCG run ...LOBPCG run for one eigenpair...LOBPCG for 5 eigenpairs
+mpirun -np 2 ./ij -solver 12 -tol 1.e-6  > solvers.out.12.lobpcg
+mpirun -np 2 ./ij -lobpcg -solver 12 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 1 > solvers.out.12.lobpcg.1
+mpirun -np 2 ./ij -lobpcg -solver 12 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 5 > solvers.out.12.lobpcg.5
+
+#PCG run ...LOBPCG run for one eigenpair...LOBPCG for 5 eigenpairs
+mpirun -np 2 ./ij -solver 43 -tol 1.e-6  > solvers.out.43.lobpcg
+mpirun -np 2 ./ij -lobpcg -solver 43 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 1 > solvers.out.43.lobpcg.
+mpirun -np 2 ./ij -lobpcg -solver 43 -tol 1.e-6  -pcgitr 10 -seed 1 -vrand 5 > solvers.out.43.lobpcg.5
+
+#systems AMG run ...unknown approach, hybrid approach, nodal approach
+mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu
+mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 -nodal 1 -smtype 6 -smlv 10 -dom 1 -ov 0 > solvers.out.sysh
+mpirun -np 2 ./new_ij -n 20 20 20 -sysL 2 -nf 2 -interptype 10 > solvers.out.sysn

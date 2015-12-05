@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.3 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.8 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * Matvec functions for hypre_CSRMatrix class.
@@ -59,7 +79,7 @@ hypre_ParCSRMatrixMatvec( double           alpha,
     *  is informational only.
     *--------------------------------------------------------------------*/
  
-   assert( idxstride>0 );
+   hypre_assert( idxstride>0 );
 
     if (num_cols != x_size)
               ierr = 11;
@@ -70,13 +90,13 @@ hypre_ParCSRMatrixMatvec( double           alpha,
     if (num_cols != x_size && num_rows != y_size)
               ierr = 13;
 
-    assert( hypre_VectorNumVectors(y_local)==num_vectors );
+    hypre_assert( hypre_VectorNumVectors(y_local)==num_vectors );
 
     if ( num_vectors==1 )
        x_tmp = hypre_SeqVectorCreate( num_cols_offd );
     else
     {
-       assert( num_vectors>1 );
+       hypre_assert( num_vectors>1 );
        x_tmp = hypre_SeqMultiVectorCreate( num_cols_offd, num_vectors );
     }
    hypre_SeqVectorInitialize(x_tmp);
@@ -90,8 +110,12 @@ hypre_ParCSRMatrixMatvec( double           alpha,
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-	hypre_MatvecCommPkgCreate(A);
-	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(A);
+#else
+      hypre_MatvecCommPkgCreate(A);
+#endif
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -126,7 +150,7 @@ hypre_ParCSRMatrixMatvec( double           alpha,
          }
       }
 
-   assert( idxstride==1 );
+   hypre_assert( idxstride==1 );
    /* >>> ... The assert is because the following loop only works for 'column' storage of a multivector <<<
       >>> This needs to be fixed to work more generally, at least for 'row' storage. <<<
       >>> This in turn, means either change CommPkg so num_sends is no.zones*no.vectors (not no.zones)
@@ -236,8 +260,12 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
     *--------------------------------------------------------------------*/
    if (!comm_pkg)
    {
-	hypre_MatvecCommPkgCreate(A);
-	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(A);
+#else
+      hypre_MatvecCommPkgCreate(A);
+#endif
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -248,7 +276,7 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
    y_tmp_data = hypre_VectorData(y_tmp);
    y_local_data = hypre_VectorData(y_local);
 
-   assert( idxstride==1 ); /* >>> only 'column' storage of multivectors implemented so far */
+   hypre_assert( idxstride==1 ); /* >>> only 'column' storage of multivectors implemented so far */
 
    if (num_cols_offd) hypre_CSRMatrixMatvecT(alpha, offd, x_local, 0.0, y_tmp);
 
@@ -298,5 +326,137 @@ hypre_ParCSRMatrixMatvecT( double           alpha,
    for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(y_buf_data[jv]);
    hypre_TFree(y_buf_data);
 
+   return ierr;
+}
+/*--------------------------------------------------------------------------
+ * hypre_ParCSRMatrixMatvec_FF
+ *--------------------------------------------------------------------------*/
+                                                                                                              
+int
+hypre_ParCSRMatrixMatvec_FF( double           alpha,
+                 hypre_ParCSRMatrix *A,
+                 hypre_ParVector    *x,
+                 double           beta,
+                 hypre_ParVector    *y,
+                 int                *CF_marker,
+                 int fpt )
+{
+   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+   hypre_ParCSRCommHandle       *comm_handle;
+   hypre_ParCSRCommPkg  *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_CSRMatrix      *diag   = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix      *offd   = hypre_ParCSRMatrixOffd(A);
+   hypre_Vector         *x_local  = hypre_ParVectorLocalVector(x);
+   hypre_Vector         *y_local  = hypre_ParVectorLocalVector(y);
+   int         num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
+   int         num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+                                                                                                              
+   hypre_Vector      *x_tmp;
+   int        x_size = hypre_ParVectorGlobalSize(x);
+   int        y_size = hypre_ParVectorGlobalSize(y);
+   int        num_cols_offd = hypre_CSRMatrixNumCols(offd);
+   int        ierr = 0;
+   int        num_sends, i, j, index, start, num_procs;
+   int        *int_buf_data = NULL;
+   int        *CF_marker_offd = NULL;
+                                                                                                              
+                                                                                                              
+   double     *x_tmp_data = NULL;
+   double     *x_buf_data = NULL;
+   double     *x_local_data = hypre_VectorData(x_local);
+   /*---------------------------------------------------------------------
+    *  Check for size compatibility.  ParMatvec returns ierr = 11 if
+    *  length of X doesn't equal the number of columns of A,
+    *  ierr = 12 if the length of Y doesn't equal the number of rows
+    *  of A, and ierr = 13 if both are true.
+    *
+    *  Because temporary vectors are often used in ParMatvec, none of
+    *  these conditions terminates processing, and the ierr flag
+    *  is informational only.
+    *--------------------------------------------------------------------*/
+                                                                                                              
+   MPI_Comm_size(comm,&num_procs);
+                                                                                                              
+   if (num_cols != x_size)
+              ierr = 11;
+                                                                                                              
+   if (num_rows != y_size)
+              ierr = 12;
+                                                                                                              
+   if (num_cols != x_size && num_rows != y_size)
+              ierr = 13;
+                                                                                                              
+   if (num_procs > 1)
+   {
+      if (num_cols_offd)
+      {
+         x_tmp = hypre_SeqVectorCreate( num_cols_offd );
+         hypre_SeqVectorInitialize(x_tmp);
+         x_tmp_data = hypre_VectorData(x_tmp);
+      }
+                                                                                                              
+   /*---------------------------------------------------------------------
+    * If there exists no CommPkg for A, a CommPkg is generated using
+    * equally load balanced partitionings
+    *--------------------------------------------------------------------*/
+      if (!comm_pkg)
+      {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         hypre_NewCommPkgCreate(A);
+#else
+         hypre_MatvecCommPkgCreate(A);
+#endif
+         comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+      }
+                                                                                                              
+      num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+      if (num_sends)
+         x_buf_data = hypre_CTAlloc(double, hypre_ParCSRCommPkgSendMapStart
+                                    (comm_pkg, num_sends));
+                                                                                                              
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            x_buf_data[index++]
+               = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+      }
+      comm_handle = hypre_ParCSRCommHandleCreate ( 1, comm_pkg, x_buf_data, x_tmp_data );
+   }
+   hypre_CSRMatrixMatvec_FF( alpha, diag, x_local, beta, y_local, CF_marker, CF_marker, fpt);
+                                                                                                              
+   if (num_procs > 1)
+   {
+      hypre_ParCSRCommHandleDestroy(comm_handle);
+      comm_handle = NULL;
+                                                                                                              
+      if (num_sends)
+         int_buf_data = hypre_CTAlloc(int, hypre_ParCSRCommPkgSendMapStart
+                                    (comm_pkg, num_sends));
+      if (num_cols_offd) CF_marker_offd = hypre_CTAlloc(int, num_cols_offd);
+      index = 0;
+      for (i = 0; i < num_sends; i++)
+      {
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            int_buf_data[index++]
+               = CF_marker[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+      }
+      comm_handle = hypre_ParCSRCommHandleCreate(11,comm_pkg,int_buf_data,CF_marker_offd );
+                                                                                                              
+      hypre_ParCSRCommHandleDestroy(comm_handle);
+      comm_handle = NULL;
+                                                                                                              
+      if (num_cols_offd) hypre_CSRMatrixMatvec_FF( alpha, offd, x_tmp, 1.0, y_local,
+        CF_marker, CF_marker_offd, fpt);
+                                                                                                              
+      hypre_SeqVectorDestroy(x_tmp);
+      x_tmp = NULL;
+      hypre_TFree(x_buf_data);
+      hypre_TFree(int_buf_data);
+      hypre_TFree(CF_marker_offd);
+   }
+                                                                                                              
    return ierr;
 }

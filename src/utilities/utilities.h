@@ -1,3 +1,29 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team, UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer and the GNU Lesser General Public License.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.23 $
+ ***********************************************************************EHEADER*/
+
 #include "HYPRE_utilities.h"
 
 #ifndef hypre_UTILITIES_HEADER
@@ -7,14 +33,6 @@
 extern "C" {
 #endif
 
-/*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision: 2.11 $
- *********************************************************************EHEADER*/
 /******************************************************************************
  *
  * General structures and values
@@ -40,14 +58,6 @@ extern "C" {
 #endif
 
 #endif
-/*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision: 2.11 $
- *********************************************************************EHEADER*/
 /******************************************************************************
  *
  *  Fake mpi stubs to generate serial codes without mpi
@@ -242,14 +252,6 @@ int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 #endif
 
 #endif
-/*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision: 2.11 $
- *********************************************************************EHEADER*/
 /******************************************************************************
  *
  * Header file for memory management utilities
@@ -369,17 +371,8 @@ void hypre_FreeDML( char *ptr , char *file , int line );
 #endif
 
 /* random.c */
-void hypre_SeedRand( int seed );
-double hypre_Rand( void );
-
-/*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision: 2.11 $
- *********************************************************************EHEADER*/
+void hypre_SeedRand ( int seed );
+double hypre_Rand ( void );
 /******************************************************************************
  *
  *  Fake mpi stubs to generate serial codes without mpi
@@ -481,14 +474,6 @@ int MPI_Irsend( void *buf , int count , MPI_Datatype datatype , int dest , int t
 #endif
 
 #endif
-/*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision: 2.11 $
-*********************************************************************EHEADER*/
 
 #ifndef hypre_THREADING_HEADER
 #define hypre_THREADING_HEADER
@@ -562,14 +547,6 @@ extern int hypre_NumThreads;
 /*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 #endif
-/*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision: 2.11 $
- *********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -692,14 +669,6 @@ int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 #endif
 
 #endif
-/*BHEADER**********************************************************************
- * (c) 1997   The Regents of the University of California
- *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
- *
- * $Revision: 2.11 $
- *********************************************************************EHEADER*/
 
 /******************************************************************************
  *
@@ -795,32 +764,62 @@ int hypre_DataExchangeList(int num_contacts,
 #endif /* end of header */
 
 /* amg_linklist.c */
-void dispose_elt( hypre_LinkList element_ptr );
-void remove_point( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
-hypre_LinkList create_elt( int Item );
-void enter_on_lists( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
-
+void dispose_elt ( hypre_LinkList element_ptr );
+void remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
+hypre_LinkList create_elt ( int Item );
+void enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , int measure , int index , int *lists , int *where );
 
 /* binsearch.c */
-int hypre_BinarySearch( int *list , int value , int list_length );
-
+int hypre_BinarySearch ( int *list , int value , int list_length );
 
 /* qsplit.c */
-int hypre_DoubleQuickSplit( double *values , int *indices , int list_length , int NumberKept );
-
+int hypre_DoubleQuickSplit ( double *values , int *indices , int list_length , int NumberKept );
 
 /* hypre_qsort.c */
-void swap( int *v , int i , int j );
-void swap2( int *v , double *w , int i , int j );
-void hypre_swap2i( int *v , int *w , int i , int j );
-void hypre_swap3i(int  *v, int  *w, int  *z, int  i, int  j );
+void swap ( int *v , int i , int j );
+void swap2 ( int *v , double *w , int i , int j );
+void hypre_swap2i ( int *v , int *w , int i , int j );
+void hypre_swap3i ( int *v , int *w , int *z , int i , int j );
+void qsort0 ( int *v , int left , int right );
+void qsort1 ( int *v , double *w , int left , int right );
+void hypre_qsort2i ( int *v , int *w , int left , int right );
+void hypre_qsort2 ( int *v , double *w , int left , int right );
+void hypre_qsort3i ( int *v , int *w , int *z , int left , int right );
 
-void qsort0( int *v , int left , int right );
-void qsort1( int *v , double *w , int left , int right );
-void hypre_qsort2i( int *v , int *w , int left , int right );
-void hypre_qsort2( int *v, double *w, int left, int right);
-void hypre_qsort3i( int *v, int*w, int*z, int left, int right);
+#ifndef hypre_ERROR_HEADER
+#define hypre_ERROR_HEADER
 
+/*--------------------------------------------------------------------------
+ * HYPRE error codes
+ *--------------------------------------------------------------------------*/
+
+#define HYPRE_ERROR_GENERIC         1   /* generic error */
+#define HYPRE_ERROR_MEMORY          2   /* unable to allocate memory */
+#define HYPRE_ERROR_ARG             4   /* argument error */
+/* bits 4-8 are reserved for the index of the argument error */
+#define HYPRE_ERROR_CONV          256   /* method did not converge as expected */
+
+/*--------------------------------------------------------------------------
+ * Global variable used in hypre error checking
+ *--------------------------------------------------------------------------*/
+
+extern int hypre__global_error;
+#define hypre_error_flag  hypre__global_error
+
+/*--------------------------------------------------------------------------
+ * HYPRE error macros
+ *--------------------------------------------------------------------------*/
+
+void hypre_error_handler(char *filename, int line, int ierr);
+#define hypre_error(IERR)  hypre_error_handler(__FILE__, __LINE__, IERR)
+#define hypre_error_in_arg(IARG)  hypre_error(HYPRE_ERROR_ARG | IARG<<3)
+#ifdef NDEBUG
+#define hypre_assert(EX)
+#else
+#define hypre_assert(EX) if (!(EX)) {fprintf(stderr,"hypre_assert failed: %s\n",#EX); hypre_error(1);}
+#endif
+
+#endif
 
 #ifdef __cplusplus
 }

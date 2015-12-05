@@ -1,0 +1,271 @@
+Running with these driver parameters:
+  solver ID    = 1
+
+  Laplacian:
+    (nx, ny, nz) = (10, 10, 10)
+    (Px, Py, Pz) = (1, 2, 1)
+    (cx, cy, cz) = (1.000000, 1.000000, 1.000000)
+
+=============================================
+IJ Matrix Setup:
+=============================================
+Spatial operator:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+  RHS vector has unit components
+  Initial guess is 0
+=============================================
+IJ Vector Setup:
+=============================================
+RHS and Initial Guess:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver: AMG-PCG
+HYPRE_ParCSRLOBPCGGetPrecond got good precond
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 8
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 1.000000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    1000     6400  0.006     4    7   6.4   0.000e+00   3.000e+00
+ 1     550     8024  0.027     7   19  14.6  -1.499e-15   4.000e+00
+ 2     239     9307  0.163    13   76  38.9  -3.955e-16   4.780e+00
+ 3     129     8125  0.488    23   99  63.0   4.670e-02   4.868e+00
+ 4      61     3469  0.932    40   61  56.9   2.823e-01   5.203e+00
+ 5      28      784  1.000    28   28  28.0   1.170e+00   5.332e+00
+ 6      11      121  1.000    11   11  11.0   2.028e+00   4.751e+00
+ 7       6       36  1.000     6    6   6.0   2.744e+00   5.076e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  1000 x 550     1   6   1.667e-01 1.667e-01 5.000e-01 1.000e+00
+ 1   550 x 239     1  12   3.125e-02 4.545e-01 2.727e-01 1.000e+00
+ 2   239 x 129     1  15   7.338e-03 5.241e-01 7.810e-02 1.000e+00
+ 3   129 x 61      1  12   1.422e-02 4.326e-01 7.761e-02 1.000e+00
+ 4    61 x 28      1  11   6.533e-03 5.652e-01 3.712e-02 1.000e+00
+ 5    28 x 11      1   7   4.903e-03 4.671e-01 1.469e-02 1.000e+00
+ 6    11 x 6       1   5   1.003e-02 1.431e-01 4.959e-02 1.000e+00
+
+
+     Complexity:    grid = 2.024000
+                operator = 5.666563
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    2    2     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+LOBPCG Setup:
+  wall clock time = 0.080000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 1
+
+No constraints
+
+
+Initial Max. Residual 1.7322050929291970e-05
+Iteration 1 	bsize 1 	maxres 3.2057366670168375e-06
+Iteration 2 	bsize 1 	maxres 4.8837889108960808e-07
+Iteration 3 	bsize 1 	maxres 1.2084595194452533e-07
+Iteration 4 	bsize 1 	maxres 1.5539829253651491e-08
+Iteration 5 	bsize 1 	maxres 1.5630923118108756e-09
+
+Eigenvalue lambda 2.4304215831301559e-01
+Residual 1.5630923118108756e-09
+
+5 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  solver ID    = 1
+
+  Laplacian:
+    (nx, ny, nz) = (10, 10, 10)
+    (Px, Py, Pz) = (1, 2, 1)
+    (cx, cy, cz) = (1.000000, 1.000000, 1.000000)
+
+=============================================
+IJ Matrix Setup:
+=============================================
+Spatial operator:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+  RHS vector has unit components
+  Initial guess is 0
+=============================================
+IJ Vector Setup:
+=============================================
+RHS and Initial Guess:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver: AMG-PCG
+HYPRE_ParCSRLOBPCGGetPrecond got good precond
+
+BoomerAMG SETUP PARAMETERS:
+
+ Max levels = 25
+ Num levels = 8
+
+ Strength Threshold = 0.250000
+ Interpolation Truncation Factor = 0.000000
+ Maximum Row Sum Threshold for Dependency Weakening = 1.000000
+
+ Coarsening Type = Falgout-CLJP 
+ Hybrid Coarsening (switch to CLJP when coarsening slows)
+ measures are determined locally
+
+ Interpolation = modified classical interpolation
+
+Operator Matrix Information:
+
+            nonzero         entries per row        row sums
+lev   rows  entries  sparse  min  max   avg       min         max
+===================================================================
+ 0    1000     6400  0.006     4    7   6.4   0.000e+00   3.000e+00
+ 1     550     8024  0.027     7   19  14.6  -1.499e-15   4.000e+00
+ 2     239     9307  0.163    13   76  38.9  -3.955e-16   4.780e+00
+ 3     129     8125  0.488    23   99  63.0   4.670e-02   4.868e+00
+ 4      61     3469  0.932    40   61  56.9   2.823e-01   5.203e+00
+ 5      28      784  1.000    28   28  28.0   1.170e+00   5.332e+00
+ 6      11      121  1.000    11   11  11.0   2.028e+00   4.751e+00
+ 7       6       36  1.000     6    6   6.0   2.744e+00   5.076e+00
+
+
+Interpolation Matrix Information:
+
+                 entries/row    min     max         row sums
+lev  rows cols    min max     weight   weight     min       max 
+=================================================================
+ 0  1000 x 550     1   6   1.667e-01 1.667e-01 5.000e-01 1.000e+00
+ 1   550 x 239     1  12   3.125e-02 4.545e-01 2.727e-01 1.000e+00
+ 2   239 x 129     1  15   7.338e-03 5.241e-01 7.810e-02 1.000e+00
+ 3   129 x 61      1  12   1.422e-02 4.326e-01 7.761e-02 1.000e+00
+ 4    61 x 28      1  11   6.533e-03 5.652e-01 3.712e-02 1.000e+00
+ 5    28 x 11      1   7   4.903e-03 4.671e-01 1.469e-02 1.000e+00
+ 6    11 x 6       1   5   1.003e-02 1.431e-01 4.959e-02 1.000e+00
+
+
+     Complexity:    grid = 2.024000
+                operator = 5.666563
+
+
+
+
+BoomerAMG SOLVER PARAMETERS:
+
+  Maximum number of cycles:         1 
+  Stopping Tolerance:               0.000000e+00 
+  Cycle type (1 = V, 2 = W, etc.):  1
+
+  Relaxation Parameters:
+   Visiting Grid:                     down   up  coarse
+            Number of partial sweeps:    2    2     1 
+   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      3    3     9 
+   Point types, partial sweeps (1=C, -1=F):
+                  Pre-CG relaxation (down):   1  -1
+                   Post-CG relaxation (up):  -1   1
+                             Coarsest grid:   0
+
+=============================================
+Setup phase times:
+=============================================
+LOBPCG Setup:
+  wall clock time = 0.070000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 2
+
+No constraints
+
+
+Initial Max. Residual 2.3095309595612186e+00
+Iteration 1 	bsize 2 	maxres 1.3687362684922668e+00
+Iteration 2 	bsize 2 	maxres 3.0334558712733450e-01
+Iteration 3 	bsize 2 	maxres 8.9010068245917950e-02
+Iteration 4 	bsize 2 	maxres 2.0560720098418566e-02
+Iteration 5 	bsize 2 	maxres 5.8773516717540043e-03
+Iteration 6 	bsize 2 	maxres 1.3192502276175402e-03
+Iteration 7 	bsize 2 	maxres 3.6133697266196277e-04
+Iteration 8 	bsize 1 	maxres 8.7046622695546039e-05
+
+Eigenvalue lambda 2.4304215844838320e-01
+Eigenvalue lambda 4.7952104553308983e-01
+Residual 1.7231449348689952e-05
+Residual 8.7046622695546039e-05
+
+8 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+

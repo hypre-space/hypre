@@ -1,19 +1,23 @@
 <html><head><TITLE>HYPRE_StructMatrixSetConstantEntries</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int  HYPRE_StructMatrixSetConstantEntries ( <!2><A HREF="StructMatrices.html#DOC.1.3.4">HYPRE_StructMatrix</A> matrix, int nentries, int *entries ) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int  HYPRE_StructMatrixSetConstantEntries ( <!2><A HREF="StructMatrices.html#DOC.1.3.10">HYPRE_StructMatrix</A> matrix, int nentries, int *entries ) </H2><BLOCKQUOTE>
 
-Specifiy which stencil entries are constant over the grid
+Specify which stencil entries are constant over the grid
 </BLOCKQUOTE>
 <A NAME="DOC.DOCU">
 <hr>
  <h2> Documentation </h2>
 <BLOCKQUOTE>
 
-Specifiy which stencil entries are constant over the grid.
-Presently supported:
-- no entries constant (this function need not be called)
-- all entries constant
-- all but the diagonal entry constant
+Specify which stencil entries are constant over the grid.  Declaring entries
+to be ``constant over the grid'' yields significant memory savings because
+the value for each declared entry will only be stored once.  However, not all
+solvers are able to utilize this feature.<P>Presently supported:
+<UL>
+<LI> no entries constant (this function need not be called)
+<LI> all entries constant
+<LI> all but the diagonal entry constant
+</UL>
 
 </BLOCKQUOTE>
 <DL>

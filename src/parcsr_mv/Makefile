@@ -1,11 +1,31 @@
-#BHEADER***********************************************************************
-# (c) 1997   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# $Revision: 2.1 $
-#EHEADER***********************************************************************
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 2.14 $
+#EHEADER**********************************************************************
+
+
+
 
 include ../config/Makefile.config
 
@@ -41,11 +61,13 @@ FILES =\
  new_commpkg.c\
  numbers.c\
  par_csr_aat.c\
+ par_csr_assumed_part.c\
  par_csr_bool_matop.c\
  par_csr_bool_matrix.c\
  par_csr_communication.c\
  par_csr_matop.c\
  par_csr_matrix.c\
+ par_csr_matop_marked.c\
  par_csr_matvec.c\
  par_vector.c
 
@@ -69,43 +91,44 @@ DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 # Targets
 ##################################################################
 
-all: libHYPRE_parcsr_mv.a
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp $(srcdir)/parcsr_mv.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp libHYPRE_*.a $(HYPRE_BUILD_DIR)/lib/.
+all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/parcsr_mv.h $(HYPRE_BUILD_DIR)/include
+	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
  
-driver: driver.o libHYPRE_parcsr_mv.a 
+driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX} 
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS} 
  
-driver_matvec: driver_matvec.o libHYPRE_parcsr_mv.a
+driver_matvec: driver_matvec.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matvec driver_matvec.o ${LFLAGS} 
  
-driver_matmul: driver_matmul.o libHYPRE_parcsr_mv.a
+driver_matmul: driver_matmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
 
-driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv.a
+driver_boolmatmul: driver_boolmatmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_boolmatmul driver_boolmatmul.o ${LFLAGS} 
 
-driver_aat: driver_aat.o libHYPRE_parcsr_mv.a
+driver_aat: driver_aat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_aat driver_aat.o ${LFLAGS} 
 
-driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv.a
+driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS} 
 
-install: libHYPRE_parcsr_mv.a
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(srcdir)/parcsr_mv.h $(HYPRE_INC_INSTALL)/.
-	cp -fp libHYPRE_*.a $(HYPRE_LIB_INSTALL)/.
+install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
+	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/parcsr_mv.h $(HYPRE_INC_INSTALL)
+	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
  
 clean:
-	rm -f *.o lib*.a
+	rm -f *.o libHYPRE*
 	rm -f driver driver_matvec driver_matmul
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
@@ -117,6 +140,10 @@ libHYPRE_parcsr_mv.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
+
+libHYPRE_parcsr_mv.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ ${OBJS}
 
 ${OBJS}: ${HEADERS}
 

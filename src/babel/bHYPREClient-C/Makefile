@@ -1,41 +1,58 @@
-#BHEADER***********************************************************************
-# (c) 1997   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# $Revision: 1.17 $
-#EHEADER***********************************************************************
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 1.6 $
+#EHEADER**********************************************************************
+
+
+
+
+
 
 include ../../config/Makefile.config
 include babel.make
 
-C_COMPILE_FLAGS=-O2
-CXX_COMPILE_FLAGS=-O2
-F77_COMPILE_FLAGS= 
-CINCLUDES= 
+CINCLUDES=${INCLUDES} ${MPIINCLUDE}
 CDEFS = 
  
 BABEL_RUNTIME_INCLUDES=\
-  -I$(top_srcdir)/babel-runtime/sidl\
-  -I$(top_builddir)/babel-runtime/sidl
+  -I$(HYPRE_SRC_TOP_DIR)/babel-runtime/sidl
 
-CFLAGS =\
- ${C_COMPILE_FLAGS}\
+C_COMPILE_FLAGS=\
  -I..\
- -I$(top_srcdir)\
- -I$(top_srcdir)/utilities\
- -I$(top_srcdir)/seq_mv\
- -I$(top_srcdir)/krylov\
- -I$(top_srcdir)/IJ_mv\
- -I$(top_srcdir)/parcsr_mv\
- -I$(top_srcdir)/parcsr_ls\
+ -I$(HYPRE_SRC_TOP_DIR)\
+ -I$(HYPRE_SRC_TOP_DIR)/utilities\
+ -I$(HYPRE_SRC_TOP_DIR)/seq_mv\
+ -I$(HYPRE_SRC_TOP_DIR)/krylov\
+ -I$(HYPRE_SRC_TOP_DIR)/IJ_mv\
+ -I$(HYPRE_SRC_TOP_DIR)/parcsr_mv\
+ -I$(HYPRE_SRC_TOP_DIR)/parcsr_ls\
  ${BABEL_RUNTIME_INCLUDES}\
  ${CINCLUDES}\
  ${CDEFS}
  
-LIBFLAGS =  -lg2c    -lm
-LDLIBFLAGS =  
+LIBFLAGS = ${LIBDIRS} ${LIBS}
+LDLIBFLAGS = ${LDLIBDIRS} ${LDLIBS}
  
 LFLAGS =\
  -L.\
@@ -45,64 +62,6 @@ LFLAGS =\
  -lHYPRE_seq_mv\
  -lHYPRE_utilities\
  ${LIBFLAGS} ${LDLIBFLAGS}
-
-IORHDRS = bHYPRE_BoomerAMG_IOR.h bHYPRE_CoefficientAccess_IOR.h               \
-  bHYPRE_GMRES_IOR.h bHYPRE_IJBuildMatrix_IOR.h bHYPRE_IJBuildVector_IOR.h    \
-  bHYPRE_IJParCSRMatrix_IOR.h bHYPRE_IJParCSRVector_IOR.h bHYPRE_IOR.h        \
-  bHYPRE_Operator_IOR.h bHYPRE_PCG_IOR.h bHYPRE_ParCSRDiagScale_IOR.h         \
-  bHYPRE_Pilut_IOR.h bHYPRE_PreconditionedSolver_IOR.h                        \
-  bHYPRE_ProblemDefinition_IOR.h bHYPRE_SStructBuildMatrix_IOR.h              \
-  bHYPRE_SStructBuildVector_IOR.h bHYPRE_SStructGraph_IOR.h                   \
-  bHYPRE_SStructGrid_IOR.h bHYPRE_SStructMatrix_IOR.h                         \
-  bHYPRE_SStructParCSRMatrix_IOR.h bHYPRE_SStructParCSRVector_IOR.h           \
-  bHYPRE_SStructStencil_IOR.h bHYPRE_SStructVariable_IOR.h                    \
-  bHYPRE_SStructVector_IOR.h bHYPRE_Solver_IOR.h                              \
-  bHYPRE_StructBuildMatrix_IOR.h bHYPRE_StructBuildVector_IOR.h               \
-  bHYPRE_StructGrid_IOR.h bHYPRE_StructMatrix_IOR.h                           \
-  bHYPRE_StructStencil_IOR.h bHYPRE_StructVector_IOR.h bHYPRE_Vector_IOR.h
-
-IORSRCS = bHYPRE_BoomerAMG_IOR.c bHYPRE_CoefficientAccess_IOR.c               \
-  bHYPRE_GMRES_IOR.c bHYPRE_IJBuildMatrix_IOR.c bHYPRE_IJBuildVector_IOR.c    \
-  bHYPRE_IJParCSRMatrix_IOR.c bHYPRE_IJParCSRVector_IOR.c                     \
-  bHYPRE_Operator_IOR.c bHYPRE_PCG_IOR.c bHYPRE_ParCSRDiagScale_IOR.c         \
-  bHYPRE_Pilut_IOR.c bHYPRE_PreconditionedSolver_IOR.c                        \
-  bHYPRE_ProblemDefinition_IOR.c bHYPRE_SStructBuildMatrix_IOR.c              \
-  bHYPRE_SStructBuildVector_IOR.c bHYPRE_SStructGraph_IOR.c                   \
-  bHYPRE_SStructGrid_IOR.c bHYPRE_SStructMatrix_IOR.c                         \
-  bHYPRE_SStructParCSRMatrix_IOR.c bHYPRE_SStructParCSRVector_IOR.c           \
-  bHYPRE_SStructStencil_IOR.c                    \
-  bHYPRE_SStructVector_IOR.c bHYPRE_Solver_IOR.c                              \
-  bHYPRE_StructBuildMatrix_IOR.c bHYPRE_StructBuildVector_IOR.c               \
-  bHYPRE_StructGrid_IOR.c bHYPRE_StructMatrix_IOR.c                           \
-  bHYPRE_StructStencil_IOR.c bHYPRE_StructVector_IOR.c bHYPRE_Vector_IOR.c
-
-STUBHDRS = bHYPRE.h bHYPRE_BoomerAMG.h bHYPRE_CoefficientAccess.h             \
-  bHYPRE_GMRES.h bHYPRE_IJBuildMatrix.h bHYPRE_IJBuildVector.h                \
-  bHYPRE_IJParCSRMatrix.h bHYPRE_IJParCSRVector.h bHYPRE_Operator.h           \
-  bHYPRE_PCG.h bHYPRE_ParCSRDiagScale.h bHYPRE_Pilut.h                        \
-  bHYPRE_PreconditionedSolver.h bHYPRE_ProblemDefinition.h                    \
-  bHYPRE_SStructBuildMatrix.h bHYPRE_SStructBuildVector.h                     \
-  bHYPRE_SStructGraph.h bHYPRE_SStructGrid.h bHYPRE_SStructMatrix.h           \
-  bHYPRE_SStructParCSRMatrix.h bHYPRE_SStructParCSRVector.h                   \
-  bHYPRE_SStructStencil.h bHYPRE_SStructVariable.h bHYPRE_SStructVector.h     \
-  bHYPRE_Solver.h bHYPRE_StructBuildMatrix.h bHYPRE_StructBuildVector.h       \
-  bHYPRE_StructGrid.h bHYPRE_StructMatrix.h bHYPRE_StructStencil.h            \
-  bHYPRE_StructVector.h bHYPRE_Vector.h
-
-STUBSRCS = bHYPRE_BoomerAMG_Stub.c bHYPRE_CoefficientAccess_Stub.c            \
-  bHYPRE_GMRES_Stub.c bHYPRE_IJBuildMatrix_Stub.c bHYPRE_IJBuildVector_Stub.c \
-  bHYPRE_IJParCSRMatrix_Stub.c bHYPRE_IJParCSRVector_Stub.c                   \
-  bHYPRE_Operator_Stub.c bHYPRE_PCG_Stub.c bHYPRE_ParCSRDiagScale_Stub.c      \
-  bHYPRE_Pilut_Stub.c bHYPRE_PreconditionedSolver_Stub.c                      \
-  bHYPRE_ProblemDefinition_Stub.c bHYPRE_SStructBuildMatrix_Stub.c            \
-  bHYPRE_SStructBuildVector_Stub.c bHYPRE_SStructGraph_Stub.c                 \
-  bHYPRE_SStructGrid_Stub.c bHYPRE_SStructMatrix_Stub.c                       \
-  bHYPRE_SStructParCSRMatrix_Stub.c bHYPRE_SStructParCSRVector_Stub.c         \
-  bHYPRE_SStructStencil_Stub.c bHYPRE_SStructVariable_Stub.c                  \
-  bHYPRE_SStructVector_Stub.c bHYPRE_Solver_Stub.c                            \
-  bHYPRE_StructBuildMatrix_Stub.c bHYPRE_StructBuildVector_Stub.c             \
-  bHYPRE_StructGrid_Stub.c bHYPRE_StructMatrix_Stub.c                         \
-  bHYPRE_StructStencil_Stub.c bHYPRE_StructVector_Stub.c bHYPRE_Vector_Stub.c
 
 HEADERS = ${STUBHDRS} ${IORHDRS} ${IMPLHDRS}
 
@@ -115,16 +74,17 @@ OBJS = ${FILES:.c=.o}
 ##################################################################
 
 all: libbHYPREClient-C.a
+	cp -fp $(srcdir)/*.h ${HYPRE_BUILD_DIR}/include/.
+	cp -fp libbHYPRE* ${HYPRE_BUILD_DIR}/lib/.
  
 install: all
-	@cp -f $(srcdir)/bHYPRE*.h $$HYPRE_INSTALL_DIR/include/.
-	@cp -f libbHYPRE*.a $$HYPRE_INSTALL_DIR/lib/.
+	cp -fp $(srcdir)/*.h ${HYPRE_INC_INSTALL}/.
+	cp -fp libbHYPRE* ${HYPRE_LIB_INSTALL}/.
  
 clean:
-	@rm -f *.o
+	rm -f *.o libbHYPRE*
 
-veryclean: clean
-	@rm -f libbHYPRE*.a
+distclean: clean
 
 ##################################################################
 # Rules

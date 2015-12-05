@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2000   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.0 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.3 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 /******************************************************************************
  *
@@ -49,10 +69,14 @@ hypre_SStructKrylovCreateVector( void *vvector )
 {
    hypre_SStructVector *vector = vvector;
    hypre_SStructVector *new_vector;
+   int                  object_type;
+
+   object_type= hypre_SStructVectorObjectType(vector);
 
    HYPRE_SStructVectorCreate(hypre_SStructVectorComm(vector),
                              hypre_SStructVectorGrid(vector),
                              &new_vector);
+   HYPRE_SStructVectorSetObjectType(new_vector, object_type);
    HYPRE_SStructVectorInitialize(new_vector);
    HYPRE_SStructVectorAssemble(new_vector);
 
@@ -68,7 +92,10 @@ hypre_SStructKrylovCreateVectorArray(int n, void *vvector )
 {
    hypre_SStructVector *vector = vvector;
    hypre_SStructVector **new_vector;
+   int                  object_type;
    int i;
+
+   object_type= hypre_SStructVectorObjectType(vector);
 
    new_vector = hypre_CTAlloc(hypre_SStructVector*,n);
    for (i=0; i < n; i++)
@@ -76,6 +103,7 @@ hypre_SStructKrylovCreateVectorArray(int n, void *vvector )
       HYPRE_SStructVectorCreate(hypre_SStructVectorComm(vector),
                                 hypre_SStructVectorGrid(vector),
                                 &new_vector[i]);
+      HYPRE_SStructVectorSetObjectType(new_vector[i], object_type);
       HYPRE_SStructVectorInitialize(new_vector[i]);
       HYPRE_SStructVectorAssemble(new_vector[i]);
    }

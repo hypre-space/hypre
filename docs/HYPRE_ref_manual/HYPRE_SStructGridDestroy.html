@@ -9,13 +9,12 @@ Destroy a grid object
  <h2> Documentation </h2>
 <BLOCKQUOTE>
 
-Destroy a grid object.  An object should be explicitly destroyed
-using this destructor when the user's code no longer needs direct
-access to it.  Once destroyed, the object must not be referenced
-again.  Note that the object may not be deallocated at the
-completion of this call, since there may be internal package
-references to the object.  The object will then be destroyed when
-all internal reference counts go to zero.
+Destroy a grid object.  An object should be explicitly destroyed using this
+destructor when the user's code no longer needs direct access to it.  Once
+destroyed, the object must not be referenced again.  Note that the object may
+not be deallocated at the completion of this call, since there may be
+internal package references to the object.  The object will then be destroyed
+when all internal reference counts go to zero.
 
 </BLOCKQUOTE>
 <DL>

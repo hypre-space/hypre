@@ -1,0 +1,124 @@
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.100000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.110000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.170000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.170000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 27
+Final Relative Residual Norm = 8.732652e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.110000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.110000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.220000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.220000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 27
+Final Relative Residual Norm = 8.732652e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.080000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.080000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.240000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.230000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 27
+Final Relative Residual Norm = 8.732652e-07
+
+=============================================
+SStruct Interface:
+=============================================
+SStruct Interface:
+  wall clock time = 0.190000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.140000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.270000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.130000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 27
+Final Relative Residual Norm = 8.732652e-07
+

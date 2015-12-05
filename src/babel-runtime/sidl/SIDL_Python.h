@@ -1,9 +1,8 @@
 /*
- * File:        SIDL_Python.h
+ * File:        sidl_Python.h
  * Copyright:   (c) 2001 The Regents of the University of California
- * Release:     $Name: V1-9-0b $
- * Revision:    @(#) $Revision: 1.4 $
- * Date:        $Date: 2003/04/07 21:44:31 $
+ * Revision:    @(#) $Revision: 1.7 $
+ * Date:        $Date: 2006/08/29 22:29:50 $
  * Description: API to initialize a Python language interpretter
  *
  * Copyright (c) 2000-2001, The Regents of the University of Calfornia.
@@ -31,8 +30,8 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef included_SIDL_Python_h
-#define included_SIDL_Python_h
+#ifndef included_sidl_Python_h
+#define included_sidl_Python_h
 
 #include "babel_config.h"
 #ifdef PYTHON_DISABLED
@@ -44,6 +43,6 @@
  * Python modules expect the Python symbols to be in the global symbol
  * space.
  */
-void SIDL_Python_Init(void);
+void sidl_Python_Init(void);
 
 #endif

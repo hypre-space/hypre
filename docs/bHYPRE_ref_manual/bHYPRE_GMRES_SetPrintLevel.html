@@ -1,6 +1,6 @@
 <html><head><TITLE>bHYPRE_GMRES_SetPrintLevel</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_GMRES_SetPrintLevel ( bHYPRE_GMRES self, int32_t level) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> SIDL_C_INLINE_DECL  int32_t  bHYPRE_GMRES_SetPrintLevel (  bHYPRE_GMRES self,  int32_t level,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>) </H2><BLOCKQUOTE>
 
 (Optional) Set the <IT>print level</IT>, specifying the degree
 of informational data to be printed either to the screen or
@@ -16,7 +16,7 @@ of informational data to be printed either to the screen or
 to a file.  Does nothing by default (level=0).  Other levels
 (if any) are implementation-specific.  Must be called before
 <TT>Setup</tt> and <TT>Apply</tt>.
-
+DEPRECATED   use SetIntParameter
 
 </BLOCKQUOTE>
 <DL>

@@ -1,3 +1,31 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.4 $
+ ***********************************************************************EHEADER*/
+
+
+
 #include "headers.h"
 
 #define AbsStencilShape(stencil, abs_shape) \
@@ -11,7 +39,6 @@
 
 /*--------------------------------------------------------------------------
  * hypre_CF_StenBox: Given a cgrid_box, a fgrid_box, and a stencil_shape,
- * finds the coarse box extents describing the coarse to fine connection in
  * the stencil_shape direction. Returns an empty box if these two boxes
  * are not connected in the stencil_shape direction.
  *--------------------------------------------------------------------------*/
@@ -19,7 +46,8 @@ hypre_Box *
 hypre_CF_StenBox( hypre_Box              *fgrid_box,
                   hypre_Box              *cgrid_box,
                   hypre_Index             stencil_shape,
-                  hypre_Index             rfactors )
+                  hypre_Index             rfactors,
+                  int                     ndim )
 {
    hypre_Box              coarsen_box;
    hypre_Box              contracted_box;
@@ -50,7 +78,7 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
    * needs to be adjusted.
    *--------------------------------------------------------------------------*/
    hypre_CopyBox(fgrid_box, &contracted_box);
-   for (i= 0; i< 3; i++)
+   for (i= 0; i< ndim; i++)
    {
       remainder= hypre_BoxIMin(&contracted_box)[i] % rfactors[i];
       if (remainder)
@@ -64,12 +92,8 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
    hypre_StructMapFineToCoarse(hypre_BoxIMax(&contracted_box), temp_index,
                                rfactors, hypre_BoxIMax(&coarsen_box));
 
-   for (i= 0; i< 3; i++)
-   {
-      size_cbox[i] = hypre_BoxSizeD(&coarsen_box, i) - 1;
-   }
-
-   for (i= 0; i< 3; i++)
+   hypre_ClearIndex(size_cbox);
+   for (i= 0; i< ndim; i++)
    {
       size_cbox[i] = hypre_BoxSizeD(&coarsen_box, i) - 1;
    }
@@ -84,7 +108,7 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
                                rfactors, hypre_BoxIMin(&extended_box));
    hypre_StructMapFineToCoarse(hypre_BoxIMax(fgrid_box), temp_index,
                                rfactors, hypre_BoxIMax(&extended_box));*/
-   for (i= 0; i< 3; i++)
+   for (i= 0; i< ndim; i++)
    {
       hypre_BoxIMin(&extended_box)[i]-=1;
       hypre_BoxIMax(&extended_box)[i]+=1;
@@ -98,7 +122,8 @@ hypre_CF_StenBox( hypre_Box              *fgrid_box,
        return stenbox;
    }
 
-   for (i= 0; i< 3; i++)
+   hypre_ClearIndex(size_ibox);
+   for (i= 0; i< ndim; i++)
    {
       size_ibox[i] = hypre_BoxSizeD(&intersect_box, i) - 1;
    }

@@ -1,29 +1,41 @@
-#BHEADER***********************************************************************
-# (c) 1999   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# $Revision: 2.1 $
-#EHEADER***********************************************************************
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 2.17 $
+#EHEADER**********************************************************************
 
-### ************************************************************************
-### This is the template file for FEI_mv/fei-hypre.  When configure determines
-### whether or not the internal files are needed, the   variable
-### will be replaced with either a space to commetn symbol and the proper
-### Makefile will be generated.
-### ************************************************************************
+# why do we create this variable, asked by Charles
+HYPRE_LIB_SUFFIX = .a
 
 include ../../config/Makefile.config
 
-BASE_DIR = ${FEIINCLUDE}
- BASE_DIR = $(srcdir)/../fei-base
+BASE_DIR = ${HYPRE_FEI_BASE_DIR}
 
 SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU
 SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 
-CINCLUDES=${INCLUDES} ${MPIINCLUDE}
-CXXINCLUDES=${INCLUDES} ${MPIINCLUDE}
+CINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
+CXXINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
 CDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED
 CXXDEFS = -DHAVE_SUPERLU -DBOOL_NOT_SUPPORTED -DMPICH_SKIP_MPICXX
 
@@ -35,6 +47,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../..\
  -I$(srcdir)/../../IJ_mv\
  -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../multivector\
  -I$(srcdir)/../../krylov\
  -I$(srcdir)/../../parcsr_mv\
  -I$(srcdir)/../../parcsr_ls\
@@ -52,6 +65,7 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)/../..\
  -I$(srcdir)/../../IJ_mv\
  -I$(srcdir)/../../utilities\
+ -I$(srcdir)/../../multivector\
  -I$(srcdir)/../../krylov\
  -I$(srcdir)/../../parcsr_mv\
  -I$(srcdir)/../../parcsr_ls\
@@ -92,19 +106,23 @@ HEADERS =\
  HYPRE_LSI_schur.h\
  HYPRE_LSI_schwarz.h\
  HYPRE_MHMatrix.h\
+ HYPRE_MLMatrix.h\
+ HYPRE_MLMaxwell.h\
  HYPRE_SlideReduction.h\
  HYPRE_parcsr_TFQmr.h\
  HYPRE_parcsr_bicgs.h\
  HYPRE_parcsr_bicgstabl.h\
  HYPRE_parcsr_fgmres.h\
  HYPRE_parcsr_lsicg.h\
- HYPRE_parcsr_symqmr.h
+ HYPRE_parcsr_symqmr.h\
+ fei_mv.h
 
 FILESC = \
  HYPRE_LSI_Dsuperlu.c\
  HYPRE_LSI_ddict.c\
  HYPRE_LSI_ddilut.c\
  HYPRE_LSI_ml.c\
+ HYPRE_LSI_mlmaxwell.c\
  HYPRE_LSI_poly.c\
  HYPRE_LSI_schwarz.c\
  HYPRE_parcsr_TFQmr.c\
@@ -113,6 +131,7 @@ FILESC = \
  HYPRE_parcsr_fgmres.c\
  HYPRE_parcsr_lsicg.c\
  HYPRE_parcsr_symqmr.c\
+ HYPRE_parcsr_maxwell.c\
  SymQMR.c\
  TFQmr.c\
  bicgs.c\
@@ -138,7 +157,10 @@ FILESCXX = \
  HYPRE_SlideReduction.cxx\
  cfei_hypre.cxx\
  hypre_schur_reduce.cxx\
- hypre_slide_reduce.cxx
+ hypre_slide_reduce.cxx\
+ HYPRE_fei_mesh.cxx\
+ HYPRE_fei_matrix.cxx\
+ HYPRE_fei_vector.cxx
 
 OBJSC = ${FILESC:.c=.o}
 OBJSCXX = ${FILESCXX:.cxx=.o}
@@ -148,43 +170,44 @@ OBJS = ${OBJSC} ${OBJSCXX}
 # Targets
 ##################################################################
 
-all: libHYPRE_FEI.a
-	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp $(BASE_DIR)/base/Data.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp $(BASE_DIR)/base/Lookup.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include/.
-	cp -fp libHYPRE_FEI.a $(HYPRE_BUILD_DIR)/lib/.
-	@echo  ""
+all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
+	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(BASE_DIR)/base/Data.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(BASE_DIR)/base/Lookup.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
+	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
-install: libHYPRE_FEI.a
-	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(BASE_DIR)/base/Data.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(BASE_DIR)/base/Lookup.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_INC_INSTALL)/.
-	cp -fp $(BASE_DIR)/fei_defs.h $(HYPRE_INC_INSTALL)/.
-	cp -fp libHYPRE_FEI.a $(HYPRE_LIB_INSTALL)/.
+install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
+	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_INC_INSTALL)
+	cp -fp $(BASE_DIR)/base/Data.h $(HYPRE_INC_INSTALL)
+	cp -fp $(BASE_DIR)/base/Lookup.h $(HYPRE_INC_INSTALL)
+	cp -fp $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_INC_INSTALL)
+	cp -fp $(BASE_DIR)/fei_defs.h $(HYPRE_INC_INSTALL)
+	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
 	@echo  ""
 
 clean:
-	rm -rf *.o lib*.a
+	rm -rf *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
 
 ##################################################################
 # Rules
 ##################################################################
-libHYPRE_FEI.a: ${OBJS}
+libHYPRE_FEI${HYPRE_LIB_SUFFIX}: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
-
+                                                                                
 ${OBJS}: ${HEADERS}
+

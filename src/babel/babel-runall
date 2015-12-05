@@ -7,16 +7,21 @@
 
 # Note that the version of Babel run here should be consistent with
 # the version of the runtime Babel which is used in compiled bHYPRE
-# code.  Here is how I get to the public version of Babel on the Casc
-# network.  As of December 2002, it is consistent with runtime version
-# 0.7.5, which is packaged with bHYPRE.  alias babel
-# /usr/casc/babel/babel-0.7.4/casc-linux-gcc2.96/bin/babel setenv
-# BABEL /usr/casc/babel/babel-0.7.4/casc-linux-gcc2.96/ setenv
-# BABEL_EXEC ${BABEL} setenv LD_LIBRARY_PATH
-# /usr/casc/babel/babel-0.7.4/casc-linux-gcc2.96/lib:${LD_LIBRARY_PATH}
-# As of January 2002, I have switched to babel-0.8.0, which is not yet
-# in /usr/casc/babel.
+# code.
+
+# To use this, hypre should be configured --with-babel
+# For Python, hypre should be configured --enable-shared
+
+babel --version
 
 babel --output-directory=bHYPRE --comment-local-only -sC Interfaces.idl
 babel --output-directory=bHYPREClient-C --comment-local-only -cC Interfaces.idl
-babel --output-directory=bHYPREClient-F --comment-local-only -cF77 Interfaces.idl
+babel --output-directory=bHYPREClient-F --comment-local-only --include-referenced -cF77 Interfaces.idl
+
+babel --output-directory=bHYPREClient-CX --comment-local-only --include-referenced -cUC++ Interfaces.idl
+# babel --output-directory=bHYPREClient-P --comment-local-only --include-referenced -cPython Interfaces.idl
+
+# Notes:
+# The --include-referenced argument copies a slew of Babel's sidl*.h files into the bHYPREClient*
+# directory.  It is necessary for Fortran and C++.  So far I haven't seen anything which would require
+# it in C and Python, but I am using this argument for Python anyway.

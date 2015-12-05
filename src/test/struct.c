@@ -17,6 +17,21 @@
 #include <cegdb.h>
 #endif
 
+/* begin lobpcg */
+
+#define NO_SOLVER -9198
+
+#include <time.h>
+ 
+#include "fortran_matrix.h"
+#include "HYPRE_lobpcg.h"
+#include "interpreter.h"
+#include "multivector.h"
+#include "HYPRE_MatvecFunctions.h"
+#include "HYPRE_struct_int.h"
+
+/* end lobpcg */
+
 int  SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,int* period);
 
 int  AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
@@ -116,6 +131,42 @@ main( int   argc,
 
    int                 print_system = 0;
 
+   /* begin lobpcg */
+   
+   int lobpcgFlag = 0;
+   int lobpcgSeed = 0;
+   int blockSize = 1;
+   int verbosity = 1;
+   int iterations;
+   int maxIterations = 100;
+   int checkOrtho = 0;
+   int printLevel = 0;
+   int pcgIterations = 0;
+   int pcgMode = 0;
+   double tol = 1e-6;
+   double pcgTol = 1e-2;
+   double nonOrthF;
+
+   FILE* filePtr;
+
+   mv_MultiVectorPtr eigenvectors = NULL;
+   mv_MultiVectorPtr constrains = NULL;
+   double* eigenvalues = NULL;
+
+   double* residuals;
+   utilities_FortranMatrix* residualNorms;
+   utilities_FortranMatrix* residualNormsHistory;
+   utilities_FortranMatrix* eigenvaluesHistory;
+   utilities_FortranMatrix* printBuffer;
+   utilities_FortranMatrix* gramXX;
+   utilities_FortranMatrix* identity;
+
+   HYPRE_StructSolver        lobpcg_solver;
+
+   mv_InterfaceInterpreter* interpreter;
+   HYPRE_MatvecFunctions matvec_fn;
+   /* end lobpcg */
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -124,7 +175,6 @@ main( int   argc,
    HYPRE_InitPthreads(4);
 #endif  
 
- 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
 
@@ -176,8 +226,15 @@ main( int   argc,
    solver_id = 0;
    solver_type = 1;
 
-   istart[0] = -3; 
-   istart[1] = -3; 
+/*     istart[0] = -3; */
+/*     istart[1] = -3; */
+/*     istart[2] = -3; */
+/* ... original was -3 */
+/*    istart[0] = 1; */
+/*    istart[1] = 1; */
+/*    istart[2] = 1; */
+   istart[0] = -3;
+   istart[1] = -3;
    istart[2] = -3;
 
    px = 0;
@@ -293,7 +350,14 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
       {
          arg_index++;
-         solver_id = atoi(argv[arg_index++]);
+
+	 /* begin lobpcg */
+	 if ( strcmp(argv[arg_index], "none") == 0 ) {
+	   solver_id = NO_SOLVER;
+	   arg_index++;
+	 }
+	 else /* end lobpcg */
+            solver_id = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-v") == 0 )
       {
@@ -346,12 +410,76 @@ main( int   argc,
          print_usage = 1;
          break;
       }
+      /* begin lobpcg */
+      else if ( strcmp(argv[arg_index], "-lobpcg") == 0 ) 
+      {				         /* use lobpcg */
+         arg_index++;
+	 lobpcgFlag = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-orthchk") == 0 )
+      {			/* lobpcg: check orthonormality */
+         arg_index++;
+	 checkOrtho = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-verb") == 0 ) 
+      {			  /* lobpcg: verbosity level */
+         arg_index++;
+         verbosity = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-vrand") == 0 ) 
+      {                         /* lobpcg: block size */
+         arg_index++;
+         blockSize = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-seed") == 0 )
+      {		           /* lobpcg: seed for srand */
+         arg_index++;
+         lobpcgSeed = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-itr") == 0 ) 
+      {		     /* lobpcg: max # of iterations */
+         arg_index++;
+         maxIterations = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-tol") == 0 ) 
+      {		               /* lobpcg: tolerance */
+         arg_index++;
+         tol = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-pcgitr") == 0 ) 
+      {		   /* lobpcg: max inner pcg iterations */
+         arg_index++;
+         pcgIterations = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-pcgtol") == 0 ) 
+      {	     /* lobpcg: inner pcg iterations tolerance */
+         arg_index++;
+         pcgTol = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-pcgmode") == 0 ) 
+      {		 /* lobpcg: initial guess for inner pcg */
+         arg_index++;	      /* 0: zero, otherwise rhs */
+         pcgMode = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-vout") == 0 )
+      {			      /* lobpcg: print level */
+         arg_index++;
+         printLevel = atoi(argv[arg_index++]);
+      }
+      /* end lobpcg */
       else
       {
 	arg_index++;
       }
    }
-   
+
+   /* begin lobpcg */
+
+   if ( solver_id == 0 && lobpcgFlag )
+     solver_id = 10;
+
+   /*end lobpcg */
+
    sum = read_x0fromfile_param + read_rhsfromfile_param + read_fromfile_param; 
 
    /*-----------------------------------------------------------
@@ -420,6 +548,48 @@ main( int   argc,
       printf("                        2 - GMRES\n");
       printf("  -cf <cf>            : convergence factor for Hybrid\n");
       printf("\n");
+
+      /* begin lobpcg */
+
+      printf("LOBPCG options:\n");
+      printf("\n");
+      printf("  -lobpcg             : run LOBPCG instead of PCG\n");
+      printf("\n");
+      printf("  -solver none        : no HYPRE preconditioner is used\n");
+      printf("\n");
+      printf("  -itr <val>          : maximal number of LOBPCG iterations (default 100);\n");
+      printf("\n");
+      printf("  -tol <val>          : residual tolerance (default 1e-6)\n");
+      printf("\n");
+      printf("  -vrand <val>        : compute <val> eigenpairs using random initial vectors (default 1)\n");
+      printf("\n");
+      printf("  -seed <val>         : use <val> as the seed for the pseudo-random number generator\n"); 
+      printf("                        (default seed is based on the time of the run)\n");
+      printf("\n");
+      printf("  -orthchk            : check eigenvectors for orthonormality\n");
+      printf("\n");
+      printf("  -verb <val>         : verbosity level\n");
+      printf("  -verb 0             : no print\n");
+      printf("  -verb 1             : print initial eigenvalues and residuals, iteration number, number of\n");
+      printf("                        non-convergent eigenpairs and final eigenvalues and residuals (default)\n");
+      printf("  -verb 2             : print eigenvalues and residuals on each iteration\n");
+      printf("\n");
+      printf("  -pcgitr <val>       : maximal number of inner PCG iterations for preconditioning (default 1);\n");
+      printf("                        if <val> = 0 then the preconditioner is applied directly\n");
+      printf("\n");
+      printf("  -pcgtol <val>       : residual tolerance for inner iterations (default 0.01)\n");
+      printf("\n");
+      printf("  -vout <val>         : file output level\n");
+      printf("  -vout 0             : no files created (default)\n");
+      printf("  -vout 1             : write eigenvalues to values.txt and residuals to residuals.txt\n");
+      printf("  -vout 2             : in addition to the above, write the eigenvalues history (the matrix whose\n");
+      printf("                        i-th column contains eigenvalues at (i+1)-th iteration) to val_hist.txt and\n");
+      printf("                        residuals history to res_hist.txt\n");
+      printf("\nNOTE: in this test driver LOBPCG only works with solvers 10, 11, 12, 17 and 18\n");
+      printf("\ndefault solver is 10\n");
+      printf("\n");
+
+      /* end lobpcg */
    }
 
    if ( print_usage )
@@ -787,6 +957,8 @@ main( int   argc,
          {
             for ( i=0; i<stencil_size; ++i ) stencil_entries[i]=i;
             hypre_StructMatrixSetConstantEntries( A, stencil_size, stencil_entries );
+            /* ... note: SetConstantEntries is where the constant_coefficient flag
+               is set in A */
             hypre_TFree( stencil_entries );
             constant_coefficient = 1;
          }
@@ -794,6 +966,9 @@ main( int   argc,
          {
             hypre_SetIndex(diag_index, 0, 0, 0);
             diag_rank = hypre_StructStencilElementRank( stencil, diag_index );
+            hypre_assert( stencil_size>=1 );
+            if ( diag_rank==0 ) stencil_entries[diag_rank]=1;
+            else stencil_entries[diag_rank]=0;
             for ( i=0; i<stencil_size; ++i )
             {
                if ( i!= diag_rank ) stencil_entries[i]=i;
@@ -907,7 +1082,8 @@ main( int   argc,
            
             /* Zero out stencils reaching to real boundary */
            
-            SetStencilBndry(A,readgrid,readperiodic); 
+            if ( constant_coefficient==0 )
+               SetStencilBndry(A,readgrid,readperiodic); 
             HYPRE_StructMatrixAssemble(A);
          }   
          /* done with one case rhs=1 x0 = 0  */
@@ -954,7 +1130,8 @@ main( int   argc,
 
             /* Zero out stencils reaching to real boundary */
 
-            SetStencilBndry(A,readgrid,readperiodic); 
+            if ( constant_coefficient == 0 )
+               SetStencilBndry(A,readgrid,readperiodic); 
             HYPRE_StructMatrixAssemble(A);
 	 }
          /* done with one case rhs=0 x0 = 1  */
@@ -1003,7 +1180,8 @@ main( int   argc,
 
             /* Zero out stencils reaching to real boundary */
 
-            SetStencilBndry(A,readgrid,readperiodic); 
+            if ( constant_coefficient == 0 )
+               SetStencilBndry(A,readgrid,readperiodic); 
             HYPRE_StructMatrixAssemble(A);
 	 }
          /* done with one case rhs=1 x0 = 1  */
@@ -1416,6 +1594,473 @@ main( int   argc,
          HYPRE_StructJacobiDestroy(precond);
       }
    }
+
+
+   /* begin lobpcg */
+
+   /*-----------------------------------------------------------
+    * Solve the system using LOBPCG
+    *-----------------------------------------------------------*/
+
+   if ( lobpcgFlag ) {
+
+     interpreter = hypre_CTAlloc(mv_InterfaceInterpreter,1);
+
+     HYPRE_StructSetupInterpreter( interpreter );
+     HYPRE_StructSetupMatvec(&matvec_fn);
+
+     if (myid != 0)
+       verbosity = 0;
+
+     if ( pcgIterations > 0 ) {
+
+       time_index = hypre_InitializeTiming("PCG Setup");
+       hypre_BeginTiming(time_index);
+
+       HYPRE_StructPCGCreate(MPI_COMM_WORLD, &solver);
+       HYPRE_PCGSetMaxIter( (HYPRE_Solver)solver, pcgIterations );
+       HYPRE_PCGSetTol( (HYPRE_Solver)solver, pcgTol );
+       HYPRE_PCGSetTwoNorm( (HYPRE_Solver)solver, 1 );
+       HYPRE_PCGSetRelChange( (HYPRE_Solver)solver, 0 );
+       HYPRE_PCGSetPrintLevel( (HYPRE_Solver)solver, 0 );
+
+       if (solver_id == 10)
+	 {
+	   /* use symmetric SMG as preconditioner */
+	   HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_StructSMGSetMemoryUse(precond, 0);
+	   HYPRE_StructSMGSetMaxIter(precond, 1);
+	   HYPRE_StructSMGSetTol(precond, 0.0);
+	   HYPRE_StructSMGSetZeroGuess(precond);
+	   HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
+	   HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+	   HYPRE_StructSMGSetPrintLevel(precond, 0);
+	   HYPRE_StructSMGSetLogging(precond, 0);
+	   HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+				(HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
+				(HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup,
+				(HYPRE_Solver) precond);
+	 }
+
+       else if (solver_id == 11)
+	 {
+	   /* use symmetric PFMG as preconditioner */
+	   HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_StructPFMGSetMaxIter(precond, 1);
+	   HYPRE_StructPFMGSetTol(precond, 0.0);
+	   HYPRE_StructPFMGSetZeroGuess(precond);
+	   HYPRE_StructPFMGSetRAPType(precond, rap);
+	   HYPRE_StructPFMGSetRelaxType(precond, relax);
+	   HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
+	   HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
+	   HYPRE_StructPFMGSetSkipRelax(precond, skip);
+	   /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+	   HYPRE_StructPFMGSetPrintLevel(precond, 0);
+	   HYPRE_StructPFMGSetLogging(precond, 0);
+	   HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+				(HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
+				(HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
+				(HYPRE_Solver) precond);
+	 }
+
+       else if (solver_id == 12)
+	 {
+	   /* use symmetric SparseMSG as preconditioner */
+	   HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_StructSparseMSGSetMaxIter(precond, 1);
+	   HYPRE_StructSparseMSGSetJump(precond, jump);
+	   HYPRE_StructSparseMSGSetTol(precond, 0.0);
+	   HYPRE_StructSparseMSGSetZeroGuess(precond);
+	   HYPRE_StructSparseMSGSetRelaxType(precond, relax);
+	   HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
+	   HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
+	   HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
+	   HYPRE_StructSparseMSGSetLogging(precond, 0);
+	   HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+				(HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
+				(HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
+				(HYPRE_Solver) precond);
+	 }
+
+       else if (solver_id == 17)
+	 {
+	   /* use two-step Jacobi as preconditioner */
+	   HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_StructJacobiSetMaxIter(precond, 2);
+	   HYPRE_StructJacobiSetTol(precond, 0.0);
+	   HYPRE_StructJacobiSetZeroGuess(precond);
+	   HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+				(HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSolve,
+				(HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSetup,
+				(HYPRE_Solver) precond);
+	 }
+
+       else if (solver_id == 18)
+	 {
+	   /* use diagonal scaling as preconditioner */
+#ifdef HYPRE_USE_PTHREADS
+	   for (i = 0; i < hypre_NumThreads; i++)
+	     {
+	       precond[i] = NULL;
+	     }
+#else
+	   precond = NULL;
+#endif
+	   HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+				(HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
+				(HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
+				(HYPRE_Solver) precond);
+	 }
+       else if (solver_id != NO_SOLVER )
+	 {
+	   if ( verbosity )
+	     printf("Solver ID not recognized - running inner PCG iterations without preconditioner\n\n");
+	 }
+
+       hypre_EndTiming(time_index);
+       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+       hypre_FinalizeTiming(time_index);
+       hypre_ClearTiming();
+   
+       HYPRE_LOBPCGCreate(interpreter, &matvec_fn, (HYPRE_Solver*)&lobpcg_solver);
+       HYPRE_LOBPCGSetMaxIter((HYPRE_Solver)lobpcg_solver, maxIterations);
+       HYPRE_LOBPCGSetPrecondUsageMode((HYPRE_Solver)lobpcg_solver, pcgMode);
+       HYPRE_LOBPCGSetTol((HYPRE_Solver)lobpcg_solver, tol);
+       HYPRE_LOBPCGSetPrintLevel((HYPRE_Solver)lobpcg_solver, verbosity);
+
+       HYPRE_LOBPCGSetPrecond((HYPRE_Solver)lobpcg_solver,
+			      (HYPRE_PtrToSolverFcn) HYPRE_PCGSolve,
+			      (HYPRE_PtrToSolverFcn) HYPRE_PCGSetup,
+			      (HYPRE_Solver)solver);
+
+       HYPRE_LOBPCGSetup((HYPRE_Solver)lobpcg_solver, (HYPRE_Matrix)A, 
+			 (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+       eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
+							       blockSize, 
+							       x );
+       eigenvalues = (double*) calloc( blockSize, sizeof(double) );
+
+       if ( lobpcgSeed )
+	 mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
+       else
+	 mv_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
+
+       time_index = hypre_InitializeTiming("LOBPCG Solve");
+       hypre_BeginTiming(time_index);
+
+       HYPRE_LOBPCGSolve((HYPRE_Solver)lobpcg_solver, constrains, 
+			 eigenvectors, eigenvalues );
+ 
+       hypre_EndTiming(time_index);
+       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+       hypre_FinalizeTiming(time_index);
+       hypre_ClearTiming();
+
+       if ( checkOrtho ) {
+		
+	 gramXX = utilities_FortranMatrixCreate();
+	 identity = utilities_FortranMatrixCreate();
+
+	 utilities_FortranMatrixAllocateData( blockSize, blockSize, gramXX );
+	 utilities_FortranMatrixAllocateData( blockSize, blockSize, identity );
+
+	 lobpcg_MultiVectorByMultiVector( eigenvectors, eigenvectors, gramXX );
+	 utilities_FortranMatrixSetToIdentity( identity );
+	 utilities_FortranMatrixAdd( -1, identity, gramXX, gramXX );
+	 nonOrthF = utilities_FortranMatrixFNorm( gramXX );
+	 if ( myid == 0 )
+	   printf("Non-orthonormality of eigenvectors: %12.5e\n", nonOrthF);
+	 
+	 utilities_FortranMatrixDestroy( gramXX );
+	 utilities_FortranMatrixDestroy( identity );
+	  
+       }
+
+       if ( printLevel ) {
+		  
+	 if ( myid == 0 ) {	  
+	   if ( (filePtr = fopen("values.txt", "w")) ) {
+	     fprintf(filePtr, "%d\n", blockSize);
+	     for ( i = 0; i < blockSize; i++ )
+	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	     fclose(filePtr);
+	   }
+
+	   if ( (filePtr = fopen("residuals.txt", "w")) ) {
+	     residualNorms = HYPRE_LOBPCGResidualNorms( (HYPRE_Solver)lobpcg_solver );
+	     residuals = utilities_FortranMatrixValues( residualNorms );
+	     fprintf(filePtr, "%d\n", blockSize);
+	     for ( i = 0; i < blockSize; i++ )
+	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	     fclose(filePtr);
+	   }
+
+	   if ( printLevel > 1 ) {
+
+	     printBuffer = utilities_FortranMatrixCreate();
+
+	     iterations = HYPRE_LOBPCGIterations( (HYPRE_Solver)lobpcg_solver );
+
+	     eigenvaluesHistory = HYPRE_LOBPCGEigenvaluesHistory( (HYPRE_Solver)lobpcg_solver );
+	     utilities_FortranMatrixSelectBlock( eigenvaluesHistory,
+						 1, blockSize, 1, iterations + 1, printBuffer );
+	     utilities_FortranMatrixPrint( printBuffer, "val_hist.txt" );
+
+	     residualNormsHistory = HYPRE_LOBPCGResidualNormsHistory( (HYPRE_Solver)lobpcg_solver );
+	     utilities_FortranMatrixSelectBlock(residualNormsHistory, 
+						1, blockSize, 1, iterations + 1, printBuffer );
+	     utilities_FortranMatrixPrint( printBuffer, "res_hist.txt" );
+
+	     utilities_FortranMatrixDestroy( printBuffer );
+	   }
+	 }
+       }
+
+       HYPRE_StructPCGDestroy(solver);
+
+       if (solver_id == 10)
+	 {
+	   HYPRE_StructSMGDestroy(precond);
+	 }
+       else if (solver_id == 11)
+	 {
+	   HYPRE_StructPFMGDestroy(precond);
+	 }
+       else if (solver_id == 12)
+	 {
+	   HYPRE_StructSparseMSGDestroy(precond);
+	 }
+       else if (solver_id == 17)
+	 {
+	   HYPRE_StructJacobiDestroy(precond);
+	 }
+
+       HYPRE_LOBPCGDestroy((HYPRE_Solver)lobpcg_solver);
+       mv_MultiVectorDestroy( eigenvectors );
+       free( eigenvalues );
+    
+     } 
+     else {
+      
+       time_index = hypre_InitializeTiming("LOBPCG Setup");
+       hypre_BeginTiming(time_index);
+
+       HYPRE_LOBPCGCreate(interpreter, &matvec_fn, (HYPRE_Solver*)&solver);
+       HYPRE_LOBPCGSetMaxIter( (HYPRE_Solver)solver, maxIterations );
+       HYPRE_LOBPCGSetTol( (HYPRE_Solver)solver, tol );
+       HYPRE_LOBPCGSetPrintLevel( (HYPRE_Solver)solver, verbosity );
+
+       if (solver_id == 10)
+	 {
+	   /* use symmetric SMG as preconditioner */
+	   HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_StructSMGSetMemoryUse(precond, 0);
+	   HYPRE_StructSMGSetMaxIter(precond, 1);
+	   HYPRE_StructSMGSetTol(precond, 0.0);
+	   HYPRE_StructSMGSetZeroGuess(precond);
+	   HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
+	   HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+	   HYPRE_StructSMGSetPrintLevel(precond, 0);
+	   HYPRE_StructSMGSetLogging(precond, 0);
+	   HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
+				   (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup,
+				   (HYPRE_Solver) precond);
+	 }
+
+       else if (solver_id == 11)
+	 {
+	   /* use symmetric PFMG as preconditioner */
+	   HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_StructPFMGSetMaxIter(precond, 1);
+	   HYPRE_StructPFMGSetTol(precond, 0.0);
+	   HYPRE_StructPFMGSetZeroGuess(precond);
+	   HYPRE_StructPFMGSetRAPType(precond, rap);
+	   HYPRE_StructPFMGSetRelaxType(precond, relax);
+	   HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
+	   HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
+	   HYPRE_StructPFMGSetSkipRelax(precond, skip);
+	   /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+	   HYPRE_StructPFMGSetPrintLevel(precond, 0);
+	   HYPRE_StructPFMGSetLogging(precond, 0);
+	   HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
+				   (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
+				   (HYPRE_Solver) precond);
+	 }
+
+       else if (solver_id == 12)
+	 {
+	   /* use symmetric SparseMSG as preconditioner */
+	   HYPRE_StructSparseMSGCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_StructSparseMSGSetMaxIter(precond, 1);
+	   HYPRE_StructSparseMSGSetJump(precond, jump);
+	   HYPRE_StructSparseMSGSetTol(precond, 0.0);
+	   HYPRE_StructSparseMSGSetZeroGuess(precond);
+	   HYPRE_StructSparseMSGSetRelaxType(precond, relax);
+	   HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
+	   HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
+	   HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
+	   HYPRE_StructSparseMSGSetLogging(precond, 0);
+	   HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSolve,
+				   (HYPRE_PtrToSolverFcn) HYPRE_StructSparseMSGSetup,
+				   (HYPRE_Solver) precond);
+	 }
+       
+       else if (solver_id == 17)
+	 {
+	   /* use two-step Jacobi as preconditioner */
+	   HYPRE_StructJacobiCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_StructJacobiSetMaxIter(precond, 2);
+	   HYPRE_StructJacobiSetTol(precond, 0.0);
+	   HYPRE_StructJacobiSetZeroGuess(precond);
+	   HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSolve,
+				   (HYPRE_PtrToSolverFcn) HYPRE_StructJacobiSetup,
+				   (HYPRE_Solver) precond);
+	 }
+       
+       else if (solver_id == 18)
+	 {
+	   /* use diagonal scaling as preconditioner */
+#ifdef HYPRE_USE_PTHREADS
+	   for (i = 0; i < hypre_NumThreads; i++)
+	     {
+	       precond[i] = NULL;
+	     }
+#else
+	   precond = NULL;
+#endif
+	   HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScale,
+				   (HYPRE_PtrToSolverFcn) HYPRE_StructDiagScaleSetup,
+				   (HYPRE_Solver) precond);
+	 }
+       else if (solver_id != NO_SOLVER )
+	 {
+	   if ( verbosity )
+	     printf("Solver ID not recognized - running LOBPCG without preconditioner\n\n");
+	 }
+       
+       HYPRE_LOBPCGSetup
+         ( (HYPRE_Solver)solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x );
+       
+       hypre_EndTiming(time_index);
+       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+       hypre_FinalizeTiming(time_index);
+       hypre_ClearTiming();
+       
+       eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
+							       blockSize, 
+							       x );
+       eigenvalues = (double*) calloc( blockSize, sizeof(double) );
+       
+       if ( lobpcgSeed )
+	 mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
+       else
+	 mv_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
+       
+       time_index = hypre_InitializeTiming("PCG Solve");
+       hypre_BeginTiming(time_index);
+
+       HYPRE_LOBPCGSolve
+         ( (HYPRE_Solver)solver, constrains, eigenvectors, eigenvalues );
+
+       hypre_EndTiming(time_index);
+       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+       hypre_FinalizeTiming(time_index);
+       hypre_ClearTiming();
+       
+       if ( checkOrtho ) {
+		
+	 gramXX = utilities_FortranMatrixCreate();
+	 identity = utilities_FortranMatrixCreate();
+	 
+	 utilities_FortranMatrixAllocateData( blockSize, blockSize, gramXX );
+	 utilities_FortranMatrixAllocateData( blockSize, blockSize, identity );
+
+	 lobpcg_MultiVectorByMultiVector( eigenvectors, eigenvectors, gramXX );
+	 utilities_FortranMatrixSetToIdentity( identity );
+	 utilities_FortranMatrixAdd( -1, identity, gramXX, gramXX );
+	 nonOrthF = utilities_FortranMatrixFNorm( gramXX );
+	 if ( myid == 0 )
+	   printf("Non-orthonormality of eigenvectors: %12.5e\n", nonOrthF);
+		
+	 utilities_FortranMatrixDestroy( gramXX );
+	 utilities_FortranMatrixDestroy( identity );
+	 
+       }
+
+       if ( printLevel ) {
+	  
+	 if ( myid == 0 ) {
+	   if ( (filePtr = fopen("values.txt", "w")) ) {
+	     fprintf(filePtr, "%d\n", blockSize);
+	     for ( i = 0; i < blockSize; i++ )
+	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	     fclose(filePtr);
+	   }
+	   
+	   if ( (filePtr = fopen("residuals.txt", "w")) ) {
+	     residualNorms = HYPRE_LOBPCGResidualNorms( (HYPRE_Solver)solver );
+	     residuals = utilities_FortranMatrixValues( residualNorms );
+	     fprintf(filePtr, "%d\n", blockSize);
+	     for ( i = 0; i < blockSize; i++ )
+	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	     fclose(filePtr);
+	   }
+	   
+	   if ( printLevel > 1 ) {
+	     
+	     printBuffer = utilities_FortranMatrixCreate();
+	     
+	     iterations = HYPRE_LOBPCGIterations( (HYPRE_Solver)solver );
+	     
+	     eigenvaluesHistory = HYPRE_LOBPCGEigenvaluesHistory( (HYPRE_Solver)solver );
+	     utilities_FortranMatrixSelectBlock( eigenvaluesHistory,
+						 1, blockSize, 1, iterations + 1, printBuffer );
+	     utilities_FortranMatrixPrint( printBuffer, "val_hist.txt" );
+	     
+	     residualNormsHistory = HYPRE_LOBPCGResidualNormsHistory( (HYPRE_Solver)solver );
+	     utilities_FortranMatrixSelectBlock(residualNormsHistory,
+						1, blockSize, 1, iterations + 1, printBuffer );
+	     utilities_FortranMatrixPrint( printBuffer, "res_hist.txt" );
+	     
+	     utilities_FortranMatrixDestroy( printBuffer );
+	   }
+	 }
+       } 
+       
+       HYPRE_LOBPCGDestroy((HYPRE_Solver)solver);
+
+       if (solver_id == 10)
+	 {
+	   HYPRE_StructSMGDestroy(precond);
+	 }
+       else if (solver_id == 11)
+	 {
+	   HYPRE_StructPFMGDestroy(precond);
+	 }
+       else if (solver_id == 12)
+	 {
+	   HYPRE_StructSparseMSGDestroy(precond);
+	 }
+       else if (solver_id == 17)
+	 {
+	   HYPRE_StructJacobiDestroy(precond);
+	 }
+       
+       mv_MultiVectorDestroy( eigenvectors );
+       free( eigenvalues );
+     }
+
+     hypre_TFree( interpreter );
+
+   }
+
+   /* end lobpcg */
 
    /*-----------------------------------------------------------
     * Solve the system using Hybrid
@@ -1834,7 +2479,7 @@ main( int   argc,
       HYPRE_StructVectorPrint("struct.out.x", x, 0);
    }
 
-   if (myid == 0 && rep==reps-1)
+   if (myid == 0 && rep==reps-1 /* begin lobpcg */ && !lobpcgFlag /* end lobpcg */)
    {
       printf("\n");
       printf("Iterations = %d\n", num_iterations);
@@ -2094,7 +2739,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
      }
      else
      {
-        assert( constant_coefficient==2 );
+        hypre_assert( constant_coefficient==2 );
 
         /* stencil index for the center equals dim, so it's easy to leave out */
         values   = hypre_CTAlloc(double, stencil_size-1);
@@ -2247,7 +2892,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
      }
      else
      {
-        assert( constant_coefficient==2 );
+        hypre_assert( constant_coefficient==2 );
         values = hypre_CTAlloc( double, stencil_size-1 );
         switch (dim)
         {  /* no center in stencil_indices and values */

@@ -1,6 +1,6 @@
 <html><head><TITLE>bHYPRE_IJParCSRMatrix_SetRowSizes</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_IJParCSRMatrix_SetRowSizes ( bHYPRE_IJParCSRMatrix self, struct SIDL_int__array* sizes) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> SIDL_C_INLINE_DECL  int32_t  bHYPRE_IJParCSRMatrix_SetRowSizes (  bHYPRE_IJParCSRMatrix self,  int32_t* sizes,  int32_t nrows,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>) </H2><BLOCKQUOTE>
 
 (Optional) Set the max number of nonzeros to expect in each
 row
@@ -12,10 +12,10 @@ row
 
 (Optional) Set the max number of nonzeros to expect in each
 row.  The array <TT>sizes</tt> contains estimated sizes for each
-row on this process.  This call can significantly improve the
+row on this process.  The integer nrows is the number of rows in
+the local matrix.  This call can significantly improve the
 efficiency of matrix construction, and should always be
 utilized if possible.<P>Not collective.
-
 
 </BLOCKQUOTE>
 <DL>

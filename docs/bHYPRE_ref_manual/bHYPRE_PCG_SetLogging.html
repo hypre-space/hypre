@@ -1,6 +1,6 @@
 <html><head><TITLE>bHYPRE_PCG_SetLogging</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_PCG_SetLogging ( bHYPRE_PCG self, int32_t level) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> SIDL_C_INLINE_DECL  int32_t  bHYPRE_PCG_SetLogging (  bHYPRE_PCG self,  int32_t level,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>) </H2><BLOCKQUOTE>
 
 (Optional) Set the <IT>logging level</IT>, specifying the degree
 of additional informational data to be accumulated
@@ -15,7 +15,7 @@ of additional informational data to be accumulated.  Does
 nothing by default (level = 0).  Other levels (if any) are
 implementation-specific.  Must be called before <TT>Setup</tt>
 and <TT>Apply</tt>.
-
+DEPRECATED   use SetIntParameter
 
 </BLOCKQUOTE>
 <DL>

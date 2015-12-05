@@ -1,10 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2001   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.107 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 // *************************************************************************
 // This is the HYPRE implementation of LinearSystemCore.
@@ -13,7 +34,7 @@
 #ifndef _HYPRE_LinSysCore_h_
 #define _HYPRE_LinSysCore_h_
 
-#define HYPRE_FEI_Version() "FEI/HYPRE 2.6.2R1"
+#define HYPRE_FEI_Version() "FEI/HYPRE 2.7.0R1"
 
 // *************************************************************************
 // system libraries used
@@ -44,7 +65,7 @@ enum HYsolverID {HYPCG,HYLSICG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,
                  HYY12M,HYAMGE,HYHYBRID};
 enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT,HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK,HYMLI,
-                 HYUZAWA};
+                 HYUZAWA,HYMLMAXWELL,HYAMS};
 
 #define HYFEI_HIGHMASK      2147483647-255
 #define HYFEI_SPECIALMASK              255
@@ -390,6 +411,13 @@ class HYPRE_LinSysCore
    void   putIntoMappedMatrix(int row, int numValues, const double* values,
                               const int* scatterIndices);
    void   getFEDataObject(void **object) { (*object) = feData_; }
+   int    HYPRE_LSC_Matvec(void *x, void *y);
+   int    HYPRE_LSC_Axpby(double, void *, double, void *);
+   void   *HYPRE_LSC_GetRHSVector();
+   void   *HYPRE_LSC_GetSolVector();
+   void   *HYPRE_LSC_GetMatrix();
+   void   *HYPRE_LSC_SetColMap(int, int);
+   void   *HYPRE_LSC_MatMatMult(void *);
 
    // ----------------------------------------------------------------------
    // MLI-specific public functions
@@ -428,6 +456,8 @@ class HYPRE_LinSysCore
    void   setupPreconPoly();
    void   setupPreconSchwarz();
    void   setupPreconML();
+   void   setupPreconMLMaxwell();
+   void   setupPreconAMS();
    void   setupPreconBlock();
    void   setupPreconEuclid();
    void   solveUsingBoomeramg(int&);
@@ -457,6 +487,8 @@ class HYPRE_LinSysCore
    void   addToAConjProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    void   addToMinResProjectionSpace(HYPRE_IJVector x, HYPRE_IJVector b);
    int    HYPRE_Schur_Search(int,int,int*,int*,int,int);
+   void   HYPRE_LSI_BuildNodalCoordinates(HYPRE_ParVector X, HYPRE_ParVector Y, 
+                                          HYPRE_ParVector Z);
 
    // ----------------------------------------------------------------------
    // private functions for selecting solver/preconditioner
@@ -503,6 +535,8 @@ class HYPRE_LinSysCore
    int             numGlobalRows_;
    int             localStartRow_;
    int             localEndRow_;
+   int             localStartCol_;
+   int             localEndCol_;
    int             *rowLengths_;
    int             **colIndices_;
    double          **colValues_;
@@ -660,6 +694,13 @@ class HYPRE_LinSysCore
    int             MLI_Hybrid_MaxIter_;
    double          MLI_Hybrid_ConvRate_;
    int             MLI_Hybrid_NTrials_;
+
+   // ----------------------------------------------------------------------
+   // ML Maxwell variables
+   // ----------------------------------------------------------------------
+
+   HYPRE_ParCSRMatrix  maxwellANN_;           // Maxwell nodal matrix 
+   HYPRE_ParCSRMatrix  maxwellGEN_;           // Maxwell gradient matrix 
 
    // ----------------------------------------------------------------------
    // temporary functions for testing purposes

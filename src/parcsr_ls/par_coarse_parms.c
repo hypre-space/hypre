@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.0 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.3 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  *****************************************************************************/
@@ -92,6 +112,22 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
       *coarse_dof_func_ptr    = coarse_dof_func;
    }
 
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   {
+      int scan_recv;
+      
+      coarse_pnts_global = hypre_CTAlloc(int,2);
+      MPI_Scan(&local_coarse_size, &scan_recv, 1, MPI_INT, MPI_SUM, comm);
+      /* first point in my range */ 
+      coarse_pnts_global[0] = scan_recv - local_coarse_size;
+      /* first point in next proc's range */
+      coarse_pnts_global[1] = scan_recv;
+
+   }
+      
+
+#else
    coarse_pnts_global = hypre_CTAlloc(int,num_procs+1);
 
    MPI_Allgather(&local_coarse_size,1,MPI_INT,&coarse_pnts_global[1],
@@ -99,6 +135,10 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
 
    for (i=2; i < num_procs+1; i++)
       coarse_pnts_global[i] += coarse_pnts_global[i-1];
+#endif
+
+
+
 
    *coarse_pnts_global_ptr = coarse_pnts_global;
 

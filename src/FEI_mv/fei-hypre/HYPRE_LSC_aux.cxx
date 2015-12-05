@@ -1,10 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2001   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.24 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 //***************************************************************************
 // This file holds the other functions for HYPRE_LinSysCore
@@ -55,12 +76,7 @@
 #include "HYPRE_LSI_block.h"
 #include "HYPRE_LSI_Uzawa_c.h"
 #include "HYPRE_LSI_Dsuperlu.h"
-
-//---------------------------------------------------------------------------
-// FEI include files
-//---------------------------------------------------------------------------
-
-#include "HYPRE_FEI_includes.h"
+#include "HYPRE_MLMaxwell.h"
 
 //---------------------------------------------------------------------------
 // SUPERLU include files
@@ -106,6 +122,22 @@ extern "C" {
    int HYPRE_LSI_MLSetCoarsenScheme( HYPRE_Solver , int );
    int HYPRE_LSI_MLSetCoarseSolver( HYPRE_Solver, int );
    int HYPRE_LSI_MLSetNumPDEs( HYPRE_Solver, int );
+#endif
+
+/*-------------------------------------------------------------------------*
+ * MLMaxwell functions   
+ *-------------------------------------------------------------------------*/
+
+#ifdef HAVE_MLMAXWELL
+   int HYPRE_LSI_MLMaxwellCreate(MPI_Comm, HYPRE_Solver *);
+   int HYPRE_LSI_MLMaxwellDestroy(HYPRE_Solver);
+   int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver, HYPRE_ParCSRMatrix,
+                                HYPRE_ParVector, HYPRE_ParVector);
+   int HYPRE_LSI_MLMaxwellSolve(HYPRE_Solver, HYPRE_ParCSRMatrix,
+                                HYPRE_ParVector, HYPRE_ParVector);
+   int HYPRE_LSI_MLMaxwellSetGMatrix(HYPRE_Solver, HYPRE_ParCSRMatrix);
+   int HYPRE_LSI_MLMaxwellSetANNMatrix(HYPRE_Solver, HYPRE_ParCSRMatrix);
+   int HYPRE_LSI_MLMaxwellSetStrongThreshold(HYPRE_Solver, double);
 #endif
 
 /*-------------------------------------------------------------------------*
@@ -283,6 +315,7 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          printf("    - euclidNlevels <d>\n");
          printf("    - euclidThreshold <f>\n");
          printf("    - blockP help (to get blockP options) \n");
+         printf("    - amsNumPDEs <d>\n");
          printf("    - MLI help (to get MLI options) \n");
 #ifdef HAVE_ML
          printf("    - mlNumSweeps <d>\n");
@@ -1445,6 +1478,19 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
       }
 
       //---------------------------------------------------------------
+      // mlpack preconditoner : no of PDEs (block size)
+      //---------------------------------------------------------------
+
+      else if ( !strcmp(param1, "amsNumPDEs") )
+      {
+         sscanf(params[i],"%s %d", param, &mlNumPDEs_);
+         if ( mlNumPDEs_ < 1 ) mlNumPDEs_ = 1;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 && mypid_ == 0 )
+            printf("       HYPRE_LSC::parameters amsNumPDEs = %d\n",
+                   mlNumPDEs_);
+      }
+
+      //---------------------------------------------------------------
       // error 
       //---------------------------------------------------------------
 
@@ -1618,6 +1664,23 @@ void HYPRE_LinSysCore::setupPCGPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+#ifdef HAVE_MLMAXWELL
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_LSI_MLMaxwellSolve,
+                                        HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconMLMaxwell();
+              HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_LSI_MLMaxwellSolve,
+                                        HYPRE_LSI_MLMaxwellSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("CG : ML preconditioning not available.\n");
+#endif
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -1627,6 +1690,7 @@ void HYPRE_LinSysCore::setupPCGPrecon()
                                         HYPRE_DummyFunction, HYPrecon_);
            else
            {
+              setupPreconAMS();
               HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_LSI_MLISolve,
                                         HYPRE_LSI_MLISetup, HYPrecon_);
               HYPreconSetup_ = 1;
@@ -1634,6 +1698,20 @@ void HYPRE_LinSysCore::setupPCGPrecon()
 #else
            printf("CG : MLI preconditioning not available.\n");
 #endif
+           break;
+
+      case HYAMS :
+           if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
+              printf("AMS preconditioning\n");
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRPCGSetPrecond(HYSolver_, HYPRE_AMSSolve,
+                                        HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              HYPRE_ParCSRPCGSetPrecond(HYSolver_,HYPRE_AMSSolve,
+                                        HYPRE_AMSSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
            break;
 
       case HYUZAWA :
@@ -1764,6 +1842,14 @@ void HYPRE_LinSysCore::setupLSICGPrecon()
            if ( mypid_ == 0 )
               printf("HYPRE_LSI : LSICG does not work with blkprec.\n");
            exit(1);
+           break;
+
+      case HYML :
+           printf("HYPRE_LSI : LSICG - MLI preconditioning not available.\n");
+           break;
+
+      case HYMLMAXWELL :
+           printf("HYPRE_LSI : LSICG - MLMAXWELL not available.\n");
            break;
 
       case HYMLI :
@@ -1964,6 +2050,23 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+#ifdef HAVE_MLMAXWELL
+           if ( HYPreconReuse_ == 1 && HYPreconSetup_ == 1 )
+              HYPRE_ParCSRGMRESSetPrecond(HYSolver_, HYPRE_LSI_MLMaxwellSolve,
+                                          HYPRE_DummyFunction, HYPrecon_);
+           else
+           {
+              setupPreconMLMaxwell();
+              HYPRE_ParCSRGMRESSetPrecond(HYSolver_,HYPRE_LSI_MLMaxwellSolve,
+                                          HYPRE_LSI_MLMaxwellSetup, HYPrecon_);
+              HYPreconSetup_ = 1;
+           }
+#else
+           printf("GMRES : ML preconditioning not available.\n");
+#endif
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -1984,6 +2087,11 @@ void HYPRE_LinSysCore::setupGMRESPrecon()
 
       case HYUZAWA :
            printf("GMRES : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
+
+      case HYAMS :
+           printf("GMRES : AMS preconditioning not available.\n");
            exit(1);
            break;
    }
@@ -2166,6 +2274,10 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+           printf("FGMRES : MLMaxwell preconditioning not available.\n");
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2196,6 +2308,11 @@ void HYPRE_LinSysCore::setupFGMRESPrecon()
                                            HYPRE_LSI_UzawaSetup, HYPrecon_);
               HYPreconSetup_ = 1;
            }
+           break;
+
+      case HYAMS :
+           printf("FGMRES: AMS preconditioning not available.\n");
+           exit(1);
            break;
    }
    return;
@@ -2370,6 +2487,10 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+           printf("BiCGSTAB : MLMaxwell preconditioning not available.\n");
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2387,8 +2508,14 @@ void HYPRE_LinSysCore::setupBiCGSTABPrecon()
            printf("BiCGSTAB : MLI preconditioning not available.\n");
 #endif
            break;
+
       case HYUZAWA :
            printf("BiCGSTAB : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
+
+      case HYAMS :
+           printf("BiCGSTAB : AMS preconditioning not available.\n");
            exit(1);
            break;
    }
@@ -2565,6 +2692,10 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+           printf("BiCGSTABL : MLMaxwell preconditioning not available.\n");
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2582,8 +2713,14 @@ void HYPRE_LinSysCore::setupBiCGSTABLPrecon()
            printf("BiCGSTABL : ML preconditioning not available.\n");
 #endif
            break;
+
       case HYUZAWA :
            printf("BiCGSTABL : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
+
+      case HYAMS :
+           printf("BiCGSTABL : AMS preconditioning not available.\n");
            exit(1);
            break;
    }
@@ -2756,6 +2893,10 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+           printf("TFQMR : MLMaxwell preconditioning not available.\n");
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2773,8 +2914,14 @@ void HYPRE_LinSysCore::setupTFQmrPrecon()
            printf("TFQMR : MLI preconditioning not available.\n");
 #endif
            break;
+
       case HYUZAWA :
            printf("TFQMR : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
+
+      case HYAMS :
+           printf("TFQMR : AMS preconditioning not available.\n");
            exit(1);
            break;
    }
@@ -2947,6 +3094,10 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+           printf("BiCGS : MLMaxwell preconditioning not available.\n");
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -2964,8 +3115,14 @@ void HYPRE_LinSysCore::setupBiCGSPrecon()
            printf("BiCGS : MLI preconditioning not available.\n");
 #endif
            break;
+
       case HYUZAWA :
            printf("BiCGS : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
+
+      case HYAMS :
+           printf("BiCGS : AMS preconditioning not available.\n");
            exit(1);
            break;
    }
@@ -3118,6 +3275,10 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
 #endif
            break;
 
+      case HYMLMAXWELL :
+           printf("SymQMR : MLMaxwell preconditioning not available.\n");
+           break;
+
       case HYMLI :
 #ifdef HAVE_MLI
            if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0)
@@ -3138,6 +3299,11 @@ void HYPRE_LinSysCore::setupSymQMRPrecon()
 
       case HYUZAWA :
            printf("SymQMR : Uzawa preconditioning not available.\n");
+           exit(1);
+           break;
+
+      case HYAMS :
+           printf("SymQMR : AMS preconditioning not available.\n");
            exit(1);
            break;
    }
@@ -3185,6 +3351,7 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
    HYPRE_BoomerAMGSetCoarsenType(HYPrecon_, amgCoarsenType_);
    HYPRE_BoomerAMGSetMeasureType(HYPrecon_, amgMeasureType_);
    HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,amgStrongThreshold_);
+   HYPRE_BoomerAMGSetTol(HYPrecon_, -1.0e0);
    num_sweeps = hypre_CTAlloc(int,4);
    for ( i = 0; i < 4; i++ ) num_sweeps[i] = amgNumSweeps_[i];
 
@@ -3274,6 +3441,70 @@ void HYPRE_LinSysCore::setupPreconML()
 #else
    return;
 #endif
+}
+
+//***************************************************************************
+// this function sets up MLMaxwell preconditioner
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::setupPreconMLMaxwell()
+{
+#ifdef HAVE_MLMAXWELL
+   HYPRE_ParCSRMatrix A_csr;
+
+   if (maxwellGEN_ != NULL)
+      HYPRE_LSI_MLMaxwellSetGMatrix(HYPrecon_,maxwellGEN_);
+   else
+   {
+      printf("HYPRE_LSC::setupPreconMLMaxwell ERROR - no G matrix.\n");
+      exit(1);
+   }
+   if (maxwellANN_ == NULL)
+   {
+      HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
+      hypre_BoomerAMGBuildCoarseOperator((hypre_ParCSRMatrix *) maxwellGEN_,
+                                      (hypre_ParCSRMatrix *) A_csr,
+                                      (hypre_ParCSRMatrix *) maxwellGEN_,
+                                      (hypre_ParCSRMatrix **) &maxwellANN_);
+   }
+   HYPRE_LSI_MLMaxwellSetANNMatrix(HYPrecon_,maxwellANN_);
+#else
+   return;
+#endif
+}
+
+//***************************************************************************
+// this function sets up AMS preconditioner
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::setupPreconAMS()
+{
+   int                maxit=100;    /* heuristics for now */
+   double             tol=1.0e-6;   /* heuristics for now */
+   int                cycle_type=1; /* V-cycle */
+
+   /* Set AMS parameters */
+   HYPRE_AMSSetDimension(HYPrecon_, mlNumPDEs_);
+   HYPRE_AMSSetMaxIter(HYPrecon_, maxit);
+   HYPRE_AMSSetTol(HYPrecon_, tol);
+   HYPRE_AMSSetCycleType(HYPrecon_, cycle_type);
+   HYPRE_AMSSetPrintLevel(HYPrecon_, HYOutputLevel_);
+
+   if (maxwellGEN_ != NULL)
+      HYPRE_AMSSetDiscreteGradient(HYPrecon_, maxwellGEN_);
+   else
+   {
+      printf("HYPRE_LSC::setupPreconAMS ERROR - no G matrix.\n");
+      exit(1);
+   }
+   if (MLI_NodalCoord_ == NULL)
+   {
+      HYPRE_ParVector amsX, amsY, amsZ;
+      HYPRE_LSI_BuildNodalCoordinates(amsX,amsY,amsZ);
+      HYPRE_AMSSetCoordinateVectors(HYPrecon_,amsX,amsY,amsZ);
+   }
+   // this is used to tell AMS that mass matrix has 0 coeff 
+   // HYPRE_AMSSetBetaPoissonMatrix(HYPrecon_, NULL);
 }
 
 //***************************************************************************
@@ -3535,7 +3766,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    HYPRE_ParVector    b_csr;
    HYPRE_ParVector    x_csr;
 
-   int                info, panel_size, permc_spec;
+   int                info=0, panel_size, permc_spec;
    int                *perm_r, *perm_c;
    double             *rhs, *soln;
    mem_usage_t        mem_usage;
@@ -3614,6 +3845,7 @@ void HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    permc_spec = superluOrdering_;
    get_perm_c(permc_spec, &A2, perm_c);
    panel_size = sp_ienv(1);
+   for ( i = 0; i < nrows; i++ ) perm_r[i] = 0;
 
    dgssv(&A2, perm_c, perm_r, &L, &U, &B, &info);
 
@@ -4608,7 +4840,6 @@ void HYPRE_LinSysCore::addToMinResProjectionSpace(HYPRE_IJVector xvec,
 //
 //          min   || trans(x - xbar) A (x - xbar) ||
 //
-// where xbar is a linear combination of the A-conjugate vectors built from
 // solutions (phi_i) at previous steps
 //
 // (1) compute r = b - A * x_0
@@ -4951,6 +5182,16 @@ void HYPRE_LinSysCore::FE_loadElemMatrix(int elemID, int nNodes,
    (void) matDim;
    (void) elemMat;
 #endif
+   return;
+}
+
+//***************************************************************************
+// build nodal coordinates
+//---------------------------------------------------------------------------
+
+void HYPRE_LinSysCore::HYPRE_LSI_BuildNodalCoordinates(HYPRE_ParVector X,
+                       HYPRE_ParVector Y, HYPRE_ParVector Z)
+{
    return;
 }
 

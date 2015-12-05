@@ -8,15 +8,15 @@
  <DD><I>
 The vector object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructVectorCreate</B>(MPI_Comm comm, <!1><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> grid, <!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> *vector)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructVectorCreate</B>(MPI_Comm comm, <!1><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> grid, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> *vector)
  <DD><I>
 Create a vector object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructVectorDestroy</B>(<!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> vector)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructVectorDestroy</B>(<!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> vector)
  <DD><I>
 Destroy a vector object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructVectorInitialize</B>(<!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> vector)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructVectorInitialize</B>(<!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> vector)
  <DD><I>
 Prepare a vector object for setting coefficient values</I>
 <DT>
@@ -24,23 +24,23 @@ Prepare a vector object for setting coefficient values</I>
  <DD><I>
 Set vector coefficients index by index</I>
 <DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructVectorAddToValues.html><B>HYPRE_SStructVectorAddToValues</B></A> 
+ <DD><I>
+Add to vector coefficients index by index</I>
+<DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructVectorSetBoxValues.html><B>HYPRE_SStructVectorSetBoxValues</B></A> 
  <DD><I>
 Set vector coefficients a box at a time</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructVectorAddToValues.html><B>HYPRE_SStructVectorAddToValues</B></A> 
- <DD><I>
-Set vector coefficients index by index</I>
-<DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructVectorAddToBoxValues.html><B>HYPRE_SStructVectorAddToBoxValues</B></A> 
  <DD><I>
-Set vector coefficients a box at a time</I>
+Add to vector coefficients a box at a time</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructVectorAssemble</B>(<!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> vector)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructVectorAssemble</B>(<!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> vector)
  <DD><I>
 Finalize the construction of the vector before using</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructVectorGather</B>(<!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> vector)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructVectorGather.html><B>HYPRE_SStructVectorGather</B></A> 
  <DD><I>
 Gather vector data so that efficient <TT>GetValues</tt> can be done</I>
 <DT>
@@ -60,7 +60,7 @@ Set the storage type of the vector object to be constructed</I>
  <DD><I>
 Get a reference to the constructed vector object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructVectorSetComplex</B>(<!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> vector)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructVectorSetComplex</B>(<!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> vector)
  <DD><I>
 Set the vector to be complex</I>
 <DT>

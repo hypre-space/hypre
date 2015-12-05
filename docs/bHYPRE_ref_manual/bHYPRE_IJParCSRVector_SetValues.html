@@ -1,6 +1,6 @@
 <html><head><TITLE>bHYPRE_IJParCSRVector_SetValues</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_IJParCSRVector_SetValues ( bHYPRE_IJParCSRVector self, int32_t nvalues, struct SIDL_int__array* indices, struct SIDL_double__array* values) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_IJParCSRVector_SetValues (  bHYPRE_IJParCSRVector self,  int32_t nvalues,  int32_t* indices,  double* values,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>) </H2><BLOCKQUOTE>
 
 Sets values in vector
 </BLOCKQUOTE>
@@ -14,7 +14,6 @@ indices</tt> are of dimension <TT>nvalues</tt> and contain the
 vector values to be set and the corresponding global vector
 indices, respectively.  Erases any previous values at the
 specified locations and replaces them with new ones.<P>Not collective.
-
 
 </BLOCKQUOTE>
 <DL>

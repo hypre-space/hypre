@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.3 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.8 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 /******************************************************************************
  *
@@ -33,7 +53,9 @@
   functions are publically provided. AJC, 5/99 */
 /* Likewise for Vector. AJC, 5/99 */
 #include "../seq_mv/vector.h"
-#include "../parcsr_mv/par_vector.h"
+/* AB 8/06 - replace header file */
+/* #include "../parcsr_mv/par_vector.h" */
+#include "../parcsr_mv/parcsr_mv.h"
 
 /* If code is more mysterious, then it must be good */
 typedef struct
@@ -184,7 +206,8 @@ HYPRE_ParCSRParaSailsSetParams(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsSetFilter - Set the filter parameter.
+ * HYPRE_ParCSRParaSailsSetFilter - Set the filter parameter,
+ * HYPRE_ParCSRParaSailsGetFilter
  *--------------------------------------------------------------------------*/
 
 int
@@ -194,6 +217,17 @@ HYPRE_ParCSRParaSailsSetFilter(HYPRE_Solver solver,
    Secret *secret = (Secret *) solver;
 
    secret->filter = filter;
+
+   return 0;
+}
+
+int
+HYPRE_ParCSRParaSailsGetFilter(HYPRE_Solver solver, 
+                               double     * filter  )
+{
+   Secret *secret = (Secret *) solver;
+
+   *filter = secret->filter;
 
    return 0;
 }
@@ -215,7 +249,7 @@ HYPRE_ParCSRParaSailsSetSym(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRParaSailsSetLoadbal
+ * HYPRE_ParCSRParaSailsSetLoadbal, HYPRE_ParCSRParaSailsGetLoadbal
  *--------------------------------------------------------------------------*/
 
 int
@@ -225,6 +259,17 @@ HYPRE_ParCSRParaSailsSetLoadbal(HYPRE_Solver solver,
    Secret *secret = (Secret *) solver;
 
    secret->loadbal = loadbal;
+
+   return 0;
+}
+
+int
+HYPRE_ParCSRParaSailsGetLoadbal(HYPRE_Solver solver, 
+                                double     * loadbal )
+{
+   Secret *secret = (Secret *) solver;
+
+   *loadbal = secret->loadbal;
 
    return 0;
 }
@@ -398,7 +443,64 @@ HYPRE_ParaSailsSetParams(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsSetThresh - Set the "thresh" parameter only
+ * for a ParaSails object.
+ * HYPRE_ParaSailsGetThresh
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParaSailsSetThresh( HYPRE_Solver solver, 
+                          double       thresh )
+{
+   Secret *secret = (Secret *) solver;
+
+   secret->thresh  = thresh;
+
+   return 0;
+}
+
+int
+HYPRE_ParaSailsGetThresh( HYPRE_Solver solver, 
+                          double     * thresh )
+{
+   Secret *secret = (Secret *) solver;
+
+   *thresh = secret->thresh;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParaSailsSetNlevels - Set the "nlevels" parameter only
+ * for a ParaSails object.
+ * HYPRE_ParaSailsGetNlevels
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParaSailsSetNlevels( HYPRE_Solver solver, 
+                           int          nlevels )
+{
+   Secret *secret = (Secret *) solver;
+
+   secret->nlevels  = nlevels;
+
+   return 0;
+}
+
+int
+HYPRE_ParaSailsGetNlevels( HYPRE_Solver solver, 
+                           int        * nlevels )
+{
+   Secret *secret = (Secret *) solver;
+
+   *nlevels = secret->nlevels;
+
+   return 0;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSetFilter - Set the filter parameter.
+ * HYPRE_ParaSailsGetFilter
  *--------------------------------------------------------------------------*/
 
 int
@@ -412,9 +514,21 @@ HYPRE_ParaSailsSetFilter(HYPRE_Solver solver,
    return 0;
 }
 
+int
+HYPRE_ParaSailsGetFilter(HYPRE_Solver solver, 
+                         double     * filter  )
+{
+   Secret *secret = (Secret *) solver;
+
+   *filter = secret->filter;
+
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSetSym - Set whether the matrix is symmetric:
  * nonzero = symmetric, 0 = nonsymmetric.
+ * HYPRE_ParaSailsGetSym
  *--------------------------------------------------------------------------*/
 
 int
@@ -428,8 +542,19 @@ HYPRE_ParaSailsSetSym(HYPRE_Solver solver,
    return 0;
 }
 
+int
+HYPRE_ParaSailsGetSym(HYPRE_Solver solver, 
+                      int        * sym     )
+{
+   Secret *secret = (Secret *) solver;
+
+   *sym = secret->sym;
+
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_ParaSailsSetLoadbal
+ * HYPRE_ParaSailsSetLoadbal, HYPRE_ParaSailsGetLoadbal
  *--------------------------------------------------------------------------*/
 
 int
@@ -443,8 +568,20 @@ HYPRE_ParaSailsSetLoadbal(HYPRE_Solver solver,
    return 0;
 }
 
+int
+HYPRE_ParaSailsGetLoadbal(HYPRE_Solver solver, 
+                          double     * loadbal )
+{
+   Secret *secret = (Secret *) solver;
+
+   *loadbal = secret->loadbal;
+
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParaSailsSetReuse - reuse pattern if "reuse" if nonzero
+ * HYPRE_ParaSailsGetReuse
  *--------------------------------------------------------------------------*/
 
 int
@@ -458,8 +595,19 @@ HYPRE_ParaSailsSetReuse(HYPRE_Solver solver,
    return 0;
 }
 
+int
+HYPRE_ParaSailsGetReuse(HYPRE_Solver solver, 
+                        int        * reuse   )
+{
+   Secret *secret = (Secret *) solver;
+
+   *reuse = secret->reuse;
+
+   return 0;
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_ParaSailsSetLogging -
+ * HYPRE_ParaSailsSetLogging, HYPRE_ParaSailsGetLogging
  *--------------------------------------------------------------------------*/
 
 int
@@ -469,6 +617,17 @@ HYPRE_ParaSailsSetLogging(HYPRE_Solver solver,
    Secret *secret = (Secret *) solver;
 
    secret->logging = logging;
+
+   return 0;
+}
+
+int
+HYPRE_ParaSailsGetLogging(HYPRE_Solver solver, 
+                          int        * logging )
+{
+   Secret *secret = (Secret *) solver;
+
+   *logging = secret->logging;
 
    return 0;
 }

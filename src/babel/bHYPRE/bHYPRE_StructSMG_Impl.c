@@ -1,17 +1,39 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 1.31 $
+ ***********************************************************************EHEADER*/
+
+
 /*
  * File:          bHYPRE_StructSMG_Impl.c
- * Symbol:        bHYPRE.StructSMG-v0.1.6
+ * Symbol:        bHYPRE.StructSMG-v1.0.0
  * Symbol Type:   class
- * Babel Version: 0.8.0
- * SIDL Created:  20030210 16:05:28 PST
- * Generated:     20030210 16:05:37 PST
+ * Babel Version: 1.0.0
  * Description:   Server-side implementation for bHYPRE.StructSMG
  * 
  * WARNING: Automatically generated; only changes within splicers preserved
  * 
- * babel-version = 0.8.0
- * source-line   = 458
- * source-url    = file:/home/painter/linear_solvers/babel/Interfaces.idl
  */
 
 /*
@@ -20,15 +42,57 @@
  */
 
 /*
- * Symbol "bHYPRE.StructSMG" (version 0.1.6)
+ * Symbol "bHYPRE.StructSMG" (version 1.0.0)
+ * 
+ * Objects of this type can be cast to Solver objects
+ * using the {\tt \_\_cast} methods.
+ * 
+ * RDF: Documentation goes here.
+ * 
+ * The StructSMG solver requires a Struct matrix.
  */
 
 #include "bHYPRE_StructSMG_Impl.h"
+#include "sidl_NotImplementedException.h"
+#include "sidl_Exception.h"
 
 /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG._includes) */
 /* Put additional includes or other arbitrary code here... */
+
+
+#include <assert.h>
+#include "hypre_babel_exception_handler.h"
+#include "bHYPRE_StructMatrix.h"
+#include "bHYPRE_StructMatrix_Impl.h"
+#include "bHYPRE_StructVector.h"
+#include "bHYPRE_StructVector_Impl.h"
+#include "struct_ls.h"
+#include "bHYPRE_MPICommunicator_Impl.h"
 /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG._includes) */
 
+#define SIDL_IOR_MAJOR_VERSION 0
+#define SIDL_IOR_MINOR_VERSION 10
+/*
+ * Static class initializer called exactly once before any user-defined method is dispatched
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG__load"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_StructSMG__load(
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG._load) */
+  /* Insert-Code-Here {bHYPRE.StructSMG._load} (static class initializer method) */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG._load) */
+  }
+}
 /*
  * Class constructor called when the class is created.
  */
@@ -36,15 +100,69 @@
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructSMG__ctor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_StructSMG__ctor(
-  bHYPRE_StructSMG self)
+  /* in */ bHYPRE_StructSMG self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG._ctor) */
   /* Insert the implementation of the constructor method here... */
+
+   /*  How to make and use a StructSMG solver:
+       First call this constructor, through bHYPRE_StructSMG__create
+       Then call SetCommunicator, SetOperator, and set whatever parameters you
+       want (e.g. logging).
+       Then call Setup.  Finally you can call Apply.
+       Destroy the solver by calling deleteRef.
+    */
+
+   /* Note: user calls of __create() are DEPRECATED, _Create also calls this function */
+
+   struct bHYPRE_StructSMG__data * data;
+   data = hypre_CTAlloc( struct bHYPRE_StructSMG__data, 1 );
+   data -> comm = MPI_COMM_NULL;
+   data -> solver = (HYPRE_StructSolver) NULL;
+   data -> matrix = (bHYPRE_StructMatrix) NULL;
+   bHYPRE_StructSMG__set_data( self, data );
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG._ctor) */
+  }
 }
 
+/*
+ * Special Class constructor called when the user wants to wrap his own private data.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG__ctor2"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_StructSMG__ctor2(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ void* private_data,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG._ctor2) */
+    /* Insert-Code-Here {bHYPRE.StructSMG._ctor2} (special constructor method) */
+    /*
+     * This method has not been implemented
+     */
+
+    SIDL_THROW(*_ex, sidl_NotImplementedException,     "This method has not been implemented");
+  EXIT:;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG._ctor2) */
+  }
+}
 /*
  * Class destructor called when the class is deleted.
  */
@@ -52,257 +170,1082 @@ impl_bHYPRE_StructSMG__ctor(
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructSMG__dtor"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 void
 impl_bHYPRE_StructSMG__dtor(
-  bHYPRE_StructSMG self)
+  /* in */ bHYPRE_StructSMG self,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG._dtor) */
   /* Insert the implementation of the destructor method here... */
+
+   int ierr = 0;
+   struct bHYPRE_StructSMG__data * data;
+   data = bHYPRE_StructSMG__get_data( self );
+   ierr += HYPRE_StructSMGDestroy( data->solver );
+   bHYPRE_StructMatrix_deleteRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
+   hypre_TFree( data );
+
+   return; hypre_babel_exception_no_return(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG._dtor) */
+  }
 }
 
 /*
- * Method:  SetCommunicator[]
+ * Method:  Create[]
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructSMG_SetCommunicator"
+#define __FUNC__ "impl_bHYPRE_StructSMG_Create"
 
-int32_t
-impl_bHYPRE_StructSMG_SetCommunicator(
-  bHYPRE_StructSMG self, void* comm)
+#ifdef __cplusplus
+extern "C"
+#endif
+bHYPRE_StructSMG
+impl_bHYPRE_StructSMG_Create(
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* in */ bHYPRE_StructMatrix A,
+  /* out */ sidl_BaseInterface *_ex)
 {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetCommunicator) */
-  /* Insert the implementation of the SetCommunicator method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetCommunicator) */
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.Create) */
+  /* Insert-Code-Here {bHYPRE.StructSMG.Create} (Create method) */
+
+   int ierr = 0;
+   HYPRE_StructSolver dummy;
+   HYPRE_StructSolver * Hsolver = &dummy;
+   bHYPRE_StructSMG solver = bHYPRE_StructSMG__create(_ex); SIDL_CHECK(*_ex);
+   struct bHYPRE_StructSMG__data * data = bHYPRE_StructSMG__get_data( solver );
+
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
+   ierr += HYPRE_StructSMGCreate( (data->comm), Hsolver );
+   hypre_assert( ierr==0 );
+   data -> solver = *Hsolver;
+
+   data->matrix = A;
+   bHYPRE_StructMatrix_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
+
+   return solver;
+
+   hypre_babel_exception_no_return(_ex);
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.Create) */
+  }
 }
 
 /*
- * Method:  GetDoubleValue[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructSMG_GetDoubleValue"
-
-int32_t
-impl_bHYPRE_StructSMG_GetDoubleValue(
-  bHYPRE_StructSMG self, const char* name, double* value)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.GetDoubleValue) */
-  /* Insert the implementation of the GetDoubleValue method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.GetDoubleValue) */
-}
-
-/*
- * Method:  GetIntValue[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructSMG_GetIntValue"
-
-int32_t
-impl_bHYPRE_StructSMG_GetIntValue(
-  bHYPRE_StructSMG self, const char* name, int32_t* value)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.GetIntValue) */
-  /* Insert the implementation of the GetIntValue method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.GetIntValue) */
-}
-
-/*
- * Method:  SetDoubleParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructSMG_SetDoubleParameter"
-
-int32_t
-impl_bHYPRE_StructSMG_SetDoubleParameter(
-  bHYPRE_StructSMG self, const char* name, double value)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetDoubleParameter) */
-  /* Insert the implementation of the SetDoubleParameter method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetDoubleParameter) */
-}
-
-/*
- * Method:  SetIntParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructSMG_SetIntParameter"
-
-int32_t
-impl_bHYPRE_StructSMG_SetIntParameter(
-  bHYPRE_StructSMG self, const char* name, int32_t value)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetIntParameter) */
-  /* Insert the implementation of the SetIntParameter method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetIntParameter) */
-}
-
-/*
- * Method:  SetStringParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructSMG_SetStringParameter"
-
-int32_t
-impl_bHYPRE_StructSMG_SetStringParameter(
-  bHYPRE_StructSMG self, const char* name, const char* value)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetStringParameter) */
-  /* Insert the implementation of the SetStringParameter method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetStringParameter) */
-}
-
-/*
- * Method:  SetIntArrayParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructSMG_SetIntArrayParameter"
-
-int32_t
-impl_bHYPRE_StructSMG_SetIntArrayParameter(
-  bHYPRE_StructSMG self, const char* name, struct SIDL_int__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetIntArrayParameter) */
-  /* Insert the implementation of the SetIntArrayParameter method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetIntArrayParameter) */
-}
-
-/*
- * Method:  SetDoubleArrayParameter[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructSMG_SetDoubleArrayParameter"
-
-int32_t
-impl_bHYPRE_StructSMG_SetDoubleArrayParameter(
-  bHYPRE_StructSMG self, const char* name, struct SIDL_double__array* value)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetDoubleArrayParameter) */
-  /* Insert the implementation of the SetDoubleArrayParameter method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetDoubleArrayParameter) */
-}
-
-/*
- * Method:  Setup[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructSMG_Setup"
-
-int32_t
-impl_bHYPRE_StructSMG_Setup(
-  bHYPRE_StructSMG self, bHYPRE_Vector b, bHYPRE_Vector x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.Setup) */
-  /* Insert the implementation of the Setup method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.Setup) */
-}
-
-/*
- * Method:  Apply[]
- */
-
-#undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructSMG_Apply"
-
-int32_t
-impl_bHYPRE_StructSMG_Apply(
-  bHYPRE_StructSMG self, bHYPRE_Vector b, bHYPRE_Vector* x)
-{
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.Apply) */
-  /* Insert the implementation of the Apply method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.Apply) */
-}
-
-/*
- * Method:  SetOperator[]
+ * Set the operator for the linear system being solved.
+ * DEPRECATED.  use Create
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructSMG_SetOperator"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructSMG_SetOperator(
-  bHYPRE_StructSMG self, bHYPRE_Operator A)
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Operator A,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetOperator) */
   /* Insert the implementation of the SetOperator method here... */
-   return 1; /* not implemented */
+
+   /* not normally needed, as an operator is provided in Create */
+   int ierr = 0;
+   struct bHYPRE_StructSMG__data * data;
+   bHYPRE_StructMatrix Amat;
+
+   Amat = (bHYPRE_StructMatrix) bHYPRE_Operator__cast2( A, "bHYPRE.StructMatrix", _ex ); SIDL_CHECK(*_ex);
+   if ( Amat==NULL ) hypre_assert( "Unrecognized operator type."==(char *)A );
+
+   data = bHYPRE_StructSMG__get_data( self );
+   data->matrix = Amat;
+   bHYPRE_StructMatrix_addRef( data->matrix, _ex ); SIDL_CHECK(*_ex);
+
+   return ierr;
+
+   hypre_babel_exception_return_error(_ex);
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetOperator) */
+  }
 }
 
 /*
- * Method:  GetResidual[]
+ * (Optional) Set the convergence tolerance.
+ * DEPRECATED.  use SetDoubleParameter
  */
 
 #undef __FUNC__
-#define __FUNC__ "impl_bHYPRE_StructSMG_GetResidual"
+#define __FUNC__ "impl_bHYPRE_StructSMG_SetTolerance"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
-impl_bHYPRE_StructSMG_GetResidual(
-  bHYPRE_StructSMG self, bHYPRE_Vector* r)
+impl_bHYPRE_StructSMG_SetTolerance(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ double tolerance,
+  /* out */ sidl_BaseInterface *_ex)
 {
-  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.GetResidual) */
-  /* Insert the implementation of the GetResidual method here... */
-   return 1; /* not implemented */
-  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.GetResidual) */
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetTolerance) */
+  /* Insert the implementation of the SetTolerance method here... */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   ierr = HYPRE_StructSMGSetTol( solver, tolerance );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetTolerance) */
+  }
 }
 
 /*
- * Method:  SetLogging[]
+ * (Optional) Set maximum number of iterations.
+ * DEPRECATED   use SetIntParameter
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_SetMaxIterations"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_SetMaxIterations(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ int32_t max_iterations,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetMaxIterations) */
+  /* Insert the implementation of the SetMaxIterations method here... */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   ierr = HYPRE_StructSMGSetMaxIter( solver, max_iterations );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetMaxIterations) */
+  }
+}
+
+/*
+ * (Optional) Set the {\it logging level}, specifying the degree
+ * of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructSMG_SetLogging"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructSMG_SetLogging(
-  bHYPRE_StructSMG self, int32_t level)
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetLogging) */
   /* Insert the implementation of the SetLogging method here... */
-   return 1; /* not implemented */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   ierr = HYPRE_StructSMGSetLogging( solver, level );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetLogging) */
+  }
 }
 
 /*
- * Method:  SetPrintLevel[]
+ * (Optional) Set the {\it print level}, specifying the degree
+ * of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
+ * DEPRECATED   use SetIntParameter
  */
 
 #undef __FUNC__
 #define __FUNC__ "impl_bHYPRE_StructSMG_SetPrintLevel"
 
+#ifdef __cplusplus
+extern "C"
+#endif
 int32_t
 impl_bHYPRE_StructSMG_SetPrintLevel(
-  bHYPRE_StructSMG self, int32_t level)
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ int32_t level,
+  /* out */ sidl_BaseInterface *_ex)
 {
+  *_ex = 0;
+  {
   /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetPrintLevel) */
   /* Insert the implementation of the SetPrintLevel method here... */
-   return 1; /* not implemented */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   ierr = HYPRE_StructSMGSetPrintLevel( solver, level );
+
+   return ierr;
+
   /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetPrintLevel) */
+  }
 }
 
-/**
- * ================= BEGIN UNREFERENCED METHOD(S) ================
- * The following code segment(s) belong to unreferenced method(s).
- * This can result from a method rename/removal in the SIDL file.
- * Move or remove the code in order to compile cleanly.
+/*
+ * (Optional) Return the number of iterations taken.
  */
-/* ================== END UNREFERENCED METHOD(S) ================= */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_GetNumIterations"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_GetNumIterations(
+  /* in */ bHYPRE_StructSMG self,
+  /* out */ int32_t* num_iterations,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.GetNumIterations) */
+  /* Insert the implementation of the GetNumIterations method here... */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   ierr = HYPRE_StructSMGGetNumIterations( solver, num_iterations );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.GetNumIterations) */
+  }
+}
+
+/*
+ * (Optional) Return the norm of the relative residual.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_GetRelResidualNorm"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_GetRelResidualNorm(
+  /* in */ bHYPRE_StructSMG self,
+  /* out */ double* norm,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.GetRelResidualNorm) */
+  /* Insert the implementation of the GetRelResidualNorm method here... */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   ierr = HYPRE_StructSMGGetFinalRelativeResidualNorm( solver, norm );
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.GetRelResidualNorm) */
+  }
+}
+
+/*
+ * Set the MPI Communicator.
+ * DEPRECATED, use Create:
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_SetCommunicator"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_SetCommunicator(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_MPICommunicator mpi_comm,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetCommunicator) */
+  /* Insert the implementation of the SetCommunicator method here... */
+
+   /* DEPRECATED   Use Create */
+
+   int ierr = 0;
+   HYPRE_StructSolver dummy;
+   HYPRE_StructSolver * solver = &dummy;
+   struct bHYPRE_StructSMG__data * data = bHYPRE_StructSMG__get_data( self );
+
+   data->comm = bHYPRE_MPICommunicator__get_data(mpi_comm)->mpi_comm;
+
+   ierr += HYPRE_StructSMGCreate( (data->comm), solver );
+   data -> solver = *solver;
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetCommunicator) */
+  }
+}
+
+/*
+ * The Destroy function doesn't necessarily destroy anything.
+ * It is just another name for deleteRef.  Thus it decrements the
+ * object's reference count.  The Babel memory management system will
+ * destroy the object if the reference count goes to zero.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_Destroy"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+void
+impl_bHYPRE_StructSMG_Destroy(
+  /* in */ bHYPRE_StructSMG self,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+    /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.Destroy) */
+    /* Insert-Code-Here {bHYPRE.StructSMG.Destroy} (Destroy method) */
+     bHYPRE_StructSMG_deleteRef(self,_ex);
+     return;
+    /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.Destroy) */
+  }
+}
+
+/*
+ * Set the int parameter associated with {\tt name}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_SetIntParameter"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_SetIntParameter(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ int32_t value,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetIntParameter) */
+  /* Insert the implementation of the SetIntParameter method here... */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"MemoryUse")==0 || strcmp(name,"memory use")==0 )
+   {
+      ierr += HYPRE_StructSMGSetMemoryUse( solver, value );      
+   }
+   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
+   {
+      ierr += HYPRE_StructSMGSetMaxIter( solver, value );
+   }
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
+   {
+      ierr += HYPRE_StructSMGSetRelChange( solver, value );
+   }
+   else if ( strcmp(name,"NonZeroGuess")==0 || strcmp(name,"nonzero guess")==0 )
+   {
+      if ( value==0 )
+      {
+         ierr += HYPRE_StructSMGSetZeroGuess( solver );
+      }
+      else if ( value==1 )
+      {
+         ierr += HYPRE_StructSMGSetNonZeroGuess( solver );
+      }
+      else
+      {
+         ierr += HYPRE_StructSMGSetNonZeroGuess( solver );
+         ++ierr;
+      }
+   }
+   else if ( strcmp(name,"ZeroGuess")==0 || strcmp(name,"zero guess")==0 )
+   {
+      if ( value==0 )
+      {
+         ierr += HYPRE_StructSMGSetNonZeroGuess( solver );
+      }
+      else if ( value==1 )
+      {
+         ierr += HYPRE_StructSMGSetZeroGuess( solver );
+      }
+      else
+      {
+         ierr += HYPRE_StructSMGSetZeroGuess( solver );
+         ++ierr;
+      }
+   }
+   else if ( strcmp(name,"NumPreRelax")==0 || strcmp(name,"num prerelax")==0 )
+   {
+      ierr += HYPRE_StructSMGSetNumPreRelax( solver, value );
+   }
+   else if ( strcmp(name,"NumPostRelax")==0 || strcmp(name,"num postrelax")==0 )
+   {
+      ierr += HYPRE_StructSMGSetNumPostRelax( solver, value );
+   }
+   else if ( strcmp(name,"Logging")==0 )
+   {
+      ierr += HYPRE_StructSMGSetLogging( solver, value );
+   }
+   else if ( strcmp(name,"PrintLevel")==0 )
+   {
+      ierr += HYPRE_StructSMGSetPrintLevel( solver, value );
+   }
+   else
+   {
+      ierr=1;
+   }
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetIntParameter) */
+  }
+}
+
+/*
+ * Set the double parameter associated with {\tt name}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_SetDoubleParameter"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_SetDoubleParameter(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ double value,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetDoubleParameter) */
+  /* Insert the implementation of the SetDoubleParameter method here... */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 )
+   {
+      ierr += HYPRE_StructSMGSetTol( solver, value );      
+   }
+   else
+   {
+      ierr=1;
+   }
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetDoubleParameter) */
+  }
+}
+
+/*
+ * Set the string parameter associated with {\tt name}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_SetStringParameter"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_SetStringParameter(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in */ const char* value,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetStringParameter) */
+  /* Insert the implementation of the SetStringParameter method here... */
+   return 1; /* not implemented */
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetStringParameter) */
+  }
+}
+
+/*
+ * Set the int 1-D array parameter associated with {\tt name}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_SetIntArray1Parameter"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_SetIntArray1Parameter(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in rarray[nvalues] */ int32_t* value,
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetIntArray1Parameter) */
+  /* Insert the implementation of the SetIntArray1Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetIntArray1Parameter) */
+  }
+}
+
+/*
+ * Set the int 2-D array parameter associated with {\tt name}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_SetIntArray2Parameter"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_SetIntArray2Parameter(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in array<int,2,column-major> */ struct sidl_int__array* value,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetIntArray2Parameter) */
+  /* Insert the implementation of the SetIntArray2Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetIntArray2Parameter) */
+  }
+}
+
+/*
+ * Set the double 1-D array parameter associated with {\tt name}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_SetDoubleArray1Parameter"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_SetDoubleArray1Parameter(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in rarray[nvalues] */ double* value,
+  /* in */ int32_t nvalues,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetDoubleArray1Parameter) */
+  /* Insert the implementation of the SetDoubleArray1Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetDoubleArray1Parameter) */
+  }
+}
+
+/*
+ * Set the double 2-D array parameter associated with {\tt name}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_SetDoubleArray2Parameter"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_SetDoubleArray2Parameter(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* in array<double,2,column-major> */ struct sidl_double__array* value,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.SetDoubleArray2Parameter) */
+  /* Insert the implementation of the SetDoubleArray2Parameter method here... */
+   return 1;
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.SetDoubleArray2Parameter) */
+  }
+}
+
+/*
+ * Set the int parameter associated with {\tt name}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_GetIntValue"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_GetIntValue(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* out */ int32_t* value,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.GetIntValue) */
+  /* Insert the implementation of the GetIntValue method here... */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"NumIterations")==0 )
+   {
+      ierr = HYPRE_StructSMGGetNumIterations( solver, value );
+   }
+   else if ( strcmp(name,"MemoryUse")==0 || strcmp(name,"memory use")==0 )
+   {
+      ierr += HYPRE_StructSMGGetMemoryUse( solver, value );      
+   }
+   else if ( strcmp(name,"MaxIter")==0 || strcmp(name,"MaxIterations")==0 )
+   {
+      ierr += HYPRE_StructSMGGetMaxIter( solver, value );
+   }
+   else if ( strcmp(name,"RelChange")==0 || strcmp(name,"relative change test")==0 )
+   {
+      ierr += HYPRE_StructSMGGetRelChange( solver, value );
+   }
+   else if ( strcmp(name,"NonZeroGuess")==0 || strcmp(name,"nonzero guess")==0 )
+   {
+      ierr += HYPRE_StructSMGGetZeroGuess( solver, value );
+      if ( *value==0 )
+         *value = 1;
+      else if ( *value==1 )
+         *value = 0;
+      else
+         ++ierr;
+   }
+   else if ( strcmp(name,"ZeroGuess")==0 || strcmp(name,"zero guess")==0 )
+   {
+      ierr += HYPRE_StructSMGGetZeroGuess( solver, value );
+   }
+   else if ( strcmp(name,"NumPreRelax")==0 || strcmp(name,"num prerelax")==0 )
+   {
+      ierr += HYPRE_StructSMGGetNumPreRelax( solver, value );
+   }
+   else if ( strcmp(name,"NumPostRelax")==0 || strcmp(name,"num postrelax")==0 )
+   {
+      ierr += HYPRE_StructSMGGetNumPostRelax( solver, value );
+   }
+   else if ( strcmp(name,"Logging")==0 )
+   {
+      ierr += HYPRE_StructSMGGetLogging( solver, value );
+   }
+   else if ( strcmp(name,"PrintLevel")==0 )
+   {
+      ierr += HYPRE_StructSMGGetPrintLevel( solver, value );
+   }
+   else
+   {
+      ierr = 1;
+   }
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.GetIntValue) */
+  }
+}
+
+/*
+ * Get the double parameter associated with {\tt name}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_GetDoubleValue"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_GetDoubleValue(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ const char* name,
+  /* out */ double* value,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.GetDoubleValue) */
+  /* Insert the implementation of the GetDoubleValue method here... */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+
+   if ( strcmp(name,"FinalRelativeResidualNorm")==0 ||
+        strcmp(name,"Final Relative Residual Norm")==0 ||
+        strcmp(name,"RelativeResidualNorm")==0 ||
+        strcmp(name,"RelResidualNorm")==0 )
+   {
+      ierr = HYPRE_StructSMGGetFinalRelativeResidualNorm( solver, value );
+   }
+   else if ( strcmp(name,"Tol")==0 || strcmp(name,"Tolerance")==0 )
+   {
+      ierr += HYPRE_StructSMGGetTol( solver, value );      
+   }
+   else
+   {
+      ierr = 1;
+   }
+
+   return ierr;
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.GetDoubleValue) */
+  }
+}
+
+/*
+ * (Optional) Do any preprocessing that may be necessary in
+ * order to execute {\tt Apply}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_Setup"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_Setup(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Vector b,
+  /* in */ bHYPRE_Vector x,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.Setup) */
+  /* Insert the implementation of the Setup method here... */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+   struct bHYPRE_StructMatrix__data * dataA;
+   struct bHYPRE_StructVector__data * datab, * datax;
+   bHYPRE_StructMatrix A;
+   HYPRE_StructMatrix HA;
+   bHYPRE_StructVector bHYPREP_b, bHYPREP_x;
+   HYPRE_StructVector Hb, Hx;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+   A = data->matrix;
+   dataA = bHYPRE_StructMatrix__get_data( A );
+   HA = dataA -> matrix;
+
+   bHYPREP_b = (bHYPRE_StructVector) bHYPRE_Vector__cast2( b, "bHYPRE.StructVector", _ex );
+   SIDL_CHECK(*_ex);
+   if ( bHYPREP_b==NULL ) hypre_assert( "Unrecognized vector type."==(char *)x );
+
+   datab = bHYPRE_StructVector__get_data( bHYPREP_b );
+   Hb = datab -> vec;
+
+   bHYPREP_x = (bHYPRE_StructVector) bHYPRE_Vector__cast2( x, "bHYPRE.StructVector", _ex );
+   SIDL_CHECK(*_ex);
+   if ( bHYPREP_x==NULL ) hypre_assert( "Unrecognized vector type."==(char *)(x) );
+
+   datax = bHYPRE_StructVector__get_data( bHYPREP_x );
+   Hx = datax -> vec;
+
+   ierr += HYPRE_StructSMGSetup( solver, HA, Hb, Hx );
+
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+
+   return ierr;
+
+   hypre_babel_exception_return_error(_ex);
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.Setup) */
+  }
+}
+
+/*
+ * Apply the operator to {\tt b}, returning {\tt x}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_Apply"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_Apply(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.Apply) */
+  /* Insert the implementation of the Apply method here... */
+
+   int ierr = 0;
+   HYPRE_StructSolver solver;
+   struct bHYPRE_StructSMG__data * data;
+   struct bHYPRE_StructMatrix__data * dataA;
+   struct bHYPRE_StructVector__data * datab, * datax;
+   bHYPRE_StructMatrix A;
+   HYPRE_StructMatrix HA;
+   bHYPRE_StructVector bHYPREP_b, bHYPREP_x;
+   HYPRE_StructVector Hb, Hx;
+
+   data = bHYPRE_StructSMG__get_data( self );
+   solver = data->solver;
+   A = data->matrix;
+   dataA = bHYPRE_StructMatrix__get_data( A );
+   HA = dataA -> matrix;
+
+   bHYPREP_b = (bHYPRE_StructVector) bHYPRE_Vector__cast2( b, "bHYPRE.StructVector", _ex );
+   SIDL_CHECK(*_ex);
+   if ( bHYPREP_b==NULL ) hypre_assert( "Unrecognized vector type."==(char *)x );
+
+   datab = bHYPRE_StructVector__get_data( bHYPREP_b );
+   Hb = datab -> vec;
+
+   if ( *x==NULL )
+   {
+      /* If vector not supplied, make one...*/
+      /* There's no good way to check the size of x.  It would be good
+       * to do something similar if x had zero length.  Or hypre_assert(x
+       * has the right size) */
+      bHYPRE_Vector_Clone( b, x, _ex ); SIDL_CHECK(*_ex);
+      bHYPRE_Vector_Clear( *x, _ex ); SIDL_CHECK(*_ex);
+   }
+   bHYPREP_x = (bHYPRE_StructVector) bHYPRE_Vector__cast2( *x, "bHYPRE.StructVector", _ex );
+   SIDL_CHECK(*_ex);
+   if ( bHYPREP_x==NULL ) hypre_assert( "Unrecognized vector type."==(char *)(*x) );
+
+   datax = bHYPRE_StructVector__get_data( bHYPREP_x );
+   Hx = datax -> vec;
+
+   ierr += HYPRE_StructSMGSolve( solver, HA, Hb, Hx );
+
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_b, _ex ); SIDL_CHECK(*_ex);
+   bHYPRE_IJParCSRVector_deleteRef( bHYPREP_x, _ex ); SIDL_CHECK(*_ex);
+
+   return ierr;
+
+   hypre_babel_exception_return_error(_ex);
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.Apply) */
+  }
+}
+
+/*
+ * Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+ */
+
+#undef __FUNC__
+#define __FUNC__ "impl_bHYPRE_StructSMG_ApplyAdjoint"
+
+#ifdef __cplusplus
+extern "C"
+#endif
+int32_t
+impl_bHYPRE_StructSMG_ApplyAdjoint(
+  /* in */ bHYPRE_StructSMG self,
+  /* in */ bHYPRE_Vector b,
+  /* inout */ bHYPRE_Vector* x,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(bHYPRE.StructSMG.ApplyAdjoint) */
+  /* Insert-Code-Here {bHYPRE.StructSMG.ApplyAdjoint} (ApplyAdjoint method) */
+
+   return 1; /* not implemented */
+
+  /* DO-NOT-DELETE splicer.end(bHYPRE.StructSMG.ApplyAdjoint) */
+  }
+}
+/* Babel internal methods, Users should not edit below this line. */
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_MPICommunicator(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_MPICommunicator__connectI(url, ar, _ex);
+}
+struct bHYPRE_MPICommunicator__object* 
+  impl_bHYPRE_StructSMG_fcast_bHYPRE_MPICommunicator(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_MPICommunicator__cast(bi, _ex);
+}
+struct bHYPRE_Operator__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_Operator(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Operator__connectI(url, ar, _ex);
+}
+struct bHYPRE_Operator__object* 
+  impl_bHYPRE_StructSMG_fcast_bHYPRE_Operator(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_Operator__cast(bi, _ex);
+}
+struct bHYPRE_Solver__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_Solver(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Solver__connectI(url, ar, _ex);
+}
+struct bHYPRE_Solver__object* impl_bHYPRE_StructSMG_fcast_bHYPRE_Solver(void* 
+  bi, sidl_BaseInterface* _ex) {
+  return bHYPRE_Solver__cast(bi, _ex);
+}
+struct bHYPRE_StructMatrix__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_StructMatrix(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return bHYPRE_StructMatrix__connectI(url, ar, _ex);
+}
+struct bHYPRE_StructMatrix__object* 
+  impl_bHYPRE_StructSMG_fcast_bHYPRE_StructMatrix(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_StructMatrix__cast(bi, _ex);
+}
+struct bHYPRE_StructSMG__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_StructSMG(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_StructSMG__connectI(url, ar, _ex);
+}
+struct bHYPRE_StructSMG__object* 
+  impl_bHYPRE_StructSMG_fcast_bHYPRE_StructSMG(void* bi,
+  sidl_BaseInterface* _ex) {
+  return bHYPRE_StructSMG__cast(bi, _ex);
+}
+struct bHYPRE_Vector__object* 
+  impl_bHYPRE_StructSMG_fconnect_bHYPRE_Vector(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return bHYPRE_Vector__connectI(url, ar, _ex);
+}
+struct bHYPRE_Vector__object* impl_bHYPRE_StructSMG_fcast_bHYPRE_Vector(void* 
+  bi, sidl_BaseInterface* _ex) {
+  return bHYPRE_Vector__cast(bi, _ex);
+}
+struct sidl_BaseClass__object* 
+  impl_bHYPRE_StructSMG_fconnect_sidl_BaseClass(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return sidl_BaseClass__connectI(url, ar, _ex);
+}
+struct sidl_BaseClass__object* impl_bHYPRE_StructSMG_fcast_sidl_BaseClass(void* 
+  bi, sidl_BaseInterface* _ex) {
+  return sidl_BaseClass__cast(bi, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructSMG_fconnect_sidl_BaseInterface(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_BaseInterface__connectI(url, ar, _ex);
+}
+struct sidl_BaseInterface__object* 
+  impl_bHYPRE_StructSMG_fcast_sidl_BaseInterface(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_BaseInterface__cast(bi, _ex);
+}
+struct sidl_ClassInfo__object* 
+  impl_bHYPRE_StructSMG_fconnect_sidl_ClassInfo(const char* url, sidl_bool ar,
+  sidl_BaseInterface *_ex) {
+  return sidl_ClassInfo__connectI(url, ar, _ex);
+}
+struct sidl_ClassInfo__object* impl_bHYPRE_StructSMG_fcast_sidl_ClassInfo(void* 
+  bi, sidl_BaseInterface* _ex) {
+  return sidl_ClassInfo__cast(bi, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_StructSMG_fconnect_sidl_RuntimeException(const char* url,
+  sidl_bool ar, sidl_BaseInterface *_ex) {
+  return sidl_RuntimeException__connectI(url, ar, _ex);
+}
+struct sidl_RuntimeException__object* 
+  impl_bHYPRE_StructSMG_fcast_sidl_RuntimeException(void* bi,
+  sidl_BaseInterface* _ex) {
+  return sidl_RuntimeException__cast(bi, _ex);
+}

@@ -6,6 +6,21 @@
 #include "HYPRE_sstruct_ls.h"
 #include "krylov.h"
 #include "sstruct_mv.h"
+
+/* begin lobpcg */
+
+#include <time.h>
+ 
+#include "fortran_matrix.h"
+#include "HYPRE_lobpcg.h"
+#include "interpreter.h"
+#include "multivector.h"
+#include "HYPRE_MatvecFunctions.h"
+#include "HYPRE_sstruct_int.h"
+
+#define NO_SOLVER -9198
+
+/* end lobpcg */
  
 #define DEBUG 0
 
@@ -89,12 +104,13 @@ typedef struct
    ProblemIndex          *glue_nbor_ilowers;
    ProblemIndex          *glue_nbor_iuppers;
    Index                 *glue_index_maps;
+   int                   *glue_primaries;
 
    /* for GraphSetStencil */
    int                   *stencil_num;
 
    /* for GraphAddEntries */
-   int                    graph_nentries;
+   int                    graph_nboxes;
    ProblemIndex          *graph_ilowers;
    ProblemIndex          *graph_iuppers;
    Index                 *graph_strides;
@@ -110,13 +126,23 @@ typedef struct
    double                *graph_values;
    int                   *graph_boxsizes;
 
-   int                    matrix_nentries;
-   ProblemIndex          *matrix_ilowers;
-   ProblemIndex          *matrix_iuppers;
-   Index                 *matrix_strides;
-   int                   *matrix_vars;
-   int                   *matrix_entries;
-   double                *matrix_values;
+   /* MatrixSetValues */
+   int                    matset_nboxes;
+   ProblemIndex          *matset_ilowers;
+   ProblemIndex          *matset_iuppers;
+   Index                 *matset_strides;
+   int                   *matset_vars;
+   int                   *matset_entries;
+   double                *matset_values;
+
+   /* MatrixAddToValues */
+   int                    matadd_nboxes;
+   ProblemIndex          *matadd_ilowers;
+   ProblemIndex          *matadd_iuppers;
+   int                   *matadd_vars;
+   int                   *matadd_nentries;
+   int                  **matadd_entries;
+   double               **matadd_values;
 
    Index                  periodic;
 
@@ -135,7 +161,7 @@ typedef struct
    int            **stencil_vars;
    double         **stencil_values;
 
-   int              symmetric_nentries;
+   int              symmetric_num;
    int             *symmetric_parts;
    int             *symmetric_vars;
    int             *symmetric_to_vars;
@@ -225,6 +251,25 @@ SScanIntArray( char  *sdata_ptr,
    return 0;
 }
 
+int
+SScanDblArray( char   *sdata_ptr,
+               char  **sdata_ptr_ptr,
+               int     size,
+               double *array )
+{
+   int i;
+                                                                                                                           
+   sdata_ptr += strspn(sdata_ptr, " \t\n[");
+   for (i = 0; i < size; i++)
+   {
+      array[i] = strtod(sdata_ptr, &sdata_ptr);
+   }
+   sdata_ptr += strcspn(sdata_ptr, "]") + 1;
+                                                                                                                           
+   *sdata_ptr_ptr = sdata_ptr;
+   return 0;
+}
+                                                                                                                           
 int
 SScanProblemIndex( char          *sdata_ptr,
                    char         **sdata_ptr_ptr,
@@ -317,7 +362,7 @@ ReadData( char         *filename,
 
    char               key[250];
 
-   int                part, var, entry, s, i, il, iu;
+   int                part, var, s, entry, i, il, iu;
 
    /*-----------------------------------------------------------
     * Read data file from process 0, then broadcast
@@ -367,7 +412,7 @@ ReadData( char         *filename,
     *-----------------------------------------------------------*/
 
    data.max_boxsize = 0;
-   data.symmetric_nentries = 0;
+   data.symmetric_num = 0;
    data.symmetric_parts    = NULL;
    data.symmetric_vars     = NULL;
    data.symmetric_to_vars  = NULL;
@@ -467,6 +512,8 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.glue_nbor_iuppers, ProblemIndex, size);
                pdata.glue_index_maps =
                   hypre_TReAlloc(pdata.glue_index_maps, Index, size);
+               pdata.glue_primaries =
+                  hypre_TReAlloc(pdata.glue_primaries, int, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.glue_ilowers[pdata.glue_nboxes]);
@@ -483,6 +530,19 @@ ReadData( char         *filename,
             for (i = data.ndim; i < 3; i++)
             {
                pdata.glue_index_maps[pdata.glue_nboxes][i] = i;
+            }
+            sdata_ptr += strcspn(sdata_ptr, ":\t\n");
+            if ( *sdata_ptr == ':' )
+            {
+               /* read in optional primary indicator */
+               sdata_ptr += 1;
+               pdata.glue_primaries[pdata.glue_nboxes] =
+                  strtol(sdata_ptr, &sdata_ptr, 10);
+            }
+            else
+            {
+               pdata.glue_primaries[pdata.glue_nboxes] = -1;
+               sdata_ptr -= 1;
             }
             pdata.glue_nboxes++;
             data.pdata[part] = pdata;
@@ -547,9 +607,9 @@ ReadData( char         *filename,
          {
             part = strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
-            if ((pdata.graph_nentries % 10) == 0)
+            if ((pdata.graph_nboxes % 10) == 0)
             {
-               size = pdata.graph_nentries + 10;
+               size = pdata.graph_nboxes + 10;
                pdata.graph_ilowers =
                   hypre_TReAlloc(pdata.graph_ilowers, ProblemIndex, size);
                pdata.graph_iuppers =
@@ -580,65 +640,65 @@ ReadData( char         *filename,
                   hypre_TReAlloc(pdata.graph_boxsizes, int, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
-                              pdata.graph_ilowers[pdata.graph_nentries]);
+                              pdata.graph_ilowers[pdata.graph_nboxes]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
-                              pdata.graph_iuppers[pdata.graph_nentries]);
+                              pdata.graph_iuppers[pdata.graph_nboxes]);
             SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
-                          pdata.graph_strides[pdata.graph_nentries]);
+                          pdata.graph_strides[pdata.graph_nboxes]);
             for (i = data.ndim; i < 3; i++)
             {
-               pdata.graph_strides[pdata.graph_nentries][i] = 1;
+               pdata.graph_strides[pdata.graph_nboxes][i] = 1;
             }
-            pdata.graph_vars[pdata.graph_nentries] =
+            pdata.graph_vars[pdata.graph_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
-            pdata.graph_to_parts[pdata.graph_nentries] =
+            pdata.graph_to_parts[pdata.graph_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
-                              pdata.graph_to_ilowers[pdata.graph_nentries]);
+                              pdata.graph_to_ilowers[pdata.graph_nboxes]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
-                              pdata.graph_to_iuppers[pdata.graph_nentries]);
+                              pdata.graph_to_iuppers[pdata.graph_nboxes]);
             SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
-                          pdata.graph_to_strides[pdata.graph_nentries]);
+                          pdata.graph_to_strides[pdata.graph_nboxes]);
             for (i = data.ndim; i < 3; i++)
             {
-               pdata.graph_to_strides[pdata.graph_nentries][i] = 1;
+               pdata.graph_to_strides[pdata.graph_nboxes][i] = 1;
             }
-            pdata.graph_to_vars[pdata.graph_nentries] =
+            pdata.graph_to_vars[pdata.graph_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
             SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
-                          pdata.graph_index_maps[pdata.graph_nentries]);
+                          pdata.graph_index_maps[pdata.graph_nboxes]);
             for (i = data.ndim; i < 3; i++)
             {
-               pdata.graph_index_maps[pdata.graph_nentries][i] = i;
+               pdata.graph_index_maps[pdata.graph_nboxes][i] = i;
             }
             for (i = 0; i < 3; i++)
             {
-               pdata.graph_index_signs[pdata.graph_nentries][i] = 1;
-               if ( pdata.graph_to_iuppers[pdata.graph_nentries][i] <
-                    pdata.graph_to_ilowers[pdata.graph_nentries][i] )
+               pdata.graph_index_signs[pdata.graph_nboxes][i] = 1;
+               if ( pdata.graph_to_iuppers[pdata.graph_nboxes][i] <
+                    pdata.graph_to_ilowers[pdata.graph_nboxes][i] )
                {
-                  pdata.graph_index_signs[pdata.graph_nentries][i] = -1;
+                  pdata.graph_index_signs[pdata.graph_nboxes][i] = -1;
                }
             }
-            pdata.graph_entries[pdata.graph_nentries] =
+            pdata.graph_entries[pdata.graph_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
-            pdata.graph_values[pdata.graph_nentries] =
+            pdata.graph_values[pdata.graph_nboxes] =
                strtod(sdata_ptr, &sdata_ptr);
-            pdata.graph_boxsizes[pdata.graph_nentries] = 1;
+            pdata.graph_boxsizes[pdata.graph_nboxes] = 1;
             for (i = 0; i < 3; i++)
             {
-               pdata.graph_boxsizes[pdata.graph_nentries] *=
-                  (pdata.graph_iuppers[pdata.graph_nentries][i] -
-                   pdata.graph_ilowers[pdata.graph_nentries][i] + 1);
+               pdata.graph_boxsizes[pdata.graph_nboxes] *=
+                  (pdata.graph_iuppers[pdata.graph_nboxes][i] -
+                   pdata.graph_ilowers[pdata.graph_nboxes][i] + 1);
             }
-            pdata.graph_nentries++;
+            pdata.graph_nboxes++;
             data.pdata[part] = pdata;
          }
          else if ( strcmp(key, "MatrixSetSymmetric:") == 0 )
          {
-            if ((data.symmetric_nentries % 10) == 0)
+            if ((data.symmetric_num % 10) == 0)
             {
-               size = data.symmetric_nentries + 10;
+               size = data.symmetric_num + 10;
                data.symmetric_parts =
                   hypre_TReAlloc(data.symmetric_parts, int, size);
                data.symmetric_vars =
@@ -648,15 +708,15 @@ ReadData( char         *filename,
                data.symmetric_booleans =
                   hypre_TReAlloc(data.symmetric_booleans, int, size);
             }
-            data.symmetric_parts[data.symmetric_nentries] =
+            data.symmetric_parts[data.symmetric_num] =
                strtol(sdata_ptr, &sdata_ptr, 10);
-            data.symmetric_vars[data.symmetric_nentries] =
+            data.symmetric_vars[data.symmetric_num] =
                strtol(sdata_ptr, &sdata_ptr, 10);
-            data.symmetric_to_vars[data.symmetric_nentries] =
+            data.symmetric_to_vars[data.symmetric_num] =
                strtol(sdata_ptr, &sdata_ptr, 10);
-            data.symmetric_booleans[data.symmetric_nentries] =
+            data.symmetric_booleans[data.symmetric_num] =
                strtol(sdata_ptr, &sdata_ptr, 10);
-            data.symmetric_nentries++;
+            data.symmetric_num++;
          }
          else if ( strcmp(key, "MatrixSetNSSymmetric:") == 0 )
          {
@@ -666,39 +726,78 @@ ReadData( char         *filename,
          {
             part = strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
-            if ((pdata.matrix_nentries % 10) == 0)
+            if ((pdata.matset_nboxes % 10) == 0)
             {
-               size = pdata.matrix_nentries + 10;
-               pdata.matrix_ilowers =
-                  hypre_TReAlloc(pdata.matrix_ilowers, ProblemIndex, size);
-               pdata.matrix_iuppers =
-                  hypre_TReAlloc(pdata.matrix_iuppers, ProblemIndex, size);
-               pdata.matrix_strides =
-                  hypre_TReAlloc(pdata.matrix_strides, Index, size);
-               pdata.matrix_vars =
-                  hypre_TReAlloc(pdata.matrix_vars, int, size);
-               pdata.matrix_entries =
-                  hypre_TReAlloc(pdata.matrix_entries, int, size);
-               pdata.matrix_values =
-                  hypre_TReAlloc(pdata.matrix_values, double, size);
+               size = pdata.matset_nboxes + 10;
+               pdata.matset_ilowers =
+                  hypre_TReAlloc(pdata.matset_ilowers, ProblemIndex, size);
+               pdata.matset_iuppers =
+                  hypre_TReAlloc(pdata.matset_iuppers, ProblemIndex, size);
+               pdata.matset_strides =
+                  hypre_TReAlloc(pdata.matset_strides, Index, size);
+               pdata.matset_vars =
+                  hypre_TReAlloc(pdata.matset_vars, int, size);
+               pdata.matset_entries =
+                  hypre_TReAlloc(pdata.matset_entries, int, size);
+               pdata.matset_values =
+                  hypre_TReAlloc(pdata.matset_values, double, size);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
-                              pdata.matrix_ilowers[pdata.matrix_nentries]);
+                              pdata.matset_ilowers[pdata.matset_nboxes]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
-                              pdata.matrix_iuppers[pdata.matrix_nentries]);
+                              pdata.matset_iuppers[pdata.matset_nboxes]);
             SScanIntArray(sdata_ptr, &sdata_ptr, data.ndim,
-                          pdata.matrix_strides[pdata.matrix_nentries]);
+                          pdata.matset_strides[pdata.matset_nboxes]);
             for (i = data.ndim; i < 3; i++)
             {
-               pdata.matrix_strides[pdata.matrix_nentries][i] = 1;
+               pdata.matset_strides[pdata.matset_nboxes][i] = 1;
             }
-            pdata.matrix_vars[pdata.matrix_nentries] =
+            pdata.matset_vars[pdata.matset_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
-            pdata.matrix_entries[pdata.matrix_nentries] =
+            pdata.matset_entries[pdata.matset_nboxes] =
                strtol(sdata_ptr, &sdata_ptr, 10);
-            pdata.matrix_values[pdata.matrix_nentries] =
+            pdata.matset_values[pdata.matset_nboxes] =
                strtod(sdata_ptr, &sdata_ptr);
-            pdata.matrix_nentries++;
+            pdata.matset_nboxes++;
+            data.pdata[part] = pdata;
+         }
+         else if ( strcmp(key, "MatrixAddToValues:") == 0 )
+         {
+            part = strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata = data.pdata[part];
+            if ((pdata.matadd_nboxes% 10) == 0)
+            {
+               size = pdata.matadd_nboxes+10;
+               pdata.matadd_ilowers=
+                  hypre_TReAlloc(pdata.matadd_ilowers, ProblemIndex, size);
+               pdata.matadd_iuppers=
+                  hypre_TReAlloc(pdata.matadd_iuppers, ProblemIndex, size);
+               pdata.matadd_vars=
+                  hypre_TReAlloc(pdata.matadd_vars, int, size);
+               pdata.matadd_nentries=
+                  hypre_TReAlloc(pdata.matadd_nentries, int, size);
+               pdata.matadd_entries=
+                  hypre_TReAlloc(pdata.matadd_entries, int *, size);
+               pdata.matadd_values=
+                  hypre_TReAlloc(pdata.matadd_values, double *, size);
+            }
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.matadd_ilowers[pdata.matadd_nboxes]);
+            SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
+               pdata.matadd_iuppers[pdata.matadd_nboxes]);
+            pdata.matadd_vars[pdata.matadd_nboxes]=
+                strtol(sdata_ptr, &sdata_ptr, 10);
+            i= strtol(sdata_ptr, &sdata_ptr, 10);
+            pdata.matadd_nentries[pdata.matadd_nboxes]= i;
+            pdata.matadd_entries[pdata.matadd_nboxes] =
+               hypre_TAlloc(int, i);
+            SScanIntArray(sdata_ptr, &sdata_ptr, i,
+              (int*) pdata.matadd_entries[pdata.matadd_nboxes]);
+            pdata.matadd_values[pdata.matadd_nboxes] =
+               hypre_TAlloc(double, i);
+            SScanDblArray(sdata_ptr, &sdata_ptr, i,
+              (double *) pdata.matadd_values[pdata.matadd_nboxes]);
+            pdata.matadd_nboxes++;
             data.pdata[part] = pdata;
          }
          else if ( strcmp(key, "ProcessPoolCreate:") == 0 )
@@ -788,7 +887,7 @@ DistributeData( ProblemData   global_data,
    ProblemPartData  pdata;
    int             *pool_procs;
    int              np, pid;
-   int              pool, part, box, entry, p, q, r, i, d;
+   int              pool, part, box, b, p, q, r, i, d;
    int              dmap, sign, size;
    Index            m, mmap, n;
    ProblemIndex     ilower, iupper, int_ilower, int_iupper;
@@ -828,8 +927,9 @@ DistributeData( ProblemData   global_data,
          /* none of this part data lives on this process */
          pdata.nboxes = 0;
          pdata.glue_nboxes = 0;
-         pdata.graph_nentries = 0;
-         pdata.matrix_nentries = 0;
+         pdata.graph_nboxes = 0;
+         pdata.matset_nboxes = 0;
+         pdata.matadd_nboxes = 0;
       }
       else
       {
@@ -845,20 +945,25 @@ DistributeData( ProblemData   global_data,
                MapProblemIndex(pdata.iuppers[box], m);
             }
 
-            for (entry = 0; entry < pdata.graph_nentries; entry++)
+            for (box = 0; box < pdata.graph_nboxes; box++)
             {
-               MapProblemIndex(pdata.graph_ilowers[entry], m);
-               MapProblemIndex(pdata.graph_iuppers[entry], m);
-               mmap[0] = m[pdata.graph_index_maps[entry][0]];
-               mmap[1] = m[pdata.graph_index_maps[entry][1]];
-               mmap[2] = m[pdata.graph_index_maps[entry][2]];
-               MapProblemIndex(pdata.graph_to_ilowers[entry], mmap);
-               MapProblemIndex(pdata.graph_to_iuppers[entry], mmap);
+               MapProblemIndex(pdata.graph_ilowers[box], m);
+               MapProblemIndex(pdata.graph_iuppers[box], m);
+               mmap[0] = m[pdata.graph_index_maps[box][0]];
+               mmap[1] = m[pdata.graph_index_maps[box][1]];
+               mmap[2] = m[pdata.graph_index_maps[box][2]];
+               MapProblemIndex(pdata.graph_to_ilowers[box], mmap);
+               MapProblemIndex(pdata.graph_to_iuppers[box], mmap);
             }
-            for (entry = 0; entry < pdata.matrix_nentries; entry++)
+            for (box = 0; box < pdata.matset_nboxes; box++)
             {
-               MapProblemIndex(pdata.matrix_ilowers[entry], m);
-               MapProblemIndex(pdata.matrix_iuppers[entry], m);
+               MapProblemIndex(pdata.matset_ilowers[box], m);
+               MapProblemIndex(pdata.matset_iuppers[box], m);
+            }
+            for (box = 0; box < pdata.matadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.matadd_ilowers[box], m);
+               MapProblemIndex(pdata.matadd_iuppers[box], m);
             }
          }
 
@@ -893,24 +998,24 @@ DistributeData( ProblemData   global_data,
             }
 
             i = 0;
-            for (entry = 0; entry < pdata.graph_nentries; entry++)
+            for (box = 0; box < pdata.graph_nboxes; box++)
             {
-               MapProblemIndex(pdata.graph_ilowers[entry], m);
-               MapProblemIndex(pdata.graph_iuppers[entry], m);
-               mmap[0] = m[pdata.graph_index_maps[entry][0]];
-               mmap[1] = m[pdata.graph_index_maps[entry][1]];
-               mmap[2] = m[pdata.graph_index_maps[entry][2]];
-               MapProblemIndex(pdata.graph_to_ilowers[entry], mmap);
-               MapProblemIndex(pdata.graph_to_iuppers[entry], mmap);
+               MapProblemIndex(pdata.graph_ilowers[box], m);
+               MapProblemIndex(pdata.graph_iuppers[box], m);
+               mmap[0] = m[pdata.graph_index_maps[box][0]];
+               mmap[1] = m[pdata.graph_index_maps[box][1]];
+               mmap[2] = m[pdata.graph_index_maps[box][2]];
+               MapProblemIndex(pdata.graph_to_ilowers[box], mmap);
+               MapProblemIndex(pdata.graph_to_iuppers[box], mmap);
 
-               for (box = 0; box < pdata.nboxes; box++)
+               for (b = 0; b < pdata.nboxes; b++)
                {
                   /* first convert the box extents based on vartype */
-                  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-                                 pdata.vartypes[pdata.graph_vars[entry]],
+                  GetVariableBox(pdata.ilowers[b], pdata.iuppers[b],
+                                 pdata.vartypes[pdata.graph_vars[box]],
                                  ilower, iupper);
-                  size = IntersectBoxes(pdata.graph_ilowers[entry],
-                                        pdata.graph_iuppers[entry],
+                  size = IntersectBoxes(pdata.graph_ilowers[box],
+                                        pdata.graph_iuppers[box],
                                         ilower, iupper,
                                         int_ilower, int_iupper);
                   if (size > 0)
@@ -918,64 +1023,64 @@ DistributeData( ProblemData   global_data,
                      /* if there is an intersection, it is the only one */
                      for (d = 0; d < 3; d++)
                      {
-                        dmap = pdata.graph_index_maps[entry][d];
-                        sign = pdata.graph_index_signs[entry][d];
+                        dmap = pdata.graph_index_maps[box][d];
+                        sign = pdata.graph_index_signs[box][d];
                         pdata.graph_to_ilowers[i][dmap] =
-                           pdata.graph_to_ilowers[entry][dmap] +
-                           sign * pdata.graph_to_strides[entry][d] *
-                           ((int_ilower[d] - pdata.graph_ilowers[entry][d]) /
-                            pdata.graph_strides[entry][d]);
+                           pdata.graph_to_ilowers[box][dmap] +
+                           sign * pdata.graph_to_strides[box][d] *
+                           ((int_ilower[d] - pdata.graph_ilowers[box][d]) /
+                            pdata.graph_strides[box][d]);
                         pdata.graph_to_iuppers[i][dmap] =
-                           pdata.graph_to_iuppers[entry][dmap] +
-                           sign * pdata.graph_to_strides[entry][d] *
-                           ((int_iupper[d] - pdata.graph_iuppers[entry][d]) /
-                            pdata.graph_strides[entry][d]);
+                           pdata.graph_to_iuppers[box][dmap] +
+                           sign * pdata.graph_to_strides[box][d] *
+                           ((int_iupper[d] - pdata.graph_iuppers[box][d]) /
+                            pdata.graph_strides[box][d]);
                         pdata.graph_ilowers[i][d] = int_ilower[d];
                         pdata.graph_iuppers[i][d] = int_iupper[d];
                         pdata.graph_strides[i][d] =
-                           pdata.graph_strides[entry][d];
+                           pdata.graph_strides[box][d];
                         pdata.graph_to_strides[i][d] =
-                           pdata.graph_to_strides[entry][d];
+                           pdata.graph_to_strides[box][d];
                         pdata.graph_index_maps[i][d]  = dmap;
                         pdata.graph_index_signs[i][d] = sign;
                      }
                      for (d = 3; d < 9; d++)
                      {
                         pdata.graph_ilowers[i][d] =
-                           pdata.graph_ilowers[entry][d];
+                           pdata.graph_ilowers[box][d];
                         pdata.graph_iuppers[i][d] =
-                           pdata.graph_iuppers[entry][d];
+                           pdata.graph_iuppers[box][d];
                         pdata.graph_to_ilowers[i][d] =
-                           pdata.graph_to_ilowers[entry][d];
+                           pdata.graph_to_ilowers[box][d];
                         pdata.graph_to_iuppers[i][d] =
-                           pdata.graph_to_iuppers[entry][d];
+                           pdata.graph_to_iuppers[box][d];
                      }
-                     pdata.graph_vars[i]     = pdata.graph_vars[entry];
-                     pdata.graph_to_parts[i] = pdata.graph_to_parts[entry];
-                     pdata.graph_to_vars[i]  = pdata.graph_to_vars[entry];
-                     pdata.graph_entries[i]  = pdata.graph_entries[entry];
-                     pdata.graph_values[i]   = pdata.graph_values[entry];
+                     pdata.graph_vars[i]     = pdata.graph_vars[box];
+                     pdata.graph_to_parts[i] = pdata.graph_to_parts[box];
+                     pdata.graph_to_vars[i]  = pdata.graph_to_vars[box];
+                     pdata.graph_entries[i]  = pdata.graph_entries[box];
+                     pdata.graph_values[i]   = pdata.graph_values[box];
                      i++;
                      break;
                   }
                }
             }
-            pdata.graph_nentries = i;
+            pdata.graph_nboxes = i;
 
             i = 0;
-            for (entry = 0; entry < pdata.matrix_nentries; entry++)
+            for (box = 0; box < pdata.matset_nboxes; box++)
             {
-               MapProblemIndex(pdata.matrix_ilowers[entry], m);
-               MapProblemIndex(pdata.matrix_iuppers[entry], m);
+               MapProblemIndex(pdata.matset_ilowers[box], m);
+               MapProblemIndex(pdata.matset_iuppers[box], m);
 
-               for (box = 0; box < pdata.nboxes; box++)
+               for (b = 0; b < pdata.nboxes; b++)
                {
                   /* first convert the box extents based on vartype */
-                  GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
-                                 pdata.vartypes[pdata.matrix_vars[entry]],
+                  GetVariableBox(pdata.ilowers[b], pdata.iuppers[b],
+                                 pdata.vartypes[pdata.matset_vars[box]],
                                  ilower, iupper);
-                  size = IntersectBoxes(pdata.matrix_ilowers[entry],
-                                        pdata.matrix_iuppers[entry],
+                  size = IntersectBoxes(pdata.matset_ilowers[box],
+                                        pdata.matset_iuppers[box],
                                         ilower, iupper,
                                         int_ilower, int_iupper);
                   if (size > 0)
@@ -983,27 +1088,68 @@ DistributeData( ProblemData   global_data,
                      /* if there is an intersection, it is the only one */
                      for (d = 0; d < 3; d++)
                      {
-                        pdata.matrix_ilowers[i][d] = int_ilower[d];
-                        pdata.matrix_iuppers[i][d] = int_iupper[d];
-                        pdata.matrix_strides[i][d] =
-                           pdata.matrix_strides[entry][d];
+                        pdata.matset_ilowers[i][d] = int_ilower[d];
+                        pdata.matset_iuppers[i][d] = int_iupper[d];
+                        pdata.matset_strides[i][d] =
+                           pdata.matset_strides[box][d];
                      }
                      for (d = 3; d < 9; d++)
                      {
-                        pdata.matrix_ilowers[i][d] =
-                           pdata.matrix_ilowers[entry][d];
-                        pdata.matrix_iuppers[i][d] =
-                           pdata.matrix_iuppers[entry][d];
+                        pdata.matset_ilowers[i][d] =
+                           pdata.matset_ilowers[box][d];
+                        pdata.matset_iuppers[i][d] =
+                           pdata.matset_iuppers[box][d];
                      }
-                     pdata.matrix_vars[i]     = pdata.matrix_vars[entry];
-                     pdata.matrix_entries[i]  = pdata.matrix_entries[entry];
-                     pdata.matrix_values[i]   = pdata.matrix_values[entry];
+                     pdata.matset_vars[i]     = pdata.matset_vars[box];
+                     pdata.matset_entries[i]  = pdata.matset_entries[box];
+                     pdata.matset_values[i]   = pdata.matset_values[box];
                      i++;
                      break;
                   }
                }
             }
-            pdata.matrix_nentries = i;
+            pdata.matset_nboxes = i;
+
+            i = 0;
+            for (box = 0; box < pdata.matadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.matadd_ilowers[box], m);
+               MapProblemIndex(pdata.matadd_iuppers[box], m);
+
+               for (b = 0; b < pdata.nboxes; b++)
+               {
+                  /* first convert the box extents based on vartype */
+                  GetVariableBox(pdata.ilowers[b], pdata.iuppers[b],
+                                 pdata.vartypes[pdata.matadd_vars[box]],
+                                 ilower, iupper);
+                  size = IntersectBoxes(pdata.matadd_ilowers[box],
+                                        pdata.matadd_iuppers[box],
+                                        ilower, iupper,
+                                        int_ilower, int_iupper);
+                  if (size > 0)
+                  {
+                     /* if there is an intersection, it is the only one */
+                     for (d = 0; d < 3; d++)
+                     {
+                        pdata.matadd_ilowers[i][d] = int_ilower[d];
+                        pdata.matadd_iuppers[i][d] = int_iupper[d];
+                     }
+                     for (d = 3; d < 9; d++)
+                     {
+                        pdata.matadd_ilowers[i][d] =
+                           pdata.matadd_ilowers[box][d];
+                        pdata.matadd_iuppers[i][d] =
+                           pdata.matadd_iuppers[box][d];
+                     }
+                     pdata.matadd_vars[i]     = pdata.matadd_vars[box];
+                     pdata.matadd_entries[i]  = pdata.matadd_entries[box];
+                     pdata.matadd_values[i]   = pdata.matadd_values[box];
+                     i++;
+                     break;
+                  }
+               }
+            }
+            pdata.matadd_nboxes = i;
          }
 
          /* refine and block boxes */
@@ -1056,20 +1202,25 @@ DistributeData( ProblemData   global_data,
             }
             pdata.nboxes *= m[0]*m[1]*m[2];
 
-            for (entry = 0; entry < pdata.graph_nentries; entry++)
+            for (box = 0; box < pdata.graph_nboxes; box++)
             {
-               MapProblemIndex(pdata.graph_ilowers[entry], m);
-               MapProblemIndex(pdata.graph_iuppers[entry], m);
-               mmap[0] = m[pdata.graph_index_maps[entry][0]];
-               mmap[1] = m[pdata.graph_index_maps[entry][1]];
-               mmap[2] = m[pdata.graph_index_maps[entry][2]];
-               MapProblemIndex(pdata.graph_to_ilowers[entry], mmap);
-               MapProblemIndex(pdata.graph_to_iuppers[entry], mmap);
+               MapProblemIndex(pdata.graph_ilowers[box], m);
+               MapProblemIndex(pdata.graph_iuppers[box], m);
+               mmap[0] = m[pdata.graph_index_maps[box][0]];
+               mmap[1] = m[pdata.graph_index_maps[box][1]];
+               mmap[2] = m[pdata.graph_index_maps[box][2]];
+               MapProblemIndex(pdata.graph_to_ilowers[box], mmap);
+               MapProblemIndex(pdata.graph_to_iuppers[box], mmap);
             }
-            for (entry = 0; entry < pdata.matrix_nentries; entry++)
+            for (box = 0; box < pdata.matset_nboxes; box++)
             {
-               MapProblemIndex(pdata.matrix_ilowers[entry], m);
-               MapProblemIndex(pdata.matrix_iuppers[entry], m);
+               MapProblemIndex(pdata.matset_ilowers[box], m);
+               MapProblemIndex(pdata.matset_iuppers[box], m);
+            }
+            for (box = 0; box < pdata.matadd_nboxes; box++)
+            {
+               MapProblemIndex(pdata.matadd_ilowers[box], m);
+               MapProblemIndex(pdata.matadd_iuppers[box], m);
             }
          }
 
@@ -1104,7 +1255,7 @@ DistributeData( ProblemData   global_data,
             pdata.max_boxsize =
                hypre_max(pdata.max_boxsize, pdata.boxsizes[box]);
          }
-         for (box = 0; box < pdata.graph_nentries; box++)
+         for (box = 0; box < pdata.graph_nboxes; box++)
          {
             pdata.graph_boxsizes[box] = 1;
             for (i = 0; i < 3; i++)
@@ -1113,6 +1264,26 @@ DistributeData( ProblemData   global_data,
                   (pdata.graph_iuppers[box][i] -
                    pdata.graph_ilowers[box][i] + 1);
             }
+         }
+         for (box = 0; box < pdata.matset_nboxes; box++)
+         {
+            size = 1;
+            for (i = 0; i < 3; i++)
+            {
+               size*= (pdata.matset_iuppers[box][i] -
+                       pdata.matset_ilowers[box][i] + 1);
+            }
+            pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
+         }
+         for (box = 0; box < pdata.matadd_nboxes; box++)
+         {
+            size = 1;
+            for (i = 0; i < 3; i++)
+            {
+               size*= (pdata.matadd_iuppers[box][i] -
+                       pdata.matadd_ilowers[box][i] + 1);
+            }
+            pdata.max_boxsize = hypre_max(pdata.max_boxsize, size);
          }
       }
 
@@ -1132,9 +1303,10 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.glue_nbor_ilowers);
          hypre_TFree(pdata.glue_nbor_iuppers);
          hypre_TFree(pdata.glue_index_maps);
+         hypre_TFree(pdata.glue_primaries);
       }
 
-      if (pdata.graph_nentries == 0)
+      if (pdata.graph_nboxes == 0)
       {
          hypre_TFree(pdata.graph_ilowers);
          hypre_TFree(pdata.graph_iuppers);
@@ -1152,14 +1324,29 @@ DistributeData( ProblemData   global_data,
          hypre_TFree(pdata.graph_boxsizes);
       }
 
-      if (pdata.matrix_nentries == 0)
+      if (pdata.matset_nboxes == 0)
       {
-         hypre_TFree(pdata.matrix_ilowers);
-         hypre_TFree(pdata.matrix_iuppers);
-         hypre_TFree(pdata.matrix_strides);
-         hypre_TFree(pdata.matrix_vars);
-         hypre_TFree(pdata.matrix_entries);
-         hypre_TFree(pdata.matrix_values);
+         hypre_TFree(pdata.matset_ilowers);
+         hypre_TFree(pdata.matset_iuppers);
+         hypre_TFree(pdata.matset_strides);
+         hypre_TFree(pdata.matset_vars);
+         hypre_TFree(pdata.matset_entries);
+         hypre_TFree(pdata.matset_values);
+      }
+
+      if (pdata.matadd_nboxes == 0)
+      {
+         hypre_TFree(pdata.matadd_ilowers);
+         hypre_TFree(pdata.matadd_iuppers);
+         hypre_TFree(pdata.matadd_vars);
+         hypre_TFree(pdata.matadd_nentries);
+         for (box = 0; box < pdata.matadd_nboxes; box++)
+         {
+            hypre_TFree(pdata.matadd_entries[box]);
+            hypre_TFree(pdata.matadd_values[box]);
+         }
+         hypre_TFree(pdata.matadd_entries);
+         hypre_TFree(pdata.matadd_values);
       }
 
       data.pdata[part] = pdata;
@@ -1186,7 +1373,7 @@ int
 DestroyData( ProblemData   data )
 {
    ProblemPartData  pdata;
-   int              part, s;
+   int              part, box, s;
 
    for (part = 0; part < data.nparts; part++)
    {
@@ -1218,6 +1405,7 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.glue_nbor_ilowers);
          hypre_TFree(pdata.glue_nbor_iuppers);
          hypre_TFree(pdata.glue_index_maps);
+         hypre_TFree(pdata.glue_primaries);
       }
 
       if (pdata.nvars > 0)
@@ -1225,7 +1413,7 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.stencil_num);
       }
 
-      if (pdata.graph_nentries > 0)
+      if (pdata.graph_nboxes > 0)
       {
          hypre_TFree(pdata.graph_ilowers);
          hypre_TFree(pdata.graph_iuppers);
@@ -1243,16 +1431,30 @@ DestroyData( ProblemData   data )
          hypre_TFree(pdata.graph_boxsizes);
       }
 
-      if (pdata.matrix_nentries > 0)
+      if (pdata.matset_nboxes > 0)
       {
-         hypre_TFree(pdata.matrix_ilowers);
-         hypre_TFree(pdata.matrix_iuppers);
-         hypre_TFree(pdata.matrix_strides);
-         hypre_TFree(pdata.matrix_vars);
-         hypre_TFree(pdata.matrix_entries);
-         hypre_TFree(pdata.matrix_values);
+         hypre_TFree(pdata.matset_ilowers);
+         hypre_TFree(pdata.matset_iuppers);
+         hypre_TFree(pdata.matset_strides);
+         hypre_TFree(pdata.matset_vars);
+         hypre_TFree(pdata.matset_entries);
+         hypre_TFree(pdata.matset_values);
       }
 
+      if (pdata.matadd_nboxes > 0)
+      {
+         hypre_TFree(pdata.matadd_ilowers);
+         hypre_TFree(pdata.matadd_iuppers);
+         hypre_TFree(pdata.matadd_vars);
+         hypre_TFree(pdata.matadd_nentries);
+         for (box = 0; box < pdata.matadd_nboxes; box++)
+         {
+            hypre_TFree(pdata.matadd_entries[box]);
+            hypre_TFree(pdata.matadd_values[box]);
+         }
+         hypre_TFree(pdata.matadd_entries);
+         hypre_TFree(pdata.matadd_values);
+      }
    }
    hypre_TFree(data.pdata);
 
@@ -1267,7 +1469,7 @@ DestroyData( ProblemData   data )
    hypre_TFree(data.stencil_vars);
    hypre_TFree(data.stencil_values);
 
-   if (data.symmetric_nentries > 0)
+   if (data.symmetric_num > 0)
    {
       hypre_TFree(data.symmetric_parts);
       hypre_TFree(data.symmetric_vars);
@@ -1290,7 +1492,7 @@ SetCosineVector(   double  scale,
                    Index   iupper,
                    double *values)
 {
-   int          i,j,k;
+   int          i, j, k;
    int          count = 0;
 
    for (k = ilower[2]; k <= iupper[2]; k++)
@@ -1343,14 +1545,14 @@ PrintUsage( char *progname,
       printf("                        38 - GMRES with diagonal scaling\n");
       printf("                        39 - GMRES\n");
       printf("                        40 - GMRES with BoomerAMG precond\n");
-      printf("                        41 - GMRES with PILUT precond\n");
+      printf("                        41 - GMRES with EUCLID precond\n");
       printf("                        42 - GMRES with ParaSails precond\n");
       printf("                        50 - BiCGSTAB with SMG split precond\n");
       printf("                        51 - BiCGSTAB with PFMG split precond\n");
       printf("                        58 - BiCGSTAB with diagonal scaling\n");
       printf("                        59 - BiCGSTAB\n");
       printf("                        60 - BiCGSTAB with BoomerAMG precond\n");
-      printf("                        61 - BiCGSTAB with PILUT precond\n");
+      printf("                        61 - BiCGSTAB with EUCLID precond\n");
       printf("                        62 - BiCGSTAB with ParaSails precond\n");
       printf("                        120- PCG with hybrid precond\n");
       printf("                        200- Struct SMG (default)\n");
@@ -1393,13 +1595,53 @@ PrintUsage( char *progname,
       printf("                        1 - Weighted Jacobi (default)\n");
       printf("                        2 - R/B Gauss-Seidel\n");
       printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
-      printf("  -skip <s>          : Struct- skip levels in PFMG (0 or 1)\n");
       printf("  -sym <s>           : Struct- symmetric storage (1) or not (0)\n");
       printf("  -jump <num>        : Struct- num levels to jump in SparseMSG\n");
       printf("  -solver_type <ID>  : Struct- solver type for Hybrid\n");
       printf("                        1 - PCG (default)\n");
       printf("                        2 - GMRES\n");
       printf("  -cf <cf>           : Struct- convergence factor for Hybrid\n");
+
+      /* begin lobpcg */
+
+      printf("\nLOBPCG options:\n");
+      printf("\n");
+      printf("  -lobpcg            : run LOBPCG instead of PCG\n");
+      printf("\n");
+      printf("  -solver none       : no HYPRE preconditioner is used\n");
+      printf("\n");
+      printf("  -itr <val>         : maximal number of LOBPCG iterations (default 100);\n");
+      printf("\n");
+      printf("  -tol <val>         : residual tolerance (default 1e-6)\n");
+      printf("\n");
+      printf("  -vrand <val>       : compute <val> eigenpairs using random initial vectors (default 1)\n");
+      printf("\n");
+      printf("  -seed <val>        : use <val> as the seed for the pseudo-random number generator\n"); 
+      printf("                       (default seed is based on the time of the run)\n");
+      printf("\n");
+      printf("  -orthchk           : check eigenvectors for orthonormality\n");
+      printf("\n");
+      printf("  -verb <val>        : verbosity level\n");
+      printf("  -verb 0            : no print\n");
+      printf("  -verb 1            : print initial eigenvalues and residuals, iteration number, number of\n");
+      printf("                       non-convergent eigenpairs and final eigenvalues and residuals (default)\n");
+      printf("  -verb 2            : print eigenvalues and residuals on each iteration\n");
+      printf("\n");
+      printf("  -pcgitr <val>      : maximal number of inner PCG iterations for preconditioning (default 1);\n");
+      printf("                       if <val> = 0 then the preconditioner is applied directly\n");
+      printf("\n");
+      printf("  -pcgtol <val>      : residual tolerance for inner iterations (default 0.01)\n");
+      printf("\n");
+      printf("  -vout <val>        : file output level\n");
+      printf("  -vout 0            : no files created (default)\n");
+      printf("  -vout 1            : write eigenvalues to values.txt and residuals to residuals.txt\n");
+      printf("  -vout 2            : in addition to the above, write the eigenvalues history (the matrix whose\n");
+      printf("                       i-th column contains eigenvalues at (i+1)-th iteration) to val_hist.txt and\n");
+      printf("                       residuals history to res_hist.txt\n");
+      printf("\nNOTE: in this test driver LOBPCG only works with solvers 10, 11, 13, and 18\n");
+      printf("\ndefault solver is 10\n");
+      
+      /* end lobpcg */
 
       printf("\n");
    }
@@ -1424,7 +1666,7 @@ main( int   argc,
    Index                *refine;
    Index                *distribute;
    Index                *block;
-   int                   solver_id;
+   int                   solver_id, object_type;
    int                   print_system;
    int                   cosine, struct_cosine;
    double                scale;
@@ -1459,7 +1701,7 @@ main( int   argc,
                          
    int                   num_procs, myid;
    int                   time_index;
-                         
+
    int                   n_pre, n_post;
    int                   skip;
    int                   sym;
@@ -1470,8 +1712,45 @@ main( int   argc,
 
    double                cf_tol;
 
-   int                   arg_index, part, box, var, entry, s, i, j, k;
+   int                   arg_index, part, var, box, s, entry, i, j, k, size;
                         
+   /* begin lobpcg */
+
+   HYPRE_SStructSolver   lobpcg_solver;
+
+   int lobpcgFlag = 0;
+   int lobpcgSeed = 0;
+   int blockSize = 1;
+   int verbosity = 1;
+   int iterations;
+   int maxIterations = 100;
+   int checkOrtho = 0;
+   int printLevel = 0;
+   int pcgIterations = 0;
+   int pcgMode = 0;
+   double tol = 1e-6;
+   double pcgTol = 1e-2;
+   double nonOrthF;
+
+   FILE* filePtr;
+
+   mv_MultiVectorPtr eigenvectors = NULL;
+   mv_MultiVectorPtr constrains = NULL;
+   double* eigenvalues = NULL;
+
+   double* residuals;
+   utilities_FortranMatrix* residualNorms;
+   utilities_FortranMatrix* residualNormsHistory;
+   utilities_FortranMatrix* eigenvaluesHistory;
+   utilities_FortranMatrix* printBuffer;
+   utilities_FortranMatrix* gramXX;
+   utilities_FortranMatrix* identity;
+
+   mv_InterfaceInterpreter* interpreter;
+   HYPRE_MatvecFunctions matvec_fn;
+
+   /* end lobpcg */
+
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -1537,6 +1816,7 @@ main( int   argc,
    cosine = 1;
    struct_cosine = 0;
 
+   skip = 0;
    n_pre  = 1;
    n_post = 1;
 
@@ -1600,7 +1880,14 @@ main( int   argc,
       else if ( strcmp(argv[arg_index], "-solver") == 0 )
       {
          arg_index++;
-         solver_id = atoi(argv[arg_index++]);
+
+	 /* begin lobpcg */
+	 if ( strcmp(argv[arg_index], "none") == 0 ) {
+	   solver_id = NO_SOLVER;
+	   arg_index++;
+	 }
+	 else /* end lobpcg */
+	   solver_id = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rhsone") == 0 )
       {
@@ -1665,16 +1952,77 @@ main( int   argc,
          exit(1);
          break;
       }
+      /* begin lobpcg */
+      else if ( strcmp(argv[arg_index], "-lobpcg") == 0 ) 
+      {					 /* use lobpcg */
+         arg_index++;
+		 lobpcgFlag = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-orthchk") == 0 )
+      {			/* lobpcg: check orthonormality */
+         arg_index++;
+	 checkOrtho = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-verb") == 0 ) 
+      {			  /* lobpcg: verbosity level */
+         arg_index++;
+         verbosity = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-vrand") == 0 )
+      {                         /* lobpcg: block size */
+         arg_index++;
+         blockSize = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-seed") == 0 )
+      {		           /* lobpcg: seed for srand */
+         arg_index++;
+         lobpcgSeed = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-itr") == 0 ) 
+      {		     /* lobpcg: max # of iterations */
+         arg_index++;
+         maxIterations = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-tol") == 0 ) 
+      {			       /* lobpcg: tolerance */
+         arg_index++;
+         tol = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-pcgitr") == 0 ) 
+      {		   /* lobpcg: max inner pcg iterations */
+         arg_index++;
+         pcgIterations = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-pcgtol") == 0 ) 
+      {	     /* lobpcg: inner pcg iterations tolerance */
+         arg_index++;
+         pcgTol = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-pcgmode") == 0 ) 
+      {		 /* lobpcg: initial guess for inner pcg */
+         arg_index++;	      /* 0: zero, otherwise rhs */
+         pcgMode = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-vout") == 0 )
+      {			      /* lobpcg: print level */
+         arg_index++;
+         printLevel = atoi(argv[arg_index++]);
+      }
       else
       {
-         break;
+	arg_index++;
+	/*break;*/
       }
    }
+
+   if ( solver_id == 39 && lobpcgFlag )
+     solver_id = 10;
+
+   /* end lobpcg */
 
    /*-----------------------------------------------------------
     * Print driver parameters TODO
     *-----------------------------------------------------------*/
- 
    if (myid == 0)
    {
    }
@@ -1692,9 +2040,20 @@ main( int   argc,
    if (solver_id >= 200)
    {
       pdata = data.pdata[0];
-      if (nparts > 1 || pdata.nvars > 1)
+      if (nparts > 1)
       {
-         printf("Error: Invalid number of parts or nvars for Struct Solver \n");
+         if (!myid)
+         {
+            printf("Warning: Invalid number of parts for Struct Solver. Part 0 taken. \n");
+         }
+      }
+
+      if (pdata.nvars > 1)
+      {
+         if (!myid)
+         {
+            printf("Error: Invalid number of nvars for Struct Solver \n");
+         }
          exit(1);
       }
    }
@@ -1729,6 +2088,7 @@ main( int   argc,
       /* GridSetNeighborBox */
       for (box = 0; box < pdata.glue_nboxes; box++)
       {
+#if 1 /* will add primary to the interface soon */
          HYPRE_SStructGridSetNeighborBox(grid, part,
                                          pdata.glue_ilowers[box],
                                          pdata.glue_iuppers[box],
@@ -1736,6 +2096,16 @@ main( int   argc,
                                          pdata.glue_nbor_ilowers[box],
                                          pdata.glue_nbor_iuppers[box],
                                          pdata.glue_index_maps[box]);
+#else
+         HYPRE_SStructGridSetNeighborBoxZ(grid, part,
+                                          pdata.glue_ilowers[box],
+                                          pdata.glue_iuppers[box],
+                                          pdata.glue_nbor_parts[box],
+                                          pdata.glue_nbor_ilowers[box],
+                                          pdata.glue_nbor_iuppers[box],
+                                          pdata.glue_index_maps[box],
+                                          pdata.glue_primaries[box]);
+#endif
       }
 
       HYPRE_SStructGridSetPeriodic(grid, part, pdata.periodic);
@@ -1751,12 +2121,31 @@ main( int   argc,
    {
       HYPRE_SStructStencilCreate(data.ndim, data.stencil_sizes[s],
                                  &stencils[s]);
-      for (i = 0; i < data.stencil_sizes[s]; i++)
+      for (entry = 0; entry < data.stencil_sizes[s]; entry++)
       {
-         HYPRE_SStructStencilSetEntry(stencils[s], i,
-                                      data.stencil_offsets[s][i],
-                                      data.stencil_vars[s][i]);
+         HYPRE_SStructStencilSetEntry(stencils[s], entry,
+                                      data.stencil_offsets[s][entry],
+                                      data.stencil_vars[s][entry]);
       }
+   }
+
+   /*-----------------------------------------------------------
+    * Set object type
+    *-----------------------------------------------------------*/
+
+   object_type = HYPRE_SSTRUCT;
+
+   if ( ((solver_id >= 20) && (solver_id < 30)) ||
+        ((solver_id >= 40) && (solver_id < 50)) ||
+        ((solver_id >= 60) && (solver_id < 70)) ||
+        (solver_id == 120))
+   {
+       object_type = HYPRE_PARCSR;  
+   }
+
+   if (solver_id >= 200)
+   {
+       object_type = HYPRE_STRUCT;
    }
 
    /*-----------------------------------------------------------
@@ -1765,17 +2154,10 @@ main( int   argc,
 
    HYPRE_SStructGraphCreate(MPI_COMM_WORLD, grid, &graph);
 
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
+   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
+   if ( object_type != HYPRE_SSTRUCT )
    {
-       HYPRE_SStructGraphSetObjectType(graph, HYPRE_PARCSR);  
-   }
-
-   if (solver_id >= 200) 
-   {
-       HYPRE_SStructGraphSetObjectType(graph, HYPRE_STRUCT);  
+       HYPRE_SStructGraphSetObjectType(graph, object_type);
    }
 
    for (part = 0; part < data.nparts; part++)
@@ -1790,34 +2172,34 @@ main( int   argc,
       }
 
       /* add entries */
-      for (entry = 0; entry < pdata.graph_nentries; entry++)
+      for (box = 0; box < pdata.graph_nboxes; box++)
       {
-         for (index[2] = pdata.graph_ilowers[entry][2];
-              index[2] <= pdata.graph_iuppers[entry][2];
-              index[2] += pdata.graph_strides[entry][2])
+         for (index[2] = pdata.graph_ilowers[box][2];
+              index[2] <= pdata.graph_iuppers[box][2];
+              index[2] += pdata.graph_strides[box][2])
          {
-            for (index[1] = pdata.graph_ilowers[entry][1];
-                 index[1] <= pdata.graph_iuppers[entry][1];
-                 index[1] += pdata.graph_strides[entry][1])
+            for (index[1] = pdata.graph_ilowers[box][1];
+                 index[1] <= pdata.graph_iuppers[box][1];
+                 index[1] += pdata.graph_strides[box][1])
             {
-               for (index[0] = pdata.graph_ilowers[entry][0];
-                    index[0] <= pdata.graph_iuppers[entry][0];
-                    index[0] += pdata.graph_strides[entry][0])
+               for (index[0] = pdata.graph_ilowers[box][0];
+                    index[0] <= pdata.graph_iuppers[box][0];
+                    index[0] += pdata.graph_strides[box][0])
                {
                   for (i = 0; i < 3; i++)
                   {
-                     j = pdata.graph_index_maps[entry][i];
-                     k = index[i] - pdata.graph_ilowers[entry][i];
-                     k /= pdata.graph_strides[entry][i];
-                     k *= pdata.graph_index_signs[entry][i];
-                     to_index[j] = pdata.graph_to_ilowers[entry][j] +
-                        k * pdata.graph_to_strides[entry][j];
+                     j = pdata.graph_index_maps[box][i];
+                     k = index[i] - pdata.graph_ilowers[box][i];
+                     k /= pdata.graph_strides[box][i];
+                     k *= pdata.graph_index_signs[box][i];
+                     to_index[j] = pdata.graph_to_ilowers[box][j] +
+                        k * pdata.graph_to_strides[box][j];
                   }
                   HYPRE_SStructGraphAddEntries(graph, part, index,
-                                               pdata.graph_vars[entry],
-                                               pdata.graph_to_parts[entry],
+                                               pdata.graph_vars[box],
+                                               pdata.graph_to_parts[box],
                                                to_index,
-                                               pdata.graph_to_vars[entry]);
+                                               pdata.graph_to_vars[box]);
                }
             }
          }
@@ -1835,27 +2217,19 @@ main( int   argc,
    HYPRE_SStructMatrixCreate(MPI_COMM_WORLD, graph, &A);
 
    /* TODO HYPRE_SStructMatrixSetSymmetric(A, 1); */
-   for (entry = 0; entry < data.symmetric_nentries; entry++)
+   for (i = 0; i < data.symmetric_num; i++)
    {
-      HYPRE_SStructMatrixSetSymmetric(A,
-                                      data.symmetric_parts[entry],
-                                      data.symmetric_vars[entry],
-                                      data.symmetric_to_vars[entry],
-                                      data.symmetric_booleans[entry]);
+      HYPRE_SStructMatrixSetSymmetric(A, data.symmetric_parts[i],
+                                      data.symmetric_vars[i],
+                                      data.symmetric_to_vars[i],
+                                      data.symmetric_booleans[i]);
    }
    HYPRE_SStructMatrixSetNSSymmetric(A, data.ns_symmetric);
 
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
+   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
+   if ( object_type != HYPRE_SSTRUCT )
    {
-      HYPRE_SStructMatrixSetObjectType(A, HYPRE_PARCSR);
-   }
-
-   else if (solver_id >= 200)
-   {
-      HYPRE_SStructMatrixSetObjectType(A, HYPRE_STRUCT);
+       HYPRE_SStructMatrixSetObjectType(A, object_type);
    }
 
    HYPRE_SStructMatrixInitialize(A);
@@ -1885,115 +2259,116 @@ main( int   argc,
       }
 
       /* set non-stencil entries */
-      for (entry = 0; entry < pdata.graph_nentries; entry++)
+      for (box = 0; box < pdata.graph_nboxes; box++)
       {
-/*
- * RDF: Add a separate interface routine for setting non-stencil entries?
- * It would be more efficient to set boundary values a box at a time,
- * but AMR may require striding, and some codes may already have a natural
- * values array to pass in, but can't because it uses ghost values.
- *
- * Example new interface routine:
- *   SetNSBoxValues(matrix, part, ilower, iupper, stride, entry
- *                  values_ilower, values_iupper, values);
- */
+         /*
+          * RDF NOTE: Add a separate interface routine for setting non-stencil
+          * entries.  It would be more efficient to set boundary values a box
+          * at a time, but AMR may require striding, and some codes may already
+          * have a natural values array to pass in, but can't because it uses
+          * ghost values.
+          *
+          * Example new interface routine:
+          *   SetNSBoxValues(matrix, part, ilower, iupper, stride, entry
+          *                  values_ilower, values_iupper, values);
+          */
+
+/* since we have already tested SetBoxValues above, use SetValues here */
 #if 0
-         for (j = 0; j < pdata.graph_boxsizes[entry]; j++)
+         for (j = 0; j < pdata.graph_boxsizes[box]; j++)
          {
-            values[j] = pdata.graph_values[entry];
+            values[j] = pdata.graph_values[box];
          }
          HYPRE_SStructMatrixSetBoxValues(A, part,
-                                         pdata.graph_ilowers[entry],
-                                         pdata.graph_iuppers[entry],
-                                         pdata.graph_vars[entry],
-                                         1, &pdata.graph_entries[entry],
+                                         pdata.graph_ilowers[box],
+                                         pdata.graph_iuppers[box],
+                                         pdata.graph_vars[box],
+                                         1, &pdata.graph_entries[box],
                                          values);
-#endif
-         for (index[2] = pdata.graph_ilowers[entry][2];
-              index[2] <= pdata.graph_iuppers[entry][2];
-              index[2] += pdata.graph_strides[entry][2])
+#else
+         for (index[2] = pdata.graph_ilowers[box][2];
+              index[2] <= pdata.graph_iuppers[box][2];
+              index[2] += pdata.graph_strides[box][2])
          {
-            for (index[1] = pdata.graph_ilowers[entry][1];
-                 index[1] <= pdata.graph_iuppers[entry][1];
-                 index[1] += pdata.graph_strides[entry][1])
+            for (index[1] = pdata.graph_ilowers[box][1];
+                 index[1] <= pdata.graph_iuppers[box][1];
+                 index[1] += pdata.graph_strides[box][1])
             {
-               for (index[0] = pdata.graph_ilowers[entry][0];
-                    index[0] <= pdata.graph_iuppers[entry][0];
-                    index[0] += pdata.graph_strides[entry][0])
+               for (index[0] = pdata.graph_ilowers[box][0];
+                    index[0] <= pdata.graph_iuppers[box][0];
+                    index[0] += pdata.graph_strides[box][0])
                {
                   HYPRE_SStructMatrixSetValues(A, part, index,
-                                               pdata.graph_vars[entry],
-                                               1, &pdata.graph_entries[entry],
-                                               &pdata.graph_values[entry]);
+                                               pdata.graph_vars[box],
+                                               1, &pdata.graph_entries[box],
+                                               &pdata.graph_values[box]);
                }
             }
          }
+#endif
       }
-   }
 
-   /* reset matrix values:
-    *   NOTE THAT THE matrix_ilowers & matrix_iuppers MUST BE IN TERMS OF THE
-    *   CHOOSEN VAR_TYPE INDICES, UNLIKE THE EXTENTS OF THE GRID< WHICH ARE
-    *   IN TEMS OF THE CELL VARTYPE INDICES.
-    */
-   for (part = 0; part < data.nparts; part++)
-   {
-      pdata = data.pdata[part];
-      for (entry = 0; entry < pdata.matrix_nentries; entry++)
+      /* reset some matrix values */
+      for (box = 0; box < pdata.matset_nboxes; box++)
       {
-         for (index[2] = pdata.matrix_ilowers[entry][2];
-              index[2] <= pdata.matrix_iuppers[entry][2];
-              index[2] += pdata.matrix_strides[entry][2])
+         size= 1;
+         for (j = 0; j < 3; j++)
          {
-            for (index[1] = pdata.matrix_ilowers[entry][1];
-                 index[1] <= pdata.matrix_iuppers[entry][1];
-                 index[1] += pdata.matrix_strides[entry][1])
+            size*= (pdata.matset_iuppers[box][j] -
+                    pdata.matset_ilowers[box][j] + 1);
+         }
+         for (j = 0; j < size; j++)
+         {
+            values[j] = pdata.matset_values[box];
+         }
+         HYPRE_SStructMatrixSetBoxValues(A, part,
+                                         pdata.matset_ilowers[box],
+                                         pdata.matset_iuppers[box],
+                                         pdata.matset_vars[box],
+                                         1, &pdata.matset_entries[box],
+                                         values);
+      }
+
+      /* add to some matrix values */
+      for (box = 0; box < pdata.matadd_nboxes; box++)
+      {
+         size = 1;
+         for (j = 0; j < 3; j++)
+         {
+            size*= (pdata.matadd_iuppers[box][j] -
+                    pdata.matadd_ilowers[box][j] + 1);
+         }
+
+         for (entry = 0; entry < pdata.matadd_nentries[box]; entry++)
+         {
+            for (j = 0; j < size; j++)
             {
-               for (index[0] = pdata.matrix_ilowers[entry][0];
-                    index[0] <= pdata.matrix_iuppers[entry][0];
-                    index[0] += pdata.matrix_strides[entry][0])
-               {
-                  HYPRE_SStructMatrixSetValues(A, part, index,
-                                               pdata.matrix_vars[entry],
-                                               1, &pdata.matrix_entries[entry],
-                                               &pdata.matrix_values[entry]);
-               }
+               values[j] = pdata.matadd_values[box][entry];
             }
+          
+            HYPRE_SStructMatrixAddToBoxValues(A, part, 
+                                              pdata.matadd_ilowers[box],
+                                              pdata.matadd_iuppers[box],
+                                              pdata.matadd_vars[box],
+                                              1, &pdata.matadd_entries[box][entry],
+                                              values);
          }
       }
    }
 
    HYPRE_SStructMatrixAssemble(A);
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
-   {
-      HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
-   }
-
-   else if ( solver_id >= 200 )
-   {
-      HYPRE_SStructMatrixGetObject(A, (void **) &sA);
-   }
 
    /*-----------------------------------------------------------
     * Set up the linear system
     *-----------------------------------------------------------*/
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
-   {
-      HYPRE_SStructVectorSetObjectType(b, HYPRE_PARCSR);
-   }
-   else if (solver_id >= 200)
-   {
-      HYPRE_SStructVectorSetObjectType(b, HYPRE_STRUCT);
-   }
 
+   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
+   if ( object_type != HYPRE_SSTRUCT )
+   {
+       HYPRE_SStructVectorSetObjectType(b, object_type);
+   }
 
    HYPRE_SStructVectorInitialize(b);
    for (j = 0; j < data.max_boxsize; j++)
@@ -2007,7 +2382,7 @@ main( int   argc,
       {
          for (box = 0; box < pdata.nboxes; box++)
          {
-            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
+            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
                            pdata.vartypes[var], ilower, iupper);
             HYPRE_SStructVectorSetBoxValues(b, part, ilower, iupper,
                                             var, values);
@@ -2015,69 +2390,16 @@ main( int   argc,
       }
    }
    HYPRE_SStructVectorAssemble(b);
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
-   {
-      HYPRE_SStructVectorGetObject(b, (void **) &par_b);
-   }
-   else if (solver_id >= 200)
-   {
-      HYPRE_SStructVectorGetObject(b, (void **) &sb);
-   }
 
    HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
+
+   /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
+   if ( object_type != HYPRE_SSTRUCT )
    {
-      HYPRE_SStructVectorSetObjectType(x, HYPRE_PARCSR);
-   }
-   else if (solver_id >= 200)
-   {
-      HYPRE_SStructVectorSetObjectType(x, HYPRE_STRUCT);
+       HYPRE_SStructVectorSetObjectType(x, object_type);
    }
 
    HYPRE_SStructVectorInitialize(x);
-   for (j = 0; j < data.max_boxsize; j++)
-   {
-      values[j] = 0.0;
-   }
-   for (part = 0; part < data.nparts; part++)
-   {
-      pdata = data.pdata[part];
-      for (var = 0; var < pdata.nvars; var++)
-      {
-         for (box = 0; box < pdata.nboxes; box++)
-         {
-            GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], 
-                           pdata.vartypes[var], ilower, iupper);
-            HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
-                                            var, values);
-         }
-      }
-   }
-   HYPRE_SStructVectorAssemble(x);
-   if ( ((solver_id >= 20) && (solver_id < 30)) ||
-        ((solver_id >= 40) && (solver_id < 50)) ||
-        ((solver_id >= 60) && (solver_id < 70)) ||
-        (solver_id == 120))
-   {
-      HYPRE_SStructVectorGetObject(x, (void **) &par_x);
-   }
-
-   else if (solver_id >= 200)
-   {
-      HYPRE_SStructVectorGetObject(x, (void **) &sx);
-   }
-
-   hypre_EndTiming(time_index);
-   hypre_PrintTiming("SStruct Interface", MPI_COMM_WORLD);
-   hypre_FinalizeTiming(time_index);
-   hypre_ClearTiming();
-
    /*-----------------------------------------------------------
     * If requested, reset linear system so that it has
     * exact solution:
@@ -2085,9 +2407,10 @@ main( int   argc,
     *   u(part,var,i,j,k) = (part+1)*(var+1)*cosine[(i+j+k)/10]
     * 
     *-----------------------------------------------------------*/
-   if (solver_id >= 200)
+
+   if (object_type == HYPRE_STRUCT)
    {
-      cosine= struct_cosine;
+      cosine = struct_cosine;
    }
 
    if (cosine)
@@ -2108,21 +2431,99 @@ main( int   argc,
             }
          }
       }
-      HYPRE_SStructVectorAssemble(x);
+   }
+   HYPRE_SStructVectorAssemble(x);
 
-      /* Apply A to cosine vector to yield righthand side */
-      hypre_SStructMatvec(1.0, A, x, 0.0, b);
-      /* Reset initial guess to zero */
-      hypre_SStructMatvec(0.0, A, b, 0.0, x);
+   hypre_EndTiming(time_index);
+   hypre_PrintTiming("SStruct Interface", MPI_COMM_WORLD);
+   hypre_FinalizeTiming(time_index);
+   hypre_ClearTiming();
 
+   /*-----------------------------------------------------------
+    * If requested, reset linear system so that it has
+    * exact solution:
+    *
+    *   u(part,var,i,j,k) = (part+1)*(var+1)*cosine[(i+j+k)/10]
+    * 
+    *-----------------------------------------------------------*/
+
+   if (object_type == HYPRE_STRUCT)
+   {
+      cosine = struct_cosine;
+   }
+
+   if (cosine)
+   {
+      for (part = 0; part < data.nparts; part++)
+      {
+         pdata = data.pdata[part];
+         for (var = 0; var < pdata.nvars; var++)
+         {
+            scale = (part+1.0)*(var+1.0);
+            for (box = 0; box < pdata.nboxes; box++)
+            {
+               GetVariableBox(pdata.ilowers[box], pdata.iuppers[box], var,
+                              ilower, iupper);
+               SetCosineVector(scale, ilower, iupper, values);
+               HYPRE_SStructVectorSetBoxValues(x, part, ilower, iupper,
+                                               var, values);
+            }
+         }
+      }
+   }
+
+   /*-----------------------------------------------------------
+    * Get the objects out
+    * NOTE: This should go after the cosine part, but for the bug
+    *-----------------------------------------------------------*/
+
+   if (object_type == HYPRE_PARCSR)
+   {
+      HYPRE_SStructMatrixGetObject(A, (void **) &par_A);
+      HYPRE_SStructVectorGetObject(b, (void **) &par_b);
+      HYPRE_SStructVectorGetObject(x, (void **) &par_x);
+   }
+   else if (object_type == HYPRE_STRUCT)
+   {
+      HYPRE_SStructMatrixGetObject(A, (void **) &sA);
+      HYPRE_SStructVectorGetObject(b, (void **) &sb);
+      HYPRE_SStructVectorGetObject(x, (void **) &sx);
+   }
+
+   /*-----------------------------------------------------------
+    * Finish resetting the linear system
+    *-----------------------------------------------------------*/
+
+   if (cosine)
+   {
+      /* This if/else is due to a bug in SStructMatvec */
+      if (object_type != HYPRE_PARCSR)
+      {
+         HYPRE_SStructVectorAssemble(x);
+         /* Apply A to cosine vector to yield righthand side */
+         hypre_SStructMatvec(1.0, A, x, 0.0, b);
+         /* Reset initial guess to zero */
+         hypre_SStructMatvec(0.0, A, b, 0.0, x);
+      }
+      else
+      {
+         /* Apply A to cosine vector to yield righthand side */
+         HYPRE_ParCSRMatrixMatvec(1.0, par_A, par_x, 0.0, par_b );
+         /* Reset initial guess to zero */
+         HYPRE_ParCSRMatrixMatvec(0.0, par_A, par_b, 0.0, par_x );
+      }
    }
 
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
-
+   /*hypre_SStructMatvec(1.0, A, x, 2.0, b);
+   HYPRE_ParCSRMatrixMatvec(1.0, par_A, par_x, 2.0, par_b );*/
+                                                                                                               
    if (print_system)
    {
+      HYPRE_SStructVectorGather(b);
+      HYPRE_SStructVectorGather(x);
       HYPRE_SStructMatrixPrint("sstruct.out.A",  A, 0);
       HYPRE_SStructVectorPrint("sstruct.out.b",  b, 0);
       HYPRE_SStructVectorPrint("sstruct.out.x0", x, 0);
@@ -2250,6 +2651,7 @@ main( int   argc,
       HYPRE_SStructSysPFMGGetNumIterations(solver, &num_iterations);
       HYPRE_SStructSysPFMGGetFinalRelativeResidualNorm(
                                            solver, &final_res_norm);
+
       HYPRE_SStructSysPFMGDestroy(solver);
    }
 
@@ -2352,6 +2754,384 @@ main( int   argc,
       }
    }
 
+   /* begin lobpcg */
+
+   /*-----------------------------------------------------------
+    * Solve the eigenvalue problem using LOBPCG
+    *-----------------------------------------------------------*/
+
+   if ( lobpcgFlag && ( solver_id < 10 || solver_id >= 20 ) && verbosity )
+     printf("\nLOBPCG works with solvers 10, 11, 13 and 18 only\n");
+
+   if ( lobpcgFlag && (solver_id >= 10) && (solver_id < 20) ) {
+
+     interpreter = hypre_CTAlloc(mv_InterfaceInterpreter,1);
+
+     HYPRE_SStructSetupInterpreter( interpreter );
+     HYPRE_SStructSetupMatvec(&matvec_fn);
+
+     if (myid != 0)
+       verbosity = 0;
+
+     if ( pcgIterations > 0 ) {
+
+       time_index = hypre_InitializeTiming("PCG Setup");
+       hypre_BeginTiming(time_index);
+
+       HYPRE_SStructPCGCreate(MPI_COMM_WORLD, &solver);
+       HYPRE_PCGSetMaxIter( (HYPRE_Solver) solver, pcgIterations );
+       HYPRE_PCGSetTol( (HYPRE_Solver) solver, pcgTol );
+       HYPRE_PCGSetTwoNorm( (HYPRE_Solver) solver, 1 );
+       HYPRE_PCGSetRelChange( (HYPRE_Solver) solver, 0 );
+       HYPRE_PCGSetPrintLevel( (HYPRE_Solver) solver, 0 );
+       
+       if ((solver_id == 10) || (solver_id == 11))
+	 {
+	   /* use Split solver as preconditioner */
+	   HYPRE_SStructSplitCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_SStructSplitSetMaxIter(precond, 1);
+	   HYPRE_SStructSplitSetTol(precond, 0.0);
+	   HYPRE_SStructSplitSetZeroGuess(precond);
+	   if (solver_id == 10)
+	     {
+	       HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
+	     }
+	   else if (solver_id == 11)
+	     {
+	       HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
+	     }
+	   HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+				(HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSolve,
+				(HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
+				(HYPRE_Solver) precond);
+	 }
+       
+       else if (solver_id == 13)
+	 {
+	   /* use SysPFMG solver as preconditioner */
+	   HYPRE_SStructSysPFMGCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
+	   HYPRE_SStructSysPFMGSetTol(precond, 0.0);
+	   HYPRE_SStructSysPFMGSetZeroGuess(precond);
+	   /* weighted Jacobi = 1; red-black GS = 2 */
+	   HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+	   HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
+	   HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
+	   HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
+	   /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+	   HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+				(HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSolve,
+				(HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
+				(HYPRE_Solver) precond);
+	   
+	 }
+       else if (solver_id == 18)
+	 {
+	   /* use diagonal scaling as preconditioner */
+	   precond = NULL;
+	   HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
+				(HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScale,
+				(HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup,
+				(HYPRE_Solver) precond);
+	 }
+       else if (solver_id != NO_SOLVER )
+	 {
+	   if ( verbosity )
+	     printf("Solver ID not recognized - running inner PCG iterations without preconditioner\n\n");
+	 }
+
+
+       hypre_EndTiming(time_index);
+       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+       hypre_FinalizeTiming(time_index);
+       hypre_ClearTiming();
+       
+       HYPRE_LOBPCGCreate(interpreter, &matvec_fn, (HYPRE_Solver*)&lobpcg_solver);
+       HYPRE_LOBPCGSetMaxIter((HYPRE_Solver)lobpcg_solver, maxIterations);
+       HYPRE_LOBPCGSetPrecondUsageMode((HYPRE_Solver)lobpcg_solver, pcgMode);
+       HYPRE_LOBPCGSetTol((HYPRE_Solver)lobpcg_solver, tol);
+       HYPRE_LOBPCGSetPrintLevel((HYPRE_Solver)lobpcg_solver, verbosity);
+       
+       HYPRE_LOBPCGSetPrecond((HYPRE_Solver)lobpcg_solver,
+			      (HYPRE_PtrToSolverFcn) HYPRE_PCGSolve,
+			      (HYPRE_PtrToSolverFcn) HYPRE_PCGSetup,
+			      (HYPRE_Solver)solver);
+       
+       HYPRE_LOBPCGSetup((HYPRE_Solver)lobpcg_solver, (HYPRE_Matrix)A, 
+			 (HYPRE_Vector)b, (HYPRE_Vector)x);
+       
+       eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
+							       blockSize, 
+							       x );
+       eigenvalues = (double*) calloc( blockSize, sizeof(double) );
+       
+       if ( lobpcgSeed )
+	 mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
+       else
+	 mv_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
+       
+       time_index = hypre_InitializeTiming("PCG Solve");
+       hypre_BeginTiming(time_index);
+       
+       HYPRE_LOBPCGSolve((HYPRE_Solver)lobpcg_solver, constrains, 
+			 eigenvectors, eigenvalues );
+       
+       hypre_EndTiming(time_index);
+       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+       hypre_FinalizeTiming(time_index);
+       hypre_ClearTiming();
+       
+       if ( checkOrtho ) {
+	 
+	 gramXX = utilities_FortranMatrixCreate();
+	 identity = utilities_FortranMatrixCreate();
+	 
+	 utilities_FortranMatrixAllocateData( blockSize, blockSize, gramXX );
+	 utilities_FortranMatrixAllocateData( blockSize, blockSize, identity );
+	 
+	 lobpcg_MultiVectorByMultiVector( eigenvectors, eigenvectors, gramXX );
+	 utilities_FortranMatrixSetToIdentity( identity );
+	 utilities_FortranMatrixAdd( -1, identity, gramXX, gramXX );
+	 nonOrthF = utilities_FortranMatrixFNorm( gramXX );
+	 if ( myid == 0 )
+	   printf("Non-orthonormality of eigenvectors: %12.5e\n", nonOrthF);
+	 
+	 utilities_FortranMatrixDestroy( gramXX );
+	 utilities_FortranMatrixDestroy( identity );
+	 
+       }
+       
+       if ( printLevel ) {
+	 
+	 if ( myid == 0 ) {	  
+	   if ( (filePtr = fopen("values.txt", "w")) ) {
+	     fprintf(filePtr, "%d\n", blockSize);
+	     for ( i = 0; i < blockSize; i++ )
+	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	     fclose(filePtr);
+	   }
+	   
+	   if ( (filePtr = fopen("residuals.txt", "w")) ) {
+	     residualNorms = HYPRE_LOBPCGResidualNorms( (HYPRE_Solver)lobpcg_solver );
+	     residuals = utilities_FortranMatrixValues( residualNorms );
+	     fprintf(filePtr, "%d\n", blockSize);
+	     for ( i = 0; i < blockSize; i++ )
+	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	     fclose(filePtr);
+	   }
+	   
+	   if ( printLevel > 1 ) {
+	     
+	     printBuffer = utilities_FortranMatrixCreate();
+	     
+	     iterations = HYPRE_LOBPCGIterations( (HYPRE_Solver)lobpcg_solver );
+	     
+	     eigenvaluesHistory = HYPRE_LOBPCGEigenvaluesHistory( (HYPRE_Solver)lobpcg_solver );
+	     utilities_FortranMatrixSelectBlock( eigenvaluesHistory,
+						 1, blockSize, 1, iterations + 1, printBuffer );
+	     utilities_FortranMatrixPrint( printBuffer, "val_hist.txt" );
+	     
+	     residualNormsHistory = HYPRE_LOBPCGResidualNormsHistory( (HYPRE_Solver)lobpcg_solver );
+	     utilities_FortranMatrixSelectBlock(residualNormsHistory, 
+						1, blockSize, 1, iterations + 1, printBuffer );
+	     utilities_FortranMatrixPrint( printBuffer, "res_hist.txt" );
+	     
+	     utilities_FortranMatrixDestroy( printBuffer );
+	   }
+	 }
+       }
+       
+       HYPRE_SStructPCGDestroy(solver);
+       
+       if ((solver_id == 10) || (solver_id == 11))
+	 {
+	   HYPRE_SStructSplitDestroy(precond);
+	 }
+       else if (solver_id == 13)
+	 {
+	   HYPRE_SStructSysPFMGDestroy(precond);
+	 }
+       
+       HYPRE_LOBPCGDestroy((HYPRE_Solver)lobpcg_solver);
+       mv_MultiVectorDestroy( eigenvectors );
+       free( eigenvalues );
+       
+     } 
+     else {
+
+       time_index = hypre_InitializeTiming("LOBPCG Setup");
+       hypre_BeginTiming(time_index);
+       
+       HYPRE_LOBPCGCreate(interpreter, &matvec_fn, (HYPRE_Solver*)&solver);
+       HYPRE_LOBPCGSetMaxIter( (HYPRE_Solver) solver, maxIterations );
+       HYPRE_LOBPCGSetTol( (HYPRE_Solver) solver, tol );
+       HYPRE_LOBPCGSetPrintLevel( (HYPRE_Solver) solver, verbosity );
+       
+       if ((solver_id == 10) || (solver_id == 11))
+	 {
+	   /* use Split solver as preconditioner */
+	   HYPRE_SStructSplitCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_SStructSplitSetMaxIter(precond, 1);
+	   HYPRE_SStructSplitSetTol(precond, 0.0);
+	   HYPRE_SStructSplitSetZeroGuess(precond);
+	   if (solver_id == 10)
+	     {
+	       HYPRE_SStructSplitSetStructSolver(precond, HYPRE_SMG);
+	     }
+	   else if (solver_id == 11)
+	     {
+	       HYPRE_SStructSplitSetStructSolver(precond, HYPRE_PFMG);
+	     }
+	   HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSolve,
+				   (HYPRE_PtrToSolverFcn) HYPRE_SStructSplitSetup,
+				   (HYPRE_Solver) precond);
+	 }
+       
+       else if (solver_id == 13)
+	 {
+	   /* use SysPFMG solver as preconditioner */
+	   HYPRE_SStructSysPFMGCreate(MPI_COMM_WORLD, &precond);
+	   HYPRE_SStructSysPFMGSetMaxIter(precond, 1);
+	   HYPRE_SStructSysPFMGSetTol(precond, 0.0);
+	   HYPRE_SStructSysPFMGSetZeroGuess(precond);
+	   /* weighted Jacobi = 1; red-black GS = 2 */
+	   HYPRE_SStructSysPFMGSetRelaxType(precond, 1);
+	   HYPRE_SStructSysPFMGSetNumPreRelax(precond, n_pre);
+	   HYPRE_SStructSysPFMGSetNumPostRelax(precond, n_post);
+	   HYPRE_SStructSysPFMGSetSkipRelax(precond, skip);
+	   /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+	   HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSolve,
+				   (HYPRE_PtrToSolverFcn) HYPRE_SStructSysPFMGSetup,
+				   (HYPRE_Solver) precond);
+	   
+	 }
+       else if (solver_id == 18)
+	 {
+	   /* use diagonal scaling as preconditioner */
+	   precond = NULL;
+	   HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScale,
+				   (HYPRE_PtrToSolverFcn) HYPRE_SStructDiagScaleSetup,
+				   (HYPRE_Solver) precond);
+	 }
+       else if (solver_id != NO_SOLVER )
+	 {
+	   if ( verbosity )
+	     printf("Solver ID not recognized - running LOBPCG without preconditioner\n\n");
+	 }
+       
+       HYPRE_LOBPCGSetup( (HYPRE_Solver) solver, (HYPRE_Matrix) A,
+			  (HYPRE_Vector) b, (HYPRE_Vector) x);
+       
+       hypre_EndTiming(time_index);
+       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+       hypre_FinalizeTiming(time_index);
+       hypre_ClearTiming();
+       
+       eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
+							       blockSize, 
+							       x );
+       eigenvalues = (double*) calloc( blockSize, sizeof(double) );
+       
+       if ( lobpcgSeed )
+	 mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
+       else
+	 mv_MultiVectorSetRandom( eigenvectors, (unsigned int)time(0) );
+       
+       time_index = hypre_InitializeTiming("LOBPCG Solve");
+       hypre_BeginTiming(time_index);
+       
+       HYPRE_LOBPCGSolve
+         ( (HYPRE_Solver) solver, constrains, eigenvectors, eigenvalues );
+       
+       hypre_EndTiming(time_index);
+       hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+       hypre_FinalizeTiming(time_index);
+       hypre_ClearTiming();
+       
+       if ( checkOrtho ) {
+	 
+	 gramXX = utilities_FortranMatrixCreate();
+	 identity = utilities_FortranMatrixCreate();
+	 
+	 utilities_FortranMatrixAllocateData( blockSize, blockSize, gramXX );
+	 utilities_FortranMatrixAllocateData( blockSize, blockSize, identity );
+	 
+	 lobpcg_MultiVectorByMultiVector( eigenvectors, eigenvectors, gramXX );
+	 utilities_FortranMatrixSetToIdentity( identity );
+	 utilities_FortranMatrixAdd( -1, identity, gramXX, gramXX );
+	 nonOrthF = utilities_FortranMatrixFNorm( gramXX );
+	 if ( myid == 0 )
+	   printf("Non-orthonormality of eigenvectors: %12.5e\n", nonOrthF);
+	 
+	 utilities_FortranMatrixDestroy( gramXX );
+	 utilities_FortranMatrixDestroy( identity );
+	 
+       }
+       
+       if ( printLevel ) {
+	 
+	 if ( myid == 0 ) {
+	   if ( (filePtr = fopen("values.txt", "w")) ) {
+	     fprintf(filePtr, "%d\n", blockSize);
+	     for ( i = 0; i < blockSize; i++ )
+	       fprintf(filePtr, "%22.16e\n", eigenvalues[i]);
+	     fclose(filePtr);
+	   }
+	   
+	   if ( (filePtr = fopen("residuals.txt", "w")) ) {
+	     residualNorms = HYPRE_LOBPCGResidualNorms( (HYPRE_Solver)solver );
+	     residuals = utilities_FortranMatrixValues( residualNorms );
+	     fprintf(filePtr, "%d\n", blockSize);
+	     for ( i = 0; i < blockSize; i++ )
+	       fprintf(filePtr, "%22.16e\n", residuals[i]);
+	     fclose(filePtr);
+	   }
+	   
+	   if ( printLevel > 1 ) {
+	     
+	     printBuffer = utilities_FortranMatrixCreate();
+	     
+	     iterations = HYPRE_LOBPCGIterations( (HYPRE_Solver)solver );
+	     
+	     eigenvaluesHistory = HYPRE_LOBPCGEigenvaluesHistory( (HYPRE_Solver)solver );
+	     utilities_FortranMatrixSelectBlock( eigenvaluesHistory,
+						 1, blockSize, 1, iterations + 1, printBuffer );
+	     utilities_FortranMatrixPrint( printBuffer, "val_hist.txt" );
+	     
+	     residualNormsHistory = HYPRE_LOBPCGResidualNormsHistory( (HYPRE_Solver)solver );
+	     utilities_FortranMatrixSelectBlock(residualNormsHistory,
+						1, blockSize, 1, iterations + 1, printBuffer );
+	     utilities_FortranMatrixPrint( printBuffer, "res_hist.txt" );
+	     
+	     utilities_FortranMatrixDestroy( printBuffer );
+	   }
+	 }
+       } 
+       
+       HYPRE_LOBPCGDestroy((HYPRE_Solver)solver);
+       
+       if ((solver_id == 10) || (solver_id == 11))
+	 {
+	   HYPRE_SStructSplitDestroy(precond);
+	 }
+       else if (solver_id == 13)
+	 {
+	   HYPRE_SStructSysPFMGDestroy(precond);
+	 }
+       
+       mv_MultiVectorDestroy( eigenvectors );
+       free( eigenvalues );
+     }
+
+     hypre_TFree( interpreter );
+
+   }
+
+   /* end lobpcg */
+
    /*-----------------------------------------------------------
     * Solve the system using ParCSR version of PCG
     *-----------------------------------------------------------*/
@@ -2393,6 +3173,17 @@ main( int   argc,
                               (HYPRE_PtrToSolverFcn) HYPRE_ParCSRParaSailsSetup,
                               par_precond );
       }
+      else if (solver_id == 23)
+      {
+         /* use Euclid as preconditioner */
+         HYPRE_EuclidCreate(MPI_COMM_WORLD, &par_precond);
+         HYPRE_EuclidSetParams(par_precond, argc, argv);
+         HYPRE_PCGSetPrecond(par_solver,
+                            (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                            (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
+                             par_precond);
+      }
+
       else if (solver_id == 28)
       {
          /* use diagonal scaling as preconditioner */
@@ -2434,6 +3225,11 @@ main( int   argc,
       {
          HYPRE_ParCSRParaSailsDestroy(par_precond);
       }
+      else if (solver_id == 23)
+      {
+         HYPRE_EuclidDestroy(par_precond);
+      }
+
    }
 
    /*-----------------------------------------------------------
@@ -2545,14 +3341,13 @@ main( int   argc,
       }
       else if (solver_id == 41)
       {
-         /* use PILUT as preconditioner */
-         HYPRE_ParCSRPilutCreate(MPI_COMM_WORLD, &par_precond ); 
-         /*HYPRE_ParCSRPilutSetDropTolerance(par_precond, drop_tol);*/
-         /*HYPRE_ParCSRPilutSetFactorRowSize(par_precond, nonzeros_to_keep);*/
-         HYPRE_GMRESSetPrecond( par_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
-                                par_precond);
+         /* use Euclid as preconditioner */
+         HYPRE_EuclidCreate(MPI_COMM_WORLD, &par_precond);
+         HYPRE_EuclidSetParams(par_precond, argc, argv);
+         HYPRE_GMRESSetPrecond(par_solver,
+                            (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                            (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
+                             par_precond);
       }
 
       else if (solver_id == 42)
@@ -2597,7 +3392,7 @@ main( int   argc,
       }
       else if (solver_id == 41)
       {
-         HYPRE_ParCSRPilutDestroy(par_precond);
+         HYPRE_EuclidDestroy(par_precond);
       }
       else if (solver_id == 42)
       {
@@ -2712,14 +3507,13 @@ main( int   argc,
       }
       else if (solver_id == 61)
       {
-         /* use PILUT as preconditioner */
-         HYPRE_ParCSRPilutCreate(MPI_COMM_WORLD, &par_precond ); 
-         /*HYPRE_ParCSRPilutSetDropTolerance(par_precond, drop_tol);*/
-         /*HYPRE_ParCSRPilutSetFactorRowSize(par_precond, nonzeros_to_keep);*/
-         HYPRE_BiCGSTABSetPrecond( par_solver,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSolve,
-                                (HYPRE_PtrToSolverFcn) HYPRE_ParCSRPilutSetup,
-                                par_precond);
+         /* use Euclid as preconditioner */
+         HYPRE_EuclidCreate(MPI_COMM_WORLD, &par_precond);
+         HYPRE_EuclidSetParams(par_precond, argc, argv);
+         HYPRE_BiCGSTABSetPrecond(par_solver,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
+                                  par_precond);
       }
 
       else if (solver_id == 62)
@@ -2764,7 +3558,7 @@ main( int   argc,
       }
       else if (solver_id == 61)
       {
-         HYPRE_ParCSRPilutDestroy(par_precond);
+         HYPRE_EuclidDestroy(par_precond);
       }
       else if (solver_id == 62)
       {
@@ -3487,7 +4281,6 @@ main( int   argc,
       }
    }
 
-
    /*-----------------------------------------------------------
     * Gather the solution vector
     *-----------------------------------------------------------*/
@@ -3503,7 +4296,7 @@ main( int   argc,
       HYPRE_SStructVectorPrint("sstruct.out.x", x, 0);
    }
 
-   if (myid == 0)
+   if (myid == 0 /* begin lobpcg */ && !lobpcgFlag /* end lobpcg */)
    {
       printf("\n");
       printf("Iterations = %d\n", num_iterations);

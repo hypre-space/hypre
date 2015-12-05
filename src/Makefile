@@ -1,20 +1,39 @@
-#BHEADER***********************************************************************
-# (c) 1998   The Regents of the University of California
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
 #
-# See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
-# notice, contact person, and disclaimer.
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
 #
-# $Revision: 2.6 $
-#EHEADER***********************************************************************
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 2.20 $
+#EHEADER**********************************************************************
+
+
+
 
 # Include all variables defined by configure
 include config/Makefile.config
 
 
 # These are the directories for internal blas, lapack and general utilities
-HYPRE_BASIC_DIRS = \
-  blas\
-  lapack\
+HYPRE_BASIC_DIRS = ${HYPRE_BLAS_SRC_DIR}\
+ ${HYPRE_LAPACK_SRC_DIR}\
   utilities
 
 # These are the directories for the generic Krylov solvers
@@ -34,17 +53,18 @@ HYPRE_SSTRUCT_DIRS =\
 HYPRE_IJ_DIRS =\
  seq_mv\
  parcsr_mv\
+ parcsr_block_mv\
  distributed_matrix\
  matrix_matrix\
  IJ_mv\
  distributed_ls\
  parcsr_ls
 
-#These are the directories for eigensolvers
-HYPRE_EIGEN_DIRS = eigensolvers
+#These are the directories for multivector
+HYPRE_MULTIVEC_DIRS = multivector
 
 #These are the directories for the FEI
-HYPRE_FEI_DIRS = FEI_mv
+HYPRE_FEI_DIRS = ${HYPRE_FEI_SRC_DIR}
 
 #This is the lib directory
 HYPRE_LIBS_DIRS = lib
@@ -62,7 +82,7 @@ HYPRE_DIRS =\
  ${HYPRE_STRUCT_DIRS}\
  ${HYPRE_SSTRUCT_DIRS}\
  ${HYPRE_IJ_DIRS}\
- ${HYPRE_EIGEN_DIRS}\
+ ${HYPRE_MULTIVEC_DIRS}\
  ${HYPRE_FEI_DIRS}\
  ${HYPRE_LIBS_DIRS}
 
@@ -82,7 +102,7 @@ all:
 	mkdir -p ${HYPRE_BUILD_DIR}/lib; \
 	cp -fp HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fp $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
-	for i in ${HYPRE_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \
 	  (cd $$i && $(MAKE) $@); \
@@ -136,7 +156,7 @@ help:
 test: all
 	@ \
 	echo "Making test drivers ..."; \
-	(cd test; $(MAKE) distclean; $(MAKE) all); \
+	(cd test; $(MAKE) clean; $(MAKE) all)
 
 install: all
 	@echo "Installing hypre ..."
@@ -144,8 +164,6 @@ install: all
 	${HYPRE_SRC_TOP_DIR}/config/mkinstalldirs ${HYPRE_LIB_INSTALL} ${HYPRE_INC_INSTALL}
 	cp -fr ${HYPRE_BUILD_DIR}/lib/* ${HYPRE_LIB_INSTALL}/.
 	cp -fr ${HYPRE_BUILD_DIR}/include/* ${HYPRE_INC_INSTALL}/.
-	chgrp -fR hypre ${HYPRE_LIB_INSTALL}
-	chgrp -fR hypre ${HYPRE_INC_INSTALL}
 	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}
 	chmod -R a+rX,u+w,go-w ${HYPRE_INC_INSTALL}
 
@@ -156,7 +174,7 @@ uninstall:
 
 clean:
 	@ \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -164,11 +182,12 @@ clean:
 	    (cd $$i && $(MAKE) $@); \
 	  fi; \
 	done
+	rm -rf tca.map pchdir *inslog*
 
 distclean:
 	@ \
 	rm -Rf hypre; \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  if [ -d $$i ]; \
 	  then \
@@ -178,6 +197,9 @@ distclean:
 	done
 	rm -rf ./config/Makefile.config
 	rm -rf ./TAGS
+	rm -rf ./autom4te.cache
+	rm -rf ./config.log
+	rm -rf ./config.status
 
 tags:
 	etags `find . -name "*.c" -or -name "*.C" -or -name "*.h" -or\

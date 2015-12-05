@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.0 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.3 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  *
@@ -118,6 +138,22 @@ hypre_JacobiSetTol( void   *jacobi_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_JacobiGetTol
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_JacobiGetTol( void   *jacobi_vdata,
+                    double *tol          )
+{
+   hypre_JacobiData *jacobi_data = jacobi_vdata;
+   int               ierr = 0;
+
+   ierr = hypre_PointRelaxGetTol((jacobi_data -> relax_data), tol);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_JacobiSetMaxIter
  *--------------------------------------------------------------------------*/
 
@@ -129,6 +165,23 @@ hypre_JacobiSetMaxIter( void  *jacobi_vdata,
    int               ierr = 0;
 
    ierr = hypre_PointRelaxSetMaxIter((jacobi_data -> relax_data),
+                                     max_iter);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_JacobiGetMaxIter
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_JacobiGetMaxIter( void  *jacobi_vdata,
+                        int  * max_iter     )
+{
+   hypre_JacobiData *jacobi_data = jacobi_vdata;
+   int               ierr = 0;
+
+   ierr = hypre_PointRelaxGetMaxIter((jacobi_data -> relax_data),
                                      max_iter);
 
    return ierr;
@@ -147,6 +200,40 @@ hypre_JacobiSetZeroGuess( void  *jacobi_vdata,
 
    ierr = hypre_PointRelaxSetZeroGuess((jacobi_data -> relax_data),
                                        zero_guess);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_JacobiGetZeroGuess
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_JacobiGetZeroGuess( void  *jacobi_vdata,
+                          int  * zero_guess   )
+{
+   hypre_JacobiData *jacobi_data = jacobi_vdata;
+   int               ierr = 0;
+
+   ierr = hypre_PointRelaxGetZeroGuess((jacobi_data -> relax_data),
+                                       zero_guess);
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_JacobiGetNumIterations
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_JacobiGetNumIterations( void  *jacobi_vdata,
+                              int  * num_iterations   )
+{
+   hypre_JacobiData *jacobi_data = jacobi_vdata;
+   int               ierr = 0;
+
+   ierr = hypre_PointRelaxGetNumIterations((jacobi_data -> relax_data),
+                                           num_iterations );
 
    return ierr;
 }

@@ -1,0 +1,81 @@
+#BHEADER**********************************************************************
+# Copyright (c) 2006   The Regents of the University of California.
+# Produced at the Lawrence Livermore National Laboratory.
+# Written by the HYPRE team. UCRL-CODE-222953.
+# All rights reserved.
+#
+# This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+# Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+# disclaimer, contact information and the GNU Lesser General Public License.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU General Public License (as published by the Free Software 
+# Foundation) version 2.1 dated February 1999.
+#
+# HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+# WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+# FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+# Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program; if not, write to the Free Software Foundation,
+# Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# $Revision: 1.10 $
+#EHEADER**********************************************************************
+
+
+
+
+include ../config/Makefile.config
+
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+ 
+C_COMPILE_FLAGS = \
+ -I.\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ ${CINCLUDES}
+
+HEADERS =\
+ multivector.h\
+ temp_multivector.h
+
+FILES =\
+ multivector.c\
+ temp_multivector.c
+
+OBJS = ${FILES:.c=.o}
+
+##################################################################
+# Targets
+##################################################################
+
+all: libHYPRE_multivector${HYPRE_LIB_SUFFIX}
+	cp -fp *.h $(HYPRE_BUILD_DIR)/include
+	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+
+install: libHYPRE_multivector${HYPRE_LIB_SUFFIX}
+	cp -f *.h $(HYPRE_INC_INSTALL)
+	cp -f libHYPRE* $(HYPRE_LIB_INSTALL)
+
+clean:
+	rm -f *.o libHYPRE*
+	rm -rf pchdir tca.map *inslog*
+
+distclean: clean
+
+##################################################################
+# Rules
+##################################################################
+
+libHYPRE_multivector.a: ${OBJS}
+	@echo  "Building $@ ... "
+	${AR} $@ ${OBJS}
+	${RANLIB} $@
+
+libHYPRE_multivector.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o $@ ${OBJS}
+
+${OBJS}: ${HEADERS}

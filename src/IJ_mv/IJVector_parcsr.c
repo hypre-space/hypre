@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1999   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.9 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.15 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * IJVector_Par interface
@@ -28,31 +48,37 @@ hypre_IJVectorCreatePar(hypre_IJVector *vector, int *IJpartitioning)
 {
    MPI_Comm comm = hypre_IJVectorComm(vector);
 
-#if 0
-   if (par_vector)
-   {
-      printf("Creating a ParVector object will orphan an old one -- ");
-      printf("hypreIJVectorCreatePar\n");
-      exit(1);
-   }
-#endif
 
    int num_procs, jmin, global_n, *partitioning, j;
    MPI_Comm_size(comm, &num_procs);
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   jmin = hypre_IJVectorGlobalFirstRow(vector);
+   global_n = hypre_IJVectorGlobalNumRows(vector);
+
+   partitioning = hypre_CTAlloc(int, 2); 
+
+/* Shift to zero-based partitioning for ParVector object */
+   for (j = 0; j < 2; j++) 
+      partitioning[j] = IJpartitioning[j] - jmin;
+
+#else
    jmin = IJpartitioning[0];
    global_n = IJpartitioning[num_procs] - jmin;
-   
+
    partitioning = hypre_CTAlloc(int, num_procs+1); 
 
 /* Shift to zero-based partitioning for ParVector object */
    for (j = 0; j < num_procs+1; j++) 
       partitioning[j] = IJpartitioning[j] - jmin;
 
+#endif
+  
+
    hypre_IJVectorObject(vector) = hypre_ParVectorCreate(comm,
             global_n, (int *) partitioning); 
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /******************************************************************************
@@ -82,7 +108,8 @@ hypre_IJVectorInitializePar(hypre_IJVector *vector)
    hypre_AuxParVector *aux_vector = hypre_IJVectorTranslator(vector);
    int *partitioning = hypre_ParVectorPartitioning(par_vector);
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
-   int my_id, ierr = 0;
+   int my_id;
+   
    MPI_Comm  comm = hypre_IJVectorComm(vector);
 
    MPI_Comm_rank(comm,&my_id);
@@ -91,23 +118,28 @@ hypre_IJVectorInitializePar(hypre_IJVector *vector)
    {
       printf("No ParVector partitioning for initialization -- ");
       printf("hypre_IJVectorInitializePar\n"); 
-      exit(1);
+      hypre_error_in_arg(1);
    }
 
-
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   hypre_VectorSize(local_vector) = partitioning[1] -
+                                    partitioning[0];
+#else
    hypre_VectorSize(local_vector) = partitioning[my_id+1] -
                                     partitioning[my_id];
+#endif
 
-   ierr += hypre_ParVectorInitialize(par_vector);
+
+   hypre_ParVectorInitialize(par_vector);
 
    if (!aux_vector)
    {  
-      ierr = hypre_AuxParVectorCreate(&aux_vector);
+      hypre_AuxParVectorCreate(&aux_vector);
       hypre_IJVectorTranslator(vector) = aux_vector;
    }
-   ierr += hypre_AuxParVectorInitialize(aux_vector);
+   hypre_AuxParVectorInitialize(aux_vector);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /******************************************************************************
@@ -120,17 +152,17 @@ int
 hypre_IJVectorSetMaxOffProcElmtsPar(hypre_IJVector *vector,
                                     int max_off_proc_elmts)
 {
-   int ierr = 0;
+  
    hypre_AuxParVector *aux_vector;
 
    aux_vector = hypre_IJVectorTranslator(vector);
    if (!aux_vector)
    {
-      ierr = hypre_AuxParVectorCreate(&aux_vector);
+      hypre_AuxParVectorCreate(&aux_vector);
       hypre_IJVectorTranslator(vector) = aux_vector;
    }
    hypre_AuxParVectorMaxOffProcElmts(aux_vector) = max_off_proc_elmts;
-   return ierr;
+   return hypre_error_flag;
 }
 
 /******************************************************************************
@@ -146,7 +178,6 @@ int
 hypre_IJVectorDistributePar(hypre_IJVector *vector,
 			    const int	   *vec_starts)
 {
-   int ierr = 0;
 
    hypre_ParVector *old_vector = hypre_IJVectorObject(vector);
    hypre_ParVector *par_vector;
@@ -156,7 +187,7 @@ hypre_IJVectorDistributePar(hypre_IJVector *vector,
       printf("old_vector == NULL -- ");
       printf("hypre_IJVectorDistributePar\n");
       printf("**** Vector storage is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
 
    par_vector = hypre_VectorToParVector(hypre_ParVectorComm(old_vector),
@@ -167,14 +198,14 @@ hypre_IJVectorDistributePar(hypre_IJVector *vector,
       printf("par_vector == NULL -- ");
       printf("hypre_IJVectorDistributePar\n");
       printf("**** Vector storage is unallocated ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
 
-   ierr = hypre_ParVectorDestroy(old_vector);
+   hypre_ParVectorDestroy(old_vector);
 
    hypre_IJVectorObject(vector) = par_vector;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /******************************************************************************
@@ -187,7 +218,6 @@ hypre_IJVectorDistributePar(hypre_IJVector *vector,
 int
 hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 {
-   int ierr = 0;
    int my_id;
    int i, vec_start, vec_stop;
    double *data;
@@ -207,39 +237,46 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
       printf("par_vector == NULL -- ");
       printf("hypre_IJVectorZeroValuesPar\n");
       printf("**** Vector storage is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
    if (!partitioning)
    {
       printf("partitioning == NULL -- ");
       printf("hypre_IJVectorZeroValuesPar\n");
       printf("**** Vector partitioning is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
    if (!local_vector)
    {
       printf("local_vector == NULL -- ");
       printf("hypre_IJVectorZeroValuesPar\n");
       printf("**** Vector local data is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   vec_start = partitioning[0];
+   vec_stop  = partitioning[1];
+#else
    vec_start = partitioning[my_id];
    vec_stop  = partitioning[my_id+1];
-   
+#endif
+
+
    if (vec_start > vec_stop) 
    {
       printf("vec_start > vec_stop -- ");
       printf("hypre_IJVectorZeroValuesPar\n");
       printf("**** This vector partitioning should not occur ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
+   
    }
 
    data = hypre_VectorData( local_vector );
    for (i = 0; i < vec_stop - vec_start; i++)
       data[i] = 0.;
   
-   return ierr;
+   return hypre_error_flag;
 }
 
 /******************************************************************************
@@ -255,7 +292,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
                                     const int      *indices,
                                     const double   *values            )
 {
-   int ierr = 0;
+
    int my_id;
    int i, j, vec_start, vec_stop;
    double *data;
@@ -279,32 +316,37 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
       printf("par_vector == NULL -- ");
       printf("hypre_IJVectorSetValuesPar\n");
       printf("**** Vector storage is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
    if (!IJpartitioning)
    {
       printf("IJpartitioning == NULL -- ");
       printf("hypre_IJVectorSetValuesPar\n");
       printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
    if (!local_vector)
    {
       printf("local_vector == NULL -- ");
       printf("hypre_IJVectorSetValuesPar\n");
       printf("**** Vector local data is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   vec_start = IJpartitioning[0];
+   vec_stop  = IJpartitioning[1]-1;
+#else
    vec_start = IJpartitioning[my_id];
    vec_stop  = IJpartitioning[my_id+1]-1;
-  
+#endif
+
    if (vec_start > vec_stop) 
    {
       printf("vec_start > vec_stop -- ");
       printf("hypre_IJVectorSetValuesPar\n");
       printf("**** This vector partitioning should not occur ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
 
 /* Determine whether indices points to local indices only,
@@ -378,7 +420,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
          data[j] = values[j];
    } 
   
-   return ierr;
+   return hypre_error_flag;
 }
 
 /******************************************************************************
@@ -394,7 +436,6 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
                              const int      *indices,
                              const double   *values      )
 {
-   int ierr = 0;
    int my_id;
    int i, j, vec_start, vec_stop;
    double *data;
@@ -418,32 +459,37 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
       printf("par_vector == NULL -- ");
       printf("hypre_IJVectorAddToValuesPar\n");
       printf("**** Vector storage is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
    if (!IJpartitioning)
    {
       printf("IJpartitioning == NULL -- ");
       printf("hypre_IJVectorAddToValuesPar\n");
       printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
    if (!local_vector)
    {
       printf("local_vector == NULL -- ");
       printf("hypre_IJVectorAddToValuesPar\n");
       printf("**** Vector local data is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   vec_start = IJpartitioning[0];
+   vec_stop  = IJpartitioning[1]-1;
+#else
    vec_start = IJpartitioning[my_id];
    vec_stop  = IJpartitioning[my_id+1]-1;
+#endif
 
    if (vec_start > vec_stop) 
    {
       printf("vec_start > vec_stop -- ");
       printf("hypre_IJVectorAddToValuesPar\n");
       printf("**** This vector partitioning should not occur ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
 
 /* Determine whether indices points to local indices only,
@@ -534,7 +580,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
          data[j] += values[j];
    } 
   
-   return ierr;
+   return hypre_error_flag;
 }
 
 /******************************************************************************
@@ -558,21 +604,21 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
       printf("par_vector == NULL -- ");
       printf("hypre_IJVectorAssemblePar\n");
       printf("**** Vector storage is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    } 
    if (!IJpartitioning)
    { 
       printf("IJpartitioning == NULL -- ");
       printf("hypre_IJVectorAssemblePar\n");
       printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
    if (!partitioning)
    { 
       printf("partitioning == NULL -- ");
       printf("hypre_IJVectorAssemblePar\n");
       printf("**** ParVector partitioning is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
 
    if (aux_vector)
@@ -597,7 +643,7 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
       }
    }
 
-   return 0;
+   return hypre_error_flag;
 }
                                  
 /******************************************************************************
@@ -613,10 +659,10 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
                            const int      *indices,
                            double         *values      )
 {
-   int ierr = 0;
    int my_id;
    int i, j, vec_start, vec_stop;
    double *data;
+   int ierr = 0;
 
    int *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
@@ -636,32 +682,37 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
       printf("par_vector == NULL -- ");
       printf("hypre_IJVectorGetValuesPar\n");
       printf("**** Vector storage is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
    if (!IJpartitioning)
    {
       printf("IJpartitioning == NULL -- ");
       printf("hypre_IJVectorGetValuesPar\n");
       printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
    if (!local_vector)
    {
       printf("local_vector == NULL -- ");
       printf("hypre_IJVectorGetValuesPar\n");
       printf("**** Vector local data is either unallocated or orphaned ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   vec_start = IJpartitioning[0];
+   vec_stop  = IJpartitioning[1];
+#else
    vec_start = IJpartitioning[my_id];
    vec_stop  = IJpartitioning[my_id+1];
+#endif
 
    if (vec_start > vec_stop) 
    {
       printf("vec_start > vec_stop -- ");
       printf("hypre_IJVectorGetValuesPar\n");
       printf("**** This vector partitioning should not occur ****\n");
-      exit(1);
+      hypre_error_in_arg(1);
    }
 
 /* Determine whether indices points to local indices only,
@@ -683,7 +734,7 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
       printf("indices beyond local range -- ");
       printf("hypre_IJVectorGetValuesPar\n");
       printf("**** Indices specified are unusable ****\n");
-      exit(1);
+      hypre_error_in_arg(3);
    }
     
    data = hypre_VectorData(local_vector);
@@ -702,8 +753,20 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
          values[j] = data[j];
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
+
+/******************************************************************************
+
+ * hypre_IJVectorAssembleOffProcValsPar
+
+ * This is for handling set and get values calls to off-proc. entries -
+ * it is called from assemble.  There is an alternate version for
+ * when the assumed partition is being used.
+
+ *****************************************************************************/
+
+#ifndef HYPRE_NO_GLOBAL_PARTITION
 
 int
 hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector, 
@@ -712,9 +775,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    				      int *off_proc_i,
    			     	      double *off_proc_data)
 {
-   int ierr = 0;
-   MPI_Comm comm = hypre_IJMatrixComm(vector);
-   hypre_ParVector *par_vector = hypre_IJMatrixObject(vector);
+   MPI_Comm comm = hypre_IJVectorComm(vector);
+   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
    MPI_Request *requests;
    MPI_Status *status;
    int i, j, j2, row;
@@ -743,8 +805,10 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    MPI_Comm_size(comm,&num_procs);
    MPI_Comm_rank(comm, &my_id);
    partitioning = hypre_IJVectorPartitioning(vector);
+
    first_index = partitioning[my_id];
-   
+
+
    info = hypre_CTAlloc(int,num_procs);  
    proc_id_mem = hypre_CTAlloc(int,current_num_elmts);
    for (i=0; i < current_num_elmts; i++)
@@ -933,5 +997,421 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    hypre_TFree(recv_i);
    hypre_TFree(recv_data);
 
-   return ierr;
+   return hypre_error_flag;
 }
+
+#else
+
+
+/*   assumed partition version */
+
+
+int
+hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector, 
+   				      int max_off_proc_elmts,
+   				      int current_num_elmts,
+   				      int *off_proc_i,
+   			     	      double *off_proc_data)
+{
+
+   int myid, global_num_rows;
+   int i, j, in, k;
+   int proc_id, last_proc, prev_id, tmp_id;
+   int max_response_size;
+   int ex_num_contacts = 0;
+   int range_start, range_end;
+   int storage;
+   int indx;
+   int row, num_ranges, row_count;
+   int num_recvs;
+   int counter, upper_bound;
+   int num_real_procs;
+   int first_index;
+   
+   int *row_list=NULL;
+   int *a_proc_id=NULL, *orig_order=NULL;
+   int *real_proc_id = NULL, *us_real_proc_id = NULL;
+   int *ex_contact_procs = NULL, *ex_contact_vec_starts = NULL;
+   int *recv_starts=NULL;
+   int *response_buf = NULL, *response_buf_starts=NULL;
+   int *num_rows_per_proc = NULL;
+
+   double *ex_contact_buf=NULL;
+   double *recv_data = NULL;
+   double *vector_data;
+   double value;
+   
+   hypre_DataExchangeResponse      response_obj1, response_obj2;
+   hypre_ProcListElements          send_proc_obj_d; 
+
+   MPI_Comm comm = hypre_IJVectorComm(vector);
+   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
+
+   hypre_IJAssumedPart   *apart;
+
+
+   MPI_Comm_rank(comm, &myid);
+   
+   global_num_rows = hypre_ParVectorGlobalSize(par_vector);
+ 
+   /* verify that we have created the assumed partition */
+
+   if  (hypre_ParVectorAssumedPartition(par_vector) == NULL)
+   {
+      hypre_ParVectorCreateAssumedPartition(par_vector);
+   }
+   apart = hypre_ParVectorAssumedPartition(par_vector);
+
+
+
+   /* get the assumed processor id for each row */
+   a_proc_id = hypre_CTAlloc(int, current_num_elmts);
+   orig_order =  hypre_CTAlloc(int, current_num_elmts);
+   real_proc_id = hypre_CTAlloc(int, current_num_elmts);
+   row_list =   hypre_CTAlloc(int, current_num_elmts);
+
+   if (current_num_elmts > 0)
+   {
+      for (i=0; i < current_num_elmts; i++)
+      {
+         row = off_proc_i[i]; 
+         if (row < 0) row = -row-1;
+         row_list[i] = row;
+         hypre_GetAssumedPartitionProcFromRow (row, global_num_rows, &proc_id);
+         a_proc_id[i] = proc_id;
+         orig_order[i] = i;
+      }
+
+      /* now we need to find the actual order of each row  - sort on row -
+         this will result in proc ids sorted also...*/
+      
+      hypre_qsort3i(row_list, a_proc_id, orig_order, 0, current_num_elmts -1);
+
+      /* calculate the number of contacts */
+      ex_num_contacts = 1;
+      last_proc = a_proc_id[0];
+      for (i=1; i < current_num_elmts; i++)
+      {
+         if (a_proc_id[i] > last_proc)      
+         {
+            ex_num_contacts++;
+            last_proc = a_proc_id[i];
+         }
+      }
+      
+   }
+   
+   /* now we will go through a create a contact list - need to contact
+      assumed processors and find out who the actual row owner is - we
+      will contact with a range (2 numbers) */
+
+
+
+
+   ex_contact_procs = hypre_CTAlloc(int, ex_num_contacts);
+   ex_contact_vec_starts =  hypre_CTAlloc(int, ex_num_contacts+1);
+   ex_contact_buf =  hypre_CTAlloc(double, ex_num_contacts*2);
+
+
+   counter = 0;
+   range_end = -1;
+   for (i=0; i< current_num_elmts; i++) 
+   {
+      if (row_list[i] > range_end)
+      {
+         /* assumed proc */
+         proc_id = a_proc_id[i];
+
+         /* end of prev. range */
+         if (counter > 0)  ex_contact_buf[counter*2 - 1] = row_list[i-1];
+         
+        /*start new range*/
+    	 ex_contact_procs[counter] = proc_id;
+         ex_contact_vec_starts[counter] = counter*2;
+         ex_contact_buf[counter*2] =  row_list[i];
+         counter++;
+         
+         hypre_GetAssumedPartitionRowRange(proc_id, global_num_rows, 
+                                           &range_start, &range_end); 
+
+
+      }
+   }
+
+
+  /*finish the starts*/
+   ex_contact_vec_starts[counter] =  counter*2;
+   /*finish the last range*/
+   if (counter > 0)  
+      ex_contact_buf[counter*2 - 1] = row_list[current_num_elmts - 1];
+
+
+
+  /*create response object - can use same fill response as used in the commpkg
+     routine */
+   response_obj1.fill_response = hypre_RangeFillResponseIJDetermineRecvProcs;
+   response_obj1.data1 =  apart; /* this is necessary so we can fill responses*/ 
+   response_obj1.data2 = NULL;
+   
+   max_response_size = 6;  /* 6 means we can fit 3 ranges*/
+   
+   
+   hypre_DataExchangeList(ex_num_contacts, ex_contact_procs, 
+                    ex_contact_buf, ex_contact_vec_starts, sizeof(int), 
+                     sizeof(int), &response_obj1, max_response_size, 4, 
+                     comm, (void**) &response_buf, &response_buf_starts);
+
+
+   /* now response_buf contains
+     a proc_id followed by an upper bound for the range.  */
+
+
+
+   hypre_TFree(ex_contact_procs);
+   hypre_TFree(ex_contact_buf);
+   hypre_TFree(ex_contact_vec_starts);
+
+   hypre_TFree(a_proc_id);
+
+/* too low */
+
+
+   /*how many ranges were returned?*/
+   num_ranges = response_buf_starts[ex_num_contacts];   
+   num_ranges = num_ranges/2;
+   
+   
+   prev_id = -1;
+   j = 0;
+   counter = 0;
+   num_real_procs = 0;
+
+
+   /* loop through ranges - create a list of actual processor ids*/
+   for (i=0; i<num_ranges; i++)
+   {
+      upper_bound = response_buf[i*2+1];
+      counter = 0;
+      tmp_id = response_buf[i*2];
+      
+      /* loop through row_list entries - counting how many are in the range */
+      while (row_list[j] <= upper_bound && j < current_num_elmts)     
+      {
+         real_proc_id[j] = tmp_id;
+         j++;
+         counter++;       
+      }
+      if (counter > 0 && tmp_id != prev_id)        
+      {
+         num_real_procs++;
+      }
+      prev_id = tmp_id;
+   }
+
+
+
+   /* now we have the list of real procesors ids (real_proc_id) - 
+      and the number of distinct ones -
+      so now we can set up data to be sent - we have int and double data.
+      (row number and value) - we will convert everything to double*/  
+ 
+
+   /*first find out how many elements to send per proc - so we can do
+     storage */
+     
+   ex_contact_procs = hypre_CTAlloc(int, num_real_procs);
+   num_rows_per_proc = hypre_CTAlloc(int, num_real_procs);
+   
+   counter = 0;
+   
+   if (num_real_procs > 0 )
+   {
+      ex_contact_procs[0] = real_proc_id[0];
+      num_rows_per_proc[0] = 1;
+      
+      for (i=1; i < current_num_elmts; i++) /* loop through real procs - these are sorted
+                                               (row_list is sorted also)*/
+      {
+         if (real_proc_id[i] == ex_contact_procs[counter]) /* same processor */
+         {
+            num_rows_per_proc[counter] += 1; /*another row */
+         }
+         else /* new processor */
+         {
+            counter++;
+            ex_contact_procs[counter] = real_proc_id[i];
+            num_rows_per_proc[counter] = 1;
+         }
+      }
+   }
+     
+   /* calculate total storage and make vec_starts arrays */
+   storage = 0;
+   ex_contact_vec_starts = hypre_CTAlloc(int, num_real_procs + 1);
+   ex_contact_vec_starts[0] = -1;
+
+   for (i=0; i < num_real_procs; i++)
+   {
+      storage += 1 + 2*  num_rows_per_proc[i];
+      ex_contact_vec_starts[i+1] = -storage-1; /* need negative for next loop */
+   }      
+
+   ex_contact_buf = hypre_CTAlloc (double, storage);
+
+
+
+   /* set up data to be sent to send procs */
+   /* for each proc, ex_contact_buf_d contains #rows, row #, data, ect. */
+      
+
+   /* un-sort real_proc_id  - we want to access data arrays in order */
+
+   us_real_proc_id =  hypre_CTAlloc(int, current_num_elmts);
+   for (i=0; i < current_num_elmts; i++)
+   {
+      us_real_proc_id[orig_order[i]] = real_proc_id[i];
+   }
+   hypre_TFree(real_proc_id);
+
+
+
+   prev_id = -1;
+   for (i=0; i < current_num_elmts; i++)
+   {
+      proc_id = us_real_proc_id[i];
+      row = off_proc_i[i]; /*can't use row list[i] - you loose the negative signs that 
+                               differentiate add/set values */
+      /* find position of this processor */
+      indx = hypre_BinarySearch(ex_contact_procs, proc_id, num_real_procs);
+      in =  ex_contact_vec_starts[indx];
+
+      if (in < 0) /* first time for this processor - add the number of rows to the buffer */
+      {
+         in = -in - 1;
+         ex_contact_buf[in++] = (double) num_rows_per_proc[indx];
+      }
+      
+      ex_contact_buf[in++] = (double) row;
+      ex_contact_buf[in++] = off_proc_data[i]; /* value */
+
+      
+      /* increment the indexes to keep track of where we are - fix later */
+      ex_contact_vec_starts[indx] = in;
+      
+   }
+   
+   /* some clean up */
+ 
+   hypre_TFree(response_buf);
+   hypre_TFree(response_buf_starts);
+
+   hypre_TFree(us_real_proc_id);
+   hypre_TFree(orig_order);
+   hypre_TFree(row_list);
+   hypre_TFree(num_rows_per_proc);
+   
+
+   for (i=num_real_procs; i > 0; i--)
+   {
+      ex_contact_vec_starts[i] =   ex_contact_vec_starts[i-1];
+   }
+
+   ex_contact_vec_starts[0] = 0;
+
+  
+
+  /* now send the data */
+
+  /***********************************/
+   /* now get the info in send_proc_obj_d */
+
+
+   /* the response we expect is just a confirmation*/
+   response_buf = NULL;
+   response_buf_starts = NULL;
+
+   /*build the response object*/
+
+   /* use the send_proc_obj for the info kept from contacts */
+   /*estimate inital storage allocation */
+
+   send_proc_obj_d.length = 0;
+   send_proc_obj_d.storage_length = num_real_procs + 5;
+   send_proc_obj_d.id = NULL; /* don't care who sent it to us */
+   send_proc_obj_d.vec_starts = hypre_CTAlloc(int, send_proc_obj_d.storage_length + 1); 
+   send_proc_obj_d.vec_starts[0] = 0;
+   send_proc_obj_d.element_storage_length = storage + 20;
+   send_proc_obj_d.d_elements = hypre_CTAlloc(double, send_proc_obj_d.element_storage_length);
+
+   response_obj2.fill_response = hypre_FillResponseIJOffProcValsDouble;
+   response_obj2.data1 = NULL;
+   response_obj2.data2 = &send_proc_obj_d;
+
+   max_response_size = 0;
+
+   hypre_DataExchangeList(num_real_procs, ex_contact_procs, 
+                          ex_contact_buf, ex_contact_vec_starts, sizeof(double),
+                          sizeof(int), &response_obj2, max_response_size, 5, 
+                          comm,  (void **) &response_buf, &response_buf_starts);
+
+
+
+
+   /***********************************/
+
+
+   hypre_TFree(response_buf);
+   hypre_TFree(response_buf_starts);
+
+   hypre_TFree(ex_contact_procs);
+   hypre_TFree(ex_contact_buf);
+   hypre_TFree(ex_contact_vec_starts);
+
+
+   /* Now we can unpack the send_proc_objects and either set or add to 
+      the vector data */
+
+   num_recvs = send_proc_obj_d.length; 
+
+   /* alias */
+   recv_data = send_proc_obj_d.d_elements;
+   recv_starts = send_proc_obj_d.vec_starts;
+   
+   vector_data = hypre_VectorData(hypre_ParVectorLocalVector(par_vector));
+   first_index = hypre_ParVectorFirstIndex(par_vector);
+   
+
+   for (i=0; i < num_recvs; i++)
+   {
+      /* get the number of rows from the this recv */
+      indx = recv_starts[i];
+      row_count = (int) recv_data[indx++];
+
+      for (j=0; j < row_count; j++) /* for each row: unpack info */
+      {
+
+         row = (int) recv_data[indx++]; /* row number*/
+         value = recv_data[indx++];
+         if (row < 0) /* add */
+         {
+            row = -row-1;
+            k = row - first_index;
+            vector_data[k] += value;
+         }
+         else  /* set */
+         {
+            k = row - first_index;
+            vector_data[k] = value;
+         }
+      }
+   }
+   
+
+   hypre_TFree(send_proc_obj_d.d_elements);
+   hypre_TFree(send_proc_obj_d.vec_starts);
+
+ 
+   return hypre_error_flag;
+}
+
+#endif

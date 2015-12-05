@@ -9,21 +9,18 @@ Describe how regions just outside of a part relate to other parts
  <h2> Documentation </h2>
 <BLOCKQUOTE>
 
-Describe how regions just outside of a part relate to other parts.
-This is done a box at a time.<P>The indexes <TT>ilower</tt> and <TT>iupper</tt> map directly to the
-indexes <TT>nbor_ilower</tt> and <TT>nbor_iupper</tt>.  Although, it is
-required that indexes increase from <TT>ilower</tt> to <TT>iupper</tt>,
-indexes may increase and/or decrease from <TT>nbor_ilower</tt> to
-<TT>nbor_iupper</tt>.<P>The <TT>index_map</tt> describes the mapping of indexes 0, 1, and 2
-on part <TT>part</tt> to the corresponding indexes on part <TT>
-nbor_part</tt>.  For example, triple (1, 2, 0) means that indexes 0,
-1, and 2 on part <TT>part</tt> map to indexes 1, 2, and 0 on part <TT>
-nbor_part</tt>, respectively.<P>NOTE: All parts related to each other via this routine must have an
-identical list of variables and variable types.  For example, if
-part 0 has only two variables on it, a cell centered variable and a
-node centered variable, and we declare part 1 to be a neighbor of
-part 0, then part 1 must also have only two variables on it, and
-they must be of type cell and node.
+Describe how regions just outside of a part relate to other parts.  This is
+done a box at a time.<P>The indexes <TT>ilower</tt> and <TT>iupper</tt> map directly to the indexes <TT>
+nbor_ilower</tt> and <TT>nbor_iupper</tt>.  Although, it is required that indexes
+increase from <TT>ilower</tt> to <TT>iupper</tt>, indexes may increase and/or
+decrease from <TT>nbor_ilower</tt> to <TT>nbor_iupper</tt>.<P>The <TT>index_map</tt> describes the mapping of indexes 0, 1, and 2 on part
+<TT>part</tt> to the corresponding indexes on part <TT>nbor_part</tt>.  For
+example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part <TT>part</tt>
+map to indexes 1, 2, and 0 on part <TT>nbor_part</tt>, respectively.<P>NOTE: All parts related to each other via this routine must have an identical
+list of variables and variable types.  For example, if part 0 has only two
+variables on it, a cell centered variable and a node centered variable, and
+we declare part 1 to be a neighbor of part 0, then part 1 must also have only
+two variables on it, and they must be of type cell and node.
 
 </BLOCKQUOTE>
 <DL>

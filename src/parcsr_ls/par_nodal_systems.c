@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.4 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.11 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  *****************************************************************************/
@@ -57,7 +77,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    int 		      *row_starts      = hypre_ParCSRMatrixRowStarts(A);
    int 		      *col_map_offd    = hypre_ParCSRMatrixColMapOffd(A);
    int                 num_variables   = hypre_CSRMatrixNumRows(A_diag);
-   int 		       num_nonzeros_diag;
    int 		       num_nonzeros_offd = 0;
    int 		       num_cols_offd = 0;
                   
@@ -117,7 +136,11 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    if (!comm_pkg)
    {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+      hypre_NewCommPkgCreate(A);
+#else
       hypre_MatvecCommPkgCreate(A);
+#endif
       comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
@@ -126,9 +149,26 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    comm_pkg_AN = NULL;
    col_map_offd_AN = NULL;
 
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   row_starts_AN = hypre_CTAlloc(int, 2);
+
+   for (i=0; i < 2; i++)
+   {
+      row_starts_AN[i] = row_starts[i]/num_functions;
+      if (row_starts_AN[i]*num_functions < row_starts[i])
+      {
+	  printf("nodes not properly aligned or incomplete info!\n");
+	  return (87);
+      }
+   }
+   
+   global_num_nodes = hypre_ParCSRMatrixGlobalNumRows(A)/num_functions;
+
+
+#else
    row_starts_AN = hypre_CTAlloc(int, num_procs+1);
 
-   for (i=0; i < num_procs+1; i++)
+  for (i=0; i < num_procs+1; i++)
    {
       row_starts_AN[i] = row_starts[i]/num_functions;
       if (row_starts_AN[i]*num_functions < row_starts[i])
@@ -139,10 +179,13 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
    }
    
    global_num_nodes = row_starts_AN[num_procs];
+
+#endif
+
+ 
    num_nodes =  num_variables/num_functions;
    num_fun2 = num_functions*num_functions;
 
-   num_nonzeros_diag = A_diag_i[num_variables];
    map_to_node = hypre_CTAlloc(int, num_variables);
    AN_diag_i = hypre_CTAlloc(int, num_nodes+1);
    counter = hypre_CTAlloc(int, num_nodes);
@@ -188,7 +231,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    switch (mode)
    {
-      case 1:
+      case 7:  /* frobenius norm with signs*/
       {
          for (i=0; i < num_nodes; i++)
          {
@@ -217,10 +260,64 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          for (i=0; i < AN_num_nonzeros_diag; i++)
             AN_diag_data[i] = sqrt(AN_diag_data[i]);
 
+         /* temp for testing - make all diagonal entries negative */
+         /* the diagonal is the first element listed in each row -
+            this is the same as serial code */
+
+         for (i=0; i < num_nodes; i++)
+         {
+            index = AN_diag_i[i];
+            AN_diag_data[index] = - AN_diag_data[index];
+         }
+
       }
       break;
       
-      case 2:
+      case 1:  /* frobenius norm */
+      {
+         for (i=0; i < num_nodes; i++)
+         {
+            for (j=0; j < num_functions; j++)
+            {
+	       for (k=A_diag_i[row]; k < A_diag_i[row+1]; k++)
+	       {
+	          k_map = map_to_node[A_diag_j[k]];
+	          if (counter[k_map] < start_index)
+	          {
+	             counter[k_map] = index;
+	             AN_diag_j[index] = k_map;
+	             AN_diag_data[index] = A_diag_data[k]*A_diag_data[k];
+	             index++;
+	          }
+	          else
+	          {
+	             AN_diag_data[counter[k_map]] += 
+				A_diag_data[k]*A_diag_data[k];
+	          }
+	       }
+	       row++;
+            }
+            start_index = index;
+         }
+         for (i=0; i < AN_num_nonzeros_diag; i++)
+            AN_diag_data[i] = sqrt(AN_diag_data[i]);
+
+#if 0
+         /* temp for testing - make all diagonal entries negative */
+         /* the diagonal is the first element listed in each row -
+            this is the same as serial code */
+
+         for (i=0; i < num_nodes; i++)
+         {
+            index = AN_diag_i[i];
+            AN_diag_data[index] = - AN_diag_data[index];
+         }
+#endif         
+
+      }
+      break;
+      
+      case 2:  /* sum of abs. value of all elements in each block */
       {
          for (i=0; i < num_nodes; i++)
          {
@@ -250,7 +347,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       }
       break;
 
-      case 3:
+      case 3:  /* largest element of each block (sets true value - not abs. value) */
       {
 
          for (i=0; i < num_nodes; i++)
@@ -426,7 +523,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       start_index = 0;
       switch (mode)
       {
-         case 1:
+         case 1: /* frobenius norm */
          {
             for (i=0; i < num_nodes; i++)
             {
@@ -457,7 +554,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          }
          break;
       
-         case 2:
+         case 2:  /* sum of abs. value of all elements in block */
          {
             for (i=0; i < num_nodes; i++)
             {
@@ -487,7 +584,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
          }
          break;
 
-         case 3:
+         case 3: /* largest element in each block (not abs. value ) */
          {
             for (i=0; i < num_nodes; i++)
             {
@@ -519,12 +616,20 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       }
       hypre_TFree(map_to_map);
    }
-
+   
+    
    AN = hypre_ParCSRMatrixCreate(comm, global_num_nodes, global_num_nodes,
 		row_starts_AN, row_starts_AN, num_cols_offd_AN,
 		AN_num_nonzeros_diag, AN_num_nonzeros_offd);
+
+   /* we already created the diag and offd matrices - so we don't need the ones
+      created above */
+   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(AN));
+   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(AN));
    hypre_ParCSRMatrixDiag(AN) = AN_diag;
    hypre_ParCSRMatrixOffd(AN) = AN_offd;
+
+
    hypre_ParCSRMatrixColMapOffd(AN) = col_map_offd_AN;
    hypre_ParCSRMatrixCommPkg(AN) = comm_pkg_AN;
 
@@ -590,6 +695,9 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    return (ierr);
 }
+
+
+/* This creates a scalar version of the CF_marker, dof_array and strength matrix (SN) */
 
 int
 hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
@@ -700,6 +808,23 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
 
    *CF_marker_ptr = CF_marker;
 
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   row_starts_S = hypre_CTAlloc(int,2);
+   for (i=0; i < 2; i++)
+      row_starts_S[i] = num_functions*row_starts_SN[i];
+
+   if (row_starts_SN != col_starts_SN)
+   {
+      col_starts_S = hypre_CTAlloc(int,2);
+      for (i=0; i < 2; i++)
+         col_starts_S[i] = num_functions*col_starts_SN[i];
+   }
+   else
+   {
+      col_starts_S = row_starts_S;
+   }
+#else
    row_starts_S = hypre_CTAlloc(int,num_procs+1);
    for (i=0; i < num_procs+1; i++)
       row_starts_S[i] = num_functions*row_starts_SN[i];
@@ -714,6 +839,8 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    {
       col_starts_S = row_starts_S;
    }
+#endif
+
 
    SN_num_nonzeros_diag = SN_diag_i[num_nodes];
    SN_num_nonzeros_offd = SN_offd_i[num_nodes];
@@ -892,6 +1019,57 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    } 
 
    *S_ptr = S; 
+
+   return (ierr);
+}
+
+
+/* This function just finds the scalaer CF_marker and dof_func */
+
+int
+hypre_BoomerAMGCreateScalarCF(int                   *CFN_marker,
+                              int                    num_functions,
+                              int                    num_nodes,
+                              int                  **dof_func_ptr,
+                              int                  **CF_marker_ptr)
+
+{
+   int		      *CF_marker;
+   int		      *dof_func;
+   int		       num_variables;
+   int		       num_coarse_nodes;
+   int		       i,j,k,cnt;
+   int		       ierr = 0;
+ 
+ 
+   num_variables = num_functions*num_nodes;
+   CF_marker = hypre_CTAlloc(int, num_variables);
+
+   cnt = 0;
+   num_coarse_nodes = 0;
+   for (i=0; i < num_nodes; i++)
+   {
+      if (CFN_marker[i] == 1) num_coarse_nodes++;
+      for (j=0; j < num_functions; j++)
+         CF_marker[cnt++] = CFN_marker[i];
+   }
+
+   
+   dof_func = hypre_CTAlloc(int,num_coarse_nodes*num_functions);
+   cnt = 0;
+   for (i=0; i < num_nodes; i++)
+   {
+      if (CFN_marker[i] == 1)
+      {
+         for (k=0; k < num_functions; k++)
+            dof_func[cnt++] = k;
+      }
+   }
+   
+
+   *dof_func_ptr = dof_func;
+   *CF_marker_ptr = CF_marker;
+
 
    return (ierr);
 }

@@ -1,9 +1,8 @@
 /*
- * File:        SIDL_String.h
+ * File:        sidl_String.h
  * Copyright:   (c) 2001 The Regents of the University of California
- * Release:     $Name: V1-9-0b $
- * Revision:    @(#) $Revision: 1.4 $
- * Date:        $Date: 2003/04/07 21:44:31 $
+ * Revision:    @(#) $Revision: 1.7 $
+ * Date:        $Date: 2006/08/29 22:29:50 $
  * Description: convenience string manipulation functions for C clients
  * Copyright (c) 2000-2001, The Regents of the University of Calfornia.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -30,8 +29,8 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef included_SIDL_String_h
-#define included_SIDL_String_h
+#ifndef included_sidl_String_h
+#define included_sidl_String_h
 
 #include <stdlib.h>
 
@@ -42,87 +41,96 @@ extern "C" {
 /**
  * Allocate a string of the specified size with an additional location for
  * the string null character.  Strings allocated using this method may be
- * freed using <code>SIDL_String_free</code> or the standard <code>free</code>
+ * freed using <code>sidl_String_free</code> or the standard <code>free</code>
  * library call.
  */
-char* SIDL_String_alloc(size_t size);
+char* sidl_String_alloc(size_t size);
 
 /**
  * Free the memory associated with the specified string.  Nothing is done if
  * the string pointer is null.
  */
-void SIDL_String_free(char* s);
+void sidl_String_free(char* s);
 
 /**
  * Return the length of the string.  If the string is null, then its length
  * is zero.  Note the string length does not include the terminating null
  * character.
  */
-size_t SIDL_String_strlen(const char* s);
+size_t sidl_String_strlen(const char* s);
 
 /**
  * Copy the string <code>s2</code> into <code>s1</code> and include the
  * terminating null character.  Note that this routine does not check whether
  * there is sufficient space in the destination string.
  */
-void SIDL_String_strcpy(char* s1, const char* s2);
+void sidl_String_strcpy(char* s1, const char* s2);
 
 /**
  * Duplicate the string.  If the argument is null, then the return value is
  * null.  This new string should be deallocated by a call to the string free
- * function <code>SIDL_String_free</code>.
+ * function <code>sidl_String_free</code>.
  */
-char* SIDL_String_strdup(const char* s);
+char* sidl_String_strdup(const char* s);
+
+/**
+ * Duplicate at most the first n characters of the string, if s is longer than
+ * n, only n characters are copied and a terminal NUL is added.
+ * This new string should be deallocated by a call to the string free
+ * function <code>sidl_String_free</code>.
+ */
+char* sidl_String_strndup(const char* s, size_t n);
+
 
 /**
  * Return whether the two strings are equal.  Either or both of the two
  * argument strings may be null.
  */
-int SIDL_String_equals(const char* s1, const char* s2);
+int sidl_String_equals(const char* s1, const char* s2);
 
 /**
  * Return whether the first string ends with the second string.  If either
  * of the two strings is null, then return false.
  */
-int SIDL_String_endsWith(const char* s, const char* end);
+int sidl_String_endsWith(const char* s, const char* end);
 
 /**
  * Return whether the first string starts with the second string.  If either
  * of the two strings is null, then return false.
  */
-int SIDL_String_startsWith(const char* s, const char* start);
+int sidl_String_startsWith(const char* s, const char* start);
 
 /**
  * Return the substring starting at the specified index and continuing to
  * the end of the string.  If the index is past the end of the string or
  * if the first argument is null, then null is returned.  The return string
- * should be freed by a call to <code>SIDL_String_free</code>.
+ * should be freed by a call to <code>sidl_String_free</code>.
  */
-char* SIDL_String_substring(const char* s, const int index);
+char* sidl_String_substring(const char* s, const int index);
 
 /**
  * Concatenate the two strings and return the resulting string.  Null string
  * arguments are ignored.  The return string should be freed by calling routine
- * <code>SIDL_String_free</code>.
+ * <code>sidl_String_free</code>.
  */
-char* SIDL_String_concat2(const char* s1,
+char* sidl_String_concat2(const char* s1,
                           const char* s2);
 
 /**
  * Concatenate the three strings and return the resulting string.  Null string
  * arguments are ignored.  The return string should be freed by calling routine
- * <code>SIDL_String_free</code>.
+ * <code>sidl_String_free</code>.
  */
-char* SIDL_String_concat3(const char* s1,
+char* sidl_String_concat3(const char* s1,
                           const char* s2,
                           const char* s3);
 
 /**
  * Concatenate the four strings and return the resulting string.  Null string
  * arguments are ignored.  The return string should be freed by calling routine
- * <code>SIDL_String_free</code>.
+ * <code>sidl_String_free</code>.
  */
-char* SIDL_String_concat4(const char* s1,
+char* sidl_String_concat4(const char* s1,
                           const char* s2,
                           const char* s3,
                           const char* s4);
@@ -131,7 +139,7 @@ char* SIDL_String_concat4(const char* s1,
  * Replace instances of oldchar with newchar in the provided string.  Null
  * string arguments are ignored.
  */
-void SIDL_String_replace(char* s, char oldchar, char newchar);
+void sidl_String_replace(char* s, char oldchar, char newchar);
 
 #ifdef __cplusplus
 }

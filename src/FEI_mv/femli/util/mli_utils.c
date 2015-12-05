@@ -1,10 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2001   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 1.50 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 /******************************************************************************
  *
@@ -22,9 +43,7 @@
 #include "HYPRE.h"
 #include "util/mli_utils.h"
 #include "IJ_mv/HYPRE_IJ_mv.h"
-/*
-#include <mpi.h>
-*/
+#include "FEI_mv/fei-hypre/HYPRE_parcsr_fgmres.h"
 
 /*--------------------------------------------------------------------------
  * external function 
@@ -1157,11 +1176,9 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
     int info;
     info = -1;
 #else
-#if 0
-    void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *, 
+    extern int hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *, 
         int *, double *, int *, double *, double *, int *, 
         double *, int *, double *, int *, int *);
-#endif
 
     char jobu  = 'O'; /* overwrite input with U */
     char jobvt = 'S'; /* return rows of V in vtArray */
@@ -1193,11 +1210,9 @@ int MLI_Utils_singular_vectors(int n, double *uArray)
     double *sArray = (double *) malloc(n*sizeof(double));
     int workLen = 5*n;
     double *workArray = (double *) malloc(workLen*sizeof(double));
-#if 0
-    void hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *,
+    extern int hypre_F90_NAME_BLAS(dgesvd, DGESVD)(char *, char *, int *,
         int *, double *, int *, double *, double *, int *,
         double *, int *, double *, int *, int *);
-#endif
 
     hypre_F90_NAME_BLAS(dgesvd, DGESVD)(&jobu, &jobvt, &n, &n, uArray,
         &n, sArray, NULL, &n, NULL, &n, workArray, &workLen, &info);
@@ -2340,8 +2355,9 @@ int MLI_Utils_HyprePCGSolve( CMLI *cmli, HYPRE_Matrix A,
 int MLI_Utils_HypreGMRESSolve(void *precon, HYPRE_Matrix A,
                               HYPRE_Vector b, HYPRE_Vector x, char *pname)
 {
-   int          numIterations, maxIter=1000, mypid;
+   int          numIterations, maxIter=1000, mypid, i, *nSweeps, *rTypes;
    double       tol=1.0e-8, norm, setupTime, solveTime;
+   double       *relaxWt, *relaxOmega;
    MPI_Comm     mpiComm;
    HYPRE_Solver gmresSolver, gmresPrecond;
    HYPRE_ParCSRMatrix hypreA;
@@ -2350,17 +2366,43 @@ int MLI_Utils_HypreGMRESSolve(void *precon, HYPRE_Matrix A,
    hypreA = (HYPRE_ParCSRMatrix) A;
    HYPRE_ParCSRMatrixGetComm(hypreA , &mpiComm);
    HYPRE_ParCSRGMRESCreate(mpiComm, &gmresSolver);
-   HYPRE_GMRESSetMaxIter(gmresSolver, maxIter );
-   HYPRE_GMRESSetTol(gmresSolver, tol);
+   HYPRE_ParCSRGMRESSetMaxIter(gmresSolver, maxIter);
+   HYPRE_ParCSRGMRESSetTol(gmresSolver, tol);
    HYPRE_GMRESSetRelChange(gmresSolver, 0);
    HYPRE_ParCSRGMRESSetPrintLevel(gmresSolver, 2);
    HYPRE_ParCSRGMRESSetKDim(gmresSolver, 100);
-   if (!strcmp(pname, "mli"))
+   if (!strcmp(pname, "boomeramg"))
+   {
+      HYPRE_BoomerAMGCreate(&gmresPrecond);
+      HYPRE_BoomerAMGSetMaxIter(gmresPrecond, 1);
+      HYPRE_BoomerAMGSetCycleType(gmresPrecond, 1);
+      HYPRE_BoomerAMGSetMaxLevels(gmresPrecond, 25);
+      HYPRE_BoomerAMGSetMeasureType(gmresPrecond, 0);
+      HYPRE_BoomerAMGSetDebugFlag(gmresPrecond, 0);
+      HYPRE_BoomerAMGSetPrintLevel(gmresPrecond, 0);
+      HYPRE_BoomerAMGSetCoarsenType(gmresPrecond, 0);
+      HYPRE_BoomerAMGSetStrongThreshold(gmresPrecond, 0.9);
+      nSweeps = (int *) malloc(4 * sizeof(int));
+      for (i = 0; i < 4; i++) nSweeps[i] = 1;
+      HYPRE_BoomerAMGSetNumGridSweeps(gmresPrecond, nSweeps);
+      rTypes = (int *) malloc(4 * sizeof(int));
+      for (i = 0; i < 4; i++) rTypes[i] = 6;
+      relaxWt = (double *) malloc(25 * sizeof(double));
+      for (i = 0; i < 25; i++) relaxWt[i] = 1.0;
+      HYPRE_BoomerAMGSetRelaxWeight(gmresPrecond, relaxWt);
+      relaxOmega = (double *) malloc(25 * sizeof(double));
+      for (i = 0; i < 25; i++) relaxOmega[i] = 1.0;
+      HYPRE_BoomerAMGSetOmega(gmresPrecond, relaxOmega);
+      HYPRE_GMRESSetPrecond(gmresSolver,
+                       (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                       (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
+                       gmresPrecond);
+   }
+   else if (!strcmp(pname, "mli"))
    {
       cmli = (CMLI *) precon;
       MLI_SetMaxIterations(cmli, 1);
       gmresPrecond = (HYPRE_Solver) cmli;
-      HYPRE_GMRESSetMaxIter(gmresSolver, maxIter);
       HYPRE_GMRESSetPrecond(gmresSolver,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISolve,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_ParCSRMLISetup,
@@ -2369,7 +2411,7 @@ int MLI_Utils_HypreGMRESSolve(void *precon, HYPRE_Matrix A,
    else if (!strcmp(pname, "pJacobi"))
    {
       gmresPrecond = (HYPRE_Solver) precon;
-      HYPRE_GMRESSetMaxIter(gmresSolver, 10);
+      HYPRE_ParCSRGMRESSetMaxIter(gmresSolver, 10);
       HYPRE_ParCSRGMRESSetPrintLevel(gmresSolver, 0);
       HYPRE_GMRESSetPrecond(gmresSolver,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_mJacobiSolve,
@@ -2379,7 +2421,7 @@ int MLI_Utils_HypreGMRESSolve(void *precon, HYPRE_Matrix A,
    else if (!strcmp(pname, "mJacobi"))
    {
       gmresPrecond = (HYPRE_Solver) precon;
-      HYPRE_GMRESSetMaxIter(gmresSolver, 5); /* change this in amgcr too */
+      HYPRE_ParCSRGMRESSetMaxIter(gmresSolver, 5); /* change this in amgcr too */
       HYPRE_ParCSRGMRESSetPrintLevel(gmresSolver, 0);
       HYPRE_GMRESSetPrecond(gmresSolver,
                        (HYPRE_PtrToSolverFcn) MLI_Utils_mJacobiSolve,
@@ -2392,11 +2434,11 @@ int MLI_Utils_HypreGMRESSolve(void *precon, HYPRE_Matrix A,
    setupTime = solveTime - setupTime;
    HYPRE_GMRESSolve(gmresSolver, A, b, x);
    solveTime = MLI_Utils_WTime() - solveTime;
-   HYPRE_GMRESGetNumIterations(gmresSolver, &numIterations);
-   HYPRE_GMRESGetFinalRelativeResidualNorm(gmresSolver, &norm);
+   HYPRE_ParCSRGMRESGetNumIterations(gmresSolver, &numIterations);
+   HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(gmresSolver, &norm);
    HYPRE_ParCSRGMRESDestroy(gmresSolver);
    MPI_Comm_rank(mpiComm, &mypid);
-   if ( mypid == 0 && (!strcmp(pname, "mli")))
+   if (mypid == 0 && ((!strcmp(pname, "mli")) || (!strcmp(pname, "boomeramg"))))
    {
       printf("\tGMRES Krylov dimension             = 200\n");
       printf("\tGMRES maximum iterations           = %d\n", maxIter);
@@ -2405,6 +2447,103 @@ int MLI_Utils_HypreGMRESSolve(void *precon, HYPRE_Matrix A,
       printf("\tGMRES final relative residual norm = %e\n", norm);
       printf("\tGMRES setup time                   = %e seconds\n",setupTime);
       printf("\tGMRES solve time                   = %e seconds\n",solveTime);
+   }
+   return 0;
+}
+
+/***************************************************************************
+ * solve the system using HYPRE fgmres
+ *--------------------------------------------------------------------------*/
+ 
+int MLI_Utils_HypreFGMRESSolve(void *precon, HYPRE_Matrix A,
+                               HYPRE_Vector b, HYPRE_Vector x, char *pname)
+{
+   int          numIterations, maxIter=1000, mypid, i, *nSweeps, *rTypes;
+   double       tol=1.0e-8, norm, setupTime, solveTime;
+   double       *relaxWt, *relaxOmega;
+   MPI_Comm     mpiComm;
+   HYPRE_Solver gmresSolver, gmresPrecond;
+   HYPRE_ParCSRMatrix hypreA;
+   CMLI         *cmli;
+
+   hypreA = (HYPRE_ParCSRMatrix) A;
+   HYPRE_ParCSRMatrixGetComm(hypreA , &mpiComm);
+   HYPRE_ParCSRFGMRESCreate(mpiComm, &gmresSolver);
+   HYPRE_ParCSRFGMRESSetMaxIter(gmresSolver, maxIter);
+   HYPRE_ParCSRFGMRESSetTol(gmresSolver, tol);
+   HYPRE_ParCSRFGMRESSetLogging(gmresSolver, 2);
+   HYPRE_ParCSRFGMRESSetKDim(gmresSolver, 100);
+   if (!strcmp(pname, "boomeramg"))
+   {
+      HYPRE_BoomerAMGCreate(&gmresPrecond);
+      HYPRE_BoomerAMGSetMaxIter(gmresPrecond, 1);
+      HYPRE_BoomerAMGSetCycleType(gmresPrecond, 1);
+      HYPRE_BoomerAMGSetMaxLevels(gmresPrecond, 25);
+      HYPRE_BoomerAMGSetMeasureType(gmresPrecond, 0);
+      HYPRE_BoomerAMGSetDebugFlag(gmresPrecond, 0);
+      HYPRE_BoomerAMGSetPrintLevel(gmresPrecond, 0);
+      HYPRE_BoomerAMGSetCoarsenType(gmresPrecond, 0);
+      HYPRE_BoomerAMGSetStrongThreshold(gmresPrecond, 0.9);
+      nSweeps = (int *) malloc(4 * sizeof(int));
+      for (i = 0; i < 4; i++) nSweeps[i] = 1;
+      HYPRE_BoomerAMGSetNumGridSweeps(gmresPrecond, nSweeps);
+      rTypes = (int *) malloc(4 * sizeof(int));
+      for (i = 0; i < 4; i++) rTypes[i] = 6;
+      relaxWt = (double *) malloc(25 * sizeof(double));
+      for (i = 0; i < 25; i++) relaxWt[i] = 1.0;
+      HYPRE_BoomerAMGSetRelaxWeight(gmresPrecond, relaxWt);
+      relaxOmega = (double *) malloc(25 * sizeof(double));
+      for (i = 0; i < 25; i++) relaxOmega[i] = 1.0;
+      HYPRE_BoomerAMGSetOmega(gmresPrecond, relaxOmega);
+      HYPRE_ParCSRFGMRESSetMaxIter(gmresSolver, maxIter);
+      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver, HYPRE_BoomerAMGSolve,
+                       HYPRE_BoomerAMGSetup, gmresPrecond);
+   }
+   else if (!strcmp(pname, "mli"))
+   {
+      cmli = (CMLI *) precon;
+      MLI_SetMaxIterations(cmli, 1);
+      gmresPrecond = (HYPRE_Solver) cmli;
+      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver, MLI_Utils_ParCSRMLISolve,
+                       MLI_Utils_ParCSRMLISetup, gmresPrecond);
+   }
+   else if (!strcmp(pname, "pJacobi"))
+   {
+      gmresPrecond = (HYPRE_Solver) precon;
+      HYPRE_ParCSRFGMRESSetMaxIter(gmresSolver, 10);
+      HYPRE_ParCSRFGMRESSetLogging(gmresSolver, 0);
+      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver, MLI_Utils_mJacobiSolve,
+                       MLI_Utils_mJacobiSetup, gmresPrecond);
+   }
+   else if (!strcmp(pname, "mJacobi"))
+   {
+      gmresPrecond = (HYPRE_Solver) precon;
+      HYPRE_ParCSRFGMRESSetMaxIter(gmresSolver, 5); /* change this in amgcr too */
+      HYPRE_ParCSRFGMRESSetLogging(gmresSolver, 0);
+      HYPRE_ParCSRFGMRESSetPrecond(gmresSolver, MLI_Utils_mJacobiSolve, 
+                       MLI_Utils_mJacobiSetup, gmresPrecond);
+   }
+   setupTime = MLI_Utils_WTime();
+   HYPRE_ParCSRFGMRESSetup(gmresSolver, hypreA, (HYPRE_ParVector) b, 
+                           (HYPRE_ParVector) x);
+   solveTime = MLI_Utils_WTime();
+   setupTime = solveTime - setupTime;
+   HYPRE_ParCSRFGMRESSolve(gmresSolver, hypreA, (HYPRE_ParVector) b,
+                           (HYPRE_ParVector) x);
+   solveTime = MLI_Utils_WTime() - solveTime;
+   HYPRE_ParCSRFGMRESGetNumIterations(gmresSolver, &numIterations);
+   HYPRE_ParCSRFGMRESGetFinalRelativeResidualNorm(gmresSolver, &norm);
+   HYPRE_ParCSRFGMRESDestroy(gmresSolver);
+   MPI_Comm_rank(mpiComm, &mypid);
+   if (mypid == 0 && ((!strcmp(pname, "mli")) || (!strcmp(pname, "boomeramg"))))
+   {
+      printf("\tFGMRES Krylov dimension             = 200\n");
+      printf("\tFGMRES maximum iterations           = %d\n", maxIter);
+      printf("\tFGMRES convergence tolerance        = %e\n", tol);
+      printf("\tFGMRES number of iterations         = %d\n", numIterations);
+      printf("\tFGMRES final relative residual norm = %e\n", norm);
+      printf("\tFGMRES setup time                   = %e seconds\n",setupTime);
+      printf("\tFGMRES solve time                   = %e seconds\n",solveTime);
    }
    return 0;
 }
@@ -2454,7 +2593,6 @@ int MLI_Utils_HypreBiCGSTABSolve( CMLI *cmli, HYPRE_Matrix A,
 }
 
 /***************************************************************************
- * binary search
  *--------------------------------------------------------------------------*/
 
 int MLI_Utils_BinarySearch(int key, int *list, int size)

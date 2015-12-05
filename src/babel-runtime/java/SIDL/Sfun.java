@@ -1,6 +1,6 @@
 /*
  * -------------------------------------------------------------------------
- *  $Id: Sfun.java,v 1.4 2003/04/07 21:44:19 painter Exp $
+ *  $Id: Sfun.java,v 1.5 2006/08/29 22:29:21 painter Exp $
  * -------------------------------------------------------------------------
  * Copyright (c) 1997 - 1998 by Visual Numerics, Inc. All rights reserved.
  *
@@ -23,10 +23,10 @@
 
 /*
  * This file has been modified from the original VNI file.  In particular,
- * the namespace has been changed to SIDL.
+ * the namespace has been changed to sidl.
  */
 
-package SIDL;
+package sidl;
 
 /**
  * Collection of special functions.

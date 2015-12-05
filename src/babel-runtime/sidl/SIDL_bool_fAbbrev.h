@@ -1,4 +1,0 @@
-#define SIDL_bool__array_isColumnOrder_m ary_isColumnOrderr6fcox_0zp8a_m
-#define sidl_bool__array_iscolumnorder_m ary_iscolumnorderr6fcox_0zp8a_m
-#define SIDL_BOOL__ARRAY_ISCOLUMNORDER_M ARY_ISCOLUMNORDERR6FCOX_0ZP8A_M
-

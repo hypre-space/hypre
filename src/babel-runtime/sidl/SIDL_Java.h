@@ -1,9 +1,8 @@
 /*
- * File:        SIDL_Java.h
+ * File:        sidl_Java.h
  * Copyright:   (c) 2001 The Regents of the University of California
- * Release:     $Name: V1-9-0b $
- * Revision:    @(#) $Revision: 1.4 $
- * Date:        $Date: 2003/04/07 21:44:31 $
+ * Revision:    @(#) $Revision: 1.7 $
+ * Date:        $Date: 2006/08/29 22:29:49 $
  * Description: run-time support for Java integration with the JVM
  * Copyright (c) 2000-2001, The Regents of the University of Calfornia.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -30,8 +29,8 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef included_SIDL_Java_h
-#define included_SIDL_Java_h
+#ifndef included_sidl_Java_h
+#define included_sidl_Java_h
 
 #ifdef __CYGWIN__
 typedef long long __int64;
@@ -43,8 +42,15 @@ typedef long long __int64;
 #endif
 
 #include <jni.h>
-#include "SIDLType.h"
-#include "SIDL_BaseException_IOR.h"
+#include "sidlType.h"
+#include "sidl_BaseInterface_IOR.h"
+#include "sidl_BaseException_IOR.h"
+
+#define JAVA_CHECK(ENV_VAR) {\
+  if ((*ENV_VAR)-> ExceptionCheck(ENV_VAR)) {			  \
+    goto JAVA_EXIT; \
+  } \
+} 
 
 #ifdef __cplusplus
 extern "C" {
@@ -55,7 +61,7 @@ extern "C" {
  * environment description.  If there is not a currently running JVM,
  * then one is created.
  */
-JNIEnv* SIDL_Java_getEnv(void);
+JNIEnv* sidl_Java_getEnv(void);
 
 /**
  * Throw a Java exception if the exception argument is not null.  If the
@@ -63,191 +69,209 @@ JNIEnv* SIDL_Java_getEnv(void);
  * is thrown.  The variable-argument parameter gives the possible Java type
  * strings.  It must be terminated by a NULL.
  */
-void SIDL_Java_CheckException(
+void sidl_Java_CheckException(
   JNIEnv* env,
-  struct SIDL_BaseException__object* ex,
+  struct sidl_BaseInterface__object* ex,
+  ...);
+
+/*
+ * This test determines if a throwable object from Java is a SIDL object or not..
+ */
+sidl_bool sidl_Java_isSIDLException(
+  JNIEnv* env,
+  jobject obj);
+
+/*
+ *  This function takes a SIDL exception from java as jthrowable obj, and checks if it is an 
+ *  expected  exception from this function.  If it is it returns the IOR pointer, if not
+ *  it returns NULL.
+ */
+
+struct sidl_BaseInterface__object* sidl_Java_catch_SIDLException(
+  JNIEnv* env,
+  jthrowable obj,
   ...);
 
 /**
- * Extract the boolean type from the SIDL.Boolean.Holder holder class.
+ * Extract the boolean type from the sidl.Boolean.Holder holder class.
  */
-SIDL_bool SIDL_Java_J2I_boolean_holder(
+sidl_bool sidl_Java_J2I_boolean_holder(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Set the boolean type in the SIDL.Boolean.Holder holder class.
+ * Set the boolean type in the sidl.Boolean.Holder holder class.
  */
-void SIDL_Java_I2J_boolean_holder(
+void sidl_Java_I2J_boolean_holder(
   JNIEnv* env,
   jobject obj,
-  SIDL_bool value);
+  sidl_bool value);
 
 /**
- * Extract the character type from the SIDL.Character.Holder holder class.
+ * Extract the character type from the sidl.Character.Holder holder class.
  */
-char SIDL_Java_J2I_character_holder(
+char sidl_Java_J2I_character_holder(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Set the character type in the SIDL.Character.Holder holder class.
+ * Set the character type in the sidl.Character.Holder holder class.
  */
-void SIDL_Java_I2J_character_holder(
+void sidl_Java_I2J_character_holder(
   JNIEnv* env,
   jobject obj,
   char value);
 
 /**
- * Extract the double type from the SIDL.Double.Holder holder class.
+ * Extract the double type from the sidl.Double.Holder holder class.
  */
-double SIDL_Java_J2I_double_holder(
+double sidl_Java_J2I_double_holder(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Set the double type in the SIDL.Double.Holder holder class.
+ * Set the double type in the sidl.Double.Holder holder class.
  */
-void SIDL_Java_I2J_double_holder(
+void sidl_Java_I2J_double_holder(
   JNIEnv* env,
   jobject obj,
   double value);
 
 /**
- * Extract the float type from the SIDL.Float.Holder holder class.
+ * Extract the float type from the sidl.Float.Holder holder class.
  */
-float SIDL_Java_J2I_float_holder(
+float sidl_Java_J2I_float_holder(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Set the float type in the SIDL.Float.Holder holder class.
+ * Set the float type in the sidl.Float.Holder holder class.
  */
-void SIDL_Java_I2J_float_holder(
+void sidl_Java_I2J_float_holder(
   JNIEnv* env,
   jobject obj,
   float value);
 
 /**
- * Extract the int type from the SIDL.Integer.Holder holder class.
+ * Extract the int type from the sidl.Integer.Holder holder class.
  */
-int SIDL_Java_J2I_int_holder(
+int sidl_Java_J2I_int_holder(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Set the int type in the SIDL.Integer.Holder holder class.
+ * Set the int type in the sidl.Integer.Holder holder class.
  */
-void SIDL_Java_I2J_int_holder(
+void sidl_Java_I2J_int_holder(
   JNIEnv* env,
   jobject obj,
   int value);
 
 /**
- * Extract the long type from the SIDL.Long.Holder holder class.
+ * Extract the long type from the sidl.Long.Holder holder class.
  */
-int64_t SIDL_Java_J2I_long_holder(
+int64_t sidl_Java_J2I_long_holder(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Set the long type in the SIDL.Long.Holder holder class.
+ * Set the long type in the sidl.Long.Holder holder class.
  */
-void SIDL_Java_I2J_long_holder(
+void sidl_Java_I2J_long_holder(
   JNIEnv* env,
   jobject obj,
   int64_t value);
 
 /**
- * Extract the opaque type from the SIDL.Opaque.Holder holder class.
+ * Extract the opaque type from the sidl.Opaque.Holder holder class.
  */
-void* SIDL_Java_J2I_opaque_holder(
+void* sidl_Java_J2I_opaque_holder(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Set the opaque type in the SIDL.Opaque.Holder holder class.
+ * Set the opaque type in the sidl.Opaque.Holder holder class.
  */
-void SIDL_Java_I2J_opaque_holder(
+void sidl_Java_I2J_opaque_holder(
   JNIEnv* env,
   jobject obj,
   void* value);
 
 /**
- * Extract the dcomplex type from the SIDL.DoubleComplex.Holder holder class.
+ * Extract the dcomplex type from the sidl.DoubleComplex.Holder holder class.
  */
-struct SIDL_dcomplex SIDL_Java_J2I_dcomplex_holder(
+struct sidl_dcomplex sidl_Java_J2I_dcomplex_holder(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Set the dcomplex type in the SIDL.DoubleComplex.Holder holder class.
+ * Set the dcomplex type in the sidl.DoubleComplex.Holder holder class.
  */
-void SIDL_Java_I2J_dcomplex_holder(
+void sidl_Java_I2J_dcomplex_holder(
   JNIEnv* env,
   jobject obj,
-  struct SIDL_dcomplex* value);
+  struct sidl_dcomplex* value);
 
 /**
- * Extract the fcomplex type from the SIDL.FloatComplex.Holder holder class.
+ * Extract the fcomplex type from the sidl.FloatComplex.Holder holder class.
  */
-struct SIDL_fcomplex SIDL_Java_J2I_fcomplex_holder(
+struct sidl_fcomplex sidl_Java_J2I_fcomplex_holder(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Set the fcomplex type in the SIDL.FloatComplex.Holder holder class.
+ * Set the fcomplex type in the sidl.FloatComplex.Holder holder class.
  */
-void SIDL_Java_I2J_fcomplex_holder(
+void sidl_Java_I2J_fcomplex_holder(
   JNIEnv* env,
   jobject obj,
-  struct SIDL_fcomplex* value);
+  struct sidl_fcomplex* value);
 
 /**
- * Extract the double complex type from a SIDL.DoubleComplex object.
+ * Extract the double complex type from a sidl.DoubleComplex object.
  */
-struct SIDL_dcomplex SIDL_Java_J2I_dcomplex(
+struct sidl_dcomplex sidl_Java_J2I_dcomplex(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Create and return a SIDL.DoubleComplex object from a SIDL double
+ * Create and return a sidl.DoubleComplex object from a sidl double
  * complex value.
  */
-jobject SIDL_Java_I2J_dcomplex(
+jobject sidl_Java_I2J_dcomplex(
   JNIEnv* env,
-  struct SIDL_dcomplex* value);
+  struct sidl_dcomplex* value);
 
 /**
- * Extract the float complex type from a SIDL.FloatComplex object.
+ * Extract the float complex type from a sidl.FloatComplex object.
  */
-struct SIDL_fcomplex SIDL_Java_J2I_fcomplex(
+struct sidl_fcomplex sidl_Java_J2I_fcomplex(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Create and return a SIDL.FloatComplex object from a SIDL float
+ * Create and return a sidl.FloatComplex object from a sidl float
  * complex value.
  */
-jobject SIDL_Java_I2J_fcomplex(
+jobject sidl_Java_I2J_fcomplex(
   JNIEnv* env,
-  struct SIDL_fcomplex* value);
+  struct sidl_fcomplex* value);
 
 /**
- * Extract the string type from the SIDL.String.Holder holder class.  The
+ * Extract the string type from the sidl.String.Holder holder class.  The
  * string returned by this function must be freed by the system free() routine
- * or SIDL_String_free().
+ * or sidl_String_free().
  */
-char* SIDL_Java_J2I_string_holder(
+char* sidl_Java_J2I_string_holder(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Set the string type in the SIDL.String.Holder holder class.  An internal
+ * Set the string type in the sidl.String.Holder holder class.  An internal
  * copy is made of the string argument; therefore, the caller must free it
  * to avoid a memory leak.
  */
-void SIDL_Java_I2J_string_holder(
+void sidl_Java_I2J_string_holder(
   JNIEnv* env,
   jobject obj,
   const char* value);
@@ -255,9 +279,9 @@ void SIDL_Java_I2J_string_holder(
 /**
  * Extract the string type from the java.lang.String object.  The string
  * returned by this function must be freed by the system free() routine
- * or SIDL_String_free().
+ * or sidl_String_free().
  */
-char* SIDL_Java_J2I_string(
+char* sidl_Java_J2I_string(
   JNIEnv* env,
   jstring str);
 
@@ -266,7 +290,7 @@ char* SIDL_Java_J2I_string(
  * internal copy is made of the string argument; therefore, the caller must
  * free it to avoid a memory leak.
  */
-jstring SIDL_Java_I2J_string(
+jstring sidl_Java_I2J_string(
   JNIEnv* env,
   const char* value);
 
@@ -275,7 +299,7 @@ jstring SIDL_Java_I2J_string(
  * returned by this function will need to be cast to the appropriate IOR
  * type.  The name of the held class must be provided in the java_name.
  */
-void* SIDL_Java_J2I_cls_holder(
+void* sidl_Java_J2I_cls_holder(
   JNIEnv* env,
   jobject obj,
   const char* java_name);
@@ -284,7 +308,7 @@ void* SIDL_Java_J2I_cls_holder(
  * Set the IOR class type in the holder class.  The name of the held class
  * must be provided in the java_name.
  */
-void SIDL_Java_I2J_cls_holder(
+void sidl_Java_I2J_cls_holder(
   JNIEnv* env,
   jobject obj,
   void* value,
@@ -295,15 +319,15 @@ void SIDL_Java_I2J_cls_holder(
  * type returned by this function will need to be cast to the appropriate
  * IOR type.
  */
-void* SIDL_Java_J2I_cls(
+void* sidl_Java_J2I_cls(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Create a new Java class object to represent the SIDL class.  The Java
+ * Create a new Java class object to represent the sidl class.  The Java
  * class name must be supplied in the java_name argument.
  */
-jobject SIDL_Java_I2J_cls(
+jobject sidl_Java_I2J_cls(
   JNIEnv* env,
   void* value,
   const char* java_name);
@@ -313,7 +337,7 @@ jobject SIDL_Java_I2J_cls(
  * type returned by this function will need to be cast to the appropriate IOR
  * type.  The name of the held class must be provided in the java_name.
  */
-void* SIDL_Java_J2I_ifc_holder(
+void* sidl_Java_J2I_ifc_holder(
   JNIEnv* env,
   jobject obj,
   const char* java_name);
@@ -322,7 +346,7 @@ void* SIDL_Java_J2I_ifc_holder(
  * Set the IOR interface type in the holder class.  The name of the held
  * interface must be provided in the java_name.
  */
-void SIDL_Java_I2J_ifc_holder(
+void sidl_Java_I2J_ifc_holder(
   JNIEnv* env,
   jobject obj,
   void* value,
@@ -331,58 +355,111 @@ void SIDL_Java_I2J_ifc_holder(
 /**
  * Extract the IOR interface type from the Java interface wrapper.  The
  * IOR interface type returned by this function will need to be cast to the
- * appropriate IOR type.  The SIDL name of the desired interface must be
+ * appropriate IOR type.  The sidl name of the desired interface must be
  * provided in the sidl_name.
  */
-void* SIDL_Java_J2I_ifc(
+void* sidl_Java_J2I_ifc(
   JNIEnv* env,
   jobject obj,
   const char* sidl_name);
 
 /**
- * Create a new Java object to represent the SIDL interface.  The Java
+ * Create a new Java object to represent the sidl interface.  The Java
  * class name must be supplied in the java_name argument.
  */
-jobject SIDL_Java_I2J_ifc(
+jobject sidl_Java_I2J_ifc(
   JNIEnv* env,
   void* value,
   const char* java_name);
 
 /**
- * Extract the SIDL array pointer from the Java array object.  This method
- * simply "borrows" the pointer; the SIDL array remains the owner of the array
+ * Create a new Java object to represent the sidl interface.  The Java
+ * class name must be supplied in the java_name argument.
+ *
+ * This function is ONLY FOR GETTING OBJECT OUT OF ARRAYS.  It's been created 
+ * as a hack to get around a refcount problem in Java.  Basically, all objects
+ * on creation need to be refcounted before they are passed to java, however,
+ * objects that come from arrays have already by the IOR Array.  The is the 
+ * same function as sidl_Java_I2J_ifc but without the addRef.
+ * 
+ */
+jobject sidl_Java_Array2J_ifc(
+  JNIEnv* env,
+  void* value,
+  const char* java_name);
+
+
+/*
+ * Set the IOR class type in the holder class.  The name of the held array
+ * must be provided in the java_name.
+ */
+void sidl_Java_I2J_array_holder(
+  JNIEnv* env,
+  jobject obj,
+  void* value,
+  const char* java_name);
+
+/*
+ * Extract the IOR array type from the holder class.  The IOR array type
+ * returned by this function will need to be cast to the appropriate IOR
+ * type.  The name of the held class must be provided in the java_name.
+ */
+void* sidl_Java_J2I_array_holder(
+  JNIEnv* env,
+  jobject obj,
+  const char* java_name);
+
+/**
+ * Extract the sidl array pointer from the Java array object.  This method
+ * simply "borrows" the pointer; the sidl array remains the owner of the array
  * data.  This is used for "in" arguments.
  */
-void* SIDL_Java_J2I_borrow_array(
+void* sidl_Java_J2I_borrow_array(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Extract the SIDL array pointer from the Java array object.  This method
- * "takes" the pointer; responsibility for the SIDL array is transferred to
- * the IOR code.  This is used for "inout" arguments.
+ * Extract the sidl array pointer from the Java array object AND addRef it.
+ * This is used for "inout" arguments.
  */
-void* SIDL_Java_J2I_take_array(
+void* sidl_Java_J2I_take_array(
   JNIEnv* env,
   jobject obj);
 
 /**
- * Change the current Java array object to point to the specified SIDL
+ * Change the current Java array object to point to the specified sidl
  * IOR object. 
  */
-void SIDL_Java_I2J_set_array(
+void sidl_Java_I2J_set_array(
   JNIEnv* env,
   jobject obj,
   void* value);
 
 /**
- * Create a new array object from the SIDL IOR object.  The array_name
+ * Create a new array object from the sidl IOR object.  The array_name
  * argument must provide the name of the Java array type.
  */
-jobject SIDL_Java_I2J_new_array(
+jobject sidl_Java_I2J_new_array(
   JNIEnv* env,
   void* value,
   const char* array_name);
+
+/**
+ * Create a new array object from the sidl IOR object.  The array_name
+ * argument must provide the name of the Java array type.
+ */
+jobject sidl_Java_I2J_new_array_server(
+  JNIEnv* env,
+  void* value,
+  const char* array_name);
+
+/*
+ * Create an empty Java object of the given name.  Good for cerating holders 
+ */
+
+jobject sidl_Java_create_empty_class(
+  JNIEnv* env,
+  const char* java_name);
 
 #ifdef __cplusplus
 }

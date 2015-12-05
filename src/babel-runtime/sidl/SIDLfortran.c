@@ -1,8 +1,7 @@
 /*
- * File:        SIDLfortran.c
- * Release:     $Name: V1-9-0b $
- * Revision:    @(#) $Revision: 1.4 $
- * Date:        $Date: 2003/04/07 21:44:31 $
+ * File:        sidlfortran.c
+ * Revision:    @(#) $Revision: 1.7 $
+ * Date:        $Date: 2006/08/29 22:29:52 $
  * Description: Functions for FORTRAN interoperability
  *
  * Copyright (c) 2000-2002, The Regents of the University of Calfornia.
@@ -30,7 +29,7 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#include "SIDLfortran.h"
+#include "sidlfortran.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -39,7 +38,7 @@
  * characters. 
  */
 char *
-SIDL_copy_fortran_str(const char * restrict fstr,
+sidl_copy_fortran_str(const char * restrict fstr,
                       int                   flen)
 {
   char *result;
@@ -57,7 +56,7 @@ SIDL_copy_fortran_str(const char * restrict fstr,
 }
 
 void
-SIDL_copy_c_str(char * restrict       fstr,
+sidl_copy_c_str(char * restrict       fstr,
                 int                   flen,
                 const char * restrict cstr)
 {
@@ -73,7 +72,7 @@ SIDL_copy_c_str(char * restrict       fstr,
 } 
                 
 void
-SIDL_copy_ior_str(char      **newfstr,
+sidl_copy_ior_str(char      **newfstr,
                   int        *newflen,
                   const char *iorstr,
                   const int   minsize)
@@ -100,7 +99,7 @@ SIDL_copy_ior_str(char      **newfstr,
 }
 
 char *
-SIDL_trim_trailing_space(char * restrict buffer,
+sidl_trim_trailing_space(char * restrict buffer,
                          int             buflen)
 {
   if (buflen >= 0 && buffer) {

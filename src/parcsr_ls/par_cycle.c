@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1996   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.14 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.19 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 /******************************************************************************
  *
@@ -15,6 +35,7 @@
 
 #include "headers.h"
 #include "par_amg.h"
+#include "par_csr_block_matrix.h"
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCycle
@@ -42,6 +63,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    hypre_ParVector    *Aux_U;
    hypre_ParVector    *Aux_F;
 
+   hypre_ParCSRBlockMatrix    **A_block_array;
+   hypre_ParCSRBlockMatrix    **P_block_array;
+   hypre_ParCSRBlockMatrix    **R_block_array;
+
    double   *Ztemp_data;
    double   *Ptemp_data;
    int     **CF_marker_array;
@@ -49,15 +74,19 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    int     **point_map_array;
    int     **v_at_point_array; */
 
-   int       cycle_op_count;   
+   double    cycle_op_count;   
    int       cycle_type;
    int       num_levels;
    int       max_levels;
 
-   int      *num_coeffs;
+   double   *num_coeffs;
    int      *num_grid_sweeps;   
    int      *grid_relax_type;   
    int     **grid_relax_points;  
+
+   int     block_mode;
+   
+
  /* Local variables  */ 
    int      *lev_counter;
    int       Solve_err_flag;
@@ -105,6 +134,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    max_levels        = hypre_ParAMGDataMaxLevels(amg_data);
    cycle_type        = hypre_ParAMGDataCycleType(amg_data);
 
+   A_block_array     = hypre_ParAMGDataABlockArray(amg_data);
+   P_block_array     = hypre_ParAMGDataPBlockArray(amg_data);
+   R_block_array     = hypre_ParAMGDataRBlockArray(amg_data);
+   block_mode        = hypre_ParAMGDataBlockMode(amg_data);
+
    num_grid_sweeps     = hypre_ParAMGDataNumGridSweeps(amg_data);
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
    grid_relax_points   = hypre_ParAMGDataGridRelaxPoints(amg_data);
@@ -125,13 +159,23 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    if (grid_relax_points) old_version = 1;
 
-   num_coeffs = hypre_CTAlloc(int, num_levels);
-   num_coeffs[0]    = hypre_ParCSRMatrixNumNonzeros(A_array[0]);
+   num_coeffs = hypre_CTAlloc(double, num_levels);
+   num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    comm = hypre_ParCSRMatrixComm(A_array[0]);
 
-   for (j = 1; j < num_levels; j++)
-      num_coeffs[j] = hypre_ParCSRMatrixNumNonzeros(A_array[j]);
-
+   if (block_mode)
+   {
+      for (j = 1; j < num_levels; j++)
+         num_coeffs[j] = hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
+      
+   }
+   else 
+   {
+       for (j = 1; j < num_levels; j++)
+         num_coeffs[j] = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
+   }
+   
+   
    /*---------------------------------------------------------------------
     *    Initialize cycling control counter
     *
@@ -321,16 +365,34 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 	    }
 	    else 
 	    {
-               Solve_err_flag = hypre_BoomerAMGRelaxIF(A_array[level], 
-                                            Aux_F,
-                                            CF_marker_array[level],
-                                            relax_type,
-                                            relax_local,
-                                            cycle_param,
-                                            relax_weight[level],
-                                            omega[level],
-                                            Aux_U,
-                                            Vtemp);
+               if (block_mode)
+               {
+
+                     Solve_err_flag = hypre_BoomerAMGBlockRelaxIF(A_block_array[level], 
+                                                                  Aux_F,
+                                                                  CF_marker_array[level],
+                                                                  relax_type,
+                                                                  relax_local,
+                                                                  cycle_param,
+                                                                  relax_weight[level],
+                                                                  omega[level],
+                                                                  Aux_U,
+                                                                  Vtemp);
+               }
+               else
+               {
+                  Solve_err_flag = hypre_BoomerAMGRelaxIF(A_array[level], 
+                                                          Aux_F,
+                                                          CF_marker_array[level],
+                                                          relax_type,
+                                                          relax_local,
+                                                          cycle_param,
+                                                          relax_weight[level],
+                                                          omega[level],
+                                                          Aux_U,
+                                                          Vtemp);
+               }
+               
 	    }
  
             if (Solve_err_flag != 0)
@@ -380,14 +442,31 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
          alpha = -1.0;
          beta = 1.0;
-         hypre_ParCSRMatrixMatvec(alpha, A_array[fine_grid], U_array[fine_grid],
-                         beta, Vtemp);
+
+         if (block_mode)
+         {
+            hypre_ParCSRBlockMatrixMatvec(alpha, A_block_array[fine_grid], U_array[fine_grid],
+                                          beta, Vtemp);
+         }
+         else 
+         {
+            hypre_ParCSRMatrixMatvec(alpha, A_array[fine_grid], U_array[fine_grid],
+                                     beta, Vtemp);
+         }
 
          alpha = 1.0;
          beta = 0.0;
 
-         hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
-                          beta,F_array[coarse_grid]);
+         if (block_mode)
+         {
+            hypre_ParCSRBlockMatrixMatvecT(alpha,R_block_array[fine_grid],Vtemp,
+                                      beta,F_array[coarse_grid]);
+         }
+         else
+         {
+            hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
+                                      beta,F_array[coarse_grid]);
+         }
 
          ++level;
          lev_counter[level] = hypre_max(lev_counter[level],cycle_type);
@@ -407,11 +486,19 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          coarse_grid = level;
          alpha = 1.0;
          beta = 1.0;
-
-         hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid], 
-			 U_array[coarse_grid],
-                         beta, U_array[fine_grid]);            
- 
+         if (block_mode)
+         {
+            hypre_ParCSRBlockMatrixMatvec(alpha, P_block_array[fine_grid], 
+                                     U_array[coarse_grid],
+                                     beta, U_array[fine_grid]);   
+         }
+         else 
+         {
+            hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid], 
+                                     U_array[coarse_grid],
+                                     beta, U_array[fine_grid]);            
+         }
+         
          --level;
          cycle_param = 2;
          if (level == 0) cycle_param = 0;

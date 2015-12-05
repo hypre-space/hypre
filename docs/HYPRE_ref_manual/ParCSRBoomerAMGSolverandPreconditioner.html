@@ -126,6 +126,10 @@ on the user defined level</I>
  <DD><I>
 (Optional)</I>
 <DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGGetResidual</B>(HYPRE_Solver solver, HYPRE_ParVector * residual)
+ <DD><I>
+Returns the residual</I>
+<DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGGetNumIterations</B>(HYPRE_Solver solver, int *num_iterations)
  <DD><I>
 Returns the number of iterations taken</I>
@@ -137,6 +141,10 @@ Returns the norm of the final relative residual</I>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetTruncFactor.html><B>HYPRE_BoomerAMGSetTruncFactor</B></A> 
  <DD><I>
 (Optional) Defines a truncation factor for the interpolation</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetPMaxElmts.html><B>HYPRE_BoomerAMGSetPMaxElmts</B></A> 
+ <DD><I>
+(Optional) Defines the maximal number of elements per row for the interpolation</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetSCommPkgSwitch.html><B>HYPRE_BoomerAMGSetSCommPkgSwitch</B></A> 
  <DD><I>
@@ -155,10 +163,9 @@ the strength matrix S uses the communication package of the operator A</I>
  <DD><I>
 (Optional) Sets the number of sweeps for more complex smoothers</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BoomerAMGSetPrintLevel</B>(HYPRE_Solver solver, int print_level)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetPrintLevel.html><B>HYPRE_BoomerAMGSetPrintLevel</B></A> 
  <DD><I>
-(Optional) Requests automatic printing of solver performance and
-debugging data; default to 0 for no printing</I>
+(Optional) Requests automatic printing of setup and solve information</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetLogging.html><B>HYPRE_BoomerAMGSetLogging</B></A> 
  <DD><I>
@@ -177,6 +184,14 @@ data to be logged by the user</I>
  <DD><I>
 (Optional) Sets the mapping that assigns the function to each variable, 
 if using the systems version</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetAggNumLevels.html><B>HYPRE_BoomerAMGSetAggNumLevels</B></A> 
+ <DD><I>
+(Optional) Defines the number of levels of aggressive coarsening</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetNumPaths.html><B>HYPRE_BoomerAMGSetNumPaths</B></A> 
+ <DD><I>
+(Optional) Defines the degree of aggressive coarsening</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BoomerAMGSetVariant.html><B>HYPRE_BoomerAMGSetVariant</B></A> 
  <DD><I>

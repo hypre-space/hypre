@@ -1,8 +1,7 @@
 /*
- * File:        SIDLfortran.h
- * Release:     $Name: V1-9-0b $
- * Revision:    @(#) $Revision: 1.4 $
- * Date:        $Date: 2003/04/07 21:44:31 $
+ * File:        sidlfortran.h
+ * Revision:    @(#) $Revision: 1.7 $
+ * Date:        $Date: 2006/08/29 22:29:52 $
  * Description: Macros for FORTRAN interoperability
  *
  * Copyright (c) 2000-2002, The Regents of the University of Calfornia.
@@ -30,8 +29,8 @@
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-#ifndef included_SIDLfortran_h
-#define included_SIDLfortran_h
+#ifndef included_sidlfortran_h
+#define included_sidlfortran_h
 
 #ifndef included_babel_config_h
 #include "babel_config.h"
@@ -135,7 +134,7 @@ struct SIDL_F77_String_t {
 #endif
 #endif
 #define SIDL_F77_STR_COPY(localvar,argvar,minsize) \
-  SIDL_copy_ior_str(&(SIDL_F77_STR_LOCAL_STR(localvar)), \
+  sidl_copy_ior_str(&(SIDL_F77_STR_LOCAL_STR(localvar)), \
                     &(SIDL_F77_STR_LOCAL_LEN(localvar)), \
                     (argvar), (minsize))
 
@@ -246,7 +245,7 @@ struct SIDL_F90_String_t {
 #endif
 #endif
 #define SIDL_F90_STR_COPY(localvar,argvar,minsize) \
-  SIDL_copy_ior_str(&(SIDL_F90_STR_LOCAL_STR(localvar)), \
+  sidl_copy_ior_str(&(SIDL_F90_STR_LOCAL_STR(localvar)), \
                     &(SIDL_F90_STR_LOCAL_LEN(localvar)), \
                     (argvar), (minsize))
 
@@ -276,7 +275,7 @@ extern "C" { /*}*/
  * trailing space characters in fstr are left out of the copy.
  */
 char *
-SIDL_copy_fortran_str(const char *fstr,
+sidl_copy_fortran_str(const char *fstr,
                       int         flen);
 
 /*
@@ -286,7 +285,7 @@ SIDL_copy_fortran_str(const char *fstr,
  * the C string are copied.
  */
 void
-SIDL_copy_c_str(char       *fstr,
+sidl_copy_c_str(char       *fstr,
                 int         flen,
                 const char *cstr);
 
@@ -305,7 +304,7 @@ SIDL_copy_c_str(char       *fstr,
  * minsize - 1 leaving the nul character untouched.
  */
 void
-SIDL_copy_ior_str(char      **newfstr, 
+sidl_copy_ior_str(char      **newfstr, 
                   int        *newflen,
                   const char *iorstr,
                   const int   minsize);
@@ -319,10 +318,10 @@ SIDL_copy_ior_str(char      **newfstr,
  * It returns buffer.
  */
 char *
-SIDL_trim_trailing_space(char *buffer,
+sidl_trim_trailing_space(char *buffer,
                          int   buflen);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* included_SIDLfortran_h */
+#endif /* included_sidlfortran_h */

@@ -1,3 +1,31 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.6 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *  FAC composite level interpolation.
  *  Identity interpolation of values away from underlying refinement patches;
@@ -12,8 +40,8 @@
 typedef struct
 {
    int                   nvars;
+   int                   ndim;
    hypre_Index           stride;
-   hypre_StructStencil  *stencil;
 
    hypre_SStructPVector *recv_cvectors;
    int                 **recv_boxnum_map;   /* mapping between the boxes of the
@@ -23,8 +51,9 @@ typedef struct
    int                ***own_cboxnums;
 
    hypre_CommPkg       **interlevel_comm;
-   hypre_ComputePkg    **compute_pkg; 
    hypre_CommPkg       **gnodes_comm_pkg;
+
+   double              **weights;
 
 } hypre_FacSemiInterpData2;
 
@@ -56,7 +85,6 @@ hypre_FacSemiInterpDestroy2( void *fac_interp_vdata)
 
    if (fac_interp_data)
    {
-      hypre_StructStencilDestroy(fac_interp_data-> stencil);
       hypre_SStructPVectorDestroy(fac_interp_data-> recv_cvectors);
 
       for (i= 0; i< (fac_interp_data-> nvars); i++)
@@ -72,7 +100,6 @@ hypre_FacSemiInterpDestroy2( void *fac_interp_vdata)
          }
          hypre_TFree(fac_interp_data -> own_cboxnums[i]);
 
-         hypre_ComputePkgDestroy(fac_interp_data -> compute_pkg[i]);
          hypre_CommPkgDestroy(fac_interp_data -> gnodes_comm_pkg[i]);
          hypre_CommPkgDestroy(fac_interp_data -> interlevel_comm[i]);
 
@@ -82,9 +109,14 @@ hypre_FacSemiInterpDestroy2( void *fac_interp_vdata)
       hypre_TFree(fac_interp_data -> ownboxes);
       hypre_TFree(fac_interp_data -> own_cboxnums);
 
-      hypre_TFree(fac_interp_data -> compute_pkg);
       hypre_TFree(fac_interp_data -> gnodes_comm_pkg);
       hypre_TFree(fac_interp_data -> interlevel_comm);
+
+      for (i= 0; i< (fac_interp_data -> ndim); i++)
+      {
+         hypre_TFree(fac_interp_data -> weights[i]);
+      }
+      hypre_TFree(fac_interp_data -> weights);
 
       hypre_TFree(fac_interp_data);
    }
@@ -109,9 +141,6 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    int                       part_fine= 1;
    int                       part_crse= 0;
 
-   hypre_StructStencil      *stencil;
-   hypre_ComputePkg        **compute_pkg;
-   hypre_ComputeInfo        *compute_info;
    hypre_CommPkg           **gnodes_comm_pkg;
    hypre_CommPkg           **interlevel_comm;
    hypre_CommInfo           *comm_info;
@@ -122,7 +151,6 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    hypre_SStructGrid        *temp_grid;
 
    hypre_SStructPGrid       *pgrid;
-   hypre_StructGrid         *grid;
 
    hypre_SStructPVector     *ef= hypre_SStructVectorPVector(e, part_fine);
    hypre_StructVector       *e_var, *s_rc, *s_cvector;
@@ -136,6 +164,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
 
    hypre_BoxArrayArray     **recv_boxes;
    int                    ***recv_processes;
+   int                    ***recv_remote_boxnums;
 
    hypre_BoxArray           *boxarray;
    hypre_BoxArray           *tmp_boxarray, *intersect_boxes;
@@ -149,15 +178,18 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    int                       nvars= hypre_SStructPVectorNVars(ef);
    int                       vars;
 
-   hypre_Index              *stencil_shape, zero_index, index;
+   hypre_Index               zero_index, index;
    hypre_Index               ilower, iupper;
    int                      *num_ghost;
-   int                       stencil_size;
 
-   int                       ndim, i, j, k, l, fi, ci;
+   int                       ndim, i, j, k, fi, ci;
    int                       cnt1, cnt2;
    int                       proc, myproc, tot_procs;
    int                       num_values;
+
+   double                  **weights;
+   double                    refine_factors_2recp[3];
+   hypre_Index               refine_factors_half;
 
    MPI_Comm_rank(MPI_COMM_WORLD, &myproc);
    MPI_Comm_size(MPI_COMM_WORLD, &tot_procs);
@@ -172,47 +204,6 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
     * stencil pattern for each StructVector, i.e., linear interpolation for
     * each variable.
     *------------------------------------------------------------------------*/
-   stencil_size= 1;
-   for (i= 0; i< ndim; i++)
-   {
-      stencil_size*= 2*rfactors[i] - 1;
-   }
-
-   /* ignore the centre stencil */
-   stencil_size-= 1;
- 
-   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
-
-   stencil_size= 0;
-   for (k= -rfactors[2]+1; k<= rfactors[2]-1; k++)
-   {
-      for (j= -rfactors[1]+1; j<= rfactors[1]-1; j++)
-      {
-         for (i= -rfactors[0]+1; i<= rfactors[0]-1; i++)
-         {
-            l= abs(i) + abs(j) + abs(k);
-            if (l)
-            {
-               hypre_SetIndex(stencil_shape[stencil_size], i, j, k);
-               stencil_size++;
-            }
-         }
-      }
-   }
-
-   stencil= hypre_StructStencilCreate(ndim, stencil_size, stencil_shape);
-
-   compute_pkg= hypre_CTAlloc(hypre_ComputePkg *, nvars);
-   for (vars= 0; vars< nvars; vars++)
-   {
-      e_var= hypre_SStructPVectorSVector(ef, vars);
-      grid = hypre_StructVectorGrid(e_var);
-
-      hypre_CreateComputeInfo(grid, stencil, &compute_info);
-      hypre_ComputePkgCreate(compute_info, hypre_StructVectorDataSpace(e_var), 1,
-                             grid, &compute_pkg[vars]);
-   }
-      
    gnodes_comm_pkg= hypre_CTAlloc(hypre_CommPkg *, nvars);
    for (vars= 0; vars< nvars; vars++)
    {
@@ -228,9 +219,8 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
                           hypre_StructVectorComm(e_var), &gnodes_comm_pkg[vars]);
    }
 
+  (fac_interp_data -> ndim)           = ndim;
   (fac_interp_data -> nvars)          = nvars;
-  (fac_interp_data -> stencil)        = stencil;
-  (fac_interp_data -> compute_pkg)    = compute_pkg;
   (fac_interp_data -> gnodes_comm_pkg)= gnodes_comm_pkg;
    hypre_CopyIndex(rfactors, (fac_interp_data -> stride));
 
@@ -257,7 +247,11 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    identity_arrayboxes= hypre_CTAlloc(hypre_BoxArrayArray *, nvars);
 
    pgrid= hypre_SStructPVectorPGrid(ec);
-   hypre_SetIndex(index, rfactors[0]-1, rfactors[1]-1, rfactors[2]-1);
+   hypre_ClearIndex(index);
+   for (i= 0; i< ndim; i++)
+   {
+      index[i]= rfactors[i]-1;
+   }
 
    tmp_boxarray = hypre_BoxArrayCreate(0);
    for (vars= 0; vars< nvars; vars++)
@@ -328,7 +322,14 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    recv_boxes= hypre_CTAlloc(hypre_BoxArrayArray *, nvars);
    recv_processes= hypre_CTAlloc(int **, nvars);
 
-   hypre_SetIndex(index, 1, 1, 1);
+   /* dummy pointer for CommInfoCreate */
+   recv_remote_boxnums= hypre_CTAlloc(int **, nvars);
+   hypre_ClearIndex(index);
+   for (i= 0; i< ndim; i++)
+   {
+      index[i]= 1;
+   }
+
    for (vars= 0; vars< nvars; vars++)
    {
       map1= hypre_SStructGridMap(hypre_SStructVectorGrid(e),
@@ -340,6 +341,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
       own_cboxnums[vars]= hypre_CTAlloc(int *, hypre_BoxArraySize(boxarray));
       recv_boxes[vars]    = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
       recv_processes[vars]= hypre_CTAlloc(int *, hypre_BoxArraySize(boxarray));
+      recv_remote_boxnums[vars]= hypre_CTAlloc(int *, hypre_BoxArraySize(boxarray));
 
       hypre_ForBoxI(fi, boxarray)
       {
@@ -382,6 +384,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
 
          own_cboxnums[vars][fi]  = hypre_CTAlloc(int, cnt1);
          recv_processes[vars][fi]= hypre_CTAlloc(int, cnt2);
+         recv_remote_boxnums[vars][fi]= hypre_CTAlloc(int , cnt2);
 
          cnt1= 0; cnt2= 0;
          for (i= 0; i< nmap_entries; i++)
@@ -431,7 +434,11 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    recv_boxnum_map= hypre_CTAlloc(int *, nvars);
 
    cnt2= 0;
-   hypre_SetIndex(index, 1, 1, 1);
+   hypre_ClearIndex(index);
+   for (i= 0; i< ndim; i++)
+   {
+      index[i]= 1;
+   }
    for (vars= 0; vars< nvars; vars++)
    {
       cnt1= 0;
@@ -520,7 +527,11 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
    send_processes= hypre_CTAlloc(int **, nvars);
    send_remote_boxnums= hypre_CTAlloc(int **, nvars);
 
-   hypre_SetIndex(index, 1, 1, 1);
+   hypre_ClearIndex(index);
+   for (i= 0; i< ndim; i++)
+   {
+      index[i]= 1;
+   }
    for (vars= 0; vars< nvars; vars++)
    {
       /*-------------------------------------------------------------------
@@ -604,7 +615,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
 
       hypre_CommInfoCreate(send_boxes[vars], recv_boxes[vars], send_processes[vars],
                            recv_processes[vars], send_remote_boxnums[vars],
-                           send_rboxes, &comm_info);
+                           recv_remote_boxnums[vars], send_rboxes, &comm_info);
 
       hypre_CommPkgCreate(comm_info,
                           hypre_StructVectorDataSpace(s_rc),
@@ -618,10 +629,41 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
   hypre_TFree(send_processes);
   hypre_TFree(recv_processes);
   hypre_TFree(send_remote_boxnums);
+  hypre_TFree(recv_remote_boxnums);
 
   (fac_interp_data -> interlevel_comm)= interlevel_comm;
 
-   return ierr;
+  /* interpolation weights */
+  weights= hypre_TAlloc(double *, ndim);
+  for (i= 0; i< ndim; i++)
+  {
+     weights[i]= hypre_CTAlloc(double, rfactors[i]+1);
+  }
+
+  hypre_ClearIndex(refine_factors_half);
+  hypre_ClearIndex(refine_factors_2recp);
+  for (i= 0; i< ndim; i++)
+  {
+     refine_factors_half[i] = rfactors[i]/2;
+     refine_factors_2recp[i]= 1.0/(2.0*rfactors[i]);
+  }
+ 
+  for (i= 0; i< ndim; i++)
+  {
+     for (j= 0; j<= refine_factors_half[i]; j++)
+     {
+        weights[i][j]= refine_factors_2recp[i]*(rfactors[i] + 2*j - 1.0);
+     }     
+
+     for (j= (refine_factors_half[i]+1); j<= rfactors[i]; j++)
+     {
+        weights[i][j]= refine_factors_2recp[i]*(2*j - rfactors[i] - 1.0);
+     }
+  }
+  (fac_interp_data -> weights)= weights;
+ 
+
+  return ierr;
 }
 
 int
@@ -667,7 +709,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    int                    **recv_boxnum_map= interp_data-> recv_boxnum_map;
    hypre_BoxArrayArray    **ownboxes       = interp_data-> ownboxes;
    int                   ***own_cboxnums   = interp_data-> own_cboxnums;
-   
+   double                 **weights        = interp_data-> weights;
+   int                      ndim           = interp_data-> ndim;
+
    hypre_CommHandle       *comm_handle;
 
    hypre_IndexRef          stride;  /* refinement factors */
@@ -710,16 +754,16 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
    int                     fi, bi;
    int                     loopi, loopj, loopk;
-   int                     nvars, var, ndim;
+   int                     nvars, var;
 
    int                     i, j, k, offset_ip1, offset_jp1, offset_kp1;
    int                     ishift, jshift, kshift;
    int                     ptr_ishift, ptr_jshift, ptr_kshift;
    int                     imax, jmax, kmax;
+   int                     jsize, ksize;
 
    int                     part_fine= 1;
 
-   double                  refine_factors_2recp[3];
    double                  xweight1, xweight2;
    double                  yweight1, yweight2;
    double                  zweight1, zweight2;
@@ -730,12 +774,15 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    stride        = (interp_data -> stride);
 
    hypre_SetIndex(zero_index, 0, 0, 0);
-   hypre_SetIndex(stridec, 1, 1, 1);
    hypre_CopyIndex(stride, refine_factors);
-   for (i= 0; i< 3; i++)
+   for (i= ndim; i< 3; i++)
+   {
+      refine_factors[i]= 1;
+   }
+   hypre_SetIndex(stridec, 1, 1, 1);
+   for (i= 0; i< ndim; i++)
    {
        refine_factors_half[i]= refine_factors[i]/2;
-       refine_factors_2recp[i]   = 1.0/(2.0*refine_factors[i]);
    }
 
    /*-----------------------------------------------------------------------
@@ -764,18 +811,32 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
       }
    }
 
-   ndim =  hypre_SStructVectorNDim(e_parts);
-   e    =  hypre_SStructVectorPVector(e_parts, part_fine);
+   e=  hypre_SStructVectorPVector(e_parts, part_fine);
 
    /*-----------------------------------------------------------------------
     * Allocate memory for the data pointers. Assuming linear interpolation.
     * We stride through the refinement patch by the refinement factors, and 
     * so we must have pointers to the intermediate fine nodes=> ep will
-    * be size refine_factors[2]*refine_factors[1].
-    * Note that we need pointers to 3 coarse nodes per coordinate direction
-    * (total no.= 3^ndim).
+    * be size refine_factors[2]*refine_factors[1]. This holds for all 
+    * dimensions since refine_factors[i]= 1 for i>= ndim.
+    * Note that we need 3 coarse nodes per coordinate direction for the 
+    * interpolating. This is dimensional dependent:
+    *   ndim= 3     kplane= 0,1,2 & jplane= 0,1,2    **ptr size [3][3]
+    *   ndim= 2     kplane= 0     & jplane= 0,1,2    **ptr size [1][3]
+    *   ndim= 1     kplane= 0     & jplane= 0        **ptr size [1][1]
     *-----------------------------------------------------------------------*/
-   xcp  = hypre_TAlloc(double **, 2*ndim-3);
+   ksize= 3; 
+   jsize= 3;
+   if (ndim < 3) 
+   {
+      ksize= 1;
+   }
+   if (ndim < 2)
+   {
+      jsize= 1;
+   }
+  
+   xcp  = hypre_TAlloc(double **, ksize);
    ep   = hypre_TAlloc(double **, refine_factors[2]);
 
    for (k= 0; k< refine_factors[2]; k++)
@@ -783,9 +844,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
       ep[k]= hypre_TAlloc(double *, refine_factors[1]);
    }
 
-   for (k= 0; k< (2*ndim-3); k++)  
+   for (k= 0; k< ksize; k++)  
    {
-      xcp[k]= hypre_TAlloc(double *, 3);
+      xcp[k]= hypre_TAlloc(double *, jsize);
    }
 
    for (var= 0; var< nvars; var++)
@@ -828,8 +889,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
               ownbox= hypre_BoxArrayBox(own_abox, bi);
               hypre_StructMapCoarseToFine(hypre_BoxIMin(ownbox), zero_index,
                                           refine_factors, hypre_BoxIMin(&refined_box));
-              hypre_SetIndex(temp_index1, refine_factors[0]-1, refine_factors[1]-1,
-                             refine_factors[2]-1);
+              hypre_ClearIndex(temp_index1);
+              for (j= 0; j< ndim; j++)
+              {
+                 temp_index1[j]= refine_factors[j]-1;
+              }
               hypre_StructMapCoarseToFine(hypre_BoxIMax(ownbox), temp_index1,
                                           refine_factors, hypre_BoxIMax(&refined_box));
               hypre_IntersectBoxes(fbox, &refined_box, &intersect_box);
@@ -861,19 +925,20 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
               * completely in the fbox are included, start is always divisible 
               * by refine_factors. We do the calculation anyways for future changes.
               *------------------------------------------------------------------*/
-              for (i= 0; i< 3; i++)
+              hypre_ClearIndex(start_offset);
+              for (i= 0; i< ndim; i++)
               {
                  start_offset[i]= start[i] % refine_factors[i];
               }
 
               ptr_kshift= 0;
-              if ( (start[2]%refine_factors[2] < refine_factors_half[2]) && ndim > 2 )
+              if ( (start[2]%refine_factors[2] < refine_factors_half[2]) && ndim == 3 )
               {
                  ptr_kshift= -1;
               }
 
               ptr_jshift= 0;
-              if ( start[1]%refine_factors[1] < refine_factors_half[1] ) 
+              if ( start[1]%refine_factors[1] < refine_factors_half[1] && ndim >= 2 ) 
               {
                  ptr_jshift= -1;
               }
@@ -884,9 +949,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                  ptr_ishift= -1;
               }
 
-              for (k= 0; k< (2*ndim-3); k++)
+              for (k= 0; k< ksize; k++)
               {
-                 for (j=0; j< 3; j++)
+                 for (j=0; j< jsize; j++)
                  {
                     hypre_SetIndex(temp_index2, ptr_ishift, j+ptr_jshift, k+ptr_kshift);
                     xcp[k][j]= hypre_StructVectorBoxData(xc_var, cboxnums[bi]) +
@@ -928,8 +993,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                          {
                             if (offset_kp1 <= refine_factors_half[2])
                             {
-                               zweight2= refine_factors_2recp[2]*
-                                         (refine_factors[2] + 2*offset_kp1 - 1.0);
+                               zweight2= weights[2][offset_kp1];
                                kshift= 0;
                             }
                             else
@@ -938,14 +1002,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                if (offset_kp1 >  refine_factors_half[2] && 
                                    offset_kp1 <= refine_factors[2])
                                {
-                                  zweight2= refine_factors_2recp[2]*
-                                            (2*offset_kp1-refine_factors[2] - 1.0);
+                                  zweight2= weights[2][offset_kp1];
                                }
                                else
                                {
-                                  zweight2= refine_factors_2recp[2]*
-                                           (refine_factors[2] + 2*(offset_kp1-refine_factors[2])
-                                           - 1.0);
+                                  zweight2= weights[2][offset_kp1-refine_factors[2]];
                                }
                             }
                             zweight1= 1.0 - zweight2;
@@ -956,8 +1017,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                             if (offset_kp1 > refine_factors_half[2] && 
                                 offset_kp1 <= refine_factors[2])
                             {
-                               zweight2= refine_factors_2recp[2]*
-                                         (2*offset_kp1-refine_factors[2] - 1.0);
+                               zweight2= weights[2][offset_kp1];
                                kshift= 0;
                             }
                             else
@@ -966,13 +1026,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                offset_kp1-= refine_factors[2];
                                if (offset_kp1 > 0 && offset_kp1 <= refine_factors_half[2])
                                {
-                                  zweight2= refine_factors_2recp[2]*
-                                            (refine_factors[2] + 2*offset_kp1 - 1.0);
+                                  zweight2= weights[2][offset_kp1];
                                }
                                else
                                {
-                                  zweight2= refine_factors_2recp[2]*
-                                            (2*offset_kp1-refine_factors[2] - 1.0);
+                                  zweight2= weights[2][offset_kp1];
                                   kshift  = 1;
                                }
                             }
@@ -982,62 +1040,58 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
                       for (j= 0; j< jmax; j++)
                       {
-                         offset_jp1= start_offset[1]+j+1;
-
-                         if (ptr_jshift == -1)
+                         if (ndim >= 2)
                          {
-                            if (offset_jp1 <= refine_factors_half[1])
+                            offset_jp1= start_offset[1]+j+1;
+
+                            if (ptr_jshift == -1)
                             {
-                               yweight2= refine_factors_2recp[1]*
-                                         (refine_factors[1] + 2*offset_jp1 - 1.0);
-                               jshift= 0;
+                               if (offset_jp1 <= refine_factors_half[1])
+                               {
+                                  yweight2= weights[1][offset_jp1];
+                                  jshift= 0;
+                               }
+                               else
+                               {
+                                  jshift= 1;
+                                  if (offset_jp1 >  refine_factors_half[1] &&
+                                      offset_jp1 <= refine_factors[1])
+                                  {
+                                     yweight2= weights[1][offset_jp1];
+                                  }
+                                  else
+                                  {
+                                     yweight2= weights[1][offset_jp1-refine_factors[1]];
+                                  }
+                               }
+                               yweight1= 1.0 - yweight2;
                             }
+
                             else
                             {
-                               jshift= 1;
-                               if (offset_jp1 >  refine_factors_half[1] &&
+                               if (offset_jp1 > refine_factors_half[1] && 
                                    offset_jp1 <= refine_factors[1])
                                {
-                                  yweight2= refine_factors_2recp[1]*
-                                            (2*offset_jp1-refine_factors[1] - 1.0);
+                                  yweight2= weights[1][offset_jp1];
+                                  jshift= 0;
                                }
                                else
                                {
-                                  yweight2= refine_factors_2recp[1]*
-                                          (refine_factors[1] + 2*(offset_jp1-refine_factors[1])
-                                          - 1.0);
+                                  jshift= 0;
+                                  offset_jp1-= refine_factors[1];
+                                  if (offset_jp1 > 0 && offset_jp1 <= refine_factors_half[1])
+                                  {
+                                     yweight2= weights[1][offset_jp1];
+                                  }
+                                  else
+                                  {
+                                     yweight2= weights[1][offset_jp1];
+                                     jshift  = 1;
+                                  }
                                }
+                               yweight1= 1.0 - yweight2;
                             }
-                            yweight1= 1.0 - yweight2;
-                         }
-
-                         else
-                         {
-                            if (offset_jp1 > refine_factors_half[1] && 
-                                offset_jp1 <= refine_factors[1])
-                            {
-                               yweight2= refine_factors_2recp[1]*
-                                         (2*offset_jp1-refine_factors[1] - 1.0);
-                               jshift= 0;
-                            }
-                            else
-                            {
-                               jshift= 0;
-                               offset_jp1-= refine_factors[1];
-                               if (offset_jp1 > 0 && offset_jp1 <= refine_factors_half[1])
-                               {
-                                  yweight2= refine_factors_2recp[1]*
-                                            (refine_factors[1] + 2*offset_jp1 - 1.0);
-                               }
-                               else
-                               {
-                                  yweight2= refine_factors_2recp[1]*
-                                            (2*offset_jp1-refine_factors[1] - 1.0);
-                                  jshift  = 1;
-                               }
-                            }
-                            yweight1= 1.0 - yweight2;
-                         }
+                         }     /* if (ndim >= 2) */
 
                          for (i= 0; i< imax; i++)
                          {
@@ -1047,8 +1101,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                             {
                                if (offset_ip1 <= refine_factors_half[0])
                                {
-                                  xweight2= refine_factors_2recp[0]*
-                                         (refine_factors[0] + 2*offset_ip1 - 1.0);
+                                  xweight2= weights[0][offset_ip1];
                                   ishift= 0;
                                }
                                else
@@ -1057,14 +1110,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                   if (offset_ip1 >  refine_factors_half[0] &&
                                       offset_ip1 <= refine_factors[0])
                                   {
-                                     xweight2= refine_factors_2recp[0]*
-                                               (2*offset_ip1-refine_factors[0] - 1.0);
+                                     xweight2= weights[0][offset_ip1];
                                   }
                                   else
                                   {
-                                     xweight2= refine_factors_2recp[0]*
-                                            (refine_factors[0] + 2*(offset_ip1-refine_factors[0])
-                                            - 1.0);
+                                     xweight2= weights[0][offset_ip1-refine_factors[0]];
                                   }
                                }
                                xweight1= 1.0 - xweight2;
@@ -1075,8 +1125,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                if (offset_ip1 > refine_factors_half[0] &&
                                             offset_ip1 <= refine_factors[0])
                                {
-                                  xweight2= refine_factors_2recp[0]*
-                                            (2*offset_ip1-refine_factors[0] - 1.0);
+                                  xweight2= weights[0][offset_ip1];
                                   ishift= 0;
                                }
                                else
@@ -1085,13 +1134,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                   offset_ip1-= refine_factors[0];
                                   if (offset_ip1 > 0 && offset_ip1 <= refine_factors_half[0])
                                   {
-                                     xweight2= refine_factors_2recp[0]*
-                                               (refine_factors[0] + 2*offset_ip1 - 1.0);
+                                     xweight2= weights[0][offset_ip1];
                                   }
                                   else
                                   {
-                                     xweight2= refine_factors_2recp[0]*
-                                               (2*offset_ip1-refine_factors[0] - 1.0);
+                                     xweight2= weights[0][offset_ip1];
                                      ishift  = 1;
                                   }
                                }
@@ -1115,7 +1162,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                                 xweight1*xcp[kshift+1][jshift+1][ishift+xci]+
                                                 xweight2*xcp[kshift+1][jshift+1][ishift+xci+1]) );
                             }
-                            else
+                            else if (ndim == 2)
                             {
                                 ep[0][j][ei+i] = yweight1*( 
                                                  xweight1*xcp[0][jshift][ishift+xci]+
@@ -1123,6 +1170,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                 ep[0][j][ei+i]+= yweight2*( 
                                                  xweight1*xcp[0][jshift+1][ishift+xci]+
                                                  xweight2*xcp[0][jshift+1][ishift+xci+1]);
+                            }
+                            else
+                            {
+                                ep[0][0][ei+i] = xweight1*xcp[0][0][ishift+xci]+
+                                                 xweight2*xcp[0][0][ishift+xci+1];
                             }
                         }      /* for (i= 0; i< imax; i++) */
                      }         /* for (j= 0; j< jmax; j++) */
@@ -1172,8 +1224,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
              hypre_StructMapCoarseToFine(hypre_BoxIMin(ownbox), zero_index,
                                     refine_factors, hypre_BoxIMin(&refined_box));
-             hypre_SetIndex(temp_index1, refine_factors[0]-1, refine_factors[1]-1,
-                            refine_factors[2]-1);
+             hypre_ClearIndex(temp_index1);
+             for (j= 0; j< ndim; j++)
+             {
+                temp_index1[j]= refine_factors[j]-1;
+             }
              hypre_StructMapCoarseToFine(hypre_BoxIMax(ownbox), temp_index1,
                                     refine_factors, hypre_BoxIMax(&refined_box));
              hypre_IntersectBoxes(fbox, &refined_box, &intersect_box);
@@ -1202,19 +1257,20 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
              * completely in the fbox are included, start is always divisible
              * by refine_factors. We do the calculation anyways for future changes.
              *------------------------------------------------------------------*/
-             for (i= 0; i< 3; i++)
+             hypre_ClearIndex(start_offset);
+             for (i= 0; i< ndim; i++)
              {
                 start_offset[i]= start[i] % refine_factors[i];
              }
 
              ptr_kshift= 0;
-             if ((start[2]%refine_factors[2]<refine_factors_half[2]) && ndim > 2)
+             if ((start[2]%refine_factors[2]<refine_factors_half[2]) && ndim==3)
              {
                 ptr_kshift= -1;
              }
 
              ptr_jshift= 0;
-             if ( start[1]%refine_factors[1] < refine_factors_half[1] )
+             if ((start[1]%refine_factors[1]<refine_factors_half[1]) && ndim>=2)
              {
                 ptr_jshift= -1;
              }
@@ -1225,9 +1281,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                 ptr_ishift= -1;
              }
 
-             for (k= 0; k< (2*ndim-3); k++)
+             for (k= 0; k< ksize; k++)
              {
-                for (j=0; j< 3; j++)
+                for (j=0; j< jsize; j++)
                 {
                    hypre_SetIndex(temp_index2, 
                                   ptr_ishift, j+ptr_jshift, k+ptr_kshift);
@@ -1270,8 +1326,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                        {
                           if (offset_kp1 <= refine_factors_half[2])
                           {
-                             zweight2= refine_factors_2recp[2]*
-                                      (refine_factors[2] + 2*offset_kp1 - 1.0);
+                             zweight2= weights[2][offset_kp1];
                              kshift= 0;
                           }
                           else
@@ -1280,14 +1335,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                              if (offset_kp1 >  refine_factors_half[2] &&
                                  offset_kp1 <= refine_factors[2])
                              {
-                                zweight2= refine_factors_2recp[2]*
-                                         (2*offset_kp1-refine_factors[2] - 1.0);
+                                zweight2= weights[2][offset_kp1];
                              }
                              else
                              {
-                                zweight2= refine_factors_2recp[2]*
-                                         (refine_factors[2] + 2*(offset_kp1-refine_factors[2])
-                                        - 1.0);
+                                zweight2= weights[2][offset_kp1-refine_factors[2]];
                              }
                           }
                           zweight1= 1.0 - zweight2;
@@ -1298,8 +1350,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                           if (offset_kp1 > refine_factors_half[2] &&
                               offset_kp1 <= refine_factors[2])
                           {
-                             zweight2= refine_factors_2recp[2]*
-                                      (2*offset_kp1-refine_factors[2] - 1.0);
+                             zweight2= weights[2][offset_kp1];
                              kshift= 0;
                           }
                           else
@@ -1308,13 +1359,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                              offset_kp1-= refine_factors[2];
                              if (offset_kp1 > 0 && offset_kp1 <= refine_factors_half[2])
                              {
-                                zweight2= refine_factors_2recp[2]*
-                                         (refine_factors[2] + 2*offset_kp1 - 1.0);
+                                zweight2= weights[2][offset_kp1];
                              }
                              else
                              {
-                                zweight2= refine_factors_2recp[2]*
-                                         (2*offset_kp1-refine_factors[2] - 1.0);
+                                zweight2= weights[2][offset_kp1];
                                 kshift  = 1;
                              }
                           }
@@ -1324,62 +1373,58 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 
                     for (j= 0; j< jmax; j++)
                     {
-                       offset_jp1= start_offset[1]+j+1;
-
-                       if (ptr_jshift == -1)
+                       if (ndim >= 2)
                        {
-                          if (offset_jp1 <= refine_factors_half[1])
+                          offset_jp1= start_offset[1]+j+1;
+
+                          if (ptr_jshift == -1)
                           {
-                             yweight2= refine_factors_2recp[1]*
-                                      (refine_factors[1] + 2*offset_jp1 - 1.0);
-                             jshift= 0;
+                             if (offset_jp1 <= refine_factors_half[1])
+                             {
+                                yweight2= weights[1][offset_jp1];
+                                jshift= 0;
+                             }
+                             else
+                             {
+                                jshift= 1;
+                                if (offset_jp1 >  refine_factors_half[1] &&
+                                    offset_jp1 <= refine_factors[1])
+                                {
+                                   yweight2= weights[1][offset_jp1];
+                                }
+                                else
+                                {
+                                   yweight2= weights[1][offset_jp1-refine_factors[1]];
+                                }
+                             }
+                             yweight1= 1.0 - yweight2;
                           }
+
                           else
                           {
-                             jshift= 1;
-                             if (offset_jp1 >  refine_factors_half[1] &&
+                             if (offset_jp1 > refine_factors_half[1] &&
                                  offset_jp1 <= refine_factors[1])
                              {
-                                yweight2= refine_factors_2recp[1]*
-                                         (2*offset_jp1-refine_factors[1] - 1.0);
+                                yweight2= weights[1][offset_jp1];
+                                jshift= 0;
                              }
                              else
                              {
-                                yweight2= refine_factors_2recp[1]*
-                                         (refine_factors[1] + 2*(offset_jp1-refine_factors[1])
-                                        - 1.0);
+                                jshift= 0;
+                                offset_jp1-= refine_factors[1];
+                                if (offset_jp1 > 0 && offset_jp1 <= refine_factors_half[1])
+                                {
+                                   yweight2= weights[1][offset_jp1];
+                                }
+                                else
+                                {
+                                   yweight2= weights[1][offset_jp1];
+                                   jshift  = 1;
+                                }
                              }
+                             yweight1= 1.0 - yweight2;
                           }
-                          yweight1= 1.0 - yweight2;
-                       }
-
-                       else
-                       {
-                          if (offset_jp1 > refine_factors_half[1] &&
-                              offset_jp1 <= refine_factors[1])
-                          {
-                             yweight2= refine_factors_2recp[1]*
-                                      (2*offset_jp1-refine_factors[1] - 1.0);
-                             jshift= 0;
-                          }
-                          else
-                          {
-                             jshift= 0;
-                             offset_jp1-= refine_factors[1];
-                             if (offset_jp1 > 0 && offset_jp1 <= refine_factors_half[1])
-                             {
-                                yweight2= refine_factors_2recp[1]*
-                                         (refine_factors[1] + 2*offset_jp1 - 1.0);
-                             }
-                             else
-                             {
-                                yweight2= refine_factors_2recp[1]*
-                                         (2*offset_jp1-refine_factors[1] - 1.0);
-                                jshift  = 1;
-                             }
-                          }
-                          yweight1= 1.0 - yweight2;
-                       }
+                       }  /* if (ndim >= 2) */
 
                        for (i= 0; i< imax; i++)
                        {
@@ -1389,8 +1434,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                           {
                              if (offset_ip1 <= refine_factors_half[0])
                              {
-                                xweight2= refine_factors_2recp[0]*
-                                         (refine_factors[0] + 2*offset_ip1 - 1.0);
+                                xweight2= weights[0][offset_ip1];
                                 ishift= 0;
                              }
                              else
@@ -1399,14 +1443,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                 if (offset_ip1 >  refine_factors_half[0] &&
                                     offset_ip1 <= refine_factors[0])
                                 {
-                                   xweight2= refine_factors_2recp[0]*
-                                            (2*offset_ip1-refine_factors[0] - 1.0);
+                                   xweight2= weights[0][offset_ip1];
                                 }
                                 else
                                 {
-                                   xweight2= refine_factors_2recp[0]*
-                                            (refine_factors[0] + 2*(offset_ip1-refine_factors[0])
-                                           - 1.0);
+                                   xweight2= weights[0][offset_ip1-refine_factors[0]];
                                 }
                              }
                              xweight1= 1.0 - xweight2;
@@ -1417,8 +1458,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                              if (offset_ip1 > refine_factors_half[0] &&
                                  offset_ip1 <= refine_factors[0])
                              {
-                                xweight2= refine_factors_2recp[0]*
-                                         (2*offset_ip1-refine_factors[0] - 1.0);
+                                xweight2= weights[0][offset_ip1];
                                 ishift= 0;
                              }
                              else
@@ -1427,13 +1467,11 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                 offset_ip1-= refine_factors[0];
                                 if (offset_ip1 > 0 && offset_ip1 <= refine_factors_half[0])
                                 {
-                                   xweight2= refine_factors_2recp[0]*
-                                            (refine_factors[0] + 2*offset_ip1 - 1.0);
+                                   xweight2= weights[0][offset_ip1];
                                 }
                                 else
                                 {
-                                   xweight2= refine_factors_2recp[0]*
-                                            (2*offset_ip1-refine_factors[0] - 1.0);
+                                   xweight2= weights[0][offset_ip1];
                                    ishift  = 1;
                                 }
                              }
@@ -1458,7 +1496,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                                            xweight1*xcp[kshift+1][jshift+1][ishift+xci]+
                                            xweight2*xcp[kshift+1][jshift+1][ishift+xci+1]) );
                           }
-                          else
+                          else if (ndim == 2)
                           {
                              ep[0][j][ei+i] = yweight1*(
                                            xweight1*xcp[0][jshift][ishift+xci]+
@@ -1466,6 +1504,12 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                              ep[0][j][ei+i]+= yweight2*(
                                            xweight1*xcp[0][jshift+1][ishift+xci]+
                                            xweight2*xcp[0][jshift+1][ishift+xci+1]);
+                          }
+
+                          else
+                          {
+                             ep[0][0][ei+i] = xweight1*xcp[0][0][ishift+xci]+
+                                              xweight2*xcp[0][0][ishift+xci+1];
                           }
 
                        }      /* for (i= 0; i< imax; i++) */
@@ -1478,7 +1522,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
        }     /* hypre_ForBoxI(bi, own_abox) */
    }         /* for (var= 0; var< nvars; var++)*/
 
-   for (k= 0; k< (2*ndim-3); k++)
+   for (k= 0; k< ksize; k++)
    {
       hypre_TFree(xcp[k]);
    }

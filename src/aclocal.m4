@@ -11,6 +11,32 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
+dnl #BHEADER**********************************************************************
+dnl # Copyright (c) 2006   The Regents of the University of California.
+dnl # Produced at the Lawrence Livermore National Laboratory.
+dnl # Written by the HYPRE team <hypre-users@llnl.gov>, UCRL-CODE-222953.
+dnl # All rights reserved.
+dnl #
+dnl # This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+dnl # Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+dnl # disclaimer and the GNU Lesser General Public License.
+dnl #
+dnl # This program is free software; you can redistribute it and/or modify it
+dnl # under the terms of the GNU General Public License (as published by the Free
+dnl # Software Foundation) version 2.1 dated February 1999.
+dnl #
+dnl # This program is distributed in the hope that it will be useful, but WITHOUT
+dnl # ANY WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or
+dnl # FITNESS FOR A PARTICULAR PURPOSE.  See the terms and conditions of the
+dnl # GNU General Public License for more details.
+dnl #
+dnl # You should have received a copy of the GNU Lesser General Public License
+dnl # along with this program; if not, write to the Free Software Foundation,
+dnl # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+dnl #
+dnl # $Revision: 2.79 $
+dnl #EHEADER**********************************************************************
+
 dnl **********************************************************************
 dnl * ACX_CHECK_MPI
 dnl *
@@ -18,10 +44,10 @@ dnl try to determine what the MPI flags should be
 dnl ACX_CHECK_MPI([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl ACTION-IF-FOUND is a list of shell commands to run 
 dnl   if an MPI library is found, and
-dnl ACTION-IF-NOT-FOUND is a list of commands to run it 
-dnl   if it is not found. If ACTION-IF-FOUND is not specified, 
-dnl   the default action will define HAVE_MPI. 
-dnl
+dnl ACTION-IF-NOT-FOUND is a list of commands to run it
+dnl   if it is not found. If ACTION-IF-FOUND is not specified,
+dnl   the default action will define HAVE_MPI.
+dnl **********************************************************************
 AC_DEFUN([ACX_CHECK_MPI],
 [AC_PREREQ(2.57)dnl
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
@@ -68,47 +94,46 @@ else
 fi
 ])
 
-dnl **********************************************************************
-dnl * ACX_TIMING
-dnl *
-dnl determine timing routines to use
-dnl
-AC_DEFUN([ACX_TIMING],
-[AC_PREREQ(2.57)dnl
-AC_ARG_WITH(timing,
-AC_HELP_STRING([--with-timing],[use HYPRE timing routines]),
-[if test "$withval" = "yes"; then
-  AC_DEFINE(HYPRE_TIMING,1,[HYPRE timing routines are being used])
-fi])
-])
 
 dnl **********************************************************************
-dnl * ACX_OPENMP
-dnl *
-dnl compile with OpenMP
-dnl
-AC_DEFUN([ACX_OPENMP],
-[AC_PREREQ(2.57)dnl
-AC_ARG_WITH(openmp,
-AC_HELP_STRING([--with-openmp],
-[use openMP--this may affect which compiler is chosen.
-Supported using guidec on IBM and Compaq.]),
-[case "${withval}" in
-  yes) casc_using_openmp=yes
-    AC_DEFINE([HYPRE_USING_OPENMP], 1, [Enable OpenMP support]) ;;
-  no)  casc_using_openmp=no;;
-  *) AC_MSG_ERROR(bad value ${withval} for --with-openmp) ;;
-esac],[casc_using_openmp=no])
+dnl * HYPRE_SET_LINK_SUBDIRS
+dnl *  sets appropriate sub-directory for linking based on using debug, 
+dnl *  no-mpi or openmp when testing public alpha, beta or general releases
+dnl **********************************************************************
+AC_DEFUN([HYPRE_SET_LINK_SUBDIRS],
+[
+ if test "$casc_using_debug" = "yes" && "$casc_using_mpi" = "yes"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+ fi
+
+ if test "$casc_using_mpi" = "no"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/serial"
+     if test "$casc_using_debug" = "yes"
+     then
+        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+     fi
+ fi
+
+ if test "$casc_using_openmp" = "yes"
+ then
+     HYPRE_LINKDIR="${HYPRE_LINKDIR}/threads"
+     if test "$casc_using_debug" = "yes"
+     then
+        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
+     fi
+ fi
 ])
+
 
 dnl **********************************************************************
 dnl * HYPRE_FIND_G2C
-dnl *
-dnl try to find libg2c.a
-dnl
+dnl *  try to find libg2c.a
+dnl **********************************************************************
 AC_DEFUN([HYPRE_FIND_G2C],
 [
- AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
+dnl AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
   hypre_save_LIBS="$LIBS"
   LIBS="$LIBS $FLIBS"
@@ -130,26 +155,51 @@ AC_DEFUN([HYPRE_FIND_G2C],
 
 ])
 
+
+dnl **********************************************************************
+dnl * HYPRE_REVERSE_FLIBS
+dnl *   reverse the order of -lpmpich and -lmpich ONLY when using insure
+dnl *   Search FLIBS to find -lpmpich, when found reverse the order with
+dnl *      mpich; ignore the -lmpich when found; save all other FLIBS
+dnl *      values
+dnl **********************************************************************
+AC_DEFUN([HYPRE_REVERSE_FLIBS],
+[
+ AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
+
+  hypre_save_FLIBS="$FLIBS"
+  FLIBS=
+
+  for lib_list in $hypre_save_FLIBS; do
+     tmp_list="$lib_list"
+     if test "$lib_list" = "-lpmpich"
+     then
+        tmp_list="-lmpich"
+     fi
+
+     if test "$lib_list" = "-lmpich"
+     then
+        tmp_list="-lpmpich"
+     fi
+
+     FLIBS="$FLIBS $tmp_list"
+  done
+
+])
+
 dnl **********************************************************************
 dnl * ACX_OPTIMIZATION_FLAGS
 dnl *
-dnl try and determine what the optimized compile FLAGS
-dnl
+dnl * Set compile FLAGS for optimization
+dnl **********************************************************************
 AC_DEFUN([ACX_OPTIMIZATION_FLAGS],
 [AC_PREREQ(2.57)dnl
+
 if test "x${casc_user_chose_cflags}" = "xno"
 then
-  if test "x${GCC}" = "xyes"
-  then
-    dnl **** default settings for gcc
-    CFLAGS="-O2"
-  else
-    case "${CC}" in
-      kcc|mpikcc)
-        CFLAGS="-fast +K3"
-        ;;
-      KCC|mpiKCC)
-        CFLAGS="--c -fast +K3"
+   case "${CC}" in
+      gcc|mpicc)
+        CFLAGS="-O2"
         ;;
       icc)
         CFLAGS="-O3 -xW -tpp7"
@@ -163,7 +213,10 @@ then
           CFLAGS="$CFLAGS -mp"
         fi
         ;;
-      cc|c89|mpcc|mpiicc|xlc|ccc)
+      KCC|mpiKCC)
+        CFLAGS="-fast +K3"
+        ;;
+      cc|mpcc|mpiicc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -O2"
@@ -203,19 +256,14 @@ then
       *)
         CFLAGS="-O"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_cxxflags}" = "xno"
 then
-  if test "x${GXX}" = "xyes"
-  then
-    dnl **** default settings for gcc
-    CXXFLAGS="-O2"
-  else
-    case "${CXX}" in
-      KCC|mpiKCC)
-        CXXFLAGS="-fast +K3"
+   case "${CXX}" in
+      gCC|mpiCC)
+        CXXFLAGS="-O2"
         ;;
       icc)
         CXXFLAGS="-O3 -xW -tpp7"
@@ -229,7 +277,10 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|aCC|mpCC|mpiicc|xlC|cxx)
+      KCC|mpiKCC)
+        CXXFLAGS="-fast +K3"
+        ;;
+      CC|mpCC|mpiicc|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -O2"
@@ -269,20 +320,16 @@ then
       *)
         CXXFLAGS="-O"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_fflags}" = "xno"
 then
-  if test "x${G77}" = "xyes"
-  then
-    FFLAGS="-O"
-  else
-    case "${F77}" in
-      kf77|mpikf77)
-        FFLAGS="-fast +K3"
+   case "${F77}" in
+      g77)
+        FFLAGS="-O"
         ;;
-      ifc)
+      ifort)
         FFLAGS="-O3 -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
@@ -294,7 +341,10 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      f77|f90|mpxlf|mpif77|mpiifc|xlf|cxx)
+      kf77|mpikf77)
+        FFLAGS="-fast +K3"
+        ;;
+      f77|f90|mpxlf|mpif77|mpiifort|xlf)
         case "${host}" in
           alpha*-dec-osf4.*)
             FFLAGS="-std1 -w0 -O2"
@@ -334,28 +384,22 @@ then
       *)
         FFLAGS="-O"
         ;;
-    esac
-  fi
+   esac
 fi])
-      
+
 dnl **********************************************************************
 dnl * ACX_DEBUG_FLAGS
 dnl *
-dnl try and determine what the debuging compile FLAGS
-dnl
+dnl * Set compile FLAGS for debug
+dnl **********************************************************************
 AC_DEFUN([ACX_DEBUG_FLAGS],
 [AC_PREREQ(2.57)dnl
+
 if test "x${casc_user_chose_cflags}" = "xno"
 then
-  if test "x${GCC}" = "xyes"
-  then
-    dnl **** default settings for gcc
-    CFLAGS="-g"
-    CFLAGS="$CFLAGS -Wall"
-  else
-    case "${CC}" in
-      kcc|mpikcc)
-        CFLAGS="-g +K3"
+   case "${CC}" in
+      gcc|mpicc)
+        CFLAGS="-g -Wall"
         ;;
       KCC|mpiKCC)
         CFLAGS="--c -g +K3"
@@ -372,7 +416,7 @@ then
           CFLAGS="$CFLAGS -mp"
         fi
         ;;
-      cc|c89|mpcc|mpiicc|xlc|ccc)
+      cc|mpcc|mpiicc|xlc)
         case "${host}" in
           alpha*-dec-osf4.*)
             CFLAGS="-std1 -w0 -g"
@@ -412,17 +456,15 @@ then
       *)
         CFLAGS="-g"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_cxxflags}" = "xno"
 then
-  if test "x${GXX}" = "xyes"
-  then
-    dnl **** default settings for gcc
-    CXXFLAGS="-g -Wall"
-  else
-    case "${CXX}" in
+   case "${CXX}" in
+      g++|mpig++)
+        CXXFLAGS="-g -Wall"
+        ;;
       KCC|mpiKCC)
         CXXFLAGS="-g +K3"
         ;;
@@ -438,7 +480,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|aCC|mpCC|mpiicc|xlC|cxx)
+      CC|mpCC|mpiicc|xlC|cxx)
         case "${host}" in
           alpha*-dec-osf4.*)
             CXXFLAGS="-std1 -w0 -g"
@@ -478,20 +520,19 @@ then
       *)
         CXXFLAGS="-g"
         ;;
-    esac
-  fi
+   esac
 fi
+
 if test "x${casc_user_chose_fflags}" = "xno"
 then
-  if test "x${G77}" = "xyes"
-  then
-    FFLAGS="-g -Wall"
-  else
-    case "${F77}" in
+   case "${F77}" in
+      g77|mpig77)
+        FFLAGS="-g -Wall"
+        ;;
       kf77|mpikf77)
         FFLAGS="-g +K3"
         ;;
-      ifc)
+      ifort)
         FFLAGS="-g -xW -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
@@ -503,7 +544,7 @@ then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
-      f77|f90|mpxlf|mpif77|mpiifc|xlf|cxx)
+      f77|f90|mpxlf|mpif77|mpiifort|xlf)
         case "${host}" in
           alpha*-dec-osf4.*)
             FFLAGS="-std1 -w0 -g"
@@ -543,85 +584,162 @@ then
       *)
         FFLAGS="-g"
         ;;
-    esac
-  fi
+   esac
 fi]) dnl
 
 dnl **********************************************************************
-dnl * HYPRE_GUESS_ARCH
-dnl * First find the hostname and assigns it to an exported macro $HOSTNAME.
+dnl * HYPRE_SET_ARCH
+dnl * Defines the architecture of the platform on which the code is to run.
+dnl * Cross-compiling is indicated by the host and build platforms being
+dnl * different values, which are usually user supplied on the command line.
+dnl * When cross-compiling is detected the values supplied will be used
+dnl * directly otherwise the needed values will be determined as follows:
+dnl *
+dnl * Find the hostname and assign it to an exported macro $HOSTNAME.
 dnl * Guesses a one-word name for the current architecture, unless ARCH
 dnl * has been preset.  This is an alternative to the built-in macro
 dnl * AC_CANONICAL_HOST, which gives a three-word name.  Uses the utility
-dnl * 'tarch', which is a Bourne shell script that should be in the same  
+dnl * 'tarch', which is a Bourne shell script that should be in the same 
 dnl * directory as the configure script.  If tarch is not present or if it
 dnl * fails, ARCH is set to the value, if any, of shell variable HOSTTYPE,
 dnl * otherwise ARCH is set to "unknown".
 dnl **********************************************************************
 
-AC_DEFUN([HYPRE_GUESS_ARCH],
+AC_DEFUN([HYPRE_SET_ARCH],
 [
-   AC_MSG_CHECKING(the hostname)
-   casc_hostname=hostname
-   HOSTNAME="`$casc_hostname`"
-
-   if test -z "$HOSTNAME" 
+   if test $host_alias = $build_alias
    then
-   dnl * if $HOSTNAME is still empty, give it the value "unknown".
-      HOSTNAME=unknown
-      AC_MSG_WARN(hostname is unknown)
-   else
-      AC_MSG_RESULT($HOSTNAME)
-   fi
-   
 
-   AC_MSG_CHECKING(the architecture)
+      AC_MSG_CHECKING(the hostname)
+      casc_hostname=hostname
+      HOSTNAME="`$casc_hostname`"
 
-   dnl * $ARCH could already be set in the environment or earlier in configure
-   dnl * Use the preset value if it exists, otherwise go through the procedure
-   if test -z "$ARCH"; then
-
-      dnl * configure searches for the tool "tarch".  It should be in the
-      dnl * same directory as configure.in, but a couple of other places
-      dnl * will be checked.  casc_tarch stores a relative path for "tarch".
-      casc_tarch_dir=
-      for casc_dir in $srcdir $srcdir/.. $srcdir/../.. $srcdir/config; do
-         if test -f $casc_dir/tarch; then
-            casc_tarch_dir=$casc_dir
-            casc_tarch=$casc_tarch_dir/tarch
-            break
-         fi
-      done
-
-      dnl * if tarch was not found or doesn't work, try using env variable
-      dnl * $HOSTTYPE
-      if test -z "$casc_tarch_dir"; then
-         AC_MSG_WARN(cannot find tarch, using \$HOSTTYPE as the architecture)
-         HYPRE_ARCH=$HOSTTYPE
+      dnl * if $HOSTNAME is still empty, give it the value "unknown".
+      if test -z "$HOSTNAME" 
+      then
+         HOSTNAME=unknown
+         AC_MSG_WARN(hostname is unknown)
       else
-         HYPRE_ARCH="`$casc_tarch`"
-
-         if test -z "$HYPRE_ARCH" || test "$HYPRE_ARCH" = "unknown"; then
-            HYPRE_ARCH=$HOSTTYPE
-         fi
+         AC_MSG_RESULT($HOSTNAME)
       fi
 
-      dnl * if $HYPRE_ARCH is still empty, give it the value "unknown".
-      if test -z "$HYPRE_ARCH"; then
-         HYPRE_ARCH=unknown
-         AC_MSG_WARN(architecture is unknown)
-      else
-         AC_MSG_RESULT($HYPRE_ARCH)
-      fi    
-   else
-      HYPRE_ARCH = $ARCH
-      AC_MSG_RESULT($HYPRE_ARCH)
-   fi
+      AC_MSG_CHECKING(the architecture)
 
+      dnl * the environment variable $ARCH may already be set; if so use its
+      dnl * value, otherwise go through this procedure
+      if test -z "$ARCH"; then
+
+         dnl * search for the tool "tarch".  It should be in the same
+         dnl * directory as configure.in, but a couple of other places will
+         dnl * be checked.  casc_tarch stores a relative path for "tarch".
+         casc_tarch_dir=
+         for casc_dir in $srcdir $srcdir/.. $srcdir/../.. $srcdir/config; do
+            if test -f $casc_dir/tarch; then
+               casc_tarch_dir=$casc_dir
+               casc_tarch=$casc_tarch_dir/tarch
+               break
+            fi
+         done
+
+         dnl * if tarch was not found or doesn't work, try using env variable
+         dnl * $HOSTTYPE
+         if test -z "$casc_tarch_dir"; then
+            AC_MSG_WARN(cannot find tarch, using \$HOSTTYPE as the architecture)
+            HYPRE_ARCH=$HOSTTYPE
+         else
+            HYPRE_ARCH="`$casc_tarch`"
+
+            if test -z "$HYPRE_ARCH" || test "$HYPRE_ARCH" = "unknown"; then
+               HYPRE_ARCH=$HOSTTYPE
+            fi
+         fi
+
+         dnl * if $HYPRE_ARCH is still empty, give it the value "unknown".
+         if test -z "$HYPRE_ARCH"; then
+            HYPRE_ARCH=unknown
+            AC_MSG_WARN(architecture is unknown)
+         else
+            AC_MSG_RESULT($HYPRE_ARCH)
+         fi
+      else
+         HYPRE_ARCH = $ARCH
+         AC_MSG_RESULT($HYPRE_ARCH)
+      fi
+
+   else
+      HYPRE_ARCH=$host_alias
+      HOSTNAME=unknown
+   fi
+dnl *
+dnl *    define type of architecture
+   case $HYPRE_ARCH in
+      alpha)
+         AC_DEFINE(HYPRE_ALPHA)
+         ;;
+      sun* | solaris*)
+         AC_DEFINE(HYPRE_SOLARIS)
+         ;;
+      hp* | HP*)
+         AC_DEFINE(HYPRE_HPPA)
+         ;;
+      rs6000 | RS6000 | *bgl* | *BGL* | ppc64*)
+         AC_DEFINE(HYPRE_RS6000)
+         ;;
+      IRIX64)
+         AC_DEFINE(HYPRE_IRIX64)
+         ;;
+      Linux | linux | LINUX)
+         if test -r /etc/home.config
+         then
+            systemtype=`grep ^SYS_TYPE /etc/home.config | cut -d" " -f2`
+            case $systemtype in 
+               chaos*)
+                  AC_DEFINE(HYPRE_LINUX_CHAOS)
+                  ;;
+               *)
+                  AC_DEFINE(HYPRE_LINUX)
+                  ;;
+            esac
+         else
+            AC_DEFINE(HYPRE_LINUX)
+         fi
+         ;;
+   esac
+     
+dnl *
+dnl *    return architecture and host name values
    AC_SUBST(HYPRE_ARCH)
    AC_SUBST(HOSTNAME)
 
 ])dnl
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.79 $
+ ***********************************************************************EHEADER*/
+
+
 
 dnl @synopsis HYPRE_FIND_BLAS([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl
@@ -651,7 +769,7 @@ dnl to run it if it is not found.
 dnl
 dnl This macro requires autoconf 2.50 or later.
 dnl
-dnl @version $Id: aclocal.m4,v 2.32 2005/02/09 17:30:25 hill66 Exp $
+dnl @version $Id: aclocal.m4,v 2.79 2006/09/29 23:13:08 hill66 Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 dnl
 AC_DEFUN([HYPRE_FIND_BLAS],
@@ -668,8 +786,8 @@ AC_DEFUN([HYPRE_FIND_BLAS],
 	[AS_HELP_STRING([  --with-blas], [Find a system-provided BLAS library])])
 
   case $with_blas in
-      yes | "") ;;
-	     *) BLASLIBS="internal" ;;
+      yes) ;;
+        *) BLASLIBS="internal" ;;
   esac
 
 #***************************************************************
@@ -751,6 +869,34 @@ AC_DEFUN([HYPRE_FIND_BLAS],
 
 ])dnl HYPRE_FIND_BLAS
 
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.79 $
+ ***********************************************************************EHEADER*/
+
+
+
 dnl @synopsis HYPRE_FIND_LAPACK([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl
 dnl This macro looks for a library that implements the LAPACK
@@ -777,7 +923,7 @@ dnl ACTION-IF-FOUND is a list of shell commands to run if a LAPACK
 dnl library is found, and ACTION-IF-NOT-FOUND is a list of commands
 dnl to run it if it is not found.
 dnl
-dnl @version $Id: aclocal.m4,v 2.32 2005/02/09 17:30:25 hill66 Exp $
+dnl @version $Id: aclocal.m4,v 2.79 2006/09/29 23:13:08 hill66 Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
 AC_DEFUN([HYPRE_FIND_LAPACK], 
@@ -794,8 +940,8 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
         [AS_HELP_STRING([  --with-lapack], [Find a system-provided LAPACK library])])
 
   case $with_lapack in
-      yes | "") ;;
-             *) LAPACKLIBS="internal" ;;
+      yes) ;;
+        *) LAPACKLIBS="internal" ;;
   esac
 
 #***************************************************************

@@ -9,26 +9,33 @@ Symbol "bHYPRE
  <h2> Documentation </h2>
 <BLOCKQUOTE>
 
-Symbol "bHYPRE.BoomerAMG" (version 1.0.0)<P>Algebraic multigrid solver, based on classical Ruge-Stueben.<P>The following optional parameters are available and may be set
+Symbol "bHYPRE.BoomerAMG" (version 1.0.0)<P>Algebraic multigrid solver, based on classical Ruge-Stueben.<P>BoomerAMG requires an IJParCSR matrix<P>The following optional parameters are available and may be set
 using the appropriate <TT>Parameter</tt> function (as indicated in
 parentheses):<P><DL><P><DT><B>MaxLevels</B><DD> (<TT>Int</tt>) - maximum number of multigrid
 levels.<P><DT><B>StrongThreshold</B><DD> (<TT>Double</tt>) - AMG strength threshold.<P><DT><B>MaxRowSum</B><DD> (<TT>Double</tt>) -<P><DT><B>CoarsenType</B><DD> (<TT>Int</tt>) - type of parallel coarsening
 algorithm used.<P><DT><B>MeasureType</B><DD> (<TT>Int</tt>) - type of measure used; local or
 global.<P><DT><B>CycleType</B><DD> (<TT>Int</tt>) - type of cycle used; a V-cycle
 (default) or a W-cycle.<P><DT><B>NumGridSweeps</B><DD> (<TT>IntArray 1D</tt>) - number of sweeps for
-fine and coarse grid, up and down cycle.<P><DT><B>GridRelaxType</B><DD> (<TT>IntArray 1D</tt>) - type of smoother used on
-fine and coarse grid, up and down cycle.<P><DT><B>GridRelaxPoints</B><DD> (<TT>IntArray 2D</tt>) - point ordering used in
-relaxation.<P><DT><B>RelaxWeight</B><DD> (<TT>DoubleArray 1D</tt>) - relaxation weight for
+fine and coarse grid, up and down cycle. DEPRECATED:
+Use NumSweeps or Cycle?NumSweeps instead.<P><DT><B>NumSweeps</B><DD> (<TT>Int</tt>) - number of sweeps for fine grid, up and
+down cycle.<P><DT><B>Cycle0NumSweeps</B><DD> (<TT>Int</tt>) - number of sweeps for fine grid<P><DT><B>Cycle1NumSweeps</B><DD> (<TT>Int</tt>) - number of sweeps for down cycle<P><DT><B>Cycle2NumSweeps</B><DD> (<TT>Int</tt>) - number of sweeps for up cycle<P><DT><B>Cycle3NumSweeps</B><DD> (<TT>Int</tt>) - number of sweeps for coarse grid<P><DT><B>GridRelaxType</B><DD> (<TT>IntArray 1D</tt>) - type of smoother used on
+fine and coarse grid, up and down cycle. DEPRECATED:
+Use RelaxType or Cycle?RelaxType instead.<P><DT><B>RelaxType</B><DD> (<TT>Int</tt>) - type of smoother for fine grid, up and
+down cycle.<P><DT><B>Cycle0RelaxType</B><DD> (<TT>Int</tt>) - type of smoother for fine grid<P><DT><B>Cycle1RelaxType</B><DD> (<TT>Int</tt>) - type of smoother for down cycle<P><DT><B>Cycle2RelaxType</B><DD> (<TT>Int</tt>) - type of smoother for up cycle<P><DT><B>Cycle3RelaxType</B><DD> (<TT>Int</tt>) - type of smoother for coarse grid<P><DT><B>GridRelaxPoints</B><DD> (<TT>IntArray 2D</tt>) - point ordering used in
+relaxation.  DEPRECATED.<P><DT><B>RelaxWeight</B><DD> (<TT>DoubleArray 1D</tt>) - relaxation weight for
+smoothed Jacobi and hybrid SOR.  DEPRECATED:
+Instead, use the RelaxWt parameter and the SetLevelRelaxWt function.<P><DT><B>RelaxWt</B><DD> (<TT>Int</tt>) - relaxation weight for all levels for
 smoothed Jacobi and hybrid SOR.<P><DT><B>TruncFactor</B><DD> (<TT>Double</tt>) - truncation factor for
-interpolation.<P><DT><B>SmoothType</B><DD> (<TT>Int</tt>) - more complex smoothers.<P><DT><B>SmoothNumLevels</B><DD> (<TT>Int</tt>) - number of levels for more
+interpolation.<P><DT><B>JacobiTruncThreshold</B><DD> (<TT>Double</tt>) - threshold for truncation
+of Jacobi interpolation.<P><DT><B>SmoothType</B><DD> (<TT>Int</tt>) - more complex smoothers.<P><DT><B>SmoothNumLevels</B><DD> (<TT>Int</tt>) - number of levels for more
 complex smoothers.<P><DT><B>SmoothNumSweeps</B><DD> (<TT>Int</tt>) - number of sweeps for more
 complex smoothers.<P><DT><B>PrintFileName</B><DD> (<TT>String</tt>) - name of file printed to in
 association with <TT>SetPrintLevel</tt>.  (not yet implemented).<P><DT><B>NumFunctions</B><DD> (<TT>Int</tt>) - size of the system of PDEs
 (when using the systems version).<P><DT><B>DOFFunc</B><DD> (<TT>IntArray 1D</tt>) - mapping that assigns the
 function to each variable (when using the systems version).<P><DT><B>Variant</B><DD> (<TT>Int</tt>) - variant of Schwarz used.<P><DT><B>Overlap</B><DD> (<TT>Int</tt>) - overlap for Schwarz.<P><DT><B>DomainType</B><DD> (<TT>Int</tt>) - type of domain used for Schwarz.<P><DT><B>SchwarzRlxWeight</B><DD> (<TT>Double</tt>) - the smoothing parameter
-for additive Schwarz.<P><DT><B>DebugFlag</B><DD> (<TT>Int</tt>) -<P></DL><P>Objects of this type can be cast to Solver objects using the
+for additive Schwarz.<P><DT><B>DebugFlag</B><DD> (<TT>Int</tt>) -<P></DL><P>The following function is specific to this class:<P><DL><P><DT><B>SetLevelRelxWeight</B><DD> (<TT>Double , \tt Int</tt>) -
+relaxation weight for one specified level of smoothed Jacobi and hybrid SOR.<P></DL><P>Objects of this type can be cast to Solver objects using the
 <TT>__cast</tt> methods.
-
 
 </BLOCKQUOTE>
 <DL>

@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2000   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.12 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.17 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * Member functions for hypre_SStructVector class.
@@ -48,7 +68,10 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
    hypre_StructVector   **svectors;
    hypre_CommPkg        **comm_pkgs;
    hypre_StructGrid      *sgrid;
-   int                    var;
+   HYPRE_SStructVariable *vartypes= hypre_SStructPGridVarTypes(pgrid);
+   int                    ndim    = hypre_SStructPGridNDim(pgrid);
+   hypre_Index            varoffset;
+   int                    var, d;
  
    pvector = hypre_TAlloc(hypre_SStructPVector, 1);
 
@@ -62,6 +85,21 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
    {
       sgrid = hypre_SStructPGridSGrid(pgrid, var);
       svectors[var] = hypre_StructVectorCreate(comm, sgrid);
+
+      /* set the Add_num_ghost layer */
+      if (vartypes[var] > 0)
+      {
+         sgrid = hypre_StructVectorGrid(svectors[var]);
+         hypre_SStructVariableGetOffset(vartypes[var], ndim, varoffset);
+         for (d = 0; d < 3; d++)
+         {
+            hypre_StructVectorAddNumGhost(svectors[var])[2*d]= 
+                                           hypre_IndexD(varoffset, d);
+            hypre_StructVectorAddNumGhost(svectors[var])[2*d+1]= 
+                                           hypre_IndexD(varoffset, d);
+         }
+      }
+         
    }
    hypre_SStructPVectorSVectors(pvector) = svectors;
    comm_pkgs = hypre_TAlloc(hypre_CommPkg *, nvars);
@@ -677,6 +715,34 @@ hypre_SStructVectorInitializeShell( hypre_SStructVector *vector)
   } 
   hypre_SStructVectorDataIndices(vector) = dataindices;
   hypre_SStructVectorDataSize(vector) = datasize ;
+
+  return ierr;
+}   
+
+
+int
+hypre_SStructVectorClearGhostValues(hypre_SStructVector *vector)
+{
+  int                    ierr= 0;
+
+  int                    nparts= hypre_SStructVectorNParts(vector);
+  hypre_SStructPVector  *pvector;
+  hypre_StructVector    *svector;
+
+  int    part;
+  int    nvars, var;
+
+  for (part= 0; part< nparts; part++)
+  {
+     pvector= hypre_SStructVectorPVector(vector, part);
+     nvars  = hypre_SStructPVectorNVars(pvector);
+
+     for (var= 0; var< nvars; var++)
+     {
+        svector= hypre_SStructPVectorSVector(pvector, var);
+        hypre_StructVectorClearGhostValues(svector);
+     }
+  }
 
   return ierr;
 }   

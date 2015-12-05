@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2000   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.7 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.11 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * Header info for the hypre_SStructGrid structures
@@ -72,6 +92,7 @@ typedef struct
    hypre_Index  ilower;
    hypre_Index  coord;
    hypre_Index  dir;
+   int          primary;
 
 } hypre_SStructNeighbor;
 
@@ -219,11 +240,8 @@ typedef struct hypre_SStructGrid_struct
  * Accessor macros: hypre_SStructNMapInfo
  *--------------------------------------------------------------------------*/
 
-#define hypre_SStructNMapInfoType(info)    ((info) -> type)
-#define hypre_SStructNMapInfoProc(info)    ((info) -> proc)
-#define hypre_SStructNMapInfoOffset(info)  ((info) -> offset)
-#define hypre_SStructNMapInfoBox(info)     ((info) -> box)
-#define hypre_SStructNMapInfoGhoffset(info) ((info) -> ghoffset)
+/* Use the MapInfo macros to access the first five structure components */
+
 #define hypre_SStructNMapInfoPart(info)    ((info) -> part)
 #define hypre_SStructNMapInfoILower(info)  ((info) -> ilower)
 #define hypre_SStructNMapInfoCoord(info)   ((info) -> coord)
@@ -240,6 +258,7 @@ typedef struct hypre_SStructGrid_struct
 #define hypre_SStructNeighborILower(neighbor)  ((neighbor) -> ilower)
 #define hypre_SStructNeighborCoord(neighbor)   ((neighbor) -> coord)
 #define hypre_SStructNeighborDir(neighbor)     ((neighbor) -> dir)
+#define hypre_SStructNeighborPrimary(neighbor) ((neighbor) -> primary)
 
 /*--------------------------------------------------------------------------
  * Accessor macros: hypre_SStructUCVar

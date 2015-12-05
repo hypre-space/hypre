@@ -1,0 +1,437 @@
+/*
+ * File:          sidlx_rmi_SimCall_IOR.h
+ * Symbol:        sidlx.rmi.SimCall-v0.1
+ * Symbol Type:   class
+ * Babel Version: 1.0.0
+ * Description:   Intermediate Object Representation for sidlx.rmi.SimCall
+ * 
+ * WARNING: Automatically generated; changes will be lost
+ * 
+ */
+
+#ifndef included_sidlx_rmi_SimCall_IOR_h
+#define included_sidlx_rmi_SimCall_IOR_h
+
+#ifndef included_sidl_header_h
+#include "sidl_header.h"
+#endif
+struct sidl_rmi_InstanceHandle__object;
+#ifndef included_sidl_BaseClass_IOR_h
+#include "sidl_BaseClass_IOR.h"
+#endif
+#ifndef included_sidl_io_Deserializer_IOR_h
+#include "sidl_io_Deserializer_IOR.h"
+#endif
+#ifndef included_sidl_rmi_Call_IOR_h
+#include "sidl_rmi_Call_IOR.h"
+#endif
+#ifndef included_sidlx_rmi_CallType_IOR_h
+#include "sidlx_rmi_CallType_IOR.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/*
+ * Symbol "sidlx.rmi.SimCall" (version 0.1)
+ * 
+ * This type is created on the server side to get inargs off the network and 
+ * pass them into exec.	
+ */
+
+struct sidlx_rmi_SimCall__array;
+struct sidlx_rmi_SimCall__object;
+
+/*
+ * Forward references for external classes and interfaces.
+ */
+
+struct sidl_BaseException__array;
+struct sidl_BaseException__object;
+struct sidl_BaseInterface__array;
+struct sidl_BaseInterface__object;
+struct sidl_ClassInfo__array;
+struct sidl_ClassInfo__object;
+struct sidl_RuntimeException__array;
+struct sidl_RuntimeException__object;
+struct sidl_io_Serializable__array;
+struct sidl_io_Serializable__object;
+struct sidl_rmi_Return__array;
+struct sidl_rmi_Return__object;
+struct sidlx_rmi_Socket__array;
+struct sidlx_rmi_Socket__object;
+
+/*
+ * Declare the method entry point vector.
+ */
+
+struct sidlx_rmi_SimCall__epv {
+  /* Implicit builtin methods */
+  /* 0 */
+  void* (*f__cast)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 1 */
+  void (*f__delete)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 2 */
+  void (*f__exec)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* methodName,
+    /* in */ struct sidl_rmi_Call__object* inArgs,
+    /* in */ struct sidl_rmi_Return__object* outArgs,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 3 */
+  char* (*f__getURL)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 4 */
+  void (*f__raddRef)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 5 */
+  sidl_bool (*f__isRemote)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 6 */
+  void (*f__set_hooks)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ sidl_bool on,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 7 */
+  void (*f__ctor)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 8 */
+  void (*f__ctor2)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ void* private_data,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 9 */
+  void (*f__dtor)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* 10 */
+  /* 11 */
+  /* 12 */
+  /* 13 */
+  /* Methods introduced in sidl.BaseInterface-v0.9.15 */
+  void (*f_addRef)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_deleteRef)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isSame)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ struct sidl_BaseInterface__object* iobj,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  sidl_bool (*f_isType)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* name,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  struct sidl_ClassInfo__object* (*f_getClassInfo)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.BaseClass-v0.9.15 */
+  /* Methods introduced in sidl.io.Deserializer-v0.9.15 */
+  void (*f_unpackBool)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out */ sidl_bool* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackChar)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out */ char* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackInt)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out */ int32_t* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackLong)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out */ int64_t* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackOpaque)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out */ void** value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackFloat)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out */ float* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackDouble)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out */ double* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackFcomplex)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out */ struct sidl_fcomplex* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackDcomplex)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out */ struct sidl_dcomplex* value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackString)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out */ char** value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackSerializable)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out */ struct sidl_io_Serializable__object** value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackBoolArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<bool> */ struct sidl_bool__array** value,
+    /* in */ int32_t ordering,
+    /* in */ int32_t dimen,
+    /* in */ sidl_bool isRarray,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackCharArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<char> */ struct sidl_char__array** value,
+    /* in */ int32_t ordering,
+    /* in */ int32_t dimen,
+    /* in */ sidl_bool isRarray,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackIntArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<int> */ struct sidl_int__array** value,
+    /* in */ int32_t ordering,
+    /* in */ int32_t dimen,
+    /* in */ sidl_bool isRarray,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackLongArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<long> */ struct sidl_long__array** value,
+    /* in */ int32_t ordering,
+    /* in */ int32_t dimen,
+    /* in */ sidl_bool isRarray,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackOpaqueArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<opaque> */ struct sidl_opaque__array** value,
+    /* in */ int32_t ordering,
+    /* in */ int32_t dimen,
+    /* in */ sidl_bool isRarray,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackFloatArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<float> */ struct sidl_float__array** value,
+    /* in */ int32_t ordering,
+    /* in */ int32_t dimen,
+    /* in */ sidl_bool isRarray,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackDoubleArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<double> */ struct sidl_double__array** value,
+    /* in */ int32_t ordering,
+    /* in */ int32_t dimen,
+    /* in */ sidl_bool isRarray,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackFcomplexArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<fcomplex> */ struct sidl_fcomplex__array** value,
+    /* in */ int32_t ordering,
+    /* in */ int32_t dimen,
+    /* in */ sidl_bool isRarray,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackDcomplexArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<dcomplex> */ struct sidl_dcomplex__array** value,
+    /* in */ int32_t ordering,
+    /* in */ int32_t dimen,
+    /* in */ sidl_bool isRarray,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackStringArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<string> */ struct sidl_string__array** value,
+    /* in */ int32_t ordering,
+    /* in */ int32_t dimen,
+    /* in */ sidl_bool isRarray,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackGenericArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<> */ struct sidl__array** value,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  void (*f_unpackSerializableArray)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ const char* key,
+    /* out array<sidl.io.Serializable> */ struct sidl_io_Serializable__array** 
+      value,
+    /* in */ int32_t ordering,
+    /* in */ int32_t dimen,
+    /* in */ sidl_bool isRarray,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  /* Methods introduced in sidl.rmi.Call-v0.9.15 */
+  /* Methods introduced in sidlx.rmi.SimCall-v0.1 */
+  void (*f_init)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* in */ struct sidlx_rmi_Socket__object* sock,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  char* (*f_getMethodName)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  char* (*f_getObjectID)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+  enum sidlx_rmi_CallType__enum (*f_getCallType)(
+    /* in */ struct sidlx_rmi_SimCall__object* self,
+    /* out */ struct sidl_BaseInterface__object* *_ex);
+};
+
+/*
+ * Define the controls structure.
+ */
+
+
+struct sidlx_rmi_SimCall__controls {
+  int     use_hooks;
+};
+/*
+ * Define the class object structure.
+ */
+
+struct sidlx_rmi_SimCall__object {
+  struct sidl_BaseClass__object       d_sidl_baseclass;
+  struct sidl_io_Deserializer__object d_sidl_io_deserializer;
+  struct sidl_rmi_Call__object        d_sidl_rmi_call;
+  struct sidlx_rmi_SimCall__epv*      d_epv;
+  void*                               d_data;
+};
+
+struct sidlx_rmi_SimCall__external {
+  struct sidlx_rmi_SimCall__object*
+  (*createObject)(void* ddata, struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_BaseClass__epv*(*getSuperEPV)(void);
+  int d_ior_major_version;
+  int d_ior_minor_version;
+};
+
+/*
+ * This function returns a pointer to a static structure of
+ * pointers to function entry points.  Its purpose is to provide
+ * one-stop shopping for loading DLLs.
+ */
+
+const struct sidlx_rmi_SimCall__external*
+sidlx_rmi_SimCall__externals(void);
+
+extern struct sidlx_rmi_SimCall__object*
+sidlx_rmi_SimCall__new(void* ddata,struct sidl_BaseInterface__object ** _ex);
+
+extern void sidlx_rmi_SimCall__init(
+  struct sidlx_rmi_SimCall__object* self, void* ddata,
+    struct sidl_BaseInterface__object ** _ex);
+extern void sidlx_rmi_SimCall__getEPVs(
+  struct sidl_BaseInterface__epv **s_arg_epv__sidl_baseinterface,
+  struct sidl_BaseInterface__epv **s_arg_epv_hooks__sidl_baseinterface,
+  struct sidl_BaseClass__epv **s_arg_epv__sidl_baseclass,
+    struct sidl_BaseClass__epv **s_arg_epv_hooks__sidl_baseclass,
+  struct sidl_io_Deserializer__epv **s_arg_epv__sidl_io_deserializer,
+  struct sidl_io_Deserializer__epv **s_arg_epv_hooks__sidl_io_deserializer,
+  struct sidl_rmi_Call__epv **s_arg_epv__sidl_rmi_call,
+  struct sidl_rmi_Call__epv **s_arg_epv_hooks__sidl_rmi_call,
+  struct sidlx_rmi_SimCall__epv **s_arg_epv__sidlx_rmi_simcall,
+    struct sidlx_rmi_SimCall__epv **s_arg_epv_hooks__sidlx_rmi_simcall);
+  extern void sidlx_rmi_SimCall__fini(
+    struct sidlx_rmi_SimCall__object* self,
+      struct sidl_BaseInterface__object ** _ex);
+  extern void sidlx_rmi_SimCall__IOR_version(int32_t *major, int32_t *minor);
+
+  struct sidl_BaseClass__object* 
+    skel_sidlx_rmi_SimCall_fconnect_sidl_BaseClass(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseClass__object* 
+    skel_sidlx_rmi_SimCall_fcast_sidl_BaseClass(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_BaseInterface__object* 
+    skel_sidlx_rmi_SimCall_fconnect_sidl_BaseInterface(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_BaseInterface__object* 
+    skel_sidlx_rmi_SimCall_fcast_sidl_BaseInterface(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_ClassInfo__object* 
+    skel_sidlx_rmi_SimCall_fconnect_sidl_ClassInfo(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_ClassInfo__object* 
+    skel_sidlx_rmi_SimCall_fcast_sidl_ClassInfo(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_RuntimeException__object* 
+    skel_sidlx_rmi_SimCall_fconnect_sidl_RuntimeException(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_RuntimeException__object* 
+    skel_sidlx_rmi_SimCall_fcast_sidl_RuntimeException(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_io_Deserializer__object* 
+    skel_sidlx_rmi_SimCall_fconnect_sidl_io_Deserializer(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_io_Deserializer__object* 
+    skel_sidlx_rmi_SimCall_fcast_sidl_io_Deserializer(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_io_Serializable__object* 
+    skel_sidlx_rmi_SimCall_fconnect_sidl_io_Serializable(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidl_io_Serializable__object* 
+    skel_sidlx_rmi_SimCall_fcast_sidl_io_Serializable(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidl_rmi_Call__object* 
+    skel_sidlx_rmi_SimCall_fconnect_sidl_rmi_Call(const char* url, sidl_bool ar,
+    struct sidl_BaseInterface__object **_ex);
+  struct sidl_rmi_Call__object* skel_sidlx_rmi_SimCall_fcast_sidl_rmi_Call(void 
+    *bi, struct sidl_BaseInterface__object **_ex);
+
+  struct sidlx_rmi_SimCall__object* 
+    skel_sidlx_rmi_SimCall_fconnect_sidlx_rmi_SimCall(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidlx_rmi_SimCall__object* 
+    skel_sidlx_rmi_SimCall_fcast_sidlx_rmi_SimCall(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidlx_rmi_Socket__object* 
+    skel_sidlx_rmi_SimCall_fconnect_sidlx_rmi_Socket(const char* url,
+    sidl_bool ar, struct sidl_BaseInterface__object **_ex);
+  struct sidlx_rmi_Socket__object* 
+    skel_sidlx_rmi_SimCall_fcast_sidlx_rmi_Socket(void *bi,
+    struct sidl_BaseInterface__object **_ex);
+
+  struct sidlx_rmi_SimCall__remote{
+    int d_refcount;
+    struct sidl_rmi_InstanceHandle__object *d_ih;
+  };
+
+  #ifdef __cplusplus
+  }
+  #endif
+  #endif

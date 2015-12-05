@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1996   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.2 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.7 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 /******************************************************************************
  *
@@ -30,6 +50,11 @@ typedef struct
    int     		global_num_cols;
    int			first_row_index;
    int			first_col_diag;
+   /* need to know entire local range in case row_starts and col_starts 
+      are null  (i.e., bgl) AHB 6/05*/
+   int                  last_row_index;
+   int                  last_col_diag;
+
    hypre_CSRMatrix	*diag;
    hypre_CSRMatrix	*offd;
    int			*col_map_offd; 
@@ -55,11 +80,16 @@ typedef struct
    int      owns_col_starts;
 
    int      num_nonzeros;
+   double   d_num_nonzeros;
 
    /* Buffers used by GetRow to hold row currently being accessed. AJC, 4/99 */
    int     *rowindices;
    double  *rowvalues;
    int      getrowactive;
+
+   hypre_IJAssumedPart *assumed_partition; /* only populated if no_global_partition option
+                                              is used (compile-time option)*/
+
 
 } hypre_ParCSRMatrix;
 
@@ -72,6 +102,8 @@ typedef struct
 #define hypre_ParCSRMatrixGlobalNumCols(matrix)   ((matrix) -> global_num_cols)
 #define hypre_ParCSRMatrixFirstRowIndex(matrix)   ((matrix) -> first_row_index)
 #define hypre_ParCSRMatrixFirstColDiag(matrix)    ((matrix) -> first_col_diag)
+#define hypre_ParCSRMatrixLastRowIndex(matrix)    ((matrix) -> last_row_index)
+#define hypre_ParCSRMatrixLastColDiag(matrix)     ((matrix) -> last_col_diag)
 #define hypre_ParCSRMatrixDiag(matrix)  	  ((matrix) -> diag)
 #define hypre_ParCSRMatrixOffd(matrix)  	  ((matrix) -> offd)
 #define hypre_ParCSRMatrixColMapOffd(matrix)  	  ((matrix) -> col_map_offd)
@@ -87,9 +119,11 @@ hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumCols(matrix) \
 hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixNumNonzeros(matrix)     ((matrix) -> num_nonzeros)
+#define hypre_ParCSRMatrixDNumNonzeros(matrix)    ((matrix) -> d_num_nonzeros)
 #define hypre_ParCSRMatrixRowindices(matrix)      ((matrix) -> rowindices)
 #define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
+#define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
 
 
 
@@ -104,6 +138,8 @@ typedef struct
    int                   global_num_cols;
    int                   first_row_index;
    int                   first_col_diag;
+   int                   last_row_index;
+   int                   last_col_diag;
    hypre_CSRBooleanMatrix *diag;
    hypre_CSRBooleanMatrix *offd;
    int	                *col_map_offd; 
@@ -130,6 +166,8 @@ typedef struct
 #define hypre_ParCSRBooleanMatrix_Get_StartRow(matrix)      ((matrix)->first_row_index)
 #define hypre_ParCSRBooleanMatrix_Get_FirstRowIndex(matrix) ((matrix)->first_row_index)
 #define hypre_ParCSRBooleanMatrix_Get_FirstColDiag(matrix)  ((matrix)->first_col_diag)
+#define hypre_ParCSRBooleanMatrix_Get_LastRowIndex(matrix)  ((matrix)->last_row_index)
+#define hypre_ParCSRBooleanMatrix_Get_LastColDiag(matrix)   ((matrix)->last_col_diag)
 #define hypre_ParCSRBooleanMatrix_Get_Diag(matrix)          ((matrix)->diag)
 #define hypre_ParCSRBooleanMatrix_Get_Offd(matrix)          ((matrix)->offd)
 #define hypre_ParCSRBooleanMatrix_Get_ColMapOffd(matrix)    ((matrix)->col_map_offd)

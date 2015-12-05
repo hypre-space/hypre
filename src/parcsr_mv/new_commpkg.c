@@ -1,3 +1,31 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.12 $
+ ***********************************************************************EHEADER*/
+
+
+
 /*---------------------------------------------------- 
  * Communication package that uses an assumed partition
  *  AHB 6/04                                            
@@ -7,44 +35,99 @@
 
 /* some debugging tools*/
 #define mydebug 0
-#define timeparts 0
-#define badpartition 0
-#define badpartition2 0
-
-int hypre_LocateAssummedPartition(int, int, int, hypre_SmIJPartition*, int);
-int hypre_GetAssumedPartitionProcFromRow( int, int, int* );
-int hypre_GetAssumedPartitionRowRange( int, int, int*, int* );
-int hypre_FillResponseIJDetermineSendProcs(void*, int, int, void*, MPI_Comm, void**, int*);
-int hypre_RangeFillResponseIJDetermineRecvProcs(void*, int, int, void*, MPI_Comm,void**, int*);
-
-#define CONTACT(a,b)  (contact_list[(a)*3+(b)])
 
 /*==========================================================================*/
 
 
+
+int PrintCommpkg(hypre_ParCSRMatrix *A, const char *file_name)
+{
+   
+   int num_sends, num_recvs;
+   
+   int *recv_vec_starts, *recv_procs;
+   int *send_map_starts, *send_map_elements, *send_procs;
+
+   int i;
+   int my_id;
+   
+   MPI_Comm comm;
+   
+   hypre_ParCSRCommPkg *comm_pkg;
+   
+
+   char   new_file[80];
+   FILE *fp;
+
+   comm_pkg =  hypre_ParCSRMatrixCommPkg(A);
+   
+
+   comm =  hypre_ParCSRCommPkgComm(comm_pkg);
+   
+   num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+   recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+   recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+   send_map_starts = hypre_ParCSRCommPkgSendMapStarts(comm_pkg);
+   send_map_elements = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+
+   
+   MPI_Comm_rank(comm, &my_id);
+
+   sprintf(new_file,"%s.%d",file_name,my_id);
+
+   fp = fopen(new_file, "w");
+   fprintf(fp, "num_recvs = %d\n", num_recvs);
+   for (i=0; i < num_recvs; i++)
+   {
+      fprintf(fp, "recv_proc [start, end] = %d [%d, %d] \n", recv_procs[i], recv_vec_starts[i], recv_vec_starts[i+1]-1);
+   }
+
+   fprintf(fp, "num_sends = %d\n", num_sends);
+   for (i=0; i < num_sends; i++)
+   {
+      fprintf(fp, "send_proc [start, end] = %d [%d, %d] \n", send_procs[i], send_map_starts[i], send_map_starts[i+1]-1);
+   }
+
+   for (i = 0; i< send_map_starts[num_sends]; i++)
+   {
+      fprintf(fp, "send_map_elements (%d) = %d\n", i, send_map_elements[i]);
+   }
+
+   fclose(fp);
+
+   return hypre_error_flag;
+
+
+
+}
+
+
 /*------------------------------------------------------------------
- * hypre_NewCommPkgCreate
- * this is an alternate way of constructing the comm package                                 
- * (compare to hypre_MatvecCommPkgCreate() in par_csr_communication.c
- * that should be more scalable 
- *-------------------------------------------------------------------*/
-
-
+ * hypre_NewCommPkgCreate_core
+ *
+ * This does the work for  hypre_NewCommPkgCreate - we have to split it 
+ * off so that it can also be used for block matrices.
+ *--------------------------------------------------------------------------*/
 
 int 
-hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
+hypre_NewCommPkgCreate_core(
+/* input args: */
+   MPI_Comm comm, int *col_map_off_d, int first_col_diag,
+   int col_start, int col_end, 
+   int num_cols_off_d, int global_num_cols,
+/* pointers to output args: */
+   int *p_num_recvs, int **p_recv_procs, int **p_recv_vec_starts,
+   int *p_num_sends, int **p_send_procs, int ** p_send_map_starts,
+   int **p_send_map_elements, hypre_IJAssumedPart *apart)
+
 {
-
-
    int        num_procs, myid;
-   int        global_num_rows;
-   int        j, i, ierr=0;
-   int        row_start=0, row_end=0, col_start = 0, col_end = 0;
+   int        j, i;
    int        range_start, range_end; 
 
    int        size;
-   int        num_cols_off_d; 
-   int       *col_map_off_d; 
    int        count;  
 
    int        num_recvs, *recv_procs = NULL, *recv_vec_starts=NULL;
@@ -59,111 +142,40 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
    
 
    int        *response_buf = NULL, *response_buf_starts=NULL;
-   int        first_col_diag;
+
    int        max_response_size;
    
-   hypre_SmIJPartition               apart;
    hypre_DataExchangeResponse        response_obj1, response_obj2;
    hypre_ProcListElements            send_proc_obj; 
 
-   MPI_Comm              comm = hypre_ParCSRMatrixComm(parcsr_A);
-
-   hypre_ParCSRCommPkg	 *comm_pkg;
-
-
 #if mydebug
    int tmp_int, index;
-#endif
-
-#if timeparts
-   double  starttime, endtime, t1, t2, t3, t_misc, t1_max, t2_max; 
-   double  t3_max, t_misc_max;
-#endif
-  
-#if timeparts
-    starttime = MPI_Wtime();
 #endif
 
    MPI_Comm_size(comm, &num_procs );
    MPI_Comm_rank(comm, &myid );
 
 
-#if timeparts
-    endtime = MPI_Wtime();
-    t_misc = endtime - starttime;
-#endif
-
-#if timeparts
-    starttime = MPI_Wtime();
-#endif
-
-
-
-   /*-----------------------------------------------------------
-    * Actual partitioning and off_d information 
-    *----------------------------------------------------------*/
-
-      ierr = hypre_ParCSRMatrixGetLocalRange( parcsr_A,
-               &row_start, &row_end ,
-               &col_start, &col_end );
-
-      col_map_off_d =  hypre_ParCSRMatrixColMapOffd(parcsr_A);
-      num_cols_off_d = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(parcsr_A));
-     
-      global_num_rows = hypre_ParCSRMatrixGlobalNumRows(parcsr_A); 
-
-
-
-
-   /*-----------------------------------------------------------
-    * Assumed Partitioning - each proc gets it own range. Then 
-    * each needs to reconcile its actual range with its assumed
-    * range.   
-    *-----------------------------------------------------------*/
-  
-  
-   /* get my assumed partitioning */
-   ierr = hypre_GetAssumedPartitionRowRange( myid, global_num_rows, &apart.row_start, 
-                                       &apart.row_end);
-
 #if mydebug
+
     printf("myid = %i, my assumed local range: [%i, %i]\n", myid, 
-                         apart.row_start, apart.row_end);
-#endif
+                         apart->row_start, apart->row_end);
 
-
-    /*allocate some space for the partition of the assumed partition */
-    apart.length = 0;
-    /*room for 10 owners of the assumed partition*/ 
-    apart.storage_length = 10; /*need to be >=1 */ 
-    apart.proc_list = hypre_TAlloc(int, apart.storage_length);
-    apart.row_start_list =   hypre_TAlloc(int, apart.storage_length);
-    apart.row_end_list =   hypre_TAlloc(int, apart.storage_length);
-
-    hypre_LocateAssummedPartition(row_start, row_end, global_num_rows, &apart, myid);
-
-
-#if timeparts
-    endtime = MPI_Wtime();
-    t1 = endtime - starttime;
-#endif
-
-#if mydebug
       for (i=0; i<apart.length; i++)
       {
         printf("myid = %d, proc %d owns assumed partition range = [%d, %d]\n", 
-                myid, apart.proc_list[i], apart.row_start_list[i], 
-	        apart.row_end_list[i]);
+                myid, apart->proc_list[i], apart->row_start_list[i], 
+	        apart->row_end_list[i]);
       }
 
-      printf("myid = %d, length of apart = %d\n", myid, apart.length);
+      printf("myid = %d, length of apart = %d\n", myid, apart->length);
 
 #endif
 
 
-
    /*-----------------------------------------------------------
-    *  Now everyone knows where their assumed range is located.
+    *  Everyone knows where their assumed range is located
+    * (because of the assumed partition object (apart).
     *  For the comm. package, each proc must know it's receive
     *  procs (who it will receive data from and how much data) 
     *  and its send procs 
@@ -174,16 +186,12 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
    
 
    /*------------------------------------------------------------
-    *  get the receive processors
+    *  First, get the receive processors
     *  each par_csr matrix will have a certain number of columns
     *  (num_cols_off_d) given in col_map_offd[] for which it needs
     *  data from another processor. 
     *
     *------------------------------------------------------------*/
-
-#if timeparts
-    starttime = MPI_Wtime();
-#endif
 
     /*calculate the assumed receive processors*/
 
@@ -197,11 +205,11 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
    ex_num_contacts = 0;
 
    /*estimate the storage needed*/
-   if (num_cols_off_d > 0 && (apart.row_end - apart.row_start) > 0  )
+   if (num_cols_off_d > 0 && (apart->row_end - apart->row_start) > 0  )
    {
       size = col_map_off_d[num_cols_off_d-1] - col_map_off_d[0];
    
-      size = (size/(apart.row_end - apart.row_start)) + 2;
+      size = (size/(apart->row_end - apart->row_start)) + 2;
    }
    else
    {
@@ -222,8 +230,10 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
    { 
       if (col_map_off_d[i] > range_end)
       {
+
+
          hypre_GetAssumedPartitionProcFromRow(col_map_off_d[i], 
-					global_num_rows, &tmp_id);
+                                              global_num_cols, &tmp_id);
 
          if (ex_num_contacts == size) /*need more space? */ 
          {
@@ -243,8 +253,10 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
          
          
          ex_num_contacts++;
-         hypre_GetAssumedPartitionRowRange(tmp_id, global_num_rows, 
-				     &range_start, &range_end); 
+
+         hypre_GetAssumedPartitionRowRange(tmp_id, global_num_cols, 
+                                           &range_start, &range_end); 
+
       }
    }
 
@@ -259,7 +271,7 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
 
    /*create response object*/
    response_obj1.fill_response = hypre_RangeFillResponseIJDetermineRecvProcs;
-   response_obj1.data1 =  &apart; /* this is necessary so we can fill responses*/ 
+   response_obj1.data1 =  apart; /* this is necessary so we can fill responses*/ 
    response_obj1.data2 = NULL;
    
    max_response_size = 6;  /* 6 means we can fit 3 ranges*/
@@ -341,10 +353,6 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
  
 
 
-#if timeparts
-    endtime = MPI_Wtime();
-    t2 = endtime - starttime;
-#endif
 
 #if mydebug
       for (i=0; i < num_recvs; i++) 
@@ -364,10 +372,6 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
 
    /* the contact information is the recv_processor infomation - so
       nothing more to do to generate contact info*/
-
-#if timeparts
-    starttime = MPI_Wtime();
-#endif
 
    /* the response we expect is just a confirmation*/
    hypre_TFree(response_buf);
@@ -407,49 +411,85 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
    /*send proc starts are in send_proc_obj.vec_starts */
 
 #if mydebug
-      printf("myid = %d, num_sends = %d\n", myid, num_sends);   
-      for (i=0; i < num_sends; i++) 
+   printf("myid = %d, num_sends = %d\n", myid, num_sends);   
+   for (i=0; i < num_sends; i++) 
+   {
+      tmp_int = send_proc_obj.vec_starts[i+1] - send_proc_obj.vec_starts[i];
+      index = send_proc_obj.vec_starts[i];
+      for (j=0; j< tmp_int; j++) 
       {
-        tmp_int = send_proc_obj.vec_starts[i+1] - send_proc_obj.vec_starts[i];
-        index = send_proc_obj.vec_starts[i];
-        for (j=0; j< tmp_int; j++) 
-	{
-	  printf("myid = %d, send proc = %d, send element = %d\n",myid,  
-                  send_proc_obj.id[i],send_proc_obj.elements[index+j]); 
-	 }   
-      }
+         printf("myid = %d, send proc = %d, send element = %d\n",myid,  
+                send_proc_obj.id[i],send_proc_obj.elements[index+j]); 
+      }   
+   }
 #endif
-
-#if timeparts
-    endtime = MPI_Wtime();
-    t3 = endtime - starttime;
-#endif 
-
-
 
    /*-----------------------------------------------------------
-    *  Set up comm package
+    *  We need to sort the send procs and send elements (to produce
+    *  the same result as with the standard comm package)
+    *   11/07/05
     *-----------------------------------------------------------*/
+   
+   {
+      
+      int *orig_order;
+      int *orig_send_map_starts;
+      int *orig_send_elements;
+      int  ct, sz, pos;
+      
+      orig_order = hypre_CTAlloc(int, num_sends);
+      orig_send_map_starts = hypre_CTAlloc(int, num_sends+1);
+      orig_send_elements = hypre_CTAlloc(int, send_proc_obj.vec_starts[num_sends]);
+      
+      orig_send_map_starts[0] = 0;
+      /* copy send map starts and elements */ 
+      for (i=0; i< num_sends; i++)
+      {
+         orig_order[i] = i;
+         orig_send_map_starts[i+1] = send_proc_obj.vec_starts[i+1];
+      }
+      for (i=0; i< send_proc_obj.vec_starts[num_sends]; i++)
+      {
+         orig_send_elements[i] = send_proc_obj.elements[i];
+      }
+      /* sort processor ids - keep track of original order */
+      hypre_qsort2i( send_proc_obj.id, orig_order, 0, num_sends-1 );
+      
+      /* now rearrange vec starts and send elements to correspond to proc ids */ 
+      ct = 0;
+      for (i=0; i< num_sends; i++)
+      {
+         pos = orig_order[i];
+         sz = orig_send_map_starts[pos + 1] - orig_send_map_starts[pos];
+         send_proc_obj.vec_starts[i+1] =  ct + sz;
+         for (j = 0; j< sz; j++)
+         {
+            send_proc_obj.elements[ct +j] = orig_send_elements[orig_send_map_starts[pos]+j];
+         }
+         ct += sz;
+      }
+      /* clean up */
+      hypre_TFree(orig_order);
+      hypre_TFree(orig_send_elements);
+      hypre_TFree(orig_send_map_starts);
+   }
+      
 
-#if timeparts
-    starttime = MPI_Wtime();
-#endif
+   /*-----------------------------------------------------------
+    *  Return output info for setting up the comm package
+    *-----------------------------------------------------------*/
+   
 
+   *p_num_recvs = num_recvs;
+   *p_recv_procs = recv_procs;
+   *p_recv_vec_starts = recv_vec_starts;
+   *p_num_sends = num_sends;
+   *p_send_procs = send_proc_obj.id;
+   *p_send_map_starts = send_proc_obj.vec_starts;
 
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
-
-   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
-
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
-
-   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_proc_obj.id;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_proc_obj.vec_starts;
 
    /*send map elements have global index - need local instead*/
-   first_col_diag = hypre_ParCSRMatrixFirstColDiag(parcsr_A);
+
    if (num_sends)
    {
       for (i=0; i<send_proc_obj.vec_starts[num_sends]; i++)
@@ -457,78 +497,134 @@ hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
          send_proc_obj.elements[i] -= first_col_diag;
       }
    }
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_proc_obj.elements;
+   *p_send_map_elements =  send_proc_obj.elements;
 
-   hypre_ParCSRMatrixCommPkg(parcsr_A) = comm_pkg;
 
 
    /*-----------------------------------------------------------
     *  Clean up
     *-----------------------------------------------------------*/
 
-
- 
-   if(apart.storage_length > 0) 
-   {      
-      hypre_TFree(apart.proc_list);
-      hypre_TFree(apart.row_start_list);
-      hypre_TFree(apart.row_end_list);
-      hypre_TFree(apart.sort_index);
-   }
-
   
    if(ex_contact_procs)      hypre_TFree(ex_contact_procs);
    if(ex_contact_vec_starts) hypre_TFree(ex_contact_vec_starts);
+   hypre_TFree(ex_contact_buf);
+   
 
    if(response_buf)        hypre_TFree(response_buf);
    if(response_buf_starts) hypre_TFree(response_buf_starts);
 
-
-#if timeparts
-    endtime = MPI_Wtime();
-    t_misc += (endtime - starttime);
-#endif
-
-
+   
    /* don't free send_proc_obj.id,send_proc_obj.vec_starts,send_proc_obj.elements;
       recv_procs, recv_vec_starts.  These are aliased to the comm package and
       will be destroyed there */
-  
 
-#if timeparts
-
- MPI_Reduce(&t1, &t1_max, 1,
-                          MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
- MPI_Reduce(&t2, &t2_max, 1,
-               MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
- 
- MPI_Reduce(&t3, &t3_max, 1,
-               MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
- 
- MPI_Reduce(&t_misc, &t_misc_max, 1,
-               MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
- 
- if (!myid) 
- {
-     printf("TIMES: t1 (assumed part.)= %f sec.\n", t1_max);
-     printf("       t2 (recv. procs)= %f sec.\n", t2_max);
-     printf("       t3 (send procs) = %f sec.\n", t3_max);
-     printf("       t_misc = %f sec.\n", t_misc_max);
-  
- }
- 
-
-#endif
-
-
-
-
-   return(ierr);
-
+   return hypre_error_flag;
 
 }
 
+/*------------------------------------------------------------------
+ * hypre_NewCommPkgCreate
+ * this is an alternate way of constructing the comm package                                 
+ * (compare to hypre_MatvecCommPkgCreate() in par_csr_communication.c
+ * that should be more scalable 
+ *-------------------------------------------------------------------*/
 
+int 
+hypre_NewCommPkgCreate( hypre_ParCSRMatrix *parcsr_A)
+{
+
+   int        row_start=0, row_end=0, col_start = 0, col_end = 0;
+   int        num_recvs, *recv_procs, *recv_vec_starts;
+
+   int        num_sends, *send_procs, *send_map_starts;
+   int        *send_map_elements;
+
+   int        num_cols_off_d; 
+   int       *col_map_off_d; 
+
+   int        first_col_diag;
+   int        global_num_cols;
+
+
+   MPI_Comm   comm;
+
+   hypre_ParCSRCommPkg	 *comm_pkg;
+   hypre_IJAssumedPart   *apart;
+   
+   /*-----------------------------------------------------------
+    * get parcsr_A information 
+    *----------------------------------------------------------*/
+
+   hypre_ParCSRMatrixGetLocalRange( parcsr_A,
+                                    &row_start, &row_end ,
+                                    &col_start, &col_end );
+   
+   col_map_off_d =  hypre_ParCSRMatrixColMapOffd(parcsr_A);
+   num_cols_off_d = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(parcsr_A));
+   
+   global_num_cols = hypre_ParCSRMatrixGlobalNumCols(parcsr_A); 
+
+   comm = hypre_ParCSRMatrixComm(parcsr_A);
+
+   first_col_diag = hypre_ParCSRMatrixFirstColDiag(parcsr_A);
+
+
+   /* Create the assumed partition */
+   if  (hypre_ParCSRMatrixAssumedPartition(parcsr_A) == NULL)
+   {
+      hypre_ParCSRMatrixCreateAssumedPartition(parcsr_A);
+   }
+
+   apart = hypre_ParCSRMatrixAssumedPartition(parcsr_A);
+   
+   /*-----------------------------------------------------------
+    * get commpkg info information 
+    *----------------------------------------------------------*/
+
+   hypre_NewCommPkgCreate_core( comm, col_map_off_d, first_col_diag, 
+                                col_start, col_end, 
+                                num_cols_off_d, global_num_cols,
+                                &num_recvs, &recv_procs, &recv_vec_starts,
+                                &num_sends, &send_procs, &send_map_starts, 
+                                &send_map_elements, apart);
+   
+
+   if (!num_recvs)
+   {
+      hypre_TFree(recv_procs);
+      recv_procs = NULL;
+   }
+   if (!num_sends)
+   {
+      hypre_TFree(send_procs);
+      hypre_TFree(send_map_elements);
+      send_procs = NULL;
+      send_map_elements = NULL;
+   }
+   
+
+  /*-----------------------------------------------------------
+   * setup commpkg
+   *----------------------------------------------------------*/
+
+   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
+
+   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
+   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
+   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
+   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
+   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
+   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs;
+   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
+   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elements;
+   
+   hypre_ParCSRMatrixCommPkg(parcsr_A) = comm_pkg;
+
+   return hypre_error_flag;
+      
+   
+}
 
 /*------------------------------------------------------------------
  *  hypre_NewCommPkgDestroy
@@ -542,7 +638,7 @@ hypre_NewCommPkgDestroy(hypre_ParCSRMatrix *parcsr_A)
 
 
    hypre_ParCSRCommPkg	 *comm_pkg = hypre_ParCSRMatrixCommPkg(parcsr_A);
-   int ierr = 0;
+
 
    /*even if num_sends and num_recvs  = 0, storage may have been allocated */
 
@@ -572,302 +668,11 @@ hypre_NewCommPkgDestroy(hypre_ParCSRMatrix *parcsr_A)
                                                   parscr since there are two comm 
                                                   packages now*/  
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 
-/*--------------------------------------------------------------------
- * hypre_LocateAssummedPartition
- * Reconcile assumed partition with actual partition.  Essentially
- * each processor ends of with a partition of its assumed partition.
- *--------------------------------------------------------------------*/
 
-
-int 
-hypre_LocateAssummedPartition(int row_start, int row_end, int global_num_rows, 
-                        hypre_SmIJPartition *part, int myid)
-{  
-
-   int       i, ierr;
-
-   int       *contact_list;
-   int        contact_list_length, contact_list_storage;
-   
-   int        contact_row_start[2], contact_row_end[2], contact_ranges;
-   int        owner_start, owner_end;
-   int        tmp_row_start, tmp_row_end, complete;
-
-   int        locate_row_start[2], locate_ranges;
-/*   int        locate_row_end[2]; */
-   
-
-   int        locate_row_count, rows_found;  
- 
-   int        tmp_range[2];
-   int       *si, *sortme;   
-
-   const int  flag1 = 17;  
-
-   MPI_Request  *requests;
-   MPI_Status   status0, *statuses;
-
-
-
-
-   /*-----------------------------------------------------------
-    *  Contact ranges - 
-    *  which rows do I have that others are assumed responsible for?
-    *  (at most two ranges - maybe none)
-    *-----------------------------------------------------------*/
-  
-
-   contact_row_start[0]=0;
-   contact_row_end[0]=0;
-   contact_row_start[1]=0;
-   contact_row_end[1]=0;
-   contact_ranges = 0;
- 
-   if (row_start <= row_end ) { /*must own at least one row*/
-
-      if ( part->row_end < row_start  || row_end < part->row_start  )   
-      {  /*no overlap - so all of my rows */
-         contact_row_start[0] = row_start;
-         contact_row_end[0] = row_end;
-         contact_ranges++;
-      }
-      else /* the two regions overlap */
-      {  
-         /* check for contact rows on the low end of the local range */
-	 if (row_start < part->row_start) 
-	 {
-            contact_row_start[0] = row_start;
-	    contact_row_end[0] = part->row_start - 1;
-	    contact_ranges++;
-	 } 
-	 if (part->row_end < row_end) /* check the high end */
-         {
-            if (contact_row_start[0]) 
-            {
-	       contact_row_start[1] = part->row_end +1;
-	       contact_row_end[1] = row_end;
-	    }
-	    else
-	    {
-	       contact_row_start[0] =  part->row_end +1;
-	       contact_row_end[0] = row_end;
-	    } 
-	    contact_ranges++;
-	 }
-      }
-   }
-
-   /*-----------------------------------------------------------
-    *  Contact: find out who is assumed responsible for these 
-    *       ranges of contact rows and contact them 
-    *
-    *-----------------------------------------------------------*/
-
-     
-   contact_list_length = 0;
-   contact_list_storage = 5; 
-   contact_list = hypre_TAlloc(int, contact_list_storage*3); /*each contact needs 3 ints */
-
-   for (i=0; i<contact_ranges; i++)
-   {
-  
-      /*get start and end row owners */
-      ierr = hypre_GetAssumedPartitionProcFromRow(contact_row_start[i], global_num_rows, 
-                                            &owner_start);
-      ierr = hypre_GetAssumedPartitionProcFromRow(contact_row_end[i], global_num_rows, 
-                                             &owner_end);
-
-      if (owner_start == owner_end) /* same processor owns the whole range */
-      {
-
-         if (contact_list_length == contact_list_storage)
-         {
-            /*allocate more space*/
-            contact_list_storage += 5;
-            contact_list = hypre_TReAlloc(contact_list, int, (contact_list_storage*3));
-         }
-         CONTACT(contact_list_length, 0) = owner_start;   /*proc #*/
-         CONTACT(contact_list_length, 1) = contact_row_start[i];  /* start row */
-         CONTACT(contact_list_length, 2) = contact_row_end[i];  /*end row */
-         contact_list_length++;
-      }
-      else
-      { 
-        complete = 0;
-        while (!complete) 
-        {
-            hypre_GetAssumedPartitionRowRange(owner_start, global_num_rows, 
-                                         &tmp_row_start, &tmp_row_end); 
-           
-            if (tmp_row_end >= contact_row_end[i])
-	    {
-	       tmp_row_end =  contact_row_end[i];
-               complete = 1; 
-	    }     
-            if (tmp_row_start <  contact_row_start[i])
-	    {
-	      tmp_row_start =  contact_row_start[i];
-            }
-
-
-            if (contact_list_length == contact_list_storage)
-            {
-               /*allocate more space*/
-               contact_list_storage += 5;
-               contact_list = hypre_TReAlloc(contact_list, int, (contact_list_storage*3));
-            }
-
-
-            CONTACT(contact_list_length, 0) = owner_start;   /*proc #*/
-            CONTACT(contact_list_length, 1) = tmp_row_start;  /* start row */
-            CONTACT(contact_list_length, 2) = tmp_row_end;  /*end row */
-            contact_list_length++;
-	    owner_start++; /*processors are seqential */
-        }
-      }
-   }
-
-   requests = hypre_CTAlloc(MPI_Request, contact_list_length);
-   statuses = hypre_CTAlloc(MPI_Status, contact_list_length);
-
-   /*send out messages */ /*don't need to track whether these are received */
-   for (i=0; i< contact_list_length; i++) 
-   {
-      MPI_Isend(&CONTACT(i,1) ,2, MPI_INT, CONTACT(i,0), flag1 , 
-                 MPI_COMM_WORLD, &requests[i]);
-   }
-
-   /*-----------------------------------------------------------
-    *  Locate ranges - 
-    *  which rows in my assumed range do I not own
-    *  (at most two ranges - maybe none)
-    *  locate_row_count = total number of rows I must locate
-    *-----------------------------------------------------------*/
-
-
-   locate_row_count = 0;
- 
-   locate_row_start[0]=0;
-   /* locate_row_end[0]=0; */
-   locate_row_start[1]=0;
-   /* locate_row_end[1]=0; */
-   locate_ranges = 0;
-
-   if (part->row_end < row_start  || row_end < part->row_start  ) 
-   /*no overlap - so all of my assumed rows */ 
-   {
-      locate_row_start[0] = part->row_start;
-      /* locate_row_end[0] = part->row_end; */
-      locate_ranges++;
-      locate_row_count += part->row_end - part->row_start + 1; 
-   }
-   else /* the two regions overlap */
-   {
-      if (part->row_start < row_start) 
-      {/* check for locate rows on the low end of the local range */
-         locate_row_start[0] = part->row_start;
-         /* locate_row_end[0] = row_start - 1; */
-         locate_ranges++;
-         locate_row_count += (row_start-1) - part->row_start + 1;
-      } 
-      if (row_end < part->row_end) /* check the high end */
-      {
-         if (locate_row_start[0]) 
-         {
-	    locate_row_start[1] = row_end +1;
-            /* locate_row_end[1] = part->row_end; */
-	 }
-         else
-         {
-	    locate_row_start[0] = row_end +1;
-            /* locate_row_end[0] = part->row_end; */
-         } 
-         locate_ranges++;
-         locate_row_count += part->row_end - (row_end + 1) + 1;
-      }
-   }
-
-
-    /*-----------------------------------------------------------
-     * Receive messages from other procs telling us where
-     * all our  locate rows actually reside 
-     *-----------------------------------------------------------*/
-
-
-    /* we will keep a partition of our assumed partition - list ourselves 
-       first.  We will sort later with an additional index.
-       In practice, this should only contain a few processors */
- 
-   /*which part do I own?*/
-   tmp_row_start = hypre_max(part->row_start, row_start);
-   tmp_row_end = hypre_min(row_end, part->row_end);
-
-   if (tmp_row_start <= tmp_row_end)
-   {
-      part->proc_list[0] =   myid;
-      part->row_start_list[0] = tmp_row_start;
-      part->row_end_list[0] = tmp_row_end;
-      part->length++;
-   }
-  
-   /* now look for messages that tell us which processor has our locate rows */
-   /* these will be blocking receives as we know how many to expect and they should
-       be waiting (and we don't want to continue on without them) */
-
-   rows_found = 0;
-
-   while (rows_found != locate_row_count) {
-  
-      MPI_Recv( tmp_range, 2 , MPI_INT, MPI_ANY_SOURCE, 
-                flag1 , MPI_COMM_WORLD, &status0);
-     
-      if (part->length==part->storage_length)
-      {
-	part->storage_length+=10;
-        part->proc_list = hypre_TReAlloc(part->proc_list, int, part->storage_length);
-        part->row_start_list =   hypre_TReAlloc(part->row_start_list, int, part->storage_length);
-        part->row_end_list =   hypre_TReAlloc(part->row_end_list, int, part->storage_length);
-
-      }
-      part->row_start_list[part->length] = tmp_range[0];
-      part->row_end_list[part->length] = tmp_range[1]; 
-
-      part->proc_list[part->length] = status0.MPI_SOURCE;
-      rows_found += tmp_range[1]- tmp_range[0] + 1;
-      
-      part->length++;
-   } 
-
-
-
-   /*In case the partition of the assumed partition is longish, 
-     we would like to know the sorted order */
-   si= hypre_CTAlloc(int, part->length); 
-   sortme = hypre_CTAlloc(int, part->length); 
-
-   for (i=0; i<part->length; i++) 
-   {
-       si[i] = i;
-       sortme[i] = part->row_start_list[i];
-   }
-   hypre_qsort2i( sortme, si, 0, (part->length)-1);
-   part->sort_index = si;
-
-  /*free the requests */
-   ierr = MPI_Waitall(contact_list_length, requests, 
-                    statuses);
-
-   hypre_TFree(sortme);
-   hypre_TFree(contact_list);
-
-
-   return(ierr);
-
-}
 
 /*--------------------------------------------------------------------
  * hypre_RangeFillResponseIJDetermineRecvProcs
@@ -890,7 +695,7 @@ hypre_RangeFillResponseIJDetermineRecvProcs(void *p_recv_contact_buf,
 
 
    hypre_DataExchangeResponse  *response_obj = ro; 
-   hypre_SmIJPartition               *part = response_obj->data1;
+   hypre_IJAssumedPart               *part = response_obj->data1;
    
    int overhead = response_obj->send_response_overhead;
 
@@ -957,8 +762,8 @@ hypre_RangeFillResponseIJDetermineRecvProcs(void *p_recv_contact_buf,
    *response_message_size = index;
    *p_send_response_buf = send_response_buf;
 
+   return hypre_error_flag;
 
-   return(0);
 }
 
 
@@ -1026,159 +831,7 @@ hypre_FillResponseIJDetermineSendProcs(void *p_recv_contact_buf,
   /*output - no message to return (confirmation) */
    *response_message_size = 0; 
   
-   
-   return(0);
+   return hypre_error_flag;
 
 }
 
-/*--------------------------------------------------------------------
- * hypre_GetAssumedPartitionProcFromRow
- * Assumed partition for IJ case. Given a particular row j, return
- * the processor that is assumed to own that row.
- *--------------------------------------------------------------------*/
-
-
-int
-hypre_GetAssumedPartitionProcFromRow( int row, int global_num_rows, int *proc_id)
-{
-
-   int     num_procs;
-   int     size, switch_row, extra;
-   
-  
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
- 
-   /* j = floor[(row*p/N]  - this overflows*/
-   /* *proc_id = (row*num_procs)/global_num_rows;*/
-       
-   /* this looks a bit odd, but we have to be very careful that
-      this function and the next are inverses - and rounding 
-      errors make this difficult!!!!! */
-
-   size = global_num_rows /num_procs;
-   extra = global_num_rows - size*num_procs;
-   switch_row = (size + 1)*extra;
-   
-   if (row >= switch_row)
-   {
-      *proc_id = extra + (row - switch_row)/size;
-   }
-   else
-   {
-      *proc_id = row/(size+1);      
-   }
-
-
-#if badpartition
-
-   /*here is "bad" partition for testing - need more rows than procs*/
-
-   if (row <= (global_num_rows - num_procs))
-   {
-      *proc_id = 0;
-   }
-   else
-   {
-      *proc_id =  num_procs - global_num_rows + row;
-   }
-#endif
-
-#if badpartition2
-
-   /*here is another "bad" partition for testing - need more rows than procs*/
-
-   if (row == 0 )
-   {
-      *proc_id = 0; 
-   }
-   else if (row <= (global_num_rows - num_procs+1))
-   {
-      *proc_id = 1;
-   }
-   else
-   {
-      *proc_id =  num_procs - global_num_rows + row;
-   }
-#endif
-
-
-   return(0);
-
-}
-/*--------------------------------------------------------------------
- * hypre_GetAssumedPartitionRowRange
- * Assumed partition for IJ case. Given a particular processor id, return
- * the assumed range of rows ([row_start, row_end]) for that processor.
- *--------------------------------------------------------------------*/
-
-
-int
-hypre_GetAssumedPartitionRowRange( int proc_id, int global_num_rows, 
-                             int *row_start, int* row_end) 
-{
-
-   int    num_procs;
-   int    size, extra;
-   
-
-   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
-
-
-  /* this may look non-intuitive, but we have to be very careful that
-      this function and the next are inverses - and avoiding overflow and
-      rounding errors makes this difficult! */
-
-   size = global_num_rows /num_procs;
-   extra = global_num_rows - size*num_procs;
-
-   *row_start = size*proc_id;
-   *row_start += hypre_min(proc_id, extra);
-   
-
-   *row_end =  size*(proc_id+1);
-   *row_end += hypre_min(proc_id+1, extra);
-   *row_end = *row_end - 1;
-
-
-
-#if badpartition
-
-   /*a bad partition for testing - need more rows than procs*/
-
-   if (proc_id)
-   {
-      *row_start = global_num_rows - (num_procs - proc_id);
-      *row_end = global_num_rows - (num_procs - proc_id);
-   }
-   else
-   {
-      *row_start = 0;
-      *row_end = global_num_rows - num_procs;
-   }
-   
-#endif
-
-#if badpartition2
-
-   /*a bad partition for testing - need more rows than procs*/
-
-   if (proc_id == 0 )
-   {
-       *row_start = 0;
-       *row_end = 0;
-   }
-   else if (proc_id == 1)
-   {
-      *row_start =1;
-      *row_end = global_num_rows - num_procs + 1;
-   }
-   else
-   {
-      *row_start = global_num_rows - (num_procs - proc_id);
-      *row_end = global_num_rows - (num_procs - proc_id);
-   }
-#endif
-
-   return(0);
-
-}

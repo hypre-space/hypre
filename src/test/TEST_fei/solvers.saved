@@ -1,0 +1,80 @@
+Running with these driver parameters:
+  solver ID    = 0
+  Laplacian_27pt:
+    (nx, ny, nz) = (20, 20, 20)
+    (Px, Py, Pz) = (1, 4, 1)
+0 : sumIntoRHSVector ERROR - index 2000 out of range.
+1 : sumIntoRHSVector ERROR - index 4000 out of range.
+bm_list_26170: (1.286554) wakeup_slave: unable to interrupt slave 0 pid 26169
+Broken pipe
+p3_26304:  p4_error: net_recv read:  probable EOF on socket: 1
+Running with these driver parameters:
+  solver ID    = 1
+  Laplacian_27pt:
+    (nx, ny, nz) = (20, 20, 20)
+    (Px, Py, Pz) = (1, 4, 1)
+0 : sumIntoRHSVector ERROR - index 2000 out of range.
+3 : sumIntoRHSVector ERROR - index 8000 out of range.
+2 : sumIntoRHSVector ERROR - index 6000 out of range.
+1 : sumIntoRHSVector ERROR - index 4000 out of range.
+Running with these driver parameters:
+  solver ID    = 2
+  Laplacian_27pt:
+    (nx, ny, nz) = (20, 20, 20)
+    (Px, Py, Pz) = (1, 4, 1)
+0 : sumIntoRHSVector ERROR - index 2000 out of range.
+bm_list_26758: (1.140099) wakeup_slave: unable to interrupt slave 0 pid 26757
+p1_26804:  p4_error: net_recv read:  probable EOF on socket: 1
+2 : sumIntoRHSVector ERROR - index 6000 out of range.
+3 : sumIntoRHSVector ERROR - index 8000 out of range.
+Running with these driver parameters:
+  solver ID    = 3
+  Laplacian_27pt:
+    (nx, ny, nz) = (20, 20, 20)
+    (Px, Py, Pz) = (1, 4, 1)
+0 : sumIntoRHSVector ERROR - index 2000 out of range.
+bm_list_27061: (1.188056) wakeup_slave: unable to interrupt slave 0 pid 27060
+1 : sumIntoRHSVector ERROR - index 4000 out of range.
+p3_27205:  p4_error: net_recv read:  probable EOF on socket: 1
+2 : sumIntoRHSVector ERROR - index 6000 out of range.
+Running with these driver parameters:
+  solver ID    = 4
+  Laplacian_27pt:
+    (nx, ny, nz) = (20, 20, 20)
+    (Px, Py, Pz) = (1, 4, 1)
+0 : sumIntoRHSVector ERROR - index 2000 out of range.
+1 : sumIntoRHSVector ERROR - index 4000 out of range.
+bm_list_27365: (1.214990) wakeup_slave: unable to interrupt slave 0 pid 27364
+p3_27508:  p4_error: net_recv read:  probable EOF on socket: 1
+Broken pipe
+rm_l_1_27412: (0.827994) net_send: could not write to fd=6, errno = 9
+rm_l_1_27412:  p4_error: net_send write: -1
+Running with these driver parameters:
+  solver ID    = 5
+  Laplacian_27pt:
+    (nx, ny, nz) = (20, 20, 20)
+    (Px, Py, Pz) = (1, 4, 1)
+0 : sumIntoRHSVector ERROR - index 2000 out of range.
+bm_list_27668: (1.212417) wakeup_slave: unable to interrupt slave 0 pid 27667
+1 : sumIntoRHSVector ERROR - index 4000 out of range.
+p3_27811:  p4_error: net_recv read:  probable EOF on socket: 1
+2 : sumIntoRHSVector ERROR - index 6000 out of range.
+Running with these driver parameters:
+  solver ID    = 6
+  Laplacian_27pt:
+    (nx, ny, nz) = (20, 20, 20)
+    (Px, Py, Pz) = (1, 4, 1)
+0 : sumIntoRHSVector ERROR - index 2000 out of range.
+1 : sumIntoRHSVector ERROR - index 4000 out of range.
+3 : sumIntoRHSVector ERROR - index 8000 out of range.
+2 : sumIntoRHSVector ERROR - index 6000 out of range.
+Running with these driver parameters:
+  solver ID    = 7
+  Laplacian_27pt:
+    (nx, ny, nz) = (20, 20, 20)
+    (Px, Py, Pz) = (1, 4, 1)
+0 : sumIntoRHSVector ERROR - index 2000 out of range.
+bm_list_28274: (1.184531) wakeup_slave: unable to interrupt slave 0 pid 28273
+1 : sumIntoRHSVector ERROR - index 4000 out of range.
+2 : sumIntoRHSVector ERROR - index 6000 out of range.
+p3_28427:  p4_error: net_recv read:  probable EOF on socket: 1

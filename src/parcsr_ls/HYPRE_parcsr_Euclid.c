@@ -1,3 +1,31 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.12 $
+ ***********************************************************************EHEADER*/
+
+
+
 #include "./HYPRE_parcsr_ls.h"
 #include "../matrix_matrix/HYPRE_matrix_matrix_protos.h"
 #include "../utilities/mpistubs.h"
@@ -6,7 +34,10 @@
   functions are publically provided. AJC, 5/99 */
 /* Likewise for Vector. AJC, 5/99 */
 #include "../seq_mv/vector.h"
-#include "../parcsr_mv/par_vector.h"
+
+/* AB 8/06 - replace header file */
+/* #include "../parcsr_mv/par_vector.h" */
+#include "../parcsr_mv/parcsr_mv.h"
 
 
   /* These are what we need from Euclid */
@@ -186,12 +217,14 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
      destroy all remaining Euclid library objects 
      (except the memory object)
    *------------------------------------------------------------------ */
-  if (parser_dh != NULL) {
+  /*if (parser_dh != NULL) { dah 3/16/06  */
+  if (parser_dh != NULL && ref_counter == 0) {
     Parser_dhDestroy(parser_dh); HYPRE_EUCLID_ERRCHKA;
     parser_dh = NULL;
   }
 
-  if (tlog_dh != NULL) {
+  /*if (tlog_dh != NULL) {  dah 3/16/06  */
+  if (tlog_dh != NULL && ref_counter == 0) {
     TimeLog_dhDestroy(tlog_dh); HYPRE_EUCLID_ERRCHKA;
     tlog_dh = NULL;
   }
@@ -200,7 +233,8 @@ HYPRE_EuclidDestroy( HYPRE_Solver solver )
      optionally print Euclid's memory report, 
      then destroy the memory object.
    *------------------------------------------------------------------ */
-  if (mem_dh != NULL) {
+  /*if (mem_dh != NULL) {  dah 3/16/06  */
+  if (mem_dh != NULL && ref_counter == 0) {
     if (printMemReport) { 
       Mem_dhPrint(mem_dh, stdout, false); HYPRE_EUCLID_ERRCHKA; 
     }

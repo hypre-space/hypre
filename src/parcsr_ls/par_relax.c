@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1996   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.3 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.8 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 /******************************************************************************
  *
@@ -797,8 +817,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
-	status = hypre_CTAlloc(MPI_Status,num_recvs);
-	requests = hypre_CTAlloc(MPI_Request, num_recvs);
+	status  = hypre_CTAlloc(MPI_Status,num_recvs+num_sends);
+	requests= hypre_CTAlloc(MPI_Request, num_recvs+num_sends);
 
 	if (num_cols_offd)
 	{
@@ -940,8 +960,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
 	Vext_data = hypre_CTAlloc(double,num_cols_offd);
         
-	status = hypre_CTAlloc(MPI_Status,num_recvs);
-	requests = hypre_CTAlloc(MPI_Request, num_recvs);
+	status  = hypre_CTAlloc(MPI_Status,num_recvs+num_sends);
+	requests= hypre_CTAlloc(MPI_Request, num_recvs+num_sends);
 
 	if (num_cols_offd)
 	{
@@ -2281,11 +2301,19 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          /*-----------------------------------------------------------------
           *  Generate CSR matrix from ParCSRMatrix A
           *-----------------------------------------------------------------*/
-
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         /* all processors are needed for these routines */
+         A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
+         f_vector = hypre_ParVectorToVectorAll(f);
+	 if (n)
+	 {
+	 
+#else
 	 if (n)
 	 {
 	    A_CSR = hypre_ParCSRMatrixToCSRMatrixAll(A);
 	    f_vector = hypre_ParVectorToVectorAll(f);
+#endif
  	    A_CSR_i = hypre_CSRMatrixI(A_CSR);
  	    A_CSR_j = hypre_CSRMatrixJ(A_CSR);
  	    A_CSR_data = hypre_CSRMatrixData(A_CSR);
@@ -2323,6 +2351,17 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             f_vector = NULL;
          
          }
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+         else
+         {
+            
+            hypre_CSRMatrixDestroy(A_CSR);
+            A_CSR = NULL;
+            hypre_SeqVectorDestroy(f_vector);
+            f_vector = NULL;
+         }
+#endif
+
       }
       break;   
    }

@@ -1,10 +1,9 @@
 ##
 ## File:        Makefile.am 
 ## Package:     gov.llnl.babel
-## Release:     $Name: V1-9-0b $
-## Revision:    $Revision: 1.5 $
-## Modified:    $Date: 2003/09/11 23:16:24 $
-## Description: automake makefile for the SIDL Java runtime support
+## Revision:    $Revision: 1.11 $
+## Modified:    $Date: 2006/08/29 22:29:15 $
+## Description: automake makefile for the sidl Java runtime support
 ##
 ## Copyright (c) 2000-2001, The Regents of the University of Calfornia.
 ## Produced at the Lawrence Livermore National Laboratory.
@@ -30,15 +29,20 @@
 ## along with this program; if not, write to the Free Software Foundation,
 ## Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-AUTOMAKE_OPTIONS = foreign no-dependencies no-installinfo	\
-                   no-installman no-texinfo.tex 1.7
+
+
 
 JAR     = @JAR@
 VERSION = @VERSION@
 JARFILE = sidl-$(VERSION).jar
 
+if BABEL_RUNTIME_ONLY
+jardir=$(prefix)/lib
+jar_DATA=$(JARFILE)
+endif
+
 #
-# Compile the SIDL jar file.  Recompile only if the jar file does not
+# Compile the sidl jar file.  Recompile only if the jar file does not
 # exist or if any of the java sources are newer than the jar file.
 #
 
@@ -49,42 +53,46 @@ jarfile:
 	@if test ! -f $(JARFILE); then					\
 	  $(MAKE) $(AM_MAKEFLAGS) force-jarfile;			\
 	else								\
-	  newfiles=`find $(srcdir)/gov $(srcdir)/SIDL -name SCCS -prune \
+	  newfiles=`find $(srcdir)/gov $(srcdir)/sidl 			\
+	    -name SCCS -prune 						\
 	    -o -name CVS -prune						\
+	    -o -name .svn -prune					\
             -o -name "*.java" -newer $(JARFILE) -print`;		\
 	  if test "x$$newfiles" != "x"; then                         	\
 	    $(MAKE) $(AM_MAKEFLAGS) force-jarfile;			\
 	  fi								\
 	fi
 
-JAVAC_FLAGS = -g -d .
+JAVAC_FLAGS = -g -d . -source 1.4 -target 1.4
 
 force-jarfile:
-	@javafiles=`find $(srcdir)/gov $(srcdir)/SIDL			\
+	@javafiles=`find $(srcdir)/gov $(srcdir)/sidl			\
 	  -name SCCS -prune -o 						\
+	  -name .svn -prune -o 						\
 	  -name CVS -prune -o -name "*.java" -print`;			\
 	echo "$(JAVAC) $(JAVAC_FLAGS) $$javafiles";			\
 	if $(JAVAC) $(JAVAC_FLAGS) $$javafiles; then			\
-	  classfiles=`find gov SIDL -name '*.class' -print`;		\
+	  classfiles=`find gov sidl -name '*.class' -print`;		\
 	  echo "$(JAR) cf $(JARFILE) $$classfiles";			\
 	  $(JAR) cf $(JARFILE) $$classfiles;				\
 	fi
 
 clean-local:
 	@if test -d gov; then						\
-	  echo rm -f `find gov SIDL -name '*.class' -print`;		\
-	  rm -f `find gov SIDL -name '*.class' -print`;		\
+	  echo rm -f `find gov sidl -name '*.class' -print`;		\
+	  rm -f `find gov sidl -name '*.class' -print`;		\
 	fi
 	rm -f *.jar
 
 dist-hook:
-	dirs=`cd $(srcdir); find gov SIDL -type d \( -name SCCS -prune -o  \
-		-name CVS -prune -o -print \)`;				\
+	dirs=`cd $(srcdir); find gov sidl -type d \( -name SCCS -prune -o  \
+		-name CVS -prune -o -name .svn -prune -o -print \)`;	\
 	for d in $$dirs; do						\
 	  mkdir -p $(distdir)/$$d;					\
 	done
-	files=`cd $(srcdir); find gov SIDL -name SCCS -prune -o 	\
+	files=`cd $(srcdir); find gov sidl -name SCCS -prune -o 	\
 		-name CVS -prune -o					\
+		-name .svn -prune -o					\
 		-name "*.j*" -print`;					\
 	for f in $$files; do						\
 	  echo cp $(srcdir)/$$f $(distdir)/$$f;				\

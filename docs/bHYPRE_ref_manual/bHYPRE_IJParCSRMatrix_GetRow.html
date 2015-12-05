@@ -1,6 +1,6 @@
 <html><head><TITLE>bHYPRE_IJParCSRMatrix_GetRow</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_IJParCSRMatrix_GetRow ( bHYPRE_IJParCSRMatrix self, int32_t row, int32_t* size, struct SIDL_int__array** col_ind, struct SIDL_double__array** values) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> SIDL_C_INLINE_DECL  int32_t  bHYPRE_IJParCSRMatrix_GetRow (  bHYPRE_IJParCSRMatrix self,  int32_t row,  int32_t* size,  struct sidl_int__array** col_ind,  struct sidl_double__array** values,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>) </H2><BLOCKQUOTE>
 
 The GetRow method will allocate space for its two output
 arrays on the first call
@@ -15,7 +15,6 @@ arrays on the first call.  The space will be reused on
 subsequent calls.  Thus the user must not delete them, yet
 must not depend on the data from GetRow to persist beyond the
 next GetRow call.
-
 
 </BLOCKQUOTE>
 <DL>

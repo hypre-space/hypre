@@ -1,10 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2001   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 1.33 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 #ifdef WIN32
 #define strcmp _stricmp
@@ -13,6 +34,7 @@
 #include <string.h>
 #include <assert.h>
 #include "HYPRE.h"
+#include "../../IJ_mv/HYPRE_IJ_mv.h"
 #include "util/mli_utils.h"
 #include "matrix/mli_matrix.h"
 #include "matrix/mli_matrix_misc.h"
@@ -208,6 +230,11 @@ int MLI_Method_AMGSA::setParams(char *in_name, int argc, char *argv[])
    else if ( !strcmp(param1, "useSAMGDDExt" ))
    {
       useSAMGDDFlag_ = 2;
+      return 0;
+   }
+   else if ( !strcmp(param1, "useSAMGDDExt2" ))
+   {
+      useSAMGDDFlag_ = 3;
       return 0;
    }
    else if ( !strcmp(param1, "setCoarsenScheme" ))
@@ -541,6 +568,52 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    MLI_FEData      *fedata;
    MLI_SFEI        *sfei;
 
+#define DEBUG
+#ifdef DEBUG
+   int                *partition, ANRows, AStart, AEnd; 
+   double             *XData, rnorm;
+   HYPRE_IJVector     IJX, IJY;
+   hypre_ParCSRMatrix *hypreA;
+   hypre_ParVector    *hypreX, *hypreY;
+
+   if (nullspaceVec_ != NULL)
+   {
+      mli_Amat = mli->getSystemMatrix(0);
+      hypreA = (hypre_ParCSRMatrix *) mli_Amat->getMatrix();
+      comm = hypre_ParCSRMatrixComm(hypreA);
+      MPI_Comm_rank(comm,&mypid);
+      HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) hypreA,&partition);
+      AStart = partition[mypid];
+      AEnd = partition[mypid+1];
+      ANRows = AEnd - AStart;
+      free(partition);
+      HYPRE_IJVectorCreate(comm, AStart, AEnd-1,&IJX);
+      HYPRE_IJVectorSetObjectType(IJX, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(IJX);
+      HYPRE_IJVectorAssemble(IJX);
+      HYPRE_IJVectorGetObject(IJX, (void **) &hypreX);
+      HYPRE_IJVectorCreate(comm, AStart, AEnd-1,&IJY);
+      HYPRE_IJVectorSetObjectType(IJY, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(IJY);
+      HYPRE_IJVectorAssemble(IJY);
+      HYPRE_IJVectorGetObject(IJY, (void **) &hypreY);
+      XData = (double *) hypre_VectorData(hypre_ParVectorLocalVector(hypreX));
+      for (ii = 0; ii < nullspaceDim_; ii++)
+      {
+         for (jj = 0; jj < ANRows; jj++) XData[jj] = nullspaceVec_[ii*ANRows+jj];
+         hypre_ParCSRMatrixMatvec(1.0, hypreA, hypreX, 0.0, hypreY);
+         rnorm = sqrt(hypre_ParVectorInnerProd(hypreY, hypreY));
+         if (mypid == 0) printf("HYPRE FEI: check null space = %e\n", rnorm);
+      }
+      HYPRE_IJVectorDestroy(IJX);
+      HYPRE_IJVectorDestroy(IJY);
+   }
+   else
+   {
+      printf("MLI::setup - no nullspace vector.\n");
+   }
+#endif
+
 #ifdef MLI_DEBUG_DETAILED
    printf("MLI_Method_AMGSA::setup begins...\n");
 #endif
@@ -553,6 +626,10 @@ int MLI_Method_AMGSA::setup( MLI *mli )
    if (useSAMGDDFlag_ == 2) 
    {
       return(setupExtendedDomainDecomp(mli));
+   }
+   if (useSAMGDDFlag_ == 3) 
+   {
+      return(setupExtendedDomainDecomp2(mli));
    }
 #endif
 

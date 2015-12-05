@@ -70,8 +70,8 @@ C++DEFINES      = $(ISIS_BOOL) $(IT_DEFINES)
 C++INCLUDES_MPI = $(C++INCLUDES)
 
 # our primary targets defined
-SLIB = $(FEI_ROOT)/lib/$(HYPRE_ARCH)/libHYPRE_FEI_BASE.a
-PLIB = $(FEI_ROOT)/lib/$(HYPRE_ARCH)/libHYPRE_FEI_BASE.a
+SLIB = $(FEI_ROOT)/lib/$(HYPRE_ARCH)/libHYPRE_FEI_BASE${HYPRE_LIB_SUFFIX}
+PLIB = $(FEI_ROOT)/lib/$(HYPRE_ARCH)/libHYPRE_FEI_BASE${HYPRE_LIB_SUFFIX}
 
 #######################################################################
 #

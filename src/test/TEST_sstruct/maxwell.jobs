@@ -1,0 +1,11 @@
+#=============================================================================
+# no test comparison at this time
+#=============================================================================
+
+mpirun -np 1 ./maxwell_unscaled -in sstruct.in.maxwell3d_unscaled -solver 1 \
+ > maxwell.out.0
+mpirun -np 2 ./maxwell_unscaled -in sstruct.in.maxwell3d_unscaled -solver 1 \
+ -P 2 1 1 > maxwell.out.1
+mpirun -np 2 ./maxwell_unscaled -in sstruct.in.maxwell3d_unscaled -solver 1 \
+ -P 2 1 1 -r 2 3 1 > maxwell.out.2
+

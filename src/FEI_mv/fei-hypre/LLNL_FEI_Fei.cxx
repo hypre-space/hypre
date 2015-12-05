@@ -1,3 +1,31 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
+ *
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice,
+ * disclaimer, contact information and the GNU Lesser General Public License.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.8 $
+ ***********************************************************************EHEADER*/
+                                                                                
+                                                                                
+
 /**************************************************************************
   Module:  LLNL_FEI_Fei.cxx
   Purpose: custom implementation of the FEI
@@ -1007,6 +1035,9 @@ int LLNL_FEI_Fei::loadComplete()
       printf("%4d : LLNL_FEI_Fei::loadComplete - numCRMult   = %d\n",
              mypid_, numCRMult_);
    }
+if (mypid_ == 0)
+printf("%4d : LLNL_FEI_Fei::loadComplete - numExtNodes = %d\n",
+mypid_, localNNodes-numLocalNodes_);
 
    /* -----------------------------------------------------------------
     * construct global node list, starting with nodes that belong
@@ -1518,7 +1549,7 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
    int    diagOffset, offdOffset, nLocal, rowInd2, *globalEqnOffsets; 
    int    *diagIA, *diagJA, *offdIA, *offdJA, *extEqnList, *crOffsets;
    int    nRecvs, *recvLengs, *recvProcs, *recvProcIndices;
-   int    nSends, *sendLengs, *sendProcs, *sendProcIndices;
+   int    nSends, *sendLengs, *sendProcs, *sendProcIndices, *flags;
    double **elemMats=NULL, *elemMat=NULL, *TdiagAA=NULL, *ToffdAA=NULL;
    double alpha, beta, gamma, dtemp, *diagAA, *offdAA, *diagonal; 
 
@@ -1902,57 +1933,40 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
     * impose boundary conditions
     * -----------------------------------------------------------------*/
 
-   for ( iD = nLocal; iD < matDim; iD++ ) rhsVector_[iD] = 0.0;
-   for ( iN = 0; iN < numBCNodes_; iN++ )
+   for (iD = nLocal; iD < matDim; iD++) rhsVector_[iD] = 0.0;
+   flags = NULL;
+   if (numLocalNodes_+numExtNodes_ > 0)
+      flags = new int[(numLocalNodes_+numExtNodes_)*nodeDOF_];
+   for (iD = 0; iD < (numLocalNodes_+numExtNodes_)*nodeDOF_; iD++)
+      flags[iD] = 0;
+
+   for (iN = 0; iN < numBCNodes_; iN++)
    {
       nodeID = BCNodeIDs_[iN];
       index  = -1;
-      if ( numLocalNodes_ > 0 )
+      if (numLocalNodes_ > 0)
          index = hypre_BinarySearch(nodeGlobalIDs_,nodeID,numLocalNodes_);
-      if ( index >= 0 )
+      if (index >= 0)
       {
-         for ( iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++ )
+         for (iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++)
          {
-            alpha = BCNodeAlpha_[iN][iD%nodeDOF_]; 
-            beta  = BCNodeBeta_[iN][iD%nodeDOF_]; 
-            gamma = BCNodeGamma_[iN][iD%nodeDOF_]; 
-            if ( beta == 0.0 && alpha != 0.0 )
+            if (flags[iD] == 0)
             {
-               for (iD2=TdiagIA[iD]; iD2<TdiagIA[iD]+diagCounts[iD]; iD2++)
+               alpha = BCNodeAlpha_[iN][iD%nodeDOF_]; 
+               beta  = BCNodeBeta_[iN][iD%nodeDOF_]; 
+               gamma = BCNodeGamma_[iN][iD%nodeDOF_]; 
+               if (beta == 0.0 && alpha != 0.0)
                {
-                  rowInd = TdiagJA[iD2];
-                  if ( rowInd != iD && rowInd >= 0 )
+                  flags[iD] = 1;
+                  for (iD2=TdiagIA[iD];iD2<TdiagIA[iD]+diagCounts[iD];iD2++)
                   {
-                     for (iD3 = TdiagIA[rowInd];
-                          iD3<TdiagIA[rowInd]+diagCounts[rowInd]; iD3++)
-                     {
-                        if ( TdiagJA[iD3] == iD && TdiagAA[iD3] != 0.0 )
-                        {
-                           rhsVector_[rowInd] -= (gamma/alpha*TdiagAA[iD3]); 
-                           TdiagAA[iD3] = 0.0;
-                           break;
-                        }
-                     }
-                  }
-               }
-               TdiagJA[TdiagIA[iD]] = iD;
-               TdiagAA[TdiagIA[iD]] = 1.0;
-               for (iD2=TdiagIA[iD]+1; iD2<TdiagIA[iD]+diagCounts[iD]; iD2++)
-               {
-                  TdiagJA[iD2] = -1;
-                  TdiagAA[iD2] = 0.0;
-               }
-               if ( ToffdIA != NULL )
-               {
-                  for (iD2=ToffdIA[iD]; iD2<ToffdIA[iD]+offdCounts[iD]; iD2++)
-                  {
-                     rowInd = ToffdJA[iD2];
-                     if ( rowInd != iD && rowInd >= 0 )
+                     rowInd = TdiagJA[iD2];
+                     if (rowInd != iD && rowInd >= 0)
                      {
                         for (iD3 = TdiagIA[rowInd];
                              iD3<TdiagIA[rowInd]+diagCounts[rowInd]; iD3++)
                         {
-                           if ( TdiagJA[iD3] == iD && TdiagAA[iD3] != 0.0 )
+                           if (TdiagJA[iD3] == iD && TdiagAA[iD3] != 0.0)
                            {
                               rhsVector_[rowInd] -= (gamma/alpha*TdiagAA[iD3]); 
                               TdiagAA[iD3] = 0.0;
@@ -1961,114 +1975,152 @@ void LLNL_FEI_Fei::buildGlobalMatrixVector()
                         }
                      }
                   }
-                  for (iD2=ToffdIA[iD]; iD2<ToffdIA[iD]+offdCounts[iD]; iD2++)
+                  TdiagJA[TdiagIA[iD]] = iD;
+                  TdiagAA[TdiagIA[iD]] = 1.0;
+                  for (iD2=TdiagIA[iD]+1;iD2<TdiagIA[iD]+diagCounts[iD];iD2++)
                   {
-                     ToffdJA[iD2] = -1;
-                     ToffdAA[iD2] = 0.0;
+                     TdiagJA[iD2] = -1;
+                     TdiagAA[iD2] = 0.0;
                   }
+                  if (ToffdIA != NULL)
+                  {
+                     for (iD2=ToffdIA[iD];iD2<ToffdIA[iD]+offdCounts[iD];iD2++)
+                     {
+                        rowInd = ToffdJA[iD2];
+                        if (rowInd != iD && rowInd >= 0)
+                        {
+                           for (iD3 = TdiagIA[rowInd];
+                                iD3<TdiagIA[rowInd]+diagCounts[rowInd]; iD3++)
+                           {
+                              if (TdiagJA[iD3] == iD && TdiagAA[iD3] != 0.0)
+                              {
+                                 rhsVector_[rowInd]-=(gamma/alpha*TdiagAA[iD3]);
+                                 TdiagAA[iD3] = 0.0;
+                                 break;
+                              }
+                           }
+                        }
+                     }
+                     for (iD2=ToffdIA[iD];iD2<ToffdIA[iD]+offdCounts[iD];iD2++)
+                     {
+                        ToffdJA[iD2] = -1;
+                        ToffdAA[iD2] = 0.0;
+                     }
+                  }
+                  rhsVector_[iD] = gamma / alpha;
                }
-               rhsVector_[iD] = gamma / alpha;
-            }
-            else if ( beta != 0.0 )
-            {
-               for (iD2=TdiagIA[iD]; iD2<TdiagIA[iD]+diagCounts[iD]; iD2++)
+               else if (beta != 0.0)
                {
-                  rowInd = TdiagJA[iD2];
-                  if ( rowInd == iD )
+                  flags[iD] = 1;
+                  for (iD2=TdiagIA[iD];iD2<TdiagIA[iD]+diagCounts[iD];iD2++)
                   {
-                     TdiagAA[iD2] += alpha / beta;
-                     break;
+                     rowInd = TdiagJA[iD2];
+                     if (rowInd == iD)
+                     {
+                        TdiagAA[iD2] += alpha / beta;
+                        break;
+                     }
                   }
+                  rhsVector_[iD] += gamma / beta;
                }
-               rhsVector_[iD] += gamma / beta;
             }
          }
       }
       else
       {
-         if ( numExtNodes_ <= 0 )
+         if (numExtNodes_ <= 0)
          {
-            printf("%4d : LLNL_FEI_Fei::buildGlobalMatrixVector ERROR(2).\n",
-                   mypid_);
-            exit(1);
+            if (outputLevel_ > 2)
+               printf("WARNING : BC node ID not local %d (%d).\n",nodeID,
+                      mypid_);
+            index = -1;
          }
-         index = hypre_BinarySearch(&nodeGlobalIDs_[numLocalNodes_],nodeID,
-                                    numExtNodes_);
-         if ( index < 0 )
+         else
          {
-            printf("ERROR : BC node ID not local.\n");
-            exit(1);
+            index = hypre_BinarySearch(&nodeGlobalIDs_[numLocalNodes_],nodeID,
+                                       numExtNodes_);
+            if (index < 0 && outputLevel_ > 2)
+               printf("WARNING : BC node ID not local %d (%d).\n",nodeID,
+                      mypid_);
          }
-         index += numLocalNodes_;
-         for ( iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++ )
+         if (index >= 0)
          {
-            alpha  = BCNodeAlpha_[iN][iD%nodeDOF_]; 
-            beta   = BCNodeBeta_[iN][iD%nodeDOF_]; 
-            gamma  = BCNodeGamma_[iN][iD%nodeDOF_]; 
-            if ( beta == 0.0 && alpha != 0.0 )
+            index += numLocalNodes_;
+            for (iD = index*nodeDOF_; iD < (index+1)*nodeDOF_; iD++)
             {
-               rowInd = iD + numCRMult_;
-               if ( numExtNodes_ > 0 )
+               if (flags[iD] == 0)
                {
-                  for (iD2=TdiagIA[rowInd]; 
-                       iD2<TdiagIA[rowInd]+diagCounts[rowInd]; iD2++)
+                  alpha  = BCNodeAlpha_[iN][iD%nodeDOF_]; 
+                  beta   = BCNodeBeta_[iN][iD%nodeDOF_]; 
+                  gamma  = BCNodeGamma_[iN][iD%nodeDOF_]; 
+                  if (beta == 0.0 && alpha != 0.0)
                   {
-                     rowInd2 = TdiagJA[iD2];
-                     if ( rowInd2 >= 0 )
+                     flags[iD] = 1;
+                     rowInd = iD + numCRMult_;
+                     if (numExtNodes_ > 0)
                      {
-                        for (iD3 = ToffdIA[rowInd2];
-                             iD3<ToffdIA[rowInd2]+offdCounts[rowInd2]; iD3++)
+                        for (iD2=TdiagIA[rowInd]; 
+                             iD2<TdiagIA[rowInd]+diagCounts[rowInd]; iD2++)
                         {
-                           if ( ToffdJA[iD3] == rowInd && ToffdAA[iD3] != 0.0 )
+                           rowInd2 = TdiagJA[iD2];
+                           if (rowInd2 >= 0)
                            {
-                              rhsVector_[rowInd2] -=(gamma/alpha*ToffdAA[iD3]); 
-                              ToffdAA[iD3] = 0.0;
-                              break;
+                              for (iD3 = ToffdIA[rowInd2];
+                                   iD3<ToffdIA[rowInd2]+offdCounts[rowInd2];iD3++)
+                              {
+                                 if (ToffdJA[iD3] == rowInd && ToffdAA[iD3]!=0.0)
+                                 {
+                                   rhsVector_[rowInd2]-=(gamma/alpha*ToffdAA[iD3]);
+                                   ToffdAA[iD3] = 0.0;
+                                   break;
+                                 }
+                              }
+                           }
+                        }
+                        for (iD2=ToffdIA[rowInd]; 
+                             iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
+                        {
+                           rowInd2 = ToffdJA[iD2];
+                           if (rowInd2 != rowInd && rowInd2 >= 0)
+                           {
+                              for (iD3 = ToffdIA[rowInd2];
+                                   iD3<ToffdIA[rowInd2]+offdCounts[rowInd2];iD3++)
+                              {
+                                 if (ToffdJA[iD3] == rowInd && ToffdAA[iD3]!=0.0)
+                                 {
+                                   rhsVector_[rowInd2]-=(gamma/alpha*ToffdAA[iD3]);
+                                   ToffdAA[iD3] = 0.0;
+                                   break;
+                                 }
+                              }
                            }
                         }
                      }
-                  }
-                  for (iD2=ToffdIA[rowInd]; 
-                       iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
-                  {
-                     rowInd2 = ToffdJA[iD2];
-                     if ( rowInd2 != rowInd && rowInd2 >= 0 )
+                     for (iD2=TdiagIA[rowInd]; 
+                          iD2<TdiagIA[rowInd]+diagCounts[rowInd]; iD2++)
                      {
-                        for (iD3 = ToffdIA[rowInd2];
-                             iD3<ToffdIA[rowInd2]+offdCounts[rowInd2]; iD3++)
+                        TdiagJA[iD2] = -1;
+                        TdiagAA[iD2] = 0.0;
+                     }
+                     if (ToffdIA != NULL)
+                     {
+                        for (iD2=ToffdIA[rowInd]; 
+                             iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
                         {
-                           if ( ToffdJA[iD3] == rowInd && ToffdAA[iD3] != 0.0 )
-                           {
-                              rhsVector_[rowInd2] -= (gamma/alpha*ToffdAA[iD3]);
-                              ToffdAA[iD3] = 0.0;
-                              break;
-                           }
+                           ToffdJA[iD2] = -1;
+                           ToffdAA[iD2] = 0.0;
                         }
                      }
+                     rhsVector_[rowInd] = 0.0;
                   }
                }
-               for (iD2=TdiagIA[rowInd]; 
-                    iD2<TdiagIA[rowInd]+diagCounts[rowInd]; iD2++)
-               {
-                  TdiagJA[iD2] = -1;
-                  TdiagAA[iD2] = 0.0;
-               }
-               if ( ToffdIA != NULL )
-               {
-                  for (iD2=ToffdIA[rowInd]; 
-                       iD2<ToffdIA[rowInd]+offdCounts[rowInd]; iD2++)
-                  {
-                     ToffdJA[iD2] = -1;
-                     ToffdAA[iD2] = 0.0;
-                  }
-               }
-               rhsVector_[rowInd] = 0.0;
             }
          }
       }
    }
-   gatherAddDData( rhsVector_ );
-   for ( iD = nLocal; iD < matDim; iD++ ) rhsVector_[iD] = 0.0;
+   if (flags != NULL) delete [] flags;
+   gatherAddDData(rhsVector_);
+   for (iD = nLocal; iD < matDim; iD++) rhsVector_[iD] = 0.0;
 
    /* -----------------------------------------------------------------
     * recompute the sparsity structure of the compressed matrix
@@ -2299,14 +2351,15 @@ void LLNL_FEI_Fei::assembleSolnVector()
 /**************************************************************************
  distribute solution vector to element solution vectors
  -------------------------------------------------------------------------*/
-void LLNL_FEI_Fei::disassembleSolnVector()
+void LLNL_FEI_Fei::disassembleSolnVector(double *solns)
 {
    int    iB, iE, iN, iD, **elemNodeLists, numElems, elemNumNodes;
    int    eqnIndex1, eqnIndex2, nLocal;
    double **solnVectors;
 
-   scatterDData( solnVector_ );
    nLocal = numLocalNodes_ * nodeDOF_;
+   for ( iD = 0; iD < nLocal; iD++ ) solnVector_[iD] = solns[iD];
+   scatterDData( solnVector_ );
    for ( iB = 0; iB < numBlocks_; iB++ )
    {
       elemNodeLists = elemBlocks_[iB]->getElemNodeLists();

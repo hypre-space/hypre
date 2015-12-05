@@ -8,43 +8,47 @@
  <DD><I>
 The vector object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorCreate</B>(MPI_Comm comm, <!2><A HREF="StructGrids.html#DOC.1.1.2">HYPRE_StructGrid</A> grid, <!2><A HREF="StructVectors.html#DOC.1.4.2">HYPRE_StructVector</A> *vector)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorCreate</B>(MPI_Comm comm, <!2><A HREF="StructGrids.html#DOC.1.1.2">HYPRE_StructGrid</A> grid, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> *vector)
  <DD><I>
 Create a vector object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorDestroy</B>(<!2><A HREF="StructVectors.html#DOC.1.4.2">HYPRE_StructVector</A> vector)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorDestroy</B>(<!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> vector)
  <DD><I>
 Destroy a vector object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorInitialize</B>(<!2><A HREF="StructVectors.html#DOC.1.4.2">HYPRE_StructVector</A> vector)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorInitialize</B>(<!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> vector)
  <DD><I>
 Prepare a vector object for setting coefficient values</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorSetValues</B>(<!2><A HREF="StructVectors.html#DOC.1.4.2">HYPRE_StructVector</A> vector, int *index, double value)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorClearGhostValues.html><B>HYPRE_StructVectorClearGhostValues</B></A> 
+ <DD><I>
+Clears the ghostvalues of vector object</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorSetValues.html><B>HYPRE_StructVectorSetValues</B></A> 
  <DD><I>
 Set vector coefficients index by index</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorSetBoxValues</B>(<!2><A HREF="StructVectors.html#DOC.1.4.2">HYPRE_StructVector</A> vector, int *ilower, int *iupper, double *values)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorAddToValues.html><B>HYPRE_StructVectorAddToValues</B></A> 
+ <DD><I>
+Add to vector coefficients index by index</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorSetBoxValues.html><B>HYPRE_StructVectorSetBoxValues</B></A> 
  <DD><I>
 Set vector coefficients a box at a time</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorAddToValues</B>(<!2><A HREF="StructVectors.html#DOC.1.4.2">HYPRE_StructVector</A> vector, int *index, double value)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorAddToBoxValues.html><B>HYPRE_StructVectorAddToBoxValues</B></A> 
  <DD><I>
-Set vector coefficients index by index</I>
+Add to vector coefficients a box at a time</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorAddToBoxValues</B>(<!2><A HREF="StructVectors.html#DOC.1.4.2">HYPRE_StructVector</A> vector, int *ilower, int *iupper, double *values)
- <DD><I>
-Set vector coefficients a box at a time</I>
-<DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorAssemble</B>(<!2><A HREF="StructVectors.html#DOC.1.4.2">HYPRE_StructVector</A> vector)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorAssemble</B>(<!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> vector)
  <DD><I>
 Finalize the construction of the vector before using</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorGetValues</B>(<!2><A HREF="StructVectors.html#DOC.1.4.2">HYPRE_StructVector</A> vector, int *index, double *value)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorGetValues.html><B>HYPRE_StructVectorGetValues</B></A> 
  <DD><I>
 Get vector coefficients index by index</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorGetBoxValues</B>(<!2><A HREF="StructVectors.html#DOC.1.4.2">HYPRE_StructVector</A> vector, int *ilower, int *iupper, double *values)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorGetBoxValues.html><B>HYPRE_StructVectorGetBoxValues</B></A> 
  <DD><I>
 Get vector coefficients a box at a time</I>
 <DT>

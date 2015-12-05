@@ -1,0 +1,24 @@
+#=============================================================================
+#  runs same solver for a direct setup of a matrix and an addtovalue setup
+#  of the same matrix
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.addtoval_cellcentre -solver 11 \
+ > addtovalues.out.0
+mpirun -np 1 ./sstruct -in sstruct.in.noaddtoval_cellcentre -solver 11 \
+ > addtovalues.out.1
+
+mpirun -np 1 ./sstruct -in sstruct.in.addtoval_edges -solver 20 \
+ > addtovalues.out.2
+mpirun -np 1 ./sstruct -in sstruct.in.noaddtoval_edges -solver 20 \
+ > addtovalues.out.3
+
+mpirun -np 2 ./sstruct -in sstruct.in.addtoval_cellcentre -P 2 1 1 -solver 11 \
+ > addtovalues.out.4
+mpirun -np 2 ./sstruct -in sstruct.in.noaddtoval_cellcentre -P 2 1 1 -solver 11 \
+ > addtovalues.out.5
+
+mpirun -np 2 ./sstruct -in sstruct.in.addtoval_edges -P 2 1 1 -solver 20 \
+ > addtovalues.out.6
+mpirun -np 2 ./sstruct -in sstruct.in.noaddtoval_edges -P 2 1 1 -solver 20 \
+ > addtovalues.out.7

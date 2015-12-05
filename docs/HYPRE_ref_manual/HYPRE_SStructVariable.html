@@ -2,21 +2,21 @@
 <body>
 <H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> typedef enum   hypre_SStructVariable_enum  HYPRE_SStructVariable  </H2><BLOCKQUOTE>
 
-An enumerated type that supports cell centered, node centered, face
-centered, and edge centered variables
+An enumerated type that supports cell centered, node centered, face centered,
+and edge centered variables
 </BLOCKQUOTE>
 <A NAME="DOC.DOCU">
 <hr>
  <h2> Documentation </h2>
 <BLOCKQUOTE>
 
-An enumerated type that supports cell centered, node centered, face
-centered, and edge centered variables.  Face centered variables are
-split into x-face, y-face, and z-face variables, and edge centered
-variables are split into x-edge, y-edge, and z-edge variables.  The
-edge centered variable types are only used in 3D.  In 2D, edge
-centered variables are handled by the face centered types.<P>Variables are referenced relative to an abstract (cell centered)
-index in the following way:
+An enumerated type that supports cell centered, node centered, face centered,
+and edge centered variables.  Face centered variables are split into x-face,
+y-face, and z-face variables, and edge centered variables are split into
+x-edge, y-edge, and z-edge variables.  The edge centered variable types are
+only used in 3D.  In 2D, edge centered variables are handled by the face
+centered types.<P>Variables are referenced relative to an abstract (cell centered) index in the
+following way:
 <UL>
 <LI> cell centered variables are aligned with the index;
 <LI> node centered variables are aligned with the cell corner
@@ -37,13 +37,12 @@ and (1/2, 1/2, 0), respectively.
 <LI> <TT>HYPRE_SSTRUCT_VARIABLE_XEDGE</tt>
 <LI> <TT>HYPRE_SSTRUCT_VARIABLE_YEDGE</tt>
 <LI> <TT>HYPRE_SSTRUCT_VARIABLE_ZEDGE</tt>
-</UL><P>NOTE: Although variables are referenced relative to a unique
-abstract cell-centered index, some variables are associated with
-multiple grid cells.  For example, node centered variables in 3D
-are associated with 8 cells (away from boundaries).  Although grid
-cells are distributed uniquely to different processes, variables
-may be owned by multiple processes because they may be associated
-with multiple cells.
+</UL><P>NOTE: Although variables are referenced relative to a unique abstract
+cell-centered index, some variables are associated with multiple grid cells.
+For example, node centered variables in 3D are associated with 8 cells (away
+from boundaries).  Although grid cells are distributed uniquely to different
+processes, variables may be owned by multiple processes because they may be
+associated with multiple cells.
 
 </BLOCKQUOTE>
 <DL>

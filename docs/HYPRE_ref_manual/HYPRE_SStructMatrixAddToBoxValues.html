@@ -9,12 +9,11 @@ Add to matrix coefficients a box at a time
  <h2> Documentation </h2>
 <BLOCKQUOTE>
 
-Add to matrix coefficients a box at a time.<P>NOTE: Users are required to set values on all processes that own
-the associated variables.  This means that some data will be
-multiply defined.<P>NOTE: The entries in this routine must all be of stencil type.
-Also, they must all represent couplings to the same variable type.<P>If the matrix is complex, then <TT>values</tt> consists of pairs of
-doubles representing the real and imaginary parts of each complex
-value.<P>
+Add to matrix coefficients a box at a time.  The data in <TT>values</tt> is
+ordered as in <!1><A HREF="HYPRE_SStructMatrixSetBoxValues.html">HYPRE_SStructMatrixSetBoxValues</A>.<P>NOTE: Users are required to set values on all processes that own the
+associated variables.  This means that some data will be multiply defined.<P>NOTE: The entries in this routine must all be of stencil type.  Also, they
+must all represent couplings to the same variable type.<P>If the matrix is complex, then <TT>values</tt> consists of pairs of doubles
+representing the real and imaginary parts of each complex value.<P>
 
 </BLOCKQUOTE>
 <DL>

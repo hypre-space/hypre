@@ -1,9 +1,8 @@
 ##
 ## File:        Makefile.am 
 ## Package:     Babel makefiles
-## Release:     $Name: V1-9-0b $
-## Revision:    $Revision: 1.4 $
-## Modified:    $Date: 2003/04/07 21:44:10 $
+## Revision:    $Revision: 1.10 $
+## Modified:    $Date: 2006/08/29 22:29:10 $
 ## Description: automake makefile to build the runtime library
 ##
 ## Copyright (c) 2000-2001, The Regents of the University of Calfornia.
@@ -30,8 +29,8 @@
 ## along with this program; if not, write to the Free Software Foundation,
 ## Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-AUTOMAKE_OPTIONS = foreign no-dependencies no-installinfo	\
-                   no-installman no-texinfo.tex 1.7
+
+
 
 noinst_SCRIPTS = copy.sh remove.sh
 

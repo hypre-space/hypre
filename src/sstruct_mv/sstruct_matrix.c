@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2000   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.15 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.23 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * Member functions for hypre_SStructPMatrix class.
@@ -29,7 +49,7 @@ hypre_SStructPMatrixRef( hypre_SStructPMatrix  *matrix,
    hypre_SStructPMatrixRefCount(matrix) ++;
    *matrix_ref = matrix;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -42,8 +62,6 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
                             hypre_SStructStencil **stencils,
                             hypre_SStructPMatrix **pmatrix_ptr )
 {
-   int ierr = 0;
-
    hypre_SStructPMatrix  *pmatrix;
    int                    nvars;
    int                  **smaps;
@@ -168,7 +186,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
 
    *pmatrix_ptr = pmatrix;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -178,8 +196,6 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
 int 
 hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
 {
-   int ierr = 0;
-
    hypre_SStructStencil  **stencils;
    int                     nvars;
    int                   **smaps;
@@ -222,7 +238,7 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -231,16 +247,25 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
 int 
 hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
 {
-   int ierr = 0;
+   int                    nvars       = hypre_SStructPMatrixNVars(pmatrix);
+   int                  **symmetric   = hypre_SStructPMatrixSymmetric(pmatrix);
+   hypre_SStructPGrid    *pgrid       = hypre_SStructPMatrixPGrid(pmatrix);
+   HYPRE_SStructVariable *vartypes    = hypre_SStructPGridVarTypes(pgrid);
+   int                    ndim        = hypre_SStructPGridNDim(pgrid);
 
-   int                  nvars        = hypre_SStructPMatrixNVars(pmatrix);
-   int                **symmetric    = hypre_SStructPMatrixSymmetric(pmatrix);
-   int                  num_ghost[6] = {1, 1, 1, 1, 1, 1};
-   hypre_StructMatrix  *smatrix;
-   int                  vi, vj;
+   int                    num_ghost[6]= {1, 1, 1, 1, 1, 1};
+   hypre_StructMatrix    *smatrix;
+   hypre_StructGrid      *sgrid;
+
+   hypre_Index            varoffset;
+   int                    vi, vj, d;
 
    for (vi = 0; vi < nvars; vi++)
    {
+     /* use variable vi add_numghost */
+      sgrid= hypre_SStructPGridSGrid(pgrid, vi);
+      hypre_SStructVariableGetOffset(vartypes[vi], ndim, varoffset);
+
       for (vj = 0; vj < nvars; vj++)
       {
          smatrix = hypre_SStructPMatrixSMatrix(pmatrix, vi, vj);
@@ -248,12 +273,21 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
          {
             HYPRE_StructMatrixSetSymmetric(smatrix, symmetric[vi][vj]);
             hypre_StructMatrixSetNumGhost(smatrix, num_ghost);
+
+            for (d = 0; d < 3; d++)
+            {
+               hypre_StructMatrixAddNumGhost(smatrix)[2*d]=
+                                       hypre_IndexD(varoffset, d);
+               hypre_StructMatrixAddNumGhost(smatrix)[2*d+1]=
+                                       hypre_IndexD(varoffset, d);
+            }
+
             hypre_StructMatrixInitialize(smatrix);
          }
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -269,7 +303,6 @@ hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix,
                                double               *values,
                                int                   add_to )
 {
-   int ierr = 0;
    hypre_SStructStencil *stencil = hypre_SStructPMatrixStencil(pmatrix, var);
    int                  *smap    = hypre_SStructPMatrixSMap(pmatrix, var);
    int                  *vars    = hypre_SStructStencilVars(stencil);
@@ -285,10 +318,9 @@ hypre_SStructPMatrixSetValues( hypre_SStructPMatrix *pmatrix,
       sentries[i] = smap[entries[i]];
    }
 
-   ierr = hypre_StructMatrixSetValues(smatrix, index, nentries, sentries,
-                                      values, add_to);
+   hypre_StructMatrixSetValues(smatrix, index, nentries, sentries, values, add_to);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -305,8 +337,6 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
                                   double               *values,
                                   int                   add_to )
 {
-   int ierr = 0;
-
    hypre_SStructStencil *stencil = hypre_SStructPMatrixStencil(pmatrix, var);
    int                  *smap    = hypre_SStructPMatrixSMap(pmatrix, var);
    int                  *vars    = hypre_SStructStencilVars(stencil);
@@ -327,12 +357,11 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
       sentries[i] = smap[entries[i]];
    }
 
-   ierr = hypre_StructMatrixSetBoxValues(smatrix, box, nentries, sentries,
-                                         values, add_to);
+   hypre_StructMatrixSetBoxValues(smatrix, box, nentries, sentries, values, add_to);
 
    hypre_BoxDestroy(box);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -342,7 +371,6 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
 int 
 hypre_SStructPMatrixAssemble( hypre_SStructPMatrix *pmatrix )
 {
-   int ierr = 0;
    int                 nvars = hypre_SStructPMatrixNVars(pmatrix);
    hypre_StructMatrix *smatrix;
    int                 vi, vj;
@@ -359,7 +387,7 @@ hypre_SStructPMatrixAssemble( hypre_SStructPMatrix *pmatrix )
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -371,8 +399,6 @@ hypre_SStructPMatrixSetSymmetric( hypre_SStructPMatrix *pmatrix,
                                   int                   to_var,
                                   int                   symmetric )
 {
-   int ierr = 0;
-
    int **pmsymmetric = hypre_SStructPMatrixSymmetric(pmatrix);
 
    int vstart = var;
@@ -400,7 +426,7 @@ hypre_SStructPMatrixSetSymmetric( hypre_SStructPMatrix *pmatrix,
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -412,7 +438,6 @@ hypre_SStructPMatrixPrint( const char           *filename,
                            hypre_SStructPMatrix *pmatrix,
                            int                   all )
 {
-   int ierr = 0;
    int                 nvars = hypre_SStructPMatrixNVars(pmatrix);
    hypre_StructMatrix *smatrix;
    int                 vi, vj;
@@ -431,7 +456,7 @@ hypre_SStructPMatrixPrint( const char           *filename,
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*==========================================================================
@@ -445,8 +470,6 @@ hypre_SStructPMatrixPrint( const char           *filename,
 int 
 hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
 {
-   int ierr = 0;
-
    HYPRE_IJMatrix          ijmatrix   = hypre_SStructMatrixIJMatrix(matrix);
    hypre_SStructGraph     *graph      = hypre_SStructMatrixGraph(matrix);
    hypre_SStructGrid      *grid       = hypre_SStructGraphGrid(graph);
@@ -475,7 +498,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    int                    *num_ghost;
 
 
-   ierr = HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
+   HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
 
    /* GEC1002 the ghlocalsize is used to set the number of rows   */
  
@@ -587,7 +610,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    }
 
    /* ZTODO: Update row_sizes based on neighbor off-part couplings */
-   ierr += HYPRE_IJMatrixSetRowSizes (ijmatrix, (const int *) row_sizes);
+   HYPRE_IJMatrixSetRowSizes (ijmatrix, (const int *) row_sizes);
 
    hypre_TFree(row_sizes);
    hypre_SStructMatrixTmpColCoords(matrix) =
@@ -597,9 +620,9 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
 
    /* GEC1002 at this point the processor has the partitioning (creation of ij) */
 
-   ierr += HYPRE_IJMatrixInitialize(ijmatrix);
+   HYPRE_IJMatrixInitialize(ijmatrix);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -620,8 +643,6 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
                                double              *values,
                                int                  add_to )
 {
-   int ierr = 0;
-
    HYPRE_IJMatrix        ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
    hypre_SStructGraph   *graph   = hypre_SStructMatrixGraph(matrix);
    hypre_SStructGrid    *grid    = hypre_SStructGraphGrid(graph);
@@ -646,40 +667,37 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
    hypre_SStructGridFindMapEntry(grid, part, index, var, &map_entry);
    if (map_entry == NULL)
    {
-      ierr = 1;
-   }
-   else
-   {
-      hypre_BoxMapEntryGetInfo(map_entry, (void **) &entry_info);
-      if (hypre_SStructMapInfoType(entry_info) !=
-          hypre_SSTRUCT_MAP_INFO_DEFAULT)
-      {
-         ierr = 1;
-      }
-   }
-   if (ierr == 1)
-   {
+      hypre_error_in_arg(1);
+      hypre_error_in_arg(2);
+      hypre_error_in_arg(3);
+      /* RDF: This printing shouldn't be on by default */
       printf("Warning: Attempt to set coeffs for point not in grid\n");
       printf("hypre_SStructUMatrixSetValues call aborted for grid point\n");
       printf("    part=%d, var=%d, index=(%d, %d, %d)\n", part, var,
              hypre_IndexD(index,0),
              hypre_IndexD(index,1),
              hypre_IndexD(index,2) );
-      return ierr;
+      return hypre_error_flag;
+   }
+   else
+   {
+      hypre_BoxMapEntryGetInfo(map_entry, (void **) &entry_info);
    }
 
-   /* return if row is not on this process; not an error */
-   hypre_SStructMapEntryGetProcess(map_entry, &proc);
-   MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
-   if (proc != myproc)
+   /* Only Set values if I am the owner process; off-process AddTo and Get
+    * values are done by IJ */
+   if (!add_to)
    {
-      return ierr;
+      hypre_SStructMapEntryGetProcess(map_entry, &proc);
+      MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
+      if (proc != myproc)
+      {
+         return hypre_error_flag;
+      }
    }
 
    /* GEC1002 get the rank using the function with the type=matrixtype*/
-
-  
-    hypre_SStructMapEntryGetGlobalRank(map_entry, index, &row_coord, matrix_type);
+   hypre_SStructMapEntryGetGlobalRank(map_entry, index, &row_coord, matrix_type);
 
   
    col_coords = hypre_SStructMatrixTmpColCoords(matrix);
@@ -726,24 +744,23 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
 
    if (add_to > 0)
    {
-      ierr = HYPRE_IJMatrixAddToValues(ijmatrix, 1, &ncoeffs, &row_coord,
-                                       (const int *) col_coords,
-                                       (const double *) coeffs);
+      HYPRE_IJMatrixAddToValues(ijmatrix, 1, &ncoeffs, &row_coord,
+                                (const int *) col_coords,
+                                (const double *) coeffs);
    }
    else if (add_to > -1)
    {
-      ierr = HYPRE_IJMatrixSetValues(ijmatrix, 1, &ncoeffs, &row_coord,
-                                     (const int *) col_coords,
-                                     (const double *) coeffs);
+      HYPRE_IJMatrixSetValues(ijmatrix, 1, &ncoeffs, &row_coord,
+                              (const int *) col_coords,
+                              (const double *) coeffs);
    }
    else
    {
-      ierr = HYPRE_IJMatrixGetValues(ijmatrix, 1, &ncoeffs, &row_coord,
-                                     col_coords, values);
+      HYPRE_IJMatrixGetValues(ijmatrix, 1, &ncoeffs, &row_coord,
+                              col_coords, values);
    }
 
-
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -765,8 +782,6 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                                   double              *values,
                                   int                  add_to )
 {
-   int ierr = 0;
-
    HYPRE_IJMatrix        ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
    hypre_SStructGraph   *graph   = hypre_SStructMatrixGraph(matrix);
    hypre_SStructGrid    *grid    = hypre_SStructGraphGrid(graph);
@@ -831,16 +846,19 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
          
       for (ii = 0; ii < nmap_entries; ii++)
       {
-         /* continue if rows are not on this process; not an error */
-         hypre_SStructMapEntryGetProcess(map_entries[ii], &proc);
-         MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
-         if (proc != myproc)
+         /* Only Set values if I am the owner process; off-process AddTo and Get
+          * values are done by IJ */
+         if (!add_to)
          {
-            continue;
+            hypre_SStructMapEntryGetProcess(map_entries[ii], &proc);
+            MPI_Comm_rank(hypre_SStructGridComm(grid), &myproc);
+            if (proc != myproc)
+            {
+               continue;
+            }
          }
 
          /* GEC1002 introducing the strides based on the type of the matrix  */
-
          hypre_SStructMapEntryGetStrides(map_entries[ii], rs, matrix_type);
 
          hypre_CopyIndex(ilower, hypre_BoxIMin(box));
@@ -931,22 +949,21 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
          if (add_to > 0)
          {
-            ierr = HYPRE_IJMatrixAddToValues(ijmatrix, nrows, ncols,
-                                             (const int *) rows,
-                                             (const int *) cols,
-                                             (const double *) ijvalues);
+            HYPRE_IJMatrixAddToValues(ijmatrix, nrows, ncols,
+                                      (const int *) rows,
+                                      (const int *) cols,
+                                      (const double *) ijvalues);
          }
          else if (add_to > -1)
          {
-            ierr = HYPRE_IJMatrixSetValues(ijmatrix, nrows, ncols,
-                                           (const int *) rows,
-                                           (const int *) cols,
-                                           (const double *) ijvalues);
+            HYPRE_IJMatrixSetValues(ijmatrix, nrows, ncols,
+                                    (const int *) rows,
+                                    (const int *) cols,
+                                    (const double *) ijvalues);
          }
          else
          {
-            ierr = HYPRE_IJMatrixGetValues(ijmatrix, nrows, ncols, rows, cols,
-                                           values);
+            HYPRE_IJMatrixGetValues(ijmatrix, nrows, ncols, rows, cols, values);
          }
       }
 
@@ -978,9 +995,8 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
             for (i = hypre_BoxIMinX(box); i <= hypre_BoxIMaxX(box); i++)
             {
                hypre_SetIndex(index, i, j, k);
-               ierr += hypre_SStructUMatrixSetValues(matrix, part, index, var,
-                                                     nentries, entries, values,
-                                                     add_to);
+               hypre_SStructUMatrixSetValues(matrix, part, index, var,
+                                             nentries, entries, values, add_to);
                values += nentries;
             }
          }
@@ -989,7 +1005,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
    hypre_BoxDestroy(box);
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -999,14 +1015,13 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 int 
 hypre_SStructUMatrixAssemble( hypre_SStructMatrix *matrix )
 {
-   int ierr = 0;
    HYPRE_IJMatrix ijmatrix = hypre_SStructMatrixIJMatrix(matrix);
 
-   ierr = HYPRE_IJMatrixAssemble(ijmatrix);
+   HYPRE_IJMatrixAssemble(ijmatrix);
    HYPRE_IJMatrixGetObject(ijmatrix,
                            (void **) &hypre_SStructMatrixParCSRMatrix(matrix));
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*==========================================================================
@@ -1024,7 +1039,7 @@ hypre_SStructMatrixRef( hypre_SStructMatrix  *matrix,
    hypre_SStructMatrixRefCount(matrix) ++;
    *matrix_ref = matrix;
 
-   return 0;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -1042,7 +1057,6 @@ hypre_SStructMatrixSplitEntries( hypre_SStructMatrix *matrix,
                                  int                 *nUentries_ptr,
                                  int                **Uentries_ptr )
 {
-   int ierr = 0;
    hypre_SStructGraph   *graph   = hypre_SStructMatrixGraph(matrix);
    int                  *split   = hypre_SStructMatrixSplit(matrix, part, var);
    hypre_SStructStencil *stencil = hypre_SStructGraphStencil(graph, part, var);
@@ -1084,6 +1098,6 @@ hypre_SStructMatrixSplitEntries( hypre_SStructMatrix *matrix,
    *nUentries_ptr = nUentries;
    *Uentries_ptr  = Uentries;
 
-   return ierr;
+   return hypre_error_flag;
 }
 

@@ -12,11 +12,16 @@ Create a FAC solver object</I>
  <DD><I>
 Destroy a FAC solver object</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetup2</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> x)
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACAMR_RAP.html><B>HYPRE_SStructFACAMR_RAP</B></A> 
+ <DD><I>
+Re-distribute the composite matrix so that the amr hierachy is approximately
+nested</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetup2</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
  <DD><I>
 Set up the FAC solver structure </I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSolve3</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.10">HYPRE_SStructVector</A> x)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSolve3</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
  <DD><I>
 Solve the system</I>
 <DT>
@@ -27,6 +32,22 @@ Set up amr structure</I>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetPRefinements</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int nparts, int (*rfactors)[3] )
  <DD><I>
 Set up amr refinement factors</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACZeroCFSten.html><B>HYPRE_SStructFACZeroCFSten</B></A> 
+ <DD><I>
+(Optional but user must make sure that they do this function otherwise</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACZeroFCSten.html><B>HYPRE_SStructFACZeroFCSten</B></A> 
+ <DD><I>
+(Optional but user must make sure that they do this function otherwise</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACZeroAMRMatrixData.html><B>HYPRE_SStructFACZeroAMRMatrixData</B></A> 
+ <DD><I>
+(Optional but user must make sure that they do this function otherwise</I>
+<DT>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructFACZeroAMRVectorData.html><B>HYPRE_SStructFACZeroAMRVectorData</B></A> 
+ <DD><I>
+(Optional but user must make sure that they do this function otherwise</I>
 <DT>
 <IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACSetMaxLevels</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int max_levels )
  <DD><I>
@@ -77,7 +98,7 @@ successive iterates be small</I>
  <DD><I>
 Return the number of iterations taken</I>
 <DT>
-<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACGetFinalRelativeResidualNorm</B>( <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double *norm)
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructFACGetFinalRelativeResidualNorm</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double *norm)
  <DD><I>
 Return the norm of the final relative residual</I>
 </DL>

@@ -1,6 +1,6 @@
 <html><head><TITLE>bHYPRE_IJParCSRMatrix_SetLocalRange</TITLE></head>
 <body>
-<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> int32_t  bHYPRE_IJParCSRMatrix_SetLocalRange ( bHYPRE_IJParCSRMatrix self, int32_t ilower, int32_t iupper, int32_t jlower, int32_t jupper) </H2><BLOCKQUOTE>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A> SIDL_C_INLINE_DECL  int32_t  bHYPRE_IJParCSRMatrix_SetLocalRange (  bHYPRE_IJParCSRMatrix self,  int32_t ilower,  int32_t iupper,  int32_t jlower,  int32_t jupper,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>) </H2><BLOCKQUOTE>
 
 Set the local range for a matrix object
 </BLOCKQUOTE>
@@ -25,7 +25,6 @@ used in matrix-vector products with the rectangular matrix.
 The matrix data structure may use <TT>jlower</tt> and <TT>
 jupper</tt> to store the diagonal blocks (rectangular in general)
 of the matrix separately from the rest of the matrix.<P>Collective.
-
 
 </BLOCKQUOTE>
 <DL>

@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# Python setup.py to build SIDL python support libraries
+# Python setup.py to build sidl python support libraries
 #
 # Copyright (c) 2000-2003, The Regents of the University of Calfornia.
 # Produced at the Lawrence Livermore National Laboratory.
@@ -30,10 +30,12 @@ import sys
 
 inc_re = compile('^--include-dirs=(.*)$')
 lib_re = compile('^--library-dirs=(.*)$')
+exlib_re = compile('^--extra-library=(.*)$')
 old_argv = sys.argv
 sys.argv = []
 inc_dirs = ['.']
 lib_dirs = []
+libs=['sidl']
 
 for i in old_argv:
   m = inc_re.match(i)
@@ -44,22 +46,27 @@ for i in old_argv:
     if (m):
       if (len(m.group(1))): lib_dirs.append(m.group(1))
     else:
-      sys.argv.append(i)
+      m = exlib_re.match(i)
+      if (m):
+        if (len(m.group(1))): libs.append(m.group(1))
+      else:
+        sys.argv.append(i)
       
 setup(name="babel",
       author="Tom Epperly",
-      version="0.8.4",
-      description="Build Python support extension modules for SIDL",
+      version="1.0.0",
+      description="Build Python support extension modules for sidl",
       author_email="components@llnl.gov",
       url="http://www.llnl.gov/CASC/components/",
       include_dirs=inc_dirs,
-      headers = ["SIDLObjA.h", "SIDLPyArrays.h"],
+      headers = ["sidlObjA.h", "sidlPyArrays.h"],
+      py_modules = [ 'sidlBaseException' ],
       ext_modules = [
-    Extension('SIDLObjA',
-              ["SIDLObjA.c"],
+    Extension('sidlObjA',
+              ["sidlObjA.c"],
               library_dirs=lib_dirs,
-              libraries=['sidl']),
-    Extension('SIDLPyArrays',
-              ["SIDLPyArrays.c"],
+              libraries=libs),
+    Extension('sidlPyArrays',
+              ["sidlPyArrays.c"],
               library_dirs=lib_dirs,
-              libraries=['sidl'])])
+              libraries=libs)])

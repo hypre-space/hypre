@@ -1,9 +1,8 @@
 ##
 ## File:        Makefile.am 
 ## Package:     Babel makefiles
-## Release:     $Name: V1-9-0b $
-## Revision:    $Revision: 1.6 $
-## Modified:    $Date: 2003/09/12 20:55:46 $
+## Revision:    $Revision: 1.12 $
+## Modified:    $Date: 2006/08/29 22:29:13 $
 ## Description: automake makefile to build the Babel config files
 ##
 ## Copyright (c) 2000-2001, The Regents of the University of Calfornia.
@@ -30,8 +29,8 @@
 ## along with this program; if not, write to the Free Software Foundation,
 ## Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-AUTOMAKE_OPTIONS = foreign no-dependencies no-installinfo	\
-                   no-installman no-texinfo.tex 1.7
+
+
 
 configdir = $(exec_prefix)/include
 
@@ -41,6 +40,5 @@ EXTRA_DIST      = disabled
 
 AUTOHEADER = @AUTOHEADER@ \
 	     && cd sidl \
-	     && @PERL@ -p -i.bak changeundef.pl \
-	          babel_config.h.in \
+	     && @PYTHON@ changeundef.py babel_config.h.in \
              && rm -f babel_config.h.in.bak

@@ -758,6 +758,19 @@ else
       link_static_flag='-Bstatic'
     fi
     ;;
+  linux-gnu*)
+    # for alternative compilers on Linux GNU
+    case $compiler in
+    *icc)
+      wl='-Wl,'
+      pic_flag='-fPIC'
+      link_static_flag='-static'
+      ;;
+    *)
+      can_build_shared=no
+      ;;
+    esac
+    ;;
   *)
     can_build_shared=no
     ;;

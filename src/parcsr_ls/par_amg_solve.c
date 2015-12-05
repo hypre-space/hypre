@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1996   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.6 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.13 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 /******************************************************************************
  *
@@ -40,9 +60,15 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    /* int      num_unknowns; */
    double   tol;
 
+   int block_mode;
+   
+
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
    hypre_ParVector    **U_array;
+
+   hypre_ParCSRBlockMatrix **A_block_array;
+
 
    /*  Local variables  */
 
@@ -92,12 +118,17 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    num_coeffs       = hypre_CTAlloc(double, num_levels);
    num_variables    = hypre_CTAlloc(double, num_levels);
-   num_coeffs[0]    = hypre_ParCSRMatrixNumNonzeros(A);
+   num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
    num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
  
    A_array[0] = A;
    F_array[0] = f;
    U_array[0] = u;
+
+   block_mode = hypre_ParAMGDataBlockMode(amg_data);
+
+   A_block_array          = hypre_ParAMGDataABlockArray(amg_data);
+
 
 /*   Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                  hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
@@ -107,11 +138,28 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 */
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
-   for (j = 1; j < num_levels; j++)
+
+
+   if (block_mode)
    {
-      num_coeffs[j]    = (double) hypre_ParCSRMatrixNumNonzeros(A_array[j]);
-      num_variables[j] = (double) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
+      for (j = 1; j < num_levels; j++)
+      {
+         num_coeffs[j]    = (double) hypre_ParCSRBlockMatrixNumNonzeros(A_block_array[j]);
+         num_variables[j] = (double) hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[j]);
+      }
+      num_coeffs[0]    = hypre_ParCSRBlockMatrixDNumNonzeros(A_block_array[0]);
+      num_variables[0] = hypre_ParCSRBlockMatrixGlobalNumRows(A_block_array[0]);
+
    }
+   else
+   {
+      for (j = 1; j < num_levels; j++)
+      {
+         num_coeffs[j]    = (double) hypre_ParCSRMatrixNumNonzeros(A_array[j]);
+         num_variables[j] = (double) hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
+      }
+   }
+   
 
    /*-----------------------------------------------------------------------
     *    Write the solver parameters
@@ -145,7 +193,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *    Compute initial fine-grid residual and print 
     *-----------------------------------------------------------------------*/
 
-   if (tol > 0.)
+   if (tol >= 0.)
    {
      if ( amg_logging > 1 ) {
         hypre_ParVectorCopy(F_array[0], Residual );
@@ -196,7 +244,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
      relative_resid = 1.;
    }
 
-   if (my_id == 0 && amg_print_level > 1 && tol > 0.)
+   if (my_id == 0 && amg_print_level > 1 && tol >= 0.)
    {     
       printf("                                            relative\n");
       printf("               residual        factor       residual\n");
@@ -222,7 +270,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
 
-      if (tol > 0.)
+      if (tol >= 0.)
       {
         old_resid = resid_nrm;
 
@@ -253,21 +301,28 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       ++cycle_count;
 
       hypre_ParAMGDataNumIterations(amg_data) = cycle_count;
+#ifdef CUMNUMIT
+      ++hypre_ParAMGDataCumNumIterations(amg_data);
+#endif
 
-      if (my_id == 0 && amg_print_level > 1 && tol > 0.)
+      if (my_id == 0 && amg_print_level > 1 && tol >= 0.)
       { 
          printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
                  resid_nrm, conv_factor, relative_resid);
       }
    }
 
-   if (cycle_count == max_iter && tol > 0.) Solve_err_flag = 1;
+   if (cycle_count == max_iter && tol >= 0.)
+   {
+      Solve_err_flag = 1;
+      hypre_error(HYPRE_ERROR_CONV);
+   }
 
    /*-----------------------------------------------------------------------
     *    Compute closing statistics
     *-----------------------------------------------------------------------*/
 
-   if (cycle_count > 0 && tol > 0.) 
+   if (cycle_count > 0 && tol >= 0.) 
      conv_factor = pow((resid_nrm/resid_nrm_init),(1.0/(double) cycle_count));
    else
      conv_factor = 1.;
@@ -298,7 +353,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          printf("      within the allowed %d V-cycles\n",max_iter);
          printf("==============================================");
       }
-      if (tol > 0.)
+      if (tol >= 0.)
         printf("\n\n Average Convergence Factor = %f",conv_factor);
       printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
       printf("                operator = %f\n",operat_cmplxty);

@@ -1253,8 +1253,8 @@ main( int   argc,
                         
    HYPRE_SStructGrid     grid;
    HYPRE_SStructStencil *stencils;
-   HYPRE_SStructGraph    graph, fac_graph;
-   HYPRE_SStructMatrix   A, fac_A, A_amg;
+   HYPRE_SStructGraph    graph;
+   HYPRE_SStructMatrix   A, A_amg;
    HYPRE_StructMatrix    sA;
    HYPRE_SStructVector   b, b_amg;
    HYPRE_SStructVector   x, x_amg;
@@ -1279,7 +1279,6 @@ main( int   argc,
                          
    int                   num_procs, myid;
    int                   time_index;
-   int                   time_fac_rap;
                          
    int                   n_pre, n_post;
    int                   skip;
@@ -1698,15 +1697,21 @@ main( int   argc,
    /* reset matrix values so that stencil connections between two parts are zeroed */
    for (part= data.nparts-1; part> 0; part--)
    {
-      hypre_FacZeroCFSten(hypre_SStructMatrixPMatrix(A, part),
+      /*hypre_FacZeroCFSten(hypre_SStructMatrixPMatrix(A, part),
                           hypre_SStructMatrixPMatrix(A, part-1),
                           grid,
                           part,
                           prefinements[part]);
-      hypre_FacZeroFCSten(hypre_SStructMatrixPMatrix(A, part),
+       hypre_FacZeroFCSten(hypre_SStructMatrixPMatrix(A, part),
                           grid,
-                          part);
-      hypre_ZeroAMRMatrixData(A, part-1, prefinements[part]);
+                          part); 
+       hypre_ZeroAMRMatrixData(A, part-1, prefinements[part]); */
+
+      HYPRE_SStructFACZeroCFSten(A, grid, part, prefinements[part]);
+      HYPRE_SStructFACZeroFCSten(A,
+                                 grid,
+                                 part);
+      HYPRE_SStructFACZeroAMRMatrixData(A, part-1, prefinements[part]);
    }
                           
    HYPRE_SStructMatrixAssemble(A);
@@ -1778,7 +1783,9 @@ main( int   argc,
          }
       }
    }
-   hypre_ZeroAMRVectorData(b, plevels, prefinements);
+   /*hypre_ZeroAMRVectorData(b, plevels, prefinements);*/
+   HYPRE_SStructFACZeroAMRVectorData(b, plevels, prefinements);
+
    HYPRE_SStructVectorAssemble(b);
 
    if ( ((solver_id >= 20) && (solver_id <= 30)) ||
@@ -1839,7 +1846,8 @@ main( int   argc,
          }
       }
    }
-   hypre_ZeroAMRVectorData(x, plevels, prefinements);
+   /*hypre_ZeroAMRVectorData(x, plevels, prefinements);*/
+   HYPRE_SStructFACZeroAMRVectorData(x, plevels, prefinements);
    HYPRE_SStructVectorAssemble(x);
 
 
@@ -1957,25 +1965,11 @@ main( int   argc,
 
    hypre_TFree(values);
 
-   if (solver_id > 90 )
-   {
-      time_fac_rap = hypre_InitializeTiming("fac rap");
-      hypre_BeginTiming(time_fac_rap);
-      hypre_AMR_RAP(A, prefinements, &fac_A);
-      hypre_ZeroAMRVectorData(b, plevels, prefinements);
-      hypre_ZeroAMRVectorData(x, plevels, prefinements);
-      hypre_EndTiming(time_fac_rap);
-      hypre_PrintTiming("fac rap", MPI_COMM_WORLD);
-      hypre_FinalizeTiming(time_fac_rap);
-      hypre_ClearTiming();
-   }
-
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
    if (print_system)
    {
-      HYPRE_SStructMatrixPrint("sstruct.out.facA",  fac_A, 0);
       HYPRE_SStructVectorPrint("sstruct.out.b",  b, 0);
       HYPRE_SStructVectorPrint("sstruct.out.x0", x, 0);
    }
@@ -2013,10 +2007,8 @@ main( int   argc,
       HYPRE_SStructFACSetNumPostRelax(solver, n_post);
       HYPRE_SStructFACSetCoarseSolverType(solver, 2);
       HYPRE_SStructFACSetLogging(solver, 1);
-      HYPRE_SStructFACSetup2(solver, fac_A, b, x);
+      HYPRE_SStructFACSetup2(solver, A, b, x);
       
-      hypre_FacZeroCData(solver, fac_A, b, x);
-
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -2027,11 +2019,11 @@ main( int   argc,
 
       if (solver_id > 90)
       {
-         HYPRE_SStructFACSolve3(solver, fac_A, b, x);
+         HYPRE_SStructFACSolve3(solver, A, b, x);
       }
       else
       {
-         HYPRE_SStructFACSolve3(solver, fac_A, b, x);
+         HYPRE_SStructFACSolve3(solver, A, b, x);
       }
 
       hypre_EndTiming(time_index);
@@ -2234,17 +2226,8 @@ main( int   argc,
       HYPRE_SStructStencilDestroy(stencils[s]);
    }
    hypre_TFree(stencils);
-   if (solver_id > 90)
-   {
-      fac_graph= hypre_SStructMatrixGraph(fac_A);
-      HYPRE_SStructGraphDestroy(fac_graph);
-   }
 
    HYPRE_SStructGraphDestroy(graph);
-   if (solver_id > 90)
-   {
-      HYPRE_SStructMatrixDestroy(fac_A);
-   }
 
    if ( ((solver_id >= 20) && (solver_id <= 30)) ||
         ((solver_id >= 40) && (solver_id < 60)) )

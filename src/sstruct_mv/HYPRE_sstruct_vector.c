@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 2000   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.11 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.18 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * HYPRE_SStructVector interface
@@ -382,8 +402,17 @@ HYPRE_SStructVectorAssemble( HYPRE_SStructVector vector )
 
    /* u-vector */
    ierr = HYPRE_IJVectorAssemble(ijvector);
+
    HYPRE_IJVectorGetObject(ijvector, 
-                           (void **) &hypre_SStructVectorParVector(vector));
+                          (void **) &hypre_SStructVectorParVector(vector));
+
+   /* if the object type is parcsr, then convert the sstruct vector which has ghost
+      layers to a parcsr vector without ghostlayers. */
+   if (hypre_SStructVectorObjectType(vector) == HYPRE_PARCSR)
+   {
+      hypre_SStructVectorParConvert(vector, 
+                                   &hypre_SStructVectorParVector(vector));
+   }
 
    return ierr;
 }
@@ -494,6 +523,27 @@ HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+int 
+HYPRE_SStructVectorSetConstantValues( HYPRE_SStructVector vector,
+                                      double              value )
+{
+   int ierr = 0;
+   hypre_SStructPVector *pvector;
+   int part;
+   int nparts   = hypre_SStructVectorNParts(vector);
+
+   for ( part = 0; part < nparts; part++ )
+   {
+      pvector = hypre_SStructVectorPVector( vector, part );
+      ierr += hypre_SStructPVectorSetConstantValues( pvector, value );
+   };
+
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 int
 HYPRE_SStructVectorSetObjectType( HYPRE_SStructVector  vector,
                                   int                  type )
@@ -528,7 +578,7 @@ HYPRE_SStructVectorGetObject( HYPRE_SStructVector   vector,
    }
    else if (vector_type == HYPRE_PARCSR)
    {
-      hypre_SStructVectorParConvert(vector, (hypre_ParVector **) object);
+     *object= hypre_SStructVectorParVector(vector);
    }
    else if (vector_type == HYPRE_STRUCT)
    {
@@ -567,3 +617,59 @@ HYPRE_SStructVectorPrint( const char          *filename,
    return ierr;
 }
 
+/******************************************************************************
+ * Zero out the ghostlayer values of a vector. Needed when a vector is
+ * re-assembled with new values and addtovalues from off_procs are triggered.
+ *****************************************************************************/
+int
+HYPRE_SStructVectorClearGhostValues(HYPRE_SStructVector x)
+{
+   return hypre_SStructVectorClearGhostValues((hypre_SStructVector *)x);
+}
+
+
+/******************************************************************************
+ * copy x to y, y should already exist and be the same size
+ *****************************************************************************/
+int
+HYPRE_SStructVectorCopy( HYPRE_SStructVector x,
+                         HYPRE_SStructVector y )
+{
+   return hypre_SStructCopy( (hypre_SStructVector *)x,
+                             (hypre_SStructVector *)y );
+}
+
+/******************************************************************************
+ * y = a*y, for vector y and scalar a
+ *****************************************************************************/
+int
+HYPRE_SStructVectorScale( double alpha, HYPRE_SStructVector y )
+{
+   return hypre_SStructScale( alpha, (hypre_SStructVector *)y );
+}
+
+/******************************************************************************
+ * inner or dot product, result = < x, y >
+ *****************************************************************************/
+int
+HYPRE_SStructInnerProd( HYPRE_SStructVector x,
+                        HYPRE_SStructVector y,
+                        double *result )
+{
+   return hypre_SStructInnerProd( (hypre_SStructVector *)x,
+                                  (hypre_SStructVector *)y,
+                                  result );
+}
+
+/******************************************************************************
+ * y = y + alpha*x for vectors y, x and scalar alpha
+ *****************************************************************************/
+int
+HYPRE_SStructAxpy( double alpha,
+                        HYPRE_SStructVector x,
+                        HYPRE_SStructVector y )
+{
+   return hypre_SStructAxpy( alpha,
+                             (hypre_SStructVector *)x,
+                             (hypre_SStructVector *)y );
+}

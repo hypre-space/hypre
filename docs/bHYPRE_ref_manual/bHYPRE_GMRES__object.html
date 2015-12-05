@@ -10,8 +10,15 @@ Symbol "bHYPRE
 <BLOCKQUOTE>
 
 Symbol "bHYPRE.GMRES" (version 1.0.0)<P>Objects of this type can be cast to PreconditionedSolver objects
-using the <TT>__cast</tt> methods.<P>RDF: Documentation goes here.
-
+using the <TT>__cast</tt> methods.<P>RDF: Documentation goes here.<P>The regular GMRES solver calls Babel-interface matrix and vector functions.
+The HGMRES solver calls HYPRE interface functions.
+The regular solver will work with any consistent matrix, vector, and
+preconditioner classes.  The HGMRES solver will work with the more common
+combinations.<P>The HGMRES solver checks whether the matrix, vectors, and preconditioner
+are of known types, and will not work with any other types.
+Presently, the recognized data types are:
+matrix, vector: IJParCSRMatrix, IJParCSRVector
+preconditioner: BoomerAMG, ParCSRDiagScale
 
 </BLOCKQUOTE>
 <DL>

@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1996   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.4 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.8 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 /******************************************************************************
  *
@@ -35,9 +55,9 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
    int      amg_print_level;
    int      amg_logging;
-   int     *num_coeffs;
+   double  *num_coeffs;
    int     *num_variables;
-   int      cycle_op_count;
+   double   cycle_op_count;
    int      num_levels;
    /* int      num_unknowns; */
    double   tol;
@@ -48,14 +68,14 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
    /*  Local variables  */
 
-   FILE    *fp;
+   /*FILE    *fp;*/
 
    int      j;
    int      Solve_err_flag;
    int      min_iter;
    int      max_iter;
    int      cycle_count;
-   int      total_coeffs;
+   double   total_coeffs;
    int      total_variables;
    int      num_procs, my_id;
 
@@ -92,9 +112,9 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    min_iter      = hypre_ParAMGDataMinIter(amg_data);
    max_iter      = hypre_ParAMGDataMaxIter(amg_data);
 
-   num_coeffs = hypre_CTAlloc(int, num_levels);
+   num_coeffs = hypre_CTAlloc(double, num_levels);
    num_variables = hypre_CTAlloc(int, num_levels);
-   num_coeffs[0]    = hypre_ParCSRMatrixNumNonzeros(A_array[0]);
+   num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A_array[0]);
  
    A_array[0] = A;
@@ -111,7 +131,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
    for (j = 1; j < num_levels; j++)
    {
-      num_coeffs[j]    = hypre_ParCSRMatrixNumNonzeros(A_array[j]);
+      num_coeffs[j]    = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
       num_variables[j] = hypre_ParCSRMatrixGlobalNumRows(A_array[j]);
    }
 
@@ -141,11 +161,11 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
     *     open the log file and write some initial info
     *-----------------------------------------------------------------------*/
 
-   if (my_id == 0 && amg_print_level >= 1)
+   if (my_id == 0 && amg_print_level > 1)
    { 
-      fp = fopen(file_name, "a");
+      /*fp = fopen(file_name, "a");*/
 
-      fprintf(fp,"\n\nAMG SOLUTION INFO:\n");
+      printf("\n\nAMG SOLUTION INFO:\n");
 
    }
 
@@ -175,10 +195,10 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
    if (my_id ==0 && (amg_print_level > 1))
    {     
-      fprintf(fp,"                                            relative\n");
-      fprintf(fp,"               residual        factor       residual\n");
-      fprintf(fp,"               --------        ------       --------\n");
-      fprintf(fp,"    Initial    %e                 %e\n",resid_nrm_init,
+      printf("                                            relative\n");
+      printf("               residual        factor       residual\n");
+      printf("               --------        ------       --------\n");
+      printf("    Initial    %e                 %e\n",resid_nrm_init,
               relative_resid);
    }
 
@@ -223,7 +243,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
       if (my_id == 0 && (amg_print_level > 1))
       { 
-         fprintf(fp,"    Cycle %2d   %e    %f     %e \n", cycle_count,
+         printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
                  resid_nrm, conv_factor, relative_resid);
       }
    }
@@ -249,33 +269,33 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
       grid_cmplxty = ((double) total_variables) / ((double) num_variables[0]);
    if (num_coeffs[0])
    {
-      operat_cmplxty = ((double) total_coeffs) / ((double) num_coeffs[0]);
-      cycle_cmplxty = ((double) cycle_op_count) / ((double) num_coeffs[0]);
+      operat_cmplxty = total_coeffs / num_coeffs[0];
+      cycle_cmplxty = cycle_op_count / num_coeffs[0];
    }
 
-   if (my_id == 0 && amg_print_level >= 1)
+   if (my_id == 0 && amg_print_level > 1)
    {
       if (Solve_err_flag == 1)
       {
-         fprintf(fp,"\n\n==============================================");
-         fprintf(fp,"\n NOTE: Convergence tolerance was not achieved\n");
-         fprintf(fp,"      within the allowed %d V-cycles\n",max_iter);
-         fprintf(fp,"==============================================");
+         printf("\n\n==============================================");
+         printf("\n NOTE: Convergence tolerance was not achieved\n");
+         printf("      within the allowed %d V-cycles\n",max_iter);
+         printf("==============================================");
       }
-      fprintf(fp,"\n\n Average Convergence Factor = %f",conv_factor);
-      fprintf(fp,"\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-      fprintf(fp,"                operator = %f\n",operat_cmplxty);
-      fprintf(fp,"                   cycle = %f\n\n",cycle_cmplxty);
+      printf("\n\n Average Convergence Factor = %f",conv_factor);
+      printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
+      printf("                operator = %f\n",operat_cmplxty);
+      printf("                   cycle = %f\n\n",cycle_cmplxty);
    }
 
    /*----------------------------------------------------------
     * Close the output file (if open)
     *----------------------------------------------------------*/
 
-   if (my_id == 0 && amg_print_level >= 1)
+   /*if (my_id == 0 && amg_print_level >= 1)
    { 
       fclose(fp); 
-   }
+   }*/
 
    hypre_TFree(num_coeffs);
    hypre_TFree(num_variables);
@@ -312,12 +332,12 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    /* int     **point_map_array; */
    /* int     **v_at_point_array; */
 
-   int       cycle_op_count;   
+   double    cycle_op_count;   
    int       cycle_type;
    int       num_levels;
    /* int       num_unknowns; */
 
-   int      *num_coeffs;
+   double   *num_coeffs;
    int      *num_grid_sweeps;   
    int      *grid_relax_type;   
    int     **grid_relax_points;  
@@ -372,11 +392,11 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
 
    Solve_err_flag = 0;
 
-   num_coeffs = hypre_CTAlloc(int, num_levels);
-   num_coeffs[0]    = hypre_ParCSRMatrixNumNonzeros(A_array[0]);
+   num_coeffs = hypre_CTAlloc(double, num_levels);
+   num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
 
    for (j = 1; j < num_levels; j++)
-      num_coeffs[j] = hypre_ParCSRMatrixNumNonzeros(A_array[j]);
+      num_coeffs[j] = hypre_ParCSRMatrixDNumNonzeros(A_array[j]);
 
    /*---------------------------------------------------------------------
     *    Initialize cycling control counter

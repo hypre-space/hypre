@@ -9,15 +9,23 @@ Set matrix coefficients a box at a time
  <h2> Documentation </h2>
 <BLOCKQUOTE>
 
-Set matrix coefficients a box at a time.<P>NOTE: Users are required to set values on all processes that own
-the associated variables.  This means that some data will be
-multiply defined.<P>NOTE: The entries in this routine must all be of the same type:
-either stencil or non-stencil, but not both.  Also, if they are
-stencil entries, they must all represent couplings to the same
-variable type (there are no such restrictions for non-stencil
-entries).<P>If the matrix is complex, then <TT>values</tt> consists of pairs of
-doubles representing the real and imaginary parts of each complex
-value.<P>
+Set matrix coefficients a box at a time.  The data in <TT>values</tt> is ordered
+as follows:<P><PRE>
+   m = 0;
+   for (k = ilower[2]; k &lt;= iupper[2]; k++)
+      for (j = ilower[1]; j &lt;= iupper[1]; j++)
+         for (i = ilower[0]; i &lt;= iupper[0]; i++)
+            for (entry = 0; entry &lt; nentries; entry++)
+            {
+               values[m] = ...;
+               m++;
+            }
+   </pre><P>NOTE: Users are required to set values on all processes that own the
+associated variables.  This means that some data will be multiply defined.<P>NOTE: The entries in this routine must all be of the same type: either
+stencil or non-stencil, but not both.  Also, if they are stencil entries,
+they must all represent couplings to the same variable type (there are no
+such restrictions for non-stencil entries).<P>If the matrix is complex, then <TT>values</tt> consists of pairs of doubles
+representing the real and imaginary parts of each complex value.<P>
 
 </BLOCKQUOTE>
 <DL>

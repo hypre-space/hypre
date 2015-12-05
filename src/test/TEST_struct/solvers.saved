@@ -1,0 +1,1410 @@
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (1, 1, 3)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 10
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.160000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.090000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.070000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.050000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 4
+Final Relative Residual Norm = 7.846564e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (1, 3, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 11
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.050000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 10
+Final Relative Residual Norm = 2.322186e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 10
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.120000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.070000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.220000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.150000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 4
+Final Relative Residual Norm = 1.355288e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 10
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.130000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.100000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.260000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.120000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+LOBPCG Setup:
+  wall clock time = 0.120000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.090000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 1
+
+No constraints
+
+
+Initial Max. Residual 2.3621065267713681e+00
+Iteration 1 	bsize 1 	maxres 1.0994170553651104e+00
+Iteration 2 	bsize 1 	maxres 1.1629029949138875e-01
+Iteration 3 	bsize 1 	maxres 2.8973090820786938e-02
+Iteration 4 	bsize 1 	maxres 6.1224488865182555e-03
+Iteration 5 	bsize 1 	maxres 1.1664364498694491e-03
+Iteration 6 	bsize 1 	maxres 3.0095303513476740e-04
+Iteration 7 	bsize 1 	maxres 1.6501373355671623e-04
+Iteration 8 	bsize 1 	maxres 4.6323846233081401e-05
+Iteration 9 	bsize 1 	maxres 7.1746876406857860e-06
+Iteration 10 	bsize 1 	maxres 9.4810234094362413e-07
+
+Eigenvalue lambda 1.8436645309228505e-01
+Residual 9.4810234094362413e-07
+
+10 iterations
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.490000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.280000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 10
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.130000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.080000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.210000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.160000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+LOBPCG Setup:
+  wall clock time = 0.110000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.070000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 5
+
+No constraints
+
+
+Initial Max. Residual 2.4298353055823254e+00
+Iteration 1 	bsize 5 	maxres 1.3827989820764401e+00
+Iteration 2 	bsize 5 	maxres 5.2141080549026042e-01
+Iteration 3 	bsize 5 	maxres 3.7756017594999647e-01
+Iteration 4 	bsize 5 	maxres 1.9816900929126299e-01
+Iteration 5 	bsize 5 	maxres 6.2386113728046790e-02
+Iteration 6 	bsize 5 	maxres 2.3115521626975871e-02
+Iteration 7 	bsize 5 	maxres 8.6365871603642369e-03
+Iteration 8 	bsize 5 	maxres 2.7962983977972188e-03
+Iteration 9 	bsize 4 	maxres 1.0490861651342967e-03
+Iteration 10 	bsize 4 	maxres 5.6297670823106545e-04
+Iteration 11 	bsize 4 	maxres 2.1927484819646984e-04
+Iteration 12 	bsize 3 	maxres 9.1692581148127290e-05
+Iteration 13 	bsize 2 	maxres 5.6230230684434725e-05
+Iteration 14 	bsize 2 	maxres 2.7700842829459723e-05
+Iteration 15 	bsize 1 	maxres 1.4164323601546389e-05
+Iteration 16 	bsize 1 	maxres 6.6571103516394126e-06
+Iteration 17 	bsize 1 	maxres 2.5490757872828660e-06
+Iteration 18 	bsize 1 	maxres 1.5499255717866186e-06
+Iteration 19 	bsize 1 	maxres 9.4214347208334813e-07
+
+Eigenvalue lambda 1.8436645309176170e-01
+Eigenvalue lambda 2.5088249396977785e-01
+Eigenvalue lambda 3.6009036973726055e-01
+Eigenvalue lambda 4.2084533465880564e-01
+Eigenvalue lambda 4.2084533465910884e-01
+Residual 3.2222473640859065e-07
+Residual 4.1440244932016760e-07
+Residual 9.4214347208334813e-07
+Residual 7.7706218470481842e-07
+Residual 8.0720676253897622e-07
+
+19 iterations
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 3.120000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 1.690000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 11
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 10
+Final Relative Residual Norm = 2.238502e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 11
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+LOBPCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 1
+
+No constraints
+
+
+Initial Max. Residual 2.3621065267713681e+00
+Iteration 1 	bsize 1 	maxres 1.2238966965265696e+00
+Iteration 2 	bsize 1 	maxres 1.7534435515730362e-01
+Iteration 3 	bsize 1 	maxres 5.2783331577394184e-02
+Iteration 4 	bsize 1 	maxres 1.5395160054332467e-02
+Iteration 5 	bsize 1 	maxres 3.8905976665401221e-03
+Iteration 6 	bsize 1 	maxres 9.7199054771354308e-04
+Iteration 7 	bsize 1 	maxres 4.1973841083142477e-04
+Iteration 8 	bsize 1 	maxres 2.0185386464915210e-04
+Iteration 9 	bsize 1 	maxres 9.6286661097461706e-05
+Iteration 10 	bsize 1 	maxres 2.2035670881228454e-05
+Iteration 11 	bsize 1 	maxres 4.3159687615096685e-06
+Iteration 12 	bsize 1 	maxres 8.6433318350903325e-07
+
+Eigenvalue lambda 1.8436645309208216e-01
+Residual 8.6433318350903325e-07
+
+12 iterations
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 11
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.030000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.030000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+LOBPCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 5
+
+No constraints
+
+
+Initial Max. Residual 2.4298353055823254e+00
+Iteration 1 	bsize 5 	maxres 1.4457977758626352e+00
+Iteration 2 	bsize 5 	maxres 6.0540124621976898e-01
+Iteration 3 	bsize 5 	maxres 4.1340725701394704e-01
+Iteration 4 	bsize 5 	maxres 3.1705655133209959e-01
+Iteration 5 	bsize 5 	maxres 1.1560218553400053e-01
+Iteration 6 	bsize 5 	maxres 2.8683899145645956e-02
+Iteration 7 	bsize 5 	maxres 1.0848308581100426e-02
+Iteration 8 	bsize 5 	maxres 4.8869678153706138e-03
+Iteration 9 	bsize 5 	maxres 3.2103981904378215e-03
+Iteration 10 	bsize 5 	maxres 1.5999783969861167e-03
+Iteration 11 	bsize 5 	maxres 6.1242897201215982e-04
+Iteration 12 	bsize 4 	maxres 3.1190456862131665e-04
+Iteration 13 	bsize 4 	maxres 1.4655810174920062e-04
+Iteration 14 	bsize 4 	maxres 4.6453346135425149e-05
+Iteration 15 	bsize 3 	maxres 1.6369742099491011e-05
+Iteration 16 	bsize 2 	maxres 8.1587037552560349e-06
+Iteration 17 	bsize 2 	maxres 3.5675471157605018e-06
+Iteration 18 	bsize 2 	maxres 1.3805419622008155e-06
+Iteration 19 	bsize 1 	maxres 1.0166591006459224e-06
+Iteration 20 	bsize 1 	maxres 8.6762227478744542e-07
+
+Eigenvalue lambda 1.8436645309176677e-01
+Eigenvalue lambda 2.5088249396974865e-01
+Eigenvalue lambda 3.6009036973725045e-01
+Eigenvalue lambda 4.2084533465852142e-01
+Eigenvalue lambda 4.2084533465903839e-01
+Residual 2.1420448089046787e-07
+Residual 2.7990896745455825e-07
+Residual 6.3677290128989802e-07
+Residual 8.6652324625552350e-07
+Residual 8.6762227478744542e-07
+
+20 iterations
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.340000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.250000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 17
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 17
+Final Relative Residual Norm = 8.241147e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 17
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 1
+
+No constraints
+
+
+Initial Max. Residual 2.3621065267713681e+00
+Iteration 1 	bsize 1 	maxres 1.0872149017913204e+00
+Iteration 2 	bsize 1 	maxres 1.1211936010556749e-01
+Iteration 3 	bsize 1 	maxres 2.7867249152646524e-02
+Iteration 4 	bsize 1 	maxres 5.3957151176161613e-03
+Iteration 5 	bsize 1 	maxres 9.2074964985217425e-04
+Iteration 6 	bsize 1 	maxres 2.6742592708683461e-04
+Iteration 7 	bsize 1 	maxres 1.5746422323612136e-04
+Iteration 8 	bsize 1 	maxres 3.8412191054852952e-05
+Iteration 9 	bsize 1 	maxres 6.1045553187912150e-06
+Iteration 10 	bsize 1 	maxres 6.5803097292276564e-07
+
+Eigenvalue lambda 1.8436645309198169e-01
+Residual 6.5803097292276564e-07
+
+10 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 17
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 5
+
+No constraints
+
+
+Initial Max. Residual 2.4298353055823254e+00
+Iteration 1 	bsize 5 	maxres 1.3736312747534689e+00
+Iteration 2 	bsize 5 	maxres 5.0465175454733913e-01
+Iteration 3 	bsize 5 	maxres 3.7976307239611629e-01
+Iteration 4 	bsize 5 	maxres 1.8400769983471249e-01
+Iteration 5 	bsize 5 	maxres 5.9286785997483292e-02
+Iteration 6 	bsize 5 	maxres 2.0722243908191135e-02
+Iteration 7 	bsize 5 	maxres 8.2996235779234269e-03
+Iteration 8 	bsize 5 	maxres 2.5099984430450462e-03
+Iteration 9 	bsize 4 	maxres 9.0247459146890240e-04
+Iteration 10 	bsize 4 	maxres 4.4750142726897378e-04
+Iteration 11 	bsize 4 	maxres 1.3475196975315729e-04
+Iteration 12 	bsize 3 	maxres 3.5872750490791106e-05
+Iteration 13 	bsize 2 	maxres 1.7626026735248557e-05
+Iteration 14 	bsize 2 	maxres 1.0120500787879686e-05
+Iteration 15 	bsize 2 	maxres 5.0753921143028360e-06
+Iteration 16 	bsize 1 	maxres 2.2431086050109068e-06
+Iteration 17 	bsize 1 	maxres 9.6163775677549592e-07
+
+Eigenvalue lambda 1.8436645309175373e-01
+Eigenvalue lambda 2.5088249396980278e-01
+Eigenvalue lambda 3.6009036973726005e-01
+Eigenvalue lambda 4.2084533465889795e-01
+Eigenvalue lambda 4.2084533465912971e-01
+Residual 2.1860090764063340e-07
+Residual 2.0140996843287329e-07
+Residual 7.1062266653132564e-07
+Residual 8.9281659801893586e-07
+Residual 9.6163775677549592e-07
+
+17 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.330000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.260000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 18
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 32
+Final Relative Residual Norm = 8.259590e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 18
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 1
+
+No constraints
+
+
+Initial Max. Residual 2.3621065267713681e+00
+Iteration 1 	bsize 1 	maxres 1.1341258511855306e+00
+Iteration 2 	bsize 1 	maxres 1.5762585732160195e-01
+Iteration 3 	bsize 1 	maxres 4.7848746057780625e-02
+Iteration 4 	bsize 1 	maxres 1.0782072226538649e-02
+Iteration 5 	bsize 1 	maxres 1.8842535641957045e-03
+Iteration 6 	bsize 1 	maxres 5.0402042700776984e-04
+Iteration 7 	bsize 1 	maxres 3.5449852908394795e-04
+Iteration 8 	bsize 1 	maxres 8.0481603417458921e-05
+Iteration 9 	bsize 1 	maxres 1.0596808610658637e-05
+Iteration 10 	bsize 1 	maxres 1.6337979256584096e-06
+Iteration 11 	bsize 1 	maxres 2.0639547005045894e-07
+
+Eigenvalue lambda 1.8436645309182240e-01
+Residual 2.0639547005045894e-07
+
+11 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.020000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 18
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 5
+
+No constraints
+
+
+Initial Max. Residual 2.4298353055823254e+00
+Iteration 1 	bsize 5 	maxres 1.3835982773104194e+00
+Iteration 2 	bsize 5 	maxres 4.9164957257899267e-01
+Iteration 3 	bsize 5 	maxres 3.4020843140266538e-01
+Iteration 4 	bsize 5 	maxres 2.8675169627953379e-01
+Iteration 5 	bsize 5 	maxres 7.4285240531389449e-02
+Iteration 6 	bsize 5 	maxres 2.0612320798992723e-02
+Iteration 7 	bsize 5 	maxres 8.9017888795092995e-03
+Iteration 8 	bsize 5 	maxres 5.1154034187296336e-03
+Iteration 9 	bsize 5 	maxres 1.9375575837816959e-03
+Iteration 10 	bsize 4 	maxres 4.9818555258722072e-04
+Iteration 11 	bsize 4 	maxres 1.2662135278957402e-04
+Iteration 12 	bsize 3 	maxres 7.6671896349764972e-05
+Iteration 13 	bsize 3 	maxres 3.1579696640470303e-05
+Iteration 14 	bsize 2 	maxres 1.5256711022858921e-05
+Iteration 15 	bsize 2 	maxres 5.0061233480195722e-06
+Iteration 16 	bsize 1 	maxres 2.1981860123570998e-06
+Iteration 17 	bsize 1 	maxres 1.2207952893129469e-06
+Iteration 18 	bsize 1 	maxres 9.6406033573518607e-07
+
+Eigenvalue lambda 1.8436645309175398e-01
+Eigenvalue lambda 2.5088249396975248e-01
+Eigenvalue lambda 3.6009036973717740e-01
+Eigenvalue lambda 4.2084533465867757e-01
+Eigenvalue lambda 4.2084533465873630e-01
+Residual 1.2329160361952885e-07
+Residual 4.1754799126809153e-07
+Residual 3.9302190222689151e-07
+Residual 9.6406033573518607e-07
+Residual 6.9224455219820661e-07
+
+18 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.310000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.280000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 19
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 32
+Final Relative Residual Norm = 8.259590e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 19
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver ID not recognized - running inner PCG iterations without preconditioner
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 1
+
+No constraints
+
+
+Initial Max. Residual 2.3621065267713681e+00
+Iteration 1 	bsize 1 	maxres 1.1341258511855306e+00
+Iteration 2 	bsize 1 	maxres 1.5762585732160209e-01
+Iteration 3 	bsize 1 	maxres 4.7848746057780375e-02
+Iteration 4 	bsize 1 	maxres 1.0782072226538585e-02
+Iteration 5 	bsize 1 	maxres 1.8842535641957038e-03
+Iteration 6 	bsize 1 	maxres 5.0402042700777472e-04
+Iteration 7 	bsize 1 	maxres 3.5449852908394031e-04
+Iteration 8 	bsize 1 	maxres 8.0481603417468381e-05
+Iteration 9 	bsize 1 	maxres 1.0596808610662337e-05
+Iteration 10 	bsize 1 	maxres 1.6337979256530954e-06
+Iteration 11 	bsize 1 	maxres 2.0639547003730103e-07
+
+Eigenvalue lambda 1.8436645309182242e-01
+Residual 2.0639547003730103e-07
+
+11 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.040000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.040000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (2, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 19
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+Solver ID not recognized - running inner PCG iterations without preconditioner
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Solving standard eigenvalue problem with preconditioning
+
+block size 5
+
+No constraints
+
+
+Initial Max. Residual 2.4298353055823254e+00
+Iteration 1 	bsize 5 	maxres 1.3835982773104172e+00
+Iteration 2 	bsize 5 	maxres 4.9164957257899505e-01
+Iteration 3 	bsize 5 	maxres 3.4020843140271845e-01
+Iteration 4 	bsize 5 	maxres 2.8675169627953223e-01
+Iteration 5 	bsize 5 	maxres 7.4285240531350175e-02
+Iteration 6 	bsize 5 	maxres 2.0612320799031605e-02
+Iteration 7 	bsize 5 	maxres 8.9017888797888831e-03
+Iteration 8 	bsize 5 	maxres 5.1154034186638338e-03
+Iteration 9 	bsize 5 	maxres 1.9375575845417823e-03
+Iteration 10 	bsize 4 	maxres 4.9818555268962676e-04
+Iteration 11 	bsize 4 	maxres 1.2662135287729983e-04
+Iteration 12 	bsize 3 	maxres 7.6671896817349602e-05
+Iteration 13 	bsize 3 	maxres 3.1579699290713819e-05
+Iteration 14 	bsize 2 	maxres 1.5256709085559727e-05
+Iteration 15 	bsize 2 	maxres 5.0061131561216874e-06
+Iteration 16 	bsize 1 	maxres 2.1981107893216813e-06
+Iteration 17 	bsize 1 	maxres 1.2207078346846157e-06
+Iteration 18 	bsize 1 	maxres 9.6411273056745005e-07
+
+Eigenvalue lambda 1.8436645309175451e-01
+Eigenvalue lambda 2.5088249396974999e-01
+Eigenvalue lambda 3.6009036973718023e-01
+Eigenvalue lambda 4.2084533465867785e-01
+Eigenvalue lambda 4.2084533465873841e-01
+Residual 1.2329160364606772e-07
+Residual 4.1754799086666806e-07
+Residual 3.9302190086564757e-07
+Residual 9.6411273056745005e-07
+Residual 6.9171591970353955e-07
+
+18 iterations
+=============================================
+Solve phase times:
+=============================================
+LOBPCG Solve:
+  wall clock time = 0.290000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.200000 seconds
+  cpu MFLOPS      = 0.000000
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (3, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 17
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.020000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 20
+Final Relative Residual Norm = 6.913376e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (1, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 18
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.010000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+
+Running with these driver parameters:
+  (nx, ny, nz)    = (10, 10, 10)
+  (istart[0],istart[1],istart[2]) = (-3, -3, -3)
+  (Px, Py, Pz)    = (1, 1, 1)
+  (bx, by, bz)    = (1, 1, 1)
+  (px, py, pz)    = (0, 0, 0)
+  (cx, cy, cz)    = (1.000000, 1.000000, 1.000000)
+  (conx,cony,conz)= (0.000000, 0.000000, 0.000000)
+  (n_pre, n_post) = (1, 1)
+  dim             = 3
+  skip            = 0
+  sym             = 1
+  rap             = 0
+  relax           = 1
+  jump            = 0
+  solver ID       = 19
+=============================================
+Struct Interface:
+=============================================
+Struct Interface:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Setup phase times:
+=============================================
+PCG Setup:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.000000 seconds
+  cpu MFLOPS      = 0.000000
+
+=============================================
+Solve phase times:
+=============================================
+PCG Solve:
+  wall clock time = 0.000000 seconds
+  wall MFLOPS     = 0.000000
+  cpu clock time  = 0.010000 seconds
+  cpu MFLOPS      = 0.000000
+
+
+Iterations = 20
+Final Relative Residual Norm = 5.962015e-07
+

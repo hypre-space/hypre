@@ -1,11 +1,31 @@
 /*BHEADER**********************************************************************
- * (c) 1998   The Regents of the University of California
+ * Copyright (c) 2006   The Regents of the University of California.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * Written by the HYPRE team. UCRL-CODE-222953.
+ * All rights reserved.
  *
- * See the file COPYRIGHT_and_DISCLAIMER for a complete copyright
- * notice, contact person, and disclaimer.
+ * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
+ * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
+ * disclaimer, contact information and the GNU Lesser General Public License.
  *
- * $Revision: 2.1 $
- *********************************************************************EHEADER*/
+ * HYPRE is free software; you can redistribute it and/or modify it under the 
+ * terms of the GNU General Public License (as published by the Free Software
+ * Foundation) version 2.1 dated February 1999.
+ *
+ * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
+ * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
+ * Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * $Revision: 2.4 $
+ ***********************************************************************EHEADER*/
+
+
+
 /******************************************************************************
  *
  * HYPRE_ParCSRCGNR Fortran interface
@@ -88,6 +108,19 @@ hypre_F90_IFACE(hypre_parcsrcgnrsettol, HYPRE_PARCSRCGNRSETTOL)( long int *solve
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ParCSRCGNRSetMinIter
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrcgnrsetminiter, HYPRE_PARCSRCGNRSETMINITER)( long int *solver,
+                                             int      *min_iter,
+                                             int      *ierr      )
+{
+   *ierr = (int) ( HYPRE_ParCSRCGNRSetMinIter( (HYPRE_Solver) *solver,
+                                               (int)          *min_iter ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_ParCSRCGNRSetMaxIter
  *--------------------------------------------------------------------------*/
 
@@ -98,6 +131,20 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetmaxiter, HYPRE_PARCSRCGNRSETMAXITER)( long in
 {
    *ierr = (int) ( HYPRE_ParCSRCGNRSetMaxIter( (HYPRE_Solver) *solver,
                                                (int)          *max_iter ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRCGNRSetStopCrit
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrcgnrsetstopcrit, HYPRE_PARCSRCGNRSETSTOPCRIT)
+                                           ( long int *solver,
+                                             int      *stop_crit,
+                                             int      *ierr      )
+{
+   *ierr = (int) ( HYPRE_ParCSRCGNRSetStopCrit( (HYPRE_Solver) *solver,
+                                               (int)          *stop_crit ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -194,7 +241,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrgetnumiteration, HYPRE_PARCSRCGNRGETNUMITERATION
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_ParCSRCGNRGetFinalRelativ
+ * HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 void
