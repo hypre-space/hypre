@@ -7,11 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.25 $
+ * $Revision: 2.26 $
  ***********************************************************************EHEADER*/
-
-
-
 
 
 #ifndef HYPRE_SSTRUCT_MV_HEADER
@@ -149,12 +146,41 @@ int HYPRE_SStructGridSetVariables(HYPRE_SStructGrid      grid,
  * Describe additional variables that live at a particular index.  These
  * variables are appended to the array of variables set in
  * \Ref{HYPRE_SStructGridSetVariables}, and are referenced as such.
+ *
+ * NOTE: This routine is not yet supported.
  **/
 int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
                                   int                    part,
                                   int                   *index,
                                   int                    nvars,
                                   HYPRE_SStructVariable *vartypes);
+
+/* NEW */
+/**
+ * Set the ordering of variables in a finite element problem.  This overrides
+ * the default ordering described below.
+ *
+ * Array {\tt ordering} is composed of blocks of size (1 + {\tt ndim}).  Each
+ * block indicates a specific variable in the element and the ordering of the
+ * blocks defines the ordering of the variables.  A block contains a variable
+ * number followed by an offset direction relative to the element's center.  For
+ * example, a block containing (2, 1, -1, 0) means variable 2 on the edge
+ * located in the (1, -1, 0) direction from the center of the element.  Note
+ * that here variable 2 must be of type {\tt ZEDGE} for this to make sense.  The
+ * {\tt ordering} array must account for all variables in the element.  This
+ * routine can only be called after \Ref{HYPRE_SStructGridSetVariables}.
+ *
+ * The default ordering for element variables (var, i, j, k) varies fastest in
+ * index i, followed by j, then k, then var.  For example, if var 0, var 1, and
+ * var 2 are declared to be XFACE, YFACE, and NODE variables, respectively, then
+ * the default ordering (in 2D) would first list the two XFACE variables, then
+ * the two YFACE variables, then the four NODE variables as follows:
+ *
+ * (0,-1,0), (0,1,0), (1,0,-1), (1,0,1), (2,-1,-1), (2,1,-1), (2,-1,1), (2,1,1)
+ **/
+int HYPRE_SStructGridSetFEMOrdering(HYPRE_SStructGrid  grid,
+                                    int                part,
+                                    int               *ordering);
 
 /**
  * Describe how regions just outside of a part relate to other parts.  This is
@@ -165,8 +191,7 @@ int HYPRE_SStructGridAddVariables(HYPRE_SStructGrid      grid,
  *
  * Indexes should increase from {\tt ilower} to {\tt iupper}.  It is not
  * necessary that indexes increase from {\tt nbor\_ilower} to {\tt
- * nbor\_iupper}.  This is to ease the transition from the old {\tt
- * SetNeighborBox} function, and to provide some flexibility for users.
+ * nbor\_iupper}.
  * 
  * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2 on part
  * {\tt part} to the corresponding indexes on part {\tt nbor\_part}.  For
@@ -201,37 +226,70 @@ int HYPRE_SStructGridSetNeighborPart(HYPRE_SStructGrid  grid,
                                      int               *index_map,
                                      int               *index_dir);
 
+/* NEW */
 /**
- * (DEFUNCT) Describe how regions just outside of a part relate to other parts.
- * This is done a box at a time.  SHOULD USE {\tt SetNeighborPart} INSTEAD!
+ * Describe how regions inside a part are shared with regions in other parts.
  *
- * Parts {\tt part} and {\tt nbor\_part} must be different, except in the case
- * where only cell-centered data is used.
+ * Parts {\tt part} and {\tt shared\_part} must be different.
  *
- * The indexes {\tt ilower} and {\tt iupper} map directly to the indexes {\tt
- * nbor\_ilower} and {\tt nbor\_iupper}.  Although, it is required that indexes
- * increase from {\tt ilower} to {\tt iupper}, indexes may increase and/or
- * decrease from {\tt nbor\_ilower} to {\tt nbor\_iupper}.
+ * Indexes should increase from {\tt ilower} to {\tt iupper}.  It is not
+ * necessary that indexes increase from {\tt shared\_ilower} to {\tt
+ * shared\_iupper}.  This is to maintain consistency with the {\tt
+ * SetNeighborPart} function, which is also able to describe shared regions but
+ * in a more limited fashion.
+ *
+ * The {\tt offset} is a triple (in 3D) used to indicate the dimensionality of
+ * the shared set of data and its position with respect to the box extents {\tt
+ * ilower} and {\tt iupper} on part {\tt part}.  The dimensionality is given by
+ * the number of 0's in the triple, and the position is given by plus or minus
+ * 1's.  For example: (0, 0, 0) indicates sharing of all data in the given box;
+ * (1, 0, 0) indicates sharing of data on the faces in the (1, 0, 0) direction;
+ * (1, 0, -1) indicates sharing of data on the edges in the (1, 0, -1)
+ * direction; and (1, -1, 1) indicates sharing of data on the nodes in the (1,
+ * -1, 1) direction.  To ensure the dimensionality, it is required that for
+ * every nonzero entry, the corresponding extents of the box are the same.  For
+ * example, if {\tt offset} is (0, 1, 0), then (2, 1, 3) and (10, 1, 15) are
+ * valid box extents, whereas (2, 1, 3) and (10, 7, 15) are invalid (because 1
+ * and 7 are not the same).
+ *
+ * The {\tt shared\_offset} is used in the same way as {\tt offset}, but with
+ * respect to the box extents {\tt shared\_ilower} and {\tt shared\_iupper} on
+ * part {\tt shared\_part}.
  * 
  * The {\tt index\_map} describes the mapping of indexes 0, 1, and 2 on part
- * {\tt part} to the corresponding indexes on part {\tt nbor\_part}.  For
+ * {\tt part} to the corresponding indexes on part {\tt shared\_part}.  For
  * example, triple (1, 2, 0) means that indexes 0, 1, and 2 on part {\tt part}
- * map to indexes 1, 2, and 0 on part {\tt nbor\_part}, respectively.
+ * map to indexes 1, 2, and 0 on part {\tt shared\_part}, respectively.
+ *
+ * The {\tt index\_dir} describes the direction of the mapping in {\tt
+ * index\_map}.  For example, triple (1, 1, -1) means that for indexes 0 and 1,
+ * increasing values map to increasing values on {\tt shared\_part}, while for
+ * index 2, decreasing values map to increasing values.
  *
  * NOTE: All parts related to each other via this routine must have an identical
  * list of variables and variable types.  For example, if part 0 has only two
  * variables on it, a cell centered variable and a node centered variable, and
- * we declare part 1 to be a neighbor of part 0, then part 1 must also have only
- * two variables on it, and they must be of type cell and node.
+ * we declare part 1 to have shared regions with part 0, then part 1 must also
+ * have only two variables on it, and they must be of type cell and node.  In
+ * addition, variables associated with FACEs or EDGEs must be grouped together
+ * and listed in X, Y, Z order.  This is to enable the code to correctly
+ * associate variables on one part with variables on a shared part when a
+ * coordinate transformation is specified.  For example, an XFACE variable on
+ * one part may correspond to a YFACE variable on a shared part under a
+ * particular tranformation, and the code determines this association by
+ * assuming that the variable lists are as noted here.
  **/
-int HYPRE_SStructGridSetNeighborBox(HYPRE_SStructGrid  grid,
-                                    int                part,
-                                    int               *ilower,
-                                    int               *iupper,
-                                    int                nbor_part,
-                                    int               *nbor_ilower,
-                                    int               *nbor_iupper,
-                                    int               *index_map);
+int HYPRE_SStructGridSetSharedPart(HYPRE_SStructGrid  grid,
+                                   int                part,
+                                   int               *ilower,
+                                   int               *iupper,
+                                   int               *offset,
+                                   int                shared_part,
+                                   int               *shared_ilower,
+                                   int               *shared_iupper,
+                                   int               *shared_offset,
+                                   int               *index_map,
+                                   int               *index_dir);
 
 /**
  * Add an unstructured part to the grid.  The variables in the unstructured part
@@ -336,6 +394,13 @@ int HYPRE_SStructGraphCreate(MPI_Comm             comm,
  **/
 int HYPRE_SStructGraphDestroy(HYPRE_SStructGraph graph);
 
+/* NEW */
+/**
+ * Set the domain grid.
+ **/
+int HYPRE_SStructGraphSetDomainGrid(HYPRE_SStructGraph graph,
+                                    HYPRE_SStructGrid  domain_grid);
+
 /**
  * Set the stencil for a variable on a structured part of the grid.
  **/
@@ -343,6 +408,32 @@ int HYPRE_SStructGraphSetStencil(HYPRE_SStructGraph   graph,
                                  int                  part,
                                  int                  var,
                                  HYPRE_SStructStencil stencil);
+
+/* NEW */
+/**
+ * Indicate that an FEM approach will be used to set matrix values on this part.
+ **/
+int HYPRE_SStructGraphSetFEM(HYPRE_SStructGraph graph,
+                             int                part);
+
+/* NEW */
+/**
+ * Set the finite element stiffness matrix sparsity.  This overrides the default
+ * full sparsity pattern described below.
+ *
+ * Array {\tt sparsity} contains {\tt nsparse} row/column tuples (I,J) that
+ * indicate the nonzeroes of the local stiffness matrix.  The layout of the
+ * values passed into the routine \Ref{HYPRE_SStructMatrixAddFEMValues} is
+ * determined here.
+ *
+ * The default sparsity is full (each variable is coupled to all others), and
+ * the values passed into the routine \Ref{HYPRE_SStructMatrixAddFEMValues} are
+ * assumed to be by rows (that is, column indices vary fastest).
+ **/
+int HYPRE_SStructGraphSetFEMSparsity(HYPRE_SStructGraph  graph,
+                                     int                 part,
+                                     int                 nsparse,
+                                     int                *sparsity);
 
 /**
  * Add a non-stencil graph entry at a particular index.  This graph entry is
@@ -360,6 +451,11 @@ int HYPRE_SStructGraphAddEntries(HYPRE_SStructGraph   graph,
                                  int                  to_var);
 
 /**
+ * Finalize the construction of the graph before using.
+ **/
+int HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
+
+/**
  * Set the storage type of the associated matrix object.  It is used before
  * AddEntries and Assemble to compute the right ranks in the graph.
  * 
@@ -370,11 +466,6 @@ int HYPRE_SStructGraphAddEntries(HYPRE_SStructGraph   graph,
  **/
   int HYPRE_SStructGraphSetObjectType(HYPRE_SStructGraph  graph,
                                       int                 type);
-/**
- * Finalize the construction of the graph before using.
- **/
-int HYPRE_SStructGraphAssemble(HYPRE_SStructGraph graph);
-
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -463,6 +554,50 @@ int HYPRE_SStructMatrixAddToValues(HYPRE_SStructMatrix  matrix,
                                    int                 *entries,
                                    double              *values);
 
+/* NEW */
+/**
+ * Add finite element stiffness matrix coefficients index by index.  The layout
+ * of the data in {\tt values} is determined by the routines
+ * \Ref{HYPRE_SStructGridSetFEMOrdering} and
+ * \Ref{HYPRE_SStructGraphSetFEMSparsity}.
+ *
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructMatrixSetComplex
+ **/
+int HYPRE_SStructMatrixAddFEMValues(HYPRE_SStructMatrix  matrix,
+                                    int                  part,
+                                    int                 *index,
+                                    double              *values);
+
+/**
+ * Get matrix coefficients index by index.  The {\tt values} array is of length
+ * {\tt nentries}.
+ *
+ * NOTE: For better efficiency, use \Ref{HYPRE_SStructMatrixGetBoxValues} to get
+ * coefficients a box at a time.
+ *
+ * NOTE: Users may get values on any process that owns the associated variables.
+ *
+ * NOTE: The entries in this routine must all be of the same type: either
+ * stencil or non-stencil, but not both.  Also, if they are stencil entries,
+ * they must all represent couplings to the same variable type (there are no
+ * such restrictions for non-stencil entries).
+ *
+ * If the matrix is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructMatrixSetComplex
+ **/
+int HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
+                                 int                  part,
+                                 int                 *index,
+                                 int                  var,
+                                 int                  nentries,
+                                 int                 *entries,
+                                 double              *values);
+
 /**
  * Set matrix coefficients a box at a time.  The data in {\tt values} is ordered
  * as follows:
@@ -500,6 +635,7 @@ int HYPRE_SStructMatrixSetBoxValues(HYPRE_SStructMatrix  matrix,
                                     int                  nentries,
                                     int                 *entries,
                                     double              *values);
+
 /**
  * Add to matrix coefficients a box at a time.  The data in {\tt values} is
  * ordered as in \Ref{HYPRE_SStructMatrixSetBoxValues}.
@@ -525,38 +661,6 @@ int HYPRE_SStructMatrixAddToBoxValues(HYPRE_SStructMatrix  matrix,
                                       double              *values);
 
 /**
- * Finalize the construction of the matrix before using.
- **/
-int HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
-
-/**
- * Get matrix coefficients index by index.  The {\tt values} array is of length
- * {\tt nentries}.
- *
- * NOTE: For better efficiency, use \Ref{HYPRE_SStructMatrixGetBoxValues} to get
- * coefficients a box at a time.
- *
- * NOTE: Users may get values on any process that owns the associated variables.
- *
- * NOTE: The entries in this routine must all be of the same type: either
- * stencil or non-stencil, but not both.  Also, if they are stencil entries,
- * they must all represent couplings to the same variable type (there are no
- * such restrictions for non-stencil entries).
- *
- * If the matrix is complex, then {\tt values} consists of pairs of doubles
- * representing the real and imaginary parts of each complex value.
- *
- * @see HYPRE_SStructMatrixSetComplex
- **/
-int HYPRE_SStructMatrixGetValues(HYPRE_SStructMatrix  matrix,
-                                 int                  part,
-                                 int                 *index,
-                                 int                  var,
-                                 int                  nentries,
-                                 int                 *entries,
-                                 double              *values);
-
-/**
  * Get matrix coefficients a box at a time.  The data in {\tt values} is
  * ordered as in \Ref{HYPRE_SStructMatrixSetBoxValues}.
  *
@@ -578,6 +682,11 @@ int HYPRE_SStructMatrixGetBoxValues(HYPRE_SStructMatrix  matrix,
                                     int                  nentries,
                                     int                 *entries,
                                     double              *values);
+
+/**
+ * Finalize the construction of the matrix before using.
+ **/
+int HYPRE_SStructMatrixAssemble(HYPRE_SStructMatrix matrix);
 
 /**
  * Define symmetry properties for the stencil entries in the matrix.  The
@@ -706,6 +815,42 @@ int HYPRE_SStructVectorAddToValues(HYPRE_SStructVector  vector,
                                    int                  var,
                                    double              *value);
 
+/* NEW */
+/**
+ * Add finite element vector coefficients index by index.  The layout of the
+ * data in {\tt values} is determined by the routine
+ * \Ref{HYPRE_SStructGridSetFEMOrdering}.
+ *
+ * If the vector is complex, then {\tt values} consists of pairs of doubles
+ * representing the real and imaginary parts of each complex value.
+ *
+ * @see HYPRE_SStructVectorSetComplex
+ **/
+int HYPRE_SStructVectorAddFEMValues(HYPRE_SStructVector  vector,
+                                    int                  part,
+                                    int                 *index,
+                                    double              *values);
+
+/**
+ * Get vector coefficients index by index.
+ *
+ * NOTE: For better efficiency, use \Ref{HYPRE_SStructVectorGetBoxValues} to get
+ * coefficients a box at a time.
+ *
+ * NOTE: Users may only get values on processes that own the associated
+ * variables.
+ *
+ * If the vector is complex, then {\tt value} consists of a pair of doubles
+ * representing the real and imaginary parts of the complex value.
+ *
+ * @see HYPRE_SStructVectorSetComplex
+ **/
+int HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
+                                 int                  part,
+                                 int                 *index,
+                                 int                  var,
+                                 double              *value);
+
 /**
  * Set vector coefficients a box at a time.  The data in {\tt values} is ordered
  * as follows:
@@ -735,6 +880,7 @@ int HYPRE_SStructVectorSetBoxValues(HYPRE_SStructVector  vector,
                                     int                 *iupper,
                                     int                  var,
                                     double              *values);
+
 /**
  * Add to vector coefficients a box at a time.  The data in {\tt values} is
  * ordered as in \Ref{HYPRE_SStructVectorSetBoxValues}.
@@ -755,41 +901,6 @@ int HYPRE_SStructVectorAddToBoxValues(HYPRE_SStructVector  vector,
                                       double              *values);
 
 /**
- * Finalize the construction of the vector before using.
- **/
-int HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
-
-
-/**
- * Gather vector data so that efficient {\tt GetValues} can be done.  This
- * routine must be called prior to calling {\tt GetValues} to insure that
- * correct and consistent values are returned, especially for non cell-centered
- * data that is shared between more than one processor.
- **/
-int HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
-
-
-/**
- * Get vector coefficients index by index.
- *
- * NOTE: For better efficiency, use \Ref{HYPRE_SStructVectorGetBoxValues} to get
- * coefficients a box at a time.
- *
- * NOTE: Users may only get values on processes that own the associated
- * variables.
- *
- * If the vector is complex, then {\tt value} consists of a pair of doubles
- * representing the real and imaginary parts of the complex value.
- *
- * @see HYPRE_SStructVectorSetComplex
- **/
-int HYPRE_SStructVectorGetValues(HYPRE_SStructVector  vector,
-                                 int                  part,
-                                 int                 *index,
-                                 int                  var,
-                                 double              *value);
-
-/**
  * Get vector coefficients a box at a time.  The data in {\tt values} is ordered
  * as in \Ref{HYPRE_SStructVectorSetBoxValues}.
  *
@@ -807,6 +918,19 @@ int HYPRE_SStructVectorGetBoxValues(HYPRE_SStructVector  vector,
                                     int                 *iupper,
                                     int                  var,
                                     double              *values);
+
+/**
+ * Finalize the construction of the vector before using.
+ **/
+int HYPRE_SStructVectorAssemble(HYPRE_SStructVector vector);
+
+/**
+ * Gather vector data so that efficient {\tt GetValues} can be done.  This
+ * routine must be called prior to calling {\tt GetValues} to insure that
+ * correct and consistent values are returned, especially for non cell-centered
+ * data that is shared between more than one processor.
+ **/
+int HYPRE_SStructVectorGather(HYPRE_SStructVector vector);
 
 /**
  * Set the storage type of the vector object to be constructed.  Currently, {\tt

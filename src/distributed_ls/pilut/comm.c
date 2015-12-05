@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -27,9 +27,7 @@
 
 #include "HYPRE_config.h"
 #include <stdlib.h>
-#if HAVE_UNISTD_H
-#  include <unistd.h>
-#endif /* HAVE_UNISTD_H */
+/* #include <unistd.h> */
 #include <time.h>
 
 #include "DistributedMatrixPilutSolver.h"

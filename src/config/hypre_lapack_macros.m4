@@ -7,13 +7,13 @@ dnl # HYPRE is free software; you can redistribute it and/or modify it under the
 dnl # terms of the GNU Lesser General Public License (as published by the Free
 dnl # Software Foundation) version 2.1 dated February 1999.
 dnl #
-dnl # $Revision: 1.7 $
+dnl # $Revision: 1.8 $
 dnl #EHEADER**********************************************************************
 
 
 
 
-dnl @synopsis HYPRE_FIND_LAPACK([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
+dnl @synopsis AC_HYPRE_FIND_LAPACK([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl
 dnl This macro looks for a library that implements the LAPACK
 dnl linear-algebra interface (see http://www.netlib.org/lapack/).
@@ -39,10 +39,10 @@ dnl ACTION-IF-FOUND is a list of shell commands to run if a LAPACK
 dnl library is found, and ACTION-IF-NOT-FOUND is a list of commands
 dnl to run it if it is not found.
 dnl
-dnl @version $Id: hypre_lapack_macros.m4,v 1.7 2008/07/18 01:32:19 ulrikey Exp $
+dnl @version $Id: hypre_lapack_macros.m4,v 1.8 2010/01/25 22:51:04 falgout Exp $
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
-AC_DEFUN([HYPRE_FIND_LAPACK], 
+AC_DEFUN([AC_HYPRE_FIND_LAPACK], 
 [
   AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
@@ -53,7 +53,7 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
   LAPACKLIBDIRS="null"
 
   AC_ARG_WITH(lapack,
-        [AS_HELP_STRING([  --with-lapack], [Find a system-provided LAPACK library])])
+        [AS_HELP_STRING([--with-lapack], [Find a system-provided LAPACK library])])
 
   case $with_lapack in
       yes) ;;
@@ -66,11 +66,6 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
   hypre_save_LIBS="$LIBS"
   hypre_save_LDFLGS="$LDFLAGS"
   LIBS="$LIBS $FLIBS"
-
-#***************************************************************
-# Get fortran linker name of LAPACK function to check for.
-#***************************************************************
-  AC_F77_FUNC(dsygv)
 
 #***************************************************************
 #   Set possible LAPACK library names
@@ -86,11 +81,12 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
 #***************************************************************
 #   Check for function dsygv in LAPACK_LIB_NAMES
 #***************************************************************
-  for lib in $LAPACK_LIB_NAMES; do
-     if test "$LAPACKLIBS" = "null"; then
+  if test "$LAPACKLIBS" = "null"; then
+     AC_F77_FUNC(dsygv)
+     for lib in $LAPACK_LIB_NAMES; do
         AC_CHECK_LIB($lib, $dsygv, [LAPACKLIBS=$lib], [], [-lblas])
-     fi
-  done
+     done
+  fi
 
 #***************************************************************
 #   Set path to selected LAPACK library
@@ -126,4 +122,4 @@ AC_DEFUN([HYPRE_FIND_LAPACK],
   LIBS="$hypre_save_LIBS"
   LDFLAGS="$hypre_save_LDFLGS"
 
-])dnl HYPRE_FIND_LAPACK
+])dnl AC_HYPRE_FIND_LAPACK

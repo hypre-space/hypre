@@ -23,10 +23,12 @@ double SuperLU_timer_() {
 #else
 
 #ifndef NO_TIMER
-#include <sys/types.h>
-#include <sys/times.h>
 #include <time.h>
+#include <sys/types.h>
+#ifndef WIN32
+#include <sys/times.h>
 #include <sys/time.h>
+#endif
 #endif
 
 #ifndef CLK_TCK

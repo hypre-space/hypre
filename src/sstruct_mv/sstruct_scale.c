@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
-
-
 
 
 /******************************************************************************
@@ -22,14 +20,12 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPScale
  *--------------------------------------------------------------------------*/
 
 int
 hypre_SStructPScale( double                alpha,
                      hypre_SStructPVector *py )
 {
-   int ierr = 0;
    int nvars = hypre_SStructPVectorNVars(py);
    int var;
 
@@ -38,18 +34,16 @@ hypre_SStructPScale( double                alpha,
       hypre_StructScale(alpha, hypre_SStructPVectorSVector(py, var));
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructScale
  *--------------------------------------------------------------------------*/
 
 int
 hypre_SStructScale( double               alpha,
                     hypre_SStructVector *y )
 {
-   int ierr = 0;
    int nparts = hypre_SStructVectorNParts(y);
    int part;
    int y_object_type= hypre_SStructVectorObjectType(y);
@@ -70,5 +64,5 @@ hypre_SStructScale( double               alpha,
       hypre_ParVectorScale(alpha, y_par);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }

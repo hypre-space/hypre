@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -228,6 +228,11 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
       ++cycle_count;
 
+
+
+      hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
+      hypre_ParAMGDataNumIterations(amg_data) = cycle_count;
+
       if (my_id == 0 && (amg_print_level > 1))
       { 
          printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
@@ -322,7 +327,7 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    double    cycle_op_count;   
    int       cycle_type;
    int       num_levels;
-   /* int       num_unknowns; */
+   int       max_levels;
 
    double   *num_coeffs;
    int      *num_grid_sweeps;   
@@ -345,6 +350,11 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    int       relax_points;
    double   *relax_weight;
 
+   int       relax_local;
+   int       relax_order;
+   int       old_version = 0;
+
+
    double    alpha;
    double    beta;
 #if 0
@@ -363,6 +373,7 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    /* v_at_point_array  = hypre_ParAMGDataVatPointArray(amg_data); */
    Vtemp             = hypre_ParAMGDataVtemp(amg_data);
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
+   max_levels        = hypre_ParAMGDataMaxLevels(amg_data);
    cycle_type        = hypre_ParAMGDataCycleType(amg_data);
    /* num_unknowns      =  hypre_ParCSRMatrixNumRows(A_array[0]); */
 
@@ -371,6 +382,8 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    grid_relax_points   = hypre_ParAMGDataGridRelaxPoints(amg_data);
    relax_weight        = hypre_ParAMGDataRelaxWeight(amg_data); 
 
+   relax_order         = hypre_ParAMGDataRelaxOrder(amg_data);
+
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
    lev_counter = hypre_CTAlloc(int, num_levels);
@@ -378,6 +391,8 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    /* Initialize */
 
    Solve_err_flag = 0;
+
+   if (grid_relax_points) old_version = 1;
 
    num_coeffs = hypre_CTAlloc(double, num_levels);
    num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
@@ -422,20 +437,31 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    {
       num_sweep = num_grid_sweeps[cycle_param];
       relax_type = grid_relax_type[cycle_param];
-
+      if (relax_type != 7 && relax_type != 9) relax_type = 7;
       /*------------------------------------------------------------------
        * Do the relaxation num_sweep times
        *-----------------------------------------------------------------*/
 
       for (j = 0; j < num_sweep; j++)
       {
-         relax_points =   grid_relax_points[cycle_param][j];
+
+         if (num_levels == 1 && max_levels > 1)
+         {
+            relax_points = 0;
+            relax_local = 0;
+         }
+         else
+         {
+            if (old_version)
+               relax_points = grid_relax_points[cycle_param][j];
+            relax_local = relax_order;
+         }
 
          /*-----------------------------------------------
           * VERY sloppy approximation to cycle complexity
           *-----------------------------------------------*/
 
-         if (level < num_levels -1)
+         if (old_version && level < num_levels -1)
          {
             switch (relax_points)
             {
@@ -453,17 +479,19 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
             cycle_op_count += num_coeffs[level]; 
          }
 
-
+         /* note: this does not use relax_points, so it doesn't matter if
+            its the "old version" */
+         
          Solve_err_flag = hypre_BoomerAMGRelaxT(A_array[level], 
-                                            F_array[level],
-                                            CF_marker_array[level],
-                                            relax_type,
-                                            relax_points,
-                                            relax_weight[level],
-                                            U_array[level],
-                                            Vtemp);
-
- 
+                                                F_array[level],
+                                                CF_marker_array[level],
+                                                relax_type,
+                                                relax_points,
+                                                relax_weight[level],
+                                                U_array[level],
+                                                Vtemp);
+        
+         
          if (Solve_err_flag != 0)
             return(Solve_err_flag);
       }
@@ -597,7 +625,7 @@ int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
   
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
-    *     relax_type = 2 -> Jacobi (uses ParMatvec)
+    *     relax_type = 7 -> Jacobi (uses ParMatvec)
     *     relax_type = 9 -> Direct Solve
     *-----------------------------------------------------------------------*/
    

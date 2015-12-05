@@ -48,7 +48,6 @@ int main (int argc, char *argv[])
       return(0);
    }
 
-
    /* 1. Set up a grid. Each processor describes the piece
       of the grid that it owns. */
    {
@@ -184,8 +183,7 @@ int main (int argc, char *argv[])
                                            stencil_indices, values);
          }
          {
-            /* values to the right of our box
-               (that do not border the other box on proc. 0) */
+            /* values to the right of our box */
             int ilower[2]={2,1}, iupper[2]={2,4};
             int stencil_indices[1] = {2};
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
@@ -199,7 +197,8 @@ int main (int argc, char *argv[])
                                            stencil_indices, values);
          }
          {
-            /* values to the left of our box */
+            /* values to the left of our box
+               (that do not border the other box on proc. 0) */
             int ilower[2]={0,3}, iupper[2]={0,4};
             int stencil_indices[1] = {1};
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,

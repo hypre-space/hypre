@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -131,9 +131,9 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    int                      ***recv_processes;
    int                      ***recv_remote_boxnums;
 
-   hypre_BoxMap               *map;
-   hypre_BoxMapEntry         **map_entries;
-   int                         nmap_entries;
+   hypre_BoxManager           *boxman;
+   hypre_BoxManEntry         **boxman_entries;
+   int                         nboxman_entries;
 
    hypre_Box                   box, scaled_box;
 
@@ -215,7 +215,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    tmp_boxarray = hypre_BoxArrayCreate(0);
    for (vars= 0; vars< nvars; vars++)
    {
-      map= hypre_SStructGridMap(hypre_SStructVectorGrid(r),
+      boxman= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(r),
                                 part_fine, vars);
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
 
@@ -232,15 +232,15 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
          hypre_StructMapCoarseToFine(hypre_BoxIMax(&box), index,
                                      rfactors, hypre_BoxIMax(&scaled_box));
 
-         hypre_BoxMapIntersect(map, hypre_BoxIMin(&scaled_box),
-                               hypre_BoxIMax(&scaled_box), &map_entries,
-                              &nmap_entries);
+         hypre_BoxManIntersect(boxman, hypre_BoxIMin(&scaled_box),
+                               hypre_BoxIMax(&scaled_box), &boxman_entries,
+                               &nboxman_entries);
 
          /* all send and coarsened fboxes on this processor are collected */
          intersect_boxes= hypre_BoxArrayCreate(0);
-         for (i= 0; i< nmap_entries; i++)
+         for (i= 0; i< nboxman_entries; i++)
          {
-            hypre_BoxMapEntryGetExtents(map_entries[i], ilower, iupper);
+            hypre_BoxManEntryGetExtents(boxman_entries[i], ilower, iupper);
             hypre_BoxSetExtents(&box, ilower, iupper);
             hypre_IntersectBoxes(&box, &scaled_box, &box);
 
@@ -255,7 +255,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
                                  intersect_boxes, tmp_boxarray);
          hypre_MinUnionBoxes(hypre_BoxArrayArrayBoxArray(identity_arrayboxes[vars], ci));
 
-         hypre_TFree(map_entries);
+         hypre_TFree(boxman_entries);
          hypre_BoxArrayDestroy(intersect_boxes);
       }
    } 
@@ -267,7 +267,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
     * pattern. For each fbox, we need a boxarray of sendboxes or ownboxes.
     *
     * Algorithm: Coarsen each fbox and see which cboxes it intersects using
-    * BoxMapIntersect. Cboxes that do not belong on the processor will have
+    * BoxManIntersect. Cboxes that do not belong on the processor will have
     * a chunk sent to it.
     *
     * Note that no contraction is needed. Contraction can lead to erroneous
@@ -285,8 +285,8 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    pgrid= hypre_SStructPVectorPGrid(rf);
    for (vars= 0; vars< nvars; vars++)
    {
-      map= hypre_SStructGridMap(hypre_SStructVectorGrid(r),
-                                part_crse, vars);
+      boxman= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(r),
+                                       part_crse, vars);
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
       fullwgt_sendboxes[vars]= hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
       fullwgt_ownboxes[vars] = hypre_BoxArrayArrayCreate(hypre_BoxArraySize(boxarray));
@@ -304,13 +304,13 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
          hypre_StructMapFineToCoarse(hypre_BoxIMax(&box), zero_index,
                                      rfactors, hypre_BoxIMax(&scaled_box));
 
-         hypre_BoxMapIntersect(map, hypre_BoxIMin(&scaled_box), 
-                               hypre_BoxIMax(&scaled_box), &map_entries, &nmap_entries);
+         hypre_BoxManIntersect(boxman, hypre_BoxIMin(&scaled_box), 
+                               hypre_BoxIMax(&scaled_box), &boxman_entries, &nboxman_entries);
 
          cnt1= 0; cnt2= 0;
-         for (i= 0; i< nmap_entries; i++)
+         for (i= 0; i< nboxman_entries; i++)
          {
-            hypre_SStructMapEntryGetProcess(map_entries[i], &proc);
+            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
             if (proc != myproc)
             {
                cnt1++;
@@ -325,13 +325,13 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
          own_cboxnums[vars][fi]       = hypre_CTAlloc(int, cnt2);
 
          cnt1= 0; cnt2= 0;
-         for (i= 0; i< nmap_entries; i++)
+         for (i= 0; i< nboxman_entries; i++)
          {
-            hypre_BoxMapEntryGetExtents(map_entries[i], ilower, iupper);
+            hypre_BoxManEntryGetExtents(boxman_entries[i], ilower, iupper);
             hypre_BoxSetExtents(&box, ilower, iupper);
             hypre_IntersectBoxes(&box, &scaled_box, &box);
 
-            hypre_SStructMapEntryGetProcess(map_entries[i], &proc);
+            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
             if (proc != myproc)
             {
                hypre_AppendBox(&box,
@@ -340,7 +340,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
                                 hypre_BoxArrayArrayBoxArray(send_boxes[vars], fi));
 
                send_processes[vars][fi][cnt1]= proc;
-               hypre_SStructMapEntryGetBoxnum(map_entries[i],
+               hypre_SStructBoxManEntryGetBoxnum(boxman_entries[i],
                                               &send_remote_boxnums[vars][fi][cnt1]);
                cnt1++;
             }
@@ -349,12 +349,12 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
             {
                hypre_AppendBox(&box,
                                 hypre_BoxArrayArrayBoxArray(fullwgt_ownboxes[vars], fi));
-               hypre_SStructMapEntryGetBoxnum(map_entries[i],
+               hypre_SStructBoxManEntryGetBoxnum(boxman_entries[i],
                                               &own_cboxnums[vars][fi][cnt2]);
                cnt2++;
             }
          }
-         hypre_TFree(map_entries);
+         hypre_TFree(boxman_entries);
 
       }  /* hypre_ForBoxI(fi, boxarray) */
    }     /* for (vars= 0; vars< nvars; vars++) */
@@ -379,7 +379,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
    pgrid= hypre_SStructPVectorPGrid(rc);
    for (vars= 0; vars< nvars; vars++)
    {
-      map= hypre_SStructGridMap(hypre_SStructVectorGrid(r),
+      boxman= hypre_SStructGridBoxManager(hypre_SStructVectorGrid(r),
                                 part_fine, vars);
       boxarray= hypre_StructGridBoxes(hypre_SStructPGridSGrid(pgrid, vars));
       
@@ -395,13 +395,13 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
          hypre_StructMapCoarseToFine(hypre_BoxIMax(&box), index,
                                      rfactors, hypre_BoxIMax(&scaled_box));
 
-         hypre_BoxMapIntersect(map, hypre_BoxIMin(&scaled_box), 
-                               hypre_BoxIMax(&scaled_box), &map_entries, &nmap_entries);
+         hypre_BoxManIntersect(boxman, hypre_BoxIMin(&scaled_box), 
+                               hypre_BoxIMax(&scaled_box), &boxman_entries, &nboxman_entries);
 
          cnt1= 0;
-         for (i= 0; i< nmap_entries; i++)
+         for (i= 0; i< nboxman_entries; i++)
          {
-            hypre_SStructMapEntryGetProcess(map_entries[i], &proc);
+            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
             if (proc != myproc)
             {
                cnt1++;
@@ -411,12 +411,12 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
          recv_remote_boxnums[vars][ci]= hypre_CTAlloc(int , cnt1);
 
          cnt1= 0;
-         for (i= 0; i< nmap_entries; i++)
+         for (i= 0; i< nboxman_entries; i++)
          {
-            hypre_SStructMapEntryGetProcess(map_entries[i], &proc);
+            hypre_SStructBoxManEntryGetProcess(boxman_entries[i], &proc);
             if (proc != myproc)
             {
-               hypre_BoxMapEntryGetExtents(map_entries[i], ilower, iupper);
+               hypre_BoxManEntryGetExtents(boxman_entries[i], ilower, iupper);
                hypre_BoxSetExtents(&box, ilower, iupper);
                hypre_IntersectBoxes(&box, &scaled_box, &box);
 
@@ -434,7 +434,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
             }  /* if (proc != myproc) */
          }     /* for (i= 0; i< nmap_entries; i++) */
 
-         hypre_TFree(map_entries);
+         hypre_TFree(boxman_entries);
 
       }        /* hypre_ForBoxI(ci, boxarray) */
    }           /* for (vars= 0; vars< nvars; vars++) */

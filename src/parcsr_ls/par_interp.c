@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.26 $
+ * $Revision: 2.27 $
  ***********************************************************************EHEADER*/
 
 
@@ -121,6 +121,7 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    int              num_sends;
    int              index;
    int              ns, ne, size, rest;
+   int              print_level = 0;
    int             *int_buf_data;
 
    int col_1 = hypre_ParCSRMatrixFirstRowIndex(A);
@@ -146,6 +147,12 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
     *-------------------------------------------------------------------*/
+
+   if (debug_flag < 0)
+   {
+      debug_flag = -debug_flag;
+      print_level = 1;
+   }
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
@@ -864,7 +871,8 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
          if (diagonal == 0.0)
          {
-	   printf(" Warning! zero diagonal! Proc id %d row %d\n", my_id,i); 
+	   if (print_level)
+	      printf(" Warning! zero diagonal! Proc id %d row %d\n", my_id,i); 
            diagonal = A_diag_data[A_diag_i[i]];
          }
 
@@ -3003,6 +3011,7 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    int              num_sends;
    int              index;
    int              ns, ne, size, rest;
+   int              print_level = 0;
    int             *int_buf_data;
 
    int col_1 = hypre_ParCSRMatrixFirstRowIndex(A);
@@ -3028,6 +3037,12 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
    /*-------------------------------------------------------------------
     * Get the CF_marker data for the off-processor columns
     *-------------------------------------------------------------------*/
+
+   if (debug_flag < 0)
+   {
+      debug_flag = -debug_flag;
+      print_level = 1;
+   }
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
@@ -3770,7 +3785,8 @@ hypre_BoomerAMGBuildInterpModUnk( hypre_ParCSRMatrix   *A,
 
          if (diagonal == 0.0)
          {
-	   printf(" Warning! zero diagonal! Proc id %d row %d\n", my_id,i); 
+           if (print_level)
+	      printf(" Warning! zero diagonal! Proc id %d row %d\n", my_id,i); 
            diagonal = A_diag_data[A_diag_i[i]];
          }
 

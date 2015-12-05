@@ -7,14 +7,8 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.31 $
+# $Revision: 1.34 $
 #EHEADER**********************************************************************
-
-
-
-
-
-
 
 
 ###############################################################################
@@ -25,7 +19,6 @@
 
 @SET_MAKE@
 
-
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 prefix = @prefix@
@@ -33,14 +26,14 @@ exec_prefix = @exec_prefix@
 
 VPATH = @srcdir@
 
-HYPRE_SRC_TOP_DIR = @HYPRE_TOP_SRCDIR@
-HYPRE_BUILD_DIR = @HYPRE_TOP_SRCDIR@/hypre
-HYPRE_LINK_DIR = @HYPRE_LINKDIR@
+HYPRE_RELEASE_NAME    = @HYPRE_NAME@
+HYPRE_RELEASE_VERSION = @HYPRE_VERSION@
+HYPRE_RELEASE_DATE    = @HYPRE_DATE@
+HYPRE_RELEASE_TIME    = @HYPRE_TIME@
+HYPRE_RELEASE_BUGS    = @HYPRE_BUGS@
 
-HYPRE_RELEASE_VERSION = @HYPRE_RELEASEVERSION@
-HYPRE_RELEASE_DATE = @HYPRE_RELEASEDATE@
-HYPRE_RELEASE_TIME = @HYPRE_RELEASETIME@
-HYPRE_RELEASE_DATETIME = @HYPRE_RELEASEDATE@
+HYPRE_SRC_TOP_DIR = @HYPRE_SRCDIR@
+HYPRE_BUILD_DIR   = @HYPRE_SRCDIR@/hypre
 
 HYPRE_INSTALL_DIR = @HYPRE_INSTALLDIR@
 HYPRE_LIB_INSTALL = @HYPRE_LIBINSTALL@
@@ -48,61 +41,52 @@ HYPRE_INC_INSTALL = @HYPRE_INCINSTALL@
 
 HYPRE_LIB_SUFFIX = @HYPRE_LIBSUFFIX@
 
-
 .SUFFIXES:
 .SUFFIXES: .o .f .c .C .cxx .cc
 
 .f.o:
-	$(F77) $(FFLAGS) $(FDEFS) -c $< 
+	$(F77) $(FFLAGS) -c $< 
 .c.o:
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< 
+	$(CC) $(CFLAGS) -c $< 
 .C.o:
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $<
+	$(CXX) $(CXXFLAGS) -c $<
 .cxx.o:
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $<
+	$(CXX) $(CXXFLAGS) -c $<
 .cc.o:
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -c $<
-
+	$(CXX) $(CXXFLAGS) -c $<
 
 F77       = @F77@
 FFLAGS    = @FFLAGS@ @F77FLAGS@ $(F77_COMPILE_FLAGS)
-FDEFS     = @DEFS@
 
 CC        = @CC@
-CFLAGS    = @CFLAGS@ $(C_COMPILE_FLAGS)
+CFLAGS    = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 
 CXX       = @CXX@
-CXXFLAGS  = @CXXFLAGS@ $(CXX_COMPILE_FLAGS)
-
-CPPFLAGS  = @DEFS@
+CXXFLAGS  = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
 LINK_F77  = @LINK_F77@
 LINK_CC   = @LINK_CC@
 LINK_CXX  = @LINK_CXX@
 
-BUILD_F77_SHARED = @BUILD_F77_SHARED@
-BUILD_CC_SHARED  = @BUILD_CC_SHARED@
-BUILD_CXX_SHARED = @BUILD_CXX_SHARED@
-
+BUILD_F77_SHARED    = @BUILD_F77_SHARED@
+BUILD_CC_SHARED     = @BUILD_CC_SHARED@
+BUILD_CXX_SHARED    = @BUILD_CXX_SHARED@
 SHARED_COMPILE_FLAG = @SHARED_COMPILE_FLAG@
-SHARED_BUILD_FLAG = @SHARED_BUILD_FLAG@
+SHARED_BUILD_FLAG   = @SHARED_BUILD_FLAG@
+SHARED_SET_SONAME   = @SHARED_SET_SONAME@
+SHARED_OPTIONS      = @SHARED_OPTIONS@
 
 BUILD_PYTHON = @BUILD_PYTHON@
-PYTHON = @PYTHON@
+PYTHON       = @PYTHON@
 
 BUILD_JAVA = @BUILD_JAVA@
 
-AR	  = @AR@
-RANLIB    = @RANLIB@
+AR     = @AR@
+RANLIB = @RANLIB@
 
-LDFLAGS   = @LDFLAGS@
-LDLIBS    = @LDLIBS@
-LDLIBDIRS = @LDLIBDIRS@
-
-INCLUDES = @INCLUDES@
-LIBDIRS = @LIBDIRS@
-LIBS = @LIBS@
-FLIBS = @FLIBS@
+LDFLAGS = @LDFLAGS@
+LIBS    = @LIBS@
+FLIBS   = @FLIBS@
 
 ##################################################################
 ##  BABEL Directories
@@ -118,33 +102,30 @@ HYPRE_EXAMPLE_DIRS = @EXAMPLEDIR@
 ##  LAPACK Library Flags 
 ##################################################################
 HYPRE_LAPACK_SRC_DIR = @HYPRE_LAPACK_SRC_DIR@
-LAPACKLIBS = @LAPACKLIBS@
-LAPACKLIBDIRS = @LAPACKLIBDIRS@
+LAPACKLIBS           = @LAPACKLIBS@
+LAPACKLIBDIRS        = @LAPACKLIBDIRS@
 
 ##################################################################
 ##  BLAS Library Flags 
 ##################################################################
 HYPRE_BLAS_SRC_DIR = @HYPRE_BLAS_SRC_DIR@
-BLASLIBS = @BLASLIBS@
-BLASLIBDIRS = @BLASLIBDIRS@
+BLASLIBS           = @BLASLIBS@
+BLASLIBDIRS        = @BLASLIBDIRS@
 
 ##################################################################
 ##  MPI options
 ##################################################################
 MPIINCLUDE = @MPIINCLUDE@
 MPILIBDIRS = @MPILIBDIRS@
-MPILIBS = @MPILIBS@
-MPIFLAGS = @MPIFLAGS@
+MPILIBS    = @MPILIBS@
+MPIFLAGS   = @MPIFLAGS@
 
 ##################################################################
 ##  FEI options
 ##################################################################
-FEIINCLUDE = @FEIINCLUDE@
-FEILIBS = @FEILIBS@
-FEILIBDIRS = @FEILIBDIRS@
-HYPRE_FEI_SRC_DIR = @HYPRE_FEI_SRC_DIR@
-HYPRE_FEI_BASE_DIR = @HYPRE_FEI_BASE_DIR@
-HYPRE_FEI_SUBDIRS = @HYPRE_FEI_SUBDIRS@
+HYPRE_FEI_SRC_DIR       = @HYPRE_FEI_SRC_DIR@
+HYPRE_FEI_BASE_DIR      = @HYPRE_FEI_BASE_DIR@
+HYPRE_FEI_SUBDIRS       = @HYPRE_FEI_SUBDIRS@
 HYPRE_FEI_SUPERLU_FILES = @HYPRE_FEI_SUPERLU_FILES@
-HYPRE_FEI_HYPRE_FILES = @HYPRE_FEI_HYPRE_FILES@
-HYPRE_FEI_FEMLI_FILES = @HYPRE_FEI_FEMLI_FILES@
+HYPRE_FEI_HYPRE_FILES   = @HYPRE_FEI_HYPRE_FILES@
+HYPRE_FEI_FEMLI_FILES   = @HYPRE_FEI_FEMLI_FILES@

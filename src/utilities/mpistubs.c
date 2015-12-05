@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -477,6 +477,18 @@ hypre_MPI_Reduce( void              *sendbuf,
                   hypre_MPI_Op       op,
                   int                root,
                   hypre_MPI_Comm     comm )
+{ 
+   hypre_MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
+   return 0;
+}
+
+int
+hypre_MPI_Scan( void              *sendbuf,
+                void              *recvbuf,
+                int                count,
+                hypre_MPI_Datatype datatype,
+                hypre_MPI_Op       op,
+                hypre_MPI_Comm     comm )
 { 
    hypre_MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
    return 0;

@@ -1,18 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision: 2.3 $
- ***********************************************************************EHEADER*/
-
-
-
-
 
 #include <HYPRE_config.h>
 
@@ -27,6 +12,21 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 2.5 $
+ ***********************************************************************EHEADER*/
+
+
+
 
 
 /******************************************************************************
@@ -77,6 +77,8 @@ typedef struct
 			if  AddToValues*/
    int     *off_proc_j; /* contains column indices */
    double  *off_proc_data; /* contains corresponding data */
+   int	    cancel_indx; /* number of elements that have to be deleted due
+			   to setting values from another processor */
 } hypre_AuxParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -101,8 +103,24 @@ typedef struct
 #define hypre_AuxParCSRMatrixOffProcI(matrix)  ((matrix) -> off_proc_i)
 #define hypre_AuxParCSRMatrixOffProcJ(matrix)  ((matrix) -> off_proc_j)
 #define hypre_AuxParCSRMatrixOffProcData(matrix)  ((matrix) -> off_proc_data)
+#define hypre_AuxParCSRMatrixCancelIndx(matrix)  ((matrix) -> cancel_indx)
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 2.5 $
+ ***********************************************************************EHEADER*/
+
+
+
+
 
 /******************************************************************************
  *
@@ -126,6 +144,8 @@ typedef struct
    int	    current_num_elmts; /* current no. of elements stored in stash */
    int     *off_proc_i; /* contains column indices */
    double  *off_proc_data; /* contains corresponding data */
+   int	    cancel_indx; /* number of elements that have to be deleted due
+                           to setting values from another processor */
 } hypre_AuxParVector;
 
 /*--------------------------------------------------------------------------
@@ -136,8 +156,24 @@ typedef struct
 #define hypre_AuxParVectorCurrentNumElmts(matrix)  ((matrix) -> current_num_elmts)
 #define hypre_AuxParVectorOffProcI(matrix)  ((matrix) -> off_proc_i)
 #define hypre_AuxParVectorOffProcData(matrix)  ((matrix) -> off_proc_data)
+#define hypre_AuxParVectorCancelIndx(matrix)  ((matrix) -> cancel_indx)
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 2.5 $
+ ***********************************************************************EHEADER*/
+
+
+
+
 /******************************************************************************
  *
  * Header info for the hypre_IJMatrix structures
@@ -169,6 +205,7 @@ typedef struct hypre_IJMatrix_struct
    int         global_first_col;    /*   to be able to avoind using the global */
    int         global_num_rows;     /*   global partition */ 
    int         global_num_cols;
+   int         print_level;
    
 
 
@@ -194,6 +231,7 @@ typedef struct hypre_IJMatrix_struct
 #define hypre_IJMatrixGlobalFirstCol(matrix)      ((matrix) -> global_first_col)
 #define hypre_IJMatrixGlobalNumRows(matrix)       ((matrix) -> global_num_rows)
 #define hypre_IJMatrixGlobalNumCols(matrix)       ((matrix) -> global_num_cols)
+#define hypre_IJMatrixPrintLevel(matrix)       ((matrix) -> print_level)
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects
@@ -212,6 +250,21 @@ hypre_GetIJMatrixISISMatrix( HYPRE_IJMatrix IJmatrix, RowMatrix *reference )
 #endif
 
 #endif
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision: 2.5 $
+ ***********************************************************************EHEADER*/
+
+
+
+
 /******************************************************************************
  *
  * Header info for the hypre_IJMatrix structures
@@ -239,9 +292,9 @@ typedef struct hypre_IJVector_struct
 				       information */
 
    int         global_first_row;    /* these for data items are necessary */
-   int         global_num_rows;     /*    to be able to avoind using the global */
+   int         global_num_rows;     /*   to be able to avoid using the global */
                                     /*    global partition */ 
-   
+   int	       print_level; 
    
 
 
@@ -264,6 +317,8 @@ typedef struct hypre_IJVector_struct
 #define hypre_IJVectorGlobalFirstRow(vector)  ((vector) -> global_first_row)
 
 #define hypre_IJVectorGlobalNumRows(vector)  ((vector) -> global_num_rows)
+
+#define hypre_IJVectorPrintLevel(vector)  ((vector) -> print_level)
 
 /*--------------------------------------------------------------------------
  * prototypes for operations on local objects
@@ -307,22 +362,20 @@ int hypre_IJMatrixDestroyISIS ( hypre_IJMatrix *matrix );
 int hypre_IJMatrixSetTotalSizeISIS ( hypre_IJMatrix *matrix , int size );
 
 /* IJMatrix_parcsr.c */
-int hypre_IJMatrixCreateParCSR( hypre_IJMatrix *matrix );
-int hypre_IJMatrixSetRowSizesParCSR( hypre_IJMatrix *matrix , const int *sizes );
-int hypre_IJMatrixSetDiagOffdSizesParCSR( hypre_IJMatrix *matrix , const int *diag_sizes , const int *offdiag_sizes );
-int hypre_IJMatrixSetMaxOffProcElmtsParCSR( hypre_IJMatrix *matrix , int max_off_proc_elmts );
-int hypre_IJMatrixInitializeParCSR( hypre_IJMatrix *matrix );
-int hypre_IJMatrixGetRowCountsParCSR( hypre_IJMatrix *matrix , int nrows , int *rows , int *ncols );
-int hypre_IJMatrixGetValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *ncols , int *rows , int *cols , double *values );
-int hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
-int hypre_IJMatrixAddToValuesParCSR( hypre_IJMatrix *matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
-int hypre_IJMatrixAssembleParCSR( hypre_IJMatrix *matrix );
-int hypre_IJMatrixDestroyParCSR( hypre_IJMatrix *matrix );
-int hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix , int off_proc_i_indx , int max_off_proc_elmts , int current_num_elmts , int *off_proc_i , int *off_proc_j , double *off_proc_data );
-int hypre_FillResponseIJOffProcVals(void *p_recv_contact_buf,  int contact_size, int contact_proc, void *ro, MPI_Comm comm, void **p_send_response_buf, int *response_message_size );
-int hypre_FillResponseIJOffProcValsDouble(void *p_recv_contact_buf,  int contact_size, int contact_proc, void *ro, MPI_Comm comm, void **p_send_response_buf, int *response_message_size );
-int hypre_FindProc( int *list , int value , int list_length );
-
+int hypre_IJMatrixCreateParCSR ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixSetRowSizesParCSR ( hypre_IJMatrix *matrix , const int *sizes );
+int hypre_IJMatrixSetDiagOffdSizesParCSR ( hypre_IJMatrix *matrix , const int *diag_sizes , const int *offdiag_sizes );
+int hypre_IJMatrixSetMaxOffProcElmtsParCSR ( hypre_IJMatrix *matrix , int max_off_proc_elmts );
+int hypre_IJMatrixInitializeParCSR ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixGetRowCountsParCSR ( hypre_IJMatrix *matrix , int nrows , int *rows , int *ncols );
+int hypre_IJMatrixGetValuesParCSR ( hypre_IJMatrix *matrix , int nrows , int *ncols , int *rows , int *cols , double *values );
+int hypre_IJMatrixSetValuesParCSR ( hypre_IJMatrix *matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
+int hypre_IJMatrixAddToValuesParCSR ( hypre_IJMatrix *matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
+int hypre_IJMatrixAssembleParCSR ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixDestroyParCSR ( hypre_IJMatrix *matrix );
+int hypre_IJMatrixAssembleOffProcValsParCSR ( hypre_IJMatrix *matrix , int off_proc_i_indx , int max_off_proc_elmts , int current_num_elmts , int *off_proc_i , int *off_proc_j , double *off_proc_data );
+int hypre_FillResponseIJOffProcVals ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
+int hypre_FindProc ( int *list , int value , int list_length );
 
 /* IJMatrix_petsc.c */
 int hypre_IJMatrixSetLocalSizePETSc ( hypre_IJMatrix *matrix , int local_m , int local_n );
@@ -362,6 +415,7 @@ int hypre_IJVectorAssembleOffProcValsPar ( hypre_IJVector *vector , int max_off_
 int HYPRE_IJMatrixCreate ( MPI_Comm comm , int ilower , int iupper , int jlower , int jupper , HYPRE_IJMatrix *matrix );
 int HYPRE_IJMatrixDestroy ( HYPRE_IJMatrix matrix );
 int HYPRE_IJMatrixInitialize ( HYPRE_IJMatrix matrix );
+int HYPRE_IJMatrixSetPrintLevel ( HYPRE_IJMatrix matrix , int print_level );
 int HYPRE_IJMatrixSetValues ( HYPRE_IJMatrix matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
 int HYPRE_IJMatrixAddToValues ( HYPRE_IJMatrix matrix , int nrows , int *ncols , const int *rows , const int *cols , const double *values );
 int HYPRE_IJMatrixAssemble ( HYPRE_IJMatrix matrix );
@@ -381,6 +435,7 @@ int HYPRE_IJMatrixPrint ( HYPRE_IJMatrix matrix , const char *filename );
 int HYPRE_IJVectorCreate ( MPI_Comm comm , int jlower , int jupper , HYPRE_IJVector *vector );
 int HYPRE_IJVectorDestroy ( HYPRE_IJVector vector );
 int HYPRE_IJVectorInitialize ( HYPRE_IJVector vector );
+int HYPRE_IJVectorSetPrintLevel ( HYPRE_IJVector vector , int print_level );
 int HYPRE_IJVectorSetValues ( HYPRE_IJVector vector , int nvalues , const int *indices , const double *values );
 int HYPRE_IJVectorAddToValues ( HYPRE_IJVector vector , int nvalues , const int *indices , const double *values );
 int HYPRE_IJVectorAssemble ( HYPRE_IJVector vector );

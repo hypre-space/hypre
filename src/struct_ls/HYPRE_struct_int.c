@@ -7,15 +7,14 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
 
 
-#include "HYPRE_struct_int.h"
-#include "temp_multivector.h"
 #include "_hypre_struct_ls.h"
+#include "temp_multivector.h"
 
 int 
 hypre_StructVectorSetRandomValues( hypre_StructVector *vector,

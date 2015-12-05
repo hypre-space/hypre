@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
-
-
 
 
 /******************************************************************************
@@ -22,7 +20,6 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * hypre_SStructPOverlapInnerProd
  *--------------------------------------------------------------------------*/
 
 int
@@ -30,7 +27,6 @@ hypre_SStructPOverlapInnerProd( hypre_SStructPVector *px,
                                 hypre_SStructPVector *py,
                                 double               *presult_ptr )
 {
-   int    ierr = 0;
    int    nvars = hypre_SStructPVectorNVars(px);
    double presult;
    double sresult;
@@ -46,11 +42,10 @@ hypre_SStructPOverlapInnerProd( hypre_SStructPVector *px,
 
    *presult_ptr = presult;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * hypre_SStructOverlapInnerProd
  *--------------------------------------------------------------------------*/
 
 int
@@ -58,7 +53,6 @@ hypre_SStructOverlapInnerProd( hypre_SStructVector *x,
                                hypre_SStructVector *y,
                                double              *result_ptr )
 {
-   int    ierr = 0;
    int    nparts = hypre_SStructVectorNParts(x);
    double result;
    double presult;
@@ -74,5 +68,5 @@ hypre_SStructOverlapInnerProd( hypre_SStructVector *x,
 
    *result_ptr = result;
 
-   return ierr;
+   return hypre_error_flag;
 }

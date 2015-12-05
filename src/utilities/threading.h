@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -18,10 +18,12 @@
 #if defined(HYPRE_USING_OPENMP) || defined (HYPRE_USING_PGCC_SMP)
 
 int hypre_NumThreads( void );
+int hypre_GetThreadNum( void );
 
 #else
 
 #define hypre_NumThreads() 1
+#define hypre_GetThreadNum() 0
 
 #endif
 

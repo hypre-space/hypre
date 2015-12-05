@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -133,8 +133,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
 
    int                    i, j, k, l, m;
 
-   hypre_BoxMap          *node_map;
-   hypre_BoxMapEntry     *entry;
+   hypre_BoxManager      *node_boxman;
+   hypre_BoxManEntry     *entry;
    int                    kstart, kend;
    int                    ilower, iupper;
    int                    jlower, jupper;
@@ -250,16 +250,16 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    part= 0;
    i   = 0;
 
-   hypre_SStructGridBoxProcFindMapEntry(node_grid, part, 0, i, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(node_grid, part, 0, i, myproc, &entry);
    pgrid= hypre_SStructGridPGrid(node_grid, part);
    vartypes[0]= HYPRE_SSTRUCT_VARIABLE_NODE;
    j= vartypes[0];
    sgrid= hypre_SStructPGridVTSGrid(pgrid, j);
    boxes= hypre_StructGridBoxes(sgrid);
    box  = hypre_BoxArrayBox(boxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(box), &jlower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(box), &jlower);
 
-   hypre_SStructGridBoxProcFindMapEntry(grid, part, 0, i, myproc, &entry);
+   hypre_SStructGridBoxProcFindBoxManEntry(grid, part, 0, i, myproc, &entry);
    pgrid= hypre_SStructGridPGrid(grid, part);
   /* grab the first edge variable type */
    vartypes[0]= hypre_SStructPGridVarType(pgrid, 0);
@@ -267,7 +267,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    sgrid= hypre_SStructPGridVTSGrid(pgrid, j);
    boxes= hypre_StructGridBoxes(sgrid);
    box  = hypre_BoxArrayBox(boxes, 0);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMin(box), &ilower);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMin(box), &ilower);
 
    part = nparts-1;
    pgrid= hypre_SStructGridPGrid(node_grid, part);
@@ -277,10 +277,10 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    boxes= hypre_StructGridBoxes(sgrid);
    box  = hypre_BoxArrayBox(boxes, hypre_BoxArraySize(boxes)-1);
 
-   hypre_SStructGridBoxProcFindMapEntry(node_grid, part, 0, 
+   hypre_SStructGridBoxProcFindBoxManEntry(node_grid, part, 0, 
                                         hypre_BoxArraySize(boxes)-1,
                                         myproc, &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(box), &jupper);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(box), &jupper);
 
    pgrid= hypre_SStructGridPGrid(grid, part);
    vars = hypre_SStructPGridNVars(pgrid);
@@ -291,10 +291,10 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    box  = hypre_BoxArrayBox(boxes, hypre_BoxArraySize(boxes)-1);
    hypre_TFree(vartypes);
 
-   hypre_SStructGridBoxProcFindMapEntry(grid, part, vars-1, 
+   hypre_SStructGridBoxProcFindBoxManEntry(grid, part, vars-1, 
                                         hypre_BoxArraySize(boxes)-1,
                                         myproc, &entry);
-   hypre_SStructMapEntryGetGlobalCSRank(entry, hypre_BoxIMax(box), &iupper);
+   hypre_SStructBoxManEntryGetGlobalCSRank(entry, hypre_BoxIMax(box), &iupper);
                                                                                                                         
    HYPRE_IJMatrixCreate(comm, ilower, iupper, jlower, jupper, &Aen);
    HYPRE_IJMatrixSetObjectType(Aen, HYPRE_PARCSR);
@@ -363,12 +363,12 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       pgrid   = hypre_SStructGridPGrid(node_grid, part);
       sgrid   = hypre_SStructPGridSGrid(pgrid, 0);
       boxes   = hypre_StructGridBoxes(sgrid);
-      node_map= hypre_SStructGridMap(node_grid, part, 0);
+      node_boxman = hypre_SStructGridBoxManager(node_grid, part, 0);
                                                                                                              
       hypre_ForBoxI(j, boxes)
       {
          box= hypre_BoxArrayBox(boxes, j);
-         hypre_BoxMapFindBoxProcEntry(node_map, j, myproc, &entry);
+         hypre_BoxManGetEntry(node_boxman, myproc, j, &entry);
          i= hypre_BoxVolume(box);
                                                                                                              
          tmp_box_array= hypre_BoxArrayCreate(0);
@@ -391,7 +391,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                    hypre_SetIndex(index, loopi, loopj, loopk);
                    hypre_AddIndex(index, start, index);
                                                                                                              
-                   hypre_SStructMapEntryGetGlobalRank(entry, index,
+                   hypre_SStructBoxManEntryGetGlobalRank(entry, index,
                                                      &rank, matrix_type);
                    flag[rank-start_rank] = 0;
                    flag2[rank-start_rank]= rank;

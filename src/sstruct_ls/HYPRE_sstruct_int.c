@@ -7,14 +7,12 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
 
 
-#include "HYPRE_struct_int.h"
-#include "HYPRE_sstruct_int.h"
 #include "_hypre_sstruct_ls.h"
 #include "interpreter.h"
 #include "HYPRE_MatvecFunctions.h"

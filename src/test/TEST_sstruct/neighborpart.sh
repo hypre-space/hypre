@@ -8,11 +8,8 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.2 $
+# $Revision: 1.3 $
 #EHEADER**********************************************************************
-
-
-
 
 
 TNAME=`basename $0 .sh`
@@ -60,6 +57,13 @@ do
    diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 done
 
+tail -3 ${TNAME}.out.60 > ${TNAME}.testdata
+for i in 61 62
+do
+   tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
+   diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+done
+
 #=============================================================================
 # compare with baseline case
 #=============================================================================
@@ -81,6 +85,9 @@ FILES="\
  ${TNAME}.out.50\
  ${TNAME}.out.51\
  ${TNAME}.out.52\
+ ${TNAME}.out.60\
+ ${TNAME}.out.61\
+ ${TNAME}.out.62\
 "
 
 for i in $FILES

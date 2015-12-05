@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.9 $
+# $Revision: 2.10 $
 #EHEADER**********************************************************************
 
 
@@ -45,7 +45,7 @@ extern "C" {
 # Structures and prototypes
 #===========================================================================
 
-cat box_map.h             >> $INTERNAL_HEADER	
+
 cat sstruct_grid.h        >> $INTERNAL_HEADER	
 cat sstruct_stencil.h     >> $INTERNAL_HEADER	
 cat sstruct_graph.h       >> $INTERNAL_HEADER	

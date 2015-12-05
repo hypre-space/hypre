@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.18 $
+ * $Revision: 2.19 $
  ***********************************************************************EHEADER*/
 
 
@@ -96,6 +96,7 @@ hypre_IJVectorInitializePar(hypre_IJVector *vector)
    int *partitioning = hypre_ParVectorPartitioning(par_vector);
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
    int my_id;
+   int print_level = hypre_IJVectorPrintLevel(vector);
    
    MPI_Comm  comm = hypre_IJVectorComm(vector);
 
@@ -103,8 +104,11 @@ hypre_IJVectorInitializePar(hypre_IJVector *vector)
   
    if (!partitioning)
    {
-      printf("No ParVector partitioning for initialization -- ");
-      printf("hypre_IJVectorInitializePar\n"); 
+      if (print_level)
+      {
+         printf("No ParVector partitioning for initialization -- ");
+         printf("hypre_IJVectorInitializePar\n"); 
+      }
       hypre_error_in_arg(1);
    }
 
@@ -168,12 +172,16 @@ hypre_IJVectorDistributePar(hypre_IJVector *vector,
 
    hypre_ParVector *old_vector = hypre_IJVectorObject(vector);
    hypre_ParVector *par_vector;
+   int print_level = hypre_IJVectorPrintLevel(vector);
    
    if (!old_vector)
    {
-      printf("old_vector == NULL -- ");
-      printf("hypre_IJVectorDistributePar\n");
-      printf("**** Vector storage is either unallocated or orphaned ****\n");
+      if (print_level)
+      {
+         printf("old_vector == NULL -- ");
+         printf("hypre_IJVectorDistributePar\n");
+         printf("**** Vector storage is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
 
@@ -182,9 +190,12 @@ hypre_IJVectorDistributePar(hypre_IJVector *vector,
                                         (int *)vec_starts);
    if (!par_vector)
    {
-      printf("par_vector == NULL -- ");
-      printf("hypre_IJVectorDistributePar\n");
-      printf("**** Vector storage is unallocated ****\n");
+      if (print_level)
+      {
+         printf("par_vector == NULL -- ");
+         printf("hypre_IJVectorDistributePar\n");
+         printf("**** Vector storage is unallocated ****\n");
+      }
       hypre_error_in_arg(1);
    }
 
@@ -213,6 +224,7 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
    MPI_Comm comm = hypre_IJVectorComm(vector);
    int *partitioning = hypre_ParVectorPartitioning(par_vector);
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
+   int print_level = hypre_IJVectorPrintLevel(vector);
 
    MPI_Comm_rank(comm, &my_id);
 
@@ -221,23 +233,32 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 
    if (!par_vector)
    {
-      printf("par_vector == NULL -- ");
-      printf("hypre_IJVectorZeroValuesPar\n");
-      printf("**** Vector storage is either unallocated or orphaned ****\n");
+      if (print_level)
+      {
+         printf("par_vector == NULL -- ");
+         printf("hypre_IJVectorZeroValuesPar\n");
+         printf("**** Vector storage is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
    if (!partitioning)
    {
-      printf("partitioning == NULL -- ");
-      printf("hypre_IJVectorZeroValuesPar\n");
-      printf("**** Vector partitioning is either unallocated or orphaned ****\n");
+      if (print_level)
+      {
+         printf("partitioning == NULL -- ");
+         printf("hypre_IJVectorZeroValuesPar\n");
+         printf("**** Vector partitioning is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
    if (!local_vector)
    {
-      printf("local_vector == NULL -- ");
-      printf("hypre_IJVectorZeroValuesPar\n");
-      printf("**** Vector local data is either unallocated or orphaned ****\n");
+      if (print_level)
+      {
+         printf("local_vector == NULL -- ");
+         printf("hypre_IJVectorZeroValuesPar\n");
+         printf("**** Vector local data is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
 
@@ -252,9 +273,12 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
 
    if (vec_start > vec_stop) 
    {
-      printf("vec_start > vec_stop -- ");
-      printf("hypre_IJVectorZeroValuesPar\n");
-      printf("**** This vector partitioning should not occur ****\n");
+      if (print_level)
+      {
+         printf("vec_start > vec_stop -- ");
+         printf("hypre_IJVectorZeroValuesPar\n");
+         printf("**** This vector partitioning should not occur ****\n");
+      }
       hypre_error_in_arg(1);
    
    }
@@ -283,6 +307,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
    int my_id;
    int i, j, vec_start, vec_stop;
    double *data;
+   int print_level = hypre_IJVectorPrintLevel(vector);
 
    int *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
@@ -300,23 +325,32 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
 
    if (!par_vector)
    {
-      printf("par_vector == NULL -- ");
-      printf("hypre_IJVectorSetValuesPar\n");
-      printf("**** Vector storage is either unallocated or orphaned ****\n");
+      if (print_level)
+      {
+         printf("par_vector == NULL -- ");
+         printf("hypre_IJVectorSetValuesPar\n");
+         printf("**** Vector storage is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
    if (!IJpartitioning)
    {
-      printf("IJpartitioning == NULL -- ");
-      printf("hypre_IJVectorSetValuesPar\n");
-      printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
+      if (print_level)
+      {
+         printf("IJpartitioning == NULL -- ");
+         printf("hypre_IJVectorSetValuesPar\n");
+         printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
    if (!local_vector)
    {
-      printf("local_vector == NULL -- ");
-      printf("hypre_IJVectorSetValuesPar\n");
-      printf("**** Vector local data is either unallocated or orphaned ****\n");
+      if (print_level)
+      {
+         printf("local_vector == NULL -- ");
+         printf("hypre_IJVectorSetValuesPar\n");
+         printf("**** Vector local data is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
 
@@ -330,9 +364,12 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
 
    if (vec_start > vec_stop) 
    {
-      printf("vec_start > vec_stop -- ");
-      printf("hypre_IJVectorSetValuesPar\n");
-      printf("**** This vector partitioning should not occur ****\n");
+      if (print_level)
+      {
+         printf("vec_start > vec_stop -- ");
+         printf("hypre_IJVectorSetValuesPar\n");
+         printf("**** This vector partitioning should not occur ****\n");
+      }
       hypre_error_in_arg(1);
    }
 
@@ -348,19 +385,34 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
    {
       int current_num_elmts
                 = hypre_AuxParVectorCurrentNumElmts(aux_vector);
-      int max_off_proc_elmts
-                = hypre_AuxParVectorMaxOffProcElmts(aux_vector);
+      /*int max_off_proc_elmts
+                = hypre_AuxParVectorMaxOffProcElmts(aux_vector);*/
       int *off_proc_i = hypre_AuxParVectorOffProcI(aux_vector);
-      double *off_proc_data = hypre_AuxParVectorOffProcData(aux_vector);
+      /*double *off_proc_data = hypre_AuxParVectorOffProcData(aux_vector);*/
+      int cancel_indx = hypre_AuxParVectorCancelIndx(aux_vector);
+      int ii;
 
       for (j = 0; j < num_values; j++)
       {
 	 i = indices[j];
 	 if (i < vec_start || i > vec_stop)
          {
+            for (ii = 0; ii < current_num_elmts; ii++)
+	    {
+	       if (i == off_proc_i[ii])
+	       {
+		  off_proc_i[ii] = -1;
+		  cancel_indx++;
+               }
+            }
+            hypre_AuxParVectorCancelIndx(aux_vector) = cancel_indx;
+         }
+	 /* if elements outside processor boundaries, search for previous
+	    occurrences  and cancel them */
+
 	 /* if elements outside processor boundaries, store in off processor
 		stash */
-	    if (!max_off_proc_elmts)
+	    /*if (!max_off_proc_elmts)
             {
                max_off_proc_elmts = 100;
                hypre_AuxParVectorMaxOffProcElmts(aux_vector) =
@@ -386,7 +438,7 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
             off_proc_i[current_num_elmts] = i;
             off_proc_data[current_num_elmts++] = values[j];
             hypre_AuxParVectorCurrentNumElmts(aux_vector)=current_num_elmts;
-         }
+         }*/
          else /* local values are inserted into the vector */
          {
             i -= vec_start;
@@ -398,8 +450,11 @@ hypre_IJVectorSetValuesPar(hypre_IJVector *vector,
    {
       if (num_values > vec_stop - vec_start + 1)
       {
-         printf("Warning! Indices beyond local range  not identified!\n ");
-         printf("Off processor values have been ignored!\n");
+         if (print_level)
+         {
+            printf("Warning! Indices beyond local range  not identified!\n ");
+            printf("Off processor values have been ignored!\n");
+         }
 	 num_values = vec_stop - vec_start +1;
       }
 
@@ -426,6 +481,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
    int my_id;
    int i, j, vec_start, vec_stop;
    double *data;
+   int print_level = hypre_IJVectorPrintLevel(vector);
 
    int *IJpartitioning = hypre_IJVectorPartitioning(vector);
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
@@ -443,23 +499,32 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
 
    if (!par_vector)
    {
-      printf("par_vector == NULL -- ");
-      printf("hypre_IJVectorAddToValuesPar\n");
-      printf("**** Vector storage is either unallocated or orphaned ****\n");
+      if (print_level)
+      {
+         printf("par_vector == NULL -- ");
+         printf("hypre_IJVectorAddToValuesPar\n");
+         printf("**** Vector storage is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
    if (!IJpartitioning)
    {
-      printf("IJpartitioning == NULL -- ");
-      printf("hypre_IJVectorAddToValuesPar\n");
-      printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
+      if (print_level)
+      {
+         printf("IJpartitioning == NULL -- ");
+         printf("hypre_IJVectorAddToValuesPar\n");
+         printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
    if (!local_vector)
    {
-      printf("local_vector == NULL -- ");
-      printf("hypre_IJVectorAddToValuesPar\n");
-      printf("**** Vector local data is either unallocated or orphaned ****\n");
+      if (print_level)
+      {
+         printf("local_vector == NULL -- ");
+         printf("hypre_IJVectorAddToValuesPar\n");
+         printf("**** Vector local data is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
 
@@ -473,9 +538,12 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
 
    if (vec_start > vec_stop) 
    {
-      printf("vec_start > vec_stop -- ");
-      printf("hypre_IJVectorAddToValuesPar\n");
-      printf("**** This vector partitioning should not occur ****\n");
+      if (print_level)
+      {
+         printf("vec_start > vec_stop -- ");
+         printf("hypre_IJVectorAddToValuesPar\n");
+         printf("**** This vector partitioning should not occur ****\n");
+      }
       hypre_error_in_arg(1);
    }
 
@@ -543,7 +611,7 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
                hypre_AuxParVectorOffProcI(aux_vector) = off_proc_i;
                hypre_AuxParVectorOffProcData(aux_vector) = off_proc_data;
             }
-            off_proc_i[current_num_elmts] = -i-1;
+            off_proc_i[current_num_elmts] = i;
             off_proc_data[current_num_elmts++] = values[j];
             hypre_AuxParVectorCurrentNumElmts(aux_vector)=current_num_elmts;
          }
@@ -558,8 +626,11 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector *vector,
    {
       if (num_values > vec_stop - vec_start + 1)
       {
-         printf("Warning! Indices beyond local range  not identified!\n ");
-         printf("Off processor values have been ignored!\n");
+         if (print_level)
+         {
+            printf("Warning! Indices beyond local range  not identified!\n ");
+            printf("Off processor values have been ignored!\n");
+         }
 	 num_values = vec_stop - vec_start +1;
       }
 
@@ -585,26 +656,36 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
    hypre_AuxParVector *aux_vector = hypre_IJVectorTranslator(vector);
    int *partitioning = hypre_ParVectorPartitioning(par_vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
+   int print_level = hypre_IJVectorPrintLevel(vector);
 
    if (!par_vector)
    {
+      if (print_level)
+      {
       printf("par_vector == NULL -- ");
       printf("hypre_IJVectorAssemblePar\n");
       printf("**** Vector storage is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    } 
    if (!IJpartitioning)
    { 
+      if (print_level)
+      {
       printf("IJpartitioning == NULL -- ");
       printf("hypre_IJVectorAssemblePar\n");
       printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
    if (!partitioning)
    { 
+      if (print_level)
+      {
       printf("partitioning == NULL -- ");
       printf("hypre_IJVectorAssemblePar\n");
       printf("**** ParVector partitioning is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
 
@@ -614,7 +695,25 @@ hypre_IJVectorAssemblePar(hypre_IJVector *vector)
       int max_off_proc_elmts;
       int *off_proc_i;
       double *off_proc_data;
+      int cancel_indx = hypre_AuxParVectorCancelIndx(aux_vector);
+      int current_i, ii;
       current_num_elmts = hypre_AuxParVectorCurrentNumElmts(aux_vector);
+      if (cancel_indx)
+      {
+         off_proc_i=hypre_AuxParVectorOffProcI(aux_vector);
+         off_proc_data=hypre_AuxParVectorOffProcData(aux_vector);
+         current_i = 0;
+	 for (ii=0; ii < current_num_elmts; ii++) 
+         {
+            if (off_proc_i[ii] != -1)
+	    {
+	       off_proc_i[current_i] = off_proc_i[ii];
+	       off_proc_data[current_i++] = off_proc_data[ii];
+	    }
+         }
+          hypre_AuxParVectorCurrentNumElmts(aux_vector) = current_i;
+          current_num_elmts = current_i;
+      }
       MPI_Allreduce(&current_num_elmts,&off_proc_elmts,1,MPI_INT, MPI_SUM,comm);
       if (off_proc_elmts)
       {
@@ -655,6 +754,7 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
    hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
+   int print_level = hypre_IJVectorPrintLevel(vector);
 
 /* If no components are to be retrieved, perform no checking and return */
    if (num_values < 1) return 0;
@@ -666,23 +766,32 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
 
    if (!par_vector)
    {
+      if (print_level)
+      {
       printf("par_vector == NULL -- ");
       printf("hypre_IJVectorGetValuesPar\n");
       printf("**** Vector storage is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
    if (!IJpartitioning)
    {
+      if (print_level)
+      {
       printf("IJpartitioning == NULL -- ");
       printf("hypre_IJVectorGetValuesPar\n");
       printf("**** IJVector partitioning is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
    if (!local_vector)
    {
+      if (print_level)
+      {
       printf("local_vector == NULL -- ");
       printf("hypre_IJVectorGetValuesPar\n");
       printf("**** Vector local data is either unallocated or orphaned ****\n");
+      }
       hypre_error_in_arg(1);
    }
 
@@ -696,9 +805,12 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
 
    if (vec_start > vec_stop) 
    {
+      if (print_level)
+      {
       printf("vec_start > vec_stop -- ");
       printf("hypre_IJVectorGetValuesPar\n");
       printf("**** This vector partitioning should not occur ****\n");
+      }
       hypre_error_in_arg(1);
    }
 
@@ -718,9 +830,12 @@ hypre_IJVectorGetValuesPar(hypre_IJVector *vector,
 
    if (ierr)
    {
+      if (print_level)
+      {
       printf("indices beyond local range -- ");
       printf("hypre_IJVectorGetValuesPar\n");
       printf("**** Indices specified are unusable ****\n");
+      }
       hypre_error_in_arg(3);
    }
     
@@ -801,7 +916,6 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    for (i=0; i < current_num_elmts; i++)
    {
       row = off_proc_i[i]; 
-      if (row < 0) row = -row-1;
       proc_id = hypre_FindProc(partitioning,row,num_procs);
       proc_id_mem[i] = proc_id; 
       info[proc_id]++;
@@ -967,17 +1081,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    for (i=0; i < recv_vec_starts[num_recvs]; i++)
    {
       row = recv_i[i];
-      if (row < 0)
-      {
-         row = -row-1;
-         j = row - first_index;
-         data[j] += recv_data[i];
-      }
-      else
-      {
-         j = row - first_index;
-         data[j] = recv_data[i];
-      }
+      j = row - first_index;
+      data[j] += recv_data[i];
    }
 
    hypre_TFree(recv_vec_starts);
@@ -1068,7 +1173,6 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       for (i=0; i < current_num_elmts; i++)
       {
          row = off_proc_i[i]; 
-         if (row < 0) row = -row-1;
          row_list[i] = row;
          hypre_GetAssumedPartitionProcFromRow (row, global_num_rows, &proc_id);
          a_proc_id[i] = proc_id;
@@ -1410,18 +1514,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
-
-         if (row < 0) /* add */
-         {
-            row = -row-1;
-            k = row - first_index;
-            vector_data[k] += value;
-         }
-         else  /* set */
-         {
-            k = row - first_index;
-            vector_data[k] = value;
-         }
+         k = row - first_index;
+         vector_data[k] += value;
       }
    }
    

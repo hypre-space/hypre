@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.6 $
+ * $Revision: 1.7 $
  ***********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -1508,6 +1508,8 @@ main( int   argc,
       /* GridSetNeighborBox */
       for (box = 0; box < pdata.glue_nboxes; box++)
       {
+         printf("Error: No longer supporting SetNeighborBox\n");
+#if 0
          HYPRE_SStructGridSetNeighborBox(grid, part,
                                          pdata.glue_ilowers[box],
                                          pdata.glue_iuppers[box],
@@ -1515,6 +1517,7 @@ main( int   argc,
                                          pdata.glue_nbor_ilowers[box],
                                          pdata.glue_nbor_iuppers[box],
                                          pdata.glue_index_maps[box]);
+#endif
       }
 
       HYPRE_SStructGridSetPeriodic(grid, part, pdata.periodic);

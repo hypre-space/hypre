@@ -7,21 +7,21 @@ dnl # HYPRE is free software; you can redistribute it and/or modify it under the
 dnl # terms of the GNU Lesser General Public License (as published by the Free
 dnl # Software Foundation) version 2.1 dated February 1999.
 dnl #
-dnl # $Revision: 1.22 $
+dnl # $Revision: 1.23 $
 dnl #EHEADER**********************************************************************
 
 dnl **********************************************************************
-dnl * ACX_CHECK_MPI
+dnl * AC_HYPRE_CHECK_MPI
 dnl *
 dnl try to determine what the MPI flags should be
-dnl ACX_CHECK_MPI([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
+dnl AC_HYPRE_CHECK_MPI([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl ACTION-IF-FOUND is a list of shell commands to run 
 dnl   if an MPI library is found, and
 dnl ACTION-IF-NOT-FOUND is a list of commands to run it
 dnl   if it is not found. If ACTION-IF-FOUND is not specified,
 dnl   the default action will define HAVE_MPI.
 dnl **********************************************************************
-AC_DEFUN([ACX_CHECK_MPI],
+AC_DEFUN([AC_HYPRE_CHECK_MPI],
 [AC_PREREQ(2.57)dnl
 AC_PREREQ(2.50) dnl for AC_LANG_CASE
 
@@ -61,50 +61,17 @@ if test x = x"$MPILIBS"; then
   $2
   :
 else
-  AC_DEFINE(HAVE_MPI,1,[Found the MPI library.])
+  AC_DEFINE(HYPRE_HAVE_MPI,1,[Found the MPI library.])
   $1
   :
 fi
 ])
 
-
 dnl **********************************************************************
-dnl * HYPRE_SET_LINK_SUBDIRS
-dnl *  sets appropriate sub-directory for linking based on using debug, 
-dnl *  no-mpi or openmp when testing public alpha, beta or general releases
-dnl **********************************************************************
-AC_DEFUN([HYPRE_SET_LINK_SUBDIRS],
-[
- if test "$casc_using_debug" = "yes" && "$casc_using_mpi" = "yes"
- then
-     HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
- fi
-
- if test "$casc_using_mpi" = "no"
- then
-     HYPRE_LINKDIR="${HYPRE_LINKDIR}/serial"
-     if test "$casc_using_debug" = "yes"
-     then
-        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
-     fi
- fi
-
- if test "$casc_using_openmp" = "yes"
- then
-     HYPRE_LINKDIR="${HYPRE_LINKDIR}/threads"
-     if test "$casc_using_debug" = "yes"
-     then
-        HYPRE_LINKDIR="${HYPRE_LINKDIR}/debug"
-     fi
- fi
-])
-
-
-dnl **********************************************************************
-dnl * HYPRE_FIND_G2C
+dnl * AC_HYPRE_FIND_G2C
 dnl *  try to find libg2c.a
 dnl **********************************************************************
-AC_DEFUN([HYPRE_FIND_G2C],
+AC_DEFUN([AC_HYPRE_FIND_G2C],
 [
 dnl AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
@@ -113,9 +80,9 @@ dnl AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
   found_g2c=no
 
+dnl * This setting of LDFLAGS is not the right way to go (RDF)
   g2c_GCC_PATH="-L/usr/lib/gcc-lib/i386-redhat-linux/3.2.3"
   g2c_SEARCH_PATHS="$g2c_GCC_PATH -L/usr/lib -L/usr/local/lib -L/usr/apps/lib -L/lib"
-
   LDFLAGS="$g2c_SEARCH_PATHS $LDFLAGS"
 
   AC_CHECK_LIB(g2c, e_wsfe, [found_g2c=yes])
@@ -128,47 +95,15 @@ dnl AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
 
 ])
 
-
 dnl **********************************************************************
-dnl * HYPRE_REVERSE_FLIBS
-dnl *   reverse the order of -lpmpich and -lmpich ONLY when using insure
-dnl *   Search FLIBS to find -lpmpich, when found reverse the order with
-dnl *      mpich; ignore the -lmpich when found; save all other FLIBS
-dnl *      values
-dnl **********************************************************************
-AC_DEFUN([HYPRE_REVERSE_FLIBS],
-[
- AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
-
-  hypre_save_FLIBS="$FLIBS"
-  FLIBS=
-
-  for lib_list in $hypre_save_FLIBS; do
-     tmp_list="$lib_list"
-     if test "$lib_list" = "-lpmpich"
-     then
-        tmp_list="-lmpich"
-     fi
-
-     if test "$lib_list" = "-lmpich"
-     then
-        tmp_list="-lpmpich"
-     fi
-
-     FLIBS="$FLIBS $tmp_list"
-  done
-
-])
-
-dnl **********************************************************************
-dnl * ACX_OPTIMIZATION_FLAGS
+dnl * AC_HYPRE_OPTIMIZATION_FLAGS
 dnl *
 dnl * Set compile FLAGS for optimization
 dnl **********************************************************************
-AC_DEFUN([ACX_OPTIMIZATION_FLAGS],
+AC_DEFUN([AC_HYPRE_OPTIMIZATION_FLAGS],
 [AC_PREREQ(2.57)dnl
 
-if test "x${casc_user_chose_cflags}" = "xno"
+if test "x${hypre_user_chose_cflags}" = "xno"
 then
    case "${CC}" in
       gcc|mpicc)
@@ -176,13 +111,13 @@ then
         ;;
       icc)
         CFLAGS="-O3"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
         fi
         ;;
       pgcc|mpipgcc)
         CFLAGS="-fast"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -mp"
         fi
         ;;
@@ -196,7 +131,7 @@ then
             ;;
           alpha*-dec-osf5.*)
             CFLAGS="-fast"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -omp"
             fi
             ;;
@@ -205,7 +140,7 @@ then
             ;;
           mips-sgi-irix6.[[4-9]]*)
             CFLAGS="-Ofast -64 -OPT:Olimit=0"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -mp"
             fi
             ;;
@@ -217,13 +152,13 @@ then
             ;;
           powerpc-ibm-aix*)
             CFLAGS="-O3 -qstrict"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -qsmp=omp"
             fi
             ;;
           *)
             CFLAGS="-O"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
                CFLAGS="$CFLAGS -openmp"
             fi
             ;;
@@ -235,7 +170,7 @@ then
    esac
 fi
 
-if test "x${casc_user_chose_cxxflags}" = "xno"
+if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
       gCC|mpiCC)
@@ -243,13 +178,13 @@ then
         ;;
       icpc|icc)
         CXXFLAGS="-O3"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
         fi
         ;;
       pgCC|mpipgCC)
         CXXFLAGS="-fast"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
@@ -263,7 +198,7 @@ then
             ;;
           alpha*-dec-osf5.*)
             CXXFLAGS="-fast"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -omp"
             fi
             ;;
@@ -272,7 +207,7 @@ then
             ;;
           mips-sgi-irix6.[[4-9]]*)
             CXXFLAGS="-Ofast -64 -OPT:Olimit=0"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -mp"
             fi
             ;;
@@ -284,13 +219,13 @@ then
             ;;
           powerpc-ibm-aix*)
             CXXFLAGS="-O3 -qstrict"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -qsmp=omp"
             fi
             ;;
           *)
             CXXFLAGS="-O"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
                CXXFLAGS="$CXXFLAGS -openmp"
             fi
             ;;
@@ -302,7 +237,7 @@ then
    esac
 fi
 
-if test "x${casc_user_chose_fflags}" = "xno"
+if test "x${hypre_user_chose_fflags}" = "xno"
 then
    case "${F77}" in
       g77)
@@ -310,13 +245,13 @@ then
         ;;
       ifort)
         FFLAGS="-O3"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
         fi
         ;;
       pgf77|mpipgf77)
         FFLAGS="-fast"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
@@ -330,13 +265,13 @@ then
             ;;
           alpha*-dec-osf5.*)
             FFLAGS="-fast"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -omp"
             fi
             ;;
           mips-sgi-irix6.[[4-9]]*)
             FFLAGS="-Ofast -64  -OPT:Olimit=0"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -mp"
             fi
             ;;
@@ -348,7 +283,7 @@ then
             ;;
           powerpc-ibm-aix*)
             FFLAGS="-O3 -qstrict"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -qsmp=omp"
             fi
             ;;
@@ -357,7 +292,7 @@ then
             ;;
           *)
             FFLAGS="-O"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
                FFLAGS="$FFLAGS -openmp"
             fi
             ;;
@@ -370,14 +305,14 @@ then
 fi])
 
 dnl **********************************************************************
-dnl * ACX_DEBUG_FLAGS
+dnl * AC_HYPRE_DEBUG_FLAGS
 dnl *
 dnl * Set compile FLAGS for debug
 dnl **********************************************************************
-AC_DEFUN([ACX_DEBUG_FLAGS],
+AC_DEFUN([AC_HYPRE_DEBUG_FLAGS],
 [AC_PREREQ(2.57)dnl
 
-if test "x${casc_user_chose_cflags}" = "xno"
+if test "x${hypre_user_chose_cflags}" = "xno"
 then
    case "${CC}" in
       gcc|mpicc)
@@ -388,13 +323,13 @@ then
         ;;
       icc)
         CFLAGS="-g"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
         fi
         ;;
       pgcc|mpipgcc)
         CFLAGS="-g"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -mp"
         fi
         ;;
@@ -405,7 +340,7 @@ then
             ;;
           alpha*-dec-osf5.*)
             CFLAGS="-g"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -omp"
             fi
             ;;
@@ -414,7 +349,7 @@ then
             ;;
           mips-sgi-irix6.[[4-9]]*)
             CFLAGS="-g -64 -OPT:Olimit=0"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -mp"
             fi
             ;;
@@ -426,13 +361,13 @@ then
             ;;
           powerpc-ibm-aix*)
             CFLAGS="-g -qstrict"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CFLAGS="$CFLAGS -qsmp=omp"
             fi
             ;;
           *)
             CFLAGS="-g"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
                CFLAGS="$CFLAGS -openmp"
             fi
             ;;
@@ -444,7 +379,7 @@ then
    esac
 fi
 
-if test "x${casc_user_chose_cxxflags}" = "xno"
+if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
       g++|mpig++)
@@ -455,13 +390,13 @@ then
         ;;
       icpc|icc)
         CXXFLAGS="-g"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
         fi
         ;;
       pgCC|mpipgCC)
         CXXFLAGS="-g"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
@@ -472,7 +407,7 @@ then
             ;;
           alpha*-dec-osf5.*)
             CXXFLAGS="-g"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -omp"
             fi
             ;;
@@ -481,7 +416,7 @@ then
             ;;
           mips-sgi-irix6.[[4-9]]*)
             CXXFLAGS="-g -64 -OPT:Olimit=0"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -mp"
             fi
             ;;
@@ -493,13 +428,13 @@ then
             ;;
           powerpc-ibm-aix*)
             CXXFLAGS="-g -qstrict"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               CXXFLAGS="$CXXFLAGS -qsmp=omp"
             fi
             ;;
           *)
             CXXFLAGS="-g"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
                CXXFLAGS="$CXXFLAGS -openmp"
             fi
             ;;
@@ -511,7 +446,7 @@ then
    esac
 fi
 
-if test "x${casc_user_chose_fflags}" = "xno"
+if test "x${hypre_user_chose_fflags}" = "xno"
 then
    case "${F77}" in
       g77|mpig77)
@@ -522,13 +457,13 @@ then
         ;;
       ifort)
         FFLAGS="-g"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
         fi
         ;;
       pgf77|mpipgf77)
         FFLAGS="-g"
-        if test "$casc_using_openmp" = "yes" ; then
+        if test "$hypre_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -mp"
         fi
         ;;
@@ -539,13 +474,13 @@ then
             ;;
           alpha*-dec-osf5.*)
             FFLAGS="-g"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -omp"
             fi
             ;;
           mips-sgi-irix6.[[4-9]]*)
             FFLAGS="-g -64 -OPT:Olimit=0"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -mp"
             fi
             ;;
@@ -557,7 +492,7 @@ then
             ;;
           powerpc-ibm-aix*)
             FFLAGS="-g -qstrict"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
               FFLAGS="$FFLAGS -qsmp=omp"
             fi
             ;;
@@ -566,7 +501,7 @@ then
             ;;
           *)
             FFLAGS="-g"
-            if test "$casc_using_openmp" = "yes" ; then
+            if test "$hypre_using_openmp" = "yes" ; then
                FFLAGS="$FFLAGS -openmp"
             fi
             ;;
@@ -579,7 +514,7 @@ then
 fi]) dnl
 
 dnl **********************************************************************
-dnl * HYPRE_SET_ARCH
+dnl * AC_HYPRE_SET_ARCH
 dnl * Defines the architecture of the platform on which the code is to run.
 dnl * Cross-compiling is indicated by the host and build platforms being
 dnl * different values, which are usually user supplied on the command line.
@@ -596,14 +531,14 @@ dnl * fails, ARCH is set to the value, if any, of shell variable HOSTTYPE,
 dnl * otherwise ARCH is set to "unknown".
 dnl **********************************************************************
 
-AC_DEFUN([HYPRE_SET_ARCH],
+AC_DEFUN([AC_HYPRE_SET_ARCH],
 [
    if test $host_alias = $build_alias
    then
 
       AC_MSG_CHECKING(the hostname)
-      casc_hostname=hostname
-      HOSTNAME="`$casc_hostname`"
+      hypre_hostname=hostname
+      HOSTNAME="`$hypre_hostname`"
 
       dnl * if $HOSTNAME is still empty, give it the value "unknown".
       if test -z "$HOSTNAME" 
@@ -622,23 +557,23 @@ AC_DEFUN([HYPRE_SET_ARCH],
 
          dnl * search for the tool "tarch".  It should be in the same
          dnl * directory as configure.in, but a couple of other places will
-         dnl * be checked.  casc_tarch stores a relative path for "tarch".
-         casc_tarch_dir=
-         for casc_dir in $srcdir $srcdir/.. $srcdir/../.. $srcdir/config; do
-            if test -f $casc_dir/tarch; then
-               casc_tarch_dir=$casc_dir
-               casc_tarch=$casc_tarch_dir/tarch
+         dnl * be checked.  hypre_tarch stores a relative path for "tarch".
+         hypre_tarch_dir=
+         for hypre_dir in $srcdir $srcdir/.. $srcdir/../.. $srcdir/config; do
+            if test -f $hypre_dir/tarch; then
+               hypre_tarch_dir=$hypre_dir
+               hypre_tarch=$hypre_tarch_dir/tarch
                break
             fi
          done
 
          dnl * if tarch was not found or doesn't work, try using env variable
          dnl * $HOSTTYPE
-         if test -z "$casc_tarch_dir"; then
+         if test -z "$hypre_tarch_dir"; then
             AC_MSG_WARN(cannot find tarch, using \$HOSTTYPE as the architecture)
             HYPRE_ARCH=$HOSTTYPE
          else
-            HYPRE_ARCH="`$casc_tarch`"
+            HYPRE_ARCH="`$hypre_tarch`"
 
             if test -z "$HYPRE_ARCH" || test "$HYPRE_ARCH" = "unknown"; then
                HYPRE_ARCH=$HOSTTYPE

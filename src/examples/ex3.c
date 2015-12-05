@@ -10,15 +10,16 @@
    To see options: ex3 -help
 
    Description:    This code solves a system corresponding to a discretization
-                   of the Laplace equation with zero boundary conditions on the
-                   unit square. The domain is split into an N x N processor grid.
-                   Thus, the given number of processors should be a perfect square.
-                   Each processor's piece of the grid has n x n cells with n x n
-                   nodes connected by the standard 5-point stencil. Note that the
-                   struct interface assumes a cell-centered grid, and, therefore,
-                   the nodes are not shared.  This example demonstrates more
-                   features than the previous two struct examples (Example 1 and
-                   Example 2).  Two solvers are available.
+                   of the Laplace equation -Delta u = 1 with zero boundary
+                   conditions on the unit square.  The domain is split into
+                   an N x N processor grid.  Thus, the given number of processors
+                   should be a perfect square.  Each processor's piece of the
+                   grid has n x n cells with n x n nodes connected by the
+                   standard 5-point stencil. Note that the struct interface
+                   assumes a cell-centered grid, and, therefore, the nodes are
+                   not shared.  This example demonstrates more features than the
+                   previous two struct examples (Example 1 and Example 2).  Two
+                   solvers are available.
 
                    To incorporate the boundary conditions, we do the following:
                    Let x_i and x_b be the interior and boundary parts of the

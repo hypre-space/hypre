@@ -24,6 +24,11 @@
 #include "HYPRE.h"
 #include "HYPRE_parcsr_ls.h"
 
+
+int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations, 
+                                      double rel_residual_norm);
+
+
 int main (int argc, char *argv[])
 {
    int i;
@@ -110,6 +115,7 @@ int main (int argc, char *argv[])
          printf("                        1  - AMG-PCG\n");
          printf("                        8  - ParaSails-PCG\n");
          printf("                        50 - PCG\n");
+         printf("                        61 - AMG-FlexGMRES\n");
          printf("  -print_solution     : print the solution vector\n");
          printf("  -print_system       : print the matrix and rhs\n");
          printf("\n");
@@ -466,6 +472,68 @@ int main (int argc, char *argv[])
       HYPRE_ParCSRPCGDestroy(solver);
       HYPRE_ParaSailsDestroy(precond);
    }
+   /* Flexible GMRES with  AMG Preconditioner */
+   else if (solver_id == 61)
+   {
+      int    num_iterations;
+      double final_res_norm;
+      int    restart = 30;
+      int    modify = 1;
+      
+
+      /* Create solver */
+      HYPRE_ParCSRFlexGMRESCreate(MPI_COMM_WORLD, &solver);
+
+      /* Set some parameters (See Reference Manual for more parameters) */
+      HYPRE_FlexGMRESSetKDim(solver, restart);
+      HYPRE_FlexGMRESSetMaxIter(solver, 1000); /* max iterations */
+      HYPRE_FlexGMRESSetTol(solver, 1e-7); /* conv. tolerance */
+      HYPRE_FlexGMRESSetPrintLevel(solver, 2); /* print solve info */
+      HYPRE_FlexGMRESSetLogging(solver, 1); /* needed to get run info later */
+
+
+      /* Now set up the AMG preconditioner and specify any parameters */
+      HYPRE_BoomerAMGCreate(&precond);
+      HYPRE_BoomerAMGSetPrintLevel(precond, 1); /* print amg solution info */
+      HYPRE_BoomerAMGSetCoarsenType(precond, 6);
+      HYPRE_BoomerAMGSetRelaxType(precond, 6); /* Sym G.S./Jacobi hybrid */ 
+      HYPRE_BoomerAMGSetNumSweeps(precond, 1);
+      HYPRE_BoomerAMGSetTol(precond, 0.0); /* conv. tolerance zero */
+      HYPRE_BoomerAMGSetMaxIter(precond, 1); /* do only one iteration! */
+
+      /* Set the FlexGMRES preconditioner */
+      HYPRE_FlexGMRESSetPrecond(solver, (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
+                          (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup, precond);
+
+
+      if (modify)
+      /* this is an optional call  - if you don't call it, hypre_FlexGMRESModifyPCDefault
+         is used - which does nothing.  Otherwise, you can define your own, similar to
+         the one used here */
+         HYPRE_FlexGMRESSetModifyPC( solver, 
+                                     (HYPRE_PtrToModifyPCFcn) hypre_FlexGMRESModifyPCAMGExample);
+
+
+      /* Now setup and solve! */
+      HYPRE_ParCSRFlexGMRESSetup(solver, parcsr_A, par_b, par_x);
+      HYPRE_ParCSRFlexGMRESSolve(solver, parcsr_A, par_b, par_x);
+
+      /* Run info - needed logging turned on */
+      HYPRE_FlexGMRESGetNumIterations(solver, &num_iterations);
+      HYPRE_FlexGMRESGetFinalRelativeResidualNorm(solver, &final_res_norm);
+      if (myid == 0)
+      {
+         printf("\n");
+         printf("Iterations = %d\n", num_iterations);
+         printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         printf("\n");
+      }
+
+      /* Destory solver and preconditioner */
+      HYPRE_ParCSRFlexGMRESDestroy(solver);
+      HYPRE_BoomerAMGDestroy(precond);
+      
+   }
    else
    {
       if (myid ==0) printf("Invalid solver id specified.\n");
@@ -485,3 +553,31 @@ int main (int argc, char *argv[])
 
    return(0);
 }
+
+/*--------------------------------------------------------------------------
+   hypre_FlexGMRESModifyPCAMGExample - 
+
+    This is an example (not recommended) 
+   of how we can modify things about AMG that
+   affect the solve phase based on how FlexGMRES is doing...For
+   another preconditioner it may make sense to modify the tolerance..
+
+ *--------------------------------------------------------------------------*/
+ 
+int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations, 
+                                   double rel_residual_norm)
+{
+
+
+   if (rel_residual_norm > .1)
+   {
+      HYPRE_BoomerAMGSetNumSweeps(precond_data, 10);
+   }
+   else
+   {
+      HYPRE_BoomerAMGSetNumSweeps(precond_data, 1);
+   }
+   
+   
+   return 0;
+} 

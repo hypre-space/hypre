@@ -7,14 +7,8 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.17 $
+# $Revision: 2.21 $
 #EHEADER**********************************************************************
-
-
-
-
-
-
 
 
 include ../config/Makefile.config
@@ -59,28 +53,29 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
+SONAME = libHYPRE_krylov-${HYPRE_RELEASE_VERSION}.so
+
 ##################################################################
 # Targets
 ##################################################################
 
 all: libHYPRE_krylov${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
-	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/krylov.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/lobpcg.h $(HYPRE_BUILD_DIR)/include
+#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: all
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
-	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/krylov.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/lobpcg.h $(HYPRE_INC_INSTALL)
+#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
-
 
 ##################################################################
 # Rules
@@ -93,6 +88,7 @@ libHYPRE_krylov.a: ${OBJS}
 
 libHYPRE_krylov.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o $@ ${OBJS}
+	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

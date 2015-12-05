@@ -3,17 +3,6 @@
 
 <blockquote>
 
-<a href="ex5b77.f.html"><h2>Example 5 (Babel-based Fortran version)</h2></a>
-<p>
-This example solves the 2-D
-Laplacian problem with zero boundary conditions
-on an nxn grid.  The number of unknowns is N=n^2.
-The standard 5-point stencil is used, and we solve
-for the interior nodes only.
-<p>
-This example solves the same problem as Example 3.
-Available solvers are AMG, PCG, and PCG with AMG or
-Parasails preconditioners.
 <a href="ex5f.f.html"><h2>Example 5 (Fortran version)</h2></a>
 <p>
 This example solves the 2-D
@@ -25,6 +14,51 @@ for the interior nodes only.
 This example solves the same problem as Example 3.
 Available solvers are AMG, PCG, and PCG with AMG or
 Parasails preconditioners.
+<a href="ex5b77.f.html"><h2>Example 5 (Babel-based Fortran version)</h2></a>
+<p>
+This example solves the 2-D
+Laplacian problem with zero boundary conditions
+on an nxn grid.  The number of unknowns is N=n^2.
+The standard 5-point stencil is used, and we solve
+for the interior nodes only.
+<p>
+This example solves the same problem as Example 3.
+Available solvers are AMG, PCG, and PCG with AMG or
+Parasails preconditioners.
+<a href="ex5b90.f90.html"><h2>Example 5 (Babel-based Fortran 90 version)</h2></a>
+<p>
+This example solves the 2-D
+Laplacian problem with zero boundary conditions
+on an nxn grid.  The number of unknowns is N=n^2.
+The standard 5-point stencil is used, and we solve
+for the interior nodes only.
+<p>
+This example solves the same problem as Example 3.
+Available solvers are AMG, PCG, and PCG with AMG or
+Parasails preconditioners.
+<a href="ex6b77.f.html"><h2>Example 6 (Babel-based Fortran version)</h2></a>
+<p>
+This is a two processor example and is the same problem
+as is solved with the structured interface in Example 2. 
+(The grid boxes are exactly those in the example
+diagram in the struct interface chapter of the User's Manual.
+Processor 0 owns two boxes and processor 1 owns one box.)
+This is the simplest sstruct example.  There is one part and 
+one variable.  The solver is PCG with SMG preconditioner. We use a 
+structured solver for this example.
+<p>
+We recommend comparing this example with Example 2.
+<a href="ex12f.f.html"><h2>Example 12 (Fortran version)</h2></a>
+<p>
+The grid layout is the same as ex1, but with nodal unknowns. The solver is PCG
+preconditioned with either PFMG or BoomerAMG, set in the code.
+<p>
+We recommend viewing the Struct examples before viewing this and the other
+SStruct examples.  This is one of the simplest SStruct examples, used primarily
+to demonstrate how to set up non-cell-centered problems, and to demonstrate how
+easy it is to switch between structured solvers (PFMG) and solvers designed for
+more general settings (AMG).
+
 </blockquote>
 
 <center>

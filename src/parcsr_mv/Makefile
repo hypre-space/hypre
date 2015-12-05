@@ -7,20 +7,14 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.18 $
+# $Revision: 2.22 $
 #EHEADER**********************************************************************
-
-
-
-
-
-
 
 
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
- 
+
 C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)\
@@ -28,7 +22,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../seq_mv\
  ${CINCLUDES}
- 
+
 HEADERS =\
  headers.h\
  HYPRE_parcsr_mv.h\
@@ -63,7 +57,7 @@ FILES =\
  par_make_system.c
 
 EXTRA_FILES =\
- parchord_to_parcsr.c\
+ parchord_to_parcsr.c
 
 DRIVER_FILES =\
  driver_aat.c\
@@ -78,23 +72,25 @@ DRIVER_FILES =\
 OBJS = ${FILES:.c=.o}
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
+SONAME = libHYPRE_parcsr_mv-${HYPRE_RELEASE_VERSION}.so
+
 ##################################################################
 # Targets
 ##################################################################
 
 all: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_BUILD_DIR)/include
-	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
- 
+	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_BUILD_DIR)/include
+#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
+
 driver: driver.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX} 
 	@echo  "Linking" $@ "... "
 	${CC} -o driver driver.o ${LFLAGS} 
- 
+
 driver_matvec: driver_matvec.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matvec driver_matvec.o ${LFLAGS} 
- 
+
 driver_matmul: driver_matmul.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	@echo  "Linking" $@ "... "
 	${CC} -o driver_matmul driver_matmul.o ${LFLAGS} 
@@ -112,10 +108,10 @@ driver_boolaat: driver_boolaat.o libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
 	${CC} -o driver_boolaat driver_boolaat.o ${LFLAGS} 
 
 install: libHYPRE_parcsr_mv${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_INC_INSTALL)
-	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
- 
+	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/_hypre_parcsr_mv.h $(HYPRE_INC_INSTALL)
+#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
+
 clean:
 	rm -f *.o libHYPRE*
 	rm -f driver driver_matvec driver_matmul
@@ -134,7 +130,8 @@ libHYPRE_parcsr_mv.a: ${OBJS}
 
 libHYPRE_parcsr_mv.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o $@ ${OBJS}
+	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}
 

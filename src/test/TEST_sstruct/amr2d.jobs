@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.7 $
+# $Revision: 1.8 $
 #EHEADER**********************************************************************
 
 
@@ -36,3 +36,5 @@ mpirun -np 1 ./sstruct -in sstruct.in.amr.2Dc -solver 20 -r 2 1 1 \
  > amr2d.out.6
 mpirun -np 2 ./sstruct -in sstruct.in.amr.2Dc -solver 20 -P 2 1 1 \
  > amr2d.out.7
+mpirun -np 6 ./sstruct -in sstruct.in.amr.2De -solver 18 -P 6 1 1 \
+ > amr2d.out.8

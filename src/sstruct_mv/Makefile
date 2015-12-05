@@ -7,14 +7,8 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.14 $
+# $Revision: 2.18 $
 #EHEADER**********************************************************************
-
-
-
-
-
-
 
 
 include ../config/Makefile.config
@@ -35,7 +29,6 @@ C_COMPILE_FLAGS = \
 HEADERS =\
  HYPRE_sstruct_mv.h\
  _hypre_sstruct_mv.h\
- box_map.h\
  headers.h\
  sstruct_graph.h\
  sstruct_grid.h\
@@ -44,7 +37,6 @@ HEADERS =\
  sstruct_vector.h
 
 FILES =\
- box_map.c\
  F90_HYPRE_sstruct_graph.c\
  F90_HYPRE_sstruct_grid.c\
  F90_HYPRE_sstruct_matrix.c\
@@ -69,19 +61,21 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
+SONAME = libHYPRE_sstruct_mv-${HYPRE_RELEASE_VERSION}.so
+
 ##################################################################
 # Targets
 ##################################################################
 
 all: libHYPRE_sstruct_mv${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/_hypre_sstruct_mv.h $(HYPRE_BUILD_DIR)/include
-	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/_hypre_sstruct_mv.h $(HYPRE_BUILD_DIR)/include
+#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_sstruct_mv${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/_hypre_sstruct_mv.h $(HYPRE_INC_INSTALL)
-	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fpPR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/_hypre_sstruct_mv.h $(HYPRE_INC_INSTALL)
+#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*
@@ -100,6 +94,7 @@ libHYPRE_sstruct_mv.a: ${OBJS}
 
 libHYPRE_sstruct_mv.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED} -o $@ ${OBJS}
+	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

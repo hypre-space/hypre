@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.10 $
+ * $Revision: 1.12 $
  ***********************************************************************EHEADER*/
 
 /*
@@ -21,6 +21,7 @@
 
 /* hypre/AMS prototypes */
 #include "_hypre_parcsr_ls.h"
+#include "HYPRE.h"
 
 void CheckIfFileExists(char *file)
 {
@@ -45,6 +46,9 @@ int main (int argc, char *argv[])
    int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_agg_npaths, amg_interp_type, amg_Pmax;
    int h1_method, singular_problem, coordinates;
    double tol, theta;
+   double rtol;
+   int rr;
+   int zero_cond;
    int blockSize;
    HYPRE_Solver solver, precond;
 
@@ -52,6 +56,8 @@ int main (int argc, char *argv[])
    HYPRE_ParVector x0, b;
    HYPRE_ParVector Gx=0, Gy=0, Gz=0;
    HYPRE_ParVector x=0, y=0, z=0;
+
+   HYPRE_ParVector interior_nodes;
 
    /* Initialize MPI */
    MPI_Init(&argc, &argv);
@@ -77,6 +83,9 @@ int main (int argc, char *argv[])
    /* amg_interp_type = 0; amg_Pmax = 0; amg_agg_npaths = 1; */  /* standard interpolation */
    theta = 0.25;
    blockSize = 5;
+   rtol = 0;
+   rr = 0;
+   zero_cond = 0;
 
    /* Parse command line */
    {
@@ -185,6 +194,21 @@ int main (int argc, char *argv[])
             arg_index++;
             blockSize = atoi(argv[arg_index++]);
          }
+         else if ( strcmp(argv[arg_index], "-rtol") == 0 )
+         {
+            arg_index++;
+            rtol = atof(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-rr") == 0 )
+         {
+            arg_index++;
+            rr = atoi(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-zc") == 0 )
+         {
+            arg_index++;
+            zero_cond = 1;
+         }
          else if ( strcmp(argv[arg_index], "-help") == 0 )
          {
             print_usage = 1;
@@ -286,6 +310,12 @@ int main (int argc, char *argv[])
       HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.Aalpha", &Aalpha);
       CheckIfFileExists("aFEM.Abeta.D.0");
       HYPRE_ParCSRMatrixRead(MPI_COMM_WORLD, "aFEM.Abeta", &Abeta);
+   }
+
+   if (zero_cond)
+   {
+      CheckIfFileExists("aFEM.inodes.0");
+      HYPRE_ParVectorRead(MPI_COMM_WORLD, "aFEM.inodes", &interior_nodes);
    }
 
    if (!myid)
@@ -475,6 +505,14 @@ int main (int argc, char *argv[])
          HYPRE_AMSSetCycleType(precond, cycle_type);
          HYPRE_AMSSetPrintLevel(precond, 0);
          HYPRE_AMSSetDiscreteGradient(precond, G);
+
+         if (zero_cond)
+         {
+            HYPRE_AMSSetInteriorNodes(precond, interior_nodes);
+            HYPRE_AMSSetProjectionFrequency(precond, 5);
+         }
+         HYPRE_PCGSetResidualTol(solver,rtol);
+         HYPRE_PCGSetRecomputeResidualP(solver, rr);
 
          /* Vectors Gx, Gy and Gz */
          if (!coordinates)
@@ -667,6 +705,9 @@ int main (int argc, char *argv[])
 
    if (Aalpha) HYPRE_ParCSRMatrixDestroy(Aalpha);
    if (Abeta)  HYPRE_ParCSRMatrixDestroy(Abeta);
+
+   if (zero_cond)
+      HYPRE_ParVectorDestroy(interior_nodes);
 
    MPI_Finalize();
 

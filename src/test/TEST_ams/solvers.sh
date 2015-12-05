@@ -8,7 +8,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.14 $
+# $Revision: 1.15 $
 #EHEADER**********************************************************************
 
 
@@ -49,6 +49,7 @@ FILES="\
  ${TNAME}.out.5\
  ${TNAME}.out.6\
  ${TNAME}.out.7\
+ ${TNAME}.out.12\
 "
 for i in $FILES
 do

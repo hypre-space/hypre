@@ -7,14 +7,8 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.7 $
+# $Revision: 1.8 $
 #EHEADER**********************************************************************
-
-
-
-
-
-
 
 
 include ../config/Makefile.config

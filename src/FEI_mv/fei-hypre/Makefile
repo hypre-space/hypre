@@ -7,15 +7,9 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.21 $
+# $Revision: 2.26 $
 #EHEADER**********************************************************************
 
-
-
-
-
-# why do we create this variable, asked by Charles
-HYPRE_LIB_SUFFIX = .a
 
 include ../../config/Makefile.config
 
@@ -158,39 +152,41 @@ OBJSC = ${FILESC:.c=.o}
 OBJSCXX = ${FILESCXX:.cxx=.o}
 OBJS = ${OBJSC} ${OBJSCXX}
 
+SONAME = libHYPRE_FEI-${HYPRE_RELEASE_VERSION}.so
+
 ##################################################################
 # Targets
 ##################################################################
 
 all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(BASE_DIR)/base/Data.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(BASE_DIR)/base/Lookup.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
-	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+	cp -fpPR $(srcdir)/cfei-hypre.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/cfei_hypre.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/HYPRE_FEI*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/LLNL_FEI*.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(BASE_DIR)/base/Data.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(BASE_DIR)/base/Lookup.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(BASE_DIR)/fei_defs.h $(HYPRE_BUILD_DIR)/include
+#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
-	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
-	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_INC_INSTALL)
-	cp -fp $(BASE_DIR)/base/Data.h $(HYPRE_INC_INSTALL)
-	cp -fp $(BASE_DIR)/base/Lookup.h $(HYPRE_INC_INSTALL)
-	cp -fp $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_INC_INSTALL)
-	cp -fp $(BASE_DIR)/fei_defs.h $(HYPRE_INC_INSTALL)
-	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
+	cp -fpPR $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/cfei_hypre.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
+	cp -fpPR $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/HYPRE_FEI*.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(srcdir)/LLNL_FEI*.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(BASE_DIR)/base/Data.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(BASE_DIR)/base/Lookup.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(BASE_DIR)/base/LinearSystemCore.h $(HYPRE_INC_INSTALL)
+	cp -fpPR $(BASE_DIR)/fei_defs.h $(HYPRE_INC_INSTALL)
+#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
 	@echo  ""
 
 clean:
-	rm -rf *.o libHYPRE*
+	rm -rf *.o libHYPRE* 
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -198,10 +194,16 @@ distclean: clean
 ##################################################################
 # Rules
 ##################################################################
-libHYPRE_FEI${HYPRE_LIB_SUFFIX}: ${OBJS}
+
+libHYPRE_FEI.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
-                                                                                
+
+libHYPRE_FEI.so: ${OBJS}
+	@echo  "Building $@ ... "
+	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
+	ln -s ${SONAME} $@
+
 ${OBJS}: ${HEADERS}
 

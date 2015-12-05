@@ -7,14 +7,8 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.12 $
+# $Revision: 2.15 $
 #EHEADER**********************************************************************
-
-
-
-
-
-
 
 
 include ../../config/Makefile.config
@@ -100,22 +94,23 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
+SONAME = libHYPRE_Euclid-${HYPRE_RELEASE_VERSION}.so
+
 ##################################################################
 # Targets
 ##################################################################
 
 all: libHYPRE_Euclid${HYPRE_LIB_SUFFIX}
-	cp -fp libHYPRE* $(HYPRE_BUILD_DIR)/lib
+#	cp -fpPR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_Euclid${HYPRE_LIB_SUFFIX}
-	cp -fp libHYPRE* $(HYPRE_LIB_INSTALL)
+#	cp -fpPR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:
 	rm -f *.o libHYPRE*
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
-
 
 ##################################################################
 # Rules
@@ -128,6 +123,7 @@ libHYPRE_Euclid.a: ${OBJS}
 
 libHYPRE_Euclid.so: ${OBJS}
 	@echo  "Building $@ ... "
-	${BUILD_CC_SHARED}  -o $@ ${OBJS}
+	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
+	ln -s ${SONAME} $@
 
 ${OBJS}: ${HEADERS}

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.9 $
+ * $Revision: 1.10 $
  ***********************************************************************EHEADER*/
 
 /*--------------------------------------------------------------------------
@@ -45,8 +45,6 @@
 #include "interpreter.h"
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"
-
-#include "HYPRE_parcsr_int.h"
 
 int
 BuildParIsoLaplacian( int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );

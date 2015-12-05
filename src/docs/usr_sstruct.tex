@@ -156,7 +156,7 @@ is similar).
     int nb2_exts[][2]   = {{1,0}, {4,0}}, nb4_exts[][2]   = {{0,1}, {0,4}};
     int nb2_n_exts[][2] = {{1,1}, {1,4}}, nb4_n_exts[][2] = {{4,1}, {4,4}};
     int nb2_map[2]      = {1,0},          nb4_map[2]      = {0,1};
-    int nb2_dir[2]      = {1,1},          nb4_dir[2]      = {1,1};
+    int nb2_dir[2]      = {1,-1},         nb4_dir[2]      = {1,1};
 
 1:  HYPRE_SStructGridCreate(MPI_COMM_WORLD, ndim, nparts, &grid);
     

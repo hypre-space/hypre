@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -59,6 +59,19 @@ typedef struct
 
    /* Representations of the constant vectors in the Nedelec basis */
    hypre_ParVector *Gx, *Gy, *Gz;
+
+   /* Nodes in the interior of the zero-conductivity region */
+   hypre_ParVector *interior_nodes;
+   /* Discrete gradient matrix for the interior nodes only */
+   hypre_ParCSRMatrix *G0;
+   /* Coarse grid matrix on the interior nodes */
+   hypre_ParCSRMatrix *A_G0;
+   /* AMG solver for A_G0 */
+   HYPRE_Solver B_G0;
+   /* How frequently to project the r.h.s. onto Ker(G0^T)? */
+   int projection_frequency;
+   /* Internal counter to use with projection_frequency in PCG */
+   int solve_counter;
 
    /* Solver options */
    int maxit;

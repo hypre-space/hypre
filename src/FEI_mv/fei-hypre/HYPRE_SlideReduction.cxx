@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.15 $
+ * $Revision: 2.16 $
  ***********************************************************************EHEADER*/
 
 
@@ -283,80 +283,133 @@ int HYPRE_SlideReduction::getPerturbationMatrix(HYPRE_ParCSRMatrix *matrix)
 int HYPRE_SlideReduction::setup(HYPRE_IJMatrix A, HYPRE_IJVector x, 
                                 HYPRE_IJVector b)
 {
-   int  mypid, ierr, maxBSize=HYPRE_SLIDEMAX, bSize=2;
+   int   mypid, nprocs, ierr, maxBSize=HYPRE_SLIDEMAX, bSize=2;
+   int   *procNRows, nrows1, nrows2, reduceAFlag;
+   HYPRE_ParCSRMatrix  A_csr;
+   HYPRE_ParVector     b_csr;
 
    //------------------------------------------------------------------
    // initial set up 
    //------------------------------------------------------------------
 
    MPI_Comm_rank( mpiComm_, &mypid );
+   MPI_Comm_size( mpiComm_, &nprocs );
    if ( mypid == 0 && (outputLevel_ & HYPRE_BITMASK2) >= 1 )
       printf("%4d : HYPRE_SlideReduction begins....\n", mypid);
 
-   Amat_ = A;
+
+   //------------------------------------------------------------------
+   // check matrix and vector compatibility
+   //------------------------------------------------------------------
+
+   reduceAFlag = 1;
+   HYPRE_IJMatrixGetObject(Amat_, (void **) &A_csr);
+   HYPRE_ParCSRMatrixGetRowPartitioning(A_csr, &procNRows);
+   nrows1 = procNRows[nprocs] - procNRows[0];
+   free(procNRows);
+   HYPRE_IJMatrixGetObject(A, (void **) &A_csr);
+   HYPRE_ParCSRMatrixGetRowPartitioning(A_csr, &procNRows);
+   nrows2 = procNRows[nprocs] - procNRows[0];
+   free(procNRows);
+   if (nrows1 != nrows2) reduceAFlag = 0;
+   if (reduceAFlag == 0)
+   {
+      HYPRE_IJVectorGetObject(b, (void **) &b_csr);
+      procNRows = hypre_ParVectorPartitioning((hypre_ParVector *) b_csr);
+      nrows2 = procNRows[nprocs] - procNRows[0];
+      if (nrows1 != nrows2)
+      {
+         if (mypid == 0)
+            printf("HYPRE_SlideReduction ERROR - A,b dim mismatch (reuse)!\n");
+         exit(1);
+      }
+   }
 
    //------------------------------------------------------------------
    // clean up first
    //------------------------------------------------------------------
 
-   if ( procNConstr_      != NULL ) delete [] procNConstr_;
-   if ( slaveEqnList_     != NULL ) delete [] slaveEqnList_;
-   if ( slaveEqnListAux_  != NULL ) delete [] slaveEqnListAux_;
-   if ( gSlaveEqnList_    != NULL ) delete [] gSlaveEqnList_;
-   if ( gSlaveEqnListAux_ != NULL ) delete [] gSlaveEqnListAux_;
-   if ( constrBlkInfo_    != NULL ) delete [] constrBlkInfo_;
-   if ( constrBlkSizes_   != NULL ) delete [] constrBlkSizes_;
-   if ( eqnStatuses_      != NULL ) delete [] eqnStatuses_;
-   if ( invA22mat_        != NULL ) HYPRE_IJMatrixDestroy(invA22mat_);
-   if ( A21mat_           != NULL ) HYPRE_IJMatrixDestroy(A21mat_);
-   if ( reducedAmat_      != NULL ) HYPRE_IJMatrixDestroy(reducedAmat_);
-   if ( reducedBvec_      != NULL ) HYPRE_IJVectorDestroy(reducedBvec_);
-   if ( reducedXvec_      != NULL ) HYPRE_IJVectorDestroy(reducedXvec_);
-   if ( reducedRvec_      != NULL ) HYPRE_IJVectorDestroy(reducedRvec_);
-   procNConstr_      = NULL;
-   slaveEqnList_     = NULL;
-   slaveEqnListAux_  = NULL;
-   gSlaveEqnList_    = NULL;
-   gSlaveEqnListAux_ = NULL;
-   eqnStatuses_      = NULL;
-   constrBlkInfo_    = NULL;
-   constrBlkSizes_   = NULL;
-   reducedAmat_      = NULL;
-   invA22mat_        = NULL;
-   A21mat_           = NULL;
-   reducedBvec_      = NULL;
-   reducedXvec_      = NULL;
-   reducedRvec_      = NULL;
+   if (reduceAFlag == 1)
+   {
+      Amat_ = A;
+      if ( procNConstr_      != NULL ) delete [] procNConstr_;
+      if ( slaveEqnList_     != NULL ) delete [] slaveEqnList_;
+      if ( slaveEqnListAux_  != NULL ) delete [] slaveEqnListAux_;
+      if ( gSlaveEqnList_    != NULL ) delete [] gSlaveEqnList_;
+      if ( gSlaveEqnListAux_ != NULL ) delete [] gSlaveEqnListAux_;
+      if ( constrBlkInfo_    != NULL ) delete [] constrBlkInfo_;
+      if ( constrBlkSizes_   != NULL ) delete [] constrBlkSizes_;
+      if ( eqnStatuses_      != NULL ) delete [] eqnStatuses_;
+      if ( invA22mat_        != NULL ) HYPRE_IJMatrixDestroy(invA22mat_);
+      if ( A21mat_           != NULL ) HYPRE_IJMatrixDestroy(A21mat_);
+      if ( reducedAmat_      != NULL ) HYPRE_IJMatrixDestroy(reducedAmat_);
+      if ( reducedBvec_      != NULL ) HYPRE_IJVectorDestroy(reducedBvec_);
+      if ( reducedXvec_      != NULL ) HYPRE_IJVectorDestroy(reducedXvec_);
+      if ( reducedRvec_      != NULL ) HYPRE_IJVectorDestroy(reducedRvec_);
+      procNConstr_      = NULL;
+      slaveEqnList_     = NULL;
+      slaveEqnListAux_  = NULL;
+      gSlaveEqnList_    = NULL;
+      gSlaveEqnListAux_ = NULL;
+      eqnStatuses_      = NULL;
+      constrBlkInfo_    = NULL;
+      constrBlkSizes_   = NULL;
+      reducedAmat_      = NULL;
+      invA22mat_        = NULL;
+      A21mat_           = NULL;
+      reducedBvec_      = NULL;
+      reducedXvec_      = NULL;
+      reducedRvec_      = NULL;
+   }
+   else
+   {
+      if ( reducedBvec_      != NULL ) HYPRE_IJVectorDestroy(reducedBvec_);
+      if ( reducedXvec_      != NULL ) HYPRE_IJVectorDestroy(reducedXvec_);
+      if ( reducedRvec_      != NULL ) HYPRE_IJVectorDestroy(reducedRvec_);
+      reducedBvec_      = NULL;
+      reducedXvec_      = NULL;
+      reducedRvec_      = NULL;
+   }
 
    //------------------------------------------------------------------
    // find the number of constraints in the local processor
    //------------------------------------------------------------------
 
-   if ( findConstraints() == 0 ) return 0;
+   if (reduceAFlag == 1)
+   {
+      if ( findConstraints() == 0 ) return 0;
+   }
 
    //------------------------------------------------------------------
    // see if we can find a set of slave nodes for the constraint eqns
    // If not, search for block size of 2 or higher.
    //------------------------------------------------------------------
 
-   if ( useSimpleScheme_ == 0 )
-   {
-      ierr = findSlaveEqns1();
-      while (ierr < 0 && bSize <= maxBSize) ierr = findSlaveEqnsBlock(bSize++);
-      if ( ierr < 0 )
+   if (reduceAFlag == 1)
+   { 
+      if ( useSimpleScheme_ == 0 )
       {
-         printf("%4d : HYPRE_SlideReduction ERROR - fail !\n", mypid);
-         exit(1);
+         ierr = findSlaveEqns1();
+         while (ierr < 0 && bSize <= maxBSize)
+            ierr = findSlaveEqnsBlock(bSize++);
+         if ( ierr < 0 )
+         {
+            printf("%4d : HYPRE_SlideReduction ERROR - fail !\n", mypid);
+            exit(1);
+         }
+         composeGlobalList();
       }
-      composeGlobalList();
    }
        
    //------------------------------------------------------------------
    // build the reduced matrix
    //------------------------------------------------------------------
 
-   if (useSimpleScheme_ == 0) buildReducedMatrix();
-   else                       buildSubMatrices();
+   if (reduceAFlag == 1)
+   {
+      if (useSimpleScheme_ == 0) buildReducedMatrix();
+      else                       buildSubMatrices();
+   }
 
    //------------------------------------------------------------------
    // build the reduced right hand side vector
@@ -369,8 +422,17 @@ int HYPRE_SlideReduction::setup(HYPRE_IJMatrix A, HYPRE_IJVector x,
    // if scale matrix is request, scale matrix and vector
    //------------------------------------------------------------------
 
-   if ( scaleMatrixFlag_ == 1 ) scaleMatrixVector();
-
+   if ( scaleMatrixFlag_ == 1 )
+   {
+      if (reduceAFlag == 1) scaleMatrixVector();
+      else
+      {
+         if (mypid == 0)
+            printf("HYPRE_SlideReduction ERROR - reuse & scale don't match!\n");
+         exit(1);
+      }
+   }
+   
    //------------------------------------------------------------------
    // clean up and return
    //------------------------------------------------------------------

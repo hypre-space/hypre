@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.3 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -21,10 +21,6 @@
 
 #include "krylov.h"
 #include "_hypre_utilities.h"
-
-
-extern int HYPRE_BoomerAMGSetNumSweeps(HYPRE_Solver  solver,
-                                          int           num_sweeps);
 
 
 
@@ -795,7 +791,7 @@ int
 hypre_FlexGMRESGetAbsoluteTol( void   *fgmres_vdata,
                    double  * a_tol      )
 {
-   hypre_GMRESData *fgmres_data = fgmres_vdata;
+   hypre_FlexGMRESData *fgmres_data = fgmres_vdata;
 
  
    *a_tol = (fgmres_data -> a_tol);
@@ -1081,41 +1077,16 @@ int hypre_FlexGMRESModifyPCDefault(void *precond_data, int iteration,
 {
 
 
-   /* Here would could check the number of its and the current residual 
-      and make some changes to the preconditioner*/
+   /* Here would could check the number of its and the current
+      residual and make some changes to the preconditioner.  There is
+      an example in ex5.c.*/
 
 
    return 0;
 } 
 
 
-/*--------------------------------------------------------------------------
- * hypre_FlexGMRESModifyPCAMGExample - an example that modifies the AMG 
- *--------------------------------------------------------------------------*/
- 
-int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations, 
-                                   double rel_residual_norm)
-{
 
-
-   /* This is an example (not recommended) 
-      of how we can modify things about AMG that
-      affect the solve phase based on how FlexGMRES is doing...For
-      another preconditioner it may make sense to modify the tolerance...*/
-
-
-   if (rel_residual_norm > .1)
-   {
-      HYPRE_BoomerAMGSetNumSweeps(precond_data, 10);
-   }
-   else
-   {
-      HYPRE_BoomerAMGSetNumSweeps(precond_data, 1);
-   }
-   
-   
-   return 0;
-} 
 
 
 

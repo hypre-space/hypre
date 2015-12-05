@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -98,10 +98,10 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    int                     part_crse= level-1;
    int                     part_fine= level;
  
-   hypre_BoxMap           *fmap;
-   hypre_BoxMapEntry     **map_entries, *map_entry;
-   int                     nmap_entries;
-   hypre_Box               map_entry_box;
+   hypre_BoxManager       *fboxman;
+   hypre_BoxManEntry     **boxman_entries, *boxman_entry;
+   int                     nboxman_entries;
+   hypre_Box               boxman_entry_box;
 
    hypre_BoxArrayArray  ***fgrid_cinterface_extents;
 
@@ -186,7 +186,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
     *
     *  Algo.: For each cbox:
     *    1) refine & stretch by a unit in each dimension.
-    *    2) boxmap_intersect with the fgrid map to get all fboxes contained
+    *    2) boxman_intersect with the fgrid boxman to get all fboxes contained
     *       or abutting this cbox.
     *    3) get the fgrid_cinterface_extents for each of these fboxes.
     *
@@ -198,7 +198,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
     fgrid_cinterface_extents= hypre_TAlloc(hypre_BoxArrayArray **, nvars);
     for (var1= 0; var1< nvars; var1++)
     {
-       fmap= hypre_SStructGridMap(grid, part_fine, var1);
+       fboxman= hypre_SStructGridBoxManager(grid, part_fine, var1);
        stencils= hypre_SStructPMatrixSStencil(A_pmatrix, var1, var1);
 
        cgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_pmatrix), var1);
@@ -218,7 +218,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                                       refine_factors, hypre_BoxIMax(&refined_box));
 
          /*------------------------------------------------------------------------
-          * Stretch the refined_box so that a BoxMapIntersect will get abutting
+          * Stretch the refined_box so that a BoxManIntersect will get abutting
           * fboxes.
           *------------------------------------------------------------------------*/
           for (i= 0; i< ndim; i++)
@@ -227,11 +227,11 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
              hypre_BoxIMax(&refined_box)[i]+= 1;
           }
 
-          hypre_BoxMapIntersect(fmap, hypre_BoxIMin(&refined_box),
-                                hypre_BoxIMax(&refined_box), &map_entries,
-                               &nmap_entries);
+          hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&refined_box),
+                                hypre_BoxIMax(&refined_box), &boxman_entries,
+                               &nboxman_entries);
 
-          fgrid_cinterface_extents[var1][ci]= hypre_BoxArrayArrayCreate(nmap_entries);
+          fgrid_cinterface_extents[var1][ci]= hypre_BoxArrayArrayCreate(nboxman_entries);
 
          /*------------------------------------------------------------------------
           * Get the  fgrid_cinterface_extents using var1-var1 stencil (only like-
@@ -239,16 +239,16 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
           *------------------------------------------------------------------------*/
           if (stencils != NULL)
           {
-             for (i= 0; i< nmap_entries; i++)
+             for (i= 0; i< nboxman_entries; i++)
              {
-                hypre_BoxMapEntryGetExtents(map_entries[i],
-                                            hypre_BoxIMin(&map_entry_box),
-                                            hypre_BoxIMax(&map_entry_box));
-                hypre_CFInterfaceExtents2(&map_entry_box, cgrid_box, stencils, refine_factors,
+                hypre_BoxManEntryGetExtents(boxman_entries[i],
+                                            hypre_BoxIMin(&boxman_entry_box),
+                                            hypre_BoxIMax(&boxman_entry_box));
+                hypre_CFInterfaceExtents2(&boxman_entry_box, cgrid_box, stencils, refine_factors,
                         hypre_BoxArrayArrayBoxArray(fgrid_cinterface_extents[var1][ci], i) );
              }
           }
-          hypre_TFree(map_entries);
+          hypre_TFree(boxman_entries);
 
        }  /* hypre_ForBoxI(ci, cgrid_boxes) */
     }     /* for (var1= 0; var1< nvars; var1++) */
@@ -359,9 +359,9 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                        index_temp[1]= node_extents[1] + loopj;
                        index_temp[2]= node_extents[2] + loopk;
 
-                       hypre_SStructGridFindMapEntry(grid, part_crse, index_temp, var1,
-                                                     &map_entry);
-                       hypre_SStructMapEntryGetGlobalRank(map_entry, index_temp, &rank,
+                       hypre_SStructGridFindBoxManEntry(grid, part_crse, index_temp, var1,
+                                                     &boxman_entry);
+                       hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index_temp, &rank,
                                                           matrix_type);
                        if (nUventries > 0)
                        {

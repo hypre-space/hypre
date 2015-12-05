@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.118 $
+ * $Revision: 2.120 $
  ***********************************************************************EHEADER*/
 
 
@@ -52,7 +52,7 @@ enum HYsolverID {HYPCG,HYLSICG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,
                  HYY12M,HYAMGE,HYHYBRID};
 enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT,HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK,HYMLI,
-                 HYUZAWA,HYMLMAXWELL,HYAMS,HYSYSPDE};
+                 HYUZAWA,HYMLMAXWELL,HYAMS,HYSYSPDE,HYDSLU};
 
 #define HYFEI_HIGHMASK      2147483647-255
 #define HYFEI_SPECIALMASK              255
@@ -375,7 +375,8 @@ class HYPRE_LinSysCore
    // 'values' list.
    // ----------------------------------------------------------------------
 
-   int formResidual(double* values, int len);
+   int    formResidual(double* values, int len);
+   double HYPRE_LSC_GetRNorm();
 
    // ----------------------------------------------------------------------
    // function for launching the linear solver
@@ -465,7 +466,7 @@ class HYPRE_LinSysCore
    void   solveUsingBoomeramg(int&);
    double solveUsingSuperLU(int&);
    double solveUsingSuperLUX(int&);
-   void   solveUsingDSuperLU(int&);
+   double solveUsingDSuperLU(int&);
    void   solveUsingY12M(int&);
    void   solveUsingAMGe(int&);
    void   buildSlideReducedSystem();
@@ -542,6 +543,7 @@ class HYPRE_LinSysCore
    int             **colIndices_;
    double          **colValues_;
    double          truncThresh_;
+   double          rnorm_;
 
    // ----------------------------------------------------------------------
    // matrix and vectors for reduction
@@ -572,6 +574,13 @@ class HYPRE_LinSysCore
    int             nStored_;
    int             *storedIndices_;
    int             *auxStoredIndices_;
+   int             mRHSFlag_;
+   int             mRHSNumGEqns_;
+   int             *mRHSGEqnIDs_;
+   int             *mRHSNEntries_;
+   int             *mRHSBCType_;
+   int             **mRHSRowInds_;
+   double          **mRHSRowVals_;
 
    // ----------------------------------------------------------------------
    // flags for matrix assembly, various reductions, and projections
@@ -589,6 +598,7 @@ class HYPRE_LinSysCore
    int             projectCurrSize_;
    double          **projectionMatrix_; 
    int             normalEqnFlag_;
+   void            *slideObj_;
 
    // ----------------------------------------------------------------------
    // variables for slide and Schur reduction

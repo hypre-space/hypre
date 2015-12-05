@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.22 $
+ * $Revision: 2.24 $
  ***********************************************************************EHEADER*/
-
-
 
 
 /******************************************************************************
@@ -288,7 +286,7 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
       grid_boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(svector));
 
       left_boxes = hypre_BoxArrayCreate(1);
-      done_boxes = hypre_BoxArrayCreate(1);
+      done_boxes = hypre_BoxArrayCreate(2);
       temp_boxes = hypre_BoxArrayCreate(0);
 
       /* done_box always points to the first box in done_boxes */

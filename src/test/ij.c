@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.26 $
+ * $Revision: 1.29 $
  ***********************************************************************EHEADER*/
 
 /*--------------------------------------------------------------------------
@@ -43,8 +43,6 @@
 #include "interpreter.h"
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"
-
-#include "HYPRE_parcsr_int.h"
 
 int
 BuildParIsoLaplacian( int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );
@@ -681,8 +679,9 @@ main( int   argc,
 	omega[i] = 1.;
    }
 
-   /* for CGNR preconditioned with Boomeramg, only relaxation scheme 7 is
-      implemented, i.e. Jacobi relaxation */
+   /* for CGNR preconditioned with Boomeramg, only relaxation scheme 0 is
+      implemented, i.e. Jacobi relaxation, and it needs to be used without
+      CF ordering */
    if (solver_id == 5) 
    {
       /* fine grid */

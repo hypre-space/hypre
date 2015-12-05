@@ -8,23 +8,8 @@ GridCreate: 3 1
 GridSetExtents: 0 (-2- -2- -2-) (8+ 8+ 8+)
 
 # GridSetVariables: part nvars vartypes[nvars]
-# CELL  = 0
 # NODE  = 1
-# XFACE = 2
-# YFACE = 3
-# ZFACE = 4
-# XEDGE = 5
-# YEDGE = 6
-# ZEDGE = 7
 GridSetVariables: 0 1 [1]
-
-# GridAddVariables: part index(ndim) vartype
-
-# GridSetNeighborBox: part      ilower(ndim)      iupper(ndim) \
-#                     nbor_part nbor_ilower(ndim) nbor_iupper(ndim) \
-#                     index_map[ndim]
-
-# GridSetPeriodic: part periodic[ndim]
 
 ###########################################################
 
@@ -45,28 +30,16 @@ StencilSetEntry: 0  6 [ 0  0  1] 0  -1.0
 # GraphSetStencil: part var stencil_num
 GraphSetStencil: 0 0 0
 
-# GraphAddEntries: \
-#   part    ilower(ndim)    iupper(ndim)    stride[ndim]    var \
-#   to_part to_ilower(ndim) to_iupper(ndim) to_stride[ndim] to_var \
-#   index_map[ndim] entry value
-
 ###########################################################
-
-# MatrixCreate:
 
 # MatrixSetValues: \
 #   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
-# NOTE THAT THESE INDICES ARE IN TERMS OF THE VARTYPE INDICES,
-# UNLIKE THE GridSetExtents INDICES
-###########################################################
 MatrixSetValues: 0 (-3- -3- -3-) (8+ 8+ -3-)  [1 1 1] 0 2 0.0
 MatrixSetValues: 0 (-3- -3-  8+) (8+ 8+  8+)  [1 1 1] 0 6 0.0
 MatrixSetValues: 0 (-3- -3- -3-) (-3- 8+ 8+)  [1 1 1] 0 0 0.0
 MatrixSetValues: 0 ( 8+ -3- -3-) ( 8+ 8+ 8+)  [1 1 1] 0 4 0.0
 MatrixSetValues: 0 (-3- -3- -3-) (8+ -3- 8+)  [1 1 1] 0 1 0.0
 MatrixSetValues: 0 (-3-  8+ -3-) (8+  8+ 8+)  [1 1 1] 0 5 0.0
-
-# VectorCreate:
 
 ###########################################################
 

@@ -7,14 +7,8 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.7 $
+# $Revision: 1.9 $
 #EHEADER**********************************************************************
-
-
-
-
-
-
 
 
 ###  Copy needed header and source files to lib sub-directory to be compiled
@@ -43,7 +37,6 @@ HEADERS = \
  ./solver/mli_solver_superlu.h\
  ./solver/mli_solver_seqsuperlu.h\
  ./solver/mli_solver_arpacksuperlu.h
-
 
 FILES =\
  ./util/mli_utils.c\
@@ -88,16 +81,15 @@ FILES =\
  ./solver/mli_solver_arpacksuperlu.cxx\
  ./vector/mli_vector.cxx
 
-
 all: 
 	@ \
 	for head in ${HEADERS}; \
 	do \
-	    (cp -fp $$head ./lib); \
+	    (cp -fpPR $$head ./lib); \
 	done;\
 	for file in ${FILES}; \
 	do \
-	    (cp -fp $$file ./lib); \
+	    (cp -fpPR $$file ./lib); \
 	done;\
 	(cd ./lib && $(MAKE) $@)
 
@@ -105,11 +97,11 @@ install:
 	@ \
 	for head in ${HEADERS}; \
 	do \
-	    (cp -fp $$head ./lib); \
+	    (cp -fpPR $$head ./lib); \
 	done;\
 	for file in ${FILES}; \
 	do \
-	    (cp -fp $$file ./lib); \
+	    (cp -fpPR $$file ./lib); \
 	done;\
 	(cd ./lib && $(MAKE) $@)
 

@@ -1,0 +1,69 @@
+#!/bin/ksh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision: 1.1 $
+#EHEADER**********************************************************************
+
+#=============================================================================
+# new_ij: Test aggressive coarsening interpolation options
+#     1: 2s-ei interpolation 1 level (Pmx = 4)
+#     2: 2s-std interpolation 1 level (Pmx = 4)
+#     3: 2s-ext interpolation 1 level (tr = 0.3)
+#     4: multipass interpolation 1 level
+#     5: 2s-ei interpolation all levels (Pmx = 4)
+#     6: 2s-std interpolation all levels (Pmx = 4)
+#     7: 2s-ext interpolation all levels (tr = 0.3 P12_tr = 0.2)
+#     8: multipass interpolation all levels
+#     9: 2s-ei interpolation all levels (Pmx = 4, P12_mx = 3)
+#     8: multipass interpolation all levels for systems problem unknown approach
+#     8: 2s-ei interpolation all levels for systems problem unknown approach
+#     8: multipass interpolation all levels for systems problem hybrid approach
+#     8: 2s-ei interpolation all levels for systems problem hybrid approach
+#=============================================================================
+
+mpirun -np 8 ./new_ij -rhsrand -n 30 29 31 -P 2 2 2 -hmis -agg_nl 1 -agg_interp 1 -agg_Pmx 4 -solver 1 -rlx 6 \
+ > agg_interp.out.1
+
+mpirun -np 8 ./new_ij -rhsrand -n 30 29 31 -P 2 2 2 -hmis -agg_nl 1 -agg_interp 2 -agg_Pmx 4 -solver 1 -rlx 6 \
+ >> agg_interp.out.2
+
+mpirun -np 8 ./new_ij -rhsrand -n 30 29 31 -P 2 2 2 -hmis -agg_nl 1 -agg_interp 3 -agg_tr 0.3 -solver 1 -rlx 6 \
+ >> agg_interp.out.3
+
+mpirun -np 8 ./new_ij -rhsrand -n 30 29 31 -P 2 2 2 -hmis -agg_nl 1 -agg_interp 4  -solver 1 -rlx 6 \
+ >> agg_interp.out.4
+
+mpirun -np 8 ./new_ij -rhsrand -n 30 29 31 -P 2 2 2 -hmis -agg_nl 10 -agg_interp 1 -agg_Pmx 4 -solver 1 -rlx 6 \
+ > agg_interp.out.5
+
+mpirun -np 8 ./new_ij -rhsrand -n 30 29 31 -P 2 2 2 -hmis -agg_nl 10 -agg_interp 2 -agg_Pmx 4 -solver 1 -rlx 6 \
+ >> agg_interp.out.6
+
+mpirun -np 8 ./new_ij -rhsrand -n 30 29 31 -P 2 2 2 -hmis -agg_nl 10 -agg_interp 3 -agg_tr 0.3 -agg_P12_tr 0.2 -solver 1 -rlx 6 \
+ >> agg_interp.out.7
+
+mpirun -np 8 ./new_ij -rhsrand -n 30 29 31 -P 2 2 2 -hmis -agg_nl 10 -agg_interp 4 -solver 1 -rlx 6 \
+ >> agg_interp.out.8
+
+mpirun -np 8 ./new_ij -rhsrand -n 30 29 31 -P 2 2 2 -hmis -agg_nl 1 -agg_interp 1 -agg_Pmx 4 -agg_P12_mx 3 -solver 1 -rlx 6 \
+ > agg_interp.out.9
+
+mpirun -np 8 ./new_ij -rhsrand -n 20 19 22 -P 2 2 2 -sysL 3 -nf 3 -hmis -agg_nl 10 -agg_interp 4 -solver 1 -rlx 6 \
+ >> agg_interp.out.10
+
+mpirun -np 8 ./new_ij -rhsrand -n 20 19 22 -P 2 2 2 -sysL 3 -nf 3 -hmis -agg_nl 10 -agg_interp 1 -agg_Pmx 4 -agg_P12_mx 4 -solver 1 -rlx 6 \
+ >> agg_interp.out.11
+
+mpirun -np 8 ./new_ij -rhsrand -n 20 19 22 -P 2 2 2 -sysL 3 -nf 3 -hmis -agg_nl 10 -agg_interp 4 -nodal 1 -solver 1 -rlx 6 \
+ >> agg_interp.out.12
+
+mpirun -np 8 ./new_ij -rhsrand -n 20 19 22 -P 2 2 2 -sysL 3 -nf 3 -hmis -agg_nl 10 -agg_interp 1 -agg_Pmx 4 -agg_P12_mx 4 -nodal 1 -solver 1 -rlx 6 \
+ >> agg_interp.out.13
+

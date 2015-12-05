@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.12 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,12 +22,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
-#if HAVE_STRING_H
-#  include <string.h>
-#endif /* HAVE_STRING_H */
-#if HAVE_STRINGS_H
-#  include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include "Common.h"
 #include "Matrix.h"
 #include "Numbering.h"
@@ -53,7 +48,7 @@ int hypre_F90_NAME_LAPACK(dgels, DGELS)(char *, int *, int *, int *, double *, i
 #endif
 
 #ifdef WIN32
-static void bzero(char *a, int n) {int i: for (i=0; i<n; i++) {a[i]=0;}}
+static void bzero(char *a, int n) {int i; for (i=0; i<n; i++) {a[i]=0;}}
 #endif
 
 

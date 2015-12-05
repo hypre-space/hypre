@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.35 $
+ * $Revision: 2.36 $
  ***********************************************************************EHEADER*/
 
 
@@ -124,6 +124,24 @@ HYPRE_BoomerAMGGetMaxLevels( HYPRE_Solver solver,
                           int        * max_levels  )
 {
    return( hypre_BoomerAMGGetMaxLevels( (void *) solver, max_levels ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetMaxCoarseSize, HYPRE_BoomerAMGGetMaxCoarseSize
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetMaxCoarseSize( HYPRE_Solver solver,
+                          int          max_coarse_size  )
+{
+   return( hypre_BoomerAMGSetMaxCoarseSize( (void *) solver, max_coarse_size ) );
+}
+
+int
+HYPRE_BoomerAMGGetMaxCoarseSize( HYPRE_Solver solver,
+                          int        * max_coarse_size  )
+{
+   return( hypre_BoomerAMGGetMaxCoarseSize( (void *) solver, max_coarse_size ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -270,6 +288,17 @@ HYPRE_BoomerAMGSetInterpType( HYPRE_Solver solver,
                            int          interp_type  )
 {
    return( hypre_BoomerAMGSetInterpType( (void *) solver, interp_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetSepWeight
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetSepWeight( HYPRE_Solver solver,
+                           int          sep_weight  )
+{
+   return( hypre_BoomerAMGSetSepWeight( (void *) solver, sep_weight ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1095,6 +1124,61 @@ HYPRE_BoomerAMGSetAggNumLevels( HYPRE_Solver  solver,
                               int          agg_num_levels  )
 {
    return( hypre_BoomerAMGSetAggNumLevels( (void *) solver, agg_num_levels ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAggInterpType
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetAggInterpType( HYPRE_Solver  solver,
+                              int          agg_interp_type  )
+{
+   return( hypre_BoomerAMGSetAggInterpType( (void *) solver, agg_interp_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAggTruncFactor
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetAggTruncFactor( HYPRE_Solver  solver,
+                              double        agg_trunc_factor  )
+{
+   return( hypre_BoomerAMGSetAggTruncFactor( (void *) solver, agg_trunc_factor ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAggP12TruncFactor
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetAggP12TruncFactor( HYPRE_Solver  solver,
+                              double        agg_P12_trunc_factor  )
+{
+   return( hypre_BoomerAMGSetAggP12TruncFactor( (void *) solver, agg_P12_trunc_factor ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAggPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetAggPMaxElmts( HYPRE_Solver  solver,
+                              int          agg_P_max_elmts  )
+{
+   return( hypre_BoomerAMGSetAggPMaxElmts( (void *) solver, agg_P_max_elmts ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAggP12MaxElmts
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_BoomerAMGSetAggP12MaxElmts( HYPRE_Solver  solver,
+                              int          agg_P12_max_elmts  )
+{
+   return( hypre_BoomerAMGSetAggP12MaxElmts( (void *) solver, agg_P12_max_elmts ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -31,7 +31,7 @@
  * Algo: For each cbox
  *       {
  *          1) refine cbox and expand by one in each direction
- *          2) boxmap_intersect with the fmap 
+ *          2) boxman_intersect with the fboxman 
  *                3) loop over intersection boxes to see if stencil
  *                   reaches over.
  *       }
@@ -43,9 +43,9 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                      int                   fine_part,
                      hypre_Index           rfactors )
 {
-   hypre_BoxMap          *fmap;
-   hypre_BoxMapEntry    **map_entries;
-   int                    nmap_entries;
+   hypre_BoxManager      *fboxman;
+   hypre_BoxManEntry    **boxman_entries;
+   int                    nboxman_entries;
 
    hypre_SStructPGrid    *p_cgrid;
 
@@ -108,12 +108,12 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
       cgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(Ac), var1);
       cgrid_boxes= hypre_StructGridBoxes(cgrid);
 
-      fmap= hypre_SStructGridMap(grid, fine_part, var1);
+      fboxman= hypre_SStructGridBoxManager(grid, fine_part, var1);
 
      /*------------------------------------------------------------------
       * For each parent coarse box find all fboxes that may be connected
       * through a stencil entry- refine this box, expand it by one
-      * in each direction, and boxmap_intersect with fmap.
+      * in each direction, and boxman_intersect with fboxman
       *------------------------------------------------------------------*/
       hypre_ForBoxI(ci, cgrid_boxes)
       {
@@ -129,9 +129,9 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
           hypre_AddIndex(hypre_BoxIMax(&scaled_box), stride,
                          hypre_BoxIMax(&scaled_box));
 
-          hypre_BoxMapIntersect(fmap, hypre_BoxIMin(&scaled_box),
-                                hypre_BoxIMax(&scaled_box), &map_entries,
-                               &nmap_entries);
+          hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&scaled_box),
+                                hypre_BoxIMax(&scaled_box), &boxman_entries,
+                               &nboxman_entries);
 
           for (var2= 0; var2< nvars; var2++)
           {
@@ -157,9 +157,9 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                    if (abs_shape)   /* non-centre stencils are zeroed */
                    {
                      /* look for connecting fboxes that must be zeroed. */
-                      for (j= 0; j< nmap_entries; j++)
+                      for (j= 0; j< nboxman_entries; j++)
                       {
-                         hypre_BoxMapEntryGetExtents(map_entries[j], ilower, iupper);
+                         hypre_BoxManEntryGetExtents(boxman_entries[j], ilower, iupper);
                          hypre_BoxSetExtents(&fgrid_box, ilower, iupper);
 
                          shift_ibox= hypre_CF_StenBox(&fgrid_box, cgrid_box, stencil_shape, 
@@ -186,13 +186,13 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
 
                          hypre_BoxDestroy(shift_ibox);
 
-                      }  /* for (j= 0; j< nmap_entries; j++) */
+                      }  /* for (j= 0; j< nboxman_entries; j++) */
                    }     /* if (abs_shape)  */
                 }        /* for (i= 0; i< stencil_size; i++) */
              }           /* if (stencils != NULL) */
           }              /* for (var2= 0; var2< nvars; var2++) */
 
-          hypre_TFree(map_entries);
+          hypre_TFree(boxman_entries);
       }   /* hypre_ForBoxI  ci */
    }      /* for (var1= 0; var1< nvars; var1++) */
 
@@ -208,7 +208,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
  *       {
  *          1) expand by one in each direction so that sibling boxes can be
  *             reached
- *          2) boxmap_intersect with the fmap to get all fboxes including
+ *          2) boxman_intersect with the fboxman to get all fboxes including
  *             itself and the siblings
  *          3) loop over intersection boxes, shift them in the stencil
  *             direction (now we are off the fbox), and subtract any sibling 
@@ -225,9 +225,9 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                      int                    fine_part)
 {
    MPI_Comm               comm=   hypre_SStructGridComm(grid); 
-   hypre_BoxMap          *fmap;
-   hypre_BoxMapEntry    **map_entries;
-   int                    nmap_entries;
+   hypre_BoxManager      *fboxman;
+   hypre_BoxManEntry    **boxman_entries;
+   int                    nboxman_entries;
 
    hypre_SStructPGrid    *p_fgrid;
    hypre_StructGrid      *fgrid;
@@ -281,7 +281,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
    {
       fgrid      = hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A), var1);
       fgrid_boxes= hypre_StructGridBoxes(fgrid);
-      fmap       = hypre_SStructGridMap(grid, fine_part, var1);
+      fboxman    = hypre_SStructGridBoxManager(grid, fine_part, var1);
 
       hypre_ForBoxI(fi, fgrid_boxes)
       {
@@ -292,15 +292,15 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
             size_ibox[i] = hypre_BoxSizeD(fgrid_box, i) - 1;
          }
 
-        /* expand fgrid_box & boxmap_intersect with fmap. */
+        /* expand fgrid_box & boxman_intersect with fboxman. */
          hypre_SubtractIndex(hypre_BoxIMin(fgrid_box), stride,
                              hypre_BoxIMin(&scaled_box));
          hypre_AddIndex(hypre_BoxIMax(fgrid_box), stride,
                         hypre_BoxIMax(&scaled_box));
 
-         hypre_BoxMapIntersect(fmap, hypre_BoxIMin(&scaled_box),
-                               hypre_BoxIMax(&scaled_box), &map_entries,
-                              &nmap_entries);
+         hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&scaled_box),
+                               hypre_BoxIMax(&scaled_box), &boxman_entries,
+                               &nboxman_entries);
          
          for (var2= 0; var2< nvars; var2++)
          {
@@ -336,8 +336,8 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
 
                       /*-----------------------------------------------------------
                        * Check to see if the stencil does not couple to a sibling
-                       * box. These boxes should be in map_entries. But do not
-                       * subtract fgrid_box itself, which is also in map_entries.
+                       * box. These boxes should be in boxman_entries. But do not
+                       * subtract fgrid_box itself, which is also in boxman_entries.
                        *-----------------------------------------------------------*/
                       hypre_AddIndex(stencil_shape, hypre_BoxIMin(&shift_ibox),
                                      hypre_BoxIMin(&shift_ibox));
@@ -347,14 +347,14 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                       intersect_boxes=  hypre_BoxArrayCreate(1);
                       hypre_CopyBox(&shift_ibox, hypre_BoxArrayBox(intersect_boxes,0));
  
-                      for (j= 0; j< nmap_entries; j++)
+                      for (j= 0; j< nboxman_entries; j++)
                       {
-                         hypre_SStructMapEntryGetProcess(map_entries[j], &proc);
-                         hypre_SStructMapEntryGetBoxnum(map_entries[j], &fj);
+                         hypre_SStructBoxManEntryGetProcess(boxman_entries[j], &proc);
+                         hypre_SStructBoxManEntryGetBoxnum(boxman_entries[j], &fj);
 
                          if ((proc != myid) || (fj != fi))
                          {
-                            hypre_BoxMapEntryGetExtents(map_entries[j], ilower, iupper);
+                            hypre_BoxManEntryGetExtents(boxman_entries[j], ilower, iupper);
                             hypre_BoxSetExtents(&scaled_box, ilower, iupper);
 
                             hypre_IntersectBoxes(&shift_ibox, &scaled_box, &intersect_box);
@@ -373,7 +373,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                                hypre_BoxArrayDestroy(tmp_box_array2);
                             }
                          }
-                      }   /* for (j= 0; j< nmap_entries; j++) */
+                      }   /* for (j= 0; j< nboxman_entries; j++) */
 
                      /*-----------------------------------------------------------
                       * intersect_boxes now has the shifted extents for the
@@ -413,7 +413,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
             }         /* if (stencils != NULL) */
          }            /* for (var2= 0; var2< nvars; var2++) */
 
-         hypre_TFree(map_entries);
+         hypre_TFree(boxman_entries);
       }  /* hypre_ForBoxI(fi, fgrid_boxes) */
    }     /* for (var1= 0; var1< nvars; var1++) */
 

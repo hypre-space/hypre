@@ -9,22 +9,7 @@ GridSetExtents: 0 (1- 1- 1-) (4+ 4+ 4+)
 
 # GridSetVariables: part nvars vartypes[nvars]
 # CELL  = 0
-# NODE  = 1
-# XFACE = 2
-# YFACE = 3
-# ZFACE = 4
-# XEDGE = 5
-# YEDGE = 6
-# ZEDGE = 7
 GridSetVariables: 0 1 [0]
-
-# GridAddVariables: part index(ndim) vartype
-
-# GridSetNeighborBox: part      ilower(ndim)      iupper(ndim) \
-#                     nbor_part nbor_ilower(ndim) nbor_iupper(ndim) \
-#                     index_map[ndim]
-
-# GridSetPeriodic: part periodic[ndim]
 
 ###########################################################
 
@@ -45,27 +30,13 @@ StencilSetEntry: 0  6 [ 0  0 -1] 0 0.0
 # GraphSetStencil: part var stencil_num
 GraphSetStencil: 0 0 0
 
-# GraphAddEntries: \
-#   part    ilower(ndim)    iupper(ndim)    stride[ndim]    var \
-#   to_part to_ilower(ndim) to_iupper(ndim) to_stride[ndim] to_var \
-#   index_map[ndim] entry value
-
 ###########################################################
-
-# MatrixCreate:
-
-# MatrixSetValues: \
-#   part ilower(ndim) iupper(ndim) stride[ndim] var entry value
 
 # MatrixAddToValues: \
 #   part ilower(ndim) iupper(ndim) var nentries entries[nentries] values[nentries]
 
 MatrixAddToValues: 0  (1- 1- 1-) (4+ 4+ 4+) 0 4 [0 1 2 3] [6.0 -1.0 -1.0 -1.0]
 MatrixAddToValues: 0  (1- 1- 1-) (4+ 4+ 4+) 0 3 [  4 5 6] [    -1.0 -1.0 -1.0]
-
-###########################################################
-
-# VectorCreate:
 
 ###########################################################
 

@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -93,6 +93,19 @@ hypre_F90_IFACE(hypre_parcsrpcgsettol, HYPRE_PARCSRPCGSETTOL)( long int *solver,
    *ierr = (int) ( HYPRE_ParCSRPCGSetTol( (HYPRE_Solver) *solver,
                                           (double)       *tol     ) );
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGSetAbsoluteTol
+ *-------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_parcsrpcgsetatol, HYPRE_PARCSRPCGSETATOL)( long int *solver,
+                                        double   *tol,
+                                        int      *ierr    )
+{
+   *ierr = (int) ( HYPRE_ParCSRPCGSetAbsoluteTol( (HYPRE_Solver) *solver,
+                                                  (double)       *tol     ) );
+}
+
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRPCGSetMaxIter

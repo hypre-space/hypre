@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 1.31 $
+ * $Revision: 1.33 $
  ***********************************************************************EHEADER*/
 
 #include <stdlib.h>
@@ -41,7 +41,6 @@
 #include "interpreter.h"
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"
-#include "HYPRE_struct_int.h"
 
 /* end lobpcg */
 
@@ -553,6 +552,12 @@ main( int   argc,
       printf("                        47 - BiCGSTAB with 2-step Jacobi\n");
       printf("                        48 - BiCGSTAB with diagonal scaling\n");
       printf("                        49 - BiCGSTAB\n");
+      printf("                        50 - LGMRES with SMG precond\n");
+      printf("                        51 - LGMRES with PFMG precond\n");
+      printf("                        59 - LGMRES\n");
+      printf("                        60 - FlexGMRES with SMG precond\n");
+      printf("                        61 - FlexGMRES with PFMG precond\n");
+      printf("                        69 - FlexGMRES\n");
       printf("  -v <n_pre> <n_post> : number of pre and post relaxations\n");
       printf("  -rap <r>            : coarse grid operator type\n");
       printf("                        0 - Galerkin (default)\n");
@@ -2289,6 +2294,7 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_StructGMRESCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, 5 );
       HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, 100 );
       HYPRE_GMRESSetTol( (HYPRE_Solver)solver, 1.0e-06 );
       HYPRE_GMRESSetRelChange( (HYPRE_Solver)solver, 0 );
@@ -2583,6 +2589,191 @@ main( int   argc,
          HYPRE_StructJacobiDestroy(precond);
       }
    }
+   /*-----------------------------------------------------------
+    * Solve the system using LGMRES
+    *-----------------------------------------------------------*/
+
+   if ((solver_id > 49) && (solver_id < 60))
+   {
+      time_index = hypre_InitializeTiming("LGMRES Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructLGMRESCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_LGMRESSetKDim( (HYPRE_Solver) solver, 5 );
+      HYPRE_LGMRESSetMaxIter( (HYPRE_Solver)solver, 100 );
+      HYPRE_LGMRESSetTol( (HYPRE_Solver)solver, 1.0e-06 );
+      HYPRE_LGMRESSetPrintLevel( (HYPRE_Solver)solver, 1 );
+      HYPRE_LGMRESSetLogging( (HYPRE_Solver)solver, 1 );
+
+      if (solver_id == 50)
+      {
+         /* use symmetric SMG as preconditioner */
+         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSMGSetMemoryUse(precond, 0);
+         HYPRE_StructSMGSetMaxIter(precond, 1);
+         HYPRE_StructSMGSetTol(precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess(precond);
+         HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
+         HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(precond, 0);
+         HYPRE_StructSMGSetLogging(precond, 0);
+         HYPRE_LGMRESSetPrecond( (HYPRE_Solver)solver,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup,
+                                 (HYPRE_Solver)precond);
+      }
+
+      else if (solver_id == 51)
+      {
+         /* use symmetric PFMG as preconditioner */
+         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructPFMGSetMaxIter(precond, 1);
+         HYPRE_StructPFMGSetTol(precond, 0.0);
+         HYPRE_StructPFMGSetZeroGuess(precond);
+         HYPRE_StructPFMGSetRAPType(precond, rap);
+         HYPRE_StructPFMGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_StructPFMGSetJacobiWeight(precond, jacobi_weight);
+         }
+         HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
+         HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructPFMGSetSkipRelax(precond, skip);
+         /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+         HYPRE_StructPFMGSetPrintLevel(precond, 0);
+         HYPRE_StructPFMGSetLogging(precond, 0);
+         HYPRE_LGMRESSetPrecond( (HYPRE_Solver)solver,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
+                                 (HYPRE_Solver)precond);
+      }
+
+      HYPRE_LGMRESSetup
+         ( (HYPRE_Solver)solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("LGMRES Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_LGMRESSolve
+         ( (HYPRE_Solver)solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_LGMRESGetNumIterations( (HYPRE_Solver)solver, &num_iterations);
+      HYPRE_LGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver)solver, &final_res_norm);
+      HYPRE_StructLGMRESDestroy(solver);
+
+      if (solver_id == 50)
+      {
+         HYPRE_StructSMGDestroy(precond);
+      }
+      else if (solver_id == 51)
+      {
+         HYPRE_StructPFMGDestroy(precond);
+      }
+      
+   }
+    /*-----------------------------------------------------------
+    * Solve the system using FlexGMRES
+    *-----------------------------------------------------------*/
+
+   if ((solver_id > 59) && (solver_id < 70))
+   {
+      time_index = hypre_InitializeTiming("FlexGMRES Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructFlexGMRESCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, 5 );
+      HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver)solver, 100 );
+      HYPRE_FlexGMRESSetTol( (HYPRE_Solver)solver, 1.0e-06 );
+      HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver)solver, 1 );
+      HYPRE_FlexGMRESSetLogging( (HYPRE_Solver)solver, 1 );
+
+      if (solver_id == 60)
+      {
+         /* use symmetric SMG as preconditioner */
+         HYPRE_StructSMGCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructSMGSetMemoryUse(precond, 0);
+         HYPRE_StructSMGSetMaxIter(precond, 1);
+         HYPRE_StructSMGSetTol(precond, 0.0);
+         HYPRE_StructSMGSetZeroGuess(precond);
+         HYPRE_StructSMGSetNumPreRelax(precond, n_pre);
+         HYPRE_StructSMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructSMGSetPrintLevel(precond, 0);
+         HYPRE_StructSMGSetLogging(precond, 0);
+         HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver)solver,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSetup,
+                                 (HYPRE_Solver)precond);
+      }
+
+      else if (solver_id == 61)
+      {
+         /* use symmetric PFMG as preconditioner */
+         HYPRE_StructPFMGCreate(MPI_COMM_WORLD, &precond);
+         HYPRE_StructPFMGSetMaxIter(precond, 1);
+         HYPRE_StructPFMGSetTol(precond, 0.0);
+         HYPRE_StructPFMGSetZeroGuess(precond);
+         HYPRE_StructPFMGSetRAPType(precond, rap);
+         HYPRE_StructPFMGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_StructPFMGSetJacobiWeight(precond, jacobi_weight);
+         }
+         HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
+         HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
+         HYPRE_StructPFMGSetSkipRelax(precond, skip);
+         /*HYPRE_StructPFMGSetDxyz(precond, dxyz);*/
+         HYPRE_StructPFMGSetPrintLevel(precond, 0);
+         HYPRE_StructPFMGSetLogging(precond, 0);
+         HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver)solver,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
+                                 (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSetup,
+                                 (HYPRE_Solver)precond);
+      }
+
+      HYPRE_FlexGMRESSetup
+         ( (HYPRE_Solver)solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x );
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+   
+      time_index = hypre_InitializeTiming("FlexGMRES Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_FlexGMRESSolve
+         ( (HYPRE_Solver)solver, (HYPRE_Matrix)A, (HYPRE_Vector)b, (HYPRE_Vector)x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_FlexGMRESGetNumIterations( (HYPRE_Solver)solver, &num_iterations);
+      HYPRE_FlexGMRESGetFinalRelativeResidualNorm( (HYPRE_Solver)solver, &final_res_norm);
+      HYPRE_StructFlexGMRESDestroy(solver);
+
+      if (solver_id == 50)
+      {
+         HYPRE_StructSMGDestroy(precond);
+      }
+      else if (solver_id == 51)
+      {
+         HYPRE_StructPFMGDestroy(precond);
+      }
+      
+   }
+
 
    /*-----------------------------------------------------------
     * Print the solution and other info

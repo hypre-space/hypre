@@ -23,6 +23,7 @@
 /* SStruct linear solvers headers */
 #include "HYPRE_sstruct_ls.h"
 
+
 int main (int argc, char *argv[])
 {
    int myid, num_procs;
@@ -115,7 +116,7 @@ int main (int argc, char *argv[])
 
       /* Now we need to set the spatial relation between each of the parts.
          Since we have the same types of variables on both parts, we can
-         use HYPRE_GridSetNeighborBox().  Each processor calls this function
+         use HYPRE_GridSetNeighborPart().  Each processor calls this function
          for each part on which it owns boxes that border a different part. */
 
       if (myid == 0)
@@ -133,10 +134,13 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
+            /* These parts map increasing values to increasing values 
+               for both variables (note: if decreasing maps to increasing, use -1)*/
+            int index_dir[2] = {1,1};
 
-            HYPRE_SStructGridSetNeighborBox(grid, part, b_ilower, b_iupper,
-                                            nbor_part, nbor_ilower, nbor_iupper,
-                                            index_map);
+            HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
+                                             nbor_part, nbor_ilower, nbor_iupper,
+                                             index_map, index_dir);
          }
 
          /* Relation between part 1 and part 0 on processor 0 */
@@ -152,10 +156,13 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
+            /* These parts map increasing values to increasing values 
+               for both variables (note: if decreasing maps to increasing, use -1)*/
+            int index_dir[2] = {1,1};
 
-            HYPRE_SStructGridSetNeighborBox(grid, part, b_ilower, b_iupper,
-                                            nbor_part, nbor_ilower, nbor_iupper,
-                                            index_map);
+            HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
+                                             nbor_part, nbor_ilower, nbor_iupper,
+                                             index_map, index_dir);
          }
 
          /* Relation between part 1 and part 2 on processor 0 */
@@ -171,10 +178,13 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
+            /* These parts map increasing values to increasing values 
+               for both variables (note: if decreasing maps to increasing, use -1)*/
+            int index_dir[2] = {1,1};
 
-            HYPRE_SStructGridSetNeighborBox(grid, part, b_ilower, b_iupper,
+            HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
                                             nbor_part, nbor_ilower, nbor_iupper,
-                                            index_map);
+                                             index_map, index_dir);
          }
       }
       else if (myid == 1)
@@ -192,10 +202,13 @@ int main (int argc, char *argv[])
             /* These parts have the same orientation, so no
                rotation is necessary */
             int index_map[2] = {0,1};
+            /* These parts map increasing values to increasing values 
+              for both variables (note: if decreasing maps to increasing, use -1)*/
+            int index_dir[2] = {1,1};
 
-            HYPRE_SStructGridSetNeighborBox(grid, part, b_ilower, b_iupper,
-                                            nbor_part, nbor_ilower, nbor_iupper,
-                                            index_map);
+            HYPRE_SStructGridSetNeighborPart(grid, part, b_ilower, b_iupper,
+                                             nbor_part, nbor_ilower, nbor_iupper,
+                                             index_map, index_dir); 
          }
       }
 

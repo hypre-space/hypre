@@ -655,72 +655,73 @@
 <a name="line648">648</a>                                                  <font color="4444FF">&amp;</font><font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line649">649</a>          <font color="#444444">/* clean up */</font>
 <a name="line650">650</a>          <font color="#2040a0">HYPRE_ParCSRGMRESDestroy</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line651">651</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line652">652</a>       <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">solver_id</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">3</font><font color="4444FF">)</font> <font color="#444444">/* AMG */</font>
-<a name="line653">653</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line654">654</a>          <font color="#2040a0">HYPRE_BoomerAMGCreate</font><font color="4444FF">(</font><font color="4444FF">&amp;</font><font color="#2040a0">par_solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line655">655</a>          <font color="#2040a0">HYPRE_BoomerAMGSetCoarsenType</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line656">656</a>          <font color="#2040a0">HYPRE_BoomerAMGSetStrongThreshold</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#FF0000">0.25</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line657">657</a>          <font color="#2040a0">HYPRE_BoomerAMGSetTol</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#FF0000">1.9e-6</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line658">658</a>          <font color="#2040a0">HYPRE_BoomerAMGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line659">659</a>          <font color="#2040a0">HYPRE_BoomerAMGSetPrintFileName</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#008000">&quot;ex9.out.log&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line660">660</a>          <font color="#2040a0">HYPRE_BoomerAMGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#FF0000">50</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line661">661</a> 
-<a name="line662">662</a>          <font color="#444444">/* do the setup */</font>
-<a name="line663">663</a>          <font color="#2040a0">HYPRE_BoomerAMGSetup</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#2040a0">par_A</font>, <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line664">664</a> 
-<a name="line665">665</a>          <font color="#444444">/* do the solve */</font>
-<a name="line666">666</a>          <font color="#2040a0">HYPRE_BoomerAMGSolve</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#2040a0">par_A</font>, <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line667">667</a> 
-<a name="line668">668</a>          <font color="#444444">/* get some info */</font>
-<a name="line669">669</a>          <font color="#2040a0">HYPRE_BoomerAMGGetNumIterations</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="4444FF">&amp;</font><font color="#2040a0">its</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line670">670</a>          <font color="#2040a0">HYPRE_BoomerAMGGetFinalRelativeResidualNorm</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>,
-<a name="line671">671</a>                                                      <font color="4444FF">&amp;</font><font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line672">672</a>          <font color="#444444">/* clean up */</font>
-<a name="line673">673</a>          <font color="#2040a0">HYPRE_BoomerAMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line674">674</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line675">675</a>       <strong>else</strong>
-<a name="line676">676</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line677">677</a>          <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font><font color="#FF0000">0</font><font color="4444FF">)</font> <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font> ERROR: Invalid solver id specified.<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line678">678</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line679">679</a> 
-<a name="line680">680</a>       <font color="#444444">/* Gather the solution vector.  This needs to be done if:
-<a name="line681">681</a>          (1) the  object  type is parcsr OR
-<a name="line682">682</a>          (2) any one of the variables is NOT cell-centered */</font>
-<a name="line683">683</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">object_type</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#2040a0">HYPRE_PARCSR</font><font color="4444FF">)</font>
-<a name="line684">684</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line685">685</a>          <font color="#2040a0">HYPRE_SStructVectorGather</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line686">686</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line687">687</a> 
-<a name="line688">688</a>       <font color="#444444">/* Print the solution and other info */</font>
-<a name="line689">689</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">print_solution</font><font color="4444FF">)</font>
-<a name="line690">690</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line691">691</a>          <font color="#2040a0">HYPRE_SStructVectorPrint</font><font color="4444FF">(</font><font color="#008000">&quot;sstruct.out.x&quot;</font>, <font color="#2040a0">x</font>, <font color="#FF0000">0</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line692">692</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line693">693</a> 
-<a name="line694">694</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
-<a name="line695">695</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line696">696</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line697">697</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Iterations = %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">its</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line698">698</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Final Relative Residual Norm = %g<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line699">699</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line700">700</a>       <font color="4444FF"><strong>}</strong></font>
-<a name="line701">701</a>    <font color="4444FF"><strong>}</strong></font>
-<a name="line702">702</a> 
-<a name="line703">703</a>    <font color="#444444">/* Free memory */</font>
-<a name="line704">704</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line705">705</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">stencil_v</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line706">706</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">stencil_u</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line707">707</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line708">708</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line709">709</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line710">710</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line711">711</a> 
-<a name="line712">712</a>    <font color="#444444">/* Finalize MPI */</font>
-<a name="line713">713</a>    <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line714">714</a> 
-<a name="line715">715</a>    <strong>return</strong> <font color="4444FF">(</font><font color="#FF0000">0</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line716">716</a> <font color="4444FF"><strong>}</strong></font>
+<a name="line651">651</a>          <font color="#2040a0">HYPRE_BoomerAMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">par_precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line652">652</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line653">653</a>       <strong>else</strong> <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">solver_id</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">3</font><font color="4444FF">)</font> <font color="#444444">/* AMG */</font>
+<a name="line654">654</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line655">655</a>          <font color="#2040a0">HYPRE_BoomerAMGCreate</font><font color="4444FF">(</font><font color="4444FF">&amp;</font><font color="#2040a0">par_solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line656">656</a>          <font color="#2040a0">HYPRE_BoomerAMGSetCoarsenType</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line657">657</a>          <font color="#2040a0">HYPRE_BoomerAMGSetStrongThreshold</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#FF0000">0.25</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line658">658</a>          <font color="#2040a0">HYPRE_BoomerAMGSetTol</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#FF0000">1.9e-6</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line659">659</a>          <font color="#2040a0">HYPRE_BoomerAMGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line660">660</a>          <font color="#2040a0">HYPRE_BoomerAMGSetPrintFileName</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#008000">&quot;ex9.out.log&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line661">661</a>          <font color="#2040a0">HYPRE_BoomerAMGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#FF0000">50</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line662">662</a> 
+<a name="line663">663</a>          <font color="#444444">/* do the setup */</font>
+<a name="line664">664</a>          <font color="#2040a0">HYPRE_BoomerAMGSetup</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#2040a0">par_A</font>, <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line665">665</a> 
+<a name="line666">666</a>          <font color="#444444">/* do the solve */</font>
+<a name="line667">667</a>          <font color="#2040a0">HYPRE_BoomerAMGSolve</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="#2040a0">par_A</font>, <font color="#2040a0">par_b</font>, <font color="#2040a0">par_x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line668">668</a> 
+<a name="line669">669</a>          <font color="#444444">/* get some info */</font>
+<a name="line670">670</a>          <font color="#2040a0">HYPRE_BoomerAMGGetNumIterations</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>, <font color="4444FF">&amp;</font><font color="#2040a0">its</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line671">671</a>          <font color="#2040a0">HYPRE_BoomerAMGGetFinalRelativeResidualNorm</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font>,
+<a name="line672">672</a>                                                      <font color="4444FF">&amp;</font><font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line673">673</a>          <font color="#444444">/* clean up */</font>
+<a name="line674">674</a>          <font color="#2040a0">HYPRE_BoomerAMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">par_solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line675">675</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line676">676</a>       <strong>else</strong>
+<a name="line677">677</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line678">678</a>          <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font><font color="#FF0000">0</font><font color="4444FF">)</font> <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font> ERROR: Invalid solver id specified.<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line679">679</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line680">680</a> 
+<a name="line681">681</a>       <font color="#444444">/* Gather the solution vector.  This needs to be done if:
+<a name="line682">682</a>          (1) the  object  type is parcsr OR
+<a name="line683">683</a>          (2) any one of the variables is NOT cell-centered */</font>
+<a name="line684">684</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">object_type</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#2040a0">HYPRE_PARCSR</font><font color="4444FF">)</font>
+<a name="line685">685</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line686">686</a>          <font color="#2040a0">HYPRE_SStructVectorGather</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line687">687</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line688">688</a> 
+<a name="line689">689</a>       <font color="#444444">/* Print the solution and other info */</font>
+<a name="line690">690</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">print_solution</font><font color="4444FF">)</font>
+<a name="line691">691</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line692">692</a>          <font color="#2040a0">HYPRE_SStructVectorPrint</font><font color="4444FF">(</font><font color="#008000">&quot;sstruct.out.x&quot;</font>, <font color="#2040a0">x</font>, <font color="#FF0000">0</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line693">693</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line694">694</a> 
+<a name="line695">695</a>       <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">myid</font> <font color="4444FF">=</font><font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">)</font>
+<a name="line696">696</a>       <font color="4444FF"><strong>{</strong></font>
+<a name="line697">697</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line698">698</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Iterations = %d<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">its</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line699">699</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;Final Relative Residual Norm = %g<font color="#77dd77">\n</font>&quot;</font>, <font color="#2040a0">final_res_norm</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line700">700</a>          <font color="#2040a0">printf</font><font color="4444FF">(</font><font color="#008000">&quot;<font color="#77dd77">\n</font>&quot;</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line701">701</a>       <font color="4444FF"><strong>}</strong></font>
+<a name="line702">702</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line703">703</a> 
+<a name="line704">704</a>    <font color="#444444">/* Free memory */</font>
+<a name="line705">705</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line706">706</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">stencil_v</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line707">707</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">stencil_u</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line708">708</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line709">709</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line710">710</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line711">711</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line712">712</a> 
+<a name="line713">713</a>    <font color="#444444">/* Finalize MPI */</font>
+<a name="line714">714</a>    <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line715">715</a> 
+<a name="line716">716</a>    <strong>return</strong> <font color="4444FF">(</font><font color="#FF0000">0</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line717">717</a> <font color="4444FF"><strong>}</strong></font>
 
 </pre>
 <hr>

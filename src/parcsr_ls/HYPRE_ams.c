@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -139,6 +139,28 @@ int HYPRE_AMSSetBetaPoissonMatrix(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMSSetSetInteriorNodes
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSSetInteriorNodes(HYPRE_Solver solver,
+                              HYPRE_ParVector interior_nodes)
+{
+   return hypre_AMSSetInteriorNodes((void *) solver,
+                                    (hypre_ParVector *) interior_nodes);
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_AMSSetSetProjectionFrequency
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSSetProjectionFrequency(HYPRE_Solver solver,
+                                    int projection_frequency)
+{
+   return hypre_AMSSetProjectionFrequency((void *) solver,
+                                          projection_frequency);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMSSetMaxIter
  *--------------------------------------------------------------------------*/
 
@@ -260,17 +282,30 @@ int HYPRE_AMSGetFinalRelativeResidualNorm(HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_AMSProjectOutGradients
+ *--------------------------------------------------------------------------*/
+
+int HYPRE_AMSProjectOutGradients(HYPRE_Solver solver,
+                                 HYPRE_ParVector x)
+{
+   return hypre_AMSProjectOutGradients((void *) solver,
+                                       (hypre_ParVector *) x);
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_AMSConstructDiscreteGradient
  *--------------------------------------------------------------------------*/
 
 int HYPRE_AMSConstructDiscreteGradient(HYPRE_ParCSRMatrix A,
                                        HYPRE_ParVector x_coord,
 				       int *edge_vertex,
+                                       int edge_orientation,
                                        HYPRE_ParCSRMatrix *G)
 {
    return hypre_AMSConstructDiscreteGradient((hypre_ParCSRMatrix *) A,
                                              (hypre_ParVector *) x_coord,
                                              edge_vertex,
+                                             edge_orientation,
                                              (hypre_ParCSRMatrix **) G);
 }
 

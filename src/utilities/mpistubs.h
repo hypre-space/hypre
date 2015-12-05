@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.11 $
+ * $Revision: 2.12 $
  ***********************************************************************EHEADER*/
 
 
@@ -102,6 +102,7 @@ extern "C" {
 #define MPI_Waitany         hypre_MPI_Waitany          
 #define MPI_Allreduce       hypre_MPI_Allreduce        
 #define MPI_Reduce          hypre_MPI_Reduce        
+#define MPI_Scan            hypre_MPI_Scan        
 #define MPI_Request_free    hypre_MPI_Request_free        
 #define MPI_Type_contiguous hypre_MPI_Type_contiguous     
 #define MPI_Type_vector     hypre_MPI_Type_vector     
@@ -190,6 +191,7 @@ int hypre_MPI_Waitall( int count , hypre_MPI_Request *array_of_requests , hypre_
 int hypre_MPI_Waitany( int count , hypre_MPI_Request *array_of_requests , int *index , hypre_MPI_Status *status );
 int hypre_MPI_Allreduce( void *sendbuf , void *recvbuf , int count , hypre_MPI_Datatype datatype , hypre_MPI_Op op , hypre_MPI_Comm comm );
 int hypre_MPI_Reduce( void *sendbuf , void *recvbuf , int count , hypre_MPI_Datatype datatype , hypre_MPI_Op op , int root , hypre_MPI_Comm comm );
+int hypre_MPI_Scan( void *sendbuf , void *recvbuf , int count , hypre_MPI_Datatype datatype , hypre_MPI_Op op , hypre_MPI_Comm comm );
 int hypre_MPI_Request_free( hypre_MPI_Request *request );
 int hypre_MPI_Type_contiguous( int count , hypre_MPI_Datatype oldtype , hypre_MPI_Datatype *newtype );
 int hypre_MPI_Type_vector( int count , int blocklength , int stride , hypre_MPI_Datatype oldtype , hypre_MPI_Datatype *newtype );

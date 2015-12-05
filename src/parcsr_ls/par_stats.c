@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.28 $
+ * $Revision: 2.29 $
  ***********************************************************************EHEADER*/
 
 
@@ -76,6 +76,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    int      num_levels; 
    int      coarsen_type;
    int      interp_type;
+   int      agg_interp_type;
    int      measure_type;
    int      agg_num_levels;
    double   global_nonzeros;
@@ -156,6 +157,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
+   agg_interp_type = hypre_ParAMGDataAggInterpType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
    smooth_type = hypre_ParAMGDataSmoothType(amg_data);
    smooth_num_levels = hypre_ParAMGDataSmoothNumLevels(amg_data);
@@ -265,6 +267,14 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       if (agg_num_levels > 0)
       {
 	printf("\n No. of levels of aggressive coarsening: %d\n\n", agg_num_levels);
+        if (agg_interp_type == 4)
+	   printf(" Interpolation on agg. levels= multipass interpolation\n");
+        else if (agg_interp_type == 1)
+	   printf(" Interpolation on agg. levels = 2-stage extended+i interpolation \n");
+        else if (agg_interp_type == 2)
+	   printf(" Interpolation on agg. levels = 2-stage std interpolation \n");
+        else if (agg_interp_type == 3)
+	   printf(" Interpolation on agg. levels = 2-stage extended interpolation \n");
       }
       
 
@@ -302,11 +312,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       }
       else if (interp_type == 6) 
       {
-	printf(" Interpolation = extended interpolation\n");
+	printf(" Interpolation = extended+i interpolation\n");
       }
       else if (interp_type == 7) 
       {
-	printf(" Interpolation = extended interpolation (if no common C point)\n");
+	printf(" Interpolation = extended+i interpolation (if no common C point)\n");
       }
       else if (interp_type == 12) 
       {
@@ -315,6 +325,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       else if (interp_type == 13) 
       {
 	printf(" Interpolation = F-F1 interpolation\n");
+      }
+      else if (interp_type == 14) 
+      {
+	printf(" Interpolation = extended interpolation\n");
       }
       else if (interp_type == 8) 
       {

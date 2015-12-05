@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.20 $
+ * $Revision: 2.21 $
  ***********************************************************************EHEADER*/
 
 
@@ -851,6 +851,7 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
 #define F_PT -1
 #define Z_PT -2
 #define SF_PT -3  /* special fine points */
+#define SC_PT 3  /* special coarse points */
 #define UNDECIDED 0 
 
 
@@ -915,6 +916,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 
    int             *lists, *where;
    int              measure, new_meas;
+   int              meas_type = 0;
+   int              agg_2 = 0;
    int              num_left, elmt;
    int              nabor, nabor_two;
 
@@ -925,6 +928,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    double	    wall_time;
 
    if (coarsen_type < 0) coarsen_type = -coarsen_type;
+   if (measure_type == 1 || measure_type == 4) meas_type = 1;
+   if (measure_type == 4 || measure_type == 3) agg_2 = 1;
 
    /*-------------------------------------------------------
     * Initialize the C/F marker, LoL_head, LoL_tail  arrays
@@ -1043,7 +1048,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       coarsen_type = 11;
    }
 
-   if ((measure_type || (coarsen_type != 1 && coarsen_type != 11)) 
+   if ((meas_type || (coarsen_type != 1 && coarsen_type != 11)) 
 		&& num_procs > 1)
    {
       if (use_commpkg_A)
@@ -1056,7 +1061,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       first_col = hypre_ParCSRMatrixFirstColDiag(S);
       col_0 = first_col-1;
       col_n = col_0+num_variables;
-      if (measure_type)
+      if (meas_type)
       {
 	 for (i=0; i < num_nonzeros; i++)
          {
@@ -1090,6 +1095,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
 		(S_offd_i[j+1]-S_offd_i[j]) == 0)
       {
          CF_marker[j] = SF_PT;
+         if (agg_2) CF_marker[j] = SC_PT;
          measure_array[j] = 0;
       }
       else
@@ -1102,7 +1108,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    for (j = 0; j < num_variables; j++) 
    {    
       measure = measure_array[j];
-      if (CF_marker[j] != SF_PT)
+      if (CF_marker[j] != SF_PT && CF_marker[j] != SC_PT)
       {
          if (measure > 0)
          {
@@ -1115,7 +1121,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
             for (k = S_i[j]; k < S_i[j+1]; k++)
             {
                nabor = S_j[k];
-               if (CF_marker[nabor] != SF_PT)
+               if (CF_marker[nabor] != SF_PT && CF_marker[nabor] != SC_PT)
                {
                   if (nabor < j)
                   {
@@ -1251,6 +1257,9 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    hypre_TFree(where);
    hypre_TFree(LoL_head);
    hypre_TFree(LoL_tail);
+
+   for (i=0; i < num_variables; i++)
+      if (CF_marker[i] == SC_PT) CF_marker[i] = C_PT;
 
    if (coarsen_type == 11)
    {
@@ -1883,7 +1892,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       hypre_TFree(ci_array);
    }   
    hypre_TFree(graph_array);
-   if ((measure_type || (coarsen_type != 1 && coarsen_type != 11)) 
+   if ((meas_type || (coarsen_type != 1 && coarsen_type != 11)) 
 		&& num_procs > 1)
    	hypre_CSRMatrixDestroy(S_ext); 
    
@@ -2116,7 +2125,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    /* this augments the measures with a random number between 0 and 1 */
    /* (only for the local part) */
    /* this augments the measures */
-   if (CF_init == 2)
+   if (CF_init == 2 || CF_init == 4)
       hypre_BoomerAMGIndepSetInit(S, measure_array, 1);
    else
       hypre_BoomerAMGIndepSetInit(S, measure_array, 0);
@@ -2179,6 +2188,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                 && (S_offd_i[i+1]-S_offd_i[i]) == 0)
          {
             CF_marker[i] = SF_PT;
+            if (CF_init == 3 || CF_init == 4) CF_marker[i] = C_PT; 
             measure_array[i] = 0;
          }
          else

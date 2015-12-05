@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.29 $
+ * $Revision: 2.31 $
  ***********************************************************************EHEADER*/
 
 
@@ -26,9 +26,9 @@
 #include "mpi.h"
 #endif
 
-#ifdef HYPRE_USING_OPENMP
+/*#ifdef HYPRE_USING_OPENMP
 #include <omp.h>
-#endif
+#endif*/
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,7 +38,7 @@ extern "C" {
  * Before a version of HYPRE goes out the door, increment the version
  * number and check in this file (for CVS to substitute the Date).
  */
-#define HYPRE_Version() "PACKAGE_STRING  $Date: 2008/07/18 01:34:47 $ Compiled: " __DATE__ " " __TIME__
+#define HYPRE_Version() "HYPRE_RELEASE_NAME  $Date: 2010/01/25 22:51:05 $ Compiled: " __DATE__ " " __TIME__
 
 #ifdef HYPRE_USE_PTHREADS
 #ifndef hypre_MAX_THREADS

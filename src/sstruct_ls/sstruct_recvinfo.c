@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -22,9 +22,9 @@
  *--------------------------------------------------------------------------*/
 
 hypre_SStructRecvInfoData *
-hypre_SStructRecvInfo( hypre_StructGrid  *cgrid,
-                       hypre_BoxMap      *fmap,
-                       hypre_Index        rfactor )
+hypre_SStructRecvInfo( hypre_StructGrid      *cgrid,
+                       hypre_BoxManager      *fboxman,
+                       hypre_Index            rfactor )
 {
    hypre_SStructRecvInfoData *recvinfo_data;
 
@@ -32,10 +32,10 @@ hypre_SStructRecvInfo( hypre_StructGrid  *cgrid,
 
    hypre_BoxArray            *grid_boxes;
    hypre_Box                 *grid_box, fbox;
-   hypre_Box                 *intersect_box, map_entry_box;
+   hypre_Box                 *intersect_box, boxman_entry_box;
 
-   hypre_BoxMapEntry        **map_entries;
-   int                        nmap_entries;
+   hypre_BoxManEntry        **boxman_entries;
+   int                        nboxman_entries;
 
    hypre_BoxArrayArray       *recv_boxes;
    int                      **recv_processes;
@@ -57,7 +57,7 @@ hypre_SStructRecvInfo( hypre_StructGrid  *cgrid,
    /*------------------------------------------------------------------------
     * Create the structured recvbox patterns. 
     *   recv_boxes are obtained by intersecting this proc's cgrid boxes
-    *   with the fine fmap. Intersecting BoxMapEntries not on this proc
+    *   with the fine fboxman. Intersecting BoxManEntries not on this proc
     *   will give the boxes that we will be receiving some data from. To
     *   get the exact receiving box extents, we need to take an intersection.
     *   Since only coarse data is communicated, these intersection boxes
@@ -78,13 +78,13 @@ hypre_SStructRecvInfo( hypre_StructGrid  *cgrid,
        hypre_SStructIndexScaleC_F(hypre_BoxIMax(grid_box), index2,
                                   rfactor, hypre_BoxIMax(&fbox));
 
-       hypre_BoxMapIntersect(fmap, hypre_BoxIMin(&fbox), hypre_BoxIMax(&fbox),
-                            &map_entries, &nmap_entries);
+       hypre_BoxManIntersect(fboxman, hypre_BoxIMin(&fbox), hypre_BoxIMax(&fbox),
+                            &boxman_entries, &nboxman_entries);
 
        cnt= 0;
-       for (j= 0; j< nmap_entries; j++)
+       for (j= 0; j< nboxman_entries; j++)
        {
-          hypre_SStructMapEntryGetProcess(map_entries[j], &proc);
+          hypre_SStructBoxManEntryGetProcess(boxman_entries[j], &proc);
           if (proc != myproc)
           {
              cnt++;
@@ -93,28 +93,28 @@ hypre_SStructRecvInfo( hypre_StructGrid  *cgrid,
        recv_processes[i]     = hypre_CTAlloc(int, cnt);
 
        cnt= 0;
-       for (j= 0; j< nmap_entries; j++)
+       for (j= 0; j< nboxman_entries; j++)
        {
-          hypre_SStructMapEntryGetProcess(map_entries[j], &proc);
+          hypre_SStructBoxManEntryGetProcess(boxman_entries[j], &proc);
 
-          /* determine the chunk of the map_entries[j] box that is needed */
-          hypre_BoxMapEntryGetExtents(map_entries[j], ilower, iupper);
-          hypre_BoxSetExtents(&map_entry_box, ilower, iupper);
-          hypre_IntersectBoxes(&map_entry_box, &fbox, &map_entry_box);
+          /* determine the chunk of the boxman_entries[j] box that is needed */
+          hypre_BoxManEntryGetExtents(boxman_entries[j], ilower, iupper);
+          hypre_BoxSetExtents(&boxman_entry_box, ilower, iupper);
+          hypre_IntersectBoxes(&boxman_entry_box, &fbox, &boxman_entry_box);
 
           if (proc != myproc)
           {
              recv_processes[i][cnt]= proc;
-             hypre_SStructIndexScaleF_C(hypre_BoxIMin(&map_entry_box), index1,
-                                        rfactor, hypre_BoxIMin(&map_entry_box));
-             hypre_SStructIndexScaleF_C(hypre_BoxIMax(&map_entry_box), index1,
-                                        rfactor, hypre_BoxIMax(&map_entry_box));
-             hypre_AppendBox(&map_entry_box, 
+             hypre_SStructIndexScaleF_C(hypre_BoxIMin(&boxman_entry_box), index1,
+                                        rfactor, hypre_BoxIMin(&boxman_entry_box));
+             hypre_SStructIndexScaleF_C(hypre_BoxIMax(&boxman_entry_box), index1,
+                                        rfactor, hypre_BoxIMax(&boxman_entry_box));
+             hypre_AppendBox(&boxman_entry_box, 
                               hypre_BoxArrayArrayBoxArray(recv_boxes, i));
              cnt++;
           }
       } 
-      hypre_TFree(map_entries);
+      hypre_TFree(boxman_entries);
    }  /* hypre_ForBoxI(i, grid_boxes) */ 
 
    hypre_TFree(intersect_box);

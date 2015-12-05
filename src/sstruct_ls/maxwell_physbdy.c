@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -51,7 +51,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
 
    int                    *npts;
    int                    *ranks, *upper_rank, *lower_rank;
-   hypre_BoxMapEntry      *map_entry;
+   hypre_BoxManEntry      *boxman_entry;
 
    hypre_SStructGrid      *grid;
    hypre_SStructPGrid     *pgrid;
@@ -111,10 +111,10 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       box_array= hypre_StructGridBoxes(sgrid);
       box  = hypre_BoxArrayBox(box_array, hypre_BoxArraySize(box_array)-1);
 
-      hypre_SStructGridBoxProcFindMapEntry(grid, part, nvars-1,
-                              hypre_BoxArraySize(box_array)-1, myproc, &map_entry);
-      hypre_SStructMapEntryGetGlobalCSRank(map_entry, hypre_BoxIMax(box), 
-                                          &upper_rank[i]);
+      hypre_SStructGridBoxProcFindBoxManEntry(grid, part, nvars-1,
+                                              hypre_BoxArraySize(box_array)-1, myproc, &boxman_entry);
+      hypre_SStructBoxManEntryGetGlobalCSRank(boxman_entry, hypre_BoxIMax(box), 
+                                              &upper_rank[i]);
 
       sgrid= hypre_SStructPGridCellSGrid(pgrid);
       box_array= hypre_StructGridBoxes(sgrid);
@@ -476,9 +476,9 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                         hypre_SetIndex(index, loopi, loopj, loopk);
                         hypre_AddIndex(index, start, index);
 
-                        hypre_SStructGridFindMapEntry(grid, part, index,
-                                                      k, &map_entry);
-                        hypre_SStructMapEntryGetGlobalRank(map_entry, index,
+                        hypre_SStructGridFindBoxManEntry(grid, part, index,
+                                                      k, &boxman_entry);
+                        hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index,
                                                           &ranks[cnt], matrix_type);
                         cnt++;
 

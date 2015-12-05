@@ -7,7 +7,7 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.21 $
+# $Revision: 2.23 $
 #EHEADER**********************************************************************
 
 
@@ -19,16 +19,16 @@ include ../config/Makefile.config
 .SUFFIXES:
 .SUFFIXES: .c .dxx .html .tex
 
-PDFLATEX = pdflatex
-LATEX = latex -interaction=nonstopmode
-MAKEINDEX = makeindex -q
-DVIPS = dvips -q
-PSPDF = ps2pdf
-
-ONLINE_OPTS =\
- -split 2\
- -show_section_numbers\
- -bottom_navigation
+PDFLATEX = pdflatex --interaction=nonstopmode
+# LATEX = latex -interaction=nonstopmode
+# MAKEINDEX = makeindex -q
+# DVIPS = dvips -q
+# PSPDF = ps2pdf
+# 
+# ONLINE_OPTS =\
+#  -split 2\
+#  -show_section_numbers\
+#  -bottom_navigation
 
 ##################################################################
 # Files
@@ -50,7 +50,8 @@ USR_FILES =\
 # Targets
 ##################################################################
 
-all: html pdf
+# all: html pdf
+all: pdf
 
 install: all
 	@ \

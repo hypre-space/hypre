@@ -7,27 +7,37 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 2.30 $
+# $Revision: 2.34 $
 #EHEADER**********************************************************************
-
-
-
-
-
-
 
 
 # Include all variables defined by configure
 include config/Makefile.config
 
-
 # These are the directories for internal blas, lapack and general utilities
-HYPRE_BASIC_DIRS = ${HYPRE_BLAS_SRC_DIR}\
+HYPRE_BASIC_DIRS =\
+ ${HYPRE_BLAS_SRC_DIR}\
  ${HYPRE_LAPACK_SRC_DIR}\
-  utilities
+ utilities
+
+#These are the directories for multivector
+HYPRE_MULTIVEC_DIRS =\
+ multivector
 
 # These are the directories for the generic Krylov solvers
-HYPRE_KRYLOV_DIRS = krylov
+HYPRE_KRYLOV_DIRS =\
+ krylov
+
+#These are the directories for the IJ interface
+HYPRE_IJ_DIRS =\
+ seq_mv\
+ parcsr_mv\
+ parcsr_block_mv\
+ distributed_matrix\
+ IJ_mv\
+ matrix_matrix\
+ distributed_ls\
+ parcsr_ls
 
 #These are the directories for the structured interface
 HYPRE_STRUCT_DIRS =\
@@ -38,20 +48,6 @@ HYPRE_STRUCT_DIRS =\
 HYPRE_SSTRUCT_DIRS =\
  sstruct_mv\
  sstruct_ls
-
-#These are the directories for the IJ interface
-HYPRE_IJ_DIRS =\
- seq_mv\
- parcsr_mv\
- parcsr_block_mv\
- distributed_matrix\
- matrix_matrix\
- IJ_mv\
- distributed_ls\
- parcsr_ls
-
-#These are the directories for multivector
-HYPRE_MULTIVEC_DIRS = multivector
 
 #These are the directories for the FEI
 HYPRE_FEI_DIRS = ${HYPRE_FEI_SRC_DIR}
@@ -68,11 +64,11 @@ HYPRE_TEST_DIRS = test
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
  ${HYPRE_BASIC_DIRS}\
+ ${HYPRE_MULTIVEC_DIRS}\
  ${HYPRE_KRYLOV_DIRS}\
+ ${HYPRE_IJ_DIRS}\
  ${HYPRE_STRUCT_DIRS}\
  ${HYPRE_SSTRUCT_DIRS}\
- ${HYPRE_IJ_DIRS}\
- ${HYPRE_MULTIVEC_DIRS}\
  ${HYPRE_FEI_DIRS}\
  ${HYPRE_LIBS_DIRS}
 
@@ -90,9 +86,9 @@ all:
 	@ \
 	mkdir -p ${HYPRE_BUILD_DIR}/include; \
 	mkdir -p ${HYPRE_BUILD_DIR}/lib; \
-	cp -fp HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
-	cp -fp $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
-	cp -fp $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fpPR HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fpPR $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fpPR $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
 	for i in ${HYPRE_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \
@@ -118,9 +114,6 @@ help:
 	@echo "     compile the program and copy executables, libraries, etc"
 	@echo "        to the file names where they reside for actual use"
 	@echo "     executes mkinstalldirs script to create directories needed"
-	@echo "     "
-	@echo "uninstall:"
-	@echo "     deletes all files that the install target creates"
 	@echo "     "
 	@echo "clean:"
 	@echo "     deletes all files from the current directory that are normally"
@@ -166,22 +159,17 @@ install: all
 	@echo "Installing hypre ..."
 	@echo "lib-install: ${HYPRE_LIB_INSTALL}"
 	${HYPRE_SRC_TOP_DIR}/config/mkinstalldirs ${HYPRE_LIB_INSTALL} ${HYPRE_INC_INSTALL}
-	cp -fr ${HYPRE_BUILD_DIR}/lib/* ${HYPRE_LIB_INSTALL}/.
-	cp -fr ${HYPRE_BUILD_DIR}/include/* ${HYPRE_INC_INSTALL}/.
+	cp -fpPR ${HYPRE_BUILD_DIR}/lib/* ${HYPRE_LIB_INSTALL}/.
+	cp -fpPR ${HYPRE_BUILD_DIR}/include/* ${HYPRE_INC_INSTALL}/.
 	chmod -R a+rX,u+w,go-w ${HYPRE_LIB_INSTALL}
 	chmod -R a+rX,u+w,go-w ${HYPRE_INC_INSTALL}
-
-uninstall:
-	@echo "Un-installing hypre ..."
-	rm -rf ${HYPRE_LIB_INSTALL}
-	rm -rf ${HYPRE_INC_INSTALL}
 
 clean:
 	@ \
 	rm -Rf hypre; \
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
-	  if [ -d $$i ]; \
+	  if [ -f $$i/Makefile ]; \
 	  then \
 	    echo "Cleaning $$i ..."; \
 	    (cd $$i && $(MAKE) $@); \

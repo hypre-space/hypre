@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -30,7 +30,6 @@ hypre_SStructPInnerProd( hypre_SStructPVector *px,
                          hypre_SStructPVector *py,
                          double               *presult_ptr )
 {
-   int    ierr = 0;
    int    nvars = hypre_SStructPVectorNVars(px);
    double presult;
    double sresult;
@@ -46,7 +45,7 @@ hypre_SStructPInnerProd( hypre_SStructPVector *px,
 
    *presult_ptr = presult;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -58,7 +57,6 @@ hypre_SStructInnerProd( hypre_SStructVector *x,
                         hypre_SStructVector *y,
                         double              *result_ptr )
 {
-   int    ierr = 0;
    int    nparts = hypre_SStructVectorNParts(x);
    double result;
    double presult;
@@ -69,8 +67,9 @@ hypre_SStructInnerProd( hypre_SStructVector *x,
    
    if (x_object_type != y_object_type)
    {
-       printf("vector object types different- cannot compute inner product\n");
-       return ierr;
+      hypre_error_in_arg(2);
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
    }
 
    result = 0.0;
@@ -98,5 +97,5 @@ hypre_SStructInnerProd( hypre_SStructVector *x,
                                                                                                                 
    *result_ptr = result;
 
-   return ierr;
+   return hypre_error_flag;
 }

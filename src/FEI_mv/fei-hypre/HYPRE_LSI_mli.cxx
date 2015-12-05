@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.24 $
+ * $Revision: 2.25 $
  ***********************************************************************EHEADER*/
 
 
@@ -53,12 +53,7 @@
 /*--------------------------------------------------------------------------*/
 
 #include "HYPRE_utilities.h"
-#if HAVE_STRING_H
-#  include <string.h>
-#endif /* HAVE_STRING_H */
-#if HAVE_STRINGS_H
-#  include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>

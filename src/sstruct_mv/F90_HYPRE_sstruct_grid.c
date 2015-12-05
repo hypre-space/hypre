@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.9 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
-
-
 
 
 /******************************************************************************
@@ -28,16 +26,17 @@
 
 void
 hypre_F90_IFACE(hypre_sstructgridcreate, HYPRE_SSTRUCTGRIDCREATE)
-                                                          (int        *comm,
-                                                           int        *ndim,
-                                                           int        *nparts,
-                                                           long int   *grid_ptr,
-                                                           int        *ierr)
+   (int        *comm,
+    int        *ndim,
+    int        *nparts,
+    long int   *grid_ptr,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridCreate( (MPI_Comm)           *comm,
-                                           (int)                *ndim,
-                                           (int)                *nparts,
-                                           (HYPRE_SStructGrid *) grid_ptr ) );
+   *ierr = (int) (HYPRE_SStructGridCreate(
+                     (MPI_Comm)           *comm,
+                     (int)                *ndim,
+                     (int)                *nparts,
+                     (HYPRE_SStructGrid *) grid_ptr ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -46,10 +45,11 @@ hypre_F90_IFACE(hypre_sstructgridcreate, HYPRE_SSTRUCTGRIDCREATE)
 
 void
 hypre_F90_IFACE(hypre_sstructgriddestroy, HYPRE_SSTRUCTGRIDDESTROY)
-                                                           (long int   *grid,
-                                                            int        *ierr)
+   (long int   *grid,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridDestroy( (HYPRE_SStructGrid) *grid ) );
+   *ierr = (int) (HYPRE_SStructGridDestroy(
+                     (HYPRE_SStructGrid) *grid ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -58,16 +58,17 @@ hypre_F90_IFACE(hypre_sstructgriddestroy, HYPRE_SSTRUCTGRIDDESTROY)
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetextents, HYPRE_SSTRUCTGRIDSETEXTENTS)
-                                                          (long int   *grid,
-                                                           int        *part,
-                                                           int        *ilower,
-                                                           int        *iupper,
-                                                           int        *ierr)
+   (long int   *grid,
+    int        *part,
+    int        *ilower,
+    int        *iupper,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetExtents( (HYPRE_SStructGrid) *grid,
-                                               (int)               *part,
-                                               (int *)              ilower,
-                                               (int *)              iupper ) );
+   *ierr = (int) (HYPRE_SStructGridSetExtents(
+                     (HYPRE_SStructGrid) *grid,
+                     (int)               *part,
+                     (int *)              ilower,
+                     (int *)              iupper ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -76,16 +77,17 @@ hypre_F90_IFACE(hypre_sstructgridsetextents, HYPRE_SSTRUCTGRIDSETEXTENTS)
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetvariables, HYPRE_SSTRUCTGRIDSETVARIABLES)
-                                                          (long int   *grid,
-                                                           int        *part,
-                                                           int        *nvars,
-                                                           int        *vartypes,
-                                                           int        *ierr)
+   (long int   *grid,
+    int        *part,
+    int        *nvars,
+    int        *vartypes,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetVariables( (HYPRE_SStructGrid)      *grid,
-                                                 (int)                    *part,
-                                                 (int)                    *nvars,
-                                                 (HYPRE_SStructVariable *) vartypes ) );
+   *ierr = (int) (HYPRE_SStructGridSetVariables(
+                     (HYPRE_SStructGrid)      *grid,
+                     (int)                    *part,
+                     (int)                    *nvars,
+                     (HYPRE_SStructVariable *) vartypes ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -96,18 +98,19 @@ hypre_F90_IFACE(hypre_sstructgridsetvariables, HYPRE_SSTRUCTGRIDSETVARIABLES)
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
-                                                          (long int   *grid,
-                                                           int        *part,
-                                                           int        *var,
-                                                           int        *nvars,
-                                                           int        *vartype,
-                                                           int        *ierr)
+   (long int   *grid,
+    int        *part,
+    int        *var,
+    int        *nvars,
+    int        *vartype,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetVariable( (HYPRE_SStructGrid)      *grid,
-                                                (int)                    *part,
-                                                (int)                    *var,
-                                                (int)                    *nvars,
-                                                (HYPRE_SStructVariable)  *vartype ) );
+   *ierr = (int) (HYPRE_SStructGridSetVariable(
+                     (HYPRE_SStructGrid)      *grid,
+                     (int)                    *part,
+                     (int)                    *var,
+                     (int)                    *nvars,
+                     (HYPRE_SStructVariable)  *vartype ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -116,18 +119,19 @@ hypre_F90_IFACE(hypre_sstructgridsetvariable, HYPRE_SSTRUCTGRIDSETVARIABLE)
 
 void
 hypre_F90_IFACE(hypre_sstructgridaddvariables, HYPRE_SSTRUCTGRIDADDVARIABLES)
-                                                          (long int   *grid,
-                                                           int        *part,
-                                                           int        *index,
-                                                           int        *nvars,
-                                                           int        *vartypes,
-                                                           int        *ierr)
+   (long int   *grid,
+    int        *part,
+    int        *index,
+    int        *nvars,
+    int        *vartypes,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridAddVariables( (HYPRE_SStructGrid)      *grid,
-                                                 (int)                    *part,
-                                                 (int *)                   index,
-                                                 (int)                    *nvars,
-                                                 (HYPRE_SStructVariable *) vartypes ));
+   *ierr = (int) (HYPRE_SStructGridAddVariables(
+                     (HYPRE_SStructGrid)      *grid,
+                     (int)                    *part,
+                     (int *)                   index,
+                     (int)                    *nvars,
+                     (HYPRE_SStructVariable *) vartypes ));
 }
 
 /*--------------------------------------------------------------------------
@@ -138,44 +142,98 @@ hypre_F90_IFACE(hypre_sstructgridaddvariables, HYPRE_SSTRUCTGRIDADDVARIABLES)
 
 void
 hypre_F90_IFACE(hypre_sstructgridaddvariable, HYPRE_SSTRUCTGRIDADDVARIABLE)
-                                                          (long int   *grid,
-                                                           int        *part,
-                                                           int        *index,
-                                                           int        *var,
-                                                           int        *vartype,
-                                                           int        *ierr)
+   (long int   *grid,
+    int        *part,
+    int        *index,
+    int        *var,
+    int        *vartype,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridAddVariable( (HYPRE_SStructGrid)      *grid,
-                                                (int)                    *part,
-                                                (int *)                   index,
-                                                (int)                    *var,
-                                                (HYPRE_SStructVariable)  *vartype ));
+   *ierr = (int) (HYPRE_SStructGridAddVariable(
+                     (HYPRE_SStructGrid)      *grid,
+                     (int)                    *part,
+                     (int *)                   index,
+                     (int)                    *var,
+                     (HYPRE_SStructVariable)  *vartype ));
 }
 
 /*--------------------------------------------------------------------------
- *  HYPRE_SStructGridSetNeighborBox
+ *  HYPRE_SStructGridSetFEMOrdering
  *--------------------------------------------------------------------------*/
 
 void
-hypre_F90_IFACE(hypre_sstructgridsetneighborbox, HYPRE_SSTRUCTGRIDSETNEIGHBORBOX)
-                                                          (long int   *grid,
-                                                           int        *part,
-                                                           int        *ilower,
-                                                           int        *iupper,
-                                                           int        *nbor_part,
-                                                           int        *nbor_ilower,
-                                                           int        *nbor_iupper,
-                                                           int        *index_map,
-                                                           int        *ierr)
+hypre_F90_IFACE(hypre_sstructgridsetfemordering, HYPRE_SSTRUCTGRIDSETFEMORDERING)
+   (long int   *grid,
+    int        *part,
+    int        *ordering,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetNeighborBox( (HYPRE_SStructGrid) *grid,
-                                                   (int)               *part,
-                                                   (int *)              ilower,
-                                                   (int *)              iupper,
-                                                   (int)               *nbor_part,
-                                                   (int *)              nbor_ilower,
-                                                   (int *)              nbor_iupper,
-                                                   (int *)              index_map ) );
+   *ierr = (int) (HYPRE_SStructGridSetFEMOrdering(
+                     (HYPRE_SStructGrid)      *grid,
+                     (int)                    *part,
+                     (int *)                   ordering ));
+}
+
+/*--------------------------------------------------------------------------
+ *  HYPRE_SStructGridSetNeighborPart
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructgridsetneighborpart, HYPRE_SSTRUCTGRIDSETNEIGHBORPART)
+   (long int   *grid,
+    int        *part,
+    int        *ilower,
+    int        *iupper,
+    int        *nbor_part,
+    int        *nbor_ilower,
+    int        *nbor_iupper,
+    int        *index_map,
+    int        *index_dir,
+    int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructGridSetNeighborPart(
+                     (HYPRE_SStructGrid) *grid,
+                     (int)               *part,
+                     (int *)              ilower,
+                     (int *)              iupper,
+                     (int)               *nbor_part,
+                     (int *)              nbor_ilower,
+                     (int *)              nbor_iupper,
+                     (int *)              index_map,
+                     (int *)              index_dir ) );
+}
+
+/*--------------------------------------------------------------------------
+ *  HYPRE_SStructGridSetSharedPart
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_sstructgridsetsharedpart, HYPRE_SSTRUCTGRIDSETSHAREDPART)
+   (long int   *grid,
+    int        *part,
+    int        *ilower,
+    int        *iupper,
+    int        *offset,
+    int        *shared_part,
+    int        *shared_ilower,
+    int        *shared_iupper,
+    int        *shared_offset,
+    int        *index_map,
+    int        *index_dir,
+    int        *ierr)
+{
+   *ierr = (int) (HYPRE_SStructGridSetSharedPart(
+                     (HYPRE_SStructGrid) *grid,
+                     (int)               *part,
+                     (int *)              ilower,
+                     (int *)              iupper,
+                     (int *)              offset,
+                     (int)               *shared_part,
+                     (int *)              shared_ilower,
+                     (int *)              shared_iupper,
+                     (int *)              shared_offset,
+                     (int *)              index_map,
+                     (int *)              index_dir ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -187,14 +245,15 @@ hypre_F90_IFACE(hypre_sstructgridsetneighborbox, HYPRE_SSTRUCTGRIDSETNEIGHBORBOX
 
 void
 hypre_F90_IFACE(hypre_sstructgridaddunstructure, HYPRE_SSTRUCTGRIDADDUNSTRUCTURE)
-                                                          (long int   *grid,
-                                                           int        *ilower,
-                                                           int        *iupper,
-                                                           int        *ierr)
+   (long int   *grid,
+    int        *ilower,
+    int        *iupper,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridAddUnstructuredPart( (HYPRE_SStructGrid) *grid,
-                                                        (int *)              ilower,
-                                                        (int *)              iupper) );
+   *ierr = (int) (HYPRE_SStructGridAddUnstructuredPart(
+                     (HYPRE_SStructGrid) *grid,
+                     (int *)              ilower,
+                     (int *)              iupper) );
 }
 #endif
 
@@ -204,10 +263,11 @@ hypre_F90_IFACE(hypre_sstructgridaddunstructure, HYPRE_SSTRUCTGRIDADDUNSTRUCTURE
 
 void
 hypre_F90_IFACE(hypre_sstructgridassemble, HYPRE_SSTRUCTGRIDASSEMBLE)
-                                                          (long int   *grid,
-                                                           int        *ierr)
+   (long int   *grid,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridAssemble( (HYPRE_SStructGrid) *grid ) );
+   *ierr = (int) (HYPRE_SStructGridAssemble(
+                     (HYPRE_SStructGrid) *grid ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -216,14 +276,15 @@ hypre_F90_IFACE(hypre_sstructgridassemble, HYPRE_SSTRUCTGRIDASSEMBLE)
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetperiodic, HYPRE_SSTRUCTGRIDSETPERIODIC)
-                                                          (long int   *grid,
-                                                           int        *part,
-                                                           int        *periodic,
-                                                           int        *ierr)
+   (long int   *grid,
+    int        *part,
+    int        *periodic,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetPeriodic( (HYPRE_SStructGrid) *grid,
-                                                (int)               *part,
-                                                (int *)              periodic ) );
+   *ierr = (int) (HYPRE_SStructGridSetPeriodic(
+                     (HYPRE_SStructGrid) *grid,
+                     (int)               *part,
+                     (int *)              periodic ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -232,10 +293,11 @@ hypre_F90_IFACE(hypre_sstructgridsetperiodic, HYPRE_SSTRUCTGRIDSETPERIODIC)
 
 void
 hypre_F90_IFACE(hypre_sstructgridsetnumghost, HYPRE_SSTRUCTGRIDSETNUMGHOST)
-                                                          (long int   *grid,
-                                                           int        *num_ghost,
-                                                           int        *ierr)
+   (long int   *grid,
+    int        *num_ghost,
+    int        *ierr)
 {
-   *ierr = (int) (HYPRE_SStructGridSetNumGhost( (HYPRE_SStructGrid) *grid,
-                                                (int *)              num_ghost));       
+   *ierr = (int) (HYPRE_SStructGridSetNumGhost(
+                     (HYPRE_SStructGrid) *grid,
+                     (int *)              num_ghost));       
 }

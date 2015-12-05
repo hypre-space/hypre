@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -62,6 +62,8 @@ typedef struct
 			if  AddToValues*/
    int     *off_proc_j; /* contains column indices */
    double  *off_proc_data; /* contains corresponding data */
+   int	    cancel_indx; /* number of elements that have to be deleted due
+			   to setting values from another processor */
 } hypre_AuxParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -86,5 +88,6 @@ typedef struct
 #define hypre_AuxParCSRMatrixOffProcI(matrix)  ((matrix) -> off_proc_i)
 #define hypre_AuxParCSRMatrixOffProcJ(matrix)  ((matrix) -> off_proc_j)
 #define hypre_AuxParCSRMatrixOffProcData(matrix)  ((matrix) -> off_proc_data)
+#define hypre_AuxParCSRMatrixCancelIndx(matrix)  ((matrix) -> cancel_indx)
 
 #endif

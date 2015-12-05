@@ -7,24 +7,20 @@
 # terms of the GNU Lesser General Public License (as published by the Free
 # Software Foundation) version 2.1 dated February 1999.
 #
-# $Revision: 1.55 $
+# $Revision: 1.57 $
 #EHEADER**********************************************************************
-
-
-
-
 
 
 include ../config/Makefile.config
 
-CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+CINCLUDES = ${MPIINCLUDE}
 CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
 C_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
- -I${HYPRE_LINK_DIR}/include\
+ -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}\
  ${CDEFS}
 
@@ -32,41 +28,41 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
- -I${HYPRE_LINK_DIR}/include\
+ -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}\
  ${CXXDEFS}
 
 F77_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
- -I${HYPRE_LINK_DIR}/include\
+ -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}
- 
+
 MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS} 
-LIBFLAGS = ${LIBDIRS} ${LIBS} 
-LDLIBFLAGS = ${LDLIBDIRS} ${LDLIBS} ${LIBM} ${LDFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
+LIBFLAGS = ${LDFLAGS} ${LIBS} ${FLIBS}
 
 LFLAGS =\
- -L${HYPRE_LINK_DIR}/lib\
+ -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE\
- ${LAPACKLIBFLAGS} \
- ${BLASLIBFLAGS} \
- ${MPILIBFLAGS} ${LIBFLAGS} ${FLIBS} ${LDLIBFLAGS}
+ ${MPILIBFLAGS}\
+ ${LAPACKLIBFLAGS}\
+ ${BLASLIBFLAGS}\
+ ${LIBFLAGS}
 
 BABELLIBFLAGS =\
- -L${HYPRE_LINK_DIR}/lib\
+ -L${HYPRE_BUILD_DIR}/lib\
  -lbHYPRE\
  -lbHYPREClient-C\
  -lbHYPREClient-F\
  -lbHYPRE\
  -lsidl -ldl -lxml2
 
-
 ##################################################################
 # Targets
 ##################################################################
+
 HYPRE_DRIVERS =\
  ij.c\
  ij_mv.c\

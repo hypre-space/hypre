@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 #include "HYPRE_utilities.h"
@@ -28,7 +28,7 @@ extern "C" {
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -66,7 +66,7 @@ extern "C" {
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -161,6 +161,7 @@ extern "C" {
 #define MPI_Waitany         hypre_MPI_Waitany          
 #define MPI_Allreduce       hypre_MPI_Allreduce        
 #define MPI_Reduce          hypre_MPI_Reduce        
+#define MPI_Scan            hypre_MPI_Scan        
 #define MPI_Request_free    hypre_MPI_Request_free        
 #define MPI_Type_contiguous hypre_MPI_Type_contiguous     
 #define MPI_Type_vector     hypre_MPI_Type_vector     
@@ -249,6 +250,7 @@ int hypre_MPI_Waitall( int count , hypre_MPI_Request *array_of_requests , hypre_
 int hypre_MPI_Waitany( int count , hypre_MPI_Request *array_of_requests , int *index , hypre_MPI_Status *status );
 int hypre_MPI_Allreduce( void *sendbuf , void *recvbuf , int count , hypre_MPI_Datatype datatype , hypre_MPI_Op op , hypre_MPI_Comm comm );
 int hypre_MPI_Reduce( void *sendbuf , void *recvbuf , int count , hypre_MPI_Datatype datatype , hypre_MPI_Op op , int root , hypre_MPI_Comm comm );
+int hypre_MPI_Scan( void *sendbuf , void *recvbuf , int count , hypre_MPI_Datatype datatype , hypre_MPI_Op op , hypre_MPI_Comm comm );
 int hypre_MPI_Request_free( hypre_MPI_Request *request );
 int hypre_MPI_Type_contiguous( int count , hypre_MPI_Datatype oldtype , hypre_MPI_Datatype *newtype );
 int hypre_MPI_Type_vector( int count , int blocklength , int stride , hypre_MPI_Datatype oldtype , hypre_MPI_Datatype *newtype );
@@ -273,7 +275,7 @@ int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -406,7 +408,7 @@ void hypre_FreeDML( char *ptr , char *file , int line );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -520,7 +522,7 @@ int MPI_Irsend( void *buf , int count , MPI_Datatype datatype , int dest , int t
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -531,10 +533,12 @@ int MPI_Irsend( void *buf , int count , MPI_Datatype datatype , int dest , int t
 #if defined(HYPRE_USING_OPENMP) || defined (HYPRE_USING_PGCC_SMP)
 
 int hypre_NumThreads( void );
+int hypre_GetThreadNum( void );
 
 #else
 
 #define hypre_NumThreads() 1
+#define hypre_GetThreadNum() 0
 
 #endif
 
@@ -606,7 +610,7 @@ extern int hypre_NumThreads;
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -741,7 +745,7 @@ int hypre_PrintTiming( const char *heading , MPI_Comm comm );
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -792,7 +796,7 @@ typedef hypre_ListElement  *hypre_LinkList;
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -860,7 +864,7 @@ int hypre_DataExchangeList(int num_contacts,
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 

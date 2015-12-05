@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -36,7 +36,8 @@ int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
                              double              relax_weight,
                              double              omega,
                              hypre_ParVector    *u,
-                             hypre_ParVector    *Vtemp )
+                             hypre_ParVector    *Vtemp,
+                             hypre_ParVector    *Ztemp )
 {
    int i, Solve_err_flag = 0;
    int relax_points[2];
@@ -52,58 +53,19 @@ int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
 	 relax_points[0] = -1;
 	 relax_points[1] = 1;
       }
-/*      if (relax_type == 6)
-      {
+
+      for (i=0; i < 2; i++)
          Solve_err_flag = hypre_BoomerAMGRelax(A,
-                                            f,
-                                            cf_marker,
-                                            3,
-                                            relax_points[0],
-                                            relax_weight,
-                                            omega,
-                                            u,
-                                            Vtemp); 
-         Solve_err_flag = hypre_BoomerAMGRelax(A,
-                                            f,
-                                            cf_marker,
-                                            4,
-                                            relax_points[0],
-                                            relax_weight,
-                                            omega,
-                                            u,
-                                            Vtemp); 
-         Solve_err_flag = hypre_BoomerAMGRelax(A,
-                                            f,
-                                            cf_marker,
-                                            4,
-                                            relax_points[1],
-                                            relax_weight,
-                                            omega,
-                                            u,
-                                            Vtemp); 
-         Solve_err_flag = hypre_BoomerAMGRelax(A,
-                                            f,
-                                            cf_marker,
-                                            3,
-                                            relax_points[1],
-                                            relax_weight,
-                                            omega,
-                                            u,
-                                            Vtemp); 
-      }
-      else */
-      {
-         for (i=0; i < 2; i++)
-            Solve_err_flag = hypre_BoomerAMGRelax(A,
-                                            f,
-                                            cf_marker,
-                                            relax_type,
-                                            relax_points[i],
-                                            relax_weight,
-                                            omega,
-                                            u,
-                                            Vtemp); 
-      }
+                                               f,
+                                               cf_marker,
+                                               relax_type,
+                                               relax_points[i],
+                                               relax_weight,
+                                               omega,
+                                               u,
+                                               Vtemp, 
+                                               Ztemp); 
+      
    }
    else
    {
@@ -115,8 +77,11 @@ int  hypre_BoomerAMGRelaxIF( hypre_ParCSRMatrix *A,
                                             relax_weight,
                                             omega,
                                             u,
-                                            Vtemp); 
+                                            Vtemp, 
+                                            Ztemp); 
    }
 
    return Solve_err_flag;
 }
+
+

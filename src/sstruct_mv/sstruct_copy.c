@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -29,7 +29,6 @@ int
 hypre_SStructPCopy( hypre_SStructPVector *px,
                     hypre_SStructPVector *py )
 {
-   int ierr = 0;
    int nvars = hypre_SStructPVectorNVars(px);
    int var;
 
@@ -39,7 +38,7 @@ hypre_SStructPCopy( hypre_SStructPVector *px,
                        hypre_SStructPVectorSVector(py, var));
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -52,7 +51,6 @@ hypre_SStructPartialPCopy( hypre_SStructPVector *px,
                            hypre_SStructPVector *py,
                            hypre_BoxArrayArray **array_boxes )
 {
-   int ierr = 0;
    int nvars = hypre_SStructPVectorNVars(px);
    hypre_BoxArrayArray  *boxes;
    int var;
@@ -65,7 +63,7 @@ hypre_SStructPartialPCopy( hypre_SStructPVector *px,
                               boxes);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
@@ -76,8 +74,6 @@ int
 hypre_SStructCopy( hypre_SStructVector *x,
                    hypre_SStructVector *y )
 {
-   int ierr = 0;
-
    int nparts = hypre_SStructVectorNParts(x);
    int part;
 
@@ -86,8 +82,9 @@ hypre_SStructCopy( hypre_SStructVector *x,
 
    if (x_object_type != y_object_type)
    {
-       printf("vector object types different- cannot perform SStructCopy\n");
-       return ierr;
+      hypre_error_in_arg(2);
+      hypre_error_in_arg(3);
+      return hypre_error_flag;
    }
 
 
@@ -111,5 +108,5 @@ hypre_SStructCopy( hypre_SStructVector *x,
       hypre_ParVectorCopy(x_par, y_par);
    }
 
-   return ierr;
+   return hypre_error_flag;
 }

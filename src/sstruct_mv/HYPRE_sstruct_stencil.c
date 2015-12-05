@@ -7,10 +7,8 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
-
-
 
 
 /******************************************************************************
@@ -22,7 +20,6 @@
 #include "headers.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructStencilCreate
  *--------------------------------------------------------------------------*/
 
 int
@@ -30,14 +27,12 @@ HYPRE_SStructStencilCreate( int                   ndim,
                             int                   size,
                             HYPRE_SStructStencil *stencil_ptr )
 {
-   int  ierr = 0;
-
    hypre_SStructStencil  *stencil;
    hypre_StructStencil   *sstencil;
    int                   *vars;
 
    stencil = hypre_TAlloc(hypre_SStructStencil, 1);
-   ierr = HYPRE_StructStencilCreate(ndim, size, &sstencil);
+   HYPRE_StructStencilCreate(ndim, size, &sstencil);
    vars = hypre_CTAlloc(int, hypre_StructStencilSize(sstencil));
 
    hypre_SStructStencilSStencil(stencil) = sstencil;
@@ -46,18 +41,15 @@ HYPRE_SStructStencilCreate( int                   ndim,
 
    *stencil_ptr = stencil;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructStencilDestroy
  *--------------------------------------------------------------------------*/
 
 int
 HYPRE_SStructStencilDestroy( HYPRE_SStructStencil stencil )
 {
-   int  ierr = 0;
-
    if (stencil)
    {
       hypre_SStructStencilRefCount(stencil) --;
@@ -69,11 +61,10 @@ HYPRE_SStructStencilDestroy( HYPRE_SStructStencil stencil )
       }
    }
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SStructStencilSetEntry
  *--------------------------------------------------------------------------*/
 
 int
@@ -82,13 +73,12 @@ HYPRE_SStructStencilSetEntry( HYPRE_SStructStencil  stencil,
                               int                  *offset,
                               int                   var )
 {
-   int                   ierr;
    hypre_StructStencil  *sstencil = hypre_SStructStencilSStencil(stencil);
 
-   ierr = HYPRE_StructStencilSetElement(sstencil, entry, offset);
+   HYPRE_StructStencilSetElement(sstencil, entry, offset);
    hypre_SStructStencilVar(stencil, entry) = var;
 
-   return ierr;
+   return hypre_error_flag;
 }
 
 

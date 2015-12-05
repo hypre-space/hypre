@@ -7,7 +7,7 @@
  * terms of the GNU Lesser General Public License (as published by the Free
  * Software Foundation) version 2.1 dated February 1999.
  *
- * $Revision: 2.71 $
+ * $Revision: 2.77 $
  ***********************************************************************EHEADER*/
 
 
@@ -48,10 +48,13 @@
 #include "HYPRE_LSI_poly.h"
 #include "HYPRE_LSI_block.h"
 #include "HYPRE_LSI_Uzawa_c.h"
+#include "HYPRE_LSI_Dsuperlu.h"
 #include "HYPRE_MLMaxwell.h"
 #include "HYPRE_SlideReduction.h"
 
 //#define HAVE_SYSPDE
+//#define HAVE_DSUPERLU
+#include "dsuperlu_include.h"
 
 //***************************************************************************
 // timers 
@@ -168,6 +171,13 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   nStored_(0),
                   storedIndices_(NULL),
                   auxStoredIndices_(NULL),
+                  mRHSFlag_(0),
+                  mRHSNumGEqns_(0),
+                  mRHSGEqnIDs_(NULL),
+                  mRHSNEntries_(NULL),
+                  mRHSBCType_(NULL),
+                  mRHSRowInds_(NULL),
+                  mRHSRowVals_(NULL),
                   matrixVectorsCreated_(0),
                   systemAssembled_(0),
                   slideReduction_(0),
@@ -180,6 +190,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
                   projectCurrSize_(0),
                   projectionMatrix_(NULL),
                   normalEqnFlag_(0),
+                  slideObj_(NULL),
                   selectedList_(NULL),
                   selectedListAux_(NULL),
                   nConstraints_(0),
@@ -306,6 +317,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    mlNumPDEs_          = 3;    // default block size 
 
    truncThresh_        = 0.0;
+   rnorm_              = 0.0;
    rhsIDs_             = new int[1];
    rhsIDs_[0]          = 0;
    feData_             = NULL;
@@ -370,6 +382,7 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
 
 HYPRE_LinSysCore::~HYPRE_LinSysCore() 
 {
+   int i;
    //-------------------------------------------------------------------
    // diagnostic message
    //-------------------------------------------------------------------
@@ -386,21 +399,21 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    if ( HYr_ != NULL ) {HYPRE_IJVectorDestroy(HYr_); HYr_ = NULL;}
    if ( HYbs_ != NULL ) 
    {
-      for ( int i = 0; i < numRHSs_; i++ ) 
+      for ( i = 0; i < numRHSs_; i++ ) 
          if ( HYbs_[i] != NULL ) HYPRE_IJVectorDestroy(HYbs_[i]);
       delete [] HYbs_;
       HYbs_ = NULL;
    }
    if ( HYpbs_ != NULL ) 
    {
-      for ( int i = 0; i <= projectSize_; i++ ) 
+      for ( i = 0; i <= projectSize_; i++ ) 
          if ( HYpbs_[i] != NULL ) HYPRE_IJVectorDestroy(HYpbs_[i]);
       delete [] HYpbs_;
       HYpbs_ = NULL;
    }
    if ( HYpxs_ != NULL ) 
    {
-      for ( int i = 0; i <= projectSize_; i++ ) 
+      for ( i = 0; i <= projectSize_; i++ ) 
          if ( HYpxs_[i] != NULL ) HYPRE_IJVectorDestroy(HYpxs_[i]);
       delete [] HYpxs_;
       HYpxs_ = NULL;
@@ -421,14 +434,14 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 
    if ( colIndices_ != NULL )
    {
-      for ( int i = 0; i < localEndRow_-localStartRow_+1; i++ )
+      for ( i = 0; i < localEndRow_-localStartRow_+1; i++ )
          if ( colIndices_[i] != NULL ) delete [] colIndices_[i];
       delete [] colIndices_;
       colIndices_ = NULL;
    }
    if ( colValues_ != NULL )
    {
-      for ( int i = 0; i < localEndRow_-localStartRow_+1; i++ )
+      for ( i = 0; i < localEndRow_-localStartRow_+1; i++ )
          if ( colValues_[i] != NULL ) delete [] colValues_[i];
       delete [] colValues_;
       colValues_ = NULL;
@@ -441,6 +454,28 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
    if ( rhsIDs_ != NULL ) delete [] rhsIDs_;
    if ( storedIndices_ != NULL ) delete [] storedIndices_;
    if ( auxStoredIndices_ != NULL ) delete [] auxStoredIndices_;
+   if ( mRHSNumGEqns_ > 0)
+   {
+      if (mRHSGEqnIDs_  != NULL) delete [] mRHSGEqnIDs_;
+      if (mRHSNEntries_ != NULL) delete [] mRHSNEntries_;
+      if (mRHSBCType_   != NULL) delete [] mRHSBCType_ ;
+      if (mRHSRowInds_ != NULL)
+      {
+         for (i = 0; i < mRHSNumGEqns_; i++) delete [] mRHSRowInds_[i];
+         delete [] mRHSRowInds_;
+      }
+      if (mRHSRowVals_ != NULL)
+      {
+         for (i = 0; i < mRHSNumGEqns_; i++) delete [] mRHSRowVals_[i];
+         delete [] mRHSRowVals_;
+      }
+      mRHSNumGEqns_ = 0;
+      mRHSGEqnIDs_ = NULL;
+      mRHSNEntries_ = NULL;
+      mRHSBCType_ = NULL;
+      mRHSRowInds_ = NULL;
+      mRHSRowVals_ = NULL;
+   }
 
    //-------------------------------------------------------------------
    // clean up direct matrix access variables
@@ -529,13 +564,17 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
       else if ( HYPreconID_ == HYSYSPDE )
          HYPRE_ParCSRSysPDEDestroy( HYPrecon_ );
 #endif
+#ifdef HAVE_DSUPERLU
+      else if ( HYPreconID_ == HYDSLU )
+         HYPRE_LSI_DSuperLUDestroy(HYPrecon_);
+#endif
 
       HYPrecon_ = NULL;
    }
    delete [] HYPreconName_;
    HYPreconName_ = NULL;
 
-   for (int i = 0; i < euclidargc_*2; i++) delete [] euclidargv_[i];
+   for (i = 0; i < euclidargc_*2; i++) delete [] euclidargv_[i];
    delete [] euclidargv_;
    euclidargv_ = NULL;
 
@@ -688,6 +727,29 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    rowLengths_ = NULL;
    colIndices_ = NULL;
    colValues_  = NULL;
+
+   if ( mRHSNumGEqns_ > 0)
+   {
+      if (mRHSGEqnIDs_  != NULL) delete [] mRHSGEqnIDs_;
+      if (mRHSNEntries_ != NULL) delete [] mRHSNEntries_;
+      if (mRHSBCType_   != NULL) delete [] mRHSBCType_;
+      if (mRHSRowInds_ != NULL)
+      {
+         for (i = 0; i < mRHSNumGEqns_; i++) delete [] mRHSRowInds_[i];
+         delete [] mRHSRowInds_;
+      }
+      if (mRHSRowVals_ != NULL)
+      {
+         for (i = 0; i < mRHSNumGEqns_; i++) delete [] mRHSRowVals_[i];
+         delete [] mRHSRowVals_;
+      }
+      mRHSNumGEqns_ = 0;
+      mRHSGEqnIDs_ = NULL;
+      mRHSNEntries_ = NULL;
+      mRHSBCType_ = NULL;
+      mRHSRowInds_ = NULL;
+      mRHSRowVals_ = NULL;
+   }
 
    //-------------------------------------------------------------------
    // error checking
@@ -891,6 +953,8 @@ int HYPRE_LinSysCore::setConnectivities(GlobalID elemBlk, int nElems,
                        const int* const* connNodes)
 {
 #ifdef HAVE_MLI
+   (void) elemIDs;
+   (void) connNodes;
    if ( HYPreconID_ == HYMLI && haveFEData_ == 2 )
    {
       if (feData_ == NULL) feData_ = (void *) HYPRE_LSI_MLISFEICreate(comm_);
@@ -2006,6 +2070,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
    FILE   *fp;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    b_csr;
+   HYPRE_SlideReduction *slideObj;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -2111,6 +2176,12 @@ int HYPRE_LinSysCore::matrixLoadComplete()
       currB_ = HYb_;
       currX_ = HYx_;
       currR_ = HYr_;
+      if (slideObj_ != NULL)
+      {
+         slideObj = (HYPRE_SlideReduction *) slideObj_; 
+         delete slideObj;
+      }
+      slideObj_ = NULL;
    }
 
    //-------------------------------------------------------------------
@@ -2563,9 +2634,10 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
 int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
                                           double* gamma1, int leng)
 {
-   int    i, j, k, localEqnNum, colIndex, rowSize, *colInd;
+   int    i, j, k, localEqnNum, colIndex, rowSize, *colInd, *iarray;
    int    numLocalRows, eqnNum, rowSize2, *colInd2, numLabels, *labels;
-   double rhs_term, val, *colVal2, *colVal;
+   int    **i2array, count;
+   double rhs_term, val, *colVal2, *colVal, **d2array;
 
    //-------------------------------------------------------------------
    // diagnostic message and error checking
@@ -2599,51 +2671,189 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
    // examine each row individually
    //-------------------------------------------------------------------
 
-   for( i = 0; i < leng; i++ ) 
+   //**/================================================================
+   //**/ The following is for multiple right hand side (Mar 2009)
+   if (mRHSFlag_ == 1 && currentRHS_ != 0 & mRHSNumGEqns_ > 0)
    {
-      localEqnNum = globalEqn[i] + 1 - localStartRow_;
-      if ( localEqnNum >= 0 && localEqnNum < numLocalRows )
+      for( i = 0; i < leng; i++ )
       {
-         rowSize = rowLengths_[localEqnNum];
-         colInd  = colIndices_[localEqnNum];
-         colVal  = colValues_[localEqnNum];
-
-         for ( j = 0; j < rowSize; j++ ) 
+         for ( j = 0; j < mRHSNumGEqns_; j++ )
+            if (mRHSGEqnIDs_[j] == globalEqn[i] && mRHSBCType_[j] == 1) break;
+         if (j == mRHSNumGEqns_)
          {
-            colIndex = colInd[j];
-            if ( colIndex-1 == globalEqn[i] ) colVal[j] = 1.0;
-            else                              colVal[j] = 0.0;
-            if ( colIndex >= localStartRow_ && colIndex <= localEndRow_) 
+            printf("%4d : HYPRE_LSC::enforceEssentialBC ERROR (1).\n",mypid_);
+            return -1;
+         }
+         k = j;
+         localEqnNum = globalEqn[i] + 1 - localStartRow_;
+         if ( localEqnNum >= 0 && localEqnNum < numLocalRows )
+         {
+            for ( j = 0; j < mRHSNEntries_[k]; j++ )
             {
-               if ( (colIndex-1) != globalEqn[i]) 
-               {
-                  rowSize2 = rowLengths_[colIndex-localStartRow_];
-                  colInd2  = colIndices_[colIndex-localStartRow_];
-                  colVal2  = colValues_ [colIndex-localStartRow_];
-
-                  for( k = 0; k < rowSize2; k++ ) 
-                  {
-                     if ( colInd2[k]-1 == globalEqn[i] ) 
-                     {
-                        rhs_term = gamma1[i] / alpha[i] * colVal2[k];
-                        eqnNum = colIndex - 1;
-                        HYPRE_IJVectorGetValues(HYb_,1,&eqnNum, &val);
-                        val -= rhs_term;
-                        HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
-                                                (const double *) &val);
-                        colVal2[k] = 0.0;
-                        break;
-                     }
-                  }
-               }
+               rhs_term = gamma1[i] / alpha[i] * mRHSRowVals_[k][j];
+               eqnNum = mRHSRowInds_[k][j] - 1;
+               HYPRE_IJVectorGetValues(HYb_,1, &eqnNum, &val);
+               val -= rhs_term;
+               HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
+                                       (const double *) &rhs_term);
             }
-         }// end for(j<rowSize) loop
-
+         }
          // Set rhs for boundary point
          rhs_term = gamma1[i] / alpha[i];
          eqnNum = globalEqn[i];
          HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
                                  (const double *) &rhs_term);
+      }
+   }
+   //**/================================================================
+   else
+   {
+      //**/=============================================================
+      //**/ save the BC information
+      if (mRHSFlag_ == 1)
+      {
+         if (mRHSNumGEqns_ == 0)
+         {
+            mRHSGEqnIDs_ = new int[leng];
+            mRHSNEntries_ = new int[leng];
+            mRHSBCType_  = new int[leng];
+            mRHSRowInds_ = new int*[leng];
+            mRHSRowVals_ = new double*[leng];
+            for (i = 0; i < leng; i++) mRHSRowInds_[i] = NULL;
+            for (i = 0; i < leng; i++) mRHSRowVals_[i] = NULL;
+         }
+         else
+         {
+            iarray = mRHSGEqnIDs_;
+            mRHSGEqnIDs_ = new int[mRHSNumGEqns_+leng];
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSGEqnIDs_[i] = iarray[i];
+            iarray = mRHSNEntries_;
+            mRHSNEntries_ = new int[mRHSNumGEqns_+leng];
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSNEntries_[i] = iarray[i];
+            iarray = mRHSBCType_;
+            mRHSBCType_ = new int[mRHSNumGEqns_+leng];
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSBCType_[i] = iarray[i];
+            i2array = mRHSRowInds_;
+            mRHSRowInds_ = new int*[mRHSNumGEqns_+leng];
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSRowInds_[i] = i2array[i];
+            d2array = mRHSRowVals_;
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSRowInds_[i] = i2array[i];
+            for (i = mRHSNumGEqns_; i < mRHSNumGEqns_+leng; i++)
+                mRHSRowInds_[i] = NULL;
+            mRHSRowVals_ = new double*[mRHSNumGEqns_+leng];
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSRowVals_[i] = d2array[i];
+            for (i = mRHSNumGEqns_; i < mRHSNumGEqns_+leng; i++)
+                mRHSRowVals_[i] = NULL;
+         }
+      }
+      //**/=============================================================
+      for( i = 0; i < leng; i++ ) 
+      {
+         localEqnNum = globalEqn[i] + 1 - localStartRow_;
+         if ( localEqnNum >= 0 && localEqnNum < numLocalRows )
+         {
+            rowSize = rowLengths_[localEqnNum];
+            colInd  = colIndices_[localEqnNum];
+            colVal  = colValues_[localEqnNum];
+
+            //===================================================
+            // store the information for multiple right hand side
+            if (mRHSFlag_ == 1)
+            {
+               count = 0;
+               for ( j = 0; j < rowSize; j++ ) 
+               {
+                  colIndex = colInd[j];
+                  if (colIndex >= localStartRow_ && colIndex <= localEndRow_) 
+                  {
+                     if ( (colIndex-1) != globalEqn[i]) 
+                     {
+                        rowSize2 = rowLengths_[colIndex-localStartRow_];
+                        colInd2  = colIndices_[colIndex-localStartRow_];
+                        colVal2  = colValues_ [colIndex-localStartRow_];
+                        for( k = 0; k < rowSize2; k++ ) 
+                        {
+                           if (colInd2[k]-1 == globalEqn[i]) 
+                              count++;
+                           break;
+                        }
+                     }
+                  }
+               }
+               if (count > 0)
+               {
+                  mRHSBCType_[mRHSNumGEqns_] = 1;
+                  mRHSGEqnIDs_[mRHSNumGEqns_] = globalEqn[i];
+                  mRHSNEntries_[mRHSNumGEqns_] = count;
+                  mRHSRowInds_[mRHSNumGEqns_] = new int[count];
+                  mRHSRowVals_[mRHSNumGEqns_] = new double[count];
+               }
+               count = 0;
+               for ( j = 0; j < rowSize; j++ ) 
+               {
+                  colIndex = colInd[j];
+                  if (colIndex >= localStartRow_ && colIndex <= localEndRow_) 
+                  {
+                     if ( (colIndex-1) != globalEqn[i]) 
+                     {
+                        rowSize2 = rowLengths_[colIndex-localStartRow_];
+                        colInd2  = colIndices_[colIndex-localStartRow_];
+                        colVal2  = colValues_ [colIndex-localStartRow_];
+                        for( k = 0; k < rowSize2; k++ ) 
+                        {
+                           if ( colInd2[k]-1 == globalEqn[i] ) 
+                           {
+                              mRHSRowVals_[mRHSNumGEqns_][count] = colVal2[k];
+                              mRHSRowInds_[mRHSNumGEqns_][count] = colIndex;
+                              count++;
+                              break;
+                           }
+                        }
+                     }
+                  }
+               }
+               mRHSNumGEqns_++;
+            }
+            //===================================================
+
+            for ( j = 0; j < rowSize; j++ ) 
+            {
+               colIndex = colInd[j];
+               if ( colIndex-1 == globalEqn[i] ) colVal[j] = 1.0;
+               else                              colVal[j] = 0.0;
+               if ( colIndex >= localStartRow_ && colIndex <= localEndRow_) 
+               {
+                  if ( (colIndex-1) != globalEqn[i]) 
+                  {
+                     rowSize2 = rowLengths_[colIndex-localStartRow_];
+                     colInd2  = colIndices_[colIndex-localStartRow_];
+                     colVal2  = colValues_ [colIndex-localStartRow_];
+
+                     for( k = 0; k < rowSize2; k++ ) 
+                     {
+                        if ( colInd2[k]-1 == globalEqn[i] ) 
+                        {
+                           rhs_term = gamma1[i] / alpha[i] * colVal2[k];
+                           eqnNum = colIndex - 1;
+                           HYPRE_IJVectorGetValues(HYb_,1,&eqnNum, &val);
+                           val -= rhs_term;
+                           HYPRE_IJVectorSetValues(HYb_,1,(const int *) &eqnNum,
+                                                   (const double *) &val);
+                           colVal2[k] = 0.0;
+                           break;
+                        }
+                     }
+                  }
+               }
+            }// end for(j<rowSize) loop
+
+            // Set rhs for boundary point
+            rhs_term = gamma1[i] / alpha[i];
+            eqnNum = globalEqn[i];
+            HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
+                                    (const double *) &rhs_term);
+
+         }
       }
    }
 
@@ -2681,7 +2891,8 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
                                           double** coefs) 
 {
    int    i, j, k, numLocalRows, localEqnNum, rowLen, *colInd, eqnNum;
-   double bval, *colVal;
+   int    *iarray, **i2array, count;
+   double bval, *colVal, rhs_term, **d2array;
 
    //-------------------------------------------------------------------
    // diagnostic message and error checking
@@ -2703,33 +2914,152 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
 
    numLocalRows = localEndRow_ - localStartRow_ + 1;
 
-   for( i = 0; i < numEqns; i++ ) 
-   {
-      localEqnNum = globalEqns[i] + 1 - localStartRow_;
-      if ( localEqnNum < 0 || localEqnNum >= numLocalRows )
-      {
-         continue;
-      }
+   //============================================================
+   //**/ The following is for multiple right hand side (Mar 2009)
 
-      rowLen = rowLengths_[localEqnNum];
-      colInd = colIndices_[localEqnNum];
-      colVal = colValues_[localEqnNum];
-      eqnNum = globalEqns[i];
-      for ( j = 0; j < colIndLen[i]; j++) 
+   if (mRHSFlag_ == 1 && currentRHS_ != 0 & mRHSNumGEqns_ > 0)
+   {
+      for( i = 0; i < numEqns; i++ )
       {
-         for ( k = 0; k < rowLen; k++ ) 
+         for ( j = 0; j < mRHSNumGEqns_; j++ )
+            if (mRHSGEqnIDs_[j] == globalEqns[i] && mRHSBCType_[j] == 2) break;
+         if (j == mRHSNumGEqns_)
          {
-            if (colInd[k]-1 == colIndices[i][j]) 
+            printf("%4d : HYPRE_LSC::enforceRemoteEssBCs ERROR (1).\n",mypid_);
+            return -1;
+         }
+         k = j;
+         localEqnNum = globalEqns[i] + 1 - localStartRow_;
+         if ( localEqnNum < 0 || localEqnNum >= numLocalRows )
+         {
+            continue;
+         }
+         eqnNum = globalEqns[i];
+         rowLen = mRHSNEntries_[k];
+         colInd = mRHSRowInds_[k];
+         colVal = mRHSRowVals_[k];
+         for ( j = 0; j < colIndLen[i]; j++) 
+         {
+            for ( k = 0; k < rowLen; k++ ) 
             {
-               HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&bval);
-               bval -= ( colVal[k] * coefs[i][j] );
-               colVal[k] = 0.0;
-               HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
-                                       (const double *) &bval);
+               if (colInd[k]-1 == colIndices[i][j]) 
+               {
+                  rhs_term = colVal[k] * coefs[i][j];
+                  HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&bval);
+                  bval -= rhs_term;
+                  HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
+                                          (const double *) &bval);
+               }
             }
          }
       }
    }
+   //**/================================================================
+   else
+   {
+      //**/=============================================================
+      //**/ save the BC information
+      if (mRHSFlag_ == 1)
+      {
+         if (mRHSNumGEqns_ == 0)
+         {
+            mRHSGEqnIDs_ = new int[numEqns];
+            mRHSNEntries_ = new int[numEqns];
+            mRHSBCType_  = new int[numEqns];
+            mRHSRowInds_ = new int*[numEqns];
+            mRHSRowVals_ = new double*[numEqns];
+            for (i = 0; i < numEqns; i++) mRHSRowInds_[i] = NULL;
+            for (i = 0; i < numEqns; i++) mRHSRowVals_[i] = NULL;
+         }
+         else
+         {
+            iarray = mRHSGEqnIDs_;
+            mRHSGEqnIDs_ = new int[mRHSNumGEqns_+numEqns];
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSGEqnIDs_[i] = iarray[i];
+            iarray = mRHSNEntries_;
+            mRHSNEntries_ = new int[mRHSNumGEqns_+numEqns];
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSNEntries_[i] = iarray[i];
+            iarray = mRHSBCType_;
+            mRHSBCType_ = new int[mRHSNumGEqns_+numEqns];
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSBCType_[i] = iarray[i];
+            i2array = mRHSRowInds_;
+            mRHSRowInds_ = new int*[mRHSNumGEqns_+numEqns];
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSRowInds_[i] = i2array[i];
+            d2array = mRHSRowVals_;
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSRowInds_[i] = i2array[i];
+            for (i = mRHSNumGEqns_; i < mRHSNumGEqns_+numEqns; i++)
+                mRHSRowInds_[i] = NULL;
+            mRHSRowVals_ = new double*[mRHSNumGEqns_+numEqns];
+            for (i = 0; i < mRHSNumGEqns_; i++) mRHSRowVals_[i] = d2array[i];
+            for (i = mRHSNumGEqns_; i < mRHSNumGEqns_+numEqns; i++)
+                mRHSRowVals_[i] = NULL;
+         }
+      }
+      //**/=============================================================
+
+      for( i = 0; i < numEqns; i++ ) 
+      {
+         localEqnNum = globalEqns[i] + 1 - localStartRow_;
+         if ( localEqnNum < 0 || localEqnNum >= numLocalRows )
+         {
+            continue;
+         }
+
+         rowLen = rowLengths_[localEqnNum];
+         colInd = colIndices_[localEqnNum];
+         colVal = colValues_[localEqnNum];
+         eqnNum = globalEqns[i];
+
+         //===================================================
+         // store the information for multiple right hand side
+         if (mRHSFlag_ == 1)
+         {
+            count = 0;
+            for ( j = 0; j < colIndLen[i]; j++) 
+            {
+               for ( k = 0; k < rowLen; k++ ) 
+                  if (colInd[k]-1 == colIndices[i][j]) count++;
+            }
+            if (count > 0)
+            {
+               mRHSGEqnIDs_[mRHSNumGEqns_] = globalEqns[i];
+               mRHSBCType_[mRHSNumGEqns_] = 2;
+               mRHSNEntries_[mRHSNumGEqns_] = count;
+               mRHSRowInds_[mRHSNumGEqns_] = new int[count];
+               mRHSRowVals_[mRHSNumGEqns_] = new double[count];
+            }
+            count = 0;
+            for ( j = 0; j < colIndLen[i]; j++) 
+            {
+               for ( k = 0; k < rowLen; k++ ) 
+               {
+                  if (colInd[k]-1 == colIndices[i][j]) 
+                  {
+                     mRHSRowVals_[k][count] = colVal[k];
+                     mRHSRowInds_[k][count] = colInd[k];
+                  }
+               }
+            }
+         }
+         //===================================================
+
+         for ( j = 0; j < colIndLen[i]; j++) 
+         {
+            for ( k = 0; k < rowLen; k++ ) 
+            {
+               if (colInd[k]-1 == colIndices[i][j]) 
+               {
+                  rhs_term = colVal[k] * coefs[i][j];
+                  HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&bval);
+                  bval -= rhs_term;
+                  HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
+                                          (const double *) &bval);
+                  colVal[k] = 0.0;
+               }
+            }
+         }
+      }
+   } 
 
    //-------------------------------------------------------------------
    // diagnostic message 
@@ -2753,7 +3083,7 @@ int HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
                                      double* beta, double* gamma1, int leng)
 {
    int    i, j, numLocalRows, localEqnNum, *colInd, rowSize, eqnNum;
-   double val, *colVal;
+   double val, *colVal, rhs_term;
 
    //-------------------------------------------------------------------
    // diagnostic message and error checking
@@ -2775,35 +3105,59 @@ int HYPRE_LinSysCore::enforceOtherBC(int* globalEqn, double* alpha,
 
    numLocalRows = localEndRow_ - localStartRow_ + 1;
 
-   for( i = 0; i < leng; i++ ) 
+   //============================================================
+   //**/ The following is for multiple right hand side (Mar 2009)
+   if (mRHSFlag_ == 1 && currentRHS_ != 0)
    {
-      localEqnNum = globalEqn[i] + 1 - localStartRow_;
-      if ( localEqnNum < 0 || localEqnNum >= numLocalRows )
+      for( i = 0; i < leng; i++ ) 
       {
-         continue;
-      }
-
-      rowSize = rowLengths_[localEqnNum];
-      colVal  = colValues_[localEqnNum];
-      colInd  = colIndices_[localEqnNum];
-
-      for ( j = 0; j < rowSize; j++) 
-      {
-         if ((colInd[j]-1) == globalEqn[i]) 
+         localEqnNum = globalEqn[i] + 1 - localStartRow_;
+         if ( localEqnNum < 0 || localEqnNum >= numLocalRows )
          {
-            colVal[j] += alpha[i]/beta[i];
-            break;
+            continue;
          }
+         eqnNum = globalEqn[i];
+         rhs_term = gamma1[i] / beta[i];
+         HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&val);
+         val += rhs_term;
+         HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
+                                 (const double *) &val);
       }
+   }
+   //============================================================
+   else
+   {
+      for( i = 0; i < leng; i++ ) 
+      {
+         localEqnNum = globalEqn[i] + 1 - localStartRow_;
+         if ( localEqnNum < 0 || localEqnNum >= numLocalRows )
+         {
+            continue;
+         }
 
-      //now make the rhs modification.
-      // need to fetch matrix and put it back before assembled
+         rowSize = rowLengths_[localEqnNum];
+         colVal  = colValues_[localEqnNum];
+         colInd  = colIndices_[localEqnNum];
 
-      eqnNum = globalEqn[i];
-      HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&val);
-      val += ( gamma1[i] / beta[i] );
-      HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
-                              (const double *) &val);
+         for ( j = 0; j < rowSize; j++) 
+         {
+            if ((colInd[j]-1) == globalEqn[i]) 
+            {
+               colVal[j] += alpha[i]/beta[i];
+               break;
+            }
+         }
+
+         //now make the rhs modification.
+         // need to fetch matrix and put it back before assembled
+
+         eqnNum = globalEqn[i];
+         rhs_term = gamma1[i] / beta[i];
+         HYPRE_IJVectorGetValues(HYb_,1,&eqnNum,&val);
+         val += rhs_term;
+         HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &eqnNum,
+                                 (const double *) &val);
+      }
    }
 
    //-------------------------------------------------------------------
@@ -3176,6 +3530,7 @@ int HYPRE_LinSysCore::destroyVectorData(Data& data)
 
 int HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs) 
 {
+   int ierr = 0;
    //-------------------------------------------------------------------
    // diagnostic message
    //-------------------------------------------------------------------
@@ -3210,6 +3565,25 @@ int HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs)
    if (numRHSs == 0) return (0);
 
    //-------------------------------------------------------------------
+   // instantiate the right hand vectors
+   //-------------------------------------------------------------------
+
+   if ( matrixVectorsCreated_ )
+   {
+      HYbs_ = new HYPRE_IJVector[numRHSs_];
+      for ( int i = 0; i < numRHSs_; i++ )
+      {
+         ierr = HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1,
+                                   &(HYbs_[i]));
+         ierr = HYPRE_IJVectorSetObjectType(HYbs_[i], HYPRE_PARCSR);
+         ierr = HYPRE_IJVectorInitialize(HYbs_[i]);
+         ierr = HYPRE_IJVectorAssemble(HYbs_[i]);
+         //assert(!ierr);
+      }
+      HYb_ = HYbs_[0];
+   }
+
+   //-------------------------------------------------------------------
    // copy in the right hand side IDs
    //-------------------------------------------------------------------
 
@@ -3225,7 +3599,7 @@ int HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  setNumRHSVectors.\n",mypid_);
-   return (0);
+   return (ierr);
 }
 
 //***************************************************************************
@@ -3251,6 +3625,7 @@ int HYPRE_LinSysCore::setRHSID(int rhsID)
       {
          currentRHS_ = i;
          HYb_ = HYbs_[currentRHS_];
+         currB_ = HYb_;
          return (0);
       }
    }
@@ -3677,6 +4052,10 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       else if (HYPreconID_ == HYSYSPDE)
          HYPRE_ParCSRSysPDEDestroy(HYPrecon_);
 #endif
+#ifdef HAVE_DSUPERLU
+      else if (HYPreconID_ == HYDSLU)
+         HYPRE_LSI_DSuperLUDestroy(HYPrecon_);
+#endif
    }
 
    //-------------------------------------------------------------------
@@ -3800,6 +4179,13 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       HYPreconID_ = HYSYSPDE;
    }
 #endif
+#ifdef HAVE_DSUPERLU
+   else if (!strcmp(name, "dsuperlu"))
+   {
+      strcpy(HYPreconName_, name);
+      HYPreconID_ = HYDSLU;
+   }
+#endif
    else
    {
       if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
@@ -3908,6 +4294,13 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
            printf("HYPRE_LSC::selectPreconditioner-SYSPDE unsupported.\n");
 #endif
            break;
+      case HYDSLU :
+#ifdef HAVE_DSUPERLU
+           ierr = HYPRE_LSI_DSuperLUCreate(comm_, &HYPrecon_);
+#else
+           printf("HYPRE_LSC::selectPreconditioner-DSUPERLU unsupported.\n");
+#endif
+           break;
    }
 
    //-------------------------------------------------------------------
@@ -3995,11 +4388,12 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 {
    int                i, j, numIterations=0, status, ierr, localNRows;
    int                startRow, *procNRows, rowSize, *colInd, nnz, nrows;
+   int                slideCheck[2];
 #ifdef HAVE_MLI
    int                *constrMap, *constrEqns, ncount, *iArray;
    double             *tempNodalCoord; 
 #endif
-   int                *numSweeps, *relaxType;
+   int                *numSweeps, *relaxType, reduceAFlag;
    int                *matSizes, *rowInd, retFlag, tempIter, nTrials;
    double             rnorm=0.0, ddata, *colVal, *relaxWt, *diagVals;
    double             stime, etime, ptime, rtime1, rtime2, newnorm;
@@ -4013,7 +4407,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 #endif
    HYPRE_ParCSRMatrix A_csr, I_csr, normalA_csr;
    HYPRE_ParVector    x_csr, b_csr, r_csr;
-   HYPRE_SlideReduction *slideObj;
+   HYPRE_SlideReduction *slideObj = (HYPRE_SlideReduction *) slideObj_;
 
    //-------------------------------------------------------------------
    // diagnostic message 
@@ -4026,6 +4420,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
    // see if Schur or slide reduction is to be performed
    //-------------------------------------------------------------------
 
+   rnorm_ = 0.0;
    MPI_Barrier(comm_);
    rtime1  = LSC_Wtime();
    if ( schurReduction_ == 1 && schurReductionCreated_ == 0 )
@@ -4043,11 +4438,30 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       else if ( slideReduction_ == 2 ) buildSlideReducedSystem2();
       else if ( slideReduction_ == 3 || slideReduction_ == 4 ) 
       {
-         slideObj = new HYPRE_SlideReduction(comm_);
+         if (slideObj == NULL)
+         {
+            slideObj = new HYPRE_SlideReduction(comm_);
+            slideObj_ = (void *) slideObj;
+         }
          TempA = currA_;
          TempX = currX_;
          TempB = currB_;
          TempR = currR_;
+         HYPRE_IJVectorGetLocalRange(HYb_,&slideCheck[0],&slideCheck[1]);
+         // check to see if it has been reduced before
+         // if so, need to redo B and X
+         reduceAFlag = 1;
+         if (currA_ != HYA_)
+         {
+            HYPRE_IJVectorDestroy(currB_);
+            HYPRE_IJVectorDestroy(currX_);
+            HYPRE_IJVectorDestroy(currR_);
+            currB_ = HYb_;
+            currX_ = HYx_;
+            currR_ = HYr_;
+            reduceAFlag = 0;
+         }
+
          if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )
             slideObj->setOutputLevel(1);
          if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE2 )
@@ -4081,10 +4495,13 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             HYPRE_LSI_MLIAdjustNullSpace(HYPrecon_,j,constrEqns,perturb_csr);
          }
 #endif
-         slideObj->getReducedMatrix(&currA_);
+         if (reduceAFlag == 1)
+         {
+            slideObj->getReducedMatrix(&currA_);
+            slideObj->getReducedAuxVector(&currR_);
+         }
          slideObj->getReducedSolnVector(&currX_);
          slideObj->getReducedRHSVector(&currB_);
-         slideObj->getReducedAuxVector(&currR_);
          if ( currA_ == NULL )
          {
             currA_ = TempA;
@@ -5089,7 +5506,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
               printf("* distributed SuperLU solver \n");
               printf("*--------------------------------------------------\n");
            }
-           solveUsingDSuperLU(status);
+           rnorm = solveUsingDSuperLU(status);
 #ifndef NOFEI
            if ( status == 1 ) status = 0; 
 #endif      
@@ -5175,7 +5592,6 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       if ( slideReduction_ == 3 )
            slideObj->buildReducedSolnVector(currX_, currB_);
       else slideObj->buildModifiedSolnVector(currX_);
-      delete slideObj;
       HYPRE_ParVectorCopy( b_csr, r_csr );
       HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
       HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
@@ -5204,6 +5620,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
    solveStatus = status;
    iterations = numIterations;
+   rnorm_ = rnorm;
 
    MPI_Barrier(comm_);
    etime = LSC_Wtime();
@@ -5259,6 +5676,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 
 int HYPRE_LinSysCore::writeSystem(const char *name)
 {
+   (void) name;
    printf("HYPRE_LinsysCore : writeSystem not implemented.\n");
    return (0);
 }
@@ -5346,5 +5764,14 @@ void *HYPRE_LinSysCore::HYPRE_LSC_MatMatMult(void *inMat)
    B_csr = (hypre_ParCSRMatrix *) inMat;
    C_csr = hypre_ParMatmul((hypre_ParCSRMatrix *)A_csr,B_csr);
    return (void *) C_csr;
+}
+
+//***************************************************************************
+// this function returns the residual norm
+//---------------------------------------------------------------------------
+
+double HYPRE_LinSysCore::HYPRE_LSC_GetRNorm()
+{
+   return rnorm_;
 }
 
