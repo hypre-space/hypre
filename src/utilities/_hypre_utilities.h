@@ -30,7 +30,7 @@ extern "C" {
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -81,7 +81,7 @@ extern "C" {
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -301,7 +301,7 @@ int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -448,7 +448,7 @@ double hypre_Rand ( void );
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 /******************************************************************************
@@ -575,7 +575,7 @@ int MPI_Irsend( void *buf , int count , MPI_Datatype datatype , int dest , int t
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -674,7 +674,7 @@ extern int hypre_NumThreads;
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -822,7 +822,7 @@ int hypre_PrintTiming( const char *heading , MPI_Comm comm );
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -886,7 +886,7 @@ typedef hypre_ListElement  *hypre_LinkList;
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 #ifndef hypre_EXCHANGE_DATA_HEADER
@@ -953,6 +953,7 @@ void enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_pt
 
 /* binsearch.c */
 int hypre_BinarySearch ( int *list , int value , int list_length );
+int hypre_BinarySearch2 ( int *list , int value , int low , int high , int *spot );
 
 /* qsplit.c */
 int hypre_DoubleQuickSplit ( double *values , int *indices , int list_length , int NumberKept );
@@ -990,7 +991,7 @@ void hypre_qsort3i ( int *v , int *w , int *z , int left , int right );
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 

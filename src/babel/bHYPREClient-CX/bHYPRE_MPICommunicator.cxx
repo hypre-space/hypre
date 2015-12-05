@@ -850,8 +850,9 @@ bHYPRE::MPICommunicator::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  Create an MPICommunicator object from C code. 
  */
 ::bHYPRE::MPICommunicator
 bHYPRE::MPICommunicator::CreateC( /* in */void* mpi_comm )
@@ -871,8 +872,9 @@ bHYPRE::MPICommunicator::CreateC( /* in */void* mpi_comm )
 }
 
 
+
 /**
- * user defined static method
+ *  Create an MPICommunicator object from Fortran code. 
  */
 ::bHYPRE::MPICommunicator
 bHYPRE::MPICommunicator::CreateF( /* in */void* mpi_comm )
@@ -892,8 +894,9 @@ bHYPRE::MPICommunicator::CreateF( /* in */void* mpi_comm )
 }
 
 
+
 /**
- * user defined static method
+ *  Create an MPICommunicator object which represents MPI_Comm_World. 
  */
 ::bHYPRE::MPICommunicator
 bHYPRE::MPICommunicator::Create_MPICommWorld(  )

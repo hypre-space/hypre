@@ -36,7 +36,7 @@ extern "C" {
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.1 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -165,7 +165,7 @@ typedef struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.1 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -213,7 +213,7 @@ typedef struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.1 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -297,7 +297,7 @@ typedef struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.1 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -484,7 +484,7 @@ typedef struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.1 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -559,7 +559,7 @@ int * hypre_NumbersArray( hypre_NumbersNode * node );
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.1 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -666,7 +666,11 @@ void RowsWithColumn ( int *rowmin , int *rowmax , int column , int num_rows_diag
 void hypre_MatTCommPkgCreate_core ( MPI_Comm comm , int *col_map_offd , int first_col_diag , int *col_starts , int num_rows_diag , int num_cols_diag , int num_cols_offd , int *row_starts , int firstColDiag , int *colMapOffd , int *mat_i_diag , int *mat_j_diag , int *mat_i_offd , int *mat_j_offd , int data , int *p_num_recvs , int **p_recv_procs , int **p_recv_vec_starts , int *p_num_sends , int **p_send_procs , int **p_send_map_starts , int **p_send_map_elmts );
 int hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A );
 
+/* driver_aat2.c */
+
 /* driver_aat.c */
+
+/* driver_ab.c */
 
 /* driver_boolaat.c */
 
@@ -696,6 +700,7 @@ int HYPRE_ParCSRMatrixGetLocalRange ( HYPRE_ParCSRMatrix matrix , int *row_start
 int HYPRE_ParCSRMatrixGetRow ( HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values );
 int HYPRE_ParCSRMatrixRestoreRow ( HYPRE_ParCSRMatrix matrix , int row , int *size , int **col_ind , double **values );
 int HYPRE_CSRMatrixToParCSRMatrix ( MPI_Comm comm , HYPRE_CSRMatrix A_CSR , int *row_partitioning , int *col_partitioning , HYPRE_ParCSRMatrix *matrix );
+int HYPRE_CSRMatrixToParCSRMatrix_WithNewPartitioning ( MPI_Comm comm , HYPRE_CSRMatrix A_CSR , HYPRE_ParCSRMatrix *matrix );
 int HYPRE_ParCSRMatrixMatvec ( double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , double beta , HYPRE_ParVector y );
 int HYPRE_ParCSRMatrixMatvecT ( double alpha , HYPRE_ParCSRMatrix A , HYPRE_ParVector x , double beta , HYPRE_ParVector y );
 

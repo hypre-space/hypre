@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.12 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -245,6 +245,15 @@ int HYPRE_StructPFMGSetNonZeroGuess(HYPRE_StructSolver solver);
  **/
 int HYPRE_StructPFMGSetRelaxType(HYPRE_StructSolver solver,
                                  int                relax_type);
+
+/*
+ * (Optional) Set Jacobi weight (this is purposely not documented)
+ */
+int HYPRE_StructPFMGSetJacobiWeight(HYPRE_StructSolver solver,
+                                    double             weight);
+int HYPRE_StructPFMGGetJacobiWeight(HYPRE_StructSolver solver,
+                                    double            *weight);
+
 
 /**
  * (Optional) Set type of coarse-grid operator to use.
@@ -937,6 +946,9 @@ int HYPRE_StructSparseMSGSetNonZeroGuess(HYPRE_StructSolver solver);
 
 int HYPRE_StructSparseMSGSetRelaxType(HYPRE_StructSolver solver,
                                       int                relax_type);
+
+int HYPRE_StructSparseMSGSetJacobiWeight(HYPRE_StructSolver solver,
+                                         double             weight);
 
 int HYPRE_StructSparseMSGSetNumPreRelax(HYPRE_StructSolver solver,
                                         int                num_pre_relax);

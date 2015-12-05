@@ -3,8 +3,8 @@
  * Symbol:        sidl.ClassInfo-v0.9.15
  * Symbol Type:   interface
  * Babel Version: 1.0.0
- * Release:       $Name:  $
- * Revision:      @(#) $Id: sidl_ClassInfo_fStub.c,v 1.38 2006/09/14 21:51:52 painter Exp $
+ * Release:       $Name: V2-2-0b $
+ * Revision:      @(#) $Id: sidl_ClassInfo_fStub.c,v 1.39 2006/12/29 21:24:27 painter Exp $
  * Description:   Client-side glue code for sidl.ClassInfo
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.

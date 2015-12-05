@@ -3,8 +3,8 @@
 // Symbol:        sidl.rmi.NoRouteToHostException-v0.9.15
 // Symbol Type:   class
 // Babel Version: 1.0.0
-// Release:       $Name:  $
-// Revision:      @(#) $Id: sidl_rmi_NoRouteToHostException.cxx,v 1.2 2006/09/14 21:52:16 painter Exp $
+// Release:       $Name: V2-2-0b $
+// Revision:      @(#) $Id: sidl_rmi_NoRouteToHostException.cxx,v 1.3 2006/12/29 21:24:49 painter Exp $
 // Description:   Client-side glue code for sidl.rmi.NoRouteToHostException
 // 
 // Copyright (c) 2000-2002, The Regents of the University of California.

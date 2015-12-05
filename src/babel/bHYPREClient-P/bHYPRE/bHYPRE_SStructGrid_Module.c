@@ -2687,8 +2687,7 @@ RAISES\n\
     sidl.RuntimeException\n\
 \n\
 \
-Set the number of dimensions {\\tt ndim} and the number of\n\
-structured parts {\\tt nparts}."
+ This function is the preferred way to create a SStruct Grid. "
    },
   { "_connect", (PyCFunction)pStub_SStructGrid__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2762,7 +2761,9 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ final construction of the object before its use "
    },
   { "Destroy", (PyCFunction)pStub_SStructGrid_Destroy,
   (METH_VARARGS | METH_KEYWORDS),

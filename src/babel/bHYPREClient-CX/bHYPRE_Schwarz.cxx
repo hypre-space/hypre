@@ -2169,8 +2169,9 @@ bHYPRE::Schwarz::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a Schwarz solver. 
  */
 ::bHYPRE::Schwarz
 bHYPRE::Schwarz::Create( /* in */::bHYPRE::IJParCSRMatrix A )

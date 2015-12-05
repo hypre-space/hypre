@@ -89,6 +89,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  CreateC[]
+C        Create an MPICommunicator object from C code. 
 C       
 
         subroutine bHYPRE_MPICommunicator_CreateC_f(mpi_comm, retval,
@@ -105,6 +106,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  CreateF[]
+C        Create an MPICommunicator object from Fortran code. 
 C       
 
         subroutine bHYPRE_MPICommunicator_CreateF_f(mpi_comm, retval,
@@ -121,6 +123,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  Create_MPICommWorld[]
+C        Create an MPICommunicator object which represents MPI_Comm_World. 
 C       
 
         subroutine bHYPRE_MPICommunicator_Create_MPICommWorld_f(retval,

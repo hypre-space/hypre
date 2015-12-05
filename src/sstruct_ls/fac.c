@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -43,15 +43,17 @@ hypre_FACCreate( MPI_Comm  comm )
    (fac_data -> time_index) = hypre_InitializeTiming("FAC");
 
    /* set defaults */
-   (fac_data -> tol)            = 1.0e-06;
-   (fac_data -> max_cycles)     = 200;
-   (fac_data -> zero_guess)     = 0;
-   (fac_data -> max_levels)     = 0;
-   (fac_data -> relax_type)     = 2; /*  1 Jacobi; 2 Gauss-Seidel */
-   (fac_data -> num_pre_smooth) = 1;
-   (fac_data -> num_post_smooth)= 1;
-   (fac_data -> csolver_type)   = 1;
-   (fac_data -> logging)        = 0;
+   (fac_data -> tol)              = 1.0e-06;
+   (fac_data -> max_cycles)       = 200;
+   (fac_data -> zero_guess)       = 0;
+   (fac_data -> max_levels)       = 0;
+   (fac_data -> relax_type)       = 2; /*  1 Jacobi; 2 Gauss-Seidel */
+   (fac_data -> jacobi_weight)    = 0.0;
+   (fac_data -> usr_jacobi_weight)= 0;
+   (fac_data -> num_pre_smooth)   = 1;
+   (fac_data -> num_post_smooth)  = 1;
+   (fac_data -> csolver_type)     = 1;
+   (fac_data -> logging)          = 0;
 
    return (void *) fac_data;
 }
@@ -288,6 +290,21 @@ hypre_FACSetRelaxType( void *fac_vdata,
    (fac_data -> relax_type) = relax_type;
 
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_FACSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+int
+hypre_FACSetJacobiWeight( void  *fac_vdata,
+                          double weight )
+{
+   hypre_FACData *fac_data = fac_vdata;
+                                                                                                                                            
+   (fac_data -> jacobi_weight)    = weight;
+   (fac_data -> usr_jacobi_weight)= 1;
+                                                                                                                                            
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

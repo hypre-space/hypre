@@ -2134,7 +2134,9 @@ RETURNS\n\
    (bHYPRE.SStructGraph _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a SStruct Graph. "
    },
   { "_connect", (PyCFunction)pStub_SStructGraph__connect,
   (METH_VARARGS | METH_KEYWORDS),

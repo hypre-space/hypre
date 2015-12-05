@@ -134,7 +134,7 @@ bHYPRE_SStructStencil__connect(const char* url, sidl_BaseInterface *_ex)
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a SStruct Stencil. 
  */
 
 bHYPRE_SStructStencil

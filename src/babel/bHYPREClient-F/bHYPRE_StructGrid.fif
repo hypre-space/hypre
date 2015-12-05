@@ -83,6 +83,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  Create[]
+C        This function is the preferred way to create a Struct Grid. 
 C       
 
         subroutine bHYPRE_StructGrid_Create_f(mpi_comm, dim, retval,
@@ -156,6 +157,9 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  SetExtents[]
+C        Define the lower and upper corners of a box of the grid.
+C       "ilower" and "iupper" are arrays of size "dim", the number of spatial
+C       dimensions. 
 C       
 
         subroutine bHYPRE_StructGrid_SetExtents_f(self, ilower, iupper,
@@ -178,6 +182,16 @@ C        in rarray<int> iupper(dim)
 
 C       
 C       Method:  SetPeriodic[]
+C        Set the periodicity for the grid.  Default is no periodicity.
+C       
+C       The argument {\tt periodic} is an {\tt dim}-dimensional integer array that
+C       contains the periodicity for each dimension.  A zero value for a dimension
+C       means non-periodic, while a nonzero value means periodic and contains the
+C       actual period.  For example, periodicity in the first and third dimensions
+C       for a 10x11x12 grid is indicated by the array [10,0,12].
+C       
+C       NOTE: Some of the solvers in hypre have power-of-two restrictions on the size
+C       of the periodic dimensions.
 C       
 
         subroutine bHYPRE_StructGrid_SetPeriodic_f(self, periodic, dim,
@@ -198,6 +212,9 @@ C        in rarray<int> periodic(dim)
 
 C       
 C       Method:  SetNumGhost[]
+C        Set the number of ghost zones, separately on the lower and upper sides
+C       for each dimension.
+C       "num_ghost" is an array of size "dim2", twice the number of dimensions. 
 C       
 
         subroutine bHYPRE_StructGrid_SetNumGhost_f(self, num_ghost,
@@ -218,6 +235,7 @@ C        in rarray<int> num_ghost(dim2)
 
 C       
 C       Method:  Assemble[]
+C        final construction of the object before its use 
 C       
 
         subroutine bHYPRE_StructGrid_Assemble_f(self, retval, exception)

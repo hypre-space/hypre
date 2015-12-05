@@ -3,8 +3,8 @@ C       File:          sidl_rmi_NetworkException_Impl.f
 C       Symbol:        sidl.rmi.NetworkException-v0.9.15
 C       Symbol Type:   class
 C       Babel Version: 1.0.0
-C       Release:       $Name:  $
-C       Revision:      @(#) $Id: sidl_rmi_NetworkException.fif,v 1.27 2006/09/14 21:51:53 painter Exp $
+C       Release:       $Name: V2-2-0b $
+C       Revision:      @(#) $Id: sidl_rmi_NetworkException.fif,v 1.28 2006/12/29 21:24:29 painter Exp $
 C       Description:   Client-side documentation text for sidl.rmi.NetworkException
 C       
 C       Copyright (c) 2000-2002, The Regents of the University of California.

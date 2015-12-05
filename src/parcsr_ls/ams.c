@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.12 $
+ * $Revision: 2.17 $
  ***********************************************************************EHEADER*/
 
 
@@ -451,7 +451,7 @@ int hypre_ParCSRMatrixSetDiagRows(hypre_ParCSRMatrix *A, double d)
    {
       j = A_diag_I[i];
       if ((A_diag_I[i+1] == j+1) && (A_diag_J[j] == i) &&
-          num_cols_offd && (A_offd_I[i+1] == A_offd_I[i]))
+          (!num_cols_offd || (A_offd_I[i+1] == A_offd_I[i])))
       {
          A_diag_data[j] = d;
       }
@@ -487,10 +487,14 @@ void * hypre_AMSCreate()
    ams_data -> B_G_agg_levels = 1;     /* Levels of aggressive coarsening */
    ams_data -> B_G_relax_type = 3;     /* hybrid G-S/Jacobi */
    ams_data -> B_G_theta = 0.25;       /* strength threshold */
+   ams_data -> B_G_interp_type = 0;    /* interpolation type */
+   ams_data -> B_G_Pmax = 0;           /* max nonzero elements in interp. rows */
    ams_data -> B_Pi_coarsen_type = 10; /* HMIS coarsening */
    ams_data -> B_Pi_agg_levels = 1;    /* Levels of aggressive coarsening */
    ams_data -> B_Pi_relax_type = 3;    /* hybrid G-S/Jacobi */
    ams_data -> B_Pi_theta = 0.25;      /* strength threshold */
+   ams_data -> B_Pi_interp_type = 0;   /* interpolation type */
+   ams_data -> B_Pi_Pmax = 0;          /* max nonzero elements in interp. rows */
    ams_data -> beta_is_zero = 0;       /* the problem has a mass term */
 
    /* The rest of the fields are initialized using the Set functions */
@@ -498,14 +502,33 @@ void * hypre_AMSCreate()
    ams_data -> A    = NULL;
    ams_data -> G    = NULL;
    ams_data -> A_G  = NULL;
+   ams_data -> B_G  = 0;
    ams_data -> Pi   = NULL;
    ams_data -> A_Pi = NULL;
+   ams_data -> B_Pi = 0;
    ams_data -> x    = NULL;
    ams_data -> y    = NULL;
    ams_data -> z    = NULL;
    ams_data -> Gx   = NULL;
    ams_data -> Gy   = NULL;
    ams_data -> Gz   = NULL;
+
+   ams_data -> r0  = NULL;
+   ams_data -> g0  = NULL;
+   ams_data -> r1  = NULL;
+   ams_data -> g1  = NULL;
+   ams_data -> r2  = NULL;
+   ams_data -> g2  = NULL;
+
+   ams_data -> Pix    = NULL;
+   ams_data -> Piy    = NULL;
+   ams_data -> Piz    = NULL;
+   ams_data -> A_Pix  = NULL;
+   ams_data -> A_Piy  = NULL;
+   ams_data -> A_Piz  = NULL;
+   ams_data -> B_Pix  = 0;
+   ams_data -> B_Piy  = 0;
+   ams_data -> B_Piz  = 0;
 
    ams_data -> A_l1_norms = NULL;
 
@@ -541,17 +564,33 @@ int hypre_AMSDestroy(void *solver)
    if (ams_data -> B_Pi)
       HYPRE_BoomerAMGDestroy(ams_data -> B_Pi);
 
+   if (ams_data -> Pix)
+      hypre_ParCSRMatrixDestroy(ams_data -> Pix);
+   if (ams_data -> A_Pix)
+      hypre_ParCSRMatrixDestroy(ams_data -> A_Pix);
+   if (ams_data -> B_Pix)
+      HYPRE_BoomerAMGDestroy(ams_data -> B_Pix);
+   if (ams_data -> Piy)
+      hypre_ParCSRMatrixDestroy(ams_data -> Piy);
+   if (ams_data -> A_Piy)
+      hypre_ParCSRMatrixDestroy(ams_data -> A_Piy);
+   if (ams_data -> B_Piy)
+      HYPRE_BoomerAMGDestroy(ams_data -> B_Piy);
+   if (ams_data -> Piz)
+      hypre_ParCSRMatrixDestroy(ams_data -> Piz);
+   if (ams_data -> A_Piz)
+      hypre_ParCSRMatrixDestroy(ams_data -> A_Piz);
+   if (ams_data -> B_Piz)
+      HYPRE_BoomerAMGDestroy(ams_data -> B_Piz);
+
    if (ams_data -> r0)
       hypre_ParVectorDestroy(ams_data -> r0);
    if (ams_data -> g0)
       hypre_ParVectorDestroy(ams_data -> g0);
-   if (!ams_data -> beta_is_zero)
-   {
-      if (ams_data -> r1)
-         hypre_ParVectorDestroy(ams_data -> r1);
-      if (ams_data -> g1)
-         hypre_ParVectorDestroy(ams_data -> g1);
-   }
+   if (ams_data -> r1)
+      hypre_ParVectorDestroy(ams_data -> r1);
+   if (ams_data -> g1)
+      hypre_ParVectorDestroy(ams_data -> g1);
    if (ams_data -> r2)
       hypre_ParVectorDestroy(ams_data -> r2);
    if (ams_data -> g2)
@@ -737,15 +776,18 @@ int hypre_AMSSetTol(void *solver,
  *
  * Choose which three-level solver to use. Possible values are:
  *
- *   1 = 3-level multipl. solver (01210)    <-- small solution time
- *   3 = 3-level multipl. solver (02120)
- *   5 = 3-level multipl. solver (0102010)  <-- small solution time
- *   7 = 3-level multipl. solver (0201020)  <-- small number of iterations
- *
+ *   1 = 3-level multipl. solver (01210)      <-- small solution time
  *   2 = 3-level additive solver (0+1+2)
+ *   3 = 3-level multipl. solver (02120)
  *   4 = 3-level additive solver (010+2)
+ *   5 = 3-level multipl. solver (0102010)    <-- small solution time
  *   6 = 3-level additive solver (1+020)
- *   8 = 3-level additive solver (010+020)
+ *   7 = 3-level multipl. solver (0201020)    <-- small number of iterations
+ *   8 = 3-level additive solver (0(1+2)0)    <-- small solution time
+ *  11 = 5-level multipl. solver (013454310)  <-- small solution time, memory
+ *  12 = 5-level additive solver (0+1+3+4+5)
+ *  13 = 5-level multipl. solver (034515430)  <-- small solution time, memory
+ *  14 = 5-level additive solver (01(3+4+5)10)
  *
  *   0 = just the smoother (0)
  *
@@ -798,40 +840,48 @@ int hypre_AMSSetSmoothingOptions(void *solver,
 /*--------------------------------------------------------------------------
  * hypre_AMSSetAlphaAMGOptions
  *
- * Set AMG parameters for B_Pi. Default values: 10, 1, 3, 0.25.
+ * Set AMG parameters for B_Pi. Default values: 10, 1, 3, 0.25, 0, 0.
  *--------------------------------------------------------------------------*/
 
 int hypre_AMSSetAlphaAMGOptions(void *solver,
                                 int B_Pi_coarsen_type,
                                 int B_Pi_agg_levels,
                                 int B_Pi_relax_type,
-                                double B_Pi_theta)
+                                double B_Pi_theta,
+                                int B_Pi_interp_type,
+                                int B_Pi_Pmax)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> B_Pi_coarsen_type = B_Pi_coarsen_type;
    ams_data -> B_Pi_agg_levels = B_Pi_agg_levels;
    ams_data -> B_Pi_relax_type = B_Pi_relax_type;
    ams_data -> B_Pi_theta = B_Pi_theta;
+   ams_data -> B_Pi_interp_type = B_Pi_interp_type;
+   ams_data -> B_Pi_Pmax = B_Pi_Pmax;
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_AMSSetBetaAMGOptions
  *
- * Set AMG parameters for B_G. Default values: 10, 1, 3, 0.25.
+ * Set AMG parameters for B_G. Default values: 10, 1, 3, 0.25, 0, 0.
  *--------------------------------------------------------------------------*/
 
 int hypre_AMSSetBetaAMGOptions(void *solver,
                                int B_G_coarsen_type,
                                int B_G_agg_levels,
                                int B_G_relax_type,
-                               double B_G_theta)
+                               double B_G_theta,
+                               int B_G_interp_type,
+                               int B_G_Pmax)
 {
    hypre_AMSData *ams_data = solver;
    ams_data -> B_G_coarsen_type = B_G_coarsen_type;
    ams_data -> B_G_agg_levels = B_G_agg_levels;
    ams_data -> B_G_relax_type = B_G_relax_type;
    ams_data -> B_G_theta = B_G_theta;
+   ams_data -> B_G_interp_type = B_G_interp_type;
+   ams_data -> B_G_Pmax = B_G_Pmax;
    return hypre_error_flag;
 }
 
@@ -1017,6 +1067,336 @@ int hypre_AMSComputePi(hypre_ParCSRMatrix *A,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_AMSComputePixyz
+ *
+ * Construct the components Pix, Piy, Piz of the interpolation matrix Pi,
+ * which maps the space of vector linear finite elements to the space of
+ * edge finite elements.
+ *
+ * The construction is based on the fact that each component has the same
+ * sparsity structure as G, and the entries can be computed from the vectors
+ * Gx, Gy, Gz.
+ *--------------------------------------------------------------------------*/
+
+int hypre_AMSComputePixyz(hypre_ParCSRMatrix *A,
+                          hypre_ParCSRMatrix *G,
+                          hypre_ParVector *x,
+                          hypre_ParVector *y,
+                          hypre_ParVector *z,
+                          hypre_ParVector *Gx,
+                          hypre_ParVector *Gy,
+                          hypre_ParVector *Gz,
+                          int dim,
+                          hypre_ParCSRMatrix **Pix_ptr,
+                          hypre_ParCSRMatrix **Piy_ptr,
+                          hypre_ParCSRMatrix **Piz_ptr)
+{
+   int input_info = 0;
+
+   hypre_ParCSRMatrix *Pix, *Piy, *Piz;
+
+   if (x != NULL && y != NULL && (dim == 2 || z != NULL))
+      input_info = 1;
+
+   if (Gx != NULL && Gy != NULL && (dim == 2 || Gz != NULL))
+      input_info = 2;
+
+   if (!input_info)
+      hypre_error_in_arg(3);
+
+   /* If not given, compute Gx, Gy and Gz */
+   if (input_info == 1)
+   {
+      Gx = hypre_ParVectorInRangeOf(G);
+      hypre_ParCSRMatrixMatvec (1.0, G, x, 0.0, Gx);
+      Gy = hypre_ParVectorInRangeOf(G);
+      hypre_ParCSRMatrixMatvec (1.0, G, y, 0.0, Gy);
+      if (dim == 3)
+      {
+         Gz = hypre_ParVectorInRangeOf(G);
+         hypre_ParCSRMatrixMatvec (1.0, G, z, 0.0, Gz);
+      }
+   }
+
+   /* Compute Pix, Piy, Piz  */
+   {
+      int i, j;
+
+      double *Gx_data, *Gy_data, *Gz_data;
+
+      MPI_Comm comm = hypre_ParCSRMatrixComm(G);
+      int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(G);
+      int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(G);
+      int *row_starts = hypre_ParCSRMatrixRowStarts(G);
+      int *col_starts = hypre_ParCSRMatrixColStarts(G);
+      int num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(G));
+      int num_nonzeros_diag = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixDiag(G));
+      int num_nonzeros_offd = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(G));
+
+      Pix = hypre_ParCSRMatrixCreate(comm,
+                                     global_num_rows,
+                                     global_num_cols,
+                                     row_starts,
+                                     col_starts,
+                                     num_cols_offd,
+                                     num_nonzeros_diag,
+                                     num_nonzeros_offd);
+      hypre_ParCSRMatrixOwnsData(Pix) = 1;
+      hypre_ParCSRMatrixOwnsRowStarts(Pix) = 0;
+      hypre_ParCSRMatrixOwnsColStarts(Pix) = 0;
+      hypre_ParCSRMatrixInitialize(Pix);
+
+      Piy = hypre_ParCSRMatrixCreate(comm,
+                                     global_num_rows,
+                                     global_num_cols,
+                                     row_starts,
+                                     col_starts,
+                                     num_cols_offd,
+                                     num_nonzeros_diag,
+                                     num_nonzeros_offd);
+      hypre_ParCSRMatrixOwnsData(Piy) = 1;
+      hypre_ParCSRMatrixOwnsRowStarts(Piy) = 0;
+      hypre_ParCSRMatrixOwnsColStarts(Piy) = 0;
+      hypre_ParCSRMatrixInitialize(Piy);
+
+      if (dim == 3)
+      {
+         Piz = hypre_ParCSRMatrixCreate(comm,
+                                        global_num_rows,
+                                        global_num_cols,
+                                        row_starts,
+                                        col_starts,
+                                        num_cols_offd,
+                                        num_nonzeros_diag,
+                                        num_nonzeros_offd);
+         hypre_ParCSRMatrixOwnsData(Piz) = 1;
+         hypre_ParCSRMatrixOwnsRowStarts(Piz) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(Piz) = 0;
+         hypre_ParCSRMatrixInitialize(Piz);
+      }
+
+      Gx_data = hypre_VectorData(hypre_ParVectorLocalVector(Gx));
+      Gy_data = hypre_VectorData(hypre_ParVectorLocalVector(Gy));
+      if (dim == 3)
+         Gz_data = hypre_VectorData(hypre_ParVectorLocalVector(Gz));
+
+      /* Fill-in the diagonal part */
+      if (dim == 3)
+      {
+         hypre_CSRMatrix *G_diag = hypre_ParCSRMatrixDiag(G);
+         int *G_diag_I = hypre_CSRMatrixI(G_diag);
+         int *G_diag_J = hypre_CSRMatrixJ(G_diag);
+
+         int G_diag_nrows = hypre_CSRMatrixNumRows(G_diag);
+         int G_diag_nnz = hypre_CSRMatrixNumNonzeros(G_diag);
+
+         hypre_CSRMatrix *Pix_diag = hypre_ParCSRMatrixDiag(Pix);
+         int *Pix_diag_I = hypre_CSRMatrixI(Pix_diag);
+         int *Pix_diag_J = hypre_CSRMatrixJ(Pix_diag);
+         double *Pix_diag_data = hypre_CSRMatrixData(Pix_diag);
+
+         hypre_CSRMatrix *Piy_diag = hypre_ParCSRMatrixDiag(Piy);
+         int *Piy_diag_I = hypre_CSRMatrixI(Piy_diag);
+         int *Piy_diag_J = hypre_CSRMatrixJ(Piy_diag);
+         double *Piy_diag_data = hypre_CSRMatrixData(Piy_diag);
+
+         hypre_CSRMatrix *Piz_diag = hypre_ParCSRMatrixDiag(Piz);
+         int *Piz_diag_I = hypre_CSRMatrixI(Piz_diag);
+         int *Piz_diag_J = hypre_CSRMatrixJ(Piz_diag);
+         double *Piz_diag_data = hypre_CSRMatrixData(Piz_diag);
+
+         for (i = 0; i < G_diag_nrows+1; i++)
+         {
+            Pix_diag_I[i] = G_diag_I[i];
+            Piy_diag_I[i] = G_diag_I[i];
+            Piz_diag_I[i] = G_diag_I[i];
+         }
+
+         for (i = 0; i < G_diag_nnz; i++)
+         {
+            Pix_diag_J[i] = G_diag_J[i];
+            Piy_diag_J[i] = G_diag_J[i];
+            Piz_diag_J[i] = G_diag_J[i];
+         }
+
+         for (i = 0; i < G_diag_nrows; i++)
+            for (j = G_diag_I[i]; j < G_diag_I[i+1]; j++)
+            {
+               *Pix_diag_data++ = 0.5 * Gx_data[i];
+               *Piy_diag_data++ = 0.5 * Gy_data[i];
+               *Piz_diag_data++ = 0.5 * Gz_data[i];
+            }
+      }
+      else
+      {
+         hypre_CSRMatrix *G_diag = hypre_ParCSRMatrixDiag(G);
+         int *G_diag_I = hypre_CSRMatrixI(G_diag);
+         int *G_diag_J = hypre_CSRMatrixJ(G_diag);
+
+         int G_diag_nrows = hypre_CSRMatrixNumRows(G_diag);
+         int G_diag_nnz = hypre_CSRMatrixNumNonzeros(G_diag);
+
+         hypre_CSRMatrix *Pix_diag = hypre_ParCSRMatrixDiag(Pix);
+         int *Pix_diag_I = hypre_CSRMatrixI(Pix_diag);
+         int *Pix_diag_J = hypre_CSRMatrixJ(Pix_diag);
+         double *Pix_diag_data = hypre_CSRMatrixData(Pix_diag);
+
+         hypre_CSRMatrix *Piy_diag = hypre_ParCSRMatrixDiag(Piy);
+         int *Piy_diag_I = hypre_CSRMatrixI(Piy_diag);
+         int *Piy_diag_J = hypre_CSRMatrixJ(Piy_diag);
+         double *Piy_diag_data = hypre_CSRMatrixData(Piy_diag);
+
+         for (i = 0; i < G_diag_nrows+1; i++)
+         {
+            Pix_diag_I[i] = G_diag_I[i];
+            Piy_diag_I[i] = G_diag_I[i];
+         }
+
+         for (i = 0; i < G_diag_nnz; i++)
+         {
+            Pix_diag_J[i] = G_diag_J[i];
+            Piy_diag_J[i] = G_diag_J[i];
+         }
+
+         for (i = 0; i < G_diag_nrows; i++)
+            for (j = G_diag_I[i]; j < G_diag_I[i+1]; j++)
+            {
+               *Pix_diag_data++ = 0.5 * Gx_data[i];
+               *Piy_diag_data++ = 0.5 * Gy_data[i];
+            }
+      }
+
+
+      /* Fill-in the off-diagonal part */
+      if (dim == 3)
+      {
+         hypre_CSRMatrix *G_offd = hypre_ParCSRMatrixOffd(G);
+         int *G_offd_I = hypre_CSRMatrixI(G_offd);
+         int *G_offd_J = hypre_CSRMatrixJ(G_offd);
+
+         int G_offd_nrows = hypre_CSRMatrixNumRows(G_offd);
+         int G_offd_ncols = hypre_CSRMatrixNumCols(G_offd);
+         int G_offd_nnz = hypre_CSRMatrixNumNonzeros(G_offd);
+
+         hypre_CSRMatrix *Pix_offd = hypre_ParCSRMatrixOffd(Pix);
+         int *Pix_offd_I = hypre_CSRMatrixI(Pix_offd);
+         int *Pix_offd_J = hypre_CSRMatrixJ(Pix_offd);
+         double *Pix_offd_data = hypre_CSRMatrixData(Pix_offd);
+
+         hypre_CSRMatrix *Piy_offd = hypre_ParCSRMatrixOffd(Piy);
+         int *Piy_offd_I = hypre_CSRMatrixI(Piy_offd);
+         int *Piy_offd_J = hypre_CSRMatrixJ(Piy_offd);
+         double *Piy_offd_data = hypre_CSRMatrixData(Piy_offd);
+
+         hypre_CSRMatrix *Piz_offd = hypre_ParCSRMatrixOffd(Piz);
+         int *Piz_offd_I = hypre_CSRMatrixI(Piz_offd);
+         int *Piz_offd_J = hypre_CSRMatrixJ(Piz_offd);
+         double *Piz_offd_data = hypre_CSRMatrixData(Piz_offd);
+
+         int *G_cmap = hypre_ParCSRMatrixColMapOffd(G);
+         int *Pix_cmap = hypre_ParCSRMatrixColMapOffd(Pix);
+         int *Piy_cmap = hypre_ParCSRMatrixColMapOffd(Piy);
+         int *Piz_cmap = hypre_ParCSRMatrixColMapOffd(Piz);
+
+         if (G_offd_ncols)
+            for (i = 0; i < G_offd_nrows+1; i++)
+            {
+               Pix_offd_I[i] = G_offd_I[i];
+               Piy_offd_I[i] = G_offd_I[i];
+               Piz_offd_I[i] = G_offd_I[i];
+            }
+
+         for (i = 0; i < G_offd_nnz; i++)
+         {
+            Pix_offd_J[i] = G_offd_J[i];
+            Piy_offd_J[i] = G_offd_J[i];
+            Piz_offd_J[i] = G_offd_J[i];
+         }
+
+         for (i = 0; i < G_offd_nrows; i++)
+            for (j = G_offd_I[i]; j < G_offd_I[i+1]; j++)
+            {
+               *Pix_offd_data++ = 0.5 * Gx_data[i];
+               *Piy_offd_data++ = 0.5 * Gy_data[i];
+               *Piz_offd_data++ = 0.5 * Gz_data[i];
+            }
+
+         for (i = 0; i < G_offd_ncols; i++)
+         {
+            Pix_cmap[i] = G_cmap[i];
+            Piy_cmap[i] = G_cmap[i];
+            Piz_cmap[i] = G_cmap[i];
+         }
+      }
+      else
+      {
+         hypre_CSRMatrix *G_offd = hypre_ParCSRMatrixOffd(G);
+         int *G_offd_I = hypre_CSRMatrixI(G_offd);
+         int *G_offd_J = hypre_CSRMatrixJ(G_offd);
+
+         int G_offd_nrows = hypre_CSRMatrixNumRows(G_offd);
+         int G_offd_ncols = hypre_CSRMatrixNumCols(G_offd);
+         int G_offd_nnz = hypre_CSRMatrixNumNonzeros(G_offd);
+
+         hypre_CSRMatrix *Pix_offd = hypre_ParCSRMatrixOffd(Pix);
+         int *Pix_offd_I = hypre_CSRMatrixI(Pix_offd);
+         int *Pix_offd_J = hypre_CSRMatrixJ(Pix_offd);
+         double *Pix_offd_data = hypre_CSRMatrixData(Pix_offd);
+
+         hypre_CSRMatrix *Piy_offd = hypre_ParCSRMatrixOffd(Piy);
+         int *Piy_offd_I = hypre_CSRMatrixI(Piy_offd);
+         int *Piy_offd_J = hypre_CSRMatrixJ(Piy_offd);
+         double *Piy_offd_data = hypre_CSRMatrixData(Piy_offd);
+
+         int *G_cmap = hypre_ParCSRMatrixColMapOffd(G);
+         int *Pix_cmap = hypre_ParCSRMatrixColMapOffd(Pix);
+         int *Piy_cmap = hypre_ParCSRMatrixColMapOffd(Piy);
+
+         if (G_offd_ncols)
+            for (i = 0; i < G_offd_nrows+1; i++)
+            {
+               Pix_offd_I[i] = G_offd_I[i];
+               Piy_offd_I[i] = G_offd_I[i];
+            }
+
+         for (i = 0; i < G_offd_nnz; i++)
+         {
+            Pix_offd_J[i] = G_offd_J[i];
+            Piy_offd_J[i] = G_offd_J[i];
+         }
+
+         for (i = 0; i < G_offd_nrows; i++)
+            for (j = G_offd_I[i]; j < G_offd_I[i+1]; j++)
+            {
+               *Pix_offd_data++ = 0.5 * Gx_data[i];
+               *Piy_offd_data++ = 0.5 * Gy_data[i];
+            }
+
+         for (i = 0; i < G_offd_ncols; i++)
+         {
+            Pix_cmap[i] = G_cmap[i];
+            Piy_cmap[i] = G_cmap[i];
+         }
+      }
+   }
+
+   if (input_info == 1)
+   {
+      hypre_ParVectorDestroy(Gx);
+      hypre_ParVectorDestroy(Gy);
+      if (dim == 3)
+         hypre_ParVectorDestroy(Gz);
+   }
+
+   *Pix_ptr = Pix;
+   *Piy_ptr = Piy;
+   if (dim == 3)
+      *Piz_ptr = Piz;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_AMSSetup
  *
  * Construct the AMS solver components.
@@ -1044,17 +1424,32 @@ int hypre_AMSSetup(void *solver,
       hypre_ParCSRComputeL1Norms(A, ams_data -> A_relax_type,
                                  &ams_data -> A_l1_norms);
 
-   /* Construct the Pi interpolation matrix */
-   hypre_AMSComputePi(ams_data -> A,
-                      ams_data -> G,
-                      ams_data -> x,
-                      ams_data -> y,
-                      ams_data -> z,
-                      ams_data -> Gx,
-                      ams_data -> Gy,
-                      ams_data -> Gz,
-                      ams_data -> dim,
-                      &ams_data -> Pi);
+   if (ams_data -> cycle_type > 10)
+      /* Construct Pi{x,y,z} instead of Pi = [Pix,Piy,Piz] */
+      hypre_AMSComputePixyz(ams_data -> A,
+                            ams_data -> G,
+                            ams_data -> x,
+                            ams_data -> y,
+                            ams_data -> z,
+                            ams_data -> Gx,
+                            ams_data -> Gy,
+                            ams_data -> Gz,
+                            ams_data -> dim,
+                            &ams_data -> Pix,
+                            &ams_data -> Piy,
+                            &ams_data -> Piz);
+   else
+      /* Construct the Pi interpolation matrix */
+      hypre_AMSComputePi(ams_data -> A,
+                         ams_data -> G,
+                         ams_data -> x,
+                         ams_data -> y,
+                         ams_data -> z,
+                         ams_data -> Gx,
+                         ams_data -> Gy,
+                         ams_data -> Gz,
+                         ams_data -> dim,
+                         &ams_data -> Pi);
 
    /* Create the AMG solver on the range of G^T */
    if (!ams_data -> beta_is_zero)
@@ -1068,6 +1463,8 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetTol(ams_data -> B_G, 0.0);
       HYPRE_BoomerAMGSetMaxIter(ams_data -> B_G, 1);
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_G, ams_data -> B_G_theta);
+      HYPRE_BoomerAMGSetInterpType(ams_data -> B_G, ams_data -> B_G_interp_type);
+      HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_G, ams_data -> B_G_Pmax);
 
       /* don't use exact solve on the coarsest level (matrix may be singular) */
       HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_G,
@@ -1100,6 +1497,86 @@ int hypre_AMSSetup(void *solver,
                            0, 0);
    }
 
+   if (ams_data -> cycle_type > 10)
+   /* Create the AMG solvers on the range of Pi{x,y,z}^T */
+   {
+      HYPRE_BoomerAMGCreate(&ams_data -> B_Pix);
+      HYPRE_BoomerAMGSetCoarsenType(ams_data -> B_Pix, ams_data -> B_Pi_coarsen_type);
+      HYPRE_BoomerAMGSetAggNumLevels(ams_data -> B_Pix, ams_data -> B_Pi_agg_levels);
+      HYPRE_BoomerAMGSetRelaxType(ams_data -> B_Pix, ams_data -> B_Pi_relax_type);
+      HYPRE_BoomerAMGSetNumSweeps(ams_data -> B_Pix, 1);
+      HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_Pix, 25);
+      HYPRE_BoomerAMGSetTol(ams_data -> B_Pix, 0.0);
+      HYPRE_BoomerAMGSetMaxIter(ams_data -> B_Pix, 1);
+      HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Pix, ams_data -> B_Pi_theta);
+      HYPRE_BoomerAMGSetInterpType(ams_data -> B_Pix, ams_data -> B_Pi_interp_type);
+      HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Pix, ams_data -> B_Pi_Pmax);
+
+      HYPRE_BoomerAMGCreate(&ams_data -> B_Piy);
+      HYPRE_BoomerAMGSetCoarsenType(ams_data -> B_Piy, ams_data -> B_Pi_coarsen_type);
+      HYPRE_BoomerAMGSetAggNumLevels(ams_data -> B_Piy, ams_data -> B_Pi_agg_levels);
+      HYPRE_BoomerAMGSetRelaxType(ams_data -> B_Piy, ams_data -> B_Pi_relax_type);
+      HYPRE_BoomerAMGSetNumSweeps(ams_data -> B_Piy, 1);
+      HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_Piy, 25);
+      HYPRE_BoomerAMGSetTol(ams_data -> B_Piy, 0.0);
+      HYPRE_BoomerAMGSetMaxIter(ams_data -> B_Piy, 1);
+      HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Piy, ams_data -> B_Pi_theta);
+      HYPRE_BoomerAMGSetInterpType(ams_data -> B_Piy, ams_data -> B_Pi_interp_type);
+      HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Piy, ams_data -> B_Pi_Pmax);
+
+      HYPRE_BoomerAMGCreate(&ams_data -> B_Piz);
+      HYPRE_BoomerAMGSetCoarsenType(ams_data -> B_Piz, ams_data -> B_Pi_coarsen_type);
+      HYPRE_BoomerAMGSetAggNumLevels(ams_data -> B_Piz, ams_data -> B_Pi_agg_levels);
+      HYPRE_BoomerAMGSetRelaxType(ams_data -> B_Piz, ams_data -> B_Pi_relax_type);
+      HYPRE_BoomerAMGSetNumSweeps(ams_data -> B_Piz, 1);
+      HYPRE_BoomerAMGSetMaxLevels(ams_data -> B_Piz, 25);
+      HYPRE_BoomerAMGSetTol(ams_data -> B_Piz, 0.0);
+      HYPRE_BoomerAMGSetMaxIter(ams_data -> B_Piz, 1);
+      HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Piz, ams_data -> B_Pi_theta);
+      HYPRE_BoomerAMGSetInterpType(ams_data -> B_Piz, ams_data -> B_Pi_interp_type);
+      HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Piz, ams_data -> B_Pi_Pmax);
+
+      /* Construct the coarse space matrices by RAP */
+      if (!hypre_ParCSRMatrixCommPkg(ams_data -> Pix))
+         hypre_MatvecCommPkgCreate(ams_data -> Pix);
+      hypre_BoomerAMGBuildCoarseOperator(ams_data -> Pix,
+                                         ams_data -> A,
+                                         ams_data -> Pix,
+                                         &ams_data -> A_Pix);
+      hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Pix) = 0;
+      hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Pix) = 0;
+      HYPRE_BoomerAMGSetup(ams_data -> B_Pix,
+                           (HYPRE_ParCSRMatrix)ams_data -> A_Pix,
+                           0, 0);
+
+      if (!hypre_ParCSRMatrixCommPkg(ams_data -> Piy))
+         hypre_MatvecCommPkgCreate(ams_data -> Piy);
+      hypre_BoomerAMGBuildCoarseOperator(ams_data -> Piy,
+                                         ams_data -> A,
+                                         ams_data -> Piy,
+                                         &ams_data -> A_Piy);
+      hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Piy) = 0;
+      hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Piy) = 0;
+      HYPRE_BoomerAMGSetup(ams_data -> B_Piy,
+                           (HYPRE_ParCSRMatrix)ams_data -> A_Piy,
+                           0, 0);
+
+      if (ams_data -> Piz)
+      {
+         if (!hypre_ParCSRMatrixCommPkg(ams_data -> Piz))
+            hypre_MatvecCommPkgCreate(ams_data -> Piz);
+         hypre_BoomerAMGBuildCoarseOperator(ams_data -> Piz,
+                                            ams_data -> A,
+                                            ams_data -> Piz,
+                                            &ams_data -> A_Piz);
+         hypre_ParCSRMatrixOwnsRowStarts(ams_data -> A_Piz) = 0;
+         hypre_ParCSRMatrixOwnsColStarts(ams_data -> A_Piz) = 0;
+         HYPRE_BoomerAMGSetup(ams_data -> B_Piz,
+                              (HYPRE_ParCSRMatrix)ams_data -> A_Piz,
+                              0, 0);
+      }
+   }
+   else
    /* Create the AMG solver on the range of Pi^T */
    {
       HYPRE_BoomerAMGCreate(&ams_data -> B_Pi);
@@ -1111,6 +1588,8 @@ int hypre_AMSSetup(void *solver,
       HYPRE_BoomerAMGSetTol(ams_data -> B_Pi, 0.0);
       HYPRE_BoomerAMGSetMaxIter(ams_data -> B_Pi, 1);
       HYPRE_BoomerAMGSetStrongThreshold(ams_data -> B_Pi, ams_data -> B_Pi_theta);
+      HYPRE_BoomerAMGSetInterpType(ams_data -> B_Pi, ams_data -> B_Pi_interp_type);
+      HYPRE_BoomerAMGSetPMaxElmts(ams_data -> B_Pi, ams_data -> B_Pi_Pmax);
 
       /* don't use exact solve on the coarsest level (matrix may be singular) */
       HYPRE_BoomerAMGSetCycleRelaxType(ams_data -> B_Pi,
@@ -1143,13 +1622,21 @@ int hypre_AMSSetup(void *solver,
    /* Allocate temporary vectors */
    ams_data -> r0 = hypre_ParVectorInRangeOf(ams_data -> A);
    ams_data -> g0 = hypre_ParVectorInRangeOf(ams_data -> A);
-   if (!ams_data -> beta_is_zero)
+   if (ams_data -> A_G)
    {
       ams_data -> r1 = hypre_ParVectorInRangeOf(ams_data -> A_G);
       ams_data -> g1 = hypre_ParVectorInRangeOf(ams_data -> A_G);
    }
-   ams_data -> r2 = hypre_ParVectorInDomainOf(ams_data -> Pi);
-   ams_data -> g2 = hypre_ParVectorInDomainOf(ams_data -> Pi);
+   if (ams_data -> r1 == NULL && ams_data -> A_Pix)
+   {
+      ams_data -> r1 = hypre_ParVectorInRangeOf(ams_data -> A_Pix);
+      ams_data -> g1 = hypre_ParVectorInRangeOf(ams_data -> A_Pix);
+   }
+   if (ams_data -> Pi)
+   {
+      ams_data -> r2 = hypre_ParVectorInDomainOf(ams_data -> Pi);
+      ams_data -> g2 = hypre_ParVectorInDomainOf(ams_data -> Pi);
+   }
 
    return hypre_error_flag;
 }
@@ -1166,30 +1653,107 @@ int hypre_AMSSolve(void *solver,
                    hypre_ParVector *x)
 {
    hypre_AMSData *ams_data = solver;
-   int (*TwoLevelPrec)(hypre_ParCSRMatrix*,int,int,double*,double,double,hypre_ParCSRMatrix*,
-                       HYPRE_Solver,hypre_ParCSRMatrix*,hypre_ParVector*,hypre_ParVector*,
-                       hypre_ParVector*,hypre_ParVector*,hypre_ParVector*,hypre_ParVector*);
-   int (*ThreeLevelPrec)(hypre_ParCSRMatrix*,int,int,double*,double,double,hypre_ParCSRMatrix*,
-                         HYPRE_Solver,hypre_ParCSRMatrix*,hypre_ParCSRMatrix*,
-                         HYPRE_Solver,hypre_ParCSRMatrix*,hypre_ParVector*,hypre_ParVector*,
-                         hypre_ParVector*,hypre_ParVector*,hypre_ParVector*,hypre_ParVector*,
-                         hypre_ParVector*,hypre_ParVector*,int);
 
    int i, my_id;
    double r0_norm, r_norm, b_norm, relative_resid = 0, old_resid;
 
+   char cycle[30];
+   hypre_ParCSRMatrix *Ai[5], *Pi[5];
+   HYPRE_Solver Bi[5];
+   hypre_ParVector *ri[5], *gi[5];
+
+   Ai[0] = ams_data -> A_G;   Bi[0] = ams_data -> B_G;   Pi[0] = ams_data -> G;
+   Ai[1] = ams_data -> A_Pi;  Bi[1] = ams_data -> B_Pi;  Pi[1] = ams_data -> Pi;
+   Ai[2] = ams_data -> A_Pix; Bi[2] = ams_data -> B_Pix; Pi[2] = ams_data -> Pix;
+   Ai[3] = ams_data -> A_Piy; Bi[3] = ams_data -> B_Piy; Pi[3] = ams_data -> Piy;
+   Ai[4] = ams_data -> A_Piz; Bi[4] = ams_data -> B_Piz; Pi[4] = ams_data -> Piz;
+
+   ri[0] = ams_data -> r1;    gi[0] = ams_data -> g1;
+   ri[1] = ams_data -> r2;    gi[1] = ams_data -> g2;
+   ri[2] = ams_data -> r1;    gi[2] = ams_data -> g1;
+   ri[3] = ams_data -> r1;    gi[3] = ams_data -> g1;
+   ri[4] = ams_data -> r1;    gi[4] = ams_data -> g1;
+
    if (ams_data -> print_level > 0)
       MPI_Comm_rank(hypre_ParCSRMatrixComm(A), &my_id);
 
-   if (ams_data -> cycle_type % 2 == 1)
+   if (ams_data -> beta_is_zero)
    {
-      TwoLevelPrec = hypre_TwoLevelParCSRMulPrec;
-      ThreeLevelPrec = hypre_ThreeLevelParCSRMulPrec;
+      switch (ams_data -> cycle_type)
+      {
+         case 0:
+            sprintf(cycle,"%s","0");
+            break;
+         case 1:
+         case 3:
+         case 5:
+         case 7:
+         default:
+            sprintf(cycle,"%s","020");
+            break;
+         case 2:
+         case 4:
+         case 6:
+         case 8:
+            sprintf(cycle,"%s","(0+2)");
+            break;
+         case 11:
+         case 13:
+            sprintf(cycle,"%s","0345430");
+            break;
+         case 12:
+            sprintf(cycle,"%s","(0+3+4+5)");
+            break;
+         case 14:
+            sprintf(cycle,"%s","0(+3+4+5)0");
+            break;
+      }
    }
-   else if (ams_data -> cycle_type %2 == 0)
+   else
    {
-      TwoLevelPrec = hypre_TwoLevelParCSRAddPrec;
-      ThreeLevelPrec = hypre_ThreeLevelParCSRAddPrec;
+      switch (ams_data -> cycle_type)
+      {
+         case 0:
+            sprintf(cycle,"%s","0");
+            break;
+         case 1:
+         default:
+            sprintf(cycle,"%s","(01210)");
+            break;
+         case 2:
+            sprintf(cycle,"%s","(0+1+2)");
+            break;
+         case 3:
+            sprintf(cycle,"%s","02120");
+            break;
+         case 4:
+            sprintf(cycle,"%s","(010+2)");
+            break;
+         case 5:
+            sprintf(cycle,"%s","0102010");
+            break;
+         case 6:
+            sprintf(cycle,"%s","(020+1)");
+            break;
+         case 7:
+            sprintf(cycle,"%s","0201020");
+            break;
+         case 8:
+            sprintf(cycle,"%s","0(+1+2)0");
+            break;
+         case 11:
+            sprintf(cycle,"%s","013454310");
+            break;
+         case 12:
+            sprintf(cycle,"%s","(0+1+3+4+5)");
+            break;
+         case 13:
+            sprintf(cycle,"%s","034515430");
+            break;
+         case 14:
+            sprintf(cycle,"%s","01(+3+4+5)10");
+            break;
+      }
    }
 
    for (i = 0; i < ams_data -> maxit; i++)
@@ -1217,42 +1781,17 @@ int hypre_AMSSolve(void *solver,
       }
 
       /* Apply the preconditioner */
-      if (ams_data -> beta_is_zero)
-         (*TwoLevelPrec) (ams_data -> A,
-                          ams_data -> A_relax_type,
-                          ams_data -> A_relax_times,
-                          ams_data -> A_l1_norms,
-                          ams_data -> A_relax_weight,
-                          ams_data -> A_omega,
-                          ams_data -> A_Pi,
-                          ams_data -> B_Pi,
-                          ams_data -> Pi,
-                          b, x,
-                          ams_data -> r0,
-                          ams_data -> r2,
-                          ams_data -> g0,
-                          ams_data -> g2);
-      else
-         (*ThreeLevelPrec) (ams_data -> A,
-                            ams_data -> A_relax_type,
-                            ams_data -> A_relax_times,
-                            ams_data -> A_l1_norms,
-                            ams_data -> A_relax_weight,
-                            ams_data -> A_omega,
-                            ams_data -> A_G,
-                            ams_data -> B_G,
-                            ams_data -> G,
-                            ams_data -> A_Pi,
-                            ams_data -> B_Pi,
-                            ams_data -> Pi,
-                            b, x,
-                            ams_data -> r0,
-                            ams_data -> r1,
-                            ams_data -> r2,
-                            ams_data -> g0,
-                            ams_data -> g1,
-                            ams_data -> g2,
-                            ams_data -> cycle_type);
+      hypre_ParCSRSubspacePrec(ams_data -> A,
+                               ams_data -> A_relax_type,
+                               ams_data -> A_relax_times,
+                               ams_data -> A_l1_norms,
+                               ams_data -> A_relax_weight,
+                               ams_data -> A_omega,
+                               Ai, Bi, Pi, ri, gi,
+                               b, x,
+                               ams_data -> r0,
+                               ams_data -> g0,
+                               cycle);
 
       /* Compute new residual norms */
       if (ams_data -> maxit > 1)
@@ -1291,614 +1830,113 @@ int hypre_AMSSolve(void *solver,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_TwoLevelParCSRMulPrec
+ * hypre_ParCSRSubspacePrec
  *
- * Two-level (symmetric) multiplicative preconditioner.
- * All operations are based on ParCSR matrices and BoomerAMG.
+ * General subspace preconditioner for A0 y = x, based on ParCSR storage.
+ *
+ * P[i] and A[i] are the interpolation and coarse grid matrices for
+ * the (i+1)'th subspace. B[i] is an AMG solver for A[i]. r[i] and g[i]
+ * are temporary vectors. A0_* are the fine grid smoothing parameters.
+ *
+ * The string cycle describes how to combine the subspace corrections.
+ * The default mode is multiplicative, '+' changes the next correction
+ * to additive, based on residual computed at '('.
  *--------------------------------------------------------------------------*/
 
-int hypre_TwoLevelParCSRMulPrec(/* fine space matrix */
-                                hypre_ParCSRMatrix *A0,
-                                /* relaxation parameters */
-                                int A0_relax_type,
-                                int A0_relax_times,
-                                double *A0_l1_norms,
-                                double A0_relax_weight,
-                                double A0_omega,
-                                /* coarse space matrix */
-                                hypre_ParCSRMatrix *A1,
-                                /* coarse space preconditioner */
-                                HYPRE_Solver B1,
-                                /* coarse-to-fine interpolation */
-                                hypre_ParCSRMatrix *P1,
-                                /* input */
-                                hypre_ParVector *x,
-                                /* input/output */
-                                hypre_ParVector *y,
-                                /* temporary vectors */
-                                hypre_ParVector *r0,
-                                hypre_ParVector *r1,
-                                hypre_ParVector *g0,
-                                hypre_ParVector *g1)
+int hypre_ParCSRSubspacePrec(/* fine space matrix */
+                             hypre_ParCSRMatrix *A0,
+                             /* relaxation parameters */
+                             int A0_relax_type,
+                             int A0_relax_times,
+                             double *A0_l1_norms,
+                             double A0_relax_weight,
+                             double A0_omega,
+                             /* subspace matrices */
+                             hypre_ParCSRMatrix **A,
+                             /* subspace preconditioners */
+                             HYPRE_Solver *B,
+                             /* subspace interpolations */
+                             hypre_ParCSRMatrix **P,
+                             /* temporary subspace vectors */
+                             hypre_ParVector **r,
+                             hypre_ParVector **g,
+                             /* right-hand side */
+                             hypre_ParVector *x,
+                             /* current approximation */
+                             hypre_ParVector *y,
+                             /* current residual */
+                             hypre_ParVector *r0,
+                             /* temporary vector */
+                             hypre_ParVector *g0,
+                             char *cycle)
 {
-   /* pre-smooth: y += S (x - Ay) */
-   hypre_ParCSRRelax(A0, x,
-                     A0_relax_type,
-                     A0_relax_times,
-                     A0_l1_norms,
-                     A0_relax_weight,
-                     A0_omega,
-                     y, r0);
+   char *op;
+   int use_saved_residual = 0;
 
-   /* coarse grid correction: y += P B^{-1} P^t (x - Ay) */
-   hypre_ParVectorCopy(x,r0);
-   hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-   hypre_ParCSRMatrixMatvecT(1.0, P1, r0, 0.0, r1);
-   hypre_ParVectorSetConstantValues(g1, 0.0);
-   hypre_BoomerAMGBlockSolve((void *)B1, A1, r1, g1);
-   hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, r0);
-   hypre_ParVectorAxpy(1.0, r0, y);
-
-   /* post-smooth: y += S (x - Ay) */
-   hypre_ParCSRRelax(A0, x,
-                     A0_relax_type,
-                     A0_relax_times,
-                     A0_l1_norms,
-                     A0_relax_weight,
-                     A0_omega,
-                     y, r0);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_TwoLevelParCSRAddPrec
- *
- * Two-level additive preconditioner.
- * All operations are based on ParCSR matrices and BoomerAMG.
- *--------------------------------------------------------------------------*/
-
-int hypre_TwoLevelParCSRAddPrec(/* fine space matrix */
-                                hypre_ParCSRMatrix *A0,
-                                /* relaxation parameters */
-                                int A0_relax_type,
-                                int A0_relax_times,
-                                double *A0_l1_norms,
-                                double A0_relax_weight,
-                                double A0_omega,
-                                /* coarse space matrix */
-                                hypre_ParCSRMatrix *A1,
-                                /* coarse space preconditioner */
-                                HYPRE_Solver B1,
-                                /* coarse-to-fine interpolation */
-                                hypre_ParCSRMatrix *P1,
-                                /* input */
-                                hypre_ParVector *x,
-                                /* input/output */
-                                hypre_ParVector *y,
-                                /* temporary vectors */
-                                hypre_ParVector *r0,
-                                hypre_ParVector *r1,
-                                hypre_ParVector *g0,
-                                hypre_ParVector *g1)
-{
-   /* compute the residual: r0 = x - Ay */
-   hypre_ParVectorCopy(x,r0);
-   hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-
-   /* add smoother correction: y += S r0 */
-   hypre_ParCSRRelax(A0, x,
-                     A0_relax_type,
-                     A0_relax_times,
-                     A0_l1_norms,
-                     A0_relax_weight,
-                     A0_omega,
-                     y, g0);
-
-   /* add coarse grid correction: y += P B^{-1} P^t r0 */
-   hypre_ParCSRMatrixMatvecT(1.0, P1, r0, 0.0, r1);
-   hypre_ParVectorSetConstantValues(g1, 0.0);
-   hypre_BoomerAMGBlockSolve((void *)B1, A1, r1, g1);
-   hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, r0);
-   hypre_ParVectorAxpy(1.0, r0, y);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ThreeLevelParCSRMulPrec
- *
- * Three-level (symmetric) multiplicative preconditioner.
- * All operations are based on ParCSR matrices and (block) BoomerAMG.
- *--------------------------------------------------------------------------*/
-
-int hypre_ThreeLevelParCSRMulPrec(/* fine space matrix */
-                                  hypre_ParCSRMatrix *A0,
-                                  /* relaxation parameters */
-                                  int A0_relax_type,
-                                  int A0_relax_times,
-                                  double *A0_l1_norms,
-                                  double A0_relax_weight,
-                                  double A0_omega,
-                                  /* coarse space matrix */
-                                  hypre_ParCSRMatrix *A1,
-                                  /* coarse space preconditioner */
-                                  HYPRE_Solver B1,
-                                  /* coarse-to-fine interpolation */
-                                  hypre_ParCSRMatrix *P1,
-                                  /* second coarse space matrix */
-                                  hypre_ParCSRMatrix *A2,
-                                  /* second coarse space preconditioner */
-                                  HYPRE_Solver B2,
-                                  /* second coarse-to-fine interpolation */
-                                  hypre_ParCSRMatrix *P2,
-                                  /* input */
-                                  hypre_ParVector *x,
-                                  /* input/output */
-                                  hypre_ParVector *y,
-                                  /* temporary vectors */
-                                  hypre_ParVector *r0,
-                                  hypre_ParVector *r1,
-                                  hypre_ParVector *r2,
-                                  hypre_ParVector *g0,
-                                  hypre_ParVector *g1,
-                                  hypre_ParVector *g2,
-                                  int cycle_type)
-{
-   if (cycle_type == 1)
+   for (op = cycle; *op != '\0'; op++)
    {
-      /* pre-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
+      /* do nothing */
+      if (*op == ')')
+         continue;
 
-      /* first coarse grid correction: y += P1 B1^{-1} P1^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P1, r0, 0.0, r1);
-      hypre_ParVectorSetConstantValues(g1, 0.0);
-      hypre_BoomerAMGSolve((void *)B1, A1, r1, g1);
-      hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
+      /* compute the residual: r = x - Ay */
+      else if (*op == '(')
+      {
+         hypre_ParVectorCopy(x,r0);
+         hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
+      }
 
-      /* second coarse grid correction: y += P2 B2^{-1} P2^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P2, r0, 0.0, r2);
-      hypre_ParVectorSetConstantValues(g2, 0.0);
-      hypre_BoomerAMGBlockSolve((void *)B2, A2, r2, g2);
-      hypre_ParCSRMatrixMatvec(1.0, P2, g2, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
+      /* switch to additive correction */
+      else if (*op == '+')
+      {
+         use_saved_residual = 1;
+         continue;
+      }
 
-      /* first coarse grid correction: y += P1 B1^{-1} P1^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P1, r0, 0.0, r1);
-      hypre_ParVectorSetConstantValues(g1, 0.0);
-      hypre_BoomerAMGSolve((void *)B1, A1, r1, g1);
-      hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
+      /* smooth: y += S (x - Ay) */
+      else if (*op == '0')
+      {
+         hypre_ParCSRRelax(A0, x,
+                           A0_relax_type,
+                           A0_relax_times,
+                           A0_l1_norms,
+                           A0_relax_weight,
+                           A0_omega,
+                           y, g0);
+      }
 
-      /* post-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
+      /* subspace correction: y += P B^{-1} P^t r */
+      else
+      {
+         int i = *op - '1';
+         if (i < 0)
+            hypre_error_in_arg(16);
+
+         /* skip empty subspaces */
+         if (!A[i]) continue;
+
+         /* compute the residual? */
+         if (use_saved_residual)
+         {
+            use_saved_residual = 0;
+            hypre_ParCSRMatrixMatvecT(1.0, P[i], r0, 0.0, r[i]);
+         }
+         else
+         {
+            hypre_ParVectorCopy(x,g0);
+            hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, g0);
+            hypre_ParCSRMatrixMatvecT(1.0, P[i], g0, 0.0, r[i]);
+         }
+
+         hypre_ParVectorSetConstantValues(g[i], 0.0);
+         if (i == 1)
+            hypre_BoomerAMGBlockSolve((void *)B[i], A[i], r[i], g[i]);
+         else
+            hypre_BoomerAMGSolve((void *)B[i], A[i], r[i], g[i]);
+         hypre_ParCSRMatrixMatvec(1.0, P[i], g[i], 0.0, g0);
+         hypre_ParVectorAxpy(1.0, g0, y);
+      }
    }
-   else if (cycle_type == 3)
-   {
-      /* pre-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
-
-      /* second coarse grid correction: y += P2 B2^{-1} P2^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P2, r0, 0.0, r2);
-      hypre_ParVectorSetConstantValues(g2, 0.0);
-      hypre_BoomerAMGBlockSolve((void *)B2, A2, r2, g2);
-      hypre_ParCSRMatrixMatvec(1.0, P2, g2, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
-
-      /* first coarse grid correction: y += P1 B1^{-1} P1^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P1, r0, 0.0, r1);
-      hypre_ParVectorSetConstantValues(g1, 0.0);
-      hypre_BoomerAMGSolve((void *)B1, A1, r1, g1);
-      hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
-
-      /* second coarse grid correction: y += P2 B2^{-1} P2^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P2, r0, 0.0, r2);
-      hypre_ParVectorSetConstantValues(g2, 0.0);
-      hypre_BoomerAMGBlockSolve((void *)B2, A2, r2, g2);
-      hypre_ParCSRMatrixMatvec(1.0, P2, g2, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
-
-      /* post-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
-   }
-   else if (cycle_type == 5)
-   {
-      /* pre-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
-
-      /* first coarse grid correction: y += P1 B1^{-1} P1^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P1, r0, 0.0, r1);
-      hypre_ParVectorSetConstantValues(g1, 0.0);
-      hypre_BoomerAMGSolve((void *)B1, A1, r1, g1);
-      hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
-
-      /* extra smoothing: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
-
-      /* second coarse grid correction: y += P2 B2^{-1} P2^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P2, r0, 0.0, r2);
-      hypre_ParVectorSetConstantValues(g2, 0.0);
-      hypre_BoomerAMGBlockSolve((void *)B2, A2, r2, g2);
-      hypre_ParCSRMatrixMatvec(1.0, P2, g2, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
-
-      /* extra smoothing: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
-
-      /* first coarse grid correction: y += P1 B1^{-1} P1^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P1, r0, 0.0, r1);
-      hypre_ParVectorSetConstantValues(g1, 0.0);
-      hypre_BoomerAMGSolve((void *)B1, A1, r1, g1);
-      hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
-
-      /* post-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
-   }
-   else if (cycle_type == 7)
-   {
-      /* pre-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
-
-      /* second coarse grid correction: y += P2 B2^{-1} P2^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P2, r0, 0.0, r2);
-      hypre_ParVectorSetConstantValues(g2, 0.0);
-      hypre_BoomerAMGBlockSolve((void *)B2, A2, r2, g2);
-      hypre_ParCSRMatrixMatvec(1.0, P2, g2, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
-
-      /* extra smoothing: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
-
-      /* first coarse grid correction: y += P1 B1^{-1} P1^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P1, r0, 0.0, r1);
-      hypre_ParVectorSetConstantValues(g1, 0.0);
-      hypre_BoomerAMGSolve((void *)B1, A1, r1, g1);
-      hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
-
-      /* extra smoothing: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
-
-      /* second coarse grid correction: y += P2 B2^{-1} P2^t (x - Ay) */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-      hypre_ParCSRMatrixMatvecT(1.0, P2, r0, 0.0, r2);
-      hypre_ParVectorSetConstantValues(g2, 0.0);
-      hypre_BoomerAMGBlockSolve((void *)B2, A2, r2, g2);
-      hypre_ParCSRMatrixMatvec(1.0, P2, g2, 0.0, r0);
-      hypre_ParVectorAxpy(1.0, r0, y);
-
-      /* post-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, r0);
-   }
-   else
-      hypre_error_in_arg(19);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_ThreeLevelParCSRAddPrec
- *
- * Three-level additive preconditioner.
- * All operations are based on ParCSR matrices and (block) BoomerAMG.
- *--------------------------------------------------------------------------*/
-
-int hypre_ThreeLevelParCSRAddPrec(/* fine space matrix */
-                                  hypre_ParCSRMatrix *A0,
-                                  /* relaxation parameters */
-                                  int A0_relax_type,
-                                  int A0_relax_times,
-                                  double *A0_l1_norms,
-                                  double A0_relax_weight,
-                                  double A0_omega,
-                                  /* first coarse space matrix */
-                                  hypre_ParCSRMatrix *A1,
-                                  /* first coarse space preconditioner */
-                                  HYPRE_Solver B1,
-                                  /* first coarse-to-fine interpolation */
-                                  hypre_ParCSRMatrix *P1,
-                                  /* second coarse space matrix */
-                                  hypre_ParCSRMatrix *A2,
-                                  /* second coarse space preconditioner */
-                                  HYPRE_Solver B2,
-                                  /* second coarse-to-fine interpolation */
-                                  hypre_ParCSRMatrix *P2,
-                                  /* input */
-                                  hypre_ParVector *x,
-                                  /* input/output */
-                                  hypre_ParVector *y,
-                                  /* temporary vectors */
-                                  hypre_ParVector *r0,
-                                  hypre_ParVector *r1,
-                                  hypre_ParVector *r2,
-                                  hypre_ParVector *g0,
-                                  hypre_ParVector *g1,
-                                  hypre_ParVector *g2,
-                                  int cycle_type)
-{
-   if (cycle_type == 0)
-   {
-      /* apply smoother: y += S r0 */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, g0);
-   }
-   else if (cycle_type == 2)
-   {
-      /* compute the residual: r0 = x - Ay */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-
-      /* add smoother correction: y += S r0 */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, g0);
-
-      /* add first coarse grid correction: y += P1 B1^{-1} P1^t r0 */
-      hypre_ParCSRMatrixMatvecT(1.0, P1, r0, 0.0, r1);
-      hypre_ParVectorSetConstantValues(g1, 0.0);
-      hypre_BoomerAMGSolve((void *)B1, A1, r1, g1);
-      hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, g0);
-      hypre_ParVectorAxpy(1.0, g0, y);
-
-      /* add second coarse grid correction: y += P2 B2^{-1} P2^t r0 */
-      hypre_ParCSRMatrixMatvecT(1.0, P2, r0, 0.0, r2);
-      hypre_ParVectorSetConstantValues(g2, 0.0);
-      hypre_BoomerAMGBlockSolve((void *)B2, A2, r2, g2);
-      hypre_ParCSRMatrixMatvec(1.0, P2, g2, 0.0, g0);
-      hypre_ParVectorAxpy(1.0, g0, y);
-   }
-   else if (cycle_type == 4)
-   {
-      /* compute the residual: r0 = x - Ay */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-
-      /* pre-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, g0);
-
-      /* first coarse grid correction: y += P1 B1^{-1} P1^t (x - Ay) */
-      hypre_ParVectorCopy(x,g0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, g0);
-      hypre_ParCSRMatrixMatvecT(1.0, P1, g0, 0.0, r1);
-      hypre_ParVectorSetConstantValues(g1, 0.0);
-      hypre_BoomerAMGSolve((void *)B1, A1, r1, g1);
-      hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, g0);
-      hypre_ParVectorAxpy(1.0, g0, y);
-
-      /* post-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, g0);
-
-      /* add second coarse grid correction: y += P2 B2^{-1} P2^t r0 */
-      hypre_ParCSRMatrixMatvecT(1.0, P2, r0, 0.0, r2);
-      hypre_ParVectorSetConstantValues(g2, 0.0);
-      hypre_BoomerAMGBlockSolve((void *)B2, A2, r2, g2);
-      hypre_ParCSRMatrixMatvec(1.0, P2, g2, 0.0, g0);
-      hypre_ParVectorAxpy(1.0, g0, y);
-   }
-   else if (cycle_type == 6)
-   {
-      /* compute the residual: r0 = x - Ay */
-      hypre_ParVectorCopy(x,r0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, r0);
-
-      /* pre-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, g0);
-
-      /* second coarse grid correction: y += P2 B2^{-1} P2^t (x - Ay) */
-      hypre_ParVectorCopy(x,g0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, g0);
-      hypre_ParCSRMatrixMatvecT(1.0, P2, g0, 0.0, r2);
-      hypre_ParVectorSetConstantValues(g2, 0.0);
-      hypre_BoomerAMGBlockSolve((void *)B2, A2, r2, g2);
-      hypre_ParCSRMatrixMatvec(1.0, P2, g2, 0.0, g0);
-      hypre_ParVectorAxpy(1.0, g0, y);
-
-      /* post-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, g0);
-
-      /* add first coarse grid correction: y += P1 B1^{-1} P1^t r0 */
-      hypre_ParCSRMatrixMatvecT(1.0, P1, r0, 0.0, r1);
-      hypre_ParVectorSetConstantValues(g1, 0.0);
-      hypre_BoomerAMGSolve((void *)B1, A1, r1, g1);
-      hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, g0);
-      hypre_ParVectorAxpy(1.0, g0, y);
-   }
-   else if (cycle_type == 8)
-   {
-      /* r0 = y */
-      hypre_ParVectorCopy(y,r0);
-
-      /* pre-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, g0);
-
-      /* first coarse grid correction: y += P1 B1^{-1} P1^t (x - Ay) */
-      hypre_ParVectorCopy(x,g0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, y, 1.0, g0);
-      hypre_ParCSRMatrixMatvecT(1.0, P1, g0, 0.0, r1);
-      hypre_ParVectorSetConstantValues(g1, 0.0);
-      hypre_BoomerAMGSolve((void *)B1, A1, r1, g1);
-      hypre_ParCSRMatrixMatvec(1.0, P1, g1, 0.0, g0);
-      hypre_ParVectorAxpy(1.0, g0, y);
-
-      /* post-smooth: y += S (x - Ay) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        y, g0);
-
-      /* pre-smooth: r0 += S (x - A r0) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        r0, g0);
-
-      /* second coarse grid correction: r0 += P2 B2^{-1} P2^t (x - A r0) */
-      hypre_ParVectorCopy(x,g0);
-      hypre_ParCSRMatrixMatvec(-1.0, A0, r0, 1.0, g0);
-      hypre_ParCSRMatrixMatvecT(1.0, P2, g0, 0.0, r2);
-      hypre_ParVectorSetConstantValues(g2, 0.0);
-      hypre_BoomerAMGBlockSolve((void *)B2, A2, r2, g2);
-      hypre_ParCSRMatrixMatvec(1.0, P2, g2, 0.0, g0);
-      hypre_ParVectorAxpy(1.0, g0, r0);
-
-      /* post-smooth: r0 += S (x - A r0) */
-      hypre_ParCSRRelax(A0, x,
-                        A0_relax_type,
-                        A0_relax_times,
-                        A0_l1_norms,
-                        A0_relax_weight,
-                        A0_omega,
-                        r0, g0);
-
-      /* y += r0 */
-      hypre_ParVectorAxpy(1.0, r0, y);
-   }
-   else
-      hypre_error_in_arg(19);
 
    return hypre_error_flag;
 }
@@ -1956,13 +1994,9 @@ int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
 {
    hypre_ParCSRMatrix *G;
 
-   int nedges, vxstart, vxend, nvert;
+   int nedges;
 
    nedges = hypre_ParCSRMatrixNumRows(A);
-
-   vxstart = hypre_ParVectorFirstIndex(x_coord);
-   vxend = hypre_ParVectorLastIndex(x_coord);
-   nvert = vxend - vxstart + 1;
 
    /* Construct the local part of G based on edge_vertex and the edge
       and vertex partitionings from A and x_coord */
@@ -2032,12 +2066,13 @@ int hypre_AMSConstructDiscreteGradient(hypre_ParCSRMatrix *A,
  *    A              - the edge element stiffness matrix
  *    num_vert       - number of vertices (nodes) in the processor
  *    num_local_vert - number of vertices owned by the processor
- *    vert_numbers   - global indexes of the vertices in the processor
- *    vert_coords    - coordinates of the vertices in the processor
+ *    vert_number    - global indexes of the vertices in the processor
+ *    vert_coord     - coordinates of the vertices in the processor
  *    num_edges      - number of edges owned by the processor
- *    edge_vertex    - the vertices of the edges owned by the processor,
- *                     vertices are in global numbering, and edge orientation
- *                     is always from the first to the second vertex.
+ *    edge_vertex    - the vertices of the edges owned by the processor.
+ *                     Vertices are in local numbering (the same as in
+ *                     vert_number), and edge orientation is always from
+ *                     the first to the second vertex.
  *
  * Here we distinguish between vertices that belong to elements in the
  * current processor, and the subset of these vertices that is owned by
@@ -2120,6 +2155,10 @@ int hypre_AMSFEISetup(void *solver,
          z_data[j] = vert_coord[3*i+2];
       }
    }
+
+   /* Change vertex numbers from local to global */
+   for (i = 0; i < 2*num_edges; i++)
+     edge_vertex[i] = vert_number[edge_vertex[i]];
 
    /* Construct the local part of G based on edge_vertex */
    {

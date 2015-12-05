@@ -1,30 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 1.34 $
- ***********************************************************************EHEADER*/
-
-
 /*
  * File:          bHYPRE_BoomerAMG_Impl.c
  * Symbol:        bHYPRE.BoomerAMG-v1.0.0
@@ -77,8 +50,6 @@
  * \item[NumSweeps] ({\tt Int}) - number of sweeps for fine grid, up and
  * down cycle.
  * 
- * \item[Cycle0NumSweeps] ({\tt Int}) - number of sweeps for fine grid
- * 
  * \item[Cycle1NumSweeps] ({\tt Int}) - number of sweeps for down cycle
  * 
  * \item[Cycle2NumSweeps] ({\tt Int}) - number of sweeps for up cycle
@@ -91,8 +62,6 @@
  * 
  * \item[RelaxType] ({\tt Int}) - type of smoother for fine grid, up and
  * down cycle.
- * 
- * \item[Cycle0RelaxType] ({\tt Int}) - type of smoother for fine grid
  * 
  * \item[Cycle1RelaxType] ({\tt Int}) - type of smoother for down cycle
  * 
@@ -125,7 +94,7 @@
  * complex smoothers.
  * 
  * \item[PrintFileName] ({\tt String}) - name of file printed to in
- * association with {\tt SetPrintLevel}.  (not yet implemented).
+ * association with {\tt SetPrintLevel}.
  * 
  * \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
  * (when using the systems version).
@@ -142,7 +111,51 @@
  * \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
  * for additive Schwarz.
  * 
+ * \item[Tolerance] ({\tt Double}) - convergence tolerance, if this
+ * is used as a solver; ignored if this is used as a preconditioner
+ * 
  * \item[DebugFlag] ({\tt Int}) -
+ * 
+ * \item[InterpType] ({\tt Int}) - Defines which parallel interpolation
+ * operator is used. There are the following options for interp\_type: 
+ * 
+ * \begin{tabular}{|c|l|} \hline
+ * 0 &	classical modified interpolation \\
+ * 1 &	LS interpolation (for use with GSMG) \\
+ * 2 &	classical modified interpolation for hyperbolic PDEs \\
+ * 3 &	direct interpolation (with separation of weights) \\
+ * 4 &	multipass interpolation \\
+ * 5 &	multipass interpolation (with separation of weights) \\
+ * 6 &  extended classical modified interpolation \\
+ * 7 &  extended (if no common C neighbor) classical modified interpolation \\
+ * 8 &	standard interpolation \\
+ * 9 &	standard interpolation (with separation of weights) \\
+ * 10 &	classical block interpolation (for use with nodal systems version only) \\
+ * 11 &	classical block interpolation (for use with nodal systems version only) \\
+ * &	with diagonalized diagonal blocks \\
+ * 12 &	FF interpolation \\
+ * 13 &	FF1 interpolation \\
+ * \hline
+ * \end{tabular}
+ * 
+ * The default is 0. 
+ * 
+ * \item[NumSamples] ({\tt Int}) - Defines the number of sample vectors used
+ * in GSMG or LS interpolation.
+ * 
+ * \item[MaxIterations] ({\tt Int}) - maximum number of iterations
+ * 
+ * \item[Logging] ({\tt Int}) - Set the {\it logging level}, specifying the
+ * degree of additional informational data to be accumulated.  Does
+ * nothing by default (level = 0).  Other levels (if any) are
+ * implementation-specific.  Must be called before {\tt Setup}
+ * and {\tt Apply}.
+ * 
+ * \item[PrintLevel] ({\tt Int}) - Set the {\it print level}, specifying the
+ * degree of informational data to be printed either to the screen or
+ * to a file.  Does nothing by default (level=0).  Other levels
+ * (if any) are implementation-specific.  Must be called before
+ * {\tt Setup} and {\tt Apply}.
  * 
  * \end{description}
  * 
@@ -167,7 +180,7 @@
 /* Put additional includes or other arbitrary code here... */
 
 
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 #include "bHYPRE_IJParCSRMatrix_Impl.h"
 #include "bHYPRE_IJParCSRVector_Impl.h"
@@ -300,7 +313,7 @@ impl_bHYPRE_BoomerAMG__dtor(
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a BoomerAMG solver. 
  */
 
 #undef __FUNC__
@@ -822,10 +835,6 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
    {
       ierr += HYPRE_BoomerAMGSetNumSweeps( solver, value );
    }
-   else if ( strcmp(name,"Cycle0NumSweeps")==0 )
-   {
-      ierr += HYPRE_BoomerAMGSetCycleNumSweeps( solver, value, 0 );
-   }
    else if ( strcmp(name,"Cycle1NumSweeps")==0 )
    {
       ierr += HYPRE_BoomerAMGSetCycleNumSweeps( solver, value, 1 );
@@ -841,10 +850,6 @@ impl_bHYPRE_BoomerAMG_SetIntParameter(
    else if ( strcmp(name,"RelaxType")==0 )
    {
       ierr += HYPRE_BoomerAMGSetRelaxType( solver, value );
-   }
-   else if ( strcmp(name,"Cycle0RelaxType")==0 )
-   {
-      ierr += HYPRE_BoomerAMGSetCycleRelaxType( solver, value, 0 );
    }
    else if ( strcmp(name,"Cycle1RelaxType")==0 )
    {
@@ -1279,10 +1284,6 @@ impl_bHYPRE_BoomerAMG_GetIntValue(
       ++ierr;
       return ierr;
    }
-   else if ( strcmp(name,"Cycle0NumSweeps")==0 )
-   {
-      ierr += HYPRE_BoomerAMGGetCycleNumSweeps( solver, value, 0 );
-   }
    else if ( strcmp(name,"Cycle1NumSweeps")==0 )
    {
       ierr += HYPRE_BoomerAMGGetCycleNumSweeps( solver, value, 1 );
@@ -1301,10 +1302,6 @@ impl_bHYPRE_BoomerAMG_GetIntValue(
          to set an array of parameters.  We can't always return just a single
          parameter because they may not still be all the same. */
       ++ierr;
-   }
-   else if ( strcmp(name,"Cycle0RelaxType")==0 )
-   {
-      ierr += HYPRE_BoomerAMGGetCycleRelaxType( solver, value, 0 );
    }
    else if ( strcmp(name,"Cycle1RelaxType")==0 )
    {
@@ -1571,7 +1568,7 @@ impl_bHYPRE_BoomerAMG_Apply(
 
    bHYPREP_b = (bHYPRE_IJParCSRVector) bHYPRE_Vector__cast2(b, "bHYPRE.IJParCSRVector", _ex );
    SIDL_CHECK(*_ex);
-   if ( bHYPREP_b==NULL ) hypre_assert( "Unrecognized vector type."==(char *)x );
+   if ( bHYPREP_b==NULL ) hypre_assert( "Unrecognized vector type."==(char *)b );
 
    datab = bHYPRE_IJParCSRVector__get_data( bHYPREP_b );
    ij_b = datab -> ij_b;

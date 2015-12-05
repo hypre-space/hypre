@@ -2221,8 +2221,9 @@ bHYPRE::Euclid::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a Euclid solver. 
  */
 ::bHYPRE::Euclid
 bHYPRE::Euclid::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

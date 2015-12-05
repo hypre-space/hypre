@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -57,6 +57,13 @@ typedef struct
    /* AMG solver for A_Pi */
    HYPRE_Solver B_Pi;
 
+   /* Componenets of the Nedelec interpolation matrix (vertex^dim-to-edge) */
+   hypre_ParCSRMatrix *Pix, *Piy, *Piz;
+   /* Coarse grid matrices on the ranges of Pi{x,y,z}^T */
+   hypre_ParCSRMatrix *A_Pix, *A_Piy, *A_Piz;
+   /* AMG solvers for A_Pi{x,y,z} */
+   HYPRE_Solver B_Pix, B_Piy, B_Piz;
+
    /* Does the solver own the coarse grid matrices? */
    int owns_A_G, owns_A_Pi;
 
@@ -84,12 +91,16 @@ typedef struct
    int B_G_agg_levels;
    int B_G_relax_type;
    double B_G_theta;
+   int B_G_interp_type;
+   int B_G_Pmax;
 
    /* AMG options for B_Pi */
    int B_Pi_coarsen_type;
    int B_Pi_agg_levels;
    int B_Pi_relax_type;
    double B_Pi_theta;
+   int B_Pi_interp_type;
+   int B_Pi_Pmax;
 
    /* Temporary vectors */
    hypre_ParVector *r0, *g0, *r1, *g1, *r2, *g2;

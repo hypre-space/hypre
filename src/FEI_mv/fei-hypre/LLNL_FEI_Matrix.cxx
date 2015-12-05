@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -835,6 +835,7 @@ void LLNL_FEI_Matrix::exchangeSubMatrices()
    for ( iD = 0; iD < localNRows_; iD++ ) newOffdNNZ += offdRowLengs[iD];
 
    /* -----------------------------------------------------------------
+    * combine the matrices
     * -----------------------------------------------------------------*/
 
    TdiagIA = new int[localNRows_+1];

@@ -83,8 +83,6 @@ namespace bHYPRE {
    * Symbol "bHYPRE.SStructSplit" (version 1.0.0)
    * 
    * 
-   * Documentation goes here.
-   * 
    * The SStructSplit solver requires a SStruct matrix.
    */
   class SStructSplit: public virtual ::bHYPRE::Solver,
@@ -110,8 +108,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a SStruct Split solver. 
      */
     static ::bHYPRE::SStructSplit
     Create (

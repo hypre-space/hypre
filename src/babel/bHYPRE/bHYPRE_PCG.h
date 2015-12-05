@@ -14,6 +14,10 @@
 
 /**
  * Symbol "bHYPRE.PCG" (version 1.0.0)
+ * 
+ * PCG solver.
+ * This calls Babel-interface matrix and vector functions, so it will work
+ * with any consistent matrix, vector, and preconditioner classes.
  */
 struct bHYPRE_PCG__object;
 struct bHYPRE_PCG__array;
@@ -97,7 +101,7 @@ bHYPRE_PCG
 bHYPRE_PCG__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a PCG solver. 
  */
 bHYPRE_PCG
 bHYPRE_PCG_Create(

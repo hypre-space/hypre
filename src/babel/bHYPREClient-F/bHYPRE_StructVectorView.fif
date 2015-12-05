@@ -56,6 +56,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  SetGrid[]
+C        Set the grid on which vectors are defined. 
 C       
 
         subroutine bHYPRE_StructVectorView_SetGrid_f(self, grid, retval,
@@ -74,6 +75,9 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  SetNumGhost[]
+C        Set the number of ghost zones, separately on the lower and upper sides
+C       for each dimension.
+C       "num_ghost" is an array of size "dim2", twice the number of dimensions. 
 C       
 
         subroutine bHYPRE_StructVectorView_SetNumGhost_f(self,
@@ -94,6 +98,9 @@ C        in rarray<int> num_ghost(dim2)
 
 C       
 C       Method:  SetValue[]
+C        Set the value of a single vector coefficient, given by "grid_index".
+C       "grid_index" is an array of size "dim", where dim is the number
+C       of dimensions. 
 C       
 
         subroutine bHYPRE_StructVectorView_SetValue_f(self, grid_index,
@@ -116,6 +123,11 @@ C        in rarray<int> grid_index(dim)
 
 C       
 C       Method:  SetBoxValues[]
+C        Set the values of all vector coefficient for grid points in a box.
+C       The box is defined by its lower and upper corners in the grid.
+C       "ilower" and "iupper" are arrays of size "dim", where dim is the
+C       number of dimensions.  The "values" array has size "nvalues", which
+C       is the number of grid points in the box. 
 C       
 
         subroutine bHYPRE_StructVectorView_SetBoxValues_f(self, ilower,

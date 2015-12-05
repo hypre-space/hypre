@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.48 $
+ * $Revision: 2.52 $
  ***********************************************************************EHEADER*/
 
 
@@ -54,19 +54,21 @@ hypre_BoomerAMGCreate()
    double   jacobi_trunc_threshold;
    double   S_commpkg_switch;
    double   CR_rate;
+   double   CR_strong_th;
    int      interp_type;
    int      coarsen_type;
    int      measure_type;
    int      setup_type;
    int      P_max_elmts;
    int 	    num_functions;
-   int 	    nodal;
+   int 	    nodal, nodal_diag;
    int 	    num_paths;
    int 	    agg_num_levels;
    int      post_interp_type;
    int 	    num_CR_relax_steps;
    int 	    IS_type;
    int 	    CR_use_CG;
+   int 	    cgc_its;
 
    /* solve params */
    int      min_iter;
@@ -106,6 +108,8 @@ hypre_BoomerAMGCreate()
    char     log_file_name[256];
    int      debug_flag;
 
+   char     plot_file_name[251];
+
    /*-----------------------------------------------------------------------
     * Setup default values for parameters
     *-----------------------------------------------------------------------*/
@@ -124,13 +128,16 @@ hypre_BoomerAMGCreate()
    P_max_elmts = 0;
    num_functions = 1;
    nodal = 0;
+   nodal_diag = 0;
    num_paths = 1;
    agg_num_levels = 0;
    post_interp_type = 0;
    num_CR_relax_steps = 2;
    CR_rate = 0.7;
+   CR_strong_th = 0;
    IS_type = 1;
    CR_use_CG = 0;
+   cgc_its = 1;
 
    variant = 0;
    overlap = 1;
@@ -193,13 +200,16 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetPMaxElmts(amg_data, P_max_elmts);
    hypre_BoomerAMGSetNumFunctions(amg_data, num_functions);
    hypre_BoomerAMGSetNodal(amg_data, nodal);
+   hypre_BoomerAMGSetNodal(amg_data, nodal_diag);
    hypre_BoomerAMGSetNumPaths(amg_data, num_paths);
    hypre_BoomerAMGSetAggNumLevels(amg_data, agg_num_levels);
    hypre_BoomerAMGSetPostInterpType(amg_data, post_interp_type);
    hypre_BoomerAMGSetNumCRRelaxSteps(amg_data, num_CR_relax_steps);
    hypre_BoomerAMGSetCRRate(amg_data, CR_rate);
+   hypre_BoomerAMGSetCRStrongTh(amg_data, CR_strong_th);
    hypre_BoomerAMGSetISType(amg_data, IS_type);
    hypre_BoomerAMGSetCRUseCG(amg_data, CR_use_CG);
+   hypre_BoomerAMGSetCGCIts(amg_data, cgc_its);
    hypre_BoomerAMGSetVariant(amg_data, variant);
    hypre_BoomerAMGSetOverlap(amg_data, overlap);
    hypre_BoomerAMGSetSchwarzRlxWeight(amg_data, schwarz_rlx_weight);
@@ -263,6 +273,14 @@ hypre_BoomerAMGCreate()
 
    /* this can not be set by the user currently */
    hypre_ParAMGDataBlockMode(amg_data) = block_mode;
+
+   /* BM Oct 22, 2006 */
+   hypre_ParAMGDataPlotGrids(amg_data) = 0;
+   hypre_BoomerAMGSetPlotFileName (amg_data, plot_file_name);
+                                                                                                       
+   /* BM Oct 17, 2006 */
+   hypre_ParAMGDataCoordDim(amg_data) = 0;
+   hypre_ParAMGDataCoordinates(amg_data) = NULL;
 
    return (void *) amg_data;
 }
@@ -803,7 +821,9 @@ hypre_BoomerAMGSetInterpType( void     *data,
       return hypre_error_flag;
    } 
 
-   if (interp_type < 0 || interp_type > 13)
+
+   if (interp_type < 0 || interp_type > 25)
+
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
@@ -1152,7 +1172,7 @@ hypre_BoomerAMGSetCycleNumSweeps( void     *data,
       return hypre_error_flag;
    } 
 
-   if (num_sweeps < 1)
+   if (num_sweeps < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
@@ -2059,6 +2079,78 @@ hypre_BoomerAMGSetNumSamples( void *data,
    return hypre_error_flag;
 }
 
+/* BM Aug 25, 2006 */
+
+int
+hypre_BoomerAMGSetCGCIts( void *data,
+                          int  its)
+{
+  int ierr = 0;
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataCGCIts(amg_data) = its;
+  return (ierr);
+}
+
+/* BM Oct 22, 2006 */
+int
+hypre_BoomerAMGSetPlotGrids( void *data,
+                          int plotgrids)
+{
+  int ierr = 0;
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataPlotGrids(amg_data) = plotgrids;
+  return (ierr);
+}
+
+int
+hypre_BoomerAMGSetPlotFileName( void       *data,
+                              const char *plot_file_name )
+{
+   hypre_ParAMGData  *amg_data = data;
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if( strlen(plot_file_name)>251 )
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   if (strlen(plot_file_name)==0 )
+     sprintf(hypre_ParAMGDataPlotFileName(amg_data), "%s", "AMGgrids.CF.dat");
+   else
+     sprintf(hypre_ParAMGDataPlotFileName(amg_data), "%s", plot_file_name);
+
+   return hypre_error_flag;
+}
+
+/* BM Oct 17, 2006 */
+int
+hypre_BoomerAMGSetCoordDim( void *data,
+                          int coorddim)
+{
+  int ierr = 0;
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataCoordDim(amg_data) = coorddim;
+  return (ierr);
+}
+
+int
+hypre_BoomerAMGSetCoordinates( void *data,
+                             float *coordinates)
+{
+  int ierr = 0;
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataCoordinates(amg_data) = coordinates;
+  return (ierr);
+}
+
 /*--------------------------------------------------------------------------
  * Routines to set the problem data parameters
  *--------------------------------------------------------------------------*/
@@ -2122,7 +2214,26 @@ hypre_BoomerAMGSetNodal( void     *data,
 
    return hypre_error_flag;
 }
+/*--------------------------------------------------------------------------
+ * Indicate how to treat diag for primary matrix with  nodal systems function
+ *--------------------------------------------------------------------------*/
 
+int
+hypre_BoomerAMGSetNodalDiag( void     *data,
+                          int    nodal )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataNodalDiag(amg_data) = nodal;
+
+   return hypre_error_flag;
+}
 /*--------------------------------------------------------------------------
  * Indicate the degree of aggressive coarsening
  *--------------------------------------------------------------------------*/
@@ -2218,6 +2329,27 @@ hypre_BoomerAMGSetCRRate( void     *data,
       return hypre_error_flag;
    } 
    hypre_ParAMGDataCRRate(amg_data) = CR_rate;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates the desired convergence rate for Compatible relaxation
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoomerAMGSetCRStrongTh( void     *data,
+                          double    CR_strong_th )
+{
+   hypre_ParAMGData  *amg_data = data;
+ 
+   if (!amg_data)
+   {
+      printf("Warning! BoomerAMG object empty!\n");
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataCRStrongTh(amg_data) = CR_strong_th;
 
    return hypre_error_flag;
 }

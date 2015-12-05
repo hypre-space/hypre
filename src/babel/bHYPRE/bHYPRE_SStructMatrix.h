@@ -96,7 +96,7 @@ bHYPRE_SStructMatrix
 bHYPRE_SStructMatrix__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a SStruct Matrix. 
  */
 bHYPRE_SStructMatrix
 bHYPRE_SStructMatrix_Create(

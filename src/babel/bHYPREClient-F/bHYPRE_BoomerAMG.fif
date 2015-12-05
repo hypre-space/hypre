@@ -47,8 +47,6 @@ C
 C       \item[NumSweeps] ({\tt Int}) - number of sweeps for fine grid, up and
 C       down cycle.
 C       
-C       \item[Cycle0NumSweeps] ({\tt Int}) - number of sweeps for fine grid
-C       
 C       \item[Cycle1NumSweeps] ({\tt Int}) - number of sweeps for down cycle
 C       
 C       \item[Cycle2NumSweeps] ({\tt Int}) - number of sweeps for up cycle
@@ -61,8 +59,6 @@ C       Use RelaxType or Cycle?RelaxType instead.
 C       
 C       \item[RelaxType] ({\tt Int}) - type of smoother for fine grid, up and
 C       down cycle.
-C       
-C       \item[Cycle0RelaxType] ({\tt Int}) - type of smoother for fine grid
 C       
 C       \item[Cycle1RelaxType] ({\tt Int}) - type of smoother for down cycle
 C       
@@ -95,7 +91,7 @@ C       \item[SmoothNumSweeps] ({\tt Int}) - number of sweeps for more
 C       complex smoothers.
 C       
 C       \item[PrintFileName] ({\tt String}) - name of file printed to in
-C       association with {\tt SetPrintLevel}.  (not yet implemented).
+C       association with {\tt SetPrintLevel}.
 C       
 C       \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
 C       (when using the systems version).
@@ -112,7 +108,51 @@ C
 C       \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
 C       for additive Schwarz.
 C       
+C       \item[Tolerance] ({\tt Double}) - convergence tolerance, if this
+C       is used as a solver; ignored if this is used as a preconditioner
+C       
 C       \item[DebugFlag] ({\tt Int}) -
+C       
+C       \item[InterpType] ({\tt Int}) - Defines which parallel interpolation
+C       operator is used. There are the following options for interp\_type: 
+C       
+C       \begin{tabular}{|c|l|} \hline
+C       0 &	classical modified interpolation \\
+C       1 &	LS interpolation (for use with GSMG) \\
+C       2 &	classical modified interpolation for hyperbolic PDEs \\
+C       3 &	direct interpolation (with separation of weights) \\
+C       4 &	multipass interpolation \\
+C       5 &	multipass interpolation (with separation of weights) \\
+C       6 &  extended classical modified interpolation \\
+C       7 &  extended (if no common C neighbor) classical modified interpolation \\
+C       8 &	standard interpolation \\
+C       9 &	standard interpolation (with separation of weights) \\
+C       10 &	classical block interpolation (for use with nodal systems version only) \\
+C       11 &	classical block interpolation (for use with nodal systems version only) \\
+C       &	with diagonalized diagonal blocks \\
+C       12 &	FF interpolation \\
+C       13 &	FF1 interpolation \\
+C       \hline
+C       \end{tabular}
+C       
+C       The default is 0. 
+C       
+C       \item[NumSamples] ({\tt Int}) - Defines the number of sample vectors used
+C       in GSMG or LS interpolation.
+C       
+C       \item[MaxIterations] ({\tt Int}) - maximum number of iterations
+C       
+C       \item[Logging] ({\tt Int}) - Set the {\it logging level}, specifying the
+C       degree of additional informational data to be accumulated.  Does
+C       nothing by default (level = 0).  Other levels (if any) are
+C       implementation-specific.  Must be called before {\tt Setup}
+C       and {\tt Apply}.
+C       
+C       \item[PrintLevel] ({\tt Int}) - Set the {\it print level}, specifying the
+C       degree of informational data to be printed either to the screen or
+C       to a file.  Does nothing by default (level=0).  Other levels
+C       (if any) are implementation-specific.  Must be called before
+C       {\tt Setup} and {\tt Apply}.
 C       
 C       \end{description}
 C       
@@ -195,6 +235,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  Create[]
+C        This function is the preferred way to create a BoomerAMG solver. 
 C       
 
         subroutine bHYPRE_BoomerAMG_Create_f(mpi_comm, A, retval,

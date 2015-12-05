@@ -26,12 +26,10 @@
  * Objects of this type can be cast to PreconditionedSolver objects
  * using the {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * The regular PCG solver calls Babel-interface matrix and vector functions.
  * The HPCG solver calls HYPRE interface functions.
  * The regular solver will work with any consistent matrix, vector, and
- * preconditioner classes.  The HPCG solver will work with the more common
+ * preconditioner classes.  The HPCG solver will work with the more common ones.
  * 
  * The HPCG solver checks whether the matrix, vectors, and preconditioner
  * are of known types, and will not work with any other types.
@@ -2966,7 +2964,9 @@ RETURNS\n\
    (bHYPRE.HPCG _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a HPCG solver. "
    },
   { "_connect", (PyCFunction)pStub_HPCG__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -3086,12 +3086,10 @@ static PyTypeObject _bHYPRE_HPCGType = {
 Objects of this type can be cast to PreconditionedSolver objects\n\
 using the {\\tt \\_\\_cast} methods.\n\
 \n\
-RDF: Documentation goes here.\n\
-\n\
 The regular PCG solver calls Babel-interface matrix and vector functions.\n\
 The HPCG solver calls HYPRE interface functions.\n\
 The regular solver will work with any consistent matrix, vector, and\n\
-preconditioner classes.  The HPCG solver will work with the more common\n\
+preconditioner classes.  The HPCG solver will work with the more common ones.\n\
 \n\
 The HPCG solver checks whether the matrix, vectors, and preconditioner\n\
 are of known types, and will not work with any other types.\n\
@@ -3330,12 +3328,10 @@ initHPCG(void) {
 Objects of this type can be cast to PreconditionedSolver objects\n\
 using the {\\tt \\_\\_cast} methods.\n\
 \n\
-RDF: Documentation goes here.\n\
-\n\
 The regular PCG solver calls Babel-interface matrix and vector functions.\n\
 The HPCG solver calls HYPRE interface functions.\n\
 The regular solver will work with any consistent matrix, vector, and\n\
-preconditioner classes.  The HPCG solver will work with the more common\n\
+preconditioner classes.  The HPCG solver will work with the more common ones.\n\
 \n\
 The HPCG solver checks whether the matrix, vectors, and preconditioner\n\
 are of known types, and will not work with any other types.\n\

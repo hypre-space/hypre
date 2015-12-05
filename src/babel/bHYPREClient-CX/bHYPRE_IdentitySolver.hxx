@@ -111,8 +111,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create an Identity (null) solver. 
      */
     static ::bHYPRE::IdentitySolver
     Create (

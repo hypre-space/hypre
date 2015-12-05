@@ -107,8 +107,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a SStruct Graph. 
      */
     static ::bHYPRE::SStructGraph
     Create (

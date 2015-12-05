@@ -1,90 +1,93 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<HTML>
-<HEAD>
-   <TITLE> IJ Matrices</TITLE>
-   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-
-<H2> <A HREF="#DOC.DOCU">IJ Matrices</A></H2></H2>
-<HR>
+<html><head><TITLE>IJ Matrices</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  IJ Matrices  </H2>
+<hr>
 <DL>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="*HYPRE_IJMatrix"></A>
-<A HREF=HYPRE_IJMatrix.html><B>*HYPRE_IJMatrix</B></A><DD><I> The matrix object</I>
+<IMG BORDER=0 SRC=icon1.gif>typedef struct   hypre_IJMatrix_struct*  <B>HYPRE_IJMatrix</B>
+ <DD><I>
+The matrix object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixCreate"></A>
-<A HREF=HYPRE_IJMatrixCreate.html><B>HYPRE_IJMatrixCreate</B></A><DD><I> Create a matrix object.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixCreate.html><B>HYPRE_IJMatrixCreate</B></A> 
+ <DD><I>
+Create a matrix object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixDestroy"></A>
-<A HREF=HYPRE_IJMatrixDestroy.html><B>HYPRE_IJMatrixDestroy</B></A><DD><I> Destroy a matrix object.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixDestroy.html><B>HYPRE_IJMatrixDestroy</B></A> 
+ <DD><I>
+Destroy a matrix object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixInitialize"></A>
-<A HREF=HYPRE_IJMatrixInitialize.html><B>HYPRE_IJMatrixInitialize</B></A><DD><I> Prepare a matrix object for setting coefficient values.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixInitialize.html><B>HYPRE_IJMatrixInitialize</B></A> 
+ <DD><I>
+Prepare a matrix object for setting coefficient values</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixSetValues"></A>
-<A HREF=HYPRE_IJMatrixSetValues.html><B>HYPRE_IJMatrixSetValues</B></A><DD><I> Sets values for <TT>nrows</TT> rows or partial rows of the matrix.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixSetValues.html><B>HYPRE_IJMatrixSetValues</B></A> 
+ <DD><I>
+Sets values for <TT>nrows</tt> rows or partial rows of the matrix</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixAddToValues"></A>
-<A HREF=HYPRE_IJMatrixAddToValues.html><B>HYPRE_IJMatrixAddToValues</B></A><DD><I> Adds to values for <TT>nrows</TT> rows or partial rows of the matrix.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixAddToValues.html><B>HYPRE_IJMatrixAddToValues</B></A> 
+ <DD><I>
+Adds to values for <TT>nrows</tt> rows or partial rows of the matrix</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixAssemble"></A>
-<A HREF=HYPRE_IJMatrixAssemble.html><B>HYPRE_IJMatrixAssemble</B></A><DD><I> Finalize the construction of the matrix before using</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_IJMatrixAssemble</B>(<!2><A HREF="IJMatrices.html#DOC.3.1.14">HYPRE_IJMatrix</A> matrix)
+ <DD><I>
+Finalize the construction of the matrix before using</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixGetRowCounts"></A>
-<A HREF=HYPRE_IJMatrixGetRowCounts.html><B>HYPRE_IJMatrixGetRowCounts</B></A><DD><I> Gets number of nonzeros elements for <TT>nrows</TT> rows specified in <TT>rows</TT> and returns them in <TT>ncols</TT>, which needs to be allocated by the user</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_IJMatrixGetRowCounts</B>(<!2><A HREF="IJMatrices.html#DOC.3.1.14">HYPRE_IJMatrix</A> matrix, int nrows, int *rows, int *ncols)
+ <DD><I>
+Gets number of nonzeros elements for <TT>nrows</tt> rows specified in <TT>rows</tt>
+and returns them in <TT>ncols</tt>, which needs to be allocated by the
+user</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixGetValues"></A>
-<A HREF=HYPRE_IJMatrixGetValues.html><B>HYPRE_IJMatrixGetValues</B></A><DD><I> Gets values for <TT>nrows</TT> rows or partial rows of the matrix.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixGetValues.html><B>HYPRE_IJMatrixGetValues</B></A> 
+ <DD><I>
+Gets values for <TT>nrows</tt> rows or partial rows of the matrix</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixSetObjectType"></A>
-<A HREF=HYPRE_IJMatrixSetObjectType.html><B>HYPRE_IJMatrixSetObjectType</B></A><DD><I> Set the storage type of the matrix object to be constructed.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixSetObjectType.html><B>HYPRE_IJMatrixSetObjectType</B></A> 
+ <DD><I>
+Set the storage type of the matrix object to be constructed</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixGetObjectType"></A>
-<A HREF=HYPRE_IJMatrixGetObjectType.html><B>HYPRE_IJMatrixGetObjectType</B></A><DD><I> Get the storage type of the constructed matrix object</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_IJMatrixGetObjectType</B>(<!2><A HREF="IJMatrices.html#DOC.3.1.14">HYPRE_IJMatrix</A> matrix, int *type)
+ <DD><I>
+Get the storage type of the constructed matrix object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixGetLocalRange"></A>
-<A HREF=HYPRE_IJMatrixGetLocalRange.html><B>HYPRE_IJMatrixGetLocalRange</B></A><DD><I> Gets range of rows owned by this processor and range of column partitioning for this processor</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_IJMatrixGetLocalRange</B>(<!2><A HREF="IJMatrices.html#DOC.3.1.14">HYPRE_IJMatrix</A> matrix, int *ilower, int *iupper, int *jlower, int *jupper)
+ <DD><I>
+Gets range of rows owned by this processor and range
+of column partitioning for this processor</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixGetObject"></A>
-<A HREF=HYPRE_IJMatrixGetObject.html><B>HYPRE_IJMatrixGetObject</B></A><DD><I> Get a reference to the constructed matrix object.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixGetObject.html><B>HYPRE_IJMatrixGetObject</B></A> 
+ <DD><I>
+Get a reference to the constructed matrix object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixSetRowSizes"></A>
-<A HREF=HYPRE_IJMatrixSetRowSizes.html><B>HYPRE_IJMatrixSetRowSizes</B></A><DD><I> (Optional) Set the max number of nonzeros to expect in each row.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixSetRowSizes.html><B>HYPRE_IJMatrixSetRowSizes</B></A> 
+ <DD><I>
+(Optional) Set the max number of nonzeros to expect in each row</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixSetDiagOffdSizes"></A>
-<A HREF=HYPRE_IJMatrixSetDiagOffdSizes.html><B>HYPRE_IJMatrixSetDiagOffdSizes</B></A><DD><I> (Optional) Set the max number of nonzeros to expect in each row of the diagonal and off-diagonal blocks.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixSetDiagOffdSizes.html><B>HYPRE_IJMatrixSetDiagOffdSizes</B></A> 
+ <DD><I>
+(Optional) Set the max number of nonzeros to expect in each row of
+the diagonal and off-diagonal blocks</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixSetMaxOffProcElmts"></A>
-<A HREF=HYPRE_IJMatrixSetMaxOffProcElmts.html><B>HYPRE_IJMatrixSetMaxOffProcElmts</B></A><DD><I> (Optional) Sets the maximum number of elements that are expected to be set (or added) on other processors from this processor This routine can significantly improve the efficiency of matrix construction, and should always be utilized if possible.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixSetMaxOffProcElmts.html><B>HYPRE_IJMatrixSetMaxOffProcElmts</B></A> 
+ <DD><I>
+(Optional) Sets the maximum number of elements that are expected to be set
+(or added) on other processors from this processor
+This routine can significantly improve the efficiency of matrix
+construction, and should always be utilized if possible</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixRead"></A>
-<A HREF=HYPRE_IJMatrixRead.html><B>HYPRE_IJMatrixRead</B></A><DD><I> Read the matrix from file.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixRead.html><B>HYPRE_IJMatrixRead</B></A> 
+ <DD><I>
+Read the matrix from file</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_IJMatrixPrint"></A>
-<A HREF=HYPRE_IJMatrixPrint.html><B>HYPRE_IJMatrixPrint</B></A><DD><I> Print the matrix to file.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_IJMatrixPrint.html><B>HYPRE_IJMatrixPrint</B></A> 
+ <DD><I>
+Print the matrix to file</I>
 </DL>
-<A NAME="DOC.DOCU"></A>
-<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
 <center>
 <img src="hypre_wiw.gif">
 </center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.6 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -188,7 +188,10 @@ HYPRE_StructPFMGSetNonZeroGuess( HYPRE_StructSolver solver )
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPFMGSetRelaxType, HYPRE_StructPFMGGetRelaxType
+ * HYPRE_StructPFMGSetRelaxType, HYPRE_StructPFMGGetRelaxType,
+ * HYPRE_StructPFMGSetJacobiWeight, HYPRE_StructPFMGGetJacobiWeight
+ * GetJacobiWeight will not return the actual weight
+ * if SetJacobiWeight has not been called.
  *--------------------------------------------------------------------------*/
 
 int
@@ -203,6 +206,19 @@ HYPRE_StructPFMGGetRelaxType( HYPRE_StructSolver solver,
                               int              * relax_type )
 {
    return( hypre_PFMGGetRelaxType( (void *) solver, relax_type) );
+}
+
+int
+HYPRE_StructPFMGSetJacobiWeight(HYPRE_StructSolver solver,
+                                double             weight)
+{
+   return( hypre_PFMGSetJacobiWeight( (void *) solver, weight) );
+}
+int
+HYPRE_StructPFMGGetJacobiWeight(HYPRE_StructSolver solver,
+                                double            *weight)
+{
+   return( hypre_PFMGGetJacobiWeight( (void *) solver, weight) );
 }
 
 /*--------------------------------------------------------------------------

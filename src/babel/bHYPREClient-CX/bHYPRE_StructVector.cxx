@@ -1808,8 +1808,9 @@ bHYPRE::StructVector::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a Struct Vector. 
  */
 ::bHYPRE::StructVector
 bHYPRE::StructVector::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,
@@ -1832,8 +1833,9 @@ bHYPRE::StructVector::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the grid on which vectors are defined. 
  */
 int32_t
 bHYPRE::StructVector::SetGrid( /* in */::bHYPRE::StructGrid grid )
@@ -1855,8 +1857,11 @@ bHYPRE::StructVector::SetGrid( /* in */::bHYPRE::StructGrid grid )
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
  */
 int32_t
 bHYPRE::StructVector::SetNumGhost( /* in rarray[dim2] */int32_t* num_ghost,
@@ -1884,8 +1889,11 @@ bHYPRE::StructVector::SetNumGhost( /* in rarray[dim2] */int32_t* num_ghost,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
  */
 int32_t
 bHYPRE::StructVector::SetNumGhost( /* in rarray[dim2] */::sidl::array<int32_t> 
@@ -1907,8 +1915,11 @@ bHYPRE::StructVector::SetNumGhost( /* in rarray[dim2] */::sidl::array<int32_t>
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the value of a single vector coefficient, given by "grid_index".
+ * "grid_index" is an array of size "dim", where dim is the number
+ * of dimensions. 
  */
 int32_t
 bHYPRE::StructVector::SetValue( /* in rarray[dim] */int32_t* grid_index,
@@ -1936,8 +1947,11 @@ bHYPRE::StructVector::SetValue( /* in rarray[dim] */int32_t* grid_index,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the value of a single vector coefficient, given by "grid_index".
+ * "grid_index" is an array of size "dim", where dim is the number
+ * of dimensions. 
  */
 int32_t
 bHYPRE::StructVector::SetValue( /* in rarray[dim] */::sidl::array<int32_t> 
@@ -1959,8 +1973,13 @@ bHYPRE::StructVector::SetValue( /* in rarray[dim] */::sidl::array<int32_t>
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the values of all vector coefficient for grid points in a box.
+ * The box is defined by its lower and upper corners in the grid.
+ * "ilower" and "iupper" are arrays of size "dim", where dim is the
+ * number of dimensions.  The "values" array has size "nvalues", which
+ * is the number of grid points in the box. 
  */
 int32_t
 bHYPRE::StructVector::SetBoxValues( /* in rarray[dim] */int32_t* ilower,
@@ -2002,8 +2021,13 @@ bHYPRE::StructVector::SetBoxValues( /* in rarray[dim] */int32_t* ilower,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the values of all vector coefficient for grid points in a box.
+ * The box is defined by its lower and upper corners in the grid.
+ * "ilower" and "iupper" are arrays of size "dim", where dim is the
+ * number of dimensions.  The "values" array has size "nvalues", which
+ * is the number of grid points in the box. 
  */
 int32_t
 bHYPRE::StructVector::SetBoxValues( /* in rarray[dim] */::sidl::array<int32_t> 

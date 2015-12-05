@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -49,20 +49,22 @@ hypre_SysPFMGCreate( MPI_Comm  comm )
    (sys_pfmg_data -> time_index) = hypre_InitializeTiming("SYS_PFMG");
 
    /* set defaults */
-   (sys_pfmg_data -> tol)            = 1.0e-06;
-   (sys_pfmg_data -> max_iter)       = 200;
-   (sys_pfmg_data -> rel_change)     = 0;
-   (sys_pfmg_data -> zero_guess)     = 0;
-   (sys_pfmg_data -> max_levels)     = 0;
-   (sys_pfmg_data -> dxyz)[0]        = 0.0;
-   (sys_pfmg_data -> dxyz)[1]        = 0.0;
-   (sys_pfmg_data -> dxyz)[2]        = 0.0;
-   (sys_pfmg_data -> relax_type)     = 1;       /* weighted Jacobi */
-   (sys_pfmg_data -> num_pre_relax)  = 1;
-   (sys_pfmg_data -> num_post_relax) = 1;
-   (sys_pfmg_data -> skip_relax)     = 1;
-   (sys_pfmg_data -> logging)        = 0;
-   (sys_pfmg_data -> print_level)    = 0;
+   (sys_pfmg_data -> tol)              = 1.0e-06;
+   (sys_pfmg_data -> max_iter  )       = 200;
+   (sys_pfmg_data -> rel_change)       = 0;
+   (sys_pfmg_data -> zero_guess)       = 0;
+   (sys_pfmg_data -> max_levels)       = 0;
+   (sys_pfmg_data -> dxyz)[0]          = 0.0;
+   (sys_pfmg_data -> dxyz)[1]          = 0.0;
+   (sys_pfmg_data -> dxyz)[2]          = 0.0;
+   (sys_pfmg_data -> relax_type)       = 1;       /* weighted Jacobi */
+   (sys_pfmg_data -> jacobi_weight)    = 0.0;
+   (sys_pfmg_data -> usr_jacobi_weight)= 0;
+   (sys_pfmg_data -> num_pre_relax)    = 1;
+   (sys_pfmg_data -> num_post_relax)   = 1;
+   (sys_pfmg_data -> skip_relax)       = 1;
+   (sys_pfmg_data -> logging)          = 0;
+   (sys_pfmg_data -> print_level)      = 0;
 
    /* initialize */
    (sys_pfmg_data -> num_levels) = -1;
@@ -220,6 +222,21 @@ hypre_SysPFMGSetRelaxType( void *sys_pfmg_vdata,
    (sys_pfmg_data -> relax_type) = relax_type;
  
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SysPFMGSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+int
+hypre_SysPFMGSetJacobiWeight( void  *sys_pfmg_vdata,
+                              double weight )
+{
+   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+                                                                                                                                     
+   (sys_pfmg_data -> jacobi_weight)    = weight;
+   (sys_pfmg_data -> usr_jacobi_weight)= 1;
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

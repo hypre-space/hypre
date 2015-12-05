@@ -3,7 +3,7 @@
  * Symbol:        sidl.BaseClass-v0.9.15
  * Symbol Type:   class
  * Babel Version: 1.0.0
- * Release:       $Name:  $
+ * Release:       $Name: V2-2-0b $
  * Revision:      @(#) $Id: sidl_BaseClass_Module.h,v 1.5 2006/08/29 22:29:27 painter Exp $
  * Description:   expose a constructor for the Python wrapper
  * 

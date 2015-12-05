@@ -98,8 +98,7 @@ namespace bHYPRE {
   public:
 
     /**
-     * Set the number of dimensions {\tt ndim} and the number of
-     * structured parts {\tt nparts}.
+     *  This function is the preferred way to create a SStruct Grid. 
      */
     static ::bHYPRE::SStructGrid
     Create (
@@ -364,8 +363,9 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  final construction of the object before its use 
      */
     int32_t
     Assemble() ;

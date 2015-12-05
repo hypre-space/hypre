@@ -1,70 +1,66 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<HTML>
-<HEAD>
-   <TITLE> SStruct GMRES Solver</TITLE>
-   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-
-<H2> <A HREF="#DOC.DOCU">SStruct GMRES Solver</A></H2></H2>
-<HR>
+<html><head><TITLE>SStruct GMRES Solver</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  SStruct GMRES Solver  </H2>
+<hr>
 <DL>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESCreate"></A>
-<A HREF=HYPRE_SStructGMRESCreate.html><B>HYPRE_SStructGMRESCreate</B></A><DD><I> Create a solver object</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESCreate</B>(MPI_Comm comm, <!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> *solver)
+ <DD><I>
+Create a solver object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESDestroy"></A>
-<A HREF=HYPRE_SStructGMRESDestroy.html><B>HYPRE_SStructGMRESDestroy</B></A><DD><I> Destroy a solver object.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGMRESDestroy.html><B>HYPRE_SStructGMRESDestroy</B></A> 
+ <DD><I>
+Destroy a solver object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESSetup"></A>
-<A HREF=HYPRE_SStructGMRESSetup.html><B>HYPRE_SStructGMRESSetup</B></A><DD><I> Prepare to solve the system.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGMRESSetup.html><B>HYPRE_SStructGMRESSetup</B></A> 
+ <DD><I>
+Prepare to solve the system</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESSolve"></A>
-<A HREF=HYPRE_SStructGMRESSolve.html><B>HYPRE_SStructGMRESSolve</B></A><DD><I> Solve the system</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSolve</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, <!2><A HREF="SStructMatrices.html#DOC.2.4.9">HYPRE_SStructMatrix</A> A, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> b, <!2><A HREF="SStructVectors.html#DOC.2.5.11">HYPRE_SStructVector</A> x)
+ <DD><I>
+Solve the system</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESSetTol"></A>
-<A HREF=HYPRE_SStructGMRESSetTol.html><B>HYPRE_SStructGMRESSetTol</B></A><DD><I> (Optional) Set the convergence tolerance</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetTol</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double tol)
+ <DD><I>
+(Optional) Set the convergence tolerance</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESSetMaxIter"></A>
-<A HREF=HYPRE_SStructGMRESSetMaxIter.html><B>HYPRE_SStructGMRESSetMaxIter</B></A><DD><I> (Optional) Set maximum number of iterations</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetMaxIter</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int max_iter)
+ <DD><I>
+(Optional) Set maximum number of iterations</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESSetKDim"></A>
-<A HREF=HYPRE_SStructGMRESSetKDim.html><B>HYPRE_SStructGMRESSetKDim</B></A><DD><I> (Optional) Set the maximum size of the Krylov space</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetKDim</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int k_dim)
+ <DD><I>
+(Optional) Set the maximum size of the Krylov space</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESSetPrecond"></A>
-<A HREF=HYPRE_SStructGMRESSetPrecond.html><B>HYPRE_SStructGMRESSetPrecond</B></A><DD><I> (Optional) Set the preconditioner to use</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetPrecond</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, HYPRE_PtrToSStructSolverFcn precond, HYPRE_PtrToSStructSolverFcn precond_setup, void *precond_solver)
+ <DD><I>
+(Optional) Set the preconditioner to use</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESSetLogging"></A>
-<A HREF=HYPRE_SStructGMRESSetLogging.html><B>HYPRE_SStructGMRESSetLogging</B></A><DD><I> (Optional) Set the amount of logging to do</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetLogging</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int logging)
+ <DD><I>
+(Optional) Set the amount of logging to do</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESSetPrintLevel"></A>
-<A HREF=HYPRE_SStructGMRESSetPrintLevel.html><B>HYPRE_SStructGMRESSetPrintLevel</B></A><DD><I> (Optional) Set the amount of printing to do to the screen</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESSetPrintLevel</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int print_level)
+ <DD><I>
+(Optional) Set the amount of printing to do to the screen</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESGetNumIterations"></A>
-<A HREF=HYPRE_SStructGMRESGetNumIterations.html><B>HYPRE_SStructGMRESGetNumIterations</B></A><DD><I> Return the number of iterations taken</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESGetNumIterations</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, int *num_iterations)
+ <DD><I>
+Return the number of iterations taken</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESGetFinalRelativeResidualNorm"></A>
-<A HREF=HYPRE_SStructGMRESGetFinalRelativeResidualNorm.html><B>HYPRE_SStructGMRESGetFinalRelativeResidualNorm</B></A><DD><I> Return the norm of the final relative residual</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESGetFinalRelativeResidualNorm</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, double *norm)
+ <DD><I>
+Return the norm of the final relative residual</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGMRESGetResidual"></A>
-<A HREF=HYPRE_SStructGMRESGetResidual.html><B>HYPRE_SStructGMRESGetResidual</B></A><DD><I> Return the residual</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGMRESGetResidual</B>(<!2><A HREF="SStructSolvers.2.html#DOC.5.1.1">HYPRE_SStructSolver</A> solver, void **residual)
+ <DD><I>
+Return the residual</I>
 </DL>
-<A NAME="DOC.DOCU"></A>
-<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
 <center>
 <img src="hypre_wiw.gif">
 </center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

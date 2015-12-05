@@ -2108,7 +2108,9 @@ RETURNS\n\
    (bHYPRE.StructGrid _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a Struct Grid. "
    },
   { "_connect", (PyCFunction)pStub_StructGrid__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2144,7 +2146,9 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ final construction of the object before its use "
    },
   { "Destroy", (PyCFunction)pStub_StructGrid_Destroy,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2193,7 +2197,11 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Define the lower and upper corners of a box of the grid.\n\
+\"ilower\" and \"iupper\" are arrays of size \"dim\", the number of spatial\n\
+dimensions. "
    },
   { "SetNumGhost", (PyCFunction)pStub_StructGrid_SetNumGhost,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2203,7 +2211,11 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set the number of ghost zones, separately on the lower and upper sides\n\
+for each dimension.\n\
+\"num_ghost\" is an array of size \"dim2\", twice the number of dimensions. "
    },
   { "SetPeriodic", (PyCFunction)pStub_StructGrid_SetPeriodic,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2213,7 +2225,18 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set the periodicity for the grid.  Default is no periodicity.\n\
+\n\
+The argument {\\tt periodic} is an {\\tt dim}-dimensional integer array that\n\
+contains the periodicity for each dimension.  A zero value for a dimension\n\
+means non-periodic, while a nonzero value means periodic and contains the\n\
+actual period.  For example, periodicity in the first and third dimensions\n\
+for a 10x11x12 grid is indicated by the array [10,0,12].\n\
+\n\
+NOTE: Some of the solvers in hypre have power-of-two restrictions on the size\n\
+of the periodic dimensions."
    },
   { "_exec", (PyCFunction)pStub_StructGrid__exec,
   (METH_VARARGS | METH_KEYWORDS),

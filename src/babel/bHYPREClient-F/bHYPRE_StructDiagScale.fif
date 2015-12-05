@@ -88,6 +88,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  Create[]
+C        This function is the preferred way to create a Struct DiagScale solver. 
 C       
 
         subroutine bHYPRE_StructDiagScale_Create_f(mpi_comm, A, retval,

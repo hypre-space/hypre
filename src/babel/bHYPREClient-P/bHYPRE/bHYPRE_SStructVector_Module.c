@@ -2939,7 +2939,9 @@ RETURNS\n\
    (bHYPRE.SStructVector _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a SStruct Vector. "
    },
   { "_connect", (PyCFunction)pStub_SStructVector__connect,
   (METH_VARARGS | METH_KEYWORDS),

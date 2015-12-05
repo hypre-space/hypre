@@ -115,8 +115,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a Struct DiagScale solver. 
      */
     static ::bHYPRE::StructDiagScale
     Create (

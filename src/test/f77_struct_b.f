@@ -11,36 +11,6 @@ c-----------------------------------------------------------------------
 
       include 'mpif.h'
 
-      integer  Hypre_Box_Constructor
-      integer  Hypre_StructGrid_Constructor
-      integer  Hypre_StructStencil_Constructor
-      integer  Hypre_StructMatrixBuilder_Constructor
-      integer  Hypre_StructVectorBuilder_Constructor
-      integer  Hypre_MPI_Com_Constructor
-      integer  Hypre_StructSMG_Constructor
-
-      integer  Hypre_Box_Setup
-      integer  Hypre_StructGrid_SetGridExtents
-      integer  Hypre_StructGrid_SetParameterIntArray
-      integer  Hypre_StructGrid_Setup
-      integer  Hypre_StructStencil_SetElement
-      integer  Hypre_StructMatrixBuilder_Start
-      integer  Hypre_StructMatrixBuilder_SetBoxValues
-      integer  Hypre_StructMatrixBuilder_Setup
-      integer  Hypre_StructMatrixBuilder_GetConstructedObject
-      integer  Hypre_StructSMG_Apply
-      integer  Hypre_StructSMG_GetConvergenceInfo
-      integer  Hypre_StructSMG_Setup
-      integer  Hypre_StructSMG_SetParameterdouble
-      integer  Hypre_StructSMG_SetParameterInt
-      integer  Hypre_StructVectorBuilder_Start
-      integer  Hypre_StructVectorBuilder_Setup
-      integer  Hypre_StructVectorBuilder_SetBoxValues
-      integer  Hypre_StructVectorBuilder_GetConstructedObject
-      integer  Hypre_Vector_castTo
-      integer  Hypre_LinearOperator_castTo
-
-
       parameter (MAXZONS=4194304)
       parameter (MAXBLKS=32)
       parameter (MAXDIM=3)
@@ -63,110 +33,40 @@ c-----------------------------------------------------------------------
       integer             num_iterations
       double precision    final_res_norm
                      
-c     HYPRE_StructMatrix  A
-c     HYPRE_StructVector  b
-c     HYPRE_StructVector  x
-
-c$$$      integer*8           A
-c$$$      integer*8           b
-c$$$      integer*8           x
-
-c      Hypre_StructMatrix  A
-c      Hypre_StructVector  b
-c      Hypre_StructVector  x
-      integer  A
-      integer  b
-      integer  x
-
-c     HYPRE_StructSolver  solver
-c     HYPRE_StructSolver  precond
-
-c$$$      integer*8           solver
-c$$$      integer*8           precond
-
-c      Hypre_StructSolver  solver
-c      Hypre_StructSolver  precond
-c      Hypre_StructJacobi  solver_SJ
-c      Hypre_StructSMG     solver_SMG
-c      Hypre_PCG           solver_PCG
-      integer  solver
-      integer  precond
-      integer  solver_SMG
-
-c     HYPRE_StructGrid    grid
-c     HYPRE_StructStencil stencil
-
-c$$$      integer*8           grid
-c$$$      integer*8           stencil
-
-c      Hypre_StructuredGrid  grid
-c      Hypre_StructStencil   stencil
-      integer  grid
-      integer  stencil
-
-c      Hypre_StructMatrixBuilder MatBuilder
-c      Hypre_StructVectorBuilder VecBuilder
-c      Hypre_LinearOperator lo_test
-c      Hypre_StructMatrix  A_SM
-c      Hypre_LinearOperator A_LO
-c      Hypre_StructVector  b_SV
-c      Hypre_Vector  b_V
-c      Hypre_StructVector  x_SV
-c      Hypre_Vector  x_V
-c      Hypre_MPI_Com       comm
-c      Hypre_Box           box(MAXBLKS)
-c      Hypre_Box           bbox
-      integer MatBuilder
-      integer VecBuilder
-      integer  A_SM
-      integer A_LO
-      integer  b_SV
-      integer  b_V
-      integer  x_SV
-      integer  x_V
-      integer  comm
-      integer  box(MAXBLKS)
-      integer  bbox
+      integer*8  A
+      integer*8  b, b_V
+      integer*8  x, x_V
+      integer*8  solver
+      integer*8  precond
+      integer*8  solver_SMG
+      integer*8  grid
+      integer*8  stencil
+      integer*8 bHYPRE_mpicomm
+      integer*8 mpi_comm
       integer             symmetric
-
-c      array1int arroffsets
-c      array1int intvals
-c      array1int intvals_lo
-c      array1int intvals_hi
-c      array1double doubvals
-c      array1int num_ghost
-c      array1int periodic_arr
+      integer*8  except
+c     ... except is for Babel exceptions, which we shall ignore
 
       double precision    dxyz(3)
-
       integer             A_num_ghost(6)
-
       integer             iupper(3,MAXBLKS), ilower(3,MAXBLKS)
-
-      integer             istart(3)
-
+      integer             istart(3), iend(3)
       integer             offsets(3,MAXDIM+1)
-
       integer             stencil_indices(MAXDIM+1)
       double precision    values((MAXDIM+1)*MAXZONS)
-
       integer             p, q, r
       integer             nblocks, volume
-
       integer             i, s, d
       integer             ix, iy, iz, ib
       integer             ierr
-
       double precision    dtemp
       integer             itemp2
       integer             itemp3
-
       integer             periodic(3)
 
       data A_num_ghost   / 0, 0, 0, 0, 0, 0 /
       data zero          / 0 /
       data one           / 1 /
-c      data ierr          / 0 /
       ierr = 0
 
 c-----------------------------------------------------------------------
@@ -174,11 +74,13 @@ c     Initialize MPI
 c-----------------------------------------------------------------------
 
       call MPI_INIT(ierr)
-
       call MPI_COMM_RANK(MPI_COMM_WORLD, myid, ierr)
       call MPI_COMM_SIZE(MPI_COMM_WORLD, num_procs, ierr)
-
-      comm = Hypre_MPI_Com_Constructor( MPI_COMM_WORLD )
+      mpi_comm = MPI_COMM_WORLD
+c     MPI_COMM_WORLD cannot be directly passed through the Babel interface
+c     because its byte length is unspecified.
+      call bHYPRE_MPICommunicator_CreateF_f( mpi_comm, bHYPRE_mpicomm,
+     1     except )
 
 c-----------------------------------------------------------------------
 c     Set defaults
@@ -210,37 +112,9 @@ c-----------------------------------------------------------------------
       istart(1) = -3
       istart(2) = -3
       istart(3) = -3
-
-c-----------------------------------------------------------------------
-c     Read options
-c-----------------------------------------------------------------------
- 
-c     open( 5, file='struct_linear_solver.in', status='old')
-c
-c     read( 5, *) dim
-c
-c     read( 5, *) nx
-c     read( 5, *) ny
-c     read( 5, *) nz
-c
-c     read( 5, *) Px
-c     read( 5, *) Py
-c     read( 5, *) Pz
-c
-c     read( 5, *) bx
-c     read( 5, *) by
-c     read( 5, *) bz
-c
-c     read( 5, *) cx
-c     read( 5, *) cy
-c     read( 5, *) cz
-c
-c     read( 5, *) n_pre
-c     read( 5, *) n_post
-c
-c     read( 5, *) solver_id
-c
-c     close( 5 )
+      iend(1) = istart(1) + nx - 1 
+      iend(2) = istart(2) + ny - 1 
+      iend(3) = istart(3) + nz - 1
 
 c-----------------------------------------------------------------------
 c     Check a few things
@@ -326,9 +200,6 @@ c----------------------------------------------------------------------
          do ix=0,bx-1
             ilower(1,ib) = istart(1) + nx*(bx*p+ix)
             iupper(1,ib) = istart(1) + nx*(bx*p+ix+1)-1
-            box(ib) = Hypre_Box_Constructor( ilower(1,ib), 1, dim,
-     1           iupper(1,ib), 1, dim, dim )
-            ierr = ierr + Hypre_Box_Setup( box(ib) )
             ib = ib + 1
          enddo
       elseif (dim .eq. 2) then
@@ -338,9 +209,6 @@ c----------------------------------------------------------------------
                iupper(1,ib) = istart(1) + nx*(bx*p+ix+1)-1
                ilower(2,ib) = istart(2) + ny*(by*q+iy)
                iupper(2,ib) = istart(2) + ny*(by*q+iy+1)-1
-               box(ib) = Hypre_Box_Constructor( ilower(1,ib), 1, dim,
-     1              iupper(1,ib), 1, dim, dim )
-               ierr = ierr + Hypre_Box_Setup( box(ib) )
                ib = ib + 1
             enddo
          enddo
@@ -354,31 +222,25 @@ c----------------------------------------------------------------------
                   iupper(2,ib) = istart(2) + ny*(by*q+iy+1)-1
                   ilower(3,ib) = istart(3) + nz*(bz*r+iz)
                   iupper(3,ib) = istart(3) + nz*(bz*r+iz+1)-1
-                  box(ib) = Hypre_Box_Constructor( ilower(1,ib), 1,
-     1                 dim, iupper(1,ib), 1, dim, dim )
-                  ierr = ierr + Hypre_Box_Setup( box(ib) )
                   ib = ib + 1
                enddo
             enddo
          enddo
       endif 
 
-      grid = Hypre_StructGrid_Constructor( comm, dim )
-c      call HYPRE_StructGridCreate(MPI_COMM_WORLD, dim, grid, ierr)
+      call bHYPRE_StructGrid_Create_f( bHYPRE_mpicomm, dim, grid,
+     1                                 except )
       do ib=1,nblocks
-         ierr = ierr + Hypre_StructGrid_SetGridExtents( grid, box(ib) )
-c         call HYPRE_StructGridSetExtents(grid, ilower(1,ib),
-c     & iupper(1,ib), ierr)
+         call bHYPRE_StructGrid_SetExtents_f( grid, ilower(1,ib),
+     1        iupper(1,ib), dim, ierr, except )
       enddo
 
       periodic(1) = 0
       periodic(2) = 0
       periodic(3) = 0
-      ierr = ierr + Hypre_StructGrid_SetParameterIntArray( grid,
-     1   "periodic", periodic, 0, 3, 8 )
-      ierr = ierr + Hypre_StructGrid_Setup( grid )
-
-c      call HYPRE_StructGridAssemble(grid, ierr)
+      call bHYPRE_StructGrid_SetPeriodic_f( grid, periodic, dim,
+     1     ierr, except )
+      call bHYPRE_StructGrid_Assemble_f( grid, ierr, except )
 
 c----------------------------------------------------------------------
 c     Compute the offsets and set up the stencil structure.
@@ -409,13 +271,11 @@ c----------------------------------------------------------------------
          offsets(3,4) =  0
       endif
  
-      stencil = Hypre_StructStencil_Constructor( dim, (dim+1) )
-c      call HYPRE_StructStencilCreate(dim, (dim+1), stencil, ierr) 
+      call bHYPRE_StructStencil_Create_f( dim, dim+1, stencil, except )
+
       do s=1,dim+1
-         ierr = ierr +  Hypre_StructStencil_SetElement( stencil, (s-1),
-     1        offsets(1,s) )
-c         call HYPRE_StructStencilSetElement(stencil, (s - 1),
-c     & offsets(1,s), ierr)
+         call bHYPRE_StructStencil_SetElement_f( stencil, (s-1),
+     1        offsets(1,s), dim, ierr, except )
       enddo
 
 c-----------------------------------------------------------------------
@@ -429,15 +289,14 @@ c-----------------------------------------------------------------------
 
       symmetric = 1
       itemp2 = 2*dim
-      MatBuilder = Hypre_StructMatrixBuilder_Constructor( grid,
-     1     stencil, symmetric, A_num_ghost, zero, itemp2 )
-      ierr = ierr + Hypre_StructMatrixBuilder_Start( MatBuilder, grid,
-     1     stencil, symmetric, A_num_ghost, zero, itemp2 )
-c      call HYPRE_StructMatrixCreate(MPI_COMM_WORLD, grid, stencil,
-c     & A, ierr)
-c      call HYPRE_StructMatrixSetSymmetric(A, 1, ierr)
-c      call HYPRE_StructMatrixSetNumGhost(A, A_num_ghost, ierr)
-c      call HYPRE_StructMatrixInitialize(A, ierr)
+      call bHYPRE_StructMatrix_Create_f( bHYPRE_mpicomm, grid, stencil,
+     1     A, except )
+      call bHYPRE_StructMatrix_SetSymmetric_f( A, symmetric,
+     2     ierr, except )
+      call bHYPRE_StructMatrix_SetNumGhost_f( A, A_num_ghost, 2*dim,
+     1     ierr, except )
+
+      call bHYPRE_StructMatrix_Initialize_f( A, ierr, except )
 
 c-----------------------------------------------------------------------
 c     Set the coefficients for the grid
@@ -466,97 +325,58 @@ c-----------------------------------------------------------------------
       itemp2 = dim+1
       itemp3 = (dim+1)*volume
       do ib=1,nblocks
-         ierr = ierr +  Hypre_StructMatrixBuilder_SetBoxValues(
-     1        MatBuilder, box(ib), stencil_indices, zero, itemp2,
-     2        values, zero, itemp3 )
-c         call HYPRE_StructMatrixSetBoxValues(A, ilower(1,ib),
-c     & iupper(1,ib), (dim+1), stencil_indices, values, ierr)
+         call bHYPRE_StructMatrix_SetBoxValues_f( A,
+     1        ilower(1,ib), iupper(1,ib), dim, dim+1,
+     2        stencil_indices,  values, (dim+1)*volume, ierr, except )
       enddo
 
 c-----------------------------------------------------------------------
-c     Zero out stencils reaching to real boundary
+c     Zero out stencils reaching to real boundary, then assemble.
 c-----------------------------------------------------------------------
 
-      do i=1,volume
-         values(i) = 0.0
-      enddo
-      do d=1,dim
-         do ib=1,nblocks
-            if( ilower(d,ib) .eq. istart(d) ) then
-               isave = iupper(d,ib)
-               iupper(d,ib) = istart(d)
-               bbox = Hypre_Box_Constructor( ilower(1,ib), 1, dim,
-     1              iupper(1,ib), 1, dim, dim )
-               stencil_indices(1) = d - 1
-               ierr = ierr + Hypre_StructMatrixBuilder_SetBoxValues(
-     1              MatBuilder, bbox, stencil_indices, zero, one,
-     2              values, zero, volume )
-c               call HYPRE_StructMatrixSetBoxValues(A, ilower(1,ib),
-c     & iupper(1,ib), 1, stencil_indices, values, ierr)
-               iupper(d,ib) = isave
-               call Hypre_Box_deletereference( bbox )
-            endif
-         enddo
-      enddo
+      call SetStencilBndry( A, ilower, iupper,
+     1     istart, iend, nblocks, dim, periodic, ierr )
 
-      ierr = ierr + Hypre_StructMatrixBuilder_Setup( MatBuilder )
-      ierr = ierr + Hypre_StructMatrixBuilder_GetConstructedObject(
-     1      MatBuilder, A_LO )
-      A_SM = Hypre_LinearOperator_castTo( A_LO, "Hypre.StructMatrix" )
-c      call HYPRE_StructMatrixAssemble(A, ierr)
-c     call HYPRE_StructMatrixPrint("driver.out.A", A, zero, ierr)
+      call bHYPRE_StructMatrix_Assemble_f( A, ierr, except )
 
 c-----------------------------------------------------------------------
 c     Set up the rhs and initial guess
 c-----------------------------------------------------------------------
 
-      VecBuilder = Hypre_StructVectorBuilder_Constructor( grid )
-      ierr = ierr + Hypre_StructVectorBuilder_Start( VecBuilder, grid )
-c      call HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil,
-c     & b, ierr)
-c      call HYPRE_StructVectorInitialize(b, ierr)
+      call bHYPRE_StructVector_Create_f( bHYPRE_mpicomm, grid,
+     1     b, except )
+      call bHYPRE_StructVector_Initialize_f( b, ierr, except )
       do i=1,volume
          values(i) = 1.0
       enddo
       do ib=1,nblocks
-         ierr = ierr + Hypre_StructVectorBuilder_SetBoxValues(
-     1        VecBuilder, box(ib), values )
-c         call HYPRE_StructVectorSetBoxValues(b, ilower(1,ib),
-c     & iupper(1,ib), values, ierr)
+         call bHYPRE_StructVector_SetBoxValues_f( b,
+     1        ilower(1,ib), iupper(1,ib), dim, values, volume,
+     2        ierr, except )
       enddo
-      ierr = ierr + Hypre_StructVectorBuilder_Setup( VecBuilder )
-      ierr = ierr + Hypre_StructVectorBuilder_GetConstructedObject(
-     1    VecBuilder, b_V )
-      b_SV = Hypre_Vector_castTo( b_V, "Hypre.StructVector" )
-c      call HYPRE_StructVectorAssemble(b, ierr)
-c     call HYPRE_StructVectorPrint("driver.out.b", b, zero, ierr)
+      call bHYPRE_StructVector_Assemble_f( b, ierr, except )
+      call bHYPRE_Vector__cast_f( b, b_V, except )
 
-      ierr = ierr + Hypre_StructVectorBuilder_Start( VecBuilder, grid )
-c      call HYPRE_StructVectorCreate(MPI_COMM_WORLD, grid, stencil,
-c     & x, ierr)
-c      call HYPRE_StructVectorInitialize(x, ierr)
+      call bHYPRE_StructVector_Create_f( bHYPRE_mpicomm, grid,
+     1     x, except )
+      call bHYPRE_StructVector_Initialize_f( x, ierr, except )
       do i=1,volume
          values(i) = 0.0
       enddo
       do ib=1,nblocks
-         ierr = ierr + Hypre_StructVectorBuilder_SetBoxValues(
-     1        VecBuilder, box(ib), values )
-c         call HYPRE_StructVectorSetBoxValues(x, ilower(1,ib),
-c     & iupper(1,ib), values, ierr)
+         call bHYPRE_StructVector_SetBoxValues_f( x,
+     1        ilower(1,ib), iupper(1,ib), dim, values, volume,
+     2        ierr, except )
       enddo
-      ierr = ierr + Hypre_StructVectorBuilder_Setup( VecBuilder )
-      ierr = ierr + Hypre_StructVectorBuilder_GetConstructedObject(
-     1    VecBuilder, x_V )
-      x_SV = Hypre_Vector_castTo( x_V, "Hypre.StructVector" )
-c      call HYPRE_StructVectorAssemble(x, ierr)
-c     call HYPRE_StructVectorPrint("driver.out.x0", x, zero, ierr)
+      call bHYPRE_StructVector_Assemble_f( x, ierr, except )
+      call bHYPRE_Vector__cast_f( x, x_V, except )
+
  
 c-----------------------------------------------------------------------
 c     Solve the linear system
 c-----------------------------------------------------------------------
 
-c     General solver parameters, passing hard coded constants
-c     will break the interface.
+c     General solver parameters
       maxiter = 50
       dscgmaxiter = 100
       pcgmaxiter = 50
@@ -566,227 +386,44 @@ c     will break the interface.
       if (solver_id .eq. 0) then
 c        Solve the system using SMG
 
-         solver_SMG = Hypre_StructSMG_Constructor( comm )
+         call bHYPRE_StructSMG_Create_f( bHYPRE_mpicomm, A, solver_SMG,
+     1        except )
 
-         ierr = ierr + Hypre_StructSMG_SetParameterInt( solver_SMG,
-     1       "memory use", 0 )
-         ierr = ierr + Hypre_StructSMG_SetParameterInt( solver_SMG,
-     1       "max iter", 50 )
-         dtemp = 1.0e-6
-         ierr = ierr + Hypre_StructSMG_SetParameterdouble( solver_SMG,
-     1       "tol", dtemp )
-c  The following line doesn't work, passes 7.4228448038894e-51 :
-c         ierr = ierr + Hypre_StructSMG_SetParameterdouble( solver_SMG,
-c     1       "tol", 1.0e-6 )
-         ierr = ierr + Hypre_StructSMG_SetParameterInt( solver_SMG,
-     1        "rel change", 0 )
-         ierr = ierr + Hypre_StructSMG_SetParameterInt( solver_SMG,
-     1        "num prerelax", n_pre )
-         ierr = ierr + Hypre_StructSMG_SetParameterInt( solver_SMG,
-     1        "num postrelax", n_post )
-         ierr = ierr + Hypre_StructSMG_SetParameterInt( solver_SMG,
-     1        "logging", 1 )
+         call bHYPRE_StructSMG_SetIntParameter_f( solver_SMG,
+     1        "MemoryUse", 0, ierr, except )
+         call bHYPRE_StructSMG_SetIntParameter_f( solver_SMG,
+     1        "MaxIter", 50, ierr, except )
+         call bHYPRE_StructSMG_SetDoubleParameter_f( solver_SMG,
+     1        "Tol", tol, ierr, except )
+         call bHYPRE_StructSMG_SetIntParameter_f( solver_SMG,
+     1        "RelChange", 0, ierr, except )
+         call bHYPRE_StructSMG_SetIntParameter_f( solver_SMG,
+     1        "NumPrerelax", n_pre, ierr, except )
+         call bHYPRE_StructSMG_SetIntParameter_f( solver_SMG,
+     1        "NumPostrelax", n_post, ierr, except )
+         call bHYPRE_StructSMG_SetIntParameter_f( solver_SMG,
+     1        "PrintLevel", 1, ierr, except )
+         call bHYPRE_StructSMG_SetIntParameter_f( solver_SMG,
+     1        "Logging", 1, ierr, except )
 
-         ierr = ierr+Hypre_StructSMG_Setup( solver_SMG, A_LO, b_V, x_V )
+         call bHYPRE_StructSMG_Setup_f( solver_SMG, b_V, x_V,
+     1        ierr, except )
 
-c         call HYPRE_StructSMGCreate(MPI_COMM_WORLD, solver, ierr)
-c         call HYPRE_StructSMGSetMemoryUse(solver, zero, ierr)
-c         call HYPRE_StructSMGSetMaxIter(solver, maxiter, ierr)
-c         call HYPRE_StructSMGSetTol(solver, tol, ierr)
-c         call HYPRE_StructSMGSetRelChange(solver, zero, ierr)
-c         call HYPRE_StructSMGSetNumPreRelax(solver, n_pre, ierr)
-c         call HYPRE_StructSMGSetNumPostRelax(solver, n_post, ierr)
-c         call HYPRE_StructSMGSetLogging(solver, one, ierr)
-c         call HYPRE_StructSMGSetup(solver, A, b, x, ierr)
+         call bHYPRE_StructSMG_Apply_f( solver_SMG, b_V, x_V,
+     1        ierr, except )
 
-         ierr = ierr + Hypre_StructSMG_Apply( solver_SMG, b_V, x_V )
-c         call HYPRE_StructSMGSolve(solver, A, b, x, ierr)
+         call bHYPRE_StructSMG_GetIntValue_f( solver_SMG,
+     1        "NumIterations", num_iterations, ierr, except )
+         call bHYPRE_StructSMG_GetDoubleValue_f( solver_SMG,
+     1        "RelResidualNorm", final_res_norm, ierr, except )
 
-         ierr = ierr + Hypre_StructSMG_GetConvergenceInfo( solver_SMG,
-     1        "num iterations", dtemp )
-         num_iterations = dtemp
-c ... TO DO: dtemp should be rounded !!! <<<<<<<<<<<<<<<<<<<<<<<
-         ierr = ierr + Hypre_StructSMG_GetConvergenceInfo( solver_SMG,
-     1        "final relative residual norm", final_res_norm )
-c         call HYPRE_StructSMGGetNumIterations(solver, num_iterations,
-c     & ierr)
-c         call HYPRE_StructSMGGetFinalRelative(solver, final_res_norm,
-c     & ierr)
+      call bHYPRE_StructSMG_deleteRef_f( solver_SMG, except )
 
-c jfp The following line was commented-out so we don't see a bug elsewhere >>>>>
-c jfp I should restore the following line and fix the bug!!! >>>>>>>>>>>>>>>>>>>
-c         call Hypre_StructSMG_deletereference( solver_SMG )
-c         call HYPRE_StructSMGDestroy(solver, ierr)
-
-      elseif (solver_id .eq. 1) then
-c        Solve the system using PFMG
-
-         call HYPRE_StructPFMGCreate(MPI_COMM_WORLD, solver, ierr)
-         call HYPRE_StructPFMGSetMaxIter(solver, maxiter, ierr)
-         call HYPRE_StructPFMGSetTol(solver, tol, ierr)
-         call HYPRE_StructPFMGSetRelChange(solver, zero, ierr)
-c        weighted Jacobi = 1; red-black GS = 2
-         call HYPRE_StructPFMGSetRelaxType(solver, one, ierr)
-         call HYPRE_StructPFMGSetNumPreRelax(solver, n_pre, ierr)
-         call HYPRE_StructPFMGSetNumPostRelax(solver, n_post, ierr)
-c        call HYPRE_StructPFMGSetDxyz(solver, dxyz, ierr)
-         call HYPRE_StructPFMGSetLogging(solver, one, ierr)
-         call HYPRE_StructPFMGSetup(solver, A, b, x, ierr)
-
-         call HYPRE_StructPFMGSolve(solver, A, b, x, ierr)
-
-         call HYPRE_StructPFMGGetNumIteration(solver, num_iterations,
-     & ierr)
-         call HYPRE_StructPFMGGetFinalRelativ(solver, final_res_norm,
-     & ierr)
-         call HYPRE_StructPFMGDestroy(solver, ierr)
-      elseif ((solver_id .gt. 9) .and. (solver_id .le. 20)) then
-c        Solve the system using CG
-
-         precond_id = -1
-         call HYPRE_StructPCGCreate(MPI_COMM_WORLD, solver, ierr)
-         call HYPRE_StructPCGSetMaxIter(solver, maxiter, ierr)
-         call HYPRE_StructPCGSetTol(solver, tol, ierr)
-         call HYPRE_StructPCGSetTwoNorm(solver, one, ierr)
-         call HYPRE_StructPCGSetRelChange(solver, zero, ierr)
-         call HYPRE_StructPCGSetLogging(solver, one, ierr)
-
-         if (solver_id .eq. 10) then
-c           use symmetric SMG as preconditioner
-            precond_id = 0
-            maxiter = 1
-            tol = 0.0
-
-            call HYPRE_StructSMGCreate(MPI_COMM_WORLD, precond,
-     & ierr)
-            call HYPRE_StructSMGSetMemoryUse(precond, zero, ierr)
-            call HYPRE_StructSMGSetMaxIter(precond, maxiter, ierr)
-            call HYPRE_StructSMGSetTol(precond, tol, ierr)
-            call HYPRE_StructSMGSetNumPreRelax(precond, n_pre, ierr)
-            call HYPRE_StructSMGSetNumPostRelax(precond, n_post, ierr)
-            call HYPRE_StructSMGSetLogging(precond, zero, ierr)
-
-            call HYPRE_StructPCGSetPrecond(solver, precond_id, precond,
-     & ierr)
-         elseif (solver_id .eq. 11) then
-c           use symmetric PFMG as preconditioner
-            precond_id = 1
-            maxiter = 1
-            tol = 0.0
-
-            call HYPRE_StructPFMGCreate(MPI_COMM_WORLD, precond,
-     & ierr)
-            call HYPRE_StructPFMGSetMaxIter(precond, maxiter, ierr)
-            call HYPRE_StructPFMGSetTol(precond, tol, ierr)
-c           weighted Jacobi = 1; red-black GS = 2
-            call HYPRE_StructPFMGSetRelaxType(precond, one, ierr)
-            call HYPRE_StructPFMGSetNumPreRelax(precond, n_pre, ierr)
-            call HYPRE_StructPFMGSetNumPostRelax(precond, n_post, ierr)
-c           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
-            call HYPRE_StructPFMGSetLogging(precond, zero, ierr)
-
-            call HYPRE_StructPCGSetPrecond(solver, precond_id, precond,
-     & ierr)
-         elseif (solver_id .eq. 18) then
-c           use diagonal scaling as preconditioner
-            precond_id = 8
-            precond = zero
-
-            call HYPRE_StructPCGSetPrecond(solver, precond_id, precond,
-     & ierr)
-         elseif (solver_id .eq. 19) then
-c           use diagonal scaling as preconditioner
-            precond_id = 9
-
-            call HYPRE_StructPCGSetPrecond(solver, precond_id, precond,
-     & ierr)
-         endif
-
-         call HYPRE_StructPCGSetup(solver, A, b, x, ierr)
-
-         call HYPRE_StructPCGSolve(solver, A, b, x, ierr)
-
-         call HYPRE_StructPCGGetNumIterations(solver, num_iterations,
-     & ierr)
-         call HYPRE_StructPCGGetFinalRelative(solver, final_res_norm,
-     & ierr)
-         call HYPRE_StructPCGDestroy(solver, ierr)
-
-         if (solver_id .eq. 10) then
-            call HYPRE_StructSMGDestroy(precond, ierr)
-         elseif (solver_id .eq. 11) then
-            call HYPRE_StructPFMGDestroy(precond, ierr)
-         endif
-      elseif ((solver_id .gt. 19) .and. (solver_id .le. 30)) then
-c        Solve the system using Hybrid
-
-         precond_id = -1
-         call HYPRE_StructHybridCreate(MPI_COMM_WORLD, solver, ierr)
-         call HYPRE_StructHybridSetDSCGMaxIte(solver, dscgmaxiter, ierr)
-         call HYPRE_StructHybridSetPCGMaxIter(solver, pcgmaxiter, ierr)
-         call HYPRE_StructHybridSetTol(solver, tol, ierr)
-         call HYPRE_StructHybridSetConvergenc(solver, convtol, ierr)
-         call HYPRE_StructHybridSetTwoNorm(solver, one, ierr)
-         call HYPRE_StructHybridSetRelChange(solver, zero, ierr)
-         call HYPRE_StructHybridSetLogging(solver, one, ierr)
-
-         if (solver_id .eq. 20) then
-c           use symmetric SMG as preconditioner
-            precond_id = 0
-            maxiter = 1
-            tol = 0.0
-
-            call HYPRE_StructSMGCreate(MPI_COMM_WORLD, precond,
-     & ierr)
-            call HYPRE_StructSMGSetMemoryUse(precond, zero, ierr)
-            call HYPRE_StructSMGSetMaxIter(precond, maxiter, ierr)
-            call HYPRE_StructSMGSetTol(precond, tol, ierr)
-            call HYPRE_StructSMGSetNumPreRelax(precond, n_pre, ierr)
-            call HYPRE_StructSMGSetNumPostRelax(precond, n_post, ierr)
-            call HYPRE_StructSMGSetLogging(precond, zero, ierr)
-         elseif (solver_id .eq. 21) then
-c           use symmetric PFMG as preconditioner
-            precond_id = 1
-            maxiter = 1
-            tol = 0.0
-
-            call HYPRE_StructPFMGCreate(MPI_COMM_WORLD, precond,
-     & ierr)
-            call HYPRE_StructPFMGSetMaxIter(precond, maxiter, ierr)
-            call HYPRE_StructPFMGSetTol(precond, tol, ierr)
-c           weighted Jacobi = 1; red-black GS = 2
-            call HYPRE_StructPFMGSetRelaxType(precond, one, ierr)
-            call HYPRE_StructPFMGSetNumPreRelax(precond, n_pre, ierr)
-            call HYPRE_StructPFMGSetNumPostRelax(precond, n_post, ierr)
-c           call HYPRE_StructPFMGSetDxyz(precond, dxyz, ierr)
-            call HYPRE_StructPFMGSetLogging(precond, zero, ierr)
-         endif
-
-         call HYPRE_StructHybridSetPrecond(solver, precond_id, precond,
-     & ierr)
-
-         call HYPRE_StructHybridSetup(solver, A, b, x, ierr)
-
-         call HYPRE_StructHybridSolve(solver, A, b, x, ierr)
-
-         call HYPRE_StructHybridGetNumIterati(solver, num_iterations,
-     & ierr)
-         call HYPRE_StructHybridGetFinalRelat(solver, final_res_norm,
-     & ierr)
-         call HYPRE_StructHybridDestroy(solver, ierr)
-
-         if (solver_id .eq. 20) then
-            call HYPRE_StructSMGDestroy(precond, ierr)
-         elseif (solver_id .eq. 21) then
-            call HYPRE_StructPFMGDestroy(precond, ierr)
-         endif
       endif
 
 c-----------------------------------------------------------------------
 c     Print the solution and other info
 c-----------------------------------------------------------------------
-
-c  call HYPRE_StructVectorPrint("driver.out.x", x, zero, ierr)
 
       if (myid .eq. 0) then
          print *, 'Iterations = ', num_iterations
@@ -797,11 +434,14 @@ c-----------------------------------------------------------------------
 c     Finalize things
 c-----------------------------------------------------------------------
 
-      call HYPRE_StructGridDestroy(grid, ierr)
-      call HYPRE_StructStencilDestroy(stencil, ierr)
-      call HYPRE_StructMatrixDestroy(A, ierr)
-      call HYPRE_StructVectorDestroy(b, ierr)
-      call HYPRE_StructVectorDestroy(x, ierr)
+      call bHYPRE_Vector_deleteRef_f( b_V, except )
+      call bHYPRE_Vector_deleteRef_f( x_V, except )
+      call bHYPRE_StructVector_deleteRef_f( b, except )
+      call bHYPRE_StructVector_deleteRef_f( x, except )
+      call bHYPRE_StructMatrix_deleteRef_f( A, except )
+      call bHYPRE_StructStencil_deleteRef_f( stencil, except )
+      call bHYPRE_StructGrid_deleteRef_f( grid, except )
+      call bHYPRE_MPICommunicator_deleteRef_f( bHYPRE_mpicomm, except )
 
 c     Finalize MPI
 
@@ -809,3 +449,69 @@ c     Finalize MPI
 
       stop
       end
+
+c-----------------------------------------------------------------------
+c this function sets to zero the stencil entries that are on the boundary
+c-----------------------------------------------------------------------
+
+      subroutine SetStencilBndry( A_b, ilower, iupper,
+     1     istart, iend, nblocks, dim, periodic, ierr )
+      parameter (MAXZONS=4194304)
+      parameter (MAXBLKS=32)
+      integer*8 A_b
+      integer ilower(3,MAXBLKS)
+      integer iupper(3,MAXBLKS)
+      integer istart(3)
+      integer iend(3)
+      integer dim
+      integer nblocks
+      integer periodic(3)
+      integer ierr
+
+      integer i,j,d,ib
+      integer vol
+      integer stencil_indices
+      double precision values(MAXZONS)
+      integer*8  except
+
+      ierr = 0
+
+      do d = 1, dim
+         do ib = 1, nblocks
+            vol = ( iupper(1,ib)-ilower(1,ib)+1 ) *
+     1           ( iupper(2,ib)-ilower(2,ib)+1 ) *
+     2           ( iupper(3,ib)-ilower(3,ib)+1 )
+            do i = 1, vol
+               values(i) = 0.0;
+            enddo
+            if( ilower(d,ib) .eq. istart(d) ) then
+               if( periodic(d) .eq. 0 ) then
+                  j = iupper(d,ib)
+                  iupper(d,ib) = istart(d)
+                  stencil_indices = d - 1
+
+                  call bHYPRE_StructMatrix_SetBoxValues_f( A_b,
+     1                 ilower(1,ib), iupper(1,ib), dim, 1,
+     2                 stencil_indices,  values, vol, ierr,
+     3                 except )
+                  iupper(d,ib) = j
+               endif
+            endif
+
+            if( iupper(d,ib) .eq. iend(d) ) then
+               if( periodic(d) .eq. 0 ) then
+                  j = ilower(d,ib)
+                  ilower(d,ib) = iend(d)
+                  stencil_indices = dim + d
+                  call bHYPRE_StructMatrix_SetBoxValues_f( A_b,
+     1                 ilower(1,ib), iupper(1,ib), dim, 1,
+     2                 stencil_indices, values, vol, ierr, except)
+                  ilower(d,ib) = j
+               endif
+            endif
+         enddo
+      enddo
+      
+      return
+      end
+

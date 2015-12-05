@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -79,6 +79,9 @@ typedef struct
    int                    max_cycles;
    int                    zero_guess;
    int                    relax_type;
+   double                 jacobi_weight;  /* weighted jacobi weight */
+   int                    usr_jacobi_weight; /* indicator flag for user weight */
+
    int                    num_pre_smooth;
    int                    num_post_smooth;
 

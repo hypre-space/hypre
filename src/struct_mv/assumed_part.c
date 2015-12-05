@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.8 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -800,10 +800,13 @@ int hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,  double *vol_array
  *
  *   8/06 - changed the assumption that
  *   that the local boxes have boxnums 0 to num(local_boxes)-1 (now need to pass in
- *   boxnums)
+ *   ids)
  *
  *   10/06 - changed - no longer need to deal with negative boxes as this is 
  *   used through the box manager
+ *
+ *   3/6 - don't allow more regions than boxes (unless global boxes = 0)and
+ *         don;'t partition into more procs than global number of boxes
  *****************************************************************************/
 
 
@@ -820,6 +823,7 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
    int                i, j, d;
    int                size;
    int                myid, num_procs;
+   int                num_proc_partitions;
    int                count_array_size;
    int                *count_array=NULL;
    double             *vol_array=NULL, one_volume;
@@ -907,6 +911,10 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
    /*don't want the number of regions exceeding the number of processors*/
    /* note: this doesn't change the value in the caller's code */
     max_regions = hypre_min(num_procs, max_regions);
+
+
+    /* don't want more regions than boxes either */
+     if (global_num_boxes) max_regions = hypre_min(global_num_boxes, max_regions);
 
  
     /* start with a region array of size 0*/
@@ -1154,9 +1162,17 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
        total_boxes += count_array[i];
     }
     /* calculate the fraction of actual boxes in each region, mult. by total number
-       of procs, put result in proc_array to
+       of proc partitons desired, put result in proc_array to
        assign  each region a number of processors proportional to the fraction
        of boxes */
+
+    /* 3/6 - put a limit on the number of proc partitions - not larger
+       than the total of boxes in the regions (at coarse levels may be
+       many more procs than boxes - this should minimize some
+       communication)*/
+    num_proc_partitions = hypre_min(num_procs, total_boxes);
+    
+
     for (i=0; i < size; i++) 
     {
  
@@ -1167,7 +1183,7 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
        else
        {
           proc_array[i] = (int) hypre_round(((double)count_array[i]/ 
-                                             (double)total_boxes)* (double) num_procs);
+                                             (double)total_boxes)* (double) num_proc_partitions);
        }
        
        box =  hypre_BoxArrayBox(region_array, i); 
@@ -1181,7 +1197,7 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
        if (dbl_vol < (double) proc_array[i]) 
        {
           proc_array[i] = (int) dbl_vol; /*don't let the the number of procs be 
-                                           greater than the volume - safe to case back to int if
+                                           greater than the volume - safe to cast back to int if
                                            this is true - then vol is not overflowing */
        }
        
@@ -1200,14 +1216,14 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
   
 
 
-    /* adjust such that num_procs = proc_count (they should be close) */
+    /* adjust such that num_proc_partitions = proc_count (they should be close) */
     /* a processor is only assigned to ONE region*/
 
     /* if we need a few more processors assigned 
-       in proc_array for proc_count to = num_procs
+       in proc_array for proc_count to = num_proc_partitions
        (it is ok if we have fewer procs in proc_array
        due to volume constraints */
-    while (num_procs > proc_count)
+    while (num_proc_partitions > proc_count)
     {
        proc_array[max_position]++;
        
@@ -1222,7 +1238,7 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
 
     /* if we we need fewer processors in proc_array*/
     i = 0;
-    while (num_procs < proc_count)
+    while (num_proc_partitions < proc_count)
     {
        if (proc_array[max_position] != 1)
        {
@@ -1594,8 +1610,7 @@ int hypre_StructAssumedPartitionCreate(int dim, hypre_Box *bounding_box,
            
         }
 
-        /* these boxes are not copied in a particular order - 
-           they are sorted later  */
+        /* these boxes are not copied in a particular order -   */
         
         contact_boxinfo[index++] = tmp_box_nums[i];
         box = hypre_BoxArrayBox(local_boxes, tmp_box_nums[i]);
@@ -1813,8 +1828,9 @@ int hypre_StructAssumedPartitionGetRegionsFromProc( hypre_StructAssumedPart *ass
    num_regions = hypre_StructAssumedPartNumRegions(assumed_part);
    
 
-   /* check to see that this processor owns an assumed region - it is rare
-      that it won't (only if the # of procs > vol. of bounding box) */
+   /* check to see that this processor owns an assumed region - it is
+      rare that it won't (only if the # of procs > vol. of bounding
+      box or # procs > global # boxes) */
  
    if (proc_id >= hypre_StructAssumedPartProcPartition(assumed_part, 
                                                        num_regions))
@@ -2252,3 +2268,120 @@ int hypre_StructAssumedPartitionGetProcsFromBox( hypre_StructAssumedPart *assume
    
 }
 
+#if 0
+{
+/*
+   UNFINISHED  
+   Create a new assumed partition by coarsen the boxes from another
+   assumed partition.
+
+   unfinished because of a problem: can't figure out what the new id
+   is since the zero boxes drop out - and we don't have all of the
+   boxes from a particular processor in the AP */
+ 
+*/ 
+
+
+int hypre_StructCoarsenAP(hypre_StructAssumedPart *ap,  hypre_Index index, hypre_Index stride,
+                          hypre_StructAssumedPart **new_ap_ptr)
+{
+   
+   int num_regions;
+   
+   hypre_BoxArray *coarse_boxes;
+   hypre_BoxArray *fine_boxes;
+   hypre_BoxArray *regions_array;
+   hypre_Box *box;
+
+   hypre_StructAssumedPartition *new_ap;
+   
+
+   
+   /* create new ap and copy global description information */
+   new_ap = hypre_TAlloc(hypre_StructAssumedPart, 1);
+   
+   num_regions = hypre_StructAssumedPartNumRegions(ap);
+   regions_array =    hypre_BoxArrayCreate(num_regions);
+
+   hypre_StructAssumedPartRegions(new_ap) = regions_array;
+   hypre_StructAssumedPartNumRegions(new_ap) = num_regions;
+   hypre_StructAssumedPartProcPartitions(new_ap) = 
+      hypre_CTAlloc(int, num_regions+1); 
+   hypre_StructAssumedPartDivisions(new_ap) = 
+      hypre_CTAlloc(int, num_regions); 
+
+   hypre_StructAssumedPartProcPartitions(new_ap)[0] = 0;
+   
+   for (i=0; i< num_regions; i++)
+   {
+      box =  hypre_BoxArrayBox(hypre_StructAssumedPartRegions(ap), i);
+                            
+      hypre_CopyBox(box, hypre_BoxArrayBox(regions_array, i));
+
+      hypre_StructAssumedPartDivision(new_ap, i) = 
+         hypre_StructAssumedPartDivision(new_ap, i);
+
+      hypre_StructAssumedPartProcPartition(new_ap, i+1)=
+         hypre_StructAssumedPartProcPartition(ap, i+1);
+
+   }
+   
+   /* copy my partition (at most 2 boxes)*/
+   hypre_StructAssumedPartMyPartition(new_ap) 
+      = hypre_BoxArrayCreate(2);
+   for (i=0; i< 2; i++)
+   {
+       box = hypre_BoxArrayBox(hypre_StructAssumedPartMyPartition(ap), i);
+       hypre_CopyBox(box, hypre_BoxArrayBox(hypre_StructAssumedPartMyPartition(new_ap), i));
+   }
+
+   /*create space for the boxes, ids and boxnums */
+   size = hypre_StructAssumedPartMyPartitionIdsSize(ap);
+
+   hypre_StructAssumedPartMyPartitionProcIds(new_ap) = hypre_CTAlloc(int, size); 
+   hypre_StructAssumedPartMyPartitionBoxnums(new_ap) = hypre_CTAlloc(int, size); 
+
+   hypre_StructAssumedPartMyPartitionBoxes(new_ap) 
+      = hypre_BoxArrayCreate(size);
+
+   hypre_StructAssumedPartMyPartitionIdsAlloc(new_ap) = size;
+   hypre_StructAssumedPartMyPartitionIdsSize(new_ap) = size;
+
+   /* now coarsen and copy the boxes - here we are going to prune - don't want size 0
+      boxes */
+   coarse_boxes = hypre_StructAssumedPartMyPartitionBoxes(new_ap);
+   fine_boxes =  hypre_StructAssumedPartMyPartitionBoxes(ap);
+
+   new_box = hypre_BoxCreate();
+
+   hypre_ForBoxI(i, fine_boxes)
+   {
+      box =  hypre_BoxArrayBox(fine_boxes,i);
+      
+      hypre_CopyBox(box, new_box);
+      
+      hypre_StructCoarsenBox( new_box, index, stride);
+  
+
+   }
+  
+
+/* unfinished because of a problem: can't figure out what the new id
+   is since the zero boxes drop out - and we don't have all of the
+   boxes from a particular processor in the AP */
+
+
+   /*  hypre_StructAssumedPartMyPartitionNumDistinctProcs(new_ap) */
+
+
+
+
+
+   *new_ap_ptr = new_ap;
+
+
+   return hypre_error_flag;
+   
+   
+}
+#endif

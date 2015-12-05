@@ -3,7 +3,7 @@
  * Symbol:        sidl.Resolve-v0.9.15
  * Symbol Type:   enumeration
  * Babel Version: 1.0.0
- * Release:       $Name:  $
+ * Release:       $Name: V2-2-0b $
  * Revision:      @(#) $Id: sidl_Resolve_IOR.h,v 1.1 2006/08/29 23:39:46 painter Exp $
  * Description:   Intermediate Object Representation for sidl.Resolve
  * 

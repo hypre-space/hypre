@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.10 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -84,15 +84,15 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   hypre_CSRMatrix    *P_diag;
   hypre_CSRMatrix    *P_offd;   
 
-  double          *P_diag_data;
-  int             *P_diag_i, *P_diag_j;
-  double          *P_offd_data;
-  int             *P_offd_i, *P_offd_j;
+  double          *P_diag_data = NULL;
+  int             *P_diag_i, *P_diag_j = NULL;
+  double          *P_offd_data = NULL;
+  int             *P_offd_i, *P_offd_j = NULL;
 
-  int		  *col_map_offd_P;
+  int		  *col_map_offd_P = NULL;
   int              P_diag_size; 
   int              P_offd_size;
-  int             *P_marker; 
+  int             *P_marker = NULL; 
   int             *P_marker_offd = NULL;
   int             *CF_marker_offd = NULL;
   int             *tmp_CF_marker_offd = NULL;
@@ -104,9 +104,9 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   int             *A_ext_i;
   int             *A_ext_j;
   
-  int             *fine_to_coarse;
+  int             *fine_to_coarse = NULL;
   int             *fine_to_coarse_offd = NULL;
-  int             *found;
+  int             *found = NULL;
 
   int              num_cols_P_offd;
   int              newoff, loc_col;
@@ -124,12 +124,15 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   int              jj_begin_row_offd = 0;
   int              jj_end_row_offd = 0;
   int              coarse_counter, coarse_counter_offd;
-  int             *ihat, *ihat_offd = NULL; 
-  int             *ipnt, *ipnt_offd = NULL; 
+  int             *ihat = NULL; 
+  int             *ihat_offd = NULL; 
+  int             *ipnt = NULL; 
+  int             *ipnt_offd = NULL; 
   int              strong_f_marker = -2;
     
   /* Interpolation weight variables */
-  double          *ahat, *ahat_offd = NULL; 
+  double          *ahat = NULL; 
+  double          *ahat_offd = NULL; 
   double           sum_pos, sum_pos_C, sum_neg, sum_neg_C, sum, sum_C;
   double           diagonal, distribute;
   double           alfa, beta;
@@ -200,7 +203,7 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
      if(newoff >= 0)
        full_off_procNodes = newoff + num_cols_A_offd;
      else
-       return(1);
+       return hypre_error_flag;
 
      /* Possibly add new points and new processors to the comm_pkg, all
       * processors need new_comm_pkg */
@@ -210,7 +213,8 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
      hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
                                    &extend_comm_pkg);
      
-     CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
+     if (full_off_procNodes)
+	CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
      
      if (num_functions > 1 && full_off_procNodes > 0)
         dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
@@ -234,9 +238,11 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    P_diag_i    = hypre_CTAlloc(int, n_fine+1);
    P_offd_i    = hypre_CTAlloc(int, n_fine+1);
 
-   fine_to_coarse = hypre_CTAlloc(int, n_fine);
-
-   P_marker = hypre_CTAlloc(int, n_fine);
+   if (n_fine)
+   {
+      fine_to_coarse = hypre_CTAlloc(int, n_fine);
+      P_marker = hypre_CTAlloc(int, n_fine);
+   }
 
    if (full_off_procNodes)
    {
@@ -394,11 +400,17 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    P_diag_size = jj_counter;
    P_offd_size = jj_counter_offd;
    
-   P_diag_j    = hypre_CTAlloc(int, P_diag_size);
-   P_diag_data = hypre_CTAlloc(double, P_diag_size);
+   if (P_diag_size)
+   {
+      P_diag_j    = hypre_CTAlloc(int, P_diag_size);
+      P_diag_data = hypre_CTAlloc(double, P_diag_size);
+   }
 
-   P_offd_j    = hypre_CTAlloc(int, P_offd_size);
-   P_offd_data = hypre_CTAlloc(double, P_offd_size);
+   if (P_offd_size)
+   {
+      P_offd_j    = hypre_CTAlloc(int, P_offd_size);
+      P_offd_data = hypre_CTAlloc(double, P_offd_size);
+   }
 
    P_diag_i[n_fine] = jj_counter; 
    P_offd_i[n_fine] = jj_counter_offd;
@@ -422,9 +434,12 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    /* Initialize ahat, which is a modification to a, used in the standard
     * interpolation routine. */
-   ahat = hypre_CTAlloc(double, n_fine);
-   ihat = hypre_CTAlloc(int, n_fine);
-   ipnt = hypre_CTAlloc(int, n_fine);
+   if (n_fine)
+   {
+      ahat = hypre_CTAlloc(double, n_fine);
+      ihat = hypre_CTAlloc(int, n_fine);
+      ipnt = hypre_CTAlloc(int, n_fine);
+   }
    if (full_off_procNodes)
    {
      ahat_offd = hypre_CTAlloc(double, full_off_procNodes);
@@ -972,7 +987,8 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    if(P_offd_size)
    {
      hypre_TFree(P_marker);
-     P_marker = hypre_CTAlloc(int, full_off_procNodes);
+     if (full_off_procNodes)
+	P_marker = hypre_CTAlloc(int, full_off_procNodes);
      
      for (i=0; i < full_off_procNodes; i++)
        P_marker[i] = 0;
@@ -991,7 +1007,8 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        }
      }
      
-     col_map_offd_P = hypre_CTAlloc(int, num_cols_P_offd);
+     if (num_cols_P_offd)
+	col_map_offd_P = hypre_CTAlloc(int, num_cols_P_offd);
      
      index = 0;
      for(i = 0; i < num_cols_P_offd; i++)
@@ -1130,15 +1147,15 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   hypre_CSRMatrix    *P_diag;
   hypre_CSRMatrix    *P_offd;   
 
-  double          *P_diag_data;
-  int             *P_diag_i, *P_diag_j;
-  double          *P_offd_data;
-  int             *P_offd_i, *P_offd_j;
+  double          *P_diag_data = NULL;
+  int             *P_diag_i, *P_diag_j = NULL;
+  double          *P_offd_data = NULL;
+  int             *P_offd_i, *P_offd_j = NULL;
 
-  int		  *col_map_offd_P;
+  int		  *col_map_offd_P = NULL;
   int              P_diag_size; 
   int              P_offd_size;
-  int             *P_marker; 
+  int             *P_marker = NULL; 
   int             *P_marker_offd = NULL;
   int             *CF_marker_offd = NULL;
   int             *tmp_CF_marker_offd = NULL;
@@ -1150,9 +1167,9 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   int             *A_ext_i;
   int             *A_ext_j;
   
-  int             *fine_to_coarse;
+  int             *fine_to_coarse = NULL;
   int             *fine_to_coarse_offd = NULL;
-  int             *found;
+  int             *found = NULL;
 
   int              num_cols_P_offd;
   int              newoff, loc_col;
@@ -1190,7 +1207,6 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
                                                                                                
-   P_diag_size = jj_counter;
   /* BEGIN */
   MPI_Comm_size(comm, &num_procs);   
   MPI_Comm_rank(comm,&my_id);
@@ -1238,7 +1254,7 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
      if(newoff >= 0)
        full_off_procNodes = newoff + num_cols_A_offd;
      else
-       return(1);
+       return hypre_error_flag;
 
      /* Possibly add new points and new processors to the comm_pkg, all
       * processors need new_comm_pkg */
@@ -1248,7 +1264,8 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
      hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
                                    &extend_comm_pkg);
      
-     CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
+     if (full_off_procNodes)
+	CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
      
      if (num_functions > 1 && full_off_procNodes > 0)
         dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
@@ -1272,9 +1289,11 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    P_diag_i    = hypre_CTAlloc(int, n_fine+1);
    P_offd_i    = hypre_CTAlloc(int, n_fine+1);
 
-   fine_to_coarse = hypre_CTAlloc(int, n_fine);
-
-   P_marker = hypre_CTAlloc(int, n_fine);
+   if (n_fine)
+   {
+      fine_to_coarse = hypre_CTAlloc(int, n_fine);
+      P_marker = hypre_CTAlloc(int, n_fine);
+   }
 
    if (full_off_procNodes)
    {
@@ -1432,12 +1451,18 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    P_diag_size = jj_counter;
    P_offd_size = jj_counter_offd;
-   
-   P_diag_j    = hypre_CTAlloc(int, P_diag_size);
-   P_diag_data = hypre_CTAlloc(double, P_diag_size);
 
-   P_offd_j    = hypre_CTAlloc(int, P_offd_size);
-   P_offd_data = hypre_CTAlloc(double, P_offd_size);
+   if (P_diag_size)
+   {   
+      P_diag_j    = hypre_CTAlloc(int, P_diag_size);
+      P_diag_data = hypre_CTAlloc(double, P_diag_size);
+   }
+
+   if (P_offd_size)
+   {   
+      P_offd_j    = hypre_CTAlloc(int, P_offd_size);
+      P_offd_data = hypre_CTAlloc(double, P_offd_size);
+   }
 
    P_diag_i[n_fine] = jj_counter; 
    P_offd_i[n_fine] = jj_counter_offd;
@@ -1807,7 +1832,8 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    if(P_offd_size)
    {
      hypre_TFree(P_marker);
-     P_marker = hypre_CTAlloc(int, full_off_procNodes);
+     if (full_off_procNodes)
+	P_marker = hypre_CTAlloc(int, full_off_procNodes);
      
      for (i=0; i < full_off_procNodes; i++)
        P_marker[i] = 0;
@@ -1826,7 +1852,8 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        }
      }
      
-     col_map_offd_P = hypre_CTAlloc(int, num_cols_P_offd);
+     if (num_cols_P_offd)
+	col_map_offd_P = hypre_CTAlloc(int, num_cols_P_offd);
      
      index = 0;
      for(i = 0; i < num_cols_P_offd; i++)
@@ -1956,15 +1983,15 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   hypre_CSRMatrix    *P_diag;
   hypre_CSRMatrix    *P_offd;   
 
-  double          *P_diag_data;
-  int             *P_diag_i, *P_diag_j;
-  double          *P_offd_data;
-  int             *P_offd_i, *P_offd_j;
+  double          *P_diag_data = NULL;
+  int             *P_diag_i, *P_diag_j = NULL;
+  double          *P_offd_data = NULL;
+  int             *P_offd_i, *P_offd_j = NULL;
 
-  int		  *col_map_offd_P;
+  int		  *col_map_offd_P = NULL;
   int              P_diag_size; 
   int              P_offd_size;
-  int             *P_marker; 
+  int             *P_marker = NULL; 
   int             *P_marker_offd = NULL;
   int             *CF_marker_offd = NULL;
   int             *tmp_CF_marker_offd = NULL;
@@ -1980,9 +2007,9 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   int             *A_ext_i;
   int             *A_ext_j;
   
-  int             *fine_to_coarse;
+  int             *fine_to_coarse = NULL;
   int             *fine_to_coarse_offd = NULL;
-  int             *found;
+  int             *found = NULL;
 
   int              num_cols_P_offd;
   int              newoff, loc_col;
@@ -2065,7 +2092,7 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
      if(newoff >= 0)
        full_off_procNodes = newoff + num_cols_A_offd;
      else
-       return(1);
+       return hypre_error_flag;
 
      /* Possibly add new points and new processors to the comm_pkg, all
       * processors need new_comm_pkg */
@@ -2075,7 +2102,8 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
      hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
                                    &extend_comm_pkg);
      
-     CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
+     if (full_off_procNodes)
+	CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
      
      if (num_functions > 1 && full_off_procNodes > 0)
         dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
@@ -2100,9 +2128,11 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    P_diag_i    = hypre_CTAlloc(int, n_fine+1);
    P_offd_i    = hypre_CTAlloc(int, n_fine+1);
 
-   fine_to_coarse = hypre_CTAlloc(int, n_fine);
-
-   P_marker = hypre_CTAlloc(int, n_fine);
+   if (n_fine)
+   {
+      fine_to_coarse = hypre_CTAlloc(int, n_fine);
+      P_marker = hypre_CTAlloc(int, n_fine);
+   }
 
    if (full_off_procNodes)
    {
@@ -2380,12 +2410,18 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    P_diag_size = jj_counter;
    P_offd_size = jj_counter_offd;
-   
-   P_diag_j    = hypre_CTAlloc(int, P_diag_size);
-   P_diag_data = hypre_CTAlloc(double, P_diag_size);
 
-   P_offd_j    = hypre_CTAlloc(int, P_offd_size);
-   P_offd_data = hypre_CTAlloc(double, P_offd_size);
+   if (P_diag_size)
+   {   
+      P_diag_j    = hypre_CTAlloc(int, P_diag_size);
+      P_diag_data = hypre_CTAlloc(double, P_diag_size);
+   }
+
+   if (P_offd_size)
+   {   
+      P_offd_j    = hypre_CTAlloc(int, P_offd_size);
+      P_offd_data = hypre_CTAlloc(double, P_offd_size);
+   }
 
    P_diag_i[n_fine] = jj_counter; 
    P_offd_i[n_fine] = jj_counter_offd;
@@ -2868,7 +2904,8 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    if(P_offd_size)
    {
      hypre_TFree(P_marker);
-     P_marker = hypre_CTAlloc(int, full_off_procNodes);
+     if (full_off_procNodes)
+	P_marker = hypre_CTAlloc(int, full_off_procNodes);
      
      for (i=0; i < full_off_procNodes; i++)
        P_marker[i] = 0;
@@ -2887,7 +2924,8 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        }
      }
      
-     col_map_offd_P = hypre_CTAlloc(int, num_cols_P_offd);
+     if (num_cols_P_offd)
+	col_map_offd_P = hypre_CTAlloc(int, num_cols_P_offd);
      
      index = 0;
      for(i = 0; i < num_cols_P_offd; i++)
@@ -3014,15 +3052,15 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   hypre_CSRMatrix    *P_diag;
   hypre_CSRMatrix    *P_offd;   
 
-  double          *P_diag_data;
-  int             *P_diag_i, *P_diag_j;
-  double          *P_offd_data;
-  int             *P_offd_i, *P_offd_j;
+  double          *P_diag_data = NULL;
+  int             *P_diag_i, *P_diag_j = NULL;
+  double          *P_offd_data = NULL;
+  int             *P_offd_i, *P_offd_j = NULL;
 
-  int		  *col_map_offd_P;
+  int		  *col_map_offd_P = NULL;
   int              P_diag_size; 
   int              P_offd_size;
-  int             *P_marker; 
+  int             *P_marker = NULL; 
   int             *P_marker_offd = NULL;
   int             *CF_marker_offd = NULL;
   int             *tmp_CF_marker_offd = NULL;
@@ -3036,9 +3074,9 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
   int             *A_ext_i;
   int             *A_ext_j;
   
-  int             *fine_to_coarse;
+  int             *fine_to_coarse = NULL;
   int             *fine_to_coarse_offd = NULL;
-  int             *found;
+  int             *found = NULL;
 
   int              num_cols_P_offd;
   int              newoff, loc_col;
@@ -3122,7 +3160,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
      if(newoff >= 0)
        full_off_procNodes = newoff + num_cols_A_offd;
      else
-       return(1);
+       return hypre_error_flag;
 
      /* Possibly add new points and new processors to the comm_pkg, all
       * processors need new_comm_pkg */
@@ -3132,7 +3170,8 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
      hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
                                    &extend_comm_pkg);
      
-     CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
+     if (full_off_procNodes)
+	CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
      
      if (num_functions > 1 && full_off_procNodes > 0)
         dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
@@ -3157,9 +3196,11 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    P_diag_i    = hypre_CTAlloc(int, n_fine+1);
    P_offd_i    = hypre_CTAlloc(int, n_fine+1);
 
-   fine_to_coarse = hypre_CTAlloc(int, n_fine);
-
-   P_marker = hypre_CTAlloc(int, n_fine);
+   if (n_fine)
+   {
+      fine_to_coarse = hypre_CTAlloc(int, n_fine);
+      P_marker = hypre_CTAlloc(int, n_fine);
+   }
 
    if (full_off_procNodes)
    {
@@ -3402,12 +3443,18 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    P_diag_size = jj_counter;
    P_offd_size = jj_counter_offd;
-   
-   P_diag_j    = hypre_CTAlloc(int, P_diag_size);
-   P_diag_data = hypre_CTAlloc(double, P_diag_size);
 
-   P_offd_j    = hypre_CTAlloc(int, P_offd_size);
-   P_offd_data = hypre_CTAlloc(double, P_offd_size);
+   if (P_diag_size)
+   {   
+      P_diag_j    = hypre_CTAlloc(int, P_diag_size);
+      P_diag_data = hypre_CTAlloc(double, P_diag_size);
+   }
+
+   if (P_offd_size)
+   {   
+      P_offd_j    = hypre_CTAlloc(int, P_offd_size);
+      P_offd_data = hypre_CTAlloc(double, P_offd_size);
+   }
 
    P_diag_i[n_fine] = jj_counter; 
    P_offd_i[n_fine] = jj_counter_offd;
@@ -3862,7 +3909,8 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
    if(P_offd_size)
    {
      hypre_TFree(P_marker);
-     P_marker = hypre_CTAlloc(int, full_off_procNodes);
+     if (full_off_procNodes)
+	P_marker = hypre_CTAlloc(int, full_off_procNodes);
      
      for (i=0; i < full_off_procNodes; i++)
        P_marker[i] = 0;
@@ -3881,7 +3929,8 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, int *CF_marker,
        }
      }
      
-     col_map_offd_P = hypre_CTAlloc(int, num_cols_P_offd);
+     if (num_cols_P_offd)
+	col_map_offd_P = hypre_CTAlloc(int, num_cols_P_offd);
      
      index = 0;
      for(i = 0; i < num_cols_P_offd; i++)
@@ -4006,15 +4055,15 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
   hypre_CSRMatrix    *P_diag;
   hypre_CSRMatrix    *P_offd;   
 
-  double          *P_diag_data;
-  int             *P_diag_i, *P_diag_j;
-  double          *P_offd_data;
-  int             *P_offd_i, *P_offd_j;
+  double          *P_diag_data = NULL;
+  int             *P_diag_i, *P_diag_j = NULL;
+  double          *P_offd_data = NULL;
+  int             *P_offd_i, *P_offd_j = NULL;
 
-  int		  *col_map_offd_P;
+  int		  *col_map_offd_P = NULL;
   int              P_diag_size; 
   int              P_offd_size;
-  int             *P_marker; 
+  int             *P_marker = NULL; 
   int             *P_marker_offd = NULL;
   int             *CF_marker_offd = NULL;
   int             *tmp_CF_marker_offd = NULL;
@@ -4028,9 +4077,9 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
   int             *A_ext_i;
   int             *A_ext_j;
   
-  int             *fine_to_coarse;
+  int             *fine_to_coarse = NULL;
   int             *fine_to_coarse_offd = NULL;
-  int             *found;
+  int             *found = NULL;
 
   int              num_cols_P_offd;
   int              newoff, loc_col;
@@ -4113,7 +4162,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
      if(newoff >= 0)
        full_off_procNodes = newoff + num_cols_A_offd;
      else
-       return(1);
+       return hypre_error_flag;
 
      /* Possibly add new points and new processors to the comm_pkg, all
       * processors need new_comm_pkg */
@@ -4123,7 +4172,8 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
      hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
                                    &extend_comm_pkg);
      
-     CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
+     if (full_off_procNodes)
+	CF_marker_offd = hypre_CTAlloc(int, full_off_procNodes);
      
      if (num_functions > 1 && full_off_procNodes > 0)
         dof_func_offd = hypre_CTAlloc(int, full_off_procNodes);
@@ -4146,9 +4196,11 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
    P_diag_i    = hypre_CTAlloc(int, n_fine+1);
    P_offd_i    = hypre_CTAlloc(int, n_fine+1);
 
-   fine_to_coarse = hypre_CTAlloc(int, n_fine);
-
-   P_marker = hypre_CTAlloc(int, n_fine);
+   if (n_fine)
+   {
+      fine_to_coarse = hypre_CTAlloc(int, n_fine);
+      P_marker = hypre_CTAlloc(int, n_fine);
+   }
 
    if (full_off_procNodes)
    {
@@ -4397,12 +4449,18 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
 
    P_diag_size = jj_counter;
    P_offd_size = jj_counter_offd;
-   
-   P_diag_j    = hypre_CTAlloc(int, P_diag_size);
-   P_diag_data = hypre_CTAlloc(double, P_diag_size);
 
-   P_offd_j    = hypre_CTAlloc(int, P_offd_size);
-   P_offd_data = hypre_CTAlloc(double, P_offd_size);
+   if (P_diag_size)
+   {   
+      P_diag_j    = hypre_CTAlloc(int, P_diag_size);
+      P_diag_data = hypre_CTAlloc(double, P_diag_size);
+   }   
+
+   if (P_offd_size)
+   {   
+      P_offd_j    = hypre_CTAlloc(int, P_offd_size);
+      P_offd_data = hypre_CTAlloc(double, P_offd_size);
+   }   
 
    P_diag_i[n_fine] = jj_counter; 
    P_offd_i[n_fine] = jj_counter_offd;
@@ -4863,7 +4921,8 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
    if(P_offd_size)
    {
      hypre_TFree(P_marker);
-     P_marker = hypre_CTAlloc(int, full_off_procNodes);
+     if (full_off_procNodes)
+	P_marker = hypre_CTAlloc(int, full_off_procNodes);
      
      for (i=0; i < full_off_procNodes; i++)
        P_marker[i] = 0;
@@ -4882,7 +4941,8 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
        }
      }
      
-     col_map_offd_P = hypre_CTAlloc(int, num_cols_P_offd);
+     if (num_cols_P_offd)
+	col_map_offd_P = hypre_CTAlloc(int, num_cols_P_offd);
      
      index = 0;
      for(i = 0; i < num_cols_P_offd; i++)
@@ -4937,7 +4997,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, int *CF_marker,
    /* Deallocate memory */   
    hypre_TFree(fine_to_coarse);
    hypre_TFree(P_marker);
-   /*hypre_TFree(clist);*/
+   /*hynre_TFree(clist);*/
    
    if (num_procs > 1) 
    {

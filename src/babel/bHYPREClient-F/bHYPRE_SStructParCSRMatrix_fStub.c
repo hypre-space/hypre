@@ -548,7 +548,7 @@ SIDLFortran77Symbol(bhypre_sstructparcsrmatrix__set_hooks_static_f,BHYPRE_SSTRUC
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a SStruct ParCSR Matrix. 
  */
 
 void

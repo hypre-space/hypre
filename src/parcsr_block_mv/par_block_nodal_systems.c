@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.5 $
+ * $Revision: 1.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -40,12 +40,13 @@
    3 = largest element (positive or negative)
    4 = 1-norm
    5 = inf - norm
+   6 = sum of all elements
  *--------------------------------------------------------------------------*/
 
 int
 hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
-                       int                    option,
-                       hypre_ParCSRMatrix   **AN_ptr)
+                                 int                    option, int diag_option,
+                                 hypre_ParCSRMatrix   **AN_ptr)
 {
    MPI_Comm 	            comm         = hypre_ParCSRBlockMatrixComm(A);
    hypre_CSRBlockMatrix    *A_diag       = hypre_ParCSRBlockMatrixDiag(A);
@@ -107,7 +108,10 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
    int		       global_num_nodes;
    int		       num_nodes;
 
+   int                 index, k;
+   
    double             tmp;
+   double             sum;
    
 
 
@@ -169,15 +173,40 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
       AN_diag_data[i] = tmp;
    }
    
-#if 0
-/* to compare with serial - make diag entries negative*/
 
-   for (i=0; i < num_nodes; i++)
+   if (diag_option ==1 )
    {
-      AN_diag_data[AN_diag_i[i]] = - AN_diag_data[AN_diag_i[i]];
+      /* make the diag entry the negative of the sum of off-diag entries (NEED to get more below!)*/
+      /* the diagonal is the first element listed in each row - */
+      for (i=0; i < num_nodes; i++)
+      {
+         index = AN_diag_i[i]; 
+         sum = 0.0;
+         for (k = AN_diag_i[i]+1; k < AN_diag_i[i+1]; k++)
+         {
+            sum += AN_diag_data[k];
+            
+         }
+
+         AN_diag_data[index] = -sum;
+      }
+      
    }
-   
-#endif
+   else if (diag_option == 2)
+   {
+      
+      /*  make all diagonal entries negative */
+      /* the diagonal is the first element listed in each row - */
+      
+      for (i=0; i < num_nodes; i++)
+      {
+         index = AN_diag_i[i];
+         AN_diag_data[index] = -AN_diag_data[index];
+      }
+   }
+
+
+
 
    /* copy the commpkg */
    if (comm_pkg)
@@ -266,6 +295,29 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
    hypre_CSRMatrixJ(AN_offd) = AN_offd_j;
    hypre_CSRMatrixData(AN_offd) = AN_offd_data;
    
+
+   if (diag_option ==1 )
+   {
+      /* make the diag entry the negative of the sum of off-diag entries (here we are adding the 
+         off_diag contribution)*/
+      /* the diagonal is the first element listed in each row of AN_diag_data - */
+       for (i=0; i < num_nodes; i++)
+      {
+         sum = 0.0;
+         for (k = AN_offd_i[i]; k < AN_offd_i[i+1]; k++)
+         {
+            sum += AN_offd_data[k];
+            
+         }
+         index = AN_diag_i[i];/* location of diag entry in data */ 
+         AN_diag_data[index] -= sum; /* subtract from current value */
+      }
+      
+   }
+
+
+
+
    /* now create AN */   
     
    AN = hypre_ParCSRMatrixCreate(comm, global_num_nodes, global_num_nodes,

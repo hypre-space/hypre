@@ -1,174 +1,174 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<HTML>
-<HEAD>
-   <TITLE> PCG Preconditioned Solver</TITLE>
-   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-
-<H2> <A HREF="#DOC.DOCU">PCG Preconditioned Solver</A></H2></H2>
-<HR>
+<html><head><TITLE>PCG Preconditioned Solver</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  PCG Preconditioned Solver  </H2>
+<hr>
 <DL>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__object"></A>
-<A HREF=bHYPRE_PCG__object.html><B>bHYPRE_PCG__object</B></A><DD><I> Symbol "bHYPREPCG" (version 100)</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG__object.html><B>bHYPRE_PCG__object</B></A> 
+ <DD><I>
+Symbol "bHYPRE</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__create"></A>
-<A HREF=bHYPRE_PCG__create.html><B>bHYPRE_PCG__create</B></A><DD><I> Constructor function for the class</I>
+<IMG BORDER=0 SRC=icon1.gif>extern  C  struct  <!1><A HREF="bHYPRE_PCG__object.html">bHYPRE_PCG__object</A>* bHYPRE_PCG__create sidl_BaseInterface* <B>_ex</B>
+ <DD><I>
+Constructor function for the class</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__createRemote"></A>
-<A HREF=bHYPRE_PCG__createRemote.html><B>bHYPRE_PCG__createRemote</B></A><DD><I> RMI constructor function for the class</I>
+<IMG BORDER=0 SRC=icon1.gif>bHYPRE_PCG  <B>bHYPRE_PCG__createRemote</B>(const char * url, sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+RMI constructor function for the class</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__wrapObj"></A>
-<A HREF=bHYPRE_PCG__wrapObj.html><B>bHYPRE_PCG__wrapObj</B></A><DD><I> Wraps up the private data struct pointer (struct bHYPRE_PCG__data) passed in rather than running the constructor</I>
+<IMG BORDER=0 SRC=icon1.gif>bHYPRE_PCG  <B>bHYPRE_PCG__wrapObj</B>(void * data, sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Wraps up the private data struct pointer (struct bHYPRE_PCG__data) passed in rather than running the constructor</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__connect"></A>
-<A HREF=bHYPRE_PCG__connect.html><B>bHYPRE_PCG__connect</B></A><DD><I> RMI connector function for the class(addrefs)</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG__connect.html><B>bHYPRE_PCG__connect</B></A> 
+ <DD><I>
+RMI connector function for the class</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_Create"></A>
-<A HREF=bHYPRE_PCG_Create.html><B>bHYPRE_PCG_Create</B></A><DD><I> Method:  Create[]</I>
+<IMG BORDER=0 SRC=icon1.gif>bHYPRE_PCG  <B>bHYPRE_PCG_Create</B>(  bHYPRE_MPICommunicator mpi_comm,  bHYPRE_Operator A,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+This function is the preferred way to create a PCG solver</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetPreconditioner"></A>
-<A HREF=bHYPRE_PCG_SetPreconditioner.html><B>bHYPRE_PCG_SetPreconditioner</B></A><DD><I> Set the preconditioner</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_SetPreconditioner</B>(  bHYPRE_PCG self,  bHYPRE_Solver s,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the preconditioner</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_GetPreconditioner"></A>
-<A HREF=bHYPRE_PCG_GetPreconditioner.html><B>bHYPRE_PCG_GetPreconditioner</B></A><DD><I> Method:  GetPreconditioner[]</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_GetPreconditioner</B>(  bHYPRE_PCG self,  bHYPRE_Solver* s,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Method:  GetPreconditioner[]</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_Clone"></A>
-<A HREF=bHYPRE_PCG_Clone.html><B>bHYPRE_PCG_Clone</B></A><DD><I> Method:  Clone[]</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_Clone</B>(  bHYPRE_PCG self,  bHYPRE_PreconditionedSolver* x,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Method:  Clone[]</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetOperator"></A>
-<A HREF=bHYPRE_PCG_SetOperator.html><B>bHYPRE_PCG_SetOperator</B></A><DD><I> Set the operator for the linear system being solved.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG_SetOperator.html><B>bHYPRE_PCG_SetOperator</B></A> 
+ <DD><I>
+Set the operator for the linear system being solved</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetTolerance"></A>
-<A HREF=bHYPRE_PCG_SetTolerance.html><B>bHYPRE_PCG_SetTolerance</B></A><DD><I> (Optional) Set the convergence tolerance.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG_SetTolerance.html><B>bHYPRE_PCG_SetTolerance</B></A> 
+ <DD><I>
+(Optional) Set the convergence tolerance</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetMaxIterations"></A>
-<A HREF=bHYPRE_PCG_SetMaxIterations.html><B>bHYPRE_PCG_SetMaxIterations</B></A><DD><I> (Optional) Set maximum number of iterations.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG_SetMaxIterations.html><B>bHYPRE_PCG_SetMaxIterations</B></A> 
+ <DD><I>
+(Optional) Set maximum number of iterations</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetLogging"></A>
-<A HREF=bHYPRE_PCG_SetLogging.html><B>bHYPRE_PCG_SetLogging</B></A><DD><I> (Optional) Set the <I>logging level</I>, specifying the degree of additional informational data to be accumulated.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG_SetLogging.html><B>bHYPRE_PCG_SetLogging</B></A> 
+ <DD><I>
+(Optional) Set the <IT>logging level</IT>, specifying the degree
+of additional informational data to be accumulated</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetPrintLevel"></A>
-<A HREF=bHYPRE_PCG_SetPrintLevel.html><B>bHYPRE_PCG_SetPrintLevel</B></A><DD><I> (Optional) Set the <I>print level</I>, specifying the degree of informational data to be printed either to the screen or to a file.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG_SetPrintLevel.html><B>bHYPRE_PCG_SetPrintLevel</B></A> 
+ <DD><I>
+(Optional) Set the <IT>print level</IT>, specifying the degree
+of informational data to be printed either to the screen or
+to a file</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_GetNumIterations"></A>
-<A HREF=bHYPRE_PCG_GetNumIterations.html><B>bHYPRE_PCG_GetNumIterations</B></A><DD><I> (Optional) Return the number of iterations taken</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_GetNumIterations</B>(  bHYPRE_PCG self,  int32_t* num_iterations,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+(Optional) Return the number of iterations taken</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_GetRelResidualNorm"></A>
-<A HREF=bHYPRE_PCG_GetRelResidualNorm.html><B>bHYPRE_PCG_GetRelResidualNorm</B></A><DD><I> (Optional) Return the norm of the relative residual</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_GetRelResidualNorm</B>(  bHYPRE_PCG self,  double* norm,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+(Optional) Return the norm of the relative residual</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetCommunicator"></A>
-<A HREF=bHYPRE_PCG_SetCommunicator.html><B>bHYPRE_PCG_SetCommunicator</B></A><DD><I> Set the MPI Communicator.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG_SetCommunicator.html><B>bHYPRE_PCG_SetCommunicator</B></A> 
+ <DD><I>
+Set the MPI Communicator</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_Destroy"></A>
-<A HREF=bHYPRE_PCG_Destroy.html><B>bHYPRE_PCG_Destroy</B></A><DD><I> The Destroy function doesn't necessarily destroy anything.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_PCG_Destroy.html><B>bHYPRE_PCG_Destroy</B></A> 
+ <DD><I>
+The Destroy function doesn't necessarily destroy anything</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetIntParameter"></A>
-<A HREF=bHYPRE_PCG_SetIntParameter.html><B>bHYPRE_PCG_SetIntParameter</B></A><DD><I> Set the int parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_SetIntParameter</B>(  bHYPRE_PCG self,  const char* name,  int32_t value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the int parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetDoubleParameter"></A>
-<A HREF=bHYPRE_PCG_SetDoubleParameter.html><B>bHYPRE_PCG_SetDoubleParameter</B></A><DD><I> Set the double parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_SetDoubleParameter</B>(  bHYPRE_PCG self,  const char* name,  double value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the double parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetStringParameter"></A>
-<A HREF=bHYPRE_PCG_SetStringParameter.html><B>bHYPRE_PCG_SetStringParameter</B></A><DD><I> Set the string parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_SetStringParameter</B>(  bHYPRE_PCG self,  const char* name,  const char* value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the string parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetIntArray1Parameter"></A>
-<A HREF=bHYPRE_PCG_SetIntArray1Parameter.html><B>bHYPRE_PCG_SetIntArray1Parameter</B></A><DD><I> Set the int 1-D array parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_SetIntArray1Parameter</B>(  bHYPRE_PCG self,  const char* name,  int32_t* value,  int32_t nvalues,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the int 1-D array parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetIntArray2Parameter"></A>
-<A HREF=bHYPRE_PCG_SetIntArray2Parameter.html><B>bHYPRE_PCG_SetIntArray2Parameter</B></A><DD><I> Set the int 2-D array parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_SetIntArray2Parameter</B>(  bHYPRE_PCG self,  const char* name,  struct sidl_int__array* value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the int 2-D array parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetDoubleArray1Parameter"></A>
-<A HREF=bHYPRE_PCG_SetDoubleArray1Parameter.html><B>bHYPRE_PCG_SetDoubleArray1Parameter</B></A><DD><I> Set the double 1-D array parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_SetDoubleArray1Parameter</B>(  bHYPRE_PCG self,  const char* name,  double* value,  int32_t nvalues,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the double 1-D array parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_SetDoubleArray2Parameter"></A>
-<A HREF=bHYPRE_PCG_SetDoubleArray2Parameter.html><B>bHYPRE_PCG_SetDoubleArray2Parameter</B></A><DD><I> Set the double 2-D array parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_SetDoubleArray2Parameter</B>(  bHYPRE_PCG self,  const char* name,  struct sidl_double__array* value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the double 2-D array parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_GetIntValue"></A>
-<A HREF=bHYPRE_PCG_GetIntValue.html><B>bHYPRE_PCG_GetIntValue</B></A><DD><I> Set the int parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_GetIntValue</B>(  bHYPRE_PCG self,  const char* name,  int32_t* value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the int parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_GetDoubleValue"></A>
-<A HREF=bHYPRE_PCG_GetDoubleValue.html><B>bHYPRE_PCG_GetDoubleValue</B></A><DD><I> Get the double parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_GetDoubleValue</B>(  bHYPRE_PCG self,  const char* name,  double* value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Get the double parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_Setup"></A>
-<A HREF=bHYPRE_PCG_Setup.html><B>bHYPRE_PCG_Setup</B></A><DD><I> (Optional) Do any preprocessing that may be necessary in order to execute <TT>Apply</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_Setup</B>(  bHYPRE_PCG self,  bHYPRE_Vector b,  bHYPRE_Vector x,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+(Optional) Do any preprocessing that may be necessary in
+order to execute <TT>Apply</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_Apply"></A>
-<A HREF=bHYPRE_PCG_Apply.html><B>bHYPRE_PCG_Apply</B></A><DD><I> Apply the operator to <TT>b</TT>, returning <TT>x</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_Apply</B>(  bHYPRE_PCG self,  bHYPRE_Vector b,  bHYPRE_Vector* x,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Apply the operator to <TT>b</tt>, returning <TT>x</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG_ApplyAdjoint"></A>
-<A HREF=bHYPRE_PCG_ApplyAdjoint.html><B>bHYPRE_PCG_ApplyAdjoint</B></A><DD><I> Apply the adjoint of the operator to <TT>b</TT>, returning <TT>x</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_PCG_ApplyAdjoint</B>(  bHYPRE_PCG self,  bHYPRE_Vector b,  bHYPRE_Vector* x,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Apply the adjoint of the operator to <TT>b</tt>, returning <TT>x</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__cast"></A>
-<A HREF=bHYPRE_PCG__cast.html><B>bHYPRE_PCG__cast</B></A><DD><I> Cast method for interface and class type conversions</I>
+<IMG BORDER=0 SRC=icon1.gif> struct  <!1><A HREF="bHYPRE_PCG__object.html">bHYPRE_PCG__object</A>* bHYPRE_PCG__cast void* obj sidl_BaseInterface* <B>_ex</B>
+ <DD><I>
+Cast method for interface and class type conversions</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__cast2"></A>
-<A HREF=bHYPRE_PCG__cast2.html><B>bHYPRE_PCG__cast2</B></A><DD><I> String cast method for interface and class type conversions</I>
+<IMG BORDER=0 SRC=icon1.gif>void*  <B>bHYPRE_PCG__cast2</B>( void* obj, const char* type, sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+String cast method for interface and class type conversions</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__exec"></A>
-<A HREF=bHYPRE_PCG__exec.html><B>bHYPRE_PCG__exec</B></A><DD><I> Select and execute a method by name</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  void  <B>bHYPRE_PCG__exec</B>(  bHYPRE_PCG self,  const char* methodName,  sidl_rmi_Call inArgs,  sidl_rmi_Return outArgs,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Select and execute a method by name</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__getURL"></A>
-<A HREF=bHYPRE_PCG__getURL.html><B>bHYPRE_PCG__getURL</B></A><DD><I> Get the URL of the Implementation of this object (for RMI)</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  char*  <B>bHYPRE_PCG__getURL</B>(  bHYPRE_PCG self,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Get the URL of the Implementation of this object (for RMI)</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__raddRef"></A>
-<A HREF=bHYPRE_PCG__raddRef.html><B>bHYPRE_PCG__raddRef</B></A><DD><I> On a remote object, addrefs the remote instance</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  void  <B>bHYPRE_PCG__raddRef</B>(  bHYPRE_PCG self,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+On a remote object, addrefs the remote instance</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__isRemote"></A>
-<A HREF=bHYPRE_PCG__isRemote.html><B>bHYPRE_PCG__isRemote</B></A><DD><I> TRUE if this object is remote, false if local</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  sidl_bool  <B>bHYPRE_PCG__isRemote</B>(  bHYPRE_PCG self,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+TRUE if this object is remote, false if local</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__isLocal"></A>
-<A HREF=bHYPRE_PCG__isLocal.html><B>bHYPRE_PCG__isLocal</B></A><DD><I> TRUE if this object is remote, false if local</I>
+<IMG BORDER=0 SRC=icon1.gif>sidl_bool  <B>bHYPRE_PCG__isLocal</B>(  bHYPRE_PCG self,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+TRUE if this object is remote, false if local</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__rmicast"></A>
-<A HREF=bHYPRE_PCG__rmicast.html><B>bHYPRE_PCG__rmicast</B></A><DD><I> Cast method for interface and class type conversions</I>
+<IMG BORDER=0 SRC=icon1.gif> struct  <!1><A HREF="bHYPRE_PCG__object.html">bHYPRE_PCG__object</A>* bHYPRE_PCG__rmicast void* obj struct sidl_BaseInterface__object <B>**_ex</B>
+ <DD><I>
+Cast method for interface and class type conversions</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_PCG__connectI"></A>
-<A HREF=bHYPRE_PCG__connectI.html><B>bHYPRE_PCG__connectI</B></A><DD><I> RMI connector function for the class.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=_ex.33.html><B>**_ex</B></A> 
+ <DD><I>
+RMI connector function for the class</I>
 </DL>
-<A NAME="DOC.DOCU"></A>
-<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
 <center>
 <img src="hypre_wiw.gif">
 </center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

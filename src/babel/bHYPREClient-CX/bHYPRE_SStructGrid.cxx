@@ -1415,8 +1415,7 @@ bHYPRE::SStructGrid::throwException0(
 
 
 /**
- * Set the number of dimensions {\tt ndim} and the number of
- * structured parts {\tt nparts}.
+ *  This function is the preferred way to create a SStruct Grid. 
  */
 ::bHYPRE::SStructGrid
 bHYPRE::SStructGrid::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,
@@ -1938,8 +1937,9 @@ bHYPRE::SStructGrid::SetNumGhost( /* in rarray[dim2] */::sidl::array<int32_t>
 }
 
 
+
 /**
- * user defined non-static method.
+ *  final construction of the object before its use 
  */
 int32_t
 bHYPRE::SStructGrid::Assemble(  )

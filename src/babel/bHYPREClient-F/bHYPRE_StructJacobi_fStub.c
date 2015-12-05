@@ -15,8 +15,6 @@
  * Objects of this type can be cast to Solver objects
  * using the {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * The StructJacobi solver requires a Struct matrix.
  */
 
@@ -541,7 +539,7 @@ SIDLFortran77Symbol(bhypre_structjacobi__set_hooks_static_f,BHYPRE_STRUCTJACOBI_
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct Jacobi solver. 
  */
 
 void

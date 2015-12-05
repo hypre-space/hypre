@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.50 $
+ * $Revision: 2.51 $
  ***********************************************************************EHEADER*/
 
 
@@ -629,13 +629,20 @@ package bHYPRE version 1.0.0
 
    /*----------- Interface -------------------------------------------------*/
 
-   /* RDF: Complete and add comments */
    interface StructMatrixView extends MatrixVectorView
    {
+      /** Set the grid on which vectors are defined.  This and the stencil
+       determine the matrix structure. */
       int SetGrid(in StructGrid grid);
 
+      /** Set the stencil. This and the grid determine the matrix structure. */
       int SetStencil(in StructStencil stencil);
 
+      /** Set matrix values at grid point, given by "index".
+          You can supply values for one or more positions in the stencil.
+          "index" is an array of size "dim"; and "stencil_indices" and "values"
+          are arrays of size "num_stencil_indices".
+       */
       int SetValues( in rarray<int,1> index(dim),
                      in int dim,
                      in int num_stencil_indices,
@@ -643,6 +650,16 @@ package bHYPRE version 1.0.0
                      in rarray<double,1> values(num_stencil_indices)
          );
 
+      /** Set matrix values throughout a box in the grid, specified by its lower
+          and upper corners.  You can supply these values for one or more positions
+          in the stencil.  Thus the total number of matrix values you supply,
+          "nvalues", is num_stencil_indices x box_size, where box_size is the
+          number of grid points in the box.  The values array should be organized
+          so all values for a given box point are together (i.e., the stencil
+          index is the most rapidly varying).
+          "ilower" and "iupper" are arrays of size "dim", "stencil_indices" is an
+          array of size "num_stencil_indices", and "values" is an array of size
+          "nvalues". */
       int SetBoxValues( in rarray<int,1> ilower(dim),
                         in rarray<int,1> iupper(dim),
                         in int dim,
@@ -652,13 +669,28 @@ package bHYPRE version 1.0.0
                         in int nvalues /* = num_stencil_indices * box_size */
          );
 
+      /** Set the number of ghost zones, separately on the lower and upper sides
+       for each dimension.
+       "num_ghost" is an array of size "dim2", twice the number of dimensions*/
       int SetNumGhost( in rarray<int,1> num_ghost(dim2),
                        in int dim2 /* = dim * 2 */
          );
 
+      /** Call SetSymmetric with symmetric=1 to turn on symmetric matrix storage if
+          available. */
       int SetSymmetric(in int symmetric);
-      int SetConstantEntries( in int num_stencil_constant_points,
-                              in rarray<int,1> stencil_constant_points(num_stencil_constant_points) );
+      /** State which stencil entries are constant over the grid.
+          Supported options are: (i) none (the default),
+          (ii) all (stencil_constant_points should include all stencil points)
+          (iii) all entries but the diagonal. */
+      int SetConstantEntries(
+         in int num_stencil_constant_points,
+         in rarray<int,1> stencil_constant_points(num_stencil_constant_points) );
+
+      /** Provide values for matrix coefficients which are constant throughout
+          the grid, one value for each stencil point.
+          "stencil_indices" and "values" is each an array of length
+          "num_stencil_indices" */
       int SetConstantValues( in int num_stencil_indices,
                              in rarray<int,1> stencil_indices(num_stencil_indices),
                              in rarray<double,1> values(num_stencil_indices) );
@@ -666,19 +698,30 @@ package bHYPRE version 1.0.0
 
    /*----------- Interface -------------------------------------------------*/
 
-   /* RDF: Complete and add comments */
    interface StructVectorView extends MatrixVectorView
    {
+      /** Set the grid on which vectors are defined. */
       int SetGrid(in StructGrid grid);
 
+      /** Set the number of ghost zones, separately on the lower and upper sides
+       for each dimension.
+       "num_ghost" is an array of size "dim2", twice the number of dimensions. */
       int SetNumGhost( in rarray<int,1> num_ghost(dim2),
                        in int dim2 /* = dim*2 */
          ); /* call before Initialize */
 
+      /** Set the value of a single vector coefficient, given by "grid_index".
+          "grid_index" is an array of size "dim", where dim is the number
+          of dimensions. */
       int SetValue( in rarray<int,1> grid_index(dim),
                     in int dim,
                     in double value );
 
+      /** Set the values of all vector coefficient for grid points in a box.
+          The box is defined by its lower and upper corners in the grid.
+          "ilower" and "iupper" are arrays of size "dim", where dim is the
+          number of dimensions.  The "values" array has size "nvalues", which
+          is the number of grid points in the box. */
       int SetBoxValues( in rarray<int,1> ilower(dim),
                         in rarray<int,1> iupper(dim),
                         in int dim,
@@ -927,8 +970,11 @@ package bHYPRE version 1.0.0
     **/
    class MPICommunicator
    {
+      /** Create an MPICommunicator object from C code. */
       static MPICommunicator CreateC( in opaque mpi_comm );
+      /** Create an MPICommunicator object from Fortran code. */
       static MPICommunicator CreateF( in opaque mpi_comm );
+      /** Create an MPICommunicator object which represents MPI_Comm_World. */
       static MPICommunicator Create_MPICommWorld();
 
       /**
@@ -949,6 +995,7 @@ package bHYPRE version 1.0.0
    class IJParCSRMatrix implements-all IJMatrixView, Operator,
       CoefficientAccess
    {
+      /** This function is the preferred way to create an IJParCSR Matrix. */
       static IJParCSRMatrix Create( in MPICommunicator mpi_comm,
                                     in int ilower,
                                     in int iupper,
@@ -989,6 +1036,7 @@ package bHYPRE version 1.0.0
     **/
    class IJParCSRVector implements-all IJVectorView, Vector
    {
+      /** This function is the preferred way to create an IJParCSR Vector. */
       static IJParCSRVector Create( in MPICommunicator mpi_comm,
                                     in int jlower, in int jupper );
    }
@@ -1062,6 +1110,7 @@ package bHYPRE version 1.0.0
        * Set the number of dimensions {\tt ndim} and the number of
        * structured parts {\tt nparts}.
        **/
+      /** This function is the preferred way to create a SStruct Grid. */
       static SStructGrid Create( in MPICommunicator mpi_comm,
                                  in int ndim,
                                  in int nparts );
@@ -1170,6 +1219,7 @@ package bHYPRE version 1.0.0
       int SetNumGhost( in rarray<int,1> num_ghost(dim2),
                        in int dim2 /* expected to be dim*2 */ );
 
+      /** final construction of the object before its use */
       int Assemble();
    }
    
@@ -1180,6 +1230,7 @@ package bHYPRE version 1.0.0
     **/
    class SStructStencil
    {
+      /** This function is the preferred way to create a SStruct Stencil. */
       static SStructStencil Create( in int ndim,
                                     in int size );
       /**
@@ -1213,6 +1264,7 @@ package bHYPRE version 1.0.0
     **/
    class SStructGraph implements-all ProblemDefinition
    {
+      /** This function is the preferred way to create a SStruct Graph. */
       static SStructGraph Create(in MPICommunicator mpi_comm,
                                  in SStructGrid grid);
 
@@ -1259,6 +1311,7 @@ package bHYPRE version 1.0.0
     **/
    class SStructMatrix implements-all SStructMatrixView, Operator
    {
+      /** This function is the preferred way to create a SStruct Matrix. */
       static SStructMatrix Create( in MPICommunicator mpi_comm,
                                    in SStructGraph graph );
       int SetObjectType( in int type ); /* object type has 2 possible values */
@@ -1274,6 +1327,7 @@ package bHYPRE version 1.0.0
     **/
    class SStructVector implements-all SStructVectorView, Vector
    {
+      /** This function is the preferred way to create a SStruct Vector. */
       static SStructVector Create( in MPICommunicator mpi_comm,
                                    in SStructGrid grid );
       int SetObjectType( in int type ); /* object type has 2 possible values */
@@ -1289,6 +1343,7 @@ package bHYPRE version 1.0.0
     **/
    class SStructParCSRMatrix implements-all SStructMatrixView, Operator
    {
+      /** This function is the preferred way to create a SStruct ParCSR Matrix. */
       static SStructParCSRMatrix Create( in MPICommunicator mpi_comm,
                                          in SStructGraph graph );
        /* no SetObjectType, as object type has only 1 possible value */
@@ -1302,14 +1357,13 @@ package bHYPRE version 1.0.0
     **/
    class SStructParCSRVector implements-all SStructVectorView, Vector
    {
+      /** This function is the preferred way to create a SStruct ParCSR Vector. */
       static SStructParCSRVector Create( in MPICommunicator mpi_comm,
                                          in SStructGrid grid );
        /* no SetObjectType, as object type has only 1 possible value */
    }
 
    /*----------- Classes ---------------------------------------------------*/
-
-   /* RDF: Complete and add comments */
 
    /**
     * Define a structured stencil for a structured problem
@@ -1319,6 +1373,9 @@ package bHYPRE version 1.0.0
     **/
    class StructStencil 
    {
+      /** This function is the preferred way to create a Struct Stencil.
+       You provide the number of spatial dimensions and the number of
+       stencil entries.  */
       static StructStencil Create( in int ndim,
                                     in int size );
       /**
@@ -1329,8 +1386,16 @@ package bHYPRE version 1.0.0
        **/
       void Destroy();
 
+      /** Set the number of dimensions.  DEPRECATED, use StructStencilCreate */
       int SetDimension(in int dim);
+
+      /** Set the number of stencil entries.
+          DEPRECATED, use StructStencilCreate */
       int SetSize(in int size);
+
+      /** Set a stencil element.  Specify the stencil index, and an array of
+          offsets.  "offset" is an array of length "dim", the number of spatial
+          dimensions. */
       int SetElement( in int index,
                       in rarray<int,1> offset(dim),
                       in int dim );
@@ -1343,6 +1408,7 @@ package bHYPRE version 1.0.0
     **/
    class StructGrid 
    {
+      /** This function is the preferred way to create a Struct Grid. */
       static StructGrid Create( in MPICommunicator mpi_comm,
                                    in int dim );
       /**
@@ -1365,16 +1431,34 @@ package bHYPRE version 1.0.0
       /* For comparison, here is some former code using sidl arrays:
          int SetExtents(in array<int,1,column-major> ilower,
          in array<int,1,column-major> iupper); */
+      /** Define the lower and upper corners of a box of the grid.
+          "ilower" and "iupper" are arrays of size "dim", the number of spatial
+          dimensions. */
       int SetExtents( in rarray<int,1> ilower(dim),
                       in rarray<int,1> iupper(dim),
                       in int dim );
 
+      /** Set the periodicity for the grid.  Default is no periodicity.
+       *
+       * The argument {\tt periodic} is an {\tt dim}-dimensional integer array that
+       * contains the periodicity for each dimension.  A zero value for a dimension
+       * means non-periodic, while a nonzero value means periodic and contains the
+       * actual period.  For example, periodicity in the first and third dimensions
+       * for a 10x11x12 grid is indicated by the array [10,0,12].
+       *
+       * NOTE: Some of the solvers in hypre have power-of-two restrictions on the size
+       * of the periodic dimensions.
+       */
       int SetPeriodic( in rarray<int,1> periodic(dim),
                        in int dim );
 
+      /** Set the number of ghost zones, separately on the lower and upper sides
+       for each dimension.
+       "num_ghost" is an array of size "dim2", twice the number of dimensions. */
       int SetNumGhost( in rarray<int,1> num_ghost(dim2),
                        in int dim2 );
 
+      /** final construction of the object before its use */
       int Assemble();
    }
 
@@ -1390,6 +1474,7 @@ package bHYPRE version 1.0.0
     **/
    class StructMatrix implements-all StructMatrixView, Operator
    {
+      /** This function is the preferred way to create a Struct Matrix. */
       static StructMatrix Create( in MPICommunicator mpi_comm,
                                   in StructGrid grid,
                                   in StructStencil stencil );
@@ -1399,6 +1484,7 @@ package bHYPRE version 1.0.0
    
    class StructVector implements-all StructVectorView, Vector
    {
+      /** This function is the preferred way to create a Struct Vector. */
          static StructVector Create( in MPICommunicator mpi_comm,
                                      in StructGrid grid );
    }
@@ -1414,6 +1500,7 @@ package bHYPRE version 1.0.0
     **/
    class IdentitySolver implements-all Solver
    {
+      /** This function is the preferred way to create an Identity (null) solver. */
       static IdentitySolver Create( in MPICommunicator mpi_comm );
    }
 
@@ -1425,6 +1512,7 @@ package bHYPRE version 1.0.0
     **/
    class ParCSRDiagScale implements-all Solver
    {
+      /** This function is the preferred way to create a ParCSR DiagScale solver. */
       static ParCSRDiagScale Create( in MPICommunicator mpi_comm,
                                      in IJParCSRMatrix A  );
    }
@@ -1437,17 +1525,21 @@ package bHYPRE version 1.0.0
     **/
    class StructDiagScale implements-all Solver
    {
+      /** This function is the preferred way to create a Struct DiagScale solver. */
       static StructDiagScale Create( in MPICommunicator mpi_comm,
                                      in StructMatrix A  );
    }
 
    class SStructDiagScale implements-all Solver
    {
+      /** This function is the preferred way to create a SStruct DiagScale solver. */
       static SStructDiagScale Create( in MPICommunicator mpi_comm,
                                       in Operator A  );
       /* ... A should also be a SStructMatrixView */
    }
 
+   /* note: the fine grid options Cycle0NumSweeps, Cycle0RelaxType have been
+      removed from BoomerAMG as of October 2006 */
    /**
     * Algebraic multigrid solver, based on classical Ruge-Stueben.
     *
@@ -1482,8 +1574,6 @@ package bHYPRE version 1.0.0
     * \item[NumSweeps] ({\tt Int}) - number of sweeps for fine grid, up and
     * down cycle.
     *
-    * \item[Cycle0NumSweeps] ({\tt Int}) - number of sweeps for fine grid
-    *
     * \item[Cycle1NumSweeps] ({\tt Int}) - number of sweeps for down cycle
     *
     * \item[Cycle2NumSweeps] ({\tt Int}) - number of sweeps for up cycle
@@ -1496,8 +1586,6 @@ package bHYPRE version 1.0.0
     *
     * \item[RelaxType] ({\tt Int}) - type of smoother for fine grid, up and
     * down cycle.
-    *
-    * \item[Cycle0RelaxType] ({\tt Int}) - type of smoother for fine grid
     *
     * \item[Cycle1RelaxType] ({\tt Int}) - type of smoother for down cycle
     *
@@ -1530,7 +1618,7 @@ package bHYPRE version 1.0.0
     * complex smoothers.
     *
     * \item[PrintFileName] ({\tt String}) - name of file printed to in
-    * association with {\tt SetPrintLevel}.  (not yet implemented).
+    * association with {\tt SetPrintLevel}.
     *
     * \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
     * (when using the systems version).
@@ -1547,7 +1635,51 @@ package bHYPRE version 1.0.0
     * \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
     * for additive Schwarz.
     *
+    * \item[Tolerance] ({\tt Double}) - convergence tolerance, if this
+    * is used as a solver; ignored if this is used as a preconditioner
+    *
     * \item[DebugFlag] ({\tt Int}) -
+    *
+    * \item[InterpType] ({\tt Int}) - Defines which parallel interpolation
+    * operator is used. There are the following options for interp\_type: 
+    * 
+    * \begin{tabular}{|c|l|} \hline
+    * 0 &	classical modified interpolation \\
+    * 1 &	LS interpolation (for use with GSMG) \\
+    * 2 &	classical modified interpolation for hyperbolic PDEs \\
+    * 3 &	direct interpolation (with separation of weights) \\
+    * 4 &	multipass interpolation \\
+    * 5 &	multipass interpolation (with separation of weights) \\
+    * 6 &  extended classical modified interpolation \\
+    * 7 &  extended (if no common C neighbor) classical modified interpolation \\
+    * 8 &	standard interpolation \\
+    * 9 &	standard interpolation (with separation of weights) \\
+    * 10 &	classical block interpolation (for use with nodal systems version only) \\
+    * 11 &	classical block interpolation (for use with nodal systems version only) \\
+    *   &	with diagonalized diagonal blocks \\
+    * 12 &	FF interpolation \\
+    * 13 &	FF1 interpolation \\
+    * \hline
+    * \end{tabular}
+    * 
+    * The default is 0. 
+    *
+    * \item[NumSamples] ({\tt Int}) - Defines the number of sample vectors used
+    * in GSMG or LS interpolation.
+    *
+    * \item[MaxIterations] ({\tt Int}) - maximum number of iterations
+    *
+    * \item[Logging] ({\tt Int}) - Set the {\it logging level}, specifying the
+    * degree of additional informational data to be accumulated.  Does
+    * nothing by default (level = 0).  Other levels (if any) are
+    * implementation-specific.  Must be called before {\tt Setup}
+    * and {\tt Apply}.
+    *
+    * \item[PrintLevel] ({\tt Int}) - Set the {\it print level}, specifying the
+    * degree of informational data to be printed either to the screen or
+    * to a file.  Does nothing by default (level=0).  Other levels
+    * (if any) are implementation-specific.  Must be called before
+    * {\tt Setup} and {\tt Apply}.
     *
     * \end{description}
     *
@@ -1565,6 +1697,7 @@ package bHYPRE version 1.0.0
     **/
    class BoomerAMG implements-all Solver
    {
+      /** This function is the preferred way to create a BoomerAMG solver. */
       static BoomerAMG Create( in MPICommunicator mpi_comm,
                                in IJParCSRMatrix A );
       int SetLevelRelaxWt( in double relax_wt, in int level );
@@ -1580,11 +1713,11 @@ package bHYPRE version 1.0.0
          in int       max_levels         );
    }
 
+   /* RDF: Documentation goes here...*/
    /**
     * Objects of this type can be cast to Solver objects using the
     * {\tt \_\_cast} methods.
     *
-    * RDF: Documentation goes here.
     * Although the usual Solver Set*Parameter functions are available,
     * a Euclid-stype parameter-setting function is also available, SetParameters.
     *
@@ -1592,52 +1725,54 @@ package bHYPRE version 1.0.0
     **/
    class Euclid implements-all Solver
    {
+      /** This function is the preferred way to create a Euclid solver. */
       static Euclid Create( in MPICommunicator mpi_comm, in IJParCSRMatrix A );
+
       int SetParameters( in int argc, inout string argv );
       /* ... argv is really in, but inout makes implementation simpler */
    }
 
+   /* RDF: Documentation goes here...*/
    /**
     * Objects of this type can be cast to Solver objects using the
     * {\tt \_\_cast} methods.
-    *
-    * RDF: Documentation goes here.
     *
     * Pilut has not been implemented yet.
     *
     **/
    class Pilut implements-all Solver
    {
+      /** This function is the preferred way to create a Pilut solver. */
       static Pilut Create( in MPICommunicator mpi_comm,
                             in Operator A );
    }
 
+   /* RDF: Documentation goes here...*/
    /**
     * Objects of this type can be cast to Solver objects using the
     * {\tt \_\_cast} methods.
-    *
-    * RDF: Documentation goes here.
     *
     * ParaSails requires an IJParCSR matrix
     *
     **/
    class ParaSails implements-all Solver
    {
+      /** This function is the preferred way to create a ParaSails solver. */
       static ParaSails Create( in MPICommunicator mpi_comm,
                                in IJParCSRMatrix A );
    }
 
+   /* RDF: Documentation goes here...*/
    /**
     * Objects of this type can be cast to Solver objects using the
     * {\tt \_\_cast} methods.
-    *
-    * RDF: Documentation goes here.
     *
     * Schwarz requires an IJParCSR matrix
     *
     **/
    class Schwarz implements-all Solver
    {
+      /** This function is the preferred way to create a Schwarz solver. */
       static Schwarz Create( in IJParCSRMatrix A );
    }
 
@@ -1645,12 +1780,10 @@ package bHYPRE version 1.0.0
     * Objects of this type can be cast to PreconditionedSolver objects
     * using the {\tt \_\_cast} methods.
     *
-    * RDF: Documentation goes here.
-    *
     * The regular PCG solver calls Babel-interface matrix and vector functions.
     * The HPCG solver calls HYPRE interface functions.
     * The regular solver will work with any consistent matrix, vector, and
-    * preconditioner classes.  The HPCG solver will work with the more common
+    * preconditioner classes.  The HPCG solver will work with the more common ones.
     *
     * The HPCG solver checks whether the matrix, vectors, and preconditioner
     * are of known types, and will not work with any other types.
@@ -1664,24 +1797,40 @@ package bHYPRE version 1.0.0
     **/
    class HPCG implements-all PreconditionedSolver
    {
+      /** This function is the preferred way to create a HPCG solver. */
       static HPCG Create( in MPICommunicator mpi_comm );
    }
 
+   /**
+    * PCG solver.
+    * This calls Babel-interface matrix and vector functions, so it will work
+    * with any consistent matrix, vector, and preconditioner classes.
+    **/
    class PCG implements-all PreconditionedSolver
    {
+      /** This function is the preferred way to create a PCG solver. */
       static PCG Create( in MPICommunicator mpi_comm, in Operator A );
+   }
+
+   /**
+    * GMRES solver.
+    * This calls Babel-interface matrix and vector functions, so it will work
+    * with any consistent matrix, vector, and preconditioner classes.
+    **/
+   class GMRES implements-all PreconditionedSolver
+   {
+      /** This function is the preferred way to create a GMRES solver. */
+      static GMRES Create( in MPICommunicator mpi_comm, in Operator A );
    }
 
    /**
     * Objects of this type can be cast to PreconditionedSolver objects
     * using the {\tt \_\_cast} methods.
     *
-    * RDF: Documentation goes here.
-    *
     * The regular GMRES solver calls Babel-interface matrix and vector functions.
     * The HGMRES solver calls HYPRE interface functions.
     * The regular solver will work with any consistent matrix, vector, and
-    * preconditioner classes.  The HGMRES solver will work with the more common
+    * preconditioner classes.  The HGMRES solver will work with the more common ones.
     *
     * The HGMRES solver checks whether the matrix, vectors, and preconditioner
     * are of known types, and will not work with any other types.
@@ -1690,99 +1839,89 @@ package bHYPRE version 1.0.0
     * preconditioner: BoomerAMG, ParCSRDiagScale
     *
     **/
-   class GMRES implements-all PreconditionedSolver
-   {
-      static GMRES Create( in MPICommunicator mpi_comm, in Operator A );
-   }
-
    class HGMRES implements-all PreconditionedSolver
    {
+      /** This function is the preferred way to create a HGMRES solver. */
       static HGMRES Create( in MPICommunicator mpi_comm );
    }
 
    /**
-    * Objects of this type can be cast to PreconditionedSolver objects
-    * using the {\tt \_\_cast} methods.
-    *
-    * RDF: Documentation goes here.
-    *
-    * CGNR solver calls Babel-interface functions
-    *
+    * CGNR solver.
+    * This calls Babel-interface matrix and vector functions, so it will work
+    * with any consistent matrix, vector, and preconditioner classes.
     **/
    class CGNR implements-all PreconditionedSolver
    {
+      /** This function is the preferred way to create a CGNR solver. */
       static CGNR Create( in MPICommunicator mpi_comm, in Operator A );
    }
 
    /**
-    * Objects of this type can be cast to PreconditionedSolver objects
-    * using the {\tt \_\_cast} methods.
-    *
-    * RDF: Documentation goes here.
-    *
-    * BiCGSTAB solver calls Babel-interface functions
-    *
+    * BiCGSTAB solver.
+    * This calls Babel-interface matrix and vector functions, so it will work
+    * with any consistent matrix, vector, and preconditioner classes.
     **/
    class BiCGSTAB implements-all PreconditionedSolver
    {
+      /** This function is the preferred way to create a BiCGSTAB solver. */
       static BiCGSTAB Create( in MPICommunicator mpi_comm, in Operator A );
    }
 
+   /* RDF: Documentation goes here.*/
    /**
     * Objects of this type can be cast to Solver objects
     * using the {\tt \_\_cast} methods.
-    *
-    * RDF: Documentation goes here.
     *
     * The StructSMG solver requires a Struct matrix.
     *
     **/
    class StructSMG implements-all Solver
    {
+      /** This function is the preferred way to create a Struct SMG solver. */
       static StructSMG Create( in MPICommunicator mpi_comm, in StructMatrix A );
    }
 
+    /* RDF: Documentation goes here.*/
    /**
     * Objects of this type can be cast to Solver objects
     * using the {\tt \_\_cast} methods.
-    *
-    * RDF: Documentation goes here.
     *
     * The StructPFMG solver requires a Struct matrix.
     *
     **/
    class StructPFMG implements-all Solver
    {
+      /** This function is the preferred way to create a Struct PFMG solver. */
       static StructPFMG Create( in MPICommunicator mpi_comm,
                                 in StructMatrix A );
    }
 
 
+   /* RDF: Documentation goes here. */
    /**
     * Objects of this type can be cast to Solver objects
     * using the {\tt \_\_cast} methods.
-    *
-    * RDF: Documentation goes here.
     *
     * The StructJacobi solver requires a Struct matrix.
     *
     **/
    class StructJacobi implements-all Solver
    {
+      /** This function is the preferred way to create a Struct Jacobi solver. */
       static StructJacobi Create( in MPICommunicator mpi_comm,
                                   in StructMatrix A );
    }
 
 
+   /* Documentation goes here. */
    /**
-    *
-    * Documentation goes here.
     *
     * The SStructSplit solver requires a SStruct matrix.
     *
     **/
    class SStructSplit implements-all Solver
    {
+      /** This function is the preferred way to create a SStruct Split solver. */
       static SStructSplit Create( in MPICommunicator mpi_comm,
                                  in Operator A );
    }
@@ -1804,6 +1943,7 @@ package bHYPRE version 1.0.0
     **/
    class Hybrid implements-all Solver
    {
+      /** This function is the preferred way to create a Hybrid solver. */
       static Hybrid Create( in MPICommunicator mpi_comm,
                             in PreconditionedSolver SecondSolver,
                             in Operator A );

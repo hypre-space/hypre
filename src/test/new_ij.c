@@ -40,6 +40,8 @@ HYPRE_ParCSRMatrix GenerateSysLaplacianVCoef (MPI_Comm comm, int nx, int ny, int
                                          int num_fun, double *mtrx, double *value);
 int SetSysVcoefValues(int num_fun, int nx, int ny, int nz, double vcx, double vcy, double vcz, int mtx_entry, double *values);
 
+int BuildParCoordinates (int argc , char *argv [], int arg_index , int *coorddim_ptr , float **coord_ptr );
+                                                                                
 
 #define SECOND_TIME 0
  
@@ -72,6 +74,7 @@ main( int   argc,
    int                 pcg_max_its; 
    int                 dscg_max_its; 
    int                 nodal = 0;
+   int                 nodal_diag = 0;
    double              cf_tol = 0.9;
    double              norm;
    double              final_res_norm;
@@ -122,6 +125,8 @@ main( int   argc,
    double   jacobi_trunc_threshold;
    double   S_commpkg_switch = 1.0;
    double   CR_rate = 0.7;
+   double   CR_strong_th = 0.0;
+   int      CR_use_CG = 0;
    int      P_max_elmts = 0;
    int      cycle_type;
    int      coarsen_type = 6;
@@ -147,7 +152,15 @@ main( int   argc,
    double   outer_wt_level;
    double   tol = 1.e-8, pc_tol = 0.;
    double   max_row_sum = 1.;
-
+   int      amg_max_iter = 20;
+   /* for CGC BM Aug 25, 2006 */
+   int      cgcits = 1;
+   /* for coordinate plotting BM Oct 24, 2006 */
+   int      plot_grids = 0;
+   int      coord_dim  = 3;
+   float    *coordinates = NULL;
+   char    plot_file_name[256];
+   
    /* parameters for ParaSAILS */
    double   sai_threshold = 0.1;
    double   sai_filter = 0.1;
@@ -199,6 +212,7 @@ main( int   argc,
    ioutdat = 3;
    poutdat = 1;
 
+   sprintf (plot_file_name,"AMGgrids.CF.dat");
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
@@ -381,6 +395,18 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 7;
       }    
+      else if ( strcmp(argv[arg_index], "-cgc") == 0 )
+      {
+        arg_index++;
+        coarsen_type      = 21;
+        cgcits            = 200;
+      }
+      else if ( strcmp(argv[arg_index], "-cgce") == 0 )
+      {
+        arg_index++;
+        coarsen_type      = 22;
+        cgcits            = 200;
+      }
       else if ( strcmp(argv[arg_index], "-pmis") == 0 )
       {
          arg_index++;
@@ -400,6 +426,11 @@ main( int   argc,
       {
          arg_index++;
          coarsen_type      = 99;
+      }    
+      else if ( strcmp(argv[arg_index], "-crcg") == 0 )
+      {
+         arg_index++;
+         CR_use_CG = atoi(argv[arg_index++]);
       }    
       else if ( strcmp(argv[arg_index], "-hmis") == 0 )
       {
@@ -460,6 +491,11 @@ main( int   argc,
       {
          arg_index++;
          CR_rate = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-crst") == 0 )
+      {
+         arg_index++;
+         CR_strong_th = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-rlx") == 0 )
       {
@@ -531,6 +567,12 @@ main( int   argc,
          arg_index++;
          smooth_num_sweeps = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-amg_max_its") == 0 )
+      {
+         arg_index++;
+         amg_max_iter = atoi(argv[arg_index++]);
+      }
+
       else if ( strcmp(argv[arg_index], "-dt") == 0 )
       {
          arg_index++;
@@ -546,6 +588,22 @@ main( int   argc,
       {
          arg_index++;
       }
+   }
+   /* begin CGC BM Aug 25, 2006 */
+   if (coarsen_type == 21 || coarsen_type == 22) {
+     arg_index = 0;
+     while ( (arg_index < argc) && (!print_usage) )
+       {
+         if ( strcmp(argv[arg_index], "-cgcits") == 0 )
+           {
+             arg_index++;
+             cgcits = atoi(argv[arg_index++]);
+           }
+         else
+           {
+             arg_index++;
+           }
+       }
    }
 
    if (solver_id == 8 || solver_id == 18)
@@ -737,10 +795,27 @@ main( int   argc,
          arg_index++;
          nodal  = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-nodal_diag") == 0 )
+      {
+         arg_index++;
+         nodal_diag  = atoi(argv[arg_index++]);
+      }
+
       else if ( strcmp(argv[arg_index], "-print") == 0 )
       {
          arg_index++;
          print_system = 1;
+      }
+      /* BM Oct 23, 2006 */
+      else if ( strcmp(argv[arg_index], "-plot_grids") == 0 )
+      {
+         arg_index++;
+         plot_grids = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-plot_file_name") == 0 )
+      {
+         arg_index++;
+	 sprintf (plot_file_name,"%s",argv[arg_index++]);
       }
       else
       {
@@ -819,8 +894,10 @@ main( int   argc,
       printf("\n");
       printf("  -cljp                 : CLJP coarsening \n");
       printf("  -cljp1                : CLJP coarsening, fixed random \n");
+      printf("  -cgc                  : CGC coarsening \n");
+      printf("  -cgce                 : CGC-E coarsening \n");
       printf("  -pmis                 : PMIS coarsening \n");
-       printf("  -pmis1                : PMIS coarsening, fixed random \n");
+      printf("  -pmis1                : PMIS coarsening, fixed random \n");
       printf("  -hmis                 : HMIS coarsening \n");
       printf("  -ruge                 : Ruge-Stueben coarsening (local)\n");
       printf("  -ruge1p               : Ruge-Stueben coarsening 1st pass only(local)\n");
@@ -840,10 +917,24 @@ main( int   argc,
       printf("       7=extended (only if no common C neighbor) interpolation  \n");
       printf("       8=standard interpolation  \n");
       printf("       9=standard interpolation with separation of weights  \n");
-      printf("      10=classical block interpolation for nodal systems AMG\n");
-      printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
       printf("      12=FF interpolation  \n");
       printf("      13=FF1 interpolation  \n");
+ 
+      printf("      16=use modified unknown interpolation for a system (w/unknown or hybrid approach) \n");
+      printf("      17=use non-systems interp = 6 for a system (w/unknown or hybrid approach) \n");
+      printf("      18=use non-systems interp = 8 for a system (w/unknown or hybrid approach) \n");
+      printf("      19=use non-systems interp = 0 for a system (w/unknown or hybrid approach) \n");
+      
+
+      printf("      10=classical block interpolation for nodal systems AMG\n");
+      printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
+      printf("      20=same as 10, but don't add weak connect. to diag \n");
+      printf("      21=same as 11, but don't add weak connect. to diag \n");
+      printf("      22=classical block interpolation w/Ruge's variant for nodal systems AMG \n");
+      printf("      23=same as 22, but use row sums for diag scaling matrices,for nodal systems AMG \n");
+        
+
+     
       printf("\n");
       printf("  -rlx  <val>            : relaxation type\n");
       printf("       0=Weighted Jacobi  \n");
@@ -863,8 +954,13 @@ main( int   argc,
       printf("       1 = Frobenius norm  \n");
       printf("       2 = Sum of Abs.value of elements  \n");
       printf("       3 = Largest magnitude element (includes its sign)  \n");
-      printf("       4 = Inf. norm \n");
-      printf("       5 = One norm  \n");
+      printf("       4 = Inf. norm (block only) \n");
+      printf("       5 = One norm  (block only) \n");
+      printf("       6 = Sum of all elements in block (block only) \n");
+      printf("  -nodal_diag <val>        :how to treat diag elements\n");
+      printf("       0 = no special treatment \n");
+      printf("       1 = make diag = neg.sum of the off_diag  \n");
+      printf("       2 = make diag = neg. of diag \n");
       printf("  -ns <val>              : Use <val> sweeps on each level\n");
       printf("                           (default C/F down, F/C up, F/C fine\n");
       printf("  -ns_coarse  <val>       : set no. of sweeps for coarsest grid\n");
@@ -880,18 +976,10 @@ main( int   argc,
       printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
       printf("  -nf <val>              : set number of functions for systems AMG\n");
       printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
-      printf("  -interptype <val>      : set to 1 to get LS interpolation (for GSMG only)\n");
-      printf("                         : set to 2 to get interpolation for hyperbolic equations\n");
-      printf("                         : set to 3 to get direct interpolation (with weight separation)\n");
-      printf("                         : set to 4 to get multipass interpolation\n");
-      printf("                         : set to 5 to get multipass interpolation with weight separation\n");
-      printf("                         : set to 6 to get extended interpolation\n");
-      printf("                         : set to 7 to get FF interpolation\n");
-      printf("                         : set to 8 to get standard interpolation\n");
-      printf("                         : set to 9 to get standard interpolation with weight separation\n");
-      printf("                         : set to 10 for nodal standard interpolation (for systems only) \n");
-      printf("                         : set to 11 for diagonal nodal standard interpolation (for systems only) \n");
+    
       printf("  -postinterptype <val>  : invokes <val> no. of Jacobi interpolation steps after main interpolation\n");
+      printf("\n");
+      printf("  -cgcitr <val>          : set maximal number of coarsening iterations for CGC\n");
       printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
       printf("                         : 1  PCG  (default)\n");
       printf("                         : 2  GMRES\n");
@@ -919,7 +1007,8 @@ main( int   argc,
       printf("\n");
       printf("  -print                 : print out the system\n");
       printf("\n");
-
+      printf("  -plot_grids            : print out information for plotting the grids\n");
+      printf("  -plot_file_name <val>  : file name for plotting output\n");
       exit(1);
    }
 
@@ -988,6 +1077,18 @@ main( int   argc,
       printf("You have asked for an unsupported problem with\n");
       printf("build_matrix_type = %d.\n", build_matrix_type);
       return(-1);
+   }
+   /* BM Oct 23, 2006 */
+   if (plot_grids)
+   {
+     if (build_matrix_type > 1 &&  build_matrix_type < 8)
+         BuildParCoordinates (argc, argv, build_matrix_arg_index, 
+		&coord_dim, &coordinates);
+     else
+     {
+       printf("Sorry, coordinates are not yet available for build_matrix_type = %d.\n", build_matrix_type);
+       return(-1);
+     }
    }
 
    time_index = hypre_InitializeTiming("Spatial operator");
@@ -1622,6 +1723,9 @@ main( int   argc,
       if (!(build_rhs_type ==1 || build_rhs_type ==7)) HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
 
+      /* HYPRE_ParCSRMatrixPrint( parcsr_A,
+         "new_mat.A" );*/
+      
    }
 
    /*-----------------------------------------------------------
@@ -1647,6 +1751,7 @@ main( int   argc,
       HYPRE_ParCSRHybridSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_ParCSRHybridSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_ParCSRHybridSetTruncFactor(amg_solver, trunc_factor);
+      HYPRE_ParCSRHybridSetPMaxElmts(amg_solver, P_max_elmts);
       HYPRE_ParCSRHybridSetMaxLevels(amg_solver, max_levels);
       HYPRE_ParCSRHybridSetMaxRowSum(amg_solver, max_row_sum);
       HYPRE_ParCSRHybridSetNumSweeps(amg_solver, num_sweeps);
@@ -1739,6 +1844,8 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_BoomerAMGCreate(&amg_solver); 
+      /* BM Aug 25, 2006 */
+      HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
       HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
@@ -1758,6 +1865,8 @@ main( int   argc,
       HYPRE_BoomerAMGSetISType(amg_solver, IS_type);
       HYPRE_BoomerAMGSetNumCRRelaxSteps(amg_solver, num_CR_relax_steps);
       HYPRE_BoomerAMGSetCRRate(amg_solver, CR_rate);
+      HYPRE_BoomerAMGSetCRStrongTh(amg_solver, CR_strong_th);
+      HYPRE_BoomerAMGSetCRUseCG(amg_solver, CR_use_CG);
       HYPRE_BoomerAMGSetRelaxType(amg_solver, relax_type);
       if (relax_down > -1)
          HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, relax_down, 1);
@@ -1786,9 +1895,20 @@ main( int   argc,
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
+      HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
       if (num_functions > 1)
 	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
+
+      HYPRE_BoomerAMGSetMaxIter(amg_solver, amg_max_iter);
+
+      /* BM Oct 23, 2006 */
+      if (plot_grids) {
+        HYPRE_BoomerAMGSetPlotGrids (amg_solver, 1);
+        HYPRE_BoomerAMGSetPlotFileName (amg_solver, plot_file_name);
+        HYPRE_BoomerAMGSetCoordDim (amg_solver, coord_dim);
+        HYPRE_BoomerAMGSetCoordinates (amg_solver, coordinates);
+      }
 
       HYPRE_BoomerAMGSetup(amg_solver, parcsr_A, b, x);
 
@@ -1833,6 +1953,8 @@ main( int   argc,
  
       HYPRE_BoomerAMGCreate(&amg_solver);
       HYPRE_BoomerAMGSetGSMG(amg_solver, 4); /* specify GSMG */
+      /* BM Aug 25, 2006 */
+      HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
       HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
@@ -1877,6 +1999,7 @@ main( int   argc,
       HYPRE_BoomerAMGSetAggNumLevels(amg_solver, agg_num_levels);
       HYPRE_BoomerAMGSetNumPaths(amg_solver, num_paths);
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
+       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
       if (num_functions > 1)
          HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
  
@@ -1955,6 +2078,8 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         /* BM Aug 25, 2006 */
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -1974,6 +2099,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
@@ -1997,6 +2124,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -2064,6 +2192,8 @@ main( int   argc,
          if (myid == 0) printf("Solver: GSMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
+         /* BM Aug 25, 2006 */
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2083,6 +2213,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
@@ -2110,6 +2242,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2235,6 +2368,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-GMRES\n");
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2254,6 +2388,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
@@ -2277,6 +2413,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -2334,6 +2471,7 @@ main( int   argc,
          if (myid == 0) printf("Solver: GSMG-GMRES\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2353,6 +2491,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
@@ -2380,6 +2520,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
@@ -2511,6 +2652,7 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2530,6 +2672,8 @@ main( int   argc,
          HYPRE_BoomerAMGSetISType(pcg_precond, IS_type);
          HYPRE_BoomerAMGSetNumCRRelaxSteps(pcg_precond, num_CR_relax_steps);
          HYPRE_BoomerAMGSetCRRate(pcg_precond, CR_rate);
+         HYPRE_BoomerAMGSetCRStrongTh(pcg_precond, CR_strong_th);
+         HYPRE_BoomerAMGSetCRUseCG(pcg_precond, CR_use_CG);
          HYPRE_BoomerAMGSetRelaxType(pcg_precond, relax_type);
          if (relax_down > -1)
             HYPRE_BoomerAMGSetCycleRelaxType(pcg_precond, relax_down, 1);
@@ -2553,6 +2697,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -2692,6 +2837,7 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-CGNR\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2731,6 +2877,7 @@ main( int   argc,
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
          HYPRE_BoomerAMGSetNodal(pcg_precond, nodal);
+         HYPRE_BoomerAMGSetNodalDiag(pcg_precond, nodal_diag);
          HYPRE_BoomerAMGSetVariant(pcg_precond, variant);
          HYPRE_BoomerAMGSetOverlap(pcg_precond, overlap);
          HYPRE_BoomerAMGSetDomainType(pcg_precond, domain_type);
@@ -2988,8 +3135,13 @@ BuildParLaplacian( int                  argc,
    double             *values;
    double             *mtrx;
 
+   double              ep = .1;
+   
    int                 system_vcoef = 0;
-
+   int                 sys_opt = 0;
+   int                 vcoef_opt = 0;
+   
+   
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -3045,10 +3197,26 @@ BuildParLaplacian( int                  argc,
          arg_index++;
          num_fun = atoi(argv[arg_index++]);
       }
-      else if ( strcmp(argv[arg_index], "-sys_vcoef") == 0 )
+      else if ( strcmp(argv[arg_index], "-sysL_opt") == 0 )
       {
          arg_index++;
+         sys_opt = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-sys_vcoef") == 0 )
+      {
+         /* have to use -sysL for this to */
+         arg_index++;
          system_vcoef = 1;
+      }
+      else if ( strcmp(argv[arg_index], "-sys_vcoef_opt") == 0 )
+      {
+         arg_index++;
+         vcoef_opt = atoi(argv[arg_index++]); 
+      }
+      else if ( strcmp(argv[arg_index], "-ep") == 0 )
+      {
+         arg_index++;
+         ep = atof(argv[arg_index++]); 
       }
       else
       {
@@ -3120,45 +3288,143 @@ BuildParLaplacian( int                  argc,
 
       if (num_fun == 2)
       {
-         mtrx[0] = 2;
-         mtrx[1] = 1;
-         mtrx[2] = 1;
-         mtrx[3] = 2;
+         if (sys_opt ==1) /* identity  */
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 0.0; 
+            mtrx[2] = 0.0;
+            mtrx[3] = 1.0; 
+         }
+         else if (sys_opt ==2)
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 0.0; 
+            mtrx[2] = 0.0;
+            mtrx[3] = 20.0; 
+         }
+         else if (sys_opt ==3) /* similar to barry's talk - ex1 */
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 2.0; 
+            mtrx[2] = 2.0;
+            mtrx[3] = 1.0; 
+         }
+         else if (sys_opt ==4) /* can use with vcoef to get barry's ex*/
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 1.0; 
+            mtrx[2] = 1.0;
+            mtrx[3] = 1.0; 
+         }
+         else if (sys_opt ==5) /* barry's talk - ex1 */
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 1.1; 
+            mtrx[2] = 1.1;
+            mtrx[3] = 1.0; 
+         }
+         else if (sys_opt ==6) /*  */
+         {
+            mtrx[0] = 1.1;
+            mtrx[1] = 1.0; 
+            mtrx[2] = 1.0;
+            mtrx[3] = 1.1; 
+         }
 
-#if 0         
-         mtrx[0] = .01;
-         mtrx[1] = 200; 
-         mtrx[2] = 200;
-         mtrx[3] = .01; 
-#endif
-
-
+         else /* == 0 */
+         {
+            mtrx[0] = 2;
+            mtrx[1] = 1;
+            mtrx[2] = 1;
+            mtrx[3] = 2;
+         }
       }
       else if (num_fun == 3)
+      {
+         if (sys_opt ==1)
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 0.0;
+            mtrx[2] = 0.0;
+            mtrx[3] = 0.0;
+            mtrx[4] = 1.0;
+            mtrx[5] = 0.0;
+            mtrx[6] = 0.0;
+            mtrx[7] = 0.0;
+            mtrx[8] = 1.0;
+         }
+         else if (sys_opt ==2)
+         {
+            mtrx[0] = 1.0;
+            mtrx[1] = 0.0;
+            mtrx[2] = 0.0;
+            mtrx[3] = 0.0;
+            mtrx[4] = 20.0;
+            mtrx[5] = 0.0;
+            mtrx[6] = 0.0;
+            mtrx[7] = 0.0;
+            mtrx[8] =.01;
+         }
+         else if (sys_opt ==3)
+         {
+            mtrx[0] = 1.01;
+            mtrx[1] = 1;
+            mtrx[2] = 0.0;
+            mtrx[3] = 1;
+            mtrx[4] = 2;
+            mtrx[5] = 1;
+            mtrx[6] = 0.0;
+            mtrx[7] = 1;
+            mtrx[8] = 1.01;  
+         }
+         else if (sys_opt ==4) /* barry ex4 */
+         {
+            mtrx[0] = 3;
+            mtrx[1] = 1;
+            mtrx[2] = 0.0;
+            mtrx[3] = 1;
+            mtrx[4] = 4;
+            mtrx[5] = 2;
+            mtrx[6] = 0.0;
+            mtrx[7] = 2;
+            mtrx[8] = .25;  
+         }
+         else /* == 0 */
+         {
+            mtrx[0] = 2.0;
+            mtrx[1] = 1.0;
+            mtrx[2] = 0.0;
+            mtrx[3] = 1.0;
+            mtrx[4] = 2.0;
+            mtrx[5] = 1.0;
+            mtrx[6] = 0.0;
+            mtrx[7] = 1.0;
+            mtrx[8] = 2.0;
+         }
+
+      } 
+      else if (num_fun == 4)
       {
          mtrx[0] = 1.01;
          mtrx[1] = 1;
          mtrx[2] = 0.0;
-         mtrx[3] = 1;
-         mtrx[4] = 2;
-         mtrx[5] = 1;
-         mtrx[6] = 0.0;
-         mtrx[7] = 1;
-         mtrx[8] = 1.01;
-
-#if 0
-         mtrx[0] = 3.0;
-         mtrx[1] = 1;
-         mtrx[2] = 0.0;
-         mtrx[3] = 1;
-         mtrx[4] = 4;
+         mtrx[3] = 0.0;
+         mtrx[4] = 1;
          mtrx[5] = 2;
-         mtrx[6] = 0.0;
-         mtrx[7] = 2;
-         mtrx[8] = .25;
-#endif
-
+         mtrx[6] = 1;
+         mtrx[7] = 0.0;
+         mtrx[8] = 0.0;
+         mtrx[9] = 1;
+         mtrx[10] = 1.01;
+         mtrx[11] = 0.0;
+         mtrx[12] = 2;
+         mtrx[13] = 1;
+         mtrx[14] = 0.0;
+         mtrx[15] = 1;
       } 
+
+
+
 
       if (!system_vcoef)
       {
@@ -3176,18 +3442,83 @@ BuildParLaplacian( int                  argc,
 
          if (num_fun == 2)
          {
+            if (vcoef_opt == 1)
+            {
+               /* Barry's talk * - must also have sys_opt = 4, all fail */
+               mtrx[0] = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, .10, 1.0, 0, mtrx_values);
+               
+               mtrx[1]  = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, .1, 1.0, 1.0, 1, mtrx_values);
+               
+               mtrx[2] = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, .01, 1.0, 1.0, 2, mtrx_values);
+               
+               mtrx[3] = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, .02, 1.0, 3, mtrx_values);
+               
+            }
+            else if (vcoef_opt == 2)
+            {
+               /* Barry's talk * - ex2 - if have sys-opt = 4*/
+               mtrx[0] = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, .010, 1.0, 0, mtrx_values);
+               
+               mtrx[1]  = 200.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 1, mtrx_values);
 
-            mtrx[0] = 2;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 0, mtrx_values);
-            
-            mtrx[1] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 2.0, 1.0, 1, mtrx_values);
-            
-            mtrx[2] = 1;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, 1.0, 0.0, 2, mtrx_values);
-            
-            mtrx[3] = 2;
-            SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 3.0, 1.0, 3, mtrx_values);
+               mtrx[2] = 200.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 2, mtrx_values);
+               
+               mtrx[3] = 1.0;
+               SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, .02, 1.0, 3, mtrx_values);
+               
+            }
+            else if (vcoef_opt == 3) /* use with default sys_opt  - ulrike ex 3*/
+            {
+               
+               /* mtrx[0] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 0, mtrx_values);
+               
+               /* mtrx[1] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 1, mtrx_values);
+               
+               /* mtrx[2] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 2, mtrx_values);
+               
+               /* mtrx[3] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 3, mtrx_values);
+            }
+            else if (vcoef_opt == 4) /* use with default sys_opt  - ulrike ex 4*/
+            {
+               double ep2 = ep;
+               
+               /* mtrx[0] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 0, mtrx_values);
+               
+               /* mtrx[1] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, ep*1.0, 1.0, 1, mtrx_values);
+               
+               /* mtrx[2] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, ep*1.0, 1.0, 1.0, 2, mtrx_values);
+               
+               /* mtrx[3] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, ep2*1.0, 1.0, 3, mtrx_values);
+            }
+            else  /* = 0 */
+            {
+               /* mtrx[0] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 1.0, 1.0, 0, mtrx_values);
+               
+               /* mtrx[1] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 2.0, 1.0, 1, mtrx_values);
+               
+               /* mtrx[2] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 2.0, 1.0, 0.0, 2, mtrx_values);
+               
+               /* mtrx[3] */
+               SetSysVcoefValues(num_fun, nx, ny, nz, 1.0, 3.0, 1.0, 3, mtrx_values);
+            }
 
          }
          else if (num_fun == 3)
@@ -4187,5 +4518,93 @@ int SetSysVcoefValues(int num_fun, int nx, int ny, int nz, double vcx,
 
    return 0;
    
+}
+                                                                                
+/*----------------------------------------------------------------------
+ * Build coordinates for 1D/2D/3D
+ *----------------------------------------------------------------------*/
+                                                                                
+int
+BuildParCoordinates( int                  argc,
+                     char                *argv[],
+                     int                  arg_index,
+                     int                 *coorddim_ptr,
+                     float               **coord_ptr     )
+{
+   int                 nx, ny, nz;
+   int                 P, Q, R;
+                                                                                
+   int                 num_procs, myid;
+   int                 p, q, r;
+                                                                                
+   int                 coorddim;
+   float               *coordinates;
+                                                                                
+   /*-----------------------------------------------------------
+    * Initialize some stuff
+    *-----------------------------------------------------------*/
+                                                                                
+   MPI_Comm_size(MPI_COMM_WORLD, &num_procs );
+   MPI_Comm_rank(MPI_COMM_WORLD, &myid );
+                                                                                
+   /*-----------------------------------------------------------
+    * Set defaults
+    *-----------------------------------------------------------*/
+                                                                                
+   nx = 10;
+   ny = 10;
+   nz = 10;
+                                                                                
+   P  = 1;
+   Q  = num_procs;
+   R  = 1;
+                                                                                
+   /*-----------------------------------------------------------
+    * Parse command line
+    *-----------------------------------------------------------*/
+   arg_index = 0;
+   while (arg_index < argc)
+   {
+      if ( strcmp(argv[arg_index], "-n") == 0 )
+      {
+         arg_index++;
+         nx = atoi(argv[arg_index++]);
+         ny = atoi(argv[arg_index++]);
+         nz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-P") == 0 )
+      {
+         arg_index++;
+         P  = atoi(argv[arg_index++]);
+         Q  = atoi(argv[arg_index++]);
+         R  = atoi(argv[arg_index++]);
+      }
+      else
+      {
+         arg_index++;
+      }
+   }
+                                                                                
+   /* compute p,q,r from P,Q,R and myid */
+   p = myid % P;
+   q = (( myid - p)/P) % Q;
+   r = ( myid - p - P*q)/( P*Q );
+                                                                                
+   /*-----------------------------------------------------------
+    * Generate the coordinates
+    *-----------------------------------------------------------*/
+                                                                                
+   coorddim = 3;
+   if (nx<2) coorddim--;
+   if (ny<2) coorddim--;
+   if (nz<2) coorddim--;
+                                                                                
+   if (coorddim>0)
+     coordinates = GenerateCoordinates (MPI_COMM_WORLD,
+                                        nx, ny, nz, P, Q, R, p, q, r, coorddim);   else coordinates=NULL;
+                                                                                
+   *coorddim_ptr = coorddim;
+   *coord_ptr = coordinates;
+   return (0);
 }
 

@@ -15,12 +15,9 @@
 /**
  * Symbol "bHYPRE.CGNR" (version 1.0.0)
  * 
- * Objects of this type can be cast to PreconditionedSolver objects
- * using the {\tt \_\_cast} methods.
- * 
- * RDF: Documentation goes here.
- * 
- * CGNR solver calls Babel-interface functions
+ * CGNR solver.
+ * This calls Babel-interface matrix and vector functions, so it will work
+ * with any consistent matrix, vector, and preconditioner classes.
  */
 struct bHYPRE_CGNR__object;
 struct bHYPRE_CGNR__array;
@@ -104,7 +101,7 @@ bHYPRE_CGNR
 bHYPRE_CGNR__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a CGNR solver. 
  */
 bHYPRE_CGNR
 bHYPRE_CGNR_Create(

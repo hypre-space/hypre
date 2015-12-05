@@ -18,8 +18,6 @@
  * Objects of this type can be cast to Solver objects using the
  * {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * Pilut has not been implemented yet.
  */
 struct bHYPRE_Pilut__object;
@@ -98,7 +96,7 @@ bHYPRE_Pilut
 bHYPRE_Pilut__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a Pilut solver. 
  */
 bHYPRE_Pilut
 bHYPRE_Pilut_Create(

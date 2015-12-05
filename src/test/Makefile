@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.51 $
+# $Revision: 1.53 $
 #EHEADER**********************************************************************
 
 
@@ -92,8 +92,11 @@ HYPRE_BABEL_DRIVERS =\
  sstruct_b.c\
  ij_b.c
 
-HYPRE_FEI_DRIVERS_CXX =\
- fei.cxx
+HYPRE_DRIVERS_CXX =\
+ fei.cxx\
+ cxx_ij.cxx\
+ cxx_sstruct.cxx\
+ cxx_struct.cxx
 
 HYPRE_F77_EXAMPLES_DRIVERS =\
  ex1_for.c\
@@ -117,7 +120,7 @@ HYPRE_BABEL_DRIVERS_F77 =\
 HYPRE_DRIVER_EXECS=${HYPRE_DRIVERS:.c=}
 HYPRE_F77_EXAMPLES_DRIVER_EXECS=${HYPRE_F77_EXAMPLES_DRIVERS:.c=}
 HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
-HYPRE_FEI_DRIVER_CXX_EXECS=${HYPRE_FEI_DRIVERS_CXX:.cxx=}
+HYPRE_DRIVER_CXX_EXECS=${HYPRE_DRIVERS_CXX:.cxx=}
 
 HYPRE_BABEL_DRIVER_OBJS=${HYPRE_BABEL_DRIVERS:.c=.o}
 HYPRE_BABEL_DRIVER_CXX_OBJS=${HYPRE_BABEL_DRIVERS_CXX:.cxx=.o}
@@ -131,7 +134,7 @@ all: ${HYPRE_DRIVER_EXECS}
 
 all77: ${HYPRE_DRIVER_F77_EXECS}
 
-all++: ${HYPRE_FEI_DRIVER_CXX_EXECS}
+all++: ${HYPRE_DRIVER_CXX_EXECS}
 
 babel: ${HYPRE_BABEL_DRIVER_EXECS} ${HYPRE_BABEL_DRIVER_F77_EXECS}
 
@@ -148,7 +151,7 @@ distclean: clean
 	rm -f ${HYPRE_BABEL_DRIVER_EXECS}
 	rm -f ${HYPRE_BABEL_DRIVER_CXX_EXECS}
 	rm -f ${HYPRE_BABEL_DRIVER_F77_EXECS}
-	rm -f ${HYPRE_FEI_DRIVER_CXX_EXECS}
+	rm -f ${HYPRE_DRIVER_CXX_EXECS} cxx_*
 	rm -f TEST_examples/*.out*
 	rm -f TEST_examples/*.err*
 	rm -f TEST_fac/*.out*
@@ -282,6 +285,27 @@ driver_commpkg: driver_commpkg.o
 ams_driver: ams_driver.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
+cxx_ij: cxx_ij.o
+	@echo  "Building" $@ "... "
+	${LINK_CXX} -o $@ $@.o ${LFLAGS}
+cxx_ij.o: cxx_ij.cxx
+cxx_ij.cxx: ij.c
+	cp -fp ij.c cxx_ij.cxx
+
+cxx_sstruct: cxx_sstruct.o
+	@echo  "Building" $@ "... "
+	${LINK_CXX} -o $@ $@.o ${LFLAGS}
+cxx_sstruct.o: cxx_sstruct.cxx
+cxx_sstruct.cxx: sstruct.c
+	cp -fp sstruct.c cxx_sstruct.cxx
+
+cxx_struct: cxx_struct.o
+	@echo  "Building" $@ "... "
+	${LINK_CXX} -o $@ $@.o ${LFLAGS}
+cxx_struct.o: cxx_struct.cxx
+cxx_struct.cxx: struct.c
+	cp -fp struct.c cxx_struct.cxx
 
 ##################################################################
 # Babel version of above

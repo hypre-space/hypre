@@ -87,7 +87,9 @@ bHYPRE_StructStencil
 bHYPRE_StructStencil__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct Stencil.
+ * You provide the number of spatial dimensions and the number of
+ * stencil entries.  
  */
 bHYPRE_StructStencil
 bHYPRE_StructStencil_Create(
@@ -118,7 +120,7 @@ bHYPRE_StructStencil_Destroy(
 
 
 /**
- * Method:  SetDimension[]
+ *  Set the number of dimensions.  DEPRECATED, use StructStencilCreate 
  */
 SIDL_C_INLINE_DECL
 int32_t
@@ -139,7 +141,8 @@ bHYPRE_StructStencil_SetDimension(
 
 
 /**
- * Method:  SetSize[]
+ *  Set the number of stencil entries.
+ * DEPRECATED, use StructStencilCreate 
  */
 SIDL_C_INLINE_DECL
 int32_t
@@ -160,7 +163,9 @@ bHYPRE_StructStencil_SetSize(
 
 
 /**
- * Method:  SetElement[]
+ *  Set a stencil element.  Specify the stencil index, and an array of
+ * offsets.  "offset" is an array of length "dim", the number of spatial
+ * dimensions. 
  */
 SIDL_C_INLINE_DECL
 int32_t

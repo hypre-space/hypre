@@ -2706,8 +2706,9 @@ bHYPRE::IJParCSRMatrix::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create an IJParCSR Matrix. 
  */
 ::bHYPRE::IJParCSRMatrix
 bHYPRE::IJParCSRMatrix::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

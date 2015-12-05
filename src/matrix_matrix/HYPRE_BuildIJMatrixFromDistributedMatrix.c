@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.4 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -104,31 +104,31 @@ HYPRE_BuildIJMatrixFromDistributedMatrix(
 
    ierr = HYPRE_IJMatrixSetLocalStorageType( 
                  *ij_matrix, local_storage_type );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr); */
 
    ierr = HYPRE_IJMatrixSetLocalSize( *ij_matrix, 
                 last_local_row-first_local_row+1,
                 last_local_col-first_local_col+1 );
 
    ierr = HYPRE_IJMatrixInitialize( *ij_matrix );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr);*/
 
    /* Loop through all locally stored rows and insert them into ij_matrix */
    for (i=first_local_row; i<= last_local_row; i++)
    {
       ierr = HYPRE_DistributedMatrixGetRow( DistributedMatrix, i, &size, &col_ind, &values );
-      if( ierr ) return(ierr);
+      /* if( ierr ) return(ierr);*/
 
       ierr = HYPRE_IJMatrixInsertRow( *ij_matrix, size, i, col_ind, values );
-      if( ierr ) return(ierr);
+      /* if( ierr ) return(ierr);*/
 
       ierr = HYPRE_DistributedMatrixRestoreRow( DistributedMatrix, i, &size, &col_ind, &values );
-      if( ierr ) return(ierr);
+      /* if( ierr ) return(ierr); */
 
    }
 
    ierr = HYPRE_IJMatrixAssemble( *ij_matrix );
-   if(ierr) return(ierr);
+   /* if(ierr) return(ierr); */
 
    return(ierr);
 }

@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -59,7 +59,7 @@ extern "C" {
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -145,6 +145,14 @@ typedef struct hypre_BoxArrayArray_struct
   hypre_IndexZ(index) = iz )
 
 #define hypre_ClearIndex(index)  hypre_SetIndex(index, 0, 0, 0)
+
+#define hypre_IndexZero(index)\
+   (hypre_IndexX(index) == 0 &&  hypre_IndexY(index) == 0 \
+    && hypre_IndexZ(index) == 0)
+
+#define hypre_IndexGTESize(index, size) \
+(hypre_IndexX(index) >= size &&  hypre_IndexY(index) >= size \
+    && hypre_IndexZ(index) >= size)
 
 #define hypre_CopyIndex(index1, index2) \
 ( hypre_IndexX(index2) = hypre_IndexX(index1),\
@@ -671,7 +679,7 @@ if (hypre__num_blocks > 1)\
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -1083,131 +1091,7 @@ int  kinc = (hypre_IndexZ(stride)*\
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
- ***********************************************************************EHEADER*/
-
-
-/******************************************************************************
- *
- * Header info for the hypre_BoxNeighbors structures
- *
- *****************************************************************************/
-
-#ifndef hypre_BOX_NEIGHBORS_HEADER
-#define hypre_BOX_NEIGHBORS_HEADER
-
-/*--------------------------------------------------------------------------
- * hypre_RankLink:
- *--------------------------------------------------------------------------*/
-
-typedef struct hypre_RankLink_struct
-{
-   int                           rank;
-   int                           prank;
-   struct hypre_RankLink_struct *next;
-
-} hypre_RankLink;
-
-/*--------------------------------------------------------------------------
- * hypre_BoxNeighbors:
- *--------------------------------------------------------------------------*/
-
-typedef struct hypre_BoxNeighbors_struct
-{
-   hypre_BoxArray      *boxes;            /* boxes in the neighborhood */
-   int                 *procs;            /* procs for 'boxes' */
-   int                 *boxnums;          /* local boxnums for 'boxes' */
-   int                 *ids;              /* ids for 'boxes' */
-   int                  first_local;      /* first local box address */
-   int                  num_local;        /* number of local boxes */
-
-   hypre_Index          periodic;         /* directions of periodicity */
-   int                  id_period;        /* period used for box ids */
-   int                  num_periods;      /* number of box set periods */
-   hypre_Index         *pshifts;          /* shifts of periodicity */
-
-   hypre_RankLink     **rank_links;       /* neighbors of local boxes */
-
-} hypre_BoxNeighbors;
-
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_RankLink
- *--------------------------------------------------------------------------*/
-
-#define hypre_RankLinkRank(link)  ((link) -> rank)
-#define hypre_RankLinkPRank(link) ((link) -> prank)
-#define hypre_RankLinkNext(link)  ((link) -> next)
-
-/*--------------------------------------------------------------------------
- * Accessor macros: hypre_BoxNeighbors
- *--------------------------------------------------------------------------*/
-
-#define hypre_BoxNeighborsBoxes(neighbors)       ((neighbors) -> boxes)
-#define hypre_BoxNeighborsProcs(neighbors)       ((neighbors) -> procs)
-#define hypre_BoxNeighborsBoxnums(neighbors)     ((neighbors) -> boxnums)
-#define hypre_BoxNeighborsIDs(neighbors)         ((neighbors) -> ids)
-#define hypre_BoxNeighborsFirstLocal(neighbors)  ((neighbors) -> first_local)
-#define hypre_BoxNeighborsNumLocal(neighbors)    ((neighbors) -> num_local)
-#define hypre_BoxNeighborsPeriodic(neighbors)    ((neighbors) -> periodic)
-#define hypre_BoxNeighborsIDPeriod(neighbors)    ((neighbors) -> id_period)
-#define hypre_BoxNeighborsNumPeriods(neighbors)  ((neighbors) -> num_periods)
-#define hypre_BoxNeighborsPShifts(neighbors)     ((neighbors) -> pshifts)
-#define hypre_BoxNeighborsPShift(neighbors, i)   ((neighbors) -> pshifts[i])
-#define hypre_BoxNeighborsRankLinks(neighbors)   ((neighbors) -> rank_links)
-
-#define hypre_BoxNeighborsNumBoxes(neighbors) \
-(hypre_BoxArraySize(hypre_BoxNeighborsBoxes(neighbors)))
-#define hypre_BoxNeighborsRankLink(neighbors, b) \
-(hypre_BoxNeighborsRankLinks(neighbors)[b])
-
-/*--------------------------------------------------------------------------
- * Looping macros:
- *--------------------------------------------------------------------------*/
- 
-#define hypre_BeginBoxNeighborsLoop(n, neighbors, b)\
-{\
-   hypre_RankLink *hypre__rank_link;\
-   int             hypre__num_boxes;\
-\
-   hypre__num_boxes = hypre_BoxNeighborsNumBoxes(neighbors) / \
-      hypre_BoxNeighborsNumPeriods(neighbors);\
-\
-   hypre__rank_link = hypre_BoxNeighborsRankLink(neighbors, b);\
-   while (hypre__rank_link)\
-   {\
-      n = hypre_RankLinkRank(hypre__rank_link) +\
-          hypre_RankLinkPRank(hypre__rank_link)*hypre__num_boxes;
-
-#define hypre_EndBoxNeighborsLoop\
-      hypre__rank_link = hypre_RankLinkNext(hypre__rank_link);\
-   }\
-}
-
-#endif
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -1262,8 +1146,8 @@ typedef struct
 #define hypre_StructAssumedPartMyPartitionNumDistinctProcs(apart) ((apart)->my_partition_num_distinct_procs)
 #define hypre_StructAssumedPartMyPartitionBoxnums(apart) ((apart)->my_partition_boxnums)
 
-
-
+#define hypre_StructAssumedPartMyPartitionProcId(apart, i) ((apart)->my_partition_proc_ids[i])
+#define hypre_StructAssumedPartMyPartitionBoxnum(apart, i) ((apart)->my_partition_boxnums[i])
 #endif
 #ifndef hypre_BOX_MANAGER_HEADER
 #define hypre_BOX_MANAGER_HEADER
@@ -1494,7 +1378,7 @@ typedef struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -1519,7 +1403,7 @@ typedef struct hypre_StructGrid_struct
                       
    hypre_BoxArray      *boxes;        /* Array of boxes in this process */
    int                 *ids;          /* Unique IDs for boxes */
-   int                  max_distance; /* Neighborhood size */
+   hypre_Index          max_distance; /* Neighborhood size - in each dimension*/
 
    hypre_Box           *bounding_box; /* Bounding box around grid */
 
@@ -1604,7 +1488,7 @@ hypre_ForBoxI(i, hypre_StructGridBoxes(grid))
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -1670,7 +1554,7 @@ hypre_StructStencilShape(stencil)[i]
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -1883,7 +1767,7 @@ typedef struct hypre_CommHandle_struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -1976,7 +1860,7 @@ typedef struct hypre_ComputePkg_struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -2098,7 +1982,7 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -2185,6 +2069,7 @@ int hypre_StructAssumedPartitionDestroy ( hypre_StructAssumedPart *assumed_part 
 int hypre_APFillResponseStructAssumedPart ( void *p_recv_contact_buf , int contact_size , int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , int *response_message_size );
 int hypre_StructAssumedPartitionGetRegionsFromProc ( hypre_StructAssumedPart *assumed_part , int proc_id , hypre_BoxArray *assumed_regions );
 int hypre_StructAssumedPartitionGetProcsFromBox ( hypre_StructAssumedPart *assumed_part , hypre_Box *box , int *num_proc_array , int *size_alloc_proc_array , int **p_proc_array );
+int hypre_StructCoarsenAP ( hypre_StructAssumedPart *ap , hypre_Index index , hypre_Index stride , hypre_StructAssumedPart **new_ap_ptr );
 
 /* box_algebra.c */
 int hypre_IntersectBoxes ( hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox );
@@ -2231,6 +2116,7 @@ int hypre_DeleteMultipleBoxes ( hypre_BoxArray *box_array , int *indices , int n
 int hypre_MaxIndexPosition ( hypre_Index index , int *position );
 int hypre_MinIndexPosition ( hypre_Index index , int *position );
 int hypre_BoxExpandConstant ( hypre_Box *box , int expand );
+int hypre_BoxExpandConstantDim ( hypre_Box *box , int *expand );
 
 /* box_manager.c */
 int hypre_BoxManEntrySetInfo ( hypre_BoxManEntry *entry , void *info );
@@ -2241,6 +2127,8 @@ int hypre_BoxManSetAllGlobalKnown ( hypre_BoxManager *manager , int known );
 int hypre_BoxManGetAllGlobalKnown ( hypre_BoxManager *manager , int *known );
 int hypre_BoxManSetIsEntriesSort ( hypre_BoxManager *manager , int is_sort );
 int hypre_BoxManGetIsEntriesSort ( hypre_BoxManager *manager , int *is_sort );
+int hypre_BoxManGetAssumedPartition ( hypre_BoxManager *manager , hypre_StructAssumedPart **assumed_partition );
+int hypre_BoxManSetAssumedPartition ( hypre_BoxManager *manager , hypre_StructAssumedPart *assumed_partition );
 int hypre_BoxManDeleteMultipleEntries ( hypre_BoxManager *manager , int *indices , int num );
 int hypre_BoxManCreate ( int max_nentries , int info_size , int dim , hypre_Box *bounding_box , MPI_Comm comm , hypre_BoxManager **manager_ptr );
 int hypre_BoxManIncSize ( hypre_BoxManager *manager , int inc_size );
@@ -2249,7 +2137,7 @@ int hypre_BoxManAddEntry ( hypre_BoxManager *manager , hypre_Index imin , hypre_
 int hypre_BoxManGetEntry ( hypre_BoxManager *manager , int proc , int id , hypre_BoxManEntry **entry_ptr );
 int hypre_BoxManGetAllEntries ( hypre_BoxManager *manager , int *num_entries , hypre_BoxManEntry **entries );
 int hypre_BoxManGetAllEntriesBoxes ( hypre_BoxManager *manager , hypre_BoxArray *boxes );
-int hypre_BoxManGetAllEntriesBoxesProc ( hypre_BoxManager *manager , hypre_BoxArray *boxes, int *procs );
+int hypre_BoxManGetAllEntriesBoxesProc ( hypre_BoxManager *manager , hypre_BoxArray *boxes , int *procs );
 int hypre_BoxManGatherEntries ( hypre_BoxManager *manager , hypre_Index imin , hypre_Index imax );
 int hypre_BoxManAssemble ( hypre_BoxManager *manager );
 int hypre_BoxManIntersect ( hypre_BoxManager *manager , hypre_Index ilower , hypre_Index iupper , hypre_BoxManEntry ***entries_ptr , int *nentries_ptr );
@@ -2368,7 +2256,7 @@ int hypre_StructGridSetBoxes ( hypre_StructGrid *grid , hypre_BoxArray *boxes );
 int hypre_StructGridSetBoundingBox ( hypre_StructGrid *grid , hypre_Box *new_bb );
 int hypre_StructGridSetIDs ( hypre_StructGrid *grid , int *ids );
 int hypre_StructGridSetBoxManager ( hypre_StructGrid *grid , hypre_BoxManager *boxman );
-int hypre_StructGridSetMaxDistance ( hypre_StructGrid *grid , int dist );
+int hypre_StructGridSetMaxDistance ( hypre_StructGrid *grid , hypre_Index dist );
 int hypre_StructGridAssemble ( hypre_StructGrid *grid );
 int hypre_GatherAllBoxes ( MPI_Comm comm , hypre_BoxArray *boxes , hypre_BoxArray **all_boxes_ptr , int **all_procs_ptr , int *first_local_ptr );
 int hypre_ComputeBoxnums ( hypre_BoxArray *boxes , int *procs , int **boxnums_ptr );

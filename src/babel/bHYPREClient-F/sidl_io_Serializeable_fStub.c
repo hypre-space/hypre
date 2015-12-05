@@ -3,7 +3,7 @@
  * Symbol:        sidl.io.Serializeable-v0.9.3
  * Symbol Type:   interface
  * Babel Version: 0.10.12
- * Release:       $Name:  $
+ * Release:       $Name: V2-2-0b $
  * Revision:      @(#) $Id: sidl_io_Serializeable_fStub.c,v 1.25 2006/04/07 23:14:09 painter Exp $
  * Description:   Client-side glue code for sidl.io.Serializeable
  * 

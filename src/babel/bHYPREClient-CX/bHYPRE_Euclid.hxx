@@ -90,7 +90,6 @@ namespace bHYPRE {
    * Objects of this type can be cast to Solver objects using the
    * {\tt \_\_cast} methods.
    * 
-   * RDF: Documentation goes here.
    * Although the usual Solver SetParameter functions are available,
    * a Euclid-stype parameter-setting function is also available, SetParameters.
    */
@@ -117,8 +116,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a Euclid solver. 
      */
     static ::bHYPRE::Euclid
     Create (

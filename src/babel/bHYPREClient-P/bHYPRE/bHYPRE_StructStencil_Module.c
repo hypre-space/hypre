@@ -1774,7 +1774,11 @@ RETURNS\n\
    (bHYPRE.StructStencil _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a Struct Stencil.\n\
+You provide the number of spatial dimensions and the number of\n\
+stencil entries.  "
    },
   { "_connect", (PyCFunction)pStub_StructStencil__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -1825,7 +1829,9 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set the number of dimensions.  DEPRECATED, use StructStencilCreate "
    },
   { "SetElement", (PyCFunction)pStub_StructStencil_SetElement,
   (METH_VARARGS | METH_KEYWORDS),
@@ -1836,7 +1842,11 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set a stencil element.  Specify the stencil index, and an array of\n\
+offsets.  \"offset\" is an array of length \"dim\", the number of spatial\n\
+dimensions. "
    },
   { "SetSize", (PyCFunction)pStub_StructStencil_SetSize,
   (METH_VARARGS | METH_KEYWORDS),
@@ -1846,7 +1856,10 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set the number of stencil entries.\n\
+DEPRECATED, use StructStencilCreate "
    },
   { "_exec", (PyCFunction)pStub_StructStencil__exec,
   (METH_VARARGS | METH_KEYWORDS),

@@ -536,7 +536,7 @@ SIDLFortran77Symbol(bhypre_structvector__set_hooks_static_f,BHYPRE_STRUCTVECTOR_
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct Vector. 
  */
 
 void
@@ -771,7 +771,7 @@ SIDLFortran77Symbol(bhypre_structvector_getclassinfo_f,BHYPRE_STRUCTVECTOR_GETCL
 }
 
 /*
- * Method:  SetGrid[]
+ *  Set the grid on which vectors are defined. 
  */
 
 void
@@ -809,7 +809,9 @@ SIDLFortran77Symbol(bhypre_structvector_setgrid_f,BHYPRE_STRUCTVECTOR_SETGRID_F,
 }
 
 /*
- * Method:  SetNumGhost[]
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
  */
 
 void
@@ -850,7 +852,9 @@ SIDLFortran77Symbol(bhypre_structvector_setnumghost_f,BHYPRE_STRUCTVECTOR_SETNUM
 }
 
 /*
- * Method:  SetValue[]
+ *  Set the value of a single vector coefficient, given by "grid_index".
+ * "grid_index" is an array of size "dim", where dim is the number
+ * of dimensions. 
  */
 
 void
@@ -893,7 +897,11 @@ SIDLFortran77Symbol(bhypre_structvector_setvalue_f,BHYPRE_STRUCTVECTOR_SETVALUE_
 }
 
 /*
- * Method:  SetBoxValues[]
+ *  Set the values of all vector coefficient for grid points in a box.
+ * The box is defined by its lower and upper corners in the grid.
+ * "ilower" and "iupper" are arrays of size "dim", where dim is the
+ * number of dimensions.  The "values" array has size "nvalues", which
+ * is the number of grid points in the box. 
  */
 
 void

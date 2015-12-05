@@ -15,6 +15,6 @@ Iterations = 6
 Final Relative Residual Norm = 1.175679e-07
 
 # Output file: hybrid.out.4
-Iterations = 11
-Final Relative Residual Norm = 9.829053e-07
+Iterations = 10
+Final Relative Residual Norm = 3.092333e-07
 

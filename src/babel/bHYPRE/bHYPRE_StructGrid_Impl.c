@@ -1,30 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 1.23 $
- ***********************************************************************EHEADER*/
-
-
 /*
  * File:          bHYPRE_StructGrid_Impl.c
  * Symbol:        bHYPRE.StructGrid-v1.0.0
@@ -55,7 +28,7 @@
 /* Put additional includes or other arbitrary code here... */
 
 
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
 #include "HYPRE_struct_mv.h"
@@ -182,7 +155,7 @@ impl_bHYPRE_StructGrid__dtor(
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct Grid. 
  */
 
 #undef __FUNC__
@@ -328,7 +301,9 @@ impl_bHYPRE_StructGrid_SetDimension(
 }
 
 /*
- * Method:  SetExtents[]
+ *  Define the lower and upper corners of a box of the grid.
+ * "ilower" and "iupper" are arrays of size "dim", the number of spatial
+ * dimensions. 
  */
 
 #undef __FUNC__
@@ -372,7 +347,16 @@ impl_bHYPRE_StructGrid_SetExtents(
 }
 
 /*
- * Method:  SetPeriodic[]
+ *  Set the periodicity for the grid.  Default is no periodicity.
+ * 
+ * The argument {\tt periodic} is an {\tt dim}-dimensional integer array that
+ * contains the periodicity for each dimension.  A zero value for a dimension
+ * means non-periodic, while a nonzero value means periodic and contains the
+ * actual period.  For example, periodicity in the first and third dimensions
+ * for a 10x11x12 grid is indicated by the array [10,0,12].
+ * 
+ * NOTE: Some of the solvers in hypre have power-of-two restrictions on the size
+ * of the periodic dimensions.
  */
 
 #undef __FUNC__
@@ -408,7 +392,9 @@ impl_bHYPRE_StructGrid_SetPeriodic(
 }
 
 /*
- * Method:  SetNumGhost[]
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
  */
 
 #undef __FUNC__
@@ -445,7 +431,7 @@ impl_bHYPRE_StructGrid_SetNumGhost(
 }
 
 /*
- * Method:  Assemble[]
+ *  final construction of the object before its use 
  */
 
 #undef __FUNC__

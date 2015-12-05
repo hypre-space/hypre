@@ -2929,7 +2929,9 @@ RETURNS\n\
    (bHYPRE.Hybrid _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a Hybrid solver. "
    },
   { "_connect", (PyCFunction)pStub_Hybrid__connect,
   (METH_VARARGS | METH_KEYWORDS),

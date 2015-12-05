@@ -97,7 +97,7 @@ bHYPRE_IdentitySolver
 bHYPRE_IdentitySolver__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create an Identity (null) solver. 
  */
 bHYPRE_IdentitySolver
 bHYPRE_IdentitySolver_Create(

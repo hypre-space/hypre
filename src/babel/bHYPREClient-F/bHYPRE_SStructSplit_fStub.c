@@ -13,8 +13,6 @@
  * Symbol "bHYPRE.SStructSplit" (version 1.0.0)
  * 
  * 
- * Documentation goes here.
- * 
  * The SStructSplit solver requires a SStruct matrix.
  */
 
@@ -535,7 +533,7 @@ SIDLFortran77Symbol(bhypre_sstructsplit__set_hooks_static_f,BHYPRE_SSTRUCTSPLIT_
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a SStruct Split solver. 
  */
 
 void

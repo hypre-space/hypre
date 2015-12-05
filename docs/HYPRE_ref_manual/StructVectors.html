@@ -1,70 +1,66 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<HTML>
-<HEAD>
-   <TITLE> Struct Vectors</TITLE>
-   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-
-<H2> <A HREF="#DOC.DOCU">Struct Vectors</A></H2></H2>
-<HR>
+<html><head><TITLE>Struct Vectors</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  Struct Vectors  </H2>
+<hr>
 <DL>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="*HYPRE_StructVector"></A>
-<A HREF=HYPRE_StructVector.html><B>*HYPRE_StructVector</B></A><DD><I> The vector object</I>
+<IMG BORDER=0 SRC=icon1.gif>typedef struct   hypre_StructVector_struct*  <B>HYPRE_StructVector</B>
+ <DD><I>
+The vector object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorCreate"></A>
-<A HREF=HYPRE_StructVectorCreate.html><B>HYPRE_StructVectorCreate</B></A><DD><I> Create a vector object</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorCreate</B>(MPI_Comm comm, <!2><A HREF="StructGrids.html#DOC.1.1.3">HYPRE_StructGrid</A> grid, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> *vector)
+ <DD><I>
+Create a vector object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorDestroy"></A>
-<A HREF=HYPRE_StructVectorDestroy.html><B>HYPRE_StructVectorDestroy</B></A><DD><I> Destroy a vector object</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorDestroy</B>(<!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> vector)
+ <DD><I>
+Destroy a vector object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorInitialize"></A>
-<A HREF=HYPRE_StructVectorInitialize.html><B>HYPRE_StructVectorInitialize</B></A><DD><I> Prepare a vector object for setting coefficient values</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorInitialize</B>(<!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> vector)
+ <DD><I>
+Prepare a vector object for setting coefficient values</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorClearGhostValues"></A>
-<A HREF=HYPRE_StructVectorClearGhostValues.html><B>HYPRE_StructVectorClearGhostValues</B></A><DD><I> Clears the ghostvalues of vector object.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorClearGhostValues.html><B>HYPRE_StructVectorClearGhostValues</B></A> 
+ <DD><I>
+Clears the ghostvalues of vector object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorSetValues"></A>
-<A HREF=HYPRE_StructVectorSetValues.html><B>HYPRE_StructVectorSetValues</B></A><DD><I> Set vector coefficients index by index.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorSetValues.html><B>HYPRE_StructVectorSetValues</B></A> 
+ <DD><I>
+Set vector coefficients index by index</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorAddToValues"></A>
-<A HREF=HYPRE_StructVectorAddToValues.html><B>HYPRE_StructVectorAddToValues</B></A><DD><I> Add to vector coefficients index by index.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorAddToValues.html><B>HYPRE_StructVectorAddToValues</B></A> 
+ <DD><I>
+Add to vector coefficients index by index</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorSetBoxValues"></A>
-<A HREF=HYPRE_StructVectorSetBoxValues.html><B>HYPRE_StructVectorSetBoxValues</B></A><DD><I> Set vector coefficients a box at a time.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorSetBoxValues.html><B>HYPRE_StructVectorSetBoxValues</B></A> 
+ <DD><I>
+Set vector coefficients a box at a time</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorAddToBoxValues"></A>
-<A HREF=HYPRE_StructVectorAddToBoxValues.html><B>HYPRE_StructVectorAddToBoxValues</B></A><DD><I> Add to vector coefficients a box at a time.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorAddToBoxValues.html><B>HYPRE_StructVectorAddToBoxValues</B></A> 
+ <DD><I>
+Add to vector coefficients a box at a time</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorAssemble"></A>
-<A HREF=HYPRE_StructVectorAssemble.html><B>HYPRE_StructVectorAssemble</B></A><DD><I> Finalize the construction of the vector before using</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructVectorAssemble</B>(<!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> vector)
+ <DD><I>
+Finalize the construction of the vector before using</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorGetValues"></A>
-<A HREF=HYPRE_StructVectorGetValues.html><B>HYPRE_StructVectorGetValues</B></A><DD><I> Get vector coefficients index by index.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorGetValues.html><B>HYPRE_StructVectorGetValues</B></A> 
+ <DD><I>
+Get vector coefficients index by index</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorGetBoxValues"></A>
-<A HREF=HYPRE_StructVectorGetBoxValues.html><B>HYPRE_StructVectorGetBoxValues</B></A><DD><I> Get vector coefficients a box at a time.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorGetBoxValues.html><B>HYPRE_StructVectorGetBoxValues</B></A> 
+ <DD><I>
+Get vector coefficients a box at a time</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructVectorPrint"></A>
-<A HREF=HYPRE_StructVectorPrint.html><B>HYPRE_StructVectorPrint</B></A><DD><I> Print the vector to file.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructVectorPrint.html><B>HYPRE_StructVectorPrint</B></A> 
+ <DD><I>
+Print the vector to file</I>
 </DL>
-<A NAME="DOC.DOCU"></A>
-<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
 <center>
 <img src="hypre_wiw.gif">
 </center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

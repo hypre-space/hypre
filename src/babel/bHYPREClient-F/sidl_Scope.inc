@@ -3,8 +3,8 @@ C       File:          sidl_Scope.inc
 C       Symbol:        sidl.Scope-v0.9.15
 C       Symbol Type:   enumeration
 C       Babel Version: 1.0.0
-C       Release:       $Name:  $
-C       Revision:      @(#) $Id: sidl_Scope.inc,v 1.27 2006/09/14 21:51:52 painter Exp $
+C       Release:       $Name: V2-2-0b $
+C       Revision:      @(#) $Id: sidl_Scope.inc,v 1.28 2006/12/29 21:24:28 painter Exp $
 C       Description:   Client-side glue code for sidl.Scope
 C       
 C       Copyright (c) 2000-2002, The Regents of the University of California.

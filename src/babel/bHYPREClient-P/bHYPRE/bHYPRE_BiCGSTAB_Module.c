@@ -23,12 +23,9 @@
 /**
  * Symbol "bHYPRE.BiCGSTAB" (version 1.0.0)
  * 
- * Objects of this type can be cast to PreconditionedSolver objects
- * using the {\tt \_\_cast} methods.
- * 
- * RDF: Documentation goes here.
- * 
- * BiCGSTAB solver calls Babel-interface functions
+ * BiCGSTAB solver.
+ * This calls Babel-interface matrix and vector functions, so it will work
+ * with any consistent matrix, vector, and preconditioner classes.
  */
 #include <Python.h>
 #include <stdlib.h>
@@ -2973,7 +2970,9 @@ RETURNS\n\
    (bHYPRE.BiCGSTAB _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a BiCGSTAB solver. "
    },
   { "_connect", (PyCFunction)pStub_BiCGSTAB__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -3090,12 +3089,9 @@ static PyTypeObject _bHYPRE_BiCGSTABType = {
   Py_TPFLAGS_DEFAULT, /* tp_flags */
   "\
 \
-Objects of this type can be cast to PreconditionedSolver objects\n\
-using the {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
-\n\
-BiCGSTAB solver calls Babel-interface functions", /* tp_doc */
+BiCGSTAB solver.\n\
+This calls Babel-interface matrix and vector functions, so it will work\n\
+with any consistent matrix, vector, and preconditioner classes.", /* tp_doc */
   0,      /* tp_traverse */
   0,       /* tp_clear */
   0,       /* tp_richcompare */
@@ -3325,12 +3321,9 @@ initBiCGSTAB(void) {
   struct bHYPRE_BiCGSTAB__external*(*_extFunc)(void) = NULL;
   module = Py_InitModule3("BiCGSTAB", _BiCGSTABModuleMethods, "\
 \
-Objects of this type can be cast to PreconditionedSolver objects\n\
-using the {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
-\n\
-BiCGSTAB solver calls Babel-interface functions"
+BiCGSTAB solver.\n\
+This calls Babel-interface matrix and vector functions, so it will work\n\
+with any consistent matrix, vector, and preconditioner classes."
   );
   dict = PyModule_GetDict(module);
   ExternalAPI[bHYPRE_BiCGSTAB__wrap_NUM] = (void*)bHYPRE_BiCGSTAB__wrap;

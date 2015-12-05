@@ -17,13 +17,10 @@ C
 C       Objects of this type can be cast to PreconditionedSolver objects
 C       using the {\tt \_\_cast} methods.
 C       
-C       RDF: Documentation goes here.
-C       
 C       The regular PCG solver calls Babel-interface matrix and vector functions.
 C       The HPCG solver calls HYPRE interface functions.
 C       The regular solver will work with any consistent matrix, vector, and
-C       preconditioner classes.  The HPCG solver will work with the more common
-C       combinations.
+C       preconditioner classes.  The HPCG solver will work with the more common ones.
 C       
 C       The HPCG solver checks whether the matrix, vectors, and preconditioner
 C       are of known types, and will not work with any other types.
@@ -99,6 +96,7 @@ C        out sidl.BaseInterface exception
 
 C       
 C       Method:  Create[]
+C        This function is the preferred way to create a HPCG solver. 
 C       
 
         subroutine bHYPRE_HPCG_Create_f(mpi_comm, retval, exception)

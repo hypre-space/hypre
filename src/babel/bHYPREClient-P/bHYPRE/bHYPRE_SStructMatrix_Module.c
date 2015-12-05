@@ -3316,7 +3316,9 @@ RETURNS\n\
    (bHYPRE.SStructMatrix _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a SStruct Matrix. "
    },
   { "_connect", (PyCFunction)pStub_SStructMatrix__connect,
   (METH_VARARGS | METH_KEYWORDS),

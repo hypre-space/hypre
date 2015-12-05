@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -267,6 +267,19 @@ HYPRE_ParCSRHybridSetTruncFactor( HYPRE_Solver solver,
 {
    return( hypre_AMGHybridSetTruncFactor( (void *) solver, trunc_factor ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRHybridSetPMaxElmts
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_ParCSRHybridSetPMaxElmts( HYPRE_Solver solver,
+                              int              p_max    )
+{
+   return( hypre_AMGHybridSetPMaxElmts( (void *) solver, p_max ) );
+}
+
+
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRHybridSetMaxLevels

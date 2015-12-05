@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.14 $
+# $Revision: 2.15 $
 #EHEADER**********************************************************************
 
 
@@ -43,7 +43,6 @@ HEADERS =\
  assumed_part.h\
  box.h\
  box_manager.h\
- box_neighbors.h\
  box_pthreads.h\
  computation.h\
  headers.h\

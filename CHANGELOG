@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.76 $
+# $Revision: 2.83 $
 #EHEADER**********************************************************************
 
 
@@ -29,6 +29,35 @@
 # This file chronicles user-level changes to hypre, beginning with the most
 # recent release.
 #=============================================================================
+
+
+Version 2.2.0b released, 2007/09/XX.
+
+- Renovate the FEI block preconditioner which will be useful for ALE3D
+  simulation of mixed variable type problem
+
+#====================================
+
+Version 2.1.0a released, 2007/06/25.
+
+- Added the CGC and CGC-E coarsening algorithms, which have been developed 
+  and implemented by Michael Griebel, Bram Metsch and Alex Schweitzer of 
+  the University of Bonn.
+
+- Added several new solver types to AMS and improved the AMS/FEI integration.
+
+- Better handling of the relative change test in GMRES.
+
+- Improved weights for Struct and SStruct weighted Jacobi.
+
+- Added a 'make check' target that does a simple code verification test.
+
+- Added truncation for interpolation according to the number of elements to the 
+  ParCSR Hybrid AMG Solver.
+
+- Renovated the hypre fei implementation for use in ARES.
+
+#====================================
 
 Version 2.0.0 released, 2006/12/15.
 

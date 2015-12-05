@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.13 $
+# $Revision: 1.14 $
 #EHEADER**********************************************************************
 
 #set -x
@@ -39,6 +39,6 @@ ln -s config/configure.in .
 
 rm -rf aclocal.m4 configure autom4te.cache config/acinclude.m4
 
-aclocal -I config
+aclocal -I config -I babel-runtime/m4
 autoconf --include=config
 rm configure.in

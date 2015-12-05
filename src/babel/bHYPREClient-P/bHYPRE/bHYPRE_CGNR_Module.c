@@ -23,12 +23,9 @@
 /**
  * Symbol "bHYPRE.CGNR" (version 1.0.0)
  * 
- * Objects of this type can be cast to PreconditionedSolver objects
- * using the {\tt \_\_cast} methods.
- * 
- * RDF: Documentation goes here.
- * 
- * CGNR solver calls Babel-interface functions
+ * CGNR solver.
+ * This calls Babel-interface matrix and vector functions, so it will work
+ * with any consistent matrix, vector, and preconditioner classes.
  */
 #include <Python.h>
 #include <stdlib.h>
@@ -2961,7 +2958,9 @@ RETURNS\n\
    (bHYPRE.CGNR _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a CGNR solver. "
    },
   { "_connect", (PyCFunction)pStub_CGNR__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -3078,12 +3077,9 @@ static PyTypeObject _bHYPRE_CGNRType = {
   Py_TPFLAGS_DEFAULT, /* tp_flags */
   "\
 \
-Objects of this type can be cast to PreconditionedSolver objects\n\
-using the {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
-\n\
-CGNR solver calls Babel-interface functions", /* tp_doc */
+CGNR solver.\n\
+This calls Babel-interface matrix and vector functions, so it will work\n\
+with any consistent matrix, vector, and preconditioner classes.", /* tp_doc */
   0,      /* tp_traverse */
   0,       /* tp_clear */
   0,       /* tp_richcompare */
@@ -3311,12 +3307,9 @@ initCGNR(void) {
   struct bHYPRE_CGNR__external*(*_extFunc)(void) = NULL;
   module = Py_InitModule3("CGNR", _CGNRModuleMethods, "\
 \
-Objects of this type can be cast to PreconditionedSolver objects\n\
-using the {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
-\n\
-CGNR solver calls Babel-interface functions"
+CGNR solver.\n\
+This calls Babel-interface matrix and vector functions, so it will work\n\
+with any consistent matrix, vector, and preconditioner classes."
   );
   dict = PyModule_GetDict(module);
   ExternalAPI[bHYPRE_CGNR__wrap_NUM] = (void*)bHYPRE_CGNR__wrap;

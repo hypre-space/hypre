@@ -22,7 +22,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.4 $
+# $Revision: 1.6 $
 #EHEADER**********************************************************************
 
 
@@ -54,7 +54,7 @@ mpirun -np 1 ./struct -d 2 -n 80 80 1 -solver 1  \
 # struct: Run parallel and blocking 
 #=============================================================================
 
-mpirun -np 8 ./struct -d 2 -n 10 80 1 -P 8 1 1 -solver 1  \
+mpirun -np 8 ./struct -d 2 -n 10 80 1 -P 8 1 1 -solver 1 \
  > parflow.out.4
-mpirun -np 4 ./struct -d 2 -n 10 10 1 -b 4 4 1 -P 2 2 1 -solver 1  \
+mpirun -np 4 ./struct -d 2 -n 10 10 1 -b 4 4 1 -P 2 2 1 -solver 1 \
  > parflow.out.5

@@ -88,8 +88,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a SStruct Stencil. 
      */
     static ::bHYPRE::SStructStencil
     Create (

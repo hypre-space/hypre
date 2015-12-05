@@ -60,6 +60,7 @@ int main (int argc, char *argv[])
    Operator  op_A;
    IJParCSRVector par_b;
    IJParCSRVector par_x;
+   Vector vec_x;
 
    BoomerAMG amg_solver;
    ParaSails ps_solver;
@@ -289,8 +290,22 @@ int main (int argc, char *argv[])
       amg_solver.SetDoubleParameter( "Tolerance", 1e-7);      /* conv. tolerance */
 
       /* Now setup and solve! */
+      // In C++, use of the Apply function is slightly more complicated than in other
+      // languages.
+      //   The second argument, the solution (and initial guess), is declared inout in
+      // Interfaces.idl.  For C++, Babel implements an inout (or out) argument as a
+      // reference argument, and obviously not a const one.
+      //   So it is important not to implicitly ask the C++ environment for a type
+      // conversion when supplying the second argument - results will be unpredictable!
+      //   Our solution vector is par_x, declared type IJParCSRVector, derived from
+      // Vector. In other languages we would use par_x directly for the second argument.
+      // In C++ we must declare a Vector, vec_x, for use as the second argument.
+      //   Fortunately, an assignment is all you have to do to set up vec_x.
+      // Babel casts and code other inside the Apply function will recover the original
+      // IJParCSRVector, par_x, to make sure it gets computed correctly.
       amg_solver.Setup( par_b, par_x );
-      amg_solver.Apply( par_b, par_x );
+      vec_x = par_x;
+      amg_solver.Apply( par_b, vec_x );
 
       /* Run info - needed logging turned on */
 
@@ -330,8 +345,10 @@ int main (int argc, char *argv[])
       pcg_solver.SetPreconditioner( identity );
 
       /* Now setup and solve! */
+      // See comments for solver 0 on Apply and vec_x.
       pcg_solver.Setup( par_b, par_x );
-      pcg_solver.Apply( par_b, par_x );
+      vec_x = par_x;
+      pcg_solver.Apply( par_b, vec_x );
 
       /* Run info - needed logging turned on */
       pcg_solver.GetIntValue( "NumIterations", num_iterations );
@@ -370,15 +387,17 @@ int main (int argc, char *argv[])
       amg_solver.SetIntParameter( "CoarsenType", 6); /* Falgout coarsening */
       amg_solver.SetIntParameter( "RelaxType", 6);   /* Sym G-S/Jacobi hybrid relaxation */
       amg_solver.SetIntParameter( "NumSweeps", 1);   /* Sweeeps on each level */
-      amg_solver.SetDoubleParameter( "Tolerance", 1e-3);      /* conv. tolerance */
+      amg_solver.SetDoubleParameter( "Tolerance", 0);      /* conv. tolerance */
       amg_solver.SetIntParameter( "MaxIter", 1 ); /* do only one iteration! */
 
       /* Set the PCG preconditioner */
       pcg_solver.SetPreconditioner( amg_solver );
 
       /* Now setup and solve! */
+      // See comments for solver 0 on Apply and vec_x.
       pcg_solver.Setup( par_b, par_x );
-      pcg_solver.Apply( par_b, par_x );
+      vec_x = par_x;
+      pcg_solver.Apply( par_b, vec_x );
 
       /* Run info - needed logging turned on */
       pcg_solver.GetIntValue( "NumIterations", num_iterations );
@@ -431,8 +450,10 @@ int main (int argc, char *argv[])
       pcg_solver.SetPreconditioner( ps_solver );
 
       /* Now setup and solve! */
+      // See comments for solver 0 on Apply and vec_x.
       pcg_solver.Setup( par_b, par_x);
-      pcg_solver.Apply( par_b, par_x);
+      vec_x = par_x;
+      pcg_solver.Apply( par_b, vec_x);
 
 
       /* Run info - needed logging turned on */

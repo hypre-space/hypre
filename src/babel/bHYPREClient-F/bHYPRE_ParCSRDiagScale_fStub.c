@@ -540,7 +540,7 @@ SIDLFortran77Symbol(bhypre_parcsrdiagscale__set_hooks_static_f,BHYPRE_PARCSRDIAG
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a ParCSR DiagScale solver. 
  */
 
 void

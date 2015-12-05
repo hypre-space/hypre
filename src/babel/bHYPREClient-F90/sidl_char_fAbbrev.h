@@ -1,0 +1,4 @@
+#define sidl_char__array_isColumnOrder_m ary_isColumnOrderezpi_hwlmp14_m
+#define sidl_char__array_iscolumnorder_m ary_iscolumnorderezpi_hwlmp14_m
+#define SIDL_CHAR__ARRAY_ISCOLUMNORDER_M ARY_ISCOLUMNORDEREZPI_HWLMP14_M
+

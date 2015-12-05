@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -349,7 +349,7 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
    {
        hypre_error_in_arg(1);
       /* printf("Cannot call setup to solver until matrix has been set\n");*/
-      return hypre_error_flag;
+      /* return hypre_error_flag; */
    }
 
    /* Set up the DataDist structure */
@@ -403,7 +403,7 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
    if (ierr) 
    {
        hypre_error(HYPRE_ERROR_GENERIC);
-       return hypre_error_flag;
+       /* return hypre_error_flag; */
    }
 
 #ifdef HYPRE_TIMING
@@ -429,7 +429,7 @@ int HYPRE_DistributedMatrixPilutSolverSetup( HYPRE_DistributedMatrixPilutSolver 
    if (ierr) 
    {
        hypre_error(HYPRE_ERROR_GENERIC);
-       return hypre_error_flag;
+       /* return hypre_error_flag; */
    }
 
 #ifdef HYPRE_DEBUG

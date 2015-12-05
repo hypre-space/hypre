@@ -1,30 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 1.21 $
- ***********************************************************************EHEADER*/
-
-
 /*
  * File:          bHYPRE_StructStencil_Impl.c
  * Symbol:        bHYPRE.StructStencil-v1.0.0
@@ -58,7 +31,7 @@
 /* Put additional includes or other arbitrary code here... */
 
 
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
 #include "_hypre_struct_mv.h"
@@ -184,7 +157,9 @@ impl_bHYPRE_StructStencil__dtor(
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct Stencil.
+ * You provide the number of spatial dimensions and the number of
+ * stencil entries.  
  */
 
 #undef __FUNC__
@@ -256,7 +231,7 @@ impl_bHYPRE_StructStencil_Destroy(
 }
 
 /*
- * Method:  SetDimension[]
+ *  Set the number of dimensions.  DEPRECATED, use StructStencilCreate 
  */
 
 #undef __FUNC__
@@ -303,7 +278,8 @@ impl_bHYPRE_StructStencil_SetDimension(
 }
 
 /*
- * Method:  SetSize[]
+ *  Set the number of stencil entries.
+ * DEPRECATED, use StructStencilCreate 
  */
 
 #undef __FUNC__
@@ -350,7 +326,9 @@ impl_bHYPRE_StructStencil_SetSize(
 }
 
 /*
- * Method:  SetElement[]
+ *  Set a stencil element.  Specify the stencil index, and an array of
+ * offsets.  "offset" is an array of length "dim", the number of spatial
+ * dimensions. 
  */
 
 #undef __FUNC__

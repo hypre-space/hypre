@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -42,6 +42,7 @@ typedef struct
    void                   *relax_data;
    void                   *rb_relax_data;
    int                     relax_type;
+   double                  jacobi_weight;
 
 } hypre_PFMGRelaxData;
 
@@ -58,6 +59,7 @@ hypre_PFMGRelaxCreate( MPI_Comm  comm )
    (pfmg_relax_data -> relax_data) = hypre_PointRelaxCreate(comm);
    (pfmg_relax_data -> rb_relax_data) = hypre_RedBlackGSCreate(comm);
    (pfmg_relax_data -> relax_type) = 0;        /* Weighted Jacobi */
+   (pfmg_relax_data -> jacobi_weight) = 0.0;
 
    return (void *) pfmg_relax_data;
 }
@@ -132,9 +134,10 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
                       hypre_StructVector *b,
                       hypre_StructVector *x                )
 {
-   hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
-   int                  relax_type = (pfmg_relax_data -> relax_type);
-   int                  ierr = 0;
+   hypre_PFMGRelaxData *pfmg_relax_data  = pfmg_relax_vdata;
+   int                  relax_type       = (pfmg_relax_data -> relax_type);
+   double               jacobi_weight    = (pfmg_relax_data -> jacobi_weight); 
+   int                  ierr;
 
    switch(relax_type)
    {
@@ -150,13 +153,19 @@ hypre_PFMGRelaxSetup( void               *pfmg_relax_vdata,
          break;
    }
 
+   if (relax_type==1)
+   {
+      hypre_PointRelaxSetWeight(pfmg_relax_data -> relax_data, jacobi_weight);
+   }
+   
    return ierr;
 }
 
 /*--------------------------------------------------------------------------
  * hypre_PFMGRelaxSetType
  *--------------------------------------------------------------------------*/
-
+/* All the weight-related code in this function should be migrated to
+ * hypre_PFMGRelaxSetup */
 int
 hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
                         int    relax_type       )
@@ -167,17 +176,14 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
 
    (pfmg_relax_data -> relax_type) = relax_type;
 
-   hypre_PointRelaxSetWeight(relax_data, 1.0);
    switch(relax_type)
    {
-      case 1: /* Weighted Jacobi (weight = 2/3) */
-      hypre_PointRelaxSetWeight(relax_data, 0.666666);
-
       case 0: /* Jacobi */
       {
          hypre_Index  stride;
          hypre_Index  indices[1];
 
+         hypre_PointRelaxSetWeight(relax_data, 1.0);
          hypre_PointRelaxSetNumPointsets(relax_data, 1);
 
          hypre_SetIndex(stride, 1, 1, 1);
@@ -195,9 +201,25 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_PFMGRelaxSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+/* Presently this should be called before hypre_PFMGRelaxSetType.
+ * If we move all the weight-related code in hypre_PFMGRelaxSetType
+ * to hypre_PFMGRelaxSetup, then this restriction will go away */
+int
+hypre_PFMGRelaxSetJacobiWeight(void  *pfmg_relax_vdata,
+                               double weight) 
+{
+   hypre_PFMGRelaxData *pfmg_relax_data = pfmg_relax_vdata;
+
+  (pfmg_relax_data -> jacobi_weight)    = weight;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_PFMGRelaxSetPreRelax
  *--------------------------------------------------------------------------*/
-
 int
 hypre_PFMGRelaxSetPreRelax( void  *pfmg_relax_vdata )
 {

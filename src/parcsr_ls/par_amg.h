@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.28 $
+ * $Revision: 2.31 $
  ***********************************************************************EHEADER*/
 
 
@@ -50,6 +50,7 @@ typedef struct
    double   jacobi_trunc_threshold;
    double   S_commpkg_switch;
    double   CR_rate;
+   double   CR_strong_th;
    int      measure_type;
    int      setup_type;
    int      coarsen_type;
@@ -62,6 +63,7 @@ typedef struct
    int      num_CR_relax_steps;
    int      IS_type;
    int      CR_use_CG;
+   int      cgc_its;
 
    /* solve params */
    int      max_iter;
@@ -81,6 +83,7 @@ typedef struct
    int      num_variables;
    int      num_functions;
    int      nodal;
+   int      nodal_diag;
    int      num_points;
    int     *dof_func;
    int     *dof_point;           
@@ -151,6 +154,14 @@ typedef struct
    char     log_file_name[256];
    int      debug_flag;
 
+   /* whether to print the constructed coarse grids BM Oct 22, 2006 */
+   int      plot_grids;
+   char     plot_filename[251];
+
+   /* coordinate data BM Oct 17, 2006 */
+   int      coorddim;
+   float    *coordinates;
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -177,9 +188,11 @@ typedef struct
 #define hypre_ParAMGDataPostInterpType(amg_data) ((amg_data)->post_interp_type)
 #define hypre_ParAMGDataNumCRRelaxSteps(amg_data) ((amg_data)->num_CR_relax_steps)
 #define hypre_ParAMGDataCRRate(amg_data) ((amg_data)->CR_rate)
+#define hypre_ParAMGDataCRStrongTh(amg_data) ((amg_data)->CR_strong_th)
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
+ #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
 
 /* solve params */
 
@@ -200,6 +213,7 @@ typedef struct
 #define  hypre_ParAMGDataNumVariables(amg_data)  ((amg_data)->num_variables)
 #define hypre_ParAMGDataNumFunctions(amg_data) ((amg_data)->num_functions)
 #define hypre_ParAMGDataNodal(amg_data) ((amg_data)->nodal)
+#define hypre_ParAMGDataNodalDiag(amg_data) ((amg_data)->nodal_diag)
 #define hypre_ParAMGDataNumPoints(amg_data) ((amg_data)->num_points)
 #define hypre_ParAMGDataDofFunc(amg_data) ((amg_data)->dof_func)
 #define hypre_ParAMGDataDofPoint(amg_data) ((amg_data)->dof_point)
@@ -270,6 +284,14 @@ typedef struct
 #define hypre_ParAMGDataPrintLevel(amg_data) ((amg_data)->print_level)
 #define hypre_ParAMGDataLogFileName(amg_data) ((amg_data)->log_file_name)
 #define hypre_ParAMGDataDebugFlag(amg_data)   ((amg_data)->debug_flag)
+
+/* BM Oct 22, 2006 */
+#define hypre_ParAMGDataPlotGrids(amg_data) ((amg_data)->plot_grids)
+#define hypre_ParAMGDataPlotFileName(amg_data) ((amg_data)->plot_filename)
+
+/* coordinates BM Oct 17, 2006 */
+#define hypre_ParAMGDataCoordDim(amg_data) ((amg_data)->coorddim)
+#define hypre_ParAMGDataCoordinates(amg_data) ((amg_data)->coordinates)
 
 #endif
 

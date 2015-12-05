@@ -120,8 +120,6 @@ namespace bHYPRE {
    * \item[NumSweeps] ({\tt Int}) - number of sweeps for fine grid, up and
    * down cycle.
    * 
-   * \item[Cycle0NumSweeps] ({\tt Int}) - number of sweeps for fine grid
-   * 
    * \item[Cycle1NumSweeps] ({\tt Int}) - number of sweeps for down cycle
    * 
    * \item[Cycle2NumSweeps] ({\tt Int}) - number of sweeps for up cycle
@@ -134,8 +132,6 @@ namespace bHYPRE {
    * 
    * \item[RelaxType] ({\tt Int}) - type of smoother for fine grid, up and
    * down cycle.
-   * 
-   * \item[Cycle0RelaxType] ({\tt Int}) - type of smoother for fine grid
    * 
    * \item[Cycle1RelaxType] ({\tt Int}) - type of smoother for down cycle
    * 
@@ -168,7 +164,7 @@ namespace bHYPRE {
    * complex smoothers.
    * 
    * \item[PrintFileName] ({\tt String}) - name of file printed to in
-   * association with {\tt SetPrintLevel}.  (not yet implemented).
+   * association with {\tt SetPrintLevel}.
    * 
    * \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
    * (when using the systems version).
@@ -185,7 +181,51 @@ namespace bHYPRE {
    * \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
    * for additive Schwarz.
    * 
+   * \item[Tolerance] ({\tt Double}) - convergence tolerance, if this
+   * is used as a solver; ignored if this is used as a preconditioner
+   * 
    * \item[DebugFlag] ({\tt Int}) -
+   * 
+   * \item[InterpType] ({\tt Int}) - Defines which parallel interpolation
+   * operator is used. There are the following options for interp\_type: 
+   * 
+   * \begin{tabular}{|c|l|} \hline
+   * 0 &	classical modified interpolation \\
+   * 1 &	LS interpolation (for use with GSMG) \\
+   * 2 &	classical modified interpolation for hyperbolic PDEs \\
+   * 3 &	direct interpolation (with separation of weights) \\
+   * 4 &	multipass interpolation \\
+   * 5 &	multipass interpolation (with separation of weights) \\
+   * 6 &  extended classical modified interpolation \\
+   * 7 &  extended (if no common C neighbor) classical modified interpolation \\
+   * 8 &	standard interpolation \\
+   * 9 &	standard interpolation (with separation of weights) \\
+   * 10 &	classical block interpolation (for use with nodal systems version only) \\
+   * 11 &	classical block interpolation (for use with nodal systems version only) \\
+   * &	with diagonalized diagonal blocks \\
+   * 12 &	FF interpolation \\
+   * 13 &	FF1 interpolation \\
+   * \hline
+   * \end{tabular}
+   * 
+   * The default is 0. 
+   * 
+   * \item[NumSamples] ({\tt Int}) - Defines the number of sample vectors used
+   * in GSMG or LS interpolation.
+   * 
+   * \item[MaxIterations] ({\tt Int}) - maximum number of iterations
+   * 
+   * \item[Logging] ({\tt Int}) - Set the {\it logging level}, specifying the
+   * degree of additional informational data to be accumulated.  Does
+   * nothing by default (level = 0).  Other levels (if any) are
+   * implementation-specific.  Must be called before {\tt Setup}
+   * and {\tt Apply}.
+   * 
+   * \item[PrintLevel] ({\tt Int}) - Set the {\it print level}, specifying the
+   * degree of informational data to be printed either to the screen or
+   * to a file.  Does nothing by default (level=0).  Other levels
+   * (if any) are implementation-specific.  Must be called before
+   * {\tt Setup} and {\tt Apply}.
    * 
    * \end{description}
    * 
@@ -224,8 +264,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a BoomerAMG solver. 
      */
     static ::bHYPRE::BoomerAMG
     Create (

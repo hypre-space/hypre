@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -66,7 +66,7 @@ extern "C" {
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -131,7 +131,7 @@ typedef struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -176,7 +176,7 @@ typedef struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -222,7 +222,7 @@ typedef struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -261,7 +261,7 @@ typedef struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -388,7 +388,7 @@ typedef struct
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -431,6 +431,7 @@ int hypre_FACSetMaxIter ( void *fac_vdata , int max_iter );
 int hypre_FACSetRelChange ( void *fac_vdata , int rel_change );
 int hypre_FACSetZeroGuess ( void *fac_vdata , int zero_guess );
 int hypre_FACSetRelaxType ( void *fac_vdata , int relax_type );
+int hypre_FACSetJacobiWeight ( void *fac_vdata , double weight );
 int hypre_FACSetNumPreSmooth ( void *fac_vdata , int num_pre_smooth );
 int hypre_FACSetNumPostSmooth ( void *fac_vdata , int num_post_smooth );
 int hypre_FACSetCoarseSolverType ( void *fac_vdata , int csolver_type );
@@ -547,6 +548,7 @@ int HYPRE_SStructFACSetRelChange ( HYPRE_SStructSolver solver , int rel_change )
 int HYPRE_SStructFACSetZeroGuess ( HYPRE_SStructSolver solver );
 int HYPRE_SStructFACSetNonZeroGuess ( HYPRE_SStructSolver solver );
 int HYPRE_SStructFACSetRelaxType ( HYPRE_SStructSolver solver , int relax_type );
+int HYPRE_SStructFACSetJacobiWeight ( HYPRE_SStructSolver solver , double weight );
 int HYPRE_SStructFACSetNumPreRelax ( HYPRE_SStructSolver solver , int num_pre_relax );
 int HYPRE_SStructFACSetNumPostRelax ( HYPRE_SStructSolver solver , int num_post_relax );
 int HYPRE_SStructFACSetCoarseSolverType ( HYPRE_SStructSolver solver , int csolver_type );
@@ -620,6 +622,7 @@ int HYPRE_SStructSysPFMGSetRelChange ( HYPRE_SStructSolver solver , int rel_chan
 int HYPRE_SStructSysPFMGSetZeroGuess ( HYPRE_SStructSolver solver );
 int HYPRE_SStructSysPFMGSetNonZeroGuess ( HYPRE_SStructSolver solver );
 int HYPRE_SStructSysPFMGSetRelaxType ( HYPRE_SStructSolver solver , int relax_type );
+int HYPRE_SStructSysPFMGSetJacobiWeight ( HYPRE_SStructSolver solver , double weight );
 int HYPRE_SStructSysPFMGSetNumPreRelax ( HYPRE_SStructSolver solver , int num_pre_relax );
 int HYPRE_SStructSysPFMGSetNumPostRelax ( HYPRE_SStructSolver solver , int num_post_relax );
 int HYPRE_SStructSysPFMGSetSkipRelax ( HYPRE_SStructSolver solver , int skip_relax );
@@ -743,6 +746,7 @@ int hypre_SysPFMGSetMaxIter ( void *sys_pfmg_vdata , int max_iter );
 int hypre_SysPFMGSetRelChange ( void *sys_pfmg_vdata , int rel_change );
 int hypre_SysPFMGSetZeroGuess ( void *sys_pfmg_vdata , int zero_guess );
 int hypre_SysPFMGSetRelaxType ( void *sys_pfmg_vdata , int relax_type );
+int hypre_SysPFMGSetJacobiWeight ( void *sys_pfmg_vdata , double weight );
 int hypre_SysPFMGSetNumPreRelax ( void *sys_pfmg_vdata , int num_pre_relax );
 int hypre_SysPFMGSetNumPostRelax ( void *sys_pfmg_vdata , int num_post_relax );
 int hypre_SysPFMGSetSkipRelax ( void *sys_pfmg_vdata , int skip_relax );
@@ -759,6 +763,7 @@ int hypre_SysPFMGRelaxDestroy ( void *sys_pfmg_relax_vdata );
 int hypre_SysPFMGRelax ( void *sys_pfmg_relax_vdata , hypre_SStructPMatrix *A , hypre_SStructPVector *b , hypre_SStructPVector *x );
 int hypre_SysPFMGRelaxSetup ( void *sys_pfmg_relax_vdata , hypre_SStructPMatrix *A , hypre_SStructPVector *b , hypre_SStructPVector *x );
 int hypre_SysPFMGRelaxSetType ( void *sys_pfmg_relax_vdata , int relax_type );
+int hypre_SysPFMGRelaxSetJacobiWeight ( void *sys_pfmg_relax_vdata , double weight );
 int hypre_SysPFMGRelaxSetPreRelax ( void *sys_pfmg_relax_vdata );
 int hypre_SysPFMGRelaxSetPostRelax ( void *sys_pfmg_relax_vdata );
 int hypre_SysPFMGRelaxSetTol ( void *sys_pfmg_relax_vdata , double tol );

@@ -3,7 +3,7 @@
  * Symbol:        sidl.rmi.ConnectException-v0.9.15
  * Symbol Type:   class
  * Babel Version: 1.0.0
- * Release:       $Name:  $
+ * Release:       $Name: V2-2-0b $
  * Revision:      @(#) $Id: sidl_rmi_ConnectException_Stub.c,v 1.1 2006/08/29 23:31:43 painter Exp $
  * Description:   Client-side glue code for sidl.rmi.ConnectException
  * 

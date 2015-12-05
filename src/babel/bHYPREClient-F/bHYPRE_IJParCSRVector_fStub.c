@@ -537,7 +537,7 @@ SIDLFortran77Symbol(bhypre_ijparcsrvector__set_hooks_static_f,BHYPRE_IJPARCSRVEC
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create an IJParCSR Vector. 
  */
 
 void

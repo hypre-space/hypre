@@ -3,7 +3,7 @@
  * Symbol:        sidl.rmi.InstanceRegistry-v0.9.15
  * Symbol Type:   class
  * Babel Version: 1.0.0
- * Release:       $Name:  $
+ * Release:       $Name: V2-2-0b $
  * Revision:      @(#) $Id: sidl_rmi_InstanceRegistry_Impl.c,v 1.6 2006/08/29 22:29:51 painter Exp $
  * Description:   Server-side implementation for sidl.rmi.InstanceRegistry
  * 

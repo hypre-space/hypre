@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.112 $
+ * $Revision: 2.115 $
  ***********************************************************************EHEADER*/
 
 
@@ -65,7 +65,7 @@ enum HYsolverID {HYPCG,HYLSICG,HYGMRES,HYFGMRES,HYCGSTAB,HYCGSTABL,HYTFQMR,
                  HYY12M,HYAMGE,HYHYBRID};
 enum HYpreconID {HYIDENTITY,HYDIAGONAL,HYPILUT,HYPARASAILS,HYBOOMERAMG,HYML,
                  HYDDILUT,HYPOLY,HYDDICT,HYSCHWARZ,HYEUCLID,HYBLOCK,HYMLI,
-                 HYUZAWA,HYMLMAXWELL,HYAMS};
+                 HYUZAWA,HYMLMAXWELL,HYAMS,HYSYSPDE};
 
 #define HYFEI_HIGHMASK      2147483647-255
 #define HYFEI_SPECIALMASK              255
@@ -474,6 +474,7 @@ class HYPRE_LinSysCore
    void   setupPreconAMS();
    void   setupPreconBlock();
    void   setupPreconEuclid();
+   void   setupPreconSysPDE();
    void   solveUsingBoomeramg(int&);
    void   solveUsingSuperLU(int&);
    void   solveUsingSuperLUX(int&);
@@ -656,6 +657,9 @@ class HYPRE_LinSysCore
    int             amgSchwarzDomainType_;
    int             amgUseGSMG_;
    int             amgGSMGNSamples_;
+   int             amgAggLevels_;
+   int             amgInterpType_;
+   int             amgPmax_;
    int             pilutFillin_;
    double          pilutDropTol_;
    int             pilutMaxNnzPerRow_;
@@ -692,6 +696,35 @@ class HYPRE_LinSysCore
    HYPRE_IJVector  amsX_;
    HYPRE_IJVector  amsY_;
    HYPRE_IJVector  amsZ_;
+   HYPRE_ParCSRMatrix  amsBetaPoisson_;
+   int             amsNumPDEs_;
+   int             amsMaxIter_;
+   double          amsTol_;
+   int             amsCycleType_;
+   int             amsRelaxType_;
+   int             amsRelaxTimes_;
+   double          amsRelaxWt_;
+   double          amsRelaxOmega_;
+   int             amsPrintLevel_;
+   int             amsAlphaCoarsenType_;
+   int             amsAlphaAggLevels_;
+   int             amsAlphaRelaxType_;
+   double          amsAlphaStrengthThresh_;
+   int             amsAlphaInterpType_;
+   int             amsAlphaPmax_;
+   int             amsBetaCoarsenType_;
+   int             amsBetaAggLevels_;
+   int             amsBetaRelaxType_;
+   double          amsBetaStrengthThresh_;
+   int             amsBetaInterpType_;
+   int             amsBetaPmax_;
+   int             sysPDEMethod_;
+   int             sysPDEFormat_;
+   double          sysPDETol_;
+   int             sysPDEMaxIter_;
+   int             sysPDENumPre_;
+   int             sysPDENumPost_;
+   int             sysPDENVars_;
 
    // ----------------------------------------------------------------------
    // FEI and MLI variables

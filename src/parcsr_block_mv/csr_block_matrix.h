@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.8 $
+ * $Revision: 1.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -99,9 +99,25 @@ int hypre_CSRBlockMatrixBlockAdd(double *, double *, double*, int);
 
 int hypre_CSRBlockMatrixBlockMultAdd(double *, double *, double, double *, int);
 int hypre_CSRBlockMatrixBlockMultAddDiag(double *, double *, double, double *, int);
+int
+hypre_CSRBlockMatrixBlockMultAddDiag2(double* i1, double* i2, double beta, 
+                                      double* o, int block_size);
+int
+hypre_CSRBlockMatrixBlockMultAddDiag3(double* i1, double* i2, double beta, 
+                                      double* o, int block_size);
+   
 
 int hypre_CSRBlockMatrixBlockInvMult(double *, double *, double *, int);
 int hypre_CSRBlockMatrixBlockInvMultDiag(double *, double *, double *, int);
+
+int
+hypre_CSRBlockMatrixBlockInvMultDiag2(double* i1, double* i2, double* o, int block_size);
+   
+int
+hypre_CSRBlockMatrixBlockInvMultDiag3(double* i1, double* i2, double* o, int block_size);
+   
+
+
 
 int hypre_CSRBlockMatrixBlockMultInv(double *, double *, double *, int);
 int hypre_CSRBlockMatrixBlockTranspose(double *, double *, int);

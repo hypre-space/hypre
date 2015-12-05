@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.3 $
  ***********************************************************************EHEADER*/
 
 
@@ -34,7 +34,7 @@
  * Started 11/29/95
  * George
  *
- * $Id: ilut.c,v 2.2 2006/09/22 22:06:01 hill66 Exp $
+ * $Id: ilut.c,v 2.3 2007/04/17 23:29:45 baker59 Exp $
  */
 
 #include <math.h>
@@ -105,7 +105,7 @@ int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, FactorMatTyp
 
     ierr = HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &size,
                NULL, &values);
-    if (ierr) return(ierr);
+    /* if (ierr) return(ierr);*/
     dummy_row_ptr[ 1 ] = size;
     hypre_ComputeAdd2Nrms( 1, dummy_row_ptr, values, &(ldu->nrm2s[i]) );
     ierr = HYPRE_DistributedMatrixRestoreRow( matrix, firstrow+i, &size,

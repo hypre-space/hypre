@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.22 $
+ * $Revision: 1.23 $
  ***********************************************************************EHEADER*/
 
 
@@ -3180,10 +3180,10 @@ int MLI_Method_AMGSA::coarsenAExt(hypre_ParCSRMatrix *hypreG,
    MPI_Comm  comm;
    int       mypid, nprocs, *partition, startRow, endRow, maxInd;
    int       localNRows, naggr=0, *node2aggr, *aggrSizes;
-   int       irow, jcol, rowLeng, *cols, globalNRows, index;
+   int       irow, jcol, rowLeng, globalNRows, index;
    int       *nodeStat, selectFlag, nSelected=0, nNotSelected=0, count;
    int       *GDiagI, *GDiagJ;
-   double    maxVal, *vals, *GDiagA;
+   double    maxVal, *GDiagA;
    hypre_CSRMatrix *GDiag;
 
    /*-----------------------------------------------------------------
@@ -3323,7 +3323,7 @@ int MLI_Method_AMGSA::coarsenAExt(hypre_ParCSRMatrix *hypreG,
          selectFlag = 1;
          for (jcol = GDiagI[irow]; jcol < GDiagI[irow+1]; jcol++)
          {
-            index = cols[jcol];
+            index = GDiagJ[jcol];
             if (nodeStat[index] != MLI_METHOD_AMGSA_READY)
             {
                selectFlag = 0;
@@ -3338,7 +3338,7 @@ int MLI_Method_AMGSA::coarsenAExt(hypre_ParCSRMatrix *hypreG,
             nSelected++;
             for (jcol = GDiagI[irow]; jcol < GDiagI[irow+1]; jcol++)
             {
-               index = cols[jcol];
+               index = GDiagJ[jcol];
                node2aggr[index] = naggr;
                nodeStat[index] = MLI_METHOD_AMGSA_SELECTED;
                aggrSizes[naggr]++;
@@ -3363,13 +3363,13 @@ int MLI_Method_AMGSA::coarsenAExt(hypre_ParCSRMatrix *hypreG,
             maxVal  = 0.0;
             for (jcol = GDiagI[irow]; jcol < GDiagI[irow+1]; jcol++)
             {
-               index = cols[jcol];
+               index = GDiagJ[jcol];
                if (nodeStat[index] == MLI_METHOD_AMGSA_SELECTED)
                {
-                  if (vals[jcol] > maxVal)
+                  if (GDiagA[jcol] > maxVal)
                   {
                      maxInd = jcol;
-                     maxVal = vals[jcol];
+                     maxVal = GDiagA[jcol];
                   }
                }
             }

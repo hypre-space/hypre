@@ -3,8 +3,8 @@
  * Symbol:        sidl.rmi.Response-v0.9.15
  * Symbol Type:   interface
  * Babel Version: 1.0.0
- * Release:       $Name:  $
- * Revision:      @(#) $Id: sidl_rmi_Response_fStub.h,v 1.2 2006/09/14 21:51:54 painter Exp $
+ * Release:       $Name: V2-2-0b $
+ * Revision:      @(#) $Id: sidl_rmi_Response_fStub.h,v 1.3 2006/12/29 21:24:29 painter Exp $
  * Description:   Client-side documentation text for sidl.rmi.Response
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.

@@ -1,82 +1,78 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<HTML>
-<HEAD>
-   <TITLE> Struct Matrices</TITLE>
-   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-
-<H2> <A HREF="#DOC.DOCU">Struct Matrices</A></H2></H2>
-<HR>
+<html><head><TITLE>Struct Matrices</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  Struct Matrices  </H2>
+<hr>
 <DL>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="*HYPRE_StructMatrix"></A>
-<A HREF=HYPRE_StructMatrix.html><B>*HYPRE_StructMatrix</B></A><DD><I> The matrix object</I>
+<IMG BORDER=0 SRC=icon1.gif>typedef struct   hypre_StructMatrix_struct*  <B>HYPRE_StructMatrix</B>
+ <DD><I>
+The matrix object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixCreate"></A>
-<A HREF=HYPRE_StructMatrixCreate.html><B>HYPRE_StructMatrixCreate</B></A><DD><I> Create a matrix object</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructMatrixCreate</B>(MPI_Comm comm, <!2><A HREF="StructGrids.html#DOC.1.1.3">HYPRE_StructGrid</A> grid, <!2><A HREF="StructStencils.html#DOC.1.2.2">HYPRE_StructStencil</A> stencil, <!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> *matrix)
+ <DD><I>
+Create a matrix object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixDestroy"></A>
-<A HREF=HYPRE_StructMatrixDestroy.html><B>HYPRE_StructMatrixDestroy</B></A><DD><I> Destroy a matrix object</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructMatrixDestroy</B>(<!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> matrix)
+ <DD><I>
+Destroy a matrix object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixInitialize"></A>
-<A HREF=HYPRE_StructMatrixInitialize.html><B>HYPRE_StructMatrixInitialize</B></A><DD><I> Prepare a matrix object for setting coefficient values</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructMatrixInitialize</B>(<!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> matrix)
+ <DD><I>
+Prepare a matrix object for setting coefficient values</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixSetValues"></A>
-<A HREF=HYPRE_StructMatrixSetValues.html><B>HYPRE_StructMatrixSetValues</B></A><DD><I> Set matrix coefficients index by index.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructMatrixSetValues.html><B>HYPRE_StructMatrixSetValues</B></A> 
+ <DD><I>
+Set matrix coefficients index by index</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixAddToValues"></A>
-<A HREF=HYPRE_StructMatrixAddToValues.html><B>HYPRE_StructMatrixAddToValues</B></A><DD><I> Add to matrix coefficients index by index.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructMatrixAddToValues.html><B>HYPRE_StructMatrixAddToValues</B></A> 
+ <DD><I>
+Add to matrix coefficients index by index</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixSetConstantValues"></A>
-<A HREF=HYPRE_StructMatrixSetConstantValues.html><B>HYPRE_StructMatrixSetConstantValues</B></A><DD><I> Set matrix coefficients which are constant over the grid.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructMatrixSetConstantValues.html><B>HYPRE_StructMatrixSetConstantValues</B></A> 
+ <DD><I>
+Set matrix coefficients which are constant over the grid</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixAddToConstantValues"></A>
-<A HREF=HYPRE_StructMatrixAddToConstantValues.html><B>HYPRE_StructMatrixAddToConstantValues</B></A><DD><I> Add to matrix coefficients which are constant over the grid.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructMatrixAddToConstantValues.html><B>HYPRE_StructMatrixAddToConstantValues</B></A> 
+ <DD><I>
+Add to matrix coefficients which are constant over the grid</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixSetBoxValues"></A>
-<A HREF=HYPRE_StructMatrixSetBoxValues.html><B>HYPRE_StructMatrixSetBoxValues</B></A><DD><I> Set matrix coefficients a box at a time.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructMatrixSetBoxValues.html><B>HYPRE_StructMatrixSetBoxValues</B></A> 
+ <DD><I>
+Set matrix coefficients a box at a time</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixAddToBoxValues"></A>
-<A HREF=HYPRE_StructMatrixAddToBoxValues.html><B>HYPRE_StructMatrixAddToBoxValues</B></A><DD><I> Add to matrix coefficients a box at a time.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructMatrixAddToBoxValues.html><B>HYPRE_StructMatrixAddToBoxValues</B></A> 
+ <DD><I>
+Add to matrix coefficients a box at a time</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixAssemble"></A>
-<A HREF=HYPRE_StructMatrixAssemble.html><B>HYPRE_StructMatrixAssemble</B></A><DD><I> Finalize the construction of the matrix before using</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructMatrixAssemble</B>(<!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> matrix)
+ <DD><I>
+Finalize the construction of the matrix before using</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixSetSymmetric"></A>
-<A HREF=HYPRE_StructMatrixSetSymmetric.html><B>HYPRE_StructMatrixSetSymmetric</B></A><DD><I> Define symmetry properties of the matrix.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructMatrixSetSymmetric.html><B>HYPRE_StructMatrixSetSymmetric</B></A> 
+ <DD><I>
+Define symmetry properties of the matrix</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixSetConstantEntries"></A>
-<A HREF=HYPRE_StructMatrixSetConstantEntries.html><B>HYPRE_StructMatrixSetConstantEntries</B></A><DD><I> Specify which stencil entries are constant over the grid.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructMatrixSetConstantEntries.html><B>HYPRE_StructMatrixSetConstantEntries</B></A> 
+ <DD><I>
+Specify which stencil entries are constant over the grid</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixSetNumGhost"></A>
-<A HREF=HYPRE_StructMatrixSetNumGhost.html><B>HYPRE_StructMatrixSetNumGhost</B></A><DD><I> Set the ghost layer in the matrix </I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructMatrixSetNumGhost</B>(<!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> matrix, int *num_ghost)
+ <DD><I>
+Set the ghost layer in the matrix </I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixPrint"></A>
-<A HREF=HYPRE_StructMatrixPrint.html><B>HYPRE_StructMatrixPrint</B></A><DD><I> Print the matrix to file.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructMatrixPrint.html><B>HYPRE_StructMatrixPrint</B></A> 
+ <DD><I>
+Print the matrix to file</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructMatrixMatvec"></A>
-<A HREF=HYPRE_StructMatrixMatvec.html><B>HYPRE_StructMatrixMatvec</B></A><DD><I> Matvec operator.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructMatrixMatvec.html><B>HYPRE_StructMatrixMatvec</B></A> 
+ <DD><I>
+Matvec operator</I>
 </DL>
-<A NAME="DOC.DOCU"></A>
-<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
 <center>
 <img src="hypre_wiw.gif">
 </center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

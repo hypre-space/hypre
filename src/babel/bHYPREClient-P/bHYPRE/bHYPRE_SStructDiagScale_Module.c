@@ -2710,7 +2710,9 @@ RETURNS\n\
    (bHYPRE.SStructDiagScale _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a SStruct DiagScale solver. "
    },
   { "_connect", (PyCFunction)pStub_SStructDiagScale__connect,
   (METH_VARARGS | METH_KEYWORDS),

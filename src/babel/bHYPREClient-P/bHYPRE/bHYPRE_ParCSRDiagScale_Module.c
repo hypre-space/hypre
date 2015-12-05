@@ -2713,7 +2713,9 @@ RETURNS\n\
    (bHYPRE.ParCSRDiagScale _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a ParCSR DiagScale solver. "
    },
   { "_connect", (PyCFunction)pStub_ParCSRDiagScale__connect,
   (METH_VARARGS | METH_KEYWORDS),

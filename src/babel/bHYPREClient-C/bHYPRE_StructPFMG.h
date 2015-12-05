@@ -18,8 +18,6 @@
  * Objects of this type can be cast to Solver objects
  * using the {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * The StructPFMG solver requires a Struct matrix.
  */
 struct bHYPRE_StructPFMG__object;
@@ -101,7 +99,7 @@ bHYPRE_StructPFMG
 bHYPRE_StructPFMG__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct PFMG solver. 
  */
 bHYPRE_StructPFMG
 bHYPRE_StructPFMG_Create(

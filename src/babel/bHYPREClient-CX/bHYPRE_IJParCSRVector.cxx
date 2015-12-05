@@ -1974,8 +1974,9 @@ bHYPRE::IJParCSRVector::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create an IJParCSR Vector. 
  */
 ::bHYPRE::IJParCSRVector
 bHYPRE::IJParCSRVector::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

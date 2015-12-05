@@ -97,7 +97,7 @@ bHYPRE_SStructParCSRVector
 bHYPRE_SStructParCSRVector__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a SStruct ParCSR Vector. 
  */
 bHYPRE_SStructParCSRVector
 bHYPRE_SStructParCSRVector_Create(

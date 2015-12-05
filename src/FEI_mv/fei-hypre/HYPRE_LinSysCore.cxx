@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.52 $
+ * $Revision: 2.65 $
  ***********************************************************************EHEADER*/
 
 //***************************************************************************
@@ -63,6 +63,8 @@
 #include "HYPRE_LSI_Uzawa_c.h"
 #include "HYPRE_MLMaxwell.h"
 #include "HYPRE_SlideReduction.h"
+
+//#define HAVE_SYSPDE
 
 //***************************************************************************
 // timers 
@@ -335,6 +337,31 @@ HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) :
    amsX_ = NULL;
    amsY_ = NULL;
    amsZ_ = NULL;
+   amsNumPDEs_ = 3;
+   amsMaxIter_ = 1;
+   amsTol_     = 0.0;
+   amsCycleType_ = 1;
+   amsRelaxType_ = 2;
+   amsRelaxTimes_ = 1;
+   amsRelaxWt_    = 1.0;
+   amsRelaxOmega_ = 1.0;
+   amsBetaPoisson_ = NULL;
+   amsPrintLevel_ = 0;
+   amsAlphaCoarsenType_ = 10;
+   amsAlphaAggLevels_ = 1;
+   amsAlphaRelaxType_ = 3;
+   amsAlphaStrengthThresh_ = 0.25;
+   amsBetaCoarsenType_ = 10;
+   amsBetaAggLevels_ = 1;
+   amsBetaRelaxType_ = 3;
+   amsBetaStrengthThresh_ = 0.25;
+   sysPDEMethod_ = -1;
+   sysPDEFormat_ = -1;
+   sysPDETol_ = 0.0;
+   sysPDEMaxIter_ = -1;
+   sysPDENumPre_ = -1;
+   sysPDENumPost_ = -1;
+   sysPDENVars_ = 3;
 
    //-------------------------------------------------------------------
    // parameters ML Maxwell solver
@@ -505,6 +532,10 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
          HYPRE_AMSFEIDestroy( HYPrecon_ );
          HYPRE_AMSDestroy( HYPrecon_ );
       }
+#ifdef HAVE_SYSPDE
+      else if ( HYPreconID_ == HYSYSPDE )
+         HYPRE_ParCSRSysPDEDestroy( HYPrecon_ );
+#endif
 
       HYPrecon_ = NULL;
    }
@@ -1043,8 +1074,17 @@ int HYPRE_LinSysCore::setMatrixStructure(int** ptColIndices, int* ptRowLengths,
    //-------------------------------------------------------------------
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
+   {
       printf("%4d : HYPRE_LSC::entering setMatrixStructure.\n",mypid_);
-
+      if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 6 )
+      {
+         int nRows = localEndRow_ - localStartRow_ + 1;
+         for (i = 0; i < nRows; i++)
+            for (j = 0; j < ptRowLengths[i]; j++) 
+               printf("  %4d : row, col = %d %d\n",mypid_,
+                      localStartRow_+i, ptColIndices[i][j]+1);
+      }
+   }
    (void) blkColIndices;
    (void) blkRowLengths;
    (void) ptRowsPerBlkRow;
@@ -1421,8 +1461,8 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
       printf("%4d : row number = %d.\n", mypid_, row);
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 6 )
          for ( i = 0; i < numValues; i++ )
-            printf("  %4d : col = %d, data = %e\n", mypid_, scatterIndices[i], 
-                    values[i]);
+            printf("  %4d : row,col = %d %d, data = %e\n", mypid_, 
+                   row+1, scatterIndices[i]+1, values[i]);
    }
 
    //-------------------------------------------------------------------
@@ -1508,7 +1548,7 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
             localRow = ptRows[i] - localStartRow_ + 1;
             for ( j = 0; j < numPtCols; j++ )
                printf("  %4d : row,col,val = %8d %8d %e\n",mypid_,
-                      localRow, ptCols[j], values[i][j]); 
+                      ptRows[i]+1, ptCols[j]+1, values[i][j]); 
          }
       }
    }
@@ -1584,8 +1624,8 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
          if ( index >= rowLeng )
          {
             printf("%4d : sumIntoSystemMatrix ERROR - loading column",mypid_);
-            printf("      that has not been declared before - %d.\n",
-                   colIndex);
+            printf(" that has not been declared before - %d (row=%d).\n",
+                   colIndex, ptRows[i]+1);
             for ( k = 0; k < rowLeng; k++ ) 
                printf("       available column index = %d\n", indptr[k]);
             exit(1);
@@ -2223,6 +2263,12 @@ This should ultimately be taken out even for newer ale3d implementation
          }
          delete [] eqnNumbers;
          delete [] newData;
+         errCnt = 0;
+         for (i = 0; i < nRows; i++)
+            if (MLI_NodalCoord_[i] == -99999.0) errCnt++;
+         if (errCnt > 0)
+            printf("putNodalFieldData ERROR:incomplete nodal coordinates (%d %d).\n",
+                   errCnt, nRows);
       }
       else
       {
@@ -2253,7 +2299,7 @@ This should ultimately be taken out even for newer ale3d implementation
                printf("putNodalFieldData : %4d %2d = %e\n",i,j,
                       data[i*fieldSize+j]);
       }    
-      if (HYPreconID_ == HYAMS && lookup_ != NULL && fieldSize == 2 &&
+      if (lookup_ != NULL && fieldSize == 2 &&
            numNodes > 0)
       {
          blockIDs       = (int *) lookup_->getElemBlockIDs();
@@ -2283,11 +2329,11 @@ This should ultimately be taken out even for newer ale3d implementation
             AMSData_.EdgeNodeList_ = new int[nRows*fieldSize];
             for (i = 0; i < nRows*fieldSize; i++)
                AMSData_.EdgeNodeList_[i] = -99999;
-            for (i = 0; i < newNumNodes; i++)
+            for (i = 0; i < newNumEdges; i++)
             {
                index = eqnNumbers[i] - localStartRow_ + 1;
                for (j = 0; j < fieldSize; j++ ) 
-                  AMSData_.EdgeNodeList_[index+j] = iArray[i*fieldSize+j];
+                  AMSData_.EdgeNodeList_[index*fieldSize+j] = iArray[i*fieldSize+j];
             }
             errCnt = 0;
             for (i = 0; i < nRows*fieldSize; i++)
@@ -2315,7 +2361,7 @@ This should ultimately be taken out even for newer ale3d implementation
                printf("putNodalFieldData : %4d %2d = %e\n",i,j,
                       data[i*fieldSize+j]);
       }    
-      if (lookup_ != NULL && fieldSize == 1)
+      if (lookup_ != NULL && fieldSize == 3)
       {
          blockIDs       = (int *) lookup_->getElemBlockIDs();
          blockID        = blockIDs[0];
@@ -2326,7 +2372,6 @@ This should ultimately be taken out even for newer ale3d implementation
          AMSData_.NodeNumbers_ = NULL;
          AMSData_.NodalCoord_  = NULL;
          AMSData_.numNodes_ = 0;
-         AMSData_.numLocalNodes_ = localEndRow_ - localStartRow_ + 1;
          if (numNodes > 0)
          {
             AMSData_.numNodes_ = numNodes;
@@ -2794,6 +2839,10 @@ int HYPRE_LinSysCore::copyInMatrix(double scalar, const Data& data)
    else if (!strcmp(name, "GEN"))
    {
       maxwellGEN_ = (HYPRE_ParCSRMatrix) data.getDataPtr();
+   }
+   else if (!strcmp(name, "AMSBMATRIX"))
+   {
+      amsBetaPoisson_ = (HYPRE_ParCSRMatrix) data.getDataPtr();
    }
    else if (!strcmp(name, "AMSData"))
    {
@@ -3612,6 +3661,10 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
 #endif
       else if (HYPreconID_ == HYUZAWA)   
          HYPRE_LSI_UzawaDestroy(HYPrecon_);
+#ifdef HAVE_SYSPDE
+      else if (HYPreconID_ == HYSYSPDE)
+         HYPRE_ParCSRSysPDEDestroy(HYPrecon_);
+#endif
    }
 
    //-------------------------------------------------------------------
@@ -3728,6 +3781,13 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
       strcpy(HYPreconName_, name);
       HYPreconID_ = HYUZAWA;
    }
+#ifdef HAVE_SYSPDE
+   else if (!strcmp(name, "syspde"))
+   {
+      strcpy(HYPreconName_, name);
+      HYPreconID_ = HYSYSPDE;
+   }
+#endif
    else
    {
       if ((HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3)
@@ -3828,6 +3888,13 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
            break;
       case HYUZAWA :
            HYPRE_LSI_UzawaCreate(comm_, &HYPrecon_);
+           break;
+      case HYSYSPDE :
+#ifdef HAVE_SYSPDE
+           ierr = HYPRE_ParCSRSysPDECreate(comm_, sysPDENVars_, &HYPrecon_);
+#else
+           printf("HYPRE_LSC::selectPreconditioner-SYSPDE unsupported.\n");
+#endif
            break;
    }
 

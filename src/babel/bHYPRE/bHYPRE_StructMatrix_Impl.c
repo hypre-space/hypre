@@ -1,30 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 1.28 $
- ***********************************************************************EHEADER*/
-
-
 /*
  * File:          bHYPRE_StructMatrix_Impl.c
  * Symbol:        bHYPRE.StructMatrix-v1.0.0
@@ -60,7 +33,7 @@
 /* Put additional includes or other arbitrary code here... */
 
 
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 /*#include "mpi.h"*/
 #include "_hypre_struct_mv.h"
@@ -195,7 +168,7 @@ impl_bHYPRE_StructMatrix__dtor(
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a Struct Matrix. 
  */
 
 #undef __FUNC__
@@ -247,7 +220,8 @@ impl_bHYPRE_StructMatrix_Create(
 }
 
 /*
- * Method:  SetGrid[]
+ *  Set the grid on which vectors are defined.  This and the stencil
+ * determine the matrix structure. 
  */
 
 #undef __FUNC__
@@ -308,7 +282,7 @@ impl_bHYPRE_StructMatrix_SetGrid(
 }
 
 /*
- * Method:  SetStencil[]
+ *  Set the stencil. This and the grid determine the matrix structure. 
  */
 
 #undef __FUNC__
@@ -361,7 +335,10 @@ impl_bHYPRE_StructMatrix_SetStencil(
 }
 
 /*
- * Method:  SetValues[]
+ *  Set matrix values at grid point, given by "index".
+ * You can supply values for one or more positions in the stencil.
+ * "index" is an array of size "dim"; and "stencil_indices" and "values"
+ * are arrays of size "num_stencil_indices".
  */
 
 #undef __FUNC__
@@ -402,7 +379,16 @@ impl_bHYPRE_StructMatrix_SetValues(
 }
 
 /*
- * Method:  SetBoxValues[]
+ *  Set matrix values throughout a box in the grid, specified by its lower
+ * and upper corners.  You can supply these values for one or more positions
+ * in the stencil.  Thus the total number of matrix values you supply,
+ * "nvalues", is num_stencil_indices x box_size, where box_size is the
+ * number of grid points in the box.  The values array should be organized
+ * so all values for a given box point are together (i.e., the stencil
+ * index is the most rapidly varying).
+ * "ilower" and "iupper" are arrays of size "dim", "stencil_indices" is an
+ * array of size "num_stencil_indices", and "values" is an array of size
+ * "nvalues". 
  */
 
 #undef __FUNC__
@@ -447,7 +433,9 @@ impl_bHYPRE_StructMatrix_SetBoxValues(
 }
 
 /*
- * Method:  SetNumGhost[]
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions
  */
 
 #undef __FUNC__
@@ -484,7 +472,8 @@ impl_bHYPRE_StructMatrix_SetNumGhost(
 }
 
 /*
- * Method:  SetSymmetric[]
+ *  Call SetSymmetric with symmetric=1 to turn on symmetric matrix storage if
+ * available. 
  */
 
 #undef __FUNC__
@@ -520,7 +509,10 @@ impl_bHYPRE_StructMatrix_SetSymmetric(
 }
 
 /*
- * Method:  SetConstantEntries[]
+ *  State which stencil entries are constant over the grid.
+ * Supported options are: (i) none (the default),
+ * (ii) all (stencil_constant_points should include all stencil points)
+ * (iii) all entries but the diagonal. 
  */
 
 #undef __FUNC__
@@ -558,7 +550,10 @@ impl_bHYPRE_StructMatrix_SetConstantEntries(
 }
 
 /*
- * Method:  SetConstantValues[]
+ *  Provide values for matrix coefficients which are constant throughout
+ * the grid, one value for each stencil point.
+ * "stencil_indices" and "values" is each an array of length
+ * "num_stencil_indices" 
  */
 
 #undef __FUNC__

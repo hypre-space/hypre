@@ -2465,8 +2465,9 @@ bHYPRE::StructMatrix::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a Struct Matrix. 
  */
 ::bHYPRE::StructMatrix
 bHYPRE::StructMatrix::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,
@@ -2491,8 +2492,10 @@ bHYPRE::StructMatrix::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the grid on which vectors are defined.  This and the stencil
+ * determine the matrix structure. 
  */
 int32_t
 bHYPRE::StructMatrix::SetGrid( /* in */::bHYPRE::StructGrid grid )
@@ -2514,8 +2517,9 @@ bHYPRE::StructMatrix::SetGrid( /* in */::bHYPRE::StructGrid grid )
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the stencil. This and the grid determine the matrix structure. 
  */
 int32_t
 bHYPRE::StructMatrix::SetStencil( /* in */::bHYPRE::StructStencil stencil )
@@ -2537,8 +2541,12 @@ bHYPRE::StructMatrix::SetStencil( /* in */::bHYPRE::StructStencil stencil )
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set matrix values at grid point, given by "index".
+ * You can supply values for one or more positions in the stencil.
+ * "index" is an array of size "dim"; and "stencil_indices" and "values"
+ * are arrays of size "num_stencil_indices".
  */
 int32_t
 bHYPRE::StructMatrix::SetValues( /* in rarray[dim] */int32_t* index,
@@ -2583,8 +2591,12 @@ bHYPRE::StructMatrix::SetValues( /* in rarray[dim] */int32_t* index,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set matrix values at grid point, given by "index".
+ * You can supply values for one or more positions in the stencil.
+ * "index" is an array of size "dim"; and "stencil_indices" and "values"
+ * are arrays of size "num_stencil_indices".
  */
 int32_t
 bHYPRE::StructMatrix::SetValues( /* in rarray[dim] */::sidl::array<int32_t> 
@@ -2610,8 +2622,18 @@ bHYPRE::StructMatrix::SetValues( /* in rarray[dim] */::sidl::array<int32_t>
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set matrix values throughout a box in the grid, specified by its lower
+ * and upper corners.  You can supply these values for one or more positions
+ * in the stencil.  Thus the total number of matrix values you supply,
+ * "nvalues", is num_stencil_indices x box_size, where box_size is the
+ * number of grid points in the box.  The values array should be organized
+ * so all values for a given box point are together (i.e., the stencil
+ * index is the most rapidly varying).
+ * "ilower" and "iupper" are arrays of size "dim", "stencil_indices" is an
+ * array of size "num_stencil_indices", and "values" is an array of size
+ * "nvalues". 
  */
 int32_t
 bHYPRE::StructMatrix::SetBoxValues( /* in rarray[dim] */int32_t* ilower,
@@ -2663,8 +2685,18 @@ bHYPRE::StructMatrix::SetBoxValues( /* in rarray[dim] */int32_t* ilower,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set matrix values throughout a box in the grid, specified by its lower
+ * and upper corners.  You can supply these values for one or more positions
+ * in the stencil.  Thus the total number of matrix values you supply,
+ * "nvalues", is num_stencil_indices x box_size, where box_size is the
+ * number of grid points in the box.  The values array should be organized
+ * so all values for a given box point are together (i.e., the stencil
+ * index is the most rapidly varying).
+ * "ilower" and "iupper" are arrays of size "dim", "stencil_indices" is an
+ * array of size "num_stencil_indices", and "values" is an array of size
+ * "nvalues". 
  */
 int32_t
 bHYPRE::StructMatrix::SetBoxValues( /* in rarray[dim] */::sidl::array<int32_t> 
@@ -2691,8 +2723,11 @@ bHYPRE::StructMatrix::SetBoxValues( /* in rarray[dim] */::sidl::array<int32_t>
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions
  */
 int32_t
 bHYPRE::StructMatrix::SetNumGhost( /* in rarray[dim2] */int32_t* num_ghost,
@@ -2720,8 +2755,11 @@ bHYPRE::StructMatrix::SetNumGhost( /* in rarray[dim2] */int32_t* num_ghost,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions
  */
 int32_t
 bHYPRE::StructMatrix::SetNumGhost( /* in rarray[dim2] */::sidl::array<int32_t> 
@@ -2743,8 +2781,10 @@ bHYPRE::StructMatrix::SetNumGhost( /* in rarray[dim2] */::sidl::array<int32_t>
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Call SetSymmetric with symmetric=1 to turn on symmetric matrix storage if
+ * available. 
  */
 int32_t
 bHYPRE::StructMatrix::SetSymmetric( /* in */int32_t symmetric )
@@ -2765,8 +2805,12 @@ bHYPRE::StructMatrix::SetSymmetric( /* in */int32_t symmetric )
 }
 
 
+
 /**
- * user defined non-static method.
+ *  State which stencil entries are constant over the grid.
+ * Supported options are: (i) none (the default),
+ * (ii) all (stencil_constant_points should include all stencil points)
+ * (iii) all entries but the diagonal. 
  */
 int32_t
 bHYPRE::StructMatrix::SetConstantEntries( /* in */int32_t 
@@ -2799,8 +2843,12 @@ bHYPRE::StructMatrix::SetConstantEntries( /* in */int32_t
 }
 
 
+
 /**
- * user defined non-static method.
+ *  State which stencil entries are constant over the grid.
+ * Supported options are: (i) none (the default),
+ * (ii) all (stencil_constant_points should include all stencil points)
+ * (iii) all entries but the diagonal. 
  */
 int32_t
 bHYPRE::StructMatrix::SetConstantEntries( /* in 
@@ -2824,8 +2872,12 @@ bHYPRE::StructMatrix::SetConstantEntries( /* in
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Provide values for matrix coefficients which are constant throughout
+ * the grid, one value for each stencil point.
+ * "stencil_indices" and "values" is each an array of length
+ * "num_stencil_indices" 
  */
 int32_t
 bHYPRE::StructMatrix::SetConstantValues( /* in */int32_t num_stencil_indices,
@@ -2862,8 +2914,12 @@ bHYPRE::StructMatrix::SetConstantValues( /* in */int32_t num_stencil_indices,
 }
 
 
+
 /**
- * user defined non-static method.
+ *  Provide values for matrix coefficients which are constant throughout
+ * the grid, one value for each stencil point.
+ * "stencil_indices" and "values" is each an array of length
+ * "num_stencil_indices" 
  */
 int32_t
 bHYPRE::StructMatrix::SetConstantValues( /* in rarray[num_stencil_indices] 

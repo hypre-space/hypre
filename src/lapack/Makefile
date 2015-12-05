@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 1.19 $
+# $Revision: 1.20 $
 #EHEADER**********************************************************************
 
 
@@ -125,6 +125,6 @@ distclean: clean
 #################################################################
 
 dlamch.o : dlamch.c ${LAPACK_HEADERS}
-	${CC} -c dlamch.c
+	${CC} ${SHARED_COMPILE_FLAG} -c dlamch.c
 
 ${OBJS}: ${LAPACK_HEADERS}

@@ -93,7 +93,7 @@ bHYPRE_IJParCSRMatrix
 bHYPRE_IJParCSRMatrix__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create an IJParCSR Matrix. 
  */
 bHYPRE_IJParCSRMatrix
 bHYPRE_IJParCSRMatrix_Create(

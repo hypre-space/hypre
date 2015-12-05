@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.9 $
+ * $Revision: 2.10 $
  ***********************************************************************EHEADER*/
 
 
@@ -107,6 +107,14 @@ typedef struct hypre_BoxArrayArray_struct
   hypre_IndexZ(index) = iz )
 
 #define hypre_ClearIndex(index)  hypre_SetIndex(index, 0, 0, 0)
+
+#define hypre_IndexZero(index)\
+   (hypre_IndexX(index) == 0 &&  hypre_IndexY(index) == 0 \
+    && hypre_IndexZ(index) == 0)
+
+#define hypre_IndexGTESize(index, size) \
+(hypre_IndexX(index) >= size &&  hypre_IndexY(index) >= size \
+    && hypre_IndexZ(index) >= size)
 
 #define hypre_CopyIndex(index1, index2) \
 ( hypre_IndexX(index2) = hypre_IndexX(index1),\

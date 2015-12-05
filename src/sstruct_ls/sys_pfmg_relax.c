@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -41,6 +41,7 @@ typedef struct
 {
    void                   *relax_data;
    int                     relax_type;
+   double                  jacobi_weight;
 
 } hypre_SysPFMGRelaxData;
 
@@ -108,8 +109,17 @@ hypre_SysPFMGRelaxSetup( void                 *sys_pfmg_relax_vdata,
                          hypre_SStructPVector *x                )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
-   int                     ierr = 0;
+   void                   *relax_data       = (sys_pfmg_relax_data -> relax_data);
+   int                     relax_type       = (sys_pfmg_relax_data -> relax_type);
+   double                  jacobi_weight    = (sys_pfmg_relax_data -> jacobi_weight);
 
+   int                     ierr = 0;
+  
+   if (relax_type == 1)
+   {
+      hypre_NodeRelaxSetWeight(relax_data, jacobi_weight);
+   }
+                                                                                                                                     
    ierr = hypre_NodeRelaxSetup((sys_pfmg_relax_data -> relax_data), A, b, x);
 
    return ierr;
@@ -129,17 +139,14 @@ hypre_SysPFMGRelaxSetType( void  *sys_pfmg_relax_vdata,
 
    (sys_pfmg_relax_data -> relax_type) = relax_type;
 
-   hypre_NodeRelaxSetWeight(relax_data, 1.0);
    switch(relax_type)
    {
-      case 1: /* Weighted Jacobi (weight = 2/3) */
-      hypre_NodeRelaxSetWeight(relax_data, 0.666666);
-
       case 0: /* Jacobi */
       {
          hypre_Index  stride;
          hypre_Index  indices[1];
 
+         hypre_NodeRelaxSetWeight(relax_data, 1.0);
          hypre_NodeRelaxSetNumNodesets(relax_data, 1);
 
          hypre_SetIndex(stride, 1, 1, 1);
@@ -175,6 +182,20 @@ hypre_SysPFMGRelaxSetType( void  *sys_pfmg_relax_vdata,
    }
 
    return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SysPFMGRelaxSetPreRelax
+ *--------------------------------------------------------------------------*/
+int
+hypre_SysPFMGRelaxSetJacobiWeight(void  *sys_pfmg_relax_vdata,
+                                  double weight)
+{
+   hypre_SysPFMGRelaxData *sys_pfmg_relax_data = sys_pfmg_relax_vdata;
+                                                                                                                                     
+  (sys_pfmg_relax_data -> jacobi_weight)    = weight;
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

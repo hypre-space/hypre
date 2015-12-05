@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.8 $
+ * $Revision: 2.9 $
  ***********************************************************************EHEADER*/
 
 
@@ -2337,6 +2337,8 @@ int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             }
 
             relax_error = gselim(A_mat,b_vec,n_global);
+            /* use version with pivoting */
+            /* relax_error = gselim_piv(A_mat,b_vec,n_global);*/
 
             for (i = 0; i < n; i++)
             {

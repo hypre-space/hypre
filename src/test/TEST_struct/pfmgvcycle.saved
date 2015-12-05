@@ -1,8 +1,8 @@
 # Output file: pfmgvcycle.out.0
-Iterations = 40
-Final Relative Residual Norm = 8.459703e-07
+Iterations = 30
+Final Relative Residual Norm = 8.360175e-07
 
 # Output file: pfmgvcycle.out.1
-Iterations = 40
-Final Relative Residual Norm = 7.713566e-07
+Iterations = 30
+Final Relative Residual Norm = 7.107142e-07
 

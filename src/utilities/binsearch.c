@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
  
@@ -61,3 +61,37 @@ int hypre_BinarySearch(int *list, int value, int list_length)
    return -1;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_BinarySearch2
+ * this one is a bit more robust:
+ *   avoids overflow of m as can happen above when (low+high) overflows
+ *   lets user specifiy high and low bounds for array (so a subset 
+     of array can be used)
+ *  if not found, then spot returns where is should be inserted
+
+ *--------------------------------------------------------------------------*/
+ 
+int hypre_BinarySearch2(int *list, int value, int low, int high, int *spot) 
+{
+   
+   int m;
+   
+   while (low <= high) 
+   {
+      m = low + (high - low)/2;
+ 
+      if (value < list[m])
+         high = m - 1;
+      else if (value > list[m])
+         low = m + 1;
+      else
+      {
+         *spot = m;
+         return m;
+      }
+   }
+   /* not found (high = low-1) - so insert at low */
+      *spot = low;
+
+   return -1;
+}

@@ -2300,8 +2300,9 @@ bHYPRE::SStructParCSRVector::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a SStruct ParCSR Vector. 
  */
 ::bHYPRE::SStructParCSRVector
 bHYPRE::SStructParCSRVector::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

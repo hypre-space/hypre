@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.2 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -192,6 +192,8 @@ int HYPRE_StructPFMGGetZeroGuess ( HYPRE_StructSolver solver , int *zeroguess );
 int HYPRE_StructPFMGSetNonZeroGuess ( HYPRE_StructSolver solver );
 int HYPRE_StructPFMGSetRelaxType ( HYPRE_StructSolver solver , int relax_type );
 int HYPRE_StructPFMGGetRelaxType ( HYPRE_StructSolver solver , int *relax_type );
+int HYPRE_StructPFMGSetJacobiWeight ( HYPRE_StructSolver solver , double weight );
+int HYPRE_StructPFMGGetJacobiWeight ( HYPRE_StructSolver solver , double *weight );
 int HYPRE_StructPFMGSetRAPType ( HYPRE_StructSolver solver , int rap_type );
 int HYPRE_StructPFMGGetRAPType ( HYPRE_StructSolver solver , int *rap_type );
 int HYPRE_StructPFMGSetNumPreRelax ( HYPRE_StructSolver solver , int num_pre_relax );
@@ -247,6 +249,7 @@ int HYPRE_StructSparseMSGSetRelChange ( HYPRE_StructSolver solver , int rel_chan
 int HYPRE_StructSparseMSGSetZeroGuess ( HYPRE_StructSolver solver );
 int HYPRE_StructSparseMSGSetNonZeroGuess ( HYPRE_StructSolver solver );
 int HYPRE_StructSparseMSGSetRelaxType ( HYPRE_StructSolver solver , int relax_type );
+int HYPRE_StructSparseMSGSetJacobiWeight ( HYPRE_StructSolver solver , double weight );
 int HYPRE_StructSparseMSGSetNumPreRelax ( HYPRE_StructSolver solver , int num_pre_relax );
 int HYPRE_StructSparseMSGSetNumPostRelax ( HYPRE_StructSolver solver , int num_post_relax );
 int HYPRE_StructSparseMSGSetNumFineRelax ( HYPRE_StructSolver solver , int num_fine_relax );
@@ -333,6 +336,8 @@ int hypre_PFMGSetZeroGuess ( void *pfmg_vdata , int zero_guess );
 int hypre_PFMGGetZeroGuess ( void *pfmg_vdata , int *zero_guess );
 int hypre_PFMGSetRelaxType ( void *pfmg_vdata , int relax_type );
 int hypre_PFMGGetRelaxType ( void *pfmg_vdata , int *relax_type );
+int hypre_PFMGSetJacobiWeight ( void *pfmg_vdata , double weight );
+int hypre_PFMGGetJacobiWeight ( void *pfmg_vdata , double *weight );
 int hypre_PFMGSetRAPType ( void *pfmg_vdata , int rap_type );
 int hypre_PFMGGetRAPType ( void *pfmg_vdata , int *rap_type );
 int hypre_PFMGSetNumPreRelax ( void *pfmg_vdata , int num_pre_relax );
@@ -356,6 +361,7 @@ int hypre_PFMGRelaxDestroy ( void *pfmg_relax_vdata );
 int hypre_PFMGRelax ( void *pfmg_relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 int hypre_PFMGRelaxSetup ( void *pfmg_relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 int hypre_PFMGRelaxSetType ( void *pfmg_relax_vdata , int relax_type );
+int hypre_PFMGRelaxSetJacobiWeight ( void *pfmg_relax_vdata , double weight );
 int hypre_PFMGRelaxSetPreRelax ( void *pfmg_relax_vdata );
 int hypre_PFMGRelaxSetPostRelax ( void *pfmg_relax_vdata );
 int hypre_PFMGRelaxSetTol ( void *pfmg_relax_vdata , double tol );
@@ -365,7 +371,7 @@ int hypre_PFMGRelaxSetTempVec ( void *pfmg_relax_vdata , hypre_StructVector *t )
 
 /* pfmg_setup.c */
 int hypre_PFMGSetup ( void *pfmg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A , double *dxyz );
+int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A , double *dxyz , double *mean , double *deviation );
 int hypre_ZeroDiagonal ( hypre_StructMatrix *A );
 
 /* pfmg_setup_interp.c */
@@ -415,7 +421,6 @@ int hypre_PointRelaxSetTempVec ( void *relax_vdata , hypre_StructVector *t );
 int hypre_PointRelaxGetFinalRelativeResidualNorm ( void *relax_vdata , double *norm );
 int hypre_relax_wtx ( void *relax_vdata , int pointset , hypre_StructVector *t , hypre_StructVector *x );
 int hypre_relax_copy ( void *relax_vdata , int pointset , hypre_StructVector *t , hypre_StructVector *x );
-int hypre_sumsqdiff_pointset ( void *relax_vdata , int pointset , hypre_StructVector *t , hypre_StructVector *x , hypre_StructMatrix *A , double *sumsq );
 
 /* red_black_constantcoef_gs.c */
 int hypre_RedBlackConstantCoefGS ( void *relax_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
@@ -573,6 +578,7 @@ int hypre_SparseMSGSetJump ( void *smsg_vdata , int jump );
 int hypre_SparseMSGSetRelChange ( void *smsg_vdata , int rel_change );
 int hypre_SparseMSGSetZeroGuess ( void *smsg_vdata , int zero_guess );
 int hypre_SparseMSGSetRelaxType ( void *smsg_vdata , int relax_type );
+int hypre_SparseMSGSetJacobiWeight ( void *smsg_vdata , double weight );
 int hypre_SparseMSGSetNumPreRelax ( void *smsg_vdata , int num_pre_relax );
 int hypre_SparseMSGSetNumPostRelax ( void *smsg_vdata , int num_post_relax );
 int hypre_SparseMSGSetNumFineRelax ( void *smsg_vdata , int num_fine_relax );

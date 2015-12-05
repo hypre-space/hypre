@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.23 $
+# $Revision: 2.26 $
 #EHEADER**********************************************************************
 
 
@@ -90,7 +90,7 @@ HYPRE_DIRS =\
 HYPRE_EXTRA_DIRS =\
  ${HYPRE_DOCS_DIRS}\
  ${HYPRE_TEST_DIRS}\
- seq_ls 
+ seq_ls/pamg 
 
 #################################################################
 # Targets
@@ -102,6 +102,7 @@ all:
 	mkdir -p ${HYPRE_BUILD_DIR}/lib; \
 	cp -fp HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fp $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fp $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
 	for i in ${HYPRE_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \
@@ -151,12 +152,25 @@ help:
 	@echo "     builds the test drivers; linking to the temporary installation"
 	@echo "        directories to simulate how application codes will link to HYPRE"
 	@echo "     "
+	@echo "check:"
+	@echo "     runs a small driver test to verify a working library"
+	@echo "     use CHECKRUN=<mpirun routine> if needed"
+	@echo "     "
 	@echo "************************************************************"
 
 test: all
 	@ \
 	echo "Making test drivers ..."; \
 	(cd test; $(MAKE) clean; $(MAKE) all)
+
+check: 
+	@ \
+	echo "Checking the library ..."; \
+	(cd test; $(MAKE) all); \
+	(cd test; $(CHECKRUN) ij 2> ij.err); \
+	(cd test; $(CHECKRUN) struct 2> struct.err); \
+	(cd test; cp -f TEST_sstruct/sstruct.in.default .; $(CHECKRUN) sstruct 2> sstruct.err); \
+	(cd test; ls -l ij.err struct.err sstruct.err)
 
 install: all
 	@echo "Installing hypre ..."

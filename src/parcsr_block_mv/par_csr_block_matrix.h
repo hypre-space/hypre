@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -160,9 +160,35 @@ hypre_BoomerAMGBuildBlockInterp( hypre_ParCSRBlockMatrix   *A,
                                  int                  *dof_func,
                                  int                   debug_flag,
                                  double                trunc_factor,
+                                 int                   add_weak_to_diag,    
                                  int 		      *col_offd_S_to_A,
                                  hypre_ParCSRBlockMatrix  **P_ptr);
    
+
+
+int
+hypre_BoomerAMGBuildBlockInterpRV( hypre_ParCSRBlockMatrix   *A,
+                                 int                  *CF_marker,
+                                 hypre_ParCSRMatrix   *S,
+                                 int                  *num_cpts_global,
+                                 int                   num_functions,
+                                 int                  *dof_func,
+                                 int                   debug_flag,
+                                 double                trunc_factor,
+                                 int 		      *col_offd_S_to_A,
+                                 hypre_ParCSRBlockMatrix  **P_ptr);
+   
+int
+hypre_BoomerAMGBuildBlockInterpRV2( hypre_ParCSRBlockMatrix   *A,
+                                 int                  *CF_marker,
+                                 hypre_ParCSRMatrix   *S,
+                                 int                  *num_cpts_global,
+                                 int                   num_functions,
+                                 int                  *dof_func,
+                                 int                   debug_flag,
+                                 double                trunc_factor,
+                                 int 		      *col_offd_S_to_A,
+                                 hypre_ParCSRBlockMatrix  **P_ptr);
 int
 hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                                      int                  *CF_marker,
@@ -172,6 +198,7 @@ hypre_BoomerAMGBuildBlockInterpDiag( hypre_ParCSRBlockMatrix   *A,
                                      int                  *dof_func,
                                      int                   debug_flag,
                                      double                trunc_factor,
+                                     int                   add_weak_to_diag,    
                                      int 		      *col_offd_S_to_A,
                                      hypre_ParCSRBlockMatrix  **P_ptr);
 
@@ -253,7 +280,7 @@ hypre_ParCSRBlockMatrixSetDNumNonzeros( hypre_ParCSRBlockMatrix *matrix);
    
 int
 hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix    *A,
-                                 int  option,
+                                 int  option, int diag_option,
                                  hypre_ParCSRMatrix   **AN_ptr);
    
 hypre_ParVector *

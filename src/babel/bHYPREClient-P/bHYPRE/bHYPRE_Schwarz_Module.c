@@ -26,8 +26,6 @@
  * Objects of this type can be cast to Solver objects using the
  * {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * Schwarz requires an IJParCSR matrix
  */
 #include <Python.h>
@@ -2687,7 +2685,9 @@ RETURNS\n\
    (bHYPRE.Schwarz _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a Schwarz solver. "
    },
   { "_connect", (PyCFunction)pStub_Schwarz__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2806,8 +2806,6 @@ static PyTypeObject _bHYPRE_SchwarzType = {
 \
 Objects of this type can be cast to Solver objects using the\n\
 {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
 \n\
 Schwarz requires an IJParCSR matrix", /* tp_doc */
   0,      /* tp_traverse */
@@ -3040,8 +3038,6 @@ initSchwarz(void) {
 \
 Objects of this type can be cast to Solver objects using the\n\
 {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
 \n\
 Schwarz requires an IJParCSR matrix"
   );

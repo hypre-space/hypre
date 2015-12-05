@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.7 $
+ * $Revision: 2.8 $
  ***********************************************************************EHEADER*/
 
 
@@ -562,6 +562,30 @@ hypre_BoxExpandConstant( hypre_Box   *box,
   return ierr;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_BoxExpandDim - grow a box in each direction (the same pos as negative)
+ * so expand is size 3
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_BoxExpandConstantDim( hypre_Box   *box,
+                         int         *expand)
+{ 
+  int   ierr = 0;
+  int  *imin = hypre_BoxIMin(box);
+  int  *imax = hypre_BoxIMax(box);
+  int  d; 
+
+  for (d = 0; d < 3; d++)
+  {
+    imin[d] -= expand[d];
+    imax[d] += expand[d];
+  }
   
+  return ierr;
+}
+
+  
+
 
 

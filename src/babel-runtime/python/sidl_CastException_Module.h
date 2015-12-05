@@ -3,7 +3,7 @@
  * Symbol:        sidl.CastException-v0.9.15
  * Symbol Type:   class
  * Babel Version: 1.0.0
- * Release:       $Name:  $
+ * Release:       $Name: V2-2-0b $
  * Revision:      @(#) $Id: sidl_CastException_Module.h,v 1.1 2006/08/29 23:39:46 painter Exp $
  * Description:   expose a constructor for the Python wrapper
  * 

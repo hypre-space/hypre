@@ -1,58 +1,54 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<HTML>
-<HEAD>
-   <TITLE> Struct Jacobi Solver</TITLE>
-   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-
-<H2> <A HREF="#DOC.DOCU">Struct Jacobi Solver</A></H2></H2>
-<HR>
+<html><head><TITLE>Struct Jacobi Solver</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  Struct Jacobi Solver  </H2>
+<hr>
 <DL>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructJacobiCreate"></A>
-<A HREF=HYPRE_StructJacobiCreate.html><B>HYPRE_StructJacobiCreate</B></A><DD><I> Create a solver object</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructJacobiCreate</B>(MPI_Comm comm, <!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> *solver)
+ <DD><I>
+Create a solver object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructJacobiDestroy"></A>
-<A HREF=HYPRE_StructJacobiDestroy.html><B>HYPRE_StructJacobiDestroy</B></A><DD><I> Destroy a solver object.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructJacobiDestroy.html><B>HYPRE_StructJacobiDestroy</B></A> 
+ <DD><I>
+Destroy a solver object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructJacobiSetup"></A>
-<A HREF=HYPRE_StructJacobiSetup.html><B>HYPRE_StructJacobiSetup</B></A><DD><I> Prepare to solve the system.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructJacobiSetup.html><B>HYPRE_StructJacobiSetup</B></A> 
+ <DD><I>
+Prepare to solve the system</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructJacobiSolve"></A>
-<A HREF=HYPRE_StructJacobiSolve.html><B>HYPRE_StructJacobiSolve</B></A><DD><I> Solve the system</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructJacobiSolve</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, <!2><A HREF="StructMatrices.html#DOC.1.3.11">HYPRE_StructMatrix</A> A, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> b, <!2><A HREF="StructVectors.html#DOC.1.4.9">HYPRE_StructVector</A> x)
+ <DD><I>
+Solve the system</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructJacobiSetTol"></A>
-<A HREF=HYPRE_StructJacobiSetTol.html><B>HYPRE_StructJacobiSetTol</B></A><DD><I> (Optional) Set the convergence tolerance</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructJacobiSetTol</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, double tol)
+ <DD><I>
+(Optional) Set the convergence tolerance</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructJacobiSetMaxIter"></A>
-<A HREF=HYPRE_StructJacobiSetMaxIter.html><B>HYPRE_StructJacobiSetMaxIter</B></A><DD><I> (Optional) Set maximum number of iterations</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructJacobiSetMaxIter</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int max_iter)
+ <DD><I>
+(Optional) Set maximum number of iterations</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructJacobiSetZeroGuess"></A>
-<A HREF=HYPRE_StructJacobiSetZeroGuess.html><B>HYPRE_StructJacobiSetZeroGuess</B></A><DD><I> (Optional) Use a zero initial guess.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructJacobiSetZeroGuess.html><B>HYPRE_StructJacobiSetZeroGuess</B></A> 
+ <DD><I>
+(Optional) Use a zero initial guess</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructJacobiSetNonZeroGuess"></A>
-<A HREF=HYPRE_StructJacobiSetNonZeroGuess.html><B>HYPRE_StructJacobiSetNonZeroGuess</B></A><DD><I> (Optional) Use a nonzero initial guess.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_StructJacobiSetNonZeroGuess.html><B>HYPRE_StructJacobiSetNonZeroGuess</B></A> 
+ <DD><I>
+(Optional) Use a nonzero initial guess</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructJacobiGetNumIterations"></A>
-<A HREF=HYPRE_StructJacobiGetNumIterations.html><B>HYPRE_StructJacobiGetNumIterations</B></A><DD><I> Return the number of iterations taken</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructJacobiGetNumIterations</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, int *num_iterations)
+ <DD><I>
+Return the number of iterations taken</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_StructJacobiGetFinalRelativeResidualNorm"></A>
-<A HREF=HYPRE_StructJacobiGetFinalRelativeResidualNorm.html><B>HYPRE_StructJacobiGetFinalRelativeResidualNorm</B></A><DD><I> Return the norm of the final relative residual</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_StructJacobiGetFinalRelativeResidualNorm</B>(<!2><A HREF="StructSolvers.2.html#DOC.4.1.1">HYPRE_StructSolver</A> solver, double *norm)
+ <DD><I>
+Return the norm of the final relative residual</I>
 </DL>
-<A NAME="DOC.DOCU"></A>
-<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
 <center>
 <img src="hypre_wiw.gif">
 </center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

@@ -21,7 +21,7 @@ dnl # You should have received a copy of the GNU Lesser General Public License
 dnl # along with this program; if not, write to the Free Software Foundation,
 dnl # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 dnl #
-dnl # $Revision: 1.15 $
+dnl # $Revision: 1.16 $
 dnl #EHEADER**********************************************************************
 
 dnl **********************************************************************
@@ -189,7 +189,7 @@ then
         CFLAGS="-O2"
         ;;
       icc)
-        CFLAGS="-O3 -xW -tpp7"
+        CFLAGS="-O3 -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
         fi
@@ -253,7 +253,7 @@ then
         CXXFLAGS="-O2"
         ;;
       icc)
-        CXXFLAGS="-O3 -xW -tpp7"
+        CXXFLAGS="-O3 -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
         fi
@@ -317,7 +317,7 @@ then
         FFLAGS="-O"
         ;;
       ifort)
-        FFLAGS="-O3 -xW -tpp7"
+        FFLAGS="-O3 -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
         fi
@@ -392,7 +392,7 @@ then
         CFLAGS="--c -g +K3"
         ;;
       icc)
-        CFLAGS="-g -xW -tpp7"
+        CFLAGS="-g -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -openmp"
         fi
@@ -456,7 +456,7 @@ then
         CXXFLAGS="-g +K3"
         ;;
       icc)
-        CXXFLAGS="-g -xW -tpp7"
+        CXXFLAGS="-g -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -openmp"
         fi
@@ -520,7 +520,7 @@ then
         FFLAGS="-g +K3"
         ;;
       ifort)
-        FFLAGS="-g -xW -tpp7"
+        FFLAGS="-g -tpp7"
         if test "$casc_using_openmp" = "yes" ; then
           FFLAGS="$FFLAGS -openmp"
         fi

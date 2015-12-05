@@ -1510,7 +1510,9 @@ RETURNS\n\
    (bHYPRE.MPICommunicator _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Create an MPICommunicator object from C code. "
    },
   { "CreateF", (PyCFunction)pStub_MPICommunicator_CreateF,
   (METH_VARARGS | METH_KEYWORDS),
@@ -1520,7 +1522,9 @@ RETURNS\n\
    (bHYPRE.MPICommunicator _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Create an MPICommunicator object from Fortran code. "
    },
   { "Create_MPICommWorld",                                                    \
     (PyCFunction)pStub_MPICommunicator_Create_MPICommWorld,
@@ -1531,7 +1535,9 @@ RETURNS\n\
    (bHYPRE.MPICommunicator _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Create an MPICommunicator object which represents MPI_Comm_World. "
    },
   { "_connect", (PyCFunction)pStub_MPICommunicator__connect,
   (METH_VARARGS | METH_KEYWORDS),

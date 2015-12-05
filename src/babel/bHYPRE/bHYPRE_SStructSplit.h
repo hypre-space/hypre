@@ -16,8 +16,6 @@
  * Symbol "bHYPRE.SStructSplit" (version 1.0.0)
  * 
  * 
- * Documentation goes here.
- * 
  * The SStructSplit solver requires a SStruct matrix.
  */
 struct bHYPRE_SStructSplit__object;
@@ -96,7 +94,7 @@ bHYPRE_SStructSplit
 bHYPRE_SStructSplit__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Method:  Create[]
+ *  This function is the preferred way to create a SStruct Split solver. 
  */
 bHYPRE_SStructSplit
 bHYPRE_SStructSplit_Create(

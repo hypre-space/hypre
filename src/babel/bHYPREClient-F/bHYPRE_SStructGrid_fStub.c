@@ -521,8 +521,7 @@ SIDLFortran77Symbol(bhypre_sstructgrid__set_hooks_static_f,BHYPRE_SSTRUCTGRID__S
 }
 
 /*
- * Set the number of dimensions {\tt ndim} and the number of
- * structured parts {\tt nparts}.
+ *  This function is the preferred way to create a SStruct Grid. 
  */
 
 void
@@ -1043,7 +1042,7 @@ SIDLFortran77Symbol(bhypre_sstructgrid_setnumghost_f,BHYPRE_SSTRUCTGRID_SETNUMGH
 }
 
 /*
- * Method:  Assemble[]
+ *  final construction of the object before its use 
  */
 
 void

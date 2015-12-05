@@ -22,13 +22,13 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.9 $
+# $Revision: 2.11 $
 #EHEADER**********************************************************************
 
 
 
 
-INTERNAL_HEADER=parcsr_mv.h
+INTERNAL_HEADER=_hypre_parcsr_mv.h
 
 #===========================================================================
 # Include guards and other includes
@@ -43,7 +43,7 @@ cat > $INTERNAL_HEADER <<@
 #ifndef hypre_PARCSR_MV_HEADER
 #define hypre_PARCSR_MV_HEADER
 
-#include "utilities.h"
+#include "_hypre_utilities.h"
 #include "seq_mv.h"
 
 #ifdef __cplusplus

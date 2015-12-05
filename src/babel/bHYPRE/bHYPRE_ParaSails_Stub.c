@@ -132,7 +132,7 @@ bHYPRE_ParaSails__connect(const char* url, sidl_BaseInterface *_ex)
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a ParaSails solver. 
  */
 
 bHYPRE_ParaSails

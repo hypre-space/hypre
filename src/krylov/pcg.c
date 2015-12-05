@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.36 $
+ * $Revision: 2.37 $
  ***********************************************************************EHEADER*/
 
 
@@ -113,6 +113,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> max_iter)     = 1000;
    (pcg_data -> two_norm)     = 0;
    (pcg_data -> rel_change)   = 0;
+   (pcg_data -> recompute_residual) = 0;
    (pcg_data -> stop_crit)    = 0;
    (pcg_data -> converged)    = 0;
    (pcg_data -> owns_matvec_data ) = 1;
@@ -288,6 +289,7 @@ hypre_PCGSolve( void *pcg_vdata,
    int             max_iter     = (pcg_data -> max_iter);
    int             two_norm     = (pcg_data -> two_norm);
    int             rel_change   = (pcg_data -> rel_change);
+   int             recompute_residual = (pcg_data -> recompute_residual);
    int             stop_crit    = (pcg_data -> stop_crit);
 /*
    int             converged    = (pcg_data -> converged);
@@ -315,7 +317,8 @@ hypre_PCGSolve( void *pcg_vdata,
    double          weight;
    double          ratio;
 
-   double          guard_zero_residual, sdotp; 
+   double          guard_zero_residual, sdotp;
+   int             tentatively_converged = 0; 
 
    int             i = 0;
    int             ierr = 0;
@@ -447,7 +450,7 @@ hypre_PCGSolve( void *pcg_vdata,
 
       if ( logging>0 || print_level>0 ) norms[0] = sqrt(i_prod_0);
    }
-   if ( print_level > 1 && my_id==0 )  /* formerly for par_csr only */
+   if ( print_level > 1 && my_id==0 )
    {
       printf("\n\n");
       if (two_norm)
@@ -470,6 +473,9 @@ hypre_PCGSolve( void *pcg_vdata,
 
    while ((i+1) <= max_iter)
    {
+      /*--------------------------------------------------------------------
+       * the core CG calculations...
+       *--------------------------------------------------------------------*/
       i++;
 
       /* s = A*p */
@@ -506,6 +512,9 @@ hypre_PCGSolve( void *pcg_vdata,
       else
          i_prod = gamma;
 
+      /*--------------------------------------------------------------------
+       * optional output
+       *--------------------------------------------------------------------*/
 #if 0
       if (two_norm)
          printf("Iter (%d): ||r||_2 = %e, ||r||_2/||b||_2 = %e\n",
@@ -543,25 +552,49 @@ hypre_PCGSolve( void *pcg_vdata,
       }
 
 
-      /* check for convergence */
-      if (i_prod / bi_prod < eps)
+      /*--------------------------------------------------------------------
+       * check for convergence
+       *--------------------------------------------------------------------*/
+      if (i_prod / bi_prod < eps)  /* the basic convergence test */
+            tentatively_converged = 1;
+      if ( tentatively_converged && recompute_residual )
+         /* At user request, don't trust the convergence test until we've recomputed
+            the residual from scratch.  This is expensive in the usual case where an
+            the norm is the energy norm.
+            This calculation is coded on the assumption that r's accuracy is only a
+            concern for problems where CG takes many iterations. */
       {
-         if (rel_change && i_prod > guard_zero_residual)
+         /* r = b - Ax */
+         (*(pcg_functions->CopyVector))(b, r);
+         (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
+
+         /* set i_prod for convergence test */
+         if (two_norm)
+            i_prod = (*(pcg_functions->InnerProd))(r,r);
+         else
          {
+            /* s = C*r */
+            (*(pcg_functions->ClearVector))(s);
+            precond(precond_data, A, r, s);
+            /* iprod = gamma = <r,s> */
+            i_prod = (*(pcg_functions->InnerProd))(r, s);
+         }
+         if (i_prod / bi_prod >= eps) tentatively_converged = 0;
+      }
+      if ( tentatively_converged && rel_change && (i_prod > guard_zero_residual ))
+         /* At user request, don't treat this as converged unless x didn't change
+            much in the last iteration. */
+      {
 	    pi_prod = (*(pcg_functions->InnerProd))(p,p); 
  	    xi_prod = (*(pcg_functions->InnerProd))(x,x);
             ratio = alpha*alpha*pi_prod/xi_prod;
-            if (ratio < eps)
- 	    {
-               (pcg_data -> converged) = 1;
-               break;
- 	    }
-         }
-         else
-         {
-            (pcg_data -> converged) = 1;
-            break;
-         }
+            if (ratio >= eps) tentatively_converged = 0;
+      }
+      if ( tentatively_converged )
+         /* we've passed all the convergence tests, it's for real */
+      {
+         (pcg_data -> converged) = 1;
+         break;
       }
 
       if ( (gamma<1.0e-292) && ((-gamma)<1.0e-292) ) {
@@ -605,6 +638,10 @@ hypre_PCGSolve( void *pcg_vdata,
          if (weight * cf_ave_1 > cf_tol) break;
       }
 
+      /*--------------------------------------------------------------------
+       * back to the core CG calculations
+       *--------------------------------------------------------------------*/
+
       /* beta = gamma / gamma_old */
       beta = gamma / gamma_old;
 
@@ -613,7 +650,11 @@ hypre_PCGSolve( void *pcg_vdata,
       (*(pcg_functions->Axpy))(1.0, s, p);
    }
 
-   if ( print_level > 1 && my_id==0 )  /* formerly for par_csr only */
+   /*--------------------------------------------------------------------
+    * Finish up with some outputs.
+    *--------------------------------------------------------------------*/
+
+   if ( print_level > 1 && my_id==0 )
       printf("\n\n");
 
    (pcg_data -> num_iterations) = i;
@@ -789,6 +830,34 @@ hypre_PCGGetRelChange( void *pcg_vdata,
    int            ierr = 0;
  
    *rel_change = (pcg_data -> rel_change);
+ 
+   return ierr;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_PCGSetRecomputeResidual, hypre_PCGGetRecomputeResidual
+ *--------------------------------------------------------------------------*/
+
+int
+hypre_PCGSetRecomputeResidual( void *pcg_vdata,
+                       int   recompute_residual  )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   (pcg_data -> recompute_residual) = recompute_residual;
+ 
+   return ierr;
+}
+
+int
+hypre_PCGGetRecomputeResidual( void *pcg_vdata,
+                       int * recompute_residual  )
+{
+   hypre_PCGData *pcg_data = pcg_vdata;
+   int            ierr = 0;
+ 
+   *recompute_residual = (pcg_data -> recompute_residual);
  
    return ierr;
 }

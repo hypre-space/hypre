@@ -58,7 +58,8 @@ bHYPRE_StructMatrixView__connect(const char* url, sidl_BaseInterface *_ex)
 }
 
 /*
- * Method:  SetGrid[]
+ *  Set the grid on which vectors are defined.  This and the stencil
+ * determine the matrix structure. 
  */
 
 SIDL_C_INLINE_DEFN
@@ -79,7 +80,7 @@ bHYPRE_StructMatrixView_SetGrid(
 #endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
- * Method:  SetStencil[]
+ *  Set the stencil. This and the grid determine the matrix structure. 
  */
 
 SIDL_C_INLINE_DEFN
@@ -100,7 +101,10 @@ bHYPRE_StructMatrixView_SetStencil(
 #endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
- * Method:  SetValues[]
+ *  Set matrix values at grid point, given by "index".
+ * You can supply values for one or more positions in the stencil.
+ * "index" is an array of size "dim"; and "stencil_indices" and "values"
+ * are arrays of size "num_stencil_indices".
  */
 
 int32_t
@@ -141,7 +145,16 @@ bHYPRE_StructMatrixView_SetValues(
 }
 
 /*
- * Method:  SetBoxValues[]
+ *  Set matrix values throughout a box in the grid, specified by its lower
+ * and upper corners.  You can supply these values for one or more positions
+ * in the stencil.  Thus the total number of matrix values you supply,
+ * "nvalues", is num_stencil_indices x box_size, where box_size is the
+ * number of grid points in the box.  The values array should be organized
+ * so all values for a given box point are together (i.e., the stencil
+ * index is the most rapidly varying).
+ * "ilower" and "iupper" are arrays of size "dim", "stencil_indices" is an
+ * array of size "num_stencil_indices", and "values" is an array of size
+ * "nvalues". 
  */
 
 int32_t
@@ -191,7 +204,9 @@ bHYPRE_StructMatrixView_SetBoxValues(
 }
 
 /*
- * Method:  SetNumGhost[]
+ *  Set the number of ghost zones, separately on the lower and upper sides
+ * for each dimension.
+ * "num_ghost" is an array of size "dim2", twice the number of dimensions
  */
 
 SIDL_C_INLINE_DEFN
@@ -219,7 +234,8 @@ bHYPRE_StructMatrixView_SetNumGhost(
 #endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
- * Method:  SetSymmetric[]
+ *  Call SetSymmetric with symmetric=1 to turn on symmetric matrix storage if
+ * available. 
  */
 
 SIDL_C_INLINE_DEFN
@@ -240,7 +256,10 @@ bHYPRE_StructMatrixView_SetSymmetric(
 #endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
- * Method:  SetConstantEntries[]
+ *  State which stencil entries are constant over the grid.
+ * Supported options are: (i) none (the default),
+ * (ii) all (stencil_constant_points should include all stencil points)
+ * (iii) all entries but the diagonal. 
  */
 
 SIDL_C_INLINE_DEFN
@@ -271,7 +290,10 @@ bHYPRE_StructMatrixView_SetConstantEntries(
 #endif /* SIDL_C_INLINE_REPEAT_DEFN */
 
 /*
- * Method:  SetConstantValues[]
+ *  Provide values for matrix coefficients which are constant throughout
+ * the grid, one value for each stencil point.
+ * "stencil_indices" and "values" is each an array of length
+ * "num_stencil_indices" 
  */
 
 int32_t

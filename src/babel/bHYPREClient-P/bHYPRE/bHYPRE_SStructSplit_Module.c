@@ -24,8 +24,6 @@
  * Symbol "bHYPRE.SStructSplit" (version 1.0.0)
  * 
  * 
- * Documentation goes here.
- * 
  * The SStructSplit solver requires a SStruct matrix.
  */
 #include <Python.h>
@@ -2704,7 +2702,9 @@ RETURNS\n\
    (bHYPRE.SStructSplit _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a SStruct Split solver. "
    },
   { "_connect", (PyCFunction)pStub_SStructSplit__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2821,8 +2821,6 @@ static PyTypeObject _bHYPRE_SStructSplitType = {
   Py_TPFLAGS_DEFAULT, /* tp_flags */
   "\
 \
-\n\
-Documentation goes here.\n\
 \n\
 The SStructSplit solver requires a SStruct matrix.", /* tp_doc */
   0,      /* tp_traverse */
@@ -3058,8 +3056,6 @@ initSStructSplit(void) {
   struct bHYPRE_SStructSplit__external*(*_extFunc)(void) = NULL;
   module = Py_InitModule3("SStructSplit", _SStructSplitModuleMethods, "\
 \
-\n\
-Documentation goes here.\n\
 \n\
 The SStructSplit solver requires a SStruct matrix."
   );

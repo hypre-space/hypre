@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.70 $
+ * $Revision: 2.77 $
  ***********************************************************************EHEADER*/
 
 
@@ -208,6 +208,8 @@ int HYPRE_BoomerAMGSetMaxRowSum(HYPRE_Solver solver,
  * 10 &	HMIS-coarsening (uses one pass Ruge-Stueben on each processor independently, followed \\
  * & by PMIS using the interior C-points generated as its first independent set) \\
  * 11 &	one-pass Ruge-Stueben coarsening on each processor, no boundary treatment (not recommended!) \\
+ * 21 &	CGC coarsening by M. Griebel, B. Metsch and A. Schweitzer \\
+ * 22 &	CGC-E coarsening by M. Griebel, B. Metsch and A.Schweitzer \\
  * \hline
  * \end{tabular}
  * 
@@ -605,7 +607,13 @@ int HYPRE_BoomerAMGSetNumFunctions(HYPRE_Solver solver,
  **/
 int HYPRE_BoomerAMGSetNodal(HYPRE_Solver solver,
                                 int          nodal);
-
+/**
+ * (Optional) Sets whether to give spoecial treatment to diagonal elements in 
+ * the nodal systems version.
+ * The default is 0.
+ **/
+int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
+                                int          nodal_diag);
 /**
  * (Optional) Sets the mapping that assigns the function to each variable, 
  * if using the systems version. If no assignment is made and the number of
@@ -746,6 +754,36 @@ int HYPRE_BoomerAMGSetGSMG(HYPRE_Solver solver,
  **/
 int HYPRE_BoomerAMGSetNumSamples(HYPRE_Solver solver,
                                 int    num_samples);
+/**
+ * (optional) Defines the number of pathes for CGC-coarsening.
+ **/
+int HYPRE_BoomerAMGSetCGCIts (HYPRE_Solver solver,
+                            int its);
+
+/*
+ * HYPRE_BoomerAMGSetPlotGrids
+ **/
+int HYPRE_BoomerAMGSetPlotGrids (HYPRE_Solver solver,
+                               int plotgrids);
+
+/*
+ * HYPRE_BoomerAMGSetPlotFilename
+ **/
+int HYPRE_BoomerAMGSetPlotFileName (HYPRE_Solver solver,
+                                  const char *plotfilename);
+
+/*
+ * HYPRE_BoomerAMGSetCoordDim
+ **/
+int HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver,
+                              int coorddim);
+
+/*
+ * HYPRE_BoomerAMGSetCoordinates
+ **/
+int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver solver,
+                                 float *coordinates);
+
 
 /*@}*/
 
@@ -1192,14 +1230,17 @@ int HYPRE_AMSSetTol(HYPRE_Solver solver, double tol);
  * \begin{tabular}{|c|l|}
  * \hline
  *   1 & 3-level multiplicative solver (01210) \\
- *   3 & 3-level multiplicative solver (02120) \\
- *   5 & 3-level multiplicative solver (0102010) \\
- *   7 & 3-level multiplicative solver (0201020) \\
- * \hline
  *   2 & 3-level additive solver (0+1+2) \\
+ *   3 & 3-level multiplicative solver (02120) \\
  *   4 & 3-level additive solver (010+2) \\
+ *   5 & 3-level multiplicative solver (0102010) \\
  *   6 & 3-level additive solver (1+020) \\
- *   8 & 3-level additive solver (010+020) \\
+ *   7 & 3-level multiplicative solver (0201020) \\
+ *   8 & 3-level additive solver (0(1+2)0) \\
+ *  11 & 5-level multiplicative solver (013454310) \\
+ *  12 & 5-level additive solver (0+1+3+4+5) \\
+ *  13 & 5-level multiplicative solver (034515430) \\
+ *  14 & 5-level additive solver (01(3+4+5)10) \\
  * \hline
  * \end{tabular}
  *
@@ -1226,23 +1267,27 @@ int HYPRE_AMSSetSmoothingOptions(HYPRE_Solver solver,
 
 /**
  * (Optional) Sets AMG parameters for $B_\Pi$.
- * The defaults are $10$, $1$, $3$, $0.25$. See the user's manual for more details.
+ * The defaults are $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
  **/
 int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
                                 int alpha_coarsen_type,
                                 int alpha_agg_levels,
                                 int alpha_relax_type,
-                                double alpha_strength_threshold);
+                                double alpha_strength_threshold,
+                                int alpha_interp_type,
+                                int alpha_Pmax);
 
 /**
  * (Optional) Sets AMG parameters for $B_G$.
- * The defaults are $10$, $1$, $3$, $0.25$. See the user's manual for more details.
+ * The defaults are $10$, $1$, $3$, $0.25$, $0$, $0$. See the user's manual for more details.
  **/
 int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                int beta_coarsen_type,
                                int beta_agg_levels,
                                int beta_relax_type,
-                               double beta_strength_threshold);
+                               double beta_strength_threshold,
+                               int beta_interp_type,
+                               int beta_Pmax);
 
 /**
  * Returns the number of iterations taken.
@@ -1426,6 +1471,19 @@ HYPRE_ParCSRHybridSetMaxRowSum( HYPRE_Solver solver,
 int
 HYPRE_ParCSRHybridSetTruncFactor( HYPRE_Solver solver,
                               double              trunc_factor    );
+
+
+/**
+ * (Optional) Defines the maximal number of elements per row for the interpolation.
+ * The default is 0.
+ **/
+int HYPRE_ParCSRHybridSetPMaxElmts(HYPRE_Solver solver,
+                                 int       P_max_elmts);
+
+
+
+
+
                                                                                                               
 /**
  * (Optional) Defines the maximal number of levels used for AMG.
@@ -2223,6 +2281,20 @@ GenerateVarDifConv( MPI_Comm comm,
                  double eps,
                  HYPRE_ParVector *rhs_ptr);
 
+float*
+GenerateCoordinates( MPI_Comm comm,
+                     int      nx,
+                     int      ny,
+                     int      nz,
+                     int      P,
+                     int      Q,
+                     int      R,
+                     int      p,
+                     int      q,
+                     int      r,
+                     int      coorddim);
+
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -2575,6 +2647,19 @@ int HYPRE_BoomerAMGSetNumCRRelaxSteps(HYPRE_Solver solver,
  **/
 int HYPRE_BoomerAMGSetCRRate(HYPRE_Solver solver,
                              double  CR_rate);
+
+/*
+ * (Optional) Defines strong threshold for CR
+ * The default is 0.0.
+ **/
+int HYPRE_BoomerAMGSetCRStrongTh(HYPRE_Solver solver,
+                             double  CR_strong_th);
+
+/*
+ * (Optional) Defines whether to use CG 
+ **/
+int HYPRE_BoomerAMGSetCRUseCG(HYPRE_Solver solver,
+                             int  CR_use_CG);
 
 /*
  * (Optional) Defines the Type of independent set algorithm used for CR

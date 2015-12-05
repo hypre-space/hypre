@@ -26,8 +26,6 @@
  * Objects of this type can be cast to Solver objects using the
  * {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * Pilut has not been implemented yet.
  */
 #include <Python.h>
@@ -2684,7 +2682,9 @@ RETURNS\n\
    (bHYPRE.Pilut _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a Pilut solver. "
    },
   { "_connect", (PyCFunction)pStub_Pilut__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2803,8 +2803,6 @@ static PyTypeObject _bHYPRE_PilutType = {
 \
 Objects of this type can be cast to Solver objects using the\n\
 {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
 \n\
 Pilut has not been implemented yet.", /* tp_doc */
   0,      /* tp_traverse */
@@ -3036,8 +3034,6 @@ initPilut(void) {
 \
 Objects of this type can be cast to Solver objects using the\n\
 {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
 \n\
 Pilut has not been implemented yet."
   );

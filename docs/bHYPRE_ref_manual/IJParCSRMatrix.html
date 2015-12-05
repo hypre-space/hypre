@@ -1,190 +1,196 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<HTML>
-<HEAD>
-   <TITLE> IJParCSR Matrix</TITLE>
-   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-
-<H2> <A HREF="#DOC.DOCU">IJParCSR Matrix</A></H2></H2>
-<HR>
+<html><head><TITLE>IJParCSR Matrix</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  IJParCSR Matrix  </H2>
+<hr>
 <DL>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__object"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__object.html><B>bHYPRE_IJParCSRMatrix__object</B></A><DD><I> Symbol "bHYPREIJParCSRMatrix" (version 100)</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix__object.html><B>bHYPRE_IJParCSRMatrix__object</B></A> 
+ <DD><I>
+Symbol "bHYPRE</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__create"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__create.html><B>bHYPRE_IJParCSRMatrix__create</B></A><DD><I> Constructor function for the class</I>
+<IMG BORDER=0 SRC=icon1.gif>extern  C  struct  <!1><A HREF="bHYPRE_IJParCSRMatrix__object.html">bHYPRE_IJParCSRMatrix__object</A>* bHYPRE_IJParCSRMatrix__create sidl_BaseInterface* <B>_ex</B>
+ <DD><I>
+Constructor function for the class</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__createRemote"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__createRemote.html><B>bHYPRE_IJParCSRMatrix__createRemote</B></A><DD><I> RMI constructor function for the class</I>
+<IMG BORDER=0 SRC=icon1.gif>bHYPRE_IJParCSRMatrix  <B>bHYPRE_IJParCSRMatrix__createRemote</B>(const char * url, sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+RMI constructor function for the class</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__wrapObj"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__wrapObj.html><B>bHYPRE_IJParCSRMatrix__wrapObj</B></A><DD><I> Wraps up the private data struct pointer (struct bHYPRE_IJParCSRMatrix__data) passed in rather than running the constructor</I>
+<IMG BORDER=0 SRC=icon1.gif>bHYPRE_IJParCSRMatrix  <B>bHYPRE_IJParCSRMatrix__wrapObj</B>(void * data, sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Wraps up the private data struct pointer (struct bHYPRE_IJParCSRMatrix__data) passed in rather than running the constructor</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__connect"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__connect.html><B>bHYPRE_IJParCSRMatrix__connect</B></A><DD><I> RMI connector function for the class(addrefs)</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix__connect.html><B>bHYPRE_IJParCSRMatrix__connect</B></A> 
+ <DD><I>
+RMI connector function for the class</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_Create"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_Create.html><B>bHYPRE_IJParCSRMatrix_Create</B></A><DD><I> Method:  Create[]</I>
+<IMG BORDER=0 SRC=icon1.gif>bHYPRE_IJParCSRMatrix  <B>bHYPRE_IJParCSRMatrix_Create</B>(  bHYPRE_MPICommunicator mpi_comm,  int32_t ilower,  int32_t iupper,  int32_t jlower,  int32_t jupper,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+This function is the preferred way to create an IJParCSR Matrix</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_GenerateLaplacian"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_GenerateLaplacian.html><B>bHYPRE_IJParCSRMatrix_GenerateLaplacian</B></A><DD><I> Method:  GenerateLaplacian[]</I>
+<IMG BORDER=0 SRC=icon1.gif>bHYPRE_IJParCSRMatrix  <B>bHYPRE_IJParCSRMatrix_GenerateLaplacian</B>(  bHYPRE_MPICommunicator mpi_comm,  int32_t nx,  int32_t ny,  int32_t nz,  int32_t Px,  int32_t Py,  int32_t Pz,  int32_t p,  int32_t q,  int32_t r,  double* values,  int32_t nvalues,  int32_t discretization,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Method:  GenerateLaplacian[]</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetDiagOffdSizes"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetDiagOffdSizes.html><B>bHYPRE_IJParCSRMatrix_SetDiagOffdSizes</B></A><DD><I> (Optional) Set the max number of nonzeros to expect in each row of the diagonal and off-diagonal blocks.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_SetDiagOffdSizes.html><B>bHYPRE_IJParCSRMatrix_SetDiagOffdSizes</B></A> 
+ <DD><I>
+(Optional) Set the max number of nonzeros to expect in each
+row of the diagonal and off-diagonal blocks</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetLocalRange"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetLocalRange.html><B>bHYPRE_IJParCSRMatrix_SetLocalRange</B></A><DD><I> Set the local range for a matrix object.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_SetLocalRange.html><B>bHYPRE_IJParCSRMatrix_SetLocalRange</B></A> 
+ <DD><I>
+Set the local range for a matrix object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetValues"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetValues.html><B>bHYPRE_IJParCSRMatrix_SetValues</B></A><DD><I> Sets values for <TT>nrows</TT> of the matrix.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_SetValues.html><B>bHYPRE_IJParCSRMatrix_SetValues</B></A> 
+ <DD><I>
+Sets values for <TT>nrows</tt> of the matrix</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_AddToValues"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_AddToValues.html><B>bHYPRE_IJParCSRMatrix_AddToValues</B></A><DD><I> Adds to values for <TT>nrows</TT> of the matrix.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_AddToValues.html><B>bHYPRE_IJParCSRMatrix_AddToValues</B></A> 
+ <DD><I>
+Adds to values for <TT>nrows</tt> of the matrix</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_GetLocalRange"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_GetLocalRange.html><B>bHYPRE_IJParCSRMatrix_GetLocalRange</B></A><DD><I> Gets range of rows owned by this processor and range of column partitioning for this processor</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_GetLocalRange</B>(  bHYPRE_IJParCSRMatrix self,  int32_t* ilower,  int32_t* iupper,  int32_t* jlower,  int32_t* jupper,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Gets range of rows owned by this processor and range of
+column partitioning for this processor</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_GetRowCounts"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_GetRowCounts.html><B>bHYPRE_IJParCSRMatrix_GetRowCounts</B></A><DD><I> Gets number of nonzeros elements for <TT>nrows</TT> rows specified in <TT>rows</TT> and returns them in <TT>ncols</TT>, which needs to be allocated by the user</I>
+<IMG BORDER=0 SRC=icon1.gif>int32_t  <B>bHYPRE_IJParCSRMatrix_GetRowCounts</B>(  bHYPRE_IJParCSRMatrix self,  int32_t nrows,  int32_t* rows,  int32_t* ncols,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Gets number of nonzeros elements for <TT>nrows</tt> rows
+specified in <TT>rows</tt> and returns them in <TT>ncols</tt>,
+which needs to be allocated by the user</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_GetValues"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_GetValues.html><B>bHYPRE_IJParCSRMatrix_GetValues</B></A><DD><I> Gets values for <TT>nrows</TT> rows or partial rows of the matrix.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_GetValues.html><B>bHYPRE_IJParCSRMatrix_GetValues</B></A> 
+ <DD><I>
+Gets values for <TT>nrows</tt> rows or partial rows of the
+matrix</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetRowSizes"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetRowSizes.html><B>bHYPRE_IJParCSRMatrix_SetRowSizes</B></A><DD><I> (Optional) Set the max number of nonzeros to expect in each row.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_SetRowSizes.html><B>bHYPRE_IJParCSRMatrix_SetRowSizes</B></A> 
+ <DD><I>
+(Optional) Set the max number of nonzeros to expect in each
+row</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_Print"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_Print.html><B>bHYPRE_IJParCSRMatrix_Print</B></A><DD><I> Print the matrix to file.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_Print.html><B>bHYPRE_IJParCSRMatrix_Print</B></A> 
+ <DD><I>
+Print the matrix to file</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_Read"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_Read.html><B>bHYPRE_IJParCSRMatrix_Read</B></A><DD><I> Read the matrix from file.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_Read.html><B>bHYPRE_IJParCSRMatrix_Read</B></A> 
+ <DD><I>
+Read the matrix from file</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetCommunicator"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetCommunicator.html><B>bHYPRE_IJParCSRMatrix_SetCommunicator</B></A><DD><I> Set the MPI Communicator.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_SetCommunicator.html><B>bHYPRE_IJParCSRMatrix_SetCommunicator</B></A> 
+ <DD><I>
+Set the MPI Communicator</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_Destroy"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_Destroy.html><B>bHYPRE_IJParCSRMatrix_Destroy</B></A><DD><I> The Destroy function doesn't necessarily destroy anything.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_Destroy.html><B>bHYPRE_IJParCSRMatrix_Destroy</B></A> 
+ <DD><I>
+The Destroy function doesn't necessarily destroy anything</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_Initialize"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_Initialize.html><B>bHYPRE_IJParCSRMatrix_Initialize</B></A><DD><I> Prepare an object for setting coefficient values, whether for the first time or subsequently</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_Initialize</B>(  bHYPRE_IJParCSRMatrix self,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Prepare an object for setting coefficient values, whether for
+the first time or subsequently</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_Assemble"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_Assemble.html><B>bHYPRE_IJParCSRMatrix_Assemble</B></A><DD><I> Finalize the construction of an object before using, either for the first time or on subsequent uses.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_Assemble.html><B>bHYPRE_IJParCSRMatrix_Assemble</B></A> 
+ <DD><I>
+Finalize the construction of an object before using, either
+for the first time or on subsequent uses</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetIntParameter"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetIntParameter.html><B>bHYPRE_IJParCSRMatrix_SetIntParameter</B></A><DD><I> Set the int parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_SetIntParameter</B>(  bHYPRE_IJParCSRMatrix self,  const char* name,  int32_t value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the int parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetDoubleParameter"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetDoubleParameter.html><B>bHYPRE_IJParCSRMatrix_SetDoubleParameter</B></A><DD><I> Set the double parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_SetDoubleParameter</B>(  bHYPRE_IJParCSRMatrix self,  const char* name,  double value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the double parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetStringParameter"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetStringParameter.html><B>bHYPRE_IJParCSRMatrix_SetStringParameter</B></A><DD><I> Set the string parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_SetStringParameter</B>(  bHYPRE_IJParCSRMatrix self,  const char* name,  const char* value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the string parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetIntArray1Parameter"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetIntArray1Parameter.html><B>bHYPRE_IJParCSRMatrix_SetIntArray1Parameter</B></A><DD><I> Set the int 1-D array parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_SetIntArray1Parameter</B>(  bHYPRE_IJParCSRMatrix self,  const char* name,  int32_t* value,  int32_t nvalues,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the int 1-D array parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetIntArray2Parameter"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetIntArray2Parameter.html><B>bHYPRE_IJParCSRMatrix_SetIntArray2Parameter</B></A><DD><I> Set the int 2-D array parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_SetIntArray2Parameter</B>(  bHYPRE_IJParCSRMatrix self,  const char* name,  struct sidl_int__array* value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the int 2-D array parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter.html><B>bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter</B></A><DD><I> Set the double 1-D array parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_SetDoubleArray1Parameter</B>(  bHYPRE_IJParCSRMatrix self,  const char* name,  double* value,  int32_t nvalues,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the double 1-D array parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter.html><B>bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter</B></A><DD><I> Set the double 2-D array parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_SetDoubleArray2Parameter</B>(  bHYPRE_IJParCSRMatrix self,  const char* name,  struct sidl_double__array* value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the double 2-D array parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_GetIntValue"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_GetIntValue.html><B>bHYPRE_IJParCSRMatrix_GetIntValue</B></A><DD><I> Set the int parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_GetIntValue</B>(  bHYPRE_IJParCSRMatrix self,  const char* name,  int32_t* value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Set the int parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_GetDoubleValue"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_GetDoubleValue.html><B>bHYPRE_IJParCSRMatrix_GetDoubleValue</B></A><DD><I> Get the double parameter associated with <TT>name</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_GetDoubleValue</B>(  bHYPRE_IJParCSRMatrix self,  const char* name,  double* value,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Get the double parameter associated with <TT>name</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_Setup"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_Setup.html><B>bHYPRE_IJParCSRMatrix_Setup</B></A><DD><I> (Optional) Do any preprocessing that may be necessary in order to execute <TT>Apply</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_Setup</B>(  bHYPRE_IJParCSRMatrix self,  bHYPRE_Vector b,  bHYPRE_Vector x,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+(Optional) Do any preprocessing that may be necessary in
+order to execute <TT>Apply</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_Apply"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_Apply.html><B>bHYPRE_IJParCSRMatrix_Apply</B></A><DD><I> Apply the operator to <TT>b</TT>, returning <TT>x</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_Apply</B>(  bHYPRE_IJParCSRMatrix self,  bHYPRE_Vector b,  bHYPRE_Vector* x,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Apply the operator to <TT>b</tt>, returning <TT>x</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_ApplyAdjoint"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_ApplyAdjoint.html><B>bHYPRE_IJParCSRMatrix_ApplyAdjoint</B></A><DD><I> Apply the adjoint of the operator to <TT>b</TT>, returning <TT>x</TT></I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  int32_t  <B>bHYPRE_IJParCSRMatrix_ApplyAdjoint</B>(  bHYPRE_IJParCSRMatrix self,  bHYPRE_Vector b,  bHYPRE_Vector* x,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Apply the adjoint of the operator to <TT>b</tt>, returning <TT>x</tt></I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix_GetRow"></A>
-<A HREF=bHYPRE_IJParCSRMatrix_GetRow.html><B>bHYPRE_IJParCSRMatrix_GetRow</B></A><DD><I> The GetRow method will allocate space for its two output arrays on the first call.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=bHYPRE_IJParCSRMatrix_GetRow.html><B>bHYPRE_IJParCSRMatrix_GetRow</B></A> 
+ <DD><I>
+The GetRow method will allocate space for its two output
+arrays on the first call</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__cast"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__cast.html><B>bHYPRE_IJParCSRMatrix__cast</B></A><DD><I> Cast method for interface and class type conversions</I>
+<IMG BORDER=0 SRC=icon1.gif> struct  <!1><A HREF="bHYPRE_IJParCSRMatrix__object.html">bHYPRE_IJParCSRMatrix__object</A>* bHYPRE_IJParCSRMatrix__cast void* obj sidl_BaseInterface* <B>_ex</B>
+ <DD><I>
+Cast method for interface and class type conversions</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__cast2"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__cast2.html><B>bHYPRE_IJParCSRMatrix__cast2</B></A><DD><I> String cast method for interface and class type conversions</I>
+<IMG BORDER=0 SRC=icon1.gif>void*  <B>bHYPRE_IJParCSRMatrix__cast2</B>( void* obj, const char* type, sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+String cast method for interface and class type conversions</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__exec"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__exec.html><B>bHYPRE_IJParCSRMatrix__exec</B></A><DD><I> Select and execute a method by name</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  void  <B>bHYPRE_IJParCSRMatrix__exec</B>(  bHYPRE_IJParCSRMatrix self,  const char* methodName,  sidl_rmi_Call inArgs,  sidl_rmi_Return outArgs,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Select and execute a method by name</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__getURL"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__getURL.html><B>bHYPRE_IJParCSRMatrix__getURL</B></A><DD><I> Get the URL of the Implementation of this object (for RMI)</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  char*  <B>bHYPRE_IJParCSRMatrix__getURL</B>(  bHYPRE_IJParCSRMatrix self,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+Get the URL of the Implementation of this object (for RMI)</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__raddRef"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__raddRef.html><B>bHYPRE_IJParCSRMatrix__raddRef</B></A><DD><I> On a remote object, addrefs the remote instance</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  void  <B>bHYPRE_IJParCSRMatrix__raddRef</B>(  bHYPRE_IJParCSRMatrix self,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+On a remote object, addrefs the remote instance</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__isRemote"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__isRemote.html><B>bHYPRE_IJParCSRMatrix__isRemote</B></A><DD><I> TRUE if this object is remote, false if local</I>
+<IMG BORDER=0 SRC=icon1.gif>SIDL_C_INLINE_DECL  sidl_bool  <B>bHYPRE_IJParCSRMatrix__isRemote</B>(  bHYPRE_IJParCSRMatrix self,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+TRUE if this object is remote, false if local</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__isLocal"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__isLocal.html><B>bHYPRE_IJParCSRMatrix__isLocal</B></A><DD><I> TRUE if this object is remote, false if local</I>
+<IMG BORDER=0 SRC=icon1.gif>sidl_bool  <B>bHYPRE_IJParCSRMatrix__isLocal</B>(  bHYPRE_IJParCSRMatrix self,  sidl_BaseInterface *<!2><A HREF="VectorInterface.html#DOC.3.10">_ex</A>)
+ <DD><I>
+TRUE if this object is remote, false if local</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__rmicast"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__rmicast.html><B>bHYPRE_IJParCSRMatrix__rmicast</B></A><DD><I> Cast method for interface and class type conversions</I>
+<IMG BORDER=0 SRC=icon1.gif> struct  <!1><A HREF="bHYPRE_IJParCSRMatrix__object.html">bHYPRE_IJParCSRMatrix__object</A>* bHYPRE_IJParCSRMatrix__rmicast void* obj struct sidl_BaseInterface__object <B>**_ex</B>
+ <DD><I>
+Cast method for interface and class type conversions</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="bHYPRE_IJParCSRMatrix__connectI"></A>
-<A HREF=bHYPRE_IJParCSRMatrix__connectI.html><B>bHYPRE_IJParCSRMatrix__connectI</B></A><DD><I> RMI connector function for the class.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=_ex.9.html><B>**_ex</B></A> 
+ <DD><I>
+RMI connector function for the class</I>
 </DL>
-<A NAME="DOC.DOCU"></A>
-<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
 <center>
 <img src="hypre_wiw.gif">
 </center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

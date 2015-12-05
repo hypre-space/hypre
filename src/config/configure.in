@@ -21,7 +21,7 @@ dnl # You should have received a copy of the GNU Lesser General Public License
 dnl # along with this program; if not, write to the Free Software Foundation,
 dnl # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 dnl #
-dnl # $Revision: 1.64 $
+dnl # $Revision: 1.68 $
 dnl #EHEADER**********************************************************************
 
 dnl *********************************************************************
@@ -53,15 +53,15 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([HYPRE_NAME], [hypre])
-m4_define([HYPRE_VERSION], [2.0.0])
-m4_define([HYPRE_DATE], [2006/12/15])
+m4_define([HYPRE_VERSION], [2.2.0b])
+m4_define([HYPRE_DATE], [2007/09/20])
 m4_define([HYPRE_TIME], [00:00:00])
 m4_define([HYPRE_DATETIME], [HYPRE_DATE])
 m4_define([HYPRE_BUGS], [hypre-support@llnl.gov])
 m4_define([HYPRE_TOP_SRC_DIR], [`pwd`])
 
 AC_PREREQ(2.59)
-AC_REVISION($Id: configure.in,v 1.64 2006/12/12 02:09:11 falgout Exp $)
+AC_REVISION($Id: configure.in,v 1.68 2007/09/20 17:22:28 baker59 Exp $)
 AC_INIT(HYPRE_NAME, HYPRE_VERSION, HYPRE_BUGS, HYPRE_NAME)
 AC_CONFIG_HEADERS([HYPRE_config.h:config/HYPRE_config.h.in])
 AC_COPYRIGHT([ Copyright (c) 2006   The Regents of the University of California.
@@ -87,6 +87,7 @@ AC_COPYRIGHT([ Copyright (c) 2006   The Regents of the University of California.
  Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA])
 
 AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_MACRO_DIR([babel-runtime/m4])
 AC_CONFIG_SRCDIR([HYPRE.h])
 
 dnl *********************************************************************
@@ -851,7 +852,7 @@ fi
 if test "$casc_using_fortran" = "yes"
 then
    AC_PROG_F77
-   AC_F77_LIBRARY_LDFLAGS
+   LLNL_F77_LIBRARY_LDFLAGS
    AC_F77_WRAPPERS
    AC_CHECK_PROGS(FPP, fpp cpp "$CC -E" "cc -E" "gcc -E")
    test -z "$FPP" && AC_MSG_ERROR([no acceptable fpp found in \$PATH])
@@ -1105,24 +1106,22 @@ if test "$casc_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
    case $hypre_platform in
-      AIX* | aix* | Aix*) FFLAGS="${FFLAGS} -qmkshrobj"
-                          CFLAGS="${CFLAGS} -qmkshrobj"
-                          CXXFLAGS="${CXXFLAGS} -qmkshrobj"
-                          BUILD_F77_SHARED="${F77} -G"
-                          BUILD_CC_SHARED="${CC} -G"
-                          BUILD_CXX_SHARED="${CXX} -G"
+      AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
+                          SHARED_BUILD_FLAG="-G"
                           LINK_F77="${F77} -brtl"
                           LINK_CC="${CC} -brtl"
                           LINK_CXX="${CXX} -brtl"
                           ;;
-                       *) FFLAGS="${FFLAGS} -fPIC"
-                          CFLAGS="${CFLAGS} -fPIC"
-                          CXXFLAGS="${CXXFLAGS} -fPIC"
-                          BUILD_F77_SHARED="${F77} -shared"
-                          BUILD_CC_SHARED="${CC} -shared"
-                          BUILD_CXX_SHARED="${CXX} -shared"
+                       *) SHARED_COMPILE_FLAG="-fPIC"
+                          SHARED_BUILD_FLAG="-shared"
                           ;;
    esac
+   FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
+   CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
+   CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
+   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
+   BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
+   BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
 fi
 
 BUILD_PYTHON=0
@@ -1286,6 +1285,9 @@ AC_SUBST(LINK_CXX)
 AC_SUBST(BUILD_F77_SHARED)
 AC_SUBST(BUILD_CC_SHARED)
 AC_SUBST(BUILD_CXX_SHARED)
+
+AC_SUBST(SHARED_COMPILE_FLAG)
+AC_SUBST(SHARED_BUILD_FLAG)
 
 AC_SUBST(BUILD_PYTHON)
 AC_SUBST(PYTHON)

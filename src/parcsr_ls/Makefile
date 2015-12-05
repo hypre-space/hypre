@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.23 $
+# $Revision: 2.24 $
 #EHEADER**********************************************************************
 
 
@@ -100,7 +100,9 @@ FILES =\
  par_amg_solveT.c\
  par_cg_relax_wt.c\
  par_coarsen.c\
+ par_cgc_coarsen.c\
  par_coarse_parms.c\
+ par_coordinates.c\
  par_cr.c\
  par_cycle.c\
  par_difconv.c\

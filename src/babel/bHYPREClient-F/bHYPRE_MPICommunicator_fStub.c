@@ -522,7 +522,7 @@ SIDLFortran77Symbol(bhypre_mpicommunicator__set_hooks_static_f,BHYPRE_MPICOMMUNI
 }
 
 /*
- * Method:  CreateC[]
+ *  Create an MPICommunicator object from C code. 
  */
 
 void
@@ -555,7 +555,7 @@ SIDLFortran77Symbol(bhypre_mpicommunicator_createc_f,BHYPRE_MPICOMMUNICATOR_CREA
 }
 
 /*
- * Method:  CreateF[]
+ *  Create an MPICommunicator object from Fortran code. 
  */
 
 void
@@ -588,7 +588,7 @@ SIDLFortran77Symbol(bhypre_mpicommunicator_createf_f,BHYPRE_MPICOMMUNICATOR_CREA
 }
 
 /*
- * Method:  Create_MPICommWorld[]
+ *  Create an MPICommunicator object which represents MPI_Comm_World. 
  */
 
 void

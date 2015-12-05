@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.15 $
+ * $Revision: 2.16 $
  ***********************************************************************EHEADER*/
 
 
@@ -508,6 +508,12 @@ int HYPRE_SStructSysPFMGSetRelaxType(HYPRE_SStructSolver solver,
                                      int                 relax_type);
 
 /**
+ * (Optional) Set Jacobi Weight.
+ **/
+int HYPRE_SStructSysPFMGSetJacobiWeight(HYPRE_SStructSolver solver,
+                                        double              weight);
+
+/**
  * (Optional) Set number of relaxation sweeps before coarse-grid correction.
  **/
 int HYPRE_SStructSysPFMGSetNumPreRelax(HYPRE_SStructSolver solver,
@@ -791,6 +797,11 @@ int HYPRE_SStructFACSetNonZeroGuess(HYPRE_SStructSolver solver);
  **/
 int HYPRE_SStructFACSetRelaxType(HYPRE_SStructSolver solver,
                                  int                 relax_type);
+/**
+ * (Optional) Set Jacobi weight if weighted Jacobi is used.
+ **/
+int HYPRE_SStructFACSetJacobiWeight(HYPRE_SStructSolver solver,
+                                    double              weight);
 /**
  * (Optional) Set number of relaxation sweeps before coarse-grid correction.
  **/

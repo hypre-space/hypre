@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.10 $
+ * $Revision: 2.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -540,7 +540,8 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
         different intersections  (TO DO: put more thought into if are
         there ever any exceptions to this?  - the intersection routine
         already eliminates duplicates - so what i mean is eliminating
-        duplicates from multiple intersection calls)  */  
+        duplicates from multiple intersection calls in periodic case)  */  
+
 
     
       /*------------------------------------------------

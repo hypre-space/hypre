@@ -1,61 +1,57 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<HTML>
-<HEAD>
-   <TITLE> BiCGSTAB Solver</TITLE>
-   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-
-<H2> <A HREF="#DOC.DOCU">BiCGSTAB Solver</A></H2></H2>
-<HR>
+<html><head><TITLE>BiCGSTAB Solver</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  BiCGSTAB Solver  </H2>
+<hr>
 <DL>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_BiCGSTABSetup"></A>
-<A HREF=HYPRE_BiCGSTABSetup.html><B>HYPRE_BiCGSTABSetup</B></A><DD><I> Prepare to solve the system.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_BiCGSTABSetup.html><B>HYPRE_BiCGSTABSetup</B></A> 
+ <DD><I>
+Prepare to solve the system</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_BiCGSTABSolve"></A>
-<A HREF=HYPRE_BiCGSTABSolve.html><B>HYPRE_BiCGSTABSolve</B></A><DD><I> Solve the system</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BiCGSTABSolve</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.2">HYPRE_Matrix</A> A, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.3">HYPRE_Vector</A> b, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.3">HYPRE_Vector</A> x)
+ <DD><I>
+Solve the system</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_BiCGSTABSetTol"></A>
-<A HREF=HYPRE_BiCGSTABSetTol.html><B>HYPRE_BiCGSTABSetTol</B></A><DD><I> (Optional) Set the convergence tolerance</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BiCGSTABSetTol</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double tol)
+ <DD><I>
+(Optional) Set the convergence tolerance</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_BiCGSTABSetMaxIter"></A>
-<A HREF=HYPRE_BiCGSTABSetMaxIter.html><B>HYPRE_BiCGSTABSetMaxIter</B></A><DD><I> (Optional) Set maximum number of iterations</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BiCGSTABSetMaxIter</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int max_iter)
+ <DD><I>
+(Optional) Set maximum number of iterations</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_BiCGSTABSetPrecond"></A>
-<A HREF=HYPRE_BiCGSTABSetPrecond.html><B>HYPRE_BiCGSTABSetPrecond</B></A><DD><I> (Optional) Set the preconditioner to use</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BiCGSTABSetPrecond</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, HYPRE_PtrToSolverFcn precond, HYPRE_PtrToSolverFcn precond_setup, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> precond_solver)
+ <DD><I>
+(Optional) Set the preconditioner to use</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_BiCGSTABSetLogging"></A>
-<A HREF=HYPRE_BiCGSTABSetLogging.html><B>HYPRE_BiCGSTABSetLogging</B></A><DD><I> (Optional) Set the amount of logging to do</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BiCGSTABSetLogging</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int logging)
+ <DD><I>
+(Optional) Set the amount of logging to do</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_BiCGSTABSetPrintLevel"></A>
-<A HREF=HYPRE_BiCGSTABSetPrintLevel.html><B>HYPRE_BiCGSTABSetPrintLevel</B></A><DD><I> (Optional) Set the amount of printing to do to the screen</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BiCGSTABSetPrintLevel</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int level)
+ <DD><I>
+(Optional) Set the amount of printing to do to the screen</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_BiCGSTABGetNumIterations"></A>
-<A HREF=HYPRE_BiCGSTABGetNumIterations.html><B>HYPRE_BiCGSTABGetNumIterations</B></A><DD><I> Return the number of iterations taken</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BiCGSTABGetNumIterations</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, int *num_iterations)
+ <DD><I>
+Return the number of iterations taken</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_BiCGSTABGetFinalRelativeResidualNorm"></A>
-<A HREF=HYPRE_BiCGSTABGetFinalRelativeResidualNorm.html><B>HYPRE_BiCGSTABGetFinalRelativeResidualNorm</B></A><DD><I> Return the norm of the final relative residual</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BiCGSTABGetFinalRelativeResidualNorm</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, double *norm)
+ <DD><I>
+Return the norm of the final relative residual</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_BiCGSTABGetResidual"></A>
-<A HREF=HYPRE_BiCGSTABGetResidual.html><B>HYPRE_BiCGSTABGetResidual</B></A><DD><I> Return the residual</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BiCGSTABGetResidual</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, void **residual)
+ <DD><I>
+Return the residual</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_BiCGSTABGetPrecond"></A>
-<A HREF=BiCGSTABSolver.html><B>HYPRE_BiCGSTABGetPrecond</B></A></DL>
-<A NAME="DOC.DOCU"></A>
-<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_BiCGSTABGetPrecond</B>(<!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> solver, <!2><A HREF="KrylovSolvers.2.html#DOC.7.1.1">HYPRE_Solver</A> *precond_data_ptr)
+ <DD><I></I>
+</DL>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
 <center>
 <img src="hypre_wiw.gif">
 </center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

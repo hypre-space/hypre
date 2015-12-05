@@ -3,8 +3,8 @@
  * Symbol:        sidl.io.IOException-v0.9.15
  * Symbol Type:   class
  * Babel Version: 1.0.0
- * Release:       $Name:  $
- * Revision:      @(#) $Id: sidl_io_IOException_fStub.h,v 1.2 2006/09/14 21:51:53 painter Exp $
+ * Release:       $Name: V2-2-0b $
+ * Revision:      @(#) $Id: sidl_io_IOException_fStub.h,v 1.3 2006/12/29 21:24:28 painter Exp $
  * Description:   Client-side documentation text for sidl.io.IOException
  * 
  * Copyright (c) 2000-2002, The Regents of the University of California.

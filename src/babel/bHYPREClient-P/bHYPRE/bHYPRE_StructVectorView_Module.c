@@ -1937,7 +1937,13 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set the values of all vector coefficient for grid points in a box.\n\
+The box is defined by its lower and upper corners in the grid.\n\
+\"ilower\" and \"iupper\" are arrays of size \"dim\", where dim is the\n\
+number of dimensions.  The \"values\" array has size \"nvalues\", which\n\
+is the number of grid points in the box. "
    },
   { "SetGrid", (PyCFunction)pStub_StructVectorView_SetGrid,
   (METH_VARARGS | METH_KEYWORDS),
@@ -1947,7 +1953,9 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set the grid on which vectors are defined. "
    },
   { "SetNumGhost", (PyCFunction)pStub_StructVectorView_SetNumGhost,
   (METH_VARARGS | METH_KEYWORDS),
@@ -1957,7 +1965,11 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set the number of ghost zones, separately on the lower and upper sides\n\
+for each dimension.\n\
+\"num_ghost\" is an array of size \"dim2\", twice the number of dimensions. "
    },
   { "SetValue", (PyCFunction)pStub_StructVectorView_SetValue,
   (METH_VARARGS | METH_KEYWORDS),
@@ -1968,7 +1980,11 @@ RETURNS\n\
    (int _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ Set the value of a single vector coefficient, given by \"grid_index\".\n\
+\"grid_index\" is an array of size \"dim\", where dim is the number\n\
+of dimensions. "
    },
   { "_exec", (PyCFunction)pStub_StructVectorView__exec,
   (METH_VARARGS | METH_KEYWORDS),

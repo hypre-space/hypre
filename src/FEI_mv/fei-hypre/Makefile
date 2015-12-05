@@ -21,7 +21,7 @@
 # along with this program; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# $Revision: 2.17 $
+# $Revision: 2.19 $
 #EHEADER**********************************************************************
 
 # why do we create this variable, asked by Charles
@@ -79,6 +79,8 @@ CXX_COMPILE_FLAGS = \
 
 HEADERS =\
  cfei-hypre.h\
+ cfei_hypre.h\
+ hypre_cfei.h\
  HYPRE_LinSysCore.h\
  HYPRE_FEI_includes.h \
  $(BASE_DIR)/base/Data.h  \
@@ -93,7 +95,6 @@ HEADERS =\
  FEI_HYPRE_Impl.h\
  FEI_HYPRE_include.h\
  HYPRE_Builder.h\
- HYPRE_FEI_mv.h\
  HYPRE_LSI_Dsuperlu.h\
  HYPRE_LSI_UZAWA.h\
  HYPRE_LSI_Uzawa_c.h\
@@ -156,6 +157,7 @@ FILESCXX = \
  HYPRE_LinSysCore.cxx\
  HYPRE_SlideReduction.cxx\
  cfei_hypre.cxx\
+ hypre_cfei.cxx\
  hypre_schur_reduce.cxx\
  hypre_slide_reduce.cxx\
  HYPRE_fei_mesh.cxx\
@@ -173,6 +175,7 @@ OBJS = ${OBJSC} ${OBJSCXX}
 all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_BUILD_DIR)/include
+	cp -fp $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_BUILD_DIR)/include
@@ -185,6 +188,7 @@ all: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 install: libHYPRE_FEI${HYPRE_LIB_SUFFIX}
 	cp -fp $(srcdir)/cfei-hypre.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/cfei_hypre.h $(HYPRE_INC_INSTALL)
+	cp -fp $(srcdir)/hypre_cfei.h $(HYPRE_BUILD_DIR)/include
 	cp -fp $(srcdir)/HYPRE_LinSysCore.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/HYPRE_FEI*.h $(HYPRE_INC_INSTALL)
 	cp -fp $(srcdir)/LLNL_FEI*.h $(HYPRE_INC_INSTALL)

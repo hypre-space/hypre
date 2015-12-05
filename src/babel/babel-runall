@@ -17,7 +17,7 @@ babel --version
 babel --output-directory=bHYPRE --comment-local-only -sC Interfaces.idl
 babel --output-directory=bHYPREClient-C --comment-local-only -cC Interfaces.idl
 babel --output-directory=bHYPREClient-F --comment-local-only --include-referenced -cF77 Interfaces.idl
-
+# babel --output-directory=bHYPREClient-F90 --comment-local-only --include-referenced -cF90 Interfaces.idl
 babel --output-directory=bHYPREClient-CX --comment-local-only --include-referenced -cUC++ Interfaces.idl
 babel --output-directory=bHYPREClient-P --comment-local-only --include-referenced -cPython Interfaces.idl
 
@@ -29,3 +29,7 @@ babel --output-directory=bHYPREClient-P --comment-local-only --include-reference
 # temporary fix to bad doc comments...
 cd bHYPREClient-C
 for i in *.h;do emacs -batch $i -l $HOME/linear_solvers/babel/docfix.el -f save-buffer; done                                                                                                        
+# This doc comment fix should be done by hand in bHYPREClient-C :
+# In bHYPRE_SStructVariable_IOR.h, first change /* to /** .
+# Then move the bHYPRE_SStructVariable__array definition to above the doc
+# comment, so the comment will instead be associated with the enum.

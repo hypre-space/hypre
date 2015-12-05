@@ -93,8 +93,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a Struct Grid. 
      */
     static ::bHYPRE::StructGrid
     Create (
@@ -136,8 +137,11 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Define the lower and upper corners of a box of the grid.
+     * "ilower" and "iupper" are arrays of size "dim", the number of spatial
+     * dimensions. 
      */
     int32_t
     SetExtents (
@@ -148,8 +152,11 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Define the lower and upper corners of a box of the grid.
+     * "ilower" and "iupper" are arrays of size "dim", the number of spatial
+     * dimensions. 
      */
     int32_t
     SetExtents (
@@ -159,8 +166,18 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the periodicity for the grid.  Default is no periodicity.
+     * 
+     * The argument {\tt periodic} is an {\tt dim}-dimensional integer array that
+     * contains the periodicity for each dimension.  A zero value for a dimension
+     * means non-periodic, while a nonzero value means periodic and contains the
+     * actual period.  For example, periodicity in the first and third dimensions
+     * for a 10x11x12 grid is indicated by the array [10,0,12].
+     * 
+     * NOTE: Some of the solvers in hypre have power-of-two restrictions on the size
+     * of the periodic dimensions.
      */
     int32_t
     SetPeriodic (
@@ -170,8 +187,18 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the periodicity for the grid.  Default is no periodicity.
+     * 
+     * The argument {\tt periodic} is an {\tt dim}-dimensional integer array that
+     * contains the periodicity for each dimension.  A zero value for a dimension
+     * means non-periodic, while a nonzero value means periodic and contains the
+     * actual period.  For example, periodicity in the first and third dimensions
+     * for a 10x11x12 grid is indicated by the array [10,0,12].
+     * 
+     * NOTE: Some of the solvers in hypre have power-of-two restrictions on the size
+     * of the periodic dimensions.
      */
     int32_t
     SetPeriodic (
@@ -180,8 +207,11 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the number of ghost zones, separately on the lower and upper sides
+     * for each dimension.
+     * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
      */
     int32_t
     SetNumGhost (
@@ -191,8 +221,11 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  Set the number of ghost zones, separately on the lower and upper sides
+     * for each dimension.
+     * "num_ghost" is an array of size "dim2", twice the number of dimensions. 
      */
     int32_t
     SetNumGhost (
@@ -201,8 +234,9 @@ namespace bHYPRE {
     ;
 
 
+
     /**
-     * user defined non-static method
+     *  final construction of the object before its use 
      */
     int32_t
     Assemble() ;

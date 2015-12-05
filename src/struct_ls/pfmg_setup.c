@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.10 $
+ * $Revision: 2.15 $
  ***********************************************************************EHEADER*/
 
 
@@ -69,9 +69,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    MPI_Comm              comm = (pfmg_data -> comm);
                      
-   int                   relax_type = (pfmg_data -> relax_type);
-   int                   skip_relax = (pfmg_data -> skip_relax);
-   double               *dxyz       = (pfmg_data -> dxyz);
+   int                   relax_type =       (pfmg_data -> relax_type);
+   int                   usr_jacobi_weight= (pfmg_data -> usr_jacobi_weight);
+   double                jacobi_weight    = (pfmg_data -> jacobi_weight);
+   int                   skip_relax =       (pfmg_data -> skip_relax);
+   double               *dxyz       =       (pfmg_data -> dxyz);
    int                   rap_type;
                      
    int                   max_iter;
@@ -92,6 +94,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
                     
    double               *data;
    int                   data_size = 0;
+   double               *relax_weights;
+   double               *mean, *deviation;
+   double                alpha, beta;
+
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **P_l;
    hypre_StructMatrix  **RT_l;
@@ -116,6 +122,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    double                min_dxyz;
    int                   cdir;
    int                   d, l;
+   int                   dxyz_flag;
                        
    int                   b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    int                   x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
@@ -148,7 +155,23 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    /* compute dxyz */
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
-      hypre_PFMGComputeDxyz(A, dxyz);
+     
+      mean= hypre_CTAlloc(double, 3);
+      deviation= hypre_CTAlloc(double, 3);
+      hypre_PFMGComputeDxyz(A, dxyz, mean, deviation);
+        
+      dxyz_flag= 0;
+      for (d= 0; d< dim; d++)
+      {
+         deviation[d]-= mean[d]*mean[d];
+         if (deviation[d]/(mean[d]*mean[d]) > .1)  /* square of coeff. of variation */
+         {
+            dxyz_flag= 1;
+            break;
+         }
+      }
+      hypre_TFree(mean);
+      hypre_TFree(deviation);
    }
 
    grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
@@ -157,12 +180,14 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    P_grid_l[0] = NULL;
    cdir_l = hypre_TAlloc(int, max_levels);
    active_l = hypre_TAlloc(int, max_levels);
+   relax_weights= hypre_CTAlloc(double, max_levels);
    hypre_SetIndex(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
    for (l = 0; ; l++)
    {
       /* determine cdir */
       min_dxyz = dxyz[0] + dxyz[1] + dxyz[2] + 1;
       cdir = -1;
+      alpha= 0.0;
       for (d = 0; d < dim; d++)
       {
          if ((hypre_BoxIMaxD(cbox, d) > hypre_BoxIMinD(cbox, d)) &&
@@ -170,6 +195,46 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          {
             min_dxyz = dxyz[d];
             cdir = d;
+         }
+         alpha+= 1.0/(dxyz[d]*dxyz[d]);
+      }
+      relax_weights[l]= 2.0/3.0;
+                                                                                                                               
+      beta= 0.0;
+      if (cdir != -1)
+      {
+         if (dxyz_flag)
+         {
+            relax_weights[l]= 2.0/3.0;
+         }
+
+         else
+         {
+            for (d = 0; d < dim; d++)
+            {
+               if (d != cdir)
+               {
+                  beta+= 1.0/(dxyz[d]*dxyz[d]);
+               }
+            }
+            if (beta == alpha)
+            {
+               alpha= 0.0;
+            }
+            else
+            {
+               alpha= beta/alpha;
+            }
+
+            /* determine level Jacobi weights */
+            if (dim > 1)
+            {
+               relax_weights[l]= 2.0/(3.0 - alpha);
+            }
+            else
+            {
+               relax_weights[l]= 2.0/3.0; /* always 2/3 for 1-d */
+            }
          }
       }
 
@@ -229,10 +294,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       }
    }
 
-   (pfmg_data -> num_levels) = num_levels;
-   (pfmg_data -> cdir_l)     = cdir_l;
-   (pfmg_data -> grid_l)     = grid_l;
-   (pfmg_data -> P_grid_l)   = P_grid_l;
+   (pfmg_data -> num_levels)   = num_levels;
+   (pfmg_data -> cdir_l)       = cdir_l;
+   (pfmg_data -> grid_l)       = grid_l;
+   (pfmg_data -> P_grid_l)     = P_grid_l;
 
    /*-----------------------------------------------------
     * Set up matrix and vector structures
@@ -418,6 +483,14 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    /* set up fine grid relaxation */
    relax_data_l[0] = hypre_PFMGRelaxCreate(comm);
    hypre_PFMGRelaxSetTol(relax_data_l[0], 0.0);
+   if (usr_jacobi_weight)
+   {
+      hypre_PFMGRelaxSetJacobiWeight(relax_data_l[0], jacobi_weight);
+   }
+   else
+   {
+      hypre_PFMGRelaxSetJacobiWeight(relax_data_l[0], relax_weights[0]);
+   }
    hypre_PFMGRelaxSetType(relax_data_l[0], relax_type);
    hypre_PFMGRelaxSetTempVec(relax_data_l[0], tx_l[0]);
    hypre_PFMGRelaxSetup(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
@@ -430,6 +503,14 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          {
             relax_data_l[l] = hypre_PFMGRelaxCreate(comm);
             hypre_PFMGRelaxSetTol(relax_data_l[l], 0.0);
+            if (usr_jacobi_weight)
+            {
+               hypre_PFMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
+            }
+            else
+            {
+               hypre_PFMGRelaxSetJacobiWeight(relax_data_l[l], relax_weights[l]);
+            }
             hypre_PFMGRelaxSetType(relax_data_l[l], relax_type);
             hypre_PFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
             hypre_PFMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
@@ -441,11 +522,20 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          relax_data_l[l] = hypre_PFMGRelaxCreate(comm);
          hypre_PFMGRelaxSetTol(relax_data_l[l], 0.0);
          hypre_PFMGRelaxSetMaxIter(relax_data_l[l], 1);
+         if (usr_jacobi_weight)
+         {
+            hypre_PFMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
+         }
+         else
+         {
+            hypre_PFMGRelaxSetJacobiWeight(relax_data_l[l], 1.0);
+         }
          hypre_PFMGRelaxSetType(relax_data_l[l], 0);
          hypre_PFMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
          hypre_PFMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
    }
+   hypre_TFree(relax_weights);
 
    for (l = 0; l < num_levels; l++)
    {
@@ -492,7 +582,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
 int
 hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
-                       double             *dxyz )
+                       double             *dxyz,
+                       double             *mean,
+                       double             *deviation)
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -503,9 +595,12 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                         
    double                *Ap;
    double                 cxyz[3];
+   double                 sqcxyz[3];
    double                 tcxyz[3];
    double                 cxyz_max;
-                        
+
+   int                    tot_size; 
+
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    int                    stencil_size;
@@ -525,6 +620,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
    int                    ierr = 0;
    double                 cx, cy, cz;
+   double                 sqcx, sqcy, sqcz;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -544,6 +640,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    cxyz[1] = 0.0;
    cxyz[2] = 0.0;
 
+   sqcxyz[0] = 0.0;
+   sqcxyz[1] = 0.0;
+   sqcxyz[2] = 0.0;
+
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
    if ( constant_coefficient==2 )
    {
@@ -552,9 +652,13 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    }
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
+
+   tot_size= hypre_StructGridGlobalSize(hypre_StructMatrixGrid(A));
+
    hypre_ForBoxI(i, compute_boxes)
       {
          compute_box = hypre_BoxArrayBox(compute_boxes, i);
+
 
          A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
 
@@ -565,6 +669,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          cx = cxyz[0];
          cy = cxyz[1];
          cz = cxyz[2];
+
+         sqcx = sqcxyz[0];
+         sqcy = sqcxyz[1];
+         sqcz = sqcxyz[2];
 
          if ( constant_coefficient==1 )
             /* all coefficients constant */
@@ -604,6 +712,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             cx += tcxyz[0];
             cy += tcxyz[1];
             cz += tcxyz[2];
+
+            sqcx += (tcxyz[0]*tcxyz[0]);
+            sqcy += (tcxyz[1]*tcxyz[1]);
+            sqcz += (tcxyz[2]*tcxyz[2]);
          }
          else if ( constant_coefficient==2 )
             /* variable diagonal, other coefficients constant */
@@ -690,6 +802,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                      cx += tcxyz[0];
                      cy += tcxyz[1];
                      cz += tcxyz[2];
+
+                     sqcx += (tcxyz[0]*tcxyz[0]);
+                     sqcy += (tcxyz[1]*tcxyz[1]);
+                     sqcz += (tcxyz[2]*tcxyz[2]);
                   }
                hypre_BoxLoop1End(Ai);
             }
@@ -698,11 +814,13 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             cy += tcxyz[1];
             cz += tcxyz[2];
 
+            sqcx += (tcxyz[0]*tcxyz[0]);
+            sqcy += (tcxyz[1]*tcxyz[1]);
+            sqcz += (tcxyz[2]*tcxyz[2]);
          }
          else
             /* constant_coefficient==0, all coefficients vary with space */
          {
-
             hypre_BoxLoop1Begin(loop_size, A_dbox, start, stride, Ai);
 #define HYPRE_BOX_SMP_PRIVATE loopk,loopi,loopj,Ai
 #define HYPRE_SMP_REDUCTION_OP +
@@ -743,13 +861,22 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                   cx += tcxyz[0];
                   cy += tcxyz[1];
                   cz += tcxyz[2];
+
+                  sqcx += (tcxyz[0]*tcxyz[0]);
+                  sqcy += (tcxyz[1]*tcxyz[1]);
+                  sqcz += (tcxyz[2]*tcxyz[2]);
                }
             hypre_BoxLoop1End(Ai);
+
          }
 
          cxyz[0] = cx;
          cxyz[1] = cy;
          cxyz[2] = cz;
+
+         sqcxyz[0] = sqcx;
+         sqcxyz[1] = sqcy;
+         sqcxyz[2] = sqcz;
       }
 
    /*----------------------------------------------------------
@@ -762,6 +889,18 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    MPI_Allreduce(tcxyz, cxyz, 3, MPI_DOUBLE, MPI_SUM,
                  hypre_StructMatrixComm(A));
 
+   tcxyz[0] = sqcxyz[0];
+   tcxyz[1] = sqcxyz[1];
+   tcxyz[2] = sqcxyz[2];
+   MPI_Allreduce(tcxyz, sqcxyz, 3, MPI_DOUBLE, MPI_SUM,
+                 hypre_StructMatrixComm(A));
+
+   for (d= 0; d< 3; d++)
+   {
+      mean[d]= cxyz[d]/tot_size;
+      deviation[d]= sqcxyz[d]/tot_size;
+   }
+     
    cxyz_max = 0.0;
    for (d = 0; d < 3; d++)
    {

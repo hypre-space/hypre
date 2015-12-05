@@ -2702,7 +2702,9 @@ RETURNS\n\
    (bHYPRE.IdentitySolver _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create an Identity (null) solver. "
    },
   { "_connect", (PyCFunction)pStub_IdentitySolver__connect,
   (METH_VARARGS | METH_KEYWORDS),

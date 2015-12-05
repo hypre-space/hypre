@@ -26,8 +26,6 @@
  * Objects of this type can be cast to Solver objects
  * using the {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * The StructSMG solver requires a Struct matrix.
  */
 #include <Python.h>
@@ -2698,7 +2696,9 @@ RETURNS\n\
    (bHYPRE.StructSMG _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a Struct SMG solver. "
    },
   { "_connect", (PyCFunction)pStub_StructSMG__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2817,8 +2817,6 @@ static PyTypeObject _bHYPRE_StructSMGType = {
 \
 Objects of this type can be cast to Solver objects\n\
 using the {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
 \n\
 The StructSMG solver requires a Struct matrix.", /* tp_doc */
   0,      /* tp_traverse */
@@ -3053,8 +3051,6 @@ initStructSMG(void) {
 \
 Objects of this type can be cast to Solver objects\n\
 using the {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
 \n\
 The StructSMG solver requires a Struct matrix."
   );

@@ -11,6 +11,10 @@
 
 /*
  * Symbol "bHYPRE.PCG" (version 1.0.0)
+ * 
+ * PCG solver.
+ * This calls Babel-interface matrix and vector functions, so it will work
+ * with any consistent matrix, vector, and preconditioner classes.
  */
 
 #ifndef included_bHYPRE_PCG_fStub_h
@@ -531,7 +535,7 @@ SIDLFortran77Symbol(bhypre_pcg__set_hooks_static_f,BHYPRE_PCG__SET_HOOKS_STATIC_
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a PCG solver. 
  */
 
 void

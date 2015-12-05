@@ -91,6 +91,10 @@ namespace bHYPRE {
 
   /**
    * Symbol "bHYPRE.PCG" (version 1.0.0)
+   * 
+   * PCG solver.
+   * This calls Babel-interface matrix and vector functions, so it will work
+   * with any consistent matrix, vector, and preconditioner classes.
    */
   class PCG: public virtual ::bHYPRE::PreconditionedSolver,
     public virtual ::sidl::BaseClass {
@@ -115,8 +119,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create a PCG solver. 
      */
     static ::bHYPRE::PCG
     Create (

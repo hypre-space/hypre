@@ -29,7 +29,7 @@ int main (int argc, char *argv[])
 
    int solver_id;
    int maxit, cycle_type, rlx_type, rlx_sweeps, dim;
-   int amg_coarsen_type, amg_rlx_type, amg_agg_levels;
+   int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_interp_type, amg_Pmax;
    int h1_method, singular_problem, coordinates;
    double tol, theta;
    int blockSize;
@@ -59,6 +59,7 @@ int main (int argc, char *argv[])
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 1; amg_rlx_type = 3;  */ /* PMIS-1 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 0; amg_rlx_type = 3;  */ /* PMIS-0 */
    /* cycle_type = 7; amg_coarsen_type = 6; amg_agg_levels = 0; amg_rlx_type = 6;  */ /* Falgout-0 */
+   amg_interp_type = 0; amg_Pmax = 0;
    theta = 0.25;
    blockSize = 5;
 
@@ -113,6 +114,16 @@ int main (int argc, char *argv[])
          {
             arg_index++;
             amg_agg_levels = atoi(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-itype") == 0 )
+         {
+            arg_index++;
+            amg_interp_type = atoi(argv[arg_index++]);
+         }
+         else if ( strcmp(argv[arg_index], "-pmax") == 0 )
+         {
+            arg_index++;
+            amg_Pmax = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-dim") == 0 )
          {
@@ -173,11 +184,13 @@ int main (int argc, char *argv[])
          printf("\n");
          printf("  AMS solver options:                                          \n");
          printf("    -dim <num>           : space dimension                     \n");
-         printf("    -type <num>          : 3-level cycle type (0-8)            \n");
+         printf("    -type <num>          : 3-level cycle type (0-8, 11-14)     \n");
          printf("    -theta <num>         : BoomerAMG threshold (0.25)          \n");
          printf("    -ctype <num>         : BoomerAMG coarsening type           \n");
          printf("    -agg <num>           : Levels of BoomerAMG agg. coarsening \n");
          printf("    -amgrlx <num>        : BoomerAMG relaxation type           \n");
+         printf("    -itype <num>         : BoomerAMG interpolation type        \n");
+         printf("    -pmax <num>          : BoomerAMG interpolation truncation  \n");
          printf("    -rlx <num>           : relaxation type                     \n");
          printf("    -rlxn <num>          : number of relaxation sweeps         \n");
          printf("    -coord               : use coordinate vectors              \n");
@@ -342,8 +355,8 @@ int main (int argc, char *argv[])
 
       /* Smoothing and AMG options */
       HYPRE_AMSSetSmoothingOptions(solver, rlx_type, rlx_sweeps, 1.0, 1.0);
-      HYPRE_AMSSetAlphaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta);
-      HYPRE_AMSSetBetaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta);
+      HYPRE_AMSSetAlphaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
+      HYPRE_AMSSetBetaAMGOptions(solver, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
 
       HYPRE_AMSSetup(solver, A, b, x0);
 
@@ -447,8 +460,8 @@ int main (int argc, char *argv[])
 
          /* Smoothing and AMG options */
          HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, 1.0, 1.0);
-         HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta);
-         HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta);
+         HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
+         HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
 
          /* Set the PCG preconditioner */
          HYPRE_PCGSetPrecond(solver,
@@ -552,8 +565,8 @@ int main (int argc, char *argv[])
 
       /* Smoothing and AMG options */
       HYPRE_AMSSetSmoothingOptions(precond, rlx_type, rlx_sweeps, 1.0, 1.0);
-      HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta);
-      HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta);
+      HYPRE_AMSSetAlphaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
+      HYPRE_AMSSetBetaAMGOptions(precond, amg_coarsen_type, amg_agg_levels, amg_rlx_type, theta, amg_interp_type, amg_Pmax);
 
       /* Create AME object */
       HYPRE_AMECreate(&solver);

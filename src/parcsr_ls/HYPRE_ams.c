@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.6 $
+ * $Revision: 2.7 $
  ***********************************************************************EHEADER*/
 
 
@@ -216,13 +216,17 @@ int HYPRE_AMSSetAlphaAMGOptions(HYPRE_Solver solver,
                                 int alpha_coarsen_type,
                                 int alpha_agg_levels,
                                 int alpha_relax_type,
-                                double alpha_strength_threshold)
+                                double alpha_strength_threshold,
+                                int alpha_interp_type,
+                                int alpha_Pmax)
 {
    return hypre_AMSSetAlphaAMGOptions((void *) solver,
                                       alpha_coarsen_type,
                                       alpha_agg_levels,
                                       alpha_relax_type,
-                                      alpha_strength_threshold);
+                                      alpha_strength_threshold,
+                                      alpha_interp_type,
+                                      alpha_Pmax);
 }
 
 /*--------------------------------------------------------------------------
@@ -233,13 +237,17 @@ int HYPRE_AMSSetBetaAMGOptions(HYPRE_Solver solver,
                                int beta_coarsen_type,
                                int beta_agg_levels,
                                int beta_relax_type,
-                               double beta_strength_threshold)
+                               double beta_strength_threshold,
+                               int beta_interp_type,
+                               int beta_Pmax)
 {
    return hypre_AMSSetBetaAMGOptions((void *) solver,
                                      beta_coarsen_type,
                                      beta_agg_levels,
                                      beta_relax_type,
-                                     beta_strength_threshold);
+                                     beta_strength_threshold,
+                                     beta_interp_type,
+                                     beta_Pmax);
 }
 
 /*--------------------------------------------------------------------------

@@ -53,7 +53,6 @@ misc. notes/considerations/open questions:
 
 #include "headers.h"
 
-
 /*--------------------------------------------------------------------------
  hypre_BoxManEntrySetInfo 
  *--------------------------------------------------------------------------*/
@@ -212,6 +211,35 @@ int hypre_BoxManGetIsEntriesSort ( hypre_BoxManager *manager , int *is_sort )
    
 }
 
+/*--------------------------------------------------------------------------
+  hypre_BoxManGetAssumedPartition
+ *--------------------------------------------------------------------------*/
+
+
+int hypre_BoxManGetAssumedPartition ( hypre_BoxManager *manager,  
+                                      hypre_StructAssumedPart **assumed_partition )
+{
+   
+   *assumed_partition = hypre_BoxManAssumedPartition(manager);
+   
+
+   return hypre_error_flag;
+   
+}
+/*--------------------------------------------------------------------------
+  hypre_BoxManSetAssumedPartition
+ *--------------------------------------------------------------------------*/
+
+
+int hypre_BoxManSetAssumedPartition ( hypre_BoxManager *manager,  
+                                      hypre_StructAssumedPart *assumed_partition )
+{
+   
+   hypre_BoxManAssumedPartition(manager) = assumed_partition;
+
+   return hypre_error_flag;
+   
+}
 
 
 /*--------------------------------------------------------------------------
@@ -971,6 +999,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
    int  i,j, k;
 
    int need_to_sort = 1; /* default it to sort */
+   int short_sort = 0; /*do abreviated sort */
    
    int  non_ap_gather = 1; /* default to gather w/out ap*/
 
@@ -983,12 +1012,14 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
    MPI_Comm comm = hypre_BoxManComm(manager);
     
 
+  
    /* cannot re-assemble */
    if (hypre_BoxManIsAssembled(manager))
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
+
 
    /* initilize */
    MPI_Comm_rank(comm, &myid);
@@ -1039,11 +1070,16 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
          number - for the second data exchange - so do some sorting now.
          Then we can use my_ids to quickly find an entry.  This will be
          freed when the sort table is created (it's redundant at that point).
-         (Note: if we are creating the AP here, then this sorting
-         may need to be done at the beginning of this function)*/  
+         (Note: we may be creating the AP here, so this sorting
+         needs to be done at the beginning for that too).  If non-ap, then
+         we want the allgatherv to already be sorted - so this takes care
+         of that*/  
+  
+      /* my entries may already be sorted (if all entries are then my entries are
+         - so check first */
       
-      hypre_entryqsort2(my_ids, my_entries, 0, num_my_entries - 1);
-
+      if (hypre_BoxManIsEntriesSort(manager)==0)
+         hypre_entryqsort2(my_ids, my_entries, 0, num_my_entries - 1);
       
       /* if AP, use AP to find out who owns the data we need.  In the 
          non-AP, then just gather everything for now. */
@@ -1060,13 +1096,12 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
 
       if (!non_ap_gather)   /*********** AP CASE! ***********/
       {
-         int  size, index;
+         int  size;
          int *tmp_proc_ids;
          int  proc_count, proc_alloc, max_proc_count;
          int *proc_array;
          int *ap_proc_ids;
          int  count;
-         int threshold;
         
          int  max_response_size;
          int  non_info_size, entry_size_bytes;
@@ -1084,6 +1119,11 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
          int max_regions, max_refinements, ologp;
          
          int  *local_boxnums;
+
+         int statbuf[3];
+         int send_statbuf[3];
+         
+
 
          int dim = hypre_BoxManDim(manager);
 
@@ -1109,78 +1149,84 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
 
          hypre_IndexRef  min_ref, max_ref;
          
-         /* 1.  Need to create an assumed partition */   
+         /* 1.  Create an assumed partition? (may have been added in the coarsen routine) */   
 
-         /* create an array of local boxes.  get the global box size/volume
-            (as a double). */
-
-         local_boxes = hypre_BoxArrayCreate(num_my_entries);
-         local_boxnums = hypre_CTAlloc(int, num_my_entries);
-
-         local_volume = 0.0;
-         
-         for (i=0; i< num_my_entries; i++)
+         if (hypre_BoxManAssumedPartition(manager) == NULL)
          {
-            /* get entry */           
-            entry_ptr = my_entries[i];
-
-            /* copy box info to local_boxes */
-            min_ref = hypre_BoxManEntryIMin(entry_ptr);
-            max_ref =  hypre_BoxManEntryIMax(entry_ptr);
-            box = hypre_BoxArrayBox(local_boxes, i);
-            hypre_BoxSetExtents( box, min_ref, max_ref );
-
-            /* keep box num also */
-            local_boxnums[i] =   hypre_BoxManEntryId(entry_ptr);
-
-            /* calculate volume */ 
-            local_volume += (double) hypre_BoxVolume(box);
-  
             
-         }/* end of local boxes */
+            /* create an array of local boxes.  get the global box size/volume
+               (as a double). */
+
+            local_boxes = hypre_BoxArrayCreate(num_my_entries);
+            local_boxnums = hypre_CTAlloc(int, num_my_entries);
+            
+            local_volume = 0.0;
+         
+            for (i=0; i< num_my_entries; i++)
+            {
+               /* get entry */           
+               entry_ptr = my_entries[i];
+               
+               /* copy box info to local_boxes */
+               min_ref = hypre_BoxManEntryIMin(entry_ptr);
+               max_ref =  hypre_BoxManEntryIMax(entry_ptr);
+               box = hypre_BoxArrayBox(local_boxes, i);
+               hypre_BoxSetExtents( box, min_ref, max_ref );
+               
+               /* keep box num also */
+               local_boxnums[i] =   hypre_BoxManEntryId(entry_ptr);
+               
+               /* calculate volume */ 
+               local_volume += (double) hypre_BoxVolume(box);
+               
+               
+            }/* end of local boxes */
      
-         /* get the number of global entries and the global volume */
+            /* get the number of global entries and the global volume */
 
-         sendbuf2[0] = local_volume;
-         sendbuf2[1] = (double) num_my_entries;
+            sendbuf2[0] = local_volume;
+            sendbuf2[1] = (double) num_my_entries;
+            
+            MPI_Allreduce(&sendbuf2, &recvbuf2, 2, MPI_DOUBLE, MPI_SUM, comm);   
+            
+            global_volume = recvbuf2[0];
+            global_num_boxes = (int) recvbuf2[1];
+            
+            /* estimates for the assumed partition */ 
+            d = nprocs/2;
+            ologp = 0;
+            while ( d > 0)
+            {
+               d = d/2; /* note - d is an int - so this is floored */
+               ologp++;
+            }
+            
+            max_regions =  hypre_min(pow(2, ologp+1), 10*ologp);
+            max_refinements = ologp;
+            gamma = .6; /* percentage a region must be full to 
+                           avoid refinement */  
+            
+            
+            hypre_StructAssumedPartitionCreate(dim, 
+                                               hypre_BoxManBoundingBox(manager), 
+                                               global_volume, 
+                                               global_num_boxes,
+                                               local_boxes, local_boxnums,
+                                               max_regions, max_refinements, 
+                                               gamma,
+                                               comm, 
+                                               &ap);
          
-         MPI_Allreduce(&sendbuf2, &recvbuf2, 2, MPI_DOUBLE, MPI_SUM, comm);   
-          
-         global_volume = recvbuf2[0];
-         global_num_boxes = (int) recvbuf2[1];
+            
+            hypre_BoxManAssumedPartition(manager) = ap;
 
-         /* estimates for the assumed partition */ 
-         d = nprocs/2;
-         ologp = 0;
-         while ( d > 0)
-         {
-            d = d/2; /* note - d is an int - so this is floored */
-            ologp++;
+            hypre_BoxArrayDestroy(local_boxes);
+            hypre_TFree(local_boxnums);
          }
-         
-         max_regions =  hypre_min(pow(2, ologp+1), 10*ologp);
-         max_refinements = ologp;
-         gamma = .6; /* percentage a region must be full to 
-                   avoid refinement */  
-    
-
-         hypre_StructAssumedPartitionCreate(dim, 
-                                            hypre_BoxManBoundingBox(manager), 
-                                            global_volume, 
-                                            global_num_boxes,
-                                            local_boxes, local_boxnums,
-                                            max_regions, max_refinements, 
-                                            gamma,
-                                            comm, 
-                                            &ap);
-         
-
-
-
-         hypre_BoxManAssumedPartition(manager) = ap;
-
-         hypre_BoxArrayDestroy(local_boxes);
-         hypre_TFree(local_boxnums);
+         else
+         {
+            ap = hypre_BoxManAssumedPartition(manager);
+         }
          
 
          /* 2.  Now go thru gather regions and find out which processor's 
@@ -1250,25 +1296,41 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             hypre_TFree(tmp_proc_ids);
             
             /* 3.  now we have a sorted list with no duplicates in ap_proc_ids */
-            /* for each of these processor ids, we need to get the
+            /* for each of these processor ids, we need to get infomation about the
                boxes in their assumed partition region */
             
             
-            /* check how many point to point communications? (what is the max?) */
-            MPI_Allreduce(&proc_count, &max_proc_count, 1, MPI_INT, MPI_MAX, comm);   
+            /* get some stats:
+               check how many point to point communications? (what is the max?) */
+            /* also get the max distinct AP procs and the max # of entries) */
+            send_statbuf[0] = proc_count;
+            send_statbuf[1] = hypre_StructAssumedPartMyPartitionNumDistinctProcs(ap);
+            send_statbuf[2] = num_my_entries;
 
 
-            /* we do not want a sinlge processor to do a ton of point
-               to point communications (relative to the number of
-               total processors -  how much is too much?
-               17 ~  log(128,000) */
-            threshold = 8*ologp;
+
+            MPI_Allreduce(send_statbuf, statbuf, 3, MPI_INT, MPI_MAX, comm);   
+
+            max_proc_count = statbuf[0];
             
-            if ( max_proc_count >  threshold)
+            /* we do not want a single processor to do a ton of point
+               to point communications (relative to the number of
+               total processors -  how much is too much?*/
+
+            /* is there a better way to figure the threshold? */ 
+
+            /* 3/07 - take out threshold calculation - shouldn't be a
+             * problem on large number of processors if box sizes are
+             * relativesly similar */ 
+
+#if 0
+            threshold = hypre_min(12*ologp, nprocs);
+
+            if ( max_proc_count >=  threshold)
             {
-               /* too many! */
-               /* if (myid == 0)
-                  printf("TOO BIG: check 1: max_proc_count = %d\n", max_proc_count);*/
+                  /* too many! */
+               /*if (myid == 0)
+                 printf("TOO BIG: check 1: max_proc_count = %d\n", max_proc_count);*/
 
                /* change coarse midstream!- now we will just gather everything! */
                non_ap_gather = 1;
@@ -1276,10 +1338,9 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                /*clean up from above */ 
                hypre_TFree(ap_proc_ids);
                
-
-
             }
-            
+#endif
+       
             if (!non_ap_gather)
             {
                
@@ -1292,20 +1353,21 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                a second communication where we contact the actual owners
                of the boxes and request the entry info...So:
                
-               (1) exchange #1: contact the AP processor, get the proc
-               ids and box numbers in that AP region (for now we ignore the 
+               (1) exchange #1: contact the AP processor, get the ids of the 
+               procs
+               with boxes in that AP region (for now we ignore the 
                box numbers - since we will get all of the entries from each 
                processor)
                
                (2) exchange #2: use this info to contact the owner
-               processor and from them get the rest of the entry infomation:
+               processors and from them get the rest of the entry infomation:
                box extents, info object, etc. ***note: we will get
                all of the entries from that processor, not just the ones 
-               in the AP region (whose box numbers we have) */
+               in a particular AP region (whose box numbers we ignored above) */
                
                
                /* exchange #1 - we send nothing, and the contacted proc
-                * returns all of the (proc, box ids) in its AP region*/
+                * returns all of the procs with boxes in its AP region*/
                
                /* build response object*/
                response_obj.fill_response = hypre_FillResponseBoxManAssemble1;
@@ -1323,12 +1385,14 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                                      * exchange data */
                response_buf_starts = NULL;
                
-               /*we expect back a pair of ints: (proc id, box number) for each
+               /*we expect back the proc id for each
                  box owned */
-               size =  2*sizeof(int);
+               size =  sizeof(int);
                
                /* this parameter needs to be the same on all processors */ 
-               max_response_size = (global_num_boxes/nprocs)*2;
+               /* max_response_size = (global_num_boxes/nprocs)*2;*/
+               /* modification - should reduce data passed */
+               max_response_size = statbuf[1]; /*max num of distinct procs */
                
                hypre_DataExchangeList(proc_count, ap_proc_ids, 
                                       send_buf, send_buf_starts, 
@@ -1344,20 +1408,14 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                
                neighbor_proc_ids = hypre_CTAlloc(int, size);
                
-               /* unpack response buffer */ 
-               index = 0;
-               for (i=0; i< size; i++) /* for each neighbor box */
-               {
-                  neighbor_proc_ids[i] = response_buf[index++];
-                  /* ignore box number */
-                  index++;
-               }
-               
+               /* alias the response buffer */ 
+               neighbor_proc_ids = response_buf;
+                                            
                /*clean up*/
                hypre_TFree(send_buf_starts);
                hypre_TFree(ap_proc_ids);
                hypre_TFree(response_buf_starts);
-               hypre_TFree(response_buf);
+
                
                /* create a contact list of these processors (eliminate
                 * duplicate procs and also my id ) */
@@ -1385,8 +1443,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                   }
                }
             
-          
-            
+                      
                /* check to see if we have any entries from a processor before
                   contacting(if we have one entry from a processor, then we have
                   all of the entries)
@@ -1398,10 +1455,17 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                if (hypre_BoxManIsEntriesSort(manager) && nentries)
                {
                   
+                  /*so we can eliminate duplicate contacts */                
+
                   int new_count = 0;
                   int proc_spot = 0;
                   int known_id, contact_id;
-                  
+                
+
+                  /* in this case, we can do the "short sort" because
+                     we will not have any duplicate proc ids */
+                  short_sort = 1;
+
                   for (i=0; i< proc_count; i++)
                   {
                      
@@ -1441,148 +1505,129 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                   proc_count = new_count;
                   
                }
-
-               
-               /* should we check again to make sure we
-                  do not have too many contacts?  - for now, no - doesn't seem like 
-                  this one fails if the first passes */
-#if 0
-               /* check (again) how many point to point
-               communications?  here the threshold is higher - we have
-               less left to do.... */
-               MPI_Allreduce(&proc_count, &max_proc_count, 1, MPI_INT, MPI_MAX, comm);   
-               threshold *=2;
-               if ( max_proc_count >  threshold)
+               /* also can do the short sort if we just have boxes that are
+                  ours....here we also don't need to check for duplicates */
+               if (nentries == num_my_entries)
                {
-                  /* too many! */
-                  /* if (myid == 0)
-                     printf("TOO BIG: check 2: max_proc_count = %d\n", max_proc_count);*/
-                  
-                  /* change coarse midstream!- now we will just gather everything! */
-                  non_ap_gather = 1;
-
-                  /* clean up before aborting */ 
-                  hypre_TFree(contact_proc_ids);
-                  hypre_TFree(neighbor_proc_ids);
+                  short_sort = 1;
                }
-#endif
-               if (!non_ap_gather)
+
+
+               send_buf_starts = hypre_CTAlloc(int, proc_count + 1);
+               for (i=0; i< proc_count+1; i++)
                {
-                  
-
-                  send_buf_starts = hypre_CTAlloc(int, proc_count + 1);
-                  for (i=0; i< proc_count+1; i++)
-                  {
-                     send_buf_starts[i] = 0;  
-                  }
-                  send_buf = NULL;
-                  
-                  
-                  /* exchange #2 - now we contact processors (send nothing) and
-                     that processor needs to send us all of their local entry
-                     information*/ 
-                  
-                  entry_response_buf = NULL; /*this and the next are allocated
-                                              * in exchange data */
-                  response_buf_starts = NULL;
-                  
-                  response_obj2.fill_response = hypre_FillResponseBoxManAssemble2;
-                  response_obj2.data1 = manager; /* needed to fill responses*/ 
-                  response_obj2.data2 = NULL;   
-                  
-                  
-                  /*how big is an entry? extents: 6 ints, proc: 1 int, id: 1
-                   * int , num_ghost: 6 ints, info: info_size is in bytes*/
-                  /* note: for now, we do not need to send num_ghost - this
-                     is just copied in addentry anyhow */
-                  non_info_size = 8;
-                  entry_size_bytes = non_info_size*sizeof(int) 
-                     + hypre_BoxManEntryInfoSize(manager);
-                  
-                  /* use same max_response_size as previous exchange */
-                  
-                  hypre_DataExchangeList(proc_count, contact_proc_ids, 
-                                         send_buf, send_buf_starts, sizeof(int),
-                                         entry_size_bytes, &response_obj2, 
-                                         max_response_size, 4, 
-                                         comm,  &entry_response_buf, 
-                                         &response_buf_starts);
-                  
-                  
-                  /* now we can add entries that are in response_buf
-                     - we check for duplicates later  */
-                  
-                  /*how many entries do we have?*/
-                  response_size = response_buf_starts[proc_count];  
-                  
-                  /* do we need more storage ?*/
-                  if (nentries + response_size >  hypre_BoxManMaxNEntries(manager))
-                  {
-                     int inc_size;
-                     
-                     inc_size = (response_size + nentries 
-                                 - hypre_BoxManMaxNEntries(manager));
-                     hypre_BoxManIncSize ( manager, inc_size);
-                     
-                     entries =  hypre_BoxManEntries(manager);
-                     procs_sort = hypre_BoxManProcsSort(manager);
-                     ids_sort = hypre_BoxManIdsSort(manager);
-                  }
-                  
-                  index_ptr = entry_response_buf; /* point into response buf */
-                  for (i = 0; i < response_size; i++)
-                  {
-                     size = sizeof(int);
-                     /* imin */
-                     for (d = 0; d < 3; d++)
-                     {
-                        memcpy( &tmp_int, index_ptr, size);
-                        index_ptr =  (void *) ((char *) index_ptr + size);
-                        hypre_IndexD(imin, d) = tmp_int;
-                     }
-                     
-                     /*imax */
-                     for (d = 0; d < 3; d++)
-                     {
-                        memcpy( &tmp_int, index_ptr, size);
-                        index_ptr =  (void *) ((char *) index_ptr + size);
-                        hypre_IndexD(imax, d) = tmp_int;
-                     }
-                     
-                     /* proc */  
-                     tmp_int_ptr = (int *) index_ptr;
-                     proc = *tmp_int_ptr;
-                     index_ptr =  (void *) ((char *) index_ptr + size);
-                     
-                     /* id */
-                     tmp_int_ptr = (int *) index_ptr;
-                     id = *tmp_int_ptr;
-                     index_ptr =  (void *) ((char *) index_ptr + size);
-                     
-                     /* info */
-                     /* index_ptr is at info */            
-                     
-                     hypre_BoxManAddEntry( manager , imin , 
-                                           imax , proc, id, 
-                                           index_ptr );
-                     
-                     /* start of next entry */  
-                     index_ptr = (void *) ((char *) index_ptr 
-                                           + hypre_BoxManEntryInfoSize(manager));
-                  }
-                  
-                  /* clean up from this section of code*/
-                  hypre_TFree(entry_response_buf);
-                  hypre_TFree(response_buf_starts);
-                  hypre_TFree(send_buf_starts);
-                  hypre_TFree(contact_proc_ids);
-                  hypre_TFree(neighbor_proc_ids);
+                  send_buf_starts[i] = 0;  
+               }
+               send_buf = NULL;
                
-             
-               } /* end of nested non_ap_gather - exchange 2*/
+               
+               /* exchange #2 - now we contact processors (send nothing) and
+                  that processor needs to send us all of their local entry
+                  information*/ 
+               
+               entry_response_buf = NULL; /*this and the next are allocated
+                                           * in exchange data */
+               response_buf_starts = NULL;
+               
+               response_obj2.fill_response = hypre_FillResponseBoxManAssemble2;
+               response_obj2.data1 = manager; /* needed to fill responses*/ 
+               response_obj2.data2 = NULL;   
+               
+               
+               /*how big is an entry? extents: 6 ints, proc: 1 int, id: 1
+                * int , num_ghost: 6 ints, info: info_size is in bytes*/
+               /* note: for now, we do not need to send num_ghost - this
+                  is just copied in addentry anyhow */
+               non_info_size = 8;
+               entry_size_bytes = non_info_size*sizeof(int) 
+                  + hypre_BoxManEntryInfoSize(manager);
+               
+               /* modification -  use an true max_response_size 
+                  (should be faster and less communication*/
+               max_response_size = statbuf[2]; /* max of num_my_entries */
+               
+               hypre_DataExchangeList(proc_count, contact_proc_ids, 
+                                      send_buf, send_buf_starts, sizeof(int),
+                                      entry_size_bytes, &response_obj2, 
+                                      max_response_size, 4, 
+                                      comm,  &entry_response_buf, 
+                                      &response_buf_starts);
+               
+               
+               /* now we can add entries that are in response_buf
+                  - we check for duplicates later  */
+               
+               /*how many entries do we have?*/
+               response_size = response_buf_starts[proc_count];  
+               
+               /* do we need more storage ?*/
+               if (nentries + response_size >  hypre_BoxManMaxNEntries(manager))
+               {
+                  int inc_size;
+                  
+                  inc_size = (response_size + nentries 
+                              - hypre_BoxManMaxNEntries(manager));
+                  hypre_BoxManIncSize ( manager, inc_size);
+                  
+                  entries =  hypre_BoxManEntries(manager);
+                  procs_sort = hypre_BoxManProcsSort(manager);
+                  ids_sort = hypre_BoxManIdsSort(manager);
+               }
+               
+               index_ptr = entry_response_buf; /* point into response buf */
+               for (i = 0; i < response_size; i++)
+               {
+                  size = sizeof(int);
+                  /* imin */
+                  for (d = 0; d < 3; d++)
+                  {
+                     memcpy( &tmp_int, index_ptr, size);
+                     index_ptr =  (void *) ((char *) index_ptr + size);
+                     hypre_IndexD(imin, d) = tmp_int;
+                  }
+                  
+                  /*imax */
+                  for (d = 0; d < 3; d++)
+                  {
+                     memcpy( &tmp_int, index_ptr, size);
+                     index_ptr =  (void *) ((char *) index_ptr + size);
+                     hypre_IndexD(imax, d) = tmp_int;
+                  }
+                  
+                  /* proc */  
+                  tmp_int_ptr = (int *) index_ptr;
+                  proc = *tmp_int_ptr;
+                  index_ptr =  (void *) ((char *) index_ptr + size);
+                  
+                  /* id */
+                  tmp_int_ptr = (int *) index_ptr;
+                  id = *tmp_int_ptr;
+                  index_ptr =  (void *) ((char *) index_ptr + size);
+                  
+                  /* info */
+                  /* index_ptr is at info */            
+                  
+                  hypre_BoxManAddEntry( manager , imin , 
+                                        imax , proc, id, 
+                                        index_ptr );
+                  
+                  /* start of next entry */  
+                  index_ptr = (void *) ((char *) index_ptr 
+                                        + hypre_BoxManEntryInfoSize(manager));
+               }
+               
+               /* clean up from this section of code*/
+               hypre_TFree(entry_response_buf);
+               hypre_TFree(response_buf_starts);
+               hypre_TFree(send_buf_starts);
+               hypre_TFree(contact_proc_ids);
+               hypre_TFree(neighbor_proc_ids);
+               
+               
+               
             } /* end of nested non_ap_gather -exchange 1*/
-
-           } /* end of if global boxes */
+            
+         } /* end of if global boxes */
          
       } /********** end of gathering for the AP case *****************/
       
@@ -1648,7 +1693,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
           sorted above by increasing id */
          send_buf = hypre_MAlloc(send_count_bytes);
          recv_buf = hypre_MAlloc(recv_buf_size_bytes);
-         
+
          index_ptr = send_buf; /* step through send_buf with this pointer */
          /* loop over my entries */  
          for (i=0; i < send_count; i++)
@@ -1694,7 +1739,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             size = hypre_BoxManEntryInfoSize(manager);
             memcpy(index_ptr, hypre_BoxManEntryInfo(entry), size);
             index_ptr =  (void *) ((char *) index_ptr + size);
-            
+       
          } /* end of loop over my entries */
 
          /* now send_buf is ready to go! */  
@@ -1787,6 +1832,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             sorted */
          need_to_sort = 0;
          hypre_BoxManIsEntriesSort(manager) = 1;
+         
    
       } /********* end of non-AP gather *****************/
 
@@ -1818,7 +1864,9 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
    /* now everything we need is in entries, also ids and procs have *
     been added to procs_sort and ids_sort, but possibly not
     sorted. (check need_to_sort flag).  If sorted already, then
-    duplicates have been removed.*/
+    duplicates have been removed. Also there may not be any duplicates
+     in the AP case if a duplicate proc check was done (depends on if
+     current entry info was sorted)*/
 
    /* check for and remove duplicate boxes - based on (proc, id) */
    /* at the same time sort the procs_sort and ids_sort and
@@ -1835,6 +1883,12 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
 
       hypre_BoxManEntry  *new_entries;
       
+      /* (TO DO): if we are sorting after the ap gather, then the box ids may
+         already be sorted within processor number (depends on if the check 
+         for contacting duplicate processors was performed....if so, then
+         there may be a faster way to sort the proc ids and not mess up the
+         already sorted box ids - also there will not be any duplicates )*/
+
 
       /* initial... */
       nentries = hypre_BoxManNEntries(manager);
@@ -1847,6 +1901,22 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
       
       if (need_to_sort)
       {
+
+#if 0
+         /* TO DO:  add code for the "short sort"  - which is don't check for duplicates and the boxids
+         are already sorted within each processor id - but the proc ids are not sorted */
+
+         if (short_sort)
+         {
+            /TO DO: write this */
+         }
+         else
+         {
+            
+            /*stuff below */   
+         }
+#endif         
+
          order_index = hypre_CTAlloc(int, nentries);
          delete_array =  hypre_CTAlloc(int, nentries);
          index = 0;
@@ -2025,17 +2095,19 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    {
     /* for the assumed partition case, we can check to see if all the global
-      information is known - this could prevent future comm costs */
+      information is known (is a gather has been done) 
+      - this could prevent future comm costs */
 
       int all_known = 0;
       int global_all_known;
       
       nentries = hypre_BoxManNEntries(manager);
    
-      if (!hypre_BoxManAllGlobalKnown(manager))
+      if (!hypre_BoxManAllGlobalKnown(manager) && global_is_gather)
       {
          /*if every processor has its nentries = global_num_boxes, then all is known */  
             if (global_num_boxes == nentries) all_known = 1;
+    
             MPI_Allreduce(&all_known, &global_all_known, 1, MPI_INT, MPI_LAND, comm);
             
             hypre_BoxManAllGlobalKnown(manager) = global_all_known;
@@ -2068,6 +2140,10 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
       int  loop, range, loop_num;
       int *proc_offsets;
 
+
+      int location, spot;
+      
+
       hypre_BoxManEntry  **index_table;
       hypre_BoxManEntry   *entry;
 
@@ -2079,8 +2155,8 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
       nentries     = hypre_BoxManNEntries(manager);
       entries      = hypre_BoxManEntries(manager);
       proc_offsets = hypre_BoxManProcsSortOffsets(manager);
-      
-  
+
+
       /*------------------------------------------------------
        * Set up the indexes array and record the processor's
        * entries. This will be used in ordering the link list
@@ -2107,22 +2183,22 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             iminmax[0] = hypre_IndexD(entry_imin, d);
             iminmax[1] = hypre_IndexD(entry_imax, d) + 1;
 
-            for (i = 0; i < 2; i++)
+            for (i = 0; i < 2; i++)/* do the min then the max */
             {
                /* find the new index position in the indexes array */
                index_not_there = 1;
-               for (j = 0; j < size[d]; j++) /* size indicates current 
-                                                size of index in that dimension*/
+
+               if (!i)
                {
-                  if (iminmax[i] <= indexes[d][j])
-                  {
-                     if (iminmax[i] == indexes[d][j])
-                     {
-                        index_not_there = 0;
-                     }
-                     break;
-                  }
+                  location = hypre_BinarySearch2(indexes[d], iminmax[i], 0, size[d]-1, &j);
+                  if (location != -1) index_not_there = 0;               
                }
+               else /* for max, we can start seach at min position */
+               {
+                  location = hypre_BinarySearch2(indexes[d], iminmax[i], j, size[d]-1, &j);
+                  if (location != -1) index_not_there = 0;
+               }
+               
                
                /* if the index is already there, don't add it again */
                if (index_not_there)
@@ -2146,7 +2222,8 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             size[d]--;
          }
       }
-      
+
+
       /*------------------------------------------------------
        * Set up the table - do offprocessor then on-processor
        *------------------------------------------------------*/
@@ -2197,18 +2274,13 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
                imin and imax */
             for (d = 0; d < 3; d++)
             {
-               j = 0;
-               while (hypre_IndexD(entry_imin, d) != indexes[d][j])
-               {
-                  j++;
-               }
-               hypre_IndexD(imin, d) = j;
-               
-               while (hypre_IndexD(entry_imax, d) + 1 != indexes[d][j])
-               {
-                  j++;
-               }
-               hypre_IndexD(imax, d) = j;
+               /* need to go to size[d] because that contains the last element */             
+               location = hypre_BinarySearch2(indexes[d], hypre_IndexD(entry_imin, d), 0, size[d], &spot);
+               hypre_IndexD(imin, d) = location;
+
+               location = hypre_BinarySearch2(indexes[d], hypre_IndexD(entry_imax, d) + 1 , 0, size[d], &spot);
+               hypre_IndexD(imax, d) = location;
+
             } /* now have imin and imax location in index array*/
             
             
@@ -2236,11 +2308,11 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
             }
          } /* end of subset of entries */
       }/* end of three loops over subsets */
-    
+
 
       /* done with the index_table! */ 
       hypre_TFree( hypre_BoxManIndexTable(manager)); /* in case this is a 
-                                                        re-assemble */
+                                                        re-assemble - shouldn't be though */
       hypre_BoxManIndexTable(manager) = index_table;
 
       for (d = 0; d < 3; d++)
@@ -2265,6 +2337,7 @@ int hypre_BoxManAssemble ( hypre_BoxManager *manager)
    hypre_BoxManGatherRegions(manager) =  hypre_BoxArrayCreate(0); 
 
    hypre_BoxManIsAssembled(manager) = 1;
+
 
 
    return hypre_error_flag;
@@ -2465,6 +2538,7 @@ int hypre_BoxManIntersect ( hypre_BoxManager *manager , hypre_Index ilower ,
     * eliminate duplicates. */
    else
    {
+   
       unsort      = hypre_CTAlloc(int, cnt);
       proc_ids    = hypre_CTAlloc(int, cnt);
       ids         = hypre_CTAlloc(int, cnt);
@@ -2585,8 +2659,10 @@ hypre_BoxManSetNumGhost( hypre_BoxManager *manager, int  *num_ghost )
 /******************************************************************************
     hypre_fillResponseBoxManAssemble1 
 
-    contact message is null.  need to return the id and boxnum of each box
+    contact message is null.  need to return the (proc) id of each box
     in our assumed partition.
+
+    1/07 - just returning distinct proc ids.
 
  *****************************************************************************/
 
@@ -2599,9 +2675,8 @@ hypre_FillResponseBoxManAssemble1(void *p_recv_contact_buf,
    
 
    int    myid, i, index;
-   int    size, num_objects;
+   int    size, num_boxes, num_objects;
    int   *proc_ids;
-   int   *boxnums;
    int   *send_response_buf = (int *) *p_send_response_buf;
     
  
@@ -2614,36 +2689,43 @@ hypre_FillResponseBoxManAssemble1(void *p_recv_contact_buf,
    MPI_Comm_rank(comm, &myid );
   
    proc_ids =  hypre_StructAssumedPartMyPartitionProcIds(ap);
-   boxnums = hypre_StructAssumedPartMyPartitionBoxnums(ap);
 
-   /*we need to send back the list of all of the boxnums and
-     corresponding processor id */
+   /*we need to send back the list of all the processor ids
+     for the boxes */
+
+   /* NOTE: in the AP, boxes with the same proc id are adjacent
+    (but proc ids not in any sorted order) */
 
    /*how many boxes do we have in the AP?*/
-   num_objects = hypre_StructAssumedPartMyPartitionIdsSize(ap);
-  
-   /* num_objects is then how much we need to send*/
-  
+   num_boxes = hypre_StructAssumedPartMyPartitionIdsSize(ap);
+   /*how many procs do we have in the AP?*/
+   num_objects = hypre_StructAssumedPartMyPartitionNumDistinctProcs(ap);
    
+   /* num_objects is then how much we need to send*/
+     
    /*check storage in send_buf for adding the information */
-   /* note: we are returning objects that are 2 ints in size */
+   /* note: we are returning objects that are 1 ints in size */
 
    if ( response_obj->send_response_storage  < num_objects  )
    {
       response_obj->send_response_storage =  hypre_max(num_objects, 10); 
-      size =  2*(response_obj->send_response_storage + overhead);
+      size =  1*(response_obj->send_response_storage + overhead);
       send_response_buf = hypre_TReAlloc( send_response_buf, int, 
                                           size);
       *p_send_response_buf = send_response_buf;  
    }
 
-   /* populate send_response_buf */
+   /* populate send_response_buf with distinct proc ids*/
    index = 0;
-   for (i = 0; i< num_objects; i++)
+
+   if (num_objects > 0) 
+      send_response_buf[index++] = proc_ids[0];
+
+   for (i = 1; i < num_boxes && index < num_objects; i++)
    {
-      /* processor id + boxnum */
-      send_response_buf[index++] = proc_ids[i];
-      send_response_buf[index++] = boxnums[i];
+      /* processor id */
+      if (proc_ids[i] != proc_ids[i-1])
+         send_response_buf[index++] = proc_ids[i];
    }
 
    /* return variables */

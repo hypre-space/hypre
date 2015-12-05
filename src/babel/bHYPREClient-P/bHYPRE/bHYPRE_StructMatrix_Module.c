@@ -3007,7 +3007,9 @@ RETURNS\n\
    (bHYPRE.StructMatrix _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a Struct Matrix. "
    },
   { "_connect", (PyCFunction)pStub_StructMatrix__connect,
   (METH_VARARGS | METH_KEYWORDS),

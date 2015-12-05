@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.4 $
  ***********************************************************************EHEADER*/
 
 
@@ -181,6 +181,19 @@ hypre_F90_IFACE(hypre_structsparsemsgsetrelaxty, HYPRE_STRUCTSPARSEMSGSETRELAXTY
    *ierr = (int)
       ( HYPRE_StructSparseMSGSetRelaxType( (HYPRE_StructSolver) *solver,
                                      (int)                *relax_type ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_StructSparseMSGSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+void
+hypre_F90_IFACE(hypre_structsparsemsgsetjacobiweigh, HYPRE_STRUCTSPARSEMSGSETJACOBIWEIGH)
+                                                  (long int *solver,
+                                                   double   *weight,
+                                                   int      *ierr)
+{
+   *ierr = (int) (HYPRE_StructSparseMSGSetJacobiWeight( (HYPRE_StructSolver) *solver,
+                                                        (double)             *weight ) );
 }
 
 /*--------------------------------------------------------------------------

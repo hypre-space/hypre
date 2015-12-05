@@ -956,8 +956,9 @@ bHYPRE::SStructStencil::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a SStruct Stencil. 
  */
 ::bHYPRE::SStructStencil
 bHYPRE::SStructStencil::Create( /* in */int32_t ndim, /* in */int32_t size )

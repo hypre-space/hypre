@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -281,6 +281,12 @@ HYPRE_ParCSRMatrixRestoreRow( HYPRE_ParCSRMatrix  matrix,
 
 /*--------------------------------------------------------------------------
  * HYPRE_CSRMatrixToParCSRMatrix
+ * Output argument (fifth argument): a new ParCSRmatrix.
+ * Input arguments: MPI communicator, CSR matrix, and optional partitionings.
+ * If you don't have partitionings, just pass a null pointer for the third
+ * and fourth arguments and they will be computed.
+ * Note that it is not possible to provide a null pointer if this is called
+ * from Fortran code; so you must provide the paritionings from Fortran.
  *--------------------------------------------------------------------------*/
 
 int
@@ -295,6 +301,24 @@ HYPRE_CSRMatrixToParCSRMatrix( MPI_Comm comm,
 		col_partitioning) ;
    if (!matrix) 
       hypre_error_in_arg(5);
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_CSRMatrixToParCSRMatrix_WithNewPartitioning
+ * Output argument (third argument): a new ParCSRmatrix.
+ * Input arguments: MPI communicator, CSR matrix.
+ * Row and column partitionings are computed for the output matrix.
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_CSRMatrixToParCSRMatrix_WithNewPartitioning(
+   MPI_Comm comm, HYPRE_CSRMatrix A_CSR, HYPRE_ParCSRMatrix *matrix)
+{
+   *matrix = (HYPRE_ParCSRMatrix) hypre_CSRMatrixToParCSRMatrix(
+      comm, (hypre_CSRMatrix *) A_CSR, NULL, NULL ) ;
+   if (!matrix) 
+      hypre_error_in_arg(3);
    return hypre_error_flag;
 }
 

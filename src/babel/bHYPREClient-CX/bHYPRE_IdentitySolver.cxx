@@ -2178,8 +2178,9 @@ bHYPRE::IdentitySolver::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create an Identity (null) solver. 
  */
 ::bHYPRE::IdentitySolver
 bHYPRE::IdentitySolver::Create( /* in */::bHYPRE::MPICommunicator mpi_comm )

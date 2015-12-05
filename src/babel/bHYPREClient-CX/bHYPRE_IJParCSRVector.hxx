@@ -108,8 +108,9 @@ namespace bHYPRE {
     // 
 
   public:
+
     /**
-     * user defined static method
+     *  This function is the preferred way to create an IJParCSR Vector. 
      */
     static ::bHYPRE::IJParCSRVector
     Create (

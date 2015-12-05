@@ -3,7 +3,7 @@
  * Symbol:        sidl.LangSpecificException-v0.9.15
  * Symbol Type:   class
  * Babel Version: 1.0.0
- * Release:       $Name:  $
+ * Release:       $Name: V2-2-0b $
  * Revision:      @(#) $Id: sidl_LangSpecificException.h,v 1.1 2006/08/29 23:20:39 painter Exp $
  * Description:   Client-side glue code for sidl.LangSpecificException
  * 

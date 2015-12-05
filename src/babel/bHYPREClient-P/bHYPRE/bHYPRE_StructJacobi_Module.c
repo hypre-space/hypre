@@ -26,8 +26,6 @@
  * Objects of this type can be cast to Solver objects
  * using the {\tt \_\_cast} methods.
  * 
- * RDF: Documentation goes here.
- * 
  * The StructJacobi solver requires a Struct matrix.
  */
 #include <Python.h>
@@ -2708,7 +2706,9 @@ RETURNS\n\
    (bHYPRE.StructJacobi _return)\n\
 RAISES\n\
     sidl.RuntimeException\n\
-"
+\n\
+\
+ This function is the preferred way to create a Struct Jacobi solver. "
    },
   { "_connect", (PyCFunction)pStub_StructJacobi__connect,
   (METH_VARARGS | METH_KEYWORDS),
@@ -2827,8 +2827,6 @@ static PyTypeObject _bHYPRE_StructJacobiType = {
 \
 Objects of this type can be cast to Solver objects\n\
 using the {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
 \n\
 The StructJacobi solver requires a Struct matrix.", /* tp_doc */
   0,      /* tp_traverse */
@@ -3066,8 +3064,6 @@ initStructJacobi(void) {
 \
 Objects of this type can be cast to Solver objects\n\
 using the {\\tt \\_\\_cast} methods.\n\
-\n\
-RDF: Documentation goes here.\n\
 \n\
 The StructJacobi solver requires a Struct matrix."
   );

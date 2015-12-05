@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.12 $
+ * $Revision: 2.13 $
  ***********************************************************************EHEADER*/
 
 
@@ -255,7 +255,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    pass_array_size = n_fine-n_coarse-n_SF;
    if (pass_array_size) pass_array = hypre_CTAlloc(int, pass_array_size);
-   pass_pointer = hypre_CTAlloc(int, max_num_passes);
+   pass_pointer = hypre_CTAlloc(int, max_num_passes+1);
    if (n_fine) assigned = hypre_CTAlloc(int, n_fine);
    P_diag_i = hypre_CTAlloc(int, n_fine+1);
    P_offd_i = hypre_CTAlloc(int, n_fine+1);

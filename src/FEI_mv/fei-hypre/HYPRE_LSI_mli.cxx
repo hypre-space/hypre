@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.21 $
+ * $Revision: 2.22 $
  ***********************************************************************EHEADER*/
 
 
@@ -1592,6 +1592,8 @@ int HYPRE_LSI_MLILoadNodalCoordinates(HYPRE_Solver solver, int nNodes,
                nCoords[eqnInd*nDim+iD] = dRecvBufs[iP][iR*nDim+iD];
       }
    }
+   for ( iN = 0; iN < numNodes*nodeDOF; iN++ )  
+      if (nCoords[iN] == -99999.0) printf("%d : LSI_mli error %d\n",mypid,iN);
 
    /* -------------------------------------------------------- */
    /* clean up                                                 */

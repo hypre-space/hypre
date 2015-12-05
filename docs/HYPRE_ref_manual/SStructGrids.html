@@ -1,66 +1,65 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-
-<HTML>
-<HEAD>
-   <TITLE> SStruct Grids</TITLE>
-   <META NAME="GENERATOR" CONTENT="DOC++ 3.4.10">
-</HEAD>
-<BODY BGCOLOR="#ffffff">
-
-<H2> <A HREF="#DOC.DOCU">SStruct Grids</A></H2></H2>
-<HR>
+<html><head><TITLE>SStruct Grids</TITLE></head>
+<body>
+<H2><A HREF ="#DOC.DOCU" > <IMG BORDER=0 SRC=down.gif></A>  SStruct Grids  </H2>
+<hr>
 <DL>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="*HYPRE_SStructGrid"></A>
-<A HREF=HYPRE_SStructGrid.html><B>*HYPRE_SStructGrid</B></A><DD><I> A grid object is constructed out of several structured ``parts'' and an optional unstructured ``part''.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGrid.html><B>HYPRE_SStructGrid</B></A> 
+ <DD><I>
+A grid object is constructed out of several structured ``parts'' and an
+optional unstructured ``part''</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructVariable"></A>
-<A HREF=HYPRE_SStructVariable.html><B>HYPRE_SStructVariable</B></A><DD><I> An enumerated type that supports cell centered, node centered, face centered, and edge centered variables.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructVariable.html><B>HYPRE_SStructVariable</B></A> 
+ <DD><I>
+An enumerated type that supports cell centered, node centered, face centered,
+and edge centered variables</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGridCreate"></A>
-<A HREF=HYPRE_SStructGridCreate.html><B>HYPRE_SStructGridCreate</B></A><DD><I> Create an <TT>ndim</TT>-dimensional grid object with <TT>nparts</TT> structured parts</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGridCreate</B>(MPI_Comm comm, int ndim, int nparts, <!1><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> *grid)
+ <DD><I>
+Create an <TT>ndim</tt>-dimensional grid object with <TT>nparts</tt> structured
+parts</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGridDestroy"></A>
-<A HREF=HYPRE_SStructGridDestroy.html><B>HYPRE_SStructGridDestroy</B></A><DD><I> Destroy a grid object.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGridDestroy.html><B>HYPRE_SStructGridDestroy</B></A> 
+ <DD><I>
+Destroy a grid object</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGridSetExtents"></A>
-<A HREF=HYPRE_SStructGridSetExtents.html><B>HYPRE_SStructGridSetExtents</B></A><DD><I> Set the extents for a box on a structured part of the grid</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGridSetExtents</B>(<!1><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> grid, int part, int *ilower, int *iupper)
+ <DD><I>
+Set the extents for a box on a structured part of the grid</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGridSetVariables"></A>
-<A HREF=HYPRE_SStructGridSetVariables.html><B>HYPRE_SStructGridSetVariables</B></A><DD><I> Describe the variables that live on a structured part of the grid</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGridSetVariables</B>(<!1><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> grid, int part, int nvars, <!1><A HREF="HYPRE_SStructVariable.html">HYPRE_SStructVariable</A> *vartypes)
+ <DD><I>
+Describe the variables that live on a structured part of the grid</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGridAddVariables"></A>
-<A HREF=HYPRE_SStructGridAddVariables.html><B>HYPRE_SStructGridAddVariables</B></A><DD><I> Describe additional variables that live at a particular index.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGridAddVariables.html><B>HYPRE_SStructGridAddVariables</B></A> 
+ <DD><I>
+Describe additional variables that live at a particular index</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGridSetNeighborBox"></A>
-<A HREF=HYPRE_SStructGridSetNeighborBox.html><B>HYPRE_SStructGridSetNeighborBox</B></A><DD><I> Describe how regions just outside of a part relate to other parts.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGridSetNeighborBox.html><B>HYPRE_SStructGridSetNeighborBox</B></A> 
+ <DD><I>
+Describe how regions just outside of a part relate to other parts</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGridAddUnstructuredPart"></A>
-<A HREF=HYPRE_SStructGridAddUnstructuredPart.html><B>HYPRE_SStructGridAddUnstructuredPart</B></A><DD><I> Add an unstructured part to the grid.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGridAddUnstructuredPart.html><B>HYPRE_SStructGridAddUnstructuredPart</B></A> 
+ <DD><I>
+Add an unstructured part to the grid</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGridAssemble"></A>
-<A HREF=HYPRE_SStructGridAssemble.html><B>HYPRE_SStructGridAssemble</B></A><DD><I> Finalize the construction of the grid before using</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGridAssemble</B>(<!1><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> grid)
+ <DD><I>
+Finalize the construction of the grid before using</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGridSetPeriodic"></A>
-<A HREF=HYPRE_SStructGridSetPeriodic.html><B>HYPRE_SStructGridSetPeriodic</B></A><DD><I> Set the periodicity a particular part.</I>
+<IMG BORDER=0 SRC=icon1.gif> <A HREF=HYPRE_SStructGridSetPeriodic.html><B>HYPRE_SStructGridSetPeriodic</B></A> 
+ <DD><I>
+Set the periodicity a particular part</I>
 <DT>
-
-<IMG ALT="o" BORDER=0 SRC=icon1.gif><A NAME="HYPRE_SStructGridSetNumGhost"></A>
-<A HREF=HYPRE_SStructGridSetNumGhost.html><B>HYPRE_SStructGridSetNumGhost</B></A><DD><I> Setting ghost in the sgrids</I>
+<IMG BORDER=0 SRC=icon1.gif>int  <B>HYPRE_SStructGridSetNumGhost</B>(<!1><A HREF="HYPRE_SStructGrid.html">HYPRE_SStructGrid</A> grid, int *num_ghost)
+ <DD><I>
+Setting ghost in the sgrids</I>
 </DL>
-<A NAME="DOC.DOCU"></A>
-<DL><DT><DD></DL><P><P><I><A HREF="index.html">Alphabetic index</A></I></P><HR>
+<A NAME="DOC.DOCU">
+<DL></DL><P><I><A HREF="aindex.html"> alphabetic index</A></I>  <I><A HREF="HIER.html"> hierarchy of classes</A></I><P><hr>
 <center>
 <img src="hypre_wiw.gif">
 </center>
+
+<P Align=right><I>generated by <A HREF="http://www.zib.de/Visual/software/doc++/index.html">doc++</A></I>
+</BODY>

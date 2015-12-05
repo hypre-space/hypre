@@ -98,7 +98,6 @@ bHYPRE_ErrorHandler_Check(
   /* out */ sidl_BaseInterface *_ex);
 
 /**
- * The Describe method will return a string describing the errors
  * included in the error flag ierr.
  */
 void

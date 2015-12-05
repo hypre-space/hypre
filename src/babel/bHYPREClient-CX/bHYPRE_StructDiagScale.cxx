@@ -2185,8 +2185,9 @@ bHYPRE::StructDiagScale::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a Struct DiagScale solver. 
  */
 ::bHYPRE::StructDiagScale
 bHYPRE::StructDiagScale::Create( /* in */::bHYPRE::MPICommunicator mpi_comm,

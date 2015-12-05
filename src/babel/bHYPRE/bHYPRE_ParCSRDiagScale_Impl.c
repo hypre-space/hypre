@@ -1,30 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2006   The Regents of the University of California.
- * Produced at the Lawrence Livermore National Laboratory.
- * Written by the HYPRE team. UCRL-CODE-222953.
- * All rights reserved.
- *
- * This file is part of HYPRE (see http://www.llnl.gov/CASC/hypre/).
- * Please see the COPYRIGHT_and_LICENSE file for the copyright notice, 
- * disclaimer, contact information and the GNU Lesser General Public License.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the 
- * terms of the GNU General Public License (as published by the Free Software
- * Foundation) version 2.1 dated February 1999.
- *
- * HYPRE is distributed in the hope that it will be useful, but WITHOUT ANY 
- * WARRANTY; without even the IMPLIED WARRANTY OF MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the terms and conditions of the GNU General
- * Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program; if not, write to the Free Software Foundation,
- * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- * $Revision: 1.29 $
- ***********************************************************************EHEADER*/
-
-
 /*
  * File:          bHYPRE_ParCSRDiagScale_Impl.c
  * Symbol:        bHYPRE.ParCSRDiagScale-v1.0.0
@@ -58,7 +31,7 @@
 /* Put additional includes or other arbitrary code here... */
 
 
-#include <assert.h>
+
 #include "hypre_babel_exception_handler.h"
 #include "bHYPRE_IJParCSRMatrix.h"
 #include "bHYPRE_IJParCSRMatrix_Impl.h"
@@ -188,7 +161,7 @@ impl_bHYPRE_ParCSRDiagScale__dtor(
 }
 
 /*
- * Method:  Create[]
+ *  This function is the preferred way to create a ParCSR DiagScale solver. 
  */
 
 #undef __FUNC__

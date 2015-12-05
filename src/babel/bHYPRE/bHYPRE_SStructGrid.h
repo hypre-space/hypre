@@ -90,8 +90,7 @@ bHYPRE_SStructGrid
 bHYPRE_SStructGrid__connect(const char *, sidl_BaseInterface *_ex);
 
 /**
- * Set the number of dimensions {\tt ndim} and the number of
- * structured parts {\tt nparts}.
+ *  This function is the preferred way to create a SStruct Grid. 
  */
 bHYPRE_SStructGrid
 bHYPRE_SStructGrid_Create(
@@ -371,7 +370,7 @@ bHYPRE_SStructGrid_SetNumGhost(
 
 
 /**
- * Method:  Assemble[]
+ *  final construction of the object before its use 
  */
 SIDL_C_INLINE_DECL
 int32_t

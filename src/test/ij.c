@@ -147,6 +147,8 @@ main( int   argc,
    int      num_functions = 1;
    int      num_paths = 1;
    int      agg_num_levels = 0;
+   /* for CGC BM Aug 25, 2006 */
+   int      cgcits = 1;
 
    /* parameters for ParaSAILS */
    double   sai_threshold = 0.1;
@@ -412,6 +414,18 @@ main( int   argc,
          arg_index++;
          coarsen_type      = 7;
       }    
+      else if ( strcmp(argv[arg_index], "-cgc") == 0 )
+      {
+        arg_index++;
+        coarsen_type      = 21;
+        cgcits            = 200;
+      }
+      else if ( strcmp(argv[arg_index], "-cgce") == 0 )
+      {
+        arg_index++;
+        coarsen_type      = 22;
+        cgcits            = 200;
+      }
       else if ( strcmp(argv[arg_index], "-ruge") == 0 )
       {
          arg_index++;
@@ -604,6 +618,22 @@ main( int   argc,
 	{
 	  arg_index++;
 	}
+   }
+   /* begin CGC BM Aug 25, 2006 */
+   if (coarsen_type == 21 || coarsen_type == 22) {
+      arg_index = 0;
+      while ( (arg_index < argc) && (!print_usage) )
+      {
+          if ( strcmp(argv[arg_index], "-cgcits") == 0 )
+          {
+             arg_index++;
+             cgcits = atoi(argv[arg_index++]);
+          }
+          else
+          {
+             arg_index++;
+          }
+      }
    }
 
    /* begin lobpcg */
@@ -978,6 +1008,8 @@ main( int   argc,
       printf("       45=Euclid-BICGSTAB\n");
       printf("\n");
       printf("  -cljp                 : CLJP coarsening \n");
+      printf("  -cgc                  : CGC coarsening \n");
+      printf("  -cgce                 : CGC-E coarsening \n");
       printf("  -ruge                 : Ruge coarsening (local)\n");
       printf("  -ruge3                : third pass on boundary\n");
       printf("  -ruge3c               : third pass on boundary, keep c-points\n");
@@ -1015,7 +1047,7 @@ main( int   argc,
       printf("                         : set to 10 for nodal standard interpolation (for systems only) \n");
       printf("                         : set to 11 for diagonal nodal standard interpolation (for systems only) \n");
       printf("  -postinterptype <val>  : invokes <val> no. of Jacobi interpolation steps after main interpolation\n");
-     
+      printf("  -cgcitr <val>          : set maximal number of coarsening iterations for CGC\n");
       printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
       printf("                         : 1  PCG  (default)\n");
       printf("                         : 2  GMRES\n");
@@ -1827,6 +1859,8 @@ main( int   argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_BoomerAMGCreate(&amg_solver); 
+      /* BM Aug 25, 2006 */
+      HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, (hybrid*coarsen_type));
@@ -1933,6 +1967,8 @@ main( int   argc,
       hypre_BeginTiming(time_index);
  
       HYPRE_BoomerAMGCreate(&amg_solver);
+      /* BM Aug 25, 2006 */
+      HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
       HYPRE_BoomerAMGSetGSMG(amg_solver, 4); /* specify GSMG */
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
@@ -2046,6 +2082,8 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         /* BM Aug 25, 2006 */
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
@@ -2166,6 +2204,8 @@ main( int   argc,
  
          if (myid == 0) printf("Solver: GSMG-PCG\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         /* BM Aug 25, 2006 */
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2438,6 +2478,8 @@ main( int   argc,
 	   /* use BoomerAMG as preconditioner */
 	   if (myid == 0) printf("Solver: AMG-PCG\n");
 	   HYPRE_BoomerAMGCreate(&pcg_precond); 
+           /* BM Aug 25, 2006 */
+           HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
 	   HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
 	   HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
 	   HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
@@ -2558,6 +2600,8 @@ main( int   argc,
 	    
 	   if (myid == 0) printf("Solver: GSMG-PCG\n");
 	   HYPRE_BoomerAMGCreate(&pcg_precond); 
+           /* BM Aug 25, 2006 */
+           HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
 	   HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
 	   HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
 	   HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -2825,6 +2869,8 @@ main( int   argc,
 	     printf("Solver: AMG-PCG\n");
 	    
 	   HYPRE_BoomerAMGCreate(&pcg_precond); 
+           /* BM Aug 25, 2006 */
+           HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
 	   HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
 	   HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
 	   HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
@@ -2950,6 +2996,8 @@ main( int   argc,
 	    
 	   if (myid == 0) printf("Solver: GSMG-PCG\n");
 	   HYPRE_BoomerAMGCreate(&pcg_precond); 
+           /* BM Aug 25, 2006 */
+           HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
 	   HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
 	   HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
 	   HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -3219,6 +3267,8 @@ main( int   argc,
          if (myid == 0) printf("Solver: AMG-GMRES\n");
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         /* BM Aug 25, 2006 */
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
@@ -3329,6 +3379,8 @@ main( int   argc,
  
          if (myid == 0) printf("Solver: GSMG-GMRES\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         /* BM Aug 25, 2006 */
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetGSMG(pcg_precond, 4); 
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
@@ -3491,6 +3543,8 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-BiCGSTAB\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         /* BM Aug 25, 2006 */
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);
@@ -3655,6 +3709,8 @@ main( int   argc,
          /* use BoomerAMG as preconditioner */
          if (myid == 0) printf("Solver: AMG-CGNR\n");
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+         /* BM Aug 25, 2006 */
+         HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetNumSamples(pcg_precond, gsmg_samples);
          HYPRE_BoomerAMGSetTol(pcg_precond, pc_tol);

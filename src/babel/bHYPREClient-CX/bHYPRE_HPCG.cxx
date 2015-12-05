@@ -2442,8 +2442,9 @@ bHYPRE::HPCG::throwException0(
 // User Defined Methods
 // 
 
+
 /**
- * user defined static method
+ *  This function is the preferred way to create a HPCG solver. 
  */
 ::bHYPRE::HPCG
 bHYPRE::HPCG::Create( /* in */::bHYPRE::MPICommunicator mpi_comm )

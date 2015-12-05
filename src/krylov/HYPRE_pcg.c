@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.13 $
+ * $Revision: 2.14 $
  ***********************************************************************EHEADER*/
 
 
@@ -217,6 +217,24 @@ HYPRE_PCGGetRelChange( HYPRE_Solver solver,
                        int              * rel_change )
 {
    return( hypre_PCGGetRelChange( (void *) solver, rel_change ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_PCGSetRecomputeResidual, HYPRE_PCGGetRecomputeResidual
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_PCGSetRecomputeResidual( HYPRE_Solver solver,
+                       int                recompute_residual )
+{
+   return( hypre_PCGSetRecomputeResidual( (void *) solver, recompute_residual ) );
+}
+
+int
+HYPRE_PCGGetRecomputeResidual( HYPRE_Solver solver,
+                       int              * recompute_residual )
+{
+   return( hypre_PCGGetRecomputeResidual( (void *) solver, recompute_residual ) );
 }
 
 /*--------------------------------------------------------------------------

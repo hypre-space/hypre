@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 1.10 $
+ * $Revision: 1.11 $
  ***********************************************************************EHEADER*/
 
 
@@ -468,7 +468,14 @@ hypre_CSRBlockMatrixBlockNorm(int norm_type, double* data, double* out, int bloc
 
    switch (norm_type)
    {
-      
+      case 6: /* sum of all elements in the block  */
+      {
+         for(i = 0; i < sz; i++) 
+         {
+               sum += (data[i]);
+         }
+         break;
+      }
       case 5: /* one norm  - max col sum*/
       {
         
@@ -657,7 +664,116 @@ hypre_CSRBlockMatrixBlockMultAddDiag(double* i1, double* i2, double beta,
    }
    return 0;
 }
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBlockMultAddDiag2 (scales cols of il by diag of i2)
+ * ((o) = (i1) * diag(i2) + beta * (o)) 
+ *--------------------------------------------------------------------------*/
+int
+hypre_CSRBlockMatrixBlockMultAddDiag2(double* i1, double* i2, double beta, 
+                                 double* o, int block_size)
+{
+   int    i, j;
 
+   if (beta == 0.0)
+   {
+
+      for (i = 0; i < block_size; i++)
+      {
+         for (j = 0; j < block_size; j++)
+         {
+            o[i*block_size + j] =  i1[i*block_size + j] * i2[j*block_size + j];
+            
+         }
+      }
+   }
+   else if (beta == 1.0)
+   {
+      for (i = 0; i < block_size; i++)
+      {
+         for (j = 0; j < block_size; j++)
+         {
+            o[i*block_size + j] =  o[i*block_size + j] +  i1[i*block_size + j] * i2[j*block_size + j];
+            
+         }
+      }
+
+
+   }
+   else
+   {
+     for (i = 0; i < block_size; i++)
+      {
+         for (j = 0; j < block_size; j++)
+         {
+            o[i*block_size + j] =  beta * o[i*block_size + j] +  i1[i*block_size + j] * i2[j*block_size + j];
+            
+         }
+      }
+   }
+   return 0;
+}
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBlockMultAddDiag3 (scales cols of il by i2 - 
+                                          whose diag elements are row sums)
+ * ((o) = (i1) * diag(i2) + beta * (o)) 
+ *--------------------------------------------------------------------------*/
+int
+hypre_CSRBlockMatrixBlockMultAddDiag3(double* i1, double* i2, double beta, 
+                                 double* o, int block_size)
+{
+   int    i, j;
+
+   double *row_sum;
+
+   row_sum = hypre_CTAlloc(double, block_size);
+   for (i = 0; i < block_size; i++)
+      {
+         for (j = 0; j < block_size; j++)
+         {
+            row_sum[i] +=  i2[i*block_size + j];
+         }
+      }
+   
+   if (beta == 0.0)
+   {
+      for (i = 0; i < block_size; i++)
+      {
+         for (j = 0; j < block_size; j++)
+         {
+            o[i*block_size + j] =  i1[i*block_size + j] * row_sum[j];
+            
+         }
+      }
+   }
+   else if (beta == 1.0)
+   {
+      for (i = 0; i < block_size; i++)
+      {
+         for (j = 0; j < block_size; j++)
+         {
+            o[i*block_size + j] =  o[i*block_size + j] +  i1[i*block_size + j] * row_sum[j];
+            
+         }
+      }
+
+
+   }
+   else
+   {
+     for (i = 0; i < block_size; i++)
+      {
+         for (j = 0; j < block_size; j++)
+         {
+            o[i*block_size + j] =  beta * o[i*block_size + j] +  i1[i*block_size + j] * row_sum[j];
+            
+         }
+      }
+   }
+
+   hypre_TFree(row_sum);
+      
+   return 0;
+}
 /*--------------------------------------------------------------------------
  * hypre_CSRBlockMatrixBlockMatvec
  * (ov = alpha* mat * v + beta * ov)
@@ -1275,6 +1391,86 @@ hypre_CSRBlockMatrixBlockInvMultDiag(double* i1, double* i2, double* o, int bloc
    
    return (ierr);
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBlockInvMultDiag2
+ * (o = (i1)* diag(i2)^-1) - so this scales the cols of il by 
+                             the diag entries in i2 
+ *--------------------------------------------------------------------------*/
+int
+hypre_CSRBlockMatrixBlockInvMultDiag2(double* i1, double* i2, double* o, int block_size)
+{
+
+   int ierr = 0;
+   int i, j;
+
+   double eps, tmp;
+   
+   eps = 1.0e-8;
+
+   for (i = 0; i < block_size; i++)
+   {
+      if (fabs(i2[i*block_size + i]) > eps)
+      {
+         tmp = 1 / i2[i*block_size + i];
+      }
+      else
+      {
+         tmp = 1.0;
+      }
+      for (j=0; j< block_size; j++)  /* this should be re-written to access by row (not col)! */
+      {
+         o[j*block_size + i] = i1[j*block_size + i] *tmp;
+      }
+   }
+   
+   return (ierr);
+}
+
+
+/*--------------------------------------------------------------------------
+ * hypre_CSRBlockMatrixBlockInvMultDiag3
+ * (o = (i1)* diag(i2)^-1) - so this scales the cols of il by 
+                             the i2 whose diags are row sums 
+ *--------------------------------------------------------------------------*/
+int
+hypre_CSRBlockMatrixBlockInvMultDiag3(double* i1, double* i2, double* o, int block_size)
+{
+
+   int ierr = 0;
+   int i, j;
+   double eps, tmp, row_sum;
+   
+   eps = 1.0e-8;
+
+   for (i = 0; i < block_size; i++)
+   {
+      /* get row sum of i2, row i */
+      row_sum = 0.0;
+      for (j=0; j< block_size; j++)  
+      {
+         row_sum += i2[i*block_size + j];   
+      }
+      
+      /* invert */
+      if (fabs(row_sum) > eps)
+      {
+         tmp = 1 / row_sum;
+      }
+      else
+      {
+         tmp = 1.0;
+      }
+      /* scale col of i1 */
+      for (j=0; j< block_size; j++)  /* this should be re-written to access by row (not col)! */
+      {
+         o[j*block_size + i] = i1[j*block_size + i] *tmp;
+      }
+   }
+   
+   return (ierr);
+}
+
 
 
 

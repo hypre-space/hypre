@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.5 $
+ * $Revision: 2.6 $
  ***********************************************************************EHEADER*/
 
 
@@ -246,6 +246,17 @@ HYPRE_SStructFACSetRelaxType( HYPRE_SStructSolver solver,
                               int                relax_type )
 {
    return( hypre_FACSetRelaxType( (void *) solver, relax_type) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SStructFACSetJacobiWeight
+ *--------------------------------------------------------------------------*/
+
+int
+HYPRE_SStructFACSetJacobiWeight( HYPRE_SStructSolver solver,
+                                 double              weight)
+{
+   return( hypre_FACSetJacobiWeight( (void *) solver, weight) );
 }
 
 /*--------------------------------------------------------------------------

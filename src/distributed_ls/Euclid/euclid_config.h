@@ -21,7 +21,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * $Revision: 2.3 $
+ * $Revision: 2.5 $
  ***********************************************************************EHEADER*/
 
 
@@ -29,7 +29,7 @@
 #ifndef EUCLID_CONF_DH
 #define EUCLID_CONF_DH
 
-#define MAX_MPI_TASKS 500
+#define MAX_MPI_TASKS 50000
 
 #define PETSC_EUCLID_ERR_CODE  PETSC_ERR_LIB
 

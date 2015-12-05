@@ -98,6 +98,8 @@ main( int   argc,
    int                 sym;
    int                 rap;
    int                 relax;
+   double              jacobi_weight;
+   int                 usr_jacobi_weight;
    int                 jump;
    int                 rep, reps;
 
@@ -199,6 +201,7 @@ main( int   argc,
    sym  = 1;
    rap = 0;
    relax = 1;
+   usr_jacobi_weight= 0;
    jump  = 0;
    reps = 1;
 
@@ -376,6 +379,12 @@ main( int   argc,
          arg_index++;
          relax = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-w") == 0 )
+      {
+         arg_index++;
+         jacobi_weight= atof(argv[arg_index++]);
+         usr_jacobi_weight= 1; /* flag user weight */
+      }
       else if ( strcmp(argv[arg_index], "-sym") == 0 )
       {
          arg_index++;
@@ -541,6 +550,7 @@ main( int   argc,
       printf("                        1 - Weighted Jacobi (default)\n");
       printf("                        2 - R/B Gauss-Seidel\n");
       printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
+      printf("  -w <jacobi weight>  : jacobi weight\n");
       printf("  -skip <s>           : skip levels in PFMG (0 or 1)\n");
       printf("  -sym <s>            : symmetric storage (1) or not (0)\n");
       printf("  -jump <num>         : num levels to jump in SparseMSG\n");
@@ -1368,6 +1378,10 @@ main( int   argc,
       HYPRE_StructPFMGSetRelChange(solver, 0);
       HYPRE_StructPFMGSetRAPType(solver, rap);
       HYPRE_StructPFMGSetRelaxType(solver, relax);
+      if (usr_jacobi_weight)
+      {
+         HYPRE_StructPFMGSetJacobiWeight(solver, jacobi_weight);
+      }
       HYPRE_StructPFMGSetNumPreRelax(solver, n_pre);
       HYPRE_StructPFMGSetNumPostRelax(solver, n_post);
       HYPRE_StructPFMGSetSkipRelax(solver, skip);
@@ -1424,6 +1438,10 @@ main( int   argc,
       HYPRE_StructSparseMSGSetTol(solver, 1.0e-06);
       HYPRE_StructSparseMSGSetRelChange(solver, 0);
       HYPRE_StructSparseMSGSetRelaxType(solver, relax);
+      if (usr_jacobi_weight)
+      {
+         HYPRE_StructSparseMSGSetJacobiWeight(solver, jacobi_weight);
+      }
       HYPRE_StructSparseMSGSetNumPreRelax(solver, n_pre);
       HYPRE_StructSparseMSGSetNumPostRelax(solver, n_post);
       HYPRE_StructSparseMSGSetPrintLevel(solver, 1);
@@ -1494,6 +1512,10 @@ main( int   argc,
          HYPRE_StructPFMGSetZeroGuess(precond);
          HYPRE_StructPFMGSetRAPType(precond, rap);
          HYPRE_StructPFMGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_StructPFMGSetJacobiWeight(precond, jacobi_weight);
+         }
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
@@ -1515,6 +1537,10 @@ main( int   argc,
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
          HYPRE_StructSparseMSGSetZeroGuess(precond);
          HYPRE_StructSparseMSGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_StructSparseMSGSetJacobiWeight(precond, jacobi_weight);
+         }
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
          HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
@@ -1652,6 +1678,10 @@ main( int   argc,
 	   HYPRE_StructPFMGSetZeroGuess(precond);
 	   HYPRE_StructPFMGSetRAPType(precond, rap);
 	   HYPRE_StructPFMGSetRelaxType(precond, relax);
+           if (usr_jacobi_weight)
+           {
+              HYPRE_StructPFMGSetJacobiWeight(precond, jacobi_weight);
+           }
 	   HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
 	   HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
 	   HYPRE_StructPFMGSetSkipRelax(precond, skip);
@@ -1673,6 +1703,10 @@ main( int   argc,
 	   HYPRE_StructSparseMSGSetTol(precond, 0.0);
 	   HYPRE_StructSparseMSGSetZeroGuess(precond);
 	   HYPRE_StructSparseMSGSetRelaxType(precond, relax);
+           if (usr_jacobi_weight)
+           {
+              HYPRE_StructSparseMSGSetJacobiWeight(precond, jacobi_weight);
+           }
 	   HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
 	   HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
 	   HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
@@ -1879,6 +1913,10 @@ main( int   argc,
 	   HYPRE_StructPFMGSetZeroGuess(precond);
 	   HYPRE_StructPFMGSetRAPType(precond, rap);
 	   HYPRE_StructPFMGSetRelaxType(precond, relax);
+           if (usr_jacobi_weight)
+           {
+              HYPRE_StructPFMGSetJacobiWeight(precond, jacobi_weight);
+           }
 	   HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
 	   HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
 	   HYPRE_StructPFMGSetSkipRelax(precond, skip);
@@ -1900,6 +1938,10 @@ main( int   argc,
 	   HYPRE_StructSparseMSGSetTol(precond, 0.0);
 	   HYPRE_StructSparseMSGSetZeroGuess(precond);
 	   HYPRE_StructSparseMSGSetRelaxType(precond, relax);
+           if (usr_jacobi_weight)
+           {
+              HYPRE_StructSparseMSGSetJacobiWeight(precond, jacobi_weight);
+           }
 	   HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
 	   HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
 	   HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
@@ -2116,6 +2158,10 @@ main( int   argc,
          HYPRE_StructPFMGSetZeroGuess(precond);
          HYPRE_StructPFMGSetRAPType(precond, rap);
          HYPRE_StructPFMGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_StructPFMGSetJacobiWeight(precond, jacobi_weight);
+         }
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
@@ -2137,6 +2183,10 @@ main( int   argc,
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
          HYPRE_StructSparseMSGSetZeroGuess(precond);
          HYPRE_StructSparseMSGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_StructSparseMSGSetJacobiWeight(precond, jacobi_weight);
+         }
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
          HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
@@ -2225,6 +2275,10 @@ main( int   argc,
          HYPRE_StructPFMGSetZeroGuess(precond);
          HYPRE_StructPFMGSetRAPType(precond, rap);
          HYPRE_StructPFMGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_StructPFMGSetJacobiWeight(precond, jacobi_weight);
+         }
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
@@ -2246,6 +2300,10 @@ main( int   argc,
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
          HYPRE_StructSparseMSGSetZeroGuess(precond);
          HYPRE_StructSparseMSGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_StructSparseMSGSetJacobiWeight(precond, jacobi_weight);
+         }
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
          HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
@@ -2369,6 +2427,10 @@ main( int   argc,
          HYPRE_StructPFMGSetZeroGuess(precond);
          HYPRE_StructPFMGSetRAPType(precond, rap);
          HYPRE_StructPFMGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_StructPFMGSetJacobiWeight(precond, jacobi_weight);
+         }
          HYPRE_StructPFMGSetNumPreRelax(precond, n_pre);
          HYPRE_StructPFMGSetNumPostRelax(precond, n_post);
          HYPRE_StructPFMGSetSkipRelax(precond, skip);
@@ -2390,6 +2452,10 @@ main( int   argc,
          HYPRE_StructSparseMSGSetTol(precond, 0.0);
          HYPRE_StructSparseMSGSetZeroGuess(precond);
          HYPRE_StructSparseMSGSetRelaxType(precond, relax);
+         if (usr_jacobi_weight)
+         {
+            HYPRE_StructSparseMSGSetJacobiWeight(precond, jacobi_weight);
+         }
          HYPRE_StructSparseMSGSetNumPreRelax(precond, n_pre);
          HYPRE_StructSparseMSGSetNumPostRelax(precond, n_post);
          HYPRE_StructSparseMSGSetPrintLevel(precond, 0);
