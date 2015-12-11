@@ -106,6 +106,8 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
       hypre_CSRMatrixCreate(local_num_rows, local_num_cols,num_nonzeros_diag);
    hypre_ParCSRMatrixOffd(matrix) =
       hypre_CSRMatrixCreate(local_num_rows, num_cols_offd,num_nonzeros_offd);
+   hypre_ParCSRMatrixDiagT(matrix) = NULL;
+   hypre_ParCSRMatrixOffdT(matrix) = NULL; // JSP: transposed matrices are optional
    hypre_ParCSRMatrixGlobalNumRows(matrix) = global_num_rows;
    hypre_ParCSRMatrixGlobalNumCols(matrix) = global_num_cols;
    hypre_ParCSRMatrixFirstRowIndex(matrix) = first_row_index;
@@ -155,6 +157,14 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matrix));
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(matrix));
+         if ( hypre_ParCSRMatrixDiagT(matrix) )
+         {
+            hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiagT(matrix));
+         }
+         if ( hypre_ParCSRMatrixOffdT(matrix) )
+         {
+            hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffdT(matrix));
+         }
          if (hypre_ParCSRMatrixColMapOffd(matrix))
             hypre_TFree(hypre_ParCSRMatrixColMapOffd(matrix));
          if (hypre_ParCSRMatrixCommPkg(matrix))

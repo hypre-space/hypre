@@ -22,25 +22,28 @@
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec
  *--------------------------------------------------------------------------*/
-
+// y = alpha*A*x + beta*b
 HYPRE_Int
-hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
-                          hypre_ParCSRMatrix *A,
-                          hypre_ParVector    *x,
-                          HYPRE_Complex       beta,
-                          hypre_ParVector    *y )
+hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
+                                    hypre_ParCSRMatrix *A,
+                                    hypre_ParVector    *x,
+                                    HYPRE_Complex       beta,
+                                    hypre_ParVector    *b,
+                                    hypre_ParVector    *y )
 {
    hypre_ParCSRCommHandle **comm_handle;
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_CSRMatrix   *diag   = hypre_ParCSRMatrixDiag(A);
    hypre_CSRMatrix   *offd   = hypre_ParCSRMatrixOffd(A);
    hypre_Vector      *x_local  = hypre_ParVectorLocalVector(x);   
+   hypre_Vector      *b_local  = hypre_ParVectorLocalVector(b);   
    hypre_Vector      *y_local  = hypre_ParVectorLocalVector(y);   
    HYPRE_Int          num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    HYPRE_Int          num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
 
    hypre_Vector      *x_tmp;
    HYPRE_Int          x_size = hypre_ParVectorGlobalSize(x);
+   HYPRE_Int          b_size = hypre_ParVectorGlobalSize(b);
    HYPRE_Int          y_size = hypre_ParVectorGlobalSize(y);
    HYPRE_Int          num_vectors = hypre_VectorNumVectors(x_local);
    HYPRE_Int          num_cols_offd = hypre_CSRMatrixNumCols(offd);
@@ -69,12 +72,13 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
    if (num_cols != x_size)
       ierr = 11;
 
-   if (num_rows != y_size)
+   if (num_rows != y_size || num_rows != b_size)
       ierr = 12;
 
-   if (num_cols != x_size && num_rows != y_size)
+   if (num_cols != x_size && (num_rows != y_size || num_rows != b_size))
       ierr = 13;
 
+   hypre_assert( hypre_VectorNumVectors(b_local)==num_vectors );
    hypre_assert( hypre_VectorNumVectors(y_local)==num_vectors );
 
    if ( num_vectors==1 )
@@ -84,10 +88,6 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
       hypre_assert( num_vectors>1 );
       x_tmp = hypre_SeqMultiVectorCreate( num_cols_offd, num_vectors );
    }
-   hypre_SeqVectorInitialize(x_tmp);
-   x_tmp_data = hypre_VectorData(x_tmp);
-   
-   comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*,num_vectors);
 
    /*---------------------------------------------------------------------
     * If there exists no CommPkg for A, a CommPkg is generated using
@@ -99,21 +99,60 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
       comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
+   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+
+   HYPRE_Int use_persistent_comm = 0;
+#ifdef HYPRE_USING_PERSISTENT_COMM
+   use_persistent_comm = num_vectors == 1;
+   // JSP TODO: we can use persistent communication for multi-vectors,
+   // but then we need different communication handles for different
+   // num_vectors.
+   hypre_ParCSRPersistentCommHandle *persistent_comm_handle;
+#endif
+
+   if ( use_persistent_comm )
+   {
+#ifdef HYPRE_USING_PERSISTENT_COMM
+      persistent_comm_handle = hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg);
+
+      HYPRE_Int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+      hypre_assert(num_cols_offd == hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs));
+
+      hypre_VectorData(x_tmp) = (HYPRE_Complex *)persistent_comm_handle->recv_data;
+      hypre_SeqVectorSetDataOwner(x_tmp, 0);
+#endif
+   }
+   else
+   {
+      comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*,num_vectors);
+   }
+   hypre_SeqVectorInitialize(x_tmp);
+   x_tmp_data = hypre_VectorData(x_tmp);
+
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   x_buf_data = hypre_CTAlloc( HYPRE_Complex*, num_vectors );
-   for ( jv=0; jv<num_vectors; ++jv )
-      x_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex, hypre_ParCSRCommPkgSendMapStart
-                                     (comm_pkg, num_sends));
+   if (!use_persistent_comm)
+   {
+      x_buf_data = hypre_CTAlloc( HYPRE_Complex*, num_vectors );
+      for ( jv=0; jv<num_vectors; ++jv )
+         x_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex, hypre_ParCSRCommPkgSendMapStart
+                                        (comm_pkg, num_sends));
+   }
 
    if ( num_vectors==1 )
    {
-      index = 0;
-      for (i = 0; i < num_sends; i++)
+      HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
+      HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for HYPRE_SMP_SCHEDULE
+#endif
+      for (i = begin; i < end; i++)
       {
-         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-         for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-            x_buf_data[0][index++] 
-               = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+#ifdef HYPRE_USING_PERSISTENT_COMM
+         ((HYPRE_Complex *)persistent_comm_handle->send_data)[i - begin]
+#else
+         x_buf_data[0][i - begin]
+#endif
+            = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
       }
    }
    else
@@ -140,29 +179,73 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
       a new variable inside CommPkg).  Or put the num_vector iteration inside
       CommHandleCreate (perhaps a new multivector variant of it).
    */
-   for ( jv=0; jv<num_vectors; ++jv )
+   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
+
+   if (use_persistent_comm)
    {
-      comm_handle[jv] = hypre_ParCSRCommHandleCreate
-         ( 1, comm_pkg, x_buf_data[jv], &(x_tmp_data[jv*num_cols_offd]) );
+#ifdef HYPRE_USING_PERSISTENT_COMM
+      hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle);
+#endif
+   }
+   else
+   {
+      for ( jv=0; jv<num_vectors; ++jv )
+      {
+         comm_handle[jv] = hypre_ParCSRCommHandleCreate
+            ( 1, comm_pkg, x_buf_data[jv], &(x_tmp_data[jv*num_cols_offd]) );
+      }
    }
 
-   hypre_CSRMatrixMatvec( alpha, diag, x_local, beta, y_local);
+   hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
+
+   hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
+
+   hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
    
-   for ( jv=0; jv<num_vectors; ++jv )
+   if (use_persistent_comm)
    {
-      hypre_ParCSRCommHandleDestroy(comm_handle[jv]);
-      comm_handle[jv] = NULL;
+#ifdef HYPRE_USING_PERSISTENT_COMM
+      hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle);
+#endif
    }
-   hypre_TFree(comm_handle);
+   else
+   {
+      for ( jv=0; jv<num_vectors; ++jv )
+      {
+         hypre_ParCSRCommHandleDestroy(comm_handle[jv]);
+         comm_handle[jv] = NULL;
+      }
+      hypre_TFree(comm_handle);
+   }
+
+   hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 
    if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);    
 
+   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+
    hypre_SeqVectorDestroy(x_tmp);
    x_tmp = NULL;
-   for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(x_buf_data[jv]);
-   hypre_TFree(x_buf_data);
+   if (!use_persistent_comm)
+   {
+      for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(x_buf_data[jv]);
+      hypre_TFree(x_buf_data);
+   }
   
+   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
+
    return ierr;
+}
+
+HYPRE_Int
+hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
+                          hypre_ParCSRMatrix *A,
+                          hypre_ParVector    *x,
+                          HYPRE_Complex       beta,
+                          hypre_ParVector    *y )
+{
+   return hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y);
 }
 
 /*--------------------------------------------------------------------------
@@ -224,8 +307,6 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    /*-----------------------------------------------------------------------
     *-----------------------------------------------------------------------*/
 
-   comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*,num_vectors);
-
    if ( num_vectors==1 )
    {
       y_tmp = hypre_SeqVectorCreate(num_cols_offd);
@@ -234,7 +315,6 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       y_tmp = hypre_SeqMultiVectorCreate(num_cols_offd,num_vectors);
    }
-   hypre_SeqVectorInitialize(y_tmp);
 
    /*---------------------------------------------------------------------
     * If there exists no CommPkg for A, a CommPkg is generated using
@@ -246,34 +326,114 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
+   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+
+   HYPRE_Int use_persistent_comm = 0;
+#ifdef HYPRE_USING_PERSISTENT_COMM
+   use_persistent_comm = num_vectors == 1;
+   // JSP TODO: we can use persistent communication for multi-vectors,
+   // but then we need different communication handles for different
+   // num_vectors.
+   hypre_ParCSRPersistentCommHandle *persistent_comm_handle;
+#endif
+
+   if (use_persistent_comm)
+   {
+#ifdef HYPRE_USING_PERSISTENT_COMM
+      // JSP TODO: we should be also able to use persistent communication for multiple vectors
+      persistent_comm_handle = hypre_ParCSRCommPkgGetPersistentCommHandle(2, comm_pkg);
+
+      HYPRE_Int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+      hypre_assert(num_cols_offd == hypre_ParCSRCommPkgRecvVecStart(comm_pkg, num_recvs));
+
+      hypre_VectorData(y_tmp) = (HYPRE_Complex *)persistent_comm_handle->send_data;
+      hypre_SeqVectorSetDataOwner(y_tmp, 0);
+#endif
+   }
+   else
+   {
+      comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*,num_vectors);
+   }
+   hypre_SeqVectorInitialize(y_tmp);
+
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   y_buf_data = hypre_CTAlloc( HYPRE_Complex*, num_vectors );
-   for ( jv=0; jv<num_vectors; ++jv )
-      y_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex, hypre_ParCSRCommPkgSendMapStart
-                                     (comm_pkg, num_sends));
+   if (!use_persistent_comm)
+   {
+      y_buf_data = hypre_CTAlloc( HYPRE_Complex*, num_vectors );
+      for ( jv=0; jv<num_vectors; ++jv )
+         y_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex, hypre_ParCSRCommPkgSendMapStart
+                                        (comm_pkg, num_sends));
+   }
    y_tmp_data = hypre_VectorData(y_tmp);
    y_local_data = hypre_VectorData(y_local);
 
    hypre_assert( idxstride==1 ); /* only 'column' storage of multivectors
                                   * implemented so far */
+   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 
-   if (num_cols_offd) hypre_CSRMatrixMatvecT(alpha, offd, x_local, 0.0, y_tmp);
-
-   for ( jv=0; jv<num_vectors; ++jv )
+   if (num_cols_offd)
    {
-      /* this is where we assume multivectors are 'column' storage */
-      comm_handle[jv] = hypre_ParCSRCommHandleCreate
-         ( 2, comm_pkg, &(y_tmp_data[jv*num_cols_offd]), y_buf_data[jv] );
+      if (A->offdT)
+      {
+         // offdT is optional. Used only if it's present.
+         hypre_CSRMatrixMatvec(alpha, A->offdT, x_local, 0.0, y_tmp);
+      }
+      else
+      {
+         hypre_CSRMatrixMatvecT(alpha, offd, x_local, 0.0, y_tmp);
+      }
    }
 
-   hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
+   hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 
-   for ( jv=0; jv<num_vectors; ++jv )
+   if (use_persistent_comm)
    {
-      hypre_ParCSRCommHandleDestroy(comm_handle[jv]);
-      comm_handle[jv] = NULL;
+#ifdef HYPRE_USING_PERSISTENT_COMM
+      hypre_ParCSRPersistentCommHandleStart(persistent_comm_handle);
+#endif
    }
-   hypre_TFree(comm_handle);
+   else
+   {
+      for ( jv=0; jv<num_vectors; ++jv )
+      {
+         /* this is where we assume multivectors are 'column' storage */
+         comm_handle[jv] = hypre_ParCSRCommHandleCreate
+            ( 2, comm_pkg, &(y_tmp_data[jv*num_cols_offd]), y_buf_data[jv] );
+      }
+   }
+
+   hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
+
+   if (A->diagT)
+   {
+      // diagT is optional. Used only if it's present.
+      hypre_CSRMatrixMatvec(alpha, A->diagT, x_local, beta, y_local);
+   }
+   else
+   {
+      hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
+   }
+
+   hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
+
+   if (use_persistent_comm)
+   {
+#ifdef HYPRE_USING_PERSISTENT_COMM
+      hypre_ParCSRPersistentCommHandleWait(persistent_comm_handle);
+#endif
+   }
+   else
+   {
+      for ( jv=0; jv<num_vectors; ++jv )
+      {
+         hypre_ParCSRCommHandleDestroy(comm_handle[jv]);
+         comm_handle[jv] = NULL;
+      }
+      hypre_TFree(comm_handle);
+   }
+
+   hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
+   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 
    if ( num_vectors==1 )
    {
@@ -283,7 +443,11 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
          for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
             y_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]
+#ifdef HYPRE_USING_PERSISTENT_COMM
+               += ((HYPRE_Complex *)persistent_comm_handle->recv_data)[index++];
+#else
                += y_buf_data[0][index++];
+#endif
       }
    }
    else
@@ -302,8 +466,13 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
         
    hypre_SeqVectorDestroy(y_tmp);
    y_tmp = NULL;
-   for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(y_buf_data[jv]);
-   hypre_TFree(y_buf_data);
+   if (!use_persistent_comm)
+   {
+      for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(y_buf_data[jv]);
+      hypre_TFree(y_buf_data);
+   }
+
+   hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 
    return ierr;
 }

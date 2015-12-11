@@ -16,7 +16,10 @@
  *
  *****************************************************************************/
 
+#include <assert.h>
+
 #include "seq_mv.h"
+#include "csr_matrix.h"
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixAdd:
@@ -362,6 +365,16 @@ hypre_CSRMatrixDeleteZeros( hypre_CSRMatrix *A, HYPRE_Real tol)
  *
  *****************************************************************************/
 
+/**
+ * idx = idx2*dim1 + idx1
+ * -> ret = idx1*dim2 + idx2
+ *        = (idx%dim1)*dim2 + idx/dim1
+ */
+static inline HYPRE_Int transpose_idx(HYPRE_Int idx, HYPRE_Int dim1, HYPRE_Int dim2)
+{
+  return idx%dim1*dim2 + idx/dim1;
+}
+
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixTranspose
  *--------------------------------------------------------------------------*/
@@ -398,7 +411,7 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
       num_nonzerosA = A_i[num_rowsA];
    }
 
-   if (num_rowsA && ! num_colsA)
+   if (num_rowsA && num_nonzerosA && ! num_colsA)
    {
       max_col = -1;
       for (i = 0; i < num_rowsA; ++i)
@@ -418,9 +431,15 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
    *AT = hypre_CSRMatrixCreate(num_rowsAT, num_colsAT, num_nonzerosAT);
 
-   AT_i = hypre_CTAlloc(HYPRE_Int, num_rowsAT+1);
+   if (0 == num_colsA)
+   {
+      // JSP: parallel counting sorting breaks down
+      // when A has no columns
+      hypre_CSRMatrixInitialize(*AT);
+      return 0;
+   }
+
    AT_j = hypre_CTAlloc(HYPRE_Int, num_nonzerosAT);
-   hypre_CSRMatrixI(*AT) = AT_i;
    hypre_CSRMatrixJ(*AT) = AT_j;
    if (data) 
    {
@@ -429,47 +448,122 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
    }
 
    /*-----------------------------------------------------------------
-    * Count the number of entries in each column of A (row of AT)
-    * and fill the AT_i array.
+    * Parallel count sort
     *-----------------------------------------------------------------*/
 
-   for (i = 0; i < num_nonzerosA; i++)
+   HYPRE_Int *bucket = hypre_TAlloc(
+    HYPRE_Int, (num_colsA + 1)*hypre_NumThreads());
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel
+#endif
    {
-      ++AT_i[A_j[i]+1];
+   HYPRE_Int num_threads = hypre_NumActiveThreads();
+   HYPRE_Int my_thread_num = hypre_GetThreadNum();
+
+   HYPRE_Int iBegin = hypre_CSRMatrixGetLoadBalancedPartitionBegin(A);
+   HYPRE_Int iEnd = hypre_CSRMatrixGetLoadBalancedPartitionEnd(A);
+   hypre_assert(iBegin <= iEnd);
+   hypre_assert(iBegin >= 0 && iBegin <= num_rowsA);
+   hypre_assert(iEnd >= 0 && iEnd <= num_rowsA);
+
+   HYPRE_Int i, j;
+   memset(bucket + my_thread_num*num_colsA, 0, sizeof(HYPRE_Int)*num_colsA);
+
+   /*-----------------------------------------------------------------
+    * Count the number of entries that will go into each bucket
+    * bucket is used as int[num_threads][num_colsA] 2D array
+    *-----------------------------------------------------------------*/
+
+   for (j = A_i[iBegin]; j < A_i[iEnd]; ++j) {
+     HYPRE_Int idx = A_j[j];
+     bucket[my_thread_num*num_colsA + idx]++;
    }
 
-   for (i = 2; i <= num_rowsAT; i++)
-   {
-      AT_i[i] += AT_i[i-1];
+   /*-----------------------------------------------------------------
+    * Parallel prefix sum of bucket with length num_colsA * num_threads
+    * accssed as if it is transposed as int[num_colsA][num_threads]
+    *-----------------------------------------------------------------*/
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
+
+   for (i = my_thread_num*num_colsA + 1; i < (my_thread_num + 1)*num_colsA; ++i) {
+     HYPRE_Int transpose_i = transpose_idx(i, num_threads, num_colsA);
+     HYPRE_Int transpose_i_minus_1 = transpose_idx(i - 1, num_threads, num_colsA);
+
+     bucket[transpose_i] += bucket[transpose_i_minus_1];
    }
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#pragma omp master
+#endif
+   {
+     for (i = 1; i < num_threads; ++i) {
+       HYPRE_Int j0 = num_colsA*i - 1, j1 = num_colsA*(i + 1) - 1;
+       HYPRE_Int transpose_j0 = transpose_idx(j0, num_threads, num_colsA);
+       HYPRE_Int transpose_j1 = transpose_idx(j1, num_threads, num_colsA);
+
+       bucket[transpose_j1] += bucket[transpose_j0];
+     }
+   }
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
+
+   if (my_thread_num > 0) {
+     HYPRE_Int transpose_i0 = transpose_idx(num_colsA*my_thread_num - 1, num_threads, num_colsA);
+     HYPRE_Int offset = bucket[transpose_i0];
+
+     for (i = my_thread_num*num_colsA; i < (my_thread_num + 1)*num_colsA - 1; ++i) {
+       HYPRE_Int transpose_i = transpose_idx(i, num_threads, num_colsA);
+
+       bucket[transpose_i] += offset;
+     }
+   }
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
 
    /*----------------------------------------------------------------
     * Load the data and column numbers of AT
     *----------------------------------------------------------------*/
 
-   for (i = 0; i < num_rowsA; i++)
-   {
-      for (j = A_i[i]; j < A_i[i+1]; j++)
-      {
-         hypre_assert( AT_i[A_j[j]] >= 0 );
-         hypre_assert( AT_i[A_j[j]] < num_nonzerosAT );
-         AT_j[AT_i[A_j[j]]] = i;
-         if (data) AT_data[AT_i[A_j[j]]] = A_data[j];
-         AT_i[A_j[j]]++;
+   if (data) {
+      for (i = iEnd - 1; i >= iBegin; --i) {
+        for (j = A_i[i + 1] - 1; j >= A_i[i]; --j) {
+          HYPRE_Int idx = A_j[j];
+          --bucket[my_thread_num*num_colsA + idx];
+
+          HYPRE_Int offset = bucket[my_thread_num*num_colsA + idx];
+
+          AT_data[offset] = A_data[j];
+          AT_j[offset] = i;
+        }
       }
    }
+   else {
+      for (i = iEnd - 1; i >= iBegin; --i) {
+        for (j = A_i[i + 1] - 1; j >= A_i[i]; --j) {
+          HYPRE_Int idx = A_j[j];
+          --bucket[my_thread_num*num_colsA + idx];
 
-   /*------------------------------------------------------------
-    * AT_i[j] now points to the *end* of the jth row of entries
-    * instead of the beginning.  Restore AT_i to front of row.
-    *------------------------------------------------------------*/
+          HYPRE_Int offset = bucket[my_thread_num*num_colsA + idx];
 
-   for (i = num_rowsAT; i > 0; i--)
-   {
-      AT_i[i] = AT_i[i-1];
+          AT_j[offset] = i;
+        }
+      }
    }
+   } /*end parallel region */
 
-   AT_i[0] = 0;
+   hypre_CSRMatrixI(*AT) = bucket; 
+      // JSP: bucket is hypre_NumThreads() times longer than
+      // the size needed for AT_i, but this should be OK.
+      // If the memory size is a concern, we can allocate
+      // a new memory for AT_i and copy from bucket.
+   hypre_CSRMatrixI(*AT)[num_colsA] = num_nonzerosA;
 
    return(0);
 }

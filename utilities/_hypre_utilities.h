@@ -15,6 +15,10 @@
 
 #include "HYPRE_utilities.h"
 
+#ifdef HYPRE_USING_OPENMP
+#include <omp.h>
+#endif
+
 /* This allows us to consistently avoid 'int' throughout hypre */
 typedef int               hypre_int;
 typedef long int          hypre_longint;
@@ -514,6 +518,8 @@ HYPRE_Int hypre_GetThreadNum( void );
 
 #endif
 
+void hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int n );
+
 #endif
 
 /*BHEADER**********************************************************************
@@ -803,6 +809,7 @@ void enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_pt
 /* binsearch.c */
 HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
 HYPRE_Int hypre_BinarySearch2 ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int low , HYPRE_Int high , HYPRE_Int *spot );
+HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value );
 
 /* hypre_complex.c */
 #ifdef HYPRE_COMPLEX
@@ -858,9 +865,200 @@ HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYP
 void hypre_SeedRand ( HYPRE_Int seed );
 HYPRE_Real hypre_Rand ( void );
 
+/* hypre_prefix_sum.c */
+/**
+ * Assumed to be called within an omp region.
+ * Let x_i be the input of ith thread.
+ * The output of ith thread y_i = x_0 + x_1 + ... + x_{i-1}
+ * Additionally, sum = x_0 + x_1 + ... + x_{nthreads - 1}
+ * Note that always y_0 = 0
+ *
+ * @param workspace at least with length (nthreads+1)
+ *                  workspace[tid] will contain result for tid
+ *                  workspace[nthreads] will contain sum
+ */
+void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace);
+/**
+ * This version does prefix sum in pair.
+ * Useful when we prefix sum of diag and offd in tandem.
+ *
+ * @param worksapce at least with length 2*(nthreads+1)
+ *                  workspace[2*tid] and workspace[2*tid+1] will contain results for tid
+ *                  workspace[3*nthreads] and workspace[3*nthreads + 1] will contain sums
+ */
+void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *workspace);
+/**
+ * @param workspace at least with length 3*(nthreads+1)
+ *                  workspace[3*tid:3*tid+3) will contain results for tid
+ */
+void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_out2, HYPRE_Int *sum2, HYPRE_Int *in_out3, HYPRE_Int *sum3, HYPRE_Int *workspace);
+
+/**
+ * n prefix-sums together.
+ * workspace[n*tid:n*(tid+1)) will contain results for tid
+ * workspace[nthreads*tid:nthreads*(tid+1)) will contain sums
+ *
+ * @param workspace at least with length n*(nthreads+1)
+ */
+void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, HYPRE_Int *workspace);
+
+/* hypre_merge_sort.c */
+/**
+ * Why merge sort?
+ * 1) Merge sort can take advantage of eliminating duplicates.
+ * 2) Merge sort is more efficiently parallelizable than qsort
+ */
+
+/**
+ * Out of place merge sort with duplicate elimination
+ * @ret number of unique elements
+ */
+HYPRE_Int hypre_merge_sort_unique(HYPRE_Int *in, HYPRE_Int *out, HYPRE_Int len);
+/**
+ * Out of place merge sort with duplicate elimination
+ *
+ * @param out pointer to output can be in or temp
+ * @ret number of unique elements
+ */
+HYPRE_Int hypre_merge_sort_unique2(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **out);
+
+void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int **sorted);
+
+/* hypre_hopscotch_hash.c */
+
+#ifdef HYPRE_USING_OPENMP
+
+/* Check if atomic operations are available to use concurrent hopscotch hash table */
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
+#define HYPRE_USING_ATOMIC
+//#pragma message ( “HYPRE_USING_ATOMIC” )
+//#elif defined _MSC_VER // JSP: haven't tested, so comment out for now
+//#define HYPRE_USING_ATOMIC
+//#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
+// JSP: not many compilers have implemented this, so comment out for now
+//#define HYPRE_USING_ATOMIC
+//#include <stdatomic.h>
+#endif
+
+#endif // HYPRE_USING_OPENMP
+
+#ifdef HYPRE_USING_ATOMIC
+static inline HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval)
+{
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
+  return __sync_val_compare_and_swap(ptr, oldval, newval);
+//#elif defind _MSC_VER
+  //return _InterlockedCompareExchange((long *)ptr, newval, oldval);
+//#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
+// JSP: not many compilers have implemented this, so comment out for now
+  //_Atomic HYPRE_Int *atomic_ptr = ptr;
+  //atomic_compare_exchange_strong(atomic_ptr, &oldval, newval);
+  //return oldval;
+#endif
+}
+
+static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
+{
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
+  return __sync_fetch_and_add(ptr, value);
+//#elif defined _MSC_VER
+  //return _InterlockedExchangeAdd((long *)ptr, value);
+//#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
+// JSP: not many compilers have implemented this, so comment out for now
+  //_Atomic HYPRE_Int *atomic_ptr = ptr;
+  //return atomic_fetch_add(atomic_ptr, value);
+#endif
+}
+#else // HYPRE_USING_ATOMIC
+static inline HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval)
+{
+   if (*ptr == oldval)
+   {
+      *ptr = newval;
+      return oldval;
+   }
+   else return *ptr;
+}
+
+static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
+{
+   HYPRE_Int oldval = *ptr;
+   *ptr += value;
+   return oldval;
+}
+#endif // HYPRE_USING_ATOMIC
+
+#ifdef HYPRE_USING_ATOMIC
+// concurrent hopscotch hasing is possible only with atomic supports
+#define HYPRE_CONCURRENT_HOPSCOTCH
+#endif
+
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+typedef struct {
+  hypre_uint volatile timestamp;
+  omp_lock_t         lock;
+} hypre_HopscotchSegment;
+#endif
+
+/**
+ * The current typical use case of unordered set is putting input sequence
+ * with lots of duplication (putting all colidx received from other ranks),
+ * followed by one sweep of enumeration.
+ * Since the capacity is set to the number of inputs, which is much larger
+ * than the number of unique elements, we optimize for initialization and
+ * enumeration whose time is proportional to the capacity.
+ * For initialization and enumeration, structure of array (SoA) is better
+ * for vectorization, cache line utilization, and so on.
+ */
+typedef struct
+{
+	hypre_uint volatile              segmentMask;
+	hypre_uint volatile              bucketMask;
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+	hypre_HopscotchSegment* volatile segments;
+#endif
+  HYPRE_Int *volatile              key;
+  hypre_uint *volatile             hopInfo;
+	hypre_uint *volatile	           hash;
+} hypre_UnorderedIntSet;
+
+typedef struct
+{
+  hypre_uint volatile hopInfo;
+  hypre_uint volatile hash;
+  HYPRE_Int  volatile key;
+  HYPRE_Int  volatile data;
+} hypre_HopscotchBucket;
+
+/**
+ * The current typical use case of unoredered map is putting input sequence
+ * with no duplication (inverse map of a bijective mapping) followed by
+ * lots of lookups.
+ * For lookup, array of structure (AoS) gives better cache line utilization.
+ */
+typedef struct
+{
+	hypre_uint volatile              segmentMask;
+	hypre_uint volatile              bucketMask;
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+	hypre_HopscotchSegment*	volatile segments;
+#endif
+	hypre_HopscotchBucket* volatile	 table;
+} hypre_UnorderedIntMap;
+
+/**
+ * Sort array "in" with length len and put result in array "out"
+ * "in" will be deallocated unless in == *out
+ * inverse_map is an inverse hash table s.t. inverse_map[i] = j iff (*out)[j] = i
+ */
+void hypre_sort_and_create_inverse_map(
+  HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map);
+
 #ifdef __cplusplus
 }
 #endif
+
+#include "hypre_hopscotch_hash.h"
 
 #endif
 

@@ -34,6 +34,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                    HYPRE_Int                 *col_offd_S_to_A,
                    hypre_ParCSRMatrix **P_ptr )
 {
+   hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] -= hypre_MPI_Wtime();
+
    MPI_Comm	           comm = hypre_ParCSRMatrixComm(A); 
    hypre_ParCSRCommPkg    *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
    hypre_ParCSRCommHandle *comm_handle;
@@ -2044,6 +2046,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
     *  Free mapping vector and marker array.
     *-----------------------------------------------------------------------*/
 
+   hypre_profile_times[HYPRE_TIMER_ID_MULTIPASS_INTERP] += hypre_MPI_Wtime();
 
    return(0);
 }

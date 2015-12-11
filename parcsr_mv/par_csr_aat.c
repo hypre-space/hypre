@@ -876,7 +876,7 @@ hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A,
         &num_nonzeros,
         data, 1, comm, comm_pkg,
         num_cols_A, num_recvs, num_sends,
-        first_col_diag, first_row_index,
+        first_col_diag, A->row_starts,
         recv_vec_starts, send_map_starts, send_map_elmts,
         diag_i, diag_j, offd_i, offd_j, col_map_offd,
         diag_data, offd_data
