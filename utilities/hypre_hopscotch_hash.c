@@ -9,7 +9,7 @@ static hypre_uint NearestPowerOfTwo( hypre_uint value )
   return rc;
 }
 
-static hypre_uint CalcDivideShift( hypre_uint _value )
+/*static hypre_uint CalcDivideShift( hypre_uint _value )
 {
   hypre_uint numShift = 0;
   hypre_uint curr = 1;
@@ -19,7 +19,7 @@ static hypre_uint CalcDivideShift( hypre_uint _value )
     ++numShift;
   }
   return numShift;
-}
+}*/
 
 static void InitBucket(hypre_HopscotchBucket *b)
 {
@@ -52,7 +52,7 @@ void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
 
   //ADJUST INPUT ............................
   hypre_uint adjInitCap = NearestPowerOfTwo(inCapacity);
-  hypre_uint adjConcurrencyLevel = NearestPowerOfTwo(concurrencyLevel);
+  // hypre_uint adjConcurrencyLevel = NearestPowerOfTwo(concurrencyLevel);
   hypre_uint num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
   s->bucketMask = adjInitCap - 1;
 
@@ -93,7 +93,7 @@ void hypre_UnorderedIntMapCreate( hypre_UnorderedIntMap *m,
 
   //ADJUST INPUT ............................
   hypre_uint adjInitCap = NearestPowerOfTwo(inCapacity);
-  hypre_uint adjConcurrencyLevel = NearestPowerOfTwo(concurrencyLevel);
+  // hypre_uint adjConcurrencyLevel = NearestPowerOfTwo(concurrencyLevel);
   hypre_uint num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
   m->bucketMask = adjInitCap - 1;
 

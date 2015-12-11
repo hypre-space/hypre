@@ -1136,13 +1136,13 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 
    hypre_CSRMatrix *C_diag;
 
-   HYPRE_Int          *C_diag_data = NULL;
+   /*HYPRE_Int          *C_diag_data = NULL;*/
    HYPRE_Int             *C_diag_i;
    HYPRE_Int             *C_diag_j = NULL;
 
    hypre_CSRMatrix *C_offd;
 
-   HYPRE_Int          *C_offd_data=NULL;
+   /*HYPRE_Int          *C_offd_data=NULL;*/
    HYPRE_Int             *C_offd_i;
    HYPRE_Int             *C_offd_j=NULL;
 
@@ -1177,7 +1177,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 
    HYPRE_Int              i, j, k;
    HYPRE_Int              i1, i2, i3;
-   HYPRE_Int              jj1, jj2, jcol, jrow, j_cnt;
+   HYPRE_Int              jj1, jj2, jrow, j_cnt;
    
    HYPRE_Int              cnt, cnt_offd, cnt_diag;
    HYPRE_Int 		    num_procs, my_id;

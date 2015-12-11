@@ -221,8 +221,8 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
    std::sort(dbg_buf, dbg_buf + len);
 #endif
 
-   HYPRE_Int thread_private_len[hypre_NumThreads()];
-   HYPRE_Int out_len = 0;
+   // HYPRE_Int thread_private_len[hypre_NumThreads()];
+   // HYPRE_Int out_len = 0;
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel
@@ -251,7 +251,7 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
          // merge 2 in-groups into 1 out-group
          HYPRE_Int out_group_size = in_group_size*2;
          HYPRE_Int group_leader = my_thread_num/out_group_size*out_group_size;
-         HYPRE_Int group_sub_leader = hypre_min(group_leader + in_group_size, num_threads - 1);
+         // HYPRE_Int group_sub_leader = hypre_min(group_leader + in_group_size, num_threads - 1);
          HYPRE_Int id_in_group = my_thread_num%out_group_size;
          HYPRE_Int num_threads_in_group =
             hypre_min(group_leader + out_group_size, num_threads) - group_leader;

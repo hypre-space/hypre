@@ -49,8 +49,8 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
   HYPRE_Int             *A_offd_i = hypre_CSRMatrixI(A_offd);
   HYPRE_Int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
 
-  HYPRE_Int              num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
-  HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+  /*HYPRE_Int              num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
+  HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);*/
   HYPRE_Int              n_fine = hypre_CSRMatrixNumRows(A_diag);
   HYPRE_Int              col_1 = hypre_ParCSRMatrixFirstRowIndex(A);
   HYPRE_Int              local_numrows = hypre_CSRMatrixNumRows(A_diag);
@@ -76,7 +76,7 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
   HYPRE_Real      *P_offd_data = NULL;
   HYPRE_Int             *P_offd_i, *P_offd_j = NULL;
 
-  HYPRE_Int		  *col_map_offd_P = NULL;
+  /*HYPRE_Int		  *col_map_offd_P = NULL;*/
   HYPRE_Int              P_diag_size; 
   HYPRE_Int              P_offd_size;
   /*HYPRE_Int             *P_marker = NULL; 
@@ -118,10 +118,10 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
   /*HYPRE_Int              strong_f_marker = -2;*/
  
   /* Loop variables */
-  HYPRE_Int              index;
+  /*HYPRE_Int              index;*/
   HYPRE_Int              cnt, old_cnt;
   HYPRE_Int              start_indexing = 0;
-  HYPRE_Int              i, j;
+  HYPRE_Int              i;
   /*HYPRE_Int              i, ii, i1, i2, j, jj, kk, k1, jj1;*/
 
   /* Definitions */
@@ -886,8 +886,8 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
   HYPRE_Int             *A_offd_i = hypre_CSRMatrixI(A_offd);
   HYPRE_Int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
 
-  HYPRE_Int              num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
-  HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+  /*HYPRE_Int              num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
+  HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);*/
   HYPRE_Int              n_fine = hypre_CSRMatrixNumRows(A_diag);
   HYPRE_Int              col_1 = hypre_ParCSRMatrixFirstRowIndex(A);
   HYPRE_Int              local_numrows = hypre_CSRMatrixNumRows(A_diag);
@@ -913,7 +913,7 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
   HYPRE_Real      *P_offd_data = NULL;
   HYPRE_Int             *P_offd_i, *P_offd_j = NULL;
 
-  HYPRE_Int		  *col_map_offd_P = NULL;
+  /*HYPRE_Int		  *col_map_offd_P = NULL;*/
   HYPRE_Int              P_diag_size; 
   HYPRE_Int              P_offd_size;
   HYPRE_Int             *P_marker = NULL; 
@@ -963,10 +963,10 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
   HYPRE_Real       alfa, beta;
   
   /* Loop variables */
-  HYPRE_Int              index;
+  /*HYPRE_Int              index;*/
   HYPRE_Int              cnt, old_cnt;
   HYPRE_Int              start_indexing = 0;
-  HYPRE_Int              i, ii, i1, j, j1, jj, kk, k1;
+  HYPRE_Int              i, ii, i1, j1, jj, kk, k1;
   HYPRE_Int              cnt_c, cnt_f, cnt_c_offd, cnt_f_offd, indx;
 
   /* Definitions */
@@ -1886,8 +1886,8 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
   HYPRE_Int             *A_offd_i = hypre_CSRMatrixI(A_offd);
   HYPRE_Int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
 
-  HYPRE_Int              num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
-  HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+  /*HYPRE_Int              num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
+  HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);*/
   HYPRE_Int              n_fine = hypre_CSRMatrixNumRows(A_diag);
   HYPRE_Int              col_1 = hypre_ParCSRMatrixFirstRowIndex(A);
   HYPRE_Int              local_numrows = hypre_CSRMatrixNumRows(A_diag);
@@ -1913,7 +1913,7 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
   HYPRE_Real      *P_offd_data = NULL;
   HYPRE_Int             *P_offd_i, *P_offd_j = NULL;
 
-  HYPRE_Int		  *col_map_offd_P = NULL;
+  /*HYPRE_Int		  *col_map_offd_P = NULL;*/
   HYPRE_Int              P_diag_size; 
   HYPRE_Int              P_offd_size;
   HYPRE_Int             *P_marker = NULL; 
@@ -1956,10 +1956,10 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
   HYPRE_Int              strong_f_marker = -2;
  
   /* Loop variables */
-  HYPRE_Int              index;
+  /*HYPRE_Int              index;*/
   HYPRE_Int              cnt, old_cnt;
   HYPRE_Int              start_indexing = 0;
-  HYPRE_Int              i, ii, i1, i2, j, jj, kk, k1, jj1;
+  HYPRE_Int              i, ii, i1, i2, jj, kk, k1, jj1;
 
   /* Definitions */
   HYPRE_Real       zero = 0.0;

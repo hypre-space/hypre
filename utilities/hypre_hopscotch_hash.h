@@ -69,13 +69,13 @@ extern "C" {
 #define HYPRE_HOPSCOTCH_HASH_BUSY  (1U)
 
 // Small Utilities ..........................................................
-inline HYPRE_Int first_lsb_bit_indx(hypre_uint x) {
+static inline HYPRE_Int first_lsb_bit_indx(hypre_uint x) {
   if (0 == x) return -1;
   return __builtin_ffs(x) - 1;
 }
 
 // assumption: key is non-negative
-inline hypre_uint hypre_Hash(HYPRE_Int key) {
+static inline hypre_uint hypre_Hash(HYPRE_Int key) {
   key -= 339522179;
   key ^= (key << 15) ^ 0xcd7dcd7d;
   key ^= (key >> 10);
@@ -90,7 +90,7 @@ inline hypre_uint hypre_Hash(HYPRE_Int key) {
   return key;
 }
 
-inline void hypre_UnorderedIntSetFindCloserFreeBucket( hypre_UnorderedIntSet *s,
+static inline void hypre_UnorderedIntSetFindCloserFreeBucket( hypre_UnorderedIntSet *s,
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
                                                        hypre_HopscotchSegment* start_seg,
 #endif
@@ -158,7 +158,7 @@ inline void hypre_UnorderedIntSetFindCloserFreeBucket( hypre_UnorderedIntSet *s,
   *free_dist = 0;
 }
 
-inline void hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedIntMap *m,
+static inline void hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedIntMap *m,
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
                                                        hypre_HopscotchSegment* start_seg,
 #endif
@@ -238,7 +238,7 @@ void hypre_UnorderedIntSetDestroy( hypre_UnorderedIntSet *s );
 void hypre_UnorderedIntMapDestroy( hypre_UnorderedIntMap *m );
 
 // Query Operations .........................................................
-inline HYPRE_Int hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
+static inline HYPRE_Int hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
                                                 HYPRE_Int key )
 {
   //CALCULATE HASH ..........................
@@ -290,7 +290,7 @@ inline HYPRE_Int hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
 /**
  * @ret -1 if key doesn't exist
  */
-inline HYPRE_Int hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
+static inline HYPRE_Int hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
                                            HYPRE_Int key)
 {
   //CALCULATE HASH ..........................
@@ -339,7 +339,7 @@ inline HYPRE_Int hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
 }
 
 //status Operations .........................................................
-inline HYPRE_Int hypre_UnorderedIntSetSize(hypre_UnorderedIntSet *s)
+static inline HYPRE_Int hypre_UnorderedIntSetSize(hypre_UnorderedIntSet *s)
 {
   HYPRE_Int counter = 0;
   HYPRE_Int n = s->bucketMask + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE;
@@ -354,7 +354,7 @@ inline HYPRE_Int hypre_UnorderedIntSetSize(hypre_UnorderedIntSet *s)
   return counter;
 }   
 
-inline HYPRE_Int hypre_UnorderedIntMapSize(hypre_UnorderedIntMap *m)
+static inline HYPRE_Int hypre_UnorderedIntMapSize(hypre_UnorderedIntMap *m)
 {
   HYPRE_Int counter = 0;
   HYPRE_Int n = m->bucketMask + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE;
@@ -372,7 +372,7 @@ inline HYPRE_Int hypre_UnorderedIntMapSize(hypre_UnorderedIntMap *m)
 HYPRE_Int *hypre_UnorderedIntSetCopyToArray( hypre_UnorderedIntSet *s, HYPRE_Int *len );
 
 //modification Operations ...................................................
-inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
+static inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
                                       HYPRE_Int key )
 {
   //CALCULATE HASH ..........................
@@ -445,7 +445,7 @@ inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
   return;
 }
 
-inline HYPRE_Int hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap *m, HYPRE_Int key, HYPRE_Int data)
+static inline HYPRE_Int hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap *m, HYPRE_Int key, HYPRE_Int data)
 {
   //CALCULATE HASH ..........................
   hypre_uint hash = hypre_Hash(key);

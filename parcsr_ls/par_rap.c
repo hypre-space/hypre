@@ -339,7 +339,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    
    HYPRE_Int              ic, i, j, k;
    HYPRE_Int              i1, i2, i3, ii, ns, ne, size, rest;
-   HYPRE_Int              cnt = 0, cnt_offd, cnt_diag, value;
+   HYPRE_Int              cnt = 0, value;
    HYPRE_Int              jj1, jj2, jj3, jcol;
    
    HYPRE_Int             *jj_count, *jj_cnt_diag, *jj_cnt_offd;

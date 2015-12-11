@@ -36,7 +36,7 @@ HYPRE_Int alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
 {   
   hypre_ParCSRCommHandle  *comm_handle;
 
-  HYPRE_Int i, j, start, index, shift;
+  HYPRE_Int i, index, shift;
 
   HYPRE_Int num_sends, num_recvs;
   
@@ -315,7 +315,7 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
 {
   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
 
-  HYPRE_Int i, i1, ii, j, ifound, kk, k1;
+  HYPRE_Int i, i1, j, ifound, kk, k1;
   HYPRE_Int got_loc, loc_col;
 
   HYPRE_Int min;
