@@ -235,3 +235,11 @@ Final Relative Residual Norm = 8.867318e-09
 BoomerAMG Iterations = 14
 Final Relative Residual Norm = 3.248865e-09
 
+# Output file: solvers.out.116
+GMRES Iterations = 19
+Final GMRES Relative Residual Norm = 3.268945e-09
+
+# Output file: solvers.out.117
+GMRES Iterations = 19
+Final GMRES Relative Residual Norm = 3.341112e-09
+

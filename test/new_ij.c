@@ -191,6 +191,7 @@ main( hypre_int argc,
    HYPRE_Int add_P_max_elmts = 0;
    HYPRE_Real add_trunc_factor = 0;
 
+   HYPRE_Int    rap2=0;
    HYPRE_Real   relax_wt; 
    HYPRE_Real   relax_wt_level; 
    HYPRE_Real   outer_wt;
@@ -1081,6 +1082,11 @@ main( hypre_int argc,
       {
          arg_index++;
          add_trunc_factor  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-rap") == 0 )
+      {
+         arg_index++;
+         rap2  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-nongalerk_tol") == 0 )
       {
@@ -2300,6 +2306,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
 
       HYPRE_BoomerAMGSetMaxIter(amg_solver, mg_max_iter);
+      HYPRE_BoomerAMGSetRAP2(amg_solver, rap2);
       /*HYPRE_BoomerAMGSetNonGalerkTol(amg_solver, nongalerk_num_tol, nongalerk_tol);*/
       if (nongalerk_tol)
       {
@@ -2448,6 +2455,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetSimple(amg_solver, simple);
       HYPRE_BoomerAMGSetMultAddPMaxElmts(amg_solver, add_P_max_elmts);
       HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
+      HYPRE_BoomerAMGSetRAP2(amg_solver, rap2);
       if (nongalerk_tol)
       {
          HYPRE_BoomerAMGSetNonGalerkinTol(amg_solver, nongalerk_tol[nongalerk_num_tol-1]);
@@ -2606,6 +2614,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -2754,6 +2763,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -2967,6 +2977,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -3105,6 +3116,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -3320,6 +3332,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -3488,6 +3501,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -3662,6 +3676,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -3871,6 +3886,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
+         HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);

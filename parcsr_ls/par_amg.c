@@ -380,6 +380,8 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataNonGalerkinTol(amg_data) = nongalerkin_tol;
    hypre_ParAMGDataNonGalTolArray(amg_data) = NULL;
 
+   hypre_ParAMGDataRAP2(amg_data) = 0;
+
    return (void *) amg_data;
 }
 
@@ -3884,6 +3886,16 @@ hypre_BoomerAMGSetNonGalerkTol( void   *data,
 
   hypre_ParAMGDataNonGalerkNumTol(amg_data) = nongalerk_num_tol;
   hypre_ParAMGDataNonGalerkTol(amg_data) = nongalerk_tol;
+  return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetRAP2( void   *data,
+                            HYPRE_Int   rap2)
+{
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataRAP2(amg_data) = rap2;
   return hypre_error_flag;
 }
 

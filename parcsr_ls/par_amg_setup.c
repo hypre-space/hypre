@@ -179,6 +179,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Int mult_addlvl = hypre_max(mult_additive, simple);
    HYPRE_Int addlvl = hypre_max(mult_addlvl, additive);
+   HYPRE_Int rap2 = hypre_ParAMGDataRAP2(amg_data);
 
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
 
@@ -2035,7 +2036,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             /* Delete AP */
             hypre_ParCSRMatrixDestroy(Q);
          }
-         else
+         else if (rap2)
+         {
+            /* Use two matrix products to generate A_H */
+            hypre_ParCSRMatrix *Q = NULL;
+            Q = hypre_ParMatmul(A_array[level],P_array[level]);
+            A_H = hypre_ParTMatmul(P_array[level],Q);
+            hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
+            hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
+            hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
+            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
+            /* Delete AP */
+            hypre_ParCSRMatrixDestroy(Q);
+         }
+         else 
          {
             /* Compute standard Galerkin coarse-grid product */
             hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 

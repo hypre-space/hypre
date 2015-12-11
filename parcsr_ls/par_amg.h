@@ -216,6 +216,9 @@ typedef struct
    hypre_ParVector *Xtilde;
    HYPRE_Real *D_inv;
 
+ /* Use 2 mat-mat-muls instead of triple product*/
+   HYPRE_Int rap2;
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -414,6 +417,7 @@ typedef struct
 #define hypre_ParAMGDataNonGalerkinTol(amg_data) ((amg_data)->nongalerkin_tol)
 #define hypre_ParAMGDataNonGalTolArray(amg_data) ((amg_data)->nongal_tol_array)
 
+#define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
 #endif
 
 

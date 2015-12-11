@@ -25,9 +25,9 @@
 #include "mpi.h"
 #endif
 
-/*#ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_USING_OPENMP
 #include <omp.h>
-#endif*/
+#endif
 
 #ifdef __cplusplus
 extern "C" {

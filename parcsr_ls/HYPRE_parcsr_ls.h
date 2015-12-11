@@ -1044,6 +1044,13 @@ HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation(HYPRE_Int    **num_grid_sweeps_ptr,
                                             HYPRE_Real **relax_weights_ptr,
                                             HYPRE_Int      max_levels);
 
+/**
+ * (Optional) If rap2 not equal 0, the triple matrix product RAP is
+ * replaced by two matrix products.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetRAP2(HYPRE_Solver solver,
+                                      HYPRE_Int    rap2);
+
 /*
  * HYPRE_BoomerAMGSetPlotGrids
  **/
