@@ -392,7 +392,7 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
    HYPRE_Int           num_nonzerosA = hypre_CSRMatrixNumNonzeros(A);
 
    HYPRE_Complex      *AT_data;
-   HYPRE_Int          *AT_i;
+   /*HYPRE_Int          *AT_i;*/
    HYPRE_Int          *AT_j;
    HYPRE_Int           num_rowsAT;
    HYPRE_Int           num_colsAT;

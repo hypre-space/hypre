@@ -389,14 +389,14 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *B_ext_offd_j;
    HYPRE_Int        B_ext_offd_size;
 
-   HYPRE_Int       *temp;
+   /*HYPRE_Int       *temp;*/
 
    HYPRE_Int        n_rows_A, n_cols_A;
    HYPRE_Int        n_rows_B, n_cols_B;
    HYPRE_Int        allsquare = 0;
-   HYPRE_Int        cnt;
+   /*HYPRE_Int        cnt;*/
    HYPRE_Int        num_procs;
-   HYPRE_Int        value;
+   /*HYPRE_Int        value;*/
    HYPRE_Int       *my_diag_array;
    HYPRE_Int       *my_offd_array;
    HYPRE_Int        max_num_threads;
@@ -840,7 +840,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     HYPRE_Int jj_row_begin_diag, jj_count_diag;
     HYPRE_Int jj_row_begin_offd, jj_count_offd;
     HYPRE_Int num_threads;
-    HYPRE_Complex a_entry, a_b_product;
+    HYPRE_Complex a_entry; /*, a_b_product;*/
 
     ii = hypre_GetThreadNum();
     num_threads = hypre_NumActiveThreads();
@@ -1107,7 +1107,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
  
    HYPRE_Int i, j, k;
    HYPRE_Int start_index;
-   HYPRE_Int jrow;
+   /*HYPRE_Int jrow;*/
    HYPRE_Int num_rows_B_ext;
 
    hypre_MPI_Comm_size(comm,&num_procs);
@@ -1184,11 +1184,11 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
               }
               for (k = offd_i[jrow]; k < offd_i[jrow + 1]; k++)
               {
-                HYPRE_Int c = offd_j[k];
-                HYPRE_Int c_global = col_map_offd[c];
 #ifdef HYPRE_NO_GLOBAL_PARTITION
                 if (offd_data[k] < 0) len++;
 #else
+                HYPRE_Int c = offd_j[k];
+                HYPRE_Int c_global = col_map_offd[c];
                 if (offd_data[k] < 0 && (CF_marker_offd[c] >= 0 || c_global >= send_proc_first_row && c_global < send_proc_last_row)) len++;
 #endif
               }
@@ -1201,11 +1201,11 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
               }
               for (k = offd_i[jrow]; k < offd_i[jrow + 1]; k++)
               {
-                HYPRE_Int c = offd_j[k];
-                HYPRE_Int c_global = col_map_offd[c];
 #ifdef HYPRE_NO_GLOBAL_PARTITION
                 if (offd_data[k] > 0) len++;
 #else
+                HYPRE_Int c = offd_j[k];
+                HYPRE_Int c_global = col_map_offd[c];
                 if (offd_data[k] > 0 && (CF_marker_offd[c] >= 0 || c_global >= send_proc_first_row && c_global < send_proc_last_row)) len++;
 #endif
               }
@@ -1312,7 +1312,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
             for (j = j_begin; j < j_end; j++)
             {
               HYPRE_Int jrow = send_map_elmts[j];
-              HYPRE_Int count_begin = count;
+              /*HYPRE_Int count_begin = count;*/
 
               if (diag_data[diag_i[jrow]] >= 0)
               {
@@ -1564,7 +1564,7 @@ hypre_ParCSRMatrixExtractBExt_Overlap( hypre_ParCSRMatrix *B,
 {
    MPI_Comm  comm = hypre_ParCSRMatrixComm(B);
    HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(B);
-   HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(B);
+   /*HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(B);*/
    HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(B);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);

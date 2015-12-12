@@ -1179,9 +1179,10 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
    HYPRE_Int              i1, i2, i3;
    HYPRE_Int              jj1, jj2, jrow, j_cnt;
    
-   HYPRE_Int              cnt, cnt_offd, cnt_diag;
+   /*HYPRE_Int              cnt, cnt_offd, cnt_diag;*/
    HYPRE_Int 		    num_procs, my_id;
-   HYPRE_Int 		    value, index;
+   HYPRE_Int 		    index;
+   /*HYPRE_Int 		    value;*/
    HYPRE_Int		    num_coarse;
    HYPRE_Int		    num_nonzeros;
    HYPRE_Int		    global_num_coarse;
@@ -1415,7 +1416,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
       S_ext_offd_i = hypre_TAlloc(HYPRE_Int, num_cols_offd_S+1);
       S_ext_offd_i[0] = 0;
 
-      HYPRE_Int temp_size = 0;
+      /*HYPRE_Int temp_size = 0;*/
 
       hypre_UnorderedIntSet found_set;
       hypre_UnorderedIntSetCreate(&found_set, S_ext_i[num_cols_offd_S] + num_cols_offd_S, 16*hypre_NumThreads());
@@ -1638,7 +1639,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
     *-----------------------------------------------------------------------*/
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel private(i1,i2,i3,jj1,jj2,cnt,jcol,index)
+#pragma omp parallel private(i1,i2,i3,jj1,jj2,index)
 #endif
    {
       HYPRE_Int my_thread_num = hypre_GetThreadNum();

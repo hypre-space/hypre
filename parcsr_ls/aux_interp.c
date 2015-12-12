@@ -315,10 +315,11 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
 {
   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
 
-  HYPRE_Int i, i1, j, ifound, kk, k1;
+  HYPRE_Int i, i1, j, kk, k1;
+  HYPRE_Int ifound;
   HYPRE_Int got_loc, loc_col;
 
-  HYPRE_Int min;
+  /*HYPRE_Int min;*/
   HYPRE_Int newoff = 0;
   HYPRE_Int full_off_procNodes = 0;
 
@@ -660,7 +661,7 @@ void build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HY
 {
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
 
-   HYPRE_Int i, j, index;
+   HYPRE_Int i, index;
 
    HYPRE_Int n_fine = hypre_CSRMatrixNumRows(P->diag);
 

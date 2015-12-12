@@ -835,7 +835,7 @@ hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A,
       whose data needs to be passed between processors. */
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
    HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
-   HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
+   /*HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);*/
    HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkgT(A);

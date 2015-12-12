@@ -440,7 +440,7 @@ hypre_ParCSRBooleanMatrixExtractBExt
 {
    MPI_Comm comm = hypre_ParCSRBooleanMatrix_Get_Comm(B);
    HYPRE_Int first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(B);
-   HYPRE_Int first_row_index = hypre_ParCSRBooleanMatrix_Get_FirstRowIndex(B);
+   /*HYPRE_Int first_row_index = hypre_ParCSRBooleanMatrix_Get_FirstRowIndex(B);*/
    HYPRE_Int *col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(B);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRBooleanMatrix_Get_CommPkg(A);
@@ -508,7 +508,7 @@ hypre_ParCSRBooleanMatrixExtractAExt( hypre_ParCSRBooleanMatrix *A,
       whose data needs to be passed between processors. */
    MPI_Comm comm = hypre_ParCSRBooleanMatrix_Get_Comm(A);
    HYPRE_Int first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(A);
-   HYPRE_Int first_row_index = hypre_ParCSRBooleanMatrix_Get_FirstRowIndex(A);
+   /*HYPRE_Int first_row_index = hypre_ParCSRBooleanMatrix_Get_FirstRowIndex(A);*/
    HYPRE_Int *col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(A);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRBooleanMatrix_Get_CommPkgT(A);
