@@ -35,7 +35,6 @@ extern "C" {
    int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
                                           hypre_ParCSRMatrix*,
                                           hypre_ParCSRMatrix*,
-                                          HYPRE_Int,
                                           hypre_ParCSRMatrix**);
    int HYPRE_LSI_Search(int*, int, int);
    void qsort0(int *, int, int);

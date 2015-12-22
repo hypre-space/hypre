@@ -43,7 +43,6 @@ extern "C"
    int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
-                                       HYPRE_Int,
                                        hypre_ParCSRMatrix**);
    void qsort0(int *, int, int);
    void qsort1(int *, double *, int, int);
@@ -1074,7 +1073,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartB(int *ProcNRows,
 
     hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) A21_csr,
                                      (hypre_ParCSRMatrix *) invA22_csr,
-                                     (hypre_ParCSRMatrix *) A21_csr, 0,
+                                     (hypre_ParCSRMatrix *) A21_csr, 
                                      (hypre_ParCSRMatrix **) &RAP_csr);
 
     if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )
@@ -2393,7 +2392,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
 
     hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) A21_csr,
                                      (hypre_ParCSRMatrix *) invA22_csr,
-                                     (hypre_ParCSRMatrix *) A21_csr, 0,
+                                     (hypre_ParCSRMatrix *) A21_csr, 
                                      (hypre_ParCSRMatrix **) &RAP_csr);
 
     if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )

@@ -43,7 +43,6 @@ extern "C" {
    int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
-                                       HYPRE_Int,
                                        hypre_ParCSRMatrix**);
    int HYPRE_LSI_Search(int*, int, int);
    void qsort0(int *, int, int);
@@ -691,7 +690,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
               mypid_);
     hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) CT_csr,
                                      (hypre_ParCSRMatrix *) M_csr,
-                                     (hypre_ParCSRMatrix *) CT_csr,0,
+                                     (hypre_ParCSRMatrix *) CT_csr,
                                      (hypre_ParCSRMatrix **) &S_csr);
     if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
        printf("%4d : buildSchurSystem - Triple matrix product ends\n",mypid_);
@@ -1879,7 +1878,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
 
     hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) CT_csr,
                                      (hypre_ParCSRMatrix *) M_csr,
-                                     (hypre_ParCSRMatrix *) CT_csr,0,
+                                     (hypre_ParCSRMatrix *) CT_csr,
                                      (hypre_ParCSRMatrix **) &S_csr);
 
     if ( HYOutputLevel_ & HYFEI_SCHURREDUCE1 )
