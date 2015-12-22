@@ -99,7 +99,9 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+#endif
 
    HYPRE_Int use_persistent_comm = 0;
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -179,8 +181,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       a new variable inside CommPkg).  Or put the num_vector iteration inside
       CommHandleCreate (perhaps a new multivector variant of it).
    */
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
+#endif
 
    if (use_persistent_comm)
    {
@@ -197,11 +201,15 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       }
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
+#endif
 
    hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
+#endif
    
    if (use_persistent_comm)
    {
@@ -219,11 +227,15 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       hypre_TFree(comm_handle);
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
+#endif
 
    if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);    
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+#endif
 
    hypre_SeqVectorDestroy(x_tmp);
    x_tmp = NULL;
@@ -233,7 +245,9 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       hypre_TFree(x_buf_data);
    }
   
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
+#endif
 
    return ierr;
 }
@@ -326,7 +340,9 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+#endif
 
    HYPRE_Int use_persistent_comm = 0;
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -369,7 +385,9 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
 
    hypre_assert( idxstride==1 ); /* only 'column' storage of multivectors
                                   * implemented so far */
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
+#endif
 
    if (num_cols_offd)
    {
@@ -384,7 +402,9 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       }
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
+#endif
 
    if (use_persistent_comm)
    {
@@ -402,7 +422,9 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       }
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
+#endif
 
    if (A->diagT)
    {
@@ -414,7 +436,9 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       hypre_CSRMatrixMatvecT(alpha, diag, x_local, beta, y_local);
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
+#endif
 
    if (use_persistent_comm)
    {
@@ -432,8 +456,10 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       hypre_TFree(comm_handle);
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
+#endif
 
    if ( num_vectors==1 )
    {
@@ -472,7 +498,9 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       hypre_TFree(y_buf_data);
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
+#endif
 
    return ierr;
 }

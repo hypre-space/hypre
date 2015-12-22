@@ -1249,7 +1249,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
       for (i=0; i < P_offd_size; i++)
 	 P_marker[i] = P_offd_j[i];
 
-      qsort0(P_marker, 0, P_offd_size-1);
+      hypre_qsort0(P_marker, 0, P_offd_size-1);
 
       num_cols_P_offd = 1;
       index = P_marker[0];
@@ -2108,7 +2108,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
       for (i=0; i < P_offd_size; i++)
 	 P_marker[i] = P_offd_j[i];
 
-      qsort0(P_marker, 0, P_offd_size-1);
+      hypre_qsort0(P_marker, 0, P_offd_size-1);
 
       num_cols_P_offd = 1;
       index = P_marker[0];

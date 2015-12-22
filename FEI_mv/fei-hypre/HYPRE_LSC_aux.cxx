@@ -4229,7 +4229,7 @@ void HYPRE_LinSysCore::setupPreconMLMaxwell()
       HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
       hypre_BoomerAMGBuildCoarseOperator((hypre_ParCSRMatrix *) maxwellGEN_,
                                       (hypre_ParCSRMatrix *) A_csr,
-                                      (hypre_ParCSRMatrix *) maxwellGEN_,
+                                      (hypre_ParCSRMatrix *) maxwellGEN_, 0,
                                       (hypre_ParCSRMatrix **) &maxwellANN_);
    }
    HYPRE_LSI_MLMaxwellSetANNMatrix(HYPrecon_,maxwellANN_);

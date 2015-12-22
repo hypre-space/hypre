@@ -2658,7 +2658,9 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
                  HYPRE_Real trunc_factor,        
                  HYPRE_Int max_elmts)        
 {
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_INTERP_TRUNC] -= hypre_MPI_Wtime();
+#endif
 
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(P);
    HYPRE_Int *P_diag_i = hypre_CSRMatrixI(P_diag);
@@ -3156,7 +3158,9 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
    hypre_TFree(num_lost_per_thread);
    hypre_TFree(num_lost_offd_per_thread);
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_INTERP_TRUNC] += hypre_MPI_Wtime();
+#endif
 
    return ierr;
 }
@@ -3170,14 +3174,14 @@ void hypre_qsort2abs( HYPRE_Int *v,
    HYPRE_Int i, last;
    if (left >= right)
       return;
-   swap2( v, w, left, (left+right)/2);
+   hypre_swap2( v, w, left, (left+right)/2);
    last = left;
    for (i = left+1; i <= right; i++)
       if (fabs(w[i]) > fabs(w[left]))
       {
-         swap2(v, w, ++last, i);
+         hypre_swap2(v, w, ++last, i);
       }
-   swap2(v, w, left, last);
+   hypre_swap2(v, w, left, last);
    hypre_qsort2abs(v, w, left, last-1);
    hypre_qsort2abs(v, w, last+1, right);
 }

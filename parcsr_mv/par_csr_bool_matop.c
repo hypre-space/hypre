@@ -182,7 +182,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
    }
    if (cnt)
    {
-      qsort0(temp, 0, cnt-1);
+      hypre_qsort0(temp, 0, cnt-1);
 
       num_cols_offd_C = 1;
       value = temp[0];

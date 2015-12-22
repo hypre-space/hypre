@@ -1408,7 +1408,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
             j_copy[i] = P_offd_j_new[i];
 
          /* now sort them */
-         qsort0(j_copy, 0, P_offd_new_size-1);
+         hypre_qsort0(j_copy, 0, P_offd_new_size-1);
 
          /* now copy to col_map offd - but only each col once */
          new_col_map_offd_P[0] = j_copy[0];

@@ -1114,7 +1114,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       {
          if (measure > 0)
          {
-            enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
+            hypre_enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
          }
          else
          {
@@ -1129,11 +1129,11 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                   {
                      new_meas = measure_array[nabor];
 	             if (new_meas > 0)
-                        remove_point(&LoL_head, &LoL_tail, new_meas, 
+                        hypre_remove_point(&LoL_head, &LoL_tail, new_meas, 
                                nabor, lists, where);
 
                      new_meas = ++(measure_array[nabor]);
-                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                     hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor, lists, where);
                   }
 	          else
@@ -1176,7 +1176,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       measure_array[index] = 0;
       --num_left;
       
-      remove_point(&LoL_head, &LoL_tail, measure, index, lists, where);
+      hypre_remove_point(&LoL_head, &LoL_tail, measure, index, lists, where);
   
       for (j = ST_i[index]; j < ST_i[index+1]; j++)
       {
@@ -1186,7 +1186,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
             CF_marker[nabor] = F_PT;
             measure = measure_array[nabor];
 
-            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+            hypre_remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
             --num_left;
 
             for (k = S_i[nabor]; k < S_i[nabor+1]; k++)
@@ -1195,12 +1195,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                if (CF_marker[nabor_two] == UNDECIDED)
                {
                   measure = measure_array[nabor_two];
-                  remove_point(&LoL_head, &LoL_tail, measure, 
+                  hypre_remove_point(&LoL_head, &LoL_tail, measure, 
                                nabor_two, lists, where);
 
                   new_meas = ++(measure_array[nabor_two]);
                  
-                  enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                  hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor_two, lists, where);
                }
             }
@@ -1213,12 +1213,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
          {
             measure = measure_array[nabor];
 
-            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+            hypre_remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
 
             measure_array[nabor] = --measure;
 	
 	    if (measure > 0)
-               enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
+               hypre_enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
 				lists, where);
 	    else
 	    {
@@ -1231,12 +1231,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                   if (CF_marker[nabor_two] == UNDECIDED)
                   {
                      new_meas = measure_array[nabor_two];
-                     remove_point(&LoL_head, &LoL_tail, new_meas, 
+                     hypre_remove_point(&LoL_head, &LoL_tail, new_meas, 
                                nabor_two, lists, where);
 
                      new_meas = ++(measure_array[nabor_two]);
                  
-                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                     hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor_two, lists, where);
                   }
                }
@@ -1973,7 +1973,9 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
                         HYPRE_Int                    debug_flag,
                         HYPRE_Int                  **CF_marker_ptr)
 {
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PMIS] -= hypre_MPI_Wtime();
+#endif
 
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg      *comm_pkg        = hypre_ParCSRMatrixCommPkg(S);
@@ -2605,7 +2607,9 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    *CF_marker_ptr   = CF_marker;
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PMIS] += hypre_MPI_Wtime();
+#endif
 
    return (ierr);
 }

@@ -568,12 +568,11 @@ HYPRE_Real time_get_cpu_seconds_( void );
 #ifndef HYPRE_TIMING
 
 #define hypre_InitializeTiming(name) 0
-#define hypre_FinalizeTiming(index)
 #define hypre_IncFLOPCount(inc)
 #define hypre_BeginTiming(i)
 #define hypre_EndTiming(i)
-#define hypre_ClearTiming()
 #define hypre_PrintTiming(heading, comm)
+#define hypre_FinalizeTiming(index)
 
 /*--------------------------------------------------------------------------
  * With timing on
@@ -801,10 +800,10 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
  *--------------------------------------------------------------------------*/
 
 /* amg_linklist.c */
-void dispose_elt ( hypre_LinkList element_ptr );
-void remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
-hypre_LinkList create_elt ( HYPRE_Int Item );
-void enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
+void hypre_dispose_elt ( hypre_LinkList element_ptr );
+void hypre_remove_point ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
+hypre_LinkList hypre_create_elt ( HYPRE_Int Item );
+void hypre_enter_on_lists ( hypre_LinkList *LoL_head_ptr , hypre_LinkList *LoL_tail_ptr , HYPRE_Int measure , HYPRE_Int index , HYPRE_Int *lists , HYPRE_Int *where );
 
 /* binsearch.c */
 HYPRE_Int hypre_BinarySearch ( HYPRE_Int *list , HYPRE_Int value , HYPRE_Int list_length );
@@ -842,15 +841,15 @@ HYPRE_Int hypre_sscanf( char *s , const char *format, ... );
 #endif
 
 /* hypre_qsort.c */
-void swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
-void swap2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
+void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );
+void hypre_swap2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap3_d ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap4_d ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int i , HYPRE_Int j );
 void hypre_swap_d ( HYPRE_Real *v , HYPRE_Int i , HYPRE_Int j );
-void qsort0 ( HYPRE_Int *v , HYPRE_Int left , HYPRE_Int right );
-void qsort1 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort0 ( HYPRE_Int *v , HYPRE_Int left , HYPRE_Int right );
+void hypre_qsort1 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort2 ( HYPRE_Int *v , HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
@@ -930,8 +929,7 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
 
 /* Check if atomic operations are available to use concurrent hopscotch hash table */
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
-#define HYPRE_USING_ATOMIC
-//#pragma message ( “HYPRE_USING_ATOMIC” )
+#define HYPRE_USING_ATOMIC 
 //#elif defined _MSC_VER // JSP: haven't tested, so comment out for now
 //#define HYPRE_USING_ATOMIC
 //#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
@@ -990,12 +988,13 @@ static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
 
 #ifdef HYPRE_USING_ATOMIC
 // concurrent hopscotch hasing is possible only with atomic supports
-#define HYPRE_CONCURRENT_HOPSCOTCH
-#endif
+/*#define HYPRE_CONCURRENT_HOPSCOTCH */
+#define HYPRE_CONCURRENT_HOPSCOTCH 
+#endif 
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
 typedef struct {
-  hypre_uint volatile timestamp;
+  HYPRE_Int volatile timestamp;
   omp_lock_t         lock;
 } hypre_HopscotchSegment;
 #endif
@@ -1012,20 +1011,20 @@ typedef struct {
  */
 typedef struct
 {
-	hypre_uint volatile              segmentMask;
-	hypre_uint volatile              bucketMask;
+	HYPRE_Int  volatile              segmentMask;
+	HYPRE_Int  volatile              bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
 	hypre_HopscotchSegment* volatile segments;
 #endif
   HYPRE_Int *volatile              key;
   hypre_uint *volatile             hopInfo;
-	hypre_uint *volatile	           hash;
+	HYPRE_Int *volatile	             hash;
 } hypre_UnorderedIntSet;
 
 typedef struct
 {
   hypre_uint volatile hopInfo;
-  hypre_uint volatile hash;
+  HYPRE_Int  volatile hash;
   HYPRE_Int  volatile key;
   HYPRE_Int  volatile data;
 } hypre_HopscotchBucket;
@@ -1038,8 +1037,8 @@ typedef struct
  */
 typedef struct
 {
-	hypre_uint volatile              segmentMask;
-	hypre_uint volatile              bucketMask;
+	HYPRE_Int  volatile              segmentMask;
+	HYPRE_Int  volatile              bucketMask;
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
 	hypre_HopscotchSegment*	volatile segments;
 #endif

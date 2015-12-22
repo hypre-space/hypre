@@ -28,7 +28,7 @@
 
 
 
-HYPRE_Int alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, 
+HYPRE_Int hypre_alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg, 
                           hypre_ParCSRCommPkg *extend_comm_pkg,
                           HYPRE_Int *IN_marker, 
                           HYPRE_Int full_off_procNodes,
@@ -210,10 +210,10 @@ HYPRE_Int hypre_ssort(HYPRE_Int *data, HYPRE_Int n)
   
   if(n > 0)
     for(i = n-1; i > 0; i--){
-      si = index_of_minimum(data,i+1);
+      si = hypre_index_of_minimum(data,i+1);
       if(i != si)
       {
-	swap_int(data, i, si);
+	hypre_swap_int(data, i, si);
 	change = 1;
       }
     }                                                                       
@@ -221,7 +221,7 @@ HYPRE_Int hypre_ssort(HYPRE_Int *data, HYPRE_Int n)
 }
 
 /* Auxilary function for hypre_ssort */
-HYPRE_Int index_of_minimum(HYPRE_Int *data, HYPRE_Int n)
+HYPRE_Int hypre_index_of_minimum(HYPRE_Int *data, HYPRE_Int n)
 {
   HYPRE_Int answer;
   HYPRE_Int i;
@@ -234,7 +234,7 @@ HYPRE_Int index_of_minimum(HYPRE_Int *data, HYPRE_Int n)
   return answer;
 }
                                                                                
-void swap_int(HYPRE_Int *data, HYPRE_Int a, HYPRE_Int b)
+void hypre_swap_int(HYPRE_Int *data, HYPRE_Int a, HYPRE_Int b)
 {
   HYPRE_Int temp;
                                                                                
@@ -246,7 +246,7 @@ void swap_int(HYPRE_Int *data, HYPRE_Int a, HYPRE_Int b)
 }
 
 /* Initialize CF_marker_offd, CF_marker, P_marker, P_marker_offd, tmp */
-void initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HYPRE_Int *offd_ftc, 
+void hypre_initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HYPRE_Int *offd_ftc, 
 		     HYPRE_Int *diag_pm, HYPRE_Int *offd_pm, HYPRE_Int *tmp_CF)
 {
   HYPRE_Int i;
@@ -308,15 +308,16 @@ void initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HY
 
 /* Find nodes that are offd and are not contained in original offd
  * (neighbors of neighbors) */
-static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int *A_ext_i, HYPRE_Int *A_ext_j, 
+HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int *A_ext_i, HYPRE_Int *A_ext_j, 
 		   HYPRE_Int num_cols_S_offd, HYPRE_Int *col_map_offd, HYPRE_Int col_1, 
 		   HYPRE_Int col_n, HYPRE_Int *Sop_i, HYPRE_Int *Sop_j,
 		   HYPRE_Int *CF_marker_offd)
 {
+#ifdef HYPRE_PROFILE
   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
+#endif
 
   HYPRE_Int i, i1, j, kk, k1;
-  HYPRE_Int ifound;
   HYPRE_Int got_loc, loc_col;
 
   /*HYPRE_Int min;*/
@@ -338,7 +339,7 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
   hypre_UnorderedIntSet set;
   hypre_UnorderedIntSetCreate(&set, size_offP, 16*hypre_NumThreads());
 
-#pragma omp parallel private(i,j,i1,ifound)
+#pragma omp parallel private(i,j,i1)
   {
 #pragma omp for HYPRE_SMP_SCHEDULE
     for (i = 0; i < num_cols_A_offd; i++)
@@ -384,7 +385,9 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
   hypre_UnorderedIntSetDestroy(&set);
 
   /* Put found in monotone increasing order */
+#ifdef HYPRE_PROFILE
   hypre_profile_times[HYPRE_TIMER_ID_MERGE] -= hypre_MPI_Wtime();
+#endif
 
   hypre_UnorderedIntMap tmp_found_inverse;
   if (newoff > 0)
@@ -392,7 +395,9 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
     hypre_sort_and_create_inverse_map(tmp_found, newoff, &tmp_found, &tmp_found_inverse);
   }
 
+#ifdef HYPRE_PROFILE
   hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
+#endif
 
   full_off_procNodes = newoff + num_cols_A_offd;
   /* Set column indices for Sop and A_ext such that offd nodes are
@@ -428,10 +433,12 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
   {
     hypre_UnorderedIntMapDestroy(&tmp_found_inverse);
   }
-#else /* HYPRE_CONCURRENT_HOPSCOTCH */
+#else /* !HYPRE_CONCURRENT_HOPSCOTCH */
   HYPRE_Int size_offP;
 
   HYPRE_Int *tmp_found;
+  HYPRE_Int min;
+  HYPRE_Int ifound;
 
   size_offP = A_ext_i[num_cols_A_offd]+Sop_i[num_cols_A_offd];
   tmp_found = hypre_CTAlloc(HYPRE_Int, size_offP);
@@ -480,7 +487,7 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
   /* Put found in monotone increasing order */
   if (newoff > 0)
   {
-     qsort0(tmp_found,0,newoff-1);
+     hypre_qsort0(tmp_found,0,newoff-1);
      ifound = tmp_found[0];
      min = 1;
      for (i=1; i < newoff; i++)
@@ -524,16 +531,18 @@ static HYPRE_Int new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HY
      }
    }
   }
-#endif /* HYPRE_CONCURRENT_HOPSCOTCH */
+#endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
 
   *found = tmp_found;
 
+#ifdef HYPRE_PROFILE
   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
+#endif
  
   return newoff;
 }
 
-HYPRE_Int exchange_marker(hypre_ParCSRCommPkg *comm_pkg,
+HYPRE_Int hypre_exchange_marker(hypre_ParCSRCommPkg *comm_pkg,
                           HYPRE_Int *IN_marker, 
                           HYPRE_Int *OUT_marker)
 {   
@@ -560,7 +569,7 @@ HYPRE_Int exchange_marker(hypre_ParCSRCommPkg *comm_pkg,
   return hypre_error_flag;
 } 
 
-HYPRE_Int exchange_interp_data(
+HYPRE_Int hypre_exchange_interp_data(
     HYPRE_Int **CF_marker_offd,
     HYPRE_Int **dof_func_offd,
     hypre_CSRMatrix **A_ext,
@@ -574,7 +583,9 @@ HYPRE_Int exchange_interp_data(
     HYPRE_Int *dof_func,
     HYPRE_Int skip_fine_or_same_sign) // skip_fine_or_same_sign if we want to skip fine points in S and nnz with the same sign as diagonal in A
 {
+#ifdef HYPRE_PROFILE
   hypre_profile_times[HYPRE_TIMER_ID_EXCHANGE_INTERP_DATA] -= hypre_MPI_Wtime();
+#endif
 
   hypre_ParCSRCommPkg   *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A); 
@@ -591,7 +602,7 @@ HYPRE_Int exchange_interp_data(
    * A_offd and S_offd.
    *---------------------------------------------------------------------*/
   *CF_marker_offd = hypre_TAlloc(HYPRE_Int, num_cols_A_offd);
-  exchange_marker(comm_pkg, CF_marker, *CF_marker_offd);
+  hypre_exchange_marker(comm_pkg, CF_marker, *CF_marker_offd);
 
   hypre_ParCSRCommHandle *comm_handle_a_idx, *comm_handle_a_data;
   *A_ext         = hypre_ParCSRMatrixExtractBExt_Overlap(A,A,1,&comm_handle_a_idx,&comm_handle_a_data,CF_marker,*CF_marker_offd,skip_fine_or_same_sign,skip_fine_or_same_sign);
@@ -614,11 +625,15 @@ HYPRE_Int exchange_interp_data(
   hypre_TFree(send_idx);
 
   /* Find nodes that are neighbors of neighbors, not found in offd */
+#ifdef HYPRE_PROFILE
   hypre_profile_times[HYPRE_TIMER_ID_EXCHANGE_INTERP_DATA] += hypre_MPI_Wtime();
-  HYPRE_Int newoff = new_offd_nodes(&found, A_ext_rows, A_ext_i, A_ext_j, 
+#endif
+  HYPRE_Int newoff = hypre_new_offd_nodes(&found, A_ext_rows, A_ext_i, A_ext_j, 
       Soprows, col_map_offd, col_1, col_n, 
       Sop_i, Sop_j, *CF_marker_offd);
+#ifdef HYPRE_PROFILE
   hypre_profile_times[HYPRE_TIMER_ID_EXCHANGE_INTERP_DATA] -= hypre_MPI_Wtime();
+#endif
   if(newoff >= 0)
     *full_off_procNodes = newoff + num_cols_A_offd;
   else
@@ -635,14 +650,14 @@ HYPRE_Int exchange_interp_data(
       extend_comm_pkg);
 
   *CF_marker_offd = hypre_TReAlloc(*CF_marker_offd, HYPRE_Int, *full_off_procNodes);
-  exchange_marker(*extend_comm_pkg, CF_marker, *CF_marker_offd + A_ext_rows);
+  hypre_exchange_marker(*extend_comm_pkg, CF_marker, *CF_marker_offd + A_ext_rows);
 
   if(num_functions > 1)
   {
     if (*full_off_procNodes > 0)
       *dof_func_offd = hypre_CTAlloc(HYPRE_Int, *full_off_procNodes);
 
-    alt_insert_new_nodes(comm_pkg, *extend_comm_pkg, dof_func, 
+    hypre_alt_insert_new_nodes(comm_pkg, *extend_comm_pkg, dof_func, 
         *full_off_procNodes, *dof_func_offd);
   }
 
@@ -652,14 +667,18 @@ HYPRE_Int exchange_interp_data(
   hypre_ParCSRCommHandleDestroy(comm_handle_a_data);
   hypre_TFree(send_data);
 
+#ifdef HYPRE_PROFILE
   hypre_profile_times[HYPRE_TIMER_ID_EXCHANGE_INTERP_DATA] += hypre_MPI_Wtime();
+#endif
 
   return hypre_error_flag;
 }
 
-void build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HYPRE_Int *tmp_CF_marker_offd, HYPRE_Int *fine_to_coarse_offd)
+void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HYPRE_Int *tmp_CF_marker_offd, HYPRE_Int *fine_to_coarse_offd)
 {
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
+#endif
 
    HYPRE_Int i, index;
 
@@ -743,6 +762,7 @@ void build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HY
 
 #else /* HYPRE_CONCURRENT_HOPSCOTCH */
      HYPRE_Int num_cols_P_offd = 0;
+     HYPRE_Int j;
      for (i=0; i < P_offd_size; i++)
      {
        index = P_offd_j[i];
@@ -804,5 +824,7 @@ void build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNodes, HY
       hypre_CSRMatrixNumCols(P->offd) = num_cols_P_offd;
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
+#endif
 }

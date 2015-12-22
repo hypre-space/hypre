@@ -299,7 +299,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
 
 	  /* get block for Schwarz smoother: ============================= */
-	  /* ierr = matinv(XE, AE, local_dof_counter); */
+	  /* ierr = hypre_matinv(XE, AE, local_dof_counter); */
 	  /* hypre_printf("ierr_AE_inv: %d\n", ierr); */
 #ifdef HYPRE_USING_ESSL
  	cnt = local_dof_counter;
@@ -344,7 +344,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 		}
 	    }
 
-	  /* ierr = matinv(XE, AE, int_dof_counter); */
+	  /* ierr = hypre_matinv(XE, AE, int_dof_counter); */
 #ifdef HYPRE_USING_ESSL
  	cnt = local_dof_counter;
         for (j_loc=1; j_loc < local_dof_counter; j_loc++)
@@ -2297,7 +2297,7 @@ HYPRE_Int hypre_AMGeAgglomerate(HYPRE_Int *i_AE_element, HYPRE_Int *j_AE_element
 	weight_max = i_face_weight[last];
 
 
-      ierr = remove_entry(weight, &weight_max, 
+      ierr = hypre_remove_entry(weight, &weight_max, 
 			  previous, next, first, &last,
 			  head, tail, 
 			  k);
@@ -2357,7 +2357,7 @@ eliminate_face:
     weight_max = i_face_weight[last];
 
 		   
-  ierr = remove_entry(max_weight, &weight_max, 
+  ierr = hypre_remove_entry(max_weight, &weight_max, 
 		      previous, next, first, &last,
 		      head, tail, 
 		      face_to_eliminate);
@@ -2403,7 +2403,7 @@ eliminate_face:
 	else
 	  weight_max = i_face_weight[last];
 
-	ierr = move_entry(weight, &weight_max, 
+	ierr = hypre_move_entry(weight, &weight_max, 
 			  previous, next, first, &last,
 			  head, tail, 
 			  j_face_face[j]);
@@ -2420,7 +2420,7 @@ eliminate_face:
 	else
 	  weight_max = i_face_weight[last];
 
-	ierr = update_entry(weight, &weight_max, 
+	ierr = hypre_update_entry(weight, &weight_max, 
 			    previous, next, first, &last,
 			    head, tail, 
 			    j_face_face[j]);
@@ -2494,7 +2494,7 @@ eliminate_face:
 		weight_max = i_face_weight[last];
 
 
-	      ierr = remove_entry(weight, &weight_max, 
+	      ierr = hypre_remove_entry(weight, &weight_max, 
 				  previous, next, first, &last,
 				  head, tail, 
 				  j_element_face[j]);
@@ -2572,7 +2572,7 @@ eliminate_face:
 	weight_max = i_face_weight[last];
 
 
-      ierr = remove_entry(weight, &weight_max, 
+      ierr = hypre_remove_entry(weight, &weight_max, 
 			  previous, next, first, &last,
 			  head, tail, 
 			  k);
@@ -2680,7 +2680,7 @@ end_agglomerate:
   return ierr;
 }
 
-HYPRE_Int update_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+HYPRE_Int hypre_update_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
 		 HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
 		 HYPRE_Int head, HYPRE_Int tail, 
 		 HYPRE_Int i)
@@ -2736,7 +2736,7 @@ HYPRE_Int update_entry(HYPRE_Int weight, HYPRE_Int *weight_max,
     
 }
 
-HYPRE_Int remove_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+HYPRE_Int hypre_remove_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
 		 HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
 		 HYPRE_Int head, HYPRE_Int tail, 
 		 HYPRE_Int i)
@@ -2766,7 +2766,7 @@ HYPRE_Int remove_entry(HYPRE_Int weight, HYPRE_Int *weight_max,
 
 }
 
-HYPRE_Int move_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+HYPRE_Int hypre_move_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
 	       HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
 	       HYPRE_Int head, HYPRE_Int tail, 
 	       HYPRE_Int i)
@@ -2789,10 +2789,10 @@ HYPRE_Int move_entry(HYPRE_Int weight, HYPRE_Int *weight_max,
 
 
 /*---------------------------------------------------------------------
- matinv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
+ hypre_matinv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
  ---------------------------------------------------------------------*/
       
-HYPRE_Int matinv(HYPRE_Real *x, HYPRE_Real *a, HYPRE_Int k)
+HYPRE_Int hypre_matinv(HYPRE_Real *x, HYPRE_Real *a, HYPRE_Int k)
 {
   HYPRE_Int i,j,l, ierr =0;
 

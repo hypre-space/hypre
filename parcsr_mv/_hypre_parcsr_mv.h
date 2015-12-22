@@ -640,8 +640,8 @@ typedef struct
 #endif /* hypre_PAR_MAKE_SYSTEM */
 
 /* communicationT.c */
-void RowsWithColumn_original ( HYPRE_Int *rowmin , HYPRE_Int *rowmax , HYPRE_Int column , hypre_ParCSRMatrix *A );
-void RowsWithColumn ( HYPRE_Int *rowmin , HYPRE_Int *rowmax , HYPRE_Int column , HYPRE_Int num_rows_diag , HYPRE_Int firstColDiag , HYPRE_Int *colMapOffd , HYPRE_Int *mat_i_diag , HYPRE_Int *mat_j_diag , HYPRE_Int *mat_i_offd , HYPRE_Int *mat_j_offd );
+void hypre_RowsWithColumn_original ( HYPRE_Int *rowmin , HYPRE_Int *rowmax , HYPRE_Int column , hypre_ParCSRMatrix *A );
+void hypre_RowsWithColumn ( HYPRE_Int *rowmin , HYPRE_Int *rowmax , HYPRE_Int column , HYPRE_Int num_rows_diag , HYPRE_Int firstColDiag , HYPRE_Int *colMapOffd , HYPRE_Int *mat_i_diag , HYPRE_Int *mat_j_diag , HYPRE_Int *mat_i_offd , HYPRE_Int *mat_j_offd );
 void hypre_MatTCommPkgCreate_core ( MPI_Comm comm , HYPRE_Int *col_map_offd , HYPRE_Int first_col_diag , HYPRE_Int *col_starts , HYPRE_Int num_rows_diag , HYPRE_Int num_cols_diag , HYPRE_Int num_cols_offd , HYPRE_Int *row_starts , HYPRE_Int firstColDiag , HYPRE_Int *colMapOffd , HYPRE_Int *mat_i_diag , HYPRE_Int *mat_j_diag , HYPRE_Int *mat_i_offd , HYPRE_Int *mat_j_offd , HYPRE_Int data , HYPRE_Int *p_num_recvs , HYPRE_Int **p_recv_procs , HYPRE_Int **p_recv_vec_starts , HYPRE_Int *p_num_sends , HYPRE_Int **p_send_procs , HYPRE_Int **p_send_map_starts , HYPRE_Int **p_send_map_elmts );
 HYPRE_Int hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A );
 
@@ -696,7 +696,7 @@ HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x , HYPRE_ParVector y , HYP
 HYPRE_Int HYPRE_VectorToParVector ( MPI_Comm comm , HYPRE_Vector b , HYPRE_Int *partitioning , HYPRE_ParVector *vector );
 
 /* new_commpkg.c */
-HYPRE_Int PrintCommpkg ( hypre_ParCSRMatrix *A , const char *file_name );
+HYPRE_Int hypre_PrintCommpkg ( hypre_ParCSRMatrix *A , const char *file_name );
 HYPRE_Int hypre_NewCommPkgCreate_core ( MPI_Comm comm , HYPRE_Int *col_map_off_d , HYPRE_Int first_col_diag , HYPRE_Int col_start , HYPRE_Int col_end , HYPRE_Int num_cols_off_d , HYPRE_Int global_num_cols , HYPRE_Int *p_num_recvs , HYPRE_Int **p_recv_procs , HYPRE_Int **p_recv_vec_starts , HYPRE_Int *p_num_sends , HYPRE_Int **p_send_procs , HYPRE_Int **p_send_map_starts , HYPRE_Int **p_send_map_elements , hypre_IJAssumedPart *apart );
 HYPRE_Int hypre_NewCommPkgCreate ( hypre_ParCSRMatrix *parcsr_A );
 HYPRE_Int hypre_NewCommPkgDestroy ( hypre_ParCSRMatrix *parcsr_A );
@@ -759,7 +759,7 @@ HYPRE_Int hypre_ParCSRBooleanMatrixGetRow ( hypre_ParCSRBooleanMatrix *mat , HYP
 HYPRE_Int hypre_ParCSRBooleanMatrixRestoreRow ( hypre_ParCSRBooleanMatrix *matrix , HYPRE_Int row , HYPRE_Int *size , HYPRE_Int **col_ind );
 HYPRE_Int hypre_BuildCSRBooleanMatrixMPIDataType ( HYPRE_Int num_nonzeros , HYPRE_Int num_rows , HYPRE_Int *a_i , HYPRE_Int *a_j , hypre_MPI_Datatype *csr_matrix_datatype );
 hypre_ParCSRBooleanMatrix *hypre_CSRBooleanMatrixToParCSRBooleanMatrix ( MPI_Comm comm , hypre_CSRBooleanMatrix *A , HYPRE_Int *row_starts , HYPRE_Int *col_starts );
-HYPRE_Int BooleanGenerateDiagAndOffd ( hypre_CSRBooleanMatrix *A , hypre_ParCSRBooleanMatrix *matrix , HYPRE_Int first_col_diag , HYPRE_Int last_col_diag );
+HYPRE_Int hypre_BooleanGenerateDiagAndOffd ( hypre_CSRBooleanMatrix *A , hypre_ParCSRBooleanMatrix *matrix , HYPRE_Int first_col_diag , HYPRE_Int last_col_diag );
 
 /* par_csr_communication.c */
 hypre_ParCSRCommHandle *hypre_ParCSRCommHandleCreate ( HYPRE_Int job , hypre_ParCSRCommPkg *comm_pkg , void *send_data , void *recv_data );

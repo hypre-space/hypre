@@ -312,7 +312,7 @@ void hypre_block_qsort( HYPRE_Int *v,
                         HYPRE_Int  right );
    
 
-void swap_blk( HYPRE_Complex *v,
+void hypre_swap_blk( HYPRE_Complex *v,
                HYPRE_Int block_size,
                HYPRE_Int  i,
                HYPRE_Int  j );

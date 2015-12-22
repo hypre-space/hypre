@@ -1831,7 +1831,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
 
    hypre_BoomerAMGBuildCoarseOperator((hypre_ParCSRMatrix *) A21_csr,
                                       (hypre_ParCSRMatrix *) invA22_csr,
-                                      (hypre_ParCSRMatrix *) A21_csr,
+                                      (hypre_ParCSRMatrix *) A21_csr, 
                                       (hypre_ParCSRMatrix **) &RAP_csr);
 
    if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )
@@ -4652,7 +4652,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
    HYPRE_ParCSRMatrixPrint((HYPRE_ParCSRMatrix) hypreCT, fname);
    strcpy( fname, "hypreB" );
    HYPRE_ParCSRMatrixPrint((HYPRE_ParCSRMatrix) hypreB, fname);
-   hypre_BoomerAMGBuildCoarseOperator(hypreCT, hypreB, hypreCT, 
+   hypre_BoomerAMGBuildCoarseOperator(hypreCT, hypreB, hypreCT,  
                                       (hypre_ParCSRMatrix **) &hypreCBC);
 #if 0
    for ( irow = 0; irow < nConstraints; irow++ ) 
@@ -4896,7 +4896,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
 
    hypre_BoomerAMGBuildCoarseOperator((hypre_ParCSRMatrix *) A21_csr,
                                       (hypre_ParCSRMatrix *) invA22_csr,
-                                      (hypre_ParCSRMatrix *) A21_csr,
+                                      (hypre_ParCSRMatrix *) A21_csr, 
                                       (hypre_ParCSRMatrix **) &RAP_csr);
 
    if ( ( outputLevel_ & HYPRE_BITMASK2 ) >= 1 )

@@ -213,7 +213,9 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
 {
    if (0 == len) return;
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] -= hypre_MPI_Wtime();
+#endif
 
 #ifdef DBG_MERGE_SORT
    int *dbg_buf = new int[len];
@@ -236,7 +238,7 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
       HYPRE_Int i_begin = hypre_min(i_per_thread*my_thread_num, len);
       HYPRE_Int i_end = hypre_min(i_begin + i_per_thread, len);
 
-      qsort0(in, i_begin, i_end - 1);
+      hypre_qsort0(in, i_begin, i_end - 1);
 
       // merge sorted sequences
       HYPRE_Int in_group_size;
@@ -283,7 +285,9 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
    delete[] dbg_buf;
 #endif
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
+#endif
 }
 
 void hypre_sort_and_create_inverse_map(
@@ -294,7 +298,9 @@ void hypre_sort_and_create_inverse_map(
       return;
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] -= hypre_MPI_Wtime();
+#endif
 
    HYPRE_Int *temp = hypre_TAlloc(HYPRE_Int, len);
    hypre_merge_sort(in, temp, len, out);
@@ -338,7 +344,9 @@ void hypre_sort_and_create_inverse_map(
       hypre_TFree(in);
    }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
+#endif
 }
 
 /* vim: set tabstop=8 softtabstop=3 sw=3 expandtab: */

@@ -2807,7 +2807,7 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          aux_offd_j = hypre_CTAlloc(HYPRE_Int, nnz_offd);
          for (i=0; i < nnz_offd; i++)
             aux_offd_j[i] = offd_j[i];
-         qsort0(aux_offd_j,0,nnz_offd-1);
+         hypre_qsort0(aux_offd_j,0,nnz_offd-1);
          num_cols_offd = 1;
          for (i=0; i < nnz_offd-1; i++)
          {

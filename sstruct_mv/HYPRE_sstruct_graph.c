@@ -805,7 +805,7 @@ HYPRE_SStructGraphAssemble( HYPRE_SStructGraph graph )
 
    if (nUventries > 1)
    {
-      qsort0(iUventries, 0, nUventries - 1);
+      hypre_qsort0(iUventries, 0, nUventries - 1);
 
       j = 1;
       for (i = 1; i < nUventries; i++)

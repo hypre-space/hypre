@@ -440,7 +440,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    }
    if (cnt)
    {
-      qsort0(temp, 0, cnt-1);
+      hypre_qsort0(temp, 0, cnt-1);
 
       num_cols_offd_Pext = 1;
       value = temp[0];
@@ -1041,7 +1041,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
       if (cnt)
       {
-         qsort0(temp,0,cnt-1);
+         hypre_qsort0(temp,0,cnt-1);
          value = temp[0];
          num_cols_offd_RAP = 1;
          for (i=1; i < cnt; i++)

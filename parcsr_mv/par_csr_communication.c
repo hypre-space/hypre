@@ -179,6 +179,9 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job,
                           ip, 0, comm, requests + num_sends + i);
          }
          break;
+      default:
+         hypre_assert(1 == 0);
+         break;
    } // switch (job_type)
 
    hypre_ParCSRCommHandleRecvData(comm_handle) = recv_data;
@@ -225,7 +228,7 @@ void hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRPersistentCommHandle *co
                                          hypre_ParCSRCommHandleRequests(comm_handle));
       if (MPI_SUCCESS != ret)
       {
-         printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);
+         hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);
       }
    }
 }
@@ -239,7 +242,7 @@ void hypre_ParCSRPersistentCommHandleWait( hypre_ParCSRPersistentCommHandle *com
                                         MPI_STATUSES_IGNORE);
       if (MPI_SUCCESS != ret)
       {
-         printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);
+         hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);
       }
    }
 }

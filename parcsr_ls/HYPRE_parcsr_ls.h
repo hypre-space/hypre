@@ -1051,6 +1051,14 @@ HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation(HYPRE_Int    **num_grid_sweeps_ptr,
 HYPRE_Int HYPRE_BoomerAMGSetRAP2(HYPRE_Solver solver,
                                       HYPRE_Int    rap2);
 
+/**
+ * (Optional) If set to 0, the local interpolation transposes will
+ * be deleted to save memory, the default will keep them to be able
+ * to use more efficient matvecs instead of matvecTs
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose(HYPRE_Solver solver,
+                                      HYPRE_Int    keepTranspose);
+
 /*
  * HYPRE_BoomerAMGSetPlotGrids
  **/

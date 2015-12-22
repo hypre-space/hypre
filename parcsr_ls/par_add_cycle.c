@@ -452,7 +452,7 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
          }
          if (max_sends)
          {
-            qsort0(all_send_procs, 0, max_sends-1);
+            hypre_qsort0(all_send_procs, 0, max_sends-1);
             num_sends_L = 1;
             this_proc = all_send_procs[0];
             for (i=1; i < max_sends; i++)
@@ -470,7 +470,7 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
          }
          if (max_recvs)
          {
-            qsort0(all_recv_procs, 0, max_recvs-1);
+            hypre_qsort0(all_recv_procs, 0, max_recvs-1);
             num_recvs_L = 1;
             this_proc = all_recv_procs[0];
             for (i=1; i < max_recvs; i++)

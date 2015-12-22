@@ -817,7 +817,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
       aux_offd_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd);
       for (i=0; i < num_nonzeros_offd; i++)
          aux_offd_j[i] = offd_j[i];
-      qsort0(aux_offd_j,0,num_nonzeros_offd-1);
+      hypre_qsort0(aux_offd_j,0,num_nonzeros_offd-1);
       col_map_offd = hypre_ParCSRMatrixColMapOffd(matrix);
       col_map_offd[0] = aux_offd_j[0];
       offd_cnt = 0;
@@ -1676,8 +1676,8 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
          used_procs[i] = send_proc_obj.id[i];
          new_vec_starts[i+1] = send_proc_obj.elements[i]+1;
       }
-      qsort0(used_procs, 0, num_types-1);
-      qsort0(new_vec_starts, 0, num_types);
+      hypre_qsort0(used_procs, 0, num_types-1);
+      hypre_qsort0(new_vec_starts, 0, num_types);
       /*now we need to put into an array to send */
       count =  2*num_types+2;
       send_info = hypre_CTAlloc(HYPRE_Int, count);

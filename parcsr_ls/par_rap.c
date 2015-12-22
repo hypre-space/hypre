@@ -205,11 +205,23 @@ HYPRE_Int
 hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
                                     hypre_ParCSRMatrix  *A,
                                     hypre_ParCSRMatrix  *P,
+                                    hypre_ParCSRMatrix **RAP_ptr )
+{
+   hypre_BoomerAMGBuildCoarseOperatorKT( RT, A, P, 1, RAP_ptr);
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
+                                    hypre_ParCSRMatrix  *A,
+                                    hypre_ParCSRMatrix  *P,
    				    HYPRE_Int keepTranspose,
                                     hypre_ParCSRMatrix **RAP_ptr )
 
 {
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_RAP] -= hypre_MPI_Wtime();
+#endif
 
    MPI_Comm        comm = hypre_ParCSRMatrixComm(A);
 
@@ -467,8 +479,10 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    }
 #endif /* HYPRE_CONCURRENT_HOPSCOTCH */
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX_RAP] -= hypre_MPI_Wtime();
+#endif
 
    if (num_procs > 1) 
    {
@@ -586,7 +600,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
          P_ext_offd_j[i] = hypre_UnorderedIntMapGet(&col_map_offd_Pext_inverse, P_ext_offd_j[i]);
       hypre_UnorderedIntMapDestroy(&col_map_offd_Pext_inverse);
    }
-#else /* HYPRE_CONCURRENT_HOPSCOTCH */
+#else /* !HYPRE_CONCURRENT_HOPSCOTCH */
    if (P_ext_offd_size || num_cols_offd_P)
    {
       temp = hypre_CTAlloc(HYPRE_Int, P_ext_offd_size+num_cols_offd_P);
@@ -598,7 +612,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    }
    if (cnt)
    {
-      qsort0(temp, 0, cnt-1);
+      HYPRE_Int value;
+      hypre_qsort0(temp, 0, cnt-1);
 
       num_cols_offd_Pext = 1;
       value = temp[0];
@@ -625,7 +640,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       P_ext_offd_j[i] = hypre_BinarySearch(col_map_offd_Pext,
                                            P_ext_offd_j[i],
                                            num_cols_offd_Pext);
-#endif /* HYPRE_CONCURRENT_HOPSCOTCH */
+#endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
 
    if (num_cols_offd_P)
    {
@@ -639,8 +654,10 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
             if (cnt == num_cols_offd_P) break;
          }
    }
+#ifdef HYPRE_PROFILE
   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX_RAP] += hypre_MPI_Wtime();
+#endif
 
    /*-----------------------------------------------------------------------
     *  First Pass: Determine size of RAP_int and set up RAP_int_i if there 
@@ -1128,8 +1145,10 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    hypre_TFree(jj_count);
   }
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX_RAP] -= hypre_MPI_Wtime();
+#endif
 
    RAP_ext_size = 0;
    if (num_sends_RT || num_recvs_RT)
@@ -1186,7 +1205,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       hypre_sort_and_create_inverse_map(temp, num_cols_offd_RAP, &col_map_offd_RAP, &col_map_offd_RAP_inverse);
       // num_cols_offd_RAP <= RAP_ext_size + num_cols_offd_Pext
    }
-#else /* HYPRE_CONCURRENT_HOPSCOTCH */
+#else /* !HYPRE_CONCURRENT_HOPSCOTCH */
    if (RAP_ext_size || num_cols_offd_Pext)
    {
       temp = hypre_CTAlloc(HYPRE_Int,RAP_ext_size+num_cols_offd_Pext);
@@ -1201,7 +1220,8 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
 
       if (cnt)
       {
-         qsort0(temp,0,cnt-1);
+         HYPRE_Int value;
+         hypre_qsort0(temp,0,cnt-1);
          value = temp[0];
          num_cols_offd_RAP = 1;
          for (i=1; i < cnt; i++)
@@ -1223,7 +1243,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
   
       hypre_TFree(temp);
    }
-#endif /* HYPRE_CONCURRENT_HOPSCOTCH */
+#endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
 
    if (num_cols_offd_P)
    {
@@ -1276,8 +1296,10 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
       hypre_UnorderedIntMapDestroy(&col_map_offd_RAP_inverse);
 #endif
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
    hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX_RAP] += hypre_MPI_Wtime();
+#endif
 
 /*   need to allocate new P_marker etc. and make further changes */
    /*-----------------------------------------------------------------------
@@ -1370,7 +1392,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
            }
         } // if (set)
       }
-#else /* HYPRE_CONCURRENT_HOPSCOTCH */
+#else /* !HYPRE_CONCURRENT_HOPSCOTCH */
       for (i=0; i < num_sends_RT; i++)
         for (j = send_map_starts_RT[i]; j < send_map_starts_RT[i+1]; j++)
             if (send_map_elmts_RT[j] == ic)
@@ -1397,7 +1419,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
                 }
                 break;
             }
-#endif /* HYPRE_CONCURRENT_HOPSCOTCH */
+#endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
 
       /*--------------------------------------------------------------------
        *  Loop over entries in row ic of R_diag.
@@ -1733,7 +1755,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
            }
         } // if (set)
       }
-#else /* HYPRE_CONCURRENT_HOPSCOTCH */
+#else /* !HYPRE_CONCURRENT_HOPSCOTCH */
       for (i=0; i < num_sends_RT; i++)
         for (j = send_map_starts_RT[i]; j < send_map_starts_RT[i+1]; j++)
             if (send_map_elmts_RT[j] == ic)
@@ -1773,7 +1795,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
                 }
                 break;
             }
-#endif /* HYPRE_CONCURRENT_HOPSCOTCH */
+#endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
 
       /*--------------------------------------------------------------------
        *  Loop over entries in row ic of R_diag and compute row ic of RA.
@@ -2152,9 +2174,12 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
    hypre_TFree(send_map_elmts_RT_aggregated);
 #endif
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_RAP] += hypre_MPI_Wtime();
+#endif
 
    return(0);
    
 }            
+
 

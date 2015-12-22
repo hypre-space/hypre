@@ -286,7 +286,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
        {
 	 if (measure > 0)
 	 {
-	   enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
+	   hypre_enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
 	   num_left++; /* compute num_left before each RS coarsening loop */
 	 }
 	 else if (CF_marker[j] == 0) /* increase weight of strongly coupled neighbors only 
@@ -308,12 +308,12 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
 	       {
 		 new_meas = measure_array[nabor];
 		 if (new_meas > 0)
-		   remove_point(&LoL_head, &LoL_tail, new_meas, 
+		   hypre_remove_point(&LoL_head, &LoL_tail, new_meas, 
 				nabor, lists, where);
 		 else num_left++; /* BM Aug 29, 2006 */
 		 
 		 new_meas = ++(measure_array[nabor]);
-		 enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+		 hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
 				nabor, lists, where);
 	       }
 	       else
@@ -335,7 +335,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
        while (LoL_head) {
 	 hypre_LinkList list_ptr = LoL_head;
 	 LoL_head = LoL_head->next_elt;
-	 dispose_elt (list_ptr);
+	 hypre_dispose_elt (list_ptr);
        }
        break;
      }
@@ -372,7 +372,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
        measure_array_master[index] = 0; /* BM May 19: for CGC */
        --num_left;
       
-       remove_point(&LoL_head, &LoL_tail, measure, index, lists, where);
+       hypre_remove_point(&LoL_head, &LoL_tail, measure, index, lists, where);
   
        for (j = ST_i[index]; j < ST_i[index+1]; j++)
        {
@@ -384,7 +384,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
 	   measure = measure_array[nabor];
 	   measure_array[nabor]=0;
 
-	   remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+	   hypre_remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
 	   --num_left;
 	   
 	   for (k = S_i[nabor]; k < S_i[nabor+1]; k++)
@@ -394,12 +394,12 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
 	     if (measure_array[nabor_two]>0) /* undecided point */
              {
 	       measure = measure_array[nabor_two];
-	       remove_point(&LoL_head, &LoL_tail, measure, 
+	       hypre_remove_point(&LoL_head, &LoL_tail, measure, 
 			    nabor_two, lists, where);
 	       
 	       new_meas = ++(measure_array[nabor_two]);
 	       
-	       enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+	       hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
 			      nabor_two, lists, where);
 	     }
 	   }
@@ -413,12 +413,12 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
          {
 	   measure = measure_array[nabor];
 	   
-	   remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+	   hypre_remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
 	   
 	   measure_array[nabor] = --measure;
 	   
 	   if (measure > 0)
-	     enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
+	     hypre_enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
 			    lists, where);
 	   else
 	   {
@@ -432,12 +432,12 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
 	       if (measure_array[nabor_two]>0)
                {
 		 new_meas = measure_array[nabor_two];
-		 remove_point(&LoL_head, &LoL_tail, new_meas, 
+		 hypre_remove_point(&LoL_head, &LoL_tail, new_meas, 
 			      nabor_two, lists, where);
 		 
 		 new_meas = ++(measure_array[nabor_two]);
                  
-		 enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+		 hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
 				nabor_two, lists, where);
 	       }
 	     }
@@ -588,7 +588,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
     
       hypre_ParCSRCommHandleDestroy(comm_handle);
       }
-      AmgCGCBoundaryFix (S,CF_marker,CF_marker_offd);
+      hypre_AmgCGCBoundaryFix (S,CF_marker,CF_marker_offd);
       if (debug_flag == 3)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
@@ -651,7 +651,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
       hypre_printf ("Starting CGC preparation\n");
     }
 #endif
-  AmgCGCPrepare (S,numberofgrids,CF_marker,&CF_marker_offd,coarsen_type,&vertexrange);
+  hypre_AmgCGCPrepare (S,numberofgrids,CF_marker,&CF_marker_offd,coarsen_type,&vertexrange);
 #if 0 /* debugging */
   if (!mpirank) {
     wall_time = time_getWallclockSeconds() - wall_time;
@@ -660,7 +660,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
     hypre_printf ("Starting CGC matrix assembly\n");
   }
 #endif
-  AmgCGCGraphAssemble (S,vertexrange,CF_marker,CF_marker_offd,coarsen_type,&ijG);
+  hypre_AmgCGCGraphAssemble (S,vertexrange,CF_marker,CF_marker_offd,coarsen_type,&ijG);
 #if 0
   HYPRE_IJMatrixPrint (ijG,"graph.txt");
 #endif
@@ -702,7 +702,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
       hypre_printf ("Starting CGC election\n");
     }
 #endif
-    AmgCGCChoose (Gseq,vertexrange_all,mpisize,&coarse);
+    hypre_AmgCGCChoose (Gseq,vertexrange_all,mpisize,&coarse);
 #if 0 /* debugging */
   if (!mpirank) {
     wall_time = time_getWallclockSeconds() - wall_time;
@@ -764,7 +764,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
   return(ierr);
 }
 
-HYPRE_Int AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int *CF_marker,HYPRE_Int **CF_marker_offd,HYPRE_Int coarsen_type,HYPRE_Int **vrange)
+HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int *CF_marker,HYPRE_Int **CF_marker_offd,HYPRE_Int coarsen_type,HYPRE_Int **vrange)
 /* assemble a graph representing the connections between the grids
  * ================================================================================================
  * S : the strength matrix
@@ -863,7 +863,7 @@ HYPRE_Int AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int *CF_ma
 #define tag_pointrange 301
 #define tag_vertexrange 302
 
-HYPRE_Int AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPRE_Int *CF_marker,HYPRE_Int *CF_marker_offd,HYPRE_Int coarsen_type,
+HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPRE_Int *CF_marker,HYPRE_Int *CF_marker_offd,HYPRE_Int coarsen_type,
 			 HYPRE_IJMatrix *ijG)
 /* assemble a graph representing the connections between the grids
  * ================================================================================================
@@ -1078,7 +1078,7 @@ HYPRE_Int AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrange,HYPR
   return (ierr);
 }
 
-HYPRE_Int AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpisize,HYPRE_Int **coarse)
+HYPRE_Int hypre_AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpisize,HYPRE_Int **coarse)
   /* chooses one grid for every processor
    * ============================================================
    * G : the connectivity graph
@@ -1203,7 +1203,7 @@ HYPRE_Int AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpis
 
   for (i=0;i<num_vertices;i++) {
     measure_array[i] = H_i[i+1] - H_i[i] + HT_i[i+1] - HT_i[i];
-    enter_on_lists (&LoL_head,&LoL_tail,measure_array[i],i,lists,where);
+    hypre_enter_on_lists (&LoL_head,&LoL_tail,measure_array[i],i,lists,where);
   }
 
   /******************************************************************
@@ -1226,7 +1226,7 @@ HYPRE_Int AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpis
     for (i=vertexrange[processor[choice]];i<vertexrange[processor[choice]+1];i++) {
       /* set weights for all remaining vertices on this processor to zero */
       measure = measure_array[i];
-      remove_point (&LoL_head,&LoL_tail,measure,i,lists,where);
+      hypre_remove_point (&LoL_head,&LoL_tail,measure,i,lists,where);
       measure_array[i]=0;
     }
     for (j=H_i[choice];j<H_i[choice+1];j++){
@@ -1234,8 +1234,8 @@ HYPRE_Int AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpis
       /* if no vertex is chosen on this proc, set weights of all heavily coupled vertices to max1 */
       if (!(*coarse)[processor[jj]]) {
 	measure = measure_array[jj];
-	remove_point (&LoL_head,&LoL_tail,measure,jj,lists,where);
-	enter_on_lists (&LoL_head,&LoL_tail,new_measure,jj,lists,where);
+	hypre_remove_point (&LoL_head,&LoL_tail,measure,jj,lists,where);
+	hypre_enter_on_lists (&LoL_head,&LoL_tail,new_measure,jj,lists,where);
 	measure_array[jj]=new_measure;
       }
     }
@@ -1244,8 +1244,8 @@ HYPRE_Int AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpis
       /* if no vertex is chosen on this proc, set weights of all heavily coupled vertices to max1 */
       if (!(*coarse)[processor[jj]]) {
 	measure = measure_array[jj];
-	remove_point (&LoL_head,&LoL_tail,measure,jj,lists,where);
-	enter_on_lists (&LoL_head,&LoL_tail,new_measure,jj,lists,where);
+	hypre_remove_point (&LoL_head,&LoL_tail,measure,jj,lists,where);
+	hypre_enter_on_lists (&LoL_head,&LoL_tail,new_measure,jj,lists,where);
 	measure_array[jj]=new_measure;
       }
     }
@@ -1258,7 +1258,7 @@ HYPRE_Int AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpis
 #if 0
     hypre_assert (measure==0);
 #endif
-    remove_point (&LoL_head,&LoL_tail,measure,i,lists,where);
+    hypre_remove_point (&LoL_head,&LoL_tail,measure,i,lists,where);
   }
     
 
@@ -1286,7 +1286,7 @@ HYPRE_Int AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpis
   return(ierr);
 }
 
-HYPRE_Int AmgCGCBoundaryFix (hypre_ParCSRMatrix *S,HYPRE_Int *CF_marker,HYPRE_Int *CF_marker_offd)
+HYPRE_Int hypre_AmgCGCBoundaryFix (hypre_ParCSRMatrix *S,HYPRE_Int *CF_marker,HYPRE_Int *CF_marker_offd)
   /* Checks whether an interpolation is possible for a fine grid point with strong couplings.
    * Required after CGC coarsening
    * ========================================================================================
@@ -1327,12 +1327,12 @@ HYPRE_Int AmgCGCBoundaryFix (hypre_ParCSRMatrix *S,HYPRE_Int *CF_marker,HYPRE_In
     /* all points i is strongly coupled to are fine: make i C_PT */
     CF_marker[i] = C_PT;
 #if 0
-    hypre_printf ("Processor %d: added point %d in AmgCGCBoundaryFix\n",mpirank,i);
+    hypre_printf ("Processor %d: added point %d in hypre_AmgCGCBoundaryFix\n",mpirank,i);
 #endif
     added_cpts++;
   }
 #if 0
-  if (added_cpts)  hypre_printf ("Processor %d: added %d points in AmgCGCBoundaryFix\n",mpirank,added_cpts);
+  if (added_cpts)  hypre_printf ("Processor %d: added %d points in hypre_AmgCGCBoundaryFix\n",mpirank,added_cpts);
   fflush(stdout);
 #endif
   return(ierr);

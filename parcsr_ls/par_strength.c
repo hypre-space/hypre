@@ -91,7 +91,9 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
                        HYPRE_Int                   *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
 {
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] -= hypre_MPI_Wtime();
+#endif
 
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -519,7 +521,9 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    hypre_TFree(S_temp_diag_j);
    hypre_TFree(S_temp_offd_j);
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATES] += hypre_MPI_Wtime();
+#endif
 
    return (ierr);
 }
@@ -1111,7 +1115,9 @@ hypre_BoomerAMGCreateSCommPkg(hypre_ParCSRMatrix *A,
 HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker, 
 	HYPRE_Int num_paths, HYPRE_Int *coarse_row_starts, hypre_ParCSRMatrix **C_ptr)
 {
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATE_2NDS] -= hypre_MPI_Wtime();
+#endif
 
    MPI_Comm 	   comm = hypre_ParCSRMatrixComm(S);
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(S);
@@ -1408,7 +1414,9 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
       hypre_TFree(S_int_i);
       hypre_TFree(S_int_j);
 
+#ifdef HYPRE_PROFILE
       hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
+#endif
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
       S_ext_diag_i = hypre_TAlloc(HYPRE_Int, num_cols_offd_S+1);
@@ -1491,7 +1499,8 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
          S_ext_offd_j[i] = hypre_UnorderedIntMapGet(&col_map_offd_C_inverse, S_ext_offd_j[i]);
 
       hypre_UnorderedIntMapDestroy(&col_map_offd_C_inverse);
-#else /* HYPRE_CONCURRENT_HOPSCOTCH */
+#else /* !HYPRE_CONCURRENT_HOPSCOTCH */
+      HYPRE_Int cnt_offd, cnt_diag, cnt, value;
       S_ext_diag_size = 0;
       S_ext_offd_size = 0;
 
@@ -1552,7 +1561,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
       }
       if (cnt)
       {
-         qsort0(temp, 0, cnt-1);
+         hypre_qsort0(temp, 0, cnt-1);
 
          num_cols_offd_C = 1;
          value = temp[0];
@@ -1580,7 +1589,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
                                            S_ext_offd_j[i],
                                            num_cols_offd_C);
 
-#endif /* HYPRE_CONCURRENT_HOPSCOTCH */
+#endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
 
       if (num_cols_offd_S)
       {
@@ -1606,7 +1615,9 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
          } /* omp parallel */
       }
 
+#ifdef HYPRE_PROFILE
       hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
+#endif
    } /* num_procs > 1 */
 
    /*-----------------------------------------------------------------------
@@ -2262,7 +2273,9 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 
    *C_ptr = S2;
 
+#ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATE_2NDS] += hypre_MPI_Wtime();
+#endif
 
    return 0;
    

@@ -180,6 +180,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int mult_addlvl = hypre_max(mult_additive, simple);
    HYPRE_Int addlvl = hypre_max(mult_addlvl, additive);
    HYPRE_Int rap2 = hypre_ParAMGDataRAP2(amg_data);
+   HYPRE_Int keepTranspose = hypre_ParAMGDataKeepTranspose(amg_data);
 
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
 
@@ -2052,8 +2053,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          else 
          {
             /* Compute standard Galerkin coarse-grid product */
-            hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
-                                        P_array[level], &A_H);
+            hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], A_array[level] , 
+                                        P_array[level], keepTranspose, &A_H);
          }
 
       }

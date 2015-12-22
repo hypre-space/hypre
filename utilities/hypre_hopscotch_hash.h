@@ -10,6 +10,12 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+/**
+ * Hopscotch hash is modified from the code downloaded from
+ * https://sites.google.com/site/cconcurrencypackage/hopscotch-hashing
+ * with the following terms of usage
+ */
+
 ////////////////////////////////////////////////////////////////////////////////
 //TERMS OF USAGE
 //------------------------------------------------------------------------------
@@ -62,40 +68,131 @@ extern "C" {
 #endif
 
 // Constants ................................................................
-#define HYPRE_HOPSCOTCH_HASH_HOP_RANGE    (32U)
-#define HYPRE_HOPSCOTCH_HASH_INSERT_RANGE (4*1024U)
+#define HYPRE_HOPSCOTCH_HASH_HOP_RANGE    (32)
+#define HYPRE_HOPSCOTCH_HASH_INSERT_RANGE (4*1024)
 
-#define HYPRE_HOPSCOTCH_HASH_EMPTY (0U)
-#define HYPRE_HOPSCOTCH_HASH_BUSY  (1U)
+#define HYPRE_HOPSCOTCH_HASH_EMPTY (0)
+#define HYPRE_HOPSCOTCH_HASH_BUSY  (1)
 
 // Small Utilities ..........................................................
-static inline HYPRE_Int first_lsb_bit_indx(hypre_uint x) {
+static inline HYPRE_Int first_lsb_bit_indx(hypre_uint x) 
+{
   if (0 == x) return -1;
   return __builtin_ffs(x) - 1;
 }
 
-// assumption: key is non-negative
-static inline hypre_uint hypre_Hash(HYPRE_Int key) {
-  key -= 339522179;
-  key ^= (key << 15) ^ 0xcd7dcd7d;
-  key ^= (key >> 10);
-  key ^= (key <<  3);
-  key ^= (key >>  6);
-  key ^= (key <<  2) + (key << 14);
-  key ^= (key >> 16);
+/**
+ * hypre_Hash is adapted from xxHash with the following license.
+ */
+/*
+   xxHash - Extremely Fast Hash algorithm
+   Header File
+   Copyright (C) 2012-2015, Yann Collet.
 
-  // only -2147483648 and -1073748731 gives HYPRE_HOPSCOTCH_HASH_EMPTY,
-  // and we're fine as long as key is non-negative
-  assert(HYPRE_HOPSCOTCH_HASH_EMPTY != key);
-  return key;
+   BSD 2-Clause License (http://www.opensource.org/licenses/bsd-license.php)
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are
+   met:
+
+       * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+       * Redistributions in binary form must reproduce the above
+   copyright notice, this list of conditions and the following disclaimer
+   in the documentation and/or other materials provided with the
+   distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+   "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+   LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+   A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+   OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+   SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+   DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+   You can contact the author at :
+   - xxHash source repository : https://github.com/Cyan4973/xxHash
+*/
+
+/***************************************
+*  Constants
+***************************************/
+#define HYPRE_XXH_PRIME32_1   2654435761U
+#define HYPRE_XXH_PRIME32_2   2246822519U
+#define HYPRE_XXH_PRIME32_3   3266489917U
+#define HYPRE_XXH_PRIME32_4    668265263U
+#define HYPRE_XXH_PRIME32_5    374761393U
+
+#define HYPRE_XXH_PRIME64_1 11400714785074694791ULL
+#define HYPRE_XXH_PRIME64_2 14029467366897019727ULL
+#define HYPRE_XXH_PRIME64_3  1609587929392839161ULL
+#define HYPRE_XXH_PRIME64_4  9650029242287828579ULL
+#define HYPRE_XXH_PRIME64_5  2870177450012600261ULL
+
+#  define HYPRE_XXH_rotl32(x,r) ((x << r) | (x >> (32 - r)))
+#  define HYPRE_XXH_rotl64(x,r) ((x << r) | (x >> (64 - r)))
+
+#ifdef HYPRE_BIGINT
+static inline HYPRE_Int hypre_Hash(HYPRE_Int input)
+{
+    hypre_ulongint h64 = HYPRE_XXH_PRIME64_5 + sizeof(input);
+
+    hypre_ulongint k1 = input;
+    k1 *= HYPRE_XXH_PRIME64_2;
+    k1 = HYPRE_XXH_rotl64(k1, 31);
+    k1 *= HYPRE_XXH_PRIME64_1;
+    h64 ^= k1;
+    h64 = HYPRE_XXH_rotl64(h64, 27)*HYPRE_XXH_PRIME64_1 + HYPRE_XXH_PRIME64_4;
+
+    h64 ^= h64 >> 33;
+    h64 *= HYPRE_XXH_PRIME64_2;
+    h64 ^= h64 >> 29;
+    h64 *= HYPRE_XXH_PRIME64_3;
+    h64 ^= h64 >> 32;
+
+#ifndef NDEBUG
+    if (HYPRE_HOPSCOTCH_HASH_EMPTY == h64) {
+      hypre_printf("hash(%lld) = %d\n", h64, HYPRE_HOPSCOTCH_HASH_EMPTY);
+      assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h64);
+    }
+#endif 
+
+    return h64;
 }
+
+#else
+static inline HYPRE_Int hypre_Hash(HYPRE_Int input)
+{
+    hypre_uint h32 = HYPRE_XXH_PRIME32_5 + sizeof(input);
+
+    // 1665863975 is added to input so that
+    // only -1073741824 gives HYPRE_HOPSCOTCH_HASH_EMPTY.
+    // Hence, we're fine as long as key is non-negative.
+    h32 += (input + 1665863975)*HYPRE_XXH_PRIME32_3;
+    h32 = HYPRE_XXH_rotl32(h32, 17)*HYPRE_XXH_PRIME32_4;
+
+    h32 ^= h32 >> 15;
+    h32 *= HYPRE_XXH_PRIME32_2;
+    h32 ^= h32 >> 13;
+    h32 *= HYPRE_XXH_PRIME32_3;
+    h32 ^= h32 >> 16;
+
+    //assert(HYPRE_HOPSCOTCH_HASH_EMPTY != h32);
+
+    return h32;
+}
+#endif
 
 static inline void hypre_UnorderedIntSetFindCloserFreeBucket( hypre_UnorderedIntSet *s,
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
                                                        hypre_HopscotchSegment* start_seg,
 #endif
                                                        HYPRE_Int *free_bucket,
-                                                       hypre_uint *free_dist )
+                                                       HYPRE_Int *free_dist )
 {
   HYPRE_Int move_bucket = *free_bucket - (HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1);
   HYPRE_Int move_free_dist;
@@ -163,7 +260,7 @@ static inline void hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedInt
                                                        hypre_HopscotchSegment* start_seg,
 #endif
                                                        hypre_HopscotchBucket** free_bucket,
-                                                       hypre_uint* free_dist)
+                                                       HYPRE_Int* free_dist)
 {
   hypre_HopscotchBucket* move_bucket = *free_bucket - (HYPRE_HOPSCOTCH_HASH_HOP_RANGE - 1);
   HYPRE_Int move_free_dist;
@@ -228,11 +325,11 @@ static inline void hypre_UnorderedIntMapFindCloserFreeBucket( hypre_UnorderedInt
 }
 
 void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
-                                  hypre_uint inCapacity,
-                                  hypre_uint concurrencyLevel);
+                                  HYPRE_Int inCapacity,
+                                  HYPRE_Int concurrencyLevel);
 void hypre_UnorderedIntMapCreate( hypre_UnorderedIntMap *m,
-                                  hypre_uint inCapacity,
-                                  hypre_uint concurrencyLevel);
+                                  HYPRE_Int inCapacity,
+                                  HYPRE_Int concurrencyLevel);
 
 void hypre_UnorderedIntSetDestroy( hypre_UnorderedIntSet *s );
 void hypre_UnorderedIntMapDestroy( hypre_UnorderedIntMap *m );
@@ -242,7 +339,7 @@ static inline HYPRE_Int hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
                                                 HYPRE_Int key )
 {
   //CALCULATE HASH ..........................
-  hypre_uint hash = hypre_Hash(key);
+  HYPRE_Int hash = hypre_Hash(key);
 
   //CHECK IF ALREADY CONTAIN ................
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
@@ -251,7 +348,7 @@ static inline HYPRE_Int hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
   HYPRE_Int bucket = hash & s->bucketMask;
   hypre_uint hopInfo = s->hopInfo[bucket];
 
-  if (0 ==hopInfo)
+  if (0 == hopInfo)
     return 0;
   else if (1 == hopInfo )
   {
@@ -261,7 +358,7 @@ static inline HYPRE_Int hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
   }
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-  hypre_uint startTimestamp = segment->timestamp;
+  HYPRE_Int startTimestamp = segment->timestamp;
 #endif
   while (0 != hopInfo)
   {
@@ -294,7 +391,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
                                            HYPRE_Int key)
 {
   //CALCULATE HASH ..........................
-  hypre_uint hash = hypre_Hash(key);
+  HYPRE_Int hash = hypre_Hash(key);
 
   //CHECK IF ALREADY CONTAIN ................
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
@@ -312,7 +409,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
   }
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
-  hypre_uint startTimestamp = segment->timestamp;
+  HYPRE_Int startTimestamp = segment->timestamp;
 #endif
   while (0 != hopInfo)
   {
@@ -376,7 +473,7 @@ static inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
                                       HYPRE_Int key )
 {
   //CALCULATE HASH ..........................
-  hypre_uint hash = hypre_Hash(key);
+  HYPRE_Int hash = hypre_Hash(key);
 
   //LOCK KEY HASH ENTERY ....................
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
@@ -404,7 +501,7 @@ static inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
 
   //LOOK FOR FREE BUCKET ....................
   HYPRE_Int free_bucket = bucket;
-  hypre_uint free_dist = 0;
+  HYPRE_Int free_dist = 0;
   for ( ; free_dist < HYPRE_HOPSCOTCH_HASH_INSERT_RANGE; ++free_dist, ++free_bucket)
   {
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
@@ -440,7 +537,7 @@ static inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
   }
 
   //NEED TO RESIZE ..........................
-  fprintf(stderr, "ERROR - RESIZE is not implemented - size %u\n", hypre_UnorderedIntSetSize(s));
+  fprintf(stderr, "ERROR - RESIZE is not implemented\n");
   exit(1);
   return;
 }
@@ -448,7 +545,7 @@ static inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
 static inline HYPRE_Int hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap *m, HYPRE_Int key, HYPRE_Int data)
 {
   //CALCULATE HASH ..........................
-  hypre_uint hash = hypre_Hash(key);
+  HYPRE_Int hash = hypre_Hash(key);
 
   //LOCK KEY HASH ENTERY ....................
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
@@ -476,7 +573,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap 
 
   //LOOK FOR FREE BUCKET ....................
   hypre_HopscotchBucket* free_bucket = startBucket;
-  hypre_uint free_dist = 0;
+  HYPRE_Int free_dist = 0;
   for ( ; free_dist < HYPRE_HOPSCOTCH_HASH_INSERT_RANGE; ++free_dist, ++free_bucket)
   {
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
@@ -512,7 +609,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap 
   }
 
   //NEED TO RESIZE ..........................
-  fprintf(stderr, "ERROR - RESIZE is not implemented - size %u\n", hypre_UnorderedIntMapSize(m));
+  fprintf(stderr, "ERROR - RESIZE is not implemented\n");
   exit(1);
   return HYPRE_HOPSCOTCH_HASH_EMPTY;
 }

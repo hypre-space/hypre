@@ -1399,7 +1399,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             
             /* now get rid of redundencies in tmp_proc_ids (since a box can lie
                in more than one AP - put in ap_proc_ids*/      
-            qsort0(tmp_proc_ids, 0, count-1);
+            hypre_qsort0(tmp_proc_ids, 0, count-1);
             proc_count = 0;
             ap_proc_ids = hypre_CTAlloc(HYPRE_Int, count);
             
@@ -1531,7 +1531,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                 * procs and also my id ) */
                
                /*first sort on proc_id  */
-               qsort0(neighbor_proc_ids, 0, size-1);
+               hypre_qsort0(neighbor_proc_ids, 0, size-1);
                
                /* new contact list: */
                contact_proc_ids = hypre_CTAlloc(HYPRE_Int, size);

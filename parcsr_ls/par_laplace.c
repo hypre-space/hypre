@@ -308,7 +308,7 @@ GenerateLaplacian( MPI_Comm comm,
       for (i=0; i < num_cols_offd; i++)
          col_map_offd[i] = offd_j[i];
    	
-      qsort0(col_map_offd, 0, num_cols_offd-1);
+      hypre_qsort0(col_map_offd, 0, num_cols_offd-1);
 
       for (i=0; i < num_cols_offd; i++)
          for (j=0; j < num_cols_offd; j++)
@@ -832,7 +832,7 @@ GenerateSysLaplacian( MPI_Comm comm,
 	    }
 	 }  
    	
-      qsort0(col_map_offd, 0, num_cols_offd-1);
+      hypre_qsort0(col_map_offd, 0, num_cols_offd-1);
 
       for (i=0; i < num_fun*num_cols_offd; i++)
          for (j=hypre_min(0,abs(i-num_fun)); j < num_cols_offd; j++)
@@ -1340,7 +1340,7 @@ GenerateSysLaplacianVCoef( MPI_Comm comm,
 	    }
 	 }  
    	
-      qsort0(col_map_offd, 0, num_cols_offd-1);
+      hypre_qsort0(col_map_offd, 0, num_cols_offd-1);
 
       for (i=0; i < num_fun*num_cols_offd; i++)
          for (j=hypre_min(0,abs(i-num_fun)); j < num_cols_offd; j++)

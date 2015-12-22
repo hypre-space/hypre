@@ -1,25 +1,13 @@
 #include "hypre_hopscotch_hash.h"
 
-static hypre_uint NearestPowerOfTwo( hypre_uint value )
+static HYPRE_Int NearestPowerOfTwo( HYPRE_Int value )
 {
-  hypre_uint rc = 1;
+  HYPRE_Int rc = 1;
   while (rc < value) {
     rc <<= 1;
   }
   return rc;
 }
-
-/*static hypre_uint CalcDivideShift( hypre_uint _value )
-{
-  hypre_uint numShift = 0;
-  hypre_uint curr = 1;
-  while (curr < _value)
-  {
-    curr <<= 1;
-    ++numShift;
-  }
-  return numShift;
-}*/
 
 static void InitBucket(hypre_HopscotchBucket *b)
 {
@@ -41,8 +29,8 @@ static void DestroySegment(hypre_HopscotchSegment *s)
 #endif
 
 void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
-                                  hypre_uint inCapacity,
-                                  hypre_uint concurrencyLevel) 
+                                  HYPRE_Int inCapacity,
+                                  HYPRE_Int concurrencyLevel) 
 {
   s->segmentMask = NearestPowerOfTwo(concurrencyLevel) - 1;
   if (inCapacity < s->segmentMask + 1)
@@ -51,9 +39,8 @@ void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
   }
 
   //ADJUST INPUT ............................
-  hypre_uint adjInitCap = NearestPowerOfTwo(inCapacity);
-  // hypre_uint adjConcurrencyLevel = NearestPowerOfTwo(concurrencyLevel);
-  hypre_uint num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
+  HYPRE_Int adjInitCap = NearestPowerOfTwo(inCapacity);
+  HYPRE_Int num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
   s->bucketMask = adjInitCap - 1;
 
   HYPRE_Int i;
@@ -69,7 +56,7 @@ void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
 
   s->hopInfo = hypre_TAlloc(hypre_uint, num_buckets);
   s->key = hypre_TAlloc(HYPRE_Int, num_buckets);
-  s->hash = hypre_TAlloc(hypre_uint, num_buckets);
+  s->hash = hypre_TAlloc(HYPRE_Int, num_buckets);
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp parallel for
@@ -82,8 +69,8 @@ void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
 }
 
 void hypre_UnorderedIntMapCreate( hypre_UnorderedIntMap *m,
-                                  hypre_uint inCapacity,
-                                  hypre_uint concurrencyLevel) 
+                                  HYPRE_Int inCapacity,
+                                  HYPRE_Int concurrencyLevel) 
 {
   m->segmentMask = NearestPowerOfTwo(concurrencyLevel) - 1;
   if (inCapacity < m->segmentMask + 1)
@@ -92,9 +79,8 @@ void hypre_UnorderedIntMapCreate( hypre_UnorderedIntMap *m,
   }
 
   //ADJUST INPUT ............................
-  hypre_uint adjInitCap = NearestPowerOfTwo(inCapacity);
-  // hypre_uint adjConcurrencyLevel = NearestPowerOfTwo(concurrencyLevel);
-  hypre_uint num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
+  HYPRE_Int adjInitCap = NearestPowerOfTwo(inCapacity);
+  HYPRE_Int num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
   m->bucketMask = adjInitCap - 1;
 
   HYPRE_Int i;
