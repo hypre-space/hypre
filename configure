@@ -9159,7 +9159,7 @@ echo "$as_me: error: $ac_sub_configure failed for $ac_dir" >&2;}
 fi
 
 
-mv config/HYPRE_config.h.in config/HYPRE_config.h.tmp
-sed 's/F77_FUNC/HYPRE_FC_FUNC/g' < config/HYPRE_config.h.tmp > config/HYPRE_config.h.in
-rm -f config/HYPRE_config.h.tmp
+mv HYPRE_config.h HYPRE_config.h.tmp
+sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
+rm -f HYPRE_config.h.tmp
 
