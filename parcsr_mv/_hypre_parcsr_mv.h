@@ -36,7 +36,7 @@ extern "C" {
  *   Structure containing information for doing communications
  *--------------------------------------------------------------------------*/
 
-#define HYPRE_USING_PERSISTENT_COMM // JSP: can be defined by configure
+/*#define HYPRE_USING_PERSISTENT_COMM*/ // JSP: can be defined by configure
 #ifdef HYPRE_USING_PERSISTENT_COMM
 typedef enum CommPkgJobType
 {
