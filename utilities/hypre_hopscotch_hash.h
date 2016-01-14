@@ -537,7 +537,8 @@ static inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
   }
 
   //NEED TO RESIZE ..........................
-  fprintf(stderr, "ERROR - RESIZE is not implemented\n");
+  hypre_error_w_msg(HYPRE_GENERIC,"ERROR - RESIZE is not implemented\n");
+  /*fprintf(stderr, "ERROR - RESIZE is not implemented\n");*/
   exit(1);
   return;
 }
@@ -609,7 +610,8 @@ static inline HYPRE_Int hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap 
   }
 
   //NEED TO RESIZE ..........................
-  fprintf(stderr, "ERROR - RESIZE is not implemented\n");
+  hypre_error_w_msg(HYPRE_GENERIC,"ERROR - RESIZE is not implemented\n");
+  /*fprintf(stderr, "ERROR - RESIZE is not implemented\n");*/
   exit(1);
   return HYPRE_HOPSCOTCH_HASH_EMPTY;
 }
