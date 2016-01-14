@@ -104,7 +104,7 @@
 
 /* Define to a macro mangling the given C identifier (in lower and upper
  * case), which must not contain underscores, for linking with Fortran. */
-#undef HYPRE_FC_FUNC
+#undef FC_FUNC
 
 /* As HYPRE_FC_FUNC, but for C identifiers containing underscores. */
-#undef HYPRE_FC_FUNC_
+#undef FC_FUNC_
