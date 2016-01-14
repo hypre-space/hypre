@@ -967,7 +967,7 @@ static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
   //return atomic_fetch_add(atomic_ptr, value);
 #endif
 }
-#else // HYPRE_USING_ATOMIC
+#else // !HYPRE_USING_ATOMIC
 static inline HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval)
 {
    if (*ptr == oldval)
@@ -984,12 +984,13 @@ static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
    *ptr += value;
    return oldval;
 }
-#endif // HYPRE_USING_ATOMIC
+#endif // !HYPRE_USING_ATOMIC
 
+#ifdef HYPRE_HOPSCOTCH
 #ifdef HYPRE_USING_ATOMIC
-// concurrent hopscotch hasing is possible only with atomic supports
-/*#define HYPRE_CONCURRENT_HOPSCOTCH */
+// concurrent hopscotch hashing is possible only with atomic supports
 #define HYPRE_CONCURRENT_HOPSCOTCH 
+#endif 
 #endif 
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
