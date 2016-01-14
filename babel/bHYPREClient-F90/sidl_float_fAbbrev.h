@@ -1,4 +1,0 @@
-#define sidl_float__array_isColumnOrder_m ary_isColumnOrderdtagsquml_s7_m
-#define sidl_float__array_iscolumnorder_m ary_iscolumnorderdtagsquml_s7_m
-#define SIDL_FLOAT__ARRAY_ISCOLUMNORDER_M ARY_ISCOLUMNORDERDTAGSQUML_S7_M
-

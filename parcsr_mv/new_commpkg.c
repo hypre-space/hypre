@@ -27,7 +27,7 @@
 
 
 
-HYPRE_Int PrintCommpkg(hypre_ParCSRMatrix *A, const char *file_name)
+HYPRE_Int hypre_PrintCommpkg(hypre_ParCSRMatrix *A, const char *file_name)
 {
    
    HYPRE_Int num_sends, num_recvs;

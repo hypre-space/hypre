@@ -58,6 +58,9 @@ typedef struct
 #define hypre_CSRMatrixNumRownnz(matrix)    ((matrix) -> num_rownnz)
 #define hypre_CSRMatrixOwnsData(matrix)     ((matrix) -> owns_data)
 
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin( hypre_CSRMatrix *A );
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd( hypre_CSRMatrix *A );
+
 /*--------------------------------------------------------------------------
  * CSR Boolean Matrix
  *--------------------------------------------------------------------------*/

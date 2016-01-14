@@ -703,7 +703,7 @@ hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,
    {
       /* We subdivided count regions */
       /* Delete the old regions */
-      qsort0(delete_indices, 0, count-1); /* Put deleted indices in asc order */
+      hypre_qsort0(delete_indices, 0, count-1); /* Put deleted indices in asc order */
       hypre_DeleteMultipleBoxes( region_array, delete_indices, count );
    }
 
@@ -1799,7 +1799,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
    {
       /* Determine unique proc_ids (could be duplicates due to a processor
          owning more than one partiton in a region).  Sort the array. */
-      qsort0(proc_ids, 0, num_proc_ids-1);
+      hypre_qsort0(proc_ids, 0, num_proc_ids-1);
       
       /* Make sure we have enough space from proc_array */
       if (*size_alloc_proc_array < num_proc_ids)

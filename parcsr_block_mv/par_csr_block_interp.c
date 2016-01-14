@@ -1607,22 +1607,22 @@ void hypre_block_qsort( HYPRE_Int  *v,
    if (left >= right)
       return;
 
-   swap2( v, w, left, (left+right)/2);
-   swap_blk(blk_array, block_size, left, (left+right)/2);
+   hypre_swap2( v, w, left, (left+right)/2);
+   hypre_swap_blk(blk_array, block_size, left, (left+right)/2);
    last = left;
    for (i = left+1; i <= right; i++)
       if (hypre_cabs(w[i]) > hypre_cabs(w[left]))
       {
-         swap2(v, w, ++last, i);
-         swap_blk(blk_array, block_size, last, i);
+         hypre_swap2(v, w, ++last, i);
+         hypre_swap_blk(blk_array, block_size, last, i);
       }
-   swap2(v, w, left, last);
-   swap_blk(blk_array, block_size, left, last);
+   hypre_swap2(v, w, left, last);
+   hypre_swap_blk(blk_array, block_size, left, last);
    hypre_block_qsort(v, w, blk_array, block_size, left, last-1);
    hypre_block_qsort(v, w, blk_array, block_size, last+1, right);
 }
 
-void swap_blk( HYPRE_Complex *v,
+void hypre_swap_blk( HYPRE_Complex *v,
                HYPRE_Int   block_size,
                HYPRE_Int   i,
                HYPRE_Int   j )

@@ -1186,7 +1186,7 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
          //for (j = 0; j < rowSize2; j++) newColInd[j+1] = colInd2[j];
          //==========================================
 #endif
-         qsort0(newColInd, 0, newRowSize-1);
+         hypre_qsort0(newColInd, 0, newRowSize-1);
          count = 0;
          for ( j = 1; j < newRowSize; j++ )
          {
@@ -1290,7 +1290,7 @@ int HYPRE_LSI_BlockP::setup(HYPRE_ParCSRMatrix Amat)
          //}
 #endif
 
-         qsort1(newColInd, newColVal, 0, newRowSize-1);
+         hypre_qsort1(newColInd, newColVal, 0, newRowSize-1);
          count = 0;
          for ( j = 1; j < newRowSize; j++ )
          {

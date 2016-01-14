@@ -1615,3 +1615,14 @@ HYPRE_BoomerAMGSetRAP2 (HYPRE_Solver solver,
    return (hypre_BoomerAMGSetRAP2 ( (void *) solver, rap2 ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetKeepTranspose
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetKeepTranspose (HYPRE_Solver solver,
+                                HYPRE_Int    keepTranspose)
+{
+   return (hypre_BoomerAMGSetKeepTranspose ( (void *) solver, keepTranspose ) );
+}
+

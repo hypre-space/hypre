@@ -869,7 +869,7 @@ hypre_CSRBooleanMatrixToParCSRBooleanMatrix
    first_col_diag = col_starts[my_id];
    last_col_diag = col_starts[my_id+1]-1;
 
-   BooleanGenerateDiagAndOffd(local_A, par_matrix, first_col_diag, last_col_diag);
+   hypre_BooleanGenerateDiagAndOffd(local_A, par_matrix, first_col_diag, last_col_diag);
 
    /* set pointers back to NULL before destroying */
    if (my_id == 0)
@@ -885,7 +885,7 @@ hypre_CSRBooleanMatrixToParCSRBooleanMatrix
 }
 
 HYPRE_Int
-BooleanGenerateDiagAndOffd(hypre_CSRBooleanMatrix *A,
+hypre_BooleanGenerateDiagAndOffd(hypre_CSRBooleanMatrix *A,
                     hypre_ParCSRBooleanMatrix *matrix,
                     HYPRE_Int first_col_diag,
                     HYPRE_Int last_col_diag)

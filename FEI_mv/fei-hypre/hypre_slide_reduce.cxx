@@ -1073,7 +1073,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartB(int *ProcNRows,
 
     hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) A21_csr,
                                      (hypre_ParCSRMatrix *) invA22_csr,
-                                     (hypre_ParCSRMatrix *) A21_csr,
+                                     (hypre_ParCSRMatrix *) A21_csr, 
                                      (hypre_ParCSRMatrix **) &RAP_csr);
 
     if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )
@@ -2392,7 +2392,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
 
     hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) A21_csr,
                                      (hypre_ParCSRMatrix *) invA22_csr,
-                                     (hypre_ParCSRMatrix *) A21_csr,
+                                     (hypre_ParCSRMatrix *) A21_csr, 
                                      (hypre_ParCSRMatrix **) &RAP_csr);
 
     if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )

@@ -340,7 +340,7 @@ GenerateVarDifConv( MPI_Comm comm,
       for (i=0; i < num_cols_offd; i++)
          col_map_offd[i] = offd_j[i];
    	
-      qsort0(col_map_offd, 0, num_cols_offd-1);
+      hypre_qsort0(col_map_offd, 0, num_cols_offd-1);
 
       for (i=0; i < num_cols_offd; i++)
          for (j=0; j < num_cols_offd; j++)

@@ -381,6 +381,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataNonGalTolArray(amg_data) = NULL;
 
    hypre_ParAMGDataRAP2(amg_data) = 0;
+   hypre_ParAMGDataKeepTranspose(amg_data) = 1;
 
    return (void *) amg_data;
 }
@@ -639,7 +640,6 @@ hypre_BoomerAMGSetRestriction( void *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -657,7 +657,6 @@ hypre_BoomerAMGSetMaxLevels( void *data,
    HYPRE_Int old_max_levels;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -715,7 +714,6 @@ hypre_BoomerAMGGetMaxLevels( void *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -733,7 +731,6 @@ hypre_BoomerAMGSetMaxCoarseSize( void *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -757,7 +754,6 @@ hypre_BoomerAMGGetMaxCoarseSize( void *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -775,7 +771,6 @@ hypre_BoomerAMGSetMinCoarseSize( void *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -799,7 +794,6 @@ hypre_BoomerAMGGetMinCoarseSize( void *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -817,7 +811,6 @@ hypre_BoomerAMGSetSeqThreshold( void *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -841,7 +834,6 @@ hypre_BoomerAMGGetSeqThreshold( void *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -859,7 +851,6 @@ hypre_BoomerAMGSetRedundant( void *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -883,7 +874,6 @@ hypre_BoomerAMGGetRedundant( void *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -901,7 +891,6 @@ hypre_BoomerAMGSetStrongThreshold( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -925,7 +914,6 @@ hypre_BoomerAMGGetStrongThreshold( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -943,7 +931,6 @@ hypre_BoomerAMGSetMaxRowSum( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -967,7 +954,6 @@ hypre_BoomerAMGGetMaxRowSum( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -985,7 +971,6 @@ hypre_BoomerAMGSetTruncFactor( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1009,7 +994,6 @@ hypre_BoomerAMGGetTruncFactor( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1027,7 +1011,6 @@ hypre_BoomerAMGSetPMaxElmts( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1051,7 +1034,6 @@ hypre_BoomerAMGGetPMaxElmts( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1069,7 +1051,6 @@ hypre_BoomerAMGSetJacobiTruncThreshold( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1093,7 +1074,6 @@ hypre_BoomerAMGGetJacobiTruncThreshold( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1111,7 +1091,6 @@ hypre_BoomerAMGSetPostInterpType( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1135,7 +1114,6 @@ hypre_BoomerAMGGetPostInterpType( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1153,7 +1131,6 @@ hypre_BoomerAMGSetSCommPkgSwitch( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1171,7 +1148,6 @@ hypre_BoomerAMGGetSCommPkgSwitch( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1189,7 +1165,6 @@ hypre_BoomerAMGSetInterpType( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1215,7 +1190,6 @@ hypre_BoomerAMGGetInterpType( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1233,7 +1207,6 @@ hypre_BoomerAMGSetSepWeight( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1251,7 +1224,6 @@ hypre_BoomerAMGSetMinIter( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1269,7 +1241,6 @@ hypre_BoomerAMGGetMinIter( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1287,7 +1258,6 @@ hypre_BoomerAMGSetMaxIter( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1311,7 +1281,6 @@ hypre_BoomerAMGGetMaxIter( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1329,7 +1298,6 @@ hypre_BoomerAMGSetCoarsenType( void  *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1347,7 +1315,6 @@ hypre_BoomerAMGGetCoarsenType( void  *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1365,7 +1332,6 @@ hypre_BoomerAMGSetMeasureType( void  *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1383,7 +1349,6 @@ hypre_BoomerAMGGetMeasureType( void  *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1401,7 +1366,6 @@ hypre_BoomerAMGSetSetupType( void  *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1419,7 +1383,6 @@ hypre_BoomerAMGGetSetupType( void  *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1437,7 +1400,6 @@ hypre_BoomerAMGSetCycleType( void  *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1461,7 +1423,6 @@ hypre_BoomerAMGGetCycleType( void  *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1479,7 +1440,6 @@ hypre_BoomerAMGSetTol( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1503,7 +1463,6 @@ hypre_BoomerAMGGetTol( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1524,7 +1483,6 @@ hypre_BoomerAMGSetNumSweeps( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1560,7 +1518,6 @@ hypre_BoomerAMGSetCycleNumSweeps( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1573,7 +1530,6 @@ hypre_BoomerAMGSetCycleNumSweeps( void     *data,
 
    if (k < 1 || k > 3)
    {
-      hypre_printf (" Warning! Invalid cycle! num_sweeps not set!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -1600,13 +1556,11 @@ hypre_BoomerAMGGetCycleNumSweeps( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
    if (k < 1 || k > 3)
    {
-      hypre_printf (" Warning! Invalid cycle! No num_sweeps to get!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -1630,7 +1584,6 @@ hypre_BoomerAMGSetNumGridSweeps( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1655,7 +1608,6 @@ hypre_BoomerAMGGetNumGridSweeps( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1675,7 +1627,6 @@ hypre_BoomerAMGSetRelaxType( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1709,13 +1660,11 @@ hypre_BoomerAMGSetCycleRelaxType( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
    if (k < 1 || k > 3)
    {
-      hypre_printf (" Warning! Invalid cycle! relax_type not set!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -1750,13 +1699,11 @@ hypre_BoomerAMGGetCycleRelaxType( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
    if (k < 1 || k > 3)
    {
-      hypre_printf (" Warning! Invalid cycle! relax_type not set!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -1780,7 +1727,6 @@ hypre_BoomerAMGSetRelaxOrder( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1797,7 +1743,6 @@ hypre_BoomerAMGGetRelaxOrder( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1814,7 +1759,6 @@ hypre_BoomerAMGSetGridRelaxType( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1840,7 +1784,6 @@ hypre_BoomerAMGGetGridRelaxType( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1858,7 +1801,6 @@ hypre_BoomerAMGSetGridRelaxPoints( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1887,7 +1829,6 @@ hypre_BoomerAMGGetGridRelaxPoints( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1904,7 +1845,6 @@ hypre_BoomerAMGSetRelaxWeight( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1929,7 +1869,6 @@ hypre_BoomerAMGGetRelaxWeight( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1948,7 +1887,6 @@ hypre_BoomerAMGSetRelaxWt( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -1974,14 +1912,12 @@ hypre_BoomerAMGSetLevelRelaxWt( void    *data,
    hypre_ParAMGData  *amg_data = data;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
    num_levels = hypre_ParAMGDataMaxLevels(amg_data);
    if (level > num_levels-1 || level < 0) 
    {
-      hypre_printf (" Warning! Invalid level! Relax weight not set!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -2006,14 +1942,12 @@ hypre_BoomerAMGGetLevelRelaxWt( void    *data,
    hypre_ParAMGData  *amg_data = data;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
    num_levels = hypre_ParAMGDataMaxLevels(amg_data);
    if (level > num_levels-1 || level < 0) 
    {
-      hypre_printf (" Warning! Invalid level! Relax weight not set!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -2036,7 +1970,6 @@ hypre_BoomerAMGSetOmega( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2060,7 +1993,6 @@ hypre_BoomerAMGGetOmega( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2079,7 +2011,6 @@ hypre_BoomerAMGSetOuterWt( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2104,14 +2035,12 @@ hypre_BoomerAMGSetLevelOuterWt( void    *data,
    hypre_ParAMGData  *amg_data = data;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
    num_levels = hypre_ParAMGDataMaxLevels(amg_data);
    if (level > num_levels-1) 
    {
-      hypre_printf (" Warning! Invalid level! Outer weight not set!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -2136,14 +2065,12 @@ hypre_BoomerAMGGetLevelOuterWt( void    *data,
    hypre_ParAMGData  *amg_data = data;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
    num_levels = hypre_ParAMGDataMaxLevels(amg_data);
    if (level > num_levels-1) 
    {
-      hypre_printf (" Warning! Invalid level! Outer weight not set!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -2165,7 +2092,6 @@ hypre_BoomerAMGSetSmoothType( void     *data,
    hypre_ParAMGData  *amg_data = data;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2183,7 +2109,6 @@ hypre_BoomerAMGGetSmoothType( void     *data,
                
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2200,7 +2125,6 @@ hypre_BoomerAMGSetSmoothNumLevels( void     *data,
                
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2222,7 +2146,6 @@ hypre_BoomerAMGGetSmoothNumLevels( void     *data,
                
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2239,7 +2162,6 @@ hypre_BoomerAMGSetSmoothNumSweeps( void     *data,
                
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2261,7 +2183,6 @@ hypre_BoomerAMGGetSmoothNumSweeps( void     *data,
                
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2284,7 +2205,6 @@ hypre_BoomerAMGSetLogging( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2301,7 +2221,6 @@ hypre_BoomerAMGGetLogging( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2318,7 +2237,6 @@ hypre_BoomerAMGSetPrintLevel( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2335,7 +2253,6 @@ hypre_BoomerAMGGetPrintLevel( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2351,7 +2268,6 @@ hypre_BoomerAMGSetPrintFileName( void       *data,
    hypre_ParAMGData  *amg_data = data;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2374,7 +2290,6 @@ hypre_BoomerAMGGetPrintFileName( void       *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2391,7 +2306,6 @@ hypre_BoomerAMGSetNumIterations( void    *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2408,7 +2322,6 @@ hypre_BoomerAMGSetDebugFlag( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2425,7 +2338,6 @@ hypre_BoomerAMGGetDebugFlag( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2446,7 +2358,6 @@ hypre_BoomerAMGSetGSMG( void *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2467,7 +2378,6 @@ hypre_BoomerAMGSetNumSamples( void *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2508,7 +2418,6 @@ hypre_BoomerAMGSetPlotFileName( void       *data,
    hypre_ParAMGData  *amg_data = data;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -2560,7 +2469,6 @@ hypre_BoomerAMGSetNumFunctions( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2582,7 +2490,6 @@ hypre_BoomerAMGGetNumFunctions( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2603,7 +2510,6 @@ hypre_BoomerAMGSetNodal( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2623,7 +2529,6 @@ hypre_BoomerAMGSetNodalLevels( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2645,7 +2550,6 @@ hypre_BoomerAMGSetNodalDiag( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2665,7 +2569,6 @@ hypre_BoomerAMGSetNumPaths( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2691,7 +2594,6 @@ hypre_BoomerAMGSetAggNumLevels( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2717,7 +2619,6 @@ hypre_BoomerAMGSetAggInterpType( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2744,7 +2645,6 @@ hypre_BoomerAMGSetAggPMaxElmts( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2771,7 +2671,6 @@ hypre_BoomerAMGSetMultAddPMaxElmts( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2798,7 +2697,6 @@ hypre_BoomerAMGSetAggP12MaxElmts( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2824,7 +2722,6 @@ hypre_BoomerAMGSetAggTruncFactor( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2851,7 +2748,6 @@ hypre_BoomerAMGSetMultAddTruncFactor( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2878,7 +2774,6 @@ hypre_BoomerAMGSetAggP12TruncFactor( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2904,7 +2799,6 @@ hypre_BoomerAMGSetNumCRRelaxSteps( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2930,7 +2824,6 @@ hypre_BoomerAMGSetCRRate( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2951,7 +2844,6 @@ hypre_BoomerAMGSetCRStrongTh( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2972,7 +2864,6 @@ hypre_BoomerAMGSetISType( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -2998,7 +2889,6 @@ hypre_BoomerAMGSetCRUseCG( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3015,7 +2905,6 @@ hypre_BoomerAMGSetNumPoints( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3032,7 +2921,6 @@ hypre_BoomerAMGSetDofFunc( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3050,7 +2938,6 @@ hypre_BoomerAMGSetPointDofMap( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3068,7 +2955,6 @@ hypre_BoomerAMGSetDofPoint( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3086,7 +2972,6 @@ hypre_BoomerAMGGetNumIterations( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3103,7 +2988,6 @@ hypre_BoomerAMGGetCumNumIterations( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3120,7 +3004,6 @@ hypre_BoomerAMGGetResidual( void * data, hypre_ParVector ** resid )
    hypre_ParAMGData  *amg_data = data;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3137,7 +3020,6 @@ hypre_BoomerAMGGetRelResidualNorm( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3154,7 +3036,6 @@ hypre_BoomerAMGSetVariant( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3176,7 +3057,6 @@ hypre_BoomerAMGGetVariant( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3193,7 +3073,6 @@ hypre_BoomerAMGSetOverlap( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3215,7 +3094,6 @@ hypre_BoomerAMGGetOverlap( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3232,7 +3110,6 @@ hypre_BoomerAMGSetDomainType( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3254,7 +3131,6 @@ hypre_BoomerAMGGetDomainType( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3271,7 +3147,6 @@ hypre_BoomerAMGSetSchwarzRlxWeight( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3288,7 +3163,6 @@ hypre_BoomerAMGGetSchwarzRlxWeight( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3305,7 +3179,6 @@ hypre_BoomerAMGSetSchwarzUseNonSymm( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3322,7 +3195,6 @@ hypre_BoomerAMGSetSym( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3339,7 +3211,6 @@ hypre_BoomerAMGSetLevel( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3356,7 +3227,6 @@ hypre_BoomerAMGSetThreshold( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3373,7 +3243,6 @@ hypre_BoomerAMGSetFilter( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3390,7 +3259,6 @@ hypre_BoomerAMGSetDropTol( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3407,7 +3275,6 @@ hypre_BoomerAMGSetMaxNzPerRow( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3429,7 +3296,6 @@ hypre_BoomerAMGSetEuclidFile( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3446,7 +3312,6 @@ hypre_BoomerAMGSetEuLevel( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3463,7 +3328,6 @@ hypre_BoomerAMGSetEuSparseA( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3480,7 +3344,6 @@ hypre_BoomerAMGSetEuBJ( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3496,7 +3359,6 @@ hypre_BoomerAMGSetChebyOrder( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3517,7 +3379,6 @@ hypre_BoomerAMGSetChebyFraction( void     *data,
  
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3544,7 +3405,6 @@ HYPRE_Int hypre_BoomerAMGSetInterpVectors(void *solver,
    hypre_ParAMGData *amg_data = solver;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3568,7 +3428,6 @@ HYPRE_Int hypre_BoomerAMGSetInterpVectors(void *solver,
    hypre_ParAMGData *amg_data = solver;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3587,7 +3446,6 @@ HYPRE_Int hypre_BoomerAMGSetInterpVecVariant(void *solver,
    hypre_ParAMGData *amg_data = solver;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3611,7 +3469,6 @@ hypre_BoomerAMGSetInterpVecQMax( void     *data,
    
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3628,7 +3485,6 @@ hypre_BoomerAMGSetInterpVecAbsQTrunc( void     *data,
    
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3644,7 +3500,6 @@ HYPRE_Int hypre_BoomerAMGSetSmoothInterpVectors(void *solver,
    hypre_ParAMGData *amg_data = solver;
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3662,7 +3517,6 @@ hypre_BoomerAMGSetInterpRefine( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3680,7 +3534,6 @@ hypre_BoomerAMGSetInterpVecFirstLevel( void     *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
@@ -3698,7 +3551,6 @@ hypre_BoomerAMGSetAdditive( void *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -3716,7 +3568,6 @@ hypre_BoomerAMGGetAdditive( void *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -3734,7 +3585,6 @@ hypre_BoomerAMGSetMultAdditive( void *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -3752,7 +3602,6 @@ hypre_BoomerAMGGetMultAdditive( void *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -3770,7 +3619,6 @@ hypre_BoomerAMGSetSimple( void *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -3788,7 +3636,6 @@ hypre_BoomerAMGGetSimple( void *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
@@ -3808,13 +3655,11 @@ hypre_BoomerAMGSetNonGalerkinTol( void   *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
    if (nongalerkin_tol < 0)
    {
-      hypre_printf("Warning! Negative tolerance!\n");
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
@@ -3845,14 +3690,12 @@ hypre_BoomerAMGSetLevelNonGalerkinTol( void   *data,
 
    if (!amg_data)
    {
-      hypre_printf("Warning! BoomerAMG object empty!\n");
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
 
    if (nongalerkin_tol < 0)
    {
-      hypre_printf("Warning! Negative tolerance!\n");
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
@@ -3868,7 +3711,6 @@ hypre_BoomerAMGSetLevelNonGalerkinTol( void   *data,
 
    if (level+1 > max_num_levels)
    {
-      hypre_printf("Warning! Out of Bounds!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -3896,6 +3738,17 @@ hypre_BoomerAMGSetRAP2( void   *data,
   hypre_ParAMGData *amg_data = data;
 
   hypre_ParAMGDataRAP2(amg_data) = rap2;
+  return hypre_error_flag;
+}
+
+
+HYPRE_Int
+hypre_BoomerAMGSetKeepTranspose( void   *data,
+                            HYPRE_Int   keepTranspose)
+{
+  hypre_ParAMGData *amg_data = data;
+
+  hypre_ParAMGDataKeepTranspose(amg_data) = keepTranspose;
   return hypre_error_flag;
 }
 

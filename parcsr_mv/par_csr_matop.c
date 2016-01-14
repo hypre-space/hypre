@@ -34,7 +34,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
    HYPRE_Int num_recvs,
    HYPRE_Int num_sends,
    HYPRE_Int first_col_diag,
-   HYPRE_Int first_row_index,
+   HYPRE_Int * row_starts,
    HYPRE_Int * recv_vec_starts,
    HYPRE_Int * send_map_starts,
    HYPRE_Int * send_map_elmts,
@@ -312,6 +312,10 @@ void hypre_ParMatmul_RowSizes(
 hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                                      hypre_ParCSRMatrix  *B )
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_MATMUL] -= hypre_MPI_Wtime();
+#endif
+
    MPI_Comm         comm = hypre_ParCSRMatrixComm(A);
 
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -387,14 +391,10 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    HYPRE_Int       *B_ext_offd_j;
    HYPRE_Int        B_ext_offd_size;
 
-   HYPRE_Int       *temp;
-
    HYPRE_Int        n_rows_A, n_cols_A;
    HYPRE_Int        n_rows_B, n_cols_B;
    HYPRE_Int        allsquare = 0;
-   HYPRE_Int        cnt;
    HYPRE_Int        num_procs;
-   HYPRE_Int        value;
    HYPRE_Int       *my_diag_array;
    HYPRE_Int       *my_offd_array;
    HYPRE_Int        max_num_threads;
@@ -412,8 +412,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
    if (n_cols_A != n_rows_B || num_cols_diag_A != num_rows_diag_B)
    {
-      hypre_error_in_arg(1);
-      hypre_printf(" Error! Incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
       return NULL;
    }
    if ( num_rows_diag_A==num_cols_diag_B) allsquare = 1;
@@ -424,6 +423,10 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     *-----------------------------------------------------------------------*/
 
    hypre_MPI_Comm_size(comm, &num_procs);
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
+#endif
 
    if (num_procs > 1)
    {
@@ -443,6 +446,171 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    B_ext_offd_size = 0;
    last_col_diag_B = first_col_diag_B + num_cols_diag_B -1;
 
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
+   hypre_UnorderedIntSet set;
+
+#pragma omp parallel 
+   {
+     HYPRE_Int size, rest, ii;
+     HYPRE_Int ns, ne;
+     HYPRE_Int i1, i, j;
+     HYPRE_Int my_offd_size, my_diag_size;
+     HYPRE_Int cnt_offd, cnt_diag;
+     HYPRE_Int num_threads = hypre_NumActiveThreads();
+
+     size = num_cols_offd_A/num_threads;
+     rest = num_cols_offd_A - size*num_threads;
+     ii = hypre_GetThreadNum();
+     if (ii < rest)
+     {
+       ns = ii*size+ii;
+       ne = (ii+1)*size+ii+1;
+     }
+     else
+     {
+       ns = ii*size+rest;
+       ne = (ii+1)*size+rest;
+     }
+
+     my_diag_size = 0;
+     my_offd_size = 0;
+     for (i=ns; i < ne; i++)
+     {
+       B_ext_diag_i[i] = my_diag_size;
+       B_ext_offd_i[i] = my_offd_size;
+       for (j=Bs_ext_i[i]; j < Bs_ext_i[i+1]; j++)
+         if (Bs_ext_j[j] < first_col_diag_B || Bs_ext_j[j] > last_col_diag_B)
+            my_offd_size++;
+         else
+            my_diag_size++;
+     }
+     my_diag_array[ii] = my_diag_size;
+     my_offd_array[ii] = my_offd_size;
+
+#pragma omp barrier
+
+     if (ii)
+     {
+       my_diag_size = my_diag_array[0];
+       my_offd_size = my_offd_array[0];
+       for (i1 = 1; i1 < ii; i1++)
+       {
+          my_diag_size += my_diag_array[i1];
+          my_offd_size += my_offd_array[i1];
+       }
+
+       for (i1 = ns; i1 < ne; i1++)
+       {
+          B_ext_diag_i[i1] += my_diag_size;
+          B_ext_offd_i[i1] += my_offd_size;
+       }
+     }
+     else
+     {
+       B_ext_diag_size = 0;
+       B_ext_offd_size = 0;
+       for (i1 = 0; i1 < num_threads; i1++)
+       {
+          B_ext_diag_size += my_diag_array[i1];
+          B_ext_offd_size += my_offd_array[i1];
+       }
+       B_ext_diag_i[num_cols_offd_A] = B_ext_diag_size;
+       B_ext_offd_i[num_cols_offd_A] = B_ext_offd_size;
+
+       if (B_ext_diag_size)
+       {
+          B_ext_diag_j = hypre_CTAlloc(HYPRE_Int, B_ext_diag_size);
+          B_ext_diag_data = hypre_CTAlloc(HYPRE_Complex, B_ext_diag_size);
+       }
+       if (B_ext_offd_size)
+       {
+          B_ext_offd_j = hypre_CTAlloc(HYPRE_Int, B_ext_offd_size);
+          B_ext_offd_data = hypre_CTAlloc(HYPRE_Complex, B_ext_offd_size);
+       }
+       hypre_UnorderedIntSetCreate(&set, B_ext_offd_size + num_cols_offd_B, 16*hypre_NumThreads());
+     }
+
+#pragma omp barrier
+
+     cnt_offd = B_ext_offd_i[ns];
+     cnt_diag = B_ext_diag_i[ns];
+     for (i=ns; i < ne; i++)
+     {
+       for (j=Bs_ext_i[i]; j < Bs_ext_i[i+1]; j++)
+         if (Bs_ext_j[j] < first_col_diag_B || Bs_ext_j[j] > last_col_diag_B)
+         {
+            hypre_UnorderedIntSetPut(&set, Bs_ext_j[j]);
+            B_ext_offd_j[cnt_offd] = Bs_ext_j[j];
+            B_ext_offd_data[cnt_offd++] = Bs_ext_data[j];
+         }
+         else
+         {
+            B_ext_diag_j[cnt_diag] = Bs_ext_j[j] - first_col_diag_B;
+            B_ext_diag_data[cnt_diag++] = Bs_ext_data[j];
+         }
+     }
+
+     HYPRE_Int i_begin, i_end;
+     hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_B);
+     for (i = i_begin; i < i_end; i++)
+     {
+        hypre_UnorderedIntSetPut(&set, col_map_offd_B[i]);
+     }
+   } /* omp parallel */
+
+   if (num_procs > 1)
+    {
+       hypre_CSRMatrixDestroy(Bs_ext);
+       Bs_ext = NULL;
+    }
+
+    col_map_offd_C = hypre_UnorderedIntSetCopyToArray(&set, &num_cols_offd_C);
+    hypre_UnorderedIntSetDestroy(&set);
+    hypre_UnorderedIntMap col_map_offd_C_inverse;
+    hypre_sort_and_create_inverse_map(col_map_offd_C, num_cols_offd_C, &col_map_offd_C, &col_map_offd_C_inverse);
+
+    HYPRE_Int i, j;
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+    for (i = 0; i < num_cols_offd_A; i++)
+       for (j=B_ext_offd_i[i]; j < B_ext_offd_i[i+1]; j++)
+          B_ext_offd_j[j] = hypre_UnorderedIntMapGet(&col_map_offd_C_inverse, B_ext_offd_j[j]);
+
+    if (num_cols_offd_C)
+    {
+       hypre_UnorderedIntMapDestroy(&col_map_offd_C_inverse);
+    }
+
+    hypre_TFree(my_diag_array);
+    hypre_TFree(my_offd_array);
+
+     if (num_cols_offd_B)
+     {
+         HYPRE_Int i;
+         map_B_to_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_B);
+
+#pragma omp parallel private(i)
+         {
+            HYPRE_Int i_begin, i_end;
+            hypre_GetSimpleThreadPartition(&i_begin, &i_end, num_cols_offd_C);
+
+            HYPRE_Int cnt;
+            if (i_end > i_begin)
+            {
+               cnt = hypre_LowerBound(col_map_offd_B, col_map_offd_B + num_cols_offd_B, col_map_offd_C[i_begin]) - col_map_offd_B;
+            }
+
+            for (i = i_begin; i < i_end && cnt < num_cols_offd_B; i++)
+            {
+               if (col_map_offd_C[i] == col_map_offd_B[cnt])
+               {
+                  map_B_to_C[cnt++] = i;
+               }
+            }
+         }
+      }
+#else /* !HYPRE_CONCURRENT_HOPSCOTCH */
+
+   HYPRE_Int *temp;
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel 
 #endif
@@ -452,6 +620,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
      HYPRE_Int i1, i, j;
      HYPRE_Int my_offd_size, my_diag_size;
      HYPRE_Int cnt_offd, cnt_diag;
+
      HYPRE_Int num_threads = hypre_NumActiveThreads();
 
      size = num_cols_offd_A/num_threads;
@@ -557,6 +726,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
      if (ii == 0)
      {
+      HYPRE_Int        cnt;
 
       if (num_procs > 1)
       {
@@ -572,7 +742,8 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
             temp[cnt++] = col_map_offd_B[i];
          if (cnt)
          {
-            qsort0(temp, 0, cnt-1);
+            HYPRE_Int        value;
+            hypre_qsort0(temp, 0, cnt-1);
             num_cols_offd_C = 1;
             value = temp[0];
             for (i=1; i < cnt; i++)
@@ -611,7 +782,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
      if (num_cols_offd_B)
      {
-         HYPRE_Int i;
+         HYPRE_Int i, cnt;
          map_B_to_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_B);
 
          cnt = 0;
@@ -622,6 +793,12 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                if (cnt == num_cols_offd_B) break;
             }
       }
+
+#endif /* !HYPRE_CONCURRENT_HOPSCOTCH */
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] += hypre_MPI_Wtime();
+#endif
 
    hypre_ParMatmul_RowSizes(
       /*&C_diag_i, &C_offd_i, &B_marker,*/
@@ -668,7 +845,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
     HYPRE_Int jj_row_begin_diag, jj_count_diag;
     HYPRE_Int jj_row_begin_offd, jj_count_offd;
     HYPRE_Int num_threads;
-    HYPRE_Complex a_entry, a_b_product;
+    HYPRE_Complex a_entry; /*, a_b_product;*/
 
     ii = hypre_GetThreadNum();
     num_threads = hypre_NumActiveThreads();
@@ -730,7 +907,6 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
             for (jj3 = B_ext_offd_i[i2]; jj3 < B_ext_offd_i[i2+1]; jj3++)
             {
                i3 = num_cols_diag_B+B_ext_offd_j[jj3];
-               a_b_product = a_entry * B_ext_offd_data[jj3];
                   
                /*--------------------------------------------------------
                 *  Check B_marker to see that C_{i1,i3} has not already
@@ -741,26 +917,25 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                if (B_marker[i3] < jj_row_begin_offd)
                {
                   B_marker[i3] = jj_count_offd;
-                  C_offd_data[jj_count_offd] = a_b_product;
+                  C_offd_data[jj_count_offd] = a_entry*B_ext_offd_data[jj3];
                   C_offd_j[jj_count_offd] = i3-num_cols_diag_B;
                   jj_count_offd++;
                }
                else
-                  C_offd_data[B_marker[i3]] += a_b_product;
+                  C_offd_data[B_marker[i3]] += a_entry*B_ext_offd_data[jj3];
             }
             for (jj3 = B_ext_diag_i[i2]; jj3 < B_ext_diag_i[i2+1]; jj3++)
             {
                i3 = B_ext_diag_j[jj3];
-               a_b_product = a_entry * B_ext_diag_data[jj3];
                if (B_marker[i3] < jj_row_begin_diag)
                {
                   B_marker[i3] = jj_count_diag;
-                  C_diag_data[jj_count_diag] = a_b_product;
+                  C_diag_data[jj_count_diag] = a_entry*B_ext_diag_data[jj3];
                   C_diag_j[jj_count_diag] = i3;
                   jj_count_diag++;
                }
                else
-                  C_diag_data[B_marker[i3]] += a_b_product;
+                  C_diag_data[B_marker[i3]] += a_entry*B_ext_diag_data[jj3];
             }
          }
       }
@@ -781,7 +956,6 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
          for (jj3 = B_diag_i[i2]; jj3 < B_diag_i[i2+1]; jj3++)
          {
             i3 = B_diag_j[jj3];
-            a_b_product = a_entry * B_diag_data[jj3];
                   
             /*--------------------------------------------------------
              *  Check B_marker to see that C_{i1,i3} has not already
@@ -792,13 +966,13 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
             if (B_marker[i3] < jj_row_begin_diag)
             {
                B_marker[i3] = jj_count_diag;
-               C_diag_data[jj_count_diag] = a_b_product;
+               C_diag_data[jj_count_diag] = a_entry*B_diag_data[jj3];
                C_diag_j[jj_count_diag] = i3;
                jj_count_diag++;
             }
             else
             {
-               C_diag_data[B_marker[i3]] += a_b_product;
+               C_diag_data[B_marker[i3]] += a_entry*B_diag_data[jj3];
             }
          }
          if (num_cols_offd_B)
@@ -806,7 +980,6 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
             for (jj3 = B_offd_i[i2]; jj3 < B_offd_i[i2+1]; jj3++)
             {
                i3 = num_cols_diag_B+map_B_to_C[B_offd_j[jj3]];
-               a_b_product = a_entry * B_offd_data[jj3];
                   
                /*--------------------------------------------------------
                 *  Check B_marker to see that C_{i1,i3} has not already
@@ -817,13 +990,13 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
                if (B_marker[i3] < jj_row_begin_offd)
                {
                   B_marker[i3] = jj_count_offd;
-                  C_offd_data[jj_count_offd] = a_b_product;
+                  C_offd_data[jj_count_offd] = a_entry*B_offd_data[jj3];
                   C_offd_j[jj_count_offd] = i3-num_cols_diag_B;
                   jj_count_offd++;
                }
                else
                {
-                  C_offd_data[B_marker[i3]] += a_b_product;
+                  C_offd_data[B_marker[i3]] += a_entry*B_offd_data[jj3];
                }
             }
          }
@@ -875,15 +1048,23 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
    }
    if (num_cols_offd_B) hypre_TFree(map_B_to_C);
 
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_MATMUL] += hypre_MPI_Wtime();
+#endif
+
    return C;
 }            
 
 /* The following function was formerly part of hypre_ParCSRMatrixExtractBExt
    but the code was removed so it can be used for a corresponding function
    for Boolean matrices
+ 
+   JSP: to allow communication overlapping, it returns comm_handle_idx and
+   comm_handle_data. Before accessing B, they should be destroyed (including
+   send_data contained in the comm_handle).
 */
 
-void hypre_ParCSRMatrixExtractBExt_Arrays(
+void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    HYPRE_Int ** pB_ext_i,
    HYPRE_Int ** pB_ext_j,
    HYPRE_Complex ** pB_ext_data,
@@ -897,7 +1078,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
    HYPRE_Int num_recvs,
    HYPRE_Int num_sends,
    HYPRE_Int first_col_diag,
-   HYPRE_Int first_row_index,
+   HYPRE_Int * row_starts,
    HYPRE_Int * recv_vec_starts,
    HYPRE_Int * send_map_starts,
    HYPRE_Int * send_map_elmts,
@@ -907,10 +1088,17 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
    HYPRE_Int * offd_j,
    HYPRE_Int * col_map_offd,
    HYPRE_Complex * diag_data,
-   HYPRE_Complex * offd_data
+   HYPRE_Complex * offd_data,
+   hypre_ParCSRCommHandle **comm_handle_idx,
+   hypre_ParCSRCommHandle **comm_handle_data,
+   HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd,
+   HYPRE_Int skip_fine, /* 1 if only coarse points are needed */
+   HYPRE_Int skip_same_sign /* 1 if only points that have the same sign are needed */
+   // extended based long range interpolation: skip_fine = 1, skip_same_sign = 0 for S matrix, skip_fine = 1, skip_same_sign = 1 for A matrix
+   // other interpolation: skip_fine = 0, skip_same_sign = 0
    )
 {
-   hypre_ParCSRCommHandle *comm_handle;
+   hypre_ParCSRCommHandle *comm_handle, *row_map_comm_handle = NULL;
    hypre_ParCSRCommPkg *tmp_comm_pkg;
    HYPRE_Int *B_int_i;
    HYPRE_Int *B_int_j;
@@ -924,13 +1112,20 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
    HYPRE_Int *jdata_recv_vec_starts;
    HYPRE_Int *jdata_send_map_starts;
  
-   HYPRE_Int i, j, k, counter;
+   HYPRE_Int i, j, k;
    HYPRE_Int start_index;
-   HYPRE_Int j_cnt, j_cnt_rm, jrow;
+   /*HYPRE_Int jrow;*/
    HYPRE_Int num_rows_B_ext;
 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
+
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   HYPRE_Int first_row_index = row_starts[0];
+#else
+   HYPRE_Int first_row_index = row_starts[my_id];
+   HYPRE_Int *send_procs = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+#endif
 
    num_rows_B_ext = recv_vec_starts[num_recvs];
    if ( num_rows_B_ext < 0 ) {  /* no B_ext, no communication */
@@ -956,73 +1151,295 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
     * a row j (which is determined through send_map_elmts) 
     *--------------------------------------------------------------------------*/
 
-   B_int_i[0] = 0;
-   j_cnt = 0;
-   j_cnt_rm = 0;
-   *num_nonzeros = 0;
-   for (i=0; i < num_sends; i++)
-   {
-      for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
-      {
-         jrow = send_map_elmts[j];
-         B_int_i[++j_cnt] = offd_i[jrow+1] - offd_i[jrow]
-            + diag_i[jrow+1] - diag_i[jrow];
-         *num_nonzeros += B_int_i[j_cnt];
-      }
-      if ( find_row_map ) {
-         for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++) {
-            jrow = send_map_elmts[j];
-            B_int_row_map[j_cnt_rm++] = jrow + first_row_index;
-         }
-      }
-   }
-
-   /*--------------------------------------------------------------------------
-    * initialize communication 
-    *--------------------------------------------------------------------------*/
-
-   comm_handle = hypre_ParCSRCommHandleCreate(11,comm_pkg,
-                                              &B_int_i[1],&(B_ext_i[1]) );
-   if ( find_row_map )
-   {
-      /* scatter/gather B_int row numbers to form array of B_ext row numbers */
-      hypre_ParCSRCommHandleDestroy(comm_handle);
-      comm_handle = hypre_ParCSRCommHandleCreate
-         (11,comm_pkg, B_int_row_map, B_ext_row_map );
-   }
-
-   B_int_j = hypre_CTAlloc(HYPRE_Int, *num_nonzeros);
-   if (data) B_int_data = hypre_CTAlloc(HYPRE_Complex, *num_nonzeros);
-
    jdata_send_map_starts = hypre_CTAlloc(HYPRE_Int, num_sends+1);
    jdata_recv_vec_starts = hypre_CTAlloc(HYPRE_Int, num_recvs+1);
-   start_index = B_int_i[0];
-   jdata_send_map_starts[0] = start_index;
-   counter = 0;
-   for (i=0; i < num_sends; i++)
+   jdata_send_map_starts[0] = B_int_i[0] = 0;
+
+   HYPRE_Int prefix_sum_workspace[(hypre_NumThreads() + 1)*num_sends];
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel private(i,j,k)
+#endif
    {
-      *num_nonzeros = counter;
-      for (j = send_map_starts[i]; j < send_map_starts[i+1]; j++)
+      HYPRE_Int counts[num_sends];
+      for (i=0; i < num_sends; i++)
       {
-         jrow = send_map_elmts[j];
-         for (k=diag_i[jrow]; k < diag_i[jrow+1]; k++) 
-         {
-            B_int_j[counter] = diag_j[k]+first_col_diag;
-            if (data) B_int_data[counter] = diag_data[k];
-            counter++;
-         }
-         for (k=offd_i[jrow]; k < offd_i[jrow+1]; k++) 
-         {
-            B_int_j[counter] = col_map_offd[offd_j[k]];
-            if (data) B_int_data[counter] = offd_data[k];
-            counter++;
-         }
-           
+        HYPRE_Int j_begin, j_end;
+        hypre_GetSimpleThreadPartition(&j_begin, &j_end, send_map_starts[i + 1] - send_map_starts[i]);
+        j_begin += send_map_starts[i];
+        j_end += send_map_starts[i];
+
+        HYPRE_Int count = 0;
+        if (skip_fine && skip_same_sign)
+        {
+#ifndef HYPRE_NO_GLOBAL_PARTITION
+          HYPRE_Int send_proc = send_procs[i];
+          HYPRE_Int send_proc_first_row = row_starts[send_proc];
+          HYPRE_Int send_proc_last_row = row_starts[send_proc + 1];
+#endif
+
+          for (j = j_begin; j < j_end; j++)
+          {
+            HYPRE_Int jrow = send_map_elmts[j];
+            HYPRE_Int len = 0;
+
+            if (diag_data[diag_i[jrow]] >= 0)
+            {
+              for (k = diag_i[jrow] + 1; k < diag_i[jrow + 1]; k++)
+              {
+                if (diag_data[k] < 0 && CF_marker[diag_j[k]] >= 0) len++;
+              }
+              for (k = offd_i[jrow]; k < offd_i[jrow + 1]; k++)
+              {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+                if (offd_data[k] < 0) len++;
+#else
+                HYPRE_Int c = offd_j[k];
+                HYPRE_Int c_global = col_map_offd[c];
+                if (offd_data[k] < 0 && (CF_marker_offd[c] >= 0 || (c_global >= send_proc_first_row && c_global < send_proc_last_row))) len++;
+#endif
+              }
+            }
+            else
+            {
+              for (k = diag_i[jrow] + 1; k < diag_i[jrow + 1]; k++)
+              {
+                if (diag_data[k] > 0 && CF_marker[diag_j[k]] >= 0) len++;
+              }
+              for (k = offd_i[jrow]; k < offd_i[jrow + 1]; k++)
+              {
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+                if (offd_data[k] > 0) len++;
+#else
+                HYPRE_Int c = offd_j[k];
+                HYPRE_Int c_global = col_map_offd[c];
+                if (offd_data[k] > 0 && (CF_marker_offd[c] >= 0 || (c_global >= send_proc_first_row && c_global < send_proc_last_row))) len++;
+#endif
+              }
+            }
+
+            B_int_i[j + 1] = len;
+            count += len;
+          }
+        }
+        else if (skip_fine)
+        {
+          for (j = j_begin; j < j_end; j++)
+          {
+            HYPRE_Int jrow = send_map_elmts[j];
+            HYPRE_Int len = 0;
+
+            for (k = diag_i[jrow]; k < diag_i[jrow + 1]; k++)
+            {
+              if (CF_marker[diag_j[k]] >= 0) len++;
+            }
+            for (k = offd_i[jrow]; k < offd_i[jrow + 1]; k++)
+            {
+              if (CF_marker_offd[offd_j[k]] >= 0) len++;
+            }
+
+            B_int_i[j + 1] = len;
+            count += len;
+          }
+        }
+        else
+        {
+          for (j = j_begin; j < j_end; j++)
+          {
+            HYPRE_Int jrow = send_map_elmts[j];
+            HYPRE_Int len = diag_i[jrow + 1] - diag_i[jrow];
+            len += offd_i[jrow + 1] - offd_i[jrow];
+            B_int_i[j + 1] = len;
+            count += len;
+          }
+        }
+
+        if (find_row_map)
+        {
+          for (j = j_begin; j < j_end; j++)
+          {
+            HYPRE_Int jrow = send_map_elmts[j];
+            B_int_row_map[j] = jrow + first_row_index;
+          }
+        }
+
+        counts[i] = count;
       }
-      *num_nonzeros = counter - *num_nonzeros;
-      start_index += *num_nonzeros;
-      jdata_send_map_starts[i+1] = start_index;
-   }
+
+      hypre_prefix_sum_multiple(counts, jdata_send_map_starts + 1, num_sends, prefix_sum_workspace);
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp master
+#endif
+      {
+        for (i = 1; i < num_sends; i++)
+        {
+           jdata_send_map_starts[i + 1] += jdata_send_map_starts[i];
+        }
+
+        /*--------------------------------------------------------------------------
+         * initialize communication 
+         *--------------------------------------------------------------------------*/
+
+        comm_handle = hypre_ParCSRCommHandleCreate(11,comm_pkg,
+                                                   &B_int_i[1],&(B_ext_i[1]) );
+        if ( find_row_map )
+        {
+            /* scatter/gather B_int row numbers to form array of B_ext row numbers */
+           row_map_comm_handle = hypre_ParCSRCommHandleCreate
+              (11,comm_pkg, B_int_row_map, B_ext_row_map );
+        }
+
+        B_int_j = hypre_TAlloc(HYPRE_Int, jdata_send_map_starts[num_sends]);
+        if (data) B_int_data = hypre_TAlloc(HYPRE_Complex, jdata_send_map_starts[num_sends]);
+      }
+#ifdef HYPRE_USING_OPENMP
+#pragma omp barrier
+#endif
+ 
+      for (i=0; i < num_sends; i++)
+      {
+        HYPRE_Int j_begin, j_end;
+        hypre_GetSimpleThreadPartition(&j_begin, &j_end, send_map_starts[i + 1] - send_map_starts[i]);
+        j_begin += send_map_starts[i];
+        j_end += send_map_starts[i];
+
+        HYPRE_Int count = counts[i] + jdata_send_map_starts[i];
+
+        if (data)
+        {
+          if (skip_same_sign && skip_fine)
+          {
+#ifndef HYPRE_NO_GLOBAL_PARTITION
+            HYPRE_Int send_proc = send_procs[i];
+            HYPRE_Int send_proc_first_row = row_starts[send_proc];
+            HYPRE_Int send_proc_last_row = row_starts[send_proc + 1];
+#endif
+
+            for (j = j_begin; j < j_end; j++)
+            {
+              HYPRE_Int jrow = send_map_elmts[j];
+              /*HYPRE_Int count_begin = count;*/
+
+              if (diag_data[diag_i[jrow]] >= 0)
+              {
+                for (k = diag_i[jrow] + 1; k < diag_i[jrow + 1]; k++)
+                {
+                  if (diag_data[k] < 0 && CF_marker[diag_j[k]] >= 0)
+                  {
+                    B_int_j[count] = diag_j[k]+first_col_diag;
+                    B_int_data[count] = diag_data[k];
+                    count++;
+                  }
+                }
+                for (k = offd_i[jrow]; k < offd_i[jrow + 1]; k++)
+                {
+                  HYPRE_Int c = offd_j[k];
+                  HYPRE_Int c_global = col_map_offd[c];
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+                  if (offd_data[k] < 0)
+#else
+                  if (offd_data[k] < 0 && (CF_marker_offd[c] >= 0 || (c_global >= send_proc_first_row && c_global < send_proc_last_row)))
+#endif
+                  {
+                    B_int_j[count] = c_global;
+                    B_int_data[count] = offd_data[k];
+                    count++;
+                  }
+                }
+              }
+              else
+              {
+                for (k = diag_i[jrow] + 1; k < diag_i[jrow + 1]; k++)
+                {
+                  if (diag_data[k] > 0 && CF_marker[diag_j[k]] >= 0)
+                  {
+                    B_int_j[count] = diag_j[k]+first_col_diag;
+                    B_int_data[count] = diag_data[k];
+                    count++;
+                  }
+                }
+                for (k = offd_i[jrow]; k < offd_i[jrow + 1]; k++)
+                {
+                  HYPRE_Int c = offd_j[k];
+                  HYPRE_Int c_global = col_map_offd[c];
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+                  if (offd_data[k] > 0)
+#else
+                  if (offd_data[k] > 0 && (CF_marker_offd[c] >= 0 || (c_global >= send_proc_first_row && c_global < send_proc_last_row)))
+#endif
+                  {
+                    B_int_j[count] = c_global;
+                    B_int_data[count] = offd_data[k];
+                    count++;
+                  }
+                }
+              }
+            }
+          }
+          else
+          {
+            for (j = j_begin; j < j_end; ++j) {
+              HYPRE_Int jrow = send_map_elmts[j];
+              for (k=diag_i[jrow]; k < diag_i[jrow+1]; k++)
+              {
+                B_int_j[count] = diag_j[k]+first_col_diag;
+                B_int_data[count] = diag_data[k];
+                count++;
+              }
+              for (k=offd_i[jrow]; k < offd_i[jrow+1]; k++)
+              {
+                B_int_j[count] = col_map_offd[offd_j[k]];
+                B_int_data[count] = offd_data[k];
+                count++;
+              }
+            }
+          }
+        } // data
+        else
+        {
+          if (skip_fine)
+          {
+            for (j = j_begin; j < j_end; j++)
+            {
+              HYPRE_Int jrow = send_map_elmts[j];
+              for (k = diag_i[jrow]; k < diag_i[jrow + 1]; k++)
+              {
+                if (CF_marker[diag_j[k]] >= 0)
+                {
+                  B_int_j[count] = diag_j[k] + first_col_diag;
+                  count++;
+                }
+              }
+              for (k = offd_i[jrow]; k < offd_i[jrow + 1]; k++)
+              {
+                if (CF_marker_offd[offd_j[k]] >= 0)
+                {
+                  B_int_j[count] = col_map_offd[offd_j[k]];
+                  count++;
+                }
+              }
+            }
+          }
+          else
+          {
+            for (j = j_begin; j < j_end; ++j) {
+              HYPRE_Int jrow = send_map_elmts[j];
+              for (k=diag_i[jrow]; k < diag_i[jrow+1]; k++)
+              {
+                B_int_j[count] = diag_j[k]+first_col_diag;
+                count++;
+              }
+              for (k=offd_i[jrow]; k < offd_i[jrow+1]; k++)
+              {
+                B_int_j[count] = col_map_offd[offd_j[k]];
+                count++;
+              }
+            }
+          }
+        } // !data
+      } /* for each send target */
+   } /* omp parallel. JSP: this takes most of time in this function */
 
    tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
    hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
@@ -1049,10 +1466,10 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
 
    *num_nonzeros = B_ext_i[num_rows_B_ext];
 
-   *pB_ext_j = hypre_CTAlloc(HYPRE_Int, *num_nonzeros);
+   *pB_ext_j = hypre_TAlloc(HYPRE_Int, *num_nonzeros);
    B_ext_j = *pB_ext_j;
    if (data) {
-      *pB_ext_data = hypre_CTAlloc(HYPRE_Complex, *num_nonzeros);
+      *pB_ext_data = hypre_TAlloc(HYPRE_Complex, *num_nonzeros);
       B_ext_data = *pB_ext_data;
    };
 
@@ -1065,29 +1482,77 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
 
    hypre_ParCSRCommPkgRecvVecStarts(tmp_comm_pkg) = jdata_recv_vec_starts;
 
-   comm_handle = hypre_ParCSRCommHandleCreate(11,tmp_comm_pkg,B_int_j,B_ext_j);
-   hypre_ParCSRCommHandleDestroy(comm_handle);
-   comm_handle = NULL;
-
+   *comm_handle_idx = hypre_ParCSRCommHandleCreate(11,tmp_comm_pkg,B_int_j,B_ext_j);
    if (data)
    {
-      comm_handle = hypre_ParCSRCommHandleCreate(1,tmp_comm_pkg,B_int_data,
+      *comm_handle_data = hypre_ParCSRCommHandleCreate(1,tmp_comm_pkg,B_int_data,
                                                  B_ext_data);
-      hypre_ParCSRCommHandleDestroy(comm_handle);
-      comm_handle = NULL;
+   }
+
+   if (row_map_comm_handle)
+   {
+      hypre_ParCSRCommHandleDestroy(row_map_comm_handle);
+      row_map_comm_handle = NULL;
    }
 
    hypre_TFree(jdata_send_map_starts);
    hypre_TFree(jdata_recv_vec_starts);
    hypre_TFree(tmp_comm_pkg);
    hypre_TFree(B_int_i);
-   hypre_TFree(B_int_j);
-   if (data) hypre_TFree(B_int_data);
    if ( find_row_map ) hypre_TFree(B_int_row_map);
 
    /* end generic part */
 }
 
+void hypre_ParCSRMatrixExtractBExt_Arrays(
+   HYPRE_Int ** pB_ext_i,
+   HYPRE_Int ** pB_ext_j,
+   HYPRE_Complex ** pB_ext_data,
+   HYPRE_Int ** pB_ext_row_map,
+   HYPRE_Int * num_nonzeros,
+   HYPRE_Int data,
+   HYPRE_Int find_row_map,
+   MPI_Comm comm,
+   hypre_ParCSRCommPkg * comm_pkg,
+   HYPRE_Int num_cols_B,
+   HYPRE_Int num_recvs,
+   HYPRE_Int num_sends,
+   HYPRE_Int first_col_diag,
+   HYPRE_Int * row_starts,
+   HYPRE_Int * recv_vec_starts,
+   HYPRE_Int * send_map_starts,
+   HYPRE_Int * send_map_elmts,
+   HYPRE_Int * diag_i,
+   HYPRE_Int * diag_j,
+   HYPRE_Int * offd_i,
+   HYPRE_Int * offd_j,
+   HYPRE_Int * col_map_offd,
+   HYPRE_Complex * diag_data,
+   HYPRE_Complex * offd_data
+   )
+{
+   hypre_ParCSRCommHandle *comm_handle_idx, *comm_handle_data;
+
+   hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
+      pB_ext_i, pB_ext_j, pB_ext_data, pB_ext_row_map, num_nonzeros,
+      data, find_row_map, comm, comm_pkg, num_cols_B, num_recvs, num_sends,
+      first_col_diag, row_starts, recv_vec_starts, send_map_starts, send_map_elmts,
+      diag_i, diag_j, offd_i, offd_j, col_map_offd, diag_data, offd_data,
+      &comm_handle_idx, &comm_handle_data,
+      NULL, NULL,
+      0, 0);
+
+   HYPRE_Int *send_idx = (HYPRE_Int *)comm_handle_idx->send_data;
+   hypre_ParCSRCommHandleDestroy(comm_handle_idx);
+   hypre_TFree(send_idx);
+
+   if (data)
+   {
+      HYPRE_Real *send_data = (HYPRE_Real *)comm_handle_data->send_data;
+      hypre_ParCSRCommHandleDestroy(comm_handle_data);
+      hypre_TFree(send_data);
+   }
+}
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixExtractBExt : extracts rows from B which are located on 
@@ -1096,13 +1561,17 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
  *--------------------------------------------------------------------------*/
 
 hypre_CSRMatrix * 
-hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
+hypre_ParCSRMatrixExtractBExt_Overlap( hypre_ParCSRMatrix *B,
                                hypre_ParCSRMatrix *A,
-                               HYPRE_Int data )
+                               HYPRE_Int data,
+                               hypre_ParCSRCommHandle **comm_handle_idx,
+                               hypre_ParCSRCommHandle **comm_handle_data,
+                               HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd,
+                               HYPRE_Int skip_fine, HYPRE_Int skip_same_sign )
 {
    MPI_Comm  comm = hypre_ParCSRMatrixComm(B);
    HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(B);
-   HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(B);
+   /*HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(B);*/
    HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(B);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -1154,15 +1623,18 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
    num_cols_B = hypre_ParCSRMatrixGlobalNumCols(B);
    num_rows_B_ext = recv_vec_starts[num_recvs];
 
-   hypre_ParCSRMatrixExtractBExt_Arrays
+   hypre_ParCSRMatrixExtractBExt_Arrays_Overlap
       ( &B_ext_i, &B_ext_j, &B_ext_data, &idummy,
         &num_nonzeros,
         data, 0, comm, comm_pkg,
         num_cols_B, num_recvs, num_sends,
-        first_col_diag, first_row_index,
+        first_col_diag, B->row_starts,
         recv_vec_starts, send_map_starts, send_map_elmts,
         diag_i, diag_j, offd_i, offd_j, col_map_offd,
-        diag_data, offd_data
+        diag_data, offd_data,
+        comm_handle_idx, comm_handle_data,
+        CF_marker, CF_marker_offd,
+        skip_fine, skip_same_sign
          );
 
    B_ext = hypre_CSRMatrixCreate(num_rows_B_ext,num_cols_B,num_nonzeros);
@@ -1173,6 +1645,28 @@ hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
    return B_ext;
 }
 
+hypre_CSRMatrix * 
+hypre_ParCSRMatrixExtractBExt( hypre_ParCSRMatrix *B,
+                               hypre_ParCSRMatrix *A,
+                               HYPRE_Int data )
+{
+   hypre_ParCSRCommHandle *comm_handle_idx, *comm_handle_data;
+
+   hypre_CSRMatrix *B_ext = hypre_ParCSRMatrixExtractBExt_Overlap(B, A, data, &comm_handle_idx, &comm_handle_data, NULL, NULL, 0, 0);
+
+   HYPRE_Int *send_idx = (HYPRE_Int *)comm_handle_idx->send_data;
+   hypre_ParCSRCommHandleDestroy(comm_handle_idx);
+   hypre_TFree(send_idx);
+
+   if (data)
+   {
+      HYPRE_Real *send_data = (HYPRE_Real *)comm_handle_data->send_data;
+      hypre_ParCSRCommHandleDestroy(comm_handle_data);
+      hypre_TFree(send_data);
+   }
+
+   return B_ext;
+}
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixTranspose
@@ -1376,7 +1870,7 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
 
       if (counter)
       {
-         qsort0(AT_buf_j,0,counter-1);
+         hypre_qsort0(AT_buf_j,0,counter-1);
          num_cols_offd_AT = 1;
          value = AT_buf_j[0];
          for (i=1; i < counter; i++)
@@ -1632,7 +2126,7 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
          proc_array = (HYPRE_Int *) malloc((nsends+nrecvs) * sizeof(HYPRE_Int));
          for (i = 0; i < nsends; i++) proc_array[i] = send_procs[i];
          for (i = 0; i < nrecvs; i++) proc_array[nsends+i] = recv_procs[i];
-         qsort0(proc_array, 0, nsends+nrecvs-1); 
+         hypre_qsort0(proc_array, 0, nsends+nrecvs-1); 
          n_proc_array = 1;
          for (i = 1; i < nrecvs+nsends; i++) 
             if (proc_array[i] != proc_array[n_proc_array])
@@ -1787,7 +2281,7 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
 
    nindices = indices2[0];
    indices  = &(indices2[1]);
-   qsort0(indices, 0, nindices-1);
+   hypre_qsort0(indices, 0, nindices-1);
 
    /* -----------------------------------------------------
     * fetch matrix information
@@ -1803,7 +2297,7 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
    hypre_MPI_Comm_size(comm, &nprocs);
    if (nprocs > 1)
    {
-      hypre_printf("ExtractSubmatrices: cannot handle nprocs > 1 yet.\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ExtractSubmatrices: cannot handle nprocs > 1 yet.\n");
       exit(1);
    }
 
@@ -1838,7 +2332,7 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
       if (exp_indices[indices[i]] == -1) exp_indices[indices[i]] = i;
       else
       {
-         hypre_printf("ExtractSubmatrices: wrong index %d %d\n", i, indices[i]);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ExtractSubmatrices: wrong index %d %d\n");
          exit(1);
       }
    }
@@ -1985,7 +2479,8 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
          diag_i[row] = nnz;
       }
    }
-   if (nnz > nnz_diag) hypre_printf("WARNING WARNING WARNING\n");
+   if (nnz > nnz_diag) hypre_error(HYPRE_ERROR_GENERIC); 
+		/*hypre_printf("WARNING WARNING WARNING\n");*/
    diag = hypre_ParCSRMatrixDiag(A12_csr);
    hypre_CSRMatrixI(diag) = diag_i;
    hypre_CSRMatrixJ(diag) = diag_j;
@@ -2146,7 +2641,7 @@ void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr,
 
    nindices = indices2[0];
    indices  = &(indices2[1]);
-   qsort0(indices, 0, nindices-1);
+   hypre_qsort0(indices, 0, nindices-1);
 
    /* -----------------------------------------------------
     * fetch matrix information
@@ -2196,7 +2691,7 @@ void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr,
       if (exp_indices[indices[i]] == -1) exp_indices[indices[i]] = i;
       else
       {
-         hypre_printf("ExtractRowSubmatrices: wrong index %d %d\n", i, indices[i]);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ExtractRowSubmatrices: wrong index %d %d\n");
          exit(1);
       }
    }
@@ -2786,8 +3281,7 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    if (n_rows_A != n_rows_B || num_rows_diag_A != num_rows_diag_B)
    {
-        hypre_error_in_arg(1);
-	hypre_printf(" Error! Incompatible matrix dimensions!\n");
+        hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
 	return NULL;
    }
 
@@ -2872,7 +3366,7 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
       if (cnt)
       {
-	  qsort0(temp,0,cnt-1);
+	  hypre_qsort0(temp,0,cnt-1);
           value = temp[0];
           num_cols_offd_C = 1;
           for (i=1; i < cnt; i++)
