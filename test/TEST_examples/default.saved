@@ -52,9 +52,9 @@ Final Relative Residual Norm = 9.21374e-08
 Setup phase times:
 =============================================
 PCG Setup:
-  wall clock time = 14.290000 seconds
+  wall clock time = 107.230000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 14.250000 seconds
+  cpu clock time  = 107.220000 seconds
   cpu MFLOPS      = 0.000000
 
 <b,b>: 5.738541e-05
@@ -74,9 +74,9 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 Solve phase times:
 =============================================
 PCG Solve:
-  wall clock time = 0.070000 seconds
+  wall clock time = 0.040000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.080000 seconds
+  cpu clock time  = 0.050000 seconds
   cpu MFLOPS      = 0.000000
 
 
@@ -92,8 +92,8 @@ lev   rows  entries  sparse  min  max   avg       min         max
 ===================================================================
  0    1089     5313  0.004     3    5   4.9   0.000e+00   2.000e+00
  1     545     4641  0.016     4    9   8.5   0.000e+00   2.500e+00
- 2     157     1535  0.062     4   14   9.8  -1.246e-15   3.020e+00
- 3      57      773  0.238     4   21  13.6   4.718e-16   3.294e+00
+ 2     157     1535  0.062     4   14   9.8  -4.233e-16   3.020e+00
+ 3      57      773  0.238     4   21  13.6   7.589e-17   3.294e+00
  4      19      251  0.695     8   18  13.2   9.852e-02   2.814e+00
  5       6       36  1.000     6    6   6.0   1.232e+00   1.875e+00
 
@@ -162,7 +162,7 @@ AMG SOLUTION INFO:
     Cycle  4   7.816537e-07    0.062749     2.738157e-05 
     Cycle  5   4.829130e-08    0.061781     1.691659e-06 
     Cycle  6   2.956748e-09    0.061227     1.035758e-07 
-    Cycle  7   1.801267e-10    0.060921     6.309892e-09 
+    Cycle  7   1.801266e-10    0.060921     6.309890e-09 
 
 
  Average Convergence Factor = 0.067387
@@ -175,7 +175,7 @@ AMG SOLUTION INFO:
 
 
 Iterations = 7
-Final Relative Residual Norm = 6.309892e-09
+Final Relative Residual Norm = 6.309890e-09
 
 # Output file: default.out.5f
 
@@ -186,8 +186,8 @@ lev   rows  entries  sparse  min  max   avg       min         max
 ===================================================================
  0    1089     5313  0.004     3    5   4.9   0.000e+00   2.000e+00
  1     545     4641  0.016     4    9   8.5   0.000e+00   2.500e+00
- 2     157     1535  0.062     4   14   9.8  -1.246e-15   3.020e+00
- 3      57      773  0.238     4   21  13.6   4.718e-16   3.294e+00
+ 2     157     1535  0.062     4   14   9.8  -4.233e-16   3.020e+00
+ 3      57      773  0.238     4   21  13.6   7.589e-17   3.294e+00
  4      19      251  0.695     8   18  13.2   9.852e-02   2.814e+00
  5       6       36  1.000     6    6   6.0   1.232e+00   1.875e+00
 
@@ -256,7 +256,7 @@ AMG SOLUTION INFO:
     Cycle  4   7.816537e-07    0.062749     2.738157e-05 
     Cycle  5   4.829130e-08    0.061781     1.691659e-06 
     Cycle  6   2.956748e-09    0.061227     1.035758e-07 
-    Cycle  7   1.801267e-10    0.060921     6.309892e-09 
+    Cycle  7   1.801266e-10    0.060921     6.309890e-09 
 
 
  Average Convergence Factor = 0.067387
@@ -269,7 +269,7 @@ AMG SOLUTION INFO:
 
 
  Iterations =  7
- Final Relative Residual Norm =   6.30989200E-09
+ Final Relative Residual Norm =   6.30989028E-09
 
 # Output file: default.out.6
 <C*b,b>: 5.488337e+01
@@ -287,9 +287,9 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 Setup phase times:
 =============================================
 PCG Setup:
-  wall clock time = 14.200000 seconds
+  wall clock time = 134.550000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 13.240000 seconds
+  cpu clock time  = 134.530000 seconds
   cpu MFLOPS      = 0.000000
 
 <b,b>: 5.738541e-05
@@ -309,9 +309,9 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 Solve phase times:
 =============================================
 PCG Solve:
-  wall clock time = 0.060000 seconds
+  wall clock time = 0.040000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.060000 seconds
+  cpu clock time  = 0.050000 seconds
   cpu MFLOPS      = 0.000000
 
 
@@ -389,22 +389,22 @@ AMG Schwarz relax weight = 1.000000e+00
 
 Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 -----    ------------   ---------  ------------ 
-    1    2.362072e-03    0.285831    2.858306e-01
-    2    1.590804e-04    0.067348    1.925006e-02
-    3    1.087675e-05    0.068373    1.316178e-03
-    4    4.417991e-07    0.040619    5.346141e-05
-    5    1.281097e-08    0.028997    1.550235e-06
-    6    5.026712e-10    0.039238    6.082744e-08
+    1    2.336684e-03    0.282758    2.827584e-01
+    2    1.512891e-04    0.064745    1.830725e-02
+    3    9.865125e-06    0.065207    1.193763e-03
+    4    4.401837e-07    0.044620    5.326593e-05
+    5    1.498060e-08    0.034033    1.812778e-06
+    6    5.485626e-10    0.036618    6.638068e-08
 
 
 ***************************************************
 *                Solver Statistics                *
 *-------------------------------------------------*
-** HYPRE preconditioner setup time = 1.834893e-02
-** HYPRE solution time             = 1.492214e-02
-** HYPRE total time                = 3.327107e-02
+** HYPRE preconditioner setup time = 1.597500e-02
+** HYPRE solution time             = 1.303411e-02
+** HYPRE total time                = 2.900910e-02
 ** HYPRE number of iterations      = 6
-** HYPRE final residual norm       = 5.026712e-10
+** HYPRE final residual norm       = 5.485626e-10
 ***************************************************
 # Output file: default.out.11
 
@@ -441,87 +441,87 @@ No constraints
 
 Initial Max. Residual   2.03558352288229e+00
 Iteration 1 	bsize 10 	maxres   6.61514157224843e-01
-Iteration 2 	bsize 10 	maxres   2.07896889116710e-01
-Iteration 3 	bsize 10 	maxres   8.94032219306993e-02
-Iteration 4 	bsize 10 	maxres   5.57350171849667e-02
-Iteration 5 	bsize 10 	maxres   4.52510317358840e-02
-Iteration 6 	bsize 10 	maxres   1.59857204829020e-02
-Iteration 7 	bsize 9 	maxres   3.01005214598883e-03
-Iteration 8 	bsize 9 	maxres   9.15794471126193e-04
-Iteration 9 	bsize 7 	maxres   2.67036683874873e-04
-Iteration 10 	bsize 7 	maxres   1.22560803599727e-04
-Iteration 11 	bsize 6 	maxres   5.82317118369297e-05
-Iteration 12 	bsize 4 	maxres   2.38206795757980e-05
-Iteration 13 	bsize 4 	maxres   1.73582603672364e-05
-Iteration 14 	bsize 4 	maxres   1.24286547834999e-05
-Iteration 15 	bsize 2 	maxres   8.17561831147489e-06
-Iteration 16 	bsize 2 	maxres   6.15437257020104e-06
-Iteration 17 	bsize 2 	maxres   3.85665129413136e-06
-Iteration 18 	bsize 2 	maxres   1.98370873016928e-06
-Iteration 19 	bsize 2 	maxres   9.04748529043191e-07
-Iteration 20 	bsize 2 	maxres   4.32381520962772e-07
-Iteration 21 	bsize 2 	maxres   2.50222048479429e-07
-Iteration 22 	bsize 1 	maxres   2.34484258071025e-07
-Iteration 23 	bsize 1 	maxres   1.83982655401445e-07
-Iteration 24 	bsize 1 	maxres   1.03489248001117e-07
-Iteration 25 	bsize 1 	maxres   4.40855000574139e-08
-Iteration 26 	bsize 1 	maxres   3.09954979505864e-08
-Iteration 27 	bsize 1 	maxres   1.60261672404816e-08
-Iteration 28 	bsize 1 	maxres   9.94572583241695e-09
+Iteration 2 	bsize 10 	maxres   2.07896889117126e-01
+Iteration 3 	bsize 10 	maxres   8.94032219327286e-02
+Iteration 4 	bsize 10 	maxres   5.57350171829443e-02
+Iteration 5 	bsize 10 	maxres   4.52510317338198e-02
+Iteration 6 	bsize 10 	maxres   1.59857204735523e-02
+Iteration 7 	bsize 9 	maxres   3.01005214052435e-03
+Iteration 8 	bsize 9 	maxres   9.15794497701057e-04
+Iteration 9 	bsize 7 	maxres   2.67036690450682e-04
+Iteration 10 	bsize 7 	maxres   1.22560817277869e-04
+Iteration 11 	bsize 6 	maxres   5.82316889628062e-05
+Iteration 12 	bsize 4 	maxres   2.38206934275850e-05
+Iteration 13 	bsize 4 	maxres   1.73582854784488e-05
+Iteration 14 	bsize 3 	maxres   1.28808365694173e-05
+Iteration 15 	bsize 3 	maxres   8.17254157523635e-06
+Iteration 16 	bsize 2 	maxres   5.35177021942332e-06
+Iteration 17 	bsize 2 	maxres   3.33379172449344e-06
+Iteration 18 	bsize 2 	maxres   1.86780300254488e-06
+Iteration 19 	bsize 2 	maxres   7.70011500078168e-07
+Iteration 20 	bsize 2 	maxres   3.81937263572792e-07
+Iteration 21 	bsize 2 	maxres   2.50613871943488e-07
+Iteration 22 	bsize 2 	maxres   2.00048472656830e-07
+Iteration 23 	bsize 2 	maxres   1.47127522618703e-07
+Iteration 24 	bsize 1 	maxres   9.49491098515467e-08
+Iteration 25 	bsize 1 	maxres   4.05310405461567e-08
+Iteration 26 	bsize 1 	maxres   2.42927627803480e-08
+Iteration 27 	bsize 1 	maxres   1.24908687108539e-08
+Iteration 28 	bsize 1 	maxres   8.98979420120014e-09
 
-Eigenvalue lambda   1.70632948198615e-02
-Eigenvalue lambda   4.25854480421258e-02
-Eigenvalue lambda   4.25854480421275e-02
-Eigenvalue lambda   6.81076012643940e-02
-Eigenvalue lambda   8.48803610642899e-02
-Eigenvalue lambda   8.48803610642927e-02
-Eigenvalue lambda   1.10402514286550e-01
-Eigenvalue lambda   1.10402514286556e-01
-Eigenvalue lambda   1.43587188600284e-01
-Eigenvalue lambda   1.43587188601197e-01
-Residual   7.10733437718353e-09
-Residual   3.11201121838922e-09
-Residual   6.06662101490030e-09
-Residual   2.99575029947378e-09
-Residual   3.27383590437594e-09
-Residual   4.64545900598969e-09
-Residual   9.94572583241695e-09
-Residual   5.37168378288395e-09
-Residual   8.95906699030658e-09
-Residual   9.21811003610402e-09
+Eigenvalue lambda   1.70632948198618e-02
+Eigenvalue lambda   4.25854480421256e-02
+Eigenvalue lambda   4.25854480421296e-02
+Eigenvalue lambda   6.81076012643952e-02
+Eigenvalue lambda   8.48803610642923e-02
+Eigenvalue lambda   8.48803610642945e-02
+Eigenvalue lambda   1.10402514286553e-01
+Eigenvalue lambda   1.10402514286557e-01
+Eigenvalue lambda   1.43587188600737e-01
+Eigenvalue lambda   1.43587188601233e-01
+Residual   7.10733430591404e-09
+Residual   3.15203866625371e-09
+Residual   6.04592625305748e-09
+Residual   2.99575189318140e-09
+Residual   4.62027693122953e-09
+Residual   3.30927749996251e-09
+Residual   4.21366574442624e-09
+Residual   8.98979420120014e-09
+Residual   7.66410058335753e-09
+Residual   7.21174355949270e-09
 
 28 iterations
 =============================================
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.100000 seconds
+  wall clock time = 0.090000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.100000 seconds
+  cpu clock time  = 0.090000 seconds
   cpu MFLOPS      = 0.000000
 
 # Output file: default.out.12
-<C*b,b>: 3.210115e+01
+<C*b,b>: 3.404268e+01
 
 
 Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 -----    ------------    ---------  ------------ 
-    1    2.267211e-01    0.040016    4.001582e-02
-    2    3.255341e-03    0.014358    5.745609e-04
-    3    6.649011e-05    0.020425    1.173537e-05
-    4    1.544291e-06    0.023226    2.725642e-07
+    1    1.351894e-01    0.023170    2.317025e-02
+    2    2.466933e-03    0.018248    4.228102e-04
+    3    2.304522e-05    0.009342    3.949744e-06
+    4    9.220930e-08    0.004001    1.580385e-08
 
 
 # Output file: default.out.12f
-<C*b,b>: 3.210115e+01
+<C*b,b>: 3.404268e+01
 
 
 Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 -----    ------------    ---------  ------------ 
-    1    2.267211e-01    0.040016    4.001582e-02
-    2    3.255341e-03    0.014358    5.745609e-04
-    3    6.649011e-05    0.020425    1.173537e-05
-    4    1.544291e-06    0.023226    2.725642e-07
+    1    1.351894e-01    0.023170    2.317025e-02
+    2    2.466933e-03    0.018248    4.228102e-04
+    3    2.304522e-05    0.009342    3.949744e-06
+    4    9.220930e-08    0.004001    1.580385e-08
 
 
 # Output file: default.out.13
@@ -583,9 +583,9 @@ Final Relative Residual Norm = 6.30776e-07
 SStruct phase times:
 =============================================
 SStruct Setup:
-  wall clock time = 0.230000 seconds
+  wall clock time = 0.220000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.240000 seconds
+  cpu clock time  = 0.210000 seconds
   cpu MFLOPS      = 0.000000
 
 Problem size: 26460
@@ -594,35 +594,35 @@ Problem size: 26460
 Setup phase times:
 =============================================
 AMS Setup:
-  wall clock time = 0.110000 seconds
+  wall clock time = 0.090000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.110000 seconds
+  cpu clock time  = 0.100000 seconds
   cpu MFLOPS      = 0.000000
 
-<C*b,b>: 8.525169e-02
+<C*b,b>: 8.520115e-02
 
 
 Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 -----    ------------    ---------  ------------ 
-    1    2.580403e-02    0.088376    8.837634e-02
-    2    1.135712e-03    0.044013    3.889706e-03
-    3    9.210442e-05    0.081098    3.154489e-04
-    4    2.211502e-05    0.240108    7.574185e-05
-    5    3.768622e-06    0.170410    1.290717e-05
-    6    7.393492e-07    0.196186    2.532201e-06
-    7    1.149856e-07    0.155523    3.938149e-07
+    1    2.578311e-02    0.088331    8.833088e-02
+    2    1.130413e-03    0.043843    3.872703e-03
+    3    8.998649e-05    0.079605    3.082865e-04
+    4    2.108336e-05    0.234295    7.222990e-05
+    5    3.535402e-06    0.167687    1.211201e-05
+    6    7.245863e-07    0.204952    2.482375e-06
+    7    1.246812e-07    0.172072    4.271479e-07
 
 
 =============================================
 Solve phase times:
 =============================================
 AMS Solve:
-  wall clock time = 0.160000 seconds
+  wall clock time = 0.140000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.160000 seconds
+  cpu clock time  = 0.140000 seconds
   cpu MFLOPS      = 0.000000
 
 
 Iterations = 7
-Final Relative Residual Norm = 3.93815e-07
+Final Relative Residual Norm = 4.27148e-07
 
