@@ -50,8 +50,8 @@ extern "C"
 {
    int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
              hypre_ParCSRMatrix*, hypre_ParCSRMatrix*, hypre_ParCSRMatrix**);
-   void qsort0(int *, int, int);
-   void qsort1(int *, double *, int, int);
+   void hypre_qsort0(int *, int, int);
+   void hypre_qsort1(int *, double *, int, int);
    int  HYPRE_LSI_Search(int*, int, int);
    int  HYPRE_LSI_qsort1a(int *, int *, int, int);
    int  HYPRE_LSI_MatrixInverse(double **, int, double ***);
@@ -1914,7 +1914,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
             newColInd[jcol] = colInd[jcol];
          for (jcol = 0; jcol < rowSize2; jcol++) 
             newColInd[rowSize+jcol] = colInd2[jcol];
-         qsort0(newColInd, 0, newRowSize-1);
+         hypre_qsort0(newColInd, 0, newRowSize-1);
          ncnt = 0;
          for ( jcol = 1; jcol < newRowSize; jcol++ ) 
             if (newColInd[jcol] != newColInd[ncnt]) 
@@ -1996,7 +1996,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
             newColVal[ncnt+jcol] = - colVal2[jcol]; 
          }
          newRowSize = ncnt + rowSize2;
-         qsort1(newColInd, newColVal, 0, newRowSize-1);
+         hypre_qsort1(newColInd, newColVal, 0, newRowSize-1);
          ncnt = 0;
          for ( jcol = 0; jcol < newRowSize; jcol++ ) 
          {
@@ -2059,7 +2059,7 @@ int HYPRE_SlideReduction::buildReducedMatrix()
          //printf("%d : reducedA ROW %d\n", mypid, irow);
          ierr = HYPRE_ParCSRMatrixGetRow(reducedA_csr,irow,&rowSize,
                                          &colInd, &colVal);
-         //qsort1(colInd, colVal, 0, rowSize-1);
+         //hypre_qsort1(colInd, colVal, 0, rowSize-1);
          for ( jcol = 0; jcol < rowSize; jcol++ )
             if ( colVal[jcol] != 0.0 )
                fprintf(fp,"%6d  %6d  %25.16e \n",irow+1,colInd[jcol]+1,
@@ -2749,7 +2749,7 @@ int HYPRE_SlideReduction::buildInvA22Mat()
       iTempList = new int[nConstraints];
       for ( irow = 0; irow < nConstraints; irow++ ) 
          iTempList[irow] = constrBlkInfo_[irow];
-      qsort0( iTempList, 0, nConstraints-1 );
+      hypre_qsort0( iTempList, 0, nConstraints-1 );
       nGroups = 1;
       for ( irow = 1; irow < nConstraints; irow++ ) 
          if ( iTempList[irow] != iTempList[irow-1] ) nGroups++;
@@ -3673,7 +3673,7 @@ double HYPRE_SlideReduction::matrixCondEst(int globalRowID, int globalColID,
    localBlkInfo = new int[blkCnt];
    for (irow = 0; irow < blkCnt; irow++) localBlkInfo[irow] = blkInfo[irow];
 
-   qsort0(localBlkInfo, 0, localBlkCnt-1);
+   hypre_qsort0(localBlkInfo, 0, localBlkCnt-1);
    matDim = 1;
    for ( irow = 0; irow < nConstraints; irow++ )
    {
@@ -3691,7 +3691,7 @@ double HYPRE_SlideReduction::matrixCondEst(int globalRowID, int globalColID,
       if ( searchIndex >= 0 ) 
          rowIndices[matDim++] = endRow - nConstraints + irow + 1;
    }
-   qsort0(rowIndices, 0, matDim-1);
+   hypre_qsort0(rowIndices, 0, matDim-1);
    matrix = (double **) malloc( matDim * sizeof(double*) );
    localSlaveEqns = new int[nConstraints];
    localSlaveAuxs = new int[nConstraints];
@@ -4985,7 +4985,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
          for (jcol = 0; jcol < rowSize; jcol++) newColInd[jcol] = colInd[jcol];
          for (jcol = 0; jcol < rowSize2; jcol++) 
             newColInd[rowSize+jcol] = colInd2[jcol];
-         qsort0(newColInd, 0, newRowSize-1);
+         hypre_qsort0(newColInd, 0, newRowSize-1);
          ncnt = 0;
          for ( jcol = 1; jcol < newRowSize; jcol++ ) 
             if (newColInd[jcol] != newColInd[ncnt]) 
@@ -5054,7 +5054,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
             newColVal[ncnt+jcol] = - colVal2[jcol]; 
          }
          newRowSize = ncnt + rowSize2;
-         qsort1(newColInd, newColVal, 0, newRowSize-1);
+         hypre_qsort1(newColInd, newColVal, 0, newRowSize-1);
          ncnt = 0;
          for ( jcol = 0; jcol < newRowSize; jcol++ ) 
          {
@@ -5105,7 +5105,7 @@ int HYPRE_SlideReduction::buildReducedMatrix2()
                //printf("%d : reducedA ROW %d\n", mypid, irow);
                ierr = HYPRE_ParCSRMatrixGetRow(reducedA_csr,irow,&rowSize,
                                                &colInd, &colVal);
-               //qsort1(colInd, colVal, 0, rowSize-1);
+               //hypre_qsort1(colInd, colVal, 0, rowSize-1);
                for ( jcol = 0; jcol < rowSize; jcol++ )
                   if ( colVal[jcol] != 0.0 )
                      printf("%6d  %6d  %25.8e \n",irow+1,colInd[jcol]+1,

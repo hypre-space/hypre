@@ -21,7 +21,7 @@
 #include "mli_utils.h"
 
 extern "C" {
-   void qsort0(int *, int, int);
+   void hypre_qsort0(int *, int, int);
 }
 
 /***************************************************************************
@@ -168,7 +168,7 @@ int MLI_Matrix_GetSubMatrix(MLI_Matrix *A_in, int nRows, int *rowIndices,
       }
    }
 
-   qsort0(myRowIndices, 0, myNRows-1);
+   hypre_qsort0(myRowIndices, 0, myNRows-1);
    j = 1;
    for ( i = 1; i < myNRows; i++ )
       if ( myRowIndices[i] != myRowIndices[j-1] ) 

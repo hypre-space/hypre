@@ -76,7 +76,7 @@ extern int HYPRE_LSI_DDIlutDecompose2(HYPRE_LSI_DDIlut *ilut_ptr,
                  MH_Matrix *Amat,int total_recv_leng, int *recv_lengths, 
                  int *ext_ja, double *ext_aa, int *map, int *map2, int Noffset);
 extern void HYPRE_LSI_qsort1a(int *, int *, int, int);
-extern void qsort0(int *, int, int);
+extern void hypre_qsort0(int *, int, int);
 extern int  HYPRE_LSI_SplitDSort(double*,int,int*,int);
 extern int  MH_ExchBdry(double *, void *);
 extern int  MH_ExchBdryBack(double *, void *, int *, double **, int **);
@@ -2256,7 +2256,7 @@ int HYPRE_LSI_DDIlutDecomposeNew(HYPRE_LSI_DDIlut *ilut_ptr,MH_Matrix *Amat,
          for (k = mat_ia[index]; k < mat_ia[index+1]; k++)
             mat_ja2[ncnt++] = mat_ja[k];
       }   
-      qsort0(mat_ja2, mat_ia2[i], ncnt-1);
+      hypre_qsort0(mat_ja2, mat_ia2[i], ncnt-1);
       k = mat_ia2[i] + 1;
       for ( j = mat_ia2[i]+1; j < ncnt; j++ )
       {
