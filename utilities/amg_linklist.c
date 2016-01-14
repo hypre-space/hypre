@@ -95,7 +95,6 @@ hypre_remove_point(hypre_LinkList   *LoL_head_ptr,
                list_ptr -> prev_elt -> next_elt = NULL;
                LoL_tail = list_ptr->prev_elt;
                hypre_dispose_elt(list_ptr);
-               hypre_dispose_elt(list_ptr);
 
                *LoL_head_ptr = LoL_head;
                *LoL_tail_ptr = LoL_tail;
