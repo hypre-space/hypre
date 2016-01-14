@@ -412,8 +412,7 @@ hypre_ParCSRMatrix *hypre_ParMatmul( hypre_ParCSRMatrix  *A,
 
    if (n_cols_A != n_rows_B || num_cols_diag_A != num_rows_diag_B)
    {
-      hypre_error_in_arg(1);
-      hypre_printf(" Error! Incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
       return NULL;
    }
    if ( num_rows_diag_A==num_cols_diag_B) allsquare = 1;
@@ -2298,7 +2297,7 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
    hypre_MPI_Comm_size(comm, &nprocs);
    if (nprocs > 1)
    {
-      hypre_printf("ExtractSubmatrices: cannot handle nprocs > 1 yet.\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ExtractSubmatrices: cannot handle nprocs > 1 yet.\n");
       exit(1);
    }
 
@@ -2333,7 +2332,7 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
       if (exp_indices[indices[i]] == -1) exp_indices[indices[i]] = i;
       else
       {
-         hypre_printf("ExtractSubmatrices: wrong index %d %d\n", i, indices[i]);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ExtractSubmatrices: wrong index %d %d\n");
          exit(1);
       }
    }
@@ -2480,7 +2479,8 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
          diag_i[row] = nnz;
       }
    }
-   if (nnz > nnz_diag) hypre_printf("WARNING WARNING WARNING\n");
+   if (nnz > nnz_diag) hypre_error(HYPRE_ERROR_GENERIC); 
+		/*hypre_printf("WARNING WARNING WARNING\n");*/
    diag = hypre_ParCSRMatrixDiag(A12_csr);
    hypre_CSRMatrixI(diag) = diag_i;
    hypre_CSRMatrixJ(diag) = diag_j;
@@ -2691,7 +2691,7 @@ void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr,
       if (exp_indices[indices[i]] == -1) exp_indices[indices[i]] = i;
       else
       {
-         hypre_printf("ExtractRowSubmatrices: wrong index %d %d\n", i, indices[i]);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ExtractRowSubmatrices: wrong index %d %d\n");
          exit(1);
       }
    }
@@ -3281,8 +3281,7 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
 
    if (n_rows_A != n_rows_B || num_rows_diag_A != num_rows_diag_B)
    {
-        hypre_error_in_arg(1);
-	hypre_printf(" Error! Incompatible matrix dimensions!\n");
+        hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
 	return NULL;
    }
 

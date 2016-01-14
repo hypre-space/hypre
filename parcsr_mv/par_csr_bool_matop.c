@@ -98,7 +98,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
 
    if (n_cols_A != n_rows_B || num_cols_diag_A != num_rows_diag_B)
    {
-	hypre_printf(" Error! Incompatible matrix dimensions!\n");
+	hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
 	return NULL;
    }
    if ( num_rows_diag_A==num_cols_diag_B ) allsquare = 1;
@@ -634,7 +634,7 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
 
    if (n_cols_A != n_rows_A)
    {
-	hypre_printf(" Error! Incompatible matrix dimensions!\n");
+	hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
 	return NULL;
    }
    /*-----------------------------------------------------------------------

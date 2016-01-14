@@ -650,7 +650,7 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
       
       fcn_num = (HYPRE_Int) fmod(i, num_functions);
       if (fcn_num != dof_func[i]) 
-         hypre_printf("WARNING - ROWS incorrectly ordered in hypre_BoomerAMG_LNExpandInterp! myid = %d, row = %d\n", myid, i);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING - ROWS incorrectly ordered in hypre_BoomerAMG_LNExpandInterp!\n");
       
       /* number of elements in row of p*/
       p_num_diag_elements = P_diag_i[i+1] - P_diag_i[i];
@@ -2044,10 +2044,10 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
       
 
       if (p_count_diag != num_new_p_diag)
-         hypre_printf("Error diag p_count in hypre_BoomerAMG_LNExpandInterp! myid = %d, row = %d\n", myid, i);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error diag p_count in hypre_BoomerAMG_LNExpandInterp!\n");
    
       if (p_count_offd != num_new_p_offd)
-         hypre_printf("Error offd p_count in hypre_BoomerAMG_LNExpandInterp! myid = %d, row = %d\n", myid, i);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error offd p_count in hypre_BoomerAMG_LNExpandInterp!\n");
    
 
        /* NOW TRUNCATE Q ?*/
@@ -2341,11 +2341,11 @@ HYPRE_Int hypre_BoomerAMG_LNExpandInterp( hypre_ParCSRMatrix *A,
 
        if (j_diag_pos != P_diag_i_new[i+1])
        {
-          hypre_printf("Warning - diag Row Problem in hypre_BoomerAMG_LNExpandInterp! myid = %d, row = %d\n", myid, i);
+          hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning - diag Row Problem in hypre_BoomerAMG_LNExpandInterp!\n");
        }
        if (j_offd_pos != P_offd_i_new[i+1])
        {
-          hypre_printf("Warning - off-diag Row Problem in hypre_BoomerAMG_LNExpandInterp! myid = %d, row = %d\n", myid, i);
+          hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning - off-diag Row Problem in hypre_BoomerAMG_LNExpandInterp!\n");
        }
        
    } 

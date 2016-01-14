@@ -600,8 +600,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
 
    if ((file = fopen(new_filename, "w")) == NULL)
    {
-      hypre_printf("Error: can't open output file %s\n", new_filename);
-      hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error: can't open output file %s\n");
       return hypre_error_flag;
    }
 
@@ -726,8 +725,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
 
    if ((file = fopen(new_filename, "r")) == NULL)
    {
-      hypre_printf("Error: can't open output file %s\n", new_filename);
-      hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error: can't open output file %s\n");
       return hypre_error_flag;
    }
 

@@ -263,7 +263,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
       for (j=i_node_dof[i]; j < i_node_dof[i+1]; j++)
 	for (k=i_dof_dof[j_node_dof[j]]; k < i_dof_dof[j_node_dof[j]+1]; k++)
 	  if (i_global_to_local[j_dof_dof[k]] < 0)
-	    hypre_printf("WRONG local indexing: ====================== \n");
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WRONG local indexing: ====================== \n");
 
 
       int_dof_counter = 0;
@@ -307,11 +307,11 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 	   for (i_loc=j_loc; i_loc < local_dof_counter; i_loc++)
 	      AE[cnt++] = AE[i_loc + j_loc * local_dof_counter];
 	ierr = dppf(AE, local_dof_counter, 1);
- 	if (ierr == 1) hypre_printf ("Error! Matrix not SPD\n");
+ 	if (ierr == 1) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error! Matrix not SPD\n");
 #else  
 	hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(&uplo, &local_dof_counter, AE,
 		&local_dof_counter, &ierr); 
- 	if (ierr) hypre_printf ("Error! Matrix not SPD\n");
+ 	if (ierr == 1) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error! Matrix not SPD\n");
 #endif  
 
 	for (i_loc=0; i_loc < local_dof_counter; i_loc++)
@@ -357,7 +357,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 /*	dpotrf_(&uplo, &local_dof_counter, AE, &local_dof_counter, &ierr);*/
 #endif 
 
-      if (ierr) hypre_printf (" error in dpotrf !!!\n");
+      if (ierr) hypre_error_w_msg(HYPRE_ERROR_GENERIC," error in dpotrf !!!\n");
 
 	  for (i_loc=0; i_loc < int_dof_counter; i_loc++)
 	    {
@@ -1680,8 +1680,7 @@ matrix_matrix_product(    HYPRE_Int **i_element_edge_pointer,
 		  if (element_edge_counter >= 
 		      i_element_edge[num_elements])
 		    {
-		      hypre_printf("error in j_element_edge size: %d \n",
-			     element_edge_counter);
+                      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"error in j_element_edge size: \n");
 		      break;
 		    }
 
@@ -1718,7 +1717,7 @@ matrix_matrix_product(    HYPRE_Int **i_element_edge_pointer,
   *i_element_edge_pointer = i_element_edge;
   *j_element_edge_pointer = j_element_edge;
 
-  return 0;
+  return hypre_error_flag;
 
 }
 
@@ -2312,7 +2311,7 @@ HYPRE_Int hypre_AMGeAgglomerate(HYPRE_Int *i_AE_element, HYPRE_Int *j_AE_element
 
   if (face_max_weight == -1)
     {
-      hypre_printf("all faces are unacceptable, i.e., no faces to eliminate !\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"all faces are unacceptable, i.e., no faces to eliminate !\n");
 
       *num_AEs_pointer = 1;
 

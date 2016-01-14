@@ -798,7 +798,8 @@ hypre_AMGHybridSetCycleNumSweeps( void *AMGhybrid_vdata,
    }
    if (k < 1 || k > 3)
    {
-      hypre_printf (" Warning! Invalid cycle! num_sweeps not set!\n");
+      if (AMGhybrid_data -> print_level) 
+         hypre_printf (" Warning! Invalid cycle! num_sweeps not set!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -864,7 +865,8 @@ hypre_AMGHybridSetCycleRelaxType( void *AMGhybrid_vdata,
 
    if (k<1 || k > 3)
    {
-      hypre_printf (" Warning! Invalid cycle! Relax type not set!\n");
+      if (AMGhybrid_data -> print_level) 
+         hypre_printf (" Warning! Invalid cycle! Relax type not set!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -1164,7 +1166,8 @@ hypre_AMGHybridSetLevelRelaxWt( void   *AMGhybrid_vdata,
    num_levels = (AMGhybrid_data -> max_levels);
    if (level > num_levels-1) 
    {
-      hypre_printf (" Warning! Invalid level! Relax weight not set!\n");
+      if (AMGhybrid_data -> print_level) 
+         hypre_printf (" Warning! Invalid level! Relax weight not set!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }
@@ -1232,7 +1235,8 @@ hypre_AMGHybridSetLevelOuterWt( void   *AMGhybrid_vdata,
    num_levels = (AMGhybrid_data -> max_levels);
    if (level > num_levels-1) 
    {
-      hypre_printf (" Warning! Invalid level! Outer weight not set!\n");
+      if (AMGhybrid_data -> print_level) 
+         hypre_printf (" Warning! Invalid level! Outer weight not set!\n");
       hypre_error_in_arg(3);
       return hypre_error_flag;
    }

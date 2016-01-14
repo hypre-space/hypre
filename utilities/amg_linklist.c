@@ -95,6 +95,7 @@ hypre_remove_point(hypre_LinkList   *LoL_head_ptr,
                list_ptr -> prev_elt -> next_elt = NULL;
                LoL_tail = list_ptr->prev_elt;
                hypre_dispose_elt(list_ptr);
+               hypre_dispose_elt(list_ptr);
 
                *LoL_head_ptr = LoL_head;
                *LoL_tail_ptr = LoL_tail;
@@ -132,9 +133,8 @@ hypre_remove_point(hypre_LinkList   *LoL_head_ptr,
       }
       list_ptr = list_ptr -> next_elt;
    } while (list_ptr != NULL);
-   
-   hypre_printf("No such list!\n");
-   return;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"No such list!\n");
+   return hypre_error_flag;
 }
 
 /*****************************************************************
@@ -152,7 +152,7 @@ hypre_LinkList hypre_create_elt( HYPRE_Int Item )
 
     if ( (new_elt_ptr = (hypre_LinkList) malloc (sizeof(hypre_ListElement))) == NULL)
     {
-       hypre_printf("\n create_elt: malloc failed \n\n");
+       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"\n create_elt: malloc failed \n\n");
     }
     else 
 

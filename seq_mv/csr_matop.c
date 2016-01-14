@@ -54,7 +54,7 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
 
    if (nrows_A != nrows_B || ncols_A != ncols_B)
    {
-      hypre_printf("Warning! incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
       return NULL;
    }
 
@@ -164,7 +164,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 
    if (ncols_A != nrows_B)
    {
-      hypre_printf("Warning! incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! incompatible matrix dimensions!\n");
       return NULL;
    }
 

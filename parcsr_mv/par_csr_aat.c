@@ -374,7 +374,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 
    if (n_cols_A != n_rows_A)
    {
-      hypre_printf(" Error! Incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
       return NULL;
    }
    /*-----------------------------------------------------------------------

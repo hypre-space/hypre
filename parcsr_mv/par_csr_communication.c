@@ -228,7 +228,8 @@ void hypre_ParCSRPersistentCommHandleStart( hypre_ParCSRPersistentCommHandle *co
                                          hypre_ParCSRCommHandleRequests(comm_handle));
       if (MPI_SUCCESS != ret)
       {
-         hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"MPI error\n");
+         /*hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);*/
       }
    }
 }
@@ -242,7 +243,8 @@ void hypre_ParCSRPersistentCommHandleWait( hypre_ParCSRPersistentCommHandle *com
                                         MPI_STATUSES_IGNORE);
       if (MPI_SUCCESS != ret)
       {
-         hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"MPI error\n");
+         /*hypre_printf("MPI error %d in %s (%s, line %u)\n", ret, __FUNCTION__, __FILE__, __LINE__);*/
       }
    }
 }

@@ -613,7 +613,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       fcn_num = (HYPRE_Int) fmod(i, num_functions); 
       
       if (fcn_num != dof_func[i]) 
-         hypre_printf("WARNING - ROWS incorrectly ordered in hypre_BoomerAMG_GMExpandInterp! myid = %d, row = %d\n", myid, i);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING - ROWS incorrectly ordered in hypre_BoomerAMG_GMExpandInterp!\n");
       
       /* number of elements in row */
       num_diag_elements = P_diag_i[i+1] - orig_diag_start;
@@ -1114,7 +1114,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                
                   
                if (tot_num_lost != (lost_counter_diag + lost_counter_offd))
-                  hypre_printf("hypre_BoomerAMG_GMExpandInterp: 1st Truncation error row %d, level = %d, myid = %d\n", i, level, myid);
+                  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"hypre_BoomerAMG_GMExpandInterp: 1st Truncation error \n");
                
             }/* end of num_lost */
                
@@ -1282,11 +1282,11 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
       
       if (j_diag_pos != P_diag_i_new[i+1])
       { 
-         hypre_printf("Warning - diag Row Problem in hypre_BoomerAMG_GMExpandInterp! myid = %d, row = %d\n", myid, i);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning - diag Row Problem in hypre_BoomerAMG_GMExpandInterp!\n");
       }
       if (j_offd_pos != P_offd_i_new[i+1])
       {
-         hypre_printf("Warning - off-diag Row Problem in hypre_BoomerAMG_GMExpandInterp! myid = %d, row = %d\n", myid, i);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning - off-diag Row Problem in hypre_BoomerAMG_GMExpandInterp!\n");
       
       }
       
@@ -1817,7 +1817,7 @@ HYPRE_Int hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
 
        fcn_num = (HYPRE_Int) fmod(i, num_functions);
        if (fcn_num != dof_func[i]) 
-          hypre_printf("WARNING - ROWS incorrectly ordered in hypre_BoomerAMGRefineInterp! myid = %d, row = %d\n", myid, i);
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING - ROWS incorrectly ordered in hypre_BoomerAMGRefineInterp!\n");
       
        /* number of elements in row of p*/
        orig_diag_start =  P_diag_i[i];

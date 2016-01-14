@@ -92,7 +92,6 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    HYPRE_Int              num_left;
    HYPRE_Int              nabor, nabor_two;
 
-   HYPRE_Int              ierr = 0;
    HYPRE_Int              use_commpkg_A = 0;
    HYPRE_Real	    wall_time;
 
@@ -295,7 +294,8 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
 					in each CGC iteration.                    BM Aug 30, 2006 */
 					
 	 {
-	   if (measure < 0) hypre_printf("negative measure!\n");
+	   if (measure < 0) hypre_error (HYPRE_ERROR_GENERIC);
+		/*hypre_printf("negative measure!\n");*/
 /* 	   CF_marker[j] = f_pnt; */
 	   for (k = S_i[j]; k < S_i[j+1]; k++)
 	   {
@@ -445,7 +445,8 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
          }
        }
      }
-     if (LoL_head) hypre_printf ("Linked list not empty! head: %d\n",LoL_head->head);
+     if (LoL_head) hypre_error(HYPRE_ERROR_GENERIC);
+	/*hypre_printf ("Linked list not empty! head: %d\n",LoL_head->head);*/
    }
    l--; /* BM Aug 15, 2006 */
 
@@ -613,7 +614,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    
    *CF_marker_ptr   = CF_marker;
    
-   return (ierr);
+   return hypre_error_flag;
 }
 
 /* begin Bram added */
@@ -627,7 +628,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
   * gridpartition : the grid partition
   * =====================================================================================================*/
 {
-  HYPRE_Int j,/*p,*/mpisize,mpirank,/*rstart,rend,*/choice,*coarse,ierr=0;
+  HYPRE_Int j,/*p,*/mpisize,mpirank,/*rstart,rend,*/choice,*coarse;
   HYPRE_Int *vertexrange = NULL;
   HYPRE_Int *vertexrange_all = NULL;
   HYPRE_Int *CF_marker_offd = NULL;
@@ -761,7 +762,7 @@ HYPRE_Int hypre_BoomerAMGCoarsenCGC (hypre_ParCSRMatrix    *S,HYPRE_Int numberof
     hypre_printf ("Finished CGC cleanup, wall_time = %f s\n",wall_time);
   }
 #endif
-  return(ierr);
+  return hypre_error_flag;
 }
 
 HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int *CF_marker,HYPRE_Int **CF_marker_offd,HYPRE_Int coarsen_type,HYPRE_Int **vrange)
@@ -774,7 +775,6 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int 
  * vrange : the ranges of the vertices representing coarse grids
  * ================================================================================================*/
 {
-  HYPRE_Int ierr=0;
   HYPRE_Int mpisize,mpirank;
   HYPRE_Int num_sends;
   HYPRE_Int *vertexrange=NULL;
@@ -857,7 +857,7 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int 
   }
   hypre_TFree (int_buf_data);
   *vrange=vertexrange;
-  return (ierr);
+  return hypre_error_flag;
 }
 
 #define tag_pointrange 301
@@ -874,7 +874,6 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
  * ijG : the created graph
  * ================================================================================================*/
 {
-  HYPRE_Int ierr=0;
   HYPRE_Int i,/* ii,*/ip,j,jj,m,n,p;
   HYPRE_Int mpisize,mpirank;
 
@@ -1026,8 +1025,9 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   for (m=vertexrange_start;m<vertexrange_end;m++) {
     for (p=0;p<num_recvs_strong;p++) {
       for (n=vertexrange_strong[2*p];n<vertexrange_strong[2*p+1];n++) {
-	ierr = HYPRE_IJMatrixAddToValues (ijmatrix,1,&one,&m,&n,&weight);
+	 HYPRE_IJMatrixAddToValues (ijmatrix,1,&one,&m,&n,&weight);
 #if 0
+	ierr = HYPRE_IJMatrixAddToValues (ijmatrix,1,&one,&m,&n,&weight);
 	if (ierr) hypre_printf ("Processor %d: error %d while initializing graphs at (%d, %d)\n",mpirank,ierr,m,n);
 #endif
       }
@@ -1057,8 +1057,9 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
 	    /* C-F-coupling */
 	    weight = 0;
 	  else weight = -8; /* F-F-coupling */
-	  ierr = HYPRE_IJMatrixAddToValues (ijmatrix,1,&one,&m,&n,&weight);
+	     HYPRE_IJMatrixAddToValues (ijmatrix,1,&one,&m,&n,&weight);
 #if 0
+	  ierr = HYPRE_IJMatrixAddToValues (ijmatrix,1,&one,&m,&n,&weight);
 	  if (ierr) hypre_printf ("Processor %d: error %d while adding %lf to entry (%d, %d)\n",mpirank,ierr,weight,m,n);
 #endif
 	}
@@ -1075,7 +1076,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   /*} */
 
   *ijG = ijmatrix;
-  return (ierr);
+  return hypre_error_flag;
 }
 
 HYPRE_Int hypre_AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_Int mpisize,HYPRE_Int **coarse)
@@ -1087,7 +1088,7 @@ HYPRE_Int hypre_AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_In
    * coarse : the chosen coarse grids
    * ===========================================================*/
 {
-  HYPRE_Int i,j,jj,p,choice,*processor,ierr=0;
+  HYPRE_Int i,j,jj,p,choice,*processor;
   HYPRE_Int measure,new_measure;
 
 /*   MPI_Comm comm = hypre_ParCSRMatrixComm(G); */
@@ -1283,7 +1284,7 @@ HYPRE_Int hypre_AmgCGCChoose (hypre_CSRMatrix *G,HYPRE_Int *vertexrange,HYPRE_In
   hypre_TFree (lists);
   hypre_TFree (where);
   
-  return(ierr);
+  return hypre_error_flag;
 }
 
 HYPRE_Int hypre_AmgCGCBoundaryFix (hypre_ParCSRMatrix *S,HYPRE_Int *CF_marker,HYPRE_Int *CF_marker_offd)
@@ -1294,7 +1295,7 @@ HYPRE_Int hypre_AmgCGCBoundaryFix (hypre_ParCSRMatrix *S,HYPRE_Int *CF_marker,HY
    * CF_marker, CF_marker_offd : the coarse/fine markers
    * ========================================================================================*/
 {
-  HYPRE_Int mpirank,i,j,has_c_pt,ierr=0;
+  HYPRE_Int mpirank,i,j,has_c_pt;
   hypre_CSRMatrix *S_diag = hypre_ParCSRMatrixDiag (S);
   hypre_CSRMatrix *S_offd = hypre_ParCSRMatrixOffd (S);
   HYPRE_Int *S_i = hypre_CSRMatrixI(S_diag);
@@ -1335,5 +1336,5 @@ HYPRE_Int hypre_AmgCGCBoundaryFix (hypre_ParCSRMatrix *S,HYPRE_Int *CF_marker,HY
   if (added_cpts)  hypre_printf ("Processor %d: added %d points in hypre_AmgCGCBoundaryFix\n",mpirank,added_cpts);
   fflush(stdout);
 #endif
-  return(ierr);
+  return hypre_error_flag;
 }
