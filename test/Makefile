@@ -173,31 +173,31 @@ struct_migrate: struct_migrate.o
 
 fij_mv: fij_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fparcsr_ls: fparcsr_ls.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fparcsr_mv: fparcsr_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fsstruct_ls: fsstruct_ls.f 
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fsstruct_mv: fsstruct_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fstruct_ls: fstruct_ls.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fstruct_mv: fstruct_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 struct_for: fstruct_mv.o fstruct_ls.o struct_for.o
 	@echo  "Building" $@ "... "
@@ -265,15 +265,15 @@ fei: fei.o
 
 f77_struct: f77_struct.o
 	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+	${FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 f77_ij: f77_ij.o
 	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+	${FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 f77_ij_mv: f77_ij_mv.o
 	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+	${FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 driver_commpkg: driver_commpkg.o
 	@echo  "Building" $@ "... "
