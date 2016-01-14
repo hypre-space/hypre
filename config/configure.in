@@ -240,6 +240,41 @@ AS_HELP_STRING([--enable-maxdim=MAXDIM],
 )
 AC_DEFINE_UNQUOTED(HYPRE_MAXDIM, [$hypre_maxdim], [Max dimension])
 
+AC_ARG_ENABLE(persistent,
+AS_HELP_STRING([--enable-persistent],
+               [Uses persistent communication (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_babel=no
+         hypre_using_persistent=yes ;;
+    no)  hypre_using_persistent=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-persistent]) ;;
+ esac],
+[hypre_using_persistent=no]
+)
+if test "$hypre_using_persistent" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_PERSISTENT_COMM, 1)
+fi
+
+AC_ARG_ENABLE(hopscotch,
+AS_HELP_STRING([--enable-hopscotch],
+               [Uses hopscotch hashing if configured with OpenMP and 
+		atomic capability available(default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_babel=no
+         hypre_using_hopscotch=yes ;;
+    no)  hypre_using_hopscotch=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-hopscotch]) ;;
+ esac],
+[hypre_using_hopscotch=no]
+)
+if test "$hypre_using_hopscotch" = "yes"
+then
+   AC_DEFINE(HYPRE_HOPSCOTCH, 1)
+fi
+
 dnl * The --with-no-global-partition option is retained here for
 dnl * backward compatibility (no help string is printed).
 dnl * The new --enable-global-partition option takes precedence.

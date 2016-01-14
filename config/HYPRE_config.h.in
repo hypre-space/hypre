@@ -55,6 +55,12 @@
 /* Define to be the max dimension size (must be at least 3) */
 #undef HYPRE_MAXDIM
 
+/* Define to 1 if using persistent communication */
+#undef HYPRE_USING_PERSISTENT_COMM
+
+/* Define to 1 if hopscotch hashing */
+#undef HYPRE_HOPSCOTCH
+
 /* Define to 1 if an MPI library is found */
 #undef HYPRE_HAVE_MPI
 
