@@ -1180,7 +1180,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    if (RAP_ext_size || num_cols_offd_Pext)
    {
       hypre_UnorderedIntSet found_set;
-      hypre_UnorderedIntSetCreate(&found_set, RAP_ext_size + num_cols_offd_Pext, 16*hypre_NumThreads());
+      hypre_UnorderedIntSetCreate(&found_set, 2*(RAP_ext_size + num_cols_offd_Pext), 16*hypre_NumThreads());
       cnt = 0;
 
 #pragma omp parallel private(i)
