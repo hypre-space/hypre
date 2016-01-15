@@ -191,6 +191,7 @@ list (APPEND HYPRE_SOURCES
   utilities/hypre_memory.c
   utilities/hypre_merge_sort.c
   utilities/hypre_mpi_comm_f2c.c
+  utilities/hypre_prefix_sum.c
   utilities/hypre_printf.c
   utilities/hypre_qsort.c
   utilities/memory_dmalloc.c
