@@ -28,7 +28,7 @@ case $1 in
 
    This script runs configure in {src_dir} with optional parameters.
 
-   Example usage: $0 .. --enable-debug
+   Example usage: $0 ../src --enable-debug
 
 EOF
       exit
@@ -57,8 +57,3 @@ cp config.log HYPRE_config.h config/Makefile.config $output_dir
 # Save the environment variables
 set > $output_dir/sh.env
 
-# Save Babel configuration (if it exists)
-if [ -f babel-runtime/config.log ]
-then
-   cp babel-runtime/config.log $output_dir/babel-config.log
-fi

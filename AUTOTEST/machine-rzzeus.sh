@@ -27,7 +27,7 @@ case $1 in
 
    This script runs a number of tests suitable for the zeus cluster.
 
-   Example usage: $0 ..
+   Example usage: $0 ../src
 
 EOF
       exit

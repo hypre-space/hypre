@@ -28,7 +28,7 @@ case $1 in
 
    This script runs make clean; make [options] in {src_dir}.
 
-   Example usage: $0 .. test
+   Example usage: $0 ../src test
 
 EOF
       exit

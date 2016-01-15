@@ -30,7 +30,7 @@ case $1 in
    This script configures and compiles the source in {src_dir}, then optionally
    runs driver and example tests.
 
-   Example usage: $0 .. -ro: -ij -sstruct
+   Example usage: $0 ../src -ro: -ij -sstruct
 
 EOF
       exit

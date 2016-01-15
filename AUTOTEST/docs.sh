@@ -28,7 +28,7 @@ case $1 in
 
    This script tests the documentation build (on the tux machines).
 
-   Example usage: $0 ..
+   Example usage: $0 ../src
 
 EOF
       exit
@@ -45,11 +45,6 @@ cd $src_dir
 
 # Test documentation build in docs/
 cd docs
-make clean
-make
-
-# Test documentation build in docs_misc/
-cd ../docs_misc
 make clean
 make
 

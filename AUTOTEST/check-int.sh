@@ -25,7 +25,7 @@ case $1 in
 
    This script checks for 'int' in the 'HYPRE_Int' sections of hypre.
 
-   Example usage: $0 ..
+   Example usage: $0 ../src
 
 EOF
       exit
@@ -39,11 +39,8 @@ shift
 cd $src_dir
 
 find . -type f -print | egrep '[.]*[.](c|cc|cpp|cxx|C|h|hpp|hxx|H)$' |
-  egrep -v '/AUTOTEST' |
-  egrep -v '/babel' |
   egrep -v '/cmbuild' |
   egrep -v '/docs' |
-  egrep -v '/docs_misc' |
   egrep -v '/examples' |
   egrep -v '/FEI_mv' |
   egrep -v '/hypre/include' > check-int.files

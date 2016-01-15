@@ -25,7 +25,7 @@ case $1 in
 
    This script runs the static analysis tool klockwork in {src_dir}.
 
-   Example usage: $0 ..
+   Example usage: $0 ../src
 
 EOF
       exit

@@ -28,7 +28,7 @@ case $1 in
 
    This script runs a number of tests suitable for the tux machines.
 
-   Example usage: $0 ..
+   Example usage: $0 ../src
 
 EOF
       exit
@@ -99,14 +99,6 @@ grep -v make.err basictest.err > basictest.tmp
 mv basictest.tmp basictest.err
 renametest.sh basictest $output_dir/basictest--enable-complex
 
-# Test babel build only if 'babel-runtime' directory is present
-if [ -d $src_dir/babel-runtime ]; then
-   co="--with-babel"
-   MO="test"  # the -j option doesn't always work with the babel code
-   test.sh basictest.sh $src_dir -co: $co -mo: $MO
-   renametest.sh basictest $output_dir/basictest--with-babel
-fi
-
 # CMake build and run tests
 mo="-j"
 ro="-ams -ij -sstruct -struct"
@@ -148,12 +140,6 @@ do
    ./test.sh link.sh $src_dir $opt
    mv -f link.??? $output_subdir
 done
-
-# Test documentation build (only if 'docs_misc' directory is present)
-if [ -d $src_dir/docs_misc ]; then
-   ./test.sh docs.sh $src_dir
-   mv -f docs.??? $output_dir
-fi
 
 # Check for 'int', 'double', and 'MPI_'
 ./test.sh check-int.sh $src_dir
