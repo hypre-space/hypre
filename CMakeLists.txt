@@ -173,6 +173,7 @@ endif (HYPRE_USING_HYPRE_LAPACK)
 list (APPEND HYPRE_HEADERS
   utilities/HYPRE_utilities.h
   utilities/_hypre_utilities.h
+  utilities/hypre_hopscotch_hash.h
   utilities/HYPRE_error_f.h
   utilities/fortran.h
   utilities/fortran_matrix.h
@@ -186,7 +187,9 @@ list (APPEND HYPRE_SOURCES
   utilities/hypre_ap.c
   utilities/hypre_complex.c
   utilities/hypre_error.c
+  utilities/hypre_hopscotch_hash.c
   utilities/hypre_memory.c
+  utilities/hypre_merge_sort.c
   utilities/hypre_mpi_comm_f2c.c
   utilities/hypre_printf.c
   utilities/hypre_qsort.c
