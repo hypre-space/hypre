@@ -52,14 +52,6 @@ LFLAGS =\
  ${BLASLIBFLAGS}\
  ${LIBFLAGS}
 
-BABELLIBFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -lbHYPRE\
- -lbHYPREClient-C\
- -lbHYPREClient-F\
- -lbHYPRE\
- -lsidl -ldl -lxml2
-
 ##################################################################
 # Targets
 ##################################################################
@@ -75,11 +67,6 @@ HYPRE_DRIVERS =\
  sstruct_fac.c\
  ij_mv.c\
  zboxloop.c
-
-HYPRE_BABEL_DRIVERS =\
- struct_b.c\
- sstruct_b.c\
- ij_b.c
 
 HYPRE_DRIVERS_CXX =\
  fei.cxx\
@@ -99,33 +86,16 @@ HYPRE_DRIVERS_F77 =\
  f77_ij_mv.f\
  f77_struct.f
 
-HYPRE_BABEL_DRIVERS_CXX =
-
-HYPRE_BABEL_DRIVERS_F77 =\
- f77_ij_b.f\
- f77_struct_b.f
-
-
 HYPRE_DRIVER_EXECS=${HYPRE_DRIVERS:.c=}
 HYPRE_F77_EXAMPLES_DRIVER_EXECS=${HYPRE_F77_EXAMPLES_DRIVERS:.c=}
 HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
 HYPRE_DRIVER_CXX_EXECS=${HYPRE_DRIVERS_CXX:.cxx=}
-
-HYPRE_BABEL_DRIVER_OBJS=${HYPRE_BABEL_DRIVERS:.c=.o}
-HYPRE_BABEL_DRIVER_CXX_OBJS=${HYPRE_BABEL_DRIVERS_CXX:.cxx=.o}
-HYPRE_BABEL_DRIVER_F77_OBJS=${HYPRE_BABEL_DRIVERS_F77:.f=.o}
-
-HYPRE_BABEL_DRIVER_EXECS=${HYPRE_BABEL_DRIVERS:.c=}
-HYPRE_BABEL_DRIVER_CXX_EXECS=${HYPRE_BABEL_DRIVERS_CXX:.cxx=}
-HYPRE_BABEL_DRIVER_F77_EXECS=${HYPRE_BABEL_DRIVERS_F77:.f=}
 
 all: ${HYPRE_DRIVER_EXECS}
 
 all77: ${HYPRE_DRIVER_F77_EXECS}
 
 all++: ${HYPRE_DRIVER_CXX_EXECS}
-
-babel: ${HYPRE_BABEL_DRIVER_EXECS} ${HYPRE_BABEL_DRIVER_F77_EXECS}
 
 install:
 
@@ -137,9 +107,6 @@ distclean: clean
 	rm -f ${HYPRE_DRIVER_EXECS}
 	rm -f ${HYPRE_F77_EXAMPLES_DRIVER_EXECS}
 	rm -f ${HYPRE_DRIVER_F77_EXECS}
-	rm -f ${HYPRE_BABEL_DRIVER_EXECS}
-	rm -f ${HYPRE_BABEL_DRIVER_CXX_EXECS}
-	rm -f ${HYPRE_BABEL_DRIVER_F77_EXECS}
 	rm -f ${HYPRE_DRIVER_CXX_EXECS} cxx_*
 	rm -f TEST_examples/*.out*
 	rm -f TEST_examples/*.err*
@@ -304,13 +271,3 @@ cxx_struct.o: cxx_struct.cxx
 cxx_struct.cxx: struct.c
 	cp -fp struct.c cxx_struct.cxx
 
-##################################################################
-# Babel version of above
-##################################################################
-${HYPRE_BABEL_DRIVER_EXECS}: ${HYPRE_BABEL_DRIVER_OBJS}
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${BABELLIBFLAGS} ${LFLAGS}
-
-${HYPRE_BABEL_DRIVER_F77_EXECS}: ${HYPRE_BABEL_DRIVER_F77_OBJS}
-	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${BABELLIBFLAGS} ${FFLAGS} ${LFLAGS}

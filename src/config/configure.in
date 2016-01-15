@@ -142,7 +142,6 @@ hypre_using_mpi=yes
 hypre_using_fei=yes
 hypre_using_superlu=yes
 
-hypre_using_babel=no
 hypre_using_examples=no
 hypre_using_openmp=no
 hypre_using_insure=no
@@ -202,7 +201,6 @@ AS_HELP_STRING([--enable-bigint],
                [Use long long int for HYPRE_Int (default is NO).]),
 [case "${enableval}" in
     yes) hypre_using_fei=no
-         hypre_using_babel=no
          hypre_using_bigint=yes ;;
     no)  hypre_using_bigint=no ;;
     *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-bigint]) ;;
@@ -219,7 +217,6 @@ AS_HELP_STRING([--enable-complex],
                [Use complex values (default is NO).]),
 [case "${enableval}" in
     yes) hypre_using_fei=no
-         hypre_using_babel=no
          hypre_using_complex=yes ;;
     no)  hypre_using_complex=no ;;
     *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-complex]) ;;
@@ -303,34 +300,6 @@ AS_HELP_STRING([--enable-fortran],
     *)   hypre_using_fortran=yes ;;
  esac],
 [hypre_using_fortran=yes]
-)
-
-AC_ARG_ENABLE(python,
-AS_HELP_STRING([--enable-python=PYTHON],
-               [Build interface to specified instance of Python (turns on
-                shared libraries, requires Babel; default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_python=yes
-         hypre_python="python" ;;
-    no)  hypre_using_python=no ;;
-    *)   hypre_using_python=yes
-         hypre_python=${enableval}
-         hypre_using_shared=yes ;;
- esac],
-[hypre_using_python=no]
-)
-
-AC_ARG_ENABLE(java,
-AS_HELP_STRING([--enable-java],
-               [Build interface to Java (turns on shared libraries, requires
-                Babel; default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_java=yes ;;
-    no)  hypre_using_java=no ;;
-    *)   hypre_using_java=yes
-         hypre_using_shared=yes ;;
- esac],
-[hypre_using_java=no]
 )
 
 dnl *********************************************************************
@@ -734,16 +703,6 @@ AS_HELP_STRING([--with-openmp],
 [hypre_using_openmp=no]
 )
 
-AC_ARG_WITH(babel,
-AS_HELP_STRING([--with-babel],
-               [Use babel.]),
-[case "${withval}" in
-    yes) hypre_using_babel=yes ;;
-    no)  hypre_using_babel=no ;;
- esac],
-[hypre_using_babel=no]
-)
-
 AC_ARG_WITH(examples,
 AS_HELP_STRING([--with-examples],
                [Build example codes.]),
@@ -933,20 +892,6 @@ then
       AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION, 1)
    fi
 fi
-
-dnl *********************************************************************
-dnl * For Babel, set the following:
-dnl *********************************************************************
-BABELDIR=""
-if test "$hypre_using_babel" = "yes"
-then
-   BABELDIR="babel-runtime babel"
-   export CC CXX F77 FC CPP LD
-   export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
-dnl   AC_CONFIG_MACRO_DIR([babel-runtime/m4])
-   AC_CONFIG_SUBDIRS(babel-runtime)
-fi
-AC_SUBST(BABELDIR)
 
 dnl *********************************************************************
 dnl * For building example codes, set the following:

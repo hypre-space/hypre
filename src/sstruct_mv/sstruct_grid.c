@@ -200,34 +200,6 @@ HYPRE_Int hypre_SStructPGridSetVariables( hypre_SStructPGrid    *pgrid,
 }
 
 /*--------------------------------------------------------------------------
- * Like hypre_SStructPGridSetVariables, but do one variable at a time.
- * Nevertheless, you still must provide nvars, for memory allocation.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int hypre_SStructPGridSetVariable( hypre_SStructPGrid    *pgrid,
-                                         HYPRE_Int              var,
-                                         HYPRE_Int              nvars,
-                                         HYPRE_SStructVariable  vartype )
-{
-   hypre_SStructVariable  *vartypes;
-
-   if ( hypre_SStructPGridVarTypes(pgrid) == NULL )
-   {
-      vartypes = hypre_TAlloc(hypre_SStructVariable, nvars);
-      hypre_SStructPGridNVars(pgrid)    = nvars;
-      hypre_SStructPGridVarTypes(pgrid) = vartypes;
-   }
-   else
-   {
-      vartypes = hypre_SStructPGridVarTypes(pgrid);
-   }
-
-   vartypes[var] = vartype;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int

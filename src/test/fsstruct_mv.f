@@ -240,32 +240,6 @@ c--------------------------------------------------------------------------
 
 
 c--------------------------------------------------------------------------
-c   HYPRE_SStructGridSetVariable
-c          Like HYPRE_SStructGridSetVariables except only one variable
-c          is done at a time; fnvars needed for memory allocation.
-c--------------------------------------------------------------------------
-      subroutine fhypre_sstructgridsetvariable(fgrid, fpart, fvar, 
-     1                                         fnvars, fvartype)
-
-      integer ierr
-      integer fpart
-      integer fvar
-      integer fnvars
-      integer*8 fgrid
-      integer*8 fvartype
-
-      call HYPRE_SStructGridSetVariable(fgrid, fpart, fvar, fnvars, 
-     1                                   fvartype, ierr)
-
-      if (ierr .ne. 0) then
-         print *, ' fhypre_sstructgridsetvariable error = ', ierr
-      endif
-
-      return
-      end
-
-
-c--------------------------------------------------------------------------
 c   HYPRE_SStructGridAddVariables
 c--------------------------------------------------------------------------
       subroutine fhypre_sstructgridaddvariables(fgrid, fpart, findex,
@@ -283,32 +257,6 @@ c--------------------------------------------------------------------------
 
       if (ierr .ne. 0) then
          print *, ' fhypre_sstructgridaddvariables error = ', ierr
-      endif
-
-      return
-      end
-
-
-c--------------------------------------------------------------------------
-c   HYPRE_SStructGridAddVariable
-c          Like HYPRE_SStructGridAddVariables except only one variable
-c          is done at a time.
-c--------------------------------------------------------------------------
-      subroutine fhypre_sstructgridaddvariable(fgrid, fpart, findex,
-     1                                         fvar,  fvartype)
-
-      integer ierr
-      integer fpart
-      integer findex
-      integer fvar
-      integer*8 fgrid
-      integer*8 fvartype
-
-      call HYPRE_SStructGridAddVariable(fgrid, fpart, findex, fvar,
-     1                                   fvartype, ierr)
-
-      if (ierr .ne. 0) then
-         print *, ' fhypre_sstructgridaddvariable error = ', ierr
       endif
 
       return
