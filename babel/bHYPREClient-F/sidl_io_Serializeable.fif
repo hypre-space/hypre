@@ -1,0 +1,214 @@
+C       
+C       File:          sidl_io_Serializeable_Impl.f
+C       Symbol:        sidl.io.Serializeable-v0.9.3
+C       Symbol Type:   interface
+C       Babel Version: 0.10.12
+C       Release:       $Name$
+C       Revision:      @(#) $Id$
+C       Description:   Client-side documentation text for sidl.io.Serializeable
+C       
+C       Copyright (c) 2000-2002, The Regents of the University of California.
+C       Produced at the Lawrence Livermore National Laboratory.
+C       Written by the Components Team <components@llnl.gov>
+C       All rights reserved.
+C       
+C       This file is part of Babel. For more information, see
+C       http://www.llnl.gov/CASC/components/. Please read the COPYRIGHT file
+C       for Our Notice and the LICENSE file for the GNU Lesser General Public
+C       License.
+C       
+C       This program is free software; you can redistribute it and/or modify it
+C       under the terms of the GNU Lesser General Public License (as published by
+C       the Free Software Foundation) version 2.1 dated February 1999.
+C       
+C       This program is distributed in the hope that it will be useful, but
+C       WITHOUT ANY WARRANTY; without even the IMPLIED WARRANTY OF
+C       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
+C       conditions of the GNU Lesser General Public License for more details.
+C       
+C       You should have recieved a copy of the GNU Lesser General Public License
+C       along with this program; if not, write to the Free Software Foundation,
+C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       babel-version = 0.10.12
+C       xml-url       = /home/painter/babel-0.10.12/bin/.././share/repository/sidl.io.Serializeable-v0.9.3.xml
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "sidl.io.Serializeable" (version 0.9.3)
+C       
+C       Classes that can pack or unpack themselves should implement this interface 
+C       
+
+
+
+
+C       
+C       Method:  _cast[]
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine sidl_io_Serializeable__cast_f(ref, retval)
+        implicit none
+C       in opaque ref
+        integer*8 ref
+C       out sidl.io.Serializeable retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  _cast2[]
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine sidl_io_Serializeable__cast2_f(self, name, retval)
+        implicit none
+C       in sidl.io.Serializeable self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out opaque retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  addRef[]
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>sidl</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine sidl_io_Serializeable_addRef_f(self)
+        implicit none
+C       in sidl.io.Serializeable self
+        integer*8 self
+        end
+
+
+C       
+C       Method:  deleteRef[]
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>sidl</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine sidl_io_Serializeable_deleteRef_f(self)
+        implicit none
+C       in sidl.io.Serializeable self
+        integer*8 self
+        end
+
+
+C       
+C       Method:  isSame[]
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine sidl_io_Serializeable_isSame_f(self, iobj, retval)
+        implicit none
+C       in sidl.io.Serializeable self
+        integer*8 self
+C       in sidl.BaseInterface iobj
+        integer*8 iobj
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Method:  queryInt[]
+C       Check whether the object can support the specified interface or
+C       class.  If the <code>sidl</code> type name in <code>name</code>
+C       is supported, then a reference to that object is returned with the
+C       reference count incremented.  The callee will be responsible for
+C       calling <code>deleteRef</code> on the returned object.  If
+C       the specified type is not supported, then a null reference is
+C       returned.
+C       
+
+        subroutine sidl_io_Serializeable_queryInt_f(self, name, retval)
+        implicit none
+C       in sidl.io.Serializeable self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out sidl.BaseInterface retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  isType[]
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>sidl</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine sidl_io_Serializeable_isType_f(self, name, retval)
+        implicit none
+C       in sidl.io.Serializeable self
+        integer*8 self
+C       in string name
+        character*(*) name
+C       out bool retval
+        logical retval
+        end
+
+
+C       
+C       Method:  getClassInfo[]
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine sidl_io_Serializeable_getClassInfo_f(self, retval)
+        implicit none
+C       in sidl.io.Serializeable self
+        integer*8 self
+C       out sidl.ClassInfo retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  packObj[]
+C       
+
+        subroutine sidl_io_Serializeable_packObj_f(self, ser)
+        implicit none
+C       in sidl.io.Serializeable self
+        integer*8 self
+C       in sidl.io.Serializer ser
+        integer*8 ser
+        end
+
+
+C       
+C       Method:  unpackObj[]
+C       
+
+        subroutine sidl_io_Serializeable_unpackObj_f(self, des)
+        implicit none
+C       in sidl.io.Serializeable self
+        integer*8 self
+C       in sidl.io.Deserializer des
+        integer*8 des
+        end

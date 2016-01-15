@@ -1,0 +1,510 @@
+C       
+C       File:          sidl_Loader_Impl.f
+C       Symbol:        sidl.Loader-v0.9.15
+C       Symbol Type:   class
+C       Babel Version: 1.0.4
+C       Release:       $Name$
+C       Revision:      @(#) $Id$
+C       Description:   Client-side documentation text for sidl.Loader
+C       
+C       Copyright (c) 2000-2002, The Regents of the University of California.
+C       Produced at the Lawrence Livermore National Laboratory.
+C       Written by the Components Team <components@llnl.gov>
+C       All rights reserved.
+C       
+C       This file is part of Babel. For more information, see
+C       http://www.llnl.gov/CASC/components/. Please read the COPYRIGHT file
+C       for Our Notice and the LICENSE file for the GNU Lesser General Public
+C       License.
+C       
+C       This program is free software; you can redistribute it and/or modify it
+C       under the terms of the GNU Lesser General Public License (as published by
+C       the Free Software Foundation) version 2.1 dated February 1999.
+C       
+C       This program is distributed in the hope that it will be useful, but
+C       WITHOUT ANY WARRANTY; without even the IMPLIED WARRANTY OF
+C       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the terms and
+C       conditions of the GNU Lesser General Public License for more details.
+C       
+C       You should have recieved a copy of the GNU Lesser General Public License
+C       along with this program; if not, write to the Free Software Foundation,
+C       Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "sidl.Loader" (version 0.9.15)
+C       
+C       Class <code>Loader</code> manages dyanamic loading and symbol name
+C       resolution for the sidl runtime system.  The <code>Loader</code> class
+C       manages a library search path and keeps a record of all libraries
+C       loaded through this interface, including the initial "global" symbols
+C       in the main program.
+C       
+C       Unless explicitly set, the <code>Loader</code> uses the default
+C       <code>sidl.Finder</code> implemented in <code>sidl.DFinder</code>.
+C       This class searches the filesystem for <code>.scl</code> files when
+C       trying to find a class. The initial path is taken from the
+C       environment variable SIDL_DLL_PATH, which is a semi-colon
+C       separated sequence of URIs as described in class <code>DLL</code>.
+C       
+
+
+
+
+C       
+C       Method:  _create[]
+C       Create an instance of class sidl.Loader
+C       
+
+        subroutine sidl_Loader__create_f(retval)
+        implicit none
+C        out sidl.Loader retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  _cast[]
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine sidl_Loader__cast_f(ref, retval, exception)
+        implicit none
+C        in opaque ref
+        integer*8 ref
+C        out sidl.Loader retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _cast2[]
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine sidl_Loader__cast2_f(self, name, retval, exception)
+        implicit none
+C        in sidl.Loader self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out opaque retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  addRef[]
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>sidl</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine sidl_Loader_addRef_f(self, exception)
+        implicit none
+C        in sidl.Loader self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  deleteRef[]
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>sidl</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine sidl_Loader_deleteRef_f(self, exception)
+        implicit none
+C        in sidl.Loader self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  isSame[]
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine sidl_Loader_isSame_f(self, iobj, retval, exception)
+        implicit none
+C        in sidl.Loader self
+        integer*8 self
+C        in sidl.BaseInterface iobj
+        integer*8 iobj
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  isType[]
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>sidl</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine sidl_Loader_isType_f(self, name, retval, exception)
+        implicit none
+C        in sidl.Loader self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  getClassInfo[]
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine sidl_Loader_getClassInfo_f(self, retval, exception)
+        implicit none
+C        in sidl.Loader self
+        integer*8 self
+C        out sidl.ClassInfo retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  loadLibrary[]
+C       Load the specified library if it has not already been loaded.
+C       The URI format is defined in class <code>DLL</code>.  The search
+C       path is not searched to resolve the library name.
+C       
+C       @param uri          the URI to load. This can be a .la file
+C       (a metadata file produced by libtool) or
+C       a shared library binary (i.e., .so,
+C       .dll or whatever is appropriate for your
+C       OS)
+C       @param loadGlobally <code>true</code> means that the shared
+C       library symbols will be loaded into the
+C       global namespace; <code>false</code> 
+C       means they will be loaded into a 
+C       private namespace. Some operating systems
+C       may not be able to honor the value presented
+C       here.
+C       @param loadLazy     <code>true</code> instructs the loader to
+C       that symbols can be resolved as needed (lazy)
+C       instead of requiring everything to be resolved
+C       now.
+C       @return if the load was successful, a non-NULL DLL object is returned.
+C       
+
+        subroutine sidl_Loader_loadLibrary_f(uri, loadGlobally, 
+     &     loadLazy, retval, exception)
+        implicit none
+C        in string uri
+        character*(*) uri
+C        in bool loadGlobally
+        logical loadGlobally
+C        in bool loadLazy
+        logical loadLazy
+C        out sidl.DLL retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  addDLL[]
+C       Append the specified DLL to the beginning of the list of already
+C       loaded DLLs.
+C       
+
+        subroutine sidl_Loader_addDLL_f(dll, exception)
+        implicit none
+C        in sidl.DLL dll
+        integer*8 dll
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  unloadLibraries[]
+C       Unload all dynamic link libraries.  The library may no longer
+C       be used to access symbol names.  When the library is actually
+C       unloaded from the memory image depends on details of the operating
+C       system.
+C       
+
+        subroutine sidl_Loader_unloadLibraries_f(exception)
+        implicit none
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  findLibrary[]
+C       Find a DLL containing the specified information for a sidl
+C       class. This method searches SCL files in the search path looking
+C       for a shared library that contains the client-side or IOR
+C       for a particular sidl class.
+C       
+C       This call is implemented by calling the current
+C       <code>Finder</code>. The default finder searches the local
+C       file system for <code>.scl</code> files to locate the
+C       target class/interface.
+C       
+C       @param sidl_name  the fully qualified (long) name of the
+C       class/interface to be found. Package names
+C       are separated by period characters from each
+C       other and the class/interface name.
+C       @param target     to find a client-side binding, this is
+C       normally the name of the language.
+C       To find the implementation of a class
+C       in order to make one, you should pass
+C       the string "ior/impl" here.
+C       @param lScope     this specifies whether the symbols should
+C       be loaded into the global scope, a local
+C       scope, or use the setting in the SCL file.
+C       @param lResolve   this specifies whether symbols should be
+C       resolved as needed (LAZY), completely
+C       resolved at load time (NOW), or use the
+C       setting from the SCL file.
+C       @return a non-NULL object means the search was successful.
+C       The DLL has already been added.
+C       
+
+        subroutine sidl_Loader_findLibrary_f(sidl_name, target, lScope, 
+     &     lResolve, retval, exception)
+        implicit none
+C        in string sidl_name
+        character*(*) sidl_name
+C        in string target
+        character*(*) target
+C        in sidl.Scope lScope
+        integer*4 lScope
+C        in sidl.Resolve lResolve
+        integer*4 lResolve
+C        out sidl.DLL retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  setSearchPath[]
+C       Set the search path, which is a semi-colon separated sequence of
+C       URIs as described in class <code>DLL</code>.  This method will
+C       invalidate any existing search path.
+C       
+C       This updates the search path in the current <code>Finder</code>.
+C       
+
+        subroutine sidl_Loader_setSearchPath_f(path_name, exception)
+        implicit none
+C        in string path_name
+        character*(*) path_name
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  getSearchPath[]
+C       Return the current search path.  The default
+C       <code>Finder</code> initializes the search path
+C       from environment variable SIDL_DLL_PATH.
+C       
+
+        subroutine sidl_Loader_getSearchPath_f(retval, exception)
+        implicit none
+C        out string retval
+        character*(*) retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  addSearchPath[]
+C       Append the specified path fragment to the beginning of the
+C       current search path.  This method operates on the Loader's
+C       current <code>Finder</code>. This will add a path to the
+C       current search path. Normally, the search path is initialized
+C       from the SIDL_DLL_PATH environment variable.
+C       
+
+        subroutine sidl_Loader_addSearchPath_f(path_fragment, exception)
+        implicit none
+C        in string path_fragment
+        character*(*) path_fragment
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  setFinder[]
+C       This method sets the <code>Finder</code> that
+C       <code>Loader</code> will use to find DLLs.  If no
+C       <code>Finder</code> is set or if NULL is passed in, the Default
+C       Finder <code>DFinder</code> will be used.
+C       
+C       Future calls to <code>findLibrary</code>,
+C       <code>addSearchPath</code>, <code>getSearchPath</code>, and
+C       <code>setSearchPath</code> are deligated to the
+C       <code>Finder</code> set here.
+C       
+
+        subroutine sidl_Loader_setFinder_f(f, exception)
+        implicit none
+C        in sidl.Finder f
+        integer*8 f
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  getFinder[]
+C       This method gets the <code>Finder</code> that <code>Loader</code>
+C       uses to find DLLs.  
+C       
+
+        subroutine sidl_Loader_getFinder_f(retval, exception)
+        implicit none
+C        out sidl.Finder retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _exec[]
+C       Select and execute a method by name
+C       
+
+        subroutine sidl_Loader__exec_f(self, methodName, inArgs, 
+     &     outArgs, exception)
+        implicit none
+C        in sidl.Loader self
+        integer*8 self
+C        in string methodName
+        character*(*) methodName
+C        in sidl.rmi.Call inArgs
+        integer*8 inArgs
+C        in sidl.rmi.Return outArgs
+        integer*8 outArgs
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _getURL[]
+C       Get the URL of the Implementation of this object (for RMI)
+C       
+
+        subroutine sidl_Loader__getURL_f(self, retval, exception)
+        implicit none
+C        in sidl.Loader self
+        integer*8 self
+C        out string retval
+        character*(*) retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isRemote[]
+C       TRUE if this object is remote, false if local
+C       
+
+        subroutine sidl_Loader__isRemote_f(self, retval, exception)
+        implicit none
+C        in sidl.Loader self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isLocal[]
+C       TRUE if this object is local, false if remote
+C       
+
+        subroutine sidl_Loader__isLocal_f(self, retval, exception)
+        implicit none
+C        in sidl.Loader self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks[]
+C       Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine sidl_Loader__set_hooks_f(self, on, exception)
+        implicit none
+C        in sidl.Loader self
+        integer*8 self
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks_static[]
+C       Static Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine sidl_Loader__set_hooks_static_f(on, exception)
+        implicit none
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end

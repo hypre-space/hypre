@@ -1,0 +1,98 @@
+HYPRE Alpha Release Checklist
+
+Alpha releases are primarily used to get new code to close collaborators quickly.
+These releases tend to occur frequently, are available only on the CASC cluster 
+and may not be stable.  The following steps must be completed, initialed & dated
+on the --->> line by the responsible project member before the release is made 
+available to users.
+
+
+
+ 1. Decision made for release
+
+    --->> ___Tzanio request, Rob OK, 7/25/06_____
+
+ 2. Release number: 
+
+    --->> ___1.12.0a___________________
+
+ 3. Copy file checklist_alpha_release to check{verson number}.txt (i.e. check1.9.0a.txt)
+       and commit to the linear_solvers/releases directory
+
+    --->> ___OK, 7/26/06____________________________
+
+ 4. Project personnel advised of release decision and tentative date with
+       a request to not disrupt the repository until the release is complete
+
+    --->> __________OK_______________________________
+
+ 5. Requests for delay in release must be made within 24 hours of notification 
+
+    --->> ___________OK______________________________
+
+ 6. Update CHANGELOG file with information regarding contents of this release
+
+    --->> ____________OK_____________________________
+
+ 7. Project Lead review and/or concurrence to release
+
+    --->> __________OK_______________________________
+
+ 8. Update config/configure.in with release number and date; run
+    ./config/bootstrap and commit changes to repository
+
+    --->> ___________OK, 7/26/06______________________________
+
+ 9. Tag repository with release number
+
+    --->> ___________OK, 7/26/06______________________________
+
+10. Checkout tagged version
+
+    --->> ___________OK, 7/26/06______________________________
+
+11. Create tar file of checked out version by running the mkdist script
+    ./mkdist [VersionID]  (run in local directory above linear_solvers)
+
+    --->> ___________OK, 7/26/06______________________________
+
+12. Manually untar the file that was created in step 11
+
+    --->> ___________OK, 7/26/06______________________________
+
+13. Manually run the autotest script with the -tux149 and -insure options on
+       the checked out version
+
+    --->> ___________OK, 7/26/06______________________________
+
+14. If the test runs properly, proceed to step 15
+    Otherwise, untag the repository, make necessary corrections, return
+       to step 8; iterating until all tests run correctly.
+
+    --->> ___________OK, 7/26/06______________________________
+
+15. Copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
+
+    --->> ___________OK, 7/26/06______________________________
+
+16. Run the mkdistlinks script to create symbolic links to the tar file 
+    ./mkdistlinks <HypreArchiveFileName>
+
+    --->> ___________OK, 7/26/06______________________________
+
+17. Run the mklibs script with the '-a install' option to create 
+       and install the release
+    ./mklibs -a <HypreArchiveFileName> install
+
+    --->> ___________OK, 7/26/06______________________________
+
+18. If there are no errors in steps 11-16; inform project team and other
+       appropriate users of availability
+
+    --->> ___________OK, 7/26/06______________________________
+
+19. FINAL SIGN-OFF
+    Verify that all steps have been signed off and commit this file to
+       the repository
+
+    --->> ___________OK, 7/26/06______________________________

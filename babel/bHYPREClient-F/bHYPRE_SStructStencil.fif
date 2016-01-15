@@ -1,0 +1,371 @@
+C       
+C       File:          bHYPRE_SStructStencil_Impl.f
+C       Symbol:        bHYPRE.SStructStencil-v1.0.0
+C       Symbol Type:   class
+C       Babel Version: 1.0.4
+C       Description:   Client-side documentation text for bHYPRE.SStructStencil
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "bHYPRE.SStructStencil" (version 1.0.0)
+C       
+C       The semi-structured grid stencil class.
+C       
+
+
+
+
+C       
+C       Method:  _create[]
+C       Create an instance of class bHYPRE.SStructStencil
+C       
+
+        subroutine bHYPRE_SStructStencil__create_f(retval)
+        implicit none
+C        out bHYPRE.SStructStencil retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  _wrapObj[]
+C       Create an instance of class that wraps the passed in private_databHYPRE.SStructStencil
+C       
+
+        subroutine bHYPRE_SStructStencil__wrapObj_f(private_data, 
+     &     retval)
+        implicit none
+C        in opaque private_data
+        integer*8 private_data
+C        out bHYPRE.SStructStencil retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  _cast[]
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine bHYPRE_SStructStencil__cast_f(ref, retval, exception)
+        implicit none
+C        in opaque ref
+        integer*8 ref
+C        out bHYPRE.SStructStencil retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _cast2[]
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine bHYPRE_SStructStencil__cast2_f(self, name, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out opaque retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  Create[]
+C        This function is the preferred way to create a SStruct Stencil. 
+C       
+
+        subroutine bHYPRE_SStructStencil_Create_f(ndim, size, retval, 
+     &     exception)
+        implicit none
+C        in int ndim
+        integer*4 ndim
+C        in int size
+        integer*4 size
+C        out bHYPRE.SStructStencil retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  Destroy[]
+C       The Destroy function doesn't necessarily destroy anything.
+C       It is just another name for deleteRef.  Thus it decrements the
+C       object's reference count.  The Babel memory management system will
+C       destroy the object if the reference count goes to zero.
+C       
+
+        subroutine bHYPRE_SStructStencil_Destroy_f(self, exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetNumDimSize[]
+C       Set the number of spatial dimensions and stencil entries.
+C       DEPRECATED, use Create:
+C       
+
+        subroutine bHYPRE_SStructStencil_SetNumDimSize_f(self, ndim, 
+     &     size, retval, exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        in int ndim
+        integer*4 ndim
+C        in int size
+        integer*4 size
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetEntry[]
+C       Set a stencil entry.
+C       
+
+        subroutine bHYPRE_SStructStencil_SetEntry_f(self, entry, offset,
+     &     dim, var, retval, exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        in int entry
+        integer*4 entry
+C        in int dim
+        integer*4 dim
+C        in int var
+        integer*4 var
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<int> offset(dim)
+        integer*4 offset(0:dim-1)
+        end
+
+
+C       
+C       Method:  addRef[]
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>sidl</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine bHYPRE_SStructStencil_addRef_f(self, exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  deleteRef[]
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>sidl</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine bHYPRE_SStructStencil_deleteRef_f(self, exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  isSame[]
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine bHYPRE_SStructStencil_isSame_f(self, iobj, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        in sidl.BaseInterface iobj
+        integer*8 iobj
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  isType[]
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>sidl</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine bHYPRE_SStructStencil_isType_f(self, name, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  getClassInfo[]
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine bHYPRE_SStructStencil_getClassInfo_f(self, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        out sidl.ClassInfo retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _exec[]
+C       Select and execute a method by name
+C       
+
+        subroutine bHYPRE_SStructStencil__exec_f(self, methodName, 
+     &     inArgs, outArgs, exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        in string methodName
+        character*(*) methodName
+C        in sidl.rmi.Call inArgs
+        integer*8 inArgs
+C        in sidl.rmi.Return outArgs
+        integer*8 outArgs
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _getURL[]
+C       Get the URL of the Implementation of this object (for RMI)
+C       
+
+        subroutine bHYPRE_SStructStencil__getURL_f(self, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        out string retval
+        character*(*) retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isRemote[]
+C       TRUE if this object is remote, false if local
+C       
+
+        subroutine bHYPRE_SStructStencil__isRemote_f(self, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isLocal[]
+C       TRUE if this object is local, false if remote
+C       
+
+        subroutine bHYPRE_SStructStencil__isLocal_f(self, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks[]
+C       Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine bHYPRE_SStructStencil__set_hooks_f(self, on, 
+     &     exception)
+        implicit none
+C        in bHYPRE.SStructStencil self
+        integer*8 self
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks_static[]
+C       Static Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine bHYPRE_SStructStencil__set_hooks_static_f(on, 
+     &     exception)
+        implicit none
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end

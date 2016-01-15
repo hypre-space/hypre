@@ -1,0 +1,74 @@
+<!--
+   sidl Class List (SCL) DTD
+   File: scl.dtd
+   Revision: @(#) $Revision$
+   Date:     $Date$
+   Copyright (c) 2003 The Regents of the University of California
+   
+The SCL file describes libraries and the sidl classes each library
+contains.  The library element indicates where the shared library is
+stored (a local file name or a URI), whether it should be loaded into
+a global or local scope (this impacts dlopen flags), and whether its
+symbols should be resolved using a lazy algorithm (resolve symbols as
+referenced) or immediately. The library description can also contain a
+md5 or sha1 digest or both. This is particularly recommended when the
+uri refers to a binary outside your control. The uri can be a shared
+library (often .so) or a libtool metadata file when the uri is a local
+filename. md5 or sha1 should contain the digest as a hexidecimal
+string (such as you would get from the md5sum or sha1sum programs).
+
+The class element has two attributes: name and desc. The name
+attribute should b e a fully qualified sidl type name (e.g.,
+sidl.BaseClass). The desc attribute is matched against the
+target argument of sidl.Loader.findLibrary, so it can be anything.
+Presently, Babel uses "ior/impl" to indicate that a library
+contains the implementation of a class and "java" to indicate that
+a library contains the "java" client-side native methods for a
+class.
+-->
+
+<!--
+The scl element holds any number of library elements. This is the
+top level element of the file.
+-->
+<!ELEMENT scl (library*) >
+
+<!--
+The library element contains information about a shared library.
+This element can contain any number of class elements.
+Classes contained in the library element indicate classes
+contains in the actual shared library.
+-->
+<!ELEMENT library (class*) >
+
+<!ATTLIST library
+<!-- provide a uri or absolute filename for the shared library -->
+    uri         CDATA           #REQUIRED
+<!-- should the library be loaded in a global or local scope -->
+    scope      (local|global)   #REQUIRED
+<!-- should symbols be resolve as referenced (lazy) or immediately
+     (now) -->
+    resolution (now|lazy)       #REQUIRED
+<!-- optional message digest as hexidecimal string (md5sum) -->
+    md5         CDATA           #IMPLIED
+<!-- optional message digest as hexidecimal string (sha1sum) -->
+    sha1        CDATA           #IMPLIED
+>
+
+<!--
+The class element describes a sidl class inside a library.
+The name attribute is the full sidl type name including
+package hierarchy and class (e.g., sidl.BaseClass). The
+desc attribute is a string indicating what information
+relating to the class is stored in the library. A desc
+of "ior/impl" means the IOR and implementation of the
+class are stored in the library. This is useful for
+sidl.DLL.createClass calls. A desc of "java" means the
+Java client-side native methods are stored in the library.
+-->
+<!ELEMENT class EMPTY >
+
+<!ATTLIST class
+    name        CDATA           #REQUIRED
+    desc        CDATA           #REQUIRED
+>

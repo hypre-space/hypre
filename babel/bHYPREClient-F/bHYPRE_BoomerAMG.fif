@@ -1,0 +1,942 @@
+C       
+C       File:          bHYPRE_BoomerAMG_Impl.f
+C       Symbol:        bHYPRE.BoomerAMG-v1.0.0
+C       Symbol Type:   class
+C       Babel Version: 1.0.4
+C       Description:   Client-side documentation text for bHYPRE.BoomerAMG
+C       
+C       WARNING: Automatically generated; changes will be lost
+C       
+C       
+
+        THIS FILE IS DOCUMENTATION - DO NOT COMPILE IT!
+
+C       
+C       Symbol "bHYPRE.BoomerAMG" (version 1.0.0)
+C       
+C       Algebraic multigrid solver, based on classical Ruge-Stueben.
+C       
+C       BoomerAMG requires an IJParCSR matrix
+C       
+C       The following optional parameters are available and may be set
+C       using the appropriate {\tt Parameter} function (as indicated in
+C       parentheses):
+C       
+C       \begin{description}
+C       
+C       \item[MaxLevels] ({\tt Int}) - maximum number of multigrid
+C       levels.
+C       
+C       \item[StrongThreshold] ({\tt Double}) - AMG strength threshold.
+C       
+C       \item[MaxRowSum] ({\tt Double}) -
+C       
+C       \item[CoarsenType] ({\tt Int}) - type of parallel coarsening
+C       algorithm used.
+C       
+C       \item[MeasureType] ({\tt Int}) - type of measure used; local or
+C       global.
+C       
+C       \item[CycleType] ({\tt Int}) - type of cycle used; a V-cycle
+C       (default) or a W-cycle.
+C       
+C       \item[NumGridSweeps] ({\tt IntArray 1D}) - number of sweeps for
+C       fine and coarse grid, up and down cycle. DEPRECATED:
+C       Use NumSweeps or Cycle?NumSweeps instead.
+C       
+C       \item[NumSweeps] ({\tt Int}) - number of sweeps for fine grid, up and
+C       down cycle.
+C       
+C       \item[Cycle1NumSweeps] ({\tt Int}) - number of sweeps for down cycle
+C       
+C       \item[Cycle2NumSweeps] ({\tt Int}) - number of sweeps for up cycle
+C       
+C       \item[Cycle3NumSweeps] ({\tt Int}) - number of sweeps for coarse grid
+C       
+C       \item[GridRelaxType] ({\tt IntArray 1D}) - type of smoother used on
+C       fine and coarse grid, up and down cycle. DEPRECATED:
+C       Use RelaxType or Cycle?RelaxType instead.
+C       
+C       \item[RelaxType] ({\tt Int}) - type of smoother for fine grid, up and
+C       down cycle.
+C       
+C       \item[Cycle1RelaxType] ({\tt Int}) - type of smoother for down cycle
+C       
+C       \item[Cycle2RelaxType] ({\tt Int}) - type of smoother for up cycle
+C       
+C       \item[Cycle3RelaxType] ({\tt Int}) - type of smoother for coarse grid
+C       
+C       \item[GridRelaxPoints] ({\tt IntArray 2D}) - point ordering used in
+C       relaxation.  DEPRECATED.
+C       
+C       \item[RelaxWeight] ({\tt DoubleArray 1D}) - relaxation weight for
+C       smoothed Jacobi and hybrid SOR.  DEPRECATED:
+C       Instead, use the RelaxWt parameter and the SetLevelRelaxWt function.
+C       
+C       \item[RelaxWt] ({\tt Int}) - relaxation weight for all levels for
+C       smoothed Jacobi and hybrid SOR.
+C       
+C       \item[TruncFactor] ({\tt Double}) - truncation factor for
+C       interpolation.
+C       
+C       \item[JacobiTruncThreshold] ({\tt Double}) - threshold for truncation
+C       of Jacobi interpolation.
+C       
+C       \item[SmoothType] ({\tt Int}) - more complex smoothers.
+C       
+C       \item[SmoothNumLevels] ({\tt Int}) - number of levels for more
+C       complex smoothers.
+C       
+C       \item[SmoothNumSweeps] ({\tt Int}) - number of sweeps for more
+C       complex smoothers.
+C       
+C       \item[PrintFileName] ({\tt String}) - name of file printed to in
+C       association with {\tt SetPrintLevel}.
+C       
+C       \item[NumFunctions] ({\tt Int}) - size of the system of PDEs
+C       (when using the systems version).
+C       
+C       \item[DOFFunc] ({\tt IntArray 1D}) - mapping that assigns the
+C       function to each variable (when using the systems version).
+C       
+C       \item[Variant] ({\tt Int}) - variant of Schwarz used.
+C       
+C       \item[Overlap] ({\tt Int}) - overlap for Schwarz.
+C       
+C       \item[DomainType] ({\tt Int}) - type of domain used for Schwarz.
+C       
+C       \item[SchwarzRlxWeight] ({\tt Double}) - the smoothing parameter
+C       for additive Schwarz.
+C       
+C       \item[Tolerance] ({\tt Double}) - convergence tolerance, if this
+C       is used as a solver; ignored if this is used as a preconditioner
+C       
+C       \item[DebugFlag] ({\tt Int}) -
+C       
+C       \item[InterpType] ({\tt Int}) - Defines which parallel interpolation
+C       operator is used. There are the following options for interp\_type: 
+C       
+C       \begin{tabular}{|c|l|} \hline
+C       0 &	classical modified interpolation \\
+C       1 &	LS interpolation (for use with GSMG) \\
+C       2 &	classical modified interpolation for hyperbolic PDEs \\
+C       3 &	direct interpolation (with separation of weights) \\
+C       4 &	multipass interpolation \\
+C       5 &	multipass interpolation (with separation of weights) \\
+C       6 &  extended classical modified interpolation \\
+C       7 &  extended (if no common C neighbor) classical modified interpolation \\
+C       8 &	standard interpolation \\
+C       9 &	standard interpolation (with separation of weights) \\
+C       10 &	classical block interpolation (for use with nodal systems version only) \\
+C       11 &	classical block interpolation (for use with nodal systems version only) \\
+C       &	with diagonalized diagonal blocks \\
+C       12 &	FF interpolation \\
+C       13 &	FF1 interpolation \\
+C       \hline
+C       \end{tabular}
+C       
+C       The default is 0. 
+C       
+C       \item[NumSamples] ({\tt Int}) - Defines the number of sample vectors used
+C       in GSMG or LS interpolation.
+C       
+C       \item[MaxIterations] ({\tt Int}) - maximum number of iterations
+C       
+C       \item[Logging] ({\tt Int}) - Set the {\it logging level}, specifying the
+C       degree of additional informational data to be accumulated.  Does
+C       nothing by default (level = 0).  Other levels (if any) are
+C       implementation-specific.  Must be called before {\tt Setup}
+C       and {\tt Apply}.
+C       
+C       \item[PrintLevel] ({\tt Int}) - Set the {\it print level}, specifying the
+C       degree of informational data to be printed either to the screen or
+C       to a file.  Does nothing by default (level=0).  Other levels
+C       (if any) are implementation-specific.  Must be called before
+C       {\tt Setup} and {\tt Apply}.
+C       
+C       \end{description}
+C       
+C       The following function is specific to this class:
+C       
+C       \begin{description}
+C       
+C       \item[SetLevelRelxWeight] ({\tt Double , \tt Int}) -
+C       relaxation weight for one specified level of smoothed Jacobi and hybrid SOR.
+C       
+C       \end{description}
+C       
+C       Objects of this type can be cast to Solver objects using the
+C       {\tt \_\_cast} methods.
+C       
+
+
+
+
+C       
+C       Method:  _create[]
+C       Create an instance of class bHYPRE.BoomerAMG
+C       
+
+        subroutine bHYPRE_BoomerAMG__create_f(retval)
+        implicit none
+C        out bHYPRE.BoomerAMG retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  _wrapObj[]
+C       Create an instance of class that wraps the passed in private_databHYPRE.BoomerAMG
+C       
+
+        subroutine bHYPRE_BoomerAMG__wrapObj_f(private_data, retval)
+        implicit none
+C        in opaque private_data
+        integer*8 private_data
+C        out bHYPRE.BoomerAMG retval
+        integer*8 retval
+        end
+
+
+C       
+C       Method:  _cast[]
+C       Cast method for interface and type conversions.
+C       
+
+        subroutine bHYPRE_BoomerAMG__cast_f(ref, retval, exception)
+        implicit none
+C        in opaque ref
+        integer*8 ref
+C        out bHYPRE.BoomerAMG retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _cast2[]
+C       Cast method for interface and class type conversions.
+C       
+
+        subroutine bHYPRE_BoomerAMG__cast2_f(self, name, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out opaque retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  Create[]
+C        This function is the preferred way to create a BoomerAMG solver. 
+C       
+
+        subroutine bHYPRE_BoomerAMG_Create_f(mpi_comm, A, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.MPICommunicator mpi_comm
+        integer*8 mpi_comm
+C        in bHYPRE.IJParCSRMatrix A
+        integer*8 A
+C        out bHYPRE.BoomerAMG retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetLevelRelaxWt[]
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetLevelRelaxWt_f(self, relax_wt, 
+     &     level, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in double relax_wt
+        double precision relax_wt
+C        in int level
+        integer*4 level
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  InitGridRelaxation[]
+C       
+
+        subroutine bHYPRE_BoomerAMG_InitGridRelaxation_f(self, 
+     &     num_grid_sweeps, grid_relax_type, grid_relax_points, 
+     &     coarsen_type, relax_weights, max_levels, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        out array<int,column-major> num_grid_sweeps
+        integer*8 num_grid_sweeps
+C        out array<int,column-major> grid_relax_type
+        integer*8 grid_relax_type
+C        out array<int,2,column-major> grid_relax_points
+        integer*8 grid_relax_points
+C        in int coarsen_type
+        integer*4 coarsen_type
+C        out array<double,column-major> relax_weights
+        integer*8 relax_weights
+C        in int max_levels
+        integer*4 max_levels
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  addRef[]
+C       <p>
+C       Add one to the intrinsic reference count in the underlying object.
+C       Object in <code>sidl</code> have an intrinsic reference count.
+C       Objects continue to exist as long as the reference count is
+C       positive. Clients should call this method whenever they
+C       create another ongoing reference to an object or interface.
+C       </p>
+C       <p>
+C       This does not have a return value because there is no language
+C       independent type that can refer to an interface or a
+C       class.
+C       </p>
+C       
+
+        subroutine bHYPRE_BoomerAMG_addRef_f(self, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  deleteRef[]
+C       Decrease by one the intrinsic reference count in the underlying
+C       object, and delete the object if the reference is non-positive.
+C       Objects in <code>sidl</code> have an intrinsic reference count.
+C       Clients should call this method whenever they remove a
+C       reference to an object or interface.
+C       
+
+        subroutine bHYPRE_BoomerAMG_deleteRef_f(self, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  isSame[]
+C       Return true if and only if <code>obj</code> refers to the same
+C       object as this object.
+C       
+
+        subroutine bHYPRE_BoomerAMG_isSame_f(self, iobj, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in sidl.BaseInterface iobj
+        integer*8 iobj
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  isType[]
+C       Return whether this object is an instance of the specified type.
+C       The string name must be the <code>sidl</code> type name.  This
+C       routine will return <code>true</code> if and only if a cast to
+C       the string type name would succeed.
+C       
+
+        subroutine bHYPRE_BoomerAMG_isType_f(self, name, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  getClassInfo[]
+C       Return the meta-data about the class implementing this interface.
+C       
+
+        subroutine bHYPRE_BoomerAMG_getClassInfo_f(self, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        out sidl.ClassInfo retval
+        integer*8 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetOperator[]
+C       Set the operator for the linear system being solved.
+C       DEPRECATED.  use Create
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetOperator_f(self, A, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in bHYPRE.Operator A
+        integer*8 A
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetTolerance[]
+C       (Optional) Set the convergence tolerance.
+C       DEPRECATED.  use SetDoubleParameter
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetTolerance_f(self, tolerance, 
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in double tolerance
+        double precision tolerance
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetMaxIterations[]
+C       (Optional) Set maximum number of iterations.
+C       DEPRECATED   use SetIntParameter
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetMaxIterations_f(self, 
+     &     max_iterations, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in int max_iterations
+        integer*4 max_iterations
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetLogging[]
+C       (Optional) Set the {\it logging level}, specifying the degree
+C       of additional informational data to be accumulated.  Does
+C       nothing by default (level = 0).  Other levels (if any) are
+C       implementation-specific.  Must be called before {\tt Setup}
+C       and {\tt Apply}.
+C       DEPRECATED   use SetIntParameter
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetLogging_f(self, level, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in int level
+        integer*4 level
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetPrintLevel[]
+C       (Optional) Set the {\it print level}, specifying the degree
+C       of informational data to be printed either to the screen or
+C       to a file.  Does nothing by default (level=0).  Other levels
+C       (if any) are implementation-specific.  Must be called before
+C       {\tt Setup} and {\tt Apply}.
+C       DEPRECATED   use SetIntParameter
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetPrintLevel_f(self, level, retval,
+     &     exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in int level
+        integer*4 level
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  GetNumIterations[]
+C       (Optional) Return the number of iterations taken.
+C       
+
+        subroutine bHYPRE_BoomerAMG_GetNumIterations_f(self, 
+     &     num_iterations, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        out int num_iterations
+        integer*4 num_iterations
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  GetRelResidualNorm[]
+C       (Optional) Return the norm of the relative residual.
+C       
+
+        subroutine bHYPRE_BoomerAMG_GetRelResidualNorm_f(self, norm, 
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        out double norm
+        double precision norm
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetCommunicator[]
+C       Set the MPI Communicator.
+C       DEPRECATED, use Create:
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetCommunicator_f(self, mpi_comm, 
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in bHYPRE.MPICommunicator mpi_comm
+        integer*8 mpi_comm
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  Destroy[]
+C       The Destroy function doesn't necessarily destroy anything.
+C       It is just another name for deleteRef.  Thus it decrements the
+C       object's reference count.  The Babel memory management system will
+C       destroy the object if the reference count goes to zero.
+C       
+
+        subroutine bHYPRE_BoomerAMG_Destroy_f(self, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetIntParameter[]
+C       Set the int parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetIntParameter_f(self, name, value,
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in int value
+        integer*4 value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetDoubleParameter[]
+C       Set the double parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetDoubleParameter_f(self, name, 
+     &     value, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in double value
+        double precision value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetStringParameter[]
+C       Set the string parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetStringParameter_f(self, name, 
+     &     value, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in string value
+        character*(*) value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetIntArray1Parameter[]
+C       Set the int 1-D array parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetIntArray1Parameter_f(self, name, 
+     &     value, nvalues, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in int nvalues
+        integer*4 nvalues
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<int> value(nvalues)
+        integer*4 value(0:nvalues-1)
+        end
+
+
+C       
+C       Method:  SetIntArray2Parameter[]
+C       Set the int 2-D array parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetIntArray2Parameter_f(self, name, 
+     &     value, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in array<int,2,column-major> value
+        integer*8 value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  SetDoubleArray1Parameter[]
+C       Set the double 1-D array parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetDoubleArray1Parameter_f(self, 
+     &     name, value, nvalues, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in int nvalues
+        integer*4 nvalues
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+C        in rarray<double> value(nvalues)
+        double precision value(0:nvalues-1)
+        end
+
+
+C       
+C       Method:  SetDoubleArray2Parameter[]
+C       Set the double 2-D array parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_SetDoubleArray2Parameter_f(self, 
+     &     name, value, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        in array<double,2,column-major> value
+        integer*8 value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  GetIntValue[]
+C       Set the int parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_GetIntValue_f(self, name, value, 
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out int value
+        integer*4 value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  GetDoubleValue[]
+C       Get the double parameter associated with {\tt name}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_GetDoubleValue_f(self, name, value, 
+     &     retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string name
+        character*(*) name
+C        out double value
+        double precision value
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  Setup[]
+C       (Optional) Do any preprocessing that may be necessary in
+C       order to execute {\tt Apply}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_Setup_f(self, b, x, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in bHYPRE.Vector b
+        integer*8 b
+C        in bHYPRE.Vector x
+        integer*8 x
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  Apply[]
+C       Apply the operator to {\tt b}, returning {\tt x}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_Apply_f(self, b, x, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in bHYPRE.Vector b
+        integer*8 b
+C        inout bHYPRE.Vector x
+        integer*8 x
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  ApplyAdjoint[]
+C       Apply the adjoint of the operator to {\tt b}, returning {\tt x}.
+C       
+
+        subroutine bHYPRE_BoomerAMG_ApplyAdjoint_f(self, b, x, retval, 
+     &     exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in bHYPRE.Vector b
+        integer*8 b
+C        inout bHYPRE.Vector x
+        integer*8 x
+C        out int retval
+        integer*4 retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _exec[]
+C       Select and execute a method by name
+C       
+
+        subroutine bHYPRE_BoomerAMG__exec_f(self, methodName, inArgs, 
+     &     outArgs, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in string methodName
+        character*(*) methodName
+C        in sidl.rmi.Call inArgs
+        integer*8 inArgs
+C        in sidl.rmi.Return outArgs
+        integer*8 outArgs
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _getURL[]
+C       Get the URL of the Implementation of this object (for RMI)
+C       
+
+        subroutine bHYPRE_BoomerAMG__getURL_f(self, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        out string retval
+        character*(*) retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isRemote[]
+C       TRUE if this object is remote, false if local
+C       
+
+        subroutine bHYPRE_BoomerAMG__isRemote_f(self, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _isLocal[]
+C       TRUE if this object is local, false if remote
+C       
+
+        subroutine bHYPRE_BoomerAMG__isLocal_f(self, retval, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        out bool retval
+        logical retval
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks[]
+C       Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine bHYPRE_BoomerAMG__set_hooks_f(self, on, exception)
+        implicit none
+C        in bHYPRE.BoomerAMG self
+        integer*8 self
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
+
+
+C       
+C       Method:  _set_hooks_static[]
+C       Static Method to set whether or not method hooks should be invoked.
+C       
+
+        subroutine bHYPRE_BoomerAMG__set_hooks_static_f(on, exception)
+        implicit none
+C        in bool on
+        logical on
+C        out sidl.BaseInterface exception
+        integer*8 exception
+        end
