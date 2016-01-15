@@ -22,10 +22,6 @@ for target in `ls ../*.cxx`; do
     $currentdir/code2html.perl -l c++ -n -o html $target $target.html
     mv $target.html .
 done
-for target in `ls ../*.py`; do
-    $currentdir/code2html.perl -l python -n -o html $target $target.html
-    mv $target.html .
-done
 cd $currentdir
 
 # Copy the example files

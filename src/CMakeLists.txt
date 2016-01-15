@@ -41,7 +41,6 @@ endif ()
 
 if (HYPRE_BIGINT)
   set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
-  # In the future, also turn off babel
 endif ()
 
 if (HYPRE_SEQUENTIAL)
