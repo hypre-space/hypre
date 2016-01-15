@@ -40,7 +40,7 @@ typedef struct
    HYPRE_Int             num_requests;
    hypre_MPI_Request    *requests;
 
-   int own_send_data, own_recv_data;
+   HYPRE_Int own_send_data, own_recv_data;
 
 } hypre_ParCSRPersistentCommHandle;
 #endif
