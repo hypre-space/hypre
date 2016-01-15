@@ -39,7 +39,7 @@ void hypre_UnorderedIntSetCreate( hypre_UnorderedIntSet *s,
   }
 
   //ADJUST INPUT ............................
-  HYPRE_Int adjInitCap = NearestPowerOfTwo(inCapacity);
+  HYPRE_Int adjInitCap = NearestPowerOfTwo(inCapacity+4096);
   HYPRE_Int num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
   s->bucketMask = adjInitCap - 1;
 
@@ -79,7 +79,7 @@ void hypre_UnorderedIntMapCreate( hypre_UnorderedIntMap *m,
   }
 
   //ADJUST INPUT ............................
-  HYPRE_Int adjInitCap = NearestPowerOfTwo(inCapacity);
+  HYPRE_Int adjInitCap = NearestPowerOfTwo(inCapacity+4096);
   HYPRE_Int num_buckets = adjInitCap + HYPRE_HOPSCOTCH_HASH_INSERT_RANGE + 1;
   m->bucketMask = adjInitCap - 1;
 

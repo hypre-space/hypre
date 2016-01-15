@@ -1,0 +1,143 @@
+HYPRE Beta Release Checklist
+
+Beta releases tend to occur somewhat frequently. They may include new technology
+and are reasonably stable.  The following steps must be completed, initialed & 
+dated on the --->> line by the responsible project member before the release is
+made available to users.
+
+
+
+ 1. Decision made for release
+
+    --->> _12/14/06 emh_________________________________
+
+ 2. Release number: ____1.10.0b________________________
+
+    --->> ___emh____________________________________
+
+ 3. Copy file checklist_beta_release to check{release number}.txt (i.e. check1.9.0b.txt)
+       and commit to the linear_solvers/releases directory
+
+    --->> _______12/15/05 emh_______________________________
+
+ 4. Project personnel advised of release decision and tentative date with
+       a request to not disrupt the repository until the release is complete
+
+    --->> ____12/14/05 emh_____________________________________
+
+ 5. Requests for delay in release must be made within 24 hours of notification 
+
+    --->> _____no requests as of 9:00 12/15/05  emh_______________________
+
+ 6. Update CHANGELOG file with information regarding contents of this release
+
+    --->> ___OK  12/16  emh_______________________________
+
+ 7. Verify that user, reference and developer manuals are updated
+
+    --->> ______OK 12/16 emh___________________________________
+
+ 8. Verify all agreed upon changes, especially documentation, have been committed
+
+    --->> __________OK_______________________________
+
+ 9. Project Lead review and/or concurrence to release
+
+    --->> __verbal OK - 12/13/05  emh_____________________
+
+10. Tag repository with release number
+
+    --->> _______done 12/19/05 -- emh________________
+
+11. Checkout tagged version
+
+    --->> ______OK 12/19 emh____________________
+
+12. Manually run the autotest script with the following options on the checked
+        out version: -tux149 -insure -gpsmp -pengra
+
+    --->> _____OK 12/19 emh________________
+
+13. If the test runs properly, proceed to step 14
+    Otherwise, untag the repository, make necessary corrections, return
+       to step 10; iterating until all tests run correctly.
+
+    --->> _____N/A______________________
+
+14. Create tar file of checked out version by running the mkdist script
+
+    --->> ____________OK 12/20/05 emh_____
+
+15. Manually untar the file that was created in step 14
+
+    --->> ____________OK 12/20/05 emh_____
+
+16. Manually run the autotest script with the following options on the checked
+        out version: -tux149 -insure -gpsmp -pengra
+
+    --->> ____________OK 12/20/05 emh_____
+
+17. If the tests run properly, proceed to step 18
+    Otherwise, untag the repository, make necessary corrections, return
+       to step 10; iterating until all tests run correctly.
+
+    --->> _________________________________________
+
+18. Copy tar file to any closed (SCF) computer system, using FIS 
+
+    --->> ____________OK 12/20/05 emh_____
+
+19. Copy tar file to /usr/casc/hypre/i686-pc-linux-gnu directory
+
+    --->> ____________OK 12/20/05 emh_____
+
+20. Run the mkdistlinks script to create symbolic links to the tar file 
+
+    --->> ____________OK 12/20/05 emh_____
+
+21. Run the mklibs script with the '-b install' option to create
+       and install the release
+
+    --->> ____________OK 12/20/05 emh_____
+
+22. Log onto any closed (SCF) computer system
+
+    --->> ____________OK 12/20/05 emh_____
+
+23. Retrieve the tar file from the FIS system
+
+    --->> ____________OK 12/20/05 emh_____
+
+24. Manually untar the file that was retrieved in step 23
+
+    --->> ____________OK 12/21/05 emh_____
+
+25. Manually run the autotest script with the following options on the checked
+        out version: -sc -white
+
+    --->> ____________OK 12/21/05 emh_____
+
+26. Copy tar file to the appropriate sub-directory (based on SYS_TYPE) of
+       /usr/gapps/hypre and /usr/casc/hypre
+
+    --->> ____________OK 12/21/05 emh_____
+
+27. Run the mkdistlinks script to create symbolic links to the tar file 
+
+    --->> ____________OK 12/21/05 emh_____
+
+28. Run the mklibs script with the '-b install' option to create
+       and install the release
+
+    --->> ____________OK 12/22/05 emh_____
+
+29. If there are no errors in steps 16-30; inform project team and other
+       appropriate users of availability
+
+    --->> ____________OK 12/21/05 emh_____
+
+30. FINAL SIGN-OFF
+    Verify that all steps have been signed off and commit this file to
+       the repository
+
+    --->> ____________finalized on 01/03/06 emh_____
