@@ -133,7 +133,7 @@ hypre_remove_point(hypre_LinkList   *LoL_head_ptr,
       list_ptr = list_ptr -> next_elt;
    } while (list_ptr != NULL);
    hypre_error_w_msg(HYPRE_ERROR_GENERIC,"No such list!\n");
-   return hypre_error_flag;
+   return ;
 }
 
 /*****************************************************************
