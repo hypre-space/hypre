@@ -72,7 +72,7 @@ extern int  HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *, int *,
                  int **recv_lengths, int **int_buf, double **dble_buf,
                  int **sindex_array, int **sindex_array2, int *offset);
 extern int  HYPRE_LSI_ILUTDecompose(HYPRE_LSI_Schwarz *sch_ptr);
-extern void qsort0(int *, int, int);
+extern void hypre_qsort0(int *, int, int);
 extern int  HYPRE_LSI_SplitDSort(double*,int,int*,int);
 extern int  MH_ExchBdry(double *, void *);
 extern int  HYPRE_LSI_Search(int *, int, int);
@@ -661,7 +661,7 @@ int HYPRE_LSI_SchwarzDecompose(HYPRE_LSI_Schwarz *sch_ptr,MH_Matrix *Amat,
                blk_indices[i][blk_size[i]++] = col_ind;
             }
          }
-         qsort0(blk_indices[i], 0, blk_size[i]-1);
+         hypre_qsort0(blk_indices[i], 0, blk_size[i]-1);
          ncnt = 0;
          for ( j = 1; j < blk_size[i]; j++ )
             if ( blk_indices[i][j] != blk_indices[i][ncnt] )

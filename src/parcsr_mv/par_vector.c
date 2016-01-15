@@ -421,8 +421,14 @@ hypre_ParVectorInnerProd( hypre_ParVector *x,
    HYPRE_Real result = 0.0;
    HYPRE_Real local_result = hypre_SeqVectorInnerProd(x_local, y_local);
    
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] -= hypre_MPI_Wtime();
+#endif
    hypre_MPI_Allreduce(&local_result, &result, 1, HYPRE_MPI_REAL,
                        hypre_MPI_SUM, comm);
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] += hypre_MPI_Wtime();
+#endif
    
    return result;
 }
@@ -675,8 +681,8 @@ hypre_ParVectorToVectorAll( hypre_ParVector *par_v )
          used_procs[i] = send_proc_obj.id[i];
          new_vec_starts[i+1] = send_proc_obj.elements[i]+1;
       }
-      qsort0(used_procs, 0, num_types-1);
-      qsort0(new_vec_starts, 0, num_types);
+      hypre_qsort0(used_procs, 0, num_types-1);
+      hypre_qsort0(new_vec_starts, 0, num_types);
       /*now we need to put into an array to send */
       count =  2*num_types+2;
       send_info = hypre_CTAlloc(HYPRE_Int, count);
@@ -870,8 +876,7 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
 
    if ((file = fopen(new_filename, "w")) == NULL)
    {
-      hypre_printf("Error: can't open output file %s\n", new_filename);
-      hypre_error_in_arg(3);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error: can't open output file %s\n");
       return hypre_error_flag;
    }
 
@@ -937,8 +942,7 @@ hypre_ParVectorReadIJ( MPI_Comm          comm,
 
    if ((file = fopen(new_filename, "r")) == NULL)
    {
-      hypre_printf("Error: can't open output file %s\n", new_filename);
-      hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error: can't open output file %s\n");
       return hypre_error_flag;
    }
 

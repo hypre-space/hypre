@@ -526,7 +526,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       /* sort the ranks & extract the unique ones */
       if (cnt)  /* recall that some may not have bdry pts */
       {
-         qsort0(ranks, 0, cnt-1);
+         hypre_qsort0(ranks, 0, cnt-1);
 
          k= 0;
          if (ranks[0] < 0) /* remove the off-processor markers */

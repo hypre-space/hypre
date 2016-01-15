@@ -21,6 +21,7 @@ C_COMPILE_FLAGS =\
    -I$(srcdir)\
    ${CINCLUDES}\
    ${CDEFS}
+CXX_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
 
 HEADERS =\
  amg_linklist.h\
@@ -56,9 +57,12 @@ FILES =\
  umalloc_local.c\
  hypre_mpi_comm_f2c.c\
  hypre_error.c\
- F90_HYPRE_error.c
+ F90_HYPRE_error.c\
+ hypre_prefix_sum.c\
+ hypre_merge_sort.c\
+ hypre_hopscotch_hash.c
 
-OBJS = ${FILES:.c=.o}
+OBJS = $(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(FILES)))
 
 SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}.so
 
@@ -69,6 +73,7 @@ SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}.so
 all: libHYPRE_utilities${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_utilities.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/hypre_hopscotch_hash.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/fortran*.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 

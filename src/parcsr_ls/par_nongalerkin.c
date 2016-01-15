@@ -49,14 +49,14 @@ void hypre_qsort2_abs( HYPRE_Int *v,
     
     if (left >= right)
         return;
-    swap2( v, w, left, (left+right)/2);
+    hypre_swap2( v, w, left, (left+right)/2);
     last = left;
     for (i = left+1; i <= right; i++)
         if (fabs(w[i]) < fabs(w[left]))
         {
-            swap2(v, w, ++last, i);
+            hypre_swap2(v, w, ++last, i);
         }
-    swap2(v, w, left, last);
+    hypre_swap2(v, w, left, last);
     hypre_qsort2_abs(v, w, left, last-1);
     hypre_qsort2_abs(v, w, last+1, right);
 }
@@ -640,7 +640,7 @@ hypre_NonGalerkinIJBufferCompressRow( HYPRE_Int      *ijbuf_cnt,      /* See Non
      * making sure to decrement ijbuf_cnt by nduplicate */
     nentries = ijbuf_numcols[ ijbuf_rowcounter-1 ];
     nduplicate = 0;
-    qsort1(ijbuf_cols, ijbuf_data, (*ijbuf_cnt)-nentries, (*ijbuf_cnt)-1 );
+    hypre_qsort1(ijbuf_cols, ijbuf_data, (*ijbuf_cnt)-nentries, (*ijbuf_cnt)-1 );
 
     for(i =(*ijbuf_cnt)-nentries+1; i <= (*ijbuf_cnt)-1; i++)
     {
@@ -1343,7 +1343,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
         if( RAP_diag_j[row_start] == i)
         {   row_start = row_start + 1; }
         row_end = RAP_diag_i[i+1];
-        qsort1(RAP_diag_j, RAP_diag_data, row_start, row_end-1 );
+        hypre_qsort1(RAP_diag_j, RAP_diag_data, row_start, row_end-1 );
         
         /* Sort diag portion of Pattern */
         row_start = Pattern_diag_i[i];
@@ -1351,18 +1351,18 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
         if( Pattern_diag_j[row_start] == i)
         {   row_start = row_start + 1; }
         row_end = Pattern_diag_i[i+1];
-        qsort1(Pattern_diag_j, Pattern_diag_data, row_start, row_end-1 );
+        hypre_qsort1(Pattern_diag_j, Pattern_diag_data, row_start, row_end-1 );
         
         /* Sort offd portion of RAP */
         row_start = RAP_offd_i[i];
         row_end = RAP_offd_i[i+1];
-        qsort1(RAP_offd_j, RAP_offd_data, row_start, row_end-1 );
+        hypre_qsort1(RAP_offd_j, RAP_offd_data, row_start, row_end-1 );
         
         /* Sort offd portion of Pattern */
         /* Be careful to map coarse dof i with CF_marker into Pattern */
         row_start = Pattern_offd_i[i];
         row_end = Pattern_offd_i[i+1];
-        qsort1(Pattern_offd_j, Pattern_offd_data, row_start, row_end-1 );
+        hypre_qsort1(Pattern_offd_j, Pattern_offd_data, row_start, row_end-1 );
         
     }
     
@@ -1524,7 +1524,7 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
         /* after this, the first so many entries of temp will hold the
          * unique column indices in S_ext_offd_j unioned with the indices
          * in col_map_offd_S */
-        qsort0(temp, 0, cnt-1);
+        hypre_qsort0(temp, 0, cnt-1);
         
         num_cols_offd_Sext = 1;
         value = temp[0];
@@ -1570,19 +1570,19 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
          * sorted position */
         row_start = Pattern_diag_i[i];
         row_end = Pattern_diag_i[i+1];
-        qsort1(Pattern_diag_j, Pattern_diag_data, row_start, row_end-1 );
+        hypre_qsort1(Pattern_diag_j, Pattern_diag_data, row_start, row_end-1 );
 
         /* Sort diag portion of S, noting that no diagonal entry */
         /* S has not "data" array...it's just NULL */
         row_start = S_diag_i[i];
         row_end = S_diag_i[i+1];
-        qsort1(S_diag_j, S_diag_data, row_start, row_end-1 );
+        hypre_qsort1(S_diag_j, S_diag_data, row_start, row_end-1 );
         
         /* Sort offd portion of S */
         /* S has no "data" array...it's just NULL */
         row_start = S_offd_i[i];
         row_end = S_offd_i[i+1];
-        qsort1(S_offd_j, S_offd_data, row_start, row_end-1 );
+        hypre_qsort1(S_offd_j, S_offd_data, row_start, row_end-1 );
         
     }
     
@@ -1593,12 +1593,12 @@ hypre_BoomerAMGBuildNonGalerkinCoarseOperator( hypre_ParCSRMatrix **RAP_ptr,
         /* Sort diag portion of S_ext */
         row_start = S_ext_diag_i[i];
         row_end = S_ext_diag_i[i+1];
-        qsort1(S_ext_diag_j, S_ext_diag_data, row_start, row_end-1 );
+        hypre_qsort1(S_ext_diag_j, S_ext_diag_data, row_start, row_end-1 );
         
         /* Sort offd portion of S_ext */
         row_start = S_ext_offd_i[i];
         row_end = S_ext_offd_i[i+1];
-        qsort1(S_ext_offd_j, S_ext_offd_data, row_start, row_end-1 );
+        hypre_qsort1(S_ext_offd_j, S_ext_offd_data, row_start, row_end-1 );
         
     }
     

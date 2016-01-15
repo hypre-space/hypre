@@ -32,7 +32,7 @@
  *                pool.
  *
  **************************************************************/
-void dispose_elt ( hypre_LinkList element_ptr )
+void hypre_dispose_elt ( hypre_LinkList element_ptr )
 {
    free( element_ptr );
 }
@@ -45,7 +45,7 @@ void dispose_elt ( hypre_LinkList element_ptr )
  *
  ****************************************************************/
 void 
-remove_point(hypre_LinkList   *LoL_head_ptr, 
+hypre_remove_point(hypre_LinkList   *LoL_head_ptr, 
              hypre_LinkList   *LoL_tail_ptr, 
              HYPRE_Int                 measure,
              HYPRE_Int                 index, 
@@ -74,7 +74,7 @@ remove_point(hypre_LinkList   *LoL_head_ptr,
             {
                LoL_head = NULL;
                LoL_tail = NULL;
-               dispose_elt(list_ptr);
+               hypre_dispose_elt(list_ptr);
 
                *LoL_head_ptr = LoL_head;
                *LoL_tail_ptr = LoL_tail;
@@ -84,7 +84,7 @@ remove_point(hypre_LinkList   *LoL_head_ptr,
             {
                list_ptr -> next_elt -> prev_elt = NULL;
                LoL_head = list_ptr->next_elt;
-               dispose_elt(list_ptr);
+               hypre_dispose_elt(list_ptr);
                
                *LoL_head_ptr = LoL_head;
                *LoL_tail_ptr = LoL_tail;
@@ -94,7 +94,7 @@ remove_point(hypre_LinkList   *LoL_head_ptr,
             {
                list_ptr -> prev_elt -> next_elt = NULL;
                LoL_tail = list_ptr->prev_elt;
-               dispose_elt(list_ptr);
+               hypre_dispose_elt(list_ptr);
 
                *LoL_head_ptr = LoL_head;
                *LoL_tail_ptr = LoL_tail;
@@ -104,7 +104,7 @@ remove_point(hypre_LinkList   *LoL_head_ptr,
             {
                list_ptr -> next_elt -> prev_elt = list_ptr -> prev_elt;
                list_ptr -> prev_elt -> next_elt = list_ptr -> next_elt;
-               dispose_elt(list_ptr);
+               hypre_dispose_elt(list_ptr);
                
                *LoL_head_ptr = LoL_head;
                *LoL_tail_ptr = LoL_tail;
@@ -132,17 +132,16 @@ remove_point(hypre_LinkList   *LoL_head_ptr,
       }
       list_ptr = list_ptr -> next_elt;
    } while (list_ptr != NULL);
-   
-   hypre_printf("No such list!\n");
-   return;
+   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"No such list!\n");
+   return ;
 }
 
 /*****************************************************************
  *
- * create_elt() : Create an element using Item for its data field
+ * hypre_create_elt() : Create an element using Item for its data field
  *
  *****************************************************************/
-hypre_LinkList create_elt( HYPRE_Int Item )
+hypre_LinkList hypre_create_elt( HYPRE_Int Item )
 {
     hypre_LinkList   new_elt_ptr;
  
@@ -152,7 +151,7 @@ hypre_LinkList create_elt( HYPRE_Int Item )
 
     if ( (new_elt_ptr = (hypre_LinkList) malloc (sizeof(hypre_ListElement))) == NULL)
     {
-       hypre_printf("\n create_elt: malloc failed \n\n");
+       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"\n create_elt: malloc failed \n\n");
     }
     else 
 
@@ -175,7 +174,7 @@ hypre_LinkList create_elt( HYPRE_Int Item )
  *
  ****************************************************************/
 void 
-enter_on_lists(hypre_LinkList   *LoL_head_ptr, 
+hypre_enter_on_lists(hypre_LinkList   *LoL_head_ptr, 
                hypre_LinkList   *LoL_tail_ptr, 
                HYPRE_Int                 measure,
                HYPRE_Int                 index, 
@@ -194,7 +193,7 @@ enter_on_lists(hypre_LinkList   *LoL_head_ptr,
 
    if (LoL_head == NULL)   /* no lists exist yet */
    {
-      new_ptr = create_elt(measure);
+      new_ptr = hypre_create_elt(measure);
       new_ptr->head = index;
       new_ptr->tail = index;
       lists[index] = LIST_TAIL;
@@ -212,7 +211,7 @@ enter_on_lists(hypre_LinkList   *LoL_head_ptr,
    {
       if (measure > list_ptr->data)
       {
-         new_ptr = create_elt(measure);
+         new_ptr = hypre_create_elt(measure);
          new_ptr->head = index;
          new_ptr->tail = index;
          lists[index] = LIST_TAIL;
@@ -250,7 +249,7 @@ enter_on_lists(hypre_LinkList   *LoL_head_ptr,
       list_ptr = list_ptr->next_elt;
    } while (list_ptr != NULL);
 
-   new_ptr = create_elt(measure);   
+   new_ptr = hypre_create_elt(measure);   
    new_ptr->head = index;
    new_ptr->tail = index;
    lists[index] = LIST_TAIL;

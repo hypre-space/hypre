@@ -263,7 +263,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
       for (j=i_node_dof[i]; j < i_node_dof[i+1]; j++)
 	for (k=i_dof_dof[j_node_dof[j]]; k < i_dof_dof[j_node_dof[j]+1]; k++)
 	  if (i_global_to_local[j_dof_dof[k]] < 0)
-	    hypre_printf("WRONG local indexing: ====================== \n");
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WRONG local indexing: ====================== \n");
 
 
       int_dof_counter = 0;
@@ -299,7 +299,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 
 
 	  /* get block for Schwarz smoother: ============================= */
-	  /* ierr = matinv(XE, AE, local_dof_counter); */
+	  /* ierr = hypre_matinv(XE, AE, local_dof_counter); */
 	  /* hypre_printf("ierr_AE_inv: %d\n", ierr); */
 #ifdef HYPRE_USING_ESSL
  	cnt = local_dof_counter;
@@ -307,11 +307,11 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 	   for (i_loc=j_loc; i_loc < local_dof_counter; i_loc++)
 	      AE[cnt++] = AE[i_loc + j_loc * local_dof_counter];
 	ierr = dppf(AE, local_dof_counter, 1);
- 	if (ierr == 1) hypre_printf ("Error! Matrix not SPD\n");
+ 	if (ierr == 1) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error! Matrix not SPD\n");
 #else  
 	hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(&uplo, &local_dof_counter, AE,
 		&local_dof_counter, &ierr); 
- 	if (ierr) hypre_printf ("Error! Matrix not SPD\n");
+ 	if (ierr == 1) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error! Matrix not SPD\n");
 #endif  
 
 	for (i_loc=0; i_loc < local_dof_counter; i_loc++)
@@ -344,7 +344,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 		}
 	    }
 
-	  /* ierr = matinv(XE, AE, int_dof_counter); */
+	  /* ierr = hypre_matinv(XE, AE, int_dof_counter); */
 #ifdef HYPRE_USING_ESSL
  	cnt = local_dof_counter;
         for (j_loc=1; j_loc < local_dof_counter; j_loc++)
@@ -357,7 +357,7 @@ hypre_AMGNodalSchwarzSmoother( hypre_CSRMatrix    *A,
 /*	dpotrf_(&uplo, &local_dof_counter, AE, &local_dof_counter, &ierr);*/
 #endif 
 
-      if (ierr) hypre_printf (" error in dpotrf !!!\n");
+      if (ierr) hypre_error_w_msg(HYPRE_ERROR_GENERIC," error in dpotrf !!!\n");
 
 	  for (i_loc=0; i_loc < int_dof_counter; i_loc++)
 	    {
@@ -1680,8 +1680,7 @@ matrix_matrix_product(    HYPRE_Int **i_element_edge_pointer,
 		  if (element_edge_counter >= 
 		      i_element_edge[num_elements])
 		    {
-		      hypre_printf("error in j_element_edge size: %d \n",
-			     element_edge_counter);
+                      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"error in j_element_edge size: \n");
 		      break;
 		    }
 
@@ -1718,7 +1717,7 @@ matrix_matrix_product(    HYPRE_Int **i_element_edge_pointer,
   *i_element_edge_pointer = i_element_edge;
   *j_element_edge_pointer = j_element_edge;
 
-  return 0;
+  return hypre_error_flag;
 
 }
 
@@ -2297,7 +2296,7 @@ HYPRE_Int hypre_AMGeAgglomerate(HYPRE_Int *i_AE_element, HYPRE_Int *j_AE_element
 	weight_max = i_face_weight[last];
 
 
-      ierr = remove_entry(weight, &weight_max, 
+      ierr = hypre_remove_entry(weight, &weight_max, 
 			  previous, next, first, &last,
 			  head, tail, 
 			  k);
@@ -2312,7 +2311,7 @@ HYPRE_Int hypre_AMGeAgglomerate(HYPRE_Int *i_AE_element, HYPRE_Int *j_AE_element
 
   if (face_max_weight == -1)
     {
-      hypre_printf("all faces are unacceptable, i.e., no faces to eliminate !\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"all faces are unacceptable, i.e., no faces to eliminate !\n");
 
       *num_AEs_pointer = 1;
 
@@ -2357,7 +2356,7 @@ eliminate_face:
     weight_max = i_face_weight[last];
 
 		   
-  ierr = remove_entry(max_weight, &weight_max, 
+  ierr = hypre_remove_entry(max_weight, &weight_max, 
 		      previous, next, first, &last,
 		      head, tail, 
 		      face_to_eliminate);
@@ -2403,7 +2402,7 @@ eliminate_face:
 	else
 	  weight_max = i_face_weight[last];
 
-	ierr = move_entry(weight, &weight_max, 
+	ierr = hypre_move_entry(weight, &weight_max, 
 			  previous, next, first, &last,
 			  head, tail, 
 			  j_face_face[j]);
@@ -2420,7 +2419,7 @@ eliminate_face:
 	else
 	  weight_max = i_face_weight[last];
 
-	ierr = update_entry(weight, &weight_max, 
+	ierr = hypre_update_entry(weight, &weight_max, 
 			    previous, next, first, &last,
 			    head, tail, 
 			    j_face_face[j]);
@@ -2494,7 +2493,7 @@ eliminate_face:
 		weight_max = i_face_weight[last];
 
 
-	      ierr = remove_entry(weight, &weight_max, 
+	      ierr = hypre_remove_entry(weight, &weight_max, 
 				  previous, next, first, &last,
 				  head, tail, 
 				  j_element_face[j]);
@@ -2572,7 +2571,7 @@ eliminate_face:
 	weight_max = i_face_weight[last];
 
 
-      ierr = remove_entry(weight, &weight_max, 
+      ierr = hypre_remove_entry(weight, &weight_max, 
 			  previous, next, first, &last,
 			  head, tail, 
 			  k);
@@ -2680,7 +2679,7 @@ end_agglomerate:
   return ierr;
 }
 
-HYPRE_Int update_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+HYPRE_Int hypre_update_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
 		 HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
 		 HYPRE_Int head, HYPRE_Int tail, 
 		 HYPRE_Int i)
@@ -2736,7 +2735,7 @@ HYPRE_Int update_entry(HYPRE_Int weight, HYPRE_Int *weight_max,
     
 }
 
-HYPRE_Int remove_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+HYPRE_Int hypre_remove_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
 		 HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
 		 HYPRE_Int head, HYPRE_Int tail, 
 		 HYPRE_Int i)
@@ -2766,7 +2765,7 @@ HYPRE_Int remove_entry(HYPRE_Int weight, HYPRE_Int *weight_max,
 
 }
 
-HYPRE_Int move_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
+HYPRE_Int hypre_move_entry(HYPRE_Int weight, HYPRE_Int *weight_max, 
 	       HYPRE_Int *previous, HYPRE_Int *next, HYPRE_Int *first, HYPRE_Int *last,
 	       HYPRE_Int head, HYPRE_Int tail, 
 	       HYPRE_Int i)
@@ -2789,10 +2788,10 @@ HYPRE_Int move_entry(HYPRE_Int weight, HYPRE_Int *weight_max,
 
 
 /*---------------------------------------------------------------------
- matinv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
+ hypre_matinv:  X <--  A**(-1) ;  A IS POSITIVE DEFINITE (non--symmetric);
  ---------------------------------------------------------------------*/
       
-HYPRE_Int matinv(HYPRE_Real *x, HYPRE_Real *a, HYPRE_Int k)
+HYPRE_Int hypre_matinv(HYPRE_Real *x, HYPRE_Real *a, HYPRE_Int k)
 {
   HYPRE_Int i,j,l, ierr =0;
 

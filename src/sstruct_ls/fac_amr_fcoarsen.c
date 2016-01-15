@@ -2488,7 +2488,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          /*-----------------------------------------------------------------
           *  qsort the ranks into ascending order
           *-----------------------------------------------------------------*/
-         qsort0(stencil_ranks, 0, stencil_size-1);
+         hypre_qsort0(stencil_ranks, 0, stencil_size-1);
 
          crse_smatrix= hypre_SStructPMatrixSMatrix(A_crse, var1, var1);
          cgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_crse), var1);
@@ -2941,7 +2941,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      temp1[j]= j;
                   }
 
-                  qsort1(interface_stencil_ranks[i], (HYPRE_Real *) temp1, 0,
+                  hypre_qsort1(interface_stencil_ranks[i], (HYPRE_Real *) temp1, 0,
                          coarse_stencil_cnt[i]-1);
 
                   /*---------------------------------------------------------------

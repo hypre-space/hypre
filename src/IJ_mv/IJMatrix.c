@@ -43,16 +43,19 @@ hypre_IJMatrixGetRowPartitioning( HYPRE_IJMatrix matrix ,
 
    if (!ijmatrix)
    {
-      hypre_printf("Variable ijmatrix is NULL -- hypre_IJMatrixGetRowPartitioning\n");
-      exit(1);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Variable ijmatrix is NULL -- hypre_IJMatrixGetRowPartitioning\n");
+      return hypre_error_flag;
    }
 
    if ( hypre_IJMatrixRowPartitioning(ijmatrix))
       *row_partitioning = hypre_IJMatrixRowPartitioning(ijmatrix);
    else
-      return -1;
+   {
+      hypre_error(HYPRE_ERROR_GENERIC);
+      return hypre_error_flag;
+   }
 
-   return -99;
+   return hypre_error_flag;
 }
 /*--------------------------------------------------------------------------
  * hypre_IJMatrixGetColPartitioning
@@ -74,16 +77,19 @@ hypre_IJMatrixGetColPartitioning( HYPRE_IJMatrix matrix ,
 
    if (!ijmatrix)
    {
-      hypre_printf("Variable ijmatrix is NULL -- hypre_IJMatrixGetColPartitioning\n");
-      exit(1);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Variable ijmatrix is NULL -- hypre_IJMatrixGetColPartitioning\n");
+      return hypre_error_flag;
    }
 
    if ( hypre_IJMatrixColPartitioning(ijmatrix))
       *col_partitioning = hypre_IJMatrixColPartitioning(ijmatrix);
    else
-      return -1;
+   {
+      hypre_error(HYPRE_ERROR_GENERIC);
+      return hypre_error_flag;
+   }
 
-   return -99;
+   return hypre_error_flag;
 }
 /*--------------------------------------------------------------------------
  * hypre_IJMatrixSetObject
@@ -97,12 +103,13 @@ hypre_IJMatrixSetObject( HYPRE_IJMatrix  matrix,
 
    if (hypre_IJMatrixObject(ijmatrix) != NULL)
    {
-      hypre_printf("Referencing a new IJMatrix object can orphan an old -- ");
-      hypre_printf("hypre_IJMatrixSetObject\n");
-      exit(1);
+      /*hypre_printf("Referencing a new IJMatrix object can orphan an old -- ");
+      hypre_printf("hypre_IJMatrixSetObject\n");*/
+      hypre_error(HYPRE_ERROR_GENERIC);
+      return hypre_error_flag;
    }
 
    hypre_IJMatrixObject(ijmatrix) = object;
 
-   return 0;
+   return hypre_error_flag;
 }

@@ -25,8 +25,8 @@
 #include "parcsr_ls/_hypre_parcsr_ls.h"
 #include "seq_mv/seq_mv.h"
 
-extern void qsort0(int*, int, int);
-extern void qsort1(int*, double*, int, int);
+extern void hypre_qsort0(int*, int, int);
+extern void hypre_qsort1(int*, double*, int, int);
 
 #define habs(x) ((x) > 0.0 ? x : -(x))
 
@@ -215,7 +215,7 @@ int HYPRE_LSI_GetParCSRMatrix(HYPRE_IJMatrix Amat, int nrows, int nnz,
           colInd2[j] = colInd[j];
           colVal2[j] = colVal[j];
        }
-       qsort1(colInd2, colVal2, 0, rowSize-1);
+       hypre_qsort1(colInd2, colVal2, 0, rowSize-1);
        for ( j = 0; j < rowSize-1; j++ )
           if ( colInd2[j] == colInd2[j+1] )
              printf("HYPRE_LSI_GetParCSRMatrix-duplicate colind at row %d \n",i);

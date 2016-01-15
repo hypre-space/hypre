@@ -264,11 +264,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
            Ztemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ztemp));
            Ptemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Ptemp));
            hypre_ParVectorSetConstantValues(Ztemp,0);
-           hypre_ParVectorCopy(F_array[level],Rtemp);
            alpha = -1.0;
            beta = 1.0;
-           hypre_ParCSRMatrixMatvec(alpha, A_array[level], 
-                                U_array[level], beta, Rtemp);
+           hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[level], 
+                                U_array[level], beta, F_array[level], Rtemp);
 	   cg_num_sweep = hypre_ParAMGDataSmoothNumSweeps(amg_data);
            num_sweep = num_grid_sweeps[cycle_param];
            Aux_U = Ztemp;
@@ -358,11 +357,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 			smooth_type == 17 || smooth_type == 18))
               {
                  hypre_VectorSize(hypre_ParVectorLocalVector(Utemp)) = local_size;
-                 hypre_ParVectorCopy(Aux_F,Vtemp);
                  alpha = -1.0;
                  beta = 1.0;
-                 hypre_ParCSRMatrixMatvec(alpha, A_array[level], 
-                                U_array[level], beta, Vtemp);
+                 hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[level], 
+                                U_array[level], beta, Aux_F, Vtemp);
                  if (smooth_type == 8 || smooth_type == 18)
                     HYPRE_ParCSRParaSailsSolve(smoother[level],
                                  (HYPRE_ParCSRMatrix) A_array[level],
@@ -566,19 +564,20 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
          hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0); 
           
-         hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
          alpha = -1.0;
          beta = 1.0;
 
          if (block_mode)
          {
+            hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
             hypre_ParCSRBlockMatrixMatvec(alpha, A_block_array[fine_grid], U_array[fine_grid],
                                           beta, Vtemp);
          }
          else 
          {
-            hypre_ParCSRMatrixMatvec(alpha, A_array[fine_grid], U_array[fine_grid],
-                                     beta, Vtemp);
+            // JSP: avoid unnecessary copy using out-of-place version of SpMV
+            hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[fine_grid], U_array[fine_grid],
+                                               beta, F_array[fine_grid], Vtemp);
          }
 
          alpha = 1.0;

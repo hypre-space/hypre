@@ -57,7 +57,7 @@
 #include "../../parcsr_mv/_hypre_parcsr_mv.h" 
 /* #include "../../parcsr_mv/par_vector.h" */
 
-extern void qsort0(int *, int, int);
+extern void hypre_qsort0(int *, int, int);
 
 #include "HYPRE_MHMatrix.h"
 
@@ -1067,7 +1067,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        }
        HYPRE_ParCSRMatrixRestoreRow(A, i, &rowLeng, &colInd, &colVal);
     }
-    if ( externLeng > 1 ) qsort0( externList, 0, externLeng-1 );
+    if ( externLeng > 1 ) hypre_qsort0( externList, 0, externLeng-1 );
     ncnt = 0;
     for ( i = 1; i < externLeng; i++ )
     {

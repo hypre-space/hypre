@@ -736,7 +736,7 @@ hypre_BoomerAMGFitVectors(HYPRE_Int ip, HYPRE_Int n, HYPRE_Int num, const HYPRE_
       b, &temp, work, &work_size, &info);
 
    if (info != 0)
-      hypre_printf("par_gsmg: dgels returned %d\n", info);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"par_gsmg: dgels returned %d\n");
 
    /* copy solution into output vector */
    for (j=0; j<nc; j++)
@@ -1249,7 +1249,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
       for (i=0; i < P_offd_size; i++)
 	 P_marker[i] = P_offd_j[i];
 
-      qsort0(P_marker, 0, P_offd_size-1);
+      hypre_qsort0(P_marker, 0, P_offd_size-1);
 
       num_cols_P_offd = 1;
       index = P_marker[0];
@@ -2108,7 +2108,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
       for (i=0; i < P_offd_size; i++)
 	 P_marker[i] = P_offd_j[i];
 
-      qsort0(P_marker, 0, P_offd_size-1);
+      hypre_qsort0(P_marker, 0, P_offd_size-1);
 
       num_cols_P_offd = 1;
       index = P_marker[0];

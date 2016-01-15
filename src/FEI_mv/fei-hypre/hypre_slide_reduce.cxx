@@ -44,8 +44,8 @@ extern "C"
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix**);
-   void qsort0(int *, int, int);
-   void qsort1(int *, double *, int, int);
+   void hypre_qsort0(int *, int, int);
+   void hypre_qsort1(int *, double *, int, int);
    int  HYPRE_LSI_Search(int*, int, int);
 }
 
@@ -464,7 +464,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartA(int *ProcNRows,
 
     dble_array = new double[nSelected];
     for ( i = 0; i < nSelected; i++ ) dble_array[i] = (double) i; 
-    if ( nSelected > 1 ) qsort1(selectedList, dble_array, 0, nSelected-1);
+    if ( nSelected > 1 ) hypre_qsort1(selectedList, dble_array, 0, nSelected-1);
     for (i = 1; i < nSelected; i++) 
     {
        if ( selectedList[i] == selectedList[i-1] )
@@ -1073,7 +1073,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartB(int *ProcNRows,
 
     hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) A21_csr,
                                      (hypre_ParCSRMatrix *) invA22_csr,
-                                     (hypre_ParCSRMatrix *) A21_csr,
+                                     (hypre_ParCSRMatrix *) A21_csr, 
                                      (hypre_ParCSRMatrix **) &RAP_csr);
 
     if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )
@@ -1186,7 +1186,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartC(int *ProcNRows,
           newColInd = new int[newRowSize];
           for (j = 0; j < rowSize; j++)  newColInd[j] = colInd[j]; 
           for (j = 0; j < rowSize2; j++) newColInd[rowSize+j] = colInd2[j];
-          qsort0(newColInd, 0, newRowSize-1);
+          hypre_qsort0(newColInd, 0, newRowSize-1);
           ncnt = 0;
           for ( j = 1; j < newRowSize; j++ ) 
           {
@@ -1265,7 +1265,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartC(int *ProcNRows,
              newColVal[ncnt+j] = - colVal2[j]; 
           }
           newRowSize = ncnt + rowSize2;
-          qsort1(newColInd, newColVal, 0, newRowSize-1);
+          hypre_qsort1(newColInd, newColVal, 0, newRowSize-1);
           ncnt = 0;
           for ( j = 0; j < newRowSize; j++ ) 
           {
@@ -1318,7 +1318,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartC(int *ProcNRows,
                 printf("%d : reducedA ROW %d\n", mypid_, i);
                 ierr = HYPRE_ParCSRMatrixGetRow(reducedA_csr,i,&rowSize,
                                                 &colInd, &colVal);
-                //qsort1(colInd, colVal, 0, rowSize-1);
+                //hypre_qsort1(colInd, colVal, 0, rowSize-1);
                 for ( j = 0; j < rowSize; j++ )
                    if ( colVal[j] != 0.0 )
                       printf("%4d %4d %20.13e\n", i, colInd[j], colVal[j]);
@@ -1590,7 +1590,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystemPartC(int *ProcNRows,
              {
                 printf("%d : A12 ROW %d\n", mypid_, i);
                 HYPRE_ParCSRMatrixGetRow(A12_csr,i,&rowSize,&colInd,&colVal);
-                //qsort1(colInd, colVal, 0, rowSize-1);
+                //hypre_qsort1(colInd, colVal, 0, rowSize-1);
                 for ( j = 0; j < rowSize; j++ )
                    if ( colVal[j] != 0.0 )
                       printf(" A12 %d %d %20.13e\n", i, colInd[j], colVal[j]);
@@ -2392,7 +2392,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
 
     hypre_BoomerAMGBuildCoarseOperator( (hypre_ParCSRMatrix *) A21_csr,
                                      (hypre_ParCSRMatrix *) invA22_csr,
-                                     (hypre_ParCSRMatrix *) A21_csr,
+                                     (hypre_ParCSRMatrix *) A21_csr, 
                                      (hypre_ParCSRMatrix **) &RAP_csr);
 
     if ( HYOutputLevel_ & HYFEI_SLIDEREDUCE1 )
@@ -2458,7 +2458,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
           newColInd = new int[newRowSize];
           for (j = 0; j < rowSize; j++)  newColInd[j] = colInd[j]; 
           for (j = 0; j < rowSize2; j++) newColInd[rowSize+j] = colInd2[j];
-          qsort0(newColInd, 0, newRowSize-1);
+          hypre_qsort0(newColInd, 0, newRowSize-1);
           ncnt = 0;
           for ( j = 0; j < newRowSize; j++ ) 
           {
@@ -2544,7 +2544,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
              newColVal[ncnt+j] = - colVal2[j]; 
           }
           newRowSize = ncnt + rowSize2;
-          qsort1(newColInd, newColVal, 0, newRowSize-1);
+          hypre_qsort1(newColInd, newColVal, 0, newRowSize-1);
           ncnt = 0;
           for ( j = 0; j < newRowSize; j++ ) 
           {
@@ -2612,7 +2612,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
                 printf("%d : reducedA ROW %d\n", mypid_, i);
                 ierr = HYPRE_ParCSRMatrixGetRow(reducedA_csr,i,&rowSize,
                                                 &colInd,&colVal);
-                //qsort1(colInd, colVal, 0, rowSize-1);
+                //hypre_qsort1(colInd, colVal, 0, rowSize-1);
                 for ( j = 0; j < rowSize; j++ )
                    if ( colVal[j] != 0.0 )
                       printf("%4d %4d %20.13e\n", i+1, colInd[j]+1, colVal[j]);
@@ -2918,7 +2918,7 @@ void HYPRE_LinSysCore::buildSlideReducedSystem2()
              {
                 printf("%d : A12 ROW %d\n", mypid_, i+1);
                 HYPRE_ParCSRMatrixGetRow(A12_csr,i,&rowSize,&colInd,&colVal);
-                //qsort1(colInd, colVal, 0, rowSize-1);
+                //hypre_qsort1(colInd, colVal, 0, rowSize-1);
                 for ( j = 0; j < rowSize; j++ )
                    if ( colVal[j] != 0.0 )
                       printf(" A12 %d %d %20.13e\n",i+1,colInd[j]+1,colVal[j]);

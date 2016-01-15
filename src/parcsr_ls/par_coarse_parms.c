@@ -69,6 +69,10 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
                       	   HYPRE_Int    **coarse_dof_func_ptr, 
                       	   HYPRE_Int    **coarse_pnts_global_ptr) 
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_COARSE_PARAMS] -= hypre_MPI_Wtime();
+#endif
+
    HYPRE_Int            i;
    HYPRE_Int            ierr = 0;
    HYPRE_Int		  num_procs;
@@ -128,6 +132,10 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
 
 
    *coarse_pnts_global_ptr = coarse_pnts_global;
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_COARSE_PARAMS] += hypre_MPI_Wtime();
+#endif
 
    return (ierr);
 }

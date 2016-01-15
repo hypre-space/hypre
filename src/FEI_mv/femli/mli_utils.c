@@ -39,8 +39,8 @@ extern
 #endif
 int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,hypre_ParCSRMatrix*,
                                     hypre_ParCSRMatrix *,hypre_ParCSRMatrix **);
-void qsort0(int *, int, int);
-void qsort1(int *, double *, int, int);
+void hypre_qsort0(int *, int, int);
+void hypre_qsort1(int *, double *, int, int);
 int  MLI_Utils_IntTreeUpdate(int treeLeng, int *tree,int *treeInd);
 
 #ifdef __cplusplus
@@ -862,7 +862,7 @@ int MLI_Utils_HypreMatrixCompress(void *Amat, int blksize, void **Amat2)
       }
       if ( newSize > 0 )
       {
-         qsort1(newInd, newVal, 0, newSize-1);
+         hypre_qsort1(newInd, newVal, 0, newSize-1);
          if ( blksize > 0 )
          {
             k = 0;
@@ -1020,7 +1020,7 @@ int MLI_Utils_HypreBoolMatrixDecompress(void *Smat, int blkSize,
       hypre_ParCSRMatrixGetRow(hypreS,sRowNum,&sRowSize,&colInd,NULL);
       for ( k = 0; k < sRowSize; k++ ) sInd[k] = colInd[k];
       hypre_ParCSRMatrixRestoreRow(hypreS,sRowNum,&sRowSize,&colInd,NULL);
-      qsort0(sInd, 0, sRowSize-1);
+      hypre_qsort0(sInd, 0, sRowSize-1);
       for ( j = 0; j < blkSize; j++)
       {
          rowNum = startRow + irow * blkSize + j;

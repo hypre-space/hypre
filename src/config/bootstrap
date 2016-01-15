@@ -27,7 +27,7 @@ rm configure.in
 cat >> configure <<EOF
 
 mv HYPRE_config.h HYPRE_config.h.tmp
-sed 's/F77_FUNC/HYPRE_F77_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
+sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
 
 EOF

@@ -115,8 +115,8 @@ extern "C" {
    int   HYPRE_LSI_AMGeWriteToFile();
 #endif
 
-   void  qsort0(int *, int, int);
-   void  qsort1(int *, double *, int, int);
+   void  hypre_qsort0(int *, int, int);
+   void  hypre_qsort1(int *, double *, int, int);
 }
 
 #define habs(x)  ( ( (x) > 0 ) ? x : -(x))
@@ -1099,7 +1099,7 @@ int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
       searchFlag = 0;
       for ( j = 1; j < rowLeng; j++ )
          if ( indPtr[j] < indPtr[j-1]) {searchFlag = 1; break;}
-      if ( searchFlag ) qsort0( indPtr, 0, rowLeng-1);
+      if ( searchFlag ) hypre_qsort0( indPtr, 0, rowLeng-1);
       maxSize = ( rowLeng > maxSize ) ? rowLeng : maxSize;
       minSize = ( rowLeng < minSize ) ? rowLeng : minSize;
       if ( rowLeng > 0 ) 
@@ -1852,7 +1852,7 @@ int HYPRE_LinSysCore::putIntoSystemMatrix(int numPtRows, const int* ptRows,
             else tempVal[index] = values[i][j];
          }
          newLeng  = rowLengths_[localRow];
-         qsort1( tempInd, tempVal, 0, newLeng-1 );
+         hypre_qsort1( tempInd, tempVal, 0, newLeng-1 );
       }
       else
       {
@@ -1868,7 +1868,7 @@ int HYPRE_LinSysCore::putIntoSystemMatrix(int numPtRows, const int* ptRows,
          for ( j = 1; j < numPtCols; j++ ) 
             if ( tempInd[j] < tempInd[j-1] ) sortFlag = 1;
          rowLengths_[localRow] = numPtCols;
-         if ( sortFlag == 1 ) qsort1( tempInd, tempVal, 0, numPtCols-1 );
+         if ( sortFlag == 1 ) hypre_qsort1( tempInd, tempVal, 0, numPtCols-1 );
       }
    }
 

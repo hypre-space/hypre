@@ -55,6 +55,12 @@
 /* Define to be the max dimension size (must be at least 3) */
 #undef HYPRE_MAXDIM
 
+/* Define to 1 if using persistent communication */
+#undef HYPRE_USING_PERSISTENT_COMM
+
+/* Define to 1 if hopscotch hashing */
+#undef HYPRE_HOPSCOTCH
+
 /* Define to 1 if an MPI library is found */
 #undef HYPRE_HAVE_MPI
 
@@ -104,7 +110,7 @@
 
 /* Define to a macro mangling the given C identifier (in lower and upper
  * case), which must not contain underscores, for linking with Fortran. */
-#undef F77_FUNC
+#undef FC_FUNC
 
-/* As F77_FUNC, but for C identifiers containing underscores. */
-#undef F77_FUNC_
+/* As HYPRE_FC_FUNC, but for C identifiers containing underscores. */
+#undef FC_FUNC_

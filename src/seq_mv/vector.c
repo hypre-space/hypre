@@ -88,7 +88,7 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
    HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
 
    if ( ! hypre_VectorData(vector) )
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size);
+      hypre_VectorData(vector) = hypre_TAlloc(HYPRE_Complex, num_vectors*size);
 
    if ( multivec_storage_method == 0 )
    {
@@ -246,6 +246,10 @@ HYPRE_Int
 hypre_SeqVectorSetConstantValues( hypre_Vector *v,
                                   HYPRE_Complex value )
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
+#endif
+
    HYPRE_Complex *vector_data = hypre_VectorData(v);
    HYPRE_Int      size        = hypre_VectorSize(v);
            
@@ -260,6 +264,10 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #endif
    for (i = 0; i < size; i++)
       vector_data[i] = value;
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+#endif
 
    return ierr;
 }
@@ -302,6 +310,10 @@ HYPRE_Int
 hypre_SeqVectorCopy( hypre_Vector *x,
                      hypre_Vector *y )
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
+#endif
+
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
@@ -318,6 +330,10 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 #endif
    for (i = 0; i < size; i++)
       y_data[i] = x_data[i];
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+#endif
 
    return ierr;
 }
@@ -375,6 +391,10 @@ HYPRE_Int
 hypre_SeqVectorScale( HYPRE_Complex alpha,
                       hypre_Vector *y     )
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
+#endif
+
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(y);
            
@@ -390,6 +410,10 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
    for (i = 0; i < size; i++)
       y_data[i] *= alpha;
 
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+#endif
+
    return ierr;
 }
 
@@ -402,6 +426,10 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
                      hypre_Vector *x,
                      hypre_Vector *y     )
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
+#endif
+
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
@@ -418,6 +446,10 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    for (i = 0; i < size; i++)
       y_data[i] += alpha * x_data[i];
 
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+#endif
+
    return ierr;
 }
 
@@ -428,6 +460,10 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
                                        hypre_Vector *y )
 {
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
+#endif
+
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
@@ -443,6 +479,10 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
 #endif
    for (i = 0; i < size; i++)
       result += hypre_conj(y_data[i]) * x_data[i];
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+#endif
 
    return result;
 }

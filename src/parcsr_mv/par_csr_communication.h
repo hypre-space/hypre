@@ -21,6 +21,30 @@
  *   Structure containing information for doing communications
  *--------------------------------------------------------------------------*/
 
+#define HYPRE_USING_PERSISTENT_COMM // JSP: can be defined by configure
+#ifdef HYPRE_USING_PERSISTENT_COMM
+typedef enum CommPkgJobType
+{
+   HYPRE_COMM_PKG_JOB_COMPLEX = 0,
+   HYPRE_COMM_PKG_JOB_COMPLEX_TRANSPOSE,
+   HYPRE_COMM_PKG_JOB_INT,
+   HYPRE_COMM_PKG_JOB_INT_TRANSPOSE,
+   NUM_OF_COMM_PKG_JOB_TYPE,
+} CommPkgJobType;
+
+typedef struct
+{
+   void     *send_data;
+   void     *recv_data;
+
+   HYPRE_Int             num_requests;
+   hypre_MPI_Request    *requests;
+
+   int own_send_data, own_recv_data;
+
+} hypre_ParCSRPersistentCommHandle;
+#endif
+
 typedef struct
 {
    MPI_Comm               comm;
@@ -38,6 +62,9 @@ typedef struct
    hypre_MPI_Datatype          *send_mpi_types;
    hypre_MPI_Datatype          *recv_mpi_types;
 
+#ifdef HYPRE_USING_PERSISTENT_COMM
+   hypre_ParCSRPersistentCommHandle *persistent_comm_handles[NUM_OF_COMM_PKG_JOB_TYPE];
+#endif
 } hypre_ParCSRCommPkg;
 
 /*--------------------------------------------------------------------------

@@ -112,7 +112,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       rest, tms, indx;
    HYPRE_Real    size;
    HYPRE_Int       not_finished_coarsening = 1;
-   HYPRE_Int       Setup_err_flag = 0;
    HYPRE_Int       coarse_threshold = hypre_ParAMGDataMaxCoarseSize(amg_data);
    HYPRE_Int       min_coarse_size = hypre_ParAMGDataMinCoarseSize(amg_data);
    HYPRE_Int       seq_threshold = hypre_ParAMGDataSeqThreshold(amg_data);
@@ -180,6 +179,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int mult_addlvl = hypre_max(mult_additive, simple);
    HYPRE_Int addlvl = hypre_max(mult_addlvl, additive);
    HYPRE_Int rap2 = hypre_ParAMGDataRAP2(amg_data);
+   HYPRE_Int keepTranspose = hypre_ParAMGDataKeepTranspose(amg_data);
 
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
 
@@ -228,7 +228,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParAMGDataNumVariables(amg_data) = hypre_ParCSRMatrixNumRows(A);
 
    if (num_procs == 1) seq_threshold = 0;
-   if (setup_type == 0) return Setup_err_flag;
+   if (setup_type == 0) return hypre_error_flag;
 
    S = NULL;
 
@@ -266,7 +266,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       nodal = 1;
       if (my_id == 0)
-         hypre_printf("WARNING: Changing to node-based coarsening because LN of GM interpolation has been specified via HYPRE_BoomerAMGSetInterpVecVariant.\n");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: Changing to node-based coarsening because LN of GM interpolation has been specified via HYPRE_BoomerAMGSetInterpVecVariant.\n");
    }
 
    /* Verify that settings are correct for solving systmes */
@@ -2052,8 +2052,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          else 
          {
             /* Compute standard Galerkin coarse-grid product */
-            hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
-                                        P_array[level], &A_H);
+            hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], A_array[level] , 
+                                        P_array[level], keepTranspose, &A_H);
          }
 
       }
@@ -2281,7 +2281,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
         if (relax_weight[j] != 0.0)
            relax_weight[j] = 4.0/3.0/relax_weight[j];
         else
-           hypre_printf (" Warning ! Matrix norm is zero !!!");
+           hypre_error_w_msg(HYPRE_ERROR_GENERIC," Warning ! Matrix norm is zero !!!");
      }
      if ((smooth_type == 6 || smooth_type == 16) && smooth_num_levels > j)
      {
@@ -2561,5 +2561,5 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 }
 #endif
 
-   return(Setup_err_flag);
+   return(hypre_error_flag);
 }  

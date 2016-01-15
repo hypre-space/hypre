@@ -133,7 +133,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
       }
       hypre_ParCSRMatrixRestoreRow (ELEM_DOF, k, &num_DOF, &DOF0, &boolean_data);
 
-      qsort0(DOF,0,num_DOF-1);
+      hypre_qsort0(DOF,0,num_DOF-1);
 
       /* Find the fine dofs interior for the current coarse element */
       hypre_ParCSRMatrixGetRow (ELEM_idof, k, &num_idof, &idof0, &boolean_data);
@@ -145,7 +145,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
       hypre_ParCSRMatrixRestoreRow (ELEM_idof, k, &num_idof, &idof0, &boolean_data);
 
       /* Sort the interior dofs according to their global number */
-      qsort0(idof,0,num_idof-1);
+      hypre_qsort0(idof,0,num_idof-1);
 
       /* Find the fine dofs on the boundary of the current coarse element */
       if (three_dimensional_problem)
@@ -176,7 +176,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
          memcpy(bdof, col_ind1, size1*sizeof(HYPRE_Int));
       memcpy(bdof+size1, col_ind2, size2*sizeof(HYPRE_Int));
 
-      qsort0(bdof,0,num_bdof-1);
+      hypre_qsort0(bdof,0,num_bdof-1);
 
       /* A = extract_rows(Aee, idof) */
       A = hypre_CSRMatrixCreate (num_idof, num_idof + num_bdof,

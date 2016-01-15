@@ -1407,7 +1407,7 @@ int MLI_Method_AMGSA::formLocalGraph( hypre_ParCSRMatrix *Amat,
          partition = new int[AdiagNRows/currNodeDofs_];
          for ( i = 0; i < AdiagNRows; i+=currNodeDofs_ )
             partition[i/currNodeDofs_] = saLabels_[currLevel_][i];
-         qsort0(partition, 0, AdiagNRows/currNodeDofs_-1);
+         hypre_qsort0(partition, 0, AdiagNRows/currNodeDofs_-1);
          jj = 1;
          for ( i = 1; i < AdiagNRows/currNodeDofs_; i++ )
             if (partition[i] != partition[i-1]) jj++;

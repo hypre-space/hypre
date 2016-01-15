@@ -73,7 +73,7 @@ dnl *  try to find libg2c.a
 dnl **********************************************************************
 AC_DEFUN([AC_HYPRE_FIND_G2C],
 [
-dnl AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
+dnl AC_REQUIRE([AC_FC_LIBRARY_LDFLAGS])
 
   hypre_save_LIBS="$LIBS"
   LIBS="$LIBS $FLIBS"
@@ -181,7 +181,7 @@ fi
 
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
-   case "${F77}" in
+   case "${FC}" in
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
@@ -301,7 +301,7 @@ fi
 
 if test "x${hypre_user_chose_fflags}" = "xno"
 then
-   case "${F77}" in
+   case "${FC}" in
       g77|gfortran|mpigfortran|mpif77)
         FFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
