@@ -52,9 +52,9 @@ Final Relative Residual Norm = 9.21374e-08
 Setup phase times:
 =============================================
 PCG Setup:
-  wall clock time = 107.230000 seconds
+  wall clock time = 14.180000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 107.220000 seconds
+  cpu clock time  = 11.470000 seconds
   cpu MFLOPS      = 0.000000
 
 <b,b>: 5.738541e-05
@@ -74,7 +74,7 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 Solve phase times:
 =============================================
 PCG Solve:
-  wall clock time = 0.040000 seconds
+  wall clock time = 0.050000 seconds
   wall MFLOPS     = 0.000000
   cpu clock time  = 0.050000 seconds
   cpu MFLOPS      = 0.000000
@@ -287,9 +287,9 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 Setup phase times:
 =============================================
 PCG Setup:
-  wall clock time = 134.550000 seconds
+  wall clock time = 13.770000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 134.530000 seconds
+  cpu clock time  = 11.950000 seconds
   cpu MFLOPS      = 0.000000
 
 <b,b>: 5.738541e-05
@@ -309,7 +309,7 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 Solve phase times:
 =============================================
 PCG Solve:
-  wall clock time = 0.040000 seconds
+  wall clock time = 0.050000 seconds
   wall MFLOPS     = 0.000000
   cpu clock time  = 0.050000 seconds
   cpu MFLOPS      = 0.000000
@@ -400,9 +400,9 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 ***************************************************
 *                Solver Statistics                *
 *-------------------------------------------------*
-** HYPRE preconditioner setup time = 1.597500e-02
-** HYPRE solution time             = 1.303411e-02
-** HYPRE total time                = 2.900910e-02
+** HYPRE preconditioner setup time = 1.693392e-02
+** HYPRE solution time             = 1.433206e-02
+** HYPRE total time                = 3.126597e-02
 ** HYPRE number of iterations      = 6
 ** HYPRE final residual norm       = 5.485626e-10
 ***************************************************
@@ -495,33 +495,33 @@ Residual   7.21174355949270e-09
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.090000 seconds
+  wall clock time = 0.100000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.090000 seconds
+  cpu clock time  = 0.100000 seconds
   cpu MFLOPS      = 0.000000
 
 # Output file: default.out.12
-<C*b,b>: 3.404268e+01
+<C*b,b>: 3.210115e+01
 
 
 Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 -----    ------------    ---------  ------------ 
-    1    1.351894e-01    0.023170    2.317025e-02
-    2    2.466933e-03    0.018248    4.228102e-04
-    3    2.304522e-05    0.009342    3.949744e-06
-    4    9.220930e-08    0.004001    1.580385e-08
+    1    2.267211e-01    0.040016    4.001582e-02
+    2    3.255341e-03    0.014358    5.745609e-04
+    3    6.649011e-05    0.020425    1.173537e-05
+    4    1.544291e-06    0.023226    2.725642e-07
 
 
 # Output file: default.out.12f
-<C*b,b>: 3.404268e+01
+<C*b,b>: 3.210115e+01
 
 
 Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 -----    ------------    ---------  ------------ 
-    1    1.351894e-01    0.023170    2.317025e-02
-    2    2.466933e-03    0.018248    4.228102e-04
-    3    2.304522e-05    0.009342    3.949744e-06
-    4    9.220930e-08    0.004001    1.580385e-08
+    1    2.267211e-01    0.040016    4.001582e-02
+    2    3.255341e-03    0.014358    5.745609e-04
+    3    6.649011e-05    0.020425    1.173537e-05
+    4    1.544291e-06    0.023226    2.725642e-07
 
 
 # Output file: default.out.13
@@ -583,9 +583,9 @@ Final Relative Residual Norm = 6.30776e-07
 SStruct phase times:
 =============================================
 SStruct Setup:
-  wall clock time = 0.220000 seconds
+  wall clock time = 0.250000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.210000 seconds
+  cpu clock time  = 0.240000 seconds
   cpu MFLOPS      = 0.000000
 
 Problem size: 26460
@@ -596,7 +596,7 @@ Setup phase times:
 AMS Setup:
   wall clock time = 0.090000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.100000 seconds
+  cpu clock time  = 0.110000 seconds
   cpu MFLOPS      = 0.000000
 
 <C*b,b>: 8.520115e-02
@@ -617,9 +617,9 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 Solve phase times:
 =============================================
 AMS Solve:
-  wall clock time = 0.140000 seconds
+  wall clock time = 0.150000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.140000 seconds
+  cpu clock time  = 0.150000 seconds
   cpu MFLOPS      = 0.000000
 
 

@@ -138,7 +138,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job,
             HYPRE_Int ip = hypre_ParCSRCommPkgRecvProc(comm_pkg, i);
             HYPRE_Int vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
             HYPRE_Int vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
-            hypre_MPI_Recv_init((HYPRE_Int *)recv_data + vec_start, vec_len, MPI_INT,
+            hypre_MPI_Recv_init((HYPRE_Int *)recv_data + vec_start, vec_len, HYPRE_MPI_INT,
                           ip, 0, comm, requests + i);
          }
          for (i = 0; i < num_sends; ++i)
@@ -147,7 +147,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job,
             HYPRE_Int vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
             HYPRE_Int vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start;
 
-            hypre_MPI_Send_init((HYPRE_Int *)send_data + vec_start, vec_len, MPI_INT,
+            hypre_MPI_Send_init((HYPRE_Int *)send_data + vec_start, vec_len, HYPRE_MPI_INT,
                           ip, 0, comm, requests + num_recvs + i);
          }
          break;
@@ -166,7 +166,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job,
             HYPRE_Int ip = hypre_ParCSRCommPkgSendProc(comm_pkg, i);
             HYPRE_Int vec_start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
             HYPRE_Int vec_len = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i + 1) - vec_start;
-            hypre_MPI_Recv_init((HYPRE_Int *)recv_data + vec_start, vec_len, MPI_INT,
+            hypre_MPI_Recv_init((HYPRE_Int *)recv_data + vec_start, vec_len, HYPRE_MPI_INT,
                           ip, 0, comm, requests + i);
          }
          for (i = 0; i < num_recvs; ++i)
@@ -175,7 +175,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job,
             HYPRE_Int vec_start = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i);
             HYPRE_Int vec_len = hypre_ParCSRCommPkgRecvVecStart(comm_pkg, i + 1) - vec_start;
 
-            hypre_MPI_Send_init((HYPRE_Int *)send_data + vec_start, vec_len, MPI_INT,
+            hypre_MPI_Send_init((HYPRE_Int *)send_data + vec_start, vec_len, HYPRE_MPI_INT,
                           ip, 0, comm, requests + num_sends + i);
          }
          break;
