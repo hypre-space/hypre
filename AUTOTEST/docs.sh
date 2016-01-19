@@ -11,9 +11,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 testname=`basename $0 .sh`
 
 # Echo usage information
@@ -36,7 +33,7 @@ EOF
 esac
 
 # Setup
-src_dir=$1
+src_dir=`cd $1; pwd`
 shift
 
 # Make sure Makefile.config is generated

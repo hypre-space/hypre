@@ -36,7 +36,8 @@ EOF
 esac
 
 # Set src_dir
-src_dir=$1; shift
+src_dir=`cd $1; pwd`
+shift
 
 # Parse the rest of the command line
 while [ "$*" ]

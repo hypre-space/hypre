@@ -34,7 +34,7 @@ EOF
 esac
 
 # Setup
-src_dir=$1
+src_dir=`cd $1; pwd`
 shift
 
 cd $src_dir

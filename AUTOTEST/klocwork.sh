@@ -36,7 +36,7 @@ esac
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
-src_dir=$1
+src_dir=`cd $1; pwd`
 shift
 
 # configure the code
