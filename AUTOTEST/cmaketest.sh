@@ -30,7 +30,7 @@ case $1 in
    This script uses cmake to configure and compile the source in {src_dir}, then
    optionally runs driver and example tests.
 
-   Example usage: $0 .. -co -DCMAKE_BUILD_TYPE=Debug -ro: -ij
+   Example usage: $0 ../src -co -DCMAKE_BUILD_TYPE=Debug -ro: -ij
 
 EOF
       exit
@@ -38,7 +38,8 @@ EOF
 esac
 
 # Set src_dir
-src_dir=$1; shift
+src_dir=`cd $1; pwd`
+shift
 
 # Parse the rest of the command line
 copts=""

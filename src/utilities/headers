@@ -1,0 +1,67 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+INTERNAL_HEADER=_hypre_utilities.h
+
+#===========================================================================
+# Include guards and other includes
+#===========================================================================
+
+cat > $INTERNAL_HEADER <<@
+
+#ifndef hypre_UTILITIES_HEADER
+#define hypre_UTILITIES_HEADER
+
+#include "HYPRE_utilities.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+@
+
+#===========================================================================
+# Structures and prototypes
+#===========================================================================
+
+cat general.h                  >> $INTERNAL_HEADER
+cat mpistubs.h                 >> $INTERNAL_HEADER
+cat hypre_smp.h                >> $INTERNAL_HEADER
+cat hypre_memory.h             >> $INTERNAL_HEADER
+cat thread_mpistubs.h          >> $INTERNAL_HEADER
+cat threading.h                >> $INTERNAL_HEADER		          
+cat timing.h                   >> $INTERNAL_HEADER
+cat amg_linklist.h             >> $INTERNAL_HEADER
+cat exchange_data.h            >> $INTERNAL_HEADER
+cat hypre_error.h              >> $INTERNAL_HEADER
+./protos amg_linklist.c        >> $INTERNAL_HEADER
+./protos binsearch.c           >> $INTERNAL_HEADER
+./protos hypre_printf.c        >> $INTERNAL_HEADER
+./protos hypre_qsort.c         >> $INTERNAL_HEADER
+./protos qsplit.c              >> $INTERNAL_HEADER
+./protos random.c              >> $INTERNAL_HEADER
+		          
+#===========================================================================
+# Include guards
+#===========================================================================
+
+cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+@
+
