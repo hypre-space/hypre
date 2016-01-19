@@ -218,7 +218,7 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
 #endif
 
 #ifdef DBG_MERGE_SORT
-   int *dbg_buf = new int[len];
+   HYPRE_Int *dbg_buf = new HYPRE_Int[len];
    std::copy(in, in + len, dbg_buf);
    std::sort(dbg_buf, dbg_buf + len);
 #endif
@@ -323,8 +323,8 @@ void hypre_sort_and_create_inverse_map(
    }
 
 #ifdef DBG_MERGE_SORT
-  std::unordered_map<int, int> inverse_map2(len);
-  for (int i = 0; i < len; ++i) {
+  std::unordered_map<HYPRE_Int, HYPRE_Int> inverse_map2(len);
+  for (HYPRE_Int i = 0; i < len; ++i) {
     inverse_map2[(*out)[i]] = i;
     if (hypre_UnorderedIntMapGet(inverse_map, (*out)[i]) != i)
     {

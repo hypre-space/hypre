@@ -43,8 +43,8 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
    HYPRE_Int * offd_i,
    HYPRE_Int * offd_j,
    HYPRE_Int * col_map_offd,
-   HYPRE_Complex * diag_data,
-   HYPRE_Complex * offd_data
+   HYPRE_Real * diag_data,
+   HYPRE_Real * offd_data
    );
 
 /* The following function was formerly part of hypre_ParMatmul
@@ -1087,8 +1087,8 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    HYPRE_Int * offd_i,
    HYPRE_Int * offd_j,
    HYPRE_Int * col_map_offd,
-   HYPRE_Complex * diag_data,
-   HYPRE_Complex * offd_data,
+   HYPRE_Real * diag_data,
+   HYPRE_Real * offd_data,
    hypre_ParCSRCommHandle **comm_handle_idx,
    hypre_ParCSRCommHandle **comm_handle_data,
    HYPRE_Int *CF_marker, HYPRE_Int *CF_marker_offd,
@@ -1527,8 +1527,8 @@ void hypre_ParCSRMatrixExtractBExt_Arrays(
    HYPRE_Int * offd_i,
    HYPRE_Int * offd_j,
    HYPRE_Int * col_map_offd,
-   HYPRE_Complex * diag_data,
-   HYPRE_Complex * offd_data
+   HYPRE_Real * diag_data,
+   HYPRE_Real * offd_data
    )
 {
    hypre_ParCSRCommHandle *comm_handle_idx, *comm_handle_data;
@@ -1585,13 +1585,13 @@ hypre_ParCSRMatrixExtractBExt_Overlap( hypre_ParCSRMatrix *B,
 
    HYPRE_Int *diag_i = hypre_CSRMatrixI(diag);
    HYPRE_Int *diag_j = hypre_CSRMatrixJ(diag);
-   HYPRE_Complex *diag_data = hypre_CSRMatrixData(diag);
+   HYPRE_Real *diag_data = hypre_CSRMatrixData(diag);
 
    hypre_CSRMatrix *offd = hypre_ParCSRMatrixOffd(B);
 
    HYPRE_Int *offd_i = hypre_CSRMatrixI(offd);
    HYPRE_Int *offd_j = hypre_CSRMatrixJ(offd);
-   HYPRE_Complex *offd_data = hypre_CSRMatrixData(offd);
+   HYPRE_Real *offd_data = hypre_CSRMatrixData(offd);
 
    HYPRE_Int num_cols_B, num_nonzeros;
    HYPRE_Int num_rows_B_ext;

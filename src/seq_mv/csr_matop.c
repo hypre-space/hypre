@@ -472,7 +472,7 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
    /*-----------------------------------------------------------------
     * Count the number of entries that will go into each bucket
-    * bucket is used as int[num_threads][num_colsA] 2D array
+    * bucket is used as HYPRE_Int[num_threads][num_colsA] 2D array
     *-----------------------------------------------------------------*/
 
    for (j = A_i[iBegin]; j < A_i[iEnd]; ++j) {
@@ -482,7 +482,7 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
 
    /*-----------------------------------------------------------------
     * Parallel prefix sum of bucket with length num_colsA * num_threads
-    * accssed as if it is transposed as int[num_colsA][num_threads]
+    * accessed as if it is transposed as HYPRE_Int[num_colsA][num_threads]
     *-----------------------------------------------------------------*/
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier

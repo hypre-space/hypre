@@ -138,6 +138,8 @@ extern "C" {
 #define MPI_MIN             hypre_MPI_MIN              
 #define MPI_MAX             hypre_MPI_MAX              
 #define MPI_LOR             hypre_MPI_LOR              
+#define MPI_SUCCESS         hypre_MPI_SUCCESS
+#define MPI_STATUSES_IGNORE hypre_MPI_STATUSES_IGNORE
 
 #define MPI_UNDEFINED       hypre_MPI_UNDEFINED        
 #define MPI_REQUEST_NULL    hypre_MPI_REQUEST_NULL        
@@ -238,6 +240,8 @@ typedef HYPRE_Int  hypre_MPI_Aint;
 #define  hypre_MPI_MIN 1
 #define  hypre_MPI_MAX 2
 #define  hypre_MPI_LOR 3
+#define  hypre_MPI_SUCCESS 0
+#define  hypre_MPI_STATUSES_IGNORE 0
 
 #define  hypre_MPI_UNDEFINED -9999
 #define  hypre_MPI_REQUEST_NULL  0
@@ -279,6 +283,7 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_MIN MPI_MIN
 #define  hypre_MPI_MAX MPI_MAX
 #define  hypre_MPI_LOR MPI_LOR
+#define  hypre_MPI_SUCCESS MPI_SUCCESS
 
 #define  hypre_MPI_UNDEFINED       MPI_UNDEFINED   
 #define  hypre_MPI_REQUEST_NULL    MPI_REQUEST_NULL

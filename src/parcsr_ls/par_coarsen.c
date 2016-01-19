@@ -2095,7 +2095,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
 
    /* first calculate the local part of the sums for the external nodes */
 #ifdef HYPRE_USING_OPENMP
-   int *measure_array_temp = hypre_CTAlloc(int, num_variables+num_cols_offd);
+   HYPRE_Int *measure_array_temp = hypre_CTAlloc(HYPRE_Int, num_variables+num_cols_offd);
 
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
    for (i=0; i < S_offd_i[num_variables]; i++)
