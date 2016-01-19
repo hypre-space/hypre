@@ -33,9 +33,10 @@
 #include "LoadBal.h"
 #include "ParaSails.h"
 
-#define ROW_REQ_TAG        222
-#define ROW_REPI_TAG       223
-#define ROW_REPV_TAG       224
+#define ROW_PRUNED_REQ_TAG        221
+#define ROW_STORED_REQ_TAG        222
+#define ROW_REPI_TAG              223
+#define ROW_REPV_TAG              224
 
 #ifdef ESSL
 #include <essl.h>
@@ -106,7 +107,7 @@ HYPRE_Int FindNumReplies(MPI_Comm comm, HYPRE_Int *replies_list)
  *          processor when the communication pattern is nonsymmetric.
  *--------------------------------------------------------------------------*/
 
-static void SendRequests(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen, HYPRE_Int *reqind,
+static void SendRequests(MPI_Comm comm, HYPRE_Int tag, Matrix *mat, HYPRE_Int reqlen, HYPRE_Int *reqind,
   HYPRE_Int *num_requests, HYPRE_Int *replies_list)
 {
     hypre_MPI_Request request;
@@ -131,7 +132,7 @@ static void SendRequests(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen, HYPRE_Int
         }
 
         /* Request rows in reqind[i..j-1] */
-        hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_INT, this_pe, ROW_REQ_TAG,
+        hypre_MPI_Isend(&reqind[i], j-i, HYPRE_MPI_INT, this_pe, tag,
             comm, &request);
         hypre_MPI_Request_free(&request);
         (*num_requests)++;
@@ -158,12 +159,12 @@ static void SendRequests(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen, HYPRE_Int
  * count  - number of indices in the output buffer (output)
  *--------------------------------------------------------------------------*/
 
-static void ReceiveRequest(MPI_Comm comm, HYPRE_Int *source, HYPRE_Int **buffer,
+static void ReceiveRequest(MPI_Comm comm, HYPRE_Int *source, HYPRE_Int tag, HYPRE_Int **buffer,
   HYPRE_Int *buflen, HYPRE_Int *count)
 {
     hypre_MPI_Status status;
 
-    hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, ROW_REQ_TAG, comm, &status);
+    hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, tag, comm, &status);
     *source = status.hypre_MPI_SOURCE;
     hypre_MPI_Get_count(&status, HYPRE_MPI_INT, count);
 
@@ -174,7 +175,7 @@ static void ReceiveRequest(MPI_Comm comm, HYPRE_Int *source, HYPRE_Int **buffer,
         *buffer = (HYPRE_Int *) malloc(*buflen * sizeof(HYPRE_Int));
     }
 
-    hypre_MPI_Recv(*buffer, *count, HYPRE_MPI_INT, *source, ROW_REQ_TAG, comm, &status);
+    hypre_MPI_Recv(*buffer, *count, HYPRE_MPI_INT, *source, tag, comm, &status);
 }
 
 /*--------------------------------------------------------------------------
@@ -470,7 +471,7 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
 
         replies_list = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
 
-        SendRequests(comm, M, len, ind, &num_requests, replies_list);
+        SendRequests(comm, ROW_PRUNED_REQ_TAG, M, len, ind, &num_requests, replies_list);
 
         num_replies = FindNumReplies(comm, replies_list);
         free(replies_list);
@@ -478,7 +479,7 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
         for (i=0; i<num_replies; i++)
         {
             /* Receive count indices stored in buffer */
-            ReceiveRequest(comm, &source, &buffer, &bufferlen, &count);
+            ReceiveRequest(comm, &source, ROW_PRUNED_REQ_TAG, &buffer, &bufferlen, &count);
 
             SendReplyPrunedRows(comm, numb, source, buffer, count,
                 pruned_rows, mem, &requests[i]);
@@ -558,7 +559,7 @@ static void ExchangePrunedRowsExt(MPI_Comm comm, Matrix *M, Numbering *numb,
 
         replies_list = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
 
-        SendRequests(comm, M, len, ind, &num_requests, replies_list);
+        SendRequests(comm, ROW_PRUNED_REQ_TAG, M, len, ind, &num_requests, replies_list);
 
         num_replies = FindNumReplies(comm, replies_list);
         free(replies_list);
@@ -566,7 +567,7 @@ static void ExchangePrunedRowsExt(MPI_Comm comm, Matrix *M, Numbering *numb,
         for (i=0; i<num_replies; i++)
         {
             /* Receive count indices stored in buffer */
-            ReceiveRequest(comm, &source, &buffer, &bufferlen, &count);
+	    ReceiveRequest(comm, &source, ROW_PRUNED_REQ_TAG, &buffer, &bufferlen, &count);
 
             SendReplyPrunedRows(comm, numb, source, buffer, count,
                 pruned_rows_local, mem, &requests[i]);
@@ -662,7 +663,7 @@ static void ExchangePrunedRowsExt2(MPI_Comm comm, Matrix *M, Numbering *numb,
 
         replies_list = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
 
-        SendRequests(comm, M, len, ind, &num_requests, replies_list);
+        SendRequests(comm, ROW_PRUNED_REQ_TAG, M, len, ind, &num_requests, replies_list);
 
         num_replies = FindNumReplies(comm, replies_list);
         free(replies_list);
@@ -670,7 +671,7 @@ static void ExchangePrunedRowsExt2(MPI_Comm comm, Matrix *M, Numbering *numb,
         for (i=0; i<num_replies; i++)
         {
             /* Receive count indices stored in buffer */
-            ReceiveRequest(comm, &source, &buffer, &bufferlen, &count);
+            ReceiveRequest(comm, &source, ROW_PRUNED_REQ_TAG, &buffer, &bufferlen, &count);
 
             SendReplyPrunedRows(comm, numb, source, buffer, count,
                 pruned_rows_global, mem, &requests[i]);
@@ -754,7 +755,7 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
 
     replies_list = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
 
-    SendRequests(comm, A, len, ind, &num_requests, replies_list);
+    SendRequests(comm, ROW_STORED_REQ_TAG, A, len, ind, &num_requests, replies_list);
 
     num_replies = FindNumReplies(comm, replies_list);
     free(replies_list);
@@ -771,7 +772,7 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
     for (i=0; i<num_replies; i++)
     {
         /* Receive count indices stored in buffer */
-        ReceiveRequest(comm, &source, &buffer, &bufferlen, &count);
+        ReceiveRequest(comm, &source, ROW_STORED_REQ_TAG, &buffer, &bufferlen, &count);
 
         SendReplyStoredRows(comm, numb, source, buffer, count,
             stored_rows, mem, &requests[i]);
