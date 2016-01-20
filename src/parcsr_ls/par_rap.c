@@ -207,7 +207,7 @@ hypre_BoomerAMGBuildCoarseOperator( hypre_ParCSRMatrix  *RT,
                                     hypre_ParCSRMatrix  *P,
                                     hypre_ParCSRMatrix **RAP_ptr )
 {
-   hypre_BoomerAMGBuildCoarseOperatorKT( RT, A, P, 1, RAP_ptr);
+   hypre_BoomerAMGBuildCoarseOperatorKT( RT, A, P, 0, RAP_ptr);
    return hypre_error_flag;
 }
 
