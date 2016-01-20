@@ -209,7 +209,8 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
    response_obj->send_response_overhead = overhead;
    response_obj->send_response_storage = max_response_size;
 
-   send_response_buf = hypre_MAlloc(max_response_total_bytes);
+   /*send_response_buf = hypre_MAlloc(max_response_total_bytes);*/
+   send_response_buf = hypre_CAlloc(max_response_size+overhead, response_obj_size);
       
    /*allocate space for inital recv array for the responses - give each processor
      size max_response_size */
