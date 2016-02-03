@@ -52,7 +52,7 @@ install: all
 	@ \
 	test ! -d ${HYPRE_INSTALL_DIR}/docs && \
 	    mkdir -m 755 -p ${HYPRE_INSTALL_DIR}/docs; \
-	for dir in HYPRE_usr_manual HYPRE_ref_manual bHYPRE_ref_manual; do \
+	for dir in HYPRE_usr_manual HYPRE_ref_manual; do \
 	  if test -d $$dir; then \
 	    test ! -d ${HYPRE_INSTALL_DIR}/docs/$$dir && \
 		mkdir -m 755 -p ${HYPRE_INSTALL_DIR}/docs/$$dir; \
@@ -61,9 +61,7 @@ install: all
 	    done; \
 	  fi; \
 	done; \
-	for file in HYPRE_usr_manual.pdf \
-		HYPRE_ref_manual.pdf \
-		bHYPRE_ref_manual.pdf; do \
+	for file in HYPRE_usr_manual.pdf HYPRE_ref_manual.pdf; do \
 	  test -f $$file && cp -fp $$file ${HYPRE_INSTALL_DIR}/docs/$$file; \
 	done
 
@@ -75,8 +73,6 @@ clean:
 	@/bin/rm -f  HYPRE_usr_manual.p*
 	@/bin/rm -fr HYPRE_ref_manual
 	@/bin/rm -f  HYPRE_ref_manual.tex HYPRE_ref_manual.p*
-	@/bin/rm -fr bHYPRE_ref_manual
-	@/bin/rm -f  bHYPRE_ref_manual.tex bHYPRE_ref_manual.p*
 
 distclean: clean
 
