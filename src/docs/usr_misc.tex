@@ -293,16 +293,11 @@ files be stripped of the BLAS functions.
 
 \section{Calling HYPRE from Other Languages}
 
-The \hypre{} library can be called from a variety of languages.  This is
-currently provided through two basic mechanisms:
-\begin{itemize}
-\item The Babel interfaces described in Chapter~\ref{ch-babel} utilize the Babel
-tool to provide the most extensive language support (note that the \hypre{}
-library is moving towards using the Babel tool as its primary means of getting
-language interoperability).
-\item A Fortran interface is manually supported to mirror the ``native'' C
-interface used throughout most of this manual.  We describe this interface next.
-\end{itemize}
+The \hypre{} library currently supports two languages: C (native) and Fortran
+(in version 2.10.1 and earlier, additional language interfaces were also
+provided through a tool called Babel).  The Fortran interface is manually
+supported to mirror the ``native'' C interface used throughout most of this
+manual.  We describe this interface next.
 
 Typically, the Fortran subroutine name is the same as the C name, unless it is
 longer than 31 characters.  In these situations, the name is condensed to 31

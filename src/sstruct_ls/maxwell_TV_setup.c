@@ -1074,7 +1074,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
             &transpose, 1);
          parcsr_mat= hypre_ParMatmul(transpose, Aen_l[l]);
          Aen_l[l+1]= hypre_ParMatmul(parcsr_mat, Pn_l[l]);
-
+         hypre_ParCSRMatrixSetRowStartsOwner(transpose,0);
+         hypre_ParCSRMatrixSetRowStartsOwner(Aen_l[l+1],1);
          hypre_ParCSRMatrixDestroy(parcsr_mat);
          hypre_ParCSRMatrixDestroy(transpose);
 

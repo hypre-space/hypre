@@ -41,7 +41,6 @@ endif ()
 
 if (HYPRE_BIGINT)
   set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
-  # In the future, also turn off babel
 endif ()
 
 if (HYPRE_SEQUENTIAL)
@@ -173,6 +172,7 @@ endif (HYPRE_USING_HYPRE_LAPACK)
 list (APPEND HYPRE_HEADERS
   utilities/HYPRE_utilities.h
   utilities/_hypre_utilities.h
+  utilities/hypre_hopscotch_hash.h
   utilities/HYPRE_error_f.h
   utilities/fortran.h
   utilities/fortran_matrix.h
@@ -186,8 +186,11 @@ list (APPEND HYPRE_SOURCES
   utilities/hypre_ap.c
   utilities/hypre_complex.c
   utilities/hypre_error.c
+  utilities/hypre_hopscotch_hash.c
   utilities/hypre_memory.c
+  utilities/hypre_merge_sort.c
   utilities/hypre_mpi_comm_f2c.c
+  utilities/hypre_prefix_sum.c
   utilities/hypre_printf.c
   utilities/hypre_qsort.c
   utilities/memory_dmalloc.c
@@ -550,6 +553,7 @@ list (APPEND HYPRE_SOURCES
   struct_ls/coarsen.c
   struct_ls/cyclic_reduction.c
   struct_ls/F90_HYPRE_struct_bicgstab.c
+  struct_ls/F90_HYPRE_struct_cycred.c
   struct_ls/F90_HYPRE_struct_gmres.c
   struct_ls/F90_HYPRE_struct_hybrid.c
   struct_ls/F90_HYPRE_struct_int.c
@@ -561,6 +565,7 @@ list (APPEND HYPRE_SOURCES
   struct_ls/general.c
   struct_ls/hybrid.c
   struct_ls/HYPRE_struct_bicgstab.c
+  struct_ls/HYPRE_struct_cycred.c
   struct_ls/HYPRE_struct_hybrid.c
   struct_ls/HYPRE_struct_int.c
   struct_ls/HYPRE_struct_jacobi.c

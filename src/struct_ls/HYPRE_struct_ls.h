@@ -446,6 +446,65 @@ HYPRE_Int HYPRE_StructSMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver
  *--------------------------------------------------------------------------*/
 
 /**
+ * @name Struct CycRed Solver
+ *
+ * CycRed is a cyclic reduction solver that simultaneously solves a collection
+ * of 1D tridiagonal systems embedded in a d-dimensional grid.
+ **/
+/*@{*/
+
+/**
+ * Create a solver object.
+ **/
+HYPRE_Int HYPRE_StructCycRedCreate(MPI_Comm            comm,
+                                   HYPRE_StructSolver *solver);
+
+/**
+ * Destroy a solver object.
+ **/
+HYPRE_Int HYPRE_StructCycRedDestroy(HYPRE_StructSolver solver);
+
+/**
+ * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * ignored here, but information about the layout of the data may be used.
+ **/
+HYPRE_Int HYPRE_StructCycRedSetup(HYPRE_StructSolver solver,
+                                  HYPRE_StructMatrix A,
+                                  HYPRE_StructVector b,
+                                  HYPRE_StructVector x);
+
+/**
+ * Solve the system.
+ **/
+HYPRE_Int HYPRE_StructCycRedSolve(HYPRE_StructSolver solver,
+                                  HYPRE_StructMatrix A,
+                                  HYPRE_StructVector b,
+                                  HYPRE_StructVector x);
+
+/**
+ *
+ * (Optional) Set the dimension number for the embedded 1D tridiagonal systems.
+ * The default is {\tt tdim} = 0.
+ **/
+HYPRE_Int HYPRE_StructCycRedSetTDim(HYPRE_StructSolver solver,
+                                    HYPRE_Int          tdim);
+
+/**
+ * (Optional) Set the base index and stride for the embedded 1D systems.  The
+ * stride must be equal one in the dimension corresponding to the 1D systems
+ * (see \Ref{HYPRE_StructCycRedSetTDim}).
+ **/
+HYPRE_Int HYPRE_StructCycRedSetBase(HYPRE_StructSolver solver,
+                                    HYPRE_Int          ndim,
+                                    HYPRE_Int         *base_index,
+                                    HYPRE_Int         *base_stride);
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+/**
  * @name Struct PCG Solver
  *
  * These routines should be used in conjunction with the generic interface in

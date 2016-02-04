@@ -98,7 +98,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
 
    if (n_cols_A != n_rows_B || num_cols_diag_A != num_rows_diag_B)
    {
-	hypre_printf(" Error! Incompatible matrix dimensions!\n");
+	hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
 	return NULL;
    }
    if ( num_rows_diag_A==num_cols_diag_B ) allsquare = 1;
@@ -182,7 +182,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
    }
    if (cnt)
    {
-      qsort0(temp, 0, cnt-1);
+      hypre_qsort0(temp, 0, cnt-1);
 
       num_cols_offd_C = 1;
       value = temp[0];
@@ -440,7 +440,7 @@ hypre_ParCSRBooleanMatrixExtractBExt
 {
    MPI_Comm comm = hypre_ParCSRBooleanMatrix_Get_Comm(B);
    HYPRE_Int first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(B);
-   HYPRE_Int first_row_index = hypre_ParCSRBooleanMatrix_Get_FirstRowIndex(B);
+   /*HYPRE_Int first_row_index = hypre_ParCSRBooleanMatrix_Get_FirstRowIndex(B);*/
    HYPRE_Int *col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(B);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRBooleanMatrix_Get_CommPkg(A);
@@ -477,7 +477,7 @@ hypre_ParCSRBooleanMatrixExtractBExt
         &num_nonzeros,
         0, 0, comm, comm_pkg,
         num_cols_B, num_recvs, num_sends,
-        first_col_diag, first_row_index,
+        first_col_diag, B->row_starts,
         recv_vec_starts, send_map_starts, send_map_elmts,
         diag_i, diag_j, offd_i, offd_j, col_map_offd,
         diag_data, offd_data
@@ -508,7 +508,7 @@ hypre_ParCSRBooleanMatrixExtractAExt( hypre_ParCSRBooleanMatrix *A,
       whose data needs to be passed between processors. */
    MPI_Comm comm = hypre_ParCSRBooleanMatrix_Get_Comm(A);
    HYPRE_Int first_col_diag = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(A);
-   HYPRE_Int first_row_index = hypre_ParCSRBooleanMatrix_Get_FirstRowIndex(A);
+   /*HYPRE_Int first_row_index = hypre_ParCSRBooleanMatrix_Get_FirstRowIndex(A);*/
    HYPRE_Int *col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(A);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRBooleanMatrix_Get_CommPkgT(A);
@@ -550,7 +550,7 @@ hypre_ParCSRBooleanMatrixExtractAExt( hypre_ParCSRBooleanMatrix *A,
         &num_nonzeros,
         data, 1, comm, comm_pkg,
         num_cols_A, num_recvs, num_sends,
-        first_col_diag, first_row_index,
+        first_col_diag, A->row_starts,
         recv_vec_starts, send_map_starts, send_map_elmts,
         diag_i, diag_j, offd_i, offd_j, col_map_offd,
         diag_data, offd_data
@@ -634,7 +634,7 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
 
    if (n_cols_A != n_rows_A)
    {
-	hypre_printf(" Error! Incompatible matrix dimensions!\n");
+	hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
 	return NULL;
    }
    /*-----------------------------------------------------------------------

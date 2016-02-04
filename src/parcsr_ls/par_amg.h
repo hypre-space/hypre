@@ -216,6 +216,11 @@ typedef struct
    hypre_ParVector *Xtilde;
    HYPRE_Real *D_inv;
 
+ /* Use 2 mat-mat-muls instead of triple product*/
+   HYPRE_Int rap2;
+
+   HYPRE_Int keepTranspose;
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -414,6 +419,8 @@ typedef struct
 #define hypre_ParAMGDataNonGalerkinTol(amg_data) ((amg_data)->nongalerkin_tol)
 #define hypre_ParAMGDataNonGalTolArray(amg_data) ((amg_data)->nongal_tol_array)
 
+#define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
+#define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
 #endif
 
 

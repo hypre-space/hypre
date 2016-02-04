@@ -1,0 +1,39 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+
+
+
+
+
+#=============================================================================
+# new_ij: Run 2D elasticity problem with different interpolation operators
+#    1: unknown approach
+#    2: hybrid approach
+#    3: GM variant 1
+#    4: GM variant 2 Qmx=2
+#    5: GM variant 2 Qtr=0.01
+#    5: LN approach
+#    6: LN approach with 3 RBMs (2 more than needed) 
+#=============================================================================
+
+mpirun -np 2 ./new_ij -fromfile A -nf 2 -rlx 6 -solver 1 > elast.out.0
+mpirun -np 2 ./new_ij -fromfile A -nf 2 -rlx 6 -solver 1 -nodal 4 > elast.out.1
+mpirun -np 2 ./new_ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 1 -nodal 1 -rlx 6 -solver 1 > elast.out.2
+mpirun -np 2 ./new_ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 1 -nodal 4 -rlx 6 -solver 1 -Qmx 2 > elast.out.3
+mpirun -np 2 ./new_ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 2 -nodal 3 -rlx 6 -solver 1 -Qtr 0.01 > elast.out.4
+mpirun -np 2 ./new_ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 3 -nodal 6 -rlx 6 -solver 1 > elast.out.5
+mpirun -np 2 ./new_ij -fromfile A -rbm 3 rbm -nf 2 -interpvecvar 3 -nodal 6 -rlx 6 -solver 1 > elast.out.6
+
+

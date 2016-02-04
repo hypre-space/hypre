@@ -7,8 +7,8 @@ lev   rows  entries  sparse  min  max   avg       min         max
 ===================================================================
  0    1089     5313  0.004     3    5   4.9   0.000e+00   2.000e+00
  1     545     4641  0.016     4    9   8.5   0.000e+00   2.500e+00
- 2     157     1535  0.062     4   14   9.8  -1.246e-15   3.020e+00
- 3      57      773  0.238     4   21  13.6   4.718e-16   3.294e+00
+ 2     157     1535  0.062     4   14   9.8  -4.233e-16   3.020e+00
+ 3      57      773  0.238     4   21  13.6   7.589e-17   3.294e+00
  4      19      251  0.695     8   18  13.2   9.852e-02   2.814e+00
  5       6       36  1.000     6    6   6.0   1.232e+00   1.875e+00
 
@@ -77,7 +77,7 @@ AMG SOLUTION INFO:
     Cycle  4   7.816537e-07    0.062749     2.738157e-05 
     Cycle  5   4.829130e-08    0.061781     1.691659e-06 
     Cycle  6   2.956748e-09    0.061227     1.035758e-07 
-    Cycle  7   1.801267e-10    0.060921     6.309892e-09 
+    Cycle  7   1.801266e-10    0.060921     6.309890e-09 
 
 
  Average Convergence Factor = 0.067387
@@ -90,16 +90,16 @@ AMG SOLUTION INFO:
 
 
 Iterations = 7
-Final Relative Residual Norm = 6.309892e-09
+Final Relative Residual Norm = 6.309890e-09
 
 # Output file: bigint.out.2
 =============================================
 SStruct phase times:
 =============================================
 SStruct Setup:
-  wall clock time = 0.230000 seconds
+  wall clock time = 0.210000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.230000 seconds
+  cpu clock time  = 0.200000 seconds
   cpu MFLOPS      = 0.000000
 
 Problem size: 26460
@@ -108,35 +108,35 @@ Problem size: 26460
 Setup phase times:
 =============================================
 AMS Setup:
-  wall clock time = 0.110000 seconds
+  wall clock time = 0.090000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.110000 seconds
+  cpu clock time  = 0.100000 seconds
   cpu MFLOPS      = 0.000000
 
-<C*b,b>: 8.525169e-02
+<C*b,b>: 8.520115e-02
 
 
 Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 -----    ------------    ---------  ------------ 
-    1    2.580403e-02    0.088376    8.837634e-02
-    2    1.135712e-03    0.044013    3.889706e-03
-    3    9.210442e-05    0.081098    3.154489e-04
-    4    2.211502e-05    0.240108    7.574185e-05
-    5    3.768622e-06    0.170410    1.290717e-05
-    6    7.393492e-07    0.196186    2.532201e-06
-    7    1.149856e-07    0.155523    3.938149e-07
+    1    2.578311e-02    0.088331    8.833088e-02
+    2    1.130413e-03    0.043843    3.872703e-03
+    3    8.998649e-05    0.079605    3.082865e-04
+    4    2.108336e-05    0.234295    7.222990e-05
+    5    3.535402e-06    0.167687    1.211201e-05
+    6    7.245863e-07    0.204952    2.482375e-06
+    7    1.246812e-07    0.172072    4.271479e-07
 
 
 =============================================
 Solve phase times:
 =============================================
 AMS Solve:
-  wall clock time = 0.160000 seconds
+  wall clock time = 0.140000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.160000 seconds
+  cpu clock time  = 0.150000 seconds
   cpu MFLOPS      = 0.000000
 
 
 Iterations = 7
-Final Relative Residual Norm = 3.93815e-07
+Final Relative Residual Norm = 4.27148e-07
 

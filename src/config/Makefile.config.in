@@ -45,7 +45,7 @@ HYPRE_LIB_SUFFIX = @HYPRE_LIBSUFFIX@
 .SUFFIXES: .o .f .c .C .cxx .cc
 
 .f.o:
-	$(F77) $(FFLAGS) -c $< 
+	$(FC) $(FFLAGS) -c $< 
 .c.o:
 	$(CC) $(CFLAGS) -c $< 
 .C.o:
@@ -55,8 +55,8 @@ HYPRE_LIB_SUFFIX = @HYPRE_LIBSUFFIX@
 .cc.o:
 	$(CXX) $(CXXFLAGS) -c $<
 
-F77       = @F77@
-FFLAGS    = @FFLAGS@ @F77FLAGS@ $(F77_COMPILE_FLAGS)
+FC       = @FC@
+FFLAGS    = @FFLAGS@ @FCFLAGS@ $(FC_COMPILE_FLAGS)
 
 CC        = @CC@
 CFLAGS    = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
@@ -64,11 +64,11 @@ CFLAGS    = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 CXX       = @CXX@
 CXXFLAGS  = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
-LINK_F77  = @LINK_F77@
+LINK_FC  = @LINK_FC@
 LINK_CC   = @LINK_CC@
 LINK_CXX  = @LINK_CXX@
 
-BUILD_F77_SHARED    = @BUILD_F77_SHARED@
+BUILD_FC_SHARED    = @BUILD_FC_SHARED@
 BUILD_CC_SHARED     = @BUILD_CC_SHARED@
 BUILD_CXX_SHARED    = @BUILD_CXX_SHARED@
 SHARED_COMPILE_FLAG = @SHARED_COMPILE_FLAG@
@@ -87,11 +87,6 @@ RANLIB = @RANLIB@
 LDFLAGS = @LDFLAGS@
 LIBS    = @LIBS@
 FLIBS   = @FLIBS@
-
-##################################################################
-##  BABEL Directories
-##################################################################
-HYPRE_BABEL_DIRS = @BABELDIR@
 
 ##################################################################
 ##  Examples Directory

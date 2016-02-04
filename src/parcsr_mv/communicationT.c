@@ -15,7 +15,7 @@
 
 #include "_hypre_parcsr_mv.h"
 
-void RowsWithColumn_original
+void hypre_RowsWithColumn_original
 ( HYPRE_Int * rowmin, HYPRE_Int * rowmax, HYPRE_Int column, hypre_ParCSRMatrix * A )
 /* Finds rows of A which have a nonzero at the given (global) column number.
    Sets rowmin to the minimum (local) row number of such rows, and rowmax
@@ -69,7 +69,7 @@ void RowsWithColumn_original
 
 }
 
-void RowsWithColumn
+void hypre_RowsWithColumn
 ( HYPRE_Int * rowmin, HYPRE_Int * rowmax, HYPRE_Int column,
   HYPRE_Int num_rows_diag, HYPRE_Int firstColDiag, HYPRE_Int * colMapOffd,
   HYPRE_Int * mat_i_diag, HYPRE_Int * mat_j_diag, HYPRE_Int * mat_i_offd, HYPRE_Int * mat_j_offd )
@@ -312,7 +312,7 @@ hypre_MatTCommPkgCreate_core (
                      ++send_map_starts[index+1];
                      send_map_elmts[index2++] = col - offset; */
                   /* Plan to send all of my rows which use this column... */
-                  RowsWithColumn( &rowmin, &rowmax, col,
+                  hypre_RowsWithColumn( &rowmin, &rowmax, col,
                                   num_rows_diag, 
                                   firstColDiag, colMapOffd,
                                   mat_i_diag, mat_j_diag, mat_i_offd, mat_j_offd
@@ -349,7 +349,7 @@ hypre_MatTCommPkgCreate_core (
                   ++send_map_starts[index+1];
                   send_map_elmts[index2++] = col - offset;*/
                   /* Plan to send all of my rows which use this column... */
-                  RowsWithColumn( &rowmin, &rowmax, col,
+                  hypre_RowsWithColumn( &rowmin, &rowmax, col,
                                   num_rows_diag, 
                                   firstColDiag, colMapOffd,
                                   mat_i_diag, mat_j_diag, mat_i_offd, mat_j_offd

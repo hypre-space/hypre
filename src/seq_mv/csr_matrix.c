@@ -18,6 +18,10 @@
 
 #include "seq_mv.h"
 
+#ifdef HYPRE_PROFILE
+HYPRE_Real hypre_profile_times[HYPRE_TIMER_ID_COUNT] = { 0 };
+#endif
+
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixCreate
  *--------------------------------------------------------------------------*/
@@ -392,28 +396,35 @@ hypre_CSRMatrixCopy( hypre_CSRMatrix *A, hypre_CSRMatrix *B, HYPRE_Int copy_data
    HYPRE_Int     *B_i = hypre_CSRMatrixI(B);
    HYPRE_Int     *B_j = hypre_CSRMatrixJ(B);
    HYPRE_Complex *B_data;
+   HYPRE_Int num_nonzeros = hypre_CSRMatrixNumNonzeros(A);
 
    HYPRE_Int i, j;
 
-   for (i=0; i < num_rows; i++)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for HYPRE_SMP_SCHEDULE
+#endif
+   for (i=0; i <= num_rows; i++)
    {
       B_i[i] = A_i[i];
-      for (j=A_i[i]; j < A_i[i+1]; j++)
-      {
-         B_j[j] = A_j[j];
-      }
    }
-   B_i[num_rows] = A_i[num_rows];
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for HYPRE_SMP_SCHEDULE
+#endif
+   for (j = 0; j < num_nonzeros; ++j)
+   {
+      B_j[j] = A_j[j];
+   }
+
    if (copy_data)
    {
       A_data = hypre_CSRMatrixData(A);
       B_data = hypre_CSRMatrixData(B);
-      for (i=0; i < num_rows; i++)
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for HYPRE_SMP_SCHEDULE
+#endif
+      for (j=0; j < num_nonzeros; j++)
       {
-         for (j=A_i[i]; j < A_i[i+1]; j++)
-         {
-            B_data[j] = A_data[j];
-         }
+         B_data[j] = A_data[j];
       }
    }
    return ierr;
@@ -624,4 +635,38 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion(
    if (jC) hypre_TFree( jC );
 
    return C;
+}
+
+static HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBoundary(hypre_CSRMatrix *A, HYPRE_Int idx)
+{
+   HYPRE_Int num_nonzerosA = hypre_CSRMatrixNumNonzeros(A);
+   HYPRE_Int num_rowsA = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int *A_i = hypre_CSRMatrixI(A);
+
+   HYPRE_Int num_threads = hypre_NumActiveThreads();
+
+   HYPRE_Int nonzeros_per_thread = (num_nonzerosA + num_threads - 1)/num_threads;
+
+   if (idx <= 0)
+   {
+      return 0;
+   }
+   else if (idx >= num_threads)
+   {
+      return num_rowsA;
+   }
+   else
+   {
+      return (HYPRE_Int)(hypre_LowerBound(A_i, A_i + num_rowsA, nonzeros_per_thread*idx) - A_i);
+   }
+}
+
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionBegin(hypre_CSRMatrix *A)
+{
+   return hypre_CSRMatrixGetLoadBalancedPartitionBoundary(A, hypre_GetThreadNum());
+}
+
+HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
+{
+   return hypre_CSRMatrixGetLoadBalancedPartitionBoundary(A, hypre_GetThreadNum() + 1);
 }

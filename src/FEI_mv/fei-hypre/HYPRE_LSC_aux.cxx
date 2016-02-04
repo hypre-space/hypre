@@ -131,7 +131,7 @@ extern "C" {
  * other functions   
  *-------------------------------------------------------------------------*/
 
-   void  qsort1(int *, double *, int, int);
+   void  hypre_qsort1(int *, double *, int, int);
    int   HYPRE_DummyFunction(HYPRE_Solver, HYPRE_ParCSRMatrix,
                             HYPRE_ParVector, HYPRE_ParVector) {return 0;}
    int   HYPRE_LSI_Search(int*, int, int);
@@ -4229,7 +4229,7 @@ void HYPRE_LinSysCore::setupPreconMLMaxwell()
       HYPRE_IJMatrixGetObject(currA_, (void **) &A_csr);
       hypre_BoomerAMGBuildCoarseOperator((hypre_ParCSRMatrix *) maxwellGEN_,
                                       (hypre_ParCSRMatrix *) A_csr,
-                                      (hypre_ParCSRMatrix *) maxwellGEN_,
+                                      (hypre_ParCSRMatrix *) maxwellGEN_, 
                                       (hypre_ParCSRMatrix **) &maxwellANN_);
    }
    HYPRE_LSI_MLMaxwellSetANNMatrix(HYPrecon_,maxwellANN_);
@@ -5371,7 +5371,7 @@ void HYPRE_LinSysCore::endCreateMapFromSoln()
    for ( i = 0; i < mapFromSolnLeng_; i++ )
       darray[i] = (double) mapFromSolnList_[i];
 
-   qsort1(mapFromSolnList2_, darray, 0, mapFromSolnLeng_-1);
+   hypre_qsort1(mapFromSolnList2_, darray, 0, mapFromSolnLeng_-1);
    iarray = mapFromSolnList2_;
    mapFromSolnList2_ = mapFromSolnList_;
    mapFromSolnList_ = iarray;
@@ -5464,7 +5464,7 @@ void HYPRE_LinSysCore::putIntoMappedMatrix(int row, int numValues,
             printf("%4d : putIntoMappedMatrix : row, col = %8d %8d %e \n",
                    mypid_, localRow, colIndices_[localRow][ind2]-1,
                    colValues_[localRow][ind2]);
-         qsort1(colIndices_[localRow],colValues_[localRow],0,index-1);
+         hypre_qsort1(colIndices_[localRow],colValues_[localRow],0,index-1);
       }
    }
    rowLengths_[localRow] = newLeng;

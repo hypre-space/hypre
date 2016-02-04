@@ -604,7 +604,7 @@ HYPRE_Int HYPRE_BoomerAMGSetSeqThreshold(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetRedundant(HYPRE_Solver solver,
                                       HYPRE_Int    redundant);
 
-/**
+/*
  * (Optional) Defines the number of sweeps for the fine and coarse grid, 
  * the up and down cycle.
  *
@@ -713,7 +713,7 @@ HYPRE_Int HYPRE_BoomerAMGSetCycleRelaxType(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_BoomerAMGSetRelaxOrder(HYPRE_Solver  solver,
                                        HYPRE_Int     relax_order);
 
-/**
+/*
  * (Optional) Defines in which order the points are relaxed. 
  *
  * Note: This routine will be phased out!!!!
@@ -722,7 +722,7 @@ HYPRE_Int HYPRE_BoomerAMGSetRelaxOrder(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_BoomerAMGSetGridRelaxPoints(HYPRE_Solver   solver,
                                             HYPRE_Int    **grid_relax_points);
 
-/**
+/*
  * (Optional) Defines the relaxation weight for smoothed Jacobi and hybrid SOR.
  *
  * Note: This routine will be phased out!!!!
@@ -1043,6 +1043,20 @@ HYPRE_Int HYPRE_BoomerAMGInitGridRelaxation(HYPRE_Int    **num_grid_sweeps_ptr,
                                             HYPRE_Int      coarsen_type,
                                             HYPRE_Real **relax_weights_ptr,
                                             HYPRE_Int      max_levels);
+
+/**
+ * (Optional) If rap2 not equal 0, the triple matrix product RAP is
+ * replaced by two matrix products.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetRAP2(HYPRE_Solver solver,
+                                      HYPRE_Int    rap2);
+
+/**
+ * (Optional) If set to 1, the local interpolation transposes will
+ * be saved to use more efficient matvecs instead of matvecTs
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose(HYPRE_Solver solver,
+                                      HYPRE_Int    keepTranspose);
 
 /*
  * HYPRE_BoomerAMGSetPlotGrids

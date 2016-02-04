@@ -119,3 +119,7 @@ mpirun -np 8 ./new_ij -n 20 20 20 -P 2 2 2 -hmis -interptype 6 -Pmx 4 -agg_nl 1 
 #nonGalerkin version
 mpirun -np 8 ./new_ij -n 40 40 40 -P 2 2 2 -hmis -interptype 6 -Pmx 4 -nongalerk_tol 1 0.03 > solvers.out.114
 mpirun -np 8 ./new_ij -n 40 40 40 -P 2 2 2 -hmis -interptype 6 -Pmx 4 -nongalerk_tol 3 0.0 0.01 0.05 > solvers.out.115
+
+#RAP options
+mpirun -np 8 ./new_ij -n 40 40 40 -P 2 2 2 -pmis -solver 3 -rap 0 > solvers.out.116
+mpirun -np 8 ./new_ij -n 40 40 40 -P 2 2 2 -pmis -solver 3 -rap 1 > solvers.out.117

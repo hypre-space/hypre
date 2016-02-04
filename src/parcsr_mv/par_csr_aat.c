@@ -374,7 +374,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 
    if (n_cols_A != n_rows_A)
    {
-      hypre_printf(" Error! Incompatible matrix dimensions!\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC," Error! Incompatible matrix dimensions!\n");
       return NULL;
    }
    /*-----------------------------------------------------------------------
@@ -835,7 +835,7 @@ hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A,
       whose data needs to be passed between processors. */
    MPI_Comm comm = hypre_ParCSRMatrixComm(A);
    HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
-   HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
+   /*HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);*/
    HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkgT(A);
@@ -876,7 +876,7 @@ hypre_ParCSRMatrixExtractAExt( hypre_ParCSRMatrix *A,
         &num_nonzeros,
         data, 1, comm, comm_pkg,
         num_cols_A, num_recvs, num_sends,
-        first_col_diag, first_row_index,
+        first_col_diag, A->row_starts,
         recv_vec_starts, send_map_starts, send_map_elmts,
         diag_i, diag_j, offd_i, offd_j, col_map_offd,
         diag_data, offd_data

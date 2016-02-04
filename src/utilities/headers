@@ -11,17 +11,13 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 INTERNAL_HEADER=_hypre_utilities.h
 
 #===========================================================================
 # Include guards and other includes
 #===========================================================================
 
-cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
-cat >> $INTERNAL_HEADER <<@
+cat > $INTERNAL_HEADER <<@
 
 #ifndef hypre_UTILITIES_HEADER
 #define hypre_UTILITIES_HEADER

@@ -42,9 +42,10 @@ HYPRE_Int hypre_StructCoarsen ( hypre_StructGrid *fgrid , hypre_Index index , hy
 /* cyclic_reduction.c */
 void *hypre_CyclicReductionCreate ( MPI_Comm comm );
 hypre_StructMatrix *hypre_CycRedCreateCoarseOp ( hypre_StructMatrix *A , hypre_StructGrid *coarse_grid , HYPRE_Int cdir );
-HYPRE_Int hypre_CycRedSetupCoarseOp ( hypre_StructMatrix *A , hypre_StructMatrix *Ac , hypre_Index cindex , hypre_Index cstride );
+HYPRE_Int hypre_CycRedSetupCoarseOp ( hypre_StructMatrix *A , hypre_StructMatrix *Ac , hypre_Index cindex , hypre_Index cstride, HYPRE_Int cdir );
 HYPRE_Int hypre_CyclicReductionSetup ( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
 HYPRE_Int hypre_CyclicReduction ( void *cyc_red_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
+HYPRE_Int hypre_CyclicReductionSetCDir ( void *cyc_red_vdata , HYPRE_Int cdir );
 HYPRE_Int hypre_CyclicReductionSetBase ( void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride );
 HYPRE_Int hypre_CyclicReductionDestroy ( void *cyc_red_vdata );
 

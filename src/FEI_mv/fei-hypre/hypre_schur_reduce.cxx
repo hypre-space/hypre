@@ -45,8 +45,8 @@ extern "C" {
                                        hypre_ParCSRMatrix*,
                                        hypre_ParCSRMatrix**);
    int HYPRE_LSI_Search(int*, int, int);
-   void qsort0(int *, int, int);
-   void qsort1(int *, double *, int, int);
+   void hypre_qsort0(int *, int, int);
+   void hypre_qsort1(int *, double *, int, int);
 }
 
 //*****************************************************************************
@@ -820,7 +820,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
           }
        }
        newRowSize = rowSize + ncnt;
-       qsort0(newColInd, 0, newRowSize-1);
+       hypre_qsort0(newColInd, 0, newRowSize-1);
        ncnt = 0;
        for ( j = 1; j < newRowSize; j++ )
        {
@@ -873,7 +873,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem()
           }
        }
        newRowSize = rowSize + ncnt;
-       qsort1(newColInd, newColVal, 0, newRowSize-1);
+       hypre_qsort1(newColInd, newColVal, 0, newRowSize-1);
        ncnt = 0;
        for ( j = 1; j < newRowSize; j++ )
        {
@@ -2004,7 +2004,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
           }
        }
        newRowSize = rowSize + ncnt;
-       qsort0(newColInd, 0, newRowSize-1);
+       hypre_qsort0(newColInd, 0, newRowSize-1);
        ncnt = 0;
        for ( j = 1; j < newRowSize; j++ )
        {
@@ -2057,7 +2057,7 @@ void HYPRE_LinSysCore::buildSchurReducedSystem2()
           }
        }
        newRowSize = rowSize + ncnt;
-       qsort1(newColInd, newColVal, 0, newRowSize-1);
+       hypre_qsort1(newColInd, newColVal, 0, newRowSize-1);
        ncnt = 0;
        for ( j = 1; j < newRowSize; j++ )
        {

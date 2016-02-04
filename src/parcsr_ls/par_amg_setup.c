@@ -41,10 +41,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
    hypre_ParVector    **U_array;
-   hypre_ParVector     *Vtemp;
-   hypre_ParVector     *Rtemp;
-   hypre_ParVector     *Ptemp;
-   hypre_ParVector     *Ztemp;
+   hypre_ParVector     *Vtemp = NULL;
+   hypre_ParVector     *Rtemp = NULL;
+   hypre_ParVector     *Ptemp = NULL;
+   hypre_ParVector     *Ztemp = NULL;
    hypre_ParCSRMatrix **P_array;
    hypre_ParVector    *Residual_array;
    HYPRE_Int                **CF_marker_array;   
@@ -112,7 +112,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       rest, tms, indx;
    HYPRE_Real    size;
    HYPRE_Int       not_finished_coarsening = 1;
-   HYPRE_Int       Setup_err_flag = 0;
    HYPRE_Int       coarse_threshold = hypre_ParAMGDataMaxCoarseSize(amg_data);
    HYPRE_Int       min_coarse_size = hypre_ParAMGDataMinCoarseSize(amg_data);
    HYPRE_Int       seq_threshold = hypre_ParAMGDataSeqThreshold(amg_data);
@@ -168,8 +167,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real        *expandp_weights =  hypre_ParAMGDataExpandPWeights(amg_data);
 
    /* parameters for non-Galerkin stuff */
-   /*HYPRE_Int nongalerk_num_tol = hypre_ParAMGDataNonGalerkNumTol (amg_data);
-   HYPRE_Real *nongalerk_tol = hypre_ParAMGDataNonGalerkTol (amg_data); */
+   HYPRE_Int nongalerk_num_tol = hypre_ParAMGDataNonGalerkNumTol (amg_data);
+   HYPRE_Real *nongalerk_tol = hypre_ParAMGDataNonGalerkTol (amg_data); 
    HYPRE_Real nongalerk_tol_l = 0.0; 
    HYPRE_Real *nongal_tol_array = hypre_ParAMGDataNonGalTolArray (amg_data); 
 
@@ -179,6 +178,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Int mult_addlvl = hypre_max(mult_additive, simple);
    HYPRE_Int addlvl = hypre_max(mult_addlvl, additive);
+   HYPRE_Int rap2 = hypre_ParAMGDataRAP2(amg_data);
+   HYPRE_Int keepTranspose = hypre_ParAMGDataKeepTranspose(amg_data);
 
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
 
@@ -227,7 +228,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParAMGDataNumVariables(amg_data) = hypre_ParCSRMatrixNumRows(A);
 
    if (num_procs == 1) seq_threshold = 0;
-   if (setup_type == 0) return Setup_err_flag;
+   if (setup_type == 0) return hypre_error_flag;
 
    S = NULL;
 
@@ -265,7 +266,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       nodal = 1;
       if (my_id == 0)
-         hypre_printf("WARNING: Changing to node-based coarsening because LN of GM interpolation has been specified via HYPRE_BoomerAMGSetInterpVecVariant.\n");
+         hypre_error_w_msg(HYPRE_ERROR_GENERIC,"WARNING: Changing to node-based coarsening because LN of GM interpolation has been specified via HYPRE_BoomerAMGSetInterpVecVariant.\n");
    }
 
    /* Verify that settings are correct for solving systmes */
@@ -1057,6 +1058,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                else 
                   hypre_BoomerAMGCoarsen(S2, S2, 0, debug_flag, &CF2_marker);
                hypre_ParCSRMatrixDestroy(S2);
+               S2 = NULL;
            }
            else
            {
@@ -1075,7 +1077,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
               hypre_TFree(CFN_marker);
               hypre_TFree(col_offd_SN_to_AN);
               hypre_ParCSRMatrixDestroy(SN);
+              SN = NULL;
               hypre_ParCSRMatrixDestroy(AN);
+              AN = NULL;
            }
          }
    /*****xxxxxxxxxxxxx changes for min_coarse_size */
@@ -1291,6 +1295,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_TFree(col_offd_S_to_A);
                   col_offd_S_to_A = NULL;
                   CF_marker = NULL;
+                  CF2_marker = NULL;
                   hypre_ParCSRMatrixDestroy(S);
                   /* hypre_BoomerAMGCreateScalarCFS(A_array[level],SN, CFN_marker, 
 			col_offd_SN_to_AN, num_functions, nodal, 0, NULL, 
@@ -1334,8 +1339,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_ParCSRMatrixDestroy(P2);
                   hypre_ParCSRMatrixOwnsColStarts(P) = 1;
                }
-               hypre_ParCSRMatrixDestroy(SN);
-               hypre_ParCSRMatrixDestroy(AN);
+               if (SN) hypre_ParCSRMatrixDestroy(SN);
+               SN = NULL;
+               if (AN) hypre_ParCSRMatrixDestroy(AN);
+               AN = NULL;
             }
 #ifdef HYPRE_NO_GLOBAL_PARTITION
             if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global[1];
@@ -1765,6 +1772,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
              (interp_vec_variant == 1 && interp_vec_first_level == level))
 
          {
+            /*if (level == 0)
+            {
+               hypre_ParCSRMatrixPrintIJ(A_array[0], 0, 0, "A");
+               hypre_ParVectorPrintIJ(interp_vectors_array[0][0], 0, "rbm");
+            }*/
             if (interp_vec_variant < 3) /* GM */
             {
                hypre_BoomerAMG_GMExpandInterp( A_array[level],
@@ -1803,7 +1815,37 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                /* check to see if we made A bigger - this can happen
                 * in 3D with certain coarsenings   - if so, need to fix vtemp*/
                
-               if (hypre_ParCSRMatrixGlobalNumRows(A_array[0]) < hypre_ParCSRMatrixGlobalNumCols(P))
+               HYPRE_Int local_sz = hypre_ParVectorActualLocalSize(Vtemp);  
+               HYPRE_Int local_P_sz = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(P));
+               if (local_sz < local_P_sz)
+               {
+                  hypre_Vector* Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
+                  hypre_TFree(hypre_VectorData(Vtemp_local)); 
+                  hypre_VectorSize(Vtemp_local) = local_P_sz; 
+                  hypre_VectorData(Vtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz);
+                  if (Ztemp)
+                  {
+                     hypre_Vector* Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
+                     hypre_TFree(hypre_VectorData(Ztemp_local)); 
+                     hypre_VectorSize(Ztemp_local) = local_P_sz; 
+                     hypre_VectorData(Ztemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz);
+                  }
+                  if (Ptemp)
+                  {
+                     hypre_Vector* Ptemp_local = hypre_ParVectorLocalVector(Ptemp);
+                     hypre_TFree(hypre_VectorData(Ptemp_local)); 
+                     hypre_VectorSize(Ptemp_local) = local_P_sz; 
+                     hypre_VectorData(Ptemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz);
+                  }
+                  if (Rtemp)
+                  {
+                     hypre_Vector* Rtemp_local = hypre_ParVectorLocalVector(Rtemp);
+                     hypre_TFree(hypre_VectorData(Rtemp_local)); 
+                     hypre_VectorSize(Rtemp_local) = local_P_sz; 
+                     hypre_VectorData(Rtemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz);
+                  }
+               } 
+               /*if (hypre_ParCSRMatrixGlobalNumRows(A_array[0]) < hypre_ParCSRMatrixGlobalNumCols(P))
                {
                   
                   hypre_ParVectorDestroy(Vtemp);
@@ -1815,7 +1857,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_ParVectorInitialize(Vtemp);
                   hypre_ParVectorSetPartitioningOwner(Vtemp,0);
                   hypre_ParAMGDataVtemp(amg_data) = Vtemp;
-               }
+               }*/
             }
             /* at the first level we have to add space for the new
              * unknowns in the smooth vectors */
@@ -1897,23 +1939,24 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   P_array[level] = hypre_ParMatmul(C,P);
             hypre_ParCSRMatrixDestroy(C); */
 
-         /* Set NonGalerkin drop tol on each level */
-         if (nongal_tol_array) nongalerk_tol_l = nongal_tol_array[level];
-         if (nongalerk_tol_l > 0.0)
-         {
+            /* Set NonGalerkin drop tol on each level */
+            if (level < nongalerk_num_tol) nongalerk_tol_l = nongalerk_tol[level];
+            if (nongal_tol_array) nongalerk_tol_l = nongal_tol_array[level];
+            if (nongalerk_tol_l > 0.0)
+            {
             /* Build Non-Galerkin Coarse Grid */
-            hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
+               hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
                     0.333*strong_threshold, max_row_sum, num_functions, 
                     dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level], 
                     /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
                       nongalerk_tol_l,      1,            0.5,    1.0 );
             
-            hypre_ParCSRMatrixColStarts(P_array[level]) = hypre_ParCSRMatrixRowStarts(A_H);
-            if (!hypre_ParCSRMatrixCommPkg(A_H))
-                hypre_MatvecCommPkgCreate(A_H);
+               hypre_ParCSRMatrixColStarts(P_array[level]) = hypre_ParCSRMatrixRowStarts(A_H);
+               if (!hypre_ParCSRMatrixCommPkg(A_H))
+                   hypre_MatvecCommPkgCreate(A_H);
 			
-         }
-         hypre_ParCSRMatrixDestroy(Q);
+            }
+            hypre_ParCSRMatrixDestroy(Q);
 
 
             if (add_P_max_elmts || add_trunc_factor)
@@ -1964,7 +2007,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       else if (mult_addlvl == -1 || level < mult_addlvl)
       {
          /* Set NonGalerkin drop tol on each level */
-         /*if (level < nongalerk_num_tol)*/
+         if (level < nongalerk_num_tol)
+            nongalerk_tol_l = nongalerk_tol[level];
          if (nongal_tol_array) nongalerk_tol_l = nongal_tol_array[level];
 
          if (nongalerk_tol_l > 0.0)
@@ -1992,11 +2036,24 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             /* Delete AP */
             hypre_ParCSRMatrixDestroy(Q);
          }
-         else
+         else if (rap2)
+         {
+            /* Use two matrix products to generate A_H */
+            hypre_ParCSRMatrix *Q = NULL;
+            Q = hypre_ParMatmul(A_array[level],P_array[level]);
+            A_H = hypre_ParTMatmul(P_array[level],Q);
+            hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
+            hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
+            hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
+            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
+            /* Delete AP */
+            hypre_ParCSRMatrixDestroy(Q);
+         }
+         else 
          {
             /* Compute standard Galerkin coarse-grid product */
-            hypre_BoomerAMGBuildCoarseOperator(P_array[level], A_array[level] , 
-                                        P_array[level], &A_H);
+            hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], A_array[level] , 
+                                        P_array[level], keepTranspose, &A_H);
          }
 
       }
@@ -2224,7 +2281,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
         if (relax_weight[j] != 0.0)
            relax_weight[j] = 4.0/3.0/relax_weight[j];
         else
-           hypre_printf (" Warning ! Matrix norm is zero !!!");
+           hypre_error_w_msg(HYPRE_ERROR_GENERIC," Warning ! Matrix norm is zero !!!");
      }
      if ((smooth_type == 6 || smooth_type == 16) && smooth_num_levels > j)
      {
@@ -2504,5 +2561,5 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 }
 #endif
 
-   return(Setup_err_flag);
+   return(hypre_error_flag);
 }  

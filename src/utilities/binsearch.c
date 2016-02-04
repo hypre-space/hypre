@@ -82,3 +82,23 @@ HYPRE_Int hypre_BinarySearch2(HYPRE_Int *list, HYPRE_Int value, HYPRE_Int low, H
 
    return -1;
 }
+
+/*--------------------------------------------------------------------------
+ * Equivalent to C++ std::lower_bound
+ *--------------------------------------------------------------------------*/
+ 
+HYPRE_Int *hypre_LowerBound( HYPRE_Int *first, HYPRE_Int *last, HYPRE_Int value )
+{
+   HYPRE_Int *it;
+   size_t count = last - first, step;
+
+   while (count > 0) {
+      it = first; step = count/2; it += step;
+      if (*it < value) {
+         first = ++it;
+         count -= step + 1;
+      }
+      else count = step;
+   }
+   return first;
+}

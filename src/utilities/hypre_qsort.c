@@ -17,7 +17,7 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void swap( HYPRE_Int *v,
+void hypre_swap( HYPRE_Int *v,
            HYPRE_Int  i,
            HYPRE_Int  j )
 {
@@ -31,7 +31,7 @@ void swap( HYPRE_Int *v,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void swap2(HYPRE_Int     *v,
+void hypre_swap2(HYPRE_Int     *v,
            HYPRE_Real  *w,
            HYPRE_Int      i,
            HYPRE_Int      j )
@@ -161,7 +161,7 @@ void hypre_swap_d( HYPRE_Real *v,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void qsort0( HYPRE_Int *v,
+void hypre_qsort0( HYPRE_Int *v,
              HYPRE_Int  left,
              HYPRE_Int  right )
 {
@@ -169,22 +169,22 @@ void qsort0( HYPRE_Int *v,
 
    if (left >= right)
       return;
-   swap( v, left, (left+right)/2);
+   hypre_swap( v, left, (left+right)/2);
    last = left;
    for (i = left+1; i <= right; i++)
       if (v[i] < v[left])
       {
-         swap(v, ++last, i);
+         hypre_swap(v, ++last, i);
       }
-   swap(v, left, last);
-   qsort0(v, left, last-1);
-   qsort0(v, last+1, right);
+   hypre_swap(v, left, last);
+   hypre_qsort0(v, left, last-1);
+   hypre_qsort0(v, last+1, right);
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-void qsort1( HYPRE_Int *v,
+void hypre_qsort1( HYPRE_Int *v,
 	     HYPRE_Real *w,
              HYPRE_Int  left,
              HYPRE_Int  right )
@@ -193,16 +193,16 @@ void qsort1( HYPRE_Int *v,
 
    if (left >= right)
       return;
-   swap2( v, w, left, (left+right)/2);
+   hypre_swap2( v, w, left, (left+right)/2);
    last = left;
    for (i = left+1; i <= right; i++)
       if (v[i] < v[left])
       {
-         swap2(v, w, ++last, i);
+         hypre_swap2(v, w, ++last, i);
       }
-   swap2(v, w, left, last);
-   qsort1(v, w, left, last-1);
-   qsort1(v, w, last+1, right);
+   hypre_swap2(v, w, left, last);
+   hypre_qsort1(v, w, left, last-1);
+   hypre_qsort1(v, w, last+1, right);
 }
 
 /*--------------------------------------------------------------------------
@@ -248,14 +248,14 @@ void hypre_qsort2( HYPRE_Int *v,
 
    if (left >= right)
       return;
-   swap2( v, w, left, (left+right)/2);
+   hypre_swap2( v, w, left, (left+right)/2);
    last = left;
    for (i = left+1; i <= right; i++)
       if (w[i] < w[left])
       {
-         swap2(v, w, ++last, i);
+         hypre_swap2(v, w, ++last, i);
       }
-   swap2(v, w, left, last);
+   hypre_swap2(v, w, left, last);
    hypre_qsort2(v, w, left, last-1);
    hypre_qsort2(v, w, last+1, right);
 }

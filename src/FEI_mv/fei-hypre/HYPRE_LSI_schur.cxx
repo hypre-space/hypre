@@ -37,8 +37,8 @@ extern "C" {
                                           hypre_ParCSRMatrix*,
                                           hypre_ParCSRMatrix**);
    int HYPRE_LSI_Search(int*, int, int);
-   void qsort0(int *, int, int);
-   void qsort1(int *, double *, int, int);
+   void hypre_qsort0(int *, int, int);
+   void hypre_qsort1(int *, double *, int, int);
 }
 
 //******************************************************************************
@@ -618,7 +618,7 @@ int HYPRE_LSI_Schur::setup(HYPRE_IJMatrix Amat,  HYPRE_IJVector sol,
          newColInd = new int[newRowSize];
          for (j = 0; j < rowSize;  j++) newColInd[j] = colInd[j];
          for (j = 0; j < rowSize2; j++) newColInd[j+rowSize] = colInd2[j];
-         qsort0(newColInd, 0, newRowSize-1);
+         hypre_qsort0(newColInd, 0, newRowSize-1);
          count = 0;
          for ( j = 1; j < newRowSize; j++ )
          {
@@ -672,7 +672,7 @@ int HYPRE_LSI_Schur::setup(HYPRE_IJMatrix Amat,  HYPRE_IJVector sol,
             newColInd[j+rowSize] = colInd2[j];
             newColVal[j+rowSize] = colVal2[j];
          }
-         qsort1(newColInd, newColVal, 0, newRowSize-1);
+         hypre_qsort1(newColInd, newColVal, 0, newRowSize-1);
          count = 0;
          for ( j = 1; j < newRowSize; j++ )
          {

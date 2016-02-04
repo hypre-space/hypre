@@ -68,6 +68,8 @@ extern "C" {
 #define MPI_ANY_TAG         hypre_MPI_ANY_TAG
 #define MPI_SOURCE          hypre_MPI_SOURCE
 #define MPI_TAG             hypre_MPI_TAG
+#define MPI_SUCCESS         hypre_MPI_SUCCESS
+#define MPI_STATUSES_IGNORE hypre_MPI_STATUSES_IGNORE
 
 #define MPI_Init            hypre_MPI_Init             
 #define MPI_Finalize        hypre_MPI_Finalize         
@@ -156,6 +158,8 @@ typedef HYPRE_Int  hypre_MPI_Aint;
 #define  hypre_MPI_MIN 1
 #define  hypre_MPI_MAX 2
 #define  hypre_MPI_LOR 3
+#define  hypre_MPI_SUCCESS 0
+#define  hypre_MPI_STATUSES_IGNORE 0
 
 #define  hypre_MPI_UNDEFINED -9999
 #define  hypre_MPI_REQUEST_NULL  0
@@ -179,6 +183,7 @@ typedef MPI_Aint     hypre_MPI_Aint;
 #define  hypre_MPI_COMM_WORLD MPI_COMM_WORLD
 #define  hypre_MPI_COMM_NULL  MPI_COMM_NULL
 #define  hypre_MPI_BOTTOM     MPI_BOTTOM
+#define  hypre_MPI_SUCCESS    MPI_SUCCESS
 
 #define  hypre_MPI_DOUBLE  MPI_DOUBLE
 /* HYPRE_MPI_INT is defined in HYPRE_utilities.h */

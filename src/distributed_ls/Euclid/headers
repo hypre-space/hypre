@@ -17,8 +17,7 @@ INTERNAL_HEADER=_hypre_Euclid.h
 # Include guards and other includes
 #===========================================================================
 
-cat ../../tools/BHEAD_code_template > $INTERNAL_HEADER
-cat >> $INTERNAL_HEADER <<@
+cat > $INTERNAL_HEADER <<@
 
 #ifndef hypre_EUCLID_HEADER
 #define hypre_EUCLID_HEADER

@@ -2188,6 +2188,7 @@ PrintUsage( char *progname,
       hypre_printf("                        202- Struct SparseMSG\n");
       hypre_printf("                        203- Struct PFMG constant coefficients\n");
       hypre_printf("                        204- Struct PFMG constant coefficients variable diagonal\n");
+      hypre_printf("                        205- Struct Cyclic Reduction\n");
       hypre_printf("                        208- Struct Jacobi\n");
       hypre_printf("                        210- Struct CG with SMG precond\n");
       hypre_printf("                        211- Struct CG with PFMG precond\n");
@@ -2232,6 +2233,9 @@ PrintUsage( char *progname,
       hypre_printf("                        1 - PCG (default)\n");
       hypre_printf("                        2 - GMRES\n");
       hypre_printf("  -cf <cf>           : Struct- convergence factor for Hybrid\n");
+      hypre_printf("  -crtdim <tdim>     : Struct- cyclic reduction tdim\n");
+      hypre_printf("  -cri <ix> <iy> <iz>: Struct- cyclic reduction base_index\n");
+      hypre_printf("  -crs <sx> <sy> <sz>: Struct- cyclic reduction base_stride\n");
 
       /* begin lobpcg */
 
@@ -2344,6 +2348,9 @@ main( hypre_int argc,
 
    HYPRE_Real            cf_tol;
 
+   HYPRE_Int             cycred_tdim;
+   Index                 cycred_index, cycred_stride;
+
    HYPRE_Int             arg_index, part, var, box, s, entry, i, j, k, size;
    HYPRE_Int             row, col;
    HYPRE_Int             gradient_matrix;
@@ -2450,6 +2457,12 @@ main( hypre_int argc,
          distribute[part][j] = 1;
          block[part][j]      = 1;
       }
+   }
+   cycred_tdim = 0;
+   for (i = 0; i < 3; i++)
+   {
+      cycred_index[i]  = 0;
+      cycred_stride[i] = 1;
    }
 
    solver_id = 39;
@@ -2604,6 +2617,27 @@ main( hypre_int argc,
       {
          arg_index++;
          cf_tol = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-crtdim") == 0 )
+      {
+         arg_index++;
+         cycred_tdim = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-cri") == 0 )
+      {
+         arg_index++;
+         for (i = 0; i < 3; i++)
+         {
+            cycred_index[i] = atoi(argv[arg_index++]);
+         }
+      }
+      else if ( strcmp(argv[arg_index], "-crs") == 0 )
+      {
+         arg_index++;
+         for (i = 0; i < 3; i++)
+         {
+            cycred_stride[i] = atoi(argv[arg_index++]);
+         }
       }
       /* begin lobpcg */
       else if ( strcmp(argv[arg_index], "-lobpcg") == 0 ) 
@@ -4559,8 +4593,6 @@ main( hypre_int argc,
       }
    }
 
-
-
    /*-----------------------------------------------------------
     * Solve the system using Flexible GMRES
     *-----------------------------------------------------------*/
@@ -4698,7 +4730,6 @@ main( hypre_int argc,
       }
    }
 
-
    /*-----------------------------------------------------------
     * Solve the system using ParCSR version of LGMRES
     *-----------------------------------------------------------*/
@@ -4760,10 +4791,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGDestroy(par_precond);
       }
    }
-
-
-
-
 
    /*-----------------------------------------------------------
     * Solve the system using ParCSR hybrid DSCG/BoomerAMG
@@ -4884,6 +4911,56 @@ main( hypre_int argc,
       HYPRE_StructPFMGGetNumIterations(struct_solver, &num_iterations);
       HYPRE_StructPFMGGetFinalRelativeResidualNorm(struct_solver, &final_res_norm);
       HYPRE_StructPFMGDestroy(struct_solver);
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using Cyclic Reduction
+    *-----------------------------------------------------------*/
+
+   else if ( solver_id == 205 )
+   {
+      HYPRE_StructVector  sr;
+
+      time_index = hypre_InitializeTiming("CycRed Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructCycRedCreate(hypre_MPI_COMM_WORLD, &struct_solver);
+      HYPRE_StructCycRedSetTDim(struct_solver, cycred_tdim);
+      HYPRE_StructCycRedSetBase(struct_solver, data.ndim,
+                                cycred_index, cycred_stride);
+      HYPRE_StructCycRedSetup(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("CycRed Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_StructCycRedSolve(struct_solver, sA, sb, sx);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      num_iterations = 1;
+      HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD,
+                               hypre_StructVectorGrid(sb), &sr);
+      HYPRE_StructVectorInitialize(sr);
+      HYPRE_StructVectorAssemble(sr);
+      HYPRE_StructVectorCopy(sb, sr);
+      hypre_StructMatvec(-1.0, sA, sx, 1.0, sr);
+      /* Using an inner product instead of a norm to help with testing */
+      final_res_norm = hypre_StructInnerProd(sr, sr);
+      if (final_res_norm < 1.0e-20)
+      {
+         final_res_norm = 0.0;
+      }
+      HYPRE_StructVectorDestroy(sr);
+
+      HYPRE_StructCycRedDestroy(struct_solver);
    }
 
    /*-----------------------------------------------------------

@@ -17,8 +17,7 @@ INTERNAL_HEADER=_hypre_struct_mv.h
 # Include guards and other includes
 #===========================================================================
 
-cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
-cat >> $INTERNAL_HEADER <<@
+cat > $INTERNAL_HEADER <<@
 
 #ifndef hypre_STRUCT_MV_HEADER
 #define hypre_STRUCT_MV_HEADER

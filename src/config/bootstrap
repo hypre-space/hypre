@@ -21,14 +21,13 @@ ln -s config/configure.in .
 
 rm -rf aclocal.m4 configure autom4te.cache
 
-# aclocal -I config -I babel-runtime/m4
 autoconf --include=config
 rm configure.in
 
 cat >> configure <<EOF
 
 mv HYPRE_config.h HYPRE_config.h.tmp
-sed 's/F77_FUNC/HYPRE_F77_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
+sed 's/FC_FUNC/HYPRE_FC_FUNC/g' < HYPRE_config.h.tmp > HYPRE_config.h
 rm -f HYPRE_config.h.tmp
 
 EOF

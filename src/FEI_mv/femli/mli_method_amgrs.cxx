@@ -1721,7 +1721,7 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
          for (jcol = AD2DiagI[irow]; jcol < AD2DiagI[irow+1]; jcol++)
             newColInd[newRowSize] = AD2DiagJ[jcol]; 
          if (newRowSize > maxRowLeng) maxRowLeng = newRowSize; 
-         qsort0(newColInd, 0, newRowSize-1);
+         hypre_qsort0(newColInd, 0, newRowSize-1);
          ncount = 0;
          for ( jcol = 0; jcol < newRowSize; jcol++ )
          {
@@ -1756,7 +1756,7 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
             newColInd[newRowSize] = AD2DiagJ[jcol]; 
             newColVal[newRowSize++] = AD2DiagA[jcol]; 
          }
-         qsort1(newColInd, newColVal, 0, newRowSize-1);
+         hypre_qsort1(newColInd, newColVal, 0, newRowSize-1);
          ncount = 0;
          for ( jcol = 0; jcol < newRowSize; jcol++ )
          {

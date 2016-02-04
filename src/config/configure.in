@@ -39,13 +39,13 @@ dnl *
 dnl * Several macros first check whether the compiler works, including:
 dnl * AC_CHECK_LIB, AC_CHECK_FUNC, AC_CHECK_FUNCS,
 dnl * AC_PROG_CC, AC_PROG_CPP, AC_PROG_CXX, AC_PROG_CXXCPP,
-dnl * AC_PROG_F77, AC_F77_WRAPPERS,
+dnl * AC_PROG_FC, AC_FC_WRAPPERS,
 dnl * AC_HYPRE_CHECK_MPI, AC_HYPRE_FIND_G2C,
 dnl * AC_HYPRE_FIND_BLAS, AC_HYPRE_FIND_LAPACK
 dnl *
 dnl * The following macros require a Fortran compiler and are protected
 dnl * below by checking the hypre_using_fortran variable:
-dnl * AC_PROG_F77, AC_F77_WRAPPERS,
+dnl * AC_PROG_FC, AC_FC_WRAPPERS,
 dnl * AC_HYPRE_FIND_BLAS, AC_HYPRE_FIND_LAPACK
 dnl *********************************************************************
 
@@ -142,11 +142,17 @@ hypre_using_mpi=yes
 hypre_using_fei=yes
 hypre_using_superlu=yes
 
-hypre_using_babel=no
 hypre_using_examples=no
 hypre_using_openmp=no
 hypre_using_insure=no
 
+dnl *********************************************************************
+dnl * Initialize flag-check variables
+dnl *********************************************************************
+hypre_blas_lib_old_style=no
+hypre_blas_lib_dir_old_style=no
+hypre_lapack_lib_old_style=no
+hypre_lapack_lib_dir_old_style=no
 dnl *********************************************************************
 dnl * Determine BUILD, HOST, and TARGET types
 dnl *********************************************************************
@@ -195,7 +201,6 @@ AS_HELP_STRING([--enable-bigint],
                [Use long long int for HYPRE_Int (default is NO).]),
 [case "${enableval}" in
     yes) hypre_using_fei=no
-         hypre_using_babel=no
          hypre_using_bigint=yes ;;
     no)  hypre_using_bigint=no ;;
     *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-bigint]) ;;
@@ -212,7 +217,6 @@ AS_HELP_STRING([--enable-complex],
                [Use complex values (default is NO).]),
 [case "${enableval}" in
     yes) hypre_using_fei=no
-         hypre_using_babel=no
          hypre_using_complex=yes ;;
     no)  hypre_using_complex=no ;;
     *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-complex]) ;;
@@ -232,6 +236,37 @@ AS_HELP_STRING([--enable-maxdim=MAXDIM],
 [hypre_maxdim=3]
 )
 AC_DEFINE_UNQUOTED(HYPRE_MAXDIM, [$hypre_maxdim], [Max dimension])
+
+AC_ARG_ENABLE(persistent,
+AS_HELP_STRING([--enable-persistent],
+               [Uses persistent communication (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_persistent=yes ;;
+    no)  hypre_using_persistent=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-persistent]) ;;
+ esac],
+[hypre_using_persistent=no]
+)
+if test "$hypre_using_persistent" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_PERSISTENT_COMM, 1)
+fi
+
+AC_ARG_ENABLE(hopscotch,
+AS_HELP_STRING([--enable-hopscotch],
+               [Uses hopscotch hashing if configured with OpenMP and 
+		atomic capability available(default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_hopscotch=yes ;;
+    no)  hypre_using_hopscotch=no ;;
+    *)   AC_MSG_ERROR([Bad value ${enableval} for --enable-hopscotch]) ;;
+ esac],
+[hypre_using_hopscotch=no]
+)
+if test "$hypre_using_hopscotch" = "yes"
+then
+   AC_DEFINE(HYPRE_HOPSCOTCH, 1)
+fi
 
 dnl * The --with-no-global-partition option is retained here for
 dnl * backward compatibility (no help string is printed).
@@ -265,34 +300,6 @@ AS_HELP_STRING([--enable-fortran],
     *)   hypre_using_fortran=yes ;;
  esac],
 [hypre_using_fortran=yes]
-)
-
-AC_ARG_ENABLE(python,
-AS_HELP_STRING([--enable-python=PYTHON],
-               [Build interface to specified instance of Python (turns on
-                shared libraries, requires Babel; default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_python=yes
-         hypre_python="python" ;;
-    no)  hypre_using_python=no ;;
-    *)   hypre_using_python=yes
-         hypre_python=${enableval}
-         hypre_using_shared=yes ;;
- esac],
-[hypre_using_python=no]
-)
-
-AC_ARG_ENABLE(java,
-AS_HELP_STRING([--enable-java],
-               [Build interface to Java (turns on shared libraries, requires
-                Babel; default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_java=yes ;;
-    no)  hypre_using_java=no ;;
-    *)   hypre_using_java=yes
-         hypre_using_shared=yes ;;
- esac],
-[hypre_using_java=no]
 )
 
 dnl *********************************************************************
@@ -332,14 +339,24 @@ fi
 dnl *********************************************************************
 dnl * Determine if user provided fortran compiler or flags
 dnl *********************************************************************
-if test "x$F77" = "x"
+if test "x$F77" != "x" && test "x$FC" = "x"
+then
+   FC="$F77"
+fi
+
+if test "x$FC" = "x"
 then
    hypre_user_chose_fcompilers=no
 else
    hypre_user_chose_fcompilers=yes
 fi
 
-if test "x$FFLAGS" = "x" || test "x$F77FLAGS" = "x"
+if test "x$F77FLAGS" != "x"
+then
+   FCFLAGS="$F77FLAGS $FCFLAGS"
+fi
+
+if test "x$FFLAGS" = "x" || test "x$FCFLAGS" = "x"
 then
    hypre_user_chose_fflags=no
 else
@@ -428,7 +445,7 @@ AS_HELP_STRING([--with-strict-checking],
     CFLAGS=""
  elif test "x$GCC" = "xyes" || test "x$CC" = "xgcc"; then
     FFLAGS="-g -Wall"
-    CFLAGS="-g -Wall -pedantic"
+    CFLAGS="-g -Wall -std=gnu99 -pedantic"
     CXXFLAGS="-g -Wall -Wshadow -fno-implicit-templates"
     CXXFLAGS="$CXXFLAGS -Woverloaded-virtual -ansi -pedantic"
  elif test "x$CC" = "xicc"; then
@@ -460,8 +477,8 @@ AS_HELP_STRING([--with-strict-checking],
  fi
  if test "$hypre_using_fortran" = "yes"
  then
-    AC_CHECK_PROGS(F77, [g77 ifort pgf77 xlf], [""])
-    if test "x$F77" = "x"
+    AC_CHECK_PROGS(FC, [g77 ifort pgf77 xlf], [""])
+    if test "x$FC" = "x"
     then
        hypre_using_fortran=no
        FFLAGS=""
@@ -524,15 +541,32 @@ AS_HELP_STRING([--with-MPI-flags=FLAGS],
 [MPIFLAGS=""]
 )
 
+AC_ARG_WITH(blas-lib,
+AS_HELP_STRING([--with-blas-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for BLAS. OK to use -L and -l flags in the list]),
+[for blas_lib in $withval; do
+    [prefix=${blas_lib:0:2}]
+    if test $prefix = "-L"
+    then
+       BLASLIBDIRS="$blas_lib $BLASLIBDIRS"
+    else
+       BLASLIBS="$blas_lib $BLASLIBS"
+    fi
+ done;
+ hypre_user_chose_blas=yes]
+)
+
 AC_ARG_WITH(blas-libs,
 AS_HELP_STRING([--with-blas-libs=LIBS],
                [LIBS is space-separated list (enclosed in quotes) of libraries
-                needed for BLAS. The options --with-blas-libs and
+                needed for BLAS (base name only). The options --with-blas-libs and
                 --with-blas-lib-dirs must be used together.]),
 [for blas_lib in $withval; do
     BLASLIBS="$BLASLIBS -l$blas_lib"
  done;
- hypre_user_chose_blas=yes]
+ hypre_user_chose_blas=yes
+ hypre_blas_lib_old_style=yes]
 )
 
 AC_ARG_WITH(blas-lib-dirs,
@@ -545,18 +579,36 @@ AS_HELP_STRING([--with-blas-lib-dirs=DIRS],
 [for blas_lib_dir in $withval; do
     BLASLIBDIRS="-L$blas_lib_dir $BLASLIBDIRS"
  done;
- hypre_user_chose_blas=yes]
+ hypre_user_chose_blas=yes
+ hypre_blas_lib_dir_old_style=yes]
+)
+
+AC_ARG_WITH(lapack-lib,
+AS_HELP_STRING([--with-lapack-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for LAPACK. OK to use -L and -l flags in the list]),
+[for lapack_lib in $withval; do
+    [prefix=${lapack_lib:0:2}]
+    if test $prefix = "-L"
+    then
+       LAPACKLIBDIRS="$lapack_lib $LAPACKLIBDIRS"
+    else
+       LAPACKLIBS="$lapack_lib $LAPACKLIBS"
+    fi
+ done;
+ hypre_user_chose_lapack=yes]
 )
 
 AC_ARG_WITH(lapack-libs,
 AS_HELP_STRING([--with-lapack-libs=LIBS],
                [LIBS is space-separated list (enclosed in quotes) of libraries
-                needed for LAPACK. The options --with-lapack-libs and
+                needed for LAPACK (base name only). The options --with-lapack-libs and
                 --with-lapack-lib-dirs must be used together.]),
 [for lapack_lib in $withval; do
     LAPACKLIBS="$LAPACKLIBS -l$lapack_lib"
  done;
- hypre_user_chose_lapack=yes]
+ hypre_user_chose_lapack=yes
+ hypre_lapack_lib_old_style=yes]
 )
 
 AC_ARG_WITH(lapack-lib-dirs,
@@ -569,7 +621,8 @@ AS_HELP_STRING([--with-lapack-lib-dirs=DIRS],
 [for lapack_lib_dir in $withval; do
     LAPACKLIBDIRS="-L$lapack_lib_dir $LAPACKLIBDIRS"
  done;
- hypre_user_chose_lapack=yes]
+ hypre_user_chose_lapack=yes
+ hypre_lapack_lib_dir_old_style=yes] 
 )
 
 dnl * Define a generic macro to set hypre_fmangle based on withval
@@ -648,16 +701,6 @@ AS_HELP_STRING([--with-openmp],
     no)  hypre_using_openmp=no ;;
  esac],
 [hypre_using_openmp=no]
-)
-
-AC_ARG_WITH(babel,
-AS_HELP_STRING([--with-babel],
-               [Use babel.]),
-[case "${withval}" in
-    yes) hypre_using_babel=yes ;;
-    no)  hypre_using_babel=no ;;
- esac],
-[hypre_using_babel=no]
 )
 
 AC_ARG_WITH(examples,
@@ -768,20 +811,20 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(F77, [xlf_r ifort gfortran g77 g95 pgf77 f77])
+         AC_CHECK_PROGS(FC, [xlf_r ifort gfortran g77 g95 pgf77 f77])
       else
-         AC_CHECK_PROGS(F77, [xlf ifort gfortran g77 g95 pgf77 f77])
+         AC_CHECK_PROGS(FC, [xlf ifort gfortran g77 g95 pgf77 f77])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(F77, [mpxlf mpixlf77_r mpiifort mpif77 mpipgf77])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77_r mpiifort mpif77 mpipgf77])
       else
-         AC_CHECK_PROGS(F77, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77])
+         AC_CHECK_PROGS(FC, [mpxlf mpixlf77 mpiifort mpif77 mpipgf77])
       fi
    fi
 
-   if test "x$F77" = "x"
+   if test "x$FC" = "x"
    then
       hypre_using_fortran=no
    fi
@@ -812,8 +855,8 @@ fi
 
 if test "$hypre_using_fortran" = "yes"
 then
-   AC_PROG_F77
-   AC_F77_WRAPPERS
+   AC_PROG_FC
+   AC_FC_WRAPPERS
 fi
 
 dnl *********************************************************************
@@ -849,20 +892,6 @@ then
       AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION, 1)
    fi
 fi
-
-dnl *********************************************************************
-dnl * For Babel, set the following:
-dnl *********************************************************************
-BABELDIR=""
-if test "$hypre_using_babel" = "yes"
-then
-   BABELDIR="babel-runtime babel"
-   export CC CXX F77 CPP LD
-   export CFLAGS CXXFLAGS FFLAGS F90FLAGS CPPFLAGS LDFLAGS
-dnl   AC_CONFIG_MACRO_DIR([babel-runtime/m4])
-   AC_CONFIG_SUBDIRS(babel-runtime)
-fi
-AC_SUBST(BABELDIR)
 
 dnl *********************************************************************
 dnl * For building example codes, set the following:
@@ -1026,7 +1055,8 @@ esac
 dnl *********************************************************************
 dnl * Set default link commands and suffix values
 dnl *********************************************************************
-LINK_F77="${F77}"
+dnl LINK_F77="${F77}"
+LINK_FC="${FC}"
 LINK_CC="${CC}"
 LINK_CXX="${CXX}"
 
@@ -1041,7 +1071,8 @@ then
    case $hypre_platform in
       AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
                           SHARED_BUILD_FLAG="-G"
-                          LINK_F77="${F77} -brtl"
+dnl                          LINK_F77="${F77} -brtl"
+                          LINK_FC="${FC} -brtl"
                           LINK_CC="${CC} -brtl"
                           LINK_CXX="${CXX} -brtl" ;;
                        *) SHARED_COMPILE_FLAG="-fPIC"
@@ -1050,7 +1081,8 @@ then
    FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
    CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
-   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
+dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
+   BUILD_FC_SHARED="${FC} ${SHARED_BUILD_FLAG}"
    if test "$hypre_using_fei" = "yes"
    then
       BUILD_CC_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
@@ -1081,12 +1113,14 @@ dnl * Set INSURE options
 dnl *********************************************************************
 if test "$hypre_using_insure" = "yes"
 then
-   LINK_F77="insure"
+dnl   LINK_F77="insure"
+   LINK_FC="insure"
    LINK_CC="insure"
    LINK_CXX="insure"
    LDFLAGS=`mpicc -link-info | awk '{$1=""; print}'`
    LDFLAGS="$LDFLAGS ${hypre_insure_flags}"
-   F77="insure"
+dnl   F77="insure"
+   FC="insure"
    CC="insure"
    CXX="insure"
    FFLAGS="`mpicc -link-info | awk '{$1=""; print}'` $FFLAGS"
@@ -1101,6 +1135,55 @@ AC_CHECK_LIB(m, cabs, LIBS="$LIBS -lm")
 dnl * Commenting this out because it doesn't really behave correctly.
 dnl * This should probably be deleted altogether at some point. (RDF)
 dnl AC_HYPRE_FIND_G2C
+
+dnl *********************************************************************
+dnl * Check working user provided blas and lapack libraries
+dnl *********************************************************************
+ if test "$hypre_user_chose_blas" = "yes";
+ then
+   if test "$hypre_blas_lib_old_style" = "yes" -a "$hypre_blas_lib_dir_old_style" = "no";
+   then
+         AC_MSG_ERROR([*********** Unspecified BLASLIBDIRS error: ******************************
+                       --with-blas-libs set without setting corresponding --with-blas-lib-dirs.
+                       Please specify directory paths to preferred blas libraries. 
+                       Otherwise use --with-blas to search for library on the system. 
+                       See "configure --help" for usage details. 
+                       ********************************************************************],[9])
+   fi
+   if test "$hypre_blas_lib_old_style" = "no" -a "$hypre_blas_lib_dir_old_style" = "yes";
+   then
+         AC_MSG_ERROR([*********** Unspecified BLASLIB error: **********************************
+                       --with-blas-lib-dirs set without setting corresponding --with-blas-libs.
+                       Please specify base names of preferred blas libraries in the provided dir paths.
+                       Otherwise use --with-blas to search for library on the system. 
+                       See "configure --help" for usage details. 
+                       ********************************************************************],[9])
+   fi
+   AC_HYPRE_CHECK_USER_BLASLIBS
+ fi
+
+ if test "$hypre_user_chose_lapack" = "yes";
+ then
+   if test "$hypre_lapack_lib_old_style" = "yes" -a "$hypre_lapack_lib_dir_old_style" = "no";
+   then
+         AC_MSG_ERROR([*********** Unspecified LAPACKLIBDIRS error: ******************************
+                       --with-lapack-libs set without setting corresponding --with-lapack-lib-dirs.
+                       Please specify directory paths to preferred lapack libraries. 
+                       Otherwise use --with-lapack to search for library on the system. 
+                       See "configure --help" for usage details. 
+                       ********************************************************************],[9])
+   fi
+   if test "$hypre_lapack_lib_old_style" = "no" -a "$hypre_lapack_lib_dir_old_style" = "yes";
+   then
+         AC_MSG_ERROR([*********** Unspecified LAPACKLIB error: **********************************
+                       --with-lapack-lib-dirs set without setting corresponding --with-lapack-libs.
+                       Please specify base names of preferred lapack libraries in the provided dir paths.
+                       Otherwise use --with-lapack to search for library on the system. 
+                       See "configure --help" for usage details. 
+                       ********************************************************************],[9])
+   fi
+   AC_HYPRE_CHECK_USER_LAPACKLIBS
+ fi
 
 dnl *********************************************************************
 dnl * Set installation directories
@@ -1126,17 +1209,22 @@ dnl *********************************************************************
 
 AC_SUBST(CC)
 AC_SUBST(CXX)
-AC_SUBST(F77)
+dnl AC_SUBST(F77)
+AC_SUBST(FC)
 AC_SUBST(CFLAGS)
 AC_SUBST(CXXFLAGS)
-AC_SUBST(F77FLAGS)
+dnl AC_SUBST(F77FLAGS)
+AC_SUBST(FCFLAGS)
+AC_SUBST(FFLAGS)
 AC_SUBST(LDFLAGS)
 
-AC_SUBST(LINK_F77)
+dnl AC_SUBST(LINK_F77)
+AC_SUBST(LINK_FC)
 AC_SUBST(LINK_CC)
 AC_SUBST(LINK_CXX)
 
-AC_SUBST(BUILD_F77_SHARED)
+dnl AC_SUBST(BUILD_F77_SHARED)
+AC_SUBST(BUILD_FC_SHARED)
 AC_SUBST(BUILD_CC_SHARED)
 AC_SUBST(BUILD_CXX_SHARED)
 AC_SUBST(SHARED_COMPILE_FLAG)
@@ -1161,7 +1249,7 @@ dnl * General purpose header files, libraries and directories
 dnl *********************************************************************
 AC_SUBST(LIBS)
 AC_SUBST(FLIBS)
-
+AC_SUBST(FCLIBS)
 dnl *********************************************************************
 dnl * suffix for hypre libraries
 dnl *********************************************************************

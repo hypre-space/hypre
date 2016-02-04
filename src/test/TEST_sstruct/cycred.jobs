@@ -1,0 +1,50 @@
+#!/bin/sh 
+
+#=============================================================================
+# 3D
+#=============================================================================
+
+# These should all give final residuals of 0
+mpirun -np 1 ./sstruct -in sstruct.in.cycred-3Dx -solver 205 -crtdim 0 -cri 0 0 0 -crs 1 1 1 -r 3 3 3 -P 1 1 1 > cycred.out.3Dx.1
+mpirun -np 5 ./sstruct -in sstruct.in.cycred-3Dx -solver 205 -crtdim 0 -cri 0 0 0 -crs 1 1 1 -r 1 5 5 -P 5 1 1 > cycred.out.3Dx.2
+mpirun -np 8 ./sstruct -in sstruct.in.cycred-3Dx -solver 205 -crtdim 0 -cri 0 0 0 -crs 1 1 1 -r 2 2 2 -P 2 2 2 > cycred.out.3Dx.3
+mpirun -np 1 ./sstruct -in sstruct.in.cycred-3Dy -solver 205 -crtdim 1 -cri 0 0 0 -crs 1 1 1 -r 3 3 3 -P 1 1 1 > cycred.out.3Dy.1
+mpirun -np 5 ./sstruct -in sstruct.in.cycred-3Dy -solver 205 -crtdim 1 -cri 0 0 0 -crs 1 1 1 -r 5 1 5 -P 1 5 1 > cycred.out.3Dy.2
+mpirun -np 8 ./sstruct -in sstruct.in.cycred-3Dy -solver 205 -crtdim 1 -cri 0 0 0 -crs 1 1 1 -r 2 2 2 -P 2 2 2 > cycred.out.3Dy.3
+mpirun -np 1 ./sstruct -in sstruct.in.cycred-3Dz -solver 205 -crtdim 2 -cri 0 0 0 -crs 1 1 1 -r 3 3 3 -P 1 1 1 > cycred.out.3Dz.1
+mpirun -np 5 ./sstruct -in sstruct.in.cycred-3Dz -solver 205 -crtdim 2 -cri 0 0 0 -crs 1 1 1 -r 5 5 1 -P 1 1 5 > cycred.out.3Dz.2
+mpirun -np 8 ./sstruct -in sstruct.in.cycred-3Dz -solver 205 -crtdim 2 -cri 0 0 0 -crs 1 1 1 -r 2 2 2 -P 2 2 2 > cycred.out.3Dz.3
+
+# These should all give the same nonzero final residuals
+mpirun -np 1 ./sstruct -in sstruct.in.cycred-3Dx -solver 205 -crtdim 0 -cri 0 0 1 -crs 1 1 3 -r 4 4 4 -P 1 1 1 > cycred.out.3Dx.5
+mpirun -np 4 ./sstruct -in sstruct.in.cycred-3Dx -solver 205 -crtdim 0 -cri 0 1 0 -crs 1 3 1 -r 1 4 4 -P 4 1 1 > cycred.out.3Dx.6
+mpirun -np 1 ./sstruct -in sstruct.in.cycred-3Dy -solver 205 -crtdim 1 -cri 0 0 1 -crs 1 1 3 -r 4 4 4 -P 1 1 1 > cycred.out.3Dy.5
+mpirun -np 4 ./sstruct -in sstruct.in.cycred-3Dy -solver 205 -crtdim 1 -cri 1 0 0 -crs 3 1 1 -r 4 1 4 -P 1 4 1 > cycred.out.3Dy.6
+mpirun -np 1 ./sstruct -in sstruct.in.cycred-3Dz -solver 205 -crtdim 2 -cri 0 1 0 -crs 1 3 1 -r 4 4 4 -P 1 1 1 > cycred.out.3Dz.5
+mpirun -np 4 ./sstruct -in sstruct.in.cycred-3Dz -solver 205 -crtdim 2 -cri 1 0 0 -crs 3 1 1 -r 4 4 1 -P 1 1 4 > cycred.out.3Dz.6
+
+#=============================================================================
+# 2D
+#=============================================================================
+
+# These should all give final residuals of 0
+mpirun -np 1 ./sstruct -in sstruct.in.cycred-2Dx -solver 205 -crtdim 0 -cri 0 0 0 -crs 1 1 1 -r 3 3 1 -P 1 1 1 > cycred.out.2Dx.1
+mpirun -np 5 ./sstruct -in sstruct.in.cycred-2Dx -solver 205 -crtdim 0 -cri 0 0 0 -crs 1 1 1 -r 1 5 1 -P 5 1 1 > cycred.out.2Dx.2
+mpirun -np 4 ./sstruct -in sstruct.in.cycred-2Dx -solver 205 -crtdim 0 -cri 0 0 0 -crs 1 1 1 -r 2 2 1 -P 2 2 1 > cycred.out.2Dx.3
+mpirun -np 1 ./sstruct -in sstruct.in.cycred-2Dy -solver 205 -crtdim 1 -cri 0 0 0 -crs 1 1 1 -r 3 3 1 -P 1 1 1 > cycred.out.2Dy.1
+mpirun -np 5 ./sstruct -in sstruct.in.cycred-2Dy -solver 205 -crtdim 1 -cri 0 0 0 -crs 1 1 1 -r 5 1 1 -P 1 5 1 > cycred.out.2Dy.2
+mpirun -np 4 ./sstruct -in sstruct.in.cycred-2Dy -solver 205 -crtdim 1 -cri 0 0 0 -crs 1 1 1 -r 2 2 1 -P 2 2 1 > cycred.out.2Dy.3
+
+# These should all give the same nonzero final residuals
+mpirun -np 1 ./sstruct -in sstruct.in.cycred-2Dx -solver 205 -crtdim 0 -cri 0 1 0 -crs 1 3 1 -r 4 4 1 -P 1 1 1 > cycred.out.2Dx.5
+mpirun -np 4 ./sstruct -in sstruct.in.cycred-2Dx -solver 205 -crtdim 0 -cri 0 1 0 -crs 1 3 1 -r 1 4 1 -P 4 1 1 > cycred.out.2Dx.6
+mpirun -np 1 ./sstruct -in sstruct.in.cycred-2Dy -solver 205 -crtdim 1 -cri 1 0 0 -crs 3 1 1 -r 4 4 1 -P 1 1 1 > cycred.out.2Dy.5
+mpirun -np 4 ./sstruct -in sstruct.in.cycred-2Dy -solver 205 -crtdim 1 -cri 1 0 0 -crs 3 1 1 -r 4 1 1 -P 1 4 1 > cycred.out.2Dy.6
+
+#=============================================================================
+# 1D
+#=============================================================================
+
+# These should all give final residuals of 0
+mpirun -np 1 ./sstruct -in sstruct.in.cycred-1Dx -solver 205 -crtdim 0 -cri 0 0 0 -crs 1 1 1 -r 3 1 1 -P 1 1 1 > cycred.out.1Dx.1
+mpirun -np 5 ./sstruct -in sstruct.in.cycred-1Dx -solver 205 -crtdim 0 -cri 0 0 0 -crs 1 1 1 -r 1 1 1 -P 5 1 1 > cycred.out.1Dx.2

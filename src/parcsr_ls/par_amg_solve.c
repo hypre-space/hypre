@@ -247,13 +247,11 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
         old_resid = resid_nrm;
 
         if ( amg_logging > 1 ) {
-           hypre_ParVectorCopy(F_array[0], Residual);
-           hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Residual );
+           hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Residual );
            resid_nrm = sqrt(hypre_ParVectorInnerProd( Residual, Residual ));
         }
         else {
-           hypre_ParVectorCopy(F_array[0], Vtemp);
-           hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
+           hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);
            resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
         }
 

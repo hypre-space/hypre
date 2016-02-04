@@ -355,7 +355,7 @@ GenerateRotate7pt( MPI_Comm comm,
       for (i=0; i < o_cnt; i++)
          work[i] = offd_j[i];
 
-      qsort0(work, 0, o_cnt-1);
+      hypre_qsort0(work, 0, o_cnt-1);
 
       col_map_offd[0] = work[0];
       cnt = 0;

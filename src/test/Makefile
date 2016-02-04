@@ -52,14 +52,6 @@ LFLAGS =\
  ${BLASLIBFLAGS}\
  ${LIBFLAGS}
 
-BABELLIBFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -lbHYPRE\
- -lbHYPREClient-C\
- -lbHYPREClient-F\
- -lbHYPRE\
- -lsidl -ldl -lxml2
-
 ##################################################################
 # Targets
 ##################################################################
@@ -75,11 +67,6 @@ HYPRE_DRIVERS =\
  sstruct_fac.c\
  ij_mv.c\
  zboxloop.c
-
-HYPRE_BABEL_DRIVERS =\
- struct_b.c\
- sstruct_b.c\
- ij_b.c
 
 HYPRE_DRIVERS_CXX =\
  fei.cxx\
@@ -99,33 +86,16 @@ HYPRE_DRIVERS_F77 =\
  f77_ij_mv.f\
  f77_struct.f
 
-HYPRE_BABEL_DRIVERS_CXX =
-
-HYPRE_BABEL_DRIVERS_F77 =\
- f77_ij_b.f\
- f77_struct_b.f
-
-
 HYPRE_DRIVER_EXECS=${HYPRE_DRIVERS:.c=}
 HYPRE_F77_EXAMPLES_DRIVER_EXECS=${HYPRE_F77_EXAMPLES_DRIVERS:.c=}
 HYPRE_DRIVER_F77_EXECS=${HYPRE_DRIVERS_F77:.f=}
 HYPRE_DRIVER_CXX_EXECS=${HYPRE_DRIVERS_CXX:.cxx=}
-
-HYPRE_BABEL_DRIVER_OBJS=${HYPRE_BABEL_DRIVERS:.c=.o}
-HYPRE_BABEL_DRIVER_CXX_OBJS=${HYPRE_BABEL_DRIVERS_CXX:.cxx=.o}
-HYPRE_BABEL_DRIVER_F77_OBJS=${HYPRE_BABEL_DRIVERS_F77:.f=.o}
-
-HYPRE_BABEL_DRIVER_EXECS=${HYPRE_BABEL_DRIVERS:.c=}
-HYPRE_BABEL_DRIVER_CXX_EXECS=${HYPRE_BABEL_DRIVERS_CXX:.cxx=}
-HYPRE_BABEL_DRIVER_F77_EXECS=${HYPRE_BABEL_DRIVERS_F77:.f=}
 
 all: ${HYPRE_DRIVER_EXECS}
 
 all77: ${HYPRE_DRIVER_F77_EXECS}
 
 all++: ${HYPRE_DRIVER_CXX_EXECS}
-
-babel: ${HYPRE_BABEL_DRIVER_EXECS} ${HYPRE_BABEL_DRIVER_F77_EXECS}
 
 install:
 
@@ -137,9 +107,6 @@ distclean: clean
 	rm -f ${HYPRE_DRIVER_EXECS}
 	rm -f ${HYPRE_F77_EXAMPLES_DRIVER_EXECS}
 	rm -f ${HYPRE_DRIVER_F77_EXECS}
-	rm -f ${HYPRE_BABEL_DRIVER_EXECS}
-	rm -f ${HYPRE_BABEL_DRIVER_CXX_EXECS}
-	rm -f ${HYPRE_BABEL_DRIVER_F77_EXECS}
 	rm -f ${HYPRE_DRIVER_CXX_EXECS} cxx_*
 	rm -f TEST_examples/*.out*
 	rm -f TEST_examples/*.err*
@@ -153,7 +120,7 @@ distclean: clean
 	rm -f TEST_sstruct/*.err*
 	rm -f TEST_struct/*.out*
 	rm -f TEST_struct/*.err*
-	rm -f ex1 ex2 ex3 ex4 ex5 ex5b ex5b77 ex6 ex7 ex8 ex9
+	rm -f ex1 ex2 ex3 ex4 ex5 ex5big ex5b ex5b77 ex6 ex7 ex8 ex9 ex15big ex18comp
 
 ##################################################################
 # Rules
@@ -173,31 +140,31 @@ struct_migrate: struct_migrate.o
 
 fij_mv: fij_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fparcsr_ls: fparcsr_ls.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fparcsr_mv: fparcsr_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fsstruct_ls: fsstruct_ls.f 
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fsstruct_mv: fsstruct_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fstruct_ls: fstruct_ls.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 fstruct_mv: fstruct_mv.f
 	@echo  "Building" $@ "... "
-	${F77} -c $@  ${FFLAGS}
+	${FC} -c $@  ${FFLAGS}
 
 struct_for: fstruct_mv.o fstruct_ls.o struct_for.o
 	@echo  "Building" $@ "... "
@@ -265,15 +232,15 @@ fei: fei.o
 
 f77_struct: f77_struct.o
 	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+	${FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 f77_ij: f77_ij.o
 	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+	${FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 f77_ij_mv: f77_ij_mv.o
 	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+	${FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 driver_commpkg: driver_commpkg.o
 	@echo  "Building" $@ "... "
@@ -304,13 +271,3 @@ cxx_struct.o: cxx_struct.cxx
 cxx_struct.cxx: struct.c
 	cp -fp struct.c cxx_struct.cxx
 
-##################################################################
-# Babel version of above
-##################################################################
-${HYPRE_BABEL_DRIVER_EXECS}: ${HYPRE_BABEL_DRIVER_OBJS}
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${BABELLIBFLAGS} ${LFLAGS}
-
-${HYPRE_BABEL_DRIVER_F77_EXECS}: ${HYPRE_BABEL_DRIVER_F77_OBJS}
-	@echo  "Building" $@ "... "
-	${F77} -o $@ $@.o ${BABELLIBFLAGS} ${FFLAGS} ${LFLAGS}

@@ -106,6 +106,8 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
       hypre_CSRMatrixCreate(local_num_rows, local_num_cols,num_nonzeros_diag);
    hypre_ParCSRMatrixOffd(matrix) =
       hypre_CSRMatrixCreate(local_num_rows, num_cols_offd,num_nonzeros_offd);
+   hypre_ParCSRMatrixDiagT(matrix) = NULL;
+   hypre_ParCSRMatrixOffdT(matrix) = NULL; // JSP: transposed matrices are optional
    hypre_ParCSRMatrixGlobalNumRows(matrix) = global_num_rows;
    hypre_ParCSRMatrixGlobalNumCols(matrix) = global_num_cols;
    hypre_ParCSRMatrixFirstRowIndex(matrix) = first_row_index;
@@ -155,6 +157,14 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
       {
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matrix));
          hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(matrix));
+         if ( hypre_ParCSRMatrixDiagT(matrix) )
+         {
+            hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiagT(matrix));
+         }
+         if ( hypre_ParCSRMatrixOffdT(matrix) )
+         {
+            hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffdT(matrix));
+         }
          if (hypre_ParCSRMatrixColMapOffd(matrix))
             hypre_TFree(hypre_ParCSRMatrixColMapOffd(matrix));
          if (hypre_ParCSRMatrixCommPkg(matrix))
@@ -590,8 +600,7 @@ hypre_ParCSRMatrixPrintIJ( const hypre_ParCSRMatrix *matrix,
 
    if ((file = fopen(new_filename, "w")) == NULL)
    {
-      hypre_printf("Error: can't open output file %s\n", new_filename);
-      hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error: can't open output file %s\n");
       return hypre_error_flag;
    }
 
@@ -716,8 +725,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
 
    if ((file = fopen(new_filename, "r")) == NULL)
    {
-      hypre_printf("Error: can't open output file %s\n", new_filename);
-      hypre_error(HYPRE_ERROR_GENERIC);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Error: can't open output file %s\n");
       return hypre_error_flag;
    }
 
@@ -807,7 +815,7 @@ hypre_ParCSRMatrixReadIJ( MPI_Comm             comm,
       aux_offd_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd);
       for (i=0; i < num_nonzeros_offd; i++)
          aux_offd_j[i] = offd_j[i];
-      qsort0(aux_offd_j,0,num_nonzeros_offd-1);
+      hypre_qsort0(aux_offd_j,0,num_nonzeros_offd-1);
       col_map_offd = hypre_ParCSRMatrixColMapOffd(matrix);
       col_map_offd[0] = aux_offd_j[0];
       offd_cnt = 0;
@@ -1666,8 +1674,8 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
          used_procs[i] = send_proc_obj.id[i];
          new_vec_starts[i+1] = send_proc_obj.elements[i]+1;
       }
-      qsort0(used_procs, 0, num_types-1);
-      qsort0(new_vec_starts, 0, num_types);
+      hypre_qsort0(used_procs, 0, num_types-1);
+      hypre_qsort0(new_vec_starts, 0, num_types);
       /*now we need to put into an array to send */
       count =  2*num_types+2;
       send_info = hypre_CTAlloc(HYPRE_Int, count);

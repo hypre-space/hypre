@@ -11,20 +11,13 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
-
-
-
 INTERNAL_HEADER=_hypre_parcsr_ls.h
 
 #===========================================================================
 # Include guards and other includes
 #===========================================================================
 
-cat ../tools/BHEAD_code_template > $INTERNAL_HEADER
-cat >> $INTERNAL_HEADER <<@
+cat > $INTERNAL_HEADER <<@
 
 #include <HYPRE_config.h>
 

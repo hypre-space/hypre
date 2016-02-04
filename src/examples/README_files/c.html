@@ -106,17 +106,6 @@ This example solves the same problem as Example 3.
 Available solvers are AMG, PCG, PCG with AMG or
 Parasails preconditioners, or Flexible GMRES with 
 AMG preconditioner.
-<a href="ex5b.c.html"><h2>Example 5 (Babel-based C version)</h2></a>
-<p>
-This example solves the 2-D
-Laplacian problem with zero boundary conditions
-on an nxn grid.  The number of unknowns is N=n^2.
-The standard 5-point stencil is used, and we solve
-for the interior nodes only.
-<p>
-This example solves the same problem as Example 3.
-Available solvers are AMG, PCG, and PCG with AMG or
-Parasails preconditioners.
 <a href="ex6.c.html"><h2>Example 6</h2></a>
 <p>
 This is a two processor example and is the same problem
@@ -131,18 +120,6 @@ structured solver for this example.
 We recommend comparing this example with Example 2.
 
 
-<a href="ex6b.c.html"><h2>Example 6 (Babel-based C version)</h2></a>
-<p>
-This is a two processor example and is the same problem
-as is solved with the structured interface in Example 2. 
-(The grid boxes are exactly those in the example
-diagram in the struct interface chapter of the User's Manual.
-Processor 0 owns two boxes and processor 1 owns one box.)
-This is the simplest sstruct example.  There is one part and 
-one variable.  The solver is PCG with SMG preconditioner. We use a 
-structured solver for this example.
-<p>
-We recommend comparing this example with Example 2.
 <a href="ex7.c.html"><h2>Example 7</h2></a>
 <p>
 This example uses the sstruct interface to solve the same 

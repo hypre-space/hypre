@@ -1,14 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
 
 #ifndef hypre_SSTRUCT_MV_HEADER
 #define hypre_SSTRUCT_MV_HEADER
@@ -828,9 +817,7 @@ HYPRE_Int HYPRE_SStructGridCreate ( MPI_Comm comm , HYPRE_Int ndim , HYPRE_Int n
 HYPRE_Int HYPRE_SStructGridDestroy ( HYPRE_SStructGrid grid );
 HYPRE_Int HYPRE_SStructGridSetExtents ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper );
 HYPRE_Int HYPRE_SStructGridSetVariables ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int nvars , HYPRE_SStructVariable *vartypes );
-HYPRE_Int HYPRE_SStructGridSetVariable ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int var , HYPRE_Int nvars , HYPRE_SStructVariable vartype );
 HYPRE_Int HYPRE_SStructGridAddVariables ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int nvars , HYPRE_SStructVariable *vartypes );
-HYPRE_Int HYPRE_SStructGridAddVariable ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , HYPRE_SStructVariable vartype );
 HYPRE_Int HYPRE_SStructGridSetFEMOrdering ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *ordering );
 HYPRE_Int HYPRE_SStructGridSetNeighborPart ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int nbor_part , HYPRE_Int *nbor_ilower , HYPRE_Int *nbor_iupper , HYPRE_Int *index_map , HYPRE_Int *index_dir );
 HYPRE_Int HYPRE_SStructGridSetSharedPart ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int *offset , HYPRE_Int shared_part , HYPRE_Int *shared_ilower , HYPRE_Int *shared_iupper , HYPRE_Int *shared_offset , HYPRE_Int *index_map , HYPRE_Int *index_dir );
@@ -909,7 +896,6 @@ HYPRE_Int hypre_SStructPGridDestroy ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructPGridSetExtents ( hypre_SStructPGrid *pgrid , hypre_Index ilower , hypre_Index iupper );
 HYPRE_Int hypre_SStructPGridSetCellSGrid ( hypre_SStructPGrid *pgrid , hypre_StructGrid *cell_sgrid );
 HYPRE_Int hypre_SStructPGridSetVariables ( hypre_SStructPGrid *pgrid , HYPRE_Int nvars , HYPRE_SStructVariable *vartypes );
-HYPRE_Int hypre_SStructPGridSetVariable ( hypre_SStructPGrid *pgrid , HYPRE_Int var , HYPRE_Int nvars , HYPRE_SStructVariable vartype );
 HYPRE_Int hypre_SStructPGridSetPNeighbor ( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box , hypre_Index pnbor_offset );
 HYPRE_Int hypre_SStructPGridAssemble ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructGridRef ( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref );

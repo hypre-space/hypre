@@ -89,7 +89,7 @@ all:
 	cp -fR HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fR $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fR $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
-	for i in ${HYPRE_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \
 	  (cd $$i && $(MAKE) $@) || exit 1; \
@@ -182,7 +182,7 @@ install: all
 clean:
 	@ \
 	rm -Rf hypre; \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
 	do \
 	  if [ -f $$i/Makefile ]; \
 	  then \
@@ -195,7 +195,7 @@ clean:
 distclean:
 	@ \
 	rm -Rf hypre; \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_BABEL_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
+	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_EXAMPLE_DIRS} examples/docs; \
 	do \
 	  if [ -d $$i ]; \
 	  then \

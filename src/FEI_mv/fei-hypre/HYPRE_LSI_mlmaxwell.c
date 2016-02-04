@@ -44,7 +44,7 @@
 #include "HYPRE_MLMatrix.h"
 #include "HYPRE_MLMaxwell.h"
 
-extern void qsort0(int *, int, int);
+extern void hypre_qsort0(int *, int, int);
 extern int  HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix,
                   HYPRE_ML_Matrix *, int *, MPI_Comm, MLMaxwell_Context*); 
 
@@ -796,7 +796,7 @@ int HYPRE_LSI_MLConstructMLMatrix(HYPRE_ParCSRMatrix A,
        }
        HYPRE_ParCSRMatrixRestoreRow(A, i, &rowLeng, &colInd, &colVal);
     }
-    if (externLeng > 1) qsort0(externList, 0, externLeng-1);
+    if (externLeng > 1) hypre_qsort0(externList, 0, externLeng-1);
     ncnt = 0;
     for (i = 1; i < externLeng; i++)
     {

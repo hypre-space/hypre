@@ -48,7 +48,6 @@ hypre_BoomerAMGCoarsenCR1( hypre_ParCSRMatrix    *A,
                                                                                                              
    HYPRE_Int             *CF_marker;
    HYPRE_Int              coarse_size;
-   HYPRE_Int              ierr = 0;
                                                                                                              
    if(CRaddCpoints == 0){
       CF_marker = hypre_CTAlloc(HYPRE_Int, num_variables);
@@ -61,7 +60,7 @@ hypre_BoomerAMGCoarsenCR1( hypre_ParCSRMatrix    *A,
   /* Run the CR routine */
                                                                                                              
    hypre_fprintf(stdout,"\n... Building CF using CR ...\n\n");
-   cr(A_i, A_j, A_data, num_variables, CF_marker,
+   hypre_cr(A_i, A_j, A_data, num_variables, CF_marker,
       RelaxScheme1, omega1, theta_global1,mu1);
                                                                                                              
    hypre_fprintf(stdout,"\n... Done \n\n");
@@ -74,11 +73,11 @@ hypre_BoomerAMGCoarsenCR1( hypre_ParCSRMatrix    *A,
    *CF_marker_ptr   = CF_marker;
    *coarse_size_ptr = coarse_size;
                                                                                                              
-   return (ierr);
+   return hypre_error_flag;
 }
 
 /* main cr routine */
-HYPRE_Int cr(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int n, HYPRE_Int *cf, 
+HYPRE_Int hypre_cr(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int n, HYPRE_Int *cf, 
        HYPRE_Int rlx, HYPRE_Real omega, HYPRE_Real tg, HYPRE_Int mu)
 { 
    HYPRE_Int i,nstages=0;  
@@ -107,11 +106,11 @@ HYPRE_Int cr(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int n, HY
       switch(rlx){
          case fptOmegaJac: 
             for (i=0;i<mu;i++)
-               fptjaccr(cf,A_i,A_j,A_data,n,e0,omega,e1); 
+               hypre_fptjaccr(cf,A_i,A_j,A_data,n,e0,omega,e1); 
          break;
          case fptgs:
             for (i=0;i<mu;i++)  
-               fptgscr(cf,A_i,A_j,A_data,n,e0,e1); 
+               hypre_fptgscr(cf,A_i,A_j,A_data,n,e0,e1); 
          break;
       }
 
@@ -123,8 +122,8 @@ HYPRE_Int cr(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int n, HY
       rho = sqrt(rho1)/sqrt(rho0);
 
       if (rho > tg){
-         formu(cf,n,e1,A_i,rho);
-         IndepSetGreedy(A_i,A_j,n,cf);
+         hypre_formu(cf,n,e1,A_i,rho);
+         hypre_IndepSetGreedy(A_i,A_j,n,cf);
 
          hypre_fprintf(stdout,"  %d \t%2.3f  \t%2.3f \n",
                  nstages,rho,nc/n);
@@ -145,11 +144,11 @@ HYPRE_Int cr(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int n, HY
          break;
       }
    }
-   free(e0); free(e1); return 0;
+   free(e0); free(e1); return hypre_error_flag;
 }
 
 /* take an ind. set over the candidates*/
-HYPRE_Int GraphAdd( Link *list, HYPRE_Int *head, HYPRE_Int *tail, HYPRE_Int index, HYPRE_Int istack )
+HYPRE_Int hypre_GraphAdd( Link *list, HYPRE_Int *head, HYPRE_Int *tail, HYPRE_Int index, HYPRE_Int istack )
 {
    HYPRE_Int prev = tail[-istack];
                                                                                                        
@@ -162,10 +161,10 @@ HYPRE_Int GraphAdd( Link *list, HYPRE_Int *head, HYPRE_Int *tail, HYPRE_Int inde
    list[index].next = -istack;
    tail[-istack] = index;
                                                                                                        
-   return 0;
+   return hypre_error_flag;
 }
                                                                                                        
-HYPRE_Int GraphRemove( Link *list, HYPRE_Int *head, HYPRE_Int *tail, HYPRE_Int index )
+HYPRE_Int hypre_GraphRemove( Link *list, HYPRE_Int *head, HYPRE_Int *tail, HYPRE_Int index )
 {
    HYPRE_Int prev = list[index].prev;
    HYPRE_Int next = list[index].next;
@@ -181,10 +180,10 @@ HYPRE_Int GraphRemove( Link *list, HYPRE_Int *head, HYPRE_Int *tail, HYPRE_Int i
       list[next].prev = prev;
    }
                                                                                                        
-   return 0;
+   return hypre_error_flag;
 }
 
-HYPRE_Int IndepSetGreedy(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int *cf) 
+HYPRE_Int hypre_IndepSetGreedy(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int *cf) 
 {
    Link *list;
    HYPRE_Int  *head, *head_mem, *ma;
@@ -234,7 +233,7 @@ HYPRE_Int IndepSetGreedy(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int 
    }
    for (i = 0; i < n; i++){
       if (ma[i] > 0){
-         GraphAdd(list, head, tail, i, (HYPRE_Int) ma[i]);
+         hypre_GraphAdd(list, head, tail, i, (HYPRE_Int) ma[i]);
       }
    }
                                                                                                        
@@ -248,7 +247,7 @@ HYPRE_Int IndepSetGreedy(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int 
       ma[i] = -1;
                                                                                                        
      /* remove i from graph */
-      GraphRemove(list, head, tail, i);
+      hypre_GraphRemove(list, head, tail, i);
                                                                                                        
      /* update nbs and nbs-of-nbs */
       for (ji = A_i[i]+1; ji < A_i[i+1]; ji++){
@@ -257,7 +256,7 @@ HYPRE_Int IndepSetGreedy(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int 
          if (ma[jj] > -1){
            /* if a candidate, remove jj from graph */
             if (ma[jj] > 0){
-               GraphRemove(list, head, tail, jj);
+               hypre_GraphRemove(list, head, tail, jj);
             }
                                                                                                        
            /* make jj an F point and mark "decided" */
@@ -271,8 +270,8 @@ HYPRE_Int IndepSetGreedy(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int 
                   ma[index]++;
                                                                                                        
                  /* move index in graph */
-                  GraphRemove(list, head, tail, index);
-                  GraphAdd(list, head, tail, index,
+                  hypre_GraphRemove(list, head, tail, index);
+                  hypre_GraphAdd(list, head, tail, index,
                            (HYPRE_Int) ma[index]);
                   if (ma[index] > istack){
                      istack = (HYPRE_Int) ma[index];
@@ -290,10 +289,10 @@ HYPRE_Int IndepSetGreedy(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int 
       }
    }
    free(ma); free(list); free(head_mem); free(tail_mem);
-   return 0;
+   return hypre_error_flag;
 }
 
-HYPRE_Int IndepSetGreedyS(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int *cf) 
+HYPRE_Int hypre_IndepSetGreedyS(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int *cf) 
 {
    Link *list;
    HYPRE_Int  *head, *head_mem, *ma;
@@ -343,7 +342,7 @@ HYPRE_Int IndepSetGreedyS(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int
    }
    for (i = 0; i < n; i++){
       if (ma[i] > 0){
-         GraphAdd(list, head, tail, i, (HYPRE_Int) ma[i]);
+         hypre_GraphAdd(list, head, tail, i, (HYPRE_Int) ma[i]);
       }
    }
                                                                                                        
@@ -357,7 +356,7 @@ HYPRE_Int IndepSetGreedyS(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int
       ma[i] = -1;
                                                                                                        
      /* remove i from graph */
-      GraphRemove(list, head, tail, i);
+      hypre_GraphRemove(list, head, tail, i);
                                                                                                        
      /* update nbs and nbs-of-nbs */
       for (ji = A_i[i]; ji < A_i[i+1]; ji++){
@@ -366,7 +365,7 @@ HYPRE_Int IndepSetGreedyS(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int
          if (ma[jj] > -1){
            /* if a candidate, remove jj from graph */
             if (ma[jj] > 0){
-               GraphRemove(list, head, tail, jj);
+               hypre_GraphRemove(list, head, tail, jj);
             }
                                                                                                        
            /* make jj an F point and mark "decided" */
@@ -380,8 +379,8 @@ HYPRE_Int IndepSetGreedyS(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int
                   ma[index]++;
                                                                                                        
                  /* move index in graph */
-                  GraphRemove(list, head, tail, index);
-                  GraphAdd(list, head, tail, index,
+                  hypre_GraphRemove(list, head, tail, index);
+                  hypre_GraphAdd(list, head, tail, index,
                            (HYPRE_Int) ma[index]);
                   if (ma[index] > istack){
                      istack = (HYPRE_Int) ma[index];
@@ -399,11 +398,11 @@ HYPRE_Int IndepSetGreedyS(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Int n, HYPRE_Int
       }
    }
    free(ma); free(list); free(head_mem); free(tail_mem);
-   return 0;
+   return hypre_error_flag;
 }
 
 /* f point jac cr */
-HYPRE_Int fptjaccr(HYPRE_Int *cf, HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data,
+HYPRE_Int hypre_fptjaccr(HYPRE_Int *cf, HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data,
        HYPRE_Int n, HYPRE_Real *e0, HYPRE_Real omega, HYPRE_Real *e1)
 {
    HYPRE_Int i, j;
@@ -425,12 +424,12 @@ HYPRE_Int fptjaccr(HYPRE_Int *cf, HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_
          e1[i] += omega*res/A_data[A_i[i]];
       }
    }
-   return 0;
+   return hypre_error_flag;
 }
 
 
 /* f point GS cr */
-HYPRE_Int fptgscr(HYPRE_Int *cf, HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int n,
+HYPRE_Int hypre_fptgscr(HYPRE_Int *cf, HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int n,
        HYPRE_Real *e0, HYPRE_Real *e1)
 {
    HYPRE_Int i, j;
@@ -451,11 +450,11 @@ HYPRE_Int fptgscr(HYPRE_Int *cf, HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_d
          e1[i] = res/A_data[A_i[i]];  
       }
    }
-return 0;
+return hypre_error_flag;
 }
 
 /* form the candidate set U */
-HYPRE_Int formu(HYPRE_Int *cf,HYPRE_Int n, HYPRE_Real *e1, HYPRE_Int *A_i, HYPRE_Real rho){
+HYPRE_Int hypre_formu(HYPRE_Int *cf,HYPRE_Int n, HYPRE_Real *e1, HYPRE_Int *A_i, HYPRE_Real rho){
    HYPRE_Int i;
    HYPRE_Real candmeas=0.0e0, max=0.0e0;
    HYPRE_Real thresh=1-rho;
@@ -472,7 +471,7 @@ HYPRE_Int formu(HYPRE_Int *cf,HYPRE_Int n, HYPRE_Real *e1, HYPRE_Int *A_i, HYPRE
          }
       }
    }
-   return 0;
+   return hypre_error_flag;
 }
 /*==========================================================================
  * Ruge's coarsening algorithm                        
@@ -530,7 +529,6 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
    HYPRE_Int              num_left = 0;
    HYPRE_Int              nabor, nabor_two;
 
-   HYPRE_Int              ierr = 0;
    HYPRE_Int              f_pnt = F_PT;
    HYPRE_Real	    wall_time;
 
@@ -786,7 +784,7 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
       {
          if (measure > 0)
          {
-            enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
+            hypre_enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
          }
          else
          {
@@ -801,11 +799,11 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
                   {
                      new_meas = measure_array[nabor];
 	             if (new_meas > 0)
-                        remove_point(&LoL_head, &LoL_tail, new_meas, 
+                        hypre_remove_point(&LoL_head, &LoL_tail, new_meas, 
                                nabor, lists, where);
 
                      new_meas = ++(measure_array[nabor]);
-                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                     hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor, lists, where);
                   }
 	          else
@@ -848,7 +846,7 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
       measure_array[index] = 0;
       --num_left;
       
-      remove_point(&LoL_head, &LoL_tail, measure, index, lists, where);
+      hypre_remove_point(&LoL_head, &LoL_tail, measure, index, lists, where);
   
       for (j = ST_i[index]; j < ST_i[index+1]; j++)
       {
@@ -858,7 +856,7 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
             CF_marker[nabor] = F_PT;
             measure = measure_array[nabor];
 
-            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+            hypre_remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
             --num_left;
 
             for (k = S_i[nabor]+1; k < S_i[nabor+1]; k++)
@@ -867,12 +865,12 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
                if (CF_marker[nabor_two] == UNDECIDED)
                {
                   measure = measure_array[nabor_two];
-                  remove_point(&LoL_head, &LoL_tail, measure, 
+                  hypre_remove_point(&LoL_head, &LoL_tail, measure, 
                                nabor_two, lists, where);
 
                   new_meas = ++(measure_array[nabor_two]);
                  
-                  enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                  hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor_two, lists, where);
                }
             }
@@ -885,12 +883,12 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
          {
             measure = measure_array[nabor];
 
-            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+            hypre_remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
 
             measure_array[nabor] = --measure;
 	
 	    if (measure > 0)
-               enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
+               hypre_enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
 				lists, where);
 	    else
 	    {
@@ -903,12 +901,12 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
                   if (CF_marker[nabor_two] == UNDECIDED)
                   {
                      new_meas = measure_array[nabor_two];
-                     remove_point(&LoL_head, &LoL_tail, new_meas, 
+                     hypre_remove_point(&LoL_head, &LoL_tail, new_meas, 
                                nabor_two, lists, where);
 
                      new_meas = ++(measure_array[nabor_two]);
                  
-                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                     hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor_two, lists, where);
                   }
                }
@@ -938,7 +936,7 @@ hypre_BoomerAMGIndepRS( hypre_ParCSRMatrix    *S,
    hypre_TFree(LoL_head);
    hypre_TFree(LoL_tail);
 
-   return (ierr);
+   return hypre_error_flag;
 }
 
 /**************************************************************
@@ -986,7 +984,6 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
    HYPRE_Int              num_left = 0;
    HYPRE_Int              nabor, nabor_two;
 
-   HYPRE_Int              ierr = 0;
    HYPRE_Int              f_pnt = F_PT;
    HYPRE_Real	    wall_time;
 
@@ -1242,7 +1239,7 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
       {
          if (measure > 0)
          {
-            enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
+            hypre_enter_on_lists(&LoL_head, &LoL_tail, measure, j, lists, where);
          }
          else
          {
@@ -1257,11 +1254,11 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
                   {
                      new_meas = measure_array[nabor];
 	             if (new_meas > 0)
-                        remove_point(&LoL_head, &LoL_tail, new_meas, 
+                        hypre_remove_point(&LoL_head, &LoL_tail, new_meas, 
                                nabor, lists, where);
 
                      new_meas = ++(measure_array[nabor]);
-                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                     hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor, lists, where);
                   }
 	          else
@@ -1304,7 +1301,7 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
       measure_array[index] = 0;
       --num_left;
       
-      remove_point(&LoL_head, &LoL_tail, measure, index, lists, where);
+      hypre_remove_point(&LoL_head, &LoL_tail, measure, index, lists, where);
   
       for (j = ST_i[index]+1; j < ST_i[index+1]; j++)
       {
@@ -1314,7 +1311,7 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
             CF_marker[nabor] = F_PT;
             measure = measure_array[nabor];
 
-            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+            hypre_remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
             --num_left;
 
             for (k = S_i[nabor]+1; k < S_i[nabor+1]; k++)
@@ -1323,12 +1320,12 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
                if (CF_marker[nabor_two] == UNDECIDED)
                {
                   measure = measure_array[nabor_two];
-                  remove_point(&LoL_head, &LoL_tail, measure, 
+                  hypre_remove_point(&LoL_head, &LoL_tail, measure, 
                                nabor_two, lists, where);
 
                   new_meas = ++(measure_array[nabor_two]);
                  
-                  enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                  hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor_two, lists, where);
                }
             }
@@ -1341,12 +1338,12 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
          {
             measure = measure_array[nabor];
 
-            remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
+            hypre_remove_point(&LoL_head, &LoL_tail, measure, nabor, lists, where);
 
             measure_array[nabor] = --measure;
 	
 	    if (measure > 0)
-               enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
+               hypre_enter_on_lists(&LoL_head, &LoL_tail, measure, nabor, 
 				lists, where);
 	    else
 	    {
@@ -1359,12 +1356,12 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
                   if (CF_marker[nabor_two] == UNDECIDED)
                   {
                      new_meas = measure_array[nabor_two];
-                     remove_point(&LoL_head, &LoL_tail, new_meas, 
+                     hypre_remove_point(&LoL_head, &LoL_tail, new_meas, 
                                nabor_two, lists, where);
 
                      new_meas = ++(measure_array[nabor_two]);
                  
-                     enter_on_lists(&LoL_head, &LoL_tail, new_meas,
+                     hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
                                  nabor_two, lists, where);
                   }
                }
@@ -1394,7 +1391,7 @@ hypre_BoomerAMGIndepRSa( hypre_ParCSRMatrix    *S,
    hypre_TFree(LoL_head);
    hypre_TFree(LoL_tail);
 
-   return (ierr);
+   return hypre_error_flag;
 }
 
 
@@ -1404,7 +1401,6 @@ hypre_BoomerAMGIndepHMIS( hypre_ParCSRMatrix    *S,
                           HYPRE_Int                    debug_flag,
                           HYPRE_Int                   *CF_marker)
 {
-   HYPRE_Int              ierr = 0;
    HYPRE_Int		    num_procs;
    MPI_Comm comm = hypre_ParCSRMatrixComm(S);
 
@@ -1413,14 +1409,14 @@ hypre_BoomerAMGIndepHMIS( hypre_ParCSRMatrix    *S,
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   ierr += hypre_BoomerAMGIndepRS (S, 2, debug_flag,
+   hypre_BoomerAMGIndepRS (S, 2, debug_flag,
                                 CF_marker);
 
    if (num_procs > 1)
-      ierr += hypre_BoomerAMGIndepPMIS (S, 0, debug_flag,
+      hypre_BoomerAMGIndepPMIS (S, 0, debug_flag,
                                 CF_marker);
 
-   return (ierr);
+   return hypre_error_flag;
 }
 
 HYPRE_Int
@@ -1429,7 +1425,6 @@ hypre_BoomerAMGIndepHMISa( hypre_ParCSRMatrix    *S,
                           HYPRE_Int                    debug_flag,
                           HYPRE_Int                   *CF_marker)
 {
-   HYPRE_Int              ierr = 0;
    HYPRE_Int		    num_procs;
    MPI_Comm comm = hypre_ParCSRMatrixComm(S);
 
@@ -1438,14 +1433,14 @@ hypre_BoomerAMGIndepHMISa( hypre_ParCSRMatrix    *S,
     * Perform Ruge coarsening followed by CLJP coarsening
     *-------------------------------------------------------*/
 
-   ierr += hypre_BoomerAMGIndepRSa (S, 2, debug_flag,
+   hypre_BoomerAMGIndepRSa (S, 2, debug_flag,
                                 CF_marker);
 
    if (num_procs > 1)
-      ierr += hypre_BoomerAMGIndepPMISa (S, 0, debug_flag,
+      hypre_BoomerAMGIndepPMISa (S, 0, debug_flag,
                                 CF_marker);
 
-   return (ierr);
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1501,7 +1496,6 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
    HYPRE_Int                 i, j, jj, jS, ig;
    HYPRE_Int		       index, start, my_id, num_procs, jrow, cnt, elmt;
                       
-   HYPRE_Int                 ierr = 0;
 
    HYPRE_Real	    wall_time;
    HYPRE_Int   iter = 0;
@@ -2030,7 +2024,7 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
    hypre_TFree(int_buf_data);
    hypre_TFree(CF_marker_offd);
 
-   return (ierr);
+   return hypre_error_flag;
 }
 HYPRE_Int
 hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
@@ -2069,7 +2063,6 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
    HYPRE_Int                 i, j, jj, jS, ig;
    HYPRE_Int		       index, start, my_id, num_procs, jrow, cnt, elmt;
                       
-   HYPRE_Int                 ierr = 0;
 
    HYPRE_Real	    wall_time;
    HYPRE_Int   iter = 0;
@@ -2583,7 +2576,7 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
    hypre_TFree(int_buf_data);
    hypre_TFree(CF_marker_offd);
 
-   return (ierr);
+   return hypre_error_flag;
 }
 HYPRE_Int
 hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
@@ -2629,7 +2622,6 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    HYPRE_Int             *CF_marker;
    /*HYPRE_Int             *CFN_marker;*/
    HYPRE_Int              coarse_size;
-   HYPRE_Int              ierr = 0;
    HYPRE_Int 		    i,j, jj, j2, nstages=0;  
    HYPRE_Int              num_procs, my_id, num_threads;
    HYPRE_Int              num_nodes = num_variables/num_functions;
@@ -2963,9 +2955,9 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
             else if (IS_type == 5)
                 hypre_BoomerAMGIndepPMIS(S,0,0,CF_marker);
    	    else if (IS_type == 3)
-               IndepSetGreedy(A_i,A_j,num_variables,CF_marker);
+               hypre_IndepSetGreedy(A_i,A_j,num_variables,CF_marker);
    	    else if (IS_type == 6)
-               IndepSetGreedyS(S_i,S_j,num_variables,CF_marker);
+               hypre_IndepSetGreedyS(S_i,S_j,num_variables,CF_marker);
             else if (IS_type == 4)
                hypre_BoomerAMGIndepRS(S,1,0,CF_marker);
    	    else 
@@ -2998,7 +2990,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
 	       /*hypre_BoomerAMGIndepPMIS(AN,0,0,CFN_marker);*/
    	    else if (IS_type == 3)
 	    {
-               IndepSetGreedy(hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AN)),
+               hypre_IndepSetGreedy(hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(AN)),
 		  	hypre_CSRMatrixJ(hypre_ParCSRMatrixDiag(AN)),
 			num_nodes,CF_marker);
 			/*num_nodes,CFN_marker);*/
@@ -3093,6 +3085,6 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    *CF_marker_ptr   = CF_marker;
    *coarse_size_ptr = coarse_size;
    hypre_TFree(sum);                                                                                                          
-   return (ierr);
+   return hypre_error_flag;
 }
 

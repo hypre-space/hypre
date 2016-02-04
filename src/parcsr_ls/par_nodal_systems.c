@@ -104,8 +104,6 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    HYPRE_Int                 i, j, k, k_map;
                       
-   HYPRE_Int                 ierr = 0;
-
    HYPRE_Int		       index, row;
    HYPRE_Int		       start_index;
    HYPRE_Int		       num_procs;
@@ -145,8 +143,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       row_starts_AN[i] = row_starts[i]/num_functions;
       if (row_starts_AN[i]*num_functions < row_starts[i])
       {
-	  hypre_printf("nodes not properly aligned or incomplete info!\n");
-	  return (87);
+	  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"nodes not properly aligned or incomplete info!\n");
+	  return hypre_error_flag;
       }
    }
    
@@ -161,8 +159,8 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
       row_starts_AN[i] = row_starts[i]/num_functions;
       if (row_starts_AN[i]*num_functions < row_starts[i])
       {
-	  hypre_printf("nodes not properly aligned or incomplete info!\n");
-	  return (87);
+	  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"nodes not properly aligned or incomplete info!\n");
+	  return hypre_error_flag;
       }
    }
    
@@ -823,7 +821,7 @@ hypre_BoomerAMGCreateNodalA(hypre_ParCSRMatrix    *A,
 
    hypre_TFree(counter);
 
-   return (ierr);
+   return hypre_error_flag;
 }
 
 
@@ -898,7 +896,6 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
    HYPRE_Int		       global_num_vars;
    HYPRE_Int		       global_num_cols;
    HYPRE_Int		       global_num_nodes;
-   HYPRE_Int		       ierr = 0;
  
    hypre_MPI_Comm_size(comm, &num_procs);
  
@@ -1150,7 +1147,7 @@ hypre_BoomerAMGCreateScalarCFS(hypre_ParCSRMatrix    *SN,
 
    *S_ptr = S; 
 
-   return (ierr);
+   return hypre_error_flag;
 }
 
 
@@ -1169,7 +1166,6 @@ hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,
    HYPRE_Int		       num_variables;
    HYPRE_Int		       num_coarse_nodes;
    HYPRE_Int		       i,j,k,cnt;
-   HYPRE_Int		       ierr = 0;
  
  
    num_variables = num_functions*num_nodes;
@@ -1201,5 +1197,5 @@ hypre_BoomerAMGCreateScalarCF(HYPRE_Int                   *CFN_marker,
    *CF_marker_ptr = CF_marker;
 
 
-   return (ierr);
+   return hypre_error_flag;
 }
