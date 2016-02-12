@@ -12,6 +12,7 @@ dnl #EHEADER********************************************************************
 
 
 
+
 dnl @synopsis AC_HYPRE_FIND_BLAS([ACTION-IF-FOUND[, ACTION-IF-NOT-FOUND]])
 dnl
 dnl This macro looks for a library that implements the BLAS
@@ -43,8 +44,6 @@ dnl
 dnl @version $Id$
 dnl @author Steven G. Johnson <stevenj@alum.mit.edu>
 
-
-
 AC_DEFUN([AC_HYPRE_FIND_BLAS],
 [
   AC_REQUIRE([AC_FC_LIBRARY_LDFLAGS])
@@ -68,7 +67,7 @@ AC_DEFUN([AC_HYPRE_FIND_BLAS],
 #***************************************************************
   hypre_save_LIBS="$LIBS"
   hypre_save_LDFLGS="$LDFLAGS"
-  LIBS="$LIBS $FCLIBS"
+  LIBS="$LIBS  -nodefaultlibs -L/usr/local/Cellar/gcc/5.3.0/lib/gcc/5/liblgfortran.a -lm"
 
 #***************************************************************
 #   Set possible BLAS library names
@@ -78,8 +77,8 @@ AC_DEFUN([AC_HYPRE_FIND_BLAS],
 #***************************************************************
 #   Set search paths for BLAS library
 #***************************************************************
-  temp_FLAGS="-L/usr/lib -L/usr/local/lib -L/lib -L/opt/intel/mkl70/lib/32"
-  LDFLAGS="$temp_FLAGS $LDFLAGS"
+  temp_FLAGS="-L/usr/local2/lib -L/usr/lib2 -L/lib -L/opt/intel/mkl70/lib/32"
+  LDFLAGS="-nodefaultlibs $temp_FLAGS $LDFLAGS"
 
 #***************************************************************
 #   Check for function dgemm in BLAS_LIB_NAMES
@@ -88,7 +87,7 @@ AC_DEFUN([AC_HYPRE_FIND_BLAS],
      AC_FC_FUNC(dgemm)
      for lib in $BLAS_LIB_NAMES; do
         AC_CHECK_LIB($lib, $dgemm, [BLASLIBS=$lib])
-     done
+    done
   fi
 
 #***************************************************************
@@ -166,7 +165,7 @@ AC_DEFUN([AC_HYPRE_CHECK_USER_BLASLIBS],
 dnl **************************************************************
 dnl Define some variables
 dnl **************************************************************
-  hypre_blas_link_ok=no
+  hypre_blas_link_ok=""
 dnl **************************************************************
 dnl Get fortran linker name for test function (dgemm in this case)
 dnl **************************************************************
@@ -177,82 +176,61 @@ dnl **************************************************************
 dnl  LDBLASLIBDIRS="$BLASLIBDIRS"
   USERBLASLIBS="$BLASLIBS"
   USERBLASLIBDIRS="$BLASLIBDIRS"  
-  BLASLIBPATHS=""
+  BLASLIBPATHS="$BLASLIBDIRS"
   BLASLIBNAMES=""
   SUFFIXES=""
-  for blas_dir in $BLASLIBDIRS; do
-    [blas_dir=${blas_dir##*-L}]
-    BLASLIBPATHS="$BLASLIBPATHS $blas_dir"
-  done
 
 dnl Case where explicit path could be given by the user
   for blas_lib in $BLASLIBS; do
     [blas_lib_name=${blas_lib##*-l}]
     if test $blas_lib = $blas_lib_name;
     then
-      [libsuffix=${blas_lib##*.}]
-      SUFFIXES="$SUFFIXES $libsuffix"
-      [dir_path=${blas_lib%/*}]
-      BLASLIBPATHS="$dir_path $BLASLIBPATHS"
-      [blas_lib_name=${blas_lib_name%%.*}]                  
-      [blas_lib_name=${blas_lib_name##*/}]  
-      [blas_lib_name=${blas_lib_name#*lib}]
-      BLASLIBNAMES="$BLASLIBNAMES $blas_lib_name"
+dnl      if test -f $blas_lib; 
+dnl      then
+dnl         [libsuffix=${blas_lib##*.}]
+dnl         SUFFIXES="$SUFFIXES $libsuffix"
+dnl         [dir_path=${blas_lib%/*}]
+dnl         BLASLIBPATHS="-L$dir_path $BLASLIBPATHS"
+dnl         [blas_lib_name=${blas_lib_name%%.*}]                  
+dnl         [blas_lib_name=${blas_lib_name##*/}]  
+dnl         [blas_lib_name=${blas_lib_name#*lib}]
+dnl         BLASLIBNAMES="$BLASLIBNAMES $blas_lib_name"
+dnl      else
+dnl         AC_MSG_ERROR([**************** Invalid path to blas library error: ***************************
+dnl         User set BLAS library path using either --with-blas-lib=<lib>, or 
+dnl        --with-blas-libs=<blas_lib_base_name> and --with-blas_dirs=<path-to-blas-lib>, 
+dnl         but the path " $blas_lib " 
+dnl         in the user-provided path for --with-blas-libs does not exist. Please
+dnl         check that the provided path is correct.
+dnl         *****************************************************************************************],[9])         
+dnl      fi
+
+dnl         if [[ $blas_lib = /* ]] ;
+dnl         then
+dnl            if test -f $blas_lib;
+dnl            then
+dnl               [dir_path=${blas_lib%/*}]
+dnl               BLASLIBPATHS="$BLASLIBPATHS -L$dir_path"
+dnl               [blas_lib_name=${blas_lib_name%.*}]
+dnl               [blas_lib_name=${blas_lib_name##*/}]
+dnl               [blas_lib_name=${blas_lib_name#*lib}]
+dnl               BLASLIBNAMES="$BLASLIBNAMES $blas_lib_name"
+dnl            else
+dnl               AC_MSG_ERROR([**************** Invalid path to blas library error: ***************************
+dnl               User set BLAS library path using either --with-blas-lib=<lib>, or 
+dnl              --with-blas-libs=<blas_lib_base_name> and --with-blas_dirs=<path-to-blas-lib>, 
+dnl               but the path " $blas_lib " 
+dnl               in the user-provided path for --with-blas-libs does not exist. Please
+dnl               check that the provided path is correct.
+dnl               *****************************************************************************************],[9])              
+dnl            fi
+dnl         else
+            BLASLIBPATHS="$dir_path $BLASLIBPATHS"
+dnl         fi
     else
       BLASLIBNAMES="$BLASLIBNAMES $blas_lib_name"
     fi
   done
-dnl  echo SUFFIXES=$SUFFIXES
-dnl  echo BLASLIBS=$BLASLIBNAMES
-dnl  echo BLASLIBPATHS=$BLASLIBPATHS
-dnl **************************************************************
-dnl Begin test:
-dnl **************************************************************
-  BLASLIBS="null"
-  BLASLIBDIRS="null"
-dnl  if test "x$BLASLIBNAMES" != "x";
-dnl  then
-
-dnl **************************************************************
-dnl Test for viable library path:
-dnl **************************************************************  
-  for dir in $BLASLIBPATHS; do
-     if test $BLASLIBDIRS = "null"; then
-        for blas_lib in $BLASLIBNAMES; do
-           if test "x$SUFFIXES" = "x"; then
-              if test $BLASLIBS = "null" -a -f $dir/lib$blas_lib.a; then
-                 BLASLIBDIRS="-L$dir"
-                 BLASLIBS="-l$blas_lib"
-              fi
-              if test $BLASLIBS = "null" -a -f $dir/lib$blas_lib.so; then
-                 BLASLIBDIRS="-L$dir"
-                 BLASLIBS="-l$blas_lib"
-              fi
-           else
-              for libsuffix in $SUFFIXES; do
-                 if test $BLASLIBS = "null" -a -f $dir/lib$blas_lib.$libsuffix; then
-                    BLASLIBDIRS="-L$dir"
-                    BLASLIBS="-l$blas_lib"
-                 fi
-              done
-           fi              
-        done
-     fi
-  done
-        
-  if test $BLASLIBDIRS = "null" -o $BLASLIBS = "null"; then
-     AC_MSG_ERROR([**************** Incorrect path to blas library error: ***************************
-     User-specified blas library path is incorrect or cannot be used. Please specify full path to 
-     blas library or check that the provided library path exists. If a library file is not explicitly
-     specified, configure checks for library files with extensions ".a" or ".so" in 
-     the user-specified path. Otherwise use --with-blas option to find the library on the system. 
-     See "configure --help" for usage details.
-     *****************************************************************************************],[9])           
-dnl  else
-dnl     echo BLASLIBDIRS=$BLASLIBDIRS
-dnl     BLASLIBS="-l$BLASLIBS"
-dnl     BLASLIBDIRS="-L$BLASLIBDIRS"
-  fi     
     
 dnl **************************************************************
 dnl Save current LIBS and LDFLAGS to be restored later 
@@ -260,7 +238,7 @@ dnl **************************************************************
     hypre_saved_LIBS="$LIBS"
     hypre_saved_LDFLAGS="$LDFLAGS"
     LIBS="$LIBS $FCLIBS"
-    LDFLAGS="$BLASLIBDIRS $LDFLAGS"
+    LDFLAGS="$BLASLIBPATHS $LDFLAGS"
 
 dnl    echo LDFLAGS=$LDFLAGS
 dnl    echo LIBS=$LIBS
@@ -268,15 +246,10 @@ dnl    echo BLASLIBPATHS=$BLASLIBPATHS
 dnl **************************************************************
 dnl Check for dgemm in linkable list of libraries
 dnl **************************************************************
-dnl    for blas_lib in $BLASLIBS; do
-dnl      if test $BLASLIBS = "null"; then
-dnl **************************************************************
-dnl Get library base name
-dnl **************************************************************
-        [blas_lib=${BLASLIBS##*-l}]
-dnl        [blas_lib=${blas_lib##*/}]        
-dnl        [blas_lib=${blas_lib##*lib}]
-dnl        [blas_lib=${blas_lib%%.*}]
+    if test "x$BLASLIBNAMES" != "x"; then
+       hypre_blas_link_ok=no
+    fi
+    for blas_lib in $BLASLIBNAMES; do
 dnl **************************************************************
 dnl Check if library works and print result
 dnl **************************************************************                   
@@ -284,43 +257,16 @@ dnl        AC_CHECK_LIB($blas_lib, $dgemm, [BLASLIBS=$blas_lib])
         AC_CHECK_LIB($blas_lib, $dgemm, [hypre_blas_link_ok=yes])
 
 dnl      fi
-dnl    done
+    done
 
-    if test $hypre_blas_link_ok = "no"; then
+    if test "$hypre_blas_link_ok" = "no"; then
       AC_MSG_ERROR([**************** Non-linkable blas library error: ***************************
       User set BLAS library path using either --with-blas-lib=<lib>, or 
       --with-blas-libs=<blas_lib_base_name> and --with-blas_dirs=<path-to-blas-lib>, 
       but $USERBLASLIBDIRS $USERBLASLIBS provided cannot be used. See "configure --help" for usage details.
       *****************************************************************************************],[9])
     fi
-dnl    else
-dnl **************************************************************
-dnl Check if working library was provided by user
-dnl **************************************************************   
-dnl        for dir in $BLASLIBPATHS; do
-dnl          if test $BLASLIBDIRS = "null" -a -f $dir/lib$BLASLIBS.a; then
-dnl             BLASLIBDIRS="$dir"
-dnl          fi
-dnl          if test $BLASLIBDIRS = "null" -a -f $dir/lib$BLASLIBS.so; then
-dnl             BLASLIBDIRS="$dir"
-dnl          fi
-dnl        done
-        
-dnl        if test $BLASLIBDIRS = "null"; then
-dnl           AC_MSG_ERROR([**************** Incorrect path to blas library error: ***************************
-dnl           Configure found a linkable blas library, but the user-specified path is incorrect.
-dnl           User set BLAS library path using either --with-blas-lib=<lib>, or 
-dnl           --with-blas-libs=<blas_lib_base_name> and --with-blas_dirs=<path-to-blas-lib>, 
-dnl           but the library $USERBLASLIBDIRS $USERBLASLIBS cannot be used. Please check that the provided 
-dnl           library path is correct. Otherwise use --with-blas option to find the library on the system. 
-dnl           See "configure --help" for usage details.
-dnl           *****************************************************************************************],[9])           
-dnl        else
-dnl           echo BLASLIBDIRS=$BLASLIBDIRS
-dnl           BLASLIBS="-l$BLASLIBS"
-dnl           BLASLIBDIRS="-L$BLASLIBDIRS"
-dnl        fi  
-dnl    fi 
+
 dnl **************************************************************
 dnl Restore LIBS and LDFLAGS
 dnl **************************************************************
@@ -329,3 +275,4 @@ dnl **************************************************************
 dnl  fi
 ])
 dnl Done with macro AC_HYPRE_CHECK_USER_BLASLIBS
+  
