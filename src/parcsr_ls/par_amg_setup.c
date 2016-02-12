@@ -1142,7 +1142,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	    if (AN) hypre_ParCSRMatrixDestroy(AN);
             hypre_TFree(CF_marker);
             hypre_TFree(coarse_pnts_global);
-            /*if (level > 0)*/
+            if (level > 0)
             {
                hypre_ParVectorDestroy(F_array[level]);
                hypre_ParVectorDestroy(U_array[level]);
