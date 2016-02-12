@@ -205,16 +205,19 @@ dnl         check that the provided path is correct.
 dnl         *****************************************************************************************],[9])         
 dnl      fi
 
-dnl         if [[ $blas_lib = /* ]] ;
-dnl         then
+         [libsuffix=${blas_lib##*.}]
+         SUFFIXES="$SUFFIXES $libsuffix"         
+         if test "$libsuffix" = "a" -o "$libsuffix" = "so" ;
+         then
 dnl            if test -f $blas_lib;
 dnl            then
-dnl               [dir_path=${blas_lib%/*}]
-dnl               BLASLIBPATHS="$BLASLIBPATHS -L$dir_path"
-dnl               [blas_lib_name=${blas_lib_name%.*}]
-dnl               [blas_lib_name=${blas_lib_name##*/}]
-dnl               [blas_lib_name=${blas_lib_name#*lib}]
-dnl               BLASLIBNAMES="$BLASLIBNAMES $blas_lib_name"
+               [dir_path=${blas_lib#*/}]
+               [dir_path=${blas_lib%/*}]
+               BLASLIBPATHS="$BLASLIBPATHS -L/$dir_path"
+               [blas_lib_name=${blas_lib_name%.*}]
+               [blas_lib_name=${blas_lib_name##*/}]
+               [blas_lib_name=${blas_lib_name#*lib}]
+               BLASLIBNAMES="$BLASLIBNAMES $blas_lib_name"
 dnl            else
 dnl               AC_MSG_ERROR([**************** Invalid path to blas library error: ***************************
 dnl               User set BLAS library path using either --with-blas-lib=<lib>, or 
@@ -224,9 +227,9 @@ dnl               in the user-provided path for --with-blas-libs does not exist.
 dnl               check that the provided path is correct.
 dnl               *****************************************************************************************],[9])              
 dnl            fi
-dnl         else
+         else
             BLASLIBPATHS="$dir_path $BLASLIBPATHS"
-dnl         fi
+         fi
     else
       BLASLIBNAMES="$BLASLIBNAMES $blas_lib_name"
     fi
