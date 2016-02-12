@@ -192,7 +192,22 @@ dnl         check that the provided path is correct.
 dnl         *****************************************************************************************],[9])         
 dnl      fi
 
-         LAPACKLIBPATHS="$dir_path $LAPACKLIBPATHS"
+         [libsuffix=${lapack_lib##*.}]
+         SUFFIXES="$SUFFIXES $libsuffix"         
+         if test "$libsuffix" = "a" -o "$libsuffix" = "so" ;
+         then
+dnl            if test -f $lapack_lib;
+dnl            then
+               [dir_path=${lapack_lib#*/}]
+               [dir_path=${lapack_lib%/*}]
+               LAPACKLIBPATHS="$LAPACKLIBPATHS -L/$dir_path"
+               [lapack_lib_name=${lapack_lib_name%.*}]
+               [lapack_lib_name=${lapack_lib_name##*/}]
+               [lapack_lib_name=${lapack_lib_name#*lib}]
+               LAPACKLIBNAMES="$LAPACKLIBNAMES $lapack_lib_name"
+         else
+            LAPACKLIBPATHS="$dir_path $LAPACKLIBPATHS"
+         fi
     else
       LAPACKLIBNAMES="$LAPACKLIBNAMES $lapack_lib_name"
     fi

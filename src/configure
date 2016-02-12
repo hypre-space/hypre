@@ -7181,7 +7181,20 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
     if test $blas_lib = $blas_lib_name;
     then
 
+         libsuffix=${blas_lib##*.}
+         SUFFIXES="$SUFFIXES $libsuffix"
+         if test "$libsuffix" = "a" -o "$libsuffix" = "so" ;
+         then
+               dir_path=${blas_lib#*/}
+               dir_path=${blas_lib%/*}
+               BLASLIBPATHS="$BLASLIBPATHS -L/$dir_path"
+               blas_lib_name=${blas_lib_name%.*}
+               blas_lib_name=${blas_lib_name##*/}
+               blas_lib_name=${blas_lib_name#*lib}
+               BLASLIBNAMES="$BLASLIBNAMES $blas_lib_name"
+         else
             BLASLIBPATHS="$dir_path $BLASLIBPATHS"
+         fi
     else
       BLASLIBNAMES="$BLASLIBNAMES $blas_lib_name"
     fi
@@ -7315,7 +7328,20 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
     if test $lapack_lib = $lapack_lib_name;
     then
 
-         LAPACKLIBPATHS="$dir_path $LAPACKLIBPATHS"
+         libsuffix=${lapack_lib##*.}
+         SUFFIXES="$SUFFIXES $libsuffix"
+         if test "$libsuffix" = "a" -o "$libsuffix" = "so" ;
+         then
+               dir_path=${lapack_lib#*/}
+               dir_path=${lapack_lib%/*}
+               LAPACKLIBPATHS="$LAPACKLIBPATHS -L/$dir_path"
+               lapack_lib_name=${lapack_lib_name%.*}
+               lapack_lib_name=${lapack_lib_name##*/}
+               lapack_lib_name=${lapack_lib_name#*lib}
+               LAPACKLIBNAMES="$LAPACKLIBNAMES $lapack_lib_name"
+         else
+            LAPACKLIBPATHS="$dir_path $LAPACKLIBPATHS"
+         fi
     else
       LAPACKLIBNAMES="$LAPACKLIBNAMES $lapack_lib_name"
     fi
