@@ -546,8 +546,8 @@ AS_HELP_STRING([--with-blas-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for BLAS. OK to use -L and -l flags in the list]),
 [for blas_lib in $withval; do
-    [prefix=${blas_lib:0:2}]
-    if test $prefix = "-L"
+    [libprefix=${blas_lib:0:2}]
+    if test $libprefix = "-L"
     then
        BLASLIBDIRS="$blas_lib $BLASLIBDIRS"
     else
@@ -588,8 +588,8 @@ AS_HELP_STRING([--with-lapack-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for LAPACK. OK to use -L and -l flags in the list]),
 [for lapack_lib in $withval; do
-    [prefix=${lapack_lib:0:2}]
-    if test $prefix = "-L"
+    [libprefix=${lapack_lib:0:2}]
+    if test $libprefix = "-L"
     then
        LAPACKLIBDIRS="$lapack_lib $LAPACKLIBDIRS"
     else

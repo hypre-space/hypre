@@ -2901,8 +2901,8 @@ fi
 # Check whether --with-blas-lib was given.
 if test "${with_blas_lib+set}" = set; then :
   withval=$with_blas_lib; for blas_lib in $withval; do
-    prefix=${blas_lib:0:2}
-    if test $prefix = "-L"
+    libprefix=${blas_lib:0:2}
+    if test $libprefix = "-L"
     then
        BLASLIBDIRS="$blas_lib $BLASLIBDIRS"
     else
@@ -2942,8 +2942,8 @@ fi
 # Check whether --with-lapack-lib was given.
 if test "${with_lapack_lib+set}" = set; then :
   withval=$with_lapack_lib; for lapack_lib in $withval; do
-    prefix=${lapack_lib:0:2}
-    if test $prefix = "-L"
+    libprefix=${lapack_lib:0:2}
+    if test $libprefix = "-L"
     then
        LAPACKLIBDIRS="$lapack_lib $LAPACKLIBDIRS"
     else
