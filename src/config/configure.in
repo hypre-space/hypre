@@ -153,6 +153,7 @@ hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
 hypre_lapack_lib_old_style=no
 hypre_lapack_lib_dir_old_style=no
+
 dnl *********************************************************************
 dnl * Determine BUILD, HOST, and TARGET types
 dnl *********************************************************************
@@ -648,23 +649,47 @@ AS_HELP_STRING([--with-fmangle=FMANGLE],
 )
 AC_DEFINE_UNQUOTED(HYPRE_FMANGLE, [$hypre_fmangle], [Fortran mangling])
 
+dnl * Define a generic macro to set hypre_fmangle_blaslapack based on withval
+AC_DEFUN([AC_HYPRE_SET_FMANGLE_BLAS],
+[
+ case "$withval" in
+    no-underscores)      hypre_fmangle_blas=1 ;;
+    one-underscore)      hypre_fmangle_blas=2 ;;
+    two-underscores)     hypre_fmangle_blas=3 ;;
+    caps-no-underscores) hypre_fmangle_blas=4 ;;
+ esac
+])
+
 dnl * Define --with-fmangle-blas
 AC_ARG_WITH(fmangle-blas,
 AS_HELP_STRING([--with-fmangle-blas=FMANGLE],
                [Name mangling for BLAS.  See --with-fmangle.]),
-[hypre_fmangle=0; AC_HYPRE_SET_FMANGLE],
-[hypre_fmangle=0]
+[hypre_fmangle_blas=0; AC_HYPRE_SET_FMANGLE_BLAS],
+[hypre_fmangle_blas=0]
 )
-AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_BLAS, [$hypre_fmangle], [BLAS mangling])
+AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_BLAS, [$hypre_fmangle_blas], [BLAS mangling])
+
+dnl * Define a generic macro to set hypre_fmangle_blaslapack based on withval
+dnl * This could use the same variable for blas, but it is redefined here for the 
+dnl * rare case that blas/ lapack manglings could be different
+AC_DEFUN([AC_HYPRE_SET_FMANGLE_LAPACK],
+[
+ case "$withval" in
+    no-underscores)      hypre_fmangle_lapack=1 ;;
+    one-underscore)      hypre_fmangle_lapack=2 ;;
+    two-underscores)     hypre_fmangle_lapack=3 ;;
+    caps-no-underscores) hypre_fmangle_lapack=4 ;;
+ esac
+])
 
 dnl * Define --with-fmangle-lapack
 AC_ARG_WITH(fmangle-lapack,
 AS_HELP_STRING([--with-fmangle-lapack=FMANGLE],
                [Name mangling for LAPACK.  See --with-fmangle.]),
-[hypre_fmangle=0; AC_HYPRE_SET_FMANGLE],
-[hypre_fmangle=0]
+[hypre_fmangle_lapack=0; AC_HYPRE_SET_FMANGLE_LAPACK],
+[hypre_fmangle_lapack=0]
 )
-AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_LAPACK, [$hypre_fmangle], [LAPACK mangling])
+AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_LAPACK, [$hypre_fmangle_lapack], [LAPACK mangling])
 
 AC_ARG_WITH(fei-inc-dir,
 AS_HELP_STRING([--with-fei-inc-dir=DIR],

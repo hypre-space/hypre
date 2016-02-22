@@ -154,9 +154,27 @@ dnl Define some variables
 dnl **************************************************************
   hypre_lapack_link_ok=""
 dnl **************************************************************
-dnl Get fortran linker name for test function (dgemm in this case)
+dnl Get fortran linker name for test function (dsygv in this case)
 dnl **************************************************************
-  AC_FC_FUNC(dsygv)
+dnl  AC_FC_FUNC(dsygv)
+  
+  if test $hypre_fmangle_lapack = 1
+  then
+     LAPACKFUNC="dsygv"
+  elif test $hypre_fmangle_lapack = 2
+  then
+     LAPACKFUNC="dsygv_"
+  elif test $hypre_fmangle_lapack = 3
+  then
+     LAPACKFUNC="dsygv__"
+  elif test $hypre_fmangle_lapack = 4
+  then
+     LAPACKFUNC="DSYGV"          
+  else
+     LAPACKFUNC="dsygv dsygv_ dsygv__ DSYGV"
+     hypre_fmangle_lapack=0
+  fi
+  
 dnl **************************************************************
 dnl Get user provided path-to-lapack library
 dnl **************************************************************
@@ -231,8 +249,12 @@ dnl **************************************************************
 dnl **************************************************************
 dnl Check if library works and print result
 dnl **************************************************************      
-        AC_CHECK_LIB($lapack_lib, $dsygv, [hypre_lapack_link_ok=yes],[],[-lblas])
-dnl      fi
+        for func in $LAPACKFUNC; do                
+           AC_CHECK_LIB($lapack_lib, $func, [hypre_lapack_link_ok=yes],[],[-lblas])
+           if test "$hypre_lapack_link_ok" = "yes"; then
+              break 2
+           fi
+        done
     done
 
     if test "$hypre_lapack_link_ok" = "no"; then
@@ -242,6 +264,27 @@ dnl      fi
       but $USERLAPACKLIBDIRS $USERLAPACKLIBS provided cannot be used. See "configure --help" for usage details.
       *****************************************************************************************],[9])
     fi
+
+dnl **************************************************************
+dnl set HYPRE_FMANGLE_LAPACK flag if not set
+dnl **************************************************************
+    if test "$hypre_lapack_link_ok" = "yes" -a "$hypre_fmangle_lapack" = "0"
+    then
+       if test "$func" = "dsygv"
+       then
+          hypre_fmangle_lapack=1
+       elif test "$func" = "dsygv_"
+       then
+          hypre_fmangle_lapack=2
+       elif test "$func" = "dsygv__"
+       then
+          hypre_fmangle_lapack=3
+       else
+          hypre_fmangle_lapack=4
+       fi
+       AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_LAPACK, [$hypre_fmangle_lapack], [LAPACK mangling])
+    fi                    
+
 dnl **************************************************************
 dnl Restore LIBS and LDFLAGS
 dnl **************************************************************
