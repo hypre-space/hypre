@@ -169,7 +169,25 @@ dnl **************************************************************
 dnl **************************************************************
 dnl Get fortran linker name for test function (dgemm in this case)
 dnl **************************************************************
-  AC_FC_FUNC(dgemm)
+dnl  AC_FC_FUNC(dgemm)
+
+  if test $hypre_fmangle_blas = 1
+  then
+     BLASFUNC="dgemm"
+  elif test $hypre_fmangle_blas = 2
+  then
+     BLASFUNC="dgemm_"
+  elif test $hypre_fmangle_blas = 3
+  then
+     BLASFUNC="dgemm__"
+  elif test $hypre_fmangle_blas = 4
+  then
+     BLASFUNC="DGEMM"          
+  else
+     BLASFUNC="dgemm dgemm_ dgemm__ DGEMM"
+     hypre_fmangle_blas=0
+  fi
+  
 dnl **************************************************************
 dnl Get user provided path-to-blas library
 dnl **************************************************************
@@ -255,11 +273,13 @@ dnl **************************************************************
     for blas_lib in $BLASLIBNAMES; do
 dnl **************************************************************
 dnl Check if library works and print result
-dnl **************************************************************                   
-dnl        AC_CHECK_LIB($blas_lib, $dgemm, [BLASLIBS=$blas_lib])
-        AC_CHECK_LIB($blas_lib, $dgemm, [hypre_blas_link_ok=yes])
-
-dnl      fi
+dnl **************************************************************   
+        for func in $BLASFUNC; do                
+           AC_CHECK_LIB($blas_lib, $func, [hypre_blas_link_ok=yes])
+           if test "$hypre_blas_link_ok" = "yes"; then
+              break 2
+           fi
+       done
     done
 
     if test "$hypre_blas_link_ok" = "no"; then
@@ -270,6 +290,25 @@ dnl      fi
       *****************************************************************************************],[9])
     fi
 
+dnl **************************************************************
+dnl set HYPRE_FMANGLE_BLAS flag if not set
+dnl **************************************************************
+    if test "$hypre_blas_link_ok" = "yes" -a "$hypre_fmangle_blas" = "0"
+    then
+       if test "$func" = "dgemm"
+       then
+          hypre_fmangle_blas=1
+       elif test "$func" = "dgemm_"
+       then
+          hypre_fmangle_blas=2
+       elif test "$func" = "dgemm__"
+       then
+          hypre_fmangle_blas=3
+       else
+          hypre_fmangle_blas=4
+       fi
+       AC_DEFINE_UNQUOTED(HYPRE_FMANGLE_BLAS, [$hypre_fmangle_blas], [BLAS mangling])
+    fi 
 dnl **************************************************************
 dnl Restore LIBS and LDFLAGS
 dnl **************************************************************

@@ -2315,6 +2315,7 @@ hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
 hypre_lapack_lib_old_style=no
 hypre_lapack_lib_dir_old_style=no
+
 if test "x$build_alias" = "x"
 then
    # Make sure we can run config.sub.
@@ -3004,46 +3005,50 @@ _ACEOF
 
 
 
+
+
 # Check whether --with-fmangle-blas was given.
 if test "${with_fmangle_blas+set}" = set; then :
-  withval=$with_fmangle_blas; hypre_fmangle=0;
+  withval=$with_fmangle_blas; hypre_fmangle_blas=0;
  case "$withval" in
-    no-underscores)      hypre_fmangle=1 ;;
-    one-underscore)      hypre_fmangle=2 ;;
-    two-underscores)     hypre_fmangle=3 ;;
-    caps-no-underscores) hypre_fmangle=4 ;;
+    no-underscores)      hypre_fmangle_blas=1 ;;
+    one-underscore)      hypre_fmangle_blas=2 ;;
+    two-underscores)     hypre_fmangle_blas=3 ;;
+    caps-no-underscores) hypre_fmangle_blas=4 ;;
  esac
 
 else
-  hypre_fmangle=0
+  hypre_fmangle_blas=0
 
 fi
 
 
 cat >>confdefs.h <<_ACEOF
-#define HYPRE_FMANGLE_BLAS $hypre_fmangle
+#define HYPRE_FMANGLE_BLAS $hypre_fmangle_blas
 _ACEOF
+
+
 
 
 
 # Check whether --with-fmangle-lapack was given.
 if test "${with_fmangle_lapack+set}" = set; then :
-  withval=$with_fmangle_lapack; hypre_fmangle=0;
+  withval=$with_fmangle_lapack; hypre_fmangle_lapack=0;
  case "$withval" in
-    no-underscores)      hypre_fmangle=1 ;;
-    one-underscore)      hypre_fmangle=2 ;;
-    two-underscores)     hypre_fmangle=3 ;;
-    caps-no-underscores) hypre_fmangle=4 ;;
+    no-underscores)      hypre_fmangle_lapack=1 ;;
+    one-underscore)      hypre_fmangle_lapack=2 ;;
+    two-underscores)     hypre_fmangle_lapack=3 ;;
+    caps-no-underscores) hypre_fmangle_lapack=4 ;;
  esac
 
 else
-  hypre_fmangle=0
+  hypre_fmangle_lapack=0
 
 fi
 
 
 cat >>confdefs.h <<_ACEOF
-#define HYPRE_FMANGLE_LAPACK $hypre_fmangle
+#define HYPRE_FMANGLE_LAPACK $hypre_fmangle_lapack
 _ACEOF
 
 
@@ -7151,24 +7156,23 @@ fi
 
 
   hypre_blas_link_ok=""
-  ac_ext=${ac_fc_srcext-f}
-ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-case $ac_cv_fc_mangling in
-  upper*) ac_val="DGEMM" ;;
-  lower*) ac_val="dgemm" ;;
-  *)      ac_val="unknown" ;;
-esac
-case $ac_cv_fc_mangling in *," underscore"*) ac_val="$ac_val"_ ;; esac
 
-dgemm="$ac_val"
-
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
+  if test $hypre_fmangle_blas = 1
+  then
+     BLASFUNC="dgemm"
+  elif test $hypre_fmangle_blas = 2
+  then
+     BLASFUNC="dgemm_"
+  elif test $hypre_fmangle_blas = 3
+  then
+     BLASFUNC="dgemm__"
+  elif test $hypre_fmangle_blas = 4
+  then
+     BLASFUNC="DGEMM"
+  else
+     BLASFUNC="dgemm dgemm_ dgemm__ DGEMM"
+     hypre_fmangle_blas=0
+  fi
 
   USERBLASLIBS="$BLASLIBS"
   USERBLASLIBDIRS="$BLASLIBDIRS"
@@ -7209,9 +7213,10 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
        hypre_blas_link_ok=no
     fi
     for blas_lib in $BLASLIBNAMES; do
-        as_ac_Lib=`$as_echo "ac_cv_lib_$blas_lib''_$dgemm" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $dgemm in -l$blas_lib" >&5
-$as_echo_n "checking for $dgemm in -l$blas_lib... " >&6; }
+        for func in $BLASFUNC; do
+           as_ac_Lib=`$as_echo "ac_cv_lib_$blas_lib''_$func" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func in -l$blas_lib" >&5
+$as_echo_n "checking for $func in -l$blas_lib... " >&6; }
 if eval \${$as_ac_Lib+:} false; then :
   $as_echo_n "(cached) " >&6
 else
@@ -7226,7 +7231,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char $dgemm ();
+char $func ();
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -7238,7 +7243,7 @@ char $dgemm ();
 int
 main ()
 {
-return $dgemm ();
+return $func ();
   ;
   return 0;
 }
@@ -7259,7 +7264,10 @@ if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
   hypre_blas_link_ok=yes
 fi
 
-
+           if test "$hypre_blas_link_ok" = "yes"; then
+              break 2
+           fi
+       done
     done
 
     if test "$hypre_blas_link_ok" = "no"; then
@@ -7270,6 +7278,26 @@ fi
       *****************************************************************************************" "$LINENO" 5
     fi
 
+    if test "$hypre_blas_link_ok" = "yes" -a "$hypre_fmangle_blas" = "0"
+    then
+       if test "$func" = "dgemm"
+       then
+          hypre_fmangle_blas=1
+       elif test "$func" = "dgemm_"
+       then
+          hypre_fmangle_blas=2
+       elif test "$func" = "dgemm__"
+       then
+          hypre_fmangle_blas=3
+       else
+          hypre_fmangle_blas=4
+       fi
+
+cat >>confdefs.h <<_ACEOF
+#define HYPRE_FMANGLE_BLAS $hypre_fmangle_blas
+_ACEOF
+
+    fi
     LIBS="$hypre_saved_LIBS"
     LDFLAGS="$hypre_saved_LDFLAGS"
 
@@ -7298,24 +7326,23 @@ fi
 
 
   hypre_lapack_link_ok=""
-  ac_ext=${ac_fc_srcext-f}
-ac_compile='$FC -c $FCFLAGS $ac_fcflags_srcext conftest.$ac_ext >&5'
-ac_link='$FC -o conftest$ac_exeext $FCFLAGS $LDFLAGS $ac_fcflags_srcext conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_fc_compiler_gnu
-case $ac_cv_fc_mangling in
-  upper*) ac_val="DSYGV" ;;
-  lower*) ac_val="dsygv" ;;
-  *)      ac_val="unknown" ;;
-esac
-case $ac_cv_fc_mangling in *," underscore"*) ac_val="$ac_val"_ ;; esac
 
-dsygv="$ac_val"
-
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
+  if test $hypre_fmangle_lapack = 1
+  then
+     LAPACKFUNC="dsygv"
+  elif test $hypre_fmangle_lapack = 2
+  then
+     LAPACKFUNC="dsygv_"
+  elif test $hypre_fmangle_lapack = 3
+  then
+     LAPACKFUNC="dsygv__"
+  elif test $hypre_fmangle_lapack = 4
+  then
+     LAPACKFUNC="DSYGV"
+  else
+     LAPACKFUNC="dsygv dsygv_ dsygv__ DSYGV"
+     hypre_fmangle_lapack=0
+  fi
 
   USERLAPACKLIBS="$LAPACKLIBS"
   USERLAPACKLIBDIRS="$LAPACKLIBDIRS"
@@ -7356,9 +7383,10 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
        hypre_lapack_link_ok=no
     fi
     for lapack_lib in $LAPACKLIBNAMES; do
-        as_ac_Lib=`$as_echo "ac_cv_lib_$lapack_lib''_$dsygv" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $dsygv in -l$lapack_lib" >&5
-$as_echo_n "checking for $dsygv in -l$lapack_lib... " >&6; }
+        for func in $LAPACKFUNC; do
+           as_ac_Lib=`$as_echo "ac_cv_lib_$lapack_lib''_$func" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $func in -l$lapack_lib" >&5
+$as_echo_n "checking for $func in -l$lapack_lib... " >&6; }
 if eval \${$as_ac_Lib+:} false; then :
   $as_echo_n "(cached) " >&6
 else
@@ -7373,7 +7401,7 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char $dsygv ();
+char $func ();
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -7385,7 +7413,7 @@ char $dsygv ();
 int
 main ()
 {
-return $dsygv ();
+return $func ();
   ;
   return 0;
 }
@@ -7406,6 +7434,10 @@ if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
   hypre_lapack_link_ok=yes
 fi
 
+           if test "$hypre_lapack_link_ok" = "yes"; then
+              break 2
+           fi
+        done
     done
 
     if test "$hypre_lapack_link_ok" = "no"; then
@@ -7415,6 +7447,28 @@ fi
       but $USERLAPACKLIBDIRS $USERLAPACKLIBS provided cannot be used. See \"configure --help\" for usage details.
       *****************************************************************************************" "$LINENO" 5
     fi
+
+    if test "$hypre_lapack_link_ok" = "yes" -a "$hypre_fmangle_lapack" = "0"
+    then
+       if test "$func" = "dsygv"
+       then
+          hypre_fmangle_lapack=1
+       elif test "$func" = "dsygv_"
+       then
+          hypre_fmangle_lapack=2
+       elif test "$func" = "dsygv__"
+       then
+          hypre_fmangle_lapack=3
+       else
+          hypre_fmangle_lapack=4
+       fi
+
+cat >>confdefs.h <<_ACEOF
+#define HYPRE_FMANGLE_LAPACK $hypre_fmangle_lapack
+_ACEOF
+
+    fi
+
     LIBS="$hypre_saved_LIBS"
     LDFLAGS="$hypre_saved_LDFLAGS"
 
