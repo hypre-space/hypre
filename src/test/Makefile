@@ -42,7 +42,6 @@ MPILIBFLAGS = ${MPILIBDIRS} ${MPILIBS} ${MPIFLAGS}
 LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
-# LIBFLAGS = ${LDFLAGS} ${LIBS} ${FLIBS}
 
 LFLAGS =\
  -L${HYPRE_BUILD_DIR}/lib\
@@ -126,45 +125,104 @@ distclean: clean
 # Rules
 ##################################################################
 
-zboxloop: zboxloop.o
+# C
+
+ij: ij.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
+
+new_ij: new_ij.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
+
+sstruct: sstruct.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 
 struct: struct.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
+
+ams_driver: ams_driver.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
+
+maxwell_unscaled: maxwell_unscaled.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 
 struct_migrate: struct_migrate.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 
-fij_mv: fij_mv.f
+sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
-	${FC} -c $@  ${FFLAGS}
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 
-fparcsr_ls: fparcsr_ls.f
+ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
-	${FC} -c $@  ${FFLAGS}
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 
-fparcsr_mv: fparcsr_mv.f
+zboxloop: zboxloop.o
 	@echo  "Building" $@ "... "
-	${FC} -c $@  ${FFLAGS}
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 
-fsstruct_ls: fsstruct_ls.f 
-	@echo  "Building" $@ "... "
-	${FC} -c $@  ${FFLAGS}
+# RDF: Keep these for now
 
-fsstruct_mv: fsstruct_mv.f
+hypre_set_precond: hypre_set_precond.o
 	@echo  "Building" $@ "... "
-	${FC} -c $@  ${FFLAGS}
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 
-fstruct_ls: fstruct_ls.f
+test_ij: hypre_set_precond.o test_ij.o
 	@echo  "Building" $@ "... "
-	${FC} -c $@  ${FFLAGS}
+	${LINK_CC} -o $@ hypre_set_precond.o $@.o ${CFLAGS} ${LFLAGS}
 
-fstruct_mv: fstruct_mv.f
+driver_commpkg: driver_commpkg.o
 	@echo  "Building" $@ "... "
-	${FC} -c $@  ${FFLAGS}
+	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
+
+# C++
+
+fei: fei.o
+	@echo  "Building" $@ "... "
+	${LINK_CXX} -o $@ $@.o ${CXXFLAGS} ${LFLAGS}
+
+cxx_ij: cxx_ij.o
+	@echo  "Building" $@ "... "
+	${LINK_CXX} -o $@ $@.o ${CXXFLAGS} ${LFLAGS}
+cxx_ij.o: cxx_ij.cxx
+cxx_ij.cxx: ij.c
+	cp -fp ij.c cxx_ij.cxx
+
+cxx_sstruct: cxx_sstruct.o
+	@echo  "Building" $@ "... "
+	${LINK_CXX} -o $@ $@.o ${CXXFLAGS} ${LFLAGS}
+cxx_sstruct.o: cxx_sstruct.cxx
+cxx_sstruct.cxx: sstruct.c
+	cp -fp sstruct.c cxx_sstruct.cxx
+
+cxx_struct: cxx_struct.o
+	@echo  "Building" $@ "... "
+	${LINK_CXX} -o $@ $@.o ${CXXFLAGS} ${LFLAGS}
+cxx_struct.o: cxx_struct.cxx
+cxx_struct.cxx: struct.c
+	cp -fp struct.c cxx_struct.cxx
+
+# Fortran
+
+f77_ij: f77_ij.o
+	@echo  "Building" $@ "... "
+	${LINK_FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+
+f77_ij_mv: f77_ij_mv.o
+	@echo  "Building" $@ "... "
+	${LINK_FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+
+f77_struct: f77_struct.o
+	@echo  "Building" $@ "... "
+	${LINK_FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+
+# RDF: Keep these for now
 
 struct_for: fstruct_mv.o fstruct_ls.o struct_for.o
 	@echo  "Building" $@ "... "
@@ -194,80 +252,31 @@ for_maxwell: fparcsr_mv.o fsstruct_mv.o fsstruct_ls.o for_maxwell.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ fparcsr_mv.o fsstruct_mv.o fsstruct_ls.o $@.o ${FFLAGS} ${LFLAGS}
 
-sstruct: sstruct.o
+fij_mv: fij_mv.f
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_FC} -c $@  ${FFLAGS}
 
-maxwell_unscaled: maxwell_unscaled.o
+fparcsr_ls: fparcsr_ls.f
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_FC} -c $@  ${FFLAGS}
 
-sstruct_fac: sstruct_fac.o
+fparcsr_mv: fparcsr_mv.f
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_FC} -c $@  ${FFLAGS}
 
-hypre_set_precond: hypre_set_precond.o
+fsstruct_ls: fsstruct_ls.f 
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_FC} -c $@  ${FFLAGS}
 
-test_ij: hypre_set_precond.o test_ij.o
+fsstruct_mv: fsstruct_mv.f
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ hypre_set_precond.o $@.o ${LFLAGS}
+	${LINK_FC} -c $@  ${FFLAGS}
 
-ij: ij.o
+fstruct_ls: fstruct_ls.f
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_FC} -c $@  ${FFLAGS}
 
-ij_mv: ij_mv.o
+fstruct_mv: fstruct_mv.f
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
-
-new_ij: new_ij.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
-
-fei: fei.o
-	@echo  "Building" $@ "... "
-	${LINK_CXX} -o $@ $@.o ${LFLAGS}
-
-f77_struct: f77_struct.o
-	@echo  "Building" $@ "... "
-	${FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
-
-f77_ij: f77_ij.o
-	@echo  "Building" $@ "... "
-	${FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
-
-f77_ij_mv: f77_ij_mv.o
-	@echo  "Building" $@ "... "
-	${FC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
-
-driver_commpkg: driver_commpkg.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
-
-ams_driver: ams_driver.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
-
-cxx_ij: cxx_ij.o
-	@echo  "Building" $@ "... "
-	${LINK_CXX} -o $@ $@.o ${LFLAGS}
-cxx_ij.o: cxx_ij.cxx
-cxx_ij.cxx: ij.c
-	cp -fp ij.c cxx_ij.cxx
-
-cxx_sstruct: cxx_sstruct.o
-	@echo  "Building" $@ "... "
-	${LINK_CXX} -o $@ $@.o ${LFLAGS}
-cxx_sstruct.o: cxx_sstruct.cxx
-cxx_sstruct.cxx: sstruct.c
-	cp -fp sstruct.c cxx_sstruct.cxx
-
-cxx_struct: cxx_struct.o
-	@echo  "Building" $@ "... "
-	${LINK_CXX} -o $@ $@.o ${LFLAGS}
-cxx_struct.o: cxx_struct.cxx
-cxx_struct.cxx: struct.c
-	cp -fp struct.c cxx_struct.cxx
+	${LINK_FC} -c $@  ${FFLAGS}
 
