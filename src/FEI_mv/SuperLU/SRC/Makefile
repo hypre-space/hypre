@@ -204,9 +204,9 @@ complex16: $(ZLUSRC) $(ALLAUX) $(LAAUX) $(ZLASRC) $(DZLAUX)
 ##################################
 # Do not optimize these routines #
 ##################################
-slamch.o: slamch.c ; $(CC) -c ${SHARED_COMPILE_FLAG} $<
-dlamch.o: dlamch.c ; $(CC) -c ${SHARED_COMPILE_FLAG} $<
-superlu_timer.o:  superlu_timer.c ; $(CC) -c -DNO_TIMER ${SHARED_COMPILE_FLAG} $<
+slamch.o: slamch.c ; $(CC) -g -c ${SHARED_COMPILE_FLAG} $<
+dlamch.o: dlamch.c ; $(CC) -g -c ${SHARED_COMPILE_FLAG} $<
+superlu_timer.o:  superlu_timer.c ; $(CC) -g -c -DNO_TIMER ${SHARED_COMPILE_FLAG} $<
 ##################################
 
 #.c.o:
