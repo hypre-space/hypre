@@ -62,7 +62,7 @@ FILES =\
  hypre_merge_sort.c\
  hypre_hopscotch_hash.c
 
-OBJS = $(patsubst %.c,%.o,$(patsubst %.cc,%.o,$(FILES)))
+OBJS = ${FILES:.c=.o}
 
 SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}.so
 
@@ -92,12 +92,12 @@ distclean: clean
 ##################################################################
 # Rules
 ##################################################################
- 
+
 libHYPRE_utilities.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ *.o
 	${RANLIB} $@
- 
+
 libHYPRE_utilities.so: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}

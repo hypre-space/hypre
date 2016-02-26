@@ -321,6 +321,11 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_Int             *R_offd_i;
    HYPRE_Int             *R_offd_j;
 
+   HYPRE_Real *RA_diag_data_array = NULL;
+   HYPRE_Int *RA_diag_j_array = NULL;
+   HYPRE_Real *RA_offd_data_array = NULL;
+   HYPRE_Int *RA_offd_j_array = NULL;
+
    hypre_CSRMatrix *Ps_ext;
    
    HYPRE_Real      *Ps_ext_data;
@@ -1610,12 +1615,8 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
       hypre_TFree(col_map_offd_RAP);
    }
 
-   HYPRE_Real *RA_diag_data_array = hypre_TAlloc(HYPRE_Real, num_cols_diag_A*num_threads);
-   HYPRE_Int *RA_diag_j_array = hypre_TAlloc(HYPRE_Int, num_cols_diag_A*num_threads);
-
-   HYPRE_Real *RA_offd_data_array = NULL;
-   HYPRE_Int *RA_offd_j_array = NULL;
-
+   RA_diag_data_array = hypre_TAlloc(HYPRE_Real, num_cols_diag_A*num_threads);
+   RA_diag_j_array = hypre_TAlloc(HYPRE_Int, num_cols_diag_A*num_threads);
    if (num_cols_offd_A)
    {
       RA_offd_data_array = hypre_TAlloc(HYPRE_Real, num_cols_offd_A*num_threads);
