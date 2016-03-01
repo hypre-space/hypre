@@ -547,13 +547,13 @@ AS_HELP_STRING([--with-blas-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for BLAS. OK to use -L and -l flags in the list]),
 [for blas_lib in $withval; do
-    [libprefix=`echo $blas_lib | cut -c1-2`]
-    if test $libprefix = "-L"
-    then
-       BLASLIBDIRS="$blas_lib $BLASLIBDIRS"
-    else
-       BLASLIBS="$blas_lib $BLASLIBS"
-    fi
+dnl    [libprefix=`echo $blas_lib | cut -c1-2`]
+dnl    if test $libprefix = "-L"
+dnl    then
+dnl       BLASLIBDIRS="$blas_lib $BLASLIBDIRS"
+dnl    else
+       BLASLIBS="$BLASLIBS $blas_lib"
+dnl    fi
  done;
  hypre_user_chose_blas=yes]
 )
@@ -589,13 +589,13 @@ AS_HELP_STRING([--with-lapack-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for LAPACK. OK to use -L and -l flags in the list]),
 [for lapack_lib in $withval; do
-    [libprefix=`echo $lapack_lib | cut -c1-2`]
-    if test $libprefix = "-L"
-    then
-       LAPACKLIBDIRS="$lapack_lib $LAPACKLIBDIRS"
-    else
-       LAPACKLIBS="$lapack_lib $LAPACKLIBS"
-    fi
+dnl    [libprefix=`echo $lapack_lib | cut -c1-2`]
+dnl    if test $libprefix = "-L"
+dnl    then
+dnl       LAPACKLIBDIRS="$lapack_lib $LAPACKLIBDIRS"
+dnl    else
+       LAPACKLIBS="$LAPACKLIBS $lapack_lib"
+dnl    fi
  done;
  hypre_user_chose_lapack=yes]
 )
@@ -1184,7 +1184,7 @@ dnl *********************************************************************
                        See "configure --help" for usage details. 
                        ********************************************************************],[9])
    fi
-   AC_HYPRE_CHECK_USER_BLASLIBS
+dnl   AC_HYPRE_CHECK_USER_BLASLIBS
  fi
 
  if test "$hypre_user_chose_lapack" = "yes";
@@ -1207,7 +1207,7 @@ dnl *********************************************************************
                        See "configure --help" for usage details. 
                        ********************************************************************],[9])
    fi
-   AC_HYPRE_CHECK_USER_LAPACKLIBS
+dnl   AC_HYPRE_CHECK_USER_LAPACKLIBS
  fi
 
 dnl *********************************************************************
