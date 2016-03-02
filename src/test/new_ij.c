@@ -192,7 +192,7 @@ main( hypre_int argc,
    HYPRE_Real add_trunc_factor = 0;
 
    HYPRE_Int    rap2=0;
-   HYPRE_Int    keepTranspose = 1;
+   HYPRE_Int    keepTranspose = 0;
    HYPRE_Real   relax_wt; 
    HYPRE_Real   relax_wt_level; 
    HYPRE_Real   outer_wt;
