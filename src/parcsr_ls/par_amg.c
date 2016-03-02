@@ -381,7 +381,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataNonGalTolArray(amg_data) = NULL;
 
    hypre_ParAMGDataRAP2(amg_data) = 0;
-   hypre_ParAMGDataKeepTranspose(amg_data) = 1;
+   hypre_ParAMGDataKeepTranspose(amg_data) = 0;
 
    return (void *) amg_data;
 }
