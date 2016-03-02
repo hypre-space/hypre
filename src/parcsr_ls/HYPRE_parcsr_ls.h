@@ -1168,8 +1168,6 @@ HYPRE_Int HYPRE_ParaSailsSetFilter(HYPRE_Solver solver,
  * Set the symmetry parameter for the
  * ParaSails preconditioner.
  *
- * @param solver [IN] Preconditioner object for which to set symmetry parameter.
- * @param sym [IN] Value of the symmetry parameter:
  * \begin{tabular}{|c|l|} \hline 
  * value & meaning \\ \hline 
  * 0 & nonsymmetric and/or indefinite problem, and nonsymmetric preconditioner\\
@@ -1177,6 +1175,9 @@ HYPRE_Int HYPRE_ParaSailsSetFilter(HYPRE_Solver solver,
  * 2 & nonsymmetric, definite problem, and SPD (factored) preconditioner \\
  * \hline
  * \end{tabular}
+ *
+ * @param solver [IN] Preconditioner object for which to set symmetry parameter.
+ * @param sym [IN] Symmetry parameter.
  **/
 HYPRE_Int HYPRE_ParaSailsSetSym(HYPRE_Solver solver,
                                 HYPRE_Int    sym);
