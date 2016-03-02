@@ -759,7 +759,7 @@ hypre_StructAssumedPartitionCreate(
    HYPRE_Int          total_boxes, proc_count, max_position;
    HYPRE_Int         *proc_array=NULL;
    HYPRE_Int          initial_level;
-   HYPRE_Int          dmin, dmax;
+   HYPRE_Int          dmax;
    HYPRE_Real         width, wmin, wmax;
    HYPRE_Real         rn_cubes, rn_cube_procs, rn_cube_divs, rdiv;
 
@@ -1142,14 +1142,13 @@ hypre_StructAssumedPartitionCreate(
       box = hypre_BoxArrayBox(region_array, i);
 
       /* Find min width and max width dimensions */
-      dmin = dmax = 0;
+      dmax = 0;
       wmin = wmax = hypre_BoxSizeD(box, 0);
       for (d = 1; d < ndim; d++)
       {
          width = hypre_BoxSizeD(box, d);
          if (width < wmin)
          {
-            dmin = d;
             wmin = width;
          }
          else if (width > wmax)

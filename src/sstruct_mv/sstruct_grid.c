@@ -1120,7 +1120,6 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
    hypre_Index             *cdirs;
 
    hypre_SStructPGrid      *pgrid;
-   hypre_BoxManager        *boxman;
 
    hypre_BoxManEntry      **pi_entries, **pj_entries;
    hypre_BoxManEntry       *pi_entry,    *pj_entry;
@@ -1180,9 +1179,8 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
             pj = hypre_SStructNeighborPart(vneighbor);
             hypre_SStructVarToNborVar(grid, pi, vi, coord, &vj);
 
-            /* intersect with boxman for part pi */
+            /* intersect with grid for part pi */
 
-            boxman = hypre_SStructGridBoxManager(grid, pi, vi);
             hypre_CopyBox(hypre_SStructNeighborBox(vneighbor), vn_box);
             /* if pi is not the owner, grow the vneighbor box */
             if (pi > pj)
@@ -1192,9 +1190,8 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
             hypre_SStructGridIntersect(grid, pi, vi, vn_box, 0,
                                        &pi_entries, &npi_entries);
 
-            /* intersect with boxman for part pj */
+            /* intersect with grid for part pj */
 
-            boxman = hypre_SStructGridBoxManager(grid, pj, vj);
             hypre_CopyBox(hypre_SStructNeighborBox(vneighbor), vn_box);
             /* if pj is not the owner, grow the vneighbor box */
             if (pj > pi)

@@ -1140,7 +1140,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
    HYPRE_Int  i, j, k;
 
    HYPRE_Int need_to_sort = 1; /* default it to sort */
-   HYPRE_Int short_sort = 0; /*do abreviated sort */
+   //HYPRE_Int short_sort = 0; /*do abreviated sort */
    
    HYPRE_Int  non_ap_gather = 1; /* default to gather w/out ap*/
 
@@ -1235,7 +1235,8 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
       {
          HYPRE_Int  size;
          HYPRE_Int *tmp_proc_ids;
-         HYPRE_Int  proc_count, proc_alloc, max_proc_count;
+         HYPRE_Int  proc_count, proc_alloc;
+         //HYPRE_Int  max_proc_count;
          HYPRE_Int *proc_array;
          HYPRE_Int *ap_proc_ids;
          HYPRE_Int  count;
@@ -1433,7 +1434,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             hypre_MPI_Allreduce(send_statbuf, statbuf, 3, HYPRE_MPI_INT,
                                 hypre_MPI_MAX, comm);   
 
-            max_proc_count = statbuf[0];
+            //max_proc_count = statbuf[0];
             
             /* we do not want a single processor to do a ton of point to point
                communications (relative to the number of total processors - how
@@ -1570,7 +1571,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
 
                   /* in this case, we can do the "short sort" because we will
                      not have any duplicate proc ids */
-                  short_sort = 1;
+                  //short_sort = 1;
 
                   for (i=0; i< proc_count; i++)
                   {
@@ -1608,12 +1609,14 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                   
                   proc_count = new_count;
                }
+#if 0
                /* also can do the short sort if we just have boxes that are
                   ours....here we also don't need to check for duplicates */
                if (nentries == num_my_entries)
                {
                   short_sort = 1;
                }
+#endif
 
                send_buf_starts = hypre_CTAlloc(HYPRE_Int, proc_count + 1);
                for (i=0; i< proc_count+1; i++)

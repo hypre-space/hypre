@@ -2227,7 +2227,6 @@ PrintUsage( char *progname,
       hypre_printf("                        2 - R/B Gauss-Seidel\n");
       hypre_printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
       hypre_printf("  -w <jacobi_weight> : jacobi weight\n");
-      hypre_printf("  -sym <s>           : Struct- symmetric storage (1) or not (0)\n");
       hypre_printf("  -jump <num>        : Struct- num levels to jump in SparseMSG\n");
       hypre_printf("  -solver_type <ID>  : Struct- solver type for Hybrid\n");
       hypre_printf("                        1 - PCG (default)\n");
@@ -2338,7 +2337,6 @@ main( hypre_int argc,
 
    HYPRE_Int             n_pre, n_post;
    HYPRE_Int             skip;
-   HYPRE_Int             sym;
    HYPRE_Int             rap;
    HYPRE_Int             relax;
    HYPRE_Real            jacobi_weight;
@@ -2433,7 +2431,6 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    skip  = 0;
-   sym   = 1;
    rap   = 0;
    relax = 1;
    usr_jacobi_weight= 0;
@@ -2597,11 +2594,6 @@ main( hypre_int argc,
          arg_index++;
          jacobi_weight= atof(argv[arg_index++]);
          usr_jacobi_weight= 1; /* flag user weight */
-      }
-      else if ( strcmp(argv[arg_index], "-sym") == 0 )
-      {
-         arg_index++;
-         sym = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-jump") == 0 )
       {
