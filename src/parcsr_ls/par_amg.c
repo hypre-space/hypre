@@ -66,7 +66,6 @@ hypre_BoomerAMGCreate()
    HYPRE_Int 	    cgc_its;
    HYPRE_Int 	    seq_threshold;
    HYPRE_Int        redundant;
-   HYPRE_Int        participate;
 
    /* solve params */
    HYPRE_Int      min_iter;
@@ -105,7 +104,6 @@ hypre_BoomerAMGCreate()
    HYPRE_Int        simple;
    HYPRE_Real   add_trunc_factor;
    HYPRE_Int      add_P_max_elmts;
-   HYPRE_Int      precond_flag;
 
    /* log info */
    HYPRE_Int      num_iterations;
@@ -129,8 +127,7 @@ hypre_BoomerAMGCreate()
    max_coarse_size = 9;
    min_coarse_size = 0;
    seq_threshold = 0;
-   redundant = 1;
-   participate = 0;
+   redundant = 0;
    strong_threshold = 0.25;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
@@ -203,7 +200,6 @@ hypre_BoomerAMGCreate()
    simple = -1;
    add_trunc_factor = 0.0;
    add_P_max_elmts = 0;
-   precond_flag = 0;
 
    /* log info */
    num_iterations = 0;
@@ -366,6 +362,8 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataExpandPWeights(amg_data) = NULL;
 
    /* for redundant coarse grid solve */
+   hypre_ParAMGDataSeqThreshold(amg_data) = seq_threshold;
+   hypre_ParAMGDataRedundant(amg_data) = redundant;
    hypre_ParAMGDataCoarseSolver(amg_data) = NULL;
    hypre_ParAMGDataACoarse(amg_data) = NULL;
    hypre_ParAMGDataFCoarse(amg_data) = NULL;

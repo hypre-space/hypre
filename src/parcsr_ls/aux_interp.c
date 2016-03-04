@@ -322,7 +322,6 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_of
 
   /*HYPRE_Int min;*/
   HYPRE_Int newoff = 0;
-  HYPRE_Int full_off_procNodes = 0;
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
   hypre_UnorderedIntMap col_map_offd_inverse;
@@ -399,7 +398,6 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_of
   hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
 #endif
 
-  full_off_procNodes = newoff + num_cols_A_offd;
   /* Set column indices for Sop and A_ext such that offd nodes are
    * negatively indexed */
 #pragma omp parallel for private(kk,k1,got_loc,loc_col) HYPRE_SMP_SCHEDULE
@@ -501,7 +499,6 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_of
      newoff = min;
   }
 
-  full_off_procNodes = newoff + num_cols_A_offd;
   /* Set column indices for Sop and A_ext such that offd nodes are
    * negatively indexed */
   for(i = 0; i < num_cols_A_offd; i++)

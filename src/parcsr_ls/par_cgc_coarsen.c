@@ -51,7 +51,6 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    HYPRE_Int             *S_i           = hypre_CSRMatrixI(S_diag);
    HYPRE_Int             *S_j           = hypre_CSRMatrixJ(S_diag);
    HYPRE_Int             *S_offd_i      = hypre_CSRMatrixI(S_offd);
-   HYPRE_Int             *S_offd_j;
    HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(S_diag);
    HYPRE_Int              num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
                   
@@ -146,8 +145,6 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-
-   if (num_cols_offd) S_offd_j = hypre_CSRMatrixJ(S_offd);
 
    jS = S_i[num_variables];
 
@@ -778,7 +775,7 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int 
   HYPRE_Int mpisize,mpirank;
   HYPRE_Int num_sends;
   HYPRE_Int *vertexrange=NULL;
-  HYPRE_Int vstart,vend;
+  HYPRE_Int vstart;
   HYPRE_Int *int_buf_data;
   HYPRE_Int start;
   HYPRE_Int i,ii,j;
@@ -813,7 +810,6 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int 
       /* first point in next proc's range */
       vertexrange[1] = scan_recv;
       vstart = vertexrange[0];
-      vend   = vertexrange[1];
    }
 #else
   vertexrange = hypre_CTAlloc (HYPRE_Int,mpisize+1);
@@ -822,7 +818,6 @@ HYPRE_Int hypre_AmgCGCPrepare (hypre_ParCSRMatrix *S,HYPRE_Int nlocal,HYPRE_Int 
   vertexrange[0]=0;
   for (i=2;i<=mpisize;i++) vertexrange[i]+=vertexrange[i-1];
   vstart = vertexrange[mpirank];
-  vend   = vertexrange[mpirank+1];
 #endif
 
   /* Note: vstart uses 0-based indexing, while CF_marker uses 1-based indexing */
@@ -874,7 +869,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
  * ijG : the created graph
  * ================================================================================================*/
 {
-  HYPRE_Int i,/* ii,*/ip,j,jj,m,n,p;
+  HYPRE_Int i,/* ii,ip,*/j,jj,m,n,p;
   HYPRE_Int mpisize,mpirank;
 
   HYPRE_Real weight;
@@ -892,7 +887,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows (S_diag);
   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (S_offd);
   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd (S);
-  HYPRE_Int pointrange_start,pointrange_end;
+  HYPRE_Int /*pointrange_start,*/ pointrange_end;
   HYPRE_Int *pointrange,*pointrange_nonlocal,*pointrange_strong=NULL;
   HYPRE_Int vertexrange_start,vertexrange_end;
   HYPRE_Int *vertexrange_strong= NULL;
@@ -925,7 +920,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
     hypre_MPI_Request *sendrequest,*recvrequest;
 
     nlocal = vertexrange[1] - vertexrange[0];
-    pointrange_start = pointrange[0];
+    /*pointrange_start = pointrange[0];*/
     pointrange_end   = pointrange[1];
     vertexrange_start = vertexrange[0];
     vertexrange_end   = vertexrange[1];
@@ -937,7 +932,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
       hypre_MPI_Irecv (vertexrange_nonlocal+2*i,2,HYPRE_MPI_INT,recv_procs[i],tag_vertexrange,comm,&recvrequest[2*i+1]);
     }
     for (i=0;i<num_sends;i++) {
-      int_buf_data[2*i] = pointrange_start;
+      /*int_buf_data[2*i] = pointrange_start;*/
       int_buf_data[2*i+1] = pointrange_end;
       int_buf_data2[2*i] = vertexrange_start;
       int_buf_data2[2*i+1] = vertexrange_end;
@@ -950,7 +945,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   }
 #else
   nlocal = vertexrange[mpirank+1] - vertexrange[mpirank];
-  pointrange_start = pointrange[mpirank];
+  /*pointrange_start = pointrange[mpirank];*/
   pointrange_end   = pointrange[mpirank+1];
   vertexrange_start = vertexrange[mpirank];
   vertexrange_end   = vertexrange[mpirank+1];
@@ -1042,7 +1037,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
       /* determine processor */
       for (p=0;p<num_recvs_strong;p++) 
 	if (col_map_offd[jj] >= pointrange_strong[2*p] && col_map_offd[jj] < pointrange_strong[2*p+1]) break;
-      ip=recv_procs_strong[p];
+      /*ip=recv_procs_strong[p];*/
       /* loop over all coarse grids constructed on this processor domain */
       for (m=vertexrange_start;m<vertexrange_end;m++) {
 	/* loop over all coarse grids constructed on neighbor processor domain */

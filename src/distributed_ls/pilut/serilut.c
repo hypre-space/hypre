@@ -357,7 +357,7 @@ HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
 		    HYPRE_Int *newperm, HYPRE_Int *newiperm, 
                     hypre_PilutSolverGlobals *globals )
 {
-  HYPRE_Int nbnd, nlocal, i, j, ierr;
+  HYPRE_Int nbnd, nlocal, i, j;
   HYPRE_Int break_loop; /* marks finding an element making this row exterior. -AC */
   HYPRE_Int row_size, *col_ind;
   HYPRE_Real *values;
@@ -375,7 +375,7 @@ HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
       nbnd++;
     } else
     {
-      ierr = HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &row_size,
+      HYPRE_DistributedMatrixGetRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
       /* if (ierr) return(ierr); */
 
@@ -390,7 +390,7 @@ HYPRE_Int hypre_SelectInterior( HYPRE_Int local_num_rows,
         }
       }
 
-      ierr = HYPRE_DistributedMatrixRestoreRow( matrix, firstrow+i, &row_size,
+      HYPRE_DistributedMatrixRestoreRow( matrix, firstrow+i, &row_size,
                &col_ind, &values);
 
       if ( break_loop == 0 ) 
@@ -489,7 +489,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 		HYPRE_Int *perm, HYPRE_Int *iperm,
 		FactorMatType *ldu, hypre_PilutSolverGlobals *globals)
 {
-  HYPRE_Int i, j, ierr;
+  HYPRE_Int i, j;
   HYPRE_Int diag, lrow;
   HYPRE_Int first, last, itmp;
   HYPRE_Real dtmp;
@@ -571,7 +571,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 
   /* Now, I want to keep maxnz elements of L. Go and extract them */
 
-  ierr = hypre_DoubleQuickSplit( w, jw, last, maxnz ); 
+  hypre_DoubleQuickSplit( w, jw, last, maxnz ); 
   /* if (ierr) return; */
   for ( j= hypre_max(0,last-maxnz); j< last; j++ ) 
   {
@@ -599,7 +599,7 @@ void hypre_SecondDrop(HYPRE_Int maxnz, HYPRE_Real tol, HYPRE_Int row,
 
 
   /* Now, I want to keep maxnz elements of U. Go and extract them */
-  ierr = hypre_DoubleQuickSplit( w+first, jw+first, lastjr-first, maxnz ); 
+  hypre_DoubleQuickSplit( w+first, jw+first, lastjr-first, maxnz ); 
   /* if (ierr) return; */
   for ( j=hypre_max(first, lastjr-maxnz); j< lastjr; j++ ) 
   {
@@ -648,7 +648,6 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
   HYPRE_Int max, nz, lrow, rrow;
   HYPRE_Int last, first, itmp;
   HYPRE_Real dtmp;
-  HYPRE_Int ierr=0;
 
 
   /* Reset the jr array, it is not needed any more */
@@ -725,7 +724,7 @@ void hypre_SecondDropUpdate(HYPRE_Int maxnz, HYPRE_Int maxnzkeep, HYPRE_Real tol
 
 
   /* Keep large maxnz elements of L */
-  ierr = hypre_DoubleQuickSplit( w+1, jw+1, last-1, maxnz ); 
+  hypre_DoubleQuickSplit( w+1, jw+1, last-1, maxnz ); 
   /* if (ierr) return; */
   for ( j= hypre_max(1,last-maxnz); j< last; j++ ) 
   {

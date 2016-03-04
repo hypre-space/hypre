@@ -59,15 +59,12 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    HYPRE_Int       level;
    HYPRE_Int       coarse_grid;
    HYPRE_Int       fine_grid;
-   HYPRE_Int       relax_type;
    HYPRE_Int       rlx_down;
    HYPRE_Int       rlx_up;
    HYPRE_Int      *grid_relax_type;
    HYPRE_Real      **l1_norms;
    HYPRE_Real    alpha, beta;
-   HYPRE_Int       num_threads;
    HYPRE_Real *u_data;
-   HYPRE_Real *f_data;
    HYPRE_Real *v_data;
    HYPRE_Real *l1_norms_lvl;
    HYPRE_Real *D_inv;
@@ -82,8 +79,6 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
 #endif
    
    /* Acquire data and allocate storage */
-
-   num_threads = hypre_NumThreads();
 
    A_array           = hypre_ParAMGDataAArray(amg_data);
    F_array           = hypre_ParAMGDataFArray(amg_data);
@@ -103,7 +98,6 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    Rtilde            = hypre_ParAMGDataRtilde(amg_data);
    l1_norms          = hypre_ParAMGDataL1Norms(amg_data);
    D_inv             = hypre_ParAMGDataDinv(amg_data);
-   grid_relax_type   = hypre_ParAMGDataGridRelaxType(amg_data);
    relax_weight      = hypre_ParAMGDataRelaxWeight(amg_data);
    omega             = hypre_ParAMGDataOmega(amg_data);
    rlx_order         = hypre_ParAMGDataRelaxOrder(amg_data);
@@ -119,7 +113,6 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
     *--------------------------------------------------------------------*/
 
    /* down cycle */
-   relax_type = grid_relax_type[1];
    rlx_down = grid_relax_type[1];
    rlx_up = grid_relax_type[2];
    for (level = 0; level < num_levels-1; level++)
@@ -128,7 +121,6 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
       coarse_grid = level + 1;
 
       u_data = hypre_VectorData(hypre_ParVectorLocalVector(U_array[fine_grid]));
-      f_data = hypre_VectorData(hypre_ParVectorLocalVector(F_array[fine_grid]));
       v_data = hypre_VectorData(hypre_ParVectorLocalVector(Vtemp));
       l1_norms_lvl = l1_norms[level];
 
@@ -224,7 +216,6 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
    }
 
    /* up cycle */
-   relax_type = grid_relax_type[2];
    for (level = num_levels-1; level > 0; level--)
    {
       fine_grid = level - 1;
@@ -356,7 +347,6 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
 
  /* Local variables  */ 
    HYPRE_Int       Solve_err_flag = 0;
-   HYPRE_Int       num_threads;
    HYPRE_Int       num_nonzeros_diag;
    HYPRE_Int       num_nonzeros_offd;
 
@@ -365,8 +355,6 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    HYPRE_Real    relax_type;
 
    /* Acquire data and allocate storage */
-
-   num_threads = hypre_NumThreads();
 
    A_array           = hypre_ParAMGDataAArray(amg_data);
    F_array           = hypre_ParAMGDataFArray(amg_data);
@@ -855,23 +843,18 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
 
    HYPRE_Int       addlvl;
    HYPRE_Int       num_levels;
-   HYPRE_Int       num_add_lvls;
    HYPRE_Int       num_rows_L;
-   HYPRE_Int       num_rows_A;
    HYPRE_Int       num_rows_tmp;
    HYPRE_Int       level, i;
 
  /* Local variables  */ 
    HYPRE_Int       Solve_err_flag = 0;
-   HYPRE_Int       num_threads;
 
    HYPRE_Real  **l1_norms_ptr = NULL;
    HYPRE_Real  *l1_norms;
    HYPRE_Int l1_start;
 
    /* Acquire data and allocate storage */
-
-   num_threads = hypre_NumThreads();
 
    A_array           = hypre_ParAMGDataAArray(amg_data);
    F_array           = hypre_ParAMGDataFArray(amg_data);
@@ -880,13 +863,10 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
    relax_weight      = hypre_ParAMGDataRelaxWeight(amg_data);
    relax_type        = hypre_ParAMGDataGridRelaxType(amg_data)[1];
-   num_rows_A        = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[0]));
 
    l1_norms_ptr      = hypre_ParAMGDataL1Norms(amg_data); 
    /* smooth_option       = hypre_ParAMGDataSmoothOption(amg_data); */
 
-   num_add_lvls = num_levels+1-addlvl;
-  
    num_rows_L  = 0;
    for (i=addlvl; i < num_levels; i++)
    {
