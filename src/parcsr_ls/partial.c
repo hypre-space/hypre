@@ -97,7 +97,6 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
   HYPRE_Int             *fine_to_coarse_offd = NULL;
   HYPRE_Int             *old_coarse_to_fine = NULL;
 
-  HYPRE_Int              num_cols_P_offd;
   HYPRE_Int              full_off_procNodes;
   
   hypre_CSRMatrix *Sop;
@@ -112,8 +111,8 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
   HYPRE_Int              jj_begin_row_offd = 0;
   HYPRE_Int              jj_end_row_offd = 0; 
   HYPRE_Int              coarse_counter, coarse_counter_offd; */
-  HYPRE_Int              n_coarse, n_coarse_old;
-  HYPRE_Int              total_old_global_cpts, my_first_old_cpt;
+  HYPRE_Int              n_coarse_old;
+  HYPRE_Int              total_old_global_cpts;
     
   /* Interpolation weight variables */
   HYPRE_Real       sum, diagonal, distribute;
@@ -146,9 +145,9 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
-   my_first_old_cpt = num_old_cpts_global[0];
+   /*my_first_old_cpt = num_old_cpts_global[0];*/
    n_coarse_old = num_old_cpts_global[1] - num_old_cpts_global[0];
-   n_coarse = num_cpts_global[1] - num_cpts_global[0];
+   /*n_coarse = num_cpts_global[1] - num_cpts_global[0];*/
    if (my_id == (num_procs -1)) 
    {
       total_global_cpts = num_cpts_global[1];
@@ -158,11 +157,11 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_INT, num_procs-1, comm);
 #else
    my_first_cpt = num_cpts_global[my_id];
-   my_first_old_cpt = num_old_cpts_global[my_id];
+   /*my_first_old_cpt = num_old_cpts_global[my_id];*/
    total_global_cpts = num_cpts_global[num_procs];
    total_old_global_cpts = num_old_cpts_global[num_procs];
    n_coarse_old = num_old_cpts_global[my_id+1] - num_old_cpts_global[my_id];
-   n_coarse = num_cpts_global[my_id+1] - num_cpts_global[my_id];
+   /*n_coarse = num_cpts_global[my_id+1] - num_cpts_global[my_id];*/
 #endif
 
    if (!comm_pkg)
@@ -818,7 +817,6 @@ hypre_BoomerAMGBuildPartialExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_mark
 
    /* This builds col_map, col_map should be monotone increasing and contain
     * global numbers. */
-   num_cols_P_offd = 0;
    if(P_offd_size)
    {
      hypre_build_interp_colmap(P, full_off_procNodes, tmp_CF_marker_offd, fine_to_coarse_offd);
@@ -938,7 +936,6 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
   HYPRE_Int             *fine_to_coarse_offd = NULL;
   HYPRE_Int             *old_coarse_to_fine = NULL;
 
-  HYPRE_Int              num_cols_P_offd;
   HYPRE_Int              loc_col;
   HYPRE_Int              full_off_procNodes;
   
@@ -951,9 +948,9 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
   HYPRE_Int              jj_begin_row, jj_end_row;
   HYPRE_Int              jj_begin_row_offd = 0;
   HYPRE_Int              jj_end_row_offd = 0;
-  HYPRE_Int              coarse_counter, coarse_counter_offd;
-  HYPRE_Int              n_coarse, n_coarse_old;
-  HYPRE_Int              total_old_global_cpts, my_first_old_cpt;
+  HYPRE_Int              coarse_counter;
+  HYPRE_Int              n_coarse_old;
+  HYPRE_Int              total_old_global_cpts;
 
   HYPRE_Int             *ihat = NULL; 
   HYPRE_Int             *ihat_offd = NULL; 
@@ -994,9 +991,10 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
-   my_first_old_cpt = num_old_cpts_global[0];
+   /*my_first_old_cpt = num_old_cpts_global[0];*/
    n_coarse_old = num_old_cpts_global[1] - num_old_cpts_global[0];
-   n_coarse = num_cpts_global[1] - num_cpts_global[0];
+   /*n_coarse = num_cpts_global[1] - num_cpts_global[0];*/
+
    if (my_id == (num_procs -1))
    {
       total_global_cpts = num_cpts_global[1];
@@ -1006,11 +1004,11 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_INT, num_procs-1, comm);
 #else
    my_first_cpt = num_cpts_global[my_id];
-   my_first_old_cpt = num_old_cpts_global[my_id];
+   /*my_first_old_cpt = num_old_cpts_global[my_id];*/
    total_global_cpts = num_cpts_global[num_procs];
    total_old_global_cpts = num_old_cpts_global[num_procs];
    n_coarse_old = num_old_cpts_global[my_id+1] - num_old_cpts_global[my_id];
-   n_coarse = num_cpts_global[my_id+1] - num_cpts_global[my_id];
+   /*n_coarse = num_cpts_global[my_id+1] - num_cpts_global[my_id];*/
 #endif
 
    if (!comm_pkg)
@@ -1074,7 +1072,6 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
    coarse_counter = 0;
-   coarse_counter_offd = 0;
 
    cnt = 0;
    old_cnt = 0;
@@ -1816,7 +1813,6 @@ hypre_BoomerAMGBuildPartialStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
 
    /* This builds col_map, col_map should be monotone increasing and contain
     * global numbers. */
-   num_cols_P_offd = 0;
    if(P_offd_size)
    {
      hypre_build_interp_colmap(P, full_off_procNodes, tmp_CF_marker_offd, fine_to_coarse_offd);
@@ -1940,7 +1936,6 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
   HYPRE_Int             *fine_to_coarse_offd = NULL;
   HYPRE_Int             *old_coarse_to_fine = NULL;
 
-  HYPRE_Int              num_cols_P_offd;
   HYPRE_Int              loc_col;
   HYPRE_Int              full_off_procNodes;
   
@@ -1955,9 +1950,9 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
   HYPRE_Int              jj_begin_row, jj_end_row;
   HYPRE_Int              jj_begin_row_offd = 0;
   HYPRE_Int              jj_end_row_offd = 0;
-  HYPRE_Int              coarse_counter, coarse_counter_offd;
-  HYPRE_Int              n_coarse, n_coarse_old;
-  HYPRE_Int              total_old_global_cpts, my_first_old_cpt;
+  HYPRE_Int              coarse_counter;
+  HYPRE_Int              n_coarse_old;
+  HYPRE_Int              total_old_global_cpts;
     
   /* Interpolation weight variables */
   HYPRE_Real       sum, diagonal, distribute;
@@ -1985,9 +1980,9 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
-   my_first_old_cpt = num_old_cpts_global[0];
+   /*my_first_old_cpt = num_old_cpts_global[0];*/
    n_coarse_old = num_old_cpts_global[1] - num_old_cpts_global[0];
-   n_coarse = num_cpts_global[1] - num_cpts_global[0];
+   /*n_coarse = num_cpts_global[1] - num_cpts_global[0];*/
    if (my_id == (num_procs -1)) 
    {
       total_global_cpts = num_cpts_global[1];
@@ -1997,11 +1992,11 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    hypre_MPI_Bcast(&total_old_global_cpts, 1, HYPRE_MPI_INT, num_procs-1, comm);
 #else
    my_first_cpt = num_cpts_global[my_id];
-   my_first_old_cpt = num_old_cpts_global[my_id];
+   /*my_first_old_cpt = num_old_cpts_global[my_id];*/
    total_global_cpts = num_cpts_global[num_procs];
    total_old_global_cpts = num_old_cpts_global[num_procs];
    n_coarse_old = num_old_cpts_global[my_id+1] - num_old_cpts_global[my_id];
-   n_coarse = num_cpts_global[my_id+1] - num_cpts_global[my_id];
+   /*n_coarse = num_cpts_global[my_id+1] - num_cpts_global[my_id];*/
 #endif
 
    if (!comm_pkg)
@@ -2065,7 +2060,6 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
    coarse_counter = 0;
-   coarse_counter_offd = 0;
 
    cnt = 0;
    old_cnt = 0;
@@ -2582,7 +2576,6 @@ hypre_BoomerAMGBuildPartialExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker
 
    /* This builds col_map, col_map should be monotone increasing and contain
     * global numbers. */
-   num_cols_P_offd = 0;
    if(P_offd_size)
    {
      hypre_build_interp_colmap(P, full_off_procNodes, tmp_CF_marker_offd, fine_to_coarse_offd);

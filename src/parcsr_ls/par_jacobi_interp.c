@@ -81,19 +81,19 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    hypre_ParCSRMatrix * Pnew;
    hypre_ParCSRMatrix * C;
    hypre_CSRMatrix *P_diag = hypre_ParCSRMatrixDiag(*P);
-   hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(*P);
-   HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);
+   /*hypre_CSRMatrix *P_offd = hypre_ParCSRMatrixOffd(*P);
+   HYPRE_Real      *P_diag_data = hypre_CSRMatrixData(P_diag);*/
    HYPRE_Int             *P_diag_i = hypre_CSRMatrixI(P_diag);
-   HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
+   /*HYPRE_Int             *P_diag_j = hypre_CSRMatrixJ(P_diag);
    HYPRE_Real      *P_offd_data = hypre_CSRMatrixData(P_offd);
    HYPRE_Int             *P_offd_i = hypre_CSRMatrixI(P_offd);
    hypre_CSRMatrix *C_diag;
    hypre_CSRMatrix *C_offd;
    hypre_CSRMatrix *Pnew_diag;
-   hypre_CSRMatrix *Pnew_offd;
+   hypre_CSRMatrix *Pnew_offd;*/
    HYPRE_Int	num_rows_diag_P = hypre_CSRMatrixNumRows(P_diag);
    HYPRE_Int i;
-   HYPRE_Int Jnochanges=0, Jchanges, Pnew_num_nonzeros;
+   HYPRE_Int Jnochanges=0/*, Jchanges, Pnew_num_nonzeros*/;
    HYPRE_Int CF_coarse=0;
    HYPRE_Int * J_marker = hypre_CTAlloc( HYPRE_Int, num_rows_diag_P );
    HYPRE_Int nc, ncmax, ncmin, nc1;
@@ -180,9 +180,9 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
          }
       }
 #endif
-   Jchanges = num_rows_diag_P - Jnochanges - CF_coarse;
 
 #ifdef HYPRE_JACINT_PRINT_SOME_ROWS
+   Jchanges = num_rows_diag_P - Jnochanges - CF_coarse;
    hypre_printf("some rows to be changed: ");
    randthresh = 15/(HYPRE_Real)Jchanges;
    for ( i=0; i<num_rows_diag_P; ++i )
@@ -233,9 +233,9 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    hypre_sprintf( filename, "C%i", level );
    if ( num_rows_diag_P <= HYPRE_MAX_PRINTABLE_MATRIX ) hypre_ParCSRMatrixPrintIJ( C,0,0,filename);
 #endif
+#ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
    C_diag = hypre_ParCSRMatrixDiag(C);
    C_offd = hypre_ParCSRMatrixOffd(C);
-#ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
    hypre_printf("%i %i Jacobi_Interp_1 after matmul, C has %i+%i=%i nonzeros, local sum %e\n",
           my_id, level, hypre_CSRMatrixNumNonzeros(C_diag),
           hypre_CSRMatrixNumNonzeros(C_offd),
@@ -261,10 +261,10 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
       argument are affected, and they should exactly correspond to all the rows
       of the second argument.
    */
+#ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
    Pnew_diag = hypre_ParCSRMatrixDiag(Pnew);
    Pnew_offd = hypre_ParCSRMatrixOffd(Pnew);
    Pnew_num_nonzeros = hypre_CSRMatrixNumNonzeros(Pnew_diag)+hypre_CSRMatrixNumNonzeros(Pnew_offd);
-#ifdef HYPRE_JACINT_PRINT_DIAGNOSTICS
    hypre_printf("%i %i Jacobi_Interp_1 after MatMinus, Pnew has %i+%i=%i nonzeros, local sum %e\n",
           my_id, level, hypre_CSRMatrixNumNonzeros(Pnew_diag),
           hypre_CSRMatrixNumNonzeros(Pnew_offd), Pnew_num_nonzeros,
@@ -302,15 +302,15 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    *P = Pnew;
 
    P_diag = hypre_ParCSRMatrixDiag(*P);
-   P_offd = hypre_ParCSRMatrixOffd(*P);
-   P_diag_data = hypre_CSRMatrixData(P_diag);
    P_diag_i = hypre_CSRMatrixI(P_diag);
-   P_diag_j = hypre_CSRMatrixJ(P_diag);
-   P_offd_data = hypre_CSRMatrixData(P_offd);
-   P_offd_i = hypre_CSRMatrixI(P_offd);
 
    /* row sum computations, for output */
 #ifdef HYPRE_JACINT_PRINT_ROW_SUMS
+   P_offd = hypre_ParCSRMatrixOffd(*P);
+   P_diag_data = hypre_CSRMatrixData(P_diag);
+   P_diag_j = hypre_CSRMatrixJ(P_diag);
+   P_offd_data = hypre_CSRMatrixData(P_offd);
+   P_offd_i = hypre_CSRMatrixI(P_offd);
    PIimax=-1.0e12, PIimin=1.0e12, PIimav=0, PIipav=0;
    nmav=0, npav=0;
    for ( i=0; i<num_rows_diag_P; ++i )

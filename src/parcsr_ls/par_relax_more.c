@@ -115,7 +115,7 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
    HYPRE_Real   *tridiag = NULL;
    HYPRE_Real   *trioffd = NULL;
 
-   HYPRE_Real lambda_max , max_row_sum;
+   HYPRE_Real lambda_max ;
    
    HYPRE_Real beta, gamma = 0.0, alpha, sdotp, gamma_old, alphainv;
   
@@ -213,7 +213,6 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
 
     /* for the initial filling of the tridiag matrix */
     beta = 1.0;
-    max_row_sum = 0.0;
     
     i = 0;
     while (i < max_iter)

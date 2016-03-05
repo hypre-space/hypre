@@ -94,7 +94,6 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
 
-  HYPRE_Int              num_cols_P_offd;
   HYPRE_Int              loc_col;
   HYPRE_Int              full_off_procNodes;
   
@@ -107,7 +106,7 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int              jj_begin_row, jj_end_row;
   HYPRE_Int              jj_begin_row_offd = 0;
   HYPRE_Int              jj_end_row_offd = 0;
-  HYPRE_Int              coarse_counter, coarse_counter_offd;
+  HYPRE_Int              coarse_counter;
   HYPRE_Int             *ihat = NULL; 
   HYPRE_Int             *ihat_offd = NULL; 
   HYPRE_Int             *ipnt = NULL; 
@@ -213,7 +212,6 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
    coarse_counter = 0;
-   coarse_counter_offd = 0;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid.
@@ -938,7 +936,6 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    /* This builds col_map, col_map should be monotone increasing and contain
     * global numbers. */
-   num_cols_P_offd = 0;
    if(P_offd_size)
    {
      hypre_build_interp_colmap(P, full_off_procNodes, tmp_CF_marker_offd, fine_to_coarse_offd);
@@ -1063,7 +1060,6 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
 
-  HYPRE_Int              num_cols_P_offd;
   HYPRE_Int              loc_col;
   HYPRE_Int              full_off_procNodes;
   
@@ -1814,7 +1810,6 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    /* This builds col_map, col_map should be monotone increasing and contain
     * global numbers. */
-   num_cols_P_offd = 0;
    if(P_offd_size)
    {
      hypre_build_interp_colmap(P, full_off_procNodes, tmp_CF_marker_offd, fine_to_coarse_offd);
@@ -1926,8 +1921,8 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *tmp_CF_marker_offd = NULL;
   HYPRE_Int             *dof_func_offd = NULL;
   /*HYPRE_Int             **ext_p, **ext_p_offd;*/
-  HYPRE_Int              ccounter_offd;
-  /*HYPRE_Int             *clist_offd;*/
+  /*HYPRE_Int              ccounter_offd;
+  HYPRE_Int             *clist_offd;*/
   HYPRE_Int              common_c;
 
   /* Full row information for columns of A that are off diag*/
@@ -1939,7 +1934,6 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
 
-  HYPRE_Int              num_cols_P_offd;
   HYPRE_Int              loc_col;
   HYPRE_Int              full_off_procNodes;
   
@@ -1954,7 +1948,7 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int              jj_begin_row, jj_end_row;
   HYPRE_Int              jj_begin_row_offd = 0;
   HYPRE_Int              jj_end_row_offd = 0;
-  HYPRE_Int              coarse_counter, coarse_counter_offd;
+  HYPRE_Int              coarse_counter;
     
   /* Interpolation weight variables */
   HYPRE_Real       sum, diagonal, distribute;
@@ -1964,8 +1958,8 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   /*HYPRE_Int              index;*/
   HYPRE_Int              start_indexing = 0;
   HYPRE_Int              i, i1, i2, jj, kk, k1, jj1;
-  HYPRE_Int              ccounter;
-  /*HYPRE_Int             *clist, ccounter;*/
+  /*HYPRE_Int              ccounter;
+  HYPRE_Int             *clist, ccounter;*/
 
   /* Definitions */
   HYPRE_Real       zero = 0.0;
@@ -2055,7 +2049,6 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
    coarse_counter = 0;
-   coarse_counter_offd = 0;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid.
@@ -2081,8 +2074,8 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      else if (CF_marker[i] != -3)
      {
        /* Initialize ccounter for each f point */
-       ccounter = 0;
-       ccounter_offd = 0;
+       /*ccounter = 0;
+       ccounter_offd = 0;*/
        for (jj = S_diag_i[i]; jj < S_diag_i[i+1]; jj++)
        { /* search through diag to find all c neighbors */
 	 i1 = S_diag_j[jj];           
@@ -2319,8 +2312,8 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
-   ccounter = start_indexing;
-   ccounter_offd = start_indexing;
+   /*ccounter = start_indexing;
+   ccounter_offd = start_indexing;*/
 
    /* Fine to coarse mapping */
    if(num_procs > 1)
@@ -2368,8 +2361,8 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      
      else if (CF_marker[i] != -3)
      {
-       ccounter = 0;
-       ccounter_offd = 0;
+       /*ccounter = 0;
+       ccounter_offd = 0;*/
        strong_f_marker--;
 
        for (jj = S_diag_i[i]; jj < S_diag_i[i+1]; jj++)
@@ -2783,7 +2776,6 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    /* This builds col_map, col_map should be monotone increasing and contain
     * global numbers. */
-   num_cols_P_offd = 0;
    if(P_offd_size)
    {
      hypre_build_interp_colmap(P, full_off_procNodes, tmp_CF_marker_offd, fine_to_coarse_offd);
@@ -2883,7 +2875,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *CF_marker_offd = NULL;
   HYPRE_Int             *tmp_CF_marker_offd = NULL;
   HYPRE_Int             *dof_func_offd = NULL;
-  HYPRE_Int              ccounter_offd;
+  /*HYPRE_Int              ccounter_offd;*/
   HYPRE_Int              common_c;
 
   /* Full row information for columns of A that are off diag*/
@@ -2895,7 +2887,6 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
 
-  HYPRE_Int              num_cols_P_offd;
   HYPRE_Int              loc_col;
   HYPRE_Int              full_off_procNodes;
   
@@ -2908,7 +2899,7 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int              jj_begin_row, jj_end_row;
   HYPRE_Int              jj_begin_row_offd = 0;
   HYPRE_Int              jj_end_row_offd = 0;
-  HYPRE_Int              coarse_counter, coarse_counter_offd;
+  HYPRE_Int              coarse_counter;
     
   /* Interpolation weight variables */
   HYPRE_Real       sum, diagonal, distribute;
@@ -2919,8 +2910,8 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   /*HYPRE_Int              index;*/
   HYPRE_Int              start_indexing = 0;
   HYPRE_Int              i, i1, i2, jj, kk, k1, jj1;
-  HYPRE_Int              ccounter;
-  /*HYPRE_Int             *clist, ccounter;*/
+  /*HYPRE_Int              ccounter;
+  HYPRE_Int             *clist, ccounter;*/
 
   /* Definitions */
   HYPRE_Real       zero = 0.0;
@@ -3000,7 +2991,6 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
    coarse_counter = 0;
-   coarse_counter_offd = 0;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid.
@@ -3026,8 +3016,8 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      else
      {
        /* Initialize ccounter for each f point */
-       ccounter = 0;
-       ccounter_offd = 0;
+       /*ccounter = 0;
+       ccounter_offd = 0;*/
        for (jj = S_diag_i[i]; jj < S_diag_i[i+1]; jj++)
        { /* search through diag to find all c neighbors */
 	 i1 = S_diag_j[jj];           
@@ -3239,8 +3229,8 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
-   ccounter = start_indexing;
-   ccounter_offd = start_indexing;
+   /*ccounter = start_indexing;
+   ccounter_offd = start_indexing;*/
 
    /* Fine to coarse mapping */
    if(num_procs > 1)
@@ -3289,8 +3279,8 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      
      else if (CF_marker[i] != -3)
      {
-       ccounter = 0;
-       ccounter_offd = 0;
+       /*ccounter = 0;
+       ccounter_offd = 0;*/
        strong_f_marker--;
 
        for (jj = S_diag_i[i]; jj < S_diag_i[i+1]; jj++)
@@ -3675,7 +3665,6 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    /* This builds col_map, col_map should be monotone increasing and contain
     * global numbers. */
-   num_cols_P_offd = 0;
    if(P_offd_size)
    {
      hypre_build_interp_colmap(P, full_off_procNodes, tmp_CF_marker_offd, fine_to_coarse_offd);
@@ -3773,7 +3762,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *CF_marker_offd = NULL;
   HYPRE_Int             *tmp_CF_marker_offd = NULL;
   HYPRE_Int             *dof_func_offd = NULL;
-  HYPRE_Int              ccounter_offd;
+  /*HYPRE_Int              ccounter_offd;*/
   HYPRE_Int              common_c;
 
   /* Full row information for columns of A that are off diag*/
@@ -3785,7 +3774,6 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
 
-  HYPRE_Int              num_cols_P_offd;
   HYPRE_Int              loc_col;
   HYPRE_Int              full_off_procNodes;
   
@@ -3798,7 +3786,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int              jj_begin_row, jj_end_row;
   HYPRE_Int              jj_begin_row_offd = 0;
   HYPRE_Int              jj_end_row_offd = 0;
-  HYPRE_Int              coarse_counter, coarse_counter_offd;
+  HYPRE_Int              coarse_counter;
     
   /* Interpolation weight variables */
   HYPRE_Real       sum, diagonal, distribute;
@@ -3809,7 +3797,7 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   /*HYPRE_Int              index;*/
   HYPRE_Int              start_indexing = 0;
   HYPRE_Int              i, i1, i2, jj, kk, k1, jj1;
-  HYPRE_Int              ccounter;
+  /*HYPRE_Int              ccounter;*/
   HYPRE_Int              found_c = 0;
 
   /* Definitions */
@@ -3889,7 +3877,6 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
    coarse_counter = 0;
-   coarse_counter_offd = 0;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid.
@@ -3915,8 +3902,8 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      else
      {
        /* Initialize ccounter for each f point */
-       ccounter = 0;
-       ccounter_offd = 0;
+       /*ccounter = 0;
+       ccounter_offd = 0;*/
        for (jj = S_diag_i[i]; jj < S_diag_i[i+1]; jj++)
        { /* search through diag to find all c neighbors */
 	 i1 = S_diag_j[jj];           
@@ -4134,8 +4121,8 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
-   ccounter = start_indexing;
-   ccounter_offd = start_indexing;
+   /*ccounter = start_indexing;
+   ccounter_offd = start_indexing;*/
 
    /* Fine to coarse mapping */
    if(num_procs > 1)
@@ -4184,8 +4171,8 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
      
      else if (CF_marker[i] != -3)
      {
-       ccounter = 0;
-       ccounter_offd = 0;
+       /*ccounter = 0;
+       ccounter_offd = 0;*/
        strong_f_marker--;
 
        for (jj = S_diag_i[i]; jj < S_diag_i[i+1]; jj++)
@@ -4576,7 +4563,6 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    /* This builds col_map, col_map should be monotone increasing and contain
     * global numbers. */
-   num_cols_P_offd = 0;
    if(P_offd_size)
    {
      hypre_build_interp_colmap(P, full_off_procNodes, tmp_CF_marker_offd, fine_to_coarse_offd);
@@ -4689,7 +4675,6 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int             *fine_to_coarse = NULL;
   HYPRE_Int             *fine_to_coarse_offd = NULL;
 
-  HYPRE_Int              num_cols_P_offd;
   HYPRE_Int              loc_col;
   HYPRE_Int              full_off_procNodes;
   
@@ -4704,7 +4689,7 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
   HYPRE_Int              jj_begin_row, jj_end_row;
   HYPRE_Int              jj_begin_row_offd = 0;
   HYPRE_Int              jj_end_row_offd = 0;
-  HYPRE_Int              coarse_counter, coarse_counter_offd;
+  HYPRE_Int              coarse_counter;
     
   /* Interpolation weight variables */
   HYPRE_Real       sum, diagonal, distribute;
@@ -4798,7 +4783,6 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    jj_counter = start_indexing;
    jj_counter_offd = start_indexing;
    coarse_counter = 0;
-   coarse_counter_offd = 0;
 
    /*-----------------------------------------------------------------------
     *  Loop over fine grid.
@@ -5298,7 +5282,6 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
 
    /* This builds col_map, col_map should be monotone increasing and contain
     * global numbers. */
-   num_cols_P_offd = 0;
    if(P_offd_size)
    {
      hypre_build_interp_colmap(P, full_off_procNodes, tmp_CF_marker_offd, fine_to_coarse_offd);
