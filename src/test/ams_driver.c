@@ -108,7 +108,7 @@ hypre_int main (hypre_int argc, char *argv[])
    HYPRE_Int solver_id;
    HYPRE_Int maxit, cycle_type, rlx_type, rlx_sweeps, dim;
    HYPRE_Real rlx_weight, rlx_omega;
-   HYPRE_Int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_agg_npaths, amg_interp_type, amg_Pmax;
+   HYPRE_Int amg_coarsen_type, amg_rlx_type, amg_agg_levels, amg_interp_type, amg_Pmax;
    HYPRE_Int h1_method, singular_problem, coordinates;
    HYPRE_Real tol, theta;
    HYPRE_Real rtol;
@@ -144,8 +144,8 @@ hypre_int main (hypre_int argc, char *argv[])
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 1; amg_rlx_type = 3;  */ /* PMIS-1 */
    /* cycle_type = 1; amg_coarsen_type = 8; amg_agg_levels = 0; amg_rlx_type = 3;  */ /* PMIS-0 */
    /* cycle_type = 7; amg_coarsen_type = 6; amg_agg_levels = 0; amg_rlx_type = 6;  */ /* Falgout-0 */
-   amg_interp_type = 6; amg_Pmax = 4; amg_agg_npaths = 1;        /* long-range interpolation */
-   /* amg_interp_type = 0; amg_Pmax = 0; amg_agg_npaths = 1; */  /* standard interpolation */
+   amg_interp_type = 6; amg_Pmax = 4;     /* long-range interpolation */
+   /* amg_interp_type = 0; amg_Pmax = 0; */  /* standard interpolation */
    theta = 0.25;
    blockSize = 5;
    rtol = 0;
@@ -213,11 +213,6 @@ hypre_int main (hypre_int argc, char *argv[])
          {
             arg_index++;
             amg_agg_levels = atoi(argv[arg_index++]);
-         }
-         else if ( strcmp(argv[arg_index], "-aggnp") == 0 )
-         {
-            arg_index++;
-            amg_agg_npaths = atoi(argv[arg_index++]);
          }
          else if ( strcmp(argv[arg_index], "-itype") == 0 )
          {
@@ -310,7 +305,6 @@ hypre_int main (hypre_int argc, char *argv[])
          hypre_printf("    -theta <num>         : BoomerAMG threshold (0.25)          \n");
          hypre_printf("    -ctype <num>         : BoomerAMG coarsening type           \n");
          hypre_printf("    -agg <num>           : Levels of BoomerAMG agg. coarsening \n");
-         hypre_printf("    -aggnp <num>         : Number of paths in agg. coarsening  \n");
          hypre_printf("    -amgrlx <num>        : BoomerAMG relaxation type           \n");
          hypre_printf("    -itype <num>         : BoomerAMG interpolation type        \n");
          hypre_printf("    -pmax <num>          : BoomerAMG interpolation truncation  \n");

@@ -716,12 +716,8 @@ DistributeData( ProblemData   global_data,
    HYPRE_Int              np, pid;
    HYPRE_Int              pool, part, box, entry, p, q, r, i, d, dmap, sign, size;
    HYPRE_Int              mod_lower, mod_upper;
-   Index            m, mmap, n, ones, mod_graph;
+   Index            m, mmap, n, mod_graph;
    ProblemIndex     ilower, iupper, int_ilower, int_iupper;
-
-   ones[0]= 1;
-   ones[1]= 1;
-   ones[2]= 1;
 
    /* determine first process number in each pool */
    pool_procs = hypre_CTAlloc(HYPRE_Int, (data.npools+1));
@@ -1292,7 +1288,6 @@ main( hypre_int argc,
    HYPRE_Int                   time_index;
                          
    HYPRE_Int                   n_pre, n_post;
-   HYPRE_Int                   skip;
 
    HYPRE_Int                   arg_index, part, box, var, entry, s, i, j, k;
 
@@ -1352,8 +1347,6 @@ main( hypre_int argc,
 
    solver_id = 39;
    print_system = 0;
-
-   skip = 0;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -1421,11 +1414,6 @@ main( hypre_int argc,
       {
          arg_index++;
          print_system = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-skip") == 0 )
-      {
-         arg_index++;
-         skip = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-v") == 0 )
       {
