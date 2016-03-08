@@ -114,7 +114,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    HYPRE_Int              n_Cell_iedges;
 
    HYPRE_Int              nElements_iedges, nFaces_iedges, nEdges_iedges;
-   HYPRE_Int              nElements_Faces, nElements_Edges, nEdges_edges;
+   HYPRE_Int              nElements_Faces, nElements_Edges;
 
    HYPRE_Int             *iFace, *iEdge, *iElement, *iedgeEdge;
    HYPRE_Int             *jFace_edge, *jEdge_iedge, *jElement_edge;
@@ -135,7 +135,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    hypre_Index            loop_size, start, cstart, stride, low_index, hi_index;
    hypre_Index            ishift, jshift, kshift, zero_index, one_index;
    hypre_Index            lindex;
-   HYPRE_Int              n_boxoffsets, component_stride;
+   HYPRE_Int              n_boxoffsets;
 
    HYPRE_Int              nparts= hypre_SStructGridNParts(fgrid_element);
    HYPRE_Int              ndim  = hypre_SStructGridNDim(fgrid_element);
@@ -914,16 +914,11 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
       nFaces_iedges = nxFaces*n_xFace_iedges + nyFaces*n_yFace_iedges + 
          nzFaces*n_zFace_iedges;
       nElements_iedges= nElements * n_Cell_iedges;
-      nEdges_edges    = nxEdges*rfactor[0] + nyEdges*rfactor[1] + nzEdges*rfactor[2];
    }
    else
    {
       n_Cell_iedges = (rfactor[0]-1)*rfactor[1] + (rfactor[1]-1)*rfactor[0];
       nElements_iedges= nElements * n_Cell_iedges;
-
-      /* edges= faces in 2-d are oriented differently; hence, the different
-         formula to compute nEdges_edges. */
-      nEdges_edges= nxEdges*rfactor[1] + nyEdges*rfactor[0]; 
    }
    
    if (ndim == 3)
@@ -3466,7 +3461,6 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                        fCedge_ratio= 1.0/rfactor[1] */
             {
                hypre_SetIndex3(stride, rfactor[0], 1, 1);
-               component_stride= 1; /*stride vertically, component y= 1.*/
                fCedge_ratio= 1.0/rfactor[1];
 
                /* boxoffset shrink in the i direction */
@@ -3482,7 +3476,6 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                        fCedge_ratio= 1.0/rfactor[0] */
             {
                hypre_SetIndex3(stride, 1, rfactor[1], 1);
-               component_stride= 0; /*stride horizontally, component x= 0.*/
                fCedge_ratio= 1.0/rfactor[0];
 
                /* boxoffset shrink in the j direction */
@@ -3498,7 +3491,6 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                        fCedge_ratio= 1.0/rfactor[0] */
             {
                hypre_SetIndex3(stride, 1, rfactor[1], rfactor[2]);
-               component_stride= 0; /*stride x direction, component x= 0.*/
                fCedge_ratio= 1.0/rfactor[0];
 
                /* boxoffset shrink in the j & k directions */
@@ -3516,7 +3508,6 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                        fCedge_ratio= 1.0/rfactor[1] */
             {
                hypre_SetIndex3(stride, rfactor[0], 1, rfactor[2]);
-               component_stride= 1; /*stride y direction, component y= 1.*/
                fCedge_ratio= 1.0/rfactor[1];
 
                /* boxoffset shrink in the i & k directions */
@@ -3534,7 +3525,6 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                        fCedge_ratio= 1.0/rfactor[2] */
             {
                hypre_SetIndex3(stride, rfactor[0], rfactor[1], 1);
-               component_stride= 2; /*stride z direction, component z= 2.*/
                fCedge_ratio= 1.0/rfactor[2];
                                                                      
                /* boxoffset shrink in the i & j directions */
@@ -5467,7 +5457,7 @@ hypre_CollapseStencilToStencil(hypre_ParCSRMatrix     *Aee,
 
    HYPRE_Real              *collapsed_vals;
 
-   hypre_Index              index1, index2, zero_index;
+   hypre_Index              index1, index2;
 
    HYPRE_Int                size, *col_inds, *col_inds2;
    HYPRE_Real              *values;
@@ -5476,8 +5466,6 @@ hypre_CollapseStencilToStencil(hypre_ParCSRMatrix     *Aee,
    HYPRE_Int                i, j, m, centre, found;
    HYPRE_Int                getrow_ierr;
    HYPRE_Int                cnt;
-
-   hypre_SetIndex3(zero_index,0,0,0);
 
    /* create the collapsed stencil coefficients. Three components. */
    collapsed_vals= hypre_CTAlloc(HYPRE_Real, 3); 

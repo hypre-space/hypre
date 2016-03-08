@@ -29,7 +29,6 @@ hypre_FACSolve3( void                 *fac_vdata,
                 hypre_SStructVector  *b_in,
                 hypre_SStructVector  *x_in         )
 {
-   hypre_SStructGrid       *grid; 
    hypre_FACData           *fac_data           = fac_vdata;
 
    hypre_SStructMatrix     *A_in               =(fac_data-> A_rap);
@@ -76,8 +75,6 @@ hypre_FACSolve3( void                 *fac_vdata,
    HYPRE_Int                level, i;
    HYPRE_Int                ierr = 0;
   
-   grid= hypre_SStructGraphGrid( hypre_SStructMatrixGraph(A_in) );
-
    /*--------------------------------------------------------------
     * Special cases
     *--------------------------------------------------------------*/

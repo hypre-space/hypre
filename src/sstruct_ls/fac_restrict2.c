@@ -507,7 +507,6 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    hypre_Box              *fgrid_box;
    hypre_StructGrid       *cgrid;
    hypre_BoxArray         *cgrid_boxes;
-   hypre_Box              *cgrid_box;
    hypre_BoxArray         *own_boxes;
    hypre_Box              *own_box;
    HYPRE_Int              *boxnums;
@@ -842,7 +841,6 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
       arrayarray_ownboxes= fullwgt_ownboxes[var];
       hypre_ForBoxI(ci, cgrid_boxes)
       {
-         cgrid_box= hypre_BoxArrayBox(cgrid_boxes, ci);
          xc_temp_dbox= hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc_temp), ci);
          xcp_temp[0][0]= hypre_StructVectorBoxData(xc_temp, ci);
 

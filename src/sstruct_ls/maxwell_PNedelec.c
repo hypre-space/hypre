@@ -56,7 +56,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    hypre_Index            var_index, *boxoffset, *suboffset;
    hypre_Index            loop_size, start, cstart, stride, hi_index, lindex;
    hypre_Index            ishift, jshift, kshift, zero_index, one_index;
-   HYPRE_Int              n_boxoffsets, component_stride;
+   HYPRE_Int              n_boxoffsets;
 
    HYPRE_Int              nparts= hypre_SStructGridNParts(fgrid_edge);
    HYPRE_Int              ndim  = hypre_SStructGridNDim(fgrid_edge);
@@ -1594,7 +1594,6 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                        fCedge_ratio= 1.0/rfactor[1] */
             {
                hypre_SetIndex3(stride, rfactor[0], 1, 1);
-               component_stride= 1; /*stride vertically, component y= 1.*/
                fCedge_ratio= 1.0/rfactor[1];
 
                /* boxoffset shrink in the i direction */
@@ -1610,7 +1609,6 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                        fCedge_ratio= 1.0/rfactor[0] */
             {
                hypre_SetIndex3(stride, 1, rfactor[1], 1);
-               component_stride= 0; /*stride horizontally, component x= 0.*/
                fCedge_ratio= 1.0/rfactor[0];
 
                /* boxoffset shrink in the j direction */
@@ -1626,7 +1624,6 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                        fCedge_ratio= 1.0/rfactor[0] */
             {
                hypre_SetIndex3(stride, 1, rfactor[1], rfactor[2]);
-               component_stride= 0; /*stride x direction, component x= 0.*/
                fCedge_ratio= 1.0/rfactor[0];
 
                /* boxoffset shrink in the j & k directions */
@@ -1644,7 +1641,6 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                        fCedge_ratio= 1.0/rfactor[1] */
             {
                hypre_SetIndex3(stride, rfactor[0], 1, rfactor[2]);
-               component_stride= 1; /*stride y direction, component y= 1.*/
                fCedge_ratio= 1.0/rfactor[1];
 
                /* boxoffset shrink in the i & k directions */
@@ -1661,7 +1657,6 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                        fCedge_ratio= 1.0/rfactor[2] */
             {
                hypre_SetIndex3(stride, rfactor[0], rfactor[1], 1);
-               component_stride= 2; /*stride z direction, component z= 2.*/
                fCedge_ratio= 1.0/rfactor[2];
 
                /* boxoffset shrink in the i & j directions */

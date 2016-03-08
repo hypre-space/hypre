@@ -159,7 +159,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               nvars, var1, var2, var2_start; 
    HYPRE_Int               iA, iAc, iA_shift_z, iA_shift_zy, iA_shift_zyx;
 
-   hypre_Index             lindex, zero_index;
+   hypre_Index             lindex;
    hypre_Index             index1, index2;
    hypre_Index             index_temp;
 
@@ -174,7 +174,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int              *iUventries  = hypre_SStructGraphIUVEntries(graph);
    hypre_SStructUVEntry  **Uventries   = hypre_SStructGraphUVEntries(graph);
    hypre_SStructUVEntry   *Uventry;
-   HYPRE_Int               nUentries, cnt1, cnt2;
+   HYPRE_Int               nUentries, cnt1;
    hypre_Index             index, *cindex, *Uv_cindex;
    HYPRE_Int               box_array_size, cbox_array_size;
 
@@ -202,7 +202,6 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               myid;
 
    hypre_MPI_Comm_rank(comm, &myid);
-   hypre_SetIndex3(zero_index, 0, 0, 0);
 
    hypre_BoxInit(&fine_box, ndim);
    hypre_BoxInit(&intersect_box, ndim);
@@ -308,7 +307,6 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
          hypre_CopyIndex(hypre_BoxIMin(cgrid_box), cstart);
 
          cnt1= 0;
-         cnt2= 0;
          temp1= hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(fgrid_boxes));
 
          hypre_ClearIndex(index_temp);
