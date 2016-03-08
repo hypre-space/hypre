@@ -1868,7 +1868,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    HYPRE_Int num_recvs;
    HYPRE_Int counter, upper_bound;
    HYPRE_Int num_real_procs;
-   HYPRE_Int current_proc, original_proc_indx;
+   HYPRE_Int /*current_proc,*/ original_proc_indx;
    
    HYPRE_Int *row_list=NULL, *row_list_num_elements=NULL;
    HYPRE_Int *a_proc_id=NULL, *orig_order=NULL;
@@ -2281,7 +2281,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
       
       /* Find the current processor in order, and reset recv_data_ptr to that processor's message */
       original_proc_indx = argsort_contact_procs[i];
-      current_proc = send_proc_obj.id[i];
+      /*current_proc = send_proc_obj.id[i];*/
       indx = recv_starts[original_proc_indx];
       recv_data_ptr = (void *) ((char *) send_proc_obj.v_elements + indx*obj_size_bytes);
 
@@ -2902,7 +2902,7 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
    HYPRE_Int *offd_j;
    HYPRE_Complex *offd_data;
    HYPRE_Int first, pstart;
-   HYPRE_Int current_num_elmts;
+   /*HYPRE_Int current_num_elmts;*/
    /*HYPRE_Int max_off_proc_elmts;*/
    HYPRE_Int off_proc_i_indx;
    HYPRE_Int *off_proc_i;
@@ -2965,8 +2965,8 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
       aux_matrix = hypre_IJMatrixTranslator(matrix);
       if (aux_matrix)
       {
-         current_num_elmts 
-                  = hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix);
+         /*current_num_elmts 
+                  = hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix);*/
          off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix);
          off_proc_i = hypre_AuxParCSRMatrixOffProcI(aux_matrix);
          off_proc_j = hypre_AuxParCSRMatrixOffProcJ(aux_matrix);
@@ -3196,8 +3196,8 @@ hypre_IJMatrixSetValuesOMPParCSR( hypre_IJMatrix       *matrix,
       aux_matrix = hypre_IJMatrixTranslator(matrix);
       if (aux_matrix)
       {
-         current_num_elmts 
-                  = hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix);
+         /*current_num_elmts 
+                  = hypre_AuxParCSRMatrixCurrentNumElmts(aux_matrix);*/
          off_proc_i_indx = hypre_AuxParCSRMatrixOffProcIIndx(aux_matrix);
          off_proc_i = hypre_AuxParCSRMatrixOffProcI(aux_matrix);
          off_proc_j = hypre_AuxParCSRMatrixOffProcJ(aux_matrix);

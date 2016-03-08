@@ -93,7 +93,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    hypre_CSRMatrix *Pnew_offd;*/
    HYPRE_Int	num_rows_diag_P = hypre_CSRMatrixNumRows(P_diag);
    HYPRE_Int i;
-   HYPRE_Int Jnochanges=0/*, Jchanges, Pnew_num_nonzeros*/;
+   /*HYPRE_Int Jnochanges=0, Jchanges, Pnew_num_nonzeros*/;
    HYPRE_Int CF_coarse=0;
    HYPRE_Int * J_marker = hypre_CTAlloc( HYPRE_Int, num_rows_diag_P );
    HYPRE_Int nc, ncmax, ncmin, nc1;

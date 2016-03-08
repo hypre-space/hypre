@@ -700,7 +700,7 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
  
-   HYPRE_Int        row_start=0, row_end=0, col_start = 0, col_end = 0;
+   HYPRE_Int        col_start = 0, col_end = 0;
    HYPRE_Int        num_recvs, *recv_procs, *recv_vec_starts;
 
    HYPRE_Int        num_sends, *send_procs, *send_map_starts;
@@ -722,8 +722,6 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
     * get parcsr_A information 
     *----------------------------------------------------------*/
 
-   row_start = hypre_ParCSRBlockMatrixFirstRowIndex(A);
-   row_end = hypre_ParCSRBlockMatrixLastRowIndex(A);
    col_start =  hypre_ParCSRBlockMatrixFirstColDiag(A);
    col_end =  hypre_ParCSRBlockMatrixLastColDiag(A);
    

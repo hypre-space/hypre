@@ -348,7 +348,6 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    HYPRE_Int       relax_points;
    HYPRE_Real   *relax_weight;
 
-   HYPRE_Int       relax_order;
    HYPRE_Int       old_version = 0;
 
 
@@ -378,8 +377,6 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
    grid_relax_points   = hypre_ParAMGDataGridRelaxPoints(amg_data);
    relax_weight        = hypre_ParAMGDataRelaxWeight(amg_data); 
-
-   relax_order         = hypre_ParAMGDataRelaxOrder(amg_data);
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 

@@ -81,7 +81,6 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
    HYPRE_Int		    num_procs, my_id;
    HYPRE_Int		    num_sends = 0;
    HYPRE_Int		    first_col, start;
-   HYPRE_Int		    col_0, col_n;
 
    hypre_LinkList   LoL_head;
    hypre_LinkList   LoL_tail;
@@ -213,8 +212,6 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
       S_ext_j    = hypre_CSRMatrixJ(S_ext);
       num_nonzeros = S_ext_i[num_cols_offd];
       first_col = hypre_ParCSRMatrixFirstColDiag(S);
-      col_0 = first_col-1;
-      col_n = col_0+num_variables;
       if (measure_type)
       {
 	 for (i=0; i < num_nonzeros; i++)
@@ -887,7 +884,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   HYPRE_Int num_variables = hypre_CSRMatrixNumRows (S_diag);
   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (S_offd);
   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd (S);
-  HYPRE_Int /*pointrange_start,*/ pointrange_end;
+  /*HYPRE_Int pointrange_start, pointrange_end;*/
   HYPRE_Int *pointrange,*pointrange_nonlocal,*pointrange_strong=NULL;
   HYPRE_Int vertexrange_start,vertexrange_end;
   HYPRE_Int *vertexrange_strong= NULL;
@@ -920,8 +917,8 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
     hypre_MPI_Request *sendrequest,*recvrequest;
 
     nlocal = vertexrange[1] - vertexrange[0];
-    /*pointrange_start = pointrange[0];*/
-    pointrange_end   = pointrange[1];
+    /*pointrange_start = pointrange[0];
+    pointrange_end   = pointrange[1]; */
     vertexrange_start = vertexrange[0];
     vertexrange_end   = vertexrange[1];
     sendrequest = hypre_CTAlloc (hypre_MPI_Request,2*(num_sends+num_recvs));
@@ -932,8 +929,8 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
       hypre_MPI_Irecv (vertexrange_nonlocal+2*i,2,HYPRE_MPI_INT,recv_procs[i],tag_vertexrange,comm,&recvrequest[2*i+1]);
     }
     for (i=0;i<num_sends;i++) {
-      /*int_buf_data[2*i] = pointrange_start;*/
-      int_buf_data[2*i+1] = pointrange_end;
+      /*int_buf_data[2*i] = pointrange_start;
+      int_buf_data[2*i+1] = pointrange_end; */
       int_buf_data2[2*i] = vertexrange_start;
       int_buf_data2[2*i+1] = vertexrange_end;
       hypre_MPI_Isend (int_buf_data+2*i,2,HYPRE_MPI_INT,send_procs[i],tag_pointrange,comm,&sendrequest[2*i]);
@@ -945,8 +942,8 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   }
 #else
   nlocal = vertexrange[mpirank+1] - vertexrange[mpirank];
-  /*pointrange_start = pointrange[mpirank];*/
-  pointrange_end   = pointrange[mpirank+1];
+  /*pointrange_start = pointrange[mpirank];
+  pointrange_end   = pointrange[mpirank+1]; */
   vertexrange_start = vertexrange[mpirank];
   vertexrange_end   = vertexrange[mpirank+1];
   for (i=0;i<num_recvs;i++) {
