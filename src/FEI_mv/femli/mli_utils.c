@@ -349,7 +349,7 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
    double   alpha, beta, rho, rhom1, sigma, offdiagNorm, *zData;
    double   rnorm, *alphaArray, *rnormArray, **Tmat, initOffdiagNorm;
    double   app, aqq, arr, ass, apq, sign, tau, t, c, s;
-   double   *ADiagA, one=1.0, *rData, *srdiag;
+   double   *ADiagA, one=1.0, *srdiag;
    MPI_Comm comm;
    hypre_CSRMatrix *ADiag;
    hypre_ParVector *rVec=NULL, *zVec, *pVec, *apVec;
@@ -406,7 +406,6 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
       apVec = hypre_ParVectorCreate(comm, globalNRows, partition);
       hypre_ParVectorInitialize(apVec);
       zData  = hypre_VectorData( hypre_ParVectorLocalVector(zVec) );
-      rData  = hypre_VectorData( hypre_ParVectorLocalVector(rVec) );
 
       pData  = hypre_VectorData( hypre_ParVectorLocalVector(pVec) );
       apData  = hypre_VectorData( hypre_ParVectorLocalVector(apVec) );

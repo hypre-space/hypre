@@ -4625,7 +4625,7 @@ double HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    HYPRE_ParVector    b_csr;
    HYPRE_ParVector    x_csr;
 
-   int                info=0, panel_size, permc_spec;
+   int                info=0, permc_spec;
    int                *perm_r, *perm_c;
    double             *rhs, *soln;
    superlu_options_t  slu_options;
@@ -4705,7 +4705,6 @@ double HYPRE_LinSysCore::solveUsingSuperLU(int& status)
    perm_c = new int[nrows];
    permc_spec = superluOrdering_;
    get_perm_c(permc_spec, &A2, perm_c);
-   panel_size = sp_ienv(1);
    for ( i = 0; i < nrows; i++ ) perm_r[i] = 0;
 
    set_default_options(&slu_options);
@@ -4805,7 +4804,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    HYPRE_ParVector    b_csr;
    HYPRE_ParVector    x_csr;
 
-   int                info, permc_spec, panel_size;
+   int                info, permc_spec;
    int                *perm_r, *perm_c, *etree, lwork;
    double             *rhs, *soln, *sol2;
    double             *R, *C;
@@ -4943,7 +4942,6 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
          printf("No of nonzeros in factor L = %d\n", Lstore->nnz);
          printf("No of nonzeros in factor U = %d\n", Ustore->nnz);
          printf("SuperLUX : NNZ in L+U = %d\n", Lstore->nnz+Ustore->nnz-nrows);
-         panel_size = sp_ienv(1);
       }
    } 
    else 

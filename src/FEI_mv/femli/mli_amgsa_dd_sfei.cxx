@@ -2151,7 +2151,7 @@ int MLI_Method_AMGSA::coarsenSelective(hypre_ParCSRMatrix *hypreG,
    int       *nodeStat, selectFlag, nSelected=0, nNotSelected=0, count;
    int       *GDiagI, *GDiagJ;
    double    maxVal, *vals, *GDiagA;
-   hypre_CSRMatrix *GDiag, *GOffd;
+   hypre_CSRMatrix *GDiag;
 #ifdef MLI_DEBUG_DETAILED
    int       rowNum;
 #endif
@@ -2179,7 +2179,6 @@ int MLI_Method_AMGSA::coarsenSelective(hypre_ParCSRMatrix *hypreG,
    GDiagI = hypre_CSRMatrixI(GDiag);
    GDiagJ = hypre_CSRMatrixJ(GDiag);
    GDiagA = hypre_CSRMatrixData(GDiag);
-   GOffd  = hypre_ParCSRMatrixOffd(hypreG);
 
    /*-----------------------------------------------------------------
     * allocate status arrays 
