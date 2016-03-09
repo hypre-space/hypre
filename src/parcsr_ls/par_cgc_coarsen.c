@@ -885,7 +885,7 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols (S_offd);
   HYPRE_Int *col_map_offd = hypre_ParCSRMatrixColMapOffd (S);
   /*HYPRE_Int pointrange_start, pointrange_end;*/
-  HYPRE_Int /**pointrange,*/*pointrange_nonlocal,*pointrange_strong=NULL;
+  HYPRE_Int *pointrange_nonlocal,*pointrange_strong=NULL;
   HYPRE_Int vertexrange_start,vertexrange_end;
   HYPRE_Int *vertexrange_strong= NULL;
   HYPRE_Int *vertexrange_nonlocal;
@@ -905,7 +905,6 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
   /* determine neighbor processors */
   num_recvs = hypre_ParCSRCommPkgNumRecvs (comm_pkg);
   recv_procs = hypre_ParCSRCommPkgRecvProcs (comm_pkg);
-  /*pointrange = hypre_ParCSRMatrixRowStarts (S);*/
   pointrange_nonlocal = hypre_CTAlloc  (HYPRE_Int, 2*num_recvs);
   vertexrange_nonlocal = hypre_CTAlloc (HYPRE_Int, 2*num_recvs);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
@@ -941,6 +940,8 @@ HYPRE_Int hypre_AmgCGCGraphAssemble (hypre_ParCSRMatrix *S,HYPRE_Int *vertexrang
     hypre_TFree (sendrequest);
   }
 #else
+  HYPRE_Int *pointrange;
+  pointrange = hypre_ParCSRMatrixRowStarts (S);
   nlocal = vertexrange[mpirank+1] - vertexrange[mpirank];
   /*pointrange_start = pointrange[mpirank];
   pointrange_end   = pointrange[mpirank+1]; */
