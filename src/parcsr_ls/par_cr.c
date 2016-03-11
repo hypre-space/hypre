@@ -2611,7 +2611,6 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    HYPRE_Real      *Vtemp_data;
    HYPRE_Real      *Ptemp_data;
    HYPRE_Real      *Ztemp_data;
-   HYPRE_Real      *Rtemp_data;
    HYPRE_Int              num_variables = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int             *A_offd_i     = hypre_CSRMatrixI(A_offd);
    hypre_ParVector *e0_vec, *e1_vec, *Vtemp, *Ptemp;
@@ -2714,7 +2713,6 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
    Rtemp = hypre_ParVectorCreate(comm,global_num_rows,row_starts);
    hypre_ParVectorInitialize(Rtemp);
    hypre_ParVectorSetPartitioningOwner(Rtemp,0);
-   Rtemp_data = hypre_VectorData(hypre_ParVectorLocalVector(Rtemp));
 
    if (num_threads > 1)
    {

@@ -196,11 +196,7 @@ hypre_PrintCCBoxArrayData( FILE            *file,
                            HYPRE_Int        num_values,
                            HYPRE_Complex   *data       )
 {
-   hypre_Box       *box;
-                   
    HYPRE_Int        datai;
-                   
-   hypre_IndexRef   start;
                    
    HYPRE_Int        i, j;
    HYPRE_Complex    value;
@@ -211,10 +207,6 @@ hypre_PrintCCBoxArrayData( FILE            *file,
 
    hypre_ForBoxI(i, box_array)
    {
-      box      = hypre_BoxArrayBox(box_array, i);
-
-      start = hypre_BoxIMin(box);
-
       datai = hypre_CCBoxIndexRank_noargs();
 
       for (j = 0; j < num_values; j++)

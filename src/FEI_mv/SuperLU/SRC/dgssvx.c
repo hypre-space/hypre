@@ -352,7 +352,7 @@ dgssvx(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r,
     int       i, j, info1;
     double    amax, anorm, bignum, smlnum, colcnd, rowcnd, rcmax, rcmin;
     int       relax, panel_size;
-    double    diag_pivot_thresh, drop_tol;
+    double    drop_tol;
     double    t0;      /* temporary time */
     double    *utime;
 
@@ -448,7 +448,6 @@ printf("dgssvx: Fact=%4d, Trans=%4d, equed=%c\n",
     /* Initialization for factor parameters */
     panel_size = sp_ienv(1);
     relax      = sp_ienv(2);
-    diag_pivot_thresh = options->DiagPivotThresh;
     drop_tol   = 0.0;
 
     utime = stat->utime;

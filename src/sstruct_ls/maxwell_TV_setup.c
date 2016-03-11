@@ -89,15 +89,16 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    HYPRE_Int            **eCF_marker_l;
    HYPRE_Int              erelax_type;
 
+#if 0
    /* objects needed to fine the edge relaxation parameters */
    HYPRE_Int              relax_type;
-   /*HYPRE_Int             *relax_types;
-     void                  *e_amg_vdata;
-     hypre_ParAMGData      *e_amgData;
-     HYPRE_Int              numCGSweeps= 10;
-     HYPRE_Int            **amg_CF_marker;
-     hypre_ParCSRMatrix   **A_array;*/
-
+   HYPRE_Int             *relax_types;
+   void                  *e_amg_vdata;
+   hypre_ParAMGData      *e_amgData;
+   HYPRE_Int              numCGSweeps= 10;
+   HYPRE_Int            **amg_CF_marker;
+   hypre_ParCSRMatrix   **A_array;
+#endif
 
    hypre_SStructGrid     *node_grid;
    hypre_SStructGraph    *node_graph;
@@ -1300,42 +1301,44 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    eomega       = hypre_TAlloc(HYPRE_Real, edge_numlevels);
    eCF_marker_l = hypre_TAlloc(HYPRE_Int *, edge_numlevels);
 
+#if 0
    relax_type= 6; /* SSOR */
-   /*for (l= 0; l< 1; l++)
-     {
-     erelax_weight[l]= 1.0;
-     eCF_marker_l[l]= NULL;
+   for (l= 0; l< 1; l++)
+   {
+      erelax_weight[l]= 1.0;
+      eCF_marker_l[l]= NULL;
 
-     e_amg_vdata= (void *) hypre_BoomerAMGCreate();
-     e_amgData= e_amg_vdata;
+      e_amg_vdata= (void *) hypre_BoomerAMGCreate();
+      e_amgData= e_amg_vdata;
 
-     relax_types= hypre_CTAlloc(HYPRE_Int, 2);
-     relax_types[1]= relax_type;
+      relax_types= hypre_CTAlloc(HYPRE_Int, 2);
+      relax_types[1]= relax_type;
 
-     amg_CF_marker= hypre_TAlloc(HYPRE_Int *, 1);
-     A_array      = hypre_TAlloc(hypre_ParCSRMatrix *, 1);
+      amg_CF_marker= hypre_TAlloc(HYPRE_Int *, 1);
+      A_array      = hypre_TAlloc(hypre_ParCSRMatrix *, 1);
 
-     amg_CF_marker[0]= NULL;
-     A_array[0]      = Aee_l[l];
+      amg_CF_marker[0]= NULL;
+      A_array[0]      = Aee_l[l];
 
-     (e_amgData -> CF_marker_array)   = amg_CF_marker;
-     (e_amgData -> A_array)           = A_array;
-     (e_amgData -> Vtemp )            = eVtemp_l[l];
-     (e_amgData -> grid_relax_type)   = relax_types;
-     (e_amgData -> smooth_num_levels) = 0;
-     (e_amgData -> smooth_type)       = 0;
-     hypre_BoomerAMGCGRelaxWt((void *) e_amgData, 0, numCGSweeps, &eomega[l]);
+      (e_amgData -> CF_marker_array)   = amg_CF_marker;
+      (e_amgData -> A_array)           = A_array;
+      (e_amgData -> Vtemp )            = eVtemp_l[l];
+      (e_amgData -> grid_relax_type)   = relax_types;
+      (e_amgData -> smooth_num_levels) = 0;
+      (e_amgData -> smooth_type)       = 0;
+      hypre_BoomerAMGCGRelaxWt((void *) e_amgData, 0, numCGSweeps, &eomega[l]);
 
-     hypre_TFree((e_amgData -> A_array));
-     hypre_TFree((e_amgData -> CF_marker_array));
-     hypre_TFree((e_amgData -> grid_relax_type));
-     (e_amgData -> A_array)= NULL;
-     (e_amgData -> Vtemp ) = NULL;
-     (e_amgData -> CF_marker_array)= NULL;
-     (e_amgData -> grid_relax_type)= NULL;
-     hypre_TFree(e_amg_vdata);
-     eomega[l]= 1.0;
-     }*/
+      hypre_TFree((e_amgData -> A_array));
+      hypre_TFree((e_amgData -> CF_marker_array));
+      hypre_TFree((e_amgData -> grid_relax_type));
+      (e_amgData -> A_array)= NULL;
+      (e_amgData -> Vtemp ) = NULL;
+      (e_amgData -> CF_marker_array)= NULL;
+      (e_amgData -> grid_relax_type)= NULL;
+      hypre_TFree(e_amg_vdata);
+      eomega[l]= 1.0;
+   }
+#endif
 
    for (l= 0; l< edge_numlevels; l++)
    {

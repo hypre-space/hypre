@@ -233,7 +233,6 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    /*   char           *log_file_name  = (bicgstab_data -> log_file_name);
      FILE           *fp; */
    
-   HYPRE_Int        ierr = 0;
    HYPRE_Int        iter; 
    HYPRE_Int        my_id, num_procs;
    HYPRE_Real alpha, beta, gamma, epsilon, temp, res, r_norm, b_norm;
@@ -387,7 +386,6 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    /* check for convergence before starting */
    if (r_norm == 0.0)
    {
-	   ierr = 0;
 	   return hypre_error_flag;
    }
    else if (r_norm <= epsilon && iter >= min_iter) 

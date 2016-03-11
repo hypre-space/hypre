@@ -129,7 +129,6 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
    hypre_BoxManEntry    **boxman_entries, *entry;
    HYPRE_Int              nboxman_entries;
 
-   hypre_Index            ishift, jshift, kshift, zero_index;
    hypre_Index            ilower, iupper, index;
 
    HYPRE_Int              proc, nprocs, myproc;
@@ -162,11 +161,6 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
 
    start_rank= hypre_ParCSRMatrixFirstRowIndex(A);
    end_rank  = hypre_ParCSRMatrixLastRowIndex(A);
-
-   hypre_SetIndex3(ishift, 1, 0, 0);
-   hypre_SetIndex3(jshift, 0, 1, 0);
-   hypre_SetIndex3(kshift, 0, 0, 1);
-   hypre_SetIndex3(zero_index, 0, 0, 0);
 
    /* need a cellgrid boxman to determine the send boxes -> only the cell dofs
       are unique so a boxman intersect can be used to get the edges that

@@ -291,7 +291,6 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    HYPRE_Int 		     k_dim        = (lgmres_data -> k_dim);
    HYPRE_Int               min_iter     = (lgmres_data -> min_iter);
    HYPRE_Int 		     max_iter     = (lgmres_data -> max_iter);
-   HYPRE_Int               rel_change   = (lgmres_data -> rel_change);
    HYPRE_Real 	     r_tol        = (lgmres_data -> tol);
    HYPRE_Real 	     cf_tol       = (lgmres_data -> cf_tol);
    HYPRE_Real        a_tol        = (lgmres_data -> a_tol);
@@ -332,7 +331,6 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    HYPRE_Real epsmac = 1.e-16; 
    HYPRE_Real ieee_check = 0.;
 
-   HYPRE_Real guard_zero_residual; 
    HYPRE_Real cf_ave_0 = 0.0;
    HYPRE_Real cf_ave_1 = 0.0;
    HYPRE_Real weight;
@@ -340,7 +338,6 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
 
 
    /* We are not checking rel. change for now... */
-   rel_change = 0;
    
 
    (lgmres_data -> converged) = 0;
@@ -350,7 +347,6 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
     * alpha to go NaN. The guard_zero_residual parameter is to circumvent
     * this. Perhaps it should be set to something non-zero (but small).
     *-----------------------------------------------------------------------*/
-   guard_zero_residual = 0.0;
 
    (*(lgmres_functions->CommInfo))(A,&my_id,&num_procs);
    if ( logging>0 || print_level>0 )

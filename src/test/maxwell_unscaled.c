@@ -1270,7 +1270,6 @@ PrintUsage( char *progname,
       hypre_printf("  -b <bx> <by> <bz>   : refine and block part(s)\n");
       hypre_printf("  -solver <ID>        : solver ID (default = 39)\n");
       hypre_printf("  -print             : print out the system\n");
-      hypre_printf("  -v <n_pre> <n_post>: SysPFMG and Struct- # of pre and post relax\n");
       hypre_printf("  -sym <s>           : Struct- symmetric storage (1) or not (0)\n");
 
       hypre_printf("\n");
@@ -1325,8 +1324,6 @@ main( hypre_int argc,
    HYPRE_Int                   num_procs, myid;
    HYPRE_Int                   time_index;
                          
-   HYPRE_Int                   n_pre, n_post;
-
    HYPRE_Int                   arg_index, part, box, var, entry, s, i, j, k;
                         
    /*-----------------------------------------------------------
@@ -1382,9 +1379,6 @@ main( hypre_int argc,
    }
 
    print_system = 0;
-
-   n_pre  = 1;
-   n_post = 1;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -1452,12 +1446,6 @@ main( hypre_int argc,
       {
          arg_index++;
          print_system = 1;
-      }
-      else if ( strcmp(argv[arg_index], "-v") == 0 )
-      {
-         arg_index++;
-         n_pre = atoi(argv[arg_index++]);
-         n_post = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {

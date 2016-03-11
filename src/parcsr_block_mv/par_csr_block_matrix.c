@@ -486,7 +486,6 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
    
    HYPRE_Int matrix_C_num_cols_offd;
    HYPRE_Int matrix_C_num_nonzeros_offd;
-   HYPRE_Int num_nonzeros_offd;
    HYPRE_Int num_rows, num_nodes;
    
    HYPRE_Int *offd_i        = hypre_CSRMatrixI(offd);
@@ -537,7 +536,6 @@ hypre_ParCSRBlockMatrixConvertFromParCSRMatrix(hypre_ParCSRMatrix *matrix,
    /* figure out the new number of offd columns (num rows is same as diag) */
    num_cols_offd = hypre_CSRMatrixNumCols(offd);
    num_rows = hypre_CSRMatrixNumRows(diag);
-   num_nonzeros_offd = offd_i[num_rows];
    num_nodes =  num_rows/matrix_C_block_size;
    
    matrix_C_offd_i = hypre_CTAlloc(HYPRE_Int, num_nodes + 1);
@@ -702,7 +700,7 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
  
-   HYPRE_Int        row_start=0, row_end=0, col_start = 0, col_end = 0;
+   HYPRE_Int        col_start = 0, col_end = 0;
    HYPRE_Int        num_recvs, *recv_procs, *recv_vec_starts;
 
    HYPRE_Int        num_sends, *send_procs, *send_map_starts;
@@ -724,8 +722,6 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
     * get parcsr_A information 
     *----------------------------------------------------------*/
 
-   row_start = hypre_ParCSRBlockMatrixFirstRowIndex(A);
-   row_end = hypre_ParCSRBlockMatrixLastRowIndex(A);
    col_start =  hypre_ParCSRBlockMatrixFirstColDiag(A);
    col_end =  hypre_ParCSRBlockMatrixLastColDiag(A);
    

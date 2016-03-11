@@ -670,7 +670,6 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
                           
-   hypre_Box               *A_data_box;
    hypre_Box               *x_data_box;
    hypre_StructStencil     *stencil;
    hypre_Index             *stencil_shape;
@@ -694,7 +693,6 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
    {
       compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-      A_data_box = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
       x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
       y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
 
@@ -708,7 +706,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
          hypre_BoxGetSize(compute_box, loop_size);
          start  = hypre_BoxIMin(compute_box);
 
-         Ai = hypre_CCBoxIndexRank( A_data_box, start );
+         Ai = 0;
 
          /* unroll up to depth MAX_DEPTH */
          for (si = 0; si < stencil_size; si+= MAX_DEPTH)

@@ -572,14 +572,19 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
    hypre_SStructNeighbor   *neighbor;
    hypre_IndexRef           nbor_offset;
    hypre_SStructNeighbor   *vneighbor;
-   hypre_Box               *box;
-   HYPRE_Int               *ilower, *coord, *dir;
-
+   HYPRE_Int               *coord, *dir;
+   hypre_Index             *fr_roots, *to_roots;
+   hypre_BoxArrayArray     *nbor_boxes;
+   hypre_BoxArray          *nbor_boxa;
+   hypre_BoxArray          *sub_boxa;
+   hypre_BoxArray          *tmp_boxa;
+   hypre_Box               *nbor_box, *box;
    hypre_SStructPGrid      *pgrid;
    HYPRE_SStructVariable   *vartypes;
    hypre_Index              varoffset;
    HYPRE_Int                nvars;
    HYPRE_Int                part, var, b, vb, d, i, valid;
+   HYPRE_Int                nbor_part, sub_part;
 
    /*-------------------------------------------------------------
     * if I own no data on some part, prune that part's neighbor info
@@ -677,6 +682,9 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
     * Set up vneighbor info
     *-------------------------------------------------*/
 
+   box = hypre_BoxCreate(ndim);
+   tmp_boxa = hypre_BoxArrayCreate(0, ndim);
+
    nvneighbors = hypre_TAlloc(HYPRE_Int *, nparts);
    vneighbors  = hypre_TAlloc(hypre_SStructNeighbor **, nparts);
 
@@ -690,33 +698,35 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
 
       for (var = 0; var < nvars; var++)
       {
-         vneighbors[part][var] = hypre_TAlloc(hypre_SStructNeighbor,
-                                              nneighbors[part]);
-
-         hypre_SStructVariableGetOffset((hypre_SStructVariable) vartypes[var],
-                                        ndim, varoffset);
-
-         vb = 0;
+         /* Put each new vneighbor box into a BoxArrayArray so we can remove overlap */
+         nbor_boxes = hypre_BoxArrayArrayCreate(nneighbors[part], ndim);
+         fr_roots = hypre_TAlloc(hypre_Index, nneighbors[part]);
+         to_roots = hypre_TAlloc(hypre_Index, nneighbors[part]);
+         hypre_SStructVariableGetOffset((hypre_SStructVariable) vartypes[var], ndim, varoffset);
+         nvneighbors[part][var] = 0;
          for (b = 0; b < nneighbors[part]; b++)
          {
             neighbor    = &neighbors[part][b];
             nbor_offset = nbor_offsets[part][b];
-            vneighbor   = &vneighbors[part][var][vb];
 
-            /* set pointers to vneighbor data */
-            box    = hypre_SStructNeighborBox(vneighbor);
-            ilower = hypre_SStructNeighborILower(vneighbor);
-            coord  = hypre_SStructNeighborCoord(vneighbor);
-            dir    = hypre_SStructNeighborDir(vneighbor);
-            /* copy neighbor data into vneighbor */
+            /* Create var-centered vneighbor box from cell-centered neighbor box */
             hypre_CopyBox(hypre_SStructNeighborBox(neighbor), box);
-            hypre_SStructNeighborPart(vneighbor) =
-               hypre_SStructNeighborPart(neighbor);
-            hypre_CopyIndex(hypre_SStructNeighborILower(neighbor), ilower);
-            hypre_CopyIndex(hypre_SStructNeighborCoord(neighbor), coord);
-            hypre_CopyIndex(hypre_SStructNeighborDir(neighbor), dir);
             hypre_SStructCellBoxToVarBox(box, nbor_offset, varoffset, &valid);
-            /* it's important to change ilower */
+            /* It is possible to have empty vneighbor boxes.  For example, if
+             * only faces are shared (see SetSharedPart), then the vneighbor
+             * boxes for cell variables will be empty. */
+            if ( !(valid && hypre_BoxVolume(box)) )
+            {
+               continue;
+            }
+
+            /* Save root mapping information for later */
+            hypre_CopyIndex(hypre_BoxIMin(box), fr_roots[b]);
+            hypre_CopyIndex(hypre_SStructNeighborILower(neighbor), to_roots[b]);
+
+            /* It's important to adjust to_root (ilower) */
+            coord = hypre_SStructNeighborCoord(neighbor);
+            dir   = hypre_SStructNeighborDir(neighbor);
             for (d = 0; d < ndim; d++)
             {
                /* Compare the imin of the neighbor cell box ('i') to its imin
@@ -731,24 +741,72 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
                if (((dir[d] > 0) && (hypre_BoxIMinD(box, d) != i)) ||
                    ((dir[d] < 0) && (hypre_BoxIMinD(box, d) == i)))
                {
-                  hypre_IndexD(ilower, coord[d]) -= hypre_IndexD(varoffset, d);
+                  hypre_IndexD(to_roots[b], coord[d]) -= hypre_IndexD(varoffset, d);
                }
             }
-            /* some variable types may lead to empty variable boxes? */
-            if (valid && hypre_BoxVolume(box))
+
+            /* Add box to the nbor_boxes */
+            nbor_boxa = hypre_BoxArrayArrayBoxArray(nbor_boxes, b);
+            hypre_AppendBox(box, nbor_boxa);
+
+            /* Make sure that the nbor_boxes don't overlap */
+            nbor_part = hypre_SStructNeighborPart(neighbor);
+            for (i = 0; i < b; i++)
             {
+               neighbor = &neighbors[part][i];
+               sub_part = hypre_SStructNeighborPart(neighbor);
+               /* Only subtract boxes on the same neighbor part */
+               if (nbor_part == sub_part)
+               {
+                  sub_boxa = hypre_BoxArrayArrayBoxArray(nbor_boxes, i);
+                  /* nbor_boxa -= sub_boxa */
+                  hypre_SubtractBoxArrays(nbor_boxa, sub_boxa, tmp_boxa);
+               }
+            }
+
+            nvneighbors[part][var] += hypre_BoxArraySize(nbor_boxa);
+         }
+
+         /* Set up vneighbors for this (part, var) */
+         vneighbors[part][var] = hypre_TAlloc(hypre_SStructNeighbor, nvneighbors[part][var]);
+         vb = 0;
+         for (b = 0; b < nneighbors[part]; b++)
+         {
+            neighbor  = &neighbors[part][b];
+            nbor_boxa = hypre_BoxArrayArrayBoxArray(nbor_boxes, b);
+            nbor_part = hypre_SStructNeighborPart(neighbor);
+            coord     = hypre_SStructNeighborCoord(neighbor);
+            dir       = hypre_SStructNeighborDir(neighbor);
+            hypre_ForBoxI(i, nbor_boxa)
+            {
+               vneighbor = &vneighbors[part][var][vb];
+               nbor_box = hypre_BoxArrayBox(nbor_boxa, i);
+
+               hypre_CopyBox(nbor_box, hypre_SStructNeighborBox(vneighbor));
+               hypre_SStructNeighborPart(vneighbor) = nbor_part;
+               hypre_SStructIndexToNborIndex(hypre_BoxIMin(nbor_box),
+                                             fr_roots[b], to_roots[b], coord, dir, ndim,
+                                             hypre_SStructNeighborILower(vneighbor));
+               hypre_CopyIndex(coord, hypre_SStructNeighborCoord(vneighbor));
+               hypre_CopyIndex(dir, hypre_SStructNeighborDir(vneighbor));
+
                vb++;
             }
 
-         } /* end of neighbor loop */
+         } /* end of vneighbor box loop */
 
-         nvneighbors[part][var] = vb;
+         hypre_BoxArrayArrayDestroy(nbor_boxes);
+         hypre_TFree(fr_roots);
+         hypre_TFree(to_roots);
 
       } /* end of variables loop */
    } /* end of part loop */
 
    hypre_SStructGridNVNeighbors(grid) = nvneighbors;
    hypre_SStructGridVNeighbors(grid)  = vneighbors;
+
+   hypre_BoxArrayDestroy(tmp_boxa);
+   hypre_BoxDestroy(box);
 
    /*-------------------------------------------------
     * Assemble the box manager info

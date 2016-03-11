@@ -84,7 +84,6 @@ HYPRE_Int hypre_BoomerAMGCoarsenInterpVectors( hypre_ParCSRMatrix *P,
   
    HYPRE_Int    *starts = hypre_ParCSRMatrixColStarts(P);
 
-   HYPRE_Int    n_old;
    HYPRE_Int    n_old_local;
    HYPRE_Int    counter;
 
@@ -107,7 +106,6 @@ HYPRE_Int hypre_BoomerAMGCoarsenInterpVectors( hypre_ParCSRMatrix *P,
 
    /* get the size of the vector we are coarsening */
    old_vector = smooth_vecs[0];
-   n_old = hypre_ParVectorGlobalSize(old_vector);
    n_old_local = hypre_VectorSize(hypre_ParVectorLocalVector(old_vector));
    
    for (i = 0; i < num_smooth_vecs; i++)
@@ -277,7 +275,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    HYPRE_Real      *smooth_vec_offd = NULL;
    HYPRE_Real      *offd_vec_data;
 
-   HYPRE_Int              orig_nf, orig_ncv;
+   HYPRE_Int              orig_nf;
    HYPRE_Int             *new_col_starts;
    HYPRE_Int              num_functions = *nf;
    HYPRE_Int             *c_dof_func = *coarse_dof_func;
@@ -420,13 +418,13 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    if (level == interp_vec_first_level)
    {
       orig_nf = num_functions;
-      orig_ncv = ncv;
+      /*orig_ncv = ncv;*/
    }
    else /* on deeper levels, need to know orig sizes (without new
          * dofs) */
    {
       orig_nf = num_functions - num_smooth_vecs;
-      orig_ncv = ncv - ncv_peru*num_smooth_vecs;
+      /*orig_ncv = ncv - ncv_peru*num_smooth_vecs;*/
    }
 
    /*weights for P_s */
@@ -681,7 +679,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                   /* Determine the Q entry value*/
                   if (variant == 2 )
                   {
-                     HYPRE_Real dt;
+                     /*HYPRE_Real dt;*/
                      /* Q: P_ij(v_i/row_sum - vc_j) - ** notice we use fine and coarse smooth vecs */
                      
                      index = P_diag_j[orig_diag_start+j]; /* don't want to use col_map here 
@@ -689,8 +687,8 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                                                              the smooth vector */
                      fine_index = coarse_to_fine[index];
                      
-                     dt =  P_diag_data[orig_diag_start+j];
-                     dt = (vec_data[i]/row_sum - vec_data[fine_index]);
+                     /*dt =  P_diag_data[orig_diag_start+j];
+                     dt = (vec_data[i]/row_sum - vec_data[fine_index]);*/
                      value  = P_diag_data[orig_diag_start+j]*(vec_data[i]/row_sum - vec_data[fine_index]);
                      
                   }
@@ -788,7 +786,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                   /* Determine the Q entry value*/
                   if (variant == 2 )
                   {
-                     HYPRE_Real dt;
+                     /*HYPRE_Real dt;*/
                      /* Q: P_ij(v_i/row_sum - vc_j) - * notice we use fine and coarse smooth vecs */
                      
                      index = P_offd_j[orig_offd_start+j]; /* don't want to use col_map here 
@@ -797,8 +795,8 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                      
                      /* did thecoasrse/fine conversion when gathering from procs above */
                      
-                     dt =  P_offd_data[orig_offd_start+j];
-                     dt = (vec_data[i]/row_sum - offd_vec_data[index]);
+                     /*dt =  P_offd_data[orig_offd_start+j];
+                     dt = (vec_data[i]/row_sum - offd_vec_data[index]);*/
                      
                      value  = P_offd_data[orig_offd_start+j]*(vec_data[i]/row_sum - offd_vec_data[index]);
                      
@@ -857,7 +855,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
          {
             HYPRE_Int m, m_pos;
             HYPRE_Real m_val;
-            HYPRE_Real tmp;
+            /*HYPRE_Real tmp;*/
             
             /**** first do diag elements *****/
             for (j=0; j < num_diag_elements; j++)
@@ -866,7 +864,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                for (m = 0; m< orig_nf; m++)
                {
                   m_pos = P_diag_i[i - (fcn_num - m)]+ j; /* recall - nodal coarsening */
-                  tmp = P_diag_data[m_pos];
+                  /*tmp = P_diag_data[m_pos];*/
                   m_val += theta[m]*P_diag_data[m_pos];
                }
                
@@ -886,7 +884,7 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
                for (m = 0; m< orig_nf; m++)
                {
                   m_pos = P_offd_i[i - (fcn_num - m)]+ j; /* recall - nodal coarsening */
-                  tmp = P_offd_data[m_pos];
+                  /*tmp = P_offd_data[m_pos];*/
                   m_val += theta[m]*P_offd_data[m_pos];
                }
                

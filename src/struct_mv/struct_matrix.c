@@ -1114,7 +1114,6 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 
    /* BEGIN - variables for ghost layer identity code below */
    hypre_StructGrid      *grid;
-   hypre_BoxArray        *boxes;
    hypre_BoxManager      *boxman;
    hypre_BoxArray        *data_space;
    hypre_BoxArrayArray   *boundary_boxes;
@@ -1125,7 +1124,6 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    hypre_Box             *boundary_box;
    hypre_Box             *entry_box;
    hypre_BoxManEntry    **entries;
-   hypre_IndexRef         periodic;
    hypre_Index            loop_size;
    hypre_Index            index;
    hypre_IndexRef         start;
@@ -1149,9 +1147,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    {
       data_space = hypre_StructMatrixDataSpace(matrix);
       grid       = hypre_StructMatrixGrid(matrix);
-      boxes      = hypre_StructGridBoxes(grid);
       boxman     = hypre_StructGridBoxMan(grid);
-      periodic   = hypre_StructGridPeriodic(grid);
 
       boundary_boxes = hypre_BoxArrayArrayCreate(
          hypre_BoxArraySize(data_space), ndim);

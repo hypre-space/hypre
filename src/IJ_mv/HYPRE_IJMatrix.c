@@ -234,7 +234,6 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
 HYPRE_Int 
 HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
 {
-   HYPRE_Int ierr = 0;
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
    if (!ijmatrix)
@@ -256,7 +255,7 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
       if hypre_IJMatrixAssumedPart(ijmatrix)
          hypre_AssumedPartitionDestroy(hypre_IJMatrixAssumedPart(ijmatrix));
       if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
-         ierr = hypre_IJMatrixDestroyParCSR( ijmatrix );
+         hypre_IJMatrixDestroyParCSR( ijmatrix );
       else if ( hypre_IJMatrixObjectType(ijmatrix) != -1 )
       {
          hypre_error_in_arg(1);
@@ -277,7 +276,6 @@ HYPRE_Int
 HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix )
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
-   HYPRE_Int ierr = 0;
 
    if (!ijmatrix)
    {
@@ -286,7 +284,7 @@ HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix )
    }
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
-      ierr = hypre_IJMatrixInitializeParCSR( ijmatrix ) ;
+      hypre_IJMatrixInitializeParCSR( ijmatrix ) ;
    else
    {
       hypre_error_in_arg(1);
@@ -546,7 +544,6 @@ HYPRE_IJMatrixGetValues( HYPRE_IJMatrix matrix,
                          HYPRE_Int     *cols,
                          HYPRE_Complex *values )
 {
-   HYPRE_Int ierr = 0;
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
    if (nrows == 0) return hypre_error_flag;
@@ -589,7 +586,7 @@ HYPRE_IJMatrixGetValues( HYPRE_IJMatrix matrix,
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
    {
-      ierr = hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
+      hypre_IJMatrixGetValuesParCSR( ijmatrix, nrows, ncols,
 					    rows, cols, values );
    }
    else

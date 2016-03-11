@@ -73,10 +73,10 @@ extern "C"
    }
 }
 #else
-   double LSC_Wtime()
-   {
-      return (MPI_Wtime());
-   }
+double LSC_Wtime()
+{
+   return (MPI_Wtime());
+}
 #endif
 extern "C" {
    int HYPRE_LSI_qsort1a( int *, int *, int, int );
@@ -126,84 +126,84 @@ extern "C" {
 //---------------------------------------------------------------------------
 
 HYPRE_LinSysCore::HYPRE_LinSysCore(MPI_Comm comm) : 
-                  comm_(comm),
-                  HYOutputLevel_(0),
-                  memOptimizerFlag_(0),
-                  mapFromSolnFlag_(0),
-                  mapFromSolnLeng_(0),
-                  mapFromSolnLengMax_(0),
-                  mapFromSolnList_(NULL),
-                  mapFromSolnList2_(NULL),
-                  HYA_(NULL),
-                  HYnormalA_(NULL),
-                  HYb_(NULL),
-                  HYnormalB_(NULL),
-                  HYbs_(NULL),
-                  HYx_(NULL),
-                  HYr_(NULL),
-                  HYpxs_(NULL),
-                  HYpbs_(NULL),
-                  numGlobalRows_(0),
-                  localStartRow_(0),
-                  localEndRow_(-1),
-                  localStartCol_(-1),
-                  localEndCol_(-1),
-                  rowLengths_(NULL),
-                  colIndices_(NULL),
-                  colValues_(NULL),
-                  reducedA_(NULL),
-                  reducedB_(NULL),
-                  reducedX_(NULL),
-                  reducedR_(NULL),
-                  HYA21_(NULL),
-                  HYA12_(NULL),
-                  A21NRows_(0),
-                  A21NCols_(0),
-                  HYinvA22_(NULL),
-                  currA_(NULL),
-                  currB_(NULL),
-                  currX_(NULL),
-                  currR_(NULL),
-                  currentRHS_(0),
-                  numRHSs_(1),
-                  nStored_(0),
-                  storedIndices_(NULL),
-                  auxStoredIndices_(NULL),
-                  mRHSFlag_(0),
-                  mRHSNumGEqns_(0),
-                  mRHSGEqnIDs_(NULL),
-                  mRHSNEntries_(NULL),
-                  mRHSBCType_(NULL),
-                  mRHSRowInds_(NULL),
-                  mRHSRowVals_(NULL),
-                  matrixVectorsCreated_(0),
-                  systemAssembled_(0),
-                  slideReduction_(0),
-                  slideReductionMinNorm_(-1.0),
-                  slideReductionScaleMatrix_(0),
-                  schurReduction_(0),
-                  schurReductionCreated_(0),
-                  projectionScheme_(0),
-                  projectSize_(0),
-                  projectCurrSize_(0),
-                  projectionMatrix_(NULL),
-                  normalEqnFlag_(0),
-                  slideObj_(NULL),
-                  selectedList_(NULL),
-                  selectedListAux_(NULL),
-                  nConstraints_(0),
-                  constrList_(NULL),
-                  matrixPartition_(0),
-                  HYSolver_(NULL), 
-                  maxIterations_(1000),
-                  tolerance_(1.0e-6),
-                  normAbsRel_(0),
-                  pcgRecomputeRes_(0),
-                  HYPrecon_(NULL), 
-                  HYPreconReuse_(0), 
-                  HYPreconSetup_(0),
-                  lookup_(NULL),
-                  haveLookup_(0)
+   comm_(comm),
+   HYOutputLevel_(0),
+   memOptimizerFlag_(0),
+   mapFromSolnFlag_(0),
+   mapFromSolnLeng_(0),
+   mapFromSolnLengMax_(0),
+   mapFromSolnList_(NULL),
+   mapFromSolnList2_(NULL),
+   HYA_(NULL),
+   HYnormalA_(NULL),
+   HYb_(NULL),
+   HYnormalB_(NULL),
+   HYbs_(NULL),
+   HYx_(NULL),
+   HYr_(NULL),
+   HYpxs_(NULL),
+   HYpbs_(NULL),
+   numGlobalRows_(0),
+   localStartRow_(0),
+   localEndRow_(-1),
+   localStartCol_(-1),
+   localEndCol_(-1),
+   rowLengths_(NULL),
+   colIndices_(NULL),
+   colValues_(NULL),
+   reducedA_(NULL),
+   reducedB_(NULL),
+   reducedX_(NULL),
+   reducedR_(NULL),
+   HYA21_(NULL),
+   HYA12_(NULL),
+   A21NRows_(0),
+   A21NCols_(0),
+   HYinvA22_(NULL),
+   currA_(NULL),
+   currB_(NULL),
+   currX_(NULL),
+   currR_(NULL),
+   currentRHS_(0),
+   numRHSs_(1),
+   nStored_(0),
+   storedIndices_(NULL),
+   auxStoredIndices_(NULL),
+   mRHSFlag_(0),
+   mRHSNumGEqns_(0),
+   mRHSGEqnIDs_(NULL),
+   mRHSNEntries_(NULL),
+   mRHSBCType_(NULL),
+   mRHSRowInds_(NULL),
+   mRHSRowVals_(NULL),
+   matrixVectorsCreated_(0),
+   systemAssembled_(0),
+   slideReduction_(0),
+   slideReductionMinNorm_(-1.0),
+   slideReductionScaleMatrix_(0),
+   schurReduction_(0),
+   schurReductionCreated_(0),
+   projectionScheme_(0),
+   projectSize_(0),
+   projectCurrSize_(0),
+   projectionMatrix_(NULL),
+   normalEqnFlag_(0),
+   slideObj_(NULL),
+   selectedList_(NULL),
+   selectedListAux_(NULL),
+   nConstraints_(0),
+   constrList_(NULL),
+   matrixPartition_(0),
+   HYSolver_(NULL), 
+   maxIterations_(1000),
+   tolerance_(1.0e-6),
+   normAbsRel_(0),
+   pcgRecomputeRes_(0),
+   HYPrecon_(NULL), 
+   HYPreconReuse_(0), 
+   HYPreconSetup_(0),
+   lookup_(NULL),
+   haveLookup_(0)
 {
    //-------------------------------------------------------------------
    // find my processor ID 
@@ -558,10 +558,10 @@ HYPRE_LinSysCore::~HYPRE_LinSysCore()
 
       else if ( HYPreconID_ == HYAMS )
       {
- 	 // Destroy G and coordinate vectors
+         // Destroy G and coordinate vectors
          // OLD WAY
          if( amsG_ == NULL ) { 
-           HYPRE_AMSFEIDestroy( HYPrecon_ );
+            HYPRE_AMSFEIDestroy( HYPrecon_ );
          }
          HYPRE_AMSDestroy( HYPrecon_ );
       }
@@ -698,9 +698,9 @@ int HYPRE_LinSysCore::setLookup(Lookup& lookup)
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
-                       int firstLocalEqn, int numLocalEqns) 
+                                               int firstLocalEqn, int numLocalEqns) 
 {
-   int i, ierr;
+   int i;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -710,7 +710,7 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    {
       printf("%4d : HYPRE_LSC::entering createMatricesAndVectors.\n",mypid_);
       printf("%4d : HYPRE_LSC::startrow, endrow = %d %d\n",mypid_,
-                    firstLocalEqn, firstLocalEqn+numLocalEqns-1);
+             firstLocalEqn, firstLocalEqn+numLocalEqns-1);
    }
 
    //-------------------------------------------------------------------
@@ -813,13 +813,12 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    //-------------------------------------------------------------------
    
    if (localStartCol_ == -1)
-      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
-                                  localStartRow_-1,localEndRow_-1, &HYA_);
+      HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
+                           localStartRow_-1,localEndRow_-1, &HYA_);
    else
-      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
-                                  localStartCol_,localEndCol_, &HYA_);
-   ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   //assert(!ierr);
+      HYPRE_IJMatrixCreate(comm_, localStartRow_-1,localEndRow_-1,
+                           localStartCol_,localEndCol_, &HYA_);
+   HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
 
    //-------------------------------------------------------------------
    // instantiate the right hand vectors
@@ -828,12 +827,11 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    HYbs_ = new HYPRE_IJVector[numRHSs_];
    for ( i = 0; i < numRHSs_; i++ )
    {
-      ierr = HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1,
-                                  &(HYbs_[i]));
-      ierr = HYPRE_IJVectorSetObjectType(HYbs_[i], HYPRE_PARCSR);
-      ierr = HYPRE_IJVectorInitialize(HYbs_[i]);
-      ierr = HYPRE_IJVectorAssemble(HYbs_[i]);
-      //assert(!ierr);
+      HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1,
+                           &(HYbs_[i]));
+      HYPRE_IJVectorSetObjectType(HYbs_[i], HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(HYbs_[i]);
+      HYPRE_IJVectorAssemble(HYbs_[i]);
    }
    HYb_ = HYbs_[0];
 
@@ -842,13 +840,12 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    //-------------------------------------------------------------------
 
    if (localStartCol_ == -1)
-      ierr = HYPRE_IJVectorCreate(comm_,localStartRow_-1,localEndRow_-1,&HYx_);
+      HYPRE_IJVectorCreate(comm_,localStartRow_-1,localEndRow_-1,&HYx_);
    else
-      ierr = HYPRE_IJVectorCreate(comm_,localStartCol_,localEndCol_,&HYx_);
-   ierr = HYPRE_IJVectorSetObjectType(HYx_, HYPRE_PARCSR);
-   ierr = HYPRE_IJVectorInitialize(HYx_);
-   ierr = HYPRE_IJVectorAssemble(HYx_);
-   //assert(!ierr);
+      HYPRE_IJVectorCreate(comm_,localStartCol_,localEndCol_,&HYx_);
+   HYPRE_IJVectorSetObjectType(HYx_, HYPRE_PARCSR);
+   HYPRE_IJVectorInitialize(HYx_);
+   HYPRE_IJVectorAssemble(HYx_);
 
    //-------------------------------------------------------------------
    // reset fedata
@@ -883,11 +880,10 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
    // instantiate the residual vector
    //-------------------------------------------------------------------
 
-   ierr = HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1, &HYr_);
-   ierr = HYPRE_IJVectorSetObjectType(HYr_, HYPRE_PARCSR);
-   ierr = HYPRE_IJVectorInitialize(HYr_);
-   ierr = HYPRE_IJVectorAssemble(HYr_);
-   //assert(!ierr);
+   HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1, &HYr_);
+   HYPRE_IJVectorSetObjectType(HYr_, HYPRE_PARCSR);
+   HYPRE_IJVectorInitialize(HYr_);
+   HYPRE_IJVectorAssemble(HYr_);
    matrixVectorsCreated_ = 1;
    schurReductionCreated_ = 0;
    systemAssembled_ = 0;
@@ -918,7 +914,7 @@ int HYPRE_LinSysCore::createMatricesAndVectors(int numGlobalEqns,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::setGlobalOffsets(int leng, int* nodeOffsets,
-                       int* eqnOffsets, int* blkEqnOffsets)
+                                       int* eqnOffsets, int* blkEqnOffsets)
 {
    //-------------------------------------------------------------------
    // diagnostic message
@@ -946,7 +942,7 @@ int HYPRE_LinSysCore::setGlobalOffsets(int leng, int* nodeOffsets,
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
    {
       printf("%4d : HYPRE_LSC::startrow, endrow = %d %d\n",mypid_,
-                    localStartRow_, localEndRow_);
+             localStartRow_, localEndRow_);
       printf("%4d : HYPRE_LSC::leaving  setGlobalOffsets.\n",mypid_);
    }
    return (0);
@@ -957,8 +953,8 @@ int HYPRE_LinSysCore::setGlobalOffsets(int leng, int* nodeOffsets,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::setConnectivities(GlobalID elemBlk, int nElems,
-                       int nNodesPerElem, const GlobalID* elemIDs,
-                       const int* const* connNodes)
+                                        int nNodesPerElem, const GlobalID* elemIDs,
+                                        const int* const* connNodes)
 {
 #ifdef HAVE_MLI
    (void) elemIDs;
@@ -985,14 +981,14 @@ int HYPRE_LinSysCore::setConnectivities(GlobalID elemBlk, int nElems,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::setStiffnessMatrices(GlobalID elemBlk, int nElems,
-              const GlobalID* elemIDs,const double *const *const *stiff,
-              int nEqnsPerElem, const int *const * eqnIndices)
+                                           const GlobalID* elemIDs,const double *const *const *stiff,
+                                           int nEqnsPerElem, const int *const * eqnIndices)
 {
 #ifdef HAVE_MLI
    if ( HYPreconID_ == HYMLI && feData_ != NULL )
    {
       HYPRE_LSI_MLISFEILoadElemMatrices(feData_,elemBlk,nElems,(int*)elemIDs,
-                           (double***)stiff,nEqnsPerElem,(int**)eqnIndices);
+                                        (double***)stiff,nEqnsPerElem,(int**)eqnIndices);
    }
 #else
    (void) elemBlk;
@@ -1013,8 +1009,8 @@ int HYPRE_LinSysCore::setStiffnessMatrices(GlobalID elemBlk, int nElems,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::setLoadVectors(GlobalID elemBlock, int numElems,
-                       const GlobalID* elemIDs, const double *const *load,
-                       int numEqnsPerElem, const int *const * eqnIndices)
+                                     const GlobalID* elemIDs, const double *const *load,
+                                     int numEqnsPerElem, const int *const * eqnIndices)
 {
    (void) elemBlock;
    (void) numElems;
@@ -1119,7 +1115,7 @@ int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
    {
       printf("%4d : allocateMatrix : max/min nnz/row = %d %d\n", mypid_, 
-                    maxSize, minSize);
+             maxSize, minSize);
       printf("%4d : HYPRE_LSC::leaving  allocateMatrix.\n", mypid_);
    }
    return (0);
@@ -1131,8 +1127,8 @@ int HYPRE_LinSysCore::allocateMatrix(int **colIndices, int *rowLengths)
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::setMatrixStructure(int** ptColIndices, int* ptRowLengths,
-                           int** blkColIndices, int* blkRowLengths,
-                           int* ptRowsPerBlkRow)
+                                         int** blkColIndices, int* blkRowLengths,
+                                         int* ptRowsPerBlkRow)
 {
    int i, j;
 
@@ -1183,8 +1179,8 @@ int HYPRE_LinSysCore::setMatrixStructure(int** ptColIndices, int* ptRowLengths,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::setMultCREqns(int multCRSetID, int numCRs, 
-                       int numNodesPerCR, int** nodeNumbers, int** eqnNumbers,
-                       int* fieldIDs, int* multiplierEqnNumbers)
+                                    int numNodesPerCR, int** nodeNumbers, int** eqnNumbers,
+                                    int* fieldIDs, int* multiplierEqnNumbers)
 {
    (void) multCRSetID;
    (void) numCRs;
@@ -1204,8 +1200,8 @@ int HYPRE_LinSysCore::setMultCREqns(int multCRSetID, int numCRs,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::setPenCREqns(int penCRSetID, int numCRs, 
-                       int numNodesPerCR, int** nodeNumbers, int** eqnNumbers,
-                       int* fieldIDs)
+                                   int numNodesPerCR, int** nodeNumbers, int** eqnNumbers,
+                                   int* fieldIDs)
 {
    (void) penCRSetID;
    (void) numCRs;
@@ -1226,7 +1222,7 @@ int HYPRE_LinSysCore::setPenCREqns(int penCRSetID, int numCRs,
 
 int HYPRE_LinSysCore::resetMatrixAndVector(double setValue)
 {
-   int    i, j, ierr, localNRows, *cols;
+   int    i, j, localNRows, *cols;
    double *vals;
 
    //-------------------------------------------------------------------
@@ -1281,10 +1277,9 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double setValue)
    //-------------------------------------------------------------------
 
    if ( HYA_ != NULL ) HYPRE_IJMatrixDestroy(HYA_);
-   ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
-                               localStartRow_-1, localEndRow_-1, &HYA_);
-   ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   //assert(!ierr);
+   HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
+                        localStartRow_-1, localEndRow_-1, &HYA_);
+   HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
 
    //-------------------------------------------------------------------
    // clean the reduction stuff
@@ -1352,7 +1347,7 @@ int HYPRE_LinSysCore::resetMatrixAndVector(double setValue)
 
 int HYPRE_LinSysCore::resetMatrix(double setValue) 
 {
-   int  i, j, ierr, size;
+   int  i, j, size;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -1387,13 +1382,12 @@ int HYPRE_LinSysCore::resetMatrix(double setValue)
    if ( HYA_ != NULL ) HYPRE_IJMatrixDestroy(HYA_);
    size = localEndRow_ - localStartRow_ + 1;
    if (localStartCol_ == -1)
-      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
-                                  localStartRow_-1, localEndRow_-1, &HYA_);
+      HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
+                           localStartRow_-1, localEndRow_-1, &HYA_);
    else
-      ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
-                                  localStartCol_, localEndCol_, &HYA_);
-   ierr = HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
-   //assert(!ierr);
+      HYPRE_IJMatrixCreate(comm_, localStartRow_-1, localEndRow_-1,
+                           localStartCol_, localEndCol_, &HYA_);
+   HYPRE_IJMatrixSetObjectType(HYA_, HYPRE_PARCSR);
 
    //-------------------------------------------------------------------
    // allocate space for storing the matrix coefficient
@@ -1514,7 +1508,7 @@ int HYPRE_LinSysCore::resetRHSVector(double setValue)
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
-                  const double* values, const int* scatterIndices)
+                                          const double* values, const int* scatterIndices)
 {
    int i, j, index, colIndex, localRow;
 
@@ -1594,8 +1588,8 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int row, int numValues,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
-                            int numPtCols, const int* ptCols,
-                            const double* const* values)
+                                          int numPtCols, const int* ptCols,
+                                          const double* const* values)
 {
    int    i, j, k, index, colIndex, localRow, orderFlag=0; 
    int    *indptr, rowLeng, useOld;
@@ -1730,9 +1724,9 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
-                       int numPtCols, const int* ptCols, int numBlkRows, 
-                       const int* blkRows, int numBlkCols, const int* blkCols,
-                       const double* const* values)
+                                          int numPtCols, const int* ptCols, int numBlkRows, 
+                                          const int* blkRows, int numBlkCols, const int* blkCols,
+                                          const double* const* values)
 {
    (void) numBlkRows;
    (void) blkRows;
@@ -1747,8 +1741,8 @@ int HYPRE_LinSysCore::sumIntoSystemMatrix(int numPtRows, const int* ptRows,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::putIntoSystemMatrix(int numPtRows, const int* ptRows,
-                            int numPtCols, const int* ptCols,
-                            const double* const* values)
+                                          int numPtCols, const int* ptCols,
+                                          const double* const* values)
 {
    int    i, j, localRow, newLeng, *tempInd, colIndex, index, localNRows;
    int    sortFlag;
@@ -1879,7 +1873,7 @@ int HYPRE_LinSysCore::putIntoSystemMatrix(int numPtRows, const int* ptRows,
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 5 )
       printf("%4d : HYPRE_LSC::leaving  putIntoSystemMatrix.\n",mypid_);
 
-   return(0);
+   return (0);
 }
 
 //***************************************************************************
@@ -1905,7 +1899,7 @@ int HYPRE_LinSysCore::getMatrixRowLength(int row, int& length)
       length = rowLeng;
       HYPRE_ParCSRMatrixRestoreRow(A_csr,row,&rowLeng,&colInd,&colVal);
    }
-   return(0);
+   return (0);
 }
 
 //***************************************************************************
@@ -1913,7 +1907,7 @@ int HYPRE_LinSysCore::getMatrixRowLength(int row, int& length)
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::getMatrixRow(int row, double* coefs, int* indices,
-				  int len, int& rowLength)
+                                   int len, int& rowLength)
 {
    int    i, rowIndex, rowLeng, *colInd, minLeng;
    double *colVal;
@@ -1953,7 +1947,7 @@ int HYPRE_LinSysCore::getMatrixRow(int row, double* coefs, int* indices,
       HYPRE_ParCSRMatrixRestoreRow(A_csr,rowIndex,&rowLeng,&colInd,&colVal);
       rowLength = rowLeng;
    }
-   return(0);
+   return (0);
 }
 
 //***************************************************************************
@@ -1961,9 +1955,9 @@ int HYPRE_LinSysCore::getMatrixRow(int row, double* coefs, int* indices,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
-                       const int* indices)
+                                       const int* indices)
 {
-   int    i, ierr, *localInds;
+   int    i, *localInds;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -1976,7 +1970,7 @@ int HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
       {
          for ( i = 0; i < num; i++ )
             printf("%d : sumIntoRHSVector - %d = %e.\n", mypid_, indices[i], 
-                         values[i]);
+                   values[i]);
       }
    }
 
@@ -1997,15 +1991,13 @@ int HYPRE_LinSysCore::sumIntoRHSVector(int num, const double* values,
       else
       {
          printf("%d : sumIntoRHSVector ERROR - index %d out of range.\n",
-                      mypid_, indices[i]);
+                mypid_, indices[i]);
          exit(1);
       }
    }
 
-   ierr = HYPRE_IJVectorAddToValues(HYb_, num, (const int *) localInds, 
-                                    (const double *) values);
-   //assert(!ierr);
-
+   HYPRE_IJVectorAddToValues(HYb_, num, (const int *) localInds, 
+                             (const double *) values);
    delete [] localInds;
 
    //-------------------------------------------------------------------
@@ -2030,7 +2022,7 @@ int HYPRE_LinSysCore::putIntoRHSVector(int num, const double* values,
 {
    int    i, index;
 
-   if ((numRHSs_ == 0) && (HYb_ == NULL)) return(0);
+   if ((numRHSs_ == 0) && (HYb_ == NULL)) return (0);
 
    for ( i = 0; i < num; i++ )
    {
@@ -2039,7 +2031,7 @@ int HYPRE_LinSysCore::putIntoRHSVector(int num, const double* values,
       HYPRE_IJVectorSetValues(HYb_, 1, (const int *) &index,
                               (const double *) &(values[i]));
    }
-   return(0);
+   return (0);
 }
 
 //***************************************************************************
@@ -2055,7 +2047,7 @@ int HYPRE_LinSysCore::getFromRHSVector(int num, double* values,
 {
    int    i, index;
 
-   if ((numRHSs_ == 0) && (HYb_ == NULL)) return(0);
+   if ((numRHSs_ == 0) && (HYb_ == NULL)) return (0);
 
    for ( i = 0; i < num; i++ )
    {
@@ -2063,7 +2055,7 @@ int HYPRE_LinSysCore::getFromRHSVector(int num, double* values,
       if (index < localStartRow_-1 || index >= localEndRow_) continue;
       HYPRE_IJVectorGetValues(HYb_,1,&index,&(values[i]));
    }
-   return(0);
+   return (0);
 }
 
 //***************************************************************************
@@ -2072,7 +2064,7 @@ int HYPRE_LinSysCore::getFromRHSVector(int num, double* values,
 
 int HYPRE_LinSysCore::matrixLoadComplete()
 {
-   int    i, j, ierr, numLocalEqns, leng, eqnNum, nnz, *newColInd=NULL;
+   int    i, j, numLocalEqns, leng, eqnNum, nnz, *newColInd=NULL;
    int    maxRowLeng, newLeng, rowSize, *colInd, nrows;
    double *newColVal=NULL, *colVal, value;
    char   fname[40];
@@ -2116,9 +2108,8 @@ int HYPRE_LinSysCore::matrixLoadComplete()
       // set system matrix initialization parameters 
       //----------------------------------------------------------------
 
-      ierr = HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
-      ierr = HYPRE_IJMatrixInitialize(HYA_);
-      //assert(!ierr);
+      HYPRE_IJMatrixSetRowSizes(HYA_, rowLengths_);
+      HYPRE_IJMatrixInitialize(HYA_);
 
       //----------------------------------------------------------------
       // load the matrix stored locally to a HYPRE matrix
@@ -2128,7 +2119,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 4 )
       {
          printf("%4d : HYPRE_LSC::matrixLoadComplete - NEqns = %d.\n",
-                 mypid_, numLocalEqns);
+                mypid_, numLocalEqns);
       }
       maxRowLeng = 0;
       for ( i = 0; i < numLocalEqns; i++ )
@@ -2156,7 +2147,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
             }
          }
          HYPRE_IJMatrixSetValues(HYA_, 1, &newLeng,(const int *) &eqnNum,
-                       (const int *) newColInd, (const double *) newColVal);
+                                 (const int *) newColInd, (const double *) newColVal);
          delete [] colValues_[i];
          if ( memOptimizerFlag_ != 0 ) delete [] colIndices_[i];
          nnz += newLeng;
@@ -2164,7 +2155,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
       if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       {
          printf("%4d : HYPRE_LSC::matrixLoadComplete - nnz = %d.\n",
-                 mypid_, nnz);
+                mypid_, nnz);
       }
       delete [] colValues_;
       colValues_ = NULL;
@@ -2233,7 +2224,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
                if ( colVal[j] != 0.0 )
                   fprintf(fp, "%6d  %6d  %25.16e \n",i+1,colInd[j]+1,colVal[j]);
             }
-             HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
+            HYPRE_ParCSRMatrixRestoreRow(A_csr,i,&rowSize,&colInd,&colVal);
          }
          fclose(fp);
          sprintf(fname, "hypre_rhs.out.%d",mypid_);
@@ -2273,7 +2264,7 @@ int HYPRE_LinSysCore::matrixLoadComplete()
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
-                       int* nodeNumbers, int numNodes, const double* data)
+                                        int* nodeNumbers, int numNodes, const double* data)
 {
    int    i, j, **nodeFieldIDs, nodeFieldID, *procNRows, nRows, errCnt;
    int    blockID, *blockIDs, *eqnNumbers, *iArray, newNumEdges;
@@ -2324,7 +2315,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
             index = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
 
 /* ======
-This should ultimately be taken out even for newer ale3d implementation
+   This should ultimately be taken out even for newer ale3d implementation
    =====*/
             if ( index >= localStartRow_-1 && index < localEndRow_)
             {
@@ -2393,7 +2384,7 @@ This should ultimately be taken out even for newer ale3d implementation
                       data[i*fieldSize+j]);
       }    
       if (lookup_ != NULL && fieldSize == 2 &&
-           numNodes > 0)
+          numNodes > 0)
       {
          blockIDs       = (int *) lookup_->getElemBlockIDs();
          blockID        = blockIDs[0];
@@ -2529,31 +2520,31 @@ This should ultimately be taken out even for newer ale3d implementation
 
    if (fieldID == -100) {
 
-        errCnt = 0;
-        //USAGE:
-        //FieldID=-100: Initialize space for vectors X,Y,Z for AMS
-        //double *data_dummy;
-        //memAllocDoubles( 1, &data_dummy, NULL);
-        //lsc->putNodalFieldData(-100,1,globalOffsets,numProcs+1,data_dummy);
-        //MPI_Comm_rank(comm, &mypid_);
-        //MPI_Comm_size(comm, &numProcs_);
-        //localStartRowAMSV_ = nodeNumbers[mypid_] + 1;
-        //localEndRowAMSV_   = nodeNumbers[mypid_+1];
-        localStartRowAMSV_ = fieldSize;
-        localEndRowAMSV_   = numNodes;
+      errCnt = 0;
+      //USAGE:
+      //FieldID=-100: Initialize space for vectors X,Y,Z for AMS
+      //double *data_dummy;
+      //memAllocDoubles( 1, &data_dummy, NULL);
+      //lsc->putNodalFieldData(-100,1,globalOffsets,numProcs+1,data_dummy);
+      //MPI_Comm_rank(comm, &mypid_);
+      //MPI_Comm_size(comm, &numProcs_);
+      //localStartRowAMSV_ = nodeNumbers[mypid_] + 1;
+      //localEndRowAMSV_   = nodeNumbers[mypid_+1];
+      localStartRowAMSV_ = fieldSize;
+      localEndRowAMSV_   = numNodes;
 
-        MPI_Comm_rank(comm_, &mypid_);
-        MPI_Comm_size(comm_, &numProcs_);
+      MPI_Comm_rank(comm_, &mypid_);
+      MPI_Comm_size(comm_, &numProcs_);
 
-        errCnt += HYPRE_IJVectorCreate(comm_, localStartRowAMSV_, localEndRowAMSV_, &amsX_);
-        errCnt += HYPRE_IJVectorCreate(comm_, localStartRowAMSV_, localEndRowAMSV_, &amsY_);
-        errCnt += HYPRE_IJVectorCreate(comm_, localStartRowAMSV_, localEndRowAMSV_, &amsZ_);
-        errCnt += HYPRE_IJVectorSetObjectType(amsX_, HYPRE_PARCSR);
-        errCnt += HYPRE_IJVectorSetObjectType(amsY_, HYPRE_PARCSR);
-        errCnt += HYPRE_IJVectorSetObjectType(amsZ_, HYPRE_PARCSR);
-        errCnt += HYPRE_IJVectorInitialize(amsX_);
-        errCnt += HYPRE_IJVectorInitialize(amsY_);
-        errCnt += HYPRE_IJVectorInitialize(amsZ_);
+      errCnt += HYPRE_IJVectorCreate(comm_, localStartRowAMSV_, localEndRowAMSV_, &amsX_);
+      errCnt += HYPRE_IJVectorCreate(comm_, localStartRowAMSV_, localEndRowAMSV_, &amsY_);
+      errCnt += HYPRE_IJVectorCreate(comm_, localStartRowAMSV_, localEndRowAMSV_, &amsZ_);
+      errCnt += HYPRE_IJVectorSetObjectType(amsX_, HYPRE_PARCSR);
+      errCnt += HYPRE_IJVectorSetObjectType(amsY_, HYPRE_PARCSR);
+      errCnt += HYPRE_IJVectorSetObjectType(amsZ_, HYPRE_PARCSR);
+      errCnt += HYPRE_IJVectorInitialize(amsX_);
+      errCnt += HYPRE_IJVectorInitialize(amsY_);
+      errCnt += HYPRE_IJVectorInitialize(amsZ_);
    }
    if (fieldID == -101 || fieldID == -102 || fieldID == -103) {
 
@@ -2570,21 +2561,21 @@ This should ultimately be taken out even for newer ale3d implementation
       //lsc->putNodalFieldData(-103,1,nodeNumbers_dummy,numNodes,dataz_dummy);
 
       switch( fieldID ) {
-        case( -101 ) :
-          //errCnt += HYPRE_IJVectorSetValues(amsX_, numNodes, localInds, data);
-          errCnt += HYPRE_IJVectorSetValues(amsX_, numNodes, nodeNumbers, data);
-          break;
-        case( -102 ) :
-          errCnt += HYPRE_IJVectorSetValues(amsY_, numNodes, nodeNumbers, data);
-          break;
-        case( -103 ) :
-          errCnt += HYPRE_IJVectorSetValues(amsZ_, numNodes, nodeNumbers, data);
-          break;
-        default :
-          printf("%d : PutNodalFieldData, FieldID=-101,-102,-103, ERROR - FieldID %d out of range.\n",
-                    mypid_,fieldID);
-          exit(1);
-          break;
+         case( -101 ) :
+            //errCnt += HYPRE_IJVectorSetValues(amsX_, numNodes, localInds, data);
+            errCnt += HYPRE_IJVectorSetValues(amsX_, numNodes, nodeNumbers, data);
+            break;
+         case( -102 ) :
+            errCnt += HYPRE_IJVectorSetValues(amsY_, numNodes, nodeNumbers, data);
+            break;
+         case( -103 ) :
+            errCnt += HYPRE_IJVectorSetValues(amsZ_, numNodes, nodeNumbers, data);
+            break;
+         default :
+            printf("%d : PutNodalFieldData, FieldID=-101,-102,-103, ERROR - FieldID %d out of range.\n",
+                   mypid_,fieldID);
+            exit(1);
+            break;
       }
    }
    if (fieldID == -200) {
@@ -2608,7 +2599,7 @@ This should ultimately be taken out even for newer ale3d implementation
 
 
       errCnt += HYPRE_IJMatrixCreate(comm_, localStartRowAMSG_, localEndRowAMSG_,
-                                  localStartColAMSG_, localEndColAMSG_, &amsG_);
+                                     localStartColAMSG_, localEndColAMSG_, &amsG_);
 
 
       errCnt += HYPRE_IJMatrixSetObjectType(amsG_, HYPRE_PARCSR);
@@ -2633,19 +2624,19 @@ This should ultimately be taken out even for newer ale3d implementation
    }
 
    if (fieldID == -203) {
-     //USAGE
-     //FieldID=-203: Final Assembly of G Matrix
-     //int *nodenumbers_dummy2;
-     //double *data_dummy2;
-     //memAllocInts( 1, &nodenumbers_dummy2, NULL);
-     //memAllocDoubles( 1, &data_dummy2, NULL);
-     //lsc->putNodalFieldData(-202,1,nodenumbers_dummy2,1,data_dummy2);
-     //memFree( &nodenumbers_dummy2, &data_dummy2, NULL);
-     errCnt = HYPRE_IJMatrixAssemble(amsG_);
-     //this is also a good time to do this:
-     errCnt += HYPRE_IJVectorAssemble(amsX_);
-     errCnt += HYPRE_IJVectorAssemble(amsY_);
-     errCnt += HYPRE_IJVectorAssemble(amsZ_);
+      //USAGE
+      //FieldID=-203: Final Assembly of G Matrix
+      //int *nodenumbers_dummy2;
+      //double *data_dummy2;
+      //memAllocInts( 1, &nodenumbers_dummy2, NULL);
+      //memAllocDoubles( 1, &data_dummy2, NULL);
+      //lsc->putNodalFieldData(-202,1,nodenumbers_dummy2,1,data_dummy2);
+      //memFree( &nodenumbers_dummy2, &data_dummy2, NULL);
+      errCnt = HYPRE_IJMatrixAssemble(amsG_);
+      //this is also a good time to do this:
+      errCnt += HYPRE_IJVectorAssemble(amsX_);
+      errCnt += HYPRE_IJVectorAssemble(amsY_);
+      errCnt += HYPRE_IJVectorAssemble(amsZ_);
 
    }
 
@@ -2673,7 +2664,7 @@ This should ultimately be taken out even for newer ale3d implementation
 
 
       errCnt += HYPRE_IJMatrixCreate(comm_, localStartRowAMSD_, localEndRowAMSD_,
-                                  localStartColAMSD_, localEndColAMSD_, &amsD0_);
+                                     localStartColAMSD_, localEndColAMSD_, &amsD0_);
 
 
       errCnt += HYPRE_IJMatrixSetObjectType(amsD0_, HYPRE_PARCSR);
@@ -2681,39 +2672,39 @@ This should ultimately be taken out even for newer ale3d implementation
    }
 
    if (fieldID == -301) {
-     //USAGE
-     //FieldID=-301: Set Row Sizes for the D0 Matrix
+      //USAGE
+      //FieldID=-301: Set Row Sizes for the D0 Matrix
       errCnt = 0;
       errCnt += HYPRE_IJMatrixSetRowSizes(amsD0_, nodeNumbers);
       errCnt += HYPRE_IJMatrixInitialize(amsD0_);
    }
 
    if (fieldID == -302) {
-     //USAGE
-     //FieldID=-302: Put Values into the D0 Matrix
-     //lsc->putNodalFieldData(-201,eindices[iedge],iindicesr,isize,icoefsr);
+      //USAGE
+      //FieldID=-302: Put Values into the D0 Matrix
+      //lsc->putNodalFieldData(-201,eindices[iedge],iindicesr,isize,icoefsr);
 
-     errCnt += HYPRE_IJMatrixSetValues(amsD0_, 1, &numNodes, &fieldSize, nodeNumbers, data);
+      errCnt += HYPRE_IJMatrixSetValues(amsD0_, 1, &numNodes, &fieldSize, nodeNumbers, data);
 
    }
 
    if (fieldID == -303) {
-     //USAGE
-     //FieldID=-303: Final Assembly of D0 Matrix
-     //int *nodenumbers_dummy2;
-     //double *data_dummy2;
-     //memAllocInts( 1, &nodenumbers_dummy2, NULL);
-     //memAllocDoubles( 1, &data_dummy2, NULL);
-     //lsc->putNodalFieldData(-202,1,nodenumbers_dummy2,1,data_dummy2);
-     //memFree( &nodenumbers_dummy2, &data_dummy2, NULL);
-     errCnt = HYPRE_IJMatrixAssemble(amsD0_);
+      //USAGE
+      //FieldID=-303: Final Assembly of D0 Matrix
+      //int *nodenumbers_dummy2;
+      //double *data_dummy2;
+      //memAllocInts( 1, &nodenumbers_dummy2, NULL);
+      //memAllocDoubles( 1, &data_dummy2, NULL);
+      //lsc->putNodalFieldData(-202,1,nodenumbers_dummy2,1,data_dummy2);
+      //memFree( &nodenumbers_dummy2, &data_dummy2, NULL);
+      errCnt = HYPRE_IJMatrixAssemble(amsD0_);
 
-     bool printD0matrix = true;
-     if(printD0matrix) {
-       HYPRE_ParCSRMatrix D0_csr;
-       HYPRE_IJMatrixGetObject(amsD0_, (void **) &D0_csr);
-       HYPRE_ParCSRMatrixPrint(D0_csr, "D0.parmatrix");
-     }
+      bool printD0matrix = true;
+      if(printD0matrix) {
+         HYPRE_ParCSRMatrix D0_csr;
+         HYPRE_IJMatrixGetObject(amsD0_, (void **) &D0_csr);
+         HYPRE_ParCSRMatrixPrint(D0_csr, "D0.parmatrix");
+      }
    }
 
    // fieldID's -400, -401, -402, -403 are for calculating the D1 Matrix
@@ -2740,7 +2731,7 @@ This should ultimately be taken out even for newer ale3d implementation
 
 
       errCnt += HYPRE_IJMatrixCreate(comm_, localStartRowAMSD_, localEndRowAMSD_,
-                                  localStartColAMSD_, localEndColAMSD_, &amsD1_);
+                                     localStartColAMSD_, localEndColAMSD_, &amsD1_);
 
 
       errCnt += HYPRE_IJMatrixSetObjectType(amsD1_, HYPRE_PARCSR);
@@ -2748,39 +2739,39 @@ This should ultimately be taken out even for newer ale3d implementation
    }
 
    if (fieldID == -401) {
-     //USAGE
-     //FieldID=-401: Set Row Sizes for the D1 Matrix
+      //USAGE
+      //FieldID=-401: Set Row Sizes for the D1 Matrix
       errCnt = 0;
       errCnt += HYPRE_IJMatrixSetRowSizes(amsD1_, nodeNumbers);
       errCnt += HYPRE_IJMatrixInitialize(amsD1_);
    }
 
    if (fieldID == -402) {
-     //USAGE
-     //FieldID=-402: Put Values into the D1 Matrix
-     //lsc->putNodalFieldData(-201,eindices[iedge],iindicesr,isize,icoefsr);
+      //USAGE
+      //FieldID=-402: Put Values into the D1 Matrix
+      //lsc->putNodalFieldData(-201,eindices[iedge],iindicesr,isize,icoefsr);
 
-     errCnt += HYPRE_IJMatrixSetValues(amsD1_, 1, &numNodes, &fieldSize, nodeNumbers, data);
+      errCnt += HYPRE_IJMatrixSetValues(amsD1_, 1, &numNodes, &fieldSize, nodeNumbers, data);
 
    }
 
    if (fieldID == -403) {
-     //USAGE
-     //FieldID=-403: Final Assembly of D1 Matrix
-     //int *nodenumbers_dummy2;
-     //double *data_dummy2;
-     //memAllocInts( 1, &nodenumbers_dummy2, NULL);
-     //memAllocDoubles( 1, &data_dummy2, NULL);
-     //lsc->putNodalFieldData(-202,1,nodenumbers_dummy2,1,data_dummy2);
-     //memFree( &nodenumbers_dummy2, &data_dummy2, NULL);
-     errCnt = HYPRE_IJMatrixAssemble(amsD1_);
+      //USAGE
+      //FieldID=-403: Final Assembly of D1 Matrix
+      //int *nodenumbers_dummy2;
+      //double *data_dummy2;
+      //memAllocInts( 1, &nodenumbers_dummy2, NULL);
+      //memAllocDoubles( 1, &data_dummy2, NULL);
+      //lsc->putNodalFieldData(-202,1,nodenumbers_dummy2,1,data_dummy2);
+      //memFree( &nodenumbers_dummy2, &data_dummy2, NULL);
+      errCnt = HYPRE_IJMatrixAssemble(amsD1_);
 
-     bool printD1matrix = true;
-     if(printD1matrix) {
-       HYPRE_ParCSRMatrix D1_csr;
-       HYPRE_IJMatrixGetObject(amsD1_, (void **) &D1_csr);
-       HYPRE_ParCSRMatrixPrint(D1_csr, "D1.parmatrix");
-     }
+      bool printD1matrix = true;
+      if(printD1matrix) {
+         HYPRE_ParCSRMatrix D1_csr;
+         HYPRE_IJMatrixGetObject(amsD1_, (void **) &D1_csr);
+         HYPRE_ParCSRMatrixPrint(D1_csr, "D1.parmatrix");
+      }
    }
  
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
@@ -2793,7 +2784,7 @@ This should ultimately be taken out even for newer ale3d implementation
 /* This section has been replaced due to changes in ale3d */
 /* ------------------------------------------------------ */
 int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
-                       int* nodeNumbers, int numNodes, const double* data)
+                                        int* nodeNumbers, int numNodes, const double* data)
 {
    int    i, **nodeFieldIDs, nodeFieldID, numFields, *procNRows;
    int    blockID, *blockIDs, *eqnNumbers, *iArray, checkFieldSize;
@@ -2837,7 +2828,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
          for ( i = 0; i < numNodes; i++ )
             eqnNumbers[i] = lookup_->getEqnNumber(nodeNumbers[i],nodeFieldID);
          HYPRE_LSI_MLILoadNodalCoordinates(HYPrecon_, numNodes, checkFieldSize,
-                       eqnNumbers, fieldSize, (double *) data);
+                                           eqnNumbers, fieldSize, (double *) data);
          delete [] eqnNumbers;
       }    
    }    
@@ -2904,7 +2895,7 @@ int HYPRE_LinSysCore::putNodalFieldData(int fieldID, int fieldSize,
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
-                                          double* gamma1, int leng)
+                                         double* gamma1, int leng)
 {
    int    i, j, k, localEqnNum, colIndex, rowSize, *colInd, *iarray;
    int    numLocalRows, eqnNum, rowSize2, *colInd2, numLabels, *labels;
@@ -3011,11 +3002,11 @@ int HYPRE_LinSysCore::enforceEssentialBC(int* globalEqn, double* alpha,
             d2array = mRHSRowVals_;
             for (i = 0; i < mRHSNumGEqns_; i++) mRHSRowInds_[i] = i2array[i];
             for (i = mRHSNumGEqns_; i < mRHSNumGEqns_+leng; i++)
-                mRHSRowInds_[i] = NULL;
+               mRHSRowInds_[i] = NULL;
             mRHSRowVals_ = new double*[mRHSNumGEqns_+leng];
             for (i = 0; i < mRHSNumGEqns_; i++) mRHSRowVals_[i] = d2array[i];
             for (i = mRHSNumGEqns_; i < mRHSNumGEqns_+leng; i++)
-                mRHSRowVals_[i] = NULL;
+               mRHSRowVals_[i] = NULL;
          }
       }
       //**/=============================================================
@@ -3260,11 +3251,11 @@ int HYPRE_LinSysCore::enforceRemoteEssBCs(int numEqns, int* globalEqns,
             d2array = mRHSRowVals_;
             for (i = 0; i < mRHSNumGEqns_; i++) mRHSRowInds_[i] = i2array[i];
             for (i = mRHSNumGEqns_; i < mRHSNumGEqns_+numEqns; i++)
-                mRHSRowInds_[i] = NULL;
+               mRHSRowInds_[i] = NULL;
             mRHSRowVals_ = new double*[mRHSNumGEqns_+numEqns];
             for (i = 0; i < mRHSNumGEqns_; i++) mRHSRowVals_[i] = d2array[i];
             for (i = mRHSNumGEqns_; i < mRHSNumGEqns_+numEqns; i++)
-                mRHSRowVals_[i] = NULL;
+               mRHSRowVals_[i] = NULL;
          }
       }
       //**/=============================================================
@@ -3642,8 +3633,6 @@ int HYPRE_LinSysCore::copyInRHSVector(double scalar, const Data& data)
 #ifndef NOFEI
 int HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data) 
 {
-   int ierr;
-
    //-------------------------------------------------------------------
    // diagnostic message
    //-------------------------------------------------------------------
@@ -3656,12 +3645,11 @@ int HYPRE_LinSysCore::copyOutRHSVector(double scalar, Data& data)
    //-------------------------------------------------------------------
 
    HYPRE_IJVector newVector;
-   ierr = HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1, 
-                               &newVector);
-   ierr = HYPRE_IJVectorSetObjectType(newVector, HYPRE_PARCSR);
-   ierr = HYPRE_IJVectorInitialize(newVector);
-   ierr = HYPRE_IJVectorAssemble(newVector);
-   //assert(!ierr);
+   HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1, 
+                        &newVector);
+   HYPRE_IJVectorSetObjectType(newVector, HYPRE_PARCSR);
+   HYPRE_IJVectorInitialize(newVector);
+   HYPRE_IJVectorAssemble(newVector);
 
    HYPRE_ParVector Vec1;
    HYPRE_ParVector Vec2;
@@ -3802,7 +3790,6 @@ int HYPRE_LinSysCore::destroyVectorData(Data& data)
 
 int HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs) 
 {
-   int ierr = 0;
    //-------------------------------------------------------------------
    // diagnostic message
    //-------------------------------------------------------------------
@@ -3845,12 +3832,11 @@ int HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs)
       HYbs_ = new HYPRE_IJVector[numRHSs_];
       for ( int i = 0; i < numRHSs_; i++ )
       {
-         ierr = HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1,
-                                   &(HYbs_[i]));
-         ierr = HYPRE_IJVectorSetObjectType(HYbs_[i], HYPRE_PARCSR);
-         ierr = HYPRE_IJVectorInitialize(HYbs_[i]);
-         ierr = HYPRE_IJVectorAssemble(HYbs_[i]);
-         //assert(!ierr);
+         HYPRE_IJVectorCreate(comm_, localStartRow_-1, localEndRow_-1,
+                              &(HYbs_[i]));
+         HYPRE_IJVectorSetObjectType(HYbs_[i], HYPRE_PARCSR);
+         HYPRE_IJVectorInitialize(HYbs_[i]);
+         HYPRE_IJVectorAssemble(HYbs_[i]);
       }
       HYb_ = HYbs_[0];
    }
@@ -3871,7 +3857,7 @@ int HYPRE_LinSysCore::setNumRHSVectors(int numRHSs, const int* rhsIDs)
 
    if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 3 )
       printf("%4d : HYPRE_LSC::leaving  setNumRHSVectors.\n",mypid_);
-   return (ierr);
+   return (0);
 }
 
 //***************************************************************************
@@ -3911,9 +3897,9 @@ int HYPRE_LinSysCore::setRHSID(int rhsID)
 //---------------------------------------------------------------------------
 
 int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
-                                       const double* values, int leng) 
+                                      const double* values, int leng) 
 {
-   int i, ierr, *localInds, *iarray, *iarray2;
+   int i, *localInds, *iarray, *iarray2;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -3953,7 +3939,7 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
       else
       {
          printf("%d : putInitialGuess ERROR - index %d out of range\n",
-                      mypid_, eqnNumbers[i]);
+                mypid_, eqnNumbers[i]);
          exit(1);
       }
       if ( mapFromSolnFlag_ == 1 )
@@ -3962,10 +3948,8 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
          mapFromSolnList2_[mapFromSolnLeng_++] = (int) values[i];
       }
    }
-   ierr = HYPRE_IJVectorSetValues(HYx_, leng, (const int *) localInds,
-                                  (const double *) values);
-   //assert(!ierr);
-
+   HYPRE_IJVectorSetValues(HYx_, leng, (const int *) localInds,
+                           (const double *) values);
    delete [] localInds;
 
    //-------------------------------------------------------------------
@@ -3990,7 +3974,7 @@ int HYPRE_LinSysCore::putInitialGuess(const int* eqnNumbers,
 
 int HYPRE_LinSysCore::getSolution(double* answers,int leng) 
 {
-   int    i, ierr, *equations;
+   int    i, *equations;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -4015,8 +3999,7 @@ int HYPRE_LinSysCore::getSolution(double* answers,int leng)
    else
       for ( i = 0; i < leng; i++ ) equations[i] = localStartCol_ + i;
 
-   ierr = HYPRE_IJVectorGetValues(HYx_,leng,equations,answers);
-   //assert(!ierr);
+   HYPRE_IJVectorGetValues(HYx_,leng,equations,answers);
 
    delete [] equations;
 
@@ -4036,7 +4019,7 @@ int HYPRE_LinSysCore::getSolution(double* answers,int leng)
 int HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer) 
 {
    double val;
-   int    ierr, equation;
+   int    equation;
 
    //-------------------------------------------------------------------
    // diagnostic message
@@ -4055,12 +4038,11 @@ int HYPRE_LinSysCore::getSolnEntry(int eqnNumber, double& answer)
        equation > localEndRow_ )
    {
       printf("%d : getSolnEntry ERROR - index out of range = %d.\n", mypid_, 
-                   eqnNumber);
+             eqnNumber);
       exit(1);
    }
 
-   ierr = HYPRE_IJVectorGetValues(HYx_,1,&equation,&val);
-   //assert(!ierr);
+   HYPRE_IJVectorGetValues(HYx_,1,&equation,&val);
    answer = val;
 
    //-------------------------------------------------------------------
@@ -4212,42 +4194,42 @@ void HYPRE_LinSysCore::selectSolver(char* name)
    switch ( HYSolverID_ )
    {
       case HYPCG :
-           HYPRE_ParCSRPCGCreate(comm_, &HYSolver_);
-           break;
+         HYPRE_ParCSRPCGCreate(comm_, &HYSolver_);
+         break;
       case HYLSICG :
-           HYPRE_ParCSRLSICGCreate(comm_, &HYSolver_);
-           break;
+         HYPRE_ParCSRLSICGCreate(comm_, &HYSolver_);
+         break;
       case HYHYBRID :
-           HYPRE_ParCSRHybridCreate(&HYSolver_);
-           break;
+         HYPRE_ParCSRHybridCreate(&HYSolver_);
+         break;
       case HYGMRES :
-           HYPRE_ParCSRGMRESCreate(comm_, &HYSolver_);
-           break;
+         HYPRE_ParCSRGMRESCreate(comm_, &HYSolver_);
+         break;
       case HYFGMRES :
-           HYPRE_ParCSRFGMRESCreate(comm_, &HYSolver_);
-           break;
+         HYPRE_ParCSRFGMRESCreate(comm_, &HYSolver_);
+         break;
       case HYCGSTAB :
-           HYPRE_ParCSRBiCGSTABCreate(comm_, &HYSolver_);
-           break;
+         HYPRE_ParCSRBiCGSTABCreate(comm_, &HYSolver_);
+         break;
       case HYCGSTABL :
-           HYPRE_ParCSRBiCGSTABLCreate(comm_, &HYSolver_);
-           break;
+         HYPRE_ParCSRBiCGSTABLCreate(comm_, &HYSolver_);
+         break;
       case HYTFQMR :
-           HYPRE_ParCSRTFQmrCreate(comm_, &HYSolver_);
-           break;
+         HYPRE_ParCSRTFQmrCreate(comm_, &HYSolver_);
+         break;
       case HYBICGS :
-           HYPRE_ParCSRBiCGSCreate(comm_, &HYSolver_);
-           break;
+         HYPRE_ParCSRBiCGSCreate(comm_, &HYSolver_);
+         break;
       case HYSYMQMR :
-           HYPRE_ParCSRSymQMRCreate(comm_, &HYSolver_);
-           break;
+         HYPRE_ParCSRSymQMRCreate(comm_, &HYSolver_);
+         break;
       case HYAMG :
-           HYPRE_BoomerAMGCreate( &HYSolver_);
-           HYPRE_BoomerAMGSetCycleType(HYSolver_, 1);
-           HYPRE_BoomerAMGSetMaxLevels(HYSolver_, 25);
-           break;
+         HYPRE_BoomerAMGCreate( &HYSolver_);
+         HYPRE_BoomerAMGSetCycleType(HYSolver_, 1);
+         HYPRE_BoomerAMGSetMaxLevels(HYSolver_, 25);
+         break;
       default:
-           break;
+         break;
    }
 
    //-------------------------------------------------------------------
@@ -4265,8 +4247,6 @@ void HYPRE_LinSysCore::selectSolver(char* name)
 
 void HYPRE_LinSysCore::selectPreconditioner(char *name)
 {
-   int ierr;
-
    //-------------------------------------------------------------------
    // diagnostic message
    //-------------------------------------------------------------------
@@ -4476,103 +4456,95 @@ void HYPRE_LinSysCore::selectPreconditioner(char *name)
    switch (HYPreconID_)
    {
       case HYIDENTITY :
-           HYPrecon_ = NULL;
-           break;
+         HYPrecon_ = NULL;
+         break;
 
       case HYDIAGONAL :
-           HYPrecon_ = NULL;
-           break;
+         HYPrecon_ = NULL;
+         break;
 
       case HYPILUT :
-           ierr = HYPRE_ParCSRPilutCreate(comm_, &HYPrecon_);
-           //assert(!ierr);
-           HYPRE_ParCSRPilutSetMaxIter(HYPrecon_, 1);
-           break;
+         HYPRE_ParCSRPilutCreate(comm_, &HYPrecon_);
+         HYPRE_ParCSRPilutSetMaxIter(HYPrecon_, 1);
+         break;
 
       case HYPARASAILS :
-           ierr = HYPRE_ParCSRParaSailsCreate(comm_, &HYPrecon_);
-           //assert(!ierr);
-           break;
+         HYPRE_ParCSRParaSailsCreate(comm_, &HYPrecon_);
+         break;
 
       case HYBOOMERAMG :
-           HYPRE_BoomerAMGCreate(&HYPrecon_);
-           HYPRE_BoomerAMGSetMaxIter(HYPrecon_, 1);
-           HYPRE_BoomerAMGSetCycleType(HYPrecon_, 1);
-           HYPRE_BoomerAMGSetMaxLevels(HYPrecon_, 25);
-           HYPRE_BoomerAMGSetMeasureType(HYPrecon_, 0);
-           break;
+         HYPRE_BoomerAMGCreate(&HYPrecon_);
+         HYPRE_BoomerAMGSetMaxIter(HYPrecon_, 1);
+         HYPRE_BoomerAMGSetCycleType(HYPrecon_, 1);
+         HYPRE_BoomerAMGSetMaxLevels(HYPrecon_, 25);
+         HYPRE_BoomerAMGSetMeasureType(HYPrecon_, 0);
+         break;
 
       case HYDDILUT :
-           ierr = HYPRE_LSI_DDIlutCreate(comm_, &HYPrecon_);
-           //assert( !ierr );
-           break;
+         HYPRE_LSI_DDIlutCreate(comm_, &HYPrecon_);
+         break;
 
       case HYSCHWARZ :
-           ierr = HYPRE_LSI_SchwarzCreate(comm_, &HYPrecon_);
-           //assert( !ierr );
-           break;
+         HYPRE_LSI_SchwarzCreate(comm_, &HYPrecon_);
+         break;
 
       case HYDDICT :
-           ierr = HYPRE_LSI_DDICTCreate(comm_, &HYPrecon_);
-           //assert( !ierr );
-           break;
+         HYPRE_LSI_DDICTCreate(comm_, &HYPrecon_);
+         break;
 
       case HYPOLY :
-           ierr = HYPRE_LSI_PolyCreate(comm_, &HYPrecon_);
-           //assert( !ierr );
-           break;
+         HYPRE_LSI_PolyCreate(comm_, &HYPrecon_);
+         break;
 
       case HYEUCLID :
-           ierr = HYPRE_EuclidCreate(comm_, &HYPrecon_);
-           //assert( !ierr );
-           break;
+         HYPRE_EuclidCreate(comm_, &HYPrecon_);
+         break;
 
       case HYBLOCK :
-           ierr = HYPRE_LSI_BlockPrecondCreate(comm_, &HYPrecon_);
-           //assert( !ierr );
-           break;
+         HYPRE_LSI_BlockPrecondCreate(comm_, &HYPrecon_);
+         break;
 
       case HYML :
 #ifdef HAVE_ML
-           ierr = HYPRE_LSI_MLCreate(comm_, &HYPrecon_);
+         HYPRE_LSI_MLCreate(comm_, &HYPrecon_);
 #else
-           printf("HYPRE_LSC::selectPreconditioner - ML not supported.\n");
+         printf("HYPRE_LSC::selectPreconditioner - ML not supported.\n");
 #endif
-           break;
+         break;
       case HYMLI :
 #ifdef HAVE_MLI
-           ierr = HYPRE_LSI_MLICreate(comm_, &HYPrecon_);
+         HYPRE_LSI_MLICreate(comm_, &HYPrecon_);
 #else
-           printf("HYPRE_LSC::selectPreconditioner - MLI not supported.\n");
+         printf("HYPRE_LSC::selectPreconditioner - MLI not supported.\n");
 #endif
-           break;
+         break;
       case HYMLMAXWELL :
 #ifdef HAVE_MLMAXWELL
-           ierr = HYPRE_LSI_MLMaxwellCreate(comm_, &HYPrecon_);
+         HYPRE_LSI_MLMaxwellCreate(comm_, &HYPrecon_);
 #else
-           printf("HYPRE_LSC::selectPreconditioner-MLMaxwell unsupported.\n");
+         printf("HYPRE_LSC::selectPreconditioner-MLMaxwell unsupported.\n");
 #endif
-           break;
+         break;
       case HYAMS :
-           ierr = HYPRE_AMSCreate(&HYPrecon_);
-           break;
+         HYPRE_AMSCreate(&HYPrecon_);
+         break;
       case HYUZAWA :
-           HYPRE_LSI_UzawaCreate(comm_, &HYPrecon_);
-           break;
+         HYPRE_LSI_UzawaCreate(comm_, &HYPrecon_);
+         break;
       case HYSYSPDE :
 #ifdef HAVE_SYSPDE
-           ierr = HYPRE_ParCSRSysPDECreate(comm_, sysPDENVars_, &HYPrecon_);
+         HYPRE_ParCSRSysPDECreate(comm_, sysPDENVars_, &HYPrecon_);
 #else
-           printf("HYPRE_LSC::selectPreconditioner-SYSPDE unsupported.\n");
+         printf("HYPRE_LSC::selectPreconditioner-SYSPDE unsupported.\n");
 #endif
-           break;
+         break;
       case HYDSLU :
 #ifdef HAVE_DSUPERLU
-           ierr = HYPRE_LSI_DSuperLUCreate(comm_, &HYPrecon_);
+         HYPRE_LSI_DSuperLUCreate(comm_, &HYPrecon_);
 #else
-           printf("HYPRE_LSC::selectPreconditioner-DSUPERLU unsupported.\n");
+         printf("HYPRE_LSC::selectPreconditioner-DSUPERLU unsupported.\n");
 #endif
-           break;
+         break;
    }
 
    //-------------------------------------------------------------------
@@ -4658,7 +4630,7 @@ int HYPRE_LinSysCore::formResidual(double* values, int leng)
 
 int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
 {
-   int                i, j, numIterations=0, status, ierr, localNRows;
+   int                i, j, numIterations=0, status, localNRows;
    int                startRow, *procNRows, rowSize, *colInd, nnz, nrows;
    int                slideCheck[2];
 #ifdef HAVE_MLI
@@ -4797,10 +4769,9 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       {
          if ( HYnormalA_ != NULL ) HYPRE_IJMatrixDestroy(HYnormalA_);
          HYPRE_IJMatrixGetObject(HYA_, (void **) &A_csr);
-         ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,
-		 localEndRow_-1, localStartRow_-1, localEndRow_-1,&IJI);
-         ierr += HYPRE_IJMatrixSetObjectType(IJI, HYPRE_PARCSR);
-         //assert(!ierr);
+         HYPRE_IJMatrixCreate(comm_, localStartRow_-1,
+                              localEndRow_-1, localStartRow_-1, localEndRow_-1,&IJI);
+         HYPRE_IJMatrixSetObjectType(IJI, HYPRE_PARCSR);
          localNRows = localEndRow_ - localStartRow_ + 1;
          matSizes = new int[localNRows];
          rowInd   = new int[localNRows];
@@ -4813,39 +4784,37 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
             colInd[i] = rowInd[i];
             colVal[i] = 1.0;
          }
-         ierr  = HYPRE_IJMatrixSetRowSizes(IJI, matSizes);
-         ierr += HYPRE_IJMatrixInitialize(IJI);
-         ierr += HYPRE_IJMatrixSetValues(IJI, localNRows, matSizes,
-                   (const int *) rowInd, (const int *) colInd,
-                   (const double *) colVal);
-         //assert(!ierr);
+         HYPRE_IJMatrixSetRowSizes(IJI, matSizes);
+         HYPRE_IJMatrixInitialize(IJI);
+         HYPRE_IJMatrixSetValues(IJI, localNRows, matSizes,
+                                 (const int *) rowInd, (const int *) colInd,
+                                 (const double *) colVal);
          delete [] rowInd;
          delete [] colInd;
          delete [] colVal;
          HYPRE_IJMatrixAssemble(IJI);
          HYPRE_IJMatrixGetObject(IJI, (void **) &I_csr);
          hypre_BoomerAMGBuildCoarseOperator((hypre_ParCSRMatrix*) A_csr,
-             (hypre_ParCSRMatrix*) I_csr, (hypre_ParCSRMatrix*) A_csr, 
-             (hypre_ParCSRMatrix**) &normalA_csr);
+                                            (hypre_ParCSRMatrix*) I_csr, (hypre_ParCSRMatrix*) A_csr, 
+                                            (hypre_ParCSRMatrix**) &normalA_csr);
          HYPRE_IJMatrixDestroy( IJI );
-         ierr = HYPRE_IJMatrixCreate(comm_, localStartRow_-1,
-		 localEndRow_-1, localStartRow_-1, localEndRow_-1,&HYnormalA_);
-         ierr += HYPRE_IJMatrixSetObjectType(HYnormalA_, HYPRE_PARCSR);
-         //assert(!ierr);
+         HYPRE_IJMatrixCreate(comm_, localStartRow_-1,
+                              localEndRow_-1, localStartRow_-1, localEndRow_-1,&HYnormalA_);
+         HYPRE_IJMatrixSetObjectType(HYnormalA_, HYPRE_PARCSR);
          for ( i = localStartRow_-1; i < localEndRow_; i++ )
          {
             HYPRE_ParCSRMatrixGetRow(normalA_csr,i,&rowSize,NULL,NULL);
             matSizes[i-localStartRow_+1] = rowSize;
             HYPRE_ParCSRMatrixRestoreRow(normalA_csr,i,&rowSize,NULL,NULL);
          }
-         ierr  = HYPRE_IJMatrixSetRowSizes(HYnormalA_, matSizes);
-         ierr += HYPRE_IJMatrixInitialize(HYnormalA_);
+         HYPRE_IJMatrixSetRowSizes(HYnormalA_, matSizes);
+         HYPRE_IJMatrixInitialize(HYnormalA_);
          for ( i = localStartRow_-1; i < localEndRow_; i++ )
          {
             HYPRE_ParCSRMatrixGetRow(normalA_csr,i,&rowSize,&colInd,&colVal);
-            ierr += HYPRE_IJMatrixSetValues(HYnormalA_, 1, &rowSize,
-                      (const int *) &i, (const int *) colInd,
-                      (const double *) colVal);
+            HYPRE_IJMatrixSetValues(HYnormalA_, 1, &rowSize,
+                                    (const int *) &i, (const int *) colInd,
+                                    (const double *) colVal);
             HYPRE_ParCSRMatrixRestoreRow(normalA_csr,i,&rowSize,&colInd,&colVal);
          }
          HYPRE_IJMatrixAssemble(HYnormalA_);
@@ -5022,8 +4991,8 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
                    mypid_, i);
       }
       HYPRE_LSI_MLILoadNodalCoordinates(HYPrecon_, MLI_NumNodes_, 
-               MLI_FieldSize_, MLI_EqnNumbers_, MLI_FieldSize_, 
-               MLI_NodalCoord_, localEndRow_-localStartRow_+1);
+                                        MLI_FieldSize_, MLI_EqnNumbers_, MLI_FieldSize_, 
+                                        MLI_NodalCoord_, localEndRow_-localStartRow_+1);
    }
 #endif
 #if 0
@@ -5041,811 +5010,811 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       //----------------------------------------------------------------
 
       case HYPCG :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* Preconditioned Conjugate Gradient solver \n");
-              printf("* maximum no. of iterations = %d\n", maxIterations_);
-              printf("* convergence tolerance     = %e\n", tolerance_);
-              printf("*--------------------------------------------------\n");
-           }
-           setupPCGPrecon();
-           HYPRE_ParCSRPCGSetMaxIter(HYSolver_, maxIterations_);
-           HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
-           HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
-           HYPRE_PCGSetRecomputeResidual(HYSolver_, pcgRecomputeRes_);
-           if ( normAbsRel_ == 0 )
-           {
-              HYPRE_PCGSetTol(HYSolver_, tolerance_);
-           }
-           else
-           {
-              HYPRE_PCGSetTol(HYSolver_, 0.0);
-              HYPRE_PCGSetAbsoluteTol(HYSolver_, tolerance_);
-           }
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
-           {
-              if ( mypid_ == 0 )
-                printf("***************************************************\n");
-              HYPRE_ParCSRPCGSetPrintLevel(HYSolver_, 1);
-              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
-                 HYPRE_ParCSRPCGSetPrintLevel(HYSolver_, 2);
-           }
-           retFlag = HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in PCG setup.\n");
-              return retFlag;
-           }
-           // if variable mli preconditioner (SA and GSA)
-           if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
-           {
-              if ( normAbsRel_ == 0 )
-              {
-                 HYPRE_ParVectorCopy( b_csr, r_csr );
-                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm0);
-                 rnorm0 = sqrt( rnorm0 );
-              }
-              else rnorm0 = 1.0;
-              HYPRE_ParCSRPCGSetMaxIter(HYSolver_, MLI_Hybrid_MaxIter_);
-              rateThresh = 1.0;
-              for ( i = 0; i < MLI_Hybrid_MaxIter_; i++ )
-                 rateThresh *= MLI_Hybrid_ConvRate_;
-           }
-           MPI_Barrier( comm_ );
-           ptime  = LSC_Wtime();
-           retFlag = HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
-           HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &numIterations);
-           HYPRE_ParVectorCopy( b_csr, r_csr );
-           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-           rnorm = sqrt( rnorm );
-           // if variable mli preconditioner (SA and GSA)
-           if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
-           {
-              nTrials = 1;
-              if (rnorm/rnorm0 >= tolerance_)
-              {
-                 HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
-                 HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &tempIter);
-                 numIterations += tempIter;
-                 HYPRE_ParVectorCopy( b_csr, r_csr );
-                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm1);
-                 rnorm1 = sqrt( rnorm1 );
-                 convRate = rnorm1 / rnorm;
-                 rnorm = rnorm1;
-              }
-              while ((rnorm/rnorm0)>=tolerance_ && nTrials<MLI_Hybrid_NTrials_)
-              {
-                 nTrials++;
-                 if ( convRate > rateThresh )
-                 {
-                    if ( MLI_Hybrid_NSIncr_ > 1 )
-                       sprintf(paramString, "MLI incrNullSpaceDim %d", 
-                               MLI_Hybrid_NSIncr_);
-                    else
-                       sprintf(paramString, "MLI incrNullSpaceDim 2");
-                    HYPRE_LSI_MLISetParams(HYPrecon_, paramString);
-                    HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
-                 }
-                 HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
-                 HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &tempIter);
-                 numIterations += tempIter;
-                 HYPRE_ParVectorCopy( b_csr, r_csr );
-                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-                 rnorm1 = rnorm;
-                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-                 rnorm = sqrt( rnorm );
-                 convRate = rnorm / rnorm1;
-              }
-              if (rnorm/rnorm0 < tolerance_) retFlag = 0;
-              else if (numIterations < maxIterations_)
-              {
-                 HYPRE_ParCSRPCGSetMaxIter(HYSolver_,maxIterations_-numIterations);
-                 retFlag = HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
-                 HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &tempIter);
-                 numIterations += tempIter;
-              }
-              else retFlag = 1;
-           }
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in PCG solve.\n");
-              return retFlag;
-           }
-           switch ( projectionScheme_ )
-           {
-              case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
-              case 2 : addToMinResProjectionSpace(currX_,currB_); break;
-           }
-           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
-           break;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* Preconditioned Conjugate Gradient solver \n");
+            printf("* maximum no. of iterations = %d\n", maxIterations_);
+            printf("* convergence tolerance     = %e\n", tolerance_);
+            printf("*--------------------------------------------------\n");
+         }
+         setupPCGPrecon();
+         HYPRE_ParCSRPCGSetMaxIter(HYSolver_, maxIterations_);
+         HYPRE_ParCSRPCGSetRelChange(HYSolver_, 0);
+         HYPRE_ParCSRPCGSetTwoNorm(HYSolver_, 1);
+         HYPRE_PCGSetRecomputeResidual(HYSolver_, pcgRecomputeRes_);
+         if ( normAbsRel_ == 0 )
+         {
+            HYPRE_PCGSetTol(HYSolver_, tolerance_);
+         }
+         else
+         {
+            HYPRE_PCGSetTol(HYSolver_, 0.0);
+            HYPRE_PCGSetAbsoluteTol(HYSolver_, tolerance_);
+         }
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+         {
+            if ( mypid_ == 0 )
+               printf("***************************************************\n");
+            HYPRE_ParCSRPCGSetPrintLevel(HYSolver_, 1);
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+               HYPRE_ParCSRPCGSetPrintLevel(HYSolver_, 2);
+         }
+         retFlag = HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in PCG setup.\n");
+            return retFlag;
+         }
+         // if variable mli preconditioner (SA and GSA)
+         if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
+         {
+            if ( normAbsRel_ == 0 )
+            {
+               HYPRE_ParVectorCopy( b_csr, r_csr );
+               HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+               HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm0);
+               rnorm0 = sqrt( rnorm0 );
+            }
+            else rnorm0 = 1.0;
+            HYPRE_ParCSRPCGSetMaxIter(HYSolver_, MLI_Hybrid_MaxIter_);
+            rateThresh = 1.0;
+            for ( i = 0; i < MLI_Hybrid_MaxIter_; i++ )
+               rateThresh *= MLI_Hybrid_ConvRate_;
+         }
+         MPI_Barrier( comm_ );
+         ptime  = LSC_Wtime();
+         retFlag = HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
+         HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &numIterations);
+         HYPRE_ParVectorCopy( b_csr, r_csr );
+         HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+         HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+         rnorm = sqrt( rnorm );
+         // if variable mli preconditioner (SA and GSA)
+         if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
+         {
+            nTrials = 1;
+            if (rnorm/rnorm0 >= tolerance_)
+            {
+               HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
+               HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &tempIter);
+               numIterations += tempIter;
+               HYPRE_ParVectorCopy( b_csr, r_csr );
+               HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+               HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm1);
+               rnorm1 = sqrt( rnorm1 );
+               convRate = rnorm1 / rnorm;
+               rnorm = rnorm1;
+            }
+            while ((rnorm/rnorm0)>=tolerance_ && nTrials<MLI_Hybrid_NTrials_)
+            {
+               nTrials++;
+               if ( convRate > rateThresh )
+               {
+                  if ( MLI_Hybrid_NSIncr_ > 1 )
+                     sprintf(paramString, "MLI incrNullSpaceDim %d", 
+                             MLI_Hybrid_NSIncr_);
+                  else
+                     sprintf(paramString, "MLI incrNullSpaceDim 2");
+                  HYPRE_LSI_MLISetParams(HYPrecon_, paramString);
+                  HYPRE_ParCSRPCGSetup(HYSolver_, A_csr, b_csr, x_csr);
+               }
+               HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
+               HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &tempIter);
+               numIterations += tempIter;
+               HYPRE_ParVectorCopy( b_csr, r_csr );
+               HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+               rnorm1 = rnorm;
+               HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+               rnorm = sqrt( rnorm );
+               convRate = rnorm / rnorm1;
+            }
+            if (rnorm/rnorm0 < tolerance_) retFlag = 0;
+            else if (numIterations < maxIterations_)
+            {
+               HYPRE_ParCSRPCGSetMaxIter(HYSolver_,maxIterations_-numIterations);
+               retFlag = HYPRE_ParCSRPCGSolve(HYSolver_, A_csr, b_csr, x_csr);
+               HYPRE_ParCSRPCGGetNumIterations(HYSolver_, &tempIter);
+               numIterations += tempIter;
+            }
+            else retFlag = 1;
+         }
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in PCG solve.\n");
+            return retFlag;
+         }
+         switch ( projectionScheme_ )
+         {
+            case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+            case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+         }
+         if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+         break;
 
-      //----------------------------------------------------------------
-      // choose LSICG 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose LSICG 
+         //----------------------------------------------------------------
 
       case HYLSICG :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* Conjugate Gradient solver \n");
-              printf("* maximum no. of iterations = %d\n", maxIterations_);
-              printf("* convergence tolerance     = %e\n", tolerance_);
-              printf("*--------------------------------------------------\n");
-           }
-           setupLSICGPrecon();
-           HYPRE_ParCSRLSICGSetMaxIter(HYSolver_, maxIterations_);
-           HYPRE_ParCSRLSICGSetTol(HYSolver_, tolerance_);
-           if (normAbsRel_ == 0) HYPRE_ParCSRLSICGSetStopCrit(HYSolver_,0);
-           else                  HYPRE_ParCSRLSICGSetStopCrit(HYSolver_,1);
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
-           {
-              if ( mypid_ == 0 )
-                printf("***************************************************\n");
-              HYPRE_ParCSRLSICGSetLogging(HYSolver_, 1);
-              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
-                 HYPRE_ParCSRLSICGSetLogging(HYSolver_, 2);
-           }
-           retFlag = HYPRE_ParCSRLSICGSetup(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in LSICG setup.\n");
-              return retFlag;
-           }
-           MPI_Barrier( comm_ );
-           ptime  = LSC_Wtime();
-           retFlag = HYPRE_ParCSRLSICGSolve(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in LSICG solve.\n");
-              return retFlag;
-           }
-           HYPRE_ParCSRLSICGGetNumIterations(HYSolver_, &numIterations);
-           HYPRE_ParVectorCopy( b_csr, r_csr );
-           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-           rnorm = sqrt( rnorm );
-           switch ( projectionScheme_ )
-           {
-              case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
-              case 2 : addToMinResProjectionSpace(currX_,currB_); break;
-           }
-           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
-           break;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* Conjugate Gradient solver \n");
+            printf("* maximum no. of iterations = %d\n", maxIterations_);
+            printf("* convergence tolerance     = %e\n", tolerance_);
+            printf("*--------------------------------------------------\n");
+         }
+         setupLSICGPrecon();
+         HYPRE_ParCSRLSICGSetMaxIter(HYSolver_, maxIterations_);
+         HYPRE_ParCSRLSICGSetTol(HYSolver_, tolerance_);
+         if (normAbsRel_ == 0) HYPRE_ParCSRLSICGSetStopCrit(HYSolver_,0);
+         else                  HYPRE_ParCSRLSICGSetStopCrit(HYSolver_,1);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+         {
+            if ( mypid_ == 0 )
+               printf("***************************************************\n");
+            HYPRE_ParCSRLSICGSetLogging(HYSolver_, 1);
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+               HYPRE_ParCSRLSICGSetLogging(HYSolver_, 2);
+         }
+         retFlag = HYPRE_ParCSRLSICGSetup(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in LSICG setup.\n");
+            return retFlag;
+         }
+         MPI_Barrier( comm_ );
+         ptime  = LSC_Wtime();
+         retFlag = HYPRE_ParCSRLSICGSolve(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in LSICG solve.\n");
+            return retFlag;
+         }
+         HYPRE_ParCSRLSICGGetNumIterations(HYSolver_, &numIterations);
+         HYPRE_ParVectorCopy( b_csr, r_csr );
+         HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+         HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+         rnorm = sqrt( rnorm );
+         switch ( projectionScheme_ )
+         {
+            case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+            case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+         }
+         if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+         break;
 
-      //----------------------------------------------------------------
-      // choose hybrid method : CG with diagonal/BoomerAMG preconditioner 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose hybrid method : CG with diagonal/BoomerAMG preconditioner 
+         //----------------------------------------------------------------
 
       case HYHYBRID :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* PCG with hybrid diagonal/BoomerAMG preconditioner\n");
-              printf("* maximum no. of iterations = %d\n", maxIterations_);
-              printf("* convergence tolerance     = %e\n", tolerance_);
-              printf("*--------------------------------------------------\n");
-           }
-           HYPRE_ParCSRHybridSetPCGMaxIter(HYSolver_, maxIterations_);
-           HYPRE_ParCSRHybridSetTol(HYSolver_, tolerance_);
-           HYPRE_ParCSRHybridSetRelChange(HYSolver_, 0);
-           HYPRE_ParCSRHybridSetTwoNorm(HYSolver_, 1);
-           HYPRE_ParCSRHybridSetConvergenceTol(HYSolver_, 0.9);
-           HYPRE_ParCSRHybridSetDSCGMaxIter(HYSolver_, 20);
-           if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
-              HYPRE_ParCSRHybridSetPrintLevel(HYSolver_, 32);
-           HYPRE_ParCSRHybridSetCoarsenType(HYSolver_, amgCoarsenType_);
-           HYPRE_ParCSRHybridSetMeasureType(HYSolver_, amgMeasureType_);
-           HYPRE_ParCSRHybridSetStrongThreshold(HYSolver_,amgStrongThreshold_);
-           numSweeps = hypre_CTAlloc(int,4);
-           for ( i = 0; i < 4; i++ ) numSweeps[i] = amgNumSweeps_[i];
-           HYPRE_ParCSRHybridSetNumGridSweeps(HYSolver_, numSweeps);
-           relaxType = hypre_CTAlloc(int,4);
-           for ( i = 0; i < 4; i++ ) relaxType[i] = amgRelaxType_[i];
-           HYPRE_ParCSRHybridSetGridRelaxType(HYSolver_, relaxType);
-           relaxWt = hypre_CTAlloc(double,25);
-           for ( i = 0; i < 25; i++ ) relaxWt[i] = amgRelaxWeight_[i];
-           HYPRE_ParCSRHybridSetRelaxWeight(HYSolver_, relaxWt);
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
-           {
-              if ( mypid_ == 0 )
-                printf("***************************************************\n");
-              HYPRE_ParCSRHybridSetLogging(HYSolver_, 1);
-              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
-                 HYPRE_ParCSRHybridSetLogging(HYSolver_, 2);
-           }
-           retFlag = HYPRE_ParCSRHybridSetup(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in Hybrid setup.\n");
-              return retFlag;
-           }
-           MPI_Barrier( comm_ );
-           ptime  = LSC_Wtime();
-           retFlag = HYPRE_ParCSRHybridSolve(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in Hybrid solve.\n");
-              return retFlag;
-           }
-           HYPRE_ParCSRHybridGetNumIterations(HYSolver_, &numIterations);
-           HYPRE_ParVectorCopy( b_csr, r_csr );
-           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-           rnorm = sqrt( rnorm );
-           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
-           break;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* PCG with hybrid diagonal/BoomerAMG preconditioner\n");
+            printf("* maximum no. of iterations = %d\n", maxIterations_);
+            printf("* convergence tolerance     = %e\n", tolerance_);
+            printf("*--------------------------------------------------\n");
+         }
+         HYPRE_ParCSRHybridSetPCGMaxIter(HYSolver_, maxIterations_);
+         HYPRE_ParCSRHybridSetTol(HYSolver_, tolerance_);
+         HYPRE_ParCSRHybridSetRelChange(HYSolver_, 0);
+         HYPRE_ParCSRHybridSetTwoNorm(HYSolver_, 1);
+         HYPRE_ParCSRHybridSetConvergenceTol(HYSolver_, 0.9);
+         HYPRE_ParCSRHybridSetDSCGMaxIter(HYSolver_, 20);
+         if ( HYOutputLevel_ & HYFEI_AMGDEBUG )
+            HYPRE_ParCSRHybridSetPrintLevel(HYSolver_, 32);
+         HYPRE_ParCSRHybridSetCoarsenType(HYSolver_, amgCoarsenType_);
+         HYPRE_ParCSRHybridSetMeasureType(HYSolver_, amgMeasureType_);
+         HYPRE_ParCSRHybridSetStrongThreshold(HYSolver_,amgStrongThreshold_);
+         numSweeps = hypre_CTAlloc(int,4);
+         for ( i = 0; i < 4; i++ ) numSweeps[i] = amgNumSweeps_[i];
+         HYPRE_ParCSRHybridSetNumGridSweeps(HYSolver_, numSweeps);
+         relaxType = hypre_CTAlloc(int,4);
+         for ( i = 0; i < 4; i++ ) relaxType[i] = amgRelaxType_[i];
+         HYPRE_ParCSRHybridSetGridRelaxType(HYSolver_, relaxType);
+         relaxWt = hypre_CTAlloc(double,25);
+         for ( i = 0; i < 25; i++ ) relaxWt[i] = amgRelaxWeight_[i];
+         HYPRE_ParCSRHybridSetRelaxWeight(HYSolver_, relaxWt);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+         {
+            if ( mypid_ == 0 )
+               printf("***************************************************\n");
+            HYPRE_ParCSRHybridSetLogging(HYSolver_, 1);
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+               HYPRE_ParCSRHybridSetLogging(HYSolver_, 2);
+         }
+         retFlag = HYPRE_ParCSRHybridSetup(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in Hybrid setup.\n");
+            return retFlag;
+         }
+         MPI_Barrier( comm_ );
+         ptime  = LSC_Wtime();
+         retFlag = HYPRE_ParCSRHybridSolve(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in Hybrid solve.\n");
+            return retFlag;
+         }
+         HYPRE_ParCSRHybridGetNumIterations(HYSolver_, &numIterations);
+         HYPRE_ParVectorCopy( b_csr, r_csr );
+         HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+         HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+         rnorm = sqrt( rnorm );
+         if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+         break;
 
-      //----------------------------------------------------------------
-      // choose GMRES 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose GMRES 
+         //----------------------------------------------------------------
 
       case HYGMRES :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* Generalized Minimal Residual (GMRES) solver \n");
-              printf("* restart size              = %d\n", gmresDim_);
-              printf("* maximum no. of iterations = %d\n", maxIterations_);
-              printf("* convergence tolerance     = %e\n", tolerance_);
-              printf("*--------------------------------------------------\n");
-           }
-           setupGMRESPrecon();
-           HYPRE_ParCSRGMRESSetKDim(HYSolver_, gmresDim_);
-           HYPRE_ParCSRGMRESSetMaxIter(HYSolver_, maxIterations_);
-           if ( normAbsRel_ == 0 )
-           {
-              HYPRE_GMRESSetTol(HYSolver_, tolerance_);
-           }
-           else
-           {
-              HYPRE_GMRESSetTol(HYSolver_, 0.0);
-              HYPRE_GMRESSetAbsoluteTol(HYSolver_, tolerance_);
-           }
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
-           {
-              HYPRE_ParCSRGMRESSetPrintLevel(HYSolver_, 1);
-              if ( mypid_ == 0 )
-                printf("***************************************************\n");
-              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
-                 HYPRE_ParCSRGMRESSetPrintLevel(HYSolver_, 2);
-           }
-           retFlag = HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in GMRES setup.\n");
-              return retFlag;
-           }
-           // if variable mli preconditioner (SA and GSA)
-           if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
-           {
-              if ( normAbsRel_ == 0 )
-              {
-                 HYPRE_ParVectorCopy( b_csr, r_csr );
-                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm0);
-                 rnorm0 = sqrt( rnorm0 );
-              }
-              else rnorm0 = 1.0;
-              HYPRE_ParCSRGMRESSetMaxIter(HYSolver_, MLI_Hybrid_MaxIter_);
-              rateThresh = 1.0;
-              for ( i = 0; i < MLI_Hybrid_MaxIter_; i++ )
-                 rateThresh *= MLI_Hybrid_ConvRate_;
-           }
-           MPI_Barrier( comm_ );
-           ptime  = LSC_Wtime();
-           retFlag = HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
-           HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &numIterations);
-           HYPRE_ParVectorCopy( b_csr, r_csr );
-           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-           rnorm = sqrt( rnorm );
-           // if variable mli preconditioner (SA and GSA)
-           if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
-           {
-              nTrials = 0;
-              //if (rnorm/rnorm0 >= tolerance_)
-              //{
-              //   HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
-              //   HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &tempIter);
-              //   numIterations += tempIter;
-              //   HYPRE_ParVectorCopy( b_csr, r_csr );
-              //   HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-              //   HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm1);
-              //   rnorm1 = sqrt( rnorm1 );
-              //   convRate = rnorm1 / rnorm;
-              //   rnorm = rnorm1;
-              //}
-              convRate = rnorm / rnorm0;
-              while ((rnorm/rnorm0)>=tolerance_ && nTrials<MLI_Hybrid_NTrials_)
-              {
-                 nTrials++;
-                 if ( convRate > rateThresh )
-                 {
-                    if ( MLI_Hybrid_NSIncr_ > 1 )
-                       sprintf(paramString, "MLI incrNullSpaceDim %d", 
-                               MLI_Hybrid_NSIncr_);
-                    else
-                       sprintf(paramString, "MLI incrNullSpaceDim 2");
-                    HYPRE_LSI_MLISetParams(HYPrecon_, paramString);
-                    HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
-                 }
-                 HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
-                 HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &tempIter);
-                 numIterations += tempIter;
-                 HYPRE_ParVectorCopy( b_csr, r_csr );
-                 HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-                 rnorm1 = rnorm;
-                 HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-                 rnorm = sqrt( rnorm );
-                 convRate = rnorm / rnorm1;
-              }
-              if (rnorm/rnorm0 < tolerance_) retFlag = 0;
-              else if (numIterations < maxIterations_)
-              {
-                 HYPRE_ParCSRGMRESSetMaxIter(HYSolver_,
-                                             maxIterations_-numIterations);
-                 retFlag = HYPRE_ParCSRGMRESSolve(HYSolver_,A_csr,b_csr,x_csr);
-                 HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &tempIter);
-                 numIterations += tempIter;
-              }
-              else retFlag = 1;
-           }
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in GMRES solve.\n");
-              return retFlag;
-           }
-           switch ( projectionScheme_ )
-           {
-              case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
-              case 2 : addToMinResProjectionSpace(currX_,currB_); break;
-           }
-           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
-           break;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* Generalized Minimal Residual (GMRES) solver \n");
+            printf("* restart size              = %d\n", gmresDim_);
+            printf("* maximum no. of iterations = %d\n", maxIterations_);
+            printf("* convergence tolerance     = %e\n", tolerance_);
+            printf("*--------------------------------------------------\n");
+         }
+         setupGMRESPrecon();
+         HYPRE_ParCSRGMRESSetKDim(HYSolver_, gmresDim_);
+         HYPRE_ParCSRGMRESSetMaxIter(HYSolver_, maxIterations_);
+         if ( normAbsRel_ == 0 )
+         {
+            HYPRE_GMRESSetTol(HYSolver_, tolerance_);
+         }
+         else
+         {
+            HYPRE_GMRESSetTol(HYSolver_, 0.0);
+            HYPRE_GMRESSetAbsoluteTol(HYSolver_, tolerance_);
+         }
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+         {
+            HYPRE_ParCSRGMRESSetPrintLevel(HYSolver_, 1);
+            if ( mypid_ == 0 )
+               printf("***************************************************\n");
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+               HYPRE_ParCSRGMRESSetPrintLevel(HYSolver_, 2);
+         }
+         retFlag = HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in GMRES setup.\n");
+            return retFlag;
+         }
+         // if variable mli preconditioner (SA and GSA)
+         if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
+         {
+            if ( normAbsRel_ == 0 )
+            {
+               HYPRE_ParVectorCopy( b_csr, r_csr );
+               HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+               HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm0);
+               rnorm0 = sqrt( rnorm0 );
+            }
+            else rnorm0 = 1.0;
+            HYPRE_ParCSRGMRESSetMaxIter(HYSolver_, MLI_Hybrid_MaxIter_);
+            rateThresh = 1.0;
+            for ( i = 0; i < MLI_Hybrid_MaxIter_; i++ )
+               rateThresh *= MLI_Hybrid_ConvRate_;
+         }
+         MPI_Barrier( comm_ );
+         ptime  = LSC_Wtime();
+         retFlag = HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+         HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &numIterations);
+         HYPRE_ParVectorCopy( b_csr, r_csr );
+         HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+         HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+         rnorm = sqrt( rnorm );
+         // if variable mli preconditioner (SA and GSA)
+         if ( MLI_Hybrid_GSA_ && HYPreconID_ == HYMLI )
+         {
+            nTrials = 0;
+            //if (rnorm/rnorm0 >= tolerance_)
+            //{
+            //   HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+            //   HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &tempIter);
+            //   numIterations += tempIter;
+            //   HYPRE_ParVectorCopy( b_csr, r_csr );
+            //   HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+            //   HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm1);
+            //   rnorm1 = sqrt( rnorm1 );
+            //   convRate = rnorm1 / rnorm;
+            //   rnorm = rnorm1;
+            //}
+            convRate = rnorm / rnorm0;
+            while ((rnorm/rnorm0)>=tolerance_ && nTrials<MLI_Hybrid_NTrials_)
+            {
+               nTrials++;
+               if ( convRate > rateThresh )
+               {
+                  if ( MLI_Hybrid_NSIncr_ > 1 )
+                     sprintf(paramString, "MLI incrNullSpaceDim %d", 
+                             MLI_Hybrid_NSIncr_);
+                  else
+                     sprintf(paramString, "MLI incrNullSpaceDim 2");
+                  HYPRE_LSI_MLISetParams(HYPrecon_, paramString);
+                  HYPRE_ParCSRGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
+               }
+               HYPRE_ParCSRGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+               HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &tempIter);
+               numIterations += tempIter;
+               HYPRE_ParVectorCopy( b_csr, r_csr );
+               HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+               rnorm1 = rnorm;
+               HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+               rnorm = sqrt( rnorm );
+               convRate = rnorm / rnorm1;
+            }
+            if (rnorm/rnorm0 < tolerance_) retFlag = 0;
+            else if (numIterations < maxIterations_)
+            {
+               HYPRE_ParCSRGMRESSetMaxIter(HYSolver_,
+                                           maxIterations_-numIterations);
+               retFlag = HYPRE_ParCSRGMRESSolve(HYSolver_,A_csr,b_csr,x_csr);
+               HYPRE_ParCSRGMRESGetNumIterations(HYSolver_, &tempIter);
+               numIterations += tempIter;
+            }
+            else retFlag = 1;
+         }
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in GMRES solve.\n");
+            return retFlag;
+         }
+         switch ( projectionScheme_ )
+         {
+            case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+            case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+         }
+         if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+         break;
 
-      //----------------------------------------------------------------
-      // choose flexible GMRES 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose flexible GMRES 
+         //----------------------------------------------------------------
 
       case HYFGMRES :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* Flexible GMRES solver \n");
-              printf("* restart size              = %d\n", gmresDim_);
-              printf("* maximum no. of iterations = %d\n", maxIterations_);
-              printf("* convergence tolerance     = %e\n", tolerance_);
-              printf("*--------------------------------------------------\n");
-           }
-           setupFGMRESPrecon();
-           HYPRE_ParCSRFGMRESSetKDim(HYSolver_, gmresDim_);
-           HYPRE_ParCSRFGMRESSetMaxIter(HYSolver_, maxIterations_);
-           HYPRE_ParCSRFGMRESSetTol(HYSolver_, tolerance_);
-           if ( normAbsRel_ == 0 ) HYPRE_ParCSRFGMRESSetStopCrit(HYSolver_,0);
-           else                    HYPRE_ParCSRFGMRESSetStopCrit(HYSolver_,1);
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
-           {
-              if ( mypid_ == 0 )
-                printf("***************************************************\n");
-              HYPRE_ParCSRFGMRESSetLogging(HYSolver_, 1);
-           }
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* Flexible GMRES solver \n");
+            printf("* restart size              = %d\n", gmresDim_);
+            printf("* maximum no. of iterations = %d\n", maxIterations_);
+            printf("* convergence tolerance     = %e\n", tolerance_);
+            printf("*--------------------------------------------------\n");
+         }
+         setupFGMRESPrecon();
+         HYPRE_ParCSRFGMRESSetKDim(HYSolver_, gmresDim_);
+         HYPRE_ParCSRFGMRESSetMaxIter(HYSolver_, maxIterations_);
+         HYPRE_ParCSRFGMRESSetTol(HYSolver_, tolerance_);
+         if ( normAbsRel_ == 0 ) HYPRE_ParCSRFGMRESSetStopCrit(HYSolver_,0);
+         else                    HYPRE_ParCSRFGMRESSetStopCrit(HYSolver_,1);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+         {
+            if ( mypid_ == 0 )
+               printf("***************************************************\n");
+            HYPRE_ParCSRFGMRESSetLogging(HYSolver_, 1);
+         }
 
-           retFlag = HYPRE_ParCSRFGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in FGMRES setup.\n");
-              return retFlag;
-           }
+         retFlag = HYPRE_ParCSRFGMRESSetup(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in FGMRES setup.\n");
+            return retFlag;
+         }
 
-           if ( fgmresUpdateTol_ && HYPreconID_ == HYBLOCK )
-              HYPRE_ParCSRFGMRESUpdatePrecondTolerance(HYSolver_, 
-                      HYPRE_LSI_BlockPrecondSetA11Tolerance);
+         if ( fgmresUpdateTol_ && HYPreconID_ == HYBLOCK )
+            HYPRE_ParCSRFGMRESUpdatePrecondTolerance(HYSolver_, 
+                                                     HYPRE_LSI_BlockPrecondSetA11Tolerance);
 
-           MPI_Barrier( comm_ );
-           ptime  = LSC_Wtime();
-           retFlag = HYPRE_ParCSRFGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in FGMRES solve.\n");
-              return retFlag;
-           }
-           HYPRE_ParCSRFGMRESGetNumIterations(HYSolver_, &numIterations);
-           HYPRE_ParVectorCopy( b_csr, r_csr );
-           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-           rnorm = sqrt( rnorm );
-           switch ( projectionScheme_ )
-           {
-              case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
-              case 2 : addToMinResProjectionSpace(currX_,currB_); break;
-           }
-           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
-           break;
+         MPI_Barrier( comm_ );
+         ptime  = LSC_Wtime();
+         retFlag = HYPRE_ParCSRFGMRESSolve(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in FGMRES solve.\n");
+            return retFlag;
+         }
+         HYPRE_ParCSRFGMRESGetNumIterations(HYSolver_, &numIterations);
+         HYPRE_ParVectorCopy( b_csr, r_csr );
+         HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+         HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+         rnorm = sqrt( rnorm );
+         switch ( projectionScheme_ )
+         {
+            case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+            case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+         }
+         if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+         break;
 
-      //----------------------------------------------------------------
-      // choose BiCGSTAB 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose BiCGSTAB 
+         //----------------------------------------------------------------
 
       case HYCGSTAB :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* BiCGSTAB solver \n");
-              printf("* maximum no. of iterations = %d\n", maxIterations_);
-              printf("* convergence tolerance     = %e\n", tolerance_);
-              printf("*--------------------------------------------------\n");
-           }
-           setupBiCGSTABPrecon();
-           HYPRE_ParCSRBiCGSTABSetMaxIter(HYSolver_, maxIterations_);
-           HYPRE_ParCSRBiCGSTABSetTol(HYSolver_, tolerance_);
-           if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSTABSetStopCrit(HYSolver_,0);
-           else                    HYPRE_ParCSRBiCGSTABSetStopCrit(HYSolver_,1);
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
-           {
-              HYPRE_ParCSRBiCGSTABSetPrintLevel(HYSolver_, 1);
-              if ( mypid_ == 0 )
-                printf("***************************************************\n");
-              if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
-                 HYPRE_ParCSRBiCGSTABSetPrintLevel(HYSolver_, 2);
-           }
-           retFlag = HYPRE_ParCSRBiCGSTABSetup(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTAB setup.\n");
-              return retFlag;
-           }
-           MPI_Barrier( comm_ );
-           ptime  = LSC_Wtime();
-           retFlag = HYPRE_ParCSRBiCGSTABSolve(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTAB solve.\n");
-              return retFlag;
-           }
-           HYPRE_ParCSRBiCGSTABGetNumIterations(HYSolver_, &numIterations);
-           HYPRE_ParVectorCopy( b_csr, r_csr );
-           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-           rnorm = sqrt( rnorm );
-           switch ( projectionScheme_ )
-           {
-              case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
-              case 2 : addToMinResProjectionSpace(currX_,currB_); break;
-           }
-           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
-           break;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* BiCGSTAB solver \n");
+            printf("* maximum no. of iterations = %d\n", maxIterations_);
+            printf("* convergence tolerance     = %e\n", tolerance_);
+            printf("*--------------------------------------------------\n");
+         }
+         setupBiCGSTABPrecon();
+         HYPRE_ParCSRBiCGSTABSetMaxIter(HYSolver_, maxIterations_);
+         HYPRE_ParCSRBiCGSTABSetTol(HYSolver_, tolerance_);
+         if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSTABSetStopCrit(HYSolver_,0);
+         else                    HYPRE_ParCSRBiCGSTABSetStopCrit(HYSolver_,1);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+         {
+            HYPRE_ParCSRBiCGSTABSetPrintLevel(HYSolver_, 1);
+            if ( mypid_ == 0 )
+               printf("***************************************************\n");
+            if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 )
+               HYPRE_ParCSRBiCGSTABSetPrintLevel(HYSolver_, 2);
+         }
+         retFlag = HYPRE_ParCSRBiCGSTABSetup(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTAB setup.\n");
+            return retFlag;
+         }
+         MPI_Barrier( comm_ );
+         ptime  = LSC_Wtime();
+         retFlag = HYPRE_ParCSRBiCGSTABSolve(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTAB solve.\n");
+            return retFlag;
+         }
+         HYPRE_ParCSRBiCGSTABGetNumIterations(HYSolver_, &numIterations);
+         HYPRE_ParVectorCopy( b_csr, r_csr );
+         HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+         HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+         rnorm = sqrt( rnorm );
+         switch ( projectionScheme_ )
+         {
+            case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+            case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+         }
+         if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+         break;
 
-      //----------------------------------------------------------------
-      // choose BiCGSTABL 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose BiCGSTABL 
+         //----------------------------------------------------------------
 
       case HYCGSTABL :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* BiCGSTAB(2) solver \n");
-              printf("* maximum no. of iterations = %d\n", maxIterations_);
-              printf("* convergence tolerance     = %e\n", tolerance_);
-              printf("*--------------------------------------------------\n");
-           }
-           setupBiCGSTABLPrecon();
-           HYPRE_ParCSRBiCGSTABLSetMaxIter(HYSolver_, maxIterations_);
-           HYPRE_ParCSRBiCGSTABLSetTol(HYSolver_, tolerance_);
-           if (normAbsRel_ == 0) HYPRE_ParCSRBiCGSTABLSetStopCrit(HYSolver_,0);
-           else                  HYPRE_ParCSRBiCGSTABLSetStopCrit(HYSolver_,1);
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
-           {
-              if ( mypid_ == 0 )
-                printf("***************************************************\n");
-              HYPRE_ParCSRBiCGSTABLSetLogging(HYSolver_, 1);
-           }
-           retFlag = HYPRE_ParCSRBiCGSTABLSetup(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTABL setup.\n");
-              return retFlag;
-           }
-           MPI_Barrier( comm_ );
-           ptime  = LSC_Wtime();
-           retFlag = HYPRE_ParCSRBiCGSTABLSolve(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTABL solve.\n");
-              return retFlag;
-           }
-           HYPRE_ParCSRBiCGSTABLGetNumIterations(HYSolver_, &numIterations);
-           HYPRE_ParVectorCopy( b_csr, r_csr );
-           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-           rnorm = sqrt( rnorm );
-           switch ( projectionScheme_ )
-           {
-              case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
-              case 2 : addToMinResProjectionSpace(currX_,currB_); break;
-           }
-           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
-           break;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* BiCGSTAB(2) solver \n");
+            printf("* maximum no. of iterations = %d\n", maxIterations_);
+            printf("* convergence tolerance     = %e\n", tolerance_);
+            printf("*--------------------------------------------------\n");
+         }
+         setupBiCGSTABLPrecon();
+         HYPRE_ParCSRBiCGSTABLSetMaxIter(HYSolver_, maxIterations_);
+         HYPRE_ParCSRBiCGSTABLSetTol(HYSolver_, tolerance_);
+         if (normAbsRel_ == 0) HYPRE_ParCSRBiCGSTABLSetStopCrit(HYSolver_,0);
+         else                  HYPRE_ParCSRBiCGSTABLSetStopCrit(HYSolver_,1);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+         {
+            if ( mypid_ == 0 )
+               printf("***************************************************\n");
+            HYPRE_ParCSRBiCGSTABLSetLogging(HYSolver_, 1);
+         }
+         retFlag = HYPRE_ParCSRBiCGSTABLSetup(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTABL setup.\n");
+            return retFlag;
+         }
+         MPI_Barrier( comm_ );
+         ptime  = LSC_Wtime();
+         retFlag = HYPRE_ParCSRBiCGSTABLSolve(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in BiCGSTABL solve.\n");
+            return retFlag;
+         }
+         HYPRE_ParCSRBiCGSTABLGetNumIterations(HYSolver_, &numIterations);
+         HYPRE_ParVectorCopy( b_csr, r_csr );
+         HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+         HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+         rnorm = sqrt( rnorm );
+         switch ( projectionScheme_ )
+         {
+            case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+            case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+         }
+         if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+         break;
 
-      //----------------------------------------------------------------
-      // choose TFQMR 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose TFQMR 
+         //----------------------------------------------------------------
 
       case HYTFQMR :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* TFQMR solver \n");
-              printf("* maximum no. of iterations = %d\n", maxIterations_);
-              printf("* convergence tolerance     = %e\n", tolerance_);
-              printf("*--------------------------------------------------\n");
-           }
-           setupTFQmrPrecon();
-           HYPRE_ParCSRTFQmrSetMaxIter(HYSolver_, maxIterations_);
-           HYPRE_ParCSRTFQmrSetTol(HYSolver_, tolerance_);
-           if ( normAbsRel_ == 0 ) HYPRE_ParCSRTFQmrSetStopCrit(HYSolver_,0);
-           else                    HYPRE_ParCSRTFQmrSetStopCrit(HYSolver_,1);
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
-           {
-              if ( mypid_ == 0 )
-                printf("***************************************************\n");
-              HYPRE_ParCSRTFQmrSetLogging(HYSolver_, 1);
-           }
-           retFlag = HYPRE_ParCSRTFQmrSetup(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in TFQMR setup.\n");
-              return retFlag;
-           }
-           MPI_Barrier( comm_ );
-           ptime  = LSC_Wtime();
-           retFlag = HYPRE_ParCSRTFQmrSolve(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in TFQMR solve.\n");
-              return retFlag;
-           }
-           HYPRE_ParCSRTFQmrGetNumIterations(HYSolver_, &numIterations);
-           HYPRE_ParVectorCopy( b_csr, r_csr );
-           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-           rnorm = sqrt( rnorm );
-           switch ( projectionScheme_ )
-           {
-              case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
-              case 2 : addToMinResProjectionSpace(currX_,currB_); break;
-           }
-           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
-           break;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* TFQMR solver \n");
+            printf("* maximum no. of iterations = %d\n", maxIterations_);
+            printf("* convergence tolerance     = %e\n", tolerance_);
+            printf("*--------------------------------------------------\n");
+         }
+         setupTFQmrPrecon();
+         HYPRE_ParCSRTFQmrSetMaxIter(HYSolver_, maxIterations_);
+         HYPRE_ParCSRTFQmrSetTol(HYSolver_, tolerance_);
+         if ( normAbsRel_ == 0 ) HYPRE_ParCSRTFQmrSetStopCrit(HYSolver_,0);
+         else                    HYPRE_ParCSRTFQmrSetStopCrit(HYSolver_,1);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+         {
+            if ( mypid_ == 0 )
+               printf("***************************************************\n");
+            HYPRE_ParCSRTFQmrSetLogging(HYSolver_, 1);
+         }
+         retFlag = HYPRE_ParCSRTFQmrSetup(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in TFQMR setup.\n");
+            return retFlag;
+         }
+         MPI_Barrier( comm_ );
+         ptime  = LSC_Wtime();
+         retFlag = HYPRE_ParCSRTFQmrSolve(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in TFQMR solve.\n");
+            return retFlag;
+         }
+         HYPRE_ParCSRTFQmrGetNumIterations(HYSolver_, &numIterations);
+         HYPRE_ParVectorCopy( b_csr, r_csr );
+         HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+         HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+         rnorm = sqrt( rnorm );
+         switch ( projectionScheme_ )
+         {
+            case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+            case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+         }
+         if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+         break;
 
-      //----------------------------------------------------------------
-      // choose BiCGS 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose BiCGS 
+         //----------------------------------------------------------------
 
       case HYBICGS :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* BiCGS solver \n");
-              printf("* maximum no. of iterations = %d\n", maxIterations_);
-              printf("* convergence tolerance     = %e\n", tolerance_);
-              printf("*--------------------------------------------------\n");
-           }
-           setupBiCGSPrecon();
-           HYPRE_ParCSRBiCGSSetMaxIter(HYSolver_, maxIterations_);
-           HYPRE_ParCSRBiCGSSetTol(HYSolver_, tolerance_);
-           if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSSetStopCrit(HYSolver_,0);
-           else                    HYPRE_ParCSRBiCGSSetStopCrit(HYSolver_,1);
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
-           {
-              if ( mypid_ == 0 )
-                printf("***************************************************\n");
-              HYPRE_ParCSRBiCGSSetLogging(HYSolver_, 1);
-           }
-           retFlag = HYPRE_ParCSRBiCGSSetup(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in CGS setup.\n");
-              return retFlag;
-           }
-           MPI_Barrier( comm_ );
-           ptime  = LSC_Wtime();
-           retFlag = HYPRE_ParCSRBiCGSSolve(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in CGS solve.\n");
-              return retFlag;
-           }
-           HYPRE_ParCSRBiCGSGetNumIterations(HYSolver_, &numIterations);
-           HYPRE_ParVectorCopy( b_csr, r_csr );
-           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-           rnorm = sqrt( rnorm );
-           switch ( projectionScheme_ )
-           {
-              case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
-              case 2 : addToMinResProjectionSpace(currX_,currB_); break;
-           }
-           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
-           break;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* BiCGS solver \n");
+            printf("* maximum no. of iterations = %d\n", maxIterations_);
+            printf("* convergence tolerance     = %e\n", tolerance_);
+            printf("*--------------------------------------------------\n");
+         }
+         setupBiCGSPrecon();
+         HYPRE_ParCSRBiCGSSetMaxIter(HYSolver_, maxIterations_);
+         HYPRE_ParCSRBiCGSSetTol(HYSolver_, tolerance_);
+         if ( normAbsRel_ == 0 ) HYPRE_ParCSRBiCGSSetStopCrit(HYSolver_,0);
+         else                    HYPRE_ParCSRBiCGSSetStopCrit(HYSolver_,1);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+         {
+            if ( mypid_ == 0 )
+               printf("***************************************************\n");
+            HYPRE_ParCSRBiCGSSetLogging(HYSolver_, 1);
+         }
+         retFlag = HYPRE_ParCSRBiCGSSetup(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in CGS setup.\n");
+            return retFlag;
+         }
+         MPI_Barrier( comm_ );
+         ptime  = LSC_Wtime();
+         retFlag = HYPRE_ParCSRBiCGSSolve(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in CGS solve.\n");
+            return retFlag;
+         }
+         HYPRE_ParCSRBiCGSGetNumIterations(HYSolver_, &numIterations);
+         HYPRE_ParVectorCopy( b_csr, r_csr );
+         HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+         HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+         rnorm = sqrt( rnorm );
+         switch ( projectionScheme_ )
+         {
+            case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+            case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+         }
+         if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+         break;
 
-      //----------------------------------------------------------------
-      // choose Symmetric QMR 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose Symmetric QMR 
+         //----------------------------------------------------------------
 
       case HYSYMQMR :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* SymQMR solver (for symmetric matrices and precond) \n");
-              printf("* maximum no. of iterations = %d\n", maxIterations_);
-              printf("* convergence tolerance     = %e\n", tolerance_);
-              printf("*--------------------------------------------------\n");
-           }
-           setupSymQMRPrecon();
-           HYPRE_ParCSRSymQMRSetMaxIter(HYSolver_, maxIterations_);
-           HYPRE_ParCSRSymQMRSetTol(HYSolver_, tolerance_);
-           if ( normAbsRel_ == 0 ) HYPRE_ParCSRSymQMRSetStopCrit(HYSolver_,0);
-           else                    HYPRE_ParCSRSymQMRSetStopCrit(HYSolver_,1);
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
-           {
-              if ( mypid_ == 0 )
-                printf("***************************************************\n");
-              HYPRE_ParCSRSymQMRSetLogging(HYSolver_, 1);
-           }
-           retFlag = HYPRE_ParCSRSymQMRSetup(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in SymQMR setup.\n");
-              return retFlag;
-           }
-           MPI_Barrier( comm_ );
-           ptime  = LSC_Wtime();
-           retFlag = HYPRE_ParCSRSymQMRSolve(HYSolver_, A_csr, b_csr, x_csr);
-           if ( retFlag != 0 )
-           {
-              printf("HYPRE_LSC::launchSolver ERROR : in SymQMR solve.\n");
-              return retFlag;
-           }
-           HYPRE_ParCSRSymQMRGetNumIterations(HYSolver_, &numIterations);
-           HYPRE_ParVectorCopy( b_csr, r_csr );
-           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-           rnorm = sqrt( rnorm );
-           switch ( projectionScheme_ )
-           {
-              case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
-              case 2 : addToMinResProjectionSpace(currX_,currB_); break;
-           }
-           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
-           break;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* SymQMR solver (for symmetric matrices and precond) \n");
+            printf("* maximum no. of iterations = %d\n", maxIterations_);
+            printf("* convergence tolerance     = %e\n", tolerance_);
+            printf("*--------------------------------------------------\n");
+         }
+         setupSymQMRPrecon();
+         HYPRE_ParCSRSymQMRSetMaxIter(HYSolver_, maxIterations_);
+         HYPRE_ParCSRSymQMRSetTol(HYSolver_, tolerance_);
+         if ( normAbsRel_ == 0 ) HYPRE_ParCSRSymQMRSetStopCrit(HYSolver_,0);
+         else                    HYPRE_ParCSRSymQMRSetStopCrit(HYSolver_,1);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )
+         {
+            if ( mypid_ == 0 )
+               printf("***************************************************\n");
+            HYPRE_ParCSRSymQMRSetLogging(HYSolver_, 1);
+         }
+         retFlag = HYPRE_ParCSRSymQMRSetup(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in SymQMR setup.\n");
+            return retFlag;
+         }
+         MPI_Barrier( comm_ );
+         ptime  = LSC_Wtime();
+         retFlag = HYPRE_ParCSRSymQMRSolve(HYSolver_, A_csr, b_csr, x_csr);
+         if ( retFlag != 0 )
+         {
+            printf("HYPRE_LSC::launchSolver ERROR : in SymQMR solve.\n");
+            return retFlag;
+         }
+         HYPRE_ParCSRSymQMRGetNumIterations(HYSolver_, &numIterations);
+         HYPRE_ParVectorCopy( b_csr, r_csr );
+         HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+         HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+         rnorm = sqrt( rnorm );
+         switch ( projectionScheme_ )
+         {
+            case 1 : addToAConjProjectionSpace(currX_,currB_);  break;
+            case 2 : addToMinResProjectionSpace(currX_,currB_); break;
+         }
+         if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+         break;
 
-      //----------------------------------------------------------------
-      // choose Boomeramg  
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose Boomeramg  
+         //----------------------------------------------------------------
 
       case HYAMG :
-           solveUsingBoomeramg(status);
-           HYPRE_BoomerAMGGetNumIterations(HYSolver_, &numIterations);
-           HYPRE_ParVectorCopy( b_csr, r_csr );
-           HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
-           HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
-           rnorm = sqrt( rnorm );
-           if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
-           ptime  = stime;
-           //printf("Boomeramg solver - return status = %d\n",status);
-           break;
+         solveUsingBoomeramg(status);
+         HYPRE_BoomerAMGGetNumIterations(HYSolver_, &numIterations);
+         HYPRE_ParVectorCopy( b_csr, r_csr );
+         HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );
+         HYPRE_ParVectorInnerProd( r_csr, r_csr, &rnorm);
+         rnorm = sqrt( rnorm );
+         if ( numIterations >= maxIterations_ ) status = 1; else status = 0;
+         ptime  = stime;
+         //printf("Boomeramg solver - return status = %d\n",status);
+         break;
 
-      //----------------------------------------------------------------
-      // choose SuperLU (single processor) 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose SuperLU (single processor) 
+         //----------------------------------------------------------------
 
       case HYSUPERLU :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* SuperLU (sequential) solver \n");
-              printf("*--------------------------------------------------\n");
-           }
-           rnorm = solveUsingSuperLU(status);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* SuperLU (sequential) solver \n");
+            printf("*--------------------------------------------------\n");
+         }
+         rnorm = solveUsingSuperLU(status);
 #ifndef NOFEI
-           if ( status == 1 ) status = 0; 
+         if ( status == 1 ) status = 0; 
 #endif      
-           numIterations = 1;
-           ptime  = stime;
-           //printf("SuperLU solver - return status = %d\n",status);
-           break;
+         numIterations = 1;
+         ptime  = stime;
+         //printf("SuperLU solver - return status = %d\n",status);
+         break;
 
-      //----------------------------------------------------------------
-      // choose SuperLU (single processor) 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose SuperLU (single processor) 
+         //----------------------------------------------------------------
 
       case HYSUPERLUX :
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* SuperLU (sequential) solver with refinement \n");
-              printf("*--------------------------------------------------\n");
-           }
-           rnorm = solveUsingSuperLUX(status);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* SuperLU (sequential) solver with refinement \n");
+            printf("*--------------------------------------------------\n");
+         }
+         rnorm = solveUsingSuperLUX(status);
 #ifndef NOFEI
-           if ( status == 1 ) status = 0; 
+         if ( status == 1 ) status = 0; 
 #endif      
-           numIterations = 1;
-           //printf("SuperLUX solver - return status = %d\n",status);
-           break;
+         numIterations = 1;
+         //printf("SuperLUX solver - return status = %d\n",status);
+         break;
 
-      //----------------------------------------------------------------
-      // choose distributed SuperLU 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose distributed SuperLU 
+         //----------------------------------------------------------------
 
       case HYDSUPERLU :
 #ifdef HAVE_DSUPERLU
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* distributed SuperLU solver \n");
-              printf("*--------------------------------------------------\n");
-           }
-           rnorm = solveUsingDSuperLU(status);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* distributed SuperLU solver \n");
+            printf("*--------------------------------------------------\n");
+         }
+         rnorm = solveUsingDSuperLU(status);
 #ifndef NOFEI
-           if ( status == 1 ) status = 0; 
+         if ( status == 1 ) status = 0; 
 #endif      
-           numIterations = 1;
+         numIterations = 1;
 #else
-           printf("distributed SuperLU not available.\n");
-           exit(1);
+         printf("distributed SuperLU not available.\n");
+         exit(1);
 #endif
-           break;
+         break;
 
-      //----------------------------------------------------------------
-      // choose Y12M (single processor) 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose Y12M (single processor) 
+         //----------------------------------------------------------------
 
       case HYY12M :
 #ifdef Y12M
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* Y12M (sequential) solver\n");
-              printf("*--------------------------------------------------\n");
-           }
-           solveUsingY12M(status);
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* Y12M (sequential) solver\n");
+            printf("*--------------------------------------------------\n");
+         }
+         solveUsingY12M(status);
 #ifndef NOFEI
-           if ( status == 1 ) status = 0; 
+         if ( status == 1 ) status = 0; 
 #endif      
-           numIterations = 1;
-           ptime  = stime;
-           //printf("Y12M solver - return status = %d\n",status);
-           break;
+         numIterations = 1;
+         ptime  = stime;
+         //printf("Y12M solver - return status = %d\n",status);
+         break;
 #else
-           printf("HYPRE_LSC : Y12M not available. \n");
-           exit(1);
-           break; 
+         printf("HYPRE_LSC : Y12M not available. \n");
+         exit(1);
+         break; 
 #endif
 
-      //----------------------------------------------------------------
-      // choose AMGE (single processor) 
-      //----------------------------------------------------------------
+         //----------------------------------------------------------------
+         // choose AMGE (single processor) 
+         //----------------------------------------------------------------
 
       case HYAMGE :
 #ifdef HAVE_AMGE
-           if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
-           {
-              printf("***************************************************\n");
-              printf("* AMGe (sequential) solver\n");
-              printf("*--------------------------------------------------\n");
-           }
-           solveUsingAMGe(numIterations);
-           if ( numIterations >= maxIterations_ ) status = 1;
-           ptime  = stime;
+         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 && mypid_ == 0 )
+         {
+            printf("***************************************************\n");
+            printf("* AMGe (sequential) solver\n");
+            printf("*--------------------------------------------------\n");
+         }
+         solveUsingAMGe(numIterations);
+         if ( numIterations >= maxIterations_ ) status = 1;
+         ptime  = stime;
 #else
-           printf("AMGe not supported.\n");
+         printf("AMGe not supported.\n");
 #endif
-           break;
+         break;
    }
 
    //-------------------------------------------------------------------
@@ -5874,7 +5843,7 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
       HYPRE_IJVectorGetObject(currB_, (void **) &b_csr);
       HYPRE_IJVectorGetObject(currR_, (void **) &r_csr);
       if ( slideReduction_ == 3 )
-           slideObj->buildReducedSolnVector(currX_, currB_);
+         slideObj->buildReducedSolnVector(currX_, currB_);
       else slideObj->buildModifiedSolnVector(currX_);
       HYPRE_ParVectorCopy( b_csr, r_csr );
       HYPRE_ParCSRMatrixMatvec( -1.0, A_csr, x_csr, 1.0, r_csr );

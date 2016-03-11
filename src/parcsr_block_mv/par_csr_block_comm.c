@@ -156,7 +156,7 @@ hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix)
 {
    HYPRE_Int global_num_cols;
    HYPRE_Int myid;
-   HYPRE_Int  row_start=0, row_end=0, col_start = 0, col_end = 0;
+   HYPRE_Int  col_start = 0, col_end = 0;
 
    MPI_Comm   comm;
    
@@ -166,8 +166,6 @@ hypre_ParCSRBlockMatrixCreateAssumedPartition( hypre_ParCSRBlockMatrix *matrix)
    comm = hypre_ParCSRBlockMatrixComm(matrix);
    
    /* find out my actualy range of rows and columns */
-   row_start = hypre_ParCSRBlockMatrixFirstRowIndex(matrix);
-   row_end = hypre_ParCSRBlockMatrixLastRowIndex(matrix);
    col_start =  hypre_ParCSRBlockMatrixFirstColDiag(matrix);
    col_end =  hypre_ParCSRBlockMatrixLastColDiag(matrix);
 

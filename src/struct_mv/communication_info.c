@@ -314,8 +314,6 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    hypre_BoxArray        *local_boxes;
    HYPRE_Int              num_boxes;
 
-   HYPRE_Int             *local_ids;
-
    hypre_BoxManager      *boxman;
                        
    hypre_Index           *stencil_shape;
@@ -376,7 +374,6 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    hypre_SetIndex(sgindex, 0);
 
    local_boxes = hypre_StructGridBoxes(grid);
-   local_ids   = hypre_StructGridIDs(grid);
    num_boxes   = hypre_BoxArraySize(local_boxes);
    num_periods = hypre_StructGridNumPeriods(grid);
    
@@ -490,8 +487,6 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    {
       /* get the box */
       box = hypre_BoxArrayBox(local_boxes, i);
-      /* box_id = local_ids[i]; the box id in the Box Manager is the box number,
-       * and we use this to find out if a box has intersected with itself */
       box_id = i;
       
       /* grow box local i according to the stencil*/

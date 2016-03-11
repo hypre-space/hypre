@@ -116,7 +116,6 @@ main( hypre_int argc,
    HYPRE_Solver        pcg_precond=NULL, pcg_precond_gotten;
 
    HYPRE_Int                 num_procs, myid;
-   HYPRE_Int                 num_threads;
    HYPRE_Int                 local_row;
    HYPRE_Int                *row_sizes;
    HYPRE_Int                *diag_sizes;
@@ -192,7 +191,7 @@ main( hypre_int argc,
    HYPRE_Real add_trunc_factor = 0;
 
    HYPRE_Int    rap2=0;
-   HYPRE_Int    keepTranspose = 1;
+   HYPRE_Int    keepTranspose = 0;
    HYPRE_Real   relax_wt; 
    HYPRE_Real   relax_wt_level; 
    HYPRE_Real   outer_wt;
@@ -267,7 +266,6 @@ main( hypre_int argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-   num_threads = hypre_NumThreads();
 /*
   hypre_InitMemoryDebug(myid);
 */

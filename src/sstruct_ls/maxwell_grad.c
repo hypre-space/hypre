@@ -64,7 +64,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    hypre_SStructPGrid    *pgrid;
    hypre_StructGrid      *var_grid;
    hypre_BoxArray        *boxes, *tmp_box_array1, *tmp_box_array2;
-   hypre_BoxArray        *node_boxes, *edge_boxes, *cell_boxes;
+   hypre_BoxArray        *edge_boxes, *cell_boxes;
    hypre_Box             *box, *cell_box;
    hypre_Box              layer, interior_box;
    hypre_Box             *box_piece;
@@ -560,7 +560,6 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       /* grab boxarray for node rank extracting later */
       pgrid       = hypre_SStructGridPGrid(node_grid, part);  
       var_grid    = hypre_SStructPGridSGrid(pgrid, 0);
-      node_boxes  = hypre_StructGridBoxes(var_grid);
 
       /* grab edge structures */
       pgrid     = hypre_SStructGridPGrid(edge_grid, part);  

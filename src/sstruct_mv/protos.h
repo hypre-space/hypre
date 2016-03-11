@@ -121,8 +121,10 @@ HYPRE_Int hypre_SStructBoxManEntryGetGlobalGhrank ( hypre_BoxManEntry *entry , h
 HYPRE_Int hypre_SStructBoxManEntryGetProcess ( hypre_BoxManEntry *entry , HYPRE_Int *proc_ptr );
 HYPRE_Int hypre_SStructBoxManEntryGetBoxnum ( hypre_BoxManEntry *entry , HYPRE_Int *id_ptr );
 HYPRE_Int hypre_SStructBoxManEntryGetPart ( hypre_BoxManEntry *entry , HYPRE_Int part , HYPRE_Int *part_ptr );
-HYPRE_Int hypre_SStructBoxToNborBox ( hypre_Box *box , hypre_Index index , hypre_Index nbor_index , hypre_Index coord , hypre_Index dir );
-HYPRE_Int hypre_SStructNborBoxToBox ( hypre_Box *nbor_box , hypre_Index index , hypre_Index nbor_index , hypre_Index coord , hypre_Index dir );
+HYPRE_Int hypre_SStructIndexToNborIndex( hypre_Index index , hypre_Index root , hypre_Index nbor_root , hypre_Index coord , hypre_Index dir , HYPRE_Int ndim , hypre_Index nbor_index );
+HYPRE_Int hypre_SStructBoxToNborBox ( hypre_Box *box , hypre_Index root , hypre_Index nbor_root , hypre_Index coord , hypre_Index dir );
+HYPRE_Int hypre_SStructNborIndexToIndex( hypre_Index nbor_index , hypre_Index root , hypre_Index nbor_root , hypre_Index coord , hypre_Index dir , HYPRE_Int ndim , hypre_Index index );
+HYPRE_Int hypre_SStructNborBoxToBox ( hypre_Box *nbor_box , hypre_Index root , hypre_Index nbor_root , hypre_Index coord , hypre_Index dir );
 HYPRE_Int hypre_SStructVarToNborVar ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int var , HYPRE_Int *coord , HYPRE_Int *nbor_var_ptr );
 HYPRE_Int hypre_SStructGridSetNumGhost ( hypre_SStructGrid *grid , HYPRE_Int *num_ghost );
 HYPRE_Int hypre_SStructBoxManEntryGetGlobalRank ( hypre_BoxManEntry *entry , hypre_Index index , HYPRE_Int *rank_ptr , HYPRE_Int type );

@@ -48,7 +48,6 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    HYPRE_Int      num_levels;
    /* HYPRE_Int      num_unknowns; */
    HYPRE_Real   tol;
-   char    *file_name;
    hypre_ParCSRMatrix **A_array;
    hypre_ParVector    **F_array;
    hypre_ParVector    **U_array;
@@ -88,7 +87,6 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    amg_logging   = hypre_ParAMGDataLogging(amg_data);
    if ( amg_logging>1 )
       Residual = hypre_ParAMGDataResidual(amg_data);
-   file_name     = hypre_ParAMGDataLogFileName(amg_data);
    /* num_unknowns  = hypre_ParAMGDataNumUnknowns(amg_data); */
    num_levels    = hypre_ParAMGDataNumLevels(amg_data);
    A_array       = hypre_ParAMGDataAArray(amg_data);
@@ -350,8 +348,6 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    HYPRE_Int       relax_points;
    HYPRE_Real   *relax_weight;
 
-   HYPRE_Int       relax_local;
-   HYPRE_Int       relax_order;
    HYPRE_Int       old_version = 0;
 
 
@@ -381,8 +377,6 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    grid_relax_type     = hypre_ParAMGDataGridRelaxType(amg_data);
    grid_relax_points   = hypre_ParAMGDataGridRelaxPoints(amg_data);
    relax_weight        = hypre_ParAMGDataRelaxWeight(amg_data); 
-
-   relax_order         = hypre_ParAMGDataRelaxOrder(amg_data);
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
@@ -448,13 +442,11 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
          if (num_levels == 1 && max_levels > 1)
          {
             relax_points = 0;
-            relax_local = 0;
          }
          else
          {
             if (old_version)
                relax_points = grid_relax_points[cycle_param][j];
-            relax_local = relax_order;
          }
 
          /*-----------------------------------------------

@@ -31,7 +31,6 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
    HYPRE_Int               **dof_func_array;   
    HYPRE_Int                num_procs, my_id;
 
-   HYPRE_Int                not_finished_coarsening;
    HYPRE_Int                level;
    HYPRE_Int                redundant;
    HYPRE_Int                num_functions;
@@ -49,8 +48,6 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
    /*initial */
    level = p_level;
    
-   not_finished_coarsening = 1;
-  
    /* convert A at this level to sequential */
    A = Par_A_array[level];
 
@@ -374,7 +371,6 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
       HYPRE_Real *recv_buf = NULL;
       HYPRE_Int *displs = NULL;
       HYPRE_Int *info = NULL;
-      HYPRE_Int size;
       HYPRE_Int new_num_procs, my_id;
       
       hypre_MPI_Comm_size(new_comm, &new_num_procs);
@@ -398,7 +394,6 @@ hypre_seqAMGCycle( hypre_ParAMGData *amg_data,
          displs[0] = 0;
          for (i=1; i < new_num_procs+1; i++)
             displs[i] = displs[i-1]+info[i-1]; 
-         size = displs[new_num_procs];
       
          if (F_coarse) 
          {

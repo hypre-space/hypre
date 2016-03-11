@@ -331,7 +331,6 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
 
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
@@ -377,19 +376,9 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
-   cgrid_ids = hypre_StructGridIDs(cgrid);
 
    constant_coefficient_A = hypre_StructMatrixConstantCoefficient(A);
 
-/*
-  fi = 0;
-  hypre_ForBoxI(ci, cgrid_boxes)
-  {
-  while (fgrid_ids[fi] != cgrid_ids[ci])
-  {
-  fi++;
-  }
-*/
    cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
    cstart = hypre_BoxIMin(cgrid_box);
@@ -540,7 +529,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
    else
    {
       zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
-      zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_offd = 0;
    }
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -627,7 +616,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
    }
    else
    {
-      iA_offd = hypre_CCBoxIndexRank(A_dbox,fstart);
+      iA_offd = 0;
       iA_offdm1 = iA_offd - zOffsetA_offd;
       iA_offdp1 = iA_offd + zOffsetA_offd;
       a_cs_offd = a_cs[iA_offd];
@@ -725,17 +714,9 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
 
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
-   hypre_Index           stridec;
    hypre_Index           fstart;
-   hypre_IndexRef        stridef;
-
-   hypre_Box            *A_dbox;
-   hypre_Box            *P_dbox;
-   hypre_Box            *R_dbox;
-   hypre_Box            *RAP_dbox;
 
    HYPRE_Real           *pa, *pb;
    HYPRE_Real           *ra, *rb;
@@ -756,31 +737,13 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
    HYPRE_Int             yOffsetP; 
    HYPRE_Int             zOffsetP; 
                         
-   stridef = cstride;
-   hypre_SetIndex3(stridec, 1, 1, 1);
-
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
-   cgrid_ids = hypre_StructGridIDs(cgrid);
 
-/*
-  fi = 0;
-  hypre_ForBoxI(ci, cgrid_boxes)
-  {
-  while (fgrid_ids[fi] != cgrid_ids[ci])
-  {
-  fi++;
-  }
-*/
    cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
    cstart = hypre_BoxIMin(cgrid_box);
    hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
-
-   A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-   P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-   R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-   RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
@@ -795,8 +758,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-      hypre_CCBoxOffsetDistance(P_dbox, index);
+   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
     * ra is pointer for weight for f-point above c-point 
@@ -810,8 +773,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-      hypre_CCBoxOffsetDistance(R_dbox, index);
+   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
+
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
     * 
@@ -911,18 +874,18 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
-   zOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   zOffsetA = 0; 
+   zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   yOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   yOffsetP = 0;
 
    hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
-   xOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   xOffsetP = 0;
 
    /*--------------------------------------------------------------------
     * Switch statement to direct control to apropriate BoxLoop depending
@@ -937,10 +900,10 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
     * center-west, and center-center).
     *--------------------------------------------------------------*/
 
-   iP = hypre_CCBoxIndexRank(P_dbox,cstart);
-   iR = hypre_CCBoxIndexRank(R_dbox,cstart);
-   iA = hypre_CCBoxIndexRank(A_dbox,fstart);
-   iAc = hypre_CCBoxIndexRank(RAP_dbox,cstart);
+   iP = 0;
+   iR = 0;
+   iA = 0;
+   iAc = 0;
 
    iAm1 = iA - zOffsetA;
    iAp1 = iA + zOffsetA;
@@ -1011,7 +974,6 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
 
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
@@ -1070,19 +1032,9 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
-   cgrid_ids = hypre_StructGridIDs(cgrid);
 
    constant_coefficient_A = hypre_StructMatrixConstantCoefficient(A);
 
-/*
-  fi = 0;
-  hypre_ForBoxI(ci, cgrid_boxes)
-  {
-  while (fgrid_ids[fi] != cgrid_ids[ci])
-  {
-  fi++;
-  }
-*/
    cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
    cstart = hypre_BoxIMin(cgrid_box);
@@ -1316,7 +1268,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
    else
    {
       zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
-      zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_offd = 0;
    }
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -1438,7 +1390,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
    }
    else
    {
-      iA_offd = hypre_CCBoxIndexRank(A_dbox,fstart);
+      iA_offd = 0;
       iA_offdm1 = iA_offd - zOffsetA_offd;
       iA_offdp1 = iA_offd + zOffsetA_offd;
       a_cs_offd = a_cs[iA_offd];
@@ -1592,17 +1544,9 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
 
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
-   hypre_Index           stridec;
    hypre_Index           fstart;
-   hypre_IndexRef        stridef;
-
-   hypre_Box            *A_dbox;
-   hypre_Box            *P_dbox;
-   hypre_Box            *R_dbox;
-   hypre_Box            *RAP_dbox;
 
    HYPRE_Real           *pa, *pb;
    HYPRE_Real           *ra, *rb;
@@ -1627,31 +1571,13 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
    HYPRE_Int             yOffsetP; 
    HYPRE_Int             zOffsetP; 
                         
-   stridef = cstride;
-   hypre_SetIndex3(stridec, 1, 1, 1);
-
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
-   cgrid_ids = hypre_StructGridIDs(cgrid);
 
-/*
-  fi = 0;
-  hypre_ForBoxI(ci, cgrid_boxes)
-  {
-  while (fgrid_ids[fi] != cgrid_ids[ci])
-  {
-  fi++;
-  }
-*/
    cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
    cstart = hypre_BoxIMin(cgrid_box);
    hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
-
-   A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-   P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-   R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-   RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
@@ -1666,8 +1592,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-      hypre_CCBoxOffsetDistance(P_dbox, index);
+   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
     * ra is pointer for weight for f-point above c-point 
@@ -1681,8 +1607,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-      hypre_CCBoxOffsetDistance(R_dbox, index);
+   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
+
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
     * 
@@ -1866,18 +1792,18 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
-   zOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   zOffsetA = 0; 
+   zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   yOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   yOffsetP = 0;
 
    hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
-   xOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   xOffsetP = 0;
 
    /*--------------------------------------------------------------------
     * Switch statement to direct control to apropriate BoxLoop depending
@@ -1893,10 +1819,10 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
     * center-south, center-southeast, center-west, and center-center).
     *--------------------------------------------------------------*/
 
-   iP = hypre_CCBoxIndexRank(P_dbox,cstart);
-   iR = hypre_CCBoxIndexRank(R_dbox,cstart);
-   iA = hypre_CCBoxIndexRank(A_dbox,fstart);
-   iAc = hypre_CCBoxIndexRank(RAP_dbox,cstart);
+   iP = 0;
+   iR = 0;
+   iA = 0;
+   iAc = 0;
 
    iAm1 = iA - zOffsetA;
    iAp1 = iA + zOffsetA;
@@ -2000,7 +1926,6 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
 
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
    hypre_Index           stridec;
@@ -2067,19 +1992,9 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
 
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
-   cgrid_ids = hypre_StructGridIDs(cgrid);
 
    constant_coefficient_A = hypre_StructMatrixConstantCoefficient(A);
 
-/*
-  fi = 0;
-  hypre_ForBoxI(ci, cgrid_boxes)
-  {
-  while (fgrid_ids[fi] != cgrid_ids[ci])
-  {
-  fi++;
-  }
-*/
    cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
    cstart = hypre_BoxIMin(cgrid_box);
@@ -2350,7 +2265,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
    else
    {
       zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
-      zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_offd = 0;
    }
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -2487,7 +2402,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
    }
    else
    {
-      iA_offd = hypre_CCBoxIndexRank(A_dbox,fstart);
+      iA_offd = 0;
       iA_offdm1 = iA_offd - zOffsetA_offd;
       iA_offdp1 = iA_offd + zOffsetA_offd;
       a_cs_offd = a_cs[iA_offd];
@@ -2670,17 +2585,9 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
 
    hypre_StructGrid     *cgrid;
    hypre_BoxArray       *cgrid_boxes;
-   HYPRE_Int            *cgrid_ids;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
-   hypre_Index           stridec;
    hypre_Index           fstart;
-   hypre_IndexRef        stridef;
-
-   hypre_Box            *A_dbox;
-   hypre_Box            *P_dbox;
-   hypre_Box            *R_dbox;
-   hypre_Box            *RAP_dbox;
 
    HYPRE_Real           *pa, *pb;
    HYPRE_Real           *ra, *rb;
@@ -2705,31 +2612,13 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
    HYPRE_Int             yOffsetP; 
    HYPRE_Int             zOffsetP; 
                         
-   stridef = cstride;
-   hypre_SetIndex3(stridec, 1, 1, 1);
-
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
-   cgrid_ids = hypre_StructGridIDs(cgrid);
 
-/*
-  fi = 0;
-  hypre_ForBoxI(ci, cgrid_boxes)
-  {
-  while (fgrid_ids[fi] != cgrid_ids[ci])
-  {
-  fi++;
-  }
-*/
    cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
    cstart = hypre_BoxIMin(cgrid_box);
    hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
-
-   A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-   P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-   R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-   RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
@@ -2744,8 +2633,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-      hypre_CCBoxOffsetDistance(P_dbox, index);
+   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
     * ra is pointer for weight for f-point above c-point 
@@ -2759,8 +2648,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-      hypre_CCBoxOffsetDistance(R_dbox, index);
+   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
@@ -2982,18 +2870,18 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
-   zOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   zOffsetA = 0; 
+   zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   yOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   yOffsetP = 0;
 
    hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
-   xOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   xOffsetP = 0;
 
    /*--------------------------------------------------------------------
     * Switch statement to direct control to apropriate BoxLoop depending
@@ -3009,10 +2897,10 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
     * center-south, center-southeast, center-west, and center-center).
     *--------------------------------------------------------------*/
 
-   iP = hypre_CCBoxIndexRank(P_dbox,cstart);
-   iR = hypre_CCBoxIndexRank(R_dbox,cstart);
-   iA = hypre_CCBoxIndexRank(A_dbox,fstart);
-   iAc = hypre_CCBoxIndexRank(RAP_dbox,cstart);
+   iP = 0;
+   iR = 0;
+   iA = 0;
+   iAc = 0;
 
    iAm1 = iA - zOffsetA;
    iAp1 = iA + zOffsetA;
@@ -3459,7 +3347,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
    else
    {
       zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
-      zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_offd = 0;
    }
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -3536,7 +3424,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
    }
    else
    {
-      iA_offd = hypre_CCBoxIndexRank(A_dbox,fstart);
+      iA_offd = 0;
       iA_offdm1 = iA_offd - zOffsetA_offd;
       iA_offdp1 = iA_offd + zOffsetA_offd;
       a_cn_offd = a_cn[iA_offd];
@@ -3624,15 +3512,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
    hypre_BoxArray       *cgrid_boxes;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
-   hypre_Index           stridec;
    hypre_Index           fstart;
-   hypre_IndexRef        stridef;
-
-
-   hypre_Box            *A_dbox;
-   hypre_Box            *P_dbox;
-   hypre_Box            *R_dbox;
-   hypre_Box            *RAP_dbox;
 
    HYPRE_Real           *pa, *pb;
    HYPRE_Real           *ra, *rb;
@@ -3651,29 +3531,13 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
    HYPRE_Int             yOffsetP;
    HYPRE_Int             zOffsetP;
                  
-   stridef = cstride;
-   hypre_SetIndex3(stridec, 1, 1, 1);
-
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
-   /* fi = 0;
-      hypre_ForBoxI(ci, cgrid_boxes)
-      {
-      while (fgrid_ids[fi] != cgrid_ids[ci])
-      {
-      fi++;
-      }
-   */
    cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
    cstart = hypre_BoxIMin(cgrid_box);
    hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
-
-   A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-   P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-   R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-   RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
@@ -3688,8 +3552,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-      hypre_CCBoxOffsetDistance(P_dbox, index);
+   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
@@ -3704,8 +3567,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-      hypre_CCBoxOffsetDistance(R_dbox, index);
+   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
@@ -3798,18 +3660,18 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
-   zOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   zOffsetA = 0; 
+   zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   yOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   yOffsetP = 0;
 
    hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
-   xOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   xOffsetP = 0;
 
    /*-----------------------------------------------------------------
     * Switch statement to direct control to apropriate BoxLoop depending
@@ -3823,10 +3685,10 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
     * above-south, center-north, and center-east).
     *--------------------------------------------------------------*/
 
-   iP = hypre_CCBoxIndexRank(P_dbox,cstart);
-   iR = hypre_CCBoxIndexRank(R_dbox,cstart);
-   iA = hypre_CCBoxIndexRank(A_dbox,fstart);
-   iAc = hypre_CCBoxIndexRank(RAP_dbox,cstart);
+   iP = 0;
+   iR = 0;
+   iA = 0;
+   iAc = 0;
 
    iAm1 = iA - zOffsetA;
    iAp1 = iA + zOffsetA;
@@ -4175,7 +4037,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
    else
    {
       zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
-      zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_offd = 0;
    }
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -4289,7 +4151,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
    }
    else
    {
-      iA_offd = hypre_CCBoxIndexRank(A_dbox,fstart);
+      iA_offd = 0;
       iA_offdm1 = iA_offd - zOffsetA_offd;
       iA_offdp1 = iA_offd + zOffsetA_offd;
       a_cn_offd = a_cn[iA_offd];
@@ -4434,14 +4296,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
    hypre_BoxArray       *cgrid_boxes;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
-   hypre_Index           stridec;
    hypre_Index           fstart;
-   hypre_IndexRef        stridef;
-
-   hypre_Box            *A_dbox;
-   hypre_Box            *P_dbox;
-   hypre_Box            *R_dbox;
-   hypre_Box            *RAP_dbox;
 
    HYPRE_Real           *pa, *pb;
    HYPRE_Real           *ra, *rb;
@@ -4462,29 +4317,13 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
    HYPRE_Int             yOffsetP;
    HYPRE_Int             zOffsetP;
                  
-   stridef = cstride;
-   hypre_SetIndex3(stridec, 1, 1, 1);
-
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
-   /* fi = 0;
-      hypre_ForBoxI(ci, cgrid_boxes)
-      {
-      while (fgrid_ids[fi] != cgrid_ids[ci])
-      {
-      fi++;
-      }
-   */
    cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
    cstart = hypre_BoxIMin(cgrid_box);
    hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
-
-   A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-   P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-   R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-   RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
@@ -4499,8 +4338,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-      hypre_CCBoxOffsetDistance(P_dbox, index);
+   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
@@ -4515,8 +4353,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-      hypre_CCBoxOffsetDistance(R_dbox, index);
+   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
@@ -4693,18 +4530,18 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
-   zOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   zOffsetA = 0; 
+   zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   yOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   yOffsetP = 0;
 
    hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
-   xOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   xOffsetP = 0;
 
    /*-----------------------------------------------------------------
     * Switch statement to direct control to apropriate BoxLoop depending
@@ -4720,10 +4557,10 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
     * center-northwest, and center-east).
     *--------------------------------------------------------------*/
 
-   iP = hypre_CCBoxIndexRank(P_dbox,cstart);
-   iR = hypre_CCBoxIndexRank(R_dbox,cstart);
-   iA = hypre_CCBoxIndexRank(A_dbox,fstart);
-   iAc = hypre_CCBoxIndexRank(RAP_dbox,cstart);
+   iP = 0;
+   iR = 0;
+   iA = 0;
+   iAc = 0;
 
    iAm1 = iA - zOffsetA;
    iAp1 = iA + zOffsetA;
@@ -5153,7 +4990,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
    else
    {
       zOffsetA_diag = hypre_BoxOffsetDistance(A_dbox,index);
-      zOffsetA_offd = hypre_CCBoxOffsetDistance(A_dbox,index);
+      zOffsetA_offd = 0;
    }
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -5284,7 +5121,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
    }
    else
    {
-      iA_offd = hypre_CCBoxIndexRank(A_dbox,fstart);
+      iA_offd = 0;
       iA_offdm1 = iA_offd - zOffsetA_offd;
       iA_offdp1 = iA_offd + zOffsetA_offd;
       a_cn_offd = a_cn[iA_offd];
@@ -5460,14 +5297,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
    hypre_BoxArray       *cgrid_boxes;
    hypre_Box            *cgrid_box;
    hypre_IndexRef        cstart;
-   hypre_Index           stridec;
    hypre_Index           fstart;
-   hypre_IndexRef        stridef;
-
-   hypre_Box            *A_dbox;
-   hypre_Box            *P_dbox;
-   hypre_Box            *R_dbox;
-   hypre_Box            *RAP_dbox;
 
    HYPRE_Real           *pa, *pb;
    HYPRE_Real           *ra, *rb;
@@ -5491,29 +5321,13 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
    HYPRE_Int             yOffsetP;
    HYPRE_Int             zOffsetP;
                  
-   stridef = cstride;
-   hypre_SetIndex3(stridec, 1, 1, 1);
-
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
-   /* fi = 0;
-      hypre_ForBoxI(ci, cgrid_boxes)
-      {
-      while (fgrid_ids[fi] != cgrid_ids[ci])
-      {
-      fi++;
-      }
-   */
    cgrid_box = hypre_BoxArrayBox(cgrid_boxes, ci);
 
    cstart = hypre_BoxIMin(cgrid_box);
    hypre_StructMapCoarseToFine(cstart, cindex, cstride, fstart);
-
-   A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), fi);
-   P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
-   R_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(R), fi);
-   RAP_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(RAP), ci);
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
@@ -5528,8 +5342,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-      hypre_CCBoxOffsetDistance(P_dbox, index);
+   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
@@ -5544,8 +5357,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-      hypre_CCBoxOffsetDistance(R_dbox, index);
+   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
 
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
@@ -5759,18 +5571,18 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = hypre_CCBoxOffsetDistance(A_dbox,index); 
-   zOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   zOffsetA = 0; 
+   zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   yOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   yOffsetP = 0;
 
    hypre_SetIndex3(index_temp,1,0,0);
    MapIndex(index_temp, cdir, index);
 
-   xOffsetP = hypre_CCBoxOffsetDistance(P_dbox,index);
+   xOffsetP = 0;
 
    /*-----------------------------------------------------------------
     * Switch statement to direct control to apropriate BoxLoop depending
@@ -5786,10 +5598,10 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
     * center-northwest, and center-east).
     *--------------------------------------------------------------*/
 
-   iP = hypre_CCBoxIndexRank(P_dbox,cstart);
-   iR = hypre_CCBoxIndexRank(R_dbox,cstart);
-   iA = hypre_CCBoxIndexRank(A_dbox,fstart);
-   iAc = hypre_CCBoxIndexRank(RAP_dbox,cstart);
+   iP = 0;
+   iR = 0;
+   iA = 0;
+   iAc = 0;
 
    iAm1 = iA - zOffsetA;
    iAp1 = iA + zOffsetA;

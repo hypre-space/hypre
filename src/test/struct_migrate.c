@@ -418,10 +418,9 @@ AddValuesVector( hypre_StructGrid   *grid,
    hypre_IndexRef     iupper;
    hypre_Box         *box;
    HYPRE_Real        *values;
-   HYPRE_Int          volume,dim;
+   HYPRE_Int          volume;
 
    gridboxes =  hypre_StructGridBoxes(grid);
-   dim       =  hypre_StructGridNDim(grid);
 
    ib=0;
    hypre_ForBoxI(ib, gridboxes)
