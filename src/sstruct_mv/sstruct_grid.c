@@ -1798,9 +1798,29 @@ hypre_SStructBoxManEntryGetPart( hypre_BoxManEntry *entry,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
+hypre_SStructIndexToNborIndex( hypre_Index  index,
+                               hypre_Index  root,
+                               hypre_Index  nbor_root,
+                               hypre_Index  coord,
+                               hypre_Index  dir,
+                               HYPRE_Int    ndim,
+                               hypre_Index  nbor_index )
+{
+   HYPRE_Int  d, nd;
+
+   for (d = 0; d < ndim; d++)
+   {
+      nd = coord[d];
+      nbor_index[nd] = nbor_root[nd] + (index[d] - root[d]) * dir[d];
+   }
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_SStructBoxToNborBox( hypre_Box   *box,
-                           hypre_Index  index,
-                           hypre_Index  nbor_index,
+                           hypre_Index  root,
+                           hypre_Index  nbor_root,
                            hypre_Index  coord,
                            hypre_Index  dir )
 {
@@ -1808,15 +1828,10 @@ hypre_SStructBoxToNborBox( hypre_Box   *box,
    HYPRE_Int   *imax = hypre_BoxIMax(box);
    HYPRE_Int    ndim = hypre_BoxNDim(box);
    hypre_Index  nbor_imin, nbor_imax;
+   HYPRE_Int    d;
 
-   HYPRE_Int  d, nd;
-
-   for (d = 0; d < ndim; d++)
-   {
-      nd = coord[d];
-      nbor_imin[nd] = nbor_index[nd] + (imin[d] - index[d]) * dir[d];
-      nbor_imax[nd] = nbor_index[nd] + (imax[d] - index[d]) * dir[d];
-   }
+   hypre_SStructIndexToNborIndex(imin, root, nbor_root, coord, dir, ndim, nbor_imin);
+   hypre_SStructIndexToNborIndex(imax, root, nbor_root, coord, dir, ndim, nbor_imax);
 
    for (d = 0; d < ndim; d++)
    {
@@ -1831,10 +1846,31 @@ hypre_SStructBoxToNborBox( hypre_Box   *box,
  * See "Mapping Notes" in comment for `hypre_SStructBoxToNborBox'.
  *--------------------------------------------------------------------------*/
 
+
+HYPRE_Int
+hypre_SStructNborIndexToIndex( hypre_Index  nbor_index,
+                               hypre_Index  root,
+                               hypre_Index  nbor_root,
+                               hypre_Index  coord,
+                               hypre_Index  dir,
+                               HYPRE_Int    ndim,
+                               hypre_Index  index )
+{
+   HYPRE_Int  d, nd;
+
+   for (d = 0; d < ndim; d++)
+   {
+      nd = coord[d];
+      index[d] = root[d] + (nbor_index[nd] - nbor_root[nd]) * dir[d];
+   }
+
+   return hypre_error_flag;
+}
+
 HYPRE_Int
 hypre_SStructNborBoxToBox( hypre_Box   *nbor_box,
-                           hypre_Index  index,
-                           hypre_Index  nbor_index,
+                           hypre_Index  root,
+                           hypre_Index  nbor_root,
                            hypre_Index  coord,
                            hypre_Index  dir )
 {
@@ -1842,15 +1878,10 @@ hypre_SStructNborBoxToBox( hypre_Box   *nbor_box,
    HYPRE_Int   *nbor_imax = hypre_BoxIMax(nbor_box);
    HYPRE_Int    ndim = hypre_BoxNDim(nbor_box);
    hypre_Index  imin, imax;
+   HYPRE_Int    d;
 
-   HYPRE_Int  d, nd;
-
-   for (d = 0; d < ndim; d++)
-   {
-      nd = coord[d];
-      imin[d] = index[d] + (nbor_imin[nd] - nbor_index[nd]) * dir[d];
-      imax[d] = index[d] + (nbor_imax[nd] - nbor_index[nd]) * dir[d];
-   }
+   hypre_SStructNborIndexToIndex(nbor_imin, root, nbor_root, coord, dir, ndim, imin);
+   hypre_SStructNborIndexToIndex(nbor_imax, root, nbor_root, coord, dir, ndim, imax);
 
    for (d = 0; d < ndim; d++)
    {
