@@ -52,9 +52,9 @@ Final Relative Residual Norm = 9.21374e-08
 Setup phase times:
 =============================================
 PCG Setup:
-  wall clock time = 14.180000 seconds
+  wall clock time = 17.200000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 11.470000 seconds
+  cpu clock time  = 13.670000 seconds
   cpu MFLOPS      = 0.000000
 
 <b,b>: 5.738541e-05
@@ -287,9 +287,9 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 Setup phase times:
 =============================================
 PCG Setup:
-  wall clock time = 13.770000 seconds
+  wall clock time = 17.340000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 11.950000 seconds
+  cpu clock time  = 14.040000 seconds
   cpu MFLOPS      = 0.000000
 
 <b,b>: 5.738541e-05
@@ -309,9 +309,9 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 Solve phase times:
 =============================================
 PCG Solve:
-  wall clock time = 0.050000 seconds
+  wall clock time = 0.060000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.050000 seconds
+  cpu clock time  = 0.070000 seconds
   cpu MFLOPS      = 0.000000
 
 
@@ -400,9 +400,9 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 ***************************************************
 *                Solver Statistics                *
 *-------------------------------------------------*
-** HYPRE preconditioner setup time = 1.693392e-02
-** HYPRE solution time             = 1.433206e-02
-** HYPRE total time                = 3.126597e-02
+** HYPRE preconditioner setup time = 1.835465e-02
+** HYPRE solution time             = 1.582384e-02
+** HYPRE total time                = 3.417850e-02
 ** HYPRE number of iterations      = 6
 ** HYPRE final residual norm       = 5.485626e-10
 ***************************************************
@@ -531,15 +531,15 @@ AMG SOLUTION INFO:
                                             relative
                residual        factor       residual
                --------        ------       --------
-    Initial    2.335962e-01                 1.000000e+00
-    Cycle  1   1.345127e-02    0.057583     5.758345e-02 
-    Cycle  2   7.607388e-04    0.056555     3.256640e-03 
-    Cycle  3   4.280536e-05    0.056268     1.832451e-04 
-    Cycle  4   2.449140e-06    0.057216     1.048450e-05 
-    Cycle  5   1.473469e-07    0.060163     6.307762e-07 
+    Initial    2.334657e-01                 1.000000e+00
+    Cycle  1   1.343247e-02    0.057535     5.753510e-02 
+    Cycle  2   7.594482e-04    0.056538     3.252932e-03 
+    Cycle  3   4.273465e-05    0.056271     1.830446e-04 
+    Cycle  4   2.445691e-06    0.057230     1.047559e-05 
+    Cycle  5   1.471809e-07    0.060180     6.304178e-07 
 
 
- Average Convergence Factor = 0.057541
+ Average Convergence Factor = 0.057534
 
      Complexity:    grid = 1.509834
                 operator = 1.841964
@@ -549,7 +549,7 @@ AMG SOLUTION INFO:
 
 
 Iterations = 5
-Final Relative Residual Norm = 6.30776e-07
+Final Relative Residual Norm = 6.30418e-07
 
 # Output file: default.out.14
 
@@ -558,15 +558,15 @@ AMG SOLUTION INFO:
                                             relative
                residual        factor       residual
                --------        ------       --------
-    Initial    2.335962e-01                 1.000000e+00
-    Cycle  1   1.345127e-02    0.057583     5.758345e-02 
-    Cycle  2   7.607388e-04    0.056555     3.256640e-03 
-    Cycle  3   4.280536e-05    0.056268     1.832451e-04 
-    Cycle  4   2.449140e-06    0.057216     1.048450e-05 
-    Cycle  5   1.473469e-07    0.060163     6.307762e-07 
+    Initial    2.334657e-01                 1.000000e+00
+    Cycle  1   1.343247e-02    0.057535     5.753510e-02 
+    Cycle  2   7.594482e-04    0.056538     3.252932e-03 
+    Cycle  3   4.273465e-05    0.056271     1.830446e-04 
+    Cycle  4   2.445691e-06    0.057230     1.047559e-05 
+    Cycle  5   1.471809e-07    0.060180     6.304178e-07 
 
 
- Average Convergence Factor = 0.057541
+ Average Convergence Factor = 0.057534
 
      Complexity:    grid = 1.509834
                 operator = 1.841964
@@ -576,7 +576,7 @@ AMG SOLUTION INFO:
 
 
 Iterations = 5
-Final Relative Residual Norm = 6.30776e-07
+Final Relative Residual Norm = 6.30418e-07
 
 # Output file: default.out.15
 =============================================
@@ -585,7 +585,7 @@ SStruct phase times:
 SStruct Setup:
   wall clock time = 0.250000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.240000 seconds
+  cpu clock time  = 0.250000 seconds
   cpu MFLOPS      = 0.000000
 
 Problem size: 26460
@@ -594,7 +594,7 @@ Problem size: 26460
 Setup phase times:
 =============================================
 AMS Setup:
-  wall clock time = 0.090000 seconds
+  wall clock time = 0.100000 seconds
   wall MFLOPS     = 0.000000
   cpu clock time  = 0.110000 seconds
   cpu MFLOPS      = 0.000000
@@ -617,9 +617,9 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 Solve phase times:
 =============================================
 AMS Solve:
-  wall clock time = 0.150000 seconds
+  wall clock time = 0.170000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.150000 seconds
+  cpu clock time  = 0.180000 seconds
   cpu MFLOPS      = 0.000000
 
 
