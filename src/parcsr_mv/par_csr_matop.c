@@ -1116,6 +1116,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    HYPRE_Int start_index;
    /*HYPRE_Int jrow;*/
    HYPRE_Int num_rows_B_ext;
+   HYPRE_Int *prefix_sum_workspace;
 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -1155,13 +1156,16 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    jdata_recv_vec_starts = hypre_CTAlloc(HYPRE_Int, num_recvs+1);
    jdata_send_map_starts[0] = B_int_i[0] = 0;
 
-   HYPRE_Int prefix_sum_workspace[(hypre_NumThreads() + 1)*num_sends];
+   /*HYPRE_Int prefix_sum_workspace[(hypre_NumThreads() + 1)*num_sends];*/
+   prefix_sum_workspace = hypre_TAlloc(HYPRE_Int, (hypre_NumThreads() + 1)*num_sends);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i,j,k)
 #endif
    {
-      HYPRE_Int counts[num_sends];
+      /*HYPRE_Int counts[num_sends];*/
+      HYPRE_Int *counts;
+      counts = hypre_TAlloc(HYPRE_Int, num_sends);
       for (i=0; i < num_sends; i++)
       {
         HYPRE_Int j_begin, j_end;
@@ -1439,7 +1443,9 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
           }
         } // !data
       } /* for each send target */
+      hypre_TFree(counts);
    } /* omp parallel. JSP: this takes most of time in this function */
+   hypre_TFree(prefix_sum_workspace);
 
    tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
    hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
