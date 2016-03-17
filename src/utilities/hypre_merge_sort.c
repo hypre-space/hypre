@@ -1,4 +1,5 @@
 #include "_hypre_utilities.h"
+#include "hypre_hopscotch_hash.h"
 #include "../seq_mv/HYPRE_seq_mv.h"
 //#define DBG_MERGE_SORT
 #ifdef DBG_MERGE_SORT

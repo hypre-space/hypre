@@ -1418,7 +1418,7 @@ HYPRE_Int hypre_GenerateSendMapAndCommPkg ( MPI_Comm comm , HYPRE_Int num_sends 
 /* par_relax.c */
 HYPRE_Int hypre_BoomerAMGRelax ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Int *cf_marker , HYPRE_Int relax_type , HYPRE_Int relax_points , HYPRE_Real relax_weight , HYPRE_Real omega , HYPRE_Real *l1_norms , hypre_ParVector *u , hypre_ParVector *Vtemp , hypre_ParVector *Ztemp );
 HYPRE_Int hypre_GaussElimSetup ( hypre_ParAMGData *amg_data , HYPRE_Int level , HYPRE_Int relax_type );
-HYPRE_Int hypre_GaussElimSolve ( void *amg_vdata , HYPRE_Int level , HYPRE_Int relax_type );
+HYPRE_Int hypre_GaussElimSolve ( hypre_ParAMGData *amg_data , HYPRE_Int level , HYPRE_Int relax_type );
 HYPRE_Int gselim ( HYPRE_Real *A , HYPRE_Real *x , HYPRE_Int n );
 
 /* par_relax_interface.c */

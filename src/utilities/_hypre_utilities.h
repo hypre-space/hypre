@@ -946,7 +946,7 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
 #endif // HYPRE_USING_OPENMP
 
 #ifdef HYPRE_USING_ATOMIC
-static inline HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval)
+static HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval)
 {
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
   return __sync_val_compare_and_swap(ptr, oldval, newval);
@@ -960,7 +960,7 @@ static inline HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval,
 #endif
 }
 
-static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
+static HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
 {
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
   return __sync_fetch_and_add(ptr, value);
@@ -973,7 +973,7 @@ static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
 #endif
 }
 #else // !HYPRE_USING_ATOMIC
-static inline HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval)
+static HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval)
 {
    if (*ptr == oldval)
    {
@@ -983,7 +983,7 @@ static inline HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval,
    else return *ptr;
 }
 
-static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
+static HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
 {
    HYPRE_Int oldval = *ptr;
    *ptr += value;
@@ -1063,7 +1063,7 @@ void hypre_sort_and_create_inverse_map(
 }
 #endif
 
-#include "hypre_hopscotch_hash.h"
+/*#include "hypre_hopscotch_hash.h"*/
 
 #endif
 
