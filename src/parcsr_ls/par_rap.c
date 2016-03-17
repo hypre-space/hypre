@@ -373,6 +373,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_Real       r_a_p_product;
    
    HYPRE_Real       zero = 0.0;
+   HYPRE_Int 	   *prefix_sum_workspace;
 
    /*-----------------------------------------------------------------------
     *  Copy ParCSRMatrix RT into CSRMatrix R so that we have row-wise access 
@@ -505,7 +506,8 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    P_ext_offd_size = 0;
    last_col_diag_P = first_col_diag_P + num_cols_diag_P - 1;
 
-   HYPRE_Int prefix_sum_workspace[2*(num_threads + 1)];
+   /*HYPRE_Int prefix_sum_workspace[2*(num_threads + 1)];*/
+   prefix_sum_workspace = hypre_TAlloc(HYPRE_Int, 2*(num_threads + 1));
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i,j)
@@ -566,6 +568,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
          P_ext_offd_i[i+1] = P_ext_offd_size_private;
       }
    } /* omp parallel */
+   hypre_TFree(prefix_sum_workspace);
 
    if (num_procs > 1) 
    {
