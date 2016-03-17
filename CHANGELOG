@@ -15,37 +15,47 @@
 # recent release.
 #=============================================================================
 
-- added a new function hypre_BoomerAMGSetKeepTranspose, which will store
-  the transposes of the interpolation operators and then replace the 
-  multiplication of the transpose of P with a more efficient matvec.
+Version 2.11.0 released 2016/03/??
 
-- added a new function hypre_BoomerAMGSetRAP2, which will replace the triple
-  matrix product R*A*P by two matrix-matrix products. This has shown to 
-  be faster on BG/Q. Note that setting this function will prevent the 
-  keeping of transposes.
+- Added a new function hypre_BoomerAMGSetKeepTranspose, which will store the
+  transposes of the interpolation operators and then replace the multiplication
+  of the transpose of P with a more efficient matvec.
+
+- Added a new function hypre_BoomerAMGSetRAP2, which will replace the triple
+  matrix product R*A*P by two matrix-matrix products. This has shown to be
+  faster on BG/Q. Note that setting this function will prevent the keeping of
+  transposes.
 
 - Added various changes that can improve performance on certain architectures,
-  particularly in the BoomerAMG Setup when using threading. While some of
-  them will be in effect automatically, using the configure options
-  --with-openmp --enable-hopscotch can lead to additional improvements
-  if atomic operations are available.
-  The configure option --enable-persistent allows the use of persistent
-  communication if available.
+  particularly in the BoomerAMG Setup when using threading. While some of them
+  will be in effect automatically, using the configure options --with-openmp
+  --enable-hopscotch can lead to additional improvements if atomic operations
+  are available.  The configure option --enable-persistent allows the use of
+  persistent communication if available.
 
+- Modified configure to conform to xSDK standards in IDEAS project
+
+- Fixed a bug related to SStructSetSharedPart and SetNeighborPart
+
+- Fixed a bug in elasticity interpolation for BoomerAMG
+
+- Fixed an MPI bug that was causing Parasails to hang occasionally
+
+- Removed Babel from the release
 
 Version 2.10.1 released 2015/09/11
 
 - Fixed various bugs in AMG and the IJ interface.
 
-- Changed function names to set interpolation truncation parameters for 
+- Changed function names to set interpolation truncation parameters for
   mult-additive versions as follows:
   HYPRE_BoomerAMGSetAddTruncFactor to HYPRE_BoomerAMGSetMultAddTruncFactor
   HYPRE_BoomerAMGSetAddPMaxElmts to HYPRE_BoomerAMGSetMultAddPMAxElmts
 
-- Replaced the function HYPRE_BoomerAMGSetNonGalerkTol, which sets parameters 
+- Replaced the function HYPRE_BoomerAMGSetNonGalerkTol, which sets parameters
   for the nonGalerkin version, with HYPRE_BoomerAMGSetNonGalerkinTol and
   HYPRE_BommerAMGSetLevelNonGalerkinTol
-  
+
 Version 2.10.0b released 2015/01/22
 
 - Added new interpolation that allows the incorporation of near null-space
