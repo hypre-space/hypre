@@ -67,6 +67,61 @@
 extern "C" {
 #endif
 
+/******************************************************************************
+ * This next section of code is here instead of in _hypre_utilities.h to get
+ * around some portability issues with Visual Studio.  By putting it here, we
+ * can explicitly include this '.h' file in a few files in hypre and compile
+ * them with C++ instead of C (VS does not support C99 'inline').
+ ******************************************************************************/
+
+#ifdef HYPRE_USING_ATOMIC
+static inline HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval)
+{
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
+  return __sync_val_compare_and_swap(ptr, oldval, newval);
+//#elif defind _MSC_VER
+  //return _InterlockedCompareExchange((long *)ptr, newval, oldval);
+//#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
+// JSP: not many compilers have implemented this, so comment out for now
+  //_Atomic HYPRE_Int *atomic_ptr = ptr;
+  //atomic_compare_exchange_strong(atomic_ptr, &oldval, newval);
+  //return oldval;
+#endif
+}
+
+static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
+{
+#if defined(__GNUC__) && defined(__GNUC_MINOR__) && defined(__GNUC_PATCHLEVEL__) && (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) > 40100
+  return __sync_fetch_and_add(ptr, value);
+//#elif defined _MSC_VER
+  //return _InterlockedExchangeAdd((long *)ptr, value);
+//#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L && !defined(__STDC_NO_ATOMICS__)
+// JSP: not many compilers have implemented this, so comment out for now
+  //_Atomic HYPRE_Int *atomic_ptr = ptr;
+  //return atomic_fetch_add(atomic_ptr, value);
+#endif
+}
+#else // !HYPRE_USING_ATOMIC
+static inline HYPRE_Int hypre_compare_and_swap(HYPRE_Int *ptr, HYPRE_Int oldval, HYPRE_Int newval)
+{
+   if (*ptr == oldval)
+   {
+      *ptr = newval;
+      return oldval;
+   }
+   else return *ptr;
+}
+
+static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
+{
+   HYPRE_Int oldval = *ptr;
+   *ptr += value;
+   return oldval;
+}
+#endif // !HYPRE_USING_ATOMIC
+
+/******************************************************************************/
+
 // Constants ................................................................
 #define HYPRE_HOPSCOTCH_HASH_HOP_RANGE    (32)
 #define HYPRE_HOPSCOTCH_HASH_INSERT_RANGE (4*1024)

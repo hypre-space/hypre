@@ -10,12 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_utilities.h"
+#include "hypre_hopscotch_hash.h"
 
 /*--------------------------------------------------------------------------
  * OLD NOTES:
