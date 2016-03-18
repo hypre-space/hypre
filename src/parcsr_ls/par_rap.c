@@ -269,8 +269,8 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
    HYPRE_Int *RT_partitioning = hypre_ParCSRMatrixColStarts(RT);
 
    hypre_ParCSRMatrix *RAP;
-   HYPRE_Int                *col_map_offd_RAP;
-   HYPRE_Int                *new_col_map_offd_RAP;
+   HYPRE_Int                *col_map_offd_RAP = NULL;
+   HYPRE_Int                *new_col_map_offd_RAP = NULL;
 
    hypre_CSRMatrix *RAP_int = NULL;
 
