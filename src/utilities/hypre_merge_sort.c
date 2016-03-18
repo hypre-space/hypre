@@ -291,6 +291,7 @@ void hypre_merge_sort(HYPRE_Int *in, HYPRE_Int *temp, HYPRE_Int len, HYPRE_Int *
 #endif
 }
 
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 void hypre_sort_and_create_inverse_map(
   HYPRE_Int *in, HYPRE_Int len, HYPRE_Int **out, hypre_UnorderedIntMap *inverse_map)
 {
@@ -307,9 +308,7 @@ void hypre_sort_and_create_inverse_map(
    hypre_merge_sort(in, temp, len, out);
    hypre_UnorderedIntMapCreate(inverse_map, 2*len, 16*hypre_NumThreads());
    HYPRE_Int i;
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
-#endif
    for (i = 0; i < len; i++)
    {
       HYPRE_Int old = hypre_UnorderedIntMapPutIfAbsent(inverse_map, (*out)[i], i);
@@ -349,5 +348,6 @@ void hypre_sort_and_create_inverse_map(
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] += hypre_MPI_Wtime();
 #endif
 }
+#endif
 
 /* vim: set tabstop=8 softtabstop=3 sw=3 expandtab: */
