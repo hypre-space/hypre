@@ -31,12 +31,13 @@ Version 2.11.0 released 2016/03/??
   will be in effect automatically, using the configure options --with-openmp
   --enable-hopscotch can lead to additional improvements if atomic operations
   are available.  The configure option --enable-persistent allows the use of
-  persistent communication if available. (Many of these changes are described 
-  in "High-Performance Algebraic Multigrid Solver Optimized for Multi-Core 
-  Based Distributed Parallel Systems" by J. Park, M. Smelyanskiy, U.M. Yang, i
-  D. Mudigere, P.Dubey, published in Proceedings of SC15.) 
+  persistent communication if available. (Many of these changes are described in
+  "High-Performance Algebraic Multigrid Solver Optimized for Multi-Core Based
+  Distributed Parallel Systems" by J. Park, M. Smelyanskiy, U.M. Yang,
+  D. Mudigere, P. Dubey, published in Proceedings of SC15.)
 
 - Modified configure to conform to xSDK standards in IDEAS project
+  (https://ideas-productivity.org/focus-areas/xsdk/)
 
 - Fixed a bug related to SStructSetSharedPart and SetNeighborPart
 
