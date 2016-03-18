@@ -26,6 +26,10 @@ if (UNIX)
   list (APPEND HYPRE_LIBS m)
 endif (UNIX)
 
+# Configuration options
+option(HYPRE_BIGINT               "Use long long int for HYPRE_Int" OFF)
+option(HYPRE_SEQUENTIAL           "Compile without MPI" OFF)
+
 # CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 # CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 # -lstdc++ -lm

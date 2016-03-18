@@ -14,39 +14,23 @@
 
 #include "_hypre_utilities.h"
 #include "hypre_hopscotch_hash.h"
-#include "../parcsr_mv/_hypre_parcsr_mv.h"
+#include "_hypre_parcsr_mv.h"
+
+/* RDF: The following prototype already exists in _hypre_parcsr_ls.h, so
+ * something needs to be reorganized here.*/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 hypre_CSRMatrix *
 hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int, hypre_ParCSRCommPkg *comm_pkg_RT);                                                                                                               
 /* reference seems necessary to prevent a problem with the
    "headers" script... */
 
-void hypre_ParCSRMatrixExtractBExt_Arrays(
-   HYPRE_Int ** pB_ext_i,
-   HYPRE_Int ** pB_ext_j,
-   HYPRE_Complex ** pB_ext_data,
-   HYPRE_Int ** pB_ext_row_map,
-   HYPRE_Int * num_nonzeros,
-   HYPRE_Int data,
-   HYPRE_Int find_row_map,
-   MPI_Comm comm,
-   hypre_ParCSRCommPkg * comm_pkg,
-   HYPRE_Int num_cols_B,
-   HYPRE_Int num_recvs,
-   HYPRE_Int num_sends,
-   HYPRE_Int first_col_diag,
-   HYPRE_Int * row_starts,
-   HYPRE_Int * recv_vec_starts,
-   HYPRE_Int * send_map_starts,
-   HYPRE_Int * send_map_elmts,
-   HYPRE_Int * diag_i,
-   HYPRE_Int * diag_j,
-   HYPRE_Int * offd_i,
-   HYPRE_Int * offd_j,
-   HYPRE_Int * col_map_offd,
-   HYPRE_Real * diag_data,
-   HYPRE_Real * offd_data
-   );
+#ifdef __cplusplus
+}
+#endif
 
 /* The following function was formerly part of hypre_ParMatmul
    but was removed so it can also be used for multiplication of
