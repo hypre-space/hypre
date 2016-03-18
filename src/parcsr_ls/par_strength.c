@@ -21,6 +21,7 @@
 
 
 #include "_hypre_parcsr_ls.h"
+#include "hypre_hopscotch_hash.h"
 
 
 /*==========================================================================*/

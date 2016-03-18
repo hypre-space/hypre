@@ -14,6 +14,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "aux_interp.h"
+#include "hypre_hopscotch_hash.h"
 
 /*---------------------------------------------------------------------------
  * Auxilary routines for the long range interpolation methods.

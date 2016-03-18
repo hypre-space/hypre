@@ -13,6 +13,7 @@
 #include "_hypre_parcsr_mv.h"
 
 #include "_hypre_utilities.h"
+#include "hypre_hopscotch_hash.h"
 #include "../parcsr_mv/_hypre_parcsr_mv.h"
 
 hypre_CSRMatrix *

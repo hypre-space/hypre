@@ -130,12 +130,13 @@ static inline HYPRE_Int hypre_fetch_and_add(HYPRE_Int *ptr, HYPRE_Int value)
 #define HYPRE_HOPSCOTCH_HASH_BUSY  (1)
 
 // Small Utilities ..........................................................
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 static inline HYPRE_Int first_lsb_bit_indx(hypre_uint x) 
 {
   if (0 == x) return -1;
   return __builtin_ffs(x) - 1;
 }
-
+#endif
 /**
  * hypre_Hash is adapted from xxHash with the following license.
  */
@@ -390,6 +391,7 @@ void hypre_UnorderedIntSetDestroy( hypre_UnorderedIntSet *s );
 void hypre_UnorderedIntMapDestroy( hypre_UnorderedIntMap *m );
 
 // Query Operations .........................................................
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 static inline HYPRE_Int hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
                                                 HYPRE_Int key )
 {
@@ -397,9 +399,7 @@ static inline HYPRE_Int hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
   HYPRE_Int hash = hypre_Hash(key);
 
   //CHECK IF ALREADY CONTAIN ................
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   hypre_HopscotchSegment *segment = &s->segments[hash & s->segmentMask];
-#endif
   HYPRE_Int bucket = hash & s->bucketMask;
   hypre_uint hopInfo = s->hopInfo[bucket];
 
@@ -412,9 +412,7 @@ static inline HYPRE_Int hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
     else return 0;
   }
 
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   HYPRE_Int startTimestamp = segment->timestamp;
-#endif
   while (0 != hopInfo)
   {
     HYPRE_Int i = first_lsb_bit_indx(hopInfo);
@@ -425,10 +423,8 @@ static inline HYPRE_Int hypre_UnorderedIntSetContains( hypre_UnorderedIntSet *s,
     hopInfo &= ~(1U << i);
   } 
 
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   if (segment->timestamp == startTimestamp)
     return 0;
-#endif
 
   HYPRE_Int i;
   for (i = 0; i< HYPRE_HOPSCOTCH_HASH_HOP_RANGE; ++i)
@@ -449,9 +445,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
   HYPRE_Int hash = hypre_Hash(key);
 
   //CHECK IF ALREADY CONTAIN ................
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   hypre_HopscotchSegment *segment = &m->segments[hash & m->segmentMask];
-#endif
   hypre_HopscotchBucket *elmAry = &(m->table[hash & m->bucketMask]);
   hypre_uint hopInfo = elmAry->hopInfo;
   if (0 == hopInfo)
@@ -463,9 +457,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
     else return -1;
   }
 
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   HYPRE_Int startTimestamp = segment->timestamp;
-#endif
   while (0 != hopInfo)
   {
     HYPRE_Int i = first_lsb_bit_indx(hopInfo);
@@ -475,10 +467,8 @@ static inline HYPRE_Int hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
     hopInfo &= ~(1U << i);
   } 
 
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   if (segment->timestamp == startTimestamp)
     return -1;
-#endif
 
   hypre_HopscotchBucket *currBucket = &(m->table[hash & m->bucketMask]);
   HYPRE_Int i;
@@ -489,6 +479,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapGet( hypre_UnorderedIntMap *m,
   }
   return -1;
 }
+#endif
 
 //status Operations .........................................................
 static inline HYPRE_Int hypre_UnorderedIntSetSize(hypre_UnorderedIntSet *s)
@@ -524,6 +515,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapSize(hypre_UnorderedIntMap *m)
 HYPRE_Int *hypre_UnorderedIntSetCopyToArray( hypre_UnorderedIntSet *s, HYPRE_Int *len );
 
 //modification Operations ...................................................
+#ifdef HYPRE_CONCURRENT_HOPSCOTCH
 static inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
                                       HYPRE_Int key )
 {
@@ -531,10 +523,8 @@ static inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
   HYPRE_Int hash = hypre_Hash(key);
 
   //LOCK KEY HASH ENTERY ....................
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   hypre_HopscotchSegment  *segment = &s->segments[hash & s->segmentMask];
   omp_set_lock(&segment->lock);
-#endif
   HYPRE_Int bucket = hash&s->bucketMask;
 
   //CHECK IF ALREADY CONTAIN ................
@@ -546,9 +536,7 @@ static inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
 
     if(hash == s->hash[currElm] && key == s->key[currElm])
     {
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
       omp_unset_lock(&segment->lock);
-#endif
       return;
     }
     hopInfo &= ~(1U << i);
@@ -559,11 +547,7 @@ static inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
   HYPRE_Int free_dist = 0;
   for ( ; free_dist < HYPRE_HOPSCOTCH_HASH_INSERT_RANGE; ++free_dist, ++free_bucket)
   {
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
     if( (HYPRE_HOPSCOTCH_HASH_EMPTY == s->hash[free_bucket]) && (HYPRE_HOPSCOTCH_HASH_EMPTY == hypre_compare_and_swap((HYPRE_Int *)&s->hash[free_bucket], (HYPRE_Int)HYPRE_HOPSCOTCH_HASH_EMPTY, (HYPRE_Int)HYPRE_HOPSCOTCH_HASH_BUSY)) )
-#else
-    if( (HYPRE_HOPSCOTCH_HASH_EMPTY == s->hash[free_bucket]) )
-#endif
       break;
   }
 
@@ -578,15 +562,11 @@ static inline void hypre_UnorderedIntSetPut( hypre_UnorderedIntSet *s,
         s->hash[free_bucket] = hash;
         s->hopInfo[bucket]  |= 1U << free_dist;
 
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
         omp_unset_lock(&segment->lock);
-#endif
         return;
       }
       hypre_UnorderedIntSetFindCloserFreeBucket(s,
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
                                                 segment,
-#endif
                                                 &free_bucket, &free_dist);
     } while (-1 != free_bucket);
   }
@@ -604,10 +584,8 @@ static inline HYPRE_Int hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap 
   HYPRE_Int hash = hypre_Hash(key);
 
   //LOCK KEY HASH ENTERY ....................
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
   hypre_HopscotchSegment *segment = &m->segments[hash & m->segmentMask];
   omp_set_lock(&segment->lock);
-#endif
   hypre_HopscotchBucket* startBucket = &(m->table[hash & m->bucketMask]);
 
   //CHECK IF ALREADY CONTAIN ................
@@ -619,9 +597,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap 
     if (hash == currElm->hash && key == currElm->key)
     {
       HYPRE_Int rc = currElm->data;
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
       omp_unset_lock(&segment->lock);
-#endif
       return rc;
     }
     hopInfo &= ~(1U << i);
@@ -632,11 +608,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap 
   HYPRE_Int free_dist = 0;
   for ( ; free_dist < HYPRE_HOPSCOTCH_HASH_INSERT_RANGE; ++free_dist, ++free_bucket)
   {
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
     if( (HYPRE_HOPSCOTCH_HASH_EMPTY == free_bucket->hash) && (HYPRE_HOPSCOTCH_HASH_EMPTY == __sync_val_compare_and_swap((HYPRE_Int *)&free_bucket->hash, (HYPRE_Int)HYPRE_HOPSCOTCH_HASH_EMPTY, (HYPRE_Int)HYPRE_HOPSCOTCH_HASH_BUSY)) )
-#else
-    if( (HYPRE_HOPSCOTCH_HASH_EMPTY == free_bucket->hash) )
-#endif
       break;
   }
 
@@ -651,15 +623,11 @@ static inline HYPRE_Int hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap 
         free_bucket->key      = key;
         free_bucket->hash     = hash;
         startBucket->hopInfo |= 1U << free_dist;
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
         omp_unset_lock(&segment->lock);
-#endif
         return HYPRE_HOPSCOTCH_HASH_EMPTY;
       }
       hypre_UnorderedIntMapFindCloserFreeBucket(m,
-#ifdef HYPRE_CONCURRENT_HOPSCOTCH
                                                 segment,
-#endif
                                                 &free_bucket, &free_dist);
     } while (NULL != free_bucket);
   }
@@ -670,6 +638,7 @@ static inline HYPRE_Int hypre_UnorderedIntMapPutIfAbsent( hypre_UnorderedIntMap 
   exit(1);
   return HYPRE_HOPSCOTCH_HASH_EMPTY;
 }
+#endif
 
 #ifdef __cplusplus
 } // extern "C"
