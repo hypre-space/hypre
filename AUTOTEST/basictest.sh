@@ -99,3 +99,7 @@ for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
+
+# Clean up
+( cd $src_dir; make distclean )
+

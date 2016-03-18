@@ -773,7 +773,11 @@ if (HYPRE_USING_OPENMP)
 endif (HYPRE_USING_OPENMP)
 
 # Turn optimization off for this file
-set_source_files_properties (lapack/dlamch.c PROPERTIES COMPILE_FLAGS /Od)
+if (MSVC)
+  set_source_files_properties (lapack/dlamch.c PROPERTIES COMPILE_FLAGS /Od)
+else ()
+  set_source_files_properties (lapack/dlamch.c PROPERTIES COMPILE_FLAGS -O0)
+endif ()
 
 if (MSVC)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)

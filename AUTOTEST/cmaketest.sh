@@ -13,6 +13,8 @@
 
 testname=`basename $0 .sh`
 
+drivers="ij new_ij sstruct struct ams_driver maxwell_unscaled sstruct_fac ij_mv struct_migrate"
+
 # Echo usage information
 case $1 in
    -h|-help)
@@ -94,7 +96,7 @@ make $mopts install
 cd $src_dir/test/cmbuild
 cmake ..
 make $mopts
-mv -f ij new_ij sstruct struct ams_driver maxwell_unscaled sstruct_fac ij_mv struct_migrate ..
+mv -f $drivers ..
 
 cd $test_dir
 
@@ -115,3 +117,11 @@ for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
+
+# Clean up
+cd $src_dir
+rm -fr `echo cmbuild/* | sed 's/[^ ]*README.txt//g'`
+rm -fr `echo test/cmbuild/* | sed 's/[^ ]*README.txt//g'`
+rm -fr hypre
+( cd $src_dir/test; rm -f $drivers; cleantest.sh )
+
