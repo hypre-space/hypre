@@ -13,39 +13,24 @@
 #include "_hypre_parcsr_mv.h"
 
 #include "_hypre_utilities.h"
-#include "../parcsr_mv/_hypre_parcsr_mv.h"
+#include "hypre_hopscotch_hash.h"
+#include "_hypre_parcsr_mv.h"
+
+/* RDF: The following prototype already exists in _hypre_parcsr_ls.h, so
+ * something needs to be reorganized here.*/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 hypre_CSRMatrix *
 hypre_ExchangeRAPData( hypre_CSRMatrix *RAP_int, hypre_ParCSRCommPkg *comm_pkg_RT);                                                                                                               
 /* reference seems necessary to prevent a problem with the
    "headers" script... */
 
-void hypre_ParCSRMatrixExtractBExt_Arrays(
-   HYPRE_Int ** pB_ext_i,
-   HYPRE_Int ** pB_ext_j,
-   HYPRE_Complex ** pB_ext_data,
-   HYPRE_Int ** pB_ext_row_map,
-   HYPRE_Int * num_nonzeros,
-   HYPRE_Int data,
-   HYPRE_Int find_row_map,
-   MPI_Comm comm,
-   hypre_ParCSRCommPkg * comm_pkg,
-   HYPRE_Int num_cols_B,
-   HYPRE_Int num_recvs,
-   HYPRE_Int num_sends,
-   HYPRE_Int first_col_diag,
-   HYPRE_Int * row_starts,
-   HYPRE_Int * recv_vec_starts,
-   HYPRE_Int * send_map_starts,
-   HYPRE_Int * send_map_elmts,
-   HYPRE_Int * diag_i,
-   HYPRE_Int * diag_j,
-   HYPRE_Int * offd_i,
-   HYPRE_Int * offd_j,
-   HYPRE_Int * col_map_offd,
-   HYPRE_Real * diag_data,
-   HYPRE_Real * offd_data
-   );
+#ifdef __cplusplus
+}
+#endif
 
 /* The following function was formerly part of hypre_ParMatmul
    but was removed so it can also be used for multiplication of
@@ -1116,6 +1101,7 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    HYPRE_Int start_index;
    /*HYPRE_Int jrow;*/
    HYPRE_Int num_rows_B_ext;
+   HYPRE_Int *prefix_sum_workspace;
 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -1155,13 +1141,16 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
    jdata_recv_vec_starts = hypre_CTAlloc(HYPRE_Int, num_recvs+1);
    jdata_send_map_starts[0] = B_int_i[0] = 0;
 
-   HYPRE_Int prefix_sum_workspace[(hypre_NumThreads() + 1)*num_sends];
+   /*HYPRE_Int prefix_sum_workspace[(hypre_NumThreads() + 1)*num_sends];*/
+   prefix_sum_workspace = hypre_TAlloc(HYPRE_Int, (hypre_NumThreads() + 1)*num_sends);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i,j,k)
 #endif
    {
-      HYPRE_Int counts[num_sends];
+      /*HYPRE_Int counts[num_sends];*/
+      HYPRE_Int *counts;
+      counts = hypre_TAlloc(HYPRE_Int, num_sends);
       for (i=0; i < num_sends; i++)
       {
         HYPRE_Int j_begin, j_end;
@@ -1439,7 +1428,9 @@ void hypre_ParCSRMatrixExtractBExt_Arrays_Overlap(
           }
         } // !data
       } /* for each send target */
+      hypre_TFree(counts);
    } /* omp parallel. JSP: this takes most of time in this function */
+   hypre_TFree(prefix_sum_workspace);
 
    tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
    hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;

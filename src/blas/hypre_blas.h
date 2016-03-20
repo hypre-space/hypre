@@ -10,15 +10,16 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /* hypre_blas.h  --  Contains BLAS prototypes needed by Hypre */
 
 #ifndef HYPRE_BLAS_H
 #define HYPRE_BLAS_H
 #include "f2c.h"
 #include "fortran.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* --------------------------------------------------------------------------
  *   Change all names to hypre_ to avoid link conflicts
@@ -116,5 +117,9 @@ HYPRE_Int dtrsv_ ( char *uplo , char *trans , char *diag , integer *n , doublere
 
 /* idamax.c */
 integer idamax_ ( integer *n , doublereal *dx , integer *incx );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

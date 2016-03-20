@@ -9,3 +9,5 @@ long range interpolation
 long-range interpolation
 monstrously long
 get a long msg
+utilities/hypre_hopscotch_hash.h:  //return _InterlockedCompareExchange
+utilities/hypre_hopscotch_hash.h:  //return _InterlockedExchangeAdd

@@ -773,10 +773,27 @@ if (HYPRE_USING_OPENMP)
 endif (HYPRE_USING_OPENMP)
 
 # Turn optimization off for this file
-set_source_files_properties (lapack/dlamch.c PROPERTIES COMPILE_FLAGS -O0)
+if (MSVC)
+  set_source_files_properties (lapack/dlamch.c PROPERTIES COMPILE_FLAGS /Od)
+else ()
+  set_source_files_properties (lapack/dlamch.c PROPERTIES COMPILE_FLAGS -O0)
+endif ()
 
 if (MSVC)
   add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  # Use the C++ compiler to compile these files to get around lack of C99 support
+  set_source_files_properties (utilities/hypre_hopscotch_hash.c PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (utilities/hypre_merge_sort.c     PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (seq_mv/csr_matop.c               PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_mv/par_csr_matop.c        PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_mv/par_csr_matvec.c       PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/aux_interp.c           PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_coarsen.c          PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_cgc_coarsen.c      PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_jacobi_interp.c    PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_rap.c              PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_relax.c            PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_strength.c         PROPERTIES COMPILE_FLAGS /TP)
 endif ()
 
 if (HYPRE_USING_FEI)

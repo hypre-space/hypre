@@ -12,8 +12,8 @@ void hypre_prefix_sum(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int *workspace)
 #pragma omp barrier
 #pragma omp master
    {
-      workspace[0] = 0;
       HYPRE_Int i;
+      workspace[0] = 0;
       for (i = 1; i < num_threads; i++)
       {
          workspace[i + 1] += workspace[i];
@@ -45,10 +45,10 @@ void hypre_prefix_sum_pair(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_ou
 #pragma omp barrier
 #pragma omp master
    {
+      HYPRE_Int i;
       workspace[0] = 0;
       workspace[1] = 0;
 
-      HYPRE_Int i;
       for (i = 1; i < num_threads; i++)
       {
          workspace[(i + 1)*2] += workspace[i*2];
@@ -88,11 +88,11 @@ void hypre_prefix_sum_triple(HYPRE_Int *in_out1, HYPRE_Int *sum1, HYPRE_Int *in_
 #pragma omp barrier
 #pragma omp master
    {
+      HYPRE_Int i;
       workspace[0] = 0;
       workspace[1] = 0;
       workspace[2] = 0;
 
-      HYPRE_Int i;
       for (i = 1; i < num_threads; i++)
       {
          workspace[(i + 1)*3] += workspace[i*3];
@@ -141,12 +141,12 @@ void hypre_prefix_sum_multiple(HYPRE_Int *in_out, HYPRE_Int *sum, HYPRE_Int n, H
 #pragma omp barrier
 #pragma omp master
    {
+      HYPRE_Int t;
       for (i = 0; i < n; i++)
       {
          workspace[i] = 0;
       }
 
-      HYPRE_Int t;
       // assuming n is not so big, we don't parallelize this loop
       for (t = 1; t < num_threads; t++)
       {

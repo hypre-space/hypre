@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 /******************************************************************************
  *
  * Relaxation scheme
@@ -26,8 +22,15 @@
 #ifdef HYPRE_USING_ESSL
 #include <essl.h>
 #else
+/* RDF: This needs to be integrated with the hypre blas/lapack stuff */
+#ifdef __cplusplus
+extern "C" {
+#endif
 HYPRE_Int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
 HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *b, HYPRE_Int*, HYPRE_Int *);
+#ifdef __cplusplus
+}
+#endif
 #endif
 
 /*--------------------------------------------------------------------------
@@ -4285,13 +4288,12 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 }
 
 
-HYPRE_Int hypre_GaussElimSolve (void *amg_vdata, HYPRE_Int level, HYPRE_Int relax_type)
+HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYPRE_Int relax_type)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_GS_ELIM_SOLVE] -= hypre_MPI_Wtime();
 #endif
 
-   hypre_ParAMGData *amg_data = amg_vdata;
    hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
    HYPRE_Int  n        = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int  error_flag = 0;
@@ -4371,10 +4373,9 @@ HYPRE_Int hypre_GaussElimSolve (void *amg_vdata, HYPRE_Int level, HYPRE_Int rela
 }
 
 
-HYPRE_Int gselim(A,x,n)
-HYPRE_Real *A;
-HYPRE_Real *x;
-HYPRE_Int n;
+HYPRE_Int gselim(HYPRE_Real *A,
+                 HYPRE_Real *x,
+                 HYPRE_Int n)
 {
    HYPRE_Int    err_flag = 0;
    HYPRE_Int    j,k,m;

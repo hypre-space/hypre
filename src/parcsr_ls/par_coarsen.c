@@ -2018,6 +2018,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
    HYPRE_Real	    wall_time;
    HYPRE_Int   iter = 0;
 
+   HYPRE_Int *prefix_sum_workspace;
 
 
 #if 0 /* debugging */
@@ -2503,7 +2504,8 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
       * Update subgraph
       *------------------------------------------------*/
 
-    HYPRE_Int prefix_sum_workspace[2*(hypre_NumThreads() + 1)];
+    /*HYPRE_Int prefix_sum_workspace[2*(hypre_NumThreads() + 1)];*/
+    prefix_sum_workspace = hypre_TAlloc(HYPRE_Int, 2*(hypre_NumThreads() + 1));
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(ig,i)
@@ -2578,6 +2580,9 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
      temp = graph_array_offd;
      graph_array_offd = graph_array_offd2;
      graph_array_offd2 = temp;
+
+     hypre_TFree(prefix_sum_workspace);
+     
    } /* end while */
 
    /*   hypre_printf("*** MIS iteration %d\n",iter);

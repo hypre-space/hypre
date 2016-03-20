@@ -21,6 +21,7 @@
 
 
 #include "_hypre_parcsr_ls.h"
+#include "hypre_hopscotch_hash.h"
 
 
 /*==========================================================================*/
@@ -135,6 +136,8 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    HYPRE_Int			num_sends;
    HYPRE_Int		       *int_buf_data;
    HYPRE_Int			index, start, j;
+
+   HYPRE_Int *prefix_sum_workspace;
    
    /*--------------------------------------------------------------
     * Compute a  ParCSR strength matrix, S.
@@ -229,7 +232,8 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
       hypre_TFree(int_buf_data);
    }
 
-   HYPRE_Int prefix_sum_workspace[2*(hypre_NumThreads() + 1)];
+   /*HYPRE_Int prefix_sum_workspace[2*(hypre_NumThreads() + 1)];*/
+   prefix_sum_workspace = hypre_TAlloc(HYPRE_Int, 2*(hypre_NumThreads() + 1));
 
    /* give S same nonzero structure as A */
 
@@ -517,6 +521,7 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
 
    *S_ptr        = S;
 
+   hypre_TFree(prefix_sum_workspace);
    hypre_TFree(dof_func_offd);
    hypre_TFree(S_temp_diag_j);
    hypre_TFree(S_temp_offd_j);
@@ -1199,7 +1204,11 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
    HYPRE_Int *S_ext_i = NULL;
    HYPRE_Int *S_ext_j = NULL;
 
-   HYPRE_Int prefix_sum_workspace[2*(hypre_NumThreads() + 1)];
+   /*HYPRE_Int prefix_sum_workspace[2*(hypre_NumThreads() + 1)];*/
+   HYPRE_Int *prefix_sum_workspace;
+   HYPRE_Int *num_coarse_prefix_sum;
+   prefix_sum_workspace = hypre_TAlloc(HYPRE_Int, 2*(hypre_NumThreads() + 1));
+   num_coarse_prefix_sum = hypre_TAlloc(HYPRE_Int, hypre_NumThreads() + 1);
 
    /*-----------------------------------------------------------------------
     *  Extract S_ext, i.e. portion of B that is stored on neighbor procs
@@ -1233,7 +1242,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
       coarse_to_fine = hypre_TAlloc(HYPRE_Int, num_cols_diag_S);
    }
 
-   HYPRE_Int num_coarse_prefix_sum[hypre_NumThreads() + 1];
+   /*HYPRE_Int num_coarse_prefix_sum[hypre_NumThreads() + 1];*/
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i)
@@ -2276,6 +2285,9 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_CREATE_2NDS] += hypre_MPI_Wtime();
 #endif
+
+   hypre_TFree(prefix_sum_workspace);
+   hypre_TFree(num_coarse_prefix_sum);
 
    return 0;
    

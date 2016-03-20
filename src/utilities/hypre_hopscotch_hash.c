@@ -137,8 +137,11 @@ void hypre_UnorderedIntMapDestroy( hypre_UnorderedIntMap *m)
 
 HYPRE_Int *hypre_UnorderedIntSetCopyToArray( hypre_UnorderedIntSet *s, HYPRE_Int *len )
 {
-  HYPRE_Int prefix_sum_workspace[hypre_NumThreads() + 1];
+  /*HYPRE_Int prefix_sum_workspace[hypre_NumThreads() + 1];*/
+  HYPRE_Int *prefix_sum_workspace;
   HYPRE_Int *ret_array = NULL;
+
+  prefix_sum_workspace = hypre_TAlloc(HYPRE_Int, hypre_NumThreads() + 1);
 
 #ifdef HYPRE_CONCURRENT_HOPSCOTCH
 #pragma omp parallel
@@ -173,6 +176,8 @@ HYPRE_Int *hypre_UnorderedIntSetCopyToArray( hypre_UnorderedIntSet *s, HYPRE_Int
       if (HYPRE_HOPSCOTCH_HASH_EMPTY != s->hash[i]) ret_array[cnt++] = s->key[i];
     }
   }
+
+  hypre_TFree(prefix_sum_workspace);
 
   return ret_array;
 }

@@ -10,15 +10,16 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /* hypre_lapack.h  --  Contains LAPACK prototypes needed by Hypre */
 
 #ifndef HYPRE_LAPACK_H
 #define HYPRE_LAPACK_H
 #include "f2c.h"
 #include "fortran.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* --------------------------------------------------------------------------
  *  Change all names to hypre_ to avoid link conflicts
@@ -340,5 +341,9 @@ HYPRE_Int dlasq5_ ( integer *i0 , integer *n0 , doublereal *z__ , integer *pp , 
 
 /* dlasq6.c */
 HYPRE_Int dlasq6_ ( integer *i0 , integer *n0 , doublereal *z__ , integer *pp , doublereal *dmin__ , doublereal *dmin1 , doublereal *dmin2 , doublereal *dn , doublereal *dnm1 , doublereal *dnm2 );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

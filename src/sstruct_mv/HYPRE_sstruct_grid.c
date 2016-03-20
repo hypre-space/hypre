@@ -403,7 +403,6 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
 
    neighbor = &neighbors[part][nneighbors[part]];
    nbor_offset = nbor_offsets[part][nneighbors[part]];
-   nneighbors[part]++;
 
    box = hypre_SStructNeighborBox(neighbor);
    hypre_CopyToCleanIndex(ilower, ndim, cilower);
@@ -411,6 +410,12 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
    hypre_BoxInit(box, ndim);
    hypre_BoxSetExtents(box, cilower, ciupper);
    hypre_SetIndex(nbor_offset, 0);
+
+   /* If the neighbor box is empty, return */
+   if ( !(hypre_BoxVolume(box) > 0) )
+   {
+      return hypre_error_flag;
+   }
 
    hypre_SStructNeighborPart(neighbor) = nbor_part;
 
@@ -443,6 +448,8 @@ HYPRE_SStructGridSetNeighborPart( HYPRE_SStructGrid  grid,
       hypre_IndexD(dir, d) = 1;
       hypre_IndexD(ilower_mapped, d) = 0;
    }
+
+   nneighbors[part]++;
 
    return hypre_error_flag;
 }
@@ -489,7 +496,6 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
 
    neighbor = &neighbors[part][nneighbors[part]];
    nbor_offset = nbor_offsets[part][nneighbors[part]];
-   nneighbors[part]++;
 
    box = hypre_SStructNeighborBox(neighbor);
    hypre_CopyToCleanIndex(ilower, ndim, cilower);
@@ -497,6 +503,12 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
    hypre_BoxInit(box, ndim);
    hypre_BoxSetExtents(box, cilower, ciupper);
    hypre_CopyToCleanIndex(offset, ndim, nbor_offset);
+
+   /* If the neighbor box is empty, return */
+   if ( !(hypre_BoxVolume(box) > 0) )
+   {
+      return hypre_error_flag;
+   }
 
    hypre_SStructNeighborPart(neighbor) = shared_part;
 
@@ -522,7 +534,9 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
       {
          hypre_IndexD(ilower_mapped, dd) = hypre_IndexD(shared_iupper, dd);
       }
-      /* map the offset to the neighbor part and adjust ilower_mapped */
+      /* Map the offset to the neighbor part and adjust ilower_mapped so that
+       * NeighborILower is a direct mapping of NeighborBoxIMin.  This allows us
+       * to eliminate shared_offset. */
       offset_mapped[dd] = offset[d]*dir[d];
       if (offset_mapped[dd] != shared_offset[dd])
       {
@@ -535,6 +549,8 @@ HYPRE_SStructGridSetSharedPart( HYPRE_SStructGrid  grid,
       hypre_IndexD(dir, d) = 1;
       hypre_IndexD(ilower_mapped, d) = 0;
    }
+
+   nneighbors[part]++;
 
    return hypre_error_flag;
 }
@@ -712,10 +728,11 @@ HYPRE_SStructGridAssemble( HYPRE_SStructGrid grid )
             /* Create var-centered vneighbor box from cell-centered neighbor box */
             hypre_CopyBox(hypre_SStructNeighborBox(neighbor), box);
             hypre_SStructCellBoxToVarBox(box, nbor_offset, varoffset, &valid);
-            /* It is possible to have empty vneighbor boxes.  For example, if
-             * only faces are shared (see SetSharedPart), then the vneighbor
-             * boxes for cell variables will be empty. */
-            if ( !(valid && hypre_BoxVolume(box)) )
+            /* Sometimes we can't construct vneighbor boxes (valid = false).
+             * For example, if only faces are shared (see SetSharedPart), then
+             * there should be no vneighbor boxes for cell variables.  Note that
+             * we ensure nonempty neighbor boxes when they are set up. */
+            if (!valid)
             {
                continue;
             }
