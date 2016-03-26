@@ -1125,23 +1125,15 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
             hypre_SStructVarToNborVar(grid, pi, vi, coord, &vj);
 
             /* intersect with grid for part pi */
-
             hypre_CopyBox(hypre_SStructNeighborBox(vneighbor), vn_box);
-            /* if pi is not the owner, grow the vneighbor box */
-            if (pi > pj)
-            {
-               hypre_BoxGrowByIndex(vn_box, varoffset);
-            }
+            /* always grow the vneighbor box */
+            hypre_BoxGrowByIndex(vn_box, varoffset);
             hypre_SStructGridIntersect(grid, pi, vi, vn_box, 0, &pi_entries, &npi_entries);
 
             /* intersect with grid for part pj */
-
             hypre_CopyBox(hypre_SStructNeighborBox(vneighbor), vn_box);
-            /* if pj is not the owner, grow the vneighbor box */
-            if (pj > pi)
-            {
-               hypre_BoxGrowByIndex(vn_box, varoffset);
-            }
+            /* always grow the vneighbor box */
+            hypre_BoxGrowByIndex(vn_box, varoffset);
             /* map vneighbor box to part pj index space */
             hypre_SStructBoxToNborBox(vn_box, imin0, imin1, coord, dir);
             hypre_SStructGridIntersect(grid, pj, vj, vn_box, 0, &pj_entries, &npj_entries);
@@ -1179,10 +1171,8 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                      hypre_BoxGrowByIndex(pj_box, varoffset);
                   }
 
-                  /* intersect the vneighbor box with the pi and pj boxes */
-                  hypre_CopyBox(hypre_SStructNeighborBox(vneighbor), int_box);
-                  hypre_IntersectBoxes(int_box, pi_box, int_box);
-                  hypre_IntersectBoxes(int_box, pj_box, int_box);
+                  /* intersect the pi and pj boxes */
+                  hypre_IntersectBoxes(pi_box, pj_box, int_box);
 
                   /* if there is an intersection, compute communication info */
                   if (hypre_BoxVolume(int_box))
