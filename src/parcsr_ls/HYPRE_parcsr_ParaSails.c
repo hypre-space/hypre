@@ -360,7 +360,7 @@ HYPRE_ParaSailsSetup( HYPRE_Solver solver,
    static HYPRE_Int virgin = 1;
    HYPRE_DistributedMatrix mat;
    Secret *secret = (Secret *) solver;
-   int ierr;
+   HYPRE_Int ierr;
 
    /* The following call will also create the distributed matrix */
 
