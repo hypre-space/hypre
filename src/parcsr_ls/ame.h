@@ -44,7 +44,8 @@ typedef struct
 
    /* Eigensolver (LOBPCG) options */
    HYPRE_Int maxit;
-   HYPRE_Real tol;
+   HYPRE_Real atol;
+   HYPRE_Real rtol;
    HYPRE_Int print_level;
 
    /* Matrix-vector interface interpreter */
