@@ -126,7 +126,7 @@ HYPRE_Int
 lobpcg_initialize( lobpcg_Data* data )
 {
    (data->tolerance).absolute    = 1.0e-06;
-   (data->tolerance).relative    = 0.0;
+   (data->tolerance).relative    = 1.0e-06;
    (data->maxIterations)         = 500;
    (data->precondUsageMode)      = 0;
    (data->verbosityLevel)        = 0;
@@ -242,6 +242,16 @@ hypre_LOBPCGSetTol( void* pcg_vdata, HYPRE_Real tol )
    hypre_LOBPCGData *pcg_data	= pcg_vdata;
 
    lobpcg_absoluteTolerance(pcg_data->lobpcgData) = tol;
+ 
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_LOBPCGSetRTol( void* pcg_vdata, HYPRE_Real tol )
+{
+   hypre_LOBPCGData *pcg_data	= pcg_vdata;
+
+   lobpcg_relativeTolerance(pcg_data->lobpcgData) = tol;
  
    return hypre_error_flag;
 }
@@ -551,6 +561,12 @@ HYPRE_Int
 HYPRE_LOBPCGSetTol( HYPRE_Solver solver, HYPRE_Real tol )
 {
    return( hypre_LOBPCGSetTol( (void *) solver, tol ) );
+}
+
+HYPRE_Int
+HYPRE_LOBPCGSetRTol( HYPRE_Solver solver, HYPRE_Real tol )
+{
+   return( hypre_LOBPCGSetRTol( (void *) solver, tol ) );
 }
 
 HYPRE_Int

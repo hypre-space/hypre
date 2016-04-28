@@ -146,6 +146,12 @@ HYPRE_Int HYPRE_LOBPCGSetTol(HYPRE_Solver solver,
                        HYPRE_Real   tol);
 
 /**
+ * (Optional) Set the relative convergence tolerance.
+ **/
+HYPRE_Int HYPRE_LOBPCGSetRTol(HYPRE_Solver solver,
+                       HYPRE_Real   tol);
+
+/**
  * (Optional) Set maximum number of iterations.
  **/
 HYPRE_Int HYPRE_LOBPCGSetMaxIter(HYPRE_Solver solver,
