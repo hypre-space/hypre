@@ -133,7 +133,7 @@ HYPRE_Int hypre_AMEDestroy(void *esolver)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetAMSSolver(void *esolver,
-                          void *ams_solver)
+                                void *ams_solver)
 {
    hypre_AMEData *ame_data = esolver;
    ame_data -> precond = ams_solver;
@@ -148,7 +148,7 @@ HYPRE_Int hypre_AMESetAMSSolver(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetMassMatrix(void *esolver,
-                           hypre_ParCSRMatrix *M)
+                                 hypre_ParCSRMatrix *M)
 {
    hypre_AMEData *ame_data = esolver;
    ame_data -> M = M;
@@ -216,7 +216,7 @@ HYPRE_Int hypre_AMESetRTol(void *esolver,
  * hypre_AMESetPrintLevel
  *
  * Control how much information is printed during the solution iterations.
- * The defaut values is 1.
+ * The default values is 1.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetPrintLevel(void *esolver,
@@ -478,7 +478,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
  * Remove the component of b in the range of G, i.e., compute
  *              b = (I - G (G^t M G)^{-1} G^t M) b
  * This way b will be orthogonal to gradients of linear functions.
- * The problem with G^t M G is solved only approximatelly by PCG-AMG.
+ * The problem with G^t M G is solved only approximately by PCG-AMG.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMEDiscrDivFreeComponent(void *esolver, hypre_ParVector *b)
