@@ -360,11 +360,13 @@ HYPRE_ParaSailsSetup( HYPRE_Solver solver,
    static HYPRE_Int virgin = 1;
    HYPRE_DistributedMatrix mat;
    Secret *secret = (Secret *) solver;
+   HYPRE_Int ierr;
 
    /* The following call will also create the distributed matrix */
 
+   ierr = HYPRE_GetError(); HYPRE_ClearAllErrors();
    HYPRE_ConvertParCSRMatrixToDistributedMatrix( A, &mat );
-   if (hypre_error_flag) return hypre_error_flag;
+   if (hypre_error_flag) return hypre_error_flag |= ierr;
 
    if (virgin || secret->reuse == 0) /* call set up at least once */
    {
@@ -372,14 +374,14 @@ HYPRE_ParaSailsSetup( HYPRE_Solver solver,
       hypre_ParaSailsSetup(
          secret->obj, mat, secret->sym, secret->thresh, secret->nlevels,
          secret->filter, secret->loadbal, secret->logging);
-      if (hypre_error_flag) return hypre_error_flag;
+      if (hypre_error_flag) return hypre_error_flag |= ierr;
    }
    else /* reuse is true; this is a subsequent call */
    {
       /* reuse pattern: always use filter value of 0 and loadbal of 0 */
       hypre_ParaSailsSetupValues(secret->obj, mat,
                                  0.0, 0.0, secret->logging);
-      if (hypre_error_flag) return hypre_error_flag;
+      if (hypre_error_flag) return hypre_error_flag |= ierr;
    }
 
    HYPRE_DistributedMatrixDestroy(mat);
