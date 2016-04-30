@@ -38,7 +38,8 @@ void * hypre_AMECreate()
 
    ame_data -> block_size = 1;  /* compute 1 eigenvector */
    ame_data -> maxit = 100;     /* perform at most 100 iterations */
-   ame_data -> tol = 1e-6;      /* convergence tolerance */
+   ame_data -> atol = 1e-6;     /* absolute convergence tolerance */
+   ame_data -> rtol = 1e-6;     /* relative convergence tolerance */
    ame_data -> print_level = 1; /* print max residual norm at each step */
 
    /* These will be computed during setup */
@@ -132,7 +133,7 @@ HYPRE_Int hypre_AMEDestroy(void *esolver)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetAMSSolver(void *esolver,
-                          void *ams_solver)
+                                void *ams_solver)
 {
    hypre_AMEData *ame_data = esolver;
    ame_data -> precond = ams_solver;
@@ -147,7 +148,7 @@ HYPRE_Int hypre_AMESetAMSSolver(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetMassMatrix(void *esolver,
-                           hypre_ParCSRMatrix *M)
+                                 hypre_ParCSRMatrix *M)
 {
    hypre_AMEData *ame_data = esolver;
    ame_data -> M = M;
@@ -186,14 +187,28 @@ HYPRE_Int hypre_AMESetMaxIter(void *esolver,
 /*--------------------------------------------------------------------------
  * hypre_AMESetTol
  *
- * Set the convergence tolerance. The default value is 1e-8.
+ * Set the absolute convergence tolerance. The default value is 1e-6.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetTol(void *esolver,
                           HYPRE_Real tol)
 {
    hypre_AMEData *ame_data = esolver;
-   ame_data -> tol = tol;
+   ame_data -> atol = tol;
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_AMESetRTol
+ *
+ * Set the relative convergence tolerance. The default value is 1e-6.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_AMESetRTol(void *esolver,
+			   HYPRE_Real tol)
+{
+   hypre_AMEData *ame_data = esolver;
+   ame_data -> rtol = tol;
    return hypre_error_flag;
 }
 
@@ -201,7 +216,7 @@ HYPRE_Int hypre_AMESetTol(void *esolver,
  * hypre_AMESetPrintLevel
  *
  * Control how much information is printed during the solution iterations.
- * The defaut values is 1.
+ * The default values is 1.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetPrintLevel(void *esolver,
@@ -463,7 +478,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
  * Remove the component of b in the range of G, i.e., compute
  *              b = (I - G (G^t M G)^{-1} G^t M) b
  * This way b will be orthogonal to gradients of linear functions.
- * The problem with G^t M G is solved only approximatelly by PCG-AMG.
+ * The problem with G^t M G is solved only approximately by PCG-AMG.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMEDiscrDivFreeComponent(void *esolver, hypre_ParVector *b)
@@ -581,8 +596,8 @@ HYPRE_Int hypre_AMESolve(void *esolver)
    blap_fn.dsygv  = hypre_F90_NAME_LAPACK(dsygv,DSYGV);
    blap_fn.dpotrf = hypre_F90_NAME_LAPACK(dpotrf,DPOTRF);
 #endif
-   lobpcg_tol.relative = ame_data -> tol;
-   lobpcg_tol.absolute = ame_data -> tol;
+   lobpcg_tol.relative = ame_data -> rtol;
+   lobpcg_tol.absolute = ame_data -> atol;
    residuals = hypre_TAlloc(HYPRE_Real, ame_data -> block_size);
 
    lobpcg_solve((mv_MultiVectorPtr) ame_data -> eigenvectors,
