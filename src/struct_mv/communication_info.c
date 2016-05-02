@@ -614,12 +614,6 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
     * Initializations
     *------------------------------------------------------*/
 
-   hypre_SetIndex(ilower, 0);
-   hypre_SetIndex(iupper, 0);
-   hypre_SetIndex(istart, 0);
-   hypre_SetIndex(istop, 0);
-   hypre_SetIndex(sgindex, 0);
-
    local_boxes = hypre_StructGridBoxes(grid);
    num_boxes   = hypre_BoxArraySize(local_boxes);
    num_periods = hypre_StructGridNumPeriods(grid);

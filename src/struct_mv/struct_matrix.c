@@ -1208,7 +1208,6 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
    hypre_BoxArray      *grid_boxes;
    hypre_Box           *grid_box;
    hypre_BoxArray      *data_boxes;
-   hypre_BoxArray      *data_space;
    hypre_Box           *data_box;
    HYPRE_Complex       *matp;
    HYPRE_Int            i, j, s, istart, istop;
@@ -1226,7 +1225,6 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
       grid_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(matrix));
    }
    data_boxes = hypre_StructMatrixDataBoxes(matrix);
-   data_space = hypre_StructMatrixDataSpace(matrix);
 
    if (boxnum < 0)
    {
@@ -1563,7 +1561,6 @@ hypre_StructMatrixClearValues( hypre_StructMatrix *matrix,
 {
    hypre_BoxArray      *grid_boxes;
    hypre_Box           *grid_box;
-   hypre_BoxArray      *data_space;
    hypre_BoxArray      *data_boxes;
    hypre_Box           *data_box;
 
@@ -1584,7 +1581,6 @@ hypre_StructMatrixClearValues( hypre_StructMatrix *matrix,
       grid_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(matrix));
    }
    data_boxes = hypre_StructMatrixDataBoxes(matrix);
-   data_space = hypre_StructMatrixDataSpace(matrix);
 
    if (boxnum < 0)
    {

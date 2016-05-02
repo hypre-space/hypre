@@ -59,7 +59,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             num_levels;
                      
    hypre_Index           cindex;
-   hypre_Index           findex;
    hypre_Index           stride;
 
    hypre_Index           coarsen;
@@ -258,7 +257,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       /* set cindex, findex, and stride */
       hypre_PFMGSetCIndex(cdir, cindex);
-      hypre_PFMGSetFIndex(cdir, findex);
       hypre_PFMGSetStride(cdir, stride);
 
       /* update dxyz and coarsen cbox*/
@@ -326,7 +324,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       cdir = cdir_l[l];
 
       hypre_PFMGSetCIndex(cdir, cindex);
-      hypre_PFMGSetFIndex(cdir, findex);
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation and restriction operators */
@@ -836,8 +833,6 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
    HYPRE_Real             diag_product = 1.0;
    HYPRE_Int              zero_diag = 0;
 
-   HYPRE_Int              constant_coefficient; 
-
    /*----------------------------------------------------------
     * Initialize some things
     *----------------------------------------------------------*/
@@ -846,8 +841,6 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
    hypre_SetIndex3(diag_offset, 0, 0, 0);
 
    /* Need to modify here */
-   constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
-
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
    hypre_ForBoxI(i, compute_boxes)
    {
