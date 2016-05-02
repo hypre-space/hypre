@@ -11,30 +11,27 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 testname=`basename $0 .sh`
 
 # Echo usage information
 case $1 in
    -h|-help)
-cat <<EOF
+      cat <<EOF
 
    **** Only run this script on a Mac ****
 
    $0 [-h|-help] {src_dir}
 
-   where: {src_dir}  is the hypre source directory
-          -h|-help   prints this usage information and exits
+   where: -h|-help   prints this usage information and exits
+          {src_dir}  is the hypre source directory
 
    This script runs a number of tests suitable for a Mac.
 
-   Example usage: $0 ..
+   Example usage: $0 ../src
 
 EOF
-   exit
-   ;;
+      exit
+      ;;
 esac
 
 # Setup
@@ -42,16 +39,28 @@ test_dir=`pwd`
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
-src_dir=$1
+src_dir=`cd $1; pwd`
 shift
 
-# Make sure that we don't check for a working Fortran compiler
-copts=--disable-fortran
+# This is needed for some reason
 export CXX="mpicxx"
 
-# Test runtest tests
-./test.sh default.sh $src_dir $copts
-mv -f default.??? $output_dir
+# Basic build and run tests
+# Make sure that we don't check for a working Fortran compiler
+mo="test"
+ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
+
+co="--disable-fortran"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro
+renametest.sh basictest $output_dir/basictest-default
+
+co="--enable-debug --disable-fortran"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+renametest.sh basictest $output_dir/basictest--enable-debug
+
+co="--enable-bigint --disable-fortran"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+renametest.sh basictest $output_dir/basictest--enable-bigint
 
 # Test linking for different languages
 link_opts="all++"
@@ -61,18 +70,6 @@ do
    mkdir -p $output_subdir
    ./test.sh link.sh $src_dir $opt
    mv -f link.??? $output_subdir
-done
-
-# Test other builds
-configure_opts="--enable-bigint --enable-debug"
-for opt in $configure_opts
-do
-   ./test.sh configure.sh $src_dir $opt $copts
-   output_subdir=$output_dir/build$opt
-   mkdir -p $output_subdir
-   mv -f configure.??? $output_subdir
-   ./test.sh make.sh $src_dir test
-   mv -f make.??? $output_subdir
 done
 
 # Echo to stderr all nonempty error files in $output_dir

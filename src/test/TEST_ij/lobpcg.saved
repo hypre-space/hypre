@@ -1,0 +1,12 @@
+# Output file: lobpcg.out.vfromfile
+Eigenvalue lambda   2.43042158313018e-01
+Eigenvalue lambda   4.79521039879659e-01
+Residual   7.81004874790696e-08
+Residual   1.50184070584915e-07
+
+# Output file: lobpcg.out.vout.1
+Eigenvalue lambda   2.43042158443256e-01
+Eigenvalue lambda   4.79521045718664e-01
+Residual   1.70192416688541e-05
+Residual   8.81917842407598e-05
+

@@ -11,9 +11,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 testname=`basename $0 .sh`
 
 # Echo usage information
@@ -25,12 +22,12 @@ case $1 in
 
    $0 [-h|-help] {src_dir}
 
-   where: {src_dir}  is the hypre source directory
-          -h|-help   prints this usage information and exits
+   where: -h|-help   prints this usage information and exits
+          {src_dir}  is the hypre source directory
 
    This script runs a number of compiler tests suitable for the tux machines.
 
-   Example usage: $0 ..
+   Example usage: $0 ../src
 
 EOF
       exit
@@ -42,7 +39,7 @@ test_dir=`pwd`
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
-src_dir=$1
+src_dir=`cd $1; pwd`
 shift
 
 # Test other builds (last one is the default build)
