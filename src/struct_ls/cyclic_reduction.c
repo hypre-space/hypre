@@ -236,6 +236,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
    HYPRE_Real             *a_cc, *a_cw, *a_ce;
    HYPRE_Real             *ac_cc, *ac_cw, *ac_ce;
+   HYPRE_Real              accm1, accp1;
                     
    HYPRE_Int               iA, iAm1, iAp1;
    HYPRE_Int               iAc;
@@ -339,13 +340,25 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             iAm1 = iA - offsetA;
             iAp1 = iA + offsetA;
 
-            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
+            /* Avoid division by zero along domain boundaries */
+            accm1 = 1.0;
+            accp1 = 1.0;
+            if (a_cc[iAm1] != 0.0)
+            {
+               accm1 = a_cc[iAm1];
+            }
+            if (a_cc[iAp1] != 0.0)
+            {
+               accp1 = a_cc[iAp1];
+            }
+
+            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / accm1;
 
             ac_cc[iAc] = a_cc[iA]
-               - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
-               - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+               - a_cw[iA] * a_ce[iAm1] / accm1
+               - a_ce[iA] * a_cw[iAp1] / accp1;
 
-            ac_ce[iAc] = - a_ce[iA] *a_ce[iAp1] / a_cc[iAp1];
+            ac_ce[iAc] = - a_ce[iA] *a_ce[iAp1] / accp1;
 
          }
          hypre_BoxLoop2End(iA, iAc);
@@ -370,11 +383,23 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             iAm1 = iA - offsetA;
             iAp1 = iA + offsetA;
 
-            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
+            /* Avoid division by zero along domain boundaries */
+            accm1 = 1.0;
+            accp1 = 1.0;
+            if (a_cc[iAm1] != 0.0)
+            {
+               accm1 = a_cc[iAm1];
+            }
+            if (a_cc[iAp1] != 0.0)
+            {
+               accp1 = a_cc[iAp1];
+            }
+
+            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / accm1;
 
             ac_cc[iAc] = a_cc[iA]
-               - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
-               - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+               - a_cw[iA] * a_ce[iAm1] / accm1
+               - a_ce[iA] * a_cw[iAp1] / accp1;
          }
          hypre_BoxLoop2End(iA, iAc);
       }
