@@ -47,6 +47,12 @@ if (HYPRE_SEQUENTIAL)
   set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
 endif ()
 
+find_package(caliper)
+
+if (caliper_FOUND)
+  set(HYPRE_USING_CALIPER ON)
+endif()
+
 #   --with-examples         Build example codes.
 #   --with-fei              Use internal FEI routines.
 #   --with-superlu          Use internal SuperLU routines.
@@ -742,6 +748,10 @@ include_directories(struct_mv)
 include_directories(struct_ls)
 include_directories(sstruct_mv)
 include_directories(sstruct_ls)
+
+if (caliper_FOUND)
+  include_directories(${caliper_INCLUDE_DIR})
+endif()
 
 # Set library build type
 if (HYPRE_SHARED)

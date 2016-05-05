@@ -24,10 +24,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
 
-#include <cali.h>
-enum phases { PHASE_MAIN = 0, PHASE_LOOP = 1 };
-const char* phase_string[] = { "main", "loop" };
-
+#include <caliper/cali.h>
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCycle
@@ -122,6 +119,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Real   *S_vec;
 #endif
 
+#ifdef HYPRE_USING_CALIPER
+   cali_id_t iter_attr =
+     cali_create_attribute("hypre.par_cycle.level", CALI_TYPE_INT, CALI_ATTR_DEFAULT);
+#endif
+   
    /* Acquire data and allocate storage */
 
    num_threads = hypre_NumThreads();
@@ -247,11 +249,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
     * Main loop of cycling
     *--------------------------------------------------------------------*/
 
-   cali_id_t attr_phase = cali_create_attribute("hypre_main", CALI_TYPE_STRING, CALI_ATTR_DEFAULT);
-   cali_begin(attr_phase, phase_string[PHASE_MAIN], strlen(phase_string[PHASE_MAIN]));
-   cali_id_t attr_iter = cali_create_attribute("hypre_iter", CALI_TYPE_INT, CALI_ATTR_ASVALUE);
-   cali_begin(attr_phase, phase_string[PHASE_LOOP], strlen(phase_string[PHASE_LOOP]));
-
+#ifdef HYPRE_USING_CALIPER
+   cali_set_int(iter_attr, level);
+#endif
+   
    while (Not_Finished)
    {
       if (num_levels > 1)
@@ -609,8 +610,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          cycle_param = 1;
          if (level == num_levels-1) cycle_param = 3;
 
-         int64_t level64 = level;
-         cali_set(attr_iter, &level64, sizeof(int64_t));  /* set the level for caliper here */
+#ifdef HYPRE_USING_CALIPER
+         cali_set_int(iter_attr, level);  /* set the level for caliper here */
+#endif
       }
 
       else if (level != 0)
@@ -640,9 +642,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
          --level;
          cycle_param = 2;
-
-         int64_t level64 = level;
-         cali_set(attr_iter, &level64, sizeof(int64_t));  /* set the level for caliper here */
+         
+#ifdef HYPRE_USING_CALIPER
+         cali_set_int(iter_attr, level);  /* set the level for caliper here */
+#endif
       }
       else
       {
@@ -650,10 +653,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       }
    }
 
-   cali_end(attr_iter);  /* unset "iter" */
-   cali_end(attr_phase); /* end "loop" */
-   cali_end(attr_phase); /* end "main" */
-
+#ifdef HYPRE_USING_CALIPER
+   cali_end(iter_attr);  /* unset "iter" */
+#endif
+   
    hypre_ParAMGDataCycleOpCount(amg_data) = cycle_op_count;
 
    hypre_TFree(lev_counter);
