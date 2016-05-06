@@ -22,6 +22,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
+#include "caliper_instrumentation.h"
 
 /*--------------------------------------------------------------------
  * hypre_BoomerAMGSolve
@@ -127,6 +128,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 */
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
 
+   HYPRE_ANNOTATION_BEGIN("hypre.BoomerAMG.solve");
 
    /*-----------------------------------------------------------------------
     *    Write the solver parameters
@@ -193,6 +195,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
           hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
         }
         hypre_error(HYPRE_ERROR_GENERIC);
+        HYPRE_ANNOTATION_END("hypre.BoomerAMG.solve");
         return hypre_error_flag;
      }
 
@@ -361,6 +364,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       hypre_TFree(num_variables);
    }
 
+   HYPRE_ANNOTATION_END("hypre.BoomerAMG.solve");
+   
    return hypre_error_flag;
 }
 
