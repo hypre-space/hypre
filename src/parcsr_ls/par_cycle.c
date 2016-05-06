@@ -24,7 +24,9 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
 
+#ifdef HYPRE_USING_CALIPER
 #include <caliper/cali.h>
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCycle
