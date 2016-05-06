@@ -114,3 +114,6 @@
 
 /* As HYPRE_FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
+
+/* Define to 1 if Caliper instrumentation is enabled */
+#undef HYPRE_USING_CALIPER

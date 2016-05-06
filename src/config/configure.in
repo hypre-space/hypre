@@ -146,6 +146,8 @@ hypre_using_examples=no
 hypre_using_openmp=no
 hypre_using_insure=no
 
+hypre_using_caliper=no
+
 dnl *********************************************************************
 dnl * Initialize flag-check variables
 dnl *********************************************************************
@@ -302,6 +304,20 @@ AS_HELP_STRING([--enable-fortran],
  esac],
 [hypre_using_fortran=yes]
 )
+
+AC_ARG_ENABLE(caliper,
+AS_HELP_STRING([--enable-caliper],
+               [Use Caliper instrumentation (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_caliper=yes ;;
+    no)  hypre_using_caliper=no ;;
+    *)   hypre_using_caliper=yes ;;
+ esac]
+)
+if test "$hypre_using_caliper" = "yes"
+then
+  AC_DEFINE(HYPRE_USING_CALIPER, 1, [Using Caliper instrumentation])
+fi
 
 dnl *********************************************************************
 dnl * Determine if user provided C compiler or flags
@@ -775,6 +791,14 @@ AS_HELP_STRING([--with-MPI],
     no) hypre_using_mpi=no ;;
     *)  hypre_using_mpi=yes ;;
  esac]
+)
+
+AC_ARG_WITH(caliper-include,
+AS_HELP_STRING([--with-caliper-include=DIR],
+               [User specifies that cali.h is in DIR/caliper.]),
+[for cali_inc_dir in $withval; do
+    CALIPER_INCLUDE="$CALIPER_INCLUDE -I$cali_inc_dir"
+ done]
 )
 
 dnl *********************************************************************
@@ -1310,6 +1334,11 @@ AC_SUBST(HYPRE_LAPACK_SRC_DIR)
 AC_SUBST(HYPRE_LAPACK_FILES)
 AC_SUBST(LAPACKLIBDIRS)
 AC_SUBST(LAPACKLIBS)
+
+dnl *********************************************************************
+dnl * Caliper instrumentation
+dnl *********************************************************************
+AC_SUBST(CALIPER_INCLUDE)
 
 dnl *********************************************************************
 dnl * ar & ranlib substitution

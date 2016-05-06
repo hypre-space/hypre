@@ -15,7 +15,7 @@ include ../config/Makefile.config
 
 ## Euclid specific macros taken from distributed_ls/Euclid
 
-CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE} ${CALIPER_INCLUDE}
 
 C_COMPILE_FLAGS =\
  -I..\

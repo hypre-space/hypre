@@ -612,6 +612,7 @@ ac_default_prefix=`pwd`/hypre
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 AR
+CALIPER_INCLUDE
 LAPACKLIBS
 LAPACKLIBDIRS
 HYPRE_LAPACK_FILES
@@ -735,6 +736,7 @@ enable_hopscotch
 with_no_global_partition
 enable_global_partition
 enable_fortran
+enable_caliper
 with_LD
 with_LDFLAGS
 with_extra_incpath
@@ -763,6 +765,7 @@ with_fei
 with_superlu
 with_mli
 with_MPI
+with_caliper_include
 with_blas
 with_lapack
 '
@@ -1417,6 +1420,7 @@ Optional Features:
   --enable-global-partition
                           Use global partitioning (default is NO).
   --enable-fortran        Require a working Fortran compiler (default is YES).
+  --enable-caliper        Use Caliper instrumentation (default is NO).
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1506,6 +1510,8 @@ Optional Packages:
   --with-mli              Use MLI
   --with-MPI              DEFAULT: Compile with MPI. Selecting --without-MPI
                           may affect which compiler is chosen.
+  --with-caliper-include=DIR
+                          User specifies that cali.h is in DIR/caliper.
   --with-blas             Find a system-provided BLAS library
   --with-lapack           Find a system-provided LAPACK library
 
@@ -2084,6 +2090,8 @@ hypre_using_examples=no
 hypre_using_openmp=no
 hypre_using_insure=no
 
+hypre_using_caliper=no
+
 hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
 hypre_lapack_lib_old_style=no
@@ -2354,6 +2362,25 @@ else
 
 fi
 
+
+# Check whether --enable-caliper was given.
+if test "${enable_caliper+set}" = set; then
+  enableval=$enable_caliper; case "${enableval}" in
+    yes) hypre_using_caliper=yes ;;
+    no)  hypre_using_caliper=no ;;
+    *)   hypre_using_caliper=yes ;;
+ esac
+
+fi
+
+if test "$hypre_using_caliper" = "yes"
+then
+
+cat >>confdefs.h <<\_ACEOF
+#define HYPRE_USING_CALIPER 1
+_ACEOF
+
+fi
 
 if test "x$CC" = "x"
 then
@@ -2961,6 +2988,16 @@ if test "${with_MPI+set}" = set; then
     no) hypre_using_mpi=no ;;
     *)  hypre_using_mpi=yes ;;
  esac
+
+fi
+
+
+
+# Check whether --with-caliper-include was given.
+if test "${with_caliper_include+set}" = set; then
+  withval=$with_caliper_include; for cali_inc_dir in $withval; do
+    CALIPER_INCLUDE="$CALIPER_INCLUDE -I$cali_inc_dir"
+ done
 
 fi
 
@@ -8133,6 +8170,8 @@ _ACEOF
          fi
          ;;
    esac
+
+
 
 
 
