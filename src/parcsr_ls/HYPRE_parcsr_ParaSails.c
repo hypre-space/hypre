@@ -40,6 +40,10 @@
 /* #include "../parcsr_mv/par_vector.h" */
 #include "../parcsr_mv/_hypre_parcsr_mv.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /* If code is more mysterious, then it must be good */
 typedef struct
 {
@@ -132,14 +136,14 @@ HYPRE_ParCSRParaSailsSetup( HYPRE_Solver solver,
    {
       virgin = 0;
       hypre_ParaSailsSetup(
-         secret->obj, mat, secret->sym, secret->thresh, secret->nlevels,
+         secret->obj, &mat, secret->sym, secret->thresh, secret->nlevels,
          secret->filter, secret->loadbal, secret->logging);
       if (hypre_error_flag) return hypre_error_flag;
    }
    else /* reuse is true; this is a subsequent call */
    {
       /* reuse pattern: always use filter value of 0 and loadbal of 0 */
-      hypre_ParaSailsSetupValues(secret->obj, mat,
+      hypre_ParaSailsSetupValues(secret->obj, &mat,
                                  0.0, 0.0, secret->logging);
       if (hypre_error_flag) return hypre_error_flag;
    }
@@ -372,14 +376,14 @@ HYPRE_ParaSailsSetup( HYPRE_Solver solver,
    {
       virgin = 0;
       hypre_ParaSailsSetup(
-         secret->obj, mat, secret->sym, secret->thresh, secret->nlevels,
+         secret->obj, &mat, secret->sym, secret->thresh, secret->nlevels,
          secret->filter, secret->loadbal, secret->logging);
       if (hypre_error_flag) return hypre_error_flag |= ierr;
    }
    else /* reuse is true; this is a subsequent call */
    {
       /* reuse pattern: always use filter value of 0 and loadbal of 0 */
-      hypre_ParaSailsSetupValues(secret->obj, mat,
+      hypre_ParaSailsSetupValues(secret->obj, &mat,
                                  0.0, 0.0, secret->logging);
       if (hypre_error_flag) return hypre_error_flag |= ierr;
    }
@@ -629,3 +633,7 @@ HYPRE_ParaSailsBuildIJMatrix(HYPRE_Solver solver, HYPRE_IJMatrix *pij_A)
     
    return hypre_error_flag;
 }
+    
+#ifdef __cplusplus
+}
+#endif

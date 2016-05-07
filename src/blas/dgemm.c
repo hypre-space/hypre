@@ -7,7 +7,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dgemm_(char *transa, char *transb, integer *m, integer *
+/* Subroutine */ HYPRE_Int dgemm_(const char *transa,const char *transb, integer *m, integer *
 	n, integer *k, doublereal *alpha, doublereal *a, integer *lda, 
 	doublereal *b, integer *ldb, doublereal *beta, doublereal *c, integer 
 	*ldc)
@@ -21,9 +21,9 @@
     static logical nota, notb;
     static doublereal temp;
     static integer i, j, l;
-    extern logical hypre_lsame_(char *, char *);
+    extern logical hypre_lsame_(const char *,const char *);
     static integer nrowa, nrowb;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
 
 
 /*  Purpose   

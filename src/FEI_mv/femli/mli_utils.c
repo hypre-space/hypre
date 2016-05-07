@@ -1304,7 +1304,7 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
 
    /* allocate storage for lanzcos vectors */
 
-   lanczos = malloc(maxIter*localNRows*sizeof(double));
+   lanczos = (double*) malloc(maxIter*localNRows*sizeof(double));
    lanczos_p = lanczos;
 
    /*-----------------------------------------------------------------

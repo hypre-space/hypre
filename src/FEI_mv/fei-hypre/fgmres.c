@@ -44,15 +44,15 @@ typedef struct
    void     **z;
    void     *r;
    void     *matvec_data;
-   int     (*precond)();
-   int     (*precond_setup)();
+   int     (*precond)(void*, void*, void*, void*);
+   int     (*precond_setup)(void*, void*, void*, void*);
    void     *precond_data;
    int      num_iterations;
    int      logging;
    double  *norms;
    char    *log_file_name;
    int     precond_tol_update;
-   int     (*precond_update_tol)();
+	int     (*precond_update_tol)(int*,double);
 
 } hypre_FGMRESData;
 
@@ -96,7 +96,7 @@ void *hypre_FGMRESCreate()
 int hypre_FGMRESDestroy( void *fgmres_vdata )
 {
    int              i, ierr=0;
-   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+   hypre_FGMRESData *fgmres_data = (hypre_FGMRESData *) fgmres_vdata;
  
    if (fgmres_data)
    {
@@ -131,10 +131,10 @@ int hypre_FGMRESDestroy( void *fgmres_vdata )
  
 int hypre_FGMRESSetup( void *fgmres_vdata, void *A, void *b, void *x )
 {
-   hypre_FGMRESData *fgmres_data     = fgmres_vdata;
+	hypre_FGMRESData *fgmres_data     = (hypre_FGMRESData *) fgmres_vdata;
    int              k_dim            = (fgmres_data -> k_dim);
    int              max_iter         = (fgmres_data -> max_iter);
-   int            (*precond_setup)() = (fgmres_data -> precond_setup);
+   int            (*precond_setup)(void*, void*, void*, void*) = (fgmres_data -> precond_setup);
    void            *precond_data     = (fgmres_data -> precond_data);
    int              ierr = 0;
  
@@ -145,9 +145,9 @@ int hypre_FGMRESSetup( void *fgmres_vdata, void *A, void *b, void *x )
    if ((fgmres_data -> w) == NULL)
       (fgmres_data -> w) = hypre_ParKrylovCreateVector(b);
    if ((fgmres_data -> p) == NULL)
-      (fgmres_data -> p) = hypre_ParKrylovCreateVectorArray(k_dim+1,b);
+	   (fgmres_data -> p) = (void**) hypre_ParKrylovCreateVectorArray(k_dim+1,b);
    if ((fgmres_data -> z) == NULL)
-      (fgmres_data -> z) = hypre_ParKrylovCreateVectorArray(k_dim+1,b);
+	   (fgmres_data -> z) = (void**) hypre_ParKrylovCreateVectorArray(k_dim+1,b);
 
    if ((fgmres_data -> matvec_data) == NULL)
       (fgmres_data -> matvec_data) = hypre_ParKrylovMatvecCreate(A, x);
@@ -159,7 +159,7 @@ int hypre_FGMRESSetup( void *fgmres_vdata, void *A, void *b, void *x )
       if ((fgmres_data -> norms) == NULL)
          (fgmres_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
       if ((fgmres_data -> log_file_name) == NULL)
-         (fgmres_data -> log_file_name) = "fgmres.out.log";
+		  (fgmres_data -> log_file_name) = (char*) "fgmres.out.log";
    }
    return ierr;
 }
@@ -170,7 +170,7 @@ int hypre_FGMRESSetup( void *fgmres_vdata, void *A, void *b, void *x )
 
 int hypre_FGMRESSolve(void  *fgmres_vdata, void  *A, void  *b, void  *x)
 {
-   hypre_FGMRESData *fgmres_data  = fgmres_vdata;
+	hypre_FGMRESData *fgmres_data  = (hypre_FGMRESData *) fgmres_vdata;
    int 		     k_dim        = (fgmres_data -> k_dim);
    int 		     max_iter     = (fgmres_data -> max_iter);
    int 		     stop_crit    = (fgmres_data -> stop_crit);
@@ -181,14 +181,14 @@ int hypre_FGMRESSolve(void  *fgmres_vdata, void  *A, void  *b, void  *x)
    void            **p            = (fgmres_data -> p);
    void            **z            = (fgmres_data -> z);
 
-   int 	           (*precond)()   = (fgmres_data -> precond);
-   int 	            *precond_data = (fgmres_data -> precond_data);
+   int 	           (*precond)(void*, void*, void*, void*)   = (fgmres_data -> precond);
+   int 	            *precond_data = (int*) (fgmres_data -> precond_data);
 
    int             logging        = (fgmres_data -> logging);
    double         *norms          = (fgmres_data -> norms);
    
    int 	           tol_update     = (fgmres_data -> precond_tol_update);
-   int 	           (*update_tol)()= (fgmres_data -> precond_update_tol);
+   int 	           (*update_tol)(int*,double)= (fgmres_data -> precond_update_tol);
 
    int	           i, j, k, ierr = 0, iter, my_id, num_procs;
    double          *rs, **hh, *c, *s, t;
@@ -373,7 +373,7 @@ int hypre_FGMRESSolve(void  *fgmres_vdata, void  *A, void  *b, void  *x)
 int hypre_FGMRESSetKDim( void *fgmres_vdata, int k_dim )
 {
    int              ierr = 0;
-   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+   hypre_FGMRESData *fgmres_data = (hypre_FGMRESData *) fgmres_vdata;
  
    (fgmres_data -> k_dim) = k_dim;
  
@@ -387,7 +387,7 @@ int hypre_FGMRESSetKDim( void *fgmres_vdata, int k_dim )
 int hypre_FGMRESSetTol( void *fgmres_vdata, double tol )
 {
    int              ierr = 0;
-   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+   hypre_FGMRESData *fgmres_data = (hypre_FGMRESData *) fgmres_vdata;
  
    (fgmres_data -> tol) = tol;
  
@@ -401,7 +401,7 @@ int hypre_FGMRESSetTol( void *fgmres_vdata, double tol )
 int hypre_FGMRESSetMaxIter( void *fgmres_vdata, int max_iter )
 {
    int              ierr = 0;
-   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+   hypre_FGMRESData *fgmres_data = (hypre_FGMRESData *) fgmres_vdata;
  
    (fgmres_data -> max_iter) = max_iter;
  
@@ -415,7 +415,7 @@ int hypre_FGMRESSetMaxIter( void *fgmres_vdata, int max_iter )
 int hypre_FGMRESSetStopCrit( void *fgmres_vdata, double stop_crit )
 {
    int              ierr = 0;
-   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+   hypre_FGMRESData *fgmres_data = (hypre_FGMRESData *) fgmres_vdata;
  
    (fgmres_data -> stop_crit) = stop_crit;
  
@@ -426,11 +426,11 @@ int hypre_FGMRESSetStopCrit( void *fgmres_vdata, double stop_crit )
  * hypre_FGMRESSetPrecond
  *--------------------------------------------------------------------------*/
  
-int hypre_FGMRESSetPrecond( void *fgmres_vdata, int (*precond)(),
-                            int  (*precond_setup)(), void  *precond_data )
+int hypre_FGMRESSetPrecond( void *fgmres_vdata, int (*precond)(void*,void*,void*,void*),
+                            int  (*precond_setup)(void*,void*,void*,void*), void  *precond_data )
 {
    int              ierr = 0;
-   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+   hypre_FGMRESData *fgmres_data = (hypre_FGMRESData *) fgmres_vdata;
  
    (fgmres_data -> precond)        = precond;
    (fgmres_data -> precond_setup)  = precond_setup;
@@ -446,7 +446,7 @@ int hypre_FGMRESSetPrecond( void *fgmres_vdata, int (*precond)(),
 int hypre_FGMRESGetPrecond(void *fgmres_vdata, HYPRE_Solver *precond_data_ptr)
 {
    int              ierr = 0;
-   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+   hypre_FGMRESData *fgmres_data = (hypre_FGMRESData *) fgmres_vdata;
  
    *precond_data_ptr = (HYPRE_Solver)(fgmres_data -> precond_data);
  
@@ -460,7 +460,7 @@ int hypre_FGMRESGetPrecond(void *fgmres_vdata, HYPRE_Solver *precond_data_ptr)
 int hypre_FGMRESSetLogging( void *fgmres_vdata, int logging )
 {
    int              ierr = 0;
-   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+   hypre_FGMRESData *fgmres_data = (hypre_FGMRESData *) fgmres_vdata;
  
    (fgmres_data -> logging) = logging;
  
@@ -474,7 +474,7 @@ int hypre_FGMRESSetLogging( void *fgmres_vdata, int logging )
 int hypre_FGMRESGetNumIterations( void *fgmres_vdata, int *num_iterations )
 {
    int              ierr = 0;
-   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+   hypre_FGMRESData *fgmres_data = (hypre_FGMRESData *) fgmres_vdata;
  
    *num_iterations = (fgmres_data -> num_iterations);
  
@@ -489,7 +489,7 @@ int hypre_FGMRESGetFinalRelativeResidualNorm(void *fgmres_vdata,
                                              double *relative_residual_norm )
 {
    int 		    ierr = 0;
-   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+   hypre_FGMRESData *fgmres_data = (hypre_FGMRESData *) fgmres_vdata;
  
    *relative_residual_norm = (fgmres_data -> rel_residual_norm);
    
@@ -500,10 +500,10 @@ int hypre_FGMRESGetFinalRelativeResidualNorm(void *fgmres_vdata,
  * hypre_FGMRESUpdatePrecondTolerance
  *--------------------------------------------------------------------------*/
  
-int hypre_FGMRESUpdatePrecondTolerance(void *fgmres_vdata, int (*update_tol)())
+int hypre_FGMRESUpdatePrecondTolerance(void *fgmres_vdata, int (*update_tol)(int*, double))
 {
    int 		    ierr = 0;
-   hypre_FGMRESData *fgmres_data = fgmres_vdata;
+   hypre_FGMRESData *fgmres_data = (hypre_FGMRESData *) fgmres_vdata;
  
    (fgmres_data -> precond_tol_update) = 1;
    (fgmres_data -> precond_update_tol) = update_tol;

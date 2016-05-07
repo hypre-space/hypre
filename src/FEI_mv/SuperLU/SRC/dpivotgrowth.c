@@ -56,7 +56,7 @@ dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c,
     int      i, j, k, oldcol;
     int      *inv_perm_c;
     double   rpg, maxaj, maxuj;
-    extern   double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
+    extern   double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(const char *);
     double   smlnum;
     double   *luval;
    
@@ -64,12 +64,12 @@ dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c,
     smlnum = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("S");
     rpg = 1. / smlnum;
 
-    Astore = A->Store;
-    Lstore = L->Store;
-    Ustore = U->Store;
-    Aval = Astore->nzval;
-    Lval = Lstore->nzval;
-    Uval = Ustore->nzval;
+    Astore = (NCformat*) A->Store;
+    Lstore = (SCformat*) L->Store;
+    Ustore = (NCformat*) U->Store;
+    Aval = (double*) Astore->nzval;
+    Lval = (double*) Lstore->nzval;
+    Uval = (double*) Ustore->nzval;
     
     inv_perm_c = (int *) SUPERLU_MALLOC(A->ncol*sizeof(int));
     for (j = 0; j < A->ncol; ++j) inv_perm_c[perm_c[j]] = j;

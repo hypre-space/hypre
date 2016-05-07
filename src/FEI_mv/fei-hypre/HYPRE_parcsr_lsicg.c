@@ -40,8 +40,8 @@ extern int  hypre_LSICGSolve(void *, void  *, void  *, void  *);
 extern int  hypre_LSICGSetTol(void *, double);
 extern int  hypre_LSICGSetMaxIter(void *, int);
 extern int  hypre_LSICGSetStopCrit(void *, double);
-extern int  hypre_LSICGSetPrecond(void *, int (*precond)(),
-                                  int (*precond_setup)(), void *);
+extern int  hypre_LSICGSetPrecond(void *, int (*precond)(void*,void*,void*,void*),
+                                  int (*precond_setup)(void*,void*,void*,void*), void *);
 extern int  hypre_LSICGSetLogging(void *, int);
 extern int  hypre_LSICGGetNumIterations(void *,int *);
 extern int hypre_LSICGGetFinalRelativeResidualNorm(void *, double *);
@@ -127,7 +127,9 @@ int HYPRE_ParCSRLSICGSetPrecond( HYPRE_Solver  solver,
           void *precond_data )
 {
    return( hypre_LSICGSetPrecond( (void *) solver,
-                                precond, precond_setup, precond_data ) );
+								  (HYPRE_Int (*)(void*,void*,void*,void*))precond,
+								  (HYPRE_Int (*)(void*,void*,void*,void*))precond_setup,
+								  precond_data ) );
 }
 
 /*--------------------------------------------------------------------------

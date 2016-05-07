@@ -306,5 +306,5 @@ hypre_F90_IFACE(hypre_sstructflexgmresgetresidual, HYPRE_SSTRUCTFLEXGMRESGETRESI
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructFlexGMRESGetResidual(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          (void *)              *residual ) );
+          (void **)              *residual ) );
 }

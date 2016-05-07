@@ -18,7 +18,10 @@
  *      list[m-1] < value <= list[m].
  * The routine returns location m or -1.
  *--------------------------------------------------------------------------*/
-
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 HYPRE_Int hypre_LowerBinarySearch(HYPRE_Int *list, HYPRE_Int value, HYPRE_Int list_length)
 {
    HYPRE_Int low, high, m;
@@ -108,3 +111,7 @@ HYPRE_Int hypre_UpperBinarySearch(HYPRE_Int *list, HYPRE_Int value, HYPRE_Int li
 
    return -1;
 }
+    
+#ifdef __cplusplus
+}
+#endif

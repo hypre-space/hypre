@@ -357,7 +357,7 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
  *
  */
 {
-    NCformat *Astore = A->Store;
+    NCformat *Astore = (NCformat*) A->Store;
     int m, n, bnz = 0, *b_colptr, i;
     int delta, maxint, nofsub, *invp;
     int *b_rowind, *dhead, *qsize, *llist, *marker;

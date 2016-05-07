@@ -25,7 +25,7 @@ hypre_MaxwellSolve( void                * maxwell_vdata,
                     hypre_SStructVector * f,
                     hypre_SStructVector * u )
 {
-   hypre_MaxwellData     *maxwell_data = maxwell_vdata;
+	hypre_MaxwellData     *maxwell_data = (hypre_MaxwellData     *)maxwell_vdata;
 
    hypre_ParVector       *f_edge;
    hypre_ParVector       *u_edge;

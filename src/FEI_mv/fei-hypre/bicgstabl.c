@@ -57,8 +57,8 @@ typedef struct
 
    void  *matvec_data;
 
-   int    (*precond)();
-   int    (*precond_setup)();
+   int    (*precond)(void*, void*, void*, void*);
+   int    (*precond_setup)(void*, void*, void*, void*);
    void    *precond_data;
 
    /* log info (always logged) */
@@ -116,7 +116,7 @@ void * hypre_BiCGSTABLCreate( )
  
 int hypre_BiCGSTABLDestroy( void *bicgstab_vdata )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int ierr = 0;
  
    if (bicgstab_data)
@@ -155,9 +155,9 @@ int hypre_BiCGSTABLDestroy( void *bicgstab_vdata )
  
 int hypre_BiCGSTABLSetup( void *bicgstab_vdata, void *A, void *b, void *x         )
 {
-   hypre_BiCGSTABLData *bicgstab_data     = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data     = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int            max_iter         = (bicgstab_data -> max_iter);
-   int          (*precond_setup)() = (bicgstab_data -> precond_setup);
+   int          (*precond_setup)(void*, void*, void*, void*) = (bicgstab_data -> precond_setup);
    void          *precond_data     = (bicgstab_data -> precond_data);
    int            ierr = 0;
  
@@ -212,7 +212,7 @@ int hypre_BiCGSTABLSetup( void *bicgstab_vdata, void *A, void *b, void *x       
       if ((bicgstab_data -> norms) == NULL)
          (bicgstab_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
       if ((bicgstab_data -> log_file_name) == NULL)
-         (bicgstab_data -> log_file_name) = "bicgstab.out.log";
+		  (bicgstab_data -> log_file_name) = (char*) "bicgstab.out.log";
    }
  
    return ierr;
@@ -224,7 +224,7 @@ int hypre_BiCGSTABLSetup( void *bicgstab_vdata, void *A, void *b, void *x       
 
 int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
 {
-   hypre_BiCGSTABLData  *bicgstab_data   = bicgstab_vdata;
+	hypre_BiCGSTABLData  *bicgstab_data   = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int 		     max_iter     = (bicgstab_data -> max_iter);
    int 		     stop_crit    = (bicgstab_data -> stop_crit);
    double 	     accuracy     = (bicgstab_data -> tol);
@@ -244,8 +244,8 @@ int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
    void             *at           = (bicgstab_data -> at);
    void             *st           = (bicgstab_data -> st);
    void             *t2           = (bicgstab_data -> t2);
-   int 	           (*precond)()   = (bicgstab_data -> precond);
-   int 	            *precond_data = (bicgstab_data -> precond_data);
+   int 	           (*precond)(void*, void*, void*, void*)   = (bicgstab_data -> precond);
+   int 	            *precond_data = (int*) (bicgstab_data -> precond_data);
 
    /* logging variables */
    int             logging        = (bicgstab_data -> logging);
@@ -445,7 +445,7 @@ hypre_ParKrylovClearVector(x);
  
 int hypre_BiCGSTABLSetTol( void *bicgstab_vdata, double tol )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int            ierr = 0;
  
    (bicgstab_data -> tol) = tol;
@@ -459,7 +459,7 @@ int hypre_BiCGSTABLSetTol( void *bicgstab_vdata, double tol )
  
 int hypre_BiCGSTABLSetSize( void *bicgstab_vdata, int size )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int              ierr = 0;
  
    (bicgstab_data -> size) = size;
@@ -473,7 +473,7 @@ int hypre_BiCGSTABLSetSize( void *bicgstab_vdata, int size )
  
 int hypre_BiCGSTABLSetMaxIter( void *bicgstab_vdata, int max_iter )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int              ierr = 0;
  
    (bicgstab_data -> max_iter) = max_iter;
@@ -487,7 +487,7 @@ int hypre_BiCGSTABLSetMaxIter( void *bicgstab_vdata, int max_iter )
  
 int hypre_BiCGSTABLSetStopCrit( void *bicgstab_vdata, double stop_crit )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int            ierr = 0;
  
    (bicgstab_data -> stop_crit) = stop_crit;
@@ -499,10 +499,10 @@ int hypre_BiCGSTABLSetStopCrit( void *bicgstab_vdata, double stop_crit )
  * hypre_BiCGSTABLSetPrecond
  *--------------------------------------------------------------------------*/
  
-int hypre_BiCGSTABLSetPrecond( void  *bicgstab_vdata, int  (*precond)(),
-                       int  (*precond_setup)(), void  *precond_data )
+int hypre_BiCGSTABLSetPrecond( void  *bicgstab_vdata, int  (*precond)(void*, void*, void*, void*),
+                       int  (*precond_setup)(void*, void*, void*, void*), void  *precond_data )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int              ierr = 0;
  
    (bicgstab_data -> precond)        = precond;
@@ -518,7 +518,7 @@ int hypre_BiCGSTABLSetPrecond( void  *bicgstab_vdata, int  (*precond)(),
  
 int hypre_BiCGSTABLSetLogging( void *bicgstab_vdata, int logging)
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int              ierr = 0;
  
    (bicgstab_data -> logging) = logging;
@@ -532,7 +532,7 @@ int hypre_BiCGSTABLSetLogging( void *bicgstab_vdata, int logging)
  
 int hypre_BiCGSTABLGetNumIterations(void *bicgstab_vdata,int  *num_iterations)
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int              ierr = 0;
  
    *num_iterations = (bicgstab_data -> num_iterations);
@@ -547,7 +547,7 @@ int hypre_BiCGSTABLGetNumIterations(void *bicgstab_vdata,int  *num_iterations)
 int hypre_BiCGSTABLGetFinalRelativeResidualNorm( void   *bicgstab_vdata,
                                          double *relative_residual_norm )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int 		ierr = 0;
  
    *relative_residual_norm = (bicgstab_data -> rel_residual_norm);
@@ -606,8 +606,8 @@ typedef struct
 
    void  *matvec_data;
 
-   int    (*precond)();
-   int    (*precond_setup)();
+	int    (*precond)(void*,void*,void*,void*);
+	int    (*precond_setup)(void*,void*,void*,void*);
    void    *precond_data;
 
    /* log info (always logged) */
@@ -664,7 +664,7 @@ void * hypre_BiCGSTABLCreate( )
  
 int hypre_BiCGSTABLDestroy( void *bicgstab_vdata )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int i, ierr = 0;
  
    if (bicgstab_data)
@@ -701,9 +701,9 @@ int hypre_BiCGSTABLDestroy( void *bicgstab_vdata )
  
 int hypre_BiCGSTABLSetup( void *bicgstab_vdata, void *A, void *b, void *x         )
 {
-   hypre_BiCGSTABLData *bicgstab_data     = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data     = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int            max_iter         = (bicgstab_data -> max_iter);
-   int          (*precond_setup)() = (bicgstab_data -> precond_setup);
+   int          (*precond_setup)(void*,void*,void*,void*) = (bicgstab_data -> precond_setup);
    void          *precond_data     = (bicgstab_data -> precond_data);
    int            ierr = 0;
  
@@ -754,7 +754,7 @@ int hypre_BiCGSTABLSetup( void *bicgstab_vdata, void *A, void *b, void *x       
       if ((bicgstab_data -> norms) == NULL)
          (bicgstab_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
       if ((bicgstab_data -> log_file_name) == NULL)
-         (bicgstab_data -> log_file_name) = "bicgstab.out.log";
+		  (bicgstab_data -> log_file_name) = (char*)"bicgstab.out.log";
    }
  
    return ierr;
@@ -766,7 +766,7 @@ int hypre_BiCGSTABLSetup( void *bicgstab_vdata, void *A, void *b, void *x       
 
 int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
 {
-   hypre_BiCGSTABLData  *bicgstab_data   = bicgstab_vdata;
+	hypre_BiCGSTABLData  *bicgstab_data   =  (hypre_BiCGSTABLData *) bicgstab_vdata;
    int               size         = (bicgstab_data -> size);
    int 		     max_iter     = (bicgstab_data -> max_iter);
    int 		     stop_crit    = (bicgstab_data -> stop_crit);
@@ -787,8 +787,8 @@ int hypre_BiCGSTABLSolve(void  *bicgstab_vdata, void  *A, void  *b, void  *x)
    void             *xh           = (bicgstab_data -> xh);
    void             *t            = (bicgstab_data -> t);
 
-   int 	           (*precond)()   = (bicgstab_data -> precond);
-   int 	            *precond_data = (bicgstab_data -> precond_data);
+   int 	           (*precond)(void*,void*,void*,void*)   = (bicgstab_data -> precond);
+   int 	            *precond_data = (int*) (bicgstab_data -> precond_data);
 
    /* logging variables */
    int             logging        = (bicgstab_data -> logging);
@@ -965,7 +965,7 @@ hypre_ParKrylovClearVector(x);
  
 int hypre_BiCGSTABLSetTol( void *bicgstab_vdata, double tol )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data =  (hypre_BiCGSTABLData *) bicgstab_vdata;
    int            ierr = 0;
  
    (bicgstab_data -> tol) = tol;
@@ -979,7 +979,7 @@ int hypre_BiCGSTABLSetTol( void *bicgstab_vdata, double tol )
  
 int hypre_BiCGSTABLSetSize( void *bicgstab_vdata, int size )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data =  (hypre_BiCGSTABLData *) bicgstab_vdata;
    int              ierr = 0;
  
    (bicgstab_data -> size) = size;
@@ -993,7 +993,7 @@ int hypre_BiCGSTABLSetSize( void *bicgstab_vdata, int size )
  
 int hypre_BiCGSTABLSetMaxIter( void *bicgstab_vdata, int max_iter )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data =  (hypre_BiCGSTABLData *) bicgstab_vdata;
    int              ierr = 0;
  
    (bicgstab_data -> max_iter) = max_iter;
@@ -1007,7 +1007,7 @@ int hypre_BiCGSTABLSetMaxIter( void *bicgstab_vdata, int max_iter )
  
 int hypre_BiCGSTABLSetStopCrit( void *bicgstab_vdata, double stop_crit )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data =  (hypre_BiCGSTABLData *) bicgstab_vdata;
    int            ierr = 0;
  
    (bicgstab_data -> stop_crit) = stop_crit;
@@ -1019,10 +1019,10 @@ int hypre_BiCGSTABLSetStopCrit( void *bicgstab_vdata, double stop_crit )
  * hypre_BiCGSTABLSetPrecond
  *--------------------------------------------------------------------------*/
  
-int hypre_BiCGSTABLSetPrecond( void  *bicgstab_vdata, int  (*precond)(),
-                       int  (*precond_setup)(), void  *precond_data )
+int hypre_BiCGSTABLSetPrecond( void  *bicgstab_vdata, int  (*precond)(void*,void*,void*,void*),
+							   int  (*precond_setup)(void*,void*,void*,void*), void  *precond_data )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data =  (hypre_BiCGSTABLData *) bicgstab_vdata;
    int              ierr = 0;
  
    (bicgstab_data -> precond)        = precond;
@@ -1038,7 +1038,7 @@ int hypre_BiCGSTABLSetPrecond( void  *bicgstab_vdata, int  (*precond)(),
  
 int hypre_BiCGSTABLSetLogging( void *bicgstab_vdata, int logging)
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int              ierr = 0;
  
    (bicgstab_data -> logging) = logging;
@@ -1052,7 +1052,7 @@ int hypre_BiCGSTABLSetLogging( void *bicgstab_vdata, int logging)
  
 int hypre_BiCGSTABLGetNumIterations(void *bicgstab_vdata,int  *num_iterations)
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int              ierr = 0;
  
    *num_iterations = (bicgstab_data -> num_iterations);
@@ -1067,7 +1067,7 @@ int hypre_BiCGSTABLGetNumIterations(void *bicgstab_vdata,int  *num_iterations)
 int hypre_BiCGSTABLGetFinalRelativeResidualNorm( void   *bicgstab_vdata,
                                          double *relative_residual_norm )
 {
-   hypre_BiCGSTABLData *bicgstab_data = bicgstab_vdata;
+	hypre_BiCGSTABLData *bicgstab_data = (hypre_BiCGSTABLData *) bicgstab_vdata;
    int 		ierr = 0;
  
    *relative_residual_norm = (bicgstab_data -> rel_residual_norm);

@@ -36,7 +36,7 @@ void CheckIfFileExists(char *file)
    fclose(test);
 }
 
-void AMSDriverMatrixRead(char *file, HYPRE_ParCSRMatrix *A)
+void AMSDriverMatrixRead(const char *file, HYPRE_ParCSRMatrix *A)
 {
    FILE *test;
    char file0[100];

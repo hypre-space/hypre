@@ -56,9 +56,15 @@ typedef struct
 } hypre_AMEData;
 
 #include "fortran.h"
-
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 HYPRE_Int hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(char *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
 HYPRE_Int hypre_F90_NAME_LAPACK(dsygv,DSYGV)(HYPRE_Int *, char *, char *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *,
                                        HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

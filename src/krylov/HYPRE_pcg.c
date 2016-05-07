@@ -268,7 +268,8 @@ HYPRE_PCGSetPrecond( HYPRE_Solver         solver,
                      HYPRE_Solver         precond_solver )
 {
    return( hypre_PCGSetPrecond( (void *) solver,
-                                precond, precond_setup,
+                                (HYPRE_Int (*)(void*, void*, void*, void*))precond,
+								(HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
                                 (void *) precond_solver ) );
 }
 

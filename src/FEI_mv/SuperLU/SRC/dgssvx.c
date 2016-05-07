@@ -358,12 +358,12 @@ dgssvx(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r,
 
     /* External functions */
     extern double dlangs(char *, SuperMatrix *);
-    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(const char *);
 
-    Bstore = B->Store;
-    Xstore = X->Store;
-    Bmat   = Bstore->nzval;
-    Xmat   = Xstore->nzval;
+    Bstore = (DNformat*) B->Store;
+    Xstore = (DNformat*) X->Store;
+    Bmat   = (  double*) Bstore->nzval;
+    Xmat   = (  double*) Xstore->nzval;
     ldb    = Bstore->lda;
     ldx    = Xstore->lda;
     nrhs   = B->ncol;
@@ -454,10 +454,10 @@ printf("dgssvx: Fact=%4d, Trans=%4d, equed=%c\n",
     
     /* Convert A to SLU_NC format when necessary. */
     if ( A->Stype == SLU_NR ) {
-	NRformat *Astore = A->Store;
+	NRformat *Astore = (NRformat*) A->Store;
 	AA = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
 	dCreate_CompCol_Matrix(AA, A->ncol, A->nrow, Astore->nnz, 
-			       Astore->nzval, Astore->colind, Astore->rowptr,
+			       (double*) Astore->nzval, Astore->colind, Astore->rowptr,
 			       SLU_NC, A->Dtype, A->Mtype);
 	if ( notran ) { /* Reverse the transpose argument. */
 	    trant = TRANS;

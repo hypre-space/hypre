@@ -78,7 +78,7 @@
 	    *, integer *);
     static integer jp;
     extern integer idamax_(integer *, doublereal *, integer *);
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
 

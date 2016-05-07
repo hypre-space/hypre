@@ -19,6 +19,10 @@
 #include "_hypre_parcsr_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRPilutCreate
  *--------------------------------------------------------------------------*/
@@ -137,3 +141,6 @@ hypre_F90_IFACE(hypre_parcsrpilutsetfacrowsize, HYPRE_PARCSRPILUTSETFACROWSIZE)
            hypre_F90_PassInt (size)    ) );
 }
 
+#ifdef __cplusplus
+}
+#endif

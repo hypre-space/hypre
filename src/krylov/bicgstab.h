@@ -87,8 +87,8 @@ typedef struct
   HYPRE_Int  (*ScaleVector)   ( HYPRE_Complex alpha , void *x );
   HYPRE_Int  (*Axpy)          ( HYPRE_Complex alpha , void *x , void *y );
   HYPRE_Int  (*CommInfo)      ( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
-  HYPRE_Int  (*precond_setup) ();
-  HYPRE_Int  (*precond)       ();
+	HYPRE_Int  (*precond_setup) (void *vdata , void *A , void *b , void *x);
+	HYPRE_Int  (*precond)       (void *vdata , void *A , void *b , void *x);
 
 } hypre_BiCGSTABFunctions;
 

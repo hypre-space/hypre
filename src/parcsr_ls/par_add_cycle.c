@@ -30,7 +30,7 @@
 HYPRE_Int
 hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
 {
-   hypre_ParAMGData *amg_data = amg_vdata;
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
 
@@ -269,7 +269,7 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
 
 HYPRE_Int hypre_CreateLambda(void *amg_vdata)
 {
-   hypre_ParAMGData *amg_data = amg_vdata;
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
    MPI_Comm comm;
@@ -821,7 +821,7 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
 
 HYPRE_Int hypre_CreateDinv(void *amg_vdata)
 {
-   hypre_ParAMGData *amg_data = amg_vdata;
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
    hypre_ParCSRMatrix **A_array;

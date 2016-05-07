@@ -12,6 +12,10 @@
 
 #include "_hypre_utilities.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 HYPRE_Int hypre_SStructKrylovCopyVector( void *x, void *y );
 
 /*--------------------------------------------------------------------------
@@ -40,3 +44,6 @@ hypre_SStructKrylovIdentity( void *vdata,
    return( hypre_SStructKrylovCopyVector(b, x) );
 }
 
+#ifdef __cplusplus
+}
+#endif

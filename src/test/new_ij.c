@@ -30,6 +30,10 @@
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 HYPRE_Int BuildParFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParRhsFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParVector *b_ptr );
 
@@ -5667,4 +5671,8 @@ BuildParCoordinates( HYPRE_Int                  argc,
    *coord_ptr = coordinates;
    return (0);
 }
+
+#ifdef __cplusplus
+}
+#endif
 

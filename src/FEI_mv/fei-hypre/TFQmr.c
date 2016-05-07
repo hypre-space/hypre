@@ -52,8 +52,8 @@ typedef struct
 
    void  *matvec_data;
 
-   int    (*precond)();
-   int    (*precond_setup)();
+   int    (*precond)(void*, void*, void*, void*);
+   int    (*precond_setup)(void*, void*, void*, void*);
    void    *precond_data;
 
    /* log info (always logged) */
@@ -107,7 +107,7 @@ void * hypre_TFQmrCreate( )
  
 int hypre_TFQmrDestroy( void *tfqmr_vdata )
 {
-   hypre_TFQmrData *tfqmr_data = tfqmr_vdata;
+	hypre_TFQmrData *tfqmr_data = (hypre_TFQmrData *) tfqmr_vdata;
    int ierr = 0;
  
    if (tfqmr_data)
@@ -142,9 +142,9 @@ int hypre_TFQmrDestroy( void *tfqmr_vdata )
  
 int hypre_TFQmrSetup( void *tfqmr_vdata, void *A, void *b, void *x         )
 {
-   hypre_TFQmrData *tfqmr_data     = tfqmr_vdata;
+	hypre_TFQmrData *tfqmr_data     = (hypre_TFQmrData *) tfqmr_vdata;
    int            max_iter         = (tfqmr_data -> max_iter);
-   int          (*precond_setup)() = (tfqmr_data -> precond_setup);
+   int          (*precond_setup)(void*, void*, void*, void*) = (tfqmr_data -> precond_setup);
    void          *precond_data     = (tfqmr_data -> precond_data);
    int            ierr = 0;
  
@@ -190,7 +190,7 @@ int hypre_TFQmrSetup( void *tfqmr_vdata, void *A, void *b, void *x         )
       if ((tfqmr_data -> norms) == NULL)
          (tfqmr_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
       if ((tfqmr_data -> log_file_name) == NULL)
-         (tfqmr_data -> log_file_name) = "tfqmr.out.log";
+		  (tfqmr_data -> log_file_name) = (char*)"tfqmr.out.log";
    }
  
    return ierr;
@@ -202,7 +202,7 @@ int hypre_TFQmrSetup( void *tfqmr_vdata, void *A, void *b, void *x         )
 
 int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
 {
-   hypre_TFQmrData  *tfqmr_data    = tfqmr_vdata;
+	hypre_TFQmrData  *tfqmr_data    = (hypre_TFQmrData *) tfqmr_vdata;
    int 		     max_iter      = (tfqmr_data -> max_iter);
    int 		     stop_crit     = (tfqmr_data -> stop_crit);
    double 	     accuracy      = (tfqmr_data -> tol);
@@ -218,8 +218,8 @@ int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
    void             *v             = (tfqmr_data -> v);
    void             *d             = (tfqmr_data -> d);
    void             *t3            = (tfqmr_data -> t3);
-   int 	           (*precond)()    = (tfqmr_data -> precond);
-   int 	            *precond_data  = (tfqmr_data -> precond_data);
+   int 	           (*precond)(void*, void*, void*, void*)    = (tfqmr_data -> precond);
+   int 	            *precond_data  = (int*)(tfqmr_data -> precond_data);
 
    /* logging variables */
    int               logging       = (tfqmr_data -> logging);
@@ -375,7 +375,7 @@ int hypre_TFQmrSolve(void  *tfqmr_vdata, void  *A, void  *b, void  *x)
  
 int hypre_TFQmrSetTol( void *tfqmr_vdata, double tol )
 {
-   hypre_TFQmrData *tfqmr_data = tfqmr_vdata;
+	hypre_TFQmrData *tfqmr_data = (hypre_TFQmrData *) tfqmr_vdata;
    int            ierr = 0;
  
    (tfqmr_data -> tol) = tol;
@@ -389,7 +389,7 @@ int hypre_TFQmrSetTol( void *tfqmr_vdata, double tol )
  
 int hypre_TFQmrSetMaxIter( void *tfqmr_vdata, int max_iter )
 {
-   hypre_TFQmrData *tfqmr_data = tfqmr_vdata;
+	hypre_TFQmrData *tfqmr_data = (hypre_TFQmrData *) tfqmr_vdata;
    int              ierr = 0;
  
    (tfqmr_data -> max_iter) = max_iter;
@@ -403,7 +403,7 @@ int hypre_TFQmrSetMaxIter( void *tfqmr_vdata, int max_iter )
  
 int hypre_TFQmrSetStopCrit( void *tfqmr_vdata, double stop_crit )
 {
-   hypre_TFQmrData *tfqmr_data = tfqmr_vdata;
+	hypre_TFQmrData *tfqmr_data = (hypre_TFQmrData *) tfqmr_vdata;
    int            ierr = 0;
  
    (tfqmr_data -> stop_crit) = stop_crit;
@@ -415,10 +415,10 @@ int hypre_TFQmrSetStopCrit( void *tfqmr_vdata, double stop_crit )
  * hypre_TFQmrSetPrecond
  *--------------------------------------------------------------------------*/
  
-int hypre_TFQmrSetPrecond( void  *tfqmr_vdata, int  (*precond)(),
-                       int  (*precond_setup)(), void  *precond_data )
+int hypre_TFQmrSetPrecond( void  *tfqmr_vdata, int  (*precond)(void*,void*,void*,void*),
+						   int  (*precond_setup)(void*,void*,void*,void*), void  *precond_data )
 {
-   hypre_TFQmrData *tfqmr_data = tfqmr_vdata;
+	hypre_TFQmrData *tfqmr_data = (hypre_TFQmrData *) tfqmr_vdata;
    int              ierr = 0;
  
    (tfqmr_data -> precond)        = precond;
@@ -434,7 +434,7 @@ int hypre_TFQmrSetPrecond( void  *tfqmr_vdata, int  (*precond)(),
  
 int hypre_TFQmrSetLogging( void *tfqmr_vdata, int logging)
 {
-   hypre_TFQmrData *tfqmr_data = tfqmr_vdata;
+	hypre_TFQmrData *tfqmr_data = (hypre_TFQmrData *) tfqmr_vdata;
    int              ierr = 0;
  
    (tfqmr_data -> logging) = logging;
@@ -448,7 +448,7 @@ int hypre_TFQmrSetLogging( void *tfqmr_vdata, int logging)
  
 int hypre_TFQmrGetNumIterations(void *tfqmr_vdata,int  *num_iterations)
 {
-   hypre_TFQmrData *tfqmr_data = tfqmr_vdata;
+	hypre_TFQmrData *tfqmr_data = (hypre_TFQmrData *) tfqmr_vdata;
    int              ierr = 0;
  
    *num_iterations = (tfqmr_data -> num_iterations);
@@ -463,7 +463,7 @@ int hypre_TFQmrGetNumIterations(void *tfqmr_vdata,int  *num_iterations)
 int hypre_TFQmrGetFinalRelativeResidualNorm( void   *tfqmr_vdata,
                                          double *relative_residual_norm )
 {
-   hypre_TFQmrData *tfqmr_data = tfqmr_vdata;
+	hypre_TFQmrData *tfqmr_data = (hypre_TFQmrData *) tfqmr_vdata;
    int 		ierr = 0;
  
    *relative_residual_norm = (tfqmr_data -> rel_residual_norm);

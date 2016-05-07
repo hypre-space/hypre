@@ -111,6 +111,6 @@ distclean: clean
 
 # compile without optimization
 dlamch.o : dlamch.c ${LAPACK_HEADERS}
-	${CC} ${CFLAGS} -O0 -c dlamch.c
+	${CC} ${CFLAGS} -c dlamch.c
 
 ${OBJS}: ${LAPACK_HEADERS}

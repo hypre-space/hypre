@@ -7,12 +7,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-doublereal ddot_(n, dx, incx, dy, incy)
-integer *n;
-doublereal *dx;
-integer *incx;
-doublereal *dy;
-integer *incy;
+doublereal ddot_(int*n,double* dx,int* incx,double* dy,int* incy)
 {
     /* System generated locals */
     integer i__1;

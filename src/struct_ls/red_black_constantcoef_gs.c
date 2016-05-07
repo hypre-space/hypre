@@ -26,7 +26,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                               hypre_StructVector *b,
                               hypre_StructVector *x )
 {
-   hypre_RedBlackGSData  *relax_data = relax_vdata;
+	hypre_RedBlackGSData  *relax_data = (hypre_RedBlackGSData  *)relax_vdata;
 
    HYPRE_Int              max_iter    = (relax_data -> max_iter);
    HYPRE_Int              zero_guess  = (relax_data -> zero_guess);

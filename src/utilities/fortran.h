@@ -27,6 +27,10 @@
 
 #include "_hypre_utilities.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*-------------------------------------------------------
  * Define specific name mangling macros to be used below
  *-------------------------------------------------------*/
@@ -140,4 +144,9 @@ typedef HYPRE_Int     *hypre_F90_ObjRef;
 #define hypre_F90_PassObj(obj,arg)       ((obj) *arg)
 #define hypre_F90_PassObjRef(obj,arg)    ((obj *) arg)
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif
+

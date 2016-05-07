@@ -49,7 +49,7 @@ hypre_SysSemiInterpSetup( void                 *sys_interp_vdata,
                           hypre_Index           findex,
                           hypre_Index           stride       )
 {
-   hypre_SysSemiInterpData  *sys_interp_data = sys_interp_vdata;
+	hypre_SysSemiInterpData  *sys_interp_data = (hypre_SysSemiInterpData  *)sys_interp_vdata;
    void                    **sinterp_data;
 
    HYPRE_Int                 nvars;
@@ -88,7 +88,7 @@ hypre_SysSemiInterp( void                 *sys_interp_vdata,
                      hypre_SStructPVector *xc,
                      hypre_SStructPVector *e            )
 {
-   hypre_SysSemiInterpData  *sys_interp_data = sys_interp_vdata;
+   hypre_SysSemiInterpData  *sys_interp_data = (hypre_SysSemiInterpData  *)sys_interp_vdata;
    void                    **sinterp_data = (sys_interp_data -> sinterp_data);
    HYPRE_Int                 nvars = (sys_interp_data -> nvars);
 
@@ -117,7 +117,7 @@ hypre_SysSemiInterp( void                 *sys_interp_vdata,
 HYPRE_Int
 hypre_SysSemiInterpDestroy( void *sys_interp_vdata )
 {
-   hypre_SysSemiInterpData *sys_interp_data = sys_interp_vdata;
+   hypre_SysSemiInterpData *sys_interp_data = (hypre_SysSemiInterpData  *)sys_interp_vdata;
 
    HYPRE_Int             nvars;
    void                **sinterp_data;

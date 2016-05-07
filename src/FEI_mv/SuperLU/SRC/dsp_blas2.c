@@ -21,7 +21,7 @@
 #define USE_VENDOR_BLAS
 #endif
 
-extern int hypre_F90_NAME_BLAS(dtrsv,DTRSV)(char *,char *,char *,int *,double *,int *,double *,int *);
+extern int hypre_F90_NAME_BLAS(dtrsv,DTRSV)(const char *,const char *,const char *,int *,double *,int *,double *,int *);
 
 /* 
  * Function prototypes 
@@ -31,7 +31,7 @@ extern void sludlsolve(int, int, double*, double*);
 extern void sludmatvec(int, int, int, double*, double*, double*);
 
 int
-sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L, 
+sp_dtrsv(const char *uplo,const char *trans,const char *diag, SuperMatrix *L, 
          SuperMatrix *U, double *x, SuperLUStat_t *stat, int *info)
 {
 /*
@@ -119,10 +119,10 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 	return 0;
     }
 
-    Lstore = L->Store;
-    Lval = Lstore->nzval;
-    Ustore = U->Store;
-    Uval = Ustore->nzval;
+    Lstore = (SCformat*) L->Store;
+    Lval = (double*) Lstore->nzval;
+    Ustore = (NCformat*) U->Store;
+    Uval = (double*) Ustore->nzval;
     solve_ops = 0;
 
     if ( !(work = doubleCalloc(L->nrow)) )
@@ -314,7 +314,7 @@ sp_dtrsv(char *uplo, char *trans, char *diag, SuperMatrix *L,
 
 
 int
-sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x, 
+sp_dgemv(const char *trans, double alpha, SuperMatrix *A, double *x, 
 	 int incx, double beta, double *y, int incy)
 {
 /*  Purpose   
@@ -384,8 +384,8 @@ sp_dgemv(char *trans, double alpha, SuperMatrix *A, double *x,
     int notran;
 
     notran = superlu_lsame(trans, "N");
-    Astore = A->Store;
-    Aval = Astore->nzval;
+    Astore = (NCformat*) A->Store;
+    Aval = (double*) Astore->nzval;
     
     /* Test the input parameters */
     info = 0;

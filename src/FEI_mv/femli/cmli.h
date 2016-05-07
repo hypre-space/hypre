@@ -161,7 +161,7 @@ int MLI_MatrixDestroy( CMLI_Matrix *matrix );
 /* constructor and destructor for a "C" MLI vector object           */
 /* ---------------------------------------------------------------- */
 
-CMLI_Vector *MLI_VectorCreate(void *vector, char *name, 
+CMLI_Vector *MLI_VectorCreate(void *vector,const char *name, 
                               MLI_Function *destroy_func);
 
 int MLI_VectorDestroy(CMLI_Vector *vector);

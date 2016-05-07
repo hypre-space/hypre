@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dpotf2_(char *uplo, integer *n, doublereal *a, integer *
+/* Subroutine */ HYPRE_Int dpotf2_(const char *uplo, integer *n, doublereal *a, integer *
 	lda, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -73,19 +73,19 @@
     integer a_dim1, a_offset, i__1, i__2, i__3;
     doublereal d__1;
     /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
+    /*HYPRE_Real sqrt(doublereal);*/
     /* Local variables */
     extern doublereal ddot_(integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer j;
     extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
-    extern logical lsame_(char *, char *);
-    extern /* Subroutine */ HYPRE_Int dgemv_(char *, integer *, integer *, 
+    extern logical lsame_(const char *,const char *);
+    extern /* Subroutine */ HYPRE_Int dgemv_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *);
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
     static doublereal ajj;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 

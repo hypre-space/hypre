@@ -63,12 +63,12 @@
     /* System generated locals */
     integer a_dim1, a_offset, b_dim1, b_offset, i__1;
     /* Local variables */
-    extern logical lsame_(char *, char *);
-    extern /* Subroutine */ HYPRE_Int dtrsm_(char *, char *, char *, char *, 
+    extern logical lsame_(const char *,const char *);
+    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
 
 
     a_dim1 = *lda;

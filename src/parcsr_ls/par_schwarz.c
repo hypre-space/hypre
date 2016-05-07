@@ -76,7 +76,7 @@ hypre_SchwarzCreate()
 HYPRE_Int
 hypre_SchwarzDestroy( void *data )
 {
-      hypre_SchwarzData  *schwarz_data = data;
+	hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
 
    if (hypre_SchwarzDataScale(schwarz_data))
       hypre_TFree (hypre_SchwarzDataScale(schwarz_data));
@@ -103,7 +103,7 @@ hypre_SchwarzSetup(void               *schwarz_vdata,
                    hypre_ParVector    *u         )
 {
 
-   hypre_SchwarzData   *schwarz_data = schwarz_vdata;
+   hypre_SchwarzData   *schwarz_data = (hypre_SchwarzData*) schwarz_vdata;
    HYPRE_Int *dof_func;
    HYPRE_Real *scale;
    hypre_CSRMatrix *domain_structure;
@@ -184,7 +184,7 @@ hypre_SchwarzSolve(void               *schwarz_vdata,
                    hypre_ParVector    *f,
                    hypre_ParVector    *u         )
 {
-   hypre_SchwarzData   *schwarz_data = schwarz_vdata;
+   hypre_SchwarzData   *schwarz_data = (hypre_SchwarzData*) schwarz_vdata;
 
    hypre_CSRMatrix *domain_structure = 
 		hypre_SchwarzDataDomainStructure(schwarz_data);
@@ -237,7 +237,7 @@ hypre_SchwarzCFSolve(void               *schwarz_vdata,
                      HYPRE_Int *CF_marker,
                      HYPRE_Int rlx_pt)
 {
-   hypre_SchwarzData   *schwarz_data = schwarz_vdata;
+   hypre_SchwarzData   *schwarz_data = (hypre_SchwarzData*) schwarz_vdata;
 
    hypre_CSRMatrix *domain_structure = 
 		hypre_SchwarzDataDomainStructure(schwarz_data);
@@ -281,7 +281,7 @@ HYPRE_Int
 hypre_SchwarzSetVariant( void *data, HYPRE_Int variant )
 {
 
-   hypre_SchwarzData  *schwarz_data = data;
+   hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
  
    hypre_SchwarzDataVariant(schwarz_data) = variant;
    return hypre_error_flag;
@@ -292,7 +292,7 @@ HYPRE_Int
 hypre_SchwarzSetDomainType( void *data, HYPRE_Int domain_type )
 {
 
-   hypre_SchwarzData  *schwarz_data = data;
+   hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
  
    hypre_SchwarzDataDomainType(schwarz_data) = domain_type;
    return hypre_error_flag;
@@ -303,7 +303,7 @@ HYPRE_Int
 hypre_SchwarzSetOverlap( void *data, HYPRE_Int overlap )
 {
 
-   hypre_SchwarzData  *schwarz_data = data;
+   hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
  
    hypre_SchwarzDataOverlap(schwarz_data) = overlap;
 
@@ -314,7 +314,7 @@ HYPRE_Int
 hypre_SchwarzSetNumFunctions( void *data, HYPRE_Int num_functions )
 {
 
-   hypre_SchwarzData  *schwarz_data = data;
+   hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
  
    hypre_SchwarzDataNumFunctions(schwarz_data) = num_functions;
 
@@ -325,7 +325,7 @@ HYPRE_Int
 hypre_SchwarzSetNonSymm( void *data, HYPRE_Int value )
 {
 
-   hypre_SchwarzData  *schwarz_data = data;
+   hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
  
    hypre_SchwarzDataUseNonSymm(schwarz_data) = value;
 
@@ -337,7 +337,7 @@ HYPRE_Int
 hypre_SchwarzSetRelaxWeight( void *data, HYPRE_Real relax_weight )
 {
 
-   hypre_SchwarzData  *schwarz_data = data;
+   hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
  
    hypre_SchwarzDataRelaxWeight(schwarz_data) = relax_weight;
 
@@ -348,7 +348,7 @@ HYPRE_Int
 hypre_SchwarzSetDomainStructure( void *data, hypre_CSRMatrix *domain_structure )
 {
 
-   hypre_SchwarzData  *schwarz_data = data;
+   hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
  
    hypre_SchwarzDataDomainStructure(schwarz_data) = domain_structure;
 
@@ -359,7 +359,7 @@ HYPRE_Int
 hypre_SchwarzSetScale( void *data, HYPRE_Real *scale)
 {
 
-   hypre_SchwarzData  *schwarz_data = data;
+   hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
  
    hypre_SchwarzDataScale(schwarz_data) = scale;
 
@@ -372,7 +372,7 @@ hypre_SchwarzReScale( void *data, HYPRE_Int size, HYPRE_Real value)
 
    HYPRE_Int i;
    HYPRE_Real *scale;
-   hypre_SchwarzData  *schwarz_data = data;
+   hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
 
    scale = hypre_SchwarzDataScale(schwarz_data);
    for (i=0; i < size; i++)
@@ -386,7 +386,7 @@ HYPRE_Int
 hypre_SchwarzSetDofFunc( void *data, HYPRE_Int *dof_func)
 {
 
-   hypre_SchwarzData  *schwarz_data = data;
+   hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
  
    hypre_SchwarzDataDofFunc(schwarz_data) = dof_func;
 

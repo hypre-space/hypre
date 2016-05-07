@@ -10,11 +10,16 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
+
+	
 #include "_hypre_utilities.h"
+
+
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
@@ -23,7 +28,9 @@
 /* begin lobpcg */
 
 #include <time.h>
- 
+
+
+    
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
 #include "interpreter.h"
@@ -36,6 +43,10 @@
  
 #define DEBUG 0
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * Data structures
  *--------------------------------------------------------------------------*/
@@ -5706,3 +5717,7 @@ main( hypre_int argc,
 
    return (0);
 }
+    
+#ifdef __cplusplus
+}
+#endif

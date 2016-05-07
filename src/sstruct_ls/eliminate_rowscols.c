@@ -16,6 +16,10 @@
 #include "_hypre_parcsr_mv.h"
 #include "eliminate_rowscols.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 HYPRE_Int hypre_ParCSRMatrixEliminateRowsCols (hypre_ParCSRMatrix *A,
                                          HYPRE_Int nrows_to_eliminate,
                                          HYPRE_Int *rows_to_eliminate)
@@ -243,3 +247,7 @@ HYPRE_Int hypre_CSRMatrixEliminateColsOffd (hypre_CSRMatrix *Aoffd,
 
    return ierr;
 }
+    
+#ifdef __cplusplus
+}
+#endif

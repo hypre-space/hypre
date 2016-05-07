@@ -40,8 +40,8 @@ extern int  hypre_SymQMRSolve(void *, void *, void *, void *);
 extern int  hypre_SymQMRSetTol(void *, double);
 extern int  hypre_SymQMRSetMaxIter(void *, int);
 extern int  hypre_SymQMRSetStopCrit(void *, double);
-extern int  hypre_SymQMRSetPrecond(void *, int (*precond)(),
-                                   int (*precond_setup)(), void *);
+extern int  hypre_SymQMRSetPrecond(void *, int (*precond)(void*,void*,void*,void*),
+                                   int (*precond_setup)(void*,void*,void*,void*), void *);
 extern int  hypre_SymQMRSetLogging(void *, int );
 extern int  hypre_SymQMRGetNumIterations(void *, int *);
 extern int  hypre_SymQMRGetFinalRelativeResidualNorm(void *, double *);
@@ -127,7 +127,9 @@ int HYPRE_ParCSRSymQMRSetPrecond( HYPRE_Solver  solver,
           void                *precond_data )
 {
    return( hypre_SymQMRSetPrecond( (void *) solver,
-                                precond, precond_setup, precond_data ) );
+								   (HYPRE_Int (*)(void*,void*,void*,void*))precond,
+								   (HYPRE_Int (*)(void*,void*,void*,void*))precond_setup,
+								   precond_data ) );
 }
 
 /*--------------------------------------------------------------------------

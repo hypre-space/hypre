@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dlasr_(char *side, char *pivot, char *direct, integer *m,
+/* Subroutine */ HYPRE_Int dlasr_(const char *side,const char *pivot,const char *direct, integer *m,
 	 integer *n, doublereal *c__, doublereal *s, doublereal *a, integer *
 	lda)
 {
@@ -112,9 +112,9 @@
     static integer info;
     static doublereal temp;
     static integer i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static doublereal ctemp, stemp;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
     --c__;

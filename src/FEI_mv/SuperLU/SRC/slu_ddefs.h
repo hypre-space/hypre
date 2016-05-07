@@ -194,12 +194,12 @@ extern void    dgsrfs (trans_t, SuperMatrix *, SuperMatrix *,
                        double *, SuperMatrix *, SuperMatrix *,
                        double *, double *, SuperLUStat_t*, int *);
 
-extern int     sp_dtrsv (char *, char *, char *, SuperMatrix *,
+extern int     sp_dtrsv (const char *,const char *,const char *, SuperMatrix *,
 			SuperMatrix *, double *, SuperLUStat_t*, int *);
-extern int     sp_dgemv (char *, double, SuperMatrix *, double *,
+extern int     sp_dgemv (const char *, double, SuperMatrix *, double *,
 			int, double, double *, int);
 
-extern int     sp_dgemm (char *, char *, int, int, int, double,
+extern int     sp_dgemm (const char *,const char *, int, int, int, double,
 			SuperMatrix *, double *, int, double, 
 			double *, int);
 

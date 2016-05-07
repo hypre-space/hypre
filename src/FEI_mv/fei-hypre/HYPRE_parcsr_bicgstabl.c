@@ -41,8 +41,8 @@ extern int  hypre_BiCGSTABLSetTol(void *, double);
 extern int  hypre_BiCGSTABLSetSize(void *, int);
 extern int  hypre_BiCGSTABLSetMaxIter(void *, int);
 extern int  hypre_BiCGSTABLSetStopCrit(void *, double);
-extern int  hypre_BiCGSTABLSetPrecond(void *, int (*precond)(),
-                               int (*precond_setup)(), void *);
+extern int  hypre_BiCGSTABLSetPrecond(void *, int (*precond)(void*,void*,void*,void*),
+									  int (*precond_setup)(void*,void*,void*,void*), void *);
 extern int  hypre_BiCGSTABLSetLogging(void *, int);
 extern int  hypre_BiCGSTABLGetNumIterations(void *,int *);
 extern int  hypre_BiCGSTABLGetFinalRelativeResidualNorm(void *, double *);
@@ -139,7 +139,9 @@ int HYPRE_ParCSRBiCGSTABLSetPrecond( HYPRE_Solver  solver,
           void               *precond_data )
 {
    return( hypre_BiCGSTABLSetPrecond( (void *) solver,
-                                precond, precond_setup, precond_data ) );
+									  (HYPRE_Int (*)(void*,void*,void*,void*))precond,
+									  (HYPRE_Int (*)(void*,void*,void*,void*))precond_setup,
+									  precond_data ) );
 }
 
 /*--------------------------------------------------------------------------
