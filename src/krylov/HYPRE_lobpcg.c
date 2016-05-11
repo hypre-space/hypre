@@ -256,7 +256,7 @@ hypre_LOBPCGSetTol( void* pcg_vdata, HYPRE_Real tol )
 HYPRE_Int
 hypre_LOBPCGSetRTol( void* pcg_vdata, HYPRE_Real tol )
 {
-   hypre_LOBPCGData *pcg_data	= pcg_vdata;
+   hypre_LOBPCGData *pcg_data	= (hypre_LOBPCGData*) pcg_vdata;
 
    lobpcg_relativeTolerance(pcg_data->lobpcgData) = tol;
  

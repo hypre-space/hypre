@@ -194,10 +194,23 @@ HYPRE_Int hypre_AMESetTol(void *esolver,
                           HYPRE_Real tol)
 {
    hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
-   ame_data -> tol = tol;
+   ame_data -> atol = tol;
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_AMESetRTol
+ *
+ * Set the relative convergence tolerance. The default value is 1e-6.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_AMESetRTol(void *esolver,
+			   HYPRE_Real tol)
+{
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
+   ame_data -> rtol = tol;
+   return hypre_error_flag;
+}
 /*--------------------------------------------------------------------------
  * hypre_AMESetPrintLevel
  *
