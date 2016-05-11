@@ -50,8 +50,8 @@ extern "C" {
 #define s_copy   hypre_F90_NAME_BLAS(s_copy,S_COPY)
 
 /* blas_utils.c */
-logical lsame_ (const char *ca ,const char *cb );
-HYPRE_Int xerbla_ (const char *srname , integer *info );
+logical lsame_ ( const char *ca ,const char *cb );
+HYPRE_Int xerbla_ ( const char *srname , integer *info );
 integer s_cmp ( char *a0 , const char *b0 , ftnlen la , ftnlen lb );
 VOID s_copy ( char *a , const char *b , ftnlen la , ftnlen lb );
 
@@ -68,10 +68,10 @@ HYPRE_Int dcopy_ ( integer *n , doublereal *dx , integer *incx , doublereal *dy 
 doublereal ddot_ ( integer *n , doublereal *dx , integer *incx , doublereal *dy , integer *incy );
 
 /* dgemm.c */
-HYPRE_Int dgemm_ (const char *transa ,const char *transb , integer *m , integer *n , integer *k , doublereal *alpha , doublereal *a , integer *lda , doublereal *b , integer *ldb , doublereal *beta , doublereal *c , integer *ldc );
+HYPRE_Int dgemm_ ( const char *transa , const char *transb , integer *m , integer *n , integer *k , doublereal *alpha , doublereal *a , integer *lda , doublereal *b , integer *ldb , doublereal *beta , doublereal *c , integer *ldc );
 
 /* dgemv.c */
-HYPRE_Int dgemv_ (const char *trans , integer *m , integer *n , doublereal *alpha , doublereal *a , integer *lda , doublereal *x , integer *incx , doublereal *beta , doublereal *y , integer *incy );
+HYPRE_Int dgemv_ ( const char *trans , integer *m , integer *n , doublereal *alpha , doublereal *a , integer *lda , doublereal *x , integer *incx , doublereal *beta , doublereal *y , integer *incy );
 
 /* dger.c */
 HYPRE_Int dger_ ( integer *m , integer *n , doublereal *alpha , doublereal *x , integer *incx , doublereal *y , integer *incy , doublereal *a , integer *lda );
@@ -89,31 +89,31 @@ HYPRE_Int dscal_ ( integer *n , doublereal *da , doublereal *dx , integer *incx 
 HYPRE_Int dswap_ ( integer *n , doublereal *dx , integer *incx , doublereal *dy , integer *incy );
 
 /* dsymm.c */
-HYPRE_Int dsymm_ (const char *side ,const char *uplo , integer *m , integer *n , doublereal *alpha , doublereal *a , integer *lda , doublereal *b , integer *ldb , doublereal *beta , doublereal *c__ , integer *ldc );
+HYPRE_Int dsymm_ ( const char *side , const char *uplo , integer *m , integer *n , doublereal *alpha , doublereal *a , integer *lda , doublereal *b , integer *ldb , doublereal *beta , doublereal *c__ , integer *ldc );
 
 /* dsymv.c */
-HYPRE_Int dsymv_ (const char *uplo , integer *n , doublereal *alpha , doublereal *a , integer *lda , doublereal *x , integer *incx , doublereal *beta , doublereal *y , integer *incy );
+HYPRE_Int dsymv_ ( const char *uplo , integer *n , doublereal *alpha , doublereal *a , integer *lda , doublereal *x , integer *incx , doublereal *beta , doublereal *y , integer *incy );
 
 /* dsyr2.c */
-HYPRE_Int dsyr2_ (const char *uplo , integer *n , doublereal *alpha , doublereal *x , integer *incx , doublereal *y , integer *incy , doublereal *a , integer *lda );
+HYPRE_Int dsyr2_ ( const char *uplo , integer *n , doublereal *alpha , doublereal *x , integer *incx , doublereal *y , integer *incy , doublereal *a , integer *lda );
 
 /* dsyr2k.c */
-HYPRE_Int dsyr2k_ (const char *uplo ,const char *trans , integer *n , integer *k , doublereal *alpha , doublereal *a , integer *lda , doublereal *b , integer *ldb , doublereal *beta , doublereal *c__ , integer *ldc );
+HYPRE_Int dsyr2k_ ( const char *uplo , const char *trans , integer *n , integer *k , doublereal *alpha , doublereal *a , integer *lda , doublereal *b , integer *ldb , doublereal *beta , doublereal *c__ , integer *ldc );
 
 /* dsyrk.c */
-HYPRE_Int dsyrk_ (const char *uplo ,const char *trans , integer *n , integer *k , doublereal *alpha , doublereal *a , integer *lda , doublereal *beta , doublereal *c , integer *ldc );
+HYPRE_Int dsyrk_ ( const char *uplo , const char *trans , integer *n , integer *k , doublereal *alpha , doublereal *a , integer *lda , doublereal *beta , doublereal *c , integer *ldc );
 
 /* dtrmm.c */
-HYPRE_Int dtrmm_ (const char *side ,const char *uplo ,const char *transa ,const char *diag , integer *m , integer *n , doublereal *alpha , doublereal *a , integer *lda , doublereal *b , integer *ldb );
+HYPRE_Int dtrmm_ ( const char *side , const char *uplo , const char *transa , const char *diag , integer *m , integer *n , doublereal *alpha , doublereal *a , integer *lda , doublereal *b , integer *ldb );
 
 /* dtrmv.c */
-HYPRE_Int dtrmv_ (const char *uplo ,const char *trans ,const char *diag , integer *n , doublereal *a , integer *lda , doublereal *x , integer *incx );
+HYPRE_Int dtrmv_ ( const char *uplo , const char *trans , const char *diag , integer *n , doublereal *a , integer *lda , doublereal *x , integer *incx );
 
 /* dtrsm.c */
-HYPRE_Int dtrsm_ (const char *side ,const char *uplo ,const char *transa ,const char *diag , integer *m , integer *n , doublereal *alpha , doublereal *a , integer *lda , doublereal *b , integer *ldb );
+HYPRE_Int dtrsm_ ( const char *side , const char *uplo , const char *transa , const char *diag , integer *m , integer *n , doublereal *alpha , doublereal *a , integer *lda , doublereal *b , integer *ldb );
 
 /* dtrsv.c */
-HYPRE_Int dtrsv_ (const char *uplo ,const char *trans ,const char *diag , integer *n , doublereal *a , integer *lda , doublereal *x , integer *incx );
+HYPRE_Int dtrsv_ ( const char *uplo , const char *trans , const char *diag , integer *n , doublereal *a , integer *lda , doublereal *x , integer *incx );
 
 /* idamax.c */
 integer idamax_ ( integer *n , doublereal *dx , integer *incx );
