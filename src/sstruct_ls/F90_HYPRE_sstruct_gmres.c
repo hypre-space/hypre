@@ -19,6 +19,10 @@
 #include "_hypre_sstruct_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 /*--------------------------------------------------------------------------
  * HYPRE_SStructGMRESCreate
  *--------------------------------------------------------------------------*/
@@ -321,3 +325,7 @@ hypre_F90_IFACE(hypre_sstructgmresgetresidual, HYPRE_SSTRUCTGMRESGETRESIDUAL)
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
           (void **)              *residual ) );
 }
+
+#ifdef __cplusplus
+}
+#endif

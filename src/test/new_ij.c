@@ -64,7 +64,9 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, HYPRE_Int
 extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int iteration, 
                                                 HYPRE_Real rel_residual_norm);
 
-
+#ifdef __cplusplus
+}
+#endif
 #define SECOND_TIME 0
  
 hypre_int
@@ -5672,7 +5674,5 @@ BuildParCoordinates( HYPRE_Int                  argc,
    return (0);
 }
 
-#ifdef __cplusplus
-}
-#endif
+
 

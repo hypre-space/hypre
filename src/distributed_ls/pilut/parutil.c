@@ -219,6 +219,6 @@ void hypre_memcpy_fp( HYPRE_Real *dest, const HYPRE_Real *src, size_t n )
   HYPRE_Int i;
 
   /*SCOPY(&n, src, &inc, dest, &inc);*/
-  for (i=0; i<n; i++) dest[i] = src[i];
+  for (i=0; i<(HYPRE_Int) n; i++) dest[i] = src[i];
 }
 

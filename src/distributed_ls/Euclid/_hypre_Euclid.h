@@ -18,8 +18,18 @@
 #define HYPRE_MODE
 #define OPTIMIZED_DH
 
+#if defined(HYPRE_MODE)
+#include "HYPRE_parcsr_mv.h"
+#include "HYPRE_config.h"
+#include "HYPRE_distributed_matrix_mv.h"
+#include "_hypre_utilities.h"
+
+#elif defined(PETSC_MODE)
+#include "petsc_config.h"
+#endif
+
 #ifdef __cplusplus
-//extern "C" {
+extern "C" {
 #endif
 
 /*BHEADER**********************************************************************
@@ -372,16 +382,6 @@ you need to write EUCLID_GET_ROW() functions: see src/getRow.c
  * maintainer's note: this is the only place where non-Euclid
  * files are included.
  *-----------------------------------------------------------------------*/
-
-#if defined(HYPRE_MODE)
-#include "HYPRE_parcsr_mv.h"
-#include "HYPRE_config.h"
-#include "HYPRE_distributed_matrix_mv.h"
-#include "_hypre_utilities.h"
-
-#elif defined(PETSC_MODE)
-#include "petsc_config.h"
-#endif
 
 #if ( !defined(FAKE_MPI) && defined(USING_MPI) && \
       !defined(HYPRE_MODE) && !defined(PETSC_MODE) )
@@ -2195,7 +2195,7 @@ extern void ScaleVec(HYPRE_Int n, HYPRE_Real alpha, HYPRE_Real *x);
 #endif
 
 #ifdef __cplusplus
-//}
+}
 #endif
 
 #endif

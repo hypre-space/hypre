@@ -17,10 +17,10 @@
 #include "f2c.h"
 #include "fortran.h"
 #include "math.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /* --------------------------------------------------------------------------
  *  Change all names to hypre_ to avoid link conflicts

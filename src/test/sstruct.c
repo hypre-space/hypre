@@ -42,10 +42,6 @@
 /* end lobpcg */
  
 #define DEBUG 0
-
-#ifdef __cplusplus
-extern "C" {
-#endif
     
 /*--------------------------------------------------------------------------
  * Data structures
@@ -1214,6 +1210,7 @@ DistributeData( ProblemData   global_data,
    /* check number of processes */
    if (pool_procs[data.npools] != num_procs)
    {
+	   hypre_printf("%d,  %d \n",pool_procs[data.npools],num_procs);
       hypre_printf("Error: Invalid number of processes or process topology \n");
       exit(1);
    }
@@ -5717,7 +5714,3 @@ main( hypre_int argc,
 
    return (0);
 }
-    
-#ifdef __cplusplus
-}
-#endif

@@ -113,4 +113,7 @@ distclean: clean
 dlamch.o : dlamch.c ${LAPACK_HEADERS}
 	${CC} ${CFLAGS} -c dlamch.c
 
+ilaenv.o : ilaenv.c ${LAPACK_HEADERS}
+	${CC} ${CFLAGS} -I../blas -c ilaenv.c
+
 ${OBJS}: ${LAPACK_HEADERS}

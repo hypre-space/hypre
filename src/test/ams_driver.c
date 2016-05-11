@@ -68,7 +68,7 @@ void AMSDriverMatrixRead(const char *file, HYPRE_ParCSRMatrix *A)
    fclose(test);
 }
 
-void AMSDriverVectorRead(char *file, HYPRE_ParVector *x)
+void AMSDriverVectorRead(const char *file, HYPRE_ParVector *x)
 {
    FILE *test;
    char file0[100];

@@ -19,6 +19,10 @@
 #include "_hypre_sstruct_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*--------------------------------------------------------------------------
  *  HYPRE_SStructPCGCreate
  *--------------------------------------------------------------------------*/
@@ -346,3 +350,7 @@ hypre_F90_IFACE(hypre_sstructdiagscale, HYPRE_SSTRUCTDIAGSCALE)
           hypre_F90_PassObj (HYPRE_SStructVector, y),
           hypre_F90_PassObj (HYPRE_SStructVector, x)    ) );
 }
+
+#ifdef __cplusplus
+}
+#endif

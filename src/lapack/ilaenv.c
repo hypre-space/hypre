@@ -1,6 +1,7 @@
 
 #include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_blas.h"
 
 integer ilaenv_(integer *ispec,const char *name__,const char *opts, integer *n1, 
 	integer *n2, integer *n3, integer *n4, ftnlen name_len, ftnlen 
@@ -112,8 +113,8 @@ integer ilaenv_(integer *ispec,const char *name__,const char *opts, integer *n1,
     /* Builtin functions   
        Subroutine */
 
-	integer s_copy(char *,char *, ftnlen, ftnlen);
-    integer s_cmp(char *,const char *, ftnlen, ftnlen);
+	//VOID s_copy( char *, char *, ftnlen, ftnlen);
+    //integer s_cmp( char *, char *, ftnlen, ftnlen);
 
     /* Local variables */
     static integer i__;
