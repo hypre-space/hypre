@@ -1033,9 +1033,14 @@ dnl *********************************************************************
 if test "$hypre_using_fei" = "yes"
 then
    HYPRE_FEI_SRC_DIR="$HYPRE_SRCDIR/FEI_mv"
-   HYPRE_FEI_SUBDIRS="femli fei-hypre"
    HYPRE_FEI_HYPRE_FILES="$HYPRE_SRCDIR/FEI_mv/fei-hypre/*.o"
-   HYPRE_FEI_FEMLI_FILES="$HYPRE_SRCDIR/FEI_mv/femli/*.o"
+   if test "$hypre_using_mli" = "yes"
+   then
+      HYPRE_FEI_SUBDIRS="femli $HYPRE_FEI_SUBDIRS"
+      HYPRE_FEI_FEMLI_FILES="$HYPRE_SRCDIR/FEI_mv/femli/*.o"
+   else
+      HYPRE_FEI_FEMLI_FILES=
+   fi
    if test "$hypre_using_superlu" = "yes"
    then
       HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
