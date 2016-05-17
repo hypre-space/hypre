@@ -17,7 +17,8 @@
 
 #include <math.h>
 #include "slu_ddefs.h"
-
+#include "hypre_blas.h"
+#include "hypre_lapack.h"
 void
 dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
        int *perm_c, int *perm_r, char *equed, double *R, double *C,

@@ -27,24 +27,27 @@
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 
+#include "HYPRE_FEI.h"
+#include "_hypre_FEI.h"
+
 /******************************************************************************
  *
  * HYPRE_ParCSRTFQmr interface
  *
  *****************************************************************************/
 
-extern void *hypre_TFQmrCreate();
-extern int hypre_TFQmrDestroy(void *);
-extern int hypre_TFQmrSetup(void *, void *, void *, void *);
-extern int hypre_TFQmrSolve(void *, void *, void *, void *);
-extern int hypre_TFQmrSetTol(void *, double);
-extern int hypre_TFQmrSetMaxIter(void *, int);
-extern int hypre_TFQmrSetStopCrit(void *, int);
-extern int hypre_TFQmrSetPrecond(void *, int (*precond)(void*,void*,void*,void*),
-                                 int (*precond_setup)(void*,void*,void*,void*), void *);
-extern int hypre_TFQmrSetLogging(void *, int);
-extern int hypre_TFQmrGetNumIterations(void *, int *);
-extern int hypre_TFQmrGetFinalRelativeResidualNorm(void *, double *);
+//extern void *hypre_TFQmrCreate();
+//extern int hypre_TFQmrDestroy(void *);
+//extern int hypre_TFQmrSetup(void *, void *, void *, void *);
+//extern int hypre_TFQmrSolve(void *, void *, void *, void *);
+//extern int hypre_TFQmrSetTol(void *, double);
+//extern int hypre_TFQmrSetMaxIter(void *, int);
+//extern int hypre_TFQmrSetStopCrit(void *, int);
+//extern int hypre_TFQmrSetPrecond(void *, int (*precond)(void*,void*,void*,void*),
+//                                 int (*precond_setup)(void*,void*,void*,void*), void *);
+//extern int hypre_TFQmrSetLogging(void *, int);
+//extern int hypre_TFQmrGetNumIterations(void *, int *);
+//extern int hypre_TFQmrGetFinalRelativeResidualNorm(void *, double *);
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRTFQmrCreate

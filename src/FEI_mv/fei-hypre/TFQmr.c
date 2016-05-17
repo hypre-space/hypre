@@ -27,6 +27,8 @@
 #include "parcsr_ls/_hypre_parcsr_ls.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 
+#include "_hypre_FEI.h"
+
 /*--------------------------------------------------------------------------
  * hypre_TFQmrData
  *--------------------------------------------------------------------------*/
@@ -399,7 +401,7 @@ int hypre_TFQmrSetMaxIter( void *tfqmr_vdata, int max_iter )
 
 /*--------------------------------------------------------------------------
  * hypre_TFQmrSetStopCrit
- *--------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------------*/ 
  
 int hypre_TFQmrSetStopCrit( void *tfqmr_vdata, double stop_crit )
 {

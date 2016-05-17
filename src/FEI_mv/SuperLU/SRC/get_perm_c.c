@@ -6,6 +6,7 @@
  *
  */
 #include "slu_ddefs.h"
+#include "slu_util.h"
 #include "colamd.h"
 
 extern int  genmmd_(int *, int *, int *, int *, int *, int *, int *, 
@@ -361,7 +362,7 @@ get_perm_c(int ispec, SuperMatrix *A, int *perm_c)
     int m, n, bnz = 0, *b_colptr, i;
     int delta, maxint, nofsub, *invp;
     int *b_rowind, *dhead, *qsize, *llist, *marker;
-    double t, SuperLU_timer_();
+    double t;//, SuperLU_timer_();
     
     m = A->nrow;
     n = A->ncol;

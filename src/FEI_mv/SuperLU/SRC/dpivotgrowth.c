@@ -13,6 +13,7 @@
 
 #include <math.h>
 #include "slu_ddefs.h"
+#include "hypre_lapack.h"
 
 double
 dPivotGrowth(int ncols, SuperMatrix *A, int *perm_c, 

@@ -27,6 +27,8 @@
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 
+#include "HYPRE_FEI.h"
+
 /******************************************************************************
  *
  * HYPRE_ParCSRLSICG interface

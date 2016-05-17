@@ -38,4 +38,3 @@ HYPRE_Int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
 HYPRE_Int hypre_ParaSailsApply(hypre_ParaSails ps, HYPRE_Real *u, HYPRE_Real *v);
 HYPRE_Int hypre_ParaSailsApplyTrans(hypre_ParaSails ps, HYPRE_Real *u, HYPRE_Real *v);
 HYPRE_Int hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A);
-

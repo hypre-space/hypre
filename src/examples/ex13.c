@@ -558,7 +558,7 @@ int main (int argc, char *argv[])
       int ilower[2] = {0,0};
       int iupper[2] = {n,n};
 
-      values = calloc(nvalues, sizeof(double));
+      values = (double*) calloc(nvalues, sizeof(double));
 
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
@@ -623,7 +623,7 @@ int main (int argc, char *argv[])
 
          int i, part = myid, var = 0;
          int nvalues = (n+1)*(n+1);
-         double *values = calloc(nvalues, sizeof(double));
+         double *values = (double*) calloc(nvalues, sizeof(double));
          int ilower[2] = {0,0};
          int iupper[2] = {n,n};
 

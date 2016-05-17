@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include "slu_ddefs.h"
+#include "hypre_lapack.h"
 
 void
 dlaqgs(SuperMatrix *A, double *r, double *c, 

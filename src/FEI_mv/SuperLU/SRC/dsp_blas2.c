@@ -20,9 +20,13 @@
 #ifndef HYPRE_USING_HYPRE_BLAS
 #define USE_VENDOR_BLAS
 #endif
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern int hypre_F90_NAME_BLAS(dtrsv,DTRSV)(const char *,const char *,const char *,int *,double *,int *,double *,int *);
-
+#ifdef __cplusplus
+}
+#endif
 /* 
  * Function prototypes 
  */

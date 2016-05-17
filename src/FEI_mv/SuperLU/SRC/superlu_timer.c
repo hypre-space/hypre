@@ -8,14 +8,15 @@
  *
  */
 
+#include "slu_ddefs.h"
 
-#ifdef SUN 
+#ifdef SUN
 /*
  * 	It uses the system call gethrtime(3C), which is accurate to 
  *	nanoseconds. 
 */
 #include <sys/time.h>
- 
+
 double SuperLU_timer_() {
     return ( (double)gethrtime() / 1e9 );
 }

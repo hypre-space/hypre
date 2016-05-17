@@ -39,7 +39,7 @@
 #endif
 
 #include "HYPRE_MHMatrix.h"
-
+#include "HYPRE_FEI.h"
 typedef struct HYPRE_LSI_DDICT_Struct
 {
    MPI_Comm  comm;

@@ -29,7 +29,7 @@
 typedef int int_t; /* default */
 
 /* Added by Rob Falgout temporarily */
-typedef int logical;
+//typedef int logical;
 
 #include "supermatrix.h"
 #include "slu_util.h"
