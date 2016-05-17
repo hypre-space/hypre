@@ -535,7 +535,7 @@ int HYPRE_SlideReduction::findConstraints()
    if ( slaveEqnList_ != NULL ) delete [] slaveEqnList_;
    if ( nConstraints > 0 ) slaveEqnList_ = new int[nConstraints];
    else                    slaveEqnList_ = NULL;
-   for ( irow = 0; irow > nConstraints; irow++ ) slaveEqnList_[irow] = -1;
+   for ( irow = 0; irow < nConstraints; irow++ ) slaveEqnList_[irow] = -1;
    if ( constrBlkInfo_ != NULL ) delete [] constrBlkInfo_;
    if ( nConstraints > 0 ) constrBlkInfo_ = new int[nConstraints];
    else                    constrBlkInfo_ = NULL;
