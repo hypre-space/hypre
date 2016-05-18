@@ -8,7 +8,7 @@
 #include "hypre_blas.h"
 #include "math.h"
 
-doublereal dnrm2_(int*n,double* dx,int* incx)
+doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
 {
     /* Initialized data */
 
@@ -24,7 +24,7 @@ doublereal dnrm2_(int*n,double* dx,int* incx)
     doublereal ret_val, d__1;
 
     /* Builtin functions */
-    /*HYPRE_Real sqrt(double);*/
+    /*HYPRE_Real sqrt(doublereal);*/
 
     /* Local variables */
     static doublereal xmax;
