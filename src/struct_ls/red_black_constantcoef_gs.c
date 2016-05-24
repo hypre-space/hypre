@@ -67,7 +67,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    HYPRE_Int              stencil_size;
    HYPRE_Int              offd[6];
                         
-   HYPRE_Int              iter, rb, redblack;
+   HYPRE_Int              iter, rb, redblack, d;
    HYPRE_Int              compute_i, i, j, ii, jj, kk;
    HYPRE_Int              ni, nj, nk;
 
@@ -164,9 +164,12 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                hypre_BoxGetSize(compute_box, loop_size);
 
                /* Are we relaxing index start or start+(1,0,0)? */
-               redblack = hypre_abs(hypre_IndexX(start) +
-                                    hypre_IndexY(start) +
-                                    hypre_IndexZ(start) + rb) % 2;
+               redblack = rb;
+               for (d = 0; d < ndim; d++)
+               {
+                  redblack += hypre_IndexD(start, d);
+               }
+               redblack = hypre_abs(redblack) % 2;
                      
                bstart = hypre_BoxIndexRank(b_dbox, start);
                xstart = hypre_BoxIndexRank(x_dbox, start);
@@ -288,10 +291,12 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                hypre_BoxGetSize(compute_box, loop_size);
 
                /* Are we relaxing index start or start+(1,0,0)? */
-               redblack = hypre_abs(hypre_IndexX(start) +
-                                    hypre_IndexY(start) +
-                                    hypre_IndexZ(start) + rb) % 2;
-
+               redblack = rb;
+               for (d = 0; d < ndim; d++)
+               {
+                  redblack += hypre_IndexD(start, d);
+               }
+               redblack = hypre_abs(redblack) % 2;
 
                bstart = hypre_BoxIndexRank(b_dbox, start);
                xstart = hypre_BoxIndexRank(x_dbox, start);
