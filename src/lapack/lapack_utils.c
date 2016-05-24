@@ -28,7 +28,7 @@ HYPRE_Real d_lg10(x) doublereal *x;
 */
 /*FIXME: need to figure out how log calls to optimize this part*/
 #include "math.h"					 
-HYPRE_Real log(HYPRE_Real); /* declaration added 2/17/00 */
+//HYPRE_Real log(HYPRE_Real); /* declaration added 2/17/00 */
 HYPRE_Real d_lg10(doublereal *x)
 #endif
 {
