@@ -18,6 +18,7 @@
 
 #include <math.h>
 #include "slu_ddefs.h"
+#include "hypre_lapack.h"
 
 void
 dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
@@ -87,7 +88,7 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
     int i, j, irow;
     double rcmin, rcmax;
     double bignum, smlnum;
-    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(const char *);
     
     /* Test the input parameters. */
     *info = 0;
@@ -108,8 +109,8 @@ dgsequ(SuperMatrix *A, double *r, double *c, double *rowcnd,
 	return;
     }
 
-    Astore = A->Store;
-    Aval = Astore->nzval;
+    Astore = (NCformat*) A->Store;
+    Aval = (double*) Astore->nzval;
     
     /* Get machine constants. */
     smlnum = hypre_F90_NAME_LAPACK(dlamch,DLAMCH)("S");

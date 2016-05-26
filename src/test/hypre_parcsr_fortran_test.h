@@ -10,6 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /******************************************************************************
  * Definitions of ParCSR Fortran interface routines
  *****************************************************************************/
@@ -1407,3 +1411,7 @@ extern void hypre_F90_NAME(fhypre_schwarzsetrelaxweight, FHYPRE_SCHWARZSETRELAXW
         hypre_F90_NAME(fhypre_schwarzsetdoffunc, FHYPRE_SCHWARZSETDOFFUNC)
 extern void hypre_F90_NAME(fhypre_schwarzsetdoffunc, FHYPRE_SCHWARZSETDOFFUNC)
                       (hypre_F90_Obj *, HYPRE_Int *);
+
+#ifdef __cplusplus
+}
+#endif

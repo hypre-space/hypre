@@ -19,6 +19,10 @@
 #include "_hypre_parcsr_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_ParVectorCreate
  *--------------------------------------------------------------------------*/
@@ -253,3 +257,7 @@ hypre_F90_IFACE(hypre_parvectorinnerprod, HYPRE_PARVECTORINNERPROD)
            hypre_F90_PassObj (HYPRE_ParVector, y),
            hypre_F90_PassRealRef (prod) ) );
 }
+    
+#ifdef __cplusplus
+}
+#endif

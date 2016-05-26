@@ -55,7 +55,7 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
                          hypre_Index         findex,
                          hypre_Index         stride                )
 {
-   hypre_SemiRestrictData *restrict_data = restrict_vdata;
+	hypre_SemiRestrictData *restrict_data = (hypre_SemiRestrictData *)restrict_vdata;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
@@ -99,7 +99,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
                     hypre_StructVector *r,
                     hypre_StructVector *rc             )
 {
-   hypre_SemiRestrictData *restrict_data = restrict_vdata;
+   hypre_SemiRestrictData *restrict_data = (hypre_SemiRestrictData *)restrict_vdata;
 
    HYPRE_Int               R_stored_as_transpose;
    hypre_ComputePkg       *compute_pkg;
@@ -293,7 +293,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
 HYPRE_Int
 hypre_SemiRestrictDestroy( void *restrict_vdata )
 {
-   hypre_SemiRestrictData *restrict_data = restrict_vdata;
+   hypre_SemiRestrictData *restrict_data = (hypre_SemiRestrictData *)restrict_vdata;
 
    if (restrict_data)
    {

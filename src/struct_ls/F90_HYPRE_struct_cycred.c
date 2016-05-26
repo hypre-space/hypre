@@ -13,6 +13,10 @@
 #include "_hypre_struct_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -112,3 +116,7 @@ hypre_F90_IFACE(hypre_structcycredsetbase, HYPRE_STRUCTCYCREDSETBASE)
            hypre_F90_PassIntArray (base_index),
            hypre_F90_PassIntArray (base_stride) ) );
 }
+    
+#ifdef __cplusplus
+}
+#endif

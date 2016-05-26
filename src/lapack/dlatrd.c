@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dlatrd_(char *uplo, integer *n, integer *nb, doublereal *
+/* Subroutine */ HYPRE_Int dlatrd_(const char *uplo, integer *n, integer *nb, doublereal *
 	a, integer *lda, doublereal *e, doublereal *tau, doublereal *w, 
 	integer *ldw)
 {
@@ -154,12 +154,12 @@
     static doublereal alpha;
     extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
-    extern logical lsame_(char *, char *);
-    extern /* Subroutine */ HYPRE_Int dgemv_(char *, integer *, integer *, 
+    extern logical lsame_(const char *,const char *);
+    extern /* Subroutine */ HYPRE_Int dgemv_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *), daxpy_(integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *), 
-	    dsymv_(char *, integer *, doublereal *, doublereal *, integer *, 
+	    dsymv_(const char *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *), dlarfg_(integer *, doublereal *, doublereal *, integer *,
 	     doublereal *);
     static integer iw;

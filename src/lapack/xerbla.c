@@ -3,7 +3,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int xerbla_(char *srname, integer *info)
+/* Subroutine */ HYPRE_Int xerbla_(const char *srname, integer *info)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   

@@ -120,7 +120,7 @@ Destroy_CompCol_Permuted(SuperMatrix *A)
 void
 Destroy_Dense_Matrix(SuperMatrix *A)
 {
-    DNformat* Astore = A->Store;
+    DNformat* Astore = (DNformat*) A->Store;
     SUPERLU_FREE (Astore->nzval);
     SUPERLU_FREE ( A->Store );
 }
@@ -411,7 +411,7 @@ int print_int_vec(char *what, int n, int *vec)
     return 0;
 }
 
-int superlu_lsame(char *ca, char *cb)
+int superlu_lsame(const char *ca,const char *cb)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
@@ -482,7 +482,7 @@ int superlu_lsame(char *ca, char *cb)
 
 } /* superlu_lsame */
 
-/* Subroutine */ int superlu_xerbla(char *srname, int *info)
+/* Subroutine */ int superlu_xerbla(const char *srname, int *info)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,
@@ -641,11 +641,7 @@ void sludlsolve ( int ldm, int ncol, double *M, double *rhs )
  * in the rhs vector.
  */
 void
-sludusolve ( ldm, ncol, M, rhs )
-int ldm;	/* in */
-int ncol;	/* in */
-double *M;	/* in */
-double *rhs;	/* modified */
+sludusolve (int ldm,int ncol,double *M,double *rhs )
 {
     double xj;
     int jcol, j, irow;
@@ -670,15 +666,7 @@ double *rhs;	/* modified */
  * Performs a dense matrix-vector multiply: Mxvec = Mxvec + M * vec.
  * The input matrix is M(1:nrow,1:ncol); The product is returned in Mxvec[].
  */
-void sludmatvec ( ldm, nrow, ncol, M, vec, Mxvec )
-
-int ldm;	/* in -- leading dimension of M */
-int nrow;	/* in */ 
-int ncol;	/* in */
-double *M;	/* in */
-double *vec;	/* in */
-double *Mxvec;	/* in/out */
-
+void sludmatvec (int ldm,int nrow,int ncol,double *M,double *vec,double *Mxvec )
 {
     double vi0, vi1, vi2, vi3, vi4, vi5, vi6, vi7;
     double *M0;

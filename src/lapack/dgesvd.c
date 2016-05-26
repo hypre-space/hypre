@@ -36,38 +36,38 @@ static doublereal c_b438 = 1.;
     static integer iscl;
     static doublereal anrm;
     static integer ierr, itau, ncvt, nrvt, i__;
-    extern /* Subroutine */ HYPRE_Int dgemm_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dgemm_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static integer chunk, minmn, wrkbl, itaup, itauq, mnthr, iwork;
     static logical wntua, wntva, wntun, wntuo, wntvn, wntvo, wntus, wntvs;
     static integer ie;
     extern /* Subroutine */ HYPRE_Int dgebrd_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
 	     doublereal *, integer *, integer *);
-    extern doublereal dlamch_(char *), dlange_(char *, integer *, 
+    extern doublereal dlamch_(const char *), dlange_(const char *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *);
     static integer ir, bdspac, iu;
     extern /* Subroutine */ HYPRE_Int dgelqf_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *, integer *), 
-	    dlascl_(char *, integer *, integer *, doublereal *, doublereal *, 
+	    dlascl_(const char *, integer *, integer *, doublereal *, doublereal *, 
 	    integer *, integer *, doublereal *, integer *, integer *),
 	     dgeqrf_(integer *, integer *, doublereal *, integer *, 
-	    doublereal *, doublereal *, integer *, integer *), dlacpy_(char *,
+	    doublereal *, doublereal *, integer *, integer *), dlacpy_(const char *,
 	     integer *, integer *, doublereal *, integer *, doublereal *, 
-	    integer *), dlaset_(char *, integer *, integer *, 
+	    integer *), dlaset_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, doublereal *, integer *), 
-	    dbdsqr_(char *, integer *, integer *, integer *, integer *, 
+	    dbdsqr_(const char *, integer *, integer *, integer *, integer *, 
 	    doublereal *, doublereal *, doublereal *, integer *, doublereal *,
-	     integer *, doublereal *, integer *, doublereal *, integer *), dorgbr_(char *, integer *, integer *, integer *, 
+	     integer *, doublereal *, integer *, doublereal *, integer *), dorgbr_(const char *, integer *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    integer *);
     static doublereal bignum;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dormbr_(char *, char *, char *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dormbr_(const char *,const char *,const char *, integer *, 
 	    integer *, integer *, doublereal *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, integer *), dorglq_(integer *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 

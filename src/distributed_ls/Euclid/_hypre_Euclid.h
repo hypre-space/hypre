@@ -18,6 +18,16 @@
 #define HYPRE_MODE
 #define OPTIMIZED_DH
 
+#if defined(HYPRE_MODE)
+#include "HYPRE_parcsr_mv.h"
+#include "HYPRE_config.h"
+#include "HYPRE_distributed_matrix_mv.h"
+#include "_hypre_utilities.h"
+
+#elif defined(PETSC_MODE)
+#include "petsc_config.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -373,16 +383,6 @@ you need to write EUCLID_GET_ROW() functions: see src/getRow.c
  * files are included.
  *-----------------------------------------------------------------------*/
 
-#if defined(HYPRE_MODE)
-#include "HYPRE_parcsr_mv.h"
-#include "HYPRE_config.h"
-#include "HYPRE_distributed_matrix_mv.h"
-#include "_hypre_utilities.h"
-
-#elif defined(PETSC_MODE)
-#include "petsc_config.h"
-#endif
-
 #if ( !defined(FAKE_MPI) && defined(USING_MPI) && \
       !defined(HYPRE_MODE) && !defined(PETSC_MODE) )
 #include <mpi.h> 
@@ -472,8 +472,8 @@ extern HYPRE_Int  ref_counter; /* for internal use only!  Reference counter
  * macros defined in "macros_dh.h"
  */
 extern bool  errFlag_dh;
-extern void  setInfo_dh(char *msg, char *function, char *file, HYPRE_Int line);
-extern void  setError_dh(char *msg, char *function, char *file, HYPRE_Int line);
+extern void  setInfo_dh(const char *msg,const char *function,const char *file, HYPRE_Int line);
+extern void  setError_dh(const char *msg,const char *function,const char *file, HYPRE_Int line);
 extern void  printErrorMsg(FILE *fp);
 
 #ifndef hypre_MPI_MAX_ERROR_STRING
@@ -496,15 +496,15 @@ extern bool logFuncsToStderr;
 extern bool logFuncsToFile;
 extern void Error_dhStartFunc(char *function, char *file, HYPRE_Int line);
 extern void Error_dhEndFunc(char *function);
-extern void dh_StartFunc(char *function, char *file, HYPRE_Int line, HYPRE_Int priority);
-extern void dh_EndFunc(char *function, HYPRE_Int priority);
+extern void dh_StartFunc(const char *function,const char *file, HYPRE_Int line, HYPRE_Int priority);
+extern void dh_EndFunc(const char *function, HYPRE_Int priority);
 extern void printFunctionStack(FILE *fp);
 
 extern void EuclidInitialize(HYPRE_Int argc, char *argv[], char *help); /* instantiates global objects */
 extern void EuclidFinalize();    /* deletes global objects */
 extern bool EuclidIsInitialized(); 
-extern void printf_dh(char *fmt, ...);
-extern void fprintf_dh(FILE *fp, char *fmt, ...);
+extern void printf_dh(const char *fmt, ...);
+extern void fprintf_dh(FILE *fp,const char *fmt, ...);
 
   /* echo command line invocation to stdout.
      The "prefix" string is for grepping; it may be NULL.
@@ -1495,10 +1495,10 @@ extern HYPRE_Real Timer_dhReadUsage(Timer_dh t);
 extern void Parser_dhCreate(Parser_dh *p);
 extern void Parser_dhDestroy(Parser_dh p);
 
-extern bool Parser_dhHasSwitch(Parser_dh p, char *in);
-extern bool Parser_dhReadString(Parser_dh p, char *in, char **out);
-extern bool Parser_dhReadInt(Parser_dh p, char *in, HYPRE_Int *out);
-extern bool Parser_dhReadDouble(Parser_dh p, char *in, HYPRE_Real *out);
+extern bool Parser_dhHasSwitch(Parser_dh p,const char *in);
+extern bool Parser_dhReadString(Parser_dh p,const char *in, char **out);
+extern bool Parser_dhReadInt(Parser_dh p,const char *in, HYPRE_Int *out);
+extern bool Parser_dhReadDouble(Parser_dh p,const char *in, HYPRE_Real *out);
   /* if the flag (char *in) is found, these four return 
      true and set "out" accordingly.  If not found, they return 
      false, and "out" is unaltered.
@@ -1509,12 +1509,12 @@ extern void Parser_dhPrint(Parser_dh p, FILE *fp, bool allPrint);
    * only meaningful when Euclid is compiled in MPI mode
    */
 
-extern void Parser_dhInsert(Parser_dh p, char *name, char *value);
+extern void Parser_dhInsert(Parser_dh p,const char *name,const char *value);
   /* For inserting a new <flag,value> pair, or altering
    * the value of an existing pair from within user apps.
    */
 
-extern void Parser_dhUpdateFromFile(Parser_dh p, char *name);
+extern void Parser_dhUpdateFromFile(Parser_dh p,const char *name);
 
 extern void Parser_dhInit(Parser_dh p, HYPRE_Int argc, char *argv[]);
   /* Init enters <flag,value> pairs in its internal database in

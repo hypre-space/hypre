@@ -19,6 +19,10 @@
 #include "_hypre_sstruct_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 /*--------------------------------------------------------------------------
  * HYPRE_SStructMaxwellCreate
  *--------------------------------------------------------------------------*/
@@ -393,3 +397,6 @@ hypre_F90_IFACE(hypre_sstructmaxwellzerovector, HYPRE_SSTRUCTMAXWELLZEROVECTOR)
            hypre_F90_PassInt (nrows) ));
 }      
 
+#ifdef __cplusplus
+}
+#endif

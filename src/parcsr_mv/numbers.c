@@ -45,22 +45,22 @@ void hypre_NumbersDeleteNode( hypre_NumbersNode * node )
 HYPRE_Int hypre_NumbersEnter( hypre_NumbersNode * node, const HYPRE_Int n )
 /* enters a number in the tree starting with 'node'. */
 {
-   HYPRE_Int new = 0;
+   HYPRE_Int newN = 0;
    HYPRE_Int q = n/10;
    HYPRE_Int r = n%10;
    hypre_assert( n>=0 );
    if ( node->digit[r] == NULL ) {
       node->digit[r] = hypre_NumbersNewNode();
-      new = 1;
+      newN = 1;
    };
    if ( q<10 ) {  /* q is a one-digit number; point to terminal object */
-      if ( ((hypre_NumbersNode *)node->digit[r])->digit[10] == NULL )
-         ((hypre_NumbersNode *)node->digit[r])->digit[10] = hypre_NumbersNewNode();
+      if ( (node->digit[r])->digit[10] == NULL )
+         (node->digit[r])->digit[10] = hypre_NumbersNewNode();
    }
    else {  /* multidigit number; place for this digit points to next node */
-      new = hypre_NumbersEnter( node->digit[r], q );
+      newN = hypre_NumbersEnter(node->digit[r], q );
    }
-   return new;
+   return newN;
 }
 
 HYPRE_Int hypre_NumbersNEntered( hypre_NumbersNode * node )
@@ -85,7 +85,7 @@ HYPRE_Int hypre_NumbersQuery( hypre_NumbersNode * node, const HYPRE_Int n )
       return 0;
    }
    else if ( q<10 ) { /* q is a one-digit number; check terminal object */
-      if ( ((hypre_NumbersNode *)node->digit[r])->digit[10] == NULL )
+      if ( (node->digit[r])->digit[10] == NULL )
          return 0;
       else
          return 1;

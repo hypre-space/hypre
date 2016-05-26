@@ -17,6 +17,10 @@
 #ifndef hypre_PARCSR_ELIMINATE_ROWSCOLS
 #define hypre_PARCSR_ELIMINATE_ROWSCOLS
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*
   Function:  hypre_ParCSRMatrixEliminateRowsCols
 
@@ -61,5 +65,9 @@ HYPRE_Int hypre_CSRMatrixEliminateRowsOffd (hypre_ParCSRMatrix *A,
 HYPRE_Int hypre_CSRMatrixEliminateColsOffd (hypre_CSRMatrix *Aoffd,
                                       HYPRE_Int ncols_to_eliminate,
                                       HYPRE_Int *cols_to_eliminate);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

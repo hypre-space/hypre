@@ -19,6 +19,10 @@
 #include "_hypre_parcsr_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_SchwarzCreate
  *--------------------------------------------------------------------------*/
@@ -197,3 +201,6 @@ hypre_F90_IFACE(hypre_schwarzsetdoffunc, HYPRE_SCHWARZSETDOFFUNC)
           hypre_F90_PassObj (HYPRE_Solver, solver),
           hypre_F90_PassIntArray (dof_func)  ));
 }
+#ifdef __cplusplus
+}
+#endif

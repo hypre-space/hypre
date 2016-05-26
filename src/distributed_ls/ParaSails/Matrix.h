@@ -26,6 +26,10 @@
 #ifndef _MATRIX_H
 #define _MATRIX_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 typedef struct
 {
     MPI_Comm comm;
@@ -76,5 +80,9 @@ void MatrixComplete(Matrix *mat);
 void MatrixMatvec(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y);
 void MatrixMatvecSerial(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y);
 void MatrixMatvecTrans(Matrix *mat, HYPRE_Real *x, HYPRE_Real *y);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _MATRIX_H */

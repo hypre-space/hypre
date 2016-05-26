@@ -19,6 +19,10 @@
 #include "_hypre_parcsr_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRCGNRCreate
  *--------------------------------------------------------------------------*/
@@ -195,7 +199,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetprecond, HYPRE_PARCSRCGNRSETPRECOND)
               HYPRE_BoomerAMGSolve,
               HYPRE_BoomerAMGSolve,
               HYPRE_BoomerAMGSetup,
-              (void *)       *precond_solver ) );
+              (HYPRE_Solver)       *precond_solver ) );
    }
    if (*precond_id == 3)
    {
@@ -205,7 +209,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetprecond, HYPRE_PARCSRCGNRSETPRECOND)
               HYPRE_ParCSRPilutSolve,
               HYPRE_ParCSRPilutSolve,
               HYPRE_ParCSRPilutSetup,
-              (void *)       *precond_solver ) );
+              (HYPRE_Solver)       *precond_solver ) );
    }
    if (*precond_id == 4)
    {
@@ -215,7 +219,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetprecond, HYPRE_PARCSRCGNRSETPRECOND)
               HYPRE_ParCSRParaSailsSolve,
               HYPRE_ParCSRParaSailsSolve,
               HYPRE_ParCSRParaSailsSetup,
-              (void *)       *precond_solver ) );
+              (HYPRE_Solver)       *precond_solver ) );
    }
    if (*precond_id == 5)
    {
@@ -225,7 +229,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrsetprecond, HYPRE_PARCSRCGNRSETPRECOND)
               HYPRE_EuclidSolve,
               HYPRE_EuclidSolve,
               HYPRE_EuclidSetup,
-              (void *)       *precond_solver ) );
+              (HYPRE_Solver)       *precond_solver ) );
    }
    else
    {
@@ -297,3 +301,7 @@ hypre_F90_IFACE(hypre_parcsrcgnrgetfinalrelativ, HYPRE_PARCSRCGNRGETFINALRELATIV
            hypre_F90_PassObj (HYPRE_Solver, solver),
            hypre_F90_PassRealRef (norm)     ) );
 }
+    
+#ifdef __cplusplus
+}
+#endif

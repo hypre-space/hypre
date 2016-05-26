@@ -19,6 +19,10 @@
 #include "_hypre_parcsr_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * hypre_ParVectorSetDataOwner
  *--------------------------------------------------------------------------*/
@@ -189,3 +193,7 @@ hypre_F90_IFACE(hypre_parvectortovectorall, HYPRE_PARVECTORTOVECTORALL)
 
    *ierr = 0;
 }
+    
+#ifdef __cplusplus
+}
+#endif

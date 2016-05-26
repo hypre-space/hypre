@@ -19,6 +19,10 @@
 #include "./_hypre_IJ_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_IJVectorCreate
  *--------------------------------------------------------------------------*/
@@ -258,3 +262,7 @@ hypre_F90_IFACE(hypre_ijvectorprint, HYPRE_IJVECTORPRINT)
           hypre_F90_PassObj (HYPRE_IJVector, vector),
           (char *)          filename ) );
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -39,7 +39,7 @@ hypre_int euclid_signals[] = { SIGSEGV, SIGFPE, SIGBUS };
 /* 
    signal names and explanatory messages 
 */
-static char *SIGNAME[] = {
+static const char *SIGNAME[] = {
     "Unknown signal",
     "HUP (Hangup detected on controlling terminal or death of controlling process)",
     "INT: Interrupt from keyboard",

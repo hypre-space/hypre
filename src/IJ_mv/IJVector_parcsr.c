@@ -76,7 +76,7 @@ hypre_IJVectorCreatePar(hypre_IJVector *vector,
 HYPRE_Int
 hypre_IJVectorDestroyPar(hypre_IJVector *vector)
 {
-   return hypre_ParVectorDestroy(hypre_IJVectorObject(vector));
+	return hypre_ParVectorDestroy((hypre_ParVector*)hypre_IJVectorObject(vector));
 }
 
 /******************************************************************************
@@ -90,8 +90,8 @@ hypre_IJVectorDestroyPar(hypre_IJVector *vector)
 HYPRE_Int
 hypre_IJVectorInitializePar(hypre_IJVector *vector)
 {
-   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
-   hypre_AuxParVector *aux_vector = hypre_IJVectorTranslator(vector);
+	hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+	hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    HYPRE_Int *partitioning = hypre_ParVectorPartitioning(par_vector);
    hypre_Vector *local_vector = hypre_ParVectorLocalVector(par_vector);
    HYPRE_Int my_id;
@@ -142,7 +142,7 @@ hypre_IJVectorSetMaxOffProcElmtsPar(hypre_IJVector *vector,
 {
    hypre_AuxParVector *aux_vector;
 
-   aux_vector = hypre_IJVectorTranslator(vector);
+   aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    if (!aux_vector)
    {
       hypre_AuxParVectorCreate(&aux_vector);
@@ -166,7 +166,7 @@ HYPRE_Int
 hypre_IJVectorDistributePar(hypre_IJVector  *vector,
 			    const HYPRE_Int *vec_starts)
 {
-   hypre_ParVector *old_vector = hypre_IJVectorObject(vector);
+	hypre_ParVector *old_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    hypre_ParVector *par_vector;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
    
@@ -218,7 +218,7 @@ hypre_IJVectorZeroValuesPar(hypre_IJVector *vector)
    HYPRE_Int i, vec_start, vec_stop;
    HYPRE_Complex *data;
 
-   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
    HYPRE_Int *partitioning;
    hypre_Vector *local_vector;
@@ -315,8 +315,8 @@ hypre_IJVectorSetValuesPar(hypre_IJVector       *vector,
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
    HYPRE_Int *IJpartitioning = hypre_IJVectorPartitioning(vector);
-   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
-   hypre_AuxParVector *aux_vector = hypre_IJVectorTranslator(vector);
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
    hypre_Vector *local_vector;
 
@@ -461,8 +461,8 @@ hypre_IJVectorAddToValuesPar(hypre_IJVector       *vector,
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
 
    HYPRE_Int *IJpartitioning = hypre_IJVectorPartitioning(vector);
-   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
-   hypre_AuxParVector *aux_vector = hypre_IJVectorTranslator(vector);
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
    hypre_Vector *local_vector;
 
@@ -614,8 +614,8 @@ HYPRE_Int
 hypre_IJVectorAssemblePar(hypre_IJVector *vector)
 {
    HYPRE_Int *IJpartitioning = hypre_IJVectorPartitioning(vector);
-   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
-   hypre_AuxParVector *aux_vector = hypre_IJVectorTranslator(vector);
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
+   hypre_AuxParVector *aux_vector = (hypre_AuxParVector*) hypre_IJVectorTranslator(vector);
    HYPRE_Int *partitioning;
    MPI_Comm comm = hypre_IJVectorComm(vector);
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
@@ -716,7 +716,7 @@ hypre_IJVectorGetValuesPar(hypre_IJVector  *vector,
    HYPRE_Int ierr = 0;
 
    HYPRE_Int *IJpartitioning = hypre_IJVectorPartitioning(vector);
-   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
    MPI_Comm comm = hypre_IJVectorComm(vector);
    hypre_Vector *local_vector;
    HYPRE_Int print_level = hypre_IJVectorPrintLevel(vector);
@@ -1120,7 +1120,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    hypre_ProcListElements          send_proc_obj; 
 
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
+   hypre_ParVector *par_vector = (hypre_ParVector*) hypre_IJVectorObject(vector);
 
    hypre_IJAssumedPart   *apart;
 
@@ -1135,7 +1135,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    {
       hypre_IJVectorCreateAssumedPartition(vector);
    }
-   apart = hypre_IJVectorAssumedPart(vector);
+   apart = (hypre_IJAssumedPart*) hypre_IJVectorAssumedPart(vector);
 
    /* get the assumed processor id for each row */
    a_proc_id = hypre_CTAlloc(HYPRE_Int, current_num_elmts);

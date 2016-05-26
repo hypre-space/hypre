@@ -55,7 +55,7 @@ hypre_SemiInterpSetup( void               *interp_vdata,
                        hypre_Index         findex,
                        hypre_Index         stride       )
 {
-   hypre_SemiInterpData   *interp_data = interp_vdata;
+	hypre_SemiInterpData   *interp_data = (hypre_SemiInterpData   *)interp_vdata;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
@@ -100,7 +100,7 @@ hypre_SemiInterp( void               *interp_vdata,
                   hypre_StructVector *xc,
                   hypre_StructVector *e            )
 {
-   hypre_SemiInterpData   *interp_data = interp_vdata;
+   hypre_SemiInterpData   *interp_data = (hypre_SemiInterpData   *)interp_vdata;
 
    HYPRE_Int               P_stored_as_transpose;
    hypre_ComputePkg       *compute_pkg;
@@ -324,7 +324,7 @@ hypre_SemiInterp( void               *interp_vdata,
 HYPRE_Int
 hypre_SemiInterpDestroy( void *interp_vdata )
 {
-   hypre_SemiInterpData *interp_data = interp_vdata;
+   hypre_SemiInterpData *interp_data = (hypre_SemiInterpData   *)interp_vdata;
 
    if (interp_data)
    {

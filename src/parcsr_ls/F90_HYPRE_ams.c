@@ -19,6 +19,10 @@
 #include "_hypre_parcsr_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_AMSCreate
  *--------------------------------------------------------------------------*/
@@ -384,3 +388,7 @@ hypre_F90_IFACE(hypre_amsconstructdiscretegradient, HYPRE_AMSCONSTRUCTDISCRETEGR
            hypre_F90_PassInt (edge_orientation),
            hypre_F90_PassObjRef (HYPRE_ParCSRMatrix, G) ) );
 }
+    
+#ifdef __cplusplus
+}
+#endif

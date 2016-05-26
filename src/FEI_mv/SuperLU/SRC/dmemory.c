@@ -125,8 +125,8 @@ int dQuerySpace(SuperMatrix *L, SuperMatrix *U, mem_usage_t *mem_usage)
     NCformat *Ustore;
     register int n, iword, dword, panel_size = sp_ienv(1);
 
-    Lstore = L->Store;
-    Ustore = U->Store;
+    Lstore = (SCformat*) L->Store;
+    Ustore = (NCformat*) U->Store;
     n = L->ncol;
     iword = sizeof(int);
     dword = sizeof(double);
@@ -248,8 +248,8 @@ dLUMemInit(fact_t fact, void *work, int lwork, int m, int n, int annz,
 	
     } else {
 	/* fact == SamePattern_SameRowPerm */
-	Lstore   = L->Store;
-	Ustore   = U->Store;
+	Lstore   = (SCformat*) L->Store;
+	Ustore   = (NCformat*) U->Store;
 	xsup     = Lstore->sup_to_col;
 	supno    = Lstore->col_to_sup;
 	xlsub    = Lstore->rowind_colptr;
@@ -270,10 +270,14 @@ dLUMemInit(fact_t fact, void *work, int lwork, int m, int n, int annz,
 	    stack.size = stack.top2;
 	}
 	
-	lsub  = expanders[LSUB].mem  = Lstore->rowind;
-	lusup = expanders[LUSUP].mem = Lstore->nzval;
-	usub  = expanders[USUB].mem  = Ustore->rowind;
-	ucol  = expanders[UCOL].mem  = Ustore->nzval;;
+	lsub  = (int*)  Lstore->rowind;
+	expanders[LSUB].mem  = (int*)  Lstore->rowind;
+	lusup = (double*) Lstore->nzval;
+	expanders[LUSUP].mem = (double*) Lstore->nzval;
+	usub  = (int*) Ustore->rowind;
+	expanders[USUB].mem  = (int*) Ustore->rowind;
+	ucol  = (double*) Ustore->nzval;
+	expanders[UCOL].mem  = (double*) Ustore->nzval;;
 	expanders[LSUB].size         = nzlmax;
 	expanders[LUSUP].size        = nzlumax;
 	expanders[USUB].size         = nzumax;
@@ -444,11 +448,11 @@ dLUMemXpand(int jcol,
 
 
 void
-copy_mem_double(int howmany, void *old, void *new)
+copy_mem_double(int howmany, void *oldV, void *newV)
 {
     register int i;
-    double *dold = old;
-    double *dnew = new;
+    double *dold = (double *)oldV;
+    double *dnew = (double *)newV;
     for (i = 0; i < howmany; i++) dnew[i] = dold[i];
 }
 
@@ -538,19 +542,25 @@ void
 		new_mem = (void*)((char*)expanders[type + 1].mem + extra);
 		bytes_to_copy = (char*)stack.array + stack.top1
 		    - (char*)expanders[type + 1].mem;
-		user_bcopy(expanders[type+1].mem, new_mem, bytes_to_copy);
+		user_bcopy((char*)expanders[type+1].mem,(char*) new_mem, bytes_to_copy);
 
 		if ( type < USUB ) {
-		    Glu->usub = expanders[USUB].mem =
-			(void*)((char*)expanders[USUB].mem + extra);
+		    Glu->usub =
+			(int*)((char*)expanders[USUB].mem + extra);
+			expanders[USUB].mem =
+			(int*)((char*)expanders[USUB].mem + extra);
 		}
 		if ( type < LSUB ) {
-		    Glu->lsub = expanders[LSUB].mem =
-			(void*)((char*)expanders[LSUB].mem + extra);
+		    Glu->lsub =
+			(int*)((char*)expanders[LSUB].mem + extra);
+		    expanders[LSUB].mem =
+			(int*)((char*)expanders[LSUB].mem + extra);
 		}
 		if ( type < UCOL ) {
-		    Glu->ucol = expanders[UCOL].mem =
-			(void*)((char*)expanders[UCOL].mem + extra);
+		    Glu->ucol =
+			(double*)((char*)expanders[UCOL].mem + extra);
+		    expanders[UCOL].mem =
+			(double*)((char*)expanders[UCOL].mem + extra);
 		}
 		stack.top1 += extra;
 		stack.used += extra;

@@ -61,6 +61,9 @@ HYPRE_DOCS_DIRS = docs
 #This is the test-driver directory
 HYPRE_TEST_DIRS = test
 
+#This is the examples directory
+HYPRE_EXAMPLE_DIRS = examples
+
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
  ${HYPRE_BASIC_DIRS}\
@@ -89,7 +92,7 @@ all:
 	cp -fR HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fR $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fR $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
+	for i in ${HYPRE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \
 	  (cd $$i && $(MAKE) $@) || exit 1; \
