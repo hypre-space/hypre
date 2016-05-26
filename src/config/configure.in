@@ -143,7 +143,6 @@ hypre_using_fei=yes
 hypre_using_superlu=yes
 hypre_using_mli=yes
 
-hypre_using_examples=no
 hypre_using_openmp=no
 hypre_using_insure=no
 
@@ -729,17 +728,6 @@ AS_HELP_STRING([--with-openmp],
 [hypre_using_openmp=no]
 )
 
-AC_ARG_WITH(examples,
-AS_HELP_STRING([--with-examples],
-               [Build example codes.]),
-[case "${withval}" in
-    yes) hypre_using_mpi=yes 
-         hypre_using_examples=yes ;;
-    no)  hypre_using_examples=no ;;
- esac],
-[hypre_using_examples=no]
-)
-
 AC_ARG_WITH(fei,
 AS_HELP_STRING([--with-fei],
                [Use internal FEI routines.]),
@@ -917,16 +905,6 @@ then
       AC_DEFINE(HYPRE_NO_GLOBAL_PARTITION, 1)
    fi
 fi
-
-dnl *********************************************************************
-dnl * For building example codes, set the following:
-dnl *********************************************************************
-EXAMPLEDIR=""
-if test "$hypre_using_examples" = "yes"
-then
-   EXAMPLEDIR="$HYPRE_SRCDIR/examples"
-fi
-AC_SUBST(EXAMPLEDIR)
 
 dnl *********************************************************************
 dnl * Define appropriate variables if user set blas to either essl or dxml
