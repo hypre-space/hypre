@@ -64,15 +64,15 @@ Residual   4.05590545015100e-07
 
 # Output file: solvers.out.1.lobpcg.5
 Eigenvalue lambda   2.43042158313016e-01
-Eigenvalue lambda   4.79521039879676e-01
+Eigenvalue lambda   4.79521039879677e-01
 Eigenvalue lambda   4.79521039879696e-01
-Eigenvalue lambda   4.79521039879800e-01
-Eigenvalue lambda   7.15999921446426e-01
+Eigenvalue lambda   4.79521039879801e-01
+Eigenvalue lambda   7.15999921446955e-01
 Residual   1.47262238767519e-07
 Residual   4.10326699242317e-07
 Residual   3.64072899758183e-07
 Residual   5.54586913659908e-07
-Residual   4.13476159836429e-07
+Residual   1.01332963441651e-06
 
 # Output file: solvers.out.2.lobpcg
 Iterations = 20
@@ -84,15 +84,15 @@ Residual   4.63315030208772e-07
 
 # Output file: solvers.out.2.lobpcg.5
 Eigenvalue lambda   2.43042158313016e-01
-Eigenvalue lambda   4.79521039879676e-01
-Eigenvalue lambda   4.79521039879701e-01
-Eigenvalue lambda   4.79521039879778e-01
-Eigenvalue lambda   7.15999921446436e-01
+Eigenvalue lambda   4.79521039879677e-01
+Eigenvalue lambda   4.79521039879700e-01
+Eigenvalue lambda   4.79521039879780e-01
+Eigenvalue lambda   7.15999921447091e-01
 Residual   1.43322942857248e-07
 Residual   4.86501096019624e-07
 Residual   3.72232026886917e-07
 Residual   5.18126375223749e-07
-Residual   4.88668179380576e-07
+Residual   1.02530795888815e-06
 
 # Output file: solvers.out.8.lobpcg
 Iterations = 15
@@ -124,15 +124,15 @@ Residual   3.94665203904632e-07
 
 # Output file: solvers.out.12.lobpcg.5
 Eigenvalue lambda   2.43042158313016e-01
-Eigenvalue lambda   4.79521039879674e-01
+Eigenvalue lambda   4.79521039879675e-01
 Eigenvalue lambda   4.79521039879685e-01
-Eigenvalue lambda   4.79521039879785e-01
-Eigenvalue lambda   7.15999921446489e-01
+Eigenvalue lambda   4.79521039879788e-01
+Eigenvalue lambda   7.15999921447147e-01
 Residual   1.36414438599642e-07
 Residual   4.59913522980684e-07
 Residual   3.72152569537697e-07
 Residual   5.07587948203054e-07
-Residual   4.54928165441120e-07
+Residual   1.11208056285383e-06
 
 # Output file: solvers.out.43.lobpcg
 Iterations = 9
