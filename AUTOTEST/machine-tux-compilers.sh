@@ -27,7 +27,7 @@ case $1 in
 
    This script runs a number of compiler tests suitable for the tux machines.
 
-   Example usage: $0 ..
+   Example usage: $0 ../src
 
 EOF
       exit
@@ -39,7 +39,7 @@ test_dir=`pwd`
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
-src_dir=$1
+src_dir=`cd $1; pwd`
 shift
 
 # Test other builds (last one is the default build)

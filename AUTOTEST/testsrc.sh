@@ -11,9 +11,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 while [ "$*" ]
 do
    case $1 in
@@ -42,7 +39,7 @@ do
 
    The output is still collected locally in exactly the same way as 'test.sh'.
 
-   Example usage: $0 .. tux149:. machine-tux.sh
+   Example usage: $0 ../src tux149:. machine-tux.sh
 
 EOF
          exit

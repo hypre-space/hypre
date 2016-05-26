@@ -11,9 +11,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 testname=`basename $0 .sh`
 
 # Echo usage information
@@ -28,7 +25,7 @@ case $1 in
 
    This script runs make clean; make [options] in {src_dir}/test.
 
-   Example usage: $0 .. all++
+   Example usage: $0 ../src all++
 
 EOF
       exit
@@ -36,7 +33,7 @@ EOF
 esac
 
 # Setup
-src_dir=$1
+src_dir=`cd $1; pwd`
 shift
 
 # Run make

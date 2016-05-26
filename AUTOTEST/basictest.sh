@@ -30,7 +30,7 @@ case $1 in
    This script configures and compiles the source in {src_dir}, then optionally
    runs driver and example tests.
 
-   Example usage: $0 .. -ro: -ij -sstruct
+   Example usage: $0 ../src -ro: -ij -sstruct
 
 EOF
       exit
@@ -38,7 +38,8 @@ EOF
 esac
 
 # Set src_dir
-src_dir=$1; shift
+src_dir=`cd $1; pwd`
+shift
 
 # Parse the rest of the command line
 copts=""
@@ -98,3 +99,7 @@ for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
+
+# Clean up
+( cd $src_dir; make distclean )
+

@@ -28,7 +28,7 @@ case $1 in
    This script builds the hypre example codes in {src_dir}/examples and runs the
    example regression tests in test/TEST_examples.
 
-   Example usage: $0 .. -maxdim
+   Example usage: $0 ../src -maxdim
 
 EOF
       exit
@@ -36,7 +36,8 @@ EOF
 esac
 
 # Set src_dir
-src_dir=$1; shift
+src_dir=`cd $1; pwd`
+shift
 
 # Parse the rest of the command line
 while [ "$*" ]

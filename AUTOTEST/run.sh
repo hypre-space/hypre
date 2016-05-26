@@ -28,7 +28,7 @@ case $1 in
 
    This script runs runtest.sh in {src_dir}/test with optional parameters.
 
-   Example usage: $0 .. -rt -D HYPRE_NO_SAVED
+   Example usage: $0 ../src -rt -D HYPRE_NO_SAVED
 
 EOF
       exit

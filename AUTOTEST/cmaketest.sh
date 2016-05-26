@@ -13,6 +13,8 @@
 
 testname=`basename $0 .sh`
 
+drivers="ij new_ij sstruct struct ams_driver maxwell_unscaled sstruct_fac ij_mv struct_migrate"
+
 # Echo usage information
 case $1 in
    -h|-help)
@@ -30,7 +32,7 @@ case $1 in
    This script uses cmake to configure and compile the source in {src_dir}, then
    optionally runs driver and example tests.
 
-   Example usage: $0 .. -co -DCMAKE_BUILD_TYPE=Debug -ro: -ij
+   Example usage: $0 ../src -co -DCMAKE_BUILD_TYPE=Debug -ro: -ij
 
 EOF
       exit
@@ -38,7 +40,8 @@ EOF
 esac
 
 # Set src_dir
-src_dir=$1; shift
+src_dir=`cd $1; pwd`
+shift
 
 # Parse the rest of the command line
 copts=""
@@ -93,7 +96,7 @@ make $mopts install
 cd $src_dir/test/cmbuild
 cmake ..
 make $mopts
-mv -f ij new_ij sstruct struct ams_driver maxwell_unscaled sstruct_fac ij_mv ..
+mv -f $drivers ..
 
 cd $test_dir
 
@@ -114,3 +117,11 @@ for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
+
+# Clean up
+cd $src_dir
+rm -fr `echo cmbuild/* | sed 's/[^ ]*README.txt//g'`
+rm -fr `echo test/cmbuild/* | sed 's/[^ ]*README.txt//g'`
+rm -fr hypre
+( cd $src_dir/test; rm -f $drivers; cleantest.sh )
+

@@ -1,0 +1,110 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+#=============================================================================
+# Check SetNeighborBox for periodic problems (2D)
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.periodic.2D -r 20 20 1 \
+-solver 11 > periodic.out.20
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.2D -r 20 10 1 -P 1 2 1 \
+-solver 11 > periodic.out.21
+
+#=============================================================================
+# Check SetNeighborBox for periodic problems (3D)
+#=============================================================================
+
+mpirun -np 1 ./sstruct -in sstruct.in.periodic -r 20 20 20 \
+-solver 11 > periodic.out.30
+mpirun -np 2 ./sstruct -in sstruct.in.periodic -r 20 20 10 -P 1 1 2 \
+-solver 11 > periodic.out.31
+
+#=============================================================================
+# Check SysPFMG for power-of-two and non-power-of-two systems
+#=============================================================================
+
+# power-of-two
+mpirun -np 1 ./sstruct -in sstruct.in.laps.periodic -r 16 16 1 -P 1 1 1 -solver 3 \
+> periodic.out.40
+mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r  8 16 1 -P 2 1 1 -solver 3 \
+> periodic.out.41
+mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r 16  8 1 -P 1 2 1 -solver 3 \
+> periodic.out.42
+
+# non-power-of-two
+mpirun -np 1 ./sstruct -in sstruct.in.laps.periodic -r 22 22 1 -P 1 1 1 -solver 3 \
+> periodic.out.50
+mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r 11 22 1 -P 2 1 1 -solver 3 \
+> periodic.out.51
+mpirun -np 2 ./sstruct -in sstruct.in.laps.periodic -r 22 11 1 -P 1 2 1 -solver 3 \
+> periodic.out.52
+
+#=============================================================================
+# Check PFMG, SMG, and SysPFMG for problems with period larger than the grid
+#=============================================================================
+
+# First check that sstruct and struct are the same here
+mpirun -np 2 ./struct -d 2 -n 8 16 1 -P 2 1 1 -p 16 0 0 -istart 0 0 0 \
+-solver 0 > periodic.out.60
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigA -r 1 2 1 -P 2 1 1 -rhsone \
+-solver 200 > periodic.out.61
+mpirun -np 2 ./struct -d 2 -n 8 16 1 -P 2 1 1 -p 16 0 0 -istart 0 0 0 \
+-solver 1 > periodic.out.62
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigA -r 1 2 1 -P 2 1 1 -rhsone \
+-solver 201 > periodic.out.63
+
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigB -r 3 6 1 -P 2 1 1 -rhsone \
+-solver 200 > periodic.out.65
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigB -r 3 6 1 -P 2 1 1 -rhsone \
+-solver 201 > periodic.out.66
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.bigB -r 3 6 1 -P 2 1 1 -rhsone \
+-solver 3 > periodic.out.67
+
+#=============================================================================
+# Check that reverse communication used to AddValues still works
+#=============================================================================
+
+mpirun -np 2 ./sstruct -in sstruct.in.periodic.add -solver 218 -P 1 1 2 \
+> periodic.out.70
+
+#=============================================================================
+# Check SetPeriodic for node/cell problems and STRUCT, SSTRUCT, PARCSR types
+#=============================================================================
+
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.cellA -P 1 6 1 -solver 218 -rhsone \
+> periodic.out.80
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.cellA -P 1 6 1 -solver  18 -rhsone \
+> periodic.out.81
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.cellA -P 1 6 1 -solver  28 -rhsone \
+> periodic.out.82
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.cellB -P 1 6 1 -solver 218 -rhsone \
+> periodic.out.83
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.cellB -P 1 6 1 -solver  18 -rhsone \
+> periodic.out.84
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.cellB -P 1 6 1 -solver  28 -rhsone \
+> periodic.out.85
+
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeA -P 1 6 1 -solver 218 -rhsone \
+> periodic.out.90
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeA -P 1 6 1 -solver  18 -rhsone \
+> periodic.out.91
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeA -P 1 6 1 -solver  28 -rhsone \
+> periodic.out.92
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeB -P 1 6 1 -solver 218 -rhsone \
+> periodic.out.93
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeB -P 1 6 1 -solver  18 -rhsone \
+> periodic.out.94
+mpirun -np 6 ./sstruct -in sstruct.in.periodic.nodeB -P 1 6 1 -solver  28 -rhsone \
+> periodic.out.95
+
