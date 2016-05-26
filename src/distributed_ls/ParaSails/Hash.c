@@ -131,14 +131,14 @@ void HashInsert(Hash *h, HYPRE_Int key, HYPRE_Int data)
  * the other.
  *--------------------------------------------------------------------------*/
 
-void HashRehash(Hash *old, Hash *new)
+void HashRehash(Hash *oldHash, Hash *newHash)
 {
     HYPRE_Int i, data;
 
-    for (i=0; i<old->num; i++)
+    for (i=0; i<oldHash->num; i++)
     {
-	data = HashLookup(old, old->keys[i]);
-	HashInsert(new, old->keys[i], data);
+	data = HashLookup(oldHash, oldHash->keys[i]);
+	HashInsert(newHash, oldHash->keys[i], data);
     }
 }
 

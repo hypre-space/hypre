@@ -31,8 +31,15 @@
 #include <essl.h>
 #else
 #include "fortran.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 HYPRE_Int hypre_F90_NAME_LAPACK(dgels, DGELS)(char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, 
   HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
+#ifdef __cplusplus
+}
+#endif
+
 #endif
 
 #ifndef ABS
@@ -457,7 +464,7 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
                        HYPRE_Int                    level,
                        HYPRE_Real           **SmoothVecs_p)
 {
-   hypre_ParAMGData  *amg_data = data;
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
    MPI_Comm             comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -608,7 +615,7 @@ hypre_BoomerAMGCreateSmoothDirs(void         *data,
                        HYPRE_Int                   *dof_func,
                        hypre_ParCSRMatrix   **S_ptr)
 {
-   hypre_ParAMGData  *amg_data = data;
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
    hypre_ParCSRMatrix *S;
    HYPRE_Real minimax;
    HYPRE_Int debug_flag = hypre_ParAMGDataDebugFlag(amg_data);

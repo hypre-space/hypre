@@ -17,7 +17,8 @@
 
 #include <math.h>
 #include "slu_ddefs.h"
-
+#include "hypre_blas.h"
+#include "hypre_lapack.h"
 void
 dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
        int *perm_c, int *perm_r, char *equed, double *R, double *C,
@@ -153,7 +154,7 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     double   *work;
     double   *rwork;
     int      *iwork;
-    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(char *);
+    extern double hypre_F90_NAME_LAPACK(dlamch,DLAMCH)(const char *);
     extern int dlacon_(int *, double *, double *, int *, double *, int *);
 #ifdef _CRAY
     extern int SCOPY(int *, double *, int *, double *, int *);
@@ -163,12 +164,12 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     extern int hypre_F90_NAME_BLAS(daxpy,DAXPY)(int *,double *,double *,int *,double *,int *);
 #endif
 
-    Astore = A->Store;
-    Aval   = Astore->nzval;
-    Bstore = B->Store;
-    Xstore = X->Store;
-    Bmat   = Bstore->nzval;
-    Xmat   = Xstore->nzval;
+    Astore = (NCformat*) A->Store;
+    Aval   = (  double*) Astore->nzval;
+    Bstore = (DNformat*) B->Store;
+    Xstore = (DNformat*) X->Store;
+    Bmat   = (  double*) Bstore->nzval;
+    Xmat   = (  double*) Xstore->nzval;
     ldb    = Bstore->lda;
     ldx    = Xstore->lda;
     nrhs   = B->ncol;
@@ -251,7 +252,7 @@ dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
     Bjcol.ncol  = 1;
     Bjcol.Store = (void *) SUPERLU_MALLOC( sizeof(DNformat) );
     if ( !Bjcol.Store ) ABORT("SUPERLU_MALLOC fails for Bjcol.Store");
-    Bjcol_store = Bjcol.Store;
+    Bjcol_store = (DNformat*) Bjcol.Store;
     Bjcol_store->lda = ldb;
     Bjcol_store->nzval = work; /* address aliasing */
 	

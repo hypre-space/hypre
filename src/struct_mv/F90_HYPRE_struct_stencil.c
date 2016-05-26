@@ -19,6 +19,10 @@
 #include "_hypre_struct_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_StructStencilCreate
  *--------------------------------------------------------------------------*/
@@ -82,3 +86,7 @@ hypre_F90_IFACE(hypre_structstencildestroy, HYPRE_STRUCTSTENCILDESTROY)
    *ierr = (hypre_F90_Int) HYPRE_StructStencilDestroy(
       hypre_F90_PassObj (HYPRE_StructStencil, stencil) );
 }
+    
+#ifdef __cplusplus
+}
+#endif

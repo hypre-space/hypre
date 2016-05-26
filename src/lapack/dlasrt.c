@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dlasrt_(char *id, integer *n, doublereal *d__, integer *
+/* Subroutine */ HYPRE_Int dlasrt_(const char *id, integer *n, doublereal *d__, integer *
 	info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -50,11 +50,11 @@
     integer i__1, i__2;
     /* Local variables */
     static integer endd, i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static integer stack[64]	/* was [2][32] */;
     static doublereal dmnmx, d1, d2, d3;
     static integer start;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
     static integer stkpnt, dir;
     static doublereal tmp;
 #define stack_ref(a_1,a_2) stack[(a_2)*2 + a_1 - 3]

@@ -19,6 +19,10 @@
 #include "_hypre_sstruct_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 /*--------------------------------------------------------------------------
  * HYPRE_SStructStencilCreate
  *--------------------------------------------------------------------------*/
@@ -70,3 +74,7 @@ hypre_F90_IFACE(hypre_sstructstencilsetentry, HYPRE_SSTRUCTSTENCILSETENTRY)
           hypre_F90_PassIntArray (offset),
           hypre_F90_PassInt (var) ) );
 }
+
+#ifdef __cplusplus
+}
+#endif

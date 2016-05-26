@@ -109,7 +109,7 @@ hypre_FacSemiRestrictSetup2( void                 *fac_restrict_vdata,
 {
    HYPRE_Int                 ierr = 0;
 
-   hypre_FacSemiRestrictData2 *fac_restrict_data = fac_restrict_vdata;
+   hypre_FacSemiRestrictData2 *fac_restrict_data = (hypre_FacSemiRestrictData2 *)fac_restrict_vdata;
    MPI_Comm                    comm= hypre_SStructPVectorComm(rc);
    hypre_CommInfo             *comm_info;
    hypre_CommPkg             **interlevel_comm;
@@ -487,7 +487,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
 {
    HYPRE_Int ierr = 0;
 
-   hypre_FacSemiRestrictData2 *restrict_data = fac_restrict_vdata;
+   hypre_FacSemiRestrictData2 *restrict_data = (hypre_FacSemiRestrictData2 *)fac_restrict_vdata;
 
    hypre_SStructPVector   *fgrid_cvectors     = restrict_data->fgrid_cvectors;
    hypre_BoxArrayArray   **identity_arrayboxes= restrict_data->identity_arrayboxes;
@@ -909,7 +909,7 @@ HYPRE_Int
 hypre_FacSemiRestrictDestroy2( void *fac_restrict_vdata )
 {
    HYPRE_Int                   ierr = 0;
-   hypre_FacSemiRestrictData2 *fac_restrict_data = fac_restrict_vdata;
+   hypre_FacSemiRestrictData2 *fac_restrict_data = (hypre_FacSemiRestrictData2 *)fac_restrict_vdata;
    HYPRE_Int                   nvars;
    HYPRE_Int                   i, j;
 

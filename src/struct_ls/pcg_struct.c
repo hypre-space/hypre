@@ -39,7 +39,7 @@ hypre_StructKrylovFree( char *ptr )
 void *
 hypre_StructKrylovCreateVector( void *vvector )
 {
-   hypre_StructVector *vector = vvector;
+	hypre_StructVector *vector = (hypre_StructVector *)vvector;
    hypre_StructVector *new_vector;
    HYPRE_Int          *num_ghost= hypre_StructVectorNumGhost(vector);
 
@@ -58,7 +58,7 @@ hypre_StructKrylovCreateVector( void *vvector )
 void *
 hypre_StructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 {
-   hypre_StructVector *vector = vvector;
+   hypre_StructVector *vector = (hypre_StructVector *)vvector;
    hypre_StructVector **new_vector;
    HYPRE_Int          *num_ghost= hypre_StructVectorNumGhost(vector);
    HYPRE_Int i;
@@ -83,7 +83,7 @@ hypre_StructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 HYPRE_Int
 hypre_StructKrylovDestroyVector( void *vvector )
 {
-   hypre_StructVector *vector = vvector;
+   hypre_StructVector *vector = (hypre_StructVector *)vvector;
 
    return( hypre_StructVectorDestroy( vector ) );
 }
@@ -98,7 +98,7 @@ hypre_StructKrylovMatvecCreate( void   *A,
    void *matvec_data;
 
    matvec_data = hypre_StructMatvecCreate();
-   hypre_StructMatvecSetup(matvec_data, A, x);
+   hypre_StructMatvecSetup(matvec_data, (hypre_StructMatrix *)A,(hypre_StructVector *)x);
 
    return ( matvec_data );
 }

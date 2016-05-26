@@ -1,8 +1,8 @@
 
 #include "hypre_blas.h"
 #include "f2c.h"
-
-logical hypre_lsame_(char *ca, char *cb)
+	
+logical hypre_lsame_(const char *ca,const char *cb)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -104,7 +104,7 @@ e
 #include <stdio.h>
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int hypre_xerbla_(char *srname, integer *info)
+/* Subroutine */ HYPRE_Int hypre_xerbla_(const char *srname, integer *info)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -150,9 +150,9 @@ e
 /* compare two strings */
 
 #ifdef KR_headers
-integer s_cmp(a0, b0, la, lb) char *a0, *b0; ftnlen la, lb;
+integer s_cmp(a0, b0, la, lb) char *a0;const char *b0; ftnlen la, lb;
 #else
-integer s_cmp(char *a0, char *b0, ftnlen la, ftnlen lb)
+integer s_cmp(char *a0,const char *b0, ftnlen la, ftnlen lb)
 #endif
 {
 register unsigned char *a, *aend, *b, *bend;
@@ -189,15 +189,15 @@ else
 	}
 return(0);
 }
-#include "f2c.h"
-#include "hypre_blas.h"
+//#include "f2c.h"
+//#include "hypre_blas.h"
 
 /* assign strings:  a = b */
 
 #ifdef KR_headers
-VOID s_copy(a, b, la, lb) char *a, *b; ftnlen la, lb;
+VOID hypre_s_copy(a, b, la, lb) char *a,const char *b; ftnlen la, lb;
 #else
-void s_copy(char *a, char *b, ftnlen la, ftnlen lb)
+void hypre_s_copy(char *a,const char *b, ftnlen la, ftnlen lb)
 #endif
 {
 register char *aend, *bend;
@@ -210,7 +210,7 @@ if(la <= lb)
 
 else
 	{
-	bend = b + lb;
+		bend = (char*)b + lb;
 	while(b < bend)
 		*a++ = *b++;
 	while(a < aend)

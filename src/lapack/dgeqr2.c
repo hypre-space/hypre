@@ -75,10 +75,10 @@
     integer a_dim1, a_offset, i__1, i__2, i__3;
     /* Local variables */
     static integer i__, k;
-    extern /* Subroutine */ HYPRE_Int dlarf_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlarf_(const char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *), dlarfg_(integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *), xerbla_(char *, integer *);
+	    doublereal *, integer *, doublereal *), xerbla_(const char *, integer *);
     static doublereal aii;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 

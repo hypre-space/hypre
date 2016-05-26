@@ -136,8 +136,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
    HYPRE_Int               ci, fi, arrayi;
    HYPRE_Int               max_stencil_size= 27;
-   HYPRE_Int               true = 1;
-   HYPRE_Int               false= 0;
+   HYPRE_Int               trueV = 1;
+   HYPRE_Int               falseV= 0;
    HYPRE_Int               found, sort;
    HYPRE_Int               stencil_marker;
    HYPRE_Int              *stencil_ranks, *rank_stencils;
@@ -505,7 +505,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
     *  Mark the stencil_marker so that the first time the stencil is non-null,
     *  the stencil contribution cnts, weights, etc are computed.
     *--------------------------------------------------------------------------*/
-   stencil_marker= true;
+   stencil_marker= trueV;
    for (var1= 0; var1< nvars; var1++)
    {
       cgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_crse), var1);
@@ -532,10 +532,10 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
              * need new stencil contributions cnts, weights, etc. Thus, find
              * the latest non-null stencil for comparison.
              *-----------------------------------------------------------------*/
-            if (stencil_marker == false)
+            if (stencil_marker == falseV)
             {
                /* search for the first previous non-null stencil */
-               found     = false;
+               found     = falseV;
                var2_start= var2-1;
                for (j= var1; j>= 0; j--)
                {
@@ -544,7 +544,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      stencils_last= hypre_SStructPMatrixSStencil(A_crse, j, i);
                      if (stencils_last != NULL)
                      {
-                        found= true;
+                        found= trueV;
                         break;
                      }
                   }
@@ -564,12 +564,12 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                stencil_last_size= hypre_StructStencilSize(stencils_last);
                if (stencil_last_size != stencil_size)
                {
-                  stencil_marker= true;
+                  stencil_marker= trueV;
                   break;
                }
                else
                {
-                  found= false;
+                  found= falseV;
                   for (i= 0; i< stencil_size; i++)
                   {
                      hypre_CopyIndex(hypre_StructStencilOffset(stencils, i),
@@ -585,8 +585,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      AbsStencilShape(index_temp, abs_stencil_shape);
                      if (abs_stencil_shape)    
                      {
-                        found= true;
-                        stencil_marker= true;
+                        found= trueV;
+                        stencil_marker= trueV;
                         hypre_TFree(stencil_contrib_cnt);
                         hypre_TFree(stencil_ranks);
                         for (i= 0; i< stencil_size; i++)
@@ -641,11 +641,11 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
              *  rank_stencils[i]      =  stencil entry of rank i.
              *-----------------------------------------------------------------*/
 
-            if (stencil_marker == true)
+            if (stencil_marker == trueV)
             {
 
                /* mark stencil_marker for the next stencil */
-               stencil_marker= false;
+               stencil_marker= falseV;
 
                stencil_contrib_cnt= hypre_CTAlloc(HYPRE_Int, stencil_size);
                stencil_contrib_i  = hypre_TAlloc(HYPRE_Int *, stencil_size);
@@ -2186,12 +2186,12 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                     hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index_temp,
                                                                           &rank, matrix_type);
 
-                                    found= false;
+                                    found= falseV;
                                     i= hypre_SStructGraphIUVEntry(graph, 0);
                                     m= hypre_SStructGraphIUVEntry(graph, nUventries-1);
                                     if ((rank-startrank) >= i && (rank-startrank) <= m)
                                     {
-                                       found= true;
+                                       found= trueV;
                                     }
 
                                     if (found)
@@ -2253,14 +2253,14 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                     hypre_SStructBoxManEntryGetGlobalRank(boxman_entry, index_temp,
                                                                           &rank, matrix_type);
 
-                                    found= false;
+                                    found= falseV;
                                     if (nUventries > 0)
                                     {
                                        i= hypre_SStructGraphIUVEntry(graph, 0);
                                        m= hypre_SStructGraphIUVEntry(graph, nUventries-1);
                                        if ((rank-startrank) >= i && (rank-startrank) <= m)
                                        {
-                                          found= true;
+                                          found= trueV;
                                        }
                                     }
 
@@ -2921,17 +2921,17 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                 * accordingly.
                 *-----------------------------------------------------------------*/
 
-               sort= false;
+               sort= falseV;
                for (j= 0; j< (coarse_stencil_cnt[i]-1); j++)
                {
                   if (interface_stencil_ranks[i][j] > interface_stencil_ranks[i][j+1])
                   {
-                     sort= true;
+                     sort= trueV;
                      break;
                   }
                }
 
-               if ( (coarse_stencil_cnt[i]>1) && (sort==true) )
+               if ( (coarse_stencil_cnt[i]>1) && (sort==trueV) )
                {
                   temp1= hypre_TAlloc(HYPRE_Int, coarse_stencil_cnt[i]);
                   for (j= 0; j< coarse_stencil_cnt[i]; j++)

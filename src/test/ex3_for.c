@@ -262,7 +262,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       /* Indicate that the matrix coefficients are ready to be set */
       HYPRE_StructMatrixInitialize(&A);
 
-      values = calloc(nvalues, sizeof(HYPRE_Real));
+      values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
 
       for (j = 0; j < nentries; j++)
          stencil_indices[j] = j;
@@ -320,7 +320,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_Real *values;
       HYPRE_Int stencil_indices[1];
 
-      values = calloc(nvalues, sizeof(HYPRE_Real));
+      values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
       for (j = 0; j < nvalues; j++)
             values[j] = 0.0;
 
@@ -421,7 +421,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_Int    nvalues = n*n;
       HYPRE_Real *values;
 
-      values = calloc(nvalues, sizeof(HYPRE_Real));
+      values = (HYPRE_Real*) calloc(nvalues, sizeof(HYPRE_Real));
 
       /* Create an empty vector object */
 #ifdef HYPRE_FORTRAN

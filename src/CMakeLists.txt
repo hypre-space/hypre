@@ -726,6 +726,8 @@ configure_file (
 # BINARY must be first in order to get the correct HYPRE_config.h file
 include_directories(${hypre_BINARY_DIR})
 include_directories(${hypre_SOURCE_DIR})
+include_directories(blas)
+include_directories(lapack)
 include_directories(utilities)
 include_directories(multivector)
 include_directories(krylov)

@@ -150,7 +150,7 @@
     /* Local variables */
     static integer i__;
     extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
-	    integer *), dgemv_(char *, integer *, integer *, doublereal *, 
+	    integer *), dgemv_(const char *, integer *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    doublereal *, integer *), dlarfg_(integer *, doublereal *,
 	     doublereal *, integer *, doublereal *);

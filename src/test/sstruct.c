@@ -10,11 +10,16 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
+
+	
 #include "_hypre_utilities.h"
+
+
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
@@ -22,7 +27,9 @@
 /* begin lobpcg */
 
 #include <time.h>
- 
+
+
+    
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
 #include "interpreter.h"
@@ -34,7 +41,7 @@
 /* end lobpcg */
  
 #define DEBUG 0
-
+    
 /*--------------------------------------------------------------------------
  * Data structures
  *--------------------------------------------------------------------------*/
@@ -1202,6 +1209,7 @@ DistributeData( ProblemData   global_data,
    /* check number of processes */
    if (pool_procs[data.npools] != num_procs)
    {
+	   hypre_printf("%d,  %d \n",pool_procs[data.npools],num_procs);
       hypre_printf("Error: Invalid number of processes or process topology \n");
       exit(1);
    }

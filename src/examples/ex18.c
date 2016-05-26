@@ -225,7 +225,7 @@ int main (int argc, char *argv[])
       /* Get ready to set values */
       HYPRE_SStructMatrixInitialize(A);
 
-      values = calloc(nvalues, sizeof(double));
+      values = (double*) calloc(nvalues, sizeof(double));
 
       /* Set intra-variable values; fix boundaries later */
       for (j = 0; j < nentries; j++)
@@ -279,7 +279,7 @@ int main (int argc, char *argv[])
       double *values;
       int stencil_indices[1];
 
-      values = calloc(nvalues, sizeof(double));
+      values = (double*) calloc(nvalues, sizeof(double));
       for (j = 0; j < nvalues; j++)
       {
          values[j] = 0.0;
@@ -345,7 +345,7 @@ int main (int argc, char *argv[])
       int nvalues = NVARS*nvol;
       double *values;
 
-      values = calloc(nvalues, sizeof(double));
+      values = (double*) calloc(nvalues, sizeof(double));
 
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);

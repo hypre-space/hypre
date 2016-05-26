@@ -18,7 +18,7 @@
     /* Local variables */
     static doublereal emin, temp, d__;
     static integer j4;
-    extern doublereal dlamch_(char *);
+    extern doublereal dlamch_(const char *);
     static doublereal safmin;
     static integer j4p2;
 

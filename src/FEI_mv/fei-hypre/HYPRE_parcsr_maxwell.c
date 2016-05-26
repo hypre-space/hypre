@@ -27,6 +27,8 @@
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 
+#include "HYPRE_FEI.h"
+
 /*--------------------------------------------------------------------------
  * hypre_CotreeData
  *--------------------------------------------------------------------------*/
@@ -205,7 +207,7 @@ int HYPRE_ParCSRCotreeSolve(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
                             HYPRE_ParVector b, HYPRE_ParVector x)
 {
    void *cotree_vdata = (void *) solver;
-   hypre_CotreeData *cotree_data  = cotree_vdata;
+   hypre_CotreeData *cotree_data  = (hypre_CotreeData *)cotree_vdata;
    cotree_data->w = NULL;
    return 0;
 }

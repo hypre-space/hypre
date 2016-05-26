@@ -513,7 +513,7 @@ HYPRE_Int hypre_AMGHybridSetKDim ( void *AMGhybrid_vdata , HYPRE_Int k_dim );
 HYPRE_Int hypre_AMGHybridSetStopCrit ( void *AMGhybrid_vdata , HYPRE_Int stop_crit );
 HYPRE_Int hypre_AMGHybridSetTwoNorm ( void *AMGhybrid_vdata , HYPRE_Int two_norm );
 HYPRE_Int hypre_AMGHybridSetRelChange ( void *AMGhybrid_vdata , HYPRE_Int rel_change );
-HYPRE_Int hypre_AMGHybridSetPrecond ( void *pcg_vdata , HYPRE_Int (*pcg_precond_solve )(), HYPRE_Int (*pcg_precond_setup )(), void *pcg_precond );
+HYPRE_Int hypre_AMGHybridSetPrecond ( void *pcg_vdata , HYPRE_Int (*pcg_precond_solve )(void*,void*,void*,void*), HYPRE_Int (*pcg_precond_setup )(void*,void*,void*,void*), void *pcg_precond );
 HYPRE_Int hypre_AMGHybridSetLogging ( void *AMGhybrid_vdata , HYPRE_Int logging );
 HYPRE_Int hypre_AMGHybridSetPrintLevel ( void *AMGhybrid_vdata , HYPRE_Int print_level );
 HYPRE_Int hypre_AMGHybridSetStrongThreshold ( void *AMGhybrid_vdata , HYPRE_Real strong_threshold );

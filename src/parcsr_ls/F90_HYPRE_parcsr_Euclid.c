@@ -19,6 +19,10 @@
 #include "_hypre_parcsr_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_EuclidCreate - Return a Euclid "solver".  
  *--------------------------------------------------------------------------*/
@@ -222,3 +226,6 @@ hypre_F90_IFACE(hypre_euclidsetilut, HYPRE_EUCLIDSETILUT)
       hypre_F90_PassReal (drop_tol) );
 }
 
+#ifdef __cplusplus
+}
+#endif

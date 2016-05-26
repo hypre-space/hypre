@@ -39,7 +39,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                  hypre_StructVector *b,
                  hypre_StructVector *x         )
 {
-   hypre_PFMGData       *pfmg_data = pfmg_vdata;
+	hypre_PFMGData       *pfmg_data = (hypre_PFMGData       *)pfmg_vdata;
 
    HYPRE_Real            tol             = (pfmg_data -> tol);
    HYPRE_Int             max_iter        = (pfmg_data -> max_iter);

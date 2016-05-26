@@ -59,7 +59,7 @@ HYPRE_Int hypre_HybridSetStopCrit ( void *hybrid_vdata , HYPRE_Int stop_crit );
 HYPRE_Int hypre_HybridSetRelChange ( void *hybrid_vdata , HYPRE_Int rel_change );
 HYPRE_Int hypre_HybridSetSolverType ( void *hybrid_vdata , HYPRE_Int solver_type );
 HYPRE_Int hypre_HybridSetKDim ( void *hybrid_vdata , HYPRE_Int k_dim );
-HYPRE_Int hypre_HybridSetPrecond ( void *pcg_vdata , HYPRE_Int (*pcg_precond_solve )(), HYPRE_Int (*pcg_precond_setup )(), void *pcg_precond );
+HYPRE_Int hypre_HybridSetPrecond ( void *pcg_vdata , HYPRE_Int (*pcg_precond_solve )(void*, void*, void*, void*), HYPRE_Int (*pcg_precond_setup )(void*, void*, void*, void*), void *pcg_precond );
 HYPRE_Int hypre_HybridSetLogging ( void *hybrid_vdata , HYPRE_Int logging );
 HYPRE_Int hypre_HybridSetPrintLevel ( void *hybrid_vdata , HYPRE_Int print_level );
 HYPRE_Int hypre_HybridGetNumIterations ( void *hybrid_vdata , HYPRE_Int *num_its );

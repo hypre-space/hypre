@@ -54,7 +54,7 @@ hypre_SMGSolve( void               *smg_vdata,
                 hypre_StructVector *x         )
 {
 
-   hypre_SMGData        *smg_data = smg_vdata;
+	hypre_SMGData        *smg_data = (hypre_SMGData        *)smg_vdata;
 
    HYPRE_Real            tol             = (smg_data -> tol);
    HYPRE_Int             max_iter        = (smg_data -> max_iter);

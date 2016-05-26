@@ -13,6 +13,10 @@
 #include "_hypre_struct_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_BiCGSTABCreate
  *--------------------------------------------------------------------------*/
@@ -233,7 +237,7 @@ hypre_F90_IFACE(hypre_structbicgstabgetresidual, HYPRE_STRUCTBICGSTABGETRESIDUAL
    *ierr = (hypre_F90_Int)
       ( HYPRE_StructBiCGSTABGetResidual(
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           (void *)          residual ) );
+           (void **)          residual ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -251,3 +255,7 @@ hypre_F90_IFACE(hypre_structbicgstabgetfinalrel, HYPRE_STRUCTBICGSTABGETFINALREL
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
            hypre_F90_PassRealRef (norm) ) );
 }
+    
+#ifdef __cplusplus
+}
+#endif

@@ -73,7 +73,7 @@ hypre_StructMatvecSetup( void               *matvec_vdata,
                          hypre_StructMatrix *A,
                          hypre_StructVector *x )
 {
-   hypre_StructMatvecData  *matvec_data = matvec_vdata;
+	hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
                           
    hypre_StructGrid        *grid;
    hypre_StructStencil     *stencil;
@@ -189,7 +189,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                            HYPRE_Complex       beta,
                            hypre_StructVector *y )
 {
-   hypre_StructMatvecData  *matvec_data = matvec_vdata;
+	hypre_StructMatvecData  *matvec_data = (hypre_StructMatvecData  *)matvec_vdata;
                           
    hypre_ComputePkg        *compute_pkg;
    hypre_CommHandle        *comm_handle;
@@ -529,7 +529,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
 HYPRE_Int
 hypre_StructMatvecDestroy( void *matvec_vdata )
 {
-   hypre_StructMatvecData *matvec_data = matvec_vdata;
+	hypre_StructMatvecData *matvec_data = (hypre_StructMatvecData *)matvec_vdata;
 
    if (matvec_data)
    {

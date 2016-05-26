@@ -20,6 +20,10 @@
 #include "fortran.h"
 #include "HYPRE_MatvecFunctions.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 /*--------------------------------------------------------------------------
  *  HYPRE_SStructPVectorSetRandomValues
  *--------------------------------------------------------------------------*/
@@ -94,3 +98,7 @@ hypre_F90_IFACE(hypre_sstructsetupmatvec, HYPRE_SSTRUCTSETUPMATVEC)
       ( HYPRE_SStructSetupMatvec(
            hypre_F90_PassObjRef (HYPRE_MatvecFunctions, mv)));
 }
+
+#ifdef __cplusplus
+}
+#endif
