@@ -164,14 +164,13 @@ hypre_BoomerAMGBuildStdInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     if (hypre_exchange_interp_data(
+     hypre_exchange_interp_data(
        &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
-       A, CF_marker, S, num_functions, dof_func, 0))
+       A, CF_marker, S, num_functions, dof_func, 0);
      {
 #ifdef HYPRE_PROFILE
        hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
 #endif
-       return hypre_error_flag;
      }
 
      A_ext_i       = hypre_CSRMatrixI(A_ext);
@@ -1126,14 +1125,13 @@ hypre_BoomerAMGBuildExtPIInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     if (hypre_exchange_interp_data(
+     hypre_exchange_interp_data(
        &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
-       A, CF_marker, S, num_functions, dof_func, 1))
+       A, CF_marker, S, num_functions, dof_func, 1)
      {
 #ifdef HYPRE_PROFILE
        hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
 #endif
-       return hypre_error_flag;
      }
 
      A_ext_i       = hypre_CSRMatrixI(A_ext);
@@ -1991,14 +1989,13 @@ hypre_BoomerAMGBuildExtPICCInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     if (hypre_exchange_interp_data(
+     hypre_exchange_interp_data(
        &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
-       A, CF_marker, S, num_functions, dof_func, 1))
+       A, CF_marker, S, num_functions, dof_func, 1)
      {
 #ifdef HYPRE_PROFILE
        hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
 #endif
-       return hypre_error_flag;
      }
 
      A_ext_i       = hypre_CSRMatrixI(A_ext);
@@ -2943,14 +2940,13 @@ hypre_BoomerAMGBuildFFInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     if (hypre_exchange_interp_data(
+     hypre_exchange_interp_data(
        &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
-       A, CF_marker, S, num_functions, dof_func, 1))
+       A, CF_marker, S, num_functions, dof_func, 1)
      {
 #ifdef HYPRE_PROFILE
        hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
 #endif
-       return hypre_error_flag;
      }
 
      A_ext_i       = hypre_CSRMatrixI(A_ext);
@@ -3829,14 +3825,13 @@ hypre_BoomerAMGBuildFF1Interp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     if (hypre_exchange_interp_data(
+     hypre_exchange_interp_data(
        &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
-       A, CF_marker, S, num_functions, dof_func, 1))
+       A, CF_marker, S, num_functions, dof_func, 1)
      {
 #ifdef HYPRE_PROFILE
        hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
 #endif
-       return hypre_error_flag;
      }
 
      A_ext_i       = hypre_CSRMatrixI(A_ext);
@@ -4734,14 +4729,13 @@ hypre_BoomerAMGBuildExtInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker,
    full_off_procNodes = 0;
    if (num_procs > 1)
    {
-     if (hypre_exchange_interp_data(
+     hypre_exchange_interp_data(
        &CF_marker_offd, &dof_func_offd, &A_ext, &full_off_procNodes, &Sop, &extend_comm_pkg,
-       A, CF_marker, S, num_functions, dof_func, 1))
+       A, CF_marker, S, num_functions, dof_func, 1)
      {
 #ifdef HYPRE_PROFILE
        hypre_profile_times[HYPRE_TIMER_ID_EXTENDED_I_INTERP] += hypre_MPI_Wtime();
 #endif
-       return hypre_error_flag;
      }
 
      A_ext_i       = hypre_CSRMatrixI(A_ext);
