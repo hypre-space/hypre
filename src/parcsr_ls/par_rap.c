@@ -387,9 +387,9 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
         send_map_starts_RT =hypre_ParCSRCommPkgSendMapStarts(comm_pkg_RT);
         send_map_elmts_RT = hypre_ParCSRCommPkgSendMapElmts(comm_pkg_RT);
    }
-   else (if num_procs > 1)
+   else if (num_procs > 1)
    {
-        MatvecCommPkgCreate(RT);
+        hypre_MatvecCommPkgCreate(RT);
         comm_pkg_RT = hypre_ParCSRMatrixCommPkg(RT);
         num_recvs_RT = hypre_ParCSRCommPkgNumRecvs(comm_pkg_RT);
         num_sends_RT = hypre_ParCSRCommPkgNumSends(comm_pkg_RT);
