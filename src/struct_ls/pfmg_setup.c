@@ -214,6 +214,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       if (cdir != -1)
       {
          /* don't coarsen if a periodic direction and not divisible by 2 */
+         /* RDF: This must be wrong; the grids are not yet available! */
          periodic = hypre_IndexD(hypre_StructGridPeriodic(grid_l[l]), cdir);
          if ((periodic) && (periodic % 2))
          {
@@ -266,6 +267,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox), cindex, stride, hypre_BoxIMax(cbox));
 
       /* build the coarse grid */
+      /* RDF: RAP is already coarsening the grid; we shouldn't be doing this twice! */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
    }
    num_levels = l + 1;
