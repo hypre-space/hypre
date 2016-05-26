@@ -13,6 +13,10 @@
 #include "_hypre_struct_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_StructVectorSetRandomValues
  *--------------------------------------------------------------------------*/
@@ -73,3 +77,7 @@ hypre_F90_IFACE(hypre_structsetupmatvec, HYPRE_STRUCTSETUPMATVEC)
       ( HYPRE_StructSetupMatvec(
            hypre_F90_PassObjRef (HYPRE_MatvecFunctions, mv)));
 }
+    
+#ifdef __cplusplus
+}
+#endif

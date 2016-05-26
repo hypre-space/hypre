@@ -16,6 +16,7 @@
 #define HYPRE_LAPACK_H
 #include "f2c.h"
 #include "fortran.h"
+#include "math.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -165,7 +166,7 @@ HYPRE_Int dlae2_ ( doublereal *a , doublereal *b , doublereal *c__ , doublereal 
 HYPRE_Int dlaev2_ ( doublereal *a , doublereal *b , doublereal *c__ , doublereal *rt1 , doublereal *rt2 , doublereal *cs1 , doublereal *sn1 );
 
 /* dlamch.c */
-doublereal dlamch_ ( char *cmach );
+doublereal dlamch_ (const char *cmach );
 HYPRE_Int dlamc1_ ( integer *beta , integer *t , logical *rnd , logical *ieee1 );
 HYPRE_Int dlamc2_ ( integer *beta , integer *t , logical *rnd , doublereal *eps , integer *emin , doublereal *rmin , integer *emax , doublereal *rmax );
 doublereal dlamc3_ ( doublereal *a , doublereal *b );
@@ -177,49 +178,49 @@ HYPRE_Int dlamc5_ ( integer *beta , integer *p , integer *emin , logical *ieee ,
 HYPRE_Int dlaswp_( integer *n , doublereal *a , integer *lda , integer *k1 , integer *k2 , integer *ipiv , integer *incx );
 
 /* dlange.c */
-doublereal dlange_ ( char *norm , integer *m , integer *n , doublereal *a , integer *lda , doublereal *work );
+doublereal dlange_ (const char *norm , integer *m , integer *n , doublereal *a , integer *lda , doublereal *work );
 
 /* dlanst.c */
-doublereal dlanst_ ( char *norm , integer *n , doublereal *d__ , doublereal *e );
+doublereal dlanst_ (const char *norm , integer *n , doublereal *d__ , doublereal *e );
 
 /* dlansy.c */
-doublereal dlansy_ ( char *norm , char *uplo , integer *n , doublereal *a , integer *lda , doublereal *work );
+doublereal dlansy_ (const char *norm ,const char *uplo , integer *n , doublereal *a , integer *lda , doublereal *work );
 
 /* dlapy2.c */
 doublereal dlapy2_ ( doublereal *x , doublereal *y );
 
 /* dlarf.c */
-HYPRE_Int dlarf_ ( char *side , integer *m , integer *n , doublereal *v , integer *incv , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work );
+HYPRE_Int dlarf_ (const char *side , integer *m , integer *n , doublereal *v , integer *incv , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work );
 
 /* dlarfb.c */
-HYPRE_Int dlarfb_ ( char *side , char *trans , char *direct , char *storev , integer *m , integer *n , integer *k , doublereal *v , integer *ldv , doublereal *t , integer *ldt , doublereal *c__ , integer *ldc , doublereal *work , integer *ldwork );
+HYPRE_Int dlarfb_ (const char *side ,const char *trans ,const char *direct ,const char *storev , integer *m , integer *n , integer *k , doublereal *v , integer *ldv , doublereal *t , integer *ldt , doublereal *c__ , integer *ldc , doublereal *work , integer *ldwork );
 
 /* dlarfg.c */
 HYPRE_Int dlarfg_ ( integer *n , doublereal *alpha , doublereal *x , integer *incx , doublereal *tau );
 
 /* dlarft.c */
-HYPRE_Int dlarft_ ( char *direct , char *storev , integer *n , integer *k , doublereal *v , integer *ldv , doublereal *tau , doublereal *t , integer *ldt );
+HYPRE_Int dlarft_ (const char *direct ,const char *storev , integer *n , integer *k , doublereal *v , integer *ldv , doublereal *tau , doublereal *t , integer *ldt );
 
 /* dlartg.c */
 HYPRE_Int dlartg_ ( doublereal *f , doublereal *g , doublereal *cs , doublereal *sn , doublereal *r__ );
 
 /* dlascl.c */
-HYPRE_Int dlascl_ ( char *type__ , integer *kl , integer *ku , doublereal *cfrom , doublereal *cto , integer *m , integer *n , doublereal *a , integer *lda , integer *info );
+HYPRE_Int dlascl_ (const char *type__ , integer *kl , integer *ku , doublereal *cfrom , doublereal *cto , integer *m , integer *n , doublereal *a , integer *lda , integer *info );
 
 /* dlaset.c */
-HYPRE_Int dlaset_ ( char *uplo , integer *m , integer *n , doublereal *alpha , doublereal *beta , doublereal *a , integer *lda );
+HYPRE_Int dlaset_ (const char *uplo , integer *m , integer *n , doublereal *alpha , doublereal *beta , doublereal *a , integer *lda );
 
 /* dlasr.c */
-HYPRE_Int dlasr_ ( char *side , char *pivot , char *direct , integer *m , integer *n , doublereal *c__ , doublereal *s , doublereal *a , integer *lda );
+HYPRE_Int dlasr_ (const char *side ,const char *pivot ,const char *direct , integer *m , integer *n , doublereal *c__ , doublereal *s , doublereal *a , integer *lda );
 
 /* dlasrt.c */
-HYPRE_Int dlasrt_ ( char *id , integer *n , doublereal *d__ , integer *info );
+HYPRE_Int dlasrt_ (const char *id , integer *n , doublereal *d__ , integer *info );
 
 /* dlassq.c */
 HYPRE_Int dlassq_ ( integer *n , doublereal *x , integer *incx , doublereal *scale , doublereal *sumsq );
 
 /* dlatrd.c */
-HYPRE_Int dlatrd_ ( char *uplo , integer *n , integer *nb , doublereal *a , integer *lda , doublereal *e , doublereal *tau , doublereal *w , integer *ldw );
+HYPRE_Int dlatrd_ (const char *uplo , integer *n , integer *nb , doublereal *a , integer *lda , doublereal *e , doublereal *tau , doublereal *w , integer *ldw );
 
 /* dorg2l.c */
 HYPRE_Int dorg2l_ ( integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *work , integer *info );
@@ -234,55 +235,55 @@ HYPRE_Int dorgql_ ( integer *m , integer *n , integer *k , doublereal *a , integ
 HYPRE_Int dorgqr_ ( integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *work , integer *lwork , integer *info );
 
 /* dorgtr.c */
-HYPRE_Int dorgtr_ ( char *uplo , integer *n , doublereal *a , integer *lda , doublereal *tau , doublereal *work , integer *lwork , integer *info );
+HYPRE_Int dorgtr_ (const char *uplo , integer *n , doublereal *a , integer *lda , doublereal *tau , doublereal *work , integer *lwork , integer *info );
 
 /* dorm2r.c */
-HYPRE_Int dorm2r_ ( char *side , char *trans , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work , integer *info );
+HYPRE_Int dorm2r_ (const char *side ,const char *trans , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work , integer *info );
 
 /* dorml2.c */
-HYPRE_Int dorml2_ ( char *side , char *trans , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work , integer *info );
+HYPRE_Int dorml2_ (const char *side ,const char *trans , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work , integer *info );
 
 /* dormlq.c */
-HYPRE_Int dormlq_ ( char *side , char *trans , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work , integer *lwork , integer *info );
+HYPRE_Int dormlq_ (const char *side ,const char *trans , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work , integer *lwork , integer *info );
 
 /* dormqr.c */
-HYPRE_Int dormqr_ ( char *side , char *trans , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work , integer *lwork , integer *info );
+HYPRE_Int dormqr_ (const char *side ,const char *trans , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work , integer *lwork , integer *info );
 
 /* dpotf2.c */
-HYPRE_Int dpotf2_ ( char *uplo , integer *n , doublereal *a , integer *lda , integer *info );
+HYPRE_Int dpotf2_ (const char *uplo , integer *n , doublereal *a , integer *lda , integer *info );
 
 /* dpotrf.c */
-HYPRE_Int dpotrf_ ( char *uplo , integer *n , doublereal *a , integer *lda , integer *info );
+HYPRE_Int dpotrf_ (const char *uplo , integer *n , doublereal *a , integer *lda , integer *info );
 
 /* dpotrs.c */
 HYPRE_Int dpotrs_ ( char *uplo , integer *n , integer *nrhs , doublereal *a , integer *lda , doublereal *b , integer *ldb , integer *info );
 
 /* dsteqr.c */
-HYPRE_Int dsteqr_ ( char *compz , integer *n , doublereal *d__ , doublereal *e , doublereal *z__ , integer *ldz , doublereal *work , integer *info );
+HYPRE_Int dsteqr_ (const char *compz , integer *n , doublereal *d__ , doublereal *e , doublereal *z__ , integer *ldz , doublereal *work , integer *info );
 
 /* dsterf.c */
 HYPRE_Int dsterf_ ( integer *n , doublereal *d__ , doublereal *e , integer *info );
 
 /* dsyev.c */
-HYPRE_Int dsyev_ ( char *jobz , char *uplo , integer *n , doublereal *a , integer *lda , doublereal *w , doublereal *work , integer *lwork , integer *info );
+HYPRE_Int dsyev_ (const char *jobz ,const char *uplo , integer *n , doublereal *a , integer *lda , doublereal *w , doublereal *work , integer *lwork , integer *info );
 
 /* dsygst.c */
-HYPRE_Int dsygst_ ( integer *itype , char *uplo , integer *n , doublereal *a , integer *lda , doublereal *b , integer *ldb , integer *info );
+HYPRE_Int dsygst_ ( integer *itype ,const char *uplo , integer *n , doublereal *a , integer *lda , doublereal *b , integer *ldb , integer *info );
 
 /* dsygv.c */
 HYPRE_Int dsygv_ ( integer *itype , char *jobz , char *uplo , integer *n , doublereal *a , integer *lda , doublereal *b , integer *ldb , doublereal *w , doublereal *work , integer *lwork , integer *info );
 
 /* dsytd2.c */
-HYPRE_Int dsytd2_ ( char *uplo , integer *n , doublereal *a , integer *lda , doublereal *d__ , doublereal *e , doublereal *tau , integer *info );
+HYPRE_Int dsytd2_ (const char *uplo , integer *n , doublereal *a , integer *lda , doublereal *d__ , doublereal *e , doublereal *tau , integer *info );
 
 /* dsytrd.c */
-HYPRE_Int dsytrd_ ( char *uplo , integer *n , doublereal *a , integer *lda , doublereal *d__ , doublereal *e , doublereal *tau , doublereal *work , integer *lwork , integer *info );
+HYPRE_Int dsytrd_ (const char *uplo , integer *n , doublereal *a , integer *lda , doublereal *d__ , doublereal *e , doublereal *tau , doublereal *work , integer *lwork , integer *info );
 
 /* ieeeck.c */
 integer ieeeck_ ( integer *ispec , real *zero , real *one );
 
 /* ilaenv.c */
-integer ilaenv_ ( integer *ispec , char *name__ , char *opts , integer *n1 , integer *n2 , integer *n3 , integer *n4 , ftnlen name_len , ftnlen opts_len );
+integer ilaenv_ ( integer *ispec ,const char *name__ ,const char *opts , integer *n1 , integer *n2 , integer *n3 , integer *n4 , ftnlen name_len , ftnlen opts_len );
 
 /* lapack_utils.c */
 HYPRE_Real d_lg10 ( doublereal *x );
@@ -292,28 +293,28 @@ HYPRE_Real pow_dd ( doublereal *ap , doublereal *bp );
 HYPRE_Int s_cat ( char *lp , char *rpp [], ftnlen rnp [], ftnlen *np , ftnlen ll );
 
 /* lsame.c */
-logical lsame_ ( char *ca , char *cb );
+logical lsame_ (const char *ca ,const char *cb );
 
 /* xerbla.c */
-HYPRE_Int xerbla_ ( char *srname , integer *info );
+HYPRE_Int xerbla_ (const char *srname , integer *info );
 
 /* dbdsqr.c */
-HYPRE_Int dbdsqr_ ( char *uplo , integer *n , integer *ncvt , integer *nru , integer *ncc , doublereal *d__ , doublereal *e , doublereal *vt , integer *ldvt , doublereal *u , integer *ldu , doublereal *c__ , integer *ldc , doublereal *work , integer *info );
+HYPRE_Int dbdsqr_ (const char *uplo , integer *n , integer *ncvt , integer *nru , integer *ncc , doublereal *d__ , doublereal *e , doublereal *vt , integer *ldvt , doublereal *u , integer *ldu , doublereal *c__ , integer *ldc , doublereal *work , integer *info );
 
 /* dorgbr.c */
-HYPRE_Int dorgbr_ ( char *vect , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *work , integer *lwork , integer *info );
+HYPRE_Int dorgbr_ (const char *vect , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *work , integer *lwork , integer *info );
 
 /* dsygs2.c */
-HYPRE_Int dsygs2_ ( integer *itype , char *uplo , integer *n , doublereal *a , integer *lda , doublereal *b , integer *ldb , integer *info );
+HYPRE_Int dsygs2_ ( integer *itype ,const char *uplo , integer *n , doublereal *a , integer *lda , doublereal *b , integer *ldb , integer *info );
 
 /* dorglq.c */
 HYPRE_Int dorglq_ ( integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *work , integer *lwork , integer *info );
 
 /* dlacpy.c */
-HYPRE_Int dlacpy_ ( char *uplo , integer *m , integer *n , doublereal *a , integer *lda , doublereal *b , integer *ldb );
+HYPRE_Int dlacpy_ (const char *uplo , integer *m , integer *n , doublereal *a , integer *lda , doublereal *b , integer *ldb );
 
 /* dormbr.c */
-HYPRE_Int dormbr_ ( char *vect , char *side , char *trans , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work , integer *lwork , integer *info );
+HYPRE_Int dormbr_ (const char *vect ,const char *side ,const char *trans , integer *m , integer *n , integer *k , doublereal *a , integer *lda , doublereal *tau , doublereal *c__ , integer *ldc , doublereal *work , integer *lwork , integer *info );
 
 /* dlasq1.c */
 HYPRE_Int dlasq1_ ( integer *n , doublereal *d__ , doublereal *e , doublereal *work , integer *info );

@@ -32,7 +32,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
                       hypre_StructVector *b,
                       hypre_StructVector *x          )
 {
-   hypre_SparseMSGData  *smsg_data = smsg_vdata;
+	hypre_SparseMSGData  *smsg_data = (hypre_SparseMSGData  *)smsg_vdata;
 
    HYPRE_Real            tol                 = (smsg_data -> tol);
    HYPRE_Int             max_iter            = (smsg_data -> max_iter);

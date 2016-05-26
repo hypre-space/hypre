@@ -13,6 +13,7 @@
 
 #include <math.h>
 #include <fortran.h>
+#include "hypre_blas.h"
 /*#include "slu_Cnames.h"*/
 
 int
@@ -82,10 +83,10 @@ dlacon_(int *n, double *v, double *x, int *isgn, double *est, int *kase)
     extern int ISAMAX(int *, double *, int *);
     extern double SASUM(int *, double *, int *);
     extern int SCOPY(int *, double *, int *, double *, int *);
-#else
+#else	
     extern int hypre_F90_NAME_BLAS(idamax,IDAMAX)(int *, double *, int *);
     extern double hypre_F90_NAME_BLAS(dasum,DASUM)(int *, double *, int *);
-    extern int hypre_F90_NAME_BLAS(dcopy,DCOPY)(int *, double *, int *, double *, int *);
+    extern int hypre_F90_NAME_BLAS(dcopy,DCOPY)(int *, double *, int *, double *, int *);	
 #endif
 #define d_sign(a, b) (b >= 0 ? fabs(a) : -fabs(a))    /* Copy sign */
 #define i_dnnt(a) \

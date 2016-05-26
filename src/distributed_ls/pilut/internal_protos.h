@@ -69,13 +69,13 @@ void hypre_EraseMap( CommInfoType *cinfo , HYPRE_Int *newperm , HYPRE_Int nmis ,
 void hypre_ParINIT( ReduceMatType *nrmat , CommInfoType *cinfo , HYPRE_Int *rowdist , hypre_PilutSolverGlobals *globals );
 
 /* parutil.c */
-void hypre_errexit( char *f_str , ...);
+void hypre_errexit(const char *f_str , ...);
 void hypre_my_abort( HYPRE_Int inSignal , hypre_PilutSolverGlobals *globals );
-HYPRE_Int *hypre_idx_malloc( HYPRE_Int n , char *msg );
-HYPRE_Int *hypre_idx_malloc_init( HYPRE_Int n , HYPRE_Int ival , char *msg );
-HYPRE_Real *hypre_fp_malloc( HYPRE_Int n , char *msg );
-HYPRE_Real *hypre_fp_malloc_init( HYPRE_Int n , HYPRE_Real ival , char *msg );
-void *hypre_mymalloc( HYPRE_Int nbytes , char *msg );
+HYPRE_Int *hypre_idx_malloc( HYPRE_Int n ,const char *msg );
+HYPRE_Int *hypre_idx_malloc_init( HYPRE_Int n , HYPRE_Int ival ,const char *msg );
+HYPRE_Real *hypre_fp_malloc( HYPRE_Int n ,const char *msg );
+HYPRE_Real *hypre_fp_malloc_init( HYPRE_Int n , HYPRE_Real ival ,const char *msg );
+void *hypre_mymalloc( HYPRE_Int nbytes ,const char *msg );
 void hypre_free_multi( void *ptr1 , ...);
 void hypre_memcpy_int( HYPRE_Int *dest , const HYPRE_Int *src , size_t n );
 void hypre_memcpy_idx( HYPRE_Int *dest , const HYPRE_Int *src , size_t n );
@@ -90,7 +90,7 @@ void hypre_p_daxbyz( DataDistType *ddist , HYPRE_Real alpha , HYPRE_Real *x , HY
 HYPRE_Int hypre_p_vprintf( DataDistType *ddist , HYPRE_Real *x , hypre_PilutSolverGlobals *globals );
 
 /* distributed_qsort.c */
-void hypre_tex_qsort(char *base, HYPRE_Int n, HYPRE_Int size, HYPRE_Int (*compar) ());
+void hypre_tex_qsort(char *base, HYPRE_Int n, HYPRE_Int size, HYPRE_Int (*compar) (char*,char*));
 /* distributed_qsort_si.c */
 void hypre_sincsort_fast( HYPRE_Int n , HYPRE_Int *base );
 void hypre_sdecsort_fast( HYPRE_Int n , HYPRE_Int *base );

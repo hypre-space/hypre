@@ -57,7 +57,7 @@ hypre_MaxwellTVCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_MaxwellTVDestroy( void *maxwell_vdata )
 {
-   hypre_MaxwellData *maxwell_data= maxwell_vdata;
+	hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
 
    HYPRE_Int l;
    HYPRE_Int ierr = 0;
@@ -179,7 +179,7 @@ HYPRE_Int
 hypre_MaxwellSetRfactors(void         *maxwell_vdata,
                           HYPRE_Int     rfactor[3] )
 {
-   hypre_MaxwellData *maxwell_data   = maxwell_vdata;
+   hypre_MaxwellData *maxwell_data   = (hypre_MaxwellData *)maxwell_vdata;
    hypre_Index       *maxwell_rfactor=(maxwell_data -> rfactor);
    HYPRE_Int          ierr       = 0;
                                                                                                               
@@ -195,7 +195,7 @@ HYPRE_Int
 hypre_MaxwellSetGrad(void               *maxwell_vdata,
                      hypre_ParCSRMatrix *T )
 {
-   hypre_MaxwellData *maxwell_data= maxwell_vdata;
+   hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr       = 0;
                                                                                                               
    (maxwell_data -> Tgrad)=  T;
@@ -210,7 +210,7 @@ HYPRE_Int
 hypre_MaxwellSetConstantCoef( void   *maxwell_vdata,
                               HYPRE_Int     constant_coef)
 {
-   hypre_MaxwellData *maxwell_data= maxwell_vdata;
+   hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr        = 0;
                                                                                                                             
   (maxwell_data -> constant_coef) = constant_coef;
@@ -225,7 +225,7 @@ HYPRE_Int
 hypre_MaxwellSetTol( void   *maxwell_vdata,
                      HYPRE_Real  tol       )
 {
-   hypre_MaxwellData *maxwell_data= maxwell_vdata;
+   hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr        = 0;
                                                                                                                             
   (maxwell_data -> tol) = tol;
@@ -240,7 +240,7 @@ HYPRE_Int
 hypre_MaxwellSetMaxIter( void *maxwell_vdata,
                          HYPRE_Int   max_iter  )
 {
-   hypre_MaxwellData *maxwell_data = maxwell_vdata;
+   hypre_MaxwellData *maxwell_data = (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
 
   (maxwell_data -> max_iter) = max_iter;
@@ -255,7 +255,7 @@ HYPRE_Int
 hypre_MaxwellSetRelChange( void *maxwell_vdata,
                            HYPRE_Int   rel_change  )
 {
-   hypre_MaxwellData *maxwell_data = maxwell_vdata;
+   hypre_MaxwellData *maxwell_data = (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
                                                                                                                             
   (maxwell_data -> rel_change) = rel_change;
@@ -271,7 +271,7 @@ HYPRE_Int
 hypre_MaxwellSetNumPreRelax( void *maxwell_vdata,
                              HYPRE_Int   num_pre_relax )
 {
-   hypre_MaxwellData *maxwell_data= maxwell_vdata;
+   hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
 
   (maxwell_data -> num_pre_relax) = num_pre_relax;
@@ -286,7 +286,7 @@ HYPRE_Int
 hypre_MaxwellSetNumPostRelax( void *maxwell_vdata,
                               HYPRE_Int   num_post_relax )
 {
-   hypre_MaxwellData *maxwell_data= maxwell_vdata;
+   hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
                                                                                                                             
   (maxwell_data -> num_post_relax)= num_post_relax;
@@ -301,7 +301,7 @@ HYPRE_Int
 hypre_MaxwellGetNumIterations( void *maxwell_vdata,
                                HYPRE_Int  *num_iterations )
 {
-   hypre_MaxwellData *maxwell_data= maxwell_vdata;
+   hypre_MaxwellData *maxwell_data= (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
                                                                                                                             
   *num_iterations = (maxwell_data -> num_iterations);
@@ -316,7 +316,7 @@ HYPRE_Int
 hypre_MaxwellSetPrintLevel( void *maxwell_vdata,
                             HYPRE_Int   print_level)
 {
-   hypre_MaxwellData *maxwell_data = maxwell_vdata;
+   hypre_MaxwellData *maxwell_data = (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
                                                                                                              
    (maxwell_data -> print_level) = print_level;
@@ -331,7 +331,7 @@ HYPRE_Int
 hypre_MaxwellSetLogging( void *maxwell_vdata,
                          HYPRE_Int   logging)
 {
-   hypre_MaxwellData *maxwell_data = maxwell_vdata;
+   hypre_MaxwellData *maxwell_data = (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
                                                                                                                        
    (maxwell_data -> logging) = logging;
@@ -346,7 +346,7 @@ HYPRE_Int
 hypre_MaxwellPrintLogging( void *maxwell_vdata,
                            HYPRE_Int   myid)
 {
-   hypre_MaxwellData *maxwell_data = maxwell_vdata;
+   hypre_MaxwellData *maxwell_data = (hypre_MaxwellData *)maxwell_vdata;
    HYPRE_Int          ierr = 0;
    HYPRE_Int          i;
    HYPRE_Int          num_iterations= (maxwell_data -> num_iterations);
@@ -377,7 +377,7 @@ HYPRE_Int
 hypre_MaxwellGetFinalRelativeResidualNorm( void   *maxwell_vdata,
                                            HYPRE_Real *relative_residual_norm )
 {
-   hypre_MaxwellData *maxwell_data = maxwell_vdata;
+   hypre_MaxwellData *maxwell_data = (hypre_MaxwellData *)maxwell_vdata;
                                                                                                                             
    HYPRE_Int          max_iter        = (maxwell_data -> max_iter);
    HYPRE_Int          num_iterations  = (maxwell_data -> num_iterations);

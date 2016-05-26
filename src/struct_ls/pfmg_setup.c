@@ -42,7 +42,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
                  hypre_StructVector *b,
                  hypre_StructVector *x        )
 {
-   hypre_PFMGData       *pfmg_data = pfmg_vdata;
+	hypre_PFMGData       *pfmg_data = (hypre_PFMGData       *)pfmg_vdata;
 
    MPI_Comm              comm = (pfmg_data -> comm);
                      

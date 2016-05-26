@@ -252,9 +252,9 @@ int main (int argc, char *argv[])
       double *rhs_values, *x_values;
       HYPRE_Int *rows;
 
-      rhs_values = calloc(local_size, sizeof(double));
-      x_values = calloc(local_size, sizeof(double));
-      rows = calloc(local_size, sizeof(HYPRE_Int));
+      rhs_values = (double*) calloc(local_size, sizeof(double));
+      x_values = (double*) calloc(local_size, sizeof(double));
+      rows = (HYPRE_Int*) calloc(local_size, sizeof(HYPRE_Int));
 
       for (i=0; i<local_size; i++)
       {
@@ -563,11 +563,11 @@ int hypre_FlexGMRESModifyPCAMGExample(void *precond_data, int iterations,
 
    if (rel_residual_norm > .1)
    {
-      HYPRE_BoomerAMGSetNumSweeps(precond_data, 10);
+	   HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 10);
    }
    else
    {
-      HYPRE_BoomerAMGSetNumSweeps(precond_data, 1);
+	   HYPRE_BoomerAMGSetNumSweeps((HYPRE_Solver)precond_data, 1);
    }
 
 

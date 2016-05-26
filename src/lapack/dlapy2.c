@@ -1,6 +1,7 @@
 
 #include "hypre_lapack.h"
 #include "f2c.h"
+#include "math.h"
 
 doublereal dlapy2_(doublereal *x, doublereal *y)
 {
@@ -27,7 +28,7 @@ doublereal dlapy2_(doublereal *x, doublereal *y)
     /* System generated locals */
     doublereal ret_val, d__1;
     /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
+    /*HYPRE_Real sqrt(doublereal);*/
     /* Local variables */
     static doublereal xabs, yabs, w, z__;
 

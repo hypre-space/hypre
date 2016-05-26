@@ -33,7 +33,7 @@ HYPRE_Int
 hypre_FacZeroCData( void                 *fac_vdata,
                     hypre_SStructMatrix  *A )
 {
-   hypre_FACData         *fac_data      =  fac_vdata;
+	hypre_FACData         *fac_data      =  (hypre_FACData*)fac_vdata;
 
    hypre_SStructGrid     *grid;
    hypre_SStructPGrid    *p_cgrid;

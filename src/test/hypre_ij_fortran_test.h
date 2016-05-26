@@ -10,6 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /******************************************************************************
  * Definitions of IJMatrix Fortran interface routines
  *****************************************************************************/
@@ -148,4 +152,8 @@ extern void hypre_F90_NAME(fhypre_ijvectorread, FHYPRE_IJVECTORREAD)
 #define HYPRE_IJVectorPrint \
         hypre_F90_NAME(fhypre_ijvectorprint, FHYPRE_IJVECTORPRINT)
 extern void hypre_F90_NAME(fhypre_ijvectorprint, FHYPRE_IJVECTORPRINT)
-                      (hypre_F90_Obj *, char *);
+                      (hypre_F90_Obj *, const char *);
+    
+#ifdef __cplusplus
+}
+#endif

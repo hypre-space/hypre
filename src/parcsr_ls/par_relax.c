@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 HYPRE_Int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *b, HYPRE_Int*, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (const char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *b, HYPRE_Int*, HYPRE_Int *);
 #ifdef __cplusplus
 }
 #endif

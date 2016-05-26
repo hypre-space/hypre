@@ -268,7 +268,7 @@ int main (int argc, char *argv[])
 
       /* eigenvectors - get a pointer */
       {
-         mv_TempMultiVector* tmp = mv_MultiVectorGetData(eigenvectors);
+		  mv_TempMultiVector* tmp = (mv_TempMultiVector*) mv_MultiVectorGetData(eigenvectors);
          pvx = (HYPRE_ParVector*)(tmp -> vector);
       }
 

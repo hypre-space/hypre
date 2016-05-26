@@ -6,11 +6,9 @@
 
 #include "f2c.h"
 #include "hypre_blas.h"
+#include "math.h"
 
-doublereal dnrm2_(n, dx, incx)
-integer *n;
-doublereal *dx;
-integer *incx;
+doublereal dnrm2_(integer*n,doublereal* dx,integer* incx)
 {
     /* Initialized data */
 
@@ -26,7 +24,7 @@ integer *incx;
     doublereal ret_val, d__1;
 
     /* Builtin functions */
-    HYPRE_Real sqrt();
+    /*HYPRE_Real sqrt(doublereal);*/
 
     /* Local variables */
     static doublereal xmax;

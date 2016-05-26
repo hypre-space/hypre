@@ -48,8 +48,8 @@ typedef struct
 
    void  *matvec_data;
 
-   int    (*precond)();
-   int    (*precond_setup)();
+	int    (*precond)(void*,void*,void*,void*);
+	int    (*precond_setup)(void*,void*,void*,void*);
    void    *precond_data;
 
    /* log info (always logged) */
@@ -99,7 +99,7 @@ void * hypre_SymQMRCreate( )
  
 int hypre_SymQMRDestroy( void *symqmr_vdata )
 {
-   hypre_SymQMRData *symqmr_data = symqmr_vdata;
+	hypre_SymQMRData *symqmr_data = (hypre_SymQMRData*) symqmr_vdata;
    int ierr = 0;
  
    if (symqmr_data)
@@ -130,9 +130,9 @@ int hypre_SymQMRDestroy( void *symqmr_vdata )
  
 int hypre_SymQMRSetup( void *symqmr_vdata, void *A, void *b, void *x         )
 {
-   hypre_SymQMRData *symqmr_data   = symqmr_vdata;
+	hypre_SymQMRData *symqmr_data   = (hypre_SymQMRData*) symqmr_vdata;
    int            max_iter         = (symqmr_data -> max_iter);
-   int          (*precond_setup)() = (symqmr_data -> precond_setup);
+   int          (*precond_setup)(void*, void*, void*, void*) = (symqmr_data -> precond_setup);
    void          *precond_data     = (symqmr_data -> precond_data);
    int            ierr = 0;
  
@@ -170,7 +170,7 @@ int hypre_SymQMRSetup( void *symqmr_vdata, void *A, void *b, void *x         )
       if ((symqmr_data -> norms) == NULL)
          (symqmr_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
       if ((symqmr_data -> log_file_name) == NULL)
-         (symqmr_data -> log_file_name) = "symqmr.out.log";
+		  (symqmr_data -> log_file_name) = (char*)"symqmr.out.log";
    }
  
    return ierr;
@@ -182,7 +182,7 @@ int hypre_SymQMRSetup( void *symqmr_vdata, void *A, void *b, void *x         )
 
 int hypre_SymQMRSolve(void  *symqmr_vdata, void  *A, void  *b, void  *x)
 {
-   hypre_SymQMRData  *symqmr_data    = symqmr_vdata;
+	hypre_SymQMRData  *symqmr_data    = (hypre_SymQMRData*) symqmr_vdata;
    int 		     max_iter      = (symqmr_data -> max_iter);
    int 		     stop_crit     = (symqmr_data -> stop_crit);
    double 	     accuracy      = (symqmr_data -> tol);
@@ -194,8 +194,8 @@ int hypre_SymQMRSolve(void  *symqmr_vdata, void  *A, void  *b, void  *x)
    void             *d             = (symqmr_data -> d);
    void             *t             = (symqmr_data -> t);
    void             *rq            = (symqmr_data -> rq);
-   int 	           (*precond)()    = (symqmr_data -> precond);
-   int 	            *precond_data  = (symqmr_data -> precond_data);
+   int 	           (*precond)(void*, void*, void*, void*)    = (symqmr_data -> precond);
+   int 	            *precond_data  = (int*)(symqmr_data -> precond_data);
 
    /* logging variables */
    int               logging       = (symqmr_data -> logging);
@@ -309,7 +309,7 @@ int hypre_SymQMRSolve(void  *symqmr_vdata, void  *A, void  *b, void  *x)
  
 int hypre_SymQMRSetTol( void *symqmr_vdata, double tol )
 {
-   hypre_SymQMRData *symqmr_data = symqmr_vdata;
+	hypre_SymQMRData *symqmr_data = (hypre_SymQMRData*) symqmr_vdata;
    int            ierr = 0;
  
    (symqmr_data -> tol) = tol;
@@ -323,7 +323,7 @@ int hypre_SymQMRSetTol( void *symqmr_vdata, double tol )
  
 int hypre_SymQMRSetMaxIter( void *symqmr_vdata, int max_iter )
 {
-   hypre_SymQMRData *symqmr_data = symqmr_vdata;
+	hypre_SymQMRData *symqmr_data = (hypre_SymQMRData*) symqmr_vdata;
    int              ierr = 0;
  
    (symqmr_data -> max_iter) = max_iter;
@@ -337,7 +337,7 @@ int hypre_SymQMRSetMaxIter( void *symqmr_vdata, int max_iter )
  
 int hypre_SymQMRSetStopCrit( void *symqmr_vdata, double stop_crit )
 {
-   hypre_SymQMRData *symqmr_data = symqmr_vdata;
+	hypre_SymQMRData *symqmr_data = (hypre_SymQMRData*) symqmr_vdata;
    int            ierr = 0;
  
    (symqmr_data -> stop_crit) = stop_crit;
@@ -349,10 +349,10 @@ int hypre_SymQMRSetStopCrit( void *symqmr_vdata, double stop_crit )
  * hypre_SymQMRSetPrecond
  *--------------------------------------------------------------------------*/
  
-int hypre_SymQMRSetPrecond( void  *symqmr_vdata, int  (*precond)(),
-                       int  (*precond_setup)(), void  *precond_data )
+int hypre_SymQMRSetPrecond( void  *symqmr_vdata, int  (*precond)(void*,void*,void*,void*),
+							int  (*precond_setup)(void*,void*,void*,void*), void  *precond_data )
 {
-   hypre_SymQMRData *symqmr_data = symqmr_vdata;
+	hypre_SymQMRData *symqmr_data = (hypre_SymQMRData*) symqmr_vdata;
    int              ierr = 0;
  
    (symqmr_data -> precond)        = precond;
@@ -368,7 +368,7 @@ int hypre_SymQMRSetPrecond( void  *symqmr_vdata, int  (*precond)(),
  
 int hypre_SymQMRSetLogging( void *symqmr_vdata, int logging)
 {
-   hypre_SymQMRData *symqmr_data = symqmr_vdata;
+	hypre_SymQMRData *symqmr_data = (hypre_SymQMRData*) symqmr_vdata;
    int              ierr = 0;
  
    (symqmr_data -> logging) = logging;
@@ -382,7 +382,7 @@ int hypre_SymQMRSetLogging( void *symqmr_vdata, int logging)
  
 int hypre_SymQMRGetNumIterations(void *symqmr_vdata,int  *num_iterations)
 {
-   hypre_SymQMRData *symqmr_data = symqmr_vdata;
+	hypre_SymQMRData *symqmr_data = (hypre_SymQMRData*) symqmr_vdata;
    int              ierr = 0;
  
    *num_iterations = (symqmr_data -> num_iterations);
@@ -397,7 +397,7 @@ int hypre_SymQMRGetNumIterations(void *symqmr_vdata,int  *num_iterations)
 int hypre_SymQMRGetFinalRelativeResidualNorm( void   *symqmr_vdata,
                                          double *relative_residual_norm )
 {
-   hypre_SymQMRData *symqmr_data = symqmr_vdata;
+	hypre_SymQMRData *symqmr_data = (hypre_SymQMRData*) symqmr_vdata;
    int 		ierr = 0;
  
    *relative_residual_norm = (symqmr_data -> rel_residual_norm);

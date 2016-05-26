@@ -71,7 +71,7 @@
     extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     static doublereal xnorm;
-    extern doublereal dlapy2_(doublereal *, doublereal *), dlamch_(char *);
+    extern doublereal dlapy2_(doublereal *, doublereal *), dlamch_(const char *);
     static doublereal safmin, rsafmn;
     static integer knt;
 

@@ -3,7 +3,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-doublereal dlamch_(char *cmach)
+doublereal dlamch_(const char *cmach)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -62,7 +62,7 @@ doublereal dlamch_(char *cmach)
     static integer imin, imax;
     static logical lrnd;
     static doublereal rmin, rmax, t, rmach;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static doublereal small, sfmin;
     extern /* Subroutine */ HYPRE_Int dlamc2_(integer *, integer *, logical *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *);

@@ -32,8 +32,8 @@ typedef struct
    HYPRE_Int 			 solver_type;
 
    HYPRE_Int             pcg_default;              /* boolean */
-   HYPRE_Int           (*pcg_precond_solve)();
-   HYPRE_Int           (*pcg_precond_setup)();
+   HYPRE_Int           (*pcg_precond_solve)(void*, void*, void*, void*);
+   HYPRE_Int           (*pcg_precond_setup)(void*, void*, void*, void*);
    void                 *pcg_precond;
 
    /* log info (always logged) */
@@ -94,7 +94,7 @@ hypre_HybridCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_HybridDestroy( void  *hybrid_vdata )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+	hypre_HybridData *hybrid_data = (hypre_HybridData *) hybrid_vdata;
 
    if (hybrid_data)
    {
@@ -112,7 +112,7 @@ HYPRE_Int
 hypre_HybridSetTol( void   *hybrid_vdata,
                     HYPRE_Real  tol       )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+	hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> tol) = tol;
 
@@ -127,7 +127,7 @@ HYPRE_Int
 hypre_HybridSetConvergenceTol( void   *hybrid_vdata,
                                HYPRE_Real  cf_tol       )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+	hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> cf_tol) = cf_tol;
 
@@ -142,7 +142,7 @@ HYPRE_Int
 hypre_HybridSetDSCGMaxIter( void   *hybrid_vdata,
                             HYPRE_Int     dscg_max_its )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+	hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> dscg_max_its) = dscg_max_its;
 
@@ -157,7 +157,7 @@ HYPRE_Int
 hypre_HybridSetPCGMaxIter( void   *hybrid_vdata,
                            HYPRE_Int     pcg_max_its  )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+	hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> pcg_max_its) = pcg_max_its;
 
@@ -172,7 +172,7 @@ HYPRE_Int
 hypre_HybridSetPCGAbsoluteTolFactor( void   *hybrid_vdata,
                                      HYPRE_Real  pcg_atolf  )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+	hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> pcg_atolf) = pcg_atolf;
 
@@ -187,7 +187,7 @@ HYPRE_Int
 hypre_HybridSetTwoNorm( void *hybrid_vdata,
                         HYPRE_Int   two_norm  )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+	hypre_HybridData *hybrid_data = ( hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> two_norm) = two_norm;
 
@@ -202,7 +202,7 @@ HYPRE_Int
 hypre_HybridSetStopCrit( void *hybrid_vdata,
                          HYPRE_Int   stop_crit  )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+	hypre_HybridData *hybrid_data = ( hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> stop_crit) = stop_crit;
 
@@ -217,7 +217,7 @@ HYPRE_Int
 hypre_HybridSetRelChange( void *hybrid_vdata,
                           HYPRE_Int   rel_change  )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+	hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> rel_change) = rel_change;
 
@@ -232,7 +232,7 @@ HYPRE_Int
 hypre_HybridSetSolverType( void *hybrid_vdata,
                            HYPRE_Int   solver_type  )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+   hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> solver_type) = solver_type;
 
@@ -247,7 +247,7 @@ HYPRE_Int
 hypre_HybridSetKDim( void *hybrid_vdata,
                      HYPRE_Int   k_dim  )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+   hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> k_dim) = k_dim;
 
@@ -260,11 +260,11 @@ hypre_HybridSetKDim( void *hybrid_vdata,
 
 HYPRE_Int
 hypre_HybridSetPrecond( void  *pcg_vdata,
-                        HYPRE_Int  (*pcg_precond_solve)(),
-                        HYPRE_Int  (*pcg_precond_setup)(),
+                        HYPRE_Int  (*pcg_precond_solve)(void*, void*, void*, void*),
+                        HYPRE_Int  (*pcg_precond_setup)(void*, void*, void*, void*),
                         void  *pcg_precond          )
 {
-   hypre_HybridData *pcg_data = pcg_vdata;
+   hypre_HybridData *pcg_data = (hypre_HybridData *)pcg_vdata;
  
    (pcg_data -> pcg_default)       = 0;
    (pcg_data -> pcg_precond_solve) = pcg_precond_solve;
@@ -282,7 +282,7 @@ HYPRE_Int
 hypre_HybridSetLogging( void *hybrid_vdata,
                         HYPRE_Int   logging  )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+   hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> logging) = logging;
 
@@ -297,7 +297,7 @@ HYPRE_Int
 hypre_HybridSetPrintLevel( void *hybrid_vdata,
                            HYPRE_Int   print_level  )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+   hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    (hybrid_data -> print_level) = print_level;
 
@@ -312,7 +312,7 @@ HYPRE_Int
 hypre_HybridGetNumIterations( void   *hybrid_vdata,
                               HYPRE_Int    *num_its      )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+   hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    *num_its = (hybrid_data -> dscg_num_its) + (hybrid_data -> pcg_num_its);
 
@@ -327,7 +327,7 @@ HYPRE_Int
 hypre_HybridGetDSCGNumIterations( void   *hybrid_vdata,
                                   HYPRE_Int    *dscg_num_its )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+   hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    *dscg_num_its = (hybrid_data -> dscg_num_its);
 
@@ -342,7 +342,7 @@ HYPRE_Int
 hypre_HybridGetPCGNumIterations( void   *hybrid_vdata,
                                  HYPRE_Int    *pcg_num_its  )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+   hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    *pcg_num_its = (hybrid_data -> pcg_num_its);
 
@@ -357,7 +357,7 @@ HYPRE_Int
 hypre_HybridGetFinalRelativeResidualNorm( void   *hybrid_vdata,
                                           HYPRE_Real *final_rel_res_norm )
 {
-   hypre_HybridData *hybrid_data = hybrid_vdata;
+   hypre_HybridData *hybrid_data = (hypre_HybridData *)hybrid_vdata;
 
    *final_rel_res_norm = (hybrid_data -> final_rel_res_norm);
 
@@ -394,7 +394,7 @@ hypre_HybridSolve( void               *hybrid_vdata,
                    hypre_StructVector *b,
                    hypre_StructVector *x            )
 {
-   hypre_HybridData  *hybrid_data    = hybrid_vdata;
+   hypre_HybridData  *hybrid_data    = (hypre_HybridData *)hybrid_vdata;
 
    MPI_Comm           comm           = (hybrid_data -> comm);
 
@@ -412,8 +412,8 @@ hypre_HybridSolve( void               *hybrid_vdata,
    HYPRE_Int          k_dim          = (hybrid_data -> k_dim);
   
    HYPRE_Int          pcg_default    = (hybrid_data -> pcg_default);
-   HYPRE_Int        (*pcg_precond_solve)();
-   HYPRE_Int        (*pcg_precond_setup)();
+   HYPRE_Int        (*pcg_precond_solve)(void*, void*, void*, void*);
+   HYPRE_Int        (*pcg_precond_setup)(void*, void*, void*, void*);
    void              *pcg_precond;
 
    void              *pcg_solver;
@@ -458,10 +458,10 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
       pcg_precond = NULL;
 
-      hypre_PCGSetPrecond(pcg_solver,
-                          HYPRE_StructDiagScale,
-                          HYPRE_StructDiagScaleSetup,
-                          pcg_precond);
+      hypre_PCGSetPrecond((void*) pcg_solver,
+                          (HYPRE_Int (*)(void*, void*, void*, void*)) HYPRE_StructDiagScale,
+                          (HYPRE_Int (*)(void*, void*, void*, void*)) HYPRE_StructDiagScaleSetup,
+                          (void*) pcg_precond);
       hypre_PCGSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
 
@@ -523,10 +523,10 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
       pcg_precond = NULL;
 
-      hypre_GMRESSetPrecond(pcg_solver,
-                            HYPRE_StructDiagScale,
-                            HYPRE_StructDiagScaleSetup,
-                            pcg_precond);
+      hypre_GMRESSetPrecond((void*) pcg_solver,
+                            (HYPRE_Int (*)(void*, void*, void*, void*))HYPRE_StructDiagScale,
+                            (HYPRE_Int (*)(void*, void*, void*, void*))HYPRE_StructDiagScaleSetup,
+                            (void*) pcg_precond);
       hypre_GMRESSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
 
@@ -574,10 +574,10 @@ hypre_HybridSolve( void               *hybrid_vdata,
 
       pcg_precond = NULL;
 
-      hypre_BiCGSTABSetPrecond(pcg_solver,
-                               HYPRE_StructDiagScale,
-                               HYPRE_StructDiagScaleSetup,
-                               pcg_precond);
+      hypre_BiCGSTABSetPrecond((void*) pcg_solver,
+                               (HYPRE_Int (*)(void*, void*, void*, void*)) HYPRE_StructDiagScale,
+                               (HYPRE_Int (*)(void*, void*, void*, void*)) HYPRE_StructDiagScaleSetup,
+                               (void*) pcg_precond);
       hypre_BiCGSTABSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
 
@@ -708,8 +708,8 @@ hypre_HybridSolve( void               *hybrid_vdata,
          hypre_SMGSetNumPreRelax(pcg_precond, 1);
          hypre_SMGSetNumPostRelax(pcg_precond, 1);
          hypre_SMGSetLogging(pcg_precond, 0);
-         pcg_precond_solve = hypre_SMGSolve;
-         pcg_precond_setup = hypre_SMGSetup;
+         pcg_precond_solve = (HYPRE_Int (*)(void*, void*, void*, void*))hypre_SMGSolve;
+         pcg_precond_setup = (HYPRE_Int (*)(void*, void*, void*, void*))hypre_SMGSetup;
       }
       else
       {
@@ -721,8 +721,10 @@ hypre_HybridSolve( void               *hybrid_vdata,
       /* Complete setup of solver+SMG */
       if (solver_type == 1)
       {
-         hypre_PCGSetPrecond(pcg_solver,
-                             pcg_precond_solve, pcg_precond_setup, pcg_precond);
+		  hypre_PCGSetPrecond((void*) pcg_solver,
+                             (HYPRE_Int (*)(void*, void*, void*, void*)) pcg_precond_solve,
+							 (HYPRE_Int (*)(void*, void*, void*, void*)) pcg_precond_setup,
+							 (void*) pcg_precond);
          hypre_PCGSetup(pcg_solver, (void*) A, (void*) b, (void*) x);
 
          /* Solve */
