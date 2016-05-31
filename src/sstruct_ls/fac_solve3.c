@@ -29,7 +29,7 @@ hypre_FACSolve3( void                 *fac_vdata,
                 hypre_SStructVector  *b_in,
                 hypre_SStructVector  *x_in         )
 {
-   hypre_FACData           *fac_data           = fac_vdata;
+	hypre_FACData           *fac_data           = (hypre_FACData*)fac_vdata;
 
    hypre_SStructMatrix     *A_in               =(fac_data-> A_rap);
    hypre_SStructMatrix    **A_level            =(fac_data-> A_level);

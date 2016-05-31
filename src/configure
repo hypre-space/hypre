@@ -634,7 +634,6 @@ LINK_FC
 FFLAGS
 HOSTNAME
 HYPRE_ARCH
-EXAMPLEDIR
 EGREP
 GREP
 CPP
@@ -743,7 +742,6 @@ with_fei_inc_dir
 with_print_errors
 with_timing
 with_openmp
-with_examples
 with_fei
 with_superlu
 with_mli
@@ -1473,7 +1471,6 @@ Optional Packages:
   --with-timing           Use HYPRE timing routines.
   --with-openmp           Use OpenMP. This may affect which compiler is
                           chosen.
-  --with-examples         Build example codes.
   --with-fei              Use internal FEI routines.
   --with-superlu          Use internal SuperLU routines.
   --with-mli              Use MLI
@@ -2306,8 +2303,8 @@ hypre_using_mpi=yes
 
 hypre_using_fei=yes
 hypre_using_superlu=yes
+hypre_using_mli=yes
 
-hypre_using_examples=no
 hypre_using_openmp=no
 hypre_using_insure=no
 
@@ -3093,20 +3090,6 @@ fi
 
 
 
-# Check whether --with-examples was given.
-if test "${with_examples+set}" = set; then :
-  withval=$with_examples; case "${withval}" in
-    yes) hypre_using_mpi=yes
-         hypre_using_examples=yes ;;
-    no)  hypre_using_examples=no ;;
- esac
-else
-  hypre_using_examples=no
-
-fi
-
-
-
 # Check whether --with-fei was given.
 if test "${with_fei+set}" = set; then :
   withval=$with_fei; case "${withval}" in
@@ -3132,11 +3115,9 @@ fi
 # Check whether --with-mli was given.
 if test "${with_mli+set}" = set; then :
   withval=$with_mli; case "${withval}" in
-    yes) hypre_using_mli=yes ;;
-    no)  hypre_using_mli=no ;;
+    no) hypre_using_mli=no ;;
+    *)  hypre_using_mli=yes ;;
  esac
-else
-  hypre_using_mli=no
 
 fi
 
@@ -6281,13 +6262,6 @@ then
    fi
 fi
 
-EXAMPLEDIR=""
-if test "$hypre_using_examples" = "yes"
-then
-   EXAMPLEDIR="$HYPRE_SRCDIR/examples"
-fi
-
-
 if test "$hypre_user_chose_blas" = "yes"
 then
    for blas_lib in $BLASLIBS; do
@@ -6703,15 +6677,21 @@ fi
 if test "$hypre_using_fei" = "yes"
 then
    HYPRE_FEI_SRC_DIR="$HYPRE_SRCDIR/FEI_mv"
-   HYPRE_FEI_SUBDIRS="femli fei-hypre"
+   HYPRE_FEI_SUBDIRS="fei-hypre"
    HYPRE_FEI_HYPRE_FILES="$HYPRE_SRCDIR/FEI_mv/fei-hypre/*.o"
-   HYPRE_FEI_FEMLI_FILES="$HYPRE_SRCDIR/FEI_mv/femli/*.o"
    if test "$hypre_using_superlu" = "yes"
    then
       HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
       HYPRE_FEI_SUPERLU_FILES="$HYPRE_SRCDIR/FEI_mv/SuperLU/SRC/*.o"
    else
       HYPRE_FEI_SUPERLU_FILES=
+   fi
+   if test "$hypre_using_mli" = "yes"
+   then
+      HYPRE_FEI_SUBDIRS="femli $HYPRE_FEI_SUBDIRS"
+      HYPRE_FEI_FEMLI_FILES="$HYPRE_SRCDIR/FEI_mv/femli/*.o"
+   else
+      HYPRE_FEI_FEMLI_FILES=
    fi
    if test "$hypre_user_chose_fei" = "no"
    then

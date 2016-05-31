@@ -19,6 +19,10 @@
 #include "_hypre_parcsr_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGCreate
  *--------------------------------------------------------------------------*/
@@ -1659,3 +1663,7 @@ hypre_F90_IFACE(hypre_boomeramgsetcgcits, HYPRE_BOOMERAMGSETCGCITS)
            hypre_F90_PassObj (HYPRE_Solver, solver),
            hypre_F90_PassInt (its) ) );
 }
+
+#ifdef __cplusplus
+}
+#endif

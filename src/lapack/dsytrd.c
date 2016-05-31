@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dsytrd_(char *uplo, integer *n, doublereal *a, integer *
+/* Subroutine */ HYPRE_Int dsytrd_(const char *uplo, integer *n, doublereal *a, integer *
 	lda, doublereal *d__, doublereal *e, doublereal *tau, doublereal *
 	work, integer *lwork, integer *info)
 {
@@ -141,18 +141,18 @@
     integer a_dim1, a_offset, i__1, i__2, i__3;
     /* Local variables */
     static integer i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static integer nbmin, iinfo;
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int dsytd2_(char *, integer *, doublereal *, 
-	    integer *, doublereal *, doublereal *, doublereal *, integer *), dsyr2k_(char *, char *, integer *, integer *, doublereal 
+    extern /* Subroutine */ HYPRE_Int dsytd2_(const char *, integer *, doublereal *, 
+	    integer *, doublereal *, doublereal *, doublereal *, integer *), dsyr2k_(const char *,const char *, integer *, integer *, doublereal 
 	    *, doublereal *, integer *, doublereal *, integer *, doublereal *,
 	     doublereal *, integer *);
     static integer nb, kk, nx;
-    extern /* Subroutine */ HYPRE_Int dlatrd_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlatrd_(const char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, doublereal *,
-	     integer *), xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+	     integer *), xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     static integer ldwork, lwkopt;
     static logical lquery;

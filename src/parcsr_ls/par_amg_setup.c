@@ -34,7 +34,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                    hypre_ParVector    *u         )
 {
    MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A); 
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
 

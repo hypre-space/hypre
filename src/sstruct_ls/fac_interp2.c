@@ -72,7 +72,7 @@ hypre_FacSemiInterpDestroy2( void *fac_interp_vdata)
 {
    HYPRE_Int                 ierr = 0;
 
-   hypre_FacSemiInterpData2 *fac_interp_data = fac_interp_vdata;
+   hypre_FacSemiInterpData2 *fac_interp_data = (hypre_FacSemiInterpData2 *)fac_interp_vdata;
    HYPRE_Int                 i, j, size;
 
    if (fac_interp_data)
@@ -129,7 +129,7 @@ hypre_FacSemiInterpSetup2( void                 *fac_interp_vdata,
 {
    HYPRE_Int                 ierr = 0;
 
-   hypre_FacSemiInterpData2 *fac_interp_data = fac_interp_vdata;
+   hypre_FacSemiInterpData2 *fac_interp_data = (hypre_FacSemiInterpData2 *)fac_interp_vdata;
    HYPRE_Int                 part_fine= 1;
    HYPRE_Int                 part_crse= 0;
 
@@ -673,7 +673,7 @@ hypre_FAC_IdentityInterp2(void                 *  fac_interp_vdata,
                           hypre_SStructPVector *  xc,
                           hypre_SStructVector  *  e)
 {
-   hypre_FacSemiInterpData2 *interp_data= fac_interp_vdata;
+   hypre_FacSemiInterpData2 *interp_data= (hypre_FacSemiInterpData2 *)fac_interp_vdata;
    hypre_BoxArrayArray     **identity_boxes= interp_data-> identity_arrayboxes; 
 
    HYPRE_Int               part_crse= 0;
@@ -703,7 +703,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
 {
    HYPRE_Int ierr = 0;
 
-   hypre_FacSemiInterpData2 *interp_data = fac_interp_vdata;
+   hypre_FacSemiInterpData2 *interp_data = (hypre_FacSemiInterpData2 *)fac_interp_vdata;
 
    hypre_CommPkg          **comm_pkg       = interp_data-> gnodes_comm_pkg;
    hypre_CommPkg          **interlevel_comm= interp_data-> interlevel_comm;

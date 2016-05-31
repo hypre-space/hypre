@@ -18,7 +18,7 @@
 extern void Parser_dhCreate(Parser_dh *p);
 extern void Parser_dhDestroy(Parser_dh p);
 
-extern bool Parser_dhHasSwitch(Parser_dh p, char *in);
+extern bool Parser_dhHasSwitch(Parser_dh p,const char *in);
 extern bool Parser_dhReadString(Parser_dh p, char *in, char **out);
 extern bool Parser_dhReadInt(Parser_dh p, char *in, HYPRE_Int *out);
 extern bool Parser_dhReadDouble(Parser_dh p, char *in, HYPRE_Real *out);

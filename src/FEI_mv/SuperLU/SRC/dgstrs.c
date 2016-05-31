@@ -116,7 +116,7 @@ dgstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U,
 
     /* Test input parameters ... */
     *info = 0;
-    Bstore = B->Store;
+    Bstore = (DNformat*) B->Store;
     ldb = Bstore->lda;
     nrhs = B->ncol;
     if ( trans != NOTRANS && trans != TRANS && trans != CONJ ) *info = -1;
@@ -141,11 +141,11 @@ dgstrs (trans_t trans, SuperMatrix *L, SuperMatrix *U,
     soln = doubleMalloc(n);
     if ( !soln ) ABORT("Malloc fails for local soln[].");
 
-    Bmat = Bstore->nzval;
-    Lstore = L->Store;
-    Lval = Lstore->nzval;
-    Ustore = U->Store;
-    Uval = Ustore->nzval;
+    Bmat = (double*) Bstore->nzval;
+    Lstore = (SCformat*) L->Store;
+    Lval = (double*)Lstore->nzval;
+    Ustore = (NCformat*) U->Store;
+    Uval = (double*)Ustore->nzval;
     solve_ops = 0;
     
     if ( trans == NOTRANS ) {

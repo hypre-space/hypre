@@ -110,7 +110,7 @@ void * hypre_ADSCreate()
 
 HYPRE_Int hypre_ADSDestroy(void *solver)
 {
-   hypre_ADSData *ads_data = solver;
+	hypre_ADSData *ads_data = (hypre_ADSData *) solver;
 
    if (!ads_data)
    {
@@ -183,7 +183,7 @@ HYPRE_Int hypre_ADSDestroy(void *solver)
 HYPRE_Int hypre_ADSSetDiscreteCurl(void *solver,
                                    hypre_ParCSRMatrix *C)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> C = C;
    return hypre_error_flag;
 }
@@ -198,7 +198,7 @@ HYPRE_Int hypre_ADSSetDiscreteCurl(void *solver,
 HYPRE_Int hypre_ADSSetDiscreteGradient(void *solver,
                                        hypre_ParCSRMatrix *G)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> G = G;
    return hypre_error_flag;
 }
@@ -215,7 +215,7 @@ HYPRE_Int hypre_ADSSetCoordinateVectors(void *solver,
                                         hypre_ParVector *y,
                                         hypre_ParVector *z)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> x = x;
    ads_data -> y = y;
    ads_data -> z = z;
@@ -267,7 +267,7 @@ HYPRE_Int hypre_ADSSetInterpolations(void *solver,
                                      hypre_ParCSRMatrix *ND_Piy,
                                      hypre_ParCSRMatrix *ND_Piz)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> Pi = RT_Pi;
    ads_data -> Pix = RT_Pix;
    ads_data -> Piy = RT_Piy;
@@ -291,7 +291,7 @@ HYPRE_Int hypre_ADSSetInterpolations(void *solver,
 HYPRE_Int hypre_ADSSetMaxIter(void *solver,
                               HYPRE_Int maxit)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> maxit = maxit;
    return hypre_error_flag;
 }
@@ -306,7 +306,7 @@ HYPRE_Int hypre_ADSSetMaxIter(void *solver,
 HYPRE_Int hypre_ADSSetTol(void *solver,
                           HYPRE_Real tol)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> tol = tol;
    return hypre_error_flag;
 }
@@ -336,7 +336,7 @@ HYPRE_Int hypre_ADSSetTol(void *solver,
 HYPRE_Int hypre_ADSSetCycleType(void *solver,
                                 HYPRE_Int cycle_type)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> cycle_type = cycle_type;
    return hypre_error_flag;
 }
@@ -351,7 +351,7 @@ HYPRE_Int hypre_ADSSetCycleType(void *solver,
 HYPRE_Int hypre_ADSSetPrintLevel(void *solver,
                                  HYPRE_Int print_level)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> print_level = print_level;
    return hypre_error_flag;
 }
@@ -368,7 +368,7 @@ HYPRE_Int hypre_ADSSetSmoothingOptions(void *solver,
                                        HYPRE_Real A_relax_weight,
                                        HYPRE_Real A_omega)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> A_relax_type = A_relax_type;
    ads_data -> A_relax_times = A_relax_times;
    ads_data -> A_relax_weight = A_relax_weight;
@@ -386,7 +386,7 @@ HYPRE_Int hypre_ADSSetChebySmoothingOptions(void *solver,
                                             HYPRE_Int A_cheby_order,
                                             HYPRE_Int A_cheby_fraction)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> A_cheby_order =  A_cheby_order;
    ads_data -> A_cheby_fraction =  A_cheby_fraction;
 
@@ -411,7 +411,7 @@ HYPRE_Int hypre_ADSSetAMSOptions(void *solver,
                                  HYPRE_Int B_C_interp_type,
                                  HYPRE_Int B_C_Pmax)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> B_C_cycle_type = B_C_cycle_type;
    ads_data -> B_C_coarsen_type = B_C_coarsen_type;
    ads_data -> B_C_agg_levels = B_C_agg_levels;
@@ -437,7 +437,7 @@ HYPRE_Int hypre_ADSSetAMGOptions(void *solver,
                                  HYPRE_Int B_Pi_interp_type,
                                  HYPRE_Int B_Pi_Pmax)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    ads_data -> B_Pi_coarsen_type = B_Pi_coarsen_type;
    ads_data -> B_Pi_agg_levels = B_Pi_agg_levels;
    ads_data -> B_Pi_relax_type = B_Pi_relax_type;
@@ -896,7 +896,7 @@ HYPRE_Int hypre_ADSSetup(void *solver,
                          hypre_ParVector *b,
                          hypre_ParVector *x)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    hypre_AMSData *ams_data;
 
    ads_data -> A = A;
@@ -1206,7 +1206,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
                          hypre_ParVector *b,
                          hypre_ParVector *x)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
 
    HYPRE_Int i, my_id = -1;
    HYPRE_Real r0_norm, r_norm, b_norm, relative_resid = 0, old_resid;
@@ -1384,7 +1384,7 @@ HYPRE_Int hypre_ADSSolve(void *solver,
 HYPRE_Int hypre_ADSGetNumIterations(void *solver,
                                     HYPRE_Int *num_iterations)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    *num_iterations = ads_data -> num_iterations;
    return hypre_error_flag;
 }
@@ -1398,7 +1398,7 @@ HYPRE_Int hypre_ADSGetNumIterations(void *solver,
 HYPRE_Int hypre_ADSGetFinalRelativeResidualNorm(void *solver,
                                                 HYPRE_Real *rel_resid_norm)
 {
-   hypre_ADSData *ads_data = solver;
+   hypre_ADSData *ads_data = (hypre_ADSData *) solver;
    *rel_resid_norm = ads_data -> rel_resid_norm;
    return hypre_error_flag;
 }

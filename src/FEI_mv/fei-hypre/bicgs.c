@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 
-
+#include "_hypre_FEI.h"
 
 /******************************************************************************
  *
@@ -50,8 +50,8 @@ typedef struct
 
    void  *matvec_data;
 
-   int    (*precond)();
-   int    (*precond_setup)();
+   int    (*precond)(void*, void*, void*, void*);
+   int    (*precond_setup)(void*, void*, void*, void*);
    void    *precond_data;
 
    /* log info (always logged) */
@@ -103,7 +103,7 @@ void * hypre_BiCGSCreate( )
  
 int hypre_BiCGSDestroy( void *bicgs_vdata )
 {
-   hypre_BiCGSData *bicgs_data = bicgs_vdata;
+	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int ierr = 0;
  
    if (bicgs_data)
@@ -136,9 +136,9 @@ int hypre_BiCGSDestroy( void *bicgs_vdata )
  
 int hypre_BiCGSSetup( void *bicgs_vdata, void *A, void *b, void *x         )
 {
-   hypre_BiCGSData *bicgs_data     = bicgs_vdata;
+	hypre_BiCGSData *bicgs_data     = (hypre_BiCGSData *) bicgs_vdata;
    int            max_iter         = (bicgs_data -> max_iter);
-   int          (*precond_setup)() = (bicgs_data -> precond_setup);
+   int          (*precond_setup)(void*, void*, void*, void*) = (bicgs_data -> precond_setup);
    void          *precond_data     = (bicgs_data -> precond_data);
    int            ierr = 0;
  
@@ -180,7 +180,7 @@ int hypre_BiCGSSetup( void *bicgs_vdata, void *A, void *b, void *x         )
       if ((bicgs_data -> norms) == NULL)
          (bicgs_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
       if ((bicgs_data -> log_file_name) == NULL)
-         (bicgs_data -> log_file_name) = "bicgs.out.log";
+		  (bicgs_data -> log_file_name) = (char*)"bicgs.out.log";
    }
  
    return ierr;
@@ -192,7 +192,7 @@ int hypre_BiCGSSetup( void *bicgs_vdata, void *A, void *b, void *x         )
 
 int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
 {
-   hypre_BiCGSData  *bicgs_data    = bicgs_vdata;
+	hypre_BiCGSData  *bicgs_data    = (hypre_BiCGSData *) bicgs_vdata;
    int 		     max_iter      = (bicgs_data -> max_iter);
    int 		     stop_crit     = (bicgs_data -> stop_crit);
    double 	     accuracy      = (bicgs_data -> tol);
@@ -206,8 +206,8 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
    void             *u             = (bicgs_data -> u);
    void             *t1            = (bicgs_data -> t1);
    void             *t2            = (bicgs_data -> t2);
-   int 	           (*precond)()    = (bicgs_data -> precond);
-   int 	            *precond_data  = (bicgs_data -> precond_data);
+   int 	           (*precond)(void*, void*, void*, void*)    = (bicgs_data -> precond);
+   int 	            *precond_data  = (int*)(bicgs_data -> precond_data);
 
    /* logging variables */
    int               logging       = (bicgs_data -> logging);
@@ -326,7 +326,7 @@ int hypre_BiCGSSolve(void  *bicgs_vdata, void  *A, void  *b, void  *x)
  
 int hypre_BiCGSSetTol( void *bicgs_vdata, double tol )
 {
-   hypre_BiCGSData *bicgs_data = bicgs_vdata;
+	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int            ierr = 0;
  
    (bicgs_data -> tol) = tol;
@@ -340,7 +340,7 @@ int hypre_BiCGSSetTol( void *bicgs_vdata, double tol )
  
 int hypre_BiCGSSetMaxIter( void *bicgs_vdata, int max_iter )
 {
-   hypre_BiCGSData *bicgs_data = bicgs_vdata;
+	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int              ierr = 0;
  
    (bicgs_data -> max_iter) = max_iter;
@@ -354,7 +354,7 @@ int hypre_BiCGSSetMaxIter( void *bicgs_vdata, int max_iter )
  
 int hypre_BiCGSSetStopCrit( void *bicgs_vdata, double stop_crit )
 {
-   hypre_BiCGSData *bicgs_data = bicgs_vdata;
+	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int            ierr = 0;
  
    (bicgs_data -> stop_crit) = stop_crit;
@@ -366,10 +366,10 @@ int hypre_BiCGSSetStopCrit( void *bicgs_vdata, double stop_crit )
  * hypre_BiCGSSetPrecond
  *--------------------------------------------------------------------------*/
  
-int hypre_BiCGSSetPrecond( void  *bicgs_vdata, int  (*precond)(),
-                       int  (*precond_setup)(), void  *precond_data )
+int hypre_BiCGSSetPrecond( void  *bicgs_vdata, int  (*precond)(void*,void*,void*,void*),
+						   int  (*precond_setup)(void*,void*,void*,void*), void  *precond_data )
 {
-   hypre_BiCGSData *bicgs_data = bicgs_vdata;
+	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int              ierr = 0;
  
    (bicgs_data -> precond)        = precond;
@@ -385,7 +385,7 @@ int hypre_BiCGSSetPrecond( void  *bicgs_vdata, int  (*precond)(),
  
 int hypre_BiCGSSetLogging( void *bicgs_vdata, int logging)
 {
-   hypre_BiCGSData *bicgs_data = bicgs_vdata;
+	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int              ierr = 0;
  
    (bicgs_data -> logging) = logging;
@@ -399,7 +399,7 @@ int hypre_BiCGSSetLogging( void *bicgs_vdata, int logging)
  
 int hypre_BiCGSGetNumIterations(void *bicgs_vdata,int  *num_iterations)
 {
-   hypre_BiCGSData *bicgs_data = bicgs_vdata;
+	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int              ierr = 0;
  
    *num_iterations = (bicgs_data -> num_iterations);
@@ -414,7 +414,7 @@ int hypre_BiCGSGetNumIterations(void *bicgs_vdata,int  *num_iterations)
 int hypre_BiCGSGetFinalRelativeResidualNorm( void   *bicgs_vdata,
                                          double *relative_residual_norm )
 {
-   hypre_BiCGSData *bicgs_data = bicgs_vdata;
+	hypre_BiCGSData *bicgs_data = (hypre_BiCGSData *) bicgs_vdata;
    int 		ierr = 0;
  
    *relative_residual_norm = (bicgs_data -> rel_residual_norm);

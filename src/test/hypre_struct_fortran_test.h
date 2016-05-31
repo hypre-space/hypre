@@ -9,10 +9,13 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**************************************************
 *  Definitions of struct fortran interface routines
 **************************************************/
+
 
 #define HYPRE_StructStencilCreate \
         hypre_F90_NAME(fhypre_structstencilcreate, FHYPRE_STRUCTSTENCILCREATE)
@@ -1018,3 +1021,7 @@ extern void hypre_F90_NAME(fhypre_structsparsemsgsetloggin, FHYPRE_STRUCTSPARSEM
         hypre_F90_NAME(fhypre_structsparsemsgsetprintl, FHYPRE_STRUCTSPARSEMSGSETPRINTL)
 extern void hypre_F90_NAME(fhypre_structsparsemsgsetprintl, FHYPRE_STRUCTSPARSEMSGSETPRINTL)
                           (hypre_F90_Obj *, HYPRE_Int *);
+
+#ifdef __cplusplus
+}
+#endif

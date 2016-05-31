@@ -39,32 +39,10 @@
 #endif
 
 #include "HYPRE_MHMatrix.h"
-
-typedef struct HYPRE_LSI_DDIlut_Struct
-{
-   MPI_Comm  comm;
-   MH_Matrix *mh_mat;
-   double    thresh;
-   double    fillin;
-   int       overlap;
-   int       Nrows;
-   int       extNrows;
-   int       *mat_ia;
-   int       *mat_ja;
-   double    *mat_aa;
-   int       outputLevel;
-   int       reorder;
-   int       *order_array;
-   int       *reorder_array;
-}
-HYPRE_LSI_DDIlut;
+#include "HYPRE_FEI.h"
 
 extern int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix,MH_Matrix *,
                                      MPI_Comm, int *, MH_Context *);
-extern int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *, int *, 
-                 int **recv_lengths, int **int_buf, double **dble_buf, 
-                 int **sindex_array, int **sindex_array2, int *offset,
-                 MPI_Comm mpi_comm);
 extern int HYPRE_LSI_DDIlutGetRowLengths(MH_Matrix *,int *, int **,MPI_Comm);
 extern int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *,
                  int Noffset, int *map, int *map2, int **int_buf,
@@ -697,7 +675,7 @@ int HYPRE_LSI_DDIlutGetOffProcRows(MH_Matrix *Amat, int leng, int *recv_leng,
 /*****************************************************************************/
 /* construct an enlarged overlapped local matrix                             */
 /*****************************************************************************/
-
+  
 int HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *mh_mat, 
               int *total_recv_leng, int **recv_lengths, int **int_buf, 
               double **dble_buf, int **sindex_array, int **sindex_array2, 

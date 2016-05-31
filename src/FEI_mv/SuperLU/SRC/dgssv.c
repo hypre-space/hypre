@@ -149,7 +149,7 @@ dgssv(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r,
 
     /* Test the input parameters ... */
     *info = 0;
-    Bstore = B->Store;
+    Bstore = (DNformat*) B->Store;
     if ( options->Fact != DOFACT ) *info = -1;
     else if ( A->nrow != A->ncol || A->nrow < 0 ||
 	 (A->Stype != SLU_NC && A->Stype != SLU_NR) ||
@@ -168,11 +168,11 @@ dgssv(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r,
 
     /* Convert A to SLU_NC format when necessary. */
     if ( A->Stype == SLU_NR ) {
-	NRformat *Astore = A->Store;
+		NRformat *Astore = (NRformat *) A->Store;
 	AA = (SuperMatrix *) SUPERLU_MALLOC( sizeof(SuperMatrix) );
 	dCreate_CompCol_Matrix(AA, A->ncol, A->nrow, Astore->nnz, 
-			       Astore->nzval, Astore->colind, Astore->rowptr,
-			       SLU_NC, A->Dtype, A->Mtype);
+						   (double*)Astore->nzval, Astore->colind, Astore->rowptr,
+						   SLU_NC, A->Dtype, A->Mtype);
 	trans = TRANS;
     } else {
         if ( A->Stype == SLU_NC ) AA = A;

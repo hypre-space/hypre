@@ -275,7 +275,7 @@
 <a name="line268">268</a> 
 <a name="line269">269</a>       <font color="#444444">/* eigenvectors - get a pointer */</font>
 <a name="line270">270</a>       <font color="4444FF"><strong>{</strong></font>
-<a name="line271">271</a>          <font color="#2040a0">mv_TempMultiVector</font><font color="4444FF">*</font> <font color="#2040a0">tmp</font> <font color="4444FF">=</font> <font color="#2040a0">mv_MultiVectorGetData</font><font color="4444FF">(</font><font color="#2040a0">eigenvectors</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line271">271</a> 		  <font color="#2040a0">mv_TempMultiVector</font><font color="4444FF">*</font> <font color="#2040a0">tmp</font> <font color="4444FF">=</font> <font color="4444FF">(</font><font color="#2040a0">mv_TempMultiVector</font><font color="4444FF">*</font><font color="4444FF">)</font> <font color="#2040a0">mv_MultiVectorGetData</font><font color="4444FF">(</font><font color="#2040a0">eigenvectors</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line272">272</a>          <font color="#2040a0">pvx</font> <font color="4444FF">=</font> <font color="4444FF">(</font><font color="#2040a0">HYPRE_ParVector</font><font color="4444FF">*</font><font color="4444FF">)</font><font color="4444FF">(</font><font color="#2040a0">tmp</font> <font color="4444FF">-</font><font color="4444FF">&gt;</font> <font color="#2040a0">vector</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line273">273</a>       <font color="4444FF"><strong>}</strong></font>
 <a name="line274">274</a> 

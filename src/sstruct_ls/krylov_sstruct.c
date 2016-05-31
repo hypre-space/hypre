@@ -45,7 +45,7 @@ hypre_SStructKrylovFree( char *ptr )
 void *
 hypre_SStructKrylovCreateVector( void *vvector )
 {
-   hypre_SStructVector  *vector = vvector;
+	hypre_SStructVector  *vector = (hypre_SStructVector  *)vvector;	
    hypre_SStructVector  *new_vector;
    HYPRE_Int             object_type;
 
@@ -97,7 +97,7 @@ hypre_SStructKrylovCreateVector( void *vvector )
 void *
 hypre_SStructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 {
-   hypre_SStructVector  *vector = vvector;
+	hypre_SStructVector  *vector = (hypre_SStructVector  *)vvector;
    hypre_SStructVector  **new_vector;
    HYPRE_Int             object_type;
 
@@ -155,7 +155,7 @@ hypre_SStructKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 HYPRE_Int
 hypre_SStructKrylovDestroyVector( void *vvector )
 {
-   hypre_SStructVector *vector = vvector;
+	hypre_SStructVector *vector = (hypre_SStructVector  *)vvector;
 
    return( HYPRE_SStructVectorDestroy( vector ) );
 }

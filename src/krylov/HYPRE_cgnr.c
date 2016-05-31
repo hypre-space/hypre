@@ -118,7 +118,9 @@ HYPRE_CGNRSetPrecond( HYPRE_Solver         solver,
                             HYPRE_Solver         precond_solver )
 {
    return( hypre_CGNRSetPrecond( (void *) solver,
-                                 precond, precondT, precond_setup,
+                                 (HYPRE_Int (*)(void*, void*, void*, void*))precond,
+								 (HYPRE_Int (*)(void*, void*, void*, void*))precondT,
+								 (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
                                  (void *) precond_solver ) );
 }
 

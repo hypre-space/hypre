@@ -38,7 +38,8 @@ void * hypre_AMECreate()
 
    ame_data -> block_size = 1;  /* compute 1 eigenvector */
    ame_data -> maxit = 100;     /* perform at most 100 iterations */
-   ame_data -> tol = 1e-6;      /* convergence tolerance */
+   ame_data -> atol = 1e-6;     /* absolute convergence tolerance */
+   ame_data -> rtol = 1e-6;     /* relative convergence tolerance */
    ame_data -> print_level = 1; /* print max residual norm at each step */
 
    /* These will be computed during setup */
@@ -71,7 +72,7 @@ void * hypre_AMECreate()
 
 HYPRE_Int hypre_AMEDestroy(void *esolver)
 {
-   hypre_AMEData *ame_data = esolver;
+	hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    hypre_AMSData *ams_data;
    mv_InterfaceInterpreter* interpreter;
    mv_MultiVectorPtr eigenvectors;
@@ -132,10 +133,10 @@ HYPRE_Int hypre_AMEDestroy(void *esolver)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetAMSSolver(void *esolver,
-                          void *ams_solver)
+                                void *ams_solver)
 {
-   hypre_AMEData *ame_data = esolver;
-   ame_data -> precond = ams_solver;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
+   ame_data -> precond = (hypre_AMSData*) ams_solver;
    return hypre_error_flag;
 }
 
@@ -147,9 +148,9 @@ HYPRE_Int hypre_AMESetAMSSolver(void *esolver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetMassMatrix(void *esolver,
-                           hypre_ParCSRMatrix *M)
+                                 hypre_ParCSRMatrix *M)
 {
-   hypre_AMEData *ame_data = esolver;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    ame_data -> M = M;
    return hypre_error_flag;
 }
@@ -164,7 +165,7 @@ HYPRE_Int hypre_AMESetMassMatrix(void *esolver,
 HYPRE_Int hypre_AMESetBlockSize(void *esolver,
                                 HYPRE_Int block_size)
 {
-   hypre_AMEData *ame_data = esolver;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    ame_data -> block_size = block_size;
    return hypre_error_flag;
 }
@@ -178,7 +179,7 @@ HYPRE_Int hypre_AMESetBlockSize(void *esolver,
 HYPRE_Int hypre_AMESetMaxIter(void *esolver,
                               HYPRE_Int maxit)
 {
-   hypre_AMEData *ame_data = esolver;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    ame_data -> maxit = maxit;
    return hypre_error_flag;
 }
@@ -186,28 +187,41 @@ HYPRE_Int hypre_AMESetMaxIter(void *esolver,
 /*--------------------------------------------------------------------------
  * hypre_AMESetTol
  *
- * Set the convergence tolerance. The default value is 1e-8.
+ * Set the absolute convergence tolerance. The default value is 1e-6.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetTol(void *esolver,
                           HYPRE_Real tol)
 {
-   hypre_AMEData *ame_data = esolver;
-   ame_data -> tol = tol;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
+   ame_data -> atol = tol;
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_AMESetRTol
+ *
+ * Set the relative convergence tolerance. The default value is 1e-6.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_AMESetRTol(void *esolver,
+			   HYPRE_Real tol)
+{
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
+   ame_data -> rtol = tol;
+   return hypre_error_flag;
+}
+/*--------------------------------------------------------------------------
  * hypre_AMESetPrintLevel
  *
  * Control how much information is printed during the solution iterations.
- * The defaut values is 1.
+ * The default values is 1.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMESetPrintLevel(void *esolver,
                                  HYPRE_Int print_level)
 {
-   hypre_AMEData *ame_data = esolver;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    ame_data -> print_level = print_level;
    return hypre_error_flag;
 }
@@ -227,7 +241,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
 {
    HYPRE_Int ne, *edge_bc;
 
-   hypre_AMEData *ame_data = esolver;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    hypre_AMSData *ams_data = ame_data -> precond;
 
    if (ams_data -> beta_is_zero)
@@ -436,7 +450,7 @@ HYPRE_Int hypre_AMESetup(void *esolver)
          HYPRE_Int i, j;
          HYPRE_Real *data;
 
-         mv_TempMultiVector* tmp = mv_MultiVectorGetData(eigenvectors);
+         mv_TempMultiVector* tmp = (mv_TempMultiVector*) mv_MultiVectorGetData(eigenvectors);
          HYPRE_ParVector *v = (HYPRE_ParVector*)(tmp -> vector);
          hypre_ParVector *vi;
 
@@ -463,12 +477,12 @@ HYPRE_Int hypre_AMESetup(void *esolver)
  * Remove the component of b in the range of G, i.e., compute
  *              b = (I - G (G^t M G)^{-1} G^t M) b
  * This way b will be orthogonal to gradients of linear functions.
- * The problem with G^t M G is solved only approximatelly by PCG-AMG.
+ * The problem with G^t M G is solved only approximately by PCG-AMG.
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_AMEDiscrDivFreeComponent(void *esolver, hypre_ParVector *b)
 {
-   hypre_AMEData *ame_data = esolver;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
 
    /* t3 = M b */
    hypre_ParCSRMatrixMatvec(1.0, ame_data -> M, b, 0.0, ame_data -> t3);
@@ -497,7 +511,7 @@ HYPRE_Int hypre_AMEDiscrDivFreeComponent(void *esolver, hypre_ParVector *b)
 
 void hypre_AMEOperatorA(void *data, void* x, void* y)
 {
-   hypre_AMEData *ame_data = data;
+   hypre_AMEData *ame_data = (hypre_AMEData *) data;
    hypre_AMSData *ams_data = ame_data -> precond;
    hypre_ParCSRMatrixMatvec(1.0, ams_data -> A, (hypre_ParVector*)x,
                             0.0, (hypre_ParVector*)y);
@@ -505,7 +519,7 @@ void hypre_AMEOperatorA(void *data, void* x, void* y)
 
 void hypre_AMEMultiOperatorA(void *data, void* x, void* y)
 {
-   hypre_AMEData *ame_data = data;
+   hypre_AMEData *ame_data = (hypre_AMEData *) data;
    mv_InterfaceInterpreter*
       interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
    interpreter -> Eval(hypre_AMEOperatorA, data, x, y);
@@ -519,14 +533,14 @@ void hypre_AMEMultiOperatorA(void *data, void* x, void* y)
 
 void hypre_AMEOperatorM(void *data, void* x, void* y)
 {
-   hypre_AMEData *ame_data = data;
+   hypre_AMEData *ame_data = (hypre_AMEData *) data;
    hypre_ParCSRMatrixMatvec(1.0, ame_data -> M, (hypre_ParVector*)x,
                             0.0, (hypre_ParVector*)y);
 }
 
 void hypre_AMEMultiOperatorM(void *data, void* x, void* y)
 {
-   hypre_AMEData *ame_data = data;
+   hypre_AMEData *ame_data = (hypre_AMEData *) data;
    mv_InterfaceInterpreter*
       interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
    interpreter -> Eval(hypre_AMEOperatorM, data, x, y);
@@ -541,18 +555,18 @@ void hypre_AMEMultiOperatorM(void *data, void* x, void* y)
 
 void hypre_AMEOperatorB(void *data, void* x, void* y)
 {
-   hypre_AMEData *ame_data = data;
+   hypre_AMEData *ame_data = (hypre_AMEData *) data;
    hypre_AMSData *ams_data = ame_data -> precond;
 
    hypre_ParVectorSetConstantValues((hypre_ParVector*)y, 0.0);
-   hypre_AMSSolve(ame_data -> precond, ams_data -> A, x, y);
+   hypre_AMSSolve(ame_data -> precond, ams_data -> A,(hypre_ParVector*) x,(hypre_ParVector*) y);
 
    hypre_AMEDiscrDivFreeComponent(data, (hypre_ParVector *)y);
 }
 
 void hypre_AMEMultiOperatorB(void *data, void* x, void* y)
 {
-   hypre_AMEData *ame_data = data;
+   hypre_AMEData *ame_data = (hypre_AMEData *) data;
    mv_InterfaceInterpreter*
       interpreter = (mv_InterfaceInterpreter*) ame_data -> interpreter;
    interpreter -> Eval(hypre_AMEOperatorB, data, x, y);
@@ -567,7 +581,7 @@ void hypre_AMEMultiOperatorB(void *data, void* x, void* y)
 
 HYPRE_Int hypre_AMESolve(void *esolver)
 {
-   hypre_AMEData *ame_data = esolver;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
 
    HYPRE_Int nit;
    lobpcg_BLASLAPACKFunctions blap_fn;
@@ -581,8 +595,8 @@ HYPRE_Int hypre_AMESolve(void *esolver)
    blap_fn.dsygv  = hypre_F90_NAME_LAPACK(dsygv,DSYGV);
    blap_fn.dpotrf = hypre_F90_NAME_LAPACK(dpotrf,DPOTRF);
 #endif
-   lobpcg_tol.relative = ame_data -> tol;
-   lobpcg_tol.absolute = ame_data -> tol;
+   lobpcg_tol.relative = ame_data -> rtol;
+   lobpcg_tol.absolute = ame_data -> atol;
    residuals = hypre_TAlloc(HYPRE_Real, ame_data -> block_size);
 
    lobpcg_solve((mv_MultiVectorPtr) ame_data -> eigenvectors,
@@ -610,10 +624,10 @@ HYPRE_Int hypre_AMESolve(void *esolver)
 HYPRE_Int hypre_AMEGetEigenvectors(void *esolver,
                                    HYPRE_ParVector **eigenvectors_ptr)
 {
-   hypre_AMEData *ame_data = esolver;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    mv_MultiVectorPtr
       eigenvectors = (mv_MultiVectorPtr) ame_data -> eigenvectors;
-   mv_TempMultiVector* tmp = mv_MultiVectorGetData(eigenvectors);
+   mv_TempMultiVector* tmp = (mv_TempMultiVector*) mv_MultiVectorGetData(eigenvectors);
 
    *eigenvectors_ptr = (HYPRE_ParVector*)(tmp -> vector);
    tmp -> vector = NULL;
@@ -630,7 +644,7 @@ HYPRE_Int hypre_AMEGetEigenvectors(void *esolver,
 HYPRE_Int hypre_AMEGetEigenvalues(void *esolver,
                                   HYPRE_Real **eigenvalues_ptr)
 {
-   hypre_AMEData *ame_data = esolver;
+   hypre_AMEData *ame_data = (hypre_AMEData *) esolver;
    *eigenvalues_ptr = ame_data -> eigenvalues;
    ame_data -> eigenvalues = NULL;
    return hypre_error_flag;

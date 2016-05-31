@@ -7,12 +7,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dcopy_(n, dx, incx, dy, incy)
-integer *n;
-doublereal *dx;
-integer *incx;
-doublereal *dy;
-integer *incy;
+/* Subroutine */ HYPRE_Int dcopy_(integer* n, doublereal* dx,integer* incx,doublereal* dy,integer* incy)
 {
     /* System generated locals */
     integer i__1;

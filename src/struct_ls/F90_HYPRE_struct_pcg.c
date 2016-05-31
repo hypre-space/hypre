@@ -13,8 +13,11 @@
 #include "_hypre_struct_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGCreate
  *--------------------------------------------------------------------------*/
 
 void
@@ -30,7 +33,6 @@ hypre_F90_IFACE(hypre_structpcgcreate, HYPRE_STRUCTPCGCREATE)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGDestroy
  *--------------------------------------------------------------------------*/
 
 void 
@@ -44,7 +46,6 @@ hypre_F90_IFACE(hypre_structpcgdestroy, HYPRE_STRUCTPCGDESTROY)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGSetup
  *--------------------------------------------------------------------------*/
 
 void 
@@ -64,7 +65,6 @@ hypre_F90_IFACE(hypre_structpcgsetup, HYPRE_STRUCTPCGSETUP)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGSolve
  *--------------------------------------------------------------------------*/
 
 void 
@@ -84,7 +84,6 @@ hypre_F90_IFACE(hypre_structpcgsolve, HYPRE_STRUCTPCGSOLVE)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGSetTol
  *--------------------------------------------------------------------------*/
 
 void
@@ -100,7 +99,21 @@ hypre_F90_IFACE(hypre_structpcgsettol, HYPRE_STRUCTPCGSETTOL)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGSetMaxIter
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structpcgsetabstol, HYPRE_STRUCTPCGSETABSTOL)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Real *tol,
+     hypre_F90_Int *ierr   )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructPCGSetAbsoluteTol(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassReal (tol) ) );
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 void
@@ -116,7 +129,6 @@ hypre_F90_IFACE(hypre_structpcgsetmaxiter, HYPRE_STRUCTPCGSETMAXITER)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGSetTwoNorm
  *--------------------------------------------------------------------------*/
 
 void
@@ -132,7 +144,6 @@ hypre_F90_IFACE(hypre_structpcgsettwonorm, HYPRE_STRUCTPCGSETTWONORM)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGSetRelChange
  *--------------------------------------------------------------------------*/
 
 void
@@ -148,7 +159,6 @@ hypre_F90_IFACE(hypre_structpcgsetrelchange, HYPRE_STRUCTPCGSETRELCHANGE)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGSetPrecond
  *--------------------------------------------------------------------------*/
 
 void
@@ -215,7 +225,6 @@ hypre_F90_IFACE(hypre_structpcgsetprecond, HYPRE_STRUCTPCGSETPRECOND)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGSetLogging
  *--------------------------------------------------------------------------*/
 
 void
@@ -231,7 +240,6 @@ hypre_F90_IFACE(hypre_structpcgsetlogging, HYPRE_STRUCTPCGSETLOGGING)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGSetLogging
  *--------------------------------------------------------------------------*/
 
 void
@@ -247,7 +255,6 @@ hypre_F90_IFACE(hypre_structpcgsetprintlevel, HYPRE_STRUCTPCGSETPRINTLEVEL)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGGetNumIterations
  *--------------------------------------------------------------------------*/
 
 void
@@ -263,7 +270,6 @@ hypre_F90_IFACE(hypre_structpcggetnumiterations, HYPRE_STRUCTPCGGETNUMITERATIONS
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructPCGGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 void
@@ -279,7 +285,6 @@ hypre_F90_IFACE(hypre_structpcggetfinalrelative, HYPRE_STRUCTPCGGETFINALRELATIVE
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructDiagScaleSetup
  *--------------------------------------------------------------------------*/
 
 void 
@@ -299,7 +304,6 @@ hypre_F90_IFACE(hypre_structdiagscalesetup, HYPRE_STRUCTDIAGSCALESETUP)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructDiagScale
  *--------------------------------------------------------------------------*/
 
 void 
@@ -317,3 +321,7 @@ hypre_F90_IFACE(hypre_structdiagscale, HYPRE_STRUCTDIAGSCALE)
            hypre_F90_PassObj (HYPRE_StructVector, Hy),
            hypre_F90_PassObj (HYPRE_StructVector, Hx)     ) );
 }
+    
+#ifdef __cplusplus
+}
+#endif

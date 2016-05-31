@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dormbr_(char *vect, char *side, char *trans, integer *m, 
+/* Subroutine */ HYPRE_Int dormbr_(const char *vect,const char *side,const char *trans, integer *m, 
 	integer *n, integer *k, doublereal *a, integer *lda, doublereal *tau, 
 	doublereal *c__, integer *ldc, doublereal *work, integer *lwork, 
 	integer *info)
@@ -136,16 +136,16 @@
        Subroutine */ HYPRE_Int s_cat(char *, char **, integer *, integer *, ftnlen);
     /* Local variables */
     static logical left;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static integer iinfo, i1, i2, nb, mi, ni, nq, nw;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dormlq_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dormlq_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *, integer *);
     static logical notran;
-    extern /* Subroutine */ HYPRE_Int dormqr_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dormqr_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *, integer *);
     static logical applyq;
@@ -210,8 +210,8 @@
 	if (applyq) {
 	    if (left) {
 /* Writing concatenation */
-		i__3[0] = 1, a__1[0] = side;
-		i__3[1] = 1, a__1[1] = trans;
+			i__3[0] = 1, a__1[0] = (char*)side;
+			i__3[1] = 1, a__1[1] = (char*)trans;
 		s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
 		i__1 = *m - 1;
 		i__2 = *m - 1;
@@ -219,8 +219,8 @@
 			ftnlen)6, (ftnlen)2);
 	    } else {
 /* Writing concatenation */
-		i__3[0] = 1, a__1[0] = side;
-		i__3[1] = 1, a__1[1] = trans;
+			i__3[0] = 1, a__1[0] = (char*)side;
+			i__3[1] = 1, a__1[1] = (char*)trans;
 		s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
 		i__1 = *n - 1;
 		i__2 = *n - 1;
@@ -230,8 +230,8 @@
 	} else {
 	    if (left) {
 /* Writing concatenation */
-		i__3[0] = 1, a__1[0] = side;
-		i__3[1] = 1, a__1[1] = trans;
+			i__3[0] = 1, a__1[0] = (char*)side;
+			i__3[1] = 1, a__1[1] = (char*)trans;
 		s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
 		i__1 = *m - 1;
 		i__2 = *m - 1;
@@ -239,8 +239,8 @@
 			ftnlen)6, (ftnlen)2);
 	    } else {
 /* Writing concatenation */
-		i__3[0] = 1, a__1[0] = side;
-		i__3[1] = 1, a__1[1] = trans;
+			i__3[0] = 1, a__1[0] = (char*)side;
+			i__3[1] = 1, a__1[1] = (char*)trans;
 		s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
 		i__1 = *n - 1;
 		i__2 = *n - 1;

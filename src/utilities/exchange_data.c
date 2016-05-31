@@ -328,7 +328,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
          /* do we have enough space to recv it? */
          if(contact_size > recv_contact_buf_size) 
          {
-            recv_contact_buf = hypre_ReAlloc(recv_contact_buf, 
+			 recv_contact_buf = hypre_ReAlloc((char*)recv_contact_buf, 
                                              contact_obj_size*contact_size);
             recv_contact_buf_size = contact_size;
          } 
@@ -460,7 +460,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
       hypre_TFree(recv_contact_buf);
    }
   
-   hypre_Free(send_response_buf);
+   hypre_Free((char*)send_response_buf);
    hypre_TFree(contact_ptrs);
    hypre_TFree(response_ptrs);
 
@@ -529,7 +529,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
 
    /*--------------CLEAN UP------------------- */
   
-   hypre_Free(initial_recv_buf);
+   hypre_Free((char*)initial_recv_buf);
 
    if (num_contacts > 0 ) 
    {
@@ -561,7 +561,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
  
       for (i=0; i< post_array_size; i++)
       {
-         hypre_Free(post_array[i]);
+		  hypre_Free((char*)post_array[i]);
       }
       hypre_TFree(post_array);
    }

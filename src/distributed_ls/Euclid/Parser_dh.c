@@ -27,7 +27,7 @@ struct _optionsNode {
   OptionsNode *next;  
 };
 
-static bool find(Parser_dh p, char *option, OptionsNode** ptr);
+static bool find(Parser_dh p,const char *option, OptionsNode** ptr);
 static void init_from_default_settings_private(Parser_dh p);
 
 
@@ -75,7 +75,7 @@ void Parser_dhDestroy(Parser_dh p)
 
 #undef __FUNC__
 #define __FUNC__ "Parser_dhUpdateFromFile"
-void Parser_dhUpdateFromFile(Parser_dh p, char *filename)
+void Parser_dhUpdateFromFile(Parser_dh p,const char *filename)
 {
   START_FUNC_DH_2
   char line[80], name[80], value[80];
@@ -151,13 +151,13 @@ void Parser_dhInit(Parser_dh p, HYPRE_Int argc, char *argv[])
 
 #undef __FUNC__
 #define __FUNC__ "Parser_dhHasSwitch"
-bool Parser_dhHasSwitch(Parser_dh p, char* s)
+bool Parser_dhHasSwitch(Parser_dh p,const char* s)
 {
   START_FUNC_DH_2
   bool has_switch = false;
   OptionsNode *node;
 
-  if (p != NULL && find(p,s,&node)) {
+  if (p != NULL && find(p,(char*)s,&node)) {
     if (! strcmp(node->value, "0")) {
       has_switch = false;
     } else if  (! strcmp(node->value, "false")) {
@@ -178,7 +178,7 @@ bool Parser_dhHasSwitch(Parser_dh p, char* s)
  */
 #undef __FUNC__
 #define __FUNC__ "Parser_dhReadInt"
-bool Parser_dhReadInt(Parser_dh p, char* in, HYPRE_Int* out)
+bool Parser_dhReadInt(Parser_dh p,const char* in, HYPRE_Int* out)
 {
   START_FUNC_DH_2
   bool has_switch = false;
@@ -198,7 +198,7 @@ bool Parser_dhReadInt(Parser_dh p, char* in, HYPRE_Int* out)
 
 #undef __FUNC__
 #define __FUNC__ "Parser_dhReadDouble"
-bool Parser_dhReadDouble(Parser_dh p, char* in, HYPRE_Real *out)
+bool Parser_dhReadDouble(Parser_dh p,const char* in, HYPRE_Real *out)
 {
   START_FUNC_DH_2
   bool optionExists = false;
@@ -213,7 +213,7 @@ bool Parser_dhReadDouble(Parser_dh p, char* in, HYPRE_Real *out)
 
 #undef __FUNC__
 #define __FUNC__ "Parser_dhReadString"
-bool Parser_dhReadString(Parser_dh p, char* in, char **out)
+bool Parser_dhReadString(Parser_dh p,const char* in, char **out)
 {
   START_FUNC_DH_2
   bool optionExists = false;
@@ -256,7 +256,7 @@ void Parser_dhPrint(Parser_dh p, FILE *fp, bool allPrint)
 
 #undef __FUNC__
 #define __FUNC__ "Parser_dhInsert"
-void Parser_dhInsert(Parser_dh p, char *option, char *value)
+void Parser_dhInsert(Parser_dh p,const char *option,const char *value)
 {
   START_FUNC_DH_2
   OptionsNode *node;
@@ -296,7 +296,7 @@ PARSER_NOT_INITED:
 
 #undef __FUNC__
 #define __FUNC__ "find"
-bool find(Parser_dh p, char *option, OptionsNode** ptr)
+bool find(Parser_dh p,const char *option, OptionsNode** ptr)
 {
   START_FUNC_DH_2
   OptionsNode *tmpPtr = p->head;

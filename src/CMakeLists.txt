@@ -47,7 +47,6 @@ if (HYPRE_SEQUENTIAL)
   set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
 endif ()
 
-#   --with-examples         Build example codes.
 #   --with-fei              Use internal FEI routines.
 #   --with-superlu          Use internal SuperLU routines.
 #   --with-mli              Use MLI
@@ -725,6 +724,8 @@ configure_file (
 # BINARY must be first in order to get the correct HYPRE_config.h file
 include_directories(${hypre_BINARY_DIR})
 include_directories(${hypre_SOURCE_DIR})
+include_directories(blas)
+include_directories(lapack)
 include_directories(utilities)
 include_directories(multivector)
 include_directories(krylov)
