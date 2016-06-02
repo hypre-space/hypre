@@ -13,7 +13,9 @@
 
 #include <math.h>
 #include <fortran.h>
+#ifdef HYPRE_USING_HYPRE_BLAS
 #include "hypre_blas.h"
+#endif
 /*#include "slu_Cnames.h"*/
 
 int
