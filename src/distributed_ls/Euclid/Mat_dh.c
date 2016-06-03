@@ -1127,7 +1127,7 @@ void Mat_dhFixDiags(Mat_dh A)
   START_FUNC_DH
   HYPRE_Int i, j;
   HYPRE_Int *rp = A->rp, *cval = A->cval, m = A->m;
-  bool ct = 0;  /* number of missing diagonals */
+  HYPRE_Int ct = 0;  /* number of missing diagonals */
   HYPRE_Real *aval = A->aval;
 
   /* determine if any diagonals are missing */

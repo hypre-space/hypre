@@ -15,6 +15,23 @@
 # recent release.
 #=============================================================================
 
+Version 2.11.1 released 2016/06/03
+
+- Fixed one more bug related to SStructSetSharedPart and SetNeighborPart
+
+- Fixed a bug in PFMG red/black relaxation for 2D problems
+
+- Fixed various other bugs in ParCSR and the FEI
+
+- Fixed configure option --without-MLI and removed option --with-examples
+
+- Modified code to enable compilation with a C++ compiler.
+
+- Added several missing Fortran interface routines in Struct and BoomerAMG
+
+- Updated the AME and LOBPCG interfaces to work correctly with both absolute and
+  relative tolerances.
+
 Version 2.11.0 released 2016/03/28
 
 - Added a new function hypre_BoomerAMGSetKeepTranspose, which will store the
