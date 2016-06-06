@@ -17,6 +17,7 @@
  *****************************************************************************/
 
 #include "_hypre_parcsr_ls.h"
+#include "par_amg.h"
 #include <assert.h>
 
 #define FMRK  -1
@@ -1699,7 +1700,7 @@ hypre_SysTGSetup( void               *systg_vdata,
 			hypre_printf("No coarse grid solver provided. Using default AMG solver ... \n");
 			/* create and set default solver parameters here */
 			/* create and initialize default_cg_solver */
-			default_cg_solver = (hypre_Solver_struct**) hypre_BoomerAMGCreate();
+			default_cg_solver = (HYPRE_Solver *) hypre_BoomerAMGCreate();
 			hypre_BoomerAMGSetMaxIter ( default_cg_solver, (systg_data -> max_iter) );
 	 
 			hypre_BoomerAMGSetRelaxOrder( default_cg_solver, 0);
@@ -2014,7 +2015,7 @@ hypre_SysTGSetup( void               *systg_vdata,
    {
       hypre_printf("No coarse grid solver provided. Using default AMG solver ... \n");
       /* create and set default solver parameters here */
-      default_cg_solver = (hypre_Solver_struct**) hypre_BoomerAMGCreate();
+      default_cg_solver = (HYPRE_Solver*) hypre_BoomerAMGCreate();
       hypre_BoomerAMGSetMaxIter ( default_cg_solver, 1 );
       hypre_BoomerAMGSetRelaxOrder( default_cg_solver, 1);
       hypre_BoomerAMGSetPrintLevel(default_cg_solver, 0);
@@ -3384,7 +3385,7 @@ hypre_SysTGSetCoarseSolver( void  *systg_vdata,
  
    (systg_data -> coarse_grid_solver_solve) = coarse_grid_solver_solve;
    (systg_data -> coarse_grid_solver_setup) = coarse_grid_solver_setup;
-   (systg_data -> coarse_grid_solver)       = (hypre_Solver_struct**) coarse_grid_solver;
+   (systg_data -> coarse_grid_solver)       = (HYPRE_Solver*) coarse_grid_solver;
    
    (systg_data -> use_default_cgrid_solver) = 0;
   
