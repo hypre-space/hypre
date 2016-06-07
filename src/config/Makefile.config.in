@@ -126,3 +126,23 @@ HYPRE_FEI_SUBDIRS       = @HYPRE_FEI_SUBDIRS@
 HYPRE_FEI_SUPERLU_FILES = @HYPRE_FEI_SUPERLU_FILES@
 HYPRE_FEI_HYPRE_FILES   = @HYPRE_FEI_HYPRE_FILES@
 HYPRE_FEI_FEMLI_FILES   = @HYPRE_FEI_FEMLI_FILES@
+
+##################################################################
+##  RAJA options
+##################################################################
+HYPRE_RAJA_SRC_DIR       = @HYPRE_RAJA_SRC_DIR@
+HYPRE_RAJA_INCLUDE       = @HYPRE_RAJA_INC_DIR@
+HYPRE_RAJA_LIB           = @HYPRE_RAJA_LIB_DIR@
+
+##################################################################
+##  kokkos options
+##################################################################
+KOKKOS_PATH = @HYPRE_KOKKOS_PATH@
+KOKKOS_DEVICES = @HYPRE_KOKKOS_DEVICE@
+KOKKOS_ARCH = @HYPRE_KOKKOS_ARCH@
+KOKKOS_CUDA_OPTIONS = @HYPRE_KOKKOS_CUDA_OPTION@
+@HYPRE_KOKKOS_INC_FILE@
+HYPRE_KOKKOS_CLEAN       = @HYPRE_KOKKOS_CLEAN@
+HYPRE_KOKKOS_LIB         = @HYPRE_KOKKOS_LIB@
+HYPRE_KOKKOS_DEPENDS     = @HYPRE_KOKKOS_DEPENDS@
+

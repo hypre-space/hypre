@@ -58,8 +58,6 @@
        Compute the eigenvalues */
     /* System generated locals */
     doublereal d__1;
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
     /* Local variables */
     static doublereal acmn, acmx, ab, df, tb, sm, rt, adf;
 

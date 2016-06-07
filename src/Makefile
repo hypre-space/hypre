@@ -192,7 +192,7 @@ clean:
 	done
 	rm -rf tca.map pchdir *inslog*
 
-distclean:
+distclean: $(HYPRE_KOKKOS_CLEAN)
 	@ \
 	rm -Rf hypre; \
 	for i in ${HYPRE_DIRS} ${HYPRE_EXTRA_DIRS} ${HYPRE_EXAMPLE_DIRS} examples/docs; \

@@ -20,9 +20,6 @@
     integer i__1;
     doublereal d__1, d__2;
 
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
-
     /* Local variables */
     static doublereal s, a2, b1, b2;
     static integer i4, nn, np;

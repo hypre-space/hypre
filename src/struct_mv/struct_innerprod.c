@@ -27,7 +27,6 @@ hypre_StructInnerProd( hypre_StructVector *x,
                        hypre_StructVector *y )
 {
    HYPRE_Real       final_innerprod_result;
-   HYPRE_Real       local_result;
    HYPRE_Real       process_result;
                    
    hypre_Box       *x_data_box;
@@ -41,49 +40,72 @@ hypre_StructInnerProd( hypre_StructVector *x,
                    
    hypre_BoxArray  *boxes;
    hypre_Box       *box;
-   hypre_Index      loop_size;
-   hypre_IndexRef   start;
-   hypre_Index      unit_stride;
-                   
-   HYPRE_Int        i;
 
+   HYPRE_Int        *loop_size, *stride, * start;
+   HYPRE_Int         ndim = hypre_StructVectorNDim(x);               
+   HYPRE_Int        i, d;
+#ifdef HYPRE_USE_RAJA
+   const size_t block_size = 256;
+   ReduceSum< cuda_reduce<block_size>, HYPRE_Real> local_result(0.0);
+#else
+   HYPRE_Real       local_result;
    local_result = 0.0;
+#endif
+/* Allocate data for boxloop */
+   hypre_DataCTAlloc(loop_size,HYPRE_Int,ndim);
+   hypre_DataCTAlloc(   stride,HYPRE_Int,ndim);
+   hypre_DataCTAlloc(    start,HYPRE_Int,ndim);
+   x_data_box = hypre_BoxCreate(ndim);
+   y_data_box = hypre_BoxCreate(ndim);
+   
    process_result = 0.0;
 
-   hypre_SetIndex(unit_stride, 1);
+   hypre_SetIndex(stride, 1);
 
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
    {
       box   = hypre_BoxArrayBox(boxes, i);
-      start = hypre_BoxIMin(box);
-
-      x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-      y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+	  for (d = 0; d < ndim; d++)
+	  {
+		  hypre_IndexD(start, d) = hypre_BoxIMinD(box, d);
+		  hypre_IndexD(loop_size, d) = hypre_BoxSizeD(box, d);
+	  }
+	  
+	  hypre_CopyBox(hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i), x_data_box);
+	  hypre_CopyBox(hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i), y_data_box);
 
       xp = hypre_StructVectorBoxData(x, i);
       yp = hypre_StructVectorBoxData(y, i);
 
-      hypre_BoxGetSize(box, loop_size);
-
-      hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
-                          x_data_box, start, unit_stride, xi,
-                          y_data_box, start, unit_stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) reduction(+:local_result) HYPRE_SMP_SCHEDULE
+#ifdef HYPRE_BOX_PRIVATE_VAR
+#undef HYPRE_BOX_PRIVATE_VAR
 #endif
-      hypre_BoxLoop2For(xi, yi)
+#define HYPRE_BOX_PRIVATE_VAR xi,yi
+#ifdef HYPRE_BOX_REDUCTION
+#undef HYPRE_BOX_REDUCTION
+#endif
+#define HYPRE_BOX_REDUCTION reduction(+:local_result)
+	  zypre_newBoxLoop2ReductionBegin(ndim, loop_size,
+									  x_data_box, start, stride, xi,
+									  y_data_box, start, stride, yi,local_result);
       {
          local_result += xp[xi] * hypre_conj(yp[yi]);
       }
-      hypre_BoxLoop2End(xi, yi);
+      zypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
    }
-   process_result = local_result;
+   process_result = static_cast<double>(local_result);
 
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));
 
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
 
+   hypre_BoxDestroy(x_data_box);
+   hypre_BoxDestroy(y_data_box);
+   hypre_DataTFree(loop_size);
+   hypre_DataTFree(   stride);
+   hypre_DataTFree(    start);
+   
    return final_innerprod_result;
 }

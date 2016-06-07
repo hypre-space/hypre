@@ -354,9 +354,10 @@ hypre_PointRelax( void               *relax_vdata,
    HYPRE_Int              xi;
    HYPRE_Int              ti;
                         
-   hypre_IndexRef         stride;
-   hypre_IndexRef         start;
-   hypre_Index            loop_size;
+   //hypre_IndexRef         stride;
+   //hypre_IndexRef         start;
+   //hypre_Index            loop_size;
+    HYPRE_Int        *loop_size, *stride, * start;
                         
    HYPRE_Int              constant_coefficient;
 
@@ -369,6 +370,14 @@ hypre_PointRelax( void               *relax_vdata,
     * Initialize some things and deal with special cases
     *----------------------------------------------------------*/
 
+    hypre_DataCTAlloc(loop_size,HYPRE_Int,ndim);
+    hypre_DataCTAlloc(   stride,HYPRE_Int,ndim);
+    hypre_DataCTAlloc(    start,HYPRE_Int,ndim);
+    A_data_box = hypre_BoxCreate(ndim);
+    b_data_box = hypre_BoxCreate(ndim);
+    x_data_box = hypre_BoxCreate(ndim);
+    t_data_box = hypre_BoxCreate(ndim);
+    
    hypre_BeginTiming(relax_data -> time_index);
 
    hypre_StructMatrixDestroy(relax_data -> A);
@@ -444,13 +453,17 @@ hypre_PointRelax( void               *relax_vdata,
          {
             compute_box_a = hypre_BoxArrayArrayBoxArray(compute_box_aa, i);
 
-            A_data_box =
-               hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-            b_data_box =
-               hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
-            x_data_box =
-               hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+            //A_data_box =
+            //   hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
+            //b_data_box =
+            //   hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i);
+            //x_data_box =
+            //   hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
 
+             hypre_CopyBox(hypre_BoxArrayBox(hypre_StructVectorDataSpace(A), i), A_data_box);
+             hypre_CopyBox(hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i), x_data_box);
+             hypre_CopyBox(hypre_BoxArrayBox(hypre_StructVectorDataSpace(b), i), b_data_box);
+             
             Ap = hypre_StructMatrixBoxData(A, i, diag_rank);
             bp = hypre_StructVectorBoxData(b, i);
             xp = hypre_StructVectorBoxData(x, i);

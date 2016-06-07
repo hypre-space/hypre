@@ -1,3 +1,15 @@
+
+#ifndef hypre_STRUCT_MV_HEADER
+#define hypre_STRUCT_MV_HEADER
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+#include "HYPRE_struct_mv.h"
+#include "_hypre_utilities.h"
+
+#ifdef HYPRE_USE_RAJA
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -10,20 +22,828 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#ifndef hypre_STRUCT_MV_HEADER
-#define hypre_STRUCT_MV_HEADER
+/******************************************************************************
+ *
+ * Header info for the BoxLoop
+ *
+ *****************************************************************************/
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+/*--------------------------------------------------------------------------
+ * BoxLoop macros:
+ *--------------------------------------------------------------------------*/
 
-#include "HYPRE_struct_mv.h"
-#include "_hypre_utilities.h"
+#ifndef HYPRE_NEWBOXLOOP_HEADER
+#define HYPRE_NEWBOXLOOP_HEADER
 
+#include <cuda.h>
+#include <cuda_runtime.h>
+extern "C++" {
+#include "RAJA/RAJA.hxx"
+}
+
+using namespace RAJA;
+
+#define hypre_CallocIndex(indexVar, dim)									\
+	cudaMallocManaged((void**)&indexVar,sizeof(HYPRE_Int)*dim, cudaMemAttachGlobal);
+
+#define hypre_CallocReal(indexVar, dim)								\
+	cudaMallocManaged((void**)&indexVar,sizeof(HYPRE_Real)*dim, cudaMemAttachGlobal);
+
+#define zypre_BoxLoopCUDAInit(ndim)										\
+	HYPRE_Int hypre__tot = 1.0;											\
+	const size_t block_size = 256;										\
+	for (HYPRE_Int i = 0;i < ndim;i ++)									\
+		hypre__tot *= loop_size[i];
+
+
+#define zypre_BoxLoopCUDADeclare()										\
+	HYPRE_Int local_idx;												\
+	HYPRE_Int d,idx_local = i;
+
+
+#define zypre_newBoxLoop0Begin(ndim, loop_size)				\
+{    														\
+    zypre_BoxLoopCUDAInit(ndim)													\
+	forall< cuda_exec<block_size> >(0, hypre__tot, [=] __device__ (int i) \
+	{
+
+
+#define zypre_newBoxLoop0End()					\
+	});											\
+	cudaDeviceSynchronize();					\
+}
+
+#define zypre_newBoxLoop1Begin(ndim, loop_size,				\
+							   dbox1, start1, stride1, i1) 	\
+{    														\
+    zypre_BoxLoopCUDAInit(ndim)													\
+	forall< cuda_exec<block_size> >(0, hypre__tot, [=] __device__ (int i) \
+    {																		\
+	    zypre_BoxLoopCUDADeclare()											\
+	    HYPRE_Int hypre_boxD1 = 1.0;										\
+	    HYPRE_Int i1 = 0;												\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+		}																\
+
+
+#define zypre_newBoxLoop1End(i1)				\
+	});											\
+	cudaDeviceSynchronize();					\
+}
+
+
+#define zypre_newBoxLoop2Begin(ndim, loop_size,				\
+                                dbox1, start1, stride1, i1,	\
+                                dbox2, start2, stride2, i2)	\
+{    														\
+    zypre_BoxLoopCUDAInit(ndim)													\
+    forall< cuda_exec<block_size> >(0, hypre__tot, [=] __device__ (int i) \
+	{																	\
+	    zypre_BoxLoopCUDADeclare()											\
+	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;						\
+	    HYPRE_Int i1 = 0, i2 = 0;											\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+			i2 += (local_idx*stride2[d] + start2[d] - hypre_BoxIMinD(dbox2, d)) * hypre_boxD2; \
+			hypre_boxD2 *= hypre_BoxSizeD(dbox2, d);					\
+		}
+
+
+#define zypre_newBoxLoop2End(i1, i2)			\
+	});											\
+	cudaDeviceSynchronize();					\
+}
+
+
+#define zypre_newBoxLoop3Begin(ndim, loop_size,\
+							   dbox1, start1, stride1, i1,	\
+							   dbox2, start2, stride2, i2,	\
+							   dbox3, start3, stride3, i3)	\
+{																	\
+    zypre_BoxLoopCUDAInit(ndim)													\
+	forall< cuda_exec<block_size> >(0, hypre__tot, [=] __device__ (int i) \
+	{																	\
+	    zypre_BoxLoopCUDADeclare()											\
+	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0;	\
+	    HYPRE_Int i1 = 0, i2 = 0, i3 = 0;											\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+			i2 += (local_idx*stride2[d] + start2[d] - hypre_BoxIMinD(dbox2, d)) * hypre_boxD2; \
+			hypre_boxD2 *= hypre_BoxSizeD(dbox2, d);					\
+			i3 += (local_idx*stride3[d] + start3[d] - hypre_BoxIMinD(dbox3, d)) * hypre_boxD3; \
+			hypre_boxD3 *= hypre_BoxSizeD(dbox3, d);					\
+		}		
+
+#define zypre_newBoxLoop3End(i1, i2, i3)		\
+	});											\
+	cudaDeviceSynchronize();					\
+}
+
+#define zypre_newBoxLoop4Begin(ndim, loop_size,				\
+							   dbox1, start1, stride1, i1,	\
+							   dbox2, start2, stride2, i2,	\
+							   dbox3, start3, stride3, i3,			\
+							   dbox4, start4, stride4, i4)			\
+{																	\
+    zypre_BoxLoopCUDAInit(ndim)													\
+	forall< cuda_exec<block_size> >(0, hypre__tot, [=] __device__ (int i) \
+	{																	\
+	    zypre_BoxLoopCUDADeclare()											\
+	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0,hypre_boxD4 = 1.0; \
+	    HYPRE_Int i1 = 0, i2 = 0, i3 = 0,i4 = 0;								\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+			i2 += (local_idx*stride2[d] + start2[d] - hypre_BoxIMinD(dbox2, d)) * hypre_boxD2; \
+			hypre_boxD2 *= hypre_BoxSizeD(dbox2, d);					\
+			i3 += (local_idx*stride3[d] + start3[d] - hypre_BoxIMinD(dbox3, d)) * hypre_boxD3; \
+			hypre_boxD3 *= hypre_BoxSizeD(dbox3, d);					\
+			i4 += (local_idx*stride4[d] + start4[d] - hypre_BoxIMinD(dbox4, d)) * hypre_boxD4; \
+			hypre_boxD4 *= hypre_BoxSizeD(dbox4, d);					\
+		}		
+
+#define zypre_newBoxLoop4End(i1, i2, i3, i4)	\
+	});											\
+	cudaDeviceSynchronize();					\
+}
+
+
+#define zypre_newBoxLoop2ReductionBegin(ndim, loop_size,				\
+										dbox1, start1, stride1, i1,		\
+										dbox2, start2, stride2, i2,sum)	\
+{    																	\
+    zypre_BoxLoopCUDAInit(ndim)											\
+	forall< cuda_exec<block_size> >(0, hypre__tot, [=] __device__ (int i) \
+	{																	\
+	    zypre_BoxLoopCUDADeclare()											\
+	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;						\
+	    HYPRE_Int i1 = 0, i2 = 0;											\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+			i2 += (local_idx*stride2[d] + start2[d] - hypre_BoxIMinD(dbox2, d)) * hypre_boxD2; \
+			hypre_boxD2 *= hypre_BoxSizeD(dbox2, d);					\
+		}
+
+
+#define zypre_newBoxLoop2ReductionEnd(i1, i2, sum)	\
+	});											\
+	cudaDeviceSynchronize();					\
+}
+
+#endif
+#elif defined(HYPRE_USE_KOKKOS_CUDA) || defined(HYPRE_USE_KOKKOS)
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+/******************************************************************************
+ *
+ * Header info for the BoxLoop
+ *
+ *****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * BoxLoop macros:
+ *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_NEWBOXLOOP_HEADER
+#define HYPRE_NEWBOXLOOP_HEADER
+extern "C++" {
+#include <Kokkos_Core.hpp>
+}
+#if defined( KOKKOS_HAVE_MPI )
+#include <mpi.h>
+#endif
+
+#include "_hypre_struct_mv.h"
+
+#define zypre_newBoxLoopInit(ndim)											\
+	HYPRE_Int hypre__tot = 1.0;											\
+	for (HYPRE_Int i = 0;i < ndim;i ++)									\
+		hypre__tot *= loop_size[i];
+
+
+#define zypre_newBoxLoopDeclare(idx)										\
+	HYPRE_Int local_idx;												\
+	HYPRE_Int d,idx_local = idx;
+
+#define zypre_newBoxLoop0Begin(ndim, loop_size) 	\
+{																	\
+    zypre_newBoxLoopInit(ndim)											\
+	Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx) \
+    {																		\
+	    zypre_newBoxLoopDeclare(idx)										\
+	    HYPRE_Int hypre_boxD1 = 1.0;										\
+	    HYPRE_Int i1 = idx;
+
+
+#define zypre_newBoxLoop0End(i1)				\
+	});											\
+}
+
+
+#define zypre_newBoxLoop1Begin(ndim, loop_size,				\
+							   dbox1, start1, stride1, i1) 	\
+{																	\
+    zypre_newBoxLoopInit(ndim)											\
+	Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx) \
+    {																		\
+	    zypre_newBoxLoopDeclare(idx)										\
+	    HYPRE_Int hypre_boxD1 = 1.0;										\
+	    HYPRE_Int i1 = 0;											\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + hypre_IndexD(start1, d) - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+		}																\
+
+
+#define zypre_newBoxLoop1End(i1)				\
+	});											\
+}
+
+
+#define zypre_newBoxLoop2Begin(ndim, loop_size,				\
+                                dbox1, start1, stride1, i1,	\
+                                dbox2, start2, stride2, i2)	\
+{    														\
+    zypre_newBoxLoopInit(ndim)													\
+	Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)				\
+	{																	\
+	    zypre_newBoxLoopDeclare(idx)											\
+	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;						\
+	    HYPRE_Int i1 = 0, i2 = 0;											\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+			i2 += (local_idx*stride2[d] + start2[d] - hypre_BoxIMinD(dbox2, d)) * hypre_boxD2; \
+			hypre_boxD2 *= hypre_BoxSizeD(dbox2, d);					\
+		}
+
+
+#define zypre_newBoxLoop2End(i1, i2)			\
+	});											\
+}
+
+
+#define zypre_newBoxLoop3Begin(ndim, loop_size,\
+							   dbox1, start1, stride1, i1,	\
+							   dbox2, start2, stride2, i2,	\
+							   dbox3, start3, stride3, i3)	\
+{																	\
+    zypre_newBoxLoopInit(ndim)													\
+	Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)				\
+	{																	\
+	    zypre_newBoxLoopDeclare(idx)											\
+	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0;	\
+	    HYPRE_Int i1 = 0, i2 = 0, i3 = 0;											\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + hypre_IndexD(start1, d) - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+			i2 += (local_idx*stride2[d] + start2[d] - hypre_BoxIMinD(dbox2, d)) * hypre_boxD2; \
+			hypre_boxD2 *= hypre_BoxSizeD(dbox2, d);					\
+			i3 += (local_idx*stride3[d] + start3[d] - hypre_BoxIMinD(dbox3, d)) * hypre_boxD3; \
+			hypre_boxD3 *= hypre_BoxSizeD(dbox3, d);					\
+		}		
+
+#define zypre_newBoxLoop3End(i1, i2,i3)			\
+	});											\
+}
+
+#define zypre_newBoxLoop4Begin(ndim, loop_size,\
+							   dbox1, start1, stride1, i1,	\
+							   dbox2, start2, stride2, i2,	\
+							   dbox3, start3, stride3, i3,			\
+							   dbox4, start4, stride4, i4)			\
+{																	\
+    zypre_newBoxLoopInit(ndim)													\
+	Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)				\
+	{																	\
+	    zypre_newBoxLoopDeclare(idx)											\
+     	HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0,hypre_boxD4 = 1.0;	\
+	    HYPRE_Int i1 = 0, i2 = 0, i3 = 0, i4 = 0;								\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + hypre_IndexD(start1, d) - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+			i2 += (local_idx*stride2[d] + start2[d] - hypre_BoxIMinD(dbox2, d)) * hypre_boxD2; \
+			hypre_boxD2 *= hypre_BoxSizeD(dbox2, d);					\
+			i3 += (local_idx*stride3[d] + start3[d] - hypre_BoxIMinD(dbox3, d)) * hypre_boxD3; \
+			hypre_boxD3 *= hypre_BoxSizeD(dbox3, d);					\
+			i4 += (local_idx*stride4[d] + start4[d] - hypre_BoxIMinD(dbox4, d)) * hypre_boxD4; \
+			hypre_boxD4 *= hypre_BoxSizeD(dbox4, d);					\
+		}		
+
+#define zypre_newBoxLoop4End(i1, i2, i3, i4)		\
+	});											\
+}
+
+
+#define zypre_newBoxLoop2ReductionBegin(ndim, loop_size,				\
+										dbox1, start1, stride1, i1,		\
+										dbox2, start2, stride2, i2,		\
+										sum)							\
+{    														\
+    zypre_newBoxLoopInit(ndim)												\
+	Kokkos::parallel_reduce (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx,HYPRE_Real &sum) \
+	{																	\
+	    zypre_newBoxLoopDeclare(idx)											\
+	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;						\
+	    HYPRE_Int i1 = 0, i2 = 0;											\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+			i2 += (local_idx*stride2[d] + start2[d] - hypre_BoxIMinD(dbox2, d)) * hypre_boxD2; \
+			hypre_boxD2 *= hypre_BoxSizeD(dbox2, d);					\
+		}
+
+
+#define zypre_newBoxLoop2ReductionEnd(i1, i2, sum)			\
+	},sum);													\
+}
+
+#endif
+#elif defined(HYPRE_USE_CUDA)
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+/******************************************************************************
+ *
+ * Header info for the BoxLoop
+ *
+ *****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * BoxLoop macros:
+ *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_NEWBOXLOOP_HEADER
+#define HYPRE_NEWBOXLOOP_HEADER
+
+#include <cuda.h>
+#include <cuda_runtime.h>
+struct cuda_traversal {};
+struct omp_traversal  {};
+struct cuda_reduce {};
+
+template <typename LOOP_BODY>
+__global__ void forall_kernel(LOOP_BODY loop_body, int length)
+{
+	int idx = blockDim.x * blockIdx.x + threadIdx.x;
+	if (idx < length)
+		loop_body(idx);
+}
+
+template<typename LOOP_BODY>
+void BoxLoopforall (cuda_traversal, HYPRE_Int length, LOOP_BODY loop_body)
+{	
+	size_t const blockSize = 128;
+	size_t const gridSize  = (length + blockSize - 1) / blockSize;
+	//hypre_printf("*blocksize = %d, gridsize = %d\n",blockSize,gridSize);
+	forall_kernel<<<gridSize, blockSize>>>(loop_body,length);
+}
+
+template<typename LOOP_BODY>
+void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
+{
+
+#pragma omp parallel for schedule(static)
+	for (int idx = 0;idx < length;idx++)
+		loop_body(idx);
+}
+
+#define hypre_CallocIndex(indexVar, dim)									\
+	cudaMallocManaged((void**)&indexVar,sizeof(HYPRE_Int)*dim, cudaMemAttachGlobal);
+
+#define hypre_CallocReal(indexVar, dim)								\
+	cudaMallocManaged((void**)&indexVar,sizeof(HYPRE_Real)*dim, cudaMemAttachGlobal);
+
+
+#define zypre_BoxLoopCUDAInit(ndim)											\
+	long hypre__tot = 1.0;											\
+	for (HYPRE_Int i = 0;i < ndim;i ++)									\
+		hypre__tot *= loop_size[i];
+
+
+#define zypre_BoxLoopCUDADeclare()										\
+	HYPRE_Int local_idx;												\
+	HYPRE_Int d,idx_local = idx;
+
+#define zypre_newBoxLoop0Begin(ndim, loop_size)				\
+{    														\
+    zypre_BoxLoopCUDAInit(ndim)													\
+	BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+	{
+
+
+#define zypre_newBoxLoop0End()					\
+	});											\
+	cudaDeviceSynchronize();					\
+}
+
+
+#define zypre_newBoxLoop1Begin(ndim, loop_size,				\
+							   dbox1, start1, stride1, i1) 	\
+{    														\
+    zypre_BoxLoopCUDAInit(ndim)													\
+	BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+	{																	\
+	    zypre_BoxLoopCUDADeclare()											\
+     	HYPRE_Int hypre_boxD1 = 1.0;						\
+	    HYPRE_Int i1 = 0;											\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+		}																\
+
+
+#define zypre_newBoxLoop1End(i1)				\
+	});											\
+	cudaDeviceSynchronize();					\
+}
+
+
+#define zypre_newBoxLoop2Begin(ndim, loop_size,				\
+                                dbox1, start1, stride1, i1,	\
+                                dbox2, start2, stride2, i2)	\
+{    														\
+    zypre_BoxLoopCUDAInit(ndim)													\
+	BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+	{																	\
+	    zypre_BoxLoopCUDADeclare()											\
+	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;						\
+	    HYPRE_Int i1 = 0, i2 = 0;											\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+			i2 += (local_idx*stride2[d] + start2[d] - hypre_BoxIMinD(dbox2, d)) * hypre_boxD2; \
+			hypre_boxD2 *= hypre_BoxSizeD(dbox2, d);					\
+		}
+
+
+#define zypre_newBoxLoop2End(i1, i2)			\
+	});											\
+	cudaDeviceSynchronize();					\
+}
+
+
+#define zypre_newBoxLoop3Begin(ndim, loop_size,\
+							   dbox1, start1, stride1, i1,	\
+							   dbox2, start2, stride2, i2,	\
+							   dbox3, start3, stride3, i3)	\
+{																	\
+    zypre_BoxLoopCUDAInit(ndim)													\
+	BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+	{																	\
+	    zypre_BoxLoopCUDADeclare()											\
+	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0;	\
+	    HYPRE_Int i1 = 0, i2 = 0, i3 = 0;											\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+			i2 += (local_idx*stride2[d] + start2[d] - hypre_BoxIMinD(dbox2, d)) * hypre_boxD2; \
+			hypre_boxD2 *= hypre_BoxSizeD(dbox2, d);					\
+			i3 += (local_idx*stride3[d] + start3[d] - hypre_BoxIMinD(dbox3, d)) * hypre_boxD3; \
+			hypre_boxD3 *= hypre_BoxSizeD(dbox3, d);					\
+		}		
+
+#define zypre_newBoxLoop3End(i1, i2,i3)			\
+	});											\
+	cudaDeviceSynchronize();					\
+}
+
+#define zypre_newBoxLoop4Begin(ndim, loop_size,				\
+							   dbox1, start1, stride1, i1,	\
+							   dbox2, start2, stride2, i2,	\
+							   dbox3, start3, stride3, i3,			\
+							   dbox4, start4, stride4, i4)			\
+{																	\
+    zypre_BoxLoopCUDAInit(ndim)													\
+	BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+	{																	\
+	    zypre_BoxLoopCUDADeclare()											\
+	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0,hypre_boxD4 = 1.0; \
+	    HYPRE_Int i1 = 0, i2 = 0, i3 = 0,i4 = 0;								\
+		for (d = 0;d < ndim;d ++)										\
+		{																\
+			local_idx  = idx_local % loop_size[d];						\
+			idx_local  = idx_local / loop_size[d];						\
+			i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+			hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);					\
+			i2 += (local_idx*stride2[d] + start2[d] - hypre_BoxIMinD(dbox2, d)) * hypre_boxD2; \
+			hypre_boxD2 *= hypre_BoxSizeD(dbox2, d);					\
+			i3 += (local_idx*stride3[d] + start3[d] - hypre_BoxIMinD(dbox3, d)) * hypre_boxD3; \
+			hypre_boxD3 *= hypre_BoxSizeD(dbox3, d);					\
+			i4 += (local_idx*stride4[d] + start4[d] - hypre_BoxIMinD(dbox4, d)) * hypre_boxD4; \
+			hypre_boxD4 *= hypre_BoxSizeD(dbox4, d);					\
+		}		
+
+#define zypre_newBoxLoop4End(i1, i2, i3, i4)	\
+	});											\
+	cudaDeviceSynchronize();					\
+}
+
+#endif
+#else
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+/******************************************************************************
+ *
+ * Header info for the BoxLoop
+ *
+ *****************************************************************************/
+
+/*--------------------------------------------------------------------------
+ * BoxLoop macros:
+ *--------------------------------------------------------------------------*/
+
+#ifndef HYPRE_NEWBOXLOOP_HEADER
+#define HYPRE_NEWBOXLOOP_HEADER
+
+#define Pragma(x) _Pragma(#x)
+#define OMP1(args...) Pragma(omp parallel for private(ZYPRE_BOX_PRIVATE,args) HYPRE_SMP_SCHEDULE)
+#define OMPREDUCTION() Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,HYPRE_BOX_PRIVATE_VAR) reduction(HYPRE_BOX_REDUCTION) HYPRE_SMP_SCHEDULE)
+
+#define hypre_CallocIndex(indexVar, dim)			\
+	indexVar = hypre_CTAlloc(HYPRE_Int, dim);
+
+#define hypre_CallocReal(indexVar, dim)		\
+	indexVar = hypre_CTAlloc(HYPRE_Real, dim);
+
+#define zypre_newBoxLoop0Begin(ndim, loop_size)				\
+{\
+   zypre_BoxLoopDeclare();									\
+   zypre_BoxLoopInit(ndim, loop_size);						\
+   OMP1(HYPRE_BOX_PRIVATE_VAR)								\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
+   {\
+      zypre_BoxLoopSet();\
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
+      {\
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
+         {
+
+#define zypre_newBoxLoop0End()\
+         }\
+         zypre_BoxLoopInc1();\
+         zypre_BoxLoopInc2();\
+      }\
+   }\
+}
+
+#define zypre_newBoxLoop1Begin(ndim, loop_size,				\
+							   dbox1, start1, stride1, i1) 	\
+	{														\
+	zypre_BoxLoopDeclare();									\
+	zypre_BoxLoopDeclareK(1);								\
+	zypre_BoxLoopInit(ndim, loop_size);						\
+	zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);					\
+	OMP1(HYPRE_BOX_PRIVATE_VAR)															\
+	for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++) \
+	{																	\
+		zypre_BoxLoopSet();												\
+		zypre_BoxLoopSetK(1, i1);										\
+		for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)			\
+		{																\
+			for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)		\
+			{
+
+#define zypre_newBoxLoop1End(i1)				\
+	             i1 += hypre__i0inc1;						\
+		    }											\
+			zypre_BoxLoopInc1();					\
+	        i1 += hypre__ikinc1[hypre__d];				\
+	        zypre_BoxLoopInc2();						\
+		}											\
+	}											\
+}
+
+
+#define zypre_newBoxLoop2Begin(ndim, loop_size,\
+							   dbox1, start1, stride1, i1,	\
+							   dbox2, start2, stride2, i2)	\
+{\
+   zypre_BoxLoopDeclare();\
+   zypre_BoxLoopDeclareK(1);\
+   zypre_BoxLoopDeclareK(2);\
+   zypre_BoxLoopInit(ndim, loop_size);\
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);\
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);\
+   OMP1(HYPRE_BOX_PRIVATE_VAR)															\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)	\
+   {\
+      zypre_BoxLoopSet();\
+      zypre_BoxLoopSetK(1, i1);\
+      zypre_BoxLoopSetK(2, i2);\
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
+      {\
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
+         {
+
+#define zypre_newBoxLoop2End(i1, i2)\
+            i1 += hypre__i0inc1;\
+            i2 += hypre__i0inc2;\
+         }\
+         zypre_BoxLoopInc1();\
+         i1 += hypre__ikinc1[hypre__d];\
+         i2 += hypre__ikinc2[hypre__d];\
+         zypre_BoxLoopInc2();\
+      }\
+   }\
+}
+
+
+#define zypre_newBoxLoop3Begin(ndim, loop_size,\
+							   dbox1, start1, stride1, i1,	\
+							   dbox2, start2, stride2, i2,	\
+							   dbox3, start3, stride3, i3)	\
+{														\
+   zypre_BoxLoopDeclare();									\
+   zypre_BoxLoopDeclareK(1);								\
+   zypre_BoxLoopDeclareK(2);								\
+   zypre_BoxLoopDeclareK(3);								\
+   zypre_BoxLoopInit(ndim, loop_size);						\
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);		\
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);		\
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);		\
+   OMP1(HYPRE_BOX_PRIVATE_VAR)								\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)	\
+   {\
+      zypre_BoxLoopSet();\
+      zypre_BoxLoopSetK(1, i1);\
+      zypre_BoxLoopSetK(2, i2);\
+      zypre_BoxLoopSetK(3, i3);\
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
+      {\
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
+         {
+
+#define zypre_newBoxLoop3End(i1, i2, i3)\
+            i1 += hypre__i0inc1;\
+            i2 += hypre__i0inc2;\
+            i3 += hypre__i0inc3;\
+         }\
+         zypre_BoxLoopInc1();\
+         i1 += hypre__ikinc1[hypre__d];\
+         i2 += hypre__ikinc2[hypre__d];\
+         i3 += hypre__ikinc3[hypre__d];\
+         zypre_BoxLoopInc2();\
+      }\
+   }\
+}
+
+#define zypre_newBoxLoop4Begin(ndim, loop_size,\
+                            dbox1, start1, stride1, i1,\
+                            dbox2, start2, stride2, i2,\
+                            dbox3, start3, stride3, i3,\
+                            dbox4, start4, stride4, i4)\
+{\
+   zypre_BoxLoopDeclare();\
+   zypre_BoxLoopDeclareK(1);\
+   zypre_BoxLoopDeclareK(2);\
+   zypre_BoxLoopDeclareK(3);\
+   zypre_BoxLoopDeclareK(4);\
+   zypre_BoxLoopInit(ndim, loop_size);\
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);\
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);\
+   zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);\
+   zypre_BoxLoopInitK(4, dbox4, start4, stride4, i4);\
+   OMP1(HYPRE_BOX_PRIVATE_VAR)								\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
+   {\
+      zypre_BoxLoopSet();\
+      zypre_BoxLoopSetK(1, i1);\
+      zypre_BoxLoopSetK(2, i2);\
+      zypre_BoxLoopSetK(3, i3);\
+      zypre_BoxLoopSetK(4, i4);\
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
+      {\
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
+         {
+
+#define zypre_newBoxLoop4End(i1, i2, i3, i4)\
+            i1 += hypre__i0inc1;\
+            i2 += hypre__i0inc2;\
+            i3 += hypre__i0inc3;\
+            i4 += hypre__i0inc4;\
+         }\
+         zypre_BoxLoopInc1();\
+         i1 += hypre__ikinc1[hypre__d];\
+         i2 += hypre__ikinc2[hypre__d];\
+         i3 += hypre__ikinc3[hypre__d];\
+         i4 += hypre__ikinc4[hypre__d];\
+         zypre_BoxLoopInc2();\
+      }\
+   }\
+}
+
+#define zypre_newBoxLoop2ReductionBegin(ndim, loop_size,				\
+										dbox1, start1, stride1, i1,		\
+										dbox2, start2, stride2, i2,		\
+                                        sum)							\
+{\
+   zypre_BoxLoopDeclare();\
+   zypre_BoxLoopDeclareK(1);\
+   zypre_BoxLoopDeclareK(2);\
+   zypre_BoxLoopInit(ndim, loop_size);\
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);\
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);\
+   OMPREDUCTION()														\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)	\
+   {\
+      zypre_BoxLoopSet();\
+      zypre_BoxLoopSetK(1, i1);\
+      zypre_BoxLoopSetK(2, i2);\
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
+      {\
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
+         {
+
+#define zypre_newBoxLoop2ReductionEnd(i1, i2, sum)\
+            i1 += hypre__i0inc1;\
+            i2 += hypre__i0inc2;\
+         }\
+         zypre_BoxLoopInc1();\
+         i1 += hypre__ikinc1[hypre__d];\
+         i2 += hypre__ikinc2[hypre__d];\
+         zypre_BoxLoopInc2();\
+      }\
+   }\
+}
+#endif
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -2028,7 +2848,6 @@ HYPRE_Int HYPRE_StructVectorSetConstantValues ( HYPRE_StructVector vector , HYPR
 HYPRE_Int HYPRE_StructVectorGetMigrateCommPkg ( HYPRE_StructVector from_vector , HYPRE_StructVector to_vector , HYPRE_CommPkg *comm_pkg );
 HYPRE_Int HYPRE_StructVectorMigrate ( HYPRE_CommPkg comm_pkg , HYPRE_StructVector from_vector , HYPRE_StructVector to_vector );
 HYPRE_Int HYPRE_CommPkgDestroy ( HYPRE_CommPkg comm_pkg );
-HYPRE_Int HYPRE_StructVectorClone ( HYPRE_StructVector x, HYPRE_StructVector *y_ptr );
 
 /* project.c */
 HYPRE_Int hypre_ProjectBox ( hypre_Box *box , hypre_Index index , hypre_Index stride );
@@ -2109,9 +2928,9 @@ hypre_StructMatrix *hypre_StructMatrixCreateMask ( hypre_StructMatrix *matrix , 
 void *hypre_StructMatvecCreate ( void );
 HYPRE_Int hypre_StructMatvecSetup ( void *matvec_vdata , hypre_StructMatrix *A , hypre_StructVector *x );
 HYPRE_Int hypre_StructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
-HYPRE_Int hypre_StructMatvecCC0 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
-HYPRE_Int hypre_StructMatvecCC1 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
-HYPRE_Int hypre_StructMatvecCC2 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
+HYPRE_Int hypre_StructMatvecCC0 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , HYPRE_Int* stride , HYPRE_Int* loop_size , HYPRE_Int* start );
+HYPRE_Int hypre_StructMatvecCC1 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , HYPRE_Int* stride , HYPRE_Int* loop_size , HYPRE_Int* start );
+HYPRE_Int hypre_StructMatvecCC2 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , HYPRE_Int* stride , HYPRE_Int* loop_size , HYPRE_Int* start );
 HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
 
@@ -2141,7 +2960,7 @@ HYPRE_Int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector , HYPRE_Int
 HYPRE_Int hypre_StructVectorAssemble ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorCopy ( hypre_StructVector *x , hypre_StructVector *y );
 HYPRE_Int hypre_StructVectorSetConstantValues ( hypre_StructVector *vector , HYPRE_Complex values );
-HYPRE_Int hypre_StructVectorSetFunctionValues ( hypre_StructVector *vector , HYPRE_Complex (*fcn )(HYPRE_Int, HYPRE_Int, HYPRE_Int));
+HYPRE_Int hypre_StructVectorSetFunctionValues ( hypre_StructVector *vector , HYPRE_Complex (*fcn )());
 HYPRE_Int hypre_StructVectorClearGhostValues ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorClearBoundGhostValues ( hypre_StructVector *vector , HYPRE_Int force );
 HYPRE_Int hypre_StructVectorScaleValues ( hypre_StructVector *vector , HYPRE_Complex factor );
@@ -2151,7 +2970,6 @@ HYPRE_Int hypre_StructVectorPrint ( const char *filename , hypre_StructVector *v
 hypre_StructVector *hypre_StructVectorRead ( MPI_Comm comm , const char *filename , HYPRE_Int *num_ghost );
 HYPRE_Int hypre_StructVectorMaxValue ( hypre_StructVector *vector , HYPRE_Real *max_value , HYPRE_Int *max_index , hypre_Index max_xyz_index );
 hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
-
 
 #ifdef __cplusplus
 }

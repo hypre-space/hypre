@@ -133,6 +133,10 @@ hypre_user_chose_mpi=no
 hypre_user_chose_blas=no
 hypre_user_chose_lapack=no
 hypre_user_chose_fei=no
+hypre_user_chose_cuda=no
+hypre_user_chose_raja=no
+hypre_user_chose_kokkos=no
+hypre_user_chose_kokkos_cuda=no
 
 hypre_using_c=yes
 hypre_using_cxx=yes
@@ -145,6 +149,7 @@ hypre_using_superlu=yes
 hypre_using_examples=no
 hypre_using_openmp=no
 hypre_using_insure=no
+hypre_using_cuda=no
 
 dnl *********************************************************************
 dnl * Initialize flag-check variables
@@ -303,6 +308,51 @@ AS_HELP_STRING([--enable-fortran],
 [hypre_using_fortran=yes]
 )
 
+AC_ARG_ENABLE(cuda,
+AS_HELP_STRING([--enable-cuda],
+               [Require cuda-7.5 compiler or higher (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_user_chose_cuda=yes
+		 hypre_using_cuda=yes ;;
+    no)  hypre_using_cuda=no ;;
+    *)   hypre_using_cuda=no ;;
+ esac],
+[hypre_using_cuda=no]
+)
+
+AC_ARG_ENABLE(raja,
+AS_HELP_STRING([--enable-raja],
+               [Require RAJA package compiled with CUDA (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_user_chose_raja=yes
+		 hypre_using_cuda=yes ;;
+    no)  hypre_using_cuda=no ;;
+    *)   hypre_using_cuda=no ;;
+ esac],
+[hypre_using_raja=no]
+)
+
+AC_ARG_ENABLE(kokkos,
+AS_HELP_STRING([--enable-kokkos],
+               [Require kokkos package (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_user_chose_kokkos=yes ;;
+    no)  hypre_user_chose_kokkos=no ;;
+    *)   hypre_user_chose_kokkos=no ;;
+ esac]
+)
+
+AC_ARG_ENABLE(kokkoscuda,
+AS_HELP_STRING([--enable-kokkoscuda],
+               [Require kokkos package compiled with CUDA (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_user_chose_kokkos_cuda=yes
+		 hypre_using_cuda=yes ;;
+    no)  hypre_using_cuda=no ;;
+    *)   hypre_using_cuda=no ;;
+ esac],
+[hypre_using_raja=no]
+)
 dnl *********************************************************************
 dnl * Determine if user provided C compiler or flags
 dnl *********************************************************************
@@ -780,6 +830,14 @@ AS_HELP_STRING([--with-MPI],
 dnl *********************************************************************
 dnl * Select compilers if not already defined by command line options 
 dnl *********************************************************************
+if test "$hypre_using_cuda" = "yes"
+then
+	hypre_using_fortran=no
+	hypre_using_mpi=no
+	AC_CHECK_PROGS(CXX, [nvcc])
+	AC_CHECK_PROGS(CC, [nvcc])
+fi
+
 if test "$hypre_user_chose_ccompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
@@ -1211,6 +1269,56 @@ dnl   AC_HYPRE_CHECK_USER_LAPACKLIBS
  fi
 
 dnl *********************************************************************
+dnl * Set raja options
+dnl *********************************************************************
+if test "$hypre_user_chose_raja" = "yes"
+then
+   HYPRE_RAJA_SRC_DIR="$HYPRE_SRCDIR/../../raja_src/src"
+   HYPRE_RAJA_INC_DIR="$HYPRE_SRCDIR/../../raja_src/include"
+   HYPRE_RAJA_LIB_DIR="\$(patsubst %.cxx,%.o,\$(wildcard $HYPRE_RAJA_SRC_DIR/*.cxx))"
+   LDFLAGS="-Xcompiler -fopenmp"
+   PLATFORM="-DRAJA_PLATFORM_X86_SSE -DRAJA_COMPILER_GNU -DRAJA_USE_CUDA -DRAJA_USE_DOUBLE -DRAJA_USE_BARE_PTR -DRAJA_USE_GETTIME"
+   RAJAFLAGS="-I$HYPRE_RAJA_INC_DIR $PLATFORM"
+   CFLAGS="-O2 -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $RAJAFLAGS $CFLAGS"
+   CXXFLAGS="-O2 -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $RAJAFLAGS  $CXXFLAGS"
+fi
+
+dnl *********************************************************************
+dnl * Set kokkos options
+dnl *********************************************************************
+if test "$hypre_user_chose_kokkos_cuda" = "yes"
+then
+   HYPRE_KOKKOS_PATH="$HYPRE_SRCDIR/../../kokkos-master"
+   HYPRE_KOKKOS_DEVICE="Cuda,OpenMP"
+   HYPRE_KOKKOS_ARCH="SNB,Kepler35"
+   HYPRE_KOKKOS_CUDA_OPTION="enable_lambda"
+   HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_PATH/Makefile.kokkos"
+   HYPRE_KOKKOS_CLEAN="kokkos-clean"	
+   HYPRE_KOKKOS_LIB="\$(KOKKOS_LIBS)"
+   HYPRE_KOKKOS_DEPENDS="\$(KOKKOS_LINK_DEPENDS)"
+   LDFLAGS="-Xcompiler -fopenmp -L./ -lkokkos"
+   CFLAGS="\$(KOKKOS_CPPFLAGS) -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS_CUDA=1"
+   CXXFLAGS="\$(KOKKOS_CPPFLAGS) -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS_CUDA=1"
+fi
+
+if test "$hypre_user_chose_kokkos" = "yes"
+then
+   HYPRE_KOKKOS_PATH="$HYPRE_SRCDIR/../../kokkos-master"
+   HYPRE_KOKKOS_DEVICE="OpenMP"
+   HYPRE_KOKKOS_ARCH="SNB"
+   HYPRE_KOKKOS_CUDA_OPTION=""
+   HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_PATH/Makefile.kokkos"
+   HYPRE_KOKKOS_CLEAN="kokkos-clean"	
+   HYPRE_KOKKOS_LIB="\$(KOKKOS_LIBS)"
+   HYPRE_KOKKOS_DEPENDS="\$(KOKKOS_LINK_DEPENDS)"
+   LDFLAGS="-fopenmp -L./ -lkokkos"
+   CC=$CXX
+   LINK_CC=$LINK_CXX
+   CFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS=1"
+   CXXFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS=1"
+fi
+
+dnl *********************************************************************
 dnl * Set installation directories
 dnl *********************************************************************
 HYPRE_INSTALLDIR="${prefix}"
@@ -1302,6 +1410,7 @@ AC_SUBST(HYPRE_FEI_SUPERLU_FILES)
 dnl *********************************************************************
 dnl * BLAS & LAPACK related information
 dnl *********************************************************************
+AC_SUBST(HYPRE_KOKKOS_PATH)
 AC_SUBST(HYPRE_BLAS_SRC_DIR)
 AC_SUBST(HYPRE_BLAS_FILES)
 AC_SUBST(BLASLIBDIRS)
@@ -1311,6 +1420,24 @@ AC_SUBST(HYPRE_LAPACK_FILES)
 AC_SUBST(LAPACKLIBDIRS)
 AC_SUBST(LAPACKLIBS)
 
+dnl *********************************************************************
+dnl * RAJA information
+dnl *********************************************************************
+AC_SUBST(HYPRE_RAJA_SRC_DIR)
+AC_SUBST(HYPRE_RAJA_INC_DIR)
+AC_SUBST(HYPRE_RAJA_LIB_DIR)
+
+dnl *********************************************************************
+dnl * KOKKOS information
+dnl *********************************************************************
+AC_SUBST(HYPRE_KOKKOS_PATH)
+AC_SUBST(HYPRE_KOKKOS_DEVICE)
+AC_SUBST(HYPRE_KOKKOS_ARCH)
+AC_SUBST(HYPRE_KOKKOS_CUDA_OPTION)
+AC_SUBST(HYPRE_KOKKOS_INC_FILE)
+AC_SUBST(HYPRE_KOKKOS_CLEAN)	
+AC_SUBST(HYPRE_KOKKOS_LIB)
+AC_SUBST(HYPRE_KOKKOS_DEPENDS)
 dnl *********************************************************************
 dnl * ar & ranlib substitution
 dnl *********************************************************************

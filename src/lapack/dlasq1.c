@@ -20,9 +20,6 @@ static integer c__0 = 0;
     integer i__1, i__2;
     doublereal d__1, d__2, d__3;
 
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
-
     /* Local variables */
     extern /* Subroutine */ HYPRE_Int dlas2_(doublereal *, doublereal *, doublereal 
 	    *, doublereal *, doublereal *);

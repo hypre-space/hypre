@@ -215,8 +215,11 @@ hypre_Box *
 hypre_BoxCreate( HYPRE_Int  ndim )
 {
    hypre_Box *box;
-
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS_CUDA)
+   cudaMallocManaged((void**)&box,sizeof(hypre_Box), cudaMemAttachGlobal);
+#else
    box = hypre_CTAlloc(hypre_Box, 1);
+#endif
    hypre_BoxNDim(box) = ndim;
 
    return box;
@@ -230,7 +233,11 @@ hypre_BoxDestroy( hypre_Box *box )
 {
    if (box)
    {
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS_CUDA)
+	   cudaFree(box);	   
+#else
       hypre_TFree(box);
+#endif
    }
 
    return hypre_error_flag;

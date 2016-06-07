@@ -83,7 +83,7 @@
     /* System generated locals */
     doublereal d__1;
     /* Builtin functions */
-    HYPRE_Real sqrt(doublereal), d_sign(doublereal *, doublereal *);
+    HYPRE_Real d_sign(doublereal *, doublereal *);
     /* Local variables */
     static integer pmax;
     static doublereal temp;

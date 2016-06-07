@@ -2087,9 +2087,9 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             HYPRE_Int position;
             HYPRE_Int info_size = hypre_BoxManEntryInfoSize(manager);
             
-            void *index_ptr;
-            void *new_info;
-            void *info;
+            void *index_ptr = NULL;
+            void *new_info = NULL;
+            void *info = NULL;
 
             size = nentries - index;
             new_entries =  hypre_CTAlloc(hypre_BoxManEntry, size);

@@ -70,7 +70,7 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
       {
          if (hypre_StructVectorDataAlloced(vector))
          {
-            hypre_SharedTFree(hypre_StructVectorData(vector));
+            hypre_DataTFree(hypre_StructVectorData(vector));
          }
          hypre_TFree(hypre_StructVectorDataIndices(vector));
          hypre_BoxArrayDestroy(hypre_StructVectorDataSpace(vector));
@@ -186,7 +186,7 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
 
    hypre_StructVectorInitializeShell(vector);
 
-   data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector));
+   hypre_DataCTAlloc(data, HYPRE_Complex, hypre_StructVectorDataSize(vector));
    hypre_StructVectorInitializeData(vector, data);
    hypre_StructVectorDataAlloced(vector) = 1;
 

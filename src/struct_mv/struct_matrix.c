@@ -103,7 +103,7 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
       {
          if (hypre_StructMatrixDataAlloced(matrix))
          {
-            hypre_SharedTFree(hypre_StructMatrixData(matrix));
+            hypre_DataTFree(hypre_StructMatrixData(matrix));
          }
          hypre_CommPkgDestroy(hypre_StructMatrixCommPkg(matrix));
          
@@ -427,7 +427,7 @@ hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
    hypre_StructMatrixInitializeShell(matrix);
 
    data = hypre_StructMatrixData(matrix);
-   data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
+   hypre_DataCTAlloc(data, HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
    hypre_StructMatrixInitializeData(matrix, data);
    hypre_StructMatrixDataAlloced(matrix) = 1;
 

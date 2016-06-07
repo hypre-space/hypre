@@ -49,7 +49,10 @@ LFLAGS =\
  ${MPILIBFLAGS}\
  ${LAPACKLIBFLAGS}\
  ${BLASLIBFLAGS}\
- ${LIBFLAGS}
+ ${LIBFLAGS}\
+ ${HYPRE_RAJA_LIB}
+
+KOKKOS_CXXFLAGS = 
 
 ##################################################################
 # Targets
@@ -65,7 +68,8 @@ HYPRE_DRIVERS =\
  struct_migrate.c\
  sstruct_fac.c\
  ij_mv.c\
- zboxloop.c
+ zboxloop.c \
+struct_newboxloop
 
 HYPRE_DRIVERS_CXX =\
  fei.cxx\
@@ -166,6 +170,10 @@ ij_mv: ij_mv.o
 zboxloop: zboxloop.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
+
+struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 # RDF: Keep these for now
 

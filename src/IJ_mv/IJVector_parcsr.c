@@ -858,7 +858,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    			     	      HYPRE_Complex  *off_proc_data)
 {
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
+   hypre_ParVector *par_vector = ( hypre_ParVector *) hypre_IJVectorObject(vector);
    hypre_MPI_Request *requests = NULL;
    hypre_MPI_Status *status = NULL;
    HYPRE_Int i, j, j2, row;

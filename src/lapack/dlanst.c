@@ -62,8 +62,6 @@ doublereal dlanst_(const char *norm, integer *n, doublereal *d__, doublereal *e)
     /* System generated locals */
     integer i__1;
     doublereal ret_val, d__1, d__2, d__3, d__4, d__5;
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
     /* Local variables */
     static integer i__;
     static doublereal scale;

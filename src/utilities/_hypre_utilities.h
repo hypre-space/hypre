@@ -464,6 +464,26 @@ extern "C" {
 #define hypre_SharedTReAlloc(type, count) hypre_TReAlloc(type, (count))
 #define hypre_SharedTFree(ptr) hypre_TFree(ptr)
 
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS_CUDA)
+#include <cuda.h>
+#include <cuda_runtime.h>
+	
+#define hypre_DataTAlloc(ptr, type, count) cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);	
+#define hypre_DataCTAlloc(ptr, type, count) cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);\
+	                                        cudaMemset(ptr,0,count);
+#define hypre_DataTReAlloc(ptr, type, count) type *newptr;				\
+	                                         cudaMallocManaged((void**)&,sizeof(type)*(count), cudaMemAttachGlobal);	\
+											 memcpy(newptr, ptr, count); \
+											 cudaFree(ptr);				\
+											 ptr = newptr;
+#define hypre_DataTFree(ptr) cudaFree(ptr);
+#else
+#define hypre_DataTAlloc(ptr, type, count) ptr = hypre_TAlloc(type, (count));
+#define hypre_DataCTAlloc(ptr, type, count) ptr = hypre_CTAlloc(type, (count));
+#define hypre_DataTReAlloc(ptr, type, count) ptr = hypre_TReAlloc(type, (count));
+#define hypre_DataTFree(ptr) hypre_TFree(ptr);
+#endif
+	
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/
