@@ -20,9 +20,10 @@
  *
  *****************************************************************************/
 
+#include "caliper_instrumentation.h"
+
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
-#include "caliper_instrumentation.h"
 
 /*--------------------------------------------------------------------
  * hypre_BoomerAMGSolve
@@ -90,6 +91,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParVector  *Vtemp;
    hypre_ParVector  *Residual;
 
+   HYPRE_ANNOTATION_BEGIN("hypre.BoomerAMG.solve");
+      
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm,&my_id);
 
@@ -127,8 +130,6 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 */
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
-
-   HYPRE_ANNOTATION_BEGIN("hypre.BoomerAMG.solve");
 
    /*-----------------------------------------------------------------------
     *    Write the solver parameters

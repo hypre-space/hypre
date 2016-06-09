@@ -10,6 +10,8 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#include "caliper_instrumentation.h"
+
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
@@ -60,6 +62,8 @@ hypre_PFMGDestroy( void *pfmg_vdata )
    hypre_PFMGData *pfmg_data = pfmg_vdata;
 
    HYPRE_Int l;
+   
+   HYPRE_ANNOTATION_BEGIN("hypre.PFMG.destroy");
 
    if (pfmg_data)
    {
@@ -120,6 +124,8 @@ hypre_PFMGDestroy( void *pfmg_vdata )
       hypre_FinalizeTiming(pfmg_data -> time_index);
       hypre_TFree(pfmg_data);
    }
+
+   HYPRE_ANNOTATION_END("hypre.PFMG.destroy");
 
    return hypre_error_flag;
 }

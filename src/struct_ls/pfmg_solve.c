@@ -10,6 +10,8 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#include "caliper_instrumentation.h"
+
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
@@ -77,6 +79,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
     * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
 
+   HYPRE_ANNOTATION_BEGIN("hypre.PFMG.solve");
+
    hypre_BeginTiming(pfmg_data -> time_index);
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
@@ -100,6 +104,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       }
 
       hypre_EndTiming(pfmg_data -> time_index);
+      HYPRE_ANNOTATION_END("hypre.PFMG.solve");
+
       return hypre_error_flag;
    }
 
@@ -121,6 +127,8 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
 
          hypre_EndTiming(pfmg_data -> time_index);
+         HYPRE_ANNOTATION_END("hypre.PFMG.solve");
+
          return hypre_error_flag;
       }
    }
@@ -322,6 +330,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    }
 
    hypre_EndTiming(pfmg_data -> time_index);
+   HYPRE_ANNOTATION_END("hypre.PFMG.solve");
 
    return hypre_error_flag;
 }

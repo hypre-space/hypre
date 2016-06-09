@@ -10,6 +10,8 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#include "caliper_instrumentation.h"
+
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
@@ -108,6 +110,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    char                  filename[255];
 #endif
 
+   HYPRE_ANNOTATION_BEGIN("hypre.PFMG.setup");
 
    /*-----------------------------------------------------
     * Set up coarse grids
@@ -580,6 +583,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_sprintf(filename, "zout_A.%02d", l);
    hypre_StructMatrixPrint(filename, A_l[l], 0);
 #endif
+
+   HYPRE_ANNOTATION_END("hypre.PFMG.setup");
 
    return hypre_error_flag;
 }

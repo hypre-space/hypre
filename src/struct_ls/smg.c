@@ -10,6 +10,8 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#include "caliper_instrumentation.h"
+
 #include "_hypre_struct_ls.h"
 #include "smg.h"
 
@@ -56,6 +58,8 @@ hypre_SMGDestroy( void *smg_vdata )
    hypre_SMGData *smg_data = smg_vdata;
 
    HYPRE_Int l;
+
+   HYPRE_ANNOTATION_BEGIN("hypre.SMG.destroy");
 
    if (smg_data)
    {
@@ -124,6 +128,8 @@ hypre_SMGDestroy( void *smg_vdata )
       hypre_FinalizeTiming(smg_data -> time_index);
       hypre_TFree(smg_data);
    }
+   
+   HYPRE_ANNOTATION_END("hypre.SMG.destroy");
 
    return hypre_error_flag;
 }
