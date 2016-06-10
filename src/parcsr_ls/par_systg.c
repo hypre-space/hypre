@@ -3046,7 +3046,7 @@ hypre_SysTGSolve( void               *systg_vdata,
         if (print_level > 0)
         {
           hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-          hypre_printf("ERROR -- hypre_StsTGSolve: INFs and/or NaNs detected in input.\n");
+          hypre_printf("ERROR -- hypre_SysTGSolve: INFs and/or NaNs detected in input.\n");
           hypre_printf("User probably placed non-numerics in supplied A, x_0, or b.\n");
           hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
         }
@@ -3115,12 +3115,8 @@ hypre_SysTGSolve( void               *systg_vdata,
 	   
 
 	   
-      /* Do one cycle of reduction solve */      
-      /**** Write SysTGCycle() or solver -- until convergence is reached in this loop as in par_amg_solve*/
-      /* Search for matvecT in par_cycle for ideas */      
+      /* Do one cycle of reduction solve */         
       hypre_SysTGCycle(systg_data, F_array, U_array);
-	  //for (i = 0;i < 10;i ++)
-	  // hypre_blockRelax(A_array[0], F_array[0],U_array[0], blk_size,num_wells,Vtemp,NULL);
 	  
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm
@@ -3276,25 +3272,25 @@ hypre_SysTGCycle( void               *systg_vdata,
 		   /* Relax solution - F-relaxation */
 		   
 		   relax_points = -1;
-		   //if (relax_type == 18)
-		   //{
-		   //	   hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-		   //							   relax_points, relax_weight, relax_l1_norms[fine_grid], 
-		   //							   U_array[fine_grid], Vtemp);
-		   //}
-		   //else if(relax_type == 8 || relax_type == 13 || relax_type == 14)
-		   //{
-		   //   hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid], 
-		   //						relax_type, relax_points, relax_weight,
-		   //						omega, relax_l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);             
-		   //}
-		   //else
-		   //{
-		   //  for(i=0; i<nsweeps; i++)
+		   if (relax_type == 18)
+		   {
+		   	   hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
+		   							   relax_points, relax_weight, relax_l1_norms[fine_grid], 
+		   							   U_array[fine_grid], Vtemp);
+		   }
+		   else if(relax_type == 8 || relax_type == 13 || relax_type == 14)
+		   {
+		      hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid], 
+		   						relax_type, relax_points, relax_weight,
+		   						omega, relax_l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);             
+		   }
+		   else
+		   {
+		     for(i=0; i<nsweeps; i++)
 				   Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid], 
 														 relax_type, relax_points, relax_weight,
 														 omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
-				   //}
+		     }
 		   
 		   
 		   hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0); 
@@ -3328,30 +3324,7 @@ hypre_SysTGCycle( void               *systg_vdata,
 		   hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid], 
 									U_array[coarse_grid],
 									beta, U_array[fine_grid]);            
-		   
-		   /* Relax solution - F-relaxation */
-		   /*
-		   relax_points = -1;
-		   if (relax_type == 18)
-		   {
-			   hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-										   relax_points, relax_weight, relax_l1_norms[fine_grid], 
-										   U_array[fine_grid], Vtemp);
-		   }
-		   else if(relax_type == 8 || relax_type == 13 || relax_type == 14)
-		   {
-			   hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid], 
-									relax_type, relax_points, relax_weight,
-									omega, relax_l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);             
-		   }
-		   else
-		   {
-			   for(i=0; i<nsweeps; i++)
-				   Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid], 
-														 relax_type, relax_points, relax_weight,
-														 omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
-		   }
-		   */
+
 		   
 		   if (Solve_err_flag != 0)
 			   return(Solve_err_flag);
