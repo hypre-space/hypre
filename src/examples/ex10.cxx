@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
       paramStrings[0] = new char[100];
       strcpy(paramStrings[0], "externalSolver HYPRE");
       feiPtr->parameters(1, paramStrings);
-      delete paramStrings[0];
+      delete [] paramStrings[0];
       delete [] paramStrings;
    }
 

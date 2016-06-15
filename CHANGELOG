@@ -15,7 +15,7 @@
 # recent release.
 #=============================================================================
 
-Version 2.11.1 released 2016/06/03
+Version 2.11.1 released 2016/06/09
 
 - Fixed one more bug related to SStructSetSharedPart and SetNeighborPart
 
