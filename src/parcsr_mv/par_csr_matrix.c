@@ -1686,7 +1686,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
 
       /* don't send to myself  - these are sorted so my id would be first*/
       start = 0;
-      if (used_procs[0] == 0)
+      if (num_types && used_procs[0] == 0)
       {
          start = 1;
       }
