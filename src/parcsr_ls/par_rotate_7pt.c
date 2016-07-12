@@ -368,6 +368,7 @@ GenerateRotate7pt( MPI_Comm comm,
          }
       }
 
+      num_cols_offd = cnt+1;
       for (i=0; i < o_cnt; i++)
       {
          for (j=0; j < num_cols_offd; j++)
