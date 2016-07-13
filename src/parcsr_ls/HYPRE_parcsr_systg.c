@@ -203,3 +203,19 @@ HYPRE_SysTGSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
 {
 	return hypre_SysTGSetGlobalsmoothType(solver, iter_type);
 }
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGGetNumIterations
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
+{
+   return hypre_SysTGGetNumIterations( solver, num_iterations );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGGetResidualNorm
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGGetResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm )
+{
+   return hypre_SysTGGetResidualNorm(solver, res_norm);
+}

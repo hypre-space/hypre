@@ -3146,8 +3146,16 @@ HYPRE_SysTGSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter );
  *--------------------------------------------------------------------------*/	
 HYPRE_Int
 HYPRE_SysTGSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type );
-
-	
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGGetNumIterations
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGGetResidualNorm
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGGetResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm );
 /*--------------------------------------------------------------------------
  * Miscellaneous: These probably do not belong in the interface.
  *--------------------------------------------------------------------------*/

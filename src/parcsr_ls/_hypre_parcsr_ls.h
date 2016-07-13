@@ -1585,6 +1585,9 @@ HYPRE_Int hypre_SysTGSetPrintLevel( void *systg_vdata, HYPRE_Int print_level );
 HYPRE_Int hypre_SysTGSetLogging( void *systg_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_SysTGSetMaxIters( void *systg_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_SysTGSetConvTol( void *systg_vdata, HYPRE_Real conv_tol );
+// Accessor functions
+HYPRE_Int hypre_SysTGGetNumIterations( void *systg_vdata, HYPRE_Int *num_iterations );
+HYPRE_Int hypre_SysTGGetResidualNorm( void *systg_vdata, HYPRE_Real *res_norm );
 	
 #ifdef __cplusplus
 }

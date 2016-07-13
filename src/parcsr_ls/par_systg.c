@@ -83,6 +83,8 @@ typedef struct
    /* temp vectors for solve phase */
    hypre_ParVector   *Vtemp;
    hypre_ParVector   *Ztemp;
+   hypre_ParVector   *Utemp;
+   hypre_ParVector   *Ftemp;
 
 	HYPRE_Real          *diaginv;
 	HYPRE_Int           n_block;
@@ -122,7 +124,9 @@ hypre_SysTGCreate()
    (systg_data -> rel_res_norms) = NULL;   
    (systg_data -> Vtemp) = NULL;   
    (systg_data -> Ztemp) = NULL; 
-     
+   (systg_data -> Utemp) = NULL; 
+   (systg_data -> Ftemp) = NULL; 
+        
    (systg_data -> num_iterations) = 0;
    (systg_data -> num_interp_sweeps) = 1;
    (systg_data -> trunc_factor) = 0.0;
@@ -204,6 +208,16 @@ hypre_SysTGDestroy( void *data )
       hypre_ParVectorDestroy( (systg_data -> Ztemp) );
       (systg_data -> Ztemp) = NULL; 
    }      
+   if((systg_data -> Utemp))
+   {
+      hypre_ParVectorDestroy( (systg_data -> Utemp) );
+      (systg_data -> Utemp) = NULL; 
+   } 
+   if((systg_data -> Ftemp))
+   {
+      hypre_ParVectorDestroy( (systg_data -> Ftemp) );
+      (systg_data -> Ftemp) = NULL; 
+   }   
    /* coarse grid solver */
    if((systg_data -> use_default_cgrid_solver))
    {
@@ -1630,7 +1644,9 @@ hypre_SysTGSetup( void               *systg_vdata,
 	
 	hypre_ParVector     *Ztemp;
 	hypre_ParVector     *Vtemp;    
-	
+	hypre_ParVector     *Utemp;    
+	hypre_ParVector     *Ftemp;    
+			
 	/* pointers to systg data */
 	HYPRE_Int  use_default_cgrid_solver = (systg_data -> use_default_cgrid_solver);
 	HYPRE_Int  logging = (systg_data -> logging);
@@ -1843,6 +1859,16 @@ hypre_SysTGSetup( void               *systg_vdata,
 		hypre_ParVectorDestroy((systg_data -> Vtemp));
 		(systg_data -> Vtemp) = NULL;
 	}
+	if ((systg_data -> Utemp))
+	{
+		hypre_ParVectorDestroy((systg_data -> Utemp));
+		(systg_data -> Utemp) = NULL;
+	}
+	if ((systg_data -> Ftemp))
+	{
+		hypre_ParVectorDestroy((systg_data -> Ftemp));
+		(systg_data -> Ftemp) = NULL;
+	}	
 	if ((systg_data -> residual))
 	{
 		hypre_ParVectorDestroy((systg_data -> residual));
@@ -1867,7 +1893,21 @@ hypre_SysTGSetup( void               *systg_vdata,
 	hypre_ParVectorInitialize(Ztemp);
 	hypre_ParVectorSetPartitioningOwner(Ztemp,0);
 	(systg_data -> Ztemp) = Ztemp;   
-	
+
+	Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+								  hypre_ParCSRMatrixGlobalNumRows(A),
+								  hypre_ParCSRMatrixRowStarts(A));
+	hypre_ParVectorInitialize(Utemp);
+	hypre_ParVectorSetPartitioningOwner(Utemp,0);
+	(systg_data ->Utemp) = Utemp;	
+
+	Ftemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
+								  hypre_ParCSRMatrixGlobalNumRows(A),
+								  hypre_ParCSRMatrixRowStarts(A));
+	hypre_ParVectorInitialize(Ftemp);
+	hypre_ParVectorSetPartitioningOwner(Ftemp,0);
+	(systg_data ->Ftemp) = Ftemp;	
+
 	/* Allocate memory for level structure */
 	if (A_array == NULL)
 		A_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels);
@@ -2934,6 +2974,8 @@ hypre_SysTGSolve( void               *systg_vdata,
    HYPRE_Real		*norms = (systg_data -> rel_res_norms);
    hypre_ParVector     	*Vtemp = (systg_data -> Vtemp);
    hypre_ParVector     	*Ztemp = (systg_data -> Ztemp);
+   hypre_ParVector     	*Utemp = (systg_data -> Utemp);
+   hypre_ParVector     	*Ftemp = (systg_data -> Ftemp);   
    hypre_ParVector     	*residual;   
    
    HYPRE_Real           alpha = -1;
@@ -2983,7 +3025,6 @@ hypre_SysTGSolve( void               *systg_vdata,
       return hypre_error_flag;
    }   
 
-   //A_array[0] = A;
    U_array[0] = u;
    F_array[0] = f;
 
@@ -3114,9 +3155,27 @@ hypre_SysTGSolve( void               *systg_vdata,
 	   }
 	   
 
-	   
-      /* Do one cycle of reduction solve */         
+      /* compute residual and reset pointers for MGR cycle */
+//      hypre_ParVectorCopy(F_array[0], Ftemp);
+//      hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Ftemp);
+      // set pointer to residual
+//      F_array[0] = Ftemp;
+      // initial guess/ solution for error
+//      hypre_ParVectorSetConstantValues(Utemp, 0.0);
+      // pointer to initial guess/ solution
+//      U_array[0] = Utemp;
+
+      /* Do one cycle of reduction solve on Ae=r */  
       hypre_SysTGCycle(systg_data, F_array, U_array);
+      
+      /* Done with MGR cycle. Update solution and Reset pointers to solution and rhs.
+       * Note: Utemp = U_array[0] holds the error update
+       */
+      // set pointers to problem rhs and initial guess/solution
+//      F_array[0] = f;
+//      U_array[0] = u;
+      // update solution with computed error correction
+//      hypre_ParVectorAxpy(beta, Utemp, U_array[0]);
 	  
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm
@@ -3234,6 +3293,7 @@ hypre_SysTGCycle( void               *systg_vdata,
    HYPRE_Real          	**relax_l1_norms = (systg_data -> l1_norms);
    hypre_ParVector     	*Vtemp = (systg_data -> Vtemp);
    hypre_ParVector     	*Ztemp = (systg_data -> Ztemp);    
+   hypre_ParVector     	*Utemp = (systg_data -> Utemp);    
    hypre_ParVector    	*Aux_U;
    hypre_ParVector    	*Aux_F;
 
@@ -3270,7 +3330,6 @@ hypre_SysTGCycle( void               *systg_vdata,
 		   fine_grid = level;
 		   coarse_grid = level + 1;
 		   /* Relax solution - F-relaxation */
-		   
 		   relax_points = -1;
 		   if (relax_type == 18)
 		   {
@@ -3291,10 +3350,8 @@ hypre_SysTGCycle( void               *systg_vdata,
 														 relax_type, relax_points, relax_weight,
 														 omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
 		     }
-		   
-		   
-		   hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0); 
-		   
+		   		   
+		   // Update residual and compute coarse-grid rhs
 		   hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
 		   alpha = -1.0;
 		   beta = 1.0;
@@ -3307,6 +3364,9 @@ hypre_SysTGCycle( void               *systg_vdata,
 		   
 		   hypre_ParCSRMatrixMatvecT(alpha,RT_array[fine_grid],Vtemp,
 									 beta,F_array[coarse_grid]);
+									 
+		   // initialize coarse grid solution array
+		   hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0); 									 
 		   
 		   ++level;
 		  
@@ -3472,5 +3532,37 @@ hypre_SysTGSetGlobalsmoothType( void *systg_vdata, HYPRE_Int iter_type )
 {
    hypre_ParSysTGData   *systg_data = (hypre_ParSysTGData*) systg_vdata;
    (systg_data -> global_smooth_type) = iter_type;
+   return hypre_error_flag;
+}
+
+/* Get number of iterations for MGR solver (sysTG) */
+HYPRE_Int
+hypre_SysTGGetNumIterations( void *systg_vdata, HYPRE_Int *num_iterations )
+{
+   hypre_ParSysTGData  *systg_data = (hypre_ParSysTGData*) systg_vdata;
+
+   if (!systg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   *num_iterations = systg_data->num_iterations;
+
+   return hypre_error_flag;
+}
+
+/* Get number of iterations for MGR solver (sysTG) */
+HYPRE_Int
+hypre_SysTGGetResidualNorm( void *systg_vdata, HYPRE_Real *res_norm )
+{
+   hypre_ParSysTGData  *systg_data = (hypre_ParSysTGData*) systg_vdata;
+
+   if (!systg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   *res_norm = systg_data->final_rel_residual_norm;
+
    return hypre_error_flag;
 }
