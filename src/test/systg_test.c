@@ -1727,6 +1727,8 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_SysTGSolve(systg_solver, parcsr_A, b, x);
+      HYPRE_SysTGGetNumIterations(systg_solver, &num_iterations);
+      HYPRE_SysTGGetResidualNorm(systg_solver, &final_res_norm);
 
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
@@ -1737,7 +1739,7 @@ main( hypre_int argc,
       if (myid == 0)
       {
          hypre_printf("\n");
-         hypre_printf("BoomerAMG Iterations = %d\n", num_iterations);
+         hypre_printf("SysTG Iterations = %d\n", num_iterations);
          hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
          hypre_printf("\n");
       }
