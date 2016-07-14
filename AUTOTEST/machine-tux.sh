@@ -28,7 +28,7 @@ case $1 in
 
    This script runs a number of tests suitable for the tux machines.
 
-   Example usage: $0 ..
+   Example usage: $0 ../src
 
 EOF
       exit
@@ -40,7 +40,7 @@ test_dir=`pwd`
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
-src_dir=$1
+src_dir=`cd $1; pwd`
 shift
 
 # Basic build and run tests
@@ -60,6 +60,10 @@ co="--enable-debug --enable-global-partition"
 RO="-fac"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
 renametest.sh basictest $output_dir/basictest-debug2
+
+co="--enable-debug CC=mpiCC"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
+renametest.sh basictest $output_dir/basictest-debug-cpp
 
 co="--with-insure --enable-debug --with-print-errors"
 MO="test"
@@ -95,16 +99,9 @@ co="--enable-complex --enable-maxdim=4 --enable-debug"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -complex
 # ignore complex compiler output for now
 rm -fr basictest.dir/make.???
-grep -v make.err basictest.err > basictest.err
+grep -v make.err basictest.err > basictest.tmp
+mv basictest.tmp basictest.err
 renametest.sh basictest $output_dir/basictest--enable-complex
-
-# Test babel build only if 'babel-runtime' directory is present
-if [ -d $src_dir/babel-runtime ]; then
-   co="--with-babel"
-   MO="test"  # the -j option doesn't always work with the babel code
-   test.sh basictest.sh $src_dir -co: $co -mo: $MO
-   renametest.sh basictest $output_dir/basictest--with-babel
-fi
 
 # CMake build and run tests
 mo="-j"
@@ -147,12 +144,6 @@ do
    ./test.sh link.sh $src_dir $opt
    mv -f link.??? $output_subdir
 done
-
-# Test documentation build (only if 'docs_misc' directory is present)
-if [ -d $src_dir/docs_misc ]; then
-   ./test.sh docs.sh $src_dir
-   mv -f docs.??? $output_dir
-fi
 
 # Check for 'int', 'double', and 'MPI_'
 ./test.sh check-int.sh $src_dir
