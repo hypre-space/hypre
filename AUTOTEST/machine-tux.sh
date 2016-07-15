@@ -22,12 +22,13 @@ case $1 in
 
    $0 [-h|-help] {src_dir}
 
-   where: {src_dir}  is the hypre source directory
-          -h|-help   prints this usage information and exits
+   where: -h|-help   prints this usage information and exits
+          {src_dir}  is the hypre source directory
+          
 
    This script runs a number of tests suitable for the tux machines.
 
-   Example usage: $0 ..
+   Example usage: $0 ../src
 
 EOF
       exit
@@ -39,66 +40,100 @@ test_dir=`pwd`
 output_dir=`pwd`/$testname.dir
 rm -fr $output_dir
 mkdir -p $output_dir
-src_dir=$1
+src_dir=`cd $1; pwd`
 shift
 
-# Test runtest tests with debugging and insure turned on
-./test.sh debug.sh $src_dir --with-insure
-mv -f debug.??? $output_dir
+# Basic build and run tests
+mo="-j test"
+ro="-ams -ij -sstruct -struct"
+eo=""
 
-# Test examples
-./test.sh examples.sh $src_dir/examples
-mv -f examples.??? $output_dir
+co=""
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+renametest.sh basictest $output_dir/basictest-default
 
-# Test babel build (only if 'babel-runtime' directory is present)
-if [ -d $src_dir/babel-runtime ]; then
-   opt="--with-babel"
-   output_subdir="$output_dir/build--with-babel"
-   mkdir -p $output_subdir
-   ./test.sh configure.sh $src_dir $opt
-   mv -f configure.??? $output_subdir
-   ./test.sh make.sh $src_dir test
-   mv -f make.??? $output_subdir
-fi
+co="--enable-debug"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: $eo
+renametest.sh basictest $output_dir/basictest-debug1
 
-# Test other builds (last one is the default build)
-configure_opts="--without-MPI:--with-strict-checking:--enable-shared:--with-no-global-partition --with-insure:--enable-bigint --enable-debug:--enable-maxdim=4 --enable-debug:--enable-complex --enable-maxdim=4 --enable-debug: "
-# temporarily change word delimeter to allow spaces in options
-tmpIFS=$IFS; IFS=:
-for opt in $configure_opts
-do
-   # only use first part of $opt for subdir name
-   optpre=`echo $opt | awk '{print $1}'`
-   output_subdir=$output_dir/build$optpre
-   mkdir -p $output_subdir
-   ./test.sh configure.sh $src_dir $opt
-   mv -f configure.??? $output_subdir
-   ./test.sh make.sh $src_dir -j test
-   mv -f make.??? $output_subdir
-   case $optpre in
-      --with-no-global-partition)
-         ./test.sh run.sh -ij -sstruct -struct $src_dir
-         mv -f run.??? $output_subdir
-      ;;
-      --enable-bigint)
-         ./test.sh run.sh $src_dir
-         mv -f run.??? $output_subdir
-         ./test.sh examples.sh -bigint $src_dir/examples
-         mv -f examples.??? $output_subdir
-      ;;
-      --enable-maxdim*)
-         ./test.sh examples.sh -maxdim $src_dir/examples
-         mv -f examples.??? $output_subdir
-      ;;
-      --enable-complex)
-         # ignore complex compiler output for now
-         rm -fr $output_subdir/make.???
-         ./test.sh examples.sh -complex $src_dir/examples
-         mv -f examples.??? $output_subdir
-      ;;
-   esac
-done
-IFS=$tmpIFS
+co="--enable-debug --enable-global-partition"
+RO="-fac"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
+renametest.sh basictest $output_dir/basictest-debug2
+
+co="--enable-debug CC=mpiCC"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
+renametest.sh basictest $output_dir/basictest-debug-cpp
+
+co="--with-insure --enable-debug --with-print-errors"
+MO="test"
+test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
+renametest.sh basictest $output_dir/basictest--with-insure1
+
+co="--with-insure --enable-debug --enable-global-partition"
+MO="test"
+test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
+renametest.sh basictest $output_dir/basictest--with-insure2
+
+co="--without-MPI"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+renametest.sh basictest $output_dir/basictest--without-MPI
+
+co="--with-strict-checking"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+renametest.sh basictest $output_dir/basictest--with-strict-checking
+
+co="--enable-shared"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo
+renametest.sh basictest $output_dir/basictest--enable-shared
+
+co="--enable-bigint --enable-debug"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
+renametest.sh basictest $output_dir/basictest--enable-bigint
+
+co="--enable-maxdim=4 --enable-debug"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
+renametest.sh basictest $output_dir/basictest--enable-maxdim=4
+
+co="--enable-complex --enable-maxdim=4 --enable-debug"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -complex
+# ignore complex compiler output for now
+rm -fr basictest.dir/make.???
+grep -v make.err basictest.err > basictest.tmp
+mv basictest.tmp basictest.err
+renametest.sh basictest $output_dir/basictest--enable-complex
+
+# CMake build and run tests
+mo="-j"
+ro="-ams -ij -sstruct -struct"
+eo=""
+
+co=""
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+renametest.sh cmaketest $output_dir/cmaketest-default
+
+co="-DCMAKE_BUILD_TYPE=Debug"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo -ro: $ro
+renametest.sh cmaketest $output_dir/cmaketest-debug
+
+co="-DHYPRE_NO_GLOBAL_PARTITION=OFF"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+renametest.sh cmaketest $output_dir/cmaketest-global-partition
+
+co="-DHYPRE_SEQUENTIAL=ON"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+renametest.sh cmaketest $output_dir/cmaketest-sequential
+
+co="-DHYPRE_SHARED=ON"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+renametest.sh cmaketest $output_dir/cmaketest-shared
+
+co="-DHYPRE_BIGINT=ON"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo -ro: $ro
+renametest.sh cmaketest $output_dir/cmaketest-bigint
+
+# cmake build doesn't currently support maxdim
+# cmake build doesn't currently support complex
 
 # Test linking for different languages
 link_opts="all++ all77"
@@ -109,12 +144,6 @@ do
    ./test.sh link.sh $src_dir $opt
    mv -f link.??? $output_subdir
 done
-
-# Test documentation build (only if 'docs_misc' directory is present)
-if [ -d $src_dir/docs_misc ]; then
-   ./test.sh docs.sh $src_dir
-   mv -f docs.??? $output_dir
-fi
 
 # Check for 'int', 'double', and 'MPI_'
 ./test.sh check-int.sh $src_dir

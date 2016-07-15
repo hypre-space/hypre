@@ -1,0 +1,66 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+INTERNAL_HEADER=_hypre_sstruct_mv.h
+
+#===========================================================================
+# Include guards and other includes
+#===========================================================================
+
+cat > $INTERNAL_HEADER <<@
+
+#ifndef hypre_SSTRUCT_MV_HEADER
+#define hypre_SSTRUCT_MV_HEADER
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+
+#include "HYPRE_sstruct_mv.h"
+#include "_hypre_utilities.h"
+#include "_hypre_struct_mv.h"
+#include "_hypre_IJ_mv.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+@
+
+#===========================================================================
+# Structures and prototypes
+#===========================================================================
+
+
+cat sstruct_grid.h        >> $INTERNAL_HEADER	
+cat sstruct_stencil.h     >> $INTERNAL_HEADER	
+cat sstruct_graph.h       >> $INTERNAL_HEADER	
+cat sstruct_matrix.h      >> $INTERNAL_HEADER	
+cat sstruct_vector.h      >> $INTERNAL_HEADER	
+
+cat protos.h              >> $INTERNAL_HEADER
+
+#===========================================================================
+# Include guards
+#===========================================================================
+
+cat >> $INTERNAL_HEADER <<@
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
+@
+

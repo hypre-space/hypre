@@ -15,6 +15,93 @@
 # recent release.
 #=============================================================================
 
+Version 2.11.1 released 2016/06/09
+
+- Fixed one more bug related to SStructSetSharedPart and SetNeighborPart
+
+- Fixed a bug in PFMG red/black relaxation for 2D problems
+
+- Fixed various other bugs in ParCSR and the FEI
+
+- Fixed configure option --without-MLI and removed option --with-examples
+
+- Modified code to enable compilation with a C++ compiler.
+
+- Added several missing Fortran interface routines in Struct and BoomerAMG
+
+- Updated the AME and LOBPCG interfaces to work correctly with both absolute and
+  relative tolerances.
+
+Version 2.11.0 released 2016/03/28
+
+- Added a new function hypre_BoomerAMGSetKeepTranspose, which will store the
+  transposes of the interpolation operators and then replace the multiplication
+  of the transpose of P with a more efficient matvec.
+
+- Added a new function hypre_BoomerAMGSetRAP2, which will replace the triple
+  matrix product R*A*P by two matrix-matrix products. This has shown to be
+  faster on BG/Q. Note that setting this function will prevent the keeping of
+  transposes.
+
+- Added various changes that can improve performance on certain architectures,
+  particularly in the BoomerAMG Setup when using threading. While some of them
+  will be in effect automatically, using the configure options --with-openmp
+  --enable-hopscotch can lead to additional improvements if atomic operations
+  are available.  The configure option --enable-persistent allows the use of
+  persistent communication if available. (Many of these changes are described in
+  "High-Performance Algebraic Multigrid Solver Optimized for Multi-Core Based
+  Distributed Parallel Systems" by J. Park, M. Smelyanskiy, U.M. Yang,
+  D. Mudigere, P. Dubey, published in Proceedings of SC15.)
+
+- Modified configure to conform to xSDK standards in IDEAS project
+  (https://ideas-productivity.org/focus-areas/xsdk/)
+
+- Fixed a bug related to SStructSetSharedPart and SetNeighborPart
+
+- Fixed a bug in elasticity interpolation for BoomerAMG
+
+- Fixed an MPI bug that was causing Parasails to hang occasionally
+
+- Removed Babel from the release
+
+Version 2.10.1 released 2015/09/11
+
+- Fixed various bugs in AMG and the IJ interface.
+
+- Changed function names to set interpolation truncation parameters for
+  mult-additive versions as follows:
+  HYPRE_BoomerAMGSetAddTruncFactor to HYPRE_BoomerAMGSetMultAddTruncFactor
+  HYPRE_BoomerAMGSetAddPMaxElmts to HYPRE_BoomerAMGSetMultAddPMAxElmts
+
+- Replaced the function HYPRE_BoomerAMGSetNonGalerkTol, which sets parameters
+  for the nonGalerkin version, with HYPRE_BoomerAMGSetNonGalerkinTol and
+  HYPRE_BommerAMGSetLevelNonGalerkinTol
+
+Version 2.10.0b released 2015/01/22
+
+- Added new interpolation that allows the incorporation of near null-space
+  vectors for systems problems.
+
+- Added additive V-cycle and new mult-additive and simplified mult-additive
+  V-cycle.
+
+- Fixed several bugs in BoomerAMG and removed some inefficiencies.
+
+- Fixed potential bug and memory leaks in the AMS and ADS solvers.
+
+- Added threading to the IJ interface and some AMG setup routines.
+
+- Added new non-Galerkin coarse grid construction scheme to reduce communication
+  and complexity.
+
+- Extended GLVis visualization to all 2D and 3D example codes.
+
+- Changed the configure settings to use --disable-global-partition by default.
+  The equivalent old option --with-no-global-partition is still available, but
+  users should migrate to the new one.
+
+#====================================
+
 Version 2.9.4a released 2013/11/21
 
 - Minor bug fix in AMS and other minor changes.
@@ -23,9 +110,9 @@ Version 2.9.4a released 2013/11/21
 
 Version 2.9.3a released 2013/10/15
 
-- Extended AMS to work for quad/hex meshes by removing an assumption that the
-  discrete gradient G only has +-1 entries.  Also changed default smoother in
-  AMS to l1-GS.
+- Extended AMS to work for AMR problems on quad/hex meshes by removing an
+  assumption that the discrete gradient G only has +-1 entries.  Also changed
+  default smoother in AMS to l1-GS.
 
 - Added a hi-D capability to Struct and SStruct.  Use the --enable-maxdim option
   to configure the library for higher-than-3D usage.
@@ -96,22 +183,22 @@ Version 2.8.1a released 2012/03/19
 
 - For non-cell data, fixed a memory problem with SStructGraphAddEntries() and an
   accumulation problem with SStructMatrixAddValues().
-  
+
 - Improved the penalty scaling factor for AMS's discrete divergence term (which is
   added to the matrix to robustly handle problems with pure void regions).
-  
+
 - Added threading to various routines in BoomerAMG.
-  
+
 - Fixed the SStructGridSetPeriodic() routine to work for all object types,
   including HYPRE_PARCSR which previously did not work.
-  
+
 - Made two changes to GMRES: 1) Added GMRESSetSkipRealResidualCheck to skip the
   evaluation and check of the final residual in GMRES. This can be useful in
   situations where restart is not expected to be beneficial. 2) Independent of the
   above, added a check to see if consecutive real GMRES residuals decrease (in the
   "false convergence" case). If not, we conclude that restart leads to pollution
   from round-off errors and exit GMRES.
-  
+
 - Implemented a CMake build system for the library and the test drivers.
 
 #====================================
@@ -387,8 +474,8 @@ Version 2.2.0b released, 2007/09/20.
 
 Version 2.1.0a released, 2007/06/25.
 
-- Added the CGC and CGC-E coarsening algorithms, which have been developed 
-  and implemented by Michael Griebel, Bram Metsch and Alex Schweitzer of 
+- Added the CGC and CGC-E coarsening algorithms, which have been developed
+  and implemented by Michael Griebel, Bram Metsch and Alex Schweitzer of
   the University of Bonn.
 
 - Added several new solver types to AMS and improved the AMS/FEI integration.
@@ -399,7 +486,7 @@ Version 2.1.0a released, 2007/06/25.
 
 - Added a 'make check' target that does a simple code verification test.
 
-- Added truncation for interpolation according to the number of elements to the 
+- Added truncation for interpolation according to the number of elements to the
   ParCSR Hybrid AMG Solver.
 
 - Renovated the hypre fei implementation for use in ARES.
@@ -468,7 +555,7 @@ Version 1.12.0a released, 2006/07/26.
 - First release of Maxwell, a semi-structured Maxwell solver.
 
 - Modifications to the fac user interface to permit easier set up of the problem.
-  
+
 #====================================
 
 Version 1.11.1b released, 2006/05/30.
@@ -498,7 +585,7 @@ Version 1.11.0b released, 2006/04/24.
     * an option to print the system matrix and rhs
     * a description of how to read in a matrix and rhs in IJ format.
 
-- Corrected error that occured when more than one Euclid solver object is used
+- Corrected error that occurred when more than one Euclid solver object is used
   at the same time
 
 - Added Maxwell capabilities via Sandia's ML solvers; see details in
@@ -526,7 +613,7 @@ Version 1.10.0b released, 2005/12/19.
   only the IJ interface solvers have been optimized.  For small or modest
   numbers of processors (typically < 1000-5000 depending on the machine), this
   option is not needed (and will likely be slower).
-  
+
 - Added aggressive coarsening, which can be applied to all available coarsening
   schemes (via HYPRE_BoomerAMGSetNumAggLevels and HYPRE_BoomerAMGSetNumPaths)
 
@@ -684,17 +771,17 @@ Version 1.7.10b released, 2002/12/02.
 
 - SStruct: Fixed a bug when connecting a part to itself with SetNeighborBox.
 
-- FEI: Added a few more smoothers and amg methods in mli, fixed a few memory 
-  leaks uncovered by running ale3d, added new aggregation coarsening for 
-  handling multiple materials.  For more details, see 
+- FEI: Added a few more smoothers and amg methods in mli, fixed a few memory
+  leaks uncovered by running ale3d, added new aggregation coarsening for
+  handling multiple materials.  For more details, see
   FEI_mv/fei-hypre/CHANGELOG.
 
 #====================================
 
 Version 1.7.9b released, 2002/10/18.
 
-- SStruct: Added an if around sorting and eliminating duplicate 
-  iUventries so that its only executed when there are at least 2 
+- SStruct: Added an if around sorting and eliminating duplicate
+  iUventries so that its only executed when there are at least 2
   such entries.
 
 #====================================
@@ -733,13 +820,13 @@ Version 1.7.5b released, 2002/01/16.
 - SStruct: Modified SetNeighborBox boxes to reach off of the global grid.
 
 - krylov solvers (PCG, GMRES, BiCGSTAB and CGNR ) are the first
-  solvers to use the new definitions for logging, which are 
-  logging = 0: no printout,  no storing of norms or rel. res. norms 
-  logging = 1: no printout,  norms (and relative residual norms for PCG) 
-               are stored 
-  logging > 1: norms (and relative residual norms for PCG) are stored 
-               and printed out to standard output during each iteration 
-               step. 
+  solvers to use the new definitions for logging, which are
+  logging = 0: no printout,  no storing of norms or rel. res. norms
+  logging = 1: no printout,  norms (and relative residual norms for PCG)
+               are stored
+  logging > 1: norms (and relative residual norms for PCG) are stored
+               and printed out to standard output during each iteration
+               step.
 
 #====================================
 
@@ -843,7 +930,7 @@ New internal installation: V1.0.0, 2000/07/06
   is in the subdirectory 'debug'.
 
 - Added support for the FEI v1.4, with additional capabilities for handling
-  parallel slide surface reduction and general Schur complement reduction. 
+  parallel slide surface reduction and general Schur complement reduction.
 
 - Using a new version numbering scheme.  The C macro HYPRE_Version()
   may be used to retrieve version information.

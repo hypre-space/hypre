@@ -26,7 +26,7 @@ case $1 in
    This script checks if there are any globally defined symbols in libHYPRE.a
    without the appropriate namespace protection.
 
-   Example usage: $0 ..
+   Example usage: $0 ../src
 
 EOF
    exit
@@ -34,7 +34,7 @@ EOF
 esac
 
 # Setup
-src_dir=$1
+src_dir=`cd $1; pwd`
 shift
 
 cd $src_dir

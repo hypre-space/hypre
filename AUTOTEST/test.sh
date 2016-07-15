@@ -11,9 +11,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 while [ "$*" ]
 do
    case $1 in
@@ -42,7 +39,7 @@ do
    Text identifying lines to be filtered are added to '{testname}.filters'.
    Usage documentation should appear at the top of each test.
 
-   Example usage: $0 default.sh ..
+   Example usage: $0 configure.sh ../src
 
 EOF
          exit

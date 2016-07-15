@@ -16,11 +16,11 @@ testing_dir=`cd ..; pwd`
 autotest_dir="$testing_dir/AUTOTEST"
 finished_dir="$testing_dir/AUTOTEST-FINISHED"
 output_dir="$testing_dir/AUTOTEST-`date +%Y.%m.%d-%a`"
-src_dir="$testing_dir/hypre"
-remote_dir="hypre/testing"
+src_dir="$testing_dir/hypre/src"
+remote_dir="test-hypre"
 summary_file="SUMMARY.html"
 summary_subject="Autotest Error Summary `date +%Y-%m-%d`"
-email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, schroder2@llnl.gov"
+email_list="rfalgout@llnl.gov, tzanio@llnl.gov, umyang@llnl.gov, schroder2@llnl.gov, oseikuffuor1@llnl.gov, wang84@llnl.gov, li50@llnl.gov"
 
 # Main loop
 test_opts=""
@@ -84,7 +84,7 @@ EOF
          shift
          finished_dir="$testing_dir/AUTOTEST-hypre-$1"
          src_dir="$testing_dir/hypre-$1/src"
-         remote_dir="hypre-$1/testing"
+         remote_dir="test-hypre-$1"
          shift
          ;;
 
