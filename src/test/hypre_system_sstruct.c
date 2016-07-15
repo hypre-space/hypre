@@ -2186,7 +2186,7 @@ hypre_DriveSystemSStructCreate(
    HYPRE_Int             time_index;
 
    HYPRE_Int             arg_index, part, var, box, s, entry, i, j, k, size;
-   HYPRE_Int             sym, row, col;
+   HYPRE_Int             row, col;
    HYPRE_Int             gradient_matrix;
                         
    /*-----------------------------------------------------------
@@ -2242,7 +2242,6 @@ hypre_DriveSystemSStructCreate(
    {
       cosine = 0;
    }
-   sym = 1;
    gradient_matrix = 0;
    print_system = 0;
 
@@ -2317,11 +2316,6 @@ hypre_DriveSystemSStructCreate(
       {
          arg_index++;
          cosine = 0;
-      }
-      else if ( strcmp(argv[arg_index], "-sym") == 0 )
-      {
-         arg_index++;
-         sym = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-gradient") == 0 )
       {
