@@ -137,10 +137,11 @@ hypre_BoomerAMGCreate()
    S_commpkg_switch = 1.0;
    interp_type = 0;
    sep_weight = 0;
-   coarsen_type = 6;
+   coarsen_type = 10;
+   interp_type = 6;
    measure_type = 0;
    setup_type = 1;
-   P_max_elmts = 0;
+   P_max_elmts = 4;
    agg_P_max_elmts = 0;
    agg_P12_max_elmts = 0;
    num_functions = 1;
@@ -234,10 +235,10 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetAggP12TruncFactor(amg_data, agg_P12_trunc_factor);
    hypre_BoomerAMGSetJacobiTruncThreshold(amg_data, jacobi_trunc_threshold);
    hypre_BoomerAMGSetSCommPkgSwitch(amg_data, S_commpkg_switch);
-   hypre_BoomerAMGSetInterpType(amg_data, interp_type);
    hypre_BoomerAMGSetSepWeight(amg_data, sep_weight);
    hypre_BoomerAMGSetMeasureType(amg_data, measure_type);
    hypre_BoomerAMGSetCoarsenType(amg_data, coarsen_type);
+   hypre_BoomerAMGSetInterpType(amg_data, interp_type);
    hypre_BoomerAMGSetSetupType(amg_data, setup_type);
    hypre_BoomerAMGSetPMaxElmts(amg_data, P_max_elmts);
    hypre_BoomerAMGSetAggPMaxElmts(amg_data, agg_P_max_elmts);
