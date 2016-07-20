@@ -23,11 +23,18 @@
 
 #ifndef NOFEI
 
+#ifdef FEI2_1
+#include "fei_defs.h"
+#include "base/Data.h"
+#include "base/Lookup.h"
+#include "base/LinearSystemCore.h"
+#else
 //New FEI 2.23.02
 #include "fei_defs.h"
 #include "fei_Data.hpp"
 #include "fei_Lookup.hpp"
 #include "fei_LinearSystemCore.hpp"
+#endif
 
 #else
 

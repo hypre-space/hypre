@@ -39,6 +39,7 @@ static void unadjust_bj_private(Factor_dh mat);
 void Factor_dhCreate(Factor_dh *mat)
 {
   START_FUNC_DH
+  int i;
   struct _factor_dh* tmp; 
 
   if (np_dh > MAX_MPI_TASKS) {
@@ -74,7 +75,16 @@ void Factor_dhCreate(Factor_dh *mat)
   tmp->numbSolve = NULL;
 
   tmp->debug = Parser_dhHasSwitch(parser_dh, "-debug_Factor");
-
+  
+  /* initialize MPI request to null */
+  for(i=0; i<MAX_MPI_TASKS; i++)
+  {
+     tmp->recv_reqLo[i] = MPI_REQUEST_NULL;
+     tmp->recv_reqHi[i] = MPI_REQUEST_NULL;
+     tmp->send_reqLo[i] = MPI_REQUEST_NULL;
+     tmp->send_reqHi[i] = MPI_REQUEST_NULL;
+     tmp->requests[i] = MPI_REQUEST_NULL;
+  }
 /*  Factor_dhZeroTiming(tmp); CHECK_V_ERROR; */
   END_FUNC_DH
 }
@@ -84,6 +94,7 @@ void Factor_dhCreate(Factor_dh *mat)
 void Factor_dhDestroy(Factor_dh mat)
 {
   START_FUNC_DH
+  int i;
 
   if (mat->rp != NULL) { FREE_DH(mat->rp); CHECK_V_ERROR; }
   if (mat->cval != NULL) { FREE_DH(mat->cval); CHECK_V_ERROR; }
@@ -99,6 +110,16 @@ void Factor_dhDestroy(Factor_dh mat)
   if (mat->sendindHi != NULL) { FREE_DH(mat->sendindHi); CHECK_V_ERROR; }
 
   if (mat->numbSolve != NULL) { Numbering_dhDestroy(mat->numbSolve); CHECK_V_ERROR; }
+  
+  /* cleanup MPI requests */
+  for(i=0; i<MAX_MPI_TASKS; i++)
+  {
+     if(mat->recv_reqLo[i] != MPI_REQUEST_NULL)hypre_MPI_Request_free(&(mat->recv_reqLo[i]));
+     if(mat->recv_reqHi[i] != MPI_REQUEST_NULL) MPI_Request_free(&(mat->recv_reqHi[i]));     
+     if(mat->send_reqLo[i] != MPI_REQUEST_NULL)MPI_Request_free(&(mat->send_reqLo[i]));
+     if(mat->send_reqHi[i] != MPI_REQUEST_NULL)MPI_Request_free(&(mat->send_reqHi[i]));
+     if(mat->requests[i] != MPI_REQUEST_NULL)MPI_Request_free(&(mat->requests[i]));     
+  }
   FREE_DH(mat); CHECK_V_ERROR; 
   END_FUNC_DH
 }
