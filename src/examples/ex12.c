@@ -449,8 +449,6 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGSetMaxIter(precond, 1);
       HYPRE_BoomerAMGSetTol(precond, 0.0);
       HYPRE_BoomerAMGSetPrintLevel(precond, 1); /* print amg solution info */
-      HYPRE_BoomerAMGSetCoarsenType(precond, 6);
-      HYPRE_BoomerAMGSetOldDefault(precond);
       HYPRE_BoomerAMGSetRelaxType(precond, 6); /* Sym G.S./Jacobi hybrid */
       HYPRE_BoomerAMGSetNumSweeps(precond, 1);
 
