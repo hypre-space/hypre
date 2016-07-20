@@ -310,6 +310,7 @@ int main (int argc, char *argv[])
       /* Set some parameters (See Reference Manual for more parameters) */
       HYPRE_BoomerAMGSetPrintLevel(solver, 3);  /* print solve info + parameters */
       HYPRE_BoomerAMGSetCoarsenType(solver, 6); /* Falgout coarsening */
+      HYPRE_BoomerAMGSetOldDefault(solver); 
       HYPRE_BoomerAMGSetRelaxType(solver, 3);   /* G-S/Jacobi hybrid relaxation */
       HYPRE_BoomerAMGSetNumSweeps(solver, 1);   /* Sweeeps on each level */
       HYPRE_BoomerAMGSetMaxLevels(solver, 20);  /* maximum number of levels */
@@ -387,6 +388,7 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGCreate(&precond);
       HYPRE_BoomerAMGSetPrintLevel(precond, 1); /* print amg solution info */
       HYPRE_BoomerAMGSetCoarsenType(precond, 6);
+      HYPRE_BoomerAMGSetOldDefault(precond); 
       HYPRE_BoomerAMGSetRelaxType(precond, 6); /* Sym G.S./Jacobi hybrid */
       HYPRE_BoomerAMGSetNumSweeps(precond, 1);
       HYPRE_BoomerAMGSetTol(precond, 0.0); /* conv. tolerance zero */
@@ -493,6 +495,7 @@ int main (int argc, char *argv[])
       HYPRE_BoomerAMGCreate(&precond);
       HYPRE_BoomerAMGSetPrintLevel(precond, 1); /* print amg solution info */
       HYPRE_BoomerAMGSetCoarsenType(precond, 6);
+      HYPRE_BoomerAMGSetOldDefault(precond);
       HYPRE_BoomerAMGSetRelaxType(precond, 6); /* Sym G.S./Jacobi hybrid */
       HYPRE_BoomerAMGSetNumSweeps(precond, 1);
       HYPRE_BoomerAMGSetTol(precond, 0.0); /* conv. tolerance zero */
