@@ -744,6 +744,7 @@ HYPRE_Int HYPRE_BoomerAMGGetCoarsenType ( HYPRE_Solver solver , HYPRE_Int *coars
 HYPRE_Int HYPRE_BoomerAMGSetMeasureType ( HYPRE_Solver solver , HYPRE_Int measure_type );
 HYPRE_Int HYPRE_BoomerAMGGetMeasureType ( HYPRE_Solver solver , HYPRE_Int *measure_type );
 HYPRE_Int HYPRE_BoomerAMGSetSetupType ( HYPRE_Solver solver , HYPRE_Int setup_type );
+HYPRE_Int HYPRE_BoomerAMGSetOldDefault ( HYPRE_Solver solver );
 HYPRE_Int HYPRE_BoomerAMGSetCycleType ( HYPRE_Solver solver , HYPRE_Int cycle_type );
 HYPRE_Int HYPRE_BoomerAMGGetCycleType ( HYPRE_Solver solver , HYPRE_Int *cycle_type );
 HYPRE_Int HYPRE_BoomerAMGSetTol ( HYPRE_Solver solver , HYPRE_Real tol );

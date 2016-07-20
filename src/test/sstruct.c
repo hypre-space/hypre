@@ -4184,6 +4184,7 @@ main( hypre_int argc,
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond); 
          HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         HYPRE_BoomerAMGSetOldDefault(par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
@@ -4359,6 +4360,7 @@ main( hypre_int argc,
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond); 
          HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         HYPRE_BoomerAMGSetOldDefault(par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
@@ -4523,6 +4525,7 @@ main( hypre_int argc,
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond); 
          HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         HYPRE_BoomerAMGSetOldDefault(par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
@@ -4690,6 +4693,7 @@ main( hypre_int argc,
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond); 
          HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         HYPRE_BoomerAMGSetOldDefault(par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
@@ -4752,6 +4756,7 @@ main( hypre_int argc,
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond); 
          HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         HYPRE_BoomerAMGSetOldDefault(par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);

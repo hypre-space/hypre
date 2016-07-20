@@ -594,6 +594,7 @@ int main (int argc, char *argv[])
          as well as the Reference manual for additional solver choices. */
       HYPRE_BoomerAMGCreate(&solver);
       HYPRE_BoomerAMGSetCoarsenType(solver, 6);
+      HYPRE_BoomerAMGSetOldDefault(solver);
       HYPRE_BoomerAMGSetStrongThreshold(solver, 0.25);
       HYPRE_BoomerAMGSetTol(solver, 1e-6);
       HYPRE_BoomerAMGSetPrintLevel(solver, 2);

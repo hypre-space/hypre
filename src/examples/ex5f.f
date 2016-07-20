@@ -232,6 +232,8 @@ c        print solve info + parameters
          call HYPRE_BoomerAMGSetPrintLevel(solver, 3, ierr)  
 c        Falgout coarsening
          call HYPRE_BoomerAMGSetCoarsenType(solver, 6, ierr) 
+c        old defaults
+         call HYPRE_BoomerAMGSetOldDefault(solver, ierr) 
 c        G-S/Jacobi hybrid relaxation 
          call HYPRE_BoomerAMGSetRelaxType(solver, 3, ierr)     
 c        Sweeeps on each level
@@ -336,6 +338,8 @@ c        print less solver info since a preconditioner
          call HYPRE_BoomerAMGSetPrintLevel(precond, 1, ierr); 
 c        Falgout coarsening
          call HYPRE_BoomerAMGSetCoarsenType(precond, 6, ierr) 
+c        old defaults
+         call HYPRE_BoomerAMGSetOldDefault(precond, ierr) 
 c        SYMMETRIC G-S/Jacobi hybrid relaxation 
          call HYPRE_BoomerAMGSetRelaxType(precond, 6, ierr)     
 c        Sweeeps on each level

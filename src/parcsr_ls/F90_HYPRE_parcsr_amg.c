@@ -531,6 +531,20 @@ hypre_F90_IFACE(hypre_boomeramggetmeasuretype, HYPRE_BOOMERAMGGETMEASURETYPE)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetOldDefault
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetolddefault, HYPRE_BOOMERAMGSETOLDDEFAULT)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGSetOldDefault(
+           hypre_F90_PassObj (HYPRE_Solver, solver) ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetSetupType
  *--------------------------------------------------------------------------*/
 
