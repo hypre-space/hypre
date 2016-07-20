@@ -18,12 +18,12 @@
 
 
 #=============================================================================
-# ij: Run default case, weigthed Jacobi, BoomerAMG
+# ij: Run default case (first old, then new), CF Jacobi, BoomerAMG
 #=============================================================================
 
-mpirun -np 1 ./ij -cljp -rlx 0 -xisone > default.out.0
+mpirun -np 1 ./ij -pmis -Pmx 0 -rlx 0 -xisone > default.out.0
 
-mpirun -np 2 ./ij -P 1 1 2 -cljp1 -rlx 0 -xisone > default.out.1
+mpirun -np 2 ./ij -P 1 1 2 -pmis1 -Pmx 0 -rlx 0 -xisone > default.out.1
 
-mpirun -np 3 ./ij -P 1 1 3 -cljp1 -rlx 0 -xisone > default.out.2
+mpirun -np 3 ./ij -P 1 1 3 -pmis1 -Pmx 0 -rlx 0 -xisone > default.out.2
 

@@ -18,22 +18,32 @@
 
 
 #=============================================================================
-# new_ij: Run 2D elasticity problem with different interpolation operators
-#    1: unknown approach
-#    2: hybrid approach
-#    3: GM variant 1
-#    4: GM variant 2 Qmx=2
-#    5: GM variant 2 Qtr=0.01
-#    5: LN approach
-#    6: LN approach with 3 RBMs (2 more than needed) 
+# ij: Run 2D elasticity problem with different interpolation operators
+#    1: unknown approach (old default)
+#    2: hybrid approach (old default)
+#    3: GM variant 1 (old default)
+#    4: GM variant 2 Qmx=2 (old default)
+#    5: GM variant 2 Qtr=0.01 (old default)
+#    5: LN approach (old default)
+#    6: LN approach with 3 RBMs (2 more than needed) (old default)
+#    7: unknown approach with default settings
+#    8: hybrid approach with default settings
+#    9: GM variant 2 Qmx=2 with default settings
+#   10: classical block interpolation for nodal systems AMG
+#   11: classical block interpolation for nodal systems AMG with diagonal blocks
 #=============================================================================
 
-mpirun -np 2 ./new_ij -fromfile A -nf 2 -rlx 6 -solver 1 > elast.out.0
-mpirun -np 2 ./new_ij -fromfile A -nf 2 -rlx 6 -solver 1 -nodal 4 > elast.out.1
-mpirun -np 2 ./new_ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 1 -nodal 1 -rlx 6 -solver 1 > elast.out.2
-mpirun -np 2 ./new_ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 1 -nodal 4 -rlx 6 -solver 1 -Qmx 2 > elast.out.3
-mpirun -np 2 ./new_ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 2 -nodal 3 -rlx 6 -solver 1 -Qtr 0.01 > elast.out.4
-mpirun -np 2 ./new_ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 3 -nodal 6 -rlx 6 -solver 1 > elast.out.5
-mpirun -np 2 ./new_ij -fromfile A -rbm 3 rbm -nf 2 -interpvecvar 3 -nodal 6 -rlx 6 -solver 1 > elast.out.6
+mpirun -np 2 ./ij -fromfile A -nf 2 -rlx 6 -solver 1 -falgout -interptype 0 -Pmx 0 > elast.out.0
+mpirun -np 2 ./ij -fromfile A -nf 2 -rlx 6 -solver 1 -nodal 4 -falgout -interptype 0 -Pmx 0 > elast.out.1
+mpirun -np 2 ./ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 1 -nodal 1 -rlx 6 -solver 1 -falgout -interptype 0 -Pmx 0 > elast.out.2
+mpirun -np 2 ./ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 1 -nodal 4 -rlx 6 -solver 1 -falgout -interptype 0 -Pmx 0 -Qmx 2 > elast.out.3
+mpirun -np 2 ./ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 2 -nodal 3 -rlx 6 -solver 1 -falgout -interptype 0 -Pmx 0 -Qtr 0.01 > elast.out.4
+mpirun -np 2 ./ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 3 -nodal 6 -rlx 6 -solver 1 -falgout -interptype 0 -Pmx 0 > elast.out.5
+mpirun -np 2 ./ij -fromfile A -rbm 3 rbm -nf 2 -interpvecvar 3 -nodal 6 -rlx 6 -solver 1 -falgout -interptype 0 -Pmx 0 > elast.out.6
+mpirun -np 2 ./ij -fromfile A -nf 2 -rlx 6 -solver 1  > elast.out.7
+mpirun -np 2 ./ij -fromfile A -nf 2 -rlx 6 -solver 1 -nodal 4 > elast.out.8
+mpirun -np 2 ./ij -fromfile A -rbm 1 rbm -nf 2 -interpvecvar 2 -Qmx 2 -nodal 1 -rlx 6 -solver 1 > elast.out.9
+mpirun -np 2 ./ij -fromfile A -nf 2 -rlx 26 -interptype 10 -solver 1 > elast.out.9
+mpirun -np 2 ./ij -fromfile A -nf 2 -rlx 26 -interptype 11 -solver 1 > elast.out.9
 
 

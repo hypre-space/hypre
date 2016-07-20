@@ -1353,7 +1353,7 @@ main( hypre_int argc,
       hypre_printf("  -cgce                 : CGC-E coarsening \n");
       hypre_printf("  -pmis                 : PMIS coarsening \n");
       hypre_printf("  -pmis1                : PMIS coarsening, fixed random \n");
-      hypre_printf("  -hmis                 : HMIS coarsening \n");
+      hypre_printf("  -hmis                 : HMIS coarsening (default)\n");
       hypre_printf("  -ruge                 : Ruge-Stueben coarsening (local)\n");
       hypre_printf("  -ruge1p               : Ruge-Stueben coarsening 1st pass only(local)\n");
       hypre_printf("  -ruge3                : third pass on boundary\n");
@@ -1362,13 +1362,13 @@ main( hypre_int argc,
       hypre_printf("  -gm                   : use global measures\n");
       hypre_printf("\n");
       hypre_printf("  -interptype  <val>    : set interpolation type\n");
-      hypre_printf("       0=Classical modified interpolation (default)  \n");
+      hypre_printf("       0=Classical modified interpolation  \n");
       hypre_printf("       1=least squares interpolation (for GSMG only)  \n");
       hypre_printf("       0=Classical modified interpolation for hyperbolic PDEs \n");
       hypre_printf("       3=direct interpolation with separation of weights  \n");
       hypre_printf("       4=multipass interpolation  \n");
       hypre_printf("       5=multipass interpolation with separation of weights  \n");
-      hypre_printf("       6=extended classical modified interpolation  \n");
+      hypre_printf("       6=extended classical modified interpolation (default) \n");
       hypre_printf("       7=extended (only if no common C neighbor) interpolation  \n");
       hypre_printf("       8=standard interpolation  \n");
       hypre_printf("       9=standard interpolation with separation of weights  \n");
@@ -1437,7 +1437,7 @@ main( hypre_int argc,
       hypre_printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n"); 
       hypre_printf("  -th   <val>            : set AMG threshold Theta = val \n");
       hypre_printf("  -tr   <val>            : set AMG interpolation truncation factor = val \n");
-      hypre_printf("  -Pmx  <val>            : set maximal no. of elmts per row for AMG interpolation \n");
+      hypre_printf("  -Pmx  <val>            : set maximal no. of elmts per row for AMG interpolation (default: 4)\n");
       hypre_printf("  -jtr  <val>            : set truncation threshold for Jacobi interpolation = val \n");
       hypre_printf("  -Ssw  <val>            : set S-commpkg-switch = val \n");
       hypre_printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");

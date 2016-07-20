@@ -18,31 +18,35 @@
 
 
 #=============================================================================
-# new_ij: Run default case with different interpolation operators
+# ij: Run default case with different interpolation operators
 #    1: Extended interpolation
 #    2: FF interpolation
 #    3: standard interpolation
 #    4: Extended interpolation and truncation max 4 elmts per row
 #    5: FF interpolation and truncation max 4 elmts per row
 #    6: standard interpolation and truncation max 4 elmts per row
+#    7: Classical modified interpolation
 #=============================================================================
 
-mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 6 \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -Pmx 0 \
  > interp.out.0
 
-mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 7 \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 7 -Pmx 0\
  > interp.out.1
 
-mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 8 \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 8 -Pmx 0 \
  > interp.out.2
 
-mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 6 -Pmx 4 \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 \
  > interp.out.3
 
-mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 7 -Pmx 4 \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 7 \
  > interp.out.4
 
-mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -interptype 8 -Pmx 4 \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 8 \
  > interp.out.5
+
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -falgout \
+ > interp.out.6
 
 

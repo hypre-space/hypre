@@ -21,40 +21,54 @@
 # ij: Run default case with different coarsenings, hybrid GS,
 #    1: Cleary_LJP
 #    2: parallel Ruge
-#    3: Ruge 3rd pass
+#    3: Ruge 3rd pass, keep c points on boundary
 #    4: Falgout
-# new_ij: Run default case with low complexity coarsenings, hybrid GS,
+# ij: Run default case with low complexity coarsenings, hybrid GS,
 #    5: PMIS
 #    6: HMIS
 #    7: Falgout 2 levels aggressive coarsening
 #    8: HMIS 1 level aggressive coarsening
+#    9: Ruge 1 pass with global measures
+#   10: Ruge 1 pass coarsening
+#   11: CGC coarsening
+#   12: Ruge 3 coarsening
+#   13: CLJP1 fixed random coarsening
+#   14: PMIS1 fixed random coarsening
 #=============================================================================
 
-mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -cljp -27pt \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -cljp -27pt \
  > coarsening.out.0
 
-mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -ruge -27pt \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -ruge -27pt \
  > coarsening.out.1
 
-mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -ruge3c -gm -27pt \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -ruge3c -gm -27pt \
  > coarsening.out.2
 
-mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -falgout -27pt \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -interptype 0 -Pmx 0 -falgout -27pt \
  > coarsening.out.3
 
-mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -27pt \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -pmis -27pt \
  > coarsening.out.4
 
-mpirun -np 4 ./new_ij -rhsrand -n 15 15 10 -P 2 2 1 -hmis -27pt \
+mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -27pt \
  > coarsening.out.5
 
-mpirun -np 4 ./new_ij -rhsrand -n 60 60 30 -P 2 2 1 -falgout -agg_nl 2 -27pt -rlx 6 -solver 1 \
+mpirun -np 4 ./ij -rhsrand -n 60 60 30 -P 2 2 1 -falgout -interptype 0 -Pmx 0 -agg_nl 2 -27pt -rlx 6 -solver 1 \
  > coarsening.out.6
 
-mpirun -np 4 ./new_ij -rhsrand -n 60 60 30 -P 2 2 1 -hmis -agg_nl 1 -27pt -rlx 6 -solver 1 \
+mpirun -np 4 ./ij -rhsrand -n 60 60 30 -P 2 2 1 -agg_nl 1 -27pt -rlx 6 -solver 1 \
  > coarsening.out.7
 
-mpirun -np 2 ./new_ij -hmis -gm > coarsening.out.8
+mpirun -np 2 ./ij -ruge1p -gm > coarsening.out.8
 
-mpirun -np 8 ./new_ij -cgc > coarsening.out.9
+mpirun -np 8 ./ij -P 2 2 2 -ruge1p  > coarsening.out.9
+
+mpirun -np 8 ./ij -P 2 2 2 -cgc -interptype 0 -Pmx 0 > coarsening.out.10
+
+mpirun -np 8 ./ij -P 2 2 2 -ruge3  -interptype 0 -Pmx 0 > coarsening.out.11
+
+mpirun -np 8 ./ij -P 2 2 2 -cljp1  -interptype 0 -Pmx 0 > coarsening.out.12
+
+mpirun -np 8 ./ij -P 2 2 2 -pmis1 > coarsening.out.13
 
