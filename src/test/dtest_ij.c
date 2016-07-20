@@ -30,7 +30,7 @@
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
 
-#include "hypre_test.h"
+#include "dtest.h"
 
 /* begin lobpcg */
 

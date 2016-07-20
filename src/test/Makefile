@@ -182,13 +182,13 @@ zboxloop: zboxloop.o
 
 # RDF: Keep these for now
 
-hypre_set_precond: hypre_set_precond.o
+dtest_set_precond: dtest_set_precond.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 
-test_ij: hypre_set_precond.o test_ij.o
+dtest_ij: dtest_set_precond.o dtest_ij.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ hypre_set_precond.o $@.o ${CFLAGS} ${LFLAGS}
+	${LINK_CC} -o $@ dtest_set_precond.o $@.o ${CFLAGS} ${LFLAGS}
 
 driver_commpkg: driver_commpkg.o
 	@echo  "Building" $@ "... "

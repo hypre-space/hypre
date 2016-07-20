@@ -39,8 +39,8 @@
 /*     include fortran headers       */
 #ifdef HYPRE_FORTRAN
 #include "fortran.h"
-#include "hypre_struct_fortran_test.h"
-#include "hypre_sstruct_fortran_test.h"
+#include "ftest_struct.h"
+#include "ftest_sstruct.h"
 #endif
 
 HYPRE_Int main (HYPRE_Int argc, char *argv[])

@@ -25,7 +25,7 @@
 /*     include fortran headers                     */
 #ifdef HYPRE_FORTRAN
 #include "fortran.h"
-#include "hypre_sstruct_fortran_test.h"
+#include "ftest_sstruct.h"
 #endif
 /*--------------------------------------------------------------------------
  * Data structures

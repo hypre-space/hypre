@@ -38,8 +38,8 @@
 
 #ifdef HYPRE_FORTRAN
 #include "fortran.h"
-#include "hypre_ij_fortran_test.h"
-#include "hypre_parcsr_fortran_test.h"
+#include "ftest_ij.h"
+#include "ftest_parcsr.h"
 #endif
 
 HYPRE_Int main (HYPRE_Int argc, char *argv[])

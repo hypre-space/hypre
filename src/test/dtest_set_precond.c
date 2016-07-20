@@ -14,7 +14,7 @@
  * Routines to set up preconditioners for use in test codes.
  * June 16, 2005
  *--------------------------------------------------------------------------*/
-#include "hypre_test.h"
+#include "dtest.h"
 
 
 HYPRE_Int hypre_set_precond(HYPRE_Int matrix_id, HYPRE_Int solver_id, HYPRE_Int precond_id, void *solver,

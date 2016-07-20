@@ -54,7 +54,7 @@
 #ifdef HYPRE_FORTRAN
 #include "HYPRE_config.h"
 #include "fortran.h"
-#include "hypre_struct_fortran_test.h"
+#include "ftest_struct.h"
 #endif
 
 
