@@ -71,7 +71,7 @@ HYPRE_Int
 FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index, HYPRE_Int **numGhostFromProc, HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostGlobalIndex, HYPRE_Int *numNewGhostNodes, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int *global_nodes, hypre_IJAssumedPart **apart );
 
 HYPRE_Int 
-LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, HYPRE_Int ****ghostUnpackIndex, HYPRE_Int **ghostInfoOffset, hypre_IJAssumedPart **apart, HYPRE_Int num_levels, HYPRE_Int *global_nodes);
+LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int **ghostInfoOffset, hypre_IJAssumedPart **apart, HYPRE_Int num_levels, HYPRE_Int *global_nodes);
 
 HYPRE_Int
 FillResponseForLocateGhostNodes(void *p_recv_contact_buf, HYPRE_Int contact_size, HYPRE_Int contact_proc, void *ro, MPI_Comm comm, void **p_send_response_buf, HYPRE_Int *response_message_size);
@@ -2045,7 +2045,7 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
 
    // Up to now, we have saved all the info acording to the assumed partition, so need to do some communication to figure out where the ghost nodes actually live and fix up our arrays
    printf("ABOUT TO LOCATE GHOST NODES\n");
-   LocateGhostNodes(&numGhostFromProc, &ghostGlobalIndex, &ghostUnpackIndex, ghostInfoOffset, apart, num_levels, global_nodes);
+   LocateGhostNodes(numGhostFromProc, ghostGlobalIndex, ghostUnpackIndex, ghostInfoOffset, apart, num_levels, global_nodes);
    printf("DONE LOCATING GHOST NODES\n");
 
    // Coarsest level should always own all info (i.e. should not ask for ghost nodes)
@@ -2056,12 +2056,12 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
 }
 
 HYPRE_Int 
-LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, HYPRE_Int ****ghostUnpackIndex, HYPRE_Int **ghostInfoOffset, hypre_IJAssumedPart **apart, HYPRE_Int num_levels, HYPRE_Int *global_nodes)
+LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int **ghostInfoOffset, hypre_IJAssumedPart **apart, HYPRE_Int num_levels, HYPRE_Int *global_nodes)
 
 {
 
 
-   HYPRE_Int        level, proc, j, i, cnt, proc_cnt;
+   HYPRE_Int        level, proc, k, j, i, cnt, proc_cnt;
    HYPRE_Int        range_start, range_end; 
 
    HYPRE_Int        num_contacts, *contact_procs=NULL, *contact_vec_starts=NULL;
@@ -2077,64 +2077,63 @@ LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, 
    
    hypre_DataExchangeResponse        response_obj1;
 
-   HYPRE_Int                  **old_numGhostFromProc = *numGhostFromProc;
-   HYPRE_Int                  ***old_ghostGlobalIndex = *ghostGlobalIndex;
-   HYPRE_Int                  ***old_ghostUnpackIndex = *ghostUnpackIndex;
-
-   HYPRE_Int                  **new_numGhostFromProc; // numGhostFromProc[proc][level]
-   HYPRE_Int                  ***new_ghostGlobalIndex; // ghostGlobalIndex[proc][level][index]
-   HYPRE_Int                  ***new_ghostUnpackIndex; // ghostUnpackIndex[proc][level][index]
+   HYPRE_Int                  **old_numGhostFromProc;
+   HYPRE_Int                  ***old_ghostGlobalIndex;
+   HYPRE_Int                  ***old_ghostUnpackIndex;
 
    HYPRE_Int        num_procs, myid;
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   new_numGhostFromProc =  hypre_CTAlloc(HYPRE_Int*, num_procs);
-   new_ghostGlobalIndex = hypre_CTAlloc(HYPRE_Int**, num_procs);
-   new_ghostUnpackIndex = hypre_CTAlloc(HYPRE_Int**, num_procs);
+   old_numGhostFromProc =  hypre_CTAlloc(HYPRE_Int*, num_procs);
+   old_ghostGlobalIndex = hypre_CTAlloc(HYPRE_Int**, num_procs);
+   old_ghostUnpackIndex = hypre_CTAlloc(HYPRE_Int**, num_procs);
    for (i = 0; i < num_procs; i++)
    {
-      new_numGhostFromProc[i] = hypre_CTAlloc(HYPRE_Int, num_levels);
-      new_ghostGlobalIndex[i] = hypre_CTAlloc(HYPRE_Int*, num_levels);
-      new_ghostUnpackIndex[i] = hypre_CTAlloc(HYPRE_Int*, num_levels);
+      old_numGhostFromProc[i] = hypre_CTAlloc(HYPRE_Int, num_levels);
+      old_ghostGlobalIndex[i] = hypre_CTAlloc(HYPRE_Int*, num_levels);
+      old_ghostUnpackIndex[i] = hypre_CTAlloc(HYPRE_Int*, num_levels);
       for (j = 0; j < num_levels; j++)
       {
-         // Allocate new ghost info arrays (with extra space) and copy over old info if it exists
-         if (old_ghostGlobalIndex[i][j])
+         // Copy over relevant old ghost node info where it exists
+         if (old_numGhostFromProc[i][j])
          {
-            new_ghostGlobalIndex[i][j] = hypre_CTAlloc(HYPRE_Int, ghostInfoOffset[i][j] + 2*old_numGhostFromProc[i][j]);
-            new_ghostUnpackIndex[i][j] = hypre_CTAlloc(HYPRE_Int, ghostInfoOffset[i][j] + 2*old_numGhostFromProc[i][j]);
-            memcpy( new_ghostGlobalIndex[i][j], old_ghostGlobalIndex[i][j], ghostInfoOffset[i][j]*sizeof(HYPRE_Int) );
-            memcpy( new_ghostUnpackIndex[i][j], old_ghostUnpackIndex[i][j], ghostInfoOffset[i][j]*sizeof(HYPRE_Int) );
-            new_ghostGlobalIndex[i][j][ ghostInfoOffset[i][j] + 2*old_numGhostFromProc[i][j] - 1 ] = -1;
-            new_ghostUnpackIndex[i][j][ ghostInfoOffset[i][j] + 2*old_numGhostFromProc[i][j] - 1 ] = -1;
+            old_numGhostFromProc[i][j] = numGhostFromProc[i][j];
+            numGhostFromProc[i][j] = 0;
+            old_ghostGlobalIndex[i][j] = hypre_CTAlloc(HYPRE_Int, old_numGhostFromProc[i][j]);
+            old_ghostUnpackIndex[i][j] = hypre_CTAlloc(HYPRE_Int, old_numGhostFromProc[i][j]);
+            for (k = 0; k < old_numGhostFromProc[i][j]; k++)
+            {
+               old_ghostGlobalIndex[i][j][k] = ghostGlobalIndex[i][j][ k + ghostInfoOffset[i][j] ];
+               old_ghostUnpackIndex[i][j][k] = ghostUnpackIndex[i][j][ k + ghostInfoOffset[i][j] ];
+            }
          }
          // Otherwise initialize to NULL
          else
          {
-            new_ghostGlobalIndex[i][j] = NULL;
-            new_ghostUnpackIndex[i][j] = NULL;
+            old_ghostGlobalIndex[i][j] = NULL;
+            old_ghostUnpackIndex[i][j] = NULL;
          }
       }
    }
 
 
-   // Debugging:
-   for (level = 0; level < num_levels; level++)
-   {
-       hypre_printf("Partition level %d\n", level);
-       hypre_printf("   myid = %i, my assumed local range: [%i, %i]\n", myid, 
-                         apart[level]->row_start, apart[level]->row_end);
+   // // Debugging:
+   // for (level = 0; level < num_levels; level++)
+   // {
+   //     hypre_printf("Partition level %d\n", level);
+   //     hypre_printf("   myid = %i, my assumed local range: [%i, %i]\n", myid, 
+   //                       apart[level]->row_start, apart[level]->row_end);
 
-      for (i=0; i<apart[level]->length; i++)
-      {
-        hypre_printf("   myid = %d, proc %d owns assumed partition range = [%d, %d]\n", 
-                myid, apart[level]->proc_list[i], apart[level]->row_start_list[i], 
-           apart[level]->row_end_list[i]);
-      }
+   //    for (i=0; i<apart[level]->length; i++)
+   //    {
+   //      hypre_printf("   myid = %d, proc %d owns assumed partition range = [%d, %d]\n", 
+   //              myid, apart[level]->proc_list[i], apart[level]->row_start_list[i], 
+   //         apart[level]->row_end_list[i]);
+   //    }
 
-      hypre_printf("   myid = %d, length of apart[level] = %d\n", myid, apart[level]->length);
-   }
+   //    hypre_printf("   myid = %d, length of apart[level] = %d\n", myid, apart[level]->length);
+   // }
 
 
 
@@ -2175,7 +2174,7 @@ LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, 
             // Find min and max over the nodes requested from this proc
             range_start = global_nodes[level];
             range_end = 0;
-            for (i = ghostInfoOffset[proc][level]; i < ghostInfoOffset[proc][level] + old_numGhostFromProc[proc][level]; i++)
+            for (i = 0; i < old_numGhostFromProc[proc][level]; i++)
             {
                if (old_ghostGlobalIndex[proc][level][i] < range_start) range_start = old_ghostGlobalIndex[proc][level][i];
                if (old_ghostGlobalIndex[proc][level][i] > range_end) range_end = old_ghostGlobalIndex[proc][level][i];               
@@ -2225,7 +2224,7 @@ LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, 
             }
 
             // Loop over the nodes we asked for from this proc and copy their info to the arrays for the appropriate processors
-            for (i = ghostInfoOffset[proc][level]; i < ghostInfoOffset[proc][level] + old_numGhostFromProc[proc][level]; i++)
+            for (i = 0; i < old_numGhostFromProc[proc][level]; i++)
             {
                // Find which range this node belongs to
                j = 0;
@@ -2233,32 +2232,32 @@ LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, 
                while (old_ghostGlobalIndex[proc][level][i] > upper_bounds[j] && j < num_ranges) actualProcID = proc_ids[j++];
 
                //If new info arrays are still null when we need them, allocate
-               if (!new_ghostGlobalIndex[actualProcID][level]) 
+               if (!ghostGlobalIndex[actualProcID][level]) 
                {
                   // likely that the number of ghost nodes will be at most 3 layers times the length of one side of the home domain (!!! 2D !!!)
                   HYPRE_Int ghostInfoLength = 3 * ( (int) sqrt( (double) (apart[level]->row_end - apart[level]->row_start) + 1 ) + 6 );
-                  new_ghostGlobalIndex[actualProcID][level] = hypre_CTAlloc(HYPRE_Int, ghostInfoLength);
-                  new_ghostUnpackIndex[actualProcID][level] = hypre_CTAlloc(HYPRE_Int, ghostInfoLength);
+                  ghostGlobalIndex[actualProcID][level] = hypre_CTAlloc(HYPRE_Int, ghostInfoLength);
+                  ghostUnpackIndex[actualProcID][level] = hypre_CTAlloc(HYPRE_Int, ghostInfoLength);
                   // Mark ends of arrays
-                  new_ghostGlobalIndex[actualProcID][level][ghostInfoLength - 1] = -1;
-                  new_ghostUnpackIndex[actualProcID][level][ghostInfoLength - 1] = -1;
+                  ghostGlobalIndex[actualProcID][level][ghostInfoLength - 1] = -1;
+                  ghostUnpackIndex[actualProcID][level][ghostInfoLength - 1] = -1;
                }
 
-               HYPRE_Int ghostInfoIndex = ghostInfoOffset[actualProcID][level] + new_numGhostFromProc[actualProcID][level];
-               // Check to see whether we need to increase the size of new_ghostGlobalIndex[actualProcID][level] and new_ghostUnpackIndex[actualProcID][level]
-               if (new_ghostGlobalIndex[actualProcID][level][ ghostInfoIndex ] == -1)
+               HYPRE_Int ghostInfoIndex = ghostInfoOffset[actualProcID][level] + numGhostFromProc[actualProcID][level];
+               // Check to see whether we need to increase the size of ghostGlobalIndex[actualProcID][level] and ghostUnpackIndex[actualProcID][level]
+               if (ghostGlobalIndex[actualProcID][level][ ghostInfoIndex ] == -1)
                {
                   // Reallocate arrays
-                  new_ghostGlobalIndex[actualProcID][level] = hypre_TReAlloc(new_ghostGlobalIndex[actualProcID][level], HYPRE_Int, 2*ghostInfoIndex + 1);
-                  new_ghostUnpackIndex[actualProcID][level] = hypre_TReAlloc(new_ghostUnpackIndex[actualProcID][level], HYPRE_Int, 2*ghostInfoIndex + 1);
+                  ghostGlobalIndex[actualProcID][level] = hypre_TReAlloc(ghostGlobalIndex[actualProcID][level], HYPRE_Int, 2*ghostInfoIndex + 1);
+                  ghostUnpackIndex[actualProcID][level] = hypre_TReAlloc(ghostUnpackIndex[actualProcID][level], HYPRE_Int, 2*ghostInfoIndex + 1);
                   // Mark end of arrays
-                  new_ghostGlobalIndex[actualProcID][level][ 2*ghostInfoIndex ] = -1;
-                  new_ghostUnpackIndex[actualProcID][level][ 2*ghostInfoIndex ] = -1;
+                  ghostGlobalIndex[actualProcID][level][ 2*ghostInfoIndex ] = -1;
+                  ghostUnpackIndex[actualProcID][level][ 2*ghostInfoIndex ] = -1;
                }
 
-               new_ghostGlobalIndex[actualProcID][level][ ghostInfoIndex ] = old_ghostGlobalIndex[proc][level][i];
-               new_ghostGlobalIndex[actualProcID][level][ ghostInfoIndex ] = old_ghostGlobalIndex[proc][level][i];
-               new_numGhostFromProc[actualProcID][level]++;
+               ghostGlobalIndex[actualProcID][level][ ghostInfoIndex ] = old_ghostGlobalIndex[proc][level][i];
+               ghostGlobalIndex[actualProcID][level][ ghostInfoIndex ] = old_ghostGlobalIndex[proc][level][i];
+               numGhostFromProc[actualProcID][level]++;
 
             }
 
@@ -2293,11 +2292,6 @@ LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, 
    hypre_TFree(response_buf_starts);
    hypre_TFree(proc_ids);
    hypre_TFree(upper_bounds);
-
-   // Assign new arrays to output
-   *numGhostFromProc = new_numGhostFromProc;
-   *ghostGlobalIndex = new_ghostGlobalIndex;
-   *ghostUnpackIndex = new_ghostUnpackIndex;
 
    return hypre_error_flag;
 
