@@ -47,19 +47,19 @@ HYPRE_Int
 UnpackResidualBuffer( HYPRE_Complex *recv_buffer, HYPRE_Int **recv_map, hypre_ParCompGrid **compGrid, HYPRE_Int current_level, HYPRE_Int num_levels );
 
 HYPRE_Int
-CommunicateGhostNodes(hypre_ParCompGrid **compGrid, HYPRE_Int **numGhostFromProc, HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostIndexOnProc, HYPRE_Int *numNewGhostNodes, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int num_levels, HYPRE_Int *global_nodes );
+CommunicateGhostNodes(hypre_ParCompGrid **compGrid, HYPRE_Int **numGhostFromProc, HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostGlobalIndex, HYPRE_Int *numNewGhostNodes, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int num_levels, HYPRE_Int *global_nodes );
 
 HYPRE_Int
 FillGhostNodeResponse(void* recv_buf, int contact_size, int contact_proc, void* response_obj, MPI_Comm comm, void** response_buf, int* response_message_size);
 
 HYPRE_Int
-CommunicateGhostNodesResidualOnly(hypre_ParCompGrid **compGrid, HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostIndexOnProc, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int num_levels, HYPRE_Int *global_nodes );
+CommunicateGhostNodesResidualOnly(hypre_ParCompGrid **compGrid, HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int num_levels, HYPRE_Int *global_nodes );
 
 HYPRE_Int
 FillGhostNodeResponseResidualOnly(void* recv_buf, int contact_size, int contact_proc, void* response_obj, MPI_Comm comm, void** response_buf, int* response_message_size);
 
 HYPRE_Int
-PackGhostNodeContact( HYPRE_Int num_levels, HYPRE_Int num_contacts, HYPRE_Int *contact_proc_list, HYPRE_Int **numGhostFromProc, HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostIndexOnProc, HYPRE_Int *contact_send_buf, HYPRE_Int *contact_send_buf_starts );
+PackGhostNodeContact( HYPRE_Int num_levels, HYPRE_Int num_contacts, HYPRE_Int *contact_proc_list, HYPRE_Int **numGhostFromProc, HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostGlobalIndex, HYPRE_Int *contact_send_buf, HYPRE_Int *contact_send_buf_starts );
 
 HYPRE_Int
 UnpackGhostNodeResponse( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_contacts, HYPRE_Int *contact_proc_list, HYPRE_Complex *response_buf, HYPRE_Int *numNewGhostNodes, HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostUnpackIndex);
@@ -68,7 +68,13 @@ HYPRE_Int
 UnpackGhostNodeResponseResidualOnly( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int num_contacts, HYPRE_Int *contact_proc_list, HYPRE_Complex *response_buf, HYPRE_Int ***ghostUnpackIndex);
 
 HYPRE_Int
-FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index, HYPRE_Int **numGhostFromProc, HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostIndexOnProc, HYPRE_Int *numNewGhostNodes, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int *global_nodes );
+FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index, HYPRE_Int **numGhostFromProc, HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostGlobalIndex, HYPRE_Int *numNewGhostNodes, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int *global_nodes, hypre_IJAssumedPart **apart );
+
+HYPRE_Int 
+LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, HYPRE_Int ****ghostUnpackIndex, HYPRE_Int **ghostInfoOffset, hypre_IJAssumedPart **apart, HYPRE_Int num_levels, HYPRE_Int *global_nodes);
+
+HYPRE_Int
+FillResponseForLocateGhostNodes(void *p_recv_contact_buf, HYPRE_Int contact_size, HYPRE_Int contact_proc, void *ro, MPI_Comm comm, void **p_send_response_buf, HYPRE_Int *response_message_size);
 
 /*****************************************************************************
  *
@@ -96,7 +102,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
 
    MPI_Comm 	      comm;
    hypre_ParAMGData   *amg_data = amg_vdata;
-   
+
    /* Data Structure variables */
  
    // level counters, indices, and parameters
@@ -116,6 +122,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    hypre_ParCSRCommPkg        *commPkg;
    HYPRE_Int                  **CF_marker_array;
    HYPRE_Int                  *proc_first_index, *proc_last_index, *global_nodes;
+   hypre_IJAssumedPart        **apart;
 
    // composite grids and temporary psiComposite grids used for communication
    hypre_ParCompGrid          **compGrid;
@@ -133,7 +140,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    HYPRE_Int                  *numNewGhostNodes; // numNewGhostNodes[level]
    HYPRE_Int                  **numGhostFromProc; // numGhostFromProc[proc][level]
    HYPRE_Int                  **ghostInfoOffset; // ghostInfoOffset[proc][level]
-   HYPRE_Int                  ***ghostIndexOnProc; // ghostIndexOnProc[proc][level][index]
+   HYPRE_Int                  ***ghostGlobalIndex; // ghostGlobalIndex[proc][level][index]
    HYPRE_Int                  ***ghostUnpackIndex; // ghostUnpackIndex[proc][level][index]
 
    // temporary arrays used for communication during comp grid setup
@@ -165,11 +172,13 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    proc_last_index = hypre_CTAlloc(HYPRE_Int, num_levels);
    global_nodes = hypre_CTAlloc(HYPRE_Int, num_levels);
    num_added_nodes = hypre_CTAlloc(HYPRE_Int, num_levels);
+   apart = hypre_CTAlloc(hypre_IJAssumedPart*, num_levels);
    for (level = 0; level < num_levels; level++)
    {
       proc_first_index[level] = hypre_ParVectorFirstIndex(F_array[level]);
       proc_last_index[level] = hypre_ParVectorLastIndex(F_array[level]);
       global_nodes[level] = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
+      apart[level] = hypre_ParCSRMatrixAssumedPartition(A_array[level]);
    }
 
    // Allocate space for some variables that store info on each level
@@ -189,17 +198,17 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    recv_map = hypre_CTAlloc(HYPRE_Int***, num_levels);
    numGhostFromProc =  hypre_CTAlloc(HYPRE_Int*, num_procs);
    ghostInfoOffset =  hypre_CTAlloc(HYPRE_Int*, num_procs);
-   ghostIndexOnProc = hypre_CTAlloc(HYPRE_Int**, num_procs);
+   ghostGlobalIndex = hypre_CTAlloc(HYPRE_Int**, num_procs);
    numNewGhostNodes = hypre_CTAlloc(HYPRE_Int, num_levels);
    ghostUnpackIndex = hypre_CTAlloc(HYPRE_Int**, num_procs);
    for (i = 0; i < num_procs; i++)
    {
       numGhostFromProc[i] = hypre_CTAlloc(HYPRE_Int, num_levels);
       ghostInfoOffset[i] = hypre_CTAlloc(HYPRE_Int, num_levels);
-      ghostIndexOnProc[i] = hypre_CTAlloc(HYPRE_Int*, num_levels);
+      ghostGlobalIndex[i] = hypre_CTAlloc(HYPRE_Int*, num_levels);
       ghostUnpackIndex[i] = hypre_CTAlloc(HYPRE_Int*, num_levels);
       for (j = 0; j < num_levels; j++) ghostUnpackIndex[i][j] = NULL;
-      for (j = 0; j < num_levels; j++) ghostIndexOnProc[i][j] = NULL;
+      for (j = 0; j < num_levels; j++) ghostGlobalIndex[i][j] = NULL;
    }
 
    /* Form residual and restrict down to all levels and initialize composite grids 
@@ -454,9 +463,9 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
             for (k = 0; k < numGhostLayers; k++)
             {
                // Figure out what ghost nodes are needed (1 layer at a time)
-               FindGhostNodes(compGrid, num_levels, proc_first_index, proc_last_index, numGhostFromProc, ghostInfoOffset, ghostIndexOnProc, numNewGhostNodes, ghostUnpackIndex, global_nodes);
+               FindGhostNodes(compGrid, num_levels, proc_first_index, proc_last_index, numGhostFromProc, ghostInfoOffset, ghostGlobalIndex, numNewGhostNodes, ghostUnpackIndex, global_nodes, apart);
                // Communicate the ghost nodes and setup local indices
-               CommunicateGhostNodes(compGrid, numGhostFromProc, ghostInfoOffset, ghostIndexOnProc, numNewGhostNodes, ghostUnpackIndex, num_levels, global_nodes);
+               CommunicateGhostNodes(compGrid, numGhostFromProc, ghostInfoOffset, ghostGlobalIndex, numNewGhostNodes, ghostUnpackIndex, num_levels, global_nodes);
                hypre_ParCompGridSetupLocalIndices(compGrid, numNewGhostNodes, num_levels, proc_first_index, proc_last_index);
                // Increment ghostInfoOffset and reset numGhostFromProc for the next iteration 
                for (j = 0; j < num_levels; j++)
@@ -635,7 +644,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    hypre_ParCompGridCommPkgSendFlag(compGridCommPkg) = send_flag;
    hypre_ParCompGridCommPkgRecvMap(compGridCommPkg) = recv_map;
    hypre_ParCompGridCommPkgNumGhostFromProc(compGridCommPkg) = ghostInfoOffset;
-   hypre_ParCompGridCommPkgGhostIndexOnProc(compGridCommPkg) = ghostIndexOnProc;
+   hypre_ParCompGridCommPkgGhostGlobalIndex(compGridCommPkg) = ghostGlobalIndex;
    hypre_ParCompGridCommPkgGhostUnpackIndex(compGridCommPkg) = ghostUnpackIndex;
 
    // assign compGrid and compGridCommPkg info to the amg structure
@@ -837,9 +846,9 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
    // Communicate ghost residuals
    HYPRE_Int **numGhostFromProc = hypre_ParCompGridCommPkgNumGhostFromProc(compGridCommPkg);
-   HYPRE_Int ***ghostIndexOnProc = hypre_ParCompGridCommPkgGhostIndexOnProc(compGridCommPkg);
+   HYPRE_Int ***ghostGlobalIndex = hypre_ParCompGridCommPkgGhostGlobalIndex(compGridCommPkg);
    HYPRE_Int ***ghostUnpackIndex = hypre_ParCompGridCommPkgGhostUnpackIndex(compGridCommPkg);
-   CommunicateGhostNodesResidualOnly(compGrid, numGhostFromProc, ghostIndexOnProc, ghostUnpackIndex, num_levels, global_nodes);
+   CommunicateGhostNodesResidualOnly(compGrid, numGhostFromProc, ghostGlobalIndex, ghostUnpackIndex, num_levels, global_nodes);
 
    #if DEBUG_COMP_GRID
    char filename[256];
@@ -1554,7 +1563,7 @@ UnpackResidualBuffer( HYPRE_Complex *recv_buffer, HYPRE_Int **recv_map, hypre_Pa
 }
 
 HYPRE_Int
-CommunicateGhostNodes(hypre_ParCompGrid **compGrid, HYPRE_Int **numGhostFromProc, HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostIndexOnProc, HYPRE_Int *numNewGhostNodes, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int num_levels, HYPRE_Int *global_nodes )
+CommunicateGhostNodes(hypre_ParCompGrid **compGrid, HYPRE_Int **numGhostFromProc, HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostGlobalIndex, HYPRE_Int *numNewGhostNodes, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int num_levels, HYPRE_Int *global_nodes )
 {
    HYPRE_Int         num_procs;
    HYPRE_Int         totalNewGhostNodes = 0;
@@ -1603,7 +1612,7 @@ CommunicateGhostNodes(hypre_ParCompGrid **compGrid, HYPRE_Int **numGhostFromProc
    contact_send_buf_starts = hypre_CTAlloc(HYPRE_Int, num_contacts+1);
    contact_send_buf = hypre_CTAlloc( HYPRE_Int, totalNewGhostNodes + (num_levels * num_contacts) + num_contacts ); // entries for each requested row, num rows on each level on each proc, and num levels for each proc
 
-   PackGhostNodeContact( num_levels, num_contacts, contact_proc_list, numGhostFromProc, ghostInfoOffset, ghostIndexOnProc, contact_send_buf, contact_send_buf_starts);
+   PackGhostNodeContact( num_levels, num_contacts, contact_proc_list, numGhostFromProc, ghostInfoOffset, ghostGlobalIndex, contact_send_buf, contact_send_buf_starts);
    response_obj.fill_response = FillGhostNodeResponse;
    response_obj.data1 = compGrid;
    response_obj.data2 = NULL;
@@ -1646,13 +1655,16 @@ FillGhostNodeResponse(void* recvBuf, int contact_size, int contact_proc, void* r
       // Then for each node...
       for (i = 0; i < numRequestedNodes; i++)
       {
+         // Get the local index of ghost node to send (incoming index is a global index)
+         HYPRE_Int localIndex = recv_buf[recv_cnt++] - hypre_ParCompGridGlobalIndices(compGrid[level])[0];
+
          // Pack the residual value and global index
-         response_buf[send_cnt++] = hypre_ParCompGridF(compGrid[level])[ recv_buf[recv_cnt] ];
-         response_buf[send_cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[ recv_buf[recv_cnt] ];
-         response_buf[send_cnt++] = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[ recv_buf[recv_cnt] ];
+         response_buf[send_cnt++] = hypre_ParCompGridF(compGrid[level])[ localIndex ];
+         response_buf[send_cnt++] = hypre_ParCompGridGlobalIndices(compGrid[level])[ localIndex ];
+         response_buf[send_cnt++] = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[ localIndex ];
 
          // Pack the info for the row of A
-         row = hypre_ParCompGridARows(compGrid[level])[ recv_buf[recv_cnt] ];
+         row = hypre_ParCompGridARows(compGrid[level])[ localIndex ];
          row_size = hypre_ParCompMatrixRowSize(row);
          response_buf[send_cnt++] = (HYPRE_Complex) row_size;
          for (j = 0; j < row_size; j++)
@@ -1665,7 +1677,7 @@ FillGhostNodeResponse(void* recvBuf, int contact_size, int contact_proc, void* r
          }
 
          // Pack the info for the row of P
-         row = hypre_ParCompGridPRows(compGrid[level])[ recv_buf[recv_cnt] ];
+         row = hypre_ParCompGridPRows(compGrid[level])[ localIndex ];
          row_size = hypre_ParCompMatrixRowSize(row);
          response_buf[send_cnt++] = (HYPRE_Complex) row_size;
          for (j = 0; j < row_size; j++)
@@ -1676,9 +1688,6 @@ FillGhostNodeResponse(void* recvBuf, int contact_size, int contact_proc, void* r
          {
             response_buf[send_cnt++] = (HYPRE_Complex) hypre_ParCompMatrixRowGlobalIndices(row)[j];
          }
-
-         // Increment the recv_cnt (i.e. go to next requested node)
-         recv_cnt++;
       }
    }
 
@@ -1688,7 +1697,7 @@ FillGhostNodeResponse(void* recvBuf, int contact_size, int contact_proc, void* r
 }
 
 HYPRE_Int
-CommunicateGhostNodesResidualOnly(hypre_ParCompGrid **compGrid, HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostIndexOnProc, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int num_levels, HYPRE_Int *global_nodes )
+CommunicateGhostNodesResidualOnly(hypre_ParCompGrid **compGrid, HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int num_levels, HYPRE_Int *global_nodes )
 {
    HYPRE_Int         num_procs;
    HYPRE_Int         totalNewGhostNodes = 0;
@@ -1734,7 +1743,7 @@ CommunicateGhostNodesResidualOnly(hypre_ParCompGrid **compGrid, HYPRE_Int **numG
    contact_send_buf_starts = hypre_CTAlloc(HYPRE_Int, num_contacts+1);
    contact_send_buf = hypre_CTAlloc( HYPRE_Int, totalNewGhostNodes + (num_levels * num_contacts) + num_contacts ); // entries for each requested row, num rows on each level on each proc, and num levels for each proc
 
-   PackGhostNodeContact( num_levels, num_contacts, contact_proc_list, numGhostFromProc, NULL, ghostIndexOnProc, contact_send_buf, contact_send_buf_starts);
+   PackGhostNodeContact( num_levels, num_contacts, contact_proc_list, numGhostFromProc, NULL, ghostGlobalIndex, contact_send_buf, contact_send_buf_starts);
    response_obj.fill_response = FillGhostNodeResponseResidualOnly;
    response_obj.data1 = compGrid;
    response_obj.data2 = NULL;
@@ -1776,8 +1785,11 @@ FillGhostNodeResponseResidualOnly(void* recvBuf, int contact_size, int contact_p
       // Then for each node...
       for (i = 0; i < numRequestedNodes; i++)
       {
+         // Get the local index of ghost node to send (incoming index is a global index)
+         HYPRE_Int localIndex = recv_buf[recv_cnt++] - hypre_ParCompGridGlobalIndices(compGrid[level])[0];
+
          // Pack the residual value and global index
-         response_buf[send_cnt++] = hypre_ParCompGridF(compGrid[level])[ recv_buf[recv_cnt++] ];
+         response_buf[send_cnt++] = hypre_ParCompGridF(compGrid[level])[ localIndex ];
       }
    }
 
@@ -1788,7 +1800,7 @@ FillGhostNodeResponseResidualOnly(void* recvBuf, int contact_size, int contact_p
 
 HYPRE_Int
 PackGhostNodeContact( HYPRE_Int num_levels, HYPRE_Int num_contacts, HYPRE_Int *contact_proc_list, HYPRE_Int **numGhostFromProc, HYPRE_Int **ghostInfoOffset, 
-         HYPRE_Int ***ghostIndexOnProc, HYPRE_Int *contact_send_buf, HYPRE_Int *contact_send_buf_starts )
+         HYPRE_Int ***ghostGlobalIndex, HYPRE_Int *contact_send_buf, HYPRE_Int *contact_send_buf_starts )
 {
    HYPRE_Int i,proc,level,cnt, offset;
    HYPRE_Int numRequestedNodes;
@@ -1810,8 +1822,8 @@ PackGhostNodeContact( HYPRE_Int num_levels, HYPRE_Int num_contacts, HYPRE_Int *c
          else offset = 0;
          for (i = offset; i < offset + numRequestedNodes; i++)
          {
-            contact_send_buf[cnt++] = ghostIndexOnProc[contact_proc_list[proc]][level][i];
-            if (level == 2 && myid == 0) printf("On level 2, rank 0 requests node %d from proc 1\n", ghostIndexOnProc[contact_proc_list[proc]][level][i]);
+            contact_send_buf[cnt++] = ghostGlobalIndex[contact_proc_list[proc]][level][i];
+            if (level == 2 && myid == 0) printf("On level 2, rank 0 requests node %d from proc 1\n", ghostGlobalIndex[contact_proc_list[proc]][level][i]);
          }
       }
    }
@@ -1936,7 +1948,7 @@ UnpackGhostNodeResponseResidualOnly( hypre_ParCompGrid **compGrid, HYPRE_Int num
 
 HYPRE_Int
 FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index, HYPRE_Int **numGhostFromProc,
-      HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostIndexOnProc, HYPRE_Int *numNewGhostNodes, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int *global_nodes )
+      HYPRE_Int **ghostInfoOffset, HYPRE_Int ***ghostGlobalIndex, HYPRE_Int *numNewGhostNodes, HYPRE_Int ***ghostUnpackIndex, HYPRE_Int *global_nodes, hypre_IJAssumedPart **apart )
 {
    HYPRE_Int                  level, i, j, k, searchStart, searchEnd;
    HYPRE_Int                  row_size, ghostProcID, ghostAddFlag = 1, searchIndex;
@@ -1973,28 +1985,28 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
                // If so, figure out what processor the node lives on (!!! We use the assumed partition to find processor ID !!!)
                hypre_GetAssumedPartitionProcFromRow( hypre_MPI_COMM_WORLD, hypre_ParCompMatrixRowGlobalIndices(row)[j], 0, global_nodes[level], &ghostProcID );
 
-               // ghostIndexOnProc[ghostProcID][level] and ghostUnpackIndex[ghostProcID][level] are initialized as NULL, so if they are still null when we need them, allocate
-               if (!ghostIndexOnProc[ghostProcID][level]) 
+               // Use assumed partition to get local index on the processor which owns the ghost node
+               hypre_GetAssumedPartitionRowRange( hypre_MPI_COMM_WORLD, ghostProcID, 0, global_nodes[level], &ghostRowStart, &ghostRowEnd );
+               searchIndex = hypre_ParCompMatrixRowGlobalIndices(row)[j];
+
+               // ghostGlobalIndex[ghostProcID][level] and ghostUnpackIndex[ghostProcID][level] are initialized as NULL, so if they are still null when we need them, allocate
+               if (!ghostGlobalIndex[ghostProcID][level]) 
                {
                   // likely that the number of ghost nodes will be at most 3 layers times the length of one side of the home domain (!!! 2D !!!)
                   ghostInfoLength = 3 * ( (int) sqrt( (double) (proc_last_index[level] - proc_first_index[level]) + 1 ) + 6 );
-                  ghostIndexOnProc[ghostProcID][level] = hypre_CTAlloc(HYPRE_Int, ghostInfoLength);
+                  ghostGlobalIndex[ghostProcID][level] = hypre_CTAlloc(HYPRE_Int, ghostInfoLength);
                   ghostUnpackIndex[ghostProcID][level] = hypre_CTAlloc(HYPRE_Int, ghostInfoLength);
                   // Mark ends of arrays
-                  ghostIndexOnProc[ghostProcID][level][ghostInfoLength - 1] = -1;
+                  ghostGlobalIndex[ghostProcID][level][ghostInfoLength - 1] = -1;
                   ghostUnpackIndex[ghostProcID][level][ghostInfoLength - 1] = -1;
                }
-
-               // Use assumed partition to get local index on the processor which owns the ghost node
-               hypre_GetAssumedPartitionRowRange( hypre_MPI_COMM_WORLD, ghostProcID, 0, global_nodes[level], &ghostRowStart, &ghostRowEnd );
-               searchIndex = hypre_ParCompMatrixRowGlobalIndices(row)[j] - ghostRowStart;
 
                // Check whether ghost node has already been accounted for (!!! involves linear search !!!)
                ghostAddFlag = 1;
                HYPRE_Int ghostInfoIndex = ghostInfoOffset[ghostProcID][level] + numGhostFromProc[ghostProcID][level];
                for (k = ghostInfoIndex - 1; k > -1; k--) // Note: doing the search backward (hopefully shorter)
                {
-                  if (ghostIndexOnProc[ghostProcID][level][k] == searchIndex)
+                  if (ghostGlobalIndex[ghostProcID][level][k] == searchIndex)
                   {
                      ghostAddFlag = 0;
                      break;
@@ -2007,18 +2019,18 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
                }
                else // otherwise, need to account for the request
                {
-                  // Check to see whether we need to increase the size of ghostIndexOnProc[ghostProcID][level] and ghostUnpackIndex[ghostProcID][level]
-                  if (ghostIndexOnProc[ghostProcID][level][ ghostInfoIndex ] == -1)
+                  // Check to see whether we need to increase the size of ghostGlobalIndex[ghostProcID][level] and ghostUnpackIndex[ghostProcID][level]
+                  if (ghostGlobalIndex[ghostProcID][level][ ghostInfoIndex ] == -1)
                   {
                      // Reallocate arrays
-                     ghostIndexOnProc[ghostProcID][level] = hypre_TReAlloc(ghostIndexOnProc[ghostProcID][level], HYPRE_Int, 2*ghostInfoIndex + 1);
+                     ghostGlobalIndex[ghostProcID][level] = hypre_TReAlloc(ghostGlobalIndex[ghostProcID][level], HYPRE_Int, 2*ghostInfoIndex + 1);
                      ghostUnpackIndex[ghostProcID][level] = hypre_TReAlloc(ghostUnpackIndex[ghostProcID][level], HYPRE_Int, 2*ghostInfoIndex + 1);
                      // Mark end of arrays
-                     ghostIndexOnProc[ghostProcID][level][ 2*ghostInfoIndex ] = -1;
+                     ghostGlobalIndex[ghostProcID][level][ 2*ghostInfoIndex ] = -1;
                      ghostUnpackIndex[ghostProcID][level][ 2*ghostInfoIndex ] = -1;
                   }
                   // Store the ghost index
-                  ghostIndexOnProc[ghostProcID][level][ ghostInfoIndex ] = searchIndex;
+                  ghostGlobalIndex[ghostProcID][level][ ghostInfoIndex ] = searchIndex;
                   if (myid == 0 ) printf("level = %d, searchIndex = %d, global index = %d, ghostRowStart = %d, global_nodes = %d\n", level, searchIndex, hypre_ParCompMatrixRowGlobalIndices(row)[j], ghostRowStart, global_nodes[level]);
                   // Store info for unpacking ghost rows later, set local ghost index and increment numGhost counters
                   ghostUnpackIndex[ghostProcID][level][ ghostInfoIndex++ ] = hypre_ParCompGridNumNodes(compGrid[level]) + numNewGhostNodes[level]; // !!! DOUBLE CHECK !!!
@@ -2031,6 +2043,9 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
       }
    }
 
+   // Up to now, we have saved all the info acording to the assumed partition, so need to do some communication to figure out where the ghost nodes actually live and fix up our arrays
+   LocateGhostNodes(&numGhostFromProc, &ghostGlobalIndex, &ghostUnpackIndex, ghostInfoOffset, apart, num_levels, global_nodes);
+
    // Coarsest level should always own all info (i.e. should not ask for ghost nodes)
    // If this is not the case, raise an error
    if (numNewGhostNodes[num_levels-1] != 0) printf("Error: Processor does not have real dofs for entire coarsest grid!\n");
@@ -2038,3 +2053,335 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
    return 0;
 }
 
+HYPRE_Int 
+LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, HYPRE_Int ****ghostUnpackIndex, HYPRE_Int **ghostInfoOffset, hypre_IJAssumedPart **apart, HYPRE_Int num_levels, HYPRE_Int *global_nodes)
+
+{
+
+
+   HYPRE_Int        level, proc, j, i, cnt, proc_cnt;
+   HYPRE_Int        range_start, range_end; 
+
+   HYPRE_Int        num_contacts, *contact_procs=NULL, *contact_vec_starts=NULL;
+   HYPRE_Int        *contact_buf=NULL;
+   HYPRE_Int        *response_buf = NULL, *response_buf_starts=NULL;
+    
+   HYPRE_Int        num_ranges;
+   HYPRE_Int        actualProcID;
+   HYPRE_Int        *proc_ids;
+   HYPRE_Int        *upper_bounds;
+
+   HYPRE_Int        max_response_size;
+   
+   hypre_DataExchangeResponse        response_obj1;
+
+   HYPRE_Int                  **old_numGhostFromProc = *numGhostFromProc;
+   HYPRE_Int                  ***old_ghostGlobalIndex = *ghostGlobalIndex;
+   HYPRE_Int                  ***old_ghostUnpackIndex = *ghostUnpackIndex;
+
+   HYPRE_Int                  **new_numGhostFromProc; // numGhostFromProc[proc][level]
+   HYPRE_Int                  ***new_ghostGlobalIndex; // ghostGlobalIndex[proc][level][index]
+   HYPRE_Int                  ***new_ghostUnpackIndex; // ghostUnpackIndex[proc][level][index]
+
+   HYPRE_Int        num_procs, myid;
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   new_numGhostFromProc =  hypre_CTAlloc(HYPRE_Int*, num_procs);
+   new_ghostGlobalIndex = hypre_CTAlloc(HYPRE_Int**, num_procs);
+   new_ghostUnpackIndex = hypre_CTAlloc(HYPRE_Int**, num_procs);
+   for (i = 0; i < num_procs; i++)
+   {
+      new_numGhostFromProc[i] = hypre_CTAlloc(HYPRE_Int, num_levels);
+      new_ghostGlobalIndex[i] = hypre_CTAlloc(HYPRE_Int*, num_levels);
+      new_ghostUnpackIndex[i] = hypre_CTAlloc(HYPRE_Int*, num_levels);
+      for (j = 0; j < num_levels; j++)
+      {
+         // Allocate new ghost info arrays (with extra space) and copy over old info if it exists
+         if (old_ghostGlobalIndex[i][j])
+         {
+            new_ghostGlobalIndex[i][j] = hypre_CTAlloc(HYPRE_Int, ghostInfoOffset[i][j] + 2*old_numGhostFromProc[i][j]);
+            new_ghostUnpackIndex[i][j] = hypre_CTAlloc(HYPRE_Int, ghostInfoOffset[i][j] + 2*old_numGhostFromProc[i][j]);
+            memcpy( new_ghostGlobalIndex[i][j], old_ghostGlobalIndex[i][j], ghostInfoOffset[i][j]*sizeof(HYPRE_Int) );
+            memcpy( new_ghostUnpackIndex[i][j], old_ghostUnpackIndex[i][j], ghostInfoOffset[i][j]*sizeof(HYPRE_Int) );
+         }
+         // Otherwise initialize to NULL
+         else
+         {
+            new_ghostGlobalIndex[i][j] = NULL;
+            new_ghostUnpackIndex[i][j] = NULL;
+         }
+      }
+   }
+
+
+   // Setup contact info
+   num_contacts = 0;
+   HYPRE_Int size_est = 10*num_levels; // estimate that we need to contact at most 10 procs per level
+   contact_procs = hypre_CTAlloc(HYPRE_Int, size_est);
+   for (proc = 0; proc < num_procs; proc++)
+   {
+      for (level = 0; level < num_levels; level++)
+      {
+         if (old_numGhostFromProc[proc][level])
+         {
+            if (num_contacts == size_est)
+            {
+               size_est += 10;
+               contact_procs = hypre_TReAlloc(contact_procs, HYPRE_Int, size_est);
+            }
+            contact_procs[num_contacts++] = proc;
+            break;
+         }
+      }
+   }
+   contact_procs = hypre_TReAlloc(contact_procs, HYPRE_Int, num_contacts);
+   contact_vec_starts = hypre_CTAlloc(HYPRE_Int, num_contacts+1);
+   contact_buf = hypre_CTAlloc(HYPRE_Int, 2*num_contacts);
+
+   cnt = 0;
+   for (proc_cnt = 0; proc_cnt < num_contacts; proc_cnt++)
+   {
+      proc = contact_procs[proc_cnt];
+      contact_vec_starts[proc_cnt] = cnt;
+      for (level = 0; level < num_levels; level++)
+      {
+         if (old_numGhostFromProc[proc][level])
+         {
+            // Find min and max over the nodes requested from this proc
+            range_start = global_nodes[level];
+            range_end = 0;
+            for (i = ghostInfoOffset[proc][level]; i < ghostInfoOffset[proc][level] + old_numGhostFromProc[proc][level]; i++)
+            {
+               if (old_ghostGlobalIndex[proc][level][i] < range_start) range_start = old_ghostGlobalIndex[proc][level][i];
+               if (old_ghostGlobalIndex[proc][level][i] > range_end) range_end = old_ghostGlobalIndex[proc][level][i];               
+            }
+            contact_buf[cnt++] = range_start;
+            contact_buf[cnt++] = range_end;
+         }
+         else
+         {
+            contact_buf[cnt++] = -1;
+         }
+      }
+   }
+   contact_vec_starts[num_contacts] = cnt;
+   
+   /*create response object*/
+   response_obj1.fill_response = FillResponseForLocateGhostNodes;
+   response_obj1.data1 =  apart; /* this is necessary so we can fill responses*/ 
+   response_obj1.data2 = &num_levels;
+   
+   max_response_size = 9*num_levels;  /* 9 means we can fit 4 ranges on each level: each range is 2 items plus one item to say how many ranges*/
+   
+   hypre_DataExchangeList(num_contacts, contact_procs, 
+                    contact_buf, contact_vec_starts, sizeof(HYPRE_Int), 
+                     sizeof(HYPRE_Int), &response_obj1, max_response_size, 1, 
+                     hypre_MPI_COMM_WORLD, (void**) &response_buf, &response_buf_starts);
+
+
+   // Unpack the response buffer and fill in new_numGhostFromProc, new_ghostGlobalIndex, new_ghostUnpackIndex
+   cnt = 0; // cnt is now indexing the reponse buffer
+   for (proc_cnt = 0; proc_cnt < num_contacts; proc_cnt++)
+   {
+      proc = contact_procs[proc_cnt];
+      for (level = 0; level < num_levels; level++)
+      {
+         if (old_numGhostFromProc[proc][level])
+         {
+            // Get num ranges and the range starts and ends
+            num_ranges = response_buf[cnt++];
+            proc_ids = hypre_CTAlloc(HYPRE_Int, num_ranges);
+            upper_bounds = hypre_CTAlloc(HYPRE_Int, num_ranges);
+            for (i = 0; i < num_ranges; i++)
+            {
+               proc_ids[i] = response_buf[cnt++];
+               upper_bounds[i] = response_buf[cnt++];
+            }
+
+            // Loop over the nodes we asked for from this proc and copy their info to the arrays for the appropriate processors
+            for (i = ghostInfoOffset[proc][level]; i < ghostInfoOffset[proc][level] + old_numGhostFromProc[proc][level]; i++)
+            {
+               // Find which range this node belongs to
+               j = 0;
+               while (old_ghostGlobalIndex[proc][level][i] > upper_bounds[j] && j < num_ranges) actualProcID = proc_ids[j++];
+
+               //If new info arrays are still null when we need them, allocate
+               if (!new_ghostGlobalIndex[actualProcID][level]) 
+               {
+                  // likely that the number of ghost nodes will be at most 3 layers times the length of one side of the home domain (!!! 2D !!!)
+                  HYPRE_Int ghostInfoLength = 3 * ( (int) sqrt( (double) (apart[level]->row_end - apart[level]->row_start) + 1 ) + 6 );
+                  new_ghostGlobalIndex[actualProcID][level] = hypre_CTAlloc(HYPRE_Int, ghostInfoLength);
+                  new_ghostUnpackIndex[actualProcID][level] = hypre_CTAlloc(HYPRE_Int, ghostInfoLength);
+                  // Mark ends of arrays
+                  new_ghostGlobalIndex[actualProcID][level][ghostInfoLength - 1] = -1;
+                  new_ghostUnpackIndex[actualProcID][level][ghostInfoLength - 1] = -1;
+               }
+
+               HYPRE_Int ghostInfoIndex = ghostInfoOffset[actualProcID][level] + new_numGhostFromProc[actualProcID][level];
+               // Check to see whether we need to increase the size of new_ghostGlobalIndex[actualProcID][level] and new_ghostUnpackIndex[actualProcID][level]
+               if (new_ghostGlobalIndex[actualProcID][level][ ghostInfoIndex ] == -1)
+               {
+                  // Reallocate arrays
+                  new_ghostGlobalIndex[actualProcID][level] = hypre_TReAlloc(new_ghostGlobalIndex[actualProcID][level], HYPRE_Int, 2*ghostInfoIndex + 1);
+                  new_ghostUnpackIndex[actualProcID][level] = hypre_TReAlloc(new_ghostUnpackIndex[actualProcID][level], HYPRE_Int, 2*ghostInfoIndex + 1);
+                  // Mark end of arrays
+                  new_ghostGlobalIndex[actualProcID][level][ 2*ghostInfoIndex ] = -1;
+                  new_ghostUnpackIndex[actualProcID][level][ 2*ghostInfoIndex ] = -1;
+               }
+
+               new_ghostGlobalIndex[actualProcID][level][ ghostInfoIndex ] = old_ghostGlobalIndex[proc][level][i];
+               new_ghostGlobalIndex[actualProcID][level][ ghostInfoIndex ] = old_ghostGlobalIndex[proc][level][i];
+               new_numGhostFromProc[actualProcID][level]++;
+
+            }
+
+            hypre_TFree(proc_ids);
+            hypre_TFree(upper_bounds);
+         }
+      }
+   }
+
+
+   // Free up old ghost info arrays and communication buffers and info
+   for (proc = 0; proc < num_procs; proc++)
+   {
+      for (level = 0; level < num_levels; level++)
+      {
+         if (old_ghostGlobalIndex[proc][level]) hypre_TFree(old_ghostGlobalIndex[proc][level]);
+         if (old_ghostUnpackIndex[proc][level]) hypre_TFree(old_ghostUnpackIndex[proc][level]);
+      }
+      hypre_TFree(old_ghostGlobalIndex[proc]);
+      hypre_TFree(old_ghostUnpackIndex[proc]);
+      hypre_TFree(old_numGhostFromProc[proc]);
+   }
+   hypre_TFree(old_ghostGlobalIndex);
+   hypre_TFree(old_ghostUnpackIndex);
+   hypre_TFree(old_numGhostFromProc);
+
+   hypre_TFree(contact_procs);
+   hypre_TFree(contact_vec_starts);
+   hypre_TFree(contact_buf);
+   hypre_TFree(response_buf);
+   hypre_TFree(response_buf_starts);
+   hypre_TFree(proc_ids);
+   hypre_TFree(upper_bounds);
+
+   // Assign new arrays to output
+   *numGhostFromProc = new_numGhostFromProc;
+   *ghostGlobalIndex = new_ghostGlobalIndex;
+   *ghostUnpackIndex = new_ghostUnpackIndex;
+
+   return hypre_error_flag;
+
+}
+
+/*--------------------------------------------------------------------
+ * FillResponseForLocateGhostNodes
+ * Fill response function for determining the recv. processors
+ * data exchange. This is copied from code used in setting up matvec comm pkg.
+ *--------------------------------------------------------------------*/
+
+HYPRE_Int
+FillResponseForLocateGhostNodes(void *p_recv_contact_buf,
+                                      HYPRE_Int contact_size, HYPRE_Int contact_proc, void *ro, 
+                                      MPI_Comm comm, void **p_send_response_buf, 
+                                      HYPRE_Int *response_message_size)
+{
+   HYPRE_Int    myid, tmp_id, row_end;
+   HYPRE_Int    j, level;
+   HYPRE_Int    row_val, index, size, contact_index;
+   
+   HYPRE_Int   *send_response_buf = (HYPRE_Int *) *p_send_response_buf;
+   HYPRE_Int   *recv_contact_buf = (HYPRE_Int * ) p_recv_contact_buf;
+
+
+   hypre_DataExchangeResponse  *response_obj = (hypre_DataExchangeResponse*)ro; 
+   hypre_IJAssumedPart               **apart = (hypre_IJAssumedPart**)response_obj->data1;
+   HYPRE_Int               num_levels = *( (HYPRE_Int*)response_obj->data2 );
+   
+   HYPRE_Int overhead = response_obj->send_response_overhead;
+
+   /*-------------------------------------------------------------------
+    * we are getting a range of off_d entries - need to see if we own them
+    * or how many ranges to send back  - send back
+    * with format [proc_id end_row  proc_id #end_row  proc_id #end_row etc...].
+    *----------------------------------------------------------------------*/ 
+
+   hypre_MPI_Comm_rank(comm, &myid );
+
+
+   /* populate send_response_buf */
+      
+   index = 0; /*count entries in send_response_buf*/
+   contact_index = 0;
+   
+   // Loop over levels
+   for (level = 0; level < num_levels; level++)
+   {
+      row_val = recv_contact_buf[contact_index++]; /*beginning of range*/
+      if (row_val != -1)
+      {
+         // Set aside first index to hold num ranges on this level
+         HYPRE_Int num_ranges = 0;
+         HYPRE_Int num_ranges_index = index++;
+
+         hypre_IJAssumedPart *part = apart[level];
+         j = 0; /*marks which partition of the assumed partition we are in */
+         row_end = part->row_end_list[part->sort_index[j]];
+         tmp_id = part->proc_list[part->sort_index[j]];
+
+         /*check storage in send_buf for adding the ranges !!! NOT SURE IF THIS MAKE SENSE AFTER MY CHANGES... THIS IS A HOLD OVER FROM ORIGINAL FUNCTION !!!*/
+         size = 2*(part->length);
+               
+         if ( response_obj->send_response_storage  < size  )
+         {
+
+            response_obj->send_response_storage =  hypre_max(size, 20); 
+            send_response_buf = hypre_TReAlloc( send_response_buf, HYPRE_Int, 
+                                               response_obj->send_response_storage + overhead );
+            *p_send_response_buf = send_response_buf;    /* needed when using ReAlloc */
+         }
+
+
+         while (row_val > row_end) /*which partition to start in */
+         {
+            j++;
+            row_end = part->row_end_list[part->sort_index[j]];   
+            tmp_id = part->proc_list[part->sort_index[j]];
+         }
+
+         /*add this range*/
+         send_response_buf[index++] = tmp_id;
+         send_response_buf[index++] = row_end; 
+         num_ranges++;
+
+         j++; /*increase j to look in next partition */
+            
+          
+         /*any more?  - now compare with end of range value*/
+         row_val = recv_contact_buf[1]; /*end of range*/
+         while ( j < part->length && row_val > row_end  )
+         {
+            row_end = part->row_end_list[part->sort_index[j]];  
+            tmp_id = part->proc_list[part->sort_index[j]];
+
+            send_response_buf[index++] = tmp_id;
+            send_response_buf[index++] = row_end;  
+            num_ranges++;
+
+            j++;
+            
+         }
+         // Set the num ranges entry for this level
+         send_response_buf[num_ranges_index] = num_ranges;
+      }
+   }
+
+
+   *response_message_size = index;
+   *p_send_response_buf = send_response_buf;
+
+   return hypre_error_flag;
+
+}

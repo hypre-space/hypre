@@ -103,7 +103,7 @@ typedef struct
 
    // Info needed for subsequent ghost node residual communication
    HYPRE_Int         **numGhostFromProc; // numGhostFromProc[proc][level]
-   HYPRE_Int         ***ghostIndexOnProc; // ghostIndexOnProc[proc][level][index]
+   HYPRE_Int         ***ghostGlobalIndex; // ghostGlobalIndex[proc][level][index]
    HYPRE_Int         ***ghostUnpackIndex; // ghostUnpackIndex[proc][level][index]
 
 } hypre_ParCompGridCommPkg;
@@ -125,7 +125,7 @@ typedef struct
  #define hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)           ((compGridCommPkg) -> send_flag)
  #define hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)            ((compGridCommPkg) -> recv_map)
  #define hypre_ParCompGridCommPkgNumGhostFromProc(compGridCommPkg)            ((compGridCommPkg) -> numGhostFromProc)
- #define hypre_ParCompGridCommPkgGhostIndexOnProc(compGridCommPkg)            ((compGridCommPkg) -> ghostIndexOnProc)
+ #define hypre_ParCompGridCommPkgGhostGlobalIndex(compGridCommPkg)            ((compGridCommPkg) -> ghostGlobalIndex)
  #define hypre_ParCompGridCommPkgGhostUnpackIndex(compGridCommPkg)            ((compGridCommPkg) -> ghostUnpackIndex)
 
 
