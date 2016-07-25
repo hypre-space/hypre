@@ -2229,6 +2229,7 @@ LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, 
             {
                // Find which range this node belongs to
                j = 0;
+               actualProcID = proc_ids[j];
                while (old_ghostGlobalIndex[proc][level][i] > upper_bounds[j] && j < num_ranges) actualProcID = proc_ids[j++];
 
                //If new info arrays are still null when we need them, allocate
