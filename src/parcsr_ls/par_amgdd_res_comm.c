@@ -2106,6 +2106,8 @@ LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, 
             new_ghostUnpackIndex[i][j] = hypre_CTAlloc(HYPRE_Int, ghostInfoOffset[i][j] + 2*old_numGhostFromProc[i][j]);
             memcpy( new_ghostGlobalIndex[i][j], old_ghostGlobalIndex[i][j], ghostInfoOffset[i][j]*sizeof(HYPRE_Int) );
             memcpy( new_ghostUnpackIndex[i][j], old_ghostUnpackIndex[i][j], ghostInfoOffset[i][j]*sizeof(HYPRE_Int) );
+            new_ghostGlobalIndex[i][j][ ghostInfoOffset[i][j] + 2*old_numGhostFromProc[i][j] - 1 ] = -1;
+            new_ghostUnpackIndex[i][j][ ghostInfoOffset[i][j] + 2*old_numGhostFromProc[i][j] - 1 ] = -1;
          }
          // Otherwise initialize to NULL
          else
@@ -2159,7 +2161,7 @@ LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, 
    }
    contact_procs = hypre_TReAlloc(contact_procs, HYPRE_Int, num_contacts);
    contact_vec_starts = hypre_CTAlloc(HYPRE_Int, num_contacts+1);
-   contact_buf = hypre_CTAlloc(HYPRE_Int, 2*num_contacts);
+   contact_buf = hypre_CTAlloc(HYPRE_Int, 2*num_contacts*num_levels);
 
    cnt = 0;
    for (proc_cnt = 0; proc_cnt < num_contacts; proc_cnt++)
@@ -2201,6 +2203,7 @@ LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, 
                      sizeof(HYPRE_Int), &response_obj1, max_response_size, 1, 
                      hypre_MPI_COMM_WORLD, (void**) &response_buf, &response_buf_starts);
 
+   printf("Done with data exchange\n");
 
    // Unpack the response buffer and fill in new_numGhostFromProc, new_ghostGlobalIndex, new_ghostUnpackIndex
    cnt = 0; // cnt is now indexing the reponse buffer
@@ -2339,6 +2342,17 @@ FillResponseForLocateGhostNodes(void *p_recv_contact_buf,
    index = 0; /*count entries in send_response_buf*/
    contact_index = 0;
    
+   // Debugging:
+   if (myid == 1)
+   {
+      printf("Rank %d: recv_contact_buf = \n", myid);
+      for (j = 0; j < contact_size; j++)
+      {
+         printf("   %d\n", recv_contact_buf[j]);
+      }
+   }
+
+
    // Loop over levels
    for (level = 0; level < num_levels; level++)
    {
