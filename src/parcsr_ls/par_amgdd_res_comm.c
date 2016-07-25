@@ -1823,7 +1823,7 @@ PackGhostNodeContact( HYPRE_Int num_levels, HYPRE_Int num_contacts, HYPRE_Int *c
          for (i = offset; i < offset + numRequestedNodes; i++)
          {
             contact_send_buf[cnt++] = ghostGlobalIndex[contact_proc_list[proc]][level][i];
-            if (level == 2 && myid == 0) printf("On level 2, rank 0 requests node %d from proc 1\n", ghostGlobalIndex[contact_proc_list[proc]][level][i]);
+            // if (level == 2 && myid == 0) printf("On level 2, rank 0 requests node %d from proc 1\n", ghostGlobalIndex[contact_proc_list[proc]][level][i]);
          }
       }
    }
@@ -2031,7 +2031,7 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
                   }
                   // Store the ghost index
                   ghostGlobalIndex[ghostProcID][level][ ghostInfoIndex ] = searchIndex;
-                  if (myid == 0 ) printf("level = %d, searchIndex = %d, global index = %d, ghostRowStart = %d, global_nodes = %d\n", level, searchIndex, hypre_ParCompMatrixRowGlobalIndices(row)[j], ghostRowStart, global_nodes[level]);
+                  // if (myid == 0 ) printf("level = %d, searchIndex = %d, global index = %d, ghostRowStart = %d, global_nodes = %d\n", level, searchIndex, hypre_ParCompMatrixRowGlobalIndices(row)[j], ghostRowStart, global_nodes[level]);
                   // Store info for unpacking ghost rows later, set local ghost index and increment numGhost counters
                   ghostUnpackIndex[ghostProcID][level][ ghostInfoIndex++ ] = hypre_ParCompGridNumNodes(compGrid[level]) + numNewGhostNodes[level]; // !!! DOUBLE CHECK !!!
                   hypre_ParCompMatrixRowLocalIndices(row)[j] = hypre_ParCompGridNumRealNodes(compGrid[level]) + numNewGhostNodes[level]; // !!! DOUBLE CHECK !!!
@@ -2044,9 +2044,7 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
    }
 
    // Up to now, we have saved all the info acording to the assumed partition, so need to do some communication to figure out where the ghost nodes actually live and fix up our arrays
-   printf("ABOUT TO LOCATE GHOST NODES\n");
    LocateGhostNodes(numGhostFromProc, ghostGlobalIndex, ghostUnpackIndex, ghostInfoOffset, apart, num_levels, global_nodes);
-   printf("DONE LOCATING GHOST NODES\n");
 
    // Coarsest level should always own all info (i.e. should not ask for ghost nodes)
    // If this is not the case, raise an error
@@ -2202,8 +2200,6 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
                      sizeof(HYPRE_Int), &response_obj1, max_response_size, 1, 
                      hypre_MPI_COMM_WORLD, (void**) &response_buf, &response_buf_starts);
 
-   printf("Done with data exchange\n");
-
    // Unpack the response buffer and fill in new_numGhostFromProc, new_ghostGlobalIndex, new_ghostUnpackIndex
    cnt = 0; // cnt is now indexing the reponse buffer
    for (proc_cnt = 0; proc_cnt < num_contacts; proc_cnt++)
@@ -2269,7 +2265,6 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
 
 
    // Free up old ghost info arrays and communication buffers and info
-   printf("   about to clean up memory\n");
    for (proc = 0; proc < num_procs; proc++)
    {
       for (level = 0; level < num_levels; level++)
@@ -2290,8 +2285,6 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
    hypre_TFree(contact_buf);
    hypre_TFree(response_buf);
    hypre_TFree(response_buf_starts);
-   hypre_TFree(proc_ids);
-   hypre_TFree(upper_bounds);
 
    return hypre_error_flag;
 
@@ -2337,17 +2330,6 @@ FillResponseForLocateGhostNodes(void *p_recv_contact_buf,
    index = 0; /*count entries in send_response_buf*/
    contact_index = 0;
    
-   // Debugging:
-   if (myid == 1)
-   {
-      printf("Rank %d: recv_contact_buf = \n", myid);
-      for (j = 0; j < contact_size; j++)
-      {
-         printf("   %d\n", recv_contact_buf[j]);
-      }
-   }
-
-
    // Loop over levels
    for (level = 0; level < num_levels; level++)
    {
