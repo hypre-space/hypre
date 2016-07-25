@@ -2044,7 +2044,9 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
    }
 
    // Up to now, we have saved all the info acording to the assumed partition, so need to do some communication to figure out where the ghost nodes actually live and fix up our arrays
+   printf("ABOUT TO LOCATE GHOST NODES\n");
    LocateGhostNodes(&numGhostFromProc, &ghostGlobalIndex, &ghostUnpackIndex, ghostInfoOffset, apart, num_levels, global_nodes);
+   printf("DONE LOCATING GHOST NODES\n");
 
    // Coarsest level should always own all info (i.e. should not ask for ghost nodes)
    // If this is not the case, raise an error
@@ -2113,6 +2115,26 @@ LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, 
          }
       }
    }
+
+
+   // Debugging:
+   for (level = 0; level < num_levels; level++)
+   {
+       hypre_printf("Partition level %d\n", level);
+       hypre_printf("   myid = %i, my assumed local range: [%i, %i]\n", myid, 
+                         apart[level]->row_start, apart[level]->row_end);
+
+      for (i=0; i<apart[level]->length; i++)
+      {
+        hypre_printf("   myid = %d, proc %d owns assumed partition range = [%d, %d]\n", 
+                myid, apart[level]->proc_list[i], apart[level]->row_start_list[i], 
+           apart[level]->row_end_list[i]);
+      }
+
+      hypre_printf("   myid = %d, length of apart[level] = %d\n", myid, apart[level]->length);
+   }
+
+
 
 
    // Setup contact info
@@ -2244,6 +2266,7 @@ LocateGhostNodes(HYPRE_Int ***numGhostFromProc, HYPRE_Int ****ghostGlobalIndex, 
 
 
    // Free up old ghost info arrays and communication buffers and info
+   printf("   about to clean up memory\n");
    for (proc = 0; proc < num_procs; proc++)
    {
       for (level = 0; level < num_levels; level++)
@@ -2360,7 +2383,7 @@ FillResponseForLocateGhostNodes(void *p_recv_contact_buf,
             
           
          /*any more?  - now compare with end of range value*/
-         row_val = recv_contact_buf[1]; /*end of range*/
+         row_val = recv_contact_buf[contact_index++]; /*end of range*/
          while ( j < part->length && row_val > row_end  )
          {
             row_end = part->row_end_list[part->sort_index[j]];  
