@@ -2045,6 +2045,13 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
 
    // Up to now, we have saved all the info acording to the assumed partition, so need to do some communication to figure out where the ghost nodes actually live and fix up our arrays
    LocateGhostNodes(numGhostFromProc, ghostGlobalIndex, ghostUnpackIndex, ghostInfoOffset, apart, num_levels, global_nodes);
+   for (level = 0; level < num_levels; level++)
+   {
+      HYPRE_Int sum = 0;
+      for (i = 0; i < num_procs; i++) sum +=numGhostFromProc[i][level];
+      printf("Rank %d, level %d: Sum of numGhostFromProc = %d, numNewGhostNodes = %d\n", myid, level, sum, numNewGhostNodes[level]);
+   }
+   
 
    // Coarsest level should always own all info (i.e. should not ask for ghost nodes)
    // If this is not the case, raise an error
@@ -2081,7 +2088,7 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
 
 
    // Debugging:
-   // if (myid == 0)
+   // if (myid == 2)
    // {
    //    FILE *file;
    //    char filename[255];
@@ -2093,6 +2100,22 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
    //       for (i = 0; i < numGhostFromProc[proc][1]; i++)
    //       {
    //          hypre_fprintf(file, "  %d\n", ghostGlobalIndex[proc][1][i]);
+   //       }
+   //    }
+   //    fclose(file);
+   // }
+   // if (myid == 2)
+   // {
+   //    FILE *file;
+   //    char filename[255];
+   //    hypre_sprintf(filename, "/Users/mitchell82/Desktop/before_ghostUnpackIndexRank%dLevel%d.txt", myid, 1);
+   //    file = fopen(filename, "w");
+   //    for (proc = 0; proc < num_procs; proc++)
+   //    {
+   //       hypre_fprintf(file, "Proc %d:\n", proc);
+   //       for (i = 0; i < numGhostFromProc[proc][1]; i++)
+   //       {
+   //          hypre_fprintf(file, "  %d\n", ghostUnpackIndex[proc][1][i]);
    //       }
    //    }
    //    fclose(file);
@@ -2214,7 +2237,7 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
 
 
    // Debugging:
-   // if (myid == 0)
+   // if (myid == 2)
    // {
    //    hypre_printf("Rank %d: num_contacts = %d\n", myid, num_contacts);
    //    FILE *file;
@@ -2250,7 +2273,7 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
 
 
    // Debugging:
-   // if (myid == 0)
+   // if (myid == 2)
    // {
    //    FILE *file;
    //    char filename[255];
@@ -2342,7 +2365,7 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
                }
 
                ghostGlobalIndex[actualProcID][level][ ghostInfoIndex ] = old_ghostGlobalIndex[proc][level][i];
-               ghostGlobalIndex[actualProcID][level][ ghostInfoIndex ] = old_ghostGlobalIndex[proc][level][i];
+               ghostUnpackIndex[actualProcID][level][ ghostInfoIndex ] = old_ghostUnpackIndex[proc][level][i];
                numGhostFromProc[actualProcID][level]++;
 
             }
@@ -2380,7 +2403,7 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
 
 
    // Debugging:
-   // if (myid == 0)
+   // if (myid == 2)
    // {
    //    FILE *file;
    //    char filename[255];
@@ -2396,7 +2419,22 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
    //    }
    //    fclose(file);
    // }
-
+   // if (myid == 2)
+   // {
+   //    FILE *file;
+   //    char filename[255];
+   //    hypre_sprintf(filename, "/Users/mitchell82/Desktop/after_ghostUnpackIndexRank%dLevel%d.txt", myid, 1);
+   //    file = fopen(filename, "w");
+   //    for (proc = 0; proc < num_procs; proc++)
+   //    {
+   //       hypre_fprintf(file, "Proc %d:\n", proc);
+   //       for (i = 0; i < numGhostFromProc[proc][1]; i++)
+   //       {
+   //          hypre_fprintf(file, "  %d\n", ghostUnpackIndex[proc][1][i]);
+   //       }
+   //    }
+   //    fclose(file);
+   // }
 
 
 
