@@ -19,7 +19,7 @@
 HYPRE_Int
 hypre_DriveSystemStructHelp( )
 {
-   hypre_printf("System Struct Options: [<options>]\n");
+   hypre_printf("SystemStructOptions: [<options>]\n");
    hypre_printf("\n");
 
    return 0;
@@ -28,8 +28,7 @@ hypre_DriveSystemStructHelp( )
 HYPRE_Int
 hypre_DriveSystemStructCreate(
    char       *argv[],
-   HYPRE_Int   argi,
-   HYPRE_Int   argn,
+   HYPRE_Int   argc,
    HYPRE_Int   object_type,
    HYPRE_StructMatrix *A_ptr,
    HYPRE_StructVector *b_ptr,

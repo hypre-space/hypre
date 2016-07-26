@@ -14,18 +14,27 @@
 
 #define DEBUG 0
 
-HYPRE_Int *argn_ref;
-#define ArgSet(argi, argn, index)  argi = argn = index; argn_ref = &argn
-#define ArgInc()                  *argn_ref++
-
 /*--------------------------------------------------------------------------
- * General Solver Options
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_DriveSolverGeneralHelp()
+hypre_DriveSolverCreate(
+   hypre_DriveSolver *solver )
 {
-   hypre_printf("Solver General Options: [<options>]\n");
+   (solver -> id)     = NONE;
+   (solver -> solver) = NULL;
+   (solver -> solve)  = NULL;
+   (solver -> setup)  = NULL;
+   (solver -> argv)   = NULL;
+   (solver -> argc)   = 0;
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DriveSolverStdHelp()
+{
+   hypre_printf("SolverStdOptions: [<options>]\n");
    hypre_printf("\n");
    hypre_printf("  -tol <val>         : convergence tolerance (default 1e-6)\n");
    hypre_printf("  -atol <val>        : absolute tolerance\n");
@@ -36,60 +45,65 @@ hypre_DriveSolverGeneralHelp()
 }
 
 HYPRE_Int
-hypre_DriveSolverGeneralOptions(
-   char       *argv[],
-   HYPRE_Int   argi,
-   HYPRE_Int   argn,
+hypre_DriveSolverStdDefaults(
    HYPRE_Real *tol_ptr,
    HYPRE_Real *atol_ptr,
    HYPRE_Int  *max_iter_ptr )
 {
-   HYPRE_Real tol      = 1.0e-6;
-   HYPRE_Real atol     = 0.0;
-   HYPRE_Int  max_iter = 100;
+   *tol_ptr      = 1.0e-6;
+   *atol_ptr     = 0.0;
+   *max_iter_ptr = 100;
 
-   HYPRE_Int  arg_index;
+   return 0;
+}
 
-   arg_index = argi;
+HYPRE_Int
+hypre_DriveSolverStdOptions(
+   char       *argv[],
+   HYPRE_Int   argc,
+   HYPRE_Real *tol_ptr,
+   HYPRE_Real *atol_ptr,
+   HYPRE_Int  *max_iter_ptr )
+{
+   HYPRE_Int  argi, argn;
 
-   while (arg_index < argn)
+   ArgInit(argv, &argi, &argn);
+   while (argi < argc)
    {
-      if ( strcmp(argv[arg_index], "-tol") == 0 )
+      if ( strcmp(argv[argi], "-tol") == 0 )
       {
-         arg_index++;
-         tol = atof(argv[arg_index++]);
+         argi++;
+         *tol_ptr = atof(argv[argi++]);
       }
-      else if ( strcmp(argv[arg_index], "-atol") == 0 )
+      else if ( strcmp(argv[argi], "-atol") == 0 )
       {
-         arg_index++;
-         atol = atof(argv[arg_index++]);
+         argi++;
+         *atol_ptr = atof(argv[argi++]);
       }
-      else if ( strcmp(argv[arg_index], "-max_iter") == 0 )
+      else if ( strcmp(argv[argi], "-max_iter") == 0 )
       {
-         arg_index++;
-         max_iter = atoi(argv[arg_index++]);
+         argi++;
+         *max_iter_ptr = atoi(argv[argi++]);
       }
       else
       {
-         arg_index++;
+         ArgNext(argv, &argi, &argn);
       }
    }
-
-   *tol_ptr      = tol;
-   *atol_ptr     = atol;
-   *max_iter_ptr = max_iter;
 
    return 0;
 }
 
 /*--------------------------------------------------------------------------
- * PCG Solver
+ * Krylov Solvers
  *--------------------------------------------------------------------------*/
+
+/* PCG Solver */
 
 HYPRE_Int
 hypre_DrivePCGHelp()
 {
-   hypre_printf("PCG Options: [<gen options>] [<options>] [-diag | <precond>]\n");
+   hypre_printf("PCGOptions: <SolverStdOptions> [<options>]\n");
    hypre_printf("\n");
 
    return 0;
@@ -97,19 +111,15 @@ hypre_DrivePCGHelp()
 
 HYPRE_Int
 hypre_DrivePCGSet(
+   HYPRE_Solver solver,
    char      *argv[],
-   HYPRE_Int  argi,
-   HYPRE_Int  argn,
-   HYPRE_Solver precond,
-   HYPRE_PtrToSolverFcn precond_solve,
-   HYPRE_PtrToSolverFcn precond_setup,
-   HYPRE_Solver solver )
+   HYPRE_Int  argc,
+   HYPRE_Real tol,
+   HYPRE_Real atol,
+   HYPRE_Int  max_iter )
 {
-   HYPRE_Real tol, atol;
-   HYPRE_Int  max_iter;
-
    /* Set general options */
-   hypre_DriveSolverGeneralOptions(argv, argi, argn, &tol, &atol, &max_iter);
+   hypre_DriveSolverStdOptions(argv, argc, &tol, &atol, &max_iter);
    HYPRE_PCGSetTol(solver, tol);
    HYPRE_PCGSetMaxIter(solver, max_iter);
 
@@ -118,22 +128,15 @@ hypre_DrivePCGSet(
    HYPRE_PCGSetRelChange(solver, 0);
    HYPRE_PCGSetPrintLevel(solver, 1);
 
-   if (precond_solve != NULL)
-   {
-      HYPRE_PCGSetPrecond(solver, precond_solve, precond_setup, precond);
-   }
-
    return 0;
 }
 
-/*--------------------------------------------------------------------------
- * GMRES Solver
- *--------------------------------------------------------------------------*/
+/* GMRES Solver */
 
 HYPRE_Int
 hypre_DriveGMRESHelp()
 {
-   hypre_printf("GMRES Options: [<gen options>] [<options>] [-diag | <precond>]\n");
+   hypre_printf("GMRESOptions: <SolverStdOptions> [<options>]\n");
    hypre_printf("\n");
 
    return 0;
@@ -141,19 +144,15 @@ hypre_DriveGMRESHelp()
 
 HYPRE_Int
 hypre_DriveGMRESSet(
+   HYPRE_Solver solver,
    char      *argv[],
-   HYPRE_Int  argi,
-   HYPRE_Int  argn,
-   HYPRE_Solver precond,
-   HYPRE_PtrToSolverFcn precond_solve,
-   HYPRE_PtrToSolverFcn precond_setup,
-   HYPRE_Solver solver )
+   HYPRE_Int  argc,
+   HYPRE_Real tol,
+   HYPRE_Real atol,
+   HYPRE_Int  max_iter )
 {
-   HYPRE_Real tol, atol;
-   HYPRE_Int  max_iter;
-
    /* Set general options */
-   hypre_DriveSolverGeneralOptions(argv, argi, argn, &tol, &atol, &max_iter);
+   hypre_DriveSolverStdOptions(argv, argc, &tol, &atol, &max_iter);
    HYPRE_GMRESSetTol(solver, tol);
    HYPRE_GMRESSetMaxIter(solver, max_iter);
 
@@ -162,22 +161,15 @@ hypre_DriveGMRESSet(
    HYPRE_GMRESSetLogging(solver, 1);
    HYPRE_GMRESSetKDim(solver, 5);
 
-   if (precond_solve != NULL)
-   {
-      HYPRE_GMRESSetPrecond(solver, precond_solve, precond_setup, precond);
-   }
-
    return 0;
 }
 
-/*--------------------------------------------------------------------------
- * BiCGSTAB Solver
- *--------------------------------------------------------------------------*/
+/* BiCGSTAB Solver */
 
 HYPRE_Int
 hypre_DriveBiCGSTABHelp()
 {
-   hypre_printf("BiCGSTAB Options: [<gen options>] [<options>] [-diag | <precond>]\n");
+   hypre_printf("BiCGSTABOptions: <SolverStdOptions> [<options>]\n");
    hypre_printf("\n");
 
    return 0;
@@ -185,19 +177,15 @@ hypre_DriveBiCGSTABHelp()
 
 HYPRE_Int
 hypre_DriveBiCGSTABSet(
+   HYPRE_Solver solver,
    char      *argv[],
-   HYPRE_Int  argi,
-   HYPRE_Int  argn,
-   HYPRE_Solver precond,
-   HYPRE_PtrToSolverFcn precond_solve,
-   HYPRE_PtrToSolverFcn precond_setup,
-   HYPRE_Solver solver )
+   HYPRE_Int  argc,
+   HYPRE_Real tol,
+   HYPRE_Real atol,
+   HYPRE_Int  max_iter )
 {
-   HYPRE_Real tol, atol;
-   HYPRE_Int  max_iter;
-
    /* Set general options */
-   hypre_DriveSolverGeneralOptions(argv, argi, argn, &tol, &atol, &max_iter);
+   hypre_DriveSolverStdOptions(argv, argc, &tol, &atol, &max_iter);
    HYPRE_BiCGSTABSetTol(solver, tol);
    HYPRE_BiCGSTABSetMaxIter(solver, max_iter);
 
@@ -205,22 +193,15 @@ hypre_DriveBiCGSTABSet(
    HYPRE_BiCGSTABSetPrintLevel(solver, 1);
    HYPRE_BiCGSTABSetLogging(solver, 1);
 
-   if (precond_solve != NULL)
-   {
-      HYPRE_BiCGSTABSetPrecond(solver, precond_solve, precond_setup, precond);
-   }
-
    return 0;
 }
 
-/*--------------------------------------------------------------------------
- * FlexGMRES Solver
- *--------------------------------------------------------------------------*/
+/* FlexGMRES Solver */
 
 HYPRE_Int
 hypre_DriveFlexGMRESHelp()
 {
-   hypre_printf("FlexGMRES Options: [<gen options>] [<options>] [-diag | <precond>]\n");
+   hypre_printf("FlexGMRESOptions: <SolverStdOptions> [<options>]\n");
    hypre_printf("\n");
 
    return 0;
@@ -228,19 +209,15 @@ hypre_DriveFlexGMRESHelp()
 
 HYPRE_Int
 hypre_DriveFlexGMRESSet(
+   HYPRE_Solver solver,
    char      *argv[],
-   HYPRE_Int  argi,
-   HYPRE_Int  argn,
-   HYPRE_Solver precond,
-   HYPRE_PtrToSolverFcn precond_solve,
-   HYPRE_PtrToSolverFcn precond_setup,
-   HYPRE_Solver solver )
+   HYPRE_Int  argc,
+   HYPRE_Real tol,
+   HYPRE_Real atol,
+   HYPRE_Int  max_iter )
 {
-   HYPRE_Real tol, atol;
-   HYPRE_Int  max_iter;
-
    /* Set general options */
-   hypre_DriveSolverGeneralOptions(argv, argi, argn, &tol, &atol, &max_iter);
+   hypre_DriveSolverStdOptions(argv, argc, &tol, &atol, &max_iter);
    HYPRE_FlexGMRESSetTol(solver, tol);
    HYPRE_FlexGMRESSetMaxIter(solver, max_iter);
 
@@ -249,22 +226,15 @@ hypre_DriveFlexGMRESSet(
    HYPRE_FlexGMRESSetLogging(solver, 1);
    HYPRE_FlexGMRESSetKDim(solver, 5);
 
-   if (precond_solve != NULL)
-   {
-      HYPRE_FlexGMRESSetPrecond(solver, precond_solve, precond_setup, precond);
-   }
-
    return 0;
 }
 
-/*--------------------------------------------------------------------------
- * LGMRES Solver
- *--------------------------------------------------------------------------*/
+/* LGMRES Solver */
 
 HYPRE_Int
 hypre_DriveLGMRESHelp()
 {
-   hypre_printf("LGMRES Options: [<gen options>] [<options>] [-diag | <precond>]\n");
+   hypre_printf("LGMRESOptions: <SolverStdOptions> [<options>]\n");
    hypre_printf("\n");
 
    return 0;
@@ -272,19 +242,15 @@ hypre_DriveLGMRESHelp()
 
 HYPRE_Int
 hypre_DriveLGMRESSet(
+   HYPRE_Solver solver,
    char      *argv[],
-   HYPRE_Int  argi,
-   HYPRE_Int  argn,
-   HYPRE_Solver precond,
-   HYPRE_PtrToSolverFcn precond_solve,
-   HYPRE_PtrToSolverFcn precond_setup,
-   HYPRE_Solver solver )
+   HYPRE_Int  argc,
+   HYPRE_Real tol,
+   HYPRE_Real atol,
+   HYPRE_Int  max_iter )
 {
-   HYPRE_Real tol, atol;
-   HYPRE_Int  max_iter;
-
    /* Set general options */
-   hypre_DriveSolverGeneralOptions(argv, argi, argn, &tol, &atol, &max_iter);
+   hypre_DriveSolverStdOptions(argv, argc, &tol, &atol, &max_iter);
    HYPRE_LGMRESSetTol(solver, tol);
    HYPRE_LGMRESSetMaxIter(solver, max_iter);
 
@@ -294,10 +260,243 @@ hypre_DriveLGMRESSet(
    HYPRE_LGMRESSetKDim(solver, 10);
    HYPRE_LGMRESSetAugDim(solver, 2);
 
-   if (precond_solve != NULL)
+   return 0;
+}
+
+/* Krylov Solver */
+
+HYPRE_Int
+hypre_DriveKrylovHelp()
+{
+   hypre_printf("KrylovOptions: [<option>]\n");
+   hypre_printf("\n");
+   hypre_printf("  -pcg       { <PCGOptions> }\n");
+   hypre_printf("  -gmres     { <GMRESOptions> }\n");
+   hypre_printf("  -bicgstab  { <BiCGSTABOptions> }\n");
+   hypre_printf("  -flexgmres { <FlexGMRESOptions> }\n");
+   hypre_printf("  -lgmres    { <LGMRESOptions> }\n");
+   hypre_printf("\n");
+   hypre_DrivePCGHelp();
+   hypre_DriveGMRESHelp();
+   hypre_DriveBiCGSTABHelp();
+   hypre_DriveFlexGMRESHelp();
+   hypre_DriveLGMRESHelp();
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DriveKrylovCreate(
+   char      *argv[],
+   HYPRE_Int  argc,
+   hypre_DriveSolver *solver_ptr )
+{
+   hypre_DriveSolver solver;
+   HYPRE_Int         argi, argn, tmp_argi;
+
+   hypre_DriveSolverCreate(&solver);
+
+   ArgInit(argv, &argi, &argn);
+   while (argi < argc)
    {
-      HYPRE_LGMRESSetPrecond(solver, precond_solve, precond_setup, precond);
+      if ( strcmp(argv[argi], "-pcg") == 0 )
+      {
+         solver.id = PCG;
+      }
+      else if ( strcmp(argv[argi], "-gmres") == 0 )
+      {
+         solver.id = GMRES;
+      }
+      else if ( strcmp(argv[argi], "-bicgstab") == 0 )
+      {
+         solver.id = BiCGSTAB;
+      }
+      else if ( strcmp(argv[argi], "-flexgmres") == 0 )
+      {
+         solver.id = FlexGMRES;
+      }
+      else if ( strcmp(argv[argi], "-lgmres") == 0 )
+      {
+         solver.id = LGMRES;
+      }
+      ArgNext(argv, &argi, &argn);
+
+      if (solver.id != NONE)
+      {
+         ArgStripBraces(argv, argi, argn, &solver.argv, &tmp_argi, &solver.argc);
+         break;
+      }
    }
+
+   *solver_ptr = solver;
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DriveKrylovSetup(
+   hypre_DriveSolver solver,
+   hypre_DriveSolver precond,
+   HYPRE_Real   tol,
+   HYPRE_Real   atol,
+   HYPRE_Int    max_iter,
+   HYPRE_Matrix A,
+   HYPRE_Vector b,
+   HYPRE_Vector x )
+{
+   switch (solver.id)
+   {
+      case PCG:
+      {
+         hypre_DrivePCGSet(solver.solver, solver.argv, solver.argc, tol, atol, max_iter);
+         if (precond.solve != NULL)
+         {
+            HYPRE_PCGSetPrecond(solver.solver, precond.solve, precond.setup, precond.solver);
+         }
+         HYPRE_PCGSetup(solver.solver, A, b, x);
+      }
+      break;
+
+      case GMRES:
+      {
+         hypre_DriveGMRESSet(solver.solver, solver.argv, solver.argc, tol, atol, max_iter);
+         if (precond.solve != NULL)
+         {
+            HYPRE_GMRESSetPrecond(solver.solver, precond.solve, precond.setup, precond.solver);
+         }
+         HYPRE_GMRESSetup(solver.solver, A, b, x);
+      }
+      break;
+
+      case BiCGSTAB:
+      {
+         hypre_DriveBiCGSTABSet(solver.solver, solver.argv, solver.argc, tol, atol, max_iter);
+         if (precond.solve != NULL)
+         {
+            HYPRE_BiCGSTABSetPrecond(solver.solver, precond.solve, precond.setup, precond.solver);
+         }
+         HYPRE_BiCGSTABSetup(solver.solver, A, b, x);
+      }
+      break;
+
+      case FlexGMRES:
+      {
+         hypre_DriveFlexGMRESSet(solver.solver, solver.argv, solver.argc, tol, atol, max_iter);
+         if (precond.solve != NULL)
+         {
+            HYPRE_FlexGMRESSetPrecond(solver.solver, precond.solve, precond.setup, precond.solver);
+         }
+         HYPRE_FlexGMRESSetup(solver.solver, A, b, x);
+      }
+      break;
+
+      case LGMRES:
+      {
+         hypre_DriveLGMRESSet(solver.solver, solver.argv, solver.argc, tol, atol, max_iter);
+         if (precond.solve != NULL)
+         {
+            HYPRE_LGMRESSetPrecond(solver.solver, precond.solve, precond.setup, precond.solver);
+         }
+         HYPRE_LGMRESSetup(solver.solver, A, b, x);
+      }
+      break;
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DriveKrylovSolve(
+   hypre_DriveSolver solver,
+   HYPRE_Matrix A,
+   HYPRE_Vector b,
+   HYPRE_Vector x )
+{
+   switch (solver.id)
+   {
+      case PCG:
+      {
+         HYPRE_PCGSolve(solver.solver, A, b, x);
+      }
+      break;
+
+      case GMRES:
+      {
+         HYPRE_GMRESSolve(solver.solver, A, b, x);
+      }
+      break;
+
+      case BiCGSTAB:
+      {
+         HYPRE_BiCGSTABSolve(solver.solver, A, b, x);
+      }
+      break;
+
+      case FlexGMRES:
+      {
+         HYPRE_FlexGMRESSolve(solver.solver, A, b, x);
+      }
+      break;
+
+      case LGMRES:
+      {
+         HYPRE_LGMRESSolve(solver.solver, A, b, x);
+      }
+      break;
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DriveKrylovGetStats(
+   hypre_DriveSolver solver,
+   HYPRE_Int   *num_iterations_ptr,
+   HYPRE_Real  *final_res_norm_ptr )
+{
+   HYPRE_Int   num_iterations;
+   HYPRE_Real  final_res_norm;
+
+   switch (solver.id)
+   {
+      case PCG:
+      {
+         HYPRE_PCGGetNumIterations(solver.solver, &num_iterations);
+         HYPRE_PCGGetFinalRelativeResidualNorm(solver.solver, &final_res_norm);
+      }
+      break;
+
+      case GMRES:
+      {
+         HYPRE_GMRESGetNumIterations(solver.solver, &num_iterations);
+         HYPRE_GMRESGetFinalRelativeResidualNorm(solver.solver, &final_res_norm);
+      }
+      break;
+
+      case BiCGSTAB:
+      {
+         HYPRE_BiCGSTABGetNumIterations(solver.solver, &num_iterations);
+         HYPRE_BiCGSTABGetFinalRelativeResidualNorm(solver.solver, &final_res_norm);
+      }
+      break;
+
+      case FlexGMRES:
+      {
+         HYPRE_FlexGMRESGetNumIterations(solver.solver, &num_iterations);
+         HYPRE_FlexGMRESGetFinalRelativeResidualNorm(solver.solver, &final_res_norm);
+      }
+      break;
+
+      case LGMRES:
+      {
+         HYPRE_LGMRESGetNumIterations(solver.solver, &num_iterations);
+         HYPRE_LGMRESGetFinalRelativeResidualNorm(solver.solver, &final_res_norm);
+      }
+      break;
+   }
+
+   *num_iterations_ptr = num_iterations;
+   *final_res_norm_ptr = final_res_norm;
 
    return 0;
 }

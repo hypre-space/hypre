@@ -19,20 +19,58 @@
 HYPRE_Int
 hypre_DriveSolverParCSRHelp( )
 {
-   hypre_printf("Solver ParCSR Options: [<options>]\n");
+   hypre_printf("SolverParCSROptions: [<options>]\n");
    hypre_printf("\n");
 
    return 0;
 }
 
 HYPRE_Int
-hypre_DriveSolveParCSR(
+hypre_DriveSolverParCSRCreate(
    char      *argv[],
-   HYPRE_Int  argi,
-   HYPRE_Int  argn,
+   HYPRE_Int  argc,
+   hypre_DriveSolver *krylov,
+   hypre_DriveSolver *precond )
+{
+   return 0;
+}
+
+HYPRE_Int
+hypre_DriveSolverParCSRSetup(
+   hypre_DriveSolver  solver,
+   HYPRE_Int          precond_bool,
+   HYPRE_Real         tol,
+   HYPRE_Real         atol,
+   HYPRE_Int          max_iter,
    HYPRE_ParCSRMatrix A,
    HYPRE_ParVector    b,
    HYPRE_ParVector    x )
+{
+   return 0;
+}
+
+HYPRE_Int
+hypre_DriveSolverParCSRSolve(
+   hypre_DriveSolver  solver,
+   HYPRE_ParCSRMatrix A,
+   HYPRE_ParVector    b,
+   HYPRE_ParVector    x )
+{
+   return 0;
+}
+
+HYPRE_Int
+hypre_DriveSolverParCSRGetStats(
+   hypre_DriveSolver  solver,
+   HYPRE_Int         *num_iterations_ptr,
+   HYPRE_Real        *final_res_norm_ptr )
+{
+   return 0;
+}
+
+HYPRE_Int
+hypre_DriveSolverParCSRDestroy(
+   hypre_DriveSolver  solver )
 {
    return 0;
 }

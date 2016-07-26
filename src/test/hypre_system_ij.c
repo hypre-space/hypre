@@ -19,7 +19,7 @@
 HYPRE_Int
 hypre_DriveSystemIJHelp( )
 {
-   hypre_printf("System IJ Options: [<options>]\n");
+   hypre_printf("SystemIJOptions: [<options>]\n");
    hypre_printf("\n");
 
    return 0;
@@ -28,8 +28,7 @@ hypre_DriveSystemIJHelp( )
 HYPRE_Int
 hypre_DriveSystemIJCreate(
    char       *argv[],
-   HYPRE_Int   argi,
-   HYPRE_Int   argn,
+   HYPRE_Int   argc,
    HYPRE_Int   object_type,
    HYPRE_IJMatrix *A_ptr,
    HYPRE_IJVector *b_ptr,

@@ -2124,10 +2124,9 @@ SetCosineVector(   HYPRE_Real  scale,
 HYPRE_Int
 hypre_DriveSystemSStructHelp( )
 {
-   hypre_printf("System SStruct Options: [-in <filename>] [<options>]\n");
+   hypre_printf("SystemSStructOptions: [<options>]\n");
    hypre_printf("\n");
-   hypre_printf("  -in <filename>      : input file (default is `%s')\n",
-                infile_default);
+   hypre_printf("  -in <filename>      : input file (default is `%s')\n", infile_default);
    hypre_printf("  -pt <pt1> <pt2> ... : set part(s) for subsequent options\n");
    hypre_printf("  -pooldist <p>       : pool distribution to use\n");
    hypre_printf("  -r <rx> <ry> <rz>   : refine part(s)\n");
@@ -2150,8 +2149,7 @@ hypre_DriveSystemSStructHelp( )
 HYPRE_Int
 hypre_DriveSystemSStructCreate(
    char       *argv[],
-   HYPRE_Int   argi,
-   HYPRE_Int   argn,
+   HYPRE_Int   argc,
    HYPRE_Int   object_type,
    HYPRE_SStructMatrix *A_ptr,
    HYPRE_SStructVector *b_ptr,
@@ -2200,11 +2198,11 @@ hypre_DriveSystemSStructCreate(
     * Read input file
     *-----------------------------------------------------------*/
 
-   arg_index = argi;
+   arg_index = 0;
 
    /* parse command line for input file name */
    infile = infile_default;
-   if (arg_index < argn)
+   if (arg_index < argc)
    {
       if ( strcmp(argv[arg_index], "-in") == 0 )
       {
@@ -2249,7 +2247,7 @@ hypre_DriveSystemSStructCreate(
     * Parse command line
     *-----------------------------------------------------------*/
 
-   while (arg_index < argn)
+   while (arg_index < argc)
    {
       if ( strcmp(argv[arg_index], "-pt") == 0 )
       {
@@ -2977,8 +2975,7 @@ hypre_DriveSystemSStructCreate(
 
       /* Set up the domain grid */
 
-      HYPRE_SStructGridCreate(hypre_MPI_COMM_WORLD, data.ndim, data.nparts,
-                              &G_grid);
+      HYPRE_SStructGridCreate(hypre_MPI_COMM_WORLD, data.ndim, data.nparts, &G_grid);
       for (part = 0; part < data.nparts; part++)
       {
          pdata = data.pdata[part];
@@ -3257,8 +3254,7 @@ hypre_DriveSystemSStructDestroy(
          pdata = data.pdata[part];
          for (var = 0; var < pdata.nvars; var++)
          {
-            hypre_sprintf(filename, "sstruct.out.xx.%02d.%02d.%05d",
-                          part, var, myid);
+            hypre_sprintf(filename, "sstruct.out.xx.%02d.%02d.%05d", part, var, myid);
             if ((file = fopen(filename, "w")) == NULL)
             {
                hypre_printf("Error: can't open output file %s\n", filename);

@@ -13,17 +13,14 @@
 #ifndef HYPRE_DRIVE_SYSTEM_HEADER
 #define HYPRE_DRIVE_SYSTEM_HEADER
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+#include "hypre_drive.h"
 
-#include "_hypre_utilities.h"
 #include "HYPRE_sstruct_mv.h"
 #include "HYPRE_struct_mv.h"
 #include "HYPRE_IJ_mv.h"
 
 /*--------------------------------------------------------------------------
- * Prototypes for driver system
+ * Prototypes for hypre drive system
  *--------------------------------------------------------------------------*/
 
 /* hypre_system_struct.c */
@@ -34,7 +31,6 @@ hypre_DriveSystemStructHelp();
 HYPRE_Int
 hypre_DriveSystemStructCreate(
    char       *argv[],
-   HYPRE_Int   argi,
    HYPRE_Int   argn,
    HYPRE_Int   object_type,
    HYPRE_StructMatrix *A_ptr,
@@ -55,7 +51,6 @@ hypre_DriveSystemSStructHelp();
 HYPRE_Int
 hypre_DriveSystemSStructCreate(
    char       *argv[],
-   HYPRE_Int   argi,
    HYPRE_Int   argn,
    HYPRE_Int   object_type,
    HYPRE_SStructMatrix *A_ptr,
@@ -76,7 +71,6 @@ hypre_DriveSystemIJHelp();
 HYPRE_Int
 hypre_DriveSystemIJCreate(
    char       *argv[],
-   HYPRE_Int   argi,
    HYPRE_Int   argn,
    HYPRE_Int   object_type,
    HYPRE_IJMatrix *A_ptr,

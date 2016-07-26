@@ -20,8 +20,14 @@
 #include "_hypre_utilities.h"
 
 /*--------------------------------------------------------------------------
- * Prototypes for driver
+ * Prototypes for hypre drive
  *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+ArgInit(
+   char        *argv[],
+   HYPRE_Int   *argi_ptr,
+   HYPRE_Int   *argn_ptr );
 
 HYPRE_Int
 ArgNext(
