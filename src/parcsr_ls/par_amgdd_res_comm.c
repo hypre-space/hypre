@@ -2058,6 +2058,9 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
 
 {
 
+   HYPRE_Int        num_procs, myid;
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    HYPRE_Int        level, proc, k, j, i, cnt, proc_cnt;
    HYPRE_Int        range_start, range_end; 
@@ -2075,13 +2078,33 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
    
    hypre_DataExchangeResponse        response_obj1;
 
+
+
+   // Debugging:
+   // if (myid == 0)
+   // {
+   //    FILE *file;
+   //    char filename[255];
+   //    hypre_sprintf(filename, "/Users/mitchell82/Desktop/before_ghostGlobalIndexRank%dLevel%d.txt", myid, 1);
+   //    file = fopen(filename, "w");
+   //    for (proc = 0; proc < num_procs; proc++)
+   //    {
+   //       hypre_fprintf(file, "Proc %d:\n", proc);
+   //       for (i = 0; i < numGhostFromProc[proc][1]; i++)
+   //       {
+   //          hypre_fprintf(file, "  %d\n", ghostGlobalIndex[proc][1][i]);
+   //       }
+   //    }
+   //    fclose(file);
+   // }
+
+
+
+
+
    HYPRE_Int                  **old_numGhostFromProc;
    HYPRE_Int                  ***old_ghostGlobalIndex;
    HYPRE_Int                  ***old_ghostUnpackIndex;
-
-   HYPRE_Int        num_procs, myid;
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
    old_numGhostFromProc =  hypre_CTAlloc(HYPRE_Int*, num_procs);
    old_ghostGlobalIndex = hypre_CTAlloc(HYPRE_Int**, num_procs);
@@ -2094,7 +2117,7 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
       for (j = 0; j < num_levels; j++)
       {
          // Copy over relevant old ghost node info where it exists
-         if (old_numGhostFromProc[i][j])
+         if (numGhostFromProc[i][j])
          {
             old_numGhostFromProc[i][j] = numGhostFromProc[i][j];
             numGhostFromProc[i][j] = 0;
@@ -2116,22 +2139,22 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
    }
 
 
-   // // Debugging:
-   // for (level = 0; level < num_levels; level++)
-   // {
-   //     hypre_printf("Partition level %d\n", level);
-   //     hypre_printf("   myid = %i, my assumed local range: [%i, %i]\n", myid, 
-   //                       apart[level]->row_start, apart[level]->row_end);
+   // Debugging:
+   for (level = 1; level < 2; level++)
+   {
+       hypre_printf("Partition level %d\n", level);
+       hypre_printf("   myid = %i, my assumed local range: [%i, %i]\n", myid, 
+                         apart[level]->row_start, apart[level]->row_end);
 
-   //    for (i=0; i<apart[level]->length; i++)
-   //    {
-   //      hypre_printf("   myid = %d, proc %d owns assumed partition range = [%d, %d]\n", 
-   //              myid, apart[level]->proc_list[i], apart[level]->row_start_list[i], 
-   //         apart[level]->row_end_list[i]);
-   //    }
+      for (i=0; i<apart[level]->length; i++)
+      {
+        hypre_printf("   myid = %d, proc %d owns assumed partition range = [%d, %d]\n", 
+                myid, apart[level]->proc_list[i], apart[level]->row_start_list[i], 
+           apart[level]->row_end_list[i]);
+      }
 
-   //    hypre_printf("   myid = %d, length of apart[level] = %d\n", myid, apart[level]->length);
-   // }
+      hypre_printf("   myid = %d, length of apart[level] = %d\n", myid, apart[level]->length);
+   }
 
 
 
@@ -2188,6 +2211,30 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
    }
    contact_vec_starts[num_contacts] = cnt;
    
+
+
+   // Debugging:
+   // if (myid == 0)
+   // {
+   //    hypre_printf("Rank %d: num_contacts = %d\n", myid, num_contacts);
+   //    FILE *file;
+   //    char filename[255];
+   //    hypre_sprintf(filename, "/Users/mitchell82/Desktop/contact_bufRank%d.txt", myid);
+   //    file = fopen(filename, "w");
+   //    for (proc = 0; proc < num_contacts; proc++)
+   //    {
+   //       hypre_fprintf(file, "Proc %d:\n", contact_procs[proc]);
+   //       for (i = contact_vec_starts[proc]; i < contact_vec_starts[proc+1]; i++)
+   //       {
+   //          hypre_fprintf(file, "  %d\n", contact_buf[i]);
+   //       }
+   //    }
+   //    fclose(file);
+   // }
+
+
+
+
    /*create response object*/
    response_obj1.fill_response = FillResponseForLocateGhostNodes;
    response_obj1.data1 =  apart; /* this is necessary so we can fill responses*/ 
@@ -2199,6 +2246,28 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
                     contact_buf, contact_vec_starts, sizeof(HYPRE_Int), 
                      sizeof(HYPRE_Int), &response_obj1, max_response_size, 1, 
                      hypre_MPI_COMM_WORLD, (void**) &response_buf, &response_buf_starts);
+
+
+
+   // Debugging:
+   // if (myid == 0)
+   // {
+   //    FILE *file;
+   //    char filename[255];
+   //    hypre_sprintf(filename, "/Users/mitchell82/Desktop/response_bufRank%d.txt", myid);
+   //    file = fopen(filename, "w");
+   //    for (proc = 0; proc < num_contacts; proc++)
+   //    {
+   //       hypre_fprintf(file, "Proc %d:\n", contact_procs[proc]);
+   //       for (i = response_buf_starts[proc]; i < response_buf_starts[proc+1]; i++)
+   //       {
+   //          hypre_fprintf(file, "  %d\n", response_buf[i]);
+   //       }
+   //    }
+   //    fclose(file);
+   // }
+
+
 
    // Unpack the response buffer and fill in new_numGhostFromProc, new_ghostGlobalIndex, new_ghostUnpackIndex
    cnt = 0; // cnt is now indexing the reponse buffer
@@ -2219,13 +2288,34 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
                upper_bounds[i] = response_buf[cnt++];
             }
 
+            if (myid == 0)
+            {
+               printf("Rank 0 unpacking proc %d, level %d:\n", proc, level );
+               printf("proc_ids = \n");
+               for (i = 0; i < num_ranges; i++)
+               {
+                  printf("   %d\n", proc_ids[i]);
+               }
+               printf("upper_bounds = \n");
+               for (i = 0; i < num_ranges; i++)
+               {
+                  printf("   %d\n", upper_bounds[i]);
+               }
+            }
+
             // Loop over the nodes we asked for from this proc and copy their info to the arrays for the appropriate processors
             for (i = 0; i < old_numGhostFromProc[proc][level]; i++)
             {
                // Find which range this node belongs to
                j = 0;
                actualProcID = proc_ids[j];
-               while (old_ghostGlobalIndex[proc][level][i] > upper_bounds[j] && j < num_ranges) actualProcID = proc_ids[j++];
+               if (myid == 0) printf("old_ghostGlobalIndex[%d][%d][%d] = %d, upper_bounds[j] = %d\n", proc, level, i, old_ghostGlobalIndex[proc][level][i], upper_bounds[j]);
+               while (old_ghostGlobalIndex[proc][level][i] > upper_bounds[j] && j < num_ranges) 
+               {
+                  if (myid == 0) printf("j = %d, upper_bounds[j] = %d\n", j, upper_bounds[j]);
+                  actualProcID = proc_ids[++j];
+               }
+               if (myid == 0) printf("actualProcID = %d\n", actualProcID);
 
                //If new info arrays are still null when we need them, allocate
                if (!ghostGlobalIndex[actualProcID][level]) 
@@ -2285,6 +2375,31 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
    hypre_TFree(contact_buf);
    hypre_TFree(response_buf);
    hypre_TFree(response_buf_starts);
+
+
+
+
+   // Debugging:
+   // if (myid == 0)
+   // {
+   //    FILE *file;
+   //    char filename[255];
+   //    hypre_sprintf(filename, "/Users/mitchell82/Desktop/after_ghostGlobalIndexRank%dLevel%d.txt", myid, 1);
+   //    file = fopen(filename, "w");
+   //    for (proc = 0; proc < num_procs; proc++)
+   //    {
+   //       hypre_fprintf(file, "Proc %d:\n", proc);
+   //       for (i = 0; i < numGhostFromProc[proc][1]; i++)
+   //       {
+   //          hypre_fprintf(file, "  %d\n", ghostGlobalIndex[proc][1][i]);
+   //       }
+   //    }
+   //    fclose(file);
+   // }
+
+
+
+
 
    return hypre_error_flag;
 
