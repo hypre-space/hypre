@@ -2049,7 +2049,7 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
    {
       HYPRE_Int sum = 0;
       for (i = 0; i < num_procs; i++) sum +=numGhostFromProc[i][level];
-      printf("Rank %d, level %d: Sum of numGhostFromProc = %d, numNewGhostNodes = %d\n", myid, level, sum, numNewGhostNodes[level]);
+      // printf("Rank %d, level %d: Sum of numGhostFromProc = %d, numNewGhostNodes = %d\n", myid, level, sum, numNewGhostNodes[level]);
    }
    
 
@@ -2163,21 +2163,21 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
 
 
    // Debugging:
-   for (level = 1; level < 2; level++)
-   {
-       hypre_printf("Partition level %d\n", level);
-       hypre_printf("   myid = %i, my assumed local range: [%i, %i]\n", myid, 
-                         apart[level]->row_start, apart[level]->row_end);
+   // for (level = 1; level < 2; level++)
+   // {
+   //     hypre_printf("Partition level %d\n", level);
+   //     hypre_printf("   myid = %i, my assumed local range: [%i, %i]\n", myid, 
+   //                       apart[level]->row_start, apart[level]->row_end);
 
-      for (i=0; i<apart[level]->length; i++)
-      {
-        hypre_printf("   myid = %d, proc %d owns assumed partition range = [%d, %d]\n", 
-                myid, apart[level]->proc_list[i], apart[level]->row_start_list[i], 
-           apart[level]->row_end_list[i]);
-      }
+   //    for (i=0; i<apart[level]->length; i++)
+   //    {
+   //      hypre_printf("   myid = %d, proc %d owns assumed partition range = [%d, %d]\n", 
+   //              myid, apart[level]->proc_list[i], apart[level]->row_start_list[i], 
+   //         apart[level]->row_end_list[i]);
+   //    }
 
-      hypre_printf("   myid = %d, length of apart[level] = %d\n", myid, apart[level]->length);
-   }
+   //    hypre_printf("   myid = %d, length of apart[level] = %d\n", myid, apart[level]->length);
+   // }
 
 
 
@@ -2311,20 +2311,20 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
                upper_bounds[i] = response_buf[cnt++];
             }
 
-            if (myid == 0)
-            {
-               printf("Rank 0 unpacking proc %d, level %d:\n", proc, level );
-               printf("proc_ids = \n");
-               for (i = 0; i < num_ranges; i++)
-               {
-                  printf("   %d\n", proc_ids[i]);
-               }
-               printf("upper_bounds = \n");
-               for (i = 0; i < num_ranges; i++)
-               {
-                  printf("   %d\n", upper_bounds[i]);
-               }
-            }
+            // if (myid == 0)
+            // {
+            //    printf("Rank 0 unpacking proc %d, level %d:\n", proc, level );
+            //    printf("proc_ids = \n");
+            //    for (i = 0; i < num_ranges; i++)
+            //    {
+            //       printf("   %d\n", proc_ids[i]);
+            //    }
+            //    printf("upper_bounds = \n");
+            //    for (i = 0; i < num_ranges; i++)
+            //    {
+            //       printf("   %d\n", upper_bounds[i]);
+            //    }
+            // }
 
             // Loop over the nodes we asked for from this proc and copy their info to the arrays for the appropriate processors
             for (i = 0; i < old_numGhostFromProc[proc][level]; i++)
@@ -2332,13 +2332,13 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
                // Find which range this node belongs to
                j = 0;
                actualProcID = proc_ids[j];
-               if (myid == 0) printf("old_ghostGlobalIndex[%d][%d][%d] = %d, upper_bounds[j] = %d\n", proc, level, i, old_ghostGlobalIndex[proc][level][i], upper_bounds[j]);
+               // if (myid == 0) printf("old_ghostGlobalIndex[%d][%d][%d] = %d, upper_bounds[j] = %d\n", proc, level, i, old_ghostGlobalIndex[proc][level][i], upper_bounds[j]);
                while (old_ghostGlobalIndex[proc][level][i] > upper_bounds[j] && j < num_ranges) 
                {
-                  if (myid == 0) printf("j = %d, upper_bounds[j] = %d\n", j, upper_bounds[j]);
+                  // if (myid == 0) printf("j = %d, upper_bounds[j] = %d\n", j, upper_bounds[j]);
                   actualProcID = proc_ids[++j];
                }
-               if (myid == 0) printf("actualProcID = %d\n", actualProcID);
+               // if (myid == 0) printf("actualProcID = %d\n", actualProcID);
 
                //If new info arrays are still null when we need them, allocate
                if (!ghostGlobalIndex[actualProcID][level]) 
