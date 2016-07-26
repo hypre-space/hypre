@@ -238,7 +238,8 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 			row = A_rows_c[i];
 			for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
 			{
-				restrict_res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_c[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
+				if ( hypre_ParCompMatrixRowLocalIndices(row)[j] == -1 ) break;
+				else restrict_res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_c[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
 			}
 		}
 	}
