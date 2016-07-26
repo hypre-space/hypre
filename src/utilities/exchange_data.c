@@ -346,7 +346,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
          post_size = response_message_size - max_response_size; 
          if (post_size > 0) /*we will need to send the extra information later */   
          {
-            /*hypre_printf("myid = %d, post_size = %d\n", myid, post_size);*/
+            hypre_printf("!!!!!!!        myid = %d, post_size = %d          !!!!!!!!!!!!\n", myid, post_size);
 
             if (post_array_size == post_array_storage)
              
@@ -459,7 +459,6 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
    {
       hypre_TFree(recv_contact_buf);
    }
-  
    hypre_Free((char*)send_response_buf);
    hypre_TFree(contact_ptrs);
    hypre_TFree(response_ptrs);
