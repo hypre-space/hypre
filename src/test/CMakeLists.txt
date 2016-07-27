@@ -55,9 +55,6 @@ endif ()
 add_executable (ij ij.c)
 target_link_libraries (ij ${HYPRE_LIBS})
  
-add_executable (new_ij new_ij.c)
-target_link_libraries (new_ij ${HYPRE_LIBS})
- 
 add_executable (sstruct sstruct.c)
 target_link_libraries (sstruct ${HYPRE_LIBS})
  
