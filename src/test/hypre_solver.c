@@ -36,9 +36,9 @@ hypre_DriveSolverStdHelp()
 {
    hypre_printf("SolverStdOptions: [<options>]\n");
    hypre_printf("\n");
-   hypre_printf("  -tol <val>         : convergence tolerance (default 1e-6)\n");
-   hypre_printf("  -atol <val>        : absolute tolerance\n");
-   hypre_printf("  -max_iter <val>    : max iterations\n");
+   hypre_printf("  -tol <val>          : convergence tolerance (default 1e-6)\n");
+   hypre_printf("  -atol <val>         : absolute tolerance\n");
+   hypre_printf("  -max_iter <val>     : max iterations\n");
    hypre_printf("\n");
 
    return 0;

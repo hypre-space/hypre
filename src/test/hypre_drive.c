@@ -125,19 +125,23 @@ HYPRE_Int
 hypre_DriveSolverHelp(char *drivename)
 {
    hypre_printf("\n");
-   hypre_printf("Usage: %s [-system <SystemOptions>] [-solver <SolverOptions>]\n", drivename);
+   hypre_printf("Usage: %s [-system <SystemOptions>] [-solver <SolverOptions>] [<options>]\n",
+                drivename);
+   hypre_printf("\n");
+   hypre_printf("  -repeat <r>         : repeat system solve r times\n");
+   hypre_printf("  -help               : print help\n");
    hypre_printf("\n");
    hypre_printf("SystemOptions: <option>\n");
    hypre_printf("\n");
-   hypre_printf("   struct  { <SystemStructOptions> }\n");
-   hypre_printf("   sstruct { <SystemSStructOptions> }\n");
-   hypre_printf("   ij      { <SystemIJOptions> }\n");
+   hypre_printf("  struct  { <SystemStructOptions> }\n");
+   hypre_printf("  sstruct { <SystemSStructOptions> }\n");
+   hypre_printf("  ij      { <SystemIJOptions> }\n");
    hypre_printf("\n");
    hypre_printf("SolverOptions: <option>\n");
    hypre_printf("\n");
-   hypre_printf("   struct  { <SolverStdOptions> [<KrylovOptions>] [<SolverStructOptions>] }\n");
-   hypre_printf("   sstruct { <SolverStdOptions> [<KrylovOptions>] [<SolverSStructOptions>] }\n");
-   hypre_printf("   parcsr  { <SolverStdOptions> [<KrylovOptions>] [<SolverParCSROptions>] }\n");
+   hypre_printf("  struct  { <SolverStdOptions> [<KrylovOptions>] [<SolverStructOptions>] }\n");
+   hypre_printf("  sstruct { <SolverStdOptions> [<KrylovOptions>] [<SolverSStructOptions>] }\n");
+   hypre_printf("  parcsr  { <SolverStdOptions> [<KrylovOptions>] [<SolverParCSROptions>] }\n");
    hypre_printf("\n");
    hypre_DriveSystemStructHelp();
    hypre_DriveSystemSStructHelp();
@@ -173,7 +177,7 @@ main( hypre_int argc,
 
    hypre_DriveSolver     krylov, precond, solver;
 
-   HYPRE_Int             precond_bool;
+   HYPRE_Int             precond_bool, reps, repeat;
 
    HYPRE_StructMatrix    s_A;
    HYPRE_StructVector    s_b, s_x;
@@ -212,6 +216,7 @@ main( hypre_int argc,
    system_type = SYSTEM_IJ;
    solver_type = SOLVER_PARCSR;
    object_type = HYPRE_PARCSR;
+   repeat      = 1;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -267,6 +272,12 @@ main( hypre_int argc,
          }
          ArgNext(argv, &argi, &argn);
          ArgStripBraces(argv, argi, argn, &solver_argv, &solver_argi, &solver_argn);
+      }
+      else if ( strcmp(argv[argi], "-repeat") == 0 )
+      {
+         ArgNext(argv, &argi, &argn);
+         repeat = atoi(argv[argi]);
+         ArgNext(argv, &argi, &argn);
       }
       else if ( strcmp(argv[argi], "-help") == 0 )
       {
@@ -477,37 +488,78 @@ main( hypre_int argc,
    time_index = hypre_InitializeTiming("Solver Solve");
    hypre_BeginTiming(time_index);
 
-   switch (solver_type)
+   for (reps = 0; reps < repeat; reps++)
    {
-      case SOLVER_STRUCT:
+      if (reps > 0)
       {
-         hypre_DriveSolverStructSolve(solver, s_A, s_b, s_x);
-      }
-      break;
+         switch (system_type)
+         {
+            case SYSTEM_STRUCT:
+            {
+               HYPRE_StructMatrixInitialize(s_A);
+               HYPRE_StructVectorInitialize(s_b);
+               HYPRE_StructMatrixAssemble(s_A);
+               HYPRE_StructVectorAssemble(s_b);
+               /* No GetObject in this interface */
+            }
+            break;
 
-      case SOLVER_SSTRUCT:
-      {
-         hypre_DriveSolverSStructSolve(solver, obj_A, obj_b, obj_x);
-      }
-      break;
+            case SYSTEM_SSTRUCT:
+            {
+               HYPRE_SStructMatrixInitialize(ss_A);
+               HYPRE_SStructVectorInitialize(ss_b);
+               HYPRE_SStructMatrixAssemble(ss_A);
+               HYPRE_SStructVectorAssemble(ss_b);
+               HYPRE_SStructMatrixGetObject(ss_A, &obj_A);
+               HYPRE_SStructVectorGetObject(ss_b, &obj_b);
+            }
+            break;
 
-      case SOLVER_PARCSR:
-      {
-         hypre_DriveSolverParCSRSolve(solver, obj_A, obj_b, obj_x);
+            case SYSTEM_IJ:
+            {
+               HYPRE_IJMatrixInitialize(ij_A);
+               HYPRE_IJVectorInitialize(ij_b);
+               HYPRE_IJMatrixAssemble(ij_A);
+               HYPRE_IJVectorAssemble(ij_b);
+               HYPRE_IJMatrixGetObject(ij_A, &obj_A);
+               HYPRE_IJVectorGetObject(ij_b, &obj_b);
+            }
+            break;
+         }
       }
-      break;
 
-      case SOLVER_XOM:
+      switch (solver_type)
       {
-         hxom_DriveSolverSolve(solver, obj_A, obj_b, obj_x);
-      }
-      break;
+         case SOLVER_STRUCT:
+         {
+            hypre_DriveSolverStructSolve(solver, s_A, s_b, s_x);
+         }
+         break;
 
-      case SOLVER_KRYLOV:
-      {
-         hypre_DriveKrylovSolve(solver, obj_A, obj_b, obj_x);
+         case SOLVER_SSTRUCT:
+         {
+            hypre_DriveSolverSStructSolve(solver, obj_A, obj_b, obj_x);
+         }
+         break;
+
+         case SOLVER_PARCSR:
+         {
+            hypre_DriveSolverParCSRSolve(solver, obj_A, obj_b, obj_x);
+         }
+         break;
+
+         case SOLVER_XOM:
+         {
+            hxom_DriveSolverSolve(solver, obj_A, obj_b, obj_x);
+         }
+         break;
+
+         case SOLVER_KRYLOV:
+         {
+            hypre_DriveKrylovSolve(solver, obj_A, obj_b, obj_x);
+         }
+         break;
       }
-      break;
    }
 
    hypre_EndTiming(time_index);

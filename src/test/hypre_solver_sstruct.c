@@ -23,9 +23,9 @@ hypre_DriveSplitHelp()
 {
    hypre_printf("SplitOptions: <SolverStdOptions> [<options>]\n");
    hypre_printf("\n");
-   hypre_printf("  -pfmg          : Use PFMG for Struct Solver\n");
-   hypre_printf("  -smg           : Use SMG for Struct Solver\n");
-   hypre_printf("  -jac           : Use Jacobi for Struct Solver\n");
+   hypre_printf("  -pfmg               : Use PFMG for Struct Solver\n");
+   hypre_printf("  -smg                : Use SMG for Struct Solver\n");
+   hypre_printf("  -jac                : Use Jacobi for Struct Solver\n");
    hypre_printf("\n");
 
    return 0;
@@ -96,14 +96,14 @@ hypre_DriveSysPFMGHelp()
 {
    hypre_printf("SysPFMGOptions: <SolverStdOptions> [<options>]\n");
    hypre_printf("\n");
-   hypre_printf("  -v <n_pre> <n_post>: Number of pre and post relax\n");
-   hypre_printf("  -relax <r>         : Relaxation type\n");
+   hypre_printf("  -v <n_pre> <n_post> : Number of pre and post relax\n");
+   hypre_printf("  -relax <r>          : Relaxation type\n");
    hypre_printf("                        0 - Jacobi\n");
    hypre_printf("                        1 - Weighted Jacobi (default)\n");
    hypre_printf("                        2 - R/B Gauss-Seidel\n");
    hypre_printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
-   hypre_printf("  -w <weight>        : Jacobi weight\n");
-   hypre_printf("  -skip <s>          : Skip relaxation (0 or 1)\n");
+   hypre_printf("  -w <weight>         : Jacobi weight\n");
+   hypre_printf("  -skip <s>           : Skip relaxation (0 or 1)\n");
    hypre_printf("\n");
 
    return 0;
