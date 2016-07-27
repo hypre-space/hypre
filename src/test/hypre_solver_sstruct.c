@@ -297,6 +297,13 @@ hypre_DriveSolverSStructCreate(
          HYPRE_SStructLGMRESCreate(hypre_MPI_COMM_WORLD, (HYPRE_SStructSolver *)&krylov.solver);
       }
       break;
+
+      case CGNR:
+      {
+         // Not implemented yet
+         // HYPRE_SStructCGNRCreate(hypre_MPI_COMM_WORLD, (HYPRE_SStructSolver *)&krylov.solver);
+      }
+      break;
    }
 
    switch (precond.id)
@@ -475,6 +482,13 @@ hypre_DriveSolverSStructDestroy(
       case LGMRES:
       {
          HYPRE_SStructLGMRESDestroy(sstruct_krylov_solver);
+      }
+      break;
+
+      case CGNR:
+      {
+         // Not implemented yet
+         // HYPRE_SStructCGNRDestroy(sstruct_krylov_solver);
       }
       break;
    }

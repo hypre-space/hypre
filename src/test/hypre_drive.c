@@ -128,7 +128,7 @@ hypre_DriveSolverHelp(char *drivename)
    hypre_printf("Usage: %s [-system <SystemOptions>] [-solver <SolverOptions>] [<options>]\n",
                 drivename);
    hypre_printf("\n");
-   hypre_printf("  -repeat <r>         : repeat system solve r times\n");
+   hypre_printf("  -repeat <r>         : number of times to repeat the solve\n");
    hypre_printf("  -help               : print help\n");
    hypre_printf("\n");
    hypre_printf("SystemOptions: <option>\n");

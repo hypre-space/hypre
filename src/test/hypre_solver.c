@@ -24,6 +24,7 @@ hypre_DriveSolverCreate(
    (solver -> id)     = NONE;
    (solver -> solver) = NULL;
    (solver -> solve)  = NULL;
+   (solver -> solveT) = NULL;
    (solver -> setup)  = NULL;
    (solver -> argv)   = NULL;
    (solver -> argc)   = 0;
@@ -105,6 +106,9 @@ hypre_DrivePCGHelp()
 {
    hypre_printf("PCGOptions: <SolverStdOptions> [<options>]\n");
    hypre_printf("\n");
+   hypre_printf("  -rel_change <bool>  : relative change stopping criteria \n");
+   hypre_printf("  -two_norm <bool>    : two-norm based stopping criteria \n");
+   hypre_printf("\n");
 
    return 0;
 }
@@ -118,15 +122,36 @@ hypre_DrivePCGSet(
    HYPRE_Real atol,
    HYPRE_Int  max_iter )
 {
+   HYPRE_Int  rel_change, two_norm;
+   HYPRE_Int  argi;
+
    /* Set general options */
    hypre_DriveSolverStdOptions(argv, argc, &tol, &atol, &max_iter);
    HYPRE_PCGSetTol(solver, tol);
+   HYPRE_PCGSetAbsoluteTol(solver, atol);
    HYPRE_PCGSetMaxIter(solver, max_iter);
 
+   /* Set command-line options */
+   argi = 0;
+   while (argi < argc)
+   {
+      if ( strcmp(argv[argi], "-rel_change") == 0 )
+      {
+         argi++;
+         rel_change = atoi(argv[argi++]);
+         HYPRE_PCGSetRelChange(solver, rel_change);
+      }
+      else if ( strcmp(argv[argi], "-two_norm") == 0 )
+      {
+         argi++;
+         two_norm = atoi(argv[argi++]);
+         HYPRE_PCGSetTwoNorm(solver, two_norm);
+      }
+   }
+
    /* Other options */
-   HYPRE_PCGSetTwoNorm(solver, 1);
-   HYPRE_PCGSetRelChange(solver, 0);
    HYPRE_PCGSetPrintLevel(solver, 1);
+   HYPRE_PCGSetLogging(solver, 1);
 
    return 0;
 }
@@ -137,6 +162,9 @@ HYPRE_Int
 hypre_DriveGMRESHelp()
 {
    hypre_printf("GMRESOptions: <SolverStdOptions> [<options>]\n");
+   hypre_printf("\n");
+   hypre_printf("  -kdim <val>         : dimension of Krylov space\n");
+   hypre_printf("  -rel_change <bool>  : relative change stopping criteria \n");
    hypre_printf("\n");
 
    return 0;
@@ -151,15 +179,36 @@ hypre_DriveGMRESSet(
    HYPRE_Real atol,
    HYPRE_Int  max_iter )
 {
+   HYPRE_Int  kdim, rel_change;
+   HYPRE_Int  argi;
+
    /* Set general options */
    hypre_DriveSolverStdOptions(argv, argc, &tol, &atol, &max_iter);
    HYPRE_GMRESSetTol(solver, tol);
+   HYPRE_GMRESSetAbsoluteTol(solver, atol);
    HYPRE_GMRESSetMaxIter(solver, max_iter);
+
+   /* Set command-line options */
+   argi = 0;
+   while (argi < argc)
+   {
+      if ( strcmp(argv[argi], "-kdim") == 0 )
+      {
+         argi++;
+         kdim = atoi(argv[argi++]);
+         HYPRE_GMRESSetKDim(solver, kdim);
+      }
+      else if ( strcmp(argv[argi], "-rel_change") == 0 )
+      {
+         argi++;
+         rel_change = atoi(argv[argi++]);
+         HYPRE_GMRESSetRelChange(solver, rel_change);
+      }
+   }
 
    /* Other options */
    HYPRE_GMRESSetPrintLevel(solver, 1);
    HYPRE_GMRESSetLogging(solver, 1);
-   HYPRE_GMRESSetKDim(solver, 5);
 
    return 0;
 }
@@ -187,6 +236,7 @@ hypre_DriveBiCGSTABSet(
    /* Set general options */
    hypre_DriveSolverStdOptions(argv, argc, &tol, &atol, &max_iter);
    HYPRE_BiCGSTABSetTol(solver, tol);
+   HYPRE_BiCGSTABSetAbsoluteTol(solver, atol);
    HYPRE_BiCGSTABSetMaxIter(solver, max_iter);
 
    /* Other options */
@@ -203,6 +253,8 @@ hypre_DriveFlexGMRESHelp()
 {
    hypre_printf("FlexGMRESOptions: <SolverStdOptions> [<options>]\n");
    hypre_printf("\n");
+   hypre_printf("  -kdim <val>         : dimension of Krylov space\n");
+   hypre_printf("\n");
 
    return 0;
 }
@@ -216,15 +268,30 @@ hypre_DriveFlexGMRESSet(
    HYPRE_Real atol,
    HYPRE_Int  max_iter )
 {
+   HYPRE_Int  kdim;
+   HYPRE_Int  argi;
+
    /* Set general options */
    hypre_DriveSolverStdOptions(argv, argc, &tol, &atol, &max_iter);
    HYPRE_FlexGMRESSetTol(solver, tol);
+   HYPRE_FlexGMRESSetAbsoluteTol(solver, atol);
    HYPRE_FlexGMRESSetMaxIter(solver, max_iter);
+
+   /* Set command-line options */
+   argi = 0;
+   while (argi < argc)
+   {
+      if ( strcmp(argv[argi], "-kdim") == 0 )
+      {
+         argi++;
+         kdim = atoi(argv[argi++]);
+         HYPRE_FlexGMRESSetKDim(solver, kdim);
+      }
+   }
 
    /* Other options */
    HYPRE_FlexGMRESSetPrintLevel(solver, 1);
    HYPRE_FlexGMRESSetLogging(solver, 1);
-   HYPRE_FlexGMRESSetKDim(solver, 5);
 
    return 0;
 }
@@ -235,6 +302,9 @@ HYPRE_Int
 hypre_DriveLGMRESHelp()
 {
    hypre_printf("LGMRESOptions: <SolverStdOptions> [<options>]\n");
+   hypre_printf("\n");
+   hypre_printf("  -kdim <val>         : dimension of Krylov space\n");
+   hypre_printf("  -augdim <val>       : number of augmentation vectors\n");
    hypre_printf("\n");
 
    return 0;
@@ -249,16 +319,70 @@ hypre_DriveLGMRESSet(
    HYPRE_Real atol,
    HYPRE_Int  max_iter )
 {
+   HYPRE_Int  kdim, augdim;
+   HYPRE_Int  argi;
+
    /* Set general options */
    hypre_DriveSolverStdOptions(argv, argc, &tol, &atol, &max_iter);
    HYPRE_LGMRESSetTol(solver, tol);
+   HYPRE_LGMRESSetAbsoluteTol(solver, atol);
    HYPRE_LGMRESSetMaxIter(solver, max_iter);
+
+   /* Set command-line options */
+   argi = 0;
+   while (argi < argc)
+   {
+      if ( strcmp(argv[argi], "-kdim") == 0 )
+      {
+         argi++;
+         kdim = atoi(argv[argi++]);
+         HYPRE_LGMRESSetKDim(solver, kdim);
+      }
+      else if ( strcmp(argv[argi], "-augdim") == 0 )
+      {
+         argi++;
+         augdim = atoi(argv[argi++]);
+         HYPRE_LGMRESSetAugDim(solver, augdim);
+      }
+   }
 
    /* Other options */
    HYPRE_LGMRESSetPrintLevel(solver, 1);
    HYPRE_LGMRESSetLogging(solver, 1);
-   HYPRE_LGMRESSetKDim(solver, 10);
    HYPRE_LGMRESSetAugDim(solver, 2);
+
+   return 0;
+}
+
+/* CGNR Solver */
+
+HYPRE_Int
+hypre_DriveCGNRHelp()
+{
+   hypre_printf("CGNROptions: <SolverStdOptions> [<options>]\n");
+   hypre_printf("\n");
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_DriveCGNRSet(
+   HYPRE_Solver solver,
+   char      *argv[],
+   HYPRE_Int  argc,
+   HYPRE_Real tol,
+   HYPRE_Real atol,
+   HYPRE_Int  max_iter )
+{
+   /* Set general options */
+   hypre_DriveSolverStdOptions(argv, argc, &tol, &atol, &max_iter);
+   HYPRE_CGNRSetTol(solver, tol);
+   // HYPRE_CGNRSetAbsoluteTol(solver, atol);
+   HYPRE_CGNRSetMaxIter(solver, max_iter);
+
+   /* Other options */
+   // HYPRE_CGNRSetPrintLevel(solver, 1);
+   HYPRE_CGNRSetLogging(solver, 1);
 
    return 0;
 }
@@ -275,12 +399,14 @@ hypre_DriveKrylovHelp()
    hypre_printf("  -bicgstab  { <BiCGSTABOptions> }\n");
    hypre_printf("  -flexgmres { <FlexGMRESOptions> }\n");
    hypre_printf("  -lgmres    { <LGMRESOptions> }\n");
+   hypre_printf("  -cgnr      { <CGNROptions> }\n");
    hypre_printf("\n");
    hypre_DrivePCGHelp();
    hypre_DriveGMRESHelp();
    hypre_DriveBiCGSTABHelp();
    hypre_DriveFlexGMRESHelp();
    hypre_DriveLGMRESHelp();
+   hypre_DriveCGNRHelp();
 
    return 0;
 }
@@ -318,6 +444,10 @@ hypre_DriveKrylovCreate(
       else if ( strcmp(argv[argi], "-lgmres") == 0 )
       {
          solver.id = LGMRES;
+      }
+      else if ( strcmp(argv[argi], "-cgnr") == 0 )
+      {
+         solver.id = CGNR;
       }
       ArgNext(argv, &argi, &argn);
 
@@ -400,6 +530,18 @@ hypre_DriveKrylovSetup(
          HYPRE_LGMRESSetup(solver.solver, A, b, x);
       }
       break;
+
+      case CGNR:
+      {
+         hypre_DriveCGNRSet(solver.solver, solver.argv, solver.argc, tol, atol, max_iter);
+         if (precond.solve != NULL)
+         {
+            HYPRE_CGNRSetPrecond(
+               solver.solver, precond.solve, precond.solveT, precond.setup, precond.solver);
+         }
+         HYPRE_CGNRSetup(solver.solver, A, b, x);
+      }
+      break;
    }
 
    return 0;
@@ -441,6 +583,12 @@ hypre_DriveKrylovSolve(
       case LGMRES:
       {
          HYPRE_LGMRESSolve(solver.solver, A, b, x);
+      }
+      break;
+
+      case CGNR:
+      {
+         HYPRE_CGNRSolve(solver.solver, A, b, x);
       }
       break;
    }
@@ -491,6 +639,13 @@ hypre_DriveKrylovGetStats(
       {
          HYPRE_LGMRESGetNumIterations(solver.solver, &num_iterations);
          HYPRE_LGMRESGetFinalRelativeResidualNorm(solver.solver, &final_res_norm);
+      }
+      break;
+
+      case CGNR:
+      {
+         HYPRE_CGNRGetNumIterations(solver.solver, &num_iterations);
+         HYPRE_CGNRGetFinalRelativeResidualNorm(solver.solver, &final_res_norm);
       }
       break;
    }

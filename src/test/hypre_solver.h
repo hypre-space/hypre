@@ -30,6 +30,7 @@
 #define BiCGSTAB  3
 #define FlexGMRES 4
 #define LGMRES    5
+#define CGNR      6
 #define DIAG      9
 
 #define AMG       101
@@ -49,6 +50,7 @@ typedef struct
    HYPRE_Int             id;
    HYPRE_Solver          solver;
    HYPRE_PtrToSolverFcn  solve;
+   HYPRE_PtrToSolverFcn  solveT;
    HYPRE_PtrToSolverFcn  setup;
 
    char                **argv;
