@@ -16,7 +16,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 1 // if true, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 0 // if true, prints out what is stored in the comp grids for each processor to a file
 #define USE_BARRIERS 0 // if true, puts MPI barriers between major tasks in setup phase (for timing purposes)
 
 HYPRE_Int 
@@ -266,19 +266,22 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    else A_eta_array = A_array;
 
    // On the coarsest level, need to make sure eta is large enough such that all procs send all nodes to other procs with nodes
-   HYPRE_Int need_to_expand_stencil = 1;
-   while (need_to_expand_stencil)
+   HYPRE_Int need_to_expand_stencil_local = 1;
+   HYPRE_Int need_to_expand_stencil_global = 0;
+   while (need_to_expand_stencil_local)
    {
-      need_to_expand_stencil = 0;
+      need_to_expand_stencil_local = 0;
       commPkg =  hypre_ParCSRMatrixCommPkg( A_eta_array[num_levels - 1] );
       HYPRE_Int num_sends = hypre_ParCSRCommPkgNumSends( commPkg );
       for (i = 0; i < num_sends; i++)
       {
          HYPRE_Int start = hypre_ParCSRCommPkgSendMapStart(commPkg, i);
          HYPRE_Int finish = hypre_ParCSRCommPkgSendMapStart(commPkg, i+1);
-         if ( (finish - start) != hypre_ParCSRMatrixNumRows( A_eta_array[num_levels - 1] ) ) need_to_expand_stencil = 1;
+         if ( (finish - start) != hypre_ParCSRMatrixNumRows( A_eta_array[num_levels - 1] ) ) need_to_expand_stencil_local = 1;
       }
-      if (need_to_expand_stencil)
+      hypre_MPI_Allreduce(&need_to_expand_stencil_global, &need_to_expand_stencil_local, 1, HYPRE_MPI_INT, hypre_MPI_MAX, hypre_MPI_COMM_WORLD);
+      // hypre_printf("Rank %d: need_to_expand_stencil_local = %d, need_to_expand_stencil_global = %d\n", myid, need_to_expand_stencil_local, need_to_expand_stencil_global);
+      if (need_to_expand_stencil_global)
       {
          printf("Expanding stencil on coarsest level\n");
          hypre_ParCSRMatrix *old_matrix = A_eta_array[num_levels - 1];

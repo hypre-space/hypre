@@ -25,7 +25,7 @@ HYPRE_Int
 hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles )
 {
 	HYPRE_Int i;
-	hypre_ParAMGData	*amg_data = amg_vdata;
+	// hypre_ParAMGData	*amg_data = amg_vdata;
 	// HYPRE_Int num_global_relax = 2;
 
 	// Form residual and do residual communication
@@ -44,12 +44,12 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles )
 	AddSolution( amg_vdata );
 
 	// Perform global relaxation
-	hypre_ParVector *Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(hypre_ParAMGDataAArray(amg_data)[0]), hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[0]), hypre_ParCSRMatrixRowStarts(hypre_ParAMGDataAArray(amg_data)[0]));
-	hypre_ParVectorInitialize(Vtemp);
-    hypre_ParVectorSetPartitioningOwner(Vtemp,0);
-    hypre_ParVector *Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(hypre_ParAMGDataAArray(amg_data)[0]), hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[0]), hypre_ParCSRMatrixRowStarts(hypre_ParAMGDataAArray(amg_data)[0]));
-	hypre_ParVectorInitialize(Ztemp);
-    hypre_ParVectorSetPartitioningOwner(Ztemp,0);
+	// hypre_ParVector *Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(hypre_ParAMGDataAArray(amg_data)[0]), hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[0]), hypre_ParCSRMatrixRowStarts(hypre_ParAMGDataAArray(amg_data)[0]));
+	// hypre_ParVectorInitialize(Vtemp);
+ //    hypre_ParVectorSetPartitioningOwner(Vtemp,0);
+ //    hypre_ParVector *Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(hypre_ParAMGDataAArray(amg_data)[0]), hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[0]), hypre_ParCSRMatrixRowStarts(hypre_ParAMGDataAArray(amg_data)[0]));
+	// hypre_ParVectorInitialize(Ztemp);
+ //    hypre_ParVectorSetPartitioningOwner(Ztemp,0);
 	// for (i = 0; num_global_relax; i++) hypre_BoomerAMGRelax( hypre_ParAMGDataAArray(amg_data)[0], hypre_ParAMGDataFArray(amg_data)[0], hypre_ParAMGDataCFMarkerArray(amg_data)[0], 0, 0,
  //                           1.0, 1.0, NULL, hypre_ParAMGDataUArray(amg_data)[0],
  //                           Vtemp, Ztemp );

@@ -109,6 +109,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 	}
 
 	//  ... solve on coarsest level ...
+	// hypre_printf("Level %d: solve\n", i);
 	for (i = 0; i < numCoarseRelax; i++) Relax( A_rows[num_levels-1], u[num_levels-1], f[num_levels-1], num_real_nodes[num_levels-1] );
 
 
