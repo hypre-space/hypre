@@ -60,7 +60,6 @@ KOKKOS_CXXFLAGS =
 
 HYPRE_DRIVERS =\
  ij.c\
- new_ij.c\
  sstruct.c\
  struct.c\
  ams_driver.c\
@@ -132,10 +131,6 @@ distclean: clean
 # C
 
 ij: ij.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
-
-new_ij: new_ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 

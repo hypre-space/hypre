@@ -61,6 +61,9 @@ HYPRE_DOCS_DIRS = docs
 #This is the test-driver directory
 HYPRE_TEST_DIRS = test
 
+#This is the examples directory
+HYPRE_EXAMPLE_DIRS = examples
+
 # These are directories that are officially in HYPRE
 HYPRE_DIRS =\
  ${HYPRE_BASIC_DIRS}\
@@ -89,7 +92,7 @@ all:
 	cp -fR HYPRE_config.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fR $(srcdir)/HYPRE.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fR $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
-	for i in ${HYPRE_DIRS} ${HYPRE_EXAMPLE_DIRS}; \
+	for i in ${HYPRE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \
 	  (cd $$i && $(MAKE) $@) || exit 1; \
@@ -137,7 +140,9 @@ help:
 	@echo "     "
 	@echo "check:"
 	@echo "     runs a small driver test to verify a working library"
-	@echo "     use CHECKRUN=<mpirun routine> if needed"
+	@echo "     use CHECKRUN=<mpirun routine> if needed combined with"
+	@echo "     PARMS='-P px py pz' where px*py*pz must be number of"
+	@echo "     processes set in CHECKRUN"
 	@echo "     "
 	@echo "************************************************************"
 
@@ -150,9 +155,9 @@ check:
 	@ \
 	echo "Checking the library ..."; \
 	(cd test; $(MAKE) all); \
-	(cd test; $(CHECKRUN) ij 2> ij.err); \
-	(cd test; $(CHECKRUN) struct 2> struct.err); \
-	(cd test; cp -f TEST_sstruct/sstruct.in.default .; $(CHECKRUN) sstruct 2> sstruct.err); \
+	(cd test; $(CHECKRUN) ij $(PARMS) 2> ij.err); \
+	(cd test; $(CHECKRUN) struct $(PARMS) 2> struct.err); \
+	(cd test; cp -f TEST_sstruct/sstruct.in.default .; $(CHECKRUN) sstruct $(PARMS) 2> sstruct.err); \
 	(cd test; ls -l ij.err struct.err sstruct.err)
 
 install: all

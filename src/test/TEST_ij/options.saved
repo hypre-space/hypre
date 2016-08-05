@@ -1,22 +1,22 @@
 # options.out.default
-Eigenvalue lambda   2.43042158313018e-01
-Residual   6.48952190941441e-08
+Eigenvalue lambda   2.43042158313017e-01
+Residual   3.73910190682533e-08
 
 # options.out.no_orthchk
-Eigenvalue lambda   2.43042158313018e-01
-Residual   6.48952190941441e-08
+Eigenvalue lambda   2.43042158313017e-01
+Residual   3.73910190682533e-08
 
 # options.out.pcgitr.0
-Eigenvalue lambda   2.43042158313018e-01
-Residual   6.48952190941441e-08
+Eigenvalue lambda   2.43042158313017e-01
+Residual   3.73910190682533e-08
 
 # options.out.pcgitr.1
-Eigenvalue lambda   2.43042158313018e-01
-Residual   6.48952190941441e-08
+Eigenvalue lambda   2.43042158313017e-01
+Residual   3.73910190682533e-08
 
 # options.out.pcgitr.2
 Eigenvalue lambda   2.43042158313017e-01
-Residual   6.31332863145569e-08
+Residual   6.24425285020618e-08
 
 # options.out.pcgtol.01
 Eigenvalue lambda   2.43042158313018e-01
@@ -27,32 +27,32 @@ Eigenvalue lambda   2.43042158313023e-01
 Residual   1.04744967214067e-07
 
 # options.out.seed
-Eigenvalue lambda   2.43042158313018e-01
-Residual   6.48952190941441e-08
+Eigenvalue lambda   2.43042158313017e-01
+Residual   3.73910190682533e-08
 
 # options.out.seed.repeat
-Eigenvalue lambda   2.43042158313018e-01
-Residual   6.48952190941441e-08
+Eigenvalue lambda   2.43042158313017e-01
+Residual   3.73910190682533e-08
 
 # options.out.solver.none
 Eigenvalue lambda   2.43042158316676e-01
 Residual   2.03104260070223e-06
 
 # options.out.verb.1
-Eigenvalue lambda   2.43042158313018e-01
-Residual   6.48952190941441e-08
+Eigenvalue lambda   2.43042158313017e-01
+Residual   3.73910190682533e-08
 
 # options.out.gen.1
 Eigenvalue lambda   1.00000000000000e+00
 Residual   7.54364534145478e-16
 
 # options.out.gen.2
-Eigenvalue lambda   3.14395676813048e-01
-Residual   2.39101583491205e-07
+Eigenvalue lambda   3.14395676812921e-01
+Residual   2.22043002999428e-07
 
 # options.out.orthchk
-Eigenvalue lambda   2.43042158313018e-01
-Residual   6.48952190941441e-08
+Eigenvalue lambda   2.43042158313017e-01
+Residual   3.73910190682533e-08
 
 # options.out.itr.100
 Eigenvalue lambda   1.10912678978531e-01
@@ -67,15 +67,15 @@ Residual   1.68566474191610e+00
 Residual   1.58810659347606e+00
 
 # options.out.vrand.2
-Eigenvalue lambda   2.43042158312873e-01
-Eigenvalue lambda   4.79521039867766e-01
-Residual   2.32087251651523e-07
-Residual   3.75990048555319e-07
+Eigenvalue lambda   2.43042158313035e-01
+Eigenvalue lambda   4.79521039879665e-01
+Residual   1.76274362852972e-07
+Residual   2.09105504279737e-07
 
 # options.out.verb.0
-     Complexity:    grid = 2.036000
-                operator = 5.803438
+     Complexity:    grid = 1.555000
+                operator = 2.667344
 # options.out.verb.2
-Eigenvalue lambda   2.43042158313018e-01
-Residual 6.489522e-08
+Eigenvalue lambda   2.43042158313017e-01
+Residual 3.739102e-08
 =============================================

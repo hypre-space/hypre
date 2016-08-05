@@ -49,7 +49,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 
    HYPRE_Complex    *x_data = hypre_VectorData(x);
    HYPRE_Complex    *b_data = hypre_VectorData(b) + offset;
-   HYPRE_Complex    *y_data = hypre_VectorData(y);
+   HYPRE_Complex    *y_data = hypre_VectorData(y) + offset;
    HYPRE_Int         x_size = hypre_VectorSize(x);
    HYPRE_Int         b_size = hypre_VectorSize(b) - offset;
    HYPRE_Int         y_size = hypre_VectorSize(y) - offset;
@@ -152,6 +152,11 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
             for (i = 0; i < num_rows*num_vectors; i++)
                y_data[i] = b_data[i]*temp;
          }
+      }
+      else
+      {
+            for (i = 0; i < num_rows*num_vectors; i++)
+               y_data[i] = b_data[i];
       }
 
 
