@@ -145,7 +145,7 @@ sstruct: sstruct.o
 
 struct: struct.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 ams_driver: ams_driver.o
 	@echo  "Building" $@ "... "
