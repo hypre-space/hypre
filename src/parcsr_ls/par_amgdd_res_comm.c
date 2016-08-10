@@ -293,10 +293,10 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
 
    /* Outer loop over levels:
    Start from coarsest level and work up to finest */
-   // if (myid == 0) printf("  Looping over levels\n");
+   if (myid == 0) printf("  Looping over levels\n");
    for (level = num_levels-1; level > -1; level--)
    {
-      // if (myid == 0) printf("    Level %d:\n", level);
+      if (myid == 0) printf("    Level %d:\n", level);
       if ( proc_last_index[level] >= proc_first_index[level] ) // If there are any owned nodes on this level
       {
          // Get the commPkg of matrix A^eta on this level
@@ -347,14 +347,14 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          if (timers) hypre_BeginTiming(timers[1]);
 
          // loop over send procs
-         // if (myid == 0) printf("      Loop over send procs:\n");
+         if (myid == 0) printf("      Loop over send procs:\n");
          for (i = 0; i < num_sends; i++)
          {
             // allocate space for psiComposite_send
             psiComposite_send[i] = hypre_CTAlloc(hypre_ParCompGrid*, num_levels);
 
             // generate psiComposite
-            // if (myid == 0) printf("        GeneratePsiComposite() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
+            if (myid == 0) printf("        GeneratePsiComposite() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
             num_psi_levels_send[i] = GeneratePsiComposite( psiComposite_send[i], compGrid, commPkg, &(send_flag_buffer_size[i]), i, level, num_levels );
          }
 
@@ -406,10 +406,10 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          }
 
          // pack and send the buffers
-         // if (myid == 0) printf("      Loop over send procs:\n");
+         if (myid == 0) printf("      Loop over send procs:\n");
          for (i = 0; i < num_sends; i++)
          {
-            // if (myid == 0) printf("        PackSendBuffer() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
+            if (myid == 0) printf("        PackSendBuffer() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
             send_buffer[i] = PackSendBuffer( psiComposite_send[i], level, num_levels, num_psi_levels_send[i], send_buffer_size[level][i] );
             hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_COMPLEX, hypre_ParCSRCommPkgSendProc(commPkg, i), 1, comm, &requests[request_counter++]);
          }
@@ -426,7 +426,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          if (timers) hypre_BeginTiming(timers[4]);
 
          // loop over received buffers
-         // if (myid == 0) printf("      Loop over recv procs:\n");
+         if (myid == 0) printf("      Loop over recv procs:\n");
          for (i = 0; i < num_recvs; i++)
          {
             // unpack the buffers
@@ -442,12 +442,12 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
             }
 
             // and add information to this composite grid
-            // if (myid == 0) printf("        AddToCompGrid() for proc %d\n", hypre_ParCSRCommPkgRecvProcs(commPkg)[i]);
+            if (myid == 0) printf("        AddToCompGrid() for proc %d\n", hypre_ParCSRCommPkgRecvProcs(commPkg)[i]);
             AddToCompGrid(compGrid, psiComposite_recv[i], recv_map_send[i], recv_map_size[i], &(recv_map_send_buffer_size[i]), level, num_levels, num_psi_levels_recv[i], proc_first_index, proc_last_index, num_added_nodes );
          }
 
          // Setup local indices for the composite grid
-         // if (myid == 0) printf("      Setup local indices\n");
+         if (myid == 0) printf("      Setup local indices\n");
          hypre_ParCompGridSetupLocalIndices(compGrid, num_added_nodes, num_levels, proc_first_index, proc_last_index);
 
          // Zero out num_added_nodes
@@ -464,7 +464,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          #endif
 
          // If on the finest level, figure out ghost node info
-         // if (myid == 0) printf("      Get the ghost node info\n");
+         if (myid == 0) printf("      Get the ghost node info\n");
          if (level == 0)
          {
             #if USE_BARRIERS
@@ -473,17 +473,17 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
 
             if (timers) hypre_BeginTiming(timers[8]);
 
-            // if (myid == 0) printf("        Loop over ghost layers:\n");
+            if (myid == 0) printf("        Loop over ghost layers:\n");
             for (k = 0; k < numGhostLayers; k++)
             {
-               // if (myid == 0) printf("          ghost layer k = %d\n", k);
+               if (myid == 0) printf("          ghost layer k = %d\n", k);
                // Figure out what ghost nodes are needed (1 layer at a time)
-               // if (myid == 0) printf("          FindGhostNodes()\n");
+               if (myid == 0) printf("          FindGhostNodes()\n");
                FindGhostNodes(compGrid, num_levels, proc_first_index, proc_last_index, numGhostFromProc, ghostInfoOffset, ghostGlobalIndex, numNewGhostNodes, ghostUnpackIndex, global_nodes, apart);
                // Communicate the ghost nodes and setup local indices
-               // printf("          Rank %d: CommunicateGhostNodes()\n", myid);
+               printf("          Rank %d: CommunicateGhostNodes()\n", myid);
                CommunicateGhostNodes(compGrid, numGhostFromProc, ghostInfoOffset, ghostGlobalIndex, numNewGhostNodes, ghostUnpackIndex, num_levels, global_nodes);
-               // printf("          Rank %d: hypre_ParCompGridSetupLocalIndices()\n", myid);
+               printf("          Rank %d: hypre_ParCompGridSetupLocalIndices()\n", myid);
                hypre_ParCompGridSetupLocalIndices(compGrid, numNewGhostNodes, num_levels, proc_first_index, proc_last_index);
                // Increment ghostInfoOffset and reset numGhostFromProc for the next iteration 
                for (j = 0; j < num_levels; j++)
