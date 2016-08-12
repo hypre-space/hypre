@@ -2832,11 +2832,11 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          hypre_CSRMatrixNumCols(offd) = num_cols_offd;    
          hypre_TFree(aux_offd_j);
       }
-      hypre_AuxParCSRMatrixDestroy(aux_matrix);
-      hypre_IJMatrixTranslator(matrix) = NULL;
       hypre_IJMatrixAssembleFlag(matrix) = 1;
    }
 
+   hypre_AuxParCSRMatrixDestroy(aux_matrix);
+   hypre_IJMatrixTranslator(matrix) = NULL;
    return hypre_error_flag;
 }
 
