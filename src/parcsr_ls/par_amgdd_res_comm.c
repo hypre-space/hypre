@@ -283,7 +283,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
       // hypre_printf("Rank %d: need_to_expand_stencil_local = %d, need_to_expand_stencil_global = %d\n", myid, need_to_expand_stencil_local, need_to_expand_stencil_global);
       if (need_to_expand_stencil_global)
       {
-         printf("Expanding stencil on coarsest level\n");
+         // printf("Expanding stencil on coarsest level\n");
          hypre_ParCSRMatrix *old_matrix = A_eta_array[num_levels - 1];
          A_eta_array[num_levels - 1] = hypre_ParMatmul(A_array[num_levels - 1], old_matrix);
          if (old_matrix != A_array[num_levels - 1]) hypre_ParCSRMatrixDestroy(old_matrix);
@@ -293,10 +293,10 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
 
    /* Outer loop over levels:
    Start from coarsest level and work up to finest */
-   if (myid == 0) printf("  Looping over levels\n");
+   // if (myid == 0) printf("  Looping over levels\n");
    for (level = num_levels-1; level > -1; level--)
    {
-      if (myid == 0) printf("    Level %d:\n", level);
+      // if (myid == 0) printf("    Level %d:\n", level);
       if ( proc_last_index[level] >= proc_first_index[level] ) // If there are any owned nodes on this level
       {
          // Get the commPkg of matrix A^eta on this level
@@ -347,14 +347,14 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          if (timers) hypre_BeginTiming(timers[1]);
 
          // loop over send procs
-         if (myid == 0) printf("      Loop over send procs:\n");
+         // if (myid == 0) printf("      Loop over send procs:\n");
          for (i = 0; i < num_sends; i++)
          {
             // allocate space for psiComposite_send
             psiComposite_send[i] = hypre_CTAlloc(hypre_ParCompGrid*, num_levels);
 
             // generate psiComposite
-            if (myid == 0) printf("        GeneratePsiComposite() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
+            // if (myid == 0) printf("        GeneratePsiComposite() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
             num_psi_levels_send[i] = GeneratePsiComposite( psiComposite_send[i], compGrid, commPkg, &(send_flag_buffer_size[i]), i, level, num_levels );
          }
 
@@ -406,10 +406,10 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          }
 
          // pack and send the buffers
-         if (myid == 0) printf("      Loop over send procs:\n");
+         // if (myid == 0) printf("      Loop over send procs:\n");
          for (i = 0; i < num_sends; i++)
          {
-            if (myid == 0) printf("        PackSendBuffer() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
+            // if (myid == 0) printf("        PackSendBuffer() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
             send_buffer[i] = PackSendBuffer( psiComposite_send[i], level, num_levels, num_psi_levels_send[i], send_buffer_size[level][i] );
             hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_COMPLEX, hypre_ParCSRCommPkgSendProc(commPkg, i), 1, comm, &requests[request_counter++]);
          }
@@ -426,7 +426,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          if (timers) hypre_BeginTiming(timers[4]);
 
          // loop over received buffers
-         if (myid == 0) printf("      Loop over recv procs:\n");
+         // if (myid == 0) printf("      Loop over recv procs:\n");
          for (i = 0; i < num_recvs; i++)
          {
             // unpack the buffers
@@ -442,12 +442,12 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
             }
 
             // and add information to this composite grid
-            if (myid == 0) printf("        AddToCompGrid() for proc %d\n", hypre_ParCSRCommPkgRecvProcs(commPkg)[i]);
+            // if (myid == 0) printf("        AddToCompGrid() for proc %d\n", hypre_ParCSRCommPkgRecvProcs(commPkg)[i]);
             AddToCompGrid(compGrid, psiComposite_recv[i], recv_map_send[i], recv_map_size[i], &(recv_map_send_buffer_size[i]), level, num_levels, num_psi_levels_recv[i], proc_first_index, proc_last_index, num_added_nodes );
          }
 
          // Setup local indices for the composite grid
-         if (myid == 0) printf("      Setup local indices\n");
+         // if (myid == 0) printf("      Setup local indices\n");
          hypre_ParCompGridSetupLocalIndices(compGrid, num_added_nodes, num_levels, proc_first_index, proc_last_index);
 
          // Zero out num_added_nodes
@@ -464,7 +464,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          #endif
 
          // If on the finest level, figure out ghost node info
-         if (myid == 0) printf("      Get the ghost node info\n");
+         // if (myid == 0) printf("      Get the ghost node info\n");
          if (level == 0)
          {
             #if USE_BARRIERS
@@ -473,17 +473,17 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
 
             if (timers) hypre_BeginTiming(timers[8]);
 
-            if (myid == 0) printf("        Loop over ghost layers:\n");
+            // if (myid == 0) printf("        Loop over ghost layers:\n");
             for (k = 0; k < numGhostLayers; k++)
             {
-               if (myid == 0) printf("          ghost layer k = %d\n", k);
+               // if (myid == 0) printf("          ghost layer k = %d\n", k);
                // Figure out what ghost nodes are needed (1 layer at a time)
-               if (myid == 0) printf("          FindGhostNodes()\n");
+               // if (myid == 0) printf("          FindGhostNodes()\n");
                FindGhostNodes(compGrid, num_levels, proc_first_index, proc_last_index, numGhostFromProc, ghostInfoOffset, ghostGlobalIndex, numNewGhostNodes, ghostUnpackIndex, global_nodes, apart);
                // Communicate the ghost nodes and setup local indices
-               printf("          Rank %d: CommunicateGhostNodes()\n", myid);
+               // printf("          Rank %d: CommunicateGhostNodes()\n", myid);
                CommunicateGhostNodes(compGrid, numGhostFromProc, ghostInfoOffset, ghostGlobalIndex, numNewGhostNodes, ghostUnpackIndex, num_levels, global_nodes);
-               printf("          Rank %d: hypre_ParCompGridSetupLocalIndices()\n", myid);
+               // printf("          Rank %d: hypre_ParCompGridSetupLocalIndices()\n", myid);
                hypre_ParCompGridSetupLocalIndices(compGrid, numNewGhostNodes, num_levels, proc_first_index, proc_last_index);
                // Increment ghostInfoOffset and reset numGhostFromProc for the next iteration 
                for (j = 0; j < num_levels; j++)
@@ -690,7 +690,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
 
 
 HYPRE_Int 
-hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
+hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *timers )
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -863,10 +863,12 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    }
 
    // Communicate ghost residuals
+   if (timers) hypre_BeginTiming(timers[8]);
    HYPRE_Int **numGhostFromProc = hypre_ParCompGridCommPkgNumGhostFromProc(compGridCommPkg);
    HYPRE_Int ***ghostGlobalIndex = hypre_ParCompGridCommPkgGhostGlobalIndex(compGridCommPkg);
    HYPRE_Int ***ghostUnpackIndex = hypre_ParCompGridCommPkgGhostUnpackIndex(compGridCommPkg);
    CommunicateGhostNodesResidualOnly(compGrid, numGhostFromProc, ghostGlobalIndex, ghostUnpackIndex, num_levels, global_nodes);
+   if (timers) hypre_EndTiming(timers[8]);
 
    #if DEBUG_COMP_GRID
    char filename[256];
@@ -2083,13 +2085,13 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
    // {
    //    HYPRE_Int sum = 0;
    //    for (i = 0; i < num_procs; i++) sum +=numGhostFromProc[i][level];
-   //    printf("Rank %d, level %d: Sum of numGhostFromProc = %d, numNewGhostNodes = %d\n", myid, level, sum, numNewGhostNodes[level]);
+   // printf("Rank %d, level %d: Sum of numGhostFromProc = %d, numNewGhostNodes = %d\n", myid, level, sum, numNewGhostNodes[level]);
    // }
    
 
    // Coarsest level should always own all info (i.e. should not ask for ghost nodes)
    // If this is not the case, raise an error
-   if (numNewGhostNodes[num_levels-1] != 0) printf("Error: Processor does not have real dofs for entire coarsest grid!\n");
+   // if (numNewGhostNodes[num_levels-1] != 0) printf("Error: Processor does not have real dofs for entire coarsest grid!\n");
 
    return 0;
 }
@@ -2346,16 +2348,16 @@ LocateGhostNodes(HYPRE_Int **numGhostFromProc, HYPRE_Int ***ghostGlobalIndex, HY
 
             // if (myid == 0)
             // {
-            //    printf("Rank 0 unpacking proc %d, level %d:\n", proc, level );
-            //    printf("proc_ids = \n");
+               // printf("Rank 0 unpacking proc %d, level %d:\n", proc, level );
+               // printf("proc_ids = \n");
             //    for (i = 0; i < num_ranges; i++)
             //    {
-            //       printf("   %d\n", proc_ids[i]);
+                  // printf("   %d\n", proc_ids[i]);
             //    }
-            //    printf("upper_bounds = \n");
+               // printf("upper_bounds = \n");
             //    for (i = 0; i < num_ranges; i++)
             //    {
-            //       printf("   %d\n", upper_bounds[i]);
+                  // printf("   %d\n", upper_bounds[i]);
             //    }
             // }
 

@@ -1693,7 +1693,7 @@ HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles );
 
 /* par_amgdd_res_comm.c */
 HYPRE_Int hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int padding );
-HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata );
+HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *timers );
 
 /* par_amgdd_fac_cycle.c */
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata );
