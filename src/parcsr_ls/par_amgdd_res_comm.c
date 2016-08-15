@@ -690,7 +690,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
 
 
 HYPRE_Int 
-hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *timers )
+hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -863,12 +863,10 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *timers )
    }
 
    // Communicate ghost residuals
-   if (timers) hypre_BeginTiming(timers[8]);
    HYPRE_Int **numGhostFromProc = hypre_ParCompGridCommPkgNumGhostFromProc(compGridCommPkg);
    HYPRE_Int ***ghostGlobalIndex = hypre_ParCompGridCommPkgGhostGlobalIndex(compGridCommPkg);
    HYPRE_Int ***ghostUnpackIndex = hypre_ParCompGridCommPkgGhostUnpackIndex(compGridCommPkg);
    CommunicateGhostNodesResidualOnly(compGrid, numGhostFromProc, ghostGlobalIndex, ghostUnpackIndex, num_levels, global_nodes);
-   if (timers) hypre_EndTiming(timers[8]);
 
    #if DEBUG_COMP_GRID
    char filename[256];
