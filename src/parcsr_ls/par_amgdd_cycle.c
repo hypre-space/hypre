@@ -29,7 +29,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles )
 	// HYPRE_Int num_global_relax = 2;
 
 	// Form residual and do residual communication
-	hypre_BoomerAMGDDResidualCommunication( amg_vdata, NULL );
+	hypre_BoomerAMGDDResidualCommunication( amg_vdata );
 
 	// Set zero initial guess for all comp grids on all levels
 	ZeroInitialGuess( amg_vdata );

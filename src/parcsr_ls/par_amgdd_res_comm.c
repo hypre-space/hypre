@@ -17,6 +17,7 @@
 #include "par_csr_block_matrix.h"	
 
 #define DEBUG_COMP_GRID 0 // if true, prints out what is stored in the comp grids for each processor to a file
+#define DEBUGGING_MESSAGES 1 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 #define USE_BARRIERS 0 // if true, puts MPI barriers between major tasks in setup phase (for timing purposes)
 
 HYPRE_Int 
@@ -98,7 +99,9 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   // hypre_printf("Began comp grid setup on rank %d\n", myid);
+   #if DEBUGGING_MESSAGES
+   hypre_printf("Began comp grid setup on rank %d\n", myid);
+   #endif
 
    MPI_Comm 	      comm;
    hypre_ParAMGData   *amg_data = amg_vdata;
@@ -252,9 +255,13 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    {
       for (level = 0; level < num_levels; level++)
       {
+
          A_eta_array[level] = hypre_ParMatmul(A_array[level], A_array[level]);
          for (i = 0; i < padding - 2; i++)
          {
+            #if DEBUGGING_MESSAGES
+            printf("Rank %d: Expanding stencil for padding %d\n", myid, i);
+            #endif
             hypre_ParCSRMatrix *old_matrix = A_eta_array[level];
             A_eta_array[level] = hypre_ParMatmul(A_array[level], old_matrix);
             hypre_ParCSRMatrixDestroy(old_matrix); // Cleanup old matrices to prevent memory leak
@@ -283,7 +290,9 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
       // hypre_printf("Rank %d: need_to_expand_stencil_local = %d, need_to_expand_stencil_global = %d\n", myid, need_to_expand_stencil_local, need_to_expand_stencil_global);
       if (need_to_expand_stencil_global)
       {
-         // printf("Expanding stencil on coarsest level\n");
+         #if DEBUGGING_MESSAGES
+         printf("Rank %d: Expanding stencil on coarsest level\n", myid);
+         #endif
          hypre_ParCSRMatrix *old_matrix = A_eta_array[num_levels - 1];
          A_eta_array[num_levels - 1] = hypre_ParMatmul(A_array[num_levels - 1], old_matrix);
          if (old_matrix != A_array[num_levels - 1]) hypre_ParCSRMatrixDestroy(old_matrix);
@@ -293,10 +302,14 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
 
    /* Outer loop over levels:
    Start from coarsest level and work up to finest */
-   // if (myid == 0) printf("  Looping over levels\n");
+   #if DEBUGGING_MESSAGES
+   if (myid == 0) printf("  Looping over levels\n");
+   #endif
    for (level = num_levels-1; level > -1; level--)
    {
-      // if (myid == 0) printf("    Level %d:\n", level);
+      #if DEBUGGING_MESSAGES
+      if (myid == 0) printf("    Level %d:\n", level);
+      #endif
       if ( proc_last_index[level] >= proc_first_index[level] ) // If there are any owned nodes on this level
       {
          // Get the commPkg of matrix A^eta on this level
@@ -347,14 +360,18 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          if (timers) hypre_BeginTiming(timers[1]);
 
          // loop over send procs
-         // if (myid == 0) printf("      Loop over send procs:\n");
+         #if DEBUGGING_MESSAGES
+         if (myid == 0) printf("      Loop over send procs:\n");
+         #endif
          for (i = 0; i < num_sends; i++)
          {
             // allocate space for psiComposite_send
             psiComposite_send[i] = hypre_CTAlloc(hypre_ParCompGrid*, num_levels);
 
             // generate psiComposite
-            // if (myid == 0) printf("        GeneratePsiComposite() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
+            #if DEBUGGING_MESSAGES
+            if (myid == 0) printf("        GeneratePsiComposite() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
+            #endif
             num_psi_levels_send[i] = GeneratePsiComposite( psiComposite_send[i], compGrid, commPkg, &(send_flag_buffer_size[i]), i, level, num_levels );
          }
 
@@ -406,10 +423,14 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          }
 
          // pack and send the buffers
-         // if (myid == 0) printf("      Loop over send procs:\n");
+         #if DEBUGGING_MESSAGES
+         if (myid == 0) printf("      Loop over send procs:\n");
+         #endif
          for (i = 0; i < num_sends; i++)
          {
-            // if (myid == 0) printf("        PackSendBuffer() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
+            #if DEBUGGING_MESSAGES
+            if (myid == 0) printf("        PackSendBuffer() for proc %d\n", hypre_ParCSRCommPkgSendProcs(commPkg)[i]);
+            #endif
             send_buffer[i] = PackSendBuffer( psiComposite_send[i], level, num_levels, num_psi_levels_send[i], send_buffer_size[level][i] );
             hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_COMPLEX, hypre_ParCSRCommPkgSendProc(commPkg, i), 1, comm, &requests[request_counter++]);
          }
@@ -426,7 +447,9 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          if (timers) hypre_BeginTiming(timers[4]);
 
          // loop over received buffers
-         // if (myid == 0) printf("      Loop over recv procs:\n");
+         #if DEBUGGING_MESSAGES
+         if (myid == 0) printf("      Loop over recv procs:\n");
+         #endif
          for (i = 0; i < num_recvs; i++)
          {
             // unpack the buffers
@@ -442,12 +465,16 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
             }
 
             // and add information to this composite grid
-            // if (myid == 0) printf("        AddToCompGrid() for proc %d\n", hypre_ParCSRCommPkgRecvProcs(commPkg)[i]);
+            #if DEBUGGING_MESSAGES
+            if (myid == 0) printf("        AddToCompGrid() for proc %d\n", hypre_ParCSRCommPkgRecvProcs(commPkg)[i]);
+            #endif
             AddToCompGrid(compGrid, psiComposite_recv[i], recv_map_send[i], recv_map_size[i], &(recv_map_send_buffer_size[i]), level, num_levels, num_psi_levels_recv[i], proc_first_index, proc_last_index, num_added_nodes );
          }
 
          // Setup local indices for the composite grid
-         // if (myid == 0) printf("      Setup local indices\n");
+         #if DEBUGGING_MESSAGES
+         if (myid == 0) printf("      Setup local indices\n");
+         #endif
          hypre_ParCompGridSetupLocalIndices(compGrid, num_added_nodes, num_levels, proc_first_index, proc_last_index);
 
          // Zero out num_added_nodes
@@ -464,7 +491,9 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          #endif
 
          // If on the finest level, figure out ghost node info
-         // if (myid == 0) printf("      Get the ghost node info\n");
+         #if DEBUGGING_MESSAGES
+         if (myid == 0) printf("      Get the ghost node info\n");
+         #endif
          if (level == 0)
          {
             #if USE_BARRIERS
@@ -473,7 +502,9 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
 
             if (timers) hypre_BeginTiming(timers[8]);
 
-            // if (myid == 0) printf("        Loop over ghost layers:\n");
+            #if DEBUGGING_MESSAGES
+            if (myid == 0) printf("        Loop over ghost layers:\n");
+            #endif
             for (k = 0; k < numGhostLayers; k++)
             {
                // if (myid == 0) printf("          ghost layer k = %d\n", k);
@@ -669,7 +700,9 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    hypre_ParAMGDataCompGrid(amg_data) = compGrid;
    hypre_ParAMGDataCompGridCommPkg(amg_data) = compGridCommPkg;
 
-   // hypre_printf("Finished comp grid setup on rank %d\n", myid);
+   #if DEBUGGING_MESSAGES
+   hypre_printf("Finished comp grid setup on rank %d\n", myid);
+   #endif
 
    // Cleanup memory
    for (i = 1; i < num_procs; i++) hypre_TFree(numGhostFromProc[i]);
@@ -695,7 +728,9 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   // hypre_printf("Began residual communication on rank %d\n", myid);
+   #if DEBUGGING_MESSAGES
+   hypre_printf("Began residual communication on rank %d\n", myid);
+   #endif
 
    MPI_Comm          comm;
    hypre_ParAMGData   *amg_data = amg_vdata;
@@ -887,7 +922,9 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    hypre_ParAMGDataCompGrid(amg_data) = compGrid;
    hypre_ParAMGDataCompGridCommPkg(amg_data) = compGridCommPkg;
 
-   // hypre_printf("Finished residual communication on rank %d\n", myid);
+   #if DEBUGGING_MESSAGES
+   hypre_printf("Finished residual communication on rank %d\n", myid);
+   #endif
 
    // Cleanup memory
    hypre_TFree(proc_first_index);
