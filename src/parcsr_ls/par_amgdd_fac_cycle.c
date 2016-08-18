@@ -193,6 +193,7 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 
 
 	// Calculate fine grid residuals and restrict
+	int no_residual_counter = 0;
 	for (i = 0; i < num_nodes_f; i++)
 	{
 		// Get row of A
@@ -205,11 +206,16 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
 		{
 			// If -1 index encountered, disregard skip this computation (don't need a residual here)
-			if ( hypre_ParCompMatrixRowLocalIndices(row)[j] == -1 ) break;
+			if ( hypre_ParCompMatrixRowLocalIndices(row)[j] == -1 )
+			{
+				no_residual_counter++;
+				break;
+			}
 			// Otherwise just subtract off A_ij * u_j
 			else res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_f[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
 		}
 	}
+	if (no_residual_counter > (0.33)*(num_nodes_f - num_real_nodes_f)) hypre_printf("Num nodes where no residual calculated = %d, num ghost nodes = %d\n", no_residual_counter, num_nodes_f - num_real_nodes_f);
 
 	// Restrict from real nodes
 	for (i = 0; i < num_real_nodes_f; i++)
