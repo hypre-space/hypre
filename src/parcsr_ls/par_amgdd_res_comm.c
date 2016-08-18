@@ -936,6 +936,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    // Cleanup memory
    hypre_TFree(proc_first_index);
    hypre_TFree(proc_last_index);
+   hypre_TFree(global_nodes);
    
    return 0;
 }

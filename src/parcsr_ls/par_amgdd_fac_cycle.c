@@ -136,6 +136,20 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 	}
 	#endif
 
+	// Cleanup memory
+	hypre_TFree(num_nodes);
+	hypre_TFree(num_real_nodes);
+
+	hypre_TFree(u);
+	hypre_TFree(f);
+
+	hypre_TFree(global_indices);
+	hypre_TFree(coarse_global_indices);
+	hypre_TFree(coarse_local_indices ); 
+
+	hypre_TFree(A_rows);
+	hypre_TFree(P_rows);
+
 	return 0;
 }
 
@@ -249,7 +263,7 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 	}
 
 	// Debugging: compare how many nodes are restricted to vs. num owned nodes
-	printf("Num owned nodes = %d, num nodes restricted to = %d\n", num_owned_nodes_c, restriction_counter );
+	if (num_owned_nodes_c > restriction_counter) printf("Num owned nodes = %d, num nodes restricted to = %d\n", num_owned_nodes_c, restriction_counter );
 
 	// Now restrict_res should hold all appropriate restricted residaul values, so copy into f_c
 	for (i = 0; i < num_nodes_c; i++) f_c[i] = restrict_res[i];
