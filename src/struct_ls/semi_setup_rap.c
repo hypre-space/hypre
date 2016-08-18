@@ -565,6 +565,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 #endif
                         hypre_BoxLoop4For(iP, iR, iA, iAc)
                         {
+                            HYPRE_Int iAp,iPp;
                            /* path 1 : (stay,stay) */
                            rap_ptrS[iAc] +=          a_ptr[iA]           ;
 
@@ -601,6 +602,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 #endif
                         hypre_BoxLoop4For(iP, iR, iA, iAc)
                         {
+                            HYPRE_Int iAp,iPp;
                            /* path 1 : (stay,stay) */
                            rap_ptrS[iAc] +=          a_ptr[iA]           ;
 
@@ -674,6 +676,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 #endif
                      hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {
+                         HYPRE_Int iAp,iPp;
                         /* Path 1 : (stay,up) & symmetric path  */
                         iPp = iP + AOffsetP; 
                         rap_ptrS[iAc] += symm_path_multiplier *
@@ -743,6 +746,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 #endif
                      hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {
+                         HYPRE_Int iAp,iPp;
                         /* Path 1 : (stay,up) */
                         iPp = iP + COffsetP + AOffsetP; 
                         rap_ptrU[iAc] +=          a_ptr[iA]  * pb[iPp];

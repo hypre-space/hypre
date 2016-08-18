@@ -367,16 +367,19 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
       if ( constant_coefficient==0 )
       {
          hypre_BoxGetSize(cgrid_box, loop_size);
-
-         hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
+          /*FIXME: error: An explicit __device__ lambda can only capture up to 30 variables*/
+         zypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                              P_dbox, cstart, stridec, iP,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,west,east,south,north) HYPRE_SMP_SCHEDULE
 #endif
-         hypre_BoxLoop3For(iP, iA, iAc)
+         zypre_BoxLoop3For(iP, iA, iAc)
          {
+             HYPRE_Int iAm1,iAp1,iPm1,iPp1;
+             HYPRE_Real west,east,south,north;
+             
             iAm1 = iA - OffsetA;
             iAp1 = iA + OffsetA;
 
@@ -409,7 +412,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                + a_cb[iA] * pb[iP] + a_ca[iA] * pa[iP]
                - west - east - south - north;
          }
-         hypre_BoxLoop3End(iP, iA, iAc);
+         zypre_BoxLoop3End(iP, iA, iAc);
       }
 
       else if ( constant_coefficient==1 )

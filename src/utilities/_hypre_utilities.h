@@ -468,15 +468,88 @@ extern "C" {
 #include <cuda.h>
 #include <cuda_runtime.h>
 	
-#define hypre_DataTAlloc(ptr, type, count) cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);	
-#define hypre_DataCTAlloc(ptr, type, count) cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);\
-	                                        cudaMemset(ptr,0,count);
+#define hypre_DataTAlloc(ptr, type, count) \
+	cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);
+	
+#define hypre_DataCTAlloc(ptr, type, count) \
+	cudaError_t cudaerr = cudaMallocManaged((void**)&ptr,sizeof(type)*(count)); \
+	if ( cudaerr != cudaSuccess ) {										\
+		std::cerr << "\n ERROR in cudaMallocManaged call" << std::endl;	\
+		exit(1);														\
+	}		\
+	cudaMemset(ptr,0,sizeof(type)*(count));
+	
 #define hypre_DataTReAlloc(ptr, type, count) type *newptr;				\
 	                                         cudaMallocManaged((void**)&,sizeof(type)*(count), cudaMemAttachGlobal);	\
-											 memcpy(newptr, ptr, count); \
+											 memcpy(newptr, ptr, sizeof(type)*(count)); \
 											 cudaFree(ptr);				\
 											 ptr = newptr;
 #define hypre_DataTFree(ptr) cudaFree(ptr);
+
+#define hypre_DeviceDataTAlloc(ptr, type, count,device) \
+	if (device == 0)									\
+	{													\
+	    cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);				\
+	}													\
+	else if (device == 1)								\
+	{													\
+	    cudaMalloc((void**)&ptr,count*sizeof(type));	\
+	}													\
+	else if (device == 2)								\
+	{													\
+	    ptr = hypre_TAlloc(type, (count));				\
+	}
+	
+#define hypre_DeviceDataCTAlloc(ptr, type, count,device)\
+	if (device == 0)									\
+	{													\
+	    cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);				\
+		cudaMemset(ptr,0,sizeof(type)*(count));										\
+	}													\
+	else if (device == 1)								\
+	{													\
+	    cudaMalloc((void**)&ptr,count*sizeof(type));	\
+		cudaMemset(ptr,0,sizeof(type)*(count));						\
+	}													\
+	else if (device == 2)								\
+	{													\
+	    ptr = hypre_CTAlloc(type, (count));				\
+	}	
+
+#define hypre_DeviceDataTReAlloc(ptr, type, count,device)\
+	if (device == 0)									\
+	{													\
+		type *newptr;													\
+	    cudaMallocManaged((void**)&newptr,sizeof(type)*(count), cudaMemAttachGlobal);				\
+	    cudaFree(ptr);													\
+		ptr = newptr;													\
+	}																	\
+	else if (device == 1)												\
+	{																	\
+		type *newptr;													\
+	    cudaMalloc((void**)&newptr,count*sizeof(type));					\
+		cudaFree(ptr);													\
+		ptr = newptr;													\
+	}																	\
+	else if (device == 2)												\
+	{																	\
+	    ptr = hypre_TReAlloc(type, (count));							\
+	}
+
+#define hypre_DeviceDataTFree(ptr,device)\
+	if (device == 0)				 \
+	{								 \
+	    cudaFree(ptr);				 \
+    }								 \
+    else if (device == 1)  			 \
+	{								 \
+	    cudaFree(ptr);				 \
+	}			  			   		 \
+	else if (device == 2)	  		 \
+	{			   					 \
+	    ptr = hypre_TFree(type);	 \
+	}
+
 #else
 #define hypre_DataTAlloc(ptr, type, count) ptr = hypre_TAlloc(type, (count));
 #define hypre_DataCTAlloc(ptr, type, count) ptr = hypre_CTAlloc(type, (count));

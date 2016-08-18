@@ -258,6 +258,9 @@ hypre_PFMGSetupInterpOp_CC0
 #endif
    hypre_BoxLoop2For(Ai, Pi)
    {
+       HYPRE_Int si,mrk0,mrk1,Astenc;
+       HYPRE_Real center;
+       HYPRE_Real *Ap;
       center  = 0.0;
       Pp0[Pi] = 0.0;
       Pp1[Pi] = 0.0;
@@ -290,7 +293,7 @@ hypre_PFMGSetupInterpOp_CC0
 
       if (!center)
       {
-         warning_cnt++;
+         //warning_cnt++;
          Pp0[Pi] = 0.0;
          Pp1[Pi] = 0.0;  
       }
@@ -520,6 +523,9 @@ hypre_PFMGSetupInterpOp_CC2
 #endif
       hypre_BoxLoop2For(Ai, Pi)
       {
+          HYPRE_Int Astenc,mrk0,mrk1;
+          HYPRE_Real center;
+          HYPRE_Real *Ap;
          Pp0[Pi] = P0;
          Pp1[Pi] = P1;
          center = center_offd;
@@ -528,7 +534,7 @@ hypre_PFMGSetupInterpOp_CC2
 
          Ap = hypre_StructMatrixBoxData(A, i, si);
          Astenc = hypre_IndexD(stencil_shape[si], cdir);
-         hypre_assert( Astenc==0 );
+         //hypre_assert( Astenc==0 );
          center += Ap[Ai];
 
          if (si == si0 && Ap[Ai] == 0.0)
@@ -538,7 +544,7 @@ hypre_PFMGSetupInterpOp_CC2
 
          if (!center)
          {
-            warning_cnt++;
+            //warning_cnt++;
             Pp0[Pi] = 0.0;
             Pp1[Pi] = 0.0;  
          }

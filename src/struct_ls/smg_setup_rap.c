@@ -36,7 +36,7 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
 #endif
 
    stencil = hypre_StructMatrixStencil(A);
-
+   
 #if OLDRAP
    switch (hypre_StructStencilNDim(stencil)) 
    {
@@ -66,7 +66,7 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
          break;
    } 
 #endif
-
+   
    return RAP;
 }
 
@@ -91,7 +91,6 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
    hypre_StructStencil   *stencil;
 
    stencil = hypre_StructMatrixStencil(A);
-
 #if OLDRAP
    switch (hypre_StructStencilNDim(stencil)) 
    {
@@ -101,6 +100,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
          /*--------------------------------------------------------------------
           *    Set lower triangular (+ diagonal) coefficients
           *--------------------------------------------------------------------*/
+
          hypre_SMG2BuildRAPSym(A, PT, R, Ac, cindex, cstride);
 
          /*--------------------------------------------------------------------
@@ -174,7 +174,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
    }
 #endif
    hypre_StructMatrixAssemble(Ac);
-
+   
    return hypre_error_flag;
 }
 

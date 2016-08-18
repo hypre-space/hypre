@@ -729,8 +729,8 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
 
          hypre_BoxGetSize(fgrid_box, temp_index1);
          hypre_StructMapFineToCoarse(temp_index1, temp_index2, rfactors, loop_size);
-
-         hypre_BoxLoop2Begin(ndim, loop_size,
+/*FIXME : it might be sequential*/
+         zypre_BoxLoop2Begin(ndim, loop_size,
                              xf_dbox, start, stride,  xfi,
                              xc_temp_dbox, startc, stridec, xci);
 #if 0 /* Are private static arrays a problem? */
@@ -738,9 +738,9 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,xfi,xci,imax,jmax,kmax,k,kcell,j,jcell,i,icell,ijkcell,temp_index2) HYPRE_SMP_SCHEDULE
 #endif
 #else
-         hypre_BoxLoopSetOneBlock();
+         zypre_BoxLoopSetOneBlock();
 #endif
-         hypre_BoxLoop2For(xfi, xci)
+         zypre_BoxLoop2For(xfi, xci)
          {
             /*-----------------------------------------------------------------
              * Arithmetic average the refinement patch values to get 
@@ -804,7 +804,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
             }
 
          }
-         hypre_BoxLoop2End(xfi, xci);
+         zypre_BoxLoop2End(xfi, xci);
 
       }   /* hypre_ForBoxI(fi, fgrid_boxes) */
    }      /* for (var= 0; var< nvars; var++)*/

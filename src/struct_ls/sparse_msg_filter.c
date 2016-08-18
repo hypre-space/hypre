@@ -396,6 +396,10 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 #endif
       hypre_BoxLoop2For(Ai, vi)
       {
+		  HYPRE_Real lambdax,lambday,lambdaz;
+		  HYPRE_Real *Ap;
+		  HYPRE_Int si,Astenc;
+		  
          lambdax = 0.0;
          lambday = 0.0;
          lambdaz = 0.0;

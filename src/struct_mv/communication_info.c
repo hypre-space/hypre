@@ -388,7 +388,8 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
 
    /* Set initial values to zero */
    stencil_grid = hypre_CTAlloc(HYPRE_Int, hypre_BoxVolume(stencil_box));
-
+   // hypre_DataCTAlloc(stencil_grid,HYPRE_Int,hypre_BoxVolume(stencil_box));
+    
    sbox = hypre_BoxCreate(ndim);
    hypre_SetIndex(stride, 1);
    
@@ -431,14 +432,15 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
       hypre_BoxSetExtents(sbox, istart, istop);
       start = hypre_BoxIMin(sbox);
       hypre_BoxGetSize(sbox, loop_size);
-      hypre_BoxLoop1Begin(ndim, loop_size,
+       /*FIXME : stencil_grid is on CPU*/
+      zypre_BoxLoop1Begin(ndim, loop_size,
                           stencil_box, start, stride, si);
       hypre_BoxLoopSetOneBlock();
-      hypre_BoxLoop1For(si)
+      zypre_BoxLoop1For(si)
       {
          stencil_grid[si] = 1;
       }
-      hypre_BoxLoop1End(si);
+      zypre_BoxLoop1End(si);
    }
 
    /*------------------------------------------------------
@@ -773,6 +775,7 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    hypre_BoxDestroy(stencil_box);
    hypre_BoxDestroy(sbox);
    hypre_TFree(stencil_grid);
+   // hypre_DataTFree(stencil_grid);
 
    /*------------------------------------------------------
     * Return

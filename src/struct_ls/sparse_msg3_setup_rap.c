@@ -556,8 +556,8 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
          case 7:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
-
-            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
+/*FIXME: error: An explicit __device__ lambda can only capture up to 30 variables*/
+            zypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
@@ -565,7 +565,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
+            zypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                iAm1 = iA - zOffsetA;
                iAp1 = iA + zOffsetA;
@@ -610,7 +610,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                   +                   a_ac[iA]   * pa[iP];
 
             }
-            hypre_BoxLoop4End(iP, iR, iA, iAc);
+            zypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -626,8 +626,8 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
          case 19:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
-
-            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
+/*FIXME: error: An explicit __device__ lambda can only capture up to 30 variables*/
+            zypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
@@ -635,7 +635,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
+            zypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                iAm1 = iA - zOffsetA;
                iAp1 = iA + zOffsetA;
@@ -714,7 +714,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                   +                   a_ac[iA]   * pa[iP];
 
             }
-            hypre_BoxLoop4End(iP, iR, iA, iAc);
+            zypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -730,8 +730,8 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
          default:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
-
-            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
+/*FIXME: error: An explicit __device__ lambda can only capture up to 30 variables*/
+            zypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
@@ -739,7 +739,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
+            zypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                iAm1 = iA - zOffsetA;
                iAp1 = iA + zOffsetA;
@@ -833,7 +833,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                   +                   a_bc[iA]   * pb[iP]
                   +                   a_ac[iA]   * pa[iP];
             }
-            hypre_BoxLoop4End(iP, iR, iA, iAc);
+            zypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -1221,8 +1221,8 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
          case 7:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
-
-            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
+/*FIXME: error: An explicit __device__ lambda can only capture up to 30 variables*/
+            zypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
@@ -1230,7 +1230,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
+            zypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                iAm1 = iA - zOffsetA;
                iAp1 = iA + zOffsetA;
@@ -1266,7 +1266,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
  
                rap_cne[iAc] = 0.0;
             }
-            hypre_BoxLoop4End(iP, iR, iA, iAc);
+            zypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -1282,8 +1282,8 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
          case 19:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
-
-            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
+/*FIXME: error: An explicit __device__ lambda can only capture up to 30 variables*/
+            zypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
@@ -1291,7 +1291,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
+            zypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                iAm1 = iA - zOffsetA;
                iAp1 = iA + zOffsetA;
@@ -1362,7 +1362,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                   +          ra[iR] * a_be[iAp1];
 
             }
-            hypre_BoxLoop4End(iP, iR, iA, iAc);
+            zypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 
@@ -1378,8 +1378,8 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
          default:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
-
-            hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
+/*FIXME: error: An explicit __device__ lambda can only capture up to 30 variables*/
+            zypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
@@ -1387,7 +1387,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
 #endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
+            zypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                iAm1 = iA - zOffsetA;
                iAp1 = iA + zOffsetA;
@@ -1475,7 +1475,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                   +          ra[iR] * a_be[iAp1];
 
             }
-            hypre_BoxLoop4End(iP, iR, iA, iAc);
+            zypre_BoxLoop4End(iP, iR, iA, iAc);
 
             break;
 

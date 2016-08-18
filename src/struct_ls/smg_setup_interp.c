@@ -171,8 +171,10 @@ hypre_SMGSetupInterpOp( void               *relax_data,
             num_stencil_indices++;
          }
       }
+
       A_mask =
          hypre_StructMatrixCreateMask(A, num_stencil_indices, stencil_indices);
+
       hypre_TFree(stencil_indices);
 
       /*-----------------------------------------------------
@@ -189,7 +191,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
       /*-----------------------------------------------------
        * Free up A_mask matrix
        *-----------------------------------------------------*/
-
+	  
       hypre_StructMatrixDestroy(A_mask);
 
       /*-----------------------------------------------------
@@ -259,33 +261,30 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                }
 
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-               hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
+               zypre_newBoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    x_data_box,  start,  stride,  xi,
                                    PT_data_box, startc, stridec, PTi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,PTi) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop2For(xi, PTi)
+               zypre_newBoxLoop2For(xi, PTi)
                {
                   PTp[PTi] = xp[xi];
                }
-               hypre_BoxLoop2End(xi, PTi);
+               zypre_newBoxLoop2End(xi, PTi);
             }
          }
       }
-
       /*-----------------------------------------------------
        * Free up compute package info
        *-----------------------------------------------------*/
-
+	  
       hypre_ComputePkgDestroy(compute_pkg);
    }
 
    /* Tell SMGRelax that the stencil has changed */
    hypre_SMGRelaxSetNewMatrixStencil(relax_data, PT_stencil);
-
    hypre_StructStencilDestroy(compute_pkg_stencil);
-
 #if 0
    hypre_StructMatrixAssemble(PT);
 #else

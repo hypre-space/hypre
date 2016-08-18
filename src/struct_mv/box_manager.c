@@ -2388,9 +2388,10 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             /* set up index table */
             hypre_BoxSetExtents(index_box, imin, imax);
             hypre_BoxGetSize(index_box, loop_size);
-            hypre_BoxLoop1Begin(ndim, loop_size, table_box, imin, stride, ii);
+			/*FIXME: This is sequential*/
+            zypre_BoxLoop1Begin(ndim, loop_size, table_box, imin, stride, ii);
             hypre_BoxLoopSetOneBlock();
-            hypre_BoxLoop1For(ii)
+            zypre_BoxLoop1For(ii)
             {
                if (!index_table[ii]) /* no entry- add one */
                {
@@ -2403,7 +2404,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                   index_table[ii] = entry;
                }
             }
-            hypre_BoxLoop1End(ii);
+            zypre_BoxLoop1End(ii);
 
          } /* end of subset of entries */
       }/* end of three loops over subsets */
@@ -2581,9 +2582,10 @@ hypre_BoxManIntersect ( hypre_BoxManager *manager,
    hypre_BoxShiftNeg(table_box, stride); /* Want box to start at 0*/
    hypre_BoxSetExtents(index_box, man_ilower, man_iupper);
    hypre_BoxGetSize(index_box, loop_size);
-   hypre_BoxLoop1Begin(ndim, loop_size, table_box, man_ilower, stride, ii);
-   hypre_BoxLoopSetOneBlock();
-   hypre_BoxLoop1For(ii)
+    /*FIXME: may not be able to parallelize this part*/
+   zypre_BoxLoop1Begin(ndim, loop_size, table_box, man_ilower, stride, ii);
+   zypre_BoxLoopSetOneBlock();
+   zypre_BoxLoop1For(ii)
    {
       entry = index_table[ii];
 
@@ -2601,7 +2603,7 @@ hypre_BoxManIntersect ( hypre_BoxManager *manager,
          entry = hypre_BoxManEntryNext(entry);
       }
    }
-   hypre_BoxLoop1End(ii);
+   zypre_BoxLoop1End(ii);
 
    entries  = hypre_TReAlloc(entries, hypre_BoxManEntry *, nentries);
 

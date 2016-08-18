@@ -88,11 +88,10 @@ hypre_SMGSolve( void               *smg_vdata,
 #if DEBUG
    char                  filename[255];
 #endif
-
    /*-----------------------------------------------------
     * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
-
+   
    hypre_BeginTiming(smg_data -> time_index);
 
    hypre_StructMatrixDestroy(A_l[0]);
@@ -116,12 +115,13 @@ hypre_SMGSolve( void               *smg_vdata,
       hypre_EndTiming(smg_data -> time_index);
       return hypre_error_flag;
    }
-
+   
    /* part of convergence check */
    if (tol > 0.0)
    {
       /* eps = (tol^2) */
       b_dot_b = hypre_StructInnerProd(b_l[0], b_l[0]);
+
       eps = tol*tol;
 
       /* if rhs is zero, return a zero solution */
@@ -162,6 +162,7 @@ hypre_SMGSolve( void               *smg_vdata,
       zero_guess = 0;
 
       /* compute fine grid residual (b - Ax) */
+	  
       hypre_SMGResidual(residual_data_l[0], A_l[0], x_l[0], b_l[0], r_l[0]);
 
       /* convergence check */
@@ -192,7 +193,7 @@ hypre_SMGSolve( void               *smg_vdata,
             }
          }
       }
-
+	  
       if (num_levels > 1)
       {
          /* restrict fine grid residual */
@@ -259,6 +260,7 @@ hypre_SMGSolve( void               *smg_vdata,
             /* interpolate error and correct (x = x + Pe_c) */
             hypre_SemiInterp(interp_data_l[l], PT_l[l], x_l[l+1], e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
+
 #if DEBUG
             if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
             {
@@ -279,6 +281,7 @@ hypre_SMGSolve( void               *smg_vdata,
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
          hypre_SemiInterp(interp_data_l[0], PT_l[0], x_l[1], e_l[0]);
          hypre_SMGAxpy(1.0, e_l[0], x_l[0], base_index, base_stride);
+
 #if DEBUG
          if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
          {

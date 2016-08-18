@@ -260,7 +260,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          active_l[l] = 0;
          hypre_IndexD(coarsen, cdir) = 1;
       }
-
+	  
       /* set cindex, findex, and stride */
       hypre_PFMGSetCIndex(cdir, cindex);
       hypre_PFMGSetFIndex(cdir, findex);
@@ -376,7 +376,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructVectorInitializeShell(tx_l[l+1]);
    }
 
-   data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
+   //data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
+   hypre_DataCTAlloc(data,HYPRE_Real,data_size);
+   
    (pfmg_data -> data) = data;
 
    hypre_StructVectorInitializeData(tx_l[0], data);
@@ -727,12 +729,13 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-         hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
+          /*FIXME: need reduction for more variables*/
+         zypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start, stride, Ai);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,si,Ap,diag,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
 #endif
-         hypre_BoxLoop1For(Ai)
+         zypre_BoxLoop1For(Ai)
          {
             tcx = 0.0;
             tcy = 0.0;
@@ -780,7 +783,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             sqcy += (tcy*tcy);
             sqcz += (tcz*tcz);
          }
-         hypre_BoxLoop1End(Ai);
+         zypre_BoxLoop1End(Ai);
       }
    }
 
@@ -907,16 +910,17 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       }
       else
       {
-         hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
+          /*FIXME: need reduction for multiplication*/
+         zypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start, stride, Ai);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai) reduction(*:diag_product) HYPRE_SMP_SCHEDULE
 #endif
-         hypre_BoxLoop1For(Ai)
+         zypre_BoxLoop1For(Ai)
          {
             diag_product *= Ap[Ai];
          }
-         hypre_BoxLoop1End(Ai);
+         zypre_BoxLoop1End(Ai);
       }
    }
 

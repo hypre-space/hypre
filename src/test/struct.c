@@ -837,7 +837,7 @@ main( hypre_int argc,
        * Set up the stencil structure needed for matrix creation
        * which is always the case for read_fromfile_param == 0
        *-----------------------------------------------------------*/
- 
+
       HYPRE_StructStencilCreate(dim, (2-sym)*dim + 1, &stencil);
       for (s = 0; s < (2-sym)*dim + 1; s++)
       {
@@ -882,7 +882,6 @@ main( hypre_int argc,
            (read_rhsfromfile_param ==1) 
          )
       {
-         hypre_printf("\nreading linear system from files: matrix, rhs and x0\n");
          /* ghost selection for reading the matrix and vectors */
          for (i = 0; i < dim; i++)
          {
@@ -958,7 +957,7 @@ main( hypre_int argc,
                      }
                break;
          }
-
+          
          HYPRE_StructGridCreate(hypre_MPI_COMM_WORLD, dim, &grid);
          for (ib = 0; ib < nblocks; ib++)
          {
@@ -967,7 +966,6 @@ main( hypre_int argc,
          }
          HYPRE_StructGridSetPeriodic(grid, periodic);
          HYPRE_StructGridAssemble(grid);
-
          /*-----------------------------------------------------------
           * Set up the matrix structure
           *-----------------------------------------------------------*/
@@ -979,6 +977,7 @@ main( hypre_int argc,
          }
 
          HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
+          
          if ( solver_id == 3 || solver_id == 4 ||
               solver_id == 13 || solver_id == 14 )
          {
@@ -1011,10 +1010,10 @@ main( hypre_int argc,
                constant_coefficient = 2;
             }
          }
+          
          HYPRE_StructMatrixSetSymmetric(A, sym);
          HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
          HYPRE_StructMatrixInitialize(A);
-
          /*-----------------------------------------------------------
           * Fill in the matrix elements
           *-----------------------------------------------------------*/
@@ -1026,7 +1025,6 @@ main( hypre_int argc,
 
          if ( constant_coefficient == 0 ) SetStencilBndry(A,grid,periodic); 
          HYPRE_StructMatrixAssemble(A);
-
          /*-----------------------------------------------------------
           * Set up the linear system
           *-----------------------------------------------------------*/
@@ -1440,6 +1438,7 @@ main( hypre_int argc,
    
          HYPRE_StructPFMGGetNumIterations(solver, &num_iterations);
          HYPRE_StructPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
+		 
          HYPRE_StructPFMGDestroy(solver);
       }
 

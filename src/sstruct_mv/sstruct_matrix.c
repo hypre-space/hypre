@@ -1048,13 +1048,14 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                      
                start = hypre_BoxIMin(int_box);
                hypre_BoxGetSize(int_box, loop_size);
-               hypre_BoxLoop2Begin(ndim, loop_size,
+			   /*FIXME: need to change hypre_BoxLoopGetIndex to GPU*/
+               zypre_BoxLoop2Begin(ndim, loop_size,
                                    int_box, start, stride, mi,
                                    vbox,    start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi,vi,index,d) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop2For(mi, vi)
+               zypre_BoxLoop2For(mi, vi)
                {
                   hypre_BoxLoopGetIndex(index);
                   rows[nrows + mi] = row_base;
@@ -1066,7 +1067,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                   }
                   ijvalues[nrows + mi] = values[ei + vi*nentries];
                }
-               hypre_BoxLoop2End(mi, vi);
+               zypre_BoxLoop2End(mi, vi);
 
                nrows += hypre_BoxVolume(int_box);
 

@@ -698,15 +698,15 @@ hypre_NodeRelax(  void               *relax_vdata,
 
                start  = hypre_BoxIMin(compute_box);
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
-               hypre_BoxLoop3Begin(ndim, loop_size,
+/*FIXME : need to rewrite for GPU*/
+               zypre_BoxLoop3Begin(ndim, loop_size,
                                    A_data_box, start, stride, Ai,
                                    b_data_box, start, stride, bi,
                                    x_data_box, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,bi,xi,vi,vj,x_loc,A_loc) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop3For(Ai, bi, xi)
+               zypre_BoxLoop3For(Ai, bi, xi)
                {
                   A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
                   x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
@@ -745,7 +745,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                   }
 
                }
-               hypre_BoxLoop3End(Ai, bi, xi);
+               zypre_BoxLoop3End(Ai, bi, xi);
             }
          }
       }
@@ -840,6 +840,7 @@ hypre_NodeRelax(  void               *relax_vdata,
 #endif
                hypre_BoxLoop2For(bi, ti)
                {
+				   HYPRE_Int vi;
                   /* Copy rhs into temp vector */ 
                   for (vi = 0; vi < nvars; vi++)
                   {
@@ -899,14 +900,14 @@ hypre_NodeRelax(  void               *relax_vdata,
                      }
                   }
                }
-
-               hypre_BoxLoop2Begin(ndim, loop_size,
+/*FIXME : need to rewrite for GPU*/
+               zypre_BoxLoop2Begin(ndim, loop_size,
                                    A_data_box, start, stride, Ai,
                                    t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,ti,vi,vj,x_loc,A_loc) HYPRE_SMP_SCHEDULE
 #endif
-               hypre_BoxLoop2For(Ai, ti)
+               zypre_BoxLoop2For(Ai, ti)
                {
                   A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
                   x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
@@ -945,7 +946,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                   }
 
                }
-               hypre_BoxLoop2End(Ai, ti);
+               zypre_BoxLoop2End(Ai, ti);
             }
          }
       }
