@@ -1043,6 +1043,9 @@ hypre_ParCSRMatrixRestoreRow( hypre_ParCSRMatrix *matrix,
       return hypre_error_flag;
    }
 
+   // NOTE: previous implementation didn't actually do any memory freeing... don't know why that was, but I put in these frees (Wayne Mitchell 8/18/2016)
+   if (hypre_ParCSRMatrixRowvalues(matrix)) hypre_TFree(hypre_ParCSRMatrixRowvalues(matrix)); 
+   if (hypre_ParCSRMatrixRowindices(matrix)) hypre_TFree(hypre_ParCSRMatrixRowindices(matrix)); 
    hypre_ParCSRMatrixGetrowactive(matrix)=0;
 
    return hypre_error_flag;

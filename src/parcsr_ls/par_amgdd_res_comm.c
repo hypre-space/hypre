@@ -250,9 +250,10 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    hypre_ParVectorCopy(Vtemp,F_array[0]);
 
    // For the given padding, eta, need to compute A^eta to determine processor neighbors of degree eta
-   hypre_ParCSRMatrix **A_eta_array = hypre_CTAlloc(hypre_ParCSRMatrix*, num_levels);
+   hypre_ParCSRMatrix **A_eta_array;
    if (padding > 1)
    {
+      A_eta_array = hypre_CTAlloc(hypre_ParCSRMatrix*, num_levels);
       for (level = 0; level < num_levels; level++)
       {
 
@@ -507,7 +508,9 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
             #endif
             for (k = 0; k < numGhostLayers; k++)
             {
-               // if (myid == 0) printf("          ghost layer k = %d\n", k);
+               #if DEBUGGING_MESSAGES
+               if (myid == 0) printf("          ghost layer k = %d\n", k);
+               #endif
                // Figure out what ghost nodes are needed (1 layer at a time)
                // if (myid == 0) printf("          FindGhostNodes()\n");
                FindGhostNodes(compGrid, num_levels, proc_first_index, proc_last_index, numGhostFromProc, ghostInfoOffset, ghostGlobalIndex, numNewGhostNodes, ghostUnpackIndex, global_nodes, apart);
@@ -705,10 +708,14 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    #endif
 
    // Cleanup memory
-   for (i = 1; i < num_procs; i++) hypre_TFree(numGhostFromProc[i]);
+   for (i = 0; i < num_procs; i++) hypre_TFree(numGhostFromProc[i]);
    hypre_TFree(numGhostFromProc);
+   hypre_TFree(numNewGhostNodes);
+   hypre_TFree(num_added_nodes);
+   hypre_TFree(global_nodes);
    hypre_TFree(proc_first_index);
    hypre_TFree(proc_last_index);
+   hypre_TFree(apart);
    if (padding > 1)
    {
       for (level = 0; level < num_levels; level++)

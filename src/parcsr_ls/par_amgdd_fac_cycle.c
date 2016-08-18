@@ -22,7 +22,7 @@ Project( hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c
 
 HYPRE_Int
 Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c, HYPRE_Complex *f_f, 
-			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_real_nodes_f, HYPRE_Int num_nodes_c );
+			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_real_nodes_f, HYPRE_Int num_nodes_c, HYPRE_Int num_owned_nodes_c );
 
 HYPRE_Int
 Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPRE_Int num_real_nodes );
@@ -74,9 +74,6 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 
 		A_rows[level] = hypre_ParCompGridARows(compGrid[level]);
 		P_rows[level] = hypre_ParCompGridPRows(compGrid[level]);
-
-		// // Set zero initial guess on each level
-		// for (i = 0; i < num_nodes[level]; i++) u[level][i] = 0;
 	}
 
 
@@ -105,7 +102,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 		// Relax on the real nodes
 		Relax( A_rows[i], u[i], f[i], num_real_nodes[i] );
 		// Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
-		Restrict( A_rows[i], A_rows[i+1], P_rows[i], u[i], u[i+1], f[i], f[i+1], num_nodes[i], num_real_nodes[i], num_nodes[i+1] );
+		Restrict( A_rows[i], A_rows[i+1], P_rows[i], u[i], u[i+1], f[i], f[i+1], num_nodes[i], num_real_nodes[i], num_nodes[i+1], hypre_ParCompGridNumOwnedNodes(compGrid[i+1]) );
 	}
 
 	//  ... solve on coarsest level ...
@@ -157,6 +154,8 @@ Project( hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c
 		// Loop over entries in row of P
 		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
 		{
+			// Debugging: make sure everyone has full interpolation stencil
+			if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) printf("A point doesn't have its full interpolation stencil! P row %d, entry %d is < 0\n",i,j);
 			// Update fine grid solution with coarse projection
 			u_f[i] += hypre_ParCompMatrixRowData(row)[j] * u_c[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
 		}
@@ -166,7 +165,7 @@ Project( hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c
 
 HYPRE_Int
 Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c, HYPRE_Complex *f_f, 
-			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_real_nodes_f, HYPRE_Int num_nodes_c )
+			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_real_nodes_f, HYPRE_Int num_nodes_c, HYPRE_Int num_owned_nodes_c )
 {
 	HYPRE_Int 					i, j; // loop variables
 	hypre_ParCompMatrixRow 		*row; // variable to store required matrix rows
@@ -210,6 +209,7 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 			// Add contribution to restricted residual and mark this as a node that should be restricted to from ghost nodes
 			restrict_res[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] += hypre_ParCompMatrixRowData(row)[j] * res[i];
 			restrict_marker[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] = 1;
+			// Debugging: make sure local indices in P are appropriate (i.e. they point to something on this procs coarse grid and aren't -1)
 			if ( (hypre_ParCompMatrixRowLocalIndices(row)[j] > num_nodes_c - 1) || (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) ) printf("Real rows of P: local index = %d, i = %d, j = %d, num_nodes = %d\n", hypre_ParCompMatrixRowLocalIndices(row)[j], i, j, num_nodes_c);
 		}
 	}
@@ -230,6 +230,7 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 	}
 
 	// Set residual on coarse grid where there was no restriction from fine grid
+	int restriction_counter = 0;
 	for (i = 0; i < num_nodes_c; i++)
 	{
 		if (!restrict_marker[i])
@@ -243,7 +244,12 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 				else restrict_res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_c[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
 			}
 		}
+		// Debugging: count up how many coarse grid nodes are restricted to from the fine grid
+		else restriction_counter++;
 	}
+
+	// Debugging: compare how many nodes are restricted to vs. num owned nodes
+	printf("Num owned nodes = %d, num nodes restricted to = %d\n", num_owned_nodes_c, restriction_counter );
 
 	// Now restrict_res should hold all appropriate restricted residaul values, so copy into f_c
 	for (i = 0; i < num_nodes_c; i++) f_c[i] = restrict_res[i];
@@ -279,6 +285,8 @@ Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPR
 		// Loop over entries in A
 		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
 		{
+			// Debugging: make sure we have the full neighborhood for all real nodes
+			if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
 			// If this is the diagonal, store for later division
 			if (hypre_ParCompMatrixRowLocalIndices(row)[j] == i) diag = hypre_ParCompMatrixRowData(row)[j];
 			// Else, subtract off A_ij*u_j
