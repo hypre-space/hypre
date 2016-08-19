@@ -15,7 +15,7 @@
 # recent release.
 #=============================================================================
 
-Version 2.11.0 released 2016/03/??
+Version 2.11.0 released 2016/03/28
 
 - Added a new function hypre_BoomerAMGSetKeepTranspose, which will store the
   transposes of the interpolation operators and then replace the multiplication

@@ -1219,10 +1219,34 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
 
                      cinfo = cinfo_a[cinfoi];
 
+
                      hypre_SStructBoxManEntryGetBoxnum(pi_entry, &bi);
 
                      cbox_a = hypre_BoxArrayArrayBoxArray((cinfo->boxes), bi);
                      crbox_a = hypre_BoxArrayArrayBoxArray((cinfo->rboxes), bi);
+
+                     /* Since cinfo is unique for each (pi,vi,pj,vj), we can use
+                      * the remote (proc, boxnum) to determine duplicates */
+                     {
+                        HYPRE_Int  j, proc, boxnum, duplicate = 0;
+
+                        hypre_SStructBoxManEntryGetProcess(pj_entry, &proc);
+                        hypre_SStructBoxManEntryGetBoxnum(pj_entry, &boxnum);
+                        cproc_a = (cinfo->procs[bi]);
+                        crboxnum_a = (cinfo->rboxnums[bi]);
+                        hypre_ForBoxI(j, cbox_a)
+                        {
+                           if ( (proc == cproc_a[j]) && (boxnum == crboxnum_a[j]) )
+                           {
+                              duplicate = 1;
+                           }
+                        }
+                        if (duplicate)
+                        {
+                           continue;
+                        }
+                     }
+
                      size = hypre_BoxArraySize(cbox_a);
                      /* Allocate in chunks of 10 ('size' grows by 1) */
                      if (size%10 == 0)
@@ -1330,8 +1354,8 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                      rboxs = (comm_info->comm_info->send_rboxnums);
                      hypre_ForBoxArrayI(i, boxaa)
                      {
-                        hypre_printf("%d: ncomm = %d, send box = %d, (proc,rbox: ...) =",
-                                     myproc, vnbor_ncomms, i);
+                        hypre_printf("%d: (pi,vi:pj,vj) = (%d,%d:%d,%d), ncomm = %d, send box = %d, (proc,rbox: ...) =",
+                                     myproc, pi, vi, pj, vj, vnbor_ncomms, i);
                         boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
                         hypre_ForBoxI(j, boxa)
                         {
@@ -1355,8 +1379,8 @@ hypre_SStructGridCreateCommInfo( hypre_SStructGrid  *grid )
                      rboxs = (comm_info->comm_info->recv_rboxnums);
                      hypre_ForBoxArrayI(i, boxaa)
                      {
-                        hypre_printf("%d: ncomm = %d, recv box = %d, (proc,rbox: ...) =",
-                                     myproc, vnbor_ncomms, i);
+                        hypre_printf("%d: (pi,vi:pj,vj) = (%d,%d:%d,%d), ncomm = %d, recv box = %d, (proc,rbox: ...) =",
+                                     myproc, pi, vi, pj, vj, vnbor_ncomms, i);
                         boxa = hypre_BoxArrayArrayBoxArray(boxaa, i);
                         hypre_ForBoxI(j, boxa)
                         {
