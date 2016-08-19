@@ -24,7 +24,10 @@ ZeroInitialGuess( void *amg_vdata );
 HYPRE_Int
 hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles )
 {
-	HYPRE_Int i;
+	HYPRE_Int   myid, num_procs;
+	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+	HYPRE_Int i,j;
 	// hypre_ParAMGData	*amg_data = amg_vdata;
 	// HYPRE_Int num_global_relax = 2;
 
@@ -34,11 +37,27 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles )
 	// Set zero initial guess for all comp grids on all levels
 	ZeroInitialGuess( amg_vdata );
 	
+	// Debugging: show norm u
+	// HYPRE_Complex 		prev_norm_u = 0.0, norm_u = 0.0;
+	// hypre_ParAMGData	*amg_data = amg_vdata;
+ //   	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
+ //   	HYPRE_Complex 		*u_comp = hypre_ParCompGridU(compGrid[0]);
+ //   	HYPRE_Int 			num_nodes = hypre_ParCompGridNumNodes(compGrid[0]);
+ //   	HYPRE_Int 			num_owned_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[0]);
+	// for (j = 0; j < num_owned_nodes; j++) prev_norm_u += u_comp[j]*u_comp[j];
+	// prev_norm_u = sqrt(prev_norm_u);
+
 	// Do the cycles
 	for (i = 0; i < num_comp_cycles; i++)
 	{
 		hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
+		// Debugging: show norm u after FAC cycle
+		// norm_u = 0.0;
+		// for (j = 0; j < num_owned_nodes; j++) norm_u += u_comp[j]*u_comp[j];
+		// norm_u = sqrt(norm_u);
+		// if ( (norm_u / prev_norm_u) >= 0.99 ) printf("Rank %d: ||u_%d||/||u_%d|| = %f\n", myid, i+1, i, norm_u / prev_norm_u );
 	}
+
 
 	// Update fine grid solution
 	AddSolution( amg_vdata );
@@ -64,10 +83,10 @@ AddSolution( void *amg_vdata )
    	HYPRE_Complex 		*u = hypre_VectorData( hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[0] ) );
    	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
    	HYPRE_Complex 		*u_comp = hypre_ParCompGridU(compGrid[0]);
-   	HYPRE_Int 			num_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[0]);
+   	HYPRE_Int 			num_owned_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[0]);
    	HYPRE_Int 			i;
 
-   	for (i = 0; i < num_nodes; i++) u[i] += u_comp[i];
+   	for (i = 0; i < num_owned_nodes; i++) u[i] += u_comp[i];
 
    	return 0;
 }
@@ -75,6 +94,9 @@ AddSolution( void *amg_vdata )
 HYPRE_Int
 ZeroInitialGuess( void *amg_vdata )
 {
+	HYPRE_Int   myid, num_procs;
+	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
 	hypre_ParAMGData	*amg_data = amg_vdata;
    	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
    	HYPRE_Int 			num_nodes;
@@ -85,6 +107,12 @@ ZeroInitialGuess( void *amg_vdata )
    	{
    		num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
    		for (i = 0; i < num_nodes; i++) hypre_ParCompGridU(compGrid[level])[i] = 0.0;
+
+   		// Debugging: try random initial guess and zero rhs to debug FAC cycle
+		// hypre_SeedRand(myid);
+  //  		for (i = 0; i < num_nodes; i++) hypre_ParCompGridU(compGrid[level])[i] = hypre_Rand();
+  //  		for (i = 0; i < num_nodes; i++) hypre_ParCompGridF(compGrid[level])[i] = 0.0;
+
    	}
 
    	return 0;

@@ -17,7 +17,7 @@
 #include "par_csr_block_matrix.h"	
 
 #define DEBUG_COMP_GRID 0 // if true, prints out what is stored in the comp grids for each processor to a file
-#define DEBUGGING_MESSAGES 1 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
+#define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 #define USE_BARRIERS 0 // if true, puts MPI barriers between major tasks in setup phase (for timing purposes)
 
 HYPRE_Int 
