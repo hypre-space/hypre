@@ -2812,6 +2812,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweeps);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -2971,6 +2972,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -3271,6 +3273,7 @@ main( hypre_int argc,
            HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
            HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
            HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+           HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
            HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
            HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
            HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
@@ -3371,6 +3374,7 @@ main( hypre_int argc,
            HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
            HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
            HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+           HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
            HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
            HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
            HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
@@ -3633,6 +3637,7 @@ main( hypre_int argc,
            HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
            HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
            HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+           HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
            HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
            HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
            HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
@@ -3737,6 +3742,7 @@ main( hypre_int argc,
            HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
            HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
            HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+           HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
            HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
            HYPRE_BoomerAMGSetNumPaths(pcg_precond, num_paths);
            HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
@@ -4025,6 +4031,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweeps);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -4174,6 +4181,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -4382,6 +4390,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweeps);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -4552,6 +4561,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweeps);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -4727,6 +4737,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweeps);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
@@ -4946,6 +4957,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSmoothNumSweeps(pcg_precond, smooth_num_sweeps);
          HYPRE_BoomerAMGSetMaxLevels(pcg_precond, max_levels);
          HYPRE_BoomerAMGSetMaxRowSum(pcg_precond, max_row_sum);
+         HYPRE_BoomerAMGSetDebugFlag(pcg_precond, debug_flag);
          HYPRE_BoomerAMGSetNumFunctions(pcg_precond, num_functions);
          HYPRE_BoomerAMGSetAggNumLevels(pcg_precond, agg_num_levels);
          HYPRE_BoomerAMGSetAggInterpType(pcg_precond, agg_interp_type);
