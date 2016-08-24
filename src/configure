@@ -662,6 +662,7 @@ LDFLAGS
 CFLAGS
 RANLIB
 SET_MAKE
+CUDACXX
 FC
 CXX
 CC
@@ -3214,7 +3215,7 @@ fi
 if test "$hypre_using_cuda" = "yes"
 then
 	hypre_using_fortran=no
-	hypre_using_mpi=no
+	hypre_using_mpi=yes
 	for ac_prog in nvcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
@@ -3297,6 +3298,48 @@ fi
 
 
   test -n "$CC" && break
+done
+
+	for ac_prog in mpxlC mpixlcxx_r mpiicpc mpicxx mpiCC mpipgCC xlC_r xlc_r icpc icc g++ gcc pgCC pgcc CC cc KCC kcc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_CUDACXX+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$CUDACXX"; then
+  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CUDACXX="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+CUDACXX=$ac_cv_prog_CUDACXX
+if test -n "$CUDACXX"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
+$as_echo "$CUDACXX" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$CUDACXX" && break
 done
 
 fi
@@ -7315,14 +7358,11 @@ fi
 
 if test "$hypre_user_chose_raja" = "yes"
 then
-   HYPRE_RAJA_SRC_DIR="$HYPRE_SRCDIR/../../raja_src/src"
-   HYPRE_RAJA_INC_DIR="$HYPRE_SRCDIR/../../raja_src/include"
-   HYPRE_RAJA_LIB_DIR="\$(patsubst %.cxx,%.o,\$(wildcard $HYPRE_RAJA_SRC_DIR/*.cxx))"
    LDFLAGS="-Xcompiler -fopenmp"
    PLATFORM="-DRAJA_PLATFORM_X86_SSE -DRAJA_COMPILER_GNU -DRAJA_USE_CUDA -DRAJA_USE_DOUBLE -DRAJA_USE_BARE_PTR -DRAJA_USE_GETTIME"
-   RAJAFLAGS="-I$HYPRE_RAJA_INC_DIR $PLATFORM"
-   CFLAGS="-O2 -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $RAJAFLAGS $CFLAGS"
-   CXXFLAGS="-O2 -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $RAJAFLAGS  $CXXFLAGS"
+   RAJAFLAGS="-lRAJA"
+   CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $RAJAFLAGS $CFLAGS"
+   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $RAJAFLAGS  $CXXFLAGS"
 fi
 
 if test "$hypre_user_chose_kokkos_cuda" = "yes"

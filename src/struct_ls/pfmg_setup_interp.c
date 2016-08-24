@@ -250,13 +250,14 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
 
-   hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
+   /*FIXME: some memory is still on CPU*/
+   zypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
 #endif
-   hypre_BoxLoop2For(Ai, Pi)
+   zypre_BoxLoop2For(Ai, Pi)
    {
        HYPRE_Int si,mrk0,mrk1,Astenc;
        HYPRE_Real center;
@@ -314,7 +315,7 @@ hypre_PFMGSetupInterpOp_CC0
       if (mrk1 != 0)
          Pp1[Pi] = 0.0;
    }
-   hypre_BoxLoop2End(Ai, Pi);
+   zypre_BoxLoop2End(Ai, Pi);
 
    if (warning_cnt)
    {

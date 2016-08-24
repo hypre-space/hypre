@@ -41,17 +41,23 @@
 extern "C++" {
 #include <curand.h>
 #include <curand_kernel.h>
-#include "RAJA/RAJA.hxx"
+#include <RAJA/RAJA.hxx>
 }
 using namespace RAJA;
 
+//__device__ __managed__ HYPRE_Int loop_size_cuda[3];
+//__device__ __managed__ HYPRE_Int cdim;
+//__device__ __managed__ HYPRE_Int stride_cuda1[3],start_cuda1[3],dboxmin1[3],dboxmax1[3];
+//__device__ __managed__ HYPRE_Int stride_cuda2[3],start_cuda2[3],dboxmin2[3],dboxmax2[3];
+//__device__ __managed__ HYPRE_Int stride_cuda3[3],start_cuda3[3],dboxmin3[3],dboxmax3[3];
+//__device__ __managed__ HYPRE_Int stride_cuda4[3],start_cuda4[3],dboxmin4[3],dboxmax4[3];
+
 __device__ __managed__ HYPRE_Int loop_size_cuda[3];
-__device__ __managed__ HYPRE_Int cdim;
+__device__ __managed__ HYPRE_Int cdim = 3;
 __device__ __managed__ HYPRE_Int stride_cuda1[3],start_cuda1[3],dboxmin1[3],dboxmax1[3];
 __device__ __managed__ HYPRE_Int stride_cuda2[3],start_cuda2[3],dboxmin2[3],dboxmax2[3];
 __device__ __managed__ HYPRE_Int stride_cuda3[3],start_cuda3[3],dboxmin3[3],dboxmax3[3];
 __device__ __managed__ HYPRE_Int stride_cuda4[3],start_cuda4[3],dboxmin4[3],dboxmax4[3];
-
 /*--------------------------------------------------------------------------
  * hypre_Index:
  *   This is used to define indices in index space, or dimension
@@ -80,12 +86,13 @@ __device__ __managed__ HYPRE_Int stride_cuda4[3],start_cuda4[3],dboxmin4[3],dbox
 #define zypre_BoxLoopCUDAInit(ndim,loop_size)				\
 	HYPRE_Int hypre__tot = 1.0;								\
 	const size_t block_size = 256;				  			\
-	cdim = ndim;											\
 	for (HYPRE_Int d = 0;d < ndim;d ++)						\
 	{														\
 		loop_size_cuda[d] = loop_size[d];					\
 		hypre__tot *= loop_size[d];							\
     }														
+
+//	cdim = ndim;								\
 
 #define zypre_BoxLoopCUDADeclare()										\
 	HYPRE_Int local_idx;												\

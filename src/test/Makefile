@@ -152,7 +152,7 @@ maxwell_unscaled: maxwell_unscaled.o
 
 struct_migrate: struct_migrate.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
 
 sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
