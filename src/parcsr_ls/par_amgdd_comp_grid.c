@@ -451,7 +451,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
             // otherwise, have to search over the added nodes
             else
             {
-               for (k = hypre_ParCompGridNumOwnedNodes(compGrid[level]); k < hypre_ParCompGridNumNodes(compGrid[level]); k++)
+               for (k = hypre_ParCompGridNumNodes(compGrid[level]) - 1; k >= hypre_ParCompGridNumOwnedNodes(compGrid[level]); k--) // Note: doing the search backward (hopefully shorter)
                {
                   if ( global_index == hypre_ParCompGridGlobalIndices(compGrid[level])[k] )
                   {
@@ -497,7 +497,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                // otherwise, have to search over added nodes
                else
                {
-                  for (j = hypre_ParCompGridNumOwnedNodes(compGrid[level+1]); j < hypre_ParCompGridNumNodes(compGrid[level+1]); j++)
+                  for (j = hypre_ParCompGridNumNodes(compGrid[level+1]) - 1; j >= hypre_ParCompGridNumOwnedNodes(compGrid[level+1]); j--) // Note: doing the search backward (hopefully shorter)
                   {
                      if ( coarse_global_index == hypre_ParCompGridGlobalIndices(compGrid[level+1])[j] )
                      {
@@ -529,7 +529,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                // otherwise, have to search over the added nodes
                else
                {
-                  for (k = hypre_ParCompGridNumOwnedNodes(compGrid[level+1]); k < hypre_ParCompGridNumNodes(compGrid[level+1]); k++)
+                  for (k = hypre_ParCompGridNumNodes(compGrid[level+1]) - 1; k >= hypre_ParCompGridNumOwnedNodes(compGrid[level+1]); k--) // Note: doing the search backward (hopefully shorter)
                   {
                      if ( global_index == hypre_ParCompGridGlobalIndices(compGrid[level+1])[k] )
                      {
@@ -542,7 +542,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
             }
          }
 
-         // Insert into P one level up (this level is in the domain of P one level up)
+         // Insert into P one level up (this level is in the domain of P one level up) !!! Whoa... this is pretty bad: we are basically looping over all of P for each node added. Yikes... !!!
          if (level != 0)
          {
             // Search over old rows of P to find where we need to update local indices to account for this new added node

@@ -24,7 +24,7 @@ ZeroInitialGuess( void *amg_vdata );
 HYPRE_Int
 hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles )
 {
-	HYPRE_Int   myid, num_procs;
+	HYPRE_Int   myid;
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
 	HYPRE_Int i,j;
@@ -94,7 +94,7 @@ AddSolution( void *amg_vdata )
 HYPRE_Int
 ZeroInitialGuess( void *amg_vdata )
 {
-	HYPRE_Int   myid, num_procs;
+	HYPRE_Int   myid;
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
 	hypre_ParAMGData	*amg_data = amg_vdata;

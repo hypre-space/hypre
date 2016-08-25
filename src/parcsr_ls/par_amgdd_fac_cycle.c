@@ -215,7 +215,7 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 			else res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_f[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
 		}
 	}
-	if (no_residual_counter > (0.4)*(num_nodes_f - num_real_nodes_f)) hypre_printf("Num nodes where no residual calculated / num ghost nodes = %f\n", ((float) no_residual_counter) / ((float) num_nodes_f - num_real_nodes_f));
+	if (no_residual_counter > (0.5)*(num_nodes_f - num_real_nodes_f)) hypre_printf("Num nodes where no residual calculated / num ghost nodes = %f\n", ((float) no_residual_counter) / ((float) num_nodes_f - num_real_nodes_f));
 
 	// Restrict from real nodes
 	for (i = 0; i < num_real_nodes_f; i++)

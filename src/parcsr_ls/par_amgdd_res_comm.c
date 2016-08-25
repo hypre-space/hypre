@@ -1366,7 +1366,7 @@ AddToCompGrid( hypre_ParCompGrid **compGrid, hypre_ParCompGrid **psiComposite, H
             {
                add_flag = 1;
                // search over nodes added to this comp grid (i.e. those with local index greater than num_owned_nodes)
-               for (j = hypre_ParCompGridNumOwnedNodes(compGrid[level]); j < hypre_ParCompGridNumNodes(compGrid[level]); j++)
+               for (j = hypre_ParCompGridNumNodes(compGrid[level]) - 1; j >= hypre_ParCompGridNumOwnedNodes(compGrid[level]); j--) // Note: doing the search backward (hopefully shorter)
                {
                   if ( hypre_ParCompGridGlobalIndices(psiComposite[level])[i] == hypre_ParCompGridGlobalIndices(compGrid[level])[j] )
                   {
@@ -2025,7 +2025,6 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
 {
    HYPRE_Int                  level, i, j, k, searchStart, searchEnd;
    HYPRE_Int                  row_size, ghostProcID, ghostAddFlag = 1, searchIndex;
-   HYPRE_Int                  ghostRowStart, ghostRowEnd;
    hypre_ParCompMatrixRow     *row;
    HYPRE_Int                  ghostInfoLength;
 
@@ -2058,8 +2057,7 @@ FindGhostNodes( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int *p
                // If so, figure out what processor the node lives on (!!! We use the assumed partition to find processor ID !!!)
                hypre_GetAssumedPartitionProcFromRow( hypre_MPI_COMM_WORLD, hypre_ParCompMatrixRowGlobalIndices(row)[j], 0, global_nodes[level], &ghostProcID );
 
-               // Use assumed partition to get local index on the processor which owns the ghost node
-               hypre_GetAssumedPartitionRowRange( hypre_MPI_COMM_WORLD, ghostProcID, 0, global_nodes[level], &ghostRowStart, &ghostRowEnd );
+               // Get global index of ghost node
                searchIndex = hypre_ParCompMatrixRowGlobalIndices(row)[j];
 
                // ghostGlobalIndex[ghostProcID][level] and ghostUnpackIndex[ghostProcID][level] are initialized as NULL, so if they are still null when we need them, allocate
