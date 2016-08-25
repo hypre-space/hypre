@@ -38,14 +38,14 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles )
 	ZeroInitialGuess( amg_vdata );
 	
 	// Debugging: show norm u
-	// HYPRE_Complex 		prev_norm_u = 0.0, norm_u = 0.0;
-	// hypre_ParAMGData	*amg_data = amg_vdata;
- //   	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
- //   	HYPRE_Complex 		*u_comp = hypre_ParCompGridU(compGrid[0]);
- //   	HYPRE_Int 			num_nodes = hypre_ParCompGridNumNodes(compGrid[0]);
- //   	HYPRE_Int 			num_owned_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[0]);
-	// for (j = 0; j < num_owned_nodes; j++) prev_norm_u += u_comp[j]*u_comp[j];
-	// prev_norm_u = sqrt(prev_norm_u);
+	HYPRE_Complex 		prev_norm_u = 0.0, norm_u = 0.0;
+	hypre_ParAMGData	*amg_data = amg_vdata;
+   	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
+   	HYPRE_Complex 		*u_comp = hypre_ParCompGridU(compGrid[0]);
+   	HYPRE_Int 			num_nodes = hypre_ParCompGridNumNodes(compGrid[0]);
+   	HYPRE_Int 			num_owned_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[0]);
+	for (j = 0; j < num_owned_nodes; j++) prev_norm_u += u_comp[j]*u_comp[j];
+	prev_norm_u = sqrt(prev_norm_u);
 
 	// Do the cycles
 	for (i = 0; i < num_comp_cycles; i++)
@@ -106,12 +106,12 @@ ZeroInitialGuess( void *amg_vdata )
    	for (level = 0; level < num_levels; level++)
    	{
    		num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
-   		for (i = 0; i < num_nodes; i++) hypre_ParCompGridU(compGrid[level])[i] = 0.0;
+   		// for (i = 0; i < num_nodes; i++) hypre_ParCompGridU(compGrid[level])[i] = 0.0;
 
    		// Debugging: try random initial guess and zero rhs to debug FAC cycle
-		// hypre_SeedRand(myid);
-  //  		for (i = 0; i < num_nodes; i++) hypre_ParCompGridU(compGrid[level])[i] = hypre_Rand();
-  //  		for (i = 0; i < num_nodes; i++) hypre_ParCompGridF(compGrid[level])[i] = 0.0;
+		hypre_SeedRand(myid);
+   		for (i = 0; i < num_nodes; i++) hypre_ParCompGridU(compGrid[level])[i] = hypre_Rand();
+   		for (i = 0; i < num_nodes; i++) hypre_ParCompGridF(compGrid[level])[i] = 0.0;
 
    	}
 

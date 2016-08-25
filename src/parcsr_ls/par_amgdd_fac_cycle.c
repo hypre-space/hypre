@@ -35,8 +35,11 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 	hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
 	#endif
+	
+	HYPRE_Int   myid, num_procs;
+	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-	HYPRE_Int level, i; // loop variables
+	HYPRE_Int level, i, j; // loop variables
 	HYPRE_Int numCoarseRelax = 20; // number of relaxations used to solve the coarse grid
 
 	// Get the AMG structure
@@ -84,57 +87,77 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 
 
 
-   	// Do FAC V-cycle
-
-	#if DEBUG_COMP_GRID
-	char filename[256];
-	for (level = 0; level < num_levels; level++)
+   	// Do FAC V-cycle (Debugging: do V-cycles starting on each level (but don't project soln up as in an FMG cycle))
+   	HYPRE_Int current_level;
+	for (current_level = num_levels - 1; current_level >= 0; current_level++)
 	{
-		hypre_sprintf(filename, "../../../scratch/CompGrids/before_Proc%dLevel%d.txt", myid, level);
-		hypre_ParCompGridDebugPrint( compGrid[level], filename );
+
+		// Measure initial norm of u
+		HYPRE_Complex 		prev_norm_u = 0.0, norm_u = 0.0;
+		for (j = 0; j < num_nodes[current_level]; j++) prev_norm_u += u[current_level][j]*u[current_level][j];
+		prev_norm_u = sqrt(prev_norm_u);
+
+		#if DEBUG_COMP_GRID
+		char filename[256];
+		for (level = 0; level < num_levels; level++)
+		{
+			hypre_sprintf(filename, "../../../scratch/CompGrids/before_Proc%dLevel%d.txt", myid, level);
+			hypre_ParCompGridDebugPrint( compGrid[level], filename );
+		}
+		#endif
+
+
+		// ... work down to coarsest ...
+		for (i = current_level; i < num_levels - 1; i++)
+		{
+			// Relax on the real nodes
+			Relax( A_rows[i], u[i], f[i], num_real_nodes[i] );
+			// Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
+			Restrict( A_rows[i], A_rows[i+1], P_rows[i], u[i], u[i+1], f[i], f[i+1], num_nodes[i], num_real_nodes[i], num_nodes[i+1], hypre_ParCompGridNumOwnedNodes(compGrid[i+1]) );
+		}
+
+		//  ... solve on coarsest level ...
+		// hypre_printf("Level %d: solve\n", i);
+		for (i = 0; i < numCoarseRelax; i++) Relax( A_rows[num_levels-1], u[num_levels-1], f[num_levels-1], num_real_nodes[num_levels-1] );
+
+		// See if relaxation blew up the solution
+		norm_u = 0.0;
+		for (j = 0; j < num_nodes[current_level]; j++) norm_u += u[current_level][j]*u[current_level][j];
+		norm_u = sqrt(norm_u);
+		if (norm_u >= prev_norm_u) printf("Rank %d, level %d: relaxation blew up norm u. norm_u/prev_norm_u = %f\n", myid, current_level, norm_u/prev_norm_u);
+		prev_norm_u = norm_u;
+
+		#if DEBUG_COMP_GRID
+		for (level = 0; level < num_levels; level++)
+		{
+			hypre_sprintf(filename, "../../../scratch/CompGrids/post_relax_Proc%dLevel%d.txt", myid, level);
+			hypre_ParCompGridDebugPrint( compGrid[level], filename );
+		}
+		#endif
+
+
+		// ... and work back up to the finest
+		for (i = num_levels - 2; i > current_level-1; i--)
+		{
+			// Project up and relax
+			Project(  P_rows[i], u[i], u[i+1], num_nodes[i] );
+			Relax( A_rows[i], u[i], f[i], num_real_nodes[i] );
+		}
+
+		// See if coarse grid correction blew up the solution
+		norm_u = 0.0;
+		for (j = 0; j < num_nodes[current_level]; j++) norm_u += u[current_level][j]*u[current_level][j];
+		norm_u = sqrt(norm_u);
+		if (norm_u >= prev_norm_u) printf("Rank %d, level %d: coarse grid correction blew up norm u. norm_u/prev_norm_u = %f\n", myid, current_level, norm_u/prev_norm_u);
+
+		#if DEBUG_COMP_GRID
+		for (level = 0; level < num_levels; level++)
+		{
+			hypre_sprintf(filename, "../../../scratch/CompGrids/after_Proc%dLevel%d.txt", myid, level);
+			hypre_ParCompGridDebugPrint( compGrid[level], filename );
+		}
+		#endif
 	}
-	#endif
-
-
-	// ... work down to coarsest ...
-	for (i = 0; i < num_levels - 1; i++)
-	{
-		// Relax on the real nodes
-		Relax( A_rows[i], u[i], f[i], num_real_nodes[i] );
-		// Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
-		Restrict( A_rows[i], A_rows[i+1], P_rows[i], u[i], u[i+1], f[i], f[i+1], num_nodes[i], num_real_nodes[i], num_nodes[i+1], hypre_ParCompGridNumOwnedNodes(compGrid[i+1]) );
-	}
-
-	//  ... solve on coarsest level ...
-	// hypre_printf("Level %d: solve\n", i);
-	for (i = 0; i < numCoarseRelax; i++) Relax( A_rows[num_levels-1], u[num_levels-1], f[num_levels-1], num_real_nodes[num_levels-1] );
-
-
-	#if DEBUG_COMP_GRID
-	for (level = 0; level < num_levels; level++)
-	{
-		hypre_sprintf(filename, "../../../scratch/CompGrids/post_relax_Proc%dLevel%d.txt", myid, level);
-		hypre_ParCompGridDebugPrint( compGrid[level], filename );
-	}
-	#endif
-
-
-	// ... and work back up to the finest
-	for (i = num_levels - 2; i > -1; i--)
-	{
-		// Project up and relax
-		Project(  P_rows[i], u[i], u[i+1], num_nodes[i] );
-		Relax( A_rows[i], u[i], f[i], num_real_nodes[i] );
-	}
-
-
-	#if DEBUG_COMP_GRID
-	for (level = 0; level < num_levels; level++)
-	{
-		hypre_sprintf(filename, "../../../scratch/CompGrids/after_Proc%dLevel%d.txt", myid, level);
-		hypre_ParCompGridDebugPrint( compGrid[level], filename );
-	}
-	#endif
 
 	// Cleanup memory
 	hypre_TFree(num_nodes);
