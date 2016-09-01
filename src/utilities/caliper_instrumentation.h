@@ -23,8 +23,8 @@
 
 #include <caliper/cali.h>
 
-#define HYPRE_ANNOTATION_BEGIN( str ) cali_begin_byname(str)
-#define HYPRE_ANNOTATION_END( str ) cali_end_byname(str)
+#define HYPRE_ANNOTATION_BEGIN( str ) cali_begin_string_byname("hypre.kernel", str)
+#define HYPRE_ANNOTATION_END( str ) cali_end_byname("hypre.kernel")
 
 #else
 

@@ -79,7 +79,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
     * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
 
-   HYPRE_ANNOTATION_BEGIN("hypre.PFMG.solve");
+   HYPRE_ANNOTATION_BEGIN("PFMG.solve");
 
    hypre_BeginTiming(pfmg_data -> time_index);
 
@@ -104,7 +104,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       }
 
       hypre_EndTiming(pfmg_data -> time_index);
-      HYPRE_ANNOTATION_END("hypre.PFMG.solve");
+      HYPRE_ANNOTATION_END("PFMG.solve");
 
       return hypre_error_flag;
    }
@@ -127,7 +127,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
 
          hypre_EndTiming(pfmg_data -> time_index);
-         HYPRE_ANNOTATION_END("hypre.PFMG.solve");
+         HYPRE_ANNOTATION_END("PFMG.solve");
 
          return hypre_error_flag;
       }
@@ -330,7 +330,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    }
 
    hypre_EndTiming(pfmg_data -> time_index);
-   HYPRE_ANNOTATION_END("hypre.PFMG.solve");
+   HYPRE_ANNOTATION_END("PFMG.solve");
 
    return hypre_error_flag;
 }

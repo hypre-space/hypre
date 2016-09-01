@@ -215,7 +215,7 @@ hypre_BoomerAMGCreate()
 
    nongalerkin_tol = 0.0;
 
-   HYPRE_ANNOTATION_BEGIN("hypre.BoomerAMG.create");
+   HYPRE_ANNOTATION_BEGIN("BoomerAMG.create");
    
    /*-----------------------------------------------------------------------
     * Create the hypre_ParAMGData structure and return
@@ -385,7 +385,7 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataRAP2(amg_data) = 0;
    hypre_ParAMGDataKeepTranspose(amg_data) = 0;
 
-   HYPRE_ANNOTATION_END("hypre.BoomerAMG.create");
+   HYPRE_ANNOTATION_END("BoomerAMG.create");
    
    return (void *) amg_data;
 }
@@ -405,7 +405,7 @@ hypre_BoomerAMGDestroy( void *data )
    MPI_Comm new_comm = hypre_ParAMGDataNewComm(amg_data);
    HYPRE_Int i;
 
-   HYPRE_ANNOTATION_BEGIN("hypre.BoomerAMG.destroy");
+   HYPRE_ANNOTATION_BEGIN("BoomerAMG.destroy");
    
    if (hypre_ParAMGDataMaxEigEst(amg_data))
    {
@@ -632,7 +632,7 @@ hypre_BoomerAMGDestroy( void *data )
    }
    hypre_TFree(amg_data);
 
-   HYPRE_ANNOTATION_END("hypre.BoomerAMG.destroy");
+   HYPRE_ANNOTATION_END("BoomerAMG.destroy");
    
    return hypre_error_flag;
 }

@@ -245,7 +245,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data); 
 
-   HYPRE_ANNOTATION_BEGIN("hypre.BoomerAMG.setup");
+   HYPRE_ANNOTATION_BEGIN("BoomerAMG.setup");
    
    /* change in definition of standard and multipass interpolation, by
       eliminating interp_type 9 and 5 and setting sep_weight instead
@@ -2567,7 +2567,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 }
 #endif
 
-   HYPRE_ANNOTATION_END("hypre.BoomerAMG.setup");
+   HYPRE_ANNOTATION_END("BoomerAMG.setup");
  
    return(hypre_error_flag);
 }  

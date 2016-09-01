@@ -63,7 +63,7 @@ hypre_PFMGDestroy( void *pfmg_vdata )
 
    HYPRE_Int l;
    
-   HYPRE_ANNOTATION_BEGIN("hypre.PFMG.destroy");
+   HYPRE_ANNOTATION_BEGIN("PFMG.destroy");
 
    if (pfmg_data)
    {
@@ -125,7 +125,7 @@ hypre_PFMGDestroy( void *pfmg_vdata )
       hypre_TFree(pfmg_data);
    }
 
-   HYPRE_ANNOTATION_END("hypre.PFMG.destroy");
+   HYPRE_ANNOTATION_END("PFMG.destroy");
 
    return hypre_error_flag;
 }

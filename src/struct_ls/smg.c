@@ -59,7 +59,7 @@ hypre_SMGDestroy( void *smg_vdata )
 
    HYPRE_Int l;
 
-   HYPRE_ANNOTATION_BEGIN("hypre.SMG.destroy");
+   HYPRE_ANNOTATION_BEGIN("SMG.destroy");
 
    if (smg_data)
    {
@@ -129,7 +129,7 @@ hypre_SMGDestroy( void *smg_vdata )
       hypre_TFree(smg_data);
    }
    
-   HYPRE_ANNOTATION_END("hypre.SMG.destroy");
+   HYPRE_ANNOTATION_END("SMG.destroy");
 
    return hypre_error_flag;
 }
