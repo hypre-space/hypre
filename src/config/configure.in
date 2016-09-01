@@ -793,11 +793,20 @@ AS_HELP_STRING([--with-MPI],
  esac]
 )
 
-AC_ARG_WITH(caliper-include,
-AS_HELP_STRING([--with-caliper-include=DIR],
-               [User specifies that cali.h is in DIR/caliper.]),
-[for cali_inc_dir in $withval; do
-    CALIPER_INCLUDE="$CALIPER_INCLUDE -I$cali_inc_dir"
+AC_ARG_WITH(caliper-include-dir,
+AS_HELP_STRING([--with-caliper-include-dir=DIR],
+               [Directory where Caliper is installed.]),
+[for caliper_inc_dir in $withval; do
+    CALIPER_INCLUDE="-I$caliper_inc_dir $CALIPER_INCLUDE"
+ done]
+)
+
+AC_ARG_WITH(caliper-libs,
+AS_HELP_STRING([--with-caliper-libs=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for Caliper. OK to use -L and -l flags in the list]),
+[for caliper_libs in $withval; do
+    CALIPER_LIBS="$CALIPER_LIBS $caliper_libs"
  done]
 )
 
@@ -1339,6 +1348,7 @@ dnl *********************************************************************
 dnl * Caliper instrumentation
 dnl *********************************************************************
 AC_SUBST(CALIPER_INCLUDE)
+AC_SUBST(CALIPER_LIBS)
 
 dnl *********************************************************************
 dnl * ar & ranlib substitution
