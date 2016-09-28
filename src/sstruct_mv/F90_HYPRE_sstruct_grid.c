@@ -19,6 +19,10 @@
 #include "_hypre_sstruct_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 /*--------------------------------------------------------------------------
  * HYPRE_SStructGridCreate
  *--------------------------------------------------------------------------*/
@@ -255,3 +259,6 @@ hypre_F90_IFACE(hypre_sstructgridsetnumghost, HYPRE_SSTRUCTGRIDSETNUMGHOST)
       hypre_F90_PassIntArray (num_ghost) );
 }
 
+#ifdef __cplusplus
+}
+#endif

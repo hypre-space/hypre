@@ -14,7 +14,7 @@
 #include "slu_ddefs.h"
 
 int
-sp_dgemm(char *transa, char *transb, int m, int n, int k, 
+sp_dgemm(const char *transa,const char *transb, int m, int n, int k, 
          double alpha, SuperMatrix *A, double *b, int ldb, 
          double beta, double *c, int ldc)
 {

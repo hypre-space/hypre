@@ -11,7 +11,7 @@
     static integer info;
     static doublereal temp;
     static integer i__, j, ix, jy, kx;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 /*  Purpose   
     =======   

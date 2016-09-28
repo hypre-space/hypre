@@ -73,11 +73,11 @@
     /* System generated locals */
     integer a_dim1, a_offset, b_dim1, b_offset, i__1;
     /* Local variables */
-    extern logical lsame_(char *, char *);
-    extern /* Subroutine */ HYPRE_Int dtrsm_(char *, char *, char *, char *, 
+    extern logical lsame_(const char *,const char *);
+    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *), xerbla_(
-	    char *, integer *), dlaswp_(integer *, doublereal *, 
+	    const char *, integer *), dlaswp_(integer *, doublereal *, 
 	    integer *, integer *, integer *, integer *, integer *);
     static logical notran;
 

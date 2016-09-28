@@ -29,6 +29,7 @@ C_COMPILE_FLAGS = \
  -I$(BASE_DIR)\
  -I$(srcdir)\
  -I$(srcdir)/../..\
+ -I$(srcdir)/../../lapack\
  -I$(srcdir)/../../IJ_mv\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../multivector\
@@ -47,6 +48,7 @@ CXX_COMPILE_FLAGS = \
  -I../..\
  -I$(BASE_DIR)\
  -I$(srcdir)/../..\
+ -I$(srcdir)/../../lapack\
  -I$(srcdir)/../../IJ_mv\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../multivector\

@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dlacpy_(char *uplo, integer *m, integer *n, doublereal *
+/* Subroutine */ HYPRE_Int dlacpy_(const char *uplo, integer *m, integer *n, doublereal *
 	a, integer *lda, doublereal *b, integer *ldb)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -54,7 +54,7 @@
     integer a_dim1, a_offset, b_dim1, b_offset, i__1, i__2;
     /* Local variables */
     static integer i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define b_ref(a_1,a_2) b[(a_2)*b_dim1 + a_1]
 

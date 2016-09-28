@@ -579,7 +579,7 @@ hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,
    HYPRE_Real        *fraction_full;
    HYPRE_Int         *order;
    HYPRE_Int          myid, num_procs, est_size;
-   HYPRE_Int          new;
+   HYPRE_Int          new1;
       
    hypre_BoxArray    *tmp_array;
    hypre_Box         *box;
@@ -651,11 +651,11 @@ hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,
       }
       
       box = hypre_BoxArrayBox(region_array, order[loop]);
-      hypre_APSubdivideRegion(box, ndim, 1, tmp_array, &new);
+      hypre_APSubdivideRegion(box, ndim, 1, tmp_array, &new1);
 
-      if (new > 1) /* If new = 1, then no subdividing occured */
+      if (new1 > 1) /* If new = 1, then no subdividing occured */
       {
-         num_regions = num_regions + new - 1; /* The orginal will be deleted */
+         num_regions = num_regions + new1 - 1; /* The orginal will be deleted */
          
          delete_indices[count] = order[loop];
          count++; /* Number of regions subdivided */
@@ -1434,8 +1434,8 @@ hypre_APFillResponseStructAssumedPart(
    hypre_Box   *box;
      
    hypre_BoxArray              *part_boxes;
-   hypre_DataExchangeResponse  *response_obj = ro;  
-   hypre_StructAssumedPart     *assumed_part = response_obj->data1;  
+   hypre_DataExchangeResponse  *response_obj = (hypre_DataExchangeResponse  *)ro;  
+   hypre_StructAssumedPart     *assumed_part = (hypre_StructAssumedPart     *)response_obj->data1;  
 
    /* Initialize stuff */
    hypre_MPI_Comm_rank(comm, &myid );

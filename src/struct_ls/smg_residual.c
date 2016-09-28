@@ -61,7 +61,7 @@ hypre_SMGResidualSetup( void               *residual_vdata,
                         hypre_StructVector *b,
                         hypre_StructVector *r              )
 {
-   hypre_SMGResidualData  *residual_data = residual_vdata;
+	hypre_SMGResidualData  *residual_data = (hypre_SMGResidualData  *)residual_vdata;
 
    hypre_IndexRef          base_index  = (residual_data -> base_index);
    hypre_IndexRef          base_stride = (residual_data -> base_stride);
@@ -122,7 +122,7 @@ hypre_SMGResidual( void               *residual_vdata,
                    hypre_StructVector *b,
                    hypre_StructVector *r              )
 {
-   hypre_SMGResidualData  *residual_data = residual_vdata;
+   hypre_SMGResidualData  *residual_data = (hypre_SMGResidualData  *)residual_vdata;
 
    hypre_IndexRef          base_stride = (residual_data -> base_stride);
    hypre_BoxArray         *base_points = (residual_data -> base_points);
@@ -279,7 +279,7 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
                           hypre_Index  base_index,
                           hypre_Index  base_stride )
 {
-   hypre_SMGResidualData *residual_data = residual_vdata;
+   hypre_SMGResidualData *residual_data = (hypre_SMGResidualData  *)residual_vdata;
    HYPRE_Int              d;
  
    for (d = 0; d < 3; d++)
@@ -299,7 +299,7 @@ hypre_SMGResidualSetBase( void        *residual_vdata,
 HYPRE_Int
 hypre_SMGResidualDestroy( void *residual_vdata )
 {
-   hypre_SMGResidualData *residual_data = residual_vdata;
+   hypre_SMGResidualData *residual_data = (hypre_SMGResidualData  *)residual_vdata;
 
    if (residual_data)
    {

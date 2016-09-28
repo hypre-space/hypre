@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dlarf_(char *side, integer *m, integer *n, doublereal *v,
+/* Subroutine */ HYPRE_Int dlarf_(const char *side, integer *m, integer *n, doublereal *v,
 	 integer *incv, doublereal *tau, doublereal *c__, integer *ldc, 
 	doublereal *work)
 {
@@ -77,8 +77,8 @@
     extern /* Subroutine */ HYPRE_Int dger_(integer *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
-    extern logical lsame_(char *, char *);
-    extern /* Subroutine */ HYPRE_Int dgemv_(char *, integer *, integer *, 
+    extern logical lsame_(const char *,const char *);
+    extern /* Subroutine */ HYPRE_Int dgemv_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *);
 

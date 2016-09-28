@@ -120,8 +120,8 @@ mv_TempMultiVectorCreateCopy( void* src_, HYPRE_Int copyValues ) {
 
   n = src->numVectors;
 
-  dest = mv_TempMultiVectorCreateFromSampleVector( src->interpreter, 
-						      n, src->vector[0] );
+  dest = (mv_TempMultiVector*)mv_TempMultiVectorCreateFromSampleVector( src->interpreter, 
+												   n, src->vector[0] );
   if ( copyValues )
     for ( i = 0; i < n; i++ ) {
       (dest->interpreter->CopyVector)(src->vector[i],dest->vector[i]);

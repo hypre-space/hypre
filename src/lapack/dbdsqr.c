@@ -14,7 +14,7 @@ static integer c__1 = 1;
 static doublereal c_b49 = 1.;
 static doublereal c_b72 = -1.;
 
-/* Subroutine */ HYPRE_Int dbdsqr_(char *uplo, integer *n, integer *ncvt, integer *
+/* Subroutine */ HYPRE_Int dbdsqr_(const char *uplo, integer *n, integer *ncvt, integer *
 	nru, integer *ncc, doublereal *d__, doublereal *e, doublereal *vt, 
 	integer *ldvt, doublereal *u, integer *ldu, doublereal *c__, integer *
 	ldc, doublereal *work, integer *info)
@@ -45,9 +45,9 @@ static doublereal c_b72 = -1.;
     static doublereal r__;
     extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static doublereal oldcs;
-    extern /* Subroutine */ HYPRE_Int dlasr_(char *, char *, char *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlasr_(const char *,const char *,const char *, integer *, 
 	    integer *, doublereal *, doublereal *, doublereal *, integer *);
     static integer oldll;
     static doublereal shift, sigmn, oldsn;
@@ -62,10 +62,10 @@ static doublereal c_b72 = -1.;
 	    doublereal *, doublereal *, doublereal *);
     static doublereal cs;
     static integer ll;
-    extern doublereal dlamch_(char *);
+    extern doublereal dlamch_(const char *);
     static doublereal sn, mu;
     extern /* Subroutine */ HYPRE_Int dlartg_(doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *), xerbla_(char *, 
+	    doublereal *, doublereal *, doublereal *), xerbla_(const char *, 
 	    integer *);
     static doublereal sminoa, thresh;
     static logical rotate;

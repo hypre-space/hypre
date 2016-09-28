@@ -81,17 +81,17 @@ Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
 		{
                     if (num_external >= numb->size)
 		    {
-		        Hash *new;
+		        Hash *newHash;
 
 		        /* allocate more space for numbering */
 		        numb->size *= 2;
 		        numb->local_to_global = (HYPRE_Int *) 
 			    realloc(numb->local_to_global, 
 			    (numb->num_loc+numb->size)*sizeof(HYPRE_Int));
-                        new = HashCreate(2*numb->size+1);
-		        HashRehash(numb->hash, new);
+                        newHash = HashCreate(2*numb->size+1);
+		        HashRehash(numb->hash, newHash);
 		        HashDestroy(numb->hash);
-		        numb->hash = new;
+		        numb->hash = newHash;
 		    }
 
                     HashInsert(numb->hash, ind[i], num_external);
@@ -188,7 +188,7 @@ void NumberingGlobalToLocal(Numbering *numb, HYPRE_Int len, HYPRE_Int *global, H
 	    {
                 if (numb->num_ind >= numb->num_loc + numb->size)
 		{
-		    Hash *new;
+		    Hash *newHash;
 
 		    /* allocate more space for numbering */
 		    numb->size *= 2;
@@ -198,10 +198,10 @@ void NumberingGlobalToLocal(Numbering *numb, HYPRE_Int len, HYPRE_Int *global, H
 		    numb->local_to_global = (HYPRE_Int *) 
 			realloc(numb->local_to_global, 
 			(numb->num_loc+numb->size)*sizeof(HYPRE_Int));
-                    new = HashCreate(2*numb->size+1);
-		    HashRehash(numb->hash, new);
+                    newHash = HashCreate(2*numb->size+1);
+		    HashRehash(numb->hash, newHash);
 		    HashDestroy(numb->hash);
-		    numb->hash = new;
+		    numb->hash = newHash;
 		}
 
 		HashInsert(numb->hash, global[i], numb->num_ind);

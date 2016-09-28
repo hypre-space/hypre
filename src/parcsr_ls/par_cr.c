@@ -1972,7 +1972,7 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
      for (ig = 0; ig < graph_size; ig++) {
        i = graph_array[ig];
        
-       if (!CF_marker[i]==0) /* C or F point */
+       if (CF_marker[i]!=0) /* C or F point */
 	 {
 	   /* the independent set subroutine needs measure 0 for
               removed nodes */
@@ -1987,7 +1987,7 @@ hypre_BoomerAMGIndepPMIS( hypre_ParCSRMatrix    *S,
      for (ig = 0; ig < graph_offd_size; ig++) {
        i = graph_array_offd[ig];
        
-       if (!CF_marker_offd[i]==0) /* C or F point */
+       if (CF_marker_offd[i]!=0) /* C or F point */
 	 {
 	   /* the independent set subroutine needs measure 0 for
               removed nodes */
@@ -2524,7 +2524,7 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
      for (ig = 0; ig < graph_size; ig++) {
        i = graph_array[ig];
        
-       if (!CF_marker[i]==0) /* C or F point */
+       if (CF_marker[i]!=0) /* C or F point */
 	 {
 	   /* the independent set subroutine needs measure 0 for
               removed nodes */
@@ -2539,7 +2539,7 @@ hypre_BoomerAMGIndepPMISa( hypre_ParCSRMatrix    *S,
      for (ig = 0; ig < graph_offd_size; ig++) {
        i = graph_array_offd[ig];
        
-       if (!CF_marker_offd[i]==0) /* C or F point */
+       if (CF_marker_offd[i]!=0) /* C or F point */
 	 {
 	   /* the independent set subroutine needs measure 0 for
               removed nodes */

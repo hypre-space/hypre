@@ -19,6 +19,7 @@ MLI_INCLUDES = \
  -I.\
  -I../..\
  -I$(srcdir)\
+ -I$(srcdir)/../../lapack\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../IJ_mv\
  -I$(srcdir)/../../krylov\

@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.11.0)
-set (HYPRE_DATE    2016/03/28)
+set (HYPRE_VERSION 2.11.1)
+set (HYPRE_DATE    2016/06/09)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -731,6 +731,8 @@ configure_file (
 # BINARY must be first in order to get the correct HYPRE_config.h file
 include_directories(${hypre_BINARY_DIR})
 include_directories(${hypre_SOURCE_DIR})
+include_directories(blas)
+include_directories(lapack)
 include_directories(utilities)
 include_directories(multivector)
 include_directories(krylov)

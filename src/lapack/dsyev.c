@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dsyev_(char *jobz, char *uplo, integer *n, doublereal *a,
+/* Subroutine */ HYPRE_Int dsyev_(const char *jobz,const char *uplo, integer *n, doublereal *a,
 	 integer *lda, doublereal *w, doublereal *work, integer *lwork, 
 	integer *info)
 {
@@ -96,30 +96,30 @@
     extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     static doublereal sigma;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static integer iinfo;
     static logical lower, wantz;
     static integer nb;
-    extern doublereal dlamch_(char *);
+    extern doublereal dlamch_(const char *);
     static integer iscale;
-    extern /* Subroutine */ HYPRE_Int dlascl_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlascl_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
 	    integer *, integer *);
     static doublereal safmin;
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
     static doublereal bignum;
     static integer indtau;
     extern /* Subroutine */ HYPRE_Int dsterf_(integer *, doublereal *, doublereal *,
 	     integer *);
-    extern doublereal dlansy_(char *, char *, integer *, doublereal *, 
+    extern doublereal dlansy_(const char *,const char *, integer *, doublereal *, 
 	    integer *, doublereal *);
     static integer indwrk;
-    extern /* Subroutine */ HYPRE_Int dorgtr_(char *, integer *, doublereal *, 
-	    integer *, doublereal *, doublereal *, integer *, integer *), dsteqr_(char *, integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dorgtr_(const char *, integer *, doublereal *, 
+	    integer *, doublereal *, doublereal *, integer *, integer *), dsteqr_(const char *, integer *, doublereal *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *), 
-	    dsytrd_(char *, integer *, doublereal *, integer *, doublereal *, 
+	    dsytrd_(const char *, integer *, doublereal *, integer *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *, integer *, integer *);
     static integer llwork;
     static doublereal smlnum;

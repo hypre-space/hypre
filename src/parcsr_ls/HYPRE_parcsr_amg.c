@@ -415,6 +415,19 @@ HYPRE_BoomerAMGGetMeasureType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetOldDefault
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetOldDefault( HYPRE_Solver solver)
+{
+   HYPRE_BoomerAMGSetCoarsenType( solver, 6 );
+   HYPRE_BoomerAMGSetInterpType( solver, 0 );
+   HYPRE_BoomerAMGSetPMaxElmts( solver, 0 );
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetSetupType
  *--------------------------------------------------------------------------*/
 

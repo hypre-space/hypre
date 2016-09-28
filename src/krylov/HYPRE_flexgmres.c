@@ -185,8 +185,9 @@ HYPRE_FlexGMRESSetPrecond( HYPRE_Solver          solver,
                              HYPRE_Solver          precond_solver )
 {
    return( hypre_FlexGMRESSetPrecond( (void *) solver,
-                                  precond, precond_setup,
-                                  (void *) precond_solver ) );
+									  (HYPRE_Int (*)(void*, void*, void*, void*))precond,
+									  (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
+									  (void *) precond_solver ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -289,7 +290,7 @@ HYPRE_Int HYPRE_FlexGMRESSetModifyPC( HYPRE_Solver  solver,
                                 HYPRE_Int (*modify_pc)(HYPRE_Solver, HYPRE_Int, HYPRE_Real) )
 
 {
-   return hypre_FlexGMRESSetModifyPC( (void *) solver, modify_pc);
+	return hypre_FlexGMRESSetModifyPC( (void *) solver, (HYPRE_Int(*)(void*, HYPRE_Int, HYPRE_Real))modify_pc);
    
 }
 

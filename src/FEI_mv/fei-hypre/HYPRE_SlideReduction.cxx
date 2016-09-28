@@ -39,6 +39,7 @@
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/_hypre_parcsr_ls.h"
 #include "seq_mv/seq_mv.h"
+#include "HYPRE_FEI.h"
 
 //***************************************************************************
 // local defines and external functions
@@ -48,13 +49,13 @@
 
 extern "C" 
 {
-   int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
-             hypre_ParCSRMatrix*, hypre_ParCSRMatrix*, hypre_ParCSRMatrix**);
-   void hypre_qsort0(int *, int, int);
-   void hypre_qsort1(int *, double *, int, int);
-   int  HYPRE_LSI_Search(int*, int, int);
-   int  HYPRE_LSI_qsort1a(int *, int *, int, int);
-   int  HYPRE_LSI_MatrixInverse(double **, int, double ***);
+	// int hypre_BoomerAMGBuildCoarseOperator(hypre_ParCSRMatrix*,
+    //         hypre_ParCSRMatrix*, hypre_ParCSRMatrix*, hypre_ParCSRMatrix**);
+	//void hypre_qsort0(int *, int, int);
+	//void hypre_qsort1(int *, double *, int, int);
+	//int  HYPRE_LSI_Search(int*, int, int);
+	//int  HYPRE_LSI_qsort1a(int *, int *, int, int);
+	//int  HYPRE_LSI_MatrixInverse(double **, int, double ***);
 }
 
 //***************************************************************************
@@ -535,7 +536,7 @@ int HYPRE_SlideReduction::findConstraints()
    if ( slaveEqnList_ != NULL ) delete [] slaveEqnList_;
    if ( nConstraints > 0 ) slaveEqnList_ = new int[nConstraints];
    else                    slaveEqnList_ = NULL;
-   for ( irow = 0; irow > nConstraints; irow++ ) slaveEqnList_[irow] = -1;
+   for ( irow = 0; irow < nConstraints; irow++ ) slaveEqnList_[irow] = -1;
    if ( constrBlkInfo_ != NULL ) delete [] constrBlkInfo_;
    if ( nConstraints > 0 ) constrBlkInfo_ = new int[nConstraints];
    else                    constrBlkInfo_ = NULL;

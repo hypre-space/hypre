@@ -1,8 +1,9 @@
 
 #include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_blas.h"
 
-integer ilaenv_(integer *ispec, char *name__, char *opts, integer *n1, 
+integer ilaenv_(integer *ispec,const char *name__,const char *opts, integer *n1, 
 	integer *n2, integer *n3, integer *n4, ftnlen name_len, ftnlen 
 	opts_len)
 {
@@ -110,8 +111,11 @@ integer ilaenv_(integer *ispec, char *name__, char *opts, integer *n1,
     /* System generated locals */
     integer ret_val;
     /* Builtin functions   
-       Subroutine */ HYPRE_Int s_copy(char *, char *, ftnlen, ftnlen);
-    integer s_cmp(char *, char *, ftnlen, ftnlen);
+       Subroutine */
+
+	//VOID s_copy( char *, char *, ftnlen, ftnlen);
+    //integer s_cmp( char *, char *, ftnlen, ftnlen);
+
     /* Local variables */
     static integer i__;
     static logical cname, sname;
@@ -149,7 +153,7 @@ L100:
 /*     Convert NAME to upper case if the first character is lower case. */
 
     ret_val = 1;
-    s_copy(subnam, name__, (ftnlen)6, name_len);
+    s_copy(subnam, (char*)name__, (ftnlen)6, name_len);
     ic = *(unsigned char *)subnam;
     iz = 'Z';
     if (iz == 90 || iz == 122) {

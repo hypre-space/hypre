@@ -118,7 +118,7 @@ hypre_NodeRelaxCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_NodeRelaxDestroy( void *relax_vdata )
 {
-   hypre_NodeRelaxData  *relax_data = relax_vdata;
+	hypre_NodeRelaxData  *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
    HYPRE_Int             i,vi;
    HYPRE_Int             nvars;
 
@@ -177,7 +177,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
                        hypre_SStructPVector *b,
                        hypre_SStructPVector *x           )
 {
-   hypre_NodeRelaxData   *relax_data = relax_vdata;
+   hypre_NodeRelaxData   *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
 
    HYPRE_Int              num_nodesets    = (relax_data -> num_nodesets);
    HYPRE_Int             *nodeset_sizes   = (relax_data -> nodeset_sizes);
@@ -537,7 +537,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                   hypre_SStructPVector *b,
                   hypre_SStructPVector *x           )
 {
-   hypre_NodeRelaxData   *relax_data = relax_vdata;
+   hypre_NodeRelaxData   *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
 
    HYPRE_Int              max_iter         = (relax_data -> max_iter);
    HYPRE_Int              zero_guess       = (relax_data -> zero_guess);
@@ -983,7 +983,7 @@ HYPRE_Int
 hypre_NodeRelaxSetTol( void   *relax_vdata,
                        HYPRE_Real  tol         )
 {
-   hypre_NodeRelaxData *relax_data = relax_vdata;
+   hypre_NodeRelaxData *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
 
    (relax_data -> tol) = tol;
 
@@ -997,7 +997,7 @@ HYPRE_Int
 hypre_NodeRelaxSetMaxIter( void *relax_vdata,
                            HYPRE_Int   max_iter    )
 {
-   hypre_NodeRelaxData *relax_data = relax_vdata;
+   hypre_NodeRelaxData *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
 
    (relax_data -> max_iter) = max_iter;
 
@@ -1011,7 +1011,7 @@ HYPRE_Int
 hypre_NodeRelaxSetZeroGuess( void *relax_vdata,
                              HYPRE_Int   zero_guess  )
 {
-   hypre_NodeRelaxData *relax_data = relax_vdata;
+   hypre_NodeRelaxData *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
 
    (relax_data -> zero_guess) = zero_guess;
 
@@ -1025,7 +1025,7 @@ HYPRE_Int
 hypre_NodeRelaxSetWeight( void    *relax_vdata,
                           HYPRE_Real   weight      )
 {
-   hypre_NodeRelaxData *relax_data = relax_vdata;
+   hypre_NodeRelaxData *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
 
    (relax_data -> weight) = weight;
 
@@ -1039,7 +1039,7 @@ HYPRE_Int
 hypre_NodeRelaxSetNumNodesets( void *relax_vdata,
                                HYPRE_Int   num_nodesets )
 {
-   hypre_NodeRelaxData *relax_data = relax_vdata;
+   hypre_NodeRelaxData *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
    HYPRE_Int            i;
 
    /* free up old nodeset memory */
@@ -1079,7 +1079,7 @@ hypre_NodeRelaxSetNodeset( void        *relax_vdata,
                            hypre_Index  nodeset_stride,
                            hypre_Index *nodeset_indices )
 {
-   hypre_NodeRelaxData *relax_data = relax_vdata;
+   hypre_NodeRelaxData *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
    HYPRE_Int            i;
 
    /* free up old nodeset memory */
@@ -1109,7 +1109,7 @@ hypre_NodeRelaxSetNodesetRank( void *relax_vdata,
                                HYPRE_Int   nodeset,
                                HYPRE_Int   nodeset_rank )
 {
-   hypre_NodeRelaxData *relax_data = relax_vdata;
+   hypre_NodeRelaxData *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
 
    (relax_data -> nodeset_ranks[nodeset]) = nodeset_rank;
 
@@ -1123,7 +1123,7 @@ HYPRE_Int
 hypre_NodeRelaxSetTempVec( void                 *relax_vdata,
                            hypre_SStructPVector *t           )
 {
-   hypre_NodeRelaxData  *relax_data = relax_vdata;
+   hypre_NodeRelaxData  *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
 
    hypre_SStructPVectorDestroy(relax_data -> t);
    hypre_SStructPVectorRef(t, &(relax_data -> t));

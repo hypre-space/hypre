@@ -89,7 +89,7 @@
     static doublereal temp;
     static logical swap;
     static doublereal a, d__, l, m, r__, s, t, tsign, fa, ga, ha;
-    extern doublereal dlamch_(char *);
+    extern doublereal dlamch_(const char *);
     static doublereal ft, gt, ht, mm;
     static logical gasmal;
     static doublereal tt, clt, crt, slt, srt;

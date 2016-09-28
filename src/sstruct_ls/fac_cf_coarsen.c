@@ -123,8 +123,8 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
    HYPRE_Int               ci, fi, boxi;
    HYPRE_Int               max_stencil_size= 27;
-   HYPRE_Int               false= 0;
-   HYPRE_Int               true = 1;
+   HYPRE_Int               falseV= 0;
+   HYPRE_Int               trueV = 1;
    HYPRE_Int               found;
    HYPRE_Int              *stencil_ranks, *rank_stencils;
    HYPRE_Int               rank, startrank;
@@ -377,11 +377,11 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                                                            matrix_type);
                      if (nUventries > 0)
                      {
-                        found= false;
+                        found= falseV;
                         if ((rank-startrank) >= hypre_SStructGraphIUVEntry(graph, 0) &&
                             (rank-startrank) <= hypre_SStructGraphIUVEntry(graph, nUventries-1))
                         {
-                           found= true;
+                           found= trueV;
                         }
                      }
 
@@ -389,7 +389,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                       * The graph has Uventries only if (nUventries > 0). Therefore,
                       * check this. Only like variables contribute to the row sum.
                       *-----------------------------------------------------------------*/
-                     if (nUventries > 0 && found == true)
+                     if (nUventries > 0 && found == trueV)
                      {
                         Uventry= hypre_SStructGraphUVEntry(graph, rank-startrank);
 

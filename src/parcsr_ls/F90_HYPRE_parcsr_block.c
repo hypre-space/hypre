@@ -20,6 +20,10 @@
 #include "_hypre_parcsr_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_BlockTridiagCreate
  *--------------------------------------------------------------------------*/
@@ -160,3 +164,7 @@ hypre_F90_IFACE(hypre_blocktridiagsetprintlevel, HYPRE_BLOCKTRIDIAGSETPRINTLEVEL
       hypre_F90_PassObj (HYPRE_Solver, solver),
       hypre_F90_PassInt (print_level));
 }
+    
+#ifdef __cplusplus
+}
+#endif

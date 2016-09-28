@@ -52,9 +52,9 @@ Final Relative Residual Norm = 9.21374e-08
 Setup phase times:
 =============================================
 PCG Setup:
-  wall clock time = 17.200000 seconds
+  wall clock time = 37.810000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 13.670000 seconds
+  cpu clock time  = 28.530000 seconds
   cpu MFLOPS      = 0.000000
 
 <b,b>: 5.738541e-05
@@ -74,9 +74,9 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 Solve phase times:
 =============================================
 PCG Solve:
-  wall clock time = 0.050000 seconds
+  wall clock time = 12.000000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.050000 seconds
+  cpu clock time  = 8.770000 seconds
   cpu MFLOPS      = 0.000000
 
 
@@ -287,9 +287,9 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 Setup phase times:
 =============================================
 PCG Setup:
-  wall clock time = 17.340000 seconds
+  wall clock time = 36.750000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 14.040000 seconds
+  cpu clock time  = 27.730000 seconds
   cpu MFLOPS      = 0.000000
 
 <b,b>: 5.738541e-05
@@ -309,9 +309,9 @@ Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 Solve phase times:
 =============================================
 PCG Solve:
-  wall clock time = 0.060000 seconds
+  wall clock time = 10.940000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.070000 seconds
+  cpu clock time  = 8.290000 seconds
   cpu MFLOPS      = 0.000000
 
 
@@ -368,7 +368,7 @@ Final Relative Residual Norm = 6.57147e-07
 * convergence tolerance     = 1.000000e-06
 *--------------------------------------------------
 AMG max levels   = 30
-AMG coarsen type = 6
+AMG coarsen type = 10
 AMG measure type = 0
 AMG threshold    = 2.500000e-01
 AMG numsweeps    = 1
@@ -389,29 +389,36 @@ AMG Schwarz relax weight = 1.000000e+00
 
 Iters       ||r||_2     conv.rate  ||r||_2/||b||_2
 -----    ------------   ---------  ------------ 
-    1    2.336684e-03    0.282758    2.827584e-01
-    2    1.512891e-04    0.064745    1.830725e-02
-    3    9.865125e-06    0.065207    1.193763e-03
-    4    4.401837e-07    0.044620    5.326593e-05
-    5    1.498060e-08    0.034033    1.812778e-06
-    6    5.485626e-10    0.036618    6.638068e-08
+    1    6.568705e-03    0.794868    7.948685e-01
+    2    2.229023e-03    0.339340    2.697305e-01
+    3    4.395103e-04    0.197176    5.318444e-02
+    4    6.154722e-05    0.140036    7.447730e-03
+    5    9.106693e-06    0.147963    1.101986e-03
+    6    1.448916e-06    0.159105    1.753310e-04
+    7    2.542814e-07    0.175498    3.077019e-05
+    8    3.559798e-08    0.139994    4.307655e-06
+    9    5.739829e-09    0.161240    6.945675e-07
 
 
 ***************************************************
 *                Solver Statistics                *
 *-------------------------------------------------*
-** HYPRE preconditioner setup time = 1.835465e-02
-** HYPRE solution time             = 1.582384e-02
-** HYPRE total time                = 3.417850e-02
-** HYPRE number of iterations      = 6
-** HYPRE final residual norm       = 5.485626e-10
+** HYPRE preconditioner setup time = 1.227999e-02
+** HYPRE solution time             = 1.899385e-02
+** HYPRE total time                = 3.127384e-02
+** HYPRE number of iterations      = 9
+** HYPRE final residual norm       = 5.739829e-09
 ***************************************************
 # Output file: default.out.11
+ 0  1089 x 545     1   4   2.500e-01 2.500e-01 7.500e-01 1.000e+00
+ 1   545 x 132     1   4   1.863e-02 6.667e-01 2.547e-01 1.000e+00
+ 2   132 x 29      0   4   5.687e-03 5.328e-01 0.000e+00 1.000e+00
+ 3    29 x 4       1   4   6.881e-03 4.675e-01 7.079e-02 1.000e+00
 
 
-     Complexity:    grid = 1.719927
-                operator = 2.361942
-                memory = 3.194052
+     Complexity:    grid = 1.651974
+                operator = 2.383776
+                memory = 3.295125
 
 
 
@@ -440,64 +447,60 @@ No constraints
 
 
 Initial Max. Residual   2.03558352288229e+00
-Iteration 1 	bsize 10 	maxres   6.61514157224843e-01
-Iteration 2 	bsize 10 	maxres   2.07896889117126e-01
-Iteration 3 	bsize 10 	maxres   8.94032219327286e-02
-Iteration 4 	bsize 10 	maxres   5.57350171829443e-02
-Iteration 5 	bsize 10 	maxres   4.52510317338198e-02
-Iteration 6 	bsize 10 	maxres   1.59857204735523e-02
-Iteration 7 	bsize 9 	maxres   3.01005214052435e-03
-Iteration 8 	bsize 9 	maxres   9.15794497701057e-04
-Iteration 9 	bsize 7 	maxres   2.67036690450682e-04
-Iteration 10 	bsize 7 	maxres   1.22560817277869e-04
-Iteration 11 	bsize 6 	maxres   5.82316889628062e-05
-Iteration 12 	bsize 4 	maxres   2.38206934275850e-05
-Iteration 13 	bsize 4 	maxres   1.73582854784488e-05
-Iteration 14 	bsize 3 	maxres   1.28808365694173e-05
-Iteration 15 	bsize 3 	maxres   8.17254157523635e-06
-Iteration 16 	bsize 2 	maxres   5.35177021942332e-06
-Iteration 17 	bsize 2 	maxres   3.33379172449344e-06
-Iteration 18 	bsize 2 	maxres   1.86780300254488e-06
-Iteration 19 	bsize 2 	maxres   7.70011500078168e-07
-Iteration 20 	bsize 2 	maxres   3.81937263572792e-07
-Iteration 21 	bsize 2 	maxres   2.50613871943488e-07
-Iteration 22 	bsize 2 	maxres   2.00048472656830e-07
-Iteration 23 	bsize 2 	maxres   1.47127522618703e-07
-Iteration 24 	bsize 1 	maxres   9.49491098515467e-08
-Iteration 25 	bsize 1 	maxres   4.05310405461567e-08
-Iteration 26 	bsize 1 	maxres   2.42927627803480e-08
-Iteration 27 	bsize 1 	maxres   1.24908687108539e-08
-Iteration 28 	bsize 1 	maxres   8.98979420120014e-09
+Iteration 1 	bsize 10 	maxres   6.59360002421051e-01
+Iteration 2 	bsize 10 	maxres   2.06780461261038e-01
+Iteration 3 	bsize 10 	maxres   8.57105302086562e-02
+Iteration 4 	bsize 10 	maxres   6.03163288093805e-02
+Iteration 5 	bsize 10 	maxres   4.50811947446665e-02
+Iteration 6 	bsize 10 	maxres   1.55246290866288e-02
+Iteration 7 	bsize 9 	maxres   3.65341571938517e-03
+Iteration 8 	bsize 8 	maxres   1.58627551388493e-03
+Iteration 9 	bsize 7 	maxres   5.50776493673156e-04
+Iteration 10 	bsize 5 	maxres   2.69977915684582e-04
+Iteration 11 	bsize 4 	maxres   2.73564771119533e-04
+Iteration 12 	bsize 3 	maxres   1.27918599918129e-04
+Iteration 13 	bsize 3 	maxres   6.20752392381466e-05
+Iteration 14 	bsize 2 	maxres   3.83777667975072e-05
+Iteration 15 	bsize 2 	maxres   2.13092936612209e-05
+Iteration 16 	bsize 2 	maxres   1.03749364298677e-05
+Iteration 17 	bsize 2 	maxres   4.36442235934966e-06
+Iteration 18 	bsize 2 	maxres   2.75955061194074e-06
+Iteration 19 	bsize 1 	maxres   2.15778144484185e-06
+Iteration 20 	bsize 1 	maxres   2.06655861262532e-06
+Iteration 21 	bsize 1 	maxres   1.03056146716440e-06
+Iteration 22 	bsize 1 	maxres   4.15118854924167e-07
+Iteration 23 	bsize 1 	maxres   1.98307343697785e-07
+Iteration 24 	bsize 1 	maxres   1.19861620829594e-07
 
 Eigenvalue lambda   1.70632948198618e-02
-Eigenvalue lambda   4.25854480421256e-02
-Eigenvalue lambda   4.25854480421296e-02
-Eigenvalue lambda   6.81076012643952e-02
-Eigenvalue lambda   8.48803610642923e-02
-Eigenvalue lambda   8.48803610642945e-02
-Eigenvalue lambda   1.10402514286553e-01
+Eigenvalue lambda   4.25854480421277e-02
+Eigenvalue lambda   4.25854480421291e-02
+Eigenvalue lambda   6.81076012643924e-02
+Eigenvalue lambda   8.48803610642922e-02
+Eigenvalue lambda   8.48803610642982e-02
 Eigenvalue lambda   1.10402514286557e-01
-Eigenvalue lambda   1.43587188600737e-01
-Eigenvalue lambda   1.43587188601233e-01
-Residual   7.10733430591404e-09
-Residual   3.15203866625371e-09
-Residual   6.04592625305748e-09
-Residual   2.99575189318140e-09
-Residual   4.62027693122953e-09
-Residual   3.30927749996251e-09
-Residual   4.21366574442624e-09
-Residual   8.98979420120014e-09
-Residual   7.66410058335753e-09
-Residual   7.21174355949270e-09
+Eigenvalue lambda   1.10402514286564e-01
+Eigenvalue lambda   1.43587188601108e-01
+Eigenvalue lambda   1.43587188601502e-01
+Residual   9.53334897966699e-09
+Residual   4.44176461772065e-08
+Residual   2.07044908221356e-08
+Residual   2.61868944118780e-08
+Residual   8.12793438585437e-08
+Residual   5.48981349167988e-08
+Residual   6.90823379969068e-08
+Residual   6.12304393213326e-08
+Residual   1.03909169990976e-07
+Residual   1.19861620829594e-07
 
-28 iterations
+24 iterations
 =============================================
 Solve phase times:
 =============================================
 LOBPCG Solve:
-  wall clock time = 0.100000 seconds
+  wall clock time = 0.070000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.100000 seconds
+  cpu clock time  = 0.080000 seconds
   cpu MFLOPS      = 0.000000
 
 # Output file: default.out.12
@@ -583,9 +586,9 @@ Final Relative Residual Norm = 6.30418e-07
 SStruct phase times:
 =============================================
 SStruct Setup:
-  wall clock time = 0.250000 seconds
+  wall clock time = 0.260000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.250000 seconds
+  cpu clock time  = 0.260000 seconds
   cpu MFLOPS      = 0.000000
 
 Problem size: 26460
@@ -594,9 +597,9 @@ Problem size: 26460
 Setup phase times:
 =============================================
 AMS Setup:
-  wall clock time = 0.100000 seconds
+  wall clock time = 0.090000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.110000 seconds
+  cpu clock time  = 0.100000 seconds
   cpu MFLOPS      = 0.000000
 
 <C*b,b>: 8.520115e-02
@@ -617,9 +620,9 @@ Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 Solve phase times:
 =============================================
 AMS Solve:
-  wall clock time = 0.170000 seconds
+  wall clock time = 0.150000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.180000 seconds
+  cpu clock time  = 0.150000 seconds
   cpu MFLOPS      = 0.000000
 
 

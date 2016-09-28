@@ -78,8 +78,8 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
    HYPRE_Int           ***n_CtoVbox, ****CtoVboxnums;
    HYPRE_Int             *num_vboxes, **vboxnums;
 
-   HYPRE_Int              true = 1;
-   HYPRE_Int              false= 0;
+   HYPRE_Int              trueV = 1;
+   HYPRE_Int              falseV= 0;
    HYPRE_Int              row_in;
 
    HYPRE_Int              myproc;
@@ -510,7 +510,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
             {
                hypre_SubtractIndexes(hypre_BoxIMin(&copy_box), suboffset[k], 3,
                                      findex);
-               row_in= false;
+               row_in= falseV;
                for (p= 0; p< num_vboxes[t]; p++)
                {
                   vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
@@ -518,7 +518,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   if (hypre_IndexInBox(findex, vbox))
                   {
                      hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                     row_in= true;
+                     row_in= trueV;
                      break;
                   }
                }
@@ -636,14 +636,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                            findex);
 
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }
@@ -719,14 +719,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                            findex);
 
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }
@@ -819,14 +819,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SubtractIndexes(hypre_BoxIMin(&copy_box), kshift, 3,
                                            findex);
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }
@@ -901,14 +901,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SubtractIndexes(hypre_BoxIMin(&copy_box), ishift, 3,
                                            findex);
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }
@@ -1004,14 +1004,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SubtractIndexes(hypre_BoxIMin(&copy_box), ishift, 3,
                                            findex);
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }
@@ -1083,14 +1083,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SubtractIndexes(hypre_BoxIMin(&copy_box), jshift, 3,
                                            findex);
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }
@@ -1690,7 +1690,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
             {
                hypre_SubtractIndexes(hypre_BoxIMin(&copy_box), suboffset[j], 3,
                                      findex);
-               row_in= false;
+               row_in= falseV;
                for (p= 0; p< num_vboxes[t]; p++)
                {
                   vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
@@ -1698,7 +1698,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   if (hypre_IndexInBox(findex, vbox))
                   {
                      hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                     row_in= true;
+                     row_in= trueV;
                      break;
                   }
                }
@@ -1841,14 +1841,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                            findex);
 
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }
@@ -1951,14 +1951,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SubtractIndexes(hypre_BoxIMin(&copy_box), jshift, 3,
                                            findex);
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }
@@ -2083,14 +2083,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                            findex);
 
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }
@@ -2193,14 +2193,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                                            findex);
 
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }
@@ -2321,14 +2321,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SubtractIndexes(hypre_BoxIMin(&copy_box), ishift, 3,
                                            findex);
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }
@@ -2429,14 +2429,14 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_SubtractIndexes(hypre_BoxIMin(&copy_box), jshift, 3,
                                            findex);
                      /* loop over all the vboxes to see if findex is inside */
-                     row_in= false;
+                     row_in= falseV;
                      for (p= 0; p< num_vboxes[t]; p++)
                      {
                         vbox= hypre_BoxArrayBox(box_array, vboxnums[t][p]);
                         if (hypre_IndexInBox(findex, vbox))
                         {
                            hypre_CopyIndex(findex, hypre_BoxIMin(&copy_box));
-                           row_in= true;
+                           row_in= trueV;
                            break;
                         }
                      }

@@ -97,7 +97,7 @@ HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver )
    HYPRE_Int            (***ssolver_destroy)();
    void                  ***ssolver_data;
 
-   HYPRE_Int              (*sdestroy)();
+   HYPRE_Int              (*sdestroy)(void *);
    void                    *sdata;
 
    HYPRE_Int                part, vi, vj;
@@ -125,7 +125,7 @@ HYPRE_SStructSplitDestroy( HYPRE_SStructSolver solver )
                }
             }
             hypre_TFree(smatvec_data[part][vi]);
-            sdestroy = ssolver_destroy[part][vi];
+            sdestroy = (HYPRE_Int (*)(void *))ssolver_destroy[part][vi];
             sdata = ssolver_data[part][vi];
             sdestroy(sdata);
          }
@@ -237,49 +237,49 @@ HYPRE_SStructSplitSetup( HYPRE_SStructSolver solver,
                } /* don't break */
             case HYPRE_Jacobi:
                HYPRE_StructJacobiCreate(comm, (HYPRE_StructSolver *)&sdata);
-               HYPRE_StructJacobiSetMaxIter(sdata, 1);
-               HYPRE_StructJacobiSetTol(sdata, 0.0);
+               HYPRE_StructJacobiSetMaxIter((HYPRE_StructSolver)sdata, 1);
+               HYPRE_StructJacobiSetTol((HYPRE_StructSolver)sdata, 0.0);
                if (solver -> zero_guess)
                {
-                  HYPRE_StructJacobiSetZeroGuess(sdata);
+                  HYPRE_StructJacobiSetZeroGuess((HYPRE_StructSolver)sdata);
                }
-               HYPRE_StructJacobiSetup(sdata, sAH, syH, sxH);
-               ssolve = HYPRE_StructJacobiSolve;
-               sdestroy = HYPRE_StructJacobiDestroy;
+               HYPRE_StructJacobiSetup((HYPRE_StructSolver)sdata, sAH, syH, sxH);
+               ssolve = (HYPRE_Int (*)())HYPRE_StructJacobiSolve;
+               sdestroy = (HYPRE_Int (*)())HYPRE_StructJacobiDestroy;
                break;
             case HYPRE_SMG:
                HYPRE_StructSMGCreate(comm, (HYPRE_StructSolver *)&sdata);
-               HYPRE_StructSMGSetMemoryUse(sdata, 0);
-               HYPRE_StructSMGSetMaxIter(sdata, 1);
-               HYPRE_StructSMGSetTol(sdata, 0.0);
+               HYPRE_StructSMGSetMemoryUse((HYPRE_StructSolver)sdata, 0);
+               HYPRE_StructSMGSetMaxIter((HYPRE_StructSolver)sdata, 1);
+               HYPRE_StructSMGSetTol((HYPRE_StructSolver)sdata, 0.0);
                if (solver -> zero_guess)
                {
-                  HYPRE_StructSMGSetZeroGuess(sdata);
+                  HYPRE_StructSMGSetZeroGuess((HYPRE_StructSolver)sdata);
                }
-               HYPRE_StructSMGSetNumPreRelax(sdata, 1);
-               HYPRE_StructSMGSetNumPostRelax(sdata, 1);
-               HYPRE_StructSMGSetLogging(sdata, 0);
-               HYPRE_StructSMGSetPrintLevel(sdata, 0);
-               HYPRE_StructSMGSetup(sdata, sAH, syH, sxH);
-               ssolve = HYPRE_StructSMGSolve;
-               sdestroy = HYPRE_StructSMGDestroy;
+               HYPRE_StructSMGSetNumPreRelax((HYPRE_StructSolver)sdata, 1);
+               HYPRE_StructSMGSetNumPostRelax((HYPRE_StructSolver)sdata, 1);
+               HYPRE_StructSMGSetLogging((HYPRE_StructSolver)sdata, 0);
+               HYPRE_StructSMGSetPrintLevel((HYPRE_StructSolver)sdata, 0);
+               HYPRE_StructSMGSetup((HYPRE_StructSolver)sdata, sAH, syH, sxH);
+               ssolve = (HYPRE_Int (*)())HYPRE_StructSMGSolve;
+               sdestroy = (HYPRE_Int (*)())HYPRE_StructSMGDestroy;
                break;
             case HYPRE_PFMG:
                HYPRE_StructPFMGCreate(comm, (HYPRE_StructSolver *)&sdata);
-               HYPRE_StructPFMGSetMaxIter(sdata, 1);
-               HYPRE_StructPFMGSetTol(sdata, 0.0);
+               HYPRE_StructPFMGSetMaxIter((HYPRE_StructSolver)sdata, 1);
+               HYPRE_StructPFMGSetTol((HYPRE_StructSolver)sdata, 0.0);
                if (solver -> zero_guess)
                {
-                  HYPRE_StructPFMGSetZeroGuess(sdata);
+                  HYPRE_StructPFMGSetZeroGuess((HYPRE_StructSolver)sdata);
                }
-               HYPRE_StructPFMGSetRelaxType(sdata, 1);
-               HYPRE_StructPFMGSetNumPreRelax(sdata, 1);
-               HYPRE_StructPFMGSetNumPostRelax(sdata, 1);
-               HYPRE_StructPFMGSetLogging(sdata, 0);
-               HYPRE_StructPFMGSetPrintLevel(sdata, 0);
-               HYPRE_StructPFMGSetup(sdata, sAH, syH, sxH);
-               ssolve = HYPRE_StructPFMGSolve;
-               sdestroy = HYPRE_StructPFMGDestroy;
+               HYPRE_StructPFMGSetRelaxType((HYPRE_StructSolver)sdata, 1);
+               HYPRE_StructPFMGSetNumPreRelax((HYPRE_StructSolver)sdata, 1);
+               HYPRE_StructPFMGSetNumPostRelax((HYPRE_StructSolver)sdata, 1);
+               HYPRE_StructPFMGSetLogging((HYPRE_StructSolver)sdata, 0);
+               HYPRE_StructPFMGSetPrintLevel((HYPRE_StructSolver)sdata, 0);
+               HYPRE_StructPFMGSetup((HYPRE_StructSolver)sdata, sAH, syH, sxH);
+               ssolve = (HYPRE_Int (*)())HYPRE_StructPFMGSolve;
+               sdestroy = (HYPRE_Int (*)())HYPRE_StructPFMGDestroy;
                break;
          }
          ssolver_solve[part][vi]   = ssolve;
@@ -330,7 +330,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
    hypre_StructMatrix      *sA;
    hypre_StructVector      *sx;
    hypre_StructVector      *sy;
-   HYPRE_Int              (*ssolve)();
+   HYPRE_Int              (*ssolve)(void*, hypre_StructMatrix*,hypre_StructVector*,hypre_StructVector*);
    void                    *sdata;
    hypre_ParCSRMatrix      *parcsrA;
    hypre_ParVector         *parx;
@@ -416,7 +416,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
          py = hypre_SStructVectorPVector(y, part);
          for (vi = 0; vi < nvars[part]; vi++)
          {
-            ssolve = ssolver_solve[part][vi];
+			 ssolve = (HYPRE_Int (*)(void *, hypre_StructMatrix *, hypre_StructVector *, hypre_StructVector *))ssolver_solve[part][vi];
             sdata  = ssolver_data[part][vi];
             sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
             sx = hypre_SStructPVectorSVector(px, vi);

@@ -3,7 +3,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-logical lsame_(char *ca, char *cb)
+logical lsame_(const char *ca,const char *cb)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   

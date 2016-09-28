@@ -19,6 +19,10 @@
 #include "_hypre_struct_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_StructMatrixCreate
  *--------------------------------------------------------------------------*/
@@ -325,3 +329,7 @@ hypre_F90_IFACE(hypre_structmatrixmatvec, HYPRE_STRUCTMATRIXMATVEC)
       hypre_F90_PassComplex (beta),
       hypre_F90_PassObj (HYPRE_StructVector, y)  );
 }
+    
+#ifdef __cplusplus
+}
+#endif

@@ -66,16 +66,16 @@
     static integer l1;
     extern doublereal dlapy2_(doublereal *, doublereal *);
     static doublereal bb;
-    extern doublereal dlamch_(char *);
+    extern doublereal dlamch_(const char *);
     static integer iscale;
-    extern /* Subroutine */ HYPRE_Int dlascl_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlascl_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
 	    integer *, integer *);
     static doublereal oldgam, safmin;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
     static doublereal safmax;
-    extern doublereal dlanst_(char *, integer *, doublereal *, doublereal *);
-    extern /* Subroutine */ HYPRE_Int dlasrt_(char *, integer *, doublereal *, 
+    extern doublereal dlanst_(const char *, integer *, doublereal *, doublereal *);
+    extern /* Subroutine */ HYPRE_Int dlasrt_(const char *, integer *, doublereal *, 
 	    integer *);
     static integer lendsv;
     static doublereal ssfmin;

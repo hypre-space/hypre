@@ -19,6 +19,10 @@
 #include "_hypre_parcsr_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_ParaSailsCreate
  *--------------------------------------------------------------------------*/
@@ -305,3 +309,7 @@ hypre_F90_IFACE(hypre_parasailsgetlogging, HYPRE_PARASAILSGETLOGGING)
            hypre_F90_PassObj (HYPRE_Solver, solver), 
            hypre_F90_PassIntRef (logging) ) );
 }
+    
+#ifdef __cplusplus
+}
+#endif

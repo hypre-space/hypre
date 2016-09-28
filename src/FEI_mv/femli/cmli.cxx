@@ -667,7 +667,7 @@ extern "C" int MLI_MatrixDestroy( CMLI_Matrix *cmatrix )
  * create a "C" vector object
  *---------------------------------------------------------------------------*/
 
-CMLI_Vector *MLI_VectorCreate(void *vector, char *name, 
+CMLI_Vector *MLI_VectorCreate(void *vector,const char *name, 
                               MLI_Function *func)
 {
    MLI_Vector  *mli_vector  = new MLI_Vector( vector, name, func );

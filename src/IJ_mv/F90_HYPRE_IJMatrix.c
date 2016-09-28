@@ -19,6 +19,10 @@
 #include "./_hypre_IJ_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*--------------------------------------------------------------------------
  * HYPRE_IJMatrixCreate
  *--------------------------------------------------------------------------*/
@@ -336,3 +340,7 @@ hypre_F90_IFACE(hypre_ijmatrixprint, HYPRE_IJMATRIXPRINT)
            hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
            (char *)          filename ) );
 }
+
+#ifdef __cplusplus
+}
+#endif

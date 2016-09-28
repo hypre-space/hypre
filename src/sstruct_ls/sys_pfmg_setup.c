@@ -42,7 +42,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
                     hypre_SStructVector  *b_in,
                     hypre_SStructVector  *x_in        )
 {
-   hypre_SysPFMGData    *sys_pfmg_data = sys_pfmg_vdata;
+	hypre_SysPFMGData    *sys_pfmg_data = (hypre_SysPFMGData    *)sys_pfmg_vdata;
 
    MPI_Comm              comm = (sys_pfmg_data -> comm);
                      

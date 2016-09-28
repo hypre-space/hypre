@@ -130,33 +130,33 @@
     static integer brow;
     static logical tpsd;
     static integer i__, j, iascl, ibscl;
-    extern logical lsame_(char *, char *);
-    extern /* Subroutine */ HYPRE_Int dtrsm_(char *, char *, char *, char *, 
+    extern logical lsame_(const char *,const char *);
+    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static integer wsize;
     static doublereal rwork[1];
     extern /* Subroutine */ HYPRE_Int dlabad_(doublereal *, doublereal *);
     static integer nb;
-    extern doublereal dlamch_(char *), dlange_(char *, integer *, 
+    extern doublereal dlamch_(const char *), dlange_(const char *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *);
     static integer mn;
     extern /* Subroutine */ HYPRE_Int dgelqf_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *, integer *), 
-	    dlascl_(char *, integer *, integer *, doublereal *, doublereal *, 
+	    dlascl_(const char *, integer *, integer *, doublereal *, doublereal *, 
 	    integer *, integer *, doublereal *, integer *, integer *),
 	     dgeqrf_(integer *, integer *, doublereal *, integer *, 
-	    doublereal *, doublereal *, integer *, integer *), dlaset_(char *,
+	    doublereal *, doublereal *, integer *, integer *), dlaset_(const char *,
 	     integer *, integer *, doublereal *, doublereal *, doublereal *, 
-	    integer *), xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+	    integer *), xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     static integer scllen;
     static doublereal bignum;
-    extern /* Subroutine */ HYPRE_Int dormlq_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dormlq_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *, integer *), 
-	    dormqr_(char *, char *, integer *, integer *, integer *, 
+	    dormqr_(const char *,const char *, integer *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *, integer *);
     static doublereal smlnum;

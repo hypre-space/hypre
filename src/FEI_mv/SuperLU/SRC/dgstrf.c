@@ -222,8 +222,8 @@ dgstrf (superlu_options_t *options, SuperMatrix *A, double drop_tol,
     m        = A->nrow;
     n        = A->ncol;
     min_mn   = SUPERLU_MIN(m, n);
-    Astore   = A->Store;
-    a        = Astore->nzval;
+    Astore   = (NCPformat*) A->Store;
+    a        = (   double*) Astore->nzval;
     asub     = Astore->rowind;
     xa_begin = Astore->colbeg;
     xa_end   = Astore->colend;

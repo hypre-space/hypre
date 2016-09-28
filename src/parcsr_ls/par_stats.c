@@ -33,7 +33,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 {
    MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A);   
 
-   hypre_ParAMGData *amg_data = amg_vdata;
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
 
@@ -1117,11 +1117,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
  *---------------------------------------------------------------*/
 
 
-HYPRE_Int    hypre_BoomerAMGWriteSolverParams(data)
-void    *data;
- 
+HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
 { 
-   hypre_ParAMGData  *amg_data = data;
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
  
    /* amg solve params */
    HYPRE_Int      num_levels; 

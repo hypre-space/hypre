@@ -27,24 +27,8 @@
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 
-/******************************************************************************
- *
- * HYPRE_ParCSRBiCGS interface
- *
- *****************************************************************************/
-
-extern void * hypre_BiCGSCreate();
-extern int hypre_BiCGSDestroy(void *);
-extern int hypre_BiCGSSetup(void *, void *, void *, void *);
-extern int hypre_BiCGSSolve(void *, void *A, void *, void *);
-extern int hypre_BiCGSSetTol(void *, double);
-extern int hypre_BiCGSSetMaxIter(void *, int);
-extern int hypre_BiCGSSetStopCrit(void *, double);
-extern int hypre_BiCGSSetPrecond(void *, int (*precond)(),
-                                 int (*precond_setup)(), void *);
-extern int hypre_BiCGSSetLogging(void *, int);
-extern int hypre_BiCGSGetNumIterations(void *,int *);
-extern int hypre_BiCGSGetFinalRelativeResidualNorm(void *, double *);
+#include "HYPRE_FEI.h"
+#include "_hypre_FEI.h"
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRBiCGSCreate
@@ -127,7 +111,9 @@ int HYPRE_ParCSRBiCGSSetPrecond( HYPRE_Solver  solver,
           void               *precond_data )
 {
    return( hypre_BiCGSSetPrecond( (void *) solver,
-                                precond, precond_setup, precond_data ) );
+								  (HYPRE_Int (*)(void*,void*,void*,void*))precond,
+								  (HYPRE_Int (*)(void*,void*,void*,void*))precond_setup,
+								  precond_data ) );
 }
 
 /*--------------------------------------------------------------------------

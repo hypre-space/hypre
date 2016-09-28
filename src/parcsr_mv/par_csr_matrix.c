@@ -1686,7 +1686,7 @@ hypre_ParCSRMatrixToCSRMatrixAll(hypre_ParCSRMatrix *par_matrix)
 
       /* don't send to myself  - these are sorted so my id would be first*/
       start = 0;
-      if (used_procs[0] == 0)
+      if (num_types && used_procs[0] == 0)
       {
          start = 1;
       }
@@ -1998,9 +1998,9 @@ hypre_FillResponseParToCSRMatrix( void       *p_recv_contact_buf,
 
    HYPRE_Int    *recv_contact_buf = (HYPRE_Int * ) p_recv_contact_buf;
 
-   hypre_DataExchangeResponse  *response_obj = ro;  
+   hypre_DataExchangeResponse  *response_obj = (hypre_DataExchangeResponse*)ro;  
 
-   hypre_ProcListElements      *send_proc_obj = response_obj->data2;   
+   hypre_ProcListElements      *send_proc_obj = (hypre_ProcListElements*)response_obj->data2;   
 
    hypre_MPI_Comm_rank(comm, &myid );
 

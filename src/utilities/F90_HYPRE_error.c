@@ -13,6 +13,10 @@
 #include "_hypre_utilities.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 void
 hypre_F90_IFACE(hypre_geterror, HYPRE_GETERROR)
    (hypre_F90_Int *result)
@@ -53,3 +57,7 @@ hypre_F90_IFACE(hypre_clearerror, HYPRE_CLEARERROR)
    *result = (hypre_F90_Int) HYPRE_ClearError(
       hypre_F90_PassInt(hypre_error_code));
 }
+
+#ifdef __cplusplus
+}
+#endif	

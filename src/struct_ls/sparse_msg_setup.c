@@ -52,7 +52,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
                       hypre_StructVector *b,
                       hypre_StructVector *x          )
 {
-   hypre_SparseMSGData  *smsg_data = smsg_vdata;
+	hypre_SparseMSGData  *smsg_data = (hypre_SparseMSGData  *)smsg_vdata;
 
    MPI_Comm              comm = (smsg_data -> comm);
                      

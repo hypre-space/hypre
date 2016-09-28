@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dsygs2_(integer *itype, char *uplo, integer *n, 
+/* Subroutine */ HYPRE_Int dsygs2_(integer *itype,const char *uplo, integer *n, 
 	doublereal *a, integer *lda, doublereal *b, integer *ldb, integer *
 	info)
 {
@@ -83,21 +83,21 @@
     integer a_dim1, a_offset, b_dim1, b_offset, i__1, i__2;
     doublereal d__1;
     /* Local variables */
-    extern /* Subroutine */ HYPRE_Int dsyr2_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dsyr2_(const char *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer k;
     extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     extern /* Subroutine */ HYPRE_Int daxpy_(integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *);
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int dtrmv_(char *, char *, char *, integer *, 
-	    doublereal *, integer *, doublereal *, integer *), dtrsv_(char *, char *, char *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dtrmv_(const char *,const char *,const char *, integer *, 
+	    doublereal *, integer *, doublereal *, integer *), dtrsv_(const char *,const char *,const char *, integer *, doublereal *, 
 	    integer *, doublereal *, integer *);
     static doublereal ct;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
     static doublereal akk, bkk;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define b_ref(a_1,a_2) b[(a_2)*b_dim1 + a_1]

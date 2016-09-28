@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dorgbr_(char *vect, integer *m, integer *n, integer *k, 
+/* Subroutine */ HYPRE_Int dorgbr_(const char *vect, integer *m, integer *n, integer *k, 
 	doublereal *a, integer *lda, doublereal *tau, doublereal *work, 
 	integer *lwork, integer *info)
 {
@@ -106,12 +106,12 @@
     integer a_dim1, a_offset, i__1, i__2, i__3;
     /* Local variables */
     static integer i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static integer iinfo;
     static logical wantq;
     static integer nb, mn;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     extern /* Subroutine */ HYPRE_Int dorglq_(integer *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 

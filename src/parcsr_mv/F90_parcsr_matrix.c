@@ -19,6 +19,10 @@
 #include "_hypre_parcsr_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixGlobalNumRows
  *--------------------------------------------------------------------------*/
@@ -53,3 +57,6 @@ hypre_F90_IFACE(hypre_parcsrmatrixrowstarts, HYPRE_PARCSRMATRIXROWSTARTS)
    *ierr = 0;
 }
 
+#ifdef __cplusplus
+}
+#endif

@@ -253,7 +253,7 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
          hypre_TFree(hypre_IJMatrixColPartitioning(ijmatrix));
       }
       if hypre_IJMatrixAssumedPart(ijmatrix)
-         hypre_AssumedPartitionDestroy(hypre_IJMatrixAssumedPart(ijmatrix));
+		 hypre_AssumedPartitionDestroy((hypre_IJAssumedPart*)hypre_IJMatrixAssumedPart(ijmatrix));
       if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
          hypre_IJMatrixDestroyParCSR( ijmatrix );
       else if ( hypre_IJMatrixObjectType(ijmatrix) != -1 )

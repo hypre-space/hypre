@@ -140,7 +140,7 @@ static void matvec_timing(MPI_Comm comm, Matrix *mat)
  * data structure of ParaSails
  *--------------------------------------------------------------------------*/
 
-static Matrix *convert_matrix(MPI_Comm comm, HYPRE_DistributedMatrix *distmat)
+static Matrix *convert_matrix(MPI_Comm comm, HYPRE_DistributedMatrix distmat)
 {
    HYPRE_Int beg_row, end_row, row, dummy;
    HYPRE_Int len, *ind;
@@ -209,7 +209,7 @@ HYPRE_Int hypre_ParaSailsDestroy(hypre_ParaSails obj)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ParaSailsSetup(hypre_ParaSails obj,
-                               HYPRE_DistributedMatrix *distmat, HYPRE_Int sym, HYPRE_Real thresh, HYPRE_Int nlevels,
+                               HYPRE_DistributedMatrix distmat, HYPRE_Int sym, HYPRE_Real thresh, HYPRE_Int nlevels,
                                HYPRE_Real filter, HYPRE_Real loadbal, HYPRE_Int logging)
 {
    /* HYPRE_Real cost; */
@@ -250,7 +250,7 @@ HYPRE_Int hypre_ParaSailsSetup(hypre_ParaSails obj,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ParaSailsSetupPattern(hypre_ParaSails obj,
-                                      HYPRE_DistributedMatrix *distmat, HYPRE_Int sym, HYPRE_Real thresh, HYPRE_Int nlevels,
+                                      HYPRE_DistributedMatrix distmat, HYPRE_Int sym, HYPRE_Real thresh, HYPRE_Int nlevels,
                                       HYPRE_Int logging)
 {
    /* HYPRE_Real cost; */
@@ -279,7 +279,7 @@ HYPRE_Int hypre_ParaSailsSetupPattern(hypre_ParaSails obj,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int hypre_ParaSailsSetupValues(hypre_ParaSails obj,
-                                     HYPRE_DistributedMatrix *distmat, HYPRE_Real filter, HYPRE_Real loadbal,
+                                     HYPRE_DistributedMatrix distmat, HYPRE_Real filter, HYPRE_Real loadbal,
                                      HYPRE_Int logging)
 {
    Matrix *mat;

@@ -19,6 +19,10 @@
 #include "_hypre_struct_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_StructSMGCreate
  *--------------------------------------------------------------------------*/
@@ -387,3 +391,6 @@ hypre_F90_IFACE(hypre_structsmggetfinalrelative, HYPRE_STRUCTSMGGETFINALRELATIVE
            hypre_F90_PassObj (HYPRE_StructSolver, solver),
            hypre_F90_PassRealRef (norm) ) );
 }
+#ifdef __cplusplus
+}
+#endif

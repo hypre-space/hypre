@@ -8,7 +8,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dsyr2_(char *uplo, integer *n, doublereal *alpha, 
+/* Subroutine */ HYPRE_Int dsyr2_(const char *uplo, integer *n, doublereal *alpha, 
 	doublereal *x, integer *incx, doublereal *y, integer *incy, 
 	doublereal *a, integer *lda)
 {
@@ -20,9 +20,9 @@
     static integer info;
     static doublereal temp1, temp2;
     static integer i, j;
-    extern logical hypre_lsame_(char *, char *);
+    extern logical hypre_lsame_(const char *,const char *);
     static integer ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
 
 
 /*  Purpose   

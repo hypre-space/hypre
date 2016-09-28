@@ -239,7 +239,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    if (vector_type == HYPRE_SSTRUCT || vector_type == HYPRE_STRUCT)
    {
-      par_vector = hypre_IJVectorObject(ijvector);
+	   par_vector = (hypre_ParVector        *)hypre_IJVectorObject(ijvector);
       parlocal_vector = hypre_ParVectorLocalVector(par_vector);
       hypre_TFree(hypre_VectorData(parlocal_vector));
       hypre_VectorData(parlocal_vector) = data ;

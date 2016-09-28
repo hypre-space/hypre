@@ -736,15 +736,15 @@ void SubdomainGraph_dhExchangePerms(SubdomainGraph_dh s)
   /* insert non-local boundary node permutations in lookup tables */
   for (i=0; i<nz; i += 2) {
     HYPRE_Int old = recvBuf[i];
-    HYPRE_Int new = recvBuf[i+1];
+    HYPRE_Int newV = recvBuf[i+1];
 
     if (debug) {
-      hypre_fprintf(logFile, "SUBG  i= %i  old= %i  new= %i\n", i, old+1, new+1);
+      hypre_fprintf(logFile, "SUBG  i= %i  old= %i  newV= %i\n", i, old+1, newV+1);
       fflush(logFile);
     }
 
-    Hash_i_dhInsert(o2n_table, old, new); CHECK_V_ERROR;
-    Hash_i_dhInsert(n2o_table, new, old); CHECK_V_ERROR;
+    Hash_i_dhInsert(o2n_table, old, newV); CHECK_V_ERROR;
+    Hash_i_dhInsert(n2o_table, newV, old); CHECK_V_ERROR;
   }
 
 

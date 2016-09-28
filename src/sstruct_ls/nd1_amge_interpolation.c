@@ -55,7 +55,7 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
    HYPRE_Int  i, j, k;
    HYPRE_Int *offproc_rnums, *swap;
 
-   hypre_ParCSRMatrix * dof_DOF = hypre_IJMatrixObject(IJ_dof_DOF);
+   hypre_ParCSRMatrix * dof_DOF = (hypre_ParCSRMatrix *)hypre_IJMatrixObject(IJ_dof_DOF);
    hypre_ParCSRMatrix * ELEM_DOF = ELEM_EDGE;
    hypre_ParCSRMatrix * ELEM_FACEidof;
    hypre_ParCSRMatrix * ELEM_EDGEidof;

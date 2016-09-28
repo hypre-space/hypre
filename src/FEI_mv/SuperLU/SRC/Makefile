@@ -46,6 +46,8 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/../../../\
  -I$(srcdir)/../../../utilities\
+ -I$(srcdir)/../../../blas\
+ -I$(srcdir)/../../../lapack\
  ${CINCLUDES}
 
 HEADERS =\
@@ -206,7 +208,7 @@ complex16: $(ZLUSRC) $(ALLAUX) $(LAAUX) $(ZLASRC) $(DZLAUX)
 ##################################
 slamch.o: slamch.c ; $(CC) -g -c ${SHARED_COMPILE_FLAG} $<
 dlamch.o: dlamch.c ; $(CC) -g -c ${SHARED_COMPILE_FLAG} $<
-superlu_timer.o:  superlu_timer.c ; $(CC) -g -c -DNO_TIMER ${SHARED_COMPILE_FLAG} $<
+#superlu_timer.o:  superlu_timer.c ; $(CC) -g -c -DNO_TIMER ${SHARED_COMPILE_FLAG} $<
 ##################################
 
 #.c.o:

@@ -143,7 +143,8 @@ HYPRE_BiCGSTABSetPrecond( HYPRE_Solver         solver,
                                 HYPRE_Solver         precond_solver )
 {
    return( hypre_BiCGSTABSetPrecond( (void *) solver,
-                                     precond, precond_setup,
+                                     (HYPRE_Int (*)(void*, void*, void*, void*))precond,
+									 (HYPRE_Int (*)(void*, void*, void*, void*))precond_setup,
                                      (void *) precond_solver ) );
 }
 

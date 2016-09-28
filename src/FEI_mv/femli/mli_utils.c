@@ -26,7 +26,8 @@
 #include "HYPRE.h"
 #include "mli_utils.h"
 #include "HYPRE_IJ_mv.h"
-#include "HYPRE_parcsr_fgmres.h"
+#include "../fei-hypre/HYPRE_parcsr_fgmres.h"
+#include "hypre_lapack.h"
 
 /*--------------------------------------------------------------------------
  * external function 
@@ -1304,7 +1305,7 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
 
    /* allocate storage for lanzcos vectors */
 
-   lanczos = malloc(maxIter*localNRows*sizeof(double));
+   lanczos = (double*) malloc(maxIter*localNRows*sizeof(double));
    lanczos_p = lanczos;
 
    /*-----------------------------------------------------------------

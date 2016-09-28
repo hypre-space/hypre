@@ -2,7 +2,7 @@
 #include "hypre_blas.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dtrmm_(char *side, char *uplo, char *transa, char *diag, 
+/* Subroutine */ HYPRE_Int dtrmm_(const char *side,const char *uplo,const char *transa,const char *diag, 
 	integer *m, integer *n, doublereal *alpha, doublereal *a, integer *
 	lda, doublereal *b, integer *ldb)
 {
@@ -13,10 +13,10 @@
     static doublereal temp;
     static integer i__, j, k;
     static logical lside;
-    extern logical hypre_lsame_(char *, char *);
+    extern logical hypre_lsame_(const char *,const char *);
     static integer nrowa;
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
     static logical nounit;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define b_ref(a_1,a_2) b[(a_2)*b_dim1 + a_1]

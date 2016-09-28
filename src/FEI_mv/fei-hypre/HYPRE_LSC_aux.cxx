@@ -64,7 +64,7 @@
 #include "HYPRE_LSI_Uzawa_c.h"
 #include "HYPRE_LSI_Dsuperlu.h"
 #include "HYPRE_MLMaxwell.h"
-
+#include "HYPRE_FEI.h"
 //---------------------------------------------------------------------------
 // SUPERLU include files
 //---------------------------------------------------------------------------

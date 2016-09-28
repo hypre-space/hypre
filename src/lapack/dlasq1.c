@@ -34,13 +34,13 @@ static integer c__0 = 0;
 	    doublereal *, integer *);
     static doublereal sigmx;
     extern /* Subroutine */ HYPRE_Int dlasq2_(integer *, doublereal *, integer *);
-    extern doublereal dlamch_(char *);
-    extern /* Subroutine */ HYPRE_Int dlascl_(char *, integer *, integer *, 
+    extern doublereal dlamch_(const char *);
+    extern /* Subroutine */ HYPRE_Int dlascl_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
 	    integer *, integer *);
     static doublereal safmin;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *), dlasrt_(
-	    char *, integer *, doublereal *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *), dlasrt_(
+	    const char *, integer *, doublereal *, integer *);
     static doublereal eps;
 
 

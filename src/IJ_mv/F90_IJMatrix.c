@@ -19,6 +19,10 @@
 #include "./_hypre_IJ_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * hypre_IJMatrixSetObject
  *--------------------------------------------------------------------------*/
@@ -35,3 +39,6 @@ hypre_F90_IFACE(hypre_ijmatrixsetobject, HYPRE_IJMATRIXSETOBJECT)
            (void *)         *object  ) );
 }
 
+#ifdef __cplusplus
+}
+#endif

@@ -67,10 +67,10 @@ typedef struct
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
 
-   HYPRE_Int    (*precond)();
-   HYPRE_Int    (*precond_setup)();
+   HYPRE_Int    (*precond)(void *vdata, void *A, void *b, void *x );
+   HYPRE_Int    (*precond_setup)(void *vdata, void *A, void *b, void *x );
 
-   HYPRE_Int    (*modify_pc)();
+   HYPRE_Int    (*modify_pc)(void *precond_data, HYPRE_Int iteration, HYPRE_Real rel_residual_norm );
    
 } hypre_FlexGMRESFunctions;
 

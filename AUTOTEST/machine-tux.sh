@@ -61,6 +61,10 @@ RO="-fac"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
 renametest.sh basictest $output_dir/basictest-debug2
 
+co="--enable-debug CC=mpiCC"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
+renametest.sh basictest $output_dir/basictest-debug-cpp
+
 co="--with-insure --enable-debug --with-print-errors"
 MO="test"
 test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
