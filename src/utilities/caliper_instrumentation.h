@@ -19,6 +19,8 @@
 #ifndef CALIPER_INSTRUMENTATION_HEADER
 #define CALIPER_INSTRUMENTATION_HEADER
 
+#include "HYPRE_config.h"
+
 #ifdef HYPRE_USING_CALIPER
 
 #include <caliper/cali.h>
