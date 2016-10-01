@@ -82,6 +82,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int      add_P_max_elmts = hypre_ParAMGDataMultAddPMaxElmts(amg_data);
    HYPRE_Real     add_trunc_factor = hypre_ParAMGDataMultAddTruncFactor(amg_data);
    HYPRE_Int      add_rlx = hypre_ParAMGDataAddRelaxType(amg_data);
+   HYPRE_Real      add_rlx_wt = hypre_ParAMGDataAddRelaxWt(amg_data);
 
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array;
  
@@ -1897,13 +1898,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             HYPRE_Real *d_diag;
             hypre_ParCSRMatrix *Q = NULL;
             Q = hypre_ParMatmul(A_array[level],P);
-            if (grid_relax_type[1] == 0)
+            if (add_rlx == 0)
             {
                hypre_CSRMatrix *lvl_Adiag = hypre_ParCSRMatrixDiag(A_array[level]);
                HYPRE_Int lvl_nrows = hypre_CSRMatrixNumRows(lvl_Adiag);
                HYPRE_Int *lvl_i = hypre_CSRMatrixI(lvl_Adiag);
                HYPRE_Real *lvl_data = hypre_CSRMatrixData(lvl_Adiag);
-               HYPRE_Real w_inv = 1.0/hypre_ParAMGDataRelaxWeight(amg_data)[level];
+               HYPRE_Real w_inv = 1.0/add_rlx_wt;
+               /*HYPRE_Real w_inv = 1.0/hypre_ParAMGDataRelaxWeight(amg_data)[level];*/
                d_diag = hypre_CTAlloc(HYPRE_Real, lvl_nrows);
                for (i=0; i < lvl_nrows; i++)
 		  d_diag[i] = lvl_data[lvl_i[i]]*w_inv;
