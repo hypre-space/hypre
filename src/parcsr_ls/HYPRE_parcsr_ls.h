@@ -139,8 +139,9 @@ HYPRE_Int HYPRE_BoomerAMGSolveT(HYPRE_Solver       solver,
                                 HYPRE_ParVector    x);
 
 /**
- * Recovers old default, i.e Falgout coarsening and untruncated modified
- * classical interpolation.
+ * Recovers old default for coarsening and interpolation, i.e Falgout 
+ * coarsening and untruncated modified classical interpolation.
+ * This option might be preferred for 2 dimensional problems.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetOldDefault(HYPRE_Solver       solver);
 
