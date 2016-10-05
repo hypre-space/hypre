@@ -20,7 +20,7 @@
                    cycle = 5.332187
 
 # Output file: matrix.out.3
- Average Convergence Factor = 1.000000
+ Average Convergence Factor = 0.000000
 
      Complexity:    grid = 1.000000
                 operator = 1.000000
