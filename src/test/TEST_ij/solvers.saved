@@ -162,11 +162,11 @@ Residual   9.97061314149104e-07
                    cycle = 5.720205
 
 # Output file: solvers.out.sysn
- Average Convergence Factor = 0.865777
+ Average Convergence Factor = 0.232267
 
-     Complexity:    grid = 1.601875
-                operator = 2.632892
-                   cycle = 11.264869
+     Complexity:    grid = 1.592000
+                operator = 2.633619
+                   cycle = 11.267164
 
 # Output file: solvers.out.sysu
  Average Convergence Factor = 0.419936
