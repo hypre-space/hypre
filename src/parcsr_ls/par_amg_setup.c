@@ -2275,10 +2275,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
      {
         
         HYPRE_ParCSRPCGCreate(comm, &smoother[j]);
-        HYPRE_ParCSRPCGSetup(smoother[j],
+        /*HYPRE_ParCSRPCGSetup(smoother[j],
                              (HYPRE_ParCSRMatrix) A_array[j],
                              (HYPRE_ParVector) F_array[j],
-                             (HYPRE_ParVector) U_array[j]);
+                             (HYPRE_ParVector) U_array[j]);*/
         
         HYPRE_PCGSetTol(smoother[j], 1e-12); /* make small */
         HYPRE_PCGSetTwoNorm(smoother[j], 1); /* use 2-norm*/

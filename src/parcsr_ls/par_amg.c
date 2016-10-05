@@ -411,6 +411,7 @@ hypre_BoomerAMGDestroy( void *data )
    void *amg = hypre_ParAMGDataCoarseSolver(amg_data);
    MPI_Comm new_comm = hypre_ParAMGDataNewComm(amg_data);
    HYPRE_Int i;
+   HYPRE_Int *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
 
    if (hypre_ParAMGDataMaxEigEst(amg_data))
    {
@@ -427,8 +428,19 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree (hypre_ParAMGDataNumGridSweeps(amg_data));
       hypre_ParAMGDataNumGridSweeps(amg_data) = NULL; 
    }
-   if (hypre_ParAMGDataGridRelaxType(amg_data))
+   if (grid_relax_type)
    {
+      HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+      if (grid_relax_type[1] == 15 || grid_relax_type[3] == 15 )
+      {
+         if (grid_relax_type[1] == 15)
+	    for (i=0; i < num_levels; i++)
+	       HYPRE_ParCSRPCGDestroy(smoother[i]);
+         if (grid_relax_type[3] == 15 && grid_relax_type[1] != 15)
+	    HYPRE_ParCSRPCGDestroy(smoother[num_levels-1]);
+         hypre_TFree(smoother);
+      }
+
       hypre_TFree (hypre_ParAMGDataGridRelaxType(amg_data));
       hypre_ParAMGDataGridRelaxType(amg_data) = NULL; 
    }
