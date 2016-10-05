@@ -35,6 +35,6 @@ Iterations = 3
 Final Relative Residual Norm = 4.822192e-07
 
 # Output file: miller.out.9
-Iterations = 1
-Final Relative Residual Norm = 1.000000e+00
+Iterations = 2
+Final Relative Residual Norm = 2.571870e-07
 
