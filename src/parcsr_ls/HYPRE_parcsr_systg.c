@@ -70,6 +70,15 @@ HYPRE_SysTGSolve( HYPRE_Solver solver,
                                  (hypre_ParVector *) x ) );
 }
 
+
+HYPRE_Int
+HYPRE_SysTGSetBlockDataWrapper( HYPRE_Solver solver, 
+                                HYPRE_Int block_size, 
+                                HYPRE_Int coarse_grid_index)
+{
+  return ( hypre_SysTGSetBlockDataWrapper( (void *) solver, block_size, coarse_grid_index) );
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetBlockData
  *--------------------------------------------------------------------------*/
@@ -82,6 +91,20 @@ HYPRE_SysTGSetBlockData( HYPRE_Solver solver,
 {
    return( hypre_SysTGSetBlockData( (void *) solver, block_size, num_coarse_points, block_coarse_indexes ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetBlockDataExp
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_SysTGSetBlockDataExp( HYPRE_Solver solver,
+                         HYPRE_Int  block_size,
+                         HYPRE_Int  *num_coarse_points,
+                         HYPRE_Int  **block_coarse_indexes)
+{
+   return( hypre_SysTGSetBlockDataExp( (void *) solver, block_size, num_coarse_points, block_coarse_indexes ) );
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetCoarseSolver
  *--------------------------------------------------------------------------*/
@@ -97,6 +120,16 @@ HYPRE_SysTGSetCoarseSolver(HYPRE_Solver          solver,
 									   (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_setup,
 									   (void *) coarse_grid_solver ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetAdditionalCoarseIndices
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetAdditionalCoarseIndices( HYPRE_Solver solver, HYPRE_Int num_add_coarse_idx, HYPRE_Int *additional_coarse_indices)
+{
+   return hypre_SysTGSetAdditionalCoarseIndices(solver, num_add_coarse_idx, additional_coarse_indices);
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetMaxLevels
  *--------------------------------------------------------------------------*/
@@ -121,6 +154,31 @@ HYPRE_SysTGSetNumWells( HYPRE_Solver solver, HYPRE_Int num_wells )
 {
    return hypre_SysTGSetNumWells(solver, num_wells );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetRestrictType
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetRestrictType(HYPRE_Solver solver, HYPRE_Int restrict_type )
+{
+   return hypre_SysTGSetRestrictType(solver, restrict_type );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetRelaxMethod
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method )
+{
+   return hypre_SysTGSetRelaxMethod(solver, relax_method );
+}
+
+HYPRE_Int
+HYPRE_SysTGSetSplittingStrategy(HYPRE_Solver solver, HYPRE_Int splitting_strategy )
+{
+   return hypre_SysTGSetSplittingStrategy(solver, splitting_strategy );
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetRelaxType
  *--------------------------------------------------------------------------*/

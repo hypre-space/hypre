@@ -3064,6 +3064,23 @@ HYPRE_Int HYPRE_SysTGSolve( HYPRE_Solver solver,
                          HYPRE_ParVector x      );
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetBlockDataWrapper
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_SysTGSetBlockDataWrapper( HYPRE_Solver solver,
+                         HYPRE_Int  block_size,
+                         HYPRE_Int  block_coarse_index);
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetBlockDataExp
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int HYPRE_SysTGSetBlockDataExp( HYPRE_Solver solver,
+                         HYPRE_Int  block_size,
+                         HYPRE_Int  *num_coarse_points,
+                         HYPRE_Int  **block_coarse_indexes);
+
+/*--------------------------------------------------------------------------
  * HYPRE_SysTGSetBlockData
  *--------------------------------------------------------------------------*/
 
@@ -3071,6 +3088,12 @@ HYPRE_Int HYPRE_SysTGSetBlockData( HYPRE_Solver solver,
                          HYPRE_Int  block_size, 
                          HYPRE_Int num_coarse_points, 
                          HYPRE_Int  *block_coarse_indexes);
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetAdditionalCoarseIndices
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetAdditionalCoarseIndices( HYPRE_Solver solver, HYPRE_Int num_add_coarse_idx, HYPRE_Int *additional_coarse_indices);
 
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetMaxCoarseLevels
@@ -3095,20 +3118,38 @@ HYPRE_Int
 HYPRE_SysTGSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type );
 
 /*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetRelaxMethod
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method );
+
+HYPRE_Int
+HYPRE_SysTGSetSplittingStrategy(HYPRE_Solver solver, HYPRE_Int splitting_strategy );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_SysTGSetRestrictType
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_SysTGSetRestrictType( HYPRE_Solver solver, HYPRE_Int restrict_type);
+
+/*--------------------------------------------------------------------------
  * HYPRE_SysTGSetInterpType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGSetInterpType( HYPRE_Solver solver, HYPRE_Int interpType );
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetNumRelaxSweeps
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps );
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetNumInterpSweeps
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGSetNumInterpSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps );                         
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetCoarseSolver
  *--------------------------------------------------------------------------*/
@@ -3116,46 +3157,55 @@ HYPRE_Int HYPRE_SysTGSetCoarseSolver(HYPRE_Solver          solver,
                              HYPRE_PtrToParSolverFcn  coarse_grid_solver_solve,
                              HYPRE_PtrToParSolverFcn  coarse_grid_solver_setup,
                              HYPRE_Solver          coarse_grid_solver );
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetPrintLevel
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level );
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetLogging
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGSetLogging( HYPRE_Solver solver, HYPRE_Int logging );
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetMaxIters
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGSetMaxIters( HYPRE_Solver solver, HYPRE_Int max_iter );
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetConvTol
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGSetConvTol( HYPRE_Solver solver, HYPRE_Real conv_tol );
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetMaxGlobalsmoothIters
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter );
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetGlobalsmoothType
  *--------------------------------------------------------------------------*/	
 HYPRE_Int
 HYPRE_SysTGSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type );
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGGetNumIterations
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
+
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGGetResidualNorm
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 HYPRE_SysTGGetResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm );
+
 /*--------------------------------------------------------------------------
  * Miscellaneous: These probably do not belong in the interface.
  *--------------------------------------------------------------------------*/

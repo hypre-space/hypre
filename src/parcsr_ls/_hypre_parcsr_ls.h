@@ -536,6 +536,7 @@ HYPRE_Int hypre_AMGHybridSetCycleType ( void *AMGhybrid_vdata , HYPRE_Int cycle_
 HYPRE_Int hypre_AMGHybridSetNumSweeps ( void *AMGhybrid_vdata , HYPRE_Int num_sweeps );
 HYPRE_Int hypre_AMGHybridSetCycleNumSweeps ( void *AMGhybrid_vdata , HYPRE_Int num_sweeps , HYPRE_Int k );
 HYPRE_Int hypre_AMGHybridSetRelaxType ( void *AMGhybrid_vdata , HYPRE_Int relax_type );
+HYPRE_Int hypre_AMGHybridSetSplittingStrategy( void *AMGhybrid_vdata , HYPRE_Int splitting_strategy );
 HYPRE_Int hypre_AMGHybridSetCycleRelaxType ( void *AMGhybrid_vdata , HYPRE_Int relax_type , HYPRE_Int k );
 HYPRE_Int hypre_AMGHybridSetRelaxOrder ( void *AMGhybrid_vdata , HYPRE_Int relax_order );
 HYPRE_Int hypre_AMGHybridSetMaxCoarseSize ( void *AMGhybrid_vdata , HYPRE_Int max_coarse_size );
@@ -1555,18 +1556,21 @@ HYPRE_Int hypre_ParGenerateHybridScale ( hypre_ParCSRMatrix *A , hypre_CSRMatrix
 void *hypre_SysTGCreate ( void );
 HYPRE_Int hypre_SysTGDestroy ( void *systg_vdata );
 HYPRE_Int hypre_SysTGCycle( void *systg_vdata, hypre_ParVector **F_array, hypre_ParVector **U_array );
-HYPRE_Int hypre_SysTGSetBlockData( void      *systg_vdata, HYPRE_Int  block_size,  HYPRE_Int num_coarse_points, HYPRE_Int  *block_coarse_indexes);
-HYPRE_Int hypre_SysTGCoarsen(hypre_ParCSRMatrix *S,  hypre_ParCSRMatrix *A,HYPRE_Int final_coarse_size,HYPRE_Int *final_coarse_indexes,HYPRE_Int debug_flag,HYPRE_Int **CF_marker,HYPRE_Int *last_level);
+HYPRE_Int hypre_SysTGSetBlockDataWrapper( void *systg_vdata, HYPRE_Int  block_size,  HYPRE_Int  block_coarse_index);
+HYPRE_Int hypre_SysTGSetBlockData( void *systg_vdata, HYPRE_Int  block_size,  HYPRE_Int num_coarse_points, HYPRE_Int  *block_coarse_indexes);
+HYPRE_Int hypre_SysTGSetBlockDataExp( void *systg_vdata, HYPRE_Int  block_size,  HYPRE_Int *num_coarse_points, HYPRE_Int  **block_coarse_indexes);
+HYPRE_Int hypre_SysTGCoarsen(hypre_ParCSRMatrix *S,  hypre_ParCSRMatrix *A,HYPRE_Int final_coarse_size,HYPRE_Int *final_coarse_indexes,HYPRE_Int debug_flag,HYPRE_Int **CF_marker,HYPRE_Int last_level);
 HYPRE_Int hypre_SysTGSetNumWells(void      *systg_vdata, HYPRE_Int num_wells);
 HYPRE_Int hypre_SysTGSetMaxGlobalsmoothIters( void *systg_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_SysTGSetGlobalsmoothType( void *systg_vdata, HYPRE_Int iter_type );
-	
+HYPRE_Int hypre_SysTGSetAdditionalCoarseIndices(void *systg_vdata, HYPRE_Int num_additional_coarse_indices, HYPRE_Int *coarse_grid_indices);
+
 //HYPRE_Int hypre_SysTGInitCFMarker(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
 //HYPRE_Int hypre_SysTGUpdateCoarseIndexes(HYPRE_Int num_variables, HYPRE_Int *CF_marker, HYPRE_Int initial_coarse_size,HYPRE_Int *initial_coarse_indexes);
 HYPRE_Int hypre_sysTGBuildInterp(hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix  **P, HYPRE_Int last_level, HYPRE_Int level, HYPRE_Int numsweeps);
 //HYPRE_Int hypre_sysTGBuildRestrictionToper(hypre_ParCSRMatrix *AT, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *ST, HYPRE_Int *num_cpts_global,HYPRE_Int num_functions,HYPRE_Int *dof_func,HYPRE_Int debug_flag,HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int  *col_offd_ST_to_AT,hypre_ParCSRMatrix  **RT,HYPRE_Int last_level,HYPRE_Int level, HYPRE_Int numsweeps);
 //HYPRE_Int hypre_BoomerAMGBuildInjectionInterp( hypre_ParCSRMatrix   *A, HYPRE_Int *CF_marker, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int debug_flag,HYPRE_Int init_data,hypre_ParCSRMatrix  **P_ptr);
-	HYPRE_Int hypre_SysTGSetCoarseSolver( void  *systg_vdata, HYPRE_Int  (*coarse_grid_solver_solve)(void*,void*,void*,void*), HYPRE_Int  (*coarse_grid_solver_setup)(void*,void*,void*,void*), void  *coarse_grid_solver );
+HYPRE_Int hypre_SysTGSetCoarseSolver( void  *systg_vdata, HYPRE_Int  (*coarse_grid_solver_solve)(void*,void*,void*,void*), HYPRE_Int  (*coarse_grid_solver_setup)(void*,void*,void*,void*), void  *coarse_grid_solver );
 HYPRE_Int hypre_SysTGSetup( void *systg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector    *f, hypre_ParVector    *u );
 HYPRE_Int hypre_SysTGSolve( void *systg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector  *u );
 HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A,hypre_ParCSRMatrix **B_ptr,void               *systg_vdata,HYPRE_Int             debug_flag);
@@ -1578,6 +1582,8 @@ HYPRE_Int hypre_blockRelax(hypre_ParCSRMatrix *A,hypre_ParVector *f,hypre_ParVec
 HYPRE_Int hypre_SysTGSetMaxCoarseLevels( void *systg_vdata, HYPRE_Int maxlev );
 HYPRE_Int hypre_SysTGSetBlockSize( void *systg_vdata, HYPRE_Int bsize );
 HYPRE_Int hypre_SysTGSetRelaxType( void *systg_vdata, HYPRE_Int relax_type );
+HYPRE_Int hypre_SysTGSetRelaxMethod( void *systg_vdata, HYPRE_Int relax_method);
+HYPRE_Int hypre_SysTGSetRestrictType( void *systg_vdata, HYPRE_Int interpType);
 HYPRE_Int hypre_SysTGSetInterpType( void *systg_vdata, HYPRE_Int interpType);
 HYPRE_Int hypre_SysTGSetNumRelaxSweeps( void *systg_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_SysTGSetNumInterpSweeps( void *systg_vdata, HYPRE_Int nsweeps );
