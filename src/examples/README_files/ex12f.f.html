@@ -456,33 +456,34 @@
 <a name="line449">449</a> <font color="#444444">c        Print amg solution info</font>
 <a name="line450">450</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
 <a name="line451">451</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetCoarsenType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line452">452</a> <font color="#444444">c        Sym G.S./Jacobi hybrid</font>
-<a name="line453">453</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetRelaxType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line454">454</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetNumSweeps</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line455">455</a> <font color="#444444">c        Set preconditioner (BoomerAMG = 2) and solve</font>
-<a name="line456">456</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetPrecond</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">2</font>, <font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line457">457</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetup</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parA</font>, <font color="#2040a0">parb</font>, <font color="#2040a0">parx</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line458">458</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSolve</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parA</font>, <font color="#2040a0">parb</font>, <font color="#2040a0">parx</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line459">459</a> 
-<a name="line460">460</a> <font color="#444444">c        Free memory</font>
-<a name="line461">461</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGDestroy</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line462">462</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line463">463</a> 
-<a name="line464">464</a>       <strong>endif</strong>
-<a name="line465">465</a> 
-<a name="line466">466</a> <font color="#444444">c     Free memory</font>
-<a name="line467">467</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">grid</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line468">468</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">stencil</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line469">469</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">graph</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line470">470</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line471">471</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line472">472</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line473">473</a> 
-<a name="line474">474</a> <font color="#444444">c     Finalize MPI</font>
-<a name="line475">475</a>       <strong>call</strong> <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line476">476</a> 
-<a name="line477">477</a>       <strong>stop</strong>
-<a name="line478">478</a>       <strong>end</strong>
+<a name="line452">452</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetOldDefault</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line453">453</a> <font color="#444444">c        Sym G.S./Jacobi hybrid</font>
+<a name="line454">454</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetRelaxType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line455">455</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGSetNumSweeps</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line456">456</a> <font color="#444444">c        Set preconditioner (BoomerAMG = 2) and solve</font>
+<a name="line457">457</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetPrecond</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">2</font>, <font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line458">458</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSetup</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parA</font>, <font color="#2040a0">parb</font>, <font color="#2040a0">parx</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line459">459</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGSolve</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parA</font>, <font color="#2040a0">parb</font>, <font color="#2040a0">parx</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line460">460</a> 
+<a name="line461">461</a> <font color="#444444">c        Free memory</font>
+<a name="line462">462</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParCSRPCGDestroy</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line463">463</a>          <strong>call</strong> <font color="#2040a0">HYPRE_BoomerAMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line464">464</a> 
+<a name="line465">465</a>       <strong>endif</strong>
+<a name="line466">466</a> 
+<a name="line467">467</a> <font color="#444444">c     Free memory</font>
+<a name="line468">468</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">grid</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line469">469</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">stencil</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line470">470</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">graph</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line471">471</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line472">472</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line473">473</a>       <strong>call</strong> <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line474">474</a> 
+<a name="line475">475</a> <font color="#444444">c     Finalize MPI</font>
+<a name="line476">476</a>       <strong>call</strong> <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="#2040a0">ierr</font><font color="4444FF">)</font>
+<a name="line477">477</a> 
+<a name="line478">478</a>       <strong>stop</strong>
+<a name="line479">479</a>       <strong>end</strong>
 
 </pre>
 <hr>

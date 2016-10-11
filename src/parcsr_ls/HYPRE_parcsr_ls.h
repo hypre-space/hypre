@@ -139,6 +139,13 @@ HYPRE_Int HYPRE_BoomerAMGSolveT(HYPRE_Solver       solver,
                                 HYPRE_ParVector    x);
 
 /**
+ * Recovers old default for coarsening and interpolation, i.e Falgout 
+ * coarsening and untruncated modified classical interpolation.
+ * This option might be preferred for 2 dimensional problems.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetOldDefault(HYPRE_Solver       solver);
+
+/**
  * Returns the residual.
  **/
 HYPRE_Int HYPRE_BoomerAMGGetResidual(HYPRE_Solver     solver,
@@ -589,6 +596,24 @@ HYPRE_Int HYPRE_BoomerAMGSetMultAddTruncFactor(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetMultAddPMaxElmts(HYPRE_Solver solver,
                                          HYPRE_Int    add_P_max_elmts);
+/**
+ * (Optional) Defines the relaxation type used in the (mult)additive cycle
+ * portion (also affects simple method.) 
+ * The default is 18 (L1-Jacobi).
+ * Currently the only other option allowed is 0 (Jacobi) which should be 
+ * used in combination with HYPRE_BoomerAMGSetAddRelaxWt.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAddRelaxType(HYPRE_Solver solver,
+                                         HYPRE_Int    add_rlx_type);
+
+/**
+ * (Optional) Defines the relaxation weight used for Jacobi within the 
+ * (mult)additive or simple cycle portion.
+ * The default is 1. 
+ * The weight only affects the Jacobi method, and has no effect on L1-Jacobi
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAddRelaxWt(HYPRE_Solver solver,
+                                         HYPRE_Real    add_rlx_wt);
 
 /**
  * (Optional) Sets maximal size for agglomeration or redundant coarse grid solve. 

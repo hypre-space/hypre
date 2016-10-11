@@ -558,7 +558,7 @@
 <a name="line551">551</a>       <font color="#444444">/* Here we construct a BoomerAMG solver.  See the other SStruct examples
 <a name="line552">552</a>          as well as the Reference manual for additional solver choices. */</font>
 <a name="line553">553</a>       <font color="#2040a0">HYPRE_BoomerAMGCreate</font><font color="4444FF">(</font><font color="4444FF">&amp;</font><font color="#2040a0">solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line554">554</a>       <font color="#2040a0">HYPRE_BoomerAMGSetCoarsenType</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line554">554</a>       <font color="#2040a0">HYPRE_BoomerAMGSetOldDefault</font><font color="4444FF">(</font><font color="#2040a0">solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line555">555</a>       <font color="#2040a0">HYPRE_BoomerAMGSetStrongThreshold</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">0.25</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line556">556</a>       <font color="#2040a0">HYPRE_BoomerAMGSetTol</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">1e-6</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line557">557</a>       <font color="#2040a0">HYPRE_BoomerAMGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#FF0000">2</font><font color="4444FF">)</font><font color="4444FF">;</font>

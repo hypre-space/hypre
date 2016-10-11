@@ -13,7 +13,7 @@
 
 testname=`basename $0 .sh`
 
-drivers="ij new_ij sstruct struct ams_driver maxwell_unscaled sstruct_fac ij_mv struct_migrate"
+drivers="ij sstruct struct ams_driver maxwell_unscaled sstruct_fac ij_mv struct_migrate"
 
 # Echo usage information
 case $1 in

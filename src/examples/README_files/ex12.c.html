@@ -456,45 +456,44 @@
 <a name="line449">449</a>       <font color="#2040a0">HYPRE_BoomerAMGSetMaxIter</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line450">450</a>       <font color="#2040a0">HYPRE_BoomerAMGSetTol</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">0.0</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line451">451</a>       <font color="#2040a0">HYPRE_BoomerAMGSetPrintLevel</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* print amg solution info */</font>
-<a name="line452">452</a>       <font color="#2040a0">HYPRE_BoomerAMGSetCoarsenType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line453">453</a>       <font color="#2040a0">HYPRE_BoomerAMGSetRelaxType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* Sym G.S./Jacobi hybrid */</font>
-<a name="line454">454</a>       <font color="#2040a0">HYPRE_BoomerAMGSetNumSweeps</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line455">455</a> 
-<a name="line456">456</a>       <font color="#444444">/* Set preconditioner and solve */</font>
-<a name="line457">457</a>       <font color="#2040a0">HYPRE_ParCSRPCGSetPrecond</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">HYPRE_BoomerAMGSolve</font>,
-<a name="line458">458</a>                                 <font color="#2040a0">HYPRE_BoomerAMGSetup</font>, <font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line459">459</a>       <font color="#2040a0">HYPRE_ParCSRPCGSetup</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parA</font>, <font color="#2040a0">parb</font>, <font color="#2040a0">parx</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line460">460</a>       <font color="#2040a0">HYPRE_ParCSRPCGSolve</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parA</font>, <font color="#2040a0">parb</font>, <font color="#2040a0">parx</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line461">461</a> 
-<a name="line462">462</a>       <font color="#444444">/* Free memory */</font>
-<a name="line463">463</a>       <font color="#2040a0">HYPRE_ParCSRPCGDestroy</font><font color="4444FF">(</font><font color="#2040a0">solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line464">464</a>       <font color="#2040a0">HYPRE_BoomerAMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line465">465</a>    <font color="4444FF"><strong>}</strong></font>
-<a name="line466">466</a> 
-<a name="line467">467</a>    <font color="#444444">/* Save the solution for GLVis visualization, see vis/glvis-ex12.sh */</font>
-<a name="line468">468</a>    <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">vis</font><font color="4444FF">)</font>
-<a name="line469">469</a>    <font color="4444FF"><strong>{</strong></font>
-<a name="line470">470</a>       <font color="#444444">/* Gather the solution vector */</font>
-<a name="line471">471</a>       <font color="#2040a0">HYPRE_SStructVectorGather</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line472">472</a> 
-<a name="line473">473</a>       <font color="#2040a0">GLVis_PrintSStructGrid</font><font color="4444FF">(</font><font color="#2040a0">grid</font>, <font color="#008000">&quot;vis/ex12.mesh&quot;</font>, <font color="#2040a0">myid</font>, <font color="#2040a0">NULL</font>, <font color="#2040a0">NULL</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line474">474</a>       <font color="#2040a0">GLVis_PrintSStructVector</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#FF0000">0</font>, <font color="#008000">&quot;vis/ex12.sol&quot;</font>, <font color="#2040a0">myid</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line475">475</a>       <font color="#2040a0">GLVis_PrintData</font><font color="4444FF">(</font><font color="#008000">&quot;vis/ex12.data&quot;</font>, <font color="#2040a0">myid</font>, <font color="#2040a0">num_procs</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line476">476</a>    <font color="4444FF"><strong>}</strong></font>
-<a name="line477">477</a> 
-<a name="line478">478</a>    <font color="#444444">/* Free memory */</font>
-<a name="line479">479</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line480">480</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">stencil</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line481">481</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line482">482</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line483">483</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line484">484</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line485">485</a> 
-<a name="line486">486</a>    <font color="#444444">/* Finalize MPI */</font>
-<a name="line487">487</a>    <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line488">488</a> 
-<a name="line489">489</a>    <strong>return</strong> <font color="4444FF">(</font><font color="#FF0000">0</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line490">490</a> <font color="4444FF"><strong>}</strong></font>
+<a name="line452">452</a>       <font color="#2040a0">HYPRE_BoomerAMGSetRelaxType</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">6</font><font color="4444FF">)</font><font color="4444FF">;</font> <font color="#444444">/* Sym G.S./Jacobi hybrid */</font>
+<a name="line453">453</a>       <font color="#2040a0">HYPRE_BoomerAMGSetNumSweeps</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line454">454</a> 
+<a name="line455">455</a>       <font color="#444444">/* Set preconditioner and solve */</font>
+<a name="line456">456</a>       <font color="#2040a0">HYPRE_ParCSRPCGSetPrecond</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">HYPRE_BoomerAMGSolve</font>,
+<a name="line457">457</a>                                 <font color="#2040a0">HYPRE_BoomerAMGSetup</font>, <font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line458">458</a>       <font color="#2040a0">HYPRE_ParCSRPCGSetup</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parA</font>, <font color="#2040a0">parb</font>, <font color="#2040a0">parx</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line459">459</a>       <font color="#2040a0">HYPRE_ParCSRPCGSolve</font><font color="4444FF">(</font><font color="#2040a0">solver</font>, <font color="#2040a0">parA</font>, <font color="#2040a0">parb</font>, <font color="#2040a0">parx</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line460">460</a> 
+<a name="line461">461</a>       <font color="#444444">/* Free memory */</font>
+<a name="line462">462</a>       <font color="#2040a0">HYPRE_ParCSRPCGDestroy</font><font color="4444FF">(</font><font color="#2040a0">solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line463">463</a>       <font color="#2040a0">HYPRE_BoomerAMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line464">464</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line465">465</a> 
+<a name="line466">466</a>    <font color="#444444">/* Save the solution for GLVis visualization, see vis/glvis-ex12.sh */</font>
+<a name="line467">467</a>    <strong>if</strong> <font color="4444FF">(</font><font color="#2040a0">vis</font><font color="4444FF">)</font>
+<a name="line468">468</a>    <font color="4444FF"><strong>{</strong></font>
+<a name="line469">469</a>       <font color="#444444">/* Gather the solution vector */</font>
+<a name="line470">470</a>       <font color="#2040a0">HYPRE_SStructVectorGather</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line471">471</a> 
+<a name="line472">472</a>       <font color="#2040a0">GLVis_PrintSStructGrid</font><font color="4444FF">(</font><font color="#2040a0">grid</font>, <font color="#008000">&quot;vis/ex12.mesh&quot;</font>, <font color="#2040a0">myid</font>, <font color="#2040a0">NULL</font>, <font color="#2040a0">NULL</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line473">473</a>       <font color="#2040a0">GLVis_PrintSStructVector</font><font color="4444FF">(</font><font color="#2040a0">x</font>, <font color="#FF0000">0</font>, <font color="#008000">&quot;vis/ex12.sol&quot;</font>, <font color="#2040a0">myid</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line474">474</a>       <font color="#2040a0">GLVis_PrintData</font><font color="4444FF">(</font><font color="#008000">&quot;vis/ex12.data&quot;</font>, <font color="#2040a0">myid</font>, <font color="#2040a0">num_procs</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line475">475</a>    <font color="4444FF"><strong>}</strong></font>
+<a name="line476">476</a> 
+<a name="line477">477</a>    <font color="#444444">/* Free memory */</font>
+<a name="line478">478</a>    <font color="#2040a0">HYPRE_SStructGridDestroy</font><font color="4444FF">(</font><font color="#2040a0">grid</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line479">479</a>    <font color="#2040a0">HYPRE_SStructStencilDestroy</font><font color="4444FF">(</font><font color="#2040a0">stencil</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line480">480</a>    <font color="#2040a0">HYPRE_SStructGraphDestroy</font><font color="4444FF">(</font><font color="#2040a0">graph</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line481">481</a>    <font color="#2040a0">HYPRE_SStructMatrixDestroy</font><font color="4444FF">(</font><font color="#2040a0">A</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line482">482</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">b</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line483">483</a>    <font color="#2040a0">HYPRE_SStructVectorDestroy</font><font color="4444FF">(</font><font color="#2040a0">x</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line484">484</a> 
+<a name="line485">485</a>    <font color="#444444">/* Finalize MPI */</font>
+<a name="line486">486</a>    <font color="#2040a0">MPI_Finalize</font><font color="4444FF">(</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line487">487</a> 
+<a name="line488">488</a>    <strong>return</strong> <font color="4444FF">(</font><font color="#FF0000">0</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line489">489</a> <font color="4444FF"><strong>}</strong></font>
 
 </pre>
 <hr>

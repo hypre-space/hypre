@@ -15,6 +15,10 @@
 # recent release.
 #=============================================================================
 
+- Changed the defaults in hypre to HMIS with ext+i(4) interpolation
+
+- Added a routine HYPRE_BoomerAMGSetOldDefault to easily get old defaults
+
 Version 2.11.1 released 2016/06/09
 
 - Fixed one more bug related to SStructSetSharedPart and SetNeighborPart
