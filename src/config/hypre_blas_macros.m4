@@ -67,7 +67,7 @@ AC_DEFUN([AC_HYPRE_FIND_BLAS],
 #***************************************************************
   hypre_save_LIBS="$LIBS"
   hypre_save_LDFLGS="$LDFLAGS"
-  LIBS="$LIBS  -nodefaultlibs -L/usr/local/Cellar/gcc/5.3.0/lib/gcc/5/liblgfortran.a -lm"
+  LIBS="$LIBS $FLIBS"
 
 #***************************************************************
 #   Set possible BLAS library names
@@ -77,8 +77,8 @@ AC_DEFUN([AC_HYPRE_FIND_BLAS],
 #***************************************************************
 #   Set search paths for BLAS library
 #***************************************************************
-  temp_FLAGS="-L/usr/local2/lib -L/usr/lib2 -L/lib -L/opt/intel/mkl70/lib/32"
-  LDFLAGS="-nodefaultlibs $temp_FLAGS $LDFLAGS"
+  temp_FLAGS="-L/usr/lib -L/usr/local/lib -L/lib -L/opt/intel/mkl70/lib/32"
+  LDFLAGS="$temp_FLAGS $LDFLAGS"
 
 #***************************************************************
 #   Check for function dgemm in BLAS_LIB_NAMES

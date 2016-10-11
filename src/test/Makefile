@@ -68,7 +68,6 @@ HYPRE_DRIVE_OBJS=${HYPRE_DRIVE_FILES:.c=.o}
 
 HYPRE_DRIVERS =\
  ij.c\
- new_ij.c\
  sstruct.c\
  struct.c\
  ams_driver.c\
@@ -141,10 +140,6 @@ hypre_drive: ${HYPRE_DRIVE_OBJS}
 	${LINK_CC} -o $@ ${HYPRE_DRIVE_OBJS} ${LFLAGS}
 
 ij: ij.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
-
-new_ij: new_ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 

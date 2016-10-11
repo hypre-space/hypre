@@ -149,7 +149,7 @@ hypre_BoomerAMGAdditiveCycle( void              *amg_vdata)
             hypre_BoomerAMGRelaxIF(A_array[fine_grid],F_array[fine_grid],
 	     CF_marker_array[fine_grid], rlx_down,rlx_order,1,
              relax_weight[fine_grid], omega[fine_grid],
-             l1_norms_lvl, U_array[fine_grid], Vtemp, Ztemp);
+             l1_norms[level], U_array[fine_grid], Vtemp, Ztemp);
             hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
          }
          else
@@ -351,8 +351,10 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    HYPRE_Int       num_nonzeros_offd;
 
    HYPRE_Real  **l1_norms_ptr = NULL;
-   HYPRE_Real   *relax_weight = NULL;
-   HYPRE_Real    relax_type;
+   /*HYPRE_Real   *relax_weight = NULL;
+   HYPRE_Int      relax_type; */
+   HYPRE_Int       add_rlx;
+   HYPRE_Real  add_rlx_wt;
 
    /* Acquire data and allocate storage */
 
@@ -362,9 +364,11 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    additive          = hypre_ParAMGDataAdditive(amg_data);
    mult_additive     = hypre_ParAMGDataMultAdditive(amg_data);
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
-   relax_weight      = hypre_ParAMGDataRelaxWeight(amg_data);
-   relax_type        = hypre_ParAMGDataGridRelaxType(amg_data)[1];
+   /*relax_weight      = hypre_ParAMGDataRelaxWeight(amg_data);
+   relax_type        = hypre_ParAMGDataGridRelaxType(amg_data)[1];*/
    comm              = hypre_ParCSRMatrixComm(A_array[0]);
+   add_rlx           = hypre_ParAMGDataAddRelaxType(amg_data);
+   add_rlx_wt        = hypre_ParAMGDataAddRelaxWt(amg_data);
 
    hypre_MPI_Comm_size(comm,&num_procs);
 
@@ -705,15 +709,15 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       }
    
       /* Compute Lambda */ 
-      if (relax_type == 0)
+      if (add_rlx == 0)
       {
-        HYPRE_Real rlx_wt = relax_weight[level];
+        /*HYPRE_Real rlx_wt = relax_weight[level];*/
 #ifdef HYPRE_USING_OPENMP
 #pragma omp for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i=0; i < num_rows_tmp; i++)
         {
-           D_data[i] = rlx_wt/A_tmp_diag_data[A_tmp_diag_i[i]];
+           D_data[i] = add_rlx_wt/A_tmp_diag_data[A_tmp_diag_i[i]];
            L_diag_i[cnt_row+i] = start_diag + A_tmp_diag_i[i+1];
            L_offd_i[cnt_row+i] = start_offd + A_tmp_offd_i[i+1];
         }
@@ -838,14 +842,16 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
    HYPRE_Real    *r_data;
    HYPRE_Real    *tmp_data;
    HYPRE_Real    *D_inv = NULL;
-   HYPRE_Real    *relax_weight = NULL;
-   HYPRE_Real     relax_type;
+   /*HYPRE_Real    *relax_weight = NULL;
+   HYPRE_Real     relax_type;*/
 
    HYPRE_Int       addlvl;
    HYPRE_Int       num_levels;
    HYPRE_Int       num_rows_L;
    HYPRE_Int       num_rows_tmp;
    HYPRE_Int       level, i;
+   HYPRE_Int       add_rlx;
+   HYPRE_Real      add_rlx_wt;
 
  /* Local variables  */ 
    HYPRE_Int       Solve_err_flag = 0;
@@ -861,8 +867,10 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
    U_array           = hypre_ParAMGDataUArray(amg_data);
    addlvl            = hypre_ParAMGDataSimple(amg_data);
    num_levels        = hypre_ParAMGDataNumLevels(amg_data);
-   relax_weight      = hypre_ParAMGDataRelaxWeight(amg_data);
-   relax_type        = hypre_ParAMGDataGridRelaxType(amg_data)[1];
+   add_rlx_wt        = hypre_ParAMGDataAddRelaxWt(amg_data);
+   add_rlx           = hypre_ParAMGDataAddRelaxType(amg_data);
+   /*relax_weight      = hypre_ParAMGDataRelaxWeight(amg_data);
+   relax_type        = hypre_ParAMGDataGridRelaxType(amg_data)[1];*/
 
    l1_norms_ptr      = hypre_ParAMGDataL1Norms(amg_data); 
    /* smooth_option       = hypre_ParAMGDataSmoothOption(amg_data); */
@@ -911,16 +919,16 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
       A_tmp_diag = hypre_ParCSRMatrixDiag(A_tmp);
       num_rows_tmp = hypre_CSRMatrixNumRows(A_tmp_diag);
 
-      if (relax_type == 0)
+      if (add_rlx == 0)
       {
-         HYPRE_Real rlx_wt = relax_weight[level];
+         /*HYPRE_Real rlx_wt = relax_weight[level];*/
          HYPRE_Int *A_tmp_diag_i = hypre_CSRMatrixI(A_tmp_diag);
          HYPRE_Real *A_tmp_diag_data = hypre_CSRMatrixData(A_tmp_diag);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp for private(i) HYPRE_SMP_SCHEDULE
 #endif
          for (i=0; i < num_rows_tmp; i++)
-            D_inv[l1_start+i] = rlx_wt/A_tmp_diag_data[A_tmp_diag_i[i]];
+            D_inv[l1_start+i] = add_rlx_wt/A_tmp_diag_data[A_tmp_diag_i[i]];
       }
       else
       {

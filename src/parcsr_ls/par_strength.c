@@ -1507,7 +1507,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
       for (i=0 ; i < S_ext_offd_size; i++)
          S_ext_offd_j[i] = hypre_UnorderedIntMapGet(&col_map_offd_C_inverse, S_ext_offd_j[i]);
 
-      hypre_UnorderedIntMapDestroy(&col_map_offd_C_inverse);
+      if (num_cols_offd_C) hypre_UnorderedIntMapDestroy(&col_map_offd_C_inverse);
 #else /* !HYPRE_CONCURRENT_HOPSCOTCH */
       HYPRE_Int cnt_offd, cnt_diag, cnt, value;
       S_ext_diag_size = 0;

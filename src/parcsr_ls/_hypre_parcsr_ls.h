@@ -241,7 +241,9 @@ typedef struct
    HYPRE_Int      mult_additive;
    HYPRE_Int      simple;
    HYPRE_Int      add_P_max_elmts;
-   HYPRE_Int      add_trunc_factor;
+   HYPRE_Real     add_trunc_factor;
+   HYPRE_Int      add_rlx_type;
+   HYPRE_Real     add_rlx_wt;
    hypre_ParCSRMatrix *Lambda;
    hypre_ParVector *Rtilde;
    hypre_ParVector *Xtilde;
@@ -437,6 +439,8 @@ typedef struct
 #define hypre_ParAMGDataSimple(amg_data) ((amg_data)->simple)
 #define hypre_ParAMGDataMultAddPMaxElmts(amg_data) ((amg_data)->add_P_max_elmts)
 #define hypre_ParAMGDataMultAddTruncFactor(amg_data) ((amg_data)->add_trunc_factor)
+#define hypre_ParAMGDataAddRelaxType(amg_data) ((amg_data)->add_rlx_type)
+#define hypre_ParAMGDataAddRelaxWt(amg_data) ((amg_data)->add_rlx_wt)
 #define hypre_ParAMGDataLambda(amg_data) ((amg_data)->Lambda)
 #define hypre_ParAMGDataRtilde(amg_data) ((amg_data)->Rtilde)
 #define hypre_ParAMGDataXtilde(amg_data) ((amg_data)->Xtilde)
@@ -744,6 +748,7 @@ HYPRE_Int HYPRE_BoomerAMGGetCoarsenType ( HYPRE_Solver solver , HYPRE_Int *coars
 HYPRE_Int HYPRE_BoomerAMGSetMeasureType ( HYPRE_Solver solver , HYPRE_Int measure_type );
 HYPRE_Int HYPRE_BoomerAMGGetMeasureType ( HYPRE_Solver solver , HYPRE_Int *measure_type );
 HYPRE_Int HYPRE_BoomerAMGSetSetupType ( HYPRE_Solver solver , HYPRE_Int setup_type );
+HYPRE_Int HYPRE_BoomerAMGSetOldDefault ( HYPRE_Solver solver );
 HYPRE_Int HYPRE_BoomerAMGSetCycleType ( HYPRE_Solver solver , HYPRE_Int cycle_type );
 HYPRE_Int HYPRE_BoomerAMGGetCycleType ( HYPRE_Solver solver , HYPRE_Int *cycle_type );
 HYPRE_Int HYPRE_BoomerAMGSetTol ( HYPRE_Solver solver , HYPRE_Real tol );
@@ -817,6 +822,8 @@ HYPRE_Int HYPRE_BoomerAMGSetAggP12TruncFactor ( HYPRE_Solver solver , HYPRE_Real
 HYPRE_Int HYPRE_BoomerAMGSetAggPMaxElmts ( HYPRE_Solver solver , HYPRE_Int agg_P_max_elmts );
 HYPRE_Int HYPRE_BoomerAMGSetAddPMaxElmts ( HYPRE_Solver solver , HYPRE_Int add_P_max_elmts );
 HYPRE_Int HYPRE_BoomerAMGSetMultAddPMaxElmts ( HYPRE_Solver solver , HYPRE_Int add_P_max_elmts );
+HYPRE_Int HYPRE_BoomerAMGSetAddRelaxType ( HYPRE_Solver solver , HYPRE_Int add_rlx_type );
+HYPRE_Int HYPRE_BoomerAMGSetAddRelaxWt ( HYPRE_Solver solver , HYPRE_Real add_rlx_wt );
 HYPRE_Int HYPRE_BoomerAMGSetAggP12MaxElmts ( HYPRE_Solver solver , HYPRE_Int agg_P12_max_elmts );
 HYPRE_Int HYPRE_BoomerAMGSetNumCRRelaxSteps ( HYPRE_Solver solver , HYPRE_Int num_CR_relax_steps );
 HYPRE_Int HYPRE_BoomerAMGSetCRRate ( HYPRE_Solver solver , HYPRE_Real CR_rate );
@@ -1214,6 +1221,8 @@ HYPRE_Int hypre_BoomerAMGSetAggNumLevels ( void *data , HYPRE_Int agg_num_levels
 HYPRE_Int hypre_BoomerAMGSetAggInterpType ( void *data , HYPRE_Int agg_interp_type );
 HYPRE_Int hypre_BoomerAMGSetAggPMaxElmts ( void *data , HYPRE_Int agg_P_max_elmts );
 HYPRE_Int hypre_BoomerAMGSetMultAddPMaxElmts ( void *data , HYPRE_Int add_P_max_elmts );
+HYPRE_Int hypre_BoomerAMGSetAddRelaxType ( void *data , HYPRE_Int add_rlx_type );
+HYPRE_Int hypre_BoomerAMGSetAddRelaxWt ( void *data , HYPRE_Real add_rlx_wt );
 HYPRE_Int hypre_BoomerAMGSetAggP12MaxElmts ( void *data , HYPRE_Int agg_P12_max_elmts );
 HYPRE_Int hypre_BoomerAMGSetAggTruncFactor ( void *data , HYPRE_Real agg_trunc_factor );
 HYPRE_Int hypre_BoomerAMGSetMultAddTruncFactor ( void *data , HYPRE_Real add_trunc_factor );
