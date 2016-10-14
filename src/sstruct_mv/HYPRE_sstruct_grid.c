@@ -311,7 +311,7 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
          for (d = 0; d < 3; d++)
          {
             loop[d] = 0;
-            if ((varoffset[d] != 0) && (d < ndim))
+            if ((d < ndim) && (varoffset[d] != 0))
             {
                loop[d] = 1;
             }
