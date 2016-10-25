@@ -14,17 +14,14 @@
 # ./runcheck.sh fname.out fname.saved 1.0e-6
 
 FNAME=$1
-#TNAME=`basename $1 .out`
-#SNAME=${TNAME}.saved
 SNAME=$2
 CONVTOL=$3
 
 if [ x$CONVTOL = "x" ]; 
 then
-    CONVTOL=1.0e-6
+    CONVTOL=0.0
 fi
-
-#echo $CONVTOL
+#echo "runcheck tol = $CONVTOL"
 
 PASSFAIL=$(awk -v filename="$SNAME" 'BEGIN{{FS=" "}
 
@@ -89,5 +86,4 @@ if [ x$PASSFAIL != "x" ];
 then
 #    echo $PASSFAIL
      diff -U3 -bI"time" $SNAME $FNAME >&2
-#     diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
 fi
