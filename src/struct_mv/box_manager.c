@@ -534,7 +534,7 @@ hypre_BoxManIncSize ( hypre_BoxManager *manager,
    entries = hypre_TReAlloc(entries, hypre_BoxManEntry, max_nentries);
    ids = hypre_TReAlloc(ids, HYPRE_Int, max_nentries);
    procs =  hypre_TReAlloc(procs, HYPRE_Int, max_nentries);
-   info = hypre_ReAlloc(info, max_nentries*info_size);
+   info = (void *)hypre_ReAlloc((char *)info, max_nentries*info_size);
 
    /* update manager */
    hypre_BoxManMaxNEntries(manager) = max_nentries;
@@ -578,7 +578,7 @@ hypre_BoxManDestroy( hypre_BoxManager *manager )
 
       hypre_TFree(hypre_BoxManEntries(manager));
 
-      hypre_Free(hypre_BoxManInfoObjects(manager));
+      hypre_Free((char *)hypre_BoxManInfoObjects(manager));
       
       hypre_TFree(hypre_BoxManIndexTable(manager));
       
@@ -2114,7 +2114,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                
             }
             hypre_TFree(entries);
-            hypre_Free(hypre_BoxManInfoObjects(manager));
+            hypre_Free((char*)hypre_BoxManInfoObjects(manager));
 
             hypre_BoxManEntries(manager) = new_entries;
             hypre_BoxManMaxNEntries(manager) = size;
@@ -2641,8 +2641,8 @@ hypre_FillResponseBoxManAssemble1( void *p_recv_contact_buf,
    HYPRE_Int   *proc_ids;
    HYPRE_Int   *send_response_buf = (HYPRE_Int *) *p_send_response_buf;
  
-   hypre_DataExchangeResponse  *response_obj = ro;  
-   hypre_StructAssumedPart     *ap = response_obj->data1;  
+   hypre_DataExchangeResponse  *response_obj = (hypre_DataExchangeResponse  *)ro;  
+   hypre_StructAssumedPart     *ap = (hypre_StructAssumedPart     *)response_obj->data1;  
 
    HYPRE_Int overhead = response_obj->send_response_overhead;
 
@@ -2715,8 +2715,8 @@ hypre_FillResponseBoxManAssemble2( void *p_recv_contact_buf,
    void              *info, *index_ptr;
   
    void                       *send_response_buf = (void *) *p_send_response_buf;
-   hypre_DataExchangeResponse *response_obj = ro;  
-   hypre_BoxManager           *manager = response_obj->data1;  
+   hypre_DataExchangeResponse *response_obj = (hypre_DataExchangeResponse *)ro;  
+   hypre_BoxManager           *manager = (hypre_BoxManager           *)response_obj->data1;  
    HYPRE_Int                   overhead = response_obj->send_response_overhead;
 
    HYPRE_Int           ndim = hypre_BoxManNDim(manager);
@@ -2735,7 +2735,7 @@ hypre_FillResponseBoxManAssemble2( void *p_recv_contact_buf,
    {
       response_obj->send_response_storage =  num_my_entries; 
       size =  entry_size_bytes*(response_obj->send_response_storage + overhead);
-      send_response_buf = hypre_ReAlloc( send_response_buf, size);
+      send_response_buf = hypre_ReAlloc( (char*)send_response_buf, size);
       *p_send_response_buf = send_response_buf;  
    }
 

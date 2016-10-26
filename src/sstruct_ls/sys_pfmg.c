@@ -56,7 +56,7 @@ hypre_SysPFMGCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+	hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
 
    HYPRE_Int l;
 
@@ -127,7 +127,7 @@ HYPRE_Int
 hypre_SysPFMGSetTol( void   *sys_pfmg_vdata,
                      HYPRE_Real  tol       )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    (sys_pfmg_data -> tol) = tol;
  
@@ -141,7 +141,7 @@ HYPRE_Int
 hypre_SysPFMGSetMaxIter( void *sys_pfmg_vdata,
                          HYPRE_Int   max_iter  )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    (sys_pfmg_data -> max_iter) = max_iter;
  
@@ -155,7 +155,7 @@ HYPRE_Int
 hypre_SysPFMGSetRelChange( void *sys_pfmg_vdata,
                            HYPRE_Int   rel_change  )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    (sys_pfmg_data -> rel_change) = rel_change;
  
@@ -169,7 +169,7 @@ HYPRE_Int
 hypre_SysPFMGSetZeroGuess( void *sys_pfmg_vdata,
                            HYPRE_Int   zero_guess )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    (sys_pfmg_data -> zero_guess) = zero_guess;
  
@@ -183,7 +183,7 @@ HYPRE_Int
 hypre_SysPFMGSetRelaxType( void *sys_pfmg_vdata,
                            HYPRE_Int   relax_type )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    (sys_pfmg_data -> relax_type) = relax_type;
  
@@ -196,7 +196,7 @@ HYPRE_Int
 hypre_SysPFMGSetJacobiWeight( void  *sys_pfmg_vdata,
                               HYPRE_Real weight )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
                                                                                                                                      
    (sys_pfmg_data -> jacobi_weight)    = weight;
    (sys_pfmg_data -> usr_jacobi_weight)= 1;
@@ -211,7 +211,7 @@ HYPRE_Int
 hypre_SysPFMGSetNumPreRelax( void *sys_pfmg_vdata,
                              HYPRE_Int   num_pre_relax )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    (sys_pfmg_data -> num_pre_relax) = num_pre_relax;
  
@@ -225,7 +225,7 @@ HYPRE_Int
 hypre_SysPFMGSetNumPostRelax( void *sys_pfmg_vdata,
                               HYPRE_Int   num_post_relax )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    (sys_pfmg_data -> num_post_relax) = num_post_relax;
  
@@ -239,7 +239,7 @@ HYPRE_Int
 hypre_SysPFMGSetSkipRelax( void *sys_pfmg_vdata,
                            HYPRE_Int  skip_relax )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    (sys_pfmg_data -> skip_relax) = skip_relax;
  
@@ -253,7 +253,7 @@ HYPRE_Int
 hypre_SysPFMGSetDxyz( void   *sys_pfmg_vdata,
                       HYPRE_Real *dxyz       )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
 
    (sys_pfmg_data -> dxyz[0]) = dxyz[0];
    (sys_pfmg_data -> dxyz[1]) = dxyz[1];
@@ -269,7 +269,7 @@ HYPRE_Int
 hypre_SysPFMGSetLogging( void *sys_pfmg_vdata,
                          HYPRE_Int   logging)
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    (sys_pfmg_data -> logging) = logging;
  
@@ -283,7 +283,7 @@ HYPRE_Int
 hypre_SysPFMGSetPrintLevel( void *sys_pfmg_vdata,
                             HYPRE_Int   print_level)
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    (sys_pfmg_data -> print_level) = print_level;
  
@@ -297,7 +297,7 @@ HYPRE_Int
 hypre_SysPFMGGetNumIterations( void *sys_pfmg_vdata,
                                HYPRE_Int  *num_iterations )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
 
    *num_iterations = (sys_pfmg_data -> num_iterations);
 
@@ -311,7 +311,7 @@ HYPRE_Int
 hypre_SysPFMGPrintLogging( void *sys_pfmg_vdata,
                            HYPRE_Int   myid)
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
    HYPRE_Int          i;
    HYPRE_Int          num_iterations  = (sys_pfmg_data -> num_iterations);
    HYPRE_Int          logging   = (sys_pfmg_data -> logging);
@@ -344,7 +344,7 @@ HYPRE_Int
 hypre_SysPFMGGetFinalRelativeResidualNorm( void   *sys_pfmg_vdata,
                                            HYPRE_Real *relative_residual_norm )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
 
    HYPRE_Int          max_iter        = (sys_pfmg_data -> max_iter);
    HYPRE_Int          num_iterations  = (sys_pfmg_data -> num_iterations);

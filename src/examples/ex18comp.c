@@ -226,7 +226,7 @@ int main (int argc, char *argv[])
       /* Get ready to set values */
       HYPRE_SStructMatrixInitialize(A);
 
-      values = calloc(nvalues, sizeof(HYPRE_Complex));
+      values = (HYPRE_Complex*) calloc(nvalues, sizeof(HYPRE_Complex));
 
       /* Set intra-variable values; fix boundaries later */
       for (j = 0; j < nentries; j++)
@@ -256,7 +256,7 @@ int main (int argc, char *argv[])
       {
          for (j = 0; j < nentries; j++)
          {
-            values[i+j] = -0.1 + I*0.1;
+			 values[i+j] =(-0.1 +  (HYPRE_Complex)I*0.1);
          }
       }
       HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper, var0,
@@ -266,7 +266,7 @@ int main (int argc, char *argv[])
       {
          for (j = 0; j < nentries; j++)
          {
-            values[i+j] = -0.1 - I*0.1;
+			 values[i+j] =(HYPRE_Complex)(-0.1 - I*0.1);
          }
       }
       HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper, var1,
@@ -288,7 +288,7 @@ int main (int argc, char *argv[])
       HYPRE_Complex *values;
       int stencil_indices[1];
 
-      values = calloc(nvalues, sizeof(HYPRE_Complex));
+      values = (HYPRE_Complex*) calloc(nvalues, sizeof(HYPRE_Complex));
       for (j = 0; j < nvalues; j++)
       {
          values[j] = 0.0;
@@ -354,7 +354,7 @@ int main (int argc, char *argv[])
       int nvalues = NVARS*nvol;
       HYPRE_Complex *values;
 
-      values = calloc(nvalues, sizeof(HYPRE_Complex));
+      values = (HYPRE_Complex*) calloc(nvalues, sizeof(HYPRE_Complex));
 
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &b);

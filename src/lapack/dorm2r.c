@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dorm2r_(char *side, char *trans, integer *m, integer *n, 
+/* Subroutine */ HYPRE_Int dorm2r_(const char *side,const char *trans, integer *m, integer *n, 
 	integer *k, doublereal *a, integer *lda, doublereal *tau, doublereal *
 	c__, integer *ldc, doublereal *work, integer *info)
 {
@@ -100,12 +100,12 @@
     /* Local variables */
     static logical left;
     static integer i__;
-    extern /* Subroutine */ HYPRE_Int dlarf_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlarf_(const char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *);
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static integer i1, i2, i3, ic, jc, mi, ni, nq;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
     static logical notran;
     static doublereal aii;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]

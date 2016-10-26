@@ -41,13 +41,13 @@ static integer c__11 = 11;
     extern /* Subroutine */ HYPRE_Int dlasq3_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
 	     integer *, integer *, integer *, logical *);
-    extern doublereal dlamch_(char *);
+    extern doublereal dlamch_(const char *);
     static integer pp, iwhila, iwhilb;
     static doublereal oldemn, safmin;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dlasrt_(char *, integer *, doublereal *, 
+    extern /* Subroutine */ HYPRE_Int dlasrt_(const char *, integer *, doublereal *, 
 	    integer *);
     static doublereal eps, tol;
     static integer ipn4;

@@ -90,7 +90,7 @@
 	    integer *, integer *, doublereal *, integer *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *, doublereal *, 
 	    doublereal *);
-    extern doublereal dlamch_(char *);
+    extern doublereal dlamch_(const char *);
     static integer nn;
     static doublereal safmin, eps, tol;
     static integer n0in, ipn4;

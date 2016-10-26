@@ -230,10 +230,12 @@ c        Set some parameters (See Reference Manual for more parameters)
 
 c        print solve info + parameters 
          call HYPRE_BoomerAMGSetPrintLevel(solver, 3, ierr)  
-c        Falgout coarsening
-         call HYPRE_BoomerAMGSetCoarsenType(solver, 6, ierr) 
+c        old defaults, Falgout coarsening, mod. class. interpolation
+         call HYPRE_BoomerAMGSetOldDefault(solver, ierr) 
 c        G-S/Jacobi hybrid relaxation 
          call HYPRE_BoomerAMGSetRelaxType(solver, 3, ierr)     
+c        C/F relaxation 
+         call HYPRE_BoomerAMGSetRelaxOrder(solver, 1, ierr)     
 c        Sweeeps on each level
          call HYPRE_BoomerAMGSetNumSweeps(solver, 1, ierr)  
 c         maximum number of levels 
@@ -336,6 +338,8 @@ c        print less solver info since a preconditioner
          call HYPRE_BoomerAMGSetPrintLevel(precond, 1, ierr); 
 c        Falgout coarsening
          call HYPRE_BoomerAMGSetCoarsenType(precond, 6, ierr) 
+c        old defaults
+         call HYPRE_BoomerAMGSetOldDefault(precond, ierr) 
 c        SYMMETRIC G-S/Jacobi hybrid relaxation 
          call HYPRE_BoomerAMGSetRelaxType(precond, 6, ierr)     
 c        Sweeeps on each level

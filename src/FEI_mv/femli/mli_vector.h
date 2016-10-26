@@ -42,7 +42,7 @@ class MLI_Vector
 
 public :
 
-   MLI_Vector( void *inVec, char *inName, MLI_Function *funcPtr );
+   MLI_Vector( void *inVec,const char *inName, MLI_Function *funcPtr );
    ~MLI_Vector();
    char   *getName();
    void   *getVector();

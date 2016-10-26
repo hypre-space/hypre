@@ -39,6 +39,7 @@
 #endif
 
 #include "HYPRE_MHMatrix.h"
+#include "HYPRE_FEI.h"
 
 typedef struct HYPRE_LSI_Schwarz_Struct
 {
@@ -68,9 +69,6 @@ extern int  HYPRE_LSI_SchwarzDecompose(HYPRE_LSI_Schwarz *sch_ptr,
                  MH_Matrix *Amat, int total_recv_leng, int *recv_lengths, 
                  int *ext_ja, double *ext_aa, int *map, int *map2, 
                  int Noffset);
-extern int  HYPRE_LSI_DDIlutComposeOverlappedMatrix(MH_Matrix *, int *,
-                 int **recv_lengths, int **int_buf, double **dble_buf,
-                 int **sindex_array, int **sindex_array2, int *offset);
 extern int  HYPRE_LSI_ILUTDecompose(HYPRE_LSI_Schwarz *sch_ptr);
 extern void hypre_qsort0(int *, int, int);
 extern int  HYPRE_LSI_SplitDSort(double*,int,int*,int);
@@ -497,7 +495,7 @@ int HYPRE_LSI_SchwarzSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    if ( overlap_flag )
    {
       HYPRE_LSI_DDIlutComposeOverlappedMatrix(mh_mat, &total_recv_leng, 
-                 &recv_lengths, &int_buf, &dble_buf, &map, &map2,&offset);
+											  &recv_lengths, &int_buf, &dble_buf, &map, &map2,&offset,comm);
    }
    else
    {

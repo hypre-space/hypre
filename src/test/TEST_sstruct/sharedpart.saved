@@ -23,18 +23,18 @@ Iterations = 18
 Final Relative Residual Norm = 4.922026e-07
 
 # Output file: sharedpart.out.50
-Iterations = 3
-Final Relative Residual Norm = 3.817579e-08
+Iterations = 5
+Final Relative Residual Norm = 1.368642e-07
 
 # Output file: sharedpart.out.51
-Iterations = 3
-Final Relative Residual Norm = 4.083987e-08
+Iterations = 5
+Final Relative Residual Norm = 1.549669e-07
 
 # Output file: sharedpart.out.52
-Iterations = 3
-Final Relative Residual Norm = 3.817579e-08
+Iterations = 5
+Final Relative Residual Norm = 1.368642e-07
 
 # Output file: sharedpart.out.53
 Iterations = 7
-Final Relative Residual Norm = 3.576822e-07
+Final Relative Residual Norm = 2.557686e-07
 

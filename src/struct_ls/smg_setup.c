@@ -24,7 +24,7 @@ hypre_SMGSetup( void               *smg_vdata,
                 hypre_StructVector *b,
                 hypre_StructVector *x        )
 {
-   hypre_SMGData        *smg_data = smg_vdata;
+	hypre_SMGData        *smg_data = (hypre_SMGData        *)smg_vdata;
 
    MPI_Comm              comm = (smg_data -> comm);
    hypre_IndexRef        base_index  = (smg_data -> base_index);

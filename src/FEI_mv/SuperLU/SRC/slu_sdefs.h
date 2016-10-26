@@ -188,7 +188,7 @@ extern void    sgsrfs (trans_t, SuperMatrix *, SuperMatrix *,
                        float *, SuperMatrix *, SuperMatrix *,
                        float *, float *, SuperLUStat_t*, int *);
 
-extern int     sp_strsv (char *, char *, char *, SuperMatrix *,
+extern int     sp_strsv (const char *,const char *,const char *, SuperMatrix *,
 			SuperMatrix *, float *, SuperLUStat_t*, int *);
 extern int     sp_sgemv (char *, float, SuperMatrix *, float *,
 			int, float, float *, int);

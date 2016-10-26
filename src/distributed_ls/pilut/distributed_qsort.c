@@ -28,7 +28,7 @@
 #define		THRESH		4	/* threshold for insertion */
 #define		MTHRESH		6	/* threshold for median */
 
-static HYPRE_Int (*qcmp) ();		/* the comparison routine */
+static HYPRE_Int (*qcmp) (char*,char*);		/* the comparison routine */
 static HYPRE_Int qsz;			/* size of each record */
 static void qst(char *, char *);
 
@@ -45,11 +45,7 @@ static HYPRE_Int mthresh;		/* MTHRESHold in chars */
  */
 
 void
-hypre_tex_qsort(base, n, size, compar)
-char *base;
-HYPRE_Int n;
-HYPRE_Int size;
-HYPRE_Int (*compar) ();
+hypre_tex_qsort(char* base,HYPRE_Int n,HYPRE_Int size, HYPRE_Int (*compar) (char*,char*))
 {
     register char *i;
     register char *j;

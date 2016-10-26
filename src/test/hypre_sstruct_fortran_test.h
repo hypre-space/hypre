@@ -1,3 +1,8 @@
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 /******************************************************************************
  *  Definitions of sstruct fortran interface routines
  *****************************************************************************/
@@ -740,3 +745,7 @@ extern void hypre_F90_NAME(fhypre_sstructmaxwelleliminater, FHYPRE_SSTRUCTMAXWEL
         hypre_F90_NAME(fhypre_sstructmaxwellzerovector, FHYPRE_SSTRUCTMAXWELLZEROVECTOR) 
 extern void hypre_F90_NAME(fhypre_sstructmaxwellzerovector, FHYPRE_SSTRUCTMAXWELLZEROVECTOR) 
                           (hypre_F90_Obj *, HYPRE_Int *, HYPRE_Int *);
+
+#ifdef __cplusplus
+}
+#endif

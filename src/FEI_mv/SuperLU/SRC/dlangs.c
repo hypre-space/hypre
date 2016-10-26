@@ -64,8 +64,8 @@ double dlangs(char *norm, SuperMatrix *A)
     double   value=0.0, sum;
     double   *rwork;
 
-    Astore = A->Store;
-    Aval   = Astore->nzval;
+    Astore = (NCformat*) A->Store;
+    Aval   = (double*)Astore->nzval;
     
     if ( SUPERLU_MIN(A->nrow, A->ncol) == 0) {
 	value = 0.;

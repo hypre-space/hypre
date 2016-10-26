@@ -29,6 +29,10 @@
 #ifndef _PARASAILS_H
 #define _PARASAILS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct
 {
     HYPRE_Int        symmetric;
@@ -64,4 +68,8 @@ void ParaSailsApplyTrans(ParaSails *ps, HYPRE_Real *u, HYPRE_Real *v);
 HYPRE_Real ParaSailsStatsPattern(ParaSails *ps, Matrix *A);
 void ParaSailsStatsValues(ParaSails *ps, Matrix *A);
 
+#ifdef __cplusplus
+}
+#endif
+	
 #endif /* _PARASAILS_H */

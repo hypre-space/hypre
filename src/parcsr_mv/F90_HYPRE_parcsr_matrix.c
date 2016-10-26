@@ -19,10 +19,14 @@
 #include "_hypre_parcsr_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRMatrixCreate
  *--------------------------------------------------------------------------*/
-
+    
 void
 hypre_F90_IFACE(hypre_parcsrmatrixcreate, HYPRE_PARCSRMATRIXCREATE)
    ( hypre_F90_Comm *comm,
@@ -361,3 +365,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixmatvect, HYPRE_PARCSRMATRIXMATVECT)
            hypre_F90_PassComplex (beta),
            hypre_F90_PassObj (HYPRE_ParVector, y)      ) );
 }
+    
+#ifdef __cplusplus
+}
+#endif

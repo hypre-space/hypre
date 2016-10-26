@@ -70,18 +70,18 @@
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4, i__5;
     /* Local variables */
     static integer i__, j;
-    extern /* Subroutine */ HYPRE_Int dgemm_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dgemm_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
     static integer iinfo;
-    extern /* Subroutine */ HYPRE_Int dtrsm_(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *), dgetf2_(
 	    integer *, integer *, doublereal *, integer *, integer *, integer 
 	    *);
     static integer jb, nb;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     extern /* Subroutine */ HYPRE_Int dlaswp_(integer *, doublereal *, integer *, 
 	    integer *, integer *, integer *, integer *);

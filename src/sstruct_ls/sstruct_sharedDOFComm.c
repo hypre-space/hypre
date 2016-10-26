@@ -48,7 +48,7 @@ hypre_MaxwellOffProcRowCreate(HYPRE_Int ncols)
 HYPRE_Int
 hypre_MaxwellOffProcRowDestroy(void *OffProcRow_vdata)
 {
-   hypre_MaxwellOffProcRow  *OffProcRow= OffProcRow_vdata;
+	hypre_MaxwellOffProcRow  *OffProcRow= (hypre_MaxwellOffProcRow  *)OffProcRow_vdata;
    HYPRE_Int                 ierr= 0;
 
    if (OffProcRow)

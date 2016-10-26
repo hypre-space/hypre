@@ -1,7 +1,7 @@
 
 #include "hypre_lapack.h"
 #include "f2c.h"
-
+#include "math.h"
 /* Subroutine */ HYPRE_Int dlartg_(doublereal *f, doublereal *g, doublereal *cs, 
 	doublereal *sn, doublereal *r__)
 {
@@ -54,13 +54,13 @@
     integer i__1;
     doublereal d__1, d__2;
     /* Builtin functions */
-    HYPRE_Real log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
+    //HYPRE_Real log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
     /* Local variables */
     static integer i__;
     static doublereal scale;
     static integer count;
     static doublereal f1, g1, safmn2, safmx2;
-    extern doublereal dlamch_(char *);
+    extern doublereal dlamch_(const char *);
     static doublereal safmin, eps;
 
 

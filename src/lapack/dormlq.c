@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dormlq_(char *side, char *trans, integer *m, integer *n, 
+/* Subroutine */ HYPRE_Int dormlq_(const char *side,const char *trans, integer *m, integer *n, 
 	integer *k, doublereal *a, integer *lda, doublereal *tau, doublereal *
 	c__, integer *ldc, doublereal *work, integer *lwork, integer *info)
 {
@@ -117,20 +117,20 @@
     static logical left;
     static integer i__;
     static doublereal t[4160]	/* was [65][64] */;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static integer nbmin, iinfo, i1, i2, i3;
-    extern /* Subroutine */ HYPRE_Int dorml2_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dorml2_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *);
     static integer ib, ic, jc, nb, mi, ni;
-    extern /* Subroutine */ HYPRE_Int dlarfb_(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int dlarfb_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, integer *, doublereal *, integer *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer nq, nw;
-    extern /* Subroutine */ HYPRE_Int dlarft_(char *, char *, integer *, integer *, 
-	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlarft_(const char *,const char *, integer *, integer *, 
+	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     static logical notran;
     static integer ldwork;
@@ -191,8 +191,8 @@
 
    Computing MIN   
    Writing concatenation */
-	i__3[0] = 1, a__1[0] = side;
-	i__3[1] = 1, a__1[1] = trans;
+		i__3[0] = 1, a__1[0] = (char*)side;
+		i__3[1] = 1, a__1[1] = (char*)trans;
 	s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
 	i__1 = 64, i__2 = ilaenv_(&c__1, "DORMLQ", ch__1, m, n, k, &c_n1, (
 		ftnlen)6, (ftnlen)2);
@@ -224,8 +224,8 @@
 	    nb = *lwork / ldwork;
 /* Computing MAX   
    Writing concatenation */
-	    i__3[0] = 1, a__1[0] = side;
-	    i__3[1] = 1, a__1[1] = trans;
+	    i__3[0] = 1, a__1[0] =(char*) side;
+	    i__3[1] = 1, a__1[1] =(char*) trans;
 	    s_cat(ch__1, a__1, i__3, &c__2, (ftnlen)2);
 	    i__1 = 2, i__2 = ilaenv_(&c__2, "DORMLQ", ch__1, m, n, k, &c_n1, (
 		    ftnlen)6, (ftnlen)2);

@@ -36,7 +36,7 @@ dCreate_CompCol_Matrix(SuperMatrix *A, int m, int n, int nnz,
     A->ncol = n;
     A->Store = (void *) SUPERLU_MALLOC( sizeof(NCformat) );
     if ( !(A->Store) ) ABORT("SUPERLU_MALLOC fails for A->Store");
-    Astore = A->Store;
+    Astore = (NCformat*) A->Store;
     Astore->nnz = nnz;
     Astore->nzval = nzval;
     Astore->rowind = rowind;
@@ -57,7 +57,7 @@ dCreate_CompRow_Matrix(SuperMatrix *A, int m, int n, int nnz,
     A->ncol = n;
     A->Store = (void *) SUPERLU_MALLOC( sizeof(NRformat) );
     if ( !(A->Store) ) ABORT("SUPERLU_MALLOC fails for A->Store");
-    Astore = A->Store;
+    Astore = (NRformat*) A->Store;
     Astore->nnz = nnz;
     Astore->nzval = nzval;
     Astore->colind = colind;
@@ -137,7 +137,7 @@ dCreate_SuperNode_Matrix(SuperMatrix *L, int m, int n, int nnz,
     L->ncol = n;
     L->Store = (void *) SUPERLU_MALLOC( sizeof(SCformat) );
     if ( !(L->Store) ) ABORT("SUPERLU_MALLOC fails for L->Store");
-    Lstore = L->Store;
+    Lstore = (SCformat*) L->Store;
     Lstore->nnz = nnz;
     Lstore->nsuper = col_to_sup[n];
     Lstore->nzval = nzval;
@@ -370,8 +370,8 @@ dFillRHS(trans_t trans, int nrhs, double *x, int ldx,
     int      ldc;
     char transc[1];
 
-    Bstore = B->Store;
-    rhs    = Bstore->nzval;
+    Bstore = (DNformat*) B->Store;
+    rhs    = (double*) Bstore->nzval;
     ldc    = Bstore->lda;
     
     if ( trans == NOTRANS ) *(unsigned char *)transc = 'N';
@@ -404,8 +404,8 @@ void dinf_norm_error(int nrhs, SuperMatrix *X, double *xtrue)
     double *Xmat, *soln_work;
     int i, j;
 
-    Xstore = X->Store;
-    Xmat = Xstore->nzval;
+    Xstore = (DNformat*) X->Store;
+    Xmat = (double*) Xstore->nzval;
 
     for (j = 0; j < nrhs; j++) {
       soln_work = &Xmat[j*Xstore->lda];

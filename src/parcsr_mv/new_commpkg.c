@@ -708,8 +708,8 @@ hypre_RangeFillResponseIJDetermineRecvProcs(void *p_recv_contact_buf,
    HYPRE_Int   *recv_contact_buf = (HYPRE_Int * ) p_recv_contact_buf;
 
 
-   hypre_DataExchangeResponse  *response_obj = ro; 
-   hypre_IJAssumedPart               *part = response_obj->data1;
+   hypre_DataExchangeResponse  *response_obj = (hypre_DataExchangeResponse*)ro; 
+   hypre_IJAssumedPart               *part = (hypre_IJAssumedPart*)response_obj->data1;
    
    HYPRE_Int overhead = response_obj->send_response_overhead;
 
@@ -798,10 +798,10 @@ hypre_FillResponseIJDetermineSendProcs(void *p_recv_contact_buf,
    HYPRE_Int    i, index, count, elength;
 
    HYPRE_Int    *recv_contact_buf = (HYPRE_Int * ) p_recv_contact_buf;
+ 
+   hypre_DataExchangeResponse  *response_obj = (hypre_DataExchangeResponse*)ro; 
 
-   hypre_DataExchangeResponse  *response_obj = ro;  
-
-   hypre_ProcListElements      *send_proc_obj = response_obj->data2;   
+   hypre_ProcListElements      *send_proc_obj = (hypre_ProcListElements*)response_obj->data2;   
 
 
    hypre_MPI_Comm_rank(comm, &myid );

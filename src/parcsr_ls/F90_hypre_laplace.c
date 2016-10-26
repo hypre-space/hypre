@@ -19,10 +19,14 @@
 #include "_hypre_parcsr_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 /*--------------------------------------------------------------------------
  * GenerateLaplacian
  *--------------------------------------------------------------------------*/
-
+    
 void
 hypre_F90_IFACE(hypre_generatelaplacian, HYPRE_GENERATELAPLACIAN)
    ( hypre_F90_Comm *comm,
@@ -56,3 +60,6 @@ hypre_F90_IFACE(hypre_generatelaplacian, HYPRE_GENERATELAPLACIAN)
 
    *ierr = 0;
 }
+#ifdef __cplusplus
+}
+#endif

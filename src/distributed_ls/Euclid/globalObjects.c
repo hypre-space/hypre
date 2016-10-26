@@ -41,7 +41,7 @@ MPI_Comm    comm_dh = 0;
    * output, and where it gets written to.  Function logging is only enabled
    * when compiled with the debugging (-g) option.
    */
-FILE *logFile;
+
 void openLogfile_dh(HYPRE_Int argc, char *argv[]);
 void closeLogfile_dh();
 bool logInfoToStderr  = false;
@@ -117,7 +117,7 @@ void  closeLogfile_dh()
   }
 }
 
-void  setInfo_dh(char *msg, char *function, char *file, HYPRE_Int line)
+void  setInfo_dh(const char *msg,const char *function,const char *file, HYPRE_Int line)
 {
   if (logInfoToFile && logFile != NULL) {
     hypre_fprintf(logFile, "INFO: %s;\n       function= %s  file=%s  line=%i\n", 
@@ -134,7 +134,7 @@ void  setInfo_dh(char *msg, char *function, char *file, HYPRE_Int line)
  *  Error handling stuph follows
  *----------------------------------------------------------------------*/
 
-void dh_StartFunc(char *function, char *file, HYPRE_Int line, HYPRE_Int priority)
+void dh_StartFunc(const char *function,const char *file, HYPRE_Int line, HYPRE_Int priority)
 {
   if (priority == 1) {
     hypre_sprintf(calling_stack[calling_stack_count], 
@@ -152,7 +152,7 @@ void dh_StartFunc(char *function, char *file, HYPRE_Int line, HYPRE_Int priority
   }
 }
 
-void dh_EndFunc(char *function, HYPRE_Int priority)
+void dh_EndFunc(const char *function, HYPRE_Int priority)
 {
   if (priority == 1) {
     --calling_stack_count;
@@ -168,7 +168,7 @@ void dh_EndFunc(char *function, HYPRE_Int priority)
 }
 
 
-void  setError_dh(char *msg, char *function, char *file, HYPRE_Int line)
+void  setError_dh(const char *msg,const char *function,const char *file, HYPRE_Int line)
 {
   errFlag_dh = true;
   if (! strcmp(msg, "")) {
@@ -331,7 +331,7 @@ void EuclidFinalize()
 
 #undef __FUNC__
 #define __FUNC__ "printf_dh"
-void printf_dh(char *fmt, ...)
+void printf_dh(const char *fmt, ...)
 {
   START_FUNC_DH
   va_list args;
@@ -348,7 +348,7 @@ void printf_dh(char *fmt, ...)
 
 #undef __FUNC__
 #define __FUNC__ "fprintf_dh"
-void fprintf_dh(FILE *fp, char *fmt, ...)
+void fprintf_dh(FILE *fp,const char *fmt, ...)
 {
   START_FUNC_DH
   va_list args;

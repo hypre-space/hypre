@@ -32,7 +32,7 @@
 /*************************************************************************
 * This function prints an error message and exits
 **************************************************************************/
-void hypre_errexit( char *f_str, ...)
+void hypre_errexit(const char *f_str, ...)
 {
   va_list argp;
 
@@ -64,7 +64,7 @@ void hypre_my_abort( HYPRE_Int inSignal, hypre_PilutSolverGlobals *globals )
 /*************************************************************************
 * The following function allocates an array of ints
 **************************************************************************/
-HYPRE_Int *hypre_idx_malloc(HYPRE_Int n, char *msg)
+HYPRE_Int *hypre_idx_malloc(HYPRE_Int n,const char *msg)
 {
   HYPRE_Int *ptr;
 
@@ -84,7 +84,7 @@ HYPRE_Int *hypre_idx_malloc(HYPRE_Int n, char *msg)
 /*************************************************************************
 * The follwoing function allocates an array of ints and initializes
 **************************************************************************/
-HYPRE_Int *hypre_idx_malloc_init(HYPRE_Int n, HYPRE_Int ival, char *msg)
+HYPRE_Int *hypre_idx_malloc_init(HYPRE_Int n, HYPRE_Int ival,const char *msg)
 {
   HYPRE_Int *ptr;
   HYPRE_Int i;
@@ -107,7 +107,7 @@ HYPRE_Int *hypre_idx_malloc_init(HYPRE_Int n, HYPRE_Int ival, char *msg)
 /*************************************************************************
 * The following function allocates an array of floats
 **************************************************************************/
-HYPRE_Real *hypre_fp_malloc(HYPRE_Int n, char *msg)
+HYPRE_Real *hypre_fp_malloc(HYPRE_Int n,const char *msg)
 {
   HYPRE_Real *ptr;
 
@@ -127,7 +127,7 @@ HYPRE_Real *hypre_fp_malloc(HYPRE_Int n, char *msg)
 /*************************************************************************
 * The follwoing function allocates an array of floats and initializes
 **************************************************************************/
-HYPRE_Real *hypre_fp_malloc_init(HYPRE_Int n, HYPRE_Real ival, char *msg)
+HYPRE_Real *hypre_fp_malloc_init(HYPRE_Int n, HYPRE_Real ival,const char *msg)
 {
   HYPRE_Real *ptr;
   HYPRE_Int i;
@@ -151,7 +151,7 @@ HYPRE_Real *hypre_fp_malloc_init(HYPRE_Int n, HYPRE_Real ival, char *msg)
 /*************************************************************************
 * This function is my wrapper around malloc.
 **************************************************************************/
-void *hypre_mymalloc(HYPRE_Int nbytes, char *msg)
+void *hypre_mymalloc(HYPRE_Int nbytes,const char *msg)
 {
   void *ptr;
 
@@ -216,9 +216,9 @@ void hypre_memcpy_idx( HYPRE_Int *dest, const HYPRE_Int *src, size_t n )
 **************************************************************************/
 void hypre_memcpy_fp( HYPRE_Real *dest, const HYPRE_Real *src, size_t n )
 {
-  HYPRE_Int i;
+  HYPRE_Int i, ni = (HYPRE_Int) n;
 
   /*SCOPY(&n, src, &inc, dest, &inc);*/
-  for (i=0; i<n; i++) dest[i] = src[i];
+  for (i=0; i<ni; i++) dest[i] = src[i];
 }
 

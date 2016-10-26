@@ -27,24 +27,27 @@
 #include "parcsr_mv/_hypre_parcsr_mv.h"
 #include "parcsr_ls/HYPRE_parcsr_ls.h"
 
+#include "HYPRE_FEI.h"
+#include "_hypre_FEI.h"
+
 /******************************************************************************
  *
  * HYPRE_ParCSRTFQmr interface
  *
  *****************************************************************************/
 
-extern void *hypre_TFQmrCreate();
-extern int hypre_TFQmrDestroy(void *);
-extern int hypre_TFQmrSetup(void *, void *, void *, void *);
-extern int hypre_TFQmrSolve(void *, void *, void *, void *);
-extern int hypre_TFQmrSetTol(void *, double);
-extern int hypre_TFQmrSetMaxIter(void *, int);
-extern int hypre_TFQmrSetStopCrit(void *, int);
-extern int hypre_TFQmrSetPrecond(void *, int (*precond)(),
-                                 int (*precond_setup)(), void *);
-extern int hypre_TFQmrSetLogging(void *, int);
-extern int hypre_TFQmrGetNumIterations(void *, int *);
-extern int hypre_TFQmrGetFinalRelativeResidualNorm(void *, double *);
+//extern void *hypre_TFQmrCreate();
+//extern int hypre_TFQmrDestroy(void *);
+//extern int hypre_TFQmrSetup(void *, void *, void *, void *);
+//extern int hypre_TFQmrSolve(void *, void *, void *, void *);
+//extern int hypre_TFQmrSetTol(void *, double);
+//extern int hypre_TFQmrSetMaxIter(void *, int);
+//extern int hypre_TFQmrSetStopCrit(void *, int);
+//extern int hypre_TFQmrSetPrecond(void *, int (*precond)(void*,void*,void*,void*),
+//                                 int (*precond_setup)(void*,void*,void*,void*), void *);
+//extern int hypre_TFQmrSetLogging(void *, int);
+//extern int hypre_TFQmrGetNumIterations(void *, int *);
+//extern int hypre_TFQmrGetFinalRelativeResidualNorm(void *, double *);
 
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRTFQmrCreate
@@ -127,7 +130,9 @@ int HYPRE_ParCSRTFQmrSetPrecond( HYPRE_Solver  solver,
           void               *precond_data )
 {
    return( hypre_TFQmrSetPrecond( (void *) solver,
-                                precond, precond_setup, precond_data ) );
+								  (HYPRE_Int (*)(void*,void*,void*,void*))precond,
+								  (HYPRE_Int (*)(void*,void*,void*,void*))precond_setup,
+								  precond_data ) );
 }
 
 /*--------------------------------------------------------------------------

@@ -58,7 +58,7 @@ hypre_SparseMSGRestrictSetup( void               *restrict_vdata,
                               hypre_Index         stride,
                               hypre_Index         strideR         )
 {
-   hypre_SparseMSGRestrictData *restrict_data = restrict_vdata;
+	hypre_SparseMSGRestrictData *restrict_data = (hypre_SparseMSGRestrictData *)restrict_vdata;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
@@ -107,7 +107,7 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
 {
    HYPRE_Int ierr = 0;
 
-   hypre_SparseMSGRestrictData *restrict_data = restrict_vdata;
+   hypre_SparseMSGRestrictData *restrict_data = (hypre_SparseMSGRestrictData *)restrict_vdata;
 
    hypre_ComputePkg       *compute_pkg;
    hypre_IndexRef          cindex;
@@ -262,7 +262,7 @@ hypre_SparseMSGRestrictDestroy( void *restrict_vdata )
 {
    HYPRE_Int ierr = 0;
 
-   hypre_SparseMSGRestrictData *restrict_data = restrict_vdata;
+   hypre_SparseMSGRestrictData *restrict_data = (hypre_SparseMSGRestrictData *)restrict_vdata;
 
    if (restrict_data)
    {

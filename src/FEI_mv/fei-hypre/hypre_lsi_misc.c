@@ -25,6 +25,8 @@
 #include "parcsr_ls/_hypre_parcsr_ls.h"
 #include "seq_mv/seq_mv.h"
 
+#include "HYPRE_FEI.h"
+
 extern void hypre_qsort0(int*, int, int);
 extern void hypre_qsort1(int*, double*, int, int);
 

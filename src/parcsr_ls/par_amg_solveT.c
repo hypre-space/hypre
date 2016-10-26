@@ -36,7 +36,7 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
 
    MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A);   
 
-   hypre_ParAMGData   *amg_data = amg_vdata;
+   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
 
@@ -308,7 +308,7 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
                    hypre_ParVector  **F_array,
                    hypre_ParVector  **U_array   )
 {
-   hypre_ParAMGData *amg_data = amg_vdata;
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
 

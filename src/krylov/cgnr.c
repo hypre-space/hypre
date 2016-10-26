@@ -102,7 +102,7 @@ hypre_CGNRCreate( hypre_CGNRFunctions *cgnr_functions )
 HYPRE_Int
 hypre_CGNRDestroy( void *cgnr_vdata )
 {
-   hypre_CGNRData *cgnr_data = cgnr_vdata;
+	hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
 
    HYPRE_Int ierr = 0;
 
@@ -138,11 +138,11 @@ hypre_CGNRSetup(void *cgnr_vdata,
                 void *b,
                 void *x         )
 {
-   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    hypre_CGNRFunctions *cgnr_functions = cgnr_data->functions;
 
    HYPRE_Int            max_iter         = (cgnr_data -> max_iter);
-   HYPRE_Int          (*precond_setup)() = (cgnr_functions -> precond_setup);
+   HYPRE_Int          (*precond_setup)(void*, void*, void*, void*) = (cgnr_functions -> precond_setup);
    void          *precond_data     = (cgnr_data -> precond_data);
    HYPRE_Int            ierr = 0;
 
@@ -170,7 +170,7 @@ hypre_CGNRSetup(void *cgnr_vdata,
    if ((cgnr_data -> logging) > 0)
    {
       (cgnr_data -> norms)     = hypre_CTAlloc(HYPRE_Real, max_iter + 1);
-      (cgnr_data -> log_file_name) = "cgnr.out.log";
+      (cgnr_data -> log_file_name) = (char*)"cgnr.out.log";
    }
 
    return ierr;
@@ -186,7 +186,7 @@ hypre_CGNRSolve(void *cgnr_vdata,
                 void *b,
                 void *x         )
 {
-   hypre_CGNRData  *cgnr_data   = cgnr_vdata;
+   hypre_CGNRData  *cgnr_data   = (hypre_CGNRData *)cgnr_vdata;
    hypre_CGNRFunctions *cgnr_functions = cgnr_data->functions;
 
    HYPRE_Real      tol          = (cgnr_data -> tol);
@@ -197,8 +197,8 @@ hypre_CGNRSolve(void *cgnr_vdata,
    void           *r            = (cgnr_data -> r);
    void           *t            = (cgnr_data -> t);
    void           *matvec_data  = (cgnr_data -> matvec_data);
-   HYPRE_Int           (*precond)()   = (cgnr_functions -> precond);
-   HYPRE_Int           (*precondT)()  = (cgnr_functions -> precondT);
+   HYPRE_Int           (*precond)(void*, void*, void*, void*)   = (cgnr_functions -> precond);
+   HYPRE_Int           (*precondT)(void*, void*, void*, void*)  = (cgnr_functions -> precondT);
    void           *precond_data = (cgnr_data -> precond_data);
    HYPRE_Int             logging      = (cgnr_data -> logging);
    HYPRE_Real     *norms        = (cgnr_data -> norms);
@@ -439,7 +439,7 @@ HYPRE_Int
 hypre_CGNRSetTol(void   *cgnr_vdata,
                  HYPRE_Real  tol       )
 {
-   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int            ierr = 0;
  
    (cgnr_data -> tol) = tol;
@@ -455,7 +455,7 @@ HYPRE_Int
 hypre_CGNRSetMinIter( void *cgnr_vdata,
                      HYPRE_Int   min_iter  )
 {
-   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int            ierr = 0;
  
    (cgnr_data -> min_iter) = min_iter;
@@ -471,7 +471,7 @@ HYPRE_Int
 hypre_CGNRSetMaxIter( void *cgnr_vdata,
                      HYPRE_Int   max_iter  )
 {
-   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int            ierr = 0;
  
    (cgnr_data -> max_iter) = max_iter;
@@ -487,7 +487,7 @@ HYPRE_Int
 hypre_CGNRSetStopCrit( void *cgnr_vdata,
                      HYPRE_Int   stop_crit  )
 {
-   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int            ierr = 0;
  
    (cgnr_data -> stop_crit) = stop_crit;
@@ -501,12 +501,12 @@ hypre_CGNRSetStopCrit( void *cgnr_vdata,
 
 HYPRE_Int
 hypre_CGNRSetPrecond(void  *cgnr_vdata,
-                     HYPRE_Int  (*precond)(),
-                     HYPRE_Int  (*precondT)(),
-                     HYPRE_Int  (*precond_setup)(),
+                     HYPRE_Int  (*precond)(void*, void*, void*, void*),
+                     HYPRE_Int  (*precondT)(void*, void*, void*, void*),
+                     HYPRE_Int  (*precond_setup)(void*, void*, void*, void*),
                      void  *precond_data )
 {
-   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    hypre_CGNRFunctions *cgnr_functions = cgnr_data->functions;
    HYPRE_Int            ierr = 0;
  
@@ -526,7 +526,7 @@ HYPRE_Int
 hypre_CGNRGetPrecond( void         *cgnr_vdata,
                       HYPRE_Solver *precond_data_ptr )
 {
-   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int             ierr = 0;
 
    *precond_data_ptr = (HYPRE_Solver)(cgnr_data -> precond_data);
@@ -542,7 +542,7 @@ HYPRE_Int
 hypre_CGNRSetLogging( void *cgnr_vdata,
                      HYPRE_Int   logging)
 {
-   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int            ierr = 0;
  
    (cgnr_data -> logging) = logging;
@@ -558,7 +558,7 @@ HYPRE_Int
 hypre_CGNRGetNumIterations( void *cgnr_vdata,
                            HYPRE_Int  *num_iterations )
 {
-   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int            ierr = 0;
 
    *num_iterations = (cgnr_data -> num_iterations);
@@ -575,7 +575,7 @@ HYPRE_Int
 hypre_CGNRGetFinalRelativeResidualNorm( void   *cgnr_vdata,
                                        HYPRE_Real *relative_residual_norm )
 {
-   hypre_CGNRData *cgnr_data = cgnr_vdata;
+   hypre_CGNRData *cgnr_data = (hypre_CGNRData *)cgnr_vdata;
    HYPRE_Int ierr = 0;
 
    *relative_residual_norm = (cgnr_data -> rel_residual_norm);

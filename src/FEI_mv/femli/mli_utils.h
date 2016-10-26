@@ -46,7 +46,7 @@ HYPRE_MLI_mJacobi;
 
 struct MLI_Function_Struct
 {
-   int (*func_)();
+   int (*func_)(void*);
 };
 
 /************************************************************************

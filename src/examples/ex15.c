@@ -684,7 +684,7 @@ int main (int argc, char *argv[])
          double *values;
          int stencil_indices[2] = {0,1}; /* the nodes of each edge */
 
-         values = calloc(2*nedges, sizeof(double));
+         values = (double*) calloc(2*nedges, sizeof(double));
 
          /* The edge orientation is fixed: from first to second node */
          for (i = 0; i < nedges; i++)
@@ -778,7 +778,7 @@ int main (int argc, char *argv[])
       int nvalues = n*(n+1)*(n+1);
       double *values;
 
-      values = calloc(nvalues, sizeof(double));
+      values = (double*) calloc(nvalues, sizeof(double));
 
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, edge_grid, &x);
@@ -944,9 +944,9 @@ int main (int argc, char *argv[])
          int nvalues = n*(n+1)*(n+1);
          double *xvalues, *yvalues, *zvalues;
 
-         xvalues = calloc(nvalues, sizeof(double));
-         yvalues = calloc(nvalues, sizeof(double));
-         zvalues = calloc(nvalues, sizeof(double));
+         xvalues = (double*) calloc(nvalues, sizeof(double));
+         yvalues = (double*) calloc(nvalues, sizeof(double));
+         zvalues = (double*) calloc(nvalues, sizeof(double));
 
          /* Get local solution in the x-edges */
          {

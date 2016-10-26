@@ -164,7 +164,7 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
       hypre_TFree(hypre_IJVectorPartitioning(vec));
 
    if (hypre_IJVectorAssumedPart(vec))
-      hypre_AssumedPartitionDestroy(hypre_IJVectorAssumedPart(vec));
+	   hypre_AssumedPartitionDestroy((hypre_IJAssumedPart*)hypre_IJVectorAssumedPart(vec));
 
    if ( hypre_IJVectorObjectType(vec) == HYPRE_PARCSR )
    {

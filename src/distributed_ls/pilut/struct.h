@@ -38,6 +38,7 @@
  * $Id$
  */
 
+#ifndef __cplusplus
 #ifndef true
 # define true  1
 # define false 0
@@ -49,6 +50,7 @@
 # else
    typedef unsigned char bool;
 # endif
+#endif
 #endif
  
 /*************************************************************************

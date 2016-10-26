@@ -861,7 +861,7 @@ void * hypre_AMSCreate()
 
 HYPRE_Int hypre_AMSDestroy(void *solver)
 {
-   hypre_AMSData *ams_data = solver;
+	hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
    if (!ams_data)
    {
@@ -945,7 +945,7 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
 HYPRE_Int hypre_AMSSetDimension(void *solver,
                                 HYPRE_Int dim)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
    if (dim != 2 && dim != 3)
       hypre_error_in_arg(2);
@@ -964,7 +964,7 @@ HYPRE_Int hypre_AMSSetDimension(void *solver,
 HYPRE_Int hypre_AMSSetDiscreteGradient(void *solver,
                                        hypre_ParCSRMatrix *G)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> G = G;
    return hypre_error_flag;
 }
@@ -983,7 +983,7 @@ HYPRE_Int hypre_AMSSetCoordinateVectors(void *solver,
                                         hypre_ParVector *y,
                                         hypre_ParVector *z)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> x = x;
    ams_data -> y = y;
    ams_data -> z = z;
@@ -1006,7 +1006,7 @@ HYPRE_Int hypre_AMSSetEdgeConstantVectors(void *solver,
                                           hypre_ParVector *Gy,
                                           hypre_ParVector *Gz)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> Gx = Gx;
    ams_data -> Gy = Gy;
    ams_data -> Gz = Gz;
@@ -1049,7 +1049,7 @@ HYPRE_Int hypre_AMSSetInterpolations(void *solver,
                                      hypre_ParCSRMatrix *Piy,
                                      hypre_ParCSRMatrix *Piz)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> Pi = Pi;
    ams_data -> Pix = Pix;
    ams_data -> Piy = Piy;
@@ -1073,7 +1073,7 @@ HYPRE_Int hypre_AMSSetInterpolations(void *solver,
 HYPRE_Int hypre_AMSSetAlphaPoissonMatrix(void *solver,
                                          hypre_ParCSRMatrix *A_Pi)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> A_Pi = A_Pi;
 
    /* Penalize the eliminated degrees of freedom */
@@ -1099,7 +1099,7 @@ HYPRE_Int hypre_AMSSetAlphaPoissonMatrix(void *solver,
 HYPRE_Int hypre_AMSSetBetaPoissonMatrix(void *solver,
                                         hypre_ParCSRMatrix *A_G)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> A_G = A_G;
    if (!A_G)
       ams_data -> beta_is_zero = 1;
@@ -1126,7 +1126,7 @@ HYPRE_Int hypre_AMSSetBetaPoissonMatrix(void *solver,
 HYPRE_Int hypre_AMSSetInteriorNodes(void *solver,
                                     hypre_ParVector *interior_nodes)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> interior_nodes = interior_nodes;
    return hypre_error_flag;
 }
@@ -1143,7 +1143,7 @@ HYPRE_Int hypre_AMSSetInteriorNodes(void *solver,
 HYPRE_Int hypre_AMSSetProjectionFrequency(void *solver,
                                           HYPRE_Int projection_frequency)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> projection_frequency = projection_frequency;
    return hypre_error_flag;
 }
@@ -1159,7 +1159,7 @@ HYPRE_Int hypre_AMSSetProjectionFrequency(void *solver,
 HYPRE_Int hypre_AMSSetMaxIter(void *solver,
                               HYPRE_Int maxit)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> maxit = maxit;
    return hypre_error_flag;
 }
@@ -1174,7 +1174,7 @@ HYPRE_Int hypre_AMSSetMaxIter(void *solver,
 HYPRE_Int hypre_AMSSetTol(void *solver,
                           HYPRE_Real tol)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> tol = tol;
    return hypre_error_flag;
 }
@@ -1207,7 +1207,7 @@ HYPRE_Int hypre_AMSSetTol(void *solver,
 HYPRE_Int hypre_AMSSetCycleType(void *solver,
                                 HYPRE_Int cycle_type)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> cycle_type = cycle_type;
    return hypre_error_flag;
 }
@@ -1222,7 +1222,7 @@ HYPRE_Int hypre_AMSSetCycleType(void *solver,
 HYPRE_Int hypre_AMSSetPrintLevel(void *solver,
                                  HYPRE_Int print_level)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> print_level = print_level;
    return hypre_error_flag;
 }
@@ -1239,7 +1239,7 @@ HYPRE_Int hypre_AMSSetSmoothingOptions(void *solver,
                                        HYPRE_Real A_relax_weight,
                                        HYPRE_Real A_omega)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> A_relax_type = A_relax_type;
    ams_data -> A_relax_times = A_relax_times;
    ams_data -> A_relax_weight = A_relax_weight;
@@ -1257,7 +1257,7 @@ HYPRE_Int hypre_AMSSetChebySmoothingOptions(void *solver,
                                             HYPRE_Int A_cheby_order,
                                             HYPRE_Int A_cheby_fraction)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> A_cheby_order =  A_cheby_order;
    ams_data -> A_cheby_fraction =  A_cheby_fraction;
 
@@ -1277,7 +1277,7 @@ HYPRE_Int hypre_AMSSetAlphaAMGOptions(void *solver,
                                       HYPRE_Int B_Pi_interp_type,
                                       HYPRE_Int B_Pi_Pmax)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> B_Pi_coarsen_type = B_Pi_coarsen_type;
    ams_data -> B_Pi_agg_levels = B_Pi_agg_levels;
    ams_data -> B_Pi_relax_type = B_Pi_relax_type;
@@ -1296,7 +1296,7 @@ HYPRE_Int hypre_AMSSetAlphaAMGOptions(void *solver,
 HYPRE_Int hypre_AMSSetAlphaAMGCoarseRelaxType(void *solver,
                                               HYPRE_Int B_Pi_coarse_relax_type)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data =  (hypre_AMSData *)solver;
    ams_data -> B_Pi_coarse_relax_type = B_Pi_coarse_relax_type;
    return hypre_error_flag;
 }
@@ -1315,7 +1315,7 @@ HYPRE_Int hypre_AMSSetBetaAMGOptions(void *solver,
                                      HYPRE_Int B_G_interp_type,
                                      HYPRE_Int B_G_Pmax)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> B_G_coarsen_type = B_G_coarsen_type;
    ams_data -> B_G_agg_levels = B_G_agg_levels;
    ams_data -> B_G_relax_type = B_G_relax_type;
@@ -1334,7 +1334,7 @@ HYPRE_Int hypre_AMSSetBetaAMGOptions(void *solver,
 HYPRE_Int hypre_AMSSetBetaAMGCoarseRelaxType(void *solver,
                                              HYPRE_Int B_G_coarse_relax_type)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    ams_data -> B_G_coarse_relax_type = B_G_coarse_relax_type;
    return hypre_error_flag;
 }
@@ -1949,7 +1949,7 @@ HYPRE_Int hypre_AMSSetup(void *solver,
                          hypre_ParVector *b,
                          hypre_ParVector *x)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
    HYPRE_Int input_info = 0;
 
@@ -2570,7 +2570,7 @@ HYPRE_Int hypre_AMSSolve(void *solver,
                          hypre_ParVector *b,
                          hypre_ParVector *x)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
    HYPRE_Int i, my_id = -1;
    HYPRE_Real r0_norm, r_norm, b_norm, relative_resid = 0, old_resid;
@@ -2920,7 +2920,7 @@ HYPRE_Int hypre_ParCSRSubspacePrec(/* fine space matrix */
 HYPRE_Int hypre_AMSGetNumIterations(void *solver,
                                     HYPRE_Int *num_iterations)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    *num_iterations = ams_data -> num_iterations;
    return hypre_error_flag;
 }
@@ -2934,7 +2934,7 @@ HYPRE_Int hypre_AMSGetNumIterations(void *solver,
 HYPRE_Int hypre_AMSGetFinalRelativeResidualNorm(void *solver,
                                                 HYPRE_Real *rel_resid_norm)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
    *rel_resid_norm = ams_data -> rel_resid_norm;
    return hypre_error_flag;
 }
@@ -2956,7 +2956,7 @@ HYPRE_Int hypre_AMSGetFinalRelativeResidualNorm(void *solver,
 HYPRE_Int hypre_AMSProjectOutGradients(void *solver,
                                        hypre_ParVector *x)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
    if (ams_data -> B_G0)
    {
@@ -3129,7 +3129,7 @@ HYPRE_Int hypre_AMSFEISetup(void *solver,
                             HYPRE_Int num_edges,
                             HYPRE_Int *edge_vertex)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
    HYPRE_Int i, j;
 
@@ -3258,7 +3258,7 @@ HYPRE_Int hypre_AMSFEISetup(void *solver,
 
 HYPRE_Int hypre_AMSFEIDestroy(void *solver)
 {
-   hypre_AMSData *ams_data = solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
    if (ams_data -> G)
       hypre_ParCSRMatrixDestroy(ams_data -> G);

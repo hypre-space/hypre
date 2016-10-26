@@ -723,7 +723,7 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
 
 HYPRE_Int 
 hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
-                                     HYPRE_Complex     (*fcn)() )
+                                     HYPRE_Complex     (*fcn)(HYPRE_Int, HYPRE_Int, HYPRE_Int) )
 {
    hypre_Box          *v_data_box;
                     
@@ -1243,9 +1243,9 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
  * hypre_StructVectorClone
  * Returns a complete copy of x - a deep copy, with its own copy of the data.
  *--------------------------------------------------------------------------*/
-
 hypre_StructVector *
-hypre_StructVectorClone( hypre_StructVector *x )
+hypre_StructVectorClone(
+	hypre_StructVector *x)
 {
    MPI_Comm		comm = hypre_StructVectorComm(x);
    hypre_StructGrid    *grid = hypre_StructVectorGrid(x);

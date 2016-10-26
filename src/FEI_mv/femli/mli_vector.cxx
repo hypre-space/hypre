@@ -25,7 +25,7 @@
  * constructor 
  *---------------------------------------------------------------------------*/
 
-MLI_Vector::MLI_Vector( void *invec, char *inName, MLI_Function *funcPtr )
+MLI_Vector::MLI_Vector( void *invec,const char *inName, MLI_Function *funcPtr )
 {
    strncpy(name_, inName, 100);
    vector_ = invec;

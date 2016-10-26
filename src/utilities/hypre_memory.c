@@ -50,7 +50,7 @@ hypre_OutOfMemory( size_t size )
 char *
 hypre_MAlloc( size_t size )
 {
-   char *ptr;
+   void *ptr;
 
    if (size > 0)
    {
@@ -74,7 +74,7 @@ hypre_MAlloc( size_t size )
       ptr = NULL;
    }
 
-   return ptr;
+   return (char*)ptr;
 }
 
 /*--------------------------------------------------------------------------
@@ -85,7 +85,7 @@ char *
 hypre_CAlloc( size_t count,
               size_t elt_size )
 {
-   char   *ptr;
+   void   *ptr;
    size_t  size = count*elt_size;
 
    if (size > 0)
@@ -110,7 +110,7 @@ hypre_CAlloc( size_t count,
       ptr = NULL;
    }
 
-   return ptr;
+   return(char*) ptr;
 }
 
 /*--------------------------------------------------------------------------
@@ -133,16 +133,16 @@ hypre_ReAlloc( char   *ptr,
    else
    {
       HYPRE_Int threadid = hypre_GetThreadID();
-      ptr = _urealloc_(ptr, size);
+      ptr = (char*)_urealloc_(ptr, size);
    }
 #else
    if (ptr == NULL)
    {
-      ptr = malloc(size);
+	   ptr = (char*)malloc(size);
    }
    else
    {
-      ptr = realloc(ptr, size);
+	   ptr = (char*)realloc(ptr, size);
    }
 #endif
 

@@ -19,6 +19,10 @@
 #include "_hypre_sstruct_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*--------------------------------------------------------------------------
  *  HYPRE_SStructPCGCreate
  *--------------------------------------------------------------------------*/
@@ -304,7 +308,7 @@ hypre_F90_IFACE(hypre_sstructpcggetresidual, HYPRE_SSTRUCTPCGGETRESIDUAL)
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructPCGGetResidual(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          (void *)              *residual ) );
+          (void **)              *residual ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -346,3 +350,7 @@ hypre_F90_IFACE(hypre_sstructdiagscale, HYPRE_SSTRUCTDIAGSCALE)
           hypre_F90_PassObj (HYPRE_SStructVector, y),
           hypre_F90_PassObj (HYPRE_SStructVector, x)    ) );
 }
+
+#ifdef __cplusplus
+}
+#endif

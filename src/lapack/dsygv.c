@@ -117,24 +117,24 @@
     integer a_dim1, a_offset, b_dim1, b_offset, i__1, i__2;
     /* Local variables */
     static integer neig;
-    extern logical lsame_(char *, char *);
-    extern /* Subroutine */ HYPRE_Int dtrmm_(char *, char *, char *, char *, 
+    extern logical lsame_(const char *,const char *);
+    extern /* Subroutine */ HYPRE_Int dtrmm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static char trans[1];
-    extern /* Subroutine */ HYPRE_Int dtrsm_(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int dsyev_(char *, char *, integer *, doublereal *
+    extern /* Subroutine */ HYPRE_Int dsyev_(const char *,const char *, integer *, doublereal *
 	    , integer *, doublereal *, doublereal *, integer *, integer *);
     static logical wantz;
     static integer nb;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dpotrf_(char *, integer *, doublereal *, 
-	    integer *, integer *), dsygst_(integer *, char *, integer 
+    extern /* Subroutine */ HYPRE_Int dpotrf_(const char *, integer *, doublereal *, 
+	    integer *, integer *), dsygst_(integer *,const char *, integer 
 	    *, doublereal *, integer *, doublereal *, integer *, integer *);
     static integer lwkopt;
     static logical lquery;

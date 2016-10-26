@@ -41,11 +41,19 @@
 #ifdef ESSL
 #include <essl.h>
 #else
+#ifdef __cplusplus
+extern "C" 
+{	
+#endif
 HYPRE_Int hypre_F90_NAME_LAPACK(dpotrf, DPOTRF)(char *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
 HYPRE_Int hypre_F90_NAME_LAPACK(dpotrs, DPOTRS)(char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, 
   HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
 HYPRE_Int hypre_F90_NAME_LAPACK(dgels, DGELS)(char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *,
   HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
+#ifdef __cplusplus
+}
+#endif
+
 #endif
 
 #if 0 /* no longer need this since using 'memset' now */
@@ -113,7 +121,7 @@ static void SendRequests(MPI_Comm comm, HYPRE_Int tag, Matrix *mat, HYPRE_Int re
     hypre_MPI_Request request;
     HYPRE_Int i, j, this_pe;
 
-    shell_sort(reqlen, reqind);
+    hypre_shell_sort(reqlen, reqind);
 
     *num_requests = 0;
 

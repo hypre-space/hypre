@@ -44,7 +44,7 @@ hypre_ParKrylovFree( char *ptr )
 void *
 hypre_ParKrylovCreateVector( void *vvector )
 {
-   hypre_ParVector *vector = vvector;
+	hypre_ParVector *vector = (hypre_ParVector *) vvector;
    hypre_ParVector *new_vector;
 
    new_vector = hypre_ParVectorCreate( hypre_ParVectorComm(vector),
@@ -63,7 +63,7 @@ hypre_ParKrylovCreateVector( void *vvector )
 void *
 hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 {
-   hypre_ParVector *vector = vvector;
+   hypre_ParVector *vector = (hypre_ParVector *) vvector;
    hypre_ParVector **new_vector;
    HYPRE_Int i;
 
@@ -87,7 +87,7 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 HYPRE_Int
 hypre_ParKrylovDestroyVector( void *vvector )
 {
-   hypre_ParVector *vector = vvector;
+   hypre_ParVector *vector = (hypre_ParVector *) vvector;
 
    return( hypre_ParVectorDestroy( vector ) );
 }

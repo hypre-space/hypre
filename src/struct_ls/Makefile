@@ -38,7 +38,9 @@ FILES =\
  cyclic_reduction.c\
  F90_HYPRE_struct_bicgstab.c\
  F90_HYPRE_struct_cycred.c\
+ F90_HYPRE_struct_flexgmres.c\
  F90_HYPRE_struct_gmres.c\
+ F90_HYPRE_struct_lgmres.c\
  F90_HYPRE_struct_hybrid.c\
  F90_HYPRE_struct_int.c\
  F90_HYPRE_struct_jacobi.c\

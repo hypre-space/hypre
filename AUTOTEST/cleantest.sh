@@ -36,8 +36,11 @@ if [ "x$1" = "x" ]
 then
    for i in *.err
    do
-      testname=`basename $i .err`
-      rm -fr $testname.???
+      if [ -f $i ] # This check is important in the case that there are no .err files
+      then
+         testname=`basename $i .err`
+         rm -fr $testname.???
+      fi
    done
 else
    while [ "$*" ]

@@ -27,7 +27,7 @@
 extern "C" {
 #endif
 HYPRE_Int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *b, HYPRE_Int*, HYPRE_Int *);
+HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (const char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *b, HYPRE_Int*, HYPRE_Int *);
 #ifdef __cplusplus
 }
 #endif
@@ -3108,29 +3108,29 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           *-----------------------------------------------------------------*/
         if (num_procs > 1)
         {
-        num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+         num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-        v_buf_data = hypre_CTAlloc(HYPRE_Real,
+         v_buf_data = hypre_CTAlloc(HYPRE_Real,
                         hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
 
-        Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+         Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
 
-        if (num_cols_offd)
-        {
+         if (num_cols_offd)
+         {
                 A_offd_j = hypre_CSRMatrixJ(A_offd);
                 A_offd_data = hypre_CSRMatrixData(A_offd);
-        }
+         }
 
-        index = 0;
-        for (i = 0; i < num_sends; i++)
-        {
+         index = 0;
+         for (i = 0; i < num_sends; i++)
+         {
                 start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
                 for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg,i+1); j++)
                         v_buf_data[index++]
                         = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
-        }
+         }
 
-        comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data,
+         comm_handle = hypre_ParCSRCommHandleCreate( 1, comm_pkg, v_buf_data,
                 Vext_data);
 
          /*-----------------------------------------------------------------

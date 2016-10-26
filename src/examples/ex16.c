@@ -492,7 +492,7 @@ int main (int argc, char *argv[])
       int nvalues = (n+1)*(n+1);
       double *values;
 
-      values = calloc(nvalues, sizeof(double));
+      values = (double*) calloc(nvalues, sizeof(double));
 
       /* Create an empty vector object */
       HYPRE_SStructVectorCreate(MPI_COMM_WORLD, grid, &x);
@@ -586,7 +586,7 @@ int main (int argc, char *argv[])
          /* GLVis-to-hypre local renumbering */
          int g2h[16] = {0, 3, 15, 12, 1, 2, 7, 11, 14, 13, 8, 4, 5, 6, 9, 10};
 
-         values = calloc(nvalues, sizeof(double));
+         values = (double*) calloc(nvalues, sizeof(double));
 
          nvalues = 0;
          for (j = 1; j <= n; j++)

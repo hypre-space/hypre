@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-doublereal dlange_(char *norm, integer *m, integer *n, doublereal *a, integer 
+doublereal dlange_(const char *norm, integer *m, integer *n, doublereal *a, integer 
 	*lda, doublereal *work)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -72,11 +72,11 @@ doublereal dlange_(char *norm, integer *m, integer *n, doublereal *a, integer
     integer a_dim1, a_offset, i__1, i__2;
     doublereal ret_val, d__1, d__2, d__3;
     /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
+    /*HYPRE_Real sqrt(doublereal);*/
     /* Local variables */
     static integer i__, j;
     static doublereal scale;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static doublereal value;
     extern /* Subroutine */ HYPRE_Int dlassq_(integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *);

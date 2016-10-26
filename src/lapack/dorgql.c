@@ -86,14 +86,14 @@
     extern /* Subroutine */ HYPRE_Int dorg2l_(integer *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *);
     static integer ib, nb, kk;
-    extern /* Subroutine */ HYPRE_Int dlarfb_(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int dlarfb_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, integer *, doublereal *, integer *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer nx;
-    extern /* Subroutine */ HYPRE_Int dlarft_(char *, char *, integer *, integer *, 
-	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int dlarft_(const char *,const char *, integer *, integer *, 
+	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     static integer ldwork, lwkopt;
     static logical lquery;

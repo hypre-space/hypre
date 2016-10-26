@@ -33,7 +33,7 @@ hypre_BoomerAMGCGRelaxWt( void              *amg_vdata,
 		   	  HYPRE_Int 		     num_cg_sweeps,
 			  HYPRE_Real 	    *rlx_wt_ptr)
 {
-   hypre_ParAMGData *amg_data = amg_vdata;
+   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    MPI_Comm comm;
    HYPRE_Solver *smoother;

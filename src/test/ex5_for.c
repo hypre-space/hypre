@@ -308,9 +308,9 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_Real *rhs_values, *x_values;
       HYPRE_Int    *rows;
 
-      rhs_values = calloc(local_size, sizeof(HYPRE_Real));
-      x_values = calloc(local_size, sizeof(HYPRE_Real));
-      rows = calloc(local_size, sizeof(HYPRE_Int));
+      rhs_values = (HYPRE_Real*) calloc(local_size, sizeof(HYPRE_Real));
+      x_values = (HYPRE_Real*) calloc(local_size, sizeof(HYPRE_Real));
+      rows = (HYPRE_Int*) calloc(local_size, sizeof(HYPRE_Int));
 
       for (i=0; i<local_size; i++)
       {

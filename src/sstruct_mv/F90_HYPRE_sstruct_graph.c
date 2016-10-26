@@ -19,6 +19,10 @@
 #include "_hypre_sstruct_mv.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 /*--------------------------------------------------------------------------
  * HYPRE_SStructGraphCreate
  *--------------------------------------------------------------------------*/
@@ -179,3 +183,7 @@ hypre_F90_IFACE(hypre_sstructgraphsetobjecttype, HYPRE_SSTRUCTGRAPHSETOBJECTTYPE
           hypre_F90_PassObj (HYPRE_SStructGraph, graph),
           hypre_F90_PassInt (type) ) );
 }
+
+#ifdef __cplusplus
+}
+#endif

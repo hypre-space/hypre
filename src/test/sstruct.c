@@ -10,11 +10,16 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
+
+	
 #include "_hypre_utilities.h"
+
+
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_struct_ls.h"
 #include "HYPRE_krylov.h"
@@ -23,7 +28,9 @@
 /* begin lobpcg */
 
 #include <time.h>
- 
+
+
+    
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
 #include "interpreter.h"
@@ -35,7 +42,7 @@
 /* end lobpcg */
  
 #define DEBUG 0
-
+    
 /*--------------------------------------------------------------------------
  * Data structures
  *--------------------------------------------------------------------------*/
@@ -1203,6 +1210,7 @@ DistributeData( ProblemData   global_data,
    /* check number of processes */
    if (pool_procs[data.npools] != num_procs)
    {
+	   hypre_printf("%d,  %d \n",pool_procs[data.npools],num_procs);
       hypre_printf("Error: Invalid number of processes or process topology \n");
       exit(1);
    }
@@ -2235,6 +2243,7 @@ PrintUsage( char *progname,
       hypre_printf("  -crtdim <tdim>     : Struct- cyclic reduction tdim\n");
       hypre_printf("  -cri <ix> <iy> <iz>: Struct- cyclic reduction base_index\n");
       hypre_printf("  -crs <sx> <sy> <sz>: Struct- cyclic reduction base_stride\n");
+      hypre_printf("  -old_default: sets old BoomerAMG defaults, possibly better for 2D problems\n");
 
       /* begin lobpcg */
 
@@ -2367,6 +2376,7 @@ main( hypre_int argc,
    HYPRE_Int printLevel = 0;
    HYPRE_Int pcgIterations = 0;
    HYPRE_Int pcgMode = 0;
+   HYPRE_Int old_default = 0;
    HYPRE_Real tol = 1e-6;
    HYPRE_Real pcgTol = 1e-2;
    HYPRE_Real nonOrthF;
@@ -2676,6 +2686,11 @@ main( hypre_int argc,
       {		 /* lobpcg: initial guess for inner pcg */
          arg_index++;	      /* 0: zero, otherwise rhs */
          pcgMode = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-old_default") == 0 )
+      {		 /* uses old BoomerAMG defaults */
+         arg_index++;
+         old_default = 1;
       }
       else if ( strcmp(argv[arg_index], "-vout") == 0 )
       {			      /* lobpcg: print level */
@@ -4175,7 +4190,7 @@ main( hypre_int argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond); 
-         HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         if (old_default) HYPRE_BoomerAMGSetOldDefault(par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
@@ -4350,7 +4365,7 @@ main( hypre_int argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond); 
-         HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         if (old_default) HYPRE_BoomerAMGSetOldDefault(par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
@@ -4514,7 +4529,7 @@ main( hypre_int argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond); 
-         HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         if (old_default) HYPRE_BoomerAMGSetOldDefault(par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
@@ -4681,7 +4696,7 @@ main( hypre_int argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond); 
-         HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         if (old_default) HYPRE_BoomerAMGSetOldDefault(par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
@@ -4743,7 +4758,7 @@ main( hypre_int argc,
       {
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond); 
-         HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         if (old_default) HYPRE_BoomerAMGSetOldDefault(par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);

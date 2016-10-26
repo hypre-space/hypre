@@ -19,6 +19,10 @@
 #include "_hypre_sstruct_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 /*--------------------------------------------------------------------------
  * HYPRE_SStructBiCGSTABCreate
  *--------------------------------------------------------------------------*/
@@ -305,5 +309,9 @@ hypre_F90_IFACE(hypre_sstructbicgstabgetresidua, HYPRE_SSTRUCTBICGSTABGETRESIDUA
    *ierr = (hypre_F90_Int)
       (HYPRE_SStructBiCGSTABGetResidual(
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
-          (void *)              *residual));
+          (void **)              *residual));
 }
+
+#ifdef __cplusplus
+}
+#endif

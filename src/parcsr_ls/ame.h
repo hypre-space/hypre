@@ -44,7 +44,8 @@ typedef struct
 
    /* Eigensolver (LOBPCG) options */
    HYPRE_Int maxit;
-   HYPRE_Real tol;
+   HYPRE_Real atol;
+   HYPRE_Real rtol;
    HYPRE_Int print_level;
 
    /* Matrix-vector interface interpreter */
@@ -56,9 +57,15 @@ typedef struct
 } hypre_AMEData;
 
 #include "fortran.h"
-
+#ifdef __cplusplus
+extern "C" {
+#endif
+    
 HYPRE_Int hypre_F90_NAME_LAPACK(dpotrf,DPOTRF)(char *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
 HYPRE_Int hypre_F90_NAME_LAPACK(dsygv,DSYGV)(HYPRE_Int *, char *, char *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *,
                                        HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

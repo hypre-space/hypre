@@ -45,11 +45,10 @@
 #ifndef hypre_NUMBERS_HEADER
 #define hypre_NUMBERS_HEADER
 
-typedef struct {
-   void * digit[11];
+typedef struct hypre_NumbersNode{
+   struct hypre_NumbersNode * digit[11];
 /* ... should be   hypre_NumbersNode * digit[11]; */
 } hypre_NumbersNode;
-
 
 hypre_NumbersNode * hypre_NumbersNewNode(void);
 void hypre_NumbersDeleteNode( hypre_NumbersNode * node );

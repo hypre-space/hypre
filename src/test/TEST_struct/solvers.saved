@@ -48,15 +48,15 @@ Residual   3.85721107269604e-07
 
 # Output file: solvers.out.11.lobpcg.5
 Eigenvalue lambda   1.84366453091761e-01
-Eigenvalue lambda   2.50882493969758e-01
-Eigenvalue lambda   3.60090369737227e-01
-Eigenvalue lambda   4.20845334658667e-01
-Eigenvalue lambda   4.20845334658986e-01
+Eigenvalue lambda   2.50882493969760e-01
+Eigenvalue lambda   3.60090369737228e-01
+Eigenvalue lambda   4.20845334658737e-01
+Eigenvalue lambda   4.20845334659947e-01
 Residual   2.05382831978917e-07
 Residual   4.59866546803063e-07
 Residual   9.90818911866409e-07
-Residual   7.11293640553675e-07
-Residual   7.05301785351486e-07
+Residual   1.33480975037863e-06
+Residual   1.29716729646718e-06
 
 # Output file: solvers.out.17.lobpcg
 Iterations = 17
@@ -88,15 +88,15 @@ Residual   2.06395470109285e-07
 
 # Output file: solvers.out.18.lobpcg.5
 Eigenvalue lambda   1.84366453091753e-01
-Eigenvalue lambda   2.50882493969751e-01
-Eigenvalue lambda   3.60090369737181e-01
-Eigenvalue lambda   4.20845334658676e-01
-Eigenvalue lambda   4.20845334658739e-01
+Eigenvalue lambda   2.50882493969752e-01
+Eigenvalue lambda   3.60090369737251e-01
+Eigenvalue lambda   4.20845334658871e-01
+Eigenvalue lambda   4.20845334659104e-01
 Residual   1.23291603592449e-07
 Residual   4.17547991069515e-07
-Residual   3.93021903186608e-07
-Residual   9.64184316819307e-07
-Residual   6.94343953589085e-07
+Residual   1.17426104064181e-06
+Residual   1.09268026031814e-06
+Residual   9.56432798770891e-07
 
 # Output file: solvers.out.19.lobpcg
 Iterations = 32
@@ -108,13 +108,13 @@ Residual   2.06395470089861e-07
 
 # Output file: solvers.out.19.lobpcg.5
 Eigenvalue lambda   1.84366453091755e-01
-Eigenvalue lambda   2.50882493969746e-01
-Eigenvalue lambda   3.60090369737177e-01
-Eigenvalue lambda   4.20845334658677e-01
-Eigenvalue lambda   4.20845334658738e-01
+Eigenvalue lambda   2.50882493969748e-01
+Eigenvalue lambda   3.60090369737247e-01
+Eigenvalue lambda   4.20845334658872e-01
+Eigenvalue lambda   4.20845334659103e-01
 Residual   1.23291603639448e-07
 Residual   4.17547991296164e-07
-Residual   3.93021898410652e-07
-Residual   9.64242670520420e-07
-Residual   6.89705523106200e-07
+Residual   1.17426103999361e-06
+Residual   1.09271838882886e-06
+Residual   9.55993938911220e-07
 

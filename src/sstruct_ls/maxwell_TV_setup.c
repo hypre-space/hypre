@@ -32,7 +32,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                       hypre_SStructVector  *b_in,
                       hypre_SStructVector  *x_in)
 {
-   hypre_MaxwellData     *maxwell_TV_data = maxwell_vdata;
+	hypre_MaxwellData     *maxwell_TV_data = (hypre_MaxwellData     *)maxwell_vdata;
 
    MPI_Comm               comm = hypre_SStructMatrixComm(Aee_in);
 
@@ -151,8 +151,8 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
    HYPRE_Int              edge_maxlevels, edge_numlevels, en_numlevels;
 
    HYPRE_Int              constant_coef=  maxwell_TV_data -> constant_coef;
-   HYPRE_Int              true = 1;
-   HYPRE_Int              false= 0;
+   HYPRE_Int              trueV = 1;
+   HYPRE_Int              falseV= 0;
 
    HYPRE_Int              ierr = 0;
 #if DEBUG
@@ -490,7 +490,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                         hypre_SStructVectorParVector(bn),
                         hypre_SStructVectorParVector(xn));
    {
-      amg_data = amg_vdata;
+	   amg_data = (hypre_ParAMGData*) amg_vdata;
 
       node_numlevels= hypre_ParAMGDataNumLevels(amg_data);
 
@@ -595,7 +595,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
       hypre_BoxDestroy(box);
       /* the following allows some of the parts to have volume zero grids */
       edge_maxlevels= hypre_max(edge_maxlevels, i);
-      coarsen[part] = true;
+      coarsen[part] = trueV;
    }
 
    if ((maxwell_TV_data-> edge_maxlevels) > 0)
@@ -752,12 +752,12 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
             if (coarsen[part])
             {
                box= hypre_BoxArrayBox(cboxes, part);
-               m= true;
+               m= trueV;
                for (i= 0; i< ndim; i++)
                {
                   if ( hypre_BoxIMaxD(box, i) < hypre_BoxIMinD(box, i) )
                   {
-                     m= false;
+                     m= falseV;
                      break;
                   }
                }
@@ -806,7 +806,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                else 
                {
                   /* record empty, coarsened-away part */
-                  coarsen[part]= false;
+                  coarsen[part]= falseV;
                   /* set up a dummy box so this grid can be destroyed */
                   HYPRE_SStructGridSetExtents(egrid_l[l+1], part,
                                               hypre_BoxIMin(box), hypre_BoxIMin(box));
@@ -1006,7 +1006,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                                 PTopology_vdata);
             }
 
-            PTopology= PTopology_vdata;
+            PTopology= (hypre_PTopology*)PTopology_vdata;
 
             /* extract off-processors rows of Pe_l[l]. Needed for amge.*/
             hypre_SStructSharedDOF_ParcsrMatRowsComm(egrid_l[l],
@@ -1159,7 +1159,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                                              PTopology_vdata);
          }
 
-         PTopology= PTopology_vdata;
+         PTopology= (hypre_PTopology*)PTopology_vdata;
 
          /* extract off-processors rows of Pe_l[l]. Needed for amge.*/
          hypre_SStructSharedDOF_ParcsrMatRowsComm(egrid_l[l],

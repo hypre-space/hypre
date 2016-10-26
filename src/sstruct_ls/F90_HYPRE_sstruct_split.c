@@ -18,6 +18,10 @@
 #include "_hypre_sstruct_ls.h"
 #include "fortran.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 /*--------------------------------------------------------------------------
  *  HYPRE_SStructSplitCreate
  *--------------------------------------------------------------------------*/
@@ -195,3 +199,7 @@ hypre_F90_IFACE(hypre_sstructsplitgetfinalrelat, HYPRE_SSTRUCTSPLITGETFINALRELAT
           hypre_F90_PassObj (HYPRE_SStructSolver, solver),
           hypre_F90_PassRealRef (norm) ) );
 }
+
+#ifdef __cplusplus
+}
+#endif

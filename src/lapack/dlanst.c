@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-doublereal dlanst_(char *norm, integer *n, doublereal *d__, doublereal *e)
+doublereal dlanst_(const char *norm, integer *n, doublereal *d__, doublereal *e)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -67,7 +67,7 @@ doublereal dlanst_(char *norm, integer *n, doublereal *d__, doublereal *e)
     /* Local variables */
     static integer i__;
     static doublereal scale;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *,const char *);
     static doublereal anorm;
     extern /* Subroutine */ HYPRE_Int dlassq_(integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *);

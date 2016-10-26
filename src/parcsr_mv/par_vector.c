@@ -1021,11 +1021,10 @@ hypre_FillResponseParToVectorAll( void       *p_recv_contact_buf,
    HYPRE_Int     i, index, count, elength;
 
    HYPRE_Int    *recv_contact_buf = (HYPRE_Int * ) p_recv_contact_buf;
+ 
+   hypre_DataExchangeResponse  *response_obj = (hypre_DataExchangeResponse*)ro;  
 
-   hypre_DataExchangeResponse  *response_obj = ro;  
-
-   hypre_ProcListElements      *send_proc_obj = response_obj->data2;   
-
+   hypre_ProcListElements      *send_proc_obj = (hypre_ProcListElements*)response_obj->data2;
    hypre_MPI_Comm_rank(comm, &myid );
 
    /*check to see if we need to allocate more space in send_proc_obj for ids*/

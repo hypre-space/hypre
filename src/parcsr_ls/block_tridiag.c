@@ -321,7 +321,7 @@ HYPRE_Int hypre_BlockTridiagSetIndexSet(void *data, HYPRE_Int n, HYPRE_Int *inds
 
 HYPRE_Int hypre_BlockTridiagSetAMGStrengthThreshold(void *data, HYPRE_Real thresh)
 {
-   hypre_BlockTridiagData *b_data = data;
+	hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
    b_data->threshold = thresh;
    return (0);
 }
@@ -332,7 +332,7 @@ HYPRE_Int hypre_BlockTridiagSetAMGStrengthThreshold(void *data, HYPRE_Real thres
 
 HYPRE_Int hypre_BlockTridiagSetAMGNumSweeps(void *data, HYPRE_Int nsweeps)
 {
-   hypre_BlockTridiagData *b_data = data;
+   hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
    b_data->num_sweeps = nsweeps;
    return (0);
 }
@@ -343,7 +343,7 @@ HYPRE_Int hypre_BlockTridiagSetAMGNumSweeps(void *data, HYPRE_Int nsweeps)
 
 HYPRE_Int hypre_BlockTridiagSetAMGRelaxType(void *data, HYPRE_Int relax_type)
 {
-   hypre_BlockTridiagData *b_data = data;
+   hypre_BlockTridiagData *b_data = (hypre_BlockTridiagData *) data;
    b_data->relax_type = relax_type;
    return (0);
 }
