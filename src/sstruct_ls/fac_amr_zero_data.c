@@ -276,9 +276,9 @@ hypre_ZeroAMRMatrixData(hypre_SStructMatrix  *A,
 
                  for (j= 0; j< stencil_size; j++)
                  {
-                    rank= abs(hypre_IndexX(stencil_shape[j]))+
-                          abs(hypre_IndexY(stencil_shape[j]))+
-                          abs(hypre_IndexZ(stencil_shape[j]));
+                    rank= hypre_abs(hypre_IndexX(stencil_shape[j]))+
+                          hypre_abs(hypre_IndexY(stencil_shape[j]))+
+                          hypre_abs(hypre_IndexZ(stencil_shape[j]));
                    
                     if (rank)
                     {

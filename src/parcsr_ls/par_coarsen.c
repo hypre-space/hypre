@@ -2524,7 +2524,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
         {
            i = graph_array[ig];
 
-           if (!CF_marker[i]==0) /* C or F point */
+           if (CF_marker[i]!=0) /* C or F point */
            {
               /* the independent set subroutine needs measure 0 for
                  removed nodes */
@@ -2540,7 +2540,7 @@ hypre_BoomerAMGCoarsenPMIS( hypre_ParCSRMatrix    *S,
         {
            i = graph_array_offd[ig];
 
-           if (!CF_marker_offd[i]==0) /* C of F point */
+           if (CF_marker_offd[i]!=0) /* C of F point */
            {
               /* the independent set subroutine needs measure 0 for
                  removed nodes */
