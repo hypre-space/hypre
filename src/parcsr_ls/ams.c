@@ -324,7 +324,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 
          }
          else
-            hypre_BoomerAMGRelax(A, f, NULL, abs(relax_type), 0, relax_weight,
+            hypre_BoomerAMGRelax(A, f, NULL, hypre_abs(relax_type), 0, relax_weight,
                                  omega, l1_norms, u, v, z);
       }
    }
