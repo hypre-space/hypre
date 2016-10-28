@@ -859,12 +859,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                if (block_mode)
                {
-                  hypre_BoomerAMGBlockCreateNodalA( A_block_array[level], abs(nodal), nodal_diag, &AN);
+                  hypre_BoomerAMGBlockCreateNodalA( A_block_array[level], hypre_abs(nodal), nodal_diag, &AN);
                }
                else
                {
                   hypre_BoomerAMGCreateNodalA(A_array[level],num_functions,
-                                              dof_func_array[level], abs(nodal), nodal_diag, &AN);
+                                              dof_func_array[level], hypre_abs(nodal), nodal_diag, &AN);
                }
 
                /* dof array not needed for creating S because we pass in that 

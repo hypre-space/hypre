@@ -59,7 +59,7 @@
       ii = hypre_IndexX(stencil);               \
       jj = hypre_IndexY(stencil);               \
       kk = hypre_IndexZ(stencil);               \
-      abs_shape= abs(ii) + abs(jj) + abs(kk);   \
+      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk);   \
    }
 
 /*--------------------------------------------------------------------------
@@ -2963,7 +2963,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                /*-----------------------------------------------------------------
                 * Compute the weights for the averaged stencil contributions.
                 * We need to convert the ranks back to stencil_shapes and then
-                * fine the abs of the stencil shape.
+                * find the abs of the stencil shape.
                 *-----------------------------------------------------------------*/
                temp3= hypre_TAlloc(HYPRE_Real, coarse_stencil_cnt[i]);
                for (j=0; j< coarse_stencil_cnt[i]; j++)
