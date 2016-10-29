@@ -57,7 +57,6 @@ LFLAGS =\
 
 HYPRE_DRIVERS =\
  ij.c\
- new_ij.c\
  sstruct.c\
  struct.c\
  structmat.c\
@@ -128,15 +127,11 @@ distclean: clean
 
 # C
 
-ij: ij.o
+structmat: structmat.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 
-structmat: structmat.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
-
-new_ij: new_ij.o
+ij: ij.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
 

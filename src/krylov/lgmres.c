@@ -245,9 +245,12 @@ hypre_LGMRESSetup( void *lgmres_vdata,
    }
  
    /* lgmres mod */
-   (lgmres_data -> aug_vecs) = (void**)(*(lgmres_functions->CreateVectorArray))(aug_dim+1,x); /* one extra */
-   (lgmres_data -> a_aug_vecs) = (void**)(*(lgmres_functions->CreateVectorArray))(aug_dim,x);
-   (lgmres_data -> aug_order) = hypre_CTAllocF(HYPRE_Int,aug_dim,lgmres_functions); 
+   if ((lgmres_data -> aug_vecs) == NULL)
+      (lgmres_data -> aug_vecs) = (void**)(*(lgmres_functions->CreateVectorArray))(aug_dim+1,x); /* one extra */
+   if ((lgmres_data -> a_aug_vecs) == NULL)
+      (lgmres_data -> a_aug_vecs) = (void**)(*(lgmres_functions->CreateVectorArray))(aug_dim,x);
+   if ((lgmres_data -> aug_order) == NULL)
+      (lgmres_data -> aug_order) = hypre_CTAllocF(HYPRE_Int,aug_dim,lgmres_functions); 
    /*---*/
 
 

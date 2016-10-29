@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
       paramStrings[0] = new char[100];
       strcpy(paramStrings[0], "externalSolver HYPRE");
       feiPtr->parameters(1, paramStrings);
-      delete paramStrings[0];
+      delete [] paramStrings[0];
       delete [] paramStrings;
    }
 
@@ -449,7 +449,7 @@ int main(int argc, char *argv[])
       strcpy(paramStrings[4], "tolerance 1e-6");
       strcpy(paramStrings[5], "gmresDim 30");
       strcpy(paramStrings[6], "amgNumSweeps 1");
-      strcpy(paramStrings[7], "amgCoarsenType falgout");
+      strcpy(paramStrings[7], "amgCoarsenType hmis");
       strcpy(paramStrings[8], "amgRelaxType hybridsym");
       strcpy(paramStrings[9], "amgSystemSize 1");
       strcpy(paramStrings[10], "amgStrongThreshold 0.25");

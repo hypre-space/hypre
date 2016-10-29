@@ -17,8 +17,12 @@
 
 #include <math.h>
 #include "slu_ddefs.h"
+#ifdef HYPRE_USING_HYPRE_BLAS
 #include "hypre_blas.h"
+#endif
+#ifdef HYPRE_USING_HYPRE_LAPACK
 #include "hypre_lapack.h"
+#endif
 void
 dgsrfs(trans_t trans, SuperMatrix *A, SuperMatrix *L, SuperMatrix *U,
        int *perm_c, int *perm_r, char *equed, double *R, double *C,

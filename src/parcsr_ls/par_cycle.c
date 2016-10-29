@@ -291,6 +291,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
         /* TK: Use the user relax type (instead of 0) to allow for setting a
            convergent smoother (e.g. in the solution of singular problems). */
         relax_type = hypre_ParAMGDataUserRelaxType(amg_data);
+        if (relax_type == -1) relax_type = 6;
       }
 
       if (l1_norms != NULL)

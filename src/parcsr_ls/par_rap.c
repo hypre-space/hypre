@@ -387,6 +387,15 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
         send_map_starts_RT =hypre_ParCSRCommPkgSendMapStarts(comm_pkg_RT);
         send_map_elmts_RT = hypre_ParCSRCommPkgSendMapElmts(comm_pkg_RT);
    }
+   else if (num_procs > 1)
+   {
+        hypre_MatvecCommPkgCreate(RT);
+        comm_pkg_RT = hypre_ParCSRMatrixCommPkg(RT);
+        num_recvs_RT = hypre_ParCSRCommPkgNumRecvs(comm_pkg_RT);
+        num_sends_RT = hypre_ParCSRCommPkgNumSends(comm_pkg_RT);
+        send_map_starts_RT =hypre_ParCSRCommPkgSendMapStarts(comm_pkg_RT);
+        send_map_elmts_RT = hypre_ParCSRCommPkgSendMapElmts(comm_pkg_RT);
+   }
 
    hypre_CSRMatrixTranspose(RT_diag,&R_diag,1); 
    if (num_cols_offd_RT) 
@@ -603,7 +612,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
       for (i=0 ; i < P_ext_offd_size; i++)
          P_ext_offd_j[i] = hypre_UnorderedIntMapGet(&col_map_offd_Pext_inverse, P_ext_offd_j[i]);
-      hypre_UnorderedIntMapDestroy(&col_map_offd_Pext_inverse);
+      if (num_cols_offd_Pext) hypre_UnorderedIntMapDestroy(&col_map_offd_Pext_inverse);
    }
 #else /* !HYPRE_CONCURRENT_HOPSCOTCH */
    if (P_ext_offd_size || num_cols_offd_P)

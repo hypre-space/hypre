@@ -629,6 +629,7 @@ int main (int argc, char *argv[])
          /* use BoomerAMG as preconditioner */
          HYPRE_BoomerAMGCreate(&par_precond);
          HYPRE_BoomerAMGSetCoarsenType(par_precond, 6);
+         HYPRE_BoomerAMGSetOldDefault(par_precond);
          HYPRE_BoomerAMGSetStrongThreshold(par_precond, 0.25);
          HYPRE_BoomerAMGSetTol(par_precond, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(par_precond, 1);
@@ -659,6 +660,7 @@ int main (int argc, char *argv[])
       {
          HYPRE_BoomerAMGCreate(&par_solver);
          HYPRE_BoomerAMGSetCoarsenType(par_solver, 6);
+         HYPRE_BoomerAMGSetOldDefault(par_solver);
          HYPRE_BoomerAMGSetStrongThreshold(par_solver, 0.25);
          HYPRE_BoomerAMGSetTol(par_solver, 1.9e-6);
          HYPRE_BoomerAMGSetPrintLevel(par_solver, 1);

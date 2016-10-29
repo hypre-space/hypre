@@ -449,6 +449,7 @@ c        Set BoomerAMG parameters
 c        Print amg solution info
          call HYPRE_BoomerAMGSetPrintLevel(precond, 1, ierr)
          call HYPRE_BoomerAMGSetCoarsenType(precond, 6, ierr)
+         call HYPRE_BoomerAMGSetOldDefault(precond, ierr)
 c        Sym G.S./Jacobi hybrid
          call HYPRE_BoomerAMGSetRelaxType(precond, 6, ierr)
          call HYPRE_BoomerAMGSetNumSweeps(precond, 1, ierr)

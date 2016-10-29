@@ -944,7 +944,7 @@ hypre_AMGHybridSetMinCoarseSize( void *AMGhybrid_vdata,
       hypre_error_in_arg(1);
       return hypre_error_flag;
    }
-   if (min_coarse_size < 1)
+   if (min_coarse_size < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
