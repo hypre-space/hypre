@@ -49,7 +49,7 @@ fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
 #   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
-   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $CONVTOL)
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $CONVTOL) >&2
 fi
 
 #=============================================================================
