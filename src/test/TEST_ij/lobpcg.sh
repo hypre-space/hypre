@@ -32,6 +32,25 @@ do
   tail -15 $i | head -5
 done > ${TNAME}.out
 
+
+FILES="\
+ ${TNAME}.out.1.lobpcg\
+ ${TNAME}.out.2.lobpcg\
+ ${TNAME}.out.8.lobpcg\
+ ${TNAME}.out.12.lobpcg\
+ ${TNAME}.out.43.lobpcg\
+"
+
+for i in $FILES
+do
+  echo "# Output file: $i"
+  tail -3 $i
+  echo "# Output file: $i.1"
+  tail -13 $i.1 | head -3
+  echo "# Output file: $i.5"
+  tail -21 $i.5 | head -11
+done >> ${TNAME}.out
+
 # Make sure that the output files are reasonable
 CHECK_LINE="Eigenvalue"
 OUT_COUNT=`grep "$CHECK_LINE" ${TNAME}.out | wc -l`

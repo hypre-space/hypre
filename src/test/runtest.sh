@@ -390,10 +390,11 @@ function ExecuteTest
    StartDir=$1
    WorkingDir=$2
    InputFile=$3
+   CONVTOL=$4
    SavePWD=`pwd`
    cd $WorkingDir
    (cat $InputFile.err.* > $InputFile.err)
-   (./$InputFile.sh     >> $InputFile.err 2>> $InputFile.err)
+   (./$InputFile.sh $CONVTOL   >> $InputFile.err 2>> $InputFile.err)
    cd $SavePWD
 }
 
@@ -464,7 +465,8 @@ function StartCrunch
 #==========================================================================
 
 # main
-
+# Set default check tolerance
+CONVTOL=0.0
 while [ "$*" ]
 do
    case $1 in
@@ -491,6 +493,11 @@ do
          eval export `echo $1`=1
          shift
          ;;
+      -tol)
+         shift
+         CONVTOL=$1
+         shift
+         ;;
       *) InputString=$1
          if [ "$InputString" ] ; then
             if [ -r $InputString ] ; then
@@ -513,7 +520,7 @@ do
                      ;;
                esac
                if [ -r $DirPart/$FilePart.jobs ] ; then
-                  StartCrunch $CurDir $DirPart $FilePart
+                  StartCrunch $CurDir $DirPart $FilePart $CONVTOL
                else
                   printf "%s: test command file %s/%s.jobs does not exist\n" \
                      $0 $DirPart $FilePart
