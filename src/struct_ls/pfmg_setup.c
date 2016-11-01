@@ -60,6 +60,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
                      
    hypre_Index           cindex;
    hypre_Index           stride;
+   hypre_Index           periodic;
 
    hypre_Index           coarsen;
 
@@ -93,7 +94,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_Box            *cbox;
 
    HYPRE_Real            min_dxyz;
-   HYPRE_Int             cdir, periodic, cmaxsize;
+   HYPRE_Int             cdir, cmaxsize;
    HYPRE_Int             d, l;
    HYPRE_Int             dxyz_flag;
                        
@@ -111,6 +112,9 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    grid  = hypre_StructMatrixGrid(A);
    ndim  = hypre_StructGridNDim(grid);
+
+   /* Initialize periodic */
+   hypre_CopyIndex(hypre_StructGridPeriodic(grid), periodic);
 
    /* Compute a new max_levels value based on the grid */
    cbox = hypre_BoxClone(hypre_StructGridBoundingBox(grid));
@@ -148,8 +152,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_TFree(deviation);
    }
 
-   grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
-   hypre_StructGridRef(grid, &grid_l[0]);
    cdir_l = hypre_TAlloc(HYPRE_Int, max_levels);
    active_l = hypre_TAlloc(HYPRE_Int, max_levels);
    relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels);
@@ -214,9 +216,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       if (cdir != -1)
       {
          /* don't coarsen if a periodic direction and not divisible by 2 */
-         /* RDF: This must be wrong; the grids are not yet available! */
-         periodic = hypre_IndexD(hypre_StructGridPeriodic(grid_l[l]), cdir);
-         if ((periodic) && (periodic % 2))
+         if ((periodic[cdir]) && (periodic[cdir] % 2))
          {
             cdir = -1;
          }
@@ -266,9 +266,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructMapFineToCoarse(hypre_BoxIMin(cbox), cindex, stride, hypre_BoxIMin(cbox));
       hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox), cindex, stride, hypre_BoxIMax(cbox));
 
-      /* build the coarse grid */
-      /* RDF: RAP is already coarsening the grid; we shouldn't be doing this twice! */
-      hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
+      /* update periodic */
+      periodic[cdir] /= 2;
+//      /* build the coarse grid */
+//      /* RDF: RAP is already coarsening the grid; we shouldn't be doing this twice! */
+//      hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
    }
    num_levels = l + 1;
 
@@ -286,7 +288,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    (pfmg_data -> num_levels)   = num_levels;
    (pfmg_data -> cdir_l)       = cdir_l;
-   (pfmg_data -> grid_l)       = grid_l;
 
    /*-----------------------------------------------------
     * Set up matrix and vector structures
@@ -303,15 +304,17 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    }
    rap_type = (pfmg_data -> rap_type);
 
-   A_l  = hypre_TAlloc(hypre_StructMatrix *, num_levels);
-   P_l  = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1);
-   RT_l = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1);
-   b_l  = hypre_TAlloc(hypre_StructVector *, num_levels);
-   x_l  = hypre_TAlloc(hypre_StructVector *, num_levels);
-   tx_l = hypre_TAlloc(hypre_StructVector *, num_levels);
-   r_l  = tx_l;
-   e_l  = tx_l;
+   grid_l = hypre_TAlloc(hypre_StructGrid *, num_levels);
+   A_l    = hypre_TAlloc(hypre_StructMatrix *, num_levels);
+   P_l    = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1);
+   RT_l   = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1);
+   b_l    = hypre_TAlloc(hypre_StructVector *, num_levels);
+   x_l    = hypre_TAlloc(hypre_StructVector *, num_levels);
+   tx_l   = hypre_TAlloc(hypre_StructVector *, num_levels);
+   r_l    = tx_l;
+   e_l    = tx_l;
 
+   hypre_StructGridRef(grid, &grid_l[0]);
    A_l[0] = hypre_StructMatrixRef(A);
    b_l[0] = hypre_StructVectorRef(b);
    x_l[0] = hypre_StructVectorRef(x);
@@ -363,9 +366,15 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          }
 
          hypre_StructMatmult(nmatrices, matrices, nterms, terms, trans, &A_l[l+1]);
+         hypre_StructGridRef(hypre_StructMatrixGrid(A_l[l+1]), &grid_l[l+1]);
       }
       else
       {
+         /* RDF: The coarse grid should be computed in CreateRAPOp() */
+         hypre_PFMGSetCIndex(cdir, cindex);
+         hypre_PFMGSetStride(cdir, stride);
+         hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
+
          A_l[l+1] = hypre_PFMGCreateRAPOp(RT_l[l], A_l[l], P_l[l], grid_l[l+1], cdir, rap_type);
          hypre_StructMatrixInitialize(A_l[l+1]);
          hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, rap_type, A_l[l+1]);
@@ -387,14 +396,15 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructVectorAssemble(tx_l[l+1]);
    }
 
-   (pfmg_data -> A_l)  = A_l;
-   (pfmg_data -> P_l)  = P_l;
-   (pfmg_data -> RT_l) = RT_l;
-   (pfmg_data -> b_l)  = b_l;
-   (pfmg_data -> x_l)  = x_l;
-   (pfmg_data -> tx_l) = tx_l;
-   (pfmg_data -> r_l)  = r_l;
-   (pfmg_data -> e_l)  = e_l;
+   (pfmg_data -> grid_l) = grid_l;
+   (pfmg_data -> A_l)    = A_l;
+   (pfmg_data -> P_l)    = P_l;
+   (pfmg_data -> RT_l)   = RT_l;
+   (pfmg_data -> b_l)    = b_l;
+   (pfmg_data -> x_l)    = x_l;
+   (pfmg_data -> tx_l)   = tx_l;
+   (pfmg_data -> r_l)    = r_l;
+   (pfmg_data -> e_l)    = e_l;
 
    /*-----------------------------------------------------
     * Set up multigrid operators and call setup routines
