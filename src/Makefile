@@ -160,6 +160,23 @@ check:
 	(cd test; cp -f TEST_sstruct/sstruct.in.default .; $(CHECKRUN) sstruct $(PARMS) 2> sstruct.err); \
 	(cd test; ls -l ij.err struct.err sstruct.err)
 
+checkpar:
+	@ \
+        echo "Checking the library ..."; \
+        (cd test; $(MAKE) all); \
+        echo "Testing IJ ..."; \
+        (cd test; runtest.sh -tol 1.e-06 TEST_ij/solvers.sh); \
+        (cd test; checktest.sh); \
+        (cd test; cleantest.sh); \
+        echo "Testing Struct ..."; \
+        (cd test; runtest.sh -tol 1.e-06 TEST_struct/solvers.sh); \
+        (cd test; checktest.sh); \
+        (cd test; cleantest.sh); \
+        echo "Testing SStruct ..."; \
+        (cd test; runtest.sh -tol 1.e-06 TEST_sstruct/solvers.sh); \
+        (cd test; checktest.sh); \
+        (cd test; cleantest.sh)
+
 install: all
 	@ \
 	echo "Installing hypre ..."; \

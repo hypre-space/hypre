@@ -678,7 +678,8 @@ int HYPRE_LinSysCore::setLookup(Lookup& lookup)
    // set the lookup object and initialize the MLI_FEData object
    //-------------------------------------------------------------------
 
-   if (&lookup == NULL) return (0);
+   // RDF: The following line doesn't make sense and generates warnings with some compilers
+   //if (&lookup == NULL) return (0);
    lookup_ = &lookup;
    haveLookup_ = 1;
 
