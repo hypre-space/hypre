@@ -5,6 +5,8 @@ BatchMode=0
 NoRun=0
 JobCheckInterval=10        #sleep time between jobs finished check
 InputString=""
+RunPrefix=`type -p mpirun`
+RunPrefix="$RunPrefix -np"
 RunString=""
 RunEcho=""
 ExecFileNames=""           #string of executable file names used
@@ -22,7 +24,9 @@ function usage
    printf "\n"
    printf " with options:\n"
    printf "    -h|-help       prints this usage information and exits\n"
+   printf "    -mpi <prefix>  MPI run prefix; default is 'mpirun -np'\n"
    printf "    -nthreads <n>  use 'n' OpenMP threads\n"
+   printf "    -tol <tol>     use relative tolerance 'tol' to compare numeric test values\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
    printf "    -t|-trace      echo each command\n"
    printf "    -D <var>       define <var> when running tests\n"
@@ -52,8 +56,9 @@ function usage
 function MpirunString
 {
    case $HOST in
-      *bgl*) shift
+      *bgl*)
          BatchMode=1
+         shift
          MY_NUM_TASKS=$1  
          MY_EXECUTE_DIR=`pwd`
          MY_EXECUTE_JOB=`pwd`/$EXECFILE
@@ -63,7 +68,8 @@ function MpirunString
          RunString="mpirun -verbose 1 -np $MY_NUM_TASKS -exe $MY_EXECUTE_JOB"
          RunString="${RunString} -cwd $MY_EXECUTE_DIR -args \" $MY_ARGS \" "
          ;;
-      up*) CPUS_PER_NODE=8
+      up*)
+         CPUS_PER_NODE=8
          POE_NUM_PROCS=$2
          POE_NUM_NODES=`expr $POE_NUM_PROCS + $CPUS_PER_NODE - 1`
          POE_NUM_NODES=`expr $POE_NUM_NODES / $CPUS_PER_NODE`
@@ -74,18 +80,8 @@ function MpirunString
          # RunString="${RunString} -nodes $POE_NUM_NODES $MY_ARGS"
          RunString="poe $MY_ARGS -rmpool pdebug -procs $POE_NUM_PROCS -nodes $POE_NUM_NODES"
          ;;
-      *dawn*) shift
-         BatchMode=1
-         MY_NUM_TASKS=$1  
-         MY_EXECUTE_DIR=`pwd`
-         MY_EXECUTE_JOB=`pwd`/$EXECFILE
+      rzzeus*|rzmerl*|ansel*|aztec*|cab*|sierra*|vulcan*)
          shift
-         shift
-         MY_ARGS="$*"
-         RunString="mpirun -verbose 1 -np $MY_NUM_TASKS -exe $MY_EXECUTE_JOB"
-         RunString="${RunString} -cwd $MY_EXECUTE_DIR -args \" $MY_ARGS \" "
-         ;;
-      rzzeus*|rzmerl*|ansel*|aztec*|cab*|sierra*|vulcan*) shift
          if [ $NumThreads -gt 0 ] ; then
             export OMP_NUM_THREADS=$NumThreads
             RunString="srun -p pdebug -c $NumThreads -n$*"
@@ -93,19 +89,12 @@ function MpirunString
             RunString="srun -p pdebug -n$*"
          fi
          ;;
-      tux*) BatchMode=0
+      *)
+         shift
          if [ $NumThreads -gt 0 ] ; then
             export OMP_NUM_THREADS=$NumThreads
          fi
-         MACHINES_FILE="hostname"
-         if [ ! -f $MACHINES_FILE ] ; then
-            hostname > $MACHINES_FILE
-         fi
-         MPIRUN=`type mpirun|sed -e 's/^.* //'`
-         RunString="$MPIRUN -machinefile $MACHINES_FILE $*"
-         ;;
-      *) MPIRUN=`type mpirun|sed -e 's/^.* //'`
-         RunString="$MPIRUN $*"
+         RunString="$RunPrefix $*"
          ;;
    esac
 }
@@ -169,35 +158,6 @@ function CalcProcs
       esac
    done
    return 1
-}
-
-# determine if HOST machine can process batch queues
-#    set to run in debug pool unless batch MUST be used.
-function CheckBatch
-{
-   case $HOST in
-      alc*) BATCH_MODE=0
-         ;;
-      peng*) BATCH_MODE=0
-         ;;
-      thun*) BATCH_MODE=0
-         ;;
-      *bgl*) BATCH_MODE=1
-         ;;
-      up*) BATCH_MODE=0
-         ;;
-      *dawn*) BATCH_MODE=1
-         ;;
-      vert*) BATCH_MODE=0
-         ;;
-      hera*) BATCH_MODE=0
-         ;;
-      *zeus*) BATCH_MODE=0
-         ;;
-      *) BATCH_MODE=0
-         ;;
-   esac
-   return $BATCH_MODE
 }
 
 # check the path to the executable if the executable exists; save the name to
@@ -423,7 +383,7 @@ function PostProcess
 }
 
                
-# removes executable and hostname files from all TEST_* directories
+# removes executables from all TEST_* directories
 function CleanUp
 {
    if [ "$BatchMode" -eq 0 ] ; then
@@ -434,13 +394,8 @@ function CleanUp
             ExecuteFile=$i/$j
             if [ -x $ExecuteFile ] ; then
                rm -f $ExecuteFile
-               rm -f hostname
             fi
          done
-         ExecuteFile=$i/hostname
-         if [ -f $ExecuteFile ] ; then
-            rm -f $ExecuteFile
-         fi
          case $i in
             TEST_examples)
                rm -f ex? ex?? ex??f
@@ -454,8 +409,6 @@ function StartCrunch
 {
    rm -f ~/insure.log*
 
-   CheckBatch
-   BatchMode=$?
    ExecuteJobs "$@"
    ExecuteTest "$@"
    PostProcess "$@"
@@ -473,6 +426,11 @@ do
       -h|-help)
          usage
          exit
+         ;;
+      -mpi)
+         shift
+         RunPrefix=$1
+         shift
          ;;
       -nthreads)
          shift
