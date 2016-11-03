@@ -182,7 +182,7 @@ checkpar:
         echo "Testing SStruct ..."; \
         (cd test; runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_sstruct/solvers.sh); \
         (cd test; checktest.sh); \
-        (cd test; cleantest.sh); \
+        (cd test; cleantest.sh); 
 
 install: all
 	@ \
