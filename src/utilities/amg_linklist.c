@@ -20,8 +20,8 @@
 
 #include "_hypre_utilities.h"
 
-#define LIST_HEAD -1
-#define LIST_TAIL -2
+#define hypre_LIST_HEAD -1
+#define hypre_LIST_TAIL -2
 
 
 /**************************************************************
@@ -114,13 +114,13 @@ hypre_remove_point(hypre_LinkList   *LoL_head_ptr,
          else if (list_ptr->head == index)      /* index is head of list */
          {
             list_ptr->head = lists[index];
-            where[lists[index]] = LIST_HEAD;
+            where[lists[index]] = hypre_LIST_HEAD;
             return;
          }
          else if (list_ptr->tail == index)      /* index is tail of list */
          {
             list_ptr->tail = where[index];
-            lists[where[index]] = LIST_TAIL;
+            lists[where[index]] = hypre_LIST_TAIL;
             return;
          }
          else                              /* index is in middle of list */
@@ -161,8 +161,8 @@ hypre_LinkList hypre_create_elt( HYPRE_Int Item )
        new_elt_ptr -> data = Item;
        new_elt_ptr -> next_elt = NULL;
        new_elt_ptr -> prev_elt = NULL;
-       new_elt_ptr -> head = LIST_TAIL;
-       new_elt_ptr -> tail = LIST_HEAD;
+       new_elt_ptr -> head = hypre_LIST_TAIL;
+       new_elt_ptr -> tail = hypre_LIST_HEAD;
     }
 
     return (new_elt_ptr);
@@ -196,8 +196,8 @@ hypre_enter_on_lists(hypre_LinkList   *LoL_head_ptr,
       new_ptr = hypre_create_elt(measure);
       new_ptr->head = index;
       new_ptr->tail = index;
-      lists[index] = LIST_TAIL;
-      where[index] = LIST_HEAD; 
+      lists[index] = hypre_LIST_TAIL;
+      where[index] = hypre_LIST_HEAD; 
       LoL_head = new_ptr;
       LoL_tail = new_ptr;
 
@@ -214,8 +214,8 @@ hypre_enter_on_lists(hypre_LinkList   *LoL_head_ptr,
          new_ptr = hypre_create_elt(measure);
          new_ptr->head = index;
          new_ptr->tail = index;
-         lists[index] = LIST_TAIL;
-         where[index] = LIST_HEAD;
+         lists[index] = hypre_LIST_TAIL;
+         where[index] = hypre_LIST_HEAD;
 
          if ( list_ptr->prev_elt != NULL)
          { 
@@ -241,7 +241,7 @@ hypre_enter_on_lists(hypre_LinkList   *LoL_head_ptr,
          old_tail = list_ptr->tail;
          lists[old_tail] = index;
          where[index] = old_tail;
-         lists[index] = LIST_TAIL;
+         lists[index] = hypre_LIST_TAIL;
          list_ptr->tail = index;
          return;
       }
@@ -252,8 +252,8 @@ hypre_enter_on_lists(hypre_LinkList   *LoL_head_ptr,
    new_ptr = hypre_create_elt(measure);   
    new_ptr->head = index;
    new_ptr->tail = index;
-   lists[index] = LIST_TAIL;
-   where[index] = LIST_HEAD;
+   lists[index] = hypre_LIST_TAIL;
+   where[index] = hypre_LIST_HEAD;
    LoL_tail->next_elt = new_ptr;
    new_ptr->prev_elt = LoL_tail;
    new_ptr->next_elt = NULL;
