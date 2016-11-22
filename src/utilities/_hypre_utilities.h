@@ -681,9 +681,6 @@ HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 extern "C" {
 #endif
 
-#define LIST_HEAD -1
-#define LIST_TAIL -2
-
 struct double_linked_list
 {
        HYPRE_Int                        data;

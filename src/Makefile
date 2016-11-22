@@ -144,6 +144,13 @@ help:
 	@echo "     PARMS='-P px py pz' where px*py*pz must be number of"
 	@echo "     processes set in CHECKRUN"
 	@echo "     "
+	@echo "     "
+	@echo "checkpar:"
+	@echo "     runs several regression test to verify a working library."
+	@echo "     Use parameter CHECKRUN='<mpirun routine -n>' if needed."
+	@echo "     If CHECKRUN is not set, 'mpirun -np' is used."
+	@echo "     "
+	@echo "     "
 	@echo "************************************************************"
 
 test: all
@@ -165,17 +172,17 @@ checkpar:
         echo "Checking the library ..."; \
         (cd test; $(MAKE) all); \
         echo "Testing IJ ..."; \
-        (cd test; runtest.sh -tol 1.e-06 TEST_ij/solvers.sh); \
+        (cd test; runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_ij/solvers.sh); \
         (cd test; checktest.sh); \
         (cd test; cleantest.sh); \
         echo "Testing Struct ..."; \
-        (cd test; runtest.sh -tol 1.e-06 TEST_struct/solvers.sh); \
+        (cd test; runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_struct/solvers.sh); \
         (cd test; checktest.sh); \
         (cd test; cleantest.sh); \
         echo "Testing SStruct ..."; \
-        (cd test; runtest.sh -tol 1.e-06 TEST_sstruct/solvers.sh); \
+        (cd test; runtest.sh -tol 1.e-06 -mpi "$(CHECKRUN)" TEST_sstruct/solvers.sh); \
         (cd test; checktest.sh); \
-        (cd test; cleantest.sh)
+        (cd test; cleantest.sh); 
 
 install: all
 	@ \
