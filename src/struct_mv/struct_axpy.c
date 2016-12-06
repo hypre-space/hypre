@@ -38,15 +38,14 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
                     
    hypre_BoxArray   *boxes;
    hypre_Box        *box;
-
    hypre_Index       loop_size;
    hypre_IndexRef    start;
    hypre_Index       unit_stride;
 
    HYPRE_Int         i;
    
-   //hypre_SetIndex(unit_stride, 1);
-   hypre_SetIndex3(unit_stride, 1, 1, 1);
+   hypre_SetIndex(unit_stride, 1);
+
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
    {
@@ -65,17 +64,18 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 #undef HYPRE_BOX_PRIVATE_VAR
 #endif
 #define HYPRE_BOX_PRIVATE_VAR xi,yi
-	  zypre_newBoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
+	  
+	  hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
 		                     x_data_box, start, unit_stride, xi,
 		                     y_data_box, start, unit_stride, yi);
-	  #ifdef HYPRE_USING_OPENMP
+#ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) HYPRE_SMP_SCHEDULE
 #endif
-	  zypre_newBoxLoop2For(xi, yi);
+	  hypre_BoxLoop2For(xi, yi);
       {
          yp[yi] += alpha * xp[xi];
       }
-      zypre_newBoxLoop2End(xi,yi);
+      hypre_BoxLoop2End(xi,yi);
 	  cudaDeviceSynchronize();
    }
    cudaDeviceSynchronize();

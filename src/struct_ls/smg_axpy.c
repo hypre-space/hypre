@@ -39,11 +39,8 @@ hypre_SMGAxpy( HYPRE_Real          alpha,
                     
    HYPRE_Int         i;
 
-
    box = hypre_BoxCreate(ndim);
-
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
-
    hypre_ForBoxI(i, boxes)
    {
       hypre_CopyBox(hypre_BoxArrayBox(boxes, i), box);
@@ -57,17 +54,17 @@ hypre_SMGAxpy( HYPRE_Real          alpha,
       yp = hypre_StructVectorBoxData(y, i);
 
       hypre_BoxGetStrideSize(box, base_stride, loop_size);
-      zypre_newBoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, base_stride, xi,
                           y_data_box, start, base_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) HYPRE_SMP_SCHEDULE
 #endif
-      zypre_newBoxLoop2For(xi, yi)
+      hypre_BoxLoop2For(xi, yi)
       {
          yp[yi] += alpha * xp[xi];
       }
-      zypre_newBoxLoop2End(xi, yi);
+      hypre_BoxLoop2End(xi, yi);
    }
    hypre_BoxDestroy(box);
 

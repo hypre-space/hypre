@@ -823,17 +823,17 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
       hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 	  
-      zypre_newBoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_dbox, start, base_stride, xi,
                           b_dbox, start, base_stride, bi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,bi) HYPRE_SMP_SCHEDULE
 #endif
-      zypre_newBoxLoop2For(xi, bi)
+      hypre_BoxLoop2For(xi, bi)
       {
          xp[xi] = bp[bi];
       }
-      zypre_newBoxLoop2End(xi, bi);
+      hypre_BoxLoop2End(xi, bi);
    }
 
    /*--------------------------------------------------
@@ -954,18 +954,18 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 			   
-               zypre_newBoxLoop3Begin(hypre_StructVectorNDim(x), loop_size,
+               hypre_BoxLoop3Begin(hypre_StructVectorNDim(x), loop_size,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi,
                                    xc_dbox, startc, stridec, xci);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,xci) HYPRE_SMP_SCHEDULE
 #endif
-               zypre_newBoxLoop3For(Ai, xi, xci)
+               hypre_BoxLoop3For(Ai, xi, xci)
                {
                   xcp[xci] = xp[xi] - Awp[Ai]*xwp[xi] - Aep[Ai]*xep[xi];
                }
-               zypre_newBoxLoop3End(Ai, xi, xci);
+               hypre_BoxLoop3End(Ai, xi, xci);
             }
          }
       }
@@ -1000,20 +1000,20 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
       hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-      zypre_newBoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
+      hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           A_dbox, start, stride, Ai,
                           x_dbox, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi) HYPRE_SMP_SCHEDULE
 #endif
-      zypre_newBoxLoop2For(Ai, xi)
+      hypre_BoxLoop2For(Ai, xi)
       {
          if (Ap[Ai] != 0.0)
          {
             xp[xi] /= Ap[Ai]; 
          }
       }
-      zypre_newBoxLoop2End(Ai, xi);
+      hypre_BoxLoop2End(Ai, xi);
    }
 
    /*--------------------------------------------------
@@ -1060,17 +1060,17 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
          hypre_BoxGetSize(compute_box, loop_size);
 
-         zypre_newBoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
+         hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                              x_dbox, start, stride, xi,
                              xc_dbox, startc, stridec, xci);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,xci) HYPRE_SMP_SCHEDULE
 #endif
-         zypre_newBoxLoop2For(xi, xci)
+         hypre_BoxLoop2For(xi, xci)
          {
             xp[xi] = xcp[xci];
          }
-         zypre_newBoxLoop2End(xi, xci);
+         hypre_BoxLoop2End(xi, xci);
       }
 
       /* Step 2 */
@@ -1125,17 +1125,17 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-               zypre_newBoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
+               hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi) HYPRE_SMP_SCHEDULE
 #endif
-               zypre_newBoxLoop2For(Ai, xi)
+               hypre_BoxLoop2For(Ai, xi)
                {
                   xp[xi] -= (Awp[Ai]*xwp[xi] + Aep[Ai]*xep[xi]  ) / Ap[Ai];
                }
-               zypre_newBoxLoop2End(Ai, xi);
+               hypre_BoxLoop2End(Ai, xi);
             }
          }
       }

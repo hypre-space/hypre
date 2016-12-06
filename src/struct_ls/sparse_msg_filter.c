@@ -381,7 +381,10 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 	   HYPRE_Int * stencil_shape_d;
 	   HYPRE_Int  stencil_shape_h[3*stencil_size];
 	   HYPRE_Complex * data_A = hypre_StructMatrixData(A);
-	   AxCheckError(cudaMalloc((void**)&indices_d,sizeof(HYPRE_Int)*stencil_size));
+
+	   hypre_DataTAlloc(indices_d, HYPRE_Int, stencil_size);
+	   hypre_DataTAlloc(stencil_shape_d, HYPRE_Int, 3*stencil_size);
+
 	   for (si = 0; si < stencil_size; si++)
 	   {
 		   indices_h[si]       = hypre_StructMatrixDataIndices(A)[i][si];
@@ -389,10 +392,9 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 		   stencil_shape_h[stencil_size+si] = hypre_IndexD(stencil_shape[si], 1);
 		   stencil_shape_h[2*stencil_size+si] = hypre_IndexD(stencil_shape[si], 2);
 	   }
-	   
-	   AxCheckError(cudaMemcpy(indices_d, indices_h, sizeof(HYPRE_Int)*stencil_size, cudaMemcpyHostToDevice));
-	   AxCheckError(cudaMalloc((void**)&stencil_shape_d,sizeof(HYPRE_Int)*3*stencil_size));
-	   AxCheckError(cudaMemcpy(stencil_shape_d, stencil_shape_h, sizeof(HYPRE_Int)*3*stencil_size, cudaMemcpyHostToDevice));
+
+	   hypre_DataCopyToData(indices_h,indices_d,HYPRE_Int, stencil_size);
+	   hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int, 3*stencil_size);
 	   
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
 
@@ -476,9 +478,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       hypre_BoxLoop2End(Ai, vi);
 
 	  
-	  AxCheckError(cudaFree(indices_d));
-	  AxCheckError(cudaFree(stencil_shape_d));
-	  
+	  hypre_DataTFree(indices_d);
+	  hypre_DataTFree(stencil_shape_d);	  
    }
 
    return ierr;

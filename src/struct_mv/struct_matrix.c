@@ -663,7 +663,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
             if (symm_elements[stencil_indices[s]] < 0)
             {
                datap = hypre_StructMatrixBoxData(matrix, i, stencil_indices[s]);
-			   
+
                if ( (constant_coefficient==1) ||
                     (constant_coefficient==2 && stencil_indices[s]!=center_rank ))
                   /* datap has only one data point for a given i and s */
@@ -1125,10 +1125,10 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    hypre_Box             *boundary_box;
    hypre_Box             *entry_box;
    hypre_BoxManEntry    **entries;
-   hypre_IndexRef         loop_size;
+   hypre_Index            loop_size;
    hypre_Index            index;
    hypre_IndexRef         start;
-   hypre_IndexRef         stride;
+   hypre_Index            stride;
    HYPRE_Complex         *datap;
    HYPRE_Int              i, j, ei, datai;
    HYPRE_Int              num_entries;
@@ -1187,9 +1187,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       /* set boundary ghost zones to the identity equation */
 
       hypre_SetIndex(index, 0);
-      //hypre_SetIndex(stride, 1);
-	  hypre_BoxSetunitStride(stride);
-	  
+      hypre_SetIndex(stride, 1);
       data_space = hypre_StructMatrixDataSpace(matrix);
       hypre_ForBoxI(i, data_space)
       {		  
@@ -1198,24 +1196,16 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
          if (datap)
          {
             data_box = hypre_BoxArrayBox(data_space, i);
-             hypre_initBoxData(data_box);
             boundary_box_a = hypre_BoxArrayArrayBoxArray(boundary_boxes, i);
             hypre_ForBoxI(j, boundary_box_a)
             {
                boundary_box = hypre_BoxArrayBox(boundary_box_a, j);
-			   hypre_initBoxData(boundary_box);
-			   
-               //start = hypre_BoxIMin(boundary_box);
-			   start = hypre_BoxIMinData(boundary_box);
+               start = hypre_BoxIMin(boundary_box);
 				   
-               //hypre_BoxGetSize(boundary_box, loop_size);
-			   loop_size = hypre_BoxSizeData(boundary_box);
-			   HYPRE_Int Boxloop_tot = 1;
-			   for (HYPRE_Int k = 0;k < hypre_StructMatrixNDim(matrix);k++)
-				   Boxloop_tot *= hypre_BoxSizeD(boundary_box, k);
-			   
-               hypre_BoxLoop1Begin1(hypre_StructMatrixNDim(matrix), Boxloop_tot,loop_size,
-                                   data_box, start, unitstride, datai);
+               hypre_BoxGetSize(boundary_box, loop_size);
+
+               hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix),loop_size,
+                                   data_box, start, stride, datai);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai) HYPRE_SMP_SCHEDULE
 #endif
@@ -1223,7 +1213,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
                {
                   datap[datai] = 1.0;
                }
-               hypre_BoxLoop1End1(datai);
+               hypre_BoxLoop1End(datai);
             }
          }
       }

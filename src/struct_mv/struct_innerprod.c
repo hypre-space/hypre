@@ -18,17 +18,6 @@
 
 #include "_hypre_struct_mv.h"
 
-#define minimo(a,b) a<b?a:b
-#define MAXBLOCKS 32
-#define NTHREADS 256 // must be a power of 2
-
-__inline__ __device__
-int warpReduceSum(int val) {
-  for (int offset = warpSize/2; offset > 0; offset /= 2)
-    val += __shfl_down(val,offset);
-  return val;
-}
-
 /*--------------------------------------------------------------------------
  * hypre_StructInnerProd
  *--------------------------------------------------------------------------*/
@@ -122,10 +111,9 @@ hypre_StructInnerProd( hypre_StructVector *x,
       zypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
    }
  
-   printf("get here\n");//process_result = (double) (local_result);
+   //process_result = (double) (local_result);
    cudaDeviceSynchronize();
    process_result = static_cast<double>(local_result);
-   printf("Cast\n");
 */
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));

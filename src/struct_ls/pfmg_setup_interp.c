@@ -255,18 +255,19 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int * stencil_shape_d;
    HYPRE_Int  stencil_shape_h[stencil_size];
    HYPRE_Complex * data_A = hypre_StructMatrixData(A);
-   AxCheckError(cudaMalloc((void**)&indices_d,sizeof(HYPRE_Int)*stencil_size));
+
+   hypre_DataTAlloc(indices_d, HYPRE_Int, stencil_size);
+   hypre_DataTAlloc(stencil_shape_d, HYPRE_Int, stencil_size);
+   
    for (si = 0; si < stencil_size; si++)
    {
 	   indices_h[si]       = hypre_StructMatrixDataIndices(A)[i][si];
 	   stencil_shape_h[si] = hypre_IndexD(stencil_shape[si], cdir);
    }
    
-   AxCheckError(cudaMemcpy(indices_d, indices_h, sizeof(HYPRE_Int)*stencil_size, cudaMemcpyHostToDevice));
-   AxCheckError(cudaMalloc((void**)&stencil_shape_d,sizeof(HYPRE_Int)*stencil_size));
-   AxCheckError(cudaMemcpy(stencil_shape_d, stencil_shape_h, sizeof(HYPRE_Int)*stencil_size, cudaMemcpyHostToDevice));
+   hypre_DataCopyToData(indices_h,indices_d,HYPRE_Int,stencil_size);
+   hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,stencil_size);
    
-   /*FIXME: some memory is still on CPU*/
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
