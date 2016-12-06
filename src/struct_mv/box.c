@@ -220,6 +220,10 @@ hypre_BoxCreate( HYPRE_Int  ndim )
 
    hypre_BoxNDim(box) = ndim;
 
+   hypre_BoxIMinData(box) = NULL;
+   hypre_BoxIMaxData(box) = NULL;
+   hypre_BoxSizeData(box) = NULL;
+   
    return box;
 }
 
@@ -229,9 +233,15 @@ hypre_BoxCreate( HYPRE_Int  ndim )
 HYPRE_Int 
 hypre_BoxDestroy( hypre_Box *box )
 {
+
+	
+	
    if (box)
    {
-      hypre_TFree(box);
+	   hypre_DataTFree(hypre_BoxIMinData(box));
+	   hypre_DataTFree(hypre_BoxIMaxData(box));
+	   hypre_DataTFree(hypre_BoxSizeData(box));
+	   hypre_TFree(box);
    }
 
    return hypre_error_flag;
@@ -258,9 +268,10 @@ hypre_BoxSetExtents( hypre_Box  *box,
                      hypre_Index imin,
                      hypre_Index imax )
 {
+	hypre_Index            box_size;
    hypre_CopyIndex(imin, hypre_BoxIMin(box));
    hypre_CopyIndex(imax, hypre_BoxIMax(box));
-
+  
    return hypre_error_flag;
 }
 
@@ -271,6 +282,8 @@ HYPRE_Int
 hypre_CopyBox( hypre_Box  *box1,
                hypre_Box  *box2 )
 {
+	hypre_Index            box_size;
+	
    hypre_CopyIndex(hypre_BoxIMin(box1), hypre_BoxIMin(box2));
    hypre_CopyIndex(hypre_BoxIMax(box1), hypre_BoxIMax(box2));
    hypre_BoxNDim(box2) = hypre_BoxNDim(box1);
@@ -616,6 +629,9 @@ hypre_BoxArrayCreate( HYPRE_Int size,
    {
       box = hypre_BoxArrayBox(box_array, i);
       hypre_BoxNDim(box) = ndim;
+	  hypre_BoxIMinData(box) = NULL;
+	  hypre_BoxIMaxData(box) = NULL;
+	  hypre_BoxSizeData(box) = NULL;
    }
 
    return box_array;
@@ -662,6 +678,9 @@ hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
       {
          box = hypre_BoxArrayBox(box_array, i);
          hypre_BoxNDim(box) = ndim;
+		  hypre_BoxIMinData(box) = NULL;
+		  hypre_BoxIMaxData(box) = NULL;
+		  hypre_BoxSizeData(box) = NULL;
       }
    }
 

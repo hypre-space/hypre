@@ -69,7 +69,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **P_grid_l;
                     
-   HYPRE_Real           *data;
+   HYPRE_Real           *data = NULL;
    HYPRE_Int             data_size = 0;
    HYPRE_Real           *relax_weights;
    HYPRE_Real           *mean, *deviation;
@@ -729,6 +729,9 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
+		  HYPRE_Complex *data_host;
+		  data_host = hypre_CTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(A));
+		  cudaMemcpy(data_host, hypre_StructMatrixData(A), sizeof(HYPRE_Complex)*hypre_StructMatrixDataSize(A),cudaMemcpyDeviceToHost);
           /*FIXME: need reduction for more variables*/
          zypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start, stride, Ai);
@@ -742,7 +745,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             tcz = 0.0;
 
             /* get sign of diagonal */
-            Ap = hypre_StructMatrixBoxData(A, i, sdiag);
+            //Ap = hypre_StructMatrixBoxData(A, i, sdiag);
+			Ap = data_host + hypre_StructMatrixDataIndices(A)[i][sdiag];
             diag = 1.0;
             if (Ap[Ai] < 0)
             {
@@ -751,8 +755,9 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
             for (si = 0; si < stencil_size; si++)
             {
-               Ap = hypre_StructMatrixBoxData(A, i, si);
-
+				//Ap = hypre_StructMatrixBoxData(A, i, si);
+				Ap = data_host + hypre_StructMatrixDataIndices(A)[i][si];
+				
                /* x-direction */
                Astenc = hypre_IndexD(stencil_shape[si], 0);
                if (Astenc)
@@ -911,6 +916,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       else
       {
           /*FIXME: need reduction for multiplication*/
+		  /*
          zypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start, stride, Ai);
 #ifdef HYPRE_USING_OPENMP
@@ -921,6 +927,9 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
             diag_product *= Ap[Ai];
          }
          zypre_BoxLoop1End(Ai);
+		  */
+		 zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+										 A_dbox, start, stride, Ai,Ap,diag_product);
       }
    }
 

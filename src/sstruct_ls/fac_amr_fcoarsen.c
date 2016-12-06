@@ -3494,6 +3494,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 #endif
                hypre_BoxLoop1For(iA)
                {
+				   HYPRE_Int i;
                   for (i= 0; i< stencil_size; i++)
                   {
                      if (i != centre)

@@ -1767,7 +1767,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
       hypre_SetIndex(stride, 1);
       hypre_BoxGetSize(part_box, loop_size);
       hypre_BoxSetExtents(part_dbox, stride, div);
-       /*FIXME: do we need to run this on GPU?*/
+       /*FIXME: It is sequential with zypre_BoxLoopSetOneBlock()*/
       zypre_BoxLoop1Begin(ndim, loop_size, part_dbox, start, stride, part_num);
       zypre_BoxLoopSetOneBlock();
       zypre_BoxLoop1For(part_num)

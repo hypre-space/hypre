@@ -186,6 +186,7 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
 
    hypre_StructVectorInitializeShell(vector);
 
+   //data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
    hypre_DataCTAlloc(data, HYPRE_Complex, hypre_StructVectorDataSize(vector));
 
    hypre_StructVectorInitializeData(vector, data);
@@ -361,45 +362,45 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
 /*FIXME : datap is on CPU*/
          if (action > 0)
          {
-            zypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
+            hypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
                                 data_box,data_start,data_stride,datai,
                                 dval_box,dval_start,dval_stride,dvali);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
 #endif
-            zypre_BoxLoop2For(datai, dvali)
+            hypre_BoxLoop2For(datai, dvali)
             {
                datap[datai] += values[dvali];
             }
-            zypre_BoxLoop2End(datai, dvali);
+            hypre_BoxLoop2End(datai, dvali);
          }
          else if (action > -1)
          {
-            zypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
+            hypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
                                 data_box,data_start,data_stride,datai,
                                 dval_box,dval_start,dval_stride,dvali);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
 #endif
-            zypre_BoxLoop2For(datai, dvali)
+            hypre_BoxLoop2For(datai, dvali)
             {
                datap[datai] = values[dvali];
             }
-            zypre_BoxLoop2End(datai, dvali);
+            hypre_BoxLoop2End(datai, dvali);
          }
          else /* action < 0 */
          {
-            zypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
+            hypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
                                 data_box,data_start,data_stride,datai,
                                 dval_box,dval_start,dval_stride,dvali);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
 #endif
-            zypre_BoxLoop2For(datai, dvali)
+            hypre_BoxLoop2For(datai, dvali)
             {
                values[dvali] = datap[datai];
             }
-            zypre_BoxLoop2End(datai, dvali);
+            hypre_BoxLoop2End(datai, dvali);
          }
       }
    }
@@ -1261,7 +1262,9 @@ hypre_StructVectorClone(
 
    hypre_StructVectorDataSize(y) = data_size;
    hypre_StructVectorDataSpace(y) = hypre_BoxArrayDuplicate(data_space);
-   hypre_StructVectorData(y) = hypre_CTAlloc(HYPRE_Complex,data_size);
+   //hypre_StructVectorData(y) = hypre_CTAlloc(HYPRE_Complex,data_size);
+   hypre_DataCTAlloc(hypre_StructVectorData(y), HYPRE_Complex, data_size);
+   
    hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size);
 
    for (i=0; i < data_space_size; i++)

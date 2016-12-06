@@ -876,17 +876,17 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
          hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-         zypre_newBoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
+         hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                              A_dbox, start, stride, Ai,
                              x_dbox, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi) HYPRE_SMP_SCHEDULE
 #endif
-         zypre_newBoxLoop2For(Ai, xi)
+         hypre_BoxLoop2For(Ai, xi)
          {
             xp[xi] /= Ap[Ai]; 
          }
-         zypre_newBoxLoop2End(Ai, xi);
+         hypre_BoxLoop2End(Ai, xi);
       }
 
       /* Step 2 */

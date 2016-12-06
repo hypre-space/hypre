@@ -663,7 +663,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
             if (symm_elements[stencil_indices[s]] < 0)
             {
                datap = hypre_StructMatrixBoxData(matrix, i, stencil_indices[s]);
-
+			   
                if ( (constant_coefficient==1) ||
                     (constant_coefficient==2 && stencil_indices[s]!=center_rank ))
                   /* datap has only one data point for a given i and s */
@@ -700,44 +700,44 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                          or diagonal with constant_coefficient==2   */
                {
                   hypre_BoxGetSize(int_box, loop_size);
-				  /*FIXME : datap is on CPU*/
+
                   if (action > 0)
                   {
-                     zypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
+                     hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          data_box,data_start,data_stride,datai,
                                          dval_box,dval_start,dval_stride,dvali);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
 #endif
-                     zypre_BoxLoop2For(datai, dvali)
+                     hypre_BoxLoop2For(datai, dvali)
                      {
                         datap[datai] += values[dvali];
                      }
-                     zypre_BoxLoop2End(datai, dvali);
+                     hypre_BoxLoop2End(datai, dvali);
                   }
                   else if (action > -1)
                   {
-                     zypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
+                     hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          data_box,data_start,data_stride,datai,
                                          dval_box,dval_start,dval_stride,dvali);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
 #endif
-                     zypre_BoxLoop2For(datai, dvali)
+                     hypre_BoxLoop2For(datai, dvali)
                      {
                         datap[datai] = values[dvali];
                      }
-                     zypre_BoxLoop2End(datai, dvali);
+                     hypre_BoxLoop2End(datai, dvali);
                   }
                   else
                   {
-                     zypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
+                     hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          data_box,data_start,data_stride,datai,
                                          dval_box,dval_start,dval_stride,dvali);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
 #endif
-                     zypre_BoxLoop2For(datai, dvali)
+                     hypre_BoxLoop2For(datai, dvali)
                      {
                         values[dvali] = datap[datai];
                         if (action == -2)
@@ -745,7 +745,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                            datap[datai] = 0;
                         }
                      }
-                     zypre_BoxLoop2End(datai, dvali);
+                     hypre_BoxLoop2End(datai, dvali);
                   }
                }
             } /* end if (symm_elements) */
@@ -1125,10 +1125,10 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    hypre_Box             *boundary_box;
    hypre_Box             *entry_box;
    hypre_BoxManEntry    **entries;
-   hypre_Index            loop_size;
+   hypre_IndexRef         loop_size;
    hypre_Index            index;
    hypre_IndexRef         start;
-   hypre_Index            stride;
+   hypre_IndexRef         stride;
    HYPRE_Complex         *datap;
    HYPRE_Int              i, j, ei, datai;
    HYPRE_Int              num_entries;
@@ -1187,33 +1187,43 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       /* set boundary ghost zones to the identity equation */
 
       hypre_SetIndex(index, 0);
-      hypre_SetIndex(stride, 1);
+      //hypre_SetIndex(stride, 1);
+	  hypre_BoxSetunitStride(stride);
+	  
       data_space = hypre_StructMatrixDataSpace(matrix);
       hypre_ForBoxI(i, data_space)
-      {
+      {		  
          datap = hypre_StructMatrixExtractPointerByIndex(matrix, i, index);
 
          if (datap)
          {
             data_box = hypre_BoxArrayBox(data_space, i);
+             hypre_initBoxData(data_box);
             boundary_box_a = hypre_BoxArrayArrayBoxArray(boundary_boxes, i);
             hypre_ForBoxI(j, boundary_box_a)
             {
                boundary_box = hypre_BoxArrayBox(boundary_box_a, j);
-               start = hypre_BoxIMin(boundary_box);
-
-               hypre_BoxGetSize(boundary_box, loop_size);
-/*FIXME : datap is on CPU*/
-               zypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
-                                   data_box, start, stride, datai);
+			   hypre_initBoxData(boundary_box);
+			   
+               //start = hypre_BoxIMin(boundary_box);
+			   start = hypre_BoxIMinData(boundary_box);
+				   
+               //hypre_BoxGetSize(boundary_box, loop_size);
+			   loop_size = hypre_BoxSizeData(boundary_box);
+			   HYPRE_Int Boxloop_tot = 1;
+			   for (HYPRE_Int k = 0;k < hypre_StructMatrixNDim(matrix);k++)
+				   Boxloop_tot *= hypre_BoxSizeD(boundary_box, k);
+			   
+               hypre_BoxLoop1Begin1(hypre_StructMatrixNDim(matrix), Boxloop_tot,loop_size,
+                                   data_box, start, unitstride, datai);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai) HYPRE_SMP_SCHEDULE
 #endif
-               zypre_BoxLoop1For(datai)
+               hypre_BoxLoop1For(datai)
                {
                   datap[datai] = 1.0;
                }
-               zypre_BoxLoop1End(datai);
+               hypre_BoxLoop1End1(datai);
             }
          }
       }

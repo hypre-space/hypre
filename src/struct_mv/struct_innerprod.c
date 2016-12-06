@@ -22,54 +22,11 @@
 #define MAXBLOCKS 32
 #define NTHREADS 256 // must be a power of 2
 
-__global__ void dot (HYPRE_Real * a, HYPRE_Real * b, HYPRE_Real *c, HYPRE_Int hypre__tot,
-                     HYPRE_Int *loop_size_cuda,HYPRE_Int ndim,
-                     HYPRE_Int *stride_cuda1,HYPRE_Int *start_cuda1,HYPRE_Int *dboxmin1,HYPRE_Int *dboxmax1,
-                     HYPRE_Int *stride_cuda2,HYPRE_Int *start_cuda2,HYPRE_Int *dboxmin2,HYPRE_Int *dboxmax2)
-{
-    int id = (blockIdx.x * blockDim.x) + threadIdx.x;
-	HYPRE_Int local_idx;
-    HYPRE_Int d,idx_local = id;
-    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;
-    HYPRE_Int i1 = 0, i2 = 0;
-    
-    //// reducted output
-    __shared__ HYPRE_Real shared_cache [NTHREADS];
-	HYPRE_Real sum = 0;
-    
-    for (d = 0;d < ndim;d ++)
-    {
-        local_idx  = idx_local % loop_size_cuda[d];
-        idx_local  = idx_local / loop_size_cuda[d];
-        i1 += (local_idx*stride_cuda1[d] + start_cuda1[d] - dboxmin1[d]) * hypre_boxD1;
-        hypre_boxD1 *= hypre_max(0, dboxmax1[d] - dboxmin1[d] + 1);
-        i2 += (local_idx*stride_cuda2[d] + start_cuda2[d] - dboxmin2[d]) * hypre_boxD2;
-        hypre_boxD2 *= hypre_max(0, dboxmax2[d] - dboxmin2[d] + 1);
-    }
-    //for (;id < size ;){
-    //    sum += (*(a+id)) * (*(b+id));
-    //    id+= nextid;
-    //}
-	if (id < hypre__tot)
-		sum = a[i1] * hypre_conj(b[i2]);
-    *(shared_cache + threadIdx.x) = sum;
-	
-    __syncthreads();
-	
-    ///////// sum of internal cache
-	
-    int i;    
-    
-    for (i=(NTHREADS /2); i>0 ; i= i/2){
-		if (threadIdx.x < i){
-			*(shared_cache + threadIdx.x) += *(shared_cache + threadIdx.x + i);
-		}
-		__syncthreads();
-    }
-	
-    if ( threadIdx.x == 0){
-        *(c+ blockIdx.x) = shared_cache[0];
-    }
+__inline__ __device__
+int warpReduceSum(int val) {
+  for (int offset = warpSize/2; offset > 0; offset /= 2)
+    val += __shfl_down(val,offset);
+  return val;
 }
 
 /*--------------------------------------------------------------------------
@@ -107,7 +64,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
    HYPRE_Real       local_result;
    local_result = 0.0;
    //zypre_Reductioninit(local_result);
-   process_result = 0.0;
+   //process_result = 0.0;
    
    hypre_SetIndex(unit_stride, 1);
    
@@ -124,39 +81,14 @@ hypre_StructInnerProd( hypre_StructVector *x,
       yp = hypre_StructVectorBoxData(y, i);
        
        hypre_BoxGetSize(box, loop_size);
-	   cudaDeviceSynchronize();
-       {
-           zypre_BoxLoopCUDAInit(ndim,loop_size);
-           zypre_newBoxLoopInitK(ndim,x_data_box,loop_size,start,unit_stride,1);
-           zypre_newBoxLoopInitK(ndim,y_data_box,loop_size,start,unit_stride,2);
-           int n_blocks = (hypre__tot+NTHREADS-1)/NTHREADS;
-           HYPRE_Real *d_c;
-		   HYPRE_Real * c = new HYPRE_Real[n_blocks];
-           cudaMalloc((void**) &d_c, n_blocks * sizeof(HYPRE_Real));
-		   //cudaMallocManaged((void**)&d_c,sizeof(HYPRE_Real)*n_blocks, cudaMemAttachGlobal);
-           dot<<< n_blocks ,NTHREADS>>>(xp,yp,d_c,hypre__tot,loop_size_cuda,ndim,
-                     stride_cuda1,start_cuda1,dboxmin1,dboxmax1,
-                     stride_cuda2,start_cuda2,dboxmin2,dboxmax2);
-		   cudaMemcpy(c,d_c,n_blocks*sizeof(HYPRE_Real),cudaMemcpyDeviceToHost);
-		   cudaDeviceSynchronize();
-		   for (int j = 0 ; j< n_blocks ; ++j){
-			   local_result += c[j];
-		   }
-       }
-	   //int n_blocks = minimo( MAXBLOCKS, ((n+NTHREADS-1)/NTHREADS));
-	   //cudaMalloc((void**) &d_c, n_blocks * sizeof(int));
-	   //dot<<< n_blocks ,NTHREADS>>>(d_a,d_b,d_c,n);
-	   //// final sum on host
-       // int final_result = 0;
-       // for (int i=0 ; i< n_blocks ; ++i){
-       //     final_result += *(c+i);
-       // }
-	   //printf("local_result = %f\n",xp[0]);
-       
+	   
+       zypre_newBoxLoop2ReductionBegin(ndim, loop_size,
+									   x_data_box, start, unit_stride, xi,xp,
+									   y_data_box, start, unit_stride, yi,yp,local_result);
    }
    process_result = local_result;
-   
-       /*
+	   
+   /*
        hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                            x_data_box, start, unit_stride, xi,
                            y_data_box, start, unit_stride, yi);
@@ -165,14 +97,12 @@ hypre_StructInnerProd( hypre_StructVector *x,
 #endif
        hypre_BoxLoop2For(xi, yi)
        {
-		   printf("local_result = %f\n",local_result);
-		   
            local_result += xp[xi] * hypre_conj(yp[yi]);
        }
        hypre_BoxLoop2End(xi, yi);
    }
     process_result = local_result;
-	   */
+   */
 /*
 #ifdef HYPRE_BOX_PRIVATE_VAR
 #undef HYPRE_BOX_PRIVATE_VAR

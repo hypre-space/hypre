@@ -7356,6 +7356,13 @@ fi
    fi
  fi
 
+if test "$hypre_user_chose_cuda" = "yes"
+then
+   LDFLAGS="-Xcompiler -fopenmp"
+   CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CFLAGS"
+   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $CXXFLAGS"
+fi
+
 if test "$hypre_user_chose_raja" = "yes"
 then
    LDFLAGS="-Xcompiler -fopenmp"

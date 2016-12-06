@@ -249,19 +249,37 @@ hypre_PFMGSetupInterpOp_CC0
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
-
+   
+   HYPRE_Int * indices_d;
+   HYPRE_Int indices_h[stencil_size];
+   HYPRE_Int * stencil_shape_d;
+   HYPRE_Int  stencil_shape_h[stencil_size];
+   HYPRE_Complex * data_A = hypre_StructMatrixData(A);
+   AxCheckError(cudaMalloc((void**)&indices_d,sizeof(HYPRE_Int)*stencil_size));
+   for (si = 0; si < stencil_size; si++)
+   {
+	   indices_h[si]       = hypre_StructMatrixDataIndices(A)[i][si];
+	   stencil_shape_h[si] = hypre_IndexD(stencil_shape[si], cdir);
+   }
+   
+   AxCheckError(cudaMemcpy(indices_d, indices_h, sizeof(HYPRE_Int)*stencil_size, cudaMemcpyHostToDevice));
+   AxCheckError(cudaMalloc((void**)&stencil_shape_d,sizeof(HYPRE_Int)*stencil_size));
+   AxCheckError(cudaMemcpy(stencil_shape_d, stencil_shape_h, sizeof(HYPRE_Int)*stencil_size, cudaMemcpyHostToDevice));
+   
    /*FIXME: some memory is still on CPU*/
-   zypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
+   hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
 #endif
-   zypre_BoxLoop2For(Ai, Pi)
+   hypre_BoxLoop2For(Ai, Pi)
    {
        HYPRE_Int si,mrk0,mrk1,Astenc;
        HYPRE_Real center;
        HYPRE_Real *Ap;
+	   HYPRE_Complex Api;
+	   
       center  = 0.0;
       Pp0[Pi] = 0.0;
       Pp1[Pi] = 0.0;
@@ -270,23 +288,26 @@ hypre_PFMGSetupInterpOp_CC0
 
       for (si = 0; si < stencil_size; si++)
       {
-         Ap = hypre_StructMatrixBoxData(A, i, si);
-         Astenc = hypre_IndexD(stencil_shape[si], cdir);
-
+		  //Ap = hypre_StructMatrixBoxData(A, i, si);
+		  Ap = data_A + indices_d[si];
+		  
+		  //Astenc = hypre_IndexD(stencil_shape[si], cdir);
+		  Astenc = stencil_shape_d[si];
+		  Api = Ap[Ai];
          if (Astenc == 0)
          {
-            center += Ap[Ai];
+            center += Api;
          }
          else if (Astenc == Pstenc0)
          {
-            Pp0[Pi] -= Ap[Ai];
+            Pp0[Pi] -= Api;
          }
          else if (Astenc == Pstenc1)
          {
-            Pp1[Pi] -= Ap[Ai];
+            Pp1[Pi] -= Api;
          }
-
-         if (si == si0 && Ap[Ai] == 0.0)
+		 
+         if (si == si0 && Api == 0.0)
             mrk0++;
          if (si == si1 && Ap[Ai] == 0.0)
             mrk1++;
@@ -315,7 +336,7 @@ hypre_PFMGSetupInterpOp_CC0
       if (mrk1 != 0)
          Pp1[Pi] = 0.0;
    }
-   zypre_BoxLoop2End(Ai, Pi);
+   hypre_BoxLoop2End(Ai, Pi);
 
    if (warning_cnt)
    {

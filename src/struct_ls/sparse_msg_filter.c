@@ -375,6 +375,25 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
    hypre_ForBoxI(i, compute_boxes)
    {
+	   //FIXME: hypre_StructMatrixBoxData(A, i, si);Astenc = hypre_IndexD(stencil_shape[si], 0); are not allowed in kernel; change this to a macro
+	   HYPRE_Int * indices_d;
+	   HYPRE_Int indices_h[stencil_size];
+	   HYPRE_Int * stencil_shape_d;
+	   HYPRE_Int  stencil_shape_h[3*stencil_size];
+	   HYPRE_Complex * data_A = hypre_StructMatrixData(A);
+	   AxCheckError(cudaMalloc((void**)&indices_d,sizeof(HYPRE_Int)*stencil_size));
+	   for (si = 0; si < stencil_size; si++)
+	   {
+		   indices_h[si]       = hypre_StructMatrixDataIndices(A)[i][si];
+		   stencil_shape_h[si] = hypre_IndexD(stencil_shape[si], 0);
+		   stencil_shape_h[stencil_size+si] = hypre_IndexD(stencil_shape[si], 1);
+		   stencil_shape_h[2*stencil_size+si] = hypre_IndexD(stencil_shape[si], 2);
+	   }
+	   
+	   AxCheckError(cudaMemcpy(indices_d, indices_h, sizeof(HYPRE_Int)*stencil_size, cudaMemcpyHostToDevice));
+	   AxCheckError(cudaMalloc((void**)&stencil_shape_d,sizeof(HYPRE_Int)*3*stencil_size));
+	   AxCheckError(cudaMemcpy(stencil_shape_d, stencil_shape_h, sizeof(HYPRE_Int)*3*stencil_size, cudaMemcpyHostToDevice));
+	   
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
 
       A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
@@ -404,12 +423,14 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
          lambday = 0.0;
          lambdaz = 0.0;
 
+		 
          for (si = 0; si < stencil_size; si++)
          {
-            Ap = hypre_StructMatrixBoxData(A, i, si);
-
+			 //Ap = hypre_StructMatrixBoxData(A, i, si);
+			Ap = data_A + indices_d[si];
             /* compute lambdax */
-            Astenc = hypre_IndexD(stencil_shape[si], 0);
+            //Astenc = hypre_IndexD(stencil_shape[si], 0);
+			Astenc = stencil_shape_d[si];
             if (Astenc == 0)
             {
                lambdax += Ap[Ai];
@@ -420,7 +441,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
             }
 
             /* compute lambday */
-            Astenc = hypre_IndexD(stencil_shape[si], 1);
+            //Astenc = hypre_IndexD(stencil_shape[si], 1);
+			Astenc = stencil_shape_d[stencil_size+si];
             if (Astenc == 0)
             {
                lambday += Ap[Ai];
@@ -431,7 +453,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
             }
 
             /* compute lambdaz */
-            Astenc = hypre_IndexD(stencil_shape[si], 2);
+            //Astenc = hypre_IndexD(stencil_shape[si], 2);
+			Astenc = stencil_shape_d[2*stencil_size+si];
             if (Astenc == 0)
             {
                lambdaz += Ap[Ai];
@@ -451,6 +474,11 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
          vzp[vi] = lambdaz / (lambdax + lambday + lambdaz);
       }
       hypre_BoxLoop2End(Ai, vi);
+
+	  
+	  AxCheckError(cudaFree(indices_d));
+	  AxCheckError(cudaFree(stencil_shape_d));
+	  
    }
 
    return ierr;

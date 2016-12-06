@@ -469,23 +469,57 @@ extern "C" {
 #include <cuda_runtime.h>
 	
 #define hypre_DataTAlloc(ptr, type, count) \
-	cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);
+{\
+	cudaError_t cudaerr = cudaMalloc((void**)&ptr,sizeof(type)*(count));\
+	if ( cudaerr != cudaSuccess ) {										\
+		printf("\n ERROR hypre_DataTAlloc %d : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+		int *p = NULL; *p = 1;\
+	}\
+}
 	
 #define hypre_DataCTAlloc(ptr, type, count) \
-	cudaError_t cudaerr = cudaMallocManaged((void**)&ptr,sizeof(type)*(count)); \
+{\
+	cudaError_t cudaerr = cudaMalloc((void**)&ptr,sizeof(type)*(count)); \
 	if ( cudaerr != cudaSuccess ) {										\
-		std::cerr << "\n ERROR in cudaMallocManaged call" << std::endl;	\
-		exit(1);														\
+		printf("\n hypre_DataCTAlloc %d : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+		int *p = NULL; *p = 1;\
 	}		\
-	cudaMemset(ptr,0,sizeof(type)*(count));
+	cudaMemset(ptr,0,sizeof(type)*(count));\
+}
 	
-#define hypre_DataTReAlloc(ptr, type, count) type *newptr;				\
-	                                         cudaMallocManaged((void**)&,sizeof(type)*(count), cudaMemAttachGlobal);	\
+#define hypre_DataTReAlloc(ptr, type, count) {type *newptr;				\
+	                                         cudaMalloc((void**)&,sizeof(type)*(count), cudaMemAttachGlobal);	\
 											 memcpy(newptr, ptr, sizeof(type)*(count)); \
 											 cudaFree(ptr);				\
-											 ptr = newptr;
-#define hypre_DataTFree(ptr) cudaFree(ptr);
+											 ptr = newptr;}
+#define hypre_DataTFree(ptr) \
+	{											\
+		cudaError_t cudaerr = cudaFree(ptr);							\
+		if ( cudaerr != cudaSuccess ) {									\
+			printf("\n CudaFree : %s in %s(%d) function %s\n",cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+			int *p = NULL; *p = 1;										\
+		}																\
+	}																	\
+	
 
+#define hypre_DataCopyToData(ptrH,ptrD,type,count)						\
+	{cudaError_t cudaerr = cudaMemcpy(ptrD, ptrH, sizeof(type)*count, cudaMemcpyHostToDevice); \
+if ( cudaerr != cudaSuccess ) {										\
+		printf("\n hypre_DataCopyToData %d : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+		int *p = NULL; *p = 1;\
+}							  \
+	}
+	
+	
+#define hypre_DataCopyFromData(ptrH,ptrD,type,count)						\
+	{cudaError_t cudaerr = cudaMemcpy(ptrH, ptrD, sizeof(type)*count, cudaMemcpyDeviceToHost); \
+	if ( cudaerr != cudaSuccess ) {										\
+		printf("\n hypre_DataCTAlloc %d : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+		int *p = NULL; *p = 1;\
+	}\
+	}
+	
+	
 #define hypre_DeviceDataTAlloc(ptr, type, count,device) \
 	if (device == 0)									\
 	{													\
