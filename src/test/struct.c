@@ -2874,10 +2874,11 @@ AddValuesVector( hypre_StructGrid  *gridvector,
 
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);
-       //FIXME : need to change to a macro
+	  
        HYPRE_Real *val_D;
-       cudaMalloc((void**)&val_D,sizeof(HYPRE_Real)*(volume));
-       cudaMemcpy(val_D, values, sizeof(HYPRE_Real)*(volume), cudaMemcpyHostToDevice);
+	   hypre_DataTAlloc(val_D, HYPRE_Real, volume);
+	   hypre_DataCopyToData(values,val_D,HYPRE_Real,volume);
+	   
       HYPRE_StructVectorSetBoxValues(zvector, ilower, iupper, val_D);
       hypre_TFree(values);
 
@@ -2976,10 +2977,11 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             }
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
-             //FIXME : need to change to a macro
+
              HYPRE_Real *val_D;
-             cudaMalloc((void**)&val_D,sizeof(HYPRE_Real)*(stencil_size*volume));
-             cudaMemcpy(val_D, values, sizeof(HYPRE_Real)*(stencil_size*volume), cudaMemcpyHostToDevice);
+			 hypre_DataTAlloc(val_D, HYPRE_Real, stencil_size*volume);
+			 hypre_DataCopyToData(values,val_D,HYPRE_Real,stencil_size*volume);
+				
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                            stencil_indices, val_D);
             hypre_TFree(values);
@@ -3327,10 +3329,10 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
                j = iupper[ib][d];
                iupper[ib][d] = istart[d];
                stencil_indices[0] = d;
-                //FIXME : need to change to a macro
+
                 HYPRE_Real *val_D;
-                cudaMalloc((void**)&val_D,sizeof(HYPRE_Real)*(vol[ib]));
-                cudaMemcpy(val_D, values, sizeof(HYPRE_Real)*(vol[ib]), cudaMemcpyHostToDevice);
+				hypre_DataTAlloc(val_D, HYPRE_Real, vol[ib]);
+				hypre_DataCopyToData(values,val_D,HYPRE_Real,vol[ib]);
                 
                HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
                                               1, stencil_indices, val_D);

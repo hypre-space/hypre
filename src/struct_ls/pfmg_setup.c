@@ -731,7 +731,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       {
 		  HYPRE_Complex *data_host;
 		  data_host = hypre_CTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(A));
-		  cudaMemcpy(data_host, hypre_StructMatrixData(A), sizeof(HYPRE_Complex)*hypre_StructMatrixDataSize(A),cudaMemcpyDeviceToHost);
+		  hypre_DataCopyFromData(data_host,hypre_StructMatrixData(A),HYPRE_Complex,hypre_StructMatrixDataSize(A));
+		  
           /*FIXME: need reduction for more variables*/
          zypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start, stride, Ai);

@@ -76,9 +76,7 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
          yp[yi] += alpha * xp[xi];
       }
       hypre_BoxLoop2End(xi,yi);
-	  cudaDeviceSynchronize();
    }
-   cudaDeviceSynchronize();
    
    return hypre_error_flag;
 }

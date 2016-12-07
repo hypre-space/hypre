@@ -356,6 +356,10 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
 								   R_dbox,   cstart, stridec, iR,
 								   A_dbox,   fstart, stridef, iA,
 								   RAP_dbox, cstart, stridec, iAc);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#endif
+            hypre_BoxLoop4For(iP, iR, iA, iAc)
 			{
 				HYPRE_Int iAm1 = iA - yOffsetA;
 				HYPRE_Int iAp1 = iA + yOffsetA;

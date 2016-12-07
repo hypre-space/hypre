@@ -925,7 +925,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                {
                   size *= length_array[d];
                }
-			   cudaMemset(dptr_data,0,size*sizeof(HYPRE_Complex));
+			   hypre_DataMemset(dptr_data,0,HYPRE_Complex,size);
+			   
 			   dptr_data += size;
             }
          }
@@ -938,8 +939,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 	   size = hypre_CommPkgSendBufsize(comm_pkg);
 	   dptr = (HYPRE_Complex *) send_buffers[0];
 	   dptr_data = (HYPRE_Complex *) send_buffers_data[0];	   
-	   hypre_DataCopyFromData(dptr,dptr_data,HYPRE_Complex,size);	   	   
-	   AxCheckError(cudaDeviceSynchronize());
+	   hypre_DataCopyFromData(dptr,dptr_data,HYPRE_Complex,size);
    }
    
    for (i = 0; i < num_sends; i++)
@@ -1166,8 +1166,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 	   size = hypre_CommPkgRecvBufsize(comm_pkg);
 	   dptr = (HYPRE_Complex *) recv_buffers[0];
 	   dptr_data = (HYPRE_Complex *) recv_buffers_data[0];	   
-	   hypre_DataCopyToData(dptr,dptr_data,HYPRE_Complex,size+Pre_size*8);	   	   
-	   AxCheckError(cudaDeviceSynchronize());   
+	   hypre_DataCopyToData(dptr,dptr_data,HYPRE_Complex,size+Pre_size*8);
    }
    
    

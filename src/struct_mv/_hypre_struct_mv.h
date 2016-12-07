@@ -494,15 +494,6 @@ printf("zypre_newBoxLoop1Begin, %s(%d): %s\n",__FILE__,__LINE__,__FUNCTION__);\
 	cudaDeviceSynchronize();					\
 }
 
-#ifdef HYPRE_USE_RAJA
-#define zypre_Reductioninit(local_result) \
-ReduceSum< cuda_reduce<BLOCKSIZE>, HYPRE_Real> local_result(0.0);
-#else
-#define zypre_Reductioninit(local_result) \
-HYPRE_Real       local_result;\
-local_result = 0.0;
-#endif
-
 #define zypre_newBoxLoop2ReductionBegin(ndim, loop_size,				\
 										dbox1, start1, stride1, i1,		\
 										dbox2, start2, stride2, i2,sum)	\
@@ -1334,9 +1325,9 @@ int *p = NULL; *p = 1;\
 	cudaFree(CUDA_data);						\
 }
 
-#define zypre_newBoxLoop2ReductionBegin(ndim, loop_size,				\
-										dbox1, start1, stride1, i1,xp,	\
-										dbox2, start2, stride2, i2,yp,sum) \
+#define zypre_newBoxLoop2ReductionCUDA(ndim, loop_size,				\
+									   dbox1, start1, stride1, i1,xp,	\
+									   dbox2, start2, stride2, i2,yp,sum) \
 {    																	\
 	HYPRE_Int hypre__tot = 1.0;								\
 	const size_t block_size = 256;				  			\
@@ -1780,6 +1771,74 @@ AxCheckError(cudaDeviceSynchronize());\
    }\
 }
 
+#define zypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
+{    														\
+    HYPRE_Int hypre__tot = 1.0;											\
+	const size_t block_size = 256;										\
+	HYPRE_Int nd = ndim;												\
+	HYPRE_Int idx;														\
+	HYPRE_Int d;														\
+	for (d = 0;d < ndim;d ++)											\
+	{																	\
+		hypre__tot *= loop_size[d];										\
+	}																	\
+	for (idx = 0;idx < hypre__tot;idx ++)										\
+	{																	\
+		HYPRE_Int local_idx;												\
+		HYPRE_Int d,idx_local = idx;									\
+	    HYPRE_Int i1 = 0;											\
+		local_idx  = idx_local % loop_size[0];							\
+		idx_local  = idx_local / loop_size[0];							\
+		i1 += local_idx*stride1[0];			\
+		local_idx  = idx_local % loop_size[1];							\
+		idx_local  = idx_local / loop_size[1];							\
+		i1 += local_idx*stride1[1];								\
+		local_idx  = idx_local % loop_size[2];							\
+		idx_local  = idx_local / loop_size[2];							\
+		i1 += local_idx*stride1[2];			\
+		
+#define zypre_BoxBoundaryCopyEnd()				\
+	}											\
+}
+
+#define zypre_BoxDataExchangeBegin(ndim, loop_size,				\
+                                   stride1, i1,	\
+                                   stride2, i2)	\
+{    														\
+    HYPRE_Int hypre__tot = 1.0;											\
+	const size_t block_size = 256;										\
+	HYPRE_Int nd = ndim;												\
+	HYPRE_Int idx;														\
+	HYPRE_Int d;														\
+	for (d = 0;d < ndim;d ++)									\
+	{																	\
+		hypre__tot *= loop_size[d];										\
+	}																	\
+    for (idx = 0;idx < hypre__tot;idx ++)										\
+	{																	\
+		HYPRE_Int local_idx;												\
+		HYPRE_Int d,idx_local = idx;									\
+	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;						\
+	    HYPRE_Int i1 = 0, i2 = 0;											\
+		local_idx  = idx_local % loop_size[0];							\
+		idx_local  = idx_local / loop_size[0];							\
+		i1 += local_idx*stride1[0];			\
+		i2 += local_idx*stride2[0];			\
+		local_idx  = idx_local % loop_size[1];							\
+		idx_local  = idx_local / loop_size[1];							\
+		i1 += local_idx*stride1[1];			\
+		i2 += local_idx*stride2[1];			\
+		local_idx  = idx_local % loop_size[2];							\
+		idx_local  = idx_local / loop_size[2];							\
+		i1 += local_idx*stride1[2];			\
+		i2 += local_idx*stride2[2];
+
+
+
+#define zypre_BoxDataExchangeEnd()				\
+	}											\
+}
+
 #define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
 
 
@@ -2002,6 +2061,15 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
 
+#ifdef HYPRE_USE_RAJA
+#define zypre_Reductioninit(local_result) \
+ReduceSum< cuda_reduce<BLOCKSIZE>, HYPRE_Real> local_result(0.0);
+#else
+#define zypre_Reductioninit(local_result) \
+HYPRE_Real       local_result;\
+local_result = 0.0;
+#endif
+	
 #if 0 /* set to 0 to use the new box loops */
 
 #define HYPRE_BOX_PRIVATE hypre__nx,hypre__ny,hypre__nz,hypre__i,hypre__j,hypre__k
