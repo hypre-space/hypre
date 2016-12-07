@@ -908,19 +908,12 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                   p[ndim] = kptr;
 
                   /* Emulate ndim nested for loops */
-                  d = 0;
-				  
-				  hypre_Index size;
-				  hypre_SetIndex(size, 0);
-				  hypre_Box*       data_box = hypre_BoxCreate(ndim);
-				  hypre_BoxSetExtents(data_box,size,size);
-					  
-				  zypre_newBoxLoop1Begin(ndim, n,data_box, size, s, i)
+                  d = 0;					  
+				  zypre_BoxBoundaryCopyBegin(ndim,n,s,i,idx)	
 				  {
 					  dptr_data[idx] = kptr[i];
-					  //printf("dptr_data[%d] = %f\n",idx,dptr_data[idx]);
 				  }
-				  zypre_newBoxLoop1End(i)
+				  zypre_BoxBoundaryCopyEnd()
 				  
 				  dptr_data += N;			   			    
                }
@@ -1227,28 +1220,18 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
                /* Emulate ndim nested for loops */
                d = 0;
-
-			   {
-			   hypre_Index size;
-			   hypre_SetIndex(size, 0);
-			   hypre_Box*       data_box = hypre_BoxCreate(ndim);
-			   hypre_BoxSetExtents(data_box,size,size);
-			   
-			   zypre_newBoxLoop1Begin(ndim, n,data_box, size, s, i)
+			   zypre_BoxBoundaryCopyBegin(ndim,n,s,i,idx)
 			   {
 				   if (action > 0)
 				   {
 					   kptr[i] += dptr_data[idx];
-					   //printf("action1: dptr_data[%d] = %f,kptr[i] = %f\n",idx,dptr_data[idx],kptr[i]);
 				   }
 				   else
 				   {
 					   kptr[i] = dptr_data[idx];
-					   //printf("dptr_data[%d] = %f\n",idx,dptr_data[idx]);
 				   }
 			   }
-			   zypre_newBoxLoop1End(i)
-			   }
+			   zypre_BoxBoundaryCopyEnd()
 			   /*
 			   zypre_newBoxLoop0Begin(N,I)
 			   {
@@ -1323,9 +1306,10 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
    HYPRE_Int           *fr_stride_array;
    HYPRE_Complex       *to_dp;
    HYPRE_Int           *to_stride_array;
+   HYPRE_Complex       *fr_dpl, *to_dpl;
                       
    HYPRE_Int           *length_array;
-   HYPRE_Int            i, d, ll;
+   HYPRE_Int            i, d, ll, i1, i2;
 
    HYPRE_Int           *order;
 
@@ -1386,40 +1370,23 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
 
                   /* Emulate ndim nested for loops */
                   d = 0;
-                  for (I = 0; I < N; I++)
-                  {
-                     if (action > 0)
+				  
+				  fr_dpl = fr_dp + (order[ll])*fr_stride_array[ndim];
+				  to_dpl = to_dp + (      ll )*to_stride_array[ndim];
+				  zypre_BoxDataExchangeBegin(ndim, n, fs, i1, ts, i2)
+				  {
+					 if (action > 0)
                      {
-						 //FIXME : need to change to transfer the data once
                         /* add the data to existing values in memory */
-                        //*tp[0] += *fp[0];
-						HYPRE_Complex tmp;
-						AxCheckError(cudaMemcpy(&tmp,tp[0], sizeof(HYPRE_Complex), cudaMemcpyDeviceToHost));
-						tmp += *fp[0];
-						AxCheckError(cudaMemcpy(tp[0],&tmp, sizeof(HYPRE_Complex), cudaMemcpyHostToDevice));
+						 to_dpl[i1] += to_dpl[i2];
                      }
                      else
                      {
                         /* copy the data over existing values in memory */
-                        //*tp[0] = *fp[0];
-						AxCheckError(cudaMemcpy(tp[0],fp[0], sizeof(HYPRE_Complex), cudaMemcpyHostToDevice));
-                     }
-
-                     while ( (i[d]+2) > n[d] )
-                     {
-                        d++;
-                     }
-                     i[d]++;
-                     fp[d] += fs[d];
-                     tp[d] += ts[d];
-                     while ( d > 0 )
-                     {
-                        d--;
-                        i[d] = 0;
-                        fp[d] = fp[d+1];
-                        tp[d] = tp[d+1];
-                     }
-                  }
+						 to_dpl[i1] = to_dpl[i2];
+                     } 
+				  }				  
+				  zypre_BoxDataExchangeEnd()
                }
             }
          }
