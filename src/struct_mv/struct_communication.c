@@ -826,8 +826,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    if (num_sends > 0)
    {
       size = hypre_CommPkgSendBufsize(comm_pkg);
-      send_buffers[0] = hypre_SharedCTAlloc(HYPRE_Complex, size);
-	  hypre_DataCTAlloc(send_buffers_data[0], HYPRE_Complex, size);
+      send_buffers[0]      = hypre_SharedCTAlloc(HYPRE_Complex, size);
+	  send_buffers_data[0] = hypre_DataCTAlloc(HYPRE_Complex, size);
       for (i = 1; i < num_sends; i++)
       {
          comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
@@ -843,8 +843,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    if (num_recvs > 0)
    {
       size = hypre_CommPkgRecvBufsize(comm_pkg);
-      recv_buffers[0] = hypre_SharedTAlloc(HYPRE_Complex, size);
-	  hypre_DataCTAlloc(recv_buffers_data[0], HYPRE_Complex, size);
+      recv_buffers[0]      = hypre_SharedTAlloc(HYPRE_Complex, size);
+	  recv_buffers_data[0] = hypre_DataCTAlloc(HYPRE_Complex, size);
       for (i = 1; i < num_recvs; i++)
       {
          comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);
@@ -1151,22 +1151,22 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    
    if (num_recvs > 0)
    {
-	   HYPRE_Int Pre_size = 0;
-	   
+	   size = 0;
 	   for (i = 0; i < num_recvs; i++)
 	   {
 		   comm_type = hypre_CommPkgRecvType(comm_pkg, i);
 		   num_entries = hypre_CommTypeNumEntries(comm_type);
+		   size += hypre_CommTypeBufsize(comm_type);
 		   if ( hypre_CommPkgFirstComm(comm_pkg) )
 		   {
-			   Pre_size += hypre_CommPrefixSize(num_entries);
+			   size += hypre_CommPrefixSize(num_entries);
 		   }
 	   }
 	   
-	   size = hypre_CommPkgRecvBufsize(comm_pkg);
 	   dptr = (HYPRE_Complex *) recv_buffers[0];
-	   dptr_data = (HYPRE_Complex *) recv_buffers_data[0];	   
-	   hypre_DataCopyToData(dptr,dptr_data,HYPRE_Complex,size+Pre_size*8);
+	   dptr_data = (HYPRE_Complex *) recv_buffers_data[0];
+	   
+	   hypre_DataCopyToData(dptr,dptr_data,HYPRE_Complex,size);
    }
    
    

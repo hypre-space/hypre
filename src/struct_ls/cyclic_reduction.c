@@ -616,7 +616,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    }
 
    //data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
-   hypre_DataCTAlloc(data,HYPRE_Real,data_size);
+  data =  hypre_DataCTAlloc(HYPRE_Real,data_size);
    
    (cyc_red_data -> data) = data;
 

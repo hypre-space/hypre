@@ -377,7 +377,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    }
 
    //data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
-   hypre_DataCTAlloc(data,HYPRE_Real,data_size);
+   data = hypre_DataCTAlloc(HYPRE_Real,data_size);
    
    (pfmg_data -> data) = data;
 
@@ -917,7 +917,10 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       else
       {
           /*FIXME: need reduction for multiplication*/
-		  /*
+#ifdef HYPRE_USE_CUDA
+		  zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+										 A_dbox, start, stride, Ai,Ap,diag_product);
+#else
          zypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start, stride, Ai);
 #ifdef HYPRE_USING_OPENMP
@@ -928,9 +931,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
             diag_product *= Ap[Ai];
          }
          zypre_BoxLoop1End(Ai);
-		  */
-		 zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-										 A_dbox, start, stride, Ai,Ap,diag_product);
+#endif
       }
    }
 

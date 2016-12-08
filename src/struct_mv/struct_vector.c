@@ -187,7 +187,7 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
    hypre_StructVectorInitializeShell(vector);
 
    //data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
-   hypre_DataCTAlloc(data, HYPRE_Complex, hypre_StructVectorDataSize(vector));
+   data = hypre_DataCTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector));
 
    hypre_StructVectorInitializeData(vector, data);
    hypre_StructVectorDataAlloced(vector) = 1;
@@ -1263,7 +1263,7 @@ hypre_StructVectorClone(
    hypre_StructVectorDataSize(y) = data_size;
    hypre_StructVectorDataSpace(y) = hypre_BoxArrayDuplicate(data_space);
    //hypre_StructVectorData(y) = hypre_CTAlloc(HYPRE_Complex,data_size);
-   hypre_DataCTAlloc(hypre_StructVectorData(y), HYPRE_Complex, data_size);
+   hypre_StructVectorData(y) = hypre_DataCTAlloc(HYPRE_Complex, data_size);
    
    hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size);
 

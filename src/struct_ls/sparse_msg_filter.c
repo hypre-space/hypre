@@ -382,8 +382,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 	   HYPRE_Int  stencil_shape_h[3*stencil_size];
 	   HYPRE_Complex * data_A = hypre_StructMatrixData(A);
 
-	   hypre_DataTAlloc(indices_d, HYPRE_Int, stencil_size);
-	   hypre_DataTAlloc(stencil_shape_d, HYPRE_Int, 3*stencil_size);
+	   indices_d = hypre_DataTAlloc(HYPRE_Int, stencil_size);
+	   stencil_shape_d = hypre_DataTAlloc(HYPRE_Int, 3*stencil_size);
 
 	   for (si = 0; si < stencil_size; si++)
 	   {

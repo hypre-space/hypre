@@ -27,7 +27,7 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
                       hypre_StructMatrix *PT,
                       hypre_StructGrid   *coarse_grid )
 {
-   hypre_StructMatrix    *RAP = NULL;
+   hypre_StructMatrix    *RAP;
    hypre_StructStencil   *stencil;
 
 #if NEWRAP
@@ -36,7 +36,7 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
 #endif
 
    stencil = hypre_StructMatrixStencil(A);
-   
+
 #if OLDRAP
    switch (hypre_StructStencilNDim(stencil)) 
    {
@@ -66,7 +66,7 @@ hypre_SMGCreateRAPOp( hypre_StructMatrix *R,
          break;
    } 
 #endif
-   
+
    return RAP;
 }
 
@@ -91,6 +91,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
    hypre_StructStencil   *stencil;
 
    stencil = hypre_StructMatrixStencil(A);
+
 #if OLDRAP
    switch (hypre_StructStencilNDim(stencil)) 
    {
@@ -174,7 +175,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
    }
 #endif
    hypre_StructMatrixAssemble(Ac);
-   
+
    return hypre_error_flag;
 }
 

@@ -427,7 +427,7 @@ hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
    hypre_StructMatrixInitializeShell(matrix);
 
    //data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
-   hypre_DataCTAlloc(data, HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
+   data = hypre_DataCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
 
    hypre_StructMatrixInitializeData(matrix, data);
    hypre_StructMatrixDataAlloced(matrix) = 1;

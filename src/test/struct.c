@@ -2876,7 +2876,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
       iupper = hypre_BoxIMax(box);
 	  
        HYPRE_Real *val_D;
-	   hypre_DataTAlloc(val_D, HYPRE_Real, volume);
+	   val_D = hypre_DataTAlloc(HYPRE_Real, volume);
 	   hypre_DataCopyToData(values,val_D,HYPRE_Real,volume);
 	   
       HYPRE_StructVectorSetBoxValues(zvector, ilower, iupper, val_D);
@@ -2979,7 +2979,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             iupper = hypre_BoxIMax(box);
 
              HYPRE_Real *val_D;
-			 hypre_DataTAlloc(val_D, HYPRE_Real, stencil_size*volume);
+			 val_D = hypre_DataTAlloc(HYPRE_Real, stencil_size*volume);
 			 hypre_DataCopyToData(values,val_D,HYPRE_Real,stencil_size*volume);
 				
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
@@ -3331,7 +3331,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
                stencil_indices[0] = d;
 
                 HYPRE_Real *val_D;
-				hypre_DataTAlloc(val_D, HYPRE_Real, vol[ib]);
+				val_D = hypre_DataTAlloc(HYPRE_Real, vol[ib]);
 				hypre_DataCopyToData(values,val_D,HYPRE_Real,vol[ib]);
                 
                HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
