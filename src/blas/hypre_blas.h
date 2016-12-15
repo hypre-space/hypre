@@ -49,6 +49,9 @@ extern "C" {
 #define s_cmp    hypre_F90_NAME_BLAS(s_cmp,S_CMP)
 #define s_copy   hypre_F90_NAME_BLAS(s_copy,S_COPY)
 
+#define lsame_ hypre_lsame_
+#define xerbla_ hypre_xerbla_
+
 /* blas_utils.c */
 logical lsame_ ( const char *ca ,const char *cb );
 HYPRE_Int xerbla_ ( const char *srname , integer *info );

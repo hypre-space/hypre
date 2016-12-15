@@ -374,7 +374,7 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
 				iP1 = iP - yOffsetP + xOffsetP;
 				rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
 
-				iP1 = iP1 = iP - xOffsetP;
+				iP1 = iP - xOffsetP;
 				rap_cw[iAc] =          a_cw[iA]
 					+          rb[iR] * a_cw[iAm1] * pb[iP1]
 					+          ra[iR] * a_cw[iAp1] * pa[iP1];
@@ -399,7 +399,7 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
              *--------------------------------------------------------------*/
 
          default:
-              //FIXME:: error: An explicit __device__ lambda can only capture up to 30 variables
+
             hypre_BoxGetSize(cgrid_box, loop_size);
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
@@ -411,11 +411,10 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
-                HYPRE_Int iAm1,iAp1,iP1;
-               iAm1 = iA - yOffsetA;
-               iAp1 = iA + yOffsetA;
+               HYPRE_Int iAm1 = iA - yOffsetA;
+               HYPRE_Int iAp1 = iA + yOffsetA;
 
-               iP1 = iP - yOffsetP - xOffsetP;
+               HYPRE_Int iP1 = iP - yOffsetP - xOffsetP;
                rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
                   +           rb[iR] * a_csw[iAm1]
                   +                    a_csw[iA]  * pa[iP1];
@@ -662,7 +661,7 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
           *--------------------------------------------------------------*/
 
          case 5:
-              //FIXME:: error: An explicit __device__ lambda can only capture up to 30 variables
+ 
             hypre_BoxGetSize(cgrid_box, loop_size);
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
@@ -838,8 +837,7 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
 #endif
          hypre_BoxLoop1For(iAc)
          {
-             HYPRE_Int iAcm1;
-            iAcm1 = iAc - xOffset;
+            HYPRE_Int iAcm1 = iAc - xOffset;
                
             rap_cw[iAc] += (rap_cse[iAcm1] + rap_csw[iAc]);
             rap_cc[iAc] += (2.0 * rap_cs[iAc]);

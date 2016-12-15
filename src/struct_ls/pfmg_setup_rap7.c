@@ -367,7 +367,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
       if ( constant_coefficient==0 )
       {
          hypre_BoxGetSize(cgrid_box, loop_size);
-          /*FIXME: error: An explicit __device__ lambda can only capture up to 30 variables*/
+
          hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                              P_dbox, cstart, stridec, iP,
                              A_dbox, fstart, stridef, iA,
