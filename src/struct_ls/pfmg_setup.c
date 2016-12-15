@@ -926,11 +926,11 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai) reduction(*:diag_product) HYPRE_SMP_SCHEDULE
 #endif
-         zypre_BoxLoop1For(Ai)
+         hypre_BoxLoop1For(Ai)
          {
             diag_product *= Ap[Ai];
          }
-         zypre_BoxLoop1End(Ai);
+         hypre_BoxLoop1End(Ai);
 #endif
       }
    }
