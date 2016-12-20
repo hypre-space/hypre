@@ -1767,10 +1767,9 @@ hypre_StructAssumedPartitionGetProcsFromBox(
       hypre_SetIndex(stride, 1);
       hypre_BoxGetSize(part_box, loop_size);
       hypre_BoxSetExtents(part_dbox, stride, div);
-       /*FIXME: It is sequential with zypre_BoxLoopSetOneBlock()*/
-      zypre_BoxLoop1Begin(ndim, loop_size, part_dbox, start, stride, part_num);
-      zypre_BoxLoopSetOneBlock();
-      zypre_BoxLoop1For(part_num)
+      hypre_SerialBoxLoop1Begin(ndim, loop_size, part_dbox, start, stride, part_num);
+      //zypre_BoxLoopSetOneBlock();
+      //zypre_BoxLoop1For(part_num)
       {
          /*convert the partition number to a processor number*/
          if (part_num < (2*extra))
@@ -1791,7 +1790,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
          proc_ids[num_proc_ids] = adj_proc_id + proc_start;
          num_proc_ids++;
       }
-      zypre_BoxLoop1End(part_num);
+      hypre_SerialBoxLoop1End(part_num);
 
    } /*end of for each region loop*/
 

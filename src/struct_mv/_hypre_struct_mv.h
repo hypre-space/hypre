@@ -1492,6 +1492,34 @@ int *p = NULL; *p = 1;\
 AxCheckError(cudaDeviceSynchronize());\
 }
 
+#define hypre_SerialBoxLoop1Begin(ndim, loop_size,			\
+				  dbox1, start1, stride1, i1)		\
+{									\
+        HYPRE_Int hypre__tot = 1.0;						\
+	const size_t block_size = 256;					\
+	HYPRE_Int nd = ndim;						\
+	for (HYPRE_Int d = 0;d < ndim;d ++)				\
+	{								\
+	    hypre__tot *= loop_size[d];					\
+	}								\
+	HYPRE_Int idx;							\
+	for (idx = 0;idx < hypre__tot;idx ++)				\
+	{								\
+	    zypre_BoxLoopCUDADeclare()											\
+	    HYPRE_Int hypre_boxD1 = 1.0;				\
+	    HYPRE_Int i1 = 0;						\
+	    for (d = 0;d < ndim;d ++)					\
+	    {								\
+	      local_idx  = idx_local % loop_size[d];			\
+	      idx_local  = idx_local / loop_size[d];			\
+	      i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
+	      hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);			\
+	    }
+
+#define hypre_SerialBoxLoop1End(i1)				\
+        }								\
+}
+
 #define zypre_newBoxLoop0For() {}
 
 #define zypre_newBoxLoop1For(i1) {}
