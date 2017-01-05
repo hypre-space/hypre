@@ -429,7 +429,7 @@ do
          ;;
       -mpi)
          shift
-         RunPrefix=$1
+         MPIRunPrefix=$1
          shift
          ;;
       -nthreads)
@@ -478,6 +478,13 @@ do
                      ;;
                esac
                if [ -r $DirPart/$FilePart.jobs ] ; then
+
+                  # Check for an mpirun routine
+                  if [ x$MPIRunprefix != "x" ]
+                  then
+                     RunPrefix=$MPIRunPrefix
+                  fi
+
                   StartCrunch $CurDir $DirPart $FilePart $CONVTOL
                else
                   printf "%s: test command file %s/%s.jobs does not exist\n" \
