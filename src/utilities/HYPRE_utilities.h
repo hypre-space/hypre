@@ -46,22 +46,34 @@ extern "C" {
 #ifdef HYPRE_BIGINT
 typedef long long int HYPRE_Int;
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
-#else 
+
+#else /* default */
 typedef int HYPRE_Int;
 #define HYPRE_MPI_INT MPI_INT
 #endif
 
 /*--------------------------------------------------------------------------
- * Complex stuff
+ * Real and Complex types
  *--------------------------------------------------------------------------*/
 
+#ifdef HYPRE_SINGLE
+typedef float HYPRE_Real;
+#define HYPRE_MPI_REAL MPI_FLOAT
+
+#elif HYPRE_LONG_DOUBLE
+typedef long double HYPRE_Real;
+#define HYPRE_MPI_REAL MPI_LONG_DOUBLE
+
+#else /* default */
 typedef double HYPRE_Real;
 #define HYPRE_MPI_REAL MPI_DOUBLE
+#endif
 
 #ifdef HYPRE_COMPLEX
 typedef double _Complex HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
-#else 
+
+#else  /* default */
 typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
 #endif
