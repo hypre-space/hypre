@@ -109,10 +109,10 @@ HYPRE_Real randomized_select(HYPRE_Real *a, HYPRE_Int p, HYPRE_Int r, HYPRE_Int 
 }
 
 /*--------------------------------------------------------------------------
- * shell_sort - sorts x[0:n-1] in place, ascending order
+ * hypre_shell_sort - sorts x[0:n-1] in place, ascending order
  *--------------------------------------------------------------------------*/
 
-void shell_sort(const HYPRE_Int n, HYPRE_Int x[])
+void hypre_shell_sort(const HYPRE_Int n, HYPRE_Int x[])
 {
     HYPRE_Int m, max, j, k, itemp;
 

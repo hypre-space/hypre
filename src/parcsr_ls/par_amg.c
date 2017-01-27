@@ -76,7 +76,9 @@ hypre_BoomerAMGCreate()
    HYPRE_Real   tol;
 
    HYPRE_Int      num_sweeps;  
-   HYPRE_Int      relax_type;   
+   HYPRE_Int      relax_down;   
+   HYPRE_Int      relax_up;   
+   HYPRE_Int      relax_coarse;   
    HYPRE_Int      relax_order;   
    HYPRE_Real   relax_wt;
    HYPRE_Real   outer_wt;
@@ -105,6 +107,8 @@ hypre_BoomerAMGCreate()
    HYPRE_Int        simple;
    HYPRE_Real   add_trunc_factor;
    HYPRE_Int      add_P_max_elmts;
+   HYPRE_Int      add_rlx_type;
+   HYPRE_Real   add_rlx_wt;
 
    /* log info */
    HYPRE_Int      num_iterations;
@@ -187,8 +191,10 @@ hypre_BoomerAMGCreate()
    tol = 1.0e-7;
 
    num_sweeps = 1;
-   relax_type = 3;
-   relax_order = 1;
+   relax_down = 13;
+   relax_up = 14;
+   relax_coarse = 9;
+   relax_order = 0;
    relax_wt = 1.0;
    outer_wt = 1.0;
 
@@ -202,6 +208,8 @@ hypre_BoomerAMGCreate()
    simple = -1;
    add_trunc_factor = 0.0;
    add_P_max_elmts = 0;
+   add_rlx_type = 18;
+   add_rlx_wt = 1.0;
 
    /* log info */
    num_iterations = 0;
@@ -282,7 +290,9 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetCycleType(amg_data, cycle_type);
    hypre_BoomerAMGSetTol(amg_data, tol); 
    hypre_BoomerAMGSetNumSweeps(amg_data, num_sweeps);
-   hypre_BoomerAMGSetRelaxType(amg_data, relax_type);
+   hypre_BoomerAMGSetCycleRelaxType(amg_data, relax_down, 1);
+   hypre_BoomerAMGSetCycleRelaxType(amg_data, relax_up, 2);
+   hypre_BoomerAMGSetCycleRelaxType(amg_data, relax_coarse, 3);
    hypre_BoomerAMGSetRelaxOrder(amg_data, relax_order);
    hypre_BoomerAMGSetRelaxWt(amg_data, relax_wt);
    hypre_BoomerAMGSetOuterWt(amg_data, outer_wt);
@@ -300,6 +310,8 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetSimple(amg_data, simple);
    hypre_BoomerAMGSetMultAddPMaxElmts(amg_data, add_P_max_elmts);
    hypre_BoomerAMGSetMultAddTruncFactor(amg_data, add_trunc_factor);
+   hypre_BoomerAMGSetAddRelaxType(amg_data, add_rlx_type);
+   hypre_BoomerAMGSetAddRelaxWt(amg_data, add_rlx_wt);
    hypre_ParAMGDataLambda(amg_data) = NULL;
    hypre_ParAMGDataXtilde(amg_data) = NULL;
    hypre_ParAMGDataRtilde(amg_data) = NULL;
@@ -405,6 +417,7 @@ hypre_BoomerAMGDestroy( void *data )
    void *amg = hypre_ParAMGDataCoarseSolver(amg_data);
    MPI_Comm new_comm = hypre_ParAMGDataNewComm(amg_data);
    HYPRE_Int i;
+   HYPRE_Int *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
 
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.destroy");
    
@@ -423,8 +436,19 @@ hypre_BoomerAMGDestroy( void *data )
       hypre_TFree (hypre_ParAMGDataNumGridSweeps(amg_data));
       hypre_ParAMGDataNumGridSweeps(amg_data) = NULL; 
    }
-   if (hypre_ParAMGDataGridRelaxType(amg_data))
+   if (grid_relax_type)
    {
+      HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+      if (grid_relax_type[1] == 15 || grid_relax_type[3] == 15 )
+      {
+         if (grid_relax_type[1] == 15)
+	    for (i=0; i < num_levels; i++)
+	       HYPRE_ParCSRPCGDestroy(smoother[i]);
+         if (grid_relax_type[3] == 15 && grid_relax_type[1] != 15)
+	    HYPRE_ParCSRPCGDestroy(smoother[num_levels-1]);
+         hypre_TFree(smoother);
+      }
+
       hypre_TFree (hypre_ParAMGDataGridRelaxType(amg_data));
       hypre_ParAMGDataGridRelaxType(amg_data) = NULL; 
    }
@@ -2690,6 +2714,46 @@ hypre_BoomerAMGSetMultAddPMaxElmts( void     *data,
       return hypre_error_flag;
    } 
    hypre_ParAMGDataMultAddPMaxElmts(amg_data) = add_P_max_elmts;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates Relaxtion Type for Additive Cycle
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetAddRelaxType( void     *data,
+                            HYPRE_Int       add_rlx_type )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataAddRelaxType(amg_data) = add_rlx_type;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates Relaxation Weight for Additive Cycle
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetAddRelaxWt( void     *data,
+                            HYPRE_Real       add_rlx_wt )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataAddRelaxWt(amg_data) = add_rlx_wt;
 
    return hypre_error_flag;
 }

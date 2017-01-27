@@ -1244,6 +1244,27 @@ HYPRE_BoomerAMGSetMultAddTruncFactor( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAddRelaxWt
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAddRelaxWt( HYPRE_Solver  solver,
+                                  HYPRE_Real        add_rlx_wt  )
+{
+   return( hypre_BoomerAMGSetAddRelaxWt( (void *) solver, add_rlx_wt ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAddRelaxType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAddRelaxType( HYPRE_Solver  solver,
+                                  HYPRE_Int        add_rlx_type  )
+{
+   return( hypre_BoomerAMGSetAddRelaxType( (void *) solver, add_rlx_type ) );
+}
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetAggP12TruncFactor
  *--------------------------------------------------------------------------*/
 

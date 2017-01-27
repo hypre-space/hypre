@@ -155,6 +155,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Int additive;
    HYPRE_Int mult_additive;
    HYPRE_Int simple;
+   HYPRE_Int add_rlx;
+   HYPRE_Real add_rlx_wt;
  
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -173,6 +175,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    additive = hypre_ParAMGDataAdditive(amg_data);
    mult_additive = hypre_ParAMGDataMultAdditive(amg_data);
    simple = hypre_ParAMGDataSimple(amg_data);
+   add_rlx = hypre_ParAMGDataAddRelaxType(amg_data);
+   add_rlx_wt = hypre_ParAMGDataAddRelaxWt(amg_data);
 
 
    A_block_array = hypre_ParAMGDataABlockArray(amg_data);
@@ -220,55 +224,55 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
 	hypre_printf(" Coarsening Type = Cleary-Luby-Jones-Plassman\n");
       }
-      else if (abs(coarsen_type) == 1) 
+      else if (hypre_abs(coarsen_type) == 1) 
       {
 	hypre_printf(" Coarsening Type = Ruge\n");
       }
-      else if (abs(coarsen_type) == 2) 
+      else if (hypre_abs(coarsen_type) == 2) 
       {
 	hypre_printf(" Coarsening Type = Ruge2B\n");
       }
-      else if (abs(coarsen_type) == 3) 
+      else if (hypre_abs(coarsen_type) == 3) 
       {
 	hypre_printf(" Coarsening Type = Ruge3\n");
       }
-      else if (abs(coarsen_type) == 4) 
+      else if (hypre_abs(coarsen_type) == 4) 
       {
 	hypre_printf(" Coarsening Type = Ruge 3c \n");
       }
-      else if (abs(coarsen_type) == 5) 
+      else if (hypre_abs(coarsen_type) == 5) 
       {
 	hypre_printf(" Coarsening Type = Ruge relax special points \n");
       }
-      else if (abs(coarsen_type) == 6) 
+      else if (hypre_abs(coarsen_type) == 6) 
       {
 	hypre_printf(" Coarsening Type = Falgout-CLJP \n");
       }
-      else if (abs(coarsen_type) == 8) 
+      else if (hypre_abs(coarsen_type) == 8) 
       {
 	hypre_printf(" Coarsening Type = PMIS \n");
       }
-      else if (abs(coarsen_type) == 10) 
+      else if (hypre_abs(coarsen_type) == 10) 
       {
 	hypre_printf(" Coarsening Type = HMIS \n");
       }
-      else if (abs(coarsen_type) == 11) 
+      else if (hypre_abs(coarsen_type) == 11) 
       {
 	hypre_printf(" Coarsening Type = Ruge 1st pass only \n");
       }
-      else if (abs(coarsen_type) == 9) 
+      else if (hypre_abs(coarsen_type) == 9) 
       {
 	hypre_printf(" Coarsening Type = PMIS fixed random \n");
       }
-      else if (abs(coarsen_type) == 7) 
+      else if (hypre_abs(coarsen_type) == 7) 
       {
 	hypre_printf(" Coarsening Type = CLJP, fixed random \n");
       }
-      else if (abs(coarsen_type) == 21) /* BM Aug 29, 2006 */
+      else if (hypre_abs(coarsen_type) == 21) /* BM Aug 29, 2006 */
       {
         hypre_printf(" Coarsening Type = CGC \n");
       }
-      else if (abs(coarsen_type) == 22) /* BM Aug 29, 2006 */
+      else if (hypre_abs(coarsen_type) == 22) /* BM Aug 29, 2006 */
       {
         hypre_printf(" Coarsening Type = CGC-E \n");
       }
@@ -931,10 +935,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
               num_grid_sweeps[1],
               num_grid_sweeps[2],(2*num_grid_sweeps[3]));
-         if (grid_relax_type[1] == 0)
-            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      0    0     0 \n");
-         else
-            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:     18   18    18 \n");
+         hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d   %2d \n", add_rlx, add_rlx, add_rlx);
+         if (add_rlx == 0) hypre_printf( "   Relaxation Weight:   %e \n", add_rlx_wt);
          hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
          hypre_printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)
@@ -1004,10 +1006,8 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
               num_grid_sweeps[1],
               num_grid_sweeps[2],(2*num_grid_sweeps[3]));
-         if (grid_relax_type[1] == 0)
-            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:      0    0     0 \n");
-         else
-            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:     18   18    18 \n");
+         hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d   %2d \n", add_rlx, add_rlx, add_rlx);
+         if (add_rlx == 0) hypre_printf( "   Relaxation Weight:   %e \n", add_rlx_wt);
          hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
          hypre_printf( "                  Pre-CG relaxation (down):");
          for (j = 0; j < num_grid_sweeps[1]; j++)

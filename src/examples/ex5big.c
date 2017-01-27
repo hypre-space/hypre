@@ -308,9 +308,9 @@ int main (int argc, char *argv[])
 
       /* Set some parameters (See Reference Manual for more parameters) */
       HYPRE_BoomerAMGSetPrintLevel(solver, 3);  /* print solve info + parameters */
-      HYPRE_BoomerAMGSetCoarsenType(solver, 6); /* Falgout coarsening */
-      HYPRE_BoomerAMGSetOldDefault(solver);
+      HYPRE_BoomerAMGSetOldDefault(solver); /* Falgout coarsening with modified classical interpolation */
       HYPRE_BoomerAMGSetRelaxType(solver, 3);   /* G-S/Jacobi hybrid relaxation */
+      HYPRE_BoomerAMGSetRelaxOrder(solver, 1);   /* Uses C/F relaxation */
       HYPRE_BoomerAMGSetNumSweeps(solver, 1);   /* Sweeeps on each level */
       HYPRE_BoomerAMGSetMaxLevels(solver, 20);  /* maximum number of levels */
       HYPRE_BoomerAMGSetTol(solver, 1e-7);      /* conv. tolerance */

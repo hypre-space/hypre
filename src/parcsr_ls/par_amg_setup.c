@@ -82,6 +82,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int      simple = hypre_ParAMGDataSimple(amg_data);
    HYPRE_Int      add_P_max_elmts = hypre_ParAMGDataMultAddPMaxElmts(amg_data);
    HYPRE_Real     add_trunc_factor = hypre_ParAMGDataMultAddTruncFactor(amg_data);
+   HYPRE_Int      add_rlx = hypre_ParAMGDataAddRelaxType(amg_data);
+   HYPRE_Real      add_rlx_wt = hypre_ParAMGDataAddRelaxWt(amg_data);
 
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array;
  
@@ -860,12 +862,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                if (block_mode)
                {
-                  hypre_BoomerAMGBlockCreateNodalA( A_block_array[level], abs(nodal), nodal_diag, &AN);
+                  hypre_BoomerAMGBlockCreateNodalA( A_block_array[level], hypre_abs(nodal), nodal_diag, &AN);
                }
                else
                {
                   hypre_BoomerAMGCreateNodalA(A_array[level],num_functions,
-                                              dof_func_array[level], abs(nodal), nodal_diag, &AN);
+                                              dof_func_array[level], hypre_abs(nodal), nodal_diag, &AN);
                }
 
                /* dof array not needed for creating S because we pass in that 
@@ -1899,13 +1901,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             HYPRE_Real *d_diag;
             hypre_ParCSRMatrix *Q = NULL;
             Q = hypre_ParMatmul(A_array[level],P);
-            if (grid_relax_type[1] == 0)
+            if (add_rlx == 0)
             {
                hypre_CSRMatrix *lvl_Adiag = hypre_ParCSRMatrixDiag(A_array[level]);
                HYPRE_Int lvl_nrows = hypre_CSRMatrixNumRows(lvl_Adiag);
                HYPRE_Int *lvl_i = hypre_CSRMatrixI(lvl_Adiag);
                HYPRE_Real *lvl_data = hypre_CSRMatrixData(lvl_Adiag);
-               HYPRE_Real w_inv = 1.0/hypre_ParAMGDataRelaxWeight(amg_data)[level];
+               HYPRE_Real w_inv = 1.0/add_rlx_wt;
+               /*HYPRE_Real w_inv = 1.0/hypre_ParAMGDataRelaxWeight(amg_data)[level];*/
                d_diag = hypre_CTAlloc(HYPRE_Real, lvl_nrows);
                for (i=0; i < lvl_nrows; i++)
 		  d_diag[i] = lvl_data[lvl_i[i]]*w_inv;
@@ -2191,7 +2194,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_ParAMGDataSmoother(amg_data) = smoother;
    }
 
-   for (j = 0; j < num_levels; j++)
+   if (addlvl == -1) addlvl = num_levels;
+   for (j = 0; j < addlvl; j++)
    {
       if (num_threads == 1)
       {
@@ -2220,8 +2224,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
          }
-         else if (addlvl > -1 && level >= addlvl)
-            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
       }
       else
       {
@@ -2250,10 +2252,20 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
          }
-         else if (addlvl > -1 && level >= addlvl)
-            hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
-
       }
+   }
+   for (j = addlvl; j < num_levels; j++)
+   {
+      if (add_rlx == 18 )
+      {
+         if (num_threads == 1)
+               hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
+         else
+               hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
+      }
+   }
+   for (j = 0; j < num_levels; j++)
+   {
       if (grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || (grid_relax_type[3] == 16 && j== (num_levels-1)))
       {
          HYPRE_Int scale = 1;
@@ -2266,10 +2278,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
      {
         
         HYPRE_ParCSRPCGCreate(comm, &smoother[j]);
-        HYPRE_ParCSRPCGSetup(smoother[j],
+        /*HYPRE_ParCSRPCGSetup(smoother[j],
                              (HYPRE_ParCSRMatrix) A_array[j],
                              (HYPRE_ParVector) F_array[j],
-                             (HYPRE_ParVector) U_array[j]);
+                             (HYPRE_ParVector) U_array[j]);*/
         
         HYPRE_PCGSetTol(smoother[j], 1e-12); /* make small */
         HYPRE_PCGSetTwoNorm(smoother[j], 1); /* use 2-norm*/

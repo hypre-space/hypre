@@ -1109,7 +1109,7 @@ hypre_StructAssumedPartitionCreate(
       }
       else
       {
-         while (proc_array[i] <=1 && i < size) /* size is the number of regions */
+         while (i < size && proc_array[i] <=1) /* size is the number of regions */
          {
             i++;
          }
