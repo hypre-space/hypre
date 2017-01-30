@@ -1125,6 +1125,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       hypre_BoxLoop0For()
       {
          hypre_BoxLoopGetIndex(index);
+         hypre_AddIndexes(index, hypre_BoxIMin(vbox), ndim, index);
          hypre_SStructUMatrixSetValues(matrix, part, index, var,
                                        nentries, entries, values, action);
          values += nentries;

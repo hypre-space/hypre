@@ -21,10 +21,10 @@ cat <<EOF
    where: {test_dir} is the name of some number of runtest directories
           -h|-help   prints this usage information and exits
 
-   This script removes the '*err*', '*out*', and '*log*' files from the
-   specified runtest directories.  If no directory is specified, it is assumed
-   that the script is being run from within the hypre 'test' directory, and all
-   of the 'TEST_*' directories are cleaned.
+   This script checks the error files for the runtest.sh tests in the specified
+   runtest directories.  If no directory is specified, it is assumed that the
+   script is being run from within the hypre 'test' directory, and all of the
+   'TEST_*' directories are checked.
 
    Example usage: $0 TEST_struct TEST_ij
 
@@ -43,10 +43,22 @@ else
 fi
 $RESET                     # Restore nullglob setting
 
+echo ""
 for testdir in $testdirs
 do
-   rm -f $testdir/*err*
-   rm -f $testdir/*out*
-   rm -f $testdir/*log*
-   rm -f $testdir/*.fil
+   files=`find $testdir -name '*.err'`
+   if [ -n "$files" ]
+   then
+      for file in $files
+      do
+         SZ=`ls -l $file | awk '{print $5}'`
+         if [ $SZ != 0 ]
+         then
+            echo "FAILED : $file  ($SZ)"
+         else
+            echo "    OK : $file"
+         fi
+      done
+      echo ""
+   fi
 done

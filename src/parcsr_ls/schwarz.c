@@ -1750,7 +1750,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   HYPRE_Int *i_domain_dof, *j_domain_dof;
   HYPRE_Real *domain_matrixinverse;
   HYPRE_Int num_domains;
-  hypre_CSRMatrix *domain_structure;  
+  hypre_CSRMatrix *domain_structure = NULL;  
 
   HYPRE_Int *i_dof_dof = hypre_CSRMatrixI(A);
   HYPRE_Int *j_dof_dof = hypre_CSRMatrixJ(A);
@@ -1785,6 +1785,7 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   HYPRE_Int cnt;
 
 
+
   /* --------------------------------------------------------------------- */
 
   /*=======================================================================*/
@@ -1794,6 +1795,14 @@ hypre_AMGCreateDomainDof(hypre_CSRMatrix     *A,
   /*hypre_printf("----------- create artificials domain by agglomeration;  ======\n");
 */
 
+  if (num_dofs == 0)
+  {
+     *domain_structure_pointer = domain_structure;
+
+     *piv_pointer = piv;
+
+     return hypre_error_flag;
+  }
 
   i_aggregate_dof = hypre_CTAlloc(HYPRE_Int,num_dofs+1);
   j_aggregate_dof= hypre_CTAlloc(HYPRE_Int,num_dofs);
@@ -3458,7 +3467,7 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
                             HYPRE_Int **piv_pointer, HYPRE_Int use_nonsymm)
 
 {
-  hypre_CSRMatrix *domain_structure;
+  hypre_CSRMatrix *domain_structure = NULL;
   HYPRE_Int *i_domain_dof, *j_domain_dof;
   HYPRE_Real *domain_matrixinverse;
   HYPRE_Int num_domains;
@@ -3521,6 +3530,15 @@ hypre_ParAMGCreateDomainDof(hypre_ParCSRMatrix   *A,
   HYPRE_Int num_procs, my_id;
 
 
+
+  if (num_variables == 0)
+  {
+     *domain_structure_pointer = domain_structure;
+
+     *piv_pointer = piv;
+
+     return hypre_error_flag;
+  }
 
 
   hypre_MPI_Comm_size(hypre_ParCSRMatrixComm(A),&num_procs);

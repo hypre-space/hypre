@@ -64,6 +64,10 @@ extern "C" {
 #define hypre_min(a,b)  (((a)<(b)) ? (a) : (b))
 #endif
 
+#ifndef hypre_abs
+#define hypre_abs(a)  (((a)>0) ? (a) : -(a))
+#endif
+
 #ifndef hypre_round
 #define hypre_round(x)  ( ((x) < 0.0) ? ((HYPRE_Int)(x - 0.5)) : ((HYPRE_Int)(x + 0.5)) )
 #endif
@@ -682,9 +686,6 @@ HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define LIST_HEAD -1
-#define LIST_TAIL -2
 
 struct double_linked_list
 {

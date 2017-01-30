@@ -1855,6 +1855,38 @@ hypre_F90_IFACE(hypre_boomeramgsetmultaddpmx, HYPRE_BOOMERAMGSETMULTADDPMX)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAddRelaxType
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetaddrlxtype, HYPRE_BOOMERAMGSETADDRLXTYPE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *add_rlx_type,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGSetAddRelaxType(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (add_rlx_type) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAddRelaxWt
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetaddrlxwt, HYPRE_BOOMERAMGSETADDRLXWT)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Real *add_rlx_wt,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGSetAddRelaxWt(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassReal (add_rlx_wt) ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetSeqThreshold
  *--------------------------------------------------------------------------*/
 

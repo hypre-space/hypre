@@ -57,7 +57,7 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen,
     hypre_MPI_Request request;
     HYPRE_Int i, j, this_pe;
 
-    shell_sort(reqlen, reqind);
+    hypre_shell_sort(reqlen, reqind);
 
     *num_requests = 0;
 
