@@ -14,7 +14,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#ifdef HYPRE_BIGINT
+// #ifdef HYPRE_BIGINT
 
 /* these prototypes are missing by default for some compilers */
 int vscanf( const char *format , va_list arg );
@@ -42,25 +42,39 @@ new_format( const char *format,
       }
       else if (foundpercent)
       {
+         if (*fp == 'l')
+         {
+            fp++; /* remove 'l' and maybe add it back in switch statement */
+         }
          switch(*fp)
          {
             case 'd':
+#ifdef HYPRE_BIGINT
                *nfp = 'l'; nfp++;
                *nfp = 'l'; nfp++;
-            case 'c':
+#endif
+               break;
+            case 'c': break;
             case 'e':
             case 'E':
             case 'f':
             case 'g':
             case 'G':
-            case 'i':
-            case 'n':
-            case 'o':
-            case 'p':
-            case 's':
-            case 'u':
-            case 'x':
-            case 'S':
+#ifdef HYPRE_SINGLE                /* no modifier */
+#elif HYPRE_LONG_DOUBLE            /* modify with 'L' */
+               *nfp = 'L'; nfp++;
+#else                              /* modify with 'l' (default is double) */
+               *nfp = 'l'; nfp++;
+#endif
+               break;
+            case 'i': break;
+            case 'n': break;
+            case 'o': break;
+            case 'p': break;
+            case 's': break;
+            case 'u': break;
+            case 'x': break;
+            case 'S': break;
             case '%':
                foundpercent = 0;
          }
@@ -186,9 +200,9 @@ hypre_sscanf( char *s, const char *format, ...)
    return ierr;
 }
 
-#else
-
-/* this is used only to eliminate compiler warnings */
-HYPRE_Int hypre_printf_empty;
-
-#endif
+// #else
+// 
+// /* this is used only to eliminate compiler warnings */
+// HYPRE_Int hypre_printf_empty;
+// 
+// #endif
