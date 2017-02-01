@@ -45,19 +45,23 @@ new_format( const char *format,
          if (*fp == 'l')
          {
             fp++; /* remove 'l' and maybe add it back in switch statement */
+            if (*fp == 'l')
+            {
+               fp++; /* remove second 'l' if present */
+            }
          }
          switch(*fp)
          {
             case 'd':
+            case 'i':
 #ifdef HYPRE_BIGINT
                *nfp = 'l'; nfp++;
                *nfp = 'l'; nfp++;
 #endif
-               break;
-            case 'c': break;
+               foundpercent = 0; break;
+            case 'f':
             case 'e':
             case 'E':
-            case 'f':
             case 'g':
             case 'G':
 #ifdef HYPRE_SINGLE                /* no modifier */
@@ -66,22 +70,22 @@ new_format( const char *format,
 #else                              /* modify with 'l' (default is double) */
                *nfp = 'l'; nfp++;
 #endif
-               break;
-            case 'i': break;
-            case 'n': break;
-            case 'o': break;
-            case 'p': break;
-            case 's': break;
-            case 'u': break;
-            case 'x': break;
-            case 'S': break;
+               foundpercent = 0; break;
+            case 'c':
+            case 'n':
+            case 'o':
+            case 'p':
+            case 's':
+            case 'u':
+            case 'x':
+            case 'X':
             case '%':
-               foundpercent = 0;
+               foundpercent = 0; break;
          }
       }
       *nfp = *fp; nfp++;
    }
-   *nfp = *fp; nfp++;
+   *nfp = *fp;
 
    *newformat_ptr = newformat;
 

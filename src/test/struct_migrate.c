@@ -362,7 +362,7 @@ main( hypre_int argc,
 
    if (myid == 0)
    {
-      printf("\nCheck = %1.0f (success = 0)\n\n", check);
+      hypre_printf("\nCheck = %1.0f (success = 0)\n\n", check);
    }
 
    /*-----------------------------------------------------------
