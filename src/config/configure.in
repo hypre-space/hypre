@@ -147,6 +147,8 @@ hypre_using_openmp=no
 hypre_using_insure=no
 
 hypre_using_caliper=no
+hypre_user_gave_caliper_lib=no
+hypre_user_gave_caliper_inc=no
 
 dnl *********************************************************************
 dnl * Initialize flag-check variables
@@ -770,32 +772,30 @@ AS_HELP_STRING([--with-MPI],
 AC_ARG_WITH(caliper,
 AS_HELP_STRING([--with-caliper],
                [Use Caliper instrumentation (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_using_caliper=yes ;;
-    no)  hypre_using_caliper=no ;;
-    *)   hypre_using_caliper=yes ;;
- esac]
-)
-if test "$hypre_using_caliper" = "yes"
-then
-  AC_DEFINE(HYPRE_USING_CALIPER, 1, [Using Caliper instrumentation])
-fi
+               [hypre_using_caliper=yes],
+               [with-caliper=no])
 
-AC_ARG_WITH(caliper-include-dir,
-AS_HELP_STRING([--with-caliper-include-dir=DIR],
+AS_IF([test "x$with_caliper" = "xyes"],
+      [AC_DEFINE(HYPRE_USING_CALIPER, 1, [Using Caliper instrumentation])],
+      [])
+
+AC_ARG_WITH(caliper-include,
+AS_HELP_STRING([--with-caliper-include=DIR],
                [Directory where Caliper is installed.]),
 [for caliper_inc_dir in $withval; do
     CALIPER_INCLUDE="-I$caliper_inc_dir $CALIPER_INCLUDE"
- done]
+ done;
+ hypre_user_gave_caliper_inc=yes]
 )
 
-AC_ARG_WITH(caliper-libs,
-AS_HELP_STRING([--with-caliper-libs=LIBS],
+AC_ARG_WITH(caliper-lib,
+AS_HELP_STRING([--with-caliper-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for Caliper. OK to use -L and -l flags in the list]),
-[for caliper_libs in $withval; do
-    CALIPER_LIBS="$CALIPER_LIBS $caliper_libs"
- done]
+[for caliper_lib in $withval; do
+    CALIPER_LIBS="$CALIPER_LIBS $caliper_lib"
+ done;
+ hypre_user_gave_caliper_lib=yes]
 )
 
 dnl *********************************************************************
@@ -1226,6 +1226,32 @@ dnl   AC_HYPRE_CHECK_USER_BLASLIBS
    fi
 dnl   AC_HYPRE_CHECK_USER_LAPACKLIBS
  fi
+
+
+dnl *********************************************************************
+dnl * Warn if caliper options are incomplete
+dnl *********************************************************************
+if test "$hypre_using_caliper" = "yes"
+then
+   if test "$hypre_user_gave_caliper_inc" != "yes"
+   then
+       AC_MSG_WARN([*******************************************************])
+       AC_MSG_WARN([Configuring with --with-caliper=yes without providing]) 
+       AC_MSG_WARN([--with-caliper-include=<path-to-caliper-install>.])
+       AC_MSG_WARN([Using default user include path.])
+       AC_MSG_WARN([NOTE: Caliper annotations may not work.])
+       AC_MSG_WARN([*******************************************************])
+   fi
+   if test "$hypre_user_gave_caliper_lib" != "yes"
+   then
+       AC_MSG_WARN([*******************************************************])
+       AC_MSG_WARN([Configuring with --with-caliper=yes without providing])
+       AC_MSG_WARN([--with-caliper-lib=<path-to-caliper-lib>.])
+       AC_MSG_WARN([Using default user library path.])
+       AC_MSG_WARN([NOTE: Caliper annotations may not work.])
+       AC_MSG_WARN([*******************************************************])
+   fi
+fi
 
 dnl *********************************************************************
 dnl * Set installation directories
