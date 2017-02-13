@@ -292,6 +292,7 @@ hypre_SStructPGridAssemble( hypre_SStructPGrid  *pgrid )
       if ((t > 0) && (sgrids[t] == NULL))
       {
          HYPRE_StructGridCreate(comm, ndim, &sgrid);
+         hypre_StructGridSetNumGhost(sgrid, hypre_StructGridNumGhost(cell_sgrid));
          boxes = hypre_BoxArrayCreate(0, ndim);
          hypre_SStructVariableGetOffset((hypre_SStructVariable) t,
                                         ndim, varoffset);
@@ -1916,23 +1917,28 @@ hypre_SStructVarToNborVar( hypre_SStructGrid  *grid,
 HYPRE_Int
 hypre_SStructGridSetNumGhost( hypre_SStructGrid  *grid, HYPRE_Int *num_ghost )
 {
+   HYPRE_Int             ndim   = hypre_SStructGridNDim(grid);
    HYPRE_Int             nparts = hypre_SStructGridNParts(grid);
-   HYPRE_Int             nvars ;
-   HYPRE_Int             part  ;
-   HYPRE_Int             var  ;
-   hypre_SStructPGrid    *pgrid;
-   hypre_StructGrid      *sgrid;
+   HYPRE_Int             part, i, t;
+   hypre_SStructPGrid   *pgrid;
+   hypre_StructGrid     *sgrid;
+
+   for (i = 0; i < 2*ndim; i++)
+   {
+      hypre_SStructGridNumGhost(grid)[i] = num_ghost[i];
+   }
 
    for (part = 0; part < nparts; part++)
    {
-
       pgrid = hypre_SStructGridPGrid(grid, part);
-      nvars = hypre_SStructPGridNVars(pgrid);
      
-      for ( var = 0; var < nvars; var++)
+      for (t = 0; t < 8; t++)
       {
-         sgrid = hypre_SStructPGridSGrid(pgrid, var);
-         hypre_StructGridSetNumGhost(sgrid, num_ghost);
+         sgrid = hypre_SStructPGridVTSGrid(pgrid, t);
+         if (sgrid != NULL)
+         {
+            hypre_StructGridSetNumGhost(sgrid, num_ghost);
+         }
       }
    }
 
