@@ -49,7 +49,7 @@ LFLAGS =\
  ${MPILIBFLAGS}\
  ${LAPACKLIBFLAGS}\
  ${BLASLIBFLAGS}\
- ${LIBFLAGS}
+ ${LIBFLAGS} -L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas
 
 ##################################################################
 # Targets
@@ -126,9 +126,9 @@ distclean: clean
 
 # C
 
-ij: ij.o
+ij: ij.o 
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CXX} -o $@ $@.o ${LFLAGS}
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "

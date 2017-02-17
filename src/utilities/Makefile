@@ -60,9 +60,13 @@ FILES =\
  F90_HYPRE_error.c\
  hypre_prefix_sum.c\
  hypre_merge_sort.c\
- hypre_hopscotch_hash.c
+ hypre_hopscotch_hash.c\
+ gpuErrorCheck.c\
+ gpuMem.c\
+ gpuUtils.C
 
 OBJS = ${FILES:.c=.o}
+CPPOBJS= ${FILES:.C=.o}
 
 SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}.so
 
@@ -93,7 +97,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_utilities.a: ${OBJS}
+libHYPRE_utilities.a: ${OBJS} ${CPPOBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ *.o
 	${RANLIB} $@

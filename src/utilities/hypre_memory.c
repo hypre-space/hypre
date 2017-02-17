@@ -17,7 +17,7 @@
  *****************************************************************************/
 
 #include "_hypre_utilities.h"
-
+#include "gpgpu.h"
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
@@ -58,6 +58,9 @@ hypre_MAlloc( size_t size )
       HYPRE_Int threadid = hypre_GetThreadID();
 
       ptr = _umalloc_(size);
+#elif HYPRE_USE_MANAGED
+      gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+      mempush(ptr,size,0);
 #else
       ptr = malloc(size);
 #endif
@@ -94,6 +97,10 @@ hypre_CAlloc( size_t count,
       HYPRE_Int threadid = hypre_GetThreadID();
 
       ptr = _ucalloc_(count, elt_size);
+#elif HYPRE_USE_MANAGED
+      gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+      memset(ptr,0,count*elt_size);
+      mempush(ptr,size,0);
 #else
       ptr = calloc(count, elt_size);
 #endif
@@ -135,6 +142,26 @@ hypre_ReAlloc( char   *ptr,
       HYPRE_Int threadid = hypre_GetThreadID();
       ptr = (char*)_urealloc_(ptr, size);
    }
+#elif HYPRE_USE_MANAGED
+   if (ptr == NULL)
+   {
+      ptr = hypre_MAlloc(size);
+   }
+   else if (size == 0)
+   {
+      hypre_Free(ptr);
+   }
+   else
+   {
+     void *nptr = hypre_MAlloc(size);
+     size_t old_size=mempush((void*)ptr,0,0);
+     if (size>old_size)
+       memcpy(nptr,ptr,old_size);
+     else
+       memcpy(nptr,ptr,size);
+     hypre_Free(ptr);
+     ptr=nptr;
+   }
 #else
    if (ptr == NULL)
    {
@@ -169,6 +196,11 @@ hypre_Free( char *ptr )
       HYPRE_Int threadid = hypre_GetThreadID();
 
       _ufree_(ptr);
+#elif HYPRE_USE_MANAGED
+      size_t size=mempush(ptr,0,0);
+      mempush(ptr,0,1);
+      cudaSafeFree(ptr);
+      //gpuErrchk(cudaFree((void*)ptr));
 #else
       free(ptr);
 #endif
