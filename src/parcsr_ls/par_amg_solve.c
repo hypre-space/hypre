@@ -160,7 +160,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
     *    Compute initial fine-grid residual and print 
     *-----------------------------------------------------------------------*/
 
-   if (amg_print_level > 1 || amg_logging > 1)
+   if (amg_print_level > 1 || amg_logging > 1 || tol > 0.)
    {
      if ( amg_logging > 1 ) {
         hypre_ParVectorCopy(F_array[0], Residual );
