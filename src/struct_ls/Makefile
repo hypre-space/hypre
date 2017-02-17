@@ -13,7 +13,7 @@
 
 include ../config/Makefile.config
 
-CINCLUDES = ${INCLUDES} ${MPIINCLUDE} ${CALIPER_INCLUDE}
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
 C_COMPILE_FLAGS = \
  -I..\

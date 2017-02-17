@@ -20,8 +20,6 @@
  *
  *****************************************************************************/
 
-#include "caliper_instrumentation.h"
-
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 
