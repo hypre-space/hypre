@@ -6,25 +6,48 @@
 #include "gpuUtils.h"
 #include <cublas_v2.h>
 #include <cusparse.h>
+#include "_hypre_utilities.h"
+
 int ggc(int id);
+
+cublasHandle_t getCublasHandle();
+cusparseHandle_t getCusparseHandle();
+void hypreGPUInit(){
+  char pciBusId[80];
+  int myid;
+  int nDevices;
+  int device;
+  gpuErrchk(cudaGetDeviceCount(&nDevices));
+  printf("There are %d GPUs on this node \n",nDevices);
+  if (nDevices>1) printf("WARNING:: Code running without mpibind or similar\n");
+  hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+  
+  device=myid%nDevices; // Warning will not work on multiple nodes without mpibind
+  gpuErrchk(cudaSetDevice(device));
+  cudaDeviceGetPCIBusId ( pciBusId, 80, device);
+  printf("MPI_RANK = %d runningon PCIBUS id :: %s as device %d of %d\n",myid,pciBusId,device,nDevices);
+
+  // Initialize the handles and streams
+  cublasHandle_t handle_1 = getCublasHandle();
+  cusparseHandle_t handle_2 = getCusparseHandle();
+  cudaStream_t s=getstream(4);
+  
+}
 void MemAdviseReadOnly(void* ptr, int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
     if (size==0) printf("WARNING:: Operations with 0 size vector \n");
-  //size_t size=mempush(ptr,0,0);
-  //printf("MEMA %p  size = %lu \n",ptr,size);
-  //return;
-  gpuErrchk(cudaMemAdvise(ptr,mempush(ptr,0,0),cudaMemAdviseSetReadMostly,device));
+    gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseSetReadMostly,device));
 }
 void MemAdviseUnSetReadOnly(void* ptr, int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
     if (size==0) printf("WARNING:: Operations with 0 size vector \n");
-  //size_t size=mempush(ptr,0,0);
-  //printf("MEMA %p  size = %lu \n",ptr,size);
-  //return;
-  gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseUnsetReadMostly,device));
+    gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseUnsetReadMostly,device));
 }
+
+
 void MemAdviseSetPrefLocDevice(const void *ptr, int device){
   if (ptr==NULL) return;
   gpuErrchk(cudaMemAdvise(ptr,mempush(ptr,0,0),cudaMemAdviseSetPreferredLocation,device));
@@ -33,25 +56,25 @@ void MemAdviseSetPrefLocHost(const void *ptr){
   if (ptr==NULL) return;
   gpuErrchk(cudaMemAdvise(ptr,mempush(ptr,0,0),cudaMemAdviseSetPreferredLocation,cudaCpuDeviceId));
 }
+
+
 void MemPrefetch(const void *ptr,int device,cudaStream_t stream){
   if (ptr==NULL) return;
-  //printf("MEMLCO %d\n",memloc(ptr,device));
-  //size_t size=mempush(ptr,0,0);
-  //gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
-  //return;
+  size_t size=mempush(ptr,0,0);
+  PUSH_RANGE_PAYLOAD("MemPreFetch",4,size);
+  /* Do a prefetch every time until a possible UM bug is fixed */
+  gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
+  gpuErrchk(cudaStreamSynchronize(stream));
+  POP_RANGE;
+  return;
+  /* End forced prefetch */
   if (memloc(ptr,device)){
-    //float rval=rand()/(float)RAND_MAX;
-    //if (rval<0.1){
-    size_t size=mempush(ptr,0,0);
-    //printf("prefetch of %p of size %d \n",ptr,size);
+    size=mempush(ptr,0,0);
     if (size==0) printf("WARNING:: Operations with 0 size vector \n");
     PUSH_RANGE_PAYLOAD("MemPreFetch",4,size);
     gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
     POP_RANGE;
-  } else {
-    //size_t size=mempush(ptr,0,0);
-    //printf("Skipped prefetch of %p of size %d \n",ptr,size);
-  }
+  } 
   return;
 }
 void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream){
@@ -62,11 +85,10 @@ void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream){
   POP_RANGE;
   return;
 }
+
 void MemPrefetchReadOnly(const void *ptr,int device,cudaStream_t stream){
   if (ptr==NULL) return;
-  //printf("MEMLCO %d\n",memloc(ptr,device));
   if (memloc(ptr,device)){
-    //printf("%d MemPrefetch Triggered %p\n",ggc(-1),ptr);
     size_t size=mempush(ptr,0,0);
     PUSH_RANGE_PAYLOAD("MemAdviseRO",3,size);
     gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseSetReadMostly,device));
@@ -74,9 +96,10 @@ void MemPrefetchReadOnly(const void *ptr,int device,cudaStream_t stream){
     PUSH_RANGE_PAYLOAD("MemPreFetchRO",4,size);
     gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
     POP_RANGE;
-  } //else printf("%d MemPrefetch Skipped %p \n",ggc(-1),ptr);
+  } 
   return;
 }
+
 void PrintPointerAttributesNew(void *ptr){
   struct cudaPointerAttributes ptr_att;
   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){
@@ -104,6 +127,8 @@ int OnHost(void *ptr){
     return 0;
   } 
 }
+
+// DeviceShare code doesnt work and triggers erros that are caught by cudaPeekLastError
 int DeviceShare(void *ptr,size_t size){
 uintptr_t p = (uintptr_t)ptr;
 uintptr_t start,end,lastpage;
@@ -113,7 +138,7 @@ end=p+size;
 lastpage=end-end%pagesize;
 uintptr_t i;
 int dc=0,hc=0;
-printf("Device Share s=%p, e =%p, actual=%p, pages = %d\n",(void*)start,(void*)lastpage,ptr,size/pagesize);
+printf("Device Share s=%p, e =%p, actual=%p, pages = %lu\n",(void*)start,(void*)lastpage,ptr,size/pagesize);
 for(i=start;i<=lastpage;i+=pagesize){
   void *pptr=(void*)i;
   struct cudaPointerAttributes ptr_att;
@@ -130,10 +155,11 @@ int retval=(float)dc/(dc+hc)*100.0;
 return retval;
 }
 
+/* Returns the same cublas handle with every call */
 cublasHandle_t getCublasHandle(){
   cublasStatus_t stat;
   static cublasHandle_t handle;
-  static firstcall=1;
+  static int firstcall=1;
   if (firstcall){
     firstcall=0;
     stat = cublasCreate(&handle);
@@ -145,10 +171,12 @@ cublasHandle_t getCublasHandle(){
   } else return handle;
   return handle;
 }
+
+/* Returns the same cusparse handle with every call */
 cusparseHandle_t getCusparseHandle(){
   cusparseStatus_t status;
   static cusparseHandle_t handle;
-  static firstcall=1;
+  static int firstcall=1;
   if (firstcall){
     firstcall=0;
     status= cusparseCreate(&handle);

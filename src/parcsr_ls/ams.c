@@ -17,7 +17,9 @@
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 #include "ams.h"
-
+#include "gpukernels.h"
+#include "gpuUtils.h"
+#include "hypre_nvtx.h"
 /*--------------------------------------------------------------------------
  * hypre_ParCSRRelax
  *
@@ -70,14 +72,22 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
    {
       if (relax_type == 1) /* l1-scaled Jacobi */
       {
-         HYPRE_Int i, num_rows = hypre_ParCSRMatrixNumRows(A);
-
+	 PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
+	 HYPRE_Int i, num_rows = hypre_ParCSRMatrixNumRows(A);
+#ifdef HYPRE_USE_GPU
+	 VecCopy(v_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(v)),getstream(4));
+#else
          hypre_ParVectorCopy(f,v);
+#endif
          hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, v);
-
+#ifdef HYPRE_USE_GPU
+	 VecScale(u_data,v_data,l1_norms,num_rows,getstream(4));
+#else
          /* u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1 */
          for (i = 0; i < num_rows; i++)
             u_data[i] += v_data[i] / l1_norms[i];
+#endif
+	 POP_RANGE;
       }
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
       {

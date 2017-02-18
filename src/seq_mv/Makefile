@@ -41,9 +41,11 @@ FILES =\
  HYPRE_vector.c\
  mapped_matrix.c\
  multiblock_matrix.c\
- vector.c
+ vector.c\
+ gpukernels.cu
 
 OBJS = ${FILES:.c=.o}
+CUOBJS = ${FILES:.cu=.o}
 
 SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}.so
 
@@ -71,12 +73,12 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_seq_mv.a: ${OBJS}
+libHYPRE_seq_mv.a: ${OBJS} ${CUOBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_seq_mv.so: ${OBJS}
+libHYPRE_seq_mv.so: ${OBJS}  ${CUOBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

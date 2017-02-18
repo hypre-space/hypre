@@ -1,10 +1,12 @@
 #ifdef HYPRE_USE_GPU
 #include "gpuErrorCheck.h"
+#include "hypre_nvtx.h"
 extern const char *cusparseErrorCheck(cusparseStatus_t error);
 extern void gpuAssert(cudaError_t code, const char *file, int line);
 extern void cusparseAssert(cusparseStatus_t code, const char *file, int line);
 void cudaSafeFree(void *ptr)
 {
+  PUSH_RANGE("SAFE_FREE",3);
   struct cudaPointerAttributes ptr_att;
   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){
     printf("WARNING :: Raw pointer passed to cudaSafeFreeree\n");
@@ -23,6 +25,7 @@ void cudaSafeFree(void *ptr)
     printf("ERROR:: NON-managed pointer passed to Mfree\n");
     gpuErrchk(cudaFree(ptr));
   }
+  POP_RANGE;
   return;
 }
 void PrintPointerAttributes(void *ptr){

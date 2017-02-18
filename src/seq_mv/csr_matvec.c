@@ -19,7 +19,9 @@
 #include "seq_mv.h"
 #include <assert.h>
 #include "gpgpu.h"
+#include "gpuMem.h"
 #include "hypre_nvtx.h"
+#include "gpukernels.h"
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec
  *--------------------------------------------------------------------------*/
@@ -38,9 +40,9 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
    HYPRE_Real time_begin = hypre_MPI_Wtime();
 #endif
 #ifdef HYPRE_USE_GPU
-PUSH_RANGE_PAYLOAD("MATVEC",0,A);
+PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
   int ret=hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset);
-POP_RANGE
+  POP_RANGE;
   return ret;
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
@@ -791,8 +793,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   cusparseStatus_t status;
   static cudaStream_t s[10];
   static int myid;
-  cudaDeviceSynchronize();
-  PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
+
   //if (b!=y)
   // memcpy(y->data+offset,b->data+offset,(y->size-offset)*sizeof(HYPRE_Complex));
   if (b!=y){
@@ -800,15 +801,18 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
       //PrintPointerAttributes(b);
       //PrintPointerAttributes(y);
     // }
-    gpuErrchk(cudaMemcpyAsync(y->data+offset,b->data+offset,(y->size-offset)*sizeof(HYPRE_Complex),cudaMemcpyDeviceToDevice,getstream(4)));
-    //VecCopy(y->data,b->data,(y->size-offset),getstream(4));
-    cudaDeviceSynchronize();
+    //gpuErrchk(cudaMemcpyAsync(y->data+offset,b->data+offset,(y->size-offset)*sizeof(HYPRE_Complex),cudaMemcpyDeviceToDevice,getstream(4)));
+    // This can be pinned copy with b pinned and y on the device.
+    PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
+    VecCopy(y->data,b->data,(y->size-offset),getstream(4));
+    gpuErrchk(cudaStreamSynchronize(getstream(4)));
+    POP_RANGE
   }
-  POP_RANGE
+
   if (x==y) printf("Houston we have a problem\n");
 
   if (FirstCall){
-    
+    PUSH_RANGE("FIRST_CALL",4);
     //status= cusparseCreate(&handle);
     handle=getCusparseHandle();
     //if (status != CUSPARSE_STATUS_SUCCESS) {
@@ -835,12 +839,13 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
 
     for(int jj=0;jj<5;jj++)
       s[jj]=getstream(jj);
-
+    nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
     hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
     myid++;
-
+    cusparseErrchk(cusparseSetStream(handle,s[4]));
+    POP_RANGE;
   }
-  cusparseErrchk(cusparseSetStream(handle,s[4]));
+
   //printf("STREEAMS %p,%p,%p\n",s[0],s[1],s[2]);
 
   //  if (OnHost(A->data)){
@@ -853,7 +858,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   
   //MemAdviseReadOnly(A->i,0);
   //MemAdviseSetPrefLocDevice(A->i,0);
-  static int llc=0;
+  //static int llc=0;
   //printf("%d Matrix Data sum = %lf \n",ggc(-1),dnorm(A->data,A->num_nonzeros));
   //printf("%d Matrix I sum = %lld \n",ggc(-1),inorm(A->i,A->num_rows+1));
   //printf("%d Matrix J sum = %lld \n",ggc(-1),inorm(A->j,A->num_nonzeros));
@@ -862,14 +867,17 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   //MemPrefetchReadOnly(A->j,0,s[1]);
   //MemPrefetchReadOnly(A->i,0,s[2]);
   
-  double hnorm = hypre_VectorSumElts(x);
+  //double hnorm = hypre_VectorSumAbsElts(x);
   //printf("%d PRE Vector sum X = %lf Alpha = %lf\n",ggc(-1),hnorm,alpha);
-  //printf("%d PRE Vector sum Y = %lf Beta = %lf\n",ggc(-1),hypre_VectorSumElts(y),beta);
-  MemPrefetch(x->data,0,s[3]);
+  //printf("%d PRE Vector sum Y = %lf Beta = %lf\n",ggc(-1),hypre_VectorSumAbsElts(y),beta);
+  PUSH_RANGE("PREFETCH+SPMV",2);
+  MemPrefetch(A->data,0,s[4]);
+  MemPrefetch(A->j,0,s[4]);
+  MemPrefetch(A->i,0,s[4]);
+  MemPrefetch(x->data,0,s[4]);
   MemPrefetch(y->data,0,s[4]);
   //for (int jj=0;jj<5;jj++)
   //  gpuErrchk(cudaStreamSynchronize(s[jj]));
-  //    }
   //cudaDeviceSynchronize();
   //usleep(6000);
   if (offset!=0) printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: %d \n",offset);
@@ -897,12 +905,13 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   //MemPrefetch(x->data,cudaCpuDeviceId,0);
 
   gpuErrchk(cudaStreamSynchronize(s[4]));
+  POP_RANGE;
   //MemAdviseUnSetReadOnly(A->data,0);
   //MemAdviseUnSetReadOnly(A->j,0);
   //MemAdviseUnSetReadOnly(A->i,0);
   //cudaDeviceSynchronize();
-  //printf("%d POST Vector sum X = %lf Size= %d\n",ggc(-1),hypre_VectorSumElts(x),DeviceShare(x->data,mempush(x->data,0,0)));
-  //printf("%d Vector sum = %lf \n",ggc(-1),hypre_VectorSumElts(y));
+  //printf("%d POST Vector sum X = %lf Size= %d\n",ggc(-1),hypre_VectorSumAbsElts(x),DeviceShare(x->data,mempush(x->data,0,0)));
+  //printf("%d Vector sum = %lf \n",ggc(-1),hypre_VectorSumAbsElts(y));
   //printf("%d %lf %lf \n",b==y,y->data[offset],b->data[offset]);
   return 0;
   

@@ -4,10 +4,11 @@
 #include <iostream>
 #include <unordered_map>
 #include "gpuErrorCheck.h"
+#include "hypre_nvtx.h"
 extern "C"{
   // Deletes the record for size <0, returns the size for size==0 and sets it for size>0
-  size_t mempush(void *ptr, size_t size,int purge){
-  static std::unordered_map<void*,size_t> map;
+  size_t mempush(const void *ptr, size_t size,int purge){
+  static std::unordered_map<const void*,size_t> map;
   // Error checking for  random pointers that have accidentally wandered in
   bool found=false;
 
@@ -46,8 +47,8 @@ extern "C"{
     return 0;
   }
 }
-  int memloc(void *ptr, int device){
-    static std::unordered_map<void*,int> map;
+  int memloc(const void *ptr, int device){
+    static std::unordered_map<const void*,int> map;
     bool found=false;
     found=(map.find(ptr)!=map.end());
     if (found){
@@ -81,6 +82,7 @@ extern "C"{
       for(int jj=0;jj<MAXSTREAMS;jj++) std::cout<<s[jj]<<",";
       std::cout<<"\n";
       firstcall=0;
+      //nvtxNameCudaStream(s[4], "HYPRE_COMPUTE_STREAM");
     }
     if (i<MAXSTREAMS) return s[i];
     std::cerr<<"ERROR in getstream in utilities/streams.C "<<i<<" is greater than MAXSTREAMS "<<MAXSTREAMS<<"\n Returning default stream";
