@@ -1,4 +1,4 @@
-#BHEADER********************************************************************** 
+#BHEADER**********************************************************************
 # Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
 # Produced at the Lawrence Livermore National Laboratory.
 # This file is part of HYPRE.  See file COPYRIGHT for details.
