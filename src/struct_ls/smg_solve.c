@@ -93,6 +93,7 @@ hypre_SMGSolve( void               *smg_vdata,
     * Initialize some things and deal with special cases
     *-----------------------------------------------------*/
 
+   HYPRE_ANNOTATION_BEGIN("SMG.solve");
    hypre_BeginTiming(smg_data -> time_index);
 
    hypre_StructMatrixDestroy(A_l[0]);
@@ -114,6 +115,8 @@ hypre_SMGSolve( void               *smg_vdata,
       }
 
       hypre_EndTiming(smg_data -> time_index);
+      HYPRE_ANNOTATION_END("SMG.solve");
+
       return hypre_error_flag;
    }
 
@@ -135,6 +138,8 @@ hypre_SMGSolve( void               *smg_vdata,
          }
 
          hypre_EndTiming(smg_data -> time_index);
+         HYPRE_ANNOTATION_END("SMG.solve");
+
          return hypre_error_flag;
       }
    }
@@ -319,6 +324,7 @@ hypre_SMGSolve( void               *smg_vdata,
    }
 
    hypre_EndTiming(smg_data -> time_index);
+   HYPRE_ANNOTATION_END("SMG.solve");
 
    return hypre_error_flag;
 }

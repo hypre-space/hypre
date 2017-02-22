@@ -89,6 +89,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParVector  *Vtemp;
    hypre_ParVector  *Residual;
 
+   HYPRE_ANNOTATION_BEGIN("BoomerAMG.solve");
+      
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm,&my_id);
 
@@ -126,7 +128,6 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParAMGDataVtemp(amg_data) = Vtemp;
 */
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
-
 
    /*-----------------------------------------------------------------------
     *    Write the solver parameters
@@ -193,6 +194,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
           hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
         }
         hypre_error(HYPRE_ERROR_GENERIC);
+        HYPRE_ANNOTATION_END("BoomerAMG.solve");
         return hypre_error_flag;
      }
 
@@ -361,6 +363,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       hypre_TFree(num_variables);
    }
 
+   HYPRE_ANNOTATION_END("BoomerAMG.solve");
+   
    return hypre_error_flag;
 }
 

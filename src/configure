@@ -596,6 +596,8 @@ ac_default_prefix=`pwd`/hypre
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 AR
+CALIPER_LIBS
+CALIPER_INCLUDE
 LAPACKLIBS
 LAPACKLIBDIRS
 HYPRE_LAPACK_FILES
@@ -746,6 +748,9 @@ with_fei
 with_superlu
 with_mli
 with_MPI
+with_caliper
+with_caliper_include
+with_caliper_lib
 with_blas
 with_lapack
 '
@@ -1476,6 +1481,12 @@ Optional Packages:
   --with-mli              Use MLI
   --with-MPI              DEFAULT: Compile with MPI. Selecting --without-MPI
                           may affect which compiler is chosen.
+  --with-caliper          Use Caliper instrumentation (default is NO).
+  --with-caliper-include=DIR
+                          Directory where Caliper is installed.
+  --with-caliper-lib=LIBS LIBS is space-separated linkable list (enclosed in
+                          quotes) of libraries needed for Caliper. OK to use
+                          -L and -l flags in the list
   --with-blas             Find a system-provided BLAS library
   --with-lapack           Find a system-provided LAPACK library
 
@@ -2308,6 +2319,10 @@ hypre_using_mli=yes
 hypre_using_openmp=no
 hypre_using_insure=no
 
+hypre_using_caliper=no
+hypre_user_gave_caliper_lib=no
+hypre_user_gave_caliper_inc=no
+
 hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
 hypre_lapack_lib_old_style=no
@@ -3129,6 +3144,43 @@ if test "${with_MPI+set}" = set; then :
     no) hypre_using_mpi=no ;;
     *)  hypre_using_mpi=yes ;;
  esac
+
+fi
+
+
+
+# Check whether --with-caliper was given.
+if test "${with_caliper+set}" = set; then :
+  withval=$with_caliper; hypre_using_caliper=yes
+else
+  with-caliper=no
+fi
+
+
+if test "x$with_caliper" = "xyes"; then :
+
+$as_echo "#define HYPRE_USING_CALIPER 1" >>confdefs.h
+
+fi
+
+
+# Check whether --with-caliper-include was given.
+if test "${with_caliper_include+set}" = set; then :
+  withval=$with_caliper_include; for caliper_inc_dir in $withval; do
+    CALIPER_INCLUDE="-I$caliper_inc_dir $CALIPER_INCLUDE"
+ done;
+ hypre_user_gave_caliper_inc=yes
+
+fi
+
+
+
+# Check whether --with-caliper-lib was given.
+if test "${with_caliper_lib+set}" = set; then :
+  withval=$with_caliper_lib; for caliper_lib in $withval; do
+    CALIPER_LIBS="$CALIPER_LIBS $caliper_lib"
+ done;
+ hypre_user_gave_caliper_lib=yes
 
 fi
 
@@ -7145,6 +7197,41 @@ fi
    fi
  fi
 
+
+if test "$hypre_using_caliper" = "yes"
+then
+   if test "$hypre_user_gave_caliper_inc" != "yes"
+   then
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+$as_echo "$as_me: WARNING: *******************************************************" >&2;}
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Configuring with --with-caliper=yes without providing" >&5
+$as_echo "$as_me: WARNING: Configuring with --with-caliper=yes without providing" >&2;}
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --with-caliper-include=<path-to-caliper-install>." >&5
+$as_echo "$as_me: WARNING: --with-caliper-include=<path-to-caliper-install>." >&2;}
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Using default user include path." >&5
+$as_echo "$as_me: WARNING: Using default user include path." >&2;}
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: NOTE: Caliper annotations may not work." >&5
+$as_echo "$as_me: WARNING: NOTE: Caliper annotations may not work." >&2;}
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+$as_echo "$as_me: WARNING: *******************************************************" >&2;}
+   fi
+   if test "$hypre_user_gave_caliper_lib" != "yes"
+   then
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+$as_echo "$as_me: WARNING: *******************************************************" >&2;}
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Configuring with --with-caliper=yes without providing" >&5
+$as_echo "$as_me: WARNING: Configuring with --with-caliper=yes without providing" >&2;}
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --with-caliper-lib=<path-to-caliper-lib>." >&5
+$as_echo "$as_me: WARNING: --with-caliper-lib=<path-to-caliper-lib>." >&2;}
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Using default user library path." >&5
+$as_echo "$as_me: WARNING: Using default user library path." >&2;}
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: NOTE: Caliper annotations may not work." >&5
+$as_echo "$as_me: WARNING: NOTE: Caliper annotations may not work." >&2;}
+       { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+$as_echo "$as_me: WARNING: *******************************************************" >&2;}
+   fi
+fi
+
 HYPRE_INSTALLDIR="${prefix}"
 HYPRE_LIBINSTALL="${libdir}"
 HYPRE_INCINSTALL="${includedir}"
@@ -7253,6 +7340,9 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
+
+
+
 
 
 

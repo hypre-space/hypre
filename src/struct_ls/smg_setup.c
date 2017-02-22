@@ -89,6 +89,8 @@ hypre_SMGSetup( void               *smg_vdata,
     * Set up coarsening direction
     *-----------------------------------------------------*/
 
+   HYPRE_ANNOTATION_BEGIN("SMG.setup");
+
    cdir = hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) - 1;
    (smg_data -> cdir) = cdir;
 
@@ -426,6 +428,8 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_StructMatrixPrint(filename, A_l[l], 0);
    }
 #endif
+
+   HYPRE_ANNOTATION_END("SMG.setup");
 
    return hypre_error_flag;
 }
