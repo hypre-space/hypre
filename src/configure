@@ -3153,7 +3153,7 @@ fi
 if test "${with_caliper+set}" = set; then :
   withval=$with_caliper; hypre_using_caliper=yes
 else
-  with-caliper=no
+  hypre_using_caliper=no
 fi
 
 

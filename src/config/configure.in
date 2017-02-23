@@ -773,7 +773,7 @@ AC_ARG_WITH(caliper,
 AS_HELP_STRING([--with-caliper],
                [Use Caliper instrumentation (default is NO).]),
                [hypre_using_caliper=yes],
-               [with-caliper=no])
+               [hypre_using_caliper=no])
 
 AS_IF([test "x$with_caliper" = "xyes"],
       [AC_DEFINE(HYPRE_USING_CALIPER, 1, [Using Caliper instrumentation])],

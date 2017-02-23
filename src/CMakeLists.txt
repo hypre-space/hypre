@@ -33,6 +33,7 @@ option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" ON)
 option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
 option(HYPRE_USING_FEI            "Use FEI" ON)
+option(HYPRE_USING_CALIPER        "Use Caliper" OFF)  # TODO: Finish this cmake feature
 
 if (HYPRE_SHARED)
   # FEI doesn't currently compile with shared
@@ -46,12 +47,6 @@ endif ()
 if (HYPRE_SEQUENTIAL)
   set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
 endif ()
-
-find_package(caliper)
-
-if (caliper_FOUND)
-  set(HYPRE_USING_CALIPER ON)
-endif()
 
 #   --with-examples         Build example codes.
 #   --with-fei              Use internal FEI routines.
@@ -750,10 +745,6 @@ include_directories(struct_mv)
 include_directories(struct_ls)
 include_directories(sstruct_mv)
 include_directories(sstruct_ls)
-
-if (caliper_FOUND)
-  include_directories(${caliper_INCLUDE_DIR})
-endif()
 
 # Set library build type
 if (HYPRE_SHARED)
