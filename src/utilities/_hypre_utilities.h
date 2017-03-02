@@ -585,7 +585,7 @@ if ( cudaerr != cudaSuccess ) {										\
 	}			  			   		 \
 	else if (device == 2)	  		 \
 	{			   					 \
-	    ptr = hypre_TFree(type);	 \
+	    ptr = hypre_TFree(ptr);	 \
 	}
 
 #else

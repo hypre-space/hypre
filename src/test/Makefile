@@ -13,7 +13,7 @@
 
 include ../config/Makefile.config
 
-CINCLUDES = ${MPIINCLUDE}
+CINCLUDES = ${MPIINCLUDE} $(HYPRE_RAJA_INCLUDE)
 CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
@@ -140,7 +140,7 @@ sstruct: sstruct.o
 
 struct: struct.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${FFLAGS} ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 ams_driver: ams_driver.o
 	@echo  "Building" $@ "... "

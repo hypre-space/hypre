@@ -43,11 +43,19 @@ hypre_PrintBoxArrayData( FILE            *file,
                    
    HYPRE_Int        i, j, d;
    HYPRE_Complex    value;
-
+   
    /*----------------------------------------
     * Print data
     *----------------------------------------*/
 
+   HYPRE_Int tot_size = num_values*hypre_BoxVolume(hypre_BoxArrayBox(data_space, hypre_BoxArraySize(box_array)-1));
+   
+   HYPRE_Complex *data_host;
+   data_host = hypre_CTAlloc(HYPRE_Complex, tot_size);
+   hypre_printf("\n Before copy: %d\n",tot_size);
+   hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);
+   hypre_printf("\n After copy: %d\n",tot_size);
+   
    hypre_SetIndex(stride, 1);
 
    hypre_ForBoxI(i, box_array)
@@ -60,7 +68,7 @@ hypre_PrintBoxArrayData( FILE            *file,
 
       hypre_BoxGetSize(box, loop_size);
        /*FIXME: must run sequentially*/
-    zypre_BoxLoop1Begin(dim, loop_size,
+      zypre_BoxLoop1Begin(dim, loop_size,
                           data_box, start, stride, datai);
       zypre_BoxLoop1For(datai)
       {
@@ -75,7 +83,7 @@ hypre_PrintBoxArrayData( FILE            *file,
                hypre_fprintf(file, ", %d",
                              hypre_IndexD(start, d) + hypre_IndexD(index, d));
             }
-            value = data[datai + j*data_box_volume];
+            value = data_host[datai + j*data_box_volume];
 #ifdef HYPRE_COMPLEX
             hypre_fprintf(file, "; %d) %.14e , %.14e\n",
                           j, hypre_creal(value), hypre_cimag(value));

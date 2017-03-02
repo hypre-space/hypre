@@ -12,7 +12,7 @@
 
 include ../config/Makefile.config
 
-CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE} ${HYPRE_RAJA_INCLUDE}
 
 C_COMPILE_FLAGS = \
  -I..\

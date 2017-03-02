@@ -89,8 +89,8 @@ extern "C" {
 #define pow_di_  hypre_pow_di
 #define pow_dd_  hypre_pow_dd
 #define s_cat_   hypre_s_cat
-#define lsame_   hypre_lsame
-#define xerbla_  hypre_xerbla
+  //#define lsame_   hypre_lsame
+  //#define xerbla_  hypre_xerbla
 #define dbdsqr_  hypre_dbdsqr
 #define dorgbr_  hypre_dorgbr
 #define dsygs2_  hypre_dsygs2

@@ -155,7 +155,7 @@ integer s_cmp(a0, b0, la, lb) char *a0;const char *b0; ftnlen la, lb;
 integer s_cmp(char *a0,const char *b0, ftnlen la, ftnlen lb)
 #endif
 {
-register unsigned char *a, *aend, *b, *bend;
+unsigned char *a, *aend, *b, *bend;
 a = (unsigned char *)a0;
 b = (unsigned char *)b0;
 aend = a + la;
@@ -200,7 +200,7 @@ VOID hypre_s_copy(a, b, la, lb) char *a,const char *b; ftnlen la, lb;
 void hypre_s_copy(char *a,const char *b, ftnlen la, ftnlen lb)
 #endif
 {
-register char *aend, *bend;
+char *aend, *bend;
 
 aend = a + la;
 

@@ -64,7 +64,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
       yp = hypre_StructVectorBoxData(y, i);
        
 	  hypre_BoxGetSize(box, loop_size);
-#ifdef	HYPRE_USE_CUDA 
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_RAJA)
        zypre_newBoxLoop2ReductionCUDA(ndim, loop_size,
 									  x_data_box, start, unit_stride, xi,xp,
 									  y_data_box, start, unit_stride, yi,yp,local_result);

@@ -428,7 +428,8 @@ hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
 
    //data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
    data = hypre_DataCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
-
+   printf("Matrix size: %d\n",hypre_StructMatrixDataSize(matrix));
+   
    hypre_StructMatrixInitializeData(matrix, data);
    hypre_StructMatrixDataAlloced(matrix) = 1;
 
@@ -1524,17 +1525,17 @@ hypre_StructMatrixPrint( const char         *filename,
    hypre_fprintf(file, "\nSymmetric: %d\n", hypre_StructMatrixSymmetric(matrix));
    hypre_fprintf(file, "\nConstantCoefficient: %d\n",
                  hypre_StructMatrixConstantCoefficient(matrix));
-
+   
    /* print grid info */
    hypre_fprintf(file, "\nGrid:\n");
    grid = hypre_StructMatrixGrid(matrix);
    hypre_StructGridPrint(file, grid);
-
+ 
    /* print stencil info */
    hypre_fprintf(file, "\nStencil:\n");
    stencil = hypre_StructMatrixStencil(matrix);
    stencil_shape = hypre_StructStencilShape(stencil);
-
+   
    ndim = hypre_StructMatrixNDim(matrix);
    num_values = hypre_StructMatrixNumValues(matrix);
    symm_elements = hypre_StructMatrixSymmElements(matrix);
@@ -1567,6 +1568,7 @@ hypre_StructMatrixPrint( const char         *filename,
       boxes = hypre_StructGridBoxes(grid);
  
    hypre_fprintf(file, "\nData:\n");
+   hypre_printf("\nData: %d\n",constant_coefficient);
    if ( constant_coefficient==1 )
    {
       hypre_PrintCCBoxArrayData(file, boxes, data_space, num_values,
@@ -1587,6 +1589,7 @@ hypre_StructMatrixPrint( const char         *filename,
       hypre_PrintBoxArrayData(file, boxes, data_space, num_values,
                               hypre_StructGridNDim(grid),
                               hypre_StructMatrixData(matrix));
+      hypre_printf("\nhypre_PrintBoxArrayData\n");
    }
 
    /*----------------------------------------

@@ -917,7 +917,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       else
       {
           /*FIXME: need reduction for multiplication*/
-#ifdef HYPRE_USE_CUDA
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_RAJA)
 		  zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 										 A_dbox, start, stride, Ai,Ap,diag_product);
 #else
