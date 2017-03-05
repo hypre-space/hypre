@@ -76,12 +76,10 @@ renametest.sh basictest $output_dir/basictest-debug-cpp
 # renametest.sh basictest $output_dir/basictest--with-insure2
 
 co="--enable-debug --with-print-errors"
-MO="test"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
 renametest.sh basictest $output_dir/basictest--valgrind1
 
 co="--enable-debug --enable-global-partition"
-MO="test"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
 renametest.sh basictest $output_dir/basictest--valgrind2
 
