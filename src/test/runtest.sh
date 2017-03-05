@@ -3,16 +3,17 @@
 # global variables
 BatchMode=0
 NoRun=0
-JobCheckInterval=10        #sleep time between jobs finished check
+JobCheckInterval=10        # sleep time between jobs finished check
 InputString=""
 RunPrefix=`type -p mpirun`
 RunPrefix="$RunPrefix -np"
 RunString=""
 RunEcho=""
-ExecFileNames=""           #string of executable file names used
-TestDirNames=""            #string of names of TEST_* directories used
+ExecFileNames=""           # string of executable file names used
+TestDirNames=""            # string of names of TEST_* directories used
 HOST=`hostname`
-NumThreads=0               #number of OpenMP threads to use if > 0
+NumThreads=0               # number of OpenMP threads to use if > 0
+Valgrind=""                # string to add to MpirunString when using valgrind
 
 function usage
 {
@@ -27,6 +28,7 @@ function usage
    printf "    -mpi <prefix>  MPI run prefix; default is 'mpirun -np'\n"
    printf "    -nthreads <n>  use 'n' OpenMP threads\n"
    printf "    -tol <tol>     use relative tolerance 'tol' to compare numeric test values\n"
+   printf "    -valgrind      use valgrind memory checker\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
    printf "    -t|-trace      echo each command\n"
    printf "    -D <var>       define <var> when running tests\n"
@@ -94,7 +96,9 @@ function MpirunString
          if [ $NumThreads -gt 0 ] ; then
             export OMP_NUM_THREADS=$NumThreads
          fi
-         RunString="$RunPrefix $*"
+         RunString="$RunPrefix $1"
+         shift
+         RunString="$RunString $Valgrind $*"
          ;;
    esac
 }
@@ -263,12 +267,12 @@ function ExecuteJobs
             ;; 
 
          *mpirun*)
-            RunCmd=`echo $InputLine| sed -e 's/^[ \t]*mpirun[ \t]*//'` 
-            RunCmd=`echo $RunCmd | sed -e 's/[ \t]*>.*$//'`
-            OutFile=`echo $InputLine | sed -e 's/^.*>//'`
-            OutFile=`echo $OutFile | sed -e 's/ //g'`
-            ErrFile=`echo $OutFile | sed -e 's/\.out\./.err./'`
-            RunName=`echo $OutFile | sed -e 's/\.out.*$//'`
+            RunCmd=`echo $InputLine| sed -e 's/^[ \t]*mpirun[ \t]*//'` # remove 'mpirun'
+            RunCmd=`echo $RunCmd | sed -e 's/[ \t]*>.*$//'`            # remove output redirect
+            OutFile=`echo $InputLine | sed -e 's/^.*>//'`           # set output file
+            OutFile=`echo $OutFile | sed -e 's/ //g'`               # remove extra space
+            ErrFile=`echo $OutFile | sed -e 's/\.out\./.err./'`  # set error file
+            RunName=`echo $OutFile | sed -e 's/\.out.*$//'`   # set test run name
             CheckPath $RunCmd               # check path to executable
             if [ "$?" -gt 0 ] ; then
                cat >> $RunName.err <<- EOF
@@ -437,6 +441,15 @@ do
          NumThreads=$1
          shift
          ;;
+      -tol)
+         shift
+         CONVTOL=$1
+         shift
+         ;;
+      -valgrind)
+         shift
+         Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind"
+         ;;
       -n|-norun)
          NoRun=1
          RunEcho="echo"
@@ -449,11 +462,6 @@ do
       -D)
          shift
          eval export `echo $1`=1
-         shift
-         ;;
-      -tol)
-         shift
-         CONVTOL=$1
          shift
          ;;
       *) InputString=$1
