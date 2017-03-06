@@ -247,9 +247,23 @@ extern "C"{
     //cudaDeviceSynchronize();
   }
 }
-
-
-// Scale vector by scalar
+extern "C"{
+  __global__
+  void  PackOnDeviceKernel(double* __restrict__ send_data,const double* __restrict__ x_local_data, const int* __restrict__ send_map, int begin,int end){
+    int i = begin+blockIdx.x * blockDim.x + threadIdx.x;
+    if (i<end){
+      send_data[i-begin]=x_local_data[send_map[i]];
+    }
+  }
+  void PackOnDevice(double *send_data,double *x_local_data, int *send_map, int begin,int end){
+    int tpb=64;
+    int num_blocks=(end-begin)/tpb+1;
+    PackOnDeviceKernel<<<num_blocks,tpb,0,0>>>(send_data,x_local_data,send_map,begin,end);
+    cudaStreamSynchronize(0);
+  }
+}
+  
+  // Scale vector by scalar
 
 extern "C"{
 __global__

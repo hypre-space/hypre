@@ -96,6 +96,7 @@ typedef struct
    HYPRE_Int     num_nonzeros;
    HYPRE_Int     owns_data;
 
+
 } hypre_CSRBooleanMatrix;
 
 /*--------------------------------------------------------------------------
@@ -213,6 +214,9 @@ typedef struct
       With rowwise storage, vj[i] = data[ j + num_vectors*i] */
    HYPRE_Int  vecstride, idxstride;
    /* ... so vj[i] = data[ j*vecstride + i*idxstride ] regardless of row_storage.*/
+#ifdef HYPRE_USE_GPU
+  HYPRE_Int on_device;
+#endif
 
 } hypre_Vector;
 

@@ -116,6 +116,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    if ( use_persistent_comm )
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
+     PUSH_RANGE("PERCOMM1",0);
       persistent_comm_handle = hypre_ParCSRCommPkgGetPersistentCommHandle(1, comm_pkg);
 
       HYPRE_Int num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
@@ -123,6 +124,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
       hypre_VectorData(x_tmp) = (HYPRE_Complex *)persistent_comm_handle->recv_data;
       hypre_SeqVectorSetDataOwner(x_tmp, 0);
+      POP_RANGE;
 #endif
    }
    else
@@ -145,9 +147,13 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
       HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
+#ifdef HYPRE_USE_GPU
+      PackOnDevice(persistent_comm_handle->send_data,x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end);
+#else
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
+      PUSH_RANGE("PERCOMM2",1);
       for (i = begin; i < end; i++)
       {
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -157,6 +163,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
             = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
       }
+      POP_RANGE;
+#endif
    }
    else
       for ( jv=0; jv<num_vectors; ++jv )
