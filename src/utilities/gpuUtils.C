@@ -4,7 +4,8 @@
 #include <iostream>
 #include <unordered_map>
 #include "gpuErrorCheck.h"
-#include "hypre_nvtx.h"
+//#include "hypre_nvtx.h"
+#include "nvToolsExt.h"
 extern "C"{
   // Deletes the record for size <0, returns the size for size==0 and sets it for size>0
   size_t mempush(const void *ptr, size_t size,int purge){
@@ -22,7 +23,9 @@ extern "C"{
       map.erase(ptr);
       return osize;
     } else {
+      #ifdef GPU_WARN
       std::cerr<<" ERROR :: Pointer for map deletetion not in map \n";
+      #endif
       return 0;
     }
   }
@@ -32,7 +35,9 @@ extern "C"{
   if (size>0) {
     found=(map.find(ptr)!=map.end());
     if (found){
+#ifdef GPU_WARN
       std::cerr<<"ERROR:: Pointer for map insertion already exists :: "<<ptr<<" of size "<<map[ptr]<<" new size = "<<size<<"\n";
+#endif
       return 0;
     } else map[ptr]=size;
     return map[ptr];
@@ -43,7 +48,7 @@ extern "C"{
   if (found)
     return map[ptr];
   else {
-    std::cerr<<"ERROR:: Pointer is not mapped "<<ptr<<" size "<<size<<" purge "<<purge<<"\n";
+    //std::cerr<<"WARNING:mempush Pointer is not mapped "<<ptr<<" size "<<size<<" purge "<<purge<<"\n";
     return 0;
   }
 }
@@ -85,8 +90,23 @@ extern "C"{
       //nvtxNameCudaStream(s[4], "HYPRE_COMPUTE_STREAM");
     }
     if (i<MAXSTREAMS) return s[i];
-    std::cerr<<"ERROR in getstream in utilities/streams.C "<<i<<" is greater than MAXSTREAMS "<<MAXSTREAMS<<"\n Returning default stream";
+    std::cerr<<"ERROR in getstream in utilities/gpuUtils.C "<<i<<" is greater than MAXSTREAMS "<<MAXSTREAMS<<"\n Returning default stream";
     return 0;
+  }
+}
+
+extern"C" {
+  nvtxDomainHandle_t getdomain(int i){
+    static int firstcall=1;
+    const int MAXDOMAINS=1;
+    static nvtxDomainHandle_t h[MAXDOMAINS];
+    if (firstcall){
+      h[0]= nvtxDomainCreateA("HYPRE");
+      firstcall=0;
+    }
+    if (i<MAXDOMAINS) return h[i];
+    std::cerr<<"ERROR in getdomain in utilities/gpuUtils.C "<<i<<" is greater than MAXDOMAINS "<<MAXDOMAINS<<"\n Returning default domain";
+    return NULL;
   }
 }
 #endif

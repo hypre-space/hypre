@@ -18,6 +18,7 @@
 
 #include "_hypre_parcsr_mv.h"
 #include <assert.h>
+#include "hypre_nvtx.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec
@@ -102,7 +103,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
-
+   PUSH_RANGE("MPI_PACK",3);
    HYPRE_Int use_persistent_comm = 0;
 #ifdef HYPRE_USING_PERSISTENT_COMM
    use_persistent_comm = num_vectors == 1;
@@ -185,7 +186,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
-
+   POP_RANGE;
+   PUSH_RANGE("MPI_HALO_EXC_SEND",4);
    if (use_persistent_comm)
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -204,13 +206,13 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
-
+   POP_RANGE;
    hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif
-   
+   PUSH_RANGE("MPI_HALO_EXC_RECV",6);
    if (use_persistent_comm)
    {
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -226,7 +228,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       }
       hypre_TFree(comm_handle);
    }
-
+   POP_RANGE;
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
@@ -236,7 +238,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
-
+   PUSH_RANGE("MPI_UNPACK",5);
    hypre_SeqVectorDestroy(x_tmp);
    x_tmp = NULL;
    if (!use_persistent_comm)
@@ -248,7 +250,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
-
+   POP_RANGE;
    return ierr;
 }
 

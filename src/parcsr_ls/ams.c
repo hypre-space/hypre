@@ -75,12 +75,15 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 	 PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
 	 HYPRE_Int i, num_rows = hypre_ParCSRMatrixNumRows(A);
 #ifdef HYPRE_USE_GPU
+	 hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(v));
+	 hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
 	 VecCopy(v_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(v)),getstream(4));
 #else
          hypre_ParVectorCopy(f,v);
 #endif
          hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, v);
 #ifdef HYPRE_USE_GPU
+	 
 	 VecScale(u_data,v_data,l1_norms,num_rows,getstream(4));
 #else
          /* u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1 */
@@ -728,6 +731,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
          break;
       }
 
+   //for (i = 0; i < num_rows; i++) l1_norm[i]=1.0/l1_norm[i];
    hypre_TFree(cf_marker_offd);
 
    *l1_norm_ptr = l1_norm;

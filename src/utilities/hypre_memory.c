@@ -60,6 +60,7 @@ hypre_MAlloc( size_t size )
       ptr = _umalloc_(size);
 #elif HYPRE_USE_MANAGED
       gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+      //gpuErrchk(cudaStreamAttachMemAsync(getstream(4), ptr,0,cudaMemAttachHost));
       mempush(ptr,size,0);
 #else
       ptr = malloc(size);
@@ -99,6 +100,7 @@ hypre_CAlloc( size_t count,
       ptr = _ucalloc_(count, elt_size);
 #elif HYPRE_USE_MANAGED
       gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+      //gpuErrchk(cudaStreamAttachMemAsync(getstream(4), ptr,0,cudaMemAttachHost));
       memset(ptr,0,count*elt_size);
       mempush(ptr,size,0);
 #else

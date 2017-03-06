@@ -842,7 +842,8 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
     nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
     hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
     myid++;
-    cusparseErrchk(cusparseSetStream(handle,s[4]));
+    // Stream is set during init
+    //cusparseErrchk(cusparseSetStream(handle,s[4]));
     POP_RANGE;
   }
 
@@ -871,11 +872,14 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   //printf("%d PRE Vector sum X = %lf Alpha = %lf\n",ggc(-1),hnorm,alpha);
   //printf("%d PRE Vector sum Y = %lf Beta = %lf\n",ggc(-1),hypre_VectorSumAbsElts(y),beta);
   PUSH_RANGE("PREFETCH+SPMV",2);
-  MemPrefetch(A->data,0,s[4]);
-  MemPrefetch(A->j,0,s[4]);
-  MemPrefetch(A->i,0,s[4]);
-  MemPrefetch(x->data,0,s[4]);
-  MemPrefetch(y->data,0,s[4]);
+  //MemPrefetch(A->data,0,s[4]);
+  //MemPrefetch(A->j,0,s[4]);
+  //MemPrefetch(A->i,0,s[4]);
+  //MemPrefetch(x->data,0,s[4]);
+  //MemPrefetch(y->data,0,s[4]);
+  hypre_CSRMatrixPrefetchToDevice(A);
+  hypre_SeqVectorPrefetchToDevice(x);
+  hypre_SeqVectorPrefetchToDevice(y);
   //for (int jj=0;jj<5;jj++)
   //  gpuErrchk(cudaStreamSynchronize(s[jj]));
   //cudaDeviceSynchronize();

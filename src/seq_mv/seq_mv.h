@@ -59,6 +59,11 @@ typedef struct
    HYPRE_Int     *rownnz;
    HYPRE_Int      num_rownnz;
 
+#ifdef HYPRE_USE_GPU
+  /* Flag to keeping track of prefetching */
+  HYPRE_Int on_device;
+#endif
+
 } hypre_CSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -245,6 +250,10 @@ HYPRE_Int hypre_CSRMatrixPrintHB ( hypre_CSRMatrix *matrix_input , char *file_na
 HYPRE_Int hypre_CSRMatrixCopy ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A );
 hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int *col_map_offd_A , HYPRE_Int *col_map_offd_B , HYPRE_Int **col_map_offd_C );
+#ifdef HYPRE_USE_GPU
+  void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A);
+  void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A);
+#endif
 
 /* csr_matvec.c */
 // y[offset:end] = alpha*A[offset:end,:]*x + beta*b[offset:end]
@@ -344,6 +353,8 @@ HYPRE_Complex hypre_VectorSumAbsElts ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorCopyDevice ( hypre_Vector *x , hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha , hypre_Vector *x , hypre_Vector *y );
 HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x , hypre_Vector *y );
+void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x);
+void hypre_SeqVectorPrefetchToHost(hypre_Vector *x);
 #endif
 #ifdef __cplusplus
 }

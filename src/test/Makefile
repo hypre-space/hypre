@@ -128,7 +128,7 @@ distclean: clean
 
 ij: ij.o 
 	@echo  "Building" $@ "... "
-	${LINK_CXX} -o $@ $@.o ${LFLAGS}
+	${LINK_CXX} -o $@  $@.o ${LFLAGS}
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "

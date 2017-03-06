@@ -35,9 +35,24 @@ void PrintDeviceArrayKernel(double *a,int num_rows){
   if (i<num_rows) printf("PrintARRAYDEVICE %d %lf\n",i,a[i]);
 }
   
+
+
 extern "C"{
 __global__
-void VecScaleKernel(double *__restrict__ u, const double *__restrict__ v, const double *__restrict__ l1_norm, int num_rows){
+void VecScaleKernelText(double *__restrict__ u, const double *__restrict__ v, const double *__restrict__ l1_norm, int num_rows){
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  //if (i<5) printf("DEVICE %d %lf %lf %lf\n",i,u[i],v[i],l1_norm[i]);
+  if (i<num_rows){
+    //double x=__ldg(v+i);
+    //double y =__ldg(l1_norm+i);
+    u[i]+=__ldg(v+i)/__ldg(l1_norm+i);
+    //if (i==0) printf("Diff Device %d %lf %lf %lf\n",i,u[i],v[i],l1_norm[i]);
+  }
+}
+}
+extern "C"{
+__global__
+void VecScaleKernel(double *__restrict__ u, const double *__restrict__ v, const double * __restrict__ l1_norm, int num_rows){
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   //if (i<5) printf("DEVICE %d %lf %lf %lf\n",i,u[i],v[i],l1_norm[i]);
   if (i<num_rows){
@@ -49,21 +64,63 @@ void VecScaleKernel(double *__restrict__ u, const double *__restrict__ v, const 
 
 extern "C"{
   void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s){
-    PUSH_RANGE("VECSCALE",1);
+    PUSH_RANGE_PAYLOAD("VECSCALE",1,num_rows);
     const int tpb=64;
     int num_blocks=num_rows/tpb+1;
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
-    MemPrefetch(u,0,s);
-    MemPrefetch(v,0,s);
+    //gpuErrchk2(cudaPeekAtLastError());
+    //gpuErrchk2(cudaDeviceSynchronize());
+    //MemPrefetch(u,0,s);
+    //MemPrefetch(v,0,s);
     MemPrefetch(l1_norm,0,s);
     VecScaleKernel<<<num_blocks,tpb,0,s>>>(u,v,l1_norm,num_rows);
     //dummy<<<num_blocks,32,0,s>>>(u,v,l1_norm,num_rows);
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    //gpuErrchk2(cudaPeekAtLastError());
+    //gpuErrchk2(cudaDeviceSynchronize());
+    gpuErrchk2(cudaStreamSynchronize(s));
     POP_RANGE;
   }
 }
+
+extern "C"{
+__global__
+void VecScaleKernelA(double *__restrict__ u, const double *__restrict__ v, const double * __restrict__ l1_norm, int num_rows){
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  //if (i<5) printf("DEVICE %d %lf %lf %lf\n",i,u[i],v[i],l1_norm[i]);
+    u[i]+=v[i]/l1_norm[i];
+    //if (i==0) printf("Diff Device %d %lf %lf %lf\n",i,u[i],v[i],l1_norm[i]);
+}
+__global__  
+void VecScaleKernelB(double *__restrict__ u, const double *__restrict__ v, const double * __restrict__ l1_norm, int num_rows,int offset){
+  int i = offset+blockIdx.x * blockDim.x + threadIdx.x;
+  //if (i<5) printf("DEVICE %d %lf %lf %lf\n",i,u[i],v[i],l1_norm[i]);
+  if (i<num_rows){
+    u[i]+=v[i]/l1_norm[i];
+    //if (i==0) printf("Diff Device %d %lf %lf %lf\n",i,u[i],v[i],l1_norm[i]);
+  }
+}
+}
+
+extern "C"{
+  void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s){
+    PUSH_RANGE("VECSCALE",1);
+    const int tpb=1024;
+    int num_blocks=num_rows/tpb;
+    //gpuErrchk2(cudaPeekAtLastError());
+    //gpuErrchk2(cudaDeviceSynchronize());
+    MemPrefetch(u,0,s);
+    MemPrefetch(v,0,s);
+    MemPrefetch(l1_norm,0,s);
+    VecScaleKernelA<<<num_blocks,tpb,0,s>>>(u,v,l1_norm,num_rows);
+    VecScaleKernelB<<<1,tpb,0,s>>>(u,v,l1_norm,num_rows,num_blocks*tpb);
+    //dummy<<<num_blocks,32,0,s>>>(u,v,l1_norm,num_rows);
+    //gpuErrchk2(cudaPeekAtLastError());
+    //gpuErrchk2(cudaDeviceSynchronize());
+    gpuErrchk2(cudaStreamSynchronize(s));
+    POP_RANGE;
+  }
+}
+
+
 
 extern "C"{
   void VecScaleGSL(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s){
@@ -165,10 +222,12 @@ extern "C"{
   void VecCopy(double* tgt, const double* src, int size,cudaStream_t s){
     int tpb=64;
     int num_blocks=size/tpb+1;
-    MemPrefetch(tgt,0,s);
-    MemPrefetch(src,0,s);
+    PUSH_RANGE_PAYLOAD("VecCopy",5,size);
+    //MemPrefetch(tgt,0,s);
+    //MemPrefetch(src,0,s);
     VecCopyKernel<<<num_blocks,tpb,0,s>>>(tgt,src,size);
     gpuErrchk2(cudaStreamSynchronize(s));
+    POP_RANGE;
   }
 }
 extern "C"{
@@ -180,12 +239,12 @@ extern "C"{
 }
   void VecSet(double* tgt, int size, double value, cudaStream_t s){
     int tpb=64;
-    cudaDeviceSynchronize();
+    //cudaDeviceSynchronize();
     MemPrefetch(tgt,0,s);
     int num_blocks=size/tpb+1;
     VecSetKernel<<<num_blocks,tpb,0,s>>>(tgt,value,size);
     cudaStreamSynchronize(s);
-    cudaDeviceSynchronize();
+    //cudaDeviceSynchronize();
   }
 }
 
@@ -205,14 +264,16 @@ void VecScaleScalarKernel(double *__restrict__ u, const double alpha ,int num_ro
 }
 extern "C"{
   int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s){
+    PUSH_RANGE("SEQVECSCALE",4);
     int num_blocks=num_rows/64+1;
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    //gpuErrchk2(cudaPeekAtLastError());
+    //gpuErrchk2(cudaDeviceSynchronize());
     VecScaleScalarKernel<<<num_blocks,64,0,s>>>(u,alpha,num_rows);
     //dummy<<<num_blocks,32,0,s>>>(u,v,l1_norm,num_rows);
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    //gpuErrchk2(cudaPeekAtLastError());
+    //gpuErrchk2(cudaDeviceSynchronize());
     gpuErrchk2(cudaStreamSynchronize(s));
+    POP_RANGE;
     return 0;
   }
 }

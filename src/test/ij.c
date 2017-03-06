@@ -44,6 +44,7 @@
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"
 #include "gpuMem.h"
+#include "hypre_nvtx.h"
 HYPRE_Int
 BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );
 
@@ -343,6 +344,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
    hypreGPUInit();
+   //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
 /*
   hypre_InitMemoryDebug(myid);
 */
@@ -5153,7 +5155,6 @@ main( hypre_int argc,
 /*
   hypre_FinalizeMemoryDebug();
 */
-
    hypre_MPI_Finalize();
 
    return (0);

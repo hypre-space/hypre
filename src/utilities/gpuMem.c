@@ -60,21 +60,28 @@ void MemAdviseSetPrefLocHost(const void *ptr){
 
 void MemPrefetch(const void *ptr,int device,cudaStream_t stream){
   if (ptr==NULL) return;
-  size_t size=mempush(ptr,0,0);
-  PUSH_RANGE_PAYLOAD("MemPreFetch",4,size);
+  size_t size;
+  size=mempush(ptr,0,0);
+  PUSH_RANGE_DOMAIN("MemPreFetchForce",4,0);
   /* Do a prefetch every time until a possible UM bug is fixed */
+  if (size>0){
   gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
   gpuErrchk(cudaStreamSynchronize(stream));
-  POP_RANGE;
+  POP_RANGE_DOMAIN(0);
   return;
+ } else {
+  //printf("WARNING :: Prefetching not done due to nvalid size  = %zu\n",size);
+  return;
+  }
   /* End forced prefetch */
+  PUSH_RANGE_PAYLOAD("MemPreFetch",4,size);
   if (memloc(ptr,device)){
     size=mempush(ptr,0,0);
     if (size==0) printf("WARNING:: Operations with 0 size vector \n");
-    PUSH_RANGE_PAYLOAD("MemPreFetch",4,size);
     gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
-    POP_RANGE;
+
   } 
+  POP_RANGE;
   return;
 }
 void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream){
@@ -128,7 +135,7 @@ int OnHost(void *ptr){
   } 
 }
 
-// DeviceShare code doesnt work and triggers erros that are caught by cudaPeekLastError
+// DeviceShare code doesnt work and triggers errors that are caught by cudaPeekLastError
 int DeviceShare(void *ptr,size_t size){
 uintptr_t p = (uintptr_t)ptr;
 uintptr_t start,end,lastpage;
@@ -168,6 +175,7 @@ cublasHandle_t getCublasHandle(){
       handle=0;
       exit(2);
     }
+    cublasErrchk(cublasSetStream(handle,getstream(4)));
   } else return handle;
   return handle;
 }
@@ -185,6 +193,7 @@ cusparseHandle_t getCusparseHandle(){
       handle=0;
       exit(2);
     }
+    cusparseErrchk(cusparseSetStream(handle,getstream(4)));
   } else return handle;
   return handle;
 }
