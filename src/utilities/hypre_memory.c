@@ -62,6 +62,7 @@ hypre_MAlloc( size_t size )
       gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
       //gpuErrchk(cudaStreamAttachMemAsync(getstream(4), ptr,0,cudaMemAttachHost));
       mempush(ptr,size,0);
+      mempushc(ptr,size,0);
 #else
       ptr = malloc(size);
 #endif
@@ -103,6 +104,7 @@ hypre_CAlloc( size_t count,
       //gpuErrchk(cudaStreamAttachMemAsync(getstream(4), ptr,0,cudaMemAttachHost));
       memset(ptr,0,count*elt_size);
       mempush(ptr,size,0);
+      mempushc(ptr,size,0);
 #else
       ptr = calloc(count, elt_size);
 #endif
@@ -156,7 +158,7 @@ hypre_ReAlloc( char   *ptr,
    else
    {
      void *nptr = hypre_MAlloc(size);
-     size_t old_size=mempush((void*)ptr,0,0);
+     size_t old_size=mempushc((void*)ptr,0,0);
      if (size>old_size)
        memcpy(nptr,ptr,old_size);
      else
@@ -199,8 +201,9 @@ hypre_Free( char *ptr )
 
       _ufree_(ptr);
 #elif HYPRE_USE_MANAGED
-      size_t size=mempush(ptr,0,0);
+      //size_t size=mempush(ptr,0,0);
       mempush(ptr,0,1);
+      mempushc(ptr,0,1);
       cudaSafeFree(ptr);
       //gpuErrchk(cudaFree((void*)ptr));
 #else

@@ -18,8 +18,13 @@
 
 #include "_hypre_parcsr_mv.h"
 #include <assert.h>
-#include "hypre_nvtx.h"
 
+#ifdef HYPRE_USE_GPU
+#include "hypre_nvtx.h"
+#include "gpuErrorCheck.h"
+cudaStream_t getstream(int i);
+void PackOnDevice(double *send_data,double *x_local_data, int *send_map, int begin,int end,cudaStream_t s);
+#endif
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec
  *--------------------------------------------------------------------------*/
@@ -148,7 +153,13 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
       HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
 #ifdef HYPRE_USE_GPU
-      PackOnDevice(persistent_comm_handle->send_data,x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end);
+      PUSH_RANGE("PERCOMM2DEVICE",4);
+#ifdef HYPRE_USING_PERSISTENT_COMM
+      PackOnDevice((HYPRE_Complex*)persistent_comm_handle->send_data,x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,getstream(4));
+#else
+      PackOnDevice((HYPRE_Complex*)x_buf_data[0],x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,getstream(4));
+#endif
+      POP_RANGE;
 #else
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for HYPRE_SMP_SCHEDULE

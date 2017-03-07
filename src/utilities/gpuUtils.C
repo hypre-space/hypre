@@ -2,6 +2,7 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <iostream>
+#include <fstream>
 #include <unordered_map>
 #include "gpuErrorCheck.h"
 //#include "hypre_nvtx.h"
@@ -9,64 +10,86 @@
 extern "C"{
   // Deletes the record for size <0, returns the size for size==0 and sets it for size>0
   size_t mempush(const void *ptr, size_t size,int purge){
-  static std::unordered_map<const void*,size_t> map;
+  static std::unordered_map<const void*,size_t> omap;
   // Error checking for  random pointers that have accidentally wandered in
   bool found=false;
-
-
+  
+  // if (purge==2){
+  //    for (const auto &x : omap) std::cout<<"ALLOCATION "<<x.second<<"\n";
+  //   return 0;
+  // }
   // Delete maps if size < 0
-
-  if (purge) {
-    found=(map.find(ptr)!=map.end());
+#ifdef MEMLOG
+  static int firstcall=1;
+  static std::ofstream of;
+  if (firstcall){
+    of.open("memory.log");
+    firstcall=0;
+  }
+#endif
+  if (purge==1) {
+    found=(omap.find(ptr)!=omap.end());
     if (found){
-      int osize=map[ptr];
-      map.erase(ptr);
+      int osize=omap[ptr];
+      omap.erase(ptr);
+#ifdef MEMLOG
+      of<<ptr<<" "<<size<<" "<<purge<<"\n";
+#endif
       return osize;
     } else {
-      #ifdef GPU_WARN
+#ifdef GPU_WARN
       std::cerr<<" ERROR :: Pointer for map deletetion not in map \n";
-      #endif
+#endif
       return 0;
     }
   }
 
-  // Insert into map if size is greater than zero
+  // Insert into omap if size is greater than zero
 
   if (size>0) {
-    found=(map.find(ptr)!=map.end());
+    found=(omap.find(ptr)!=omap.end());
     if (found){
 #ifdef GPU_WARN
-      std::cerr<<"ERROR:: Pointer for map insertion already exists :: "<<ptr<<" of size "<<map[ptr]<<" new size = "<<size<<"\n";
+      std::cerr<<"ERROR:: Pointer for map insertion already exists :: "<<ptr<<" of size "<<omap[ptr]<<" new size = "<<size<<"\n";
 #endif
       return 0;
-    } else map[ptr]=size;
-    return map[ptr];
+    } else {
+      omap[ptr]=size;
+#ifdef MEMLOG
+      of<<ptr<<" "<<size<<" "<<purge<<"\n";
+#endif
+    }
+    return omap[ptr];
   }
 
+
+  
   // Query size of pointer allocation using size=0
-  found=(map.find(ptr)!=map.end());
+  found=(omap.find(ptr)!=omap.end());
   if (found)
-    return map[ptr];
+    return omap[ptr];
   else {
     //std::cerr<<"WARNING:mempush Pointer is not mapped "<<ptr<<" size "<<size<<" purge "<<purge<<"\n";
     return 0;
   }
+
+  
 }
   int memloc(const void *ptr, int device){
-    static std::unordered_map<const void*,int> map;
+    static std::unordered_map<const void*,int> omap;
     bool found=false;
-    found=(map.find(ptr)!=map.end());
+    found=(omap.find(ptr)!=omap.end());
     if (found){
-      if (map[ptr]==device){
+      if (omap[ptr]==device){
         //std::cout<<" Data already on device "<<device<<" "<<ptr<<"\n";
 	return 0;
       } else {
         //std::cout<<" Strange Data not on device "<<device<<" "<<ptr<<"\n";
-	map[ptr]=device;
+	omap[ptr]=device;
 	return 1;
       }
     } else {
-      map[ptr]=device;  
+      omap[ptr]=device;  
       //std::cout<<" First move to "<<device<<" "<<ptr<<"\n";
       return 1;
     }

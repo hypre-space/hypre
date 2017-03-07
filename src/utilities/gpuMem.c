@@ -7,11 +7,11 @@
 #include <cublas_v2.h>
 #include <cusparse.h>
 #include "_hypre_utilities.h"
-
+#include "gpuMem.h"
 int ggc(int id);
 
-cublasHandle_t getCublasHandle();
-cusparseHandle_t getCusparseHandle();
+//cublasHandle_t getCublasHandle();
+//cusparseHandle_t getCusparseHandle();
 void hypreGPUInit(){
   char pciBusId[80];
   int myid;
@@ -27,20 +27,20 @@ void hypreGPUInit(){
   gpuErrchk(cudaSetDevice(device));
   cudaDeviceGetPCIBusId ( pciBusId, 80, device);
   printf("MPI_RANK = %d runningon PCIBUS id :: %s as device %d of %d\n",myid,pciBusId,device,nDevices);
-
+  //mempushc(NULL,0,1);
   // Initialize the handles and streams
   cublasHandle_t handle_1 = getCublasHandle();
   cusparseHandle_t handle_2 = getCusparseHandle();
   cudaStream_t s=getstream(4);
   
 }
-void MemAdviseReadOnly(void* ptr, int device){
+void MemAdviseReadOnly(const void* ptr, int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
     if (size==0) printf("WARNING:: Operations with 0 size vector \n");
     gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseSetReadMostly,device));
 }
-void MemAdviseUnSetReadOnly(void* ptr, int device){
+void MemAdviseUnSetReadOnly(const void* ptr, int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
     if (size==0) printf("WARNING:: Operations with 0 size vector \n");
@@ -196,5 +196,105 @@ cusparseHandle_t getCusparseHandle(){
     cusparseErrchk(cusparseSetStream(handle,getstream(4)));
   } else return handle;
   return handle;
+}
+/* C version of mempush using linked lists */
+
+
+size_t mempushc(const void *ptr, size_t size, int action){
+  static node* head=NULL;
+  node *found=NULL;
+  if (!head){
+    if ((size<=0)||(action==1)) {
+      fprintf(stderr,"mempush can start only with an insertion or a size call \n");
+      return 0;
+    }
+    //printf("GENERATING head node ..");
+    head = (node*)malloc(sizeof(node));
+    head->ptr=ptr;
+    head->size=size;
+    head->next=NULL;
+    //printf("Done\n");
+    //printlist(head);
+    return size;
+  } else {
+    // Purge an address
+    if (action==1){
+      found=memfind(head,ptr);
+      if (found){
+	memdel(&head, found);
+	//	printf("DELETING FROM LIST\n");
+	//printlist(head);
+	return 0;
+      } else {
+	fprintf(stderr,"ERROR :: Pointer for deletion not found in linked list\n");
+	return 0;
+      }
+    } // End purge
+    
+    // Insertion
+    if (size>0){
+      found=memfind(head,ptr);
+      if (found){
+	fprintf(stderr,"ERROR :: Pointer for insertion already in use in linked list\n");
+	return 0;
+      } else {
+	meminsert(&head,ptr,size);
+	//printf("INSERTING INTO LIST\n");
+	//printlist(head);
+	return 0;
+      }
+    }
+
+    // Getting allocation size
+    found=memfind(head,ptr);
+    if (found){
+      return found->size;
+    } else{
+      fprintf(stderr,"ERROR :: Pointer for insertion not found in linked list\n");
+      return 0;
+    }
+  }
+}
+node *memfind(node *head, const void *ptr){
+  node *next;
+  next=head;
+  while(next!=NULL){
+    if (next->ptr==ptr) return next;
+    next=next->next;
+  }
+  return NULL;
+}
+void memdel(node **head, node *found){
+  node *next;
+  if (found==*head){
+    next=(*head)->next;
+    free(*head);
+    *head=next;
+    return;
+  }
+  next=*head;
+  while(next->next!=found){
+    next=next->next;
+  }
+  next->next=next->next->next;
+  free(found);
+  return;
+}
+void meminsert(node **head, const void  *ptr,size_t size){
+  node *nhead;
+  nhead = (node*)malloc(sizeof(node));
+  nhead->ptr=ptr;
+  nhead->size=size;
+  nhead->next=*head;
+  *head=nhead;
+  return;
+}
+void printlist(node *head){
+  node *next;
+  next=head;
+  while(next!=NULL){
+    printf("Address %p of size %zu \n",next->ptr,next->size);
+    next=next->next;
+  }
 }
 #endif

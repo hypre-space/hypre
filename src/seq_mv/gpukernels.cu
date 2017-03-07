@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "hypre_nvtx.h"
+
 extern "C"{
 void MemPrefetch(const void *ptr,int device,cudaStream_t stream);
 }
@@ -9,6 +10,7 @@ inline void gpuAssert2(cudaError_t code, const char *file, int line)
    if (code != cudaSuccess) 
    {
      printf("GPUassert2: %s %s %d\n", cudaGetErrorString(code), file, line);
+     exit(2);
    }
 }
 
@@ -255,11 +257,18 @@ extern "C"{
       send_data[i-begin]=x_local_data[send_map[i]];
     }
   }
-  void PackOnDevice(double *send_data,double *x_local_data, int *send_map, int begin,int end){
+  void PackOnDevice(double *send_data,double *x_local_data, int *send_map, int begin,int end,cudaStream_t s){
+    //gpuErrchk2(cudaPeekAtLastError());
+    //gpuErrchk2(cudaDeviceSynchronize());
+    if ((end-begin)<=0) return;
     int tpb=64;
     int num_blocks=(end-begin)/tpb+1;
-    PackOnDeviceKernel<<<num_blocks,tpb,0,0>>>(send_data,x_local_data,send_map,begin,end);
-    cudaStreamSynchronize(0);
+    PackOnDeviceKernel<<<num_blocks,tpb,0,s>>>(send_data,x_local_data,send_map,begin,end);
+    //gpuErrchk2(cudaPeekAtLastError());
+    //gpuErrchk2(cudaDeviceSynchronize());
+
+    gpuErrchk2(cudaMemPrefetchAsync((void*)send_data,(end-begin)*sizeof(double),cudaCpuDeviceId,s));
+    gpuErrchk2(cudaStreamSynchronize(s));
   }
 }
   
