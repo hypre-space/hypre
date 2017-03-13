@@ -106,6 +106,8 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    F_array[0] = f;
    U_array[0] = u;
 
+   HYPRE_ANNOTATION_BEGIN("BoomerAMG.solveT");
+
 /*   Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
                                  hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
                                  hypre_ParCSRMatrixRowStarts(A_array[0]));
@@ -290,6 +292,8 @@ hypre_BoomerAMGSolveT( void               *amg_vdata,
    hypre_TFree(num_coeffs);
    hypre_TFree(num_variables);
 
+   HYPRE_ANNOTATION_END("BoomerAMG.solveT");
+
    return(Solve_err_flag);
 }
 
@@ -357,7 +361,9 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    HYPRE_Real   *D_mat;
    HYPRE_Real   *S_vec;
 #endif
-   
+
+   HYPRE_ANNOTATION_BEGIN("BoomerAMG.cycleT");
+
    /* Acquire data and allocate storage */
 
    A_array           = hypre_ParAMGDataAArray(amg_data);
@@ -488,6 +494,7 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
          {
             hypre_TFree(lev_counter);
             hypre_TFree(num_coeffs);
+            HYPRE_ANNOTATION_END("BoomerAMG.cycleT");
             return(Solve_err_flag);
          }
       }
@@ -565,6 +572,8 @@ hypre_BoomerAMGCycleT( void              *amg_vdata,
    hypre_TFree(lev_counter);
    hypre_TFree(num_coeffs);
 
+   HYPRE_ANNOTATION_END("BoomerAMG.cycleT");
+
    return(Solve_err_flag);
 }
 
@@ -618,7 +627,9 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
    HYPRE_Real     *b_vec;
 
    HYPRE_Real      zero = 0.0;
-  
+
+   HYPRE_ANNOTATION_BEGIN("BoomerAMG.relaxT");
+      
    /*-----------------------------------------------------------------------
     * Switch statement to direct control based on relax_type:
     *     relax_type = 7 -> Jacobi (uses ParMatvec)
@@ -710,6 +721,8 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
       }
       break;   
    }
+
+   HYPRE_ANNOTATION_END("BoomerAMG.relaxT");
 
    return(relax_error); 
 }

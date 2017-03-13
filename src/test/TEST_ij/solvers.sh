@@ -12,7 +12,14 @@
 #EHEADER**********************************************************************
 
 TNAME=`basename $0 .sh`
+CONVTOL=$1
 
+# Set default check tolerance
+if [ x$CONVTOL = "x" ];
+then
+    CONVTOL=0.0
+fi
+#echo "tol = $CONVTOL"
 #=============================================================================
 # IJ: Run multiplicative and mult_additive cycle and compare results 
 #                    should be the same
@@ -57,24 +64,6 @@ for i in $FILES
 do
   echo "# Output file: $i"
   tail -5 $i
-done >> ${TNAME}.out
-
-FILES="\
- ${TNAME}.out.1.lobpcg\
- ${TNAME}.out.2.lobpcg\
- ${TNAME}.out.8.lobpcg\
- ${TNAME}.out.12.lobpcg\
- ${TNAME}.out.43.lobpcg\
-"
-
-for i in $FILES
-do
-  echo "# Output file: $i"
-  tail -3 $i
-  echo "# Output file: $i.1"
-  tail -13 $i.1 | head -3
-  echo "# Output file: $i.5"
-  tail -21 $i.5 | head -11
 done >> ${TNAME}.out
 
 FILES="\
@@ -124,7 +113,7 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $CONVTOL) >&2
 fi
 
 #=============================================================================

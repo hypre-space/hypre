@@ -14,3 +14,4 @@ Additional optimization may be attained by recompiling and specifying MAXMEM opt
 WARNING in dReadValues: Infinite loop.  Program may not stop.
 WARNING in dReadVector: Infinite loop.  Program may not stop.
 icc: command line warning .*: overriding
+WARNING: no debugging flags detected

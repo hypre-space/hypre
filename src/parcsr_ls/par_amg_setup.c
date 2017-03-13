@@ -246,6 +246,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data); 
 
+   HYPRE_ANNOTATION_BEGIN("BoomerAMG.setup");
+   
    /* change in definition of standard and multipass interpolation, by
       eliminating interp_type 9 and 5 and setting sep_weight instead
       when using separation of weights option */
@@ -859,12 +861,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
                if (block_mode)
                {
-                  hypre_BoomerAMGBlockCreateNodalA( A_block_array[level], abs(nodal), nodal_diag, &AN);
+                  hypre_BoomerAMGBlockCreateNodalA( A_block_array[level], hypre_abs(nodal), nodal_diag, &AN);
                }
                else
                {
                   hypre_BoomerAMGCreateNodalA(A_array[level],num_functions,
-                                              dof_func_array[level], abs(nodal), nodal_diag, &AN);
+                                              dof_func_array[level], hypre_abs(nodal), nodal_diag, &AN);
                }
 
                /* dof array not needed for creating S because we pass in that 
@@ -2576,5 +2578,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 }
 #endif
 
+   HYPRE_ANNOTATION_END("BoomerAMG.setup");
+ 
    return(hypre_error_flag);
 }  

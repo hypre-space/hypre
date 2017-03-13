@@ -105,7 +105,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < num_rows*num_vectors; i++)
-         y_data[i] *= beta;
+         y_data[i] = beta*b_data[i];
 
 #ifdef HYPRE_PROFILE
       hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;

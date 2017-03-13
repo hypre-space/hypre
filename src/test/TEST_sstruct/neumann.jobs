@@ -11,26 +11,34 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
-
-
-
 #=============================================================================
 # sstruct: Run base 3d cases
 #=============================================================================
 
-mpirun -np 1 ./sstruct -in sstruct.in.neumann -r 6 6 6 -solver 200 \
- > neumann.out.0
-mpirun -np 1 ./sstruct -in sstruct.in.neumann -r 6 6 6 -solver 201 \
- > neumann.out.1
+# Neumann in x, y, and z
+mpirun -np 1 ./sstruct -in sstruct.in.neumann -r 6 6 6 -solver 200     > neumann.out.0
+mpirun -np 1 ./sstruct -in sstruct.in.neumann -r 6 6 6 -solver 201     > neumann.out.1
+
+# Neumann in y and z (Dirichlet in x)
+mpirun -np 1 ./sstruct -in sstruct.in.neumann-yz -r 6 6 6 -solver 200  > neumann.out.10
+mpirun -np 1 ./sstruct -in sstruct.in.neumann-yz -r 6 6 6 -solver 201  > neumann.out.11
+
+# All Dirichlet just for fun
+mpirun -np 1 ./sstruct -in sstruct.in.dirichlet -r 6 6 6 -solver 200   > neumann.out.20
+mpirun -np 1 ./sstruct -in sstruct.in.dirichlet -r 6 6 6 -solver 201   > neumann.out.21
 
 #=============================================================================
 # sstruct: Run various blockings and distributions
 #=============================================================================
 
-mpirun -np 4 ./sstruct -in sstruct.in.neumann -P 2 2 1 -b 1 3 2 -r 3 1 3 -solver 200 \
- > neumann.out.2
-mpirun -np 3 ./sstruct -in sstruct.in.neumann -P 1 1 3 -b 6 1 1 -r 1 6 2 -solver 201 \
- > neumann.out.3
+# Neumann in x, y, and z
+mpirun -np 4 ./sstruct -in sstruct.in.neumann -P 2 2 1 -b 1 3 2 -r 3 1 3 -solver 200     > neumann.out.2
+mpirun -np 3 ./sstruct -in sstruct.in.neumann -P 1 1 3 -b 6 1 1 -r 1 6 2 -solver 201     > neumann.out.3
+
+# Neumann in y and z (Dirichlet in x)
+mpirun -np 4 ./sstruct -in sstruct.in.neumann-yz -P 2 2 1 -b 1 3 2 -r 3 1 3 -solver 200  > neumann.out.12
+mpirun -np 3 ./sstruct -in sstruct.in.neumann-yz -P 1 1 3 -b 6 1 1 -r 1 6 2 -solver 201  > neumann.out.13
+
+# All Dirichlet just for fun
+mpirun -np 4 ./sstruct -in sstruct.in.dirichlet -P 2 2 1 -b 1 3 2 -r 3 1 3 -solver 200   > neumann.out.22
+mpirun -np 3 ./sstruct -in sstruct.in.dirichlet -P 1 1 3 -b 6 1 1 -r 1 6 2 -solver 201   > neumann.out.23

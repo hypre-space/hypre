@@ -85,8 +85,9 @@ main( hypre_int argc,
 
    /*HYPRE_Real          dxyz[3];*/
 
+   HYPRE_Int           num_ghost[6]   = {0, 0, 0, 0, 0, 0};
    HYPRE_Int           A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
-   HYPRE_Int           v_num_ghost[3] = {0,0,0};
+   HYPRE_Int           v_num_ghost[6] = {0, 0, 0, 0, 0, 0};
                      
    HYPRE_StructMatrix  A;
    HYPRE_StructVector  b;
@@ -256,11 +257,12 @@ main( hypre_int argc,
    read_x0fromfile_index = argc;
    sum = 0;
 
-   /* ghosts for the building of matrix: default  */
-   for (i = 0; i < dim; i++)
+   /* ghost defaults */
+   for (i = 0; i < 2*dim; i++)
    {
-      A_num_ghost[2*i] = 1;
-      A_num_ghost[2*i + 1] = 1;
+      num_ghost[i]   = 1;
+      A_num_ghost[i] = num_ghost[i];
+      v_num_ghost[i] = num_ghost[i];
    }
 
    /*-----------------------------------------------------------
@@ -966,17 +968,12 @@ main( hypre_int argc,
             HYPRE_StructGridSetExtents(grid, ilower[ib], iupper[ib]);
          }
          HYPRE_StructGridSetPeriodic(grid, periodic);
+         HYPRE_StructGridSetNumGhost(grid, num_ghost);
          HYPRE_StructGridAssemble(grid);
 
          /*-----------------------------------------------------------
           * Set up the matrix structure
           *-----------------------------------------------------------*/
-
-         for (i = 0; i < dim; i++)
-         {
-            A_num_ghost[2*i] = 1;
-            A_num_ghost[2*i + 1] = 1;
-         }
 
          HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
          if ( solver_id == 3 || solver_id == 4 ||
@@ -1012,7 +1009,6 @@ main( hypre_int argc,
             }
          }
          HYPRE_StructMatrixSetSymmetric(A, sym);
-         HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
          HYPRE_StructMatrixInitialize(A);
 
          /*-----------------------------------------------------------
@@ -1075,13 +1071,6 @@ main( hypre_int argc,
                hypre_printf("\ninitial rhs from file prefix :%s\n",
                             argv[read_rhsfromfile_index]);
 
-               /* ghost selection for vector  */
-               for (i = 0; i < dim; i++)
-               {
-                  v_num_ghost[2*i] = 1;
-                  v_num_ghost[2*i + 1] = 1;
-               }
-           
                b = (HYPRE_StructVector)
                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
                                          argv[read_rhsfromfile_index],
@@ -1099,7 +1088,6 @@ main( hypre_int argc,
                HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD,
                                         readgrid, stencil, &A);
                HYPRE_StructMatrixSetSymmetric(A, 1);
-               HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
                HYPRE_StructMatrixInitialize(A);
 
                /*-----------------------------------------------------------
@@ -1125,13 +1113,6 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0 from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               /* ghost selection for vector  */
-               for (i = 0; i < dim; i++)
-               {
-                  v_num_ghost[2*i] = 1;
-                  v_num_ghost[2*i + 1] = 1;
-               }
-  
                x = (HYPRE_StructVector)
                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
                                          argv[read_x0fromfile_index],v_num_ghost);
@@ -1148,7 +1129,6 @@ main( hypre_int argc,
                HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD,
                                         readgrid, stencil, &A);
                HYPRE_StructMatrixSetSymmetric(A, 1);
-               HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
                HYPRE_StructMatrixInitialize(A);
 
                /*-----------------------------------------------------------
@@ -1176,13 +1156,6 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0  from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               /* ghost selection for vector  */
-               for (i = 0; i < dim; i++)
-               {
-                  v_num_ghost[2*i] = 1;
-                  v_num_ghost[2*i + 1] = 1;
-               }
-  
                b = (HYPRE_StructVector)
                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
                                          argv[read_rhsfromfile_index],
@@ -1199,7 +1172,6 @@ main( hypre_int argc,
                HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD,
                                         readgrid, stencil, &A);
                HYPRE_StructMatrixSetSymmetric(A, 1);
-               HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
                HYPRE_StructMatrixInitialize(A);
 
                /*-----------------------------------------------------------
@@ -1222,12 +1194,6 @@ main( hypre_int argc,
          {   
             hypre_printf("\nreading matrix from file:%s\n",
                          argv[read_fromfile_index]);
-            /* ghost selection for reading the matrix  */
-            for (i = 0; i < dim; i++)
-            {
-               A_num_ghost[2*i] = 1;
-               A_num_ghost[2*i + 1] = 1;
-            }
 
             A = (HYPRE_StructMatrix)
                hypre_StructMatrixRead(hypre_MPI_COMM_WORLD,
@@ -1242,13 +1208,6 @@ main( hypre_int argc,
                hypre_printf("\ninitial rhs from file prefix :%s\n",
                             argv[read_rhsfromfile_index]);
 
-               /* ghost selection for vector  */
-               for (i = 0; i < dim; i++)
-               {
-                  v_num_ghost[2*i] = 1;
-                  v_num_ghost[2*i + 1] = 1;
-               }
-  
                b = (HYPRE_StructVector)
                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
                                          argv[read_rhsfromfile_index],
@@ -1266,13 +1225,6 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0 from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               /* ghost selection for vector  */
-               for (i = 0; i < dim; i++)
-               {
-                  v_num_ghost[2*i] = 1;
-                  v_num_ghost[2*i + 1] = 1;
-               }
-  
                x = (HYPRE_StructVector)
                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
                                          argv[read_x0fromfile_index],
@@ -1340,7 +1292,7 @@ main( hypre_int argc,
          HYPRE_StructSMGCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_StructSMGSetMemoryUse(solver, 0);
          HYPRE_StructSMGSetMaxIter(solver, 50);
-         HYPRE_StructSMGSetTol(solver, 1.0e-06);
+         HYPRE_StructSMGSetTol(solver, tol);
          HYPRE_StructSMGSetRelChange(solver, 0);
          HYPRE_StructSMGSetNumPreRelax(solver, n_pre);
          HYPRE_StructSMGSetNumPostRelax(solver, n_post);
@@ -1393,7 +1345,7 @@ main( hypre_int argc,
          HYPRE_StructPFMGCreate(hypre_MPI_COMM_WORLD, &solver);
          /*HYPRE_StructPFMGSetMaxLevels( solver, 9 );*/
          HYPRE_StructPFMGSetMaxIter(solver, 200);
-         HYPRE_StructPFMGSetTol(solver, 1.0e-06);
+         HYPRE_StructPFMGSetTol(solver, tol);
          HYPRE_StructPFMGSetRelChange(solver, 0);
          HYPRE_StructPFMGSetRAPType(solver, rap);
          HYPRE_StructPFMGSetRelaxType(solver, relax);
@@ -1455,7 +1407,7 @@ main( hypre_int argc,
          HYPRE_StructSparseMSGCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_StructSparseMSGSetMaxIter(solver, 50);
          HYPRE_StructSparseMSGSetJump(solver, jump);
-         HYPRE_StructSparseMSGSetTol(solver, 1.0e-06);
+         HYPRE_StructSparseMSGSetTol(solver, tol);
          HYPRE_StructSparseMSGSetRelChange(solver, 0);
          HYPRE_StructSparseMSGSetRelaxType(solver, relax);
          if (usr_jacobi_weight)
@@ -1500,7 +1452,7 @@ main( hypre_int argc,
 
          HYPRE_StructJacobiCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_StructJacobiSetMaxIter(solver, 100);
-         HYPRE_StructJacobiSetTol(solver, 1.0e-06);
+         HYPRE_StructJacobiSetTol(solver, tol);
          HYPRE_StructJacobiSetup(solver, A, b, x);
 
          hypre_EndTiming(time_index);
@@ -1534,7 +1486,7 @@ main( hypre_int argc,
 
          HYPRE_StructPCGCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_PCGSetMaxIter( (HYPRE_Solver)solver, 100 );
-         HYPRE_PCGSetTol( (HYPRE_Solver)solver, 1.0e-06 );
+         HYPRE_PCGSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_PCGSetTwoNorm( (HYPRE_Solver)solver, 1 );
          HYPRE_PCGSetRelChange( (HYPRE_Solver)solver, 0 );
          HYPRE_PCGSetPrintLevel( (HYPRE_Solver)solver, 1 );
@@ -2150,7 +2102,7 @@ main( hypre_int argc,
          HYPRE_StructHybridCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_StructHybridSetDSCGMaxIter(solver, 100);
          HYPRE_StructHybridSetPCGMaxIter(solver, 100);
-         HYPRE_StructHybridSetTol(solver, 1.0e-06);
+         HYPRE_StructHybridSetTol(solver, tol);
          /*HYPRE_StructHybridSetPCGAbsoluteTolFactor(solver, 1.0e-200);*/
          HYPRE_StructHybridSetConvergenceTol(solver, cf_tol);
          HYPRE_StructHybridSetTwoNorm(solver, 1);
@@ -2277,7 +2229,7 @@ main( hypre_int argc,
          HYPRE_StructGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_GMRESSetKDim( (HYPRE_Solver) solver, 5 );
          HYPRE_GMRESSetMaxIter( (HYPRE_Solver)solver, 100 );
-         HYPRE_GMRESSetTol( (HYPRE_Solver)solver, 1.0e-06 );
+         HYPRE_GMRESSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_GMRESSetRelChange( (HYPRE_Solver)solver, 0 );
          HYPRE_GMRESSetPrintLevel( (HYPRE_Solver)solver, 1 );
          HYPRE_GMRESSetLogging( (HYPRE_Solver)solver, 1 );
@@ -2423,7 +2375,7 @@ main( hypre_int argc,
 
          HYPRE_StructBiCGSTABCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_BiCGSTABSetMaxIter( (HYPRE_Solver)solver, 100 );
-         HYPRE_BiCGSTABSetTol( (HYPRE_Solver)solver, 1.0e-06 );
+         HYPRE_BiCGSTABSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_BiCGSTABSetPrintLevel( (HYPRE_Solver)solver, 1 );
          HYPRE_BiCGSTABSetLogging( (HYPRE_Solver)solver, 1 );
 
@@ -2568,7 +2520,7 @@ main( hypre_int argc,
          HYPRE_StructLGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_LGMRESSetKDim( (HYPRE_Solver) solver, 5 );
          HYPRE_LGMRESSetMaxIter( (HYPRE_Solver)solver, 100 );
-         HYPRE_LGMRESSetTol( (HYPRE_Solver)solver, 1.0e-06 );
+         HYPRE_LGMRESSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_LGMRESSetPrintLevel( (HYPRE_Solver)solver, 1 );
          HYPRE_LGMRESSetLogging( (HYPRE_Solver)solver, 1 );
 
@@ -2660,7 +2612,7 @@ main( hypre_int argc,
          HYPRE_StructFlexGMRESCreate(hypre_MPI_COMM_WORLD, &solver);
          HYPRE_FlexGMRESSetKDim( (HYPRE_Solver) solver, 5 );
          HYPRE_FlexGMRESSetMaxIter( (HYPRE_Solver)solver, 100 );
-         HYPRE_FlexGMRESSetTol( (HYPRE_Solver)solver, 1.0e-06 );
+         HYPRE_FlexGMRESSetTol( (HYPRE_Solver)solver, tol );
          HYPRE_FlexGMRESSetPrintLevel( (HYPRE_Solver)solver, 1 );
          HYPRE_FlexGMRESSetLogging( (HYPRE_Solver)solver, 1 );
 

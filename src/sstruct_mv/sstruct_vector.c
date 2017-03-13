@@ -360,10 +360,6 @@ hypre_SStructPVectorAccumulate( hypre_SStructPVector *pvector )
       return hypre_error_flag;
    }
 
-   for (d = ndim; d < ndim; d++)
-   {
-      num_ghost[2*d] = num_ghost[2*d+1] = 0;
-   }
    for (var = 0; var < nvars; var++)
    {
       if (vartypes[var] > 0)

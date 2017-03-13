@@ -10,37 +10,29 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
- * General structures and values
+ * Header file for Caliper instrumentation macros
  *
  *****************************************************************************/
 
-#ifndef hypre_GENERAL_HEADER
-#define hypre_GENERAL_HEADER
+#ifndef CALIPER_INSTRUMENTATION_HEADER
+#define CALIPER_INSTRUMENTATION_HEADER
 
-/*--------------------------------------------------------------------------
- * Define various functions
- *--------------------------------------------------------------------------*/
+#include "HYPRE_config.h"
 
-#ifndef hypre_max
-#define hypre_max(a,b)  (((a)<(b)) ? (b) : (a))
-#endif
-#ifndef hypre_min
-#define hypre_min(a,b)  (((a)<(b)) ? (a) : (b))
-#endif
+#ifdef HYPRE_USING_CALIPER
 
-#ifndef hypre_abs
-#define hypre_abs(a)  (((a)>0) ? (a) : -(a))
-#endif
+#include <caliper/cali.h>
 
-#ifndef hypre_round
-#define hypre_round(x)  ( ((x) < 0.0) ? ((HYPRE_Int)(x - 0.5)) : ((HYPRE_Int)(x + 0.5)) )
-#endif
+#define HYPRE_ANNOTATION_BEGIN( str ) cali_begin_string_byname("hypre.kernel", str)
+#define HYPRE_ANNOTATION_END( str ) cali_end_byname("hypre.kernel")
 
-#ifndef hypre_pow2
-#define hypre_pow2(i)  ( 1 << (i) )
-#endif
+#else
+
+#define HYPRE_ANNOTATION_BEGIN( str ) 
+#define HYPRE_ANNOTATION_END( str ) 
 
 #endif
+
+#endif /* CALIPER_INSTRUMENTATION_HEADER */

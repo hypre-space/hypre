@@ -58,7 +58,7 @@
       ii = hypre_IndexX(stencil);               \
       jj = hypre_IndexY(stencil);               \
       kk = hypre_IndexZ(stencil);               \
-      abs_shape= abs(ii) + abs(jj) + abs(kk);   \
+      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk);   \
    }
 
 /*--------------------------------------------------------------------------

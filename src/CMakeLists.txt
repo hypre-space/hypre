@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.11.1)
-set (HYPRE_DATE    2016/06/09)
+set (HYPRE_VERSION 2.11.2)
+set (HYPRE_DATE    2017/03/13)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -33,6 +33,7 @@ option(HYPRE_NO_GLOBAL_PARTITION  "Use assumed partition" ON)
 option(HYPRE_PRINT_ERRORS         "Print HYPRE errors" OFF)
 option(HYPRE_USING_OPENMP         "Use OpenMP" OFF)
 option(HYPRE_USING_FEI            "Use FEI" ON)
+option(HYPRE_USING_CALIPER        "Use Caliper" OFF)  # TODO: Finish this cmake feature
 
 if (HYPRE_SHARED)
   # FEI doesn't currently compile with shared
@@ -47,6 +48,7 @@ if (HYPRE_SEQUENTIAL)
   set (HYPRE_NO_GLOBAL_PARTITION OFF CACHE BOOL "" FORCE)
 endif ()
 
+#   --with-examples         Build example codes.
 #   --with-fei              Use internal FEI routines.
 #   --with-superlu          Use internal SuperLU routines.
 #   --with-mli              Use MLI

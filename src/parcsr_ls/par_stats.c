@@ -224,55 +224,55 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       {
 	hypre_printf(" Coarsening Type = Cleary-Luby-Jones-Plassman\n");
       }
-      else if (abs(coarsen_type) == 1) 
+      else if (hypre_abs(coarsen_type) == 1) 
       {
 	hypre_printf(" Coarsening Type = Ruge\n");
       }
-      else if (abs(coarsen_type) == 2) 
+      else if (hypre_abs(coarsen_type) == 2) 
       {
 	hypre_printf(" Coarsening Type = Ruge2B\n");
       }
-      else if (abs(coarsen_type) == 3) 
+      else if (hypre_abs(coarsen_type) == 3) 
       {
 	hypre_printf(" Coarsening Type = Ruge3\n");
       }
-      else if (abs(coarsen_type) == 4) 
+      else if (hypre_abs(coarsen_type) == 4) 
       {
 	hypre_printf(" Coarsening Type = Ruge 3c \n");
       }
-      else if (abs(coarsen_type) == 5) 
+      else if (hypre_abs(coarsen_type) == 5) 
       {
 	hypre_printf(" Coarsening Type = Ruge relax special points \n");
       }
-      else if (abs(coarsen_type) == 6) 
+      else if (hypre_abs(coarsen_type) == 6) 
       {
 	hypre_printf(" Coarsening Type = Falgout-CLJP \n");
       }
-      else if (abs(coarsen_type) == 8) 
+      else if (hypre_abs(coarsen_type) == 8) 
       {
 	hypre_printf(" Coarsening Type = PMIS \n");
       }
-      else if (abs(coarsen_type) == 10) 
+      else if (hypre_abs(coarsen_type) == 10) 
       {
 	hypre_printf(" Coarsening Type = HMIS \n");
       }
-      else if (abs(coarsen_type) == 11) 
+      else if (hypre_abs(coarsen_type) == 11) 
       {
 	hypre_printf(" Coarsening Type = Ruge 1st pass only \n");
       }
-      else if (abs(coarsen_type) == 9) 
+      else if (hypre_abs(coarsen_type) == 9) 
       {
 	hypre_printf(" Coarsening Type = PMIS fixed random \n");
       }
-      else if (abs(coarsen_type) == 7) 
+      else if (hypre_abs(coarsen_type) == 7) 
       {
 	hypre_printf(" Coarsening Type = CLJP, fixed random \n");
       }
-      else if (abs(coarsen_type) == 21) /* BM Aug 29, 2006 */
+      else if (hypre_abs(coarsen_type) == 21) /* BM Aug 29, 2006 */
       {
         hypre_printf(" Coarsening Type = CGC \n");
       }
-      else if (abs(coarsen_type) == 22) /* BM Aug 29, 2006 */
+      else if (hypre_abs(coarsen_type) == 22) /* BM Aug 29, 2006 */
       {
         hypre_printf(" Coarsening Type = CGC-E \n");
       }

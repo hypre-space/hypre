@@ -64,6 +64,10 @@ extern "C" {
 #define hypre_min(a,b)  (((a)<(b)) ? (a) : (b))
 #endif
 
+#ifndef hypre_abs
+#define hypre_abs(a)  (((a)>0) ? (a) : -(a))
+#endif
+
 #ifndef hypre_round
 #define hypre_round(x)  ( ((x) < 0.0) ? ((HYPRE_Int)(x - 0.5)) : ((HYPRE_Int)(x + 0.5)) )
 #endif
@@ -677,9 +681,6 @@ HYPRE_Int hypre_PrintTiming( const char *heading , MPI_Comm comm );
 extern "C" {
 #endif
 
-#define LIST_HEAD -1
-#define LIST_TAIL -2
-
 struct double_linked_list
 {
        HYPRE_Int                        data;
@@ -799,6 +800,45 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #endif
 
 #endif
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+/******************************************************************************
+ *
+ * Header file for Caliper instrumentation macros
+ *
+ *****************************************************************************/
+
+#ifndef CALIPER_INSTRUMENTATION_HEADER
+#define CALIPER_INSTRUMENTATION_HEADER
+
+#include "HYPRE_config.h"
+
+#ifdef HYPRE_USING_CALIPER
+
+#include <caliper/cali.h>
+
+#define HYPRE_ANNOTATION_BEGIN( str ) cali_begin_string_byname("hypre.kernel", str)
+#define HYPRE_ANNOTATION_END( str ) cali_end_byname("hypre.kernel")
+
+#else
+
+#define HYPRE_ANNOTATION_BEGIN( str ) 
+#define HYPRE_ANNOTATION_END( str ) 
+
+#endif
+
+#endif /* CALIPER_INSTRUMENTATION_HEADER */
 
 /*--------------------------------------------------------------------------
  * Other prototypes
