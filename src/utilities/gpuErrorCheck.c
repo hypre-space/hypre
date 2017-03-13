@@ -1,26 +1,38 @@
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 #include "gpuErrorCheck.h"
 #include "hypre_nvtx.h"
+
+#define FULL_WARNING
+
+#ifdef ABORT_ON_RAW_POINTER
+#endif
+#include <signal.h>
 extern const char *cusparseErrorCheck(cusparseStatus_t error);
 extern void gpuAssert(cudaError_t code, const char *file, int line);
 extern void cusparseAssert(cusparseStatus_t code, const char *file, int line);
+
 void cudaSafeFree(void *ptr)
 {
   PUSH_RANGE("SAFE_FREE",3);
   struct cudaPointerAttributes ptr_att;
-  if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){
-    printf("WARNING :: Raw pointer passed to cudaSafeFreeree\n");
+  cudaError_t err;
+#ifdef FULL_WARNING
+  err=cudaPointerGetAttributes(&ptr_att,ptr);
+  if (err!=cudaSuccess){
+    if (err==cudaErrorInvalidValue) fprintf(stderr,"INVALID VALUE\n");
+    if (err==cudaErrorInvalidDevice) fprintf(stderr,"INVALID DEVICE\n");
+    fprintf(stderr,"WARNING :: Raw pointer passed to cudaSafeFree %p\n",ptr);
+    PrintPointerAttributes(ptr);
+#endif
+#ifdef ABORT_ON_RAW_POINTER
+    raise(SIGABRT);
+#endif
     free(ptr);
     return;
   }
   if (ptr_att.isManaged){
-#ifndef HYPRE_USE_CNMEM
     gpuErrchk(cudaFree(ptr));
-#else
-    if (cnmemFree(ptr,0)!=CNMEM_STATUS_SUCCESS){
-      fprintf(stderr,"ERROR :: cnmemFree failed \n");
-    }
-#endif
+
   } else {
     printf("ERROR:: NON-managed pointer passed to Mfree\n");
     gpuErrchk(cudaFree(ptr));

@@ -18,8 +18,8 @@
 #include "float.h"
 #include "ams.h"
 #include "gpukernels.h"
-#include "gpuUtils.h"
 #include "hypre_nvtx.h"
+#include "gpuMem.h"
 /*--------------------------------------------------------------------------
  * hypre_ParCSRRelax
  *

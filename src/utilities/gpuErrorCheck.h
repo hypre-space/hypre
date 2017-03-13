@@ -1,4 +1,4 @@
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
 #include <cusparse.h>

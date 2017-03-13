@@ -62,8 +62,7 @@ FILES =\
  hypre_merge_sort.c\
  hypre_hopscotch_hash.c\
  gpuErrorCheck.c\
- gpuMem.c\
- gpuUtils.C
+ gpuMem.c
 
 OBJS = ${FILES:.c=.o}
 CPPOBJS= ${FILES:.C=.o}

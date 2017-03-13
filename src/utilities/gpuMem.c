@@ -1,15 +1,14 @@
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 #include "gpuErrorCheck.h"
 #include "hypre_nvtx.h"
 #include <stdlib.h>
 #include <stdint.h>
-#include "gpuUtils.h"
 #include <cublas_v2.h>
 #include <cusparse.h>
 #include "_hypre_utilities.h"
 #include "gpuMem.h"
 int ggc(int id);
-
+#define FULL_WARN
 //cublasHandle_t getCublasHandle();
 //cusparseHandle_t getCusparseHandle();
 void hypreGPUInit(){
@@ -75,12 +74,12 @@ void MemPrefetch(const void *ptr,int device,cudaStream_t stream){
   }
   /* End forced prefetch */
   PUSH_RANGE_PAYLOAD("MemPreFetch",4,size);
-  if (memloc(ptr,device)){
-    size=mempush(ptr,0,0);
-    if (size==0) printf("WARNING:: Operations with 0 size vector \n");
-    gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
+  /* if (memloc(ptr,device)){ */
+  /*   size=mempush(ptr,0,0); */
+  /*   if (size==0) printf("WARNING:: Operations with 0 size vector \n"); */
+  /*   gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream)); */
 
-  } 
+  /* }  */
   POP_RANGE;
   return;
 }
@@ -95,15 +94,15 @@ void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream){
 
 void MemPrefetchReadOnly(const void *ptr,int device,cudaStream_t stream){
   if (ptr==NULL) return;
-  if (memloc(ptr,device)){
-    size_t size=mempush(ptr,0,0);
-    PUSH_RANGE_PAYLOAD("MemAdviseRO",3,size);
-    gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseSetReadMostly,device));
-    POP_RANGE;
-    PUSH_RANGE_PAYLOAD("MemPreFetchRO",4,size);
-    gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
-    POP_RANGE;
-  } 
+  /* if (memloc(ptr,device)){ */
+  /*   size_t size=mempush(ptr,0,0); */
+  /*   PUSH_RANGE_PAYLOAD("MemAdviseRO",3,size); */
+  /*   gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseSetReadMostly,device)); */
+  /*   POP_RANGE; */
+  /*   PUSH_RANGE_PAYLOAD("MemPreFetchRO",4,size); */
+  /*   gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream)); */
+  /*   POP_RANGE; */
+  /* }  */
   return;
 }
 
@@ -200,8 +199,9 @@ cusparseHandle_t getCusparseHandle(){
 /* C version of mempush using linked lists */
 
 
-size_t mempushc(const void *ptr, size_t size, int action){
+size_t mempush(const void *ptr, size_t size, int action){
   static node* head=NULL;
+  static int nc=0;
   node *found=NULL;
   if (!head){
     if ((size<=0)||(action==1)) {
@@ -215,6 +215,7 @@ size_t mempushc(const void *ptr, size_t size, int action){
     head->next=NULL;
     //printf("Done\n");
     //printlist(head);
+    nc++;
     return size;
   } else {
     // Purge an address
@@ -223,10 +224,14 @@ size_t mempushc(const void *ptr, size_t size, int action){
       if (found){
 	memdel(&head, found);
 	//	printf("DELETING FROM LIST\n");
-	//printlist(head);
+	//printlist(head,nc);
+	nc--;
 	return 0;
       } else {
-	fprintf(stderr,"ERROR :: Pointer for deletion not found in linked list\n");
+#ifdef FULL_WARN
+	fprintf(stderr,"ERROR :: Pointer for deletion not found in linked list %p\n",ptr);
+	//printlist(head,nc);
+#endif
 	return 0;
       }
     } // End purge
@@ -235,12 +240,16 @@ size_t mempushc(const void *ptr, size_t size, int action){
     if (size>0){
       found=memfind(head,ptr);
       if (found){
-	fprintf(stderr,"ERROR :: Pointer for insertion already in use in linked list\n");
+#ifdef FULL_WARN
+	fprintf(stderr,"ERROR :: Pointer for insertion already in use in linked list %p\n",ptr);
+	//printlist(head,nc);
+#endif
 	return 0;
       } else {
+	nc++;
 	meminsert(&head,ptr,size);
 	//printf("INSERTING INTO LIST\n");
-	//printlist(head);
+	//printlist(head,nc);
 	return 0;
       }
     }
@@ -250,7 +259,9 @@ size_t mempushc(const void *ptr, size_t size, int action){
     if (found){
       return found->size;
     } else{
-      fprintf(stderr,"ERROR :: Pointer for insertion not found in linked list\n");
+#ifdef FULL_WARN
+      fprintf(stderr,"ERROR :: Pointer for size check found in linked list\n");
+#endif
       return 0;
     }
   }
@@ -289,12 +300,42 @@ void meminsert(node **head, const void  *ptr,size_t size){
   *head=nhead;
   return;
 }
-void printlist(node *head){
+void printlist(node *head,int nc){
   node *next;
   next=head;
+  printf("Node count %d \n",nc);
   while(next!=NULL){
     printf("Address %p of size %zu \n",next->ptr,next->size);
     next=next->next;
   }
 }
+
+cudaStream_t getstream(int i){
+  static int firstcall=1;
+  const int MAXSTREAMS=10;
+  static cudaStream_t s[MAXSTREAMS];
+  if (firstcall){
+    for(int jj=0;jj<MAXSTREAMS;jj++)
+      gpuErrchk(cudaStreamCreateWithFlags(&s[jj],cudaStreamNonBlocking));
+    printf("Created streams ..\n");
+    firstcall=0;
+    //nvtxNameCudaStream(s[4], "HYPRE_COMPUTE_STREAM");
+  }
+  if (i<MAXSTREAMS) return s[i];
+  fprintf(stderr,"ERROR in getstream in utilities/gpuUtils.C %d is greater than MAXSTREAMS = %d\n Returning default stream",i,MAXSTREAMS);
+  return 0;
+}
+
+nvtxDomainHandle_t getdomain(int i){
+    static int firstcall=1;
+    const int MAXDOMAINS=1;
+    static nvtxDomainHandle_t h[MAXDOMAINS];
+    if (firstcall){
+      h[0]= nvtxDomainCreateA("HYPRE");
+      firstcall=0;
+    }
+    if (i<MAXDOMAINS) return h[i];
+    fprintf(stderr,"ERROR in getdomain in utilities/gpuUtils.C %d  is greater than MAXDOMAINS = %d \n Returning default domain",i,MAXDOMAINS);
+    return NULL;
+  }
 #endif

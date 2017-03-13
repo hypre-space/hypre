@@ -20,11 +20,11 @@
 #include <assert.h>
 
 #ifdef HYPRE_USE_GPU
-#include "hypre_nvtx.h"
 #include "gpuErrorCheck.h"
 cudaStream_t getstream(int i);
 void PackOnDevice(double *send_data,double *x_local_data, int *send_map, int begin,int end,cudaStream_t s);
 #endif
+#include "hypre_nvtx.h"
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec
  *--------------------------------------------------------------------------*/
@@ -164,7 +164,6 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
-      PUSH_RANGE("PERCOMM2",1);
       for (i = begin; i < end; i++)
       {
 #ifdef HYPRE_USING_PERSISTENT_COMM
@@ -174,7 +173,6 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
             = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
       }
-      POP_RANGE;
 #endif
    }
    else

@@ -37,8 +37,9 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
                        HYPRE_Int num_nonzeros )
 {
    hypre_CSRMatrix  *matrix;
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_GPU2
    matrix = (hypre_CSRMatrix*)calloc(1,sizeof(hypre_CSRMatrix));
+   //mempush(matrix,sizeof(hypre_CSRMatrix),0);
 #else
    matrix = hypre_CTAlloc(hypre_CSRMatrix, 1);
 #endif
@@ -82,7 +83,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
          hypre_CSRMatrixData(matrix) = NULL;
          hypre_CSRMatrixJ(matrix)    = NULL;
       }
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_GPU2
       free(matrix);
 #else
       hypre_TFree(matrix);

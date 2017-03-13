@@ -1,5 +1,8 @@
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 #include <cublas_v2.h>
 #include <cusparse.h>
+cudaStream_t getstream(int i);
+nvtxDomainHandle_t getdomain(int i);
 void MemAdviseReadOnly(const void *ptr, int device);
 void MemAdviseUnSetReadOnly(const void *ptr, int device);
 void MemAdviseSetPrefLocDevice(const void *ptr, int device);
@@ -15,9 +18,9 @@ typedef struct node {
   size_t size;
   struct node *next;
 } node;
-
-size_t mempushc(const void *ptr, size_t size, int action);
+size_t mempush(const void *ptr, size_t size, int action);
 node *memfind(node *head, const void *ptr);
 void memdel(node **head, node *found);
 void meminsert(node **head, const void *ptr,size_t size);
-void printlist(node *head);
+void printlist(node *head,int nc);
+#endif

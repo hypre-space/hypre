@@ -21,9 +21,9 @@
 #ifdef HYPRE_USE_GPU
 #include <cublas_v2.h>
 #include <cusparse.h>
+#include "hypre_nvtx.h"
 #include "gpuErrorCheck.h"
 #include "gpuMem.h"
-#include "hypre_nvtx.h"
 #include "gpukernels.h"
 cudaStream_t getstream(int i);
 HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
@@ -46,9 +46,11 @@ hypre_Vector *
 hypre_SeqVectorCreate( HYPRE_Int size )
 {
    hypre_Vector  *vector;
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_GPU2
    vector = (hypre_Vector*)calloc(1,sizeof(hypre_Vector));
    vector->on_device=0;
+   //printf("Vector %p size %zu \n",vector,sizeof(hypre_Vector));
+   //mempush((void*)vector,sizeof(hypre_Vector),0);
 #else
    vector = hypre_CTAlloc(hypre_Vector, 1);
 #endif
@@ -91,7 +93,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
       {
          hypre_TFree(hypre_VectorData(vector));
       }
-#ifndef HYPRE_USE_GPU
+#ifndef HYPRE_USE_GPU2
       hypre_TFree(vector);
 #else
       free(vector);

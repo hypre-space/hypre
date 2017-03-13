@@ -18,10 +18,12 @@
 
 #include "seq_mv.h"
 #include <assert.h>
+#ifdef HYPRE_USE_GPU
 #include "gpgpu.h"
-#include "gpuMem.h"
 #include "hypre_nvtx.h"
+#include "gpuMem.h"
 #include "gpukernels.h"
+#endif
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec
  *--------------------------------------------------------------------------*/

@@ -36,7 +36,8 @@
 #include "interpreter.h"
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"
-
+#include "hypre_nvtx.h"
+#include "gpuMem.h"
 #define NO_SOLVER -9198
 
 /* end lobpcg */
@@ -466,7 +467,6 @@ ReadData( char         *filename,
          sdata_line = fgets((sdata + sdata_size), maxline, file);
       }
    }
-
    /* broadcast the data size */
    hypre_MPI_Bcast(&sdata_size, 1, HYPRE_MPI_INT, 0, hypre_MPI_COMM_WORLD);
 
@@ -2422,7 +2422,7 @@ main( hypre_int argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-
+   hypreGPUInit();
    hypre_InitMemoryDebug(myid);
 
    /*-----------------------------------------------------------
