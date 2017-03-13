@@ -46,7 +46,7 @@ $RESET                     # Restore nullglob setting
 echo ""
 for testdir in $testdirs
 do
-   files=`find $testdir -name '*.err'`
+   files=`find $testdir -name '*.err' | sort`
    if [ -n "$files" ]
    then
       for file in $files

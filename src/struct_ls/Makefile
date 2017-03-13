@@ -14,7 +14,7 @@
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
- 
+
 C_COMPILE_FLAGS = \
  -I..\
  -I$(srcdir)\

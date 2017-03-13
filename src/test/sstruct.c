@@ -201,6 +201,9 @@ typedef struct
    ProblemPartData *pdata;
    HYPRE_Int        max_boxsize;
 
+   /* for GridSetNumGhost */
+   HYPRE_Int       *numghost;
+
    HYPRE_Int        nstencils;
    HYPRE_Int       *stencil_sizes;
    Index          **stencil_offsets;
@@ -476,6 +479,7 @@ ReadData( char         *filename,
     *-----------------------------------------------------------*/
 
    data.max_boxsize = 0;
+   data.numghost = NULL;
    data.nstencils = 0;
    data.rhs_true = 0;
    data.fem_nvars = 0;
@@ -505,6 +509,13 @@ ReadData( char         *filename,
             data.ndim = strtol(sdata_ptr, &sdata_ptr, 10);
             data.nparts = strtol(sdata_ptr, &sdata_ptr, 10);
             data.pdata = hypre_CTAlloc(ProblemPartData, data.nparts);
+         }
+         else if ( strcmp(key, "GridSetNumGhost:") == 0 )
+         {
+            // # GridSetNumGhost: numghost[2*ndim]
+            // GridSetNumGhost: [3 3 3 3]
+            data.numghost = hypre_CTAlloc(HYPRE_Int, 2*data.ndim);
+            SScanIntArray(sdata_ptr, &sdata_ptr, 2*data.ndim, data.numghost);
          }
          else if ( strcmp(key, "GridSetExtents:") == 0 )
          {
@@ -2054,6 +2065,8 @@ DestroyData( ProblemData   data )
    }
    hypre_TFree(data.pdata);
 
+   hypre_TFree(data.numghost);
+
    if (data.nstencils > 0)
    {
       for (s = 0; s < data.nstencils; s++)
@@ -2761,6 +2774,10 @@ main( hypre_int argc,
    hypre_BeginTiming(time_index);
 
    HYPRE_SStructGridCreate(hypre_MPI_COMM_WORLD, data.ndim, data.nparts, &grid);
+   if (data.numghost != NULL)
+   {
+      HYPRE_SStructGridSetNumGhost(grid, data.numghost);
+   }
    for (part = 0; part < data.nparts; part++)
    {
       pdata = data.pdata[part];

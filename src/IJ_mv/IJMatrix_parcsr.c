@@ -2119,7 +2119,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
 
    hypre_TFree(num_elements_total);
 
-   void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);
+   /*void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);*/
+   void_contact_buf = hypre_CAlloc(storage, obj_size_bytes);
    index_ptr = void_contact_buf; /* step through with this index */
 
    /* for each proc: #rows, row #, no. elements, 
