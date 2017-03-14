@@ -8,6 +8,7 @@ void MemAdviseUnSetReadOnly(const void *ptr, int device);
 void MemAdviseSetPrefLocDevice(const void *ptr, int device);
 void MemAdviseSetPrefLocHost(const void *ptr);
 void MemPrefetch(const void *ptr,int device,cudaStream_t stream);
+void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream);
 void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream);
 void MemPrefetchReadOnly(const void *ptr,int device,cudaStream_t stream);
 cublasHandle_t getCublasHandle();
@@ -23,4 +24,6 @@ node *memfind(node *head, const void *ptr);
 void memdel(node **head, node *found);
 void meminsert(node **head, const void *ptr,size_t size);
 void printlist(node *head,int nc);
+#define MEM_PAD_LEN 1
+size_t memsize(const void *ptr);
 #endif

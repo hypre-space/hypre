@@ -31,6 +31,8 @@ void hypreGPUInit(){
   cublasHandle_t handle_1 = getCublasHandle();
   cusparseHandle_t handle_2 = getCusparseHandle();
   cudaStream_t s=getstream(4);
+  /* Check is the arch flags used for compiling the cuda kernels match the device */
+  CudaCompileFlagCheck();
   
 }
 void MemAdviseReadOnly(const void* ptr, int device){
@@ -60,12 +62,15 @@ void MemAdviseSetPrefLocHost(const void *ptr){
 void MemPrefetch(const void *ptr,int device,cudaStream_t stream){
   if (ptr==NULL) return;
   size_t size;
-  size=mempush(ptr,0,0);
+  //size=mempush(ptr,0,0);
+  size=memsize(ptr);
   PUSH_RANGE_DOMAIN("MemPreFetchForce",4,0);
   /* Do a prefetch every time until a possible UM bug is fixed */
   if (size>0){
-  gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
-  gpuErrchk(cudaStreamSynchronize(stream));
+    PrintPointerAttributes(ptr);
+    printf("Prefetch size %zu for %p %zu\n",size,ptr,mempush(ptr,0,0));
+    gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
+    gpuErrchk(cudaStreamSynchronize(stream));
   POP_RANGE_DOMAIN(0);
   return;
  } else {
@@ -85,10 +90,27 @@ void MemPrefetch(const void *ptr,int device,cudaStream_t stream){
 }
 void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream){
   if (ptr==NULL) return;
-  size_t size=mempush(ptr,0,0);
+  //size_t size=mempush(ptr,0,0);
+  size_t size=memsize(ptr);
   PUSH_RANGE_PAYLOAD("MemPreFetchForce",4,size);
   gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
   POP_RANGE;
+  return;
+}
+
+void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream){
+  if (ptr==NULL) return;
+  PUSH_RANGE_DOMAIN("MemPreFetchSized",4,0);
+  /* Do a prefetch every time until a possible UM bug is fixed */
+  if (size>0){
+    gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
+    gpuErrchk(cudaStreamSynchronize(stream));
+    POP_RANGE_DOMAIN(0);
+    return;
+  } else {
+    //printf("WARNING :: Prefetching not done due to nvalid size  = %zu\n",size);
+    return;
+  }
   return;
 }
 
@@ -106,7 +128,7 @@ void MemPrefetchReadOnly(const void *ptr,int device,cudaStream_t stream){
   return;
 }
 
-void PrintPointerAttributesNew(void *ptr){
+void PrintPointerAttributesNew(const void *ptr){
   struct cudaPointerAttributes ptr_att;
   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){
     printf("PrintPointerAttributes:: Raw pointer\n");
@@ -260,7 +282,7 @@ size_t mempush(const void *ptr, size_t size, int action){
       return found->size;
     } else{
 #ifdef FULL_WARN
-      fprintf(stderr,"ERROR :: Pointer for size check found in linked list\n");
+      fprintf(stderr,"ERROR :: Pointer for size check NOT found in linked list\n");
 #endif
       return 0;
     }

@@ -43,8 +43,10 @@
 #include "interpreter.h"
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"
+#ifdef HYPRE_USE_GPU
 #include "hypre_nvtx.h"
 #include "gpuMem.h"
+#endif
 HYPRE_Int
 BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );
 

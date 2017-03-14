@@ -144,7 +144,7 @@ ams_driver: ams_driver.o
 
 maxwell_unscaled: maxwell_unscaled.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -pg -o $@ $@.o ${LFLAGS}
 
 struct_migrate: struct_migrate.o
 	@echo  "Building" $@ "... "

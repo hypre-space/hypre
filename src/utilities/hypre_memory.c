@@ -23,7 +23,7 @@
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
-
+#define HYPRE_USE_MANAGED_SCALABLE 1
 /******************************************************************************
  *
  * Standard routines
@@ -63,9 +63,15 @@ hypre_MAlloc( size_t size )
 #endif
       ptr = _umalloc_(size);
 #elif HYPRE_USE_MANAGED
+#ifdef HYPRE_USE_MANAGED_SCALABLE
+      gpuErrchk( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
+      size_t *sp=(size_t*)ptr;
+      *sp=size;
+      ptr=(void*)(&sp[MEM_PAD_LEN]);
+#else
       gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
-      //gpuErrchk(cudaStreamAttachMemAsync(getstream(4), ptr,0,cudaMemAttachHost));
       mempush(ptr,size,0);
+#endif
 #else
       ptr = malloc(size);
 #endif
@@ -106,10 +112,15 @@ hypre_CAlloc( size_t count,
 
       ptr = _ucalloc_(count, elt_size);
 #elif HYPRE_USE_MANAGED
+#ifdef HYPRE_USE_MANAGED_SCALABLE
+      ptr=(void*)hypre_MAlloc(size);
+      memset(ptr,0,count*elt_size);
+#else
       gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
       //gpuErrchk(cudaStreamAttachMemAsync(getstream(4), ptr,0,cudaMemAttachHost));
       memset(ptr,0,count*elt_size);
       mempush(ptr,size,0);
+#endif
 #else
       ptr = calloc(count, elt_size);
 #endif
@@ -129,6 +140,9 @@ hypre_CAlloc( size_t count,
    return(char*) ptr;
 }
 
+size_t memsize(const void *ptr){
+return ((size_t*)ptr)[-MEM_PAD_LEN];
+}
 /*--------------------------------------------------------------------------
  * hypre_ReAlloc
  *--------------------------------------------------------------------------*/
@@ -167,7 +181,11 @@ hypre_ReAlloc( char   *ptr,
    else
    {
      void *nptr = hypre_MAlloc(size);
+#ifdef HYPRE_USE_MANAGED_SCALABLE
+     size_t old_size=memsize((void*)ptr);
+#else
      size_t old_size=mempush((void*)ptr,0,0);
+#endif
      if (size>old_size)
        memcpy(nptr,ptr,old_size);
      else
@@ -214,8 +232,12 @@ hypre_Free( char *ptr )
       _ufree_(ptr);
 #elif HYPRE_USE_MANAGED
       //size_t size=mempush(ptr,0,0);
+#ifdef HYPRE_USE_MANAGED_SCALABLE
+      cudaSafeFree(ptr,MEM_PAD_LEN);
+#else
       mempush(ptr,0,1);
-      cudaSafeFree(ptr);
+      cudaSafeFree(ptr,0);
+#endif
       //gpuErrchk(cudaFree((void*)ptr));
 #else
       free(ptr);

@@ -109,8 +109,8 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
    }
 }
 //int PointerType(const void *ptr);
-void cudaSafeFree(void *ptr);
-void PrintPointerAttributes(void *ptr);
+void cudaSafeFree(void *ptr,int padding);
+void PrintPointerAttributes(const void *ptr);
 //size_t mempush(void* ptr, size_t size,int purge);
 //int memloc(void *ptr, int device);
 #endif

@@ -2,58 +2,62 @@
 #include "gpuErrorCheck.h"
 #include "hypre_nvtx.h"
 
-#define FULL_WARNING
-
-#ifdef ABORT_ON_RAW_POINTER
-#endif
 #include <signal.h>
 extern const char *cusparseErrorCheck(cusparseStatus_t error);
 extern void gpuAssert(cudaError_t code, const char *file, int line);
 extern void cusparseAssert(cusparseStatus_t code, const char *file, int line);
 
-void cudaSafeFree(void *ptr)
+/*
+  cudaSafeFree frees Managed memory allocated in hypre_MAlloc,hypre_CAlloc and hypre_ReAlloc
+  It checks if the memory is managed before freeing and emits a warning if it is not memory
+  allocated using the above routines. This behaviour can be changed by defining ABORT_ON_RAW_POINTER.
+  The core file can then be used to find the location of the anomalous hypre_Free.
+ */
+void cudaSafeFree(void *ptr,int padding)
 {
   PUSH_RANGE("SAFE_FREE",3);
   struct cudaPointerAttributes ptr_att;
+  size_t *sptr=(size_t*)ptr-padding;
   cudaError_t err;
-#ifdef FULL_WARNING
-  err=cudaPointerGetAttributes(&ptr_att,ptr);
+
+  err=cudaPointerGetAttributes(&ptr_att,sptr);
   if (err!=cudaSuccess){
-    if (err==cudaErrorInvalidValue) fprintf(stderr,"INVALID VALUE\n");
-    if (err==cudaErrorInvalidDevice) fprintf(stderr,"INVALID DEVICE\n");
-    fprintf(stderr,"WARNING :: Raw pointer passed to cudaSafeFree %p\n",ptr);
+#ifndef ABORT_ON_RAW_POINTER
+    if (err==cudaErrorInvalidValue) fprintf(stderr,"WARNING :: Raw pointer passed to cudaSafeFree %p\n",ptr);
+    if (err==cudaErrorInvalidDevice) fprintf(stderr,"WARNING :: cudaSafeFree :: INVALID DEVICE on ptr = %p\n",ptr);
     PrintPointerAttributes(ptr);
-#endif
-#ifdef ABORT_ON_RAW_POINTER
+#else
+    fprintf(stderr,"ERROR:: cudaSafeFree Aborting on raw unmanaged pointer %p\n",ptr);
     raise(SIGABRT);
 #endif
-    free(ptr);
+    free(ptr); /* Free the nonManaged pointer */
     return;
   }
   if (ptr_att.isManaged){
-    gpuErrchk(cudaFree(ptr));
+    gpuErrchk(cudaFree(sptr)); 
 
   } else {
-    printf("ERROR:: NON-managed pointer passed to Mfree\n");
-    gpuErrchk(cudaFree(ptr));
+    /* This should never happen */
+    printf("ERROR:: NON-managed pointer passed to cudaSafeFree\n");
+    gpuErrchk(cudaFree(sptr));
   }
   POP_RANGE;
   return;
 }
-void PrintPointerAttributes(void *ptr){
+void PrintPointerAttributes(const void *ptr){
   struct cudaPointerAttributes ptr_att;
   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){
-    printf("PrintPointerAttributes:: Raw pointer\n");
+    fprintf(stderr,"PrintPointerAttributes:: Raw pointer\n");
     return;
   }
   if (ptr_att.isManaged){
-    printf("PrintPointerAttributes:: Managed pointer\n");
-    printf("Host address = %p, Device Address = %p\n",ptr_att.hostPointer, ptr_att.devicePointer);
-    if (ptr_att.memoryType==cudaMemoryTypeHost) printf("Memory is located on host\n");
-    if (ptr_att.memoryType==cudaMemoryTypeDevice) printf("Memory is located on device\n");
-    printf("Device associated with this pointer is %d\n",ptr_att.device);
+    fprintf(stderr,"PrintPointerAttributes:: Managed pointer\n");
+    fprintf(stderr,"Host address = %p, Device Address = %p\n",ptr_att.hostPointer, ptr_att.devicePointer);
+    if (ptr_att.memoryType==cudaMemoryTypeHost) fprintf(stderr,"Memory is located on host\n");
+    if (ptr_att.memoryType==cudaMemoryTypeDevice) fprintf(stderr,"Memory is located on device\n");
+    fprintf(stderr,"Device associated with this pointer is %d\n",ptr_att.device);
   } else {
-    printf("PrintPointerAttributes:: Non-Managed & non-raw pointer\n Probably a device pointer\n");
+    fprintf(stderr,"PrintPointerAttributes:: Non-Managed & non-raw pointer\n Probably a device pointer\n");
   }
   return;
 }

@@ -3,6 +3,7 @@
 
 extern "C"{
 void MemPrefetch(const void *ptr,int device,cudaStream_t stream);
+void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream);
 }
 #define gpuErrchk2(ans) { gpuAssert2((ans), __FILE__, __LINE__); }
 inline void gpuAssert2(cudaError_t code, const char *file, int line)
@@ -73,7 +74,7 @@ extern "C"{
     //gpuErrchk2(cudaDeviceSynchronize());
     //MemPrefetch(u,0,s);
     //MemPrefetch(v,0,s);
-    MemPrefetch(l1_norm,0,s);
+    MemPrefetchSized(l1_norm,num_rows*sizeof(double),0,s);
     VecScaleKernel<<<num_blocks,tpb,0,s>>>(u,v,l1_norm,num_rows);
     //dummy<<<num_blocks,32,0,s>>>(u,v,l1_norm,num_rows);
     //gpuErrchk2(cudaPeekAtLastError());
@@ -109,9 +110,9 @@ extern "C"{
     int num_blocks=num_rows/tpb;
     //gpuErrchk2(cudaPeekAtLastError());
     //gpuErrchk2(cudaDeviceSynchronize());
-    MemPrefetch(u,0,s);
-    MemPrefetch(v,0,s);
-    MemPrefetch(l1_norm,0,s);
+    MemPrefetchSized(u,num_rows*sizeof(double),0,s);
+    MemPrefetchSized(v,num_rows*sizeof(double),0,s);
+    MemPrefetchSized(l1_norm,num_rows*sizeof(double),0,s);
     VecScaleKernelA<<<num_blocks,tpb,0,s>>>(u,v,l1_norm,num_rows);
     VecScaleKernelB<<<1,tpb,0,s>>>(u,v,l1_norm,num_rows,num_blocks*tpb);
     //dummy<<<num_blocks,32,0,s>>>(u,v,l1_norm,num_rows);
@@ -242,7 +243,7 @@ extern "C"{
   void VecSet(double* tgt, int size, double value, cudaStream_t s){
     int tpb=64;
     //cudaDeviceSynchronize();
-    MemPrefetch(tgt,0,s);
+    MemPrefetchSized(tgt,size*sizeof(double),0,s);
     int num_blocks=size/tpb+1;
     VecSetKernel<<<num_blocks,tpb,0,s>>>(tgt,value,size);
     cudaStreamSynchronize(s);
@@ -267,7 +268,7 @@ extern "C"{
     //gpuErrchk2(cudaPeekAtLastError());
     //gpuErrchk2(cudaDeviceSynchronize());
 
-    gpuErrchk2(cudaMemPrefetchAsync((void*)send_data,(end-begin)*sizeof(double),cudaCpuDeviceId,s));
+    MemPrefetchSized((void*)send_data,(end-begin)*sizeof(double),cudaCpuDeviceId,s);
     gpuErrchk2(cudaStreamSynchronize(s));
   }
 }
@@ -344,4 +345,46 @@ void SpMVCudaKernelZB(double* __restrict__ y,double alpha, const double* __restr
     gpuErrchk2(cudaDeviceSynchronize());
 
 }
+}
+extern "C"{
+  __global__
+  void CompileFlagSafetyCheck(int actual){
+#ifdef __CUDA_ARCH__
+    int cudarch=__CUDA_ARCH__;
+    if (cudarch!=actual){
+      printf("WARNING :: nvcc -arch flag does not match actual device architecture\nWARNING :: The code can fail silently and produce wrong results\n");
+      printf("Arch specified at compile = sm_%d Actual device = sm_%d\n",cudarch/10,actual/10);
+    } //else printf("CompileFlagSafetyCheck:: Compile flag %d matches arch\n",cudarch);
+#else
+    printf("ERROR:: CUDA_ ARCH is not defined \n This should not be happening\n");
+    //return 0;
+#endif
+  }
+}
+extern "C"{
+  void CudaCompileFlagCheck(){
+    int devCount;
+    cudaGetDeviceCount(&devCount);
+    //printf("CudaCompileFlagCheck:: Device Count:: %d \n",devCount);
+    int i;
+    int cudarch_actual;
+    for(i = 0; i < devCount; ++i)
+      {
+	struct cudaDeviceProp props;
+	cudaGetDeviceProperties(&props, i);
+	//printf("CudaCompileFlagCheck::Name %s major = %d minor = %d \n",props.name,props.major,props.minor);
+	cudarch_actual=props.major*100+props.minor*10;
+    }
+    gpuErrchk2(cudaPeekAtLastError());
+    gpuErrchk2(cudaDeviceSynchronize());
+    CompileFlagSafetyCheck<<<1,1,0,0>>>(cudarch_actual);
+    cudaError_t code=cudaPeekAtLastError();
+    if (code != cudaSuccess)
+      {
+	fprintf(stderr,"ERROR in CudaCompileFlagCheck%s \n", cudaGetErrorString(code));
+	fprintf(stderr,"ERROR :: Check if compile arch flags match actual device arch = sm_%d\n",cudarch_actual/10);
+	exit(2);
+      }
+    gpuErrchk2(cudaDeviceSynchronize());
+  }
 }

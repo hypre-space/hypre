@@ -19,7 +19,11 @@
 #include "HYPRE_krylov.h"
 #include "_hypre_sstruct_mv.h"
 #include "_hypre_sstruct_ls.h"
- 
+#define HYPRE_USE_GPU 1
+#ifdef HYPRE_USE_GPU
+#include "hypre_nvtx.h"
+#include "gpuMem.h"
+#endif
 #define DEBUG 0
 
 /*--------------------------------------------------------------------------
@@ -1336,6 +1340,10 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
+#ifdef HYPRE_USE_GPU
+   hypreGPUInit();
+#endif
+
    hypre_InitMemoryDebug(myid);
 
    /*-----------------------------------------------------------
@@ -1797,7 +1805,7 @@ main( hypre_int argc,
    hypre_PrintTiming("SStruct Interface", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-
+		    
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
