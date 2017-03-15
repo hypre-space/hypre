@@ -2,8 +2,10 @@
 #include "hypre_nvtx.h"
 
 extern "C"{
-void MemPrefetch(const void *ptr,int device,cudaStream_t stream);
-void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream);
+  void MemPrefetch(const void *ptr,int device,cudaStream_t stream);
+  void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream);
+  cudaStream_t getstream(int i);
+  cudaEvent_t getevent(int i);
 }
 #define gpuErrchk2(ans) { gpuAssert2((ans), __FILE__, __LINE__); }
 inline void gpuAssert2(cudaError_t code, const char *file, int line)
@@ -267,9 +269,12 @@ extern "C"{
     PackOnDeviceKernel<<<num_blocks,tpb,0,s>>>(send_data,x_local_data,send_map,begin,end);
     //gpuErrchk2(cudaPeekAtLastError());
     //gpuErrchk2(cudaDeviceSynchronize());
-
-    MemPrefetchSized((void*)send_data,(end-begin)*sizeof(double),cudaCpuDeviceId,s);
-    gpuErrchk2(cudaStreamSynchronize(s));
+    gpuErrchk2(cudaEventRecord(getevent(4),s));
+    gpuErrchk2(cudaStreamWaitEvent(getstream(7),getevent(4),0));
+    PUSH_RANGE("PACK_PREFETCH",1);
+    MemPrefetchSized((void*)send_data,(end-begin)*sizeof(double),cudaCpuDeviceId,getstream(7));
+    POP_RANGE;
+    //gpuErrchk2(cudaStreamSynchronize(s));
   }
 }
   

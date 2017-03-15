@@ -690,7 +690,7 @@ void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
   if (hypre_CSRMatrixNumNonzeros(A)==0) return;
 
   PUSH_RANGE("hypre_CSRMatrixPrefetchToDevice",0);
-  if (!A->on_device){
+  if ((!A->on_device)&&(hypre_CSRMatrixNumNonzeros(A)>8192)){
     gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),0,getstream(4)));
     gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),0,getstream(5)));
     gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),0,getstream(6)));

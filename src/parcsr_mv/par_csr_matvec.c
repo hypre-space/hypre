@@ -160,6 +160,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       PackOnDevice((HYPRE_Complex*)x_buf_data[0],x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,getstream(4));
 #endif
       POP_RANGE;
+      hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
+      gpuErrchk(cudaStreamSynchronize(getstream(7)));
 #else
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
@@ -224,8 +226,9 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
    POP_RANGE;
+#ifndef HYPRE_USE_GPU
    hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
-
+#endif
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
 #endif

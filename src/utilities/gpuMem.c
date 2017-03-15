@@ -104,7 +104,7 @@ void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream
   /* Do a prefetch every time until a possible UM bug is fixed */
   if (size>0){
     gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
-    gpuErrchk(cudaStreamSynchronize(stream));
+    //gpuErrchk(cudaStreamSynchronize(stream));
     POP_RANGE_DOMAIN(0);
     return;
   } else {
@@ -344,7 +344,7 @@ cudaStream_t getstream(int i){
     //nvtxNameCudaStream(s[4], "HYPRE_COMPUTE_STREAM");
   }
   if (i<MAXSTREAMS) return s[i];
-  fprintf(stderr,"ERROR in getstream in utilities/gpuUtils.C %d is greater than MAXSTREAMS = %d\n Returning default stream",i,MAXSTREAMS);
+  fprintf(stderr,"ERROR in getstream in utilities/gpuMem.c %d is greater than MAXSTREAMS = %d\n Returning default stream",i,MAXSTREAMS);
   return 0;
 }
 
@@ -357,7 +357,23 @@ nvtxDomainHandle_t getdomain(int i){
       firstcall=0;
     }
     if (i<MAXDOMAINS) return h[i];
-    fprintf(stderr,"ERROR in getdomain in utilities/gpuUtils.C %d  is greater than MAXDOMAINS = %d \n Returning default domain",i,MAXDOMAINS);
+    fprintf(stderr,"ERROR in getdomain in utilities/gpuMem.c %d  is greater than MAXDOMAINS = %d \n Returning default domain",i,MAXDOMAINS);
     return NULL;
   }
+
+cudaEvent_t getevent(int i){
+  static int firstcall=1;
+  const int MAXEVENTS=10;
+  static cudaEvent_t s[MAXEVENTS];
+  if (firstcall){
+    for(int jj=0;jj<MAXEVENTS;jj++)
+      gpuErrchk(cudaEventCreateWithFlags(&s[i],cudaEventDisableTiming));
+    printf("Created events ..\n");
+    firstcall=0;
+  }
+  if (i<MAXEVENTS) return s[i];
+  fprintf(stderr,"ERROR in getevent in utilities/gpuMem.c %d is greater than MAXEVENTS = %d\n Returning default stream",i,MAXEVENTS);
+  return 0;
+}
+  
 #endif

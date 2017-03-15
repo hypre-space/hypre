@@ -3,6 +3,7 @@
 #include <cusparse.h>
 cudaStream_t getstream(int i);
 nvtxDomainHandle_t getdomain(int i);
+cudaEvent_t getevent(int i);
 void MemAdviseReadOnly(const void *ptr, int device);
 void MemAdviseUnSetReadOnly(const void *ptr, int device);
 void MemAdviseSetPrefLocDevice(const void *ptr, int device);
