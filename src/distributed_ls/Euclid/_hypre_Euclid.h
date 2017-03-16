@@ -198,8 +198,14 @@ you need to write EUCLID_GET_ROW() functions: see src/getRow.c
 #define FABS(a)    ((a) < 0 ? -(a) : a)
 #endif
 
-/* used in Mat_SEQ_PrintTriples, so matlab won't discard zeros (yuck!) */
+#ifdef HYPRE_SINGLE
+#define _ATOL_ 1.0e-16   /* used to compute absolute tolerance for Euclid's internal Krylov solvers */
+#define _MATLAB_ZERO_  1e-30 /* used in Mat_SEQ_PrintTriples, so matlab won't discard zeros (yuck!) */
+#else // default
+#define _ATOL_ 1.0e-50
 #define _MATLAB_ZERO_  1e-100
+#endif
+
 
 
 /*---------------------------------------------------------------------- 

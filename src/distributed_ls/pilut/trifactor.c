@@ -126,7 +126,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     /* Recv the required lx elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_DOUBLE,
+	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
 		  rpes[i], TAG, pilut_comm, &receive_requests[i] );
 
 	rdone[i] += rnum[i] ;
@@ -139,7 +139,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
         for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]<nnodes[ii];   j++, l++) 
           gatherbuf[l] = lx[sindex[j]];
 
-	hypre_MPI_Send( gatherbuf, l, hypre_MPI_DOUBLE,
+	hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
 		  spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;
@@ -212,7 +212,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
     /* Recv the required ux elements from the appropriate processors */
     for (i=0; i<rnbrpes; i++) {
       if ( rnum[i] > 0 ) { /* Something to recv */
-	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_DOUBLE,
+	hypre_MPI_Irecv( raddr[i]+rdone[i], rnum[i], hypre_MPI_REAL,
 		  rpes[i], TAG, pilut_comm, &receive_requests[ i ] );
 
 	rdone[i] += rnum[i] ;
@@ -225,7 +225,7 @@ void hypre_LDUSolve(DataDistType *ddist, FactorMatType *ldu, HYPRE_Real *x, HYPR
         for (j=auxsptr[i], l=0;   j<sptr[i+1] && sindex[j]>=nnodes[ii-1];   j++, l++) 
           gatherbuf[l] = ux[sindex[j]];
 
-	hypre_MPI_Send( gatherbuf, l, hypre_MPI_DOUBLE,
+	hypre_MPI_Send( gatherbuf, l, hypre_MPI_REAL,
 		  spes[i], TAG, pilut_comm );
 
         auxsptr[i] = j;

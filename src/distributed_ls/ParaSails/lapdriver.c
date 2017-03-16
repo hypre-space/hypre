@@ -304,9 +304,9 @@ hcstop();
         ParaSailsStatsPattern(ps, A);
         ParaSailsStatsValues(ps, A);
 
-        hypre_MPI_Reduce(&setup_time, &max_setup_time, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0,
+        hypre_MPI_Reduce(&setup_time, &max_setup_time, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0,
             hypre_MPI_COMM_WORLD);
-        hypre_MPI_Reduce(&solve_time, &max_solve_time, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0,
+        hypre_MPI_Reduce(&solve_time, &max_solve_time, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0,
             hypre_MPI_COMM_WORLD);
 
         if (mype == 0)

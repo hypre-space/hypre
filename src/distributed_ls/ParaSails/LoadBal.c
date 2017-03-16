@@ -57,7 +57,7 @@ void LoadBalInit(MPI_Comm comm, HYPRE_Real local_cost, HYPRE_Real beta,
 
     cost = (HYPRE_Real *) malloc(npes * sizeof(HYPRE_Real));
 
-    hypre_MPI_Allgather(&local_cost, 1, hypre_MPI_DOUBLE, cost, 1, hypre_MPI_DOUBLE, comm);
+    hypre_MPI_Allgather(&local_cost, 1, hypre_MPI_REAL, cost, 1, hypre_MPI_REAL, comm);
 
     /* Compute the average cost */
     average = 0.0;
@@ -284,7 +284,7 @@ void LoadBalRecipSend(MPI_Comm comm, HYPRE_Int num_taken,
             bufferp += len;
         }
 
-        hypre_MPI_Isend(recip_data[i].buffer, buflen, hypre_MPI_DOUBLE, recip_data[i].pe,
+        hypre_MPI_Isend(recip_data[i].buffer, buflen, hypre_MPI_REAL, recip_data[i].pe,
             LOADBAL_REP_TAG, comm, &request[i]);
 
         MatrixDestroy(mat);
@@ -311,10 +311,10 @@ void LoadBalDonorRecv(MPI_Comm comm, Matrix *mat,
     {
         hypre_MPI_Probe(hypre_MPI_ANY_SOURCE, LOADBAL_REP_TAG, comm, &status);
         source = status.hypre_MPI_SOURCE;
-        hypre_MPI_Get_count(&status, hypre_MPI_DOUBLE, &count);
+        hypre_MPI_Get_count(&status, hypre_MPI_REAL, &count);
 
         buffer = (HYPRE_Real *) malloc(count * sizeof(HYPRE_Real));
-        hypre_MPI_Recv(buffer, count, hypre_MPI_DOUBLE, source, LOADBAL_REP_TAG, 
+        hypre_MPI_Recv(buffer, count, hypre_MPI_REAL, source, LOADBAL_REP_TAG, 
            comm, &status);
 
 	/* search for which entry in donor_data this message corresponds to */

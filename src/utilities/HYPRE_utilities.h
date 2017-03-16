@@ -58,14 +58,23 @@ typedef int HYPRE_Int;
 
 #ifdef HYPRE_SINGLE
 typedef float HYPRE_Real;
+#define HYPRE_REAL_MAX FLT_MAX
+#define HYPRE_REAL_MIN FLT_MIN
+#define HYPRE_REAL_EPSILON FLT_EPSILON
 #define HYPRE_MPI_REAL MPI_FLOAT
 
 #elif HYPRE_LONG_DOUBLE
 typedef long double HYPRE_Real;
+#define HYPRE_REAL_MAX LDBL_MAX
+#define HYPRE_REAL_MIN LDBL_MIN
+#define HYPRE_REAL_EPSILON LDBL_EPSILON
 #define HYPRE_MPI_REAL MPI_LONG_DOUBLE
 
 #else /* default */
 typedef double HYPRE_Real;
+#define HYPRE_REAL_MAX DBL_MAX
+#define HYPRE_REAL_MIN DBL_MIN
+#define HYPRE_REAL_EPSILON DBL_EPSILON
 #define HYPRE_MPI_REAL MPI_DOUBLE
 #endif
 

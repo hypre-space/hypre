@@ -76,7 +76,7 @@ static void ExchangeDiagEntries(MPI_Comm comm, Matrix *mat, HYPRE_Int reqlen,
         }
 
         /* Post receive for diagonal values */
-        hypre_MPI_Irecv(&diags[i], j-i, hypre_MPI_DOUBLE, this_pe, DIAG_VALS_TAG, 
+        hypre_MPI_Irecv(&diags[i], j-i, hypre_MPI_REAL, this_pe, DIAG_VALS_TAG, 
 	    comm, &requests[*num_requests]);
 
         /* Request rows in reqind[i..j-1] */
@@ -130,7 +130,7 @@ static void ExchangeDiagEntriesServer(MPI_Comm comm, Matrix *mat,
 	    sendbuf[j] = local_diags[recvbuf[j] - mat->beg_row];
 
 	/* Use ready-mode send, since receives already posted */
-	hypre_MPI_Irsend(sendbuf, count, hypre_MPI_DOUBLE, source, 
+	hypre_MPI_Irsend(sendbuf, count, hypre_MPI_REAL, source, 
 	    DIAG_VALS_TAG, comm, &requests[i]);
     }
 }

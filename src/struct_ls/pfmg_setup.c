@@ -12,6 +12,7 @@
 
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
+#include "float.h"
 
 #define DEBUG 0
 
@@ -847,7 +848,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       }
       else
       {
-         dxyz[d] = 1.0e+123;
+         dxyz[d] = HYPRE_REAL_MAX;
       }
    }
 
