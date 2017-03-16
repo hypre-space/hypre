@@ -27,4 +27,8 @@ void meminsert(node **head, const void *ptr,size_t size);
 void printlist(node *head,int nc);
 #define MEM_PAD_LEN 1
 size_t memsize(const void *ptr);
+int getsetasyncmode(int mode, int action);
+void SetAsyncMode(int mode);
+int GetAsyncMode();
+void branchStream(int i, int j);
 #endif

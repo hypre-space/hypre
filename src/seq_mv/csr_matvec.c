@@ -42,9 +42,9 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
    HYPRE_Real time_begin = hypre_MPI_Wtime();
 #endif
 #ifdef HYPRE_USE_GPU
-PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
-  int ret=hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset);
-  POP_RANGE;
+   PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
+   int ret=hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset);
+   POP_RANGE;
   return ret;
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
@@ -806,8 +806,8 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
     //gpuErrchk(cudaMemcpyAsync(y->data+offset,b->data+offset,(y->size-offset)*sizeof(HYPRE_Complex),cudaMemcpyDeviceToDevice,getstream(4)));
     // This can be pinned copy with b pinned and y on the device.
     PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
-    VecCopy(y->data,b->data,(y->size-offset),getstream(4));
-    gpuErrchk(cudaStreamSynchronize(getstream(4)));
+    VecCopy(y->data,b->data,(y->size-offset),getstream(5));
+    //gpuErrchk(cudaStreamSynchronize(getstream(5)));
     POP_RANGE
   }
 
@@ -909,8 +909,9 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
 
   //MemPrefetch(y->data,cudaCpuDeviceId,0);
   //MemPrefetch(x->data,cudaCpuDeviceId,0);
-
+  if (!GetAsyncMode()){
   gpuErrchk(cudaStreamSynchronize(s[4]));
+  }
   POP_RANGE;
   //MemAdviseUnSetReadOnly(A->data,0);
   //MemAdviseUnSetReadOnly(A->j,0);

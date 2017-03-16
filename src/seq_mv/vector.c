@@ -46,7 +46,7 @@ hypre_Vector *
 hypre_SeqVectorCreate( HYPRE_Int size )
 {
    hypre_Vector  *vector;
-#ifdef HYPRE_USE_GPU2
+#ifdef HYPRE_USE_GPU
    vector = (hypre_Vector*)calloc(1,sizeof(hypre_Vector));
    vector->on_device=0;
    //printf("Vector %p size %zu \n",vector,sizeof(hypre_Vector));
@@ -93,7 +93,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
       {
          hypre_TFree(hypre_VectorData(vector));
       }
-#ifndef HYPRE_USE_GPU2
+#ifndef HYPRE_USE_GPU
       hypre_TFree(vector);
 #else
       free(vector);
@@ -663,12 +663,14 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
   
 }
 void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x){
+  //static int cc=0;
   if (hypre_VectorSize(x)==0) return;
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
   //if (!x->on_device){ // This test actually slows down the code 
   //x->on_device=1;
     gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),0,getstream(4)));
     gpuErrchk(cudaStreamSynchronize(getstream(4)));
+    //cc=(cc+1)%10;
     //}
   POP_RANGE;
 }

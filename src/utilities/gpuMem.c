@@ -367,7 +367,7 @@ cudaEvent_t getevent(int i){
   static cudaEvent_t s[MAXEVENTS];
   if (firstcall){
     for(int jj=0;jj<MAXEVENTS;jj++)
-      gpuErrchk(cudaEventCreateWithFlags(&s[i],cudaEventDisableTiming));
+      gpuErrchk(cudaEventCreateWithFlags(&s[jj],cudaEventDisableTiming));
     printf("Created events ..\n");
     firstcall=0;
   }
@@ -375,5 +375,21 @@ cudaEvent_t getevent(int i){
   fprintf(stderr,"ERROR in getevent in utilities/gpuMem.c %d is greater than MAXEVENTS = %d\n Returning default stream",i,MAXEVENTS);
   return 0;
 }
-  
+int getsetasyncmode(int mode, int action){
+  static int async_mode=0;
+  if (action==0) async_mode = mode;
+  if (action==1) return async_mode;
+  return async_mode;
+}
+void SetAsyncMode(int mode){
+  getsetasyncmode(mode,0);
+}
+int GetAsyncMode(){
+  return getsetasyncmode(0,1);
+}
+void branchStream(int i, int j){
+  //printf("Handles %d %d %d\n",getevent(i),getstream(i),getstream(j));
+  gpuErrchk(cudaEventRecord(getevent(i),getstream(i)));
+  gpuErrchk(cudaStreamWaitEvent(getstream(j),getevent(i),0));
+}
 #endif
