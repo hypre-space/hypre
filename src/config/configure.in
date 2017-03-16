@@ -294,8 +294,6 @@ AS_HELP_STRING([--enable-global-partition],
     *)   hypre_using_global_partition=yes ;;
  esac]
 )
-dnl * The AC_DEFINE is below, after hypre_using_mpi is completely set
-dnl * Need to change to a new approach that always defines variable to some value
 
 AC_ARG_ENABLE(fortran,
 AS_HELP_STRING([--enable-fortran],
@@ -308,51 +306,9 @@ AS_HELP_STRING([--enable-fortran],
 [hypre_using_fortran=yes]
 )
 
-AC_ARG_ENABLE(cuda,
-AS_HELP_STRING([--enable-cuda],
-               [Require cuda-7.5 compiler or higher (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_user_chose_cuda=yes
-		 hypre_using_cuda=yes ;;
-    no)  hypre_using_cuda=no ;;
-    *)   hypre_using_cuda=no ;;
- esac],
-[hypre_using_cuda=no]
-)
+dnl * The AC_DEFINE is below, after hypre_using_mpi is completely set
+dnl * Need to change to a new approach that always defines variable to some value
 
-AC_ARG_ENABLE(raja,
-AS_HELP_STRING([--enable-raja],
-               [Require RAJA package compiled with CUDA (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_user_chose_raja=yes
-		 hypre_using_cuda=yes ;;
-    no)  hypre_using_cuda=no ;;
-    *)   hypre_using_cuda=no ;;
- esac],
-[hypre_using_raja=no]
-)
-
-AC_ARG_ENABLE(kokkos,
-AS_HELP_STRING([--enable-kokkos],
-               [Require kokkos package (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_user_chose_kokkos=yes ;;
-    no)  hypre_user_chose_kokkos=no ;;
-    *)   hypre_user_chose_kokkos=no ;;
- esac]
-)
-
-AC_ARG_ENABLE(kokkoscuda,
-AS_HELP_STRING([--enable-kokkoscuda],
-               [Require kokkos package compiled with CUDA (default is NO).]),
-[case "${enableval}" in
-    yes) hypre_user_chose_kokkos_cuda=yes
-		 hypre_using_cuda=yes ;;
-    no)  hypre_using_cuda=no ;;
-    *)   hypre_using_cuda=no ;;
- esac],
-[hypre_using_raja=no]
-)
 dnl *********************************************************************
 dnl * Determine if user provided C compiler or flags
 dnl *********************************************************************
@@ -815,6 +771,80 @@ AS_HELP_STRING([--with-MPI],
  esac]
 )
 
+AC_ARG_WITH(cuda,
+AS_HELP_STRING([--with-cuda],
+               [Require cuda-7.5 compiler or higher (default is NO).]),
+[case "$withval" in
+    yes) hypre_user_chose_cuda=yes
+		 hypre_using_cuda=yes ;;
+    no)  hypre_using_cuda=no ;;
+    *)   hypre_using_cuda=no ;;
+ esac],
+[hypre_using_cuda=no]
+)
+
+AC_ARG_WITH(raja,
+AS_HELP_STRING([--with-raja],
+               [Require RAJA package compiled with CUDA (default is NO).]),
+[case "$withval" in
+    yes) hypre_user_chose_raja=yes
+		 hypre_using_cuda=yes ;;
+    no)  hypre_using_cuda=no ;;
+    *)   hypre_using_cuda=no ;;
+ esac],
+[hypre_using_raja=no]
+)
+
+AC_ARG_WITH(kokkos,
+AS_HELP_STRING([--with-kokkos],
+               [Require kokkos package (default is NO).]),
+[case "$withval" in
+    yes) hypre_user_chose_kokkos=yes ;;
+    no)  hypre_user_chose_kokkos=no ;;
+    *)   hypre_user_chose_kokkos=no ;;
+ esac]
+)
+
+AC_ARG_WITH(raja-lib,
+AS_HELP_STRING([--with-raja-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for RAJA. OK to use -L and -l flags in the list]),
+[for raja_lib in $withval; do
+dnl    [libprefix=`echo $blas_lib | cut -c1-2`]
+dnl    if test $libprefix = "-L"
+dnl    then
+dnl       BLASLIBDIRS="$blas_lib $BLASLIBDIRS"
+dnl    else
+       HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB $raja_lib"
+dnl    fi
+ done;
+]
+)
+
+AC_ARG_WITH(raja-libs,
+AS_HELP_STRING([--with-raja-libs=LIBS],
+               [LIBS is space-separated list (enclosed in quotes) of libraries
+                needed for RAJA (base name only). The options --with-raja-libs and
+                --with-raja-lib-dirs must be used together.]),
+[for raja_lib in $withval; do
+    HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB -l$raja_lib"
+ done;
+]
+)
+
+AC_ARG_WITH(raja-lib-dirs,
+AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
+               [DIRS is space-separated list (enclosed in quotes) of 
+                directories containing the libraries specified by 
+                --with-raja-libs, e.g "usr/lib /usr/local/lib".
+                The  options --with-raja-libs and --raja-blas-lib-dirs
+                must be used together.]),
+[for raja_lib_dir in $withval; do
+    HYPRE_RAJA_SRC_DIR="-L$raja_lib_dir $HYPRE_RAJA_SRC_DIR"
+ done;
+]
+)
+
 dnl *********************************************************************
 dnl * Select compilers if not already defined by command line options 
 dnl *********************************************************************
@@ -1258,9 +1288,9 @@ dnl * Set cuda options
 dnl *********************************************************************
 if test "$hypre_user_chose_cuda" = "yes"
 then
-   LDFLAGS="-Xcompiler -fopenmp"
+   LDFLAGS="-Xcompiler -fopenmp -arch compute_35"
    CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CFLAGS"
-   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $CXXFLAGS"
+   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CXXFLAGS"
 fi
 
 dnl *********************************************************************

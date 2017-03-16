@@ -249,12 +249,14 @@ hypre_PFMGSetupInterpOp_CC0
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
-   
+
+   /*
+   HYPRE_Complex * data_A = hypre_StructMatrixData(A);
    HYPRE_Int * indices_d;
    HYPRE_Int indices_h[stencil_size];
    HYPRE_Int * stencil_shape_d;
    HYPRE_Int  stencil_shape_h[stencil_size];
-   HYPRE_Complex * data_A = hypre_StructMatrixData(A);
+   
 
    indices_d = hypre_DataTAlloc(HYPRE_Int, stencil_size);
    stencil_shape_d = hypre_DataTAlloc(HYPRE_Int, stencil_size);
@@ -267,6 +269,8 @@ hypre_PFMGSetupInterpOp_CC0
    
    hypre_DataCopyToData(indices_h,indices_d,HYPRE_Int,stencil_size);
    hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,stencil_size);
+   */
+   hypre_MatrixIndexMove(A, stencil_size, i, cdir,1);
    
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
@@ -289,26 +293,28 @@ hypre_PFMGSetupInterpOp_CC0
 
       for (si = 0; si < stencil_size; si++)
       {
-		  //Ap = hypre_StructMatrixBoxData(A, i, si);
-		  Ap = data_A + indices_d[si];
-		  
-		  //Astenc = hypre_IndexD(stencil_shape[si], cdir);
-		  Astenc = stencil_shape_d[si];
-		  Api = Ap[Ai];
+	//Ap = hypre_StructMatrixBoxData(A, i, si);
+	Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
+	//Ap = (hypre_StructMatrixData(A) + indices_d[si]);
+	
+	//Astenc = hypre_IndexD(stencil_shape[si], cdir);
+	Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
+	//Astenc = stencil_shape_d[si];
+	
          if (Astenc == 0)
          {
-            center += Api;
+	   center += Ap[Ai];
          }
          else if (Astenc == Pstenc0)
          {
-            Pp0[Pi] -= Api;
+            Pp0[Pi] -= Ap[Ai];
          }
          else if (Astenc == Pstenc1)
          {
-            Pp1[Pi] -= Api;
+            Pp1[Pi] -= Ap[Ai];
          }
 		 
-         if (si == si0 && Api == 0.0)
+         if (si == si0 && Ap[Ai] == 0.0)
             mrk0++;
          if (si == si1 && Ap[Ai] == 0.0)
             mrk1++;
@@ -538,6 +544,8 @@ hypre_PFMGSetupInterpOp_CC2
       }
 
       si = diag_rank;
+
+      /*FIXME: There might be some problem for this boxloop*/
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);

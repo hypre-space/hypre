@@ -1659,25 +1659,82 @@ void hypre_device_reduce_stable(T*a,T*b, T* out, HYPRE_Int N,
         cudaFree(d_c);\
 }
 
-
-/*
-	int n_blocks = (hypre__tot+BLOCKSIZE-1)/BLOCKSIZE;					\
-	HYPRE_Real *d_c;													\
-	HYPRE_Real * c = new HYPRE_Real[n_blocks];							\
-	cudaMalloc((void**) &d_c, n_blocks * sizeof(HYPRE_Real));			\
-	dot<HYPRE_Real><<< n_blocks ,BLOCKSIZE>>>(xp,yp,d_c,hypre__tot,databox1,databox2);		\
-        cudaError err = cudaGetLastError();\
-if ( cudaSuccess != err ) {\
-  printf("\n ERROR zypre_newBoxLoop2Reduction: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-  int *p = NULL; *p = 1;						\
- }									\
-	AxCheckError(cudaMemcpy(c,d_c,n_blocks*sizeof(HYPRE_Real),cudaMemcpyDeviceToHost)); \
-	for (int j = 0 ; j< n_blocks ; ++j){								\
-		sum += c[j];													\
-	}																	\
-	delete c;															\
+extern "C++" {
+template <typename LOOP_BODY>
+__global__ void hypre_device_reduction_kernel(HYPRE_Real* out,
+					      HYPRE_Int N,hypre_Boxloop box1,hypre_Boxloop box2,
+					      LOOP_BODY loop_body)
+{
+    HYPRE_Int local_idx;
+    HYPRE_Int d,idx_local;
+    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;
+    HYPRE_Int i1 = 0, i2 = 0;
+    HYPRE_Real sum = HYPRE_Real(0);
+    HYPRE_Int i;
+    
+    for(i=blockIdx.x*blockDim.x+threadIdx.x;i<N;i+=blockDim.x*gridDim.x)
+      {
+	idx_local = i;
+	local_idx  = idx_local % box1.lsize0;
+	idx_local  = idx_local / box1.lsize0;
+	i1 += (local_idx*box1.strides0 + box1.bstart0) * hypre_boxD1;
+	hypre_boxD1 *= hypre_max(0, box1.bsize0 + 1);
+	i2 += (local_idx*box2.strides0 + box2.bstart0) * hypre_boxD2;
+	hypre_boxD2 *= hypre_max(0, box2.bsize0 + 1);
+	local_idx  = idx_local % box1.lsize1;
+	idx_local  = idx_local / box1.lsize1;
+	i1 += (local_idx*box1.strides1 + box1.bstart1) * hypre_boxD1;
+	hypre_boxD1 *= hypre_max(0, box1.bsize1 + 1);
+	i2 += (local_idx*box2.strides1 + box2.bstart1) * hypre_boxD2;   
+	hypre_boxD2 *= hypre_max(0, box2.bsize1 + 1);	
+	local_idx  = idx_local % box1.lsize2;	      
+	idx_local  = idx_local / box1.lsize2;		      
+	i1 += (local_idx*box1.strides2 + box1.bstart2) * hypre_boxD1;
+	hypre_boxD1 *= hypre_max(0, box1.bsize2 + 1);	
+	i2 += (local_idx*box2.strides2 + box2.bstart2) * hypre_boxD2;
+	hypre_boxD2 *= hypre_max(0, box2.bsize2 + 1);
+	sum += loop_body(i1,i2);
+      }
+    sum=blockReduceSum<HYPRE_Real>(sum);
+    if(threadIdx.x==0)
+      out[blockIdx.x]=sum;
 }
-*/
+
+template<typename LOOP_BODY>
+void hypre_device_reduction (HYPRE_Real* out,
+			     HYPRE_Int N,hypre_Boxloop box1,hypre_Boxloop box2,
+			     LOOP_BODY loop_body)
+{	
+  HYPRE_Int threads=512;
+  HYPRE_Int blocks=min((N+threads-1)/threads,1024);
+
+  hypre_device_reduction_kernel<<<blocks,threads>>>(out,N,box1,box2,loop_body);
+  hypre_device_reduce_stable_kernel2<HYPRE_Real><<<1,1024>>>(out,out,blocks);
+
+}
+}
+
+#define zypre_newBoxLoop2ReductionBegin(ndim, loop_size,		\
+					dbox1, start1, stride1, i1,	\
+					dbox2, start2, stride2, i2,sum) \
+{    									   \
+        zypre_BoxLoopCUDAInit(ndim);						\
+	zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
+	zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2); \
+        HYPRE_Real *d_c;				      		\
+        cudaMalloc((void**) &d_c, 1024 * sizeof(HYPRE_Real));			\
+        hypre_device_reduction(d_c,hypre__tot,databox1,databox2,[=] __device__(HYPRE_Int i1, HYPRE_Int i2) \
+	{					\
+	  HYPRE_Real sum = 0;			\
+
+#define zypre_newBoxLoop2ReductionEnd(i1, i2, sum)			\
+  return sum;								\
+  });									\
+  cudaMemcpy(&sum,d_c,sizeof(HYPRE_Real),cudaMemcpyDeviceToHost);	\
+  cudaFree(d_c);							\
+}
+
+
 
 #define zypre_newBoxLoop1ReductionBegin(ndim, loop_size,				\
 										dbox1, start1, stride1, i1,xp,sum) \
@@ -1794,33 +1851,6 @@ int *p = NULL; *p = 1;\
 AxCheckError(cudaDeviceSynchronize());\
 }
 
-#define hypre_SerialBoxLoop1Begin(ndim, loop_size,			\
-				  dbox1, start1, stride1, i1)		\
-{									\
-        HYPRE_Int hypre__tot = 1.0;						\
-	const size_t block_size = 256;					\
-	HYPRE_Int nd = ndim;						\
-	for (HYPRE_Int d = 0;d < ndim;d ++)				\
-	{								\
-	    hypre__tot *= loop_size[d];					\
-	}								\
-	HYPRE_Int idx;							\
-	for (idx = 0;idx < hypre__tot;idx ++)				\
-	{								\
-	    zypre_BoxLoopCUDADeclare()											\
-	    HYPRE_Int hypre_boxD1 = 1.0;				\
-	    HYPRE_Int i1 = 0;						\
-	    for (d = 0;d < ndim;d ++)					\
-	    {								\
-	      local_idx  = idx_local % loop_size[d];			\
-	      idx_local  = idx_local / loop_size[d];			\
-	      i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
-	      hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);			\
-	    }
-
-#define hypre_SerialBoxLoop1End(i1)				\
-        }								\
-}
 
 #define zypre_newBoxLoop0For() {}
 
@@ -1857,6 +1887,43 @@ AxCheckError(cudaDeviceSynchronize());\
 
 #define hypre_BoxLoop1Begin1      zypre_newBoxLoop1Begin1
 #define hypre_BoxLoop1End1        zypre_newBoxLoop1End1
+
+#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)	\
+HYPRE_Int * indices_d;				\
+HYPRE_Int indices_h[stencil_size];		\
+HYPRE_Int * stencil_shape_d;			\
+HYPRE_Int  stencil_shape_h[size*stencil_size];		\
+HYPRE_Complex * data_A = hypre_StructMatrixData(A);\
+indices_d = hypre_DataTAlloc(HYPRE_Int, stencil_size);		\
+stencil_shape_d = hypre_DataTAlloc(HYPRE_Int, size*stencil_size);	\
+for (si = 0; si < stencil_size; si++)				\
+  {									\
+    HYPRE_Int jj = 0;								\
+    indices_h[si]       = hypre_StructMatrixDataIndices(A)[i][si];	\
+    if (size > 1) cdir = 0;						\
+    stencil_shape_h[si] = hypre_IndexD(stencil_shape[si], cdir); \
+    for (jj = 1;jj < size;jj++)						\
+      stencil_shape_h[jj*stencil_size+si] = hypre_IndexD(stencil_shape[si], jj);	\
+  }									\
+hypre_DataCopyToData(indices_h,indices_d,HYPRE_Int,stencil_size);	\
+hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size);
+
+#define hypre_StructGetMatrixBoxData(A, i, si,indices)	(data_A + indices[si])
+
+#define hypre_StructGetIndexD(index,i,index_d) (index_d)
+
+#define hypre_StructcleanIndexD() \
+  hypre_DataTFree(indices_d);			 \
+  hypre_DataTFree(stencil_shape_d);		 \
+
+#define hypre_StructPreparePrint()		\
+  HYPRE_Int tot_size = num_values*hypre_BoxVolume(hypre_BoxArrayBox(data_space, hypre_BoxArraySize(box_array)-1)); \
+  data_host = hypre_CTAlloc(HYPRE_Complex, tot_size);			\
+  hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);	\
+
+#define hypre_StructPostPrint() \
+  hypre_TFree(data_host);	\
+  
 
 #endif
 #else
@@ -2685,7 +2752,67 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
 /*-----------------------------------*/
 
 #else
+  
+#define hypre_SerialBoxLoop1Begin(ndim, loop_size,				\
+				  dbox1, start1, stride1, i1)		\
+  {									\
+        zypre_BoxLoopDeclare();						\
+	zypre_BoxLoopDeclareK(1);					\
+	zypre_BoxLoopInit(ndim, loop_size);				\
+	zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);		\
+        zypre_BoxLoopSetOneBlock();					\
+	for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++) \
+	  {								\
+		zypre_BoxLoopSet();												\
+		zypre_BoxLoopSetK(1, i1);										\
+		for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)			\
+		{																\
+			for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)		\
+			{
 
+#define hypre_SerialBoxLoop1End(i1)				\
+	             i1 += hypre__i0inc1;						\
+		    }											\
+			zypre_BoxLoopInc1();					\
+	        i1 += hypre__ikinc1[hypre__d];				\
+	        zypre_BoxLoopInc2();						\
+		}											\
+	}											\
+}
+
+#define hypre_SerialBoxLoop2Begin(ndim, loop_size,\
+							   dbox1, start1, stride1, i1,	\
+							   dbox2, start2, stride2, i2)	\
+{\
+   zypre_BoxLoopDeclare();\
+   zypre_BoxLoopDeclareK(1);\
+   zypre_BoxLoopDeclareK(2);\
+   zypre_BoxLoopInit(ndim, loop_size);\
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);\
+   zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);\
+   zypre_BoxLoopSetOneBlock();						\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)	\
+   {\
+      zypre_BoxLoopSet();\
+      zypre_BoxLoopSetK(1, i1);\
+      zypre_BoxLoopSetK(2, i2);\
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
+      {\
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
+         {
+
+#define hypre_SerialBoxLoop2End(i1, i2)\
+            i1 += hypre__i0inc1;\
+            i2 += hypre__i0inc2;\
+         }\
+         zypre_BoxLoopInc1();\
+         i1 += hypre__ikinc1[hypre__d];\
+         i2 += hypre__ikinc2[hypre__d];\
+         zypre_BoxLoopInc2();\
+      }\
+   }\
+}
+  
 #define HYPRE_BOX_PRIVATE        ZYPRE_BOX_PRIVATE
 
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex

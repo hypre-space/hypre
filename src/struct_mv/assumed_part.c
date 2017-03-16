@@ -1768,8 +1768,6 @@ hypre_StructAssumedPartitionGetProcsFromBox(
       hypre_BoxGetSize(part_box, loop_size);
       hypre_BoxSetExtents(part_dbox, stride, div);
       hypre_SerialBoxLoop1Begin(ndim, loop_size, part_dbox, start, stride, part_num);
-      //zypre_BoxLoopSetOneBlock();
-      //zypre_BoxLoop1For(part_num)
       {
          /*convert the partition number to a processor number*/
          if (part_num < (2*extra))

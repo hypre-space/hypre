@@ -54,20 +54,27 @@ hypre_StructInnerProd( hypre_StructVector *x,
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(y));
    hypre_ForBoxI(i, boxes)
    {
-      box   = hypre_BoxArrayBox(boxes, i);
-	  start = hypre_BoxIMin(box);
-	  
-	  x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
-	  y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
-       
-      xp = hypre_StructVectorBoxData(x, i);
-      yp = hypre_StructVectorBoxData(y, i);
-       
-	  hypre_BoxGetSize(box, loop_size);
+     box   = hypre_BoxArrayBox(boxes, i);
+     start = hypre_BoxIMin(box);
+     
+     x_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x), i);
+     y_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(y), i);
+     
+     xp = hypre_StructVectorBoxData(x, i);
+     yp = hypre_StructVectorBoxData(y, i);
+     
+     hypre_BoxGetSize(box, loop_size);
 #if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_RAJA)
-       zypre_newBoxLoop2ReductionCUDA(ndim, loop_size,
-									  x_data_box, start, unit_stride, xi,xp,
-									  y_data_box, start, unit_stride, yi,yp,local_result);
+     //zypre_newBoxLoop2ReductionCUDA(ndim, loop_size,
+     //				      x_data_box, start, unit_stride, xi,xp,
+     //				      y_data_box, start, unit_stride, yi,yp,local_result);
+       zypre_newBoxLoop2ReductionBegin(ndim, loop_size,
+				       x_data_box, start, unit_stride, xi,
+				       y_data_box, start, unit_stride, yi, local_result);
+       {
+	 local_result += xp[xi] * hypre_conj(yp[yi]);		 
+       }
+       zypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
 #else
 #ifdef HYPRE_BOX_PRIVATE_VAR
 #undef HYPRE_BOX_PRIVATE_VAR
@@ -79,10 +86,10 @@ hypre_StructInnerProd( hypre_StructVector *x,
 #define HYPRE_BOX_REDUCTION reduction(+:local_result)
 	   
 	   zypre_newBoxLoop2ReductionBegin(ndim, loop_size,
-									   x_data_box, start, unit_stride, xi,
-									   y_data_box, start, unit_stride, yi,local_result);
+					   x_data_box, start, unit_stride, xi,
+					   y_data_box, start, unit_stride, yi,local_result);
 	   {
-		   local_result += xp[xi] * hypre_conj(yp[yi]);		 
+	     local_result += xp[xi] * hypre_conj(yp[yi]);		 
 	   }
 	   zypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
 #endif
@@ -92,7 +99,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
    
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));
-
+   
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
    
    return final_innerprod_result;

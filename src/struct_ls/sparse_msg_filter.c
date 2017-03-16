@@ -376,6 +376,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_ForBoxI(i, compute_boxes)
    {
 	   //FIXME: hypre_StructMatrixBoxData(A, i, si);Astenc = hypre_IndexD(stencil_shape[si], 0); are not allowed in kernel; change this to a macro
+     /*
 	   HYPRE_Int * indices_d;
 	   HYPRE_Int indices_h[stencil_size];
 	   HYPRE_Int * stencil_shape_d;
@@ -395,7 +396,9 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 
 	   hypre_DataCopyToData(indices_h,indices_d,HYPRE_Int, stencil_size);
 	   hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int, 3*stencil_size);
-	   
+     */
+     hypre_MatrixIndexMove(A, stencil_size, i, si,3);
+     
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
 
       A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
@@ -429,10 +432,12 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
          for (si = 0; si < stencil_size; si++)
          {
 			 //Ap = hypre_StructMatrixBoxData(A, i, si);
-			Ap = data_A + indices_d[si];
+	   //Ap = data_A + indices_d[si];
+			Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
             /* compute lambdax */
             //Astenc = hypre_IndexD(stencil_shape[si], 0);
-			Astenc = stencil_shape_d[si];
+			//Astenc = stencil_shape_d[si];
+			Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
             if (Astenc == 0)
             {
                lambdax += Ap[Ai];
@@ -477,9 +482,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       }
       hypre_BoxLoop2End(Ai, vi);
 
-	  
-	  hypre_DataTFree(indices_d);
-	  hypre_DataTFree(stencil_shape_d);	  
+      hypre_StructcleanIndexD();	  
    }
 
    return ierr;

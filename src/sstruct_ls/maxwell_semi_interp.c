@@ -2367,17 +2367,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
             hypre_AddIndexes(loop_size, hi_index, 3, loop_size);
 
             hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
-            zypre_BoxLoop1Begin(ndim, loop_size,
-                                &copy_box, start, stride, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,k,entry,rank,j) HYPRE_SMP_SCHEDULE
-#endif
-#else
-            zypre_BoxLoopSetOneBlock();
-#endif
-            zypre_BoxLoop1For(m)
+
+            hypre_SerialBoxLoop1Begin(ndim, loop_size,
+				      &copy_box, start, stride, m);
             {
                hypre_BoxLoopGetIndex(lindex);
                hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2398,7 +2390,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   j++;
                }
             }
-            zypre_BoxLoop1End(m);
+            hypre_SerialBoxLoop1End(m);
 
          }   /* hypre_ForBoxI */
          hypre_TFree(boxoffset);
@@ -2496,19 +2488,11 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                                                  loop_size);
 
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
+
                      /* increase the loop_size by one in the Z plane direction */
                      loop_size[2]++;
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,p,var_index,n,entry,rank,j) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2549,7 +2533,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            }  /* for (n= 1; n< rfactor[1]; n++) */
                         }     /* for (p= 0; p< rfactor[0]; p++) */
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
 
                      /* Y_Face */
                      hypre_CopyBox(cellbox, &copy_box);
@@ -2582,17 +2566,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
                      loop_size[1]++;
-					 /*FIXME :  this might be sequential*/
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,k,p,var_index,n,entry,rank,j,l) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2632,7 +2608,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            }  /* for (n= 1; n< rfactor[2]; n++) */
                         }     /* for (p= 0; p< rfactor[0]; p++) */
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
                   }  /* hypre_ForBoxI(i, fboxes) */
 
                   break;
@@ -2691,17 +2667,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                      /* reset and then increase the loop_size by one in the Z_Face direction */
                      loop_size[2]++;
-					 /*FIXME :  this might be sequential*/
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,k,p,var_index,n,entry,rank,j,l) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2740,7 +2708,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            }  /* for (n= 1; n< rfactor[0]; n++) */
                         }     /* for (p= 0; p< rfactor[1]; p++) */
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
 
                      /* X_Face */
                      hypre_CopyBox(cellbox, &copy_box);
@@ -2774,17 +2742,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      loop_size[0]++;
-					 /*FIXME :  this might be sequential*/
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,k,p,var_index,n,entry,rank,j,l) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2823,7 +2783,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            }  /* for (n= 1; n< rfactor[2]; n++) */
                         }     /* for (p= 0; p< rfactor[1]; p++) */
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
                   }  /* hypre_ForBoxI(i, fboxes) */
 
                   break;
@@ -2882,17 +2842,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                      /* increase the loop_size by one in the X_Face direction */
                      loop_size[0]++;
-					 /*FIXME :  this might be sequential*/
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,k,p,var_index,n,entry,rank,j,l) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2934,7 +2886,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            }  /* for (n= 1; n< rfactor[1]; n++) */
                         }     /* for (p= 0; p< rfactor[2]; p++) */
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
 
                      /* Y_Face */
                      hypre_CopyBox(cellbox, &copy_box);
@@ -2968,17 +2920,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      loop_size[1]++;
-					 /*FIXME :  this might be sequential*/
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,k,p,var_index,n,entry,rank,j,l) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -3019,7 +2963,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            }  /* for (n= 1; n< rfactor[0]; n++) */
                         }     /* for (p= 0; p< rfactor[2]; p++) */
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
                   }  /* hypre_ForBoxI(i, fboxes) */
 
                   break;
@@ -3068,17 +3012,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
                                               loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
-                  zypre_BoxLoop1Begin(ndim, loop_size,
-                                      &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,k,p,var_index,n,entry,rank,j) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  zypre_BoxLoopSetOneBlock();
-#endif
-                  zypre_BoxLoop1For(m)
+
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					    &copy_box, start, rfactor, m);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -3110,7 +3046,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      }     /* for (p= 1; p< rfactor[0]; p++) */
 
                   }
-                  zypre_BoxLoop1End(m);
+                  hypre_SerialBoxLoop1End(m);
                }  /* hypre_ForBoxI(i, fboxes) */
                break;
             }
@@ -3132,17 +3068,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
                                               loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
-                  zypre_BoxLoop1Begin(ndim, loop_size,
-                                      &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,k,p,var_index,n,entry,rank,j) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  zypre_BoxLoopSetOneBlock();
-#endif
-                  zypre_BoxLoop1For(m)
+
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					    &copy_box, start, rfactor, m);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -3175,7 +3103,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         }  /* for (n= 0; n< rfactor[0]; n++) */
                      }     /* for (p= 1; p< rfactor[1]; p++) */
                   }
-                  zypre_BoxLoop1End(m);
+                  hypre_SerialBoxLoop1End(m);
                }  /* hypre_ForBoxI(i, fboxes) */
                break;
             }
@@ -3197,17 +3125,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
                                               loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
-                  zypre_BoxLoop1Begin(ndim, loop_size,
-                                      &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,k,p,var_index,n,entry,rank,j) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  zypre_BoxLoopSetOneBlock();
-#endif
-                  zypre_BoxLoop1For(m)
+
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					    &copy_box, start, rfactor, m);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -3250,7 +3170,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      }  /* for (p= 1; p< rfactor[2]; p++) */
 
                   }
-                  zypre_BoxLoop1End(m);
+                  hypre_SerialBoxLoop1End(m);
                }  /* hypre_ForBoxI(i, fboxes) */
                break;
             }
@@ -3272,17 +3192,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
                                               loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
-                  zypre_BoxLoop1Begin(ndim, loop_size,
-                                      &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,k,p,var_index,n,entry,rank,j) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  zypre_BoxLoopSetOneBlock();
-#endif
-                  zypre_BoxLoop1For(m)
+
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					    &copy_box, start, rfactor, m);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -3325,7 +3237,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      }  /* for (p= 1; p< rfactor[2]; p++) */
 
                   }
-                  zypre_BoxLoop1End(m);
+                  hypre_SerialBoxLoop1End(m);
                }  /* hypre_ForBoxI(i, fboxes) */
 
                break;
@@ -3348,17 +3260,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
                                               loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
-                  zypre_BoxLoop1Begin(ndim, loop_size,
-                                      &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,k,p,var_index,n,entry,rank,j) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  zypre_BoxLoopSetOneBlock();
-#endif
-                  zypre_BoxLoop1For(m)
+
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					    &copy_box, start, rfactor, m);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -3401,7 +3305,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      }  /* for (p= 1; p< rfactor[1]; p++) */
 
                   }
-                  zypre_BoxLoop1End(m);
+                  hypre_SerialBoxLoop1End(m);
                }  /* hypre_ForBoxI(i, fboxes) */
                break;
             }
@@ -3600,17 +3504,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
             /* note that the correct cbox corresponding to this non-vanishing
                fbox is used. */
-/*FIXME :  this might be sequential*/
-            zypre_BoxLoop1Begin(ndim, loop_size,
-                                &copy_box, start, stride, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,j,entry,cindex,var_index,rank,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-            zypre_BoxLoopSetOneBlock();
-#endif
-            zypre_BoxLoop1For(m)
+
+            hypre_SerialBoxLoop1Begin(ndim, loop_size,
+				      &copy_box, start, stride, m);
             {
                hypre_BoxLoopGetIndex(lindex);
                hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -3648,7 +3544,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   k++;
                }
             }
-            zypre_BoxLoop1End(m);
+            hypre_SerialBoxLoop1End(m);
          }   /* hypre_ForBoxI */
          hypre_TFree(boxoffset);
          hypre_TFree(suboffset);
@@ -3759,17 +3655,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                      /* increase the loop_size by one in the Z plane direction */
                      loop_size[2]++;
-					 /*FIXME :  this might be sequential*/
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -3868,7 +3756,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            }
                         }  /* for (p= 0; p< rfactor[0]; p++) */
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
 
                      /* Y_Face */
                      hypre_CopyIndex(Edge_cstarts[part][i], cstart);
@@ -3905,17 +3793,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      loop_size[1]++;
-					 /*FIXME :  this might be sequential*/
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -4013,7 +3893,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         }  /* for (p= 0; p< rfactor[0]; p++) */
 
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
                   }  /* hypre_ForBoxI(i, fboxes) */
                   break;
                }
@@ -4077,17 +3957,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                      /* increase the loop_size by one in the Z plane direction */
                      loop_size[2]++;
-					 /*FIXME :  this might be sequential*/
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -4180,7 +4052,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            }
                         }  /* for (p= 0; p< rfactor[1]; p++) */
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
 
                      /* X_Face */
                      hypre_CopyBox(cellbox, &copy_box);
@@ -4218,17 +4090,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      loop_size[0]++;
-					 /*FIXME :  this might be sequential*/
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -4326,7 +4190,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         }  /* for (p= 0; p< rfactor[1]; p++) */
 
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
                   }  /* hypre_ForBoxI(i, fboxes) */
                   break;
                }
@@ -4390,17 +4254,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
 
                      /* increase the loop_size by one in the X plane direction */
                      loop_size[0]++;
-					 /*FIXME :  this might be sequential*/
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -4493,7 +4349,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                            }
                         }  /* for (p= 0; p< rfactor[2]; p++) */
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
 
                      /* Y_Face */
                      hypre_CopyBox(cellbox, &copy_box);
@@ -4530,17 +4386,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      loop_size[1]++;
-					 /*FIXME :  this might be sequential*/
-                     zypre_BoxLoop1Begin(ndim, loop_size,
-                                         &copy_box, start, rfactor, m);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,m,lindex,findex,cindex,l,var_index,entry,rank2,rank,p,n,face_w1,face_w2,off_proc_flag,stencil_vals,lower,diag,upper,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     zypre_BoxLoopSetOneBlock();
-#endif
-                     zypre_BoxLoop1For(m)
+
+                     hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					       &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -4638,7 +4486,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         }  /* for (p= 0; p< rfactor[2]; p++) */
 
                      }
-                     zypre_BoxLoop1End(m);
+                     hypre_SerialBoxLoop1End(m);
                   }  /* hypre_ForBoxI(i, fboxes) */
                   break;
                }
@@ -4695,17 +4543,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
                                               loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
-                  zypre_BoxLoop1Begin(ndim, loop_size,
-                                      &copy_box, start, rfactor, r);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,r,lindex,findex,p,n,cindex,entry,rank,var_index,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  zypre_BoxLoopSetOneBlock();
-#endif
-                  zypre_BoxLoop1For(r)
+
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					    &copy_box, start, rfactor, r);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -4762,7 +4602,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      }     /* for (p= 1; p< rfactor[0]; p++) */
 
                   }
-                  zypre_BoxLoop1End(r);
+                  hypre_SerialBoxLoop1End(r);
                }  /* hypre_ForBoxI(i, fboxes) */
 
                break;
@@ -4786,17 +4626,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
                                               loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
-                  zypre_BoxLoop1Begin(ndim, loop_size,
-                                      &copy_box, start, rfactor, r);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,r,lindex,findex,p,n,cindex,entry,rank,var_index,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  zypre_BoxLoopSetOneBlock();
-#endif
-                  zypre_BoxLoop1For(r)
+
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					    &copy_box, start, rfactor, r);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -4853,7 +4685,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      }     /* for (p= 1; p< rfactor[1]; p++) */
 
                   }
-                  zypre_BoxLoop1End(r);
+                  hypre_SerialBoxLoop1End(r);
                }  /* hypre_ForBoxI(i, fboxes) */
 
                break;
@@ -4877,17 +4709,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
                                               loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
-                  zypre_BoxLoop1Begin(ndim, loop_size,
-                                      &copy_box, start, rfactor, r);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,r,lindex,findex,p,n,m,cindex,entry,rank,var_index,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  zypre_BoxLoopSetOneBlock();
-#endif
-                  zypre_BoxLoop1For(r)
+
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					    &copy_box, start, rfactor, r);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -5015,7 +4839,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                         }     /* for (n= 1; n< rfactor[1]; n++) */
                      }        /* for (p= 1; p< rfactor[2]; p++) */
                   }
-                  zypre_BoxLoop1End(r);
+                  hypre_SerialBoxLoop1End(r);
                }  /* hypre_ForBoxI(i, fboxes) */
 
                break;
@@ -5039,17 +4863,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
                                               loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
-                  zypre_BoxLoop1Begin(ndim, loop_size,
-                                      &copy_box, start, rfactor, r);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,r,lindex,findex,p,n,m,cindex,entry,rank,var_index,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  zypre_BoxLoopSetOneBlock();
-#endif
-                  zypre_BoxLoop1For(r)
+
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					    &copy_box, start, rfactor, r);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -5178,7 +4994,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      }        /* for (p= 1; p< rfactor[2]; p++) */
 
                   }
-                  zypre_BoxLoop1End(r);
+                  hypre_SerialBoxLoop1End(r);
                }  /* hypre_ForBoxI(i, fboxes) */
 
                break;
@@ -5202,17 +5018,9 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                   hypre_StructMapFineToCoarse(loop_size, zero_index, rfactor,
                                               loop_size);
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
-/*FIXME :  this might be sequential*/
-                  zypre_BoxLoop1Begin(ndim, loop_size,
-                                      &copy_box, start, rfactor, r);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,r,lindex,findex,p,n,m,cindex,entry,rank,var_index,k) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  zypre_BoxLoopSetOneBlock();
-#endif
-                  zypre_BoxLoop1For(r)
+
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size,
+					    &copy_box, start, rfactor, r);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -5341,7 +5149,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
                      }        /* for (p= 1; p< rfactor[1]; p++) */
 
                   }
-                  zypre_BoxLoop1End(r);
+                  hypre_SerialBoxLoop1End(r);
                }  /* hypre_ForBoxI(i, fboxes) */
 
                break;

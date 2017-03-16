@@ -731,10 +731,6 @@ enable_hopscotch
 with_no_global_partition
 enable_global_partition
 enable_fortran
-enable_cuda
-enable_raja
-enable_kokkos
-enable_kokkoscuda
 with_LD
 with_LDFLAGS
 with_extra_incpath
@@ -762,6 +758,12 @@ with_fei
 with_superlu
 with_mli
 with_MPI
+with_cuda
+with_raja
+with_kokkos
+with_raja_lib
+with_raja_libs
+with_raja_lib_dirs
 with_blas
 with_lapack
 '
@@ -1404,12 +1406,6 @@ Optional Features:
   --enable-global-partition
                           Use global partitioning (default is NO).
   --enable-fortran        Require a working Fortran compiler (default is YES).
-  --enable-cuda           Require cuda-7.5 compiler or higher (default is NO).
-  --enable-raja           Require RAJA package compiled with CUDA (default is
-                          NO).
-  --enable-kokkos         Require kokkos package (default is NO).
-  --enable-kokkoscuda     Require kokkos package compiled with CUDA (default
-                          is NO).
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -1498,6 +1494,23 @@ Optional Packages:
   --with-mli              Use MLI
   --with-MPI              DEFAULT: Compile with MPI. Selecting --without-MPI
                           may affect which compiler is chosen.
+  --with-cuda             Require cuda-7.5 compiler or higher (default is NO).
+  --with-raja             Require RAJA package compiled with CUDA (default is
+                          NO).
+  --with-kokkos           Require kokkos package (default is NO).
+  --with-raja-lib=LIBS    LIBS is space-separated linkable list (enclosed in
+                          quotes) of libraries needed for RAJA. OK to use -L
+                          and -l flags in the list
+  --with-raja-libs=LIBS   LIBS is space-separated list (enclosed in quotes) of
+                          libraries needed for RAJA (base name only). The
+                          options --with-raja-libs and --with-raja-lib-dirs
+                          must be used together.
+  --with-raja-lib-dirs=DIRS
+                          DIRS is space-separated list (enclosed in quotes) of
+                          directories containing the libraries specified by
+                          --with-raja-libs, e.g "usr/lib /usr/local/lib". The
+                          options --with-raja-libs and --raja-blas-lib-dirs
+                          must be used together.
   --with-blas             Find a system-provided BLAS library
   --with-lapack           Find a system-provided LAPACK library
 
@@ -2574,57 +2587,6 @@ else
 fi
 
 
-# Check whether --enable-cuda was given.
-if test "${enable_cuda+set}" = set; then :
-  enableval=$enable_cuda; case "${enableval}" in
-    yes) hypre_user_chose_cuda=yes
-		 hypre_using_cuda=yes ;;
-    no)  hypre_using_cuda=no ;;
-    *)   hypre_using_cuda=no ;;
- esac
-else
-  hypre_using_cuda=no
-
-fi
-
-
-# Check whether --enable-raja was given.
-if test "${enable_raja+set}" = set; then :
-  enableval=$enable_raja; case "${enableval}" in
-    yes) hypre_user_chose_raja=yes
-		 hypre_using_cuda=yes ;;
-    no)  hypre_using_cuda=no ;;
-    *)   hypre_using_cuda=no ;;
- esac
-else
-  hypre_using_raja=no
-
-fi
-
-
-# Check whether --enable-kokkos was given.
-if test "${enable_kokkos+set}" = set; then :
-  enableval=$enable_kokkos; case "${enableval}" in
-    yes) hypre_user_chose_kokkos=yes ;;
-    no)  hypre_user_chose_kokkos=no ;;
-    *)   hypre_user_chose_kokkos=no ;;
- esac
-
-fi
-
-
-# Check whether --enable-kokkoscuda was given.
-if test "${enable_kokkoscuda+set}" = set; then :
-  enableval=$enable_kokkoscuda; case "${enableval}" in
-    yes) hypre_user_chose_kokkos_cuda=yes
-		 hypre_using_cuda=yes ;;
-    no)  hypre_using_cuda=no ;;
-    *)   hypre_using_cuda=no ;;
- esac
-else
-  hypre_using_raja=no
-
-fi
 
 if test "x$CC" = "x"
 then
@@ -3208,6 +3170,81 @@ if test "${with_MPI+set}" = set; then :
     no) hypre_using_mpi=no ;;
     *)  hypre_using_mpi=yes ;;
  esac
+
+fi
+
+
+
+# Check whether --with-cuda was given.
+if test "${with_cuda+set}" = set; then :
+  withval=$with_cuda; case "$withval" in
+    yes) hypre_user_chose_cuda=yes
+		 hypre_using_cuda=yes ;;
+    no)  hypre_using_cuda=no ;;
+    *)   hypre_using_cuda=no ;;
+ esac
+else
+  hypre_using_cuda=no
+
+fi
+
+
+
+# Check whether --with-raja was given.
+if test "${with_raja+set}" = set; then :
+  withval=$with_raja; case "$withval" in
+    yes) hypre_user_chose_raja=yes
+		 hypre_using_cuda=yes ;;
+    no)  hypre_using_cuda=no ;;
+    *)   hypre_using_cuda=no ;;
+ esac
+else
+  hypre_using_raja=no
+
+fi
+
+
+
+# Check whether --with-kokkos was given.
+if test "${with_kokkos+set}" = set; then :
+  withval=$with_kokkos; case "$withval" in
+    yes) hypre_user_chose_kokkos=yes ;;
+    no)  hypre_user_chose_kokkos=no ;;
+    *)   hypre_user_chose_kokkos=no ;;
+ esac
+
+fi
+
+
+
+# Check whether --with-raja-lib was given.
+if test "${with_raja_lib+set}" = set; then :
+  withval=$with_raja_lib; for raja_lib in $withval; do
+       HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB $raja_lib"
+ done;
+
+
+fi
+
+
+
+# Check whether --with-raja-libs was given.
+if test "${with_raja_libs+set}" = set; then :
+  withval=$with_raja_libs; for raja_lib in $withval; do
+    HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB -l$raja_lib"
+ done;
+
+
+fi
+
+
+
+# Check whether --with-raja-lib-dirs was given.
+if test "${with_raja_lib_dirs+set}" = set; then :
+  withval=$with_raja_lib_dirs; for raja_lib_dir in $withval; do
+    HYPRE_RAJA_SRC_DIR="-L$raja_lib_dir $HYPRE_RAJA_SRC_DIR"
+ done;
+
 
 fi
 
@@ -7358,9 +7395,9 @@ fi
 
 if test "$hypre_user_chose_cuda" = "yes"
 then
-   LDFLAGS="-Xcompiler -fopenmp"
+   LDFLAGS="-Xcompiler -fopenmp -arch compute_35"
    CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CFLAGS"
-   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $CXXFLAGS"
+   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CXXFLAGS"
 fi
 
 if test "$hypre_user_chose_raja" = "yes"
