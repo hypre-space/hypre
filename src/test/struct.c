@@ -85,8 +85,9 @@ main( hypre_int argc,
 
    /*HYPRE_Real          dxyz[3];*/
 
+   HYPRE_Int           num_ghost[6]   = {0, 0, 0, 0, 0, 0};
    HYPRE_Int           A_num_ghost[6] = {0, 0, 0, 0, 0, 0};
-   HYPRE_Int           v_num_ghost[3] = {0,0,0};
+   HYPRE_Int           v_num_ghost[6] = {0, 0, 0, 0, 0, 0};
                      
    HYPRE_StructMatrix  A;
    HYPRE_StructVector  b;
@@ -256,11 +257,12 @@ main( hypre_int argc,
    read_x0fromfile_index = argc;
    sum = 0;
 
-   /* ghosts for the building of matrix: default  */
-   for (i = 0; i < dim; i++)
+   /* ghost defaults */
+   for (i = 0; i < 2*dim; i++)
    {
-      A_num_ghost[2*i] = 1;
-      A_num_ghost[2*i + 1] = 1;
+      num_ghost[i]   = 1;
+      A_num_ghost[i] = num_ghost[i];
+      v_num_ghost[i] = num_ghost[i];
    }
 
    /*-----------------------------------------------------------
@@ -966,17 +968,12 @@ main( hypre_int argc,
             HYPRE_StructGridSetExtents(grid, ilower[ib], iupper[ib]);
          }
          HYPRE_StructGridSetPeriodic(grid, periodic);
+         HYPRE_StructGridSetNumGhost(grid, num_ghost);
          HYPRE_StructGridAssemble(grid);
 
          /*-----------------------------------------------------------
           * Set up the matrix structure
           *-----------------------------------------------------------*/
-
-         for (i = 0; i < dim; i++)
-         {
-            A_num_ghost[2*i] = 1;
-            A_num_ghost[2*i + 1] = 1;
-         }
 
          HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
          if ( solver_id == 3 || solver_id == 4 ||
@@ -1012,7 +1009,6 @@ main( hypre_int argc,
             }
          }
          HYPRE_StructMatrixSetSymmetric(A, sym);
-         HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
          HYPRE_StructMatrixInitialize(A);
 
          /*-----------------------------------------------------------
@@ -1075,13 +1071,6 @@ main( hypre_int argc,
                hypre_printf("\ninitial rhs from file prefix :%s\n",
                             argv[read_rhsfromfile_index]);
 
-               /* ghost selection for vector  */
-               for (i = 0; i < dim; i++)
-               {
-                  v_num_ghost[2*i] = 1;
-                  v_num_ghost[2*i + 1] = 1;
-               }
-           
                b = (HYPRE_StructVector)
                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
                                          argv[read_rhsfromfile_index],
@@ -1099,7 +1088,6 @@ main( hypre_int argc,
                HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD,
                                         readgrid, stencil, &A);
                HYPRE_StructMatrixSetSymmetric(A, 1);
-               HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
                HYPRE_StructMatrixInitialize(A);
 
                /*-----------------------------------------------------------
@@ -1125,13 +1113,6 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0 from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               /* ghost selection for vector  */
-               for (i = 0; i < dim; i++)
-               {
-                  v_num_ghost[2*i] = 1;
-                  v_num_ghost[2*i + 1] = 1;
-               }
-  
                x = (HYPRE_StructVector)
                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
                                          argv[read_x0fromfile_index],v_num_ghost);
@@ -1148,7 +1129,6 @@ main( hypre_int argc,
                HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD,
                                         readgrid, stencil, &A);
                HYPRE_StructMatrixSetSymmetric(A, 1);
-               HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
                HYPRE_StructMatrixInitialize(A);
 
                /*-----------------------------------------------------------
@@ -1176,13 +1156,6 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0  from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               /* ghost selection for vector  */
-               for (i = 0; i < dim; i++)
-               {
-                  v_num_ghost[2*i] = 1;
-                  v_num_ghost[2*i + 1] = 1;
-               }
-  
                b = (HYPRE_StructVector)
                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
                                          argv[read_rhsfromfile_index],
@@ -1199,7 +1172,6 @@ main( hypre_int argc,
                HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD,
                                         readgrid, stencil, &A);
                HYPRE_StructMatrixSetSymmetric(A, 1);
-               HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
                HYPRE_StructMatrixInitialize(A);
 
                /*-----------------------------------------------------------
@@ -1222,12 +1194,6 @@ main( hypre_int argc,
          {   
             hypre_printf("\nreading matrix from file:%s\n",
                          argv[read_fromfile_index]);
-            /* ghost selection for reading the matrix  */
-            for (i = 0; i < dim; i++)
-            {
-               A_num_ghost[2*i] = 1;
-               A_num_ghost[2*i + 1] = 1;
-            }
 
             A = (HYPRE_StructMatrix)
                hypre_StructMatrixRead(hypre_MPI_COMM_WORLD,
@@ -1242,13 +1208,6 @@ main( hypre_int argc,
                hypre_printf("\ninitial rhs from file prefix :%s\n",
                             argv[read_rhsfromfile_index]);
 
-               /* ghost selection for vector  */
-               for (i = 0; i < dim; i++)
-               {
-                  v_num_ghost[2*i] = 1;
-                  v_num_ghost[2*i + 1] = 1;
-               }
-  
                b = (HYPRE_StructVector)
                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
                                          argv[read_rhsfromfile_index],
@@ -1266,13 +1225,6 @@ main( hypre_int argc,
                hypre_printf("\ninitial x0 from file prefix :%s\n",
                             argv[read_x0fromfile_index]);
 
-               /* ghost selection for vector  */
-               for (i = 0; i < dim; i++)
-               {
-                  v_num_ghost[2*i] = 1;
-                  v_num_ghost[2*i + 1] = 1;
-               }
-  
                x = (HYPRE_StructVector)
                   hypre_StructVectorRead(hypre_MPI_COMM_WORLD,
                                          argv[read_x0fromfile_index],

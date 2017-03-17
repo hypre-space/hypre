@@ -20,6 +20,9 @@
 # GridCreate: ndim nparts
 GridCreate: 2 2
 
+## GridSetNumGhost: numghost[2*ndim]
+#GridSetNumGhost: [3 3 3 3]
+
 # GridSetExtents: part ilower(ndim) iupper(ndim)
 GridSetExtents: 0 (0- 0-) (4+ 4+)
 
