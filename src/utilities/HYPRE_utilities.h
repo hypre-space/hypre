@@ -56,6 +56,8 @@ typedef int HYPRE_Int;
  * Real and Complex types
  *--------------------------------------------------------------------------*/
 
+#include <float.h>
+
 #ifdef HYPRE_SINGLE
 typedef float HYPRE_Real;
 #define HYPRE_REAL_MAX FLT_MAX

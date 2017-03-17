@@ -18,7 +18,6 @@
 
 #include "krylov.h"
 #include "_hypre_utilities.h"
-#include "float.h"
 
 /*--------------------------------------------------------------------------
  * hypre_BiCGSTABFunctionsCreate

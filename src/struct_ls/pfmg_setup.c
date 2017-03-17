@@ -12,7 +12,6 @@
 
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
-#include "float.h"
 
 #define DEBUG 0
 
