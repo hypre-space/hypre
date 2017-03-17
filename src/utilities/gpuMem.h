@@ -11,7 +11,6 @@ void MemAdviseSetPrefLocHost(const void *ptr);
 void MemPrefetch(const void *ptr,int device,cudaStream_t stream);
 void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream);
 void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream);
-void MemPrefetchReadOnly(const void *ptr,int device,cudaStream_t stream);
 cublasHandle_t getCublasHandle();
 cusparseHandle_t getCusparseHandle();
 void hypreGPUInit();

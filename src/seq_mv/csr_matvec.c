@@ -796,33 +796,19 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   static cudaStream_t s[10];
   static int myid;
 
-  //if (b!=y)
-  // memcpy(y->data+offset,b->data+offset,(y->size-offset)*sizeof(HYPRE_Complex));
   if (b!=y){
-    //if(y->size-offset>26000000){
-      //PrintPointerAttributes(b);
-      //PrintPointerAttributes(y);
-    // }
-    //gpuErrchk(cudaMemcpyAsync(y->data+offset,b->data+offset,(y->size-offset)*sizeof(HYPRE_Complex),cudaMemcpyDeviceToDevice,getstream(4)));
-    // This can be pinned copy with b pinned and y on the device.
+
     PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
     VecCopy(y->data,b->data,(y->size-offset),getstream(5));
-    //gpuErrchk(cudaStreamSynchronize(getstream(5)));
     POP_RANGE
   }
 
-  if (x==y) printf("Houston we have a problem\n");
+  if (x==y) fprintf(stderr,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
 
   if (FirstCall){
     PUSH_RANGE("FIRST_CALL",4);
-    //status= cusparseCreate(&handle);
-    handle=getCusparseHandle();
-    //if (status != CUSPARSE_STATUS_SUCCESS) {
-    //  printf("ERROR:: CUSPARSE Library initialization failed\n");
-    // handle=0;
-    //  exit(2);
-    //} 
 
+    handle=getCusparseHandle();
     
     status= cusparseCreateMatDescr(&descr); 
     if (status != CUSPARSE_STATUS_SUCCESS) {
@@ -834,92 +820,34 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
     cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
     
     FirstCall=0;
-    //PrintPointerAttributes(y->data);
-    
-    //for(int jj=0;jj<5;jj++)
-    //gpuErrchk(cudaStreamCreateWithFlags(&s[jj],cudaStreamNonBlocking));
-
     for(int jj=0;jj<5;jj++)
       s[jj]=getstream(jj);
     nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
     hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
     myid++;
-    // Stream is set during init
-    //cusparseErrchk(cusparseSetStream(handle,s[4]));
     POP_RANGE;
   }
 
-  //printf("STREEAMS %p,%p,%p\n",s[0],s[1],s[2]);
-
-  //  if (OnHost(A->data)){
-  //printf("Prefetching %p %d \n",A->data,A->num_nonzeros);
-  //MemAdviseReadOnly(A->data,0);
-  //MemAdviseSetPrefLocDevice(A->data,0);
-  
-  //MemAdviseReadOnly(A->j,0);
-  //MemAdviseSetPrefLocDevice(A->j,0);
-  
-  //MemAdviseReadOnly(A->i,0);
-  //MemAdviseSetPrefLocDevice(A->i,0);
-  //static int llc=0;
-  //printf("%d Matrix Data sum = %lf \n",ggc(-1),dnorm(A->data,A->num_nonzeros));
-  //printf("%d Matrix I sum = %lld \n",ggc(-1),inorm(A->i,A->num_rows+1));
-  //printf("%d Matrix J sum = %lld \n",ggc(-1),inorm(A->j,A->num_nonzeros));
-  //usleep(600000);
-  //MemPrefetchReadOnly(A->data,0,s[0]);
-  //MemPrefetchReadOnly(A->j,0,s[1]);
-  //MemPrefetchReadOnly(A->i,0,s[2]);
-  
-  //double hnorm = hypre_VectorSumAbsElts(x);
-  //printf("%d PRE Vector sum X = %lf Alpha = %lf\n",ggc(-1),hnorm,alpha);
-  //printf("%d PRE Vector sum Y = %lf Beta = %lf\n",ggc(-1),hypre_VectorSumAbsElts(y),beta);
   PUSH_RANGE("PREFETCH+SPMV",2);
-  //MemPrefetch(A->data,0,s[4]);
-  //MemPrefetch(A->j,0,s[4]);
-  //MemPrefetch(A->i,0,s[4]);
-  //MemPrefetch(x->data,0,s[4]);
-  //MemPrefetch(y->data,0,s[4]);
+
   hypre_CSRMatrixPrefetchToDevice(A);
   hypre_SeqVectorPrefetchToDevice(x);
   hypre_SeqVectorPrefetchToDevice(y);
-  //for (int jj=0;jj<5;jj++)
-  //  gpuErrchk(cudaStreamSynchronize(s[jj]));
-  //cudaDeviceSynchronize();
-  //usleep(6000);
-  if (offset!=0) printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: %d \n",offset);
-  //printf("%d Device share %d \n",ggc(-1),DeviceShare(x->data,mempush(x->data,0,0)));
   
-  int naive=0;
-  //double vnorm=devicenorm(x->data,x->size);
-  //printf("%d POSTFETCH Vector sum X = %lf Alpha = %lf\n",ggc(-1),vnorm,alpha);
-  //printf("%d POSTFETCH Vector sum Y = %lf Beta = %lf\n",ggc(-1),devicenorm(y->data,y->size),beta);
-  if (naive){
-    //printf("Naive SPmV\n");
-    //SpMVCuda(A->num_rows-offset,alpha,A->data,A->i+offset,A->j,x->data,beta,y->data+offset);
-  }
-  else{
-    cusparseErrchk(cusparseDcsrmv(handle ,
-				  CUSPARSE_OPERATION_NON_TRANSPOSE, 
-				  A->num_rows-offset, A->num_cols, A->num_nonzeros,
-				  &alpha, descr,
-				  A->data ,A->i+offset,A->j,
-				  x->data, &beta, y->data+offset));
-  }
-  static int lc=0;
+  if (offset!=0) printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: %d \n",offset);
+  cusparseErrchk(cusparseDcsrmv(handle ,
+				CUSPARSE_OPERATION_NON_TRANSPOSE, 
+				A->num_rows-offset, A->num_cols, A->num_nonzeros,
+				&alpha, descr,
+				A->data ,A->i+offset,A->j,
+				x->data, &beta, y->data+offset));
 
-  //MemPrefetch(y->data,cudaCpuDeviceId,0);
-  //MemPrefetch(x->data,cudaCpuDeviceId,0);
+
   if (!GetAsyncMode()){
   gpuErrchk(cudaStreamSynchronize(s[4]));
   }
   POP_RANGE;
-  //MemAdviseUnSetReadOnly(A->data,0);
-  //MemAdviseUnSetReadOnly(A->j,0);
-  //MemAdviseUnSetReadOnly(A->i,0);
-  //cudaDeviceSynchronize();
-  //printf("%d POST Vector sum X = %lf Size= %d\n",ggc(-1),hypre_VectorSumAbsElts(x),DeviceShare(x->data,mempush(x->data,0,0)));
-  //printf("%d Vector sum = %lf \n",ggc(-1),hypre_VectorSumAbsElts(y));
-  //printf("%d %lf %lf \n",b==y,y->data[offset],b->data[offset]);
+  
   return 0;
   
 }

@@ -56,6 +56,7 @@ hypre_MAlloc( size_t size )
 
    if (size > 0)
    {
+     PUSH_RANGE_PAYLOAD("MALLOC",2,size);
 #ifdef HYPRE_USE_UMALLOC
       HYPRE_Int threadid = hypre_GetThreadID();
 #ifdef HYPRE_USE_MANAGED
@@ -82,6 +83,7 @@ hypre_MAlloc( size_t size )
         hypre_OutOfMemory(size);
       }
 #endif
+      POP_RANGE;
    }
    else
    {
@@ -104,6 +106,7 @@ hypre_CAlloc( size_t count,
 
    if (size > 0)
    {
+     PUSH_RANGE_PAYLOAD("MALLOC",4,size);
 #ifdef HYPRE_USE_UMALLOC
 #ifdef HYPRE_USE_MANAGED
       printf("ERROR HYPRE_USE_UMALLOC AND HYPRE_USE_MANAGED are mutually exclusive\n");
@@ -131,6 +134,7 @@ hypre_CAlloc( size_t count,
         hypre_OutOfMemory(size);
       }
 #endif
+      POP_RANGE;
    }
    else
    {
@@ -216,6 +220,7 @@ hypre_ReAlloc( char   *ptr,
 
    return ptr;
 }
+
 
 /*--------------------------------------------------------------------------
  * hypre_Free

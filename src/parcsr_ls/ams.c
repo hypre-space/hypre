@@ -75,8 +75,10 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 	 PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
 	 HYPRE_Int i, num_rows = hypre_ParCSRMatrixNumRows(A);
 #ifdef HYPRE_USE_GPU
-	 hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(v));
-	 hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
+	 if (sweep==0){
+	   hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(v));
+	   hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
+	 }
 	 VecCopy(v_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(v)),getstream(4));
 #else
          hypre_ParVectorCopy(f,v);

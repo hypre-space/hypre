@@ -18,13 +18,13 @@
 
 #include "_hypre_parcsr_mv.h"
 #include <assert.h>
-
+#include "hypre_nvtx.h"
 #ifdef HYPRE_USE_GPU
 #include "gpuErrorCheck.h"
-cudaStream_t getstream(int i);
+#include "gpuMem.h"
 void PackOnDevice(double *send_data,double *x_local_data, int *send_map, int begin,int end,cudaStream_t s);
 #endif
-#include "hypre_nvtx.h"
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec
  *--------------------------------------------------------------------------*/
@@ -72,7 +72,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
     *  these conditions terminates processing, and the ierr flag
     *  is informational only.
     *--------------------------------------------------------------------*/
-   PUSH_RANGE_PAYLOAD("PAR_CSR_MATVEC",4,x_size);
+   PUSH_RANGE_PAYLOAD("PAR_CSR_MATVEC",5,x_size);
    hypre_assert( idxstride>0 );
 
    if (num_cols != x_size)
@@ -273,6 +273,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
    POP_RANGE;
+   gpuErrchk(cudaStreamSynchronize(getstream(4)));
    POP_RANGE; // PAR_CSR
    return ierr;
 }
