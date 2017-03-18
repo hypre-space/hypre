@@ -461,6 +461,8 @@ extern "C" {
 #define hypre_TFree(ptr) \
 ( hypre_Free((char *)ptr), ptr = NULL )
 
+#define hypre_PTAlloc(type, count) \
+( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
 #endif
 
 #define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count))
@@ -476,6 +478,7 @@ extern "C" {
 HYPRE_Int hypre_OutOfMemory ( size_t size );
 char *hypre_MAlloc ( size_t size );
 char *hypre_CAlloc ( size_t count , size_t elt_size );
+char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc ( char *ptr , size_t size );
 void hypre_Free ( char *ptr );
 char *hypre_SharedMAlloc ( size_t size );

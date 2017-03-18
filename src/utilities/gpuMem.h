@@ -30,4 +30,5 @@ int getsetasyncmode(int mode, int action);
 void SetAsyncMode(int mode);
 int GetAsyncMode();
 void branchStream(int i, int j);
+void joinStreams(int i, int j, int k);
 #endif

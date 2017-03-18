@@ -23,7 +23,7 @@
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
-#define HYPRE_USE_MANAGED_SCALABLE 1
+
 /******************************************************************************
  *
  * Standard routines
@@ -248,4 +248,55 @@ hypre_Free( char *ptr )
       free(ptr);
 #endif
    }
+}
+/*--------------------------------------------------------------------------
+ * hypre_MAllocPinned
+ *--------------------------------------------------------------------------*/
+
+char *
+hypre_MAllocPinned( size_t size )
+{
+   void *ptr;
+
+   if (size > 0)
+   {
+     PUSH_RANGE_PAYLOAD("MALLOC",2,size);
+#ifdef HYPRE_USE_UMALLOC
+      HYPRE_Int threadid = hypre_GetThreadID();
+#ifdef HYPRE_USE_MANAGED
+      printf("ERROR HYPRE_USE_UMALLOC AND HYPRE_USE_MANAGED are mutually exclusive\n");
+#endif
+      ptr = _umalloc_(size);
+#elif HYPRE_USE_MANAGED
+#ifdef HYPRE_USE_MANAGED_SCALABLE
+#ifdef HYPRE_GPU_USE_PINNED
+      gpuErrchk( cudaHostAlloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,cudaHostAllocMapped));
+#else
+      gpuErrchk( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
+#endif
+      size_t *sp=(size_t*)ptr;
+      *sp=size;
+      ptr=(void*)(&sp[MEM_PAD_LEN]);
+#else
+      gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+      mempush(ptr,size,0);
+#endif
+#else
+      ptr = malloc(size);
+#endif
+
+#if 1
+      if (ptr == NULL)
+      {
+        hypre_OutOfMemory(size);
+      }
+#endif
+      POP_RANGE;
+   }
+   else
+   {
+      ptr = NULL;
+   }
+
+   return (char*)ptr;
 }

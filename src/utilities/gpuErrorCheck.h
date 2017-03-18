@@ -37,10 +37,9 @@ inline const char *cusparseErrorCheck(cusparseStatus_t error)
         case CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED:
             return "CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED";
         default:
-	    return "Some new error";
+	    return "Unknown error in cusparseErrorCheck";
     }
-
-    return "Congrats::Undefined ERRROR";
+    
 }
 inline const char *cublasErrorCheck(cublasStatus_t error)
 {
@@ -75,10 +74,9 @@ inline const char *cublasErrorCheck(cublasStatus_t error)
         case CUBLAS_STATUS_LICENSE_ERROR:
 	    return "CUBLAS_STATUS_LICENSE_ERROR";
         default:
-	    return "Some new error";
+	    return "Unknown error in cublasErrorCheck";
     }
 
-    return "Congrats::This cannot possibly be happening";
 }
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line)

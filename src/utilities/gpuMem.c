@@ -324,4 +324,10 @@ void branchStream(int i, int j){
   gpuErrchk(cudaEventRecord(getevent(i),getstream(i)));
   gpuErrchk(cudaStreamWaitEvent(getstream(j),getevent(i),0));
 }
+void joinStreams(int i, int j, int k){
+  gpuErrchk(cudaEventRecord(getevent(i),getstream(i)));
+  gpuErrchk(cudaEventRecord(getevent(j),getstream(j)));
+  gpuErrchk(cudaStreamWaitEvent(getstream(k),getevent(i),0));
+  gpuErrchk(cudaStreamWaitEvent(getstream(k),getevent(j),0));
+}
 #endif

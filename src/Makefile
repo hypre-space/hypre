@@ -94,6 +94,8 @@ all:
 	cp -fR $(srcdir)/HYPREf.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fR $(srcdir)/utilities/gpuMem.h ${HYPRE_BUILD_DIR}/include/.; \
 	cp -fR $(srcdir)/utilities/hypre_nvtx.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fR $(srcdir)/utilities/gpgpu.h ${HYPRE_BUILD_DIR}/include/.; \
+	cp -fR $(srcdir)/utilities/gpuErrorCheck.h ${HYPRE_BUILD_DIR}/include/.; \
 	for i in ${HYPRE_DIRS}; \
 	do \
 	  echo "Making $$i ..."; \

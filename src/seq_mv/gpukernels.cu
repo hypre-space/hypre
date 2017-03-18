@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "hypre_nvtx.h"
+#include "gpgpu.h"
 
 extern "C"{
   void MemPrefetch(const void *ptr,int device,cudaStream_t stream);
@@ -78,7 +79,7 @@ extern "C"{
     //MemPrefetch(tgt,0,s);
     //MemPrefetch(src,0,s);
     VecCopyKernel<<<num_blocks,tpb,0,s>>>(tgt,src,size);
-    gpuErrchk2(cudaStreamSynchronize(s));
+    //gpuErrchk2(cudaStreamSynchronize(s));
     POP_RANGE;
   }
 }
@@ -116,10 +117,12 @@ extern "C"{
     PackOnDeviceKernel<<<num_blocks,tpb,0,s>>>(send_data,x_local_data,send_map,begin,end);
     //gpuErrchk2(cudaPeekAtLastError());
     //gpuErrchk2(cudaDeviceSynchronize());
-    gpuErrchk2(cudaEventRecord(getevent(4),s));
-    gpuErrchk2(cudaStreamWaitEvent(getstream(7),getevent(4),0));
+    //gpuErrchk2(cudaEventRecord(getevent(4),s));
+    //gpuErrchk2(cudaStreamWaitEvent(getstream(7),getevent(4),0));
     PUSH_RANGE("PACK_PREFETCH",1);
-    MemPrefetchSized((void*)send_data,(end-begin)*sizeof(double),cudaCpuDeviceId,getstream(7));
+#ifndef HYPRE_GPU_USE_PINNED
+    MemPrefetchSized((void*)send_data,(end-begin)*sizeof(double),cudaCpuDeviceId,s);
+#endif
     POP_RANGE;
     //gpuErrchk2(cudaStreamSynchronize(s));
   }
