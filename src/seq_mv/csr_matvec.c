@@ -799,7 +799,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   if (b!=y){
 
     PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
-    VecCopy(y->data,b->data,(y->size-offset),getstream(5));
+    VecCopy(y->data,b->data,(y->size-offset),getstream(4));
     POP_RANGE
   }
 

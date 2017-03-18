@@ -656,7 +656,7 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
 		  x_data, 1,
 		  y_data, 1,
 		  &result);
-  //gpuErrchk(cudaStreamSynchronize(getstream(4)));
+  gpuErrchk(cudaStreamSynchronize(getstream(4)));
   POP_RANGE;
   POP_RANGE;
   return result;
