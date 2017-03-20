@@ -151,8 +151,8 @@ hypre_PFMGRelaxSetType( void  *pfmg_relax_vdata,
          hypre_PointRelaxSetWeight(relax_data, 1.0);
          hypre_PointRelaxSetNumPointsets(relax_data, 1);
 
-         hypre_SetIndex3(stride, 1, 1, 1);
-         hypre_SetIndex3(indices[0], 0, 0, 0);
+         hypre_SetIndex(stride, 1);
+         hypre_SetIndex(indices[0], 0);
          hypre_PointRelaxSetPointset(relax_data, 0, 1, stride, indices);
       }
       break;

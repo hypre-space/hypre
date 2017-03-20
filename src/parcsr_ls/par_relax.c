@@ -4373,14 +4373,15 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 }
 
 
-HYPRE_Int gselim(HYPRE_Real *A,
-                 HYPRE_Real *x,
-                 HYPRE_Int n)
+HYPRE_Int gselim(A,x,n)
+HYPRE_Complex *A;
+HYPRE_Complex *x;
+HYPRE_Int n;
 {
    HYPRE_Int    err_flag = 0;
    HYPRE_Int    j,k,m;
-   HYPRE_Real factor;
-   HYPRE_Real divA;
+   HYPRE_Complex factor;
+   HYPRE_Complex divA;
    
    if (n==1)                           /* A is 1x1 */  
    {

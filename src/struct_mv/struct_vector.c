@@ -1181,7 +1181,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
    We assume that there is only one box to deal with. */
 {
    HYPRE_Int         datai;
-   HYPRE_Real       *data;
+   HYPRE_Complex    *data;
 
    hypre_Index       imin;
    hypre_BoxArray   *boxes;
@@ -1215,16 +1215,16 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
       hypre_BoxLoop1Begin(ndim, loop_size,
                           box, imin, unit_stride, datai);
       maxindex = hypre_BoxIndexRank( box, imin );
-      maxvalue = data[maxindex];
+      maxvalue = hypre_creal(data[maxindex]);
       hypre_SetIndex(max_xyz_index, 0);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For(datai)
       {
-         if ( data[datai] > maxvalue )
+         if ( hypre_creal(data[datai]) > maxvalue )
          {
-            maxvalue = data[datai];
+            maxvalue = hypre_creal(data[datai]);
             maxindex = datai;
             hypre_BoxLoopGetIndex(max_xyz_index);
          }

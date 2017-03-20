@@ -32,8 +32,8 @@ hypre_JacobiCreate( MPI_Comm  comm )
    jacobi_data = hypre_CTAlloc(hypre_JacobiData, 1);
    relax_data = hypre_PointRelaxCreate(comm);
    hypre_PointRelaxSetNumPointsets(relax_data, 1);
-   hypre_SetIndex3(stride, 1, 1, 1);
-   hypre_SetIndex3(indices[0], 0, 0, 0);
+   hypre_SetIndex(stride, 1);
+   hypre_SetIndex(indices[0], 0);
    hypre_PointRelaxSetPointset(relax_data, 0, 1, stride, indices);
    hypre_PointRelaxSetTol(relax_data,1.0e-6);
    (jacobi_data -> relax_data) = relax_data;

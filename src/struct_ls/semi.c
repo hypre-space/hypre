@@ -57,7 +57,7 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
    hypre_CommPkg        *comm_pkg;
    hypre_CommHandle     *comm_handle;
 
-   HYPRE_Int             num_ghost[] = {0, 0, 0, 0, 0, 0};
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM] = {0};
    HYPRE_Int             i, j, s, dim;
 
    if (hypre_StructMatrixConstantCoefficient(P) != 0)
@@ -93,11 +93,11 @@ hypre_StructInterpAssemble( hypre_StructMatrix  *A,
       {
          case 0:
             box_aa = hypre_CommInfoSendBoxes(comm_info);
-            hypre_SetIndex3(hypre_CommInfoSendStride(comm_info), 1, 1, 1);
+            hypre_SetIndex(hypre_CommInfoSendStride(comm_info), 1);
             break;
          case 1:
             box_aa = hypre_CommInfoRecvBoxes(comm_info);
-            hypre_SetIndex3(hypre_CommInfoRecvStride(comm_info), 1, 1, 1);
+            hypre_SetIndex(hypre_CommInfoRecvStride(comm_info), 1);
             break;
          case 2:
             box_aa = hypre_CommInfoSendRBoxes(comm_info);

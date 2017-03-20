@@ -82,6 +82,7 @@ extern "C" {
 #define dsygv_   hypre_dsygv
 #define dsytd2_  hypre_dsytd2
 #define dsytrd_  hypre_dsytrd
+#define dtrtrs_  hypre_dtrtrs
 #define ieeeck_  hypre_ieeeck
 #define ilaenv_  hypre_ilaenv
 #define d_lg10_  hypre_d_lg10
@@ -106,6 +107,24 @@ extern "C" {
 #define dlasq4_  hypre_dlasq4
 #define dlasq5_  hypre_dlasq5
 #define dlasq6_  hypre_dlasq6
+
+#define zbdsqr_  hypre_zbdsqr
+#define zgebrd_  hypre_zgebrd
+#define zgeqrf_  hypre_zgeqrf
+#define ztrtrs_  hypre_ztrtrs
+#define zungqr_  hypre_zungqr
+#define zunmbr_  hypre_zunmbr
+#define zunmqr_  hypre_zunmqr
+#define zunmlq_  hypre_zunmlq
+#define zunm2r_  hypre_zun2mr
+#define zlasr_   hypre_zlasr
+#define zlarft_  hypre_zlarft
+#define zlarfb_  hypre_zlarfb
+#define zlabrd_  hypre_zlabrd
+#define zgeqrf_  hypre_zgeqrf
+#define zgeqr2_  hypre_zgerq2
+#define zgebd2_  hypre_zgebd2
+#define zdrot_   hypre_zdrot
 
 #define s_cmp    hypre_F90_NAME_BLAS(s_cmp,S_CMP)
 #define s_copy   hypre_F90_NAME_BLAS(s_copy,S_COPY)
@@ -279,6 +298,10 @@ HYPRE_Int dsytd2_ (const char *uplo , integer *n , doublereal *a , integer *lda 
 /* dsytrd.c */
 HYPRE_Int dsytrd_ (const char *uplo , integer *n , doublereal *a , integer *lda , doublereal *d__ , doublereal *e , doublereal *tau , doublereal *work , integer *lwork , integer *info );
 
+/* dtrtrs.c */
+HYPRE_Int dtrtrs_(char *uplo, char *trans, char *diag, integer *n, integer *nrhs, doublereal *a, integer *lda, doublereal *b, integer * ldb, integer *info );
+
+
 /* ieeeck.c */
 integer ieeeck_ ( integer *ispec , real *zero , real *one );
 
@@ -342,6 +365,24 @@ HYPRE_Int dlasq5_ ( integer *i0 , integer *n0 , doublereal *z__ , integer *pp , 
 
 /* dlasq6.c */
 HYPRE_Int dlasq6_ ( integer *i0 , integer *n0 , doublereal *z__ , integer *pp , doublereal *dmin__ , doublereal *dmin1 , doublereal *dmin2 , doublereal *dn , doublereal *dnm1 , doublereal *dnm2 );
+
+/* zbdsqr.c */
+HYPRE_Int zbdsqr_(char *uplo, integer *n, integer *ncvt, integer * nru, integer *ncc, doublereal *d__, doublereal *e, doublecomplex *vt, integer *ldvt, doublecomplex *u, integer *ldu, doublecomplex *c__, integer *ldc, doublereal *rwork, integer *info);
+
+/* zgebrd.c */
+HYPRE_Int zgebrd_(integer *m, integer *n, doublecomplex *a, integer *lda, doublereal *d__, doublereal *e, doublecomplex *tauq, doublecomplex *taup, doublecomplex *work, integer *lwork, integer * info);
+
+/* zgeqrf.c */
+HYPRE_Int zgeqrf_(integer *m, integer *n, doublecomplex *a, integer *lda, doublecomplex *tau, doublecomplex *work, integer *lwork, integer *info);
+
+/* ztrtrs.c */
+HYPRE_Int ztrtrs_(char *uplo, char *trans, char *diag, integer *n, integer *nrhs, doublecomplex *a, integer *lda, doublecomplex *b, integer *ldb, integer *info);
+
+/* zunmbr.c */
+HYPRE_Int zunmbr_(char *vect, char *side, char *trans, integer *m, integer *n, integer *k, doublecomplex *a, integer *lda, doublecomplex *tau, doublecomplex *c__, integer *ldc, doublecomplex *work, integer * lwork, integer *info);
+
+/* zunmqr.c */
+HYPRE_Int zunmqr_(char *side, char *trans, integer *m, integer *n, integer *k, doublecomplex *a, integer *lda, doublecomplex *tau, doublecomplex *c__, integer *ldc, doublecomplex *work, integer *lwork, integer *info);
 
 #ifdef __cplusplus
 }

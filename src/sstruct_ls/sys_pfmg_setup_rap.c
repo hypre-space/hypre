@@ -78,9 +78,9 @@ hypre_SysPFMGCreateRAPOp( hypre_SStructPMatrix *R,
          sstencil_sizes[vj] = 0;
          if (A_s != NULL)
          {         
-            RAP_s = hypre_SemiCreateRAPOp(R_s, A_s, P_s,
-                                          cgrid, cdir,
-                                          P_stored_as_transpose);
+            // note: this is same as hypre_PFMGCreateRAPOp with rap_type=2
+            RAP_s = hypre_SemiCreateRAPOp(R_s, A_s, P_s, cgrid, cdir, P_stored_as_transpose);
+
             /* Just want stencil for RAP */
             hypre_StructMatrixInitializeShell(RAP_s);
             sstencil = hypre_StructMatrixStencil(RAP_s);

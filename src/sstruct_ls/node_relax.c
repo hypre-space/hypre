@@ -48,14 +48,14 @@ typedef struct
    hypre_ComputePkg      **compute_pkgs;
 
    /* pointers to local storage used to invert diagonal blocks */
-   HYPRE_Real           **A_loc;
-   HYPRE_Real            *x_loc;
+   HYPRE_Complex        **A_loc;
+   HYPRE_Complex         *x_loc;
 
    /* pointers for vector and matrix data */	
-   HYPRE_Real          ***Ap;
-   HYPRE_Real           **bp;
-   HYPRE_Real           **xp;
-   HYPRE_Real           **tp;
+   HYPRE_Complex       ***Ap;
+   HYPRE_Complex        **bp;
+   HYPRE_Complex        **xp;
+   HYPRE_Complex        **tp;
 
 
    /* log info (always logged) */
@@ -104,8 +104,8 @@ hypre_NodeRelaxCreate( MPI_Comm  comm )
    (relax_data -> svec_compute_pkgs)= NULL;
    (relax_data -> compute_pkgs)     = NULL;
 
-   hypre_SetIndex3(stride, 1, 1, 1);
-   hypre_SetIndex3(indices[0], 0, 0, 0);
+   hypre_SetIndex(stride, 1);
+   hypre_SetIndex(indices[0], 0);
    hypre_NodeRelaxSetNumNodesets((void *) relax_data, 1);
    hypre_NodeRelaxSetNodeset((void *) relax_data, 0, 1, stride, indices);
 
@@ -118,7 +118,7 @@ hypre_NodeRelaxCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_NodeRelaxDestroy( void *relax_vdata )
 {
-	hypre_NodeRelaxData  *relax_data = (hypre_NodeRelaxData  *)relax_vdata;
+   hypre_NodeRelaxData  *relax_data = relax_vdata;
    HYPRE_Int             i,vi;
    HYPRE_Int             nvars;
 
@@ -187,12 +187,12 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
 
    hypre_SStructPVector  *t;
    HYPRE_Int            **diag_rank;
-   HYPRE_Real           **A_loc;
-   HYPRE_Real            *x_loc;
-   HYPRE_Real          ***Ap;
-   HYPRE_Real           **bp;
-   HYPRE_Real           **xp;
-   HYPRE_Real           **tp;
+   HYPRE_Complex        **A_loc;
+   HYPRE_Complex         *x_loc;
+   HYPRE_Complex       ***Ap;
+   HYPRE_Complex        **bp;
+   HYPRE_Complex        **xp;
+   HYPRE_Complex        **tp;
 
    hypre_ComputeInfo     *compute_info;
    hypre_ComputePkg     **compute_pkgs;
@@ -262,7 +262,7 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
          if (hypre_SStructPMatrixSMatrix(A, vi, vj) != NULL)
          {
             sstencil = hypre_SStructPMatrixSStencil(A, vi, vj);
-            hypre_SetIndex3(diag_index, 0, 0, 0);
+            hypre_SetIndex(diag_index, 0);
             diag_rank[vi][vj] = 
                hypre_StructStencilElementRank(sstencil, diag_index);
          }
@@ -277,22 +277,22 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
     * Allocate storage used to invert local diagonal blocks
     *----------------------------------------------------------*/
 
-   x_loc    = hypre_TAlloc(HYPRE_Real   , hypre_NumThreads()*nvars);
-   A_loc    = hypre_TAlloc(HYPRE_Real  *, hypre_NumThreads()*nvars);
-   A_loc[0] = hypre_TAlloc(HYPRE_Real   , hypre_NumThreads()*nvars*nvars);
+   x_loc    = hypre_TAlloc(HYPRE_Complex   , hypre_NumThreads()*nvars);
+   A_loc    = hypre_TAlloc(HYPRE_Complex  *, hypre_NumThreads()*nvars);
+   A_loc[0] = hypre_TAlloc(HYPRE_Complex   , hypre_NumThreads()*nvars*nvars);
    for (vi = 1; vi < hypre_NumThreads()*nvars; vi++)
    {
       A_loc[vi] = A_loc[0] + vi*nvars;
    }
 
    /* Allocate pointers for vector and matrix */
-   bp = hypre_TAlloc(HYPRE_Real  *, nvars);
-   xp = hypre_TAlloc(HYPRE_Real  *, nvars);
-   tp = hypre_TAlloc(HYPRE_Real  *, nvars);
-   Ap = hypre_TAlloc(HYPRE_Real **, nvars);
+   bp = hypre_TAlloc(HYPRE_Complex  *, nvars);
+   xp = hypre_TAlloc(HYPRE_Complex  *, nvars);
+   tp = hypre_TAlloc(HYPRE_Complex  *, nvars);
+   Ap = hypre_TAlloc(HYPRE_Complex **, nvars);
    for (vi = 0; vi < nvars; vi++)
    {
-      Ap[vi] = hypre_TAlloc(HYPRE_Real  *, nvars);
+      Ap[vi] = hypre_TAlloc(HYPRE_Complex  *, nvars);
    }
 
    /*----------------------------------------------------------
@@ -569,15 +569,15 @@ hypre_NodeRelax(  void               *relax_vdata,
    HYPRE_Int              xi;
    HYPRE_Int              ti;
                         
-   HYPRE_Real           **tA_loc = (relax_data -> A_loc);
-   HYPRE_Real            *tx_loc = (relax_data -> x_loc);
-   HYPRE_Real           **A_loc;
-   HYPRE_Real            *x_loc;
+   HYPRE_Complex        **tA_loc = (relax_data -> A_loc);
+   HYPRE_Complex         *tx_loc = (relax_data -> x_loc);
+   HYPRE_Complex        **A_loc;
+   HYPRE_Complex         *x_loc;
 
-   HYPRE_Real          ***Ap = (relax_data -> Ap);
-   HYPRE_Real           **bp = (relax_data -> bp);
-   HYPRE_Real           **xp = (relax_data -> xp);
-   HYPRE_Real           **tp = (relax_data -> tp);
+   HYPRE_Complex       ***Ap = (relax_data -> Ap);
+   HYPRE_Complex        **bp = (relax_data -> bp);
+   HYPRE_Complex        **xp = (relax_data -> xp);
+   HYPRE_Complex        **tp = (relax_data -> tp);
 
    hypre_StructMatrix    *A_block;
    hypre_StructVector    *x_block;

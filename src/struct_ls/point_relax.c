@@ -88,8 +88,8 @@ hypre_PointRelaxCreate( MPI_Comm  comm )
    (relax_data -> t)                = NULL;
    (relax_data -> compute_pkgs)     = NULL;
 
-   hypre_SetIndex3(stride, 1, 1, 1);
-   hypre_SetIndex3(indices[0], 0, 0, 0);
+   hypre_SetIndex(stride, 1);
+   hypre_SetIndex(indices[0], 0);
    hypre_PointRelaxSetNumPointsets((void *) relax_data, 1);
    hypre_PointRelaxSetPointset((void *) relax_data, 0, 1, stride, indices);
 
@@ -200,7 +200,7 @@ hypre_PointRelaxSetup( void               *relax_vdata,
    grid    = hypre_StructMatrixGrid(A);
    stencil = hypre_StructMatrixStencil(A);
 
-   hypre_SetIndex3(diag_index, 0, 0, 0);
+   hypre_SetIndex(diag_index, 0);
    diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
 
    /*----------------------------------------------------------

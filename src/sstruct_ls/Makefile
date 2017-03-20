@@ -29,6 +29,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../sstruct_mv\
  -I$(srcdir)/../struct_ls\
  -I$(srcdir)/../parcsr_ls\
+ -I$(srcdir)/../lapack\
  ${CINCLUDES}
 
 HEADERS =\
@@ -40,7 +41,8 @@ HEADERS =\
  sstruct_owninfo.h\
  sstruct_recvinfo.h\
  sstruct_sendinfo.h\
- sys_pfmg.h
+ sys_pfmg.h\
+ sys_bamg.h
 
 FILES =\
  F90_HYPRE_sstruct_bicgstab.c\
@@ -53,6 +55,7 @@ FILES =\
  F90_HYPRE_sstruct_pcg.c\
  F90_HYPRE_sstruct_split.c\
  F90_HYPRE_sstruct_sys_pfmg.c\
+ F90_HYPRE_sstruct_sys_bamg.c\
  HYPRE_sstruct_bicgstab.c\
  HYPRE_sstruct_gmres.c\
  HYPRE_sstruct_flexgmres.c\
@@ -63,6 +66,7 @@ FILES =\
  HYPRE_sstruct_pcg.c\
  HYPRE_sstruct_split.c\
  HYPRE_sstruct_sys_pfmg.c\
+ HYPRE_sstruct_sys_bamg.c\
  fac.c\
  fac_amr_rap.c\
  fac_amr_fcoarsen.c\
@@ -104,6 +108,12 @@ FILES =\
  sys_pfmg_setup_interp.c\
  sys_pfmg_setup_rap.c\
  sys_pfmg_solve.c\
+ sys_bamg.c\
+ sys_bamg_relax.c\
+ sys_bamg_setup.c\
+ sys_bamg_setup_interp.c\
+ sys_bamg_setup_rap.c\
+ sys_bamg_solve.c\
  sys_semi_interp.c\
  sys_semi_restrict.c
 
@@ -118,11 +128,13 @@ SONAME = libHYPRE_sstruct_ls-${HYPRE_RELEASE_VERSION}.so
 all: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/../lapack/hypre_lapack.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_BUILD_DIR)/lib
 
 install: libHYPRE_sstruct_ls${HYPRE_LIB_SUFFIX}
 	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)
 	cp -fR $(srcdir)/_hypre_sstruct_ls.h $(HYPRE_INC_INSTALL)
+	cp -fR $(srcdir)/../lapack/hypre_lapack.h $(HYPRE_BUILD_DIR)/include
 #	cp -fR libHYPRE* $(HYPRE_LIB_INSTALL)
 
 clean:

@@ -38,6 +38,11 @@ hypre_SysPFMGCreate( MPI_Comm  comm )
    (sys_pfmg_data -> relax_type)       = 1;       /* weighted Jacobi */
    (sys_pfmg_data -> jacobi_weight)    = 0.0;
    (sys_pfmg_data -> usr_jacobi_weight)= 0;
+#if HYPRE_MAXDIM <= 3
+   (sys_pfmg_data -> rap_type)         = 0;
+#else
+   (sys_pfmg_data -> rap_type)         = 2;
+#endif
    (sys_pfmg_data -> num_pre_relax)    = 1;
    (sys_pfmg_data -> num_post_relax)   = 1;
    (sys_pfmg_data -> skip_relax)       = 1;
@@ -201,6 +206,31 @@ hypre_SysPFMGSetJacobiWeight( void  *sys_pfmg_vdata,
    (sys_pfmg_data -> jacobi_weight)    = weight;
    (sys_pfmg_data -> usr_jacobi_weight)= 1;
 
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SysPFMGSetRAPType( void *sys_pfmg_vdata,
+                         HYPRE_Int   rap_type )
+{
+   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+ 
+   (sys_pfmg_data -> rap_type) = rap_type;
+ 
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_SysPFMGGetRAPType( void *sys_pfmg_vdata,
+                         HYPRE_Int * rap_type )
+{
+   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+ 
+   *rap_type = (sys_pfmg_data -> rap_type);
+ 
    return hypre_error_flag;
 }
 

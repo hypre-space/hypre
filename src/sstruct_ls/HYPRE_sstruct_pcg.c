@@ -20,13 +20,13 @@ HYPRE_SStructPCGCreate( MPI_Comm             comm,
                         HYPRE_SStructSolver *solver )
 {
    hypre_PCGFunctions * pcg_functions =
-      hypre_PCGFunctionsCreate(
+      hypre_PCGFunctionsCreateComplex(
          hypre_CAlloc, hypre_SStructKrylovFree, hypre_SStructKrylovCommInfo,
          hypre_SStructKrylovCreateVector,
          hypre_SStructKrylovDestroyVector, hypre_SStructKrylovMatvecCreate,
          hypre_SStructKrylovMatvec, hypre_SStructKrylovMatvecDestroy,
-         hypre_SStructKrylovInnerProd, hypre_SStructKrylovCopyVector,
-         hypre_SStructKrylovClearVector,
+         hypre_SStructKrylovInnerProd, hypre_SStructKrylovComplexInnerProd,
+         hypre_SStructKrylovCopyVector, hypre_SStructKrylovClearVector,
          hypre_SStructKrylovScaleVector, hypre_SStructKrylovAxpy,
          hypre_SStructKrylovIdentitySetup, hypre_SStructKrylovIdentity );
 

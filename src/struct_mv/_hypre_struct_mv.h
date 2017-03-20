@@ -1891,6 +1891,7 @@ HYPRE_Int hypre_IndexMax( hypre_Index index , HYPRE_Int ndim );
 HYPRE_Int hypre_AddIndexes ( hypre_Index index1 , hypre_Index index2 , HYPRE_Int ndim , hypre_Index result );
 HYPRE_Int hypre_SubtractIndexes ( hypre_Index index1 , hypre_Index index2 , HYPRE_Int ndim , hypre_Index result );
 HYPRE_Int hypre_IndexesEqual ( hypre_Index index1 , hypre_Index index2 , HYPRE_Int ndim );
+HYPRE_Int hypre_PrintIndex( const hypre_Index Index, const HYPRE_Int NDim );
 hypre_Box *hypre_BoxCreate ( HYPRE_Int ndim );
 HYPRE_Int hypre_BoxDestroy ( hypre_Box *box );
 HYPRE_Int hypre_BoxInit( hypre_Box *box , HYPRE_Int  ndim );
@@ -1974,6 +1975,8 @@ HYPRE_Int hypre_ComputePkgCreate ( hypre_ComputeInfo *compute_info , hypre_BoxAr
 HYPRE_Int hypre_ComputePkgDestroy ( hypre_ComputePkg *compute_pkg );
 HYPRE_Int hypre_InitializeIndtComputations ( hypre_ComputePkg *compute_pkg , HYPRE_Complex *data , hypre_CommHandle **comm_handle_ptr );
 HYPRE_Int hypre_FinalizeIndtComputations ( hypre_CommHandle *comm_handle );
+HYPRE_Int hypre_ComputePkgCreate2 ( hypre_ComputeInfo *compute_info, hypre_BoxArray *data_space, HYPRE_Int num_values, HYPRE_Int reverse, hypre_StructGrid *grid, hypre_ComputePkg **compute_pkg_ptr );
+HYPRE_Int hypre_InitializeIndtComputations2 ( hypre_ComputePkg *compute_pkg, HYPRE_Complex *data, hypre_CommHandle **comm_handle_ptr, HYPRE_Int action );
 
 /* HYPRE_struct_grid.c */
 HYPRE_Int HYPRE_StructGridCreate ( MPI_Comm comm , HYPRE_Int dim , HYPRE_StructGrid *grid );
@@ -2071,6 +2074,7 @@ HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_
 
 /* struct_innerprod.c */
 HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
+HYPRE_Complex hypre_StructComplexInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_io.c */
 HYPRE_Int hypre_PrintBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int dim , HYPRE_Complex *data );
@@ -2114,6 +2118,12 @@ HYPRE_Int hypre_StructMatvecCC1 ( HYPRE_Complex alpha , hypre_StructMatrix *A , 
 HYPRE_Int hypre_StructMatvecCC2 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
 HYPRE_Int hypre_StructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_StructMatvec ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
+
+/* struct_matvecT.c */
+HYPRE_Int hypre_StructMatvecT ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
+HYPRE_Int hypre_StructMatvecTCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , HYPRE_Complex beta , hypre_StructVector *y );
+HYPRE_Int hypre_StructMatvecTCC0 ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
+HYPRE_Int hypre_StructMatvecTZero ( HYPRE_Complex alpha , hypre_StructMatrix *A , hypre_StructVector *x , hypre_StructVector *y , hypre_BoxArrayArray *compute_box_aa , hypre_IndexRef stride );
 
 /* struct_scale.c */
 HYPRE_Int hypre_StructScale ( HYPRE_Complex alpha , hypre_StructVector *y );

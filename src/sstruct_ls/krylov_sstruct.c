@@ -223,6 +223,22 @@ hypre_SStructKrylovInnerProd( void *x,
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+HYPRE_Complex
+hypre_SStructKrylovComplexInnerProd( void *x, 
+                                     void *y )
+{
+   HYPRE_Complex result;
+
+   hypre_SStructComplexInnerProd( (hypre_SStructVector *) x,
+                                  (hypre_SStructVector *) y, &result );
+
+   return result;
+}
+
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
 HYPRE_Int
 hypre_SStructKrylovCopyVector( void *x, 
                                void *y )

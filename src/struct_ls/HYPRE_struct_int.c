@@ -20,7 +20,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
    hypre_Box          *v_data_box;
                     
    HYPRE_Int           vi;
-   HYPRE_Real         *vp;
+   HYPRE_Complex      *vp;
 
    hypre_BoxArray     *boxes;
    hypre_Box          *box;
@@ -36,7 +36,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 
    srand( seed );
 
-   hypre_SetIndex3(unit_stride, 1, 1, 1);
+   hypre_SetIndex(unit_stride, 1);
  
    boxes = hypre_StructGridBoxes(hypre_StructVectorGrid(vector));
    hypre_ForBoxI(i, boxes)
@@ -44,8 +44,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       box      = hypre_BoxArrayBox(boxes, i);
       start = hypre_BoxIMin(box);
 
-      v_data_box =
-         hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
+      v_data_box = hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);
       vp = hypre_StructVectorBoxData(vector, i);
  
       hypre_BoxGetSize(box, loop_size);
@@ -58,6 +57,9 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_BoxLoop1For(vi)
       {
          vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
+#ifdef HYPRE_COMPLEX
+         vp[vi] *= cexp(rand()*I);
+#endif
       }
       hypre_BoxLoop1End(vi);
    }

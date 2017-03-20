@@ -129,9 +129,9 @@ hypre_SemiInterp( void               *interp_vdata,
    HYPRE_Int               ei;
    HYPRE_Int               constant_coefficient;
                          
-   HYPRE_Real             *Pp0, *Pp1;
-   HYPRE_Real             *xcp;
-   HYPRE_Real             *ep, *ep0, *ep1;
+   HYPRE_Complex          *Pp0, *Pp1;
+   HYPRE_Complex          *xcp;
+   HYPRE_Complex          *ep, *ep0, *ep1;
                        
    hypre_Index             loop_size;
    hypre_Index             start;
@@ -164,7 +164,7 @@ hypre_SemiInterp( void               *interp_vdata,
 
    if (constant_coefficient) hypre_StructVectorClearBoundGhostValues(e, 0);
 
-   hypre_SetIndex3(stridec, 1, 1, 1);
+   hypre_SetIndex(stridec, 1);
 
    /*-----------------------------------------------------------------------
     * Compute e at coarse points (injection)

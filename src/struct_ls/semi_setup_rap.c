@@ -12,31 +12,32 @@
 
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
+#include "bamg.h"
 
-#define hypre_MapRAPMarker(indexRAP, rank)      \
-   {                                            \
-      HYPRE_Int imacro,jmacro,kmacro;           \
-      imacro = hypre_IndexX(indexRAP);          \
-      jmacro = hypre_IndexY(indexRAP);          \
-      kmacro = hypre_IndexZ(indexRAP);          \
-      if (imacro==-1) imacro=2;                 \
-      if (jmacro==-1) jmacro=2;                 \
-      if (kmacro==-1) kmacro=2;                 \
-      rank = imacro + 3*jmacro + 9*kmacro;      \
+// RAP marker size per dimension, temporary (better than a bunch of hard-wired 3's)
+#define RMSIZE 3
+
+#define hypre_MapRAPMarker(indexRAP, rank) \
+   { \
+      HYPRE_Int macro, mu, stride; \
+      for ( rank = 0, mu = 0, stride = 1; mu < HYPRE_MAXDIM; mu++, stride *= RMSIZE ) { \
+        macro = hypre_IndexD(indexRAP,mu); \
+        if ( macro == -1 ) macro = 2; \
+        rank += macro*stride; \
+      } \
    }
 
-#define hypre_InverseMapRAPMarker(rank, indexRAP)       \
-   {                                                    \
-      HYPRE_Int imacro,ijmacro,jmacro,kmacro;           \
-      ijmacro = (rank%9);                               \
-      imacro  = (ijmacro%3);                            \
-      jmacro  = (ijmacro-imacro)/3;                     \
-      kmacro  = (rank-3*jmacro-imacro)/9;               \
-      if (imacro==2) imacro=-1;                         \
-      if (jmacro==2) jmacro=-1;                         \
-      if (kmacro==2) kmacro=-1;                         \
-      hypre_SetIndex3(indexRAP,imacro,jmacro,kmacro);    \
+#define hypre_InverseMapRAPMarker(rank, indexRAP) \
+   { \
+      HYPRE_Int macro, mu, stride; \
+      for ( mu = 0, stride = 1; mu < HYPRE_MAXDIM; mu++, stride *= RMSIZE ) { \
+        macro = (rank/stride) % RMSIZE; \
+        if ( macro == 2 ) macro = -1; \
+        hypre_IndexD( indexRAP, mu ) = macro; \
+      } \
    }
+
+#define print_complex(x) if ( iAc < 0 ) { bamg_dbgmsg( "  %30s %16.6e %16.6e\n", #x, hypre_creal(x), hypre_cimag(x) ); }
 
 /*--------------------------------------------------------------------------
  * Sets up new coarse grid operator stucture.
@@ -55,8 +56,8 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    hypre_Index           *RAP_stencil_shape;
    hypre_StructStencil   *RAP_stencil;
    HYPRE_Int              RAP_stencil_size;
-   HYPRE_Int              dim;
-   HYPRE_Int              RAP_num_ghost[] = {1, 1, 1, 1, 1, 1};
+   HYPRE_Int              ndim = hypre_StructMatrixNDim(A);
+   HYPRE_Int              RAP_num_ghost[2*HYPRE_MAXDIM] = {1};
 
    HYPRE_Int             *not_cdirs;
    hypre_StructStencil   *A_stencil;
@@ -77,7 +78,6 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    HYPRE_Int              RAP_marker_rank;
 
    A_stencil = hypre_StructMatrixStencil(A);
-   dim = hypre_StructStencilNDim(A_stencil);
    A_stencil_size = hypre_StructStencilSize(A_stencil);
    A_stencil_shape = hypre_StructStencilShape(A_stencil);
  
@@ -87,9 +87,9 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
     *-----------------------------------------------------------------------*/
 
    RAP_marker_size = 1;
-   for (i = 0; i < dim; i++)
+   for (i = 0; i < ndim; i++)
    {
-      RAP_marker_size *= 3;
+      RAP_marker_size *= RMSIZE;
    }
    RAP_marker = hypre_CTAlloc(HYPRE_Int, RAP_marker_size);
    
@@ -112,7 +112,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
       hypre_IndexD(indexR,cdir) = Rloop;
       for (Aloop = 0; Aloop < A_stencil_size; Aloop++)
       {
-         for (d = 0; d < dim; d++)
+         for (d = 0; d < ndim; d++)
          {
             hypre_IndexD(indexRA, d) = hypre_IndexD(indexR, d) +
                hypre_IndexD(A_stencil_shape[Aloop], d);  
@@ -150,6 +150,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
       }
    }
 
+#if HYPRE_MAXDIM <= 3
    /*-----------------------------------------------------------------------
     * For symmetric A, we zero out some entries of RAP_marker to yield
     * the stencil with the proper stored entries.
@@ -180,14 +181,14 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
     *-----------------------------------------------------------------------*/
    if (hypre_StructMatrixSymmetric(A))
    {
-      if (dim > 1)
+      if (ndim > 1)
       {
-         not_cdirs = hypre_CTAlloc(HYPRE_Int, dim-1);
+         not_cdirs = hypre_CTAlloc(HYPRE_Int, ndim-1);
       }
 
-      for (d = 1; d < dim; d++)
+      for (d = 1; d < ndim; d++)
       {
-         not_cdirs[d-1] = (dim+cdir-d) % dim;
+         not_cdirs[d-1] = (ndim+cdir-d) % ndim;
       }
 
       hypre_SetIndex(indexRAP, 0);
@@ -195,7 +196,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
       hypre_MapRAPMarker(indexRAP,RAP_marker_rank);
       RAP_marker[RAP_marker_rank] = 0;
 
-      if (dim > 1)
+      if (ndim > 1)
       {
          hypre_SetIndex(indexRAP, 0);
          hypre_IndexD(indexRAP,not_cdirs[0]) = 1;
@@ -206,8 +207,8 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
             RAP_marker[RAP_marker_rank] = 0;
          }
       }
-   
-      if (dim > 2)
+
+      if (ndim > 2)
       {
          hypre_SetIndex(indexRAP, 0);
          hypre_IndexD(indexRAP,not_cdirs[1]) = 1;
@@ -224,11 +225,14 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
          }
       }
 
-      if (dim > 1)
+      if (ndim > 1)
       {
          hypre_TFree(not_cdirs);
       }
    }
+#else
+#warning Symmetrization in hypre_SemiCreateRAPOp needs work! This could definitely screw you.
+#endif
 
    RAP_stencil_size= 0;
 
@@ -252,7 +256,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
       }
    }
 
-   RAP_stencil = hypre_StructStencilCreate(dim, RAP_stencil_size,
+   RAP_stencil = hypre_StructStencilCreate(ndim, RAP_stencil_size,
                                            RAP_stencil_shape);
    RAP = hypre_StructMatrixCreate(hypre_StructMatrixComm(A),
                                   coarse_grid, RAP_stencil);
@@ -260,7 +264,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    hypre_StructStencilDestroy(RAP_stencil);
 
    /*-----------------------------------------------------------------------
-    * Coarse operator in symmetric iff fine operator is
+    * Coarse operator is symmetric iff fine operator is
     *-----------------------------------------------------------------------*/
    hypre_StructMatrixSymmetric(RAP) = hypre_StructMatrixSymmetric(A);
 
@@ -314,12 +318,12 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
    hypre_Box            *R_dbox;
    hypre_Box            *RAP_dbox;
 
-   HYPRE_Real           *pa, *pb;
-   HYPRE_Real           *ra, *rb;
+   HYPRE_Complex        *pa, *pb;
+   HYPRE_Complex        *ra, *rb;
 
-   HYPRE_Real           *a_ptr;
+   HYPRE_Complex        *a_ptr;
 
-   HYPRE_Real           *rap_ptrS, *rap_ptrU, *rap_ptrD;
+   HYPRE_Complex        *rap_ptrS, *rap_ptrU, *rap_ptrD;
 
    HYPRE_Int             symm_path_multiplier;
 
@@ -334,7 +338,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
    HYPRE_Int             RAPloop;
    HYPRE_Int             diag;
-   HYPRE_Int             dim;
+   HYPRE_Int             ndim = hypre_StructMatrixNDim(A);
    HYPRE_Int             d;
                      
    HYPRE_Real            zero = 0.0;
@@ -343,10 +347,9 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
    coarse_stencil_size = hypre_StructStencilSize(coarse_stencil);
    coarse_symm_elements = hypre_StructMatrixSymmElements(RAP);
    coarse_stencil_shape = hypre_StructStencilShape(coarse_stencil);
-   dim = hypre_StructStencilNDim(coarse_stencil);
 
    stridef = cstride;
-   hypre_SetIndex3(stridec, 1, 1, 1);
+   hypre_SetIndex(stridec, 1);
 
    fgrid = hypre_StructMatrixGrid(A);
    fgrid_ids = hypre_StructGridIDs(fgrid);
@@ -482,8 +485,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
          if (coarse_symm_elements[RAPloop] == -1)
          {
             rap_ptrS = hypre_StructMatrixBoxData(RAP, ci, RAPloop);
-            hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
-                                RAP_dbox, cstart, stridec, iAc);
+            hypre_BoxLoop1Begin(ndim, loop_size, RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
 #endif
@@ -540,7 +542,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      rap_ptrS = hypre_StructMatrixExtractPointerByIndex(RAP,
                                                                         ci, index);
                      diag = 0;
-                     for (d = 0; d < dim; d++)
+                     for (d = 0; d < ndim; d++)
                      {
                         diag += hypre_IndexD(index,d) * hypre_IndexD(index,d);
                      }
@@ -555,7 +557,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                          * the (up,up) path contributes to a non-stored entry
                          * in RAP.
                          *--------------------------------------------------*/
-                        hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
+                        hypre_BoxLoop4Begin(ndim, loop_size,
                                             P_dbox, cstart, stridec, iP,
                                             R_dbox, cstart, stridec, iR,
                                             A_dbox, fstart, stridef, iA,
@@ -591,7 +593,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                          * If A stencil index is not (0,0,0) or RAP is
                          * nonsymmetric, all 5 paths are calculated.
                          *--------------------------------------------------*/
-                        hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
+                        hypre_BoxLoop4Begin(ndim, loop_size,
                                             P_dbox, cstart, stridec, iP,
                                             R_dbox, cstart, stridec, iR,
                                             A_dbox, fstart, stridef, iA,
@@ -655,7 +657,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                       *--------------------------------------------------*/
                      symm_path_multiplier = 1;
                      diag = 0;
-                     for (d = 0; d < dim; d++)
+                     for (d = 0; d < ndim; d++)
                      {
                         diag += hypre_IndexD(index,d) * hypre_IndexD(index,d);
                      }
@@ -664,7 +666,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         symm_path_multiplier = 2;
                      }
 
-                     hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
+                     hypre_BoxLoop4Begin(ndim, loop_size,
                                          P_dbox, cstart, stridec, iP,
                                          R_dbox, cstart, stridec, iR,
                                          A_dbox, fstart, stridef, iA,
@@ -724,7 +726,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                       *--------------------------------------------------*/
                      symm_path_multiplier = 1;
                      diag = 0;
-                     for (d = 0; d < dim; d++)
+                     for (d = 0; d < ndim; d++)
                      {
                         diag += hypre_IndexD(index,d) * hypre_IndexD(index,d);
                      }
@@ -733,7 +735,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         symm_path_multiplier = 2;
                      }
 
-                     hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
+                     hypre_BoxLoop4Begin(ndim, loop_size,
                                          P_dbox, cstart, stridec, iP,
                                          R_dbox, cstart, stridec, iR,
                                          A_dbox, fstart, stridef, iA,
@@ -835,7 +837,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                       *--------------------------------------------------*/
                      symm_path_multiplier = 1;
                      diag = 0;
-                     for (d = 0; d < dim; d++)
+                     for (d = 0; d < ndim; d++)
                      {
                         diag += hypre_IndexD(index,d) * hypre_IndexD(index,d);
                      }
@@ -844,7 +846,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         symm_path_multiplier = 2;
                      }
 
-                     hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
+                     hypre_BoxLoop1Begin(ndim, loop_size,
                                          RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
@@ -872,3 +874,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
    return hypre_error_flag;
 }
+
+#undef RMSIZE
+

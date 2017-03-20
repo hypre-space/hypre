@@ -30,6 +30,7 @@
 
 /*--------------------------------------------------------------------------
  * hypre_PCGFunctionsCreate
+ * NB: only for use with real numbers
  *--------------------------------------------------------------------------*/
 
 hypre_PCGFunctions *
@@ -66,6 +67,62 @@ hypre_PCGFunctionsCreate(
    pcg_functions->Matvec = Matvec;
    pcg_functions->MatvecDestroy = MatvecDestroy;
    pcg_functions->InnerProd = InnerProd;
+#ifdef HYPRE_COMPLEX
+   hypre_printf("ERROR - must use PCGFunctionsCreateComplex() with complex numbers.");
+   fflush(stdout);
+   hypre_error(HYPRE_ERROR_GENERIC);
+   return NULL;
+#else
+   pcg_functions->ComplexInnerProd = InnerProd;
+#endif
+   pcg_functions->CopyVector = CopyVector;
+   pcg_functions->ClearVector = ClearVector;
+   pcg_functions->ScaleVector = ScaleVector;
+   pcg_functions->Axpy = Axpy;
+/* default preconditioner must be set here but can be changed later... */
+   pcg_functions->precond_setup = PrecondSetup;
+   pcg_functions->precond       = Precond;
+
+   return pcg_functions;
+}
+
+hypre_PCGFunctions *
+hypre_PCGFunctionsCreateComplex(
+   char *        (*CAlloc)           ( size_t count, size_t elt_size ),
+   HYPRE_Int     (*Free)             ( char *ptr ),
+   HYPRE_Int     (*CommInfo)         ( void  *A, HYPRE_Int   *my_id,
+                                       HYPRE_Int   *num_procs ),
+   void *        (*CreateVector)     ( void *vector ),
+   HYPRE_Int     (*DestroyVector)    ( void *vector ),
+   void *        (*MatvecCreate)     ( void *A, void *x ),
+   HYPRE_Int     (*Matvec)           ( void *matvec_data, HYPRE_Complex alpha, void *A,
+                                       void *x, HYPRE_Complex beta, void *y ),
+   HYPRE_Int     (*MatvecDestroy)    ( void *matvec_data ),
+   HYPRE_Real    (*InnerProd)        ( void *x, void *y ),
+   HYPRE_Complex (*ComplexInnerProd) ( void *x, void *y ),
+   HYPRE_Int     (*CopyVector)       ( void *x, void *y ),
+   HYPRE_Int     (*ClearVector)      ( void *x ),
+   HYPRE_Int     (*ScaleVector)      ( HYPRE_Complex alpha, void *x ),
+   HYPRE_Int     (*Axpy)             ( HYPRE_Complex alpha, void *x, void *y ),
+   HYPRE_Int     (*PrecondSetup)     ( void *vdata, void *A, void *b, void *x ),
+   HYPRE_Int     (*Precond)          ( void *vdata, void *A, void *b, void *x )
+   )
+{
+   hypre_PCGFunctions * pcg_functions;
+   pcg_functions = (hypre_PCGFunctions *)
+      CAlloc( 1, sizeof(hypre_PCGFunctions) );
+
+   pcg_functions->CAlloc = CAlloc;
+   pcg_functions->Free = Free;
+   pcg_functions->CommInfo = CommInfo;
+   pcg_functions->CreateVector = CreateVector;
+   pcg_functions->DestroyVector = DestroyVector;
+   pcg_functions->MatvecCreate = MatvecCreate;
+   pcg_functions->Matvec = Matvec;
+   pcg_functions->MatvecDestroy = MatvecDestroy;
+   pcg_functions->InnerProd = InnerProd;
+   pcg_functions->ComplexInnerProd = ComplexInnerProd;
+   //pcg_functions->ComplexInnerProd = InnerProd;
    pcg_functions->CopyVector = CopyVector;
    pcg_functions->ClearVector = ClearVector;
    pcg_functions->ScaleVector = ScaleVector;
@@ -293,13 +350,14 @@ hypre_PCGSolve( void *pcg_vdata,
    HYPRE_Int             logging      = (pcg_data -> logging);
    HYPRE_Real     *norms        = (pcg_data -> norms);
    HYPRE_Real     *rel_norms    = (pcg_data -> rel_norms);
-                
-   HYPRE_Real      alpha, beta;
-   HYPRE_Real      gamma, gamma_old;
+
    HYPRE_Real      bi_prod, eps;
    HYPRE_Real      pi_prod, xi_prod;
    HYPRE_Real      ieee_check = 0.;
-                
+
+   HYPRE_Complex   alpha, beta, gamma, gamma_old;
+   HYPRE_Complex   pdotb, sdotp;
+
    HYPRE_Real      i_prod = 0.0;
    HYPRE_Real      i_prod_0 = 0.0;
    HYPRE_Real      cf_ave_0 = 0.0;
@@ -307,7 +365,7 @@ hypre_PCGSolve( void *pcg_vdata,
    HYPRE_Real      weight;
    HYPRE_Real      ratio;
 
-   HYPRE_Real      guard_zero_residual, sdotp;
+   HYPRE_Real      guard_zero_residual;
    HYPRE_Int             tentatively_converged = 0;
    HYPRE_Int             recompute_true_residual = 0;
 
@@ -344,9 +402,9 @@ hypre_PCGSolve( void *pcg_vdata,
       /* bi_prod = <C*b,b> */
       (*(pcg_functions->ClearVector))(p);
       precond(precond_data, A, b, p);
-      bi_prod = (*(pcg_functions->InnerProd))(p, b);
-      if (print_level > 1 && my_id == 0)
-          hypre_printf("<C*b,b>: %e\n",bi_prod);
+      pdotb = (*(pcg_functions->ComplexInnerProd))(p, b);
+      if (print_level>1 && my_id==0)
+         hypre_printf("<C*b,b>: %e + I %e\n",hypre_creal(pdotb),hypre_cimag(pdotb));
    };
 
    /* Since it is does not diminish performance, attempt to return an error flag
@@ -416,7 +474,9 @@ hypre_PCGSolve( void *pcg_vdata,
    precond(precond_data, A, r, p);
 
    /* gamma = <r,p> */
-   gamma = (*(pcg_functions->InnerProd))(r,p);
+   gamma = (*(pcg_functions->ComplexInnerProd))(r,p);
+
+   hypre_printf("%s:%d:%s gamma %e + I %e\n", __FILE__, __LINE__, __func__, hypre_creal(gamma), hypre_cimag(gamma));
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
@@ -430,11 +490,23 @@ hypre_PCGSolve( void *pcg_vdata,
          found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
       if (print_level > 0 || logging > 0)
       {
-        hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-        hypre_printf("ERROR -- hypre_PCGSolve: INFs and/or NaNs detected in input.\n");
-        hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
-        hypre_printf("Returning error flag += 101.  Program not terminated.\n");
-        hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
+         hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
+         hypre_printf("ERROR -- hypre_PCGSolve: INFs and/or NaNs detected in input.\n");
+         hypre_printf("User probably placed non-numerics in supplied A or x_0.\n");
+
+         if ( print_level > 1 )
+         {
+            bi_prod = (*(pcg_functions->InnerProd))(x, x);
+            if (my_id == 0) hypre_printf("<x,x>: %e\n",bi_prod);
+
+            (*(pcg_functions->ClearVector))(p);
+            precond(precond_data, A, b, p);
+            pdotb = (*(pcg_functions->ComplexInnerProd))(p, b);
+            if (my_id == 0) hypre_printf("<C*b,b>: %e + I %e\n",hypre_creal(pdotb),hypre_cimag(pdotb));
+         }
+
+         hypre_printf("Returning error flag += 101.  Program not terminated.\n");
+         hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
       }
       hypre_error(HYPRE_ERROR_GENERIC);
       return hypre_error_flag;
@@ -446,7 +518,7 @@ hypre_PCGSolve( void *pcg_vdata,
       if (two_norm)
          i_prod_0 = (*(pcg_functions->InnerProd))(r,r);
       else
-         i_prod_0 = gamma;
+         i_prod_0 = hypre_creal(gamma);
 
       if ( logging>0 || print_level>0 ) norms[0] = sqrt(i_prod_0);
    }
@@ -488,7 +560,7 @@ hypre_PCGSolve( void *pcg_vdata,
       (*(pcg_functions->Matvec))(matvec_data, 1.0, A, p, 0.0, s);
 
       /* alpha = gamma / <s,p> */
-      sdotp = (*(pcg_functions->InnerProd))(s, p);
+      sdotp = (*(pcg_functions->ComplexInnerProd))(s, p);
       if ( sdotp==0.0 )
       {
          /* ++ierr;*/
@@ -521,8 +593,8 @@ hypre_PCGSolve( void *pcg_vdata,
       if (rtol && two_norm)
       {
          /* use that r_new-r_old = alpha * s */
-         HYPRE_Real drob2 = alpha*alpha*(*(pcg_functions->InnerProd))(s,s)/bi_prod;
-         if ( drob2 < rtol*rtol )
+         HYPRE_Complex drob2 = alpha*alpha*(*(pcg_functions->InnerProd))(s,s)/bi_prod;
+         if ( hypre_cabs(drob2) < rtol*rtol )
          {
             if (print_level > 1 && my_id == 0)
             {
@@ -537,14 +609,14 @@ hypre_PCGSolve( void *pcg_vdata,
       precond(precond_data, A, r, s);
 
       /* gamma = <r,s> */
-      gamma = (*(pcg_functions->InnerProd))(r, s);
+      gamma = (*(pcg_functions->ComplexInnerProd))(r, s);
 
       /* residual-based stopping criteria: ||r_new-r_old||_C < rtol ||b||_C */
       if (rtol && !two_norm)
       {
          /* use that ||r_new-r_old||_C^2 = (r_new ,C r_new) + (r_old, C r_old) */
-         HYPRE_Real r2ob2 = (gamma + gamma_old)/bi_prod;
-         if ( r2ob2 < rtol*rtol)
+         HYPRE_Complex r2ob2 = (gamma + gamma_old)/bi_prod;
+         if ( hypre_cabs(r2ob2) < rtol*rtol)
          {
             if (print_level > 1 && my_id == 0)
             {
@@ -558,7 +630,7 @@ hypre_PCGSolve( void *pcg_vdata,
       if (two_norm)
          i_prod = (*(pcg_functions->InnerProd))(r,r);
       else
-         i_prod = gamma;
+         i_prod = hypre_creal(gamma);
 
       /*--------------------------------------------------------------------
        * optional output
@@ -625,7 +697,7 @@ hypre_PCGSolve( void *pcg_vdata,
             (*(pcg_functions->ClearVector))(s);
             precond(precond_data, A, r, s);
             /* iprod = gamma = <r,s> */
-            i_prod = (*(pcg_functions->InnerProd))(r, s);
+            i_prod = (*(pcg_functions->ComplexInnerProd))(r, s);
          }
          if (i_prod / bi_prod >= eps) tentatively_converged = 0;
       }
@@ -635,7 +707,7 @@ hypre_PCGSolve( void *pcg_vdata,
       {
             pi_prod = (*(pcg_functions->InnerProd))(p,p); 
             xi_prod = (*(pcg_functions->InnerProd))(x,x);
-            ratio = alpha*alpha*pi_prod/xi_prod;
+            ratio = hypre_creal(alpha*hypre_conj(alpha)) * pi_prod/xi_prod;
             if (ratio >= eps) tentatively_converged = 0;
       }
       if ( tentatively_converged )
@@ -645,7 +717,7 @@ hypre_PCGSolve( void *pcg_vdata,
          break;
       }
 
-      if ( (gamma<1.0e-292) && ((-gamma)<1.0e-292) ) {
+      if ( hypre_cabs(gamma) < 1.0e-292 ) {
          /* ierr = 1;*/
          hypre_error(HYPRE_ERROR_CONV);
          
