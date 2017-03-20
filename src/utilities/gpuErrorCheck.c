@@ -35,11 +35,14 @@ void cudaSafeFree(void *ptr,int padding)
   }
   if (ptr_att.isManaged){
     gpuErrchk(cudaFree(sptr)); 
-
   } else {
     /* It is a pinned memory pointer */
     //printf("ERROR:: NON-managed pointer passed to cudaSafeFree\n");
-    gpuErrchk(cudaFreeHost(sptr));
+    if (ptr_att.memoryType==cudaMemoryTypeHost){
+      gpuErrchk(cudaFreeHost(sptr));
+    } else if (ptr_att.memoryType==cudaMemoryTypeDevice){
+      gpuErrchk(cudaFree(sptr)); 
+    }
   }
   POP_RANGE;
   return;
@@ -58,6 +61,8 @@ void PrintPointerAttributes(const void *ptr){
     fprintf(stderr,"Device associated with this pointer is %d\n",ptr_att.device);
   } else {
     fprintf(stderr,"PrintPointerAttributes:: Non-Managed & non-raw pointer\n Probably pinned host pointer\n");
+    if (ptr_att.memoryType==cudaMemoryTypeHost) fprintf(stderr,"Memory is located on host\n");
+    if (ptr_att.memoryType==cudaMemoryTypeDevice) fprintf(stderr,"Memory is located on device\n");
   }
   return;
 }
