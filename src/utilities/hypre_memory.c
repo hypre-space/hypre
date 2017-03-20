@@ -144,9 +144,11 @@ hypre_CAlloc( size_t count,
    return(char*) ptr;
 }
 
+#ifdef HYPRE_USE_MANAGED
 size_t memsize(const void *ptr){
 return ((size_t*)ptr)[-MEM_PAD_LEN];
 }
+#endif
 /*--------------------------------------------------------------------------
  * hypre_ReAlloc
  *--------------------------------------------------------------------------*/

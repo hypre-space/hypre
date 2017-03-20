@@ -274,7 +274,9 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
    POP_RANGE;
+#ifdef HYPRE_USE_GPU
    gpuErrchk(cudaStreamSynchronize(getstream(4)));
+#endif
    POP_RANGE; // PAR_CSR
    return ierr;
 }

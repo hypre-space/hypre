@@ -19,7 +19,6 @@
 #include "HYPRE_krylov.h"
 #include "_hypre_sstruct_mv.h"
 #include "_hypre_sstruct_ls.h"
-#define HYPRE_USE_GPU 1
 #ifdef HYPRE_USE_GPU
 #include "hypre_nvtx.h"
 #include "gpuMem.h"

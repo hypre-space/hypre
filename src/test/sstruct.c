@@ -2422,7 +2422,9 @@ main( hypre_int argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+#ifdef HYPRE_USE_GPU
    hypreGPUInit();
+#endif
    hypre_InitMemoryDebug(myid);
 
    /*-----------------------------------------------------------
