@@ -18,6 +18,7 @@
 
 #include "seq_mv.h"
 #include <assert.h>
+
 #ifdef HYPRE_USE_GPU
 #include <cublas_v2.h>
 #include <cusparse.h>
@@ -25,17 +26,6 @@
 #include "gpuErrorCheck.h"
 #include "gpuMem.h"
 #include "gpukernels.h"
-cudaStream_t getstream(int i);
-HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
-					     hypre_Vector *y );
-HYPRE_Int hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
-			   hypre_Vector *x,
-			   hypre_Vector *y     );
-HYPRE_Int
-hypre_SeqVectorCopyDevice( hypre_Vector *x,
-			   hypre_Vector *y );
-void VecSet(double* tgt, int size, double value, cudaStream_t s);
-void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
 #endif
 
 /*--------------------------------------------------------------------------
@@ -49,8 +39,6 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 #ifdef HYPRE_USE_GPU
    vector = (hypre_Vector*)calloc(1,sizeof(hypre_Vector));
    vector->on_device=0;
-   //printf("Vector %p size %zu \n",vector,sizeof(hypre_Vector));
-   //mempush((void*)vector,sizeof(hypre_Vector),0);
 #else
    vector = hypre_CTAlloc(hypre_Vector, 1);
 #endif
@@ -583,10 +571,8 @@ hypre_SeqVectorCopyDevice( hypre_Vector *x,
   if (size > size_y) size = size_y;
   size *=hypre_VectorNumVectors(x);
   PUSH_RANGE_PAYLOAD("VECCOPYDEVICE",2,size);
-  //gpuErrchk(cudaMemcpyAsync(y_data,x_data,size*sizeof(HYPRE_Complex),cudaMemcpyDeviceToDevice,0));
   hypre_SeqVectorPrefetchToDevice(x);
   hypre_SeqVectorPrefetchToDevice(y);
-  //joinStreams(5,6,4);
   VecCopy(y_data,x_data,size,getstream(4));
   cudaStreamSynchronize(getstream(4));
   POP_RANGE;
@@ -606,21 +592,17 @@ hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
   HYPRE_Int      ierr = 0;
   cublasStatus_t stat;
   size *=hypre_VectorNumVectors(x);
-  //gpuErrchk(cudaDeviceSynchronize());
+
   PUSH_RANGE_PAYLOAD("DEVAXPY",0,hypre_VectorSize(x));
-  //MemPrefetch(x->data,0,getstream(4));
-  //MemPrefetch(y->data,0,getstream(4));
   hypre_SeqVectorPrefetchToDevice(x);
   hypre_SeqVectorPrefetchToDevice(y);
   static cublasHandle_t handle;
   static int firstcall=1;
   if (firstcall){
-    //stat = cublasCreate(&handle);
     handle=getCublasHandle();
     firstcall=0;
   }
-  //gpuErrchk(cudaStreamSynchronize(getstream(3)));
-  cublasErrchk(cublasDaxpy(handle,size,&alpha,x_data,1,y_data,1));
+  cublasErrchk(cublasDaxpy(handle,(int)size,&alpha,x_data,1,y_data,1));
   gpuErrchk(cudaStreamSynchronize(getstream(4)));
   POP_RANGE;
   return ierr;
@@ -648,11 +630,9 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
   PUSH_RANGE_PAYLOAD("DEVDOT-PRFETCH",5,hypre_VectorSize(x));
   //hypre_SeqVectorPrefetchToDevice(x);
   //hypre_SeqVectorPrefetchToDevice(y);
-  //joinStreams(5,6,4);
-  //for(int ii=0;ii<2;ii++)gpuErrchk(cudaStreamSynchronize(getstream(ii)));
   POP_RANGE;
   PUSH_RANGE_PAYLOAD("DEVDOT-ACTUAL",0,hypre_VectorSize(x));
-  stat=cublasDdot(handle, size,
+  stat=cublasDdot(handle, (int)size,
 		  x_data, 1,
 		  y_data, 1,
 		  &result);
@@ -663,36 +643,23 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
   
 }
 void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x){
-  //static int cc=0;
   if (hypre_VectorSize(x)==0) return;
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
-  //if (!x->on_device){ // This test actually slows down the code 
-  //x->on_device=1;
-    gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),0,getstream(4)));
-    gpuErrchk(cudaStreamSynchronize(getstream(4)));
-    //cc=(cc+1)%10;
-    //}
+  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),0,getstream(4)));
+  gpuErrchk(cudaStreamSynchronize(getstream(4)));
   POP_RANGE;
 }
 void hypre_SeqVectorPrefetchToHost(hypre_Vector *x){
   PUSH_RANGE("hypre_SeqVectorPrefetchToHost",0);
-  //if (x->on_device){  // This test actually slows down the code 
-  //x->on_device=0;
-    gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),cudaCpuDeviceId,getstream(4)));
-    gpuErrchk(cudaStreamSynchronize(getstream(4)));
-    //}
+  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),cudaCpuDeviceId,getstream(4)));
+  gpuErrchk(cudaStreamSynchronize(getstream(4)));
   POP_RANGE;
 }
 void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x,int index){
-  //static int cc=0;
   if (hypre_VectorSize(x)==0) return;
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
-  //if (!x->on_device){ // This test actually slows down the code 
-  //x->on_device=1;
-    gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),0,getstream(index)));
-    gpuErrchk(cudaStreamSynchronize(getstream(index)));
-    //cc=(cc+1)%10;
-    //}
+  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),0,getstream(index)));
+  gpuErrchk(cudaStreamSynchronize(getstream(index)));
   POP_RANGE;
 }
 #endif

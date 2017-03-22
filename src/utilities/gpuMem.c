@@ -17,7 +17,7 @@ void hypreGPUInit(){
   int device;
   gpuErrchk(cudaGetDeviceCount(&nDevices));
   //printf("There are %d GPUs on this node \n",nDevices);
-  if (nDevices>1) printf("WARNING:: Code running without mpibind or similar affinity support\n");
+  if (nDevices>1) hypre_printf("WARNING:: Code running without mpibind or similar affinity support\n");
   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
   
@@ -97,33 +97,33 @@ void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream
 
 
 
-void PrintPointerAttributesNew(const void *ptr){
-  struct cudaPointerAttributes ptr_att;
-  if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){
-    printf("PrintPointerAttributes:: Raw pointer\n");
-    return;
-  }
-  if (ptr_att.isManaged){
-    printf("PrintPointerAttributes:: Managed pointer\n");
-    printf("Host address = %p, Device Address = %p\n",ptr_att.hostPointer, ptr_att.devicePointer);
-    if (ptr_att.memoryType==cudaMemoryTypeHost) printf("Memory is located on host\n");
-    if (ptr_att.memoryType==cudaMemoryTypeDevice) printf("Memory is located on device\n");
-    printf("Device associated with this pointer is %d\n",ptr_att.device);
-  } else {
-    printf("PrintPointerAttributes:: Non-Managed & non-raw pointer\n Probably a device pointer\n");
-  }
-  return;
-}
-int OnHost(void *ptr){
-  return 1;
-  struct cudaPointerAttributes ptr_att;
-  if (cudaPointerGetAttributes(&ptr_att,ptr)==cudaSuccess){
-    return (ptr_att.memoryType==cudaMemoryTypeHost);
-  } else {
-    printf("PrintPointerAttributes:: Raw pointer\n");
-    return 0;
-  } 
-}
+/* void PrintPointerAttributesNew(const void *ptr){ */
+/*   struct cudaPointerAttributes ptr_att; */
+/*   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){ */
+/*     printf("PrintPointerAttributes:: Raw pointer\n"); */
+/*     return; */
+/*   } */
+/*   if (ptr_att.isManaged){ */
+/*     printf("PrintPointerAttributes:: Managed pointer\n"); */
+/*     printf("Host address = %p, Device Address = %p\n",ptr_att.hostPointer, ptr_att.devicePointer); */
+/*     if (ptr_att.memoryType==cudaMemoryTypeHost) printf("Memory is located on host\n"); */
+/*     if (ptr_att.memoryType==cudaMemoryTypeDevice) printf("Memory is located on device\n"); */
+/*     printf("Device associated with this pointer is %d\n",ptr_att.device); */
+/*   } else { */
+/*     printf("PrintPointerAttributes:: Non-Managed & non-raw pointer\n Probably a device pointer\n"); */
+/*   } */
+/*   return; */
+/* } */
+/* int OnHost(void *ptr){ */
+/*   return 1; */
+/*   struct cudaPointerAttributes ptr_att; */
+/*   if (cudaPointerGetAttributes(&ptr_att,ptr)==cudaSuccess){ */
+/*     return (ptr_att.memoryType==cudaMemoryTypeHost); */
+/*   } else { */
+/*     printf("PrintPointerAttributes:: Raw pointer\n"); */
+/*     return 0; */
+/*   }  */
+/* } */
 
 /* Returns the same cublas handle with every call */
 cublasHandle_t getCublasHandle(){

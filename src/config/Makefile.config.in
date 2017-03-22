@@ -66,6 +66,9 @@ CFLAGS    = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 CXX       = @CXX@
 CXXFLAGS  = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
+NVCC 	 = nvcc
+NVCCFLAGS = -O3 -arch=sm_60  -I ../hypre/include -DUSE_NVTX -c -DHYPRE_USE_GPU
+
 LINK_FC  = @LINK_FC@
 LINK_CC   = @LINK_CC@
 LINK_CXX  = @LINK_CXX@

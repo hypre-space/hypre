@@ -1,4 +1,6 @@
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#ifndef __GPUMEM_H__
+#define  __GPUMEM_H__
 #include <cublas_v2.h>
 #include <cusparse.h>
 cudaStream_t getstream(int i);
@@ -31,4 +33,5 @@ void SetAsyncMode(int mode);
 int GetAsyncMode();
 void branchStream(int i, int j);
 void joinStreams(int i, int j, int k);
+#endif
 #endif

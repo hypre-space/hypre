@@ -23,7 +23,6 @@ C_COMPILE_FLAGS = \
  -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}\
  ${CDEFS}\
- -qsmp=omp
 
 CXX_COMPILE_FLAGS = \
  -I$(srcdir)\
