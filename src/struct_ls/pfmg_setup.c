@@ -729,25 +729,22 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-		  HYPRE_Complex *data_host;
-		  data_host = hypre_CTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(A));
-		  hypre_DataCopyFromData(data_host,hypre_StructMatrixData(A),HYPRE_Complex,hypre_StructMatrixDataSize(A));
-		  
-          /*FIXME: need reduction for more variables*/
-         zypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
-                             A_dbox, start, stride, Ai);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,si,Ap,diag,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
-#endif
-         zypre_BoxLoop1For(Ai)
-         {
-            tcx = 0.0;
-            tcy = 0.0;
-            tcz = 0.0;
-
+        /*FIXME: need reduction for more variables*/
+	HYPRE_Int tmp = 0;
+	hypre_MatrixIndexMove(A, stencil_size, i, tmp, 3);
+	
+        zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+					A_dbox, start, stride, Ai,cx);
+	{
+            HYPRE_Int tcx = 0.0;
+	    HYPRE_Complex *Ap;
+	    HYPRE_Int Astenc,si;
+	    HYPRE_Real diag;
+	    
             /* get sign of diagonal */
-            //Ap = hypre_StructMatrixBoxData(A, i, sdiag);
-			Ap = data_host + hypre_StructMatrixDataIndices(A)[i][sdiag];
+	    Ap = hypre_StructGetMatrixBoxData(A, i, sdiag,indices_d);
+	    //Ap = (data_A + indices_d[sdiag]);
+	    
             diag = 1.0;
             if (Ap[Ai] < 0)
             {
@@ -756,43 +753,177 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
             for (si = 0; si < stencil_size; si++)
             {
-				//Ap = hypre_StructMatrixBoxData(A, i, si);
-				Ap = data_host + hypre_StructMatrixDataIndices(A)[i][si];
-				
-               /* x-direction */
-               Astenc = hypre_IndexD(stencil_shape[si], 0);
-               if (Astenc)
-               {
+	      Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
+	      //Ap = (data_A + indices_d[si]);
+	      /* x-direction */
+	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[si]);
+	      if (Astenc)
+	      {
                   tcx -= Ap[Ai]*diag;
-               }
-
-               /* y-direction */
-               Astenc = hypre_IndexD(stencil_shape[si], 1);
-               if (Astenc)
-               {
-                  tcy -= Ap[Ai]*diag;
-               }
-
-               /* z-direction */
-               Astenc = hypre_IndexD(stencil_shape[si], 2);
-               if (Astenc)
-               {
-                  tcz -= Ap[Ai]*diag;
-               }
+	      }
             }
 
             cx += tcx;
-            cy += tcy;
-            cz += tcz;
-            
+	}
+	zypre_newBoxLoop1ReductionEnd(Ai,cx);
+	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+					A_dbox, start, stride, Ai,sqcx);
+	{
+            HYPRE_Int tcx = 0.0;
+	    HYPRE_Real *Ap;
+	    HYPRE_Int Astenc,si;
+	    HYPRE_Real diag;
+	    
+            /* get sign of diagonal */
+	    //Ap = hypre_StructGetMatrixBoxData(A, i, sdiag,indices_d);
+	    Ap = (data_A + indices_d[sdiag]);
+            diag = 1.0;
+            if (Ap[Ai] < 0)
+            {
+               diag = -1.0;
+            }
+
+            for (si = 0; si < stencil_size; si++)
+            {
+	      //Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
+	      Ap = (data_A + indices_d[si]);
+	      /* x-direction */
+	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[si]);
+	      if (Astenc)
+	      {
+                  tcx -= Ap[Ai]*diag;
+	      }
+            }       
             sqcx += (tcx*tcx);
+	}
+	zypre_newBoxLoop1ReductionEnd(Ai,sqcx);
+	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+					A_dbox, start, stride, Ai,cy);
+	{
+            HYPRE_Int tcy = 0.0;
+	    HYPRE_Real *Ap;
+	    HYPRE_Int Astenc,si;
+	    HYPRE_Real diag;
+	    
+            /* get sign of diagonal */
+	    Ap = hypre_StructGetMatrixBoxData(A, i, sdiag,indices_d);
+            diag = 1.0;
+            if (Ap[Ai] < 0)
+            {
+               diag = -1.0;
+            }
+
+            for (si = 0; si < stencil_size; si++)
+            {
+	      Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
+	      
+	      /* y-direction */
+	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[stencil_size+si]);
+	      if (Astenc)
+		{
+                  tcy -= Ap[Ai]*diag;
+		}
+            }
+
+            cy += tcy;            
+	}
+	zypre_newBoxLoop1ReductionEnd(Ai,cy);
+	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+					A_dbox, start, stride, Ai,sqcy);
+	{
+            HYPRE_Int tcy = 0.0;
+	    HYPRE_Real *Ap;
+	    HYPRE_Int Astenc,si;
+	    HYPRE_Real diag;
+	    
+            /* get sign of diagonal */
+	    Ap = hypre_StructGetMatrixBoxData(A, i, sdiag,indices_d);
+            diag = 1.0;
+            if (Ap[Ai] < 0)
+            {
+               diag = -1.0;
+            }
+
+            for (si = 0; si < stencil_size; si++)
+            {
+	      Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
+	      
+	      /* y-direction */
+	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[stencil_size+si]);
+	      if (Astenc)
+		{
+                  tcy -= Ap[Ai]*diag;
+		}
+            }       
             sqcy += (tcy*tcy);
+	}
+	zypre_newBoxLoop1ReductionEnd(Ai,sqcy);
+	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+					A_dbox, start, stride, Ai,cz);
+	{
+            HYPRE_Int tcz = 0.0;
+	    HYPRE_Real *Ap;
+	    HYPRE_Int Astenc,si;
+	    HYPRE_Real diag;
+	    
+            /* get sign of diagonal */
+	    Ap = hypre_StructGetMatrixBoxData(A, i, sdiag,indices_d);
+            diag = 1.0;
+            if (Ap[Ai] < 0)
+            {
+               diag = -1.0;
+            }
+
+            for (si = 0; si < stencil_size; si++)
+            {
+	      Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
+	      
+	      /* z-direction */
+	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[2*stencil_size+si]);
+	      if (Astenc)
+		{
+                  tcz -= Ap[Ai]*diag;
+		}
+            }
+
+            cz += tcz;            
+	}
+	zypre_newBoxLoop1ReductionEnd(Ai,cz);
+	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+					A_dbox, start, stride, Ai,sqcz);
+	{
+            HYPRE_Int tcz = 0.0;
+	    HYPRE_Real *Ap;
+	    HYPRE_Int Astenc,si;
+	    HYPRE_Real diag;
+	    
+            /* get sign of diagonal */
+	    Ap = hypre_StructGetMatrixBoxData(A, i, sdiag,indices_d);
+            diag = 1.0;
+            if (Ap[Ai] < 0)
+            {
+               diag = -1.0;
+            }
+
+            for (si = 0; si < stencil_size; si++)
+            {
+	      Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
+
+	      /* z-direction */
+	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[2*stencil_size+si]);
+	      if (Astenc)
+		{
+                  tcz -= Ap[Ai]*diag;
+		}
+            }       
             sqcz += (tcz*tcz);
-         }
-         zypre_BoxLoop1End(Ai);
+	}
+	zypre_newBoxLoop1ReductionEnd(Ai,sqcz);	 
       }
    }
-
+   
+   hypre_StructcleanIndexD();
+   
    cxyz[0] = cx;
    cxyz[1] = cy;
    cxyz[2] = cz;
@@ -918,8 +1049,8 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       {
           /*FIXME: need reduction for multiplication*/
 #if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_RAJA)
-		  zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-										 A_dbox, start, stride, Ai,Ap,diag_product);
+	zypre_newBoxLoop1ReductionMult(hypre_StructMatrixNDim(A), loop_size,
+				       A_dbox, start, stride, Ai,Ap,diag_product);
 #else
          zypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start, stride, Ai);

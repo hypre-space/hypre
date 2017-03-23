@@ -159,7 +159,7 @@ hypre_APSubdivideRegion( hypre_Box      *region,
 
    count = 0;
    hypre_BoxLoop0Begin(ndim, div);
-   hypre_BoxLoopSetOneBlock();
+   //hypre_BoxLoopSetOneBlock();
    hypre_BoxLoop0For()
    {
       box = hypre_BoxArrayBox(box_array, count);

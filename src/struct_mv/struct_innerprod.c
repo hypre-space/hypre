@@ -64,18 +64,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
      yp = hypre_StructVectorBoxData(y, i);
      
      hypre_BoxGetSize(box, loop_size);
-#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_RAJA)
-     //zypre_newBoxLoop2ReductionCUDA(ndim, loop_size,
-     //				      x_data_box, start, unit_stride, xi,xp,
-     //				      y_data_box, start, unit_stride, yi,yp,local_result);
-       zypre_newBoxLoop2ReductionBegin(ndim, loop_size,
-				       x_data_box, start, unit_stride, xi,
-				       y_data_box, start, unit_stride, yi, local_result);
-       {
-	 local_result += xp[xi] * hypre_conj(yp[yi]);		 
-       }
-       zypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
-#else
+
 #ifdef HYPRE_BOX_PRIVATE_VAR
 #undef HYPRE_BOX_PRIVATE_VAR
 #endif
@@ -85,22 +74,20 @@ hypre_StructInnerProd( hypre_StructVector *x,
 #endif
 #define HYPRE_BOX_REDUCTION reduction(+:local_result)
 	   
-	   zypre_newBoxLoop2ReductionBegin(ndim, loop_size,
-					   x_data_box, start, unit_stride, xi,
-					   y_data_box, start, unit_stride, yi,local_result);
-	   {
-	     local_result += xp[xi] * hypre_conj(yp[yi]);		 
-	   }
-	   zypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
-#endif
+     zypre_newBoxLoop2ReductionBegin(ndim, loop_size,
+				     x_data_box, start, unit_stride, xi,
+				     y_data_box, start, unit_stride, yi,local_result);
+     {
+       local_result += xp[xi] * hypre_conj(yp[yi]);		 
+     }
+     zypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
    }
-   //process_result = local_result;
    process_result = (double)(local_result);
    
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));
-   
+
    hypre_IncFLOPCount(2*hypre_StructVectorGlobalSize(x));
-   
+
    return final_innerprod_result;
 }

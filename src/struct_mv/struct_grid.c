@@ -330,7 +330,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       p = 1;
       hypre_BoxGetSize(box, loop_size);
       hypre_BoxLoop0Begin(ndim, loop_size);
-      hypre_BoxLoopSetOneBlock();
+      //hypre_BoxLoopSetOneBlock();
       hypre_BoxLoop0For()
       {
          pshift = pshifts[p];

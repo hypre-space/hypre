@@ -136,7 +136,6 @@ hypre_user_chose_fei=no
 hypre_user_chose_cuda=no
 hypre_user_chose_raja=no
 hypre_user_chose_kokkos=no
-hypre_user_chose_kokkos_cuda=no
 
 hypre_using_c=yes
 hypre_using_cxx=yes
@@ -150,6 +149,8 @@ hypre_using_mli=yes
 hypre_using_openmp=no
 hypre_using_insure=no
 hypre_using_cuda=no
+hypre_using_gpu=no
+hypre_using_um=no
 
 dnl *********************************************************************
 dnl * Initialize flag-check variables
@@ -304,6 +305,17 @@ AS_HELP_STRING([--enable-fortran],
     *)   hypre_using_fortran=yes ;;
  esac],
 [hypre_using_fortran=yes]
+)
+
+AC_ARG_ENABLE(unified-memory,
+AS_HELP_STRING([--enable-unified-memory],
+               [Use unified memory for allocating the data memory (default is NO).]),
+[case "${enableval}" in
+    yes) hypre_using_um=yes ;;
+    no)  hypre_using_um=no ;;
+    *)   hypre_using_um=no ;;
+ esac],
+[hypre_using_um=no]
 )
 
 dnl * The AC_DEFINE is below, after hypre_using_mpi is completely set
@@ -773,10 +785,10 @@ AS_HELP_STRING([--with-MPI],
 
 AC_ARG_WITH(cuda,
 AS_HELP_STRING([--with-cuda],
-               [Require cuda-7.5 compiler or higher (default is NO).]),
+               [Require cuda-8.0 compiler or higher (default is NO).]),
 [case "$withval" in
     yes) hypre_user_chose_cuda=yes
-		 hypre_using_cuda=yes ;;
+    	 hypre_using_cuda=yes ;;
     no)  hypre_using_cuda=no ;;
     *)   hypre_using_cuda=no ;;
  esac],
@@ -1291,6 +1303,14 @@ then
    LDFLAGS="-Xcompiler -fopenmp -arch compute_35"
    CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CFLAGS"
    CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CXXFLAGS"
+   if test "$hypre_using_um" = "yes"
+   then
+	CFLAGS+=" -DHYPRE_MEMORY_UM=1"
+	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1"
+   else
+	CFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+   fi
 fi
 
 dnl *********************************************************************
@@ -1298,34 +1318,24 @@ dnl * Set raja options
 dnl *********************************************************************
 if test "$hypre_user_chose_raja" = "yes"
 then
-dnl   HYPRE_RAJA_SRC_DIR="$HYPRE_SRCDIR/../../raja_src/src"
-dnl   HYPRE_RAJA_INC_DIR="$HYPRE_SRCDIR/../../raja_src/include"
-dnl   HYPRE_RAJA_LIB_DIR="\$(patsubst %.cxx,%.o,\$(wildcard $HYPRE_RAJA_SRC_DIR/*.cxx))"
    LDFLAGS="-Xcompiler -fopenmp"
    PLATFORM="-DRAJA_PLATFORM_X86_SSE -DRAJA_COMPILER_GNU -DRAJA_USE_CUDA -DRAJA_USE_DOUBLE -DRAJA_USE_BARE_PTR -DRAJA_USE_GETTIME"
-dnl   RAJAFLAGS="-I$HYPRE_RAJA_INC_DIR $PLATFORM"
    RAJAFLAGS="-lRAJA"
    CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $RAJAFLAGS $CFLAGS"
    CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $RAJAFLAGS  $CXXFLAGS"
+   if test "$hypre_using_um" = "yes"
+   then
+	CFLAGS+=" -DHYPRE_MEMORY_UM=1"
+	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1"
+   else
+	CFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+   fi
 fi
 
 dnl *********************************************************************
 dnl * Set kokkos options
 dnl *********************************************************************
-if test "$hypre_user_chose_kokkos_cuda" = "yes"
-then
-   HYPRE_KOKKOS_PATH="$HYPRE_SRCDIR/../../kokkos-master"
-   HYPRE_KOKKOS_DEVICE="Cuda,OpenMP"
-   HYPRE_KOKKOS_ARCH="SNB,Kepler35"
-   HYPRE_KOKKOS_CUDA_OPTION="enable_lambda"
-   HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_PATH/Makefile.kokkos"
-   HYPRE_KOKKOS_CLEAN="kokkos-clean"	
-   HYPRE_KOKKOS_LIB="\$(KOKKOS_LIBS)"
-   HYPRE_KOKKOS_DEPENDS="\$(KOKKOS_LINK_DEPENDS)"
-   LDFLAGS="-Xcompiler -fopenmp -L./ -lkokkos"
-   CFLAGS="\$(KOKKOS_CPPFLAGS) -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS_CUDA=1"
-   CXXFLAGS="\$(KOKKOS_CPPFLAGS) -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS_CUDA=1"
-fi
 
 if test "$hypre_user_chose_kokkos" = "yes"
 then
