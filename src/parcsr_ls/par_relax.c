@@ -4207,7 +4207,6 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
    /* Generate sub communicator */
    hypre_GenerateSubComm(comm, num_rows, &new_comm);
-
    if (num_rows)
    {
       hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);

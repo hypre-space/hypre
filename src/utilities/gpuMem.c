@@ -7,33 +7,87 @@
 #include <cusparse.h>
 #include "_hypre_utilities.h"
 #include "gpuMem.h"
+#include "../seq_mv/gpukernels.h"
 int ggc(int id);
 #define FULL_WARN
-void CudaCompileFlagCheck();
-void hypreGPUInit(){
+
+/* Global struct that holds device,library handles etc */
+struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1};
+
+
+
+void hypre_GPUInit(){
   char pciBusId[80];
   int myid;
   int nDevices;
   int device;
-  gpuErrchk(cudaGetDeviceCount(&nDevices));
-  //printf("There are %d GPUs on this node \n",nDevices);
-  if (nDevices>1) hypre_printf("WARNING:: Code running without mpibind or similar affinity support\n");
-  hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+  if (!HYPRE_GPU_HANDLE){
+    HYPRE_GPU_HANDLE=1;
+    HYPRE_DEVICE=0;
+    gpuErrchk(cudaGetDeviceCount(&nDevices));
+    HYPRE_DEVICE_COUNT=nDevices;
+    
+    if (nDevices==1){
+      HYPRE_DEVICE=0;
+      gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
+      cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
+    } else if (nDevices>1) {
 
+      hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+      
+      MPI_Comm node_comm;
+      MPI_Info info;
+      MPI_Info_create(&info);
+      MPI_Comm_split_type(hypre_MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, myid, info, &node_comm);
+
+      int myNodeid, NodeSize;
+      MPI_Comm_rank(node_comm, &myNodeid);
+      MPI_Comm_size(node_comm, &NodeSize);
+      
+      HYPRE_DEVICE=myNodeid%nDevices; 
+      gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
+      cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
+      hypre_printf("WARNING:: Code running without mpibind or similar affinity support\n");
+      hypre_printf("Global ID = %d , Node ID %d running on device %d of %d \n",myid,myNodeid,HYPRE_DEVICE,nDevices);
+      MPI_Info_free(&info);
+    } else {
+      /* No device found  */
+      hypre_fprintf(stderr,"ERROR:: NO GPUS found \n");
+      exit(2);
+    }
+    
+
+    /* Initialize streams */
+    for(int jj=0;jj<MAX_HGS_ELEMENTS;jj++)
+      gpuErrchk(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)),cudaStreamNonBlocking));
+    
+      /* Initialize the library handles and streams */
+    //hypre__global_handle.cublas_handle=getCublasHandle();
+    //hypre__global_handle.cusparse_handle=getCusparseHandle();
+
+    cusparseErrchk(cusparseCreate(&(HYPRE_CUSPARSE_HANDLE)));
+    cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,getstream(4)));
+    cusparseErrchk(cusparseCreateMatDescr(&(HYPRE_CUSPARSE_MAT_DESCR))); 
+    cusparseErrchk(cusparseSetMatType(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_MATRIX_TYPE_GENERAL));
+    cusparseErrchk(cusparseSetMatIndexBase(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_INDEX_BASE_ZERO));
+
+    cublasErrchk(cublasCreate(&(HYPRE_CUBLAS_HANDLE)));
+    cublasErrchk(cublasSetStream(HYPRE_CUBLAS_HANDLE,getstream(4)));
+    
+    /* Check if the arch flags used for compiling the cuda kernels match the device */
+    CudaCompileFlagCheck();
+  }
+}
+
+
+void hypre_GPUFinalize(){
   
-  device=myid%nDevices; // Warning will not work on multiple nodes without mpibind
-  gpuErrchk(cudaSetDevice(device));
-  cudaDeviceGetPCIBusId ( pciBusId, 80, device);
-  //printf("MPI_RANK = %d runningon PCIBUS id :: %s as device %d of %d\n",myid,pciBusId,device,nDevices);
-
-  // Initialize the handles and streams
-  cublasHandle_t handle_1 = getCublasHandle();
-  cusparseHandle_t handle_2 = getCusparseHandle();
-  cudaStream_t s=getstream(4);
-  /* Check is the arch flags used for compiling the cuda kernels match the device */
-  CudaCompileFlagCheck();
+  cusparseErrchk(cusparseDestroy(HYPRE_CUSPARSE_HANDLE));
+  
+  cublasErrchk(cublasDestroy(HYPRE_CUBLAS_HANDLE));
   
 }
+
 void MemAdviseReadOnly(const void* ptr, int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
@@ -66,8 +120,7 @@ void MemPrefetch(const void *ptr,int device,cudaStream_t stream){
   /* Do a prefetch every time until a possible UM bug is fixed */
   if (size>0){
     PrintPointerAttributes(ptr);
-    printf("Prefetch size %zu for %p %zu\n",size,ptr,mempush(ptr,0,0));
-    gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
+     gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
     gpuErrchk(cudaStreamSynchronize(stream));
     POP_RANGE_DOMAIN(0);
   return;

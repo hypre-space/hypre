@@ -22,7 +22,6 @@
 #include "hypre_nvtx.h"
 #include "gpukernels.h"
 #include "gpuMem.h"
-cudaStream_t getstream(int i);
 #endif
 #ifdef HYPRE_PROFILE
 HYPRE_Real hypre_profile_times[HYPRE_TIMER_ID_COUNT] = { 0 };
@@ -38,12 +37,9 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
                        HYPRE_Int num_nonzeros )
 {
    hypre_CSRMatrix  *matrix;
-#ifdef HYPRE_USE_GPU
-   matrix = (hypre_CSRMatrix*)calloc(1,sizeof(hypre_CSRMatrix));
-   //mempush(matrix,sizeof(hypre_CSRMatrix),0);
-#else
-   matrix = hypre_CTAlloc(hypre_CSRMatrix, 1);
-#endif
+
+   matrix = hypre_HCTAlloc(hypre_CSRMatrix, 1);
+   
 
    hypre_CSRMatrixData(matrix) = NULL;
    hypre_CSRMatrixI(matrix)    = NULL;
@@ -84,11 +80,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
          hypre_CSRMatrixData(matrix) = NULL;
          hypre_CSRMatrixJ(matrix)    = NULL;
       }
-#ifdef HYPRE_USE_GPU
-      free(matrix);
-#else
-      hypre_TFree(matrix);
-#endif
+      hypre_HCTFree(matrix);
       matrix = NULL;
    }
 
@@ -692,9 +684,9 @@ void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
 
   PUSH_RANGE_PAYLOAD("hypre_CSRMatrixPrefetchToDevice",0,hypre_CSRMatrixNumNonzeros(A));
   if ((!A->on_device)&&(hypre_CSRMatrixNumNonzeros(A)>8192)){
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),0,getstream(4)));
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),0,getstream(5)));
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),0,getstream(6)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,getstream(4)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,getstream(5)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,getstream(6)));
     //branchStream(5,4);
     //branchStream(6,4);
     gpuErrchk(cudaStreamSynchronize(getstream(4)));

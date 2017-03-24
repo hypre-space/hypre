@@ -841,8 +841,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
 				&alpha, descr,
 				A->data ,A->i+offset,A->j,
 				x->data, &beta, y->data+offset));
-
-
+  
   if (!GetAsyncMode()){
   gpuErrchk(cudaStreamSynchronize(s[4]));
   }

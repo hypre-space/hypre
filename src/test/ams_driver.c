@@ -23,6 +23,8 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_IJ_mv.h"
 #include "HYPRE.h"
+#include "hypre_nvtx.h"
+#include "gpuMem.h"
 
 void CheckIfFileExists(char *file)
 {
@@ -128,7 +130,9 @@ hypre_int main (hypre_int argc, char *argv[])
    hypre_MPI_Init(&argc, &argv);
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-
+#ifdef HYPRE_USE_GPU
+   hypre_GPUInit();
+#endif
    /* Set defaults */
    solver_id = 3;
    maxit = 100;
@@ -752,7 +756,9 @@ hypre_int main (hypre_int argc, char *argv[])
 
    if (zero_cond)
       HYPRE_ParVectorDestroy(interior_nodes);
-
+#ifdef HYPRE_USE_GPU
+   hypre_GPUFinalize();
+#endif
    hypre_MPI_Finalize();
 
    if (HYPRE_GetError() && !myid)

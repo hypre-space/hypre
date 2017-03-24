@@ -1,15 +1,12 @@
 #include <stdio.h>
 #include "hypre_nvtx.h"
 #include "gpgpu.h"
+extern "C"{
+#include "gpuMem.h"
+}
 #define DISABLE_IN_CUDA_KERNEL_FILE
 #include "HYPRE_utilities.h"
-typedef int hypre_int;
-extern "C"{
-  void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream);
-  void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t stream);
-  cudaStream_t getstream(hypre_int i);
-  cudaEvent_t getevent(hypre_int i);
-}
+typedef int hypre_int; /* This needs to be fixed. Avoids the MPI include path */
 #define gpuErrchk2(ans) { gpuAssert2((ans), __FILE__, __LINE__); }
 inline void gpuAssert2(cudaError_t code, const char *file, hypre_int line)
 {
@@ -23,22 +20,23 @@ inline void gpuAssert2(cudaError_t code, const char *file, hypre_int line)
 
 
 extern "C"{
-__global__
-void VecScaleKernelText(HYPRE_Complex *__restrict__ u, const HYPRE_Complex *__restrict__ v, const HYPRE_Complex *__restrict__ l1_norm, hypre_int num_rows){
-  hypre_int i = blockIdx.x * blockDim.x + threadIdx.x;
-  if (i<num_rows){
-    u[i]+=__ldg(v+i)/__ldg(l1_norm+i);
+  __global__
+  void VecScaleKernelText(HYPRE_Complex *__restrict__ u, const HYPRE_Complex *__restrict__ v, const HYPRE_Complex *__restrict__ l1_norm, hypre_int num_rows){
+    hypre_int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i<num_rows){
+      u[i]+=__ldg(v+i)/__ldg(l1_norm+i);
+    }
   }
 }
-}
+
 extern "C"{
-__global__
-void VecScaleKernel(HYPRE_Complex *__restrict__ u, const HYPRE_Complex *__restrict__ v, const HYPRE_Complex * __restrict__ l1_norm, hypre_int num_rows){
-  hypre_int i = blockIdx.x * blockDim.x + threadIdx.x;
-  if (i<num_rows){
-    u[i]+=v[i]/l1_norm[i];
+  __global__
+  void VecScaleKernel(HYPRE_Complex *__restrict__ u, const HYPRE_Complex *__restrict__ v, const HYPRE_Complex * __restrict__ l1_norm, hypre_int num_rows){
+    hypre_int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i<num_rows){
+      u[i]+=v[i]/l1_norm[i];
   }
-}
+  }
 }
 
 extern "C"{
@@ -50,7 +48,7 @@ extern "C"{
     gpuErrchk2(cudaPeekAtLastError());
     gpuErrchk2(cudaDeviceSynchronize());
 #endif
-    MemPrefetchSized(l1_norm,num_rows*sizeof(HYPRE_Complex),0,s);
+    MemPrefetchSized(l1_norm,num_rows*sizeof(HYPRE_Complex),HYPRE_DEVICE,s);
     VecScaleKernel<<<num_blocks,tpb,0,s>>>(u,v,l1_norm,num_rows);
 #ifdef CATCH_LAUNCH_ERRORS    
     gpuErrchk2(cudaPeekAtLastError());
@@ -90,7 +88,7 @@ extern "C"{
   void VecSet(HYPRE_Complex* tgt, hypre_int size, HYPRE_Complex value, cudaStream_t s){
     hypre_int tpb=64;
     //cudaDeviceSynchronize();
-    MemPrefetchSized(tgt,size*sizeof(HYPRE_Complex),0,s);
+    MemPrefetchSized(tgt,size*sizeof(HYPRE_Complex),HYPRE_DEVICE,s);
     hypre_int num_blocks=size/tpb+1;
     VecSetKernel<<<num_blocks,tpb,0,s>>>(tgt,value,size);
     cudaStreamSynchronize(s);

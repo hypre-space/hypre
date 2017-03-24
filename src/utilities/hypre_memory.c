@@ -302,3 +302,63 @@ hypre_MAllocPinned( size_t size )
 
    return (char*)ptr;
 }
+/*--------------------------------------------------------------------------
+ * hypre_CAllocHost
+ *--------------------------------------------------------------------------*/
+
+char *
+hypre_CAllocHost( size_t count,
+		  size_t elt_size )
+{
+   void   *ptr;
+   size_t  size = count*elt_size;
+
+   if (size > 0)
+   {
+     PUSH_RANGE_PAYLOAD("CAllocHost",4,size);
+#ifdef HYPRE_USE_UMALLOC
+#ifdef HYPRE_USE_MANAGED
+      printf("ERROR HYPRE_USE_UMALLOC AND HYPRE_USE_MANAGED are mutually exclusive\n");
+#endif
+      HYPRE_Int threadid = hypre_GetThreadID();
+
+ptr = _ucalloc_(count, elt_size);
+
+#else
+     ptr = calloc(count, elt_size);
+#endif
+
+#if 1
+      if (ptr == NULL)
+      {
+        hypre_OutOfMemory(size);
+      }
+#endif
+      POP_RANGE;
+   }
+   else
+   {
+      ptr = NULL;
+   }
+
+   return(char*) ptr;
+}
+/*--------------------------------------------------------------------------
+ * hypre_CHFree
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_HFree( char *ptr )
+{
+   if (ptr)
+   {
+#ifdef HYPRE_USE_UMALLOC
+      HYPRE_Int threadid = hypre_GetThreadID();
+
+      _ufree_(ptr);
+
+#else
+      free(ptr);
+#endif
+   }
+}

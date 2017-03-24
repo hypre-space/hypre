@@ -346,7 +346,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 #ifdef HYPRE_USE_GPU
-   hypreGPUInit();
+   hypre_GPUInit();
 #endif
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
 /*
@@ -3071,7 +3071,7 @@ main( hypre_int argc,
 
       HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, 
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
- 
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -5159,6 +5159,9 @@ main( hypre_int argc,
 /*
   hypre_FinalizeMemoryDebug();
 */
+#ifdef HYPRE_USE_GPU
+   hypre_GPUFinalize();
+#endif
    hypre_MPI_Finalize();
 
    return (0);

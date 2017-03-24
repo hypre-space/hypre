@@ -15,7 +15,8 @@ void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream
 void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream);
 cublasHandle_t getCublasHandle();
 cusparseHandle_t getCusparseHandle();
-void hypreGPUInit();
+void hypre_GPUInit();
+void hypre_GPUFinalize();
 typedef struct node {
   const void *ptr;
   size_t size;
@@ -33,5 +34,39 @@ void SetAsyncMode(int mode);
 int GetAsyncMode();
 void branchStream(int i, int j);
 void joinStreams(int i, int j, int k);
+
+/*
+ * Global struct for keeping HYPRE GPU Init state
+ */
+
+#define MAX_HGS_ELEMENTS 10
+struct hypre__global_struct{
+  int initd;
+  int device;
+  int device_count;
+  cublasHandle_t cublas_handle;
+  cusparseHandle_t cusparse_handle;
+  cusparseMatDescr_t cusparse_mat_descr;
+  cudaStream_t streams[MAX_HGS_ELEMENTS];
+};
+
+extern struct hypre__global_struct hypre__global_handle ;
+
+/*
+ * Macros for accessing the handle members
+ */
+#define HYPRE_GPU_HANDLE hypre__global_handle.initd
+#define HYPRE_CUBLAS_HANDLE hypre__global_handle.cublas_handle
+#define HYPRE_CUSPARSE_HANDLE hypre__global_handle.cusparse_handle
+#define HYPRE_DEVICE hypre__global_handle.device
+#define HYPRE_DEVICE_COUNT hypre__global_handle.device_count
+#define HYPRE_CUSPARSE_MAT_DESCR hypre__global_handle.cusparse_mat_descr
+#define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
+
+
+
+
+
+
 #endif
 #endif

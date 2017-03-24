@@ -15,10 +15,8 @@
  * Member functions for hypre_Vector class.
  *
  *****************************************************************************/
-
 #include "seq_mv.h"
 #include <assert.h>
-
 #ifdef HYPRE_USE_GPU
 #include <cublas_v2.h>
 #include <cusparse.h>
@@ -36,12 +34,13 @@ hypre_Vector *
 hypre_SeqVectorCreate( HYPRE_Int size )
 {
    hypre_Vector  *vector;
+   vector = hypre_HCTAlloc(hypre_Vector, 1);
+
 #ifdef HYPRE_USE_GPU
-   vector = (hypre_Vector*)calloc(1,sizeof(hypre_Vector));
    vector->on_device=0;
-#else
-   vector = hypre_CTAlloc(hypre_Vector, 1);
 #endif
+
+
    hypre_VectorData(vector) = NULL;
    hypre_VectorSize(vector) = size;
 
@@ -81,11 +80,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
       {
          hypre_TFree(hypre_VectorData(vector));
       }
-#ifndef HYPRE_USE_GPU
-      hypre_TFree(vector);
-#else
-      free(vector);
-#endif
+      hypre_HCTFree(vector);
    }
 
    return ierr;
@@ -645,11 +640,12 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
 void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x){
   if (hypre_VectorSize(x)==0) return;
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
-  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),0,getstream(4)));
+  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,getstream(4)));
   gpuErrchk(cudaStreamSynchronize(getstream(4)));
   POP_RANGE;
 }
 void hypre_SeqVectorPrefetchToHost(hypre_Vector *x){
+  if (hypre_VectorSize(x)==0) return;
   PUSH_RANGE("hypre_SeqVectorPrefetchToHost",0);
   gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),cudaCpuDeviceId,getstream(4)));
   gpuErrchk(cudaStreamSynchronize(getstream(4)));
@@ -658,7 +654,7 @@ void hypre_SeqVectorPrefetchToHost(hypre_Vector *x){
 void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x,int index){
   if (hypre_VectorSize(x)==0) return;
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
-  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),0,getstream(index)));
+  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,getstream(index)));
   gpuErrchk(cudaStreamSynchronize(getstream(index)));
   POP_RANGE;
 }
