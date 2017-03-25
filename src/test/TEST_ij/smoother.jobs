@@ -24,8 +24,8 @@
 #    3: hybrid GS on 4 procs with backward solve GS on up cycle
 #    4: hybrid GS, no CF-relaxation, on 4 procs
 #    5: hybrid SOR on 4 procs, determine a weight automatically
-#    6: use Schwarz smoothing
-#    7: use Schwarz smoothing with automatic weight determination
+#    6: use Schwarz smoothing on first level 
+#    7: use Schwarz smoothing on first level with automatic weight determination
 #    8: use 3 level Schwarz smoothing with automatic weight determination
 #       followed by SSOR with automatic weight determination
 #    9: CF Jacobi on 3 procs
@@ -47,14 +47,13 @@ mpirun -np 4 ./ij -rhsrand -n 15 15 10 -P 2 2 1 -rlx 6 -owl -10 0 \
 mpirun -np 4 ./ij -rhsrand -n 20 20 10 -P 2 2 1 -rlx_up 4 \
  > smoother.out.2
 
-mpirun -np 4 ./ij -rhsrand -n 20 20 10 -P 2 2 1 -CF 0 \
+mpirun -np 4 ./ij -rhsrand -n 20 20 10 -P 2 2 1 -CF 1 \
  > smoother.out.3
 
-mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 -CF 0 \
+mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 \
 -w -10 > smoother.out.4
 
-mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 \
--sysL 2 -nf 2 -smlv 1 -smtype 6 -dom 1 -ov 0 -var 1 > smoother.out.5
+mpirun -np 3 ./ij -rhsrand -fromfile schw -agg_nl 1 -smlv 1 > smoother.out.5
 
 mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 6 -n 20 20 10 -P 2 2 1 \
 -sysL 2 -nf 2 -smlv 1 -smtype 6 -dom 1 -ov 0 -var 1 -ow -10 -sw -10 \
@@ -64,27 +63,27 @@ mpirun -np 4 ./ij -rlx 6 -n 20 20 10 -P 2 2 1 -sysL 3 -nf 3 -smlv 3 \
 -smtype 6 -dom 1 -ov 0 -w -10 -sw -10 \
 > smoother.out.7
 
-mpirun -np 3 ./ij -rhsrand -n 15 30 10 -rlx 0 \
+mpirun -np 3 ./ij -rhsrand -n 15 30 10 -rlx 0 -CF 1 \
 > smoother.out.8
 
-mpirun -np 3 ./ij -rhsrand -n 15 30 10 -rlx 18 \
+mpirun -np 3 ./ij -rhsrand -n 15 30 10 -rlx 18 -CF 1 \
 > smoother.out.9
 
-mpirun -np 3 ./ij -rhsrand -n 15 30 10 -rlx 18 -CF 0 \
+mpirun -np 3 ./ij -rhsrand -n 15 30 10 -rlx 18 \
 > smoother.out.10
 
-mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 8 -n 20 20 10 -P 2 2 1 -CF 0 \
+mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 8 -n 20 20 10 -P 2 2 1 \
 > smoother.out.11
 
-mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 16 -n 20 20 10 -P 2 2 1 -CF 0 \
+mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 16 -n 20 20 10 -P 2 2 1 \
 > smoother.out.12
 
 mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 16 -cheby_order 3 -n 20 20 10 \
- -P 2 2 1 -CF 0 > smoother.out.13
+ -P 2 2 1 > smoother.out.13
 
-mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 17 -n 20 20 10 -P 2 2 1 -CF 0 \
+mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 17 -n 20 20 10 -P 2 2 1 \
 > smoother.out.14
 
-mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 15 -n 20 20 10 -P 2 2 1 -CF 0 \
+mpirun -np 4 ./ij -rhsrand -solver 1 -rlx 15 -n 20 20 10 -P 2 2 1 \
 > smoother.out.15
 

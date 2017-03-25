@@ -228,19 +228,20 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
 {
    HYPRE_Int             nvars        = hypre_SStructPMatrixNVars(pmatrix);
    HYPRE_Int           **symmetric    = hypre_SStructPMatrixSymmetric(pmatrix);
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];
    hypre_StructMatrix   *smatrix;
-   HYPRE_Int             vi, vj, d, ndim;
+   HYPRE_Int             vi, vj;
+   /* HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; */
+   /* HYPRE_Int             vi, vj, d, ndim; */
 
+#if 0
    ndim = hypre_SStructPMatrixNDim(pmatrix);
+   /* RDF: Why are the ghosts being reset to one? Maybe it needs to be at least
+    * one to set shared coefficients correctly, but not exactly one? */
    for (d = 0; d < ndim; d++)
    {
       num_ghost[2*d] = num_ghost[2*d+1] = 1;
    }
-   for (d = ndim; d < ndim; d++)
-   {
-      num_ghost[2*d] = num_ghost[2*d+1] = 0;
-   }
+#endif
    for (vi = 0; vi < nvars; vi++)
    {
       for (vj = 0; vj < nvars; vj++)
@@ -249,7 +250,7 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
          if (smatrix != NULL)
          {
             HYPRE_StructMatrixSetSymmetric(smatrix, symmetric[vi][vj]);
-            hypre_StructMatrixSetNumGhost(smatrix, num_ghost);
+            /* hypre_StructMatrixSetNumGhost(smatrix, num_ghost); */
             hypre_StructMatrixInitialize(smatrix);
             /* needed to get AddTo accumulation correct between processors */
             hypre_StructMatrixClearGhostValues(smatrix);
@@ -505,10 +506,6 @@ hypre_SStructPMatrixAccumulate( hypre_SStructPMatrix *pmatrix )
       return hypre_error_flag;
    }
 
-   for (d = ndim; d < ndim; d++)
-   {
-      num_ghost[2*d] = num_ghost[2*d+1] = 0;
-   }
    for (vi = 0; vi < nvars; vi++)
    {
       for (vj = 0; vj < nvars; vj++)
@@ -1126,6 +1123,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       hypre_BoxLoop0For()
       {
          hypre_BoxLoopGetIndex(index);
+         hypre_AddIndexes(index, hypre_BoxIMin(vbox), ndim, index);
          hypre_SStructUMatrixSetValues(matrix, part, index, var,
                                        nentries, entries, values, action);
          values += nentries;

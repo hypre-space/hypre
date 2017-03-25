@@ -612,7 +612,7 @@ hypre_BoomerAMGBuildCoarseOperatorKT( hypre_ParCSRMatrix  *RT,
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
       for (i=0 ; i < P_ext_offd_size; i++)
          P_ext_offd_j[i] = hypre_UnorderedIntMapGet(&col_map_offd_Pext_inverse, P_ext_offd_j[i]);
-      hypre_UnorderedIntMapDestroy(&col_map_offd_Pext_inverse);
+      if (num_cols_offd_Pext) hypre_UnorderedIntMapDestroy(&col_map_offd_Pext_inverse);
    }
 #else /* !HYPRE_CONCURRENT_HOPSCOTCH */
    if (P_ext_offd_size || num_cols_offd_P)

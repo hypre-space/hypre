@@ -14,6 +14,7 @@
 include ../config/Makefile.config
 
 CINCLUDES = ${MPIINCLUDE} $(HYPRE_RAJA_INCLUDE)
+
 CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
@@ -257,29 +258,29 @@ for_maxwell: fparcsr_mv.o fsstruct_mv.o fsstruct_ls.o for_maxwell.o
 
 fij_mv: fij_mv.f
 	@echo  "Building" $@ "... "
-	${LINK_FC} -c $@  ${FFLAGS}
+	${LINK_FC} -c $@
 
 fparcsr_ls: fparcsr_ls.f
 	@echo  "Building" $@ "... "
-	${LINK_FC} -c $@  ${FFLAGS}
+	${LINK_FC} -c $@
 
 fparcsr_mv: fparcsr_mv.f
 	@echo  "Building" $@ "... "
-	${LINK_FC} -c $@  ${FFLAGS}
+	${LINK_FC} -c $@
 
 fsstruct_ls: fsstruct_ls.f 
 	@echo  "Building" $@ "... "
-	${LINK_FC} -c $@  ${FFLAGS}
+	${LINK_FC} -c $@
 
 fsstruct_mv: fsstruct_mv.f
 	@echo  "Building" $@ "... "
-	${LINK_FC} -c $@  ${FFLAGS}
+	${LINK_FC} -c $@
 
 fstruct_ls: fstruct_ls.f
 	@echo  "Building" $@ "... "
-	${LINK_FC} -c $@  ${FFLAGS}
+	${LINK_FC} -c $@
 
 fstruct_mv: fstruct_mv.f
 	@echo  "Building" $@ "... "
-	${LINK_FC} -c $@  ${FFLAGS}
+	${LINK_FC} -c $@
 

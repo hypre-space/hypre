@@ -2119,7 +2119,8 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
 
    hypre_TFree(num_elements_total);
 
-   void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);
+   /*void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);*/
+   void_contact_buf = hypre_CAlloc(storage, obj_size_bytes);
    index_ptr = void_contact_buf; /* step through with this index */
 
    /* for each proc: #rows, row #, no. elements, 
@@ -2832,11 +2833,11 @@ hypre_IJMatrixAssembleParCSR(hypre_IJMatrix *matrix)
          hypre_CSRMatrixNumCols(offd) = num_cols_offd;    
          hypre_TFree(aux_offd_j);
       }
-      hypre_AuxParCSRMatrixDestroy(aux_matrix);
-      hypre_IJMatrixTranslator(matrix) = NULL;
       hypre_IJMatrixAssembleFlag(matrix) = 1;
    }
 
+   hypre_AuxParCSRMatrixDestroy(aux_matrix);
+   hypre_IJMatrixTranslator(matrix) = NULL;
    return hypre_error_flag;
 }
 

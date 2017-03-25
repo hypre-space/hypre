@@ -62,12 +62,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGridGhlocalSize(grid)  = 0;
    for (i = 0; i < 2*ndim; i++)
    {
-      hypre_StructGridNumGhost(grid)[i] = 0;
-   }
-   for (i = 0; i < ndim; i++)
-   {
-      hypre_StructGridNumGhost(grid)[2*i] = 1;
-      hypre_StructGridNumGhost(grid)[2*i+1] = 1;
+      hypre_StructGridNumGhost(grid)[i] = 1;
    }
 
    *grid_ptr = grid;

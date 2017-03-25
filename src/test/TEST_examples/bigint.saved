@@ -99,7 +99,7 @@ SStruct phase times:
 SStruct Setup:
   wall clock time = 0.210000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.200000 seconds
+  cpu clock time  = 0.210000 seconds
   cpu MFLOPS      = 0.000000
 
 Problem size: 26460
@@ -113,30 +113,30 @@ AMS Setup:
   cpu clock time  = 0.100000 seconds
   cpu MFLOPS      = 0.000000
 
-<C*b,b>: 8.520115e-02
+<C*b,b>: 8.373120e-02
 
 
 Iters       ||r||_C     conv.rate  ||r||_C/||b||_C
 -----    ------------    ---------  ------------ 
-    1    2.578311e-02    0.088331    8.833088e-02
-    2    1.130413e-03    0.043843    3.872703e-03
-    3    8.998649e-05    0.079605    3.082865e-04
-    4    2.108336e-05    0.234295    7.222990e-05
-    5    3.535402e-06    0.167687    1.211201e-05
-    6    7.245863e-07    0.204952    2.482375e-06
-    7    1.246812e-07    0.172072    4.271479e-07
+    1    2.820328e-02    0.097467    9.746663e-02
+    2    1.245772e-03    0.044171    4.305215e-03
+    3    9.147965e-05    0.073432    3.161410e-04
+    4    2.203937e-05    0.240921    7.616500e-05
+    5    4.101633e-06    0.186105    1.417468e-05
+    6    7.804698e-07    0.190283    2.697195e-06
+    7    1.393405e-07    0.178534    4.815415e-07
 
 
 =============================================
 Solve phase times:
 =============================================
 AMS Solve:
-  wall clock time = 0.140000 seconds
+  wall clock time = 0.160000 seconds
   wall MFLOPS     = 0.000000
-  cpu clock time  = 0.150000 seconds
+  cpu clock time  = 0.160000 seconds
   cpu MFLOPS      = 0.000000
 
 
 Iterations = 7
-Final Relative Residual Norm = 4.27148e-07
+Final Relative Residual Norm = 4.81542e-07
 

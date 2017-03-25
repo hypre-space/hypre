@@ -11,9 +11,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
 # Echo usage information
 case $1 in
    -h|-help)
@@ -36,22 +33,20 @@ EOF
    ;;
 esac
 
+RESET=`shopt -p nullglob`  # Save current nullglob setting
+shopt -s nullglob          # Return an empty string for failed wildcard matches 
 if [ "x$1" = "x" ]
 then
-   for testdir in TEST*
-   do
-      rm -f $testdir/*err*
-      rm -f $testdir/*out*
-      rm -f $testdir/*log*
-      rm -f $testdir/*.fil
-   done
+   testdirs=`echo TEST*`   # All TEST directories
 else
-   while [ "$*" ]
-   do
-      rm -f $1/*err*
-      rm -f $1/*out*
-      rm -f $1/*log*
-      rm -f $1/*.fil
-      shift
-   done
+   testdirs=`echo $*`      # Only the specified test directories
 fi
+$RESET                     # Restore nullglob setting
+
+for testdir in $testdirs
+do
+   rm -f $testdir/*err*
+   rm -f $testdir/*out*
+   rm -f $testdir/*log*
+   rm -f $testdir/*.fil
+done
