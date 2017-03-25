@@ -775,8 +775,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 	    HYPRE_Real diag;
 	    
             /* get sign of diagonal */
-	    //Ap = hypre_StructGetMatrixBoxData(A, i, sdiag,indices_d);
-	    Ap = (data_A + indices_d[sdiag]);
+	    Ap = hypre_StructGetMatrixBoxData(A, i, sdiag,indices_d);
+	    //Ap = (data_A + indices_d[sdiag]);
             diag = 1.0;
             if (Ap[Ai] < 0)
             {
@@ -785,8 +785,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
             for (si = 0; si < stencil_size; si++)
             {
-	      //Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
-	      Ap = (data_A + indices_d[si]);
+	      Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
+	      //Ap = (data_A + indices_d[si]);
 	      /* x-direction */
 	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[si]);
 	      if (Astenc)
@@ -918,11 +918,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             }       
             sqcz += (tcz*tcz);
 	}
-	zypre_newBoxLoop1ReductionEnd(Ai,sqcz);	 
+	zypre_newBoxLoop1ReductionEnd(Ai,sqcz);
+	hypre_StructcleanIndexD();
       }
    }
-   
-   hypre_StructcleanIndexD();
    
    cxyz[0] = cx;
    cxyz[1] = cy;

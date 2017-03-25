@@ -1122,7 +1122,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       /* RDF: THREAD (Check safety on UMatrixSetValues call) */
       hypre_BoxGetSize(vbox, loop_size);
       hypre_BoxLoop0Begin(ndim, loop_size);
-      hypre_BoxLoopSetOneBlock();
+      //hypre_BoxLoopSetOneBlock();
       hypre_BoxLoop0For()
       {
          hypre_BoxLoopGetIndex(index);

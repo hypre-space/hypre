@@ -820,55 +820,76 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
     *--------------------------------------------------------------------*/
 
    /* allocate send buffers */
-   send_size_tot = 0;
    send_buffers = hypre_TAlloc(HYPRE_Complex *, num_sends);
-   send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends);
+
    if (num_sends > 0)
    {
       size = hypre_CommPkgSendBufsize(comm_pkg);
       send_buffers[0]      = hypre_SharedCTAlloc(HYPRE_Complex, size);
-      if (size > global_send_size)
-      {
-	if (global_send_size > 0)
-	  hypre_DataTFree(global_send_buffer);
-	global_send_buffer = hypre_DataCTAlloc(HYPRE_Complex, 5*size);
-	global_send_size   = 5*size;
-      }
-      send_buffers_data[0] = global_send_buffer;
 
       for (i = 1; i < num_sends; i++)
       {
          comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
          size = hypre_CommTypeBufsize(comm_type);
          send_buffers[i] = send_buffers[i-1] + size;
-	 send_buffers_data[i] = send_buffers_data[i-1] + size;
       }
    }
 
+   send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends);
+   if (num_sends > 0)
+   {
+     size = hypre_CommPkgSendBufsize(comm_pkg);
+     if (size > global_send_size)
+     {
+         if (global_send_size > 0)
+             hypre_DataTFree(global_send_buffer);
+         global_send_buffer = hypre_DataCTAlloc(HYPRE_Complex, 5*size);
+         global_send_size   = 5*size;
+     }
+     send_buffers_data[0] = global_send_buffer;
+     for (i = 1; i < num_sends; i++)
+     {
+         comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
+         size = hypre_CommTypeBufsize(comm_type);
+         send_buffers_data[i] = send_buffers_data[i-1] + size;
+     }
+   }
+   
    /* allocate recv buffers */
    recv_buffers = hypre_TAlloc(HYPRE_Complex *, num_recvs);
-   recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs);
+   
    if (num_recvs > 0)
    {
       size = hypre_CommPkgRecvBufsize(comm_pkg);
       recv_buffers[0]      = hypre_SharedTAlloc(HYPRE_Complex, size);
+      for (i = 1; i < num_recvs; i++)
+      {
+         comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);
+         size = hypre_CommTypeBufsize(comm_type);
+         recv_buffers[i] = recv_buffers[i-1] + size;
+      }
+   }
+
+   recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs);
+   if (num_recvs > 0)
+   {
+      size = hypre_CommPkgRecvBufsize(comm_pkg);
       if (size > global_recv_size)
       {
-	if (global_recv_size > 0)
-	  hypre_DataTFree(global_recv_buffer);
-	global_recv_buffer = hypre_DataCTAlloc(HYPRE_Complex, 5*size);
-	global_recv_size   = 5*size;
+          if (global_recv_size > 0)
+              hypre_DataTFree(global_recv_buffer);
+          global_recv_buffer = hypre_DataCTAlloc(HYPRE_Complex, 5*size);
+          global_recv_size   = 5*size;
       }
       recv_buffers_data[0] = global_recv_buffer;
       for (i = 1; i < num_recvs; i++)
       {
          comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);
          size = hypre_CommTypeBufsize(comm_type);
-         recv_buffers[i] = recv_buffers[i-1] + size;
-	 recv_buffers_data[i] = recv_buffers_data[i-1] + size;
+         recv_buffers_data[i] = recv_buffers_data[i-1] + size;
       }
    }
-   
+
    /*--------------------------------------------------------------------
     * pack send buffers
     *--------------------------------------------------------------------*/

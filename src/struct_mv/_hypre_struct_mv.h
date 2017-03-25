@@ -1062,11 +1062,6 @@ extern "C++" {
 #include <curand_kernel.h>
 }
 
-static HYPRE_Complex* global_recv_buffer;
-static HYPRE_Complex* global_send_buffer;
-static HYPRE_Int      global_recv_size = 0;
-static HYPRE_Int      global_send_size = 0;
-
 struct cuda_traversal {HYPRE_Int cuda;};
 struct omp_traversal  {HYPRE_Int omp;};
 
@@ -1702,6 +1697,7 @@ AxCheckError(cudaMemcpy(b,d_b,n_blocks*sizeof(HYPRE_Real),cudaMemcpyDeviceToHost
 
 #define zypre_newBoxLoopSetOneBlock() {}
 
+#define hypre_BoxLoopSetOneBlock zypre_newBoxLoopSetOneBlock
 #define hypre_BoxLoop0Begin      zypre_BoxLoop0Begin
 #define hypre_BoxLoop0For        zypre_BoxLoop0For
 #define hypre_BoxLoop0End        zypre_BoxLoop0End
@@ -1986,76 +1982,6 @@ AxCheckError(cudaMemcpy(b,d_b,n_blocks*sizeof(HYPRE_Real),cudaMemcpyDeviceToHost
    }\
 }
 
-
-
-#define zypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
-{    														\
-    HYPRE_Int hypre__tot = 1.0;											\
-	const size_t block_size = 256;										\
-	HYPRE_Int nd = ndim;												\
-	HYPRE_Int idx;														\
-	HYPRE_Int d;														\
-	for (d = 0;d < ndim;d ++)											\
-	{																	\
-		hypre__tot *= loop_size[d];										\
-	}																	\
-	for (idx = 0;idx < hypre__tot;idx ++)										\
-	{																	\
-		HYPRE_Int local_idx;												\
-		HYPRE_Int d,idx_local = idx;									\
-	    HYPRE_Int i1 = 0;											\
-		local_idx  = idx_local % loop_size[0];							\
-		idx_local  = idx_local / loop_size[0];							\
-		i1 += local_idx*stride1[0];			\
-		local_idx  = idx_local % loop_size[1];							\
-		idx_local  = idx_local / loop_size[1];							\
-		i1 += local_idx*stride1[1];								\
-		local_idx  = idx_local % loop_size[2];							\
-		idx_local  = idx_local / loop_size[2];							\
-		i1 += local_idx*stride1[2];			\
-		
-#define zypre_BoxBoundaryCopyEnd()				\
-	}											\
-}
-
-#define zypre_BoxDataExchangeBegin(ndim, loop_size,				\
-                                   stride1, i1,	\
-                                   stride2, i2)	\
-{    														\
-    HYPRE_Int hypre__tot = 1.0;											\
-	const size_t block_size = 256;										\
-	HYPRE_Int nd = ndim;												\
-	HYPRE_Int idx;														\
-	HYPRE_Int d;														\
-	for (d = 0;d < ndim;d ++)									\
-	{																	\
-		hypre__tot *= loop_size[d];										\
-	}																	\
-    for (idx = 0;idx < hypre__tot;idx ++)										\
-	{																	\
-		HYPRE_Int local_idx;												\
-		HYPRE_Int d,idx_local = idx;									\
-	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;						\
-	    HYPRE_Int i1 = 0, i2 = 0;											\
-		local_idx  = idx_local % loop_size[0];							\
-		idx_local  = idx_local / loop_size[0];							\
-		i1 += local_idx*stride1[0];			\
-		i2 += local_idx*stride2[0];			\
-		local_idx  = idx_local % loop_size[1];							\
-		idx_local  = idx_local / loop_size[1];							\
-		i1 += local_idx*stride1[1];			\
-		i2 += local_idx*stride2[1];			\
-		local_idx  = idx_local % loop_size[2];							\
-		idx_local  = idx_local / loop_size[2];							\
-		i1 += local_idx*stride1[2];			\
-		i2 += local_idx*stride2[2];
-
-
-
-#define zypre_BoxDataExchangeEnd()				\
-	}											\
-}
-
 #define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
 
 
@@ -2080,6 +2006,11 @@ AxCheckError(cudaMemcpy(b,d_b,n_blocks*sizeof(HYPRE_Real),cudaMemcpyDeviceToHost
 #endif
 
 #if defined(HYPRE_MEMORY_GPU)
+static HYPRE_Complex* global_recv_buffer;
+static HYPRE_Complex* global_send_buffer;
+static HYPRE_Int      global_recv_size = 0;
+static HYPRE_Int      global_send_size = 0;
+
 #define zypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
 {    														\
     HYPRE_Int hypre__tot = 1.0;											\
@@ -2210,9 +2141,22 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
   hypre_TFree(data_host);
 
 #else
+static HYPRE_Complex* global_recv_buffer;
+static HYPRE_Complex* global_send_buffer;
+static HYPRE_Int      global_recv_size = 0;
+static HYPRE_Int      global_send_size = 0;
+typedef struct hypre_Boxloop_struct
+{
+	HYPRE_Int lsize0,lsize1,lsize2;
+	HYPRE_Int strides0,strides1,strides2;
+	HYPRE_Int bstart0,bstart1,bstart2;
+	HYPRE_Int bsize0,bsize1,bsize2;
+} hypre_Boxloop;
+
+
 #define zypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
-{    														\
-  HYPRE_Int hypre__tot = 1.0;						\
+{									\
+    HYPRE_Int hypre__tot = 1.0;						\
     const size_t block_size = 256;					\
     hypre_Boxloop databox1;						\
     HYPRE_Int nd = ndim;						\
@@ -2226,40 +2170,41 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
     {									\
 	hypre__tot *= loop_size[d];					\
     }									\
-    for (idx = 0;i < hypre__tot;idx++)					\
+    for (idx = 0;idx < hypre__tot;idx++)				\
       {									\
-	  zypre_BoxLoopCUDADeclare();					\
+	  HYPRE_Int local_idx;						\
+	  HYPRE_Int d,idx_local = idx;					\
 	  HYPRE_Int i1 = 0;						\
 	  local_idx  = idx_local % databox1.lsize0;			\
 	  idx_local  = idx_local / databox1.lsize0;			\
 	  i1 += local_idx*databox1.strides0;				\
 	  local_idx  = idx_local % databox1.lsize1;			\
 	  idx_local  = idx_local / databox1.lsize1;			\
-	i1 += local_idx*databox1.strides1;				\
-		local_idx  = idx_local % databox1.lsize2;							\
-		idx_local  = idx_local / databox1.lsize2;							\
-		i1 += local_idx*databox1.strides2;			\
+	  i1 += local_idx*databox1.strides1;				\
+	  local_idx  = idx_local % databox1.lsize2;			\
+	  idx_local  = idx_local / databox1.lsize2;			\
+	  i1 += local_idx*databox1.strides2;				\
 		
-#define zypre_BoxBoundaryCopyEnd()				\
-	}											\
+#define zypre_BoxBoundaryCopyEnd()					\
+  }									\
 }
 
-#define zypre_BoxDataExchangeBegin(ndim, loop_size,				\
-                                   stride1, i1,	\
-                                   stride2, i2)	\
-{    														\
-    HYPRE_Int hypre__tot = 1.0;											\
+#define zypre_BoxDataExchangeBegin(ndim, loop_size,	\
+                                   stride1, i1,		\
+                                   stride2, i2)				\
+{									\
+  HYPRE_Int hypre__tot = 1.0,idx;						\
     const size_t block_size = 256;					\
     hypre_Boxloop databox1,databox2;					\
     HYPRE_Int nd = ndim;						\
     databox1.lsize0 = loop_size[0];					\
-    databox1.lsize1 = loop_size[1];									\
+    databox1.lsize1 = loop_size[1];					\
     databox1.lsize2 = loop_size[2];					\
     databox1.strides0 = stride1[0];					\
     databox1.strides1 = stride1[1];					\
     databox1.strides2 = stride1[2];					\
     databox2.lsize0 = loop_size[0];					\
-    databox2.lsize1 = loop_size[1];									\
+    databox2.lsize1 = loop_size[1];					\
     databox2.lsize2 = loop_size[2];					\
     databox2.strides0 = stride2[0];					\
     databox2.strides1 = stride2[1];					\
@@ -2268,9 +2213,10 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
       {									\
 	hypre__tot *= loop_size[d];					\
       }									\
-    for (idx = 0;i < hypre__tot;idx++) \
+    for (idx = 0;idx < hypre__tot;idx++)					\
       {									\
-	  zypre_BoxLoopCUDADeclare();					\
+	  HYPRE_Int local_idx;						\
+	  HYPRE_Int d,idx_local = idx;					\
 	  HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;		\
 	  HYPRE_Int i1 = 0, i2 = 0;					\
 	  local_idx  = idx_local % databox1.lsize0;			\
@@ -2291,11 +2237,9 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
 		}						\
       }
 
-hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)	\
-HYPRE_Int * indices_d;				\
-HYPRE_Int * stencil_shape_d;
+#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size) HYPRE_Int* indices_d; HYPRE_Int* stencil_shape_d;
 
-#define hypre_StructGetMatrixBoxData(A, i, si,indices) hypre_StructGetMatrixBoxData(A,i,si)
+#define hypre_StructGetMatrixBoxData(A, i, si,indices) hypre_StructMatrixBoxData(A,i,si)
 #define hypre_StructGetIndexD(index,i,index_d) hypre_IndexD(index,i)
 #define hypre_StructcleanIndexD() {;}
 #define hypre_StructPreparePrint() data_host = data;

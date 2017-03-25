@@ -837,7 +837,7 @@ main( hypre_int argc,
        * Set up the stencil structure needed for matrix creation
        * which is always the case for read_fromfile_param == 0
        *-----------------------------------------------------------*/
-
+      
       HYPRE_StructStencilCreate(dim, (2-sym)*dim + 1, &stencil);
       for (s = 0; s < (2-sym)*dim + 1; s++)
       {
@@ -957,7 +957,7 @@ main( hypre_int argc,
                      }
                break;
          }
-          
+     
          HYPRE_StructGridCreate(hypre_MPI_COMM_WORLD, dim, &grid);
          for (ib = 0; ib < nblocks; ib++)
          {
@@ -1010,14 +1010,14 @@ main( hypre_int argc,
                constant_coefficient = 2;
             }
          }
-          
+
          HYPRE_StructMatrixSetSymmetric(A, sym);
          HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
          HYPRE_StructMatrixInitialize(A);
          /*-----------------------------------------------------------
           * Fill in the matrix elements
           *-----------------------------------------------------------*/
-   
+	 
          AddValuesMatrix(A,grid,cx,cy,cz,conx,cony,conz);
 
          /* Zero out stencils reaching to real boundary */
@@ -1043,10 +1043,10 @@ main( hypre_int argc,
 
          HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
          HYPRE_StructVectorInitialize(x);
-    
+	 printf("AddValuesVector\n");
          AddValuesVector(grid,x,periodx0,0.0);
          HYPRE_StructVectorAssemble(x);
-
+	 printf("VectorAssemble\n");
          HYPRE_StructGridDestroy(grid);
    
          for (i = 0; i < nblocks; i++)
@@ -2847,7 +2847,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
       box      = hypre_BoxArrayBox(gridboxes, ib);
       volume   =  hypre_BoxVolume(box);
       //values   = hypre_CTAlloc(HYPRE_Real, volume);
-      hypre_DeviceDataTAlloc(values, HYPRE_Real, volume,0);
+      hypre_DeviceDataCTAlloc(values, HYPRE_Real, volume,0);
       
       /*-----------------------------------------------------------
        * For periodic b.c. in all directions, need rhs to satisfy 
@@ -2956,7 +2956,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
             //values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
-	    hypre_DeviceDataTAlloc(values, HYPRE_Real, stencil_size*volume,0);
+	    hypre_DeviceDataCTAlloc(values, HYPRE_Real, stencil_size*volume,0);
 	    
             for (i = 0; i < stencil_size*volume; i += stencil_size)
             {
@@ -2981,10 +2981,10 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             }
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
-				
+	    
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                            stencil_indices, values);
-            //hypre_TFree(values);
+            //hypre_TFree(values);	    
 	    hypre_DeviceDataTFree(values,0);
 	    
          }
@@ -3320,7 +3320,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
          for (ib = 0; ib < size; ib++)
          {
 	   //values = hypre_CTAlloc(HYPRE_Real, vol[ib]);
-	    hypre_DeviceDataTAlloc(values, HYPRE_Real, vol[ib],0);
+	    hypre_DeviceDataCTAlloc(values, HYPRE_Real, vol[ib],0);
             for (i = 0; i < vol[ib]; i++)
             {
                values[i] = 0.0;

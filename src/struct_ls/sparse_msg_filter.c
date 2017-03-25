@@ -433,11 +433,11 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
          {
 			 //Ap = hypre_StructMatrixBoxData(A, i, si);
 	   //Ap = data_A + indices_d[si];
-			Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
+	   Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
             /* compute lambdax */
             //Astenc = hypre_IndexD(stencil_shape[si], 0);
 			//Astenc = stencil_shape_d[si];
-			Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
+	   Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[si]);
             if (Astenc == 0)
             {
                lambdax += Ap[Ai];
@@ -449,7 +449,9 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 
             /* compute lambday */
             //Astenc = hypre_IndexD(stencil_shape[si], 1);
-			Astenc = stencil_shape_d[stencil_size+si];
+	    //Astenc = stencil_shape_d[stencil_size+si];
+	    Astenc = hypre_StructGetIndexD(stencil_shape[si], 1,stencil_shape_d[stencil_size+si]);
+	    
             if (Astenc == 0)
             {
                lambday += Ap[Ai];
@@ -461,7 +463,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 
             /* compute lambdaz */
             //Astenc = hypre_IndexD(stencil_shape[si], 2);
-			Astenc = stencil_shape_d[2*stencil_size+si];
+	    //Astenc = stencil_shape_d[2*stencil_size+si];
+	    Astenc = hypre_StructGetIndexD(stencil_shape[si], 2,stencil_shape_d[2*stencil_size+si]);
             if (Astenc == 0)
             {
                lambdaz += Ap[Ai];

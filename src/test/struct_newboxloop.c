@@ -148,7 +148,7 @@ main( hypre_int argc,
    HYPRE_Int           periodx0[3] = {0,0,0};
    HYPRE_Int          *readperiodic;
    HYPRE_Int           sum;
-   HYPRE_Int           inner(0);
+   HYPRE_Int           inner;
 
    HYPRE_Int           print_system = 0;
 
@@ -1237,20 +1237,20 @@ main( hypre_int argc,
    
    if (solver_id == 0)
    {
-	   timeval tstart,tstop;
+     //timeval tstart,tstop;
 	   time_index = hypre_InitializeTiming("axpy");
 	   hypre_BeginTiming(time_index);
-	   gettimeofday(&tstart,NULL);
+	   //gettimeofday(&tstart,NULL);
 
 	   for ( rep=0; rep<reps; ++rep )
 	   {
 		   hypre_StructAxpy(2.0, b, x);
 	   }
-	   gettimeofday(&tstop,NULL);
+	   //gettimeofday(&tstop,NULL);
 	   hypre_EndTiming(time_index);
 
-	   double telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
-	   hypre_printf("axpy, \t %d, \t %f\n",nx*ny*nz,telapsed/reps);
+	   //double telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
+	   //hypre_printf("axpy, \t %d, \t %f\n",nx*ny*nz,telapsed/reps);
 	   
 	   hypre_PrintTiming("Time for axpy", hypre_MPI_COMM_WORLD);
 	   hypre_FinalizeTiming(time_index);
@@ -1263,7 +1263,7 @@ main( hypre_int argc,
    
    else if ( solver_id == 1 || solver_id == 3 || solver_id == 4 )
    {
-	   timeval tstart,tstop;
+     //timeval tstart,tstop;
 	   void *matvec_data;
 
 	   matvec_data = hypre_StructMatvecCreate();
@@ -1271,17 +1271,17 @@ main( hypre_int argc,
 	   
 	   time_index = hypre_InitializeTiming("Mat-Vec");
 	   hypre_BeginTiming(time_index);
-	   gettimeofday(&tstart,NULL);
+	   //gettimeofday(&tstart,NULL);
 
 	   for ( rep=0; rep<reps; ++rep )
 	   {
 		   hypre_StructMatvecCompute(matvec_data, 1.0, A, x, 1.0, b);
 	   }
-	   gettimeofday(&tstop,NULL);
+	   //gettimeofday(&tstop,NULL);
 	   hypre_EndTiming(time_index);
 
-	   double telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
-	   hypre_printf("Mat-Vec, \t %d, \t %f\n",nx*ny*nz,telapsed/reps);
+	   //double telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
+	   //hypre_printf("Mat-Vec, \t %d, \t %f\n",nx*ny*nz,telapsed/reps);
 
 	   hypre_PrintTiming("Time for Mat-Vec", hypre_MPI_COMM_WORLD);
 	   hypre_FinalizeTiming(time_index);
@@ -1294,18 +1294,18 @@ main( hypre_int argc,
 
    else if (solver_id == 2)
    {
-	   timeval tstart,tstop;
+     //timeval tstart,tstop;
 	   time_index = hypre_InitializeTiming("inner");
 	   hypre_BeginTiming(time_index);
-	   gettimeofday(&tstart,NULL);
+	   //gettimeofday(&tstart,NULL);
 	   for ( rep=0; rep<reps; ++rep )
 	   {
 		   inner = hypre_StructInnerProd(x,b);
 	   }
-	   gettimeofday(&tstop,NULL);
+	   //gettimeofday(&tstop,NULL);
 	   hypre_EndTiming(time_index);
-	   double telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
-	   hypre_printf("inner, \t %d, \t %f\n",nx*ny*nz,telapsed/reps);
+	   //double telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
+	   //hypre_printf("inner, \t %d, \t %f\n",nx*ny*nz,telapsed/reps);
 
 	   hypre_PrintTiming("Time for inner product", hypre_MPI_COMM_WORLD);
 	   hypre_FinalizeTiming(time_index);
