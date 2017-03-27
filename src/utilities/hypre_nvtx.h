@@ -15,7 +15,7 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
     eventAttrib.color = colors[color_id]; \
     eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
     eventAttrib.message.ascii = name; \
-    nvtxRangePushEx(&eventAttrib);	\
+    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib);	\
 }
 
 #define PUSH_RANGE_PAYLOAD(name,cid,load) {		\
@@ -31,7 +31,7 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
     eventAttrib.payloadType = NVTX_PAYLOAD_TYPE_INT64; \
     eventAttrib.payload.llValue = load; \
     eventAttrib.category=1; \
-    nvtxRangePushEx(&eventAttrib); \
+    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib); \
 }
 
 #define PUSH_RANGE_DOMAIN(name,cid,dId) {				\
@@ -47,7 +47,7 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
     nvtxDomainRangePushEx(getdomain(dId),&eventAttrib);	\
 }
 
-#define POP_RANGE nvtxRangePop();
+#define POP_RANGE nvtxDomainRangePop(HYPRE_DOMAIN);
 #define POP_RANGE_DOMAIN(dId) {			\
   nvtxDomainRangePop(getdomain(dId));		\
   }
@@ -58,7 +58,4 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #define PUSH_RANGE_DOMAIN(name,cid,domainName)
 #endif
 
-
-//void __cyg_profile_func_enter(void *this_fn, void *call_site) __attribute__((no_instrument_function));
-//void __cyg_profile_func_exit(void *this_fn, void *call_site) __attribute__((no_instrument_function));
 

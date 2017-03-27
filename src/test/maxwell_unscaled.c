@@ -1340,7 +1340,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
 #ifdef HYPRE_USE_GPU
-   hypre_GPUInit();
+   hypre_GPUInit(-1);
 #endif
 
    hypre_InitMemoryDebug(myid);

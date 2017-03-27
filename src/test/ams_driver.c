@@ -131,7 +131,7 @@ hypre_int main (hypre_int argc, char *argv[])
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 #ifdef HYPRE_USE_GPU
-   hypre_GPUInit();
+   hypre_GPUInit(-1);
 #endif
    /* Set defaults */
    solver_id = 3;

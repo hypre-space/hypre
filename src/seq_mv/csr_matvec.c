@@ -799,7 +799,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   if (b!=y){
 
     PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
-    VecCopy(y->data,b->data,(y->size-offset),getstream(4));
+    VecCopy(y->data,b->data,(y->size-offset),HYPRE_STREAM(4));
     POP_RANGE
   }
 
@@ -821,7 +821,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
     
     FirstCall=0;
     for(int jj=0;jj<5;jj++)
-      s[jj]=getstream(jj);
+      s[jj]=HYPRE_STREAM(jj);
     nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
     hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
     myid++;

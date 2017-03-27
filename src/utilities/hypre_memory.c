@@ -120,7 +120,7 @@ hypre_CAlloc( size_t count,
       memset(ptr,0,count*elt_size);
 #else
       gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
-      //gpuErrchk(cudaStreamAttachMemAsync(getstream(4), ptr,0,cudaMemAttachHost));
+      //gpuErrchk(cudaStreamAttachMemAsync(HYPRE_STREAM(4), ptr,0,cudaMemAttachHost));
       memset(ptr,0,count*elt_size);
       mempush(ptr,size,0);
 #endif

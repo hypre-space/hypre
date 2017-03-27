@@ -684,14 +684,14 @@ void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
 
   PUSH_RANGE_PAYLOAD("hypre_CSRMatrixPrefetchToDevice",0,hypre_CSRMatrixNumNonzeros(A));
   if ((!A->on_device)&&(hypre_CSRMatrixNumNonzeros(A)>8192)){
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,getstream(4)));
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,getstream(5)));
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,getstream(6)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(5)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(6)));
     //branchStream(5,4);
     //branchStream(6,4);
-    gpuErrchk(cudaStreamSynchronize(getstream(4)));
-    gpuErrchk(cudaStreamSynchronize(getstream(5)));
-    gpuErrchk(cudaStreamSynchronize(getstream(6)));
+    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(5)));
+    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(6)));
     A->on_device=1;
   }
   POP_RANGE;
@@ -700,10 +700,10 @@ void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A){
   PUSH_RANGE("hypre_CSRMatrixPrefetchToDevice",0);
   if (A->on_device){
     A->on_device=0;
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),cudaCpuDeviceId,getstream(4)));
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),cudaCpuDeviceId,getstream(4)));
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),cudaCpuDeviceId,getstream(4)));
-    gpuErrchk(cudaStreamSynchronize(getstream(4)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
   }
   POP_RANGE;
 }

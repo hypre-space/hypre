@@ -3,7 +3,7 @@
 #define  __GPUMEM_H__
 #include <cublas_v2.h>
 #include <cusparse.h>
-cudaStream_t getstream(int i);
+cudaStream_t getstreamOlde(int i);
 nvtxDomainHandle_t getdomain(int i);
 cudaEvent_t getevent(int i);
 void MemAdviseReadOnly(const void *ptr, int device);
@@ -15,7 +15,7 @@ void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream
 void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream);
 cublasHandle_t getCublasHandle();
 cusparseHandle_t getCusparseHandle();
-void hypre_GPUInit();
+void hypre_GPUInit(int use_device);
 void hypre_GPUFinalize();
 typedef struct node {
   const void *ptr;
@@ -34,7 +34,9 @@ void SetAsyncMode(int mode);
 int GetAsyncMode();
 void branchStream(int i, int j);
 void joinStreams(int i, int j, int k);
-
+void affs(int myid);
+int getcore();
+int getnuma();
 /*
  * Global struct for keeping HYPRE GPU Init state
  */
@@ -48,6 +50,7 @@ struct hypre__global_struct{
   cusparseHandle_t cusparse_handle;
   cusparseMatDescr_t cusparse_mat_descr;
   cudaStream_t streams[MAX_HGS_ELEMENTS];
+  nvtxDomainHandle_t nvtx_domain;
 };
 
 extern struct hypre__global_struct hypre__global_handle ;
@@ -62,6 +65,7 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_DEVICE_COUNT hypre__global_handle.device_count
 #define HYPRE_CUSPARSE_MAT_DESCR hypre__global_handle.cusparse_mat_descr
 #define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
+#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 
 
 
