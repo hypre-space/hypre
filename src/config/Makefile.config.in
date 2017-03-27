@@ -67,7 +67,7 @@ CXX       = @CXX@
 CXXFLAGS  = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
 NVCC 	 = nvcc
-NVCCFLAGS = -O3 -arch=sm_60  -I ../hypre/include -DUSE_NVTX -c -DHYPRE_USE_GPU
+NVCCFLAGS = -O3 -arch=sm_60  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU
 
 LINK_FC  = @LINK_FC@
 LINK_CC   = @LINK_CC@

@@ -6,7 +6,6 @@ extern "C"{
 }
 #define DISABLE_IN_CUDA_KERNEL_FILE
 #include "HYPRE_utilities.h"
-typedef int hypre_int; /* This needs to be fixed. Avoids the MPI include path */
 #define gpuErrchk2(ans) { gpuAssert2((ans), __FILE__, __LINE__); }
 inline void gpuAssert2(cudaError_t code, const char *file, hypre_int line)
 {

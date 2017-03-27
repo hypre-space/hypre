@@ -6,13 +6,12 @@
 #include <stdint.h>
 #include <cublas_v2.h>
 #include <cusparse.h>
-#include "_hypre_utilities.h"
 #include "gpuMem.h"
 #include "../seq_mv/gpukernels.h"
 
 #include <sched.h>
 #include <errno.h>
-int ggc(int id);
+hypre_int ggc(hypre_int id);
 #define FULL_WARN
 
 /* Global struct that holds device,library handles etc */
@@ -21,11 +20,11 @@ struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .devic
 
 /* Initialize GPU branch of Hypre AMG */
 /* use_device =-1 */
-void hypre_GPUInit(int use_device){
+void hypre_GPUInit(hypre_int use_device){
   char pciBusId[80];
-  int myid;
-  int nDevices;
-  int device;
+  hypre_int myid;
+  hypre_int nDevices;
+  hypre_int device;
   if (!HYPRE_GPU_HANDLE){
     HYPRE_GPU_HANDLE=1;
     HYPRE_DEVICE=0;
@@ -46,8 +45,8 @@ void hypre_GPUInit(int use_device){
 	MPI_Info info;
 	MPI_Info_create(&info);
 	MPI_Comm_split_type(hypre_MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, myid, info, &node_comm);
-	int round_robin=1;
-	int myNodeid, NodeSize;
+	hypre_int round_robin=1;
+	hypre_int myNodeid, NodeSize;
 	MPI_Comm_rank(node_comm, &myNodeid);
 	MPI_Comm_size(node_comm, &NodeSize);
 	if (round_robin){
@@ -62,10 +61,10 @@ void hypre_GPUInit(int use_device){
 	  /* works correcly for all cases */
 	  MPI_Comm numa_comm;
 	  MPI_Comm_split(node_comm,getnuma(),myNodeid,&numa_comm);
-	  int myNumaId,NumaSize;
+	  hypre_int myNumaId,NumaSize;
 	  MPI_Comm_rank(numa_comm, &myNumaId);
 	  MPI_Comm_size(numa_comm, &NumaSize);
-	  int domain_devices=nDevices/2; /* Again hardwired for 2 NUMA domains */
+	  hypre_int domain_devices=nDevices/2; /* Again hardwired for 2 NUMA domains */
 	  HYPRE_DEVICE = getnuma()*2+myNumaId%domain_devices;
 	  gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
 	  hypre_printf("WARNING:: Code running without mpibind\n");
@@ -88,7 +87,7 @@ void hypre_GPUInit(int use_device){
       HYPRE_DOMAIN=nvtxDomainCreateA("Hypre");
       
       /* Initialize streams */
-      for(int jj=0;jj<MAX_HGS_ELEMENTS;jj++)
+      for(hypre_int jj=0;jj<MAX_HGS_ELEMENTS;jj++)
 	gpuErrchk(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)),cudaStreamNonBlocking));
       
       /* Initialize the library handles and streams */
@@ -115,19 +114,19 @@ void hypre_GPUFinalize(){
   cublasErrchk(cublasDestroy(HYPRE_CUBLAS_HANDLE));
 
   /* Destroy streams */
-    for(int jj=0;jj<MAX_HGS_ELEMENTS;jj++)
+    for(hypre_int jj=0;jj<MAX_HGS_ELEMENTS;jj++)
       gpuErrchk(cudaStreamDestroy(HYPRE_STREAM(jj)));
   
 }
 
-void MemAdviseReadOnly(const void* ptr, int device){
+void MemAdviseReadOnly(const void* ptr, hypre_int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
     if (size==0) printf("WARNING:: Operations with 0 size vector \n");
     gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseSetReadMostly,device));
 }
 
-void MemAdviseUnSetReadOnly(const void* ptr, int device){
+void MemAdviseUnSetReadOnly(const void* ptr, hypre_int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
     if (size==0) printf("WARNING:: Operations with 0 size vector \n");
@@ -135,7 +134,7 @@ void MemAdviseUnSetReadOnly(const void* ptr, int device){
 }
 
 
-void MemAdviseSetPrefLocDevice(const void *ptr, int device){
+void MemAdviseSetPrefLocDevice(const void *ptr, hypre_int device){
   if (ptr==NULL) return;
   gpuErrchk(cudaMemAdvise(ptr,mempush(ptr,0,0),cudaMemAdviseSetPreferredLocation,device));
 }
@@ -146,7 +145,7 @@ void MemAdviseSetPrefLocHost(const void *ptr){
 }
 
 
-void MemPrefetch(const void *ptr,int device,cudaStream_t stream){
+void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream){
   if (ptr==NULL) return;
   size_t size;
   size=memsize(ptr);
@@ -163,7 +162,7 @@ void MemPrefetch(const void *ptr,int device,cudaStream_t stream){
 }
 
 
-void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream){
+void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream){
   if (ptr==NULL) return;
   size_t size=memsize(ptr);
   PUSH_RANGE_PAYLOAD("MemPreFetchForce",4,size);
@@ -172,7 +171,7 @@ void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream){
   return;
 }
 
-void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream){
+void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t stream){
   if (ptr==NULL) return;
   PUSH_RANGE_DOMAIN("MemPreFetchSized",4,0);
   /* Do a prefetch every time until a possible UM bug is fixed */
@@ -189,7 +188,7 @@ void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream
 cublasHandle_t getCublasHandle(){
   cublasStatus_t stat;
   static cublasHandle_t handle;
-  static int firstcall=1;
+  static hypre_int firstcall=1;
   if (firstcall){
     firstcall=0;
     stat = cublasCreate(&handle);
@@ -207,7 +206,7 @@ cublasHandle_t getCublasHandle(){
 cusparseHandle_t getCusparseHandle(){
   cusparseStatus_t status;
   static cusparseHandle_t handle;
-  static int firstcall=1;
+  static hypre_int firstcall=1;
   if (firstcall){
     firstcall=0;
     status= cusparseCreate(&handle);
@@ -223,9 +222,9 @@ cusparseHandle_t getCusparseHandle(){
 
 /* C version of mempush using linked lists */
 
-size_t mempush(const void *ptr, size_t size, int action){
+size_t mempush(const void *ptr, size_t size, hypre_int action){
   static node* head=NULL;
-  static int nc=0;
+  static hypre_int nc=0;
   node *found=NULL;
   if (!head){
     if ((size<=0)||(action==1)) {
@@ -319,7 +318,7 @@ void meminsert(node **head, const void  *ptr,size_t size){
   return;
 }
 
-void printlist(node *head,int nc){
+void printlist(node *head,hypre_int nc){
   node *next;
   next=head;
   printf("Node count %d \n",nc);
@@ -329,12 +328,12 @@ void printlist(node *head,int nc){
   }
 }
 
-cudaStream_t getstreamOlde(int i){
-  static int firstcall=1;
-  const int MAXSTREAMS=10;
+cudaStream_t getstreamOlde(hypre_int i){
+  static hypre_int firstcall=1;
+  const hypre_int MAXSTREAMS=10;
   static cudaStream_t s[MAXSTREAMS];
   if (firstcall){
-    for(int jj=0;jj<MAXSTREAMS;jj++)
+    for(hypre_int jj=0;jj<MAXSTREAMS;jj++)
       gpuErrchk(cudaStreamCreateWithFlags(&s[jj],cudaStreamNonBlocking));
     //printf("Created streams ..\n");
     firstcall=0;
@@ -344,9 +343,9 @@ cudaStream_t getstreamOlde(int i){
   return 0;
 }
 
-nvtxDomainHandle_t getdomain(int i){
-    static int firstcall=1;
-    const int MAXDOMAINS=1;
+nvtxDomainHandle_t getdomain(hypre_int i){
+    static hypre_int firstcall=1;
+    const hypre_int MAXDOMAINS=1;
     static nvtxDomainHandle_t h[MAXDOMAINS];
     if (firstcall){
       h[0]= nvtxDomainCreateA("HYPRE_A");
@@ -357,12 +356,12 @@ nvtxDomainHandle_t getdomain(int i){
     return NULL;
   }
 
-cudaEvent_t getevent(int i){
-  static int firstcall=1;
-  const int MAXEVENTS=10;
+cudaEvent_t getevent(hypre_int i){
+  static hypre_int firstcall=1;
+  const hypre_int MAXEVENTS=10;
   static cudaEvent_t s[MAXEVENTS];
   if (firstcall){
-    for(int jj=0;jj<MAXEVENTS;jj++)
+    for(hypre_int jj=0;jj<MAXEVENTS;jj++)
       gpuErrchk(cudaEventCreateWithFlags(&s[jj],cudaEventDisableTiming));
     //printf("Created events ..\n");
     firstcall=0;
@@ -372,48 +371,48 @@ cudaEvent_t getevent(int i){
   return 0;
 }
 
-int getsetasyncmode(int mode, int action){
-  static int async_mode=0;
+hypre_int getsetasyncmode(hypre_int mode, hypre_int action){
+  static hypre_int async_mode=0;
   if (action==0) async_mode = mode;
   if (action==1) return async_mode;
   return async_mode;
 }
 
-void SetAsyncMode(int mode){
+void SetAsyncMode(hypre_int mode){
   getsetasyncmode(mode,0);
 }
 
-int GetAsyncMode(){
+hypre_int GetAsyncMode(){
   return getsetasyncmode(0,1);
 }
 
-void branchStream(int i, int j){
+void branchStream(hypre_int i, hypre_int j){
   gpuErrchk(cudaEventRecord(getevent(i),HYPRE_STREAM(i)));
   gpuErrchk(cudaStreamWaitEvent(HYPRE_STREAM(j),getevent(i),0));
 }
 
-void joinStreams(int i, int j, int k){
+void joinStreams(hypre_int i, hypre_int j, hypre_int k){
   gpuErrchk(cudaEventRecord(getevent(i),HYPRE_STREAM(i)));
   gpuErrchk(cudaEventRecord(getevent(j),HYPRE_STREAM(j)));
   gpuErrchk(cudaStreamWaitEvent(HYPRE_STREAM(k),getevent(i),0));
   gpuErrchk(cudaStreamWaitEvent(HYPRE_STREAM(k),getevent(j),0));
 }
 
-void affs(int myid){
-  const int NCPUS=160;
+void affs(hypre_int myid){
+  const hypre_int NCPUS=160;
   cpu_set_t* mask = CPU_ALLOC(NCPUS);
   size_t size = CPU_ALLOC_SIZE(NCPUS);
-  int cpus[NCPUS];
-  int retval=sched_getaffinity(0, size,mask);
+  hypre_int cpus[NCPUS];
+  hypre_int retval=sched_getaffinity(0, size,mask);
   if (!retval){
-    for(int i=0;i<NCPUS;i++){
+    for(hypre_int i=0;i<NCPUS;i++){
       if (CPU_ISSET(i,mask)) 
 	cpus[i]=1; 
       else
 	cpus[i]=0;
     }
     printf("Node(%d)::",myid);
-    for(int i=0;i<160;i++)printf("%d",cpus[i]);
+    for(hypre_int i=0;i<160;i++)printf("%d",cpus[i]);
     printf("\n");
   } else {
     fprintf(stderr,"sched_affinity failed\n");
@@ -432,14 +431,14 @@ void affs(int myid){
   CPU_FREE(mask);
   
 }
-int getcore(){
-  const int NCPUS=160;
+hypre_int getcore(){
+  const hypre_int NCPUS=160;
   cpu_set_t* mask = CPU_ALLOC(NCPUS);
   size_t size = CPU_ALLOC_SIZE(NCPUS);
-  int cpus[NCPUS];
-  int retval=sched_getaffinity(0, size,mask);
+  hypre_int cpus[NCPUS];
+  hypre_int retval=sched_getaffinity(0, size,mask);
   if (!retval){
-    for(int i=0;i<NCPUS;i+=20){
+    for(hypre_int i=0;i<NCPUS;i+=20){
       if (CPU_ISSET(i,mask)) {
 	CPU_FREE(mask);
 	return i;
@@ -462,18 +461,18 @@ int getcore(){
   CPU_FREE(mask);
   
 }
-int getnuma(){
-  const int NCPUS=160;
+hypre_int getnuma(){
+  const hypre_int NCPUS=160;
   cpu_set_t* mask = CPU_ALLOC(NCPUS);
   size_t size = CPU_ALLOC_SIZE(NCPUS);
-  int retval=sched_getaffinity(0, size,mask);
+  hypre_int retval=sched_getaffinity(0, size,mask);
   /* HARDWIRED FOR 2 NUMA DOMAINS */
   if (!retval){
-    int sum0=0;
-    for(int i=0;i<NCPUS/2;i++) 
+    hypre_int sum0=0;
+    for(hypre_int i=0;i<NCPUS/2;i++) 
       if (CPU_ISSET(i,mask)) sum0++;
-    int sum1=0;
-    for(int i=NCPUS/2;i<NCPUS;i++) 
+    hypre_int sum1=0;
+    for(hypre_int i=NCPUS/2;i<NCPUS;i++) 
       if (CPU_ISSET(i,mask)) sum1++;
     CPU_FREE(mask);
     if (sum0>sum1) return 0;

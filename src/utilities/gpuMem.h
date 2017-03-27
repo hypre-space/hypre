@@ -3,49 +3,50 @@
 #define  __GPUMEM_H__
 #include <cublas_v2.h>
 #include <cusparse.h>
-cudaStream_t getstreamOlde(int i);
-nvtxDomainHandle_t getdomain(int i);
-cudaEvent_t getevent(int i);
-void MemAdviseReadOnly(const void *ptr, int device);
-void MemAdviseUnSetReadOnly(const void *ptr, int device);
-void MemAdviseSetPrefLocDevice(const void *ptr, int device);
+#include "_hypre_utilities.h"
+cudaStream_t getstreamOlde(hypre_int i);
+nvtxDomainHandle_t getdomain(hypre_int i);
+cudaEvent_t getevent(hypre_int i);
+void MemAdviseReadOnly(const void *ptr, hypre_int device);
+void MemAdviseUnSetReadOnly(const void *ptr, hypre_int device);
+void MemAdviseSetPrefLocDevice(const void *ptr, hypre_int device);
 void MemAdviseSetPrefLocHost(const void *ptr);
-void MemPrefetch(const void *ptr,int device,cudaStream_t stream);
-void MemPrefetchSized(const void *ptr,size_t size,int device,cudaStream_t stream);
-void MemPrefetchForce(const void *ptr,int device,cudaStream_t stream);
+void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream);
+void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t stream);
+void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream);
 cublasHandle_t getCublasHandle();
 cusparseHandle_t getCusparseHandle();
-void hypre_GPUInit(int use_device);
+void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();
 typedef struct node {
   const void *ptr;
   size_t size;
   struct node *next;
 } node;
-size_t mempush(const void *ptr, size_t size, int action);
+size_t mempush(const void *ptr, size_t size, hypre_int action);
 node *memfind(node *head, const void *ptr);
 void memdel(node **head, node *found);
 void meminsert(node **head, const void *ptr,size_t size);
-void printlist(node *head,int nc);
+void printlist(node *head,hypre_int nc);
 #define MEM_PAD_LEN 1
 size_t memsize(const void *ptr);
-int getsetasyncmode(int mode, int action);
-void SetAsyncMode(int mode);
-int GetAsyncMode();
-void branchStream(int i, int j);
-void joinStreams(int i, int j, int k);
-void affs(int myid);
-int getcore();
-int getnuma();
+hypre_int getsetasyncmode(hypre_int mode, hypre_int action);
+void SetAsyncMode(hypre_int mode);
+hypre_int GetAsyncMode();
+void branchStream(hypre_int i, hypre_int j);
+void joinStreams(hypre_int i, hypre_int j, hypre_int k);
+void affs(hypre_int myid);
+hypre_int getcore();
+hypre_int getnuma();
 /*
  * Global struct for keeping HYPRE GPU Init state
  */
 
 #define MAX_HGS_ELEMENTS 10
 struct hypre__global_struct{
-  int initd;
-  int device;
-  int device_count;
+  hypre_int initd;
+  hypre_int device;
+  hypre_int device_count;
   cublasHandle_t cublas_handle;
   cusparseHandle_t cusparse_handle;
   cusparseMatDescr_t cusparse_mat_descr;
@@ -56,7 +57,7 @@ struct hypre__global_struct{
 extern struct hypre__global_struct hypre__global_handle ;
 
 /*
- * Macros for accessing the handle members
+ * Macros for accessing elements of the global handle
  */
 #define HYPRE_GPU_HANDLE hypre__global_handle.initd
 #define HYPRE_CUBLAS_HANDLE hypre__global_handle.cublas_handle

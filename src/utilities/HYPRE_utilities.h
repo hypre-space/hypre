@@ -21,10 +21,8 @@
 
 #include <HYPRE_config.h>
 
-#ifndef DISABLE_IN_CUDA_KERNEL_FILE
 #ifndef HYPRE_SEQUENTIAL
 #include "mpi.h"
-#endif
 #endif
 
 #ifdef HYPRE_USING_OPENMP
