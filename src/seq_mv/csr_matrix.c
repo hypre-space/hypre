@@ -687,8 +687,6 @@ void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
     gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
     gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(5)));
     gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(6)));
-    //branchStream(5,4);
-    //branchStream(6,4);
     gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
     gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(5)));
     gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(6)));
@@ -706,5 +704,10 @@ void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A){
     gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
   }
   POP_RANGE;
+}
+hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a){
+  return ((pointerIsManaged((void*)hypre_CSRMatrixData(a))) 
+	  && (pointerIsManaged((void*)hypre_CSRMatrixI(a)))
+	  && (pointerIsManaged((void*)hypre_CSRMatrixJ(a))));
 }
 #endif

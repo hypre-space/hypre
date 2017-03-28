@@ -185,6 +185,23 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
 
+#ifdef HYPRE_USE_GPU
+   if (hypre_ParCSRMatrixIsManaged(A))
+     hypre_printf("VALID A in SETUP\n");
+   else
+     hypre_printf("INVALID A in SETUP\n");
+
+   if (hypre_ParVectorIsManaged(f))
+     hypre_printf("VALID f in SETUP\n");
+   else
+     hypre_printf("INVALID f in SETUP\n");
+   
+   if (hypre_ParVectorIsManaged(u))
+     hypre_printf("VALID u in SETUP\n");
+   else
+     hypre_printf("INVALID u in SETUP\n");
+#endif
+
    /*hypre_CSRMatrix *A_new;*/
 
    hypre_MPI_Comm_size(comm, &num_procs);   

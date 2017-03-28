@@ -38,6 +38,8 @@ void joinStreams(hypre_int i, hypre_int j, hypre_int k);
 void affs(hypre_int myid);
 hypre_int getcore();
 hypre_int getnuma();
+hypre_int checkDeviceProps();
+hypre_int pointerIsManaged(const void *ptr);
 /*
  * Global struct for keeping HYPRE GPU Init state
  */
@@ -52,6 +54,7 @@ struct hypre__global_struct{
   cusparseMatDescr_t cusparse_mat_descr;
   cudaStream_t streams[MAX_HGS_ELEMENTS];
   nvtxDomainHandle_t nvtx_domain;
+  hypre_int concurrent_managed_access;
 };
 
 extern struct hypre__global_struct hypre__global_handle ;
@@ -67,6 +70,7 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_CUSPARSE_MAT_DESCR hypre__global_handle.cusparse_mat_descr
 #define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
 #define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
+#define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
 
 
 

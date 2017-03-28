@@ -820,7 +820,8 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
     cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
     
     FirstCall=0;
-    for(int jj=0;jj<5;jj++)
+    hypre_int jj;
+    for(jj=0;jj<5;jj++)
       s[jj]=HYPRE_STREAM(jj);
     nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
     hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );

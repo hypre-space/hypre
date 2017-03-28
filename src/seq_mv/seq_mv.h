@@ -255,8 +255,9 @@ HYPRE_Int hypre_CSRMatrixCopy ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A );
 hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int *col_map_offd_A , HYPRE_Int *col_map_offd_B , HYPRE_Int **col_map_offd_C );
 #ifdef HYPRE_USE_GPU
-  void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A);
-  void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A);
+void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A);
+void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A);
+hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a);
 #endif
 
 /* csr_matvec.c */
@@ -360,6 +361,7 @@ HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x , hypre_Vector *y );
 void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x);
 void hypre_SeqVectorPrefetchToHost(hypre_Vector *x);
 void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x,int index);
+hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x);
 #endif
 #ifdef __cplusplus
 }

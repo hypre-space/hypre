@@ -87,7 +87,8 @@ void hypre_GPUInit(hypre_int use_device){
       HYPRE_DOMAIN=nvtxDomainCreateA("Hypre");
       
       /* Initialize streams */
-      for(hypre_int jj=0;jj<MAX_HGS_ELEMENTS;jj++)
+      hypre_int jj;
+      for(jj=0;jj<MAX_HGS_ELEMENTS;jj++)
 	gpuErrchk(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)),cudaStreamNonBlocking));
       
       /* Initialize the library handles and streams */
@@ -100,7 +101,7 @@ void hypre_GPUInit(hypre_int use_device){
 
     cublasErrchk(cublasCreate(&(HYPRE_CUBLAS_HANDLE)));
     cublasErrchk(cublasSetStream(HYPRE_CUBLAS_HANDLE,HYPRE_STREAM(4)));
-    
+    if (!checkDeviceProps()) hypre_printf("WARNING:: Concurrent memory access not allowed\n");
     /* Check if the arch flags used for compiling the cuda kernels match the device */
     CudaCompileFlagCheck();
   }
@@ -114,8 +115,9 @@ void hypre_GPUFinalize(){
   cublasErrchk(cublasDestroy(HYPRE_CUBLAS_HANDLE));
 
   /* Destroy streams */
-    for(hypre_int jj=0;jj<MAX_HGS_ELEMENTS;jj++)
-      gpuErrchk(cudaStreamDestroy(HYPRE_STREAM(jj)));
+  hypre_int jj;
+  for(jj=0;jj<MAX_HGS_ELEMENTS;jj++)
+    gpuErrchk(cudaStreamDestroy(HYPRE_STREAM(jj)));
   
 }
 
@@ -333,7 +335,8 @@ cudaStream_t getstreamOlde(hypre_int i){
   const hypre_int MAXSTREAMS=10;
   static cudaStream_t s[MAXSTREAMS];
   if (firstcall){
-    for(hypre_int jj=0;jj<MAXSTREAMS;jj++)
+    hypre_int jj;
+    for(jj=0;jj<MAXSTREAMS;jj++)
       gpuErrchk(cudaStreamCreateWithFlags(&s[jj],cudaStreamNonBlocking));
     //printf("Created streams ..\n");
     firstcall=0;
@@ -361,7 +364,8 @@ cudaEvent_t getevent(hypre_int i){
   const hypre_int MAXEVENTS=10;
   static cudaEvent_t s[MAXEVENTS];
   if (firstcall){
-    for(hypre_int jj=0;jj<MAXEVENTS;jj++)
+    hypre_int jj;
+    for(jj=0;jj<MAXEVENTS;jj++)
       gpuErrchk(cudaEventCreateWithFlags(&s[jj],cudaEventDisableTiming));
     //printf("Created events ..\n");
     firstcall=0;
@@ -402,17 +406,17 @@ void affs(hypre_int myid){
   const hypre_int NCPUS=160;
   cpu_set_t* mask = CPU_ALLOC(NCPUS);
   size_t size = CPU_ALLOC_SIZE(NCPUS);
-  hypre_int cpus[NCPUS];
+  hypre_int cpus[NCPUS],i;
   hypre_int retval=sched_getaffinity(0, size,mask);
   if (!retval){
-    for(hypre_int i=0;i<NCPUS;i++){
+    for(i=0;i<NCPUS;i++){
       if (CPU_ISSET(i,mask)) 
 	cpus[i]=1; 
       else
 	cpus[i]=0;
     }
     printf("Node(%d)::",myid);
-    for(hypre_int i=0;i<160;i++)printf("%d",cpus[i]);
+    for(i=0;i<160;i++)printf("%d",cpus[i]);
     printf("\n");
   } else {
     fprintf(stderr,"sched_affinity failed\n");
@@ -435,10 +439,10 @@ hypre_int getcore(){
   const hypre_int NCPUS=160;
   cpu_set_t* mask = CPU_ALLOC(NCPUS);
   size_t size = CPU_ALLOC_SIZE(NCPUS);
-  hypre_int cpus[NCPUS];
+  hypre_int cpus[NCPUS],i;
   hypre_int retval=sched_getaffinity(0, size,mask);
   if (!retval){
-    for(hypre_int i=0;i<NCPUS;i+=20){
+    for(i=0;i<NCPUS;i+=20){
       if (CPU_ISSET(i,mask)) {
 	CPU_FREE(mask);
 	return i;
@@ -468,11 +472,11 @@ hypre_int getnuma(){
   hypre_int retval=sched_getaffinity(0, size,mask);
   /* HARDWIRED FOR 2 NUMA DOMAINS */
   if (!retval){
-    hypre_int sum0=0;
-    for(hypre_int i=0;i<NCPUS/2;i++) 
+    hypre_int sum0=0,i;
+    for(i=0;i<NCPUS/2;i++) 
       if (CPU_ISSET(i,mask)) sum0++;
     hypre_int sum1=0;
-    for(hypre_int i=NCPUS/2;i<NCPUS;i++) 
+    for(i=NCPUS/2;i<NCPUS;i++) 
       if (CPU_ISSET(i,mask)) sum1++;
     CPU_FREE(mask);
     if (sum0>sum1) return 0;
@@ -494,5 +498,15 @@ hypre_int getnuma(){
   CPU_FREE(mask);
   
 }
-
+hypre_int checkDeviceProps(){
+  struct cudaDeviceProp prop;
+  gpuErrchk(cudaGetDeviceProperties(&prop, HYPRE_DEVICE));
+  HYPRE_GPU_CMA=prop.concurrentManagedAccess;
+  return HYPRE_GPU_CMA;
+}
+hypre_int pointerIsManaged(const void *ptr){
+  struct cudaPointerAttributes ptr_att;
+  gpuErrchk((cudaPointerGetAttributes(&ptr_att,ptr)));
+  return ptr_att.isManaged;
+}
 #endif

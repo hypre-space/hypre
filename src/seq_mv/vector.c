@@ -658,4 +658,7 @@ void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x,int index){
   gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(index)));
   POP_RANGE;
 }
+hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x){
+  return pointerIsManaged((void*)hypre_VectorData(x));
+}
 #endif
