@@ -772,7 +772,7 @@ hypre_StructAssumedPartitionCreate(
    HYPRE_Int   proc_alloc, count, box_count;
    HYPRE_Int   max_response_size;
    HYPRE_Int  *response_buf = NULL, *response_buf_starts=NULL;
-   HYPRE_Int  *tmp_box_nums = NULL, *tmp_proc_ids = NULL;
+   HYPRE_Int  *tmp_proc_ids = NULL, *tmp_box_nums = NULL, *tmp_box_inds = NULL;
    HYPRE_Int  *proc_array_starts=NULL;
 
    hypre_BoxArray              *my_partition;
@@ -1255,8 +1255,10 @@ hypre_StructAssumedPartitionCreate(
    /* Don't want to allocate too much memory here */
    size = 1.2 * hypre_BoxArraySize(local_boxes);
 
-   tmp_box_nums = hypre_CTAlloc(HYPRE_Int, size);
-   tmp_proc_ids =  hypre_CTAlloc(HYPRE_Int, size);
+   /* Each local box may live on multiple procs in the assumed partition */
+   tmp_proc_ids = hypre_CTAlloc(HYPRE_Int, size); /* local box proc ids */
+   tmp_box_nums = hypre_CTAlloc(HYPRE_Int, size); /* local box boxnum */
+   tmp_box_inds = hypre_CTAlloc(HYPRE_Int, size); /* local box array index */
 
    proc_count = 0;
    count = 0; /* Current number of procs */
@@ -1273,13 +1275,15 @@ hypre_StructAssumedPartitionCreate(
       {
          size = size + proc_count + 1.2*(hypre_BoxArraySize(local_boxes)-i);
          /* hypre_printf("myid = %d, *adjust* alloc size = %d\n", myid, size);*/
-         tmp_box_nums = hypre_TReAlloc(tmp_box_nums, HYPRE_Int, size);
          tmp_proc_ids = hypre_TReAlloc(tmp_proc_ids, HYPRE_Int, size);
+         tmp_box_nums = hypre_TReAlloc(tmp_box_nums, HYPRE_Int, size);
+         tmp_box_inds = hypre_TReAlloc(tmp_box_inds, HYPRE_Int, size);
       }
       for (j = 0; j < proc_count; j++)
       {
-         tmp_box_nums[count] = local_boxnums[i];
          tmp_proc_ids[count] = proc_array[j];
+         tmp_box_nums[count] = local_boxnums[i];
+         tmp_box_inds[count] = i;
          count++;
       }
    }
@@ -1291,7 +1295,7 @@ hypre_StructAssumedPartitionCreate(
       and then create a new buffer to send to the exchange data function. */
 
    /* Sort the proc_ids */
-   hypre_qsort2i(tmp_proc_ids, tmp_box_nums, 0, count-1);
+   hypre_qsort3i(tmp_proc_ids, tmp_box_nums, tmp_box_inds, 0, count-1);
      
    /* Use proc_array for the processor ids to contact.  Use box array to get our
       boxes and then pass the array only (not the structure) to exchange data. */
@@ -1311,7 +1315,7 @@ hypre_StructAssumedPartitionCreate(
       proc_array[0] = tmp_proc_ids[0];
 
       contact_boxinfo[index++] = tmp_box_nums[0];
-      box = hypre_BoxArrayBox(local_boxes, tmp_box_nums[0]);
+      box = hypre_BoxArrayBox(local_boxes, tmp_box_inds[0]);
       for (d = 0; d < ndim; d++)
       {
          contact_boxinfo[index++] = hypre_BoxIMinD(box, d);
@@ -1332,7 +1336,7 @@ hypre_StructAssumedPartitionCreate(
       /* These boxes are not copied in a particular order */
         
       contact_boxinfo[index++] = tmp_box_nums[i];
-      box = hypre_BoxArrayBox(local_boxes, tmp_box_nums[i]);
+      box = hypre_BoxArrayBox(local_boxes, tmp_box_inds[i]);
       for (d = 0; d < ndim; d++)
       {
          contact_boxinfo[index++] = hypre_BoxIMinD(box, d);
@@ -1344,6 +1348,7 @@ hypre_StructAssumedPartitionCreate(
    /* Clean up */
    hypre_TFree(tmp_proc_ids);
    hypre_TFree(tmp_box_nums);
+   hypre_TFree(tmp_box_inds);
 
    /* EXCHANGE DATA */
 

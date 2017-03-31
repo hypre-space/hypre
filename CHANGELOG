@@ -15,9 +15,15 @@
 # recent release.
 #=============================================================================
 
+Version 2.11.2 released 2017/03/13
+
 - Changed the defaults in hypre to HMIS with ext+i(4) interpolation
 
 - Added a routine HYPRE_BoomerAMGSetOldDefault to easily get old defaults
+
+- Added Caliper instrumentation
+
+- Various bug fixes
 
 Version 2.11.1 released 2016/06/09
 
