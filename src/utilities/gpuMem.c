@@ -12,7 +12,6 @@
 #include <sched.h>
 #include <errno.h>
 hypre_int ggc(hypre_int id);
-#define FULL_WARN
 
 /* Global struct that holds device,library handles etc */
 struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1};
@@ -506,7 +505,9 @@ hypre_int checkDeviceProps(){
 }
 hypre_int pointerIsManaged(const void *ptr){
   struct cudaPointerAttributes ptr_att;
-  gpuErrchk((cudaPointerGetAttributes(&ptr_att,ptr)));
+  if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess) {
+    return 0;
+  }
   return ptr_att.isManaged;
 }
 #endif

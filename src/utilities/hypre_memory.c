@@ -23,7 +23,6 @@
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
-
 /******************************************************************************
  *
  * Standard routines

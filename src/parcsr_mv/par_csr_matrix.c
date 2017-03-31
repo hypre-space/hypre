@@ -2158,6 +2158,6 @@ hypre_int hypre_ParCSRMatrixIsManaged(hypre_ParCSRMatrix *a){
   if (hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(a)))
     return ((hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixDiag(a))) && (hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixOffd(a))));
   else
-    return hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixDiag(a)); /* offd should be checked as well */
+    return hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixDiag(a)); 
 }
 #endif

@@ -186,20 +186,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
 
 #ifdef HYPRE_USE_GPU
-   if (hypre_ParCSRMatrixIsManaged(A))
-     hypre_printf("VALID A in SETUP\n");
-   else
-     hypre_printf("INVALID A in SETUP\n");
-
-   if (hypre_ParVectorIsManaged(f))
-     hypre_printf("VALID f in SETUP\n");
-   else
-     hypre_printf("INVALID f in SETUP\n");
-   
-   if (hypre_ParVectorIsManaged(u))
-     hypre_printf("VALID u in SETUP\n");
-   else
-     hypre_printf("INVALID u in SETUP\n");
+   if (!hypre_ParCSRMatrixIsManaged(A)){
+     hypre_fprintf(stderr,"ERROR:: INVALID A in hypre_BoomerAMGSetup::Address %p\n",A);
+     //exit(2);
+   } else if(!hypre_ParVectorIsManaged(f)){
+     hypre_fprintf(stderr,"ERROR:: INVALID f in hypre_BoomerAMGSetup::Address %p\n",f);
+     //exit(2);
+   } else if (!hypre_ParVectorIsManaged(u)){
+     hypre_fprintf(stderr,"ERROR:: INVALID u in hypre_BoomerAMGSetup::Address %p\n",u);
+     //exit(2);
+   } 
 #endif
 
    /*hypre_CSRMatrix *A_new;*/

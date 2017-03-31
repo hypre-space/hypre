@@ -23,9 +23,11 @@ void cudaSafeFree(void *ptr,int padding)
   err=cudaPointerGetAttributes(&ptr_att,sptr);
   if (err!=cudaSuccess){
 #ifndef ABORT_ON_RAW_POINTER
+#ifdef FULL_WARN
     if (err==cudaErrorInvalidValue) fprintf(stderr,"WARNING :: Raw pointer passed to cudaSafeFree %p\n",ptr);
     if (err==cudaErrorInvalidDevice) fprintf(stderr,"WARNING :: cudaSafeFree :: INVALID DEVICE on ptr = %p\n",ptr);
     PrintPointerAttributes(ptr);
+#endif
 #else
     fprintf(stderr,"ERROR:: cudaSafeFree Aborting on raw unmanaged pointer %p\n",ptr);
     raise(SIGABRT);
