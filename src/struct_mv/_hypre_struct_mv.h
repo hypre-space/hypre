@@ -1944,6 +1944,7 @@ AxCheckError(cudaMemcpy(b,d_b,n_blocks*sizeof(HYPRE_Real),cudaMemcpyDeviceToHost
          }\
          zypre_BoxLoopInc1();\
          i1 += hypre__ikinc1[hypre__d];\
+         zypre_BoxLoopInc2();\
       }\
    }\
 }

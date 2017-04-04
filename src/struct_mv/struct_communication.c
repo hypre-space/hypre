@@ -903,7 +903,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       dptr_data = (HYPRE_Complex *) send_buffers_data[i];
       if ( hypre_CommPkgFirstComm(comm_pkg) )
       {
-	dptr_data += hypre_CommPrefixSize(num_entries);
+          dptr_data += hypre_CommPrefixSize(num_entries);
       }
 
       for (j = 0; j < num_entries; j++)
@@ -1413,12 +1413,12 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
 					 if (action > 0)
                      {
                         /* add the data to existing values in memory */
-						 to_dpl[i1] += to_dpl[i2];
+						 to_dpl[i2] += fr_dpl[i1];
                      }
                      else
                      {
                         /* copy the data over existing values in memory */
-						 to_dpl[i1] = to_dpl[i2];
+						 to_dpl[i2] = fr_dpl[i1];
                      } 
 				  }				  
 				  zypre_BoxDataExchangeEnd()

@@ -69,7 +69,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **P_grid_l;
                     
-   HYPRE_Real           *data = NULL;
+   HYPRE_Real           *data;
    HYPRE_Int             data_size = 0;
    HYPRE_Real           *relax_weights;
    HYPRE_Real           *mean, *deviation;
@@ -261,7 +261,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          active_l[l] = 0;
          hypre_IndexD(coarsen, cdir) = 1;
       }
-	  
+
       /* set cindex, findex, and stride */
       hypre_PFMGSetCIndex(cdir, cindex);
       hypre_PFMGSetFIndex(cdir, findex);
@@ -735,11 +735,18 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
         /*FIXME: need reduction for more variables*/
 	HYPRE_Int tmp = 0;
 	hypre_MatrixIndexMove(A, stencil_size, i, tmp, 3);
-	
+#ifdef HYPRE_BOX_PRIVATE_VAR
+#undef HYPRE_BOX_PRIVATE_VAR
+#endif
+#define HYPRE_BOX_PRIVATE_VAR Ai,si,Ap,diag,Astenc,tcx
+#ifdef HYPRE_BOX_REDUCTION
+#undef HYPRE_BOX_REDUCTION
+#endif
+#define HYPRE_BOX_REDUCTION reduction(+:cx)
         zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,cx);
 	{
-            HYPRE_Int tcx = 0.0;
+        HYPRE_Int tcx = 0.0;
 	    HYPRE_Complex *Ap;
 	    HYPRE_Int Astenc,si;
 	    HYPRE_Real diag;
@@ -769,6 +776,14 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             cx += tcx;
 	}
 	zypre_newBoxLoop1ReductionEnd(Ai,cx);
+#ifdef HYPRE_BOX_PRIVATE_VAR
+#undef HYPRE_BOX_PRIVATE_VAR
+#endif
+#define HYPRE_BOX_PRIVATE_VAR Ai,si,Ap,diag,Astenc,tcx
+#ifdef HYPRE_BOX_REDUCTION
+#undef HYPRE_BOX_REDUCTION
+#endif
+#define HYPRE_BOX_REDUCTION reduction(+:sqcx)
 	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,sqcx);
 	{
@@ -800,6 +815,14 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             sqcx += (tcx*tcx);
 	}
 	zypre_newBoxLoop1ReductionEnd(Ai,sqcx);
+#ifdef HYPRE_BOX_PRIVATE_VAR
+#undef HYPRE_BOX_PRIVATE_VAR
+#endif
+#define HYPRE_BOX_PRIVATE_VAR Ai,si,Ap,diag,Astenc,tcy
+#ifdef HYPRE_BOX_REDUCTION
+#undef HYPRE_BOX_REDUCTION
+#endif
+#define HYPRE_BOX_REDUCTION reduction(+:cy)
 	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,cy);
 	{
@@ -821,7 +844,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 	      Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
 	      
 	      /* y-direction */
-	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[stencil_size+si]);
+	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 1,stencil_shape_d[stencil_size+si]);
 	      if (Astenc)
 		{
                   tcy -= Ap[Ai]*diag;
@@ -831,6 +854,14 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             cy += tcy;            
 	}
 	zypre_newBoxLoop1ReductionEnd(Ai,cy);
+#ifdef HYPRE_BOX_PRIVATE_VAR
+#undef HYPRE_BOX_PRIVATE_VAR
+#endif
+#define HYPRE_BOX_PRIVATE_VAR Ai,si,Ap,diag,Astenc,tcy
+#ifdef HYPRE_BOX_REDUCTION
+#undef HYPRE_BOX_REDUCTION
+#endif
+#define HYPRE_BOX_REDUCTION reduction(+:sqcy)
 	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,sqcy);
 	{
@@ -852,7 +883,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 	      Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
 	      
 	      /* y-direction */
-	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[stencil_size+si]);
+	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 1,stencil_shape_d[stencil_size+si]);
 	      if (Astenc)
 		{
                   tcy -= Ap[Ai]*diag;
@@ -861,6 +892,14 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             sqcy += (tcy*tcy);
 	}
 	zypre_newBoxLoop1ReductionEnd(Ai,sqcy);
+#ifdef HYPRE_BOX_PRIVATE_VAR
+#undef HYPRE_BOX_PRIVATE_VAR
+#endif
+#define HYPRE_BOX_PRIVATE_VAR Ai,si,Ap,diag,Astenc,tcz
+#ifdef HYPRE_BOX_REDUCTION
+#undef HYPRE_BOX_REDUCTION
+#endif
+#define HYPRE_BOX_REDUCTION reduction(+:cz)
 	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,cz);
 	{
@@ -882,7 +921,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 	      Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
 	      
 	      /* z-direction */
-	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[2*stencil_size+si]);
+	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 2,stencil_shape_d[2*stencil_size+si]);
 	      if (Astenc)
 		{
                   tcz -= Ap[Ai]*diag;
@@ -892,6 +931,14 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             cz += tcz;            
 	}
 	zypre_newBoxLoop1ReductionEnd(Ai,cz);
+#ifdef HYPRE_BOX_PRIVATE_VAR
+#undef HYPRE_BOX_PRIVATE_VAR
+#endif
+#define HYPRE_BOX_PRIVATE_VAR Ai,si,Ap,diag,Astenc,tcz
+#ifdef HYPRE_BOX_REDUCTION
+#undef HYPRE_BOX_REDUCTION
+#endif
+#define HYPRE_BOX_REDUCTION reduction(+:sqcz)
 	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,sqcz);
 	{
@@ -913,7 +960,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 	      Ap = hypre_StructGetMatrixBoxData(A, i, si,indices_d);
 
 	      /* z-direction */
-	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[2*stencil_size+si]);
+	      Astenc = hypre_StructGetIndexD(stencil_shape[si], 2,stencil_shape_d[2*stencil_size+si]);
 	      if (Astenc)
 		{
                   tcz -= Ap[Ai]*diag;
