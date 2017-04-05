@@ -769,6 +769,29 @@ AS_HELP_STRING([--with-MPI],
  esac]
 )
 
+AC_ARG_WITH(nvcc,
+AS_HELP_STRING([--with-nvcc],
+               [Use NVCC compiler (default is NO).]),
+[case "${withval}" in
+    yes) hypre_using_nvcc=yes ;;
+    no)  hypre_using_nvcc=no ;;
+    *)   AC_MSG_ERROR([Bad value ${withval} for --with-nvcc]) ;;
+ esac],
+[hypre_using_nvcc=no]
+)
+
+if test "$hypre_using_nvcc" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
+   NVCCFLAGS="-O3 -arch=sm_60  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU"
+   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
+else
+   NVCCFLAGS=
+   NVCCLIBS=
+   HYPRE_NVCC_MAKEFILE="Makefile.empty"
+fi
+
 AC_ARG_WITH(caliper,
 AS_HELP_STRING([--with-caliper],
                [Use Caliper instrumentation (default is NO).]),
@@ -1353,6 +1376,13 @@ AC_SUBST(HYPRE_LAPACK_SRC_DIR)
 AC_SUBST(HYPRE_LAPACK_FILES)
 AC_SUBST(LAPACKLIBDIRS)
 AC_SUBST(LAPACKLIBS)
+
+dnl *********************************************************************
+dnl * NVCC stuff
+dnl *********************************************************************
+AC_SUBST(NVCCFLAGS)
+AC_SUBST(NVCCLIBS)
+AC_SUBST(HYPRE_NVCC_MAKEFILE)
 
 dnl *********************************************************************
 dnl * Caliper instrumentation

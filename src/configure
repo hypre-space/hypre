@@ -598,6 +598,9 @@ LIBOBJS
 AR
 CALIPER_LIBS
 CALIPER_INCLUDE
+HYPRE_NVCC_MAKEFILE
+NVCCLIBS
+NVCCFLAGS
 LAPACKLIBS
 LAPACKLIBDIRS
 HYPRE_LAPACK_FILES
@@ -748,6 +751,7 @@ with_fei
 with_superlu
 with_mli
 with_MPI
+with_nvcc
 with_caliper
 with_caliper_include
 with_caliper_lib
@@ -1481,6 +1485,7 @@ Optional Packages:
   --with-mli              Use MLI
   --with-MPI              DEFAULT: Compile with MPI. Selecting --without-MPI
                           may affect which compiler is chosen.
+  --with-nvcc             Use NVCC compiler (default is NO).
   --with-caliper          Use Caliper instrumentation (default is NO).
   --with-caliper-include=DIR
                           Directory where Caliper is installed.
@@ -3147,6 +3152,34 @@ if test "${with_MPI+set}" = set; then :
 
 fi
 
+
+
+# Check whether --with-nvcc was given.
+if test "${with_nvcc+set}" = set; then :
+  withval=$with_nvcc; case "${withval}" in
+    yes) hypre_using_nvcc=yes ;;
+    no)  hypre_using_nvcc=no ;;
+    *)   as_fn_error $? "Bad value ${withval} for --with-nvcc" "$LINENO" 5 ;;
+ esac
+else
+  hypre_using_nvcc=no
+
+fi
+
+
+if test "$hypre_using_nvcc" = "yes"
+then
+
+$as_echo "#define HYPRE_USING_NVCC 1" >>confdefs.h
+
+   NVCCFLAGS="-O3 -arch=sm_60  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU"
+   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
+else
+   NVCCFLAGS=
+   NVCCLIBS=
+   HYPRE_NVCC_MAKEFILE="Makefile.empty"
+fi
 
 
 # Check whether --with-caliper was given.
@@ -7340,6 +7373,10 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
+
+
+
+
 
 
 

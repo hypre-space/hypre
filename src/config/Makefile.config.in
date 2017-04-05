@@ -66,8 +66,9 @@ CFLAGS   = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 CXX      = @CXX@
 CXXFLAGS = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
-NVCC 	 = nvcc
-NVCCFLAGS = -O3 -arch=sm_60  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU
+NVCC 	  = nvcc
+NVCCFLAGS = @NVCCFLAGS@
+NVCCLIBS  = @NVCCLIBS@
 
 LINK_FC  = @LINK_FC@
 LINK_CC  = @LINK_CC@
@@ -90,7 +91,7 @@ AR     = @AR@
 RANLIB = @RANLIB@
 
 LDFLAGS = @LDFLAGS@
-LIBS    = @LIBS@ @CALIPER_LIBS@
+LIBS    = @LIBS@ @CALIPER_LIBS@ @NVCCLIBS@
 FLIBS   = @FLIBS@
 
 INCLUDES = @CALIPER_INCLUDE@
@@ -120,6 +121,11 @@ MPILIBS    = @MPILIBS@
 MPIFLAGS   = @MPIFLAGS@
 
 ##################################################################
+##  NVCC options
+##################################################################
+HYPRE_NVCC_MAKEFILE = @HYPRE_NVCC_MAKEFILE@
+
+##################################################################
 ##  Caliper options
 ##################################################################
 CALIPER_INCLUDE = @CALIPER_INCLUDE@
@@ -134,3 +140,4 @@ HYPRE_FEI_SUBDIRS       = @HYPRE_FEI_SUBDIRS@
 HYPRE_FEI_SUPERLU_FILES = @HYPRE_FEI_SUPERLU_FILES@
 HYPRE_FEI_HYPRE_FILES   = @HYPRE_FEI_HYPRE_FILES@
 HYPRE_FEI_FEMLI_FILES   = @HYPRE_FEI_FEMLI_FILES@
+

@@ -72,6 +72,15 @@ extern "C" {
 #define hypre_TFree(ptr) \
 ( hypre_Free((char *)ptr), ptr = NULL )
 
+#define hypre_PTAlloc(type, count) \
+( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
+
+#define hypre_HCTAlloc(type, count) \
+( (type *)hypre_CAllocHost((size_t)(count), (size_t)sizeof(type)) )
+
+#define hypre_HCTFree(ptr) \
+( hypre_HFree((char *)ptr), ptr = NULL )
+
 #endif
 
 #define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count))
@@ -87,8 +96,11 @@ extern "C" {
 HYPRE_Int hypre_OutOfMemory ( size_t size );
 char *hypre_MAlloc ( size_t size );
 char *hypre_CAlloc ( size_t count , size_t elt_size );
+char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc ( char *ptr , size_t size );
 void hypre_Free ( char *ptr );
+char *hypre_CAllocHost( size_t count,size_t elt_size );
+void hypre_HFree( char *ptr );
 char *hypre_SharedMAlloc ( size_t size );
 char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
 char *hypre_SharedReAlloc ( char *ptr , size_t size );
@@ -108,3 +120,4 @@ void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
 #endif
 
 #endif
+

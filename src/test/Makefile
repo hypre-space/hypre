@@ -10,7 +10,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
@@ -49,7 +48,7 @@ LFLAGS =\
  ${MPILIBFLAGS}\
  ${LAPACKLIBFLAGS}\
  ${BLASLIBFLAGS}\
- ${LIBFLAGS} -L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt 
+ ${LIBFLAGS}
 
 ##################################################################
 # Targets

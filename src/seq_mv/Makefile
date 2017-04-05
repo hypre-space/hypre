@@ -13,6 +13,9 @@
 
 include ../config/Makefile.config
 
+FILES_NVCC =
+include $(HYPRE_NVCC_MAKEFILE)
+
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
 C_COMPILE_FLAGS =\
@@ -41,11 +44,10 @@ FILES =\
  HYPRE_vector.c\
  mapped_matrix.c\
  multiblock_matrix.c\
- vector.c\
- gpukernels.cu
+ vector.c
 
 OBJS = ${FILES:.c=.o}
-CUOBJS = ${FILES:.cu=.o}
+CUOBJS = ${FILES_NVCC:.cu=.o}
 
 SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}.so
 

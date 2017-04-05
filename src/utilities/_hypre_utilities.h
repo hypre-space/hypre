@@ -1,14 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
 
 #ifndef hypre_UTILITIES_HEADER
 #define hypre_UTILITIES_HEADER
@@ -18,15 +7,6 @@
 #ifdef HYPRE_USING_OPENMP
 #include <omp.h>
 #endif
-
-/* This allows us to consistently avoid 'int' throughout hypre */
-typedef int               hypre_int;
-typedef long int          hypre_longint;
-typedef unsigned int      hypre_uint;
-typedef unsigned long int hypre_ulongint;
-
-/* This allows us to consistently avoid 'double' throughout hypre */
-typedef double            hypre_double;
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,6 +32,15 @@ extern "C" {
 
 #ifndef hypre_GENERAL_HEADER
 #define hypre_GENERAL_HEADER
+
+/* This allows us to consistently avoid 'int' throughout hypre */
+typedef int               hypre_int;
+typedef long int          hypre_longint;
+typedef unsigned int      hypre_uint;
+typedef unsigned long int hypre_ulongint;
+
+/* This allows us to consistently avoid 'double' throughout hypre */
+typedef double            hypre_double;
 
 /*--------------------------------------------------------------------------
  * Define various functions
@@ -288,6 +277,7 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_MAX MPI_MAX
 #define  hypre_MPI_LOR MPI_LOR
 #define  hypre_MPI_SUCCESS MPI_SUCCESS
+#define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
 
 #define  hypre_MPI_UNDEFINED       MPI_UNDEFINED   
 #define  hypre_MPI_REQUEST_NULL    MPI_REQUEST_NULL
@@ -295,7 +285,6 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_ANY_TAG         MPI_ANY_TAG
 #define  hypre_MPI_SOURCE          MPI_SOURCE
 #define  hypre_MPI_TAG             MPI_TAG
-#define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
 #define  hypre_MPI_LAND            MPI_LAND
 
 #endif
@@ -772,7 +761,6 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
                      HYPRE_Int rnum, MPI_Comm comm,  void **p_response_recv_buf, 
                      HYPRE_Int **p_response_recv_buf_starts);
 
-
 #endif /* end of header */
 
 /*BHEADER**********************************************************************
@@ -851,10 +839,17 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #endif
 
 #endif /* CALIPER_INSTRUMENTATION_HEADER */
-
-/*--------------------------------------------------------------------------
- * Other prototypes
- *--------------------------------------------------------------------------*/
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 /* amg_linklist.c */
 void hypre_dispose_elt ( hypre_LinkList element_ptr );
@@ -1068,8 +1063,6 @@ void hypre_sort_and_create_inverse_map(
 #ifdef __cplusplus
 }
 #endif
-
-/*#include "hypre_hopscotch_hash.h"*/
 
 #endif
 
