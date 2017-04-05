@@ -448,7 +448,7 @@ do
          ;;
       -valgrind)
          shift
-         Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind"
+         Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind --leak-check=yes --track-origins=yes"
          ;;
       -n|-norun)
          NoRun=1

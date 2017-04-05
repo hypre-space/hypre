@@ -27,7 +27,9 @@
 #include "mli_utils.h"
 #include "HYPRE_IJ_mv.h"
 #include "../fei-hypre/HYPRE_parcsr_fgmres.h"
+#ifdef HYPRE_USING_HYPRE_LAPACK
 #include "hypre_lapack.h"
+#endif
 
 /*--------------------------------------------------------------------------
  * external function 
