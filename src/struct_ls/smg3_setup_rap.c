@@ -268,11 +268,6 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
    HYPRE_Real           *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
    HYPRE_Real           *rap_csw, *rap_cse;
    HYPRE_Real           *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
-
-   HYPRE_Int             iA, iAm1, iAp1;
-   HYPRE_Int             iAc;
-   HYPRE_Int             iP, iP1;
-   HYPRE_Int             iR;
                         
    HYPRE_Int             zOffsetA; 
    HYPRE_Int             xOffsetP; 
@@ -638,7 +633,7 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
                                 A_dbox,   fstart, stridef, iA,
                                 RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
@@ -719,7 +714,7 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
                                 A_dbox,   fstart, stridef, iA,
                                 RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
@@ -822,7 +817,7 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
                                 A_dbox,   fstart, stridef, iA,
                                 RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
@@ -981,11 +976,6 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
    HYPRE_Real           *rap_ac, *rap_aw, *rap_ae, *rap_as, *rap_an;
    HYPRE_Real           *rap_cnw, *rap_cne;
    HYPRE_Real           *rap_asw, *rap_ase, *rap_anw, *rap_ane;
-
-   HYPRE_Int            iA, iAm1, iAp1;
-   HYPRE_Int            iAc;
-   HYPRE_Int            iP, iP1;
-   HYPRE_Int            iR;
 
    HYPRE_Int            zOffsetA;
    HYPRE_Int            xOffsetP;
@@ -1282,7 +1272,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                                 A_dbox,   fstart, stridef, iA,
                                 RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
@@ -1337,7 +1327,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                                 A_dbox,   fstart, stridef, iA,
                                 RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
@@ -1411,7 +1401,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                                 A_dbox,   fstart, stridef, iA,
                                 RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
@@ -1506,7 +1496,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                                 A_dbox,   fstart, stridef, iA,
                                 RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
@@ -1637,12 +1627,6 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
    HYPRE_Real           *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
    HYPRE_Real           *rap_csw, *rap_cse;
 
-   HYPRE_Int            iAc;
-   HYPRE_Int            iAcmx;
-   HYPRE_Int            iAcmy;
-   HYPRE_Int            iAcmxmy;
-   HYPRE_Int            iAcpxmy;
-
    HYPRE_Int            xOffset;
    HYPRE_Int            yOffset;
 
@@ -1739,13 +1723,12 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
          hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                              RAP_dbox,  cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc,iAcmx,iAcmy) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop1For(iAc)
          {
-             HYPRE_Int iAcmx,iAcmy;
-            iAcmx = iAc - xOffset;
-            iAcmy = iAc - yOffset;
+            HYPRE_Int iAcmx = iAc - xOffset;
+            HYPRE_Int iAcmy = iAc - yOffset;
                
             rap_cc[iAc] += (2.0 * rap_bc[iAc]);
             rap_cw[iAc] += (rap_bw[iAc] + rap_be[iAcmx]);
@@ -1756,7 +1739,7 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
          hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                              RAP_dbox,  cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop1For(iAc)
          {
@@ -1779,13 +1762,12 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                                 RAP_dbox,  cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc,iAcmxmy,iAcpxmy) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop1For(iAc)
             {
-	      HYPRE_Int iAcmxmy,iAcpxmy;
-               iAcmxmy = iAc - xOffset - yOffset;
-               iAcpxmy = iAc + xOffset - yOffset;
+               HYPRE_Int iAcmxmy = iAc - xOffset - yOffset;
+               HYPRE_Int iAcpxmy = iAc + xOffset - yOffset;
                   
                rap_csw[iAc] += (rap_bsw[iAc] + rap_bne[iAcmxmy]);
                   
@@ -1797,7 +1779,7 @@ hypre_SMG3RAPPeriodicSym( hypre_StructMatrix *RAP,
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                                 RAP_dbox,  cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop1For(iAc)
             {
@@ -1846,8 +1828,6 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
    HYPRE_Real           *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
    HYPRE_Real           *rap_csw, *rap_cse, *rap_cnw, *rap_cne;
    HYPRE_Real           *rap_asw, *rap_ase, *rap_anw, *rap_ane;
-
-   HYPRE_Int            iAc;
 
    HYPRE_Real           zero = 0.0;
 
@@ -1976,7 +1956,7 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
                              RAP_dbox,  cstart, stridec, iAc);
 
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
 
          hypre_BoxLoop1For(iAc)
@@ -2014,7 +1994,7 @@ hypre_SMG3RAPPeriodicNoSym( hypre_StructMatrix *RAP,
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                                 RAP_dbox,  cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop1For(iAc)
             {

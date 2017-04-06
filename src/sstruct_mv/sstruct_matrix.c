@@ -963,7 +963,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    hypre_IndexRef        start;
    hypre_Index           rs, cs;
    HYPRE_Int             row_base, col_base;
-   HYPRE_Int             d, ei, entry, ii, jj, i, mi, vi;
+   HYPRE_Int             d, ei, entry, ii, jj, i;
    HYPRE_Int             matrix_type = hypre_SStructMatrixObjectType(matrix);
 
    box  = hypre_BoxCreate(ndim);
@@ -1050,7 +1050,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                                    int_box, start, stride, mi,
                                    vbox,    start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi,vi,index,d) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE,index,d) HYPRE_SMP_SCHEDULE
 #endif
                zypre_BoxLoop2For(mi, vi)
                {
@@ -1118,9 +1118,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    {
       /* RDF: THREAD (Check safety on UMatrixSetValues call) */
       hypre_BoxGetSize(vbox, loop_size);
-      hypre_BoxLoop0Begin(ndim, loop_size);
-      //hypre_BoxLoopSetOneBlock();
-      hypre_BoxLoop0For()
+      hypre_SerialBoxLoop0Begin(ndim, loop_size);
       {
          hypre_BoxLoopGetIndex(index);
          hypre_AddIndexes(index, hypre_BoxIMin(vbox), ndim, index);
@@ -1128,7 +1126,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                                        nentries, entries, values, action);
          values += nentries;
       }
-      hypre_BoxLoop0End();
+      hypre_SerialBoxLoop0End();
    }
 
    hypre_BoxDestroy(box);
@@ -1384,7 +1382,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    hypre_SStructBoxManInfo *frinfo, *toinfo;
    HYPRE_Complex           *tvalues = NULL;
    HYPRE_Int                nfrentries, ntoentries, frpart, topart;
-   HYPRE_Int                entry, sentry, ei, fri, toi, vi, mi;
+   HYPRE_Int                entry, sentry, ei, fri, toi;
 
    pmatrix = hypre_SStructMatrixPMatrix(matrix, part);
 
@@ -1482,7 +1480,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                                          ibox1, start, stride, mi,
                                          vbox,  start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi,vi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop2For(mi, vi)
                      {
@@ -1514,7 +1512,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                                          ibox1, start, stride, mi,
                                          vbox,  start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi,vi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop2For(mi, vi)
                      {

@@ -5,7 +5,7 @@
  *
  * HYPRE is free software; you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
+ * Software Foundation) version 2.1 dated Feruary 1999.
  *
  * $Revision$
  ***********************************************************************EHEADER*/
@@ -959,7 +959,7 @@ main( hypre_int argc,
                      }
                break;
          }
-     
+
          HYPRE_StructGridCreate(hypre_MPI_COMM_WORLD, dim, &grid);
          for (ib = 0; ib < nblocks; ib++)
          {
@@ -969,12 +969,14 @@ main( hypre_int argc,
          HYPRE_StructGridSetPeriodic(grid, periodic);
          HYPRE_StructGridSetNumGhost(grid, num_ghost);
          HYPRE_StructGridAssemble(grid);
+	 
+	 
          /*-----------------------------------------------------------
           * Set up the matrix structure
           *-----------------------------------------------------------*/
-
+	 
          HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
-          
+
          if ( solver_id == 3 || solver_id == 4 ||
               solver_id == 13 || solver_id == 14 )
          {
@@ -1010,12 +1012,13 @@ main( hypre_int argc,
 
          HYPRE_StructMatrixSetSymmetric(A, sym);
          HYPRE_StructMatrixInitialize(A);
+	 printf("HYPRE_StructMatrixInitialize\n");
          /*-----------------------------------------------------------
           * Fill in the matrix elements
           *-----------------------------------------------------------*/
-	 
+	 printf("AddValuesMatrix\n");
          AddValuesMatrix(A,grid,cx,cy,cz,conx,cony,conz);
-
+	 printf("HYPRE_StructMatrixAssemble\n");
          /* Zero out stencils reaching to real boundary */
          /* But in constant coefficient case, no special stencils! */
 
@@ -2798,8 +2801,8 @@ AddValuesVector( hypre_StructGrid  *gridvector,
    {
       box      = hypre_BoxArrayBox(gridboxes, ib);
       volume   =  hypre_BoxVolume(box);
-      //values   = hypre_CTAlloc(HYPRE_Real, volume);
-      hypre_DeviceDataCTAlloc(values, HYPRE_Real, volume,0);
+      //values = hypre_CTAlloc(HYPRE_Real, volume);
+      values   = hypre_UMCTAlloc(HYPRE_Real, volume);
       
       /*-----------------------------------------------------------
        * For periodic b.c. in all directions, need rhs to satisfy 
@@ -2828,13 +2831,8 @@ AddValuesVector( hypre_StructGrid  *gridvector,
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);
 	  
-      //HYPRE_Real *val_D;
-      //   val_D = hypre_DataTAlloc(HYPRE_Real, volume);
-      //   hypre_DataCopyToData(values,val_D,HYPRE_Real,volume);
-	   
       HYPRE_StructVectorSetBoxValues(zvector, ilower, iupper, values);
-      //hypre_TFree(values);
-      hypre_DeviceDataTFree(values,0);
+      hypre_UMTFree(values);
       
 
    }
@@ -2908,7 +2906,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
             //values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
-	    hypre_DeviceDataCTAlloc(values, HYPRE_Real, stencil_size*volume,0);
+	    values     = hypre_UMCTAlloc(HYPRE_Real, stencil_size*volume);
 	    
             for (i = 0; i < stencil_size*volume; i += stencil_size)
             {
@@ -2936,14 +2934,14 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 	    
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                            stencil_indices, values);
-            //hypre_TFree(values);	    
-	    hypre_DeviceDataTFree(values,0);
+            //hypre_TFree(values);
+	    hypre_UMTFree(values);
 	    
          }
       }
       else if ( constant_coefficient==1 )
       {
-         values   = hypre_CTAlloc(HYPRE_Real, stencil_size);
+	 values   = hypre_CTAlloc(HYPRE_Real, stencil_size);
          switch (dim)
          {
             case 1:
@@ -2974,7 +2972,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          hypre_assert( constant_coefficient==2 );
 
          /* stencil index for the center equals dim, so it's easy to leave out */
-         values   = hypre_CTAlloc(HYPRE_Real, stencil_size-1);
+         //values   = hypre_CTAlloc(HYPRE_Real, stencil_size-1);
+	 values     = hypre_UMCTAlloc(HYPRE_Real, stencil_size-1);
          switch (dim)
          {
             case 1:
@@ -2995,14 +2994,15 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             HYPRE_StructMatrixSetConstantValues(A, stencil_size-1,
                                                 stencil_indices, values);
          }
-         hypre_TFree(values);
-
+         //hypre_TFree(values);
+	 hypre_UMTFree(values);
+	 
          hypre_ForBoxI(bi, gridboxes)
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(HYPRE_Real, volume);
-
+            //values   = hypre_CTAlloc(HYPRE_Real, volume);
+	    values     = hypre_UMCTAlloc(HYPRE_Real, volume);
             for ( i=0; i < volume; ++i )
             {
                values[i] = center;
@@ -3011,7 +3011,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices+dim, values);
-            hypre_TFree(values);
+            //hypre_TFree(values);
+	    hypre_UMTFree(values);
          }
       }
    }
@@ -3272,7 +3273,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
          for (ib = 0; ib < size; ib++)
          {
 	   //values = hypre_CTAlloc(HYPRE_Real, vol[ib]);
-	    hypre_DeviceDataCTAlloc(values, HYPRE_Real, vol[ib],0);
+	    values = hypre_UMCTAlloc(HYPRE_Real, vol[ib]);
             for (i = 0; i < vol[ib]; i++)
             {
                values[i] = 0.0;
@@ -3299,7 +3300,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
                ilower[ib][d] = j;
             }
             //hypre_TFree(values);
-	    hypre_DeviceDataTFree(values,0);
+	    hypre_UMTFree(values);
 	    
          }
       }

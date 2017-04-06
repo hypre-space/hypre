@@ -350,9 +350,6 @@ hypre_PointRelax( void               *relax_vdata,
    void                  *matvec_data = NULL;
 
    HYPRE_Int              Ai;
-   HYPRE_Int              bi;
-   HYPRE_Int              xi;
-   HYPRE_Int              ti;
                         
    hypre_IndexRef         stride;
    hypre_IndexRef         start;
@@ -471,7 +468,7 @@ hypre_PointRelax( void               *relax_vdata,
                                       b_data_box, start, stride, bi,
                                       x_data_box, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(bi, xi)
                   {
@@ -488,7 +485,7 @@ hypre_PointRelax( void               *relax_vdata,
                                       b_data_box, start, stride, bi,
                                       x_data_box, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,bi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop3For(Ai, bi, xi)
                   {
@@ -608,7 +605,7 @@ hypre_PointRelax( void               *relax_vdata,
                                       A_data_box, start, stride, Ai,
                                       t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(Ai, ti)
                   {
@@ -711,10 +708,6 @@ hypre_PointRelax_core0( void               *relax_vdata,
    hypre_IndexRef         start;
    hypre_Index            loop_size;
    HYPRE_Int              si, sk, ssi[MAX_DEPTH], depth, k;
-   HYPRE_Int              Ai;
-   HYPRE_Int              bi;
-   HYPRE_Int              xi;
-   HYPRE_Int              ti;
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -726,7 +719,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
                        b_data_box, start, stride, bi,
                        t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
    hypre_BoxLoop2For(bi, ti)
    {
@@ -802,7 +795,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop3For(Ai, xi, ti)
             {
@@ -824,7 +817,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop3For(Ai, xi, ti)
             {
@@ -845,7 +838,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop3For(Ai, xi, ti)
             {
@@ -865,7 +858,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop3For(Ai, xi, ti)
             {
@@ -884,7 +877,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop3For(Ai, xi, ti)
             {
@@ -902,7 +895,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop3For(Ai, xi, ti)
             {
@@ -919,7 +912,7 @@ hypre_PointRelax_core0( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop3For(Ai, xi, ti)
             {
@@ -991,9 +984,6 @@ hypre_PointRelax_core12( void               *relax_vdata,
    hypre_Index            loop_size;
    HYPRE_Int              si, sk, ssi[MAX_DEPTH], depth, k;
    HYPRE_Int              Ai;
-   HYPRE_Int              bi;
-   HYPRE_Int              xi;
-   HYPRE_Int              ti;
 
    stencil       = hypre_StructMatrixStencil(A);
    stencil_shape = hypre_StructStencilShape(stencil);
@@ -1018,7 +1008,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
                           b_data_box, start, stride, bi,
                           t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(bi, ti)
       {
@@ -1033,7 +1023,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
                           b_data_box, start, stride, bi,
                           t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(bi, ti)
       {
@@ -1117,7 +1107,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(xi, ti)
             {
@@ -1144,7 +1134,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(xi, ti)
             {
@@ -1169,7 +1159,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(xi, ti)
             {
@@ -1192,7 +1182,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(xi, ti)
             {
@@ -1213,7 +1203,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(xi, ti)
             {
@@ -1232,7 +1222,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(xi, ti)
             {
@@ -1249,7 +1239,7 @@ hypre_PointRelax_core12( void               *relax_vdata,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(xi, ti)
             {
@@ -1514,7 +1504,7 @@ HYPRE_Int hypre_relax_wtx( void *relax_vdata, HYPRE_Int pointset,
 
    HYPRE_Real weightc = 1 - weight;
    HYPRE_Real *xp, *tp;
-   HYPRE_Int compute_i, i, j, xi, ti;
+   HYPRE_Int compute_i, i, j;
 
    hypre_BoxArrayArray   *compute_box_aa;
    hypre_BoxArray        *compute_box_a;
@@ -1565,7 +1555,7 @@ HYPRE_Int hypre_relax_wtx( void *relax_vdata, HYPRE_Int pointset,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(xi, ti)
             {
@@ -1598,7 +1588,7 @@ HYPRE_Int hypre_relax_copy( void *relax_vdata, HYPRE_Int pointset,
    hypre_Index            loop_size;
 
    HYPRE_Real *xp, *tp;
-   HYPRE_Int compute_i, i, j, xi, ti;
+   HYPRE_Int compute_i, i, j;
 
    hypre_BoxArrayArray   *compute_box_aa;
    hypre_BoxArray        *compute_box_a;
@@ -1649,7 +1639,7 @@ HYPRE_Int hypre_relax_copy( void *relax_vdata, HYPRE_Int pointset,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,ti) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(xi, ti)
             {

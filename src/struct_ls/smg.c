@@ -111,8 +111,7 @@ hypre_SMGDestroy( void *smg_vdata )
             hypre_StructVectorDestroy(smg_data -> tb_l[l+1]);
             hypre_StructVectorDestroy(smg_data -> tx_l[l+1]);
          }
-         //hypre_SharedTFree(smg_data -> data);
-		 hypre_DataTFree(smg_data -> data);
+	 hypre_DeviceTFree(smg_data -> data);
          hypre_TFree(smg_data -> grid_l);
          hypre_TFree(smg_data -> PT_grid_l);
          hypre_TFree(smg_data -> A_l);
@@ -469,7 +468,6 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
 {
    hypre_Box          *v_data_box;
 
-   HYPRE_Int           vi;
    HYPRE_Real         *vp;
 
    hypre_Box          *box;
@@ -496,7 +494,7 @@ hypre_SMGSetStructVectorConstantValues( hypre_StructVector *vector,
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For(vi)
       {

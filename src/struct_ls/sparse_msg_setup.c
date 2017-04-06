@@ -559,8 +559,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
       }
    }
 
-   //data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
-   data = hypre_DataCTAlloc(HYPRE_Real,data_size);
+   data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
    
    (smsg_data -> data) = data;
 

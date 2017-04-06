@@ -816,9 +816,7 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
    size = 0;
    start = hypre_BoxIMin(box);
    hypre_BoxGetSize(box, loop_size);
-   hypre_BoxLoop0Begin(ndim, loop_size);
-   //hypre_BoxLoopSetOneBlock();
-   hypre_BoxLoop0For()
+   hypre_SerialBoxLoop0Begin(ndim, loop_size);
    {
       hypre_BoxLoopGetIndex(ii);
       for (d = 0; d < ndim; d++)
@@ -835,7 +833,7 @@ hypre_CreateCommInfoFromNumGhost( hypre_StructGrid      *grid,
       }
       size++;
    }
-   hypre_BoxLoop0End();
+   hypre_SerialBoxLoop0End();
 
    hypre_BoxDestroy(box);
 

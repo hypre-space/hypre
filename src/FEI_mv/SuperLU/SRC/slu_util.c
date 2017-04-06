@@ -189,7 +189,7 @@ countnz(const int n, int *xprune, int *nnzL, int *nnzU, GlobalLU_t *Glu)
 void
 fixupL(const int n, const int *perm_r, GlobalLU_t *Glu)
 {
-    int nsuper, fsupc, nextl, i, j, k, jstrt;
+    register int nsuper, fsupc, nextl, i, j, k, jstrt;
     int          *xsup, *lsub, *xlsub;
 
     if ( n <= 1 ) return;
@@ -241,7 +241,7 @@ void print_panel_seg(int n, int w, int jcol, int nseg,
 void
 StatInit(SuperLUStat_t *stat)
 {
-    int i, w, panel_size, relax;
+    register int i, w, panel_size, relax;
 
     panel_size = sp_ienv(1);
     relax = sp_ienv(2);
@@ -309,7 +309,7 @@ LUSolveFlops(SuperLUStat_t *stat)
  */
 void ifill(int *a, int alen, int ival)
 {
-    int i;
+    register int i;
     for (i = 0; i < alen; i++) a[i] = ival;
 }
 
@@ -323,7 +323,7 @@ static 	int	max_sup_size;
 
 void super_stats(int nsuper, int *xsup)
 {
-    int nsup1 = 0;
+    register int nsup1 = 0;
     int          i, isize, whichb, bl, bh;
     int          bucket[NBUCKS];
 
@@ -548,8 +548,8 @@ void sludlsolve ( int ldm, int ncol, double *M, double *rhs )
     int k;
     double x0, x1, x2, x3, x4, x5, x6, x7;
     double *M0;
-    double *Mki0, *Mki1, *Mki2, *Mki3, *Mki4, *Mki5, *Mki6, *Mki7;
-    int firstcol = 0;
+    register double *Mki0, *Mki1, *Mki2, *Mki3, *Mki4, *Mki5, *Mki6, *Mki7;
+    register int firstcol = 0;
 
     M0 = &M[0];
 
@@ -670,8 +670,8 @@ void sludmatvec (int ldm,int nrow,int ncol,double *M,double *vec,double *Mxvec )
 {
     double vi0, vi1, vi2, vi3, vi4, vi5, vi6, vi7;
     double *M0;
-    double *Mki0, *Mki1, *Mki2, *Mki3, *Mki4, *Mki5, *Mki6, *Mki7;
-    int firstcol = 0;
+    register double *Mki0, *Mki1, *Mki2, *Mki3, *Mki4, *Mki5, *Mki6, *Mki7;
+    register int firstcol = 0;
     int k;
 
     M0 = &M[0];

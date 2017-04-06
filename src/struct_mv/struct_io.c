@@ -62,7 +62,7 @@ hypre_PrintBoxArrayData( FILE            *file,
       data_box_volume = hypre_BoxVolume(data_box);
 
       hypre_BoxGetSize(box, loop_size);
-       /*FIXME: must run on CPU*/
+ 
       hypre_SerialBoxLoop1Begin(dim, loop_size,
                           data_box, start, stride, datai);
       {
@@ -160,9 +160,8 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
 
       hypre_BoxGetSize(box, loop_size);
 /*FIXME: must run sequentially*/
-      zypre_BoxLoop1Begin(dim, loop_size,
-                          data_box, start, stride, datai);
-      zypre_BoxLoop1For(datai)
+      hypre_SerialBoxLoop1Begin(dim, loop_size,
+				data_box, start, stride, datai);
       {
          /* Print line of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
          hypre_BoxLoopGetIndex(index);
@@ -181,7 +180,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
          hypre_fprintf(file, "; %d) %.14e\n", center_rank, value);
 #endif
       }
-      zypre_BoxLoop1End(datai);
+      hypre_SerialBoxLoop1End(datai);
       data += data_box_volume;
    }
 
@@ -270,9 +269,8 @@ hypre_ReadBoxArrayData( FILE            *file,
 
       hypre_BoxGetSize(box, loop_size);
        /*FIXME: must run sequentially*/
-      zypre_BoxLoop1Begin(dim, loop_size,
+      hypre_SerialBoxLoop1Begin(dim, loop_size,
                           data_box, start, stride, datai);
-      zypre_BoxLoop1For(datai)
       {
          /* Read lines of the form: "%d: (%d, %d, %d; %d) %le\n" */
          for (j = 0; j < num_values; j++)
@@ -286,7 +284,7 @@ hypre_ReadBoxArrayData( FILE            *file,
                          &idummy, &data[datai + j*data_box_volume]);
          }
       }
-      zypre_BoxLoop1End(datai);
+      hypre_SerialBoxLoop1End(datai);
 
       data += num_values*data_box_volume;
    }
@@ -352,10 +350,8 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
 
       if ( constant_coefficient==2 )
       {
-          /*FIXME: must run sequentially*/
-         zypre_BoxLoop1Begin(dim, loop_size,
+         hypre_SerialBoxLoop1Begin(dim, loop_size,
                              data_box, start, stride, datai);
-         zypre_BoxLoop1For(datai)
          {
             /* Read line of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
             hypre_fscanf(file, "%d: (%d", &idummy, &idummy);
@@ -365,7 +361,7 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
             }
             hypre_fscanf(file, "; %d) %le\n", &idummy, &data[datai]);
          }
-         zypre_BoxLoop1End(datai);
+         hypre_SerialBoxLoop1End(datai);
          data += data_box_volume;
       }
 

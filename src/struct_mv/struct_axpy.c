@@ -30,8 +30,8 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
                  
-   HYPRE_Int         xi;
-   HYPRE_Int         yi;
+   //HYPRE_Int         xi;
+   //HYPRE_Int         yi;
                     
    HYPRE_Complex    *xp;
    HYPRE_Complex    *yp;

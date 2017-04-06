@@ -155,7 +155,7 @@ integer s_cmp(a0, b0, la, lb) char *a0;const char *b0; ftnlen la, lb;
 integer s_cmp(char *a0,const char *b0, ftnlen la, ftnlen lb)
 #endif
 {
-unsigned char *a, *aend, *b, *bend;
+register unsigned char *a, *aend, *b, *bend;
 a = (unsigned char *)a0;
 b = (unsigned char *)b0;
 aend = a + la;

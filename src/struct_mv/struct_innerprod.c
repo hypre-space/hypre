@@ -32,9 +32,6 @@ hypre_StructInnerProd( hypre_StructVector *x,
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
                    
-   HYPRE_Int        xi;
-   HYPRE_Int        yi;
-                   
    HYPRE_Complex   *xp;
    HYPRE_Complex   *yp;
                    
@@ -45,7 +42,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
     hypre_Index      unit_stride;
     
    HYPRE_Int         ndim = hypre_StructVectorNDim(x);               
-   HYPRE_Int        i, d;
+   HYPRE_Int        i;
 
    zypre_Reductioninit(local_result);
    
@@ -73,7 +70,6 @@ hypre_StructInnerProd( hypre_StructVector *x,
 #undef HYPRE_BOX_REDUCTION
 #endif
 #define HYPRE_BOX_REDUCTION reduction(+:local_result)
-	   
      zypre_newBoxLoop2ReductionBegin(ndim, loop_size,
 				     x_data_box, start, unit_stride, xi,
 				     y_data_box, start, unit_stride, yi,local_result);

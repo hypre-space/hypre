@@ -158,9 +158,7 @@ hypre_APSubdivideRegion( hypre_Box      *region,
    }
 
    count = 0;
-   hypre_BoxLoop0Begin(ndim, div);
-   //hypre_BoxLoopSetOneBlock();
-   hypre_BoxLoop0For()
+   hypre_SerialBoxLoop0Begin(ndim, div);
    {
       box = hypre_BoxArrayBox(box_array, count);
       hypre_BoxLoopGetIndex(index);
@@ -172,7 +170,7 @@ hypre_APSubdivideRegion( hypre_Box      *region,
       }
       count++;
    }
-   hypre_BoxLoop0End();
+   hypre_SerialBoxLoop0End();
 
    /* clean up */
    for (i = 0; i < ndim; i++) 

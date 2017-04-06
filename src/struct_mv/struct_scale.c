@@ -28,7 +28,6 @@ hypre_StructScale( HYPRE_Complex       alpha,
 {
    hypre_Box       *y_data_box;
                    
-   HYPRE_Int        yi;
    HYPRE_Complex   *yp;
                    
    hypre_BoxArray  *boxes;
@@ -55,7 +54,7 @@ hypre_StructScale( HYPRE_Complex       alpha,
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(y), loop_size,
                           y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For(yi)
       {

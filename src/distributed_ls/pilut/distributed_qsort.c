@@ -47,12 +47,12 @@ static HYPRE_Int mthresh;		/* MTHRESHold in chars */
 void
 hypre_tex_qsort(char* base,HYPRE_Int n,HYPRE_Int size, HYPRE_Int (*compar) (char*,char*))
 {
-    char *i;
-    char *j;
-    char *lo;
-    char *hi;
-    char *min;
-    char c;
+    register char *i;
+    register char *j;
+    register char *lo;
+    register char *hi;
+    register char *min;
+    register char c;
     char *max;
 
     if (n <= 1)
@@ -129,12 +129,12 @@ hypre_tex_qsort(char* base,HYPRE_Int n,HYPRE_Int size, HYPRE_Int (*compar) (char
 
 static void qst(char *base, char *max)
 {
-    char *i;
-    char *j;
-    char *jj;
-    char *mid;
-    HYPRE_Int ii;
-    char c;
+    register char *i;
+    register char *j;
+    register char *jj;
+    register char *mid;
+    register HYPRE_Int ii;
+    register char c;
     char *tmp;
     HYPRE_Int lo;
     HYPRE_Int hi;

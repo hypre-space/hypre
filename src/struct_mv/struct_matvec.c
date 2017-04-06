@@ -109,8 +109,6 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
    hypre_BoxArrayArray     *compute_box_aa;
    hypre_Box               *y_data_box;
                           
-   HYPRE_Int                yi;
-                          
    HYPRE_Complex           *xp;
    HYPRE_Complex           *yp;
                           
@@ -158,7 +156,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                              y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop1For(yi)
          {
@@ -222,7 +220,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                      hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                                          y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop1For(yi)
                      {
@@ -237,7 +235,7 @@ hypre_StructMatvecCompute( void               *matvec_vdata,
                      hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                                          y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop1For(yi)
                      {
@@ -321,8 +319,6 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
    HYPRE_Int                xoff4;
    HYPRE_Int                xoff5;
    HYPRE_Int                xoff6;
-   HYPRE_Int                Ai;
-   HYPRE_Int                xi;
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
                           
@@ -338,7 +334,6 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
    HYPRE_Int                depth;
    hypre_Index              loop_size;
    hypre_IndexRef           start;
-   HYPRE_Int                yi;
    HYPRE_Int                ndim;
 
    stencil       = hypre_StructMatrixStencil(A);
@@ -399,7 +394,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop3For(Ai, xi, yi)
                   {
@@ -442,7 +437,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop3For(Ai, xi, yi)
                   {
@@ -481,7 +476,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop3For(Ai, xi, yi)
                   {
@@ -516,7 +511,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop3For(Ai, xi, yi)
                   {
@@ -547,7 +542,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop3For(Ai, xi, yi)
                   {
@@ -574,7 +569,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop3For(Ai, xi, yi)
                   {
@@ -597,7 +592,7 @@ HYPRE_Int hypre_StructMatvecCC0( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop3For(Ai, xi, yi)
                   {
@@ -666,7 +661,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
    HYPRE_Int                xoff5;
    HYPRE_Int                xoff6;
    HYPRE_Int                Ai;
-   HYPRE_Int                xi;
+
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
                           
@@ -681,7 +676,6 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
    HYPRE_Int                depth;
    hypre_Index              loop_size;
    hypre_IndexRef           start;
-   HYPRE_Int                yi;
    HYPRE_Int                ndim;
 
    stencil       = hypre_StructMatrixStencil(A);
@@ -749,7 +743,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -796,7 +790,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -838,7 +832,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -875,7 +869,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -907,7 +901,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -934,7 +928,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -956,7 +950,7 @@ HYPRE_Int hypre_StructMatvecCC1( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -1010,8 +1004,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
    HYPRE_Int                xoff6;
    HYPRE_Int                si_center, center_rank;
    hypre_Index              center_index;
-   HYPRE_Int                Ai, Ai_CC;
-   HYPRE_Int                xi;
+   HYPRE_Int                Ai_CC;
    hypre_BoxArray          *compute_box_a;
    hypre_Box               *compute_box;
                           
@@ -1027,7 +1020,6 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
    HYPRE_Int                depth;
    hypre_Index              loop_size;
    hypre_IndexRef           start;
-   HYPRE_Int                yi;
    HYPRE_Int                ndim;
 
    stencil       = hypre_StructMatrixStencil(A);
@@ -1120,7 +1112,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -1180,7 +1172,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -1233,7 +1225,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -1280,7 +1272,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -1321,7 +1313,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -1356,7 +1348,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -1382,7 +1374,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                                       x_data_box, start, stride, xi,
                                       y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(xi, yi)
                   {
@@ -1405,7 +1397,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                                 x_data_box, start, stride, xi,
                                 y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop3For(Ai, xi, yi)
             {
@@ -1421,7 +1413,7 @@ HYPRE_Int hypre_StructMatvecCC2( HYPRE_Complex       alpha,
                                 x_data_box, start, stride, xi,
                                 y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop3For(Ai, xi, yi)
             {

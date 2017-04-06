@@ -113,8 +113,6 @@ hypre_SMGSetupInterpOp( void               *relax_data,
    hypre_Box            *x_data_box;
    HYPRE_Real           *PTp;
    HYPRE_Real           *xp;
-   HYPRE_Int             PTi;
-   HYPRE_Int             xi;
 
    hypre_Index           loop_size;
    hypre_Index           start;
@@ -265,7 +263,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                                    x_data_box,  start,  stride,  xi,
                                    PT_data_box, startc, stridec, PTi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,PTi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(xi, PTi)
                {

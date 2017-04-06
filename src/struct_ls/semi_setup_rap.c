@@ -322,11 +322,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
    HYPRE_Real           *rap_ptrS, *rap_ptrU, *rap_ptrD;
 
    HYPRE_Int             symm_path_multiplier;
-
-   HYPRE_Int             iA, iAp;
-   HYPRE_Int             iAc;
-   HYPRE_Int             iP, iPp;
-   HYPRE_Int             iR;
                         
    HYPRE_Int             COffsetA; 
    HYPRE_Int             COffsetP; 
@@ -561,7 +556,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                             A_dbox, fstart, stridef, iA,
                                             RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                         hypre_BoxLoop4For(iP, iR, iA, iAc)
                         {
@@ -598,7 +593,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                             A_dbox, fstart, stridef, iA,
                                             RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                         hypre_BoxLoop4For(iP, iR, iA, iAc)
                         {
@@ -672,7 +667,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                          A_dbox, fstart, stridef, iA,
                                          RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {
@@ -742,7 +737,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                          A_dbox, fstart, stridef, iA,
                                          RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAp,iPp) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop4For(iP, iR, iA, iAc)
                      {

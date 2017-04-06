@@ -564,11 +564,6 @@ hypre_NodeRelax(  void               *relax_vdata,
    hypre_Box             *x_data_box;
    hypre_Box             *t_data_box;
                         
-   HYPRE_Int              Ai;
-   HYPRE_Int              bi;
-   HYPRE_Int              xi;
-   HYPRE_Int              ti;
-                        
    HYPRE_Real           **tA_loc = (relax_data -> A_loc);
    HYPRE_Real            *tx_loc = (relax_data -> x_loc);
    HYPRE_Real           **A_loc;
@@ -704,12 +699,12 @@ hypre_NodeRelax(  void               *relax_vdata,
                                    b_data_box, start, stride, bi,
                                    x_data_box, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,bi,xi,vi,vj,x_loc,A_loc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                zypre_BoxLoop3For(Ai, bi, xi)
                {
-                  A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
-                  x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
+                     HYPRE_Real   **A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
+		     HYPRE_Real    *x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
                   /*------------------------------------------------
                    * Copy rhs and matrix for diagonal coupling
                    * (intra-nodal) into local storage.

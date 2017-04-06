@@ -859,6 +859,7 @@ AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
     HYPRE_RAJA_SRC_DIR="-L$raja_lib_dir $HYPRE_RAJA_SRC_DIR"
  done;
 ]
+)
 
 AC_ARG_WITH(caliper,
 AS_HELP_STRING([--with-caliper],
@@ -898,7 +899,7 @@ then
 	hypre_using_mpi=yes
 	AC_CHECK_PROGS(CXX, [nvcc])
 	AC_CHECK_PROGS(CC, [nvcc])
-	AC_CHECK_PROGS(CUDACXX, [mpxlC mpixlcxx_r mpiicpc mpicxx mpiCC mpipgCC xlC_r xlc_r icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+	AC_CHECK_PROGS(CUDACXX, [mpxlC mpixlcxx_r mpicxx mpiCC mpipgCC xlC_r xlc_r g++ gcc pgCC pgcc CC cc KCC kcc])
 fi
 
 if test "$hypre_user_chose_ccompilers" = "no"
@@ -1358,7 +1359,7 @@ dnl * Set cuda options
 dnl *********************************************************************
 if test "$hypre_user_chose_cuda" = "yes"
 then
-   LDFLAGS="-Xcompiler -fopenmp -arch compute_35"
+   LDFLAGS="-ccbin=mpicxx -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
    CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CFLAGS"
    CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CXXFLAGS"
    if test "$hypre_using_um" = "yes"

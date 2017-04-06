@@ -84,10 +84,10 @@ int MLI_Solver_SGS::solve(MLI_Vector *fIn, MLI_Vector *uIn)
 {
    int                 *ADiagI, *ADiagJ, *AOffdI, *AOffdJ;
    double              *ADiagA, *AOffdA, *uData, *fData;
-   int        iStart, iEnd, jj;
+   register int        iStart, iEnd, jj;
    int                 i, j, is, localNRows, extNRows, *tmpJ, relaxError=0;
    int                 iC, index, nprocs, mypid, nSends, start;
-   double     res;
+   register double     res;
    double              zero = 0.0, relaxWeight, rnorm;
    double              *vBufData=NULL, *tmpData, *vExtData=NULL;
    MPI_Comm            comm;
@@ -486,10 +486,10 @@ int MLI_Solver_SGS::findOmega()
 {
    int                 *ADiagI, *ADiagJ, *AOffdI, *AOffdJ;
    double              *ADiagA, *AOffdA, *uData, *fData;
-   int        iStart, iEnd, jj;
+   register int        iStart, iEnd, jj;
    int                 i, j, is, iR, localNRows, extNRows, *tmpJ;
    int                 index, nprocs, mypid, nSends, start;
-   double     res;
+   register double     res;
    double              zero = 0.0, relaxWeight, rnorm, *relNorms;
    double              *vBufData=NULL, *tmpData, *vExtData=NULL; 
    MPI_Comm            comm;

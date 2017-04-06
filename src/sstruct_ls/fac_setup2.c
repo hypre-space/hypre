@@ -105,7 +105,6 @@ hypre_FacSetup2( void                 *fac_vdata,
    HYPRE_Int              *stencil_vars;
    HYPRE_Real             *values;
    HYPRE_Real             *A_smatrix_value;
-   HYPRE_Int               iA;
  
    HYPRE_Int              *nrows;
    HYPRE_Int             **ncols;
@@ -498,7 +497,7 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
                                    sgrid_box, box_start, stride, k,
                                    A_smatrix_dbox, box_start, stride, iA);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,k,iA) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(k, iA)
                {
@@ -573,7 +572,7 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
                                       sgrid_box, box_start, stride, k,
                                       A_smatrix_dbox, box_start, stride, iA);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,k,iA) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(k, iA)
                   {

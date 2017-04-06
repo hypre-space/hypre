@@ -229,8 +229,7 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_StructVectorInitializeShell(tx_l[l+1]);
    }
 
-   //data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
-   data = hypre_DataCTAlloc(HYPRE_Real,data_size);
+   data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
 
    (smg_data -> data) = data;
 

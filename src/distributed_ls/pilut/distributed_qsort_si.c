@@ -43,12 +43,12 @@ static void sdqst(HYPRE_Int *, HYPRE_Int *);
 
 void hypre_sincsort_fast(HYPRE_Int n, HYPRE_Int *base)
 {
-  HYPRE_Int *i;
-  HYPRE_Int *j;
-  HYPRE_Int *lo;
-  HYPRE_Int *hi;
-  HYPRE_Int *min;
-  HYPRE_Int c;
+  register HYPRE_Int *i;
+  register HYPRE_Int *j;
+  register HYPRE_Int *lo;
+  register HYPRE_Int *hi;
+  register HYPRE_Int *min;
+  register HYPRE_Int c;
   HYPRE_Int *max;
 
   if (n <= 1)
@@ -115,11 +115,11 @@ void hypre_sincsort_fast(HYPRE_Int n, HYPRE_Int *base)
 
 static void siqst(HYPRE_Int *base, HYPRE_Int *max)
 {
-  HYPRE_Int *i;
-  HYPRE_Int *j;
-  HYPRE_Int *jj;
-  HYPRE_Int *mid;
-  HYPRE_Int c;
+  register HYPRE_Int *i;
+  register HYPRE_Int *j;
+  register HYPRE_Int *jj;
+  register HYPRE_Int *mid;
+  register HYPRE_Int c;
   HYPRE_Int *tmp;
   HYPRE_Int lo;
   HYPRE_Int hi;
