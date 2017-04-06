@@ -65,7 +65,6 @@ FILES =\
  gpuMem.c
 
 OBJS = ${FILES:.c=.o}
-CPPOBJS= ${FILES:.C=.o}
 
 SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}.so
 
@@ -96,7 +95,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_utilities.a: ${OBJS} ${CPPOBJS}
+libHYPRE_utilities.a: ${OBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ *.o
 	${RANLIB} $@

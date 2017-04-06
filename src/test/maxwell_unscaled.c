@@ -1801,7 +1801,7 @@ main( hypre_int argc,
    hypre_PrintTiming("SStruct Interface", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
    hypre_ClearTiming();
-		    
+
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
