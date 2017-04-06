@@ -1604,6 +1604,17 @@ HYPRE_BoomerAMGGetSimple( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAddLastLvl
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAddLastLvl( HYPRE_Solver solver,
+                          HYPRE_Int          add_last_lvl  )
+{
+   return( hypre_BoomerAMGSetAddLastLvl( (void *) solver, add_last_lvl ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetNonGalerkinTol
  *--------------------------------------------------------------------------*/
 

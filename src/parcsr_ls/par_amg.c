@@ -104,6 +104,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int        additive;
    HYPRE_Int        mult_additive;
    HYPRE_Int        simple;
+   HYPRE_Int        add_last_lvl;
    HYPRE_Real   add_trunc_factor;
    HYPRE_Int      add_P_max_elmts;
    HYPRE_Int      add_rlx_type;
@@ -205,6 +206,7 @@ hypre_BoomerAMGCreate()
    additive = -1;
    mult_additive = -1;
    simple = -1;
+   add_last_lvl = -1;
    add_trunc_factor = 0.0;
    add_P_max_elmts = 0;
    add_rlx_type = 18;
@@ -308,6 +310,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMultAddTruncFactor(amg_data, add_trunc_factor);
    hypre_BoomerAMGSetAddRelaxType(amg_data, add_rlx_type);
    hypre_BoomerAMGSetAddRelaxWt(amg_data, add_rlx_wt);
+   hypre_ParAMGDataAddLastLvl(amg_data) = add_last_lvl;
    hypre_ParAMGDataLambda(amg_data) = NULL;
    hypre_ParAMGDataXtilde(amg_data) = NULL;
    hypre_ParAMGDataRtilde(amg_data) = NULL;
@@ -495,6 +498,14 @@ hypre_BoomerAMGDestroy( void *data )
 
    if (hypre_ParAMGDataLambda(amg_data))
       hypre_ParCSRMatrixDestroy(hypre_ParAMGDataLambda(amg_data));
+
+   if (hypre_ParAMGDataAtilde(amg_data))
+   {
+      hypre_ParCSRMatrix *Atilde = hypre_ParAMGDataAtilde(amg_data);
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(Atilde));
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(Atilde));
+      hypre_TFree (Atilde);
+   }
 
    if (hypre_ParAMGDataXtilde(amg_data))
       hypre_ParVectorDestroy(hypre_ParAMGDataXtilde(amg_data));
@@ -3704,6 +3715,23 @@ hypre_BoomerAMGGetSimple( void *data,
    }
 
    *simple = hypre_ParAMGDataSimple(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetAddLastLvl( void *data,
+                          HYPRE_Int   add_last_lvl )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataAddLastLvl(amg_data) = add_last_lvl;
 
    return hypre_error_flag;
 }

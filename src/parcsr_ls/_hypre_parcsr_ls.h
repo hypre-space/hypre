@@ -240,11 +240,13 @@ typedef struct
    HYPRE_Int      additive;
    HYPRE_Int      mult_additive;
    HYPRE_Int      simple;
+   HYPRE_Int      add_last_lvl;
    HYPRE_Int      add_P_max_elmts;
    HYPRE_Real     add_trunc_factor;
    HYPRE_Int      add_rlx_type;
    HYPRE_Real     add_rlx_wt;
    hypre_ParCSRMatrix *Lambda;
+   hypre_ParCSRMatrix *Atilde;
    hypre_ParVector *Rtilde;
    hypre_ParVector *Xtilde;
    HYPRE_Real *D_inv;
@@ -437,11 +439,13 @@ typedef struct
 #define hypre_ParAMGDataAdditive(amg_data) ((amg_data)->additive)
 #define hypre_ParAMGDataMultAdditive(amg_data) ((amg_data)->mult_additive)
 #define hypre_ParAMGDataSimple(amg_data) ((amg_data)->simple)
+#define hypre_ParAMGDataAddLastLvl(amg_data) ((amg_data)->add_last_lvl)
 #define hypre_ParAMGDataMultAddPMaxElmts(amg_data) ((amg_data)->add_P_max_elmts)
 #define hypre_ParAMGDataMultAddTruncFactor(amg_data) ((amg_data)->add_trunc_factor)
 #define hypre_ParAMGDataAddRelaxType(amg_data) ((amg_data)->add_rlx_type)
 #define hypre_ParAMGDataAddRelaxWt(amg_data) ((amg_data)->add_rlx_wt)
 #define hypre_ParAMGDataLambda(amg_data) ((amg_data)->Lambda)
+#define hypre_ParAMGDataAtilde(amg_data) ((amg_data)->Atilde)
 #define hypre_ParAMGDataRtilde(amg_data) ((amg_data)->Rtilde)
 #define hypre_ParAMGDataXtilde(amg_data) ((amg_data)->Xtilde)
 #define hypre_ParAMGDataDinv(amg_data) ((amg_data)->D_inv)
@@ -852,6 +856,7 @@ HYPRE_Int HYPRE_BoomerAMGSetMultAdditive ( HYPRE_Solver solver , HYPRE_Int mult_
 HYPRE_Int HYPRE_BoomerAMGGetMultAdditive ( HYPRE_Solver solver , HYPRE_Int *mult_additive );
 HYPRE_Int HYPRE_BoomerAMGSetSimple ( HYPRE_Solver solver , HYPRE_Int simple );
 HYPRE_Int HYPRE_BoomerAMGGetSimple ( HYPRE_Solver solver , HYPRE_Int *simple );
+HYPRE_Int HYPRE_BoomerAMGSetAddLastLvl ( HYPRE_Solver solver , HYPRE_Int add_last_lvl );
 HYPRE_Int HYPRE_BoomerAMGSetNonGalerkinTol ( HYPRE_Solver solver , HYPRE_Real nongalerkin_tol );
 HYPRE_Int HYPRE_BoomerAMGSetLevelNonGalerkinTol ( HYPRE_Solver solver , HYPRE_Real nongalerkin_tol , HYPRE_Int level );
 HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol ( HYPRE_Solver solver , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
@@ -1274,6 +1279,7 @@ HYPRE_Int hypre_BoomerAMGSetMultAdditive ( void *data , HYPRE_Int mult_additive 
 HYPRE_Int hypre_BoomerAMGGetMultAdditive ( void *data , HYPRE_Int *mult_additive );
 HYPRE_Int hypre_BoomerAMGSetSimple ( void *data , HYPRE_Int simple );
 HYPRE_Int hypre_BoomerAMGGetSimple ( void *data , HYPRE_Int *simple );
+HYPRE_Int hypre_BoomerAMGSetAddLastLvl ( void *data , HYPRE_Int add_last_lvl );
 HYPRE_Int hypre_BoomerAMGSetNonGalerkinTol ( void *data , HYPRE_Real nongalerkin_tol );
 HYPRE_Int hypre_BoomerAMGSetLevelNonGalerkinTol ( void *data , HYPRE_Real nongalerkin_tol , HYPRE_Int level );
 HYPRE_Int hypre_BoomerAMGSetNonGalerkTol ( void *data , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
