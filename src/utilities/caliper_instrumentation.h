@@ -10,39 +10,29 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
- * Header file link lists
+ * Header file for Caliper instrumentation macros
  *
  *****************************************************************************/
 
-#ifndef HYPRE_LINKLIST_HEADER
-#define HYPRE_LINKLIST_HEADER
+#ifndef CALIPER_INSTRUMENTATION_HEADER
+#define CALIPER_INSTRUMENTATION_HEADER
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "HYPRE_config.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifdef HYPRE_USING_CALIPER
 
-struct double_linked_list
-{
-       HYPRE_Int                        data;
-       struct double_linked_list *next_elt;
-       struct double_linked_list *prev_elt;
-       HYPRE_Int                        head;
-       HYPRE_Int                        tail;
-};
+#include <caliper/cali.h>
 
-typedef struct double_linked_list hypre_ListElement;
-typedef hypre_ListElement  *hypre_LinkList;  
+#define HYPRE_ANNOTATION_BEGIN( str ) cali_begin_string_byname("hypre.kernel", str)
+#define HYPRE_ANNOTATION_END( str ) cali_end_byname("hypre.kernel")
 
-#ifdef __cplusplus
-}
-#endif
+#else
+
+#define HYPRE_ANNOTATION_BEGIN( str ) 
+#define HYPRE_ANNOTATION_END( str ) 
 
 #endif
+
+#endif /* CALIPER_INSTRUMENTATION_HEADER */

@@ -65,15 +65,23 @@ co="--enable-debug CC=mpiCC"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
 renametest.sh basictest $output_dir/basictest-debug-cpp
 
-co="--with-insure --enable-debug --with-print-errors"
-MO="test"
-test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
-renametest.sh basictest $output_dir/basictest--with-insure1
+# co="--with-insure --enable-debug --with-print-errors"
+# MO="test"
+# test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
+# renametest.sh basictest $output_dir/basictest--with-insure1
+# 
+# co="--with-insure --enable-debug --enable-global-partition"
+# MO="test"
+# test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
+# renametest.sh basictest $output_dir/basictest--with-insure2
 
-co="--with-insure --enable-debug --enable-global-partition"
-MO="test"
-test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
-renametest.sh basictest $output_dir/basictest--with-insure2
+co="--enable-debug --with-print-errors"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+renametest.sh basictest $output_dir/basictest--valgrind1
+
+co="--enable-debug --enable-global-partition"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+renametest.sh basictest $output_dir/basictest--valgrind2
 
 co="--without-MPI"
 test.sh basictest.sh $src_dir -co: $co -mo: $mo

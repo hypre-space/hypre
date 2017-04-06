@@ -46,6 +46,9 @@
 /* Use OpenMP */
 #cmakedefine HYPRE_USING_OPENMP
 
+/* Use Caliper instrumentation */
+#cmakedefine HYPRE_USING_CALIPER
+
 /* #undef HYPRE_HAVE_MPI */
 /* #undef HYPRE_HAVE_MPI_COMM_F2C */
 
