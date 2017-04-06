@@ -1,3 +1,15 @@
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
 #ifdef USE_NVTX
 #include "nvToolsExt.h"
 #include "nvToolsExtCudaRt.h"
@@ -57,5 +69,4 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #define PUSH_RANGE_PAYLOAD(name,cid,load)
 #define PUSH_RANGE_DOMAIN(name,cid,domainName)
 #endif
-
 

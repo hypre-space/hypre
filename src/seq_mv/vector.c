@@ -15,14 +15,12 @@
  * Member functions for hypre_Vector class.
  *
  *****************************************************************************/
+
 #include "seq_mv.h"
 #include <assert.h>
 #ifdef HYPRE_USE_GPU
 #include <cublas_v2.h>
 #include <cusparse.h>
-#include "hypre_nvtx.h"
-#include "gpuErrorCheck.h"
-#include "gpuMem.h"
 #include "gpukernels.h"
 #endif
 
@@ -34,12 +32,12 @@ hypre_Vector *
 hypre_SeqVectorCreate( HYPRE_Int size )
 {
    hypre_Vector  *vector;
+
    vector = hypre_HCTAlloc(hypre_Vector, 1);
 
 #ifdef HYPRE_USE_GPU
    vector->on_device=0;
 #endif
-
 
    hypre_VectorData(vector) = NULL;
    hypre_VectorSize(vector) = size;
@@ -434,6 +432,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
+
    return ierr;
 }
 
@@ -528,7 +527,7 @@ HYPRE_Complex hypre_VectorSumElts( hypre_Vector *vector )
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
 #endif
-   for ( i=0; i<size; ++i ) sum += data[i]; 
+   for ( i=0; i<size; ++i ) sum += data[i];
 
    return sum;
 }

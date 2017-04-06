@@ -10,15 +10,11 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
-
-	
 #include "_hypre_utilities.h"
-
 
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_struct_ls.h"
@@ -29,15 +25,11 @@
 
 #include <time.h>
 
-
-    
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
 #include "interpreter.h"
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"
-#include "hypre_nvtx.h"
-#include "gpuMem.h"
 #define NO_SOLVER -9198
 
 /* end lobpcg */

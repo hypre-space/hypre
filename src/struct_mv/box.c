@@ -656,6 +656,7 @@ hypre_BoxArraySetSize( hypre_BoxArray  *box_array,
       hypre_BoxArrayBoxes(box_array) =
          hypre_TReAlloc(hypre_BoxArrayBoxes(box_array), hypre_Box, alloc_size);
       hypre_BoxArrayAllocSize(box_array) = alloc_size;
+
       for (i = old_alloc_size; i < alloc_size; i++)
       {
          box = hypre_BoxArrayBox(box_array, i);

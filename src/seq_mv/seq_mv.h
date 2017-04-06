@@ -96,7 +96,6 @@ typedef struct
    HYPRE_Int     num_nonzeros;
    HYPRE_Int     owns_data;
 
-
 } hypre_CSRBooleanMatrix;
 
 /*--------------------------------------------------------------------------

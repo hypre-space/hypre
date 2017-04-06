@@ -21,7 +21,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}\
- ${CDEFS}\
+ ${CDEFS}
 
 CXX_COMPILE_FLAGS = \
  -I$(srcdir)\
@@ -125,25 +125,25 @@ distclean: clean
 
 # C
 
-ij: ij.o 
+ij: ij.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@  ${C_COMPILE_FLAGS} $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ ${C_COMPILE_FLAGS} $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 struct: struct.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ ${C_COMPILE_FLAGS} $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 ams_driver: ams_driver.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ ${C_COMPILE_FLAGS} $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 maxwell_unscaled: maxwell_unscaled.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ ${C_COMPILE_FLAGS} $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 struct_migrate: struct_migrate.o
 	@echo  "Building" $@ "... "

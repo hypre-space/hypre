@@ -393,7 +393,6 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
 #define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
 
-
 /*--------------------------------------------------------------------------
  * Parallel CSR Boolean Matrix
  *--------------------------------------------------------------------------*/

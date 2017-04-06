@@ -10,16 +10,10 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 #include "ams.h"
-#include "gpukernels.h"
-#include "hypre_nvtx.h"
-#include "gpuMem.h"
+
 /*--------------------------------------------------------------------------
  * hypre_ParCSRRelax
  *

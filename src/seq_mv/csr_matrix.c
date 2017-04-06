@@ -18,10 +18,7 @@
 
 #include "seq_mv.h"
 #ifdef HYPRE_USE_GPU
-#include "gpuErrorCheck.h"
-#include "hypre_nvtx.h"
 #include "gpukernels.h"
-#include "gpuMem.h"
 #endif
 #ifdef HYPRE_PROFILE
 HYPRE_Real hypre_profile_times[HYPRE_TIMER_ID_COUNT] = { 0 };
@@ -39,7 +36,6 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrix  *matrix;
 
    matrix = hypre_HCTAlloc(hypre_CSRMatrix, 1);
-   
 
    hypre_CSRMatrixData(matrix) = NULL;
    hypre_CSRMatrixI(matrix)    = NULL;

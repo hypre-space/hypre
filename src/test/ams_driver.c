@@ -23,8 +23,6 @@
 #include "_hypre_parcsr_ls.h"
 #include "_hypre_IJ_mv.h"
 #include "HYPRE.h"
-#include "hypre_nvtx.h"
-#include "gpuMem.h"
 
 void CheckIfFileExists(char *file)
 {

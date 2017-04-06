@@ -18,10 +18,7 @@
 
 #include "_hypre_parcsr_mv.h"
 #include <assert.h>
-#include "hypre_nvtx.h"
 #ifdef HYPRE_USE_GPU
-#include "gpuErrorCheck.h"
-#include "gpuMem.h"
 void PackOnDevice(double *send_data,double *x_local_data, int *send_map, int begin,int end,cudaStream_t s);
 #endif
 

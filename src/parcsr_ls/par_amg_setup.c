@@ -2113,7 +2113,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    /* redundant coarse grid solve */
    if (  (seq_threshold >= coarse_threshold) && (coarse_size > coarse_threshold) && (level != max_levels-1))
    {
-     hypre_seqAMGSetup( amg_data, level, coarse_threshold);
+      hypre_seqAMGSetup( amg_data, level, coarse_threshold);
 
    }
    else if (grid_relax_type[3] == 9 || grid_relax_type[3] == 99)  /*use of Gaussian elimination on coarsest level */
@@ -2128,6 +2128,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       if (coarse_size > coarse_threshold)
          grid_relax_type[3] = grid_relax_type[1];
    }
+
    if (level > 0)
    {
       if (block_mode)
@@ -2164,6 +2165,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParVectorSetPartitioningOwner(U_array[level],0);
       }   
    }
+
    /*-----------------------------------------------------------------------
     * enter all the stuff created, A[level], P[level], CF_marker[level],
     * for levels 1 through coarsest, into amg_data data structure
