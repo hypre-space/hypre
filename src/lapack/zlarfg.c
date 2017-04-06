@@ -76,7 +76,7 @@
 	    doublecomplex *, integer *);
     static doublereal xnorm;
     extern doublereal dlapy3_(doublereal *, doublereal *, doublereal *), 
-	    dznrm2_(integer *, doublecomplex *, integer *), dlamch_(char *);
+	    dznrm2_(integer *, doublecomplex *, integer *), dlamch_(const char *);
     static doublereal safmin;
     extern /* Subroutine */ HYPRE_Int zdscal_(integer *, doublereal *, 
 	    doublecomplex *, integer *);

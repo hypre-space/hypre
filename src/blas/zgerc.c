@@ -94,7 +94,7 @@
 	return 0;
     }
 /*     Quick return if possible. */
-    if (*m == 0 || *n == 0 || alpha->r == 0. && alpha->i == 0.) {
+    if (*m == 0 || *n == 0 || (alpha->r == 0. && alpha->i == 0.)) {
 	return 0;
     }
 /*     Start the operations. In this version the elements of A are   

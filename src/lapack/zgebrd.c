@@ -160,11 +160,11 @@
 	    doublecomplex *, doublecomplex *, doublecomplex *, integer *);
     static integer nb, nx;
     static doublereal ws;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *), zlabrd_(
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *), zlabrd_(
 	    integer *, integer *, integer *, doublecomplex *, integer *, 
 	    doublereal *, doublereal *, doublecomplex *, doublecomplex *, 
 	    doublecomplex *, integer *, doublecomplex *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern integer ilaenv_(integer *, const char *, const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     static integer ldwrkx, ldwrky, lwkopt;
     static logical lquery;

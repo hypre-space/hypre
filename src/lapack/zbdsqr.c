@@ -41,7 +41,7 @@ static doublereal c_b72 = -1.;
     static doublereal f, g, h__;
     static integer i__, j, m;
     static doublereal r__;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *, const char *);
     static doublereal oldcs;
     static integer oldll;
     static doublereal shift, sigmn, oldsn;
@@ -58,15 +58,15 @@ static doublereal c_b72 = -1.;
 	    doublereal *, doublereal *, doublereal *);
     static doublereal cs;
     static integer ll;
-    extern doublereal dlamch_(char *);
+    extern doublereal dlamch_(const char *);
     static doublereal sn, mu;
     extern /* Subroutine */ HYPRE_Int dlartg_(doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *), xerbla_(char *, 
+	    doublereal *, doublereal *, doublereal *), xerbla_(const char *, 
 	    integer *), zdscal_(integer *, doublereal *, 
 	    doublecomplex *, integer *);
     static doublereal sminoa, thresh;
     static logical rotate;
-    static doublereal sminlo;
+    //static doublereal sminlo;
     static integer nm1;
     static doublereal tolmul;
     static integer nm12, nm13, lll;
@@ -233,11 +233,11 @@ static doublereal c_b72 = -1.;
 	*info = -4;
     } else if (*ncc < 0) {
 	*info = -5;
-    } else if (*ncvt == 0 && *ldvt < 1 || *ncvt > 0 && *ldvt < max(1,*n)) {
+    } else if ((*ncvt == 0 && *ldvt < 1) || (*ncvt > 0 && *ldvt < max(1,*n))) {
 	*info = -9;
     } else if (*ldu < max(1,*nru)) {
 	*info = -11;
-    } else if (*ncc == 0 && *ldc < 1 || *ncc > 0 && *ldc < max(1,*n)) {
+    } else if ((*ncc == 0 && *ldc < 1) || (*ncc > 0 && *ldc < max(1,*n))) {
 	*info = -13;
     }
     if (*info != 0) {
@@ -483,8 +483,8 @@ L90:
 /*        Run convergence test in forward direction   
           First apply standard test to bottom of matrix */
 
-	if ((d__2 = e[m - 1], abs(d__2)) <= abs(tol) * (d__1 = d__[m], abs(
-		d__1)) || tol < 0. && (d__3 = e[m - 1], abs(d__3)) <= thresh) 
+	if ((d__2 = e[m - 1], abs(d__2)) <= abs(tol) * (d__1 = d__[m], abs(d__1)) ||
+            (tol < 0. && (d__3 = e[m - 1], abs(d__3)) <= thresh)) 
 		{
 	    e[m - 1] = 0.;
 	    goto L60;
@@ -503,7 +503,7 @@ L90:
 		    e[lll] = 0.;
 		    goto L60;
 		}
-		sminlo = sminl;
+		//sminlo = sminl;
 		mu = (d__2 = d__[lll + 1], abs(d__2)) * (mu / (mu + (d__1 = e[
 			lll], abs(d__1))));
 		sminl = min(sminl,mu);
@@ -516,8 +516,8 @@ L90:
 /*        Run convergence test in backward direction   
           First apply standard test to top of matrix */
 
-	if ((d__2 = e[ll], abs(d__2)) <= abs(tol) * (d__1 = d__[ll], abs(d__1)
-		) || tol < 0. && (d__3 = e[ll], abs(d__3)) <= thresh) {
+	if ((d__2 = e[ll], abs(d__2)) <= abs(tol) * (d__1 = d__[ll], abs(d__1)) ||
+            (tol < 0. && (d__3 = e[ll], abs(d__3)) <= thresh)) {
 	    e[ll] = 0.;
 	    goto L60;
 	}
@@ -535,7 +535,7 @@ L90:
 		    e[lll] = 0.;
 		    goto L60;
 		}
-		sminlo = sminl;
+		//sminlo = sminl;
 		mu = (d__2 = d__[lll], abs(d__2)) * (mu / (mu + (d__1 = e[lll]
 			, abs(d__1))));
 		sminl = min(sminl,mu);

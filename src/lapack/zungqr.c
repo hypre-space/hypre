@@ -83,8 +83,8 @@
     static integer i__, j, l, ib, nb, ki, kk, nx, iws, nbmin, iinfo;
     extern /* Subroutine */ HYPRE_Int zung2r_(integer *, integer *, integer *, 
 	    doublecomplex *, integer *, doublecomplex *, doublecomplex *, 
-	    integer *), xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+	    integer *), xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *, const char *, const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     extern /* Subroutine */ HYPRE_Int zlarfb_(char *, char *, char *, char *, 
 	    integer *, integer *, integer *, doublecomplex *, integer *, 

@@ -117,14 +117,14 @@
     static logical left;
     static integer i__;
     static doublecomplex t[4160]	/* was [65][64] */;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *, const char *);
     static integer nbmin, iinfo, i1, i2, i3, ib, ic, jc, nb, mi, ni;
     extern /* Subroutine */ HYPRE_Int zunm2r_(char *, char *, integer *, integer *, 
 	    integer *, doublecomplex *, integer *, doublecomplex *, 
 	    doublecomplex *, integer *, doublecomplex *, integer *);
     static integer nq, nw;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *, const char *, const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     extern /* Subroutine */ HYPRE_Int zlarfb_(char *, char *, char *, char *, 
 	    integer *, integer *, integer *, doublecomplex *, integer *, 
@@ -247,7 +247,7 @@
 
 /*        Use blocked code */
 
-	if (left && ! notran || ! left && notran) {
+        if ((left && ! notran) || (! left && notran)) {
 	    i1 = 1;
 	    i2 = *k;
 	    i3 = nb;

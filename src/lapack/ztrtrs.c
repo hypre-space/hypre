@@ -85,11 +85,11 @@
     /* System generated locals */
     integer a_dim1, a_offset, b_dim1, b_offset, i__1, i__2;
     /* Local variables */
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *, const char *);
     extern /* Subroutine */ HYPRE_Int ztrsm_(char *, char *, char *, char *, 
 	    integer *, integer *, doublecomplex *, doublecomplex *, integer *,
 	     doublecomplex *, integer *), 
-	    xerbla_(char *, integer *);
+	    xerbla_(const char *, integer *);
     static logical nounit;
 #define a_subscr(a_1,a_2) (a_2)*a_dim1 + a_1
 #define a_ref(a_1,a_2) a[a_subscr(a_1,a_2)]

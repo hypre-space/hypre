@@ -117,8 +117,8 @@
 	return 0;
     }
 /*     Quick return if possible. */
-    if (*m == 0 || *n == 0 || alpha->r == 0. && alpha->i == 0. && (beta->r == 
-	    1. && beta->i == 0.)) {
+    if (*m == 0 || *n == 0 || (alpha->r == 0. && alpha->i == 0. &&
+                               beta->r == 1. && beta->i == 0.)) {
 	return 0;
     }
     noconj = hypre_lsame_(trans, "T");

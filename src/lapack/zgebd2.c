@@ -140,7 +140,7 @@
     static doublecomplex alpha;
     extern /* Subroutine */ HYPRE_Int zlarf_(char *, integer *, integer *, 
 	    doublecomplex *, integer *, doublecomplex *, doublecomplex *, 
-	    integer *, doublecomplex *), xerbla_(char *, integer *), zlarfg_(integer *, doublecomplex *, doublecomplex *, 
+	    integer *, doublecomplex *), xerbla_(const char *, integer *), zlarfg_(integer *, doublecomplex *, doublecomplex *, 
 	    integer *, doublecomplex *), zlacgv_(integer *, doublecomplex *, 
 	    integer *);
 #define a_subscr(a_1,a_2) (a_2)*a_dim1 + a_1

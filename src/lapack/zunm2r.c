@@ -103,12 +103,12 @@
     static logical left;
     static doublecomplex taui;
     static integer i__;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *, const char *);
     extern /* Subroutine */ HYPRE_Int zlarf_(char *, integer *, integer *, 
 	    doublecomplex *, integer *, doublecomplex *, doublecomplex *, 
 	    integer *, doublecomplex *);
     static integer i1, i2, i3, ic, jc, mi, ni, nq;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
     static logical notran;
     static doublecomplex aii;
 #define a_subscr(a_1,a_2) (a_2)*a_dim1 + a_1
@@ -165,7 +165,7 @@
 	return 0;
     }
 
-    if (left && ! notran || ! left && notran) {
+    if ((left && ! notran) || (! left && notran)) {
 	i1 = 1;
 	i2 = *k;
 	i3 = 1;

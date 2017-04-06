@@ -135,10 +135,10 @@
        Subroutine */ HYPRE_Int s_cat(char *, char **, integer *, integer *, ftnlen);
     /* Local variables */
     static logical left;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *, const char *);
     static integer iinfo, i1, i2, nb, mi, ni, nq, nw;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
-    extern integer ilaenv_(integer *, char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern integer ilaenv_(integer *, const char *, const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
     static logical notran, applyq;
     static char transt[1];
@@ -195,7 +195,7 @@
     } else /* if(complicated condition) */ {
 /* Computing MAX */
 	i__1 = 1, i__2 = min(nq,*k);
-	if (applyq && *lda < max(1,nq) || ! applyq && *lda < max(i__1,i__2)) {
+	if ((applyq && *lda < max(1,nq)) || (! applyq && *lda < max(i__1,i__2))) {
 	    *info = -8;
 	} else if (*ldc < max(1,*m)) {
 	    *info = -11;

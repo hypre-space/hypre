@@ -103,7 +103,7 @@
     void d_cnjg(doublecomplex *, doublecomplex *);
     /* Local variables */
     static integer i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *, const char *);
     extern /* Subroutine */ HYPRE_Int zgemm_(char *, char *, integer *, integer *, 
 	    integer *, doublecomplex *, doublecomplex *, integer *, 
 	    doublecomplex *, integer *, doublecomplex *, doublecomplex *, 

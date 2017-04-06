@@ -110,9 +110,9 @@
     static integer info;
     static doublecomplex temp;
     static integer i__, j;
-    extern logical lsame_(char *, char *);
+    extern logical lsame_(const char *, const char *);
     static doublereal ctemp, stemp;
-    extern /* Subroutine */ HYPRE_Int xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
 #define a_subscr(a_1,a_2) (a_2)*a_dim1 + a_1
 #define a_ref(a_1,a_2) a[a_subscr(a_1,a_2)]
 

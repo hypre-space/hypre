@@ -18,7 +18,7 @@
     static doublecomplex temp;
     static integer i__, j, l;
     static logical conja, conjb;
-    static integer ncola;
+    //static integer ncola;
     extern logical hypre_lsame_(char *, char *);
     static integer nrowa, nrowb;
     extern /* Subroutine */ HYPRE_Int hypre_xerbla_(char *, integer *);
@@ -138,10 +138,10 @@
     conjb = hypre_lsame_(transb, "C");
     if (nota) {
 	nrowa = *m;
-	ncola = *k;
+	//ncola = *k;
     } else {
 	nrowa = *k;
-	ncola = *m;
+	//ncola = *m;
     }
     if (notb) {
 	nrowb = *k;
@@ -172,8 +172,8 @@
 	return 0;
     }
 /*     Quick return if possible. */
-    if (*m == 0 || *n == 0 || (alpha->r == 0. && alpha->i == 0. || *k == 0) &&
-	     (beta->r == 1. && beta->i == 0.)) {
+    if (*m == 0 || *n == 0 || (((alpha->r == 0. && alpha->i == 0.) || *k == 0) &&
+                               (beta->r == 1. && beta->i == 0.))) {
 	return 0;
     }
 /*     And when  alpha.eq.zero. */
