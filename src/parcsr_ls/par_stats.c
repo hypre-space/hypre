@@ -155,6 +155,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Int additive;
    HYPRE_Int mult_additive;
    HYPRE_Int simple;
+   HYPRE_Int add_end;
    HYPRE_Int add_rlx;
    HYPRE_Real add_rlx_wt;
  
@@ -175,6 +176,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    additive = hypre_ParAMGDataAdditive(amg_data);
    mult_additive = hypre_ParAMGDataMultAdditive(amg_data);
    simple = hypre_ParAMGDataSimple(amg_data);
+   add_end = hypre_ParAMGDataAddLastLvl(amg_data);
    add_rlx = hypre_ParAMGDataAddRelaxType(amg_data);
    add_rlx_wt = hypre_ParAMGDataAddRelaxWt(amg_data);
 
@@ -924,11 +926,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       if (additive == 0 || mult_additive == 0 || simple == 0)
       {
          if (additive > -1)
-            hypre_printf( "  Additive V-cycle starting at level %d  \n", additive);
+            hypre_printf( "  Additive V-cycle 1st level %d last level %d \n", additive, add_end);
          if (mult_additive > -1)
-            hypre_printf( "  Mult-Additive V-cycle starting at level %d  \n", mult_additive);
+            hypre_printf( "  Mult-Additive V-cycle 1st level %d last level %d \n", mult_additive, add_end);
          if (simple > -1)
-            hypre_printf( "  Simplified Mult-Additive V-cycle starting at level %d  \n", simple);
+            hypre_printf( "  Simplified Mult-Additive V-cycle 1st level %d last level %d \n", simple, add_end);
          hypre_printf( "\n");
          hypre_printf( "  Relaxation Parameters:\n");
          hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
@@ -995,11 +997,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          }
          hypre_printf( "\n\n");
          if (additive > -1)
-            hypre_printf( "  Additive V-cycle starting at level %d  \n", additive);
+            hypre_printf( "  Additive V-cycle 1st level %d last level %d  \n", additive, add_end);
          if (mult_additive > -1)
-            hypre_printf( "  Mult-Additive V-cycle starting at level %d  \n", mult_additive);
+            hypre_printf( "  Mult-Additive V-cycle 1st level %d last level %d \n", mult_additive, add_end);
          if (simple > -1)
-            hypre_printf( "  Simplified Mult-Additive V-cycle starting at level %d  \n", simple);
+            hypre_printf( "  Simplified Mult-Additive V-cycle 1st level %d last level %d  \n", simple, add_end);
          hypre_printf( "\n");
          hypre_printf( "  Relaxation Parameters:\n");
          hypre_printf( "   Visiting Grid:                     down   up  coarse\n");

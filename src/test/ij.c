@@ -213,6 +213,7 @@ main( hypre_int argc,
    HYPRE_Int additive = -1;
    HYPRE_Int mult_add = -1;
    HYPRE_Int simple = -1;
+   HYPRE_Int add_last_lvl = -1;
    HYPRE_Int add_P_max_elmts = 0;
    HYPRE_Real add_trunc_factor = 0;
 
@@ -1226,6 +1227,11 @@ main( hypre_int argc,
       {
          arg_index++;
          simple  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-add_end") == 0 )
+      {
+         arg_index++;
+         add_last_lvl  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-add_Pmx") == 0 )
       {
@@ -2536,6 +2542,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
       HYPRE_BoomerAMGSetSimple(amg_solver, simple);
+      HYPRE_BoomerAMGSetAddLastLvl(amg_solver, add_last_lvl);
       HYPRE_BoomerAMGSetMultAddPMaxElmts(amg_solver, add_P_max_elmts);
       HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
 
@@ -2690,6 +2697,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
       HYPRE_BoomerAMGSetSimple(amg_solver, simple);
+      HYPRE_BoomerAMGSetAddLastLvl(amg_solver, add_last_lvl);
       HYPRE_BoomerAMGSetMultAddPMaxElmts(amg_solver, add_P_max_elmts);
       HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
       HYPRE_BoomerAMGSetRAP2(amg_solver, rap2);
@@ -2855,6 +2863,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -3008,6 +3017,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -4098,6 +4108,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -4241,6 +4252,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -4461,6 +4473,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -4634,6 +4647,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -4813,6 +4827,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -5027,6 +5042,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
