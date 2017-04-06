@@ -22,16 +22,19 @@
 
 #ifndef HYPRE_NEWBOXLOOP_HEADER
 #define HYPRE_NEWBOXLOOP_HEADER
-
+#ifdef HYPRE_USING_OPENMP
 #define Pragma(x) _Pragma(#x)
 #define OMP1(args...) Pragma(omp parallel for private(ZYPRE_BOX_PRIVATE,args) HYPRE_SMP_SCHEDULE)
-#define OMPREDUCTION() Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,HYPRE_BOX_PRIVATE_VAR) reduction(HYPRE_BOX_REDUCTION) HYPRE_SMP_SCHEDULE)
+#define OMPREDUCTION() Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,HYPRE_BOX_PRIVATE_VAR) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+#else
+#define OMP1(args...)  ;
+#define OMPREDUCTION() ;
+#endif
 
-#define hypre_CallocIndex(indexVar, dim)			\
-	indexVar = hypre_CTAlloc(HYPRE_Int, dim);
-
-#define hypre_CallocReal(indexVar, dim)		\
-	indexVar = hypre_CTAlloc(HYPRE_Real, dim);
+#define hypre_rand(val) \
+{\
+    val = rand();\
+}
 
 #define zypre_newBoxLoop0Begin(ndim, loop_size)				\
 {\
@@ -200,11 +203,40 @@
    }\
 }
 
-#define zypre_newBoxLoop2ReductionBegin(ndim, loop_size,				\
-										dbox1, start1, stride1, i1,		\
-										dbox2, start2, stride2, i2,		\
+#define zypre_newBoxLoop1ReductionBegin(ndim, loop_size,		\
+					dbox1, start1, stride1, i1,	\
+                                        sum)				\
+{									\
+   zypre_BoxLoopDeclare();						\
+   zypre_BoxLoopDeclareK(1);						\
+   zypre_BoxLoopInit(ndim, loop_size);					\
+   zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);			\
+   OMPREDUCTION()							\
+   for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++) \
+   {\
+      zypre_BoxLoopSet();\
+      zypre_BoxLoopSetK(1, i1);\
+      for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
+      {\
+         for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
+         {
+
+#define zypre_newBoxLoop1ReductionEnd(i1, sum)\
+            i1 += hypre__i0inc1;\
+         }\
+         zypre_BoxLoopInc1();\
+         i1 += hypre__ikinc1[hypre__d];\
+         zypre_BoxLoopInc2();\
+      }\
+   }\
+}
+
+#define hypre_newBoxLoop2ReductionBegin(ndim, loop_size,				\
+					dbox1, start1, stride1, i1,	\
+					dbox2, start2, stride2, i2,	\
                                         sum)							\
 {\
+   HYPRE_Int i1,i2;				\
    zypre_BoxLoopDeclare();\
    zypre_BoxLoopDeclareK(1);\
    zypre_BoxLoopDeclareK(2);\
@@ -222,7 +254,7 @@
          for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
          {
 
-#define zypre_newBoxLoop2ReductionEnd(i1, i2, sum)\
+#define hypre_newBoxLoop2ReductionEnd(i1, i2, sum)\
             i1 += hypre__i0inc1;\
             i2 += hypre__i0inc2;\
          }\
@@ -233,4 +265,32 @@
       }\
    }\
 }
-#endif
+
+#define hypre_LoopBegin(size,idx)			\
+{									\
+   HYPRE_Int idx;							\
+   for (idx = 0;idx < size;idx ++)					\
+   {
+
+#define hypre_LoopEnd()					\
+  }							\
+}
+
+#define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
+
+
+#define hypre_BoxLoop0Begin      zypre_BoxLoop0Begin
+#define hypre_BoxLoop0For        zypre_BoxLoop0For
+#define hypre_BoxLoop0End        zypre_BoxLoop0End
+#define hypre_BoxLoop1Begin      zypre_BoxLoop1Begin
+#define hypre_BoxLoop1For        zypre_BoxLoop1For
+#define hypre_BoxLoop1End        zypre_BoxLoop1End
+#define hypre_BoxLoop2Begin      zypre_BoxLoop2Begin
+#define hypre_BoxLoop2For        zypre_BoxLoop2For
+#define hypre_BoxLoop2End        zypre_BoxLoop2End
+#define hypre_BoxLoop3Begin      zypre_BoxLoop3Begin
+#define hypre_BoxLoop3For        zypre_BoxLoop3For
+#define hypre_BoxLoop3End        zypre_BoxLoop3End
+#define hypre_BoxLoop4Begin      zypre_BoxLoop4Begin
+#define hypre_BoxLoop4For        zypre_BoxLoop4For
+#define hypre_BoxLoop4End        zypre_BoxLoop4End

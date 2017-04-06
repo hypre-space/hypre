@@ -617,9 +617,9 @@ if ( cudaerr != cudaSuccess ) {										\
 #define hypre_DataCopyToData(ptrH,ptrD,type,count) memcpy(ptrD, ptrH, sizeof(type)*(count))
 #define hypre_DataCopyFromData(ptrH,ptrD,type,count) memcpy(ptrH, ptrD, sizeof(type)*(count))
 #define hypre_DeviceMemset(ptr,value,type,count)	memset(ptr,value,count*sizeof(type))
-#define hypre_UMTAlloc(ptr, type, count) hypre_TAlloc(type, (count))
-#define hypre_UMCTAlloc(ptr, type, count) hypre_CTAlloc(type, (count))
-#define hypre_UMTReAlloc(ptr, type, count) hypre_TReAlloc(type, (count))
+#define hypre_UMTAlloc(type, count) hypre_TAlloc(type, (count))
+#define hypre_UMCTAlloc(type, count) hypre_CTAlloc(type, (count))
+#define hypre_UMTReAlloc(type, count) hypre_TReAlloc(type, (count))
 #define hypre_UMTFree(ptr) hypre_TFree(ptr)
 #endif
 	

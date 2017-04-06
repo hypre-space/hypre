@@ -31,14 +31,8 @@ extern "C++" {
 #include <curand_kernel.h>
 }
 
-static HYPRE_Complex* global_recv_buffer;
-static HYPRE_Complex* global_send_buffer;
-static HYPRE_Int      global_recv_size = 0;
-static HYPRE_Int      global_send_size = 0;
-
-struct cuda_traversal {};
-struct omp_traversal  {};
-struct cuda_reduce {};
+struct cuda_traversal {HYPRE_Int cuda;};
+struct omp_traversal  {HYPRE_Int omp;};
 
 typedef struct hypre_Boxloop_struct
 {
@@ -54,7 +48,7 @@ inline void CheckError(cudaError_t const err, char const* const fun, const int l
     if (err)
     {
         printf("CUDA Error Code[%d]: %s\n%s() Line:%d\n", err, cudaGetErrorString(err), fun, line);
-		int *p = NULL; *p = 1;
+	//int *p = NULL; *p = 1;
     }
 }
 #define BLOCKSIZE 128
@@ -109,7 +103,7 @@ __global__ void dot (T * a, T * b, T *c, HYPRE_Int hypre__tot,
 {
     int id = (blockIdx.x * blockDim.x) + threadIdx.x;
 	HYPRE_Int local_idx;
-    HYPRE_Int d,idx_local = id;
+    HYPRE_Int idx_local = id;
     HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;
     HYPRE_Int i1 = 0, i2 = 0;
     //// reducted output
@@ -162,7 +156,7 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 {
     int id = (blockIdx.x * blockDim.x) + threadIdx.x;
 	HYPRE_Int local_idx;
-    HYPRE_Int d,idx_local = id;
+    HYPRE_Int idx_local = id;
     HYPRE_Int hypre_boxD1 = 1.0;
     HYPRE_Int i1 = 0;
     //// reducted output
@@ -204,58 +198,26 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
   
 }
 
-#define hypre_CallocIndex(indexVar, dim)									\
-	cudaMallocManaged((void**)&indexVar,sizeof(HYPRE_Int)*dim, cudaMemAttachGlobal);
-
-#define hypre_CallocReal(indexVar, dim)								\
-	cudaMallocManaged((void**)&indexVar,sizeof(HYPRE_Real)*dim, cudaMemAttachGlobal);
-
-
-#define zypre_BoxLoopCUDAInit(ndim)											\
-	HYPRE_Int hypre__tot = 1.0;											\
-	for (HYPRE_Int i = 0;i < ndim;i ++)									\
-		hypre__tot *= loop_size[i];
+#define zypre_BoxLoopCUDAInit(ndim)					\
+  HYPRE_Int hypre__tot = 1.0;						\
+  for (HYPRE_Int i = 0;i < ndim;i ++)					\
+      hypre__tot *= loop_size[i];
 
 
 #define zypre_BoxLoopCUDADeclare()										\
 	HYPRE_Int local_idx;												\
-	HYPRE_Int d,idx_local = idx;
+	HYPRE_Int idx_local = idx;
 
 #define zypre_newBoxLoop0Begin(ndim, loop_size,idx)			\
-{    														\
-    HYPRE_Int hypre__tot = 1.0;												\
-    for (HYPRE_Int d = 0;d < ndim;d ++)										\
-	{																	\
-		hypre__tot *= loop_size[d];										\
-	}																	\
-	BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
-	{
+{									\
+    zypre_BoxLoopCUDAInit(ndim);					\
+    BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+    {
 
 
 #define zypre_newBoxLoop0End()					\
-	});											\
-	cudaDeviceSynchronize();					\
-}
-
-extern "C++" {
-template <typename LOOP_BODY>
-__global__ void forall_kernel1(LOOP_BODY loop_body, hypre_Boxloop box1,int length)
-{
-	int idx = blockDim.x * blockIdx.x + threadIdx.x;
-	if (idx < length)
-		loop_body(idx,box1);
-}
-
-template<typename LOOP_BODY>
-void BoxLoop1forall (cuda_traversal, HYPRE_Int length, hypre_Boxloop box1, LOOP_BODY loop_body)
-{	
-	size_t const blockSize = 128;
-	size_t gridSize  = (length + blockSize - 1) / blockSize;
-	if (gridSize == 0) gridSize = 1;
-	
-	//hypre_printf("length= %d, blocksize = %d, gridsize = %d\n",length,blockSize,gridSize);
-	forall_kernel1<<<gridSize, blockSize>>>(loop_body,box1,length);
-}
+    });								\
+    AxCheckError(cudaDeviceSynchronize());			\
 }
 
 #define zypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)	\
@@ -311,29 +273,8 @@ void BoxLoop1forall (cuda_traversal, HYPRE_Int length, hypre_Boxloop box1, LOOP_
 cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
 printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-int *p = NULL; *p = 1;\
 }\
-}
-
-extern "C++" {
-template <typename LOOP_BODY>
-__global__ void forall_kernel2(LOOP_BODY loop_body, hypre_Boxloop box1,hypre_Boxloop box2,int length)
-{
-	int idx = blockDim.x * blockIdx.x + threadIdx.x;
-	if (idx < length)
-		loop_body(idx,box1,box2);
-}
-
-template<typename LOOP_BODY>
-void BoxLoop2forall (cuda_traversal, HYPRE_Int length, hypre_Boxloop box1,hypre_Boxloop box2, LOOP_BODY loop_body)
-{	
-	size_t const blockSize = 128;
-	size_t gridSize  = (length + blockSize - 1) / blockSize;
-	if (gridSize == 0) gridSize = 1;
-	
-	//hypre_printf("length= %d, blocksize = %d, gridsize = %d\n",length,blockSize,gridSize);
-	forall_kernel2<<<gridSize, blockSize>>>(loop_body,box1,box2,length);
-}
+ AxCheckError(cudaDeviceSynchronize());\
 }
 	
 #define zypre_newBoxLoop2Begin(ndim, loop_size,				\
@@ -343,29 +284,29 @@ void BoxLoop2forall (cuda_traversal, HYPRE_Int length, hypre_Boxloop box1,hypre_
         zypre_BoxLoopCUDAInit(ndim);						\
 	zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
 	zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2); \
-	BoxLoop2forall(cuda_traversal(),hypre__tot,databox1,databox2,[=] __device__ (HYPRE_Int idx,hypre_Boxloop box1,hypre_Boxloop box2) \
+	BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
 	{																	\
 	    zypre_BoxLoopCUDADeclare()											\
 	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;						\
 	    HYPRE_Int i1 = 0, i2 = 0;											\
-		local_idx  = idx_local % box1.lsize0;							\
-		idx_local  = idx_local / box1.lsize0;							\
-		i1 += (local_idx*box1.strides0 + box1.bstart0) * hypre_boxD1;			\
-		hypre_boxD1 *= hypre_max(0, box1.bsize0 + 1);					\
-		i2 += (local_idx*box2.strides0 + box2.bstart0) * hypre_boxD2;			\
-		hypre_boxD2 *= hypre_max(0, box2.bsize0 + 1);					\
-		local_idx  = idx_local % box1.lsize1;							\
-		idx_local  = idx_local / box1.lsize1;							\
-		i1 += (local_idx*box1.strides1 + box1.bstart1) * hypre_boxD1;			\
-		hypre_boxD1 *= hypre_max(0, box1.bsize1 + 1);					\
-		i2 += (local_idx*box2.strides1 + box2.bstart1) * hypre_boxD2;			\
-		hypre_boxD2 *= hypre_max(0, box2.bsize1 + 1);					\
-		local_idx  = idx_local % box1.lsize2;							\
-		idx_local  = idx_local / box1.lsize2;							\
-		i1 += (local_idx*box1.strides2 + box1.bstart2) * hypre_boxD1;			\
-		hypre_boxD1 *= hypre_max(0, box1.bsize2 + 1);					\
-		i2 += (local_idx*box2.strides2 + box2.bstart2) * hypre_boxD2;			\
-		hypre_boxD2 *= hypre_max(0, box2.bsize2 + 1);					\
+		local_idx  = idx_local % databox1.lsize0;							\
+		idx_local  = idx_local / databox1.lsize0;							\
+		i1 += (local_idx*databox1.strides0 + databox1.bstart0) * hypre_boxD1;			\
+		hypre_boxD1 *= hypre_max(0, databox1.bsize0 + 1);					\
+		i2 += (local_idx*databox2.strides0 + databox2.bstart0) * hypre_boxD2;			\
+		hypre_boxD2 *= hypre_max(0, databox2.bsize0 + 1);					\
+		local_idx  = idx_local % databox1.lsize1;							\
+		idx_local  = idx_local / databox1.lsize1;							\
+		i1 += (local_idx*databox1.strides1 + databox1.bstart1) * hypre_boxD1;			\
+		hypre_boxD1 *= hypre_max(0, databox1.bsize1 + 1);					\
+		i2 += (local_idx*databox2.strides1 + databox2.bstart1) * hypre_boxD2;			\
+		hypre_boxD2 *= hypre_max(0, databox2.bsize1 + 1);					\
+		local_idx  = idx_local % databox1.lsize2;							\
+		idx_local  = idx_local / databox1.lsize2;							\
+		i1 += (local_idx*databox1.strides2 + databox1.bstart2) * hypre_boxD1;			\
+		hypre_boxD1 *= hypre_max(0, databox1.bsize2 + 1);					\
+		i2 += (local_idx*databox2.strides2 + databox2.bstart2) * hypre_boxD2;			\
+		hypre_boxD2 *= hypre_max(0, databox2.bsize2 + 1);					\
 
 
 
@@ -374,30 +315,8 @@ void BoxLoop2forall (cuda_traversal, HYPRE_Int length, hypre_Boxloop box1,hypre_
 cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
 printf("\n ERROR zypre_newBoxLoop2End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-int *p = NULL; *p = 1;\
 }\
 AxCheckError(cudaDeviceSynchronize());\
-}
-
-extern "C++" {
-template <typename LOOP_BODY>
-__global__ void forall_kernel3(LOOP_BODY loop_body, hypre_Boxloop box1,hypre_Boxloop box2,hypre_Boxloop box3,int length)
-{
-	int idx = blockDim.x * blockIdx.x + threadIdx.x;
-	if (idx < length)
-		loop_body(idx,box1,box2,box3);
-}
-
-template<typename LOOP_BODY>
-void BoxLoop3forall (cuda_traversal, HYPRE_Int length, hypre_Boxloop box1,hypre_Boxloop box2,hypre_Boxloop box3, LOOP_BODY loop_body)
-{	
-	size_t const blockSize = 128;
-	size_t gridSize  = (length + blockSize - 1) / blockSize;
-	if (gridSize == 0) gridSize = 1;
-	
-	//hypre_printf("length= %d, blocksize = %d, gridsize = %d\n",length,blockSize,gridSize);
-	forall_kernel3<<<gridSize, blockSize>>>(loop_body,box1,box2,box3,length);
-}
 }
 
 #define zypre_newBoxLoop3Begin(ndim, loop_size,				\
@@ -409,35 +328,35 @@ void BoxLoop3forall (cuda_traversal, HYPRE_Int length, hypre_Boxloop box1,hypre_
 	zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
 	zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2); \
         zypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3); \
-   BoxLoop3forall(cuda_traversal(),hypre__tot,databox1,databox2,databox3,[=] __device__ (HYPRE_Int idx,hypre_Boxloop box1,hypre_Boxloop box2,hypre_Boxloop box3) \
+	BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
       {							\
 	zypre_BoxLoopCUDADeclare();					\
 	HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0; \
 	HYPRE_Int i1 = 0, i2 = 0, i3 = 0;				\
-	local_idx  = idx_local % box1.lsize0;				\
-	idx_local  = idx_local / box1.lsize0;				\
-	i1 += (local_idx*box1.strides0 + box1.bstart0) * hypre_boxD1;	\
-	hypre_boxD1 *= hypre_max(0, box1.bsize0 + 1);			\
-	i2 += (local_idx*box2.strides0 + box2.bstart0) * hypre_boxD2;	\
-	hypre_boxD2 *= hypre_max(0, box2.bsize0 + 1);			\
-	i3 += (local_idx*box3.strides0 + box3.bstart0) * hypre_boxD3;	\
-	hypre_boxD3 *= hypre_max(0, box3.bsize0 + 1);			\
-	local_idx  = idx_local % box1.lsize1;				\
-	idx_local  = idx_local / box1.lsize1;				\
-	i1 += (local_idx*box1.strides1 + box1.bstart1) * hypre_boxD1;	\
-	hypre_boxD1 *= hypre_max(0, box1.bsize1 + 1);			\
-	i2 += (local_idx*box2.strides1 + box2.bstart1) * hypre_boxD2;	\
-	hypre_boxD2 *= hypre_max(0, box2.bsize1 + 1);			\
-	i3 += (local_idx*box3.strides1 + box3.bstart1) * hypre_boxD3;	\
-	hypre_boxD3 *= hypre_max(0, box3.bsize1 + 1);			\
-	local_idx  = idx_local % box1.lsize2;				\
-	idx_local  = idx_local / box1.lsize2;				\
-	i1 += (local_idx*box1.strides2 + box1.bstart2) * hypre_boxD1;	\
-	hypre_boxD1 *= hypre_max(0, box1.bsize2 + 1);			\
-	i2 += (local_idx*box2.strides2 + box2.bstart2) * hypre_boxD2;	\
-	hypre_boxD2 *= hypre_max(0, box2.bsize2 + 1);			\
-	i3 += (local_idx*box3.strides2 + box3.bstart2) * hypre_boxD3;	\
-	hypre_boxD3 *= hypre_max(0, box3.bsize2 + 1);			\
+	local_idx  = idx_local % databox1.lsize0;				\
+	idx_local  = idx_local / databox1.lsize0;				\
+	i1 += (local_idx*databox1.strides0 + databox1.bstart0) * hypre_boxD1;	\
+	hypre_boxD1 *= hypre_max(0, databox1.bsize0 + 1);			\
+	i2 += (local_idx*databox2.strides0 + databox2.bstart0) * hypre_boxD2;	\
+	hypre_boxD2 *= hypre_max(0, databox2.bsize0 + 1);			\
+	i3 += (local_idx*databox3.strides0 + databox3.bstart0) * hypre_boxD3;	\
+	hypre_boxD3 *= hypre_max(0, databox3.bsize0 + 1);			\
+	local_idx  = idx_local % databox1.lsize1;				\
+	idx_local  = idx_local / databox1.lsize1;				\
+	i1 += (local_idx*databox1.strides1 + databox1.bstart1) * hypre_boxD1;	\
+	hypre_boxD1 *= hypre_max(0, databox1.bsize1 + 1);			\
+	i2 += (local_idx*databox2.strides1 + databox2.bstart1) * hypre_boxD2;	\
+	hypre_boxD2 *= hypre_max(0, databox2.bsize1 + 1);			\
+	i3 += (local_idx*databox3.strides1 + databox3.bstart1) * hypre_boxD3;	\
+	hypre_boxD3 *= hypre_max(0, databox3.bsize1 + 1);			\
+	local_idx  = idx_local % databox1.lsize2;				\
+	idx_local  = idx_local / databox1.lsize2;				\
+	i1 += (local_idx*databox1.strides2 + databox1.bstart2) * hypre_boxD1;	\
+	hypre_boxD1 *= hypre_max(0, databox1.bsize2 + 1);			\
+	i2 += (local_idx*databox2.strides2 + databox2.bstart2) * hypre_boxD2;	\
+	hypre_boxD2 *= hypre_max(0, databox2.bsize2 + 1);			\
+	i3 += (local_idx*databox3.strides2 +databox3.bstart2) * hypre_boxD3;	\
+	hypre_boxD3 *= hypre_max(0, databox3.bsize2 + 1);			\
 	
 
 #define zypre_newBoxLoop3End(i1, i2,i3)			\
@@ -445,8 +364,8 @@ void BoxLoop3forall (cuda_traversal, HYPRE_Int length, hypre_Boxloop box1,hypre_
 cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
 printf("\n ERROR zypre_newBoxLoop3End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-int *p = NULL; *p = 1;\
 }\
+AxCheckError(cudaDeviceSynchronize());\
 }
 
 #define zypre_newBoxLoop4Begin(ndim, loop_size,				\
@@ -460,8 +379,8 @@ int *p = NULL; *p = 1;\
      zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2); \
      zypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3); \
      zypre_BoxLoopDataDeclareK(4,ndim,loop_size,dbox4,start4,stride4); \
-  BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
-		{							\
+     BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+		   {							\
 		  zypre_BoxLoopCUDADeclare();				\
 		  HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0,hypre_boxD4 = 1.0; \
 		  HYPRE_Int i1 = 0, i2 = 0, i3 = 0,i4 = 0;		\
@@ -501,7 +420,6 @@ int *p = NULL; *p = 1;\
   cudaError err = cudaGetLastError();		\
   if ( cudaSuccess != err ) {						\
     printf("\n ERROR zypre_newBoxLoop4End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-    int *p = NULL; *p = 1;						\
   }									\
   AxCheckError(cudaDeviceSynchronize());				\
 }
@@ -556,7 +474,7 @@ template<class T>
 __global__ void hypre_device_reduce_stable_kernel(T*a, T*b, T* out, HYPRE_Int N,
 						  hypre_Boxloop box1,hypre_Boxloop box2) {
   HYPRE_Int local_idx;
-  HYPRE_Int d,idx_local;
+  HYPRE_Int idx_local;
   HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;
   HYPRE_Int i1 = 0, i2 = 0;
   T sum=T(0);
@@ -613,43 +531,103 @@ void hypre_device_reduce_stable(T*a,T*b, T* out, HYPRE_Int N,
 
 }
 
+extern "C++" {
+template <typename LOOP_BODY>
+__global__ void hypre_device_reduction_kernel(HYPRE_Real* out,
+					      HYPRE_Int N,hypre_Boxloop box1,hypre_Boxloop box2,
+					      LOOP_BODY loop_body)
+{
+    HYPRE_Int local_idx;
+    HYPRE_Int idx_local;
+    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;
+    HYPRE_Int i1 = 0, i2 = 0;
+    HYPRE_Real sum = HYPRE_Real(0);
+    HYPRE_Int i;
+    
+    for(i=blockIdx.x*blockDim.x+threadIdx.x;i<N;i+=blockDim.x*gridDim.x)
+      {
+	idx_local = i;
+	local_idx  = idx_local % box1.lsize0;
+	idx_local  = idx_local / box1.lsize0;
+	i1 += (local_idx*box1.strides0 + box1.bstart0) * hypre_boxD1;
+	hypre_boxD1 *= hypre_max(0, box1.bsize0 + 1);
+	i2 += (local_idx*box2.strides0 + box2.bstart0) * hypre_boxD2;
+	hypre_boxD2 *= hypre_max(0, box2.bsize0 + 1);
+	local_idx  = idx_local % box1.lsize1;
+	idx_local  = idx_local / box1.lsize1;
+	i1 += (local_idx*box1.strides1 + box1.bstart1) * hypre_boxD1;
+	hypre_boxD1 *= hypre_max(0, box1.bsize1 + 1);
+	i2 += (local_idx*box2.strides1 + box2.bstart1) * hypre_boxD2;   
+	hypre_boxD2 *= hypre_max(0, box2.bsize1 + 1);	
+	local_idx  = idx_local % box1.lsize2;	      
+	idx_local  = idx_local / box1.lsize2;		      
+	i1 += (local_idx*box1.strides2 + box1.bstart2) * hypre_boxD1;
+	hypre_boxD1 *= hypre_max(0, box1.bsize2 + 1);	
+	i2 += (local_idx*box2.strides2 + box2.bstart2) * hypre_boxD2;
+	hypre_boxD2 *= hypre_max(0, box2.bsize2 + 1);
+	sum += loop_body(i1,i2);
+      }
+    sum=blockReduceSum<HYPRE_Real>(sum);
+    if(threadIdx.x==0)
+      out[blockIdx.x]=sum;
+}
 
-#define zypre_newBoxLoop2ReductionCUDA(ndim, loop_size,				\
-				       dbox1, start1, stride1, i1,xp,	\
-				       dbox2, start2, stride2, i2,yp,sum) \
+template<typename LOOP_BODY>
+void hypre_device_reduction (HYPRE_Real* out,
+			     HYPRE_Int N,hypre_Boxloop box1,hypre_Boxloop box2,
+			     LOOP_BODY loop_body)
+{	
+  HYPRE_Int threads=512;
+  HYPRE_Int blocks=min((N+threads-1)/threads,1024);
+
+  hypre_device_reduction_kernel<<<blocks,threads>>>(out,N,box1,box2,loop_body);
+  hypre_device_reduce_stable_kernel2<HYPRE_Real><<<1,1024>>>(out,out,blocks);
+
+}
+}
+
+#define zypre_newBoxLoop1ReductionBegin(ndim, loop_size,		\
+					dbox1, start1, stride1, i1, sum) \
+{    									   \
+        zypre_BoxLoopCUDAInit(ndim);						\
+	zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
+        HYPRE_Real *d_c;				      		\
+        cudaMalloc((void**) &d_c, 1024 * sizeof(HYPRE_Real));			\
+        hypre_device_reduction(d_c,hypre__tot,databox1,databox1,[=] __device__(HYPRE_Int i1, HYPRE_Int i2) \
+	{					\
+	  HYPRE_Real sum = 0;			\
+
+#define zypre_newBoxLoop1ReductionEnd(i1, sum)			\
+  return sum;								\
+  });									\
+  cudaMemcpy(&sum,d_c,sizeof(HYPRE_Real),cudaMemcpyDeviceToHost);	\
+  cudaFree(d_c);							\
+}
+
+#define zypre_newBoxLoop2ReductionBegin(ndim, loop_size,		\
+					dbox1, start1, stride1, i1,	\
+					dbox2, start2, stride2, i2,sum) \
 {    									   \
         zypre_BoxLoopCUDAInit(ndim);						\
 	zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
 	zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2); \
         HYPRE_Real *d_c;				      		\
         cudaMalloc((void**) &d_c, 1024 * sizeof(HYPRE_Real));			\
-        hypre_device_reduce_stable<HYPRE_Real>(xp,yp,d_c,hypre__tot,databox1,databox2);\
-        cudaMemcpy(&sum,d_c,sizeof(HYPRE_Real),cudaMemcpyDeviceToHost);\
-        cudaFree(d_c);\
+        hypre_device_reduction(d_c,hypre__tot,databox1,databox2,[=] __device__(HYPRE_Int i1, HYPRE_Int i2) \
+	{					\
+	  HYPRE_Real sum = 0;			\
+
+#define zypre_newBoxLoop2ReductionEnd(i1, i2, sum)			\
+  return sum;								\
+  });									\
+  cudaMemcpy(&sum,d_c,sizeof(HYPRE_Real),cudaMemcpyDeviceToHost);	\
+  cudaFree(d_c);							\
 }
 
 
-/*
-	int n_blocks = (hypre__tot+BLOCKSIZE-1)/BLOCKSIZE;					\
-	HYPRE_Real *d_c;													\
-	HYPRE_Real * c = new HYPRE_Real[n_blocks];							\
-	cudaMalloc((void**) &d_c, n_blocks * sizeof(HYPRE_Real));			\
-	dot<HYPRE_Real><<< n_blocks ,BLOCKSIZE>>>(xp,yp,d_c,hypre__tot,databox1,databox2);		\
-        cudaError err = cudaGetLastError();\
-if ( cudaSuccess != err ) {\
-  printf("\n ERROR zypre_newBoxLoop2Reduction: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-  int *p = NULL; *p = 1;						\
- }									\
-	AxCheckError(cudaMemcpy(c,d_c,n_blocks*sizeof(HYPRE_Real),cudaMemcpyDeviceToHost)); \
-	for (int j = 0 ; j< n_blocks ; ++j){								\
-		sum += c[j];													\
-	}																	\
-	delete c;															\
-}
-*/
 
-#define zypre_newBoxLoop1ReductionBegin(ndim, loop_size,				\
-										dbox1, start1, stride1, i1,xp,sum) \
+#define zypre_newBoxLoop1ReductionMult(ndim, loop_size,				\
+					dbox1, start1, stride1, i1,xp,sum) \
 {    																	\
         zypre_BoxLoopCUDAInit(ndim);						\
 	zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
@@ -670,127 +648,103 @@ AxCheckError(cudaMemcpy(b,d_b,n_blocks*sizeof(HYPRE_Real),cudaMemcpyDeviceToHost
 	delete b;															\
 }
 
-#define zypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
+#define hypre_LoopBegin(size,idx)					\
+{    														\
+	BoxLoopforall(cuda_traversal(),size,[=] __device__ (HYPRE_Int idx) \
+	{
+
+#define hypre_LoopEnd()					\
+	});											\
+	AxCheckError(cudaDeviceSynchronize());\
+}
+
+
+#define hypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
 {    														\
     HYPRE_Int hypre__tot = 1.0;											\
-	const size_t block_size = 256;										\
-	hypre_Boxloop databox1;												\
-	HYPRE_Int nd = ndim;												\
-	databox1.lsize0 = loop_size[0];									\
-    databox1.lsize1 = loop_size[1];									\
-	databox1.lsize2 = loop_size[2];									\
-	databox1.strides0 = stride1[0];										\
-	databox1.strides1 = stride1[1];										\
-	databox1.strides2 = stride1[2];										\
-	for (HYPRE_Int d = 0;d < ndim;d ++)									\
-	{																	\
-		hypre__tot *= loop_size[d];										\
-	}																	\
-	BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
-	{																	\
+    hypre_Boxloop databox1;						\
+    databox1.lsize0 = loop_size[0];					\
+    databox1.lsize1 = loop_size[1];					\
+    databox1.lsize2 = loop_size[2];					\
+    databox1.strides0 = stride1[0];					\
+    databox1.strides1 = stride1[1];					\
+    databox1.strides2 = stride1[2];					\
+    for (HYPRE_Int d = 0;d < ndim;d ++)					\
+    {									\
+	hypre__tot *= loop_size[d];					\
+    }									\
+    BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+    {									\
 	    zypre_BoxLoopCUDADeclare()											\
 	    HYPRE_Int i1 = 0;											\
-		local_idx  = idx_local % databox1.lsize0;							\
-		idx_local  = idx_local / databox1.lsize0;							\
-		i1 += local_idx*databox1.strides0;			\
-		local_idx  = idx_local % databox1.lsize1;							\
-		idx_local  = idx_local / databox1.lsize1;							\
-		i1 += local_idx*databox1.strides1;								\
-		local_idx  = idx_local % databox1.lsize2;							\
-		idx_local  = idx_local / databox1.lsize2;							\
-		i1 += local_idx*databox1.strides2;			\
+	    local_idx  = idx_local % databox1.lsize0;			\
+	    idx_local  = idx_local / databox1.lsize0;			\
+	    i1 += local_idx*databox1.strides0;				\
+	    local_idx  = idx_local % databox1.lsize1;			\
+	    idx_local  = idx_local / databox1.lsize1;			\
+	    i1 += local_idx*databox1.strides1;				\
+	    local_idx  = idx_local % databox1.lsize2;			\
+	    idx_local  = idx_local / databox1.lsize2;			\
+	    i1 += local_idx*databox1.strides2;				\
 		
-#define zypre_BoxBoundaryCopyEnd()				\
+#define hypre_BoxBoundaryCopyEnd()				\
 	});											\
 cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
-printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-int *p = NULL; *p = 1;\
-}\
+  printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+ }									\
+ AxCheckError(cudaDeviceSynchronize());					\
 }
 
-#define zypre_BoxDataExchangeBegin(ndim, loop_size,				\
+#define hypre_BoxDataExchangeBegin(ndim, loop_size,				\
                                    stride1, i1,	\
                                    stride2, i2)	\
 {    														\
     HYPRE_Int hypre__tot = 1.0;											\
-	const size_t block_size = 256;										\
-	hypre_Boxloop databox1,databox2;									\
-	HYPRE_Int nd = ndim;												\
-	databox1.lsize0 = loop_size[0];									\
+    hypre_Boxloop databox1,databox2;					\
+    databox1.lsize0 = loop_size[0];					\
     databox1.lsize1 = loop_size[1];									\
-	databox1.lsize2 = loop_size[2];									\
-	databox1.strides0 = stride1[0];										\
-	databox1.strides1 = stride1[1];										\
-	databox1.strides2 = stride1[2];										\
-	databox2.lsize0 = loop_size[0];									\
+    databox1.lsize2 = loop_size[2];					\
+    databox1.strides0 = stride1[0];					\
+    databox1.strides1 = stride1[1];					\
+    databox1.strides2 = stride1[2];					\
+    databox2.lsize0 = loop_size[0];					\
     databox2.lsize1 = loop_size[1];									\
-	databox2.lsize2 = loop_size[2];									\
-	databox2.strides0 = stride2[0];										\
-	databox2.strides1 = stride2[1];										\
-	databox2.strides2 = stride2[2];										\
-	for (HYPRE_Int d = 0;d < ndim;d ++)									\
-	{																	\
-		hypre__tot *= loop_size[d];										\
-	}																	\
-	BoxLoop2forall(cuda_traversal(),hypre__tot,databox1,databox2,[=] __device__ (HYPRE_Int idx,hypre_Boxloop box1,hypre_Boxloop box2) \
-	{																	\
-	    zypre_BoxLoopCUDADeclare()											\
-	    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;						\
-	    HYPRE_Int i1 = 0, i2 = 0;											\
-		local_idx  = idx_local % box1.lsize0;							\
-		idx_local  = idx_local / box1.lsize0;							\
-		i1 += local_idx*box1.strides0;			\
-		i2 += local_idx*box2.strides0;			\
-		local_idx  = idx_local % box1.lsize1;							\
-		idx_local  = idx_local / box1.lsize1;							\
-		i1 += local_idx*box1.strides1;			\
-		i2 += local_idx*box2.strides1;			\
-		local_idx  = idx_local % box1.lsize2;							\
-		idx_local  = idx_local / box1.lsize2;							\
-		i1 += local_idx*box1.strides2;			\
-		i2 += local_idx*box2.strides2;
+    databox2.lsize2 = loop_size[2];					\
+    databox2.strides0 = stride2[0];					\
+    databox2.strides1 = stride2[1];					\
+    databox2.strides2 = stride2[2];					\
+    for (HYPRE_Int d = 0;d < ndim;d ++)					\
+      {									\
+	hypre__tot *= loop_size[d];					\
+      }									\
+    BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+    {									\
+        zypre_BoxLoopCUDADeclare()					\
+	HYPRE_Int i1 = 0, i2 = 0;					\
+	local_idx  = idx_local % databox1.lsize0;			\
+	idx_local  = idx_local / databox1.lsize0;			\
+	i1 += local_idx*databox1.strides0;				\
+	i2 += local_idx*databox2.strides0;				\
+	local_idx  = idx_local % databox1.lsize1;			\
+	idx_local  = idx_local / databox1.lsize1;			\
+	i1 += local_idx*databox1.strides1;				\
+	i2 += local_idx*databox2.strides1;				\
+	local_idx  = idx_local % databox1.lsize2;			\
+	idx_local  = idx_local / databox1.lsize2;			\
+	i1 += local_idx*databox1.strides2;				\
+	i2 += local_idx*databox2.strides2;
 
 
-
-#define zypre_BoxDataExchangeEnd()				\
+#define hypre_BoxDataExchangeEnd()				\
 	});											\
 cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
 printf("\n ERROR zypre_newBoxLoop2End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-int *p = NULL; *p = 1;\
 }\
 AxCheckError(cudaDeviceSynchronize());\
 }
-
-#define hypre_SerialBoxLoop1Begin(ndim, loop_size,			\
-				  dbox1, start1, stride1, i1)		\
-{									\
-        HYPRE_Int hypre__tot = 1.0;						\
-	const size_t block_size = 256;					\
-	HYPRE_Int nd = ndim;						\
-	for (HYPRE_Int d = 0;d < ndim;d ++)				\
-	{								\
-	    hypre__tot *= loop_size[d];					\
-	}								\
-	HYPRE_Int idx;							\
-	for (idx = 0;idx < hypre__tot;idx ++)				\
-	{								\
-	    zypre_BoxLoopCUDADeclare()											\
-	    HYPRE_Int hypre_boxD1 = 1.0;				\
-	    HYPRE_Int i1 = 0;						\
-	    for (d = 0;d < ndim;d ++)					\
-	    {								\
-	      local_idx  = idx_local % loop_size[d];			\
-	      idx_local  = idx_local / loop_size[d];			\
-	      i1 += (local_idx*stride1[d] + start1[d] - hypre_BoxIMinD(dbox1, d)) * hypre_boxD1; \
-	      hypre_boxD1 *= hypre_BoxSizeD(dbox1, d);			\
-	    }
-
-#define hypre_SerialBoxLoop1End(i1)				\
-        }								\
-}
-
+  
 #define zypre_newBoxLoop0For() {}
 
 #define zypre_newBoxLoop1For(i1) {}
@@ -803,14 +757,10 @@ AxCheckError(cudaDeviceSynchronize());\
 
 #define zypre_newBoxLoopSetOneBlock() {}
 
-
-//#define hypre_BoxLoopGetIndex    zypre_newBoxLoopGetIndex
 #define hypre_BoxLoopSetOneBlock zypre_newBoxLoopSetOneBlock
-//#define hypre_BoxLoopBlock       zypre_newBoxLoopBlock
-
-#define hypre_BoxLoop0Begin      zypre_BoxLoop0Begin
-#define hypre_BoxLoop0For        zypre_BoxLoop0For
-#define hypre_BoxLoop0End        zypre_BoxLoop0End
+#define hypre_BoxLoop0Begin      zypre_newBoxLoop0Begin
+#define hypre_BoxLoop0For        zypre_newBoxLoop0For
+#define hypre_BoxLoop0End        zypre_newBoxLoop0End
 #define hypre_BoxLoop1Begin      zypre_newBoxLoop1Begin
 #define hypre_BoxLoop1For        zypre_newBoxLoop1For
 #define hypre_BoxLoop1End        zypre_newBoxLoop1End

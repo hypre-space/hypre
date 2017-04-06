@@ -70,13 +70,13 @@ hypre_StructInnerProd( hypre_StructVector *x,
 #undef HYPRE_BOX_REDUCTION
 #endif
 #define HYPRE_BOX_REDUCTION reduction(+:local_result)
-     zypre_newBoxLoop2ReductionBegin(ndim, loop_size,
+     hypre_newBoxLoop2ReductionBegin(ndim, loop_size,
 				     x_data_box, start, unit_stride, xi,
 				     y_data_box, start, unit_stride, yi,local_result);
      {
        local_result += xp[xi] * hypre_conj(yp[yi]);		 
      }
-     zypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
+     hypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
    }
    process_result = (double)(local_result);
    
