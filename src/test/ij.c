@@ -44,6 +44,9 @@
 #include "multivector.h"
 #include "HYPRE_MatvecFunctions.h"
 
+/* max dt */
+#define DT_INF 1.0e30
+
 HYPRE_Int
 BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );
 
@@ -173,7 +176,7 @@ main( hypre_int argc,
    HYPRE_Int Q_max = 0;
    HYPRE_Real Q_trunc = 0;
 
-   const HYPRE_Real dt_inf = 1.e40;
+   const HYPRE_Real dt_inf = DT_INF;
    HYPRE_Real dt = dt_inf;
 
    /* parameters for BoomerAMG */
