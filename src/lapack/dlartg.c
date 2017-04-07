@@ -70,8 +70,9 @@
 	safmin = dlamch_("S");
 	eps = dlamch_("E");
 	d__1 = dlamch_("B");
-	i__1 = (integer) (log(safmin / eps) / log(dlamch_("B")) / 
-		2.);
+//	i__1 = (integer) (log(safmin / eps) / log(dlamch_("B")) / 
+//		2.);
+   i__1 = HYPRE_REAL_MIN_EXP>>1;
 	safmn2 = pow_di(&d__1, &i__1);
 	safmx2 = 1. / safmn2;
     }
