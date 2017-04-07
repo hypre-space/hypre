@@ -1448,8 +1448,8 @@ main( hypre_int argc,
       hypre_printf("  -ns <val>              : Use <val> sweeps on each level\n");
       hypre_printf("                           (default C/F down, F/C up, F/C fine\n");
       hypre_printf("  -ns_coarse  <val>       : set no. of sweeps for coarsest grid\n");
-      hypre_printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
-      hypre_printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");
+      /*hypre_printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
+      hypre_printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");*/
       hypre_printf("\n"); 
       hypre_printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n"); 
       hypre_printf("  -th   <val>            : set AMG threshold Theta = val \n");
