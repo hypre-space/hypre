@@ -3131,6 +3131,7 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 #define zypre_BoxLoop1For(i1)\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
+      HYPRE_Int i1;					\
       zypre_BoxLoopSet();\
       zypre_BoxLoopSetK(1, i1);\
       for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)\
@@ -3165,6 +3166,7 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 #define zypre_BoxLoop2For(i1, i2)\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
+      HYPRE_Int i1,i2;				\
       zypre_BoxLoopSet();\
       zypre_BoxLoopSetK(1, i1);\
       zypre_BoxLoopSetK(2, i2);\
@@ -3205,6 +3207,7 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 #define zypre_BoxLoop3For(i1, i2, i3)\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
+      HYPRE_Int i1,i2,i3;				\
       zypre_BoxLoopSet();\
       zypre_BoxLoopSetK(1, i1);\
       zypre_BoxLoopSetK(2, i2);\
@@ -3236,7 +3239,7 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
                             dbox3, start3, stride3, i3,\
                             dbox4, start4, stride4, i4)\
 {\
- HYPRE_Int i1,i2,i3,i4;				\
+   HYPRE_Int i1,i2,i3,i4;				\
    zypre_BoxLoopDeclare();\
    zypre_BoxLoopDeclareK(1);\
    zypre_BoxLoopDeclareK(2);\
@@ -3251,6 +3254,7 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 #define zypre_BoxLoop4For(i1, i2, i3, i4)\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
+      HYPRE_Int i1,i2,i3,i4;				\
       zypre_BoxLoopSet();\
       zypre_BoxLoopSetK(1, i1);\
       zypre_BoxLoopSetK(2, i2);\

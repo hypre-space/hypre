@@ -200,7 +200,7 @@ VOID hypre_s_copy(a, b, la, lb) char *a,const char *b; ftnlen la, lb;
 void hypre_s_copy(char *a,const char *b, ftnlen la, ftnlen lb)
 #endif
 {
-char *aend, *bend;
+register char *aend, *bend;
 
 aend = a + la;
 
