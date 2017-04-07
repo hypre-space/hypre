@@ -19,7 +19,7 @@
  *   Wrapper for CreateRAPOp routines which set up new coarse grid structures.
  *--------------------------------------------------------------------------*/
 
-  hypre_StructMatrix *
+hypre_StructMatrix *
 hypre_BAMGCreateRAPOp( hypre_StructMatrix *R,
     hypre_StructMatrix *A,
     hypre_StructMatrix *P,
@@ -27,14 +27,10 @@ hypre_BAMGCreateRAPOp( hypre_StructMatrix *R,
     HYPRE_Int           cdir )
 {
   hypre_StructMatrix    *RAP;
-  hypre_StructStencil   *stencil;
   HYPRE_Int              P_stored_as_transpose = 0;
   HYPRE_Int              constant_coefficient;
 
-  stencil = hypre_StructMatrixStencil(A);
-
-  RAP = hypre_SemiCreateRAPOp(R ,A, P, coarse_grid, cdir,
-      P_stored_as_transpose);
+  RAP = hypre_SemiCreateRAPOp(R ,A, P, coarse_grid, cdir, P_stored_as_transpose);
 
   constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
@@ -49,7 +45,7 @@ hypre_BAMGCreateRAPOp( hypre_StructMatrix *R,
  * Wrapper for routines to calculate entries in RAP. Incomplete error handling at the moment. 
  *--------------------------------------------------------------------------*/
 
-  HYPRE_Int
+HYPRE_Int
 hypre_BAMGSetupRAPOp( hypre_StructMatrix *R,
     hypre_StructMatrix *A,
     hypre_StructMatrix *P,
@@ -59,15 +55,10 @@ hypre_BAMGSetupRAPOp( hypre_StructMatrix *R,
     hypre_StructMatrix *Ac      )
 {
   HYPRE_Int              P_stored_as_transpose = 0;
-  hypre_StructStencil   *stencil;
 
-  stencil = hypre_StructMatrixStencil(A);
-
-  hypre_SemiBuildRAP(A, P, R, cdir, cindex, cstride,
-      P_stored_as_transpose, Ac);
+  hypre_SemiBuildRAP(A, P, R, cdir, cindex, cstride, P_stored_as_transpose, Ac);
 
   hypre_StructMatrixAssemble(Ac);
 
   return hypre_error_flag;
 }
-

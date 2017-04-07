@@ -37,6 +37,7 @@ HEADERS =\
 FILES =\
  coarsen.c\
  cyclic_reduction.c\
+ F90_HYPRE_struct_bamg.c\
  F90_HYPRE_struct_bicgstab.c\
  F90_HYPRE_struct_cycred.c\
  F90_HYPRE_struct_flexgmres.c\
@@ -46,12 +47,12 @@ FILES =\
  F90_HYPRE_struct_int.c\
  F90_HYPRE_struct_jacobi.c\
  F90_HYPRE_struct_pcg.c\
- F90_HYPRE_struct_bamg.c\
  F90_HYPRE_struct_pfmg.c\
  F90_HYPRE_struct_smg.c\
  F90_HYPRE_struct_sparse_msg.c\
  general.c\
  hybrid.c\
+ HYPRE_struct_bamg.c\
  HYPRE_struct_bicgstab.c\
  HYPRE_struct_cycred.c\
  HYPRE_struct_flexgmres.c\
@@ -59,7 +60,8 @@ FILES =\
  HYPRE_struct_hybrid.c\
  HYPRE_struct_int.c\
  HYPRE_struct_jacobi.c\
- HYPRE_struct_bamg.c\
+ HYPRE_struct_lgmres.c\
+ HYPRE_struct_pcg.c\
  HYPRE_struct_pfmg.c\
  HYPRE_struct_smg.c\
  HYPRE_struct_sparse_msg.c\

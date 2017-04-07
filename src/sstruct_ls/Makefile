@@ -41,8 +41,8 @@ HEADERS =\
  sstruct_owninfo.h\
  sstruct_recvinfo.h\
  sstruct_sendinfo.h\
- sys_pfmg.h\
- sys_bamg.h
+ sys_bamg.h\
+ sys_pfmg.h
 
 FILES =\
  F90_HYPRE_sstruct_bicgstab.c\
@@ -54,8 +54,8 @@ FILES =\
  F90_HYPRE_sstruct_maxwell.c\
  F90_HYPRE_sstruct_pcg.c\
  F90_HYPRE_sstruct_split.c\
- F90_HYPRE_sstruct_sys_pfmg.c\
  F90_HYPRE_sstruct_sys_bamg.c\
+ F90_HYPRE_sstruct_sys_pfmg.c\
  HYPRE_sstruct_bicgstab.c\
  HYPRE_sstruct_gmres.c\
  HYPRE_sstruct_flexgmres.c\

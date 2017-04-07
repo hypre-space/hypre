@@ -58,7 +58,7 @@ HYPRE_Int hypre_BAMGDestroy( void *bamg_vdata )
 {
   hypre_BAMGData *bamg_data = bamg_vdata;
 
-  HYPRE_Int l, k;
+  HYPRE_Int l;
 
   if (bamg_data)
   {

@@ -123,14 +123,13 @@ HYPRE_Int hypre_SysBAMGSetup
   HYPRE_Real*             relax_weights;
 
   HYPRE_Int               NDim;
-  HYPRE_Int               NDimCoarsen;
 
   HYPRE_Int               cmaxsize;
   HYPRE_Int               i, k, l, d;
 
   hypre_SStructPVector*** tv;     // tv[l][k] == k'th test vector on level l
 
-#if DEBUG_SYSBAMG
+#if DEBUG_SYSBAMG > 1
   char                    filename[255];
 #endif
 
@@ -150,8 +149,7 @@ HYPRE_Int hypre_SysBAMGSetup
     hypre_SStructPGrid* PGrid = hypre_SStructPMatrixPGrid(A);
     hypre_StructGrid*   SGrid = hypre_SStructPGridSGrid(PGrid, 0);
 
-    NDim        = hypre_StructGridNDim(SGrid);
-    NDimCoarsen = NDim;                          // XXX should be a parameter?
+    NDim = hypre_StructGridNDim(SGrid);
 
     hypre_Box* cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(SGrid));
 
@@ -169,6 +167,11 @@ HYPRE_Int hypre_SysBAMGSetup
     P_PGrid_l = (data->P_PGrid_l) = hypre_TAlloc(hypre_SStructPGrid*, max_levels);
     cdir_l    = (data->cdir_l)    = hypre_TAlloc(HYPRE_Int, max_levels);
     active_l  = (data->active_l)  = hypre_TAlloc(HYPRE_Int, max_levels);
+
+    (data->PGrid_l)   = PGrid_l;
+    (data->P_PGrid_l) = P_PGrid_l;
+    (data->cdir_l)    = cdir_l;
+    (data->active_l)  = active_l;
 
     PGrid_l[0]     = PGrid;
     P_PGrid_l[0]   = NULL;
@@ -188,14 +191,23 @@ HYPRE_Int hypre_SysBAMGSetup
    * Allocate/Create/Assemble matrix and vector structures
    *----------------------------------------------------------------------------------------------*/
 
-  A_l  = (data->A_l)  = hypre_TAlloc(hypre_SStructPMatrix*, num_levels);
-  P_l  = (data->P_l)  = hypre_TAlloc(hypre_SStructPMatrix*, num_levels - 1);
-  RT_l = (data->RT_l) = hypre_TAlloc(hypre_SStructPMatrix*, num_levels - 1);
-  b_l  = (data->b_l)  = hypre_TAlloc(hypre_SStructPVector*, num_levels);
-  x_l  = (data->x_l)  = hypre_TAlloc(hypre_SStructPVector*, num_levels);
-  tx_l = (data->tx_l) = hypre_TAlloc(hypre_SStructPVector*, num_levels);
-  r_l  = (data->r_l)  = tx_l;
-  e_l  = (data->e_l)  = tx_l;
+  A_l  = hypre_TAlloc(hypre_SStructPMatrix*, num_levels);
+  P_l  = hypre_TAlloc(hypre_SStructPMatrix*, num_levels - 1);
+  RT_l = hypre_TAlloc(hypre_SStructPMatrix*, num_levels - 1);
+  b_l  = hypre_TAlloc(hypre_SStructPVector*, num_levels);
+  x_l  = hypre_TAlloc(hypre_SStructPVector*, num_levels);
+  tx_l = hypre_TAlloc(hypre_SStructPVector*, num_levels);
+  r_l  = tx_l;
+  e_l  = tx_l;
+
+  (data->A_l)  = A_l;
+  (data->P_l)  = P_l;
+  (data->RT_l) = RT_l;
+  (data->b_l)  = b_l;
+  (data->x_l)  = x_l;
+  (data->tx_l) = tx_l;
+  (data->r_l)  = r_l;
+  (data->e_l)  = e_l;
 
   hypre_SysBAMGSetupMV( data, A, b, x );
 

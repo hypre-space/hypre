@@ -13,6 +13,7 @@
 #include "_hypre_struct_ls.h"
 #include "_hypre_struct_mv.h"
 #include "bamg.h"
+#include <time.h>
 
 #define DEBUG 0
 
@@ -30,7 +31,6 @@ HYPRE_Int hypre_BAMGSetup(
   MPI_Comm              comm = (bamg_data -> comm);
 
   HYPRE_Int             relax_type =       (bamg_data -> relax_type);
-  HYPRE_Int             usr_jacobi_weight= (bamg_data -> usr_jacobi_weight);
   HYPRE_Real            jacobi_weight    = (bamg_data -> jacobi_weight);
 
   HYPRE_Int             num_tv1 = (bamg_data -> num_tv1);

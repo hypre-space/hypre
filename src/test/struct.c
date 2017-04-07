@@ -979,7 +979,7 @@ main( hypre_int argc,
          HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
          if ( solver_id == 3 || solver_id == 4 ||
               solver_id == 13 || solver_id == 14 ||
-              solver_id == 103 | solver_id == 104 )
+              solver_id == 103 || solver_id == 104 )
          {
             stencil_size  = hypre_StructStencilSize(stencil);
             stencil_entries = hypre_CTAlloc(HYPRE_Int, stencil_size);

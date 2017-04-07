@@ -642,7 +642,7 @@ HYPRE_Int hypre_SVD
   hypre_printf("\n");
 #endif
 
-  sysbamg_dbgmsg("hypre_xgebrd finished at %d s\n", difftime(time(NULL),t_init));
+  sysbamg_dbgmsg("hypre_xgebrd finished at %f s\n", difftime(time(NULL),t_init));
   sysbamg_dbgmsg("hypre_xbdsqr starting ...\n");
 
   char            uplo = 'U';
@@ -690,7 +690,7 @@ HYPRE_Int hypre_SVD
   }
 #endif
 
-  sysbamg_dbgmsg("hypre_xbdsqr finished at %d s\n", difftime(time(NULL),t_init));
+  sysbamg_dbgmsg("hypre_xbdsqr finished at %f s\n", difftime(time(NULL),t_init));
   sysbamg_dbgmsg("hypre_xxxmbr starting ...\n");
 
   // compute the singular vector matrices U = U_1 U_2 == Q U and V^T = V_2^T V_1^T == VT P^T
@@ -722,7 +722,7 @@ HYPRE_Int hypre_SVD
   }
 #endif
 
-  sysbamg_dbgmsg("hypre_xxxmbr finished at %d s\n", difftime(time(NULL),t_init));
+  sysbamg_dbgmsg("hypre_xxxmbr finished at %f s\n", difftime(time(NULL),t_init));
 
   // write lowest Mrows/2 L and R singular vectors into M := [v_l,1, v_l,2, ..., v_r,1, v_r,2, ...]
   //    nb: values/vectors are returned in* descending* order
