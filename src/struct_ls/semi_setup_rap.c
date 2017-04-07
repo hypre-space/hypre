@@ -18,24 +18,26 @@
 #define RMSIZE 3
 
 #define hypre_MapRAPMarker(indexRAP, rank) \
-   { \
-      HYPRE_Int macro, mu, stride; \
-      for ( rank = 0, mu = 0, stride = 1; mu < HYPRE_MAXDIM; mu++, stride *= RMSIZE ) { \
-        macro = hypre_IndexD(indexRAP,mu); \
-        if ( macro == -1 ) macro = 2; \
-        rank += macro*stride; \
-      } \
-   }
+{\
+   HYPRE_Int macro, d, stride;\
+   for (rank = 0, d = 0, stride = 1; d < HYPRE_MAXDIM; d++, stride *= RMSIZE)\
+   {\
+      macro = hypre_IndexD(indexRAP,d);\
+      if (macro == -1) macro = 2;\
+      rank += macro*stride;\
+   }\
+}
 
 #define hypre_InverseMapRAPMarker(rank, indexRAP) \
-   { \
-      HYPRE_Int macro, mu, stride; \
-      for ( mu = 0, stride = 1; mu < HYPRE_MAXDIM; mu++, stride *= RMSIZE ) { \
-        macro = (rank/stride) % RMSIZE; \
-        if ( macro == 2 ) macro = -1; \
-        hypre_IndexD( indexRAP, mu ) = macro; \
-      } \
-   }
+{\
+   HYPRE_Int macro, d, stride;\
+   for (d = 0, stride = 1; d < HYPRE_MAXDIM; d++, stride *= RMSIZE)\
+   {\
+      macro = (rank/stride) % RMSIZE;\
+      if (macro == 2) macro = -1;\
+      hypre_IndexD(indexRAP, d) = macro;\
+   }\
+}
 
 #define print_complex(x) if ( iAc < 0 ) { bamg_dbgmsg( "  %30s %16.6e %16.6e\n", #x, hypre_creal(x), hypre_cimag(x) ); }
 

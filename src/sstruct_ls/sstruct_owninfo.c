@@ -20,7 +20,8 @@ hypre_SStructIndexScaleF_C( hypre_Index findex,
 {
    HYPRE_Int d;
  
-   for ( d = 0; d < HYPRE_MAXDIM; d++ ) {
+   for (d = 0; d < HYPRE_MAXDIM; d++)
+   {
       hypre_IndexD(cindex,d) =
          (hypre_IndexD(findex,d) - hypre_IndexD(index,d)) / hypre_IndexD(stride,d);
    }
@@ -37,7 +38,8 @@ hypre_SStructIndexScaleC_F( hypre_Index cindex,
 {
    HYPRE_Int d;
  
-   for ( d = 0; d < HYPRE_MAXDIM; d++ ) {
+   for (d = 0; d < HYPRE_MAXDIM; d++)
+   {
       hypre_IndexD(findex,d) =
          hypre_IndexD(cindex,d) * hypre_IndexD(stride,d) + hypre_IndexD(index,d);
    }
@@ -178,7 +180,7 @@ hypre_SStructOwnInfo( hypre_StructGrid  *fgrid,
        hypre_ClearIndex(index); 
        hypre_SStructIndexScaleC_F(hypre_BoxIMin(grid_box), index,
                                   rfactor, hypre_BoxIMin(&scaled_box));
-       for ( j = 0; j < HYPRE_MAXDIM; j++ ) { hypre_IndexD(index,j) = rfactor[j]-1; }
+       for (j = 0; j < HYPRE_MAXDIM; j++) { hypre_IndexD(index,j) = rfactor[j]-1; }
        hypre_SStructIndexScaleC_F(hypre_BoxIMax(grid_box), index,
                                   rfactor, hypre_BoxIMax(&scaled_box));
 

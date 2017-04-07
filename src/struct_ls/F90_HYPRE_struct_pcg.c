@@ -197,7 +197,7 @@ hypre_F90_IFACE(hypre_structpcgsetprecond, HYPRE_STRUCTPCGSETPRECOND)
               HYPRE_StructPFMGSetup,
               hypre_F90_PassObj (HYPRE_StructSolver, precond_solver)) );
    }
-   else if (*precond_id == 1)
+   else if (*precond_id == 2)
    {
       *ierr = (hypre_F90_Int)
          ( HYPRE_StructPCGSetPrecond(

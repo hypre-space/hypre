@@ -30,10 +30,15 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    HYPRE_Int             stencil_size;
    HYPRE_Int             stencil_dim;
 
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM] = {1};
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM];
 
    HYPRE_Int             i;
    HYPRE_Int             constant_coefficient;
+
+   for (i = 0; i < 2*HYPRE_MAXDIM; i++)
+   {
+      num_ghost[i] = 1;
+   }
 
    /* set up stencil */
    stencil_size = 2;

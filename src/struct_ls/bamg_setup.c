@@ -82,13 +82,18 @@ HYPRE_Int hypre_BAMGSetup(
   HYPRE_Int             cdir, periodic, cmaxsize;
   HYPRE_Int             d, l, k;
 
-  HYPRE_Int             b_num_ghost[2*HYPRE_MAXDIM]  = {0};
-  HYPRE_Int             x_num_ghost[2*HYPRE_MAXDIM]  = {1};
+  HYPRE_Int             b_num_ghost[2*HYPRE_MAXDIM];
+  HYPRE_Int             x_num_ghost[2*HYPRE_MAXDIM];
 
 #if DEBUG_BAMG
   char                  filename[255];
 #endif
 
+   for (d = 0; d < 2*HYPRE_MAXDIM; d++)
+   {
+      b_num_ghost[d] = 0;
+      x_num_ghost[d] = 1;
+   }
 
   /*-----------------------------------------------------
    * Set up coarse grids - Semi coarsening, as in PFMG

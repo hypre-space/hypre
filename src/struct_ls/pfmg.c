@@ -20,6 +20,7 @@ void *
 hypre_PFMGCreate( MPI_Comm  comm )
 {
    hypre_PFMGData *pfmg_data;
+   HYPRE_Int       d;
 
    pfmg_data = hypre_CTAlloc(hypre_PFMGData, 1);
 
@@ -32,9 +33,10 @@ hypre_PFMGCreate( MPI_Comm  comm )
    (pfmg_data -> rel_change)       = 0;
    (pfmg_data -> zero_guess)       = 0;
    (pfmg_data -> max_levels)       = 0;
-   (pfmg_data -> dxyz)[0]          = 0.0;
-   (pfmg_data -> dxyz)[1]          = 0.0;
-   (pfmg_data -> dxyz)[2]          = 0.0;
+   for (d = 0; d < HYPRE_MAXDIM; d++)
+   {
+      (pfmg_data -> dxyz)[d]       = 0.0;
+   }
    (pfmg_data -> relax_type)       = 1;       /* weighted Jacobi */
    (pfmg_data -> jacobi_weight)    = 0.0;  
    (pfmg_data -> usr_jacobi_weight)= 0;     /* no user Jacobi weight */

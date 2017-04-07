@@ -480,6 +480,10 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
    for (i = 0; i < size; i++)
       result += hypre_conj(y_data[i]) * x_data[i];
 
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+#endif
+
    return result;
 }
 
@@ -505,6 +509,10 @@ HYPRE_Complex   hypre_SeqVectorComplexInnerProd( hypre_Vector *x,
 #endif
    for (i = 0; i < size; i++)
       result += hypre_conj(y_data[i]) * x_data[i];
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
+#endif
 
    return result;
 }

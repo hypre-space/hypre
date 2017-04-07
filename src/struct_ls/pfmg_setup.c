@@ -15,23 +15,23 @@
 
 #define DEBUG 0
 
-#define hypre_PFMGSetCIndex(cdir, cindex) \
-{ \
-  hypre_SetIndex(cindex, 0); \
-  hypre_IndexD(cindex, cdir) = 0; \
-}
+#define hypre_PFMGSetCIndex(cdir, cindex)       \
+   {                                            \
+      hypre_SetIndex(cindex, 0);                \
+      hypre_IndexD(cindex, cdir) = 0;           \
+   }
 
-#define hypre_PFMGSetFIndex(cdir, findex) \
-{ \
-  hypre_SetIndex(findex, 0); \
-  hypre_IndexD(findex, cdir) = 1; \
-}
+#define hypre_PFMGSetFIndex(cdir, findex)       \
+   {                                            \
+      hypre_SetIndex(findex, 0);                \
+      hypre_IndexD(findex, cdir) = 1;           \
+   }
 
-#define hypre_PFMGSetStride(cdir, stride) \
-{ \
-  hypre_SetIndex(stride, 1); \
-  hypre_IndexD(stride, cdir) = 2; \
-}
+#define hypre_PFMGSetStride(cdir, stride)       \
+   {                                            \
+      hypre_SetIndex(stride, 1);                \
+      hypre_IndexD(stride, cdir) = 2;           \
+   }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -45,19 +45,19 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_PFMGData       *pfmg_data = (hypre_PFMGData       *)pfmg_vdata;
 
    MPI_Comm              comm = (pfmg_data -> comm);
-                     
+
    HYPRE_Int             relax_type =       (pfmg_data -> relax_type);
    HYPRE_Int             usr_jacobi_weight= (pfmg_data -> usr_jacobi_weight);
    HYPRE_Real            jacobi_weight    = (pfmg_data -> jacobi_weight);
    HYPRE_Int             skip_relax =       (pfmg_data -> skip_relax);
    HYPRE_Real           *dxyz       =       (pfmg_data -> dxyz);
    HYPRE_Int             rap_type;
-                     
+
    HYPRE_Int             max_iter;
    HYPRE_Int             max_levels;
-                      
+
    HYPRE_Int             num_levels;
-                     
+
    hypre_Index           cindex;
    hypre_Index           findex;
    hypre_Index           stride;
@@ -68,7 +68,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int            *active_l;
    hypre_StructGrid    **grid_l;
    hypre_StructGrid    **P_grid_l;
-                    
+
    HYPRE_Complex        *data;
    HYPRE_Int             data_size = 0;
    HYPRE_Real           *relax_weights;
@@ -99,16 +99,22 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Real            min_dxyz;
    HYPRE_Int             cdir, periodic, cmaxsize;
    HYPRE_Int             d, l;
-   HYPRE_Int             dxyz_flag;
-                       
-   HYPRE_Int             b_num_ghost[2*HYPRE_MAXDIM] = {0};
-   HYPRE_Int             x_num_ghost[2*HYPRE_MAXDIM] = {1};
+   HYPRE_Int             dxyz_flag, dxyz_zeroes;
+
+   HYPRE_Int             b_num_ghost[2*HYPRE_MAXDIM];
+   HYPRE_Int             x_num_ghost[2*HYPRE_MAXDIM];
 
 #if DEBUG
    char                  filename[255];
 #endif
 
    HYPRE_ANNOTATION_BEGIN("PFMG.setup");
+
+   for (d = 0; d < 2*HYPRE_MAXDIM; d++)
+   {
+      b_num_ghost[d] = 0;
+      x_num_ghost[d] = 1;
+   }
 
    /*-----------------------------------------------------
     * Set up coarse grids
@@ -132,15 +138,15 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    (pfmg_data -> max_levels) = max_levels;
 
    /* compute dxyz */
-   dxyz_flag= 0;
-   HYPRE_Int dxyz_zeroes = 0;
-   for ( d = 0; d < ndim; d++ ) dxyz_zeroes += ( dxyz[d] == 0 );
+   dxyz_flag = 0;
+   dxyz_zeroes = 0;
+   for (d = 0; d < ndim; d++) { dxyz_zeroes += ( dxyz[d] == 0 ); }
    if (dxyz_zeroes != 0)
    {
       mean = hypre_CTAlloc(HYPRE_Real, ndim);
       deviation = hypre_CTAlloc(HYPRE_Real, ndim);
       hypre_PFMGComputeDxyz(A, dxyz, mean, deviation);
-        
+
       for (d = 0; d < ndim; d++)
       {
          deviation[d] -= mean[d]*mean[d];
@@ -166,7 +172,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    for (l = 0; ; l++)
    {
       /* determine cdir */
-      min_dxyz = dxyz[0] + dxyz[1] + dxyz[2] + 1;
+      min_dxyz = dxyz[0] + 1;
+      for (d = 1; d < ndim; d++)
+      {
+         min_dxyz += dxyz[d];
+      }
       cdir = -1;
       alpha = 0.0;
       for (d = 0; d < ndim; d++)
@@ -307,7 +317,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     *-----------------------------------------------------*/
 
    /*-----------------------------------------------------
-    * Modify the rap_type if red-black Gauss-Seidel is 
+    * Modify the rap_type if red-black Gauss-Seidel is
     * used. Red-black gs is used only in the non-Galerkin
     * case.
     *-----------------------------------------------------*/
@@ -602,29 +612,29 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_dbox;
-                        
+
    HYPRE_Int              Ai;
 
    HYPRE_Complex         *Ap;
    HYPRE_Real             cxyz[HYPRE_MAXDIM], sqcxyz[HYPRE_MAXDIM], tcxyz[HYPRE_MAXDIM];
    HYPRE_Real             cxyz_max;
 
-   HYPRE_Int              tot_size; 
+   HYPRE_Int              tot_size;
 
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
 
    HYPRE_Int              constant_coefficient;
-                        
+
    HYPRE_Int              Astenc;
-                        
+
    hypre_Index            loop_size;
    hypre_IndexRef         start;
    hypre_Index            stride;
-                        
+
    HYPRE_Int              i, si, d, sdiag;
 
    HYPRE_Real             c[HYPRE_MAXDIM], sqc[HYPRE_MAXDIM], tc[HYPRE_MAXDIM], diag;
@@ -643,12 +653,12 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
     * Compute cxyz (use arithmetic mean)
     *----------------------------------------------------------*/
 
-   for ( d = 0; d < ndim; d++ )
+   for (d = 0; d < ndim; d++)
    {
       c[d]   = 0.0;
       sqc[d] = 0.0;
    }
-   
+
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
@@ -659,14 +669,18 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    for (si = 0; si < stencil_size; si++)
    {
       sdiag = si;
-      for ( d = 0; d < ndim; d++ )
+      for (d = 0; d < ndim; d++)
       {
-         if ( hypre_IndexD(stencil_shape[si], d) != 0 ) {
+         if (hypre_IndexD(stencil_shape[si], d) != 0)
+         {
             sdiag = -1;
             break;
          }
       }
-      if ( sdiag >= 0 ) break;
+      if (sdiag >= 0)
+      {
+         break;
+      }
    }
 
    hypre_ForBoxI(i, compute_boxes)
@@ -684,7 +698,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       {
          Ai = hypre_CCBoxIndexRank( A_dbox, start );
 
-         for ( d = 0; d < ndim; d++ ) tc[d] = 0.0;
+         for (d = 0; d < ndim; d++)
+         {
+            tc[d] = 0.0;
+         }
 
          /* get sign of diagonal */
          Ap = hypre_StructMatrixBoxData(A, i, sdiag);
@@ -698,7 +715,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          {
             Ap = hypre_StructMatrixBoxData(A, i, si);
 
-            for ( d = 0; d < ndim; d++ )
+            for (d = 0; d < ndim; d++)
             {
                Astenc = hypre_IndexD(stencil_shape[si], d);
                if (Astenc)
@@ -708,7 +725,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             }
          }
 
-         for ( d = 0; d < ndim; d++ )
+         for (d = 0; d < ndim; d++)
          {
             c[d]   += tc[d];
             sqc[d] += tc[d]*tc[d];
@@ -735,7 +752,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 #endif
             hypre_BoxLoop1For(Ai)
             {
-               for ( d = 0; d < ndim; d++ ) t_tc[d] = 0.0;
+               for (d = 0; d < ndim; d++)
+               {
+                  t_tc[d] = 0.0;
+               }
 
                /* get sign of diagonal */
                Ap = hypre_StructMatrixBoxData(A, i, sdiag);
@@ -749,7 +769,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                {
                   Ap = hypre_StructMatrixBoxData(A, i, si);
 
-                  for ( d = 0; d < ndim; d++ )
+                  for (d = 0; d < ndim; d++)
                   {
                      Astenc = hypre_IndexD(stencil_shape[si], d);
                      if (Astenc)
@@ -759,7 +779,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                   }
                }
 
-               for ( d = 0; d < ndim; d++ )
+               for (d = 0; d < ndim; d++)
                {
                   t_c[d]   += t_tc[d];
                   t_sqc[d] += t_tc[d]*t_tc[d];
@@ -770,7 +790,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp critical
 #endif
-            for ( d = 0; d < ndim; d++ )
+            for (d = 0; d < ndim; d++)
             {
                c[d]   += t_c[d];
                sqc[d] += t_sqc[d];
@@ -779,7 +799,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       }
    }
 
-   for ( d = 0; d < ndim; d++ )
+   for (d = 0; d < ndim; d++)
    {
       cxyz[d]   = c[d];
       sqcxyz[d] = sqc[d];
@@ -801,13 +821,17 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    /* constant_coefficient==0, all coefficients vary with space */
    else
    {
-      for ( d = 0; d < ndim; d++ ) tcxyz[d] = cxyz[d];
-
+      for (d = 0; d < ndim; d++)
+      {
+         tcxyz[d] = cxyz[d];
+      }
       hypre_MPI_Allreduce(tcxyz, cxyz, ndim, HYPRE_MPI_REAL, hypre_MPI_SUM,
                           hypre_StructMatrixComm(A));
 
-      for ( d = 0; d < ndim; d++ ) tcxyz[d] = sqcxyz[d];
-
+      for (d = 0; d < ndim; d++)
+      {
+         tcxyz[d] = sqcxyz[d];
+      }
       hypre_MPI_Allreduce(tcxyz, sqcxyz, ndim, HYPRE_MPI_REAL, hypre_MPI_SUM,
                           hypre_StructMatrixComm(A));
 
@@ -817,7 +841,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          deviation[d]= sqcxyz[d]/tot_size;
       }
    }
-     
+
    cxyz_max = 0.0;
    for (d = 0; d < ndim; d++)
    {
@@ -871,7 +895,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
    HYPRE_Real             diag_product = 1.0;
    HYPRE_Int              zero_diag = 0;
 
-   HYPRE_Int              constant_coefficient; 
+   HYPRE_Int              constant_coefficient;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -915,6 +939,6 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
    {
       zero_diag = 1;
    }
-   
+
    return zero_diag;
 }

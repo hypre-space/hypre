@@ -100,7 +100,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    HYPRE_Real           *relax_weights;
    HYPRE_Real           *mean, *deviation;
    HYPRE_Real            alpha, beta;
-   HYPRE_Int             dxyz_flag;
+   HYPRE_Int             dxyz_flag, dxyz_zeroes;
 
    HYPRE_Real            min_dxyz;
    HYPRE_Int             cdir, periodic, cmaxsize;
@@ -128,7 +128,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
     *--------------------------------------------------------*/
    nvars    = hypre_SStructPMatrixNVars(A);
    sys_dxyz = hypre_TAlloc(HYPRE_Real *, nvars);
-   for ( i = 0; i < nvars; i++)
+   for (i = 0; i < nvars; i++)
    {
       sys_dxyz[i] = hypre_TAlloc(HYPRE_Real, HYPRE_MAXDIM);
    }
@@ -145,7 +145,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(sgrid));
 
    max_levels = 0;
-   for ( d = 0; d < ndim; d++ ) max_levels += hypre_Log2(hypre_BoxSizeD(cbox, d)) + 2;
+   for (d = 0; d < ndim; d++) { max_levels += hypre_Log2(hypre_BoxSizeD(cbox, d)) + 2; }
    if ((sys_pfmg_data -> max_levels) > 0)
    {
       max_levels = hypre_min(max_levels, (sys_pfmg_data -> max_levels));
@@ -153,9 +153,9 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    (sys_pfmg_data -> max_levels) = max_levels;
 
    /* compute dxyz */
-   dxyz_flag= 0;
-   HYPRE_Int dxyz_zeroes = 0;
-   for ( d = 0; d < ndim; d++ ) dxyz_zeroes += ( dxyz[d] == 0 );
+   dxyz_flag = 0;
+   dxyz_zeroes = 0;
+   for (d = 0; d < ndim; d++) { dxyz_zeroes += ( dxyz[d] == 0 ); }
    if (dxyz_zeroes != 0)
    {
       mean = hypre_CTAlloc(HYPRE_Real, ndim);

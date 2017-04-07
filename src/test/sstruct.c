@@ -1162,17 +1162,17 @@ MapProblemIndex( ProblemIndex index,
    HYPRE_Int i;
 
    /* un-shift the index */
-   for ( i = 0; i < HYPRE_MAXDIM; i++ )
+   for (i = 0; i < HYPRE_MAXDIM; i++)
    {
       index[i] -= index[2*HYPRE_MAXDIM+i];
    }
    /* map the index */
-   for ( i = 0; i < HYPRE_MAXDIM; i++ )
+   for (i = 0; i < HYPRE_MAXDIM; i++)
    {
       index[i] = m[i]*index[i] + (m[i]-1)*index[HYPRE_MAXDIM+i];
    }
    /* pre-shift the new mapped index */
-   for ( i = 0; i < HYPRE_MAXDIM; i++ )
+   for (i = 0; i < HYPRE_MAXDIM; i++)
    {
       index[i] += index[2*HYPRE_MAXDIM+i];
    }

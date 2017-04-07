@@ -426,6 +426,9 @@ hypre_ParVectorInnerProd( hypre_ParVector *x,
 #endif
    hypre_MPI_Allreduce(&local_result, &result, 1, HYPRE_MPI_REAL,
                        hypre_MPI_SUM, comm);
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] += hypre_MPI_Wtime();
+#endif
    
    return result;
 }
@@ -445,8 +448,14 @@ hypre_ParVectorComplexInnerProd( hypre_ParVector *x,
    HYPRE_Complex result = 0.0;
    HYPRE_Complex local_result = hypre_SeqVectorComplexInnerProd(x_local, y_local);
    
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] -= hypre_MPI_Wtime();
+#endif
    hypre_MPI_Allreduce(&local_result, &result, 1, HYPRE_MPI_COMPLEX,
                        hypre_MPI_SUM, comm);
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] += hypre_MPI_Wtime();
+#endif
    
    return result;
 }

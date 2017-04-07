@@ -208,15 +208,16 @@ hypre_IndexesEqual( hypre_Index  index1,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_PrintIndex( const hypre_Index       Index,
-                  const HYPRE_Int         ndim )
+hypre_PrintIndex( const hypre_Index  Index,
+                  const HYPRE_Int    ndim )
 {
   HYPRE_Int d;
 
-  for ( d = 0; d < ndim; d++ ) {
-    hypre_printf( "  %d", hypre_IndexD(Index,d) );
+  for ( d = 0; d < ndim; d++ )
+  {
+     hypre_printf("  %d", hypre_IndexD(Index,d));
   }
-  hypre_printf( "\n" );
+  hypre_printf("\n");
 
   return hypre_error_flag;
 }
