@@ -1045,7 +1045,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                      
                start = hypre_BoxIMin(int_box);
                hypre_BoxGetSize(int_box, loop_size);
-			   /*FIXME: need to change hypre_BoxLoopGetIndex to GPU*/
+			   /*FIXME: It has to be the old boxloop */
                zypre_BoxLoop2Begin(ndim, loop_size,
                                    int_box, start, stride, mi,
                                    vbox,    start, stride, vi);

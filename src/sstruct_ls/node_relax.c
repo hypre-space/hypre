@@ -277,9 +277,9 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
     * Allocate storage used to invert local diagonal blocks
     *----------------------------------------------------------*/
 
-   x_loc    = hypre_TAlloc(HYPRE_Real   , hypre_NumThreads()*nvars);
+   x_loc    = hypre_UMTAlloc(HYPRE_Real   , hypre_NumThreads()*nvars);
    A_loc    = hypre_TAlloc(HYPRE_Real  *, hypre_NumThreads()*nvars);
-   A_loc[0] = hypre_TAlloc(HYPRE_Real   , hypre_NumThreads()*nvars*nvars);
+   A_loc[0] = hypre_UMTAlloc(HYPRE_Real   , hypre_NumThreads()*nvars*nvars);
    for (vi = 1; vi < hypre_NumThreads()*nvars; vi++)
    {
       A_loc[vi] = A_loc[0] + vi*nvars;
@@ -693,18 +693,18 @@ hypre_NodeRelax(  void               *relax_vdata,
 
                start  = hypre_BoxIMin(compute_box);
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-/*FIXME : need to rewrite for GPU*/
-               zypre_BoxLoop3Begin(ndim, loop_size,
+
+               hypre_BoxLoop3Begin(ndim, loop_size,
                                    A_data_box, start, stride, Ai,
                                    b_data_box, start, stride, bi,
                                    x_data_box, start, stride, xi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-               zypre_BoxLoop3For(Ai, bi, xi)
+               hypre_BoxLoop3For(Ai, bi, xi)
                {
-                     HYPRE_Real   **A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
-		     HYPRE_Real    *x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
+                   HYPRE_Real   **A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
+                   HYPRE_Real    *x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
                   /*------------------------------------------------
                    * Copy rhs and matrix for diagonal coupling
                    * (intra-nodal) into local storage.
@@ -740,7 +740,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                   }
 
                }
-               zypre_BoxLoop3End(Ai, bi, xi);
+               hypre_BoxLoop3End(Ai, bi, xi);
             }
          }
       }
@@ -895,17 +895,17 @@ hypre_NodeRelax(  void               *relax_vdata,
                      }
                   }
                }
-/*FIXME : need to rewrite for GPU*/
-               zypre_BoxLoop2Begin(ndim, loop_size,
+
+               hypre_BoxLoop2Begin(ndim, loop_size,
                                    A_data_box, start, stride, Ai,
                                    t_data_box, start, stride, ti);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,ti,vi,vj,x_loc,A_loc) HYPRE_SMP_SCHEDULE
 #endif
-               zypre_BoxLoop2For(Ai, ti)
+               hypre_BoxLoop2For(Ai, ti)
                {
-                  A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
-                  x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
+                  HYPRE_Real   **A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
+                  HYPRE_Real    *x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
                   /*------------------------------------------------
                    * Copy rhs and matrix for diagonal coupling
                    * (intra-nodal) into local storage.
@@ -941,7 +941,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                   }
 
                }
-               zypre_BoxLoop2End(Ai, ti);
+               hypre_BoxLoop2End(Ai, ti);
             }
          }
       }
