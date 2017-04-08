@@ -67,7 +67,7 @@ new_format( const char *format,
 #ifdef HYPRE_SINGLE                /* no modifier */
 #elif HYPRE_LONG_DOUBLE            /* modify with 'L' */
                *nfp = 'L'; nfp++;
-#else                              /* modify with 'l' (default is double) */
+#else                              /* modify with 'l' (default is _double_) */
                *nfp = 'l'; nfp++;
 #endif
                foundpercent = 0; break;
@@ -97,9 +97,7 @@ new_format( const char *format,
 HYPRE_Int
 free_format( char *newformat )
 {
-#ifdef HYPRE_BIGINT
    hypre_TFree(newformat);
-#endif
 
    return 0;
 }
