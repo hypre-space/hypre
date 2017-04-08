@@ -120,7 +120,9 @@ hypre_SStructPComplexInnerProd( hypre_SStructPVector *px,
       presult += sresult;
    }
 
+#if 0
    hypre_printf("%s:%d %s presult= %e + I %e\n", __FILE__, __LINE__, __func__, hypre_creal(presult), hypre_cimag(presult));
+#endif
 
    *presult_ptr = presult;
 

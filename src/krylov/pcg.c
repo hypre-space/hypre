@@ -476,7 +476,9 @@ hypre_PCGSolve( void *pcg_vdata,
    /* gamma = <r,p> */
    gamma = (*(pcg_functions->ComplexInnerProd))(r,p);
 
+#if 0
    hypre_printf("%s:%d:%s gamma %e + I %e\n", __FILE__, __LINE__, __func__, hypre_creal(gamma), hypre_cimag(gamma));
+#endif
 
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
