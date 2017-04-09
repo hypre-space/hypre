@@ -335,8 +335,7 @@ hypre_Vector *hypre_SeqVectorCloneDeep ( hypre_Vector *x );
 hypre_Vector *hypre_SeqVectorCloneShallow ( hypre_Vector *x );
 HYPRE_Int hypre_SeqVectorScale ( HYPRE_Complex alpha , hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpy ( HYPRE_Complex alpha , hypre_Vector *x , hypre_Vector *y );
-HYPRE_Real hypre_SeqVectorInnerProd ( hypre_Vector *x , hypre_Vector *y );
-HYPRE_Complex hypre_SeqVectorComplexInnerProd ( hypre_Vector *x , hypre_Vector *y );
+HYPRE_Complex hypre_SeqVectorInnerProd ( hypre_Vector *x , hypre_Vector *y );
 HYPRE_Complex hypre_VectorSumElts ( hypre_Vector *vector );
 
 #ifdef __cplusplus

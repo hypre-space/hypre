@@ -690,7 +690,7 @@ HYPRE_Int HYPRE_ParVectorCopy ( HYPRE_ParVector x , HYPRE_ParVector y );
 HYPRE_ParVector HYPRE_ParVectorCloneShallow ( HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorScale ( HYPRE_Complex value , HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorAxpy ( HYPRE_Complex alpha , HYPRE_ParVector x , HYPRE_ParVector y );
-HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x , HYPRE_ParVector y , HYPRE_Real *prod );
+HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x , HYPRE_ParVector y , HYPRE_Complex *prod );
 HYPRE_Int HYPRE_VectorToParVector ( MPI_Comm comm , HYPRE_Vector b , HYPRE_Int *partitioning , HYPRE_ParVector *vector );
 
 /* new_commpkg.c */
@@ -862,8 +862,7 @@ HYPRE_Int hypre_ParVectorCopy ( hypre_ParVector *x , hypre_ParVector *y );
 hypre_ParVector *hypre_ParVectorCloneShallow ( hypre_ParVector *x );
 HYPRE_Int hypre_ParVectorScale ( HYPRE_Complex alpha , hypre_ParVector *y );
 HYPRE_Int hypre_ParVectorAxpy ( HYPRE_Complex alpha , hypre_ParVector *x , hypre_ParVector *y );
-HYPRE_Real hypre_ParVectorInnerProd ( hypre_ParVector *x , hypre_ParVector *y );
-HYPRE_Complex hypre_ParVectorComplexInnerProd ( hypre_ParVector *x , hypre_ParVector *y );
+HYPRE_Complex hypre_ParVectorInnerProd ( hypre_ParVector *x , hypre_ParVector *y );
 hypre_ParVector *hypre_VectorToParVector ( MPI_Comm comm , hypre_Vector *v , HYPRE_Int *vec_starts );
 hypre_Vector *hypre_ParVectorToVectorAll ( hypre_ParVector *par_v );
 HYPRE_Int hypre_ParVectorPrintIJ ( hypre_ParVector *vector , HYPRE_Int base_j , const char *filename );

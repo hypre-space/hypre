@@ -1,14 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
 
 #ifndef hypre_STRUCT_MV_HEADER
 #define hypre_STRUCT_MV_HEADER
@@ -1891,7 +1880,7 @@ HYPRE_Int hypre_IndexMax( hypre_Index index , HYPRE_Int ndim );
 HYPRE_Int hypre_AddIndexes ( hypre_Index index1 , hypre_Index index2 , HYPRE_Int ndim , hypre_Index result );
 HYPRE_Int hypre_SubtractIndexes ( hypre_Index index1 , hypre_Index index2 , HYPRE_Int ndim , hypre_Index result );
 HYPRE_Int hypre_IndexesEqual ( hypre_Index index1 , hypre_Index index2 , HYPRE_Int ndim );
-HYPRE_Int hypre_PrintIndex( const hypre_Index Index, const HYPRE_Int NDim );
+HYPRE_Int hypre_PrintIndex( const hypre_Index Index, const HYPRE_Int ndim );
 hypre_Box *hypre_BoxCreate ( HYPRE_Int ndim );
 HYPRE_Int hypre_BoxDestroy ( hypre_Box *box );
 HYPRE_Int hypre_BoxInit( hypre_Box *box , HYPRE_Int  ndim );
@@ -2073,8 +2062,7 @@ HYPRE_Int hypre_StructGridRead ( MPI_Comm comm , FILE *file , hypre_StructGrid *
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_ghost );
 
 /* struct_innerprod.c */
-HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
-HYPRE_Complex hypre_StructComplexInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
+HYPRE_Complex hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
 
 /* struct_io.c */
 HYPRE_Int hypre_PrintBoxArrayData ( FILE *file , hypre_BoxArray *box_array , hypre_BoxArray *data_space , HYPRE_Int num_values , HYPRE_Int dim , HYPRE_Complex *data );

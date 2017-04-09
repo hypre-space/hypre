@@ -457,8 +457,9 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
  * hypre_SeqVectorInnerProd
  *--------------------------------------------------------------------------*/
 
-HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
-                                       hypre_Vector *y )
+HYPRE_Complex
+hypre_SeqVectorInnerProd( hypre_Vector *x,
+                          hypre_Vector *y )
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
@@ -470,37 +471,7 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
            
    HYPRE_Int      i;
 
-   HYPRE_Real     result = 0.0;
-
-   size *=hypre_VectorNumVectors(x);
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) reduction(+:result) HYPRE_SMP_SCHEDULE
-#endif
-   for (i = 0; i < size; i++)
-      result += hypre_conj(y_data[i]) * x_data[i];
-
-#ifdef HYPRE_PROFILE
-   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
-#endif
-
-   return result;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_SeqVectorComplexInnerProd
- *--------------------------------------------------------------------------*/
-
-HYPRE_Complex   hypre_SeqVectorComplexInnerProd( hypre_Vector *x,
-                                                 hypre_Vector *y )
-{
-   HYPRE_Complex *x_data = hypre_VectorData(x);
-   HYPRE_Complex *y_data = hypre_VectorData(y);
-   HYPRE_Int      size   = hypre_VectorSize(x);
-           
-   HYPRE_Int      i;
-
-   HYPRE_Complex     result = 0.0;
+   HYPRE_Complex  result = 0.0;
 
    size *=hypre_VectorNumVectors(x);
 

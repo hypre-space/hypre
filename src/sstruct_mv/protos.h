@@ -26,7 +26,9 @@ HYPRE_Int HYPRE_SStructGridCreate ( MPI_Comm comm , HYPRE_Int ndim , HYPRE_Int n
 HYPRE_Int HYPRE_SStructGridDestroy ( HYPRE_SStructGrid grid );
 HYPRE_Int HYPRE_SStructGridSetExtents ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper );
 HYPRE_Int HYPRE_SStructGridSetVariables ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int nvars , HYPRE_SStructVariable *vartypes );
+HYPRE_Int HYPRE_SStructGridSetVariable ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int var , HYPRE_Int nvars , HYPRE_SStructVariable vartype );
 HYPRE_Int HYPRE_SStructGridAddVariables ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int nvars , HYPRE_SStructVariable *vartypes );
+HYPRE_Int HYPRE_SStructGridAddVariable ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *index , HYPRE_Int var , HYPRE_SStructVariable vartype );
 HYPRE_Int HYPRE_SStructGridSetFEMOrdering ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *ordering );
 HYPRE_Int HYPRE_SStructGridSetNeighborPart ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int nbor_part , HYPRE_Int *nbor_ilower , HYPRE_Int *nbor_iupper , HYPRE_Int *index_map , HYPRE_Int *index_dir );
 HYPRE_Int HYPRE_SStructGridSetSharedPart ( HYPRE_SStructGrid grid , HYPRE_Int part , HYPRE_Int *ilower , HYPRE_Int *iupper , HYPRE_Int *offset , HYPRE_Int shared_part , HYPRE_Int *shared_ilower , HYPRE_Int *shared_iupper , HYPRE_Int *shared_offset , HYPRE_Int *index_map , HYPRE_Int *index_dir );
@@ -80,7 +82,7 @@ HYPRE_Int HYPRE_SStructVectorGetObject ( HYPRE_SStructVector vector , void **obj
 HYPRE_Int HYPRE_SStructVectorPrint ( const char *filename , HYPRE_SStructVector vector , HYPRE_Int all );
 HYPRE_Int HYPRE_SStructVectorCopy ( HYPRE_SStructVector x , HYPRE_SStructVector y );
 HYPRE_Int HYPRE_SStructVectorScale ( HYPRE_Complex alpha , HYPRE_SStructVector y );
-HYPRE_Int HYPRE_SStructInnerProd ( HYPRE_SStructVector x , HYPRE_SStructVector y , HYPRE_Real *result );
+HYPRE_Int HYPRE_SStructInnerProd ( HYPRE_SStructVector x , HYPRE_SStructVector y , HYPRE_Complex *result );
 HYPRE_Int HYPRE_SStructAxpy ( HYPRE_Complex alpha , HYPRE_SStructVector x , HYPRE_SStructVector y );
 
 /* sstruct_axpy.c */
@@ -105,6 +107,7 @@ HYPRE_Int hypre_SStructPGridDestroy ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructPGridSetExtents ( hypre_SStructPGrid *pgrid , hypre_Index ilower , hypre_Index iupper );
 HYPRE_Int hypre_SStructPGridSetCellSGrid ( hypre_SStructPGrid *pgrid , hypre_StructGrid *cell_sgrid );
 HYPRE_Int hypre_SStructPGridSetVariables ( hypre_SStructPGrid *pgrid , HYPRE_Int nvars , HYPRE_SStructVariable *vartypes );
+HYPRE_Int hypre_SStructPGridSetVariable ( hypre_SStructPGrid *pgrid , HYPRE_Int var , HYPRE_Int nvars , HYPRE_SStructVariable vartype );
 HYPRE_Int hypre_SStructPGridSetPNeighbor ( hypre_SStructPGrid *pgrid , hypre_Box *pneighbor_box , hypre_Index pnbor_offset );
 HYPRE_Int hypre_SStructPGridAssemble ( hypre_SStructPGrid *pgrid );
 HYPRE_Int hypre_SStructGridRef ( hypre_SStructGrid *grid , hypre_SStructGrid **grid_ref );
@@ -135,8 +138,8 @@ HYPRE_Int hypre_SStructCellBoxToVarBox ( hypre_Box *box , hypre_Index offset , h
 HYPRE_Int hypre_SStructGridIntersect ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int var , hypre_Box *box , HYPRE_Int action , hypre_BoxManEntry ***entries_ptr , HYPRE_Int *nentries_ptr );
 
 /* sstruct_innerprod.c */
-HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Real *presult_ptr );
-HYPRE_Int hypre_SStructInnerProd ( hypre_SStructVector *x , hypre_SStructVector *y , HYPRE_Real *result_ptr );
+HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Complex *presult_ptr );
+HYPRE_Int hypre_SStructInnerProd ( hypre_SStructVector *x , hypre_SStructVector *y , HYPRE_Complex *result_ptr );
 
 /* sstruct_matrix.c */
 HYPRE_Int hypre_SStructPMatrixRef ( hypre_SStructPMatrix *matrix , hypre_SStructPMatrix **matrix_ref );
@@ -170,6 +173,12 @@ HYPRE_Int hypre_SStructMatvecSetup ( void *matvec_vdata , hypre_SStructMatrix *A
 HYPRE_Int hypre_SStructMatvecCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *y );
 HYPRE_Int hypre_SStructMatvecDestroy ( void *matvec_vdata );
 HYPRE_Int hypre_SStructMatvec ( HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *y );
+
+/* sstruct_matvecT.c */
+HYPRE_Int hypre_SStructPMatvecTCompute ( void *pmatvec_vdata , HYPRE_Complex alpha , hypre_SStructPMatrix *pA , hypre_SStructPVector *px , HYPRE_Complex beta , hypre_SStructPVector *py );
+HYPRE_Int hypre_SStructPMatvecT ( HYPRE_Complex alpha , hypre_SStructPMatrix *pA , hypre_SStructPVector *px , HYPRE_Complex beta , hypre_SStructPVector *py );
+HYPRE_Int hypre_SStructMatvecTCompute ( void *matvec_vdata , HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *y );
+HYPRE_Int hypre_SStructMatvecT ( HYPRE_Complex alpha , hypre_SStructMatrix *A , hypre_SStructVector *x , HYPRE_Complex beta , hypre_SStructVector *y );
 
 /* sstruct_scale.c */
 HYPRE_Int hypre_SStructPScale ( HYPRE_Complex alpha , hypre_SStructPVector *py );

@@ -755,7 +755,7 @@ HYPRE_SStructVectorScale( HYPRE_Complex       alpha,
 HYPRE_Int
 HYPRE_SStructInnerProd( HYPRE_SStructVector x,
                         HYPRE_SStructVector y,
-                        HYPRE_Real         *result )
+                        HYPRE_Complex      *result )
 {
    hypre_SStructInnerProd(x, y, result);
 

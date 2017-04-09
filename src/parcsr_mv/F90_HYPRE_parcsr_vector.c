@@ -255,7 +255,7 @@ hypre_F90_IFACE(hypre_parvectorinnerprod, HYPRE_PARVECTORINNERPROD)
       ( HYPRE_ParVectorInnerProd(
            hypre_F90_PassObj (HYPRE_ParVector, x),
            hypre_F90_PassObj (HYPRE_ParVector, y),
-           hypre_F90_PassRealRef (prod) ) );
+           hypre_F90_PassComplexRef (prod) ) );
 }
     
 #ifdef __cplusplus

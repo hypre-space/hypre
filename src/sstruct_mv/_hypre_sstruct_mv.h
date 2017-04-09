@@ -875,8 +875,7 @@ HYPRE_Int HYPRE_SStructVectorGetObject ( HYPRE_SStructVector vector , void **obj
 HYPRE_Int HYPRE_SStructVectorPrint ( const char *filename , HYPRE_SStructVector vector , HYPRE_Int all );
 HYPRE_Int HYPRE_SStructVectorCopy ( HYPRE_SStructVector x , HYPRE_SStructVector y );
 HYPRE_Int HYPRE_SStructVectorScale ( HYPRE_Complex alpha , HYPRE_SStructVector y );
-HYPRE_Int HYPRE_SStructInnerProd ( HYPRE_SStructVector x , HYPRE_SStructVector y , HYPRE_Real *result );
-HYPRE_Int HYPRE_SStructComplexInnerProd ( HYPRE_SStructVector x , HYPRE_SStructVector y , HYPRE_Complex *result );
+HYPRE_Int HYPRE_SStructInnerProd ( HYPRE_SStructVector x , HYPRE_SStructVector y , HYPRE_Complex *result );
 HYPRE_Int HYPRE_SStructAxpy ( HYPRE_Complex alpha , HYPRE_SStructVector x , HYPRE_SStructVector y );
 
 /* sstruct_axpy.c */
@@ -932,10 +931,8 @@ HYPRE_Int hypre_SStructCellBoxToVarBox ( hypre_Box *box , hypre_Index offset , h
 HYPRE_Int hypre_SStructGridIntersect ( hypre_SStructGrid *grid , HYPRE_Int part , HYPRE_Int var , hypre_Box *box , HYPRE_Int action , hypre_BoxManEntry ***entries_ptr , HYPRE_Int *nentries_ptr );
 
 /* sstruct_innerprod.c */
-HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Real *presult_ptr );
-HYPRE_Int hypre_SStructInnerProd ( hypre_SStructVector *x , hypre_SStructVector *y , HYPRE_Real *result_ptr );
-HYPRE_Int hypre_SStructPComplexInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Complex *presult_ptr );
-HYPRE_Int hypre_SStructComplexInnerProd ( hypre_SStructVector *x , hypre_SStructVector *y , HYPRE_Complex *result_ptr );
+HYPRE_Int hypre_SStructPInnerProd ( hypre_SStructPVector *px , hypre_SStructPVector *py , HYPRE_Complex *presult_ptr );
+HYPRE_Int hypre_SStructInnerProd ( hypre_SStructVector *x , hypre_SStructVector *y , HYPRE_Complex *result_ptr );
 
 /* sstruct_matrix.c */
 HYPRE_Int hypre_SStructPMatrixRef ( hypre_SStructPMatrix *matrix , hypre_SStructPMatrix **matrix_ref );

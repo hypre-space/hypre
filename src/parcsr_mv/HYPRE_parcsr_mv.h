@@ -66,7 +66,7 @@ HYPRE_Int HYPRE_ParVectorSetConstantValues( HYPRE_ParVector vector , HYPRE_Compl
 HYPRE_Int HYPRE_ParVectorSetRandomValues( HYPRE_ParVector vector , HYPRE_Int seed );
 HYPRE_Int HYPRE_ParVectorCopy( HYPRE_ParVector x , HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParVectorScale( HYPRE_Complex value , HYPRE_ParVector x );
-HYPRE_Int HYPRE_ParVectorInnerProd( HYPRE_ParVector x , HYPRE_ParVector y , HYPRE_Real *prod );
+HYPRE_Int HYPRE_ParVectorInnerProd( HYPRE_ParVector x , HYPRE_ParVector y , HYPRE_Complex *prod );
 HYPRE_Int HYPRE_VectorToParVector( MPI_Comm comm , HYPRE_Vector b , HYPRE_Int *partitioning , HYPRE_ParVector *vector );
 
 #ifdef __cplusplus

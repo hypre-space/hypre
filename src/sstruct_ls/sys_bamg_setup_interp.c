@@ -990,7 +990,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
   for ( i = 0; i < 3; i++ ) {
     for ( j = 0; j < 3; j++ ) {
       hypre_SStructPMatvec( 1.0, A, svecs[j + (symmetric ? 0 : nsvecs)], 0.0, AV );
-      hypre_SStructPComplexInnerProd( svecs[i], AV, &x );
+      hypre_SStructPInnerProd( svecs[i], AV, &x );
       sysbamg_dbgmsg("SVD Check: U[k][%d] A[k,l] V[l][%d] / S[%d]: %16.6e\n", i, j, i, hypre_cabs(x / S[i]));
     }
   }

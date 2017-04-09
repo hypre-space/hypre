@@ -25,12 +25,12 @@
 HYPRE_Int
 hypre_SStructPInnerProd( hypre_SStructPVector *px,
                          hypre_SStructPVector *py,
-                         HYPRE_Real           *presult_ptr )
+                         HYPRE_Complex        *presult_ptr )
 {
-   HYPRE_Int    nvars = hypre_SStructPVectorNVars(px);
-   HYPRE_Real   presult;
-   HYPRE_Real   sresult;
-   HYPRE_Int    var;
+   HYPRE_Int      nvars = hypre_SStructPVectorNVars(px);
+   HYPRE_Complex  presult;
+   HYPRE_Complex  sresult;
+   HYPRE_Int      var;
 
    presult = 0.0;
    for (var = 0; var < nvars; var++)
@@ -52,15 +52,15 @@ hypre_SStructPInnerProd( hypre_SStructPVector *px,
 HYPRE_Int
 hypre_SStructInnerProd( hypre_SStructVector *x,
                         hypre_SStructVector *y,
-                        HYPRE_Real          *result_ptr )
+                        HYPRE_Complex       *result_ptr )
 {
-   HYPRE_Int    nparts = hypre_SStructVectorNParts(x);
-   HYPRE_Real   result;
-   HYPRE_Real   presult;
-   HYPRE_Int    part;
+   HYPRE_Int      nparts = hypre_SStructVectorNParts(x);
+   HYPRE_Complex  result;
+   HYPRE_Complex  presult;
+   HYPRE_Int      part;
 
-   HYPRE_Int    x_object_type= hypre_SStructVectorObjectType(x);
-   HYPRE_Int    y_object_type= hypre_SStructVectorObjectType(y);
+   HYPRE_Int      x_object_type= hypre_SStructVectorObjectType(x);
+   HYPRE_Int      y_object_type= hypre_SStructVectorObjectType(y);
    
    if (x_object_type != y_object_type)
    {
@@ -96,88 +96,3 @@ hypre_SStructInnerProd( hypre_SStructVector *x,
 
    return hypre_error_flag;
 }
-
-/*--------------------------------------------------------------------------
- * hypre_SStructPComplexInnerProd
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SStructPComplexInnerProd( hypre_SStructPVector *px,
-                                hypre_SStructPVector *py,
-                                HYPRE_Complex        *presult_ptr )
-{
-   HYPRE_Int    nvars = hypre_SStructPVectorNVars(px);
-   HYPRE_Complex presult;
-   HYPRE_Complex sresult;
-   HYPRE_Int    var;
-
-   presult = 0.0;
-
-   for (var = 0; var < nvars; var++)
-   {
-      sresult = hypre_StructComplexInnerProd(hypre_SStructPVectorSVector(px, var),
-                                             hypre_SStructPVectorSVector(py, var));
-      presult += sresult;
-   }
-
-#if 0
-   hypre_printf("%s:%d %s presult= %e + I %e\n", __FILE__, __LINE__, __func__, hypre_creal(presult), hypre_cimag(presult));
-#endif
-
-   *presult_ptr = presult;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- * hypre_SStructComplexInnerProd
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SStructComplexInnerProd( hypre_SStructVector *x,
-                               hypre_SStructVector *y,
-                               HYPRE_Complex        *result_ptr )
-{
-   HYPRE_Int      nparts = hypre_SStructVectorNParts(x);
-   HYPRE_Complex  result;
-   HYPRE_Complex  presult;
-   HYPRE_Int      part;
-
-   HYPRE_Int      x_object_type= hypre_SStructVectorObjectType(x);
-   HYPRE_Int      y_object_type= hypre_SStructVectorObjectType(y);
-
-   if (x_object_type != y_object_type)
-   {
-      hypre_error_in_arg(2);
-      hypre_error_in_arg(3);
-      return hypre_error_flag;
-   }
-
-   result = 0.0;
-
-   if ( (x_object_type == HYPRE_SSTRUCT) || (x_object_type == HYPRE_STRUCT) )
-   {
-      for (part = 0; part < nparts; part++)
-      {
-         hypre_SStructPComplexInnerProd(hypre_SStructVectorPVector(x, part),
-                                        hypre_SStructVectorPVector(y, part), &presult);
-         result += presult;
-      }
-   }
-
-   else if (x_object_type == HYPRE_PARCSR)
-   {
-      hypre_ParVector  *x_par;
-      hypre_ParVector  *y_par;
-
-      hypre_SStructVectorConvert(x, &x_par);
-      hypre_SStructVectorConvert(y, &y_par);
-
-      result= hypre_ParVectorComplexInnerProd(x_par, y_par);
-   }
-
-   *result_ptr = result;
-
-   return hypre_error_flag;
-}
-

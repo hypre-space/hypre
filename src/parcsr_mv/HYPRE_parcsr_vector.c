@@ -185,7 +185,7 @@ HYPRE_ParVectorAxpy( HYPRE_Complex   alpha,
 HYPRE_Int
 HYPRE_ParVectorInnerProd( HYPRE_ParVector x,
                           HYPRE_ParVector y,
-                          HYPRE_Real     *prod)
+                          HYPRE_Complex  *prod)
 {
    if (!x) 
    {
