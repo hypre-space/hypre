@@ -1145,12 +1145,21 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
 		loop_body(idx);
 }
 
-#define zypre_BoxLoopIncK(k,box)					\
+#define zypre_BoxLoopIncK(k,box,i)					\
 {									\
-   local_idx  = idx_local % box.lsize0;					\
-   idx_local  = idx_local / box.lsize0;					\
-   i##k += (local_idx*box.strides0 + box.bstart0) * hypre_boxD##k;		\
-   hypre_boxD##k *= hypre_max(0, box.bsize0 + 1);			\
+HYPRE_Int idx = idx_local;						\
+local_idx  = idx % box.lsize0;					\
+idx        = idx / box.lsize0;					\
+i += (local_idx*box.strides0 + box.bstart0) * hypre_boxD##k;		\
+hypre_boxD##k *= hypre_max(0, box.bsize0 + 1);			\
+local_idx  = idx % box.lsize1;					\
+idx        = idx / box.lsize1;					\
+i += (local_idx*box.strides1 + box.bstart1) * hypre_boxD##k;		\
+hypre_boxD##k *= hypre_max(0, box.bsize1 + 1);			\
+local_idx  = idx % box.lsize2;					\
+idx  = idx / box.lsize2;					\
+i += (local_idx*box.strides2 + box.bstart2) * hypre_boxD##k;		\
+hypre_boxD##k *= hypre_max(0, box.bsize2 + 1);			\
 }
 
   
@@ -1267,18 +1276,14 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 
 #define zypre_newBoxLoop0Begin(ndim, loop_size)				\
 {									\
-    HYPRE_Int hypre__tot = 1.0;												\
-    for (HYPRE_Int d = 0;d < ndim;d ++)					\
-    {									\
-        hypre__tot *= loop_size[d];					\
-    }									\
+    zypre_BoxLoopCUDAInit(ndim);\
     BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
     {
 
 
 #define zypre_newBoxLoop0End()					\
 	});											\
-	cudaDeviceSynchronize();					\
+	AxCheckError(cudaDeviceSynchronize());		\
 }
 
 #define zypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)	\

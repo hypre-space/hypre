@@ -87,15 +87,6 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
 	for (int idx = 0;idx < length;idx++)
 		loop_body(idx);
 }
-
-#define zypre_BoxLoopIncK(k,box)					\
-{									\
-   local_idx  = idx_local % box.lsize0;					\
-   idx_local  = idx_local / box.lsize0;					\
-   i##k += (local_idx*box.strides0 + box.bstart0) * hypre_boxD##k;		\
-   hypre_boxD##k *= hypre_max(0, box.bsize0 + 1);			\
-}
-
   
 template<class T>
 __global__ void dot (T * a, T * b, T *c, HYPRE_Int hypre__tot,
@@ -208,7 +199,24 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 	HYPRE_Int local_idx;												\
 	HYPRE_Int idx_local = idx;
 
-#define zypre_newBoxLoop0Begin(ndim, loop_size,idx)			\
+#define zypre_BoxLoopIncK(k,box,i)					\
+{									\
+HYPRE_Int idx = idx_local;						\
+local_idx  = idx % box.lsize0;					\
+idx        = idx / box.lsize0;					\
+i += (local_idx*box.strides0 + box.bstart0) * hypre_boxD##k;		\
+hypre_boxD##k *= hypre_max(0, box.bsize0 + 1);			\
+local_idx  = idx % box.lsize1;					\
+idx        = idx / box.lsize1;					\
+i += (local_idx*box.strides1 + box.bstart1) * hypre_boxD##k;		\
+hypre_boxD##k *= hypre_max(0, box.bsize1 + 1);			\
+local_idx  = idx % box.lsize2;					\
+idx  = idx / box.lsize2;					\
+i += (local_idx*box.strides2 + box.bstart2) * hypre_boxD##k;		\
+hypre_boxD##k *= hypre_max(0, box.bsize2 + 1);			\
+}
+
+#define zypre_newBoxLoop0Begin(ndim, loop_size)			\
 {									\
     zypre_BoxLoopCUDAInit(ndim);					\
     BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
