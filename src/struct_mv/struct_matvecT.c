@@ -311,9 +311,6 @@ HYPRE_Int hypre_StructMatvecTCC0(
   HYPRE_Int                yi;
   HYPRE_Int                ndim;
 
-  HYPRE_Int                rank;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank); // XXX Not correct in general
-
   stencil       = hypre_StructMatrixStencil(A);
   stencil_shape = hypre_StructStencilShape(stencil);
   stencil_size  = hypre_StructStencilSize(stencil);

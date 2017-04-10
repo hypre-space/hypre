@@ -13,6 +13,10 @@
 #include "_hypre_struct_ls.h"
 #include "temp_multivector.h"
 
+#ifdef HYPRE_COMPLEX
+#include <complex.h>
+#endif
+
 HYPRE_Int 
 hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
                                    HYPRE_Int seed )

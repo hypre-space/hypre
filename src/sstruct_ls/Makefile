@@ -65,8 +65,8 @@ FILES =\
  HYPRE_sstruct_maxwell.c\
  HYPRE_sstruct_pcg.c\
  HYPRE_sstruct_split.c\
- HYPRE_sstruct_sys_pfmg.c\
  HYPRE_sstruct_sys_bamg.c\
+ HYPRE_sstruct_sys_pfmg.c\
  fac.c\
  fac_amr_rap.c\
  fac_amr_fcoarsen.c\
@@ -102,18 +102,18 @@ FILES =\
  sstruct_recvinfo.c\
  sstruct_sendinfo.c\
  sstruct_sharedDOFComm.c\
- sys_pfmg.c\
- sys_pfmg_relax.c\
- sys_pfmg_setup.c\
- sys_pfmg_setup_interp.c\
- sys_pfmg_setup_rap.c\
- sys_pfmg_solve.c\
  sys_bamg.c\
  sys_bamg_relax.c\
  sys_bamg_setup.c\
  sys_bamg_setup_interp.c\
  sys_bamg_setup_rap.c\
  sys_bamg_solve.c\
+ sys_pfmg.c\
+ sys_pfmg_relax.c\
+ sys_pfmg_setup.c\
+ sys_pfmg_setup_interp.c\
+ sys_pfmg_setup_rap.c\
+ sys_pfmg_solve.c\
  sys_semi_interp.c\
  sys_semi_restrict.c
 

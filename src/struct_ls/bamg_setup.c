@@ -154,7 +154,7 @@ HYPRE_Int hypre_BAMGSetup(
     // NB: fail if BoxIMin != (0,0,0,...)! Otherwise, have to change a lot to keep track of offset.
     for ( d = 0; d < ndim; d++ )
     {
-      int min_d = hypre_IndexD(hypre_BoxIMin(cbox),d);
+      HYPRE_Int min_d = hypre_IndexD(hypre_BoxIMin(cbox),d);
       if ( min_d != 0 )
       {
         hypre_printf("Error!\n");

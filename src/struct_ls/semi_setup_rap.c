@@ -152,7 +152,6 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
       }
    }
 
-#if HYPRE_MAXDIM <= 3
    /*-----------------------------------------------------------------------
     * For symmetric A, we zero out some entries of RAP_marker to yield
     * the stencil with the proper stored entries.
@@ -232,8 +231,12 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
          hypre_TFree(not_cdirs);
       }
    }
-#else
-#warning Symmetrization in hypre_SemiCreateRAPOp needs work! This could definitely screw you.
+
+#if (HYPRE_MAXDIM > 3)
+   if (ndim > 3)
+   {
+      hypre_printf("Symmetrization in hypre_SemiCreateRAPOp needs work!\n");
+   }
 #endif
 
    RAP_stencil_size= 0;

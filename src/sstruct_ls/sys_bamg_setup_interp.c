@@ -90,11 +90,11 @@ hypre_SStructPMatrix * hypre_SysBAMGCreateInterpOp
 HYPRE_Int hypre_SStructPMatrixUnpack
 (
   const hypre_SStructPMatrix* M,
-  const int                   NVars,
+  const HYPRE_Int             NVars,
   hypre_StructMatrix***       sM
 )
 {
-  int I, J;
+  HYPRE_Int I, J;
 
   for ( I = 0; I < NVars; I++ ) {
     for ( J = 0; J < NVars; J++ ) {
@@ -114,11 +114,11 @@ HYPRE_Int hypre_SStructPMatrixUnpack
 HYPRE_Int hypre_SStructPVectorUnpack
 (
   const hypre_SStructPVector* V,
-  const int                   NVars,
+  const HYPRE_Int             NVars,
   hypre_StructVector**        sV
 )
 {
-  int I;
+  HYPRE_Int I;
 
   for ( I = 0; I < NVars; I++ ) {
     sV[I] = hypre_SStructPVectorSVector(V,I);

@@ -29,7 +29,7 @@
     doublereal d__1, d__2, d__3, d__4;
     doublecomplex z__1;
     /* Builtin functions */
-    double d_imag(doublecomplex *);
+    doublereal d_imag(doublecomplex *);
     /* Local variables */
     static doublereal zi;
     extern /* Subroutine */ HYPRE_Int dladiv_(doublereal *, doublereal *, 

@@ -67,7 +67,7 @@
     doublereal d__1, d__2;
     doublecomplex z__1, z__2;
     /* Builtin functions */
-    double d_imag(doublecomplex *), d_sign(doublereal *, doublereal *);
+    doublereal d_imag(doublecomplex *), d_sign(doublereal *, doublereal *);
     /* Local variables */
     static doublereal beta;
     static integer j;

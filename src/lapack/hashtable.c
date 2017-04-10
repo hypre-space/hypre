@@ -17,12 +17,12 @@ typedef struct chain* chain;
 
 /* alpha = n/m = num_elems/size */
 struct table {
-  int size;			/* m */
-  int num_elems;		/* n */
+  integer size;			/* m */
+  integer num_elems;		/* n */
   chain* array;			/* \length(array) == size */
   ht_key (*elem_key)(ht_elem e); /* extracting keys from elements */
   bool (*equal)(ht_key k1, ht_key k2); /* comparing keys */
-  int (*hash)(ht_key k, int m);	       /* hashing keys */
+  integer (*hash)(ht_key k, integer m);	       /* hashing keys */
 };
 
 struct list {
@@ -124,7 +124,7 @@ void chain_free(chain C, void (*elem_free)(ht_elem e))
 /* is_h_chain(C, h, m) - all of chain C's keys are equal to h */
 /* keys should also be pairwise distinct, but we do not check that */
 /* table size is m */
-bool is_h_chain (table H, chain C, int h, int m)
+bool is_h_chain (table H, chain C, integer h, integer m)
 { REQUIRES(0 <= h && h < m);
   if (C == NULL) return false;
   list p = C->list;
@@ -140,7 +140,7 @@ bool is_h_chain (table H, chain C, int h, int m)
 bool is_table(table H)
 //@requires H != NULL && H->size == \length(H->array);
 {
-  int i; int m;
+  integer i; integer m;
   /* array elements may be NULL or chains */
   if (H == NULL) return false;
   m = H->size;
@@ -151,10 +151,10 @@ bool is_table(table H)
   return true;
 }
 
-table table_new(int init_size,
+table table_new(integer init_size,
 		 ht_key (*elem_key)(ht_elem e),
 		 bool (*equal)(ht_key k1, ht_key k2),
-		 int (*hash)(ht_key k, int m))
+		 integer (*hash)(ht_key k, integer m))
 { REQUIRES(init_size > 1);
   chain* A = xcalloc(init_size, sizeof(chain));
   table H = xmalloc(sizeof(struct table));
@@ -172,7 +172,7 @@ ht_elem table_insert(table H, ht_elem e)
 { REQUIRES(is_table(H));
   ht_elem old_e;
   ht_key k = (*H->elem_key)(e);
-  int h = (*H->hash)(k, H->size);
+  integer h = (*H->hash)(k, H->size);
   if (H->array[h] == NULL)
     H->array[h] = chain_new();
   old_e = chain_insert(H, H->array[h], e);
@@ -185,7 +185,7 @@ ht_elem table_insert(table H, ht_elem e)
 
 ht_elem table_search(table H, ht_key k)
 { REQUIRES(is_table(H));
-  int h = (*H->hash)(k, H->size);
+  integer h = (*H->hash)(k, H->size);
   if (H->array[h] == NULL) return NULL;
   ht_elem e = chain_search(H, H->array[h], k);
   ENSURES(e == NULL || (*H->equal)((*H->elem_key)(e), k));
@@ -194,7 +194,7 @@ ht_elem table_search(table H, ht_key k)
 
 void table_free(table H, void (*elem_free)(ht_elem e))
 { REQUIRES(is_table(H));
-  int i;
+  integer i;
   for (i = 0; i < H->size; i++) {
     chain C = H->array[i];
     if (C != NULL) chain_free(C, elem_free);

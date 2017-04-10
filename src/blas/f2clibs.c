@@ -13,9 +13,9 @@ void d_cnjg(doublecomplex *r, doublecomplex *z)
 }
 
 #ifdef KR_headers
-double d_imag(z) doublecomplex *z;
+doublereal d_imag(z) doublecomplex *z;
 #else
-double d_imag(doublecomplex *z)
+doublereal d_imag(doublecomplex *z)
 #endif
 {
 return(z->i);
@@ -25,12 +25,12 @@ return(z->i);
 extern VOID sig_die();
 VOID z_div(c, a, b) doublecomplex *a, *b, *c;
 #else
-extern void sig_die(char*, int);
+extern void sig_die(char*, integer);
 void z_div(doublecomplex *c, doublecomplex *a, doublecomplex *b)
 #endif
 {
-  double ratio, den;
-  double abr, abi, cr;
+  doublereal ratio, den;
+  doublereal abr, abi, cr;
 
   if( (abr = b->r) < 0.)
     abr = - abr;
@@ -67,7 +67,7 @@ void z_div(doublecomplex *c, doublecomplex *a, doublecomplex *b)
 #endif
 
 #ifdef KR_headers
-void sig_die(s, kill) register char *s; int kill;
+void sig_die(s, kill) register char *s; integer kill;
 #else
 #include "stdlib.h"
 #ifdef __cplusplus
@@ -75,7 +75,7 @@ extern "C" {
 #endif
 //  extern void f_exit(void);
 
-  void sig_die(register char *s, int kill)
+  void sig_die(register char *s, integer kill)
 #endif
   {
     /* print error message, then clear buffers */

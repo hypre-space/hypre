@@ -10,7 +10,7 @@ doublereal dznrm2_(integer *n, doublecomplex *x, integer *incx)
     integer i__1, i__2, i__3;
     doublereal ret_val, d__1;
     /* Builtin functions */
-    double d_imag(doublecomplex *), sqrt(doublereal);
+    doublereal d_imag(doublecomplex *), sqrt(doublereal);
     /* Local variables */
     static doublereal temp, norm, scale;
     static integer ix;

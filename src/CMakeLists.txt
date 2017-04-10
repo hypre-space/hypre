@@ -86,9 +86,22 @@ list (APPEND HYPRE_SOURCES
   blas/dsyrk.c
   blas/dtrmm.c
   blas/dtrmv.c
+  blas/dznrm2.c
+  blas/f2clibs.c
   blas/dtrsm.c
   blas/dtrsv.c
   blas/idamax.c
+  blas/xerbla.c
+  blas/zcopy.c
+  blas/zdscal.c
+  blas/zgemm.c
+  blas/zgemv.c
+  blas/zgerc.c
+  blas/zscal.c
+  blas/zswap.c
+  blas/ztrmm.c
+  blas/ztrmv.c
+  blas/ztrsm.c
 )
 endif (HYPRE_USING_HYPRE_BLAS)
 
@@ -104,12 +117,13 @@ list (APPEND HYPRE_SOURCES
   lapack/dgeqr2.c
   lapack/dgeqrf.c
   lapack/dgesvd.c
+  lapack/dgetf2.c
   lapack/dgetrf.c
   lapack/dgetrs.c
-  lapack/dgetf2.c
   lapack/dlabad.c
   lapack/dlabrd.c
   lapack/dlacpy.c
+  lapack/dladiv.c
   lapack/dlae2.c
   lapack/dlaev2.c
   lapack/dlamch.c
@@ -117,8 +131,9 @@ list (APPEND HYPRE_SOURCES
   lapack/dlanst.c
   lapack/dlansy.c
   lapack/dlapy2.c
-  lapack/dlarfb.c
+  lapack/dlapy3.c
   lapack/dlarf.c
+  lapack/dlarfb.c
   lapack/dlarfg.c
   lapack/dlarft.c
   lapack/dlartg.c
@@ -134,8 +149,8 @@ list (APPEND HYPRE_SOURCES
   lapack/dlasr.c
   lapack/dlasrt.c
   lapack/dlassq.c
-  lapack/dlaswp.c
   lapack/dlasv2.c
+  lapack/dlaswp.c
   lapack/dlatrd.c
   lapack/dorg2l.c
   lapack/dorg2r.c
@@ -161,11 +176,33 @@ list (APPEND HYPRE_SOURCES
   lapack/dsygv.c
   lapack/dsytd2.c
   lapack/dsytrd.c
+  lapack/dtrtrs.c
   lapack/ieeeck.c
   lapack/ilaenv.c
   lapack/lapack_utils.c
   lapack/lsame.c
   lapack/xerbla.c
+  lapack/zbdsqr.c
+  lapack/zdrot.c
+  lapack/zgebd2.c
+  lapack/zgebrd.c
+  lapack/zgeqr2.c
+  lapack/zgeqrf.c
+  lapack/zlabrd.c
+  lapack/zlacgv.c
+  lapack/zladiv.c
+  lapack/zlarf.c
+  lapack/zlarfb.c
+  lapack/zlarfg.c
+  lapack/zlarft.c
+  lapack/zlasr.c
+  lapack/ztrtrs.c
+  lapack/zungqr.c
+  lapack/zunm2r.c
+  lapack/zunmbr.c
+  lapack/zunml2.c
+  lapack/zunmlq.c
+  lapack/zunmqr.c
 )
 endif (HYPRE_USING_HYPRE_LAPACK)
 
@@ -553,6 +590,7 @@ list (APPEND HYPRE_HEADERS
 list (APPEND HYPRE_SOURCES
   struct_ls/coarsen.c
   struct_ls/cyclic_reduction.c
+  struct_ls/F90_HYPRE_struct_bamg.c
   struct_ls/F90_HYPRE_struct_bicgstab.c
   struct_ls/F90_HYPRE_struct_cycred.c
   struct_ls/F90_HYPRE_struct_gmres.c
@@ -565,6 +603,7 @@ list (APPEND HYPRE_SOURCES
   struct_ls/F90_HYPRE_struct_sparse_msg.c
   struct_ls/general.c
   struct_ls/hybrid.c
+  struct_ls/HYPRE_struct_bamg.c
   struct_ls/HYPRE_struct_bicgstab.c
   struct_ls/HYPRE_struct_cycred.c
   struct_ls/HYPRE_struct_hybrid.c
@@ -577,6 +616,12 @@ list (APPEND HYPRE_SOURCES
   struct_ls/HYPRE_struct_gmres.c
   struct_ls/HYPRE_struct_flexgmres.c
   struct_ls/HYPRE_struct_lgmres.c
+  struct_ls/bamg.c
+  struct_ls/bamg_relax.c
+  struct_ls/bamg_setup.c
+  struct_ls/bamg_setup_interp.c
+  struct_ls/bamg_setup_rap.c
+  struct_ls/bamg_solve.c
   struct_ls/jacobi.c
   struct_ls/pcg_struct.c
   struct_ls/pfmg2_setup_rap.c
@@ -661,6 +706,7 @@ list (APPEND HYPRE_SOURCES
   sstruct_ls/F90_HYPRE_sstruct_maxwell.c
   sstruct_ls/F90_HYPRE_sstruct_pcg.c
   sstruct_ls/F90_HYPRE_sstruct_split.c
+  sstruct_ls/F90_HYPRE_sstruct_sys_bamg.c
   sstruct_ls/F90_HYPRE_sstruct_sys_pfmg.c
   sstruct_ls/HYPRE_sstruct_bicgstab.c
   sstruct_ls/HYPRE_sstruct_gmres.c
@@ -671,6 +717,7 @@ list (APPEND HYPRE_SOURCES
   sstruct_ls/HYPRE_sstruct_maxwell.c
   sstruct_ls/HYPRE_sstruct_pcg.c
   sstruct_ls/HYPRE_sstruct_split.c
+  sstruct_ls/HYPRE_sstruct_sys_bamg.c
   sstruct_ls/HYPRE_sstruct_sys_pfmg.c
   sstruct_ls/fac.c
   sstruct_ls/fac_amr_rap.c
@@ -707,6 +754,12 @@ list (APPEND HYPRE_SOURCES
   sstruct_ls/sstruct_recvinfo.c
   sstruct_ls/sstruct_sendinfo.c
   sstruct_ls/sstruct_sharedDOFComm.c
+  sstruct_ls/sys_bamg.c
+  sstruct_ls/sys_bamg_relax.c
+  sstruct_ls/sys_bamg_setup.c
+  sstruct_ls/sys_bamg_setup_interp.c
+  sstruct_ls/sys_bamg_setup_rap.c
+  sstruct_ls/sys_bamg_solve.c
   sstruct_ls/sys_pfmg.c
   sstruct_ls/sys_pfmg_relax.c
   sstruct_ls/sys_pfmg_setup.c

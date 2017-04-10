@@ -27,7 +27,7 @@ doublereal dlapy3_(doublereal *x, doublereal *y, doublereal *z__)
     /* System generated locals */
     doublereal ret_val, d__1, d__2, d__3;
     /* Builtin functions */
-    double sqrt(doublereal);
+    doublereal sqrt(doublereal);
     /* Local variables */
     static doublereal xabs, yabs, zabs, w;
 
