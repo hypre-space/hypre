@@ -853,7 +853,7 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
  ***********************************************************************EHEADER*/
 
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
-#include "gpuErrorCheck.h"
+//#include "gpuErrorCheck.h"
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
 //#define CUDAMEMATTACHTYPE cudaMemAttachHost
 #define HYPRE_GPU_USE_PINNED 1
@@ -1075,9 +1075,16 @@ void PrintPointerAttributes(const void *ptr);
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
-#include <cublas_v2.h>
-#include <cusparse.h>
-#include "_hypre_utilities.h"
+#ifdef HYPRE_USE_GPU
+#include <cuda_runtime_api.h>
+int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
+void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
+void VecSet(double* tgt, int size, double value, cudaStream_t s);
+void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
+void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
+void CudaCompileFlagCheck();
+#endif
+
 cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
 cudaEvent_t getevent(hypre_int i);

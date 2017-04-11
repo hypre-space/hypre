@@ -1,13 +1,14 @@
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 #define _GNU_SOURCE
-#include "gpuErrorCheck.h"
-#include "hypre_nvtx.h"
+//#include "gpuErrorCheck.h"
+//#include "hypre_nvtx.h"
+#include "_hypre_utilities.h"
 #include <stdlib.h>
 #include <stdint.h>
-#include <cublas_v2.h>
-#include <cusparse.h>
-#include "gpuMem.h"
-#include "../seq_mv/gpukernels.h"
+//#include <cublas_v2.h>
+//#include <cusparse.h>
+//#include "gpuMem.h"
+//#include "../seq_mv/gpukernels.h"
 
 #include <sched.h>
 #include <errno.h>

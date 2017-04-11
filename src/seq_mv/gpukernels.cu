@@ -1,11 +1,12 @@
 #include <stdio.h>
-#include "hypre_nvtx.h"
-#include "gpgpu.h"
+//#include "hypre_nvtx.h"
+//#include "gpgpu.h"
+#include <cuda_runtime.h>
+//#include <cublas_v2.h>
 extern "C"{
-#include "gpuMem.h"
+#include "_hypre_utilities.h"
 }
-#define DISABLE_IN_CUDA_KERNEL_FILE
-#include "HYPRE_utilities.h"
+//include "HYPRE_utilities.h"
 #define gpuErrchk2(ans) { gpuAssert2((ans), __FILE__, __LINE__); }
 inline void gpuAssert2(cudaError_t code, const char *file, hypre_int line)
 {

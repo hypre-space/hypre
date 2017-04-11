@@ -17,9 +17,9 @@
  *****************************************************************************/
 
 #include "_hypre_utilities.h"
-#include "gpgpu.h"
-#include "hypre_nvtx.h"
-#include "gpuMem.h"
+//#include "gpgpu.h"
+//#include "hypre_nvtx.h"
+//#include "gpuMem.h"
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
