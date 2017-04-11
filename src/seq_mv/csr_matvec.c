@@ -18,9 +18,7 @@
 
 #include "seq_mv.h"
 #include <assert.h>
-#ifdef HYPRE_USE_GPU
-#include "gpukernels.h"
-#endif
+
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec

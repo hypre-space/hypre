@@ -33,7 +33,7 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 {
    hypre_Vector  *vector;
 
-   vector = hypre_HCTAlloc(hypre_Vector, 1);
+   vector = hypre_HostCTAlloc(hypre_Vector, 1);
 
 #ifdef HYPRE_USE_GPU
    vector->on_device=0;
@@ -78,7 +78,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
       {
          hypre_TFree(hypre_VectorData(vector));
       }
-      hypre_HCTFree(vector);
+      hypre_HostTFree(vector);
    }
 
    return ierr;

@@ -302,6 +302,34 @@ hypre_MAllocPinned( size_t size )
    return (char*)ptr;
 }
 /*--------------------------------------------------------------------------
+ * hypre_MAllocHost
+ *--------------------------------------------------------------------------*/
+
+char *
+hypre_MAllocHost( size_t size )
+{
+   void *ptr;
+
+   if (size > 0)
+   {
+     ptr = malloc(size);
+#if 1
+      if (ptr == NULL)
+      {
+        hypre_OutOfMemory(size);
+      }
+#endif
+      POP_RANGE;
+   }
+   else
+   {
+      ptr = NULL;
+   }
+
+   return (char*)ptr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CAllocHost
  *--------------------------------------------------------------------------*/
 
@@ -343,11 +371,39 @@ ptr = _ucalloc_(count, elt_size);
    return(char*) ptr;
 }
 /*--------------------------------------------------------------------------
+ * hypre_ReAllocHost
+ *--------------------------------------------------------------------------*/
+
+char *
+hypre_ReAllocHost( char   *ptr,
+               size_t  size )
+{
+  if (ptr == NULL)
+   {
+          ptr = (char*)malloc(size);
+   }
+   else
+   {
+
+	   ptr = (char*)realloc(ptr, size);
+   }
+
+#if 1
+   if ((ptr == NULL) && (size > 0))
+   {
+      hypre_OutOfMemory(size);
+   }
+#endif
+
+   return ptr;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_CHFree
  *--------------------------------------------------------------------------*/
 
 void
-hypre_HFree( char *ptr )
+hypre_FreeHost( char *ptr )
 {
    if (ptr)
    {

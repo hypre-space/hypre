@@ -1,7 +1,4 @@
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
-//#include "gpuErrorCheck.h"
-//#include "hypre_nvtx.h"
-//#include "gpuMem.h"
 #include "_hypre_utilities.h"
 #include <signal.h>
 extern const char *cusparseErrorCheck(cusparseStatus_t error);

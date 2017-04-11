@@ -450,14 +450,20 @@ extern "C" {
 #define hypre_TFree(ptr) \
 ( hypre_Free((char *)ptr), ptr = NULL )
 
-#define hypre_PTAlloc(type, count) \
+#define hypre_PinnedTAlloc(type, count) \
 ( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
 
-#define hypre_HCTAlloc(type, count) \
+#define hypre_HostTAlloc(type, count) \
+( (type *)hypre_MAllocHost((size_t)(sizeof(type) * (count))) )
+
+#define hypre_HostCTAlloc(type, count) \
 ( (type *)hypre_CAllocHost((size_t)(count), (size_t)sizeof(type)) )
 
-#define hypre_HCTFree(ptr) \
-( hypre_HFree((char *)ptr), ptr = NULL )
+#define hypre_HostTReAlloc(ptr, type, count) \
+( (type *)hypre_ReAllocHost((char *)ptr, (size_t)(sizeof(type) * (count))) )
+
+#define hypre_HostTFree(ptr) \
+( hypre_FreeHost((char *)ptr), ptr = NULL )
 
 #endif
 
@@ -478,7 +484,9 @@ char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc ( char *ptr , size_t size );
 void hypre_Free ( char *ptr );
 char *hypre_CAllocHost( size_t count,size_t elt_size );
-void hypre_HFree( char *ptr );
+char *hypre_MAllocHost( size_t size );
+char *hypre_ReAllocHost( char   *ptr,size_t  size );
+void hypre_FreeHost( char *ptr );
 char *hypre_SharedMAlloc ( size_t size );
 char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
 char *hypre_SharedReAlloc ( char *ptr , size_t size );
@@ -853,7 +861,6 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
  ***********************************************************************EHEADER*/
 
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
-//#include "gpuErrorCheck.h"
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
 //#define CUDAMEMATTACHTYPE cudaMemAttachHost
 #define HYPRE_GPU_USE_PINNED 1

@@ -71,7 +71,7 @@ hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job,
       case HYPRE_COMM_PKG_JOB_COMPLEX:
          if (!send_data)
          {
-            send_data = hypre_PTAlloc(HYPRE_Complex, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+            send_data = hypre_PinnedTAlloc(HYPRE_Complex, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
          }
          if (!recv_data)
          {
