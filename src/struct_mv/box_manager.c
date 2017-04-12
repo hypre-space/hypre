@@ -2389,8 +2389,6 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             hypre_BoxSetExtents(index_box, imin, imax);
             hypre_BoxGetSize(index_box, loop_size);
             hypre_SerialBoxLoop1Begin(ndim, loop_size, table_box, imin, stride, ii);
-            //hypre_BoxLoopSetOneBlock();
-            //zypre_BoxLoop1For(ii)
             {
                if (!index_table[ii]) /* no entry- add one */
                {
@@ -2582,8 +2580,6 @@ hypre_BoxManIntersect ( hypre_BoxManager *manager,
    hypre_BoxSetExtents(index_box, man_ilower, man_iupper);
    hypre_BoxGetSize(index_box, loop_size);
    hypre_SerialBoxLoop1Begin(ndim, loop_size, table_box, man_ilower, stride, ii);
-   //zypre_BoxLoopSetOneBlock();
-   //zypre_BoxLoop1For(ii)
    {
       entry = index_table[ii];
 

@@ -44,7 +44,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
    HYPRE_Int         ndim = hypre_StructVectorNDim(x);               
    HYPRE_Int        i;
 
-   zypre_Reductioninit(local_result);
+   hypre_Reductioninit(local_result);
    
    hypre_SetIndex(unit_stride, 1);
    

@@ -750,7 +750,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 #undef HYPRE_BOX_REDUCTION
 #endif
 #define HYPRE_BOX_REDUCTION reduction(+:cx)
-        zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+        hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,cx);
 	{
         HYPRE_Int tcx = 0.0;
@@ -782,7 +782,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
             cx += tcx;
 	}
-	zypre_newBoxLoop1ReductionEnd(Ai,cx);
+	hypre_newBoxLoop1ReductionEnd(Ai,cx);
 #ifdef HYPRE_BOX_PRIVATE_VAR
 #undef HYPRE_BOX_PRIVATE_VAR
 #endif
@@ -791,7 +791,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 #undef HYPRE_BOX_REDUCTION
 #endif
 #define HYPRE_BOX_REDUCTION reduction(+:sqcx)
-	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+	hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,sqcx);
 	{
             HYPRE_Int tcx = 0.0;
@@ -821,7 +821,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             }       
             sqcx += (tcx*tcx);
 	}
-	zypre_newBoxLoop1ReductionEnd(Ai,sqcx);
+	hypre_newBoxLoop1ReductionEnd(Ai,sqcx);
 #ifdef HYPRE_BOX_PRIVATE_VAR
 #undef HYPRE_BOX_PRIVATE_VAR
 #endif
@@ -830,7 +830,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 #undef HYPRE_BOX_REDUCTION
 #endif
 #define HYPRE_BOX_REDUCTION reduction(+:cy)
-	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+	hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,cy);
 	{
             HYPRE_Int tcy = 0.0;
@@ -860,7 +860,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
             cy += tcy;            
 	}
-	zypre_newBoxLoop1ReductionEnd(Ai,cy);
+	hypre_newBoxLoop1ReductionEnd(Ai,cy);
 #ifdef HYPRE_BOX_PRIVATE_VAR
 #undef HYPRE_BOX_PRIVATE_VAR
 #endif
@@ -869,7 +869,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 #undef HYPRE_BOX_REDUCTION
 #endif
 #define HYPRE_BOX_REDUCTION reduction(+:sqcy)
-	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+	hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,sqcy);
 	{
             HYPRE_Int tcy = 0.0;
@@ -898,7 +898,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             }       
             sqcy += (tcy*tcy);
 	}
-	zypre_newBoxLoop1ReductionEnd(Ai,sqcy);
+	hypre_newBoxLoop1ReductionEnd(Ai,sqcy);
 #ifdef HYPRE_BOX_PRIVATE_VAR
 #undef HYPRE_BOX_PRIVATE_VAR
 #endif
@@ -907,7 +907,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 #undef HYPRE_BOX_REDUCTION
 #endif
 #define HYPRE_BOX_REDUCTION reduction(+:cz)
-	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+	hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,cz);
 	{
             HYPRE_Int tcz = 0.0;
@@ -937,7 +937,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
             cz += tcz;            
 	}
-	zypre_newBoxLoop1ReductionEnd(Ai,cz);
+	hypre_newBoxLoop1ReductionEnd(Ai,cz);
 #ifdef HYPRE_BOX_PRIVATE_VAR
 #undef HYPRE_BOX_PRIVATE_VAR
 #endif
@@ -946,7 +946,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 #undef HYPRE_BOX_REDUCTION
 #endif
 #define HYPRE_BOX_REDUCTION reduction(+:sqcz)
-	zypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+	hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					A_dbox, start, stride, Ai,sqcz);
 	{
             HYPRE_Int tcz = 0.0;
@@ -975,11 +975,11 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             }       
             sqcz += (tcz*tcz);
 	}
-	zypre_newBoxLoop1ReductionEnd(Ai,sqcz);
+	hypre_newBoxLoop1ReductionEnd(Ai,sqcz);
 	hypre_StructcleanIndexD();
 #else
-	         hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
-                             A_dbox, start, stride, Ai);
+	hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
+			    A_dbox, start, stride, Ai);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,si,Ap,diag,Astenc,tcx,tcy,tcz) reduction(+:cx,cy,cz,sqcx,sqcy,sqcz) HYPRE_SMP_SCHEDULE
 #endif
@@ -1166,10 +1166,10 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       {
           /*FIXME: need reduction for multiplication*/
 #if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_RAJA)
-	zypre_newBoxLoop1ReductionMult(hypre_StructMatrixNDim(A), loop_size,
+	hypre_newBoxLoop1ReductionMult(hypre_StructMatrixNDim(A), loop_size,
 				       A_dbox, start, stride, Ai,Ap,diag_product);
 #else
-         zypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
+	hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start, stride, Ai);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai) reduction(*:diag_product) HYPRE_SMP_SCHEDULE

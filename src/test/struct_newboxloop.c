@@ -195,7 +195,7 @@ main( hypre_int argc,
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
    
-#if defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_KOKKOS_CUDA)
+#if defined(HYPRE_USE_KOKKOS)
    Kokkos::InitArguments args;
    args.num_threads = 12;
    Kokkos::initialize (args);
@@ -1415,7 +1415,7 @@ main( hypre_int argc,
    
    /* Finalize MPI */
    hypre_MPI_Finalize();
-#if defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_KOKKOS_CUDA)
+#if defined(HYPRE_USE_KOKKOS)
    Kokkos::finalize ();
 #endif
    return (0);

@@ -68,8 +68,7 @@ HYPRE_DRIVERS =\
  struct_migrate.c\
  sstruct_fac.c\
  ij_mv.c\
- zboxloop.c \
-struct_newboxloop
+ zboxloop.c
 
 HYPRE_DRIVERS_CXX =\
  fei.cxx\

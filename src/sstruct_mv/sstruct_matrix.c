@@ -963,7 +963,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    hypre_IndexRef        start;
    hypre_Index           rs, cs;
    HYPRE_Int             row_base, col_base;
-   HYPRE_Int             d, ei, entry, ii, jj, i;
+   HYPRE_Int             ei, entry, ii, jj, i;
    HYPRE_Int             matrix_type = hypre_SStructMatrixObjectType(matrix);
 
    box  = hypre_BoxCreate(ndim);
@@ -982,7 +982,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       int_box = hypre_BoxCreate(ndim);
 
       nrows    = hypre_BoxVolume(vbox)*nentries;
-      ncols    = hypre_CTAlloc(HYPRE_Int, nrows);
+      ncols    = hypre_UMCTAlloc(HYPRE_Int, nrows);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -990,9 +990,9 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       {
          ncols[i] = 1;
       }
-      rows     = hypre_CTAlloc(HYPRE_Int, nrows);
-      cols     = hypre_CTAlloc(HYPRE_Int, nrows);
-      ijvalues = hypre_CTAlloc(HYPRE_Complex, nrows);
+      rows     = hypre_UMCTAlloc(HYPRE_Int, nrows);
+      cols     = hypre_UMCTAlloc(HYPRE_Int, nrows);
+      ijvalues = hypre_UMCTAlloc(HYPRE_Complex, nrows);
 
       hypre_SetIndex(stride, 1);
 
@@ -1045,7 +1045,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                      
                start = hypre_BoxIMin(int_box);
                hypre_BoxGetSize(int_box, loop_size);
-			   /*FIXME: It has to be the old boxloop */
+	       /*FIXME: It has to be the old boxloop */
                zypre_BoxLoop2Begin(ndim, loop_size,
                                    int_box, start, stride, mi,
                                    vbox,    start, stride, vi);
@@ -1054,6 +1054,9 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 #endif
                zypre_BoxLoop2For(mi, vi)
                {
+		  hypre_Index           index;
+		  HYPRE_Int d;
+		  
                   hypre_BoxLoopGetIndex(index);
                   rows[nrows + mi] = row_base;
                   cols[nrows + mi] = col_base;
@@ -1100,10 +1103,10 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
       hypre_TFree(boxman_entries);
       
-      hypre_TFree(ncols);
-      hypre_TFree(rows);
-      hypre_TFree(cols);
-      hypre_TFree(ijvalues);
+      hypre_UMTFree(ncols);
+      hypre_UMTFree(rows);
+      hypre_UMTFree(cols);
+      hypre_UMTFree(ijvalues);
 
       hypre_BoxDestroy(to_box);
       hypre_BoxDestroy(map_box);

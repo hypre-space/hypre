@@ -188,7 +188,12 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-
+#if defined(HYPRE_USE_KOKKOS)
+   Kokkos::InitArguments args;
+   args.num_threads = 10;
+   Kokkos::initialize (args);
+#endif
+   
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
@@ -1012,13 +1017,13 @@ main( hypre_int argc,
 
          HYPRE_StructMatrixSetSymmetric(A, sym);
          HYPRE_StructMatrixInitialize(A);
-	 printf("HYPRE_StructMatrixInitialize\n");
+
          /*-----------------------------------------------------------
           * Fill in the matrix elements
           *-----------------------------------------------------------*/
-	 printf("AddValuesMatrix\n");
+
          AddValuesMatrix(A,grid,cx,cy,cz,conx,cony,conz);
-	 printf("HYPRE_StructMatrixAssemble\n");
+
          /* Zero out stencils reaching to real boundary */
          /* But in constant coefficient case, no special stencils! */
 
@@ -1042,10 +1047,10 @@ main( hypre_int argc,
 
          HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
          HYPRE_StructVectorInitialize(x);
-	 printf("AddValuesVector\n");
+
          AddValuesVector(grid,x,periodx0,0.0);
          HYPRE_StructVectorAssemble(x);
-	 printf("VectorAssemble\n");
+
          HYPRE_StructGridDestroy(grid);
    
          for (i = 0; i < nblocks; i++)
@@ -2767,6 +2772,9 @@ main( hypre_int argc,
    }
 
    /* Finalize MPI */
+#if defined(HYPRE_USE_KOKKOS)
+   Kokkos::finalize ();
+#endif
    hypre_MPI_Finalize();
 
    return (0);

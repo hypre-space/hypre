@@ -1380,8 +1380,8 @@ then
    LDFLAGS="-Xcompiler -fopenmp"
    PLATFORM="-DRAJA_PLATFORM_X86_SSE -DRAJA_COMPILER_GNU -DRAJA_USE_CUDA -DRAJA_USE_DOUBLE -DRAJA_USE_BARE_PTR -DRAJA_USE_GETTIME"
    RAJAFLAGS="-lRAJA"
-   CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $RAJAFLAGS $CFLAGS"
-   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 $RAJAFLAGS  $CXXFLAGS"
+   CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Wdeprecated-register $RAJAFLAGS $CFLAGS"
+   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Wdeprecated-register $RAJAFLAGS  $CXXFLAGS"
    if test "$hypre_using_um" = "yes"
    then
 	CFLAGS+=" -DHYPRE_MEMORY_UM=1"

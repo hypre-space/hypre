@@ -422,7 +422,8 @@ extern "C" {
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_MEMORY_UM)
 #include <cuda.h>
 #include <cuda_runtime.h>
-
+#define HYPRE_CUDA_GLOBAL __host__ __device__
+  
 #if defined(HYPRE_MEMORY_GPU)
 #define hypre_DeviceTAlloc(type, count) \
   ({									\
@@ -560,7 +561,7 @@ if ( cudaerr != cudaSuccess ) {										\
 #define hypre_SharedTReAlloc(type, count) hypre_TReAlloc(type, (count))
 #define hypre_SharedTFree(ptr) hypre_TFree(ptr)
 #else
-
+#define HYPRE_CUDA_GLOBAL 
 #ifdef HYPRE_MEMORY_DMALLOC
 
 #define hypre_InitMemoryDebug(id)    hypre_InitMemoryDebugDML(id)

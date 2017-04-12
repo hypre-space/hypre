@@ -751,12 +751,14 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
       vp = hypre_StructVectorBoxData(vector, b);
  
       hypre_BoxGetSize(box, loop_size);
-/*FIXME: must run sequentially*/
-      zypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
-				v_data_box, start, unit_stride, vi);
+
       i = hypre_IndexD(start, 0);
       j = hypre_IndexD(start, 1);
       k = hypre_IndexD(start, 2);
+      
+      hypre_SerialBoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
+				v_data_box, start, unit_stride, vi);
+
 /* RDF: This won't work as written with threading on */
        
 #if 0
@@ -764,16 +766,14 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE ) HYPRE_SMP_SCHEDULE
 #endif
 #else
-      zypre_BoxLoopSetOneBlock();
 #endif
-      zypre_BoxLoop1For(vi)
       {
          vp[vi] = fcn(i, j, k);
          i++;
          j++;
          k++;
       }
-      zypre_BoxLoop1End(vi);
+      hypre_SerialBoxLoop1End(vi);
    }
 
    return hypre_error_flag;
@@ -1204,12 +1204,12 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
       data = hypre_StructVectorBoxData(vector, i);
       hypre_BoxGetSize(box, loop_size);
       hypre_CopyIndex( hypre_BoxIMin(box), imin );
-/*FIXME: must run sequentially*/
-      zypre_BoxLoop1Begin(ndim, loop_size,
-                          box, imin, unit_stride, datai);
       maxindex = hypre_BoxIndexRank( box, imin );
       maxvalue = data[maxindex];
       hypre_SetIndex(max_xyz_index, 0);
+/*FIXME: must run sequentially*/
+      zypre_BoxLoop1Begin(ndim, loop_size,
+                          box, imin, unit_stride, datai);      
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif

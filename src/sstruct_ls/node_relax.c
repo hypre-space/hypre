@@ -566,8 +566,6 @@ hypre_NodeRelax(  void               *relax_vdata,
                         
    HYPRE_Real           **tA_loc = (relax_data -> A_loc);
    HYPRE_Real            *tx_loc = (relax_data -> x_loc);
-   HYPRE_Real           **A_loc;
-   HYPRE_Real            *x_loc;
 
    HYPRE_Real          ***Ap = (relax_data -> Ap);
    HYPRE_Real           **bp = (relax_data -> bp);
@@ -705,6 +703,8 @@ hypre_NodeRelax(  void               *relax_vdata,
                {
                    HYPRE_Real   **A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
                    HYPRE_Real    *x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
+		   HYPRE_Int vi, vj;
+		   
                   /*------------------------------------------------
                    * Copy rhs and matrix for diagonal coupling
                    * (intra-nodal) into local storage.
@@ -906,6 +906,8 @@ hypre_NodeRelax(  void               *relax_vdata,
                {
                   HYPRE_Real   **A_loc = &tA_loc[hypre_BoxLoopBlock()*nvars];
                   HYPRE_Real    *x_loc = &tx_loc[hypre_BoxLoopBlock()*nvars];
+		  HYPRE_Int vi, vj;
+		  
                   /*------------------------------------------------
                    * Copy rhs and matrix for diagonal coupling
                    * (intra-nodal) into local storage.
