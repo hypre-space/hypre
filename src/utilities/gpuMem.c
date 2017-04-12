@@ -1,4 +1,4 @@
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #define _GNU_SOURCE
 #include "_hypre_utilities.h"
 #include <stdlib.h>
@@ -9,11 +9,12 @@
 hypre_int ggc(hypre_int id);
 
 /* Global struct that holds device,library handles etc */
-struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1};
+struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1,.memoryHWM=0};
 
 
 /* Initialize GPU branch of Hypre AMG */
 /* use_device =-1 */
+/* Application passes device number it is using or -1 to let Hypre decide on which device to use */
 void hypre_GPUInit(hypre_int use_device){
   char pciBusId[80];
   hypre_int myid;
@@ -44,7 +45,7 @@ void hypre_GPUInit(hypre_int use_device){
 	MPI_Comm_rank(node_comm, &myNodeid);
 	MPI_Comm_size(node_comm, &NodeSize);
 	if (round_robin){
-	  /* Round robin allocation of GPUs. DOes not account for affinities */
+	  /* Round robin allocation of GPUs. Does not account for affinities */
 	  HYPRE_DEVICE=myNodeid%nDevices; 
 	  gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
 	  cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
@@ -107,7 +108,9 @@ void hypre_GPUFinalize(){
   cusparseErrchk(cusparseDestroy(HYPRE_CUSPARSE_HANDLE));
   
   cublasErrchk(cublasDestroy(HYPRE_CUBLAS_HANDLE));
-
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_MEASURE_GPU_HWM)
+  hypre_printf("GPU Memory High Water Mark(per MPI_RANK) %f MB \n",(double)HYPRE_GPU_HWM/1024/1024);
+#endif
   /* Destroy streams */
   hypre_int jj;
   for(jj=0;jj<MAX_HGS_ELEMENTS;jj++)
@@ -505,4 +508,7 @@ hypre_int pointerIsManaged(const void *ptr){
   }
   return ptr_att.isManaged;
 }
+#else
+ void hypre_GPUInit(hypre_int use_device){}
+ void hypre_GPUFinalize(){}
 #endif

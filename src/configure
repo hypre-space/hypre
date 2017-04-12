@@ -3172,7 +3172,7 @@ then
 
 $as_echo "#define HYPRE_USING_NVCC 1" >>confdefs.h
 
-   NVCCFLAGS="-O3 -arch=sm_60 -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -DHYPRE_USE_GPU -I /usr/local/cuda/include"
+   NVCCFLAGS="-O3 -arch=sm_60 -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
    NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
    HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
 else

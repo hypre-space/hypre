@@ -16,6 +16,7 @@
  *
  *****************************************************************************/
 
+#define HYPRE_USE_MANAGED_SCALABLE 1
 #include "_hypre_utilities.h"
 //#include "gpgpu.h"
 //#include "hypre_nvtx.h"
@@ -119,7 +120,6 @@ hypre_CAlloc( size_t count,
       memset(ptr,0,count*elt_size);
 #else
       gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
-      //gpuErrchk(cudaStreamAttachMemAsync(HYPRE_STREAM(4), ptr,0,cudaMemAttachHost));
       memset(ptr,0,count*elt_size);
       mempush(ptr,size,0);
 #endif
@@ -175,11 +175,9 @@ hypre_ReAlloc( char   *ptr,
    {
 
       ptr = hypre_MAlloc(size);
-      //fprintf(stderr,"REalloc doing amalloc = %p\n",ptr);
    }
    else if (size == 0)
    {
-     //printf("BOOM\n");
      hypre_Free(ptr);
      return NULL;
    }
@@ -195,19 +193,16 @@ hypre_ReAlloc( char   *ptr,
        memcpy(nptr,ptr,old_size);
      else
        memcpy(nptr,ptr,size);
-     //printf("Realloced %zu -> %zu(%zu), old ptr = %p, new ptr = %p \n",old_size,size,mempush(nptr,0,0),ptr,nptr);
      hypre_Free(ptr);
      ptr=nptr;
    }
 #else
    if (ptr == NULL)
    {
-     //printf("BOOM\n");
 	   ptr = (char*)malloc(size);
    }
    else
    {
-     //printf("BOOM\n");
 	   ptr = (char*)realloc(ptr, size);
    }
 #endif

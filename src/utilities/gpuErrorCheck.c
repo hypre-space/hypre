@@ -1,9 +1,11 @@
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 #include "_hypre_utilities.h"
 #include <signal.h>
+#ifdef HYPRE_USE_GPU
 extern const char *cusparseErrorCheck(cusparseStatus_t error);
 extern void gpuAssert(cudaError_t code, const char *file, int line);
 extern void cusparseAssert(cusparseStatus_t code, const char *file, int line);
+#endif
 
 /*
   cudaSafeFree frees Managed memory allocated in hypre_MAlloc,hypre_CAlloc and hypre_ReAlloc
@@ -34,6 +36,11 @@ void cudaSafeFree(void *ptr,int padding)
     return;
   }
   if (ptr_att.isManaged){
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_MEASURE_GPU_HWM)
+    size_t mfree,mtotal;
+    gpuErrchk(cudaMemGetInfo(&mfree,&mtotal));
+    HYPRE_GPU_HWM=hypre_max((mtotal-mfree),HYPRE_GPU_HWM);
+#endif
     gpuErrchk(cudaFree(sptr)); 
   } else {
     /* It is a pinned memory pointer */

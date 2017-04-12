@@ -860,8 +860,8 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
-#define CUDAMEMATTACHTYPE cudaMemAttachGlobal
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+  //#define CUDAMEMATTACHTYPE cudaMemAttachGlobal
 //#define CUDAMEMATTACHTYPE cudaMemAttachHost
 #define HYPRE_GPU_USE_PINNED 1
 #define HYPRE_USE_MANAGED_SCALABLE 1
@@ -950,14 +950,31 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
  *
  * $Revision$
  ***********************************************************************EHEADER*/
+#ifdef HYPRE_USE_MANAGED
+#include <cuda_runtime_api.h>
+#define CUDAMEMATTACHTYPE cudaMemAttachGlobal
+#define MEM_PAD_LEN 1
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line)
+{
+   if (code != cudaSuccess) 
+   {
+     fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file);
+     fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code));
+     exit(2);
+   }
+}
+void cudaSafeFree(void *ptr,int padding);
+void PrintPointerAttributes(const void *ptr);
+#endif
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
 #include <cusparse.h>
 #include <cublas_v2.h>
 #include <stdio.h>
-#include <cuda_runtime_api.h>
+  //#include <cuda_runtime_api.h>
 #include <stdlib.h>
 inline const char *cusparseErrorCheck(cusparseStatus_t error)
 {
@@ -1031,16 +1048,16 @@ inline const char *cublasErrorCheck(cublasStatus_t error)
     }
 
 }
-#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line)
-{
-   if (code != cudaSuccess) 
-   {
-     fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file);
-     fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code));
-     exit(2);
-   }
-}
+/* #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); } */
+/* inline void gpuAssert(cudaError_t code, const char *file, int line) */
+/* { */
+/*    if (code != cudaSuccess)  */
+/*    { */
+/*      fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file); */
+/*      fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code)); */
+/*      exit(2); */
+/*    } */
+/* } */
 #define cusparseErrchk(ans) { cusparseAssert((ans), __FILE__, __LINE__); }
 inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
 {
@@ -1067,6 +1084,7 @@ void PrintPointerAttributes(const void *ptr);
 #endif
 #endif
 
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -1079,7 +1097,7 @@ void PrintPointerAttributes(const void *ptr);
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 #ifdef HYPRE_USE_GPU
@@ -1116,7 +1134,7 @@ node *memfind(node *head, const void *ptr);
 void memdel(node **head, node *found);
 void meminsert(node **head, const void *ptr,size_t size);
 void printlist(node *head,hypre_int nc);
-#define MEM_PAD_LEN 1
+  //#define MEM_PAD_LEN 1
 size_t memsize(const void *ptr);
 hypre_int getsetasyncmode(hypre_int mode, hypre_int action);
 void SetAsyncMode(hypre_int mode);
@@ -1143,6 +1161,7 @@ struct hypre__global_struct{
   cudaStream_t streams[MAX_HGS_ELEMENTS];
   nvtxDomainHandle_t nvtx_domain;
   hypre_int concurrent_managed_access;
+  size_t memoryHWM;
 };
 
 extern struct hypre__global_struct hypre__global_handle ;
@@ -1159,6 +1178,7 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
 #define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
+#define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
 
 #endif
 #endif

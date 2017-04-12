@@ -127,7 +127,7 @@ distclean: clean
 
 ij: ij.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS}
+	${LINK_CC} -o $@ $@.o ${LFLAGS} -L /usr/local/cuda/lib64 -lcudart
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
