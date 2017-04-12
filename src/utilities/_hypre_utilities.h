@@ -1096,7 +1096,8 @@ void PrintPointerAttributes(const void *ptr);
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
+void hypre_GPUInit(hypre_int use_device);
+void hypre_GPUFinalize();
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
@@ -1122,8 +1123,6 @@ void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t 
 void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream);
 cublasHandle_t getCublasHandle();
 cusparseHandle_t getCusparseHandle();
-void hypre_GPUInit(hypre_int use_device);
-void hypre_GPUFinalize();
 typedef struct node {
   const void *ptr;
   size_t size;
