@@ -97,7 +97,7 @@ HYPRE_Int hypre_SStructPMatrixUnpack
   for ( I = 0; I < NVars; I++ ) {
     for ( J = 0; J < NVars; J++ ) {
       sM[I][J] = hypre_SStructPMatrixSMatrix(M,I,J);
-      //sysbamg_dbgmsg("sM[%d][%d] %p\n", I, J, sM[I][J]);
+      //sysbamg_ifdbg{hypre_printf("sM[%d][%d] %p\n", I, J, sM[I][J]); fflush(stdout);}
     }
   }
 
@@ -212,7 +212,7 @@ HYPRE_Int hypre_LS
   HYPRE_Int               Ccols
 )
 {
-  //sysbamg_dbgmsg("M=%p Mrows=%d Mcols=%d C=%p Crows=%d Ccols=%d\n", M, Mrows, Mcols, C, Crows, Ccols);
+  //sysbamg_ifdbg{hypre_printf("M=%p Mrows=%d Mcols=%d C=%p Crows=%d Ccols=%d\n", M, Mrows, Mcols, C, Crows, Ccols); fflush(stdout);}
 
 #if DEBUG_SYSBAMG > 1
   HYPRE_Int Mi, Mj;
@@ -326,7 +326,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
   //
   // XXX: Does hypre_LS() have to be in an omp critical region? Why?
 
-  sysbamg_dbgmsg("\n");
+  sysbamg_ifdbg{hypre_printf("\n"); fflush(stdout);}
 
   hypre_StructStencil* P_Stencil      = hypre_StructMatrixStencil(sP[0][0]);
   hypre_Index*         P_StencilShape = hypre_StructStencilShape(P_Stencil);
@@ -352,12 +352,12 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
       }
     }
     for ( I = 0; I < NVars; I++ ) {
-      //sysbamg_dbgmsg("numIJ[ %2d ] = %2d\n", I, numIJ[I]);
+      //sysbamg_ifdbg{hypre_printf("numIJ[ %2d ] = %2d\n", I, numIJ[I]); fflush(stdout);}
     }
     for ( I = 0; I < NVars; I++ ) {
       for ( J = 0; J < NVars; J++ ) {
         if ( sP[I][J] == NULL ) continue;
-        //sysbamg_dbgmsg("idxIJ[ %2d ][ %2d ] = %2d\n", I, J, idxIJ[I][J]);
+        //sysbamg_ifdbg{hypre_printf("idxIJ[ %2d ][ %2d ] = %2d\n", I, J, idxIJ[I][J]); fflush(stdout);}
       }
     }
   }
@@ -368,7 +368,11 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
   HYPRE_Int Crows = Mrows;
   HYPRE_Int Ccols = 1;
 
-  sysbamg_dbgmsg("Mrows %d  Mcols %d  Crows %d  Ccols %d\n", Mrows, Mcols, Crows, Ccols);
+  sysbamg_ifdbg
+  {
+     hypre_printf("Mrows %d  Mcols %d  Crows %d  Ccols %d\n", Mrows, Mcols, Crows, Ccols);
+     fflush(stdout);
+  }
 
   hypre_BoxArray* GridBoxes = hypre_StructGridBoxes( hypre_StructMatrixGrid(sP[0][0]) );
 
@@ -410,7 +414,7 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
         hypre_BoxLoop2For(iP, iv)
         {
 #if DEBUG_SYSBAMG > 1
-          sysbamg_dbgmsg("Set up LS - I %d iP %d iv %d\n", I, iP, iv);
+          sysbamg_ifdbg{hypre_printf("Set up LS - I %d iP %d iv %d\n", I, iP, iv); fflush(stdout);}
           hypre_Index iIndex; hypre_BoxLoopGetIndex(iIndex); hypre_PrintIndex(iIndex, NDim); // dbgmsg
 #endif
 
@@ -459,25 +463,25 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS
     hypre_TFree( M );
   }
 
-  //sysbamg_dbgmsg("findex  "); if ( DEBUG_SYSBAMG > 0 ) hypre_PrintIndex(findex,NDim);
-  //sysbamg_dbgmsg("stride  "); if ( DEBUG_SYSBAMG > 0 ) hypre_PrintIndex(stride,NDim);
-  //sysbamg_dbgmsg("cdir %d\n", cdir);
+  //sysbamg_ifdbg{hypre_printf("findex  "); if ( DEBUG_SYSBAMG > 0 ) hypre_PrintIndex(findex,NDim); fflush(stdout);}
+  //sysbamg_ifdbg{hypre_printf("stride  "); if ( DEBUG_SYSBAMG > 0 ) hypre_PrintIndex(stride,NDim); fflush(stdout);}
+  //sysbamg_ifdbg{hypre_printf("cdir %d\n", cdir); fflush(stdout);}
 
   {
     HYPRE_Int I, J;
     for ( I = 0; I < NVars; I++ ) {
       for ( J = 0; J < NVars; J++ ) {
         if ( sP[I][J] == NULL ) continue;
-        //sysbamg_dbgmsg("StructInterpAssemble() I %2d J %2d sA %p sP %p\n", I, J, sA[I][J], sP[I][J]);
+        //sysbamg_ifdbg{hypre_printf("StructInterpAssemble() I %2d J %2d sA %p sP %p\n", I, J, sA[I][J], sP[I][J]); fflush(stdout);}
         hypre_StructInterpAssemble(sA[I][J], sP[I][J], 0, cdir, findex, stride);
       }
     }
   }
 
-  sysbamg_dbgmsg("TFree v_offsets\n");
+  sysbamg_ifdbg{hypre_printf("TFree v_offsets\n"); fflush(stdout);}
   hypre_TFree( v_offsets );
 
-  sysbamg_dbgmsg("return\n");
+  sysbamg_ifdbg{hypre_printf("return\n"); fflush(stdout);}
   return hypre_error_flag;
 }
 
@@ -598,20 +602,20 @@ HYPRE_Int hypre_SVD
   HYPRE_Int               symmetric
 )
 {
-  sysbamg_dbgmsg("%s starting\n", __func__);
+  sysbamg_ifdbg{hypre_printf("%s starting\n", __func__); fflush(stdout);}
 
   HYPRE_Int               Mi, Mj;
 
 #if DEBUG_SYSBAMG > 1
   // print M to check
-  sysbamg_dbgmsg("hypre_SVD M:\n");
+  sysbamg_ifdbg{hypre_printf("hypre_SVD M:\n"); fflush(stdout);}
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) {
       PrintComplex("  ", M[Mi + Mj*Mrows], "");
     }
     hypre_printf("\n");
   }
-  sysbamg_dbgmsg("symmetric = %d\n", symmetric);
+  sysbamg_ifdbg{hypre_printf("symmetric = %d\n", symmetric); fflush(stdout);}
 #endif
 
   HYPRE_Real*     e     = (HYPRE_Real*) hypre_TAlloc(HYPRE_Real, Mrows);
@@ -622,7 +626,7 @@ HYPRE_Int hypre_SVD
   HYPRE_Int       info;
 
   time_t t_init = time(NULL);
-  sysbamg_dbgmsg("hypre_xgebrd starting ...\n");
+  sysbamg_ifdbg{hypre_printf("hypre_xgebrd starting ...\n"); fflush(stdout);}
 
   // NB: R and Q (via reflectors) are written to M
   hypre_xgebrd( &Mrows, &Mcols, M, &Mrows, S, e, tauq, taup, work, &lwork, &info );
@@ -630,16 +634,16 @@ HYPRE_Int hypre_SVD
 
 #if DEBUG_SYSBAMG > 1
   // print Q\R to check
-  sysbamg_dbgmsg("hypre_SVD BD d:\n");
+  sysbamg_ifdbg{hypre_printf("hypre_SVD BD d:\n"); fflush(stdout);}
   for ( Mi = 0; Mi < Mrows; Mi++ )   PrintComplex("  ", S[Mi], "");
   hypre_printf("\n");
-  sysbamg_dbgmsg("hypre_SVD BD e:\n");
+  sysbamg_ifdbg{hypre_printf("hypre_SVD BD e:\n"); fflush(stdout);}
   for ( Mi = 0; Mi < Mrows-1; Mi++ ) PrintComplex("  ", e[Mi], "");
   hypre_printf("\n");
 #endif
 
-  sysbamg_dbgmsg("hypre_xgebrd finished at %f s\n", difftime(time(NULL),t_init));
-  sysbamg_dbgmsg("hypre_xbdsqr starting ...\n");
+  sysbamg_ifdbg{hypre_printf("hypre_xgebrd finished at %f s\n", difftime(time(NULL),t_init)); fflush(stdout);}
+  sysbamg_ifdbg{hypre_printf("hypre_xbdsqr starting ...\n"); fflush(stdout);}
 
   char            uplo = 'U';
   HYPRE_Int       zero = 0;
@@ -655,25 +659,25 @@ HYPRE_Int hypre_SVD
   hypre_CheckReturnValue( "hypre_xbdsqr", info );
 
 #if DEBUG_SYSBAMG > 0
-  sysbamg_dbgmsg("hypre_SVD S:\n");
+  sysbamg_ifdbg{hypre_printf("hypre_SVD S:\n"); fflush(stdout);}
   for ( Mi = 0; Mi < Mrows; Mi++ ) PrintComplex("  ", S[Mi], "");
   hypre_printf("\n");
 #endif
 
 #if DEBUG_SYSBAMG > 1
-  sysbamg_dbgmsg("hypre_SVD Q:\n");
+  sysbamg_ifdbg{hypre_printf("hypre_SVD Q:\n"); fflush(stdout);}
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) PrintComplex("  ", U[Mi+Mj*Mrows], "");
     hypre_printf("\n");
   }
 
-  sysbamg_dbgmsg("hypre_SVD P^T:\n");
+  sysbamg_ifdbg{hypre_printf("hypre_SVD P^T:\n"); fflush(stdout);}
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) PrintComplex("  ", VT[Mi+Mj*Mrows], "");
     hypre_printf("\n");
   }
 
-  sysbamg_dbgmsg("hypre_SVD [Q S P^T]:\n");
+  sysbamg_ifdbg{hypre_printf("hypre_SVD [Q S P^T]:\n"); fflush(stdout);}
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) {
       HYPRE_Int     k;
@@ -686,8 +690,8 @@ HYPRE_Int hypre_SVD
   }
 #endif
 
-  sysbamg_dbgmsg("hypre_xbdsqr finished at %f s\n", difftime(time(NULL),t_init));
-  sysbamg_dbgmsg("hypre_xxxmbr starting ...\n");
+  sysbamg_ifdbg{hypre_printf("hypre_xbdsqr finished at %f s\n", difftime(time(NULL),t_init)); fflush(stdout);}
+  sysbamg_ifdbg{hypre_printf("hypre_xxxmbr starting ...\n"); fflush(stdout);}
 
   // compute the singular vector matrices U = U_1 U_2 == Q U and V^T = V_2^T V_1^T == VT P^T
   // ( "N" : no transpose )
@@ -705,7 +709,7 @@ HYPRE_Int hypre_SVD
   hypre_CheckReturnValue( "hypre_xxxmbr", info );
 
 #if DEBUG_SYSBAMG > 1
-  sysbamg_dbgmsg("hypre_SVD [U S V^T]:\n");
+  sysbamg_ifdbg{hypre_printf("hypre_SVD [U S V^T]:\n"); fflush(stdout);}
   for ( Mi = 0; Mi < Mrows; Mi++ ) {
     for ( Mj = 0; Mj < Mcols; Mj++ ) {
       HYPRE_Int     k;
@@ -718,7 +722,7 @@ HYPRE_Int hypre_SVD
   }
 #endif
 
-  sysbamg_dbgmsg("hypre_xxxmbr finished at %f s\n", difftime(time(NULL),t_init));
+  sysbamg_ifdbg{hypre_printf("hypre_xxxmbr finished at %f s\n", difftime(time(NULL),t_init)); fflush(stdout);}
 
   // write lowest Mrows/2 L and R singular vectors into M := [v_l,1, v_l,2, ..., v_r,1, v_r,2, ...]
   //    nb: values/vectors are returned in* descending* order
@@ -740,7 +744,7 @@ HYPRE_Int hypre_SVD
         M[Mi+(nsvecs+Mj)*Mrows] = VT[(Mcols-1-Mj)+Mi*Mcols];
   }
 
-  sysbamg_dbgmsg("%s finished\n", __func__);
+  sysbamg_ifdbg{hypre_printf("%s finished\n", __func__); fflush(stdout);}
 
   return hypre_error_flag;
 }
@@ -861,7 +865,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
 
   hypre_BoxGetSize( GridBox, GridBoxSize );
 
-  //sysbamg_dbgmsg( "GridBoxVolume = %d\n", GridBoxVolume );
+  //sysbamg_ifdbg{hypre_printf( "GridBoxVolume = %d\n", GridBoxVolume ); fflush(stdout);}
 
   NVars = hypre_SStructPMatrixNVars( A );
 
@@ -875,10 +879,10 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
   NDim = hypre_SStructPMatrixNDim( A );
 
 #if DEBUG_SYSBAMG > 0
-  sysbamg_dbgmsg("Coarse Grid Min and Max:\n");
+  sysbamg_ifdbg{hypre_printf("Coarse Grid Min and Max:\n"); fflush(stdout);}
   hypre_PrintIndex( hypre_BoxIMin( GridBox ), NDim );
   hypre_PrintIndex( hypre_BoxIMax( GridBox ), NDim );
-  sysbamg_dbgmsg("Mrows=%d Mcols=%d\n", Mrows, Mcols);
+  sysbamg_ifdbg{hypre_printf("Mrows=%d Mcols=%d\n", Mrows, Mcols); fflush(stdout);}
 #endif
 
   start = hypre_BoxIMin( GridBox );
@@ -910,7 +914,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
       {
         hypre_BoxLoopGetIndex( iIndex );  // note: relative to Min
 
-        //sysbamg_dbgmsg( "iIndex:\n" );
+        //sysbamg_ifdbg{hypre_printf( "iIndex:\n" ); fflush(stdout);}
         //hypre_PrintIndex( iIndex, NDim ); // dbg
 
         Mi = I * GridBoxVolume + IndexToInt( iIndex, GridBox );
@@ -919,14 +923,14 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
         {
           AddIndex( jIndex, iIndex, StencilShape[si], GridBox );
 
-          //sysbamg_dbgmsg( "StencilShape[%d] and jIndex:\n", si )
+          //sysbamg_ifdbg{hypre_printf( "StencilShape[%d] and jIndex:\n", si ); fflush(stdout);}
           //hypre_PrintIndex( StencilShape[si], NDim ); // dbg
           //hypre_PrintIndex( jIndex, NDim ); // dbg
 
           Mj = J * GridBoxVolume + IndexToInt( jIndex, GridBox );
 
           M[ Mi + Mj * Mrows ] = hypre_StructMatrixBoxData( StructMatrix, BoxIdx, si )[ i ];  // NB: column-major
-          //sysbamg_dbgmsg( "Mi %3d Mj %3d M %12.3e I %d  J %d  i %d  si %d\n", Mi, Mj, M[Mi+Mj*Mrows], I, J, i, si );
+          //sysbamg_ifdbg{hypre_printf( "Mi %3d Mj %3d M %12.3e I %d  J %d  i %d  si %d\n", Mi, Mj, M[Mi+Mj*Mrows], I, J, i, si ); fflush(stdout);}
         }
       }
       hypre_BoxLoop1End( i );
@@ -940,7 +944,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
   // compute singular vectors
   hypre_SVD( S, M, Mrows, Mcols, nsvecs, symmetric );
 
-  sysbamg_dbgmsg("copy vectors; symmetric %d; nsvecs %d\n", symmetric, nsvecs);
+  sysbamg_ifdbg{hypre_printf("copy vectors; symmetric %d; nsvecs %d\n", symmetric, nsvecs); fflush(stdout);}
 
   // copy lowest singular vectors into svecs
   //    M := [ v_l,1, v_l,2, ..., v_r,1, v_r,2, ... ] -> svecs[...]
@@ -985,10 +989,16 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
   hypre_SStructPVectorAssemble( AV );
 
   for ( i = 0; i < 3; i++ ) {
-    for ( j = 0; j < 3; j++ ) {
+    for ( j = 0; j < 3; j++ )
+    {
       hypre_SStructPMatvec( 1.0, A, svecs[j + (symmetric ? 0 : nsvecs)], 0.0, AV );
       hypre_SStructPInnerProd( svecs[i], AV, &x );
-      sysbamg_dbgmsg("SVD Check: U[k][%d] A[k,l] V[l][%d] / S[%d]: %16.6e\n", i, j, i, hypre_cabs(x / S[i]));
+      sysbamg_ifdbg
+      {
+         hypre_printf("SVD Check: U[k][%d] A[k,l] V[l][%d] / S[%d]: %16.6e\n",
+                      i, j, i, hypre_cabs(x / S[i]));
+         fflush(stdout);
+      }
     }
   }
 

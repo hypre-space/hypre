@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * Header info for the BAMG solver
@@ -27,11 +24,7 @@
 
 #define DEBUG_BAMG 1
 
-#define bamg_dbgmsg( format, args... ) \
-{ \
-  if ( DEBUG_BAMG ) hypre_printf( "DEBUG_BAMG (%s:%d): " format, __FILE__, __LINE__, ## args ); fflush(stdout); \
-}
-
+#define bamg_ifdbg if (DEBUG_BAMG)
 
 /*--------------------------------------------------------------------------
  * hypre_BAMGData:

@@ -237,7 +237,11 @@ HYPRE_Int hypre_SysBAMGSetup
 
   nsym      = ( symmetric ? 1 : 2 );
 
-  sysbamg_dbgmsg("num_tv = %d = %d + %d; nsym = %d\n", num_tv, num_rtv, num_stv, nsym);
+  sysbamg_ifdbg
+  {
+     hypre_printf("num_tv = %d = %d + %d; nsym = %d\n", num_tv, num_rtv, num_stv, nsym);
+     fflush(stdout);
+  }
 
   tv = hypre_TAlloc(hypre_SStructPVector**, num_levels);
 
@@ -247,7 +251,11 @@ HYPRE_Int hypre_SysBAMGSetup
    * Set up operators (P_l, RT_l, A_l)
    *----------------------------------------------------------------------------------------------*/
 
-  sysbamg_dbgmsg("Set up multigrid operators (num_levels=%d) ...\n", num_levels);
+  sysbamg_ifdbg
+  {
+     hypre_printf("Set up multigrid operators (num_levels=%d) ...\n", num_levels);
+     fflush(stdout);
+  }
 
   hypre_SysBAMGSetupOperators( data, tv, num_rtv*nsym, relax_weights, cmaxsize );
 
@@ -262,7 +270,11 @@ HYPRE_Int hypre_SysBAMGSetup
      * Compute the coarse-grid singular vectors and then prolongate them to the fine grid
      *--------------------------------------------------------------------------------------------*/
 
-    sysbamg_dbgmsg("Compute singular vectors num_stv=%d ...\n", num_stv);
+    sysbamg_ifdbg
+    {
+       hypre_printf("Compute singular vectors num_stv=%d ...\n", num_stv);
+       fflush(stdout);
+    }
 
     hypre_SysBAMGComputeSVecs( A_l[num_levels-1], num_stv, &(tv[num_levels-1][num_rtv*nsym]) );
 
@@ -276,7 +288,11 @@ HYPRE_Int hypre_SysBAMGSetup
      * Refine operators using coarse-grid singular vectors (P_l, RT_l, A_l)
      *--------------------------------------------------------------------------------------------*/
 
-    sysbamg_dbgmsg("Refine multigrid operators (num_levels=%d) ...\n", num_levels);
+    sysbamg_ifdbg
+    {
+       hypre_printf("Refine multigrid operators (num_levels=%d) ...\n", num_levels);
+       fflush(stdout);
+    }
 
     hypre_SysBAMGSetupOperators( data, tv, num_tv*nsym, relax_weights, cmaxsize );
   }
@@ -431,7 +447,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
 
   for (l = 0; l < max_levels; l++)
   {
-    sysbamg_dbgmsg("%s l=%d\n", __func__, l);
+    sysbamg_ifdbg{hypre_printf("%s l=%d\n", __func__, l); fflush(stdout);}
 
 #if DEBUG_SYSBAMG_PFMG
     /* determine cdir */
@@ -517,7 +533,12 @@ HYPRE_Int hypre_SysBAMGSetupGrids
       break;
     }
 
-    sysbamg_dbgmsg( "l %d  cdir %d  Min %d Max %d\n", l, cdir, hypre_BoxIMinD(cbox,cdir), hypre_BoxIMaxD(cbox,cdir) );
+    sysbamg_ifdbg
+    {
+       hypre_printf( "l %d  cdir %d  Min %d Max %d\n",
+                     l, cdir, hypre_BoxIMinD(cbox,cdir), hypre_BoxIMaxD(cbox,cdir) );
+       fflush(stdout);
+    }
 
     cdir_l[l] = cdir;
 
@@ -546,7 +567,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
     hypre_StructMapFineToCoarse(hypre_BoxIMin(cbox), cindex, stride, hypre_BoxIMin(cbox));
     hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox), cindex, stride, hypre_BoxIMax(cbox));
 
-    sysbamg_dbgmsg( "cbox Min and Max:\n" );
+    sysbamg_ifdbg{hypre_printf( "cbox Min and Max:\n" ); fflush(stdout);}
     hypre_PrintIndex( hypre_BoxIMin(cbox), NDim );
     hypre_PrintIndex( hypre_BoxIMax(cbox), NDim );
 
@@ -574,7 +595,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
 
   (data->num_levels) = num_levels;
 
-  sysbamg_dbgmsg("%s freeing\n", __func__);
+  sysbamg_ifdbg{hypre_printf("%s freeing\n", __func__); fflush(stdout);}
 
 #if DEBUG_SYSBAMG_PFMG
   for ( i = 0; i < nvars; i++) {
@@ -585,7 +606,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
 
   hypre_BoxDestroy(cbox);
 
-  sysbamg_dbgmsg("%s finished\n", __func__);
+  sysbamg_ifdbg{hypre_printf("%s finished\n", __func__); fflush(stdout);}
 
   return hypre_error_flag;
 }
@@ -656,7 +677,7 @@ HYPRE_Int hypre_SysBAMGSetupMV
     hypre_SStructPVectorAssemble(tx_l[l]);
   }
 
-  sysbamg_dbgmsg("%s finished\n", __func__);
+  sysbamg_ifdbg{hypre_printf("%s finished\n", __func__); fflush(stdout);}
 
   return hypre_error_flag;
 }
@@ -686,7 +707,12 @@ HYPRE_Int hypre_SysBAMGSetupTV
 
   HYPRE_Int               l, k;
 
-  sysbamg_dbgmsg("%s:%d symmetric=%d num_tv*nsym=%d\n", __FILE__, __LINE__, symmetric, num_tv*nsym);
+  sysbamg_ifdbg
+  {
+     hypre_printf("%s:%d symmetric=%d num_tv*nsym=%d\n",
+                  __FILE__, __LINE__, symmetric, num_tv*nsym);
+     fflush(stdout);
+  }
 
   for ( l = 0; l < num_levels; l++ )
   {
@@ -710,7 +736,7 @@ HYPRE_Int hypre_SysBAMGSetupTV
 #endif
   }
 
-  sysbamg_dbgmsg("%s finished\n", __func__);
+  sysbamg_ifdbg{hypre_printf("%s finished\n", __func__); fflush(stdout);}
 
   return hypre_error_flag;
 }
@@ -764,7 +790,7 @@ HYPRE_Int hypre_SysBAMGSetupOperators
 
     // smooth the test vectors at *this* level
     {
-      sysbamg_dbgmsg("smooth the test vectors at level %d\n", l);
+      sysbamg_ifdbg{hypre_printf("smooth the test vectors at level %d\n", l); fflush(stdout);}
 
       // 1) set up the rhs for smoothing, zero for now
       hypre_SStructPVector* rhs;
@@ -802,7 +828,11 @@ HYPRE_Int hypre_SysBAMGSetupOperators
       hypre_SStructPVectorDestroy( rhs );
 
 #if DEBUG_SYSBAMG > 1
-      sysbamg_dbgmsg("printing sysbamg test vectors; level %d; num_tv_ %d\n", l, num_tv_);
+      sysbamg_ifdbg
+      {
+         hypre_printf("printing sysbamg test vectors; level %d; num_tv_ %d\n", l, num_tv_);
+         fflush(stdout);
+      }
       char filename[255];
       for ( k = 0; k < num_tv_; k++ ) {
         hypre_sprintf(filename, "sysbamg_tv_l=%d,k=%d.dat", l, k);
@@ -815,24 +845,44 @@ HYPRE_Int hypre_SysBAMGSetupOperators
     HYPRE_Int num_interps = num_levels-2;
 
     /* set up the interpolation operator */
-    sysbamg_dbgmsg( "SysBAMGSetupInterpOp %d of %d\n", l, num_interps );
+    sysbamg_ifdbg
+    {
+       hypre_printf( "SysBAMGSetupInterpOp %d of %d\n", l, num_interps );
+       fflush(stdout);
+    }
     hypre_SysBAMGSetupInterpOp(A_l[l], cdir_l[l], findex, stride, P_l[l], num_tv_, tv[l]);
 
     /* set up the coarse grid operator */
-    sysbamg_dbgmsg( "SysBAMGSetupRAPOp    %d of %d\n", l, num_interps );
+    sysbamg_ifdbg
+    {
+       hypre_printf( "SysBAMGSetupRAPOp    %d of %d\n", l, num_interps );
+       fflush(stdout);
+    }
     hypre_SysBAMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir_l[l], cindex, stride, A_l[l+1]);
 
     /* set up the interpolation routine */
-    sysbamg_dbgmsg( "SysSemiInterpSetup   %d of %d\n", l, num_interps );
+    sysbamg_ifdbg
+    {
+       hypre_printf( "SysSemiInterpSetup   %d of %d\n", l, num_interps );
+       fflush(stdout);
+    }
     hypre_SysSemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l], cindex, findex, stride);
 
     /* set up the restriction routine */
-    sysbamg_dbgmsg( "SysSemiRestrictSetup %d of %d\n", l, num_interps );
+    sysbamg_ifdbg
+    {
+       hypre_printf( "SysSemiRestrictSetup %d of %d\n", l, num_interps );
+       fflush(stdout);
+    }
     hypre_SysSemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1], cindex, findex, stride);
 
     // restrict the tv[l] to tv[l+1] (NB: don't need tv's on the coarsest grid)
     if ( l < num_interps ) {
-      sysbamg_dbgmsg( "SysSemiRestrict      %d of %d\n", l, num_interps );
+      sysbamg_ifdbg
+      {
+         hypre_printf( "SysSemiRestrict      %d of %d\n", l, num_interps );
+         fflush(stdout);
+      }
       for ( k = 0; k < num_tv_; k++ ) {
         hypre_SysSemiRestrict(restrict_data_l[l], RT_l[l], tv[l][k], tv[l+1][k]);
       }
@@ -890,7 +940,7 @@ HYPRE_Int hypre_SysBAMGSetupOperators
     hypre_SStructPMatvecSetup(matvec_data_l[l], A_l[l], x_l[l]);
   }
 
-  sysbamg_dbgmsg("%s finished\n", __func__);
+  sysbamg_ifdbg{hypre_printf("%s finished\n", __func__); fflush(stdout);}
 
   return hypre_error_flag;
 }

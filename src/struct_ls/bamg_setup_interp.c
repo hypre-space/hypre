@@ -127,32 +127,36 @@ HYPRE_Int hypre_BAMGSetupInterpOp(
     
     hypre_BoxGetStrideSize(compute_box, stridec, loop_size);
 
-    bamg_dbgmsg("findex:  %d %d %d\n", hypre_IndexD(findex, 0), hypre_IndexD(findex, 1), hypre_IndexD(findex, 2));
-    bamg_dbgmsg("stride:  %d %d %d\n", hypre_IndexD(stride, 0), hypre_IndexD(stride, 1), hypre_IndexD(stride, 2));
-    bamg_dbgmsg("stridec: %d %d %d\n", hypre_IndexD(stridec,0), hypre_IndexD(stridec,1), hypre_IndexD(stridec,2));
-    bamg_dbgmsg("startc:  %d %d %d\n", hypre_IndexD(startc, 0), hypre_IndexD(startc, 1), hypre_IndexD(startc, 2));
-    bamg_dbgmsg("start:   %d %d %d\n", hypre_IndexD(start,  0), hypre_IndexD(start,  1), hypre_IndexD(start,  2));
+    bamg_ifdbg
+    {
+       hypre_printf("findex:  %d %d %d\n", hypre_IndexD(findex, 0), hypre_IndexD(findex, 1), hypre_IndexD(findex, 2));
+       hypre_printf("stride:  %d %d %d\n", hypre_IndexD(stride, 0), hypre_IndexD(stride, 1), hypre_IndexD(stride, 2));
+       hypre_printf("stridec: %d %d %d\n", hypre_IndexD(stridec,0), hypre_IndexD(stridec,1), hypre_IndexD(stridec,2));
+       hypre_printf("startc:  %d %d %d\n", hypre_IndexD(startc, 0), hypre_IndexD(startc, 1), hypre_IndexD(startc, 2));
+       hypre_printf("start:   %d %d %d\n", hypre_IndexD(start,  0), hypre_IndexD(start,  1), hypre_IndexD(start,  2));
+       fflush(stdout);
+    }
 
     P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), i);
 
     for ( j = 0; j < P_stencil_size; j++ )
       Pp[j] = hypre_StructMatrixBoxData(P, i, j);
 
-    bamg_dbgmsg("tv_dbox\n");
+    bamg_ifdbg{hypre_printf("tv_dbox\n"); fflush(stdout);}
 
     tv_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(tv[0]),i);
 
-    bamg_dbgmsg("vp[k]\n");
+    bamg_ifdbg{hypre_printf("vp[k]\n"); fflush(stdout);}
 
     for ( k = 0; k < num_tv; k++ )
       vp[k] = hypre_StructVectorBoxData(tv[k],i);
     
-    bamg_dbgmsg("v_offsets[j]\n");
+    bamg_ifdbg{hypre_printf("v_offsets[j]\n"); fflush(stdout);}
 
     for ( j = 0; j < P_stencil_size; j++ )
       v_offsets[j] = hypre_BoxOffsetDistance( tv_dbox, P_stencil_shape[j] );
 
-    bamg_dbgmsg("v_offsets: %d %d\n", v_offsets[0], v_offsets[1]);
+    bamg_ifdbg{hypre_printf("v_offsets: %d %d\n", v_offsets[0], v_offsets[1]); fflush(stdout);}
 
     /* No constant_coefficient switch */
 
@@ -181,7 +185,11 @@ HYPRE_Int hypre_BAMGSetupInterpOp(
         smz += vkm * vkz;
         spp += vkp * vkp;
         spz += vkp * vkz;
-        bamg_dbgmsg("vi: %d k: %d v{-,0,+}: %12.5e %12.5e %12.5e\n", vi, k, vkm, vkz, vkp);
+        bamg_ifdbg
+        {
+           hypre_printf("vi: %d k: %d v{-,0,+}: %12.5e %12.5e %12.5e\n", vi, k, vkm, vkz, vkp);
+           fflush(stdout);
+        }
       }
 #if 1
       if ( spp == 0.0 ) {
@@ -204,8 +212,12 @@ HYPRE_Int hypre_BAMGSetupInterpOp(
       Pp[0][Pi] = ( smz / smp - spz / spp ) / ( smm / smp - smp / spp );
       Pp[1][Pi] = ( spz / smp - smz / smm ) / ( spp / smp - smp / smm );
 #endif
-      bamg_dbgmsg("%12.5e %12.5e %12.5e %12.5e %12.5e . %12.5e %12.5e\n",
-                   smm, smp, smz, spp, spz,        Pp[0][Pi], Pp[1][Pi]);
+      bamg_ifdbg
+      {
+         hypre_printf("%12.5e %12.5e %12.5e %12.5e %12.5e . %12.5e %12.5e\n",
+                      smm, smp, smz, spp, spz,        Pp[0][Pi], Pp[1][Pi]);
+         fflush(stdout);
+      }
 #endif
     }
     hypre_BoxLoop2End(Pi, vi);

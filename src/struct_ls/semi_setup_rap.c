@@ -39,8 +39,6 @@
    }\
 }
 
-#define print_complex(x) if ( iAc < 0 ) { bamg_dbgmsg( "  %30s %16.6e %16.6e\n", #x, hypre_creal(x), hypre_cimag(x) ); }
-
 /*--------------------------------------------------------------------------
  * Sets up new coarse grid operator stucture.
  *--------------------------------------------------------------------------*/

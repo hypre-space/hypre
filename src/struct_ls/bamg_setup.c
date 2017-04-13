@@ -99,7 +99,7 @@ HYPRE_Int hypre_BAMGSetup(
    * Set up coarse grids - Semi coarsening, as in PFMG
    *-----------------------------------------------------*/
 
-  bamg_dbgmsg("Set up coarse grids\n");
+  bamg_ifdbg{hypre_printf("Set up coarse grids\n"); fflush(stdout);}
 
   grid = hypre_StructMatrixGrid(A);
   ndim = hypre_StructGridNDim(grid);
@@ -130,14 +130,18 @@ HYPRE_Int hypre_BAMGSetup(
       periodic = hypre_IndexD(hypre_StructGridPeriodic(grid_l[l]), cdir);
       if ((periodic) && (periodic % 2))
       {
-        bamg_dbgmsg("  stop coarsening - periodic = %d\n", periodic);
+        bamg_ifdbg{hypre_printf("  stop coarsening - periodic = %d\n", periodic); fflush(stdout);}
         cdir = -1;
       }
 
       /* don't coarsen if we've reached max_levels */
       if (l == (max_levels - 1))
       {
-        bamg_dbgmsg("  stop coarsening - l = %d, max_levels = %d\n", l, max_levels);
+        bamg_ifdbg
+        {
+           hypre_printf("  stop coarsening - l = %d, max_levels = %d\n", l, max_levels);
+           fflush(stdout);
+        }
         cdir = -1;
       }
     }
@@ -178,9 +182,13 @@ HYPRE_Int hypre_BAMGSetup(
     hypre_StructMapFineToCoarse(hypre_BoxIMin(cbox), cindex, stride, hypre_BoxIMin(cbox));
     hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox), cindex, stride, hypre_BoxIMax(cbox));
 
-    bamg_dbgmsg("2) IMin(cbox): %d %d %d    IMax(cbox): %d %d %d\n",
-                hypre_IndexD(hypre_BoxIMin(cbox),0), hypre_IndexD(hypre_BoxIMin(cbox),1), hypre_IndexD(hypre_BoxIMin(cbox),2),
-                hypre_IndexD(hypre_BoxIMax(cbox),0), hypre_IndexD(hypre_BoxIMax(cbox),1), hypre_IndexD(hypre_BoxIMax(cbox),2));
+    bamg_ifdbg
+    {
+       hypre_printf("2) IMin(cbox): %d %d %d    IMax(cbox): %d %d %d\n",
+                    hypre_IndexD(hypre_BoxIMin(cbox),0), hypre_IndexD(hypre_BoxIMin(cbox),1), hypre_IndexD(hypre_BoxIMin(cbox),2),
+                    hypre_IndexD(hypre_BoxIMax(cbox),0), hypre_IndexD(hypre_BoxIMax(cbox),1), hypre_IndexD(hypre_BoxIMax(cbox),2));
+       fflush(stdout);
+    }
 
     /* build the interpolation grid */
     hypre_StructCoarsen(grid_l[l], findex, stride, 0, &P_grid_l[l+1]);
@@ -225,7 +233,7 @@ HYPRE_Int hypre_BAMGSetup(
   {
     cdir = cdir_l[l];
 
-    bamg_dbgmsg("CreateInterpOp l=%d cdir=%d\n", l, cdir);
+    bamg_ifdbg{hypre_printf("CreateInterpOp l=%d cdir=%d\n", l, cdir); fflush(stdout);}
 
     P_l[l]  = hypre_BAMGCreateInterpOp(A_l[l], P_grid_l[l+1], cdir);
     hypre_StructMatrixInitializeShell(P_l[l]);
@@ -235,7 +243,7 @@ HYPRE_Int hypre_BAMGSetup(
     // Cannot do non-symmetric case at present (need non-pruned grid, see PFMG)
     RT_l[l] = P_l[l];
 
-    bamg_dbgmsg("CreateRAPOp\n");
+    bamg_ifdbg{hypre_printf("CreateRAPOp\n"); fflush(stdout);}
 
     A_l[l+1] = hypre_BAMGCreateRAPOp(RT_l[l], A_l[l], P_l[l], grid_l[l+1], cdir);
     hypre_StructMatrixInitializeShell(A_l[l+1]);
@@ -299,7 +307,7 @@ HYPRE_Int hypre_BAMGSetup(
    * Set up multigrid operators and call setup routines
    *-----------------------------------------------------*/
 
-  bamg_dbgmsg("Set up multigrid operators ...\n");
+  bamg_ifdbg{hypre_printf("Set up multigrid operators ...\n"); fflush(stdout);}
 
   relax_data_l    = hypre_TAlloc(void *, num_levels);
   matvec_data_l   = hypre_TAlloc(void *, num_levels);
@@ -356,7 +364,7 @@ HYPRE_Int hypre_BAMGSetup(
     // 5) destroy zero vector
     HYPRE_StructVectorDestroy(rhs);
 
-    bamg_dbgmsg("SetupInterpOp l=%d cdir=%d\n", l, cdir);
+    bamg_ifdbg{hypre_printf("SetupInterpOp l=%d cdir=%d\n", l, cdir); fflush(stdout);}
 
 #if DEBUG_BAMG
   for ( k = 0; k < num_tv1; k++ ) {
@@ -368,7 +376,7 @@ HYPRE_Int hypre_BAMGSetup(
     /* set up interpolation operator */
     hypre_BAMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l], num_tv1, tv[l]);
 
-    bamg_dbgmsg("SetupRAPOp\n");
+    bamg_ifdbg{hypre_printf("SetupRAPOp\n"); fflush(stdout);}
 
     /* set up the coarse grid operator */
     hypre_BAMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, A_l[l+1]);
@@ -401,12 +409,16 @@ HYPRE_Int hypre_BAMGSetup(
 
   if ( hypre_ZeroDiagonal(A_l[l]) )
   {
-    bamg_dbgmsg("ZeroDiagonal ...\n");
+    bamg_ifdbg{hypre_printf("ZeroDiagonal ...\n"); fflush(stdout);}
     active_l[l] = 0;
   }
 
   /* set up fine grid relaxation */
-  bamg_dbgmsg("set relaxation parameters (relax_type=%d)\n", relax_type);
+  bamg_ifdbg
+  {
+     hypre_printf("set relaxation parameters (relax_type=%d)\n", relax_type);
+     fflush(stdout);
+  }
 
   for (l = 0; l < num_levels; l++)
   {
@@ -501,7 +513,7 @@ HYPRE_Int hypre_BAMGSetup(
   }
   hypre_TFree(tv);
 
-  bamg_dbgmsg("BAMGSetup finished.\n");
+  bamg_ifdbg{hypre_printf("BAMGSetup finished.\n"); fflush(stdout);}
 
   return hypre_error_flag;
 }

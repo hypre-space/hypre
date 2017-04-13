@@ -284,11 +284,16 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
             cmaxsize = hypre_max(cmaxsize, hypre_BoxSizeD(cbox, d));
          }
 
-         sysbamg_dbgmsg("stop coarsening: l = %d\n", l);
+         sysbamg_ifdbg{hypre_printf("stop coarsening: l = %d\n", l); fflush(stdout);}
          break;
       }
 
-      sysbamg_dbgmsg("l %2d cdir %d Min %3d Max %3d periodic %3d\n", l, cdir, hypre_BoxIMinD(cbox,cdir), hypre_BoxIMaxD(cbox,cdir), periodic);
+      sysbamg_ifdbg
+      {
+         hypre_printf("l %2d cdir %d Min %3d Max %3d periodic %3d\n", l, cdir,
+                      hypre_BoxIMinD(cbox,cdir), hypre_BoxIMaxD(cbox,cdir), periodic);
+         fflush(stdout);
+      }
 
       cdir_l[l] = cdir;
 
@@ -346,7 +351,11 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       num_levels -= 1;
    }
 
-   sysbamg_dbgmsg("num_levels = %d (full_periodic = %d)\n", num_levels, full_periodic);
+   sysbamg_ifdbg
+   {
+      hypre_printf("num_levels = %d (full_periodic = %d)\n", num_levels, full_periodic);
+      fflush(stdout);
+   }
 
    /* free up some things */
    hypre_BoxDestroy(cbox);
@@ -461,11 +470,19 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       hypre_PFMGSetStride(cdir, stride);
 
       /* set up interpolation operator */
-      sysbamg_dbgmsg("SysPFMGSetupInterpOp() P_l[l] l=%d cdir=%d\n", l, cdir);
+      sysbamg_ifdbg
+      {
+         hypre_printf("SysPFMGSetupInterpOp() P_l[l] l=%d cdir=%d\n", l, cdir);
+         fflush(stdout);
+      }
       hypre_SysPFMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l], rap_type);
 
       /* set up the coarse grid operator */
-      sysbamg_dbgmsg("SysPFMGSetupRAPOp() A_l[l+1] l=%d cdir=%d\n", l, cdir);
+      sysbamg_ifdbg
+      {
+         hypre_printf("SysPFMGSetupRAPOp() A_l[l+1] l=%d cdir=%d\n", l, cdir);
+         fflush(stdout);
+      }
       hypre_SysPFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, A_l[l+1]);
 
       /* set up the interpolation routine */
