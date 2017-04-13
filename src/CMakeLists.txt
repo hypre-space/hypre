@@ -91,7 +91,6 @@ list (APPEND HYPRE_SOURCES
   blas/dtrsm.c
   blas/dtrsv.c
   blas/idamax.c
-  blas/xerbla.c
   blas/zcopy.c
   blas/zdscal.c
   blas/zgemm.c
