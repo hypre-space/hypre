@@ -363,3 +363,67 @@ hypre_FinalizeIndtComputations( hypre_CommHandle *comm_handle )
 
    return hypre_error_flag;
 }
+
+
+/*--------------------------------------------------------------------------
+ * ComputePkgCreate2 and InitializeIndtComputations2:
+ *   similar to original versions above but with 'reverse' and 'action'
+ *   not hard-wired.
+ *
+ *   reverse = 0  -  receive ghost-cell data from neighbors' interiors
+ *   reverse = 1  -  send ghost-cell data to neighbors' interiors
+ *
+ *   action = 0    - copy the data over existing values in memory
+ *   action = 1    - add the data to existing values in memory
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ComputePkgCreate2( hypre_ComputeInfo     *compute_info,
+                         hypre_BoxArray        *data_space,
+                         HYPRE_Int              num_values,
+                         HYPRE_Int              reverse,
+                         hypre_StructGrid      *grid,
+                         hypre_ComputePkg     **compute_pkg_ptr )
+{
+   hypre_ComputePkg  *compute_pkg;
+   hypre_CommPkg     *comm_pkg;
+
+   compute_pkg = hypre_CTAlloc(hypre_ComputePkg, 1);
+
+   hypre_CommPkgCreate(hypre_ComputeInfoCommInfo(compute_info),
+                       data_space, data_space, num_values, NULL, reverse,
+                       hypre_StructGridComm(grid), &comm_pkg);
+   hypre_CommInfoDestroy(hypre_ComputeInfoCommInfo(compute_info));
+   hypre_ComputePkgCommPkg(compute_pkg) = comm_pkg;
+
+   hypre_ComputePkgIndtBoxes(compute_pkg) = 
+      hypre_ComputeInfoIndtBoxes(compute_info);
+   hypre_ComputePkgDeptBoxes(compute_pkg) =
+      hypre_ComputeInfoDeptBoxes(compute_info);
+   hypre_CopyIndex(hypre_ComputeInfoStride(compute_info),
+                   hypre_ComputePkgStride(compute_pkg));
+
+   hypre_StructGridRef(grid, &hypre_ComputePkgGrid(compute_pkg));
+   hypre_ComputePkgDataSpace(compute_pkg) = data_space;
+   hypre_ComputePkgNumValues(compute_pkg) = num_values;
+
+   hypre_ComputeInfoDestroy(compute_info);
+
+   *compute_pkg_ptr = compute_pkg;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_InitializeIndtComputations2( hypre_ComputePkg  *compute_pkg,
+                                   HYPRE_Complex     *data,
+                                   hypre_CommHandle **comm_handle_ptr,
+                                   HYPRE_Int          action )
+{
+   hypre_CommPkg *comm_pkg = hypre_ComputePkgCommPkg(compute_pkg);
+
+   hypre_InitializeCommunication(comm_pkg, data, data, action, 0, comm_handle_ptr); // NB: 0 -> MPI tag
+
+   return hypre_error_flag;
+}
+
