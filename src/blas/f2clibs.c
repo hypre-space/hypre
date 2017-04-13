@@ -25,7 +25,7 @@ return(z->i);
 extern VOID sig_die();
 VOID z_div(c, a, b) doublecomplex *a, *b, *c;
 #else
-extern void sig_die(char*, integer);
+extern void sig_die(const char*, integer);
 void z_div(doublecomplex *c, doublecomplex *a, doublecomplex *b)
 #endif
 {
@@ -70,12 +70,9 @@ void z_div(doublecomplex *c, doublecomplex *a, doublecomplex *b)
 void sig_die(s, kill) register char *s; integer kill;
 #else
 #include "stdlib.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
 //  extern void f_exit(void);
 
-  void sig_die(register char *s, integer kill)
+  void sig_die(const char *s, integer kill)
 #endif
   {
     /* print error message, then clear buffers */
@@ -99,7 +96,4 @@ extern "C" {
       exit(1);
     }
   }
-#ifdef __cplusplus
-}
-#endif
 

@@ -1,7 +1,9 @@
+
+#include "../blas/hypre_blas.h"
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int dtrtrs_(char *uplo, char *trans, char *diag, integer *n, 
+/* Subroutine */ HYPRE_Int dtrtrs_(const char *uplo, const char *trans, const char *diag, integer *n, 
 	integer *nrhs, doublereal *a, integer *lda, doublereal *b, integer *
 	ldb, integer *info  	)
 {
@@ -84,7 +86,7 @@
     integer a_dim1, a_offset, b_dim1, b_offset, i__1;
     /* Local variables */
     extern logical lsame_(const char *, const char *);
-    extern /* Subroutine */ HYPRE_Int hypre_dtrsm(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *, const char *, const char *, const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *), xerbla_(
 	    const char *, integer *);
@@ -144,7 +146,7 @@
 
 /*     Solve A * x = b  or  A' * x = b. */
 
-    hypre_dtrsm("Left", uplo, trans, diag, n, nrhs, &c_b12, &a[a_offset], lda, &b[ b_offset], ldb);
+    dtrsm_("Left", uplo, trans, diag, n, nrhs, &c_b12, &a[a_offset], lda, &b[ b_offset], ldb);
 
     return 0;
 

@@ -1,7 +1,7 @@
 #include "hypre_blas.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int ztrsm_(char *side, char *uplo, char *transa, char *diag, 
+/* Subroutine */ HYPRE_Int ztrsm_(const char *side, const char *uplo, const char *transa, const char *diag, 
 	integer *m, integer *n, doublecomplex *alpha, doublecomplex *a, 
 	integer *lda, doublecomplex *b, integer *ldb)
 {
@@ -20,10 +20,10 @@
     static doublecomplex temp;
     static integer i__, j, k;
     static logical lside;
-    extern logical hypre_lsame_(char *, char *);
+    extern logical hypre_lsame_(const char *, const char *);
     static integer nrowa;
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
     static logical noconj, nounit;
 #define a_subscr(a_1,a_2) (a_2)*a_dim1 + a_1
 #define a_ref(a_1,a_2) a[a_subscr(a_1,a_2)]

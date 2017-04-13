@@ -44,7 +44,7 @@ hypre_SysBAMGRelaxCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_SysBAMGRelaxDestroy( void *sys_bamg_relax_vdata )
 {
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = sys_bamg_relax_vdata;
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
 
    if (sys_bamg_relax_data)
    {
@@ -64,7 +64,7 @@ hypre_SysBAMGRelax( void                 *sys_bamg_relax_vdata,
                     hypre_SStructPVector *b,
                     hypre_SStructPVector *x                )
 {
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = sys_bamg_relax_vdata;
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
 
    hypre_NodeRelax((sys_bamg_relax_data -> relax_data), A, b, x);
 
@@ -80,7 +80,7 @@ hypre_SysBAMGRelaxSetup( void                 *sys_bamg_relax_vdata,
                          hypre_SStructPVector *b,
                          hypre_SStructPVector *x                )
 {
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = sys_bamg_relax_vdata;
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
    void                   *relax_data    = (sys_bamg_relax_data -> relax_data);
    HYPRE_Int               relax_type    = (sys_bamg_relax_data -> relax_type);
    HYPRE_Real              jacobi_weight = (sys_bamg_relax_data -> jacobi_weight);
@@ -102,7 +102,7 @@ HYPRE_Int
 hypre_SysBAMGRelaxSetType( void  *sys_bamg_relax_vdata,
                            HYPRE_Int    relax_type       )
 {
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = sys_bamg_relax_vdata;
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
    void                   *relax_data = (sys_bamg_relax_data -> relax_data);
 
    (sys_bamg_relax_data -> relax_type) = relax_type;
@@ -161,7 +161,7 @@ HYPRE_Int
 hypre_SysBAMGRelaxSetJacobiWeight(void  *sys_bamg_relax_vdata,
                                   HYPRE_Real weight)
 {
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = sys_bamg_relax_vdata;
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
                                                                                                                                      
    (sys_bamg_relax_data -> jacobi_weight)    = weight;
 
@@ -174,7 +174,7 @@ hypre_SysBAMGRelaxSetJacobiWeight(void  *sys_bamg_relax_vdata,
 HYPRE_Int
 hypre_SysBAMGRelaxSetPreRelax( void  *sys_bamg_relax_vdata )
 {
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = sys_bamg_relax_vdata;
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
    void                   *relax_data = (sys_bamg_relax_data -> relax_data);
    HYPRE_Int               relax_type = (sys_bamg_relax_data -> relax_type);
 
@@ -201,7 +201,7 @@ hypre_SysBAMGRelaxSetPreRelax( void  *sys_bamg_relax_vdata )
 HYPRE_Int
 hypre_SysBAMGRelaxSetPostRelax( void  *sys_bamg_relax_vdata )
 {
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = sys_bamg_relax_vdata;
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
    void                   *relax_data = (sys_bamg_relax_data -> relax_data);
    HYPRE_Int               relax_type = (sys_bamg_relax_data -> relax_type);
 
@@ -229,7 +229,7 @@ HYPRE_Int
 hypre_SysBAMGRelaxSetTol( void   *sys_bamg_relax_vdata,
                           HYPRE_Real  tol              )
 {
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = sys_bamg_relax_vdata;
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
 
    hypre_NodeRelaxSetTol((sys_bamg_relax_data -> relax_data), tol);
 
@@ -243,7 +243,7 @@ HYPRE_Int
 hypre_SysBAMGRelaxSetMaxIter( void  *sys_bamg_relax_vdata,
                               HYPRE_Int    max_iter         )
 {
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = sys_bamg_relax_vdata;
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
 
    hypre_NodeRelaxSetMaxIter((sys_bamg_relax_data -> relax_data), max_iter);
 
@@ -257,7 +257,7 @@ HYPRE_Int
 hypre_SysBAMGRelaxSetZeroGuess( void  *sys_bamg_relax_vdata,
                                 HYPRE_Int    zero_guess       )
 {
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = sys_bamg_relax_vdata;
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
 
    hypre_NodeRelaxSetZeroGuess((sys_bamg_relax_data -> relax_data), zero_guess);
 
@@ -271,7 +271,7 @@ HYPRE_Int
 hypre_SysBAMGRelaxSetTempVec( void               *sys_bamg_relax_vdata,
                               hypre_SStructPVector *t                )
 {
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = sys_bamg_relax_vdata;
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
 
    hypre_NodeRelaxSetTempVec((sys_bamg_relax_data -> relax_data), t);
 

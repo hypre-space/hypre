@@ -46,7 +46,6 @@ BLAS_FILES = \
   dznrm2.c \
   f2clibs.c \
   idamax.c \
-  xerbla.c \
   zcopy.c \
   zdscal.c \
   zgemm.c \

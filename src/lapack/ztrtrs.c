@@ -2,7 +2,7 @@
 #include "hypre_lapack.h"
 #include "f2c.h"
 
-/* Subroutine */ HYPRE_Int ztrtrs_(char *uplo, char *trans, char *diag, integer *n, 
+/* Subroutine */ HYPRE_Int ztrtrs_(const char *uplo, const char *trans, const char *diag, integer *n, 
 	integer *nrhs, doublecomplex *a, integer *lda, doublecomplex *b, 
 	integer *ldb, integer *info)
 {
@@ -86,7 +86,7 @@
     integer a_dim1, a_offset, b_dim1, b_offset, i__1, i__2;
     /* Local variables */
     extern logical lsame_(const char *, const char *);
-    extern /* Subroutine */ HYPRE_Int ztrsm_(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int ztrsm_(const char *, const char *, const char *, const char *, 
 	    integer *, integer *, doublecomplex *, doublecomplex *, integer *,
 	     doublecomplex *, integer *), 
 	    xerbla_(const char *, integer *);

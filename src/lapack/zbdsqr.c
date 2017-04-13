@@ -48,7 +48,7 @@ static doublereal c_b72 = -1.;
     static integer maxit;
     static doublereal sminl, sigmx;
     static logical lower;
-    extern /* Subroutine */ HYPRE_Int zlasr_(char *, char *, char *, integer *, 
+    extern /* Subroutine */ HYPRE_Int zlasr_(const char *, const char *, const char *, integer *, 
 	    integer *, doublereal *, doublereal *, doublecomplex *, integer *), zdrot_(integer *, doublecomplex *, 
 	    integer *, doublecomplex *, integer *, doublereal *, doublereal *)
 	    , zswap_(integer *, doublecomplex *, integer *, doublecomplex *, 

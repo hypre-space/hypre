@@ -104,12 +104,12 @@
     /* Local variables */
     static integer i__, j;
     extern logical lsame_(const char *, const char *);
-    extern /* Subroutine */ HYPRE_Int zgemm_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int zgemm_(const char *, const char *, integer *, integer *, 
 	    integer *, doublecomplex *, doublecomplex *, integer *, 
 	    doublecomplex *, integer *, doublecomplex *, doublecomplex *, 
 	    integer *), zcopy_(integer *, doublecomplex *, 
-	    integer *, doublecomplex *, integer *), ztrmm_(char *, char *, 
-	    char *, char *, integer *, integer *, doublecomplex *, 
+	    integer *, doublecomplex *, integer *), ztrmm_(const char *, const char *, 
+	    const char *, const char *, integer *, integer *, doublecomplex *, 
 	    doublecomplex *, integer *, doublecomplex *, integer *), zlacgv_(integer *, doublecomplex *, 
 	    integer *);
     static char transt[1];

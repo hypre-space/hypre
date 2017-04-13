@@ -22,9 +22,7 @@
 #define PrintComplex( s, x, t ) hypre_printf("%s%12.3e%s", s, x, t);
 #endif
 
-#if DEBUG_SYSBAMG > 0
 #include <time.h>
-#endif
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -623,9 +621,7 @@ HYPRE_Int hypre_SVD
   HYPRE_Complex*  work  = (HYPRE_Complex*) hypre_TAlloc(HYPRE_Complex, lwork);
   HYPRE_Int       info;
 
-#if DEBUG_SYSBAMG > 0
   time_t t_init = time(NULL);
-#endif
   sysbamg_dbgmsg("hypre_xgebrd starting ...\n");
 
   // NB: R and Q (via reflectors) are written to M
@@ -840,7 +836,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
   hypre_Index             DataBoxSize;
 
   HYPRE_Int               BoxIdx = 0;   // XXX hard-wired* should loop over boxes* XXX
-  HYPRE_Int               I, J, i, j, k, si;
+  HYPRE_Int               I, J, i, k, si;
   hypre_IndexRef          start;
   hypre_Index             stride;
   hypre_Index             iIndex, jIndex;
@@ -982,6 +978,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs
   hypre_SStructPVector* AV;
   hypre_SStructPGrid*   PGrid = hypre_SStructPVectorPGrid( svecs[0] );
   MPI_Comm              Comm  = hypre_SStructPGridComm( PGrid );
+  HYPRE_Int             j;
 
   hypre_SStructPVectorCreate( Comm, PGrid, &AV );
   hypre_SStructPVectorInitialize( AV );

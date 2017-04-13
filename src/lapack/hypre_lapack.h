@@ -299,7 +299,7 @@ HYPRE_Int dsytd2_ (const char *uplo , integer *n , doublereal *a , integer *lda 
 HYPRE_Int dsytrd_ (const char *uplo , integer *n , doublereal *a , integer *lda , doublereal *d__ , doublereal *e , doublereal *tau , doublereal *work , integer *lwork , integer *info );
 
 /* dtrtrs.c */
-HYPRE_Int dtrtrs_(char *uplo, char *trans, char *diag, integer *n, integer *nrhs, doublereal *a, integer *lda, doublereal *b, integer * ldb, integer *info );
+HYPRE_Int dtrtrs_(const char *uplo, const char *trans, const char *diag, integer *n, integer *nrhs, doublereal *a, integer *lda, doublereal *b, integer * ldb, integer *info );
 
 
 /* ieeeck.c */
@@ -376,7 +376,7 @@ HYPRE_Int zgebrd_(integer *m, integer *n, doublecomplex *a, integer *lda, double
 HYPRE_Int zgeqrf_(integer *m, integer *n, doublecomplex *a, integer *lda, doublecomplex *tau, doublecomplex *work, integer *lwork, integer *info);
 
 /* ztrtrs.c */
-HYPRE_Int ztrtrs_(char *uplo, char *trans, char *diag, integer *n, integer *nrhs, doublecomplex *a, integer *lda, doublecomplex *b, integer *ldb, integer *info);
+HYPRE_Int ztrtrs_(const char *uplo, const char *trans, const char *diag, integer *n, integer *nrhs, doublecomplex *a, integer *lda, doublecomplex *b, integer *ldb, integer *info);
 
 /* zunmbr.c */
 HYPRE_Int zunmbr_(char *vect, char *side, char *trans, integer *m, integer *n, integer *k, doublecomplex *a, integer *lda, doublecomplex *tau, doublecomplex *c__, integer *ldc, doublecomplex *work, integer * lwork, integer *info);

@@ -4373,10 +4373,10 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 }
 
 
-HYPRE_Int gselim(A,x,n)
-HYPRE_Complex *A;
-HYPRE_Complex *x;
-HYPRE_Int n;
+HYPRE_Int
+gselim(HYPRE_Complex *A,
+       HYPRE_Complex *x,
+       HYPRE_Int n)
 {
    HYPRE_Int    err_flag = 0;
    HYPRE_Int    j,k,m;

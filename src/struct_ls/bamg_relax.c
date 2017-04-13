@@ -47,7 +47,7 @@ hypre_BAMGRelaxCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_BAMGRelaxDestroy( void *bamg_relax_vdata )
 {
-   hypre_BAMGRelaxData *bamg_relax_data = bamg_relax_vdata;
+   hypre_BAMGRelaxData *bamg_relax_data = (hypre_BAMGRelaxData *)bamg_relax_vdata;
 
    if (bamg_relax_data)
    {
@@ -68,7 +68,7 @@ hypre_BAMGRelax( void               *bamg_relax_vdata,
                  hypre_StructVector *b,
                  hypre_StructVector *x                )
 {
-   hypre_BAMGRelaxData *bamg_relax_data = bamg_relax_vdata;
+   hypre_BAMGRelaxData *bamg_relax_data = (hypre_BAMGRelaxData *)bamg_relax_vdata;
    HYPRE_Int    relax_type = (bamg_relax_data -> relax_type);
    HYPRE_Int    constant_coefficient= hypre_StructMatrixConstantCoefficient(A);
 
@@ -105,7 +105,7 @@ hypre_BAMGRelaxSetup( void               *bamg_relax_vdata,
                       hypre_StructVector *b,
                       hypre_StructVector *x                )
 {
-   hypre_BAMGRelaxData *bamg_relax_data  = bamg_relax_vdata;
+   hypre_BAMGRelaxData *bamg_relax_data  = (hypre_BAMGRelaxData *)bamg_relax_vdata;
    HYPRE_Int            relax_type       = (bamg_relax_data -> relax_type);
    HYPRE_Real           jacobi_weight    = (bamg_relax_data -> jacobi_weight); 
 
@@ -136,7 +136,7 @@ HYPRE_Int
 hypre_BAMGRelaxSetType( void  *bamg_relax_vdata,
                         HYPRE_Int    relax_type       )
 {
-   hypre_BAMGRelaxData *bamg_relax_data = bamg_relax_vdata;
+   hypre_BAMGRelaxData *bamg_relax_data = (hypre_BAMGRelaxData *)bamg_relax_vdata;
    void                *relax_data = (bamg_relax_data -> relax_data);
 
    (bamg_relax_data -> relax_type) = relax_type;
@@ -172,7 +172,7 @@ HYPRE_Int
 hypre_BAMGRelaxSetJacobiWeight(void  *bamg_relax_vdata,
                                HYPRE_Real weight) 
 {
-   hypre_BAMGRelaxData *bamg_relax_data = bamg_relax_vdata;
+   hypre_BAMGRelaxData *bamg_relax_data = (hypre_BAMGRelaxData *)bamg_relax_vdata;
 
    (bamg_relax_data -> jacobi_weight)    = weight;
 
@@ -185,7 +185,7 @@ hypre_BAMGRelaxSetJacobiWeight(void  *bamg_relax_vdata,
 HYPRE_Int
 hypre_BAMGRelaxSetPreRelax( void  *bamg_relax_vdata )
 {
-   hypre_BAMGRelaxData *bamg_relax_data = bamg_relax_vdata;
+   hypre_BAMGRelaxData *bamg_relax_data = (hypre_BAMGRelaxData *)bamg_relax_vdata;
    HYPRE_Int            relax_type = (bamg_relax_data -> relax_type);
 
    switch(relax_type)
@@ -212,7 +212,7 @@ hypre_BAMGRelaxSetPreRelax( void  *bamg_relax_vdata )
 HYPRE_Int
 hypre_BAMGRelaxSetPostRelax( void  *bamg_relax_vdata )
 {
-   hypre_BAMGRelaxData *bamg_relax_data = bamg_relax_vdata;
+   hypre_BAMGRelaxData *bamg_relax_data = (hypre_BAMGRelaxData *)bamg_relax_vdata;
    HYPRE_Int            relax_type = (bamg_relax_data -> relax_type);
 
    switch(relax_type)
@@ -240,7 +240,7 @@ HYPRE_Int
 hypre_BAMGRelaxSetTol( void   *bamg_relax_vdata,
                        HYPRE_Real  tol              )
 {
-   hypre_BAMGRelaxData *bamg_relax_data = bamg_relax_vdata;
+   hypre_BAMGRelaxData *bamg_relax_data = (hypre_BAMGRelaxData *)bamg_relax_vdata;
 
    hypre_PointRelaxSetTol((bamg_relax_data -> relax_data), tol);
    hypre_RedBlackGSSetTol((bamg_relax_data -> rb_relax_data), tol);
@@ -255,7 +255,7 @@ HYPRE_Int
 hypre_BAMGRelaxSetMaxIter( void  *bamg_relax_vdata,
                            HYPRE_Int    max_iter         )
 {
-   hypre_BAMGRelaxData *bamg_relax_data = bamg_relax_vdata;
+   hypre_BAMGRelaxData *bamg_relax_data = (hypre_BAMGRelaxData *)bamg_relax_vdata;
 
    hypre_PointRelaxSetMaxIter((bamg_relax_data -> relax_data), max_iter);
    hypre_RedBlackGSSetMaxIter((bamg_relax_data -> rb_relax_data), max_iter);
@@ -270,7 +270,7 @@ HYPRE_Int
 hypre_BAMGRelaxSetZeroGuess( void  *bamg_relax_vdata,
                              HYPRE_Int    zero_guess       )
 {
-   hypre_BAMGRelaxData *bamg_relax_data = bamg_relax_vdata;
+   hypre_BAMGRelaxData *bamg_relax_data = (hypre_BAMGRelaxData *)bamg_relax_vdata;
 
    hypre_PointRelaxSetZeroGuess((bamg_relax_data -> relax_data), zero_guess);
    hypre_RedBlackGSSetZeroGuess((bamg_relax_data -> rb_relax_data), zero_guess);
@@ -285,7 +285,7 @@ HYPRE_Int
 hypre_BAMGRelaxSetTempVec( void               *bamg_relax_vdata,
                            hypre_StructVector *t                )
 {
-   hypre_BAMGRelaxData *bamg_relax_data = bamg_relax_vdata;
+   hypre_BAMGRelaxData *bamg_relax_data = (hypre_BAMGRelaxData *)bamg_relax_vdata;
 
    hypre_PointRelaxSetTempVec((bamg_relax_data -> relax_data), t);
 

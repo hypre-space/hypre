@@ -127,13 +127,13 @@
     extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *, const char *, const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int zlarfb_(char *, char *, char *, char *, 
+    extern /* Subroutine */ HYPRE_Int zlarfb_(const char *, const char *, const char *, const char *, 
 	    integer *, integer *, integer *, doublecomplex *, integer *, 
 	    doublecomplex *, integer *, doublecomplex *, integer *, 
 	    doublecomplex *, integer *);
     static logical notran;
     static integer ldwork;
-    extern /* Subroutine */ HYPRE_Int zlarft_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int zlarft_(const char *, const char *, integer *, integer *, 
 	    doublecomplex *, integer *, doublecomplex *, doublecomplex *, 
 	    integer *);
     static char transt[1];

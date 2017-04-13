@@ -152,7 +152,7 @@
     doublecomplex z__1;
     /* Local variables */
     static integer i__, j, nbmin, iinfo, minmn;
-    extern /* Subroutine */ HYPRE_Int zgemm_(char *, char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int zgemm_(const char *, const char *, integer *, integer *, 
 	    integer *, doublecomplex *, doublecomplex *, integer *, 
 	    doublecomplex *, integer *, doublecomplex *, doublecomplex *, 
 	    integer *), zgebd2_(integer *, integer *, 

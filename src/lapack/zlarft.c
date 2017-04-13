@@ -116,10 +116,10 @@
     /* Local variables */
     static integer i__, j;
     extern logical lsame_(const char *, const char *);
-    extern /* Subroutine */ HYPRE_Int zgemv_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int zgemv_(const char *, integer *, integer *, 
 	    doublecomplex *, doublecomplex *, integer *, doublecomplex *, 
 	    integer *, doublecomplex *, doublecomplex *, integer *), 
-	    ztrmv_(char *, char *, char *, integer *, doublecomplex *, 
+	    ztrmv_(const char *, const char *, const char *, integer *, doublecomplex *, 
 	    integer *, doublecomplex *, integer *), 
 	    zlacgv_(integer *, doublecomplex *, integer *);
     static doublecomplex vii;

@@ -62,7 +62,7 @@ hypre_SysBAMGCreate( MPI_Comm  comm )
 
 HYPRE_Int hypre_SysBAMGDestroy( void *sys_bamg_vdata )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   HYPRE_Int l;
 
@@ -132,7 +132,7 @@ HYPRE_Int hypre_SysBAMGDestroy( void *sys_bamg_vdata )
 hypre_SysBAMGSetTol( void   *sys_bamg_vdata,
     HYPRE_Real  tol       )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> tol) = tol;
 
@@ -146,7 +146,7 @@ hypre_SysBAMGSetTol( void   *sys_bamg_vdata,
 hypre_SysBAMGSetMaxIter( void *sys_bamg_vdata,
     HYPRE_Int   max_iter  )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> max_iter) = max_iter;
 
@@ -160,7 +160,7 @@ hypre_SysBAMGSetMaxIter( void *sys_bamg_vdata,
 hypre_SysBAMGSetRelChange( void *sys_bamg_vdata,
     HYPRE_Int   rel_change  )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> rel_change) = rel_change;
 
@@ -174,7 +174,7 @@ hypre_SysBAMGSetRelChange( void *sys_bamg_vdata,
 hypre_SysBAMGSetZeroGuess( void *sys_bamg_vdata,
     HYPRE_Int   zero_guess )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> zero_guess) = zero_guess;
 
@@ -188,7 +188,7 @@ hypre_SysBAMGSetZeroGuess( void *sys_bamg_vdata,
 hypre_SysBAMGSetRelaxType( void *sys_bamg_vdata,
     HYPRE_Int   relax_type )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> relax_type) = relax_type;
 
@@ -201,7 +201,7 @@ hypre_SysBAMGSetRelaxType( void *sys_bamg_vdata,
 hypre_SysBAMGSetJacobiWeight( void  *sys_bamg_vdata,
     HYPRE_Real weight )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> jacobi_weight)    = weight;
   (sys_bamg_data -> usr_jacobi_weight)= 1;
@@ -216,7 +216,7 @@ hypre_SysBAMGSetJacobiWeight( void  *sys_bamg_vdata,
 hypre_SysBAMGSetNumPreRelax( void *sys_bamg_vdata,
     HYPRE_Int   num_pre_relax )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> num_pre_relax) = num_pre_relax;
 
@@ -230,7 +230,7 @@ hypre_SysBAMGSetNumPreRelax( void *sys_bamg_vdata,
 hypre_SysBAMGSetNumPostRelax( void *sys_bamg_vdata,
     HYPRE_Int   num_post_relax )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> num_post_relax) = num_post_relax;
 
@@ -242,7 +242,7 @@ hypre_SysBAMGSetNumPostRelax( void *sys_bamg_vdata,
 
 HYPRE_Int hypre_SysBAMGSetNumRTV( void *bamg_vdata, HYPRE_Int num_rtv )
 {
-  hypre_SysBAMGData *bamg_data = bamg_vdata;
+  hypre_SysBAMGData *bamg_data = (hypre_SysBAMGData *)bamg_vdata;
 
   (bamg_data -> num_rtv) = num_rtv;
 
@@ -251,7 +251,7 @@ HYPRE_Int hypre_SysBAMGSetNumRTV( void *bamg_vdata, HYPRE_Int num_rtv )
 
 HYPRE_Int hypre_SysBAMGGetNumRTV( void *bamg_vdata, HYPRE_Int *num_rtv )
 {
-  hypre_SysBAMGData *bamg_data = bamg_vdata;
+  hypre_SysBAMGData *bamg_data = (hypre_SysBAMGData *)bamg_vdata;
 
   *num_rtv = (bamg_data -> num_rtv);
 
@@ -260,7 +260,7 @@ HYPRE_Int hypre_SysBAMGGetNumRTV( void *bamg_vdata, HYPRE_Int *num_rtv )
 
 HYPRE_Int hypre_SysBAMGSetNumSTV( void *bamg_vdata, HYPRE_Int num_stv )
 {
-  hypre_SysBAMGData *bamg_data = bamg_vdata;
+  hypre_SysBAMGData *bamg_data = (hypre_SysBAMGData *)bamg_vdata;
 
   (bamg_data -> num_stv) = num_stv;
 
@@ -269,7 +269,7 @@ HYPRE_Int hypre_SysBAMGSetNumSTV( void *bamg_vdata, HYPRE_Int num_stv )
 
 HYPRE_Int hypre_SysBAMGGetNumSTV( void *bamg_vdata, HYPRE_Int *num_stv )
 {
-  hypre_SysBAMGData *bamg_data = bamg_vdata;
+  hypre_SysBAMGData *bamg_data = (hypre_SysBAMGData *)bamg_vdata;
 
   *num_stv = (bamg_data -> num_stv);
 
@@ -281,7 +281,7 @@ HYPRE_Int hypre_SysBAMGGetNumSTV( void *bamg_vdata, HYPRE_Int *num_stv )
 
 HYPRE_Int hypre_SysBAMGSetNumPreRelaxTV( void *bamg_vdata, HYPRE_Int num_pre_relax_tv )
 {
-  hypre_SysBAMGData *bamg_data = bamg_vdata;
+  hypre_SysBAMGData *bamg_data = (hypre_SysBAMGData *)bamg_vdata;
 
   (bamg_data -> num_pre_relax_tv) = num_pre_relax_tv;
 
@@ -290,7 +290,7 @@ HYPRE_Int hypre_SysBAMGSetNumPreRelaxTV( void *bamg_vdata, HYPRE_Int num_pre_rel
 
 HYPRE_Int hypre_SysBAMGGetNumPreRelaxTV( void *bamg_vdata, HYPRE_Int *num_pre_relax_tv )
 {
-  hypre_SysBAMGData *bamg_data = bamg_vdata;
+  hypre_SysBAMGData *bamg_data = (hypre_SysBAMGData *)bamg_vdata;
 
   *num_pre_relax_tv = (bamg_data -> num_pre_relax_tv);
 
@@ -299,7 +299,7 @@ HYPRE_Int hypre_SysBAMGGetNumPreRelaxTV( void *bamg_vdata, HYPRE_Int *num_pre_re
 
 HYPRE_Int hypre_SysBAMGSetNumPostRelaxTV( void *bamg_vdata, HYPRE_Int num_post_relax_tv )
 {
-  hypre_SysBAMGData *bamg_data = bamg_vdata;
+  hypre_SysBAMGData *bamg_data = (hypre_SysBAMGData *)bamg_vdata;
 
   (bamg_data -> num_post_relax_tv) = num_post_relax_tv;
 
@@ -308,7 +308,7 @@ HYPRE_Int hypre_SysBAMGSetNumPostRelaxTV( void *bamg_vdata, HYPRE_Int num_post_r
 
 HYPRE_Int hypre_SysBAMGGetNumPostRelaxTV( void *bamg_vdata, HYPRE_Int *num_post_relax_tv )
 {
-  hypre_SysBAMGData *bamg_data = bamg_vdata;
+  hypre_SysBAMGData *bamg_data = (hypre_SysBAMGData *)bamg_vdata;
 
   *num_post_relax_tv = (bamg_data -> num_post_relax_tv);
 
@@ -320,7 +320,7 @@ HYPRE_Int hypre_SysBAMGGetNumPostRelaxTV( void *bamg_vdata, HYPRE_Int *num_post_
 
 HYPRE_Int hypre_SysBAMGSetNumRefine( void *bamg_vdata, HYPRE_Int num_refine )
 {
-  hypre_SysBAMGData *bamg_data = bamg_vdata;
+  hypre_SysBAMGData *bamg_data = (hypre_SysBAMGData *)bamg_vdata;
 
   (bamg_data -> num_refine) = num_refine;
 
@@ -329,7 +329,7 @@ HYPRE_Int hypre_SysBAMGSetNumRefine( void *bamg_vdata, HYPRE_Int num_refine )
 
 HYPRE_Int hypre_SysBAMGGetNumRefine( void *bamg_vdata, HYPRE_Int *num_refine )
 {
-  hypre_SysBAMGData *bamg_data = bamg_vdata;
+  hypre_SysBAMGData *bamg_data = (hypre_SysBAMGData *)bamg_vdata;
 
   *num_refine = (bamg_data -> num_refine);
 
@@ -343,7 +343,7 @@ HYPRE_Int hypre_SysBAMGGetNumRefine( void *bamg_vdata, HYPRE_Int *num_refine )
 hypre_SysBAMGSetSkipRelax( void *sys_bamg_vdata,
     HYPRE_Int  skip_relax )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> skip_relax) = skip_relax;
 
@@ -357,7 +357,7 @@ hypre_SysBAMGSetSkipRelax( void *sys_bamg_vdata,
 hypre_SysBAMGSetDxyz( void   *sys_bamg_vdata,
     HYPRE_Real *dxyz       )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> dxyz[0]) = dxyz[0];
   (sys_bamg_data -> dxyz[1]) = dxyz[1];
@@ -373,7 +373,7 @@ hypre_SysBAMGSetDxyz( void   *sys_bamg_vdata,
 hypre_SysBAMGSetLogging( void *sys_bamg_vdata,
     HYPRE_Int   logging)
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> logging) = logging;
 
@@ -387,7 +387,7 @@ hypre_SysBAMGSetLogging( void *sys_bamg_vdata,
 hypre_SysBAMGSetPrintLevel( void *sys_bamg_vdata,
     HYPRE_Int   print_level)
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   (sys_bamg_data -> print_level) = print_level;
 
@@ -401,7 +401,7 @@ hypre_SysBAMGSetPrintLevel( void *sys_bamg_vdata,
 hypre_SysBAMGGetNumIterations( void *sys_bamg_vdata,
     HYPRE_Int  *num_iterations )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   *num_iterations = (sys_bamg_data -> num_iterations);
 
@@ -415,7 +415,7 @@ hypre_SysBAMGGetNumIterations( void *sys_bamg_vdata,
 hypre_SysBAMGPrintLogging( void *sys_bamg_vdata,
     HYPRE_Int   myid)
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
   HYPRE_Int          i;
   HYPRE_Int          num_iterations  = (sys_bamg_data -> num_iterations);
   HYPRE_Int          logging   = (sys_bamg_data -> logging);
@@ -448,7 +448,7 @@ hypre_SysBAMGPrintLogging( void *sys_bamg_vdata,
 hypre_SysBAMGGetFinalRelativeResidualNorm( void   *sys_bamg_vdata,
     HYPRE_Real *relative_residual_norm )
 {
-  hypre_SysBAMGData *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   HYPRE_Int          max_iter        = (sys_bamg_data -> max_iter);
   HYPRE_Int          num_iterations  = (sys_bamg_data -> num_iterations);

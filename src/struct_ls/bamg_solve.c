@@ -38,7 +38,7 @@ hypre_BAMGSolve( void               *bamg_vdata,
                  hypre_StructVector *b,
                  hypre_StructVector *x         )
 {
-   hypre_BAMGData       *bamg_data = bamg_vdata;
+   hypre_BAMGData       *bamg_data = (hypre_BAMGData *)bamg_vdata;
 
    HYPRE_Real            tol             = (bamg_data -> tol);
    HYPRE_Int             max_iter        = (bamg_data -> max_iter);

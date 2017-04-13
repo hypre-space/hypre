@@ -78,7 +78,7 @@
     /* Local variables */
     static integer i__, k;
     static doublecomplex alpha;
-    extern /* Subroutine */ HYPRE_Int zlarf_(char *, integer *, integer *, 
+    extern /* Subroutine */ HYPRE_Int zlarf_(const char *, integer *, integer *, 
 	    doublecomplex *, integer *, doublecomplex *, doublecomplex *, 
 	    integer *, doublecomplex *), xerbla_(const char *, integer *), zlarfg_(integer *, doublecomplex *, doublecomplex *, 
 	    integer *, doublecomplex *);

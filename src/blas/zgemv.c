@@ -15,9 +15,9 @@
     static integer info;
     static doublecomplex temp;
     static integer lenx, leny, i__, j;
-    extern logical hypre_lsame_(char *, char *);
+    extern logical hypre_lsame_(const char *, const char *);
     static integer ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
     static logical noconj;
 #define a_subscr(a_1,a_2) (a_2)*a_dim1 + a_1
 #define a_ref(a_1,a_2) a[a_subscr(a_1,a_2)]

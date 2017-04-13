@@ -79,7 +79,7 @@ HYPRE_Int hypre_SysBAMGSetup
   hypre_SStructVector*    x_in
 )
 {
-  hypre_SysBAMGData*      data              = sys_bamg_vdata;
+  hypre_SysBAMGData*      data              = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   MPI_Comm                comm              = (data->comm);
 

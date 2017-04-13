@@ -24,7 +24,7 @@ hypre_SysBAMGSolve( void                 *sys_bamg_vdata,
     hypre_SStructVector  *b_in,
     hypre_SStructVector  *x_in         )
 {
-  hypre_SysBAMGData       *sys_bamg_data = sys_bamg_vdata;
+  hypre_SysBAMGData       *sys_bamg_data = (hypre_SysBAMGData *)sys_bamg_vdata;
 
   hypre_SStructPMatrix *A;
   hypre_SStructPVector *b;

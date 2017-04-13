@@ -26,7 +26,7 @@ HYPRE_Int hypre_BAMGSetup(
     hypre_StructVector *b,
     hypre_StructVector *x)
 {
-  hypre_BAMGData       *bamg_data = bamg_vdata;
+  hypre_BAMGData       *bamg_data = (hypre_BAMGData *)bamg_vdata;
 
   MPI_Comm              comm = (bamg_data -> comm);
 

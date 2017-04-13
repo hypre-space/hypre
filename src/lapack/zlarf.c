@@ -81,7 +81,7 @@
     extern logical lsame_(const char *, const char *);
     extern /* Subroutine */ HYPRE_Int zgerc_(integer *, integer *, doublecomplex *, 
 	    doublecomplex *, integer *, doublecomplex *, integer *, 
-	    doublecomplex *, integer *), zgemv_(char *, integer *, integer *, 
+	    doublecomplex *, integer *), zgemv_(const char *, integer *, integer *, 
 	    doublecomplex *, doublecomplex *, integer *, doublecomplex *, 
 	    integer *, doublecomplex *, doublecomplex *, integer *);
 

@@ -152,7 +152,7 @@
     static integer i__;
     static doublecomplex alpha;
     extern /* Subroutine */ HYPRE_Int zscal_(integer *, doublecomplex *, 
-	    doublecomplex *, integer *), zgemv_(char *, integer *, integer *, 
+	    doublecomplex *, integer *), zgemv_(const char *, integer *, integer *, 
 	    doublecomplex *, doublecomplex *, integer *, doublecomplex *, 
 	    integer *, doublecomplex *, doublecomplex *, integer *), 
 	    zlarfg_(integer *, doublecomplex *, doublecomplex *, integer *, 

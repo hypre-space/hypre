@@ -19,9 +19,9 @@
     static integer i__, j, l;
     static logical conja, conjb;
     //static integer ncola;
-    extern logical hypre_lsame_(char *, char *);
+    extern logical hypre_lsame_(const char *, const char *);
     static integer nrowa, nrowb;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(char *, integer *);
+    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
 #define a_subscr(a_1,a_2) (a_2)*a_dim1 + a_1
 #define a_ref(a_1,a_2) a[a_subscr(a_1,a_2)]
 #define b_subscr(a_1,a_2) (a_2)*b_dim1 + a_1

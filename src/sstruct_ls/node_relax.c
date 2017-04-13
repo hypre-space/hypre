@@ -118,7 +118,7 @@ hypre_NodeRelaxCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_NodeRelaxDestroy( void *relax_vdata )
 {
-   hypre_NodeRelaxData  *relax_data = relax_vdata;
+   hypre_NodeRelaxData  *relax_data = (hypre_NodeRelaxData *)relax_vdata;
    HYPRE_Int             i,vi;
    HYPRE_Int             nvars;
 

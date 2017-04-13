@@ -216,7 +216,7 @@ HYPRE_Int
 hypre_SysPFMGSetRAPType( void *sys_pfmg_vdata,
                          HYPRE_Int   rap_type )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    (sys_pfmg_data -> rap_type) = rap_type;
  
@@ -227,7 +227,7 @@ HYPRE_Int
 hypre_SysPFMGGetRAPType( void *sys_pfmg_vdata,
                          HYPRE_Int * rap_type )
 {
-   hypre_SysPFMGData *sys_pfmg_data = sys_pfmg_vdata;
+   hypre_SysPFMGData *sys_pfmg_data = (hypre_SysPFMGData *)sys_pfmg_vdata;
  
    *rap_type = (sys_pfmg_data -> rap_type);
  
