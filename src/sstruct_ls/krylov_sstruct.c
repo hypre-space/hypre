@@ -207,11 +207,11 @@ hypre_SStructKrylovMatvecDestroy( void *matvec_data )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Real
+HYPRE_Complex
 hypre_SStructKrylovInnerProd( void *x, 
                               void *y )
 {
-   HYPRE_Real result;
+   HYPRE_Complex result;
 
    hypre_SStructInnerProd( (hypre_SStructVector *) x,
                            (hypre_SStructVector *) y, &result );

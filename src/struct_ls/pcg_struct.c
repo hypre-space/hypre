@@ -134,7 +134,7 @@ hypre_StructKrylovMatvecDestroy( void *matvec_data )
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-HYPRE_Real
+HYPRE_Complex
 hypre_StructKrylovInnerProd( void *x, 
                              void *y )
 {

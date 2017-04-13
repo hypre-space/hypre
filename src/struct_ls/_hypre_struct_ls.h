@@ -347,7 +347,7 @@ HYPRE_Int hypre_StructKrylovDestroyVector ( void *vvector );
 void *hypre_StructKrylovMatvecCreate ( void *A , void *x );
 HYPRE_Int hypre_StructKrylovMatvec ( void *matvec_data , HYPRE_Complex alpha , void *A , void *x , HYPRE_Complex beta , void *y );
 HYPRE_Int hypre_StructKrylovMatvecDestroy ( void *matvec_data );
-HYPRE_Real hypre_StructKrylovInnerProd ( void *x , void *y );
+HYPRE_Complex hypre_StructKrylovInnerProd ( void *x , void *y );
 HYPRE_Int hypre_StructKrylovCopyVector ( void *x , void *y );
 HYPRE_Int hypre_StructKrylovClearVector ( void *x );
 HYPRE_Int hypre_StructKrylovScaleVector ( HYPRE_Complex alpha , void *x );
