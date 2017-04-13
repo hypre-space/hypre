@@ -363,22 +363,6 @@ hypre_F90_IFACE(hypre_structbamggetskiprelax, HYPRE_STRUCTBAMGGETSKIPRELAX)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructBAMGSetDxyz
- *--------------------------------------------------------------------------*/
-
-void
-hypre_F90_IFACE(hypre_structbamgsetdxyz, HYPRE_STRUCTBAMGSETDXYZ)
-   ( hypre_F90_Obj *solver,
-     hypre_F90_RealArray *dxyz,
-     hypre_F90_Int *ierr   )
-{
-   *ierr = (hypre_F90_Int)
-      ( HYPRE_StructBAMGSetDxyz(
-           hypre_F90_PassObj (HYPRE_StructSolver, solver),
-           hypre_F90_PassRealArray (dxyz)   ) );
-}
-
-/*--------------------------------------------------------------------------
  * HYPRE_StructBAMGSetLogging, HYPRE_StructBAMGGetLogging
  *--------------------------------------------------------------------------*/
 

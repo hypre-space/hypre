@@ -196,7 +196,6 @@ list (APPEND HYPRE_SOURCES
   lapack/zlarft.c
   lapack/zlasr.c
   lapack/ztrtrs.c
-  lapack/zungqr.c
   lapack/zunm2r.c
   lapack/zunmbr.c
   lapack/zunml2.c

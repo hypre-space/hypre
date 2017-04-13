@@ -108,7 +108,6 @@ LAPACK_FILES = \
   zlarft.c \
   zlasr.c \
   ztrtrs.c \
-  zungqr.c \
   zunm2r.c \
   zunmbr.c \
   zunml2.c \

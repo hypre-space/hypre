@@ -112,7 +112,7 @@ extern "C" {
 #define zgebrd_  hypre_zgebrd
 #define zgeqrf_  hypre_zgeqrf
 #define ztrtrs_  hypre_ztrtrs
-#define zungqr_  hypre_zungqr
+/* RDF: Not sure why we need this... #define zungqr_  hypre_zungqr */
 #define zunmbr_  hypre_zunmbr
 #define zunmqr_  hypre_zunmqr
 #define zunmlq_  hypre_zunmlq
