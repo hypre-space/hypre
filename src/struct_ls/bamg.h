@@ -90,19 +90,19 @@ typedef struct
 } hypre_BAMGData;
 
 
-#define hypre_index2rank(indexRAP, rank, dim) \
-{ \
-  HYPRE_Int d, s; \
-  rank = 0; \
-  for ( d = 0, s = 1; d < dim; d++, s*=3 ) \
-    rank += (hypre_IndexD(indexRAP,d)+1) * s; \
+#define hypre_index2rank(indexRAP, rank, dim)        \
+{                                                    \
+   HYPRE_Int d, s;                                   \
+   rank = 0;                                         \
+   for ( d = 0, s = 1; d < dim; d++, s*=3 )          \
+      rank += (hypre_IndexD(indexRAP,d)+1) * s;      \
 }
 
-#define hypre_rank2index(rank, indexRAP, dim) \
-{ \
-  HYPRE_Int d, s; \
-  for ( d = 0, s = 1; d < dim; d++, s*=3 ) \
-    hypre_IndexD(indexRAP,d) = ( rank % (3*s) ) / s - 1; \
+#define hypre_rank2index(rank, indexRAP, dim)                \
+{                                                            \
+   HYPRE_Int d, s;                                           \
+   for ( d = 0, s = 1; d < dim; d++, s*=3 )                  \
+      hypre_IndexD(indexRAP,d) = ( rank % (3*s) ) / s - 1;   \
 }
 
 #endif

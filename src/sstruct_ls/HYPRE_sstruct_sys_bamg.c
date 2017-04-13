@@ -57,9 +57,9 @@ HYPRE_SStructSysBAMGSolve( HYPRE_SStructSolver solver,
                            HYPRE_SStructVector x      )
 {
    return( hypre_SysBAMGSolve( (void *) solver,
-                            (hypre_SStructMatrix *) A,
-                            (hypre_SStructVector *) b,
-                            (hypre_SStructVector *) x ) );
+                               (hypre_SStructMatrix *) A,
+                               (hypre_SStructVector *) b,
+                               (hypre_SStructVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -165,7 +165,7 @@ HYPRE_SStructSysBAMGSetSkipRelax( HYPRE_SStructSolver solver,
 
 HYPRE_Int
 HYPRE_SStructSysBAMGSetDxyz( HYPRE_SStructSolver  solver,
-                         HYPRE_Real         *dxyz   )
+                             HYPRE_Real         *dxyz   )
 {
    return( hypre_SysBAMGSetDxyz( (void *) solver, dxyz) );
 }
@@ -181,11 +181,11 @@ HYPRE_SStructSysBAMGSetLogging( HYPRE_SStructSolver solver,
 }
 
 /*--------------------------------------------------------------------------
-*--------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_SStructSysBAMGSetPrintLevel( HYPRE_SStructSolver solver,
-                                HYPRE_Int         print_level )
+                                   HYPRE_Int         print_level )
 {
    return( hypre_SysBAMGSetPrintLevel( (void *) solver, print_level) );
 }

@@ -21,22 +21,22 @@
 
 hypre_StructMatrix *
 hypre_BAMGCreateRAPOp( hypre_StructMatrix *R,
-    hypre_StructMatrix *A,
-    hypre_StructMatrix *P,
-    hypre_StructGrid   *coarse_grid,
-    HYPRE_Int           cdir )
+                       hypre_StructMatrix *A,
+                       hypre_StructMatrix *P,
+                       hypre_StructGrid   *coarse_grid,
+                       HYPRE_Int           cdir )
 {
-  hypre_StructMatrix    *RAP;
-  HYPRE_Int              P_stored_as_transpose = 0;
-  HYPRE_Int              constant_coefficient;
+   hypre_StructMatrix    *RAP;
+   HYPRE_Int              P_stored_as_transpose = 0;
+   HYPRE_Int              constant_coefficient;
 
-  RAP = hypre_SemiCreateRAPOp(R ,A, P, coarse_grid, cdir, P_stored_as_transpose);
+   RAP = hypre_SemiCreateRAPOp(R ,A, P, coarse_grid, cdir, P_stored_as_transpose);
 
-  constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
+   constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
-  hypre_StructMatrixSetConstantCoefficient( RAP, constant_coefficient );
+   hypre_StructMatrixSetConstantCoefficient( RAP, constant_coefficient );
 
-  return RAP;
+   return RAP;
 }
 
 /*--------------------------------------------------------------------------
@@ -47,18 +47,18 @@ hypre_BAMGCreateRAPOp( hypre_StructMatrix *R,
 
 HYPRE_Int
 hypre_BAMGSetupRAPOp( hypre_StructMatrix *R,
-    hypre_StructMatrix *A,
-    hypre_StructMatrix *P,
-    HYPRE_Int           cdir,
-    hypre_Index         cindex,
-    hypre_Index         cstride,
-    hypre_StructMatrix *Ac      )
+                      hypre_StructMatrix *A,
+                      hypre_StructMatrix *P,
+                      HYPRE_Int           cdir,
+                      hypre_Index         cindex,
+                      hypre_Index         cstride,
+                      hypre_StructMatrix *Ac      )
 {
-  HYPRE_Int              P_stored_as_transpose = 0;
+   HYPRE_Int              P_stored_as_transpose = 0;
 
-  hypre_SemiBuildRAP(A, P, R, cdir, cindex, cstride, P_stored_as_transpose, Ac);
+   hypre_SemiBuildRAP(A, P, R, cdir, cindex, cstride, P_stored_as_transpose, Ac);
 
-  hypre_StructMatrixAssemble(Ac);
+   hypre_StructMatrixAssemble(Ac);
 
-  return hypre_error_flag;
+   return hypre_error_flag;
 }

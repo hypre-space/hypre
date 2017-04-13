@@ -39,10 +39,10 @@ typedef struct
 
 HYPRE_Int
 hypre_SStructPMatvecTSetup(
-      void                 *pmatvec_vdata,
-      hypre_SStructPMatrix *pA,
-      hypre_SStructPVector *px
-      )
+   void                 *pmatvec_vdata,
+   hypre_SStructPMatrix *pA,
+   hypre_SStructPVector *px
+   )
 {
    hypre_SStructPMatvecData   *pmatvec_data = pmatvec_vdata;
    HYPRE_Int                   nvars;
@@ -86,13 +86,13 @@ hypre_SStructPMatvecTSetup(
 
 HYPRE_Int
 hypre_SStructPMatvecTCompute(
-      void                 *pmatvec_vdata,
-      HYPRE_Complex         alpha,
-      hypre_SStructPMatrix *pA,
-      hypre_SStructPVector *px,
-      HYPRE_Complex         beta,
-      hypre_SStructPVector *py
-      )
+   void                 *pmatvec_vdata,
+   HYPRE_Complex         alpha,
+   hypre_SStructPMatrix *pA,
+   hypre_SStructPVector *px,
+   HYPRE_Complex         beta,
+   hypre_SStructPVector *py
+   )
 {
    hypre_SStructPMatvecData *pmatvec_data = pmatvec_vdata;
    HYPRE_Int                 nvars        = (pmatvec_data -> nvars);
@@ -150,12 +150,12 @@ hypre_SStructPMatvecTCompute(
 
 HYPRE_Int
 hypre_SStructPMatvecT(
-      HYPRE_Complex         alpha,
-      hypre_SStructPMatrix *pA,
-      hypre_SStructPVector *px,
-      HYPRE_Complex         beta,
-      hypre_SStructPVector *py
-      )
+   HYPRE_Complex         alpha,
+   hypre_SStructPMatrix *pA,
+   hypre_SStructPVector *px,
+   HYPRE_Complex         beta,
+   hypre_SStructPVector *py
+   )
 {
    void *pmatvec_data;
 
@@ -187,9 +187,9 @@ typedef struct
 
 HYPRE_Int
 hypre_SStructMatvecTSetup( 
-      void                *matvec_vdata,
-      hypre_SStructMatrix *A,
-      hypre_SStructVector *x )
+   void                *matvec_vdata,
+   hypre_SStructMatrix *A,
+   hypre_SStructVector *x )
 {
    hypre_SStructMatvecData  *matvec_data = matvec_vdata;
    HYPRE_Int                 nparts;
@@ -219,12 +219,12 @@ hypre_SStructMatvecTSetup(
 
 HYPRE_Int
 hypre_SStructMatvecTCompute( 
-      void                *matvec_vdata,
-      HYPRE_Complex        alpha,
-      hypre_SStructMatrix *A,
-      hypre_SStructVector *x,
-      HYPRE_Complex        beta,
-      hypre_SStructVector *y )
+   void                *matvec_vdata,
+   HYPRE_Complex        alpha,
+   hypre_SStructMatrix *A,
+   hypre_SStructVector *x,
+   HYPRE_Complex        beta,
+   hypre_SStructVector *y )
 {
    hypre_SStructMatvecData  *matvec_data  = matvec_vdata;
    HYPRE_Int                 nparts       = (matvec_data -> nparts);
@@ -310,11 +310,11 @@ hypre_SStructMatvecTCompute(
 
 HYPRE_Int
 hypre_SStructMatvecT( 
-      HYPRE_Complex        alpha,
-      hypre_SStructMatrix *A,
-      hypre_SStructVector *x,
-      HYPRE_Complex        beta,
-      hypre_SStructVector *y )
+   HYPRE_Complex        alpha,
+   hypre_SStructMatrix *A,
+   hypre_SStructVector *x,
+   HYPRE_Complex        beta,
+   hypre_SStructVector *y )
 {
    void *matvec_data;
 
