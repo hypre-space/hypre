@@ -122,7 +122,7 @@ HYPRE_Int hypre_SysBAMGSetup
 
   HYPRE_Real*             relax_weights;
 
-  HYPRE_Int               NDim;
+  HYPRE_Int               ndim;
 
   HYPRE_Int               cmaxsize;
   HYPRE_Int               i, k, l, d;
@@ -149,12 +149,12 @@ HYPRE_Int hypre_SysBAMGSetup
     hypre_SStructPGrid* PGrid = hypre_SStructPMatrixPGrid(A);
     hypre_StructGrid*   SGrid = hypre_SStructPGridSGrid(PGrid, 0);
 
-    NDim = hypre_StructGridNDim(SGrid);
+    ndim = hypre_StructGridNDim(SGrid);
 
     hypre_Box* cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(SGrid));
 
    max_levels = 0;
-   for ( d = 0; d < NDim; d++ ) max_levels += hypre_Log2(hypre_BoxSizeD(cbox, d)) + 2;
+   for ( d = 0; d < ndim; d++ ) max_levels += hypre_Log2(hypre_BoxSizeD(cbox, d)) + 2;
    if ((data->max_levels) > 0)
       max_levels = hypre_min(max_levels, (data->max_levels));
    (data->max_levels) = max_levels;
@@ -359,8 +359,8 @@ HYPRE_Int hypre_SysBAMGSetupGrids
   HYPRE_Int               max_levels        = (data->max_levels);
   HYPRE_Int               skip_relax        = (data->skip_relax);
 
-  HYPRE_Int               NDim;
-  HYPRE_Int               NDimCoarsen;
+  HYPRE_Int               ndim;
+  HYPRE_Int               ndimCoarsen;
   hypre_Box*              cbox;
 
   HYPRE_Int               num_levels;
@@ -380,8 +380,8 @@ HYPRE_Int hypre_SysBAMGSetupGrids
   PGrid = hypre_SStructPMatrixPGrid(A);
   SGrid = hypre_SStructPGridSGrid(PGrid, 0);
 
-  NDim        = hypre_StructGridNDim(SGrid);
-  NDimCoarsen = NDim;                           // XXX should be a parameter?
+  ndim        = hypre_StructGridNDim(SGrid);
+  ndimCoarsen = ndim;                           // XXX should be a parameter?
 
   cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(SGrid));
 
@@ -405,14 +405,14 @@ HYPRE_Int hypre_SysBAMGSetupGrids
   sys_dxyz = hypre_TAlloc(HYPRE_Real*, nvars);
 
   for ( i = 0; i < nvars; i++)
-    sys_dxyz[i] = hypre_TAlloc(HYPRE_Real, NDim);
+    sys_dxyz[i] = hypre_TAlloc(HYPRE_Real, ndim);
 
   HYPRE_Int dxyz_zeroes = 0;
-  for ( d = 0; d < NDim; d++ ) dxyz_zeroes += ( dxyz[d] == 0 );
+  for ( d = 0; d < ndim; d++ ) dxyz_zeroes += ( dxyz[d] == 0 );
   if (dxyz_zeroes != 0)
   {
-    mean = hypre_CTAlloc(HYPRE_Real, NDim);
-    deviation = hypre_CTAlloc(HYPRE_Real, NDim);
+    mean = hypre_CTAlloc(HYPRE_Real, ndim);
+    deviation = hypre_CTAlloc(HYPRE_Real, ndim);
 
     dxyz_flag = 0;
     for (i = 0; i < nvars; i++)
@@ -422,7 +422,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
       /* check if any var has a large (square) coeff. of variation */
       if (!dxyz_flag)
       {
-        for (d = 0; d < NDim; d++)
+        for (d = 0; d < ndim; d++)
         {
           /* square of coeff. of variation */
           deviation[d] -= mean[d]*mean[d];
@@ -433,7 +433,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
         }
       }
 
-      for (d = 0; d < NDim; d++) {
+      for (d = 0; d < ndim; d++) {
         dxyz[d] += sys_dxyz[i][d];
       }
     }
@@ -452,10 +452,10 @@ HYPRE_Int hypre_SysBAMGSetupGrids
 #if DEBUG_SYSBAMG_PFMG
     /* determine cdir */
     min_dxyz = 1;
-    for ( d = 0; d < NDim; d++ ) min_dxyz += dxyz[d];
+    for ( d = 0; d < ndim; d++ ) min_dxyz += dxyz[d];
     cdir = -1;
     alpha = 0.0;
-    for (d = 0; d < NDim; d++)
+    for (d = 0; d < ndim; d++)
     {
       if ((hypre_BoxIMaxD(cbox, d) > hypre_BoxIMinD(cbox, d)) && (dxyz[d] < min_dxyz)) {
         min_dxyz = dxyz[d];
@@ -472,7 +472,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
         relax_weights[l] = 2.0/3.0;
       }
       else {
-        for (d = 0; d < NDim; d++) {
+        for (d = 0; d < ndim; d++) {
           if (d != cdir) {
             beta += 1.0/(dxyz[d]*dxyz[d]);
           }
@@ -485,7 +485,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
         }
 
         /* determine level Jacobi weights */
-        if (NDim > 1) {
+        if (ndim > 1) {
           relax_weights[l] = 2.0/(3.0 - alpha);
         }
         else {
@@ -494,13 +494,13 @@ HYPRE_Int hypre_SysBAMGSetupGrids
       }
     }
 #else
-    cdir = l % NDimCoarsen;
+    cdir = l % ndimCoarsen;
     relax_weights[l] = 2.0/3.0;
 
     // stop coarsening if lengths of dims to coarsen are not *all* multiples of 2
     // XXX should the min size be 2, 4, 8, ...?
     if ( cdir == 0 ) {
-      for ( d = 0; d < NDimCoarsen; d++ ) {
+      for ( d = 0; d < ndimCoarsen; d++ ) {
         dimSize = hypre_BoxIMaxD(cbox,d) - hypre_BoxIMinD(cbox,d) + 1;
         if ( dimSize <= 2 || dimSize % 2 != 0 ) {
           cdir = -1;
@@ -527,7 +527,7 @@ HYPRE_Int hypre_SysBAMGSetupGrids
     if (cdir == -1) {
       active_l[l] = 1; /* forces relaxation on coarsest grid */
       *cmaxsize = 0;
-      for (d = 0; d < NDim; d++)
+      for (d = 0; d < ndim; d++)
         *cmaxsize = hypre_max(*cmaxsize, hypre_BoxSizeD(cbox, d));
       hypre_printf("stop coarsening: l = %d\n", l);
       break;
@@ -568,8 +568,8 @@ HYPRE_Int hypre_SysBAMGSetupGrids
     hypre_StructMapFineToCoarse(hypre_BoxIMax(cbox), cindex, stride, hypre_BoxIMax(cbox));
 
     sysbamg_ifdbg{hypre_printf( "cbox Min and Max:\n" ); fflush(stdout);}
-    hypre_PrintIndex( hypre_BoxIMin(cbox), NDim );
-    hypre_PrintIndex( hypre_BoxIMax(cbox), NDim );
+    hypre_PrintIndex( hypre_BoxIMin(cbox), ndim );
+    hypre_PrintIndex( hypre_BoxIMax(cbox), ndim );
 
 #if DEBUG_SYSBAMG_PFMG
     dxyz[cdir] *= 2;
@@ -963,7 +963,7 @@ HYPRE_Int hypre_SysBAMGCoarsen
   hypre_StructGrid*     coarseSGrid;
 
   MPI_Comm               comm;
-  HYPRE_Int              NDim;
+  HYPRE_Int              ndim;
   HYPRE_Int              nvars;
   hypre_SStructVariable* vartypes;
   hypre_SStructVariable* new_vartypes;
@@ -975,14 +975,14 @@ HYPRE_Int hypre_SysBAMGCoarsen
    *-----------------------------------------*/
 
   comm      = hypre_SStructPGridComm(finePGrid);
-  NDim      = hypre_SStructPGridNDim(finePGrid);
+  ndim      = hypre_SStructPGridNDim(finePGrid);
   nvars     = hypre_SStructPGridNVars(finePGrid);
   vartypes  = hypre_SStructPGridVarTypes(finePGrid);
 
   coarsePGrid = hypre_TAlloc(hypre_SStructPGrid, 1);
 
   hypre_SStructPGridComm(coarsePGrid)     = comm;
-  hypre_SStructPGridNDim(coarsePGrid)     = NDim;
+  hypre_SStructPGridNDim(coarsePGrid)     = ndim;
   hypre_SStructPGridNVars(coarsePGrid)    = nvars;
   new_vartypes = hypre_TAlloc(hypre_SStructVariable, nvars);
   for (i = 0; i < nvars; i++)
@@ -1009,7 +1009,7 @@ HYPRE_Int hypre_SysBAMGCoarsen
 
   hypre_SStructPGridSetCellSGrid(coarsePGrid, coarseSGrid);
 
-  hypre_SStructPGridPNeighbors(coarsePGrid) = hypre_BoxArrayCreate(0, NDim);
+  hypre_SStructPGridPNeighbors(coarsePGrid) = hypre_BoxArrayCreate(0, ndim);
   hypre_SStructPGridPNborOffsets(coarsePGrid) = NULL;
 
   hypre_SStructPGridLocalSize(coarsePGrid)  = 0;
