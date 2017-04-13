@@ -2573,163 +2573,7 @@ AxCheckError(cudaDeviceSynchronize());\
 
 #endif
 #endif
-
-#if defined(HYPRE_MEMORY_GPU)
-static HYPRE_Complex* global_recv_buffer;
-static HYPRE_Complex* global_send_buffer;
-static HYPRE_Int      global_recv_size = 0;
-static HYPRE_Int      global_send_size = 0;
-
-#define hypre_PrepareSendBuffers()				\
-  send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends);	\
-  if (num_sends > 0)						\
-  {								\
-     size = hypre_CommPkgSendBufsize(comm_pkg);			\
-     if (size > global_send_size)				\
-     {							\
-         if (global_send_size > 0)						\
-	     hypre_DeviceTFree(global_send_buffer);			\
-         global_send_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size); \
-         global_send_size   = 5*size;					\
-     }									\
-     send_buffers_data[0] = global_send_buffer;				\
-     for (i = 1; i < num_sends; i++)					\
-     {								\
-         comm_type = hypre_CommPkgSendType(comm_pkg, i-1);		\
-	 size = hypre_CommTypeBufsize(comm_type);			\
-	 send_buffers_data[i] = send_buffers_data[i-1] + size;		\
-     }									\
-  }
-
-#define hypre_PrepareRcevBuffers()		\
-  recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs);	\
-  if (num_recvs > 0)						\
-  {								\
-      size = hypre_CommPkgRecvBufsize(comm_pkg);		\
-      if (size > global_recv_size)				\
-      {							\
-          if (global_recv_size > 0)				\
-	      hypre_DeviceTFree(global_recv_buffer);			\
-          global_recv_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size); \
-          global_recv_size   = 5*size;					\
-      }									\
-      recv_buffers_data[0] = global_recv_buffer;			\
-      for (i = 1; i < num_recvs; i++)					\
-      {								\
-         comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);			\
-         size = hypre_CommTypeBufsize(comm_type);			\
-         recv_buffers_data[i] = recv_buffers_data[i-1] + size;		\
-      }									\
-   }
-
-#define hypre_SendBufferTransfer()					\
-  if (num_sends > 0)							\
-  {									\
-      size = hypre_CommPkgSendBufsize(comm_pkg);			\
-      dptr = (HYPRE_Complex *) send_buffers[0];				\
-      dptr_data = (HYPRE_Complex *) send_buffers_data[0];		\
-      hypre_DataCopyFromData(dptr,dptr_data,HYPRE_Complex,size);	\
-  }
-
-#define hypre_RecvBufferTransfer()		\
-  if (num_recvs > 0)				\
-  {						\
-      size = 0;					\
-      for (i = 0; i < num_recvs; i++)		\
-      {						\
-          comm_type = hypre_CommPkgRecvType(comm_pkg, i);			\
-	  num_entries = hypre_CommTypeNumEntries(comm_type);		\
-	  size += hypre_CommTypeBufsize(comm_type);			\
-	  if ( hypre_CommPkgFirstComm(comm_pkg) )			\
-	  {								\
-	      size += hypre_CommPrefixSize(num_entries);		\
-	  }								\
-      }									\
-      dptr = (HYPRE_Complex *) recv_buffers[0];				\
-      dptr_data = (HYPRE_Complex *) recv_buffers_data[0];		\
-      hypre_DataCopyToData(dptr,dptr_data,HYPRE_Complex,size);		\
-   }
-
-#define hypre_FreeBuffer()						\
-  hypre_TFree(send_buffers);						\
-  hypre_TFree(recv_buffers);						\
-  hypre_TFree(send_buffers_data);					\
-  hypre_TFree(recv_buffers_data);
-
-#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)	\
-HYPRE_Int * indices_d;				\
-HYPRE_Int indices_h[stencil_size];		\
-HYPRE_Int * stencil_shape_d;			\
-HYPRE_Int  stencil_shape_h[size*stencil_size];		\
-HYPRE_Complex * data_A = hypre_StructMatrixData(A);\
-indices_d = hypre_DeviceTAlloc(HYPRE_Int, stencil_size);		\
-stencil_shape_d = hypre_DeviceTAlloc(HYPRE_Int, size*stencil_size);	\
-for (si = 0; si < stencil_size; si++)				\
-  {									\
-    HYPRE_Int jj = 0;								\
-    indices_h[si]       = hypre_StructMatrixDataIndices(A)[i][si];	\
-    if (size > 1) cdir = 0;						\
-    stencil_shape_h[si] = hypre_IndexD(stencil_shape[si], cdir); \
-    for (jj = 1;jj < size;jj++)						\
-      stencil_shape_h[jj*stencil_size+si] = hypre_IndexD(stencil_shape[si], jj);	\
-  }									\
-hypre_DataCopyToData(indices_h,indices_d,HYPRE_Int,stencil_size);	\
-hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size);
-
-#define hypre_StructGetMatrixBoxData(A, i, si)	(data_A + indices_d[si])
-
-#define hypre_StructGetIndexD(index,i,index_d) (index_d)
-
-#define hypre_StructcleanIndexD() \
-  hypre_DeviceTFree(indices_d);			 \
-  hypre_DeviceTFree(stencil_shape_d);		 \
-
-#define hypre_StructPreparePrint()		\
-  HYPRE_Int tot_size = num_values*hypre_BoxVolume(hypre_BoxArrayBox(data_space, hypre_BoxArraySize(box_array)-1)); \
-  data_host = hypre_CTAlloc(HYPRE_Complex, tot_size);			\
-  hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);	\
-
-#define hypre_StructPostPrint() \
-  hypre_TFree(data_host);
-
-#else
-
-static HYPRE_Complex* global_recv_buffer;
-static HYPRE_Complex* global_send_buffer;
-static HYPRE_Int      global_recv_size = 0;
-static HYPRE_Int      global_send_size = 0;
-typedef struct hypre_Boxloop_struct
-{
-	HYPRE_Int lsize0,lsize1,lsize2;
-	HYPRE_Int strides0,strides1,strides2;
-	HYPRE_Int bstart0,bstart1,bstart2;
-	HYPRE_Int bsize0,bsize1,bsize2;
-} hypre_Boxloop;
-
-#define hypre_PrepareSendBuffers()				\
-  send_buffers_data = send_buffers;	\
-
-#define hypre_PrepareRcevBuffers()		\
-  recv_buffers_data = recv_buffers;
-
-#define hypre_SendBufferTransfer()  {}
-
-#define hypre_RecvBufferTransfer()  {}
-
-
-#define hypre_FreeBuffer()						\
-  hypre_TFree(send_buffers);						\
-  hypre_TFree(recv_buffers);
-
-#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size) HYPRE_Int* indices_d; HYPRE_Int* stencil_shape_d;
-#define hypre_StructGetMatrixBoxData(A, i, si) hypre_StructMatrixBoxData(A,i,si)
-#define hypre_StructGetIndexD(index,i,index_d) hypre_IndexD(index,i)
-#define hypre_StructcleanIndexD() {;}
-#define hypre_StructPreparePrint() data_host = data;
-#define hypre_StructPostPrint() {;}
-
-#endif
-
+  
 
 #ifdef __cplusplus
 extern "C" {
@@ -2934,7 +2778,163 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 HYPRE_Real       local_result;\
 local_result = 0.0;
 #endif
-	
+
+#if defined(HYPRE_MEMORY_GPU)
+static HYPRE_Complex* global_recv_buffer;
+static HYPRE_Complex* global_send_buffer;
+static HYPRE_Int      global_recv_size = 0;
+static HYPRE_Int      global_send_size = 0;
+
+#define hypre_PrepareSendBuffers()				\
+  send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends);	\
+  if (num_sends > 0)						\
+  {								\
+     size = hypre_CommPkgSendBufsize(comm_pkg);			\
+     if (size > global_send_size)				\
+     {							\
+         if (global_send_size > 0)						\
+	     hypre_DeviceTFree(global_send_buffer);			\
+         global_send_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size); \
+         global_send_size   = 5*size;					\
+     }									\
+     send_buffers_data[0] = global_send_buffer;				\
+     for (i = 1; i < num_sends; i++)					\
+     {								\
+         comm_type = hypre_CommPkgSendType(comm_pkg, i-1);		\
+	 size = hypre_CommTypeBufsize(comm_type);			\
+	 send_buffers_data[i] = send_buffers_data[i-1] + size;		\
+     }									\
+  }
+
+#define hypre_PrepareRcevBuffers()		\
+  recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs);	\
+  if (num_recvs > 0)						\
+  {								\
+      size = hypre_CommPkgRecvBufsize(comm_pkg);		\
+      if (size > global_recv_size)				\
+      {							\
+          if (global_recv_size > 0)				\
+	      hypre_DeviceTFree(global_recv_buffer);			\
+          global_recv_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size); \
+          global_recv_size   = 5*size;					\
+      }									\
+      recv_buffers_data[0] = global_recv_buffer;			\
+      for (i = 1; i < num_recvs; i++)					\
+      {								\
+         comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);			\
+         size = hypre_CommTypeBufsize(comm_type);			\
+         recv_buffers_data[i] = recv_buffers_data[i-1] + size;		\
+      }									\
+   }
+
+#define hypre_SendBufferTransfer()					\
+  if (num_sends > 0)							\
+  {									\
+      size = hypre_CommPkgSendBufsize(comm_pkg);			\
+      dptr = (HYPRE_Complex *) send_buffers[0];				\
+      dptr_data = (HYPRE_Complex *) send_buffers_data[0];		\
+      hypre_DataCopyFromData(dptr,dptr_data,HYPRE_Complex,size);	\
+  }
+
+#define hypre_RecvBufferTransfer()		\
+  if (num_recvs > 0)				\
+  {						\
+      size = 0;					\
+      for (i = 0; i < num_recvs; i++)		\
+      {						\
+          comm_type = hypre_CommPkgRecvType(comm_pkg, i);			\
+	  num_entries = hypre_CommTypeNumEntries(comm_type);		\
+	  size += hypre_CommTypeBufsize(comm_type);			\
+	  if ( hypre_CommPkgFirstComm(comm_pkg) )			\
+	  {								\
+	      size += hypre_CommPrefixSize(num_entries);		\
+	  }								\
+      }									\
+      dptr = (HYPRE_Complex *) recv_buffers[0];				\
+      dptr_data = (HYPRE_Complex *) recv_buffers_data[0];		\
+      hypre_DataCopyToData(dptr,dptr_data,HYPRE_Complex,size);		\
+   }
+
+#define hypre_FreeBuffer()						\
+  hypre_TFree(send_buffers);						\
+  hypre_TFree(recv_buffers);						\
+  hypre_TFree(send_buffers_data);					\
+  hypre_TFree(recv_buffers_data);
+
+#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)	\
+HYPRE_Int * indices_d;				\
+HYPRE_Int indices_h[stencil_size];		\
+HYPRE_Int * stencil_shape_d;			\
+HYPRE_Int  stencil_shape_h[size*stencil_size];		\
+HYPRE_Complex * data_A = hypre_StructMatrixData(A);\
+indices_d = hypre_DeviceTAlloc(HYPRE_Int, stencil_size);		\
+stencil_shape_d = hypre_DeviceTAlloc(HYPRE_Int, size*stencil_size);	\
+for (HYPRE_Int ii = 0; ii < stencil_size; ii++)				\
+  {									\
+    HYPRE_Int jj = 0;								\
+    indices_h[ii]       = hypre_StructMatrixDataIndices(A)[i][ii];	\
+    if (size > 1) cdir = 0;						\
+    stencil_shape_h[ii] = hypre_IndexD(stencil_shape[ii], cdir); \
+    for (jj = 1;jj < size;jj++)						\
+      stencil_shape_h[jj*stencil_size+ii] = hypre_IndexD(stencil_shape[ii], jj);	\
+  }									\
+hypre_DataCopyToData(indices_h,indices_d,HYPRE_Int,stencil_size);	\
+hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size);
+
+#define hypre_StructGetMatrixBoxData(A, i, si)	(data_A + indices_d[si])
+
+#define hypre_StructGetIndexD(index,i,index_d) (index_d)
+
+#define hypre_StructcleanIndexD() \
+  hypre_DeviceTFree(indices_d);			 \
+  hypre_DeviceTFree(stencil_shape_d);		 \
+
+#define hypre_StructPreparePrint()		\
+  HYPRE_Int tot_size = num_values*hypre_BoxVolume(hypre_BoxArrayBox(data_space, hypre_BoxArraySize(box_array)-1)); \
+  data_host = hypre_CTAlloc(HYPRE_Complex, tot_size);			\
+  hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);	\
+
+#define hypre_StructPostPrint() \
+  hypre_TFree(data_host);
+
+#else
+
+static HYPRE_Complex* global_recv_buffer;
+static HYPRE_Complex* global_send_buffer;
+static HYPRE_Int      global_recv_size = 0;
+static HYPRE_Int      global_send_size = 0;
+typedef struct hypre_Boxloop_struct
+{
+	HYPRE_Int lsize0,lsize1,lsize2;
+	HYPRE_Int strides0,strides1,strides2;
+	HYPRE_Int bstart0,bstart1,bstart2;
+	HYPRE_Int bsize0,bsize1,bsize2;
+} hypre_Boxloop;
+
+#define hypre_PrepareSendBuffers()				\
+  send_buffers_data = send_buffers;	\
+
+#define hypre_PrepareRcevBuffers()		\
+  recv_buffers_data = recv_buffers;
+
+#define hypre_SendBufferTransfer()  {}
+
+#define hypre_RecvBufferTransfer()  {}
+
+
+#define hypre_FreeBuffer()						\
+  hypre_TFree(send_buffers);						\
+  hypre_TFree(recv_buffers);
+
+#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size) HYPRE_Int* indices_d; HYPRE_Int* stencil_shape_d;
+#define hypre_StructGetMatrixBoxData(A, i, si) hypre_StructMatrixBoxData(A,i,si)
+#define hypre_StructGetIndexD(index,i,index_d) hypre_IndexD(index,i)
+#define hypre_StructcleanIndexD() {;}
+#define hypre_StructPreparePrint() data_host = data;
+#define hypre_StructPostPrint() {;}
+
+#endif
+  
 #if 0 /* set to 0 to use the new box loops */
 
 #define HYPRE_BOX_PRIVATE hypre__nx,hypre__ny,hypre__nz,hypre__i,hypre__j,hypre__k
@@ -3301,26 +3301,6 @@ index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
   
 #define HYPRE_BOX_PRIVATE        ZYPRE_BOX_PRIVATE
 
-//#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
-//#define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
-//#define hypre_BoxLoopBlock       zypre_BoxLoopBlock
-    /*
-#define hypre_BoxLoop0Begin      zypre_BoxLoop0Begin
-#define hypre_BoxLoop0For        zypre_BoxLoop0For
-#define hypre_BoxLoop0End        zypre_BoxLoop0End
-#define hypre_BoxLoop1Begin      zypre_BoxLoop1Begin
-#define hypre_BoxLoop1For        zypre_BoxLoop1For
-#define hypre_BoxLoop1End        zypre_BoxLoop1End
-#define hypre_BoxLoop2Begin      zypre_BoxLoop2Begin
-#define hypre_BoxLoop2For        zypre_BoxLoop2For
-#define hypre_BoxLoop2End        zypre_BoxLoop2End
-#define hypre_BoxLoop3Begin      zypre_BoxLoop3Begin
-#define hypre_BoxLoop3For        zypre_BoxLoop3For
-#define hypre_BoxLoop3End        zypre_BoxLoop3End
-#define hypre_BoxLoop4Begin      zypre_BoxLoop4Begin
-#define hypre_BoxLoop4For        zypre_BoxLoop4For
-#define hypre_BoxLoop4End        zypre_BoxLoop4End
-*/
 #endif /* end if 1 */
 
 #endif

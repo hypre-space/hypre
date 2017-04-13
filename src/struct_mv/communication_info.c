@@ -772,7 +772,6 @@ hypre_CreateCommInfoFromStencil( hypre_StructGrid      *grid,
    hypre_BoxDestroy(stencil_box);
    hypre_BoxDestroy(sbox);
    hypre_TFree(stencil_grid);
-   // hypre_DataTFree(stencil_grid);
 
    /*------------------------------------------------------
     * Return

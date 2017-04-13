@@ -368,7 +368,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_ForBoxI(i, compute_boxes)
    {
 
-     hypre_MatrixIndexMove(A, stencil_size, i, si,3);
+      hypre_MatrixIndexMove(A, stencil_size, i, si,3);
      
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
 
@@ -402,7 +402,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 		 
          for (si = 0; si < stencil_size; si++)
          {
-			 //Ap = hypre_StructMatrixBoxData(A, i, si);
+	   //Ap = hypre_StructMatrixBoxData(A, i, si);
 	   //Ap = data_A + indices_d[si];
 	   Ap = hypre_StructGetMatrixBoxData(A, i, si);
             /* compute lambdax */

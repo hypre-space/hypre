@@ -42,3 +42,228 @@ typedef struct
 
 } hypre_RedBlackGSData;
 
+#ifdef HYPRE_USE_RAJA
+#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
+				Astart,Ani,Anj,Ai,	\
+				bstart,bni,bnj,bi,	\
+				xstart,xni,xnj,xi)	\
+{					  \
+    HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
+    {									\
+        HYPRE_Int idx_local = idx;					\
+	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	kk = idx_local % nk;						\
+	idx_local = idx_local / nk;					\
+	jj = idx_local % nj;						\
+	idx_local = idx_local / nj;					\
+	ii = 2*idx_local + redblack;					\
+	if (ii < ni)							\
+	{								\
+	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;			\
+	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\
+	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
+
+#define hypre_RedBlackLoopEnd()			\
+         }						\
+     });						\
+     cudaError err = cudaGetLastError();		\
+     if ( cudaSuccess != err ) {					\
+       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+     }									\
+     AxCheckError(cudaDeviceSynchronize());				\
+}
+
+#define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
+				bstart,bni,bnj,bi,	\
+				xstart,xni,xnj,xi)	\
+{					  \
+    HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
+    {									\
+        HYPRE_Int idx_local = idx;					\
+	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	kk = idx_local % nk;						\
+	idx_local = idx_local / nk;					\
+	jj = idx_local % nj;						\
+	idx_local = idx_local / nj;					\
+	ii = 2*idx_local + redblack;					\
+	if (ii < ni)							\
+	{								\
+	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\
+	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
+
+#define hypre_RedBlackConstantcoefLoopEnd()			\
+         }						\
+     });						\
+     cudaError err = cudaGetLastError();		\
+     if ( cudaSuccess != err ) {					\
+       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+     }									\
+     AxCheckError(cudaDeviceSynchronize());				\
+}  
+#elif defined(HYPRE_USE_KOKKOS)
+#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
+				Astart,Ani,Anj,Ai,	\
+				bstart,bni,bnj,bi,	\
+				xstart,xni,xnj,xi)	\
+{					  \
+    HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx) \
+    {									\
+        HYPRE_Int idx_local = idx;					\
+	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	kk = idx_local % nk;						\
+	idx_local = idx_local / nk;					\
+	jj = idx_local % nj;						\
+	idx_local = idx_local / nj;					\
+	ii = 2*idx_local + redblack;					\
+	if (ii < ni)							\
+	{								\
+	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;			\
+	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\
+	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
+
+#define hypre_RedBlackLoopEnd()			\
+         }						\
+     });						\
+     cudaError err = cudaGetLastError();		\
+     if ( cudaSuccess != err ) {					\
+       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+     }									\
+     AxCheckError(cudaDeviceSynchronize());				\
+}
+
+#define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
+				bstart,bni,bnj,bi,	\
+				xstart,xni,xnj,xi)	\
+{					  \
+    HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx) \
+    {									\
+        HYPRE_Int idx_local = idx;					\
+	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	kk = idx_local % nk;						\
+	idx_local = idx_local / nk;					\
+	jj = idx_local % nj;						\
+	idx_local = idx_local / nj;					\
+	ii = 2*idx_local + redblack;					\
+	if (ii < ni)							\
+	{								\
+	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\
+	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
+
+#define hypre_RedBlackConstantcoefLoopEnd()			\
+         }						\
+     });						\
+     cudaError err = cudaGetLastError();		\
+     if ( cudaSuccess != err ) {					\
+       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+     }									\
+     AxCheckError(cudaDeviceSynchronize());				\
+}  
+#elif defined(HYPRE_USE_CUDA)
+#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
+				Astart,Ani,Anj,Ai,	\
+				bstart,bni,bnj,bi,	\
+				xstart,xni,xnj,xi)	\
+{					  \
+    HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+    {									\
+        HYPRE_Int idx_local = idx;					\
+	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	kk = idx_local % nk;						\
+	idx_local = idx_local / nk;					\
+	jj = idx_local % nj;						\
+	idx_local = idx_local / nj;					\
+	ii = 2*idx_local + redblack;					\
+	if (ii < ni)							\
+	{								\
+	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;			\
+	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\
+	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
+
+#define hypre_RedBlackLoopEnd()			\
+         }						\
+     });						\
+     cudaError err = cudaGetLastError();		\
+     if ( cudaSuccess != err ) {					\
+       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+     }									\
+     AxCheckError(cudaDeviceSynchronize());				\
+}
+	   
+#define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
+					    bstart,bni,bnj,bi,	\
+					    xstart,xni,xnj,xi)	\
+{					  \
+    HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+    {									\
+        HYPRE_Int idx_local = idx;					\
+	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	kk = idx_local % nk;						\
+	idx_local = idx_local / nk;					\
+	jj = idx_local % nj;						\
+	idx_local = idx_local / nj;					\
+	ii = 2*idx_local + redblack;					\
+	if (ii < ni)							\
+	{								\
+	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\
+	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
+
+#define hypre_RedBlackConstantcoefLoopEnd()			\
+         }						\
+     });						\
+     cudaError err = cudaGetLastError();		\
+     if ( cudaSuccess != err ) {					\
+       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+     }									\
+     AxCheckError(cudaDeviceSynchronize());				\
+}
+#else
+#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
+				Astart,Ani,Anj,Ai,	\
+				bstart,bni,bnj,bi,	\
+				xstart,xni,xnj,xi)	\
+{					  \
+    HYPRE_Int ii,jj,kk,Ai,bi,xi;		  \
+    for (kk = 0; kk < nk; kk++)			  \
+    {						  \
+        for (jj = 0; jj < nj; jj++)			  \
+	{						  \
+	    ii = (kk + jj + redblack) % 2;\
+	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;		\
+	    bi = bstart + kk*bnj*bni + jj*bni + ii;		\
+	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
+	    for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)			\
+	    {
+
+#define hypre_RedBlackLoopEnd()			\
+            }\
+	}\
+    }\
+}
+
+#define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
+				bstart,bni,bnj,bi,	\
+				xstart,xni,xnj,xi)	\
+{					  \
+    HYPRE_Int ii,jj,kk,Ai,bi,xi;		  \
+    for (kk = 0; kk < nk; kk++)			  \
+    {						  \
+        for (jj = 0; jj < nj; jj++)			  \
+	{						  \
+	    ii = (kk + jj + redblack) % 2;\
+	    bi = bstart + kk*bnj*bni + jj*bni + ii;		\
+	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
+	    for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)			\
+	    {
+
+#define hypre_RedBlackConstantcoefLoopEnd()			\
+            }\
+	}\
+    }\
+}  
+#endif

@@ -33,13 +33,13 @@ cat > $INTERNAL_HEADER <<@
 
 
 cat >> $INTERNAL_HEADER <<@
-#ifdef HYPRE_USE_RAJA
+#if defined(HYPRE_USE_RAJA)
 @
 
 cat boxloop_raja.h              >> $INTERNAL_HEADER
 
 cat >> $INTERNAL_HEADER <<@
-#elif defined(HYPRE_USE_KOKKOS_CUDA) || defined(HYPRE_USE_KOKKOS)
+#elif defined(HYPRE_USE_KOKKOS)
 @
 
 cat boxloop_kokkos.h              >> $INTERNAL_HEADER
@@ -79,7 +79,7 @@ cat struct_communication.h >> $INTERNAL_HEADER
 cat computation.h          >> $INTERNAL_HEADER	
 cat struct_matrix.h        >> $INTERNAL_HEADER	
 cat struct_vector.h        >> $INTERNAL_HEADER	
-
+cat red_black_gs.h         >> $INTERNAL_HEADER
 cat protos.h               >> $INTERNAL_HEADER
 
 #===========================================================================

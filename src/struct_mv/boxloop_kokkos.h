@@ -518,7 +518,12 @@ AxCheckError(cudaDeviceSynchronize());\
 
 #define zypre_newBoxLoopSetOneBlock() {}
 
+#define hypre_newBoxLoopGetIndex(index)					\
+  index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
+
+#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 #define hypre_BoxLoopSetOneBlock zypre_newBoxLoopSetOneBlock
+#define hypre_BoxLoopBlock()       1
 #define hypre_BoxLoop0Begin      zypre_newBoxLoop0Begin
 #define hypre_BoxLoop0For        zypre_newBoxLoop0For
 #define hypre_BoxLoop0End        zypre_newBoxLoop0End
@@ -534,5 +539,15 @@ AxCheckError(cudaDeviceSynchronize());\
 #define hypre_BoxLoop4Begin      zypre_newBoxLoop4Begin
 #define hypre_BoxLoop4For        zypre_newBoxLoop4For
 #define hypre_BoxLoop4End        zypre_newBoxLoop4End
+
+#define hypre_newBoxLoop1ReductionBegin zypre_newBoxLoop1ReductionBegin
+#define hypre_newBoxLoop1ReductionEnd   zypre_newBoxLoop1ReductionEnd
+#define hypre_newBoxLoop2ReductionBegin zypre_newBoxLoop2ReductionBegin
+#define hypre_newBoxLoop2ReductionEnd   zypre_newBoxLoop2ReductionEnd
+#define hypre_newBoxLoop1ReductionMult zypre_newBoxLoop1ReductionMult
+#define hypre_BoxBoundaryCopyBegin zypre_BoxBoundaryCopyBegin
+#define hypre_BoxBoundaryCopyEnd zypre_BoxBoundaryCopyEnd
+#define hypre_BoxDataExchangeBegin zypre_BoxDataExchangeBegin
+#define hypre_BoxDataExchangeEnd zypre_BoxDataExchangeEnd
 
 #endif

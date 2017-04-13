@@ -217,9 +217,8 @@ hypre_BoxCreate( HYPRE_Int  ndim )
    hypre_Box *box;
 
    box = hypre_CTAlloc(hypre_Box, 1);
-
    hypre_BoxNDim(box) = ndim;
-   
+
    return box;
 }
 
@@ -231,7 +230,7 @@ hypre_BoxDestroy( hypre_Box *box )
 {
    if (box)
    {
-	   hypre_TFree(box);
+      hypre_TFree(box);
    }
 
    return hypre_error_flag;
@@ -260,7 +259,7 @@ hypre_BoxSetExtents( hypre_Box  *box,
 {
    hypre_CopyIndex(imin, hypre_BoxIMin(box));
    hypre_CopyIndex(imax, hypre_BoxIMax(box));
-  
+
    return hypre_error_flag;
 }
 
@@ -270,7 +269,7 @@ hypre_BoxSetExtents( hypre_Box  *box,
 HYPRE_Int
 hypre_CopyBox( hypre_Box  *box1,
                hypre_Box  *box2 )
-{	
+{
    hypre_CopyIndex(hypre_BoxIMin(box1), hypre_BoxIMin(box2));
    hypre_CopyIndex(hypre_BoxIMax(box1), hypre_BoxIMax(box2));
    hypre_BoxNDim(box2) = hypre_BoxNDim(box1);

@@ -105,7 +105,6 @@ hypre_SubtractBoxes( hypre_Box      *box1,
          }
       }
    }
-  
    hypre_BoxArraySetSize(box_array, size);
 
    return hypre_error_flag;
@@ -458,7 +457,6 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
 
    size= hypre_BoxArraySize(boxes);
    rotated_box= hypre_CTAlloc(hypre_Box, 1);
-
    rotated_array= hypre_BoxArrayArrayCreate(5, hypre_BoxArrayNDim(boxes));
 
    for (i= 0; i< 5; i++)

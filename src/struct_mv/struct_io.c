@@ -43,12 +43,10 @@ hypre_PrintBoxArrayData( FILE            *file,
                    
    HYPRE_Int        i, j, d;
    HYPRE_Complex    value;
-   
+   HYPRE_Complex *data_host;
    /*----------------------------------------
     * Print data
     *----------------------------------------*/
-   HYPRE_Complex *data_host;
-   
    hypre_StructPreparePrint();
    
    hypre_SetIndex(stride, 1);
@@ -159,7 +157,7 @@ hypre_PrintCCVDBoxArrayData( FILE            *file,
       data_box_volume = hypre_BoxVolume(data_box);
 
       hypre_BoxGetSize(box, loop_size);
-/*FIXME: must run sequentially*/
+
       hypre_SerialBoxLoop1Begin(dim, loop_size,
 				data_box, start, stride, datai);
       {
@@ -268,7 +266,7 @@ hypre_ReadBoxArrayData( FILE            *file,
       data_box_volume = hypre_BoxVolume(data_box);
 
       hypre_BoxGetSize(box, loop_size);
-       /*FIXME: must run sequentially*/
+
       hypre_SerialBoxLoop1Begin(dim, loop_size,
                           data_box, start, stride, datai);
       {

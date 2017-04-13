@@ -3387,8 +3387,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
 	   
 	   iP1 = iP + zOffsetP; 
 	   rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
-	     +          ra[iR] * a_cc[iAp1] * pb[iP1]
-	     +          ra[iR] * a_ac[iAp1];
+	      +          ra[iR] * a_cc[iAp1] * pb[iP1]
+	      +          ra[iR] * a_ac[iAp1];
 	   
 	   iP1 = iP + zOffsetP - xOffsetP;
 	   rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
@@ -3398,13 +3398,13 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
 	   
 	   iP1 = iP + yOffsetP;
 	   rap_cn[iAc] =          a_cn[iA]
-	     +          rb[iR] * a_cn[iAm1] * pb[iP1]
-	     +          ra[iR] * a_cn[iAp1] * pa[iP1];
+	      +          rb[iR] * a_cn[iAm1] * pb[iP1]
+	      +          ra[iR] * a_cn[iAp1] * pa[iP1];
 	   
 	   iP1 = iP + xOffsetP;
 	   rap_ce[iAc] =          a_ce[iA]
-	     +          rb[iR] * a_ce[iAm1] * pb[iP1]
-	     +          ra[iR] * a_ce[iAp1] * pa[iP1];
+	      +          rb[iR] * a_ce[iAm1] * pb[iP1]
+	      +          ra[iR] * a_ce[iAp1] * pa[iP1];
 	   
 	   rap_cnw[iAc] = 0.0;
 	   

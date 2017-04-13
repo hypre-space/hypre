@@ -415,10 +415,6 @@ HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int com
 extern "C" {
 #endif
 
-/*--------------------------------------------------------------------------
- * Use "Debug Malloc Library", dmalloc
- *--------------------------------------------------------------------------*/
-
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_MEMORY_UM)
 #include <cuda.h>
 #include <cuda_runtime.h>
@@ -467,7 +463,7 @@ extern "C" {
 	type * ptr;						   \
 	cudaError_t cudaerr = cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal); \
 	if ( cudaerr != cudaSuccess ) {										\
-		printf("\n hypre_DataCTAlloc %d : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+		printf("\n hypre_DataCTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
 		int *p = NULL; *p = 1;\
 	}		\
 	cudaMemset(ptr,0,sizeof(type)*(count));	   \
@@ -539,6 +535,7 @@ if ( cudaerr != cudaSuccess ) {										\
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
+  
 #define hypre_TAlloc(type, count) \
 ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )
 
@@ -563,7 +560,10 @@ if ( cudaerr != cudaSuccess ) {										\
 #else
 #define HYPRE_CUDA_GLOBAL 
 #ifdef HYPRE_MEMORY_DMALLOC
-
+/*--------------------------------------------------------------------------
+ * Use "Debug Malloc Library", dmalloc
+ *--------------------------------------------------------------------------*/
+  
 #define hypre_InitMemoryDebug(id)    hypre_InitMemoryDebugDML(id)
 #define hypre_FinalizeMemoryDebug()  hypre_FinalizeMemoryDebugDML()
 

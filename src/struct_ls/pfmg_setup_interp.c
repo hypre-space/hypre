@@ -258,7 +258,6 @@ hypre_PFMGSetupInterpOp_CC0
       HYPRE_Int si,mrk0,mrk1,Astenc;
       HYPRE_Real center;
       HYPRE_Real *Ap;
-      //HYPRE_Complex Api;
 	   
       center  = 0.0;
       Pp0[Pi] = 0.0;
@@ -268,13 +267,9 @@ hypre_PFMGSetupInterpOp_CC0
 
       for (si = 0; si < stencil_size; si++)
       {
-	//Ap = hypre_StructMatrixBoxData(A, i, si);
 	Ap = hypre_StructGetMatrixBoxData(A, i, si);
-	//Ap = (hypre_StructMatrixData(A) + indices_d[si]);
 	
-	//Astenc = hypre_IndexD(stencil_shape[si], cdir);
 	Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
-	//Astenc = stencil_shape_d[si];
 	
          if (Astenc == 0)
          {
@@ -288,7 +283,7 @@ hypre_PFMGSetupInterpOp_CC0
          {
             Pp1[Pi] -= Ap[Ai];
          }
-		 
+	 
          if (si == si0 && Ap[Ai] == 0.0)
             mrk0++;
          if (si == si1 && Ap[Ai] == 0.0)
@@ -520,7 +515,6 @@ hypre_PFMGSetupInterpOp_CC2
 
       si = diag_rank;
       
-      /*FIXME: There might be some problem for this boxloop*/
       hypre_MatrixIndexMove(A, stencil_size, i, si, 1);
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start, stride, Ai,
@@ -533,14 +527,17 @@ hypre_PFMGSetupInterpOp_CC2
 	 HYPRE_Int   mrk0,mrk1;
 	 HYPRE_Real  center;
 	 HYPRE_Real *Ap;
+	 HYPRE_Real p0val,p1val;
 	 
-         Pp0[Pi] = P0;
-         Pp1[Pi] = P1;
+         //Pp0[Pi] = P0;
+	 //Pp1[Pi] = P1;
+	 p0val = P0;
+	 p1val = P1;
+	 
          center = center_offd;
          mrk0 = mrk0_offd;
          mrk1 = mrk1_offd;
 	 
-         //Ap = hypre_StructMatrixBoxData(A, i, si);
 	 Ap = hypre_StructGetMatrixBoxData(A, i, si);
          //Astenc = hypre_IndexD(stencil_shape[si], cdir);
          //hypre_assert( Astenc==0 );
@@ -555,29 +552,36 @@ hypre_PFMGSetupInterpOp_CC2
          if (!center)
          {
             //warning_cnt++;
-            Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;  
+            //Pp0[Pi] = 0.0;
+            //Pp1[Pi] = 0.0;
+	   p0val = 0;
+	   p1val = 0;
          }
          else
          {
-            Pp0[Pi] /= center;
-            Pp1[Pi] /= center;  
+	   //Pp0[Pi] /= center;
+	   //Pp1[Pi] /= center;
+	   p0val /= center;
+	   p1val /= center;
          }
-	 
+
          /*----------------------------------------------
           * Set interpolation weight to zero, if stencil
           * entry in same direction is zero. Prevents
           * interpolation and operator stencils reaching
           * outside domain.
           *----------------------------------------------*/
-	 
+
          if (mrk0 != 0)
-            Pp0[Pi] = 0.0;
+	   Pp0[Pi] = 0.0;
          if (mrk1 != 0)
             Pp1[Pi] = 0.0;
+	 Pp0[Pi] = p0val;
+	 Pp1[Pi] = p1val;
+
       }
       hypre_BoxLoop2End(Ai, Pi);
-      hypre_StructcleanIndexD();
+      //hypre_StructcleanIndexD();
    }
 
    if (warning_cnt)

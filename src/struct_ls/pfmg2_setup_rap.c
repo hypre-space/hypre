@@ -483,23 +483,23 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
            
            iP1 = iP - yOffsetP;
            rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-           +          rb[iR] * a_cs[iAm1]
-           +                   a_cs[iA]   * pa[iP1];
+	      +          rb[iR] * a_cs[iAm1]
+	      +                   a_cs[iA]   * pa[iP1];
            iP1 = iP - yOffsetP + xOffsetP;
            rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
 
 	   iP1 = iP - xOffsetP;
            rap_cw[iAc] =          a_cw[iA]
-           +          rb[iR] * a_cw[iAm1] * pb[iP1]
-           +          ra[iR] * a_cw[iAp1] * pa[iP1];
+	      +          rb[iR] * a_cw[iAm1] * pb[iP1]
+	      +          ra[iR] * a_cw[iAp1] * pa[iP1];
            
            rap_cc[iAc] =          a_cc[iA]
-           +          rb[iR] * a_cc[iAm1] * pb[iP]
-           +          ra[iR] * a_cc[iAp1] * pa[iP]
-           +          rb[iR] * a_cn[iAm1]
-           +          ra[iR] * a_cs[iAp1]
-           +                   a_cs[iA]   * pb[iP]
-           +                   a_cn[iA]   * pa[iP];
+	      +          rb[iR] * a_cc[iAm1] * pb[iP]
+	      +          ra[iR] * a_cc[iAp1] * pa[iP]
+	      +          rb[iR] * a_cn[iAm1]
+	      +          ra[iR] * a_cs[iAp1]
+	      +                   a_cs[iA]   * pb[iP]
+	      +                   a_cn[iA]   * pa[iP];
        }
        hypre_BoxLoop4End(iP, iR, iA, iAc);
    }
@@ -2222,7 +2222,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
 #endif
       hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
-	//HYPRE_Int iAm1 = iA - yOffsetA_diag;
          HYPRE_Int iAp1 = iA + yOffsetA_diag;
 
          HYPRE_Int iP1 = iP + yOffsetP + xOffsetP;
