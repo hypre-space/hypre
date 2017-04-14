@@ -427,8 +427,9 @@ HYPRE_Int hypre_SysBAMGSetupInterpOpLS(
 
                   for ( sj = 0; sj < P_StencilSize; sj++ ) {
                      Mj = idxIJ[I][J]*P_StencilSize + sj;
-#if 1 // DEBUG_SYSBAMG_PFMG > 0  - XXX LS results are currently awful, probably because Jacobi relaxation stinks
+#if 0 // DEBUG_SYSBAMG_PFMG > 0  - XXX LS results are currently awful, probably because Jacobi relaxation stinks
                      hypre_StructMatrixBoxData(sP[I][J], b, sj)[iP] = 0.5;     // to check against PFMG
+
 #else
                      // restrict P values to [-1,1]
                      if ( hypre_cabs(C[Mj]) > 1.0 ) C[Mj] = C[Mj] / hypre_cabs(C[Mj]);
