@@ -1741,7 +1741,7 @@ main( hypre_int argc,
    for (j = 0; j < data.max_boxsize; j++)
    {
       values[j]= sin((HYPRE_Real)(j+1));
-      values[j]= (HYPRE_Real) rand()/RAND_MAX;
+      values[j]= (HYPRE_Real) hypre_Rand();
       values[j]= (HYPRE_Real) j;
    }
    for (part = 0; part < data.nparts; part++)
