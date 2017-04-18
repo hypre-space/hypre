@@ -46,8 +46,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    hypre_Box             *x_dbox;
                         
    HYPRE_Int              Ai, Astart, Ani, Anj;
-   HYPRE_Int              bi, bstart, bni, bnj;
-   HYPRE_Int              xi, xstart, xni, xnj;
+   HYPRE_Int              bstart, bni, bnj;
+   HYPRE_Int              xstart, xni, xnj;
    HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
                         
    HYPRE_Real            *Ap;
@@ -68,7 +68,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
    HYPRE_Int              offd[6];
                         
    HYPRE_Int              iter, rb, redblack, d;
-   HYPRE_Int              compute_i, i, j, ii, jj, kk;
+   HYPRE_Int              compute_i, i, j;
    HYPRE_Int              ni, nj, nk;
 
    /*----------------------------------------------------------

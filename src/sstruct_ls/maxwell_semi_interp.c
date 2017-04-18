@@ -148,7 +148,7 @@ hypre_Maxwell_PTopology(  hypre_SStructGrid    *fgrid_edge,
    HYPRE_Int              nvars, Face_nvars, Edge_nvars, part, var, box, fboxi;
    HYPRE_Int              tot_vars= 8;
 
-   HYPRE_Int              t, i, j, k, l, m, n, p, r;
+   HYPRE_Int              t, i, j, k, l, m, n, p;
 
    HYPRE_Int              ilower, iupper;
    HYPRE_Int              jlower, jupper;

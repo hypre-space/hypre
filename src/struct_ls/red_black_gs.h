@@ -82,7 +82,7 @@ typedef struct
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
-	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	HYPRE_Int ii,jj,kk,bi,xi;					\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
@@ -142,7 +142,7 @@ typedef struct
     Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
-	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	HYPRE_Int ii,jj,kk,bi,xi;					\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
@@ -202,7 +202,7 @@ typedef struct
     BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
-	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	HYPRE_Int ii,jj,kk,bi,xi;					\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
@@ -250,7 +250,7 @@ typedef struct
 				bstart,bni,bnj,bi,	\
 				xstart,xni,xnj,xi)	\
 {					  \
-    HYPRE_Int ii,jj,kk,Ai,bi,xi;		  \
+    HYPRE_Int ii,jj,kk,bi,xi;		  \
     for (kk = 0; kk < nk; kk++)			  \
     {						  \
         for (jj = 0; jj < nj; jj++)			  \

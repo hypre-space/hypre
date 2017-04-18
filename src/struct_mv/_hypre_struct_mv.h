@@ -1421,8 +1421,8 @@ AxCheckError(cudaDeviceSynchronize());\
 
 extern "C++" {
 #include <curand.h>
-#include <curand_kernel.h>
 }
+#include <curand_kernel.h>
 
 struct cuda_traversal {HYPRE_Int cuda;};
 struct omp_traversal  {HYPRE_Int omp;};
@@ -1967,7 +1967,7 @@ __global__ void hypre_device_reduction_kernel(HYPRE_Real* out,
 	hypre_boxD1 *= hypre_max(0, box1.bsize2 + 1);	
 	i2 += (local_idx*box2.strides2 + box2.bstart2) * hypre_boxD2;
 	hypre_boxD2 *= hypre_max(0, box2.bsize2 + 1);
-	sum += loop_body(i1,i2);
+	sum = loop_body(i1,i2,sum);
       }
     sum=blockReduceSum<HYPRE_Real>(sum);
     if(threadIdx.x==0)
@@ -1991,18 +1991,19 @@ void hypre_device_reduction (HYPRE_Real* out,
 #define zypre_newBoxLoop1ReductionBegin(ndim, loop_size,		\
 					dbox1, start1, stride1, i1, sum) \
 {    									   \
-        zypre_BoxLoopCUDAInit(ndim);						\
-	zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
-        HYPRE_Real *d_c;				      		\
-        cudaMalloc((void**) &d_c, 1024 * sizeof(HYPRE_Real));			\
-        hypre_device_reduction(d_c,hypre__tot,databox1,databox1,[=] __device__(HYPRE_Int i1, HYPRE_Int i2) \
-	{					\
-	  HYPRE_Real sum = 0;			\
+   HYPRE_Real sum_old = sum;						\
+   zypre_BoxLoopCUDAInit(ndim);						\
+   zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
+   HYPRE_Real *d_c;							\
+   cudaMalloc((void**) &d_c, 1024 * sizeof(HYPRE_Real));		\
+   hypre_device_reduction(d_c,hypre__tot,databox1,databox1,[=] __device__(HYPRE_Int i1, HYPRE_Int i2, HYPRE_Real sum) \
+   {
 
 #define zypre_newBoxLoop1ReductionEnd(i1, sum)			\
   return sum;								\
   });									\
   cudaMemcpy(&sum,d_c,sizeof(HYPRE_Real),cudaMemcpyDeviceToHost);	\
+  sum += sum_old;							\
   cudaFree(d_c);							\
 }
 
@@ -2010,19 +2011,20 @@ void hypre_device_reduction (HYPRE_Real* out,
 					dbox1, start1, stride1, i1,	\
 					dbox2, start2, stride2, i2,sum) \
 {    									   \
-        zypre_BoxLoopCUDAInit(ndim);						\
-	zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
-	zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2); \
-        HYPRE_Real *d_c;				      		\
-        cudaMalloc((void**) &d_c, 1024 * sizeof(HYPRE_Real));			\
-        hypre_device_reduction(d_c,hypre__tot,databox1,databox2,[=] __device__(HYPRE_Int i1, HYPRE_Int i2) \
-	{					\
-	  HYPRE_Real sum = 0;			\
+   HYPRE_Real sum_old = sum;						\
+   zypre_BoxLoopCUDAInit(ndim);						\
+   zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
+   zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);	\
+   HYPRE_Real *d_c;							\
+   cudaMalloc((void**) &d_c, 1024 * sizeof(HYPRE_Real));		\
+   hypre_device_reduction(d_c,hypre__tot,databox1,databox2,[=] __device__(HYPRE_Int i1, HYPRE_Int i2, HYPRE_Real sum) \
+   {
 
 #define zypre_newBoxLoop2ReductionEnd(i1, i2, sum)			\
   return sum;								\
   });									\
   cudaMemcpy(&sum,d_c,sizeof(HYPRE_Real),cudaMemcpyDeviceToHost);	\
+  sum += sum_old;							\
   cudaFree(d_c);							\
 }
 
@@ -2030,24 +2032,24 @@ void hypre_device_reduction (HYPRE_Real* out,
 
 #define zypre_newBoxLoop1ReductionMult(ndim, loop_size,				\
 					dbox1, start1, stride1, i1,xp,sum) \
-{    																	\
-        zypre_BoxLoopCUDAInit(ndim);						\
+{    									 \
+   zypre_BoxLoopCUDAInit(ndim);						\
 	zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
 	int n_blocks = (hypre__tot+BLOCKSIZE-1)/BLOCKSIZE;					\
 	HYPRE_Real *d_b;													\
 	HYPRE_Real * b = new HYPRE_Real[n_blocks];							\
 	cudaMalloc((void**) &d_b, n_blocks * sizeof(HYPRE_Real));			\
 	reduction_mult<HYPRE_Real><<< n_blocks ,BLOCKSIZE>>>(xp,d_b,hypre__tot,databox1);		\
-cudaError err = cudaGetLastError();\
+   cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
-printf("\n ERROR zypre_newBoxLoop1Reduction: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+  printf("\n ERROR zypre_newBoxLoop1Reduction: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
 int *p = NULL; *p = 1;\
 }\
 AxCheckError(cudaMemcpy(b,d_b,n_blocks*sizeof(HYPRE_Real),cudaMemcpyDeviceToHost)); \
 	for (int j = 0 ; j< n_blocks ; ++j){								\
-		sum += b[j];											\
+		sum *= b[j];											\
 	}																	\
-	delete b;															\
+	delete [] b;															\
 }
 
 #define hypre_LoopBegin(size,idx)					\

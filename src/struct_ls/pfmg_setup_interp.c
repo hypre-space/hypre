@@ -239,7 +239,6 @@ hypre_PFMGSetupInterpOp_CC0
   HYPRE_Int           si0,
   HYPRE_Int           si1 )
 {
-   HYPRE_Int              si;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);

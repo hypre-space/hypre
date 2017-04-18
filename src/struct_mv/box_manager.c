@@ -2226,7 +2226,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
       HYPRE_Int  size[HYPRE_MAXDIM];
       HYPRE_Int  iminmax[2];
       HYPRE_Int  index_not_there;
-      HYPRE_Int  d, e, ii, itsize;
+      HYPRE_Int  d, e, itsize;
       HYPRE_Int  mystart, myfinish;
       HYPRE_Int  imin[HYPRE_MAXDIM];
       HYPRE_Int  imax[HYPRE_MAXDIM];
@@ -2462,7 +2462,7 @@ hypre_BoxManIntersect ( hypre_BoxManager *manager,
                         HYPRE_Int *nentries_ptr )
 {
    HYPRE_Int           ndim = hypre_BoxManNDim(manager);
-   HYPRE_Int           d, ii;
+   HYPRE_Int           d;
    HYPRE_Int           find_index_d, current_index_d;
    HYPRE_Int          *man_indexes_d;
    HYPRE_Int           man_index_size_d;

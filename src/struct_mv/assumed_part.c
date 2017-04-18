@@ -1633,7 +1633,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
 
    HYPRE_Int       i, d, p, q, r, myid;
    HYPRE_Int       num_regions, in_regions, this_region, proc_count, proc_start;
-   HYPRE_Int       adj_proc_id, extra, num_partitions, part_num;
+   HYPRE_Int       adj_proc_id, extra, num_partitions;
    HYPRE_Int       width;
    
    HYPRE_Int      *proc_array, proc_array_count;

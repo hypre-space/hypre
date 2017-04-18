@@ -130,7 +130,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               rank, startrank;
    HYPRE_Real             *vals;
 
-   HYPRE_Int               i, j, iA;
+   HYPRE_Int               i, j;
    HYPRE_Int               nvars, var1; 
 
    hypre_Index             lindex, zero_index;
