@@ -605,8 +605,8 @@ HYPRE_KOKKOS_INC_FILE
 HYPRE_KOKKOS_CUDA_OPTION
 HYPRE_KOKKOS_ARCH
 HYPRE_KOKKOS_DEVICE
-HYPRE_RAJA_LIB_DIR
-HYPRE_RAJA_INC_DIR
+HYPRE_RAJA_LIB
+HYPRE_RAJA_INCLUDE
 HYPRE_RAJA_SRC_DIR
 LAPACKLIBS
 LAPACKLIBDIRS
@@ -764,6 +764,7 @@ with_MPI
 with_cuda
 with_raja
 with_kokkos
+with_raja_include
 with_raja_lib
 with_raja_libs
 with_raja_lib_dirs
@@ -1506,6 +1507,9 @@ Optional Packages:
   --with-raja             Require RAJA package compiled with CUDA (default is
                           NO).
   --with-kokkos           Require kokkos package (default is NO).
+  --with-raja-include=DIR User specifies that RAJA/*.h is in DIR. The options
+                          --with-raja-include --with-raja-libs and
+                          --with-raja-lib-dirs must be used together.
   --with-raja-lib=LIBS    LIBS is space-separated linkable list (enclosed in
                           quotes) of libraries needed for RAJA. OK to use -L
                           and -l flags in the list
@@ -3226,8 +3230,8 @@ fi
 if test "${with_raja+set}" = set; then :
   withval=$with_raja; case "$withval" in
     yes) hypre_user_chose_raja=yes;;
-    no)  hypre_using_cuda=no ;;
-    *)   hypre_using_cuda=no ;;
+    no)  hypre_user_chose_raja=no ;;
+    *)   hypre_user_chose_raja=no ;;
  esac
 else
   hypre_using_raja=no
@@ -3248,12 +3252,23 @@ fi
 
 
 
+# Check whether --with-raja-include was given.
+if test "${with_raja_include+set}" = set; then :
+  withval=$with_raja_include; for raja_dir in $withval; do
+    HYPRE_RAJA_INCLUDE="$HYPRE_RAJA_INCLUDE -I$raja_dir"
+ done;
+ hypre_user_chose_raja=yes
+
+fi
+
+
+
 # Check whether --with-raja-lib was given.
 if test "${with_raja_lib+set}" = set; then :
   withval=$with_raja_lib; for raja_lib in $withval; do
        HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB $raja_lib"
  done;
-
+hypre_user_chose_raja=yes
 
 fi
 
@@ -3264,7 +3279,7 @@ if test "${with_raja_libs+set}" = set; then :
   withval=$with_raja_libs; for raja_lib in $withval; do
     HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB -l$raja_lib"
  done;
-
+hypre_user_chose_raja=yes
 
 fi
 
@@ -3275,7 +3290,7 @@ if test "${with_raja_lib_dirs+set}" = set; then :
   withval=$with_raja_lib_dirs; for raja_lib_dir in $withval; do
     HYPRE_RAJA_SRC_DIR="-L$raja_lib_dir $HYPRE_RAJA_SRC_DIR"
  done;
-
+hypre_user_chose_raja=yes
 
 fi
 
@@ -7496,38 +7511,31 @@ $as_echo "$as_me: WARNING: *****************************************************
    fi
 fi
 
-if test "$hypre_user_chose_cuda" = "yes"
-then
-   LDFLAGS="-ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
-   CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CFLAGS"
-   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CXXFLAGS"
-   if test "$hypre_using_um" = "yes"
-   then
-	CFLAGS+=" -DHYPRE_MEMORY_UM=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1"
-   else
-	CFLAGS+=" -DHYPRE_MEMORY_GPU=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1"
-   fi
-fi
-
 if test "$hypre_user_chose_raja" = "yes"
 then
-   LDFLAGS="-ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
-   PLATFORM="-DRAJA_PLATFORM_X86_SSE -DRAJA_COMPILER_GNU -DRAJA_USE_CUDA -DRAJA_USE_DOUBLE -DRAJA_USE_BARE_PTR -DRAJA_USE_GETTIME"
-   RAJAFLAGS="-lRAJA"
-   CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 -Xcompiler $RAJAFLAGS $CFLAGS"
-   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1  $RAJAFLAGS  $CXXFLAGS"
-   if test "$hypre_using_um" = "yes"
-   then
-	CFLAGS+=" -DHYPRE_MEMORY_UM=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1"
+   if test "$hypre_using_cuda" = "yes"
+      then
+	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda -lRAJA"
+   	RAJAFLAGS=" -lRAJA"
+   	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 -Xcompiler $RAJAFLAGS "
+   	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1  $RAJAFLAGS "
+   	if test "$hypre_using_um" = "yes"
+   	   then
+		CFLAGS+=" -DHYPRE_MEMORY_UM=1 "
+	    	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1 "
+   	   else
+		CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
+	   	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
+   	fi
+	hypre_user_chose_cuda=no
    else
-	CFLAGS+=" -DHYPRE_MEMORY_GPU=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+   	CC=${CXX}
+   	LDFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
+   	CFLAGS+=" -Wno-deprecated-register -qmaxmem=-1 -DHYPRE_USE_RAJA=1 "
+   	CXXFLAGS+=" -Wno-deprecated-register -qmaxmem=-1 -DHYPRE_USE_RAJA=1  "
+
    fi
 fi
-
 
 if test "$hypre_user_chose_kokkos" = "yes"
 then
@@ -7544,6 +7552,20 @@ then
    LINK_CC=$LINK_CXX
    CFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS=1"
    CXXFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS=1"
+fi
+if test "$hypre_user_chose_cuda" = "yes"
+then
+   LDFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
+   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
+   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
+   if test "$hypre_using_um" = "yes"
+   then
+	CFLAGS+=" -DHYPRE_MEMORY_UM=1"
+	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1"
+   else
+	CFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+   fi
 fi
 
 HYPRE_INSTALLDIR="${prefix}"

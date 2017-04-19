@@ -34,21 +34,10 @@
 
 #ifndef HYPRE_NEWBOXLOOP_HEADER
 #define HYPRE_NEWBOXLOOP_HEADER
-
-#include <cuda.h>
-#include <cuda_runtime.h>
-
 extern "C++" {
-#include <curand.h>
-#include <curand_kernel.h>
 #include <RAJA/RAJA.hxx>
 }
 using namespace RAJA;
-
-static HYPRE_Complex* global_recv_buffer;
-static HYPRE_Complex* global_send_buffer;
-static HYPRE_Int      global_recv_size = 0;
-static HYPRE_Int      global_send_size = 0;
 
 typedef struct hypre_Boxloop_struct
 {
@@ -61,6 +50,14 @@ typedef struct hypre_Boxloop_struct
 #define BLOCKSIZE 256
 
 #if defined(HYPRE_MEMORY_GPU)
+#include <cuda.h>
+#include <cuda_runtime.h>
+
+extern "C++" {
+#include <curand.h>
+#include <curand_kernel.h>
+}
+
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
 inline void CheckError(cudaError_t const err, char const* const fun, const int line)
 {
@@ -125,7 +122,7 @@ __global__ void dot (T * a, T * b, T *c, HYPRE_Int hypre__tot,
 {
     int id = (blockIdx.x * blockDim.x) + threadIdx.x;
 	HYPRE_Int local_idx;
-    HYPRE_Int d,idx_local = id;
+    HYPRE_Int idx_local = id;
     HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;
     HYPRE_Int i1 = 0, i2 = 0;
     //// reducted output
@@ -178,7 +175,7 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 {
     int id = (blockIdx.x * blockDim.x) + threadIdx.x;
 	HYPRE_Int local_idx;
-    HYPRE_Int d,idx_local = id;
+    HYPRE_Int idx_local = id;
     HYPRE_Int hypre_boxD1 = 1.0;
     HYPRE_Int i1 = 0;
     //// reducted output
@@ -222,14 +219,13 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 
 #define zypre_BoxLoopCUDAInit(ndim)											\
 	HYPRE_Int hypre__tot = 1.0;											\
-	const HYPRE_Int block_size = BLOCKSIZE;					\
 	for (HYPRE_Int i = 0;i < ndim;i ++)									\
 		hypre__tot *= loop_size[i];
 
 
 #define zypre_BoxLoopCUDADeclare()										\
 	HYPRE_Int local_idx;												\
-	HYPRE_Int d,idx_local = idx;
+	HYPRE_Int idx_local = idx;
 
 #define zypre_newBoxLoop0Begin(ndim, loop_size)			\
 {    														\
@@ -287,7 +283,7 @@ cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
 printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
 }\
-hypre_fence();\ 
+hypre_fence();\
 }
 	
 #define zypre_newBoxLoop2Begin(ndim, loop_size,				\
@@ -378,7 +374,7 @@ hypre_fence();\
 	if ( cudaSuccess != err ) {					\
 	  printf("\n ERROR zypre_newBoxLoop3End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
 	}								\
-	hypre_fence();							\	
+	hypre_fence();							\
 }
 
 #define zypre_newBoxLoop4Begin(ndim, loop_size,				\
@@ -483,7 +479,7 @@ public:
 
     // initialize shared memory
     T val = static_cast<T>(0);
-    for (int i = BLOCK_SIZE / 2; i > 0; i /= 2) {
+    for (int i = BLOCKSIZE / 2; i > 0; i /= 2) {
       // this descends all the way to 1
       if (threadId < i) {
         sd[threadId + i] = val;
@@ -522,7 +518,7 @@ public:
       T temp = 0;
       __syncthreads();
 
-      for (int i = BLOCK_SIZE / 2; i >= WARP_SIZE; i /= 2) {
+      for (int i = BLOCKSIZE / 2; i >= WARP_SIZE; i /= 2) {
         if (threadId < i) {
           sd[threadId] *= sd[threadId + i];
         }
@@ -649,7 +645,7 @@ private:
    HYPRE_Real sum_tmp;							\
    {									\
       ReduceSum< hypre_reduce_policy, HYPRE_Real> sum(0.0);				\
-      zypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1)	\
+      zypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1,i1)	\
       {
 
 #define zypre_newBoxLoop1ReductionEnd(i1,sum)				\
@@ -658,7 +654,7 @@ private:
       hypre_fence();						\
       sum_tmp = (HYPRE_Real)(sum);				\
    }								\
-   sum = sum_tmp; \
+   sum += sum_tmp; \
 }
 		    
 #define zypre_newBoxLoop2ReductionBegin(ndim, loop_size,		\
@@ -668,7 +664,9 @@ private:
    HYPRE_Real sum_tmp;							\
    {									\
       ReduceSum< hypre_reduce_policy, HYPRE_Real> sum(0.0);				\
-      zypre_newBoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1,dbox2, start2, stride2, i2,) \
+      zypre_newBoxLoop2Begin(ndim, loop_size, \
+			     dbox1, start1, stride1,i1,\
+			     dbox2, start2, stride2,i2)	\
       {
 
 #define zypre_newBoxLoop2ReductionEnd(i1,i2,sum)			\
@@ -677,20 +675,21 @@ private:
       hypre_fence();							\
       sum_tmp = (HYPRE_Real)(sum);					\
    }								\
-   sum = sum_tmp; \
+   sum += sum_tmp; \
 }
 
 #define zypre_newBoxLoop1ReductionMult(ndim, loop_size,				\
 				       dbox1, start1, stride1, i1,xp,sum) \
-{    																	\
+{									\
    ReduceMult<HYPRE_Real> local_result_raja(0.0);				\
-   zypre_newBoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, dbox2, start2, stride2, i2) \
+   zypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1) \
    {									\
        local_result_raja *= xp[i1];					\
    }									\
-   zypre_newBoxLoop2End(i1, i2)						\
+   zypre_newBoxLoop1End(i1)						\
    hypre_fence();							\
-   sum = (HYPRE_Real)(local_result_raja);
+   sum *= (HYPRE_Real)(local_result_raja);				\
+}
 
 
 #define hypre_LoopBegin(size,idx)					\
@@ -704,8 +703,8 @@ private:
 }
   
 #define zypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
-{    														\
-    HYPRE_Int hypre__tot = 1.0;											\
+{									\
+    HYPRE_Int hypre__tot = 1.0;						\
     hypre_Boxloop databox1;						\
     databox1.lsize0 = loop_size[0];					\
     databox1.lsize1 = loop_size[1];					\
@@ -745,7 +744,6 @@ private:
                                    stride2, i2)	\
 {    														\
     HYPRE_Int hypre__tot = 1.0;											\
-    const size_t block_size = 256;					\
     hypre_Boxloop databox1,databox2;					\
     databox1.lsize0 = loop_size[0];					\
     databox1.lsize1 = loop_size[1];					\

@@ -804,8 +804,8 @@ AS_HELP_STRING([--with-raja],
                [Require RAJA package compiled with CUDA (default is NO).]),
 [case "$withval" in
     yes) hypre_user_chose_raja=yes;;
-    no)  hypre_using_cuda=no ;;
-    *)   hypre_using_cuda=no ;;
+    no)  hypre_user_chose_raja=no ;;
+    *)   hypre_user_chose_raja=no ;;
  esac],
 [hypre_using_raja=no]
 )
@@ -818,6 +818,17 @@ AS_HELP_STRING([--with-kokkos],
     no)  hypre_user_chose_kokkos=no ;;
     *)   hypre_user_chose_kokkos=no ;;
  esac]
+)
+
+AC_ARG_WITH(raja-include,
+AS_HELP_STRING([--with-raja-include=DIR],
+               [User specifies that RAJA/*.h is in DIR.  The options
+                --with-raja-include --with-raja-libs and 
+                --with-raja-lib-dirs must be used together.]),
+[for raja_dir in $withval; do
+    HYPRE_RAJA_INCLUDE="$HYPRE_RAJA_INCLUDE -I$raja_dir"
+ done;
+ hypre_user_chose_raja=yes]
 )
 
 AC_ARG_WITH(raja-lib,
@@ -833,7 +844,7 @@ dnl    else
        HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB $raja_lib"
 dnl    fi
  done;
-]
+hypre_user_chose_raja=yes]
 )
 
 AC_ARG_WITH(raja-libs,
@@ -844,7 +855,7 @@ AS_HELP_STRING([--with-raja-libs=LIBS],
 [for raja_lib in $withval; do
     HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB -l$raja_lib"
  done;
-]
+hypre_user_chose_raja=yes]
 )
 
 AC_ARG_WITH(raja-lib-dirs,
@@ -857,7 +868,7 @@ AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
 [for raja_lib_dir in $withval; do
     HYPRE_RAJA_SRC_DIR="-L$raja_lib_dir $HYPRE_RAJA_SRC_DIR"
  done;
-]
+hypre_user_chose_raja=yes]
 )
 
 AC_ARG_WITH(caliper,
@@ -1354,43 +1365,34 @@ then
 fi
 
 dnl *********************************************************************
-dnl * Set cuda options
-dnl *********************************************************************
-if test "$hypre_user_chose_cuda" = "yes"
-then
-   LDFLAGS="-ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
-   CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CFLAGS"
-   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 $CXXFLAGS"
-   if test "$hypre_using_um" = "yes"
-   then
-	CFLAGS+=" -DHYPRE_MEMORY_UM=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1"
-   else
-	CFLAGS+=" -DHYPRE_MEMORY_GPU=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1"
-   fi
-fi
-
-dnl *********************************************************************
 dnl * Set raja options
 dnl *********************************************************************
+dnl PLATFORM=" -DRAJA_PLATFORM_X86_SSE -DRAJA_COMPILER_GNU -DRAJA_USE_CUDA -DRAJA_USE_DOUBLE -DRAJA_USE_BARE_PTR -DRAJA_USE_GETTIME"
 if test "$hypre_user_chose_raja" = "yes"
 then
-   LDFLAGS="-ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
-   PLATFORM="-DRAJA_PLATFORM_X86_SSE -DRAJA_COMPILER_GNU -DRAJA_USE_CUDA -DRAJA_USE_DOUBLE -DRAJA_USE_BARE_PTR -DRAJA_USE_GETTIME"
-   RAJAFLAGS="-lRAJA"
-   CFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 -Xcompiler $RAJAFLAGS $CFLAGS"
-   CXXFLAGS="-O2 -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1  $RAJAFLAGS  $CXXFLAGS"
-   if test "$hypre_using_um" = "yes"
-   then
-	CFLAGS+=" -DHYPRE_MEMORY_UM=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1"
-   else
-	CFLAGS+=" -DHYPRE_MEMORY_GPU=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+   if test "$hypre_using_cuda" = "yes"
+      then
+	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda -lRAJA"
+   	RAJAFLAGS=" -lRAJA"
+   	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 -Xcompiler $RAJAFLAGS "
+   	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1  $RAJAFLAGS "
+   	if test "$hypre_using_um" = "yes"
+   	   then
+		CFLAGS+=" -DHYPRE_MEMORY_UM=1 "
+	    	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1 "
+   	   else
+		CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
+	   	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
+   	fi
+	hypre_user_chose_cuda=no
+   else 
+   	CC=${CXX}
+   	LDFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
+   	CFLAGS+=" -Wno-deprecated-register -qmaxmem=-1 -DHYPRE_USE_RAJA=1 "
+   	CXXFLAGS+=" -Wno-deprecated-register -qmaxmem=-1 -DHYPRE_USE_RAJA=1  "
+
    fi
 fi
-
 dnl *********************************************************************
 dnl * Set kokkos options
 dnl *********************************************************************
@@ -1410,6 +1412,23 @@ then
    LINK_CC=$LINK_CXX
    CFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS=1"
    CXXFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS=1"
+fi
+dnl *********************************************************************
+dnl * Set cuda options
+dnl *********************************************************************
+if test "$hypre_user_chose_cuda" = "yes"
+then
+   LDFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
+   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
+   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
+   if test "$hypre_using_um" = "yes"
+   then
+	CFLAGS+=" -DHYPRE_MEMORY_UM=1"
+	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1"
+   else
+	CFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+   fi
 fi
 
 dnl *********************************************************************
@@ -1518,8 +1537,8 @@ dnl *********************************************************************
 dnl * RAJA information
 dnl *********************************************************************
 AC_SUBST(HYPRE_RAJA_SRC_DIR)
-AC_SUBST(HYPRE_RAJA_INC_DIR)
-AC_SUBST(HYPRE_RAJA_LIB_DIR)
+AC_SUBST(HYPRE_RAJA_INCLUDE)
+AC_SUBST(HYPRE_RAJA_LIB)
 
 dnl *********************************************************************
 dnl * KOKKOS information

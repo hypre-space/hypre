@@ -134,8 +134,8 @@ HYPRE_FEI_FEMLI_FILES   = @HYPRE_FEI_FEMLI_FILES@
 ##  RAJA options
 ##################################################################
 HYPRE_RAJA_SRC_DIR       = @HYPRE_RAJA_SRC_DIR@
-HYPRE_RAJA_INCLUDE       = @HYPRE_RAJA_INC_DIR@
-HYPRE_RAJA_LIB           = @HYPRE_RAJA_LIB_DIR@
+HYPRE_RAJA_INCLUDE       = @HYPRE_RAJA_INCLUDE@
+HYPRE_RAJA_LIB           = @HYPRE_RAJA_LIB@
 
 ##################################################################
 ##  kokkos options
