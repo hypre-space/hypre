@@ -19,7 +19,7 @@
 #include "HYPRE_krylov.h"
 #include "_hypre_sstruct_mv.h"
 #include "_hypre_sstruct_ls.h"
- 
+
 #define DEBUG 0
 
 /*--------------------------------------------------------------------------
@@ -1336,6 +1336,8 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
+   hypre_GPUInit(-1);
+
    hypre_InitMemoryDebug(myid);
 
    /*-----------------------------------------------------------
@@ -1900,6 +1902,7 @@ main( hypre_int argc,
    hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
+   hypre_GPUFinalize();
    hypre_MPI_Finalize();
 
    return (0);

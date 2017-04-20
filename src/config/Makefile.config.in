@@ -42,7 +42,7 @@ HYPRE_INC_INSTALL = @HYPRE_INCINSTALL@
 HYPRE_LIB_SUFFIX = @HYPRE_LIBSUFFIX@
 
 .SUFFIXES:
-.SUFFIXES: .o .f .c .C .cxx .cc
+.SUFFIXES: .o .f .c .C .cxx .cc .cu
 
 .f.o:
 	$(FC) $(FFLAGS) -c $< 
@@ -54,6 +54,8 @@ HYPRE_LIB_SUFFIX = @HYPRE_LIBSUFFIX@
 	$(CXX) $(CXXFLAGS) -c $<
 .cc.o:
 	$(CXX) $(CXXFLAGS) -c $<
+.cu.o:
+	$(NVCC) $(NVCCFLAGS) -c $<
 
 FC       = @FC@
 FFLAGS   = @FFLAGS@ @FCFLAGS@ $(FC_COMPILE_FLAGS)
@@ -63,6 +65,10 @@ CFLAGS   = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 
 CXX      = @CXX@
 CXXFLAGS = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
+
+NVCC 	  = nvcc
+NVCCFLAGS = @NVCCFLAGS@
+NVCCLIBS  = @NVCCLIBS@
 
 LINK_FC  = @LINK_FC@
 LINK_CC  = @LINK_CC@
@@ -85,7 +91,7 @@ AR     = @AR@
 RANLIB = @RANLIB@
 
 LDFLAGS = @LDFLAGS@
-LIBS    = @LIBS@ @CALIPER_LIBS@
+LIBS    = @LIBS@ @CALIPER_LIBS@ @NVCCLIBS@
 FLIBS   = @FLIBS@
 
 INCLUDES = @CALIPER_INCLUDE@
@@ -113,6 +119,11 @@ MPIINCLUDE = @MPIINCLUDE@
 MPILIBDIRS = @MPILIBDIRS@
 MPILIBS    = @MPILIBS@
 MPIFLAGS   = @MPIFLAGS@
+
+##################################################################
+##  NVCC options
+##################################################################
+HYPRE_NVCC_MAKEFILE = @HYPRE_NVCC_MAKEFILE@
 
 ##################################################################
 ##  Caliper options
@@ -148,4 +159,3 @@ KOKKOS_CUDA_OPTIONS = @HYPRE_KOKKOS_CUDA_OPTION@
 HYPRE_KOKKOS_CLEAN       = @HYPRE_KOKKOS_CLEAN@
 HYPRE_KOKKOS_LIB         = @HYPRE_KOKKOS_LIB@
 HYPRE_KOKKOS_DEPENDS     = @HYPRE_KOKKOS_DEPENDS@
-

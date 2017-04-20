@@ -185,6 +185,19 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
 
+#ifdef HYPRE_USE_GPU
+   if (!hypre_ParCSRMatrixIsManaged(A)){
+     hypre_fprintf(stderr,"ERROR:: INVALID A in hypre_BoomerAMGSetup::Address %p\n",A);
+     //exit(2);
+   } else if(!hypre_ParVectorIsManaged(f)){
+     hypre_fprintf(stderr,"ERROR:: INVALID f in hypre_BoomerAMGSetup::Address %p\n",f);
+     //exit(2);
+   } else if (!hypre_ParVectorIsManaged(u)){
+     hypre_fprintf(stderr,"ERROR:: INVALID u in hypre_BoomerAMGSetup::Address %p\n",u);
+     //exit(2);
+   } 
+#endif
+
    /*hypre_CSRMatrix *A_new;*/
 
    hypre_MPI_Comm_size(comm, &num_procs);   
@@ -744,7 +757,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    while (not_finished_coarsening)
    {
-
 
       /* only do nodal coarsening on a fixed number of levels */
       if (level >= nodal_levels)
@@ -1389,7 +1401,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                        my_id,level, wall_time); 
 	    fflush(NULL);
          }
-
 
             if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
@@ -2104,6 +2115,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (  (seq_threshold >= coarse_threshold) && (coarse_size > coarse_threshold) && (level != max_levels-1))
    {
       hypre_seqAMGSetup( amg_data, level, coarse_threshold);
+
    }
    else if (grid_relax_type[3] == 9 || grid_relax_type[3] == 99)  /*use of Gaussian elimination on coarsest level */
    {
@@ -2154,7 +2166,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          hypre_ParVectorSetPartitioningOwner(U_array[level],0);
       }   
    }
-   
+
    /*-----------------------------------------------------------------------
     * enter all the stuff created, A[level], P[level], CF_marker[level],
     * for levels 1 through coarsest, into amg_data data structure

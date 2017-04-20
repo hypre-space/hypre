@@ -54,7 +54,7 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    HYPRE_Int  num_procs, my_id;
    HYPRE_Int local_num_rows, local_num_cols;
    HYPRE_Int first_row_index, first_col_diag;
-   
+
    matrix = hypre_CTAlloc(hypre_ParCSRMatrix, 1);
 
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -2153,3 +2153,11 @@ hypre_ParCSRMatrix * hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix * A,
 
    return C;
 }
+#ifdef HYPRE_USE_GPU
+hypre_int hypre_ParCSRMatrixIsManaged(hypre_ParCSRMatrix *a){
+  if (hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(a)))
+    return ((hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixDiag(a))) && (hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixOffd(a))));
+  else
+    return hypre_CSRMatrixIsManaged(hypre_ParCSRMatrixDiag(a)); 
+}
+#endif

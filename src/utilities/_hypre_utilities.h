@@ -1,14 +1,3 @@
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
 
 #ifndef hypre_UTILITIES_HEADER
 #define hypre_UTILITIES_HEADER
@@ -18,15 +7,6 @@
 #ifdef HYPRE_USING_OPENMP
 #include <omp.h>
 #endif
-
-/* This allows us to consistently avoid 'int' throughout hypre */
-typedef int               hypre_int;
-typedef long int          hypre_longint;
-typedef unsigned int      hypre_uint;
-typedef unsigned long int hypre_ulongint;
-
-/* This allows us to consistently avoid 'double' throughout hypre */
-typedef double            hypre_double;
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,6 +32,15 @@ extern "C" {
 
 #ifndef hypre_GENERAL_HEADER
 #define hypre_GENERAL_HEADER
+
+/* This allows us to consistently avoid 'int' throughout hypre */
+typedef int               hypre_int;
+typedef long int          hypre_longint;
+typedef unsigned int      hypre_uint;
+typedef unsigned long int hypre_ulongint;
+
+/* This allows us to consistently avoid 'double' throughout hypre */
+typedef double            hypre_double;
 
 /*--------------------------------------------------------------------------
  * Define various functions
@@ -288,6 +277,7 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_MAX MPI_MAX
 #define  hypre_MPI_LOR MPI_LOR
 #define  hypre_MPI_SUCCESS MPI_SUCCESS
+#define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
 
 #define  hypre_MPI_UNDEFINED       MPI_UNDEFINED   
 #define  hypre_MPI_REQUEST_NULL    MPI_REQUEST_NULL
@@ -295,7 +285,6 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_ANY_TAG         MPI_ANY_TAG
 #define  hypre_MPI_SOURCE          MPI_SOURCE
 #define  hypre_MPI_TAG             MPI_TAG
-#define  hypre_MPI_STATUSES_IGNORE MPI_STATUSES_IGNORE
 #define  hypre_MPI_LAND            MPI_LAND
 
 #endif
@@ -604,6 +593,21 @@ if ( cudaerr != cudaSuccess ) {										\
 #define hypre_TFree(ptr) \
 ( hypre_Free((char *)ptr), ptr = NULL )
 
+#define hypre_PinnedTAlloc(type, count) \
+( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
+
+#define hypre_HostTAlloc(type, count) \
+( (type *)hypre_MAllocHost((size_t)(sizeof(type) * (count))) )
+
+#define hypre_HostCTAlloc(type, count) \
+( (type *)hypre_CAllocHost((size_t)(count), (size_t)sizeof(type)) )
+
+#define hypre_HostTReAlloc(ptr, type, count) \
+( (type *)hypre_ReAllocHost((char *)ptr, (size_t)(sizeof(type) * (count))) )
+
+#define hypre_HostTFree(ptr) \
+( hypre_FreeHost((char *)ptr), ptr = NULL )
+
 #endif
 
 #define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count))
@@ -632,8 +636,13 @@ if ( cudaerr != cudaSuccess ) {										\
 HYPRE_Int hypre_OutOfMemory ( size_t size );
 char *hypre_MAlloc ( size_t size );
 char *hypre_CAlloc ( size_t count , size_t elt_size );
+char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc ( char *ptr , size_t size );
 void hypre_Free ( char *ptr );
+char *hypre_CAllocHost( size_t count,size_t elt_size );
+char *hypre_MAllocHost( size_t size );
+char *hypre_ReAllocHost( char   *ptr,size_t  size );
+void hypre_FreeHost( char *ptr );
 char *hypre_SharedMAlloc ( size_t size );
 char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
 char *hypre_SharedReAlloc ( char *ptr , size_t size );
@@ -916,7 +925,6 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
                      HYPRE_Int rnum, MPI_Comm comm,  void **p_response_recv_buf, 
                      HYPRE_Int **p_response_recv_buf_starts);
 
-
 #endif /* end of header */
 
 /*BHEADER**********************************************************************
@@ -996,9 +1004,351 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 
 #endif /* CALIPER_INSTRUMENTATION_HEADER */
 
-/*--------------------------------------------------------------------------
- * Other prototypes
- *--------------------------------------------------------------------------*/
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+  //#define CUDAMEMATTACHTYPE cudaMemAttachGlobal
+//#define CUDAMEMATTACHTYPE cudaMemAttachHost
+#define HYPRE_GPU_USE_PINNED 1
+#define HYPRE_USE_MANAGED_SCALABLE 1
+#endif
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+
+#ifdef USE_NVTX
+#include "nvToolsExt.h"
+#include "nvToolsExtCudaRt.h"
+
+static const uint32_t colors[] = { 0x0000ff00, 0x000000ff, 0x00ffff00, 0x00ff00ff, 0x0000ffff, 0x00ff0000, 0x00ffffff };
+static const int num_colors = sizeof(colors)/sizeof(uint32_t);
+
+#define PUSH_RANGE(name,cid) { \
+    int color_id = cid; \
+    color_id = color_id%num_colors;\
+    nvtxEventAttributes_t eventAttrib = {0}; \
+    eventAttrib.version = NVTX_VERSION; \
+    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
+    eventAttrib.colorType = NVTX_COLOR_ARGB; \
+    eventAttrib.color = colors[color_id]; \
+    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
+    eventAttrib.message.ascii = name; \
+    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib);	\
+}
+
+#define PUSH_RANGE_PAYLOAD(name,cid,load) {		\
+    int color_id = cid; \
+    color_id = color_id%num_colors;\
+    nvtxEventAttributes_t eventAttrib = {0}; \
+    eventAttrib.version = NVTX_VERSION; \
+    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
+    eventAttrib.colorType = NVTX_COLOR_ARGB; \
+    eventAttrib.color = colors[color_id]; \
+    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
+    eventAttrib.message.ascii = name; \
+    eventAttrib.payloadType = NVTX_PAYLOAD_TYPE_INT64; \
+    eventAttrib.payload.llValue = load; \
+    eventAttrib.category=1; \
+    nvtxDomainRangePushEx(HYPRE_DOMAIN,&eventAttrib); \
+}
+
+#define PUSH_RANGE_DOMAIN(name,cid,dId) {				\
+    int color_id = cid; \
+    color_id = color_id%num_colors;\
+    nvtxEventAttributes_t eventAttrib = {0}; \
+    eventAttrib.version = NVTX_VERSION; \
+    eventAttrib.size = NVTX_EVENT_ATTRIB_STRUCT_SIZE; \
+    eventAttrib.colorType = NVTX_COLOR_ARGB; \
+    eventAttrib.color = colors[color_id]; \
+    eventAttrib.messageType = NVTX_MESSAGE_TYPE_ASCII; \
+    eventAttrib.message.ascii = name; \
+    nvtxDomainRangePushEx(getdomain(dId),&eventAttrib);	\
+}
+
+#define POP_RANGE nvtxDomainRangePop(HYPRE_DOMAIN);
+#define POP_RANGE_DOMAIN(dId) {			\
+  nvtxDomainRangePop(getdomain(dId));		\
+  }
+#else
+#define PUSH_RANGE(name,cid)
+#define POP_RANGE
+#define PUSH_RANGE_PAYLOAD(name,cid,load)
+#define PUSH_RANGE_DOMAIN(name,cid,domainName)
+#endif
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+#ifdef HYPRE_USE_MANAGED
+#include <cuda_runtime_api.h>
+#define CUDAMEMATTACHTYPE cudaMemAttachGlobal
+#define MEM_PAD_LEN 1
+#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line)
+{
+   if (code != cudaSuccess) 
+   {
+     fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file);
+     fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code));
+     exit(2);
+   }
+}
+void cudaSafeFree(void *ptr,int padding);
+void PrintPointerAttributes(const void *ptr);
+#endif
+
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#ifndef __cusparseErrorCheck__
+#define __cusparseErrorCheck__
+#include <cusparse.h>
+#include <cublas_v2.h>
+#include <stdio.h>
+  //#include <cuda_runtime_api.h>
+#include <stdlib.h>
+inline const char *cusparseErrorCheck(cusparseStatus_t error)
+{
+    switch (error)
+    {
+        case CUSPARSE_STATUS_SUCCESS:
+            return "CUSPARSE_STATUS_SUCCESS";
+
+        case CUSPARSE_STATUS_NOT_INITIALIZED:
+            return "CUSPARSE_STATUS_NOT_INITIALIZED";
+
+        case CUSPARSE_STATUS_ALLOC_FAILED:
+            return "CUSPARSE_STATUS_ALLOC_FAILED";
+
+        case CUSPARSE_STATUS_INVALID_VALUE:
+            return "CUSPARSE_STATUS_INVALID_VALUE";
+
+        case CUSPARSE_STATUS_ARCH_MISMATCH:
+            return "CUSPARSE_STATUS_ARCH_MISMATCH";
+
+        case CUSPARSE_STATUS_MAPPING_ERROR:
+            return "CUSPARSE_STATUS_MAPPING_ERROR";
+
+        case CUSPARSE_STATUS_EXECUTION_FAILED:
+            return "CUSPARSE_STATUS_EXECUTION_FAILED";
+
+        case CUSPARSE_STATUS_INTERNAL_ERROR:
+            return "CUSPARSE_STATUS_INTERNAL_ERROR";
+
+        case CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED:
+            return "CUSPARSE_STATUS_MATRIX_TYPE_NOT_SUPPORTED";
+        default:
+	    return "Unknown error in cusparseErrorCheck";
+    }
+    
+}
+inline const char *cublasErrorCheck(cublasStatus_t error)
+{
+    switch (error)
+    {
+        case CUBLAS_STATUS_SUCCESS:
+            return "CUBLAS_STATUS_SUCCESS";
+
+        case CUBLAS_STATUS_NOT_INITIALIZED:
+            return "CUBLAS_STATUS_NOT_INITIALIZED";
+
+        case CUBLAS_STATUS_ALLOC_FAILED:
+            return "CUBLAS_STATUS_ALLOC_FAILED";
+
+        case CUBLAS_STATUS_INVALID_VALUE:
+            return "CUBLAS_STATUS_INVALID_VALUE";
+
+        case CUBLAS_STATUS_ARCH_MISMATCH:
+            return "CUBLAS_STATUS_ARCH_MISMATCH";
+
+        case CUBLAS_STATUS_MAPPING_ERROR:
+            return "CUBLAS_STATUS_MAPPING_ERROR";
+
+        case CUBLAS_STATUS_EXECUTION_FAILED:
+            return "CUBLAS_STATUS_EXECUTION_FAILED";
+
+        case CUBLAS_STATUS_INTERNAL_ERROR:
+            return "CUBLAS_STATUS_INTERNAL_ERROR";
+
+        case CUBLAS_STATUS_NOT_SUPPORTED:
+            return "CUBLAS_STATUS_NOT_SUPPORTED";
+        case CUBLAS_STATUS_LICENSE_ERROR:
+	    return "CUBLAS_STATUS_LICENSE_ERROR";
+        default:
+	    return "Unknown error in cublasErrorCheck";
+    }
+
+}
+/* #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); } */
+/* inline void gpuAssert(cudaError_t code, const char *file, int line) */
+/* { */
+/*    if (code != cudaSuccess)  */
+/*    { */
+/*      fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file); */
+/*      fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code)); */
+/*      exit(2); */
+/*    } */
+/* } */
+#define cusparseErrchk(ans) { cusparseAssert((ans), __FILE__, __LINE__); }
+inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
+{
+   if (code != CUSPARSE_STATUS_SUCCESS) 
+   {
+     fprintf(stderr,"CUSPARSE ERROR  ( Code = %d) IN CUDA CALL line %d of file %s\n",code,line,file);
+     fprintf(stderr,"CUSPARSE ERROR : %s \n", cusparseErrorCheck(code));
+   }
+}
+#define cublasErrchk(ans){ cublasAssert((ans), __FILE__, __LINE__); }
+inline void cublasAssert(cublasStatus_t code, const char *file, int line)
+{
+   if (code != CUBLAS_STATUS_SUCCESS) 
+   {
+     fprintf(stderr,"CUBLAS ERROR  ( Code = %d) IN CUDA CALL line %d of file %s\n",code,line,file);
+     fprintf(stderr,"CUBLAS ERROR : %s \n", cublasErrorCheck(code));
+   }
+}
+//int PointerType(const void *ptr);
+void cudaSafeFree(void *ptr,int padding);
+void PrintPointerAttributes(const void *ptr);
+//size_t mempush(void* ptr, size_t size,int purge);
+//int memloc(void *ptr, int device);
+#endif
+#endif
+
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
+void hypre_GPUInit(hypre_int use_device);
+void hypre_GPUFinalize();
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#ifndef __GPUMEM_H__
+#define  __GPUMEM_H__
+#ifdef HYPRE_USE_GPU
+#include <cuda_runtime_api.h>
+int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
+void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
+void VecSet(double* tgt, int size, double value, cudaStream_t s);
+void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
+void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
+void CudaCompileFlagCheck();
+#endif
+
+cudaStream_t getstreamOlde(hypre_int i);
+nvtxDomainHandle_t getdomain(hypre_int i);
+cudaEvent_t getevent(hypre_int i);
+void MemAdviseReadOnly(const void *ptr, hypre_int device);
+void MemAdviseUnSetReadOnly(const void *ptr, hypre_int device);
+void MemAdviseSetPrefLocDevice(const void *ptr, hypre_int device);
+void MemAdviseSetPrefLocHost(const void *ptr);
+void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream);
+void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t stream);
+void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream);
+cublasHandle_t getCublasHandle();
+cusparseHandle_t getCusparseHandle();
+typedef struct node {
+  const void *ptr;
+  size_t size;
+  struct node *next;
+} node;
+size_t mempush(const void *ptr, size_t size, hypre_int action);
+node *memfind(node *head, const void *ptr);
+void memdel(node **head, node *found);
+void meminsert(node **head, const void *ptr,size_t size);
+void printlist(node *head,hypre_int nc);
+  //#define MEM_PAD_LEN 1
+size_t memsize(const void *ptr);
+hypre_int getsetasyncmode(hypre_int mode, hypre_int action);
+void SetAsyncMode(hypre_int mode);
+hypre_int GetAsyncMode();
+void branchStream(hypre_int i, hypre_int j);
+void joinStreams(hypre_int i, hypre_int j, hypre_int k);
+void affs(hypre_int myid);
+hypre_int getcore();
+hypre_int getnuma();
+hypre_int checkDeviceProps();
+hypre_int pointerIsManaged(const void *ptr);
+/*
+ * Global struct for keeping HYPRE GPU Init state
+ */
+
+#define MAX_HGS_ELEMENTS 10
+struct hypre__global_struct{
+  hypre_int initd;
+  hypre_int device;
+  hypre_int device_count;
+  cublasHandle_t cublas_handle;
+  cusparseHandle_t cusparse_handle;
+  cusparseMatDescr_t cusparse_mat_descr;
+  cudaStream_t streams[MAX_HGS_ELEMENTS];
+  nvtxDomainHandle_t nvtx_domain;
+  hypre_int concurrent_managed_access;
+  size_t memoryHWM;
+};
+
+extern struct hypre__global_struct hypre__global_handle ;
+
+/*
+ * Macros for accessing elements of the global handle
+ */
+#define HYPRE_GPU_HANDLE hypre__global_handle.initd
+#define HYPRE_CUBLAS_HANDLE hypre__global_handle.cublas_handle
+#define HYPRE_CUSPARSE_HANDLE hypre__global_handle.cusparse_handle
+#define HYPRE_DEVICE hypre__global_handle.device
+#define HYPRE_DEVICE_COUNT hypre__global_handle.device_count
+#define HYPRE_CUSPARSE_MAT_DESCR hypre__global_handle.cusparse_mat_descr
+#define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
+#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
+#define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
+#define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
+
+#endif
+#endif
+
+/*BHEADER**********************************************************************
+ * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+ * Produced at the Lawrence Livermore National Laboratory.
+ * This file is part of HYPRE.  See file COPYRIGHT for details.
+ *
+ * HYPRE is free software; you can redistribute it and/or modify it under the
+ * terms of the GNU Lesser General Public License (as published by the Free
+ * Software Foundation) version 2.1 dated February 1999.
+ *
+ * $Revision$
+ ***********************************************************************EHEADER*/
 
 /* amg_linklist.c */
 void hypre_dispose_elt ( hypre_LinkList element_ptr );
@@ -1213,8 +1563,6 @@ void hypre_sort_and_create_inverse_map(
 #ifdef __cplusplus
 }
 #endif
-
-/*#include "hypre_hopscotch_hash.h"*/
 
 #endif
 

@@ -10,24 +10,11 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#ifndef hypre_THREADING_HEADER
-#define hypre_THREADING_HEADER
-
-#ifdef HYPRE_USING_OPENMP
-
-HYPRE_Int hypre_NumThreads( void );
-HYPRE_Int hypre_NumActiveThreads( void );
-HYPRE_Int hypre_GetThreadNum( void );
-
-#else
-
-#define hypre_NumThreads() 1
-#define hypre_NumActiveThreads() 1
-#define hypre_GetThreadNum() 0
-
-#endif
-
-void hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int n );
-
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#include "gpuErrorCheck.h"
+#define CUDAMEMATTACHTYPE cudaMemAttachGlobal
+//#define CUDAMEMATTACHTYPE cudaMemAttachHost
+#define HYPRE_GPU_USE_PINNED 1
+#define HYPRE_USE_MANAGED_SCALABLE 1
 #endif
 

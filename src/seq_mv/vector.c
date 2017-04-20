@@ -18,6 +18,11 @@
 
 #include "seq_mv.h"
 #include <assert.h>
+#ifdef HYPRE_USE_GPU
+#include <cublas_v2.h>
+#include <cusparse.h>
+#include "gpukernels.h"
+#endif
 
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCreate
@@ -28,7 +33,11 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 {
    hypre_Vector  *vector;
 
-   vector = hypre_CTAlloc(hypre_Vector, 1);
+   vector = hypre_HostCTAlloc(hypre_Vector, 1);
+
+#ifdef HYPRE_USE_GPU
+   vector->on_device=0;
+#endif
 
    hypre_VectorData(vector) = NULL;
    hypre_VectorSize(vector) = size;
@@ -69,7 +78,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
       {
          hypre_TFree(hypre_VectorData(vector));
       }
-      hypre_TFree(vector);
+      hypre_HostTFree(vector);
    }
 
    return ierr;
@@ -246,6 +255,10 @@ HYPRE_Int
 hypre_SeqVectorSetConstantValues( hypre_Vector *v,
                                   HYPRE_Complex value )
 {
+#ifdef HYPRE_USE_GPU
+  VecSet(hypre_VectorData(v),hypre_VectorSize(v),value,HYPRE_STREAM(4));
+  return 0;
+#endif
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
@@ -310,6 +323,9 @@ HYPRE_Int
 hypre_SeqVectorCopy( hypre_Vector *x,
                      hypre_Vector *y )
 {
+#ifdef HYPRE_USE_GPU
+  return hypre_SeqVectorCopyDevice(x,y);
+#endif
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
@@ -394,7 +410,10 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
-
+   
+#ifdef HYPRE_USE_GPU
+   return VecScaleScalar(y->data,alpha, hypre_VectorSize(y),HYPRE_STREAM(4));
+#endif
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(y);
            
@@ -426,6 +445,9 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
                      hypre_Vector *x,
                      hypre_Vector *y     )
 {
+#ifdef  HYPRE_USE_GPU
+  return hypre_SeqVectorAxpyDevice(alpha,x,y);
+#endif
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
@@ -460,6 +482,9 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
                                        hypre_Vector *y )
 {
+#ifdef HYPRE_USE_GPU
+  return hypre_SeqVectorInnerProdDevice(x,y);
+#endif
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
@@ -506,3 +531,133 @@ HYPRE_Complex hypre_VectorSumElts( hypre_Vector *vector )
 
    return sum;
 }
+
+#ifdef HYPRE_USE_GPU
+/* Sums of the absolute value of the elements for comparison to cublas device side routine */
+HYPRE_Complex hypre_VectorSumAbsElts( hypre_Vector *vector )
+{
+   HYPRE_Complex  sum = 0;
+   HYPRE_Complex *data = hypre_VectorData( vector );
+   HYPRE_Int      size = hypre_VectorSize( vector );
+   HYPRE_Int      i;
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) reduction(+:sum) HYPRE_SMP_SCHEDULE
+#endif
+   for ( i=0; i<size; ++i ) sum += fabs(data[i]); 
+
+   return sum;
+}
+HYPRE_Int
+hypre_SeqVectorCopyDevice( hypre_Vector *x,
+                     hypre_Vector *y )
+{
+  
+  HYPRE_Complex *x_data = hypre_VectorData(x);
+  HYPRE_Complex *y_data = hypre_VectorData(y);
+  HYPRE_Int      size   = hypre_VectorSize(x);
+  HYPRE_Int      size_y   = hypre_VectorSize(y);
+  
+  HYPRE_Int      i;
+  
+  HYPRE_Int      ierr = 0;
+  
+  if (size > size_y) size = size_y;
+  size *=hypre_VectorNumVectors(x);
+  PUSH_RANGE_PAYLOAD("VECCOPYDEVICE",2,size);
+  hypre_SeqVectorPrefetchToDevice(x);
+  hypre_SeqVectorPrefetchToDevice(y);
+  VecCopy(y_data,x_data,size,HYPRE_STREAM(4));
+  cudaStreamSynchronize(HYPRE_STREAM(4));
+  POP_RANGE;
+  return ierr;
+}
+HYPRE_Int
+hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
+                     hypre_Vector *x,
+		     hypre_Vector *y     ){
+
+  HYPRE_Complex *x_data = hypre_VectorData(x);
+  HYPRE_Complex *y_data = hypre_VectorData(y);
+  HYPRE_Int      size   = hypre_VectorSize(x);
+           
+  HYPRE_Int      i;
+           
+  HYPRE_Int      ierr = 0;
+  cublasStatus_t stat;
+  size *=hypre_VectorNumVectors(x);
+
+  PUSH_RANGE_PAYLOAD("DEVAXPY",0,hypre_VectorSize(x));
+  hypre_SeqVectorPrefetchToDevice(x);
+  hypre_SeqVectorPrefetchToDevice(y);
+  static cublasHandle_t handle;
+  static int firstcall=1;
+  if (firstcall){
+    handle=getCublasHandle();
+    firstcall=0;
+  }
+  cublasErrchk(cublasDaxpy(handle,(int)size,&alpha,x_data,1,y_data,1));
+  gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+  POP_RANGE;
+  return ierr;
+}
+
+HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
+                                       hypre_Vector *y )
+{
+  PUSH_RANGE_PAYLOAD("DEVDOT",4,hypre_VectorSize(x));
+  static cublasHandle_t handle;
+  static int firstcall=1;
+
+  HYPRE_Complex *x_data = hypre_VectorData(x);
+  HYPRE_Complex *y_data = hypre_VectorData(y);
+  HYPRE_Int      size   = hypre_VectorSize(x);
+           
+  HYPRE_Int      i;
+
+  HYPRE_Real     result = 0.0;
+  cublasStatus_t stat;
+  if (firstcall){
+    handle = getCublasHandle();
+    firstcall=0;
+  }
+  PUSH_RANGE_PAYLOAD("DEVDOT-PRFETCH",5,hypre_VectorSize(x));
+  //hypre_SeqVectorPrefetchToDevice(x);
+  //hypre_SeqVectorPrefetchToDevice(y);
+  POP_RANGE;
+  PUSH_RANGE_PAYLOAD("DEVDOT-ACTUAL",0,hypre_VectorSize(x));
+  stat=cublasDdot(handle, (int)size,
+		  x_data, 1,
+		  y_data, 1,
+		  &result);
+  gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+  POP_RANGE;
+  POP_RANGE;
+  return result;
+  
+}
+void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x){
+  if (hypre_VectorSize(x)==0) return;
+  PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
+  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
+  gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+  POP_RANGE;
+}
+void hypre_SeqVectorPrefetchToHost(hypre_Vector *x){
+  if (hypre_VectorSize(x)==0) return;
+  PUSH_RANGE("hypre_SeqVectorPrefetchToHost",0);
+  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
+  gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+  POP_RANGE;
+}
+void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x,int index){
+  if (hypre_VectorSize(x)==0) return;
+  PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
+  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(index)));
+  gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(index)));
+  POP_RANGE;
+}
+hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x){
+  return pointerIsManaged((void*)hypre_VectorData(x));
+}
+#endif

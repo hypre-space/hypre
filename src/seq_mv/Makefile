@@ -13,6 +13,9 @@
 
 include ../config/Makefile.config
 
+FILES_NVCC =
+include $(HYPRE_NVCC_MAKEFILE)
+
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
 C_COMPILE_FLAGS =\
@@ -44,6 +47,7 @@ FILES =\
  vector.c
 
 OBJS = ${FILES:.c=.o}
+CUOBJS = ${FILES_NVCC:.cu=.o}
 
 SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}.so
 
@@ -71,12 +75,12 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE_seq_mv.a: ${OBJS}
+libHYPRE_seq_mv.a: ${OBJS} ${CUOBJS}
 	@echo  "Building $@ ... "
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_seq_mv.so: ${OBJS}
+libHYPRE_seq_mv.so: ${OBJS}  ${CUOBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@
