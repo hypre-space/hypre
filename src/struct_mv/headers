@@ -79,26 +79,18 @@ cat struct_communication.h >> $INTERNAL_HEADER
 cat computation.h          >> $INTERNAL_HEADER	
 cat struct_matrix.h        >> $INTERNAL_HEADER	
 cat struct_vector.h        >> $INTERNAL_HEADER	
-cat red_black_gs.h         >> $INTERNAL_HEADER
+
 cat protos.h               >> $INTERNAL_HEADER
 
 #===========================================================================
 # Include guards
 #===========================================================================
 
-if [ "$hypre_using_cpp" == "1" ]; then
-cat >> $INTERNAL_HEADER <<@
-@
-else
 cat >> $INTERNAL_HEADER <<@
 
 #ifdef __cplusplus
 }
 #endif
-@
-fi
-
-cat >> $INTERNAL_HEADER <<@
 
 #endif
 

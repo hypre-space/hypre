@@ -169,11 +169,13 @@ if ( cudaerr != cudaSuccess ) {										\
 #define hypre_SharedTFree(ptr) hypre_TFree(ptr)
 #else
 #define HYPRE_CUDA_GLOBAL 
-#ifdef HYPRE_MEMORY_DMALLOC
+
 /*--------------------------------------------------------------------------
  * Use "Debug Malloc Library", dmalloc
  *--------------------------------------------------------------------------*/
-  
+
+#ifdef HYPRE_MEMORY_DMALLOC
+
 #define hypre_InitMemoryDebug(id)    hypre_InitMemoryDebugDML(id)
 #define hypre_FinalizeMemoryDebug()  hypre_FinalizeMemoryDebugDML()
 

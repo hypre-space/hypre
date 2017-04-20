@@ -853,8 +853,8 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
                rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
                   +          rb[iR] * a_be[iAm1]
                   +                   a_be[iA]   * pa[iP1];
-
-	       iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
+ 
+               iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
                rap_bnw[iAc] = rb[iR] * a_cnw[iAm1] * pa[iP1]
                   +           rb[iR] * a_bnw[iAm1]
                   +                    a_bnw[iA]   * pa[iP1];
@@ -878,7 +878,7 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
                   +          rb[iR] * a_asw[iAm1]
                   +          ra[iR] * a_bsw[iAp1];
 
-	       iP1 = iP - yOffsetP;
+               iP1 = iP - yOffsetP;
                rap_cs[iAc] =          a_cs[iA]
                   +          rb[iR] * a_cs[iAm1] * pb[iP1]
                   +          ra[iR] * a_cs[iAp1] * pa[iP1]
@@ -1532,8 +1532,8 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
                   +          ra[iR] * a_aw[iAp1]
                   +                   a_aw[iA]   * pb[iP1];
-
-	       iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
+ 
+               iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
                rap_ase[iAc] = ra[iR] * a_cse[iAp1] * pb[iP1]
                   +           ra[iR] * a_ase[iAp1]
                   +                    a_ase[iA]   * pb[iP1];
@@ -1558,7 +1558,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                   +          rb[iR] * a_ane[iAm1]
                   +          ra[iR] * a_bne[iAp1];
 
-	       iP1 = iP + yOffsetP;
+               iP1 = iP + yOffsetP;
                rap_cn[iAc] =          a_cn[iA]
                   +          rb[iR] * a_cn[iAm1] * pb[iP1]
                   +          ra[iR] * a_cn[iAp1] * pa[iP1]

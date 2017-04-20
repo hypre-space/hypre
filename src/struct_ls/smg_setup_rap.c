@@ -101,7 +101,6 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
          /*--------------------------------------------------------------------
           *    Set lower triangular (+ diagonal) coefficients
           *--------------------------------------------------------------------*/
-
          hypre_SMG2BuildRAPSym(A, PT, R, Ac, cindex, cstride);
 
          /*--------------------------------------------------------------------

@@ -167,7 +167,6 @@ hypre_RedBlackGS( void               *relax_vdata,
                         
    HYPRE_Int              iter, rb, redblack, d;
    HYPRE_Int              compute_i, i, j;
-   
    HYPRE_Int              ni, nj, nk;
 
    /*----------------------------------------------------------

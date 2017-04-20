@@ -125,7 +125,6 @@ hypre_SMGSolve( void               *smg_vdata,
    {
       /* eps = (tol^2) */
       b_dot_b = hypre_StructInnerProd(b_l[0], b_l[0]);
-
       eps = tol*tol;
 
       /* if rhs is zero, return a zero solution */

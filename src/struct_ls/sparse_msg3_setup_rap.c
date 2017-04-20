@@ -774,16 +774,16 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                   +           rb[iR] * a_bnw[iAm1]
                   +                    a_bnw[iA]   * pa[iP1];
 
-	       iP1 = iP - zOffsetP + yOffsetP;
+               iP1 = iP - zOffsetP + yOffsetP;
                rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1]
                   +          rb[iR] * a_bn[iAm1]
                   +                   a_bn[iA]   * pa[iP1];
-			   
-			   iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
+ 
+               iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
                rap_bne[iAc] = rb[iR] * a_cne[iAm1] * pa[iP1]
                   +           rb[iR] * a_bne[iAm1]
                   +                    a_bne[iA]   * pa[iP1];
-			   
+
                iP1 = iP - yOffsetP - xOffsetP;
                rap_csw[iAc] =          a_csw[iA]
                   +          rb[iR] * a_csw[iAm1] * pb[iP1]
@@ -801,8 +801,8 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                   +                   a_as[iA]   * pa[iP1]
                   +          rb[iR] * a_as[iAm1]
                   +          ra[iR] * a_bs[iAp1];
-
-	       iP1 = iP - yOffsetP + xOffsetP;
+ 
+               iP1 = iP - yOffsetP + xOffsetP;
                rap_cse[iAc] =          a_cse[iA]
                   +          rb[iR] * a_cse[iAm1] * pb[iP1]
                   +          ra[iR] * a_cse[iAp1] * pa[iP1]
@@ -1410,8 +1410,8 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
                   +          ra[iR] * a_aw[iAp1]
                   +                   a_aw[iA]   * pb[iP1];
-
-	       iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
+ 
+               iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
                rap_ase[iAc] = ra[iR] * a_cse[iAp1] * pb[iP1]
                   +           ra[iR] * a_ase[iAp1]
                   +                    a_ase[iA]   * pb[iP1];

@@ -819,12 +819,10 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
    /* allocate send buffers */
    send_buffers = hypre_TAlloc(HYPRE_Complex *, num_sends);
-
    if (num_sends > 0)
    {
       size = hypre_CommPkgSendBufsize(comm_pkg);
-      send_buffers[0]      = hypre_SharedCTAlloc(HYPRE_Complex, size);
-
+      send_buffers[0] = hypre_SharedTAlloc(HYPRE_Complex, size);
       for (i = 1; i < num_sends; i++)
       {
          comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
@@ -837,11 +835,10 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    
    /* allocate recv buffers */
    recv_buffers = hypre_TAlloc(HYPRE_Complex *, num_recvs);
-   
    if (num_recvs > 0)
    {
       size = hypre_CommPkgRecvBufsize(comm_pkg);
-      recv_buffers[0]      = hypre_SharedTAlloc(HYPRE_Complex, size);
+      recv_buffers[0] = hypre_SharedTAlloc(HYPRE_Complex, size);
       for (i = 1; i < num_recvs; i++)
       {
          comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);
@@ -851,7 +848,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    }
 
    hypre_PrepareRcevBuffers();
-   
+
    /*--------------------------------------------------------------------
     * pack send buffers
     *--------------------------------------------------------------------*/
@@ -1089,7 +1086,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
                         hypre_CommHandleRequests(comm_handle),
                         hypre_CommHandleStatus(comm_handle));
    }
-   
+
    /*--------------------------------------------------------------------
     * if FirstComm, unpack prefix information and set 'num_entries' and
     * 'entries' for RecvType

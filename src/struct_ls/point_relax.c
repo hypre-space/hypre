@@ -365,7 +365,7 @@ hypre_PointRelax( void               *relax_vdata,
    /*----------------------------------------------------------
     * Initialize some things and deal with special cases
     *----------------------------------------------------------*/
-    
+
    hypre_BeginTiming(relax_data -> time_index);
 
    hypre_StructMatrixDestroy(relax_data -> A);

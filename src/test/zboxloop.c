@@ -205,7 +205,6 @@ main( hypre_int argc,
    sum = 0;
    hypre_SerialBoxLoop1Begin(3, loop_size,
 			     x1_data_box, start, unit_stride, xi1);
-   //hypre_BoxLoop1For(xi1)
    {
       sum += xp1[xi1];
       if (xp1[xi1] != 1)
@@ -251,6 +250,7 @@ main( hypre_int argc,
       hypre_BoxLoop0For()
       {
          xp1[xi1] += xp1[xi1];
+         xi1++;
       }
       hypre_BoxLoop0End();
    }

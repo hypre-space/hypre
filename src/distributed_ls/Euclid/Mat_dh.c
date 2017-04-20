@@ -1140,7 +1140,7 @@ void Mat_dhFixDiags(Mat_dh A)
         break;
       }
     }
-    if (flag) ct = 1;
+    if (flag) ++ct;
   }
 
   /* insert any missing diagonal elements */

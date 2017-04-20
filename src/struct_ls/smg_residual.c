@@ -200,7 +200,7 @@ hypre_SMGResidual( void               *residual_vdata,
 #endif
                hypre_BoxLoop2For(bi, ri)
                {
-		   rp[ri] = bp[bi];
+                  rp[ri] = bp[bi];
                }
                hypre_BoxLoop2End(bi, ri);
             }

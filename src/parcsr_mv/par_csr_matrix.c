@@ -54,7 +54,7 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    HYPRE_Int  num_procs, my_id;
    HYPRE_Int local_num_rows, local_num_cols;
    HYPRE_Int first_row_index, first_col_diag;
-
+   
    matrix = hypre_CTAlloc(hypre_ParCSRMatrix, 1);
 
    hypre_MPI_Comm_rank(comm,&my_id);

@@ -169,10 +169,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
             num_stencil_indices++;
          }
       }
-
       A_mask =
          hypre_StructMatrixCreateMask(A, num_stencil_indices, stencil_indices);
-
       hypre_TFree(stencil_indices);
 
       /*-----------------------------------------------------
@@ -189,7 +187,7 @@ hypre_SMGSetupInterpOp( void               *relax_data,
       /*-----------------------------------------------------
        * Free up A_mask matrix
        *-----------------------------------------------------*/
-	  
+
       hypre_StructMatrixDestroy(A_mask);
 
       /*-----------------------------------------------------
@@ -273,16 +271,19 @@ hypre_SMGSetupInterpOp( void               *relax_data,
             }
          }
       }
+
       /*-----------------------------------------------------
        * Free up compute package info
        *-----------------------------------------------------*/
-	  
+
       hypre_ComputePkgDestroy(compute_pkg);
    }
 
    /* Tell SMGRelax that the stencil has changed */
    hypre_SMGRelaxSetNewMatrixStencil(relax_data, PT_stencil);
+
    hypre_StructStencilDestroy(compute_pkg_stencil);
+
 #if 0
    hypre_StructMatrixAssemble(PT);
 #else

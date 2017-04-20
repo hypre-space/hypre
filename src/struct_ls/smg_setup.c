@@ -84,7 +84,7 @@ hypre_SMGSetup( void               *smg_vdata,
 #if DEBUG
    char                  filename[255];
 #endif
- 
+
    /*-----------------------------------------------------
     * Set up coarsening direction
     *-----------------------------------------------------*/
@@ -236,7 +236,7 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructVectorInitializeData(tb_l[0], data);
    hypre_StructVectorAssemble(tb_l[0]);
    data += hypre_StructVectorDataSize(tb_l[0]);
-   
+
    hypre_StructVectorInitializeData(tx_l[0], data);
    hypre_StructVectorAssemble(tx_l[0]);
    data += hypre_StructVectorDataSize(tx_l[0]);
@@ -274,7 +274,7 @@ hypre_SMGSetup( void               *smg_vdata,
                                        hypre_StructVectorData(tx_l[0]));
       hypre_StructVectorAssemble(tx_l[l+1]);
    }
-   
+
    (smg_data -> A_l)  = A_l;
    (smg_data -> PT_l) = PT_l;
    (smg_data -> R_l)  = R_l;
@@ -294,7 +294,7 @@ hypre_SMGSetup( void               *smg_vdata,
     * the fine-grid unknown and right-hand-side vectors
     * is temporarily changed to temporary data.
     *-----------------------------------------------------*/
- 
+
    relax_data_l    = hypre_TAlloc(void *, num_levels);
    residual_data_l = hypre_TAlloc(void *, num_levels);
    restrict_data_l = hypre_TAlloc(void *, num_levels);
@@ -309,7 +309,7 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructVectorInitializeData(x_l[0], hypre_StructVectorData(tx_l[0]));
    hypre_StructVectorAssemble(b_l[0]);
    hypre_StructVectorAssemble(x_l[0]);
-   
+
    for (l = 0; l < (num_levels - 1); l++)
    {
       hypre_SMGSetBIndex(base_index, base_stride, l, bindex);
@@ -317,7 +317,7 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_SMGSetCIndex(base_index, base_stride, l, cdir, cindex);
       hypre_SMGSetFIndex(base_index, base_stride, l, cdir, findex);
       hypre_SMGSetStride(base_index, base_stride, l, cdir, stride);
-	  
+
       /* set up relaxation */
       relax_data_l[l] = hypre_SMGRelaxCreate(comm);
       hypre_SMGRelaxSetBase(relax_data_l[l], bindex, bstride);

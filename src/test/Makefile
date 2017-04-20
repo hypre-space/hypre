@@ -10,6 +10,7 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+
 include ../config/Makefile.config
 
 CINCLUDES = ${MPIINCLUDE} $(HYPRE_RAJA_INCLUDE)
@@ -131,7 +132,7 @@ distclean: clean
 
 ij: ij.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS} -L /usr/local/cuda/lib64 -lcudart
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "

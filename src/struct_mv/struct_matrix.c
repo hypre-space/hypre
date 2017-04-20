@@ -103,7 +103,7 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
       {
          if (hypre_StructMatrixDataAlloced(matrix))
          {
-			  hypre_DeviceTFree(hypre_StructMatrixData(matrix));
+            hypre_DeviceTFree(hypre_StructMatrixData(matrix));
          }
          hypre_CommPkgDestroy(hypre_StructMatrixCommPkg(matrix));
          
@@ -1200,7 +1200,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
       hypre_SetIndex(stride, 1);
       data_space = hypre_StructMatrixDataSpace(matrix);
       hypre_ForBoxI(i, data_space)
-      {		  
+      {
          datap = hypre_StructMatrixExtractPointerByIndex(matrix, i, index);
 
          if (datap)
@@ -1211,10 +1211,10 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
             {
                boundary_box = hypre_BoxArrayBox(boundary_box_a, j);
                start = hypre_BoxIMin(boundary_box);
-				   
+
                hypre_BoxGetSize(boundary_box, loop_size);
 
-               hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix),loop_size,
+               hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                    data_box, start, stride, datai);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
@@ -1533,17 +1533,17 @@ hypre_StructMatrixPrint( const char         *filename,
    hypre_fprintf(file, "\nSymmetric: %d\n", hypre_StructMatrixSymmetric(matrix));
    hypre_fprintf(file, "\nConstantCoefficient: %d\n",
                  hypre_StructMatrixConstantCoefficient(matrix));
-   
+
    /* print grid info */
    hypre_fprintf(file, "\nGrid:\n");
    grid = hypre_StructMatrixGrid(matrix);
    hypre_StructGridPrint(file, grid);
- 
+
    /* print stencil info */
    hypre_fprintf(file, "\nStencil:\n");
    stencil = hypre_StructMatrixStencil(matrix);
    stencil_shape = hypre_StructStencilShape(stencil);
-   
+
    ndim = hypre_StructMatrixNDim(matrix);
    num_values = hypre_StructMatrixNumValues(matrix);
    symm_elements = hypre_StructMatrixSymmElements(matrix);

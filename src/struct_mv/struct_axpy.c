@@ -38,7 +38,7 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
    hypre_Index       loop_size;
    hypre_IndexRef    start;
    hypre_Index       unit_stride;
-
+                    
    HYPRE_Int         i;
 
    hypre_SetIndex(unit_stride, 1);
@@ -74,6 +74,6 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
       }
       hypre_BoxLoop2End(xi, yi);
    }
-   
+
    return hypre_error_flag;
 }

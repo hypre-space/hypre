@@ -15,7 +15,3 @@ WARNING in dReadValues: Infinite loop.  Program may not stop.
 WARNING in dReadVector: Infinite loop.  Program may not stop.
 icc: command line warning .*: overriding
 WARNING: no debugging flags detected
-*: warning: 'register' storage class specifier is deprecated and incompatible with C++1z *
-* warning: linkage specification is incompatible with previous
-* warning: format specifies type 'int' but the argument has type 'unsigned long' *
-1500-029: (W) WARNING: subprogram __nv_dl_wrapper_t<__nv_dl_tag *

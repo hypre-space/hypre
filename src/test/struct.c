@@ -5,7 +5,7 @@
  *
  * HYPRE is free software; you can redistribute it and/or modify it under the
  * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated Feruary 1999.
+ * Software Foundation) version 2.1 dated February 1999.
  *
  * $Revision$
  ***********************************************************************EHEADER*/
@@ -1398,7 +1398,6 @@ main( hypre_int argc,
    
          HYPRE_StructPFMGGetNumIterations(solver, &num_iterations);
          HYPRE_StructPFMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
-		 
          HYPRE_StructPFMGDestroy(solver);
       }
 
@@ -2977,7 +2976,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          hypre_assert( constant_coefficient==2 );
 
          /* stencil index for the center equals dim, so it's easy to leave out */
-	 values     = hypre_UMCTAlloc(HYPRE_Real, stencil_size-1);
+	 values   = hypre_UMCTAlloc(HYPRE_Real, stencil_size-1);
          switch (dim)
          {
             case 1:
@@ -2999,12 +2998,12 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                                                 stencil_indices, values);
          }
 	 hypre_UMTFree(values);
-	 
+
          hypre_ForBoxI(bi, gridboxes)
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-	    values     = hypre_UMCTAlloc(HYPRE_Real, volume);
+	    values   = hypre_UMCTAlloc(HYPRE_Real, volume);
             for ( i=0; i < volume; ++i )
             {
                values[i] = center;
@@ -3274,6 +3273,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
          for (ib = 0; ib < size; ib++)
          {
 	    values = hypre_UMCTAlloc(HYPRE_Real, vol[ib]);
+        
             for (i = 0; i < vol[ib]; i++)
             {
                values[i] = 0.0;
@@ -3284,7 +3284,6 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
                j = iupper[ib][d];
                iupper[ib][d] = istart[d];
                stencil_indices[0] = d;
-                
                HYPRE_StructMatrixSetBoxValues(A, ilower[ib], iupper[ib],
                                               1, stencil_indices, values);
                iupper[ib][d] = j;
@@ -3300,7 +3299,6 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
                ilower[ib][d] = j;
             }
 	    hypre_UMTFree(values);
-	    
          }
       }
    }

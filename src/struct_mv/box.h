@@ -46,6 +46,7 @@ typedef struct hypre_Box_struct
    hypre_Index imin;           /* min bounding indices */
    hypre_Index imax;           /* max bounding indices */
    HYPRE_Int   ndim;           /* number of dimensions */
+
 } hypre_Box;
 
 /*--------------------------------------------------------------------------
@@ -111,24 +112,6 @@ typedef struct hypre_BoxArrayArray_struct
 #define hypre_BoxIMax(box)     ((box) -> imax)
 #define hypre_BoxNDim(box)     ((box) -> ndim)
 
-#define hypre_BoxCopyIndexToData(indexHost,indexData)\
-	if(indexData == NULL)\
-	{					 \
-	    AxCheckError(cudaMalloc((int**)&indexData,sizeof(HYPRE_Int)*(HYPRE_MAXDIM)));	\
-	}					 \
-	hypre_DataCopyToData(indexHost,indexData,HYPRE_Int,HYPRE_MAXDIM);
-
-#define hypre_BoxSetunitStride(idx) idx = unitstride;
-#define hypre_initBoxData(box)					\
-	{											\
-    	hypre_Index            box_size;\
-	    hypre_BoxCopyIndexToData(hypre_BoxIMin(box),hypre_BoxIMinData(box));\
-		hypre_BoxCopyIndexToData(hypre_BoxIMax(box),hypre_BoxIMaxData(box)); \
-		hypre_BoxGetSize(box, box_size);								\
-		hypre_BoxCopyIndexToData(box_size,hypre_BoxSizeData(box));		\
-	}																	\
-   
-	
 #define hypre_BoxIMinD(box, d) (hypre_IndexD(hypre_BoxIMin(box), d))
 #define hypre_BoxIMaxD(box, d) (hypre_IndexD(hypre_BoxIMax(box), d))
 #define hypre_BoxSizeD(box, d) \

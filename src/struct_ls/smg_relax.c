@@ -233,7 +233,7 @@ hypre_SMGRelax( void               *relax_vdata,
    HYPRE_Int            *space_ranks;
                     
    HYPRE_Int             i, j, k, is;
- 
+                    
    /*----------------------------------------------------------
     * Note: The zero_guess stuff is not handled correctly
     * for general relaxation parameters.  It is correct when

@@ -479,10 +479,10 @@ extern void  printErrorMsg(FILE *fp);
 #ifndef hypre_MPI_MAX_ERROR_STRING
 #define hypre_MPI_MAX_ERROR_STRING 256
 #endif
-    
+
 #define MSG_BUF_SIZE_DH MAX(1024, hypre_MPI_MAX_ERROR_STRING)
 static char  msgBuf_dh[MSG_BUF_SIZE_DH];
-  
+
 /* Each processor (may) open a logfile.
  * The bools are switches for controlling the amount of informational 
  * output, and where it gets written to.  Function trace logging is only 
