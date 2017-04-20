@@ -90,7 +90,7 @@ HYPRE_Int hypre_cr(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int
    hypre_fprintf(stdout,"-----------------------\n");
 
    for (i = 0; i < n; i++) 
-      e1[i] = 1.0e0+.1*rand();
+      e1[i] = 1.0e0+.1*hypre_RandI();
    
   /* stages */
    while(1){
@@ -133,8 +133,8 @@ HYPRE_Int hypre_cr(HYPRE_Int *A_i, HYPRE_Int *A_j, HYPRE_Real *A_data, HYPRE_Int
 	    if (cf[i] ==  cpt) 
                nc+=1.0e0;
 	    else if (cf[i] ==  fpt){ 
-               e0[i] = 1.0e0+.1*rand();
-               e1[i] = 1.0e0+.1*rand();
+               e0[i] = 1.0e0+.1*hypre_RandI();
+               e1[i] = 1.0e0+.1*hypre_RandI();
             }
          }
          nstages += 1;
@@ -2735,7 +2735,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
 
    for (i = 0; i < num_variables; i++) 
       e1[i] = 1.0e0;
-      /*e1[i] = 1.0e0+.1*rand();*/
+      /*e1[i] = 1.0e0+.1*hypre_RandI();*/
    
   /* stages */
    while(1)
@@ -2852,7 +2852,7 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                if (CF_marker[i] ==  fpt)
                {
                   e1[i] = 1.0e0;
-                  /*e1[i] = 1.0e0+.1*rand();*/
+                  /*e1[i] = 1.0e0+.1*hypre_RandI();*/
                   e0[i] = e1[i];
                }
             }
@@ -3011,8 +3011,8 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                   num_coarse++;
 	       else if (CF_marker[i] ==  fpt)
                { 
-                  e0[i] = 1.0e0+.1*rand();
-                  e1[i] = 1.0e0+.1*rand();
+                  e0[i] = 1.0e0+.1*hypre_RandI();
+                  e1[i] = 1.0e0+.1*hypre_RandI();
                }
             }
          }
@@ -3035,8 +3035,8 @@ hypre_BoomerAMGCoarsenCR( hypre_ParCSRMatrix    *A,
                   for (j=0; j < num_functions; j++)
                   { 
 		     /*CF_marker[jj] = CFN_marker[i];
-                     e0[jj] = 1.0e0+.1*rand();
-                     e1[jj++] = 1.0e0+.1*rand();*/
+                     e0[jj] = 1.0e0+.1*hypre_RandI();
+                     e1[jj++] = 1.0e0+.1*hypre_RandI();*/
                      e0[jj] = 1.0e0;
                      e1[jj++] = 1.0e0;
                   } 

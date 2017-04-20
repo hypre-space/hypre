@@ -563,7 +563,7 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
    for (sample=0; sample<nsamples; sample++)
    {
        for (i=0; i<n_local; i++)
-           datax[i] = (rand()/(HYPRE_Real)RAND_MAX) - .5;
+           datax[i] = hypre_Rand() - .5;
 
        for (i=0; i<num_sweeps; i++)
        {

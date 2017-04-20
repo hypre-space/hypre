@@ -33,7 +33,8 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   srand( seed );
+//   srand( seed );
+   hypre_SeedRand(seed);
 
    hypre_SetIndex3(unit_stride, 1, 1, 1);
  
@@ -58,7 +59,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       {
           HYPRE_Real randx;
           hypre_rand(randx);		  
-		  vp[vi] = 2.0*randx/RAND_MAX - 1.0;
+		  vp[vi] = 2.0*randx - 1.0;
       }
       hypre_BoxLoop1End(vi);
    }

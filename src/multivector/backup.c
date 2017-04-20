@@ -132,10 +132,10 @@ hypre_TempMultiVectorSetRandom( void* v, HYPRE_Int seed ) {
 
   hypre_assert( data != NULL );
 
-  srand( seed );
+  hypre_SeedRand( seed );
   for ( i = 0; i < data->numVectors; i++ ) {
     if ( data->mask == NULL || (data->mask)[i] ) {
-      seed = rand();
+      seed = hypre_RandI();
       (data->interpreter->SetRandomValues)(data->vector[i],seed);
     }
   }
