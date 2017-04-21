@@ -1419,9 +1419,9 @@ AxCheckError(cudaDeviceSynchronize());\
 
 extern "C++" {
 #include <curand.h>
-}
 #include <curand_kernel.h>
-
+}
+  
 struct cuda_traversal {HYPRE_Int cuda;};
 struct omp_traversal  {HYPRE_Int omp;};
 

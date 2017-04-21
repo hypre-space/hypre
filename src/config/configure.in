@@ -836,13 +836,7 @@ AS_HELP_STRING([--with-raja-lib=LIBS],
                [LIBS is space-separated linkable list (enclosed in quotes) of libraries
                 needed for RAJA. OK to use -L and -l flags in the list]),
 [for raja_lib in $withval; do
-dnl    [libprefix=`echo $blas_lib | cut -c1-2`]
-dnl    if test $libprefix = "-L"
-dnl    then
-dnl       BLASLIBDIRS="$blas_lib $BLASLIBDIRS"
-dnl    else
        HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB $raja_lib"
-dnl    fi
  done;
 hypre_user_chose_raja=yes]
 )
@@ -868,7 +862,52 @@ AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
 [for raja_lib_dir in $withval; do
     HYPRE_RAJA_SRC_DIR="-L$raja_lib_dir $HYPRE_RAJA_SRC_DIR"
  done;
-hypre_user_chose_raja=yes]
+ hypre_user_chose_raja=yes]
+)
+
+AC_ARG_WITH(kokkos-include,
+AS_HELP_STRING([--with-kokkos-include=DIR],
+               [User specifies that KOKKOS headers is in DIR.  The options
+                --with-kokkos-include --with-kokkos-libs and
+                --with-kokkos-lib-dirs must be used together.]), 
+[for kokkos_dir in $withval; do
+HYPRE_KOKKOS_INCLUDE="$HYPRE_KOKKOS_INCLUDE -I$kokkos_dir"
+done;
+hypre_user_chose_kokkos=yes]
+) 
+
+AC_ARG_WITH(kokkos-lib,
+AS_HELP_STRING([--with-kokkos-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for KOKKOS. OK to use -L and -l flags in the list]),
+[for kokkos_lib in $withval; do
+       HYPRE_KOKKOS_LIB="$HYPRE_KOKKOS_LIB $kokkos_lib"
+ done;
+hypre_user_chose_kokkos=yes]
+)
+
+AC_ARG_WITH(kokkos-libs,
+AS_HELP_STRING([--with-kokkos-libs=LIBS],
+               [LIBS is space-separated list (enclosed in quotes) of libraries
+                needed for KOKKOS (base name only). The options --with-kokkos-libs and
+                --with-kokkos-lib-dirs must be used together.]),
+[for kokkos_lib in $withval; do
+    HYPRE_KOKKOS_LIB="$HYPRE_KOKKOS_LIB -l$kokkos_lib"
+ done;
+hypre_user_chose_kokkos=yes]
+)
+
+AC_ARG_WITH(kokkos-lib-dirs,
+AS_HELP_STRING([--with-kokkos-lib-dirs=DIRS],
+               [DIRS is space-separated list (enclosed in quotes) of 
+                directories containing the libraries specified by 
+                --with-kokkos-libs, e.g "usr/lib /usr/local/lib".
+                The  options --with-kokkos-libs and --kokkos-blas-lib-dirs
+                must be used together.]),
+[for kokkos_lib_dir in $withval; do
+    HYPRE_KOKKOS_SRC_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_SRC_DIR"
+ done;
+hypre_user_chose_kokkos=yes]
 )
 
 AC_ARG_WITH(nvcc,
@@ -885,7 +924,7 @@ AS_HELP_STRING([--with-nvcc],
 if test "$hypre_using_nvcc" = "yes"
 then
    AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
-   NVCCFLAGS="-O3 -arch=sm_60  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU"
+   NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
    NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
    HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
 else
@@ -1395,22 +1434,23 @@ if test "$hypre_user_chose_raja" = "yes"
 then
    if test "$hypre_using_cuda" = "yes"
       then
-	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda -lRAJA"
-   	RAJAFLAGS=" -lRAJA"
+        RAJAFLAGS=" -lRAJA "
+	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda $RAJAFLAGS "
    	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 -Xcompiler $RAJAFLAGS "
    	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1  $RAJAFLAGS "
-   	if test "$hypre_using_um" = "yes"
-   	   then
-		CFLAGS+=" -DHYPRE_MEMORY_UM=1 "
-	    	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1 "
-   	   else
+   	if test "$hypre_using_um" != "yes"
+   	then
 		CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
 	   	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
+		AC_MSG_WARN([*******************************************************])
+       		AC_MSG_WARN([Configuring with --with-raja=yes without unified memory.]) 
+		AC_MSG_WARN([It only works for struct interface.])
+       		AC_MSG_WARN([*******************************************************])
    	fi
 	hypre_user_chose_cuda=no
    else 
    	CC=${CXX}
-   	LDFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
+   	LDFLAGS+=" -lRAJA "
    	CFLAGS+=" -Wno-deprecated-register -qmaxmem=-1 -DHYPRE_USE_RAJA=1 "
    	CXXFLAGS+=" -Wno-deprecated-register -qmaxmem=-1 -DHYPRE_USE_RAJA=1  "
 
@@ -1422,19 +1462,21 @@ dnl *********************************************************************
 
 if test "$hypre_user_chose_kokkos" = "yes"
 then
-   HYPRE_KOKKOS_PATH="$HYPRE_SRCDIR/../../kokkos-master"
-   HYPRE_KOKKOS_DEVICE="OpenMP"
-   HYPRE_KOKKOS_ARCH="SNB"
-   HYPRE_KOKKOS_CUDA_OPTION=""
-   HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_PATH/Makefile.kokkos"
-   HYPRE_KOKKOS_CLEAN="kokkos-clean"	
-   HYPRE_KOKKOS_LIB="\$(KOKKOS_LIBS)"
-   HYPRE_KOKKOS_DEPENDS="\$(KOKKOS_LINK_DEPENDS)"
-   LDFLAGS="-fopenmp -L./ -lkokkos"
-   CC=$CXX
-   LINK_CC=$LINK_CXX
-   CFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS=1"
-   CXXFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS=1"
+   if test "$hypre_using_cuda" = "yes"
+   then
+      LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda -lRAJA"
+      HYPRE_KOKKOS_DEVICE="OpenMP"
+      HYPRE_KOKKOS_ARCH="SNB"
+      HYPRE_KOKKOS_CUDA_OPTION=""
+      HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
+      HYPRE_KOKKOS_CLEAN="kokkos-clean"	
+      HYPRE_KOKKOS_LIB="\$(KOKKOS_LIBS)"
+      HYPRE_KOKKOS_DEPENDS="\$(KOKKOS_LINK_DEPENDS)"
+      LDFLAGS="-fopenmp -L./ -lkokkos"
+      CC=$CXX
+      LINK_CC=$LINK_CXX
+      CFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS"
+      CXXFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS"
 fi
 dnl *********************************************************************
 dnl * Set cuda options
@@ -1444,16 +1486,26 @@ then
    LDFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
    CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
    CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
-   if test "$hypre_using_um" = "yes"
+   if test "$hypre_using_um" != "yes"
    then
-	CFLAGS+=" -DHYPRE_MEMORY_UM=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1"
+	CFLAGS+=" -DHYPRE_MEMORY_GPU"
+	CXXFLAGS+=" -DHYPRE_MEMORY_GPU"
+	AC_MSG_WARN([*******************************************************])
+       	AC_MSG_WARN([Configuring with --with-cuda=yes without unified memory.]) 
+	AC_MSG_WARN([It only works for struct interface.])
+	AC_MSG_WARN([Use --enable-unified-memory to compile with unified memory.])
+       	AC_MSG_WARN([*******************************************************])
    else
-	CFLAGS+=" -DHYPRE_MEMORY_GPU=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+	CFLAGS+=" -DHYPRE_USE_GPU "
+   	CXXFLAGS+=" -DHYPRE_USE_GPU "
    fi
 fi
 
+if test "$hypre_using_um" = "yes"
+then
+   CFLAGS+=" -DHYPRE_USE_MANAGED=1"
+   CXXFLAGS+=" -DHYPRE_USE_MANAGED=1"
+fi
 dnl *********************************************************************
 dnl * Set installation directories
 dnl *********************************************************************
@@ -1566,7 +1618,7 @@ AC_SUBST(HYPRE_RAJA_LIB)
 dnl *********************************************************************
 dnl * KOKKOS information
 dnl *********************************************************************
-AC_SUBST(HYPRE_KOKKOS_PATH)
+AC_SUBST(HYPRE_KOKKOS_SRC_DIR)
 AC_SUBST(HYPRE_KOKKOS_DEVICE)
 AC_SUBST(HYPRE_KOKKOS_ARCH)
 AC_SUBST(HYPRE_KOKKOS_CUDA_OPTION)

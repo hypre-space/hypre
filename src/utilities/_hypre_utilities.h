@@ -404,7 +404,7 @@ HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int com
 extern "C" {
 #endif
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_MEMORY_UM)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 #include <cuda.h>
 #include <cuda_runtime.h>
 #define HYPRE_CUDA_GLOBAL __host__ __device__
@@ -592,22 +592,6 @@ if ( cudaerr != cudaSuccess ) {										\
 
 #define hypre_TFree(ptr) \
 ( hypre_Free((char *)ptr), ptr = NULL )
-
-#define hypre_PinnedTAlloc(type, count) \
-( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
-
-#define hypre_HostTAlloc(type, count) \
-( (type *)hypre_MAllocHost((size_t)(sizeof(type) * (count))) )
-
-#define hypre_HostCTAlloc(type, count) \
-( (type *)hypre_CAllocHost((size_t)(count), (size_t)sizeof(type)) )
-
-#define hypre_HostTReAlloc(ptr, type, count) \
-( (type *)hypre_ReAllocHost((char *)ptr, (size_t)(sizeof(type) * (count))) )
-
-#define hypre_HostTFree(ptr) \
-( hypre_FreeHost((char *)ptr), ptr = NULL )
-
 #endif
 
 #define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count))
@@ -627,7 +611,21 @@ if ( cudaerr != cudaSuccess ) {										\
 #define hypre_UMTReAlloc(type, count) hypre_TReAlloc(type, (count))
 #define hypre_UMTFree(ptr) hypre_TFree(ptr)
 #endif
-	
+
+#define hypre_PinnedTAlloc(type, count)\
+( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
+
+#define hypre_HostTAlloc(type, count) \
+( (type *)hypre_MAllocHost((size_t)(sizeof(type) * (count))) )
+
+#define hypre_HostCTAlloc(type, count) \
+( (type *)hypre_CAllocHost((size_t)(count), (size_t)sizeof(type)) )
+
+#define hypre_HostTReAlloc(ptr, type, count) \
+( (type *)hypre_ReAllocHost((char *)ptr, (size_t)(sizeof(type) * (count))) )
+
+#define hypre_HostTFree(ptr) \
+( hypre_FreeHost((char *)ptr), ptr = NULL )
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/

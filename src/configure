@@ -598,6 +598,9 @@ LIBOBJS
 AR
 CALIPER_LIBS
 CALIPER_INCLUDE
+HYPRE_NVCC_MAKEFILE
+NVCCLIBS
+NVCCFLAGS
 HYPRE_KOKKOS_DEPENDS
 HYPRE_KOKKOS_LIB
 HYPRE_KOKKOS_CLEAN
@@ -608,9 +611,6 @@ HYPRE_KOKKOS_DEVICE
 HYPRE_RAJA_LIB
 HYPRE_RAJA_INCLUDE
 HYPRE_RAJA_SRC_DIR
-HYPRE_NVCC_MAKEFILE
-NVCCLIBS
-NVCCFLAGS
 LAPACKLIBS
 LAPACKLIBDIRS
 HYPRE_LAPACK_FILES
@@ -3215,6 +3215,7 @@ if test "${with_MPI+set}" = set; then :
 fi
 
 
+
 # Check whether --with-cuda was given.
 if test "${with_cuda+set}" = set; then :
   withval=$with_cuda; case "$withval" in
@@ -3225,19 +3226,9 @@ if test "${with_cuda+set}" = set; then :
  esac
 else
   hypre_using_cuda=no
+
 fi
 
-
-# Check whether --with-nvcc was given.
-if test "${with_nvcc+set}" = set; then :
-  withval=$with_nvcc; case "${withval}" in
-    yes) hypre_using_nvcc=yes ;;
-    no)  hypre_using_nvcc=no ;;
-    *)   as_fn_error $? "Bad value ${withval} for --with-nvcc" "$LINENO" 5 ;;
- esac
-else
-  hypre_using_nvcc=no
-fi
 
 
 # Check whether --with-raja was given.
@@ -3310,12 +3301,25 @@ fi
 
 
 
+# Check whether --with-nvcc was given.
+if test "${with_nvcc+set}" = set; then :
+  withval=$with_nvcc; case "${withval}" in
+    yes) hypre_using_nvcc=yes ;;
+    no)  hypre_using_nvcc=no ;;
+    *)   as_fn_error $? "Bad value ${withval} for --with-nvcc" "$LINENO" 5 ;;
+ esac
+else
+  hypre_using_nvcc=no
+
+fi
+
+
 if test "$hypre_using_nvcc" = "yes"
 then
 
 $as_echo "#define HYPRE_USING_NVCC 1" >>confdefs.h
 
-   NVCCFLAGS="-O3 -arch=sm_60 -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
+   NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
    NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
    HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
 else
@@ -7548,13 +7552,18 @@ then
    	RAJAFLAGS=" -lRAJA"
    	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 -Xcompiler $RAJAFLAGS "
    	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1  $RAJAFLAGS "
-   	if test "$hypre_using_um" = "yes"
-   	   then
-		CFLAGS+=" -DHYPRE_MEMORY_UM=1 "
-	    	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1 "
-   	   else
+   	if test "$hypre_using_um" != "yes"
+   	then
 		CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
 	   	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+$as_echo "$as_me: WARNING: *******************************************************" >&2;}
+       		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Configuring with --with-raja=yes without unified memory." >&5
+$as_echo "$as_me: WARNING: Configuring with --with-raja=yes without unified memory." >&2;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: It only works for struct interface." >&5
+$as_echo "$as_me: WARNING: It only works for struct interface." >&2;}
+       		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+$as_echo "$as_me: WARNING: *******************************************************" >&2;}
    	fi
 	hypre_user_chose_cuda=no
    else
@@ -7587,16 +7596,31 @@ then
    LDFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
    CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
    CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
-   if test "$hypre_using_um" = "yes"
+   if test "$hypre_using_um" != "yes"
    then
-	CFLAGS+=" -DHYPRE_MEMORY_UM=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_UM=1"
+	CFLAGS+=" -DHYPRE_MEMORY_GPU"
+	CXXFLAGS+=" -DHYPRE_MEMORY_GPU"
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+$as_echo "$as_me: WARNING: *******************************************************" >&2;}
+       	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Configuring with --with-cuda=yes without unified memory." >&5
+$as_echo "$as_me: WARNING: Configuring with --with-cuda=yes without unified memory." >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: It only works for struct interface." >&5
+$as_echo "$as_me: WARNING: It only works for struct interface." >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Use --enable-unified-memory to compile with unified memory." >&5
+$as_echo "$as_me: WARNING: Use --enable-unified-memory to compile with unified memory." >&2;}
+       	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
+$as_echo "$as_me: WARNING: *******************************************************" >&2;}
    else
-	CFLAGS+=" -DHYPRE_MEMORY_GPU=1"
-	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1"
+	CFLAGS+=" -DHYPRE_USE_GPU "
+   	CXXFLAGS+=" -DHYPRE_USE_GPU "
    fi
 fi
 
+if test "$hypre_using_um" = "yes"
+then
+   CFLAGS+=" -DHYPRE_USE_MANAGED=1"
+   CXXFLAGS+=" -DHYPRE_USE_MANAGED=1"
+fi
 HYPRE_INSTALLDIR="${prefix}"
 HYPRE_LIBINSTALL="${libdir}"
 HYPRE_INCINSTALL="${includedir}"
@@ -7705,6 +7729,20 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

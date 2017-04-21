@@ -250,7 +250,7 @@ main( hypre_int argc,
       hypre_BoxLoop0For()
       {
          xp1[xi1] += xp1[xi1];
-         xi1++;
+         //xi1++;
       }
       hypre_BoxLoop0End();
    }
