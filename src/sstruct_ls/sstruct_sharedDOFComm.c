@@ -689,15 +689,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                      hypre_BoxGetSize(&boxman_entry_box, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(&boxman_entry_box), start);
 
-                     hypre_BoxLoop0Begin(ndim, loop_size);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,entry,rank,tot_nsendRowsNcols,n,col_inds,values,send_ColsData_alloc,k,tot_sendColsData) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     hypre_BoxLoopSetOneBlock();
-#endif
-                     hypre_BoxLoop0For()
+                     hypre_SerialBoxLoop0Begin(ndim, loop_size);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
@@ -742,7 +734,7 @@ hypre_SStructSharedDOF_ParcsrMatRowsComm( hypre_SStructGrid    *grid,
                            }  /* if (rank <= end_rank && rank >= start_rank) */
                         }     /* if (entry) */
                      }
-                     hypre_BoxLoop0End();
+                     hypre_SerialBoxLoop0End();
 
                   }  /* if (proc != myproc) */
                }     /* for (m= 0; m< nboxman_entries; m++) */

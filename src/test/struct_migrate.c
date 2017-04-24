@@ -65,7 +65,11 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-
+#if defined(HYPRE_USE_KOKKOS)
+   Kokkos::InitArguments args;
+   args.num_threads = 10;
+   Kokkos::initialize (args);
+#endif
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
@@ -397,6 +401,9 @@ main( hypre_int argc,
    HYPRE_StructVectorDestroy(check_vector);
 
    /* Finalize MPI */
+#if defined(HYPRE_USE_KOKKOS)
+   Kokkos::finalize ();
+#endif
    hypre_MPI_Finalize();
 
    return (0);
@@ -426,18 +433,19 @@ AddValuesVector( hypre_StructGrid   *grid,
    hypre_ForBoxI(ib, gridboxes)
    {
       box      = hypre_BoxArrayBox(gridboxes, ib);
-      volume   =  hypre_BoxVolume(box);
-      values   = hypre_CTAlloc(HYPRE_Real, volume);
+      volume   = hypre_BoxVolume(box);
+      values   = hypre_DeviceCTAlloc(HYPRE_Real, volume);
 
-      for (i = 0; i < volume; i++)
+      hypre_LoopBegin(volume,i)
       {
          values[i] = value;
       }
-
+      hypre_LoopEnd()
+	
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);
       HYPRE_StructVectorSetBoxValues(vector, ilower, iupper, values);
-      hypre_TFree(values);
+      hypre_DeviceTFree(values);
    }
 
    return ierr;

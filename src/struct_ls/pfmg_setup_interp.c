@@ -239,25 +239,25 @@ hypre_PFMGSetupInterpOp_CC0
   HYPRE_Int           si0,
   HYPRE_Int           si1 )
 {
-   HYPRE_Int              si;
-   HYPRE_Int              Ai, Pi;
-   HYPRE_Real            *Ap;
-   HYPRE_Real             center;
-   HYPRE_Int              Astenc;
-   HYPRE_Int              mrk0, mrk1;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
 
+   hypre_MatrixIndexMove(A, stencil_size, i, cdir,1);
+   
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,Pi,si,center,Ap,Astenc,mrk0,mrk1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
    hypre_BoxLoop2For(Ai, Pi)
    {
+      HYPRE_Int si,mrk0,mrk1,Astenc;
+      HYPRE_Real center;
+      HYPRE_Real *Ap;
+	   
       center  = 0.0;
       Pp0[Pi] = 0.0;
       Pp1[Pi] = 0.0;
@@ -266,12 +266,13 @@ hypre_PFMGSetupInterpOp_CC0
 
       for (si = 0; si < stencil_size; si++)
       {
-         Ap = hypre_StructMatrixBoxData(A, i, si);
-         Astenc = hypre_IndexD(stencil_shape[si], cdir);
-
+	Ap = hypre_StructGetMatrixBoxData(A, i, si);
+	
+	Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
+	
          if (Astenc == 0)
          {
-            center += Ap[Ai];
+	   center += Ap[Ai];
          }
          else if (Astenc == Pstenc0)
          {
@@ -281,7 +282,7 @@ hypre_PFMGSetupInterpOp_CC0
          {
             Pp1[Pi] -= Ap[Ai];
          }
-
+	 
          if (si == si0 && Ap[Ai] == 0.0)
             mrk0++;
          if (si == si1 && Ap[Ai] == 0.0)
@@ -290,7 +291,7 @@ hypre_PFMGSetupInterpOp_CC0
 
       if (!center)
       {
-         warning_cnt++;
+         //warning_cnt++;
          Pp0[Pi] = 0.0;
          Pp1[Pi] = 0.0;  
       }
@@ -449,9 +450,9 @@ hypre_PFMGSetupInterpOp_CC2
    HYPRE_Int              Pi;
    HYPRE_Real            *Ap;
    HYPRE_Real             P0, P1;
-   HYPRE_Real             center, center_offd;
+   HYPRE_Real             center_offd;
    HYPRE_Int              Astenc;
-   HYPRE_Int              mrk0, mrk1, mrk0_offd, mrk1_offd;
+   HYPRE_Int              mrk0_offd, mrk1_offd;
    hypre_StructStencil   *stencil = hypre_StructMatrixStencil(A);
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
@@ -512,6 +513,8 @@ hypre_PFMGSetupInterpOp_CC2
       }
 
       si = diag_rank;
+      
+      hypre_MatrixIndexMove(A, stencil_size, i, si, 1);
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);
@@ -520,15 +523,24 @@ hypre_PFMGSetupInterpOp_CC2
 #endif
       hypre_BoxLoop2For(Ai, Pi)
       {
-         Pp0[Pi] = P0;
-         Pp1[Pi] = P1;
+	 HYPRE_Int   mrk0,mrk1;
+	 HYPRE_Real  center;
+	 HYPRE_Real *Ap;
+	 HYPRE_Real p0val,p1val;
+	 
+         //Pp0[Pi] = P0;
+	 //Pp1[Pi] = P1;
+	 p0val = P0;
+	 p1val = P1;
+	 
          center = center_offd;
          mrk0 = mrk0_offd;
          mrk1 = mrk1_offd;
+	 
+	 Ap = hypre_StructGetMatrixBoxData(A, i, si);
+         //Astenc = hypre_IndexD(stencil_shape[si], cdir);
+         //hypre_assert( Astenc==0 );
 
-         Ap = hypre_StructMatrixBoxData(A, i, si);
-         Astenc = hypre_IndexD(stencil_shape[si], cdir);
-         hypre_assert( Astenc==0 );
          center += Ap[Ai];
 
          if (si == si0 && Ap[Ai] == 0.0)
@@ -538,14 +550,18 @@ hypre_PFMGSetupInterpOp_CC2
 
          if (!center)
          {
-            warning_cnt++;
-            Pp0[Pi] = 0.0;
-            Pp1[Pi] = 0.0;  
+            //warning_cnt++;
+            //Pp0[Pi] = 0.0;
+            //Pp1[Pi] = 0.0;
+	   p0val = 0;
+	   p1val = 0;
          }
          else
          {
-            Pp0[Pi] /= center;
-            Pp1[Pi] /= center;  
+	   //Pp0[Pi] /= center;
+	   //Pp1[Pi] /= center;
+	   p0val /= center;
+	   p1val /= center;
          }
 
          /*----------------------------------------------
@@ -554,13 +570,17 @@ hypre_PFMGSetupInterpOp_CC2
           * interpolation and operator stencils reaching
           * outside domain.
           *----------------------------------------------*/
+
          if (mrk0 != 0)
-            Pp0[Pi] = 0.0;
+	   Pp0[Pi] = 0.0;
          if (mrk1 != 0)
             Pp1[Pi] = 0.0;
+	 Pp0[Pi] = p0val;
+	 Pp1[Pi] = p1val;
 
       }
       hypre_BoxLoop2End(Ai, Pi);
+      //hypre_StructcleanIndexD();
    }
 
    if (warning_cnt)

@@ -201,12 +201,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
    HYPRE_Real           *rap_cc, *rap_cw, *rap_ce, *rap_cs, *rap_cn;
    HYPRE_Real           *rap_cb, *rap_ca;
-   HYPRE_Real            west, east, south, north;
    HYPRE_Real            center_int, center_bdy;
-
-   HYPRE_Int             iA, iAm1, iAp1;
-   HYPRE_Int             iAc;
-   HYPRE_Int             iP, iPm1, iPp1;
                       
    HYPRE_Int             OffsetA; 
    HYPRE_Int             OffsetP; 
@@ -373,10 +368,13 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iA,iAc,iAm1,iAp1,iPm1,iPp1,west,east,south,north) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop3For(iP, iA, iAc)
          {
+	    HYPRE_Int iAm1,iAp1,iPm1,iPp1;
+	    HYPRE_Real west,east,south,north;
+             
             iAm1 = iA - OffsetA;
             iAp1 = iA + OffsetA;
 

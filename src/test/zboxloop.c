@@ -203,9 +203,8 @@ main( hypre_int argc,
    /* Use old boxloop to check that values are set to 1 */
    fail = 0;
    sum = 0;
-   hypre_BoxLoop1Begin(3, loop_size,
-                       x1_data_box, start, unit_stride, xi1);
-   hypre_BoxLoop1For(xi1)
+   hypre_SerialBoxLoop1Begin(3, loop_size,
+			     x1_data_box, start, unit_stride, xi1);
    {
       sum += xp1[xi1];
       if (xp1[xi1] != 1)
@@ -216,7 +215,7 @@ main( hypre_int argc,
          fail = 1;
       }
    }
-   hypre_BoxLoop1End(xi1);
+   hypre_SerialBoxLoop1End(xi1);
 
    if (sum != (nx*ny*nz))
    {
@@ -251,7 +250,7 @@ main( hypre_int argc,
       hypre_BoxLoop0For()
       {
          xp1[xi1] += xp1[xi1];
-         xi1++;
+         //xi1++;
       }
       hypre_BoxLoop0End();
    }

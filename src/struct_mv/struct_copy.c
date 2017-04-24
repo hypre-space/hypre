@@ -29,9 +29,6 @@ hypre_StructCopy( hypre_StructVector *x,
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
                    
-   HYPRE_Int        xi;
-   HYPRE_Int        yi;
-                   
    HYPRE_Complex   *xp;
    HYPRE_Complex   *yp;
                    
@@ -63,7 +60,7 @@ hypre_StructCopy( hypre_StructVector *x,
                           x_data_box, start, unit_stride, xi,
                           y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(xi, yi)
       {
@@ -88,9 +85,6 @@ hypre_StructPartialCopy( hypre_StructVector  *x,
 {
    hypre_Box       *x_data_box;
    hypre_Box       *y_data_box;
-
-   HYPRE_Int        xi;
-   HYPRE_Int        yi;
 
    HYPRE_Complex   *xp;
    HYPRE_Complex   *yp;
@@ -127,7 +121,7 @@ hypre_StructPartialCopy( hypre_StructVector  *x,
                              x_data_box, start, unit_stride, xi,
                              y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop2For(xi, yi)
          {

@@ -10,20 +10,22 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+
 include ../config/Makefile.config
 
-CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+CINCLUDES = ${MPIINCLUDE} $(HYPRE_RAJA_INCLUDE)
+
 CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
-C_COMPILE_FLAGS = \
+C_COMPILE_FLAGS += \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}\
  ${CDEFS}
 
-CXX_COMPILE_FLAGS = \
+CXX_COMPILE_FLAGS += \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
@@ -48,7 +50,10 @@ LFLAGS =\
  ${MPILIBFLAGS}\
  ${LAPACKLIBFLAGS}\
  ${BLASLIBFLAGS}\
- ${LIBFLAGS}
+ ${LIBFLAGS}\
+ ${HYPRE_RAJA_LIB}
+
+KOKKOS_CXXFLAGS = 
 
 ##################################################################
 # Targets
@@ -127,7 +132,7 @@ distclean: clean
 
 ij: ij.o
 	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${LFLAGS} -L /usr/local/cuda/lib64 -lcudart
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 sstruct: sstruct.o
 	@echo  "Building" $@ "... "
@@ -158,6 +163,10 @@ ij_mv: ij_mv.o
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 zboxloop: zboxloop.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
+struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 

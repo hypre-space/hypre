@@ -60,8 +60,6 @@
     ==================================================================== */
     /* System generated locals */
     doublereal d__1, d__2;
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
     /* Local variables */
     static doublereal fhmn, fhmx, c__, fa, ga, ha, as, at, au;
 

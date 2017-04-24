@@ -481,7 +481,7 @@ extern void  printErrorMsg(FILE *fp);
 #endif
 
 #define MSG_BUF_SIZE_DH MAX(1024, hypre_MPI_MAX_ERROR_STRING)
-extern char  msgBuf_dh[MSG_BUF_SIZE_DH];
+static char  msgBuf_dh[MSG_BUF_SIZE_DH];
 
 /* Each processor (may) open a logfile.
  * The bools are switches for controlling the amount of informational 

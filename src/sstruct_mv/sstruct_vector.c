@@ -614,11 +614,9 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
    hypre_SStructPVector *pvector;
    hypre_StructVector   *y;
    hypre_Box            *y_data_box;
-   HYPRE_Int             yi;
    HYPRE_Complex        *yp;
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
-   HYPRE_Int             bi;
    hypre_Index           loop_size;
    hypre_IndexRef        start;
    hypre_Index           stride;
@@ -655,7 +653,7 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
                                 y_data_box, start, stride, yi,
                                 box,        start, stride, bi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,bi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(yi, bi)
             {
@@ -698,11 +696,9 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
    hypre_SStructPVector *pvector;
    hypre_StructVector   *y;
    hypre_Box            *y_data_box;
-   HYPRE_Int             yi;
    HYPRE_Complex        *yp;
    hypre_BoxArray       *boxes;
    hypre_Box            *box;
-   HYPRE_Int             bi;
    hypre_Index           loop_size;
    hypre_IndexRef        start;
    hypre_Index           stride;
@@ -741,7 +737,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                                    y_data_box, start, stride, yi,
                                    box,        start, stride, bi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,bi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(yi, bi)
                {

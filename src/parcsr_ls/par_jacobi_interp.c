@@ -189,7 +189,7 @@ void hypre_BoomerAMGJacobiInterp_1( hypre_ParCSRMatrix * A,
    {
       if ( J_marker[i]<0 )
       {
-         if ( ((HYPRE_Real)rand())/RAND_MAX < randthresh )
+         if ( ((HYPRE_Real)hypre_Rand()) < randthresh )
          {
             hypre_printf( "%i: ", i );
             for ( m=P_diag_i[i]; m<P_diag_i[i+1]; ++m )

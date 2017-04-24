@@ -788,6 +788,9 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    HYPRE_Complex      **send_buffers;
    HYPRE_Complex      **recv_buffers;
 
+   HYPRE_Complex      **send_buffers_data;
+   HYPRE_Complex      **recv_buffers_data;
+
    hypre_CommType      *comm_type, *from_type, *to_type;
    hypre_CommEntryType *comm_entry;
    HYPRE_Int            num_entries;
@@ -796,7 +799,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    HYPRE_Int           *stride_array;
    HYPRE_Int           *order;
 
-   HYPRE_Complex       *dptr, *kptr, *lptr;
+   HYPRE_Complex       *dptr, *kptr, *lptr,*dptr_data;
    HYPRE_Int           *qptr;
 
    HYPRE_Int            i, j, d, ll;
@@ -828,6 +831,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       }
    }
 
+   hypre_PrepareSendBuffers();
+   
    /* allocate recv buffers */
    recv_buffers = hypre_TAlloc(HYPRE_Complex *, num_recvs);
    if (num_recvs > 0)
@@ -842,6 +847,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       }
    }
 
+   hypre_PrepareRcevBuffers();
+
    /*--------------------------------------------------------------------
     * pack send buffers
     *--------------------------------------------------------------------*/
@@ -851,23 +858,10 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       comm_type = hypre_CommPkgSendType(comm_pkg, i);
       num_entries = hypre_CommTypeNumEntries(comm_type);
 
-      dptr = (HYPRE_Complex *) send_buffers[i];
-
+      dptr_data = (HYPRE_Complex *) send_buffers_data[i];
       if ( hypre_CommPkgFirstComm(comm_pkg) )
       {
-         qptr = (HYPRE_Int *) send_buffers[i];
-         *qptr = num_entries;
-         qptr ++;
-         memcpy(qptr, hypre_CommTypeRemBoxnums(comm_type),
-                num_entries*sizeof(HYPRE_Int));
-         qptr += num_entries;
-         memcpy(qptr, hypre_CommTypeRemBoxes(comm_type),
-                num_entries*sizeof(hypre_Box));
-
-         hypre_CommTypeRemBoxnums(comm_type) = NULL;
-         hypre_CommTypeRemBoxes(comm_type)   = NULL;
-
-         dptr += hypre_CommPrefixSize(num_entries);
+          dptr_data += hypre_CommPrefixSize(num_entries);
       }
 
       for (j = 0; j < num_entries; j++)
@@ -886,47 +880,36 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
                /* This is based on "Idea 2" in box.h */
                {
-                  HYPRE_Int      i[HYPRE_MAXDIM+1];
+		 //HYPRE_Int      i[HYPRE_MAXDIM+1];
                   HYPRE_Int      n[HYPRE_MAXDIM+1];
                   HYPRE_Int      s[HYPRE_MAXDIM+1];
-                  HYPRE_Complex *p[HYPRE_MAXDIM+1];
-                  HYPRE_Int      I, N;
+                  //HYPRE_Complex *p[HYPRE_MAXDIM+1];
+                  HYPRE_Int      N;
 
                   /* Initialize */
                   N = 1;
                   for (d = 0; d < ndim; d++)
                   {
-                     i[d] = 0;
+		    //i[d] = 0;
                      n[d] = length_array[d];
                      s[d] = stride_array[d];
-                     p[d] = kptr;
+                     //p[d] = kptr;
                      N *= n[d];
                   }
-                  i[ndim] = 0;
+                  //i[ndim] = 0;
                   n[ndim] = 2;
                   s[ndim] = 0;
-                  p[ndim] = kptr;
+                  //p[ndim] = kptr;
 
                   /* Emulate ndim nested for loops */
-                  d = 0;
-                  for (I = 0; I < N; I++)
-                  {
-                     dptr[I] = *p[0];
-
-                     while ( (i[d]+2) > n[d] )
-                     {
-                        d++;
-                     }
-                     i[d]++;
-                     p[d] += s[d];
-                     while ( d > 0 )
-                     {
-                        d--;
-                        i[d] = 0;
-                        p[d] = p[d+1];
-                     }
-                  }
-                  dptr += N;
+                  d = 0;					  
+		  hypre_BoxBoundaryCopyBegin(ndim,n,s,i,idx);
+		  {
+		      dptr_data[idx] = kptr[i];
+		  }
+		  hypre_BoxBoundaryCopyEnd();
+		    
+		  dptr_data += N;			   			    
                }
             }
             else
@@ -936,13 +919,38 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                {
                   size *= length_array[d];
                }
-               memset(dptr, 0, size*sizeof(HYPRE_Complex));
-               dptr += size;
+	       hypre_DeviceMemset(dptr_data,0,HYPRE_Complex,size);
+			   
+	       dptr_data += size;
             }
          }
       }
    }
 
+   /* copy buffer data from Device to Host */
+
+   hypre_SendBufferTransfer();
+   
+   for (i = 0; i < num_sends; i++)
+   {
+	   comm_type = hypre_CommPkgSendType(comm_pkg, i);
+	   num_entries = hypre_CommTypeNumEntries(comm_type);
+	   
+	   dptr = (HYPRE_Complex *) send_buffers[i];
+	   if ( hypre_CommPkgFirstComm(comm_pkg) )
+	   {
+		   qptr = (HYPRE_Int *) send_buffers[i];
+		   *qptr = num_entries;
+         qptr ++;
+         memcpy(qptr, hypre_CommTypeRemBoxnums(comm_type),
+                num_entries*sizeof(HYPRE_Int));
+         qptr += num_entries;		 
+         memcpy(qptr, hypre_CommTypeRemBoxes(comm_type),
+                num_entries*sizeof(hypre_Box));
+         hypre_CommTypeRemBoxnums(comm_type) = NULL;
+         hypre_CommTypeRemBoxes(comm_type)   = NULL;		 
+      }
+   }
    /*--------------------------------------------------------------------
     * post receives and initiate sends
     *--------------------------------------------------------------------*/
@@ -1020,7 +1028,9 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    hypre_CommHandleSendBuffers(comm_handle) = send_buffers;
    hypre_CommHandleRecvBuffers(comm_handle) = recv_buffers;
    hypre_CommHandleAction(comm_handle)      = action;
-
+   hypre_CommHandleSendBuffersDevice(comm_handle) = send_buffers_data;
+   hypre_CommHandleRecvBuffersDevice(comm_handle) = recv_buffers_data;
+	
    *comm_handle_ptr = comm_handle;
 
    return hypre_error_flag;
@@ -1040,7 +1050,10 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    hypre_CommPkg       *comm_pkg     = hypre_CommHandleCommPkg(comm_handle);
    HYPRE_Complex      **send_buffers = hypre_CommHandleSendBuffers(comm_handle);
    HYPRE_Complex      **recv_buffers = hypre_CommHandleRecvBuffers(comm_handle);
+   HYPRE_Complex      **send_buffers_data = hypre_CommHandleSendBuffersDevice(comm_handle);
+   HYPRE_Complex      **recv_buffers_data = hypre_CommHandleRecvBuffersDevice(comm_handle);
    HYPRE_Int            action       = hypre_CommHandleAction(comm_handle);
+   HYPRE_Int            size;
                       
    HYPRE_Int            ndim         = hypre_CommPkgNDim(comm_pkg);
    HYPRE_Int            num_values   = hypre_CommPkgNumValues(comm_pkg);
@@ -1055,7 +1068,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    HYPRE_Int           *stride_array;
 
    HYPRE_Complex       *kptr, *lptr;
-   HYPRE_Complex       *dptr;
+   HYPRE_Complex       *dptr,*dptr_data;
    HYPRE_Int           *qptr;
 
    HYPRE_Int           *boxnums;
@@ -1123,17 +1136,22 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
     * unpack receive buffer data
     *--------------------------------------------------------------------*/
 
+   /* copy buffer data from Host to Device */
+   
+   hypre_RecvBufferTransfer();
+   
    for (i = 0; i < num_recvs; i++)
    {
       comm_type = hypre_CommPkgRecvType(comm_pkg, i);
       num_entries = hypre_CommTypeNumEntries(comm_type);
 
-      dptr = (HYPRE_Complex *) recv_buffers[i];
+      dptr_data = (HYPRE_Complex *) recv_buffers_data[i];
+	  
       if ( hypre_CommPkgFirstComm(comm_pkg) )
       {
-         dptr += hypre_CommPrefixSize(num_entries);
+		 dptr_data += hypre_CommPrefixSize(num_entries);
       }
-
+	  
       for (j = 0; j < num_entries; j++)
       {
          comm_entry = hypre_CommTypeEntry(comm_type, j);
@@ -1148,56 +1166,42 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
             /* This is based on "Idea 2" in box.h */
             {
-               HYPRE_Int      i[HYPRE_MAXDIM+1];
+	      //HYPRE_Int      i[HYPRE_MAXDIM+1];
                HYPRE_Int      n[HYPRE_MAXDIM+1];
                HYPRE_Int      s[HYPRE_MAXDIM+1];
-               HYPRE_Complex *p[HYPRE_MAXDIM+1];
-               HYPRE_Int      I, N;
+               //HYPRE_Complex *p[HYPRE_MAXDIM+1];
+               HYPRE_Int      N;
 
                /* Initialize */
                N = 1;
                for (d = 0; d < ndim; d++)
                {
-                  i[d] = 0;
+		 //i[d] = 0;
                   n[d] = length_array[d];
                   s[d] = stride_array[d];
-                  p[d] = kptr;
+                  //p[d] = kptr;
                   N *= n[d];
                }
-               i[ndim] = 0;
+               //i[ndim] = 0;
                n[ndim] = 2;
                s[ndim] = 0;
-               p[ndim] = kptr;
+               //p[ndim] = kptr;
 
                /* Emulate ndim nested for loops */
                d = 0;
-               for (I = 0; I < N; I++)
-               {
-                  if (action > 0)
-                  {
-                     /* add the data to existing values in memory */
-                     *p[0] += dptr[I];
-                  }
-                  else
-                  {
-                     /* copy the data over existing values in memory */
-                     *p[0] = dptr[I];
-                  }
-
-                  while ( (i[d]+2) > n[d] )
-                  {
-                     d++;
-                  }
-                  i[d]++;
-                  p[d] += s[d];
-                  while ( d > 0 )
-                  {
-                     d--;
-                     i[d] = 0;
-                     p[d] = p[d+1];
-                  }
-               }
-               dptr += N;
+	       hypre_BoxBoundaryCopyBegin(ndim,n,s,i,idx)
+	       {
+		   if (action > 0)
+		   {
+		       kptr[i] += dptr_data[idx];
+		   }
+		   else
+		   {
+		       kptr[i] = dptr_data[idx];
+		   }
+	       }
+	       hypre_BoxBoundaryCopyEnd()
+               dptr_data += N;
             }
          }
       }
@@ -1217,16 +1221,16 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    hypre_TFree(hypre_CommHandleStatus(comm_handle));
    if (num_sends > 0)
    {
-      hypre_SharedTFree(send_buffers[0]);
+      hypre_SharedTFree(send_buffers[0]); 
    }
    if (num_recvs > 0)
    {
       hypre_SharedTFree(recv_buffers[0]);
    }
-   hypre_TFree(send_buffers);
-   hypre_TFree(recv_buffers);
-   hypre_TFree(comm_handle);
 
+   hypre_TFree(comm_handle);
+   hypre_FreeBuffer();
+   
    return hypre_error_flag;
 }
 
@@ -1251,6 +1255,7 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
    HYPRE_Int           *fr_stride_array;
    HYPRE_Complex       *to_dp;
    HYPRE_Int           *to_stride_array;
+   HYPRE_Complex       *fr_dpl, *to_dpl;
                       
    HYPRE_Int           *length_array;
    HYPRE_Int            i, d, ll;
@@ -1287,15 +1292,15 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
             {
                /* This is based on "Idea 2" in box.h */
                {
-                  HYPRE_Int      i[HYPRE_MAXDIM+1];
+		 //HYPRE_Int      i[HYPRE_MAXDIM+1];
                   HYPRE_Int      n[HYPRE_MAXDIM+1];
                   HYPRE_Int      fs[HYPRE_MAXDIM+1],  ts[HYPRE_MAXDIM+1];
                   HYPRE_Complex *fp[HYPRE_MAXDIM+1], *tp[HYPRE_MAXDIM+1];
-                  HYPRE_Int      I, N;
+                  HYPRE_Int      N;
 
                   /* Initialize */
                   N = 1;
-                  i[ndim]  = 0;
+                  //i[ndim]  = 0;
                   n[ndim]  = 2;
                   fs[ndim] = 0;
                   ts[ndim] = 0;
@@ -1303,7 +1308,7 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                   tp[ndim] = to_dp + (      ll )*to_stride_array[ndim];
                   for (d = 0; d < ndim; d++)
                   {
-                     i[d]  = 0;
+		    //i[d]  = 0;
                      n[d]  = length_array[d];
                      fs[d] = fr_stride_array[d];
                      ts[d] = to_stride_array[d];
@@ -1314,34 +1319,23 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
 
                   /* Emulate ndim nested for loops */
                   d = 0;
-                  for (I = 0; I < N; I++)
-                  {
-                     if (action > 0)
-                     {
+				  
+		  fr_dpl = fr_dp + (order[ll])*fr_stride_array[ndim];
+		  to_dpl = to_dp + (      ll )*to_stride_array[ndim];
+		  hypre_BoxDataExchangeBegin(ndim, n, fs, i1, ts, i2)
+		  {
+		      if (action > 0)
+		      {
                         /* add the data to existing values in memory */
-                        *tp[0] += *fp[0];
-                     }
-                     else
-                     {
+			  to_dpl[i2] += fr_dpl[i1];
+		      }
+		      else
+		      {
                         /* copy the data over existing values in memory */
-                        *tp[0] = *fp[0];
-                     }
-
-                     while ( (i[d]+2) > n[d] )
-                     {
-                        d++;
-                     }
-                     i[d]++;
-                     fp[d] += fs[d];
-                     tp[d] += ts[d];
-                     while ( d > 0 )
-                     {
-                        d--;
-                        i[d] = 0;
-                        fp[d] = fp[d+1];
-                        tp[d] = tp[d+1];
-                     }
-                  }
+			  to_dpl[i2] = fr_dpl[i1];
+		      } 
+		  }				  
+		  hypre_BoxDataExchangeEnd()
                }
             }
          }

@@ -967,17 +967,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
             hypre_CopyIndex(hypre_BoxIMin(ownbox), startc);
             hypre_BoxGetSize(ownbox, loop_size);
 
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                e_dbox,  start,  stride,  ei,
-                                xc_dbox, startc, stridec, xci);
-#if 1
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci,lindex,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1) HYPRE_SMP_SCHEDULE
-#endif
-#else
-            hypre_BoxLoopSetOneBlock();
-#endif
-            hypre_BoxLoop2For(ei, xci)
+            hypre_SerialBoxLoop2Begin(ndim, loop_size,
+				      e_dbox,  start,  stride,  ei,
+				      xc_dbox, startc, stridec, xci);
             {
                /*--------------------------------------------------------
                 * Linear interpolation. Determine the weights and the
@@ -1191,7 +1183,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                   }         /* for (j= 0; j< jmax; j++) */
                }            /* for (k= 0; k< kmax; k++) */ 
             }
-            hypre_BoxLoop2End(ei, xci);
+            hypre_SerialBoxLoop2End(ei, xci);
 
          }/* hypre_ForBoxI(bi, own_abox) */
       }   /* hypre_ForBoxArray(fi, fgrid_boxes) */
@@ -1306,17 +1298,9 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
             hypre_CopyIndex(hypre_BoxIMin(ownbox), startc);
             hypre_BoxGetSize(ownbox, loop_size);
 
-            hypre_BoxLoop2Begin(ndim, loop_size,
-                                e_dbox,  start,  stride,  ei,
-                                xc_dbox, startc, stridec, xci);
-#if 1
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci,lindex,imax,jmax,kmax,k,offset_kp1,zweight2,kshift,zweight1,j,offset_jp1,yweight2,jshift,yweight1,i,offset_ip1,xweight2,ishift,xweight1) HYPRE_SMP_SCHEDULE
-#endif
-#else
-            hypre_BoxLoopSetOneBlock();
-#endif
-            hypre_BoxLoop2For(ei, xci)
+            hypre_SerialBoxLoop2Begin(ndim, loop_size,
+				      e_dbox,  start,  stride,  ei,
+				      xc_dbox, startc, stridec, xci);
             {
                /*--------------------------------------------------------
                 * Linear interpolation. Determine the weights and the
@@ -1533,7 +1517,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                   }         /* for (j= 0; j< jmax; j++) */
                }            /* for (k= 0; k< kmax; k++) */
             }
-            hypre_BoxLoop2End(ei, xci);
+            hypre_SerialBoxLoop2End(ei, xci);
 
          }  /* if (hypre_BoxVolume(ownbox)) */
       }     /* hypre_ForBoxI(bi, own_abox) */

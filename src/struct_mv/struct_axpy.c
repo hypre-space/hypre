@@ -29,9 +29,6 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 {
    hypre_Box        *x_data_box;
    hypre_Box        *y_data_box;
-                 
-   HYPRE_Int         xi;
-   HYPRE_Int         yi;
                     
    HYPRE_Complex    *xp;
    HYPRE_Complex    *yp;
@@ -59,10 +56,15 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
       yp = hypre_StructVectorBoxData(y, i);
 
       hypre_BoxGetSize(box, loop_size);
-
+	  
+#ifdef HYPRE_BOX_PRIVATE_VAR
+#undef HYPRE_BOX_PRIVATE_VAR
+#endif
+#define HYPRE_BOX_PRIVATE_VAR xi,yi
+	  
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
-                          x_data_box, start, unit_stride, xi,
-                          y_data_box, start, unit_stride, yi);
+			  x_data_box, start, unit_stride, xi,
+			  y_data_box, start, unit_stride, yi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,yi) HYPRE_SMP_SCHEDULE
 #endif

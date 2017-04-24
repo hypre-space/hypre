@@ -64,11 +64,10 @@ void  hypre_SeedRand( HYPRE_Int seed )
  * Computes the next pseudo-random number in the sequence using the global
  * variable Seed.
  *
- * @return a HYPRE_Real containing the next number in the sequence divided by
- * 2147483647 so that the numbers are in (0, 1].
+ * @return a HYPRE_Int between (0, 2147483647]
  *--------------------------------------------------------------------------*/
 
-HYPRE_Real  hypre_Rand()
+HYPRE_Int  hypre_RandI()
 {
    HYPRE_Int  low, high, test;
 
@@ -84,5 +83,33 @@ HYPRE_Real  hypre_Rand()
       Seed = test + m;
    }
 
-   return ((HYPRE_Real)(Seed) / m);
+   return Seed;
+}
+
+/*--------------------------------------------------------------------------
+ * Computes the next pseudo-random number in the sequence using the global
+ * variable Seed.
+ *
+ * @return a HYPRE_Real containing the next number in the sequence divided by
+ * 2147483647 so that the numbers are in (0, 1].
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Real  hypre_Rand()
+{
+/*
+   HYPRE_Int  low, high, test;
+
+   high = Seed / q;
+   low = Seed % q;
+   test = a * low - r * high;
+   if(test > 0)
+   {
+      Seed = test;
+   }
+   else
+   {
+      Seed = test + m;
+   }
+*/
+   return ((HYPRE_Real)(hypre_RandI()) / m);
 }

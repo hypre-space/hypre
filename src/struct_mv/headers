@@ -29,10 +29,41 @@ cat > $INTERNAL_HEADER <<@
 #include "HYPRE_struct_mv.h"
 #include "_hypre_utilities.h"
 
+@
+
+
+cat >> $INTERNAL_HEADER <<@
+#if defined(HYPRE_USE_RAJA)
+@
+
+cat boxloop_raja.h              >> $INTERNAL_HEADER
+
+cat >> $INTERNAL_HEADER <<@
+#elif defined(HYPRE_USE_KOKKOS)
+@
+
+cat boxloop_kokkos.h              >> $INTERNAL_HEADER
+
+cat >> $INTERNAL_HEADER <<@
+#elif defined(HYPRE_USE_CUDA)
+@
+
+cat boxloop_cuda.h              >> $INTERNAL_HEADER
+
+cat >> $INTERNAL_HEADER <<@
+#else
+@
+
+cat boxloop.h              >> $INTERNAL_HEADER
+
+cat >> $INTERNAL_HEADER <<@
+#endif
+@
+
+cat >> $INTERNAL_HEADER <<@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 @
 
 #===========================================================================
