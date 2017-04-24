@@ -67,11 +67,7 @@ typedef struct
 #define hypre_RedBlackLoopEnd()			\
          }						\
      });						\
-     cudaError err = cudaGetLastError();		\
-     if ( cudaSuccess != err ) {					\
-       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-     }									\
-     AxCheckError(cudaDeviceSynchronize());				\
+     hypre_fence();					\
 }
 
 #define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
@@ -96,11 +92,7 @@ typedef struct
 #define hypre_RedBlackConstantcoefLoopEnd()			\
          }						\
      });						\
-     cudaError err = cudaGetLastError();		\
-     if ( cudaSuccess != err ) {					\
-       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-     }									\
-     AxCheckError(cudaDeviceSynchronize());				\
+     hypre_fence();					\
 }  
 #elif defined(HYPRE_USE_KOKKOS)
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\

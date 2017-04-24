@@ -971,7 +971,25 @@ then
 	hypre_using_mpi=yes
 	AC_CHECK_PROGS(CXX, [nvcc])
 	AC_CHECK_PROGS(CC, [nvcc])
-	AC_CHECK_PROGS(CUDACXX, [mpxlC mpixlcxx_r mpicxx mpiCC mpipgCC xlC_r xlc_r g++ gcc pgCC pgcc CC cc KCC kcc])
+	if test "$hypre_user_chose_cxxcompilers" = "no"
+	then
+	   if test "$hypre_using_mpi" = "no"
+	   then
+	      if test "$hypre_using_openmp" = "yes"
+	      then
+	         AC_CHECK_PROGS(CUDACXX, [xlC_r xlc_r icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+              else
+		 AC_CHECK_PROGS(CUDACXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+	      fi
+	   else
+	      if test "$hypre_using_openmp" = "yes"
+	      then
+	         AC_CHECK_PROGS(CUDACXX, [mpig++ mpxlC mpixlcxx_r mpiicpc mpiCC mpicxx mpipgCC])
+	      else
+	         AC_CHECK_PROGS(CUDACXX, [mpig++ mpxlC mpixlcxx mpiicpc mpiCC mpicxx mpipgCC])
+	      fi
+	   fi
+	fi
 fi
 
 if test "$hypre_user_chose_ccompilers" = "no"
@@ -987,9 +1005,9 @@ then
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpiicc mpicc mpipgcc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpiicc mpigcc mpicc mpipgcc])
       else
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpicc mpipgcc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpigcc mpicc mpipgcc])
       fi
    fi
 
@@ -1012,9 +1030,9 @@ then
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpiicpc mpiCC mpicxx mpipgCC])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpiicpc mpig++ mpiCC mpicxx mpipgCC])
       else
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpiicpc mpiCC mpicxx mpipgCC])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpiicpc mpig++ mpiCC mpicxx mpipgCC])
       fi
    fi
 
@@ -1449,11 +1467,19 @@ then
    	fi
 	hypre_user_chose_cuda=no
    else 
-   	CC=${CXX}
-   	LDFLAGS+=" -lRAJA "
-   	CFLAGS+=" -Wno-deprecated-register -qmaxmem=-1 -DHYPRE_USE_RAJA=1 "
-   	CXXFLAGS+=" -Wno-deprecated-register -qmaxmem=-1 -DHYPRE_USE_RAJA=1  "
-
+   	if test "$hypre_using_openmp" = "yes"
+	then
+	   CC=${CXX}
+	   LDFLAGS+=" -lRAJA "
+	   AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support])
+	   CFLAGS+=" -DHYPRE_USE_RAJA "
+	   CXXFLAGS+=" -DHYPRE_USE_RAJA "
+	else
+	   CC=${CXX}
+   	   LDFLAGS+=" -lRAJA "
+   	   CFLAGS+=" -DHYPRE_USE_RAJA "
+   	   CXXFLAGS+=" -DHYPRE_USE_RAJA "
+	fi
    fi
 fi
 dnl *********************************************************************
@@ -1477,6 +1503,22 @@ then
       LINK_CC=$LINK_CXX
       CFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS"
       CXXFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS"
+      hypre_user_chose_cuda=no
+   else
+      if test "$hypre_using_openmp" = "yes"                                                                               
+      then
+         CC=${CXX}
+	 LDFLAGS+=" -lkokkos "
+	 AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support])
+	 CFLAGS+=" -DHYPRE_USE_KOKKOS "
+	 CXXFLAGS+=" -DHYPRE_USE_KOKKOS "
+      else
+      	 CC=${CXX}
+	 LDFLAGS+=" -lkokkos "
+	 CFLAGS+=" -DHYPRE_USE_KOKKOS "
+	 CXXFLAGS+=" -DHYPRE_USE_KOKKOS "
+      fi   
+  fi
 fi
 dnl *********************************************************************
 dnl * Set cuda options
@@ -1619,13 +1661,9 @@ dnl *********************************************************************
 dnl * KOKKOS information
 dnl *********************************************************************
 AC_SUBST(HYPRE_KOKKOS_SRC_DIR)
-AC_SUBST(HYPRE_KOKKOS_DEVICE)
-AC_SUBST(HYPRE_KOKKOS_ARCH)
-AC_SUBST(HYPRE_KOKKOS_CUDA_OPTION)
-AC_SUBST(HYPRE_KOKKOS_INC_FILE)
-AC_SUBST(HYPRE_KOKKOS_CLEAN)	
+AC_SUBST(HYPRE_KOKKOS_INCLUDE)
+AC_SUBST(HYPRE_KOKKOS_INC_FILE)	
 AC_SUBST(HYPRE_KOKKOS_LIB)
-AC_SUBST(HYPRE_KOKKOS_DEPENDS)
 dnl *********************************************************************
 dnl * NVCC stuff
 dnl *********************************************************************

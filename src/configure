@@ -601,13 +601,10 @@ CALIPER_INCLUDE
 HYPRE_NVCC_MAKEFILE
 NVCCLIBS
 NVCCFLAGS
-HYPRE_KOKKOS_DEPENDS
 HYPRE_KOKKOS_LIB
-HYPRE_KOKKOS_CLEAN
 HYPRE_KOKKOS_INC_FILE
-HYPRE_KOKKOS_CUDA_OPTION
-HYPRE_KOKKOS_ARCH
-HYPRE_KOKKOS_DEVICE
+HYPRE_KOKKOS_INCLUDE
+HYPRE_KOKKOS_SRC_DIR
 HYPRE_RAJA_LIB
 HYPRE_RAJA_INCLUDE
 HYPRE_RAJA_SRC_DIR
@@ -771,6 +768,10 @@ with_raja_include
 with_raja_lib
 with_raja_libs
 with_raja_lib_dirs
+with_kokkos_include
+with_kokkos_lib
+with_kokkos_libs
+with_kokkos_lib_dirs
 with_nvcc
 with_caliper
 with_caliper_include
@@ -1527,6 +1528,23 @@ Optional Packages:
                           --with-raja-libs, e.g "usr/lib /usr/local/lib". The
                           options --with-raja-libs and --raja-blas-lib-dirs
                           must be used together.
+  --with-kokkos-include=DIR
+                          User specifies that KOKKOS headers is in DIR. The
+                          options --with-kokkos-include --with-kokkos-libs and
+                          --with-kokkos-lib-dirs must be used together.
+  --with-kokkos-lib=LIBS  LIBS is space-separated linkable list (enclosed in
+                          quotes) of libraries needed for KOKKOS. OK to use -L
+                          and -l flags in the list
+  --with-kokkos-libs=LIBS LIBS is space-separated list (enclosed in quotes) of
+                          libraries needed for KOKKOS (base name only). The
+                          options --with-kokkos-libs and
+                          --with-kokkos-lib-dirs must be used together.
+  --with-kokkos-lib-dirs=DIRS
+                          DIRS is space-separated list (enclosed in quotes) of
+                          directories containing the libraries specified by
+                          --with-kokkos-libs, e.g "usr/lib /usr/local/lib".
+                          The options --with-kokkos-libs and
+                          --kokkos-blas-lib-dirs must be used together.
   --with-nvcc             Use NVCC compiler (default is NO).
   --with-caliper          Use Caliper instrumentation (default is NO).
   --with-caliper-include=DIR
@@ -3295,7 +3313,51 @@ if test "${with_raja_lib_dirs+set}" = set; then :
   withval=$with_raja_lib_dirs; for raja_lib_dir in $withval; do
     HYPRE_RAJA_SRC_DIR="-L$raja_lib_dir $HYPRE_RAJA_SRC_DIR"
  done;
-hypre_user_chose_raja=yes
+ hypre_user_chose_raja=yes
+
+fi
+
+
+
+# Check whether --with-kokkos-include was given.
+if test "${with_kokkos_include+set}" = set; then :
+  withval=$with_kokkos_include; for kokkos_dir in $withval; do
+HYPRE_KOKKOS_INCLUDE="$HYPRE_KOKKOS_INCLUDE -I$kokkos_dir"
+done;
+hypre_user_chose_kokkos=yes
+
+fi
+
+
+
+# Check whether --with-kokkos-lib was given.
+if test "${with_kokkos_lib+set}" = set; then :
+  withval=$with_kokkos_lib; for kokkos_lib in $withval; do
+       HYPRE_KOKKOS_LIB="$HYPRE_KOKKOS_LIB $kokkos_lib"
+ done;
+hypre_user_chose_kokkos=yes
+
+fi
+
+
+
+# Check whether --with-kokkos-libs was given.
+if test "${with_kokkos_libs+set}" = set; then :
+  withval=$with_kokkos_libs; for kokkos_lib in $withval; do
+    HYPRE_KOKKOS_LIB="$HYPRE_KOKKOS_LIB -l$kokkos_lib"
+ done;
+hypre_user_chose_kokkos=yes
+
+fi
+
+
+
+# Check whether --with-kokkos-lib-dirs was given.
+if test "${with_kokkos_lib_dirs+set}" = set; then :
+  withval=$with_kokkos_lib_dirs; for kokkos_lib_dir in $withval; do
+    HYPRE_KOKKOS_SRC_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_SRC_DIR"
+ done;
+hypre_user_chose_kokkos=yes
 
 fi
 
@@ -3453,7 +3515,13 @@ fi
   test -n "$CC" && break
 done
 
-	for ac_prog in mpxlC mpixlcxx_r mpicxx mpiCC mpipgCC xlC_r xlc_r g++ gcc pgCC pgcc CC cc KCC kcc
+	if test "$hypre_user_chose_cxxcompilers" = "no"
+	then
+	   if test "$hypre_using_mpi" = "no"
+	   then
+	      if test "$hypre_using_openmp" = "yes"
+	      then
+	         for ac_prog in xlC_r xlc_r icpc icc g++ gcc pgCC pgcc CC cc KCC kcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3495,6 +3563,141 @@ fi
   test -n "$CUDACXX" && break
 done
 
+              else
+		 for ac_prog in xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_CUDACXX+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$CUDACXX"; then
+  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CUDACXX="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+CUDACXX=$ac_cv_prog_CUDACXX
+if test -n "$CUDACXX"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
+$as_echo "$CUDACXX" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$CUDACXX" && break
+done
+
+	      fi
+	   else
+	      if test "$hypre_using_openmp" = "yes"
+	      then
+	         for ac_prog in mpig++ mpxlC mpixlcxx_r mpiicpc mpiCC mpicxx mpipgCC
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_CUDACXX+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$CUDACXX"; then
+  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CUDACXX="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+CUDACXX=$ac_cv_prog_CUDACXX
+if test -n "$CUDACXX"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
+$as_echo "$CUDACXX" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$CUDACXX" && break
+done
+
+	      else
+	         for ac_prog in mpig++ mpxlC mpixlcxx mpiicpc mpiCC mpicxx mpipgCC
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_CUDACXX+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$CUDACXX"; then
+  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CUDACXX="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+CUDACXX=$ac_cv_prog_CUDACXX
+if test -n "$CUDACXX"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
+$as_echo "$CUDACXX" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+  test -n "$CUDACXX" && break
+done
+
+	      fi
+	   fi
+	fi
 fi
 
 if test "$hypre_user_chose_ccompilers" = "no"
@@ -3592,7 +3795,7 @@ done
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlc mpixlc_r mpiicc mpicc mpipgcc
+         for ac_prog in mpxlc mpixlc_r mpiicc mpigcc mpicc mpipgcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3635,7 +3838,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlc mpixlc mpiicc mpicc mpipgcc
+         for ac_prog in mpxlc mpixlc mpiicc mpigcc mpicc mpipgcc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3781,7 +3984,7 @@ done
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlC mpixlcxx_r mpiicpc mpiCC mpicxx mpipgCC
+         for ac_prog in mpxlC mpixlcxx_r mpiicpc mpig++ mpiCC mpicxx mpipgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3824,7 +4027,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlC mpixlcxx mpiicpc mpiCC mpicxx mpipgCC
+         for ac_prog in mpxlC mpixlcxx mpiicpc mpig++ mpiCC mpicxx mpipgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -7548,8 +7751,8 @@ if test "$hypre_user_chose_raja" = "yes"
 then
    if test "$hypre_using_cuda" = "yes"
       then
-	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda -lRAJA"
-   	RAJAFLAGS=" -lRAJA"
+        RAJAFLAGS=" -lRAJA "
+	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda $RAJAFLAGS "
    	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 -Xcompiler $RAJAFLAGS "
    	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1  $RAJAFLAGS "
    	if test "$hypre_using_um" != "yes"
@@ -7567,29 +7770,59 @@ $as_echo "$as_me: WARNING: *****************************************************
    	fi
 	hypre_user_chose_cuda=no
    else
-   	CC=${CXX}
-   	LDFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
-   	CFLAGS+=" -Wno-deprecated-register -qmaxmem=-1 -DHYPRE_USE_RAJA=1 "
-   	CXXFLAGS+=" -Wno-deprecated-register -qmaxmem=-1 -DHYPRE_USE_RAJA=1  "
+   	if test "$hypre_using_openmp" = "yes"
+	then
+	   CC=${CXX}
+	   LDFLAGS+=" -lRAJA "
 
+$as_echo "#define HYPRE_USING_OPENMP 1" >>confdefs.h
+
+	   CFLAGS+=" -DHYPRE_USE_RAJA "
+	   CXXFLAGS+=" -DHYPRE_USE_RAJA "
+	else
+	   CC=${CXX}
+   	   LDFLAGS+=" -lRAJA "
+   	   CFLAGS+=" -DHYPRE_USE_RAJA "
+   	   CXXFLAGS+=" -DHYPRE_USE_RAJA "
+	fi
    fi
 fi
 
 if test "$hypre_user_chose_kokkos" = "yes"
 then
-   HYPRE_KOKKOS_PATH="$HYPRE_SRCDIR/../../kokkos-master"
-   HYPRE_KOKKOS_DEVICE="OpenMP"
-   HYPRE_KOKKOS_ARCH="SNB"
-   HYPRE_KOKKOS_CUDA_OPTION=""
-   HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_PATH/Makefile.kokkos"
-   HYPRE_KOKKOS_CLEAN="kokkos-clean"
-   HYPRE_KOKKOS_LIB="\$(KOKKOS_LIBS)"
-   HYPRE_KOKKOS_DEPENDS="\$(KOKKOS_LINK_DEPENDS)"
-   LDFLAGS="-fopenmp -L./ -lkokkos"
-   CC=$CXX
-   LINK_CC=$LINK_CXX
-   CFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS=1"
-   CXXFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS=1"
+   if test "$hypre_using_cuda" = "yes"
+   then
+      LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda -lRAJA"
+      HYPRE_KOKKOS_DEVICE="OpenMP"
+      HYPRE_KOKKOS_ARCH="SNB"
+      HYPRE_KOKKOS_CUDA_OPTION=""
+      HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
+      HYPRE_KOKKOS_CLEAN="kokkos-clean"
+      HYPRE_KOKKOS_LIB="\$(KOKKOS_LIBS)"
+      HYPRE_KOKKOS_DEPENDS="\$(KOKKOS_LINK_DEPENDS)"
+      LDFLAGS="-fopenmp -L./ -lkokkos"
+      CC=$CXX
+      LINK_CC=$LINK_CXX
+      CFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS"
+      CXXFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS"
+      hypre_user_chose_cuda=no
+   else
+      if test "$hypre_using_openmp" = "yes"
+      then
+         CC=${CXX}
+	 LDFLAGS+=" -lkokkos "
+
+$as_echo "#define HYPRE_USING_OPENMP 1" >>confdefs.h
+
+	 CFLAGS+=" -DHYPRE_USE_KOKKOS "
+	 CXXFLAGS+=" -DHYPRE_USE_KOKKOS "
+      else
+      	 CC=${CXX}
+	 LDFLAGS+=" -lkokkos "
+	 CFLAGS+=" -DHYPRE_USE_KOKKOS "
+	 CXXFLAGS+=" -DHYPRE_USE_KOKKOS "
+      fi
+  fi
 fi
 if test "$hypre_user_chose_cuda" = "yes"
 then
@@ -7729,10 +7962,6 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
-
-
-
-
 
 
 

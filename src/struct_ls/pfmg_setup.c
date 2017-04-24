@@ -1,3 +1,4 @@
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -738,7 +739,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA)
         /*FIXME: need reduction for more variables*/
 	HYPRE_Int tmp = 0;
 	hypre_MatrixIndexMove(A, stencil_size, i, tmp, 3);
