@@ -13,58 +13,58 @@
 #include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGCreate
+ * HYPRE_MGRCreate
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SysTGCreate( HYPRE_Solver *solver )
+HYPRE_MGRCreate( HYPRE_Solver *solver )
 {
    if (!solver)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;
    }
-   *solver = ( (HYPRE_Solver) hypre_SysTGCreate( ) );
+   *solver = ( (HYPRE_Solver) hypre_MGRCreate( ) );
    return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGDestroy
+ * HYPRE_MGRDestroy
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_SysTGDestroy( HYPRE_Solver solver )
+HYPRE_MGRDestroy( HYPRE_Solver solver )
 {
-   return( hypre_SysTGDestroy( (void *) solver ) );
+   return( hypre_MGRDestroy( (void *) solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetup
+ * HYPRE_MGRSetup
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_SysTGSetup( HYPRE_Solver solver,
+HYPRE_MGRSetup( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
                          HYPRE_ParVector x      )
 {
-   return( hypre_SysTGSetup( (void *) solver,
+   return( hypre_MGRSetup( (void *) solver,
                                  (hypre_ParCSRMatrix *) A,
                                  (hypre_ParVector *) b,
                                  (hypre_ParVector *) x ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSolve
+ * HYPRE_MGRSolve
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_SysTGSolve( HYPRE_Solver solver,
+HYPRE_MGRSolve( HYPRE_Solver solver,
                          HYPRE_ParCSRMatrix A,
                          HYPRE_ParVector b,
                          HYPRE_ParVector x      )
 {
-   return( hypre_SysTGSolve( (void *) solver,
+   return( hypre_MGRSolve( (void *) solver,
                                  (hypre_ParCSRMatrix *) A,
                                  (hypre_ParVector *) b,
                                  (hypre_ParVector *) x ) );
@@ -72,208 +72,208 @@ HYPRE_SysTGSolve( HYPRE_Solver solver,
 
 
 HYPRE_Int
-HYPRE_SysTGSetBlockDataWrapper( HYPRE_Solver solver, 
+HYPRE_MGRSetBlockDataWrapper( HYPRE_Solver solver, 
                                 HYPRE_Int block_size, 
                                 HYPRE_Int coarse_grid_index)
 {
-  return ( hypre_SysTGSetBlockDataWrapper( (void *) solver, block_size, coarse_grid_index) );
+  return ( hypre_MGRSetBlockDataWrapper( (void *) solver, block_size, coarse_grid_index) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetBlockData
+ * HYPRE_MGRSetBlockData
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SysTGSetBlockData( HYPRE_Solver solver,
+HYPRE_MGRSetBlockData( HYPRE_Solver solver,
                          HYPRE_Int  block_size, 
                          HYPRE_Int num_coarse_points, 
                          HYPRE_Int  *block_coarse_indexes)
 {
-   return( hypre_SysTGSetBlockData( (void *) solver, block_size, num_coarse_points, block_coarse_indexes ) );
+   return( hypre_MGRSetBlockData( (void *) solver, block_size, num_coarse_points, block_coarse_indexes ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetBlockDataExp
+ * HYPRE_MGRSetBlockDataExp
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SysTGSetBlockDataExp( HYPRE_Solver solver,
+HYPRE_MGRSetBlockDataExp( HYPRE_Solver solver,
                          HYPRE_Int  block_size,
                          HYPRE_Int  *num_coarse_points,
                          HYPRE_Int  **block_coarse_indexes)
 {
-   return( hypre_SysTGSetBlockDataExp( (void *) solver, block_size, num_coarse_points, block_coarse_indexes ) );
+   return( hypre_MGRSetBlockDataExp( (void *) solver, block_size, num_coarse_points, block_coarse_indexes ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetCoarseSolver
+ * HYPRE_MGRSetCoarseSolver
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SysTGSetCoarseSolver(HYPRE_Solver          solver,
+HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
                              HYPRE_PtrToParSolverFcn  coarse_grid_solver_solve,
                              HYPRE_PtrToParSolverFcn  coarse_grid_solver_setup,
                              HYPRE_Solver          coarse_grid_solver )
 {
-   return( hypre_SysTGSetCoarseSolver( (void *) solver,
+   return( hypre_MGRSetCoarseSolver( (void *) solver,
 									   (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_solve,
 									   (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_setup,
 									   (void *) coarse_grid_solver ) );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetAdditionalCoarseIndices
+ * HYPRE_MGRSetAdditionalCoarseIndices
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetAdditionalCoarseIndices( HYPRE_Solver solver, HYPRE_Int num_add_coarse_idx, HYPRE_Int *additional_coarse_indices)
+HYPRE_MGRSetAdditionalCoarseIndices( HYPRE_Solver solver, HYPRE_Int num_add_coarse_idx, HYPRE_Int *additional_coarse_indices)
 {
-   return hypre_SysTGSetAdditionalCoarseIndices(solver, num_add_coarse_idx, additional_coarse_indices);
+   return hypre_MGRSetAdditionalCoarseIndices(solver, num_add_coarse_idx, additional_coarse_indices);
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetMaxLevels
+ * HYPRE_MGRSetMaxLevels
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetMaxCoarseLevels( HYPRE_Solver solver, HYPRE_Int maxlev )
+HYPRE_MGRSetMaxCoarseLevels( HYPRE_Solver solver, HYPRE_Int maxlev )
 {
-   return hypre_SysTGSetMaxCoarseLevels(solver, maxlev);
+   return hypre_MGRSetMaxCoarseLevels(solver, maxlev);
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetBlockSize
+ * HYPRE_MGRSetBlockSize
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize )
+HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize )
 {
-   return hypre_SysTGSetBlockSize(solver, bsize );
+   return hypre_MGRSetBlockSize(solver, bsize );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetReservedCoarseSize
+ * HYPRE_MGRSetReservedCoarseSize
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetReservedCoarseSize( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size )
+HYPRE_MGRSetReservedCoarseSize( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size )
 {
-   return hypre_SysTGSetReservedCoarseSize(solver, reserved_coarse_size );
+   return hypre_MGRSetReservedCoarseSize(solver, reserved_coarse_size );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetRestrictType
+ * HYPRE_MGRSetRestrictType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetRestrictType(HYPRE_Solver solver, HYPRE_Int restrict_type )
+HYPRE_MGRSetRestrictType(HYPRE_Solver solver, HYPRE_Int restrict_type )
 {
-   return hypre_SysTGSetRestrictType(solver, restrict_type );
+   return hypre_MGRSetRestrictType(solver, restrict_type );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetRelaxMethod
+ * HYPRE_MGRSetRelaxMethod
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method )
+HYPRE_MGRSetRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method )
 {
-   return hypre_SysTGSetRelaxMethod(solver, relax_method );
+   return hypre_MGRSetRelaxMethod(solver, relax_method );
 }
 
 HYPRE_Int
-HYPRE_SysTGSetSplittingStrategy(HYPRE_Solver solver, HYPRE_Int splitting_strategy )
+HYPRE_MGRSetSplittingStrategy(HYPRE_Solver solver, HYPRE_Int splitting_strategy )
 {
-   return hypre_SysTGSetSplittingStrategy(solver, splitting_strategy );
+   return hypre_MGRSetSplittingStrategy(solver, splitting_strategy );
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetRelaxType
+ * HYPRE_MGRSetRelaxType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type )
+HYPRE_MGRSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type )
 {
-   return hypre_SysTGSetRelaxType(solver, relax_type );
+   return hypre_MGRSetRelaxType(solver, relax_type );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetNumRelaxSweeps
+ * HYPRE_MGRSetNumRelaxSweeps
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
+HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
 {
-   return hypre_SysTGSetNumRelaxSweeps(solver, nsweeps);
+   return hypre_MGRSetNumRelaxSweeps(solver, nsweeps);
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetInterpType
+ * HYPRE_MGRSetInterpType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetInterpType( HYPRE_Solver solver, HYPRE_Int interpType )
+HYPRE_MGRSetInterpType( HYPRE_Solver solver, HYPRE_Int interpType )
 {
-   return hypre_SysTGSetInterpType(solver, interpType);
+   return hypre_MGRSetInterpType(solver, interpType);
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetNumInterpSweeps
+ * HYPRE_MGRSetNumInterpSweeps
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetNumInterpSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
+HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
 {
-   return hypre_SysTGSetNumInterpSweeps(solver, nsweeps);
+   return hypre_MGRSetNumInterpSweeps(solver, nsweeps);
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetPrintLevel
+ * HYPRE_MGRSetPrintLevel
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
+HYPRE_MGRSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
 {
-   return hypre_SysTGSetPrintLevel( solver, print_level );
+   return hypre_MGRSetPrintLevel( solver, print_level );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetLogging
+ * HYPRE_MGRSetLogging
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
+HYPRE_MGRSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
 {
-   return hypre_SysTGSetLogging(solver, logging );
+   return hypre_MGRSetLogging(solver, logging );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetMaxIters
+ * HYPRE_MGRSetMaxIters
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetMaxIters( HYPRE_Solver solver, HYPRE_Int max_iter )
+HYPRE_MGRSetMaxIters( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-   return hypre_SysTGSetMaxIters( solver, max_iter );
+   return hypre_MGRSetMaxIters( solver, max_iter );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetConvTol
+ * HYPRE_MGRSetConvTol
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetConvTol( HYPRE_Solver solver, HYPRE_Real conv_tol )
+HYPRE_MGRSetConvTol( HYPRE_Solver solver, HYPRE_Real conv_tol )
 {
-   return hypre_SysTGSetConvTol( solver, conv_tol );
+   return hypre_MGRSetConvTol( solver, conv_tol );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetMaxGlobalsmoothIters
+ * HYPRE_MGRSetMaxGlobalsmoothIters
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
+HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-	return hypre_SysTGSetMaxGlobalsmoothIters(solver, max_iter);
+	return hypre_MGRSetMaxGlobalsmoothIters(solver, max_iter);
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetGlobalsmoothType
+ * HYPRE_MGRSetGlobalsmoothType
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_SysTGSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
+HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int iter_type )
 {
-	return hypre_SysTGSetGlobalsmoothType(solver, iter_type);
+	return hypre_MGRSetGlobalsmoothType(solver, iter_type);
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGGetNumIterations
+ * HYPRE_MGRGetNumIterations
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
+HYPRE_MGRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
 {
-   return hypre_SysTGGetNumIterations( solver, num_iterations );
+   return hypre_MGRGetNumIterations( solver, num_iterations );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGGetResidualNorm
+ * HYPRE_MGRGetResidualNorm
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGGetResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm )
+HYPRE_MGRGetResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm )
 {
-   return hypre_SysTGGetResidualNorm(solver, res_norm);
+   return hypre_MGRGetResidualNorm(solver, res_norm);
 }
