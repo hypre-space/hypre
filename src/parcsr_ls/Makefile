@@ -121,6 +121,8 @@ FILES =\
  pcg_par.c\
  schwarz.c\
  par_systg.c\
+ par_systg_setup.c\
+ par_systg_solve.c\
  block_tridiag.c\
  ams.c\
  ads.c\

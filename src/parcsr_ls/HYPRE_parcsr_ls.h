@@ -3106,10 +3106,10 @@ HYPRE_SysTGSetMaxCoarseLevels( HYPRE_Solver solver, HYPRE_Int maxlev );
 HYPRE_Int
 HYPRE_SysTGSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize );
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetNumWells
+ * HYPRE_SysTGSetReservedCoarseSize
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetNumWells( HYPRE_Solver solver, HYPRE_Int num_wells );
+HYPRE_SysTGSetReservedCoarseSize( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size );
 	
 /*--------------------------------------------------------------------------
  * HYPRE_SysTGSetRelaxType

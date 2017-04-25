@@ -147,12 +147,12 @@ HYPRE_SysTGSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize )
    return hypre_SysTGSetBlockSize(solver, bsize );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_SysTGSetNumWells
+ * HYPRE_SysTGSetReservedCoarseSize
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_SysTGSetNumWells( HYPRE_Solver solver, HYPRE_Int num_wells )
+HYPRE_SysTGSetReservedCoarseSize( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size )
 {
-   return hypre_SysTGSetNumWells(solver, num_wells );
+   return hypre_SysTGSetReservedCoarseSize(solver, reserved_coarse_size );
 }
 
 /*--------------------------------------------------------------------------

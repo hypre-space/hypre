@@ -1560,7 +1560,7 @@ HYPRE_Int hypre_SysTGSetBlockDataWrapper( void *systg_vdata, HYPRE_Int  block_si
 HYPRE_Int hypre_SysTGSetBlockData( void *systg_vdata, HYPRE_Int  block_size,  HYPRE_Int num_coarse_points, HYPRE_Int  *block_coarse_indexes);
 HYPRE_Int hypre_SysTGSetBlockDataExp( void *systg_vdata, HYPRE_Int  block_size,  HYPRE_Int *num_coarse_points, HYPRE_Int  **block_coarse_indexes);
 HYPRE_Int hypre_SysTGCoarsen(hypre_ParCSRMatrix *S,  hypre_ParCSRMatrix *A,HYPRE_Int final_coarse_size,HYPRE_Int *final_coarse_indexes,HYPRE_Int debug_flag,HYPRE_Int **CF_marker,HYPRE_Int last_level);
-HYPRE_Int hypre_SysTGSetNumWells(void      *systg_vdata, HYPRE_Int num_wells);
+HYPRE_Int hypre_SysTGSetReservedCoarseSize(void      *systg_vdata, HYPRE_Int reserved_coarse_size);
 HYPRE_Int hypre_SysTGSetMaxGlobalsmoothIters( void *systg_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_SysTGSetGlobalsmoothType( void *systg_vdata, HYPRE_Int iter_type );
 HYPRE_Int hypre_SysTGSetAdditionalCoarseIndices(void *systg_vdata, HYPRE_Int num_additional_coarse_indices, HYPRE_Int *coarse_grid_indices);
@@ -1575,8 +1575,8 @@ HYPRE_Int hypre_SysTGSetup( void *systg_vdata, hypre_ParCSRMatrix *A, hypre_ParV
 HYPRE_Int hypre_SysTGSolve( void *systg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector  *u );
 HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A,hypre_ParCSRMatrix **B_ptr,void               *systg_vdata,HYPRE_Int             debug_flag);
 HYPRE_Int hypre_block_jacobi (hypre_ParCSRMatrix *A,hypre_ParVector    *f,hypre_ParVector    *u,HYPRE_Real         blk_size,HYPRE_Int           n_block,HYPRE_Int           left_size,HYPRE_Real *diaginv,hypre_ParVector    *Vtemp);
-HYPRE_Int hypre_blockRelax_setup(hypre_ParCSRMatrix *A,HYPRE_Int blk_size, HYPRE_Int Numwell, HYPRE_Real **diaginvptr);
-HYPRE_Int hypre_blockRelax(hypre_ParCSRMatrix *A,hypre_ParVector *f,hypre_ParVector *u,HYPRE_Int blk_size,HYPRE_Int Numwell,hypre_ParVector *Vtemp,hypre_ParVector *Ztemp);
+HYPRE_Int hypre_blockRelax_setup(hypre_ParCSRMatrix *A,HYPRE_Int blk_size, HYPRE_Int reserved_coarse_size, HYPRE_Real **diaginvptr);
+HYPRE_Int hypre_blockRelax(hypre_ParCSRMatrix *A,hypre_ParVector *f,hypre_ParVector *u,HYPRE_Int blk_size,HYPRE_Int reserved_coarse_size,hypre_ParVector *Vtemp,hypre_ParVector *Ztemp);
 	
 	
 HYPRE_Int hypre_SysTGSetMaxCoarseLevels( void *systg_vdata, HYPRE_Int maxlev );

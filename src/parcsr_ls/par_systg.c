@@ -18,104 +18,8 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
+#include "par_systg.h"
 #include <assert.h>
-
-#define FMRK  -1
-#define CMRK  1
-#define UMRK  0
-#define S_CMRK  2
-
-#define FPT(i, bsize) (((i) % (bsize)) == FMRK)
-#define CPT(i, bsize) (((i) % (bsize)) == CMRK)
-
-#define SMALLREAL 1e-20
-
-typedef struct
-{
-  // block data
-  HYPRE_Int  block_size;
-  HYPRE_Int  num_coarse_indexes;
-  HYPRE_Int  *tmp_num_coarse_points;
-  HYPRE_Int  num_additional_coarse_indices;
-  HYPRE_Int  *block_cf_marker;
-  HYPRE_Int  **tmp_block_cf_marker;
-  HYPRE_Int  *additional_coarse_indices;
-
-   //general data
-  HYPRE_Int num_coarse_levels;
-  HYPRE_Int max_num_coarse_levels;
-  hypre_ParCSRMatrix **A_array;
-  hypre_ParCSRMatrix ** A_ff_array;
-  hypre_ParCSRMatrix **P_array;
-  hypre_ParCSRMatrix **P_f_array;
-  hypre_ParCSRMatrix **RT_array;
-  hypre_ParCSRMatrix *P_f;
-  hypre_ParCSRMatrix *RAP;
-  hypre_ParCSRMatrix *A_ff;
-  HYPRE_Int **CF_marker_array;
-  HYPRE_Int *final_coarse_indexes;
-  HYPRE_Int **coarse_indices_lvls;
-  hypre_ParVector    **F_array;
-  hypre_ParVector    **U_array;
-  hypre_ParVector    *residual;
-  HYPRE_Real    *rel_res_norms;
-
-  HYPRE_Real   max_row_sum;
-  HYPRE_Real	num_interp_sweeps;
-  HYPRE_Int    interp_type;
-  HYPRE_Int   restrict_type;
-  HYPRE_Real   strong_threshold;
-  HYPRE_Real   trunc_factor;
-  HYPRE_Real   S_commpkg_switch;
-  HYPRE_Int	P_max_elmts;
-  HYPRE_Int  	num_iterations;
-
-  HYPRE_Real   **l1_norms;
-  HYPRE_Real	final_rel_residual_norm;
-  HYPRE_Real	conv_tol;
-  HYPRE_Real	relax_weight;
-  HYPRE_Int	relax_type;
-  HYPRE_Int	logging;
-  HYPRE_Int	print_level;
-  HYPRE_Int	max_iter;
-  HYPRE_Int	relax_order;
-  HYPRE_Int	num_relax_sweeps;
-  HYPRE_Int relax_method;
-
-  HYPRE_Solver *coarse_grid_solver;
-  HYPRE_Int	(*coarse_grid_solver_setup)(void*,void*,void*,void*);
-  HYPRE_Int	(*coarse_grid_solver_solve)(void*,void*,void*,void*);
-
-  HYPRE_Solver *fine_grid_solver;
-  HYPRE_Int   (*fine_grid_solver_setup)(void*,void*,void*,void*);
-  HYPRE_Int   (*fine_grid_solver_solve)(void*,void*,void*,void*);
-
-  HYPRE_Solver global_smoother;
-  HYPRE_Solver *aff_solver;
-
-  HYPRE_Int	use_default_cgrid_solver;
-  HYPRE_Real	omega;
-
-  /* temp vectors for solve phase */
-  hypre_ParVector   *Vtemp;
-  hypre_ParVector   *Ztemp;
-  hypre_ParVector   *Utemp;
-  hypre_ParVector   *Ftemp;
-  hypre_ParVector   **U_fine_array;
-  hypre_ParVector   **F_fine_array;
-
-  HYPRE_Real          *diaginv;
-  HYPRE_Int           n_block;
-  HYPRE_Int           left_size;
-  HYPRE_Int           global_smooth;
-  HYPRE_Int           global_smooth_type;
-
-  HYPRE_Int num_wells;
-  HYPRE_Int block_form;
-
-  HYPRE_Int build_aff;
-  HYPRE_Int splitting_strategy;
-} hypre_ParSysTGData;
 
 /* Create */
 void *
@@ -195,7 +99,7 @@ hypre_SysTGCreate()
 
   (systg_data -> l1_norms) = NULL;
 
-  (systg_data -> num_wells) = 0;
+  (systg_data -> reserved_coarse_size) = 0;
   (systg_data -> diaginv) = NULL;
   (systg_data -> global_smooth) = 1;
   (systg_data -> global_smooth_type) = 0;
@@ -477,10 +381,11 @@ hypre_SysTGSetBlockData( void      *systg_vdata,
   return hypre_error_flag;
 }
 
-/* Set the number of wells in the system */
+  /* 
+/*Set nmber of points that remain part of the coarse grid throughout the hierarchy */
 HYPRE_Int
-hypre_SysTGSetNumWells(void      *systg_vdata,
-					   HYPRE_Int num_wells)
+hypre_SysTGSetReservedCoarseSize(void      *systg_vdata,
+					   HYPRE_Int reserved_coarse_size)
 {
 	hypre_ParSysTGData   *systg_data = (hypre_ParSysTGData*) systg_vdata;
 
@@ -490,8 +395,14 @@ hypre_SysTGSetNumWells(void      *systg_vdata,
 		hypre_error_in_arg(1);
 		return hypre_error_flag;
 	}
+	
+	if(reserved_coarse_size < 0)
+	{
+	  hypre_error_in_arg(2);
+          return hypre_error_flag;
+	}
 
-	(systg_data -> num_wells) = num_wells;
+	(systg_data -> reserved_coarse_size) = reserved_coarse_size;
 
 	return hypre_error_flag;
 }
@@ -1148,7 +1059,7 @@ hypre_SysTGBuildPDRS( hypre_ParCSRMatrix   *A,
 					  HYPRE_Int            *CF_marker,
 					  HYPRE_Int            *num_cpts_global,
 					  HYPRE_Int             blk_size,
-					  HYPRE_Int             num_Wells,
+					  HYPRE_Int             reserved_coarse_size,
 					  HYPRE_Int             debug_flag,
 					  hypre_ParCSRMatrix  **P_ptr)
 {
@@ -1196,7 +1107,7 @@ hypre_SysTGBuildPDRS( hypre_ParCSRMatrix   *A,
 	HYPRE_Int              start_indexing = 0; /* start indexing for P_data at 0 */
 
 	HYPRE_Int              n_fine  = hypre_CSRMatrixNumRows(A_diag);
-	HYPRE_Int              num_blk = (n_fine - num_Wells) / blk_size;
+	HYPRE_Int              num_blk = (n_fine - reserved_coarse_size) / blk_size;
 
 	HYPRE_Int             *fine_to_coarse;
 	HYPRE_Int             *fine_to_coarse_offd;
@@ -1687,7 +1598,7 @@ hypre_SysTGBuildPDRS( hypre_ParCSRMatrix   *A,
 	return(0);
 }
 
-/* Setupinterpolation operator. This code uses Jacobi relaxation
+/* Setup interpolation operator. This code uses Jacobi relaxation
  * (diagonal scaling) for interpolation at the last level
 */
 HYPRE_Int
@@ -1753,729 +1664,6 @@ hypre_sysTGBuildInterp(hypre_ParCSRMatrix     *A,
    }
    /* set pointer to P */
    *P = P_ptr;
-
-   return hypre_error_flag;
-}
-/* Setup sysTG data */
-HYPRE_Int
-hypre_SysTGSetup( void               *systg_vdata,
-                  hypre_ParCSRMatrix *A,
-                  hypre_ParVector    *f,
-                  hypre_ParVector    *u )
-{
-	MPI_Comm 	         comm = hypre_ParCSRMatrixComm(A);
-	hypre_ParSysTGData   *systg_data = (hypre_ParSysTGData*) systg_vdata;
-
-	HYPRE_Int       j, final_coarse_size, block_size, idx, row, size, *cols = NULL, *block_cf_marker, *additional_coarse_indices;
-	HYPRE_Int	   lev, num_coarsening_levs, last_level, num_c_levels, num_threads, gnumrows;
-	HYPRE_Int	   debug_flag = 0, old_coarse_size, coarse_size_diff;
-	HYPRE_Int      ierr;
-
-	hypre_ParCSRMatrix  *RT = NULL;
-	hypre_ParCSRMatrix  *P = NULL;
-	hypre_ParCSRMatrix  *S = NULL;
-	hypre_ParCSRMatrix  *ST = NULL;
-	hypre_ParCSRMatrix  *AT = NULL;
-  hypre_ParCSRMatrix  *RT_f = NULL;
-  hypre_ParCSRMatrix  *P_f = NULL;
-
-	HYPRE_Int * col_offd_S_to_A = NULL;
-	HYPRE_Int * col_offd_ST_to_AT = NULL;
-	HYPRE_Int * dof_func_buff = NULL;
-	HYPRE_Int * coarse_pnts_global = NULL;
-	HYPRE_Real         **l1_norms = NULL;
-
-	hypre_ParVector     *Ztemp;
-	hypre_ParVector     *Vtemp;
-	hypre_ParVector     *Utemp;
-	hypre_ParVector     *Ftemp;
-
-	/* pointers to systg data */
-	HYPRE_Int  use_default_cgrid_solver = (systg_data -> use_default_cgrid_solver);
-	HYPRE_Int  logging = (systg_data -> logging);
-	HYPRE_Int  print_level = (systg_data -> print_level);
-	HYPRE_Int  relax_type = (systg_data -> relax_type);
-	HYPRE_Int  relax_order = (systg_data -> relax_order);
-	HYPRE_Int  interp_type = (systg_data -> interp_type);
-  HYPRE_Int  restrict_type = (systg_data -> restrict_type);
-	HYPRE_Int num_interp_sweeps = (systg_data -> num_interp_sweeps);
-	HYPRE_Int num_restrict_sweeps = (systg_data -> num_interp_sweeps);
-	HYPRE_Int	max_elmts = (systg_data -> P_max_elmts);
-	HYPRE_Real   max_row_sum = (systg_data -> max_row_sum);
-	HYPRE_Real   strong_threshold = (systg_data -> strong_threshold);
-	HYPRE_Real   trunc_factor = (systg_data -> trunc_factor);
-	HYPRE_Real   S_commpkg_switch = (systg_data -> S_commpkg_switch);
-	HYPRE_Int  old_num_coarse_levels = (systg_data -> num_coarse_levels);
-	HYPRE_Int  max_num_coarse_levels = (systg_data -> max_num_coarse_levels);
-	HYPRE_Int * final_coarse_indexes = (systg_data -> final_coarse_indexes);
-	HYPRE_Int ** CF_marker_array = (systg_data -> CF_marker_array);
-	hypre_ParCSRMatrix  **A_array = (systg_data -> A_array);
-  hypre_ParCSRMatrix  **A_ff_array = (systg_data -> A_ff_array);
-	hypre_ParCSRMatrix  **P_array = (systg_data -> P_array);
-  hypre_ParCSRMatrix  **P_f_array = (systg_data -> P_f_array);
-	hypre_ParCSRMatrix  **RT_array = (systg_data -> RT_array);
-	hypre_ParCSRMatrix  *RAP_ptr = NULL;
-  hypre_ParCSRMatrix  *A_ff_ptr = NULL;
-  HYPRE_Solver *aff_solver = NULL;
-
-	hypre_ParVector    **F_array = (systg_data -> F_array);
-	hypre_ParVector    **U_array = (systg_data -> U_array);
-  hypre_ParVector    **F_fine_array = (systg_data -> F_fine_array);
-  hypre_ParVector    **U_fine_array = (systg_data -> U_fine_array);
-	hypre_ParVector    *residual = (systg_data -> residual);
-	HYPRE_Real    *rel_res_norms = (systg_data -> rel_res_norms);
-
-	HYPRE_Solver    	*default_cg_solver;
-   HYPRE_Int   (*fine_grid_solver_setup)(void*,void*,void*,void*);
-   HYPRE_Int   (*fine_grid_solver_solve)(void*,void*,void*,void*);
-	HYPRE_Int	(*coarse_grid_solver_setup)(void*,void*,void*,void*) = (HYPRE_Int (*)(void*, void*, void*, void*)) (systg_data -> coarse_grid_solver_setup);
-	HYPRE_Int	(*coarse_grid_solver_solve)(void*,void*,void*,void*) = (HYPRE_Int (*)(void*, void*, void*, void*)) (systg_data -> coarse_grid_solver_solve);
-
-	HYPRE_Int    global_smooth      =  (systg_data -> global_smooth);
-	HYPRE_Int    global_smooth_type =  (systg_data -> global_smooth_type);
-
-	HYPRE_Int    num_wells = (systg_data -> num_wells);
-
-	HYPRE_Real          *diaginv = (systg_data -> diaginv);
-	HYPRE_Int		   num_procs,  my_id;
-	hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
-	HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
-	HYPRE_Int    blk_size  = (systg_data -> block_size);
-  HYPRE_Int    *num_coarse_points = (systg_data -> tmp_num_coarse_points);
-  HYPRE_Int num_additional_coarse_indices = (systg_data -> num_additional_coarse_indices);
-  HYPRE_Int splitting_strategy = (systg_data -> splitting_strategy);
-  HYPRE_Int coarse_size = 0;
-
-
-	/* ----- begin -----*/
-
-	num_threads = hypre_NumThreads();
-
-  block_size = (systg_data -> block_size);
-  block_cf_marker = (systg_data -> block_cf_marker);
-  HYPRE_Int **tmp_block_cf_marker = (systg_data -> tmp_block_cf_marker);
-  additional_coarse_indices = (systg_data -> additional_coarse_indices);
-  HYPRE_Int **coarse_indices_lvls = (systg_data -> coarse_indices_lvls);
-
-   if (print_level > 0)
-   {
-      hypre_printf("Solver info: \n");
-      hypre_printf("Relax type: %d\n", relax_type);
-      hypre_printf("Splitting Strategy: %d\n", splitting_strategy);
-      hypre_printf("Number of relax sweeps: %d\n", (systg_data -> num_relax_sweeps));
-      hypre_printf("Interpolation type: %d\n", interp_type);
-      hypre_printf("Number of interpolation sweeps: %d\n", num_interp_sweeps);
-      hypre_printf("Restriction type: %d\n", restrict_type);
-      hypre_printf("Max number of iterations: %d\n", (systg_data -> max_iter));
-      hypre_printf("Number of coarse levels: %d\n", (systg_data -> num_coarse_levels));
-      hypre_printf("Max number of coarse levels: %d\n", (systg_data -> max_num_coarse_levels));
-      hypre_printf("Tolerance: %e\n", (systg_data -> conv_tol));
-   }
-
-	gnumrows = hypre_ParCSRMatrixGlobalNumRows(A);
-	if(((gnumrows-num_wells) % block_size) != 0)
-	{
-		hypre_printf("ERROR: Global number of rows minus wells is not a multiple of block_size ... n = %d, num_wells = %d, block_size = %d \n", gnumrows,num_wells, block_size);
-		hypre_MPI_Abort(comm, -1);
-	}
-
-	if( block_size < 2 || (systg_data -> max_num_coarse_levels) < 1)
-	{
-		hypre_printf("Warning: Block size is < 2 or number of coarse levels is < 1. \n");
-		hypre_printf("Solving scalar problem on fine grid using coarse level solver \n");
-		/* Trivial case: simply solve the coarse level problem */
-		if(use_default_cgrid_solver)
-		{
-			hypre_printf("No coarse grid solver provided. Using default AMG solver ... \n");
-			/* create and set default solver parameters here */
-			/* create and initialize default_cg_solver */
-			default_cg_solver = (HYPRE_Solver *) hypre_BoomerAMGCreate();
-			hypre_BoomerAMGSetMaxIter ( default_cg_solver, (systg_data -> max_iter) );
-
-			hypre_BoomerAMGSetRelaxOrder( default_cg_solver, 0);
-			hypre_BoomerAMGSetPrintLevel(default_cg_solver, 0);
-			/* set setup and solve functions */
-			coarse_grid_solver_setup = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSetup;
-			coarse_grid_solver_solve = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSolve;
-			(systg_data -> coarse_grid_solver_setup) = coarse_grid_solver_setup;
-			(systg_data -> coarse_grid_solver_solve) = coarse_grid_solver_solve;
-			(systg_data -> coarse_grid_solver) = default_cg_solver;
-		}
-		/* setup coarse grid solver */
-		coarse_grid_solver_setup((systg_data -> coarse_grid_solver), A, f, u);
-		(systg_data -> max_num_coarse_levels) = 0;
-
-		return hypre_error_flag;
-	}
-
-	/* setup default block data if not set. Use first index as C-point */
-	if((systg_data -> block_cf_marker)==NULL)
-	{
-		(systg_data -> block_cf_marker) = hypre_CTAlloc(HYPRE_Int,block_size);
-		memset((systg_data -> block_cf_marker), FMRK, block_size*sizeof(HYPRE_Int));
-		(systg_data -> block_cf_marker)[0] = CMRK;
-	}
-
-  /* Initialize local indexes of coarse sets at different levels */
-  HYPRE_Int num_coarse_levels = (systg_data -> num_coarse_levels);
-  if ((systg_data -> coarse_indices_lvls) != NULL) {
-    for (j = 0; j < num_coarse_levels; j++)
-      if ((systg_data -> coarse_indices_lvls)[j])
-        hypre_TFree((systg_data -> coarse_indices_lvls)[j]);
-    hypre_TFree((systg_data -> coarse_indices_lvls));
-  }
-
-	HYPRE_Int nloc =  hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-	HYPRE_Int ilower =  hypre_ParCSRMatrixFirstRowIndex(A);
-	HYPRE_Int iupper =  hypre_ParCSRMatrixLastRowIndex(A);
-
-	/* Initialize local indexes of final coarse set -- to be passed on to subsequent levels */
-  if (splitting_strategy == 0) {
-	if((systg_data -> final_coarse_indexes) != NULL)
-		hypre_TFree((systg_data -> final_coarse_indexes));
-	(systg_data -> final_coarse_indexes) = hypre_CTAlloc(HYPRE_Int, nloc);
-	final_coarse_indexes = (systg_data -> final_coarse_indexes);
-	final_coarse_size = 0;
-	for( row = ilower; row <= iupper; row++)
-	{
-		idx = row % block_size;
-		if(block_cf_marker[idx] == CMRK)
-		{
-			final_coarse_indexes[final_coarse_size++] = row - ilower;
-		}
-		if (row>=gnumrows-num_wells)
-		{
-			final_coarse_indexes[final_coarse_size++] = row - ilower;
-		}
-	}
-  }
-  else if (splitting_strategy == 1) {
-  if((systg_data -> final_coarse_indexes) != NULL)
-    hypre_TFree((systg_data -> final_coarse_indexes));
-  (systg_data -> final_coarse_indexes) = hypre_CTAlloc(HYPRE_Int, nloc);
-  final_coarse_indexes = (systg_data -> final_coarse_indexes);
-  if ((systg_data -> coarse_indices_lvls) == NULL)
-    (systg_data -> coarse_indices_lvls) = hypre_CTAlloc(HYPRE_Int*, num_coarse_levels);
-  if (coarse_indices_lvls == NULL)
-    coarse_indices_lvls = hypre_CTAlloc(HYPRE_Int*, nloc);
-  (systg_data -> coarse_indices_lvls) = coarse_indices_lvls;
-  if (coarse_indices_lvls[0] == NULL)
-    coarse_indices_lvls[0] = hypre_CTAlloc(HYPRE_Int,nloc);
-  final_coarse_size = 0;
-  for( row = ilower; row <= iupper; row++)
-  {
-    idx = row % block_size;
-    if(tmp_block_cf_marker[0][idx] == CMRK)
-    {
-      final_coarse_indexes[final_coarse_size] = row - ilower;
-      (systg_data -> coarse_indices_lvls)[0][final_coarse_size] = row - ilower;
-      final_coarse_size++;
-    }
-    if (row>=gnumrows-num_wells)
-    {
-      final_coarse_indexes[final_coarse_size++] = row - ilower;
-    }
-  }
-  HYPRE_Int i;
-  if ((systg_data -> additional_coarse_indices) != NULL)
-  for (i = 0; i < num_additional_coarse_indices; i++) {
-    row = additional_coarse_indices[i] - 1 + ilower;
-    idx = row % block_size;
-    if (tmp_block_cf_marker[0][idx] != CMRK) {
-      final_coarse_indexes[final_coarse_size] = additional_coarse_indices[i] - 1 + ilower;
-      (systg_data -> coarse_indices_lvls)[0][final_coarse_size] = additional_coarse_indices[i] - 1 - ilower;
-      final_coarse_size++;
-    }
-  }
-  }
-  coarse_size = final_coarse_size;
-
-  /* Free Previously allocated data, if any not destroyed */
-  if (A_array || P_array || P_f_array || RT_array || CF_marker_array || A_ff_array)
-  {
-    for (j = 1; j < (old_num_coarse_levels); j++)
-    {
-      if (A_array[j])
-      {
-            hypre_ParCSRMatrixDestroy(A_array[j]);
-            A_array[j] = NULL;
-      }
-    }
-
-    for (j = 0; j < old_num_coarse_levels; j++)
-    {
-         if (P_array[j])
-         {
-            hypre_ParCSRMatrixDestroy(P_array[j]);
-            P_array[j] = NULL;
-         }
-
-         if (P_f_array[j])
-         {
-            hypre_ParCSRMatrixDestroy(P_f_array[j]);
-            P_f_array[j] = NULL;
-         }
-
-         if (RT_array[j])
-         {
-       hypre_ParCSRMatrixDestroy(RT_array[j]);
-       RT_array[j] = NULL;
-         }
-
-         if (CF_marker_array[j])
-         {
-       hypre_TFree(CF_marker_array[j]);
-       CF_marker_array[j] = NULL;
-         }
-    }
-  }
-
-  /* destroy final A_ff matrix, if not previously destroyed */
-  if((systg_data -> A_ff))
-  {
-    hypre_ParCSRMatrixDestroy((systg_data -> A_ff));
-    (systg_data -> A_ff) = NULL;
-  }
-
-  /* destroy final coarse grid matrix, if not previously destroyed */
-  if((systg_data -> RAP))
-  {
-    hypre_ParCSRMatrixDestroy((systg_data -> RAP));
-    (systg_data -> RAP) = NULL;
-  }
-
-	/* Setup for global block smoothers*/
-
-	hypre_MPI_Comm_size(comm,&num_procs);
-	hypre_MPI_Comm_rank(comm,&my_id);
-	if (my_id == num_procs)
-	{
-		systg_data -> n_block   = (n - num_wells) / blk_size;
-		systg_data -> left_size = n - blk_size*(systg_data -> n_block);
-	}
-	else
-	{
-		systg_data -> n_block = n / blk_size;
-		systg_data -> left_size = n - blk_size*(systg_data -> n_block);
-	}
-	if (global_smooth_type == 0)
-	{
-		hypre_blockRelax_setup(A,blk_size,num_wells,&(systg_data -> diaginv));
-	}
-	else if (global_smooth_type == 3)
-	{
-		ierr = HYPRE_EuclidCreate(comm, &(systg_data -> global_smoother));
-		HYPRE_EuclidSetLevel(systg_data -> global_smoother, 0);
-		HYPRE_EuclidSetBJ(systg_data -> global_smoother, 1);
-		HYPRE_EuclidSetup(systg_data -> global_smoother, A, f, u);
-	}
-
-
-	/* clear old l1_norm data, if created */
-	if((systg_data -> l1_norms))
-	{
-		for (j = 0; j < (old_num_coarse_levels); j++)
-		{
-			if ((systg_data -> l1_norms)[j])
-			{
-				hypre_TFree((systg_data -> l1_norms)[j]);
-				(systg_data -> l1_norms)[j] = NULL;
-			}
-		}
-		hypre_TFree((systg_data -> l1_norms));
-	}
-
-	/* setup temporary storage */
-	if ((systg_data -> Ztemp))
-	{
-		hypre_ParVectorDestroy((systg_data -> Ztemp));
-		(systg_data -> Ztemp) = NULL;
-	}
-	if ((systg_data -> Vtemp))
-	{
-		hypre_ParVectorDestroy((systg_data -> Vtemp));
-		(systg_data -> Vtemp) = NULL;
-	}
-	if ((systg_data -> Utemp))
-	{
-		hypre_ParVectorDestroy((systg_data -> Utemp));
-		(systg_data -> Utemp) = NULL;
-	}
-	if ((systg_data -> Ftemp))
-	{
-		hypre_ParVectorDestroy((systg_data -> Ftemp));
-		(systg_data -> Ftemp) = NULL;
-	}
-	if ((systg_data -> residual))
-	{
-		hypre_ParVectorDestroy((systg_data -> residual));
-		(systg_data -> residual) = NULL;
-	}
-	if ((systg_data -> rel_res_norms))
-	{
-		hypre_TFree((systg_data -> rel_res_norms));
-		(systg_data -> rel_res_norms) = NULL;
-	}
-
-	Vtemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-								  hypre_ParCSRMatrixGlobalNumRows(A),
-								  hypre_ParCSRMatrixRowStarts(A));
-	hypre_ParVectorInitialize(Vtemp);
-	hypre_ParVectorSetPartitioningOwner(Vtemp,0);
-	(systg_data ->Vtemp) = Vtemp;
-
-	Ztemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-								  hypre_ParCSRMatrixGlobalNumRows(A),
-								  hypre_ParCSRMatrixRowStarts(A));
-	hypre_ParVectorInitialize(Ztemp);
-	hypre_ParVectorSetPartitioningOwner(Ztemp,0);
-	(systg_data -> Ztemp) = Ztemp;
-
-	Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-								  hypre_ParCSRMatrixGlobalNumRows(A),
-								  hypre_ParCSRMatrixRowStarts(A));
-	hypre_ParVectorInitialize(Utemp);
-	hypre_ParVectorSetPartitioningOwner(Utemp,0);
-	(systg_data ->Utemp) = Utemp;
-
-	Ftemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
-								  hypre_ParCSRMatrixGlobalNumRows(A),
-								  hypre_ParCSRMatrixRowStarts(A));
-	hypre_ParVectorInitialize(Ftemp);
-	hypre_ParVectorSetPartitioningOwner(Ftemp,0);
-	(systg_data ->Ftemp) = Ftemp;
-
-  /* Allocate memory for level structure */
-  if (A_array == NULL)
-    A_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels);
-  if (A_ff_array == NULL)
-    A_ff_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels);
-  if (P_array == NULL && max_num_coarse_levels > 0)
-    P_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels);
-  if (P_f_array == NULL && max_num_coarse_levels > 0)
-    P_f_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels);
-  if (RT_array == NULL && max_num_coarse_levels > 0)
-    RT_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels);
-  if (CF_marker_array == NULL)
-    CF_marker_array = hypre_CTAlloc(HYPRE_Int*, max_num_coarse_levels);
-  if (aff_solver == NULL)
-    aff_solver = hypre_CTAlloc(HYPRE_Solver, max_num_coarse_levels);
-
-  /* set pointers to systg data */
-  (systg_data -> A_array) = A_array;
-  (systg_data -> A_ff_array) = A_ff_array;
-  (systg_data -> P_array) = P_array;
-  (systg_data -> P_f_array) = P_f_array;
-  (systg_data -> RT_array) = RT_array;
-  (systg_data -> CF_marker_array) = CF_marker_array;
-  (systg_data -> aff_solver) = aff_solver;
-
-  /* Set up solution and rhs arrays */
-  if (F_array != NULL || U_array != NULL || F_fine_array != NULL || U_fine_array != NULL)
-  {
-    for (j = 1; j < old_num_coarse_levels+1; j++)
-    {
-      if (F_array[j] != NULL)
-      {
-        hypre_ParVectorDestroy(F_array[j]);
-        F_array[j] = NULL;
-      }
-      if (U_array[j] != NULL)
-      {
-        hypre_ParVectorDestroy(U_array[j]);
-        U_array[j] = NULL;
-      }
-      if (F_fine_array[j] != NULL)
-      {
-        hypre_ParVectorDestroy(F_fine_array[j]);
-        F_fine_array[j] = NULL;
-      }
-      if (U_fine_array[j] != NULL)
-      {
-        hypre_ParVectorDestroy(U_fine_array[j]);
-        U_fine_array[j] = NULL;
-      }
-    }
-  }
-
-  if (F_array == NULL)
-    F_array = hypre_CTAlloc(hypre_ParVector*, max_num_coarse_levels+1);
-  if (U_array == NULL)
-    U_array = hypre_CTAlloc(hypre_ParVector*, max_num_coarse_levels+1);
-  if (F_fine_array == NULL)
-    F_fine_array = hypre_CTAlloc(hypre_ParVector*, max_num_coarse_levels+1);
-  if (U_fine_array == NULL)
-    U_fine_array = hypre_CTAlloc(hypre_ParVector*, max_num_coarse_levels+1);
-
-	/* set solution and rhs pointers */
-	F_array[0] = f;
-	U_array[0] = u;
-
-	(systg_data -> F_array) = F_array;
-	(systg_data -> U_array) = U_array;
-  (systg_data -> F_fine_array) = F_fine_array;
-  (systg_data -> U_fine_array) = U_fine_array;
-
-	/* begin coarsening loop */
-	num_coarsening_levs = max_num_coarse_levels;
-	/* initialize level data matrix here */
-	RAP_ptr = A;
-	old_coarse_size = hypre_ParCSRMatrixGlobalNumRows(RAP_ptr);
-	coarse_size_diff = old_coarse_size;
-	/* loop over levels of coarsening */
-	for(lev = 0; lev < num_coarsening_levs; lev++)
-	{
-		/* check if this is the last level */
-		last_level = ((lev == num_coarsening_levs-1) || (coarse_size_diff < 10));
-
-		/* initialize A_array */
-		A_array[lev] = RAP_ptr;
-    nloc = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[lev]));
-
-		/* Compute strength matrix for interpolation operator - use default parameters, to be modified later */
-		hypre_BoomerAMGCreateS(A_array[lev], strong_threshold, max_row_sum, 1, NULL, &S);
-
-		/* use appropriate communication package for Strength matrix */
-		if (strong_threshold > S_commpkg_switch)
-			hypre_BoomerAMGCreateSCommPkg(A_array[lev],S,&col_offd_S_to_A);
-		/* Coarsen: Build CF_marker array based on rows of A */
-    if (splitting_strategy == 0) {
-      hypre_SysTGCoarsen(S, A_array[lev], final_coarse_size, final_coarse_indexes,debug_flag, &CF_marker_array[lev], last_level);
-    } else if (splitting_strategy == 1) {
-      hypre_SysTGCoarsen(S, A_array[lev], coarse_size, coarse_indices_lvls[lev], debug_flag, &CF_marker_array[lev], 1);
-    }
-    /*
-    FILE* cf_out;
-    HYPRE_Int nrows =  hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[lev]));
-    cf_out = fopen("cf_vector.00000","w");
-    for (i=0; i<nrows; i++) {
-      fprintf(cf_out, "%d %d\n", i+1, CF_marker_array[lev][i]);
-    }
-    fflush(cf_out);
-    fclose(cf_out);
-    */
-
-		/* Get global coarse sizes. Note that we assume num_functions = 1
-		 * so dof_func arrays are NULL */
-		hypre_BoomerAMGCoarseParms(comm, nloc, 1, NULL, CF_marker_array[lev], &dof_func_buff,&coarse_pnts_global);
-		/* Compute Petrov-Galerkin operators */
-		/* Interpolation operator */
-		num_interp_sweeps = (systg_data -> num_interp_sweeps);
-
-		hypre_sysTGBuildInterp(A_array[lev], CF_marker_array[lev], S, coarse_pnts_global, 1, dof_func_buff, 
-      debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, 1, interp_type, num_interp_sweeps);
-		//hypre_SysTGBuildP( A_array[lev],CF_marker_array[lev],coarse_pnts_global,2,debug_flag,&P);
-    hypre_ParCSRMatrixPrintIJ(P, 1, 1, "P.mat");
-		P_array[lev] = P;
-
-      /* Build AT (transpose A) */
-      hypre_ParCSRMatrixTranspose(A_array[lev], &AT, 1);
-
-      /* Build new strength matrix */
-      hypre_BoomerAMGCreateS(AT, strong_threshold, max_row_sum, 1, NULL, &ST);
-      /* use appropriate communication package for Strength matrix */
-      if (strong_threshold > S_commpkg_switch)
-         hypre_BoomerAMGCreateSCommPkg(AT, ST, &col_offd_ST_to_AT);
-
-      num_restrict_sweeps = 0; /* do injection for restriction */
-      hypre_sysTGBuildInterp(AT, CF_marker_array[lev], ST, coarse_pnts_global, 1, dof_func_buff,
-                         	debug_flag, trunc_factor, max_elmts, col_offd_ST_to_AT, &RT, last_level, 0, num_restrict_sweeps);
-	  //hypre_SysTGBuildP(AT,CF_marker_array[lev],coarse_pnts_global,2,debug_flag,&RT);
-	  //hypre_SysTGBuildP(A_array[lev],CF_marker_array[lev],coarse_pnts_global,0,debug_flag,&RT);
-      RT_array[lev] = RT;
-
-      /* Compute RAP for next level */
-      hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
-    //      (systg_data -> RAP) = RAP_ptr;
-    hypre_ParCSRMatrixPrintIJ(RAP_ptr, 1, 1, "RAP.mat");
-
-    if (splitting_strategy == 1) {
-    HYPRE_Int nloc_next = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(RAP_ptr));
-    ilower =  hypre_ParCSRMatrixFirstRowIndex(A_array[lev]);
-    iupper =  hypre_ParCSRMatrixLastRowIndex(A_array[lev]);
-    if (lev < num_coarsening_levs - 1) {
-      coarse_indices_lvls[lev+1] = hypre_CTAlloc(HYPRE_Int, nloc_next);
-      HYPRE_Int i;
-      for (i = 0; i < num_additional_coarse_indices; i++) {
-        CF_marker_array[lev][additional_coarse_indices[i]-1-ilower] = S_CMRK;
-      }
-      HYPRE_Int nc = 0;
-      HYPRE_Int index_i = 0;
-      HYPRE_Int add_cnt = 0;
-      HYPRE_Int incr = 0;
-      for (row = 0; row < nloc; row++) {
-        if (CF_marker_array[lev][row] == CMRK) {
-          idx = (nc - incr) % num_coarse_points[lev];
-          if (tmp_block_cf_marker[lev+1][idx] == CMRK) {
-            coarse_indices_lvls[lev+1][index_i++] = nc;
-          }
-          nc++;
-        }
-        else if (CF_marker_array[lev][row] == S_CMRK) {
-          additional_coarse_indices[add_cnt++] = nc+1;
-          //hypre_printf("constraint idx at level %d: %d\n", lev+1, nc);
-          idx = row % (lev == 0 ? blk_size : num_coarse_points[lev]);
-          if (tmp_block_cf_marker[lev][idx] != CMRK || lev >= 1) incr++;
-          //incr++;
-          if (lev != num_coarsening_levs - 2) {
-            coarse_indices_lvls[lev+1][index_i++] = nc;
-          }
-          nc++;
-          CF_marker_array[lev][row] = CMRK;
-        }
-        //hypre_printf("row %d CF_marker %d index_i %d\n", row, CF_marker_array[lev][row], index_i);
-      }
-      coarse_size = index_i;
-      //hypre_printf("Number of coarse points at lev %d: %d\n", lev + 1, nc);
-      //hypre_printf("Number of coarse points at lev %d: %d\n", lev + 2, coarse_size);
-    }
-
-    if (systg_data -> build_aff) {
-      hypre_sysTGBuildAff(comm, nloc, 1, NULL, CF_marker_array[lev], &dof_func_buff, &coarse_pnts_global,
-        A_array[lev], debug_flag, &P_f, &A_ff_ptr);
-      //hypre_ParCSRMatrixPrintIJ(P_f, 1, 1, "P_f.mat");
-      //hypre_ParCSRMatrixPrintIJ(A_ff_ptr, 1, 1, "A_ff.mat");
-      F_fine_array[lev+1] =
-         hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
-                               hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
-                               hypre_ParCSRMatrixRowStarts(A_ff_ptr));
-      hypre_ParVectorInitialize(F_fine_array[lev+1]);
-      hypre_ParVectorSetPartitioningOwner(F_fine_array[lev+1],0);
-
-      U_fine_array[lev+1] =
-         hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_ff_ptr),
-                               hypre_ParCSRMatrixGlobalNumRows(A_ff_ptr),
-                               hypre_ParCSRMatrixRowStarts(A_ff_ptr));
-      hypre_ParVectorInitialize(U_fine_array[lev+1]);
-      hypre_ParVectorSetPartitioningOwner(U_fine_array[lev+1],0);
-      A_ff_array[lev] = A_ff_ptr;
-      P_f_array[lev] = P_f;
-      ierr = HYPRE_EuclidCreate(comm, &(aff_solver[lev]));
-      HYPRE_EuclidSetLevel((systg_data -> aff_solver)[lev], 0);
-      HYPRE_EuclidSetup((systg_data -> aff_solver)[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
-    }
-    }
-
-    /* allocate space for solution and rhs arrays */
-    F_array[lev+1] =
-      hypre_ParVectorCreate(hypre_ParCSRMatrixComm(RAP_ptr),
-                            hypre_ParCSRMatrixGlobalNumRows(RAP_ptr),
-                            hypre_ParCSRMatrixRowStarts(RAP_ptr));
-    hypre_ParVectorInitialize(F_array[lev+1]);
-    hypre_ParVectorSetPartitioningOwner(F_array[lev+1],0);
-
-    U_array[lev+1] =
-      hypre_ParVectorCreate(hypre_ParCSRMatrixComm(RAP_ptr),
-                            hypre_ParCSRMatrixGlobalNumRows(RAP_ptr),
-                            hypre_ParCSRMatrixRowStarts(RAP_ptr));
-    hypre_ParVectorInitialize(U_array[lev+1]);
-    hypre_ParVectorSetPartitioningOwner(U_array[lev+1],0);
-
-    /* free memory before starting next level */
-    hypre_ParCSRMatrixDestroy(S);
-    S = NULL;
-    hypre_TFree(col_offd_S_to_A);
-    col_offd_S_to_A = NULL;
-
-    hypre_ParCSRMatrixDestroy(AT);
-    hypre_ParCSRMatrixDestroy(ST);
-    ST = NULL;
-    hypre_TFree(col_offd_ST_to_AT);
-    col_offd_ST_to_AT = NULL;
-
-    /* check if last level */
-    if(last_level) break;
-
-    /* update coarse_size_diff and old_coarse_size */
-    int num_c_rows = hypre_ParCSRMatrixGlobalNumRows(RAP_ptr);
-    coarse_size_diff = old_coarse_size - num_c_rows;
-    old_coarse_size = num_c_rows;
-  }
-
-   /* set pointer to last level matrix */
-    num_c_levels = lev+1;
-   (systg_data->num_coarse_levels) = num_c_levels;
-   (systg_data->RAP) = RAP_ptr;
-
-   /* setup default coarse grid solver */
-   /* default is BoomerAMG */
-   if(use_default_cgrid_solver)
-   {
-      hypre_printf("No coarse grid solver provided. Using default AMG solver ... \n");
-      /* create and set default solver parameters here */
-      default_cg_solver = (HYPRE_Solver*) hypre_BoomerAMGCreate();
-      hypre_BoomerAMGSetMaxIter ( default_cg_solver, 1 );
-      hypre_BoomerAMGSetRelaxOrder( default_cg_solver, 1);
-      hypre_BoomerAMGSetPrintLevel(default_cg_solver, 0);
-      /* set setup and solve functions */
-      coarse_grid_solver_setup =  (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSetup;
-      coarse_grid_solver_solve =  (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSolve;
-      (systg_data -> coarse_grid_solver_setup) =   coarse_grid_solver_setup;
-      (systg_data -> coarse_grid_solver_solve) =   coarse_grid_solver_solve;
-      (systg_data -> coarse_grid_solver) = default_cg_solver;
-   }
-   /* setup coarse grid solver */
-   coarse_grid_solver_setup((systg_data -> coarse_grid_solver), RAP_ptr, F_array[num_c_levels], U_array[num_c_levels]);
-
-   /* Setup smoother for fine grid */
-   if (	relax_type == 8 || relax_type == 13 || relax_type == 14 || relax_type == 18 )
-   {
-      l1_norms = hypre_CTAlloc(HYPRE_Real *, num_c_levels);
-      (systg_data -> l1_norms) = l1_norms;
-   }
-   for (j = 0; j < num_c_levels; j++)
-   {
-      if (num_threads == 1)
-      {
-         if (relax_type == 8 || relax_type == 13 || relax_type == 14)
-         {
-            if (relax_order)
-               hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], &l1_norms[j]);
-            else
-               hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norms[j]);
-         }
-         else if (relax_type == 18)
-         {
-            if (relax_order)
-               hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], &l1_norms[j]);
-            else
-               hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
-         }
-      }
-      else
-      {
-         if (relax_type == 8 || relax_type == 13 || relax_type == 14)
-         {
-            if (relax_order)
-               hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, CF_marker_array[j] , &l1_norms[j]);
-            else
-               hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, NULL, &l1_norms[j]);
-         }
-         else if (relax_type == 18)
-         {
-            if (relax_order)
-               hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, CF_marker_array[j] , &l1_norms[j]);
-            else
-               hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
-         }
-      }
-   }
-
-   if ( logging > 1 ) {
-
-      residual =
-	hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A_array[0]),
-                              hypre_ParCSRMatrixGlobalNumRows(A_array[0]),
-                              hypre_ParCSRMatrixRowStarts(A_array[0]) );
-      hypre_ParVectorInitialize(residual);
-      hypre_ParVectorSetPartitioningOwner(residual,0);
-      (systg_data -> residual) = residual;
-   }
-   else{
-      (systg_data -> residual) = NULL;
-   }
-   rel_res_norms = hypre_CTAlloc(HYPRE_Real,(systg_data -> max_iter));
-   (systg_data -> rel_res_norms) = rel_res_norms;
 
    return hypre_error_flag;
 }
@@ -2586,10 +1774,8 @@ void hypre_blas_mat_inv(HYPRE_Real *a,
 	}// end if
 }
 
-HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A,
-									 hypre_ParCSRMatrix **B_ptr,
-									 void               *systg_vdata,
-									 HYPRE_Int             debug_flag)
+HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **B_ptr,
+				     void *systg_vdata, HYPRE_Int debug_flag)
 {
 	MPI_Comm 	         comm = hypre_ParCSRMatrixComm(A);
 	hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -2601,7 +1787,7 @@ HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A,
 	HYPRE_Int              num_threads;
 
 	HYPRE_Int    blk_size  = (systg_data -> block_size);
-	HYPRE_Int    num_wells = (systg_data -> num_wells);
+	HYPRE_Int    reserved_coarse_size = (systg_data -> reserved_coarse_size);
 
 	hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
 	HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
@@ -2665,7 +1851,7 @@ HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A,
 
 	if (my_id == num_procs)
 	{
-		n_block   = (n - num_wells) / blk_size;
+		n_block   = (n - reserved_coarse_size) / blk_size;
 		left_size = n - blk_size*n_block;
 	}
 	else
@@ -2678,7 +1864,7 @@ HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A,
 
 	//printf("inv_size = %d\n",inv_size);
 
-	hypre_blockRelax_setup(A,blk_size,num_wells,&(systg_data -> diaginv));
+	hypre_blockRelax_setup(A,blk_size,reserved_coarse_size,&(systg_data -> diaginv));
 
 	if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
@@ -2942,7 +2128,7 @@ HYPRE_Int hypre_block_jacobi (hypre_ParCSRMatrix *A,
 HYPRE_Int
 hypre_blockRelax_setup(hypre_ParCSRMatrix *A,
 					   HYPRE_Int          blk_size,
-					   HYPRE_Int          Numwell,
+					   HYPRE_Int          reserved_coarse_size,
 					   HYPRE_Real        **diaginvptr)
 {
 	MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
@@ -2990,7 +2176,7 @@ hypre_blockRelax_setup(hypre_ParCSRMatrix *A,
 
 	if (my_id == num_procs)
 	{
-		n_block   = (n - Numwell) / blk_size;
+		n_block   = (n - reserved_coarse_size) / blk_size;
 		left_size = n - blk_size*n_block;
 	}
 	else
@@ -3094,14 +2280,12 @@ hypre_blockRelax_setup(hypre_ParCSRMatrix *A,
 	return 1;
 }
 
-
-
 HYPRE_Int
 hypre_blockRelax(hypre_ParCSRMatrix *A,
 				 hypre_ParVector    *f,
 				 hypre_ParVector    *u,
 				 HYPRE_Int          blk_size,
-				 HYPRE_Int          Numwell,
+				 HYPRE_Int          reserved_coarse_size,
 				 hypre_ParVector    *Vtemp,
 				 hypre_ParVector    *Ztemp)
 {
@@ -3168,7 +2352,7 @@ hypre_blockRelax(hypre_ParCSRMatrix *A,
 
 	if (my_id == num_procs)
 	{
-		n_block   = (n - Numwell) / blk_size;
+		n_block   = (n - reserved_coarse_size) / blk_size;
 		left_size = n - blk_size*n_block;
 	}
 	else
@@ -3299,528 +2483,6 @@ hypre_blockRelax(hypre_ParCSRMatrix *A,
 	return(relax_error);
 }
 
-
-/* Solve */
-HYPRE_Int
-hypre_SysTGSolve( void               *systg_vdata,
-                  hypre_ParCSRMatrix *A,
-                  hypre_ParVector    *f,
-                  hypre_ParVector    *u )
-{
-
-   MPI_Comm 	         comm = hypre_ParCSRMatrixComm(A);
-   hypre_ParSysTGData   *systg_data = (hypre_ParSysTGData*) systg_vdata;
-
-   hypre_ParCSRMatrix  **A_array = (systg_data -> A_array);
-   hypre_ParVector    **F_array = (systg_data -> F_array);
-   hypre_ParVector    **U_array = (systg_data -> U_array);
-
-   HYPRE_Real		tol = (systg_data -> conv_tol);
-   HYPRE_Int		logging = (systg_data -> logging);
-   HYPRE_Int		print_level = (systg_data -> print_level);
-   HYPRE_Int		max_iter = (systg_data -> max_iter);
-   HYPRE_Real		*norms = (systg_data -> rel_res_norms);
-   hypre_ParVector     	*Vtemp = (systg_data -> Vtemp);
-   hypre_ParVector     	*Ztemp = (systg_data -> Ztemp);
-   hypre_ParVector     	*Utemp = (systg_data -> Utemp);
-   hypre_ParVector     	*Ftemp = (systg_data -> Ftemp);
-   hypre_ParVector     	*residual;
-
-   HYPRE_Real           alpha = -1;
-   HYPRE_Real           beta = 1;
-   HYPRE_Real           conv_factor = 0.0;
-   HYPRE_Real   	resnorm = 1.0;
-   HYPRE_Real   	init_resnorm = 0.0;
-   HYPRE_Real   	rel_resnorm;
-   HYPRE_Real   	res_resnorm;
-   HYPRE_Real   	rhs_norm = 0.0;
-   HYPRE_Real   	old_resnorm;
-   HYPRE_Real   	ieee_check = 0.;
-
-   HYPRE_Int		iter, num_procs, my_id;
-   HYPRE_Int		Solve_err_flag;
-
-   HYPRE_Real   total_coeffs;
-   HYPRE_Real   total_variables;
-   HYPRE_Real   operat_cmplxty;
-   HYPRE_Real   grid_cmplxty;
-
-   HYPRE_Solver    	*cg_solver = (systg_data -> coarse_grid_solver);
-   HYPRE_Int		(*coarse_grid_solver_solve)(void*,void*,void*,void*) = (systg_data -> coarse_grid_solver_solve);
-
-   HYPRE_Int    num_wells = (systg_data -> num_wells);
-   HYPRE_Int    blk_size  = (systg_data -> block_size);
-   HYPRE_Real    *diaginv = (systg_data -> diaginv);
-   HYPRE_Int      n_block = (systg_data -> n_block);
-   HYPRE_Int    left_size = (systg_data -> left_size);
-
-   HYPRE_Int    global_smooth      =  (systg_data -> global_smooth);
-   HYPRE_Int    global_smooth_type =  (systg_data -> global_smooth_type);
-   HYPRE_Int    splitting_strategy =  (systg_data -> splitting_strategy);
-
-   int i,j,k;
-
-   if(logging > 1)
-   {
-      residual = (systg_data -> residual);
-   }
-
-   (systg_data -> num_iterations) = 0;
-
-   if((systg_data -> max_num_coarse_levels) == 0)
-   {
-      /* Do standard AMG solve when only one level */
-      coarse_grid_solver_solve(*cg_solver, A, f, u);
-      return hypre_error_flag;
-   }
-
-   U_array[0] = u;
-   F_array[0] = f;
-
-   hypre_MPI_Comm_size(comm, &num_procs);
-   hypre_MPI_Comm_rank(comm,&my_id);
-
-   /*-----------------------------------------------------------------------
-    *    Write the solver parameters
-    *-----------------------------------------------------------------------*/
-//   if (my_id == 0 && print_level > 1)
-//      hypre_SysTGWriteSolverParams(systg_data);
-
-   /*-----------------------------------------------------------------------
-    *    Initialize the solver error flag and assorted bookkeeping variables
-    *-----------------------------------------------------------------------*/
-
-   Solve_err_flag = 0;
-
-   total_coeffs = 0;
-   total_variables = 0;
-   operat_cmplxty = 0;
-   grid_cmplxty = 0;
-
-   /*-----------------------------------------------------------------------
-    *     write some initial info
-    *-----------------------------------------------------------------------*/
-
-   if (my_id == 0 && print_level > 1 && tol > 0.)
-     hypre_printf("\n\nTWO-GRID SOLVER SOLUTION INFO:\n");
-
-
-   /*-----------------------------------------------------------------------
-    *    Compute initial fine-grid residual and print
-    *-----------------------------------------------------------------------*/
-   if (print_level > 1 || logging > 1 || tol > 0.)
-   {
-     if ( logging > 1 ) {
-        hypre_ParVectorCopy(F_array[0], residual );
-        if (tol > 0)
-	   hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, residual );
-           resnorm = sqrt(hypre_ParVectorInnerProd( residual, residual ));
-     }
-     else {
-        hypre_ParVectorCopy(F_array[0], Vtemp);
-        if (tol > 0)
-           hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
-        resnorm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
-     }
-
-     /* Since it is does not diminish performance, attempt to return an error flag
-        and notify users when they supply bad input. */
-     if (resnorm != 0.) ieee_check = resnorm/resnorm; /* INF -> NaN conversion */
-     if (ieee_check != ieee_check)
-     {
-        /* ...INFs or NaNs in input can make ieee_check a NaN.  This test
-           for ieee_check self-equality works on all IEEE-compliant compilers/
-           machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
-           by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-           found at http://HTTP.CS.Berkeley.EDU/~wkahan/ieee754status/IEEE754.PDF */
-        if (print_level > 0)
-        {
-          hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
-          hypre_printf("ERROR -- hypre_SysTGSolve: INFs and/or NaNs detected in input.\n");
-          hypre_printf("User probably placed non-numerics in supplied A, x_0, or b.\n");
-          hypre_printf("ERROR detected by Hypre ...  END\n\n\n");
-        }
-        hypre_error(HYPRE_ERROR_GENERIC);
-        return hypre_error_flag;
-     }
-
-     init_resnorm = resnorm;
-     rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
-     if (rhs_norm)
-     {
-       rel_resnorm = init_resnorm / rhs_norm;
-     }
-     else
-     {
-       /* rhs is zero, return a zero solution */
-       hypre_ParVectorSetConstantValues(U_array[0], 0.0);
-       if(logging > 0)
-       {
-          rel_resnorm = 0.0;
-          (systg_data -> final_rel_residual_norm) = rel_resnorm;
-       }
-       return hypre_error_flag;
-     }
-   }
-   else
-   {
-     rel_resnorm = 1.;
-   }
-
-   //hypre_ParVectorSetConstantValues(U_array[0], 0.0);
-
-   if (my_id == 0 && print_level > 1)
-   {
-      hypre_printf("                                            relative\n");
-      hypre_printf("               residual        factor       residual\n");
-      hypre_printf("               --------        ------       --------\n");
-      hypre_printf("    Initial    %e                 %e\n",init_resnorm,
-              rel_resnorm);
-   }
-   /************** Main Solver Loop - always do 1 iteration ************/
-   iter = 0;
-   while ((rel_resnorm >= tol || iter < 1)
-          && iter < max_iter)
-   {
-    if (splitting_strategy == 0) {
-	   // for (i = 0;i < 10;i ++)
-	   //   hypre_BoomerAMGRelax(A_array[0], F_array[0], NULL, 0, 0, 1.0, 0.0, NULL, U_array[0], Vtemp, NULL);
-	   //hypre_blockRelax(A_array[0], F_array[0],U_array[0], blk_size,num_wells,Vtemp,NULL);
-	   if (global_smooth_type == 0)//block Jacobi smoother
-	   {
-	   	   for (i = 0;i < global_smooth;i ++)
-	  		   hypre_block_jacobi(A_array[0],F_array[0],U_array[0],blk_size,n_block,left_size,diaginv,Vtemp);
-	   }
-	   else if (global_smooth_type == 1 ||global_smooth_type == 6)
-	   {
-
-		   for (i = 0;i < global_smooth;i ++)
-			   hypre_BoomerAMGRelax(A_array[0], F_array[0], NULL, global_smooth_type-1, 0, 1.0, 0.0, NULL, U_array[0], Vtemp, NULL);
-	   }
-	   else if (global_smooth_type == 3)//ILU smoother
-	   {
-		   for (i = 0;i < global_smooth;i ++)
-			   HYPRE_EuclidSolve( (systg_data -> global_smoother),A_array[0],F_array[0],U_array[0]);
-
-	   }
-    }
-
-
-      /* compute residual and reset pointers for MGR cycle */
-//      hypre_ParVectorCopy(F_array[0], Ftemp);
-//      hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Ftemp);
-      // set pointer to residual
-//      F_array[0] = Ftemp;
-      // initial guess/ solution for error
-//      hypre_ParVectorSetConstantValues(Utemp, 0.0);
-      // pointer to initial guess/ solution
-//      U_array[0] = Utemp;
-
-      /* Do one cycle of reduction solve on Ae=r */
-      hypre_SysTGCycle(systg_data, F_array, U_array);
-
-      /* Done with MGR cycle. Update solution and Reset pointers to solution and rhs.
-       * Note: Utemp = U_array[0] holds the error update
-       */
-      // set pointers to problem rhs and initial guess/solution
-//      F_array[0] = f;
-//      U_array[0] = u;
-      // update solution with computed error correction
-//      hypre_ParVectorAxpy(beta, Utemp, U_array[0]);
-
-      /*---------------------------------------------------------------
-       *    Compute  fine-grid residual and residual norm
-       *----------------------------------------------------------------*/
-
-      if (print_level > 1 || logging > 1 || tol > 0.)
-      {
-        old_resnorm = resnorm;
-
-        if ( logging > 1 ) {
-           hypre_ParVectorCopy(F_array[0], residual);
-           hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, residual );
-           resnorm = sqrt(hypre_ParVectorInnerProd( residual, residual ));
-        }
-        else {
-           hypre_ParVectorCopy(F_array[0], Vtemp);
-           hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
-           resnorm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
-        }
-
-        if (old_resnorm) conv_factor = resnorm / old_resnorm;
-        else conv_factor = resnorm;
-        if (rhs_norm)
-        {
-           rel_resnorm = resnorm / rhs_norm;
-        }
-        else
-        {
-           rel_resnorm = resnorm;
-        }
-
-        norms[iter] = rel_resnorm;
-      }
-
-      ++iter;
-      (systg_data -> num_iterations) = iter;
-      (systg_data -> final_rel_residual_norm) = rel_resnorm;
-
-      if (my_id == 0 && print_level > 1)
-      {
-         hypre_printf("    Cycle %2d   %e    %f     %e \n", iter,
-                 resnorm, conv_factor, rel_resnorm);
-      }
-   }
-
-   /* check convergence within max_iter */
-   if (iter == max_iter && tol > 0.)
-   {
-      Solve_err_flag = 1;
-      hypre_error(HYPRE_ERROR_CONV);
-   }
-
-   /*-----------------------------------------------------------------------
-    *    Print closing statistics
-    *	 Add operator and grid complexity stats
-    *-----------------------------------------------------------------------*/
-
-   if (iter > 0 && init_resnorm)
-     conv_factor = pow((resnorm/init_resnorm),(1.0/(HYPRE_Real) iter));
-   else
-     conv_factor = 1.;
-
-   if (print_level > 1)
-   {
-      /*** compute operator and grid complexities here ?? ***/
-      if (my_id == 0)
-      {
-         if (Solve_err_flag == 1)
-         {
-            hypre_printf("\n\n==============================================");
-            hypre_printf("\n NOTE: Convergence tolerance was not achieved\n");
-            hypre_printf("      within the allowed %d iterations\n",max_iter);
-            hypre_printf("==============================================");
-         }
-         hypre_printf("\n\n Average Convergence Factor = %f \n",conv_factor);
-         hypre_printf(" Number of coarse levels = %d \n",(systg_data -> num_coarse_levels));
-//         hypre_printf("\n\n     Complexity:    grid = %f\n",grid_cmplxty);
-//         hypre_printf("                operator = %f\n",operat_cmplxty);
-//         hypre_printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
-      }
-   }
-
-   return hypre_error_flag;
-}
-
-HYPRE_Int
-hypre_SysTGCycle( void               *systg_vdata,
-                  hypre_ParVector    **F_array,
-                  hypre_ParVector    **U_array )
-{
-   MPI_Comm 	         comm;
-   hypre_ParSysTGData   *systg_data = (hypre_ParSysTGData*) systg_vdata;
-
-   HYPRE_Int       Solve_err_flag;
-   HYPRE_Int       level;
-   HYPRE_Int       coarse_grid;
-   HYPRE_Int       fine_grid;
-   HYPRE_Int       Not_Finished;
-   HYPRE_Int	   cycle_type;
-
-   hypre_ParCSRMatrix  	**A_array = (systg_data -> A_array);
-   hypre_ParCSRMatrix  	**RT_array  = (systg_data -> RT_array);
-   hypre_ParCSRMatrix  	**P_array   = (systg_data -> P_array);
-  hypre_ParCSRMatrix   **P_f_array = (systg_data -> P_f_array);
-   hypre_ParCSRMatrix  	*RAP = (systg_data -> RAP);
-  hypre_ParCSRMatrix   **A_ff_array = (systg_data -> A_ff_array);
-   HYPRE_Solver    	*cg_solver = (systg_data -> coarse_grid_solver);
-   HYPRE_Int		(*coarse_grid_solver_solve)(void*, void*, void*, void*) = (systg_data -> coarse_grid_solver_solve);
-   HYPRE_Int		(*coarse_grid_solver_setup)(void*, void*, void*, void*) = (systg_data -> coarse_grid_solver_setup);
-
-  HYPRE_Solver      *fg_solver = (systg_data -> fine_grid_solver);
-  HYPRE_Int      (*fine_grid_solver_setup)(void*, void*, void*, void*) = (systg_data -> fine_grid_solver_setup);
-  HYPRE_Int      (*fine_grid_solver_solve)(void*, void*, void*, void*) = (systg_data -> fine_grid_solver_solve);
-
-   HYPRE_Int           	**CF_marker = (systg_data -> CF_marker_array);
-   HYPRE_Int            nsweeps = (systg_data -> num_relax_sweeps);
-   HYPRE_Int            relax_type = (systg_data -> relax_type);
-  HYPRE_Int            relax_method = (systg_data -> relax_method);
-   HYPRE_Real           relax_weight = (systg_data -> relax_weight);
-   HYPRE_Real           relax_order = (systg_data -> relax_order);
-   HYPRE_Real           omega = (systg_data -> omega);
-   HYPRE_Real          	**relax_l1_norms = (systg_data -> l1_norms);
-   hypre_ParVector     	*Vtemp = (systg_data -> Vtemp);
-   hypre_ParVector     	*Ztemp = (systg_data -> Ztemp);
-   hypre_ParVector     	*Utemp = (systg_data -> Utemp);
-  hypre_ParVector      **U_fine_array = (systg_data -> U_fine_array);
-  hypre_ParVector      **F_fine_array = (systg_data -> F_fine_array);
-   hypre_ParVector    	*Aux_U;
-   hypre_ParVector    	*Aux_F;
-
-   HYPRE_Int            i, relax_points;
-   HYPRE_Int           	num_coarse_levels = (systg_data -> num_coarse_levels);
-
-   HYPRE_Real    alpha;
-   HYPRE_Real    beta;
-
-   /* Initialize */
-   comm = hypre_ParCSRMatrixComm(A_array[0]);
-   Solve_err_flag = 0;
-   Not_Finished = 1;
-   cycle_type = 1;
-   level = 0;
-
-   /***** Main loop ******/
-   while (Not_Finished)
-   {
-
-	   /* Do coarse grid correction solve */
-	   if(cycle_type == 3)
-	   {
-		   /* call coarse grid solver here *
-			  /* default is BoomerAMG */
-		   coarse_grid_solver_solve(cg_solver, RAP, F_array[level], U_array[level]);
-		   /**** cycle up ***/
-		   cycle_type = 2;
-	   }
-	   /* restrict */
-	   else if(cycle_type == 1)
-	   {
-
-		   fine_grid = level;
-		   coarse_grid = level + 1;
-		   /* Relax solution - F-relaxation */
-		   relax_points = -1;
-      //hypre_ParVectorPrintIJ(F_array[fine_grid], 0, "F_array");
-      //hypre_ParVectorPrintIJ(U_array[fine_grid], 0, "U_array");
-      //hypre_ParCSRMatrixPrintIJ(P_f, 1, 1, "P_f.mat");
-
-      Aux_F = hypre_ParVectorCreate(comm,
-                      hypre_ParCSRMatrixGlobalNumRows(A_array[fine_grid]),
-                      hypre_ParCSRMatrixRowStarts(A_array[fine_grid]));
-      hypre_ParVectorInitialize(Aux_F);
-      hypre_ParVectorSetPartitioningOwner(Aux_F, 0);
-      hypre_ParVectorSetConstantValues(Aux_F, 0.0);
-
-        if (relax_method == 0) { /* Original SysTG relaxation for A_ff */
-		   if (relax_type == 18)
-		   {
-		   	   hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-		   							   relax_points, relax_weight, relax_l1_norms[fine_grid],
-		   							   U_array[fine_grid], Vtemp);
-		   }
-		   else if(relax_type == 8 || relax_type == 13 || relax_type == 14)
-		   {
-		      hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-		   						relax_type, relax_points, relax_weight,
-		   						omega, relax_l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);
-		   }
-		   else
-		   {
-		     for(i=0; i<nsweeps; i++)
-				   Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-														 relax_type, relax_points, relax_weight,
-														 omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
-		     }
-      }
-      else if (relax_method == 1) { /* Do a solve based on AMG or ILU for the A_ff part */
-        /*
-        // solve the A_ff part instead of doing a relaxation
-        hypre_ParVectorCopy(F_array[fine_grid], Aux_F);
-        hypre_ParCSRMatrixMatvec(-1.0, A_array[fine_grid], U_array[fine_grid],
-                  1.0, Aux_F);
-        hypre_ParCSRMatrixMatvecT(1.0, P_f, Aux_F, 0.0, F_fine);
-        //hypre_ParCSRMatrixMatvecT(1.0, P_f, U_array[fine_grid], 0.0, U_fine);
-        hypre_ParVectorSetConstantValues(U_fine, 0.0);
-        hypre_ParVectorPrintIJ(F_fine, 0, "F_fine");
-        //fine_grid_solver_solve(fg_solver, A_ff, F_fine, U_fine); // solve using AMG
-        HYPRE_EuclidSolve( (systg_data -> aff_solver), A_ff, F_fine, U_fine);
-        hypre_ParVectorPrintIJ(U_fine, 0, "U_fine_euclid");
-        hypre_ParCSRMatrixMatvec(1.0, P_f, U_fine, 1.0, U_array[fine_grid]);
-        hypre_ParVectorPrintIJ(U_array[fine_grid], 0, "U_array_after_euclid");
-        */
-      }
-      else if (relax_method == 99) {
-      /* Experimental method for multilevel reduction with 
-       * user-defined input data for choosing coarse grid */
-        if (level == 0 || level == 2) {
-          /* solve the A_ff part instead of doing a relaxation
-           * for the first and next to last level. This correspond
-           * to grouping all the constraints together and eliminating
-           * the constraints that have zero diagonal from the final 
-           * coarse grid. */
-          hypre_ParVectorCopy(F_array[fine_grid], Aux_F);
-          hypre_ParCSRMatrixMatvec(-1.0, A_array[fine_grid], U_array[fine_grid],
-                    1.0, Aux_F);
-          hypre_ParCSRMatrixMatvecT(1.0, P_f_array[fine_grid], Aux_F, 0.0, F_fine_array[coarse_grid]);
-          //hypre_ParCSRMatrixMatvecT(1.0, P_f, U_array[fine_grid], 0.0, U_fine);
-          hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
-          //fine_grid_solver_solve(fg_solver, A_ff, F_fine, U_fine); // solve using AMG
-          HYPRE_EuclidSolve( (systg_data -> aff_solver)[fine_grid], A_ff_array[fine_grid], F_fine_array[coarse_grid], U_fine_array[coarse_grid]);
-          hypre_ParCSRMatrixMatvec(1.0, P_f_array[fine_grid], U_fine_array[coarse_grid], 1.0, U_array[fine_grid]);
-        } else {
-          for (i=0; i<nsweeps; i++)
-            //hypre_ParVectorPrintIJ(U_array[fine_grid], 0, "U_array_before_relax");
-            Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-                            relax_type, relax_points, relax_weight,
-                            omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
-            //hypre_ParVectorPrintIJ(U_array[fine_grid], 0, "U_array_after_relax");
-          }
-      }
-
-
-		   // Update residual and compute coarse-grid rhs
-		   hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
-		   alpha = -1.0;
-		   beta = 1.0;
-
-		   hypre_ParCSRMatrixMatvec(alpha, A_array[fine_grid], U_array[fine_grid],
-									beta, Vtemp);
-
-		   alpha = 1.0;
-		   beta = 0.0;
-
-		   hypre_ParCSRMatrixMatvecT(alpha,RT_array[fine_grid],Vtemp,
-									 beta,F_array[coarse_grid]);
-
-		   // initialize coarse grid solution array
-		   hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0);
-
-		   ++level;
-
-		   if (level == num_coarse_levels) cycle_type = 3;
-	   }
-	   else if(level != 0)
-	   {
-		   /* Interpolate */
-
-		   fine_grid = level - 1;
-		   coarse_grid = level;
-		   alpha = 1.0;
-		   beta = 1.0;
-
-		   hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid],
-									U_array[coarse_grid],
-									beta, U_array[fine_grid]);
-
-
-		   if (Solve_err_flag != 0)
-			   return(Solve_err_flag);
-
-		   --level;
-
-	   }
-	   else
-	   {
-		   Not_Finished = 0;
-	   }
-   }
-  //if (Aux_U && relax_method == 0) hypre_ParVectorDestroy(Aux_U);
-  //if (Aux_F) hypre_ParVectorDestroy(Aux_F);
-
-   return Solve_err_flag;
-}
-
 /* set coarse grid solver */
 HYPRE_Int
 hypre_SysTGSetCoarseSolver( void  *systg_vdata,
@@ -3884,7 +2546,7 @@ hypre_SysTGSetRelaxType( void *systg_vdata, HYPRE_Int relax_type )
  * The user defines only the coarse points that are kept to the final coarse grid.
  * Method 1: the new splitting strategy for phase transition and more general cases.
  * The user can define the coarse points at each level. The user also provides a set
- * of additional points that are kept to the final coarse gird. The intermediate levels
+ * of additional points that are kept to the final coarse grid. The intermediate levels
  * will also include these points as coarse points. */
 HYPRE_Int
 hypre_SysTGSetSplittingStrategy( void *systg_vdata, HYPRE_Int splitting_strategy)
