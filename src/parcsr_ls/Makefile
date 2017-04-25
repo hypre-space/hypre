@@ -76,7 +76,7 @@ FILES =\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
  HYPRE_parcsr_schwarz.c\
- HYPRE_parcsr_systg.c\
+ HYPRE_parcsr_mgr.c\
  HYPRE_ams.c\
  HYPRE_ads.c\
  HYPRE_ame.c\
@@ -120,9 +120,9 @@ FILES =\
  partial.c\
  pcg_par.c\
  schwarz.c\
- par_systg.c\
- par_systg_setup.c\
- par_systg_solve.c\
+ par_mgr.c\
+ par_mgr_setup.c\
+ par_mgr_solve.c\
  block_tridiag.c\
  ams.c\
  ads.c\

@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 #include "_hypre_parcsr_ls.h"
-#include "par_systg.h"
+#include "par_mgr.h"
 #include "par_amg.h"
 
 /* Setup MGR data */
