@@ -415,6 +415,19 @@ HYPRE_BoomerAMGGetMeasureType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetOldDefault
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetOldDefault( HYPRE_Solver solver)
+{
+   HYPRE_BoomerAMGSetCoarsenType( solver, 6 );
+   HYPRE_BoomerAMGSetInterpType( solver, 0 );
+   HYPRE_BoomerAMGSetPMaxElmts( solver, 0 );
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetSetupType
  *--------------------------------------------------------------------------*/
 
@@ -1230,6 +1243,27 @@ HYPRE_BoomerAMGSetMultAddTruncFactor( HYPRE_Solver  solver,
    return( hypre_BoomerAMGSetMultAddTruncFactor( (void *) solver, add_trunc_factor ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAddRelaxWt
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAddRelaxWt( HYPRE_Solver  solver,
+                                  HYPRE_Real        add_rlx_wt  )
+{
+   return( hypre_BoomerAMGSetAddRelaxWt( (void *) solver, add_rlx_wt ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAddRelaxType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetAddRelaxType( HYPRE_Solver  solver,
+                                  HYPRE_Int        add_rlx_type  )
+{
+   return( hypre_BoomerAMGSetAddRelaxType( (void *) solver, add_rlx_type ) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetAggP12TruncFactor
  *--------------------------------------------------------------------------*/

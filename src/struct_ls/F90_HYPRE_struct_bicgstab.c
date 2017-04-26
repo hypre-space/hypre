@@ -18,7 +18,6 @@ extern "C" {
 #endif
     
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABCreate
  *--------------------------------------------------------------------------*/
 
 void
@@ -34,7 +33,6 @@ hypre_F90_IFACE(hypre_structbicgstabcreate, HYPRE_STRUCTBICGSTABCREATE)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABDestroy
  *--------------------------------------------------------------------------*/
 
 void 
@@ -48,7 +46,6 @@ hypre_F90_IFACE(hypre_structbicgstabdestroy, HYPRE_STRUCTBICGSTABDESTROY)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABSetup
  *--------------------------------------------------------------------------*/
 
 void 
@@ -68,7 +65,6 @@ hypre_F90_IFACE(hypre_structbicgstabsetup, HYPRE_STRUCTBICGSTABSETUP)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABSolve
  *--------------------------------------------------------------------------*/
 
 void 
@@ -88,7 +84,6 @@ hypre_F90_IFACE(hypre_structbicgstabsolve, HYPRE_STRUCTBICGSTABSOLVE)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABSetTol
  *--------------------------------------------------------------------------*/
 
 void
@@ -104,7 +99,21 @@ hypre_F90_IFACE(hypre_structbicgstabsettol, HYPRE_STRUCTBICGSTABSETTOL)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABSetMaxIter
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structbicgstabsetabstol, HYPRE_STRUCTBICGSTABSETABSTOL)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Real *tol,
+     hypre_F90_Int *ierr   )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructBiCGSTABSetAbsoluteTol(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassReal (tol) ) );
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 void
@@ -120,7 +129,6 @@ hypre_F90_IFACE(hypre_structbicgstabsetmaxiter, HYPRE_STRUCTBICGSTABSETMAXITER)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABSetPrecond
  *--------------------------------------------------------------------------*/
 
 void
@@ -177,7 +185,6 @@ hypre_F90_IFACE(hypre_structbicgstabsetprecond, HYPRE_STRUCTBICGSTABSETPRECOND)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABSetLogging
  *--------------------------------------------------------------------------*/
 
 void
@@ -193,7 +200,6 @@ hypre_F90_IFACE(hypre_structbicgstabsetlogging, HYPRE_STRUCTBICGSTABSETLOGGING)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 void
@@ -209,7 +215,6 @@ hypre_F90_IFACE(hypre_structbicgstabsetprintlev, HYPRE_STRUCTBICGSTABSETPRINTLEV
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABGetNumIterations
  *--------------------------------------------------------------------------*/
 
 void
@@ -225,7 +230,6 @@ hypre_F90_IFACE(hypre_structbicgstabgetnumitera, HYPRE_STRUCTBICGSTABGETNUMITERA
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABGetResidual
  *--------------------------------------------------------------------------*/
 
 void
@@ -241,7 +245,6 @@ hypre_F90_IFACE(hypre_structbicgstabgetresidual, HYPRE_STRUCTBICGSTABGETRESIDUAL
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BiCGSTABGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 void

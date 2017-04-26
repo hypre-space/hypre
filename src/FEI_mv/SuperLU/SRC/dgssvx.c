@@ -13,7 +13,9 @@
 
 
 #include "slu_ddefs.h"
+#ifdef HYPRE_USING_HYPRE_LAPACK
 #include "hypre_lapack.h"
+#endif
 
 void
 dgssvx(superlu_options_t *options, SuperMatrix *A, int *perm_c, int *perm_r,

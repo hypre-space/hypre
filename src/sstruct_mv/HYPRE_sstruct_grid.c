@@ -39,6 +39,7 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
    HYPRE_Int               *fem_nvars;
    HYPRE_Int              **fem_vars;
    hypre_Index            **fem_offsets;
+   HYPRE_Int                num_ghost[2*HYPRE_MAXDIM];
    HYPRE_Int                i;
 
    grid = hypre_TAlloc(hypre_SStructGrid, 1);
@@ -83,7 +84,14 @@ HYPRE_SStructGridCreate( MPI_Comm           comm,
    hypre_SStructGridRefCount(grid)      = 1;
 
    /* GEC0902 ghost addition to the grid    */
-   hypre_SStructGridGhlocalSize(grid)   = 0; 
+   hypre_SStructGridGhlocalSize(grid)   = 0;
+
+   /* Initialize num ghost */
+   for (i = 0; i < 2*ndim; i++)
+   {
+      num_ghost[i] = 1;
+   }
+   hypre_SStructGridSetNumGhost(grid, num_ghost);
 
    *grid_ptr = grid;
 
@@ -311,7 +319,7 @@ HYPRE_SStructGridSetFEMOrdering( HYPRE_SStructGrid  grid,
          for (d = 0; d < 3; d++)
          {
             loop[d] = 0;
-            if ((varoffset[d] != 0) && (d < ndim))
+            if ((d < ndim) && (varoffset[d] != 0))
             {
                loop[d] = 1;
             }

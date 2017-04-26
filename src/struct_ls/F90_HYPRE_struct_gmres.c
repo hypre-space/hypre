@@ -18,7 +18,6 @@ extern "C" {
 #endif
     
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESCreate
  *--------------------------------------------------------------------------*/
 
 void
@@ -34,7 +33,6 @@ hypre_F90_IFACE(hypre_structgmrescreate, HYPRE_STRUCTGMRESCREATE)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESDestroy
  *--------------------------------------------------------------------------*/
 
 void 
@@ -48,7 +46,6 @@ hypre_F90_IFACE(hypre_structgmresdestroy, HYPRE_STRUCTGMRESDESTROY)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESSetup
  *--------------------------------------------------------------------------*/
 
 void 
@@ -68,7 +65,6 @@ hypre_F90_IFACE(hypre_structgmressetup, HYPRE_STRUCTGMRESSETUP)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESSolve
  *--------------------------------------------------------------------------*/
 
 void 
@@ -86,23 +82,8 @@ hypre_F90_IFACE(hypre_structgmressolve, HYPRE_STRUCTGMRESSOLVE)
            hypre_F90_PassObj (HYPRE_StructVector, b),
            hypre_F90_PassObj (HYPRE_StructVector, x) ) );
 }
-/*--------------------------------------------------------------------------
- * HYPRE_StructGMRESSetKDim
- *--------------------------------------------------------------------------*/
 
-void
-hypre_F90_IFACE(hypre_structgmressetkdim, HYPRE_STRUCTGMRESSETKDIM)
-   (hypre_F90_Obj *solver,
-    hypre_F90_Int *k_dim,
-    hypre_F90_Int *ierr)
-{
-   *ierr = (hypre_F90_Int)
-      (HYPRE_StructGMRESSetKDim(
-          hypre_F90_PassObj (HYPRE_StructSolver, solver),
-          hypre_F90_PassInt (k_dim) ));
-}
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESSetTol
  *--------------------------------------------------------------------------*/
 
 void
@@ -118,7 +99,21 @@ hypre_F90_IFACE(hypre_structgmressettol, HYPRE_STRUCTGMRESSETTOL)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESSetMaxIter
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structgmressetabstol, HYPRE_STRUCTGMRESSETABSTOL)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Real *tol,
+     hypre_F90_Int *ierr   )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_StructGMRESSetAbsoluteTol(
+           hypre_F90_PassObj (HYPRE_StructSolver, solver),
+           hypre_F90_PassReal (tol) ) );
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 void
@@ -134,7 +129,21 @@ hypre_F90_IFACE(hypre_structgmressetmaxiter, HYPRE_STRUCTGMRESSETMAXITER)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESSetPrecond
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_structgmressetkdim, HYPRE_STRUCTGMRESSETKDIM)
+   (hypre_F90_Obj *solver,
+    hypre_F90_Int *k_dim,
+    hypre_F90_Int *ierr)
+{
+   *ierr = (hypre_F90_Int)
+      (HYPRE_StructGMRESSetKDim(
+          hypre_F90_PassObj (HYPRE_StructSolver, solver),
+          hypre_F90_PassInt (k_dim) ));
+}
+
+/*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 void
@@ -209,7 +218,6 @@ hypre_F90_IFACE(hypre_structgmressetprecond, HYPRE_STRUCTGMRESSETPRECOND)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESSetLogging
  *--------------------------------------------------------------------------*/
 
 void
@@ -225,7 +233,6 @@ hypre_F90_IFACE(hypre_structgmressetlogging, HYPRE_STRUCTGMRESSETLOGGING)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESSetPrintLevel
  *--------------------------------------------------------------------------*/
 
 void
@@ -241,7 +248,6 @@ hypre_F90_IFACE(hypre_structgmressetprintlevel, HYPRE_STRUCTGMRESSETPRINTLEVEL)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESGetNumIterations
  *--------------------------------------------------------------------------*/
 
 void
@@ -257,7 +263,6 @@ hypre_F90_IFACE(hypre_structgmresgetnumiteratio, HYPRE_STRUCTGMRESGETNUMITERATIO
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_StructGMRESGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 
 void

@@ -409,7 +409,7 @@ Various coarsening techniques are available:
 \begin{itemize}
 \item the Cleary-Luby-Jones-Plassman (CLJP) coarsening,
 \item the Falgout coarsening which is a combination of CLJP and the
-classical RS coarsening algorithm (default),
+classical RS coarsening algorithm,
 \item CGC and CGC-E coarsenings \cite{Griebela_1, Griebel_2},
 \item PMIS and HMIS coarsening algorithms which lead to coarsenings with lower complexities \cite{DeSterck_Yang_Heys_2004}
 as well as
@@ -420,10 +420,12 @@ aggressive coarsening (starting with the finest level)
 via \code{HYPRE_BoomerAMGSetAggNumLevels}. Since aggressive coarsening requires long range
 interpolation, multipass interpolation is always used on levels with aggressive coarsening, unless the user specifies another long-range interpolation suitable for aggressive coarsening.
 
+Note that the default coarsening is HMIS \cite{DeSterck_Yang_Heys_2004}.
+
 \subsection{Interpolation Options}
 Various interpolation techniques can be set using \code{HYPRE_BoomerAMGSetInterpType}:
 \begin{itemize}
-\item the ``classical'' interpolation as defined in \cite{Ruge_Stueben_1987} (default),
+\item the ``classical'' interpolation as defined in \cite{Ruge_Stueben_1987},
 \item direct interpolation \cite{Stueben_1999},
 \item standard interpolation \cite{Stueben_1999},
 \item an extended ``classical'' interpolation, which is a long range interpolation and is recommended to be used with PMIS and HMIS coarsening for harder problems \cite{DeSterck_Falgout_Nolting_Yang_2008},
@@ -439,6 +441,8 @@ and recommended to control complexity and truncate the interpolation operators
 using \code{HYPRE_BoomerAMGSetTruncFactor} and/or \code{HYPRE_BoomerAMGSetPMaxElmts},
 or \code{HYPRE_BoomerAMGSetJacobiTruncTheshold} (for Jacobi interpolation only).
 
+Note that the default interpolation is extended+i interpolation \cite{DeSterck_Falgout_Nolting_Yang_2008} truncated to 4 elements per row.
+
 \subsection{Non-Galerkin Options}
 In order to reduce communication, there is a non-Galerkin coarse grid
 sparsification option available \cite{FaSc2014}.  This option can be used by
@@ -451,7 +455,7 @@ on coarser levels.  A common choice of drop-tolerances is $[0.0,
 first coarse level (level 1), use a drop-tolerance of 0.01 on the second coarse
 level (level 2) and then use 0.05 on all subsequent coarse levels.  While still
 experimental, this capability has significantly improved performance on a
-variety of problems.  See the \code{new_ij} driver for an example usage and the
+variety of problems.  See the \code{ij} driver for an example usage and the
 reference manual for more details.
 
 
