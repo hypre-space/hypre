@@ -9,7 +9,7 @@
 #include "HYPRE_struct_mv.h"
 #include "_hypre_utilities.h"
 
-#ifdef HYPRE_USE_RAJA
+#if defined(HYPRE_USE_RAJA)
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -34,6 +34,7 @@
 
 #ifndef HYPRE_NEWBOXLOOP_HEADER
 #define HYPRE_NEWBOXLOOP_HEADER
+
 extern "C++" {
 #include <RAJA/RAJA.hxx>
 }
@@ -52,7 +53,6 @@ typedef struct hypre_Boxloop_struct
 #if defined(HYPRE_MEMORY_GPU)
 #include <cuda.h>
 #include <cuda_runtime.h>
-
 extern "C++" {
 #include <curand.h>
 #include <curand_kernel.h>
@@ -1424,7 +1424,6 @@ AxCheckError(cudaDeviceSynchronize());\
 #define hypre_BoxDataExchangeEnd zypre_BoxDataExchangeEnd
 
 #endif
-
 #elif defined(HYPRE_USE_CUDA)
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
@@ -1458,7 +1457,7 @@ extern "C++" {
 #include <curand.h>
 #include <curand_kernel.h>
 }
-  
+
 struct cuda_traversal {HYPRE_Int cuda;};
 struct omp_traversal  {HYPRE_Int omp;};
 
@@ -2533,7 +2532,7 @@ typedef struct hypre_Boxloop_struct
     for (idx = 0;idx < hypre__tot;idx++)				\
       {									\
 	  HYPRE_Int local_idx;						\
-	  HYPRE_Int d,idx_local = idx;					\
+	  HYPRE_Int idx_local = idx;					\
 	  HYPRE_Int i1 = 0;						\
 	  local_idx  = idx_local % databox1.lsize0;			\
 	  idx_local  = idx_local / databox1.lsize0;			\
@@ -2576,7 +2575,7 @@ typedef struct hypre_Boxloop_struct
     for (idx = 0;idx < hypre__tot;idx++)				\
       {									\
 	  HYPRE_Int local_idx;						\
-	  HYPRE_Int d,idx_local = idx;					\
+	  HYPRE_Int idx_local = idx;					\
 	  HYPRE_Int i1 = 0, i2 = 0;					\
 	  local_idx  = idx_local % databox1.lsize0;			\
 	  idx_local  = idx_local / databox1.lsize0;			\
@@ -2618,8 +2617,6 @@ typedef struct hypre_Boxloop_struct
 
 #endif
 #endif
-  
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -2671,6 +2668,7 @@ typedef struct hypre_Box_struct
    hypre_Index imin;           /* min bounding indices */
    hypre_Index imax;           /* max bounding indices */
    HYPRE_Int   ndim;           /* number of dimensions */
+
 } hypre_Box;
 
 /*--------------------------------------------------------------------------
@@ -2736,24 +2734,6 @@ typedef struct hypre_BoxArrayArray_struct
 #define hypre_BoxIMax(box)     ((box) -> imax)
 #define hypre_BoxNDim(box)     ((box) -> ndim)
 
-#define hypre_BoxCopyIndexToData(indexHost,indexData)\
-	if(indexData == NULL)\
-	{					 \
-	    AxCheckError(cudaMalloc((int**)&indexData,sizeof(HYPRE_Int)*(HYPRE_MAXDIM)));	\
-	}					 \
-	hypre_DataCopyToData(indexHost,indexData,HYPRE_Int,HYPRE_MAXDIM);
-
-#define hypre_BoxSetunitStride(idx) idx = unitstride;
-#define hypre_initBoxData(box)					\
-	{											\
-    	hypre_Index            box_size;\
-	    hypre_BoxCopyIndexToData(hypre_BoxIMin(box),hypre_BoxIMinData(box));\
-		hypre_BoxCopyIndexToData(hypre_BoxIMax(box),hypre_BoxIMaxData(box)); \
-		hypre_BoxGetSize(box, box_size);								\
-		hypre_BoxCopyIndexToData(box_size,hypre_BoxSizeData(box));		\
-	}																	\
-   
-	
 #define hypre_BoxIMinD(box, d) (hypre_IndexD(hypre_BoxIMin(box), d))
 #define hypre_BoxIMaxD(box, d) (hypre_IndexD(hypre_BoxIMax(box), d))
 #define hypre_BoxSizeD(box, d) \
@@ -2825,86 +2805,6 @@ local_result = 0.0;
 #endif
 
 #if defined(HYPRE_MEMORY_GPU)
-static HYPRE_Complex* global_recv_buffer;
-static HYPRE_Complex* global_send_buffer;
-static HYPRE_Int      global_recv_size = 0;
-static HYPRE_Int      global_send_size = 0;
-
-#define hypre_PrepareSendBuffers()				\
-  send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends);	\
-  if (num_sends > 0)						\
-  {								\
-     size = hypre_CommPkgSendBufsize(comm_pkg);			\
-     if (size > global_send_size)				\
-     {							\
-         if (global_send_size > 0)						\
-	     hypre_DeviceTFree(global_send_buffer);			\
-         global_send_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size); \
-         global_send_size   = 5*size;					\
-     }									\
-     send_buffers_data[0] = global_send_buffer;				\
-     for (i = 1; i < num_sends; i++)					\
-     {								\
-         comm_type = hypre_CommPkgSendType(comm_pkg, i-1);		\
-	 size = hypre_CommTypeBufsize(comm_type);			\
-	 send_buffers_data[i] = send_buffers_data[i-1] + size;		\
-     }									\
-  }
-
-#define hypre_PrepareRcevBuffers()		\
-  recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs);	\
-  if (num_recvs > 0)						\
-  {								\
-      size = hypre_CommPkgRecvBufsize(comm_pkg);		\
-      if (size > global_recv_size)				\
-      {							\
-          if (global_recv_size > 0)				\
-	      hypre_DeviceTFree(global_recv_buffer);			\
-          global_recv_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size); \
-          global_recv_size   = 5*size;					\
-      }									\
-      recv_buffers_data[0] = global_recv_buffer;			\
-      for (i = 1; i < num_recvs; i++)					\
-      {								\
-         comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);			\
-         size = hypre_CommTypeBufsize(comm_type);			\
-         recv_buffers_data[i] = recv_buffers_data[i-1] + size;		\
-      }									\
-   }
-
-#define hypre_SendBufferTransfer()					\
-  if (num_sends > 0)							\
-  {									\
-      size = hypre_CommPkgSendBufsize(comm_pkg);			\
-      dptr = (HYPRE_Complex *) send_buffers[0];				\
-      dptr_data = (HYPRE_Complex *) send_buffers_data[0];		\
-      hypre_DataCopyFromData(dptr,dptr_data,HYPRE_Complex,size);	\
-  }
-
-#define hypre_RecvBufferTransfer()		\
-  if (num_recvs > 0)				\
-  {						\
-      size = 0;					\
-      for (i = 0; i < num_recvs; i++)		\
-      {						\
-          comm_type = hypre_CommPkgRecvType(comm_pkg, i);			\
-	  num_entries = hypre_CommTypeNumEntries(comm_type);		\
-	  size += hypre_CommTypeBufsize(comm_type);			\
-	  if ( hypre_CommPkgFirstComm(comm_pkg) )			\
-	  {								\
-	      size += hypre_CommPrefixSize(num_entries);		\
-	  }								\
-      }									\
-      dptr = (HYPRE_Complex *) recv_buffers[0];				\
-      dptr_data = (HYPRE_Complex *) recv_buffers_data[0];		\
-      hypre_DataCopyToData(dptr,dptr_data,HYPRE_Complex,size);		\
-   }
-
-#define hypre_FreeBuffer()						\
-  hypre_TFree(send_buffers);						\
-  hypre_TFree(recv_buffers);						\
-  hypre_TFree(send_buffers_data);					\
-  hypre_TFree(recv_buffers_data);
 
 #define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)	\
 HYPRE_Int * indices_d;				\
@@ -2930,7 +2830,7 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
 
 #define hypre_StructGetIndexD(index,i,index_d) (index_d)
 
-#define hypre_StructcleanIndexD() \
+#define hypre_StructCleanIndexD() \
   hypre_DeviceTFree(indices_d);			 \
   hypre_DeviceTFree(stencil_shape_d);		 \
 
@@ -2944,37 +2844,10 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
 
 #else
 
-static HYPRE_Complex* global_recv_buffer;
-static HYPRE_Complex* global_send_buffer;
-static HYPRE_Int      global_recv_size = 0;
-static HYPRE_Int      global_send_size = 0;
-//typedef struct hypre_Boxloop_struct
-//{
-//	HYPRE_Int lsize0,lsize1,lsize2;
-//	HYPRE_Int strides0,strides1,strides2;
-//	HYPRE_Int bstart0,bstart1,bstart2;
-//	HYPRE_Int bsize0,bsize1,bsize2;
-//} hypre_Boxloop;
-
-#define hypre_PrepareSendBuffers()				\
-  send_buffers_data = send_buffers;	\
-
-#define hypre_PrepareRcevBuffers()		\
-  recv_buffers_data = recv_buffers;
-
-#define hypre_SendBufferTransfer()  {}
-
-#define hypre_RecvBufferTransfer()  {}
-
-
-#define hypre_FreeBuffer()						\
-  hypre_TFree(send_buffers);						\
-  hypre_TFree(recv_buffers);
-
-#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size) HYPRE_Int* indices_d; HYPRE_Int* stencil_shape_d;
+#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size) if (cdir) {}
 #define hypre_StructGetMatrixBoxData(A, i, si) hypre_StructMatrixBoxData(A,i,si)
 #define hypre_StructGetIndexD(index,i,index_d) hypre_IndexD(index,i)
-#define hypre_StructcleanIndexD() {;}
+#define hypre_StructCleanIndexD() {;}
 #define hypre_StructPreparePrint() data_host = data;
 #define hypre_StructPostPrint() {;}
 

@@ -141,6 +141,9 @@ typedef struct hypre_CommHandle_struct
    HYPRE_Complex **send_buffers;
    HYPRE_Complex **recv_buffers;
 
+   HYPRE_Complex      **send_buffers_data;
+   HYPRE_Complex      **recv_buffers_data;
+	
    /* set = 0, add = 1 */
    HYPRE_Int       action;
 
@@ -248,5 +251,7 @@ typedef struct hypre_CommHandle_struct
 #define hypre_CommHandleSendBuffers(comm_handle) (comm_handle -> send_buffers)
 #define hypre_CommHandleRecvBuffers(comm_handle) (comm_handle -> recv_buffers)
 #define hypre_CommHandleAction(comm_handle)      (comm_handle -> action)
+#define hypre_CommHandleSendBuffersDevice(comm_handle)    (comm_handle -> send_buffers_data)
+#define hypre_CommHandleRecvBuffersDevice(comm_handle)    (comm_handle -> recv_buffers_data)
 
 #endif

@@ -234,7 +234,7 @@ inline void CheckError(cudaError_t const err, char const* const fun, const int l
 	i2 += (local_idx*databox2.strides2 + databox2.bstart2) * hypre_boxD2;	\
 	hypre_boxD2 *= hypre_max(0, databox2.bsize2 + 1);			\
 	i3 += (local_idx*databox3.strides2 +databox3.bstart2) * hypre_boxD3;	\
-	hypre_boxD3 *= hypre_max(0, databox3.bsize2 + 1);			\	
+	hypre_boxD3 *= hypre_max(0, databox3.bsize2 + 1);
 
 #define zypre_newBoxLoop3End(i1, i2, i3)			\
     });							\

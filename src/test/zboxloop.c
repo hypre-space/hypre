@@ -38,7 +38,8 @@ main( hypre_int argc,
    HYPRE_Int         rep, reps, fail, sum;
    HYPRE_Int         size;
    hypre_Box        *x1_data_box, *x2_data_box, *x3_data_box, *x4_data_box;
-   HYPRE_Int         xi1, xi2, xi3, xi4;
+   //HYPRE_Int         xi1, xi2, xi3, xi4;
+   HYPRE_Int         xi1;
    HYPRE_Real       *xp1, *xp2, *xp3, *xp4;
    hypre_Index       loop_size, start, unit_stride, index;
    
@@ -192,7 +193,7 @@ main( hypre_int argc,
    zypre_BoxLoop1Begin(dim, loop_size,
                        x1_data_box, start, unit_stride, xi1);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE,xi1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
    zypre_BoxLoop1For(xi1)
    {
@@ -264,7 +265,7 @@ main( hypre_int argc,
       hypre_BoxLoop1Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For(xi1)
       {
@@ -283,7 +284,7 @@ main( hypre_int argc,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi1,xi2) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(xi1, xi2)
       {
@@ -303,7 +304,7 @@ main( hypre_int argc,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi1,xi2,xi3) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop3For(xi1, xi2, xi3)
       {
@@ -324,7 +325,7 @@ main( hypre_int argc,
                           x3_data_box, start, unit_stride, xi3,
                           x4_data_box, start, unit_stride, xi4);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi1,xi2,xi3,xi4) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop4For(xi1, xi2, xi3, xi4)
       {
@@ -369,7 +370,7 @@ main( hypre_int argc,
       zypre_BoxLoop1Begin(dim, loop_size,
                           x1_data_box, start, unit_stride, xi1);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE,xi1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop1For(xi1)
       {
@@ -388,7 +389,7 @@ main( hypre_int argc,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE,xi1,xi2) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop2For(xi1, xi2)
       {
@@ -408,7 +409,7 @@ main( hypre_int argc,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE,xi1,xi2,xi3) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop3For(xi1, xi2, xi3)
       {
@@ -429,7 +430,7 @@ main( hypre_int argc,
                           x3_data_box, start, unit_stride, xi3,
                           x4_data_box, start, unit_stride, xi4);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE,xi1,xi2,xi3,xi4) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop4For(xi1, xi2, xi3, xi4)
       {

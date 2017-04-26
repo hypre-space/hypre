@@ -580,7 +580,7 @@ hypre_PFMGSetupInterpOp_CC2
 
       }
       hypre_BoxLoop2End(Ai, Pi);
-      //hypre_StructcleanIndexD();
+      //hypre_StructCleanIndexD();
    }
 
    if (warning_cnt)

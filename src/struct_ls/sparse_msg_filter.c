@@ -456,7 +456,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       }
       hypre_BoxLoop2End(Ai, vi);
 
-      hypre_StructcleanIndexD();	  
+      hypre_StructCleanIndexD();	  
    }
 
    return ierr;

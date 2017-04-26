@@ -1,4 +1,3 @@
-
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -975,7 +974,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             sqcz += (tcz*tcz);
 	}
 	hypre_newBoxLoop1ReductionEnd(Ai,sqcz);
-	hypre_StructcleanIndexD();
+	hypre_StructCleanIndexD();
 #else
 	hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
 			    A_dbox, start, stride, Ai);

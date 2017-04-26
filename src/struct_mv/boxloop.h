@@ -31,6 +31,14 @@
 #define OMPREDUCTION() ;
 #endif
 
+typedef struct hypre_Boxloop_struct
+  {
+    HYPRE_Int lsize0,lsize1,lsize2;
+    HYPRE_Int strides0,strides1,strides2;
+    HYPRE_Int bstart0,bstart1,bstart2;
+    HYPRE_Int bsize0,bsize1,bsize2;
+  }hypre_Boxloop;
+
 #define hypre_rand(val) \
 {\
     val = rand();\
@@ -294,7 +302,7 @@
     for (idx = 0;idx < hypre__tot;idx++)				\
       {									\
 	  HYPRE_Int local_idx;						\
-	  HYPRE_Int d,idx_local = idx;					\
+	  HYPRE_Int idx_local = idx;					\
 	  HYPRE_Int i1 = 0;						\
 	  local_idx  = idx_local % databox1.lsize0;			\
 	  idx_local  = idx_local / databox1.lsize0;			\
@@ -337,7 +345,7 @@
     for (idx = 0;idx < hypre__tot;idx++)				\
       {									\
 	  HYPRE_Int local_idx;						\
-	  HYPRE_Int d,idx_local = idx;					\
+	  HYPRE_Int idx_local = idx;					\
 	  HYPRE_Int i1 = 0, i2 = 0;					\
 	  local_idx  = idx_local % databox1.lsize0;			\
 	  idx_local  = idx_local / databox1.lsize0;			\
