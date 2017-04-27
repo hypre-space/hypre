@@ -26,7 +26,7 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                               hypre_StructVector *b,
                               hypre_StructVector *x )
 {
-	hypre_RedBlackGSData  *relax_data = (hypre_RedBlackGSData  *)relax_vdata;
+   hypre_RedBlackGSData  *relax_data = (hypre_RedBlackGSData  *)relax_vdata;
 
    HYPRE_Int              max_iter    = (relax_data -> max_iter);
    HYPRE_Int              zero_guess  = (relax_data -> zero_guess);
@@ -194,8 +194,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   Ai= hypre_CCBoxIndexRank(A_dbox, start);
                   AApd= 1.0/Ap[Ai];
 
+                  hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
 						      bstart,bni,bnj,bi,
@@ -212,17 +213,18 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   Ani = hypre_BoxSizeX(A_dbox);
                   Anj = hypre_BoxSizeY(A_dbox);
 
+                  hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
 					  Astart,Ani,Anj,Ai,
 					  bstart,bni,bnj,bi,
 					  xstart,xni,xnj,xi);
 		  {
-		    xp[xi] = bp[bi] / Ap[Ai];
+                     xp[xi] = bp[bi] / Ap[Ai];
 		  }
-		  hypre_RedBlackLoopEnd()
+		  hypre_RedBlackLoopEnd();
                }
 
             }
@@ -346,56 +348,59 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   switch(stencil_size)
                   {
                      case 7:
+                        hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
 		        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
 							    bstart,bni,bnj,bi,
 							    xstart,xni,xnj,xi);
 			{
-			    xp[xi] =
-			        (bp[bi] - 
-				 App0*xp[xi + xoff0] -
-				 App1*xp[xi + xoff1] -
-				 App2*xp[xi + xoff2] -
-				 App3*xp[xi + xoff3] -
-				 App4*xp[xi + xoff4] -
-				 App5*xp[xi + xoff5])*AApd;
+                           xp[xi] =
+                              (bp[bi] - 
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1] -
+                               App2*xp[xi + xoff2] -
+                               App3*xp[xi + xoff3] -
+                               App4*xp[xi + xoff4] -
+                               App5*xp[xi + xoff5])*AApd;
 			}
 			hypre_RedBlackConstantcoefLoopEnd();
 			
                         break;
 
                      case 5:
+                        hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
 		        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
-							   bstart,bni,bnj,bi,
+                                                            bstart,bni,bnj,bi,
 							    xstart,xni,xnj,xi);
 		        {
 			   xp[xi] =
-			     (bp[bi] -
-			      App0*xp[xi + xoff0] -
-			      App1*xp[xi + xoff1] -
-			      App2*xp[xi + xoff2] -
-			      App3*xp[xi + xoff3])*AApd;
+                              (bp[bi] -
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1] -
+                               App2*xp[xi + xoff2] -
+                               App3*xp[xi + xoff3])*AApd;
 		        }
 		        hypre_RedBlackConstantcoefLoopEnd();
                         break;
 
                      case 3:
+                        hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
 		        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
 							    bstart,bni,bnj,bi,
 							    xstart,xni,xnj,xi);
 		        {
-			  xp[xi] =
-			    (bp[bi] -
-			     App0*xp[xi + xoff0] -
-			     App1*xp[xi + xoff1])*AApd;
+                           xp[xi] =
+                              (bp[bi] -
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1])*AApd;
 		        }
 		        hypre_RedBlackConstantcoefLoopEnd();
                         break;
@@ -412,61 +417,64 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   switch(stencil_size)
                   {
                      case 7:
+                        hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
 			hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
 						Astart,Ani,Anj,Ai,
 						bstart,bni,bnj,bi,
 						xstart,xni,xnj,xi);
 			{
-			  xp[xi] =
-			     (bp[bi] - 
-			      App0*xp[xi + xoff0] -
-			      App1*xp[xi + xoff1] -
-			      App2*xp[xi + xoff2] -
-			      App3*xp[xi + xoff3] -
-			      App4*xp[xi + xoff4] -
-			      App5*xp[xi + xoff5]) / Ap[Ai];
+                           xp[xi] =
+                              (bp[bi] - 
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1] -
+                               App2*xp[xi + xoff2] -
+                               App3*xp[xi + xoff3] -
+                               App4*xp[xi + xoff4] -
+                               App5*xp[xi + xoff5]) / Ap[Ai];
 			}
 			hypre_RedBlackLoopEnd();
                         break;
 
                      case 5:
+                        hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                         hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
 						Astart,Ani,Anj,Ai,
 						bstart,bni,bnj,bi,
 						xstart,xni,xnj,xi);
 			{
-			  xp[xi] =
-			     (bp[bi] - 
-			      App0*xp[xi + xoff0] -
-			      App1*xp[xi + xoff1] -
-			      App2*xp[xi + xoff2] -
-			      App3*xp[xi + xoff3]) / Ap[Ai]; 
+                           xp[xi] =
+                              (bp[bi] - 
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1] -
+                               App2*xp[xi + xoff2] -
+                               App3*xp[xi + xoff3]) / Ap[Ai]; 
 			}
 			hypre_RedBlackLoopEnd();
                         break;
 
                      case 3:
+                        hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-		       hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-					       Astart,Ani,Anj,Ai,
-					       bstart,bni,bnj,bi,
-					       xstart,xni,xnj,xi);
-		       {
-			 xp[xi] =
-			    (bp[bi] -
-			     App0*xp[xi + xoff0] -
-			     App1*xp[xi + xoff1]) / Ap[Ai]; 
-		       }
-		       hypre_RedBlackLoopEnd();
-		       break;
+                        hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                                Astart,Ani,Anj,Ai,
+                                                bstart,bni,bnj,bi,
+                                                xstart,xni,xnj,xi);
+                        {
+                           xp[xi] =
+                              (bp[bi] -
+                               App0*xp[xi + xoff0] -
+                               App1*xp[xi + xoff1]) / Ap[Ai]; 
+                        }
+                        hypre_RedBlackLoopEnd();
+                        break;
 
                   }  /* switch(stencil_size) */
                }     /* else */

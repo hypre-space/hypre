@@ -1050,12 +1050,12 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                                    int_box, start, stride, mi,
                                    vbox,    start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,index,d) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                zypre_BoxLoop2For(mi, vi)
                {
-		  hypre_Index           index;
-		  HYPRE_Int d;
+		  hypre_Index index;
+		  HYPRE_Int   d;
 		  
                   hypre_BoxLoopGetIndex(index);
                   rows[nrows + mi] = row_base;

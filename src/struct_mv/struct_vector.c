@@ -560,16 +560,24 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
 {
    HYPRE_Complex *data      = hypre_StructVectorData(vector);
    HYPRE_Int      data_size = hypre_StructVectorDataSize(vector);
+   hypre_Index    imin, imax;
+   hypre_Box     *box;
 
+   box = hypre_BoxCreate(1);
+   hypre_IndexD(imin, 0) = 1;
+   hypre_IndexD(imax, 0) = data_size;
+   hypre_BoxSetExtents(box, imin, imax);
+
+   hypre_BoxLoop1Begin(1, imax,
+                       box, imin, imin, datai);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-   
-   hypre_LoopBegin(data_size,i);
+   hypre_BoxLoop1For(datai)
    {
-      data[i] = 0.0;
+      data[datai] = 0.0;
    }
-   hypre_LoopEnd();
+   hypre_BoxLoop1End(datai);
    
    return hypre_error_flag;
 }

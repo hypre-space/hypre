@@ -43,6 +43,7 @@ typedef struct
 } hypre_RedBlackGSData;
 
 #ifdef HYPRE_USE_RAJA
+#define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
 				bstart,bni,bnj,bi,	\
@@ -95,6 +96,7 @@ typedef struct
      hypre_fence();					\
 }  
 #elif defined(HYPRE_USE_KOKKOS)
+#define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
 				bstart,bni,bnj,bi,	\
@@ -155,6 +157,7 @@ typedef struct
      AxCheckError(cudaDeviceSynchronize());				\
 }  
 #elif defined(HYPRE_USE_CUDA)
+#define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
 				bstart,bni,bnj,bi,	\
@@ -215,47 +218,50 @@ typedef struct
      AxCheckError(cudaDeviceSynchronize());				\
 }
 #else
-#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
-				Astart,Ani,Anj,Ai,	\
-				bstart,bni,bnj,bi,	\
-				xstart,xni,xnj,xi)	\
-{					  \
-    HYPRE_Int ii,jj,kk,Ai,bi,xi;		  \
-    for (kk = 0; kk < nk; kk++)			  \
-    {						  \
-        for (jj = 0; jj < nj; jj++)			  \
-	{						  \
-	    ii = (kk + jj + redblack) % 2;\
-	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;		\
-	    bi = bstart + kk*bnj*bni + jj*bni + ii;		\
-	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
-	    for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)			\
-	    {
+#define HYPRE_REDBLACK_PRIVATE hypre__kk
+#define hypre_RedBlackLoopInit()\
+{\
+   HYPRE_Int hypre__kk;
 
-#define hypre_RedBlackLoopEnd()			\
-            }\
-	}\
-    }\
+#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
+				Astart,Ani,Anj,Ai,\
+				bstart,bni,bnj,bi,\
+				xstart,xni,xnj,xi)\
+   for (hypre__kk = 0; hypre__kk < nk; hypre__kk++)\
+   {\
+      HYPRE_Int ii,jj,Ai,bi,xi;\
+      for (jj = 0; jj < nj; jj++)\
+      {\
+         ii = (hypre__kk + jj + redblack) % 2;\
+         Ai = Astart + hypre__kk*Anj*Ani + jj*Ani + ii;\
+         bi = bstart + hypre__kk*bnj*bni + jj*bni + ii;\
+         xi = xstart + hypre__kk*xnj*xni + jj*xni + ii;\
+         for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)\
+         {
+
+#define hypre_RedBlackLoopEnd()\
+         }\
+      }\
+   }\
 }
 
 #define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
-				bstart,bni,bnj,bi,	\
-				xstart,xni,xnj,xi)	\
-{					  \
-    HYPRE_Int ii,jj,kk,bi,xi;		  \
-    for (kk = 0; kk < nk; kk++)			  \
-    {						  \
-        for (jj = 0; jj < nj; jj++)			  \
-	{						  \
-	    ii = (kk + jj + redblack) % 2;\
-	    bi = bstart + kk*bnj*bni + jj*bni + ii;		\
-	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
-	    for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)			\
-	    {
+                                            bstart,bni,bnj,bi,\
+                                            xstart,xni,xnj,xi)\
+   for (hypre__kk = 0; hypre__kk < nk; hypre__kk++)\
+   {\
+      HYPRE_Int ii,jj,bi,xi;\
+      for (jj = 0; jj < nj; jj++)\
+      {\
+         ii = (hypre__kk + jj + redblack) % 2;\
+         bi = bstart + hypre__kk*bnj*bni + jj*bni + ii;\
+         xi = xstart + hypre__kk*xnj*xni + jj*xni + ii;\
+         for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)\
+         {
 
-#define hypre_RedBlackConstantcoefLoopEnd()			\
-            }\
-	}\
-    }\
-}  
+#define hypre_RedBlackConstantcoefLoopEnd()\
+         }\
+      }\
+   }\
+}
 #endif

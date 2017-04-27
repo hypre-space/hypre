@@ -37,7 +37,7 @@ extern "C" {
     type * ptr;								\
     cudaError_t cudaerr = cudaMalloc((void**)&ptr,sizeof(type)*(count)); \
     if ( cudaerr != cudaSuccess ) {					\
-      printf("\n ERROR hypre_DataTAlloc %d : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+      printf("\n ERROR hypre_DataTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
       int *p = NULL; *p = 1;						\
     }									\
     ptr;})
@@ -47,7 +47,7 @@ extern "C" {
 	type * ptr;						   \
 	cudaError_t cudaerr = cudaMalloc((void**)&ptr,sizeof(type)*(count)); \
 	if ( cudaerr != cudaSuccess ) {										\
-		printf("\n hypre_DataCTAlloc %d : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+		printf("\n hypre_DataCTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
 		int *p = NULL; *p = 1;\
 	}		\
 	cudaMemset(ptr,0,sizeof(type)*(count));	   \
@@ -64,7 +64,7 @@ extern "C" {
 	type * ptr;															\
 	cudaError_t cudaerr = cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);\
 	if ( cudaerr != cudaSuccess ) {										\
-		printf("\n ERROR hypre_DataTAlloc %d : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+		printf("\n ERROR hypre_DataTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
 		int *p = NULL; *p = 1;\
 	}\
 	ptr;})
@@ -74,7 +74,7 @@ extern "C" {
 	type * ptr;						   \
 	cudaError_t cudaerr = cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal); \
 	if ( cudaerr != cudaSuccess ) {										\
-		printf("\n hypre_DataCTAlloc %d : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+		printf("\n hypre_DataCTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
 		int *p = NULL; *p = 1;\
 	}		\
 	cudaMemset(ptr,0,sizeof(type)*(count));	   \
@@ -100,7 +100,7 @@ extern "C" {
 #define hypre_DataCopyToData(ptrH,ptrD,type,count)						\
 	{cudaError_t cudaerr = cudaMemcpy(ptrD, ptrH, sizeof(type)*count, cudaMemcpyHostToDevice); \
 if ( cudaerr != cudaSuccess ) {										\
-		printf("\n hypre_DataCopyToData %d : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+		printf("\n hypre_DataCopyToData %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
 		int *p = NULL; *p = 1;\
 }							  \
 	}
@@ -109,7 +109,7 @@ if ( cudaerr != cudaSuccess ) {										\
 #define hypre_DataCopyFromData(ptrH,ptrD,type,count)						\
 	{cudaError_t cudaerr = cudaMemcpy(ptrH, ptrD, sizeof(type)*count, cudaMemcpyDeviceToHost); \
 	if ( cudaerr != cudaSuccess ) {										\
-		printf("\n hypre_DataCTAlloc %d : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
+		printf("\n hypre_DataCTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
 		int *p = NULL; *p = 1;\
 	}\
 	}
@@ -146,6 +146,7 @@ if ( cudaerr != cudaSuccess ) {										\
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
+
 #define hypre_TAlloc(type, count) \
 ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )
 
@@ -216,15 +217,6 @@ if ( cudaerr != cudaSuccess ) {										\
 #define hypre_TFree(ptr) \
 ( hypre_Free((char *)ptr), ptr = NULL )
 
-#define hypre_PTAlloc(type, count) \
-( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
-
-#define hypre_HCTAlloc(type, count) \
-( (type *)hypre_CAllocHost((size_t)(count), (size_t)sizeof(type)) )
-
-#define hypre_HCTFree(ptr) \
-( hypre_HFree((char *)ptr), ptr = NULL )
-
 #endif
 
 #define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count))
@@ -245,6 +237,21 @@ if ( cudaerr != cudaSuccess ) {										\
 #define hypre_UMTFree(ptr) hypre_TFree(ptr)
 #endif
   
+#define hypre_PinnedTAlloc(type, count)\
+( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
+
+#define hypre_HostTAlloc(type, count) \
+( (type *)hypre_MAllocHost((size_t)(sizeof(type) * (count))) )
+
+#define hypre_HostCTAlloc(type, count) \
+( (type *)hypre_CAllocHost((size_t)(count), (size_t)sizeof(type)) )
+
+#define hypre_HostTReAlloc(ptr, type, count) \
+( (type *)hypre_ReAllocHost((char *)ptr, (size_t)(sizeof(type) * (count))) )
+
+#define hypre_HostTFree(ptr) \
+( hypre_FreeHost((char *)ptr), ptr = NULL )
+
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/
@@ -257,7 +264,9 @@ char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc ( char *ptr , size_t size );
 void hypre_Free ( char *ptr );
 char *hypre_CAllocHost( size_t count,size_t elt_size );
-void hypre_HFree( char *ptr );
+char *hypre_MAllocHost( size_t size );
+char *hypre_ReAllocHost( char   *ptr,size_t  size );
+void hypre_FreeHost( char *ptr );
 char *hypre_SharedMAlloc ( size_t size );
 char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
 char *hypre_SharedReAlloc ( char *ptr , size_t size );

@@ -73,6 +73,7 @@ HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYP
 
 /* random.c */
 void hypre_SeedRand ( HYPRE_Int seed );
+HYPRE_Int hypre_RandI ( void );
 HYPRE_Real hypre_Rand ( void );
 
 /* hypre_prefix_sum.c */
