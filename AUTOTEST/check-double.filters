@@ -1,4 +1,10 @@
 /_hypre_utilities.h:
 /HYPRE_utilities.h:
-/mpistubs.c
+/utilities/general.h:
+/utilities/gpuErrorCheck.h:
+/utilities/gpuErrorCheck.c:
+/utilities/gpuMem.h:
+/utilities/hypre_nvtx.h:
+/utilities/mpistubs.c
+/seq_mv/gpukernels.h:
 double-check

@@ -3,6 +3,13 @@
 /hypre_printf.c:
 /_hypre_utilities.h:
 /HYPRE_utilities.h:
+/utilities/general.h:
+/utilities/gpuErrorCheck.h:
+/utilities/gpuErrorCheck.c:
+/utilities/gpuMem.h:
+/utilities/hypre_nvtx.h:
+/utilities/mpistubs.c
+/seq_mv/gpukernels.h:
 as long as
 too long
 long range interpolation

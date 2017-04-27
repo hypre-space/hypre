@@ -78,7 +78,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
      }
      hypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
    }
-   process_result = (double)(local_result);
+   process_result = local_result;
    
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));

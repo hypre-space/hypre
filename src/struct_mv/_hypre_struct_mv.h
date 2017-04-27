@@ -62,12 +62,12 @@ extern "C++" {
 }
 
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, char const* const fun, const int line)
+inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
 {
     if (err)
     {
         printf("CUDA Error Code[%d]: %s\n%s() Line:%d\n", err, cudaGetErrorString(err), fun, line);
-		int *p = NULL; *p = 1;
+		HYPRE_Int *p = NULL; *p = 1;
     }
 }
 
@@ -366,12 +366,12 @@ public:
     extern __shared__ unsigned char sd_block[];
     T *sd = reinterpret_cast<T *>(&sd_block[m_smem_offset]);
 
-    int threadId = threadIdx.x + blockDim.x * threadIdx.y
+    HYPRE_Int threadId = threadIdx.x + blockDim.x * threadIdx.y
                    + (blockDim.x * blockDim.y) * threadIdx.z;
 
     // initialize shared memory
     T val = static_cast<T>(0);
-    for (int i = BLOCKSIZE / 2; i > 0; i /= 2) {
+    for (HYPRE_Int i = BLOCKSIZE / 2; i > 0; i /= 2) {
       // this descends all the way to 1
       if (threadId < i) {
         sd[threadId + i] = val;
@@ -404,13 +404,13 @@ public:
       extern __shared__ unsigned char sd_block[];
       T *sd = reinterpret_cast<T *>(&sd_block[m_smem_offset]);
 
-      int threadId = threadIdx.x + blockDim.x * threadIdx.y
+      HYPRE_Int threadId = threadIdx.x + blockDim.x * threadIdx.y
                      + (blockDim.x * blockDim.y) * threadIdx.z;
 
       T temp = 0;
       __syncthreads();
 
-      for (int i = BLOCKSIZE / 2; i >= WARP_SIZE; i /= 2) {
+      for (HYPRE_Int i = BLOCKSIZE / 2; i >= WARP_SIZE; i /= 2) {
         if (threadId < i) {
           sd[threadId] *= sd[threadId + i];
         }
@@ -419,7 +419,7 @@ public:
 
       if (threadId < WARP_SIZE) {
         temp = sd[threadId];
-        for (int i = WARP_SIZE / 2; i > 0; i /= 2) {
+        for (HYPRE_Int i = WARP_SIZE / 2; i > 0; i /= 2) {
           temp *= HIDDEN::shfl_xor<T>(temp, i);
         }
       }
@@ -468,7 +468,7 @@ public:
     extern __shared__ unsigned char sd_block[];
     T *sd = reinterpret_cast<T *>(&sd_block[m_smem_offset]);
 
-    int threadId = threadIdx.x + blockDim.x * threadIdx.y
+    HYPRE_Int threadId = threadIdx.x + blockDim.x * threadIdx.y
                    + (blockDim.x * blockDim.y) * threadIdx.z;
 
     sd[threadId] *= val;
@@ -495,12 +495,12 @@ private:
   /*!
    * \brief My cuda reduction variable ID.
    */
-  int m_myID = -1;
+  HYPRE_Int m_myID = -1;
 
   /*!
    * \brief Byte offset into dynamic shared memory.
    */
-  int m_smem_offset = -1;
+  HYPRE_Int m_smem_offset = -1;
 
   /*!
    * \brief If this variable is a copy or not; only original may release memory 
@@ -906,12 +906,12 @@ extern "C++" {
 #endif
 
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, char const* const fun, const int line)
+inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
 {
     if (err)
     {
         printf("CUDA Error Code[%d]: %s\n%s() Line:%d\n", err, cudaGetErrorString(err), fun, line);
-	//int *p = NULL; *p = 1;
+	//HYPRE_Int *p = NULL; *p = 1;
     }
 }
 #define BLOCKSIZE 256
@@ -1473,12 +1473,12 @@ typedef struct hypre_Boxloop_struct
 } hypre_Boxloop;
 
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, char const* const fun, const int line)
+inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
 {
     if (err)
     {
         printf("CUDA Error Code[%d]: %s\n%s() Line:%d\n", err, cudaGetErrorString(err), fun, line);
-	//int *p = NULL; *p = 1;
+	//HYPRE_Int *p = NULL; *p = 1;
     }
 }
 #define BLOCKSIZE 128
@@ -1491,9 +1491,9 @@ inline void CheckError(cudaError_t const err, char const* const fun, const int l
 }
 extern "C++" {
 template <typename LOOP_BODY>
-__global__ void forall_kernel(LOOP_BODY loop_body, int length)
+__global__ void forall_kernel(LOOP_BODY loop_body, HYPRE_Int length)
 {
-	int idx = blockDim.x * blockIdx.x + threadIdx.x;
+	HYPRE_Int idx = blockDim.x * blockIdx.x + threadIdx.x;
 	if (idx < length)
 		loop_body(idx);
 }
@@ -1514,7 +1514,7 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
 {
 
 #pragma omp parallel for schedule(static)
-	for (int idx = 0;idx < length;idx++)
+	for (HYPRE_Int idx = 0;idx < length;idx++)
 		loop_body(idx);
 }
 
@@ -1540,7 +1540,7 @@ template<class T>
 __global__ void dot (T * a, T * b, T *c, HYPRE_Int hypre__tot,
                      hypre_Boxloop box1,hypre_Boxloop box2)
 {
-    int id = (blockIdx.x * blockDim.x) + threadIdx.x;
+    HYPRE_Int id = (blockIdx.x * blockDim.x) + threadIdx.x;
 	HYPRE_Int local_idx;
     HYPRE_Int idx_local = id;
     HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;
@@ -1575,7 +1575,7 @@ __global__ void dot (T * a, T * b, T *c, HYPRE_Int hypre__tot,
 	
     ///////// sum of internal cache
 	
-    int i;    
+    HYPRE_Int i;    
     
     for (i=(BLOCKSIZE /2); i>0 ; i= i/2){
 		if (threadIdx.x < i){
@@ -1593,7 +1593,7 @@ template<class T>
 __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 				hypre_Boxloop box1)
 {
-    int id = (blockIdx.x * blockDim.x) + threadIdx.x;
+    HYPRE_Int id = (blockIdx.x * blockDim.x) + threadIdx.x;
     HYPRE_Int local_idx;
     HYPRE_Int idx_local = id;
     HYPRE_Int hypre_boxD1 = 1.0;
@@ -1621,7 +1621,7 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
     
     ///////// sum of internal cache
     
-    int i;    
+    HYPRE_Int i;    
     
     for (i=(BLOCKSIZE /2); i>0 ; i= i/2){
       if (threadIdx.x < i){
@@ -1868,7 +1868,7 @@ AxCheckError(cudaDeviceSynchronize());\
 extern "C++" {
 template<class T>
 __inline__ __device__
-int fake_shfl_down(T val, HYPRE_Int offset, HYPRE_Int width=32) {
+HYPRE_Int fake_shfl_down(T val, HYPRE_Int offset, HYPRE_Int width=32) {
   static __shared__ T shared[MAX_BLOCK];
   HYPRE_Int lane=threadIdx.x%32;
 
@@ -1884,7 +1884,7 @@ int fake_shfl_down(T val, HYPRE_Int offset, HYPRE_Int width=32) {
 template<class T>  
 __inline__ __device__
 HYPRE_Real warpReduceSum (T val) {
-  for (int offset = warpSize/2; offset > 0; offset /= 2)
+  for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
     val += __shfl_down(val,offset);
   return val;
 }
@@ -1903,7 +1903,7 @@ HYPRE_Real blockReduceSum(T val) {
   __syncthreads();
 
   //ensure we only grab a value from shared memory if that warp existed
-  val = (threadIdx.x<blockDim.x/warpSize) ? shared[lane] : int(0);
+  val = (threadIdx.x<blockDim.x/warpSize) ? shared[lane] : HYPRE_Int(0);
   if(wid==0) val=warpReduceSum<T>(val);
 
   return val;
@@ -1948,9 +1948,9 @@ __global__ void hypre_device_reduce_stable_kernel(T*a, T*b, T* out, HYPRE_Int N,
 }
 
 template<class T>       
-__global__ void hypre_device_reduce_stable_kernel2(T *in, T* out, int N) {
+__global__ void hypre_device_reduce_stable_kernel2(T *in, T* out, HYPRE_Int N) {
   T sum=T(0);
-  for(int i=blockIdx.x*blockDim.x+threadIdx.x;i<N;i+=blockDim.x*gridDim.x) {
+  for(HYPRE_Int i=blockIdx.x*blockDim.x+threadIdx.x;i<N;i+=blockDim.x*gridDim.x) {
     sum+=in[i];
   }
   sum=blockReduceSum<T>(sum);
@@ -2072,7 +2072,7 @@ void hypre_device_reduction (HYPRE_Real* out,
 {    									 \
    zypre_BoxLoopCUDAInit(ndim);						\
 	zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
-	int n_blocks = (hypre__tot+BLOCKSIZE-1)/BLOCKSIZE;					\
+	HYPRE_Int n_blocks = (hypre__tot+BLOCKSIZE-1)/BLOCKSIZE;					\
 	HYPRE_Real *d_b;													\
 	HYPRE_Real * b = new HYPRE_Real[n_blocks];							\
 	cudaMalloc((void**) &d_b, n_blocks * sizeof(HYPRE_Real));			\
@@ -2080,10 +2080,10 @@ void hypre_device_reduction (HYPRE_Real* out,
    cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
   printf("\n ERROR zypre_newBoxLoop1Reduction: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-int *p = NULL; *p = 1;\
+HYPRE_Int *p = NULL; *p = 1;\
 }\
 AxCheckError(cudaMemcpy(b,d_b,n_blocks*sizeof(HYPRE_Real),cudaMemcpyDeviceToHost)); \
-	for (int j = 0 ; j< n_blocks ; ++j){								\
+	for (HYPRE_Int j = 0 ; j< n_blocks ; ++j){								\
 		sum *= b[j];											\
 	}																	\
 	delete [] b;															\

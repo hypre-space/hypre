@@ -359,7 +359,7 @@ HYPRE_Int hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha , hypre_Vector *x , hyp
 HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x , hypre_Vector *y );
 void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x);
 void hypre_SeqVectorPrefetchToHost(hypre_Vector *x);
-void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x,int index);
+void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index);
 hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x);
 #endif
 #ifdef __cplusplus

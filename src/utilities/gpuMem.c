@@ -111,7 +111,7 @@ void hypre_GPUFinalize(){
   
   cublasErrchk(cublasDestroy(HYPRE_CUBLAS_HANDLE));
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_MEASURE_GPU_HWM)
-  hypre_printf("GPU Memory High Water Mark(per MPI_RANK) %f MB \n",(double)HYPRE_GPU_HWM/1024/1024);
+  hypre_printf("GPU Memory High Water Mark(per MPI_RANK) %f MB \n",(HYPRE_Real)HYPRE_GPU_HWM/1024/1024);
 #endif
   /* Destroy streams */
   hypre_int jj;

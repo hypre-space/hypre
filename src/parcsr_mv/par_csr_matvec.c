@@ -19,7 +19,7 @@
 #include "_hypre_parcsr_mv.h"
 #include <assert.h>
 #ifdef HYPRE_USE_GPU
-void PackOnDevice(double *send_data,double *x_local_data, int *send_map, int begin,int end,cudaStream_t s);
+void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_Int *send_map, HYPRE_Int begin,HYPRE_Int end,cudaStream_t s);
 #endif
 
 /*--------------------------------------------------------------------------

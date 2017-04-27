@@ -47,12 +47,12 @@ extern "C++" {
 }
 
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, char const* const fun, const int line)
+inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
 {
     if (err)
     {
         printf("CUDA Error Code[%d]: %s\n%s() Line:%d\n", err, cudaGetErrorString(err), fun, line);
-		int *p = NULL; *p = 1;
+		HYPRE_Int *p = NULL; *p = 1;
     }
 }
 
@@ -351,12 +351,12 @@ public:
     extern __shared__ unsigned char sd_block[];
     T *sd = reinterpret_cast<T *>(&sd_block[m_smem_offset]);
 
-    int threadId = threadIdx.x + blockDim.x * threadIdx.y
+    HYPRE_Int threadId = threadIdx.x + blockDim.x * threadIdx.y
                    + (blockDim.x * blockDim.y) * threadIdx.z;
 
     // initialize shared memory
     T val = static_cast<T>(0);
-    for (int i = BLOCKSIZE / 2; i > 0; i /= 2) {
+    for (HYPRE_Int i = BLOCKSIZE / 2; i > 0; i /= 2) {
       // this descends all the way to 1
       if (threadId < i) {
         sd[threadId + i] = val;
@@ -389,13 +389,13 @@ public:
       extern __shared__ unsigned char sd_block[];
       T *sd = reinterpret_cast<T *>(&sd_block[m_smem_offset]);
 
-      int threadId = threadIdx.x + blockDim.x * threadIdx.y
+      HYPRE_Int threadId = threadIdx.x + blockDim.x * threadIdx.y
                      + (blockDim.x * blockDim.y) * threadIdx.z;
 
       T temp = 0;
       __syncthreads();
 
-      for (int i = BLOCKSIZE / 2; i >= WARP_SIZE; i /= 2) {
+      for (HYPRE_Int i = BLOCKSIZE / 2; i >= WARP_SIZE; i /= 2) {
         if (threadId < i) {
           sd[threadId] *= sd[threadId + i];
         }
@@ -404,7 +404,7 @@ public:
 
       if (threadId < WARP_SIZE) {
         temp = sd[threadId];
-        for (int i = WARP_SIZE / 2; i > 0; i /= 2) {
+        for (HYPRE_Int i = WARP_SIZE / 2; i > 0; i /= 2) {
           temp *= HIDDEN::shfl_xor<T>(temp, i);
         }
       }
@@ -453,7 +453,7 @@ public:
     extern __shared__ unsigned char sd_block[];
     T *sd = reinterpret_cast<T *>(&sd_block[m_smem_offset]);
 
-    int threadId = threadIdx.x + blockDim.x * threadIdx.y
+    HYPRE_Int threadId = threadIdx.x + blockDim.x * threadIdx.y
                    + (blockDim.x * blockDim.y) * threadIdx.z;
 
     sd[threadId] *= val;
@@ -480,12 +480,12 @@ private:
   /*!
    * \brief My cuda reduction variable ID.
    */
-  int m_myID = -1;
+  HYPRE_Int m_myID = -1;
 
   /*!
    * \brief Byte offset into dynamic shared memory.
    */
-  int m_smem_offset = -1;
+  HYPRE_Int m_smem_offset = -1;
 
   /*!
    * \brief If this variable is a copy or not; only original may release memory 

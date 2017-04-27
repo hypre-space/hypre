@@ -30,12 +30,12 @@ extern "C++" {
 #endif
 
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, char const* const fun, const int line)
+inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
 {
     if (err)
     {
         printf("CUDA Error Code[%d]: %s\n%s() Line:%d\n", err, cudaGetErrorString(err), fun, line);
-	//int *p = NULL; *p = 1;
+	//HYPRE_Int *p = NULL; *p = 1;
     }
 }
 #define BLOCKSIZE 256
