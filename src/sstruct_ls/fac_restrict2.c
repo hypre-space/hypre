@@ -518,9 +518,6 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    hypre_StructVector     *xc_var;
    hypre_StructVector     *xf_var;
 
-   HYPRE_Int               xci;
-   HYPRE_Int               xfi;
-
    HYPRE_Real           ***xfp;
    HYPRE_Real           ***xcp;
    HYPRE_Real           ***xcp_temp;

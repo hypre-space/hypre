@@ -739,9 +739,6 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
    hypre_StructVector     *e_var;
    hypre_StructVector     *recv_var;
 
-   HYPRE_Int               xci;
-   HYPRE_Int               ei;
-
    HYPRE_Real           ***xcp;
    HYPRE_Real           ***ep;
 

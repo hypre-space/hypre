@@ -157,7 +157,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
    HYPRE_Int               i, j, k, l, m, n, ll, kk, jj;
    HYPRE_Int               nvars, var1, var2, var2_start; 
-   HYPRE_Int               iA, iAc, iA_shift_z, iA_shift_zy, iA_shift_zyx;
+   HYPRE_Int               iA_shift_z, iA_shift_zy, iA_shift_zyx;
 
    hypre_Index             lindex;
    hypre_Index             index1, index2;

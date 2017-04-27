@@ -22,9 +22,10 @@
 
 #ifndef HYPRE_NEWBOXLOOP_HEADER
 #define HYPRE_NEWBOXLOOP_HEADER
+
 #ifdef HYPRE_USING_OPENMP
 #define Pragma(x) _Pragma(#x)
-#define OMP1(args...) Pragma(omp parallel for private(ZYPRE_BOX_PRIVATE,args) HYPRE_SMP_SCHEDULE)
+#define OMP1(args...) Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,args) HYPRE_SMP_SCHEDULE)
 #define OMPREDUCTION() Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,HYPRE_BOX_PRIVATE_VAR) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #else
 #define OMP1(args...)  ;
@@ -38,11 +39,6 @@ typedef struct hypre_Boxloop_struct
     HYPRE_Int bstart0,bstart1,bstart2;
     HYPRE_Int bsize0,bsize1,bsize2;
   }hypre_Boxloop;
-
-#define hypre_rand(val) \
-{\
-    val = rand();\
-}
 
 #define zypre_newBoxLoop0Begin(ndim, loop_size)				\
 {\
@@ -66,7 +62,7 @@ typedef struct hypre_Boxloop_struct
 }
 
 #define zypre_newBoxLoop1Begin(ndim, loop_size,				\
-							   dbox1, start1, stride1, i1) 	\
+                               dbox1, start1, stride1, i1)              \
 	{														\
 	zypre_BoxLoopDeclare();									\
 	zypre_BoxLoopDeclareK(1);								\
@@ -323,47 +319,47 @@ typedef struct hypre_Boxloop_struct
                                    stride1, i1,				\
                                    stride2, i2)				\
 {									\
-    HYPRE_Int hypre__tot = 1.0,idx;					\
-    hypre_Boxloop databox1,databox2;					\
-    HYPRE_Int d;						\
-    databox1.lsize0 = loop_size[0];					\
-    databox1.lsize1 = loop_size[1];					\
-    databox1.lsize2 = loop_size[2];					\
-    databox1.strides0 = stride1[0];					\
-    databox1.strides1 = stride1[1];					\
-    databox1.strides2 = stride1[2];					\
-    databox2.lsize0 = loop_size[0];					\
-    databox2.lsize1 = loop_size[1];					\
-    databox2.lsize2 = loop_size[2];					\
-    databox2.strides0 = stride2[0];					\
-    databox2.strides1 = stride2[1];					\
-    databox2.strides2 = stride2[2];					\
-    for (d = 0;d < ndim;d ++)						\
-      {									\
-	hypre__tot *= loop_size[d];					\
-      }									\
-    for (idx = 0;idx < hypre__tot;idx++)				\
-      {									\
-	  HYPRE_Int local_idx;						\
-	  HYPRE_Int idx_local = idx;					\
-	  HYPRE_Int i1 = 0, i2 = 0;					\
-	  local_idx  = idx_local % databox1.lsize0;			\
-	  idx_local  = idx_local / databox1.lsize0;			\
-	  i1 += local_idx*databox1.strides0;				\
-	  i2 += local_idx*databox2.strides0;				\
-	  local_idx  = idx_local % databox1.lsize1;			\
-	  idx_local  = idx_local / databox1.lsize1;			\
-	  i1 += local_idx*databox1.strides1;				\
-	  i2 += local_idx*databox2.strides1;				\
-	  local_idx  = idx_local % databox1.lsize2;			\
-	  idx_local  = idx_local / databox1.lsize2;			\
-	  i1 += local_idx*databox1.strides2;				\
-	  i2 += local_idx*databox2.strides2;
+   HYPRE_Int hypre__tot = 1.0,idx;					\
+   hypre_Boxloop databox1,databox2;					\
+   HYPRE_Int d;								\
+   databox1.lsize0 = loop_size[0];					\
+   databox1.lsize1 = loop_size[1];					\
+   databox1.lsize2 = loop_size[2];					\
+   databox1.strides0 = stride1[0];					\
+   databox1.strides1 = stride1[1];					\
+   databox1.strides2 = stride1[2];					\
+   databox2.lsize0 = loop_size[0];					\
+   databox2.lsize1 = loop_size[1];					\
+   databox2.lsize2 = loop_size[2];					\
+   databox2.strides0 = stride2[0];					\
+   databox2.strides1 = stride2[1];					\
+   databox2.strides2 = stride2[2];					\
+   for (d = 0;d < ndim;d ++)						\
+   {									\
+      hypre__tot *= loop_size[d];					\
+   }									\
+   for (idx = 0;idx < hypre__tot;idx++)					\
+   {									\
+      HYPRE_Int local_idx;						\
+      HYPRE_Int idx_local = idx;					\
+      HYPRE_Int i1 = 0, i2 = 0;						\
+      local_idx  = idx_local % databox1.lsize0;				\
+      idx_local  = idx_local / databox1.lsize0;				\
+      i1 += local_idx*databox1.strides0;				\
+      i2 += local_idx*databox2.strides0;				\
+      local_idx  = idx_local % databox1.lsize1;				\
+      idx_local  = idx_local / databox1.lsize1;				\
+      i1 += local_idx*databox1.strides1;				\
+      i2 += local_idx*databox2.strides1;				\
+      local_idx  = idx_local % databox1.lsize2;				\
+      idx_local  = idx_local / databox1.lsize2;				\
+      i1 += local_idx*databox1.strides2;				\
+      i2 += local_idx*databox2.strides2;
 
+#define hypre_BoxDataExchangeEnd()					\
+   }                                                                    \
+}
 
-#define hypre_BoxDataExchangeEnd()				\
-		}						\
-      }
 #define hypre_newBoxLoopGetIndex zypre_BoxLoopGetIndex  
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 #define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
@@ -383,6 +379,6 @@ typedef struct hypre_Boxloop_struct
 #define hypre_BoxLoop4Begin      zypre_BoxLoop4Begin
 #define hypre_BoxLoop4For        zypre_BoxLoop4For
 #define hypre_BoxLoop4End        zypre_BoxLoop4End
-
+#define hypre_BasicBoxLoop2Begin zypre_BasicBoxLoop2Begin
 
 #endif
