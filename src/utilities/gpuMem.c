@@ -1,4 +1,6 @@
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include "_hypre_utilities.h"
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #include <stdlib.h>

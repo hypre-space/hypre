@@ -2258,10 +2258,10 @@ AxCheckError(cudaDeviceSynchronize());\
 
 #ifdef HYPRE_USING_OPENMP
 #define Pragma(x) _Pragma(#x)
-#define OMP1(args...) Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,args) HYPRE_SMP_SCHEDULE)
+#define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,HYPRE_BOX_PRIVATE_VAR) HYPRE_SMP_SCHEDULE)
 #define OMPREDUCTION() Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,HYPRE_BOX_PRIVATE_VAR) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #else
-#define OMP1(args...)  ;
+#define OMP1
 #define OMPREDUCTION() ;
 #endif
 
@@ -2277,7 +2277,7 @@ typedef struct hypre_Boxloop_struct
 {\
    zypre_BoxLoopDeclare();									\
    zypre_BoxLoopInit(ndim, loop_size);						\
-   OMP1(HYPRE_BOX_PRIVATE_VAR)								\
+   OMP1\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
       zypre_BoxLoopSet();\
@@ -2301,7 +2301,7 @@ typedef struct hypre_Boxloop_struct
 	zypre_BoxLoopDeclareK(1);								\
 	zypre_BoxLoopInit(ndim, loop_size);						\
 	zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);					\
-	OMP1(HYPRE_BOX_PRIVATE_VAR)															\
+	OMP1\
 	for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++) \
 	{																	\
 		zypre_BoxLoopSet();												\
@@ -2332,7 +2332,7 @@ typedef struct hypre_Boxloop_struct
    zypre_BoxLoopInit(ndim, loop_size);\
    zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);\
    zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);\
-   OMP1(HYPRE_BOX_PRIVATE_VAR)															\
+   OMP1\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)	\
    {\
       zypre_BoxLoopSet();\
@@ -2369,7 +2369,7 @@ typedef struct hypre_Boxloop_struct
    zypre_BoxLoopInitK(1, dbox1, start1, stride1, i1);		\
    zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);		\
    zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);		\
-   OMP1(HYPRE_BOX_PRIVATE_VAR)								\
+   OMP1\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)	\
    {\
       zypre_BoxLoopSet();\
@@ -2411,7 +2411,7 @@ typedef struct hypre_Boxloop_struct
    zypre_BoxLoopInitK(2, dbox2, start2, stride2, i2);\
    zypre_BoxLoopInitK(3, dbox3, start3, stride3, i3);\
    zypre_BoxLoopInitK(4, dbox4, start4, stride4, i4);\
-   OMP1(HYPRE_BOX_PRIVATE_VAR)								\
+   OMP1\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
       zypre_BoxLoopSet();\
