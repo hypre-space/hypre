@@ -510,7 +510,4 @@ hypre_int pointerIsManaged(const void *ptr){
   }
   return ptr_att.isManaged;
 }
-#else
- void hypre_GPUInit(hypre_int use_device){}
- void hypre_GPUFinalize(){}
 #endif

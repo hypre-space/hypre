@@ -10,13 +10,13 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-void hypre_GPUInit(hypre_int use_device);
-void hypre_GPUFinalize();
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 #ifdef HYPRE_USE_GPU
 #include <cuda_runtime_api.h>
+void hypre_GPUInit(hypre_int use_device);
+void hypre_GPUFinalize();
 int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
 void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
 void VecSet(double* tgt, int size, double value, cudaStream_t s);
@@ -94,5 +94,11 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
 
 #endif
+
+#else
+
+#define hypre_GPUInit(use_device)
+#define hypre_GPUFinalize()
+
 #endif
 

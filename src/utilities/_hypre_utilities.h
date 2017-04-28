@@ -419,7 +419,7 @@ extern "C" {
     cudaError_t cudaerr = cudaMalloc((void**)&ptr,sizeof(type)*(count)); \
     if ( cudaerr != cudaSuccess ) {					\
       printf("\n ERROR hypre_DataTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-      int *p = NULL; *p = 1;						\
+      HYPRE_Int *p = NULL; *p = 1;						\
     }									\
     ptr;})
 	
@@ -429,7 +429,7 @@ extern "C" {
 	cudaError_t cudaerr = cudaMalloc((void**)&ptr,sizeof(type)*(count)); \
 	if ( cudaerr != cudaSuccess ) {										\
 		printf("\n hypre_DataCTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-		int *p = NULL; *p = 1;\
+		HYPRE_Int *p = NULL; *p = 1;\
 	}		\
 	cudaMemset(ptr,0,sizeof(type)*(count));	   \
 	ptr;})									   \
@@ -446,7 +446,7 @@ extern "C" {
 	cudaError_t cudaerr = cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);\
 	if ( cudaerr != cudaSuccess ) {										\
 		printf("\n ERROR hypre_DataTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-		int *p = NULL; *p = 1;\
+		HYPRE_Int *p = NULL; *p = 1;\
 	}\
 	ptr;})
 	
@@ -456,7 +456,7 @@ extern "C" {
 	cudaError_t cudaerr = cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal); \
 	if ( cudaerr != cudaSuccess ) {										\
 		printf("\n hypre_DataCTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-		int *p = NULL; *p = 1;\
+		HYPRE_Int *p = NULL; *p = 1;\
 	}		\
 	cudaMemset(ptr,0,sizeof(type)*(count));	   \
 	ptr;})									   \
@@ -473,7 +473,7 @@ extern "C" {
 		cudaError_t cudaerr = cudaFree(ptr);							\
 		if ( cudaerr != cudaSuccess ) {									\
 			printf("\n CudaFree : %s in %s(%d) function %s\n",cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-			int *p = NULL; *p = 1;										\
+			HYPRE_Int *p = NULL; *p = 1;										\
 		}																\
 	}																	\
 	
@@ -482,7 +482,7 @@ extern "C" {
 	{cudaError_t cudaerr = cudaMemcpy(ptrD, ptrH, sizeof(type)*count, cudaMemcpyHostToDevice); \
 if ( cudaerr != cudaSuccess ) {										\
 		printf("\n hypre_DataCopyToData %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-		int *p = NULL; *p = 1;\
+		HYPRE_Int *p = NULL; *p = 1;\
 }							  \
 	}
 	
@@ -491,7 +491,7 @@ if ( cudaerr != cudaSuccess ) {										\
 	{cudaError_t cudaerr = cudaMemcpy(ptrH, ptrD, sizeof(type)*count, cudaMemcpyDeviceToHost); \
 	if ( cudaerr != cudaSuccess ) {										\
 		printf("\n hypre_DataCTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-		int *p = NULL; *p = 1;\
+		HYPRE_Int *p = NULL; *p = 1;\
 	}\
 	}
 
@@ -1256,13 +1256,13 @@ void PrintPointerAttributes(const void *ptr);
  * $Revision$
  ***********************************************************************EHEADER*/
 
-void hypre_GPUInit(hypre_int use_device);
-void hypre_GPUFinalize();
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 #ifdef HYPRE_USE_GPU
 #include <cuda_runtime_api.h>
+void hypre_GPUInit(hypre_int use_device);
+void hypre_GPUFinalize();
 int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
 void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
 void VecSet(double* tgt, int size, double value, cudaStream_t s);
@@ -1340,6 +1340,12 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
 
 #endif
+
+#else
+
+#define hypre_GPUInit(use_device)
+#define hypre_GPUFinalize()
+
 #endif
 
 /*BHEADER**********************************************************************
