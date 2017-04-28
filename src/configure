@@ -604,10 +604,11 @@ NVCCFLAGS
 HYPRE_KOKKOS_LIB
 HYPRE_KOKKOS_INC_FILE
 HYPRE_KOKKOS_INCLUDE
+HYPRE_KOKKOS_LIB_DIR
 HYPRE_KOKKOS_SRC_DIR
 HYPRE_RAJA_LIB
 HYPRE_RAJA_INCLUDE
-HYPRE_RAJA_SRC_DIR
+HYPRE_RAJA_LIB_DIR
 LAPACKLIBS
 LAPACKLIBDIRS
 HYPRE_LAPACK_FILES
@@ -771,7 +772,7 @@ with_raja_lib_dirs
 with_kokkos_include
 with_kokkos_lib
 with_kokkos_libs
-with_kokkos_lib_dirs
+with_kokkos_dirs
 with_nvcc
 with_caliper
 with_caliper_include
@@ -1539,11 +1540,9 @@ Optional Packages:
                           libraries needed for KOKKOS (base name only). The
                           options --with-kokkos-libs and
                           --with-kokkos-lib-dirs must be used together.
-  --with-kokkos-lib-dirs=DIRS
-                          DIRS is space-separated list (enclosed in quotes) of
-                          directories containing the libraries specified by
-                          --with-kokkos-libs, e.g "usr/lib /usr/local/lib".
-                          The options --with-kokkos-libs and
+  --with-kokkos-dirs=DIRS DIRS is space-separated list (enclosed in quotes) of
+                          directories/lib containing Makefile.kokkos The
+                          options --with-kokkos-libs and
                           --kokkos-blas-lib-dirs must be used together.
   --with-nvcc             Use NVCC compiler (default is NO).
   --with-caliper          Use Caliper instrumentation (default is NO).
@@ -3177,10 +3176,7 @@ fi
 # Check whether --with-openmp was given.
 if test "${with_openmp+set}" = set; then :
   withval=$with_openmp; case "${withval}" in
-    yes) hypre_using_openmp=yes
-
-$as_echo "#define HYPRE_USING_OPENMP 1" >>confdefs.h
- ;;
+    yes) hypre_using_openmp=yes;;
     no)  hypre_using_openmp=no ;;
  esac
 else
@@ -3311,7 +3307,7 @@ fi
 # Check whether --with-raja-lib-dirs was given.
 if test "${with_raja_lib_dirs+set}" = set; then :
   withval=$with_raja_lib_dirs; for raja_lib_dir in $withval; do
-    HYPRE_RAJA_SRC_DIR="-L$raja_lib_dir $HYPRE_RAJA_SRC_DIR"
+    HYPRE_RAJA_LIB_DIR="-L$raja_lib_dir $HYPRE_RAJA_LIB_DIR"
  done;
  hypre_user_chose_raja=yes
 
@@ -3352,10 +3348,10 @@ fi
 
 
 
-# Check whether --with-kokkos-lib-dirs was given.
-if test "${with_kokkos_lib_dirs+set}" = set; then :
-  withval=$with_kokkos_lib_dirs; for kokkos_lib_dir in $withval; do
-    HYPRE_KOKKOS_SRC_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_SRC_DIR"
+# Check whether --with-kokkos-dirs was given.
+if test "${with_kokkos_dirs+set}" = set; then :
+  withval=$with_kokkos_dirs; for kokkos_lib_dir in $withval; do
+    HYPRE_KOKKOS_SRC_DIR="$kokkos_lib_dir"
  done;
 hypre_user_chose_kokkos=yes
 
@@ -7753,37 +7749,37 @@ then
       then
         RAJAFLAGS=" -lRAJA "
 	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda $RAJAFLAGS "
-   	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 -Xcompiler $RAJAFLAGS "
-   	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1  $RAJAFLAGS "
+   	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register -Xcompiler $RAJAFLAGS "
+   	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register  $RAJAFLAGS "
    	if test "$hypre_using_um" != "yes"
    	then
 		CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
 	   	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
-$as_echo "$as_me: WARNING: *******************************************************" >&2;}
-       		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Configuring with --with-raja=yes without unified memory." >&5
-$as_echo "$as_me: WARNING: Configuring with --with-raja=yes without unified memory." >&2;}
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: It only works for struct interface." >&5
-$as_echo "$as_me: WARNING: It only works for struct interface." >&2;}
-       		{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
-$as_echo "$as_me: WARNING: *******************************************************" >&2;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
+$as_echo "$as_me: *******************************************************" >&6;}
+       		{ $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-raja and --with-cuda without unified memory." >&5
+$as_echo "$as_me: Configuring with --with-raja and --with-cuda without unified memory." >&6;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
+$as_echo "$as_me: It only works for struct interface." >&6;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: Try to confiure with --wiht-raja --with-cuda --enable-unified-memory" >&5
+$as_echo "$as_me: Try to confiure with --wiht-raja --with-cuda --enable-unified-memory" >&6;}
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: to use the cuda feature for the whold package" >&5
+$as_echo "$as_me: to use the cuda feature for the whold package" >&6;}
+       		{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
+$as_echo "$as_me: *******************************************************" >&6;}
    	fi
 	hypre_user_chose_cuda=no
    else
    	if test "$hypre_using_openmp" = "yes"
 	then
 	   CC=${CXX}
-	   LDFLAGS+=" -lRAJA "
-
-$as_echo "#define HYPRE_USING_OPENMP 1" >>confdefs.h
-
-	   CFLAGS+=" -DHYPRE_USE_RAJA "
-	   CXXFLAGS+=" -DHYPRE_USE_RAJA "
+	   CFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA -DHYPRE_USE_OPENMP "
+	   CXXFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA -DHYPRE_USE_OPENMP "
+	   hypre_using_openmp=no
 	else
 	   CC=${CXX}
-   	   LDFLAGS+=" -lRAJA "
-   	   CFLAGS+=" -DHYPRE_USE_RAJA "
-   	   CXXFLAGS+=" -DHYPRE_USE_RAJA "
+   	   CFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA "
+   	   CXXFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA "
 	fi
    fi
 fi
@@ -7792,57 +7788,68 @@ if test "$hypre_user_chose_kokkos" = "yes"
 then
    if test "$hypre_using_cuda" = "yes"
    then
-      LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda -lRAJA"
-      HYPRE_KOKKOS_DEVICE="OpenMP"
-      HYPRE_KOKKOS_ARCH="SNB"
-      HYPRE_KOKKOS_CUDA_OPTION=""
+      LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda"
       HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
-      HYPRE_KOKKOS_CLEAN="kokkos-clean"
-      HYPRE_KOKKOS_LIB="\$(KOKKOS_LIBS)"
-      HYPRE_KOKKOS_DEPENDS="\$(KOKKOS_LINK_DEPENDS)"
-      LDFLAGS="-fopenmp -L./ -lkokkos"
-      CC=$CXX
+      HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
+      CC=${CXX}
       LINK_CC=$LINK_CXX
-      CFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS"
-      CXXFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS"
+      CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS "
+      CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS "
+      if test "$hypre_using_um" != "yes"
+      then
+          CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
+	  CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
+          { $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
+$as_echo "$as_me: *******************************************************" >&6;}
+	  { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-kokkos and --with-cuda, but not with unified memory" >&5
+$as_echo "$as_me: Configuring with --with-kokkos and --with-cuda, but not with unified memory" >&6;}
+	  { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
+$as_echo "$as_me: It only works for struct interface." >&6;}
+	  { $as_echo "$as_me:${as_lineno-$LINENO}: Try to confiure with --wiht-raja --with-cuda --enable-unified-memory" >&5
+$as_echo "$as_me: Try to confiure with --wiht-raja --with-cuda --enable-unified-memory" >&6;}
+	  { $as_echo "$as_me:${as_lineno-$LINENO}: to use the cuda feature for the whold package" >&5
+$as_echo "$as_me: to use the cuda feature for the whold package" >&6;}
+	  { $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
+$as_echo "$as_me: *******************************************************" >&6;}
+      fi
       hypre_user_chose_cuda=no
    else
       if test "$hypre_using_openmp" = "yes"
       then
          CC=${CXX}
-	 LDFLAGS+=" -lkokkos "
-
-$as_echo "#define HYPRE_USING_OPENMP 1" >>confdefs.h
-
-	 CFLAGS+=" -DHYPRE_USE_KOKKOS "
-	 CXXFLAGS+=" -DHYPRE_USE_KOKKOS "
+	 CFLAGS+=" -fopenmp -std=c++11 -DHYPRE_USE_KOKKOS -DHYPRE_USE_OPENMP"
+	 CXXFLAGS+=" -fopenmp -std=c++11 -DHYPRE_USE_KOKKOS -DHYPRE_USE_OPENMP"
+	 HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
+	 HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
+	 hypre_using_openmp=no
       else
       	 CC=${CXX}
-	 LDFLAGS+=" -lkokkos "
-	 CFLAGS+=" -DHYPRE_USE_KOKKOS "
-	 CXXFLAGS+=" -DHYPRE_USE_KOKKOS "
+	 CFLAGS+=" -std=c++11 -DHYPRE_USE_KOKKOS "
+	 CXXFLAGS+=" -std=c++11 -DHYPRE_USE_KOKKOS "
+	 HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
+	 HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
       fi
   fi
 fi
 if test "$hypre_user_chose_cuda" = "yes"
 then
-   LDFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
-   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
-   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
+   LDFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 "
+   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA "
+   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA "
    if test "$hypre_using_um" != "yes"
    then
 	CFLAGS+=" -DHYPRE_MEMORY_GPU"
 	CXXFLAGS+=" -DHYPRE_MEMORY_GPU"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
-$as_echo "$as_me: WARNING: *******************************************************" >&2;}
-       	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Configuring with --with-cuda=yes without unified memory." >&5
-$as_echo "$as_me: WARNING: Configuring with --with-cuda=yes without unified memory." >&2;}
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: It only works for struct interface." >&5
-$as_echo "$as_me: WARNING: It only works for struct interface." >&2;}
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Use --enable-unified-memory to compile with unified memory." >&5
-$as_echo "$as_me: WARNING: Use --enable-unified-memory to compile with unified memory." >&2;}
-       	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: *******************************************************" >&5
-$as_echo "$as_me: WARNING: *******************************************************" >&2;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
+$as_echo "$as_me: *******************************************************" >&6;}
+       	{ $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-cuda=yes without unified memory." >&5
+$as_echo "$as_me: Configuring with --with-cuda=yes without unified memory." >&6;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
+$as_echo "$as_me: It only works for struct interface." >&6;}
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
+$as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
+       	{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
+$as_echo "$as_me: *******************************************************" >&6;}
    else
 	CFLAGS+=" -DHYPRE_USE_GPU "
    	CXXFLAGS+=" -DHYPRE_USE_GPU "
@@ -7851,9 +7858,18 @@ fi
 
 if test "$hypre_using_um" = "yes"
 then
-   CFLAGS+=" -DHYPRE_USE_MANAGED=1"
-   CXXFLAGS+=" -DHYPRE_USE_MANAGED=1"
+   LDFLAGS+=" -lcudart -lcuda "
+   CFLAGS+=" -DHYPRE_USE_MANAGED -I /usr/local/cuda/include "
+   CXXFLAGS+=" -DHYPRE_USE_MANAGED -I /usr/local/cuda/include "
 fi
+
+if test "$hypre_using_openmp" = "yes"
+then
+
+$as_echo "#define HYPRE_USING_OPENMP 1" >>confdefs.h
+
+fi
+
 HYPRE_INSTALLDIR="${prefix}"
 HYPRE_LIBINSTALL="${libdir}"
 HYPRE_INCINSTALL="${includedir}"
@@ -7962,6 +7978,7 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
+
 
 
 

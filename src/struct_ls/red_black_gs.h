@@ -54,11 +54,13 @@ typedef struct
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;			\
@@ -80,11 +82,13 @@ typedef struct
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\
@@ -107,11 +111,13 @@ typedef struct
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;			\
@@ -121,11 +127,7 @@ typedef struct
 #define hypre_RedBlackLoopEnd()			\
          }						\
      });						\
-     cudaError err = cudaGetLastError();		\
-     if ( cudaSuccess != err ) {					\
-       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-     }									\
-     AxCheckError(cudaDeviceSynchronize());				\
+     hypre_fence();					\
 }
 
 #define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
@@ -137,11 +139,13 @@ typedef struct
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\
@@ -150,11 +154,7 @@ typedef struct
 #define hypre_RedBlackConstantcoefLoopEnd()			\
          }						\
      });						\
-     cudaError err = cudaGetLastError();		\
-     if ( cudaSuccess != err ) {					\
-       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-     }									\
-     AxCheckError(cudaDeviceSynchronize());				\
+     hypre_fence();					\
 }  
 #elif defined(HYPRE_USE_CUDA)
 #define hypre_RedBlackLoopInit()
@@ -168,11 +168,13 @@ typedef struct
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;			\
@@ -198,11 +200,13 @@ typedef struct
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\

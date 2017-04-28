@@ -937,7 +937,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
             {
                kptr = lptr + order[ll]*stride_array[ndim];
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS)
                /* This is based on "Idea 2" in box.h */
                {
                   HYPRE_Int      n[HYPRE_MAXDIM+1];
@@ -1265,7 +1265,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
          {
             kptr = lptr + ll*stride_array[ndim];
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS)
             /* This is based on "Idea 2" in box.h */
             {
                HYPRE_Int      n[HYPRE_MAXDIM+1];
@@ -1418,14 +1418,14 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                fr_dpl = fr_dp + (order[ll])*fr_stride_array[ndim];
                to_dpl = to_dp + (      ll )*to_stride_array[ndim];
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS)
                /* This is based on "Idea 2" in box.h */
                {
                   //HYPRE_Int      i[HYPRE_MAXDIM+1];
                   HYPRE_Int      n[HYPRE_MAXDIM+1];
                   HYPRE_Int      fs[HYPRE_MAXDIM+1],  ts[HYPRE_MAXDIM+1];
                   HYPRE_Complex *fp[HYPRE_MAXDIM+1], *tp[HYPRE_MAXDIM+1];
-                  HYPRE_Int      N;
+                  HYPRE_Int      N,d;
 
                   /* Initialize */
                   N = 1;

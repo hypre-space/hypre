@@ -27,8 +27,14 @@ extern "C" {
 #endif
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#ifdef __cplusplus
+extern "C++" {
+#endif
 #include <cuda.h>
 #include <cuda_runtime.h>
+#ifdef __cplusplus
+}
+#endif
 #define HYPRE_CUDA_GLOBAL __host__ __device__
   
 #if defined(HYPRE_MEMORY_GPU)

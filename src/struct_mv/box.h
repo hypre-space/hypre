@@ -311,8 +311,12 @@ hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);
       }\
    }\
 }
-  
+
+#if defined (HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS)
+#define HYPRE_BOX_PRIVATE
+#else
 #define HYPRE_BOX_PRIVATE ZYPRE_BOX_PRIVATE
+#endif
 #define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i
 
 #define zypre_BoxLoopDeclare() \

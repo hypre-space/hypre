@@ -41,10 +41,6 @@ typedef struct hypre_Boxloop_struct
 #if defined(HYPRE_MEMORY_GPU)
 #include <cuda.h>
 #include <cuda_runtime.h>
-extern "C++" {
-#include <curand.h>
-#include <curand_kernel.h>
-}
 
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
 inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
@@ -65,8 +61,8 @@ printf("\n ERROR zypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorStrin
 }\
 AxCheckError(cudaDeviceSynchronize());
 
-#elif defined(HYPRE_USING_OPENMP)
-   #define hypre_exec_policy      omp_parallel_for
+#elif defined(HYPRE_USE_OPENMP)
+   #define hypre_exec_policy      omp_parallel_exec
    #define hypre_reduce_policy omp_reduce
    #define hypre_fence() ;
 #elif defined(HYPRE_USING_OPENMP_ACC)
@@ -109,7 +105,7 @@ AxCheckError(cudaDeviceSynchronize());
 }
 
 
-#define zypre_BoxLoopCUDAInit(ndim)											\
+#define zypre_BoxLoopCUDAInit(ndim,loop_size)					\
 	HYPRE_Int hypre__tot = 1.0;											\
 	for (HYPRE_Int i = 0;i < ndim;i ++)									\
 		hypre__tot *= loop_size[i];
@@ -121,7 +117,7 @@ AxCheckError(cudaDeviceSynchronize());
 
 #define zypre_newBoxLoop0Begin(ndim, loop_size)			\
 {    														\
-    zypre_BoxLoopCUDAInit(ndim);						\
+ zypre_BoxLoopCUDAInit(ndim,loop_size);						\
 	forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
 	{
 
@@ -159,7 +155,7 @@ AxCheckError(cudaDeviceSynchronize());
 #define zypre_newBoxLoop1Begin(ndim, loop_size,				\
 			       dbox1, start1, stride1, i1)		\
 {    														\
-    zypre_BoxLoopCUDAInit(ndim);					\
+ zypre_BoxLoopCUDAInit(ndim,loop_size);						\
     zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
@@ -178,7 +174,7 @@ AxCheckError(cudaDeviceSynchronize());
                                 dbox1, start1, stride1, i1,	\
                                 dbox2, start2, stride2, i2)	\
 {    														\
-    zypre_BoxLoopCUDAInit(ndim);						\
+  zypre_BoxLoopCUDAInit(ndim,loop_size);						\
     zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
     zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);	\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
@@ -217,7 +213,7 @@ AxCheckError(cudaDeviceSynchronize());
 			       dbox2, start2, stride2, i2,		\
 			       dbox3, start3, stride3, i3)		\
   {									\
-        zypre_BoxLoopCUDAInit(ndim);						\
+  zypre_BoxLoopCUDAInit(ndim,loop_size);						\
         zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
         zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2); \
         zypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3); \
@@ -263,7 +259,7 @@ AxCheckError(cudaDeviceSynchronize());
 			       dbox3, start3, stride3, i3,		\
 			       dbox4, start4, stride4, i4)		\
 {								       \
-     zypre_BoxLoopCUDAInit(ndim);						\
+ zypre_BoxLoopCUDAInit(ndim,loop_size);					       \
      zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
      zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2); \
      zypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3); \
@@ -530,7 +526,7 @@ private:
         //
         // Copy ctor.
         //
-        ReduceMult(const ReduceSum& other) :
+        ReduceMult(const ReduceMult& other) :
         m_parent(other.m_parent ? other.m_parent : &other),
         m_val(other.m_custom_init),
         m_custom_init(other.m_custom_init)
@@ -831,7 +827,7 @@ private:
 
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 #define hypre_BoxLoopSetOneBlock zypre_newBoxLoopSetOneBlock
-#define hypre_BoxLoopBlock()       1
+#define hypre_BoxLoopBlock()       0
 #define hypre_BoxLoop0Begin      zypre_newBoxLoop0Begin
 #define hypre_BoxLoop0For        zypre_newBoxLoop0For
 #define hypre_BoxLoop0End        zypre_newBoxLoop0End

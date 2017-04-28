@@ -11,6 +11,9 @@
 #EHEADER**********************************************************************
 
 
+.PHONY: default
+default: all
+
 # Include all variables defined by configure
 include config/Makefile.config
 

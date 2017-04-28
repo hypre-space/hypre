@@ -738,10 +738,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA)
-         /*FIXME: need reduction for more variables*/
-         HYPRE_Int tmp = 0;
-         hypre_MatrixIndexMove(A, stencil_size, i, tmp, 3);
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS)
+        /*FIXME: need reduction for more variables*/
+	HYPRE_Int tmp = 0;
+	hypre_MatrixIndexMove(A, stencil_size, i, tmp, 3);
 #ifdef HYPRE_BOX_PRIVATE_VAR
 #undef HYPRE_BOX_PRIVATE_VAR
 #endif
@@ -1162,10 +1162,10 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
       }
       else
       {
-         /*FIXME: need reduction for multiplication*/
-#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_RAJA)
-         hypre_newBoxLoop1ReductionMult(hypre_StructMatrixNDim(A), loop_size,
-                                        A_dbox, start, stride, Ai,Ap,diag_product);
+          /*FIXME: need reduction for multiplication*/
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS)
+	hypre_newBoxLoop1ReductionMult(hypre_StructMatrixNDim(A), loop_size,
+				       A_dbox, start, stride, Ai,Ap,diag_product);
 #else
          hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, start, stride, Ai);

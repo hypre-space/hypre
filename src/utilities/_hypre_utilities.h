@@ -408,8 +408,14 @@ extern "C" {
 #endif
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#ifdef __cplusplus
+extern "C++" {
+#endif
 #include <cuda.h>
 #include <cuda_runtime.h>
+#ifdef __cplusplus
+}
+#endif
 #define HYPRE_CUDA_GLOBAL __host__ __device__
   
 #if defined(HYPRE_MEMORY_GPU)
@@ -1429,9 +1435,9 @@ void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );
 
 /* random.c */
-void hypre_SeedRand ( HYPRE_Int seed );
-HYPRE_Int hypre_RandI ( void );
-HYPRE_Real hypre_Rand ( void );
+HYPRE_CUDA_GLOBAL void hypre_SeedRand ( HYPRE_Int seed );
+HYPRE_CUDA_GLOBAL HYPRE_Int hypre_RandI ( void );
+HYPRE_CUDA_GLOBAL HYPRE_Real hypre_Rand ( void );
 
 /* hypre_prefix_sum.c */
 /**
