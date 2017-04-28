@@ -391,9 +391,9 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 #endif
       hypre_BoxLoop2For(Ai, vi)
       {
-	HYPRE_Real lambdax,lambday,lambdaz;
-	HYPRE_Real *Ap;
-	HYPRE_Int si,Astenc;
+         HYPRE_Real lambdax,lambday,lambdaz;
+         HYPRE_Real *Ap;
+         HYPRE_Int si,Astenc;
 		  
          lambdax = 0.0;
          lambday = 0.0;
@@ -402,13 +402,13 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
 		 
          for (si = 0; si < stencil_size; si++)
          {
-	   //Ap = hypre_StructMatrixBoxData(A, i, si);
-	   //Ap = data_A + indices_d[si];
-	   Ap = hypre_StructGetMatrixBoxData(A, i, si);
+            //Ap = hypre_StructMatrixBoxData(A, i, si);
+            //Ap = data_A + indices_d[si];
+            Ap = hypre_StructGetMatrixBoxData(A, i, si);
             /* compute lambdax */
             //Astenc = hypre_IndexD(stencil_shape[si], 0);
-			//Astenc = stencil_shape_d[si];
-	   Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[si]);
+            //Astenc = stencil_shape_d[si];
+            Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[si]);
             if (Astenc == 0)
             {
                lambdax += Ap[Ai];

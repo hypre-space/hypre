@@ -61,7 +61,7 @@ hypre_PrintBoxArrayData( FILE            *file,
       hypre_BoxGetSize(box, loop_size);
  
       hypre_SerialBoxLoop1Begin(dim, loop_size,
-                          data_box, start, stride, datai);
+                                data_box, start, stride, datai);
       {
          /* Print lines of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
          hypre_BoxLoopGetIndex(index);
@@ -266,7 +266,7 @@ hypre_ReadBoxArrayData( FILE            *file,
       hypre_BoxGetSize(box, loop_size);
 
       hypre_SerialBoxLoop1Begin(dim, loop_size,
-                          data_box, start, stride, datai);
+                                data_box, start, stride, datai);
       {
          /* Read lines of the form: "%d: (%d, %d, %d; %d) %le\n" */
          for (j = 0; j < num_values; j++)
@@ -346,7 +346,7 @@ hypre_ReadBoxArrayData_CC( FILE            *file,
       if ( constant_coefficient==2 )
       {
          hypre_SerialBoxLoop1Begin(dim, loop_size,
-                             data_box, start, stride, datai);
+                                   data_box, start, stride, datai);
          {
             /* Read line of the form: "%d: (%d, %d, %d; %d) %.14e\n" */
             hypre_fscanf(file, "%d: (%d", &idummy, &idummy);

@@ -965,8 +965,8 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
             hypre_BoxGetSize(ownbox, loop_size);
 
             hypre_SerialBoxLoop2Begin(ndim, loop_size,
-				      e_dbox,  start,  stride,  ei,
-				      xc_dbox, startc, stridec, xci);
+                                      e_dbox,  start,  stride,  ei,
+                                      xc_dbox, startc, stridec, xci);
             {
                /*--------------------------------------------------------
                 * Linear interpolation. Determine the weights and the
@@ -1286,7 +1286,7 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
                for (j=0; j< jsize; j++)
                {
                   hypre_SetIndex3(temp_index2, 
-                                 ptr_ishift, j+ptr_jshift, k+ptr_kshift);
+                                  ptr_ishift, j+ptr_jshift, k+ptr_kshift);
                   xcp[k][j]= hypre_StructVectorBoxData(recv_var, bi) +
                      hypre_BoxOffsetDistance(xc_dbox, temp_index2);
                }
@@ -1296,8 +1296,8 @@ hypre_FAC_WeightedInterp2(void                  *fac_interp_vdata,
             hypre_BoxGetSize(ownbox, loop_size);
 
             hypre_SerialBoxLoop2Begin(ndim, loop_size,
-				      e_dbox,  start,  stride,  ei,
-				      xc_dbox, startc, stridec, xci);
+                                      e_dbox,  start,  stride,  ei,
+                                      xc_dbox, startc, stridec, xci);
             {
                /*--------------------------------------------------------
                 * Linear interpolation. Determine the weights and the

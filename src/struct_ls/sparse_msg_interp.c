@@ -58,7 +58,7 @@ hypre_SparseMSGInterpSetup( void               *interp_vdata,
                             hypre_Index         stride,
                             hypre_Index         strideP       )
 {
-	hypre_SparseMSGInterpData   *interp_data = (hypre_SparseMSGInterpData   *)interp_vdata;
+   hypre_SparseMSGInterpData   *interp_data = (hypre_SparseMSGInterpData   *)interp_vdata;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;

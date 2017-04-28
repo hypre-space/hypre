@@ -1246,7 +1246,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
  *--------------------------------------------------------------------------*/
 hypre_StructVector *
 hypre_StructVectorClone(
-	hypre_StructVector *x)
+   hypre_StructVector *x)
 {
    MPI_Comm		comm = hypre_StructVectorComm(x);
    hypre_StructGrid    *grid = hypre_StructVectorGrid(x);
@@ -1265,7 +1265,7 @@ hypre_StructVectorClone(
    hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size);
 
    for (i=0; i < data_space_size; i++)
-       hypre_StructVectorDataIndices(y)[i] = data_indices[i];
+      hypre_StructVectorDataIndices(y)[i] = data_indices[i];
 
    hypre_StructVectorCopy( x, y );
 

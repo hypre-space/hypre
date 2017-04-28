@@ -32,7 +32,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                       hypre_SStructVector  *b_in,
                       hypre_SStructVector  *x_in)
 {
-	hypre_MaxwellData     *maxwell_TV_data = (hypre_MaxwellData     *)maxwell_vdata;
+   hypre_MaxwellData     *maxwell_TV_data = (hypre_MaxwellData     *)maxwell_vdata;
 
    MPI_Comm               comm = hypre_SStructMatrixComm(Aee_in);
 
@@ -489,7 +489,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                         hypre_SStructVectorParVector(bn),
                         hypre_SStructVectorParVector(xn));
    {
-	   amg_data = (hypre_ParAMGData*) amg_vdata;
+      amg_data = (hypre_ParAMGData*) amg_vdata;
 
       node_numlevels= hypre_ParAMGDataNumLevels(amg_data);
 

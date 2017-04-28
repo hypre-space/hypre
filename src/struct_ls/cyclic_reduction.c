@@ -26,7 +26,7 @@
 #define hypre_CycRedSetCIndex(base_index, base_stride, level, cdir, cindex) \
    {                                                                    \
       if (level > 0)                                                    \
-         hypre_SetIndex3(cindex, 0, 0, 0);                               \
+         hypre_SetIndex3(cindex, 0, 0, 0);                              \
       else                                                              \
          hypre_CopyIndex(base_index,  cindex);                          \
       hypre_IndexD(cindex, cdir) += 0;                                  \
@@ -35,7 +35,7 @@
 #define hypre_CycRedSetFIndex(base_index, base_stride, level, cdir, findex) \
    {                                                                    \
       if (level > 0)                                                    \
-         hypre_SetIndex3(findex, 0, 0, 0);                               \
+         hypre_SetIndex3(findex, 0, 0, 0);                              \
       else                                                              \
          hypre_CopyIndex(base_index,  findex);                          \
       hypre_IndexD(findex, cdir) += 1;                                  \
@@ -44,7 +44,7 @@
 #define hypre_CycRedSetStride(base_index, base_stride, level, cdir, stride) \
    {                                                                    \
       if (level > 0)                                                    \
-         hypre_SetIndex3(stride, 1, 1, 1);                               \
+         hypre_SetIndex3(stride, 1, 1, 1);                              \
       else                                                              \
          hypre_CopyIndex(base_stride, stride);                          \
       hypre_IndexD(stride, cdir) *= 2;                                  \
@@ -479,7 +479,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
                             hypre_StructVector *b,
                             hypre_StructVector *x             )
 {
-	hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *) cyc_red_vdata;
+   hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *) cyc_red_vdata;
 
    MPI_Comm                comm        = (cyc_red_data -> comm);
    HYPRE_Int               cdir        = (cyc_red_data -> cdir);
@@ -613,7 +613,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    }
 
    //data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
-  data =  hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+   data =  hypre_DeviceCTAlloc(HYPRE_Real,data_size);
    
    (cyc_red_data -> data) = data;
 
@@ -737,7 +737,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                        hypre_StructVector *b,
                        hypre_StructVector *x             )
 {
-	hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
+   hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
 
    HYPRE_Int             num_levels      = (cyc_red_data -> num_levels);
    HYPRE_Int             cdir            = (cyc_red_data -> cdir);
@@ -814,7 +814,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
       hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
       hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-	  
+          
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_dbox, start, base_stride, xi,
                           b_dbox, start, base_stride, bi);
@@ -945,7 +945,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                hypre_StructMapFineToCoarse(start, cindex, stride, startc);
 
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-			   
+                           
                hypre_BoxLoop3Begin(hypre_StructVectorNDim(x), loop_size,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi,
@@ -1152,7 +1152,7 @@ hypre_CyclicReductionSetBase( void        *cyc_red_vdata,
                               hypre_Index  base_index,
                               hypre_Index  base_stride )
 {
-	hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
+   hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
    HYPRE_Int                d;
  
    for (d = 0; d < 3; d++)
@@ -1174,7 +1174,7 @@ HYPRE_Int
 hypre_CyclicReductionSetCDir( void        *cyc_red_vdata,
                               HYPRE_Int    cdir )
 {
-	hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
+   hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
  
    (cyc_red_data -> cdir) = cdir;
 
@@ -1188,7 +1188,7 @@ hypre_CyclicReductionSetCDir( void        *cyc_red_vdata,
 HYPRE_Int
 hypre_CyclicReductionDestroy( void *cyc_red_vdata )
 {
-	hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
+   hypre_CyclicReductionData *cyc_red_data = (hypre_CyclicReductionData *)cyc_red_vdata;
 
    HYPRE_Int l;
 

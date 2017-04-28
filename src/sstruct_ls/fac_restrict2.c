@@ -38,7 +38,7 @@
       ii = (ij%2);                              \
       jj = (ij-ii)/2;                           \
       kk = (rank-2*jj-ii)/4;                    \
-      hypre_SetIndex3(stencil, ii, jj, kk);      \
+      hypre_SetIndex3(stencil, ii, jj, kk);     \
    }
 
 /*--------------------------------------------------------------------------
@@ -60,8 +60,8 @@ typedef struct
 
    hypre_CommPkg       **interlevel_comm;
 /*   hypre_CommPkg       **intralevel_comm;*/ /* may need to build an intra comm so
-                                                 that each processor only fullwts its
-                                                 own fine data- may need to add contrib */
+     that each processor only fullwts its
+     own fine data- may need to add contrib */
 
 } hypre_FacSemiRestrictData2;
 
@@ -728,8 +728,8 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
          hypre_StructMapFineToCoarse(temp_index1, temp_index2, rfactors, loop_size);
 
          hypre_SerialBoxLoop2Begin(ndim, loop_size,
-				   xf_dbox, start, stride,  xfi,
-				   xc_temp_dbox, startc, stridec, xci);
+                                   xf_dbox, start, stride,  xfi,
+                                   xc_temp_dbox, startc, stridec, xci);
          {
             /*-----------------------------------------------------------------
              * Arithmetic average the refinement patch values to get 

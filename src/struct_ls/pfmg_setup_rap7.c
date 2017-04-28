@@ -372,8 +372,8 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 #endif
          hypre_BoxLoop3For(iP, iA, iAc)
          {
-	    HYPRE_Int iAm1,iAp1,iPm1,iPp1;
-	    HYPRE_Real west,east,south,north;
+            HYPRE_Int iAm1,iAp1,iPm1,iPp1;
+            HYPRE_Real west,east,south,north;
              
             iAm1 = iA - OffsetA;
             iAp1 = iA + OffsetA;

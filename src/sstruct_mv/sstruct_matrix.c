@@ -728,7 +728,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
             box = hypre_BoxArrayBox(boxes, b);
             hypre_CopyBox(box, ghost_box);
             if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
-	    {
+            {
                hypre_BoxGrowByArray(ghost_box, hypre_StructGridNumGhost(sgrid));
             }
             start = hypre_BoxIMin(box);
@@ -1045,7 +1045,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                      
                start = hypre_BoxIMin(int_box);
                hypre_BoxGetSize(int_box, loop_size);
-	       /*FIXME: It has to be the old boxloop */
+               /*FIXME: It has to be the old boxloop */
                zypre_BoxLoop2Begin(ndim, loop_size,
                                    int_box, start, stride, mi,
                                    vbox,    start, stride, vi);
@@ -1054,9 +1054,9 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 #endif
                zypre_BoxLoop2For(mi, vi)
                {
-		  hypre_Index index;
-		  HYPRE_Int   d;
-		  
+                  hypre_Index index;
+                  HYPRE_Int   d;
+                  
                   hypre_BoxLoopGetIndex(index);
                   rows[nrows + mi] = row_base;
                   cols[nrows + mi] = col_base;

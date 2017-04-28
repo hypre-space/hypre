@@ -292,14 +292,14 @@ hypre_RedBlackGS( void               *relax_vdata,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-	       hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-				       Astart,Ani,Anj,Ai,
-				       bstart,bni,bnj,bi,
-				       xstart,xni,xnj,xi);
-	       {
+               hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                       Astart,Ani,Anj,Ai,
+                                       bstart,bni,bnj,bi,
+                                       xstart,xni,xnj,xi);
+               {
                   xp[xi] = bp[bi] / Ap[Ai];
-	       }
-	       hypre_RedBlackLoopEnd();
+               }
+               hypre_RedBlackLoopEnd();
             }
          }
       }
@@ -422,7 +422,7 @@ hypre_RedBlackGS( void               *relax_vdata,
                                              bstart,bni,bnj,bi,
                                              xstart,xni,xnj,xi);
                      {
-		        xp[xi] =
+                        xp[xi] =
                            (bp[bi] - 
                             Ap0[Ai] * xp[xi + xoff0] -
                             Ap1[Ai] * xp[xi + xoff1] -
@@ -444,7 +444,7 @@ hypre_RedBlackGS( void               *relax_vdata,
                                              bstart,bni,bnj,bi,
                                              xstart,xni,xnj,xi);
                      {
-		        xp[xi] =
+                        xp[xi] =
                            (bp[bi] - 
                             Ap0[Ai] * xp[xi + xoff0] -
                             Ap1[Ai] * xp[xi + xoff1] -
@@ -464,7 +464,7 @@ hypre_RedBlackGS( void               *relax_vdata,
                                              bstart,bni,bnj,bi,
                                              xstart,xni,xnj,xi);
                      {
-		        xp[xi] =
+                        xp[xi] =
                            (bp[bi] - 
                             Ap0[Ai] * xp[xi + xoff0] -
                             Ap1[Ai] * xp[xi + xoff1]) / Ap[Ai];

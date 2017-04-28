@@ -102,7 +102,7 @@ hypre_PointRelaxCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_PointRelaxDestroy( void *relax_vdata )
 {
-	hypre_PointRelaxData *relax_data = (hypre_PointRelaxData *)relax_vdata;
+   hypre_PointRelaxData *relax_data = (hypre_PointRelaxData *)relax_vdata;
    HYPRE_Int             i;
 
    if (relax_data)

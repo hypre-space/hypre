@@ -199,12 +199,12 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
-						      bstart,bni,bnj,bi,
-						      xstart,xni,xnj,xi);
-		  {
-		     xp[xi] = bp[bi]*AApd;
-		  }
-		  hypre_RedBlackConstantcoefLoopEnd();			
+                                                      bstart,bni,bnj,bi,
+                                                      xstart,xni,xnj,xi);
+                  {
+                     xp[xi] = bp[bi]*AApd;
+                  }
+                  hypre_RedBlackConstantcoefLoopEnd();                  
                }
 
                else      /* variable coefficient diag */
@@ -218,13 +218,13 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-					  Astart,Ani,Anj,Ai,
-					  bstart,bni,bnj,bi,
-					  xstart,xni,xnj,xi);
-		  {
+                                          Astart,Ani,Anj,Ai,
+                                          bstart,bni,bnj,bi,
+                                          xstart,xni,xnj,xi);
+                  {
                      xp[xi] = bp[bi] / Ap[Ai];
-		  }
-		  hypre_RedBlackLoopEnd();
+                  }
+                  hypre_RedBlackLoopEnd();
                }
 
             }
@@ -352,10 +352,10 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-		        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
-							    bstart,bni,bnj,bi,
-							    xstart,xni,xnj,xi);
-			{
+                        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
+                                                            bstart,bni,bnj,bi,
+                                                            xstart,xni,xnj,xi);
+                        {
                            xp[xi] =
                               (bp[bi] - 
                                App0*xp[xi + xoff0] -
@@ -364,9 +364,9 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                                App3*xp[xi + xoff3] -
                                App4*xp[xi + xoff4] -
                                App5*xp[xi + xoff5])*AApd;
-			}
-			hypre_RedBlackConstantcoefLoopEnd();
-			
+                        }
+                        hypre_RedBlackConstantcoefLoopEnd();
+                        
                         break;
 
                      case 5:
@@ -374,18 +374,18 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-		        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
+                        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
                                                             bstart,bni,bnj,bi,
-							    xstart,xni,xnj,xi);
-		        {
-			   xp[xi] =
+                                                            xstart,xni,xnj,xi);
+                        {
+                           xp[xi] =
                               (bp[bi] -
                                App0*xp[xi + xoff0] -
                                App1*xp[xi + xoff1] -
                                App2*xp[xi + xoff2] -
                                App3*xp[xi + xoff3])*AApd;
-		        }
-		        hypre_RedBlackConstantcoefLoopEnd();
+                        }
+                        hypre_RedBlackConstantcoefLoopEnd();
                         break;
 
                      case 3:
@@ -393,16 +393,16 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-		        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
-							    bstart,bni,bnj,bi,
-							    xstart,xni,xnj,xi);
-		        {
+                        hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
+                                                            bstart,bni,bnj,bi,
+                                                            xstart,xni,xnj,xi);
+                        {
                            xp[xi] =
                               (bp[bi] -
                                App0*xp[xi + xoff0] -
                                App1*xp[xi + xoff1])*AApd;
-		        }
-		        hypre_RedBlackConstantcoefLoopEnd();
+                        }
+                        hypre_RedBlackConstantcoefLoopEnd();
                         break;
                   }
 
@@ -421,11 +421,11 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-			hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-						Astart,Ani,Anj,Ai,
-						bstart,bni,bnj,bi,
-						xstart,xni,xnj,xi);
-			{
+                        hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                                Astart,Ani,Anj,Ai,
+                                                bstart,bni,bnj,bi,
+                                                xstart,xni,xnj,xi);
+                        {
                            xp[xi] =
                               (bp[bi] - 
                                App0*xp[xi + xoff0] -
@@ -434,8 +434,8 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                                App3*xp[xi + xoff3] -
                                App4*xp[xi + xoff4] -
                                App5*xp[xi + xoff5]) / Ap[Ai];
-			}
-			hypre_RedBlackLoopEnd();
+                        }
+                        hypre_RedBlackLoopEnd();
                         break;
 
                      case 5:
@@ -444,18 +444,18 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                         hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
-						Astart,Ani,Anj,Ai,
-						bstart,bni,bnj,bi,
-						xstart,xni,xnj,xi);
-			{
+                                                Astart,Ani,Anj,Ai,
+                                                bstart,bni,bnj,bi,
+                                                xstart,xni,xnj,xi);
+                        {
                            xp[xi] =
                               (bp[bi] - 
                                App0*xp[xi + xoff0] -
                                App1*xp[xi + xoff1] -
                                App2*xp[xi + xoff2] -
                                App3*xp[xi + xoff3]) / Ap[Ai]; 
-			}
-			hypre_RedBlackLoopEnd();
+                        }
+                        hypre_RedBlackLoopEnd();
                         break;
 
                      case 3:

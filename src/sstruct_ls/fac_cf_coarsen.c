@@ -48,17 +48,17 @@
          jj= -1;                                \
       if (kk==2)                                \
          kk= -1;                                \
-      hypre_SetIndex3(stencil, ii, jj, kk);      \
+      hypre_SetIndex3(stencil, ii, jj, kk);     \
    }
 
 
-#define AbsStencilShape(stencil, abs_shape)     \
-   {                                            \
-      HYPRE_Int ii,jj,kk;                       \
-      ii = hypre_IndexX(stencil);               \
-      jj = hypre_IndexY(stencil);               \
-      kk = hypre_IndexZ(stencil);               \
-      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk);   \
+#define AbsStencilShape(stencil, abs_shape)                     \
+   {                                                            \
+      HYPRE_Int ii,jj,kk;                                       \
+      ii = hypre_IndexX(stencil);                               \
+      jj = hypre_IndexY(stencil);                               \
+      kk = hypre_IndexZ(stencil);                               \
+      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk); \
    }
 
 /*--------------------------------------------------------------------------
@@ -219,7 +219,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
          hypre_StructMapCoarseToFine(hypre_BoxIMin(cgrid_box), zero_index,
                                      refine_factors, hypre_BoxIMin(&refined_box));
          hypre_SetIndex3(index1, refine_factors[0]-1, refine_factors[1]-1,
-                        refine_factors[2]-1);
+                         refine_factors[2]-1);
          hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), index1,
                                      refine_factors, hypre_BoxIMax(&refined_box));
 
@@ -342,7 +342,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                   hypre_BoxGetSize(fgrid_cinterface, loop_size);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					    A_dbox, node_extents, stridec, iA);
+                                            A_dbox, node_extents, stridec, iA);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      for (i= 0; i< stencil_size; i++)
