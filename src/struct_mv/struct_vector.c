@@ -579,6 +579,8 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
    }
    hypre_BoxLoop1End(datai);
    
+   hypre_BoxDestroy(box);
+
    return hypre_error_flag;
 }
 
