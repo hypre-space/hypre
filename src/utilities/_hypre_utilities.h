@@ -1124,8 +1124,15 @@ inline void gpuAssert(cudaError_t code, const char *file, int line)
      exit(2);
    }
 }
+#define HYPRE_HOST_POINTER 0
+#define HYPRE_MANAGED_POINTER 1
+#define HYPRE_PINNED_POINTER 2
+#define HYPRE_DEVICE_POINTER 3
+#define HYPRE_UNDEFINED_POINTER1 4
+#define HYPRE_UNDEFINED_POINTER2 5
 void cudaSafeFree(void *ptr,int padding);
-void PrintPointerAttributes(const void *ptr);
+hypre_int PrintPointerAttributes(const void *ptr);
+hypre_int PointerAttributes(const void *ptr);
 #endif
 
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
@@ -1238,7 +1245,7 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
 }
 //int PointerType(const void *ptr);
 void cudaSafeFree(void *ptr,int padding);
-void PrintPointerAttributes(const void *ptr);
+//void PrintPointerAttributes(const void *ptr);
 //size_t mempush(void* ptr, size_t size,int purge);
 //int memloc(void *ptr, int device);
 #endif

@@ -22,13 +22,15 @@ void cudaSafeFree(void *ptr,int padding)
   size_t *sptr=(size_t*)ptr-padding;
   cudaError_t err;
 
-  err=cudaPointerGetAttributes(&ptr_att,sptr);
+  err=cudaPointerGetAttributes(&ptr_att,ptr);
   if (err!=cudaSuccess){
+    cudaGetLastError(); 
+#define FULL_WARN
 #ifndef ABORT_ON_RAW_POINTER
 #ifdef FULL_WARN
     if (err==cudaErrorInvalidValue) fprintf(stderr,"WARNING :: Raw pointer passed to cudaSafeFree %p\n",ptr);
     if (err==cudaErrorInvalidDevice) fprintf(stderr,"WARNING :: cudaSafeFree :: INVALID DEVICE on ptr = %p\n",ptr);
-    PrintPointerAttributes(ptr);
+    //PrintPointerAttributes(ptr);
 #endif
 #else
     fprintf(stderr,"ERROR:: cudaSafeFree Aborting on raw unmanaged pointer %p\n",ptr);
@@ -43,6 +45,12 @@ void cudaSafeFree(void *ptr,int padding)
     gpuErrchk(cudaMemGetInfo(&mfree,&mtotal));
     HYPRE_GPU_HWM=hypre_max((mtotal-mfree),HYPRE_GPU_HWM);
 #endif
+    /* Code below for handling managed memory pointers not allocated using hypre_CTAlloc oir hypre_TAlooc */
+    if (PointerAttributes(ptr)!=PointerAttributes(sptr)){
+      //fprintf(stderr,"ERROR IN Pointer for freeing %p %p\n",ptr,sptr);
+      gpuErrchk(cudaFree(ptr)); 
+      return;
+    }
     gpuErrchk(cudaFree(sptr)); 
   } else {
     /* It is a pinned memory pointer */
@@ -56,11 +64,12 @@ void cudaSafeFree(void *ptr,int padding)
   POP_RANGE;
   return;
 }
-void PrintPointerAttributes(const void *ptr){
+hypre_int PrintPointerAttributes(const void *ptr){
   struct cudaPointerAttributes ptr_att;
   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){
-    fprintf(stderr,"PrintPointerAttributes:: Raw pointer\n");
-    return;
+    cudaGetLastError(); 
+    fprintf(stderr,"PrintPointerAttributes:: Raw pointer %p\n",ptr);
+    return HYPRE_HOST_POINTER;
   }
   if (ptr_att.isManaged){
     fprintf(stderr,"PrintPointerAttributes:: Managed pointer\n");
@@ -68,11 +77,35 @@ void PrintPointerAttributes(const void *ptr){
     if (ptr_att.memoryType==cudaMemoryTypeHost) fprintf(stderr,"Memory is located on host\n");
     if (ptr_att.memoryType==cudaMemoryTypeDevice) fprintf(stderr,"Memory is located on device\n");
     fprintf(stderr,"Device associated with this pointer is %d\n",ptr_att.device);
+    return HYPRE_MANAGED_POINTER;
   } else {
     fprintf(stderr,"PrintPointerAttributes:: Non-Managed & non-raw pointer\n Probably pinned host pointer\n");
-    if (ptr_att.memoryType==cudaMemoryTypeHost) fprintf(stderr,"Memory is located on host\n");
-    if (ptr_att.memoryType==cudaMemoryTypeDevice) fprintf(stderr,"Memory is located on device\n");
+    if (ptr_att.memoryType==cudaMemoryTypeHost) {
+      fprintf(stderr,"Memory is located on host\n");
+      return HYPRE_PINNED_POINTER;
+    }
+    if (ptr_att.memoryType==cudaMemoryTypeDevice) {
+      fprintf(stderr,"Memory is located on device\n");
+      return HYPRE_DEVICE_POINTER ;
+    }
+    return HYPRE_UNDEFINED_POINTER1;
   }
-  return;
+  return HYPRE_UNDEFINED_POINTER2;
 }
+hypre_int PointerAttributes(const void *ptr){
+  struct cudaPointerAttributes ptr_att;
+  if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){
+     cudaGetLastError(); 
+     return HYPRE_HOST_POINTER;
+  }
+  if (ptr_att.isManaged){
+    return HYPRE_MANAGED_POINTER; 
+  } else {
+    if (ptr_att.memoryType==cudaMemoryTypeHost) return HYPRE_PINNED_POINTER; /* Host pointer from cudaMallocHost */
+    if (ptr_att.memoryType==cudaMemoryTypeDevice) return HYPRE_DEVICE_POINTER ; /* cudadevice pointer */
+    return HYPRE_UNDEFINED_POINTER1; /* Shouldn't happen */
+  }
+  return HYPRE_UNDEFINED_POINTER2; /* Shouldnt happen */
+}
+
 #endif
