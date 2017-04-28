@@ -1869,6 +1869,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                    * Loop over interior grid box. 
                    *----------------------------------------------------------------*/
 
+                  hypre_BoxGetSize(&fine_box, loop_size);
+
                   hypre_SerialBoxLoop2Begin(ndim, loop_size,
 					    A_dbox, fstart, stridef, iA,
 					    crse_dbox, cstart, stridec, iAc);
@@ -2046,6 +2048,9 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      /*--------------------------------------------------------------
                       * Loop over boundary grid box.
                       *--------------------------------------------------------------*/
+
+                     hypre_BoxGetSize(&fine_box, loop_size);
+
                      hypre_SerialBoxLoop2Begin(ndim, loop_size,
 					       A_dbox, fstart, stridef, iA,
 					       crse_dbox, cstart, stridec, iAc);
