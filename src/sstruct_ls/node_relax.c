@@ -147,8 +147,8 @@ hypre_NodeRelaxDestroy( void *relax_vdata )
       hypre_TFree(relax_data -> compute_pkgs);
       hypre_SStructPVectorDestroy(relax_data -> t);
 
-      hypre_TFree(relax_data -> x_loc);
-      hypre_TFree((relax_data ->A_loc)[0]);
+      hypre_UMTFree(relax_data -> x_loc);
+      hypre_UMTFree((relax_data ->A_loc)[0]);
       hypre_TFree(relax_data -> A_loc);
       hypre_TFree(relax_data -> bp);
       hypre_TFree(relax_data -> xp);
