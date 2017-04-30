@@ -1419,7 +1419,7 @@ Optional Features:
   --enable-global-partition
                           Use global partitioning (default is NO).
   --enable-fortran        Require a working Fortran compiler (default is YES).
-  --enable-unified-memory Use unified memory for allocating the data memory
+  --enable-unified-memory Use unified memory for allocating the memory
                           (default is NO).
 
 Optional Packages:
@@ -1509,10 +1509,12 @@ Optional Packages:
   --with-mli              Use MLI
   --with-MPI              DEFAULT: Compile with MPI. Selecting --without-MPI
                           may affect which compiler is chosen.
-  --with-cuda             Require cuda-8.0 compiler or higher (default is NO).
-  --with-raja             Require RAJA package compiled with CUDA (default is
+  --with-cuda             Use CUDA. Require cuda-8.0 or higher (default is
                           NO).
-  --with-kokkos           Require kokkos package (default is NO).
+  --with-raja             Use RAJA. Require RAJA package to be compiled
+                          properly (default is NO).
+  --with-kokkos           Use Kokkos. Require kokkos package to be compiled
+                          properly(default is NO).
   --with-raja-include=DIR User specifies that RAJA/*.h is in DIR. The options
                           --with-raja-include --with-raja-libs and
                           --with-raja-lib-dirs must be used together.
@@ -1532,18 +1534,18 @@ Optional Packages:
   --with-kokkos-include=DIR
                           User specifies that KOKKOS headers is in DIR. The
                           options --with-kokkos-include --with-kokkos-libs and
-                          --with-kokkos-lib-dirs must be used together.
+                          --with-kokkos-dirs must be used together.
   --with-kokkos-lib=LIBS  LIBS is space-separated linkable list (enclosed in
                           quotes) of libraries needed for KOKKOS. OK to use -L
                           and -l flags in the list
   --with-kokkos-libs=LIBS LIBS is space-separated list (enclosed in quotes) of
                           libraries needed for KOKKOS (base name only). The
-                          options --with-kokkos-libs and
-                          --with-kokkos-lib-dirs must be used together.
+                          options --with-kokkos-libs and --with-kokkos-dirs
+                          must be used together.
   --with-kokkos-dirs=DIRS DIRS is space-separated list (enclosed in quotes) of
-                          directories/lib containing Makefile.kokkos The
-                          options --with-kokkos-libs and
-                          --kokkos-blas-lib-dirs must be used together.
+                          directories containing Makefile.kokkos. The options
+                          --with-kokkos-libs and --with-kokkos-dirs must be
+                          used together.
   --with-nvcc             Use NVCC compiler (default is NO).
   --with-caliper          Use Caliper instrumentation (default is NO).
   --with-caliper-include=DIR
@@ -7767,6 +7769,9 @@ $as_echo "$as_me: Try to confiure with --wiht-raja --with-cuda --enable-unified-
 $as_echo "$as_me: to use the cuda feature for the whold package" >&6;}
        		{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
 $as_echo "$as_me: *******************************************************" >&6;}
+	else
+		CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
+		CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
    	fi
 	hypre_user_chose_cuda=no
    else
@@ -7811,6 +7816,9 @@ $as_echo "$as_me: Try to confiure with --wiht-raja --with-cuda --enable-unified-
 $as_echo "$as_me: to use the cuda feature for the whold package" >&6;}
 	  { $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
 $as_echo "$as_me: *******************************************************" >&6;}
+      else
+	  CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
+	  CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
       fi
       hypre_user_chose_cuda=no
    else
@@ -7851,8 +7859,8 @@ $as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >
        	{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
 $as_echo "$as_me: *******************************************************" >&6;}
    else
-	CFLAGS+=" -DHYPRE_USE_GPU "
-   	CXXFLAGS+=" -DHYPRE_USE_GPU "
+	CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
+   	CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
    fi
 fi
 
