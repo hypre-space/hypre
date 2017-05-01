@@ -10,8 +10,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-.PHONY: default
 default: all
 
 # Include all variables defined by configure

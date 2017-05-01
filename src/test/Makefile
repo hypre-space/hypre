@@ -10,7 +10,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-.PHONY: default
 default:all
 
 include ../config/Makefile.config
