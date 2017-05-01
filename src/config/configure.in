@@ -1494,7 +1494,6 @@ dnl *********************************************************************
 
 if test "$hypre_user_chose_kokkos" = "yes"
 then
-   KOKKOS_LIBS=" $HYPRE_KOKKOS_LIB_DIR $HYPRE_KOKKOS_LIB "
    if test "$hypre_using_cuda" = "yes"
    then
       LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda"
@@ -1536,6 +1535,7 @@ then
 	 HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
       fi   
   fi
+  KOKKOS_LIBS=" $HYPRE_KOKKOS_LIB_DIR $HYPRE_KOKKOS_LIB "
 fi
 dnl *********************************************************************
 dnl * Set cuda options
