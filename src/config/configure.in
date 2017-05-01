@@ -919,18 +919,6 @@ AS_HELP_STRING([--with-nvcc],
 [hypre_using_nvcc=no]
 )
 
-if test "$hypre_using_nvcc" = "yes"
-then
-   AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
-   NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
-   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
-else
-   NVCCFLAGS=
-   NVCCLIBS=
-   HYPRE_NVCC_MAKEFILE="Makefile.empty"
-fi
-
 AC_ARG_WITH(caliper,
 AS_HELP_STRING([--with-caliper],
                [Use Caliper instrumentation (default is NO).]),
@@ -966,7 +954,6 @@ dnl *********************************************************************
 if test "$hypre_using_cuda" = "yes"
 then
 	hypre_using_fortran=no
-	hypre_using_mpi=yes
 	AC_CHECK_PROGS(CXX, [nvcc])
 	AC_CHECK_PROGS(CC, [nvcc])
 	if test "$hypre_user_chose_cxxcompilers" = "no"
@@ -1443,11 +1430,29 @@ then
 fi
 
 dnl *********************************************************************
+dnl * Set nvcc options
+dnl *********************************************************************
+
+if test "$hypre_using_nvcc" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
+   NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
+   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
+   CFLAGS="${CFLAGS} -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED "
+   CXXFLAGS="${CXXFLAGS} -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED "
+else
+   NVCCFLAGS=
+   NVCCLIBS=
+   HYPRE_NVCC_MAKEFILE="Makefile.empty"
+fi
+
+dnl *********************************************************************
 dnl * Set raja options
 dnl *********************************************************************
-dnl PLATFORM=" -DRAJA_PLATFORM_X86_SSE -DRAJA_COMPILER_GNU -DRAJA_USE_CUDA -DRAJA_USE_DOUBLE -DRAJA_USE_BARE_PTR -DRAJA_USE_GETTIME"
 if test "$hypre_user_chose_raja" = "yes"
 then
+   RAJA_LIBS=" $HYPRE_RAJA_LIB_DIR $HYPRE_RAJA_LIB "
    if test "$hypre_using_cuda" = "yes"
       then
         RAJAFLAGS=" -lRAJA "
@@ -1489,6 +1494,7 @@ dnl *********************************************************************
 
 if test "$hypre_user_chose_kokkos" = "yes"
 then
+   KOKKOS_LIBS=" $HYPRE_KOKKOS_LIB_DIR $HYPRE_KOKKOS_LIB "
    if test "$hypre_using_cuda" = "yes"
    then
       LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda"
@@ -1674,6 +1680,7 @@ dnl *********************************************************************
 AC_SUBST(HYPRE_RAJA_LIB_DIR)
 AC_SUBST(HYPRE_RAJA_INCLUDE)
 AC_SUBST(HYPRE_RAJA_LIB)
+AC_SUBST(RAJA_LIBS)
 
 dnl *********************************************************************
 dnl * KOKKOS information
@@ -1683,6 +1690,7 @@ AC_SUBST(HYPRE_KOKKOS_LIB_DIR)
 AC_SUBST(HYPRE_KOKKOS_INCLUDE)
 AC_SUBST(HYPRE_KOKKOS_INC_FILE)	
 AC_SUBST(HYPRE_KOKKOS_LIB)
+AC_SUBST(KOKKOS_LIBS)
 dnl *********************************************************************
 dnl * NVCC stuff
 dnl *********************************************************************

@@ -91,10 +91,10 @@ AR     = @AR@
 RANLIB = @RANLIB@
 
 LDFLAGS = @LDFLAGS@
-LIBS    = @LIBS@ @CALIPER_LIBS@ @NVCCLIBS@
+LIBS    = @LIBS@ @CALIPER_LIBS@ @NVCCLIBS@  @RAJA_LIBS@ @KOKKOS_LIBS@
 FLIBS   = @FLIBS@
 
-INCLUDES = @CALIPER_INCLUDE@
+INCLUDES = @CALIPER_INCLUDE@ @HYPRE_RAJA_INCLUDE@ @HYPRE_KOKKOS_INCLUDE@
 
 ##################################################################
 ##  LAPACK Library Flags 

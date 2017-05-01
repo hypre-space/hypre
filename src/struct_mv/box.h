@@ -313,7 +313,7 @@ hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);
 }
 
 #if defined (HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS)
-#define HYPRE_BOX_PRIVATE
+#define HYPRE_BOX_PRIVATE hypre_fake 
 #else
 #define HYPRE_BOX_PRIVATE ZYPRE_BOX_PRIVATE
 #endif

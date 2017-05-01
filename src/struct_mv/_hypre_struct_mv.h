@@ -70,6 +70,7 @@ inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE
 #define hypre_exec_policy cuda_exec<BLOCKSIZE>
 #define hypre_reduce_policy  cuda_reduce_atomic<BLOCKSIZE>
 #define hypre_fence() \
+  if (hypre_fake){;}				\
 cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
 printf("\n ERROR zypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
@@ -77,29 +78,16 @@ printf("\n ERROR zypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorStrin
 AxCheckError(cudaDeviceSynchronize());
 
 #elif defined(HYPRE_USE_OPENMP)
-   #define hypre_exec_policy      omp_parallel_exec
+   #define hypre_exec_policy      omp_for_exec
    #define hypre_reduce_policy omp_reduce
-   #define hypre_fence() ;
+   #define hypre_fence() if (hypre_fake){;}
 #elif defined(HYPRE_USING_OPENMP_ACC)
    #define hypre_exec_policy      omp_parallel_for_acc
    #define hypre_reduce_policy omp_acc_reduce
 #else 
    #define hypre_exec_policy   seq_exec
    #define hypre_reduce_policy seq_reduce
-   #define hypre_fence();
-#endif
-#if defined(HYPRE_MEMORY_GPU)
-#define hypre_rand(val) \
-{\
-    curandState_t state;\
-    curand_init(0,0,0,&state);\
-    val = curand(&state);\
-}
-#else
-#define hypre_rand(val) \
-{\
-    val = rand();\
-}
+   #define hypre_fence()if (hypre_fake){;}
 #endif
 
 #define zypre_BoxLoopIncK(k,box,i)					\
@@ -120,10 +108,11 @@ AxCheckError(cudaDeviceSynchronize());
 }
 
 
-#define zypre_BoxLoopCUDAInit(ndim,loop_size)					\
-	HYPRE_Int hypre__tot = 1.0;											\
-	for (HYPRE_Int i = 0;i < ndim;i ++)									\
-		hypre__tot *= loop_size[i];
+#define zypre_BoxLoopCUDAInit(ndim,loop_size)				\
+  HYPRE_Int hypre_fake = 0;						\
+  HYPRE_Int hypre__tot = 1.0;						\
+  for (HYPRE_Int i = 0;i < ndim;i ++)					\
+      hypre__tot *= loop_size[i];
 
 
 #define zypre_BoxLoopCUDADeclare()										\
@@ -170,7 +159,7 @@ AxCheckError(cudaDeviceSynchronize());
 #define zypre_newBoxLoop1Begin(ndim, loop_size,				\
 			       dbox1, start1, stride1, i1)		\
 {    														\
- zypre_BoxLoopCUDAInit(ndim,loop_size);						\
+    zypre_BoxLoopCUDAInit(ndim,loop_size);						\
     zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
@@ -189,7 +178,7 @@ AxCheckError(cudaDeviceSynchronize());
                                 dbox1, start1, stride1, i1,	\
                                 dbox2, start2, stride2, i2)	\
 {    														\
-  zypre_BoxLoopCUDAInit(ndim,loop_size);						\
+    zypre_BoxLoopCUDAInit(ndim,loop_size);						\
     zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
     zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);	\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
@@ -689,6 +678,7 @@ private:
    HYPRE_Real sum_tmp;							\
    {									\
       ReduceSum< hypre_reduce_policy, HYPRE_Real> sum(0.0);				\
+      HYPRE_Int hypre_fake = 0;						\
       zypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1,i1)	\
       {
 
@@ -708,6 +698,7 @@ private:
    HYPRE_Real sum_tmp;							\
    {									\
       ReduceSum< hypre_reduce_policy, HYPRE_Real> sum(0.0);				\
+      HYPRE_Int hypre_fake = 0;						\
       zypre_newBoxLoop2Begin(ndim, loop_size, \
 			     dbox1, start1, stride1,i1,\
 			     dbox2, start2, stride2,i2)	\
@@ -726,6 +717,7 @@ private:
 				       dbox1, start1, stride1, i1,xp,sum) \
 {									\
    ReduceMult<HYPRE_Real> local_result_raja(1.0);				\
+   HYPRE_Int hypre_fake = 0;						\
    zypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1) \
    {									\
        local_result_raja *= xp[i1];					\
@@ -748,7 +740,7 @@ private:
   
 #define zypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
 {									\
-    HYPRE_Int hypre__tot = 1.0;						\
+    zypre_BoxLoopCUDAInit(ndim,loop_size);				\
     hypre_Boxloop databox1;						\
     databox1.lsize0 = loop_size[0];					\
     databox1.lsize1 = loop_size[1];					\
@@ -756,10 +748,6 @@ private:
     databox1.strides0 = stride1[0];					\
     databox1.strides1 = stride1[1];					\
     databox1.strides2 = stride1[2];					\
-    for (HYPRE_Int d = 0;d < ndim;d ++)					\
-    {									\
-       hypre__tot *= loop_size[d];					\
-    }									\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         zypre_BoxLoopCUDADeclare()					\
@@ -783,7 +771,7 @@ private:
                                    stride1, i1,	\
                                    stride2, i2)	\
 {    														\
-    HYPRE_Int hypre__tot = 1.0;											\
+    zypre_BoxLoopCUDAInit(ndim,loop_size);					\
     hypre_Boxloop databox1,databox2;					\
     databox1.lsize0 = loop_size[0];					\
     databox1.lsize1 = loop_size[1];					\
@@ -797,10 +785,6 @@ private:
     databox2.strides0 = stride2[0];					\
     databox2.strides1 = stride2[1];					\
     databox2.strides2 = stride2[2];					\
-    for (HYPRE_Int d = 0;d < ndim;d ++)					\
-      {									\
-	hypre__tot *= loop_size[d];					\
-      }									\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         zypre_BoxLoopCUDADeclare()					\
@@ -825,17 +809,17 @@ private:
 	hypre_fence();							\
 }
 
-#define zypre_newBoxLoop0For() {}
+#define zypre_newBoxLoop0For()
 
-#define zypre_newBoxLoop1For(i1) {}
+#define zypre_newBoxLoop1For(i1)
 
-#define zypre_newBoxLoop2For(i1, i2) {}
+#define zypre_newBoxLoop2For(i1, i2)
 
-#define zypre_newBoxLoop3For(i1, i2, i3) {}
+#define zypre_newBoxLoop3For(i1, i2, i3)
 
-#define zypre_newBoxLoop4For(i1, i2, i3, i4) {}
+#define zypre_newBoxLoop4For(i1, i2, i3, i4)
 
-#define zypre_newBoxLoopSetOneBlock() {}
+#define zypre_newBoxLoopSetOneBlock()
 
 #define hypre_newBoxLoopGetIndex(index)					\
   index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
@@ -2816,7 +2800,7 @@ hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);
 }
 
 #if defined (HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS)
-#define HYPRE_BOX_PRIVATE
+#define HYPRE_BOX_PRIVATE hypre_fake 
 #else
 #define HYPRE_BOX_PRIVATE ZYPRE_BOX_PRIVATE
 #endif

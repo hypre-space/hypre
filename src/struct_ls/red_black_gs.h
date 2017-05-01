@@ -50,6 +50,7 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    HYPRE_Int hypre_fake = 0;						\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
@@ -78,6 +79,7 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    HYPRE_Int hypre_fake = 0;						\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
@@ -107,6 +109,7 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    HYPRE_Int hypre_fake = 0;						\
     Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
@@ -135,6 +138,7 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    HYPRE_Int hypre_fake = 0;						\
     Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
@@ -164,6 +168,7 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    HYPRE_Int hypre_fake = 0;						\
     BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
@@ -184,11 +189,7 @@ typedef struct
 #define hypre_RedBlackLoopEnd()			\
          }						\
      });						\
-     cudaError err = cudaGetLastError();		\
-     if ( cudaSuccess != err ) {					\
-       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-     }									\
-     AxCheckError(cudaDeviceSynchronize());				\
+     hypre_fence();					\
 }
 	   
 #define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
@@ -196,6 +197,7 @@ typedef struct
 					    xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    HYPRE_Int hypre_fake = 0;						\
     BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
@@ -215,11 +217,7 @@ typedef struct
 #define hypre_RedBlackConstantcoefLoopEnd()			\
          }						\
      });						\
-     cudaError err = cudaGetLastError();		\
-     if ( cudaSuccess != err ) {					\
-       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-     }									\
-     AxCheckError(cudaDeviceSynchronize());				\
+     hypre_fence();					\
 }
 #else
 #define HYPRE_REDBLACK_PRIVATE hypre__kk
