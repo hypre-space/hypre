@@ -1453,6 +1453,10 @@ dnl *********************************************************************
 if test "$hypre_user_chose_raja" = "yes"
 then
    RAJA_LIBS=" $HYPRE_RAJA_LIB_DIR $HYPRE_RAJA_LIB "
+   if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
+   then 
+   	CFLAGS+=" -+ "
+   fi
    if test "$hypre_using_cuda" = "yes"
       then
         RAJAFLAGS=" -lRAJA "

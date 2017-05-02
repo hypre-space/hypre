@@ -103,10 +103,10 @@ AxCheckError(cudaDeviceSynchronize());
 	HYPRE_Int idx_local = idx;
 
 #define zypre_newBoxLoop0Begin(ndim, loop_size)			\
-{    														\
- zypre_BoxLoopCUDAInit(ndim,loop_size);						\
-	forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
-	{
+{									\
+   zypre_BoxLoopCUDAInit(ndim,loop_size);					\
+   forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
+   {
 
 
 #define zypre_newBoxLoop0End()					\
