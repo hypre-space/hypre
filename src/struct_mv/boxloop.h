@@ -207,7 +207,7 @@ typedef struct hypre_Boxloop_struct
    }\
 }
 
-#define zypre_newBoxLoop1ReductionBegin(ndim, loop_size,		\
+#define hypre_newBoxLoop1ReductionBegin(ndim, loop_size,		\
 					dbox1, start1, stride1, i1,	\
                                         sum)				\
 {									\
@@ -225,7 +225,7 @@ typedef struct hypre_Boxloop_struct
          for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
          {
 
-#define zypre_newBoxLoop1ReductionEnd(i1, sum)\
+#define hypre_newBoxLoop1ReductionEnd(i1, sum)\
             i1 += hypre__i0inc1;\
          }\
          zypre_BoxLoopInc1();\

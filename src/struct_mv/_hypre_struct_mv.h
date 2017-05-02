@@ -130,28 +130,38 @@ AxCheckError(cudaDeviceSynchronize());
 }
 
 #define zypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)	\
-	hypre_Boxloop databox##k;											\
-	databox##k.lsize0 = loop_size[0];									\
-	databox##k.strides0 = stride[0];									\
-	databox##k.bstart0  = start[0] - dbox->imin[0];					\
-	databox##k.bsize0   = dbox->imax[0]-dbox->imin[0];				\
-	databox##k.lsize1 = loop_size[1];									\
-	databox##k.strides1 = stride[1];									\
-	databox##k.bstart1  = start[1] - dbox->imin[1];					\
-	databox##k.bsize1   = dbox->imax[1]-dbox->imin[1];				\
-	if (ndim == 3)														\
-	{																	\
-		databox##k.lsize2 = loop_size[2];								\
-		databox##k.strides2 = stride[2];								\
-		databox##k.bstart2  = start[2] - dbox->imin[2];				\
-		databox##k.bsize2   = dbox->imax[2]-dbox->imin[2];			\
-	}																	\
-	else																\
-	{																	\
-		databox##k.lsize2 = 1;											\
-		databox##k.strides2 = 0;									\
-		databox##k.bstart2  = 0;									\
-		databox##k.bsize2   = 0;							\
+	hypre_Boxloop databox##k;					\
+	databox##k.lsize0 = loop_size[0];				\
+	databox##k.strides0 = stride[0];				\
+	databox##k.bstart0  = start[0] - dbox->imin[0];			\
+	databox##k.bsize0   = dbox->imax[0]-dbox->imin[0];		\
+	if (ndim > 1)							\
+	{								\
+	    databox##k.lsize1 = loop_size[1];				\
+	    databox##k.strides1 = stride[1];				\
+	    databox##k.bstart1  = start[1] - dbox->imin[1];		\
+	    databox##k.bsize1   = dbox->imax[1]-dbox->imin[1];   	\
+	}								\
+	else						        	\
+	{							       	\
+		databox##k.lsize1 = 1;				       	\
+		databox##k.strides1 = 0;		       		\
+		databox##k.bstart1  = 0;	       			\
+		databox##k.bsize1   = 0;		       		\
+	}								\
+	if (ndim == 3)							\
+	{								\
+	    databox##k.lsize2 = loop_size[2];				\
+	    databox##k.strides2 = stride[2];				\
+	    databox##k.bstart2  = start[2] - dbox->imin[2];		\
+	    databox##k.bsize2   = dbox->imax[2]-dbox->imin[2];   	\
+	}								\
+	else								\
+	{								\
+	    databox##k.lsize2 = 1;					\
+	    databox##k.strides2 = 0;					\
+	    databox##k.bstart2  = 0;					\
+	    databox##k.bsize2   = 0;					\
 	}
 
 #define zypre_newBoxLoop1Begin(ndim, loop_size,				\
@@ -939,28 +949,38 @@ extern "C++" {
  }
 
  #define hypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)	\
-	 hypre_Boxloop databox##k;											\
-	 databox##k.lsize0 = loop_size[0];									\
-	 databox##k.strides0 = stride[0];									\
-	 databox##k.bstart0  = start[0] - dbox->imin[0];					\
-	 databox##k.bsize0   = dbox->imax[0]-dbox->imin[0];				\
-	 databox##k.lsize1 = loop_size[1];									\
-	 databox##k.strides1 = stride[1];									\
-	 databox##k.bstart1  = start[1] - dbox->imin[1];					\
-	 databox##k.bsize1   = dbox->imax[1]-dbox->imin[1];				\
-	 if (ndim == 3)														\
-	 {																	\
-		 databox##k.lsize2 = loop_size[2];								\
-		 databox##k.strides2 = stride[2];								\
-		 databox##k.bstart2  = start[2] - dbox->imin[2];				\
-		 databox##k.bsize2   = dbox->imax[2]-dbox->imin[2];			\
-	 }																	\
-	 else																\
-	 {																	\
-		 databox##k.lsize2 = 1;											\
-		 databox##k.strides2 = 0;									\
-		 databox##k.bstart2  = 0;									\
-		 databox##k.bsize2   = 0;							\
+	 hypre_Boxloop databox##k;     					\
+	 databox##k.lsize0 = loop_size[0];				\
+	 databox##k.strides0 = stride[0];				\
+	 databox##k.bstart0  = start[0] - dbox->imin[0];		\
+	 databox##k.bsize0   = dbox->imax[0]-dbox->imin[0];		\
+	 if (ndim > 1)							\
+	 {								\
+	    databox##k.lsize1 = loop_size[1];				\
+	    databox##k.strides1 = stride[1];				\
+	    databox##k.bstart1  = start[1] - dbox->imin[1];		\
+	    databox##k.bsize1   = dbox->imax[1]-dbox->imin[1];   	\
+	 }								\
+	 else						        	\
+	 {							       	\
+	    databox##k.lsize1 = 1;				       	\
+	    databox##k.strides1 = 0;					\
+	    databox##k.bstart1  = 0;					\
+	    databox##k.bsize1   = 0;					\
+	 }								\
+	 if (ndim == 3)							\
+	 {								\
+	    databox##k.lsize2 = loop_size[2];				\
+	    databox##k.strides2 = stride[2];				\
+	    databox##k.bstart2  = start[2] - dbox->imin[2];		\
+	    databox##k.bsize2   = dbox->imax[2]-dbox->imin[2];	\
+	 }								\
+	 else								\
+	 {								\
+	   databox##k.lsize2 = 1;					\
+	   databox##k.strides2 = 0;					\
+	   databox##k.bstart2  = 0;					\
+	   databox##k.bsize2   = 0;					\
 	 }
 
  #define hypre_newBoxLoopDeclare()										\
@@ -1558,27 +1578,37 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 
 #define hypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)	\
 	hypre_Boxloop databox##k;											\
-	databox##k.lsize0 = loop_size[0];									\
-	databox##k.strides0 = stride[0];									\
-	databox##k.bstart0  = start[0] - dbox->imin[0];					\
-	databox##k.bsize0   = dbox->imax[0]-dbox->imin[0];				\
-	databox##k.lsize1 = loop_size[1];									\
-	databox##k.strides1 = stride[1];									\
-	databox##k.bstart1  = start[1] - dbox->imin[1];					\
-	databox##k.bsize1   = dbox->imax[1]-dbox->imin[1];				\
-	if (ndim == 3)														\
-	{																	\
-		databox##k.lsize2 = loop_size[2];								\
-		databox##k.strides2 = stride[2];								\
-		databox##k.bstart2  = start[2] - dbox->imin[2];				\
-		databox##k.bsize2   = dbox->imax[2]-dbox->imin[2];			\
-	}																	\
-	else																\
-	{																	\
-		databox##k.lsize2 = 1;											\
-		databox##k.strides2 = 0;									\
-		databox##k.bstart2  = 0;									\
-		databox##k.bsize2   = 0;							\
+	databox##k.lsize0 = loop_size[0];				\
+	databox##k.strides0 = stride[0];				\
+	databox##k.bstart0  = start[0] - dbox->imin[0];			\
+	databox##k.bsize0   = dbox->imax[0]-dbox->imin[0];		\
+	if (ndim > 1)							\
+	{								\
+	    databox##k.lsize1 = loop_size[1];				\
+	    databox##k.strides1 = stride[1];				\
+	    databox##k.bstart1  = start[1] - dbox->imin[1];		\
+	    databox##k.bsize1   = dbox->imax[1]-dbox->imin[1];	\
+	}								\
+	else						        	\
+	{							       	\
+		databox##k.lsize1 = 1;				       	\
+		databox##k.strides1 = 0;		       		\
+		databox##k.bstart1  = 0;	       			\
+		databox##k.bsize1   = 0;		       		\
+	}								\
+	if (ndim == 3)							\
+	{							      	\
+	      databox##k.lsize2 = loop_size[2];				\
+	      databox##k.strides2 = stride[2];				\
+	      databox##k.bstart2  = start[2] - dbox->imin[2];		\
+	      databox##k.bsize2   = dbox->imax[2]-dbox->imin[2];	\
+	}				                        	\
+	else						        	\
+	{							       	\
+		databox##k.lsize2 = 1;				       	\
+		databox##k.strides2 = 0;		       		\
+		databox##k.bstart2  = 0;	       			\
+		databox##k.bsize2   = 0;		       		\
 	}
 
 #define hypre_newBoxLoop1Begin(ndim, loop_size,				\
@@ -2299,7 +2329,7 @@ typedef struct hypre_Boxloop_struct
    }\
 }
 
-#define zypre_newBoxLoop1ReductionBegin(ndim, loop_size,		\
+#define hypre_newBoxLoop1ReductionBegin(ndim, loop_size,		\
 					dbox1, start1, stride1, i1,	\
                                         sum)				\
 {									\
@@ -2317,7 +2347,7 @@ typedef struct hypre_Boxloop_struct
          for (hypre__I = 0; hypre__I < hypre__IN; hypre__I++)\
          {
 
-#define zypre_newBoxLoop1ReductionEnd(i1, sum)\
+#define hypre_newBoxLoop1ReductionEnd(i1, sum)\
             i1 += hypre__i0inc1;\
          }\
          zypre_BoxLoopInc1();\
