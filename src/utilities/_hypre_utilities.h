@@ -759,7 +759,6 @@ HYPRE_Real time_get_cpu_seconds_( void );
 #define hypre_EndTiming(i)
 #define hypre_PrintTiming(heading, comm)
 #define hypre_ClearTiming()
-#define hypre_FinalizeTiming(index)
 
 /*--------------------------------------------------------------------------
  * With timing on
