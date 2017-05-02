@@ -823,7 +823,7 @@ HYPRE_Int hypre_SysBAMGSetupOperators(
          // 5) destroy the rhs
          hypre_SStructPVectorDestroy( rhs );
 
-#if DEBUG_SYSBAMG > 1
+#if DEBUG_SYSBAMG > 0
          sysbamg_ifdbg
          {
             hypre_printf("printing sysbamg test vectors; level %d; num_tv_ %d\n", l, num_tv_);
