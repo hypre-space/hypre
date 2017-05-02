@@ -1498,6 +1498,10 @@ dnl *********************************************************************
 
 if test "$hypre_user_chose_kokkos" = "yes"
 then
+   if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
+   then 
+   	CFLAGS+=" -+ "
+   fi
    if test "$hypre_using_cuda" = "yes"
    then
       LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda"
