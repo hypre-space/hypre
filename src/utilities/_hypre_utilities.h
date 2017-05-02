@@ -753,10 +753,12 @@ HYPRE_Real time_get_cpu_seconds_( void );
 #ifndef HYPRE_TIMING
 
 #define hypre_InitializeTiming(name) 0
+#define hypre_FinalizeTiming(index)
 #define hypre_IncFLOPCount(inc)
 #define hypre_BeginTiming(i)
 #define hypre_EndTiming(i)
 #define hypre_PrintTiming(heading, comm)
+#define hypre_ClearTiming()
 #define hypre_FinalizeTiming(index)
 
 /*--------------------------------------------------------------------------
