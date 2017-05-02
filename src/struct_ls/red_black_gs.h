@@ -43,6 +43,7 @@ typedef struct
 } hypre_RedBlackGSData;
 
 #ifdef HYPRE_USE_RAJA
+#define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
@@ -50,7 +51,6 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    HYPRE_Int hypre_fake = 0;						\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
@@ -79,7 +79,6 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    HYPRE_Int hypre_fake = 0;						\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
@@ -102,6 +101,7 @@ typedef struct
      hypre_fence();					\
 }  
 #elif defined(HYPRE_USE_KOKKOS)
+#define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
@@ -138,7 +138,6 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    HYPRE_Int hypre_fake = 0;						\
     Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
@@ -161,6 +160,7 @@ typedef struct
      hypre_fence();					\
 }  
 #elif defined(HYPRE_USE_CUDA)
+#define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
@@ -168,7 +168,6 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    HYPRE_Int hypre_fake = 0;						\
     BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
@@ -197,7 +196,6 @@ typedef struct
 					    xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    HYPRE_Int hypre_fake = 0;						\
     BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\

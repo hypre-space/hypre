@@ -282,7 +282,7 @@ typedef struct hypre_Boxloop_struct
 
 #define hypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
 {									\
-    HYPRE_Int hypre__tot = 1.0;						\
+    HYPRE_Int hypre__tot = 1;						\
     hypre_Boxloop databox1;						\
     HYPRE_Int d,idx;							\
     databox1.lsize0 = loop_size[0];					\
@@ -319,7 +319,7 @@ typedef struct hypre_Boxloop_struct
                                    stride1, i1,				\
                                    stride2, i2)				\
 {									\
-   HYPRE_Int hypre__tot = 1.0,idx;					\
+   HYPRE_Int hypre__tot = 1,idx;					\
    hypre_Boxloop databox1,databox2;					\
    HYPRE_Int d;								\
    databox1.lsize0 = loop_size[0];					\

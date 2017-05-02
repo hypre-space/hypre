@@ -65,7 +65,7 @@ extern "C++" {
  #endif
 
  #define hypre_newBoxLoopInit(ndim,loop_size)					\
-	 HYPRE_Int hypre__tot = 1.0;											\
+	 HYPRE_Int hypre__tot = 1;											\
 	 for (HYPRE_Int i = 0;i < ndim;i ++)									\
 		 hypre__tot *= loop_size[i];
 
@@ -106,7 +106,7 @@ extern "C++" {
 	 }																	\
 	 else																\
 	 {																	\
-		 databox##k.lsize2 = 0;											\
+		 databox##k.lsize2 = 1;											\
 		 databox##k.strides2 = 0;									\
 		 databox##k.bstart2  = 0;									\
 		 databox##k.bsize2   = 0;							\
@@ -136,7 +136,7 @@ extern "C++" {
      Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)		\
      {									\
        hypre_newBoxLoopDeclare();						\
-       HYPRE_Int hypre_boxD1 = 1.0;					\
+       HYPRE_Int hypre_boxD1 = 1;					\
        HYPRE_Int i1 = 0;							\
        local_idx  = idx_local % databox1.lsize0;				\
        idx_local  = idx_local / databox1.lsize0;				\
@@ -168,7 +168,7 @@ extern "C++" {
      Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)		\
      {									\
 	 hypre_newBoxLoopDeclare()					\
-	 HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;			\
+	 HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1;			\
 	 HYPRE_Int i1 = 0, i2 = 0;					\
 	 local_idx  = idx_local % databox1.lsize0;			\
 	 idx_local  = idx_local / databox1.lsize0;			\
@@ -207,7 +207,7 @@ extern "C++" {
       Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)		\
       {									\
 	 hypre_newBoxLoopDeclare();					\
-	 HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0; \
+	 HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1,hypre_boxD3 = 1; \
 	 HYPRE_Int i1 = 0, i2 = 0, i3 = 0;				\
 	 local_idx  = idx_local % databox1.lsize0;				\
 	 idx_local  = idx_local / databox1.lsize0;				\
@@ -253,7 +253,7 @@ extern "C++" {
      Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx)		\
      {									\
 	 hypre_newBoxLoopDeclare();					\
-	 HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0,hypre_boxD4 = 1.0; \
+	 HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1,hypre_boxD3 = 1,hypre_boxD4 = 1; \
 	 HYPRE_Int i1 = 0, i2 = 0, i3 = 0,i4 = 0;			\
 	 local_idx  = idx_local % databox1.lsize0;			\
 	 idx_local  = idx_local / databox1.lsize0;			\
@@ -302,7 +302,7 @@ extern "C++" {
      Kokkos::parallel_reduce (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx,HYPRE_Real &sum) \
      {									\
 	 hypre_newBoxLoopDeclare()					\
-	 HYPRE_Int hypre_boxD1 = 1.0;					\
+	 HYPRE_Int hypre_boxD1 = 1;					\
 	 HYPRE_Int i1 = 0;						\
 	 local_idx  = idx_local % databox1.lsize0;			\
 	 idx_local  = idx_local / databox1.lsize0;			\
@@ -337,7 +337,7 @@ extern "C++" {
      Kokkos::parallel_reduce (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx,HYPRE_Real &sum) \
      {									\
 	 hypre_newBoxLoopDeclare()					\
-	 HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;			\
+	 HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1;			\
 	 HYPRE_Int i1 = 0, i2 = 0;					\
 	 local_idx  = idx_local % databox1.lsize0;			\
 	 idx_local  = idx_local / databox1.lsize0;			\
@@ -375,7 +375,7 @@ extern "C++" {
      Kokkos::parallel_reduce (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx,HYPRE_Real &sum) \
      {									\
 	 hypre_newBoxLoopDeclare()					\
-	 HYPRE_Int hypre_boxD1 = 1.0;					\
+	 HYPRE_Int hypre_boxD1 = 1;					\
 	 HYPRE_Int i1 = 0;						\
 	 local_idx  = idx_local % databox1.lsize0;			\
 	 idx_local  = idx_local / databox1.lsize0;			\
@@ -408,7 +408,7 @@ extern "C++" {
   
 #define hypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
 {    														\
-    HYPRE_Int hypre__tot = 1.0;											\
+    HYPRE_Int hypre__tot = 1;											\
     hypre_Boxloop databox1;						\
     databox1.lsize0 = loop_size[0];					\
     databox1.lsize1 = loop_size[1];					\
@@ -443,7 +443,7 @@ extern "C++" {
                                    stride1, i1,	\
                                    stride2, i2)	\
 {    														\
-    HYPRE_Int hypre__tot = 1.0;											\
+    HYPRE_Int hypre__tot = 1;											\
     hypre_Boxloop databox1,databox2;					\
     databox1.lsize0 = loop_size[0];					\
     databox1.lsize1 = loop_size[1];					\
@@ -485,16 +485,16 @@ extern "C++" {
 	hypre_fence();							\
 }
 
-#define hypre_newBoxLoop0For() {}
+#define zypre_newBoxLoop0For()
 
-#define hypre_newBoxLoop1For(i1) {}
+#define zypre_newBoxLoop1For(i1)
 
-#define hypre_newBoxLoop2For(i1, i2) {}
+#define zypre_newBoxLoop2For(i1, i2) 
+ 
+#define zypre_newBoxLoop3For(i1, i2, i3)
 
-#define hypre_newBoxLoop3For(i1, i2, i3) {}
-
-#define hypre_newBoxLoop4For(i1, i2, i3, i4) {}
-
+#define zypre_newBoxLoop4For(i1, i2, i3, i4)
+ 
 #define hypre_newBoxLoopSetOneBlock() {}
 
 #define hypre_newBoxLoopGetIndex(index)					\

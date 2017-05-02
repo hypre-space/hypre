@@ -111,7 +111,7 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
     HYPRE_Int id = (blockIdx.x * blockDim.x) + threadIdx.x;
     HYPRE_Int local_idx;
     HYPRE_Int idx_local = id;
-    HYPRE_Int hypre_boxD1 = 1.0;
+    HYPRE_Int hypre_boxD1 = 1;
     HYPRE_Int i1 = 0;
     //// reducted output
     __shared__ T shared_cache [BLOCKSIZE];
@@ -152,7 +152,7 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 }
 
 #define hypre_BoxLoopInit(ndim,loop_size)					\
-	HYPRE_Int hypre__tot = 1.0;											\
+	HYPRE_Int hypre__tot = 1;											\
 	for (HYPRE_Int i = 0;i < ndim;i ++)									\
 		hypre__tot *= loop_size[i];
 
@@ -191,7 +191,7 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 	}																	\
 	else																\
 	{																	\
-		databox##k.lsize2 = 0;											\
+		databox##k.lsize2 = 1;											\
 		databox##k.strides2 = 0;									\
 		databox##k.bstart2  = 0;									\
 		databox##k.bsize2   = 0;							\
@@ -205,7 +205,7 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
     BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
     {									\
       hypre_newBoxLoopDeclare();					\
-      HYPRE_Int hypre_boxD1 = 1.0;					\
+      HYPRE_Int hypre_boxD1 = 1;					\
       HYPRE_Int i1 = 0;							\
       hypre__i  = idx_local % databox1.lsize0;				\
       idx_local = idx_local / databox1.lsize0;				\
@@ -235,7 +235,7 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
     BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
     {									\
         hypre_newBoxLoopDeclare()					\
-        HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;			\
+        HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1;			\
 	HYPRE_Int i1 = 0, i2 = 0;					\
 	hypre__i  = idx_local % databox1.lsize0;			\
 	idx_local  = idx_local / databox1.lsize0;			\
@@ -273,7 +273,7 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
     BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
     {									\
 	hypre_newBoxLoopDeclare();					\
-	HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0; \
+	HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1,hypre_boxD3 = 1; \
 	HYPRE_Int i1 = 0, i2 = 0, i3 = 0;				\
 	hypre__i  = idx_local % databox1.lsize0;				\
 	idx_local  = idx_local / databox1.lsize0;				\
@@ -320,7 +320,7 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
      BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
      {									\
         hypre_newBoxLoopDeclare();					\
-	HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0,hypre_boxD4 = 1.0; \
+	HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1,hypre_boxD3 = 1,hypre_boxD4 = 1; \
 	HYPRE_Int i1 = 0, i2 = 0, i3 = 0,i4 = 0;			\
 	hypre__i  = idx_local % databox1.lsize0;			\
 	idx_local  = idx_local / databox1.lsize0;			\
@@ -409,7 +409,7 @@ __global__ void hypre_device_reduce_stable_kernel(T*a, T*b, T* out, HYPRE_Int N,
 						  hypre_Boxloop box1,hypre_Boxloop box2) {
   HYPRE_Int local_idx;
   HYPRE_Int idx_local;
-  HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;
+  HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1;
   HYPRE_Int i1 = 0, i2 = 0;
   T sum=T(0);
   HYPRE_Int i;
@@ -473,7 +473,7 @@ __global__ void hypre_device_reduction_kernel(HYPRE_Real* out,
 {
     HYPRE_Int local_idx;
     HYPRE_Int idx_local;
-    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;
+    HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1;
     HYPRE_Int i1 = 0, i2 = 0;
     HYPRE_Real sum = HYPRE_Real(0);
     HYPRE_Int i;
@@ -596,7 +596,7 @@ void hypre_device_reduction (HYPRE_Real* out,
 
 #define hypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
 {    														\
-    HYPRE_Int hypre__tot = 1.0;											\
+    HYPRE_Int hypre__tot = 1;											\
     hypre_Boxloop databox1;						\
     databox1.lsize0 = loop_size[0];					\
     databox1.lsize1 = loop_size[1];					\
@@ -631,7 +631,7 @@ void hypre_device_reduction (HYPRE_Real* out,
                                    stride1, i1,	\
                                    stride2, i2)	\
 {    														\
-    HYPRE_Int hypre__tot = 1.0;											\
+    HYPRE_Int hypre__tot = 1;											\
     hypre_Boxloop databox1,databox2;					\
     databox1.lsize0 = loop_size[0];					\
     databox1.lsize1 = loop_size[1];									\
@@ -672,17 +672,15 @@ void hypre_device_reduction (HYPRE_Real* out,
      hypre_fence();							\
 }
   
-#define hypre_newBoxLoop0For() {}
+#define zypre_newBoxLoop0For()
 
-#define hypre_newBoxLoop1For(i1) {}
+#define zypre_newBoxLoop1For(i1)
 
-#define hypre_newBoxLoop2For(i1, i2) {}
+#define zypre_newBoxLoop2For(i1, i2) 
+ 
+#define zypre_newBoxLoop3For(i1, i2, i3)
 
-#define hypre_newBoxLoop3For(i1, i2, i3) {}
-
-#define hypre_newBoxLoop4For(i1, i2, i3, i4) {}
-
-#define hypre_newBoxLoopSetOneBlock() {}
+#define zypre_newBoxLoop4For(i1, i2, i3, i4)
 
 #define hypre_newBoxLoopGetIndex(index)					\
   index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k

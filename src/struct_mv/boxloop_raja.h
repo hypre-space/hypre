@@ -55,7 +55,6 @@ inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE
 #define hypre_exec_policy cuda_exec<BLOCKSIZE>
 #define hypre_reduce_policy  cuda_reduce_atomic<BLOCKSIZE>
 #define hypre_fence() \
-  if (hypre_fake){;}				\
 cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
 printf("\n ERROR zypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
@@ -65,14 +64,14 @@ AxCheckError(cudaDeviceSynchronize());
 #elif defined(HYPRE_USE_OPENMP)
    #define hypre_exec_policy      omp_for_exec
    #define hypre_reduce_policy omp_reduce
-   #define hypre_fence() if (hypre_fake){;}
+   #define hypre_fence() 
 #elif defined(HYPRE_USING_OPENMP_ACC)
    #define hypre_exec_policy      omp_parallel_for_acc
    #define hypre_reduce_policy omp_acc_reduce
 #else 
    #define hypre_exec_policy   seq_exec
    #define hypre_reduce_policy seq_reduce
-   #define hypre_fence()if (hypre_fake){;}
+   #define hypre_fence()
 #endif
 
 #define zypre_BoxLoopIncK(k,box,i)					\
@@ -94,8 +93,7 @@ AxCheckError(cudaDeviceSynchronize());
 
 
 #define zypre_BoxLoopCUDAInit(ndim,loop_size)				\
-  HYPRE_Int hypre_fake = 0;						\
-  HYPRE_Int hypre__tot = 1.0;						\
+  HYPRE_Int hypre__tot = 1;						\
   for (HYPRE_Int i = 0;i < ndim;i ++)					\
       hypre__tot *= loop_size[i];
 
@@ -135,7 +133,7 @@ AxCheckError(cudaDeviceSynchronize());
 	}																	\
 	else																\
 	{																	\
-		databox##k.lsize2 = 0;											\
+		databox##k.lsize2 = 1;											\
 		databox##k.strides2 = 0;									\
 		databox##k.bstart2  = 0;									\
 		databox##k.bsize2   = 0;							\
@@ -149,7 +147,7 @@ AxCheckError(cudaDeviceSynchronize());
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
       zypre_BoxLoopCUDADeclare();					\
-      HYPRE_Int hypre_boxD1 = 1.0;					\
+      HYPRE_Int hypre_boxD1 = 1;					\
       HYPRE_Int i1 = 0;							\
       zypre_BoxLoopIncK(1,databox1,i1);
 
@@ -169,8 +167,8 @@ AxCheckError(cudaDeviceSynchronize());
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         zypre_BoxLoopCUDADeclare()					\
-        HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;			\
-	HYPRE_Int i1 = 0, i2 = 0;					\
+        HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1;			\
+		HYPRE_Int i1 = 0, i2 = 0;							\
 	local_idx  = idx_local % databox1.lsize0;			\
 	idx_local  = idx_local / databox1.lsize0;			\
 	i1 += (local_idx*databox1.strides0 + databox1.bstart0) * hypre_boxD1; \
@@ -209,7 +207,7 @@ AxCheckError(cudaDeviceSynchronize());
         forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
 	{								\
 	  zypre_BoxLoopCUDADeclare();					\
-	  HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0; \
+	  HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1,hypre_boxD3 = 1; \
 	  HYPRE_Int i1 = 0, i2 = 0, i3 = 0;				\
 	  local_idx  = idx_local % databox1.lsize0;				\
 	  idx_local  = idx_local / databox1.lsize0;				\
@@ -256,7 +254,7 @@ AxCheckError(cudaDeviceSynchronize());
      forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
      {									\
          zypre_BoxLoopCUDADeclare();					\
-	 HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0,hypre_boxD4 = 1.0; \
+		 HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1,hypre_boxD3 = 1,hypre_boxD4 = 1; \
 	 HYPRE_Int i1 = 0, i2 = 0, i3 = 0,i4 = 0;			\
 	 local_idx  = idx_local % databox1.lsize0;			\
 	 idx_local  = idx_local / databox1.lsize0;			\
@@ -377,7 +375,7 @@ public:
       HYPRE_Int threadId = threadIdx.x + blockDim.x * threadIdx.y
                      + (blockDim.x * blockDim.y) * threadIdx.z;
 
-      T temp = 0;
+      T temp = 1;
       __syncthreads();
 
       for (HYPRE_Int i = BLOCKSIZE / 2; i >= WARP_SIZE; i /= 2) {
@@ -663,7 +661,6 @@ private:
    HYPRE_Real sum_tmp;							\
    {									\
       ReduceSum< hypre_reduce_policy, HYPRE_Real> sum(0.0);				\
-      HYPRE_Int hypre_fake = 0;						\
       zypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1,i1)	\
       {
 
@@ -683,7 +680,6 @@ private:
    HYPRE_Real sum_tmp;							\
    {									\
       ReduceSum< hypre_reduce_policy, HYPRE_Real> sum(0.0);				\
-      HYPRE_Int hypre_fake = 0;						\
       zypre_newBoxLoop2Begin(ndim, loop_size, \
 			     dbox1, start1, stride1,i1,\
 			     dbox2, start2, stride2,i2)	\
@@ -702,7 +698,6 @@ private:
 				       dbox1, start1, stride1, i1,xp,sum) \
 {									\
    ReduceMult<HYPRE_Real> local_result_raja(1.0);				\
-   HYPRE_Int hypre_fake = 0;						\
    zypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1) \
    {									\
        local_result_raja *= xp[i1];					\
@@ -798,8 +793,8 @@ private:
 
 #define zypre_newBoxLoop1For(i1)
 
-#define zypre_newBoxLoop2For(i1, i2)
-
+#define zypre_newBoxLoop2For(i1, i2) 
+ 
 #define zypre_newBoxLoop3For(i1, i2, i3)
 
 #define zypre_newBoxLoop4For(i1, i2, i3, i4)
