@@ -30,7 +30,7 @@ Parser_dh   parser_dh = NULL;   /* for setting/getting runtime options */
 TimeLog_dh  tlog_dh = NULL;     /* internal timing  functionality */
 Mem_dh      mem_dh = NULL;      /* memory management */
 FILE        *logFile = NULL;
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA)
 #else
 char        msgBuf_dh[MSG_BUF_SIZE_DH]; /* for internal use */
 #endif
