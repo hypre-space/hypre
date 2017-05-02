@@ -18,9 +18,12 @@
 
 #include "_hypre_parcsr_mv.h"
 #include <assert.h>
-#ifdef HYPRE_USE_GPU
-void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_Int *send_map, HYPRE_Int begin,HYPRE_Int end,cudaStream_t s);
-#endif
+//#ifdef HYPRE_USE_GPU
+//extern "C"
+//{
+//void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_Int *send_map, HYPRE_Int begin,HYPRE_Int end,cudaStream_t s);
+//}
+//#endif
 
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvec

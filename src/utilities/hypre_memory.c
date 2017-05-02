@@ -194,7 +194,7 @@ hypre_ReAlloc( char   *ptr,
      else
        memcpy(nptr,ptr,size);
      hypre_Free(ptr);
-     ptr=nptr;
+     ptr=(char*) nptr;
    }
 #else
    if (ptr == NULL)

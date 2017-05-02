@@ -672,21 +672,21 @@ void hypre_device_reduction (HYPRE_Real* out,
      hypre_fence();							\
 }
   
-#define zypre_newBoxLoop0For()
+#define hypre_newBoxLoop0For()
 
-#define zypre_newBoxLoop1For(i1)
+#define hypre_newBoxLoop1For(i1)
 
-#define zypre_newBoxLoop2For(i1, i2) 
+#define hypre_newBoxLoop2For(i1, i2) 
  
-#define zypre_newBoxLoop3For(i1, i2, i3)
+#define hypre_newBoxLoop3For(i1, i2, i3)
 
-#define zypre_newBoxLoop4For(i1, i2, i3, i4)
+#define hypre_newBoxLoop4For(i1, i2, i3, i4)
 
 #define hypre_newBoxLoopGetIndex(index)					\
   index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
   
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex  
-#define hypre_BoxLoopSetOneBlock hypre_newBoxLoopSetOneBlock
+#define hypre_BoxLoopSetOneBlock() ; 
 #define hypre_BoxLoopBlock()       0
 
 #define hypre_BoxLoop0Begin      hypre_newBoxLoop0Begin
