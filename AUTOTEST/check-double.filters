@@ -7,4 +7,5 @@
 /utilities/hypre_nvtx.h:
 /utilities/mpistubs.c
 /seq_mv/gpukernels.h:
+/seq_mv/seq_mv.h:.*cudaStream_t
 double-check
