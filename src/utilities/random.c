@@ -41,7 +41,9 @@
 /*--------------------------------------------------------------------------
  * Static variables
  *--------------------------------------------------------------------------*/
-
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+__managed__ __device__
+#endif
 static HYPRE_Int Seed = 13579;
 
 #define a  16807
@@ -54,7 +56,7 @@ static HYPRE_Int Seed = 13579;
  *
  * @param seed an HYPRE_Int containing the seed for the RNG.
  *--------------------------------------------------------------------------*/
-
+HYPRE_CUDA_GLOBAL
 void  hypre_SeedRand( HYPRE_Int seed )
 {
    Seed = seed;
@@ -64,11 +66,10 @@ void  hypre_SeedRand( HYPRE_Int seed )
  * Computes the next pseudo-random number in the sequence using the global
  * variable Seed.
  *
- * @return a HYPRE_Real containing the next number in the sequence divided by
- * 2147483647 so that the numbers are in (0, 1].
+ * @return a HYPRE_Int between (0, 2147483647]
  *--------------------------------------------------------------------------*/
-
-HYPRE_Real  hypre_Rand()
+HYPRE_CUDA_GLOBAL
+HYPRE_Int  hypre_RandI()
 {
    HYPRE_Int  low, high, test;
 
@@ -84,5 +85,33 @@ HYPRE_Real  hypre_Rand()
       Seed = test + m;
    }
 
-   return ((HYPRE_Real)(Seed) / m);
+   return Seed;
+}
+
+/*--------------------------------------------------------------------------
+ * Computes the next pseudo-random number in the sequence using the global
+ * variable Seed.
+ *
+ * @return a HYPRE_Real containing the next number in the sequence divided by
+ * 2147483647 so that the numbers are in (0, 1].
+ *--------------------------------------------------------------------------*/
+HYPRE_CUDA_GLOBAL
+HYPRE_Real  hypre_Rand()
+{
+/*
+   HYPRE_Int  low, high, test;
+
+   high = Seed / q;
+   low = Seed % q;
+   test = a * low - r * high;
+   if(test > 0)
+   {
+      Seed = test;
+   }
+   else
+   {
+      Seed = test + m;
+   }
+*/
+   return ((HYPRE_Real)(hypre_RandI()) / m);
 }

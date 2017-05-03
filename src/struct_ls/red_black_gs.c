@@ -53,7 +53,7 @@ hypre_RedBlackGSCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_RedBlackGSDestroy( void *relax_vdata )
 {
-	hypre_RedBlackGSData *relax_data = (hypre_RedBlackGSData *)relax_vdata;
+   hypre_RedBlackGSData *relax_data = (hypre_RedBlackGSData *)relax_vdata;
 
    if (relax_data)
    {
@@ -147,9 +147,9 @@ hypre_RedBlackGS( void               *relax_vdata,
    hypre_Box             *b_dbox;
    hypre_Box             *x_dbox;
                         
-   HYPRE_Int              Ai, Astart, Ani, Anj;
-   HYPRE_Int              bi, bstart, bni, bnj;
-   HYPRE_Int              xi, xstart, xni, xnj;
+   HYPRE_Int              Astart, Ani, Anj;
+   HYPRE_Int              bstart, bni, bnj;
+   HYPRE_Int              xstart, xni, xnj;
    HYPRE_Int              xoff0, xoff1, xoff2, xoff3, xoff4, xoff5;
                         
    HYPRE_Real            *Ap;
@@ -166,7 +166,7 @@ hypre_RedBlackGS( void               *relax_vdata,
    HYPRE_Int              offd[6];
                         
    HYPRE_Int              iter, rb, redblack, d;
-   HYPRE_Int              compute_i, i, j, ii, jj, kk;
+   HYPRE_Int              compute_i, i, j;
    HYPRE_Int              ni, nj, nk;
 
    /*----------------------------------------------------------
@@ -288,23 +288,18 @@ hypre_RedBlackGS( void               *relax_vdata,
                   }
                }
 
+               hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-               for (kk = 0; kk < nk; kk++)
+               hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                       Astart,Ani,Anj,Ai,
+                                       bstart,bni,bnj,bi,
+                                       xstart,xni,xnj,xi);
                {
-                  for (jj = 0; jj < nj; jj++)
-                  {
-                     ii = (kk + jj + redblack) % 2;
-                     Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                     bi = bstart + kk*bnj*bni + jj*bni + ii;
-                     xi = xstart + kk*xnj*xni + jj*xni + ii;
-                     for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                     {
-                        xp[xi] = bp[bi] / Ap[Ai];
-                     }
-                  }
+                  xp[xi] = bp[bi] / Ap[Ai];
                }
+               hypre_RedBlackLoopEnd();
             }
          }
       }
@@ -418,78 +413,64 @@ hypre_RedBlackGS( void               *relax_vdata,
                switch(stencil_size)
                {
                   case 7:
+                     hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-                     for (kk = 0; kk < nk; kk++)
+                     hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                             Astart,Ani,Anj,Ai,
+                                             bstart,bni,bnj,bi,
+                                             xstart,xni,xnj,xi);
                      {
-                        for (jj = 0; jj < nj; jj++)
-                        {
-                           ii = (kk + jj + redblack) % 2;
-                           Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                           bi = bstart + kk*bnj*bni + jj*bni + ii;
-                           xi = xstart + kk*xnj*xni + jj*xni + ii;
-                           for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                           {
-                              xp[xi] =
-                                 (bp[bi] - 
-                                  Ap0[Ai] * xp[xi + xoff0] -
-                                  Ap1[Ai] * xp[xi + xoff1] -
-                                  Ap2[Ai] * xp[xi + xoff2] -
-                                  Ap3[Ai] * xp[xi + xoff3] -
-                                  Ap4[Ai] * xp[xi + xoff4] -
-                                  Ap5[Ai] * xp[xi + xoff5]) / Ap[Ai];
-                           }
-                        }
+                        xp[xi] =
+                           (bp[bi] - 
+                            Ap0[Ai] * xp[xi + xoff0] -
+                            Ap1[Ai] * xp[xi + xoff1] -
+                            Ap2[Ai] * xp[xi + xoff2] -
+                            Ap3[Ai] * xp[xi + xoff3] -
+                            Ap4[Ai] * xp[xi + xoff4] -
+                            Ap5[Ai] * xp[xi + xoff5]) / Ap[Ai];
                      }
+                     hypre_RedBlackLoopEnd();
                      break;
 
                   case 5:
+                     hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-                     for (kk = 0; kk < nk; kk++)
+                     hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                             Astart,Ani,Anj,Ai,
+                                             bstart,bni,bnj,bi,
+                                             xstart,xni,xnj,xi);
                      {
-                        for (jj = 0; jj < nj; jj++)
-                        {
-                           ii = (kk + jj + redblack) % 2;
-                           Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                           bi = bstart + kk*bnj*bni + jj*bni + ii;
-                           xi = xstart + kk*xnj*xni + jj*xni + ii;
-                           for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                           {
-                              xp[xi] =
-                                 (bp[bi] - 
-                                  Ap0[Ai] * xp[xi + xoff0] -
-                                  Ap1[Ai] * xp[xi + xoff1] -
-                                  Ap2[Ai] * xp[xi + xoff2] -
-                                  Ap3[Ai] * xp[xi + xoff3]) / Ap[Ai];
-                           }
-                        }
+                        xp[xi] =
+                           (bp[bi] - 
+                            Ap0[Ai] * xp[xi + xoff0] -
+                            Ap1[Ai] * xp[xi + xoff1] -
+                            Ap2[Ai] * xp[xi + xoff2] -
+                            Ap3[Ai] * xp[xi + xoff3]) / Ap[Ai];
                      }
+                     hypre_RedBlackLoopEnd();
                      break;
 
                   case 3:
+                     hypre_RedBlackLoopInit();
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ii,jj,Ai,bi,xi,kk) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-                     for (kk = 0; kk < nk; kk++)
+                     hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
+                                             Astart,Ani,Anj,Ai,
+                                             bstart,bni,bnj,bi,
+                                             xstart,xni,xnj,xi);
                      {
-                        for (jj = 0; jj < nj; jj++)
-                        {
-                           ii = (kk + jj + redblack) % 2;
-                           Ai = Astart + kk*Anj*Ani + jj*Ani + ii;
-                           bi = bstart + kk*bnj*bni + jj*bni + ii;
-                           xi = xstart + kk*xnj*xni + jj*xni + ii;
-                           for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)
-                           {
-                              xp[xi] =
-                                 (bp[bi] - 
-                                  Ap0[Ai] * xp[xi + xoff0] -
-                                  Ap1[Ai] * xp[xi + xoff1]) / Ap[Ai];
-                           }
-                        }
+                        xp[xi] =
+                           (bp[bi] - 
+                            Ap0[Ai] * xp[xi + xoff0] -
+                            Ap1[Ai] * xp[xi + xoff1]) / Ap[Ai];
                      }
+                     hypre_RedBlackLoopEnd();
+
                      break;
                }
             }

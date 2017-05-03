@@ -188,7 +188,12 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-
+#if defined(HYPRE_USE_KOKKOS)
+   Kokkos::InitArguments args;
+   args.num_threads = 10;
+   Kokkos::initialize (args);
+#endif
+   
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
@@ -839,7 +844,7 @@ main( hypre_int argc,
        * Set up the stencil structure needed for matrix creation
        * which is always the case for read_fromfile_param == 0
        *-----------------------------------------------------------*/
- 
+      
       HYPRE_StructStencilCreate(dim, (2-sym)*dim + 1, &stencil);
       for (s = 0; s < (2-sym)*dim + 1; s++)
       {
@@ -884,7 +889,6 @@ main( hypre_int argc,
            (read_rhsfromfile_param ==1) 
          )
       {
-         hypre_printf("\nreading linear system from files: matrix, rhs and x0\n");
          /* ghost selection for reading the matrix and vectors */
          for (i = 0; i < dim; i++)
          {
@@ -970,12 +974,14 @@ main( hypre_int argc,
          HYPRE_StructGridSetPeriodic(grid, periodic);
          HYPRE_StructGridSetNumGhost(grid, num_ghost);
          HYPRE_StructGridAssemble(grid);
-
+	 
+	 
          /*-----------------------------------------------------------
           * Set up the matrix structure
           *-----------------------------------------------------------*/
-
+	 
          HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
+
          if ( solver_id == 3 || solver_id == 4 ||
               solver_id == 13 || solver_id == 14 )
          {
@@ -1008,13 +1014,14 @@ main( hypre_int argc,
                constant_coefficient = 2;
             }
          }
+
          HYPRE_StructMatrixSetSymmetric(A, sym);
          HYPRE_StructMatrixInitialize(A);
 
          /*-----------------------------------------------------------
           * Fill in the matrix elements
           *-----------------------------------------------------------*/
-   
+
          AddValuesMatrix(A,grid,cx,cy,cz,conx,cony,conz);
 
          /* Zero out stencils reaching to real boundary */
@@ -1022,7 +1029,6 @@ main( hypre_int argc,
 
          if ( constant_coefficient == 0 ) SetStencilBndry(A,grid,periodic); 
          HYPRE_StructMatrixAssemble(A);
-
          /*-----------------------------------------------------------
           * Set up the linear system
           *-----------------------------------------------------------*/
@@ -1041,7 +1047,7 @@ main( hypre_int argc,
 
          HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
          HYPRE_StructVectorInitialize(x);
-    
+
          AddValuesVector(grid,x,periodx0,0.0);
          HYPRE_StructVectorAssemble(x);
 
@@ -2765,6 +2771,9 @@ main( hypre_int argc,
    }
 
    /* Finalize MPI */
+#if defined(HYPRE_USE_KOKKOS)
+   Kokkos::finalize ();
+#endif
    hypre_MPI_Finalize();
 
    return (0);
@@ -2799,8 +2808,8 @@ AddValuesVector( hypre_StructGrid  *gridvector,
    {
       box      = hypre_BoxArrayBox(gridboxes, ib);
       volume   =  hypre_BoxVolume(box);
-      values   = hypre_CTAlloc(HYPRE_Real, volume);
-
+      values   = hypre_UMCTAlloc(HYPRE_Real, volume);
+      
       /*-----------------------------------------------------------
        * For periodic b.c. in all directions, need rhs to satisfy 
        * compatibility condition. Achieved by setting a source and
@@ -2827,8 +2836,10 @@ AddValuesVector( hypre_StructGrid  *gridvector,
 
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);
+	  
       HYPRE_StructVectorSetBoxValues(zvector, ilower, iupper, values);
-      hypre_TFree(values);
+      hypre_UMTFree(values);
+      
 
    }
 
@@ -2900,8 +2911,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
-
+	    values     = hypre_UMCTAlloc(HYPRE_Real, stencil_size*volume);
+	    
             for (i = 0; i < stencil_size*volume; i += stencil_size)
             {
                switch (dim)
@@ -2925,14 +2936,16 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             }
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
+	    
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                            stencil_indices, values);
-            hypre_TFree(values);
+	    hypre_UMTFree(values);
+	    
          }
       }
       else if ( constant_coefficient==1 )
       {
-         values   = hypre_CTAlloc(HYPRE_Real, stencil_size);
+	 values   = hypre_CTAlloc(HYPRE_Real, stencil_size);
          switch (dim)
          {
             case 1:
@@ -2963,7 +2976,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          hypre_assert( constant_coefficient==2 );
 
          /* stencil index for the center equals dim, so it's easy to leave out */
-         values   = hypre_CTAlloc(HYPRE_Real, stencil_size-1);
+	 values   = hypre_UMCTAlloc(HYPRE_Real, stencil_size-1);
          switch (dim)
          {
             case 1:
@@ -2984,14 +2997,13 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             HYPRE_StructMatrixSetConstantValues(A, stencil_size-1,
                                                 stencil_indices, values);
          }
-         hypre_TFree(values);
+	 hypre_UMTFree(values);
 
          hypre_ForBoxI(bi, gridboxes)
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(HYPRE_Real, volume);
-
+	    values   = hypre_UMCTAlloc(HYPRE_Real, volume);
             for ( i=0; i < volume; ++i )
             {
                values[i] = center;
@@ -3000,7 +3012,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices+dim, values);
-            hypre_TFree(values);
+	    hypre_UMTFree(values);
          }
       }
    }
@@ -3043,7 +3055,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume);
+            values   = hypre_UMCTAlloc(HYPRE_Real, stencil_size*volume);
 
             for (i = 0; i < stencil_size*volume; i += stencil_size)
             {
@@ -3077,7 +3089,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                            stencil_indices, values);
 
-            hypre_TFree(values);
+            hypre_UMTFree(values);
          }
       }
       else if ( constant_coefficient==1 )
@@ -3120,7 +3132,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
       else
       {
          hypre_assert( constant_coefficient==2 );
-         values = hypre_CTAlloc( HYPRE_Real, stencil_size-1 );
+         values = hypre_UMCTAlloc( HYPRE_Real, stencil_size-1 );
          switch (dim)
          {  /* no center in stencil_indices and values */
             case 1:
@@ -3160,7 +3172,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             HYPRE_StructMatrixSetConstantValues(A, stencil_size,
                                                 stencil_indices, values);
          }
-         hypre_TFree(values);
+         hypre_UMTFree(values);
 
 
          /* center is variable */
@@ -3169,7 +3181,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-            values   = hypre_CTAlloc(HYPRE_Real, volume);
+            values   = hypre_UMCTAlloc(HYPRE_Real, volume);
 
             for ( i=0; i < volume; ++i )
             {
@@ -3179,7 +3191,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
-            hypre_TFree(values);
+            hypre_UMTFree(values);
          }
       }
    }
@@ -3260,7 +3272,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
       {
          for (ib = 0; ib < size; ib++)
          {
-            values = hypre_CTAlloc(HYPRE_Real, vol[ib]);
+	    values = hypre_UMCTAlloc(HYPRE_Real, vol[ib]);
         
             for (i = 0; i < vol[ib]; i++)
             {
@@ -3286,7 +3298,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
                                               1, stencil_indices, values);
                ilower[ib][d] = j;
             }
-            hypre_TFree(values);
+	    hypre_UMTFree(values);
          }
       }
    }

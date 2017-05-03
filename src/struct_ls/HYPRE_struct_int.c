@@ -19,7 +19,6 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 {
    hypre_Box          *v_data_box;
                     
-   HYPRE_Int           vi;
    HYPRE_Real         *vp;
 
    hypre_BoxArray     *boxes;
@@ -34,7 +33,8 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
     * Set the vector coefficients
     *-----------------------------------------------------------------------*/
 
-   srand( seed );
+//   srand( seed );
+   hypre_SeedRand(seed);
 
    hypre_SetIndex3(unit_stride, 1, 1, 1);
  
@@ -53,11 +53,12 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi ) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For(vi)
       {
-         vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
+//         vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
+         vp[vi] = 2.0*hypre_Rand() - 1.0;
       }
       hypre_BoxLoop1End(vi);
    }

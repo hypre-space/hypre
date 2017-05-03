@@ -476,15 +476,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                      hypre_BoxGetSize(box, loop_size);
                      hypre_CopyIndex(hypre_BoxIMin(box), start);
       
-                     hypre_BoxLoop0Begin(ndim, loop_size);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,boxman_entry,cnt) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     hypre_BoxLoopSetOneBlock();
-#endif
-                     hypre_BoxLoop0For()
+                     hypre_SerialBoxLoop0Begin(ndim, loop_size);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
@@ -497,7 +489,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                         cnt++;
 
                      }
-                     hypre_BoxLoop0End();
+                     hypre_SerialBoxLoop0End();
                   }  /* hypre_ForBoxI(p, box_array) */
                }     /* hypre_ForBoxArrayI(m, fbdry) */
 

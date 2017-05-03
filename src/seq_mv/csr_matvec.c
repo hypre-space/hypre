@@ -19,6 +19,7 @@
 #include "seq_mv.h"
 #include <assert.h>
 
+
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec
  *--------------------------------------------------------------------------*/
@@ -36,7 +37,15 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 #ifdef HYPRE_PROFILE
    HYPRE_Real time_begin = hypre_MPI_Wtime();
 #endif
-
+#ifdef HYPRE_USE_GPU
+   PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
+   HYPRE_Int ret=hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset);
+   POP_RANGE;
+  return ret;
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
+#endif
+#endif
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A) + offset;
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
@@ -765,3 +774,77 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
 
    return ierr;
 }
+#ifdef HYPRE_USE_GPU
+HYPRE_Int
+hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
+                       hypre_CSRMatrix *A,
+                       hypre_Vector    *x,
+                       HYPRE_Complex    beta,
+		       hypre_Vector    *b,
+		       hypre_Vector    *y,
+		       HYPRE_Int offset )
+{
+
+  static cusparseHandle_t handle;
+  static cusparseMatDescr_t descr;
+  static HYPRE_Int FirstCall=1;
+  cusparseStatus_t status;
+  static cudaStream_t s[10];
+  static HYPRE_Int myid;
+
+  if (b!=y){
+
+    PUSH_RANGE_PAYLOAD("MEMCPY",1,y->size-offset);
+    VecCopy(y->data,b->data,(y->size-offset),HYPRE_STREAM(4));
+    POP_RANGE
+  }
+
+  if (x==y) fprintf(stderr,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
+
+  if (FirstCall){
+    PUSH_RANGE("FIRST_CALL",4);
+
+    handle=getCusparseHandle();
+    
+    status= cusparseCreateMatDescr(&descr); 
+    if (status != CUSPARSE_STATUS_SUCCESS) {
+      printf("ERROR:: Matrix descriptor initialization failed\n");
+      exit(2);
+    } 
+    
+    cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
+    
+    FirstCall=0;
+    hypre_int jj;
+    for(jj=0;jj<5;jj++)
+      s[jj]=HYPRE_STREAM(jj);
+    nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
+    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+    myid++;
+    POP_RANGE;
+  }
+
+  PUSH_RANGE("PREFETCH+SPMV",2);
+
+  hypre_CSRMatrixPrefetchToDevice(A);
+  hypre_SeqVectorPrefetchToDevice(x);
+  hypre_SeqVectorPrefetchToDevice(y);
+  
+  if (offset!=0) printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: %d \n",offset);
+  cusparseErrchk(cusparseDcsrmv(handle ,
+				CUSPARSE_OPERATION_NON_TRANSPOSE, 
+				A->num_rows-offset, A->num_cols, A->num_nonzeros,
+				&alpha, descr,
+				A->data ,A->i+offset,A->j,
+				x->data, &beta, y->data+offset));
+  
+  if (!GetAsyncMode()){
+  gpuErrchk(cudaStreamSynchronize(s[4]));
+  }
+  POP_RANGE;
+  
+  return 0;
+  
+}
+#endif

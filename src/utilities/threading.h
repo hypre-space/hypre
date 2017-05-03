@@ -30,3 +30,4 @@ HYPRE_Int hypre_GetThreadNum( void );
 void hypre_GetSimpleThreadPartition( HYPRE_Int *begin, HYPRE_Int *end, HYPRE_Int n );
 
 #endif
+

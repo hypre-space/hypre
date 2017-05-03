@@ -123,8 +123,6 @@ hypre_SemiRestrict( void               *restrict_vdata,
    hypre_Box              *rc_dbox;
                        
    HYPRE_Int               Ri;
-   HYPRE_Int               ri;
-   HYPRE_Int               rci;
    HYPRE_Int               constant_coefficient;
 
    HYPRE_Real             *Rp0, *Rp1;
@@ -248,7 +246,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ri,rci) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(ri, rci)
                {
@@ -264,7 +262,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ri,ri,rci) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop3For(Ri, ri, rci)
                {

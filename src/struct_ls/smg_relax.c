@@ -263,7 +263,6 @@ hypre_SMGRelax( void               *relax_vdata,
    residual_data   = (relax_data -> residual_data);
    solve_data      = (relax_data -> solve_data);
 
-
    /*----------------------------------------------------------
     * Set zero values
     *----------------------------------------------------------*/
@@ -315,7 +314,6 @@ hypre_SMGRelax( void               *relax_vdata,
          (relax_data -> num_iterations) = (i + 1);
       }
    }
-
    /*----------------------------------------------------------
     * Free up memory according to memory_use parameter
     *----------------------------------------------------------*/
@@ -586,6 +584,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
          hypre_SMGSetMemoryUse(solve_data[i], (relax_data -> memory_use));
          hypre_SMGSetTol(solve_data[i], 0.0);
          hypre_SMGSetMaxIter(solve_data[i], 1);
+		 
          hypre_SMGSetup(solve_data[i], A_sol, temp_vec, x);
       }
       else

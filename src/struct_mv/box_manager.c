@@ -2226,7 +2226,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
       HYPRE_Int  size[HYPRE_MAXDIM];
       HYPRE_Int  iminmax[2];
       HYPRE_Int  index_not_there;
-      HYPRE_Int  d, e, ii, itsize;
+      HYPRE_Int  d, e, itsize;
       HYPRE_Int  mystart, myfinish;
       HYPRE_Int  imin[HYPRE_MAXDIM];
       HYPRE_Int  imax[HYPRE_MAXDIM];
@@ -2388,9 +2388,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             /* set up index table */
             hypre_BoxSetExtents(index_box, imin, imax);
             hypre_BoxGetSize(index_box, loop_size);
-            hypre_BoxLoop1Begin(ndim, loop_size, table_box, imin, stride, ii);
-            hypre_BoxLoopSetOneBlock();
-            hypre_BoxLoop1For(ii)
+            hypre_SerialBoxLoop1Begin(ndim, loop_size, table_box, imin, stride, ii);
             {
                if (!index_table[ii]) /* no entry- add one */
                {
@@ -2403,7 +2401,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                   index_table[ii] = entry;
                }
             }
-            hypre_BoxLoop1End(ii);
+            hypre_SerialBoxLoop1End(ii);
 
          } /* end of subset of entries */
       }/* end of three loops over subsets */
@@ -2464,7 +2462,7 @@ hypre_BoxManIntersect ( hypre_BoxManager *manager,
                         HYPRE_Int *nentries_ptr )
 {
    HYPRE_Int           ndim = hypre_BoxManNDim(manager);
-   HYPRE_Int           d, ii;
+   HYPRE_Int           d;
    HYPRE_Int           find_index_d, current_index_d;
    HYPRE_Int          *man_indexes_d;
    HYPRE_Int           man_index_size_d;
@@ -2581,9 +2579,7 @@ hypre_BoxManIntersect ( hypre_BoxManager *manager,
    hypre_BoxShiftNeg(table_box, stride); /* Want box to start at 0*/
    hypre_BoxSetExtents(index_box, man_ilower, man_iupper);
    hypre_BoxGetSize(index_box, loop_size);
-   hypre_BoxLoop1Begin(ndim, loop_size, table_box, man_ilower, stride, ii);
-   hypre_BoxLoopSetOneBlock();
-   hypre_BoxLoop1For(ii)
+   hypre_SerialBoxLoop1Begin(ndim, loop_size, table_box, man_ilower, stride, ii);
    {
       entry = index_table[ii];
 
@@ -2601,7 +2597,7 @@ hypre_BoxManIntersect ( hypre_BoxManager *manager,
          entry = hypre_BoxManEntryNext(entry);
       }
    }
-   hypre_BoxLoop1End(ii);
+   hypre_SerialBoxLoop1End(ii);
 
    entries  = hypre_TReAlloc(entries, hypre_BoxManEntry *, nentries);
 
