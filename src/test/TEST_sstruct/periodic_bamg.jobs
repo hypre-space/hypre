@@ -1,0 +1,25 @@
+#!/bin/sh
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+
+#=============================================================================
+# Check scalar Poisson operator, purely real case, agrees with Chris' code
+#=============================================================================
+
+mpirun -np 1 sstruct -in sstruct.in.periodic.crs \
+-solver 14 > periodic_bamg.out.10
+
+#=============================================================================
+# Next test batch... 
+#=============================================================================
+
