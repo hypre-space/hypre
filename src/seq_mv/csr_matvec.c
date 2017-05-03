@@ -39,7 +39,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 #endif
 #ifdef HYPRE_USE_GPU
    PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
-   int ret=hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset);
+   HYPRE_Int ret=hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset);
    POP_RANGE;
   return ret;
 #ifdef HYPRE_PROFILE
@@ -787,10 +787,10 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
 
   static cusparseHandle_t handle;
   static cusparseMatDescr_t descr;
-  static int FirstCall=1;
+  static HYPRE_Int FirstCall=1;
   cusparseStatus_t status;
   static cudaStream_t s[10];
-  static int myid;
+  static HYPRE_Int myid;
 
   if (b!=y){
 

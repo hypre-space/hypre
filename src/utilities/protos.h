@@ -72,8 +72,9 @@ void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );
 
 /* random.c */
-void hypre_SeedRand ( HYPRE_Int seed );
-HYPRE_Real hypre_Rand ( void );
+HYPRE_CUDA_GLOBAL void hypre_SeedRand ( HYPRE_Int seed );
+HYPRE_CUDA_GLOBAL HYPRE_Int hypre_RandI ( void );
+HYPRE_CUDA_GLOBAL HYPRE_Real hypre_Rand ( void );
 
 /* hypre_prefix_sum.c */
 /**

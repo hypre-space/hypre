@@ -560,17 +560,27 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
 {
    HYPRE_Complex *data      = hypre_StructVectorData(vector);
    HYPRE_Int      data_size = hypre_StructVectorDataSize(vector);
+   hypre_Index    imin, imax;
+   hypre_Box     *box;
 
+   box = hypre_BoxCreate(1);
+   hypre_IndexD(imin, 0) = 1;
+   hypre_IndexD(imax, 0) = data_size;
+   hypre_BoxSetExtents(box, imin, imax);
+
+   hypre_BoxLoop1Begin(1, imax,
+                       box, imin, imin, datai);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-   
-   hypre_LoopBegin(data_size,i);
+   hypre_BoxLoop1For(datai)
    {
-      data[i] = 0.0;
+      data[datai] = 0.0;
    }
-   hypre_LoopEnd();
+   hypre_BoxLoop1End(datai);
    
+   hypre_BoxDestroy(box);
+
    return hypre_error_flag;
 }
 
@@ -1238,7 +1248,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
  *--------------------------------------------------------------------------*/
 hypre_StructVector *
 hypre_StructVectorClone(
-	hypre_StructVector *x)
+   hypre_StructVector *x)
 {
    MPI_Comm		comm = hypre_StructVectorComm(x);
    hypre_StructGrid    *grid = hypre_StructVectorGrid(x);
@@ -1257,7 +1267,7 @@ hypre_StructVectorClone(
    hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size);
 
    for (i=0; i < data_space_size; i++)
-       hypre_StructVectorDataIndices(y)[i] = data_indices[i];
+      hypre_StructVectorDataIndices(y)[i] = data_indices[i];
 
    hypre_StructVectorCopy( x, y );
 

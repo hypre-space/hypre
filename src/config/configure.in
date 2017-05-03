@@ -55,8 +55,8 @@ dnl * Set package information so it only has to be modified in one place
 dnl *********************************************************************
 
 m4_define([M4_HYPRE_NAME],    [hypre])
-m4_define([M4_HYPRE_VERSION], [2.11.2])
-m4_define([M4_HYPRE_DATE],    [2017/03/13])
+m4_define([M4_HYPRE_VERSION], [2.12.0])
+m4_define([M4_HYPRE_DATE],    [2017/05/02])
 m4_define([M4_HYPRE_TIME],    [00:00:00])
 m4_define([M4_HYPRE_BUGS],    [hypre-support@llnl.gov])
 m4_define([M4_HYPRE_SRCDIR],  [`pwd`])
@@ -313,7 +313,7 @@ AS_HELP_STRING([--enable-fortran],
 
 AC_ARG_ENABLE(unified-memory,
 AS_HELP_STRING([--enable-unified-memory],
-               [Use unified memory for allocating the data memory (default is NO).]),
+               [Use unified memory for allocating the memory (default is NO).]),
 [case "${enableval}" in
     yes) hypre_using_um=yes ;;
     no)  hypre_using_um=no ;;
@@ -743,8 +743,7 @@ AC_ARG_WITH(openmp,
 AS_HELP_STRING([--with-openmp],
                [Use OpenMP.  This may affect which compiler is chosen.]),
 [case "${withval}" in
-    yes) hypre_using_openmp=yes
-         AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support]) ;;
+    yes) hypre_using_openmp=yes;;
     no)  hypre_using_openmp=no ;;
  esac],
 [hypre_using_openmp=no]
@@ -789,7 +788,7 @@ AS_HELP_STRING([--with-MPI],
 
 AC_ARG_WITH(cuda,
 AS_HELP_STRING([--with-cuda],
-               [Require cuda-8.0 compiler or higher (default is NO).]),
+               [Use CUDA. Require cuda-8.0 or higher (default is NO).]),
 [case "$withval" in
     yes) hypre_user_chose_cuda=yes
     	 hypre_using_cuda=yes ;;
@@ -801,7 +800,7 @@ AS_HELP_STRING([--with-cuda],
 
 AC_ARG_WITH(raja,
 AS_HELP_STRING([--with-raja],
-               [Require RAJA package compiled with CUDA (default is NO).]),
+               [Use RAJA. Require RAJA package to be compiled properly (default is NO).]),
 [case "$withval" in
     yes) hypre_user_chose_raja=yes;;
     no)  hypre_user_chose_raja=no ;;
@@ -812,7 +811,7 @@ AS_HELP_STRING([--with-raja],
 
 AC_ARG_WITH(kokkos,
 AS_HELP_STRING([--with-kokkos],
-               [Require kokkos package (default is NO).]),
+               [Use Kokkos. Require kokkos package to be compiled properly(default is NO).]),
 [case "$withval" in
     yes) hypre_user_chose_kokkos=yes ;;
     no)  hypre_user_chose_kokkos=no ;;
@@ -860,7 +859,7 @@ AS_HELP_STRING([--with-raja-lib-dirs=DIRS],
                 The  options --with-raja-libs and --raja-blas-lib-dirs
                 must be used together.]),
 [for raja_lib_dir in $withval; do
-    HYPRE_RAJA_SRC_DIR="-L$raja_lib_dir $HYPRE_RAJA_SRC_DIR"
+    HYPRE_RAJA_LIB_DIR="-L$raja_lib_dir $HYPRE_RAJA_LIB_DIR"
  done;
  hypre_user_chose_raja=yes]
 )
@@ -869,7 +868,7 @@ AC_ARG_WITH(kokkos-include,
 AS_HELP_STRING([--with-kokkos-include=DIR],
                [User specifies that KOKKOS headers is in DIR.  The options
                 --with-kokkos-include --with-kokkos-libs and
-                --with-kokkos-lib-dirs must be used together.]), 
+                --with-kokkos-dirs must be used together.]), 
 [for kokkos_dir in $withval; do
 HYPRE_KOKKOS_INCLUDE="$HYPRE_KOKKOS_INCLUDE -I$kokkos_dir"
 done;
@@ -890,22 +889,21 @@ AC_ARG_WITH(kokkos-libs,
 AS_HELP_STRING([--with-kokkos-libs=LIBS],
                [LIBS is space-separated list (enclosed in quotes) of libraries
                 needed for KOKKOS (base name only). The options --with-kokkos-libs and
-                --with-kokkos-lib-dirs must be used together.]),
+                --with-kokkos-dirs must be used together.]),
 [for kokkos_lib in $withval; do
     HYPRE_KOKKOS_LIB="$HYPRE_KOKKOS_LIB -l$kokkos_lib"
  done;
 hypre_user_chose_kokkos=yes]
 )
 
-AC_ARG_WITH(kokkos-lib-dirs,
-AS_HELP_STRING([--with-kokkos-lib-dirs=DIRS],
+AC_ARG_WITH(kokkos-dirs,
+AS_HELP_STRING([--with-kokkos-dirs=DIRS],
                [DIRS is space-separated list (enclosed in quotes) of 
-                directories containing the libraries specified by 
-                --with-kokkos-libs, e.g "usr/lib /usr/local/lib".
-                The  options --with-kokkos-libs and --kokkos-blas-lib-dirs
+                directories containing Makefile.kokkos.
+                The  options --with-kokkos-libs and --with-kokkos-dirs
                 must be used together.]),
 [for kokkos_lib_dir in $withval; do
-    HYPRE_KOKKOS_SRC_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_SRC_DIR"
+    HYPRE_KOKKOS_SRC_DIR="$kokkos_lib_dir"
  done;
 hypre_user_chose_kokkos=yes]
 )
@@ -920,18 +918,6 @@ AS_HELP_STRING([--with-nvcc],
  esac],
 [hypre_using_nvcc=no]
 )
-
-if test "$hypre_using_nvcc" = "yes"
-then
-   AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
-   NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
-   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
-else
-   NVCCFLAGS=
-   NVCCLIBS=
-   HYPRE_NVCC_MAKEFILE="Makefile.empty"
-fi
 
 AC_ARG_WITH(caliper,
 AS_HELP_STRING([--with-caliper],
@@ -968,7 +954,6 @@ dnl *********************************************************************
 if test "$hypre_using_cuda" = "yes"
 then
 	hypre_using_fortran=no
-	hypre_using_mpi=yes
 	AC_CHECK_PROGS(CXX, [nvcc])
 	AC_CHECK_PROGS(CC, [nvcc])
 	if test "$hypre_user_chose_cxxcompilers" = "no"
@@ -984,9 +969,9 @@ then
 	   else
 	      if test "$hypre_using_openmp" = "yes"
 	      then
-	         AC_CHECK_PROGS(CUDACXX, [mpig++ mpxlC mpixlcxx_r mpiicpc mpiCC mpicxx mpipgCC])
+	         AC_CHECK_PROGS(CUDACXX, [mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC])
 	      else
-	         AC_CHECK_PROGS(CUDACXX, [mpig++ mpxlC mpixlcxx mpiicpc mpiCC mpicxx mpipgCC])
+	         AC_CHECK_PROGS(CUDACXX, [mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC])
 	      fi
 	   fi
 	fi
@@ -998,14 +983,14 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [xlc_r xlC_r icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
+         AC_CHECK_PROGS(CC, [xlc_r xlC_r xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
       else
          AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpiicc mpigcc mpicc mpipgcc])
+         AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc])
       else
          AC_CHECK_PROGS(CC, [mpxlc mpixlc mpiicc mpigcc mpicc mpipgcc])
       fi
@@ -1023,16 +1008,16 @@ then
    then
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [xlC_r xlc_r icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
+         AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
       else
          AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
       fi
    else
       if test "$hypre_using_openmp" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpiicpc mpig++ mpiCC mpicxx mpipgCC])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC])
       else
-         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpiicpc mpig++ mpiCC mpicxx mpipgCC])
+         AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC])
       fi
    fi
 
@@ -1445,40 +1430,65 @@ then
 fi
 
 dnl *********************************************************************
+dnl * Set nvcc options
+dnl *********************************************************************
+
+if test "$hypre_using_nvcc" = "yes"
+then
+   AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
+   NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
+   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
+   CFLAGS="${CFLAGS} -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED "
+   CXXFLAGS="${CXXFLAGS} -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED "
+else
+   NVCCFLAGS=
+   NVCCLIBS=
+   HYPRE_NVCC_MAKEFILE="Makefile.empty"
+fi
+
+dnl *********************************************************************
 dnl * Set raja options
 dnl *********************************************************************
-dnl PLATFORM=" -DRAJA_PLATFORM_X86_SSE -DRAJA_COMPILER_GNU -DRAJA_USE_CUDA -DRAJA_USE_DOUBLE -DRAJA_USE_BARE_PTR -DRAJA_USE_GETTIME"
 if test "$hypre_user_chose_raja" = "yes"
 then
+   RAJA_LIBS=" $HYPRE_RAJA_LIB_DIR $HYPRE_RAJA_LIB "
+   if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
+   then 
+   	CFLAGS+=" -+ "
+   fi
    if test "$hypre_using_cuda" = "yes"
       then
         RAJAFLAGS=" -lRAJA "
 	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda $RAJAFLAGS "
-   	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 -Xcompiler $RAJAFLAGS "
-   	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA=1 -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1  $RAJAFLAGS "
+   	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register -Xcompiler $RAJAFLAGS "
+   	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register  $RAJAFLAGS "
    	if test "$hypre_using_um" != "yes"
    	then
 		CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
 	   	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
-		AC_MSG_WARN([*******************************************************])
-       		AC_MSG_WARN([Configuring with --with-raja=yes without unified memory.]) 
-		AC_MSG_WARN([It only works for struct interface.])
-       		AC_MSG_WARN([*******************************************************])
+		AC_MSG_NOTICE([*******************************************************])
+       		AC_MSG_NOTICE([Configuring with --with-raja and --with-cuda without unified memory.]) 
+		AC_MSG_NOTICE([It only works for struct interface.])
+		AC_MSG_NOTICE([Try to confiure with --wiht-raja --with-cuda --enable-unified-memory])
+		AC_MSG_NOTICE([to use the cuda feature for the whold package])
+       		AC_MSG_NOTICE([*******************************************************])
+	else
+		CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
+		CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU " 
    	fi
 	hypre_user_chose_cuda=no
    else 
    	if test "$hypre_using_openmp" = "yes"
 	then
 	   CC=${CXX}
-	   LDFLAGS+=" -lRAJA "
-	   AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support])
-	   CFLAGS+=" -DHYPRE_USE_RAJA "
-	   CXXFLAGS+=" -DHYPRE_USE_RAJA "
+	   CFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA -DHYPRE_USE_OPENMP "
+	   CXXFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA -DHYPRE_USE_OPENMP "
+	   hypre_using_openmp=no
 	else
 	   CC=${CXX}
-   	   LDFLAGS+=" -lRAJA "
-   	   CFLAGS+=" -DHYPRE_USE_RAJA "
-   	   CXXFLAGS+=" -DHYPRE_USE_RAJA "
+   	   CFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA "
+   	   CXXFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA "
 	fi
    fi
 fi
@@ -1488,66 +1498,103 @@ dnl *********************************************************************
 
 if test "$hypre_user_chose_kokkos" = "yes"
 then
+   if [test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"]
+   then 
+   	CFLAGS+=" -+ "
+   fi
    if test "$hypre_using_cuda" = "yes"
    then
-      LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda -lRAJA"
-      HYPRE_KOKKOS_DEVICE="OpenMP"
-      HYPRE_KOKKOS_ARCH="SNB"
-      HYPRE_KOKKOS_CUDA_OPTION=""
+      LDFLAGS=" -ccbin=$CUDACXX -arch compute_35 -lcudart -lcuda"
       HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
-      HYPRE_KOKKOS_CLEAN="kokkos-clean"	
-      HYPRE_KOKKOS_LIB="\$(KOKKOS_LIBS)"
-      HYPRE_KOKKOS_DEPENDS="\$(KOKKOS_LINK_DEPENDS)"
-      LDFLAGS="-fopenmp -L./ -lkokkos"
-      CC=$CXX
+      HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
+      CC=${CXX}
       LINK_CC=$LINK_CXX
-      CFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS"
-      CXXFLAGS="\$(KOKKOS_CPPFLAGS) --std=c++11 -fopenmp -DHYPRE_USE_KOKKOS"
+      CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS "
+      CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS "
+      if test "$hypre_using_um" != "yes"
+      then
+          CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
+	  CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
+          AC_MSG_NOTICE([*******************************************************])
+	  AC_MSG_NOTICE([Configuring with --with-kokkos and --with-cuda, but not with unified memory])
+	  AC_MSG_NOTICE([It only works for struct interface.])
+	  AC_MSG_NOTICE([Try to confiure with --wiht-raja --with-cuda --enable-unified-memory])
+	  AC_MSG_NOTICE([to use the cuda feature for the whold package])
+	  AC_MSG_NOTICE([*******************************************************])
+      else
+	  CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
+	  CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
+	  LDFLAGS+="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+	  AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
+	NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
+   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
+      fi
       hypre_user_chose_cuda=no
    else
-      if test "$hypre_using_openmp" = "yes"                                                                               
+      if test "$hypre_using_openmp" = "yes"  
       then
          CC=${CXX}
-	 LDFLAGS+=" -lkokkos "
-	 AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support])
-	 CFLAGS+=" -DHYPRE_USE_KOKKOS "
-	 CXXFLAGS+=" -DHYPRE_USE_KOKKOS "
+	 CFLAGS+=" -fopenmp -std=c++11 -DHYPRE_USE_KOKKOS -DHYPRE_USE_OPENMP"
+	 CXXFLAGS+=" -fopenmp -std=c++11 -DHYPRE_USE_KOKKOS -DHYPRE_USE_OPENMP"
+	 HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
+	 HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
+	 hypre_using_openmp=no
       else
       	 CC=${CXX}
-	 LDFLAGS+=" -lkokkos "
-	 CFLAGS+=" -DHYPRE_USE_KOKKOS "
-	 CXXFLAGS+=" -DHYPRE_USE_KOKKOS "
+	 CFLAGS+=" -std=c++11 -DHYPRE_USE_KOKKOS "
+	 CXXFLAGS+=" -std=c++11 -DHYPRE_USE_KOKKOS "
+	 HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
+	 HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
+	 LDFLAGS+="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+	 AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
+	NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
+   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
       fi   
   fi
+  KOKKOS_LIBS=" $HYPRE_KOKKOS_LIB_DIR $HYPRE_KOKKOS_LIB "
 fi
 dnl *********************************************************************
 dnl * Set cuda options
 dnl *********************************************************************
 if test "$hypre_user_chose_cuda" = "yes"
 then
-   LDFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda "
-   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
-   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register -Xcompiler -qmaxmem=-1 --x cu -lcudart -lcuda -DHYPRE_USE_CUDA=1 "
+   LDFLAGS+=" -ccbin=$CUDACXX -arch compute_35 "
+   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA "
+   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA "
    if test "$hypre_using_um" != "yes"
    then
 	CFLAGS+=" -DHYPRE_MEMORY_GPU"
 	CXXFLAGS+=" -DHYPRE_MEMORY_GPU"
-	AC_MSG_WARN([*******************************************************])
-       	AC_MSG_WARN([Configuring with --with-cuda=yes without unified memory.]) 
-	AC_MSG_WARN([It only works for struct interface.])
-	AC_MSG_WARN([Use --enable-unified-memory to compile with unified memory.])
-       	AC_MSG_WARN([*******************************************************])
+	AC_MSG_NOTICE([*******************************************************])
+       	AC_MSG_NOTICE([Configuring with --with-cuda=yes without unified memory.]) 
+	AC_MSG_NOTICE([It only works for struct interface.])
+	AC_MSG_NOTICE([Use --enable-unified-memory to compile with unified memory.])
+       	AC_MSG_NOTICE([*******************************************************])
    else
-	CFLAGS+=" -DHYPRE_USE_GPU "
-   	CXXFLAGS+=" -DHYPRE_USE_GPU "
+	CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
+   	CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
+	LDFLAGS+="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+	AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
+	NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
+   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
    fi
 fi
 
 if test "$hypre_using_um" = "yes"
 then
-   CFLAGS+=" -DHYPRE_USE_MANAGED=1"
-   CXXFLAGS+=" -DHYPRE_USE_MANAGED=1"
+   LDFLAGS+=" -lcudart -lcuda "
+   CFLAGS+=" -DHYPRE_USE_MANAGED -I /usr/local/cuda/include "
+   CXXFLAGS+=" -DHYPRE_USE_MANAGED -I /usr/local/cuda/include "
 fi
+
+if test "$hypre_using_openmp" = "yes"
+then
+   AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support])
+fi
+
 dnl *********************************************************************
 dnl * Set installation directories
 dnl *********************************************************************
@@ -1653,17 +1700,20 @@ AC_SUBST(LAPACKLIBS)
 dnl *********************************************************************
 dnl * RAJA information
 dnl *********************************************************************
-AC_SUBST(HYPRE_RAJA_SRC_DIR)
+AC_SUBST(HYPRE_RAJA_LIB_DIR)
 AC_SUBST(HYPRE_RAJA_INCLUDE)
 AC_SUBST(HYPRE_RAJA_LIB)
+AC_SUBST(RAJA_LIBS)
 
 dnl *********************************************************************
 dnl * KOKKOS information
 dnl *********************************************************************
 AC_SUBST(HYPRE_KOKKOS_SRC_DIR)
+AC_SUBST(HYPRE_KOKKOS_LIB_DIR)
 AC_SUBST(HYPRE_KOKKOS_INCLUDE)
 AC_SUBST(HYPRE_KOKKOS_INC_FILE)	
 AC_SUBST(HYPRE_KOKKOS_LIB)
+AC_SUBST(KOKKOS_LIBS)
 dnl *********************************************************************
 dnl * NVCC stuff
 dnl *********************************************************************

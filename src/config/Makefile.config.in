@@ -91,10 +91,10 @@ AR     = @AR@
 RANLIB = @RANLIB@
 
 LDFLAGS = @LDFLAGS@
-LIBS    = @LIBS@ @CALIPER_LIBS@ @NVCCLIBS@
+LIBS    = @LIBS@ @CALIPER_LIBS@ @NVCCLIBS@  @RAJA_LIBS@ @KOKKOS_LIBS@
 FLIBS   = @FLIBS@
 
-INCLUDES = @CALIPER_INCLUDE@
+INCLUDES = @CALIPER_INCLUDE@ @HYPRE_RAJA_INCLUDE@ @HYPRE_KOKKOS_INCLUDE@
 
 ##################################################################
 ##  LAPACK Library Flags 
@@ -144,14 +144,15 @@ HYPRE_FEI_FEMLI_FILES   = @HYPRE_FEI_FEMLI_FILES@
 ##################################################################
 ##  RAJA options
 ##################################################################
-HYPRE_RAJA_SRC_DIR       = @HYPRE_RAJA_SRC_DIR@
+HYPRE_RAJA_LIB_DIR       = @HYPRE_RAJA_LIB_DIR@
 HYPRE_RAJA_INCLUDE       = @HYPRE_RAJA_INCLUDE@
 HYPRE_RAJA_LIB           = @HYPRE_RAJA_LIB@
 
 ##################################################################
 ##  kokkos options
 ##################################################################
-KOKKOS_PATH = @HYPRE_KOKKOS_SRC_DIR@
-KOKKOS_INCLUDE = @HYPRE_KOKKOS_INCLUDE@
+HYPRE_KOKKOS_SRC_DIR = @HYPRE_KOKKOS_SRC_DIR@
+HYPRE_KOKKOS_LIB_DIR = @HYPRE_KOKKOS_LIB_DIR@
+HYPRE_KOKKOS_INCLUDE = @HYPRE_KOKKOS_INCLUDE@
 HYPRE_KOKKOS_LIB         = @HYPRE_KOKKOS_LIB@
 @HYPRE_KOKKOS_INC_FILE@

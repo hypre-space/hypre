@@ -539,7 +539,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
             hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
             hypre_SerialBoxLoop1Begin(ndim, loop_size,
-				      &copy_box, start, stride, m);
+                                      &copy_box, start, stride, m);
             {
                hypre_BoxLoopGetIndex(lindex);
                hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -656,7 +656,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      /* increase the loop_size by one in the Z plane direction */
                      loop_size[2]++;
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -730,7 +730,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      loop_size[1]++;
 
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -826,7 +826,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      loop_size[2]++;
 
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -899,7 +899,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      loop_size[0]++;
 
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -996,7 +996,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      loop_size[0]++;
 
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -1067,7 +1067,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      loop_size[1]++;
 
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -1154,7 +1154,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					    &copy_box, start, rfactor, m);
+                                            &copy_box, start, rfactor, m);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -1210,7 +1210,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					    &copy_box, start, rfactor, m);
+                                            &copy_box, start, rfactor, m);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -1268,7 +1268,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					    &copy_box, start, rfactor, m);
+                                            &copy_box, start, rfactor, m);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -1335,7 +1335,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					    &copy_box, start, rfactor, m);
+                                            &copy_box, start, rfactor, m);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -1403,7 +1403,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					    &copy_box, start, rfactor, m);
+                                            &copy_box, start, rfactor, m);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -1637,7 +1637,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
             /* note that the correct cbox corresponding to this non-vanishing
                fbox is used. */
             hypre_SerialBoxLoop1Begin(ndim, loop_size,
-				      &copy_box, start, stride, m);
+                                      &copy_box, start, stride, m);
             {
                hypre_BoxLoopGetIndex(lindex);
                hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -1773,7 +1773,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      loop_size[2]++;
 
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -1875,7 +1875,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      loop_size[1]++;
 
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2001,7 +2001,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      loop_size[2]++;
 
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2100,9 +2100,9 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                      loop_size[0]++;
-		     
+                     
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2224,7 +2224,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      loop_size[0]++;
 
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2324,7 +2324,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                      loop_size[1]++;
 
                      hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					       &copy_box, start, rfactor, m);
+                                               &copy_box, start, rfactor, m);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2435,7 +2435,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					    &copy_box, start, rfactor, r);
+                                            &copy_box, start, rfactor, r);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2503,7 +2503,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					    &copy_box, start, rfactor, r);
+                                            &copy_box, start, rfactor, r);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2571,7 +2571,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
-                                      &copy_box, start, rfactor, r);
+                                            &copy_box, start, rfactor, r);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2666,7 +2666,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					    &copy_box, start, rfactor, r);
+                                            &copy_box, start, rfactor, r);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);
@@ -2761,7 +2761,7 @@ hypre_Maxwell_PNedelec( hypre_SStructGrid    *fgrid_edge,
                   hypre_CopyIndex(hypre_BoxIMin(&copy_box), start);
 
                   hypre_SerialBoxLoop1Begin(ndim, loop_size,
-					    &copy_box, start, rfactor, r);
+                                            &copy_box, start, rfactor, r);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      hypre_SetIndex3(findex, lindex[0], lindex[1], lindex[2]);

@@ -109,10 +109,10 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
          
          hypre_ForBoxI(i, hypre_StructMatrixDataSpace(matrix))
 	 {    
-	   if (hypre_StructMatrixConstantCoefficient(matrix) < 2)
-             hypre_TFree(hypre_StructMatrixDataIndices(matrix)[i]);
-	   else
-	     hypre_UMTFree(hypre_StructMatrixDataIndices(matrix)[i]); 
+            if (hypre_StructMatrixConstantCoefficient(matrix) < 2)
+               hypre_TFree(hypre_StructMatrixDataIndices(matrix)[i]);
+            else
+               hypre_UMTFree(hypre_StructMatrixDataIndices(matrix)[i]); 
 	 }
 	 
          hypre_TFree(hypre_StructMatrixDataIndices(matrix));
@@ -436,9 +436,9 @@ hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
    //data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
    
    if (constant_coefficient == 0)
-     data = hypre_DeviceCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
+      data = hypre_DeviceCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
    else
-     data = hypre_UMCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
+      data = hypre_UMCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
    
    hypre_StructMatrixInitializeData(matrix, data);
    hypre_StructMatrixDataAlloced(matrix) = 1;
@@ -1867,7 +1867,7 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
             data_box = hypre_BoxArrayBox(data_space, i);
             boundary = hypre_BoxArrayCreate( 0, ndim );
             hypre_GeneralBoxBoundaryIntersect(grid_box, grid, stencil_element,
-                boundary);
+                                              boundary);
             data = hypre_StructMatrixBoxData(matrix, i, j);
             hypre_ForBoxI(i2, boundary)
             {

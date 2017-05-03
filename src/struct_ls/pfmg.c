@@ -57,7 +57,7 @@ hypre_PFMGCreate( MPI_Comm  comm )
 HYPRE_Int
 hypre_PFMGDestroy( void *pfmg_vdata )
 {
-	hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
+   hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
 
    HYPRE_Int l;
    
@@ -73,6 +73,9 @@ hypre_PFMGDestroy( void *pfmg_vdata )
 
       if ((pfmg_data -> num_levels) > -1)
       {
+         HYPRE_Int constant_coefficient =
+            hypre_StructMatrixConstantCoefficient(pfmg_data -> A_l[0]);
+
          for (l = 0; l < (pfmg_data -> num_levels); l++)
          {
             if (pfmg_data -> active_l[l])
@@ -106,7 +109,11 @@ hypre_PFMGDestroy( void *pfmg_vdata )
             hypre_StructVectorDestroy(pfmg_data -> x_l[l+1]);
             hypre_StructVectorDestroy(pfmg_data -> tx_l[l+1]);
          }
-	 hypre_DeviceTFree(pfmg_data -> data);
+         if (constant_coefficient == 0)
+	   {hypre_DeviceTFree(pfmg_data -> data);}
+         else
+	   {hypre_UMTFree(pfmg_data -> data);}
+      
          hypre_TFree(pfmg_data -> cdir_l);
          hypre_TFree(pfmg_data -> active_l);
          hypre_TFree(pfmg_data -> grid_l);

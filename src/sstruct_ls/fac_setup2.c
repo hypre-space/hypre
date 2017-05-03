@@ -25,7 +25,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                  hypre_SStructVector  *b,
                  hypre_SStructVector  *x )
 {
-	hypre_FACData          *fac_data      =  (hypre_FACData*)fac_vdata;
+   hypre_FACData          *fac_data      =  (hypre_FACData*)fac_vdata;
 
    HYPRE_Int              *plevels       = (fac_data-> plevels);
    hypre_Index            *rfactors      = (fac_data-> prefinements);
@@ -125,8 +125,8 @@ hypre_FacSetup2( void                 *fac_vdata,
    HYPRE_Int               ierr = 0;
 /*hypre_SStructMatrix *nested_A;
 
-nested_A= hypre_TAlloc(hypre_SStructMatrix , 1);
-nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
+  nested_A= hypre_TAlloc(hypre_SStructMatrix , 1);
+  nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
 
    /* generate the composite operator with the computed coarse-grid operators */
    hypre_AMR_RAP(A_in, rfactors, &A_rap);

@@ -569,10 +569,10 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
                                 A_dbox,   fstart, stridef, iA,
                                 RAP_dbox, cstart, stridec, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iP,iR,iA,iAc,iAm1,iAp1,iP1) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
-            {			
+            {                   
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
 
@@ -755,7 +755,7 @@ hypre_SMG3BuildRAPSym( hypre_StructMatrix *A,
                   +          rb[iR] * a_bn[iAm1]
                   +                   a_bn[iA]   * pa[iP1];
 
-	       iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
+               iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
                rap_bne[iAc] = rb[iR] * a_cne[iAm1] * pa[iP1];
 
                iP1 = iP - yOffsetP - xOffsetP;
@@ -1434,7 +1434,7 @@ hypre_SMG3BuildRAPNoSym( hypre_StructMatrix *A,
                   +          ra[iR] * a_aw[iAp1]
                   +                   a_aw[iA]   * pb[iP1];
 
-	       iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
+               iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
                rap_ase[iAc] = ra[iR] * a_cse[iAp1] * pb[iP1];
 
                iP1 = iP + zOffsetP - yOffsetP;

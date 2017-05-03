@@ -1249,7 +1249,7 @@ main( hypre_int argc,
 	   //gettimeofday(&tstop,NULL);
 	   hypre_EndTiming(time_index);
 
-	   //double telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
+	   //HYPRE_Real telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
 	   //hypre_printf("axpy, \t %d, \t %f\n",nx*ny*nz,telapsed/reps);
 	   
 	   hypre_PrintTiming("Time for axpy", hypre_MPI_COMM_WORLD);
@@ -1280,7 +1280,7 @@ main( hypre_int argc,
 	   //gettimeofday(&tstop,NULL);
 	   hypre_EndTiming(time_index);
 
-	   //double telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
+	   //HYPRE_Real telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
 	   //hypre_printf("Mat-Vec, \t %d, \t %f\n",nx*ny*nz,telapsed/reps);
 
 	   hypre_PrintTiming("Time for Mat-Vec", hypre_MPI_COMM_WORLD);
@@ -1304,7 +1304,7 @@ main( hypre_int argc,
 	   }
 	   //gettimeofday(&tstop,NULL);
 	   hypre_EndTiming(time_index);
-	   //double telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
+	   //HYPRE_Real telapsed = (tstop.tv_sec - tstart.tv_sec) + (tstop.tv_usec - tstart.tv_usec)/1e6 ;
 	   //hypre_printf("inner, \t %d, \t %f\n",nx*ny*nz,telapsed/reps);
 
 	   hypre_PrintTiming("Time for inner product", hypre_MPI_COMM_WORLD);

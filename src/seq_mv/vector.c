@@ -591,12 +591,12 @@ hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
   hypre_SeqVectorPrefetchToDevice(x);
   hypre_SeqVectorPrefetchToDevice(y);
   static cublasHandle_t handle;
-  static int firstcall=1;
+  static HYPRE_Int firstcall=1;
   if (firstcall){
     handle=getCublasHandle();
     firstcall=0;
   }
-  cublasErrchk(cublasDaxpy(handle,(int)size,&alpha,x_data,1,y_data,1));
+  cublasErrchk(cublasDaxpy(handle,(HYPRE_Int)size,&alpha,x_data,1,y_data,1));
   gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
   POP_RANGE;
   return ierr;
@@ -607,7 +607,7 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
 {
   PUSH_RANGE_PAYLOAD("DEVDOT",4,hypre_VectorSize(x));
   static cublasHandle_t handle;
-  static int firstcall=1;
+  static HYPRE_Int firstcall=1;
 
   HYPRE_Complex *x_data = hypre_VectorData(x);
   HYPRE_Complex *y_data = hypre_VectorData(y);
@@ -626,7 +626,7 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
   //hypre_SeqVectorPrefetchToDevice(y);
   POP_RANGE;
   PUSH_RANGE_PAYLOAD("DEVDOT-ACTUAL",0,hypre_VectorSize(x));
-  stat=cublasDdot(handle, (int)size,
+  stat=cublasDdot(handle, (HYPRE_Int)size,
 		  x_data, 1,
 		  y_data, 1,
 		  &result);
@@ -650,7 +650,7 @@ void hypre_SeqVectorPrefetchToHost(hypre_Vector *x){
   gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
   POP_RANGE;
 }
-void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x,int index){
+void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index){
   if (hypre_VectorSize(x)==0) return;
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
   gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(index)));

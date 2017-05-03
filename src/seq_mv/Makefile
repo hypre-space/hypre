@@ -80,7 +80,7 @@ libHYPRE_seq_mv.a: ${OBJS} ${CUOBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_seq_mv.so: ${OBJS}  ${CUOBJS}
+libHYPRE_seq_mv.so: ${OBJS} ${CUOBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

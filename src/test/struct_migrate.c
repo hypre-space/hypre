@@ -420,7 +420,7 @@ AddValuesVector( hypre_StructGrid   *grid,
 {
    HYPRE_Int          ierr = 0;
    hypre_BoxArray    *gridboxes;
-   HYPRE_Int          i,ib;
+   HYPRE_Int          ib;
    hypre_IndexRef     ilower;
    hypre_IndexRef     iupper;
    hypre_Box         *box;
@@ -440,7 +440,7 @@ AddValuesVector( hypre_StructGrid   *grid,
       {
          values[i] = value;
       }
-      hypre_LoopEnd()
+      hypre_LoopEnd();
 	
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);

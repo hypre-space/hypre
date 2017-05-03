@@ -233,6 +233,20 @@ typedef struct
 
 #endif
 
+#ifndef hypre_GPUKERNELS_HEADER
+#define hypre_GPUKERNELS_HEADER
+#ifdef HYPRE_USE_GPU
+#include <cuda_runtime_api.h>
+int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
+void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
+void VecSet(double* tgt, int size, double value, cudaStream_t s);
+void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
+void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
+void CudaCompileFlagCheck();
+void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, hypre_int *send_map, hypre_int begin,hypre_int end,cudaStream_t s);
+#endif
+#endif
+
 /* csr_matop.c */
 hypre_CSRMatrix *hypre_CSRMatrixAdd ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
 hypre_CSRMatrix *hypre_CSRMatrixMultiply ( hypre_CSRMatrix *A , hypre_CSRMatrix *B );
@@ -359,7 +373,7 @@ HYPRE_Int hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha , hypre_Vector *x , hyp
 HYPRE_Real hypre_SeqVectorInnerProdDevice ( hypre_Vector *x , hypre_Vector *y );
 void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x);
 void hypre_SeqVectorPrefetchToHost(hypre_Vector *x);
-void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x,int index);
+void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index);
 hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x);
 #endif
 #ifdef __cplusplus

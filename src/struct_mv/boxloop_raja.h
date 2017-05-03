@@ -23,20 +23,10 @@
 #ifndef HYPRE_NEWBOXLOOP_HEADER
 #define HYPRE_NEWBOXLOOP_HEADER
 
-#include <cuda.h>
-#include <cuda_runtime.h>
-
 extern "C++" {
-#include <curand.h>
-#include <curand_kernel.h>
 #include <RAJA/RAJA.hxx>
 }
 using namespace RAJA;
-
-static HYPRE_Complex* global_recv_buffer;
-static HYPRE_Complex* global_send_buffer;
-static HYPRE_Int      global_recv_size = 0;
-static HYPRE_Int      global_send_size = 0;
 
 typedef struct hypre_Boxloop_struct
 {
@@ -49,43 +39,39 @@ typedef struct hypre_Boxloop_struct
 #define BLOCKSIZE 256
 
 #if defined(HYPRE_MEMORY_GPU)
+#include <cuda.h>
+#include <cuda_runtime.h>
+
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, char const* const fun, const int line)
+inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
 {
     if (err)
     {
         printf("CUDA Error Code[%d]: %s\n%s() Line:%d\n", err, cudaGetErrorString(err), fun, line);
-		int *p = NULL; *p = 1;
+		HYPRE_Int *p = NULL; *p = 1;
     }
 }
 
 #define hypre_exec_policy cuda_exec<BLOCKSIZE>
 #define hypre_reduce_policy  cuda_reduce_atomic<BLOCKSIZE>
-#define hypre_fence() AxCheckError(cudaDeviceSynchronize()); 
-#elif defined(HYPRE_USING_OPENMP)
-   #define hypre_exec_policy      omp_parallel_for
+#define hypre_fence() \
+cudaError err = cudaGetLastError();\
+if ( cudaSuccess != err ) {\
+printf("\n ERROR zypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+}\
+AxCheckError(cudaDeviceSynchronize());
+
+#elif defined(HYPRE_USE_OPENMP)
+   #define hypre_exec_policy      omp_for_exec
    #define hypre_reduce_policy omp_reduce
-   #define hypre_fence() ;
+   #define hypre_fence() 
 #elif defined(HYPRE_USING_OPENMP_ACC)
    #define hypre_exec_policy      omp_parallel_for_acc
    #define hypre_reduce_policy omp_acc_reduce
 #else 
-   #define hypre_exec_policy   sequential
+   #define hypre_exec_policy   seq_exec
    #define hypre_reduce_policy seq_reduce
-   #define hypre_fence();
-#endif
-#if defined(HYPRE_MEMORY_GPU)
-#define hypre_rand(val) \
-{\
-    curandState_t state;\
-    curand_init(0,0,0,&state);\
-    val = curand(&state);\
-}
-#else
-#define hypre_rand(val) \
-{\
-    val = rand();\
-}
+   #define hypre_fence()
 #endif
 
 #define zypre_BoxLoopIncK(k,box,i)					\
@@ -105,125 +91,22 @@ inline void CheckError(cudaError_t const err, char const* const fun, const int l
    hypre_boxD##k *= hypre_max(0, box.bsize2 + 1);			\
 }
 
-extern "C++" {
-  
-template<class T>
-__global__ void dot (T * a, T * b, T *c, HYPRE_Int hypre__tot,
-                     hypre_Boxloop box1,hypre_Boxloop box2)
-{
-    int id = (blockIdx.x * blockDim.x) + threadIdx.x;
-	HYPRE_Int local_idx;
-    HYPRE_Int d,idx_local = id;
-    HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;
-    HYPRE_Int i1 = 0, i2 = 0;
-    //// reducted output
-    __shared__ T shared_cache [BLOCKSIZE];
-	T sum = 0;
-    local_idx  = idx_local % box1.lsize0;
-    idx_local  = idx_local / box1.lsize0;
-    i1 += (local_idx*box1.strides0 + box1.bstart0) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize0 + 1);
-    i2 += (local_idx*box2.strides0 + box2.bstart0) * hypre_boxD2;
-    hypre_boxD2 *= hypre_max(0, box2.bsize0 + 1);
-    local_idx  = idx_local % box1.lsize1;
-    idx_local  = idx_local / box1.lsize1;
-    i1 += (local_idx*box1.strides1 + box1.bstart1) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize1 + 1);
-    i2 += (local_idx*box2.strides1 + box2.bstart1) * hypre_boxD2;   
-    hypre_boxD2 *= hypre_max(0, box2.bsize1 + 1);	
-    local_idx  = idx_local % box1.lsize2;	      
-    idx_local  = idx_local / box1.lsize2;		      
-    i1 += (local_idx*box1.strides2 + box1.bstart2) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize2 + 1);	
-    i2 += (local_idx*box2.strides2 + box2.bstart2) * hypre_boxD2;
-    hypre_boxD2 *= hypre_max(0, box2.bsize2 + 1);
-    
-	if (id < hypre__tot)
-		sum = a[i1] * hypre_conj(b[i2]);
-    *(shared_cache + threadIdx.x) = sum;
-	
-    __syncthreads();
-	
-    ///////// sum of internal cache
-	
-    int i;    
-    
-    for (i=(BLOCKSIZE /2); i>0 ; i= i/2){
-		if (threadIdx.x < i){
-			*(shared_cache + threadIdx.x) += *(shared_cache + threadIdx.x + i);
-		}
-		__syncthreads();
-    }
-	
-    if ( threadIdx.x == 0){
-        *(c+ blockIdx.x) = shared_cache[0];
-    }
-}
 
-template<class T>
-__global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
-				hypre_Boxloop box1)
-{
-    int id = (blockIdx.x * blockDim.x) + threadIdx.x;
-	HYPRE_Int local_idx;
-    HYPRE_Int d,idx_local = id;
-    HYPRE_Int hypre_boxD1 = 1.0;
-    HYPRE_Int i1 = 0;
-    //// reducted output
-    __shared__ T shared_cache [BLOCKSIZE];
-    T sum = 0;
-    local_idx  = idx_local % box1.lsize0;
-    idx_local  = idx_local / box1.lsize0;
-    i1 += (local_idx*box1.strides0 + box1.bstart0) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize0 + 1);
-    local_idx  = idx_local % box1.lsize1;
-    idx_local  = idx_local / box1.lsize1;
-    i1 += (local_idx*box1.strides1 + box1.bstart1) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize1 + 1);	
-    local_idx  = idx_local % box1.lsize2;	      
-    idx_local  = idx_local / box1.lsize2;		      
-    i1 += (local_idx*box1.strides2 + box1.bstart2) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize2 + 1);	
-    if (id < hypre__tot)
-      sum = a[i1];
-    *(shared_cache + threadIdx.x) = sum;
-    
-    __syncthreads();
-    
-    ///////// sum of internal cache
-    
-    int i;    
-    
-    for (i=(BLOCKSIZE /2); i>0 ; i= i/2){
-      if (threadIdx.x < i){
-	*(shared_cache + threadIdx.x) *= *(shared_cache + threadIdx.x + i);
-      }
-      __syncthreads();
-    }
-    
-    if ( threadIdx.x == 0){
-      *(b+ blockIdx.x) = shared_cache[0];
-    }
-}
-  
-}
-
-#define zypre_BoxLoopCUDAInit(ndim)											\
-	HYPRE_Int hypre__tot = 1.0;											\
-	const HYPRE_Int block_size = BLOCKSIZE;					\
-	for (HYPRE_Int i = 0;i < ndim;i ++)									\
-		hypre__tot *= loop_size[i];
+#define zypre_BoxLoopCUDAInit(ndim,loop_size)				\
+  HYPRE_Int hypre__tot = 1;						\
+  for (HYPRE_Int i = 0;i < ndim;i ++)					\
+      hypre__tot *= loop_size[i];
 
 
 #define zypre_BoxLoopCUDADeclare()										\
 	HYPRE_Int local_idx;												\
-	HYPRE_Int d,idx_local = idx;
+	HYPRE_Int idx_local = idx;
 
 #define zypre_newBoxLoop0Begin(ndim, loop_size)			\
-{    														\
-    zypre_BoxLoopCUDAInit(ndim);						\
-	forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
-	{
+{									\
+   zypre_BoxLoopCUDAInit(ndim,loop_size);					\
+   forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
+   {
 
 
 #define zypre_newBoxLoop0End()					\
@@ -232,64 +115,70 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 }
 
 #define zypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)	\
-	hypre_Boxloop databox##k;											\
-	databox##k.lsize0 = loop_size[0];									\
-	databox##k.strides0 = stride[0];									\
-	databox##k.bstart0  = start[0] - dbox->imin[0];					\
-	databox##k.bsize0   = dbox->imax[0]-dbox->imin[0];				\
-	databox##k.lsize1 = loop_size[1];									\
-	databox##k.strides1 = stride[1];									\
-	databox##k.bstart1  = start[1] - dbox->imin[1];					\
-	databox##k.bsize1   = dbox->imax[1]-dbox->imin[1];				\
-	if (ndim == 3)														\
-	{																	\
-		databox##k.lsize2 = loop_size[2];								\
-		databox##k.strides2 = stride[2];								\
-		databox##k.bstart2  = start[2] - dbox->imin[2];				\
-		databox##k.bsize2   = dbox->imax[2]-dbox->imin[2];			\
-	}																	\
-	else																\
-	{																	\
-		databox##k.lsize2 = 0;											\
-		databox##k.strides2 = 0;									\
-		databox##k.bstart2  = 0;									\
-		databox##k.bsize2   = 0;							\
+	hypre_Boxloop databox##k;					\
+	databox##k.lsize0 = loop_size[0];				\
+	databox##k.strides0 = stride[0];				\
+	databox##k.bstart0  = start[0] - dbox->imin[0];			\
+	databox##k.bsize0   = dbox->imax[0]-dbox->imin[0];		\
+	if (ndim > 1)							\
+	{								\
+	    databox##k.lsize1 = loop_size[1];				\
+	    databox##k.strides1 = stride[1];				\
+	    databox##k.bstart1  = start[1] - dbox->imin[1];		\
+	    databox##k.bsize1   = dbox->imax[1]-dbox->imin[1];   	\
+	}								\
+	else						        	\
+	{							       	\
+		databox##k.lsize1 = 1;				       	\
+		databox##k.strides1 = 0;		       		\
+		databox##k.bstart1  = 0;	       			\
+		databox##k.bsize1   = 0;		       		\
+	}								\
+	if (ndim == 3)							\
+	{								\
+	    databox##k.lsize2 = loop_size[2];				\
+	    databox##k.strides2 = stride[2];				\
+	    databox##k.bstart2  = start[2] - dbox->imin[2];		\
+	    databox##k.bsize2   = dbox->imax[2]-dbox->imin[2];   	\
+	}								\
+	else								\
+	{								\
+	    databox##k.lsize2 = 1;					\
+	    databox##k.strides2 = 0;					\
+	    databox##k.bstart2  = 0;					\
+	    databox##k.bsize2   = 0;					\
 	}
 
 #define zypre_newBoxLoop1Begin(ndim, loop_size,				\
 			       dbox1, start1, stride1, i1)		\
 {    														\
-    zypre_BoxLoopCUDAInit(ndim);					\
+    zypre_BoxLoopCUDAInit(ndim,loop_size);						\
     zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
       zypre_BoxLoopCUDADeclare();					\
-      HYPRE_Int hypre_boxD1 = 1.0;					\
+      HYPRE_Int hypre_boxD1 = 1;					\
       HYPRE_Int i1 = 0;							\
       zypre_BoxLoopIncK(1,databox1,i1);
 
       
 #define zypre_newBoxLoop1End(i1)				\
 	});											\
-cudaError err = cudaGetLastError();\
-if ( cudaSuccess != err ) {\
-printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-}\
-hypre_fence();\ 
+    hypre_fence();\
 }
 	
 #define zypre_newBoxLoop2Begin(ndim, loop_size,				\
                                 dbox1, start1, stride1, i1,	\
                                 dbox2, start2, stride2, i2)	\
 {    														\
-    zypre_BoxLoopCUDAInit(ndim);						\
+    zypre_BoxLoopCUDAInit(ndim,loop_size);						\
     zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
     zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);	\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         zypre_BoxLoopCUDADeclare()					\
-        HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0;			\
-	HYPRE_Int i1 = 0, i2 = 0;					\
+        HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1;			\
+		HYPRE_Int i1 = 0, i2 = 0;							\
 	local_idx  = idx_local % databox1.lsize0;			\
 	idx_local  = idx_local / databox1.lsize0;			\
 	i1 += (local_idx*databox1.strides0 + databox1.bstart0) * hypre_boxD1; \
@@ -313,11 +202,7 @@ hypre_fence();\
 
 #define zypre_newBoxLoop2End(i1, i2)			\
 	});											\
-cudaError err = cudaGetLastError();\
-if ( cudaSuccess != err ) {\
-printf("\n ERROR zypre_newBoxLoop2End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-}\
-hypre_fence();\
+    hypre_fence();\
 }
 
 #define zypre_newBoxLoop3Begin(ndim, loop_size,				\
@@ -325,14 +210,14 @@ hypre_fence();\
 			       dbox2, start2, stride2, i2,		\
 			       dbox3, start3, stride3, i3)		\
   {									\
-        zypre_BoxLoopCUDAInit(ndim);						\
+  zypre_BoxLoopCUDAInit(ndim,loop_size);						\
         zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
         zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2); \
         zypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3); \
         forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
 	{								\
 	  zypre_BoxLoopCUDADeclare();					\
-	  HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0; \
+	  HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1,hypre_boxD3 = 1; \
 	  HYPRE_Int i1 = 0, i2 = 0, i3 = 0;				\
 	  local_idx  = idx_local % databox1.lsize0;				\
 	  idx_local  = idx_local / databox1.lsize0;				\
@@ -362,11 +247,7 @@ hypre_fence();\
 
 #define zypre_newBoxLoop3End(i1, i2, i3)			\
 	});											\
-	cudaError err = cudaGetLastError();				\
-	if ( cudaSuccess != err ) {					\
-	  printf("\n ERROR zypre_newBoxLoop3End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-	}								\
-	hypre_fence();							\	
+	hypre_fence();							\
 }
 
 #define zypre_newBoxLoop4Begin(ndim, loop_size,				\
@@ -375,7 +256,7 @@ hypre_fence();\
 			       dbox3, start3, stride3, i3,		\
 			       dbox4, start4, stride4, i4)		\
 {								       \
-     zypre_BoxLoopCUDAInit(ndim);						\
+ zypre_BoxLoopCUDAInit(ndim,loop_size);					       \
      zypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
      zypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2); \
      zypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3); \
@@ -383,7 +264,7 @@ hypre_fence();\
      forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
      {									\
          zypre_BoxLoopCUDADeclare();					\
-	 HYPRE_Int hypre_boxD1 = 1.0,hypre_boxD2 = 1.0,hypre_boxD3 = 1.0,hypre_boxD4 = 1.0; \
+		 HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1,hypre_boxD3 = 1,hypre_boxD4 = 1; \
 	 HYPRE_Int i1 = 0, i2 = 0, i3 = 0,i4 = 0;			\
 	 local_idx  = idx_local % databox1.lsize0;			\
 	 idx_local  = idx_local / databox1.lsize0;			\
@@ -418,16 +299,13 @@ hypre_fence();\
 	 
 #define zypre_newBoxLoop4End(i1, i2, i3, i4)	\
   });						\
-  cudaError err = cudaGetLastError();		\
-  if ( cudaSuccess != err ) {						\
-    printf("\n ERROR zypre_newBoxLoop4End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-  }									\
   hypre_fence();				\
 }
 
 #define MAX_BLOCK BLOCKSIZE
 
 extern "C++" {
+#if defined(HYPRE_MEMORY_GPU)
 template<class T>
 class ReduceMult   
 {
@@ -466,12 +344,12 @@ public:
     extern __shared__ unsigned char sd_block[];
     T *sd = reinterpret_cast<T *>(&sd_block[m_smem_offset]);
 
-    int threadId = threadIdx.x + blockDim.x * threadIdx.y
+    HYPRE_Int threadId = threadIdx.x + blockDim.x * threadIdx.y
                    + (blockDim.x * blockDim.y) * threadIdx.z;
 
     // initialize shared memory
     T val = static_cast<T>(0);
-    for (int i = BLOCK_SIZE / 2; i > 0; i /= 2) {
+    for (HYPRE_Int i = BLOCKSIZE / 2; i > 0; i /= 2) {
       // this descends all the way to 1
       if (threadId < i) {
         sd[threadId + i] = val;
@@ -504,13 +382,13 @@ public:
       extern __shared__ unsigned char sd_block[];
       T *sd = reinterpret_cast<T *>(&sd_block[m_smem_offset]);
 
-      int threadId = threadIdx.x + blockDim.x * threadIdx.y
+      HYPRE_Int threadId = threadIdx.x + blockDim.x * threadIdx.y
                      + (blockDim.x * blockDim.y) * threadIdx.z;
 
-      T temp = 0;
+      T temp = 1;
       __syncthreads();
 
-      for (int i = BLOCK_SIZE / 2; i >= WARP_SIZE; i /= 2) {
+      for (HYPRE_Int i = BLOCKSIZE / 2; i >= WARP_SIZE; i /= 2) {
         if (threadId < i) {
           sd[threadId] *= sd[threadId + i];
         }
@@ -519,7 +397,7 @@ public:
 
       if (threadId < WARP_SIZE) {
         temp = sd[threadId];
-        for (int i = WARP_SIZE / 2; i > 0; i /= 2) {
+        for (HYPRE_Int i = WARP_SIZE / 2; i > 0; i /= 2) {
           temp *= HIDDEN::shfl_xor<T>(temp, i);
         }
       }
@@ -562,13 +440,13 @@ public:
    *
    * Note: only operates on device.
    */
-  __device__ ReduceMult<T> const &
+  RAJA_DEVICE ReduceMult<T> const &
   operator*=(T val) const
   {
     extern __shared__ unsigned char sd_block[];
     T *sd = reinterpret_cast<T *>(&sd_block[m_smem_offset]);
 
-    int threadId = threadIdx.x + blockDim.x * threadIdx.y
+    HYPRE_Int threadId = threadIdx.x + blockDim.x * threadIdx.y
                    + (blockDim.x * blockDim.y) * threadIdx.z;
 
     sd[threadId] *= val;
@@ -595,12 +473,12 @@ private:
   /*!
    * \brief My cuda reduction variable ID.
    */
-  int m_myID = -1;
+  HYPRE_Int m_myID = -1;
 
   /*!
    * \brief Byte offset into dynamic shared memory.
    */
-  int m_smem_offset = -1;
+  HYPRE_Int m_smem_offset = -1;
 
   /*!
    * \brief If this variable is a copy or not; only original may release memory 
@@ -627,7 +505,163 @@ private:
       "Error: type must be of size <= " 
       RAJA_STRINGIFY_MACRO(RAJA_CUDA_REDUCE_VAR_MAXSIZE));
 };
-
+#elif defined(HYPRE_USING_OPENMP)
+    template <typename T>
+    class ReduceMult
+    {
+        using my_type = ReduceMult;
+        
+    public:
+        //
+        // Constructor takes default value (default ctor is disabled).
+        //
+        explicit ReduceMult(T init_val, T initializer = 1)
+        : m_parent(NULL), m_val(init_val), m_custom_init(initializer)
+        {
+        }
+        
+        //
+        // Copy ctor.
+        //
+        ReduceMult(const ReduceMult& other) :
+        m_parent(other.m_parent ? other.m_parent : &other),
+        m_val(other.m_custom_init),
+        m_custom_init(other.m_custom_init)
+        {
+        }
+        
+        //
+        // Destruction releases the shared memory block chunk for reduction id
+        // and id itself for others to use.
+        //
+        ~ReduceMult()
+        {
+            if (m_parent) {
+#pragma omp critical
+                {
+                    *m_parent *= m_val;
+                }
+            }
+        }
+        
+        //
+        // Operator that returns reduced sum value.
+        //
+        operator T()
+        {
+            return m_val;
+        }
+        
+        //
+        // Method that returns sum value.
+        //
+        T get() { return operator T(); }
+        
+        //
+        // += operator that adds value to sum for current thread.
+        //
+        const ReduceMult& operator*=(T rhs) const
+        {
+            this->m_val *= rhs;
+            return *this;
+        }
+        
+        ReduceMult& operator*=(T rhs)
+        {
+            this->m_val *= rhs;
+            return *this;
+        }
+        
+    private:
+        //
+        // Default ctor is declared private and not implemented.
+        //
+        ReduceMult();
+        
+        const my_type * m_parent;
+        
+        mutable T m_val;
+        T m_custom_init;
+        
+    };
+#else
+    template <typename T>
+    class ReduceMult
+    {
+        using my_type = ReduceMult;
+        
+    public:
+        //
+        // Constructor takes default value (default ctor is disabled).
+        //
+        explicit ReduceMult(T init_m_val, T initializer = 1) :
+        m_parent(NULL),
+        m_val(init_m_val),
+        m_custom_init(initializer)
+        {
+        }
+        
+        //
+        // Copy ctor.
+        //
+        ReduceMult(const ReduceMult& other) :
+        m_parent(other.m_parent ? other.m_parent : &other),
+        m_val(other.m_custom_init),
+        m_custom_init(other.m_custom_init)
+        {
+        }
+        
+        //
+        // Destruction releases the shared memory block chunk for reduction id
+        // and id itself for others to use.
+        //
+        ~ReduceMult()
+        {
+            if (m_parent) {
+                *m_parent *= m_val;
+            }
+        }
+        
+        //
+        // Operator that returns reduced sum value.
+        //
+        operator T()
+        {
+            return m_val;
+        }
+        
+        //
+        // Method that returns reduced sum value.
+        //
+        T get() { return operator T(); }
+        
+        //
+        // += operator that adds value to sum.
+        //
+        ReduceMult& operator*=(T rhs)
+        {
+            this->m_val *= rhs;
+            return *this;
+        }
+        
+        const ReduceMult& operator*=(T rhs) const
+        {
+            this->m_val *= rhs;
+            return *this;
+        }
+        
+    private:
+        //
+        // Default ctor is declared private and not implemented.
+        //
+        ReduceMult();
+        
+        const my_type * m_parent;
+        
+        mutable T m_val;
+        T m_custom_init;
+    };
+#endif
 }
 
 
@@ -637,7 +671,7 @@ private:
    HYPRE_Real sum_tmp;							\
    {									\
       ReduceSum< hypre_reduce_policy, HYPRE_Real> sum(0.0);				\
-      zypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1)	\
+      zypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1,i1)	\
       {
 
 #define zypre_newBoxLoop1ReductionEnd(i1,sum)				\
@@ -646,7 +680,7 @@ private:
       hypre_fence();						\
       sum_tmp = (HYPRE_Real)(sum);				\
    }								\
-   sum = sum_tmp; \
+   sum += sum_tmp; \
 }
 		    
 #define zypre_newBoxLoop2ReductionBegin(ndim, loop_size,		\
@@ -656,7 +690,9 @@ private:
    HYPRE_Real sum_tmp;							\
    {									\
       ReduceSum< hypre_reduce_policy, HYPRE_Real> sum(0.0);				\
-      zypre_newBoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1,dbox2, start2, stride2, i2,) \
+      zypre_newBoxLoop2Begin(ndim, loop_size, \
+			     dbox1, start1, stride1,i1,\
+			     dbox2, start2, stride2,i2)	\
       {
 
 #define zypre_newBoxLoop2ReductionEnd(i1,i2,sum)			\
@@ -665,20 +701,21 @@ private:
       hypre_fence();							\
       sum_tmp = (HYPRE_Real)(sum);					\
    }								\
-   sum = sum_tmp; \
+   sum += sum_tmp; \
 }
 
 #define zypre_newBoxLoop1ReductionMult(ndim, loop_size,				\
 				       dbox1, start1, stride1, i1,xp,sum) \
-{    																	\
-   ReduceMult<HYPRE_Real> local_result_raja(0.0);				\
-   zypre_newBoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, dbox2, start2, stride2, i2) \
+{									\
+   ReduceMult<HYPRE_Real> local_result_raja(1.0);				\
+   zypre_newBoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1) \
    {									\
        local_result_raja *= xp[i1];					\
    }									\
-   zypre_newBoxLoop2End(i1, i2)						\
+   zypre_newBoxLoop1End(i1)						\
    hypre_fence();							\
-   sum = (HYPRE_Real)(local_result_raja);
+   sum *= (HYPRE_Real)(local_result_raja);				\
+}
 
 
 #define hypre_LoopBegin(size,idx)					\
@@ -692,8 +729,8 @@ private:
 }
   
 #define zypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
-{    														\
-    HYPRE_Int hypre__tot = 1.0;											\
+{									\
+    zypre_BoxLoopCUDAInit(ndim,loop_size);				\
     hypre_Boxloop databox1;						\
     databox1.lsize0 = loop_size[0];					\
     databox1.lsize1 = loop_size[1];					\
@@ -701,30 +738,22 @@ private:
     databox1.strides0 = stride1[0];					\
     databox1.strides1 = stride1[1];					\
     databox1.strides2 = stride1[2];					\
-    for (HYPRE_Int d = 0;d < ndim;d ++)					\
-    {									\
-       hypre__tot *= loop_size[d];					\
-    }									\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         zypre_BoxLoopCUDADeclare()					\
         HYPRE_Int i1 = 0;							\
-	local_idx  = idx_local % databox1.lsize0;			\
-	idx_local  = idx_local / databox1.lsize0;			\
-	i1 += local_idx*databox1.strides0;				\
-	local_idx  = idx_local % databox1.lsize1;			\
-	idx_local  = idx_local / databox1.lsize1;			\
-	i1 += local_idx*databox1.strides1;				\
-	local_idx  = idx_local % databox1.lsize2;			\
-	idx_local  = idx_local / databox1.lsize2;			\
-	i1 += local_idx*databox1.strides2;				\
+        local_idx  = idx_local % databox1.lsize0;			\
+        idx_local  = idx_local / databox1.lsize0;			\
+        i1 += local_idx*databox1.strides0;				\
+        local_idx  = idx_local % databox1.lsize1;			\
+        idx_local  = idx_local / databox1.lsize1;			\
+        i1 += local_idx*databox1.strides1;				\
+        local_idx  = idx_local % databox1.lsize2;			\
+        idx_local  = idx_local / databox1.lsize2;			\
+        i1 += local_idx*databox1.strides2;				\
 		
 #define zypre_BoxBoundaryCopyEnd()				\
 	});											\
-	cudaError err = cudaGetLastError();				\
-	if ( cudaSuccess != err ) {					\
-	  printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-	}								\
 	hypre_fence();							\
 }
 
@@ -732,8 +761,7 @@ private:
                                    stride1, i1,	\
                                    stride2, i2)	\
 {    														\
-    HYPRE_Int hypre__tot = 1.0;											\
-    const size_t block_size = 256;					\
+    zypre_BoxLoopCUDAInit(ndim,loop_size);					\
     hypre_Boxloop databox1,databox2;					\
     databox1.lsize0 = loop_size[0];					\
     databox1.lsize1 = loop_size[1];					\
@@ -747,10 +775,6 @@ private:
     databox2.strides0 = stride2[0];					\
     databox2.strides1 = stride2[1];					\
     databox2.strides2 = stride2[2];					\
-    for (HYPRE_Int d = 0;d < ndim;d ++)					\
-      {									\
-	hypre__tot *= loop_size[d];					\
-      }									\
     forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         zypre_BoxLoopCUDADeclare()					\
@@ -772,31 +796,27 @@ private:
 
 #define zypre_BoxDataExchangeEnd()				\
 	});											\
-	cudaError err = cudaGetLastError();				\
-	if ( cudaSuccess != err ) {					\
-	  printf("\n ERROR zypre_newBoxLoop2End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-	}								\
 	hypre_fence();							\
 }
 
-#define zypre_newBoxLoop0For() {}
+#define zypre_newBoxLoop0For()
 
-#define zypre_newBoxLoop1For(i1) {}
+#define zypre_newBoxLoop1For(i1)
 
-#define zypre_newBoxLoop2For(i1, i2) {}
+#define zypre_newBoxLoop2For(i1, i2) 
+ 
+#define zypre_newBoxLoop3For(i1, i2, i3)
 
-#define zypre_newBoxLoop3For(i1, i2, i3) {}
+#define zypre_newBoxLoop4For(i1, i2, i3, i4)
 
-#define zypre_newBoxLoop4For(i1, i2, i3, i4) {}
-
-#define zypre_newBoxLoopSetOneBlock() {}
+#define zypre_newBoxLoopSetOneBlock()
 
 #define hypre_newBoxLoopGetIndex(index)					\
   index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
 
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 #define hypre_BoxLoopSetOneBlock zypre_newBoxLoopSetOneBlock
-#define hypre_BoxLoopBlock()       1
+#define hypre_BoxLoopBlock()       0
 #define hypre_BoxLoop0Begin      zypre_newBoxLoop0Begin
 #define hypre_BoxLoop0For        zypre_newBoxLoop0For
 #define hypre_BoxLoop0End        zypre_newBoxLoop0End

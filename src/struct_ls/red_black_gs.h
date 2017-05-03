@@ -43,6 +43,8 @@ typedef struct
 } hypre_RedBlackGSData;
 
 #ifdef HYPRE_USE_RAJA
+#define HYPRE_REDBLACK_PRIVATE hypre__global_error
+#define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
 				bstart,bni,bnj,bi,	\
@@ -53,11 +55,13 @@ typedef struct
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;			\
@@ -79,11 +83,13 @@ typedef struct
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\
@@ -95,21 +101,26 @@ typedef struct
      hypre_fence();					\
 }  
 #elif defined(HYPRE_USE_KOKKOS)
+#define HYPRE_REDBLACK_PRIVATE hypre__global_error
+#define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
 				bstart,bni,bnj,bi,	\
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
+    HYPRE_Int hypre_fake = 0;						\
     Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;			\
@@ -119,11 +130,7 @@ typedef struct
 #define hypre_RedBlackLoopEnd()			\
          }						\
      });						\
-     cudaError err = cudaGetLastError();		\
-     if ( cudaSuccess != err ) {					\
-       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-     }									\
-     AxCheckError(cudaDeviceSynchronize());				\
+     hypre_fence();					\
 }
 
 #define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
@@ -135,11 +142,13 @@ typedef struct
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\
@@ -148,13 +157,11 @@ typedef struct
 #define hypre_RedBlackConstantcoefLoopEnd()			\
          }						\
      });						\
-     cudaError err = cudaGetLastError();		\
-     if ( cudaSuccess != err ) {					\
-       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-     }									\
-     AxCheckError(cudaDeviceSynchronize());				\
+     hypre_fence();					\
 }  
 #elif defined(HYPRE_USE_CUDA)
+#define HYPRE_REDBLACK_PRIVATE hypre__global_error
+#define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
 				bstart,bni,bnj,bi,	\
@@ -165,11 +172,13 @@ typedef struct
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;			\
@@ -179,11 +188,7 @@ typedef struct
 #define hypre_RedBlackLoopEnd()			\
          }						\
      });						\
-     cudaError err = cudaGetLastError();		\
-     if ( cudaSuccess != err ) {					\
-       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-     }									\
-     AxCheckError(cudaDeviceSynchronize());				\
+     hypre_fence();					\
 }
 	   
 #define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
@@ -195,11 +200,13 @@ typedef struct
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,bi,xi;					\
+	HYPRE_Int local_ii;						\
 	kk = idx_local % nk;						\
 	idx_local = idx_local / nk;					\
 	jj = idx_local % nj;						\
 	idx_local = idx_local / nj;					\
-	ii = 2*idx_local + redblack;					\
+	local_ii = (kk + jj + redblack) % 2;				\
+	ii = 2*idx_local + local_ii;					\
 	if (ii < ni)							\
 	{								\
 	    bi = bstart + kk*bnj*bni + jj*bni + ii;			\
@@ -208,54 +215,53 @@ typedef struct
 #define hypre_RedBlackConstantcoefLoopEnd()			\
          }						\
      });						\
-     cudaError err = cudaGetLastError();		\
-     if ( cudaSuccess != err ) {					\
-       printf("\n ERROR zypre_newBoxLoop1End: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
-     }									\
-     AxCheckError(cudaDeviceSynchronize());				\
+     hypre_fence();					\
 }
 #else
-#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
-				Astart,Ani,Anj,Ai,	\
-				bstart,bni,bnj,bi,	\
-				xstart,xni,xnj,xi)	\
-{					  \
-    HYPRE_Int ii,jj,kk,Ai,bi,xi;		  \
-    for (kk = 0; kk < nk; kk++)			  \
-    {						  \
-        for (jj = 0; jj < nj; jj++)			  \
-	{						  \
-	    ii = (kk + jj + redblack) % 2;\
-	    Ai = Astart + kk*Anj*Ani + jj*Ani + ii;		\
-	    bi = bstart + kk*bnj*bni + jj*bni + ii;		\
-	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
-	    for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)			\
-	    {
+#define HYPRE_REDBLACK_PRIVATE hypre__kk
+#define hypre_RedBlackLoopInit()\
+{\
+   HYPRE_Int hypre__kk;
 
-#define hypre_RedBlackLoopEnd()			\
-            }\
-	}\
-    }\
+#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
+				Astart,Ani,Anj,Ai,\
+				bstart,bni,bnj,bi,\
+				xstart,xni,xnj,xi)\
+   for (hypre__kk = 0; hypre__kk < nk; hypre__kk++)\
+   {\
+      HYPRE_Int ii,jj,Ai,bi,xi;\
+      for (jj = 0; jj < nj; jj++)\
+      {\
+         ii = (hypre__kk + jj + redblack) % 2;\
+         Ai = Astart + hypre__kk*Anj*Ani + jj*Ani + ii;\
+         bi = bstart + hypre__kk*bnj*bni + jj*bni + ii;\
+         xi = xstart + hypre__kk*xnj*xni + jj*xni + ii;\
+         for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)\
+         {
+
+#define hypre_RedBlackLoopEnd()\
+         }\
+      }\
+   }\
 }
 
 #define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
-				bstart,bni,bnj,bi,	\
-				xstart,xni,xnj,xi)	\
-{					  \
-    HYPRE_Int ii,jj,kk,bi,xi;		  \
-    for (kk = 0; kk < nk; kk++)			  \
-    {						  \
-        for (jj = 0; jj < nj; jj++)			  \
-	{						  \
-	    ii = (kk + jj + redblack) % 2;\
-	    bi = bstart + kk*bnj*bni + jj*bni + ii;		\
-	    xi = xstart + kk*xnj*xni + jj*xni + ii;			\
-	    for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)			\
-	    {
+                                            bstart,bni,bnj,bi,\
+                                            xstart,xni,xnj,xi)\
+   for (hypre__kk = 0; hypre__kk < nk; hypre__kk++)\
+   {\
+      HYPRE_Int ii,jj,bi,xi;\
+      for (jj = 0; jj < nj; jj++)\
+      {\
+         ii = (hypre__kk + jj + redblack) % 2;\
+         bi = bstart + hypre__kk*bnj*bni + jj*bni + ii;\
+         xi = xstart + hypre__kk*xnj*xni + jj*xni + ii;\
+         for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)\
+         {
 
-#define hypre_RedBlackConstantcoefLoopEnd()			\
-            }\
-	}\
-    }\
-}  
+#define hypre_RedBlackConstantcoefLoopEnd()\
+         }\
+      }\
+   }\
+}
 #endif

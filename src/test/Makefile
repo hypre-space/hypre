@@ -10,22 +10,23 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+default:all
 
 include ../config/Makefile.config
 
-CINCLUDES = ${MPIINCLUDE} $(HYPRE_RAJA_INCLUDE)
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
 CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
-C_COMPILE_FLAGS += \
+C_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
  ${CINCLUDES}\
  ${CDEFS}
 
-CXX_COMPILE_FLAGS += \
+CXX_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
@@ -50,10 +51,7 @@ LFLAGS =\
  ${MPILIBFLAGS}\
  ${LAPACKLIBFLAGS}\
  ${BLASLIBFLAGS}\
- ${LIBFLAGS}\
- ${HYPRE_RAJA_LIB}
-
-KOKKOS_CXXFLAGS = 
+ ${LIBFLAGS}
 
 ##################################################################
 # Targets

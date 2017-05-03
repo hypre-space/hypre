@@ -10,12 +10,21 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
-#include <cublas_v2.h>
-#include <cusparse.h>
-#include "_hypre_utilities.h"
+#ifdef HYPRE_USE_GPU
+#include <cuda_runtime_api.h>
+void hypre_GPUInit(hypre_int use_device);
+void hypre_GPUFinalize();
+int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
+void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
+void VecSet(double* tgt, int size, double value, cudaStream_t s);
+void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
+void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
+void CudaCompileFlagCheck();
+#endif
+
 cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
 cudaEvent_t getevent(hypre_int i);
@@ -28,8 +37,6 @@ void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t 
 void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream);
 cublasHandle_t getCublasHandle();
 cusparseHandle_t getCusparseHandle();
-void hypre_GPUInit(hypre_int use_device);
-void hypre_GPUFinalize();
 typedef struct node {
   const void *ptr;
   size_t size;
@@ -40,7 +47,7 @@ node *memfind(node *head, const void *ptr);
 void memdel(node **head, node *found);
 void meminsert(node **head, const void *ptr,size_t size);
 void printlist(node *head,hypre_int nc);
-#define MEM_PAD_LEN 1
+//#define MEM_PAD_LEN 1
 size_t memsize(const void *ptr);
 hypre_int getsetasyncmode(hypre_int mode, hypre_int action);
 void SetAsyncMode(hypre_int mode);
@@ -67,6 +74,7 @@ struct hypre__global_struct{
   cudaStream_t streams[MAX_HGS_ELEMENTS];
   nvtxDomainHandle_t nvtx_domain;
   hypre_int concurrent_managed_access;
+  size_t memoryHWM;
 };
 
 extern struct hypre__global_struct hypre__global_handle ;
@@ -83,7 +91,14 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
 #define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
+#define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
 
 #endif
+
+#else
+
+#define hypre_GPUInit(use_device)
+#define hypre_GPUFinalize()
+
 #endif
 
