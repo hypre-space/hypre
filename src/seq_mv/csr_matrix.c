@@ -17,7 +17,9 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
-
+#ifdef HYPRE_USE_GPU
+#include "gpukernels.h"
+#endif
 #ifdef HYPRE_PROFILE
 HYPRE_Real hypre_profile_times[HYPRE_TIMER_ID_COUNT] = { 0 };
 #endif
@@ -33,7 +35,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
 {
    hypre_CSRMatrix  *matrix;
 
-   matrix = hypre_CTAlloc(hypre_CSRMatrix, 1);
+   matrix = hypre_HostCTAlloc(hypre_CSRMatrix, 1);
 
    hypre_CSRMatrixData(matrix) = NULL;
    hypre_CSRMatrixI(matrix)    = NULL;
@@ -47,7 +49,9 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixOwnsData(matrix) = 1;
    hypre_CSRMatrixNumRownnz(matrix) = num_rows;
 
-
+#ifdef HYPRE_USE_GPU
+   matrix->on_device=0;
+#endif
    return matrix;
 }
 /*--------------------------------------------------------------------------
@@ -72,7 +76,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
          hypre_CSRMatrixData(matrix) = NULL;
          hypre_CSRMatrixJ(matrix)    = NULL;
       }
-      hypre_TFree(matrix);
+      hypre_HostTFree(matrix);
       matrix = NULL;
    }
 
@@ -670,3 +674,36 @@ HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
 {
    return hypre_CSRMatrixGetLoadBalancedPartitionBoundary(A, hypre_GetThreadNum() + 1);
 }
+#ifdef HYPRE_USE_GPU
+void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
+  if (hypre_CSRMatrixNumNonzeros(A)==0) return;
+
+  PUSH_RANGE_PAYLOAD("hypre_CSRMatrixPrefetchToDevice",0,hypre_CSRMatrixNumNonzeros(A));
+  if ((!A->on_device)&&(hypre_CSRMatrixNumNonzeros(A)>8192)){
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(5)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(6)));
+    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(5)));
+    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(6)));
+    A->on_device=1;
+  }
+  POP_RANGE;
+}
+void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A){
+  PUSH_RANGE("hypre_CSRMatrixPrefetchToDevice",0);
+  if (A->on_device){
+    A->on_device=0;
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+  }
+  POP_RANGE;
+}
+hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a){
+  return ((pointerIsManaged((void*)hypre_CSRMatrixData(a))) 
+	  && (pointerIsManaged((void*)hypre_CSRMatrixI(a)))
+	  && (pointerIsManaged((void*)hypre_CSRMatrixJ(a))));
+}
+#endif

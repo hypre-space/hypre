@@ -38,7 +38,7 @@
       ii = (ij%2);                              \
       jj = (ij-ii)/2;                           \
       kk = (rank-2*jj-ii)/4;                    \
-      hypre_SetIndex3(stencil, ii, jj, kk);      \
+      hypre_SetIndex3(stencil, ii, jj, kk);     \
    }
 
 /*--------------------------------------------------------------------------
@@ -60,8 +60,8 @@ typedef struct
 
    hypre_CommPkg       **interlevel_comm;
 /*   hypre_CommPkg       **intralevel_comm;*/ /* may need to build an intra comm so
-                                                 that each processor only fullwts its
-                                                 own fine data- may need to add contrib */
+     that each processor only fullwts its
+     own fine data- may need to add contrib */
 
 } hypre_FacSemiRestrictData2;
 
@@ -518,9 +518,6 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
    hypre_StructVector     *xc_var;
    hypre_StructVector     *xf_var;
 
-   HYPRE_Int               xci;
-   HYPRE_Int               xfi;
-
    HYPRE_Real           ***xfp;
    HYPRE_Real           ***xcp;
    HYPRE_Real           ***xcp_temp;
@@ -730,17 +727,9 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
          hypre_BoxGetSize(fgrid_box, temp_index1);
          hypre_StructMapFineToCoarse(temp_index1, temp_index2, rfactors, loop_size);
 
-         hypre_BoxLoop2Begin(ndim, loop_size,
-                             xf_dbox, start, stride,  xfi,
-                             xc_temp_dbox, startc, stridec, xci);
-#if 0 /* Are private static arrays a problem? */
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xfi,xci,imax,jmax,kmax,k,kcell,j,jcell,i,icell,ijkcell,temp_index2) HYPRE_SMP_SCHEDULE
-#endif
-#else
-         hypre_BoxLoopSetOneBlock();
-#endif
-         hypre_BoxLoop2For(xfi, xci)
+         hypre_SerialBoxLoop2Begin(ndim, loop_size,
+                                   xf_dbox, start, stride,  xfi,
+                                   xc_temp_dbox, startc, stridec, xci);
          {
             /*-----------------------------------------------------------------
              * Arithmetic average the refinement patch values to get 
@@ -804,7 +793,7 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
             }
 
          }
-         hypre_BoxLoop2End(xfi, xci);
+         hypre_SerialBoxLoop2End(xfi, xci);
 
       }   /* hypre_ForBoxI(fi, fgrid_boxes) */
    }      /* for (var= 0; var< nvars; var++)*/

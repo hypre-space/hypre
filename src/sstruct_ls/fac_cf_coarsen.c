@@ -48,17 +48,17 @@
          jj= -1;                                \
       if (kk==2)                                \
          kk= -1;                                \
-      hypre_SetIndex3(stencil, ii, jj, kk);      \
+      hypre_SetIndex3(stencil, ii, jj, kk);     \
    }
 
 
-#define AbsStencilShape(stencil, abs_shape)     \
-   {                                            \
-      HYPRE_Int ii,jj,kk;                       \
-      ii = hypre_IndexX(stencil);               \
-      jj = hypre_IndexY(stencil);               \
-      kk = hypre_IndexZ(stencil);               \
-      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk);   \
+#define AbsStencilShape(stencil, abs_shape)                     \
+   {                                                            \
+      HYPRE_Int ii,jj,kk;                                       \
+      ii = hypre_IndexX(stencil);                               \
+      jj = hypre_IndexY(stencil);                               \
+      kk = hypre_IndexZ(stencil);                               \
+      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk); \
    }
 
 /*--------------------------------------------------------------------------
@@ -130,7 +130,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    HYPRE_Int               rank, startrank;
    HYPRE_Real             *vals;
 
-   HYPRE_Int               i, j, iA;
+   HYPRE_Int               i, j;
    HYPRE_Int               nvars, var1; 
 
    hypre_Index             lindex, zero_index;
@@ -219,7 +219,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
          hypre_StructMapCoarseToFine(hypre_BoxIMin(cgrid_box), zero_index,
                                      refine_factors, hypre_BoxIMin(&refined_box));
          hypre_SetIndex3(index1, refine_factors[0]-1, refine_factors[1]-1,
-                        refine_factors[2]-1);
+                         refine_factors[2]-1);
          hypre_StructMapCoarseToFine(hypre_BoxIMax(cgrid_box), index1,
                                      refine_factors, hypre_BoxIMax(&refined_box));
 
@@ -340,17 +340,9 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                   fgrid_cinterface= hypre_BoxArrayBox(cinterface_array, boxi);
                   hypre_CopyIndex(hypre_BoxIMin(fgrid_cinterface), node_extents);
                   hypre_BoxGetSize(fgrid_cinterface, loop_size);
-                    
-                  hypre_BoxLoop1Begin(ndim, loop_size,
-                                      A_dbox, node_extents, stridec, iA);
-#if 0 /* Are private static arrays a problem? */
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,lindex,i,index_temp,boxman_entry,rank,found,Uventry,nUentries,temp1,cnt1,ncols,rows,cols,temp2,vals,index2,index1,j) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                  hypre_BoxLoopSetOneBlock();
-#endif
-                  hypre_BoxLoop1For(iA)
+
+                  hypre_SerialBoxLoop1Begin(ndim, loop_size,
+                                            A_dbox, node_extents, stridec, iA);
                   {
                      hypre_BoxLoopGetIndex(lindex);
                      for (i= 0; i< stencil_size; i++)
@@ -482,7 +474,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                         }   /* if (Uventry != NULL) */
                      }       /* if (nUventries > 0) */
                   }
-                  hypre_BoxLoop1End(iA);
+                  hypre_SerialBoxLoop1End(iA);
                }  /* for (boxi= stencil_size; boxi< box_array_size; boxi++) */
             }     /* hypre_ForBoxArrayI(fi, cinterface_arrays) */
          }        /* hypre_ForBoxI(ci, cgrid_boxes) */

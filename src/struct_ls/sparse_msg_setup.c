@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 /******************************************************************************
  *
  *
@@ -24,23 +22,23 @@
 
 #define GRID 0
 
-#define hypre_SparseMSGSetCIndex(cdir, cindex) \
-{\
-   hypre_SetIndex3(cindex, 0, 0, 0);\
-   hypre_IndexD(cindex, cdir) = 0;\
-}
+#define hypre_SparseMSGSetCIndex(cdir, cindex)  \
+   {                                            \
+      hypre_SetIndex3(cindex, 0, 0, 0);         \
+      hypre_IndexD(cindex, cdir) = 0;           \
+   }
 
-#define hypre_SparseMSGSetFIndex(cdir, findex) \
-{\
-   hypre_SetIndex3(findex, 0, 0, 0);\
-   hypre_IndexD(findex, cdir) = 1;\
-}
+#define hypre_SparseMSGSetFIndex(cdir, findex)  \
+   {                                            \
+      hypre_SetIndex3(findex, 0, 0, 0);         \
+      hypre_IndexD(findex, cdir) = 1;           \
+   }
 
-#define hypre_SparseMSGSetStride(cdir, stride) \
-{\
-   hypre_SetIndex3(stride, 1, 1, 1);\
-   hypre_IndexD(stride, cdir) = 2;\
-}
+#define hypre_SparseMSGSetStride(cdir, stride)  \
+   {                                            \
+      hypre_SetIndex3(stride, 1, 1, 1);         \
+      hypre_IndexD(stride, cdir) = 2;           \
+   }
 
 /*--------------------------------------------------------------------------
  * hypre_SparseMSGSetup
@@ -52,7 +50,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
                       hypre_StructVector *b,
                       hypre_StructVector *x          )
 {
-	hypre_SparseMSGData  *smsg_data = (hypre_SparseMSGData  *)smsg_vdata;
+   hypre_SparseMSGData  *smsg_data = (hypre_SparseMSGData  *)smsg_vdata;
 
    MPI_Comm              comm = (smsg_data -> comm);
                      
@@ -559,7 +557,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
       }
    }
 
-   data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
+   data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
    (smsg_data -> data) = data;
 
    hypre_StructVectorInitializeData(t_a[0], data);

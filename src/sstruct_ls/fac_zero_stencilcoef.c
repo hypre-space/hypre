@@ -13,13 +13,13 @@
 #include "_hypre_sstruct_ls.h"
 #include "fac.h"
 
-#define AbsStencilShape(stencil, abs_shape)     \
-   {                                            \
-      HYPRE_Int ii,jj,kk;                       \
-      ii = hypre_IndexX(stencil);               \
-      jj = hypre_IndexY(stencil);               \
-      kk = hypre_IndexZ(stencil);               \
-      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk);   \
+#define AbsStencilShape(stencil, abs_shape)                     \
+   {                                                            \
+      HYPRE_Int ii,jj,kk;                                       \
+      ii = hypre_IndexX(stencil);                               \
+      jj = hypre_IndexY(stencil);                               \
+      kk = hypre_IndexZ(stencil);                               \
+      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk); \
    }
 
 /*--------------------------------------------------------------------------
@@ -71,7 +71,6 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
    HYPRE_Real            *ac_ptr;
    hypre_Index            loop_size;
 
-   HYPRE_Int              iac;
    HYPRE_Int              ci, i, j;
 
    HYPRE_Int              abs_shape;
@@ -176,7 +175,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                                                ac_dbox, hypre_BoxIMin(shift_ibox),
                                                stride, iac);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iac) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                            hypre_BoxLoop1For(iac)
                            {
@@ -258,7 +257,6 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
    HYPRE_Real            *a_ptr;
    hypre_Index            loop_size;
 
-   HYPRE_Int              ia;
    HYPRE_Int              fi, fj, i, j;
    HYPRE_Int              abs_shape;
    HYPRE_Int              myid, proc;
@@ -402,7 +400,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                                             a_dbox, hypre_BoxIMin(&intersect_box),
                                             stride, ia);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ia) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                         hypre_BoxLoop1For(ia)
                         {

@@ -64,7 +64,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
    HYPRE_Int            *active_l        = (pfmg_data -> active_l);
 
    HYPRE_Real            b_dot_b = 0, r_dot_r, eps = 0;
-   HYPRE_Real            e_dot_e, x_dot_x;
+   HYPRE_Real            e_dot_e = 0.0, x_dot_x = 1.0;
                     
    HYPRE_Int             i, l;
    HYPRE_Int             constant_coefficient;

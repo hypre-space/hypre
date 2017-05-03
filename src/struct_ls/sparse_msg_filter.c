@@ -325,22 +325,14 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_Box             *A_dbox;
    hypre_Box             *v_dbox;
                         
-   HYPRE_Int              Ai;
-   HYPRE_Int              vi;
-                        
-   HYPRE_Real            *Ap;
    HYPRE_Real            *vxp;
    HYPRE_Real            *vyp;
    HYPRE_Real            *vzp;
-   HYPRE_Real             lambdax;
-   HYPRE_Real             lambday;
-   HYPRE_Real             lambdaz;
+
                         
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
-   HYPRE_Int              stencil_size;
-                        
-   HYPRE_Int              Astenc;
+   HYPRE_Int              stencil_size;                        
                         
    hypre_Index            loop_size;
    hypre_Index            cindex;
@@ -375,6 +367,9 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
    hypre_ForBoxI(i, compute_boxes)
    {
+
+      hypre_MatrixIndexMove(A, stencil_size, i, si,3);
+     
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
 
       A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
@@ -392,20 +387,28 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
                           A_dbox, start,  stride,  Ai,
                           v_dbox, startv, stridev, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,vi,lambdax,lambday,lambdaz,si,Ap,Astenc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(Ai, vi)
       {
+         HYPRE_Real lambdax,lambday,lambdaz;
+         HYPRE_Real *Ap;
+         HYPRE_Int si,Astenc;
+		  
          lambdax = 0.0;
          lambday = 0.0;
          lambdaz = 0.0;
 
+		 
          for (si = 0; si < stencil_size; si++)
          {
-            Ap = hypre_StructMatrixBoxData(A, i, si);
-
+            //Ap = hypre_StructMatrixBoxData(A, i, si);
+            //Ap = data_A + indices_d[si];
+            Ap = hypre_StructGetMatrixBoxData(A, i, si);
             /* compute lambdax */
-            Astenc = hypre_IndexD(stencil_shape[si], 0);
+            //Astenc = hypre_IndexD(stencil_shape[si], 0);
+            //Astenc = stencil_shape_d[si];
+            Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[si]);
             if (Astenc == 0)
             {
                lambdax += Ap[Ai];
@@ -416,7 +419,10 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
             }
 
             /* compute lambday */
-            Astenc = hypre_IndexD(stencil_shape[si], 1);
+            //Astenc = hypre_IndexD(stencil_shape[si], 1);
+	    //Astenc = stencil_shape_d[stencil_size+si];
+	    Astenc = hypre_StructGetIndexD(stencil_shape[si], 1,stencil_shape_d[stencil_size+si]);
+	    
             if (Astenc == 0)
             {
                lambday += Ap[Ai];
@@ -427,7 +433,9 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
             }
 
             /* compute lambdaz */
-            Astenc = hypre_IndexD(stencil_shape[si], 2);
+            //Astenc = hypre_IndexD(stencil_shape[si], 2);
+	    //Astenc = stencil_shape_d[2*stencil_size+si];
+	    Astenc = hypre_StructGetIndexD(stencil_shape[si], 2,stencil_shape_d[2*stencil_size+si]);
             if (Astenc == 0)
             {
                lambdaz += Ap[Ai];
@@ -447,6 +455,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
          vzp[vi] = lambdaz / (lambdax + lambday + lambdaz);
       }
       hypre_BoxLoop2End(Ai, vi);
+
+      hypre_StructCleanIndexD();	  
    }
 
    return ierr;
@@ -471,9 +481,6 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
                         
    hypre_Box             *e_dbox;
    hypre_Box             *v_dbox;
-                        
-   HYPRE_Int              ei;
-   HYPRE_Int              vi;
                         
    HYPRE_Real            *ep;
    HYPRE_Real            *vp;
@@ -519,7 +526,7 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
                           e_dbox, start,  stride,  ei,
                           v_dbox, startv, stridev, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,vi) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(ei, vi)
       {

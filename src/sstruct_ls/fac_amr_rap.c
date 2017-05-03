@@ -86,7 +86,6 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
    hypre_Index                  index, stride, zero_index;
    HYPRE_Int                    nvars, var1, var2, part, cbox;
    HYPRE_Int                    i, j, k, size;
-   HYPRE_Int                    iA, iAc;
 
    HYPRE_Int                    myid;
    HYPRE_Int                    ierr= 0;
@@ -220,7 +219,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(iA, iAc)
                   {
@@ -277,7 +276,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(iA, iAc)
                   {
@@ -415,7 +414,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(iA, iAc)
                   {

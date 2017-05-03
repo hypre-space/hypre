@@ -186,6 +186,7 @@ hypre_SMGSetup( void               *smg_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
       PT_l[l]  = hypre_SMGCreateInterpOp(A_l[l], PT_grid_l[l+1], cdir);
+	  
       hypre_StructMatrixInitializeShell(PT_l[l]);
       data_size += hypre_StructMatrixDataSize(PT_l[l]);
 
@@ -228,7 +229,8 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_StructVectorInitializeShell(tx_l[l+1]);
    }
 
-   data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
+   data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+
    (smg_data -> data) = data;
 
    hypre_StructVectorInitializeData(tb_l[0], data);
@@ -331,6 +333,7 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_SMGRelaxSetTempVec(relax_data_l[l], tb_l[l]);
       hypre_SMGRelaxSetNumPreRelax( relax_data_l[l], n_pre);
       hypre_SMGRelaxSetNumPostRelax( relax_data_l[l], n_post);
+
       hypre_SMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
       hypre_SMGSetupInterpOp(relax_data_l[l], A_l[l], b_l[l], x_l[l],
