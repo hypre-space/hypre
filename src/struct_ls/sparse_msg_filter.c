@@ -341,7 +341,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_Index            stride;
    hypre_Index            stridev;
                         
-   HYPRE_Int              i, si;
+   HYPRE_Int              i;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -368,7 +368,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_ForBoxI(i, compute_boxes)
    {
 
-      hypre_MatrixIndexMove(A, stencil_size, i, si,3);
+      hypre_MatrixIndexMove(A, stencil_size, i, ierr,3);
      
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
 
