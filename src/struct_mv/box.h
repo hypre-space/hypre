@@ -220,7 +220,7 @@ hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);
 
 #else
 
-#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size) cdir = 0;
+#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)
 #define hypre_StructGetMatrixBoxData(A, i, si) hypre_StructMatrixBoxData(A,i,si)
 #define hypre_StructGetIndexD(index,i,index_d) hypre_IndexD(index,i)
 #define hypre_StructCleanIndexD() {;}
