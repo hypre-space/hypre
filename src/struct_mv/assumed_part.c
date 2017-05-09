@@ -158,9 +158,7 @@ hypre_APSubdivideRegion( hypre_Box      *region,
    }
 
    count = 0;
-   hypre_BoxLoop0Begin(ndim, div);
-   hypre_BoxLoopSetOneBlock();
-   hypre_BoxLoop0For()
+   hypre_SerialBoxLoop0Begin(ndim, div);
    {
       box = hypre_BoxArrayBox(box_array, count);
       hypre_BoxLoopGetIndex(index);
@@ -172,7 +170,7 @@ hypre_APSubdivideRegion( hypre_Box      *region,
       }
       count++;
    }
-   hypre_BoxLoop0End();
+   hypre_SerialBoxLoop0End();
 
    /* clean up */
    for (i = 0; i < ndim; i++) 
@@ -1635,7 +1633,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
 
    HYPRE_Int       i, d, p, q, r, myid;
    HYPRE_Int       num_regions, in_regions, this_region, proc_count, proc_start;
-   HYPRE_Int       adj_proc_id, extra, num_partitions, part_num;
+   HYPRE_Int       adj_proc_id, extra, num_partitions;
    HYPRE_Int       width;
    
    HYPRE_Int      *proc_array, proc_array_count;
@@ -1772,9 +1770,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
       hypre_SetIndex(stride, 1);
       hypre_BoxGetSize(part_box, loop_size);
       hypre_BoxSetExtents(part_dbox, stride, div);
-      hypre_BoxLoop1Begin(ndim, loop_size, part_dbox, start, stride, part_num);
-      hypre_BoxLoopSetOneBlock();
-      hypre_BoxLoop1For(part_num)
+      hypre_SerialBoxLoop1Begin(ndim, loop_size, part_dbox, start, stride, part_num);
       {
          /*convert the partition number to a processor number*/
          if (part_num < (2*extra))
@@ -1795,7 +1791,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
          proc_ids[num_proc_ids] = adj_proc_id + proc_start;
          num_proc_ids++;
       }
-      hypre_BoxLoop1End(part_num);
+      hypre_SerialBoxLoop1End(part_num);
 
    } /*end of for each region loop*/
 

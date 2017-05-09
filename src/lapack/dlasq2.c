@@ -22,9 +22,6 @@ static integer c__11 = 11;
     integer i__1, i__2, i__3;
     doublereal d__1, d__2;
 
-    /* Builtin functions */
-    HYPRE_Real sqrt(doublereal);
-
     /* Local variables */
     static logical ieee;
     static integer nbig;

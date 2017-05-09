@@ -10,10 +10,12 @@
 # $Revision$
 #EHEADER**********************************************************************
 
+default:all
 
 include ../config/Makefile.config
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+
 CDEFS = -DHYPRE_TIMING -DHYPRE_FORTRAN
 CXXDEFS = -DNOFEI -DHYPRE_TIMING -DMPICH_SKIP_MPICXX
 
@@ -159,6 +161,10 @@ ij_mv: ij_mv.o
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
 zboxloop: zboxloop.o
+	@echo  "Building" $@ "... "
+	${LINK_CC} -o $@ $@.o ${LFLAGS}
+
+struct_newboxloop: struct_newboxloop.o $(KOKKOS_LINK_DEPENDS)
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 

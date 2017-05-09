@@ -324,9 +324,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    {
       p = 1;
       hypre_BoxGetSize(box, loop_size);
-      hypre_BoxLoop0Begin(ndim, loop_size);
-      hypre_BoxLoopSetOneBlock();
-      hypre_BoxLoop0For()
+      hypre_SerialBoxLoop0Begin(ndim, loop_size);
       {
          pshift = pshifts[p];
          hypre_BoxLoopGetIndex(pshift);
@@ -345,7 +343,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
             p++;
          }
       }
-      hypre_BoxLoop0End();
+      hypre_SerialBoxLoop0End();
    }
    hypre_BoxDestroy(box);
    

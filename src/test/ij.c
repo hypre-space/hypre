@@ -345,6 +345,8 @@ main( hypre_int argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   hypre_GPUInit(-1);
+   //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
 /*
   hypre_InitMemoryDebug(myid);
 */
@@ -3067,7 +3069,7 @@ main( hypre_int argc,
 
       HYPRE_PCGSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, 
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
- 
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
@@ -5155,7 +5157,7 @@ main( hypre_int argc,
 /*
   hypre_FinalizeMemoryDebug();
 */
-
+   hypre_GPUFinalize();
    hypre_MPI_Finalize();
 
    return (0);

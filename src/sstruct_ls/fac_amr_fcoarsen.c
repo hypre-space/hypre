@@ -53,13 +53,13 @@
    }
 
 
-#define AbsStencilShape(stencil, abs_shape)     \
-   {                                            \
-      HYPRE_Int ii,jj,kk;                       \
-      ii = hypre_IndexX(stencil);               \
-      jj = hypre_IndexY(stencil);               \
-      kk = hypre_IndexZ(stencil);               \
-      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk);   \
+#define AbsStencilShape(stencil, abs_shape)                     \
+   {                                                            \
+      HYPRE_Int ii,jj,kk;                                       \
+      ii = hypre_IndexX(stencil);                               \
+      jj = hypre_IndexY(stencil);                               \
+      kk = hypre_IndexZ(stencil);                               \
+      abs_shape= hypre_abs(ii) + hypre_abs(jj) + hypre_abs(kk); \
    }
 
 /*--------------------------------------------------------------------------
@@ -157,7 +157,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
    HYPRE_Int               i, j, k, l, m, n, ll, kk, jj;
    HYPRE_Int               nvars, var1, var2, var2_start; 
-   HYPRE_Int               iA, iAc, iA_shift_z, iA_shift_zy, iA_shift_zyx;
+   HYPRE_Int               iA_shift_z, iA_shift_zy, iA_shift_zyx;
 
    hypre_Index             lindex;
    hypre_Index             index1, index2;
@@ -1868,19 +1868,17 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   /*----------------------------------------------------------------
                    * Loop over interior grid box. 
                    *----------------------------------------------------------------*/
+
                   hypre_BoxGetSize(&fine_box, loop_size);
 
-                  hypre_BoxLoop2Begin(ndim, loop_size,
-                                      A_dbox, fstart, stridef, iA,
-                                      crse_dbox, cstart, stridec, iAc);
+                  hypre_SerialBoxLoop2Begin(ndim, loop_size,
+                                            A_dbox, fstart, stridef, iA,
+                                            crse_dbox, cstart, stridec, iAc);
 #if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc,i,rank,index1,index2,m,l,k,j,iA_shift_z,iA_shift_zy,iA_shift_zyx,stencil_i,sum,vals) HYPRE_SMP_SCHEDULE
 #endif
-#else
-                  hypre_BoxLoopSetOneBlock();
 #endif
-                  hypre_BoxLoop2For(iA, iAc)
                   {
                      for (i= 0; i< stencil_size; i++)
                      {
@@ -1986,7 +1984,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      }
                      crse_ptrs[ rank_stencils[0] ][iAc]= sum;
                   }
-                  hypre_BoxLoop2End(iA, iAc);
+                  hypre_SerialBoxLoop2End(iA, iAc);
                }    /* end hypre_ForBoxI(fi, fbox_interior_ci) */
 
                /*------------------------------------------------------------------
@@ -2050,19 +2048,12 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                      /*--------------------------------------------------------------
                       * Loop over boundary grid box.
                       *--------------------------------------------------------------*/
+
                      hypre_BoxGetSize(&fine_box, loop_size);
 
-                     hypre_BoxLoop2Begin(ndim, loop_size,
-                                         A_dbox, fstart, stridef, iA,
-                                         crse_dbox, cstart, stridec, iAc);
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc,i,rank,index1,index2,m,l,k,j,iA_shift_z,iA_shift_zy,iA_shift_zyx,stencil_i,temp3,ll,kk,jj,temp2,cnt1,index_temp,boxman_entry,found,Uventry,nUentries,ncols,rows,cols,vals2,sum,vals) HYPRE_SMP_SCHEDULE
-#endif
-#else
-                     hypre_BoxLoopSetOneBlock();
-#endif
-                     hypre_BoxLoop2For(iA, iAc)
+                     hypre_SerialBoxLoop2Begin(ndim, loop_size,
+                                               A_dbox, fstart, stridef, iA,
+                                               crse_dbox, cstart, stridec, iAc);
                      {
                         hypre_BoxLoopGetIndex(lindex);
                         for (i= 0; i< stencil_size; i++)
@@ -2338,7 +2329,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                         hypre_TFree(temp3);
 
                      }
-                     hypre_BoxLoop2End(iA, iAc);
+                     hypre_SerialBoxLoop2End(iA, iAc);
 
                   }  /* hypre_ForBoxI(fi, fbox_bdy_ci_fi) */
                }      /* hypre_ForBoxArrayI(arrayi, fbox_bdy_ci) */
@@ -2940,7 +2931,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   }
 
                   hypre_qsort1(interface_stencil_ranks[i], (HYPRE_Real *) temp1, 0,
-                         coarse_stencil_cnt[i]-1);
+                               coarse_stencil_cnt[i]-1);
 
                   /*---------------------------------------------------------------
                    * swap the stencil_vals to agree with the rank swapping.
@@ -3494,6 +3485,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 #endif
                hypre_BoxLoop1For(iA)
                {
+                  HYPRE_Int i;
                   for (i= 0; i< stencil_size; i++)
                   {
                      if (i != centre)

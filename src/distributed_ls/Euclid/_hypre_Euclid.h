@@ -487,7 +487,11 @@ extern void  printErrorMsg(FILE *fp);
 #endif
 
 #define MSG_BUF_SIZE_DH MAX(1024, hypre_MPI_MAX_ERROR_STRING)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA)
+static char  msgBuf_dh[MSG_BUF_SIZE_DH];
+#else
 extern char  msgBuf_dh[MSG_BUF_SIZE_DH];
+#endif
 
 /* Each processor (may) open a logfile.
  * The bools are switches for controlling the amount of informational 

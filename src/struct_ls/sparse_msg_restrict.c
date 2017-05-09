@@ -58,7 +58,7 @@ hypre_SparseMSGRestrictSetup( void               *restrict_vdata,
                               hypre_Index         stride,
                               hypre_Index         strideR         )
 {
-	hypre_SparseMSGRestrictData *restrict_data = (hypre_SparseMSGRestrictData *)restrict_vdata;
+   hypre_SparseMSGRestrictData *restrict_data = (hypre_SparseMSGRestrictData *)restrict_vdata;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
@@ -129,10 +129,6 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
    hypre_Box              *R_dbox;
    hypre_Box              *r_dbox;
    hypre_Box              *rc_dbox;
-                       
-   HYPRE_Int               Ri;
-   HYPRE_Int               ri;
-   HYPRE_Int               rci;
                          
    HYPRE_Real             *Rp0, *Rp1;
    HYPRE_Real             *rp, *rp0, *rp1;
@@ -231,7 +227,7 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
                                 r_dbox,  start,  stride,  ri,
                                 rc_dbox, startc, stridec, rci);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ri,ri,rci) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop3For(Ri, ri, rci)
             {

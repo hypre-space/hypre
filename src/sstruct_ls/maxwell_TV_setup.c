@@ -32,7 +32,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                       hypre_SStructVector  *b_in,
                       hypre_SStructVector  *x_in)
 {
-	hypre_MaxwellData     *maxwell_TV_data = (hypre_MaxwellData     *)maxwell_vdata;
+   hypre_MaxwellData     *maxwell_TV_data = (hypre_MaxwellData     *)maxwell_vdata;
 
    MPI_Comm               comm = hypre_SStructMatrixComm(Aee_in);
 
@@ -387,13 +387,12 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                hypre_BoxGetSize(box_piece, loop_size);
                hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
 
-               hypre_BoxLoop0Begin(ndim, loop_size);
+               hypre_SerialBoxLoop0Begin(ndim, loop_size);
 #if 0 /* Are private static arrays a problem? */
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,rank) HYPRE_SMP_SCHEDULE
 #endif
 #endif
-               hypre_BoxLoop0For()
                {
                   hypre_BoxLoopGetIndex(lindex);
                   hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);
@@ -404,7 +403,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                   flag[rank-start_rank] = 0;
                   flag2[rank-start_rank]= rank;
                }
-               hypre_BoxLoop0End();
+               hypre_SerialBoxLoop0End();
             }  /* if (hypre_BoxVolume(box_piece) < i) */
          }  /* for (m= 0; m< hypre_BoxArraySize(tmp_box_array); m++) */
          hypre_BoxArrayDestroy(tmp_box_array);
@@ -490,7 +489,7 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                         hypre_SStructVectorParVector(bn),
                         hypre_SStructVectorParVector(xn));
    {
-	   amg_data = (hypre_ParAMGData*) amg_vdata;
+      amg_data = (hypre_ParAMGData*) amg_vdata;
 
       node_numlevels= hypre_ParAMGDataNumLevels(amg_data);
 

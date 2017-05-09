@@ -203,10 +203,6 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
    HYPRE_Real           *Ap;
    HYPRE_Real           *yp;
    HYPRE_Real           *xp;
-                       
-   HYPRE_Int             Ai;
-   HYPRE_Int             yi;
-   HYPRE_Int             xi;
                      
    hypre_Index           index;
    hypre_IndexRef        start;
@@ -240,7 +236,7 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
                           x_data_box, start, stride, xi,
                           y_data_box, start, stride, yi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,yi,xi,Ai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop3For(Ai, xi, yi)
       {
