@@ -31,7 +31,7 @@ tail -17 ${TNAME}.out.109 | head -3 > ${TNAME}.testdata
 
 tail -17 ${TNAME}.out.110 | head -3 > ${TNAME}.testdata.temp
 #diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
-../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp 1.e-6 >&2
+../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp 1.e-4 >&2
 
 #=============================================================================
 # compare with baseline case
