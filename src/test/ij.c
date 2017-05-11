@@ -229,6 +229,9 @@ main( hypre_int argc,
    HYPRE_Real   max_row_sum = 1.;
 
    HYPRE_Int cheby_order = 2;
+   HYPRE_Int cheby_eig_est = 10;
+   HYPRE_Int cheby_variant = 0;
+   HYPRE_Int cheby_scale = 1;
    HYPRE_Real cheby_fraction = .3;
 
    /* for CGC BM Aug 25, 2006 */
@@ -1207,6 +1210,21 @@ main( hypre_int argc,
       {
          arg_index++;
          cheby_order = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-cheby_eig_est") == 0 )
+      {
+         arg_index++;
+         cheby_eig_est = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-cheby_variant") == 0 )
+      {
+         arg_index++;
+         cheby_variant = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-cheby_scale") == 0 )
+      {
+         arg_index++;
+         cheby_scale = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-cheby_fraction") == 0 )
       {
@@ -2503,6 +2521,9 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetAddRelaxWt(amg_solver, add_relax_wt);
       HYPRE_BoomerAMGSetChebyOrder(amg_solver, cheby_order);
       HYPRE_BoomerAMGSetChebyFraction(amg_solver, cheby_fraction);
+      HYPRE_BoomerAMGSetChebyEigEst(amg_solver, cheby_eig_est);
+      HYPRE_BoomerAMGSetChebyVariant(amg_solver, cheby_variant);
+      HYPRE_BoomerAMGSetChebyScale(amg_solver, cheby_scale);
       HYPRE_BoomerAMGSetRelaxOrder(amg_solver, relax_order);
       HYPRE_BoomerAMGSetRelaxWt(amg_solver, relax_wt);
       HYPRE_BoomerAMGSetOuterWt(amg_solver, outer_wt);
@@ -2660,6 +2681,9 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetAddRelaxWt(amg_solver, add_relax_wt);
       HYPRE_BoomerAMGSetChebyOrder(amg_solver, cheby_order);
       HYPRE_BoomerAMGSetChebyFraction(amg_solver, cheby_fraction);
+      HYPRE_BoomerAMGSetChebyEigEst(amg_solver, cheby_eig_est);
+      HYPRE_BoomerAMGSetChebyVariant(amg_solver, cheby_variant);
+      HYPRE_BoomerAMGSetChebyScale(amg_solver, cheby_scale);
       HYPRE_BoomerAMGSetRelaxOrder(amg_solver, relax_order);
       HYPRE_BoomerAMGSetRelaxWt(amg_solver, relax_wt);
       HYPRE_BoomerAMGSetOuterWt(amg_solver, outer_wt);
@@ -2825,6 +2849,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -2981,6 +3008,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
          if (level_w > -1)
@@ -4070,6 +4100,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -4214,6 +4247,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -4435,6 +4471,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -4609,6 +4648,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -4788,6 +4830,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -5011,6 +5056,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);

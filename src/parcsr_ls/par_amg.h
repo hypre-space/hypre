@@ -105,7 +105,6 @@ typedef struct
    HYPRE_Int                  num_levels;
    HYPRE_Real         **l1_norms;
 
-
    /* Block data */
    hypre_ParCSRBlockMatrix **A_block_array;
    hypre_ParCSRBlockMatrix **P_block_array;
@@ -136,8 +135,13 @@ typedef struct
 
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
-   HYPRE_Int                  cheby_order;
+   HYPRE_Int            cheby_eig_est;
+   HYPRE_Int            cheby_order;
+   HYPRE_Int            cheby_variant;
+   HYPRE_Int            cheby_scale;
    HYPRE_Real           cheby_fraction;
+   HYPRE_Real         **cheby_ds;
+   HYPRE_Real         **cheby_coefs;
 
    /* data needed for non-Galerkin option */
    HYPRE_Int           nongalerk_num_tol;
@@ -334,9 +338,13 @@ typedef struct
 
 #define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)	
 #define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)	
+#define hypre_ParAMGDataChebyEigEst(amg_data) ((amg_data)->cheby_eig_est)
+#define hypre_ParAMGDataChebyVariant(amg_data) ((amg_data)->cheby_variant)
+#define hypre_ParAMGDataChebyScale(amg_data) ((amg_data)->cheby_scale)
 #define hypre_ParAMGDataChebyOrder(amg_data) ((amg_data)->cheby_order)
 #define hypre_ParAMGDataChebyFraction(amg_data) ((amg_data)->cheby_fraction)
-
+#define hypre_ParAMGDataChebyDS(amg_data) ((amg_data)->cheby_ds)
+#define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
 
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)

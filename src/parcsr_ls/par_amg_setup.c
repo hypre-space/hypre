@@ -103,6 +103,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *Pnew = NULL;
    HYPRE_Real          *SmoothVecs = NULL;
    HYPRE_Real         **l1_norms = NULL;
+   HYPRE_Real         **cheby_ds = NULL;
+   HYPRE_Real         **cheby_coefs = NULL;
 
    HYPRE_Int       old_num_levels, num_levels;
    HYPRE_Int       level;
@@ -2256,6 +2258,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       min_eig_est = hypre_CTAlloc(HYPRE_Real, num_levels);
       hypre_ParAMGDataMaxEigEst(amg_data) = max_eig_est;
       hypre_ParAMGDataMinEigEst(amg_data) = min_eig_est;
+      cheby_ds = hypre_CTAlloc(HYPRE_Real *, num_levels);
+      cheby_coefs = hypre_CTAlloc(HYPRE_Real *, num_levels);
+      hypre_ParAMGDataChebyDS(amg_data) = cheby_ds;
+      hypre_ParAMGDataChebyCoefs(amg_data) = cheby_coefs;
    }
    if (grid_relax_type[0] == 15 ||grid_relax_type[1] == 15 ||  grid_relax_type[2] == 15 || grid_relax_type[3] == 15)
       /* CG */
@@ -2397,11 +2403,25 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    {
       if (grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || (grid_relax_type[3] == 16 && j== (num_levels-1)))
       {
-         HYPRE_Int scale = 1;
-         HYPRE_Real temp_d, temp_d2;
-         hypre_ParCSRMaxEigEstimateCG(A_array[j], scale, 10, &temp_d, &temp_d2);
-         max_eig_est[j] = temp_d;
-         min_eig_est[j] = temp_d2;
+         HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);;
+         HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
+         HYPRE_Real max_eig, min_eig = 0;
+         HYPRE_Real *coefs = NULL;
+         HYPRE_Real *ds = NULL;
+         HYPRE_Int cheby_order = hypre_ParAMGDataChebyOrder(amg_data);
+         HYPRE_Int cheby_eig_est = hypre_ParAMGDataChebyEigEst(amg_data);
+         HYPRE_Real cheby_fraction = hypre_ParAMGDataChebyFraction(amg_data);
+         if (cheby_eig_est)
+	    hypre_ParCSRMaxEigEstimateCG(A_array[j], scale, cheby_eig_est, 
+		&max_eig, &min_eig);
+         else
+	    hypre_ParCSRMaxEigEstimate(A_array[j], scale, &max_eig);
+         max_eig_est[j] = max_eig;
+         min_eig_est[j] = min_eig;
+         hypre_ParCSRRelax_Cheby_Setup(A_array[j],max_eig, min_eig, 
+		cheby_fraction, cheby_order, scale, variant, &coefs, &ds);
+         cheby_coefs[j] = coefs;
+         cheby_ds[j] = ds;
       }
      else if (grid_relax_type[1] == 15 || (grid_relax_type[3] == 15 && j == (num_levels-1))  )
      {

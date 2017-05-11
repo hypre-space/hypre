@@ -1466,7 +1466,7 @@ HYPRE_BoomerAMGSetChebyOrder( HYPRE_Solver  solver,
    return( hypre_BoomerAMGSetChebyOrder( (void *) solver, order ) );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetChebyEigRatio
+ * HYPRE_BoomerAMGSetChebyFraction
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -1475,10 +1475,43 @@ HYPRE_BoomerAMGSetChebyFraction( HYPRE_Solver  solver,
 {
    return( hypre_BoomerAMGSetChebyFraction( (void *) solver, ratio ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetChebyScale
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetChebyScale( HYPRE_Solver  solver,
+                                 HYPRE_Int     scale )
+{
+   return( hypre_BoomerAMGSetChebyScale( (void *) solver, scale ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetChebyVariant
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetChebyVariant( HYPRE_Solver  solver,
+                                 HYPRE_Int     variant )
+{
+   return( hypre_BoomerAMGSetChebyVariant( (void *) solver, variant ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetChebyEigEst
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetChebyEigEst( HYPRE_Solver  solver,
+                                 HYPRE_Int     eig_est )
+{
+   return( hypre_BoomerAMGSetChebyEigEst( (void *) solver, eig_est ) );
+}
+                                                                                                       
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetInterpVectors
  *--------------------------------------------------------------------------*/
-                                                                                                       
 HYPRE_Int
 HYPRE_BoomerAMGSetInterpVectors (HYPRE_Solver solver, HYPRE_Int num_vectors,
                                  HYPRE_ParVector *vectors)

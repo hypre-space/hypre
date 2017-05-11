@@ -76,10 +76,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    HYPRE_Int     block_mode;
 
-   HYPRE_Real  *max_eig_est;
-   HYPRE_Real  *min_eig_est;
    HYPRE_Int      cheby_order;
-   HYPRE_Real   cheby_fraction;
 
  /* Local variables  */
    HYPRE_Int      *lev_counter;
@@ -111,6 +108,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Real    alpha;
    HYPRE_Real  **l1_norms = NULL;
    HYPRE_Real   *l1_norms_level;
+   HYPRE_Real   **ds = hypre_ParAMGDataChebyDS(amg_data);
+   HYPRE_Real   **coefs = hypre_ParAMGDataChebyCoefs(amg_data);
 
    HYPRE_Int seq_cg = 0;
 
@@ -158,10 +157,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    l1_norms            = hypre_ParAMGDataL1Norms(amg_data);
    /* smooth_option       = hypre_ParAMGDataSmoothOption(amg_data); */
 
-   max_eig_est = hypre_ParAMGDataMaxEigEst(amg_data);
+   /*max_eig_est = hypre_ParAMGDataMaxEigEst(amg_data);
    min_eig_est = hypre_ParAMGDataMinEigEst(amg_data);
+   cheby_fraction = hypre_ParAMGDataChebyFraction(amg_data);*/
    cheby_order = hypre_ParAMGDataChebyOrder(amg_data);
-   cheby_fraction = hypre_ParAMGDataChebyFraction(amg_data);
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
@@ -470,13 +469,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
               }
               else if (relax_type == 16)
               { /* scaled Chebyshev */
-                 HYPRE_Int scale = 1;
-                 HYPRE_Int variant = 0;
-                 hypre_ParCSRRelax_Cheby(A_array[level],
-                                       Aux_F,
-                                       max_eig_est[level],
-                                       min_eig_est[level],
-                                       cheby_fraction, cheby_order, scale,
+                 HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);
+                 HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
+                 hypre_ParCSRRelax_Cheby_Solve(A_array[level], Aux_F,
+                                       ds[level], coefs[level],
+                                       cheby_order, scale,
                                        variant, Aux_U, Vtemp, Ztemp );
               }
               else if (relax_type ==17)

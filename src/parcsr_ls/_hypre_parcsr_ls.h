@@ -167,8 +167,13 @@ typedef struct
 
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
-   HYPRE_Int                  cheby_order;
+   HYPRE_Int           cheby_eig_est;
+   HYPRE_Int            cheby_order;
+   HYPRE_Int           cheby_variant;
+   HYPRE_Int           cheby_scale;
    HYPRE_Real           cheby_fraction;
+   HYPRE_Real         **cheby_ds;
+   HYPRE_Real         **cheby_coefs;
 
    /* data needed for non-Galerkin option */
    HYPRE_Int           nongalerk_num_tol;
@@ -365,7 +370,11 @@ typedef struct
 #define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)	
 #define hypre_ParAMGDataChebyOrder(amg_data) ((amg_data)->cheby_order)
 #define hypre_ParAMGDataChebyFraction(amg_data) ((amg_data)->cheby_fraction)
-
+#define hypre_ParAMGDataChebyEigEst(amg_data) ((amg_data)->cheby_eig_est)
+#define hypre_ParAMGDataChebyVariant(amg_data) ((amg_data)->cheby_variant)
+#define hypre_ParAMGDataChebyScale(amg_data) ((amg_data)->cheby_scale)
+#define hypre_ParAMGDataChebyDS(amg_data) ((amg_data)->cheby_ds)
+#define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
 
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)
@@ -843,6 +852,9 @@ HYPRE_Int HYPRE_BoomerAMGSetCoordDim ( HYPRE_Solver solver , HYPRE_Int coorddim 
 HYPRE_Int HYPRE_BoomerAMGSetCoordinates ( HYPRE_Solver solver , float *coordinates );
 HYPRE_Int HYPRE_BoomerAMGSetChebyOrder ( HYPRE_Solver solver , HYPRE_Int order );
 HYPRE_Int HYPRE_BoomerAMGSetChebyFraction ( HYPRE_Solver solver , HYPRE_Real ratio );
+HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst ( HYPRE_Solver solver , HYPRE_Int eig_est );
+HYPRE_Int HYPRE_BoomerAMGSetChebyVariant ( HYPRE_Solver solver , HYPRE_Int variant );
+HYPRE_Int HYPRE_BoomerAMGSetChebyScale ( HYPRE_Solver solver , HYPRE_Int scale );
 HYPRE_Int HYPRE_BoomerAMGSetInterpVectors ( HYPRE_Solver solver , HYPRE_Int num_vectors , HYPRE_ParVector *vectors );
 HYPRE_Int HYPRE_BoomerAMGSetInterpVecVariant ( HYPRE_Solver solver , HYPRE_Int num );
 HYPRE_Int HYPRE_BoomerAMGSetInterpVecQMax ( HYPRE_Solver solver , HYPRE_Int q_max );
@@ -1266,6 +1278,9 @@ HYPRE_Int hypre_BoomerAMGSetEuSparseA ( void *data , HYPRE_Real eu_sparse_A );
 HYPRE_Int hypre_BoomerAMGSetEuBJ ( void *data , HYPRE_Int eu_bj );
 HYPRE_Int hypre_BoomerAMGSetChebyOrder ( void *data , HYPRE_Int order );
 HYPRE_Int hypre_BoomerAMGSetChebyFraction ( void *data , HYPRE_Real ratio );
+HYPRE_Int hypre_BoomerAMGSetChebyEigEst ( void *data , HYPRE_Int eig_est );
+HYPRE_Int hypre_BoomerAMGSetChebyVariant ( void *data , HYPRE_Int variant );
+HYPRE_Int hypre_BoomerAMGSetChebyScale ( void *data , HYPRE_Int scale );
 HYPRE_Int hypre_BoomerAMGSetInterpVectors ( void *solver , HYPRE_Int num_vectors , hypre_ParVector **interp_vectors );
 HYPRE_Int hypre_BoomerAMGSetInterpVecVariant ( void *solver , HYPRE_Int var );
 HYPRE_Int hypre_BoomerAMGSetInterpVecQMax ( void *data , HYPRE_Int q_max );
@@ -1308,6 +1323,10 @@ HYPRE_Int hypre_AmgCGCBoundaryFix ( hypre_ParCSRMatrix *S , HYPRE_Int *CF_marker
 /* par_cg_relax_wt.c */
 HYPRE_Int hypre_BoomerAMGCGRelaxWt ( void *amg_vdata , HYPRE_Int level , HYPRE_Int num_cg_sweeps , HYPRE_Real *rlx_wt_ptr );
 HYPRE_Int hypre_Bisection ( HYPRE_Int n , HYPRE_Real *diag , HYPRE_Real *offd , HYPRE_Real y , HYPRE_Real z , HYPRE_Real tol , HYPRE_Int k , HYPRE_Real *ev_ptr );
+
+/* par_cheby.c */
+HYPRE_Int hypre_ParCSRRelax_Cheby_Setup ( hypre_ParCSRMatrix *A , HYPRE_Real max_eig , HYPRE_Real min_eig , HYPRE_Real fraction , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , HYPRE_Real **coefs_ptr , HYPRE_Real **ds_ptr );
+HYPRE_Int hypre_ParCSRRelax_Cheby_Solve ( hypre_ParCSRMatrix *A , hypre_ParVector *f , HYPRE_Real *ds_data , HYPRE_Real *coefs , HYPRE_Int order , HYPRE_Int scale , HYPRE_Int variant , hypre_ParVector *u , hypre_ParVector *v , hypre_ParVector *r );
 
 /* par_coarsen.c */
 HYPRE_Int hypre_BoomerAMGCoarsen ( hypre_ParCSRMatrix *S , hypre_ParCSRMatrix *A , HYPRE_Int CF_init , HYPRE_Int debug_flag , HYPRE_Int **CF_marker_ptr );
