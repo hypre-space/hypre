@@ -848,6 +848,31 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyOrder(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetChebyFraction (HYPRE_Solver solver,
                                            HYPRE_Real   ratio);
 
+/*
+ * (Optional) Defines whether matrix should be scaled.
+ *  The default is 1 (i.e., scaled).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetChebyScale (HYPRE_Solver solver,
+                                           HYPRE_Int   scale);
+/*
+ * (Optional) Defines which polynomial variant should be used.
+ *  The default is 0 (i.e., scaled).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetChebyVariant (HYPRE_Solver solver,
+                                           HYPRE_Int   variant);
+
+/*
+ * (Optional) Defines how to estimate eigenvalues.
+ *  The default is 10 (i.e., 10 CG iterations are used to find extreme 
+ *  eigenvalues.) If eig_est=0, the largest eigenvalue is estimated
+ *  using Gershgorin, the smallest is set to 0.
+ *  If eig_est is a positive number n, n iterations of CG are used to
+ *  determine the smallest and largest eigenvalue.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst (HYPRE_Solver solver,
+                                           HYPRE_Int   eig_est);
+
+
 /**
  * (Optional) Enables the use of more complex smoothers.
  * The following options exist for smooth\_type:
