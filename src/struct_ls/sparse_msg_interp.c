@@ -58,7 +58,7 @@ hypre_SparseMSGInterpSetup( void               *interp_vdata,
                             hypre_Index         stride,
                             hypre_Index         strideP       )
 {
-	hypre_SparseMSGInterpData   *interp_data = (hypre_SparseMSGInterpData   *)interp_vdata;
+   hypre_SparseMSGInterpData   *interp_data = (hypre_SparseMSGInterpData   *)interp_vdata;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
@@ -131,10 +131,6 @@ hypre_SparseMSGInterp( void               *interp_vdata,
    hypre_Box              *P_dbox;
    hypre_Box              *xc_dbox;
    hypre_Box              *e_dbox;
-                       
-   HYPRE_Int               Pi;
-   HYPRE_Int               xci;
-   HYPRE_Int               ei;
                          
    HYPRE_Real             *Pp0, *Pp1;
    HYPRE_Real             *xcp;
@@ -203,7 +199,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
                           e_dbox,  start,  stride,  ei,
                           xc_dbox, startc, stridec, xci);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(ei, xci)
       {
@@ -263,7 +259,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
                                 P_dbox, startP, strideP, Pi,
                                 e_dbox, start,  stride,  ei);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Pi,ei) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(Pi, ei)
             {

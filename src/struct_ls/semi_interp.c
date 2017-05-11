@@ -125,8 +125,6 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_Box              *e_dbox;
                        
    HYPRE_Int               Pi;
-   HYPRE_Int               xci;
-   HYPRE_Int               ei;
    HYPRE_Int               constant_coefficient;
                          
    HYPRE_Real             *Pp0, *Pp1;
@@ -201,7 +199,7 @@ hypre_SemiInterp( void               *interp_vdata,
                           e_dbox, start, stride, ei,
                           xc_dbox, startc, stridec, xci);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,xci) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(ei, xci)
       {
@@ -280,7 +278,7 @@ hypre_SemiInterp( void               *interp_vdata,
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(P), loop_size,
                                    e_dbox, start, stride, ei);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop1For(ei)
                {
@@ -295,7 +293,7 @@ hypre_SemiInterp( void               *interp_vdata,
                                    P_dbox, startc, stridec, Pi,
                                    e_dbox, start, stride, ei);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Pi,ei) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(Pi, ei)
                {

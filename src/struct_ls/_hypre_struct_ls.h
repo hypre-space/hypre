@@ -32,8 +32,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
 /* coarsen.c */
 HYPRE_Int hypre_StructMapFineToCoarse ( hypre_Index findex , hypre_Index index , hypre_Index stride , hypre_Index cindex );
 HYPRE_Int hypre_StructMapCoarseToFine ( hypre_Index cindex , hypre_Index index , hypre_Index stride , hypre_Index findex );

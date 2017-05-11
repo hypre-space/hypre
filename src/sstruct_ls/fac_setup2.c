@@ -25,7 +25,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                  hypre_SStructVector  *b,
                  hypre_SStructVector  *x )
 {
-	hypre_FACData          *fac_data      =  (hypre_FACData*)fac_vdata;
+   hypre_FACData          *fac_data      =  (hypre_FACData*)fac_vdata;
 
    HYPRE_Int              *plevels       = (fac_data-> plevels);
    hypre_Index            *rfactors      = (fac_data-> prefinements);
@@ -105,7 +105,6 @@ hypre_FacSetup2( void                 *fac_vdata,
    HYPRE_Int              *stencil_vars;
    HYPRE_Real             *values;
    HYPRE_Real             *A_smatrix_value;
-   HYPRE_Int               iA;
  
    HYPRE_Int              *nrows;
    HYPRE_Int             **ncols;
@@ -126,8 +125,8 @@ hypre_FacSetup2( void                 *fac_vdata,
    HYPRE_Int               ierr = 0;
 /*hypre_SStructMatrix *nested_A;
 
-nested_A= hypre_TAlloc(hypre_SStructMatrix , 1);
-nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
+  nested_A= hypre_TAlloc(hypre_SStructMatrix , 1);
+  nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
 
    /* generate the composite operator with the computed coarse-grid operators */
    hypre_AMR_RAP(A_in, rfactors, &A_rap);
@@ -498,7 +497,7 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
                                    sgrid_box, box_start, stride, k,
                                    A_smatrix_dbox, box_start, stride, iA);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,k,iA) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(k, iA)
                {
@@ -573,7 +572,7 @@ nested_A= hypre_CoarsenAMROp(fac_vdata, A);*/
                                       sgrid_box, box_start, stride, k,
                                       A_smatrix_dbox, box_start, stride, iA);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,k,iA) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(k, iA)
                   {

@@ -4372,7 +4372,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    return hypre_error_flag;
 }
 
-
+HYPRE_CUDA_GLOBAL
 HYPRE_Int gselim(HYPRE_Real *A,
                  HYPRE_Real *x,
                  HYPRE_Int n)

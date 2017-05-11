@@ -25,7 +25,7 @@ hypre_MPI_Comm_f2c( hypre_int comm )
 #ifdef HYPRE_HAVE_MPI_COMM_F2C
    return (hypre_MPI_Comm) MPI_Comm_f2c(comm);
 #else
-   return (hypre_MPI_Comm) comm;
+   return (hypre_MPI_Comm) (size_t)comm;
 #endif
 }
 

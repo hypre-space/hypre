@@ -70,7 +70,7 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
       {
          if (hypre_StructVectorDataAlloced(vector))
          {
-            hypre_SharedTFree(hypre_StructVectorData(vector));
+            hypre_DeviceTFree(hypre_StructVectorData(vector));
          }
          hypre_TFree(hypre_StructVectorDataIndices(vector));
          hypre_BoxArrayDestroy(hypre_StructVectorDataSpace(vector));
@@ -186,7 +186,8 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
 
    hypre_StructVectorInitializeShell(vector);
 
-   data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector));
+   data = hypre_DeviceCTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector));
+
    hypre_StructVectorInitializeData(vector, data);
    hypre_StructVectorDataAlloced(vector) = 1;
 
@@ -294,13 +295,11 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
    hypre_Box          *data_box;
    hypre_IndexRef      data_start;
    hypre_Index         data_stride;
-   HYPRE_Int           datai;
    HYPRE_Complex      *datap;
 
    hypre_Box          *dval_box;
    hypre_Index         dval_start;
    hypre_Index         dval_stride;
-   HYPRE_Int           dvali;
 
    hypre_Index         loop_size;
 
@@ -364,7 +363,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
                                 data_box,data_start,data_stride,datai,
                                 dval_box,dval_start,dval_stride,dvali);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(datai, dvali)
             {
@@ -480,7 +479,6 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
    hypre_Box          *data_box;
    hypre_IndexRef      data_start;
    hypre_Index         data_stride;
-   HYPRE_Int           datai;
    HYPRE_Complex      *datap;
 
    hypre_Index         loop_size;
@@ -539,7 +537,7 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                              data_box,data_start,data_stride,datai);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop1For(datai)
          {
@@ -562,15 +560,26 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
 {
    HYPRE_Complex *data      = hypre_StructVectorData(vector);
    HYPRE_Int      data_size = hypre_StructVectorDataSize(vector);
-   HYPRE_Int      i;
+   hypre_Index    imin, imax;
+   hypre_Box     *box;
 
+   box = hypre_BoxCreate(1);
+   hypre_IndexD(imin, 0) = 1;
+   hypre_IndexD(imax, 0) = data_size;
+   hypre_BoxSetExtents(box, imin, imax);
+
+   hypre_BoxLoop1Begin(1, imax,
+                       box, imin, imin, datai);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-   for (i = 0; i < data_size; i++)
+   hypre_BoxLoop1For(datai)
    {
-      data[i] = 0.0;
+      data[datai] = 0.0;
    }
+   hypre_BoxLoop1End(datai);
+   
+   hypre_BoxDestroy(box);
 
    return hypre_error_flag;
 }
@@ -616,7 +625,6 @@ hypre_StructVectorCopy( hypre_StructVector *x,
 {
    hypre_Box          *x_data_box;
                     
-   HYPRE_Int           vi;
    HYPRE_Complex      *xp, *yp;
 
    hypre_BoxArray     *boxes;
@@ -649,7 +657,7 @@ hypre_StructVectorCopy( hypre_StructVector *x,
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, unit_stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi ) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For(vi)
       {
@@ -670,7 +678,6 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
 {
    hypre_Box          *v_data_box;
                     
-   HYPRE_Int           vi;
    HYPRE_Complex      *vp;
 
    hypre_BoxArray     *boxes;
@@ -702,7 +709,7 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi ) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For(vi)
       {
@@ -727,7 +734,6 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
 {
    hypre_Box          *v_data_box;
                     
-   HYPRE_Int           vi;
    HYPRE_Complex      *vp;
 
    hypre_BoxArray     *boxes;
@@ -756,27 +762,28 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
  
       hypre_BoxGetSize(box, loop_size);
 
-      hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
-                          v_data_box, start, unit_stride, vi);
       i = hypre_IndexD(start, 0);
       j = hypre_IndexD(start, 1);
       k = hypre_IndexD(start, 2);
+      
+      hypre_SerialBoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
+				v_data_box, start, unit_stride, vi);
+
 /* RDF: This won't work as written with threading on */
+       
 #if 0
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi ) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE ) HYPRE_SMP_SCHEDULE
 #endif
 #else
-      hypre_BoxLoopSetOneBlock();
 #endif
-      hypre_BoxLoop1For(vi)
       {
          vp[vi] = fcn(i, j, k);
          i++;
          j++;
          k++;
       }
-      hypre_BoxLoop1End(vi);
+      hypre_SerialBoxLoop1End(vi);
    }
 
    return hypre_error_flag;
@@ -791,7 +798,6 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
    HYPRE_Int           ndim = hypre_StructVectorNDim(vector);
    hypre_Box          *v_data_box;
                     
-   HYPRE_Int           vi;
    HYPRE_Complex      *vp;
 
    hypre_BoxArray     *boxes;
@@ -830,7 +836,7 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                              v_data_box, start, unit_stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi ) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop1For(vi)
          {
@@ -853,7 +859,6 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
                                          HYPRE_Int           force )
 {
    HYPRE_Int           ndim = hypre_StructVectorNDim(vector);
-   HYPRE_Int           vi;
    HYPRE_Complex      *vp;
    hypre_BoxArray     *boxes;
    hypre_Box          *box;
@@ -905,7 +910,7 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
             hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                                 v_data_box, start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,vi ) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE ) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop1For(vi)
             {
@@ -930,7 +935,6 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
 HYPRE_Int 
 hypre_StructVectorScaleValues( hypre_StructVector *vector, HYPRE_Complex factor )
 {
-   HYPRE_Int         datai;
    HYPRE_Complex    *data;
 
    hypre_Index       imin;
@@ -953,7 +957,7 @@ hypre_StructVectorScaleValues( hypre_StructVector *vector, HYPRE_Complex factor 
    hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                        box, imin, imin, datai);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
    hypre_BoxLoop1For(datai)
    {
@@ -1180,7 +1184,6 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
    A hypre_Index corresponding to max_index is put in max_xyz_index.
    We assume that there is only one box to deal with. */
 {
-   HYPRE_Int         datai;
    HYPRE_Real       *data;
 
    hypre_Index       imin;
@@ -1211,16 +1214,16 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
       data = hypre_StructVectorBoxData(vector, i);
       hypre_BoxGetSize(box, loop_size);
       hypre_CopyIndex( hypre_BoxIMin(box), imin );
-
-      hypre_BoxLoop1Begin(ndim, loop_size,
-                          box, imin, unit_stride, datai);
       maxindex = hypre_BoxIndexRank( box, imin );
       maxvalue = data[maxindex];
       hypre_SetIndex(max_xyz_index, 0);
+/*FIXME: must run sequentially*/
+      zypre_BoxLoop1Begin(ndim, loop_size,
+                          box, imin, unit_stride, datai);      
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
-      hypre_BoxLoop1For(datai)
+      zypre_BoxLoop1For(datai)
       {
          if ( data[datai] > maxvalue )
          {
@@ -1229,7 +1232,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
             hypre_BoxLoopGetIndex(max_xyz_index);
          }
       }
-      hypre_BoxLoop1End(datai);
+      zypre_BoxLoop1End(datai);
       hypre_AddIndexes(max_xyz_index, imin, ndim, max_xyz_index);
    }
 
@@ -1245,7 +1248,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
  *--------------------------------------------------------------------------*/
 hypre_StructVector *
 hypre_StructVectorClone(
-	hypre_StructVector *x)
+   hypre_StructVector *x)
 {
    MPI_Comm		comm = hypre_StructVectorComm(x);
    hypre_StructGrid    *grid = hypre_StructVectorGrid(x);
@@ -1259,11 +1262,12 @@ hypre_StructVectorClone(
 
    hypre_StructVectorDataSize(y) = data_size;
    hypre_StructVectorDataSpace(y) = hypre_BoxArrayDuplicate(data_space);
-   hypre_StructVectorData(y) = hypre_CTAlloc(HYPRE_Complex,data_size);
+   hypre_StructVectorData(y) = hypre_DeviceCTAlloc(HYPRE_Complex, data_size);
+   
    hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size);
 
    for (i=0; i < data_space_size; i++)
-       hypre_StructVectorDataIndices(y)[i] = data_indices[i];
+      hypre_StructVectorDataIndices(y)[i] = data_indices[i];
 
    hypre_StructVectorCopy( x, y );
 

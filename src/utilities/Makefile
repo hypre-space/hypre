@@ -60,7 +60,9 @@ FILES =\
  F90_HYPRE_error.c\
  hypre_prefix_sum.c\
  hypre_merge_sort.c\
- hypre_hopscotch_hash.c
+ hypre_hopscotch_hash.c\
+ gpuErrorCheck.c\
+ gpuMem.c
 
 OBJS = ${FILES:.c=.o}
 

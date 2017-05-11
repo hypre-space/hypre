@@ -433,6 +433,18 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                  }
                  else /* not CF - so use through AMS */
                  {
+#ifdef HYPRE_USE_GPU
+		   hypre_ParCSRRelax(A_array[level], 
+                                       Aux_F,
+                                       1,
+                                       1,
+                                       l1_norms_level,
+                                       relax_weight[level],
+                                       omega[level],0,0,0,0,
+                                       Aux_U,
+                                       Vtemp, 
+				       Ztemp);
+#else
                     if (num_threads == 1)
                        hypre_ParCSRRelax(A_array[level],
                                        Aux_F,
@@ -456,6 +468,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                               Aux_U,
                                               Vtemp,
                                               Ztemp);
+#endif
                  }
               }
               else if (relax_type == 15)

@@ -138,11 +138,6 @@ hypre_SMGResidual( void               *residual_vdata,
    hypre_Box              *x_data_box;
    hypre_Box              *b_data_box;
    hypre_Box              *r_data_box;
-                       
-   HYPRE_Int               Ai;
-   HYPRE_Int               xi;
-   HYPRE_Int               bi;
-   HYPRE_Int               ri;
                          
    HYPRE_Real             *Ap;
    HYPRE_Real             *xp;
@@ -201,7 +196,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                    b_data_box, start, base_stride, bi,
                                    r_data_box, start, base_stride, ri);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ri) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(bi, ri)
                {
@@ -253,7 +248,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                    x_data_box, start, base_stride, xi,
                                    r_data_box, start, base_stride, ri);
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop3For(Ai, xi, ri)
                {
