@@ -155,6 +155,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Int additive;
    HYPRE_Int mult_additive;
    HYPRE_Int simple;
+   HYPRE_Int add_end;
    HYPRE_Int add_rlx;
    HYPRE_Real add_rlx_wt;
  
@@ -175,9 +176,9 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    additive = hypre_ParAMGDataAdditive(amg_data);
    mult_additive = hypre_ParAMGDataMultAdditive(amg_data);
    simple = hypre_ParAMGDataSimple(amg_data);
+   add_end = hypre_ParAMGDataAddLastLvl(amg_data);
    add_rlx = hypre_ParAMGDataAddRelaxType(amg_data);
    add_rlx_wt = hypre_ParAMGDataAddRelaxWt(amg_data);
-
 
    A_block_array = hypre_ParAMGDataABlockArray(amg_data);
    P_block_array = hypre_ParAMGDataPBlockArray(amg_data);
@@ -923,19 +924,40 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
       if (additive == 0 || mult_additive == 0 || simple == 0)
       {
+         HYPRE_Int add_lvl = add_end;
+         if (add_end == -1) add_lvl = num_levels-1;
          if (additive > -1)
-            hypre_printf( "  Additive V-cycle starting at level %d  \n", additive);
+            hypre_printf( "  Additive V-cycle 1st level %d last level %d: \n", additive, add_lvl);
          if (mult_additive > -1)
-            hypre_printf( "  Mult-Additive V-cycle starting at level %d  \n", mult_additive);
+            hypre_printf( "  Mult-Additive V-cycle 1st level %d last level %d: \n", mult_additive, add_lvl);
          if (simple > -1)
-            hypre_printf( "  Simplified Mult-Additive V-cycle starting at level %d  \n", simple);
-         hypre_printf( "\n");
+            hypre_printf( "  Simplified Mult-Additive V-cycle 1st level %d: last level %d \n", simple, add_lvl);
          hypre_printf( "  Relaxation Parameters:\n");
-         hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
-         hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
+         if (add_lvl == num_levels-1)
+         {
+            hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
+            hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
               num_grid_sweeps[1],
-              num_grid_sweeps[2],(2*num_grid_sweeps[3]));
-         hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d   %2d \n", add_rlx, add_rlx, add_rlx);
+              num_grid_sweeps[1],(2*num_grid_sweeps[1]));
+            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d   %2d \n", add_rlx, add_rlx, add_rlx);
+         }
+         else
+         {
+            hypre_printf( "   Visiting Grid:                     down   up\n");
+            hypre_printf( "            Number of sweeps:         %4d   %2d\n",
+              num_grid_sweeps[1], num_grid_sweeps[1]);
+            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d\n", add_rlx, add_rlx);
+         }
+         if (add_lvl < num_levels -1)
+         {
+            hypre_printf( " \n");
+            hypre_printf( "Multiplicative portion: \n");
+            hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
+            hypre_printf( "            Number of sweeps:         %4d   %2d  %4d\n",
+              num_grid_sweeps[1], num_grid_sweeps[2], num_grid_sweeps[3]);
+            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d\n",
+              grid_relax_type[1], grid_relax_type[2], grid_relax_type[3]);
+         }
          if (add_rlx == 0) hypre_printf( "   Relaxation Weight:   %e \n", add_rlx_wt);
          hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
          hypre_printf( "                  Pre-CG relaxation (down):");
@@ -953,12 +975,25 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       }
       else if (additive > 0 || mult_additive > 0 || simple > 0)
       {
+         HYPRE_Int add_lvl = add_end;
+         if (add_end == -1) add_lvl = num_levels-1;
          hypre_printf( "  Relaxation Parameters:\n");
-         hypre_printf( "   Visiting Grid:                     down   up  \n");
-         hypre_printf( "            Number of sweeps:         %4d   %2d  \n",
+         if (add_lvl < num_levels -1)
+         {
+            hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
+            hypre_printf( "            Number of sweeps:         %4d   %2d  %4d\n",
+              num_grid_sweeps[1], num_grid_sweeps[2], num_grid_sweeps[3]);
+            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  %4d\n",
+              grid_relax_type[1], grid_relax_type[2], grid_relax_type[3]);
+         }
+         else
+         {
+            hypre_printf( "   Visiting Grid:                     down   up  \n");
+            hypre_printf( "            Number of sweeps:         %4d   %2d  \n",
               num_grid_sweeps[1], num_grid_sweeps[2]);
-         hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  \n",
+            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:   %4d   %2d  \n",
               grid_relax_type[1], grid_relax_type[2]);
+         }
          hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
          if (grid_relax_points && grid_relax_type[1] != 8)
          {
@@ -995,18 +1030,27 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
          }
          hypre_printf( "\n\n");
          if (additive > -1)
-            hypre_printf( "  Additive V-cycle starting at level %d  \n", additive);
+            hypre_printf( "  Additive V-cycle 1st level %d last level %d:  \n", additive, add_lvl);
          if (mult_additive > -1)
-            hypre_printf( "  Mult-Additive V-cycle starting at level %d  \n", mult_additive);
+            hypre_printf( "  Mult-Additive V-cycle 1st level %d last level %d: \n", mult_additive, add_lvl);
          if (simple > -1)
-            hypre_printf( "  Simplified Mult-Additive V-cycle starting at level %d  \n", simple);
-         hypre_printf( "\n");
+            hypre_printf( "  Simplified Mult-Additive V-cycle 1st level %d: last level %d  \n", simple, add_lvl);
          hypre_printf( "  Relaxation Parameters:\n");
-         hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
-         hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
+         if (add_lvl == num_levels-1)
+         {
+            hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
+            hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",
               num_grid_sweeps[1],
-              num_grid_sweeps[2],(2*num_grid_sweeps[3]));
-         hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d   %2d \n", add_rlx, add_rlx, add_rlx);
+              num_grid_sweeps[1],(2*num_grid_sweeps[1]));
+            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d   %2d \n", add_rlx, add_rlx, add_rlx);
+         }
+         else
+         {
+            hypre_printf( "   Visiting Grid:                     down   up\n");
+            hypre_printf( "            Number of sweeps:         %4d   %2d\n",
+              num_grid_sweeps[1], num_grid_sweeps[1]);
+            hypre_printf( "   Type 0=Jac, 3=hGS, 6=hSGS, 9=GE:    %2d   %2d\n", add_rlx, add_rlx);
+         }
          if (add_rlx == 0) hypre_printf( "   Relaxation Weight:   %e \n", add_rlx_wt);
          hypre_printf( "   Point types, partial sweeps (1=C, -1=F):\n");
          hypre_printf( "                  Pre-CG relaxation (down):");

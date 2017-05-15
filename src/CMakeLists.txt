@@ -470,6 +470,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_cg_relax_wt.c
   parcsr_ls/par_coarsen.c
   parcsr_ls/par_cgc_coarsen.c
+  parcsr_ls/par_cheby.c
   parcsr_ls/par_coarse_parms.c
   parcsr_ls/par_coordinates.c
   parcsr_ls/par_cr.c

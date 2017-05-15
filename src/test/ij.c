@@ -216,6 +216,7 @@ main( hypre_int argc,
    HYPRE_Int additive = -1;
    HYPRE_Int mult_add = -1;
    HYPRE_Int simple = -1;
+   HYPRE_Int add_last_lvl = -1;
    HYPRE_Int add_P_max_elmts = 0;
    HYPRE_Real add_trunc_factor = 0;
 
@@ -231,6 +232,9 @@ main( hypre_int argc,
    HYPRE_Real   max_row_sum = 1.;
 
    HYPRE_Int cheby_order = 2;
+   HYPRE_Int cheby_eig_est = 10;
+   HYPRE_Int cheby_variant = 0;
+   HYPRE_Int cheby_scale = 1;
    HYPRE_Real cheby_fraction = .3;
 
    /* for CGC BM Aug 25, 2006 */
@@ -1212,6 +1216,21 @@ main( hypre_int argc,
          arg_index++;
          cheby_order = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-cheby_eig_est") == 0 )
+      {
+         arg_index++;
+         cheby_eig_est = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-cheby_variant") == 0 )
+      {
+         arg_index++;
+         cheby_variant = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-cheby_scale") == 0 )
+      {
+         arg_index++;
+         cheby_scale = atoi(argv[arg_index++]);
+      }
       else if ( strcmp(argv[arg_index], "-cheby_fraction") == 0 )
       {
          arg_index++;
@@ -1231,6 +1250,11 @@ main( hypre_int argc,
       {
          arg_index++;
          simple  = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-add_end") == 0 )
+      {
+         arg_index++;
+         add_last_lvl  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-add_Pmx") == 0 )
       {
@@ -1447,8 +1471,8 @@ main( hypre_int argc,
       hypre_printf("  -ns <val>              : Use <val> sweeps on each level\n");
       hypre_printf("                           (default C/F down, F/C up, F/C fine\n");
       hypre_printf("  -ns_coarse  <val>       : set no. of sweeps for coarsest grid\n");
-      hypre_printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
-      hypre_printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");
+      /*hypre_printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
+      hypre_printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");*/
       hypre_printf("\n"); 
       hypre_printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n"); 
       hypre_printf("  -th   <val>            : set AMG threshold Theta = val \n");
@@ -2502,6 +2526,9 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetAddRelaxWt(amg_solver, add_relax_wt);
       HYPRE_BoomerAMGSetChebyOrder(amg_solver, cheby_order);
       HYPRE_BoomerAMGSetChebyFraction(amg_solver, cheby_fraction);
+      HYPRE_BoomerAMGSetChebyEigEst(amg_solver, cheby_eig_est);
+      HYPRE_BoomerAMGSetChebyVariant(amg_solver, cheby_variant);
+      HYPRE_BoomerAMGSetChebyScale(amg_solver, cheby_scale);
       HYPRE_BoomerAMGSetRelaxOrder(amg_solver, relax_order);
       HYPRE_BoomerAMGSetRelaxWt(amg_solver, relax_wt);
       HYPRE_BoomerAMGSetOuterWt(amg_solver, outer_wt);
@@ -2541,6 +2568,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
       HYPRE_BoomerAMGSetSimple(amg_solver, simple);
+      HYPRE_BoomerAMGSetAddLastLvl(amg_solver, add_last_lvl);
       HYPRE_BoomerAMGSetMultAddPMaxElmts(amg_solver, add_P_max_elmts);
       HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
 
@@ -2658,6 +2686,9 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetAddRelaxWt(amg_solver, add_relax_wt);
       HYPRE_BoomerAMGSetChebyOrder(amg_solver, cheby_order);
       HYPRE_BoomerAMGSetChebyFraction(amg_solver, cheby_fraction);
+      HYPRE_BoomerAMGSetChebyEigEst(amg_solver, cheby_eig_est);
+      HYPRE_BoomerAMGSetChebyVariant(amg_solver, cheby_variant);
+      HYPRE_BoomerAMGSetChebyScale(amg_solver, cheby_scale);
       HYPRE_BoomerAMGSetRelaxOrder(amg_solver, relax_order);
       HYPRE_BoomerAMGSetRelaxWt(amg_solver, relax_wt);
       HYPRE_BoomerAMGSetOuterWt(amg_solver, outer_wt);
@@ -2695,6 +2726,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
       HYPRE_BoomerAMGSetMultAdditive(amg_solver, mult_add);
       HYPRE_BoomerAMGSetSimple(amg_solver, simple);
+      HYPRE_BoomerAMGSetAddLastLvl(amg_solver, add_last_lvl);
       HYPRE_BoomerAMGSetMultAddPMaxElmts(amg_solver, add_P_max_elmts);
       HYPRE_BoomerAMGSetMultAddTruncFactor(amg_solver, add_trunc_factor);
       HYPRE_BoomerAMGSetRAP2(amg_solver, rap2);
@@ -2822,6 +2854,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -2860,6 +2895,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -2977,6 +3013,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
          if (level_w > -1)
@@ -3013,6 +3052,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -4065,6 +4105,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -4103,6 +4146,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -4208,6 +4252,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -4246,6 +4293,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -4428,6 +4476,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -4466,6 +4517,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -4601,6 +4653,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -4639,6 +4694,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -4779,6 +4835,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -4818,6 +4877,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
@@ -5001,6 +5061,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAddRelaxWt(pcg_precond, add_relax_wt);
          HYPRE_BoomerAMGSetChebyOrder(pcg_precond, cheby_order);
          HYPRE_BoomerAMGSetChebyFraction(pcg_precond, cheby_fraction);
+         HYPRE_BoomerAMGSetChebyEigEst(pcg_precond, cheby_eig_est);
+         HYPRE_BoomerAMGSetChebyVariant(pcg_precond, cheby_variant);
+         HYPRE_BoomerAMGSetChebyScale(pcg_precond, cheby_scale);
          HYPRE_BoomerAMGSetRelaxOrder(pcg_precond, relax_order);
          HYPRE_BoomerAMGSetRelaxWt(pcg_precond, relax_wt);
          HYPRE_BoomerAMGSetOuterWt(pcg_precond, outer_wt);
@@ -5032,6 +5095,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
          HYPRE_BoomerAMGSetMultAdditive(pcg_precond, mult_add);
          HYPRE_BoomerAMGSetSimple(pcg_precond, simple);
+         HYPRE_BoomerAMGSetAddLastLvl(pcg_precond, add_last_lvl);
          HYPRE_BoomerAMGSetMultAddPMaxElmts(pcg_precond, add_P_max_elmts);
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);

@@ -79,10 +79,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int      mult_additive = hypre_ParAMGDataMultAdditive(amg_data);
    HYPRE_Int      additive = hypre_ParAMGDataAdditive(amg_data);
    HYPRE_Int      simple = hypre_ParAMGDataSimple(amg_data);
+   HYPRE_Int      add_last_lvl = hypre_ParAMGDataAddLastLvl(amg_data);
    HYPRE_Int      add_P_max_elmts = hypre_ParAMGDataMultAddPMaxElmts(amg_data);
    HYPRE_Real     add_trunc_factor = hypre_ParAMGDataMultAddTruncFactor(amg_data);
    HYPRE_Int      add_rlx = hypre_ParAMGDataAddRelaxType(amg_data);
-   HYPRE_Real      add_rlx_wt = hypre_ParAMGDataAddRelaxWt(amg_data);
+   HYPRE_Real     add_rlx_wt = hypre_ParAMGDataAddRelaxWt(amg_data);
 
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array;
  
@@ -99,8 +100,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *AN = NULL;
    hypre_ParCSRMatrix  *P1;
    hypre_ParCSRMatrix  *P2;
+   hypre_ParCSRMatrix  *Pnew = NULL;
    HYPRE_Real          *SmoothVecs = NULL;
    HYPRE_Real         **l1_norms = NULL;
+   HYPRE_Real         **cheby_ds = NULL;
+   HYPRE_Real         **cheby_coefs = NULL;
 
    HYPRE_Int       old_num_levels, num_levels;
    HYPRE_Int       level;
@@ -183,7 +187,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int rap2 = hypre_ParAMGDataRAP2(amg_data);
    HYPRE_Int keepTranspose = hypre_ParAMGDataKeepTranspose(amg_data);
 
+   HYPRE_Int *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
+   HYPRE_Int ns = num_grid_sweeps[1];
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
+   HYPRE_Int      add_end;
 
 #ifdef HYPRE_USE_GPU
    if (!hypre_ParCSRMatrixIsManaged(A)){
@@ -209,6 +216,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_CSRMatrixPrint(A_new, "Atestnew"); */
    old_num_levels = hypre_ParAMGDataNumLevels(amg_data);
    max_levels = hypre_ParAMGDataMaxLevels(amg_data);
+   add_end = hypre_min(add_last_lvl, max_levels-1);
+   if (add_end == -1) add_end = max_levels-1;
    amg_logging = hypre_ParAMGDataLogging(amg_data);
    amg_print_level = hypre_ParAMGDataPrintLevel(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
@@ -1907,11 +1916,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       if (!block_mode)
       {
-         if (mult_addlvl > -1 && level >= mult_addlvl)
+         if (mult_addlvl > -1 && level >= mult_addlvl && level <= add_end)
          {
             HYPRE_Real *d_diag;
-            hypre_ParCSRMatrix *Q = NULL;
-            Q = hypre_ParMatmul(A_array[level],P);
             if (add_rlx == 0)
             {
                hypre_CSRMatrix *lvl_Adiag = hypre_ParCSRMatrixDiag(A_array[level]);
@@ -1929,54 +1936,113 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (num_threads == 1) 
 		  hypre_ParCSRComputeL1Norms(A_array[level], 1, NULL, &d_diag);
                else 
-                  hypre_ParCSRComputeL1NormsThreads(A_array[level], 1, num_threads, NULL, &d_diag);
+                  hypre_ParCSRComputeL1NormsThreads(A_array[level], 1, 
+			num_threads, NULL, &d_diag);
             }
-            hypre_ParCSRMatrixAminvDB(P,Q,d_diag,&P_array[level]);
-            A_H = hypre_ParTMatmul(P,Q);
-            hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
-            hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
-            hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
-            hypre_ParCSRMatrixOwnsColStarts(P) = 0; 
-            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H); 
-            /*hypre_ParCSRMatrixDestroy(P); */
-            hypre_TFree(d_diag); 
-	    /*hypre_BoomerAMGBuildCoarseOperator(P, A_array[level] , P, &A_H); 
-            hypre_ParCSRMatrix *C = NULL;
-            HYPRE_Int *num_grid_sweeps
-                        = hypre_ParAMGDataNumGridSweeps(amg_data);
-            if (grid_relax_type[1] == 18)
-		C = hypre_CreateC(A_array[level], 0.0);
-            else
-		C = hypre_CreateC(A_array[level], relax_weight[level]);
-            if (num_grid_sweeps[1] > 1)
+            if (ns == 1)
             {
-                  hypre_ParCSRMatrix *Pnew = NULL;
-                  Pnew = hypre_ParMatmul(C,P);
-                  P_array[level] = hypre_ParMatmul(C,Pnew);
-                  hypre_ParCSRMatrixDestroy(Pnew);
-            }
-            else
-                  P_array[level] = hypre_ParMatmul(C,P);
-            hypre_ParCSRMatrixDestroy(C); */
-
-            /* Set NonGalerkin drop tol on each level */
-            if (level < nongalerk_num_tol) nongalerk_tol_l = nongalerk_tol[level];
-            if (nongal_tol_array) nongalerk_tol_l = nongal_tol_array[level];
-            if (nongalerk_tol_l > 0.0)
-            {
-            /* Build Non-Galerkin Coarse Grid */
-               hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
+               hypre_ParCSRMatrix *Q = NULL;
+               Q = hypre_ParMatmul(A_array[level],P);
+               hypre_ParCSRMatrixAminvDB(P,Q,d_diag,&P_array[level]);
+               A_H = hypre_ParTMatmul(P,Q);
+               hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
+               hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
+               hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
+               hypre_ParCSRMatrixOwnsColStarts(P) = 0; 
+               if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H); 
+               /*hypre_ParCSRMatrixDestroy(P); */
+               hypre_TFree(d_diag); 
+               /* Set NonGalerkin drop tol on each level */
+               if (level < nongalerk_num_tol) nongalerk_tol_l = nongalerk_tol[level];
+               if (nongal_tol_array) nongalerk_tol_l = nongal_tol_array[level];
+               if (nongalerk_tol_l > 0.0)
+               {
+               /* Build Non-Galerkin Coarse Grid */
+                  hypre_ParCSRMatrix *Q = NULL;
+                  hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
                     0.333*strong_threshold, max_row_sum, num_functions, 
                     dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level], 
                     /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
                       nongalerk_tol_l,      1,            0.5,    1.0 );
             
-               hypre_ParCSRMatrixColStarts(P_array[level]) = hypre_ParCSRMatrixRowStarts(A_H);
-               if (!hypre_ParCSRMatrixCommPkg(A_H))
-                   hypre_MatvecCommPkgCreate(A_H);
+                  hypre_ParCSRMatrixColStarts(P_array[level]) = hypre_ParCSRMatrixRowStarts(A_H);
+                  if (!hypre_ParCSRMatrixCommPkg(A_H))
+                     hypre_MatvecCommPkgCreate(A_H);
+               }
+               hypre_ParCSRMatrixDestroy(Q);
 			
             }
-            hypre_ParCSRMatrixDestroy(Q);
+            else 
+            {
+               HYPRE_Int ns_tmp = ns;
+               hypre_ParCSRMatrix *C = NULL;
+               hypre_ParCSRMatrix *Ptmp = NULL;
+               /* Set NonGalerkin drop tol on each level */
+               if (level < nongalerk_num_tol)
+                   nongalerk_tol_l = nongalerk_tol[level];
+               if (nongal_tol_array) nongalerk_tol_l = nongal_tol_array[level];
+
+               if (nongalerk_tol_l > 0.0)
+               {
+                  /* Construct AP, and then RAP */
+                  hypre_ParCSRMatrix *Q = NULL;
+                  Q = hypre_ParMatmul(A_array[level],P_array[level]);
+                  A_H = hypre_ParTMatmul(P_array[level],Q);
+                  hypre_ParCSRMatrixRowStarts(A_H) = hypre_ParCSRMatrixColStarts(A_H);
+                  hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
+                  hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
+                  hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
+                  if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
+            
+                  /* Build Non-Galerkin Coarse Grid */
+                  hypre_BoomerAMGBuildNonGalerkinCoarseOperator(&A_H, Q,
+                    0.333*strong_threshold, max_row_sum, num_functions, 
+                    dof_func_array[level+1], S_commpkg_switch, CF_marker_array[level], 
+                    /* nongalerk_tol, sym_collapse, lump_percent, beta );*/
+                      nongalerk_tol_l,      1,            0.5,    1.0 );
+            
+                  if (!hypre_ParCSRMatrixCommPkg(A_H))
+                     hypre_MatvecCommPkgCreate(A_H);
+            
+                  /* Delete AP */
+                  hypre_ParCSRMatrixDestroy(Q);
+               }
+               else if (rap2)
+               {
+                  /* Use two matrix products to generate A_H */
+                  hypre_ParCSRMatrix *Q = NULL;
+                  Q = hypre_ParMatmul(A_array[level],P_array[level]);
+                  A_H = hypre_ParTMatmul(P_array[level],Q);
+                  hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
+                  hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
+                  hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
+                  if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
+                  /* Delete AP */
+                  hypre_ParCSRMatrixDestroy(Q);
+               }
+               else
+	          hypre_BoomerAMGBuildCoarseOperatorKT(P, A_array[level] , P, 
+			keepTranspose, &A_H); 
+	
+               if (add_rlx == 18)
+	          C = hypre_CreateC(A_array[level], 0.0);
+               else
+		  C = hypre_CreateC(A_array[level], add_rlx_wt);
+               Ptmp = P;
+	       while (ns_tmp > 0)
+               {
+                  Pnew = Ptmp;
+                  Ptmp = NULL;
+		  Ptmp = hypre_ParMatmul(C,Pnew);
+                  if (ns_tmp < ns)
+			hypre_ParCSRMatrixDestroy(Pnew);
+		  ns_tmp--;
+               }
+               Pnew = Ptmp;
+               P_array[level] = Pnew;
+               hypre_ParCSRMatrixDestroy(C); 
+            }
+
 
 
             if (add_P_max_elmts || add_trunc_factor)
@@ -2024,7 +2090,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          A_block_array[level+1] = A_H_block;
 
       }
-      else if (mult_addlvl == -1 || level < mult_addlvl)
+      else if (mult_addlvl == -1 || level < mult_addlvl || level > add_end)
       {
          /* Set NonGalerkin drop tol on each level */
          if (level < nongalerk_num_tol)
@@ -2074,6 +2140,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             /* Compute standard Galerkin coarse-grid product */
             hypre_BoomerAMGBuildCoarseOperatorKT(P_array[level], A_array[level] , 
                                         P_array[level], keepTranspose, &A_H);
+            if (Pnew && ns==1) 
+            {
+               hypre_ParCSRMatrixDestroy(P);
+               P_array[level] = Pnew;
+            }
+	
          }
 
       }
@@ -2198,6 +2270,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       min_eig_est = hypre_CTAlloc(HYPRE_Real, num_levels);
       hypre_ParAMGDataMaxEigEst(amg_data) = max_eig_est;
       hypre_ParAMGDataMinEigEst(amg_data) = min_eig_est;
+      cheby_ds = hypre_CTAlloc(HYPRE_Real *, num_levels);
+      cheby_coefs = hypre_CTAlloc(HYPRE_Real *, num_levels);
+      hypre_ParAMGDataChebyDS(amg_data) = cheby_ds;
+      hypre_ParAMGDataChebyCoefs(amg_data) = cheby_coefs;
    }
    if (grid_relax_type[0] == 15 ||grid_relax_type[1] == 15 ||  grid_relax_type[2] == 15 || grid_relax_type[3] == 15)
       /* CG */
@@ -2266,7 +2342,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
       }
    }
-   for (j = addlvl; j < num_levels; j++)
+   for (j = addlvl; j < hypre_min(add_end+1, num_levels) ; j++)
    {
       if (add_rlx == 18 )
       {
@@ -2276,15 +2352,88 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
       }
    }
+   for (j = add_end+1; j < num_levels; j++)
+   {
+      if (num_threads == 1)
+      {
+         if (j < num_levels-1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || 
+		grid_relax_type[1] == 14 || grid_relax_type[2] == 8 || grid_relax_type[2] == 13 ||
+		grid_relax_type[2] == 14)) 
+         {
+            if (relax_order)
+               hypre_ParCSRComputeL1Norms(A_array[j], 4, CF_marker_array[j], &l1_norms[j]);
+            else
+               hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norms[j]);
+         }
+         else if ((grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14) 
+		&& j == num_levels-1)
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 4, NULL, &l1_norms[j]);
+         }
+         if ((grid_relax_type[1] == 18 || grid_relax_type[2] == 18)  && j < num_levels-1)
+         {
+            if (relax_order)
+               hypre_ParCSRComputeL1Norms(A_array[j], 1, CF_marker_array[j], &l1_norms[j]);
+            else
+               hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
+         }
+         else if (grid_relax_type[3] == 18 && j == num_levels-1)
+         {
+            hypre_ParCSRComputeL1Norms(A_array[j], 1, NULL, &l1_norms[j]);
+         }
+      }
+      else
+      {
+         if (j < num_levels-1 && (grid_relax_type[1] == 8 || grid_relax_type[1] == 13 || 
+		grid_relax_type[1] == 14 || grid_relax_type[2] == 8 || grid_relax_type[2] == 13 ||
+		grid_relax_type[2] == 14)) 
+         {
+            if (relax_order)
+               hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, CF_marker_array[j] , &l1_norms[j]);
+            else
+               hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, NULL, &l1_norms[j]);
+         }
+         else if ((grid_relax_type[3] == 8 || grid_relax_type[3] == 13 || grid_relax_type[3] == 14) 
+		&& j == num_levels-1)
+         {
+            hypre_ParCSRComputeL1NormsThreads(A_array[j], 4, num_threads, NULL, &l1_norms[j]);
+         }
+         if ((grid_relax_type[1] == 18 || grid_relax_type[2] == 18)  && j < num_levels-1)
+         {
+            if (relax_order)
+               hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, CF_marker_array[j], &l1_norms[j]);
+            else
+               hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
+         }
+         else if (grid_relax_type[3] == 18 && j == num_levels-1)
+         {
+            hypre_ParCSRComputeL1NormsThreads(A_array[j], 1, num_threads, NULL, &l1_norms[j]);
+         }
+      }
+   }
    for (j = 0; j < num_levels; j++)
    {
       if (grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || (grid_relax_type[3] == 16 && j== (num_levels-1)))
       {
-         HYPRE_Int scale = 1;
-         HYPRE_Real temp_d, temp_d2;
-         hypre_ParCSRMaxEigEstimateCG(A_array[j], scale, 10, &temp_d, &temp_d2);
-         max_eig_est[j] = temp_d;
-         min_eig_est[j] = temp_d2;
+         HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);;
+         HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
+         HYPRE_Real max_eig, min_eig = 0;
+         HYPRE_Real *coefs = NULL;
+         HYPRE_Real *ds = NULL;
+         HYPRE_Int cheby_order = hypre_ParAMGDataChebyOrder(amg_data);
+         HYPRE_Int cheby_eig_est = hypre_ParAMGDataChebyEigEst(amg_data);
+         HYPRE_Real cheby_fraction = hypre_ParAMGDataChebyFraction(amg_data);
+         if (cheby_eig_est)
+	    hypre_ParCSRMaxEigEstimateCG(A_array[j], scale, cheby_eig_est, 
+		&max_eig, &min_eig);
+         else
+	    hypre_ParCSRMaxEigEstimate(A_array[j], scale, &max_eig);
+         max_eig_est[j] = max_eig;
+         min_eig_est[j] = min_eig;
+         hypre_ParCSRRelax_Cheby_Setup(A_array[j],max_eig, min_eig, 
+		cheby_fraction, cheby_order, scale, variant, &coefs, &ds);
+         cheby_coefs[j] = coefs;
+         cheby_ds[j] = ds;
       }
      else if (grid_relax_type[1] == 15 || (grid_relax_type[3] == 15 && j == (num_levels-1))  )
      {
