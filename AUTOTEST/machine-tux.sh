@@ -49,67 +49,67 @@ ro="-ams -ij -sstruct -struct"
 eo=""
 
 co=""
-test.sh basictest.sh $src_dir -co: $co -mo: $mo
-renametest.sh basictest $output_dir/basictest-default
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basictest $output_dir/basictest-default
 
 co="--enable-debug"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: $eo
-renametest.sh basictest $output_dir/basictest-debug1
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: $eo
+./renametest.sh basictest $output_dir/basictest-debug1
 
 co="--enable-debug --enable-global-partition"
 RO="-fac"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
-renametest.sh basictest $output_dir/basictest-debug2
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
+./renametest.sh basictest $output_dir/basictest-debug2
 
 co="--enable-debug CC=mpiCC"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
-renametest.sh basictest $output_dir/basictest-debug-cpp
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
+./renametest.sh basictest $output_dir/basictest-debug-cpp
 
 # co="--with-insure --enable-debug --with-print-errors"
 # MO="test"
-# test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
-# renametest.sh basictest $output_dir/basictest--with-insure1
+# ./test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
+# ./renametest.sh basictest $output_dir/basictest--with-insure1
 # 
 # co="--with-insure --enable-debug --enable-global-partition"
 # MO="test"
-# test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
-# renametest.sh basictest $output_dir/basictest--with-insure2
+# ./test.sh basictest.sh $src_dir -co: $co -mo: $MO -ro: $ro
+# ./renametest.sh basictest $output_dir/basictest--with-insure2
 
 co="--enable-debug --with-print-errors"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
-renametest.sh basictest $output_dir/basictest--valgrind1
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+./renametest.sh basictest $output_dir/basictest--valgrind1
 
 co="--enable-debug --enable-global-partition"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
-renametest.sh basictest $output_dir/basictest--valgrind2
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+./renametest.sh basictest $output_dir/basictest--valgrind2
 
 co="--without-MPI"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo
-renametest.sh basictest $output_dir/basictest--without-MPI
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basictest $output_dir/basictest--without-MPI
 
 co="--with-strict-checking"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo
-renametest.sh basictest $output_dir/basictest--with-strict-checking
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basictest $output_dir/basictest--with-strict-checking
 
 co="--enable-shared"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo
-renametest.sh basictest $output_dir/basictest--enable-shared
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basictest $output_dir/basictest--enable-shared
 
 co="--enable-bigint --enable-debug"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
-renametest.sh basictest $output_dir/basictest--enable-bigint
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
+./renametest.sh basictest $output_dir/basictest--enable-bigint
 
 co="--enable-maxdim=4 --enable-debug"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
-renametest.sh basictest $output_dir/basictest--enable-maxdim=4
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
+./renametest.sh basictest $output_dir/basictest--enable-maxdim=4
 
 co="--enable-complex --enable-maxdim=4 --enable-debug"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -complex
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -complex
 # ignore complex compiler output for now
 rm -fr basictest.dir/make.???
 grep -v make.err basictest.err > basictest.tmp
 mv basictest.tmp basictest.err
-renametest.sh basictest $output_dir/basictest--enable-complex
+./renametest.sh basictest $output_dir/basictest--enable-complex
 
 # CMake build and run tests
 mo="-j"
@@ -117,28 +117,28 @@ ro="-ams -ij -sstruct -struct"
 eo=""
 
 co=""
-test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
-renametest.sh cmaketest $output_dir/cmaketest-default
+./test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+./renametest.sh cmaketest $output_dir/cmaketest-default
 
 co="-DCMAKE_BUILD_TYPE=Debug"
-test.sh cmaketest.sh $src_dir -co: $co -mo: $mo -ro: $ro
-renametest.sh cmaketest $output_dir/cmaketest-debug
+./test.sh cmaketest.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh cmaketest $output_dir/cmaketest-debug
 
 co="-DHYPRE_NO_GLOBAL_PARTITION=OFF"
-test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
-renametest.sh cmaketest $output_dir/cmaketest-global-partition
+./test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+./renametest.sh cmaketest $output_dir/cmaketest-global-partition
 
 co="-DHYPRE_SEQUENTIAL=ON"
-test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
-renametest.sh cmaketest $output_dir/cmaketest-sequential
+./test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+./renametest.sh cmaketest $output_dir/cmaketest-sequential
 
 co="-DHYPRE_SHARED=ON"
-test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
-renametest.sh cmaketest $output_dir/cmaketest-shared
+./test.sh cmaketest.sh $src_dir -co: $co -mo: $mo
+./renametest.sh cmaketest $output_dir/cmaketest-shared
 
 co="-DHYPRE_BIGINT=ON"
-test.sh cmaketest.sh $src_dir -co: $co -mo: $mo -ro: $ro
-renametest.sh cmaketest $output_dir/cmaketest-bigint
+./test.sh cmaketest.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh cmaketest $output_dir/cmaketest-bigint
 
 # cmake build doesn't currently support maxdim
 # cmake build doesn't currently support complex
