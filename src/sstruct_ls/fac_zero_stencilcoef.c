@@ -174,10 +174,6 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                            hypre_BoxLoop1Begin(ndim, loop_size,
                                                ac_dbox, hypre_BoxIMin(shift_ibox),
                                                stride, iac);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                           hypre_BoxLoop1For(iac)
                            {
                               ac_ptr[iac] = 0.0;
                            }
@@ -399,10 +395,6 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                         hypre_BoxLoop1Begin(ndim, loop_size,
                                             a_dbox, hypre_BoxIMin(&intersect_box),
                                             stride, ia);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                        hypre_BoxLoop1For(ia)
                         {
                            a_ptr[ia] = 0.0;
                         }

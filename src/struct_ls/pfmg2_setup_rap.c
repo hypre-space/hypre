@@ -470,10 +470,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          HYPRE_Int iAm1 = iA - yOffsetA;
          HYPRE_Int iAp1 = iA + yOffsetA;
@@ -523,10 +519,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          HYPRE_Int iAm1 = iA - yOffsetA_diag;
          HYPRE_Int iAp1 = iA + yOffsetA_diag;
@@ -990,10 +982,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          HYPRE_Int iAm1 = iA - yOffsetA;
          HYPRE_Int iAp1 = iA + yOffsetA;
@@ -1060,10 +1048,6 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          HYPRE_Int iAm1 = iA - yOffsetA_diag;
          HYPRE_Int iAp1 = iA + yOffsetA_diag;
@@ -1662,10 +1646,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          HYPRE_Int iAm1 = iA - yOffsetA;
          HYPRE_Int iAp1 = iA + yOffsetA;
@@ -1708,10 +1688,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          HYPRE_Int iAp1 = iA + yOffsetA_diag;
 
@@ -2156,10 +2132,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          HYPRE_Int iAm1 = iA - yOffsetA;
          HYPRE_Int iAp1 = iA + yOffsetA;
@@ -2217,10 +2189,6 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop4For(iP, iR, iA, iAc)
       {
          HYPRE_Int iAp1 = iA + yOffsetA_diag;
 

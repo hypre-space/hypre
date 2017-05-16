@@ -38,7 +38,7 @@ typedef struct hypre_Boxloop_struct
 
 #define BLOCKSIZE 256
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 #include <cuda.h>
 #include <cuda_runtime.h>
 
@@ -301,11 +301,59 @@ AxCheckError(cudaDeviceSynchronize());
   });						\
   hypre_fence();				\
 }
+#define zypre_BasicBoxLoopDataDeclareK(k,ndim,loop_size,stride)		\
+	hypre_Boxloop databox##k;					\
+	databox##k.lsize0 = loop_size[0];				\
+	databox##k.strides0 = stride[0];				\
+	if (ndim > 1)							\
+	{								\
+	    databox##k.lsize1 = loop_size[1];				\
+	    databox##k.strides1 = stride[1];				\
+	}								\
+	else						        	\
+	{							       	\
+		databox##k.lsize1 = 1;				       	\
+		databox##k.strides1 = 0;		       		\
+	}								\
+	if (ndim == 3)							\
+	{								\
+	    databox##k.lsize2 = loop_size[2];				\
+	    databox##k.strides2 = stride[2];				\
+	}								\
+	else								\
+	{								\
+	    databox##k.lsize2 = 1;					\
+	    databox##k.strides2 = 0;					\
+	}
 
+#define zypre_newBasicBoxLoop2Begin(ndim, loop_size,			\
+				    stride1, i1,			\
+				    stride2, i2)			\
+{    		       				                	\
+    zypre_BoxLoopCUDAInit(ndim,loop_size);		        	\
+    zypre_BasicBoxLoopDataDeclareK(1,ndim,loop_size,stride1);	\
+    zypre_BasicBoxLoopDataDeclareK(2,ndim,loop_size,stride2);	\
+    forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
+    {									\
+        zypre_BoxLoopCUDADeclare()					\
+	HYPRE_Int i1 = 0, i2 = 0;					\
+	local_idx  = idx_local % databox1.lsize0;			\
+	idx_local  = idx_local / databox1.lsize0;			\
+	i1 += local_idx*databox1.strides0;		\
+	i2 += local_idx*databox2.strides0; \
+	local_idx  = idx_local % databox1.lsize1;			\
+	idx_local  = idx_local / databox1.lsize1;			\
+	i1 += local_idx*databox1.strides1; \
+	i2 += local_idx*databox2.strides1; \
+	local_idx  = idx_local % databox1.lsize2;			\
+	idx_local  = idx_local / databox1.lsize2;			\
+	i1 += local_idx*databox1.strides2; \
+	i2 += local_idx*databox2.strides2; \
+	
 #define MAX_BLOCK BLOCKSIZE
 
 extern "C++" {
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 template<class T>
 class ReduceMult   
 {
@@ -842,4 +890,6 @@ private:
 #define hypre_BoxBoundaryCopyEnd zypre_BoxBoundaryCopyEnd
 #define hypre_BoxDataExchangeBegin zypre_BoxDataExchangeBegin
 #define hypre_BoxDataExchangeEnd zypre_BoxDataExchangeEnd
+
+#define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
 #endif

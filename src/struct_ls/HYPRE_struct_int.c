@@ -52,10 +52,6 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
 
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop1For(vi)
       {
 //         vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
          vp[vi] = 2.0*hypre_Rand() - 1.0;

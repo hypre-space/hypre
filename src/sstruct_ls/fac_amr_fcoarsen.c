@@ -3480,10 +3480,6 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                hypre_BoxLoop1Begin(ndim, loop_size,
                                    A_dbox, cstart, stridec, iA);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,i) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop1For(iA)
                {
                   HYPRE_Int i;
                   for (i= 0; i< stencil_size; i++)

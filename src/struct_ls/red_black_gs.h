@@ -109,7 +109,6 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    HYPRE_Int hypre_fake = 0;						\
     Kokkos::parallel_for (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\

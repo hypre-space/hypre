@@ -119,14 +119,12 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start,  stride,  Ai,
                           v_dbox, startv, stridev, vi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,vi,lambdax,lambday,lambdaz,si,Ap,Astenc,lambda_max,dir) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(Ai, vi)
       {
-         lambdax = 0.0;
-         lambday = 0.0;
-         lambdaz = 0.0;
+         HYPRE_Real lambdax = 0.0;
+         HYPRE_Real lambday = 0.0;
+         HYPRE_Real lambdaz = 0.0;
+	 HYPRE_Int si, dir, Astenc;
+	 HYPRE_Real *Ap,lambda_max;
 
          for (si = 0; si < stencil_size; si++)
          {
@@ -284,10 +282,6 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(e), loop_size,
                           e_dbox, start,  stride,  ei,
                           v_dbox, startv, stridev, vi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,vi) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(ei, vi)
       {
          if ( !(((HYPRE_Int) vp[vi]) & k) )
          {
@@ -386,10 +380,6 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start,  stride,  Ai,
                           v_dbox, startv, stridev, vi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(Ai, vi)
       {
          HYPRE_Real lambdax,lambday,lambdaz;
          HYPRE_Real *Ap;
@@ -525,10 +515,6 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(e), loop_size,
                           e_dbox, start,  stride,  ei,
                           v_dbox, startv, stridev, vi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(ei, vi)
       {
          ep[ei] *= vp[vi];
       }

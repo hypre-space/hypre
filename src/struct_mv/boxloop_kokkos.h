@@ -37,7 +37,7 @@ extern "C++" {
 	 HYPRE_Int bsize0,bsize1,bsize2;
  } hypre_Boxloop;
 
- #if defined(HYPRE_MEMORY_GPU)
+ #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
  #include <cuda.h>
  #include <cuda_runtime.h>
  #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
@@ -495,15 +495,15 @@ extern "C++" {
 	hypre_fence();							\
 }
 
-#define zypre_newBoxLoop0For()
+#define hypre_newBoxLoop0For()
 
-#define zypre_newBoxLoop1For(i1)
+#define hypre_newBoxLoop1For(i1)
 
-#define zypre_newBoxLoop2For(i1, i2) 
+#define hypre_newBoxLoop2For(i1, i2) 
  
-#define zypre_newBoxLoop3For(i1, i2, i3)
+#define hypre_newBoxLoop3For(i1, i2, i3)
 
-#define zypre_newBoxLoop4For(i1, i2, i3, i4)
+#define hypre_newBoxLoop4For(i1, i2, i3, i4)
  
 #define hypre_newBoxLoopSetOneBlock() {}
 

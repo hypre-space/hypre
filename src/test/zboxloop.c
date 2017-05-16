@@ -192,9 +192,6 @@ main( hypre_int argc,
 
    zypre_BoxLoop1Begin(dim, loop_size,
                        x1_data_box, start, unit_stride, xi1);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(ZYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
    zypre_BoxLoop1For(xi1)
    {
       xp1[xi1] ++;
@@ -245,10 +242,6 @@ main( hypre_int argc,
    {
       xi1 = 0;
       hypre_BoxLoop0Begin(3, loop_size);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) firstprivate(xi1) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop0For()
       {
          xp1[xi1] += xp1[xi1];
          //xi1++;
@@ -264,10 +257,6 @@ main( hypre_int argc,
    {
       hypre_BoxLoop1Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop1For(xi1)
       {
          xp1[xi1] += xp1[xi1];
       }
@@ -283,10 +272,6 @@ main( hypre_int argc,
       hypre_BoxLoop2Begin(3, loop_size,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(xi1, xi2)
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2];
       }
@@ -303,10 +288,6 @@ main( hypre_int argc,
                           x1_data_box, start, unit_stride, xi1,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop3For(xi1, xi2, xi3)
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3];
       }
@@ -324,10 +305,6 @@ main( hypre_int argc,
                           x2_data_box, start, unit_stride, xi2,
                           x3_data_box, start, unit_stride, xi3,
                           x4_data_box, start, unit_stride, xi4);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop4For(xi1, xi2, xi3, xi4)
       {
          xp1[xi1] += xp1[xi1] + xp2[xi2] + xp3[xi3] + xp4[xi4];
       }

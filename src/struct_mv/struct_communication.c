@@ -937,7 +937,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
             {
                kptr = lptr + order[ll]*stride_array[ndim];
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA)
                /* This is based on "Idea 2" in box.h */
                {
                   HYPRE_Int      n[HYPRE_MAXDIM+1];
@@ -966,10 +966,6 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                hypre_BasicBoxLoop2Begin(ndim, length_array,
                                         stride_array, ki,
                                         unitst_array, di);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop2For(ki, di)
                {
                   dptr[di] = kptr[ki];
                }
@@ -1265,7 +1261,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
          {
             kptr = lptr + ll*stride_array[ndim];
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS)|| defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_KOKKOS)|| defined(HYPRE_USE_CUDA)
             /* This is based on "Idea 2" in box.h */
             {
                HYPRE_Int      n[HYPRE_MAXDIM+1];
@@ -1301,10 +1297,6 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
             hypre_BasicBoxLoop2Begin(ndim, length_array,
                                      stride_array, ki,
                                      unitst_array, di);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(ki, di)
             {
                if (action > 0)
                {
@@ -1418,7 +1410,7 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                fr_dpl = fr_dp + (order[ll])*fr_stride_array[ndim];
                to_dpl = to_dp + (      ll )*to_stride_array[ndim];
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA)
                /* This is based on "Idea 2" in box.h */
                {
                   //HYPRE_Int      i[HYPRE_MAXDIM+1];
@@ -1464,10 +1456,6 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                hypre_BasicBoxLoop2Begin(ndim, length_array,
                                         fr_stride_array, fi,
                                         to_stride_array, ti);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop2For(fi, ti)
                {
                   if (action > 0)
                   {

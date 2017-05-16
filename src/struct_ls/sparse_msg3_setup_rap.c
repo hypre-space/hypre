@@ -557,10 +557,6 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {           
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
@@ -627,10 +623,6 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
@@ -731,10 +723,6 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
@@ -1216,10 +1204,6 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
@@ -1277,10 +1261,6 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
@@ -1373,10 +1353,6 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;

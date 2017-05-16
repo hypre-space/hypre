@@ -735,10 +735,6 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
             hypre_BoxGetSize(box, loop_size);
             hypre_BoxLoop1Begin(hypre_SStructMatrixNDim(matrix), loop_size,
                                 ghost_box, start, stride, mi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop1For(mi)
             {
                row_sizes[m+mi] = nnzs;
             }
@@ -1482,10 +1478,6 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      hypre_BoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
                                          vbox,  start, stride, vi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop2For(mi, vi)
                      {
                         tvalues[mi] = values[ei + vi*nentries];
                      }
@@ -1514,10 +1506,6 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      hypre_BoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
                                          vbox,  start, stride, vi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop2For(mi, vi)
                      {
                         values[ei + vi*nentries] = tvalues[mi];
                      }

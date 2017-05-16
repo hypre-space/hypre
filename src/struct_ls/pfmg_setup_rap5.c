@@ -343,10 +343,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
                              P_dbox, cstart, stridec, iP,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop3For(iP, iA, iAc)
          {
             HYPRE_Int iAm1,iAp1,iPm1,iPp1;
             HYPRE_Real  west, east;
@@ -405,10 +401,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop2For(iA, iAc)
          {
             rap_cc[iAc] = 2.0*a_cc[iA] + center_int;
          }
@@ -440,10 +432,6 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, bfstart, stridef, iA,
                                 RAP_dbox, bcstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(iA, iAc)
             {
                rap_cc[iAc] -= 0.5*a_cc[iA] + center_bdy;
             }

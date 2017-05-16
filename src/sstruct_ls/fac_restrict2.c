@@ -849,10 +849,6 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 xc_temp_dbox, hypre_BoxIMin(own_box), stridec, xfi,
                                 xf_dbox, hypre_BoxIMin(own_box), stridec, xci);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,xfi,xci) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(xfi, xci)
             {
                xcp[0][0][xci]+= xcp_temp[0][0][xfi];
             }

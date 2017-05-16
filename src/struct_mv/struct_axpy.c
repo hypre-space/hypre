@@ -57,18 +57,9 @@ hypre_StructAxpy( HYPRE_Complex       alpha,
 
       hypre_BoxGetSize(box, loop_size);
 	  
-#ifdef HYPRE_BOX_PRIVATE_VAR
-#undef HYPRE_BOX_PRIVATE_VAR
-#endif
-#define HYPRE_BOX_PRIVATE_VAR xi,yi
-	  
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
 			  x_data_box, start, unit_stride, xi,
 			  y_data_box, start, unit_stride, yi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(xi, yi)
       {
          yp[yi] += alpha * xp[xi];
       }
