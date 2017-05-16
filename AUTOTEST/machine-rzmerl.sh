@@ -47,21 +47,21 @@ mo="test"
 ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
 
 co=""
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro
-renametest.sh basictest $output_dir/basictest-default
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basictest $output_dir/basictest-default
 
 co="--with-openmp"
 RO="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED -nthreads 2"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO
-renametest.sh basictest $output_dir/basictest--with-openmp
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $RO
+./renametest.sh basictest $output_dir/basictest--with-openmp
 
 co="--enable-debug"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo
-renametest.sh basictest $output_dir/basictest--enable-debug
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basictest $output_dir/basictest--enable-debug
 
 co="--enable-bigint"
-test.sh basictest.sh $src_dir -co: $co -mo: $mo
-renametest.sh basictest $output_dir/basictest--enable-bigint
+./test.sh basictest.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basictest $output_dir/basictest--enable-bigint
 
 # Test linking for different languages
 link_opts="all++ all77"
