@@ -1662,7 +1662,8 @@ main( hypre_int argc,
    else if ( build_matrix_type == 6 )
    {
       BuildParVarDifConv(argc, argv, build_matrix_arg_index, &parcsr_A, &b);
-      /*HYPRE_ParCSRMatrixPrint(parcsr_A,"mat100");*/
+      build_rhs_type      = 6;
+      build_src_type      = 5;
    }
    else if ( build_matrix_type == 7 )
    {
@@ -2336,6 +2337,30 @@ main( hypre_int argc,
 
       ierr = HYPRE_IJVectorGetObject( ij_b, &object );
       b = (HYPRE_ParVector) object;
+
+      /* Initial guess */
+      HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(ij_x);
+
+      /* For backward Euler the previous backward Euler iterate (assumed
+         random in 0 - 1 here) is usually used as the initial guess */
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
+      hypre_SeedRand(myid);
+      for (i = 0; i < local_num_cols; i++)
+         values[i] = hypre_Rand();
+      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
+      hypre_TFree(values);
+
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
+   }
+   else if ( build_src_type == 5 )
+   {
+      if (myid == 0)
+      {
+         hypre_printf("  Initial guess is 0 \n");
+      }
 
       /* Initial guess */
       HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
@@ -5183,8 +5208,8 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    /* RDF: Why is this here? */
-   if (!(build_rhs_type ==1 || build_rhs_type ==7))
-      HYPRE_IJVectorGetObjectType(ij_b, &j);
+   /*if (!(build_rhs_type ==1 || build_rhs_type ==7))
+      HYPRE_IJVectorGetObjectType(ij_b, &j);*/
 
    if (print_system)
    {
@@ -5199,7 +5224,7 @@ main( hypre_int argc,
    else HYPRE_ParCSRMatrixDestroy(parcsr_A);
 
    /* for build_rhs_type = 1 or 7, we did not create ij_b  - just b*/
-   if (build_rhs_type ==1 || build_rhs_type ==7)
+   if (build_rhs_type ==1 || build_rhs_type ==7 || build_rhs_type==6)
       HYPRE_ParVectorDestroy(b);
    else
       HYPRE_IJVectorDestroy(ij_b);
