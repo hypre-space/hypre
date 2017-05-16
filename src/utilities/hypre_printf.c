@@ -54,7 +54,7 @@ new_format( const char *format,
          {
             case 'd':
             case 'i':
-#ifdef HYPRE_BIGINT
+#if defined(HYPRE_BIGINT)
                *nfp = 'l'; nfp++;
                *nfp = 'l'; nfp++;
 #endif
@@ -64,8 +64,8 @@ new_format( const char *format,
             case 'E':
             case 'g':
             case 'G':
-#ifdef HYPRE_SINGLE                /* no modifier */
-#elif HYPRE_LONG_DOUBLE            /* modify with 'L' */
+#if defined(HYPRE_SINGLE)          /* no modifier */
+#elif defined(HYPRE_LONG_DOUBLE)   /* modify with 'L' */
                *nfp = 'L'; nfp++;
 #else                              /* modify with 'l' (default is _double_) */
                *nfp = 'l'; nfp++;

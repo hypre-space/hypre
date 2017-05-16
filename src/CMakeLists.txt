@@ -25,6 +25,8 @@ set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
 # Configuration options
 option(HYPRE_SHARED               "Build a shared library" OFF)
 option(HYPRE_BIGINT               "Use long long int for HYPRE_Int" OFF)
+option(HYPRE_SINGLE               "Use float for HYPRE_Real" OFF)
+option(HYPRE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
 option(HYPRE_SEQUENTIAL           "Compile without MPI" OFF)
 option(HYPRE_TIMING               "Use HYPRE timing routines" OFF)
 option(HYPRE_USING_HYPRE_BLAS     "Use internal BLAS library" ON)
@@ -41,6 +43,14 @@ if (HYPRE_SHARED)
 endif ()
 
 if (HYPRE_BIGINT)
+  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_SINGLE)
+  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_LONG_DOUBLE)
   set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
 endif ()
 

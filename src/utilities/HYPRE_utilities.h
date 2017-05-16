@@ -43,7 +43,7 @@ extern "C" {
  * Big int stuff
  *--------------------------------------------------------------------------*/
 
-#ifdef HYPRE_BIGINT
+#if defined(HYPRE_BIGINT)
 typedef long long int HYPRE_Int;
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
 
@@ -58,7 +58,7 @@ typedef int HYPRE_Int;
 
 #include <float.h>
 
-#ifdef HYPRE_SINGLE
+#if defined(HYPRE_SINGLE)
 typedef float HYPRE_Real;
 #define HYPRE_REAL_MAX FLT_MAX
 #define HYPRE_REAL_MIN FLT_MIN
@@ -66,7 +66,7 @@ typedef float HYPRE_Real;
 #define HYPRE_REAL_MIN_EXP FLT_MIN_EXP
 #define HYPRE_MPI_REAL MPI_FLOAT
 
-#elif HYPRE_LONG_DOUBLE
+#elif defined(HYPRE_LONG_DOUBLE)
 typedef long double HYPRE_Real;
 #define HYPRE_REAL_MAX LDBL_MAX
 #define HYPRE_REAL_MIN LDBL_MIN
@@ -83,7 +83,7 @@ typedef double HYPRE_Real;
 #define HYPRE_MPI_REAL MPI_DOUBLE
 #endif
 
-#ifdef HYPRE_COMPLEX
+#if defined(HYPRE_COMPLEX)
 typedef double _Complex HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
 

@@ -22,9 +22,9 @@
 extern "C" {
 #endif
 
-#ifdef HYPRE_SINGLE
+#if defined(HYPRE_SINGLE)
 #define sqrt sqrtf
-#elif HYPRE_LONG_DOUBLE
+#elif defined(HYPRE_LONG_DOUBLE)
 #define sqrt sqrtl
 #endif
 
