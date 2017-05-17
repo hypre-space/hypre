@@ -1847,7 +1847,7 @@ hypre_F90_IFACE(hypre_boomeramggetadditive, HYPRE_BOOMERAMGGETADDITIVE)
    *ierr = (hypre_F90_Int)
       ( HYPRE_BoomerAMGGetAdditive(
            hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassInt (add_lvl) ) );
+           hypre_F90_PassIntRef (add_lvl) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1875,7 +1875,7 @@ hypre_F90_IFACE(hypre_boomeramggetmultadd, HYPRE_BOOMERAMGGETMULTADD)
    *ierr = (hypre_F90_Int)
       ( HYPRE_BoomerAMGGetMultAdditive(
            hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassInt (add_lvl) ) );
+           hypre_F90_PassIntRef (add_lvl) ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1903,7 +1903,7 @@ hypre_F90_IFACE(hypre_boomeramggetsimple, HYPRE_BOOMERAMGGETSIMPLE)
    *ierr = (hypre_F90_Int)
       ( HYPRE_BoomerAMGGetSimple(
            hypre_F90_PassObj (HYPRE_Solver, solver),
-           hypre_F90_PassInt (add_lvl) ) );
+           hypre_F90_PassIntRef (add_lvl) ) );
 }
 
 /*--------------------------------------------------------------------------
