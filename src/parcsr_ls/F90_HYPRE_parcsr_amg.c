@@ -1743,6 +1743,54 @@ hypre_F90_IFACE(hypre_boomeramgsetchebyfract, HYPRE_BOOMERAMGSETCHEBYFRACT)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetChebyScale
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetchebyscale, HYPRE_BOOMERAMGSETCHEBYSCALE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *cheby_scale,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGSetChebyScale(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (cheby_scale) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetChebyVariant
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetchebyvariant, HYPRE_BOOMERAMGSETCHEBYVARIANT)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *cheby_variant,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGSetChebyVariant(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (cheby_variant) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetChebyEigEst
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetchebyeigest, HYPRE_BOOMERAMGSETCHEBYEIGEST)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *cheby_eig_est,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGSetChebyEigEst(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (cheby_eig_est) ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetKeepTranspose
  *--------------------------------------------------------------------------*/
 
@@ -1775,7 +1823,7 @@ hypre_F90_IFACE(hypre_boomeramgsetrap2, HYPRE_BOOMERAMGSETRAP2)
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetAdditive
+ * HYPRE_BoomerAMGSetAdditive, HYPRE_BoomerAMGGetAdditive
  *--------------------------------------------------------------------------*/
 
 void
@@ -1790,8 +1838,20 @@ hypre_F90_IFACE(hypre_boomeramgsetadditive, HYPRE_BOOMERAMGSETADDITIVE)
            hypre_F90_PassInt (add_lvl) ) );
 }
 
+void
+hypre_F90_IFACE(hypre_boomeramggetadditive, HYPRE_BOOMERAMGGETADDITIVE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *add_lvl,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGGetAdditive(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (add_lvl) ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetMultAdditive
+ * HYPRE_BoomerAMGSetMultAdditive, HYPRE BoomerAMGGetMultAdditive
  *--------------------------------------------------------------------------*/
 
 void
@@ -1806,8 +1866,20 @@ hypre_F90_IFACE(hypre_boomeramgsetmultadd, HYPRE_BOOMERAMGSETMULTADD)
            hypre_F90_PassInt (add_lvl) ) );
 }
 
+void
+hypre_F90_IFACE(hypre_boomeramggetmultadd, HYPRE_BOOMERAMGGETMULTADD)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *add_lvl,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGGetMultAdditive(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (add_lvl) ) );
+}
+
 /*--------------------------------------------------------------------------
- * HYPRE_BoomerAMGSetSimple
+ * HYPRE_BoomerAMGSetSimple, HYPRE_BoomerAMGGetSimple
  *--------------------------------------------------------------------------*/
 
 void
@@ -1820,6 +1892,34 @@ hypre_F90_IFACE(hypre_boomeramgsetsimple, HYPRE_BOOMERAMGSETSIMPLE)
       ( HYPRE_BoomerAMGSetSimple(
            hypre_F90_PassObj (HYPRE_Solver, solver),
            hypre_F90_PassInt (add_lvl) ) );
+}
+
+void
+hypre_F90_IFACE(hypre_boomeramggetsimple, HYPRE_BOOMERAMGGETSIMPLE)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *add_lvl,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGGetSimple(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (add_lvl) ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetAddLastLvl
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetaddlastlvl, HYPRE_BOOMERAMGSETADDLASTLVL)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *add_last_lvl,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGSetAddLastLvl(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (add_last_lvl) ) );
 }
 
 /*--------------------------------------------------------------------------
