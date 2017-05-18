@@ -532,7 +532,7 @@ void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename)
 
     if (mype != 0)
     {
-	hypre_MPI_Recv(rhs, num_local, hypre_MPI_DOUBLE, 0, 0, mat->comm, &status);
+	hypre_MPI_Recv(rhs, num_local, hypre_MPI_REAL, 0, 0, mat->comm, &status);
 	return;
     }
 
@@ -567,7 +567,7 @@ void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename)
 	  else
             hypre_fscanf(file, "%lf", &buffer[i]);
 
-	hypre_MPI_Send(buffer, num_local, hypre_MPI_DOUBLE, pe, 0, mat->comm);
+	hypre_MPI_Send(buffer, num_local, hypre_MPI_REAL, pe, 0, mat->comm);
     }
 
     free(buffer);
@@ -614,10 +614,10 @@ static void SetupReceives(Matrix *mat, HYPRE_Int reqlen, HYPRE_Int *reqind, HYPR
 	/* Count of number of number of indices needed from this_pe */
         outlist[this_pe] = j-i;
 
-        hypre_MPI_Recv_init(&mat->recvbuf[i+num_local], j-i, hypre_MPI_DOUBLE, this_pe, 555,
+        hypre_MPI_Recv_init(&mat->recvbuf[i+num_local], j-i, hypre_MPI_REAL, this_pe, 555,
 	    comm, &mat->recv_req[mat->num_recv]);
 
-        hypre_MPI_Send_init(&mat->recvbuf[i+num_local], j-i, hypre_MPI_DOUBLE, this_pe, 666,
+        hypre_MPI_Send_init(&mat->recvbuf[i+num_local], j-i, hypre_MPI_REAL, this_pe, 666,
 	    comm, &mat->send_req2[mat->num_recv]);
 
         mat->num_recv++;
@@ -665,11 +665,11 @@ static void SetupSends(Matrix *mat, HYPRE_Int *inlist)
                 &requests[mat->num_send]);
 
 	    /* Set up the send */
-	    hypre_MPI_Send_init(&mat->sendbuf[j], inlist[i], hypre_MPI_DOUBLE, i, 555, comm,
+	    hypre_MPI_Send_init(&mat->sendbuf[j], inlist[i], hypre_MPI_REAL, i, 555, comm,
 		&mat->send_req[mat->num_send]);
 
 	    /* Set up the receive for the transpose  */
-	    hypre_MPI_Recv_init(&mat->sendbuf[j], inlist[i], hypre_MPI_DOUBLE, i, 666, comm,
+	    hypre_MPI_Recv_init(&mat->sendbuf[j], inlist[i], hypre_MPI_REAL, i, 666, comm,
 		&mat->recv_req2[mat->num_send]);
 
 	    mat->num_send++;

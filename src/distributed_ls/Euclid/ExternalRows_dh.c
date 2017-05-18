@@ -317,7 +317,7 @@ void rcv_external_rows_private(ExternalRows_dh er)
     nz = rcv_nz_counts[i];
     hypre_MPI_Irecv(extRowCval+offset, nz, HYPRE_MPI_INT,    nabor, CVAL_TAG, comm_dh, er->req1+i);
     hypre_MPI_Irecv(extRowFill+offset, nz, HYPRE_MPI_INT,    nabor, FILL_TAG, comm_dh, er->req2+i);
-    hypre_MPI_Irecv(extRowAval+offset, nz, hypre_MPI_DOUBLE, nabor, AVAL_TAG, comm_dh, er->req3+i);
+    hypre_MPI_Irecv(extRowAval+offset, nz, hypre_MPI_REAL, nabor, AVAL_TAG, comm_dh, er->req3+i);
     offset += nz;
   }
 
@@ -537,7 +537,7 @@ void send_external_rows_private(ExternalRows_dh er)
     HYPRE_Int nabor = hiNabors[i];
     hypre_MPI_Isend(cvalSend, nz, HYPRE_MPI_INT,    nabor, CVAL_TAG, comm_dh, er->cval_req+i);
     hypre_MPI_Isend(fillSend, nz, HYPRE_MPI_INT,    nabor, FILL_TAG, comm_dh, er->fill_req+i); 
-    hypre_MPI_Isend(avalSend, nz, hypre_MPI_DOUBLE, nabor, AVAL_TAG, comm_dh, er->aval_req+i);
+    hypre_MPI_Isend(avalSend, nz, hypre_MPI_REAL, nabor, AVAL_TAG, comm_dh, er->aval_req+i);
   }
   END_FUNC_DH
 }

@@ -503,7 +503,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
     hypre_MPI_Irecv( incolind+j, cnt, HYPRE_MPI_INT,
 	      penum, TAG_Send_colind, pilut_comm, &index_requests[i] );
 
-    hypre_MPI_Irecv( invalues+j, cnt, hypre_MPI_DOUBLE,
+    hypre_MPI_Irecv( invalues+j, cnt, hypre_MPI_REAL,
 	      penum, TAG_Send_values, pilut_comm, &value_requests[i] );
 
     j += cnt;
@@ -550,7 +550,7 @@ void hypre_SendFactoredRows(FactorMatType *ldu, CommInfoType *cinfo,
 
   /* send values to each neighbor */
   for (i=0; i<snnbr; i++) {
-    hypre_MPI_Send( dgatherbuf, l, hypre_MPI_DOUBLE,
+    hypre_MPI_Send( dgatherbuf, l, hypre_MPI_REAL,
 	      snbrind[i], TAG_Send_values, pilut_comm );
   }
 

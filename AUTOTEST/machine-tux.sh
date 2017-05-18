@@ -99,6 +99,14 @@ co="--enable-bigint --enable-debug"
 ./test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
 ./renametest.sh basictest $output_dir/basictest--enable-bigint
 
+co="--enable-single --enable-debug"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: -single
+renametest.sh basictest $output_dir/basictest--enable-single
+
+co="--enable-longdouble --enable-debug"
+test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
+renametest.sh basictest $output_dir/basictest--enable-longdouble
+
 co="--enable-maxdim=4 --enable-debug"
 ./test.sh basictest.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
 ./renametest.sh basictest $output_dir/basictest--enable-maxdim=4
@@ -139,6 +147,14 @@ co="-DHYPRE_SHARED=ON"
 co="-DHYPRE_BIGINT=ON"
 ./test.sh cmaketest.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh cmaketest $output_dir/cmaketest-bigint
+
+co="-DHYPRE_SINGLE=ON"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo -ro: -single
+renametest.sh cmaketest $output_dir/cmaketest-single
+
+co="-DHYPRE_LONG_DOUBLE=ON"
+test.sh cmaketest.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
+renametest.sh cmaketest $output_dir/cmaketest-longdouble
 
 # cmake build doesn't currently support maxdim
 # cmake build doesn't currently support complex

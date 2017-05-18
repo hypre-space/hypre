@@ -75,7 +75,7 @@ void Euclid_dhCreate(Euclid_dh *ctxOUT)
   strcpy(ctx->krylovMethod, "bicgstab");
   ctx->maxIts = 200;
   ctx->rtol = 1e-5;
-  ctx->atol = 1e-50;
+  ctx->atol = _ATOL_;
   ctx->its = 0;
   ctx->itsTotal = 0;
   ctx->setupCount = 0;
@@ -419,7 +419,7 @@ void compute_rho_private(Euclid_dh ctx)
       bufGlobal[1] = bufLocal[1];
       bufGlobal[2] = bufLocal[2];
     } else {
-      hypre_MPI_Reduce(bufLocal, bufGlobal, 3, hypre_MPI_DOUBLE, hypre_MPI_SUM, 0, comm_dh);
+      hypre_MPI_Reduce(bufLocal, bufGlobal, 3, hypre_MPI_REAL, hypre_MPI_SUM, 0, comm_dh);
     }
 
     if (myid_dh == 0) {
@@ -897,7 +897,7 @@ void reduce_timings_private(Euclid_dh ctx)
     HYPRE_Real bufOUT[TIMING_BINS];
 
     memcpy(bufOUT, ctx->timing, TIMING_BINS*sizeof(HYPRE_Real));
-    hypre_MPI_Reduce(bufOUT, ctx->timing, TIMING_BINS, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm_dh);
+    hypre_MPI_Reduce(bufOUT, ctx->timing, TIMING_BINS, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
   }
 
   ctx->timingsWereReduced = true;

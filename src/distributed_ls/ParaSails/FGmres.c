@@ -37,7 +37,7 @@ static HYPRE_Real InnerProd(HYPRE_Int n, HYPRE_Real *x, HYPRE_Real *y, MPI_Comm 
     HYPRE_Int one = 1;
     local_result = hypre_F90_NAME_BLAS(ddot, DDOT)(&n, x, &one, y, &one);
 
-    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
+    hypre_MPI_Allreduce(&local_result, &result, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
 
     return result;
 }
