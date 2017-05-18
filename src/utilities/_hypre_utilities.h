@@ -565,35 +565,8 @@ if ( cudaerr != cudaSuccess ) {										\
 #define HYPRE_CUDA_GLOBAL 
 
 /*--------------------------------------------------------------------------
- * Use "Debug Malloc Library", dmalloc
- *--------------------------------------------------------------------------*/
-
-#ifdef HYPRE_MEMORY_DMALLOC
-
-#define hypre_InitMemoryDebug(id)    hypre_InitMemoryDebugDML(id)
-#define hypre_FinalizeMemoryDebug()  hypre_FinalizeMemoryDebugDML()
-
-#define hypre_TAlloc(type, count) \
-( (type *)hypre_MAllocDML((size_t)(sizeof(type) * (count)),\
-                          __FILE__, __LINE__) )
-
-#define hypre_CTAlloc(type, count) \
-( (type *)hypre_CAllocDML((size_t)(count), (size_t)sizeof(type),\
-                          __FILE__, __LINE__) )
-
-#define hypre_TReAlloc(ptr, type, count) \
-( (type *)hypre_ReAllocDML((char *)ptr,\
-                           (size_t)(sizeof(type) * (count)),\
-                           __FILE__, __LINE__) )
-
-#define hypre_TFree(ptr) \
-( hypre_FreeDML((char *)ptr, __FILE__, __LINE__), ptr = NULL )
-
-/*--------------------------------------------------------------------------
  * Use standard memory routines
  *--------------------------------------------------------------------------*/
-
-#else
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()  
@@ -609,8 +582,6 @@ if ( cudaerr != cudaSuccess ) {										\
 
 #define hypre_TFree(ptr) \
 ( hypre_Free((char *)ptr), ptr = NULL )
-
-#endif
 
 #define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count))
 #define hypre_SharedCTAlloc(type, count) hypre_CTAlloc(type, (count))
@@ -665,14 +636,6 @@ char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
 char *hypre_SharedReAlloc ( char *ptr , size_t size );
 void hypre_SharedFree ( char *ptr );
 HYPRE_Real *hypre_IncrementSharedDataPtr ( HYPRE_Real *ptr , size_t size );
-
-/* memory_dmalloc.c */
-HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
-HYPRE_Int hypre_FinalizeMemoryDebugDML( void );
-char *hypre_MAllocDML( HYPRE_Int size , char *file , HYPRE_Int line );
-char *hypre_CAllocDML( HYPRE_Int count , HYPRE_Int elt_size , char *file , HYPRE_Int line );
-char *hypre_ReAllocDML( char *ptr , HYPRE_Int size , char *file , HYPRE_Int line );
-void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
 
 #ifdef __cplusplus
 }

@@ -21,9 +21,7 @@
 //#include "gpgpu.h"
 //#include "hypre_nvtx.h"
 //#include "gpuMem.h"
-#ifdef HYPRE_USE_UMALLOC
-#undef HYPRE_USE_UMALLOC
-#endif
+
 /******************************************************************************
  *
  * Standard routines
@@ -56,14 +54,8 @@ hypre_MAlloc( size_t size )
 
    if (size > 0)
    {
-     PUSH_RANGE_PAYLOAD("MALLOC",2,size);
-#ifdef HYPRE_USE_UMALLOC
-      HYPRE_Int threadid = hypre_GetThreadID();
+      PUSH_RANGE_PAYLOAD("MALLOC",2,size);
 #ifdef HYPRE_USE_MANAGED
-      printf("ERROR HYPRE_USE_UMALLOC AND HYPRE_USE_MANAGED are mutually exclusive\n");
-#endif
-      ptr = _umalloc_(size);
-#elif HYPRE_USE_MANAGED
 #ifdef HYPRE_USE_MANAGED_SCALABLE
       gpuErrchk( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
       size_t *sp=(size_t*)ptr;
@@ -77,12 +69,11 @@ hypre_MAlloc( size_t size )
       ptr = malloc(size);
 #endif
 
-#if 1
       if (ptr == NULL)
       {
-        hypre_OutOfMemory(size);
+         hypre_OutOfMemory(size);
       }
-#endif
+
       POP_RANGE;
    }
    else
@@ -106,15 +97,8 @@ hypre_CAlloc( size_t count,
 
    if (size > 0)
    {
-     PUSH_RANGE_PAYLOAD("MALLOC",4,size);
-#ifdef HYPRE_USE_UMALLOC
+      PUSH_RANGE_PAYLOAD("MALLOC",4,size);
 #ifdef HYPRE_USE_MANAGED
-      printf("ERROR HYPRE_USE_UMALLOC AND HYPRE_USE_MANAGED are mutually exclusive\n");
-#endif
-      HYPRE_Int threadid = hypre_GetThreadID();
-
-      ptr = _ucalloc_(count, elt_size);
-#elif HYPRE_USE_MANAGED
 #ifdef HYPRE_USE_MANAGED_SCALABLE
       ptr=(void*)hypre_MAlloc(size);
       memset(ptr,0,count*elt_size);
@@ -127,12 +111,11 @@ hypre_CAlloc( size_t count,
       ptr = calloc(count, elt_size);
 #endif
 
-#if 1
       if (ptr == NULL)
       {
-        hypre_OutOfMemory(size);
+         hypre_OutOfMemory(size);
       }
-#endif
+
       POP_RANGE;
    }
    else
@@ -145,9 +128,10 @@ hypre_CAlloc( size_t count,
 
 #ifdef HYPRE_USE_MANAGED
 size_t memsize(const void *ptr){
-return ((size_t*)ptr)[-MEM_PAD_LEN];
+   return ((size_t*)ptr)[-MEM_PAD_LEN];
 }
 #endif
+
 /*--------------------------------------------------------------------------
  * hypre_ReAlloc
  *--------------------------------------------------------------------------*/
@@ -156,67 +140,50 @@ char *
 hypre_ReAlloc( char   *ptr,
                size_t  size )
 {
-#ifdef HYPRE_USE_UMALLOC
+#ifdef HYPRE_USE_MANAGED
    if (ptr == NULL)
    {
+
       ptr = hypre_MAlloc(size);
    }
    else if (size == 0)
    {
       hypre_Free(ptr);
+      return NULL;
    }
    else
    {
-      HYPRE_Int threadid = hypre_GetThreadID();
-      ptr = (char*)_urealloc_(ptr, size);
-   }
-#elif HYPRE_USE_MANAGED
-   if (ptr == NULL)
-   {
-
-      ptr = hypre_MAlloc(size);
-   }
-   else if (size == 0)
-   {
-     hypre_Free(ptr);
-     return NULL;
-   }
-   else
-   {
-     void *nptr = hypre_MAlloc(size);
+      void *nptr = hypre_MAlloc(size);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
-     size_t old_size=memsize((void*)ptr);
+      size_t old_size=memsize((void*)ptr);
 #else
-     size_t old_size=mempush((void*)ptr,0,0);
+      size_t old_size=mempush((void*)ptr,0,0);
 #endif
-     if (size>old_size)
-       memcpy(nptr,ptr,old_size);
-     else
-       memcpy(nptr,ptr,size);
-     hypre_Free(ptr);
-     ptr=(char*) nptr;
+      if (size>old_size)
+         memcpy(nptr,ptr,old_size);
+      else
+         memcpy(nptr,ptr,size);
+      hypre_Free(ptr);
+      ptr=(char*) nptr;
    }
 #else
    if (ptr == NULL)
    {
-	   ptr = (char*)malloc(size);
+      ptr = (char*)malloc(size);
    }
    else
    {
-	   ptr = (char*)realloc(ptr, size);
+      ptr = (char*)realloc(ptr, size);
    }
 #endif
 
-#if 1
    if ((ptr == NULL) && (size > 0))
    {
       hypre_OutOfMemory(size);
    }
-#endif
 
    return ptr;
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_Free
@@ -227,11 +194,7 @@ hypre_Free( char *ptr )
 {
    if (ptr)
    {
-#ifdef HYPRE_USE_UMALLOC
-      HYPRE_Int threadid = hypre_GetThreadID();
-
-      _ufree_(ptr);
-#elif HYPRE_USE_MANAGED
+#ifdef HYPRE_USE_MANAGED
       //size_t size=mempush(ptr,0,0);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
       cudaSafeFree(ptr,MEM_PAD_LEN);
@@ -256,14 +219,8 @@ hypre_MAllocPinned( size_t size )
 
    if (size > 0)
    {
-     PUSH_RANGE_PAYLOAD("MALLOC",2,size);
-#ifdef HYPRE_USE_UMALLOC
-      HYPRE_Int threadid = hypre_GetThreadID();
+      PUSH_RANGE_PAYLOAD("MALLOC",2,size);
 #ifdef HYPRE_USE_MANAGED
-      printf("ERROR HYPRE_USE_UMALLOC AND HYPRE_USE_MANAGED are mutually exclusive\n");
-#endif
-      ptr = _umalloc_(size);
-#elif HYPRE_USE_MANAGED
 #ifdef HYPRE_USE_MANAGED_SCALABLE
 #ifdef HYPRE_GPU_USE_PINNED
       gpuErrchk( cudaHostAlloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,cudaHostAllocMapped));
@@ -281,12 +238,11 @@ hypre_MAllocPinned( size_t size )
       ptr = malloc(size);
 #endif
 
-#if 1
       if (ptr == NULL)
       {
-        hypre_OutOfMemory(size);
+         hypre_OutOfMemory(size);
       }
-#endif
+
       POP_RANGE;
    }
    else
@@ -307,13 +263,13 @@ hypre_MAllocHost( size_t size )
 
    if (size > 0)
    {
-     ptr = malloc(size);
-#if 1
+      ptr = malloc(size);
+
       if (ptr == NULL)
       {
-        hypre_OutOfMemory(size);
+         hypre_OutOfMemory(size);
       }
-#endif
+
       POP_RANGE;
    }
    else
@@ -337,25 +293,14 @@ hypre_CAllocHost( size_t count,
 
    if (size > 0)
    {
-     PUSH_RANGE_PAYLOAD("CAllocHost",4,size);
-#ifdef HYPRE_USE_UMALLOC
-#ifdef HYPRE_USE_MANAGED
-      printf("ERROR HYPRE_USE_UMALLOC AND HYPRE_USE_MANAGED are mutually exclusive\n");
-#endif
-      HYPRE_Int threadid = hypre_GetThreadID();
+      PUSH_RANGE_PAYLOAD("CAllocHost",4,size);
 
-ptr = _ucalloc_(count, elt_size);
-
-#else
-     ptr = calloc(count, elt_size);
-#endif
-
-#if 1
+      ptr = calloc(count, elt_size);
       if (ptr == NULL)
       {
-        hypre_OutOfMemory(size);
+         hypre_OutOfMemory(size);
       }
-#endif
+
       POP_RANGE;
    }
    else
@@ -371,24 +316,22 @@ ptr = _ucalloc_(count, elt_size);
 
 char *
 hypre_ReAllocHost( char   *ptr,
-               size_t  size )
+                   size_t  size )
 {
-  if (ptr == NULL)
+   if (ptr == NULL)
    {
-          ptr = (char*)malloc(size);
+      ptr = (char*)malloc(size);
    }
    else
    {
 
-	   ptr = (char*)realloc(ptr, size);
+      ptr = (char*)realloc(ptr, size);
    }
 
-#if 1
    if ((ptr == NULL) && (size > 0))
    {
       hypre_OutOfMemory(size);
    }
-#endif
 
    return ptr;
 }
@@ -402,13 +345,6 @@ hypre_FreeHost( char *ptr )
 {
    if (ptr)
    {
-#ifdef HYPRE_USE_UMALLOC
-      HYPRE_Int threadid = hypre_GetThreadID();
-
-      _ufree_(ptr);
-
-#else
       free(ptr);
-#endif
    }
 }

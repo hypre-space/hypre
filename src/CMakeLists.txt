@@ -204,14 +204,12 @@ list (APPEND HYPRE_SOURCES
   utilities/hypre_prefix_sum.c
   utilities/hypre_printf.c
   utilities/hypre_qsort.c
-  utilities/memory_dmalloc.c
   utilities/mpistubs.c
   utilities/qsplit.c
   utilities/random.c
   utilities/threading.c
   utilities/timer.c
   utilities/timing.c
-  utilities/umalloc_local.c
 )
 
 # Headers and sources: multivector

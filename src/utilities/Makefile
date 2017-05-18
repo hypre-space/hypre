@@ -34,7 +34,6 @@ HEADERS =\
  mpistubs.h\
  threading.h\
  timing.h\
- umalloc_local.h\
  _hypre_utilities.h
 
 FILES =\
@@ -47,14 +46,12 @@ FILES =\
  hypre_memory.c\
  hypre_printf.c\
  hypre_qsort.c\
- memory_dmalloc.c\
  mpistubs.c\
  qsplit.c\
  random.c\
  threading.c\
  timer.c\
  timing.c\
- umalloc_local.c\
  hypre_mpi_comm_f2c.c\
  hypre_error.c\
  F90_HYPRE_error.c\
