@@ -49,10 +49,10 @@
 /* Define to 1 if using long long int for HYPRE_Int */
 #undef HYPRE_BIGINT
 
-/* Define to 1 if using single precision values */
+/* Define to 1 if using single precision values for HYPRE_Real */
 #undef HYPRE_SINGLE
 
-/* Define to 1 if using long double precision values */
+/* Define to 1 if using quad precision values for HYPRE_Real */
 #undef HYPRE_LONG_DOUBLE
 
 /* Define to 1 if using complex values */

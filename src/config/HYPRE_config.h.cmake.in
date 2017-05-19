@@ -22,7 +22,7 @@
 /* Use single precision values for HYPRE_Real */
 #cmakedefine HYPRE_SINGLE
 
-/* Use long double precision values for HYPRE_Real */
+/* Use quad precision values for HYPRE_Real */
 #cmakedefine HYPRE_LONG_DOUBLE
 
 /* Use complex values */
