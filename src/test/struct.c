@@ -202,8 +202,6 @@ main( hypre_int argc,
    cegdb(&argc, &argv, myid);
 #endif
 
-   hypre_InitMemoryDebug(myid);
-
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -2765,9 +2763,6 @@ main( hypre_int argc,
       for ( i = 0; i < (dim + 1); i++)
          hypre_TFree(offsets[i]);
       hypre_TFree(offsets);
-
-      hypre_FinalizeMemoryDebug();
-
    }
 
    /* Finalize MPI */

@@ -17,6 +17,7 @@
  * works by first building a parcsr matrix as before and then "copying"
  * that matrix row-by-row into the IJMatrix interface. AJC 7/99.
  *--------------------------------------------------------------------------*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -189,9 +190,7 @@ main( HYPRE_Int   argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-/*
-   hypre_InitMemoryDebug(myid);
-*/
+
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -3698,10 +3697,6 @@ main( HYPRE_Int   argc,
    HYPRE_IJMatrixDestroy(ij_A);
    HYPRE_IJVectorDestroy(ij_b);
    HYPRE_IJVectorDestroy(ij_x);
-
-/*
-   hypre_FinalizeMemoryDebug();
-*/
 
    hypre_MPI_Finalize();
 

@@ -272,9 +272,7 @@ main( hypre_int argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-/*
-  hypre_InitMemoryDebug(myid);
-*/
+
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -4024,10 +4022,6 @@ main( hypre_int argc,
       hypre_TFree(interp_vecs);
    }
    if (nongalerk_tol) hypre_TFree (nongalerk_tol);
-
-/*
-  hypre_FinalizeMemoryDebug();
-*/
 
    hypre_MPI_Finalize();
 

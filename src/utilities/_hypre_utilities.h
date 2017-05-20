@@ -537,9 +537,6 @@ if ( cudaerr != cudaSuccess ) {										\
 #define hypre_UMTFree(ptr) \
       cudaFree(ptr)
 
-#define hypre_InitMemoryDebug(id)
-#define hypre_FinalizeMemoryDebug()
-
 #define hypre_TAlloc(type, count) \
 ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )
 
@@ -567,9 +564,6 @@ if ( cudaerr != cudaSuccess ) {										\
 /*--------------------------------------------------------------------------
  * Use standard memory routines
  *--------------------------------------------------------------------------*/
-
-#define hypre_InitMemoryDebug(id)
-#define hypre_FinalizeMemoryDebug()  
 
 #define hypre_TAlloc(type, count) \
 ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )

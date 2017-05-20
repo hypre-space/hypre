@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 #include "_hypre_parcsr_ls.h"
 
 /*--------------------------------------------------------------------------
@@ -84,9 +81,7 @@ main( HYPRE_Int   argc,
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-/*
-   hypre_InitMemoryDebug(myid);
-*/
+
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -880,9 +875,7 @@ main( HYPRE_Int   argc,
    HYPRE_ParCSRMatrixDestroy(A);
    HYPRE_ParVectorDestroy(b);
    HYPRE_ParVectorDestroy(x);
-/*
-   hypre_FinalizeMemoryDebug();
-*/
+
    /* Finalize MPI */
    hypre_MPI_Finalize();
 

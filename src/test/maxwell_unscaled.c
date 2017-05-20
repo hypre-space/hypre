@@ -1338,8 +1338,6 @@ main( hypre_int argc,
 
    hypre_GPUInit(-1);
 
-   hypre_InitMemoryDebug(myid);
-
    /*-----------------------------------------------------------
     * Read input file
     *-----------------------------------------------------------*/
@@ -1898,8 +1896,6 @@ main( hypre_int argc,
    hypre_TFree(refine);
    hypre_TFree(distribute);
    hypre_TFree(block);
-
-   hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
    hypre_GPUFinalize();

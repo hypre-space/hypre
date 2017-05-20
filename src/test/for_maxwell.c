@@ -1386,8 +1386,6 @@ main( HYPRE_Int   argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   hypre_InitMemoryDebug(myid);
-
    /*-----------------------------------------------------------
     * Read input file
     *-----------------------------------------------------------*/
@@ -2179,8 +2177,6 @@ main( HYPRE_Int   argc,
    hypre_TFree(refine);
    hypre_TFree(distribute);
    hypre_TFree(block);
-
-   hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();

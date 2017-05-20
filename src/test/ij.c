@@ -17,6 +17,7 @@
  * works by first building a parcsr matrix as before and then "copying"
  * that matrix row-by-row into the IJMatrix interface. AJC 7/99.
  *--------------------------------------------------------------------------*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -351,9 +352,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
    hypre_GPUInit(-1);
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
-/*
-  hypre_InitMemoryDebug(myid);
-*/
+
    /*-----------------------------------------------------------
     * Set defaults
     *-----------------------------------------------------------*/
@@ -5243,9 +5242,6 @@ main( hypre_int argc,
    }
    if (nongalerk_tol) hypre_TFree (nongalerk_tol);
 
-/*
-  hypre_FinalizeMemoryDebug();
-*/
    hypre_GPUFinalize();
    hypre_MPI_Finalize();
 
