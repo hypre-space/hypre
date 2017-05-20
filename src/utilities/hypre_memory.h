@@ -14,6 +14,37 @@
  *
  * Header file for memory management utilities
  *
+ * The abstract memory model has a Host (think CPU) and a Device (think GPU) and
+ * three basic types of memory management utilities:
+ *
+ *    1. Malloc       - This memory is available only on the Host
+ *    2. DeviceMalloc - This memory is available only on the Device
+ *    3. MemCopy      - Copies memory to/from the Device
+ *
+ * Although the abstract model does not explicitly reflect a managed memory
+ * model (i.e., unified memory), it can support it.  Here is a summary of how
+ * the abstract model would be mapped to specific hardware scenarios:
+ *
+ *    Not using a device, not using managed memory
+ *       Malloc       = host malloc          e.g., malloc
+ *       DeviceMalloc = host malloc          e.g., malloc
+ *       MemCopy      = host/host memcpy     e.g., memcpy
+ *
+ *    Using a device, not using managed memory
+ *       Malloc       = host malloc          e.g., malloc
+ *       DeviceMalloc = device malloc        e.g., cudaMalloc
+ *       MemCopy      = host/device memcpy   e.g., cudaMemcpy
+ *
+ *    Using a device, using managed memory
+ *       Malloc       = managed malloc       e.g., cudaMallocManaged
+ *       DeviceMalloc = managed malloc       e.g., cudaMallocManaged
+ *       MemCopy      = no-op or pre-fetch   e.g., TBD
+ *
+ * Questions:
+ *
+ *    1. Pinned memory?
+ *    2. Need to allocate some host-only memory in a unified memory setting?
+ *
  *****************************************************************************/
 
 #ifndef hypre_MEMORY_HEADER
@@ -25,6 +56,39 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/*--------------------------------------------------------------------------
+ * Interface prototypes (only for the no-device setting for starters)
+ *--------------------------------------------------------------------------*/
+
+#define hypre_TAlloc(type, count) \
+( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )
+
+#define hypre_CTAlloc(type, count) \
+( (type *)hypre_CAlloc((size_t)(count), (size_t)sizeof(type)) )
+
+#define hypre_TReAlloc(ptr, type, count) \
+( (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count))) )
+
+#define hypre_TFree(ptr) \
+( hypre_Free((char *)ptr), ptr = NULL )
+
+#define hypre_DeviceTAlloc(type, count)   hypre_TAlloc(type, (count))
+#define hypre_DeviceCTAlloc(type, count)  hypre_CTAlloc(type, (count))
+#define hypre_DeviceTReAlloc(type, count) hypre_TReAlloc(type, (count))
+#define hypre_DeviceTFree(ptr)            hypre_TFree(ptr)
+
+#define hypre_MemCopyToDevice(ptrHost, ptrDevice, type, count) \
+memcpy(ptrDevice, ptrHost, sizeof(type)*(count))
+
+#define hypre_MemCopyFromDevice(ptrHost, ptrDevice, type, count) \
+memcpy(ptrHost, ptrDevice, sizeof(type)*(count))
+
+
+
+/*--------------------------------------------------------------------------
+ * CURRENT CODE
+ *--------------------------------------------------------------------------*/
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 #ifdef __cplusplus
@@ -150,9 +214,6 @@ if ( cudaerr != cudaSuccess ) {										\
 #define hypre_UMTFree(ptr) \
       cudaFree(ptr)
 
-#define hypre_InitMemoryDebug(id)
-#define hypre_FinalizeMemoryDebug()
-
 #define hypre_TAlloc(type, count) \
 ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )
 
@@ -180,9 +241,6 @@ if ( cudaerr != cudaSuccess ) {										\
 /*--------------------------------------------------------------------------
  * Use standard memory routines
  *--------------------------------------------------------------------------*/
-
-#define hypre_InitMemoryDebug(id)
-#define hypre_FinalizeMemoryDebug()  
 
 #define hypre_TAlloc(type, count) \
 ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )
