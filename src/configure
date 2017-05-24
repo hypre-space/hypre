@@ -729,6 +729,8 @@ enable_option_checking
 enable_debug
 enable_shared
 enable_bigint
+enable_single
+enable_longdouble
 enable_complex
 enable_maxdim
 enable_persistent
@@ -1412,6 +1414,8 @@ Optional Features:
   --enable-debug          Set compiler flags for debugging.
   --enable-shared         Build shared libraries (default is NO).
   --enable-bigint         Use long long int for HYPRE_Int (default is NO).
+  --enable-single         Use single precision values (default is NO).
+  --enable-longdouble     Use long double precision values (default is NO).
   --enable-complex        Use complex values (default is NO).
   --enable-maxdim=MAXDIM  Change max dimension size to MAXDIM (default is 3).
                           Currently must be at least 3.
@@ -2528,6 +2532,44 @@ fi
 if test "$hypre_using_bigint" = "yes"
 then
    $as_echo "#define HYPRE_BIGINT 1" >>confdefs.h
+
+fi
+
+# Check whether --enable-single was given.
+if test "${enable_single+set}" = set; then :
+  enableval=$enable_single; case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_single=yes ;;
+    no)  hypre_using_single=no ;;
+    *)   as_fn_error $? "Bad value ${enableval} for --enable-single" "$LINENO" 5 ;;
+ esac
+else
+  hypre_using_single=no
+
+fi
+
+if test "$hypre_using_single" = "yes"
+then
+   $as_echo "#define HYPRE_SINGLE 1" >>confdefs.h
+
+fi
+
+# Check whether --enable-longdouble was given.
+if test "${enable_longdouble+set}" = set; then :
+  enableval=$enable_longdouble; case "${enableval}" in
+    yes) hypre_using_fei=no
+         hypre_using_longdouble=yes ;;
+    no)  hypre_using_longdouble=no ;;
+    *)   as_fn_error $? "Bad value ${enableval} for --enable-longdouble" "$LINENO" 5 ;;
+ esac
+else
+  hypre_using_longdouble=no
+
+fi
+
+if test "$hypre_using_longdouble" = "yes"
+then
+   $as_echo "#define HYPRE_LONG_DOUBLE 1" >>confdefs.h
 
 fi
 

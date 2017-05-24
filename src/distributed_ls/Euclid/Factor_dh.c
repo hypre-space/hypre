@@ -379,7 +379,7 @@ static HYPRE_Int setup_receives_private(Factor_dh mat, HYPRE_Int *beg_rows, HYPR
     hypre_MPI_Request_free(&request); 
 
     /* set up persistent comms for receiving the values from this_pe */
-    hypre_MPI_Recv_init(recvBuf+i, j-i, hypre_MPI_DOUBLE, this_pe, 555,
+    hypre_MPI_Recv_init(recvBuf+i, j-i, hypre_MPI_REAL, this_pe, 555,
                         comm_dh, req+num_recv); 
     ++num_recv;
   }
@@ -457,7 +457,7 @@ static void setup_sends_private(Factor_dh mat, HYPRE_Int *inlist,
       ++count;
 
       /* Set up the send */
-      hypre_MPI_Send_init(sendBuf, inlist[i], hypre_MPI_DOUBLE, i, 555, comm_dh, sendReq); 
+      hypre_MPI_Send_init(sendBuf, inlist[i], hypre_MPI_REAL, i, 555, comm_dh, sendReq); 
     }
   }
 
@@ -1128,7 +1128,7 @@ HYPRE_Real Factor_dhMaxPivotInverse(Factor_dh mat)
   if (np_dh == 1) {
     minGlobal = min;
   } else {
-    hypre_MPI_Reduce(&min, &minGlobal, 1, hypre_MPI_DOUBLE, hypre_MPI_MIN, 0, comm_dh);
+    hypre_MPI_Reduce(&min, &minGlobal, 1, hypre_MPI_REAL, hypre_MPI_MIN, 0, comm_dh);
   }
 
   if (minGlobal == 0) {
@@ -1155,7 +1155,7 @@ HYPRE_Real Factor_dhMaxValue(Factor_dh mat)
   if (np_dh == 1) {
     maxGlobal = max;
   } else {
-    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm_dh);
+    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
   }
   END_FUNC_VAL(maxGlobal)
 }
@@ -1185,7 +1185,7 @@ HYPRE_Real Factor_dhCondEst(Factor_dh mat, Euclid_dh ctx)
   if (np_dh == 1) {
     maxGlobal = max;
   } else {
-    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, comm_dh);
+    hypre_MPI_Reduce(&max, &maxGlobal, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
   }
   END_FUNC_VAL(maxGlobal)
 }

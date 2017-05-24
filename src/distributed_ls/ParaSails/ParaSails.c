@@ -371,7 +371,7 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
 
     hypre_MPI_Request_free(request);
 
-    hypre_MPI_Isend(valbuf, valbufp-valbuf, hypre_MPI_DOUBLE, dest, ROW_REPV_TAG,
+    hypre_MPI_Isend(valbuf, valbufp-valbuf, hypre_MPI_REAL, dest, ROW_REPV_TAG,
         comm, request);
 }
 
@@ -400,7 +400,7 @@ static void ReceiveReplyStoredRows(MPI_Comm comm, Numbering *numb,
     ind = StoredRowsAllocInd(stored_rows, count);
     hypre_MPI_Recv(ind, count, HYPRE_MPI_INT, source, ROW_REPI_TAG, comm, &status);
     val = StoredRowsAllocVal(stored_rows, count);
-    hypre_MPI_Recv(val, count, hypre_MPI_DOUBLE, source, ROW_REPV_TAG, comm, &status);
+    hypre_MPI_Recv(val, count, hypre_MPI_REAL, source, ROW_REPV_TAG, comm, &status);
 
     /* Parse the message */
     num_rows = *ind++; /* number of rows */
@@ -1430,7 +1430,7 @@ static HYPRE_Real SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
     }
 
     /* Find the average across all processors */
-    hypre_MPI_Allreduce(&localsum, &sum, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
+    hypre_MPI_Allreduce(&localsum, &sum, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
     hypre_MPI_Comm_size(comm, &npes);
 
     free(buffer);
@@ -1486,7 +1486,7 @@ static HYPRE_Real SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
     }
 
     /* Find the average across all processors */
-    hypre_MPI_Allreduce(&localsum, &sum, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
+    hypre_MPI_Allreduce(&localsum, &sum, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
     hypre_MPI_Comm_size(comm, &npes);
 
     free(buffer);
@@ -1980,9 +1980,9 @@ HYPRE_Real ParaSailsStatsPattern(ParaSails *ps, Matrix *A)
     }
 
     hypre_MPI_Allreduce(&ps->setup_pattern_time, &max_pattern_time, 
-	1, hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
-    hypre_MPI_Allreduce(&ps->cost, &max_cost, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
-    hypre_MPI_Allreduce(&ps->cost, &ave_cost, 1, hypre_MPI_DOUBLE, hypre_MPI_SUM, comm);
+	1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
+    hypre_MPI_Allreduce(&ps->cost, &max_cost, 1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
+    hypre_MPI_Allreduce(&ps->cost, &ave_cost, 1, hypre_MPI_REAL, hypre_MPI_SUM, comm);
     ave_cost = ave_cost / (HYPRE_Real) npes;
 
     if (mype)
@@ -2029,13 +2029,13 @@ void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
     }
 
     hypre_MPI_Allreduce(&ps->setup_values_time, &max_values_time, 
-	1, hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
+	1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
 
     if (!mype)
         setup_times = (HYPRE_Real *) malloc(npes * sizeof(HYPRE_Real));
 
     temp = ps->setup_pattern_time + ps->setup_values_time;
-    hypre_MPI_Gather(&temp, 1, hypre_MPI_DOUBLE, setup_times, 1, hypre_MPI_DOUBLE, 0, comm);
+    hypre_MPI_Gather(&temp, 1, hypre_MPI_REAL, setup_times, 1, hypre_MPI_REAL, 0, comm);
 
     if (mype)
         return;

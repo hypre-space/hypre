@@ -19,7 +19,6 @@
 #include "krylov.h"
 #include "_hypre_utilities.h"
 
-
 /*--------------------------------------------------------------------------
  * hypre_BiCGSTABFunctionsCreate
  *--------------------------------------------------------------------------*/
@@ -236,7 +235,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
    HYPRE_Int        iter; 
    HYPRE_Int        my_id, num_procs;
    HYPRE_Real alpha, beta, gamma, epsilon, temp, res, r_norm, b_norm;
-   HYPRE_Real epsmac = 1.e-128; 
+   HYPRE_Real epsmac = HYPRE_REAL_MIN; 
    HYPRE_Real ieee_check = 0.;
    HYPRE_Real cf_ave_0 = 0.0;
    HYPRE_Real cf_ave_1 = 0.0;
