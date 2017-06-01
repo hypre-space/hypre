@@ -1,10 +1,14 @@
 from scipy import *
 from pylab import *
 
-# This file just loads and plots a solution file for a single processor case.  It loads
-fname = 'sstruct.out.x.00.00.00000'
-fname = 'sysbamg_tv_l=0,k=4.dat.00.00000'
-# where the numbers at the end are 'part, var, myid', that is part=0, var=0 and myid=0 here.
+# This file just loads a test vector 
+#    l = level number                 
+#    k = test vector number
+#    first two zeros are the var number 
+#    the final 5 zeros are the MPI rank
+fname = 'sysbamg_tv_l=0,k=6.dat.02.00000'
+#fname = 'sysbamg_tv_l=0,k=4.dat.01.00000'
+
 # It is also assumed that this is a regular 3D grid, ordered lexicographically.
 
 # Grab the file

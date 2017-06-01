@@ -2,3 +2,7 @@
 Iterations = 10
 Final Relative Residual Norm = 4.607806e-07
 
+# Output file: periodic_bamg.out.11
+Iterations = 12
+Final Relative Residual Norm = 3.111677e-07
+
