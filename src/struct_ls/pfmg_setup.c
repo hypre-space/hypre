@@ -382,11 +382,18 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    //data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
    if (constant_coefficient == 0)
+   {
       data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+   }
    else
+   {
       data = hypre_UMCTAlloc(HYPRE_Real,data_size);
-   
+   }
+
    (pfmg_data -> data) = data;
+#ifdef HYPRE_USE_OMP45
+   (pfmg_data -> data_size) = data_size;
+#endif
 
    hypre_StructVectorInitializeData(tx_l[0], data);
    hypre_StructVectorAssemble(tx_l[0]);
@@ -738,7 +745,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_OMP45)
         /*FIXME: need reduction for more variables*/
 	HYPRE_Int tmp = 0;
 	hypre_MatrixIndexMove(A, stencil_size, i, tmp, 3);
@@ -974,7 +981,12 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             sqcz += (tcz*tcz);
          }
          hypre_newBoxLoop1ReductionEnd(Ai,sqcz);
+#ifdef HYPRE_USE_OMP45
+         hypre_StructCleanIndexD(stencil_size, 3);
+#else
          hypre_StructCleanIndexD();
+#endif
+
 #else
 #ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
@@ -1175,7 +1187,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
          hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
 					 A_dbox, start, stride, Ai,diag_product);
          {
-            diag_product *= Ap[Ai];
+            diag_product += Ap[Ai] == 0.0 ? 1 : 0;
          }
          hypre_newBoxLoop1ReductionEnd(Ai,diag_product);
 #endif

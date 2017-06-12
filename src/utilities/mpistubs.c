@@ -12,6 +12,12 @@
 
 #include "_hypre_utilities.h"
 
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+extern HYPRE_Complex *global_recv_buffer, *global_send_buffer;
+extern HYPRE_Int      global_recv_size, global_send_size;
+
+#endif
+
 /******************************************************************************
  * This routine is the same in both the sequential and normal cases
  *
@@ -666,6 +672,17 @@ hypre_MPI_Init( hypre_int   *argc,
 HYPRE_Int
 hypre_MPI_Finalize( )
 {
+#if defined(HYPRE_USE_OMP45)
+   if (global_send_buffer)
+   {
+      hypre_DeviceTFree(global_send_buffer, HYPRE_Complex, global_send_size);
+   }
+   if (global_recv_buffer)
+   {
+      hypre_DeviceTFree(global_recv_buffer, HYPRE_Complex, global_recv_size);
+   }
+#endif
+
    return (HYPRE_Int) MPI_Finalize();
 }
 

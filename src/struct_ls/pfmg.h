@@ -58,6 +58,10 @@ typedef struct
    hypre_StructGrid    **P_grid_l;
                     
    HYPRE_Real           *data;
+#ifdef HYPRE_USE_OMP45
+   HYPRE_Int             data_size;
+#endif
+
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **P_l;
    hypre_StructMatrix  **RT_l;

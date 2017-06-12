@@ -103,7 +103,12 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
       {
          if (hypre_StructMatrixDataAlloced(matrix))
          {
+#ifdef HYPRE_USE_OMP45
+            hypre_DeviceTFree(hypre_StructMatrixData(matrix), HYPRE_Complex,
+                              hypre_StructMatrixDataSize(matrix));
+#else
             hypre_DeviceTFree(hypre_StructMatrixData(matrix));
+#endif
          }
          hypre_CommPkgDestroy(hypre_StructMatrixCommPkg(matrix));
          
@@ -436,10 +441,14 @@ hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
    //data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
    
    if (constant_coefficient == 0)
+   {
       data = hypre_DeviceCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
+   }
    else
+   {
       data = hypre_UMCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
-   
+   }
+
    hypre_StructMatrixInitializeData(matrix, data);
    hypre_StructMatrixDataAlloced(matrix) = 1;
 

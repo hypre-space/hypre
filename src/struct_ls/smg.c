@@ -16,6 +16,21 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
+#ifdef HYPRE_USE_OMP45
+HYPRE_Int hypre__global_offload = 0;
+HYPRE_Long hypre__offload_to_count = 0;
+HYPRE_Long hypre__offload_from_count = 0;
+HYPRE_Long hypre__offload_to_byte_count = 0;
+HYPRE_Long hypre__offload_from_byte_count = 0;
+
+HYPRE_Long hypre__update_to_count = 0;
+HYPRE_Long hypre__update_from_count = 0;
+HYPRE_Long hypre__update_to_byte_count = 0;
+HYPRE_Long hypre__update_from_byte_count = 0;
+
+HYPRE_Int hypre__smg_recur_level = -1;
+#endif
+
 void *
 hypre_SMGCreate( MPI_Comm  comm )
 {
@@ -111,7 +126,12 @@ hypre_SMGDestroy( void *smg_vdata )
             hypre_StructVectorDestroy(smg_data -> tb_l[l+1]);
             hypre_StructVectorDestroy(smg_data -> tx_l[l+1]);
          }
+#ifdef HYPRE_USE_OMP45
+         hypre_DeviceTFree(smg_data -> data, HYPRE_Real,
+                           smg_data -> data_size);
+#else
          hypre_DeviceTFree(smg_data -> data);
+#endif
          hypre_TFree(smg_data -> grid_l);
          hypre_TFree(smg_data -> PT_grid_l);
          hypre_TFree(smg_data -> A_l);

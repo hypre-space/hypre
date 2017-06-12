@@ -71,6 +71,9 @@ typedef struct
    hypre_BoxArray      **fine_points_l;
 
    HYPRE_Real           *data;
+#if HYPRE_USE_OMP45
+   HYPRE_Int            data_size;
+#endif
    hypre_StructMatrix  **A_l;
    hypre_StructVector  **x_l;
 
@@ -600,6 +603,9 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    data =  hypre_DeviceCTAlloc(HYPRE_Real,data_size);
    
    (cyc_red_data -> data) = data;
+#ifdef HYPRE_USE_OMP45
+   (cyc_red_data -> data_size) = data_size;
+#endif
 
    for (l = 0; l < (num_levels - 1); l++)
    {
@@ -904,14 +910,15 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             hypre_SetIndex3(index, 0, 0, 0);
             hypre_IndexD(index, cdir) = -1;
             Awp = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-            xwp = hypre_StructVectorBoxData(x_l[l], fi) +
-               hypre_BoxOffsetDistance(x_dbox, index);
+            xwp = hypre_StructVectorBoxData(x_l[l], fi);
+//RL:PTR_OFFSET
+            HYPRE_Int xwp_offset = hypre_BoxOffsetDistance(x_dbox, index);
 
             hypre_SetIndex3(index, 0, 0, 0);
             hypre_IndexD(index, cdir) = 1;
             Aep = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-            xep = hypre_StructVectorBoxData(x_l[l], fi) +
-               hypre_BoxOffsetDistance(x_dbox, index);
+            xep = hypre_StructVectorBoxData(x_l[l], fi);
+            HYPRE_Int xep_offset = hypre_BoxOffsetDistance(x_dbox, index);
 
             hypre_ForBoxI(j, compute_box_a)
             {
@@ -927,7 +934,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                    x_dbox, start, stride, xi,
                                    xc_dbox, startc, stridec, xci);
                {
-                  xcp[xci] = xp[xi] - Awp[Ai]*xwp[xi] - Aep[Ai]*xep[xi];
+                  xcp[xci] = xp[xi] - Awp[Ai] * xwp[xi+xwp_offset] - 
+                                      Aep[Ai] * xep[xi+xep_offset];
                }
                hypre_BoxLoop3End(Ai, xi, xci);
             }
@@ -1065,14 +1073,15 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             hypre_SetIndex3(index, 0, 0, 0);
             hypre_IndexD(index, cdir) = -1;
             Awp = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-            xwp = hypre_StructVectorBoxData(x_l[l], fi) +
-               hypre_BoxOffsetDistance(x_dbox, index);
+//RL PTROFFSET
+            xwp = hypre_StructVectorBoxData(x_l[l], fi);
+            HYPRE_Int xwp_offset = hypre_BoxOffsetDistance(x_dbox, index);
 
             hypre_SetIndex3(index, 0, 0, 0);
             hypre_IndexD(index, cdir) = 1;
             Aep = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-            xep = hypre_StructVectorBoxData(x_l[l], fi) +
-               hypre_BoxOffsetDistance(x_dbox, index);
+            xep = hypre_StructVectorBoxData(x_l[l], fi);
+            HYPRE_Int xep_offset = hypre_BoxOffsetDistance(x_dbox, index);
 
             hypre_ForBoxI(j, compute_box_a)
             {
@@ -1085,7 +1094,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi);
                {
-                  xp[xi] -= (Awp[Ai]*xwp[xi] + Aep[Ai]*xep[xi]  ) / Ap[Ai];
+                  xp[xi] -= (Awp[Ai]*xwp[xi+xwp_offset] + Aep[Ai]*xep[xi+xep_offset]) / Ap[Ai];
                }
                hypre_BoxLoop2End(Ai, xi);
             }
@@ -1168,7 +1177,12 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
          hypre_ComputePkgDestroy(cyc_red_data -> up_compute_pkg_l[l]);
       }
       hypre_BoxArrayDestroy(cyc_red_data -> fine_points_l[l]);
+#ifdef HYPRE_USE_OMP45
+      hypre_DeviceTFree(cyc_red_data -> data, HYPRE_Real,
+                        cyc_red_data -> data_size);
+#elif
       hypre_DeviceTFree(cyc_red_data -> data);
+#endif
       hypre_TFree(cyc_red_data -> grid_l);
       hypre_TFree(cyc_red_data -> fine_points_l);
       hypre_TFree(cyc_red_data -> A_l);

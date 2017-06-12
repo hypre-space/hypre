@@ -204,19 +204,22 @@ hypre_SemiRestrict( void               *restrict_vdata,
          r_dbox  = hypre_BoxArrayBox(hypre_StructVectorDataSpace(r),  fi);
          rc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(rc), ci);
 
+         // RL: PTROFFSET
+         HYPRE_Int Rp0_offset = 0, rp0_offset, rp1_offset;
+
          if (R_stored_as_transpose)
          {
             if ( constant_coefficient )
             {
-               Rp0 = hypre_StructMatrixBoxData(R, fi, 1) -
-                  hypre_CCBoxOffsetDistance(R_dbox, stencil_shape[1]);
+               Rp0 = hypre_StructMatrixBoxData(R, fi, 1);
                Rp1 = hypre_StructMatrixBoxData(R, fi, 0);
+               Rp0_offset = -hypre_CCBoxOffsetDistance(R_dbox, stencil_shape[1]);
             }
             else
             {
-               Rp0 = hypre_StructMatrixBoxData(R, fi, 1) -
-                  hypre_BoxOffsetDistance(R_dbox, stencil_shape[1]);
+               Rp0 = hypre_StructMatrixBoxData(R, fi, 1);
                Rp1 = hypre_StructMatrixBoxData(R, fi, 0);
+               Rp0_offset = -hypre_BoxOffsetDistance(R_dbox, stencil_shape[1]);
             }
          }
          else
@@ -225,8 +228,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
             Rp1 = hypre_StructMatrixBoxData(R, fi, 1);
          }
          rp  = hypre_StructVectorBoxData(r, fi);
-         rp0 = rp + hypre_BoxOffsetDistance(r_dbox, stencil_shape[0]);
-         rp1 = rp + hypre_BoxOffsetDistance(r_dbox, stencil_shape[1]);
+         rp0_offset = hypre_BoxOffsetDistance(r_dbox, stencil_shape[0]);
+         rp1_offset = hypre_BoxOffsetDistance(r_dbox, stencil_shape[1]);
          rcp = hypre_StructVectorBoxData(rc, ci);
 
          hypre_ForBoxI(j, compute_box_a)
@@ -246,8 +249,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);
                {
-                  rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
-                                       Rp1[Ri] * rp1[ri]);
+                  rcp[rci] = rp[ri] + (Rp0[Ri+Rp0_offset] * rp[ri+rp0_offset] +
+                                       Rp1[Ri]            * rp[ri+rp1_offset]);
                }
                hypre_BoxLoop2End(ri, rci);
             }
@@ -258,8 +261,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);
                {
-                  rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
-                                       Rp1[Ri] * rp1[ri]);
+                  rcp[rci] = rp[ri] + (Rp0[Ri+Rp0_offset] * rp[ri+rp0_offset] +
+                                       Rp1[Ri]            * rp[ri+rp1_offset]);
                }
                hypre_BoxLoop3End(Ri, ri, rci);
             }

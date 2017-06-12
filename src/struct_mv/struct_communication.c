@@ -20,11 +20,11 @@ FILE      *file;
 #endif
 
 /* This is needed to do communication in the GPU case */
-#if defined(HYPRE_MEMORY_GPU)
-static HYPRE_Complex* global_recv_buffer;
-static HYPRE_Complex* global_send_buffer;
-static HYPRE_Int      global_recv_size = 0;
-static HYPRE_Int      global_send_size = 0;
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+HYPRE_Complex* global_recv_buffer = NULL;
+HYPRE_Complex* global_send_buffer = NULL;
+HYPRE_Int      global_recv_size = 0;
+HYPRE_Int      global_send_size = 0;
 #endif
 
 /* this computes a (large enough) size (in doubles) for the message prefix */
@@ -848,7 +848,9 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       if (size > global_send_size)
       {
          if (global_send_size > 0)
+         {
             hypre_DeviceTFree(global_send_buffer);
+         }
          global_send_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
          global_send_size   = 5*size;
       }
@@ -859,6 +861,37 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
          size = hypre_CommTypeBufsize(comm_type);
          send_buffers_data[i] = send_buffers_data[i-1] + size;
       }
+   }
+#elif defined(HYPRE_USE_OMP45)
+   if (hypre__global_offload) 
+   {
+      send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends);
+      /* OFFLOAD is turned on */
+      if (num_sends > 0)
+      {
+         size = hypre_CommPkgSendBufsize(comm_pkg);
+         if (size > global_send_size)
+         {
+            if (global_send_size > 0)
+            {
+               hypre_DeviceTFree(global_send_buffer, HYPRE_Complex, global_send_size);
+            }
+            global_send_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
+            global_send_size   = 5*size;
+         }
+         send_buffers_data[0] = global_send_buffer;
+         for (i = 1; i < num_sends; i++)
+         {
+            comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
+            size = hypre_CommTypeBufsize(comm_type);
+            send_buffers_data[i] = send_buffers_data[i-1] + size;
+         }
+      }
+   } 
+   else 
+   {
+      /* if OFFLOAD is turned off, just as done for CPU code */
+      send_buffers_data = send_buffers;
    }
 #else
    send_buffers_data = send_buffers;
@@ -887,7 +920,9 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       if (size > global_recv_size)
       {
          if (global_recv_size > 0)
+         {
             hypre_DeviceTFree(global_recv_buffer);
+         }
          global_recv_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
          global_recv_size   = 5*size;
       }
@@ -898,6 +933,36 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
          size = hypre_CommTypeBufsize(comm_type);
          recv_buffers_data[i] = recv_buffers_data[i-1] + size;
       }
+   }
+#elif defined(HYPRE_USE_OMP45)
+   if (hypre__global_offload) 
+   {
+      recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs);
+      /* OFFLOAD is turned on */
+      if (num_recvs > 0)
+      {
+         size = hypre_CommPkgRecvBufsize(comm_pkg);
+         if (size > global_recv_size)
+         {
+            if (global_recv_size > 0) {
+               hypre_DeviceTFree(global_recv_buffer, HYPRE_Complex, global_recv_size);
+            }
+            global_recv_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
+            global_recv_size   = 5*size;
+         }
+         recv_buffers_data[0] = global_recv_buffer;
+         for (i = 1; i < num_recvs; i++)
+         {
+            comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);
+            size = hypre_CommTypeBufsize(comm_type);
+            recv_buffers_data[i] = recv_buffers_data[i-1] + size;
+         }
+      }
+   }
+   else 
+   {
+      /* if OFFLOAD is turned off, just as done for CPU code */
+      recv_buffers_data = recv_buffers;
    }
 #else
    recv_buffers_data = recv_buffers;
@@ -937,7 +1002,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
             {
                kptr = lptr + order[ll]*stride_array[ndim];
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_OMP45)
                /* This is based on "Idea 2" in box.h */
                {
                   HYPRE_Int      n[HYPRE_MAXDIM+1];
@@ -955,6 +1020,19 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                   n[ndim] = 2;
                   s[ndim] = 0;
 
+                  /*
+                  HYPRE_Int device_num = omp_get_default_device();
+                  if (HYPRE_IsMapped(dptr, device_num)) {
+                     printf("i=%d, dptr error\n", i);
+                     exit(0);
+                  } else {
+                     printf("i=%d, dptr OK\n", i);
+                  }
+                  if (HYPRE_IsMapped(kptr, device_num)) {
+                     printf("kptr error\n");
+                     exit(0);
+                  }
+                  */
                   /* Emulate ndim nested for loops */
                   hypre_BoxBoundaryCopyBegin(ndim, n, s, i, idx)
                   {
@@ -981,8 +1059,16 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                {
                   size *= length_array[d];
                }
+#if defined(HYPRE_USE_OMP45)
+               hypre_BoxLoop0Begin(ndim, length_array)
+               {
+                  dptr[hypre__thread] = 0.0;
+               }
+               hypre_BoxLoop0End();
+#else
                hypre_DeviceMemset(dptr, 0, HYPRE_Complex, size);
 
+#endif
                dptr += size;
             }
          }
@@ -990,7 +1076,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    }
 
    /* Copy buffer data from Device to Host */
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
    if (num_sends > 0)
    {
       HYPRE_Complex  *dptr_host;
@@ -1144,7 +1230,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    HYPRE_Int            i, j, d, ll;
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
    HYPRE_Complex      **send_buffers_data = hypre_CommHandleSendBuffersDevice(comm_handle);
 #endif
    HYPRE_Complex      **recv_buffers_data = hypre_CommHandleRecvBuffersDevice(comm_handle);
@@ -1210,7 +1296,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
     *--------------------------------------------------------------------*/
 
    /* Copy buffer data from Host to Device */
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
    if (num_recvs > 0)
    {
       HYPRE_Complex  *dptr_host;
@@ -1261,7 +1347,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
          {
             kptr = lptr + ll*stride_array[ndim];
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_KOKKOS)|| defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_KOKKOS)|| defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_OMP45)
             /* This is based on "Idea 2" in box.h */
             {
                HYPRE_Int      n[HYPRE_MAXDIM+1];
@@ -1338,11 +1424,25 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    hypre_TFree(comm_handle);
 
-#if defined(HYPRE_MEMORY_GPU)
-   hypre_TFree(send_buffers);
-   hypre_TFree(recv_buffers);
-   hypre_TFree(send_buffers_data);
-   hypre_TFree(recv_buffers_data);
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+   if (send_buffers == send_buffers_data) 
+   {
+      hypre_TFree(send_buffers);
+   } 
+   else 
+   {
+      hypre_TFree(send_buffers);
+      hypre_TFree(send_buffers_data);
+   }
+   if (recv_buffers == recv_buffers_data)
+   {
+      hypre_TFree(recv_buffers);
+   }
+   else
+   {
+      hypre_TFree(recv_buffers);
+      hypre_TFree(recv_buffers_data);
+   }
 #else
    hypre_TFree(send_buffers);
    hypre_TFree(recv_buffers);
@@ -1410,7 +1510,7 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                fr_dpl = fr_dp + (order[ll])*fr_stride_array[ndim];
                to_dpl = to_dp + (      ll )*to_stride_array[ndim];
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_OMP45)
                /* This is based on "Idea 2" in box.h */
                {
                   //HYPRE_Int      i[HYPRE_MAXDIM+1];

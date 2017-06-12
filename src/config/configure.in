@@ -1,4 +1,5 @@
 /*BHEADER**********************************************************************
+
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
  * This file is part of HYPRE.  See file COPYRIGHT for details.
@@ -147,6 +148,7 @@ hypre_using_superlu=yes
 hypre_using_mli=yes
 
 hypre_using_openmp=no
+hypre_using_openmp45=no
 hypre_using_insure=no
 hypre_using_cuda=no
 hypre_using_gpu=no
@@ -749,6 +751,17 @@ AS_HELP_STRING([--with-openmp],
 [hypre_using_openmp=no]
 )
 
+AC_ARG_WITH(openmp45,
+AS_HELP_STRING([--with-openmp45],
+               [Use OpenMP 4.5.  This may affect which compiler is chosen.]),
+[case "${withval}" in
+    yes) hypre_using_openmp45=yes
+         AC_DEFINE([HYPRE_USING_OPENMP_4_5],1,[Enable OpenMP 4.5]) ;;
+    no)  hypre_using_openmp45=no ;;
+ esac],
+[hypre_using_openmp45=no]
+)
+
 AC_ARG_WITH(fei,
 AS_HELP_STRING([--with-fei],
                [Use internal FEI routines.]),
@@ -981,6 +994,11 @@ if test "$hypre_user_chose_ccompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
    then
+      if test "$hypre_using_openmp45" = "yes"
+      then
+         AC_CHECK_PROGS(CC, [clang-gpu])
+      fi
+
       if test "$hypre_using_openmp" = "yes"
       then
          AC_CHECK_PROGS(CC, [xlc_r xlC_r xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
@@ -988,6 +1006,11 @@ then
          AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
       fi
    else
+      if test "$hypre_using_openmp45" = "yes"
+      then
+         AC_CHECK_PROGS(CC, [mpiclang-gpu])
+      fi
+      
       if test "$hypre_using_openmp" = "yes"
       then
          AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc])
@@ -1006,6 +1029,11 @@ if test "$hypre_user_chose_cxxcompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
    then
+      if test "$hypre_using_openmp45" = "yes"
+      then
+         AC_CHECK_PROGS(CXX, [clang++-gpu])
+      fi
+
       if test "$hypre_using_openmp" = "yes"
       then
          AC_CHECK_PROGS(CXX, [xlC_r xlc_r xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
@@ -1013,6 +1041,11 @@ then
          AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
       fi
    else
+      if test "$hypre_using_openmp45" = "yes"
+      then
+         AC_CHECK_PROGS(CXX, [mpiclang++-gpu])
+      fi
+
       if test "$hypre_using_openmp" = "yes"
       then
          AC_CHECK_PROGS(CXX, [mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC])
@@ -1471,7 +1504,7 @@ then
        		AC_MSG_NOTICE([Configuring with --with-raja and --with-cuda without unified memory.]) 
 		AC_MSG_NOTICE([It only works for struct interface.])
 		AC_MSG_NOTICE([Try to confiure with --wiht-raja --with-cuda --enable-unified-memory])
-		AC_MSG_NOTICE([to use the cuda feature for the whold package])
+		AC_MSG_NOTICE([to use the cuda feature for the whole package])
        		AC_MSG_NOTICE([*******************************************************])
 	else
 		CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
@@ -1524,7 +1557,7 @@ then
 	  AC_MSG_NOTICE([Configuring with --with-kokkos and --with-cuda, but not with unified memory])
 	  AC_MSG_NOTICE([It only works for struct interface.])
 	  AC_MSG_NOTICE([Try to confiure with --wiht-raja --with-cuda --enable-unified-memory])
-	  AC_MSG_NOTICE([to use the cuda feature for the whold package])
+	  AC_MSG_NOTICE([to use the cuda feature for the whole package])
 	  AC_MSG_NOTICE([*******************************************************])
       else
 	  CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
@@ -1598,6 +1631,12 @@ fi
 if test "$hypre_using_openmp" = "yes"
 then
    AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support])
+fi
+
+if test "$hypre_using_openmp45" = "yes"
+then
+   CFLAGS+=" -O3 -fopenmp-nonaliased-maps -DHYPRE_USE_OMP45"
+   CXXFLAGS+=" -O3 -fopenmp-nonaliased-maps -DHYPRE_USE_OMP45"
 fi
 
 dnl *********************************************************************
