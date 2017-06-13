@@ -34,6 +34,8 @@ typedef struct hypre_StructStencil_struct
 
    HYPRE_Int      ref_count;
 
+   HYPRE_Int     *shape_device;
+  
 } hypre_StructStencil;
 
 /*--------------------------------------------------------------------------
@@ -44,6 +46,7 @@ typedef struct hypre_StructStencil_struct
 #define hypre_StructStencilSize(stencil)       ((stencil) -> size)
 #define hypre_StructStencilNDim(stencil)       ((stencil) -> ndim)
 #define hypre_StructStencilRefCount(stencil)   ((stencil) -> ref_count)
+#define hypre_StructStencilShapeDevice(stencil)      ((stencil) -> shape_device)
 
 #define hypre_StructStencilElement(stencil, i) \
 hypre_StructStencilShape(stencil)[i]

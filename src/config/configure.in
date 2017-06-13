@@ -1494,6 +1494,7 @@ then
 	   CC=${CXX}
    	   CFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA "
    	   CXXFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA "
+	   LDFLAGS+="/usr/tcetmp/packages/xl/xl-beta-2017.05.08/lib/libibmc++.so.1"
 	fi
    fi
 fi

@@ -46,8 +46,15 @@ hypre_PrintBoxArrayData( FILE            *file,
    /*----------------------------------------
     * Print data
     *----------------------------------------*/
-   hypre_StructPreparePrint();
-   
+
+#if defined(HYPRE_MEMORY_GPU)
+   HYPRE_Int tot_size = num_values*hypre_BoxVolume(hypre_BoxArrayBox(data_space, hypre_BoxArraySize(box_array)-1));\
+   data_host = hypre_CTAlloc(HYPRE_Complex, tot_size);			\
+   hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);
+#else
+   data_host = data;
+#endif
+ 
    hypre_SetIndex(stride, 1);
 
    hypre_ForBoxI(i, box_array)
@@ -88,7 +95,9 @@ hypre_PrintBoxArrayData( FILE            *file,
       data_host += num_values*data_box_volume;
    }
 
-   hypre_StructPostPrint();
+#if defined(HYPRE_MEMORY_GPU)
+   hypre_TFree(data_host);
+#endif   
    
    return hypre_error_flag;
 }

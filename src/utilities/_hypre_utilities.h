@@ -1269,10 +1269,10 @@ void cudaSafeFree(void *ptr,int padding);
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
+
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifdef HYPRE_USE_GPU
 #include <cuda_runtime_api.h>
 void hypre_GPUInit(hypre_int use_device);
@@ -1353,12 +1353,29 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
 
-#endif
-
 #else
 
 #define hypre_GPUInit(use_device)
 #define hypre_GPUFinalize()
+
+#endif
+
+#if defined(HYPRE_USE_CUDA)
+#define RAJA_MAX_REDUCE_VARS (8)
+#define RAJA_CUDA_MAX_NUM_BLOCKS (512*512*512)
+#define RAJA_CUDA_REDUCE_BLOCK_LENGTH RAJA_CUDA_MAX_NUM_BLOCKS
+#define RAJA_CUDA_REDUCE_TALLY_LENGTH RAJA_MAX_REDUCE_VARS
+#define RAJA_CUDA_REDUCE_VAR_MAXSIZE 16
+typedef HYPRE_Real CudaReductionBlockDataType;
+typedef HYPRE_Int GridSizeType;
+
+
+int getCudaReductionId();
+CudaReductionBlockDataType* getCudaReductionMemBlock(int id);
+void releaseCudaReductionId(int id);
+void freeCudaReductionMemBlock();
+
+#endif
 
 #endif
 

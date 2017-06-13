@@ -37,6 +37,7 @@ typedef struct hypre_StructMatrix_struct
    hypre_BoxArray       *data_space;
 
    HYPRE_Complex        *data;         /* Pointer to matrix data */
+   HYPRE_Complex        *data_host;
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
    HYPRE_Int             data_size;    /* Size of matrix data */
    HYPRE_Int           **data_indices; /* num-boxes by stencil-size array
@@ -60,6 +61,7 @@ typedef struct hypre_StructMatrix_struct
 
    HYPRE_Int             ref_count;
 
+   HYPRE_Int            *data_indices_device;
 } hypre_StructMatrix;
 
 /*--------------------------------------------------------------------------
@@ -73,6 +75,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
 #define hypre_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)
 #define hypre_StructMatrixData(matrix)          ((matrix) -> data)
+#define hypre_StructMatrixDataHost(matrix)          ((matrix) -> data_host)
 #define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
 #define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
@@ -83,6 +86,7 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixGlobalSize(matrix)    ((matrix) -> global_size)
 #define hypre_StructMatrixCommPkg(matrix)       ((matrix) -> comm_pkg)
 #define hypre_StructMatrixRefCount(matrix)      ((matrix) -> ref_count)
+#define hypre_StructMatrixDataDeviceIndices(matrix)   ((matrix) -> data_indices_device)
 
 #define hypre_StructMatrixNDim(matrix) \
 hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
@@ -92,6 +96,9 @@ hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 
 #define hypre_StructMatrixBoxData(matrix, b, s) \
 (hypre_StructMatrixData(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
+
+#define hypre_StructMatrixBoxDataHost(matrix, b, s) \
+(hypre_StructMatrixDataHost(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
 
 #define hypre_StructMatrixBoxDataValue(matrix, b, s, index) \
 (hypre_StructMatrixBoxData(matrix, b, s) + \

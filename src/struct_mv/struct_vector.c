@@ -1131,78 +1131,7 @@ hypre_StructVectorRead( MPI_Comm    comm,
 
 /*--------------------------------------------------------------------------
  * The following is used only as a debugging aid.
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int 
-hypre_StructVectorMaxValue( hypre_StructVector *vector,
-                            HYPRE_Real *max_value, HYPRE_Int *max_index,
-                            hypre_Index max_xyz_index )
-/* Input: vector, and pointers to where to put returned data.
-   Return value: error flag, 0 means ok.
-   Finds the maximum value in a vector, puts it in max_value.
-   The corresponding index is put in max_index.
-   A hypre_Index corresponding to max_index is put in max_xyz_index.
-   We assume that there is only one box to deal with. */
-{
-   HYPRE_Real       *data;
-
-   hypre_Index       imin;
-   hypre_BoxArray   *boxes;
-   hypre_Box        *box;
-   hypre_Index       loop_size;
-   hypre_Index       unit_stride;
-
-   HYPRE_Int         i, ndim;
-   HYPRE_Real        maxvalue;
-   HYPRE_Int         maxindex;
-
-   ndim = hypre_StructVectorNDim(vector);
-   boxes = hypre_StructVectorDataSpace(vector);
-   if ( hypre_BoxArraySize(boxes)!=1 )
-   {
-      /* if more than one box, the return system max_xyz_index is too simple
-         if needed, fix later */
-      hypre_error(HYPRE_ERROR_GENERIC);
-      return hypre_error_flag;
-   }
-   hypre_SetIndex(unit_stride, 1);
-   hypre_ForBoxI(i, boxes)
-   {
-      box  = hypre_BoxArrayBox(boxes, i);
-      /*v_data_box =
-        hypre_BoxArrayBox(hypre_StructVectorDataSpace(vector), i);*/
-      data = hypre_StructVectorBoxData(vector, i);
-      hypre_BoxGetSize(box, loop_size);
-      hypre_CopyIndex( hypre_BoxIMin(box), imin );
-      maxindex = hypre_BoxIndexRank( box, imin );
-      maxvalue = data[maxindex];
-      hypre_SetIndex(max_xyz_index, 0);
-/*FIXME: must run sequentially*/
-      zypre_BoxLoop1Begin(ndim, loop_size,
-                          box, imin, unit_stride, datai);      
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      zypre_BoxLoop1For(datai)
-      {
-         if ( data[datai] > maxvalue )
-         {
-            maxvalue = data[datai];
-            maxindex = datai;
-            hypre_BoxLoopGetIndex(max_xyz_index);
-         }
-      }
-      zypre_BoxLoop1End(datai);
-      hypre_AddIndexes(max_xyz_index, imin, ndim, max_xyz_index);
-   }
-
-   *max_value = maxvalue;
-   *max_index = maxindex;
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
+ *
  * hypre_StructVectorClone
  * Returns a complete copy of x - a deep copy, with its own copy of the data.
  *--------------------------------------------------------------------------*/

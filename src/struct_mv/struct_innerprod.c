@@ -43,8 +43,15 @@ hypre_StructInnerProd( hypre_StructVector *x,
     
    HYPRE_Int         ndim = hypre_StructVectorNDim(x);               
    HYPRE_Int        i;
-
-   hypre_Reductioninit(local_result);
+   
+#if defined(HYPRE_USE_RAJA)
+   ReduceSum<hypre_reduce_policy, HYPRE_Real> local_result(0.0);
+#elif defined(HYPRE_USE_CUDA)
+   ReduceSum<HYPRE_Real> local_result(0.0);
+#else
+   HYPRE_Real       local_result;
+   local_result = 0.0;
+#endif
    
    hypre_SetIndex(unit_stride, 1);
    
@@ -62,23 +69,30 @@ hypre_StructInnerProd( hypre_StructVector *x,
      
       hypre_BoxGetSize(box, loop_size);
 
-#ifdef HYPRE_BOX_PRIVATE_VAR
-#undef HYPRE_BOX_PRIVATE_VAR
-#endif
-#define HYPRE_BOX_PRIVATE_VAR xi,yi
+#if defined(HYPRE_USE_KOKKOS)
+      hypre_newBoxLoop2ReductionBegin(ndim, loop_size,
+				      x_data_box, start, unit_stride, xi,
+				      y_data_box, start, unit_stride, yi,local_result);
+      {
+	local_result += xp[xi] * hypre_conj(yp[yi]);
+      }
+      hypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
+#else
 #ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
 #endif
 #define HYPRE_BOX_REDUCTION reduction(+:local_result)
-      hypre_newBoxLoop2ReductionBegin(ndim, loop_size,
-                                      x_data_box, start, unit_stride, xi,
-                                      y_data_box, start, unit_stride, yi,local_result);
+      hypre_BoxLoop2Begin(ndim, loop_size,
+			  x_data_box, start, unit_stride, xi,
+			  y_data_box, start, unit_stride, yi);
       {
          local_result += xp[xi] * hypre_conj(yp[yi]);		 
       }
-      hypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
+      hypre_BoxLoop2End(xi, yi);
+#undef HYPRE_BOX_REDUCTION
+#endif
    }
-   process_result = local_result;
+   process_result = (HYPRE_Real) local_result;
    
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));

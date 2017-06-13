@@ -109,11 +109,22 @@ hypre_PFMGDestroy( void *pfmg_vdata )
             hypre_StructVectorDestroy(pfmg_data -> x_l[l+1]);
             hypre_StructVectorDestroy(pfmg_data -> tx_l[l+1]);
          }
-         if (constant_coefficient == 0)
-	   {hypre_DeviceTFree(pfmg_data -> data);}
-         else
-	   {hypre_UMTFree(pfmg_data -> data);}
-      
+
+	 if (constant_coefficient==0)
+	 {    
+	    hypre_DeviceTFree(pfmg_data -> data_matrix);
+	 }
+	 else if (constant_coefficient==1)
+	 {    
+	    hypre_TFree(pfmg_data -> data_matrix);
+	 }
+	 else
+	 {
+	    hypre_UMTFree(pfmg_data -> data_matrix);
+	 }
+	 
+	 hypre_DeviceTFree(pfmg_data -> data_vector);
+	 
          hypre_TFree(pfmg_data -> cdir_l);
          hypre_TFree(pfmg_data -> active_l);
          hypre_TFree(pfmg_data -> grid_l);

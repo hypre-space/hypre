@@ -1,7 +1,9 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+
 #include "_hypre_utilities.h"
+
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #include <stdlib.h>
 #include <stdint.h>
@@ -510,4 +512,89 @@ hypre_int pointerIsManaged(const void *ptr){
   }
   return ptr_att.isManaged;
 }
+#endif
+
+#if defined(HYPRE_USE_CUDA)
+
+static bool cuda_reduction_id_used[RAJA_MAX_REDUCE_VARS];
+CudaReductionBlockDataType* s_cuda_reduction_mem_block = 0;
+
+int getCudaReductionId()
+{
+   static int first_time_called = true;
+
+   if (first_time_called) {
+
+      for (int id = 0; id < RAJA_MAX_REDUCE_VARS; ++id) {
+         cuda_reduction_id_used[id] = false;
+      }
+
+      first_time_called = false;
+   }
+
+   int id = 0;
+   while ( id < RAJA_MAX_REDUCE_VARS && cuda_reduction_id_used[id] ) {
+     id++;
+   }
+
+   if ( id >= RAJA_MAX_REDUCE_VARS ) {
+      printf("error\n");
+      exit(1);
+   }
+
+   cuda_reduction_id_used[id] = true;
+
+   return id;
+}
+
+void freeCudaReductionMemBlock()
+{
+   if ( s_cuda_reduction_mem_block != 0 ) {
+      cudaError_t cudaerr = cudaFree(s_cuda_reduction_mem_block);
+      s_cuda_reduction_mem_block = 0;
+      if (cudaerr != cudaSuccess) {
+	printf("Error\n");
+         exit(1);
+       }
+   }
+}
+
+CudaReductionBlockDataType* getCudaReductionMemBlock(int id)
+{
+   //
+   // For each reducer object, we want a chunk of managed memory that
+   // holds RAJA_CUDA_REDUCE_BLOCK_LENGTH slots for the reduction 
+   // value for each thread, a single slot for the global reduced value
+   // across grid blocks, and a single slot for the max grid size.  
+   //
+   int block_offset = RAJA_CUDA_REDUCE_BLOCK_LENGTH + 1 + 1 + 1;
+
+   if (s_cuda_reduction_mem_block == 0) {
+      int len = RAJA_MAX_REDUCE_VARS * block_offset;
+
+      cudaError_t cudaerr = 
+         cudaMallocManaged((void **)&s_cuda_reduction_mem_block,
+                           sizeof(CudaReductionBlockDataType)*len,
+                           cudaMemAttachGlobal);
+
+      if ( cudaerr != cudaSuccess ) {
+	 printf("error\n");
+         exit(1);
+      }
+      cudaMemset(s_cuda_reduction_mem_block, 0, 
+                 sizeof(CudaReductionBlockDataType)*len);
+
+      atexit(freeCudaReductionMemBlock);
+   }
+
+   return &(s_cuda_reduction_mem_block[id * block_offset]) ;
+}
+
+void releaseCudaReductionId(int id)
+{
+   if ( id < RAJA_MAX_REDUCE_VARS ) {
+      cuda_reduction_id_used[id] = false;
+   }
+}
+
 #endif

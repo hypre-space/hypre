@@ -169,18 +169,6 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
-
-#ifdef HYPRE_USE_RAJA
-#define hypre_Reductioninit(local_result)\
-HYPRE_Real       local_result;\
-local_result = 0.0;
-//ReduceSum< cuda_reduce<BLOCKSIZE>, HYPRE_Real> local_result(0.0);
-#else
-#define hypre_Reductioninit(local_result)\
-HYPRE_Real       local_result;\
-local_result = 0.0;
-#endif
-
 #if defined(HYPRE_MEMORY_GPU)
 
 #define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)\
@@ -208,15 +196,8 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
 #define hypre_StructGetIndexD(index,i,index_d) (index_d)
 
 #define hypre_StructCleanIndexD()\
-hypre_DeviceTFree(indices_d);\
-hypre_DeviceTFree(stencil_shape_d);
-
-#define hypre_StructPreparePrint()\
-HYPRE_Int tot_size = num_values*hypre_BoxVolume(hypre_BoxArrayBox(data_space, hypre_BoxArraySize(box_array)-1));\
-data_host = hypre_CTAlloc(HYPRE_Complex, tot_size);\
-hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);
-
-#define hypre_StructPostPrint() hypre_TFree(data_host)
+   if (indices_d) hypre_DeviceTFree(indices_d);		\
+   if (stencil_shape_d) hypre_DeviceTFree(stencil_shape_d);
 
 #else
 
@@ -224,8 +205,6 @@ hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);
 #define hypre_StructGetMatrixBoxData(A, i, si) hypre_StructMatrixBoxData(A,i,si)
 #define hypre_StructGetIndexD(index,i,index_d) hypre_IndexD(index,i)
 #define hypre_StructCleanIndexD() {;}
-#define hypre_StructPreparePrint() data_host = data;
-#define hypre_StructPostPrint() {;}
 
 #endif
   

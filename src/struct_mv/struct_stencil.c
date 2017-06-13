@@ -28,7 +28,8 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
                            hypre_Index  *shape )
 {
    hypre_StructStencil   *stencil;
-
+   HYPRE_Int *stencil_shape_h;
+   
    stencil = hypre_TAlloc(hypre_StructStencil, 1);
 
    hypre_StructStencilShape(stencil)    = shape;
@@ -36,6 +37,21 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
    hypre_StructStencilNDim(stencil)      = dim;
    hypre_StructStencilRefCount(stencil) = 1;
 
+   stencil_shape_h = hypre_CTAlloc(HYPRE_Int, HYPRE_MAXDIM*size);
+   hypre_StructStencilShapeDevice(stencil) = hypre_DeviceTAlloc(HYPRE_Int, HYPRE_MAXDIM*size);
+   for (HYPRE_Int i = 0; i < size; i++)
+   {
+      for (HYPRE_Int j = 0;j < dim;j++)
+      {
+	 stencil_shape_h[i*HYPRE_MAXDIM+j] = hypre_IndexD(shape[i], j);
+      }
+   }
+      
+#if defined(HYPRE_MEMORY_GPU)   
+      hypre_DataCopyToData(stencil_shape_h,hypre_StructStencilShapeDevice(stencil),HYPRE_Int,HYPRE_MAXDIM*size);
+#else
+      hypre_StructStencilShapeDevice(stencil) = stencil_shape_h;
+#endif
    return stencil;
 }
 
@@ -64,7 +80,14 @@ hypre_StructStencilDestroy( hypre_StructStencil *stencil )
       if (hypre_StructStencilRefCount(stencil) == 0)
       {
          hypre_TFree(hypre_StructStencilShape(stencil));
-         hypre_TFree(stencil);
+#if defined(HYPRE_MEMORY_GPU)
+	 if (hypre_StructStencilShapeDevice(stencil))
+	    hypre_DeviceTFree(hypre_StructStencilShapeDevice(stencil));
+#else
+	 if (hypre_StructStencilShapeDevice(stencil))
+	   hypre_TFree(hypre_StructStencilShapeDevice(stencil));
+#endif
+	 hypre_TFree(stencil);
       }
    }
 
