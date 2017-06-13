@@ -1304,9 +1304,26 @@ main( hypre_int argc,
          HYPRE_StructSMGSetNumPostRelax(solver, n_post);
          HYPRE_StructSMGSetPrintLevel(solver, 1);
          HYPRE_StructSMGSetLogging(solver, 1);
+#if HYPRE_USE_OMP45
+         HYPRE_OMP45_OFFLOAD_ON();
+         int device_num = omp_get_default_device();
+         HYPRE_OMPOffload(device_num, hypre_StructMatrixData(A), 
+                          sizeof(HYPRE_Complex)*hypre_StructMatrixDataSize(A), 
+                          "enter", "to");
+
+         HYPRE_OMPOffload(device_num, hypre_StructVectorData(b), 
+                          sizeof(HYPRE_Complex)*hypre_StructVectorDataSize(b), 
+                          "enter", "to");
+
+         HYPRE_OMPOffload(device_num, hypre_StructVectorData(x), 
+                          sizeof(HYPRE_Complex)*hypre_StructVectorDataSize(x),
+                          "enter", "to");
+#endif
+
          HYPRE_StructSMGSetup(solver, A, b, x);
 
          hypre_EndTiming(time_index);
+
          if ( reps==1 ) {
             hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
             hypre_FinalizeTiming(time_index);
@@ -1365,6 +1382,23 @@ main( hypre_int argc,
          /*HYPRE_StructPFMGSetDxyz(solver, dxyz);*/
          HYPRE_StructPFMGSetPrintLevel(solver, 1);
          HYPRE_StructPFMGSetLogging(solver, 1);
+
+#if HYPRE_USE_OMP45
+         HYPRE_OMP45_OFFLOAD_ON();
+         int device_num = omp_get_default_device();
+         HYPRE_OMPOffload(device_num, hypre_StructMatrixData(A), 
+                          sizeof(HYPRE_Complex)*hypre_StructMatrixDataSize(A), 
+                          "enter", "to");
+
+         HYPRE_OMPOffload(device_num, hypre_StructVectorData(b), 
+                          sizeof(HYPRE_Complex)*hypre_StructVectorDataSize(b), 
+                          "enter", "to");
+
+         HYPRE_OMPOffload(device_num, hypre_StructVectorData(x), 
+                          sizeof(HYPRE_Complex)*hypre_StructVectorDataSize(x),
+                          "enter", "to");
+#endif
+
          HYPRE_StructPFMGSetup(solver, A, b, x);
 
          hypre_EndTiming(time_index);
