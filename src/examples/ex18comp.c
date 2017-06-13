@@ -419,6 +419,28 @@ int main (int argc, char *argv[])
       /* Clean up */
       HYPRE_SStructPCGDestroy(solver);
    }
+   else if (solver_id == 1)
+   {
+      HYPRE_SStructGMRESCreate(MPI_COMM_WORLD, &solver);
+      HYPRE_SStructGMRESSetMaxIter(solver, 100);
+      HYPRE_SStructGMRESSetTol(solver, 1.0e-06);
+      HYPRE_SStructGMRESSetPrintLevel(solver, 2); /* print each CG iteration */
+      HYPRE_SStructGMRESSetLogging(solver, 1);
+
+      /* No preconditioner */
+
+      HYPRE_SStructGMRESSetup(solver, A, b, x);
+      HYPRE_SStructGMRESSolve(solver, A, b, x);
+
+      /* Get some info on the run */
+      HYPRE_SStructGMRESGetNumIterations(solver, &num_iterations);
+      HYPRE_SStructGMRESGetFinalRelativeResidualNorm(solver, &final_res_norm);
+
+      /* Clean up */
+      HYPRE_SStructGMRESDestroy(solver);
+   }
+
+
 
    if (myid == 0)
    {
