@@ -42,9 +42,11 @@
  * Static variables
  *--------------------------------------------------------------------------*/
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-__managed__ __device__
-#endif
+__managed__ __device__ static HYPRE_Int Seed = 13579;
+#else
 static HYPRE_Int Seed = 13579;
+#endif
+
 
 #define a  16807
 #define m  2147483647

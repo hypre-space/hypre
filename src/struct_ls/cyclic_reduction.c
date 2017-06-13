@@ -1180,7 +1180,7 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
 #ifdef HYPRE_USE_OMP45
       hypre_DeviceTFree(cyc_red_data -> data, HYPRE_Real,
                         cyc_red_data -> data_size);
-#elif
+#else
       hypre_DeviceTFree(cyc_red_data -> data);
 #endif
       hypre_TFree(cyc_red_data -> grid_l);

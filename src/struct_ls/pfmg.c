@@ -115,8 +115,8 @@ hypre_PFMGDestroy( void *pfmg_vdata )
 #ifdef HYPRE_USE_OMP45
             hypre_DeviceTFree(pfmg_data -> data_matrix, HYPRE_Real,
                               pfmg_data -> data_size_matrix);
-#elif
-            hypre_DeviceTFree(pfmg_data -> data);
+#else
+            hypre_DeviceTFree(pfmg_data -> data_matrix);
 #endif
 	 }
 	 else if (constant_coefficient==1)
@@ -127,8 +127,12 @@ hypre_PFMGDestroy( void *pfmg_vdata )
 	 {
 	    hypre_UMTFree(pfmg_data -> data_matrix);
 	 }
-	 
+#ifdef HYPRE_USE_OMP45
+	 hypre_DeviceTFree(pfmg_data -> data_vector, HYPRE_Real,
+			   pfmg_data -> data_size_vector);
+#else
 	 hypre_DeviceTFree(pfmg_data -> data_vector);
+#endif
 	 
          hypre_TFree(pfmg_data -> cdir_l);
          hypre_TFree(pfmg_data -> active_l);
