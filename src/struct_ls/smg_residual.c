@@ -234,8 +234,9 @@ hypre_SMGResidual( void               *residual_vdata,
             for (si = 0; si < stencil_size; si++)
             {
                Ap = hypre_StructMatrixBoxData(A, i, si);
-               xp = hypre_StructVectorBoxData(x, i) +
-                  hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
+               xp = hypre_StructVectorBoxData(x, i);
+//RL:PTROFFSET
+               HYPRE_Int xp_off = hypre_BoxOffsetDistance(x_data_box, stencil_shape[si]);
 
                hypre_BoxGetStrideSize(compute_box, base_stride,
                                       loop_size);
@@ -244,7 +245,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                    x_data_box, start, base_stride, xi,
                                    r_data_box, start, base_stride, ri);
                {
-                  rp[ri] -= Ap[Ai] * xp[xi];
+                  rp[ri] -= Ap[Ai] * xp[xi+xp_off];
                }
                hypre_BoxLoop3End(Ai, xi, ri);
             }

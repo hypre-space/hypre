@@ -235,19 +235,21 @@ hypre_SemiInterp( void               *interp_vdata,
          P_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(P), fi);
          e_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(e), fi);
 
+         //RL:PTROFFSET
+         HYPRE_Int Pp1_offset = 0, ep0_offset, ep1_offset;
          if (P_stored_as_transpose)
          {
             if ( constant_coefficient )
             {
                Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
-               Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
-                  hypre_CCBoxOffsetDistance(P_dbox, stencil_shape[0]);
+               Pp1 = hypre_StructMatrixBoxData(P, fi, 0);
+               Pp1_offset = -hypre_CCBoxOffsetDistance(P_dbox, stencil_shape[0]);
             }
             else
             {
                Pp0 = hypre_StructMatrixBoxData(P, fi, 1);
-               Pp1 = hypre_StructMatrixBoxData(P, fi, 0) -
-                  hypre_BoxOffsetDistance(P_dbox, stencil_shape[0]);
+               Pp1 = hypre_StructMatrixBoxData(P, fi, 0);
+               Pp1_offset = -hypre_BoxOffsetDistance(P_dbox, stencil_shape[0]);
             }
          }
          else
@@ -256,8 +258,8 @@ hypre_SemiInterp( void               *interp_vdata,
             Pp1 = hypre_StructMatrixBoxData(P, fi, 1);
          }
          ep  = hypre_StructVectorBoxData(e, fi);
-         ep0 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[0]);
-         ep1 = ep + hypre_BoxOffsetDistance(e_dbox, stencil_shape[1]);
+         ep0_offset = hypre_BoxOffsetDistance(e_dbox, stencil_shape[0]);
+         ep1_offset = hypre_BoxOffsetDistance(e_dbox, stencil_shape[1]);
 
          hypre_ForBoxI(j, compute_box_a)
          {
@@ -274,8 +276,8 @@ hypre_SemiInterp( void               *interp_vdata,
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(P), loop_size,
                                    e_dbox, start, stride, ei);
                {
-                  ep[ei] =  (Pp0[Pi] * ep0[ei] +
-                             Pp1[Pi] * ep1[ei]);
+                  ep[ei] =  (Pp0[Pi]            * ep[ei+ep0_offset] +
+                             Pp1[Pi+Pp1_offset] * ep[ei+ep1_offset]);
                }
                hypre_BoxLoop1End(ei);
             }
@@ -285,8 +287,8 @@ hypre_SemiInterp( void               *interp_vdata,
                                    P_dbox, startc, stridec, Pi,
                                    e_dbox, start, stride, ei);
                {
-                  ep[ei] =  (Pp0[Pi] * ep0[ei] +
-                             Pp1[Pi] * ep1[ei]);
+                  ep[ei] =  (Pp0[Pi]            * ep[ei+ep0_offset] +
+                             Pp1[Pi+Pp1_offset] * ep[ei+ep1_offset]);
                }
                hypre_BoxLoop2End(Pi, ei);
             }

@@ -216,6 +216,82 @@ typedef struct
      });						\
      hypre_fence();					\
 }
+
+#elif defined(HYPRE_USE_OMP45) /* BEGIN OF OMP 4.5 */
+
+#define IF_CLAUSE if (hypre__global_offload)
+
+/* stringification:
+ * _Pragma(string-literal), so we need to cast argument to a string
+ * The three dots as last argument of the macro tells compiler that this is a variadic macro. 
+ * I.e. this is a macro that receives variable number of arguments. 
+ */
+#define HYPRE_STR(s...) #s
+#define HYPRE_XSTR(s...) HYPRE_STR(s)
+
+#define hypre_RedBlackLoopInit()
+
+#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,                      \
+                                Astart,Ani,Anj,Ai,                      \
+                                bstart,bni,bnj,bi,                      \
+                                xstart,xni,xnj,xi)                      \
+{                                                                       \
+   HYPRE_Int hypre__thread, hypre__tot = nk*nj*((ni+1)/2);              \
+   /* device code: */                                                   \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE)) \
+   for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++)     \
+   {                                                                    \
+        HYPRE_Int idx_local = hypre__thread;                            \
+        HYPRE_Int ii,jj,kk,Ai,bi,xi;                                    \
+        HYPRE_Int local_ii;                                             \
+        kk = idx_local % nk;                                            \
+        idx_local = idx_local / nk;                                     \
+        jj = idx_local % nj;                                            \
+        idx_local = idx_local / nj;                                     \
+        local_ii = (kk + jj + redblack) % 2;                            \
+        ii = 2*idx_local + local_ii;                                    \
+        if (ii < ni)                                                    \
+        {                                                               \
+            Ai = Astart + kk*Anj*Ani + jj*Ani + ii;                     \
+            bi = bstart + kk*bnj*bni + jj*bni + ii;                     \
+            xi = xstart + kk*xnj*xni + jj*xni + ii;                     \
+
+#define hypre_RedBlackLoopEnd()                                         \
+        }                                                               \
+     }                                                                  \
+}
+
+
+           
+#define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,        \
+                                            bstart,bni,bnj,bi,        \
+                                            xstart,xni,xnj,xi)        \
+{                                                                     \
+   HYPRE_Int hypre__thread, hypre__tot = nk*nj*((ni+1)/2);            \
+   /* device code: */                                                 \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE)) \
+   for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++)   \
+   {                                                                  \
+        HYPRE_Int idx_local = hypre__thread;                          \
+        HYPRE_Int ii,jj,kk,bi,xi;                                     \
+        HYPRE_Int local_ii;                                           \
+        kk = idx_local % nk;                                          \
+        idx_local = idx_local / nk;                                   \
+        jj = idx_local % nj;                                          \
+        idx_local = idx_local / nj;                                   \
+        local_ii = (kk + jj + redblack) % 2;                          \
+        ii = 2*idx_local + local_ii;                                  \
+        if (ii < ni)                                                  \
+        {                                                             \
+            bi = bstart + kk*bnj*bni + jj*bni + ii;                   \
+            xi = xstart + kk*xnj*xni + jj*xni + ii;                   \
+
+#define hypre_RedBlackConstantcoefLoopEnd()                           \
+         }                                                            \
+     }                                                                \
+}
+
+/* END OF OMP 4.5 */
 #else
 #define HYPRE_REDBLACK_PRIVATE hypre__kk
 #define hypre_RedBlackLoopInit()\

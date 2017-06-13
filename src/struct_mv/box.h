@@ -169,7 +169,7 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_OMP45)
 
 #define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)\
 HYPRE_Int * indices_d;\
@@ -195,9 +195,15 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
 
 #define hypre_StructGetIndexD(index,i,index_d) (index_d)
 
+#ifdef HYPRE_MEMORY_GPU
 #define hypre_StructCleanIndexD()\
-   if (indices_d) hypre_DeviceTFree(indices_d);		\
-   if (stencil_shape_d) hypre_DeviceTFree(stencil_shape_d);
+hypre_DeviceTFree(indices_d);\
+hypre_DeviceTFree(stencil_shape_d);
+#else /* OMP 45 */
+#define hypre_StructCleanIndexD(stencil_size, size)\
+hypre_DeviceTFree(indices_d, HYPRE_Int, stencil_size);\
+hypre_DeviceTFree(stencil_shape_d, HYPRE_Int, size*stencil_size);
+#endif
 
 #else
 

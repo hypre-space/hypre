@@ -91,6 +91,11 @@ function MpirunString
             RunString="srun -p pdebug -n$*"
          fi
          ;;
+      surface*)
+         shift
+         RunString="srun -n$*"
+         ;;
+
       *)
          shift
          if [ $NumThreads -gt 0 ] ; then

@@ -258,8 +258,9 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
 
       hypre_SetIndex3(index_temp,0,1,0);
       MapIndex(index_temp, cdir, index);
-      pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-         hypre_BoxOffsetDistance(P_dbox, index);
+      pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
+      //RL PTROFFSET
+      HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
  
       /*-----------------------------------------------------------------
        * Extract pointers for 5-point fine grid operator:
@@ -354,7 +355,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
             iPp1 = iP + OffsetP;
 
             rap_cb[iAc] = a_cb[iA] * pa[iPm1];
-            rap_ca[iAc] = a_ca[iA] * pb[iPp1];
+            rap_ca[iAc] = a_ca[iA] * pb[iPp1-pbOffset];
 
             west  = a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1];
             east  = a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1];
@@ -369,7 +370,7 @@ hypre_PFMGBuildCoarseOp5( hypre_StructMatrix *A,
             rap_ce[iAc] = east;
 
             rap_cc[iAc] = a_cc[iA] + a_cw[iA] + a_ce[iA]
-               + a_cb[iA] * pb[iP] + a_ca[iA] * pa[iP]
+               + a_cb[iA] * pb[iP-pbOffset] + a_ca[iA] * pa[iP]
                - west - east;
          }
          hypre_BoxLoop3End(iP, iA, iAc);

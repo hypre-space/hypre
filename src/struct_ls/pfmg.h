@@ -59,6 +59,10 @@ typedef struct
                     
    HYPRE_Real           *data_matrix;
    HYPRE_Real           *data_vector;
+#ifdef HYPRE_USE_OMP45
+   HYPRE_Int             data_size_matrix;
+   HYPRE_Int             data_size_vector;	
+#endif  
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **P_l;
    hypre_StructMatrix  **RT_l;

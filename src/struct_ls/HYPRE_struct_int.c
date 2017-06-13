@@ -12,6 +12,7 @@
 
 #include "_hypre_struct_ls.h"
 #include "temp_multivector.h"
+#include "__omp45_random.h"
 
 HYPRE_Int 
 hypre_StructVectorSetRandomValues( hypre_StructVector *vector,

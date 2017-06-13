@@ -232,6 +232,9 @@ hypre_SMGSetup( void               *smg_vdata,
    data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
 
    (smg_data -> data) = data;
+#ifdef HYPRE_USE_OMP45
+   (smg_data -> data_size) = data_size;
+#endif
 
    hypre_StructVectorInitializeData(tb_l[0], data);
    hypre_StructVectorAssemble(tb_l[0]);

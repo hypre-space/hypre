@@ -399,7 +399,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    
    (pfmg_data -> data_matrix) = data_matrix;
    (pfmg_data -> data_vector) = data_vector;
-   
+#ifdef HYPRE_USE_OMP45
+   (pfmg_data -> data_size_matrix) = data_size_matrix;
+   (pfmg_data -> data_size_vector) = data_size_vector;
+#endif
    hypre_StructVectorInitializeData(tx_l[0], data_vector);
    hypre_StructVectorAssemble(tx_l[0]);
    data_vector += hypre_StructVectorDataSize(tx_l[0]);
@@ -753,7 +756,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-#if defined(HYPRE_USE_KOKKOS)
+#if defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_OMP45)
         /*FIXME: need reduction for more variables*/
 	HYPRE_Int tmp = 0;
 	hypre_MatrixIndexMove(A, stencil_size, i, tmp, 3);
@@ -989,7 +992,12 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             sqcz += (tcz*tcz);
          }
          hypre_newBoxLoop1ReductionEnd(Ai,sqcz);
+#ifdef HYPRE_USE_OMP45
+         hypre_StructCleanIndexD(stencil_size, 3);
+#else
          hypre_StructCleanIndexD();
+#endif
+
 #else
 #if defined(HYPRE_USE_RAJA)
 	 ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cx),cyb(cy),czb(cz),sqcxb(sqcx),sqcyb(sqcy),sqczb(sqcz);
@@ -1036,6 +1044,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             {
                diag = -1.0;
             }
+
             for (si = 0; si < stencil_size; si++)
             {
 		Ap = data_A + indices_A[i*stencil_size+si];

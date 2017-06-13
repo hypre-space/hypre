@@ -598,8 +598,21 @@ inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE
      hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
      Kokkos::parallel_reduce (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx,HYPRE_Real &sum) \
      {									\
-       hypre_newBoxLoopDeclare(databox1);				\
-       hypre_BoxLoopIncK(1,databox1,i1);				\
+	 hypre_newBoxLoopDeclare()					\
+	 HYPRE_Int hypre_boxD1 = 1;					\
+	 HYPRE_Int i1 = 0;						\
+	 local_idx  = idx_local % databox1.lsize0;			\
+	 idx_local  = idx_local / databox1.lsize0;			\
+	 i1 += (local_idx*databox1.strides0 + databox1.bstart0) * hypre_boxD1; \
+	 hypre_boxD1 *= hypre_max(0, databox1.bsize0 + 1);		\
+	 local_idx  = idx_local % databox1.lsize1;			\
+	 idx_local  = idx_local / databox1.lsize1;			\
+	 i1 += (local_idx*databox1.strides1 + databox1.bstart1) * hypre_boxD1; \
+	 hypre_boxD1 *= hypre_max(0, databox1.bsize1 + 1);		\
+	 local_idx  = idx_local % databox1.lsize2;			\
+	 idx_local  = idx_local / databox1.lsize2;			\
+	 i1 += (local_idx*databox1.strides2 + databox1.bstart2) * hypre_boxD1; \
+	 hypre_boxD1 *= hypre_max(0, databox1.bsize2 + 1);		\
 
 
 
@@ -629,6 +642,37 @@ inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE
      hypre_fence();							\
      sum +=sum_tmp;							\
  }
+
+ #define hypre_newBoxLoop1ReductionMult(ndim, loop_size,		\
+					dbox1, start1, stride1, i1, xp, sum) \
+ {									\
+     HYPRE_Real sum_tmp = sum;						\
+     sum = 1.0;								\
+     hypre_newBoxLoopInit(ndim,loop_size);						\
+     hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
+     Kokkos::parallel_reduce (hypre__tot, KOKKOS_LAMBDA (HYPRE_Int idx,HYPRE_Real &sum) \
+     {									\
+	 hypre_newBoxLoopDeclare()					\
+	 HYPRE_Int hypre_boxD1 = 1;					\
+	 HYPRE_Int i1 = 0;						\
+	 local_idx  = idx_local % databox1.lsize0;			\
+	 idx_local  = idx_local / databox1.lsize0;			\
+	 i1 += (local_idx*databox1.strides0 + databox1.bstart0) * hypre_boxD1; \
+	 hypre_boxD1 *= hypre_max(0, databox1.bsize0 + 1);		\
+	 local_idx  = idx_local % databox1.lsize1;			\
+	 idx_local  = idx_local / databox1.lsize1;			\
+	 i1 += (local_idx*databox1.strides1 + databox1.bstart1) * hypre_boxD1; \
+	 hypre_boxD1 *= hypre_max(0, databox1.bsize1 + 1);		\
+	 local_idx  = idx_local % databox1.lsize2;			\
+	 idx_local  = idx_local / databox1.lsize2;			\
+	 i1 += (local_idx*databox1.strides2 + databox1.bstart2) * hypre_boxD1; \
+	 hypre_boxD1 *= hypre_max(0, databox1.bsize2 + 1);		\
+	 sum *= xp[i1];							\
+     },sum);								\
+     hypre_fence();							\
+     sum *=sum_tmp;								\
+}
+
 
 #define hypre_LoopBegin(size,idx)					\
 {									\
@@ -1653,7 +1697,7 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU)  || defined(HYPRE_USE_OMP45)
 
 #define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)\
 HYPRE_Int * indices_d;\
@@ -1679,9 +1723,15 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
 
 #define hypre_StructGetIndexD(index,i,index_d) (index_d)
 
+#ifdef HYPRE_MEMORY_GPU
 #define hypre_StructCleanIndexD()\
-   if (indices_d) hypre_DeviceTFree(indices_d);		\
-   if (stencil_shape_d) hypre_DeviceTFree(stencil_shape_d);
+hypre_DeviceTFree(indices_d);\
+hypre_DeviceTFree(stencil_shape_d);
+#else /* OMP 45 */
+#define hypre_StructCleanIndexD(stencil_size, size)\
+hypre_DeviceTFree(indices_d, HYPRE_Int, stencil_size);\
+hypre_DeviceTFree(stencil_shape_d, HYPRE_Int, size*stencil_size);
+#endif
 
 #else
 
@@ -3002,7 +3052,6 @@ typedef struct hypre_StructMatrix_struct
    hypre_BoxArray       *data_space;
 
    HYPRE_Complex        *data;         /* Pointer to matrix data */
-   HYPRE_Complex        *data_host;
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
    HYPRE_Int             data_size;    /* Size of matrix data */
    HYPRE_Int           **data_indices; /* num-boxes by stencil-size array
@@ -3460,6 +3509,7 @@ hypre_CommPkg *hypre_StructVectorGetMigrateCommPkg ( hypre_StructVector *from_ve
 HYPRE_Int hypre_StructVectorMigrate ( hypre_CommPkg *comm_pkg , hypre_StructVector *from_vector , hypre_StructVector *to_vector );
 HYPRE_Int hypre_StructVectorPrint ( const char *filename , hypre_StructVector *vector , HYPRE_Int all );
 hypre_StructVector *hypre_StructVectorRead ( MPI_Comm comm , const char *filename , HYPRE_Int *num_ghost );
+HYPRE_Int hypre_StructVectorMaxValue ( hypre_StructVector *vector , HYPRE_Real *max_value , HYPRE_Int *max_index , hypre_Index max_xyz_index );
 hypre_StructVector *hypre_StructVectorClone ( hypre_StructVector *vector );
 
 #ifdef __cplusplus

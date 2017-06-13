@@ -598,3 +598,21 @@ void releaseCudaReductionId(int id)
 }
 
 #endif
+
+#ifdef HYPRE_USE_OMP45
+/* num: number of bytes */
+HYPRE_Int HYPRE_OMPOffload(int device, void *ptr, size_t num, 
+                          const char *type1, const char *type2) {
+   hypre_omp45_offload(device, ptr, char, 0, num, type1, type2);
+
+   return 0;
+}
+
+HYPRE_Int HYPRE_IsMapped(void *p, HYPRE_Int device_num) {
+   if (hypre__global_offload && !omp_target_is_present(p, device_num)) {
+      printf("HYPRE mapping error: %p has not been mapped to device %d!\n", p, device_num);
+      return 1;
+   }
+   return 0;
+}
+#endif

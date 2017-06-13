@@ -348,8 +348,9 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-      hypre_BoxOffsetDistance(P_dbox, index);
+   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
+   //RL PTROFFSET
+   HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
@@ -364,8 +365,9 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-      hypre_BoxOffsetDistance(R_dbox, index);
+   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
+   //RL PTROFFSET
+   HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
@@ -475,26 +477,26 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
          HYPRE_Int iAp1 = iA + yOffsetA;
            
          HYPRE_Int iP1 = iP - yOffsetP - xOffsetP;
-         rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1];
+         rap_csw[iAc] = rb[iR-rbOffset] * a_cw[iAm1] * pa[iP1];
            
          iP1 = iP - yOffsetP;
-         rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-            +          rb[iR] * a_cs[iAm1]
+         rap_cs[iAc] = rb[iR-rbOffset] * a_cc[iAm1] * pa[iP1]
+            +          rb[iR-rbOffset] * a_cs[iAm1]
             +                   a_cs[iA]   * pa[iP1];
          iP1 = iP - yOffsetP + xOffsetP;
-         rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
+         rap_cse[iAc] = rb[iR-rbOffset] * a_ce[iAm1] * pa[iP1];
 
          iP1 = iP - xOffsetP;
          rap_cw[iAc] =          a_cw[iA]
-            +          rb[iR] * a_cw[iAm1] * pb[iP1]
+            +          rb[iR-rbOffset] * a_cw[iAm1] * pb[iP1-pbOffset]
             +          ra[iR] * a_cw[iAp1] * pa[iP1];
            
          rap_cc[iAc] =          a_cc[iA]
-            +          rb[iR] * a_cc[iAm1] * pb[iP]
+            +          rb[iR-rbOffset] * a_cc[iAm1] * pb[iP-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pa[iP]
-            +          rb[iR] * a_cn[iAm1]
+            +          rb[iR-rbOffset] * a_cn[iAm1]
             +          ra[iR] * a_cs[iAp1]
-            +                   a_cs[iA]   * pb[iP]
+            +                   a_cs[iA]   * pb[iP-pbOffset]
             +                   a_cn[iA]   * pa[iP];
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
@@ -524,27 +526,27 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
          HYPRE_Int iAp1 = iA + yOffsetA_diag;
 
          HYPRE_Int iP1 = iP - yOffsetP - xOffsetP;
-         rap_csw[iAc] = rb[iR] * a_cw_offdm1 * pa[iP1];
+         rap_csw[iAc] = rb[iR-rbOffset] * a_cw_offdm1 * pa[iP1];
 
          iP1 = iP - yOffsetP;
-         rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-            +          rb[iR] * a_cs_offdm1
+         rap_cs[iAc] = rb[iR-rbOffset] * a_cc[iAm1] * pa[iP1]
+            +          rb[iR-rbOffset] * a_cs_offdm1
             +                   a_cs_offd   * pa[iP1];
 
          iP1 = iP - yOffsetP + xOffsetP;
-         rap_cse[iAc] = rb[iR] * a_ce_offdm1 * pa[iP1];
+         rap_cse[iAc] = rb[iR-rbOffset] * a_ce_offdm1 * pa[iP1];
 
          iP1 = iP - xOffsetP;
          rap_cw[iAc] =          a_cw_offd
-            +          rb[iR] * a_cw_offdm1 * pb[iP1]
+            +          rb[iR-rbOffset] * a_cw_offdm1 * pb[iP1-pbOffset]
             +          ra[iR] * a_cw_offdp1 * pa[iP1];
 
          rap_cc[iAc] =          a_cc[iA]
-            +          rb[iR] * a_cc[iAm1] * pb[iP]
+            +          rb[iR-rbOffset] * a_cc[iAm1] * pb[iP-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pa[iP]
-            +          rb[iR] * a_cn_offdm1
+            +          rb[iR-rbOffset] * a_cn_offdm1
             +          ra[iR] * a_cs_offdp1
-            +                   a_cs_offd  * pb[iP]
+            +                   a_cs_offd  * pb[iP-pbOffset]
             +                   a_cn_offd  * pa[iP];
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
@@ -841,8 +843,9 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-      hypre_BoxOffsetDistance(P_dbox, index);
+   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
+   //RL PTROFFSET
+   HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
@@ -857,8 +860,8 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-      hypre_BoxOffsetDistance(R_dbox, index);
+   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
+   HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
@@ -987,35 +990,35 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
          HYPRE_Int iAp1 = iA + yOffsetA;
 
          HYPRE_Int iP1 = iP - yOffsetP - xOffsetP;
-         rap_csw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
-            +           rb[iR] * a_csw[iAm1]
+         rap_csw[iAc] = rb[iR-rbOffset] * a_cw[iAm1] * pa[iP1]
+            +           rb[iR-rbOffset] * a_csw[iAm1]
             +                    a_csw[iA]  * pa[iP1];
 
          iP1 = iP - yOffsetP;
-         rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-            +          rb[iR] * a_cs[iAm1]
+         rap_cs[iAc] = rb[iR-rbOffset] * a_cc[iAm1] * pa[iP1]
+            +          rb[iR-rbOffset] * a_cs[iAm1]
             +                   a_cs[iA]   * pa[iP1];
 
          iP1 = iP - yOffsetP + xOffsetP;
-         rap_cse[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
-            +           rb[iR] * a_cse[iAm1]
+         rap_cse[iAc] = rb[iR-rbOffset] * a_ce[iAm1] * pa[iP1]
+            +           rb[iR-rbOffset] * a_cse[iAm1]
             +                    a_cse[iA]  * pa[iP1];
 
          iP1 = iP - xOffsetP;
          rap_cw[iAc] =          a_cw[iA]
-            +          rb[iR] * a_cw[iAm1] * pb[iP1]
+            +          rb[iR-rbOffset] * a_cw[iAm1] * pb[iP1-pbOffset]
             +          ra[iR] * a_cw[iAp1] * pa[iP1]
-            +          rb[iR] * a_cnw[iAm1]
+            +          rb[iR-rbOffset] * a_cnw[iAm1]
             +          ra[iR] * a_csw[iAp1]
-            +                   a_csw[iA]  * pb[iP1]
+            +                   a_csw[iA]  * pb[iP1-pbOffset]
             +                   a_cnw[iA]  * pa[iP1];
 
          rap_cc[iAc] =          a_cc[iA]
-            +          rb[iR] * a_cc[iAm1] * pb[iP]
+            +          rb[iR-rbOffset] * a_cc[iAm1] * pb[iP-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pa[iP]
-            +          rb[iR] * a_cn[iAm1]
+            +          rb[iR-rbOffset] * a_cn[iAm1]
             +          ra[iR] * a_cs[iAp1]
-            +                   a_cs[iA]   * pb[iP]
+            +                   a_cs[iA]   * pb[iP-pbOffset]
             +                   a_cn[iA]   * pa[iP];
 
       }
@@ -1053,35 +1056,35 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
          HYPRE_Int iAp1 = iA + yOffsetA_diag;
 
          HYPRE_Int iP1 = iP - yOffsetP - xOffsetP;
-         rap_csw[iAc] = rb[iR] * a_cw_offdm1 * pa[iP1]
-            +           rb[iR] * a_csw_offdm1
+         rap_csw[iAc] = rb[iR-rbOffset] * a_cw_offdm1 * pa[iP1]
+            +           rb[iR-rbOffset] * a_csw_offdm1
             +                    a_csw_offd  * pa[iP1];
 
          iP1 = iP - yOffsetP;
-         rap_cs[iAc] = rb[iR] * a_cc[iAm1] * pa[iP1]
-            +          rb[iR] * a_cs_offdm1
+         rap_cs[iAc] = rb[iR-rbOffset] * a_cc[iAm1] * pa[iP1]
+            +          rb[iR-rbOffset] * a_cs_offdm1
             +                   a_cs_offd   * pa[iP1];
 
          iP1 = iP - yOffsetP + xOffsetP;
-         rap_cse[iAc] = rb[iR] * a_ce_offdm1 * pa[iP1]
-            +           rb[iR] * a_cse_offdm1
+         rap_cse[iAc] = rb[iR-rbOffset] * a_ce_offdm1 * pa[iP1]
+            +           rb[iR-rbOffset] * a_cse_offdm1
             +                    a_cse_offd  * pa[iP1];
 
          iP1 = iP - xOffsetP;
          rap_cw[iAc] =          a_cw_offd
-            +          rb[iR] * a_cw_offdm1 * pb[iP1]
+            +          rb[iR-rbOffset] * a_cw_offdm1 * pb[iP1-pbOffset]
             +          ra[iR] * a_cw_offdp1 * pa[iP1]
-            +          rb[iR] * a_cnw_offdm1
+            +          rb[iR-rbOffset] * a_cnw_offdm1
             +          ra[iR] * a_csw_offdp1
-            +                   a_csw_offd  * pb[iP1]
+            +                   a_csw_offd  * pb[iP1-pbOffset]
             +                   a_cnw_offd  * pa[iP1];
 
          rap_cc[iAc] =          a_cc[iA]
-            +          rb[iR] * a_cc[iAm1] * pb[iP]
+            +          rb[iR-rbOffset] * a_cc[iAm1] * pb[iP-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pa[iP]
-            +          rb[iR] * a_cn_offdm1
+            +          rb[iR-rbOffset] * a_cn_offdm1
             +          ra[iR] * a_cs_offdp1
-            +                   a_cs_offd   * pb[iP]
+            +                   a_cs_offd   * pb[iP-pbOffset]
             +                   a_cn_offd   * pa[iP];
 
       }
@@ -1531,8 +1534,9 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-      hypre_BoxOffsetDistance(P_dbox, index);
+   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
+   //RL PTROFFSET
+   HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
@@ -1547,8 +1551,9 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-      hypre_BoxOffsetDistance(R_dbox, index);
+   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
+   //RL PTROFFSET
+   HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
@@ -1651,19 +1656,19 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
          HYPRE_Int iAp1 = iA + yOffsetA;
 
          HYPRE_Int iP1 = iP + yOffsetP + xOffsetP;
-         rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1];
+         rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1-pbOffset];
 
          iP1 = iP + yOffsetP;
-         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_cn[iAp1]
-            +                   a_cn[iA]   * pb[iP1];
+            +                   a_cn[iA]   * pb[iP1-pbOffset];
 
          iP1 = iP + yOffsetP - xOffsetP;
-         rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
+         rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1-pbOffset];
 
          iP1 = iP + xOffsetP;
          rap_ce[iAc] =          a_ce[iA]
-            +          rb[iR] * a_ce[iAm1] * pb[iP1]
+            +          rb[iR-rbOffset] * a_ce[iAm1] * pb[iP1-pbOffset]
             +          ra[iR] * a_ce[iAp1] * pa[iP1];
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
@@ -1692,19 +1697,19 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
          HYPRE_Int iAp1 = iA + yOffsetA_diag;
 
          HYPRE_Int iP1 = iP + yOffsetP + xOffsetP;
-         rap_cne[iAc] = ra[iR] * a_ce_offdp1 * pb[iP1];
+         rap_cne[iAc] = ra[iR] * a_ce_offdp1 * pb[iP1-pbOffset];
 
          iP1 = iP + yOffsetP;
-         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_cn_offdp1
-            +                   a_cn_offd   * pb[iP1];
+            +                   a_cn_offd   * pb[iP1-pbOffset];
 
          iP1 = iP + yOffsetP - xOffsetP;
-         rap_cnw[iAc] = ra[iR] * a_cw_offdp1 * pb[iP1];
+         rap_cnw[iAc] = ra[iR] * a_cw_offdp1 * pb[iP1-pbOffset];
 
          iP1 = iP + xOffsetP;
          rap_ce[iAc] =          a_ce_offd
-            +          rb[iR] * a_ce_offdm1 * pb[iP1]
+            +          rb[iR-rbOffset] * a_ce_offdm1 * pb[iP1-pbOffset]
             +          ra[iR] * a_ce_offdp1 * pa[iP1];
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
@@ -1991,8 +1996,9 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-      hypre_BoxOffsetDistance(P_dbox, index);
+   pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
+   //RL PTROFFSET
+   HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
@@ -2007,8 +2013,9 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
    hypre_SetIndex3(index_temp,0,1,0);
    MapIndex(index_temp, cdir, index);
 
-   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index) -
-      hypre_BoxOffsetDistance(R_dbox, index);
+   rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
+   //RL PTROFFSET
+   HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
  
    /*-----------------------------------------------------------------
     * Extract pointers for 5-point fine grid operator:
@@ -2137,27 +2144,27 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
          HYPRE_Int iAp1 = iA + yOffsetA;
 
          HYPRE_Int iP1 = iP + yOffsetP + xOffsetP;
-         rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1]
+         rap_cne[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1-pbOffset]
             +           ra[iR] * a_cne[iAp1]
-            +                    a_cne[iA]  * pb[iP1];
+            +                    a_cne[iA]  * pb[iP1-pbOffset];
 
          iP1 = iP + yOffsetP;
-         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_cn[iAp1]
-            +                   a_cn[iA]   * pb[iP1];
+            +                   a_cn[iA]   * pb[iP1-pbOffset];
 
          iP1 = iP + yOffsetP - xOffsetP;
-         rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
+         rap_cnw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1-pbOffset]
             +           ra[iR] * a_cnw[iAp1]
-            +                    a_cnw[iA]  * pb[iP1];
+            +                    a_cnw[iA]  * pb[iP1-pbOffset];
 
          iP1 = iP + xOffsetP;
          rap_ce[iAc] =          a_ce[iA]
-            +          rb[iR] * a_ce[iAm1] * pb[iP1]
+            +          rb[iR-rbOffset] * a_ce[iAm1] * pb[iP1-pbOffset]
             +          ra[iR] * a_ce[iAp1] * pa[iP1]
-            +          rb[iR] * a_cne[iAm1]
+            +          rb[iR-rbOffset] * a_cne[iAm1]
             +          ra[iR] * a_cse[iAp1]
-            +                   a_cse[iA]  * pb[iP1]
+            +                   a_cse[iA]  * pb[iP1-pbOffset]
             +                   a_cne[iA]  * pa[iP1];
 
       }
@@ -2193,27 +2200,27 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
          HYPRE_Int iAp1 = iA + yOffsetA_diag;
 
          HYPRE_Int iP1 = iP + yOffsetP + xOffsetP;
-         rap_cne[iAc] = ra[iR] * a_ce_offdp1 * pb[iP1]
+         rap_cne[iAc] = ra[iR] * a_ce_offdp1 * pb[iP1-pbOffset]
             +           ra[iR] * a_cne_offdp1
-            +                    a_cne_offd  * pb[iP1];
+            +                    a_cne_offd  * pb[iP1-pbOffset];
 
          iP1 = iP + yOffsetP;
-         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1]
+         rap_cn[iAc] = ra[iR] * a_cc[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_cn_offdp1
-            +                   a_cn_offd   * pb[iP1];
+            +                   a_cn_offd   * pb[iP1-pbOffset];
 
          iP1 = iP + yOffsetP - xOffsetP;
-         rap_cnw[iAc] = ra[iR] * a_cw_offdp1 * pb[iP1]
+         rap_cnw[iAc] = ra[iR] * a_cw_offdp1 * pb[iP1-pbOffset]
             +           ra[iR] * a_cnw_offdp1
-            +                    a_cnw_offd  * pb[iP1];
+            +                    a_cnw_offd  * pb[iP1-pbOffset];
 
          iP1 = iP + xOffsetP;
          rap_ce[iAc] =          a_ce_offd
-            +          rb[iR] * a_ce_offdm1 * pb[iP1]
+            +          rb[iR-rbOffset] * a_ce_offdm1 * pb[iP1-pbOffset]
             +          ra[iR] * a_ce_offdp1 * pa[iP1]
-            +          rb[iR] * a_cne_offdm1
+            +          rb[iR-rbOffset] * a_cne_offdm1
             +          ra[iR] * a_cse_offdp1
-            +                   a_cse_offd  * pb[iP1]
+            +                   a_cse_offd  * pb[iP1-pbOffset]
             +                   a_cne_offd  * pa[iP1];
 
       }

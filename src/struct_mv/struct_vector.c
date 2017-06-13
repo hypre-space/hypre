@@ -70,7 +70,12 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
       {
          if (hypre_StructVectorDataAlloced(vector))
          {
+#ifdef HYPRE_USE_OMP45
+            hypre_DeviceTFree(hypre_StructVectorData(vector), HYPRE_Complex,
+                              hypre_StructVectorDataSize(vector));
+#else
             hypre_DeviceTFree(hypre_StructVectorData(vector));
+#endif
          }
          hypre_TFree(hypre_StructVectorDataIndices(vector));
          hypre_BoxArrayDestroy(hypre_StructVectorDataSpace(vector));

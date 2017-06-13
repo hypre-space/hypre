@@ -106,7 +106,12 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
          {
 	    if (constant_coefficient==0)
 	    {    
-	       hypre_DeviceTFree(hypre_StructMatrixData(matrix))
+#ifdef HYPRE_USE_OMP45
+               hypre_DeviceTFree(hypre_StructMatrixData(matrix), HYPRE_Complex,
+                              hypre_StructMatrixDataSize(matrix));
+#else
+               hypre_DeviceTFree(hypre_StructMatrixData(matrix));
+#endif
 	    }
 	    else if (constant_coefficient==1)
 	    {    
@@ -479,7 +484,7 @@ hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
       data = hypre_UMCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
       hypre_StructMatrixDataHost(matrix) = hypre_CTAlloc(HYPRE_Complex, stencil_size);
    }
-   
+
    hypre_StructMatrixInitializeData(matrix, data);
    hypre_StructMatrixDataAlloced(matrix) = 1;
 
