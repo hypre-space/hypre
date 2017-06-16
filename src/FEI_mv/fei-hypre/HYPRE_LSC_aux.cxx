@@ -4615,11 +4615,12 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
 
 double HYPRE_LinSysCore::solveUsingSuperLU(int& status)
 {
+  double             rnorm=-1.0;
 #ifdef HAVE_SUPERLU
    int                i, nnz, nrows, ierr;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
    int                nz_ptr, *partition, start_row, end_row;
-   double             *colVal, *new_a, rnorm=-1.0;
+   double             *colVal, *new_a;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    r_csr;
    HYPRE_ParVector    b_csr;
@@ -4793,12 +4794,13 @@ double HYPRE_LinSysCore::solveUsingSuperLU(int& status)
 
 double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 {
+   double             rnorm=-1.0;
 #ifdef HAVE_SUPERLU
    int                i, nnz, nrows, ierr;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
    int                nz_ptr;
    int                *partition, start_row, end_row;
-   double             *colVal, *new_a, rnorm=-1.0;
+   double             *colVal, *new_a;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    r_csr;
    HYPRE_ParVector    b_csr;
