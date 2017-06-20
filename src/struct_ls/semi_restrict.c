@@ -126,7 +126,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
    HYPRE_Int               constant_coefficient;
 
    HYPRE_Real             *Rp0, *Rp1;
-   HYPRE_Real             *rp, *rp0, *rp1;
+   HYPRE_Real             *rp;
    HYPRE_Real             *rcp;
                        
    hypre_Index             loop_size;
@@ -243,14 +243,17 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
             if ( constant_coefficient )
             {
+	       HYPRE_Complex Rp0val,Rp1val;
                Ri = hypre_CCBoxIndexRank( R_dbox, startc );
 
+	       Rp0val = Rp0[Ri+Rp0_offset];
+	       Rp1val = Rp1[Ri];
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(R), loop_size,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);
                {
-                  rcp[rci] = rp[ri] + (Rp0[Ri+Rp0_offset] * rp[ri+rp0_offset] +
-                                       Rp1[Ri]            * rp[ri+rp1_offset]);
+                  rcp[rci] = rp[ri] + (Rp0val * rp[ri+rp0_offset] +
+                                       Rp1val * rp[ri+rp1_offset]);
                }
                hypre_BoxLoop2End(ri, rci);
             }

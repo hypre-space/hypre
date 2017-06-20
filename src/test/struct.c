@@ -2952,7 +2952,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 	    
 	    hypre_LoopBegin(volume,d)  
             {
-	      HYPRE_Int i = stencil_size*d;
+	       HYPRE_Int i = stencil_size*d;
                switch (dim)
                {
                   case 1:

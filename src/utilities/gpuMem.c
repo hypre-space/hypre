@@ -519,20 +519,21 @@ hypre_int pointerIsManaged(const void *ptr){
 static bool cuda_reduction_id_used[RAJA_MAX_REDUCE_VARS];
 CudaReductionBlockDataType* s_cuda_reduction_mem_block = 0;
 
-int getCudaReductionId()
+HYPRE_Int getCudaReductionId()
 {
-   static int first_time_called = true;
-
+   static HYPRE_Int first_time_called = true;
+   HYPRE_Int id;
+   
    if (first_time_called) {
 
-      for (int id = 0; id < RAJA_MAX_REDUCE_VARS; ++id) {
+      for (id = 0; id < RAJA_MAX_REDUCE_VARS; ++id) {
          cuda_reduction_id_used[id] = false;
       }
 
       first_time_called = false;
    }
 
-   int id = 0;
+   id = 0;
    while ( id < RAJA_MAX_REDUCE_VARS && cuda_reduction_id_used[id] ) {
      id++;
    }
@@ -567,10 +568,10 @@ CudaReductionBlockDataType* getCudaReductionMemBlock(int id)
    // value for each thread, a single slot for the global reduced value
    // across grid blocks, and a single slot for the max grid size.  
    //
-   int block_offset = RAJA_CUDA_REDUCE_BLOCK_LENGTH + 1 + 1 + 1;
+   HYPRE_Int block_offset = RAJA_CUDA_REDUCE_BLOCK_LENGTH + 1 + 1 + 1;
 
    if (s_cuda_reduction_mem_block == 0) {
-      int len = RAJA_MAX_REDUCE_VARS * block_offset;
+      HYPRE_Int len = RAJA_MAX_REDUCE_VARS * block_offset;
 
       cudaError_t cudaerr = 
          cudaMallocManaged((void **)&s_cuda_reduction_mem_block,
@@ -590,7 +591,7 @@ CudaReductionBlockDataType* getCudaReductionMemBlock(int id)
    return &(s_cuda_reduction_mem_block[id * block_offset]) ;
 }
 
-void releaseCudaReductionId(int id)
+void releaseCudaReductionId(HYPRE_Int id)
 {
    if ( id < RAJA_MAX_REDUCE_VARS ) {
       cuda_reduction_id_used[id] = false;
@@ -601,8 +602,8 @@ void releaseCudaReductionId(int id)
 
 #ifdef HYPRE_USE_OMP45
 /* num: number of bytes */
-HYPRE_Int HYPRE_OMPOffload(int device, void *ptr, size_t num, 
-                          const char *type1, const char *type2) {
+HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
+			   const char *type1, const char *type2) {
    hypre_omp45_offload(device, ptr, char, 0, num, type1, type2);
 
    return 0;

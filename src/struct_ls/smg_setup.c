@@ -50,7 +50,9 @@ hypre_SMGSetup( void               *smg_vdata,
    hypre_StructGrid    **PT_grid_l;
                     
    HYPRE_Real           *data;
+   HYPRE_Real           *data_const;
    HYPRE_Int             data_size = 0;
+   HYPRE_Int             data_size_const = 0;
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **PT_l;
    hypre_StructMatrix  **R_l;
@@ -189,6 +191,7 @@ hypre_SMGSetup( void               *smg_vdata,
 	  
       hypre_StructMatrixInitializeShell(PT_l[l]);
       data_size += hypre_StructMatrixDataSize(PT_l[l]);
+      data_size_const += hypre_StructMatrixDataConstSize(PT_l[l]);
 
       if (hypre_StructMatrixSymmetric(A))
       {
@@ -203,12 +206,14 @@ hypre_SMGSetup( void               *smg_vdata,
          R_l[l]   = hypre_SMGCreateRestrictOp(A_l[l], grid_l[l+1], cdir);
          hypre_StructMatrixInitializeShell(R_l[l]);
          data_size += hypre_StructMatrixDataSize(R_l[l]);
+	 data_size_const += hypre_StructMatrixDataConstSize(R_l[l]);
 #endif
       }
 
       A_l[l+1] = hypre_SMGCreateRAPOp(R_l[l], A_l[l], PT_l[l], grid_l[l+1]);
       hypre_StructMatrixInitializeShell(A_l[l+1]);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
+      data_size_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
 
       b_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(b_l[l+1], b_num_ghost);
@@ -230,8 +235,10 @@ hypre_SMGSetup( void               *smg_vdata,
    }
 
    data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+   data_const = hypre_CTAlloc(HYPRE_Real,data_size_const);
 
    (smg_data -> data) = data;
+   (smg_data -> data_const) = data_const;
 #ifdef HYPRE_USE_OMP45
    (smg_data -> data_size) = data_size;
 #endif
@@ -246,20 +253,23 @@ hypre_SMGSetup( void               *smg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_StructMatrixInitializeData(PT_l[l], data);
+      hypre_StructMatrixInitializeData(PT_l[l], data, data_const);
       data += hypre_StructMatrixDataSize(PT_l[l]);
+      data_const += hypre_StructMatrixDataConstSize(PT_l[l]);
 
 #if 0
       /* Allow R != PT for non symmetric case */
       if (!hypre_StructMatrixSymmetric(A))
       {
-         hypre_StructMatrixInitializeData(R_l[l], data);
+	 hypre_StructMatrixInitializeData(R_l[l], data, data_const);
          data += hypre_StructMatrixDataSize(R_l[l]);
+	 data_const += hypre_StructMatrixDataConstSize(R_l[l]);
       }
 #endif
 
-      hypre_StructMatrixInitializeData(A_l[l+1], data);
+      hypre_StructMatrixInitializeData(A_l[l+1], data, data_const);
       data += hypre_StructMatrixDataSize(A_l[l+1]);
+      data_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
 
       hypre_StructVectorInitializeData(b_l[l+1], data);
       hypre_StructVectorAssemble(b_l[l+1]);

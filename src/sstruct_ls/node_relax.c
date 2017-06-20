@@ -149,8 +149,8 @@ hypre_NodeRelaxDestroy( void *relax_vdata )
       hypre_TFree(relax_data -> compute_pkgs);
       hypre_SStructPVectorDestroy(relax_data -> t);
 
-      hypre_UMTFree(relax_data -> x_loc);
-      hypre_UMTFree((relax_data ->A_loc)[0]);
+      hypre_DeviceTFree(relax_data -> x_loc);
+      hypre_DeviceTFree((relax_data ->A_loc)[0]);
       hypre_TFree(relax_data -> A_loc);
       hypre_TFree(relax_data -> bp);
       hypre_TFree(relax_data -> xp);
@@ -279,13 +279,15 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
     * Allocate storage used to invert local diagonal blocks
     *----------------------------------------------------------*/
 
-   x_loc    = hypre_UMTAlloc(HYPRE_Real   , hypre_NumThreads()*nvars);
+   x_loc    = hypre_DeviceTAlloc(HYPRE_Real   , hypre_NumThreads()*nvars);
    A_loc    = hypre_TAlloc(HYPRE_Real  *, hypre_NumThreads()*nvars);
-   A_loc[0] = hypre_UMTAlloc(HYPRE_Real   , hypre_NumThreads()*nvars*nvars);
+   A_loc[0] = hypre_DeviceTAlloc(HYPRE_Real   , hypre_NumThreads()*nvars*nvars);
    for (vi = 1; vi < hypre_NumThreads()*nvars; vi++)
+   hypre_LoopBegin(hypre_NumThreads()*nvars,vi)
    {
       A_loc[vi] = A_loc[0] + vi*nvars;
    }
+   hypre_LoopEnd()
 
    /* Allocate pointers for vector and matrix */
    bp = hypre_TAlloc(HYPRE_Real  *, nvars);

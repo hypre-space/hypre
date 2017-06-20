@@ -86,8 +86,11 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
       hypre_BoxArrayDuplicate(hypre_StructMatrixDataSpace(matrix));
 
    hypre_StructMatrixData(mask) = hypre_StructMatrixData(matrix);
+   hypre_StructMatrixDataConst(mask) = hypre_StructMatrixDataConst(matrix);
+   hypre_StructMatrixStencilData(mask) = hypre_StructMatrixStencilData(matrix);
    hypre_StructMatrixDataAlloced(mask) = 0;
    hypre_StructMatrixDataSize(mask) = hypre_StructMatrixDataSize(matrix);
+   hypre_StructMatrixDataConstSize(mask) = hypre_StructMatrixDataConstSize(matrix);
    data_space   = hypre_StructMatrixDataSpace(matrix);
    data_indices = hypre_StructMatrixDataIndices(matrix);
    mask_data_indices = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(data_space));

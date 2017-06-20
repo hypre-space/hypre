@@ -45,11 +45,12 @@ typedef struct hypre_Boxloop_struct
 } hypre_Boxloop;
 
 #define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line)
+void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line)
 {
     if (err)
     {
       printf("CUDA Error Code[%d]: %s\n %s(%s) Line:%d\n", err, cudaGetErrorString(err), file, fun, line);
+      HYPRE_Int *p = NULL; *p = 1;
     }
 }
 #define BLOCKSIZE 512
@@ -61,6 +62,7 @@ inline void CheckError(cudaError_t const err, const char* file, char const* cons
   if ( cudaSuccess != err )			\
   {									\
     printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+    HYPRE_Int *p = NULL; *p = 1;\
   }									\
   AxCheckError(cudaDeviceSynchronize());				\
 }				      \
@@ -283,7 +285,16 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
 	    databox##k.bsize2   = 0;					\
 	}
 
-
+#define zypre_newBasicBoxLoop1Begin(ndim, loop_size,			\
+				    stride1, i1)			\
+{    		       				                	\
+    hypre_newBoxLoopInit(ndim,loop_size);		        	\
+    zypre_BasicBoxLoopDataDeclareK(1,ndim,loop_size,stride1);	\
+    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
+    {									\
+        hypre_newBoxLoopDeclare(databox1);					\
+        hypre_BoxLoopIncK(1,databox1,i1);					\
+	
 #define zypre_newBasicBoxLoop2Begin(ndim, loop_size,			\
 				    stride1, i1,			\
 				    stride2, i2)			\
@@ -420,12 +431,12 @@ public:
 
       if ( blockIdx.x  + blockIdx.y  + blockIdx.z +
            threadIdx.x + threadIdx.y + threadIdx.z == 0 ) {
-          int numBlock = gridDim.x * gridDim.y * gridDim.z ;
+          HYPRE_Int numBlock = gridDim.x * gridDim.y * gridDim.z ;
           m_max_grid_size[0] = RAJA_MAX( numBlock,  m_max_grid_size[0] );
       } 
 
        // initialize shared memory
-      for ( int i = BLOCK_SIZE / 2; i > 0; i /=2 ) {     
+      for ( HYPRE_Int i = BLOCK_SIZE / 2; i > 0; i /=2 ) {     
           // this descends all the way to 1
           if ( threadIdx.x < i ) {
               // no need for __syncthreads()
@@ -439,7 +450,7 @@ public:
       T temp = 0;
       __syncthreads();
 
-      for (int i = BLOCK_SIZE / 2; i >= WARP_SIZE; i /= 2) {
+      for (HYPRE_Int i = BLOCK_SIZE / 2; i >= WARP_SIZE; i /= 2) {
          if (threadIdx.x < i) {
             sd[threadIdx.x] += sd[threadIdx.x + i];
          }
@@ -448,7 +459,7 @@ public:
 
       if (threadIdx.x < WARP_SIZE) {
          temp = sd[threadIdx.x];
-         for (int i = WARP_SIZE / 2; i > 0; i /= 2) {
+         for (HYPRE_Int i = WARP_SIZE / 2; i > 0; i /= 2) {
             temp += hypre_shfl_xor(temp, i);
          }
       }
@@ -456,7 +467,7 @@ public:
       // one thread adds to gmem, we skip m_blockdata[m_blockoffset]
       // because we will be accumlating into this
       if (threadIdx.x == 0) {
-         int blockID = m_blockoffset + 1 + blockIdx.x +
+         HYPRE_Int blockID = m_blockoffset + 1 + blockIdx.x +
                        blockIdx.y*gridDim.x +
                        blockIdx.z*gridDim.x*gridDim.y ;
          m_blockdata[blockID] += temp ;
@@ -472,24 +483,25 @@ private:
    ReduceSum< T >();
 
    bool m_is_copy;
-   int m_myID;
+   HYPRE_Int m_myID;
 
    T m_init_val;
    T m_reduced_val;
 
    CudaReductionBlockDataType* m_blockdata ;
-   int m_blockoffset;
+   HYPRE_Int m_blockoffset;
 
    CudaReductionBlockDataType* m_max_grid_size;
 };
 }
+#define hypre_newBoxLoopGetIndex(index)\
+  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
 
-
-
-#define hypre_newBoxLoopGetIndex(index)				\
-  index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
+//#define hypre_newBoxLoopGetIndex(index)			\
+//  index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
   
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex  
+#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
+
 #define hypre_BoxLoopSetOneBlock() ; 
 #define hypre_BoxLoopBlock()       0
 
@@ -509,5 +521,6 @@ private:
 #define hypre_BoxLoop4For        hypre_newBoxLoop4For
 #define hypre_BoxLoop4End        hypre_newBoxLoop4End
 
+#define hypre_BasicBoxLoop1Begin zypre_newBasicBoxLoop1Begin 
 #define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin 
 #endif

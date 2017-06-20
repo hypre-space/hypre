@@ -43,7 +43,7 @@ typedef struct hypre_Boxloop_struct
 #include <cuda_runtime.h>
 
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
+void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
 {
     if (err)
     {
@@ -290,8 +290,8 @@ AxCheckError(cudaDeviceSynchronize());
 
 #define zypre_newBoxLoopSetOneBlock()
 
-#define hypre_newBoxLoopGetIndex(index)					\
-  index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
+#define hypre_newBoxLoopGetIndex(index)\
+  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
 
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 #define hypre_BoxLoopSetOneBlock zypre_newBoxLoopSetOneBlock

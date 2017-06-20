@@ -2129,9 +2129,9 @@ SetCosineVector(   HYPRE_Real  scale,
                    Index   iupper,
                    HYPRE_Real *values)
 {
-   HYPRE_Int    i, j, k;
-   HYPRE_Int    count = 0;
-
+  //HYPRE_Int    i, j, k;
+  //HYPRE_Int    count = 0;
+/*
    for (k = ilower[2]; k <= iupper[2]; k++)
    {
       for (j = ilower[1]; j <= iupper[1]; j++)
@@ -2143,7 +2143,23 @@ SetCosineVector(   HYPRE_Real  scale,
          }
       }
    }
+*/
+   hypre_Index loop_size,stride,start;
+   hypre_Box   *dbox;
 
+   dbox = hypre_BoxCreate(3);
+   hypre_BoxSetExtents(dbox,ilower,iupper);
+   hypre_SubtractIndexes(iupper,ilower,3,loop_size);
+   hypre_SetIndex(stride,1);
+   hypre_SetIndex(start,0);
+   
+   hypre_BoxLoop1Begin(3,loop_size,dbox,start,stride,count)
+   {
+      hypre_Index id;
+      hypre_newBoxLoopGetIndex(id);
+      values[count] = scale * cos((id[0]+id[1]+id[2])/10.0);
+   }
+   hypre_BoxLoop1End(count)
    return(0);
 }
 
@@ -2961,7 +2977,7 @@ main( hypre_int argc,
     * Set up the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse));
+   values = hypre_DeviceTAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse));
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -2994,10 +3010,12 @@ main( hypre_int argc,
             s = pdata.stencil_num[var];
             for (i = 0; i < data.stencil_sizes[s]; i++)
             {
-               for (j = 0; j < pdata.max_boxsize; j++)
-               {
-                  values[j] = data.stencil_values[s][i];
-               }
+	      //for (j = 0; j < pdata.max_boxsize; j++)
+              // {
+              //    values[j] = data.stencil_values[s][i];
+              // }
+	       hypre_DataCopyToData(data.stencil_values[s],values,HYPRE_Real,data.stencil_sizes[s]);
+	      
                for (box = 0; box < pdata.nboxes; box++)
                {
                   GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
@@ -3101,10 +3119,13 @@ main( hypre_int argc,
             size*= (pdata.matset_iuppers[box][j] -
                     pdata.matset_ilowers[box][j] + 1);
          }
-         for (j = 0; j < size; j++)
-         {
-            values[j] = pdata.matset_values[box];
-         }
+         //for (j = 0; j < size; j++)
+         //{
+         //   values[j] = pdata.matset_values[box];
+         //}
+	 //hypre_DataCopyToData(data.stencil_values[s],values,HYPRE_Real,data.stencil_sizes[s]);
+	 hypre_DeviceMemset(values,pdata.matset_values[box],HYPRE_Real,size);
+	 
          HYPRE_SStructMatrixSetBoxValues(A, part,
                                          pdata.matset_ilowers[box],
                                          pdata.matset_iuppers[box],
@@ -3129,11 +3150,11 @@ main( hypre_int argc,
 
          for (entry = 0; entry < pdata.matadd_nentries[box]; entry++)
          {
-            for (j = 0; j < size; j++)
-            {
-               values[j] = pdata.matadd_values[box][entry];
-            }
-          
+	   //for (j = 0; j < size; j++)
+	   //{
+           //    values[j] = pdata.matadd_values[box][entry];
+           // }
+	    hypre_DeviceMemset(values,pdata.matadd_values[box][entry],HYPRE_Real,size);
             HYPRE_SStructMatrixAddToBoxValues(A, part, 
                                               pdata.matadd_ilowers[box],
                                               pdata.matadd_iuppers[box],
@@ -3150,10 +3171,12 @@ main( hypre_int argc,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.fem_matadd_nboxes; box++)
       {
-         for (i = 0; i < data.fem_nsparse; i++)
-         {
-            values[i] = 0.0;
-         }
+	//for (i = 0; i < data.fem_nsparse; i++)
+	//{
+        //    values[i] = 0.0;
+        // }
+	//LW: HYPRE_SStructMatrixAddFEMValues may run on CPU
+	 hypre_DeviceMemset(values,0.0,HYPRE_Real,data.fem_nsparse);
          s = 0;
          for (i = 0; i < pdata.fem_matadd_nrows[box]; i++)
          {
@@ -3187,7 +3210,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set up the linear system
     *-----------------------------------------------------------*/
-
+   
    HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &b);
 
    /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
@@ -3201,24 +3224,27 @@ main( hypre_int argc,
    /* Initialize the rhs values */
    if (data.rhs_true)
    {
-      for (j = 0; j < data.max_boxsize; j++)
-      {
-         values[j] = data.rhs_value;
-      }
+     //for (j = 0; j < data.max_boxsize; j++)
+     // {
+     //    values[j] = data.rhs_value;
+     // }
+       hypre_DeviceMemset(values,data.rhs_value,HYPRE_Real,data.max_boxsize);
    }
    else if (data.fem_rhs_true)
    {
-      for (j = 0; j < data.max_boxsize; j++)
-      {
-         values[j] = 0.0;
-      }
+     //for (j = 0; j < data.max_boxsize; j++)
+     //{
+     //  values[j] = 0.0;
+     //}
+      hypre_DeviceMemset(values,0.0,HYPRE_Real,data.max_boxsize);
    }
    else /* rhs=1 is the default */
    {
-      for (j = 0; j < data.max_boxsize; j++)
-      {
-         values[j] = 1.0;
-      }
+     //for (j = 0; j < data.max_boxsize; j++)
+     //{
+     //  values[j] = 1.0;
+     //}
+      hypre_DeviceMemset(values,1.0,HYPRE_Real,data.max_boxsize);
    }
    for (part = 0; part < data.nparts; part++)
    {
@@ -3274,11 +3300,12 @@ main( hypre_int argc,
                     pdata.rhsadd_ilowers[box][j] + 1);
          }
 
-         for (j = 0; j < size; j++)
-         {
-            values[j] = pdata.rhsadd_values[box];
-         }
-          
+         //for (j = 0; j < size; j++)
+         //{
+         //   values[j] = pdata.rhsadd_values[box];
+         //}
+         hypre_DeviceMemset(values,pdata.rhsadd_values[box],HYPRE_Real,size);
+	 
          HYPRE_SStructVectorAddToBoxValues(b, part, 
                                            pdata.rhsadd_ilowers[box],
                                            pdata.rhsadd_iuppers[box],
@@ -3617,7 +3644,7 @@ main( hypre_int argc,
    }
 #endif
 
-   hypre_TFree(values);
+   hypre_UMTFree(values);
 
    /*-----------------------------------------------------------
     * Solve the system using SysPFMG or Split

@@ -112,7 +112,7 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
          
          if (hypre_SStructVectorData(vector) && (vector_type == HYPRE_PARCSR))
 	 {
-            hypre_TFree(hypre_SStructVectorData(vector));
+	   hypre_UMTFree(hypre_SStructVectorData(vector));
          }
 
          hypre_TFree(vector);
@@ -162,7 +162,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    datasize = hypre_SStructVectorDataSize(vector);
 
-   data = hypre_CTAlloc(HYPRE_Complex, datasize);
+   data = hypre_UMCTAlloc(HYPRE_Complex, datasize);
 
    dataindices = hypre_SStructVectorDataIndices(vector);
 

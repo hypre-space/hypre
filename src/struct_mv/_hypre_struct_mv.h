@@ -58,7 +58,7 @@ typedef struct hypre_Boxloop_struct
 #include <cuda_runtime.h>
 
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
+void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
 {
     if (err)
     {
@@ -305,8 +305,8 @@ AxCheckError(cudaDeviceSynchronize());
 
 #define zypre_newBoxLoopSetOneBlock()
 
-#define hypre_newBoxLoopGetIndex(index)					\
-  index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
+#define hypre_newBoxLoopGetIndex(index)\
+  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
 
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 #define hypre_BoxLoopSetOneBlock zypre_newBoxLoopSetOneBlock
@@ -374,7 +374,7 @@ typedef struct hypre_Boxloop_struct
 #include <cuda.h>
 #include <cuda_runtime.h>
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
+void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
 {
    if (err)
    {
@@ -677,9 +677,9 @@ struct ColumnSums
 
 #define hypre_newBoxLoopSetOneBlock() {}
 
-#define hypre_newBoxLoopGetIndex(index)					\
-  index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
-
+#define hypre_newBoxLoopGetIndex(index)\
+  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
+  
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 #define hypre_BoxLoopSetOneBlock hypre_newBoxLoopSetOneBlock
 #define hypre_BoxLoopBlock()       0
@@ -749,11 +749,12 @@ typedef struct hypre_Boxloop_struct
 } hypre_Boxloop;
 
 #define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line)
+void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line)
 {
     if (err)
     {
       printf("CUDA Error Code[%d]: %s\n %s(%s) Line:%d\n", err, cudaGetErrorString(err), file, fun, line);
+      HYPRE_Int *p = NULL; *p = 1;
     }
 }
 #define BLOCKSIZE 512
@@ -765,6 +766,7 @@ inline void CheckError(cudaError_t const err, const char* file, char const* cons
   if ( cudaSuccess != err )			\
   {									\
     printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+    HYPRE_Int *p = NULL; *p = 1;\
   }									\
   AxCheckError(cudaDeviceSynchronize());				\
 }				      \
@@ -987,7 +989,16 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
 	    databox##k.bsize2   = 0;					\
 	}
 
-
+#define zypre_newBasicBoxLoop1Begin(ndim, loop_size,			\
+				    stride1, i1)			\
+{    		       				                	\
+    hypre_newBoxLoopInit(ndim,loop_size);		        	\
+    zypre_BasicBoxLoopDataDeclareK(1,ndim,loop_size,stride1);	\
+    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
+    {									\
+        hypre_newBoxLoopDeclare(databox1);					\
+        hypre_BoxLoopIncK(1,databox1,i1);					\
+	
 #define zypre_newBasicBoxLoop2Begin(ndim, loop_size,			\
 				    stride1, i1,			\
 				    stride2, i2)			\
@@ -1124,12 +1135,12 @@ public:
 
       if ( blockIdx.x  + blockIdx.y  + blockIdx.z +
            threadIdx.x + threadIdx.y + threadIdx.z == 0 ) {
-          int numBlock = gridDim.x * gridDim.y * gridDim.z ;
+          HYPRE_Int numBlock = gridDim.x * gridDim.y * gridDim.z ;
           m_max_grid_size[0] = RAJA_MAX( numBlock,  m_max_grid_size[0] );
       } 
 
        // initialize shared memory
-      for ( int i = BLOCK_SIZE / 2; i > 0; i /=2 ) {     
+      for ( HYPRE_Int i = BLOCK_SIZE / 2; i > 0; i /=2 ) {     
           // this descends all the way to 1
           if ( threadIdx.x < i ) {
               // no need for __syncthreads()
@@ -1143,7 +1154,7 @@ public:
       T temp = 0;
       __syncthreads();
 
-      for (int i = BLOCK_SIZE / 2; i >= WARP_SIZE; i /= 2) {
+      for (HYPRE_Int i = BLOCK_SIZE / 2; i >= WARP_SIZE; i /= 2) {
          if (threadIdx.x < i) {
             sd[threadIdx.x] += sd[threadIdx.x + i];
          }
@@ -1152,7 +1163,7 @@ public:
 
       if (threadIdx.x < WARP_SIZE) {
          temp = sd[threadIdx.x];
-         for (int i = WARP_SIZE / 2; i > 0; i /= 2) {
+         for (HYPRE_Int i = WARP_SIZE / 2; i > 0; i /= 2) {
             temp += hypre_shfl_xor(temp, i);
          }
       }
@@ -1160,7 +1171,7 @@ public:
       // one thread adds to gmem, we skip m_blockdata[m_blockoffset]
       // because we will be accumlating into this
       if (threadIdx.x == 0) {
-         int blockID = m_blockoffset + 1 + blockIdx.x +
+         HYPRE_Int blockID = m_blockoffset + 1 + blockIdx.x +
                        blockIdx.y*gridDim.x +
                        blockIdx.z*gridDim.x*gridDim.y ;
          m_blockdata[blockID] += temp ;
@@ -1176,24 +1187,25 @@ private:
    ReduceSum< T >();
 
    bool m_is_copy;
-   int m_myID;
+   HYPRE_Int m_myID;
 
    T m_init_val;
    T m_reduced_val;
 
    CudaReductionBlockDataType* m_blockdata ;
-   int m_blockoffset;
+   HYPRE_Int m_blockoffset;
 
    CudaReductionBlockDataType* m_max_grid_size;
 };
 }
+#define hypre_newBoxLoopGetIndex(index)\
+  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
 
-
-
-#define hypre_newBoxLoopGetIndex(index)				\
-  index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
+//#define hypre_newBoxLoopGetIndex(index)			\
+//  index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
   
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex  
+#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
+
 #define hypre_BoxLoopSetOneBlock() ; 
 #define hypre_BoxLoopBlock()       0
 
@@ -1213,6 +1225,7 @@ private:
 #define hypre_BoxLoop4For        hypre_newBoxLoop4For
 #define hypre_BoxLoop4End        hypre_newBoxLoop4End
 
+#define hypre_BasicBoxLoop1Begin zypre_newBasicBoxLoop1Begin 
 #define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin 
 #endif
 #elif defined(HYPRE_USE_OMP45)
@@ -3571,10 +3584,12 @@ typedef struct hypre_StructMatrix_struct
 
    hypre_BoxArray       *data_space;
 
-   HYPRE_Complex        *data;         /* Pointer to matrix data */
-   HYPRE_Complex        *data_host;
+   HYPRE_Complex        *data;         /* Pointer to variable matrix data */
+   HYPRE_Complex        *data_const;   /* Pointer to constant matrix data */
+   HYPRE_Complex       **stencil_data; /* Pointer for each stencil */
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
-   HYPRE_Int             data_size;    /* Size of matrix data */
+   HYPRE_Int             data_size;    /* Size of variable matrix data */
+   HYPRE_Int             data_const_size; /* Size of constant matrix data */
    HYPRE_Int           **data_indices; /* num-boxes by stencil-size array
                                           of indices into the data array.
                                           data_indices[b][s] is the starting
@@ -3610,9 +3625,11 @@ typedef struct hypre_StructMatrix_struct
 #define hypre_StructMatrixNumValues(matrix)     ((matrix) -> num_values)
 #define hypre_StructMatrixDataSpace(matrix)     ((matrix) -> data_space)
 #define hypre_StructMatrixData(matrix)          ((matrix) -> data)
-#define hypre_StructMatrixDataHost(matrix)          ((matrix) -> data_host)
+#define hypre_StructMatrixDataConst(matrix)     ((matrix) -> data_const)
+#define hypre_StructMatrixStencilData(matrix)   ((matrix) -> stencil_data)
 #define hypre_StructMatrixDataAlloced(matrix)   ((matrix) -> data_alloced)
 #define hypre_StructMatrixDataSize(matrix)      ((matrix) -> data_size)
+#define hypre_StructMatrixDataConstSize(matrix) ((matrix) -> data_const_size)
 #define hypre_StructMatrixDataIndices(matrix)   ((matrix) -> data_indices)
 #define hypre_StructMatrixConstantCoefficient(matrix) ((matrix) -> constant_coefficient)
 #define hypre_StructMatrixSymmetric(matrix)     ((matrix) -> symmetric)
@@ -3630,10 +3647,7 @@ hypre_StructGridNDim(hypre_StructMatrixGrid(matrix))
 hypre_BoxArrayBox(hypre_StructMatrixDataSpace(matrix), b)
 
 #define hypre_StructMatrixBoxData(matrix, b, s) \
-(hypre_StructMatrixData(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
-
-#define hypre_StructMatrixBoxDataHost(matrix, b, s) \
-(hypre_StructMatrixDataHost(matrix) + hypre_StructMatrixDataIndices(matrix)[b][s])
+(hypre_StructMatrixStencilData(matrix)[s] + hypre_StructMatrixDataIndices(matrix)[b][s])
 
 #define hypre_StructMatrixBoxDataValue(matrix, b, s, index) \
 (hypre_StructMatrixBoxData(matrix, b, s) + \
@@ -3966,7 +3980,7 @@ hypre_StructMatrix *hypre_StructMatrixCreate ( MPI_Comm comm , hypre_StructGrid 
 hypre_StructMatrix *hypre_StructMatrixRef ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixDestroy ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixInitializeShell ( hypre_StructMatrix *matrix );
-HYPRE_Int hypre_StructMatrixInitializeData ( hypre_StructMatrix *matrix , HYPRE_Complex *data );
+HYPRE_Int hypre_StructMatrixInitializeData ( hypre_StructMatrix *matrix , HYPRE_Complex *data ,HYPRE_Complex *data_const);
 HYPRE_Int hypre_StructMatrixInitialize ( hypre_StructMatrix *matrix );
 HYPRE_Int hypre_StructMatrixSetValues ( hypre_StructMatrix *matrix , hypre_Index grid_index , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructMatrixSetBoxValues ( hypre_StructMatrix *matrix , hypre_Box *set_box , hypre_Box *value_box , HYPRE_Int num_stencil_indices , HYPRE_Int *stencil_indices , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );

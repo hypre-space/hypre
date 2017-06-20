@@ -73,9 +73,6 @@ hypre_PFMGDestroy( void *pfmg_vdata )
 
       if ((pfmg_data -> num_levels) > -1)
       {
-         HYPRE_Int constant_coefficient =
-            hypre_StructMatrixConstantCoefficient(pfmg_data -> A_l[0]);
-
          for (l = 0; l < (pfmg_data -> num_levels); l++)
          {
             if (pfmg_data -> active_l[l])
@@ -110,29 +107,13 @@ hypre_PFMGDestroy( void *pfmg_vdata )
             hypre_StructVectorDestroy(pfmg_data -> tx_l[l+1]);
          }
 
-	 if (constant_coefficient==0)
-	 {    
 #ifdef HYPRE_USE_OMP45
-            hypre_DeviceTFree(pfmg_data -> data_matrix, HYPRE_Real,
-                              pfmg_data -> data_size_matrix);
+	 hypre_DeviceTFree(pfmg_data -> data, HYPRE_Real,
+			   pfmg_data -> data_size);
 #else
-            hypre_DeviceTFree(pfmg_data -> data_matrix);
+	 hypre_DeviceTFree(pfmg_data -> data);
 #endif
-	 }
-	 else if (constant_coefficient==1)
-	 {    
-	    hypre_TFree(pfmg_data -> data_matrix);
-	 }
-	 else
-	 {
-	    hypre_UMTFree(pfmg_data -> data_matrix);
-	 }
-#ifdef HYPRE_USE_OMP45
-	 hypre_DeviceTFree(pfmg_data -> data_vector, HYPRE_Real,
-			   pfmg_data -> data_size_vector);
-#else
-	 hypre_DeviceTFree(pfmg_data -> data_vector);
-#endif
+	 hypre_TFree(pfmg_data -> data_const);
 	 
          hypre_TFree(pfmg_data -> cdir_l);
          hypre_TFree(pfmg_data -> active_l);

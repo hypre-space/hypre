@@ -71,8 +71,10 @@ typedef struct
    hypre_BoxArray      **fine_points_l;
 
    HYPRE_Real           *data;
+   HYPRE_Real           *data_const;
 #if HYPRE_USE_OMP45
    HYPRE_Int            data_size;
+   HYPRE_Int            data_size_const;
 #endif
    hypre_StructMatrix  **A_l;
    hypre_StructVector  **x_l;
@@ -478,7 +480,9 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    hypre_BoxArray         *base_points;
    hypre_BoxArray        **fine_points_l;
    HYPRE_Real             *data;
+   HYPRE_Real             *data_const;
    HYPRE_Int               data_size = 0;
+   HYPRE_Int               data_size_const = 0;
    hypre_StructMatrix    **A_l;
    hypre_StructVector    **x_l;
    hypre_ComputePkg      **down_compute_pkg_l;
@@ -592,6 +596,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    {
       A_l[l+1] = hypre_CycRedCreateCoarseOp(A_l[l], grid_l[l+1], cdir);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
+      data_size_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
 
       x_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(x_l[l+1], x_num_ghost);
@@ -599,18 +604,21 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       data_size += hypre_StructVectorDataSize(x_l[l+1]);
    }
 
-   //data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
    data =  hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+   data_const = hypre_TAlloc(HYPRE_Real,data_size_const);
    
    (cyc_red_data -> data) = data;
+   (cyc_red_data -> data_const) = data_const;
 #ifdef HYPRE_USE_OMP45
    (cyc_red_data -> data_size) = data_size;
+   (cyc_red_data -> data_size_const) = data_size_const;
 #endif
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_StructMatrixInitializeData(A_l[l+1], data);
+      hypre_StructMatrixInitializeData(A_l[l+1], data,data_const);
       data += hypre_StructMatrixDataSize(A_l[l+1]);
+      data_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
       hypre_StructVectorInitializeData(x_l[l+1], data);
       hypre_StructVectorAssemble(x_l[l+1]);
       data += hypre_StructVectorDataSize(x_l[l+1]);
