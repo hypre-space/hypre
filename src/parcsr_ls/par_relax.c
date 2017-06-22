@@ -2368,27 +2368,33 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          /*-----------------------------------------------------------------
           * Copy f into temporary vector.
           *-----------------------------------------------------------------*/
-
+         PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
+#ifdef HYPRE_USE_GPU
+         if (sweep==0){
+           hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(Vtemp));
+           hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
+         }
+         VecCopy(Vtemp_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)),HYPRE_STREAM(4));
+#else
          hypre_ParVectorCopy(f,Vtemp);
-
+#endif 
          /*-----------------------------------------------------------------
           * Perform Matvec Vtemp=f-Au
           *-----------------------------------------------------------------*/
 
-            hypre_ParCSRMatrixMatvec(-1.0,A, u, 1.0, Vtemp);
+            hypre_ParCSRMatrixMatvec(-relax_weight,A, u, relax_weight, Vtemp);
+#ifdef HYPRE_USE_GPU
+         VecScale(u_data,Vtemp_data,l1_norms,n,HYPRE_STREAM(4));
+#else
             for (i = 0; i < n; i++)
             {
-
                /*-----------------------------------------------------------
                 * If diagonal is nonzero, relax point i; otherwise, skip it.
                 *-----------------------------------------------------------*/
-
-               if (A_diag_data[A_diag_i[i]] != zero)
-               {
-                  u_data[i] += relax_weight * Vtemp_data[i]
-                                / A_diag_data[A_diag_i[i]];
-               }
+                  u_data[i] += Vtemp_data[i] / l1_norms[i];
             }
+#endif
+         POP_RANGE;
       }
       break;
 
