@@ -1256,8 +1256,6 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
 
          HYPRE_Int max_regions, max_refinements, ologp;
          
-         HYPRE_Int  *local_boxnums;
-
          HYPRE_Int statbuf[3];
          HYPRE_Int send_statbuf[3];
 
@@ -1295,7 +1293,6 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                (as a HYPRE_Real). */
 
             local_boxes = hypre_BoxArrayCreate(num_my_entries, ndim);
-            local_boxnums = hypre_CTAlloc(HYPRE_Int, num_my_entries);
             
             local_volume = 0.0;
          
@@ -1309,9 +1306,6 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                max_ref =  hypre_BoxManEntryIMax(entry_ptr);
                box = hypre_BoxArrayBox(local_boxes, i);
                hypre_BoxSetExtents( box, min_ref, max_ref );
-               
-               /* keep box num also */
-               local_boxnums[i] =   hypre_BoxManEntryId(entry_ptr);
                
                /* calculate volume */ 
                local_volume += (HYPRE_Real) hypre_BoxVolume(box);
@@ -1345,13 +1339,12 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             
             hypre_StructAssumedPartitionCreate(
                ndim, hypre_BoxManBoundingBox(manager), global_volume,
-               global_num_boxes, local_boxes, local_boxnums,
+               global_num_boxes, local_boxes,
                max_regions, max_refinements, gamma,comm, &ap);
             
             hypre_BoxManAssumedPartition(manager) = ap;
 
             hypre_BoxArrayDestroy(local_boxes);
-            hypre_TFree(local_boxnums);
          }
          else
          {

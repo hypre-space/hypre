@@ -723,9 +723,6 @@ hypre_APRefineRegionsByVol( hypre_BoxArray *region_array,
 /******************************************************************************
  * Construct an assumed partition
  *
- * 8/06 - Changed the assumption that the local boxes have boxnums 0 to
- * num(local_boxes)-1 (now need to pass in ids).
- *
  * 10/06 - Changed.  No longer need to deal with negative boxes as this is used
  * through the box manager.
  *
@@ -740,7 +737,6 @@ hypre_StructAssumedPartitionCreate(
    HYPRE_Real                global_boxes_size,
    HYPRE_Int                 global_num_boxes,
    hypre_BoxArray           *local_boxes,
-   HYPRE_Int                *local_boxnums,
    HYPRE_Int                 max_regions,
    HYPRE_Int                 max_refinements, 
    HYPRE_Real                gamma,
@@ -804,7 +800,6 @@ hypre_StructAssumedPartitionCreate(
       hypre_StructAssumedPartMyPartitionIdsAlloc(assumed_part) = 0;
       hypre_StructAssumedPartMyPartitionIdsSize(assumed_part) = 0;
       hypre_StructAssumedPartMyPartitionNumDistinctProcs(assumed_part) = 0;
-      hypre_StructAssumedPartMyPartitionBoxnums(assumed_part) = NULL;
       hypre_StructAssumedPartMyPartitionProcIds(assumed_part) = NULL;
       *p_assumed_partition = assumed_part;
 
@@ -1278,7 +1273,7 @@ hypre_StructAssumedPartitionCreate(
       }
       for (j = 0; j < proc_count; j++)
       {
-         tmp_box_nums[count] = local_boxnums[i];
+         tmp_box_nums[count] = i;
          tmp_proc_ids[count] = proc_array[j];
          count++;
       }
@@ -1355,8 +1350,6 @@ hypre_StructAssumedPartitionCreate(
    hypre_StructAssumedPartMyPartitionIdsAlloc(assumed_part) = box_count;
    hypre_StructAssumedPartMyPartitionProcIds(assumed_part) 
       = hypre_CTAlloc(HYPRE_Int, box_count);
-   hypre_StructAssumedPartMyPartitionBoxnums(assumed_part) 
-      = hypre_CTAlloc(HYPRE_Int, box_count);
    hypre_StructAssumedPartMyPartitionNumDistinctProcs(assumed_part) = 0;
 
    /* Set up for exchanging data */  
@@ -1404,7 +1397,6 @@ hypre_StructAssumedPartitionDestroy( hypre_StructAssumedPart *assumed_part )
       hypre_BoxArrayDestroy( hypre_StructAssumedPartMyPartition(assumed_part));
       hypre_BoxArrayDestroy( hypre_StructAssumedPartMyPartitionBoxes(assumed_part));
       hypre_TFree(hypre_StructAssumedPartMyPartitionProcIds(assumed_part));
-      hypre_TFree( hypre_StructAssumedPartMyPartitionBoxnums(assumed_part));
       
       /* This goes last! */
       hypre_TFree(assumed_part);
@@ -1428,7 +1420,7 @@ hypre_APFillResponseStructAssumedPart(
    HYPRE_Int *response_message_size )
 {
    HYPRE_Int    ndim, size, alloc_size, myid, i, d, index;
-   HYPRE_Int   *ids, *boxnums;
+   HYPRE_Int   *ids;
    HYPRE_Int   *recv_contact_buf;
 
    hypre_Box   *box;
@@ -1443,7 +1435,6 @@ hypre_APFillResponseStructAssumedPart(
    ndim = hypre_StructAssumedPartNDim(assumed_part);
    part_boxes =  hypre_StructAssumedPartMyPartitionBoxes(assumed_part);
    ids = hypre_StructAssumedPartMyPartitionProcIds(assumed_part);
-   boxnums = hypre_StructAssumedPartMyPartitionBoxnums(assumed_part);
 
    size =  hypre_StructAssumedPartMyPartitionIdsSize(assumed_part);
    alloc_size = hypre_StructAssumedPartMyPartitionIdsAlloc(assumed_part);
@@ -1453,12 +1444,11 @@ hypre_APFillResponseStructAssumedPart(
    /* Increment how many procs have contacted us */ 
    hypre_StructAssumedPartMyPartitionNumDistinctProcs(assumed_part)++;
    
-   /* Check to see if we need to allocate more space for ids and boxnums */
+   /* Check to see if we need to allocate more space for ids */
    if ((size + contact_size) > alloc_size)
    {
       alloc_size = size + contact_size;
       ids = hypre_TReAlloc(ids, HYPRE_Int, alloc_size);
-      boxnums = hypre_TReAlloc(boxnums, HYPRE_Int, alloc_size);
       hypre_StructAssumedPartMyPartitionIdsAlloc(assumed_part) = alloc_size;
    }
    
@@ -1469,7 +1459,6 @@ hypre_APFillResponseStructAssumedPart(
    for (i = 0; i < contact_size; i++)
    {
       ids[size+i] = contact_proc; /* Set the proc id */
-      boxnums[size+i] = recv_contact_buf[index++];
       for (d = 0; d < ndim; d++)
       {
          hypre_BoxIMinD(box, d) = recv_contact_buf[index++];
@@ -1484,7 +1473,6 @@ hypre_APFillResponseStructAssumedPart(
    /* In case more memory was allocated we have to assign these pointers back */
    hypre_StructAssumedPartMyPartitionBoxes(assumed_part) = part_boxes;
    hypre_StructAssumedPartMyPartitionProcIds(assumed_part) = ids;
-   hypre_StructAssumedPartMyPartitionBoxnums(assumed_part) = boxnums;
 
    /* Output - no message to return (confirmation) */
    *response_message_size = 0; 
@@ -1546,8 +1534,7 @@ hypre_StructAssumedPartitionGetRegionsFromProc(
       /* How many processors in that region? */
       proc_count = proc_partitions[in_region+1] - proc_partitions[in_region];
       /* Get the region */   
-      region = hypre_BoxArrayBox(hypre_StructAssumedPartRegions(assumed_part),
-                                 in_region);
+      region = hypre_BoxArrayBox(hypre_StructAssumedPartRegions(assumed_part), in_region);
       /* Size of the regions */
       hypre_BoxGetSize(region, rsize);
       /* Get the divisions in each dimension */
@@ -1851,7 +1838,7 @@ hypre_StructAssumedPartitionGetProcsFromBox(
 
 HYPRE_Int
 hypre_StructCoarsenAP(hypre_StructAssumedPart  *ap,
-                      hypre_Index               index,
+                      hypre_Index               origin,
                       hypre_Index               stride,
                       hypre_StructAssumedPart **new_ap_ptr )
 {
@@ -1872,23 +1859,20 @@ hypre_StructCoarsenAP(hypre_StructAssumedPart  *ap,
 
    hypre_StructAssumedPartRegions(new_ap) = regions_array;
    hypre_StructAssumedPartNumRegions(new_ap) = num_regions;
-   hypre_StructAssumedPartProcPartitions(new_ap) = 
-      hypre_CTAlloc(HYPRE_Int, num_regions+1); 
-   hypre_StructAssumedPartDivisions(new_ap) = 
-      hypre_CTAlloc(HYPRE_Int, num_regions); 
+   hypre_StructAssumedPartProcPartitions(new_ap) = hypre_CTAlloc(HYPRE_Int, num_regions+1); 
+   hypre_StructAssumedPartDivisions(new_ap) = hypre_CTAlloc(HYPRE_Int, num_regions); 
 
-   hypre_StructAssumedPartProcPartitions(new_ap)[0] = 0;
-   
+   hypre_StructAssumedPartProcPartition(new_ap, 0) =
+      hypre_StructAssumedPartProcPartition(ap, 0);
    for (i = 0; i < num_regions; i++)
    {
       box =  hypre_BoxArrayBox(hypre_StructAssumedPartRegions(ap), i);
                             
       hypre_CopyBox(box, hypre_BoxArrayBox(regions_array, i));
 
-      hypre_StructAssumedPartDivision(new_ap, i) = 
-         hypre_StructAssumedPartDivision(new_ap, i);
+      hypre_StructAssumedPartDivision(new_ap, i) = hypre_StructAssumedPartDivision(new_ap, i);
 
-      hypre_StructAssumedPartProcPartition(new_ap, i+1)=
+      hypre_StructAssumedPartProcPartition(new_ap, i+1) = 
          hypre_StructAssumedPartProcPartition(ap, i+1);
    }
    
@@ -1901,31 +1885,27 @@ hypre_StructCoarsenAP(hypre_StructAssumedPart  *ap,
       hypre_CopyBox(box, new_box);
    }
 
-   /* Create space for the boxes, ids and boxnums */
+   /* Create space for the boxes and ids */
    size = hypre_StructAssumedPartMyPartitionIdsSize(ap);
 
-   hypre_StructAssumedPartMyPartitionProcIds(new_ap) =
-      hypre_CTAlloc(HYPRE_Int, size); 
-   hypre_StructAssumedPartMyPartitionBoxnums(new_ap) =
-      hypre_CTAlloc(HYPRE_Int, size); 
+   hypre_StructAssumedPartMyPartitionProcIds(new_ap) = hypre_CTAlloc(HYPRE_Int, size); 
 
-   hypre_StructAssumedPartMyPartitionBoxes(new_ap) 
-      = hypre_BoxArrayCreate(size, ndim);
+   hypre_StructAssumedPartMyPartitionBoxes(new_ap) = hypre_BoxArrayCreate(size, ndim);
 
    hypre_StructAssumedPartMyPartitionIdsAlloc(new_ap) = size;
    hypre_StructAssumedPartMyPartitionIdsSize(new_ap) = size;
 
    /* Coarsen and copy the boxes.  Need to prune size 0 boxes. */
+   fine_boxes = hypre_StructAssumedPartMyPartitionBoxes(ap);
    coarse_boxes = hypre_StructAssumedPartMyPartitionBoxes(new_ap);
-   fine_boxes =  hypre_StructAssumedPartMyPartitionBoxes(ap);
 
    new_box = hypre_BoxCreate(ndim);
 
    hypre_ForBoxI(i, fine_boxes)
    {
-      box =  hypre_BoxArrayBox(fine_boxes,i);
+      box = hypre_BoxArrayBox(fine_boxes,i);
       hypre_CopyBox(box, new_box);
-      hypre_StructCoarsenBox(new_box, index, stride);
+      hypre_StructCoarsenBox(new_box, origin, stride);
    }
 
    /* Unfinished because of a problem: Can't figure out what the new id is since

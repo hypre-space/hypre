@@ -47,7 +47,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGridBoxes(grid)       = hypre_BoxArrayCreate(0, ndim);
    hypre_StructGridIDs(grid)         = NULL;
 
-   hypre_SetIndex(hypre_StructGridMaxDistance(grid),8);
+   hypre_SetIndex(hypre_StructGridMaxDistance(grid), 8);
 
    hypre_StructGridBoundingBox(grid) = NULL;
    hypre_StructGridLocalSize(grid)   = 0;
@@ -472,13 +472,12 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       hypre_ForBoxI(i, local_boxes)
       {
          box = hypre_BoxArrayBox(local_boxes, i);
-         /* add entry for each local box (the id is the boxnum, and should be
-            sequential */         
+         /* add entry for each local box (the id is the boxnum, and should be sequential */
          hypre_BoxManAddEntry( boxman, hypre_BoxIMin(box), hypre_BoxIMax(box),
                                myid, i, entry_info );
  
          /* now expand box by max_distance or larger and gather entries */
-         hypre_CopyBox(box ,grow_box);     
+         hypre_CopyBox(box, grow_box);
          hypre_BoxGrowByIndex(grow_box, max_distance);
          hypre_BoxManGatherEntries(boxman, hypre_BoxIMin(grow_box), 
                                    hypre_BoxIMax(grow_box));

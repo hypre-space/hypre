@@ -33,7 +33,6 @@ typedef struct
    hypre_BoxArray     *my_partition;        /* my portion of grid (at most 2) */
    hypre_BoxArray     *my_partition_boxes;  /* boxes in my portion */
    HYPRE_Int          *my_partition_proc_ids;
-   HYPRE_Int          *my_partition_boxnums;
    HYPRE_Int           my_partition_ids_size;   
    HYPRE_Int           my_partition_ids_alloc;
    HYPRE_Int           my_partition_num_distinct_procs;
@@ -56,8 +55,6 @@ typedef struct
 #define hypre_StructAssumedPartMyPartitionIdsSize(apart) ((apart)->my_partition_ids_size)
 #define hypre_StructAssumedPartMyPartitionIdsAlloc(apart) ((apart)->my_partition_ids_alloc)
 #define hypre_StructAssumedPartMyPartitionNumDistinctProcs(apart) ((apart)->my_partition_num_distinct_procs)
-#define hypre_StructAssumedPartMyPartitionBoxnums(apart) ((apart)->my_partition_boxnums)
 
 #define hypre_StructAssumedPartMyPartitionProcId(apart, i) ((apart)->my_partition_proc_ids[i])
-#define hypre_StructAssumedPartMyPartitionBoxnum(apart, i) ((apart)->my_partition_boxnums[i])
 #endif

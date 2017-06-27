@@ -201,7 +201,7 @@ hypre_CoarsenBoxArrayArray( hypre_BoxArrayArray  *box_array_array,
  *  ("Sufficient" is determined by checking max_distance in the fine grid.)
  *
  *  3. Otherwise, neighbor information will be collected during the
- *  StructGridAssemble according to the choosen value of max_distance for the
+ *  StructGridAssemble according to the chosen value of max_distance for the
  *  coarse grid.
  *
  *  4. We do not need a separate version for the assumed partition case
@@ -373,7 +373,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    /* now get the entries from the fgrid box manager, coarsen, and add to the
       coarse grid box manager (note: my boxes have already been coarsened) */
    
-   hypre_BoxManGetAllEntries( fboxman , &num_entries, &entries); 
+   hypre_BoxManGetAllEntries(fboxman, &num_entries, &entries); 
 
    new_box = hypre_BoxCreate(ndim);
    num = 0;
@@ -438,7 +438,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    } /* loop through entries */
    
    /* these entries are sorted */
-   hypre_BoxManSetIsEntriesSort(cboxman, 1 );
+   hypre_BoxManSetIsEntriesSort(cboxman, 1);
    
    hypre_BoxDestroy(new_box);
 
@@ -449,7 +449,8 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
     
    if (fap)
    {
-      /* coarsen fap to get cap */ 
+      /* coarsen fap to get cap */
+      hypre_StructCoarsenAP(fap, origin, stride, &cap);
 
       /* set cap */  
       hypre_BoxManSetAssumedPartition (cboxman, cap);
