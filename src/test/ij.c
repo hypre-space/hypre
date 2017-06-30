@@ -271,6 +271,8 @@ main( hypre_int argc,
    /* interpolation */
    HYPRE_Int      interp_type  = 6; /* default value */
    HYPRE_Int      post_interp_type  = 0; /* default value */
+   /* RL: restriction */
+   HYPRE_Int      restri_type = 0;
    /* aggressive coarsening */
    HYPRE_Int      agg_interp_type  = 4; /* default value */
    HYPRE_Int      agg_P_max_elmts  = 0; /* default value */
@@ -785,6 +787,11 @@ main( hypre_int argc,
          dt = atof(argv[arg_index++]);
          build_rhs_type = -1;
          if ( build_src_type == -1 ) build_src_type = 2;
+      }
+      else if ( strcmp(argv[arg_index], "-restritype") == 0 )
+      {
+         arg_index++;
+         restri_type  = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-help") == 0 )
       {
@@ -1428,10 +1435,14 @@ main( hypre_int argc,
       hypre_printf("      22=classical block interpolation w/Ruge's variant for nodal systems AMG \n");
       hypre_printf("      23=same as 22, but use row sums for diag scaling matrices,for nodal systems AMG \n");
       hypre_printf("      24=direct block interpolation for nodal systems AMG\n");
-
-
-     
       hypre_printf("\n");
+
+      /* RL */
+      hypre_printf("  -restritype  <val>    : set restriction type\n");
+      hypre_printf("       0=transpose of the interpolation  \n");
+      hypre_printf("       1=local approximate ideal restriction (AIR)  \n");
+      hypre_printf("\n");
+
       hypre_printf("  -rlx  <val>            : relaxation type\n");
       hypre_printf("       0=Weighted Jacobi  \n");
       hypre_printf("       1=Gauss-Seidel (very slow!)  \n");
@@ -2513,6 +2524,8 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_BoomerAMGCreate(&amg_solver); 
+      /* RL: specify restriction */
+      HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 1: AIR */
       /* BM Aug 25, 2006 */
       HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);

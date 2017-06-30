@@ -105,6 +105,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       smooth_num_levels;
    HYPRE_Int       num_threads, my_id;
 
+   /* RL */
+   HYPRE_Int       restri_type;
+   
    HYPRE_Real    alpha;
    HYPRE_Real  **l1_norms = NULL;
    HYPRE_Real   *l1_norms_level;
@@ -156,7 +159,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    smooth_num_levels   = hypre_ParAMGDataSmoothNumLevels(amg_data);
    l1_norms            = hypre_ParAMGDataL1Norms(amg_data);
    /* smooth_option       = hypre_ParAMGDataSmoothOption(amg_data); */
-
+   /* RL */
+   restri_type = hypre_ParAMGDataRestriction(amg_data); 
+   
    /*max_eig_est = hypre_ParAMGDataMaxEigEst(amg_data);
    min_eig_est = hypre_ParAMGDataMinEigEst(amg_data);
    cheby_fraction = hypre_ParAMGDataChebyFraction(amg_data);*/
@@ -614,8 +619,17 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
          else
          {
-            hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
-                                      beta,F_array[coarse_grid]);
+            if (restri_type)
+            {
+               /* RL: no transpose for R */
+               hypre_ParCSRMatrixMatvec(alpha, R_array[fine_grid], Vtemp,
+                                        beta, F_array[coarse_grid]);
+            }
+            else
+            {
+               hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
+                                         beta,F_array[coarse_grid]);
+            }
          }
 
          ++level;

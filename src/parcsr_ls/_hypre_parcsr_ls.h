@@ -1576,6 +1576,8 @@ HYPRE_Int hypre_ParAdSchwarzSolve ( hypre_ParCSRMatrix *A , hypre_ParVector *F ,
 HYPRE_Int hypre_ParAMGCreateDomainDof ( hypre_ParCSRMatrix *A , HYPRE_Int domain_type , HYPRE_Int overlap , HYPRE_Int num_functions , HYPRE_Int *dof_func , hypre_CSRMatrix **domain_structure_pointer , HYPRE_Int **piv_pointer , HYPRE_Int use_nonsymm );
 HYPRE_Int hypre_ParGenerateScale ( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , HYPRE_Real relaxation_weight , HYPRE_Real **scale_pointer );
 HYPRE_Int hypre_ParGenerateHybridScale ( hypre_ParCSRMatrix *A , hypre_CSRMatrix *domain_structure , hypre_CSRMatrix **A_boundary_pointer , HYPRE_Real **scale_pointer );
+/* RL */
+HYPRE_Int hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
 
 #ifdef __cplusplus
 }

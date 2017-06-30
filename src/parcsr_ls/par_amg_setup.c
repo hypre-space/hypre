@@ -46,6 +46,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParVector     *Ptemp = NULL;
    hypre_ParVector     *Ztemp = NULL;
    hypre_ParCSRMatrix **P_array;
+   hypre_ParCSRMatrix **R_array;
    hypre_ParVector    *Residual_array;
    HYPRE_Int                **CF_marker_array;   
    HYPRE_Int                **dof_func_array;   
@@ -85,7 +86,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int      add_rlx = hypre_ParAMGDataAddRelaxType(amg_data);
    HYPRE_Real     add_rlx_wt = hypre_ParAMGDataAddRelaxWt(amg_data);
 
-   hypre_ParCSRBlockMatrix **A_block_array, **P_block_array;
+   hypre_ParCSRBlockMatrix **A_block_array, **P_block_array, **R_block_array;
  
    /* Local variables */
    HYPRE_Int                 *CF_marker;
@@ -96,6 +97,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParCSRMatrix  *SN = NULL;
    hypre_ParCSRMatrix  *SCR;
    hypre_ParCSRMatrix  *P = NULL;
+   hypre_ParCSRMatrix  *R = NULL;
    hypre_ParCSRMatrix  *A_H;
    hypre_ParCSRMatrix  *AN = NULL;
    hypre_ParCSRMatrix  *P1;
@@ -154,9 +156,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int	     eu_bj;
    HYPRE_Real    eu_sparse_A;
 
-   HYPRE_Int interp_type;
+   HYPRE_Int interp_type, restri_type;
    HYPRE_Int post_interp_type;  /* what to do after computing the interpolation matrix
-                             0 for nothing, 1 for a Jacobi step */
+                                   0 for nothing, 1 for a Jacobi step */
 
 
    /*for fittting interp vectors */
@@ -238,6 +240,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    eu_sparse_A = hypre_ParAMGDataEuSparseA(amg_data);
    eu_bj = hypre_ParAMGDataEuBJ(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
+   restri_type = hypre_ParAMGDataRestriction(amg_data); /* RL */
    post_interp_type = hypre_ParAMGDataPostInterpType(amg_data);
    IS_type = hypre_ParAMGDataISType(amg_data);
    num_CR_relax_steps = hypre_ParAMGDataNumCRRelaxSteps(amg_data);
@@ -258,6 +261,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    A_array = hypre_ParAMGDataAArray(amg_data);
    P_array = hypre_ParAMGDataPArray(amg_data);
+   R_array = hypre_ParAMGDataRArray(amg_data);
    CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
    dof_func_array = hypre_ParAMGDataDofFuncArray(amg_data);
    local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
@@ -265,6 +269,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
  
    A_block_array = hypre_ParAMGDataABlockArray(amg_data);
    P_block_array = hypre_ParAMGDataPBlockArray(amg_data);
+   R_block_array = hypre_ParAMGDataRBlockArray(amg_data);
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data); 
 
@@ -352,7 +357,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    /* free up storage in case of new setup without prvious destroy */
 
-   if (A_array || A_block_array || P_array || P_block_array || CF_marker_array || dof_func_array)
+   if (A_array || A_block_array || P_array || P_block_array || CF_marker_array || 
+       dof_func_array || R_array || R_block_array)
    {
       for (j = 1; j < old_num_levels; j++)
       {
@@ -390,7 +396,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRBlockMatrixDestroy(P_block_array[j]);
             P_array[j] = NULL;
          }
+         /* RL */
+         if (R_array[j])
+         {
+            hypre_ParCSRMatrixDestroy(R_array[j]);
+            R_array[j] = NULL;
+         }
 
+         if (R_block_array[j])
+         {
+            hypre_ParCSRBlockMatrixDestroy(R_block_array[j]);
+            R_array[j] = NULL;
+         }
       }
 
 /* Special case use of CF_marker_array when old_num_levels == 1
@@ -561,6 +578,18 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (P_block_array == NULL && max_levels > 1)
       P_block_array = hypre_CTAlloc(hypre_ParCSRBlockMatrix*, max_levels-1);
 
+   /* RL: if retri_type != 0, R != P^T, allocate R matrices */
+   if (restri_type)
+   {
+      if (R_array == NULL && max_levels > 1)
+      {
+         R_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_levels-1);
+      }
+      if (R_block_array == NULL && max_levels > 1)
+      {
+         R_block_array = hypre_CTAlloc(hypre_ParCSRBlockMatrix*, max_levels-1);
+      }
+   }
 
    if (CF_marker_array == NULL)
       CF_marker_array = hypre_CTAlloc(HYPRE_Int*, max_levels);
@@ -621,11 +650,29 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParAMGDataDofFuncArray(amg_data) = dof_func_array;
    hypre_ParAMGDataAArray(amg_data) = A_array;
    hypre_ParAMGDataPArray(amg_data) = P_array;
-   hypre_ParAMGDataRArray(amg_data) = P_array;
+   
+   /* RL: if R != P^T */
+   if (restri_type)
+   {
+      hypre_ParAMGDataRArray(amg_data) = R_array;
+   }
+   else
+   {
+      hypre_ParAMGDataRArray(amg_data) = P_array;
+   }
 
    hypre_ParAMGDataABlockArray(amg_data) = A_block_array;
    hypre_ParAMGDataPBlockArray(amg_data) = P_block_array;
-   hypre_ParAMGDataRBlockArray(amg_data) = P_block_array;
+   
+   /* RL: if R != P^T */
+   if (restri_type)
+   {
+      hypre_ParAMGDataRBlockArray(amg_data) = R_block_array;
+   }
+   else
+   {
+      hypre_ParAMGDataRBlockArray(amg_data) = P_block_array;
+   }
 
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
 
@@ -1403,13 +1450,21 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             coarse_size = coarse_pnts_global[num_procs];
 #endif
  xxxxxxxxxxxxxxxxxxxxxxxxx change for min_coarse_size */ 
-         if (debug_flag==1)
-         {
-            wall_time = time_getWallclockSeconds() - wall_time;
-            hypre_printf("Proc = %d    Level = %d    Coarsen Time = %f\n",
-                       my_id,level, wall_time); 
-	    fflush(NULL);
-         }
+            if (debug_flag==1)
+            {
+               wall_time = time_getWallclockSeconds() - wall_time;
+               hypre_printf("Proc = %d    Level = %d    Coarsen Time = %f\n",
+                            my_id,level, wall_time); 
+               fflush(NULL);
+            }
+
+            /* RL: build restriction */
+            if (restri_type == 1)
+            {
+               hypre_BoomerAMGBuildRestrAIR(A_array[level], CF_marker, 
+                                            S, coarse_pnts_global, num_functions, dof_func_array[level], 
+                                            debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &R );
+            }
 
             if (debug_flag==1) wall_time = time_getWallclockSeconds();
 
@@ -2021,9 +2076,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_ParCSRMatrixDestroy(Q);
                }
                else
+               {
 	          hypre_BoomerAMGBuildCoarseOperatorKT(P, A_array[level] , P, 
 			keepTranspose, &A_H); 
-	
+               }
+
                if (add_rlx == 18)
 	          C = hypre_CreateC(A_array[level], 0.0);
                else
@@ -2055,7 +2112,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixDestroy(P);
          }
          else
-            P_array[level] = P; 
+         {
+            P_array[level] = P;
+            /* RL: save R matrix */
+            if (restri_type)
+            {
+               R_array[level] = R;
+            }
+         }
       }
      
       if (S) hypre_ParCSRMatrixDestroy(S);
@@ -2121,6 +2185,26 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             
             /* Delete AP */
             hypre_ParCSRMatrixDestroy(Q);
+         }
+         else if (restri_type) /* RL: */
+         {
+            /* Use two matrix products to generate A_H */
+            hypre_ParCSRMatrix *AP = NULL;
+            AP  = hypre_ParMatmul(A_array[level], P_array[level]);
+            A_H = hypre_ParMatmul(R_array[level], AP);
+            /* RL: XXX NEED TO CHECK THIS WITH UMY */
+            hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
+            hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
+            /* P gives up her ColStarts */
+            hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
+            /* R gives up her RowStarts */
+            hypre_ParCSRMatrixOwnsRowStarts(R_array[level]) = 0;
+            if (num_procs > 1) 
+            {
+               hypre_MatvecCommPkgCreate(A_H);
+            }
+            /* Delete AP */
+            hypre_ParCSRMatrixDestroy(AP);
          }
          else if (rap2)
          {

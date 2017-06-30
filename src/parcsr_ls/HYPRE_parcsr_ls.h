@@ -1050,6 +1050,8 @@ HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
 
 /*
  * (Optional)
+ *  0: transpose of the interpolation
+ *  1: AIR - approximate ideal restriction
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
                                         HYPRE_Int    restr_par);
@@ -3267,6 +3269,7 @@ hypre_ParCSRMultiVectorPrint(void *x_, const char *fileName);
  **/
 void *
 hypre_ParCSRMultiVectorRead(MPI_Comm comm, void *ii_, const char *fileName);
+
 
 /*@}*/
 

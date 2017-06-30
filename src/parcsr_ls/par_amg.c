@@ -504,6 +504,15 @@ hypre_BoomerAMGDestroy( void *data )
         if (hypre_ParAMGDataPArray(amg_data)[i-1])
            hypre_ParCSRMatrixDestroy(hypre_ParAMGDataPArray(amg_data)[i-1]);
 
+        /* RL */
+        if (hypre_ParAMGDataRestriction(amg_data))
+        {
+           if (hypre_ParAMGDataRArray(amg_data)[i-1])
+           {
+              hypre_ParCSRMatrixDestroy(hypre_ParAMGDataRArray(amg_data)[i-1]);
+           }
+        }
+
 	hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data)[i-1]);
 
         /* get rid of any block structures */ 
@@ -513,6 +522,14 @@ hypre_BoomerAMGDestroy( void *data )
         if (hypre_ParAMGDataPBlockArray(amg_data)[i-1])
            hypre_ParCSRBlockMatrixDestroy(hypre_ParAMGDataPBlockArray(amg_data)[i-1]);
 
+        /* RL */
+        if (hypre_ParAMGDataRestriction(amg_data))
+        {
+           if (hypre_ParAMGDataRBlockArray(amg_data)[i-1])
+           {
+              hypre_ParCSRBlockMatrixDestroy(hypre_ParAMGDataRBlockArray(amg_data)[i-1]);
+           }
+        }
    }
 
    if (hypre_ParAMGDataLambda(amg_data))
@@ -594,6 +611,7 @@ hypre_BoomerAMGDestroy( void *data )
    }
    if (hypre_ParAMGDataRestriction(amg_data))
    {
+      hypre_TFree(hypre_ParAMGDataRBlockArray(amg_data));
       hypre_TFree(hypre_ParAMGDataRArray(amg_data));
       hypre_ParAMGDataRArray(amg_data) = NULL;
    }
@@ -706,15 +724,25 @@ hypre_BoomerAMGDestroy( void *data )
 
 HYPRE_Int
 hypre_BoomerAMGSetRestriction( void *data,
-                            HYPRE_Int   restr_par )
+                               HYPRE_Int   restr_par )
 {
-	hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
    if (!amg_data)
    {
       hypre_error_in_arg(1);
       return hypre_error_flag;
    } 
+ 
+   /* RL: currently, only 0: R = P^T
+    *                     1: AIR
+    */
+   if (restr_par < 0 || restr_par > 1)
+
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
 
    hypre_ParAMGDataRestriction(amg_data) = restr_par;
 
@@ -2423,7 +2451,7 @@ hypre_BoomerAMGGetDebugFlag( void     *data,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGSetGSMG( void *data,
+hypre_BoomerAMGSetGSMG( void       *data,
                         HYPRE_Int   par )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;

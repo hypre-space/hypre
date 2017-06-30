@@ -695,43 +695,45 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
                if (sum != 0)
 	       {
-	       distribute = A_diag_data[jj] / sum;
+                  distribute = A_diag_data[jj] / sum;
  
-               /*-----------------------------------------------------------
-                * Loop over row of A for point i1 and do the distribution.
-                *-----------------------------------------------------------*/
+                  /*-----------------------------------------------------------
+                   * Loop over row of A for point i1 and do the distribution.
+                   *-----------------------------------------------------------*/
 
-               /* Diagonal block part of row i1 */
-               for (jj1 = A_diag_i[i1]; jj1 < A_diag_i[i1+1]; jj1++)
-               {
-                  i2 = A_diag_j[jj1];
-                  if (P_marker[i2] >= jj_begin_row 
+                  /* Diagonal block part of row i1 */
+                  for (jj1 = A_diag_i[i1]; jj1 < A_diag_i[i1+1]; jj1++)
+                  {
+                     i2 = A_diag_j[jj1];
+                     if (P_marker[i2] >= jj_begin_row 
 				&& (sgn*A_diag_data[jj1]) < 0)
-                  {
-                     P_diag_data[P_marker[i2]]
-                                  += distribute * A_diag_data[jj1];
-                  }
-               }
-
-               /* Off-Diagonal block part of row i1 */
-               if (num_procs > 1)
-               {
-                  for (jj1 = A_offd_i[i1]; jj1 < A_offd_i[i1+1]; jj1++)
-                  {
-                     i2 = A_offd_j[jj1];
-                     if (P_marker_offd[i2] >= jj_begin_row_offd
-				&& (sgn*A_offd_data[jj1]) < 0)
                      {
-                         P_offd_data[P_marker_offd[i2]]    
+                        P_diag_data[P_marker[i2]]
+                                  += distribute * A_diag_data[jj1];
+                     }
+                  }
+
+                  /* Off-Diagonal block part of row i1 */
+                  if (num_procs > 1)
+                  {
+                     for (jj1 = A_offd_i[i1]; jj1 < A_offd_i[i1+1]; jj1++)
+                     {
+                        i2 = A_offd_j[jj1];
+                        if (P_marker_offd[i2] >= jj_begin_row_offd
+				&& (sgn*A_offd_data[jj1]) < 0)
+                        {
+                           P_offd_data[P_marker_offd[i2]]    
                                   += distribute * A_offd_data[jj1]; 
+                        }
                      }
                   }
                }
-               }
                else
                {
-		  if (num_functions == 1 || dof_func[i] == dof_func[i1])
+                  if (num_functions == 1 || dof_func[i] == dof_func[i1])
+                  {
                      diagonal += A_diag_data[jj];
+                  }
                }
             }
             
@@ -743,7 +745,9 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
             else if (CF_marker[i1] != -3)
             {
 	       if (num_functions == 1 || dof_func[i] == dof_func[i1])
+               {
                   diagonal += A_diag_data[jj];
+               }
             } 
 
          }    
@@ -818,41 +822,43 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
 
                   if (sum != 0)
 		  {
-		  distribute = A_offd_data[jj] / sum;   
-                  /*---------------------------------------------------------
-                   * Loop over row of A_ext for point i1 and do 
-                   * the distribution.
-                   *--------------------------------------------------------*/
+                     distribute = A_offd_data[jj] / sum;   
+                     /*---------------------------------------------------------
+                      * Loop over row of A_ext for point i1 and do 
+                      * the distribution.
+                      *--------------------------------------------------------*/
 
-                  /* Diagonal block part of row i1 */
+                     /* Diagonal block part of row i1 */
                           
-                  for (jj1 = A_ext_i[c_num]; jj1 < A_ext_i[c_num+1]; jj1++)
-                  {
-                     i2 = A_ext_j[jj1];
-
-                     if (i2 > -1) /* in the diagonal block */           
+                     for (jj1 = A_ext_i[c_num]; jj1 < A_ext_i[c_num+1]; jj1++)
                      {
-                        if (P_marker[i2] >= jj_begin_row
-				&& (sgn*A_ext_data[jj1]) < 0)
+                        i2 = A_ext_j[jj1];
+
+                        if (i2 > -1) /* in the diagonal block */           
                         {
-                           P_diag_data[P_marker[i2]]
+                           if (P_marker[i2] >= jj_begin_row
+				&& (sgn*A_ext_data[jj1]) < 0)
+                           {
+                              P_diag_data[P_marker[i2]]
+                                     += distribute * A_ext_data[jj1];
+                           }
+                        }
+                        else
+                        {
+                           /* in the off_diagonal block  */
+                           if (P_marker_offd[-i2-1] >= jj_begin_row_offd
+				&& (sgn*A_ext_data[jj1]) < 0)
+                              P_offd_data[P_marker_offd[-i2-1]]
                                      += distribute * A_ext_data[jj1];
                         }
                      }
-                     else
-                     {
-                        /* in the off_diagonal block  */
-                        if (P_marker_offd[-i2-1] >= jj_begin_row_offd
-				&& (sgn*A_ext_data[jj1]) < 0)
-                           P_offd_data[P_marker_offd[-i2-1]]
-                                     += distribute * A_ext_data[jj1];
-                     }
-                  }
                   }
 		  else
                   {
 	             if (num_functions == 1 || dof_func[i] == dof_func_offd[i1])
+                     {
                         diagonal += A_offd_data[jj];
+                     }
                   }
                }
             
@@ -864,7 +870,9 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
                else if (CF_marker_offd[i1] != -3)
                {
 	          if (num_functions == 1 || dof_func[i] == dof_func_offd[i1])
+                  {
                      diagonal += A_offd_data[jj];
+                  }
                } 
 
             }
@@ -877,7 +885,9 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
          if (diagonal == 0.0)
          {
             if (print_level)
-               hypre_printf(" Warning! zero diagonal! Proc id %d row %d\n", my_id,i); 
+            {
+               hypre_printf(" Warning! zero diagonal! Proc id %d row %d\n", my_id,i);
+            }
             for (jj = jj_begin_row; jj < jj_end_row; jj++)
             {
                P_diag_data[jj] = 0.0;
@@ -985,12 +995,14 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    }
 
    for (i=0; i < n_fine; i++)
+   {
       if (CF_marker[i] == -3) CF_marker[i] = -1;
+   }
 
    if (num_cols_P_offd)
    { 
-   	hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
-   	hypre_CSRMatrixNumCols(P_offd) = num_cols_P_offd;
+      hypre_ParCSRMatrixColMapOffd(P) = col_map_offd_P;
+      hypre_CSRMatrixNumCols(P_offd) = num_cols_P_offd;
    } 
 
    hypre_GetCommPkgRTFromCommPkgA(P,A, fine_to_coarse_offd);
