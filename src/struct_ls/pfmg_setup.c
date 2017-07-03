@@ -324,6 +324,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    hypre_StructVectorInitialize(tx_l[0]);
    hypre_StructVectorAssemble(tx_l[0]);
 
+//   /* RDF AP Debug */
+//   hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
+//                                        hypre_StructGridBoxMan(grid_l[0])));
+
    for (l = 0; l < (num_levels - 1); l++)
    {
       cdir = cdir_l[l];
@@ -379,6 +383,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          hypre_StructMatrixInitialize(A_l[l+1]);
          hypre_PFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l], cdir, cindex, stride, rap_type, A_l[l+1]);
       }
+
+//      /* RDF AP Debug */
+//      hypre_StructAssumedPartitionPrint("zAP", hypre_BoxManAssumedPartition(
+//                                           hypre_StructGridBoxMan(grid_l[l+1])));
 
       b_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(b_l[l+1], b_num_ghost);

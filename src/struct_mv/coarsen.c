@@ -107,6 +107,39 @@ hypre_StructMapCoarseToFine( hypre_Index cindex,
 }
 
 /*--------------------------------------------------------------------------
+ * Compute a new coarse (origin, stride) pair from an old (origin, stride) pair.
+ * This new pair can be used with the RefineBox() function to map back to the
+ * finest grid with just one call, i.e., the following two lines of code are
+ * equivalent:
+ *
+ *    RefineBox(box, origin_new, stride_new);
+ *    RefineBox(box, origin, stride); RefineBox(box, origin_old, stride_old);
+ *
+ * NOTE: Need to check to see if this holds for CoarsenBox() also.
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ComputeCoarseOriginStride( hypre_Index     coarse_origin,
+                                 hypre_Index     coarse_stride,
+                                 hypre_IndexRef  origin,
+                                 hypre_Index     stride,
+                                 HYPRE_Int       ndim )
+{
+   HYPRE_Int d;
+
+   for (d = 0; d < ndim; d++)
+   {
+      if (origin != NULL)
+      {
+         coarse_origin[d] += origin[d] * coarse_stride[d];
+      }
+      coarse_stride[d] *= stride[d];
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * This may produce an empty box, i.e., one with volume 0.
  * If 'origin' is NULL, a zero origin is used.
  *--------------------------------------------------------------------------*/
@@ -239,15 +272,13 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    HYPRE_Int         proc, id;
    HYPRE_Int         coarsen_factor, known;
    HYPRE_Int         num, last_proc;
-#if 0
+   hypre_BoxManager *fboxman, *cboxman;
    hypre_StructAssumedPart *fap = NULL, *cap = NULL;
-#endif
-   hypre_BoxManager   *fboxman, *cboxman;
 
    hypre_BoxManEntry *entries;
-   hypre_BoxManEntry  *entry;
+   hypre_BoxManEntry *entry;
      
-   void               *entry_info = NULL;
+   void              *entry_info = NULL;
  
 #if TIME_DEBUG  
    HYPRE_Int tindex;
@@ -326,18 +357,14 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       Note: if all global info is already known for a grid, the we do not need
       to re-gather regardless of the max_distance values. */
 
+//   hypre_SetIndex(new_dist, 2); /* RDF: Is this needed with new MAXDIM stuff? */
    for (i = 0; i < ndim; i++)
    {
       coarsen_factor = hypre_IndexD(stride,i); 
       hypre_IndexD(new_dist, i) = hypre_IndexD(max_distance,i)/coarsen_factor;
    }
-   for (i = ndim; i < 3; i++)
-   {
-      hypre_IndexD(new_dist, i) = 2;
-   }
    
    hypre_BoxManGetAllGlobalKnown (fboxman, &known );
-
 
    /* large enough - don't need to re-gather */
    if ( (hypre_IndexMin(new_dist, ndim) > 1) || known )
@@ -346,8 +373,9 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
       if (!known) /* only need to change if global info is not known */
          hypre_StructGridSetMaxDistance(cgrid, new_dist);
    }
-   else  /* not large enough - set max_distance to 0 - neighbor info will be
-            collected during the assemble */
+   /* not large enough - set max_distance to 0 - neighbor info will be collected
+      during the assemble */
+   else
    {
       hypre_SetIndex(new_dist, 0);
       hypre_StructGridSetMaxDistance(cgrid, new_dist);
@@ -442,20 +470,18 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
    
    hypre_BoxDestroy(new_box);
 
-#if 0   
    /* if there is an assumed partition in the fg, then coarsen those boxes as
       well and add to cg */
-   hypre_BoxManGetAssumedPartition (fboxman, &fap);
-    
+   hypre_BoxManGetAssumedPartition(fboxman, &fap);
+
    if (fap)
    {
       /* coarsen fap to get cap */
       hypre_StructCoarsenAP(fap, origin, stride, &cap);
 
       /* set cap */  
-      hypre_BoxManSetAssumedPartition (cboxman, cap);
+      hypre_BoxManSetAssumedPartition(cboxman, cap);
    }
-#endif
 
    /* assign new box manager */
    hypre_StructGridSetBoxManager(cgrid, cboxman);

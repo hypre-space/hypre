@@ -22,6 +22,8 @@ HYPRE_Int hypre_StructAssumedPartitionDestroy ( hypre_StructAssumedPart *assumed
 HYPRE_Int hypre_APFillResponseStructAssumedPart ( void *p_recv_contact_buf , HYPRE_Int contact_size , HYPRE_Int contact_proc , void *ro , MPI_Comm comm , void **p_send_response_buf , HYPRE_Int *response_message_size );
 HYPRE_Int hypre_StructAssumedPartitionGetRegionsFromProc ( hypre_StructAssumedPart *assumed_part , HYPRE_Int proc_id , hypre_BoxArray *assumed_regions );
 HYPRE_Int hypre_StructAssumedPartitionGetProcsFromBox ( hypre_StructAssumedPart *assumed_part , hypre_Box *box , HYPRE_Int *num_proc_array , HYPRE_Int *size_alloc_proc_array , HYPRE_Int **p_proc_array );
+HYPRE_Int hypre_StructAssumedPartitionPrint ( const char *filename , hypre_StructAssumedPart *ap );
+HYPRE_Int hypre_StructCoarsenAP ( hypre_StructAssumedPart *ap , hypre_Index origin , hypre_Index stride , hypre_StructAssumedPart **new_ap_ptr );
 
 /* box_algebra.c */
 HYPRE_Int hypre_IntersectBoxes ( hypre_Box *box1 , hypre_Box *box2 , hypre_Box *ibox );
@@ -114,6 +116,8 @@ HYPRE_Int hypre_MapToCoarseIndex( hypre_Index index , hypre_IndexRef origin , hy
 HYPRE_Int hypre_MapToFineIndex( hypre_Index index , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
 HYPRE_Int hypre_StructMapFineToCoarse( hypre_Index findex , hypre_Index origin , hypre_Index stride , hypre_Index cindex );
 HYPRE_Int hypre_StructMapCoarseToFine( hypre_Index cindex , hypre_Index origin , hypre_Index stride , hypre_Index findex );
+HYPRE_Int
+hypre_ComputeCoarseOriginStride( hypre_Index coarse_origin , hypre_Index coarse_stride , hypre_IndexRef origin , hypre_Index stride , HYPRE_Int ndim );
 HYPRE_Int hypre_CoarsenBox( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
 HYPRE_Int hypre_RefineBox ( hypre_Box *box , hypre_IndexRef origin , hypre_Index stride );
 HYPRE_Int hypre_CoarsenBoxArray( hypre_BoxArray *box_array , hypre_IndexRef origin , hypre_Index stride );

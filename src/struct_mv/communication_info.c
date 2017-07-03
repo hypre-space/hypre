@@ -706,9 +706,8 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
          hypre_BoxShiftPos(periodic_box, pshift);
          
          /* get the intersections */
-         hypre_BoxManIntersect(boxman, hypre_BoxIMin(periodic_box) , 
-                               hypre_BoxIMax(periodic_box) , 
-                               &entries , &num_entries);
+         hypre_BoxManIntersect(boxman, hypre_BoxIMin(periodic_box), hypre_BoxIMax(periodic_box),
+                               &entries, &num_entries);
       
          /* note: do we need to remove the intersection with our original box?
             no if periodic, yes if non-periodic (k=0) */ 
@@ -717,11 +716,9 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
          if (neighbor_count + num_entries > neighbor_alloc)
          {
             neighbor_alloc = neighbor_count + num_entries + 5;
-            neighbor_procs = hypre_TReAlloc(neighbor_procs, HYPRE_Int,
-                                            neighbor_alloc);
+            neighbor_procs = hypre_TReAlloc(neighbor_procs, HYPRE_Int, neighbor_alloc);
             neighbor_ids = hypre_TReAlloc(neighbor_ids, HYPRE_Int, neighbor_alloc);
-            neighbor_shifts = hypre_TReAlloc(neighbor_shifts, HYPRE_Int,
-                                             neighbor_alloc);
+            neighbor_shifts = hypre_TReAlloc(neighbor_shifts, HYPRE_Int, neighbor_alloc);
          }
          /* check storage for the array */
          hypre_BoxArraySetSize(neighbor_boxes, neighbor_count + num_entries);
@@ -779,7 +776,7 @@ hypre_CreateCommInfo( hypre_StructGrid   *grid,
       if (neighbor_count > cbox_alloc)
       {
          cbox_alloc = neighbor_count;
-         cboxes_neighbor_location = hypre_TReAlloc(cboxes_neighbor_location, 
+         cboxes_neighbor_location = hypre_TReAlloc(cboxes_neighbor_location,
                                                    HYPRE_Int, cbox_alloc);
          cboxes = hypre_TReAlloc(cboxes, hypre_Box *, cbox_alloc);
          cboxes_mem = hypre_TReAlloc(cboxes_mem, hypre_Box, cbox_alloc);
