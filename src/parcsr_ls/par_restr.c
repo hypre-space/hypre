@@ -77,8 +77,8 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *A_ext_i    = NULL;
    HYPRE_Int       *A_ext_j    = NULL;
    
-   HYPRE_Int i, j, k, i1, k1, k2, rr, cc, ic, index, start, local_max_size, local_size,
-             num_cols_offd_R;
+   HYPRE_Int        i, j, k, i1, k1, k2, rr, cc, ic, index, start, 
+                    local_max_size, local_size, num_cols_offd_R;
 
    /* LAPACK */
    HYPRE_Real *DAi, *Dbi;
@@ -172,7 +172,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
             int_buf_data[index++] = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
          }
       }
-      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, dof_func_offd);
+      comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, dof_func_offd);
       hypre_ParCSRCommHandleDestroy(comm_handle);   
    }
     

@@ -1270,7 +1270,7 @@ hypre_BoomerAMGSetInterpType( void     *data,
    } 
 
 
-   if (interp_type < 0 || interp_type > 25)
+   if ((interp_type < 0 || interp_type > 25) && interp_type != 100)
 
    {
       hypre_error_in_arg(2);
