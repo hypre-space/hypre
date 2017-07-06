@@ -120,6 +120,7 @@ extern "C" {
 #define zlasr_   hypre_zlasr
 #define zlarft_  hypre_zlarft
 #define zlarfb_  hypre_zlarfb
+#define zlartg_  hypre_zlartg
 #define zlabrd_  hypre_zlabrd
 #define zgeqrf_  hypre_zgeqrf
 #define zgeqr2_  hypre_zgerq2
@@ -374,6 +375,9 @@ HYPRE_Int zgebrd_(integer *m, integer *n, doublecomplex *a, integer *lda, double
 
 /* zgeqrf.c */
 HYPRE_Int zgeqrf_(integer *m, integer *n, doublecomplex *a, integer *lda, doublecomplex *tau, doublecomplex *work, integer *lwork, integer *info);
+
+/* zlartg.c */
+HYPRE_Int zlartg_(doublecomplex *f, doublecomplex *g, doublereal * cs, doublecomplex *sn, doublecomplex *r__);
 
 /* ztrtrs.c */
 HYPRE_Int ztrtrs_(const char *uplo, const char *trans, const char *diag, integer *n, integer *nrhs, doublecomplex *a, integer *lda, doublecomplex *b, integer *ldb, integer *info);

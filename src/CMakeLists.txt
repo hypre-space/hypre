@@ -194,6 +194,7 @@ list (APPEND HYPRE_SOURCES
   lapack/zlarfb.c
   lapack/zlarfg.c
   lapack/zlarft.c
+  lapack/zlartg.c
   lapack/zlasr.c
   lapack/ztrtrs.c
   lapack/zunm2r.c

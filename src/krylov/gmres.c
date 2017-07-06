@@ -18,6 +18,7 @@
 
 #include "krylov.h"
 #include "_hypre_utilities.h"
+#include "hypre_lapack.h"
 
 /*--------------------------------------------------------------------------
  * hypre_GMRESFunctionsCreate
@@ -36,7 +37,7 @@ hypre_GMRESFunctionsCreate(
    HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A,
                                    void *x, HYPRE_Complex beta, void *y ),
    HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
-   HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
+   HYPRE_Complex(*InnerProd)     ( void *x, void *y ),
    HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
    HYPRE_Int    (*ClearVector)   ( void *x ),
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
@@ -238,24 +239,30 @@ hypre_GMRESSetup( void *gmres_vdata,
  * hypre_GMRESSolve
  *-------------------------------------------------------------------------*/
 
+
+#ifdef HYPRE_COMPLEX
+#define hypre_xlartg hypre_zlartg
+#else
+#define hypre_xlartg hypre_dlartg
+#endif
+
 HYPRE_Int
 hypre_GMRESSolve(void  *gmres_vdata,
                  void  *A,
                  void  *b,
-		 void  *x)
+		           void  *x)
 {
    hypre_GMRESData  *gmres_data   = (hypre_GMRESData *)gmres_vdata;
    hypre_GMRESFunctions *gmres_functions = gmres_data->functions;
-   HYPRE_Int 		     k_dim        = (gmres_data -> k_dim);
-   HYPRE_Int               min_iter     = (gmres_data -> min_iter);
-   HYPRE_Int 		     max_iter     = (gmres_data -> max_iter);
-   HYPRE_Int               rel_change   = (gmres_data -> rel_change);
+   HYPRE_Int 		   k_dim        = (gmres_data -> k_dim);
+   HYPRE_Int         min_iter     = (gmres_data -> min_iter);
+   HYPRE_Int 		   max_iter     = (gmres_data -> max_iter);
+   HYPRE_Int         rel_change   = (gmres_data -> rel_change);
    HYPRE_Int         skip_real_r_check  = (gmres_data -> skip_real_r_check);
-   HYPRE_Real 	     r_tol        = (gmres_data -> tol);
-   HYPRE_Real 	     cf_tol       = (gmres_data -> cf_tol);
+   HYPRE_Real 	      r_tol        = (gmres_data -> tol);
+   HYPRE_Real 	      cf_tol       = (gmres_data -> cf_tol);
    HYPRE_Real        a_tol        = (gmres_data -> a_tol);
    void             *matvec_data  = (gmres_data -> matvec_data);
-
    void             *r            = (gmres_data -> r);
    void             *w            = (gmres_data -> w);
    /* note: w_2 is only allocated if rel_change = 1 */
@@ -275,13 +282,14 @@ hypre_GMRESSolve(void  *gmres_vdata,
 /*   FILE           *fp; */
    
    HYPRE_Int        break_value = 0;
-   HYPRE_Int	      i, j, k;
-   HYPRE_Real *rs, **hh, *c, *s, *rs_2; 
+   HYPRE_Int	     i, j, k;
+   HYPRE_Real      *c;                       /* cosine in Given's is always Real */
+   HYPRE_Complex  **hh, *rs, *rs_2, *s;
    HYPRE_Int        iter; 
    HYPRE_Int        my_id, num_procs;
-   HYPRE_Real epsilon, gamma, t, r_norm, b_norm, den_norm, x_norm;
-   HYPRE_Real w_norm;
-   
+   HYPRE_Real       epsilon, r_norm, b_norm, den_norm, x_norm, w_norm;
+   HYPRE_Complex    t;
+
    HYPRE_Real epsmac = 1.e-16; 
    HYPRE_Real ieee_check = 0.;
 
@@ -292,7 +300,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
    HYPRE_Real r_norm_0;
    HYPRE_Real relative_error = 1.0;
 
-   HYPRE_Int        rel_change_passed = 0, num_rel_change_check = 0;
+   HYPRE_Int  rel_change_passed = 0, num_rel_change_check = 0;
 
    HYPRE_Real real_r_norm_old, real_r_norm_new;
 
@@ -312,17 +320,17 @@ hypre_GMRESSolve(void  *gmres_vdata,
    }
 
    /* initialize work arrays */
-   rs = hypre_CTAllocF(HYPRE_Real,k_dim+1,gmres_functions); 
+   rs = hypre_CTAllocF(HYPRE_Complex,k_dim+1,gmres_functions); 
    c = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions); 
-   s = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions); 
-   if (rel_change) rs_2 = hypre_CTAllocF(HYPRE_Real,k_dim+1,gmres_functions); 
+   s = hypre_CTAllocF(HYPRE_Complex,k_dim,gmres_functions); 
+   if (rel_change) rs_2 = hypre_CTAllocF(HYPRE_Complex,k_dim+1,gmres_functions); 
    
 
 
-   hh = hypre_CTAllocF(HYPRE_Real*,k_dim+1,gmres_functions); 
+   hh = hypre_CTAllocF(HYPRE_Complex*,k_dim+1,gmres_functions); 
    for (i=0; i < k_dim+1; i++)
    {	
-   	hh[i] = hypre_CTAllocF(HYPRE_Real,k_dim,gmres_functions); 
+   	hh[i] = hypre_CTAllocF(HYPRE_Complex,k_dim,gmres_functions);
    }
 
    (*(gmres_functions->CopyVector))(b,p[0]);
@@ -498,7 +506,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
            /* modified Gram_Schmidt */
            for (j=0; j < i; j++)
            {
-              hh[j][i-1] = (*(gmres_functions->InnerProd))(p[j],p[i]);
+              hh[j][i-1] = (*(gmres_functions->InnerProd))(p[i],p[j]);
               (*(gmres_functions->Axpy))(-hh[j][i-1],p[j],p[i]);
            }
            t = sqrt((*(gmres_functions->InnerProd))(p[i],p[i]));
@@ -514,20 +522,19 @@ hypre_GMRESSolve(void  *gmres_vdata,
            {
               t = hh[j-1][i-1];
               hh[j-1][i-1] = s[j-1]*hh[j][i-1] + c[j-1]*t;
-              hh[j][i-1] = -s[j-1]*t + c[j-1]*hh[j][i-1];
+              hh[j][i-1] = -hypre_conj(s[j-1])*t + c[j-1]*hh[j][i-1];
            }
-           t= hh[i][i-1]*hh[i][i-1];
-           t+= hh[i-1][i-1]*hh[i-1][i-1];
-           gamma = sqrt(t);
-           if (gamma == 0.0) gamma = epsmac;
-           c[i-1] = hh[i-1][i-1]/gamma;
-           s[i-1] = hh[i][i-1]/gamma;
-           rs[i] = -hh[i][i-1]*rs[i-1];
-           rs[i]/=  gamma;
+ 
+           /* Compute and then apply Given's rotation to the right-hand-side, rs,
+            * noting that rs[i] is 0, so we can skip computing s*rs[i] or c*rs[i].
+            * The rotation G = [[c, s], [-conj(s), c]] */ 
+           hypre_xlartg(&(hh[i-1][i-1]), &(hh[i][i-1]), &(c[i-1]), &(s[i-1]), &t);
+           rs[i] = -hypre_conj(s[i-1])*rs[i-1]; 
            rs[i-1] = c[i-1]*rs[i-1];
+
            /* determine residual norm */
            hh[i-1][i-1] = s[i-1]*hh[i][i-1] + c[i-1]*hh[i-1][i-1];
-           r_norm = fabs(rs[i]);
+           r_norm = hypre_cabs(rs[i]);
 
            /* print ? */
            if ( print_level>0 )

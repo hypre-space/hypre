@@ -106,6 +106,7 @@ LAPACK_FILES = \
   zlarfb.c \
   zlarfg.c \
   zlarft.c \
+  zlartg.c \
   zlasr.c \
   ztrtrs.c \
   zunm2r.c \

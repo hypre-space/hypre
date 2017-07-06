@@ -16,4 +16,6 @@
 #           differences (except for timings) indicate errors
 #=============================================================================
 
-diff -U3 -bI"time" ex18comp.base complex.out.1 >&2
+# Compare the CG, then the GMRES output
+diff -U3 -bI"time" ex18compCG.base complex.out.1 >&2
+diff -U3 -bI"time" ex18compGMRES.base complex.out.2 >&2

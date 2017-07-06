@@ -20,6 +20,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/..\
  -I$(srcdir)/../multivector\
  -I$(srcdir)/../utilities\
+ -I$(srcdir)/../lapack\
  ${CINCLUDES}
 
 HEADERS =\

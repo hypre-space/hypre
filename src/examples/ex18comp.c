@@ -251,17 +251,25 @@ int main (int argc, char *argv[])
       {
          stencil_indices[j] = 2*j+1;
       }
-      /* Add an imaginary component and ensure conjugate to below */
+      /* Add an imaginary component.  Choose the symmetric option or nonsymmetric option,
+       * depending on CG or GMRES */
       for (i = 0; i < nvalues; i += nentries)
       {
          for (j = 0; j < nentries; j++)
          {
-			 values[i+j] =(-0.1 +  (HYPRE_Complex)I*0.1);
+            if(solver_id == 0)
+            {
+			      values[i+j] =(-0.1 +  (HYPRE_Complex)I*0.1);
+            }
+            else if(solver_id == 1)
+            {
+			      values[i+j] =(+0.1 +  (HYPRE_Complex)I*0.132124312);
+            }
          }
       }
       HYPRE_SStructMatrixSetBoxValues(A, part, ilower, iupper, var0,
                                       nentries, stencil_indices, values);
-      /* Add an imaginary component and ensure conjugate to above */
+      /* Add an imaginary component.  If using CG, then this is the conjugate value to above*/
       for (i = 0; i < nvalues; i += nentries)
       {
          for (j = 0; j < nentries; j++)
@@ -423,8 +431,9 @@ int main (int argc, char *argv[])
    {
       HYPRE_SStructGMRESCreate(MPI_COMM_WORLD, &solver);
       HYPRE_SStructGMRESSetMaxIter(solver, 100);
+      HYPRE_SStructGMRESSetKDim(solver, 5);
       HYPRE_SStructGMRESSetTol(solver, 1.0e-06);
-      HYPRE_SStructGMRESSetPrintLevel(solver, 2); /* print each CG iteration */
+      HYPRE_SStructGMRESSetPrintLevel(solver, 2); /* print each GMRES iteration */
       HYPRE_SStructGMRESSetLogging(solver, 1);
 
       /* No preconditioner */
