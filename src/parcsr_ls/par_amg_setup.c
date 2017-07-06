@@ -1544,7 +1544,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            }
            else if (interp_type == 100) /* 1pt interpolation */
            {
-              printf("1pt interp\n");
               hypre_BoomerAMGBuildInterpOnePnt(A_array[level], CF_marker, 
                                                coarse_pnts_global, num_functions, dof_func_array[level], 
                                                debug_flag, &P);

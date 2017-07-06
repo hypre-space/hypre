@@ -76,6 +76,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Int      num_levels; 
    HYPRE_Int      coarsen_type;
    HYPRE_Int      interp_type;
+   HYPRE_Int      restri_type;
    HYPRE_Int      agg_interp_type;
    HYPRE_Int      measure_type;
    HYPRE_Int      agg_num_levels;
@@ -168,6 +169,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
+   restri_type = hypre_ParAMGDataRestriction(amg_data); /* RL */
    agg_interp_type = hypre_ParAMGDataAggInterpType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
    smooth_type = hypre_ParAMGDataSmoothType(amg_data);
@@ -370,8 +372,15 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 	hypre_printf(" Interpolation = block direct interpolation \n");
 	hypre_printf("                 for nodal systems AMG\n");
       }
+      else if (interp_type == 100)
+      {
+	hypre_printf(" Interpolation = one-point interpolation \n");
+      }
 
-
+      if (restri_type == 1)
+      {
+	hypre_printf(" Restriction = local approximate ideal restriction \n");
+      }
 
       if (block_mode)
       {

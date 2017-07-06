@@ -156,7 +156,7 @@ main( hypre_int argc,
    HYPRE_Int		       num_functions = 1;
    HYPRE_Int		       num_paths = 1;
    HYPRE_Int		       agg_num_levels = 0;
-   HYPRE_Int		       ns_coarse = 1;
+   HYPRE_Int		       ns_coarse = 1, ns_down = 1, ns_up = 1;
 
    HYPRE_Int		       time_index;
    MPI_Comm            comm = hypre_MPI_COMM_WORLD;
@@ -342,6 +342,9 @@ main( hypre_int argc,
    HYPRE_Int i_indx, j_indx, num_rows;
    HYPRE_Real *data = NULL;
 
+
+   HYPRE_Int air = 0;
+   HYPRE_Int **grid_relax_points = NULL;
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -764,6 +767,16 @@ main( hypre_int argc,
       {
          arg_index++;
          ns_coarse = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ns_down") == 0 )
+      {
+         arg_index++;
+         ns_down = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ns_up") == 0 )
+      {
+         arg_index++;
+         ns_up = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-sns") == 0 )
       {
@@ -1317,12 +1330,46 @@ main( hypre_int argc,
          arg_index++;
 	 hypre_sprintf (plot_file_name,"%s",argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-AIR") == 0 )
+      {
+         arg_index++;
+         air = 1;
+      }
       else
       {
          arg_index++;
       }
    }
 
+   /* default settings for AIR alg. */
+   if (air)
+   {
+      restri_type = 1;    /* AIR */
+      interp_type = 100;  /* 1-pt Interp */
+      ns_down = 1;
+      ns_up = 2;
+      /* this is a 2-D 4-by-k array using double pointers */
+      grid_relax_points = hypre_CTAlloc(HYPRE_Int*, 4);
+      grid_relax_points[0] = NULL;
+      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, ns_down);
+      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, ns_up);
+      grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int, ns_coarse);
+      /* down cycle: C */
+      for (i=0; i<ns_down; i++)
+      {
+         grid_relax_points[1][i] = 1;
+      }
+      /* up cycle: F */
+      for (i=0; i<ns_up; i++)
+      {
+         grid_relax_points[2][i] = -1;
+      }
+      /* coarse: all */
+      for (i=0; i<ns_coarse; i++)
+      {
+         grid_relax_points[3][i] = 0;
+      }
+   }
    /*-----------------------------------------------------------
     * Print usage info
     *-----------------------------------------------------------*/
@@ -1435,6 +1482,7 @@ main( hypre_int argc,
       hypre_printf("      22=classical block interpolation w/Ruge's variant for nodal systems AMG \n");
       hypre_printf("      23=same as 22, but use row sums for diag scaling matrices,for nodal systems AMG \n");
       hypre_printf("      24=direct block interpolation for nodal systems AMG\n");
+      hypre_printf("     100=One point interpolation [a Boolean matrix]\n");
       hypre_printf("\n");
 
       /* RL */
@@ -1482,8 +1530,9 @@ main( hypre_int argc,
       hypre_printf("  -ns <val>              : Use <val> sweeps on each level\n");
       hypre_printf("                           (default C/F down, F/C up, F/C fine\n");
       hypre_printf("  -ns_coarse  <val>       : set no. of sweeps for coarsest grid\n");
-      /*hypre_printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
-      hypre_printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");*/
+      /* RL restore these */
+      hypre_printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
+      hypre_printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");
       hypre_printf("\n"); 
       hypre_printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n"); 
       hypre_printf("  -th   <val>            : set AMG threshold Theta = val \n");
@@ -2526,6 +2575,10 @@ main( hypre_int argc,
       HYPRE_BoomerAMGCreate(&amg_solver); 
       /* RL: specify restriction */
       HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 1: AIR */
+      if (air)
+      {
+         HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
+      }
       /* BM Aug 25, 2006 */
       HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
@@ -2543,7 +2596,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetPMaxElmts(amg_solver, P_max_elmts);
       HYPRE_BoomerAMGSetJacobiTruncThreshold(amg_solver, jacobi_trunc_threshold);
       HYPRE_BoomerAMGSetSCommPkgSwitch(amg_solver, S_commpkg_switch);
-/* note: log is written to standard output, not to file */
+      /* note: log is written to standard output, not to file */
       HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
       HYPRE_BoomerAMGSetPrintFileName(amg_solver, "driver.out.log"); 
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
@@ -2601,6 +2654,8 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
+      HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_down,   1);
+      HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_up,     2);
       if (num_functions > 1)
 	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
@@ -3212,8 +3267,8 @@ main( hypre_int argc,
    /* begin lobpcg */
 
    /*-----------------------------------------------------------
- *     * Solve the eigenvalue problem using LOBPCG 
- *         *-----------------------------------------------------------*/
+    * Solve the eigenvalue problem using LOBPCG 
+    *-----------------------------------------------------------*/
 
    if ( lobpcgFlag ) {
 
@@ -3345,7 +3400,7 @@ main( hypre_int argc,
        HYPRE_PCGGetPrecond(pcg_solver, &pcg_precond);
 
        if (solver_id == 1)
-         {
+       {
            /* use BoomerAMG as preconditioner */
            if (myid == 0) hypre_printf("Solver: AMG-PCG\n");
            HYPRE_BoomerAMGCreate(&pcg_precond);
@@ -3717,8 +3772,8 @@ main( hypre_int argc,
        HYPRE_LOBPCGGetPrecond(pcg_solver, &pcg_precond);
 
        if (solver_id == 1)
-         {
-           /* use BoomerAMG as preconditioner */
+       {
+          /* use BoomerAMG as preconditioner */
            if (myid == 0)
              hypre_printf("Solver: AMG-PCG\n");
 
@@ -3771,9 +3826,9 @@ main( hypre_int argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                                   pcg_precond);
-         }
+       }
        else if (solver_id == 2)
-         {
+       {
 
            /* use diagonal scaling as preconditioner */
            if (myid == 0)
@@ -3785,9 +3840,9 @@ main( hypre_int argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScale,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParCSRDiagScaleSetup,
                                   pcg_precond);
-         }
+       }
        else if (solver_id == 8)
-         {
+       {
            /* use ParaSails preconditioner */
            if (myid == 0)
              hypre_printf("Solver: ParaSails-PCG\n");
@@ -3801,9 +3856,9 @@ main( hypre_int argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_ParaSailsSetup,
                                   pcg_precond);
-         }
+       }
        else if (solver_id == 12)
-         {
+       {
            /* use Schwarz preconditioner */
            if (myid == 0)
              hypre_printf("Solver: Schwarz-PCG\n");
@@ -3818,9 +3873,9 @@ main( hypre_int argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_SchwarzSetup,
                                   pcg_precond);
-         }
+       }
        else if (solver_id == 14)
-         {
+       {
            /* use GSMG as preconditioner */
 
            /* reset some smoother parameters */
@@ -3875,9 +3930,9 @@ main( hypre_int argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_BoomerAMGSetup,
                                   pcg_precond);
-         }
+       }
        else if (solver_id == 43)
-         {
+       {
            /* use Euclid preconditioning */
            if (myid == 0)
              hypre_printf("Solver: Euclid-PCG\n");
@@ -3895,19 +3950,19 @@ main( hypre_int argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                                   pcg_precond);
-         }
+       }
        else if (solver_id != NO_SOLVER )
-         {
+       {
            if ( verbosity )
              hypre_printf("Solver ID not recognized - running LOBPCG without preconditioner\n\n");
-         }
+       }
 
        HYPRE_LOBPCGGetPrecond(pcg_solver, &pcg_precond_gotten);
        if (pcg_precond_gotten !=  pcg_precond && pcgIterations)
-         {
+       {
            hypre_printf("HYPRE_ParCSRLOBPCGGetPrecond got bad precond\n");
            return(-1);
-         }
+       }
        else
          if (myid == 0)
            hypre_printf("HYPRE_ParCSRLOBPCGGetPrecond got good precond\n");
@@ -5255,7 +5310,6 @@ main( hypre_int argc,
       hypre_TFree(interp_vecs);
    }
    if (nongalerk_tol) hypre_TFree (nongalerk_tol);
-
 /*
   hypre_FinalizeMemoryDebug();
 */
