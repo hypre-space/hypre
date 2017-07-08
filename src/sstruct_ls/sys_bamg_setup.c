@@ -85,6 +85,7 @@ HYPRE_Int hypre_SysBAMGSetup(
    HYPRE_Int               num_refine        = (data->num_refine);
    HYPRE_Int               num_rtv           = (data->num_rtv);
    HYPRE_Int               num_stv           = (data->num_stv);
+   HYPRE_Int               relax_type        = (data->relax_type);
 
    HYPRE_Int               num_tv            = num_rtv + num_stv;
 
@@ -219,7 +220,7 @@ HYPRE_Int hypre_SysBAMGSetup(
    restrict_data_l = (data->restrict_data_l) = hypre_TAlloc(void *, num_levels);
    interp_data_l   = (data->interp_data_l)   = hypre_TAlloc(void *, num_levels);
 
-   for (l = 0; l < num_levels; l++)          relax_data_l[l] = hypre_SysBAMGRelaxCreate(comm);
+   for (l = 0; l < num_levels; l++)          relax_data_l[l] = hypre_SysBAMGRelaxCreate(comm, relax_type);
    for (l = 0; l < num_levels; l++)          hypre_SStructPMatvecCreate(&matvec_data_l[l]);
    for (l = 0; l < (num_levels - 1); l++)    hypre_SysSemiRestrictCreate(&restrict_data_l[l]);
    for (l = 0; l < (num_levels - 1); l++)    hypre_SysSemiInterpCreate(&interp_data_l[l]);
@@ -726,7 +727,7 @@ HYPRE_Int hypre_SysBAMGSetupTV(
       // note: need offset (5173, arbitrary) so that tv[0][0] != tv[0][1] (on oslic at least)
       hypre_SStructPVectorSetRandomValues(tv[0][k], k + 5173 /*+ (HYPRE_Int)time(0)*/);
 
-#if DEBUG_SYSBAMG > 1
+#if DEBUG_SYSBAMG > 0
       char filename[255];
       hypre_sprintf(filename, "sysbamg_tv_init,k=%d.dat", k);
       hypre_SStructPVectorPrint(filename, tv[0][k], 0);
@@ -793,23 +794,25 @@ HYPRE_Int hypre_SysBAMGSetupOperators(
          hypre_SStructPVectorCreate(comm, PGrid_l[l], &rhs);
          hypre_SStructPVectorInitialize(rhs);
          hypre_SStructPVectorAssemble(rhs);
-
          hypre_SStructPVectorSetConstantValues(rhs, 0.0);
 
          // 2) set up the relax struct
-         void* tv_relax = hypre_SysBAMGRelaxCreate(comm);
+         void* tv_relax = hypre_SysBAMGRelaxCreate(comm, relax_type);
          hypre_SysBAMGRelaxSetTol(tv_relax, 0.0);
-         if (usr_jacobi_weight) {
-            hypre_SysBAMGRelaxSetJacobiWeight(tv_relax, jacobi_weight);
+         if(relax_type < 10)
+         {
+            /* These calls are only needed if doing Jacobi/GS type relaxations, not Krylov */
+            if (usr_jacobi_weight) {
+               hypre_SysBAMGRelaxSetJacobiWeight(tv_relax, jacobi_weight);
+            }
+            else {
+               hypre_SysBAMGRelaxSetJacobiWeight(tv_relax, relax_weights[l]);
+            }
+            hypre_SysBAMGRelaxSetTempVec(tv_relax, tx_l[l]);
+            hypre_SysBAMGRelaxSetPreRelax(tv_relax);
+            hypre_SysBAMGRelaxSetZeroGuess(tv_relax, 0);
          }
-         else {
-            hypre_SysBAMGRelaxSetJacobiWeight(tv_relax, relax_weights[l]);
-         }
-         hypre_SysBAMGRelaxSetType(tv_relax, relax_type);
-         hypre_SysBAMGRelaxSetTempVec(tv_relax, tx_l[l]);
-         hypre_SysBAMGRelaxSetPreRelax(tv_relax);
          hypre_SysBAMGRelaxSetMaxIter(tv_relax, num_pre_relax_tv);
-         hypre_SysBAMGRelaxSetZeroGuess(tv_relax, 0);
          hypre_SysBAMGRelaxSetup(tv_relax, A_l[l], rhs, x_l[l]);
 
          // 3) smooth
@@ -895,14 +898,17 @@ HYPRE_Int hypre_SysBAMGSetupOperators(
 
    /* set up fine grid relaxation */
    hypre_SysBAMGRelaxSetTol(relax_data_l[0], 0.0);
-   if (usr_jacobi_weight) {
-      hypre_SysBAMGRelaxSetJacobiWeight(relax_data_l[0], jacobi_weight);
+   if(relax_type < 10)
+   {
+      /* These calls are only needed if doing Jacobi/GS type relaxations, not Krylov */
+      if (usr_jacobi_weight) {
+         hypre_SysBAMGRelaxSetJacobiWeight(relax_data_l[0], jacobi_weight);
+      }
+      else {
+         hypre_SysBAMGRelaxSetJacobiWeight(relax_data_l[0], relax_weights[0]);
+      }
+      hypre_SysBAMGRelaxSetTempVec(relax_data_l[0], tx_l[0]);
    }
-   else {
-      hypre_SysBAMGRelaxSetJacobiWeight(relax_data_l[0], relax_weights[0]);
-   }
-   hypre_SysBAMGRelaxSetType(relax_data_l[0], relax_type);
-   hypre_SysBAMGRelaxSetTempVec(relax_data_l[0], tx_l[0]);
    hypre_SysBAMGRelaxSetup(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
    if (num_levels > 1)
    {
@@ -910,14 +916,17 @@ HYPRE_Int hypre_SysBAMGSetupOperators(
       {
          /* set relaxation parameters */
          hypre_SysBAMGRelaxSetTol(relax_data_l[l], 0.0);
-         if (usr_jacobi_weight) {
-            hypre_SysBAMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
+         if(relax_type < 10)
+         {
+            /* These calls are only needed if doing Jacobi/GS type relaxations, not Krylov */
+            if (usr_jacobi_weight) {
+               hypre_SysBAMGRelaxSetJacobiWeight(relax_data_l[l], jacobi_weight);
+            }
+            else {
+               hypre_SysBAMGRelaxSetJacobiWeight(relax_data_l[l], relax_weights[l]);
+            }
+            hypre_SysBAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
          }
-         else {
-            hypre_SysBAMGRelaxSetJacobiWeight(relax_data_l[l], relax_weights[l]);
-         }
-         hypre_SysBAMGRelaxSetType(relax_data_l[l], relax_type);
-         hypre_SysBAMGRelaxSetTempVec(relax_data_l[l], tx_l[l]);
       }
 
       /* change coarsest grid relaxation parameters */
@@ -925,7 +934,6 @@ HYPRE_Int hypre_SysBAMGSetupOperators(
        * (estimating roughly 4 communications per V-cycle level)
        * do sweeps proportional to the coarsest grid size */
       HYPRE_Int maxiter = hypre_min(4*num_levels, cmaxsize);
-      hypre_SysBAMGRelaxSetType(relax_data_l[num_levels-1], 0);
       hypre_SysBAMGRelaxSetMaxIter(relax_data_l[num_levels-1], maxiter);
 
       /* call relax setup */

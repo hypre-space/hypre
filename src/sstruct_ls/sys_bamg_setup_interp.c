@@ -964,7 +964,7 @@ HYPRE_Int hypre_SysBAMGComputeSVecs(
          hypre_SStructPInnerProd( svecs[i], AV, &x );
          sysbamg_ifdbg
          {
-            hypre_printf("SVD Check: U[k][%d] A[k,l] V[l][%d] / S[%d]: %16.6e\n",
+            hypre_printf("SVD Check: U[k][%d] A[k,l] V[l][%d] / S[%d]: %16.16e\n",
                          i, j, i, hypre_cabs(x / S[i]));
             fflush(stdout);
          }

@@ -20,6 +20,7 @@ typedef struct
    void                   *relax_data;
    HYPRE_Int               relax_type;
    HYPRE_Real              jacobi_weight;
+   HYPRE_SStructSolver     solver;
 
 } hypre_SysBAMGRelaxData;
 
@@ -27,86 +28,27 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
 void *
-hypre_SysBAMGRelaxCreate( MPI_Comm  comm )
+hypre_SysBAMGRelaxCreate( MPI_Comm  comm, HYPRE_Int relax_type )
 {
    hypre_SysBAMGRelaxData *sys_bamg_relax_data;
+   void * relax_data           = NULL;
+   HYPRE_SStructSolver  solver = NULL;
 
    sys_bamg_relax_data = hypre_CTAlloc(hypre_SysBAMGRelaxData, 1);
-   (sys_bamg_relax_data -> relax_data) = hypre_NodeRelaxCreate(comm);
-   (sys_bamg_relax_data -> relax_type) = 0;        /* Weighted Jacobi */
-
-   return (void *) sys_bamg_relax_data;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysBAMGRelaxDestroy( void *sys_bamg_relax_vdata )
-{
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
-
-   if (sys_bamg_relax_data)
+   if (relax_type < 10)
    {
-      hypre_NodeRelaxDestroy(sys_bamg_relax_data -> relax_data);
-      hypre_TFree(sys_bamg_relax_data);
+      relax_data = hypre_NodeRelaxCreate(comm);
    }
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysBAMGRelax( void                 *sys_bamg_relax_vdata,
-                    hypre_SStructPMatrix *A,
-                    hypre_SStructPVector *b,
-                    hypre_SStructPVector *x                )
-{
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
-
-   hypre_NodeRelax((sys_bamg_relax_data -> relax_data), A, b, x);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysBAMGRelaxSetup( void                 *sys_bamg_relax_vdata,
-                         hypre_SStructPMatrix *A,
-                         hypre_SStructPVector *b,
-                         hypre_SStructPVector *x                )
-{
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
-   void                   *relax_data    = (sys_bamg_relax_data -> relax_data);
-   HYPRE_Int               relax_type    = (sys_bamg_relax_data -> relax_type);
-   HYPRE_Real              jacobi_weight = (sys_bamg_relax_data -> jacobi_weight);
-
-   if (relax_type == 1)
+   else if(relax_type == 10)
    {
-      hypre_NodeRelaxSetWeight(relax_data, jacobi_weight);
+      HYPRE_SStructGMRESCreate(comm, &solver);
+      
    }
-
-   hypre_NodeRelaxSetup((sys_bamg_relax_data -> relax_data), A, b, x);
-
-   return hypre_error_flag;
-}
-
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-hypre_SysBAMGRelaxSetType( void  *sys_bamg_relax_vdata,
-                           HYPRE_Int    relax_type       )
-{
-   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
-   void                   *relax_data = (sys_bamg_relax_data -> relax_data);
-
+   (sys_bamg_relax_data -> relax_data) = relax_data; 
+   (sys_bamg_relax_data -> solver)     = solver; 
    (sys_bamg_relax_data -> relax_type) = relax_type;
 
+   /* Do more solver specific setup */
    switch(relax_type)
    {
       case 0: /* Jacobi */
@@ -151,8 +93,93 @@ hypre_SysBAMGRelaxSetType( void  *sys_bamg_relax_vdata,
       break;
    }
 
+
+
+   return (void *) sys_bamg_relax_data;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SysBAMGRelaxDestroy( void *sys_bamg_relax_vdata )
+{
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
+   HYPRE_Int               relax_type          = (sys_bamg_relax_data -> relax_type);
+
+   if (sys_bamg_relax_data)
+   {
+      if(relax_type < 10)
+      {
+         hypre_NodeRelaxDestroy(sys_bamg_relax_data -> relax_data);
+      }
+      else if (relax_type == 10)
+      {
+         HYPRE_SStructGMRESDestroy(sys_bamg_relax_data -> solver);
+      }
+      hypre_TFree(sys_bamg_relax_data);
+   }
+
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SysBAMGRelax( void                 *sys_bamg_relax_vdata,
+                    hypre_SStructPMatrix *A,
+                    hypre_SStructPVector *b,
+                    hypre_SStructPVector *x                )
+{
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
+   HYPRE_Int               relax_type          = (sys_bamg_relax_data -> relax_type);
+   HYPRE_SStructSolver     solver              = (sys_bamg_relax_data -> solver);
+
+   if (relax_type < 10)
+   {
+      hypre_NodeRelax((sys_bamg_relax_data -> relax_data), A, b, x);
+   }
+   else if (relax_type == 10)
+   {
+      HYPRE_SStructGMRESSolve(solver, A, b, x);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SysBAMGRelaxSetup( void                 *sys_bamg_relax_vdata,
+                         hypre_SStructPMatrix *A,
+                         hypre_SStructPVector *b,
+                         hypre_SStructPVector *x                )
+{
+   hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
+   void                   *relax_data    = (sys_bamg_relax_data -> relax_data);
+   HYPRE_Int               relax_type    = (sys_bamg_relax_data -> relax_type);
+   HYPRE_Real              jacobi_weight = (sys_bamg_relax_data -> jacobi_weight);
+   HYPRE_SStructSolver     solver        = (sys_bamg_relax_data -> solver);
+
+   if (relax_type == 1)
+   {
+      hypre_NodeRelaxSetWeight(relax_data, jacobi_weight);
+   }
+   
+   if (relax_type < 10)
+   {
+      hypre_NodeRelaxSetup((sys_bamg_relax_data -> relax_data), A, b, x);
+   }
+   else if (relax_type == 10)
+   {
+      HYPRE_SStructGMRESSetup(solver, A, b, x);
+   }
+
+   return hypre_error_flag;
+}
+
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -161,6 +188,7 @@ HYPRE_Int
 hypre_SysBAMGRelaxSetJacobiWeight(void  *sys_bamg_relax_vdata,
                                   HYPRE_Real weight)
 {
+   /* Only useful for relax_types < 10, the non-Krylov relaxation types */
    hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
                                                                                                                                      
    (sys_bamg_relax_data -> jacobi_weight)    = weight;
@@ -178,6 +206,7 @@ hypre_SysBAMGRelaxSetPreRelax( void  *sys_bamg_relax_vdata )
    void                   *relax_data = (sys_bamg_relax_data -> relax_data);
    HYPRE_Int               relax_type = (sys_bamg_relax_data -> relax_type);
 
+   /* Only useful for relax_types < 10, the non-Krylov relaxation types */
    switch(relax_type)
    {
       case 1: /* Weighted Jacobi */
@@ -205,6 +234,7 @@ hypre_SysBAMGRelaxSetPostRelax( void  *sys_bamg_relax_vdata )
    void                   *relax_data = (sys_bamg_relax_data -> relax_data);
    HYPRE_Int               relax_type = (sys_bamg_relax_data -> relax_type);
 
+   /* Only useful for relax_types < 10, the non-Krylov relaxation types */
    switch(relax_type)
    {
       case 1: /* Weighted Jacobi */
@@ -230,8 +260,17 @@ hypre_SysBAMGRelaxSetTol( void   *sys_bamg_relax_vdata,
                           HYPRE_Real  tol              )
 {
    hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
+   HYPRE_Int               relax_type          = (sys_bamg_relax_data -> relax_type);
+   HYPRE_SStructSolver     solver              = (sys_bamg_relax_data -> solver);
 
-   hypre_NodeRelaxSetTol((sys_bamg_relax_data -> relax_data), tol);
+   if (relax_type < 10)
+   {
+      hypre_NodeRelaxSetTol((sys_bamg_relax_data -> relax_data), tol);
+   }
+   else if (relax_type == 10)
+   {
+      HYPRE_SStructGMRESSetTol(solver, tol);
+   }
 
    return hypre_error_flag;
 }
@@ -244,8 +283,18 @@ hypre_SysBAMGRelaxSetMaxIter( void  *sys_bamg_relax_vdata,
                               HYPRE_Int    max_iter         )
 {
    hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
+   HYPRE_Int               relax_type          = (sys_bamg_relax_data -> relax_type);
+   HYPRE_SStructSolver     solver              = (sys_bamg_relax_data -> solver);
 
-   hypre_NodeRelaxSetMaxIter((sys_bamg_relax_data -> relax_data), max_iter);
+   if (relax_type < 10)
+   {
+      hypre_NodeRelaxSetMaxIter((sys_bamg_relax_data -> relax_data), max_iter);
+   }
+   else if (relax_type == 10)
+   {
+      HYPRE_SStructGMRESSetMaxIter(solver, max_iter);
+      HYPRE_SStructGMRESSetKDim(solver, max_iter+2);
+   }
 
    return hypre_error_flag;
 }
@@ -258,8 +307,13 @@ hypre_SysBAMGRelaxSetZeroGuess( void  *sys_bamg_relax_vdata,
                                 HYPRE_Int    zero_guess       )
 {
    hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
+   HYPRE_Int               relax_type          = (sys_bamg_relax_data -> relax_type);
 
-   hypre_NodeRelaxSetZeroGuess((sys_bamg_relax_data -> relax_data), zero_guess);
+   /* Only useful for relax_types < 10, the non-Krylov relaxation types */
+   if(relax_type < 10)
+   {
+      hypre_NodeRelaxSetZeroGuess((sys_bamg_relax_data -> relax_data), zero_guess);
+   }
 
    return hypre_error_flag;
 }
@@ -272,8 +326,13 @@ hypre_SysBAMGRelaxSetTempVec( void               *sys_bamg_relax_vdata,
                               hypre_SStructPVector *t                )
 {
    hypre_SysBAMGRelaxData *sys_bamg_relax_data = (hypre_SysBAMGRelaxData *)sys_bamg_relax_vdata;
+   HYPRE_Int               relax_type          = (sys_bamg_relax_data -> relax_type);
 
-   hypre_NodeRelaxSetTempVec((sys_bamg_relax_data -> relax_data), t);
+   /* Only useful for relax_types < 10, the non-Krylov relaxation types */
+   if(relax_type < 10)
+   {
+      hypre_NodeRelaxSetTempVec((sys_bamg_relax_data -> relax_data), t);
+   }
 
    return hypre_error_flag;
 }

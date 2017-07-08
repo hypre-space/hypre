@@ -794,11 +794,10 @@ HYPRE_Int hypre_SysBAMGPrintLogging ( void *sys_bamg_vdata , HYPRE_Int myid );
 HYPRE_Int hypre_SysBAMGGetFinalRelativeResidualNorm ( void *sys_bamg_vdata , HYPRE_Real *relative_residual_norm );
 
 /* sys_bamg_relax.c */
-void *hypre_SysBAMGRelaxCreate ( MPI_Comm comm );
+void * hypre_SysBAMGRelaxCreate( MPI_Comm  comm, HYPRE_Int relax_type );
 HYPRE_Int hypre_SysBAMGRelaxDestroy ( void *sys_bamg_relax_vdata );
 HYPRE_Int hypre_SysBAMGRelax ( void *sys_bamg_relax_vdata , hypre_SStructPMatrix *A , hypre_SStructPVector *b , hypre_SStructPVector *x );
 HYPRE_Int hypre_SysBAMGRelaxSetup ( void *sys_bamg_relax_vdata , hypre_SStructPMatrix *A , hypre_SStructPVector *b , hypre_SStructPVector *x );
-HYPRE_Int hypre_SysBAMGRelaxSetType ( void *sys_bamg_relax_vdata , HYPRE_Int relax_type );
 HYPRE_Int hypre_SysBAMGRelaxSetJacobiWeight ( void *sys_bamg_relax_vdata , HYPRE_Real weight );
 HYPRE_Int hypre_SysBAMGRelaxSetPreRelax ( void *sys_bamg_relax_vdata );
 HYPRE_Int hypre_SysBAMGRelaxSetPostRelax ( void *sys_bamg_relax_vdata );

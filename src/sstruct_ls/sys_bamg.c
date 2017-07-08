@@ -35,7 +35,7 @@ hypre_SysBAMGCreate( MPI_Comm  comm )
    (sys_bamg_data -> dxyz)[0]             = 0.0;
    (sys_bamg_data -> dxyz)[1]             = 0.0;
    (sys_bamg_data -> dxyz)[2]             = 0.0;
-   (sys_bamg_data -> relax_type)          = 1;       /* weighted Jacobi */
+   (sys_bamg_data -> relax_type)          = 10;       /* 1: weighted Jacobi, 10: GMRES */
    (sys_bamg_data -> jacobi_weight)       = 0.0;
    (sys_bamg_data -> usr_jacobi_weight)   = 0;
    (sys_bamg_data -> num_pre_relax)       = 1;
