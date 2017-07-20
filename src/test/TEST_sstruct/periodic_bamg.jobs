@@ -22,6 +22,12 @@ mpirun -np 1 sstruct -in sstruct.in.periodic.crs \
 mpirun -np 1 sstruct -in sstruct.in.periodic.3var.crs \
 -solver 14 -P 1 1 1 > periodic_bamg.out.11
 
+mpirun -np 1 sstruct -in sstruct.in.periodic.crs \
+-solver 4 -P 1 1 1 -relax 10 -v 2 2 > periodic_bamg.out.12
+
+mpirun -np 1 sstruct -in sstruct.in.periodic.3var.crs \
+-solver 4 -P 1 1 1 -relax 10 -v 2 2 > periodic_bamg.out.13
+
 #=============================================================================
 # Next test batch... 
 #=============================================================================

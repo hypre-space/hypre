@@ -1,8 +1,16 @@
 # Output file: periodic_bamg.out.10
 Iterations = 10
-Final Relative Residual Norm = 4.607806e-07
+Final Relative Residual Norm = 4.612601e-07
 
 # Output file: periodic_bamg.out.11
 Iterations = 12
-Final Relative Residual Norm = 3.111677e-07
+Final Relative Residual Norm = 3.114040e-07
+
+# Output file: periodic_bamg.out.12
+Iterations = 24
+Final Relative Residual Norm = 6.520063e-07
+
+# Output file: periodic_bamg.out.13
+Iterations = 14
+Final Relative Residual Norm = 7.565638e-07
 

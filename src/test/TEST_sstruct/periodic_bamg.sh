@@ -43,6 +43,8 @@ TNAME=`basename $0 .sh`
 FILES="\
  ${TNAME}.out.10
  ${TNAME}.out.11
+ ${TNAME}.out.12
+ ${TNAME}.out.13
 "
 
 for i in $FILES
