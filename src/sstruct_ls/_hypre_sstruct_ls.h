@@ -453,6 +453,24 @@ HYPRE_Int HYPRE_SStructGMRESGetNumIterations ( HYPRE_SStructSolver solver , HYPR
 HYPRE_Int HYPRE_SStructGMRESGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , HYPRE_Real *norm );
 HYPRE_Int HYPRE_SStructGMRESGetResidual ( HYPRE_SStructSolver solver , void **residual );
 
+/* hypre_sstructp_gmres.c */
+HYPRE_Int hypre_SStructGMRESCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
+HYPRE_Int hypre_SStructGMRESDestroy ( HYPRE_SStructSolver solver );
+HYPRE_Int hypre_SStructGMRESSetup ( HYPRE_SStructSolver solver , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
+HYPRE_Int hypre_SStructGMRESSolve ( HYPRE_SStructSolver solver , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
+HYPRE_Int hypre_SStructGMRESSetKDim ( HYPRE_SStructSolver solver , HYPRE_Int k_dim );
+HYPRE_Int hypre_SStructGMRESSetTol ( HYPRE_SStructSolver solver , HYPRE_Real tol );
+HYPRE_Int hypre_SStructGMRESSetAbsoluteTol ( HYPRE_SStructSolver solver , HYPRE_Real atol );
+HYPRE_Int hypre_SStructGMRESSetMinIter ( HYPRE_SStructSolver solver , HYPRE_Int min_iter );
+HYPRE_Int hypre_SStructGMRESSetMaxIter ( HYPRE_SStructSolver solver , HYPRE_Int max_iter );
+HYPRE_Int hypre_SStructGMRESSetStopCrit ( HYPRE_SStructSolver solver , HYPRE_Int stop_crit );
+HYPRE_Int hypre_SStructGMRESSetPrecond ( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , void *precond_data );
+HYPRE_Int hypre_SStructGMRESSetLogging ( HYPRE_SStructSolver solver , HYPRE_Int logging );
+HYPRE_Int hypre_SStructGMRESSetPrintLevel ( HYPRE_SStructSolver solver , HYPRE_Int level );
+HYPRE_Int hypre_SStructGMRESGetNumIterations ( HYPRE_SStructSolver solver , HYPRE_Int *num_iterations );
+HYPRE_Int hypre_SStructGMRESGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , HYPRE_Real *norm );
+HYPRE_Int hypre_SStructGMRESGetResidual ( HYPRE_SStructSolver solver , void **residual );
+
 /* HYPRE_sstruct_int.c */
 HYPRE_Int hypre_SStructPVectorSetRandomValues ( hypre_SStructPVector *pvector , HYPRE_Int seed );
 HYPRE_Int hypre_SStructVectorSetRandomValues ( hypre_SStructVector *vector , HYPRE_Int seed );
@@ -603,6 +621,25 @@ HYPRE_Int hypre_SStructKrylovClearVector ( void *x );
 HYPRE_Int hypre_SStructKrylovScaleVector ( HYPRE_Complex alpha , void *x );
 HYPRE_Int hypre_SStructKrylovAxpy ( HYPRE_Complex alpha , void *x , void *y );
 HYPRE_Int hypre_SStructKrylovCommInfo ( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
+
+/* krylov_sstructp.c */
+HYPRE_Int hypre_SStructPKrylovIdentitySetup ( void *vdata , void *A , void *b , void *x );
+HYPRE_Int hypre_SStructPKrylovIdentity ( void *vdata , void *A , void *b , void *x );
+char *hypre_SStructPKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
+HYPRE_Int hypre_SStructPKrylovFree ( char *ptr );
+void *hypre_SStructPKrylovCreateVector ( void *vvector );
+void *hypre_SStructPKrylovCreateVectorArray ( HYPRE_Int n , void *vvector );
+HYPRE_Int hypre_SStructPKrylovDestroyVector ( void *vvector );
+void *hypre_SStructPKrylovMatvecCreate ( void *A , void *x );
+HYPRE_Int hypre_SStructPKrylovMatvec ( void *matvec_data , HYPRE_Complex alpha , void *A , void *x , HYPRE_Complex beta , void *y );
+HYPRE_Int hypre_SStructPKrylovMatvecDestroy ( void *matvec_data );
+HYPRE_Complex hypre_SStructPKrylovInnerProd ( void *x , void *y );
+HYPRE_Int hypre_SStructPKrylovCopyVector ( void *x , void *y );
+HYPRE_Int hypre_SStructPKrylovClearVector ( void *x );
+HYPRE_Int hypre_SStructPKrylovScaleVector ( HYPRE_Complex alpha , void *x );
+HYPRE_Int hypre_SStructPKrylovAxpy ( HYPRE_Complex alpha , void *x , void *y );
+HYPRE_Int hypre_SStructPKrylovCommInfo ( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
+
 
 /* maxwell_grad.c */
 hypre_ParCSRMatrix *hypre_Maxwell_Grad ( hypre_SStructGrid *grid );

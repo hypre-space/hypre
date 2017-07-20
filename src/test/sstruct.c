@@ -2203,6 +2203,7 @@ PrintUsage( char *progname,
       hypre_printf("                         0 - SMG split solver\n");
       hypre_printf("                         1 - PFMG split solver\n");
       hypre_printf("                         3 - SysPFMG\n");
+      hypre_printf("                         4 - SysBAMG\n");
       hypre_printf("                         8 - 1-step Jacobi split solver\n");
       hypre_printf("                        10 - PCG with SMG split precond\n");
       hypre_printf("                        11 - PCG with PFMG split precond\n");
@@ -2278,6 +2279,7 @@ PrintUsage( char *progname,
       hypre_printf("                        1 - Weighted Jacobi (default)\n");
       hypre_printf("                        2 - R/B Gauss-Seidel\n");
       hypre_printf("                        3 - R/B Gauss-Seidel (nonsymmetric)\n");
+      hypre_printf("                        10- GMRES (SysBAMG only)\n");
       hypre_printf("  -w <jacobi_weight> : jacobi weight\n");
       hypre_printf("  -jump <num>        : Struct- num levels to jump in SparseMSG\n");
       hypre_printf("  -solver_type <ID>  : Struct- solver type for Hybrid\n");
@@ -3654,7 +3656,7 @@ main( hypre_int argc,
    hypre_TFree(values);
 
    /*-----------------------------------------------------------
-    * Solve the system using SysPFMG or Split
+    * Solve the system using SysPFMG, SysBAMG, or Split
     *-----------------------------------------------------------*/
 
    if (solver_id == 3)
@@ -3702,7 +3704,51 @@ main( hypre_int argc,
       HYPRE_SStructSysPFMGDestroy(solver);
    }
 
-   else if ((solver_id >= 0) && (solver_id < 10) && (solver_id != 3))
+   else if (solver_id == 4)
+   {
+      time_index = hypre_InitializeTiming("SysBAMG Setup");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_SStructSysBAMGCreate(hypre_MPI_COMM_WORLD, &solver);
+      HYPRE_SStructSysBAMGSetMaxIter(solver, 100);
+      HYPRE_SStructSysBAMGSetTol(solver, tol);
+      HYPRE_SStructSysBAMGSetRelChange(solver, 0);
+      /* weighted Jacobi = 1; red-black GS = 2 */
+      // HYPRE_SStructSysBAMGSetRAPType(solver,2);    Set RAPType = 2 for general RAP
+      HYPRE_SStructSysBAMGSetRelaxType(solver, relax);
+      if (usr_jacobi_weight)
+      {
+         HYPRE_SStructSysBAMGSetJacobiWeight(solver, jacobi_weight);
+      }
+      HYPRE_SStructSysBAMGSetNumPreRelax(solver, n_pre);
+      HYPRE_SStructSysBAMGSetSkipRelax(solver, skip);
+      /*HYPRE_StructBAMGSetDxyz(solver, dxyz);*/
+      HYPRE_SStructSysBAMGSetPrintLevel(solver, 1);
+      HYPRE_SStructSysBAMGSetLogging(solver, 1);
+      HYPRE_SStructSysBAMGSetup(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      time_index = hypre_InitializeTiming("SysBAMG Solve");
+      hypre_BeginTiming(time_index);
+
+      HYPRE_SStructSysBAMGSolve(solver, A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_SStructSysBAMGGetNumIterations(solver, &num_iterations);
+      HYPRE_SStructSysBAMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
+
+      HYPRE_SStructSysBAMGDestroy(solver);
+   }
+
+   else if ((solver_id >= 0) && (solver_id < 10) && (solver_id != 3) && (solver_id != 4))
    {
       time_index = hypre_InitializeTiming("Split Setup");
       hypre_BeginTiming(time_index);
@@ -3819,7 +3865,6 @@ main( hypre_int argc,
             HYPRE_SStructSysBAMGSetJacobiWeight(precond, jacobi_weight);
          }
          HYPRE_SStructSysBAMGSetNumPreRelax(precond, n_pre);
-         HYPRE_SStructSysBAMGSetNumPostRelax(precond, n_post);
          HYPRE_SStructSysBAMGSetSkipRelax(precond, skip);
          /*HYPRE_StructBAMGSetDxyz(precond, dxyz);*/
          HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,

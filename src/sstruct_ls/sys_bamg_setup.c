@@ -766,6 +766,7 @@ HYPRE_Int hypre_SysBAMGSetupOperators(
    void**                  restrict_data_l   = (data->restrict_data_l);
    void**                  interp_data_l     = (data->interp_data_l);
 
+   HYPRE_Int               num_pre_relax     = (data -> num_pre_relax);
    HYPRE_Int               num_levels        = (data->num_levels);
    HYPRE_Int               relax_type        = (data->relax_type);
    HYPRE_Int               usr_jacobi_weight = (data->usr_jacobi_weight);
@@ -896,8 +897,10 @@ HYPRE_Int hypre_SysBAMGSetupOperators(
       hypre_SStructPMatrixSetSymmetric( A_l[l], 0, 0,
                                         hypre_SStructPMatrixSymmetric(A_l[0])[0][0] );
 
-   /* set up fine grid relaxation */
+   /* set up fine grid relaxation, setting maxiter here, so that any Krylov 
+    * workspaces can be pre-allocated */
    hypre_SysBAMGRelaxSetTol(relax_data_l[0], 0.0);
+   hypre_SysBAMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
    if(relax_type < 10)
    {
       /* These calls are only needed if doing Jacobi/GS type relaxations, not Krylov */
@@ -914,8 +917,10 @@ HYPRE_Int hypre_SysBAMGSetupOperators(
    {
       for (l = 1; l < num_levels; l++)
       {
-         /* set relaxation parameters */
+         /* set relaxation parameters, setting maxiter here, so that any Krylov 
+          * workspaces can be pre-allocated */
          hypre_SysBAMGRelaxSetTol(relax_data_l[l], 0.0);
+         hypre_SysBAMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
          if(relax_type < 10)
          {
             /* These calls are only needed if doing Jacobi/GS type relaxations, not Krylov */

@@ -58,6 +58,7 @@ FILES =\
  F90_HYPRE_sstruct_sys_pfmg.c\
  HYPRE_sstruct_bicgstab.c\
  HYPRE_sstruct_gmres.c\
+ hypre_sstructp_gmres.c\
  HYPRE_sstruct_flexgmres.c\
  HYPRE_sstruct_lgmres.c\
  HYPRE_sstruct_InterFAC.c\
@@ -84,6 +85,7 @@ FILES =\
  hypre_bsearch.c\
  krylov.c\
  krylov_sstruct.c\
+ krylov_sstructp.c\
  eliminate_rowscols.c\
  maxwell_grad.c\
  maxwell_physbdy.c\

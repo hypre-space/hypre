@@ -41,7 +41,7 @@ hypre_SysBAMGRelaxCreate( MPI_Comm  comm, HYPRE_Int relax_type )
    }
    else if(relax_type == 10)
    {
-      HYPRE_SStructGMRESCreate(comm, &solver);
+      hypre_SStructPGMRESCreate(comm, &solver);
       
    }
    (sys_bamg_relax_data -> relax_data) = relax_data; 
@@ -115,7 +115,7 @@ hypre_SysBAMGRelaxDestroy( void *sys_bamg_relax_vdata )
       }
       else if (relax_type == 10)
       {
-         HYPRE_SStructGMRESDestroy(sys_bamg_relax_data -> solver);
+         hypre_SStructPGMRESDestroy(sys_bamg_relax_data -> solver);
       }
       hypre_TFree(sys_bamg_relax_data);
    }
@@ -142,7 +142,7 @@ hypre_SysBAMGRelax( void                 *sys_bamg_relax_vdata,
    }
    else if (relax_type == 10)
    {
-      HYPRE_SStructGMRESSolve(solver, A, b, x);
+      hypre_SStructPGMRESSolve(solver, A, b, x);
    }
 
    return hypre_error_flag;
@@ -174,7 +174,7 @@ hypre_SysBAMGRelaxSetup( void                 *sys_bamg_relax_vdata,
    }
    else if (relax_type == 10)
    {
-      HYPRE_SStructGMRESSetup(solver, A, b, x);
+      hypre_SStructPGMRESSetup(solver, A, b, x);
    }
 
    return hypre_error_flag;
@@ -269,7 +269,7 @@ hypre_SysBAMGRelaxSetTol( void   *sys_bamg_relax_vdata,
    }
    else if (relax_type == 10)
    {
-      HYPRE_SStructGMRESSetTol(solver, tol);
+      hypre_SStructPGMRESSetTol(solver, tol);
    }
 
    return hypre_error_flag;
@@ -292,8 +292,8 @@ hypre_SysBAMGRelaxSetMaxIter( void  *sys_bamg_relax_vdata,
    }
    else if (relax_type == 10)
    {
-      HYPRE_SStructGMRESSetMaxIter(solver, max_iter);
-      HYPRE_SStructGMRESSetKDim(solver, max_iter+2);
+      hypre_SStructPGMRESSetMaxIter(solver, max_iter);
+      hypre_SStructPGMRESSetKDim(solver, max_iter+2);
    }
 
    return hypre_error_flag;

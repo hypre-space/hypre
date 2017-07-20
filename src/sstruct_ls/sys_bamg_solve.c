@@ -34,8 +34,6 @@ hypre_SysBAMGSolve( void                 *sys_bamg_vdata,
    HYPRE_Int             max_iter        = (sys_bamg_data -> max_iter);
    HYPRE_Int             rel_change      = (sys_bamg_data -> rel_change);
    HYPRE_Int             zero_guess      = (sys_bamg_data -> zero_guess);
-   HYPRE_Int             num_pre_relax   = (sys_bamg_data -> num_pre_relax);
-   HYPRE_Int             num_post_relax  = (sys_bamg_data -> num_post_relax);
    HYPRE_Int             num_levels      = (sys_bamg_data -> num_levels);
    hypre_SStructPMatrix  **A_l           = (sys_bamg_data -> A_l);
    hypre_SStructPMatrix  **P_l           = (sys_bamg_data -> P_l);
@@ -134,7 +132,6 @@ hypre_SysBAMGSolve( void                 *sys_bamg_vdata,
 
       /* fine grid pre-relaxation */
       hypre_SysBAMGRelaxSetPreRelax(relax_data_l[0]);
-      hypre_SysBAMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
       hypre_SysBAMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
       hypre_SysBAMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
@@ -191,7 +188,6 @@ hypre_SysBAMGSolve( void                 *sys_bamg_vdata,
             {
                /* pre-relaxation */
                hypre_SysBAMGRelaxSetPreRelax(relax_data_l[l]);
-               hypre_SysBAMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
                hypre_SysBAMGRelaxSetZeroGuess(relax_data_l[l], 1);
                hypre_SysBAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
@@ -250,7 +246,6 @@ hypre_SysBAMGSolve( void                 *sys_bamg_vdata,
             {
                /* post-relaxation */
                hypre_SysBAMGRelaxSetPostRelax(relax_data_l[l]);
-               hypre_SysBAMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
                hypre_SysBAMGRelaxSetZeroGuess(relax_data_l[l], 0);
                hypre_SysBAMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             }
@@ -279,7 +274,6 @@ hypre_SysBAMGSolve( void                 *sys_bamg_vdata,
 
       /* fine grid post-relaxation */
       hypre_SysBAMGRelaxSetPostRelax(relax_data_l[0]);
-      hypre_SysBAMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_SysBAMGRelaxSetZeroGuess(relax_data_l[0], 0);
       hypre_SysBAMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
 

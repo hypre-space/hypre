@@ -236,7 +236,7 @@ HYPRE_Int hypre_LS(
 #endif
 
    // Q is Mrows x Mrows, 'M' = Mrows, 'N' = 1, 'K' = Mrows, 'A' = elementary reflector array = M
-   hypre_xxxmqr( "Left", TRANS, &Crows, &Ccols, &Mrows, M, &Mrows, tau, C, &Mrows, work, &lwork, &info );
+   hypre_xxxmqr( "Left", TRANS, &Crows, &Ccols, &Mcols, M, &Mrows, tau, C, &Mrows, work, &lwork, &info );
    hypre_CheckReturnValue( "hypre_xxxmqr", info );
 
 #if DEBUG_SYSBAMG > 1

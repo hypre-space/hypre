@@ -147,6 +147,8 @@ HYPRE_Int
 HYPRE_SStructSysBAMGSetNumPostRelax( HYPRE_SStructSolver solver,
                                      HYPRE_Int          num_post_relax )
 {
+   
+   hypre_printf("HYPRE_SStructSysBAMGSetNumPostRelax() currently disable.\n Use HYPRE_SStructSysBAMGSetNumPreRelax() to set the number\n of pre AND post relaxation sweeps.  This is done for\n efficiency when using Krylov-based relaxation schemes.\n");
    return( hypre_SysBAMGSetNumPostRelax( (void *) solver, num_post_relax) );
 }
 
