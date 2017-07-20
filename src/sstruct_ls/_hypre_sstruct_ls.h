@@ -454,22 +454,22 @@ HYPRE_Int HYPRE_SStructGMRESGetFinalRelativeResidualNorm ( HYPRE_SStructSolver s
 HYPRE_Int HYPRE_SStructGMRESGetResidual ( HYPRE_SStructSolver solver , void **residual );
 
 /* hypre_sstructp_gmres.c */
-HYPRE_Int hypre_SStructGMRESCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
-HYPRE_Int hypre_SStructGMRESDestroy ( HYPRE_SStructSolver solver );
-HYPRE_Int hypre_SStructGMRESSetup ( HYPRE_SStructSolver solver , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
-HYPRE_Int hypre_SStructGMRESSolve ( HYPRE_SStructSolver solver , hypre_SStructMatrix *A , hypre_SStructVector *b , hypre_SStructVector *x );
-HYPRE_Int hypre_SStructGMRESSetKDim ( HYPRE_SStructSolver solver , HYPRE_Int k_dim );
-HYPRE_Int hypre_SStructGMRESSetTol ( HYPRE_SStructSolver solver , HYPRE_Real tol );
-HYPRE_Int hypre_SStructGMRESSetAbsoluteTol ( HYPRE_SStructSolver solver , HYPRE_Real atol );
-HYPRE_Int hypre_SStructGMRESSetMinIter ( HYPRE_SStructSolver solver , HYPRE_Int min_iter );
-HYPRE_Int hypre_SStructGMRESSetMaxIter ( HYPRE_SStructSolver solver , HYPRE_Int max_iter );
-HYPRE_Int hypre_SStructGMRESSetStopCrit ( HYPRE_SStructSolver solver , HYPRE_Int stop_crit );
-HYPRE_Int hypre_SStructGMRESSetPrecond ( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , void *precond_data );
-HYPRE_Int hypre_SStructGMRESSetLogging ( HYPRE_SStructSolver solver , HYPRE_Int logging );
-HYPRE_Int hypre_SStructGMRESSetPrintLevel ( HYPRE_SStructSolver solver , HYPRE_Int level );
-HYPRE_Int hypre_SStructGMRESGetNumIterations ( HYPRE_SStructSolver solver , HYPRE_Int *num_iterations );
-HYPRE_Int hypre_SStructGMRESGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , HYPRE_Real *norm );
-HYPRE_Int hypre_SStructGMRESGetResidual ( HYPRE_SStructSolver solver , void **residual );
+HYPRE_Int hypre_SStructPGMRESCreate ( MPI_Comm comm , HYPRE_SStructSolver *solver );
+HYPRE_Int hypre_SStructPGMRESDestroy ( HYPRE_SStructSolver solver );
+HYPRE_Int hypre_SStructPGMRESSetup ( HYPRE_SStructSolver solver , hypre_SStructPMatrix *A , hypre_SStructPVector *b , hypre_SStructPVector *x );
+HYPRE_Int hypre_SStructPGMRESSolve ( HYPRE_SStructSolver solver , hypre_SStructPMatrix *A , hypre_SStructPVector *b , hypre_SStructPVector *x );
+HYPRE_Int hypre_SStructPGMRESSetKDim ( HYPRE_SStructSolver solver , HYPRE_Int k_dim );
+HYPRE_Int hypre_SStructPGMRESSetTol ( HYPRE_SStructSolver solver , HYPRE_Real tol );
+HYPRE_Int hypre_SStructPGMRESSetAbsoluteTol ( HYPRE_SStructSolver solver , HYPRE_Real atol );
+HYPRE_Int hypre_SStructPGMRESSetMinIter ( HYPRE_SStructSolver solver , HYPRE_Int min_iter );
+HYPRE_Int hypre_SStructPGMRESSetMaxIter ( HYPRE_SStructSolver solver , HYPRE_Int max_iter );
+HYPRE_Int hypre_SStructPGMRESSetStopCrit ( HYPRE_SStructSolver solver , HYPRE_Int stop_crit );
+HYPRE_Int hypre_SStructPGMRESSetPrecond ( HYPRE_SStructSolver solver , HYPRE_PtrToSStructSolverFcn precond , HYPRE_PtrToSStructSolverFcn precond_setup , void *precond_data );
+HYPRE_Int hypre_SStructPGMRESSetLogging ( HYPRE_SStructSolver solver , HYPRE_Int logging );
+HYPRE_Int hypre_SStructPGMRESSetPrintLevel ( HYPRE_SStructSolver solver , HYPRE_Int level );
+HYPRE_Int hypre_SStructPGMRESGetNumIterations ( HYPRE_SStructSolver solver , HYPRE_Int *num_iterations );
+HYPRE_Int hypre_SStructPGMRESGetFinalRelativeResidualNorm ( HYPRE_SStructSolver solver , HYPRE_Real *norm );
+HYPRE_Int hypre_SStructPGMRESGetResidual ( HYPRE_SStructSolver solver , void **residual );
 
 /* HYPRE_sstruct_int.c */
 HYPRE_Int hypre_SStructPVectorSetRandomValues ( hypre_SStructPVector *pvector , HYPRE_Int seed );
