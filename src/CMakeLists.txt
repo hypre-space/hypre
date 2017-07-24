@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.11.2)
-set (HYPRE_DATE    2017/03/13)
+set (HYPRE_VERSION 2.12.0)
+set (HYPRE_DATE    2017/05/02)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -25,6 +25,8 @@ set (CMAKE_BUILD_TYPE "${HYPRE_BUILD_TYPE}" CACHE INTERNAL "" FORCE)
 # Configuration options
 option(HYPRE_SHARED               "Build a shared library" OFF)
 option(HYPRE_BIGINT               "Use long long int for HYPRE_Int" OFF)
+option(HYPRE_SINGLE               "Use float for HYPRE_Real" OFF)
+option(HYPRE_LONG_DOUBLE          "Use long double for HYPRE_Real" OFF)
 option(HYPRE_SEQUENTIAL           "Compile without MPI" OFF)
 option(HYPRE_TIMING               "Use HYPRE timing routines" OFF)
 option(HYPRE_USING_HYPRE_BLAS     "Use internal BLAS library" ON)
@@ -41,6 +43,14 @@ if (HYPRE_SHARED)
 endif ()
 
 if (HYPRE_BIGINT)
+  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_SINGLE)
+  set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
+endif ()
+
+if (HYPRE_LONG_DOUBLE)
   set (HYPRE_USING_FEI OFF CACHE BOOL "" FORCE)
 endif ()
 
@@ -470,6 +480,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_cg_relax_wt.c
   parcsr_ls/par_coarsen.c
   parcsr_ls/par_cgc_coarsen.c
+  parcsr_ls/par_cheby.c
   parcsr_ls/par_coarse_parms.c
   parcsr_ls/par_coordinates.c
   parcsr_ls/par_cr.c

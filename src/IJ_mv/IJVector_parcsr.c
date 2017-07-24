@@ -858,7 +858,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    			     	      HYPRE_Complex  *off_proc_data)
 {
    MPI_Comm comm = hypre_IJVectorComm(vector);
-   hypre_ParVector *par_vector = hypre_IJVectorObject(vector);
+   hypre_ParVector *par_vector = ( hypre_ParVector *) hypre_IJVectorObject(vector);
    hypre_MPI_Request *requests = NULL;
    hypre_MPI_Status *status = NULL;
    HYPRE_Int i, j, j2, row;
@@ -1315,7 +1315,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       ex_contact_vec_starts[i+1] = -storage-1; /* need negative for next loop */
    }      
 
-   void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);
+   /*void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);*/
+   void_contact_buf = hypre_CAlloc(storage,obj_size_bytes);
    index_ptr = void_contact_buf; /* step through with this index */
 
    /* set up data to be sent to send procs */

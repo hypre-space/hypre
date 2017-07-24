@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 #include "ams.h"
@@ -24,7 +20,7 @@
  * Relaxation on the ParCSR matrix A with right-hand side f and
  * initial guess u. Possible values for relax_type are:
  *
- * 1 = l1-scaled Jacobi
+ * 1 = l1-scaled (or weighted) Jacobi
  * 2 = l1-scaled block Gauss-Seidel/SSOR
  * 3 = Kaczmarz
  * 4 = truncated version of 2 (Remark 6.2 in smoothers paper)
@@ -70,14 +66,27 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
    {
       if (relax_type == 1) /* l1-scaled Jacobi */
       {
-         HYPRE_Int i, num_rows = hypre_ParCSRMatrixNumRows(A);
-
+	 PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
+	 HYPRE_Int i, num_rows = hypre_ParCSRMatrixNumRows(A);
+#ifdef HYPRE_USE_GPU
+	 if (sweep==0){
+	   hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(v));
+	   hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
+	 }
+	 VecCopy(v_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(v)),HYPRE_STREAM(4));
+#else
          hypre_ParVectorCopy(f,v);
+#endif
          hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, v);
-
+#ifdef HYPRE_USE_GPU
+	 
+	 VecScale(u_data,v_data,l1_norms,num_rows,HYPRE_STREAM(4));
+#else
          /* u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1 */
          for (i = 0; i < num_rows; i++)
             u_data[i] += v_data[i] / l1_norms[i];
+#endif
+	 POP_RANGE;
       }
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
       {
@@ -704,6 +713,18 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
             l1_norm[i] = diag;
       }
    }
+   else if (option == 5) /*stores diagonal of A for Jacobi using matvec, rlx 7 */
+   {
+      for (i = 0; i < num_rows; i++)
+      {
+         diag = A_diag_data[A_diag_I[i]];
+         if (diag != 0.0) l1_norm[i] = diag;
+	 else l1_norm[i] = 1.0;
+      }
+      *l1_norm_ptr = l1_norm;
+
+      return hypre_error_flag;
+   }
 
    /* Handle negative definite matrices */
    for (i = 0; i < num_rows; i++)
@@ -718,6 +739,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
          break;
       }
 
+   //for (i = 0; i < num_rows; i++) l1_norm[i]=1.0/l1_norm[i];
    hypre_TFree(cf_marker_offd);
 
    *l1_norm_ptr = l1_norm;
@@ -1077,7 +1099,7 @@ HYPRE_Int hypre_AMSSetAlphaPoissonMatrix(void *solver,
    ams_data -> A_Pi = A_Pi;
 
    /* Penalize the eliminated degrees of freedom */
-   hypre_ParCSRMatrixSetDiagRows(A_Pi, DBL_MAX);
+   hypre_ParCSRMatrixSetDiagRows(A_Pi, HYPRE_REAL_MAX);
 
    /* Make sure that the first entry in each row is the diagonal one. */
    /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_Pi)); */
@@ -1106,7 +1128,7 @@ HYPRE_Int hypre_AMSSetBetaPoissonMatrix(void *solver,
    else
    {
       /* Penalize the eliminated degrees of freedom */
-      hypre_ParCSRMatrixSetDiagRows(A_G, DBL_MAX);
+      hypre_ParCSRMatrixSetDiagRows(A_G, HYPRE_REAL_MAX);
 
       /* Make sure that the first entry in each row is the diagonal one. */
       /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_G)); */

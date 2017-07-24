@@ -22,6 +22,12 @@
 extern "C" {
 #endif
 
+#if defined(HYPRE_SINGLE)
+#define sqrt sqrtf
+#elif defined(HYPRE_LONG_DOUBLE)
+#define sqrt sqrtl
+#endif
+
 /* --------------------------------------------------------------------------
  *  Change all names to hypre_ to avoid link conflicts
  * --------------------------------------------------------------------------*/

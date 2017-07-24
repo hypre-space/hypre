@@ -43,25 +43,51 @@ extern "C" {
  * Big int stuff
  *--------------------------------------------------------------------------*/
 
-#ifdef HYPRE_BIGINT
+#if defined(HYPRE_BIGINT)
 typedef long long int HYPRE_Int;
 #define HYPRE_MPI_INT MPI_LONG_LONG_INT
-#else 
+
+#else /* default */
 typedef int HYPRE_Int;
 #define HYPRE_MPI_INT MPI_INT
 #endif
 
 /*--------------------------------------------------------------------------
- * Complex stuff
+ * Real and Complex types
  *--------------------------------------------------------------------------*/
 
-typedef double HYPRE_Real;
-#define HYPRE_MPI_REAL MPI_DOUBLE
+#include <float.h>
 
-#ifdef HYPRE_COMPLEX
+#if defined(HYPRE_SINGLE)
+typedef float HYPRE_Real;
+#define HYPRE_REAL_MAX FLT_MAX
+#define HYPRE_REAL_MIN FLT_MIN
+#define HYPRE_REAL_EPSILON FLT_EPSILON
+#define HYPRE_REAL_MIN_EXP FLT_MIN_EXP
+#define HYPRE_MPI_REAL MPI_FLOAT
+
+#elif defined(HYPRE_LONG_DOUBLE)
+typedef long double HYPRE_Real;
+#define HYPRE_REAL_MAX LDBL_MAX
+#define HYPRE_REAL_MIN LDBL_MIN
+#define HYPRE_REAL_EPSILON LDBL_EPSILON
+#define HYPRE_REAL_MIN_EXP DBL_MIN_EXP
+#define HYPRE_MPI_REAL MPI_LONG_DOUBLE
+
+#else /* default */
+typedef double HYPRE_Real;
+#define HYPRE_REAL_MAX DBL_MAX
+#define HYPRE_REAL_MIN DBL_MIN
+#define HYPRE_REAL_EPSILON DBL_EPSILON
+#define HYPRE_REAL_MIN_EXP DBL_MIN_EXP
+#define HYPRE_MPI_REAL MPI_DOUBLE
+#endif
+
+#if defined(HYPRE_COMPLEX)
 typedef double _Complex HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX MPI_C_DOUBLE_COMPLEX  /* or MPI_LONG_DOUBLE ? */
-#else 
+
+#else  /* default */
 typedef HYPRE_Real HYPRE_Complex;
 #define HYPRE_MPI_COMPLEX HYPRE_MPI_REAL
 #endif

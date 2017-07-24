@@ -15,5 +15,5 @@
 # Run complex examples
 #=============================================================================
 
-mpirun -np 16 ex18comp -n 4 > complex.out.1
+mpirun -np 16 ./ex18comp -n 4 > complex.out.1
 

@@ -10,8 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
 #ifndef hypre_ERROR_HEADER
 #define hypre_ERROR_HEADER
 
@@ -37,3 +35,4 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
 #endif
 
 #endif
+

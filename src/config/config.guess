@@ -2,7 +2,7 @@
 # Attempt to guess a canonical system name.
 #   Copyright 1992-2016 Free Software Foundation, Inc.
 
-timestamp='2016-10-02'
+timestamp='2017-03-02'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -1009,7 +1009,23 @@ EOF
     or32:Linux:*:* | or1k*:Linux:*:*)
 	echo ${UNAME_MACHINE}-unknown-linux-${LIBC}
 	exit ;;
-    padre:Linux:*:*)
+    ppc64le:Linux:*:*)
+	echo powerpc64-unknown-linux-gnu
+	exit ;;
+    alpha:Linux:*:*)
+	case `sed -n '/^cpu model/s/^.*: \(.*\)/\1/p' < /proc/cpuinfo` in
+	  EV5)   UNAME_MACHINE=alphaev5 ;;
+	  EV56)  UNAME_MACHINE=alphaev56 ;;
+	  PCA56) UNAME_MACHINE=alphapca56 ;;
+	  PCA57) UNAME_MACHINE=alphapca56 ;;
+	  EV6)   UNAME_MACHINE=alphaev6 ;;
+	  EV67)  UNAME_MACHINE=alphaev67 ;;
+	  EV68*) UNAME_MACHINE=alphaev68 ;;
+        esac
+	objdump --private-headers /bin/sh | grep ld.so.1 >/dev/null
+	if test "$?" = 0 ; then LIBC="libc1" ; else LIBC="" ; fi
+	echo ${UNAME_MACHINE}-unknown-linux-gnu${LIBC}
+    padre:Linux:*:*
 	echo sparc-unknown-linux-${LIBC}
 	exit ;;
     parisc64:Linux:*:* | hppa64:Linux:*:*)

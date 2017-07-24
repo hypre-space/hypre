@@ -49,6 +49,12 @@
 /* Define to 1 if using long long int for HYPRE_Int */
 #undef HYPRE_BIGINT
 
+/* Define to 1 if using single precision values for HYPRE_Real */
+#undef HYPRE_SINGLE
+
+/* Define to 1 if using quad precision values for HYPRE_Real */
+#undef HYPRE_LONG_DOUBLE
+
 /* Define to 1 if using complex values */
 #undef HYPRE_COMPLEX
 
@@ -114,6 +120,9 @@
 
 /* As HYPRE_FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
+
+/* Define to 1 if nvcc is enabled */
+#undef HYPRE_USING_NVCC
 
 /* Define to 1 if Caliper instrumentation is enabled */
 #undef HYPRE_USING_CALIPER

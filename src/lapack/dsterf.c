@@ -54,7 +54,7 @@
     integer i__1;
     doublereal d__1, d__2, d__3;
     /* Builtin functions */
-    HYPRE_Real sqrt(doublereal), d_sign(doublereal *, doublereal *);
+    HYPRE_Real d_sign(doublereal *, doublereal *);
     /* Local variables */
     static doublereal oldc;
     static integer lend, jtot;

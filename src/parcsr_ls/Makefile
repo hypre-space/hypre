@@ -87,6 +87,7 @@ FILES =\
  par_cg_relax_wt.c\
  par_coarsen.c\
  par_cgc_coarsen.c\
+ par_cheby.c\
  par_coarse_parms.c\
  par_coordinates.c\
  par_cr.c\

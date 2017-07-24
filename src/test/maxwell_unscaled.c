@@ -1336,6 +1336,8 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
+   hypre_GPUInit(-1);
+
    hypre_InitMemoryDebug(myid);
 
    /*-----------------------------------------------------------
@@ -1741,7 +1743,7 @@ main( hypre_int argc,
    for (j = 0; j < data.max_boxsize; j++)
    {
       values[j]= sin((HYPRE_Real)(j+1));
-      values[j]= (HYPRE_Real) rand()/RAND_MAX;
+      values[j]= (HYPRE_Real) hypre_Rand();
       values[j]= (HYPRE_Real) j;
    }
    for (part = 0; part < data.nparts; part++)
@@ -1900,6 +1902,7 @@ main( hypre_int argc,
    hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
+   hypre_GPUFinalize();
    hypre_MPI_Finalize();
 
    return (0);
