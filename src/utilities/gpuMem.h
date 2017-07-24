@@ -96,9 +96,21 @@ extern struct hypre__global_struct hypre__global_handle ;
 #endif
 
 #else
-
+struct hypre__global_struct{
+  hypre_int initd;
+  hypre_int device;
+  hypre_int device_count;
+  // cublasHandle_t cublas_handle;
+  //cusparseHandle_t cusparse_handle;
+  //cusparseMatDescr_t cusparse_mat_descr;
+  //cudaStream_t streams[MAX_HGS_ELEMENTS];
+   nvtxDomainHandle_t nvtx_domain;
+  //hypre_int concurrent_managed_access;
+  size_t memoryHWM;
+};
+extern struct hypre__global_struct hypre__global_handle ;
 #define hypre_GPUInit(use_device)
 #define hypre_GPUFinalize()
-
+#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #endif
 

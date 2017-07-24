@@ -46,7 +46,6 @@
 
 /* max dt */
 #define DT_INF 1.0e30
-
 HYPRE_Int
 BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );
 

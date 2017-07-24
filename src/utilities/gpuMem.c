@@ -2,6 +2,9 @@
 #define _GNU_SOURCE
 #endif
 #include "_hypre_utilities.h"
+#if defined(HYPRE_USE_MANAGED) && !defined(HYPRE_USE_GPU)
+struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1,.memoryHWM=0};
+#endif
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #include <stdlib.h>
 #include <stdint.h>
