@@ -1569,7 +1569,7 @@ HYPRE_Int hypre_MGRSetBlockDataWrapper( void *mgr_vdata, HYPRE_Int  block_size, 
 HYPRE_Int hypre_MGRSetBlockData( void *mgr_vdata, HYPRE_Int  block_size,  HYPRE_Int num_coarse_points, HYPRE_Int  *block_coarse_indexes);
 HYPRE_Int hypre_MGRSetBlockDataExp( void *mgr_vdata, HYPRE_Int  block_size,  HYPRE_Int *num_coarse_points, HYPRE_Int  **block_coarse_indexes);
 HYPRE_Int hypre_MGRCoarsen(hypre_ParCSRMatrix *S,  hypre_ParCSRMatrix *A,HYPRE_Int final_coarse_size,HYPRE_Int *final_coarse_indexes,HYPRE_Int debug_flag,HYPRE_Int **CF_marker,HYPRE_Int last_level);
-HYPRE_Int hypre_MGRSetReservedCoarseSize(void      *mgr_vdata, HYPRE_Int reserved_coarse_size);
+HYPRE_Int hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_nodes);
 HYPRE_Int hypre_MGRSetMaxGlobalsmoothIters( void *mgr_vdata, HYPRE_Int max_iter );
 HYPRE_Int hypre_MGRSetGlobalsmoothType( void *mgr_vdata, HYPRE_Int iter_type );
 HYPRE_Int hypre_MGRSetAdditionalCoarseIndices(void *mgr_vdata, HYPRE_Int num_additional_coarse_indices, HYPRE_Int *coarse_grid_indices);

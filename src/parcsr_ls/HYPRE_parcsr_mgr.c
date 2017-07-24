@@ -147,12 +147,12 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize )
    return hypre_MGRSetBlockSize(solver, bsize );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetReservedCoarseSize
+ * HYPRE_MGRSetReservedCoarseNodes
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetReservedCoarseSize( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size )
+HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_indexes )
 {
-   return hypre_MGRSetReservedCoarseSize(solver, reserved_coarse_size );
+   return hypre_MGRSetReservedCoarseNodes(solver, reserved_coarse_size, reserved_coarse_indexes );
 }
 
 /*--------------------------------------------------------------------------

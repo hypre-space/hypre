@@ -382,10 +382,11 @@ hypre_MGRSetBlockData( void      *mgr_vdata,
 }
 
   /* 
-/*Set nmber of points that remain part of the coarse grid throughout the hierarchy */
+/*Set number of points that remain part of the coarse grid throughout the hierarchy */
 HYPRE_Int
-hypre_MGRSetReservedCoarseSize(void      *mgr_vdata,
-					   HYPRE_Int reserved_coarse_size)
+hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata,
+					   HYPRE_Int reserved_coarse_size,
+					   HYPRE_Int *reserved_cpt_index)
 {
 	hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
@@ -403,7 +404,8 @@ hypre_MGRSetReservedCoarseSize(void      *mgr_vdata,
 	}
 
 	(mgr_data -> reserved_coarse_size) = reserved_coarse_size;
-
+	(mgr_data -> reserved_coarse_indexes) = reserved_cpt_index;
+	
 	return hypre_error_flag;
 }
 

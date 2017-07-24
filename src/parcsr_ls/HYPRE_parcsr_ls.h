@@ -3131,10 +3131,10 @@ HYPRE_MGRSetMaxCoarseLevels( HYPRE_Solver solver, HYPRE_Int maxlev );
 HYPRE_Int
 HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize );
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetReservedCoarseSize
+ * HYPRE_MGRSetReservedCoarseNodes
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetReservedCoarseSize( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size );
+HYPRE_MGRSetReservedCoarseSize( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_nodes );
 	
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxType
