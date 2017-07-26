@@ -424,7 +424,7 @@ hypre_CSRMatrixMatvec( HYPRE_Complex    alpha,
                        HYPRE_Complex    beta,
                        hypre_Vector    *y     )
 {
-   return hypre_CSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y, 0);
+   return hypre_CSRMatrixMatvecOutOfPlaceOOMP(alpha, A, x, beta, y, y, 0);
 }
 
 /*--------------------------------------------------------------------------

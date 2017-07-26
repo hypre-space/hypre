@@ -83,6 +83,10 @@ void hypre_GPUInit(hypre_int use_device){
       gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
     }
       
+#ifdef HYPRE_USING_OPENMP_OFFLOAD
+    omp_set_default_device(HYPRE_DEVICE);
+    printf("Set OMP Default device to %d \n",HYPRE_DEVICE);
+#endif
       /* Create NVTX domain for all the nvtx calls in HYPRE */
       HYPRE_DOMAIN=nvtxDomainCreateA("Hypre");
       

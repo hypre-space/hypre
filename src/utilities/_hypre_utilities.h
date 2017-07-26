@@ -1370,7 +1370,7 @@ struct hypre__global_struct{
   //cusparseHandle_t cusparse_handle;
   //cusparseMatDescr_t cusparse_mat_descr;
   //cudaStream_t streams[MAX_HGS_ELEMENTS];
-   nvtxDomainHandle_t nvtx_domain;
+  //   nvtxDomainHandle_t nvtx_domain;
   //hypre_int concurrent_managed_access;
   size_t memoryHWM;
 };
