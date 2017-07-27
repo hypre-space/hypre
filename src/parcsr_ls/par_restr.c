@@ -342,6 +342,29 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          }
       }
 
+      /* DEBUG FOR local_size == 0 */
+      /*
+      if (local_size == 0)
+      {
+         printf("my_id %d:  ", my_id);
+         for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+         {
+            i1 = S_diag_j[j];
+            printf("%d[d, %d] ", i1, CF_marker[i1]);
+         }
+         printf("\n");
+         for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+         {
+            i1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+            printf("%d[o, %d] ", i1, CF_marker_offd[i1]);
+         }
+
+         printf("\n");
+         
+         exit(0);
+      }
+      */
+
       /* Second, copy values to local system: Ai and bi from A */
       /* now we have marked all rows/cols we want. next we extract the entries 
        * we need from these rows and put them in Ai and bi*/
@@ -460,6 +483,9 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          i1 = A_diag_j[j];
          if ((cc = marker_diag[i1]) >= 0)
          {
+            /* this should be true but not very important
+             * what does it say is that eqn order == unknown order
+             * this is true, since order in A is preserved in S */
             hypre_assert(rr == cc);
             /* Note the sign change */
             Dbi[cc] = -A_diag_data[j];
@@ -474,6 +500,9 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
             i1 = A_offd_j[j];
             if ((cc = marker_offd[i1]) >= 0)
             {
+               /* this should be true but not very important
+                * what does it say is that eqn order == unknown order
+                * this is true, since order in A is preserved in S */
                hypre_assert(rr == cc);
                /* Note the sign change */
                Dbi[cc] = -A_offd_data[j];
@@ -483,32 +512,37 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       }
       hypre_assert(rr == local_size);
 
-      /* we have Ai and bi build
-       * solve the linear system by LAPACK */
-      memcpy(TMPA, DAi, local_size*local_size*sizeof(double)); /* XXX */
-      memcpy(TMPb, Dbi, local_size*sizeof(double)); /* XXX */
-      hypre_dgetrf(&local_size, &local_size, DAi, &local_size, Ipi,
-                   &lapack_info);
-      hypre_assert(lapack_info == 0);
-      if (lapack_info == 0)
+      if (local_size > 0)
       {
-         /* solve A_i^T x_i = b_i,
-          * solution is saved in b_i on return */
-         hypre_dgetrs(&charT, &local_size, &ione, DAi, &local_size,
-                      Ipi, Dbi, &local_size, &lapack_info);
-         hypre_assert(lapack_info == 0);
-      }
+         /* we have Ai and bi build
+          * solve the linear system by LAPACK : LU factorization */
+         memcpy(TMPA, DAi, local_size*local_size*sizeof(double)); /* XXX */
+         memcpy(TMPb, Dbi, local_size*sizeof(double)); /* XXX */
+         hypre_dgetrf(&local_size, &local_size, DAi, &local_size, Ipi,
+               &lapack_info);
 
-      int one = 1;
-      double alp = 1.0, bet = 0.0;
-      hypre_dgemv(&charT, &local_size, &local_size, &alp, TMPA, &local_size, Dbi, 
-                  &one, &bet, TMPd, &one);
-      alp = -1.0;
-      hypre_daxpy(&local_size, &alp, TMPb, &one, TMPd, &one);
-      double err = hypre_dnrm2(&local_size, TMPd, &one);
-      if (err > 1e-8)
-      {
-         printf("local res norm %e\n", err);
+         hypre_assert(lapack_info == 0);
+
+         if (lapack_info == 0)
+         {
+            /* solve A_i^T x_i = b_i,
+             * solution is saved in b_i on return */
+            hypre_dgetrs(&charT, &local_size, &ione, DAi, &local_size,
+                  Ipi, Dbi, &local_size, &lapack_info);
+            hypre_assert(lapack_info == 0);
+         }
+
+         int one = 1;
+         double alp = 1.0, bet = 0.0;
+         hypre_dgemv(&charT, &local_size, &local_size, &alp, TMPA, &local_size, Dbi, 
+               &one, &bet, TMPd, &one);
+         alp = -1.0;
+         hypre_daxpy(&local_size, &alp, TMPb, &one, TMPd, &one);
+         double err = hypre_dnrm2(&local_size, TMPd, &one);
+         if (err > 1e-8)
+         {
+            printf("local res norm %e\n", err);
+         }
       }
       
       /* now we are ready to fill this row of R */

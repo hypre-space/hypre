@@ -1333,7 +1333,7 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-AIR") == 0 )
       {
          arg_index++;
-         air = 1;
+         air = atoi(argv[arg_index++]);
       }
       else
       {
@@ -1344,7 +1344,7 @@ main( hypre_int argc,
    /* default settings for AIR alg. */
    if (air)
    {
-      restri_type = 1;    /* AIR */
+      restri_type = air;    /* Set Restriction to be AIR */
       interp_type = 100;  /* 1-pt Interp */
       ns_down = 1;
       ns_up = 2;
@@ -1357,7 +1357,7 @@ main( hypre_int argc,
       /* down cycle: C */
       for (i=0; i<ns_down; i++)
       {
-         grid_relax_points[1][i] = 1;
+         grid_relax_points[1][i] = 0;//1;
       }
       /* up cycle: F */
       for (i=0; i<ns_up; i++)
@@ -2574,7 +2574,8 @@ main( hypre_int argc,
 
       HYPRE_BoomerAMGCreate(&amg_solver); 
       /* RL: specify restriction */
-      HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 1: AIR */
+      hypre_assert(restri_type >= 0);
+      HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
       if (air)
       {
          HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);

@@ -736,9 +736,9 @@ hypre_BoomerAMGSetRestriction( void *data,
  
    /* RL: currently, only 0: R = P^T
     *                     1: AIR
+    *                    >1: AIR-2
     */
-   if (restr_par < 0 || restr_par > 1)
-
+   if (restr_par < 0)
    {
       hypre_error_in_arg(2);
       return hypre_error_flag;

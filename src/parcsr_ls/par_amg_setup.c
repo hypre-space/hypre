@@ -1459,11 +1459,24 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             }
 
             /* RL: build restriction */
-            if (restri_type == 1)
+            if (restri_type)
             {
-               hypre_BoomerAMGBuildRestrAIR(A_array[level], CF_marker, 
-                                            S, coarse_pnts_global, num_functions, dof_func_array[level], 
-                                            debug_flag, trunc_factor, P_max_elmts, col_offd_S_to_A, &R );
+               if (restri_type == 1) /* distance-1 AIR */
+               {
+                  hypre_BoomerAMGBuildRestrAIR(A_array[level], CF_marker, 
+                                               S, coarse_pnts_global, num_functions, 
+                                               dof_func_array[level], 
+                                               debug_flag, trunc_factor, P_max_elmts, 
+                                               col_offd_S_to_A, &R );
+               }
+               else /* distance-2 AIR */
+               {
+                  hypre_BoomerAMGBuildRestrDist2AIR(A_array[level], CF_marker, 
+                                                    S, coarse_pnts_global, num_functions, 
+                                                    dof_func_array[level], 
+                                                    debug_flag, trunc_factor, P_max_elmts, 
+                                                    col_offd_S_to_A, &R );
+               }
             }
 
             if (debug_flag==1) wall_time = time_getWallclockSeconds();
