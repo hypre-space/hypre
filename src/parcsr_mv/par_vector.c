@@ -1076,7 +1076,7 @@ HYPRE_Complex hypre_ParVectorLocalSumElts( hypre_ParVector * vector )
 {
    return hypre_VectorSumElts( hypre_ParVectorLocalVector(vector) );
 }
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
 hypre_int hypre_ParVectorIsManaged(hypre_ParVector *vector){
   if (vector==NULL) return 1;
   return hypre_SeqVectorIsManaged(hypre_ParVectorLocalVector(vector));

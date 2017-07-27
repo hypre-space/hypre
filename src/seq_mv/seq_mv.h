@@ -59,7 +59,7 @@ typedef struct
    HYPRE_Int     *rownnz;
    HYPRE_Int      num_rownnz;
 
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
   /* Flag to keeping track of prefetching */
   HYPRE_Int on_device;
 #endif
@@ -267,7 +267,7 @@ HYPRE_Int hypre_CSRMatrixPrintHB ( hypre_CSRMatrix *matrix_input , char *file_na
 HYPRE_Int hypre_CSRMatrixCopy ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A );
 hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int *col_map_offd_A , HYPRE_Int *col_map_offd_B , HYPRE_Int **col_map_offd_C );
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
 void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A);
 void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A);
 hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a);
@@ -367,7 +367,7 @@ HYPRE_Int hypre_SeqVectorScale ( HYPRE_Complex alpha , hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpy ( HYPRE_Complex alpha , hypre_Vector *x , hypre_Vector *y );
 HYPRE_Real hypre_SeqVectorInnerProd ( hypre_Vector *x , hypre_Vector *y );
 HYPRE_Complex hypre_VectorSumElts ( hypre_Vector *vector );
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
 HYPRE_Complex hypre_VectorSumAbsElts ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorCopyDevice ( hypre_Vector *x , hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha , hypre_Vector *x , hypre_Vector *y );

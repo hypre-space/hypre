@@ -2,10 +2,10 @@
 #define _GNU_SOURCE
 #endif
 #include "_hypre_utilities.h"
-#if defined(HYPRE_USE_MANAGED) && !defined(HYPRE_USE_GPU)
-struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1,.memoryHWM=0};
-#endif
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+//#if defined(HYPRE_USE_MANAGED) && !defined(HYPRE_USE_GPU)
+//struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1,.memoryHWM=0};
+//#endif
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -107,7 +107,9 @@ void hypre_GPUInit(hypre_int use_device){
     cublasErrchk(cublasSetStream(HYPRE_CUBLAS_HANDLE,HYPRE_STREAM(4)));
     if (!checkDeviceProps()) hypre_printf("WARNING:: Concurrent memory access not allowed\n");
     /* Check if the arch flags used for compiling the cuda kernels match the device */
+#ifdef HYPRE_USE_GPU
     CudaCompileFlagCheck();
+#endif
   }
 }
 

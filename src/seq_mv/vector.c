@@ -24,6 +24,8 @@
 #include "gpukernels.h"
 #endif
 
+#define NUM_TEAMS 128
+#define NUM_THREADS 1024
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCreate
  *--------------------------------------------------------------------------*/
@@ -272,7 +274,10 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 
    size *=hypre_VectorNumVectors(v);
 
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+   hypre_SeqVectorPrefetchToDevice(v);
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(vector_data)
+#elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
@@ -341,7 +346,11 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 
    if (size > size_y) size = size_y;
    size *=hypre_VectorNumVectors(x);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+   //printf("Offloading Vec Copy\n");
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,x_data)
+#elif defined(HYPRE_USING_OPENMP)
+   printf("OMPing Vec Copy\n");
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
@@ -423,7 +432,10 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
    size *=hypre_VectorNumVectors(y);
 
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+   //printf("Offloading Vector Scale\n");
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data)
+#elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
@@ -462,7 +474,12 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
    size *=hypre_VectorNumVectors(x);
 
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+   hypre_SeqVectorPrefetchToDevice(x);
+   hypre_SeqVectorPrefetchToDevice(y);
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,x_data)
+#elif defined(HYPRE_USING_OPENMP)
+   //printf("AXPY OMP \n");
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
@@ -496,15 +513,18 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
    HYPRE_Int      i;
 
    HYPRE_Real     result = 0.0;
-
+   PUSH_RANGE("INNER_PROD",0);
    size *=hypre_VectorNumVectors(x);
-
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+   //printf("Vector Offload Innerporduct\n");
+   // Reductions on GPU using the XL compiler dont work July 26 2017
+   //#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) reduction(+:result) is_device_ptr(y_data,x_data)
+#elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) reduction(+:result) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
-      result += hypre_conj(y_data[i]) * x_data[i];
-
+     result += hypre_conj(y_data[i]) * x_data[i];
+   POP_RANGE;
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
@@ -532,7 +552,7 @@ HYPRE_Complex hypre_VectorSumElts( hypre_Vector *vector )
    return sum;
 }
 
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
 /* Sums of the absolute value of the elements for comparison to cublas device side routine */
 HYPRE_Complex hypre_VectorSumAbsElts( hypre_Vector *vector )
 {
@@ -567,7 +587,9 @@ hypre_SeqVectorCopyDevice( hypre_Vector *x,
   PUSH_RANGE_PAYLOAD("VECCOPYDEVICE",2,size);
   hypre_SeqVectorPrefetchToDevice(x);
   hypre_SeqVectorPrefetchToDevice(y);
+#ifdef HYPRE_USE_GPU
   VecCopy(y_data,x_data,size,HYPRE_STREAM(4));
+#endif
   cudaStreamSynchronize(HYPRE_STREAM(4));
   POP_RANGE;
   return ierr;

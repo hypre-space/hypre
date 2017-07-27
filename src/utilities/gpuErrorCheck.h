@@ -12,6 +12,8 @@
 
 #ifdef HYPRE_USE_MANAGED
 #include <cuda_runtime_api.h>
+#include <cusparse.h>
+#include <cublas_v2.h>
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
 #define MEM_PAD_LEN 1
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
@@ -35,11 +37,10 @@ hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
 #endif
 
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
-#include <cusparse.h>
-#include <cublas_v2.h>
+
 #include <stdio.h>
 //#include <cuda_runtime_api.h>
 #include <stdlib.h>

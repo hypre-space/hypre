@@ -367,6 +367,10 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
      exit(2);
    }
 
+   hypre_CSRMatrixPrefetchToDevice(A);
+   hypre_SeqVectorPrefetchToDevice(x);
+   hypre_SeqVectorPrefetchToDevice(y);
+   if (b!=y) hypre_SeqVectorPrefetchToDevice(b);
    if (x == y)
    {
      x_tmp = hypre_SeqVectorCloneDeep(x);
@@ -374,7 +378,9 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    }
    int i;
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(A_data,A_i,A_j,y_data,b_data,x_data)
+   int num_threads=64; // >64  for 100% Theoritical occupancy
+   int num_teams = (num_rows+num_rows%num_threads)/num_threads;
+#pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(num_threads) is_device_ptr(A_data,A_i,A_j,y_data,b_data,x_data)
 #endif
    for(i=0;i<num_rows;i++)
      {

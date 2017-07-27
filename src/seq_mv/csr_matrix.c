@@ -49,7 +49,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixOwnsData(matrix) = 1;
    hypre_CSRMatrixNumRownnz(matrix) = num_rows;
 
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
    matrix->on_device=0;
 #endif
    return matrix;
@@ -674,7 +674,7 @@ HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
 {
    return hypre_CSRMatrixGetLoadBalancedPartitionBoundary(A, hypre_GetThreadNum() + 1);
 }
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
 void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
   if (hypre_CSRMatrixNumNonzeros(A)==0) return;
 
@@ -686,7 +686,11 @@ void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
     gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
     gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(5)));
     gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(6)));
+#ifdef HYPRE_USING_OPENMP_OFFLOAD
+    A->on_device=0; // Should be 1 for CUDA code. 0 for OMP for now
+#else
     A->on_device=1;
+#endif
   }
   POP_RANGE;
 }

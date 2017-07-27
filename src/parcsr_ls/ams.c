@@ -68,24 +68,33 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
       {
 	 PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
 	 HYPRE_Int i, num_rows = hypre_ParCSRMatrixNumRows(A);
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
 	 if (sweep==0){
 	   hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(v));
 	   hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
 	 }
+#endif
+#ifdef HYPRE_USE_GPU
 	 VecCopy(v_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(v)),HYPRE_STREAM(4));
 #else
          hypre_ParVectorCopy(f,v);
 #endif
          hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, v);
+	 PUSH_RANGE_PAYLOAD("VECSCALE-RELAX",5,num_rows);
 #ifdef HYPRE_USE_GPU
 	 
 	 VecScale(u_data,v_data,l1_norms,num_rows,HYPRE_STREAM(4));
 #else
          /* u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1 */
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+	 int num_teams = (num_rows+num_rows%1024)/1024;
+	 //printf("AMS.C %d = %d \n",num_rows,num_teams*1024);
+#pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(1024) is_device_ptr(u_data,v_data,l1_norms)
+#endif
          for (i = 0; i < num_rows; i++)
             u_data[i] += v_data[i] / l1_norms[i];
 #endif
+	 POP_RANGE;
 	 POP_RANGE;
       }
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
