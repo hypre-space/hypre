@@ -52,6 +52,9 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
 #ifdef HYPRE_USE_MANAGED
    matrix->on_device=0;
 #endif
+#ifdef HYPRE_USE_MAP
+   matrix->mapped=0;
+#endif
    return matrix;
 }
 /*--------------------------------------------------------------------------
@@ -709,5 +712,20 @@ hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a){
   return ((pointerIsManaged((void*)hypre_CSRMatrixData(a))) 
 	  && (pointerIsManaged((void*)hypre_CSRMatrixI(a)))
 	  && (pointerIsManaged((void*)hypre_CSRMatrixJ(a))));
+}
+#endif
+#ifdef HYPRE_USE_MAP
+void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A){
+  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+  HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
+#pragma omp target enter data map(to:A[0:0])
+#pragma omp target enter data map(to:A_data[0:nnz])
+#pragma omp target enter data map(to:A_i[0:num_rows+1])
+#pragma omp target enter data map(to:A_j[0:nnz])
+  A->mapped=1;
 }
 #endif

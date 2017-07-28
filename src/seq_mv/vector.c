@@ -37,10 +37,12 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 
    vector = hypre_HostCTAlloc(hypre_Vector, 1);
 
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
    vector->on_device=0;
 #endif
-
+#ifdef HYPRE_USE_MAP
+   vector->mapped=0;
+#endif
    hypre_VectorData(vector) = NULL;
    hypre_VectorSize(vector) = size;
 
@@ -275,7 +277,9 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    size *=hypre_VectorNumVectors(v);
 
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
+#ifdef HYPRE_USE_MANAGED
    hypre_SeqVectorPrefetchToDevice(v);
+#endif
 #pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(vector_data)
 #elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
@@ -347,10 +351,8 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    if (size > size_y) size = size_y;
    size *=hypre_VectorNumVectors(x);
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
-   //printf("Offloading Vec Copy\n");
 #pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,x_data)
 #elif defined(HYPRE_USING_OPENMP)
-   printf("OMPing Vec Copy\n");
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
@@ -474,8 +476,10 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    size *=hypre_VectorNumVectors(x);
 
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
+#ifdef HYPRE_USE_MANAGED
    hypre_SeqVectorPrefetchToDevice(x);
    hypre_SeqVectorPrefetchToDevice(y);
+#endif
 #pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,x_data)
 #elif defined(HYPRE_USING_OPENMP)
    //printf("AXPY OMP \n");
@@ -678,5 +682,26 @@ void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index){
 }
 hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x){
   return pointerIsManaged((void*)hypre_VectorData(x));
+}
+#endif
+
+
+
+
+#ifdef HYPRE_USE_MAP
+
+void hypre_SeqVectorMapToDevice(hypre_Vector *x){
+#pragma omp target enter data map(to:x[0:0])
+#pragma omp target enter data map(to:x->data[0:x->size])
+  x->mapped=1;
+}
+
+
+void hypre_SeqVectorUpdateDevice(hypre_Vector *x){
+#pragma omp target update to(x->data[0:x->size])
+}
+
+void hypre_SeqVectorUpdateHost(hypre_Vector *x){
+#pragma omp target update from(x->data[0:x->size])
 }
 #endif
