@@ -114,8 +114,8 @@ hypre_CSRMatrixMatMultivec(HYPRE_Complex alpha, hypre_CSRMatrix *A,
          temp = y_data[i];
          for (jj = A_i[i]; jj < A_i[i+1]; jj++)
             temp += A_data[jj] * x_data[A_j[jj]];
+         y_data[i] = temp;
       }
-      y_data[i] = temp;
    }
    else
    {

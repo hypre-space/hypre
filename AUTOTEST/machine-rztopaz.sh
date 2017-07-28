@@ -18,14 +18,14 @@ case $1 in
    -h|-help)
       cat <<EOF
 
-   **** Only run this script on the zeus cluster ****
+   **** Only run this script on the rztopaz machine ****
 
    $0 [-h|-help] {src_dir}
 
    where: -h|-help   prints this usage information and exits
           {src_dir}  is the hypre source directory
 
-   This script runs a number of tests suitable for the zeus cluster.
+   This script runs a number of tests suitable for the rztopaz machine.
 
    Example usage: $0 ../src
 
@@ -47,20 +47,21 @@ mo="test"
 ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
 
 co=""
-./test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro
-./renametest.sh basictest $output_dir/basictest-default
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-default
+
+co="--with-openmp"
+RO="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED -nthreads 2"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
+./renametest.sh basic $output_dir/basic--with-openmp
 
 co="--enable-debug"
-./test.sh basictest.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basictest $output_dir/basictest--enable-debug
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--enable-debug
 
 co="--enable-bigint"
-./test.sh basictest.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basictest $output_dir/basictest--enable-bigint
-
-co="--with-blas --with-lapack --with-blas-lib-dirs=/usr/lib64 --with-lapack-lib-dirs=/usr/lib64 --with-blas-libs=blas --with-lapack-libs=lapack"
-./test.sh basictest.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basictest $output_dir/basictest--with-blas
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--enable-bigint
 
 # Test linking for different languages
 link_opts="all++ all77"
