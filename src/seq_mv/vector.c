@@ -518,7 +518,7 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
    //printf("Vector Offload Innerporduct\n");
    // Reductions on GPU using the XL compiler dont work July 26 2017
-   //#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) reduction(+:result) is_device_ptr(y_data,x_data)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) reduction(+:result) is_device_ptr(y_data,x_data) map(result)
 #elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) reduction(+:result) HYPRE_SMP_SCHEDULE
 #endif

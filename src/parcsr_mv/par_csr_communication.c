@@ -420,10 +420,11 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
                         hypre_ParCSRCommHandleRequests(comm_handle), status0);
       hypre_TFree(status0);
    }
-
+   //printf("HERE---- 0\n"); // debugging the Invalid Cuda context issue
    hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle));
+   //printf("HERE 1 %p\n",comm_handle);
    hypre_TFree(comm_handle);
-
+   //printf("HERE 2 \n");
    return hypre_error_flag;
 }
 
