@@ -166,7 +166,12 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       SetAsyncMode(0);
       //gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(7)));
 #else
-#ifdef HYPRE_USING_OPENMP
+      PUSH_RANGE("MPI_PACK_OMP",4);
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+      int num_teams = (end-begin+(end-begin)%1024)/1024;
+      //int *map=comm_pkg -> send_map_elmts;
+#pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(1024) is_device_ptr(x_local_data,x_buf_data,comm_pkg,comm_pkg->send_map_elmts)
+#elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
       for (i = begin; i < end; i++)
@@ -178,6 +183,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
             = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
       }
+      POP_RANGE; // "MPI_PACK_OMP"
 #endif
    }
    else

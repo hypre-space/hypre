@@ -844,3 +844,5 @@ hypre_BuildCSRJDataType( HYPRE_Int num_nonzeros,
  
    return hypre_error_flag;
 }
+
+    
