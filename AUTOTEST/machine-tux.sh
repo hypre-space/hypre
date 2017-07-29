@@ -76,12 +76,12 @@ co="--enable-debug CC=mpiCC"
 # ./renametest.sh basic $output_dir/basic--with-insure2
 
 co="--enable-debug --with-print-errors"
-#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
-#./renametest.sh basic $output_dir/basic--valgrind1
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+./renametest.sh basic $output_dir/basic--valgrind1
 
 co="--enable-debug --enable-global-partition"
-#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
-#./renametest.sh basic $output_dir/basic--valgrind2
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+./renametest.sh basic $output_dir/basic--valgrind2
 
 co="--without-MPI"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
