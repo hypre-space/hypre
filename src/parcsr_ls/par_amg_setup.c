@@ -2360,6 +2360,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
     *-----------------------------------------------------------------------*/
 
    if (addlvl > -1 || 
+	grid_relax_type[1] == 7 || grid_relax_type[2] == 7 || grid_relax_type[3] == 7 ||
 	grid_relax_type[1] == 8 || grid_relax_type[2] == 8 || grid_relax_type[3] == 8 ||
 	grid_relax_type[1] == 13 || grid_relax_type[2] == 13 || grid_relax_type[3] == 13 ||
 	grid_relax_type[1] == 14 || grid_relax_type[2] == 14 || grid_relax_type[3] == 14 ||
@@ -2518,7 +2519,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    }
    for (j = 0; j < num_levels; j++)
    {
-      if (grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || (grid_relax_type[3] == 16 && j== (num_levels-1)))
+      if (grid_relax_type[1] == 7 || grid_relax_type[2] == 7 || (grid_relax_type[3] == 7 && j== (num_levels-1)))
+      {
+          hypre_ParCSRComputeL1Norms(A_array[j], 5, NULL, &l1_norms[j]);
+      }
+      else if (grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || (grid_relax_type[3] == 16 && j== (num_levels-1)))
       {
          HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);;
          HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);

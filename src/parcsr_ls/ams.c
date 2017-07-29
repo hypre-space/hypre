@@ -20,7 +20,7 @@
  * Relaxation on the ParCSR matrix A with right-hand side f and
  * initial guess u. Possible values for relax_type are:
  *
- * 1 = l1-scaled Jacobi
+ * 1 = l1-scaled (or weighted) Jacobi
  * 2 = l1-scaled block Gauss-Seidel/SSOR
  * 3 = Kaczmarz
  * 4 = truncated version of 2 (Remark 6.2 in smoothers paper)
@@ -712,6 +712,18 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
          if (l1_norm[i] <= 4.0/3.0*diag)
             l1_norm[i] = diag;
       }
+   }
+   else if (option == 5) /*stores diagonal of A for Jacobi using matvec, rlx 7 */
+   {
+      for (i = 0; i < num_rows; i++)
+      {
+         diag = A_diag_data[A_diag_I[i]];
+         if (diag != 0.0) l1_norm[i] = diag;
+	 else l1_norm[i] = 1.0;
+      }
+      *l1_norm_ptr = l1_norm;
+
+      return hypre_error_flag;
    }
 
    /* Handle negative definite matrices */

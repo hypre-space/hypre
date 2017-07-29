@@ -51,16 +51,16 @@ mo="test"
 ro="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED"
 
 co="--disable-fortran"
-./test.sh basictest.sh $src_dir -co: $co -mo: $mo -ro: $ro
-./renametest.sh basictest $output_dir/basictest-default
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh basic $output_dir/basic-default
 
 co="--enable-debug --disable-fortran"
-./test.sh basictest.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basictest $output_dir/basictest--enable-debug
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--enable-debug
 
 co="--enable-bigint --disable-fortran"
-./test.sh basictest.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basictest $output_dir/basictest--enable-bigint
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--enable-bigint
 
 # Test linking for different languages
 link_opts="all++"

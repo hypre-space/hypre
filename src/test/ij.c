@@ -61,7 +61,7 @@ HYPRE_Int BuildParRhsFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_ind
 
 HYPRE_Int BuildParLaplacian (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParSysLaplacian (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParDifConv (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
+HYPRE_Int BuildParDifConv (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr);
 HYPRE_Int BuildParFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_Int num_functions , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildFuncsFromFiles (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildFuncsFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
@@ -1395,6 +1395,9 @@ main( hypre_int argc,
       hypre_printf("    -P <Px> <Py> <Pz>    : processor topology\n");
       hypre_printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
       hypre_printf("    -a <ax> <ay> <az>    : convection coefficients\n");
+      hypre_printf("    -atype <type>        : FD scheme for convection \n");
+      hypre_printf("           0=Forward (default)       1=Backward\n");
+      hypre_printf("           2=Centered                3=Upwind\n");
       hypre_printf("\n");
       hypre_printf("  -exact_size            : inserts immediately into ParCSR structure\n");
       hypre_printf("  -storage_low           : allocates not enough storage for aux struct\n");
@@ -5923,6 +5926,11 @@ BuildParLaplacian( HYPRE_Int                  argc,
    return (0);
 }
 
+static inline HYPRE_Int sign_double(HYPRE_Real a)
+{
+   return ( (0.0 < a) - (0.0 > a) );
+}
+
 /*----------------------------------------------------------------------
  * Build standard 7-point convection-diffusion operator 
  * Parameters given in command line.
@@ -5936,18 +5944,19 @@ HYPRE_Int
 BuildParDifConv( HYPRE_Int                  argc,
                  char                *argv[],
                  HYPRE_Int                  arg_index,
-                 HYPRE_ParCSRMatrix  *A_ptr     )
+                 HYPRE_ParCSRMatrix  *A_ptr)
 {
-   HYPRE_Int                 nx, ny, nz;
-   HYPRE_Int                 P, Q, R;
+   HYPRE_Int           nx, ny, nz;
+   HYPRE_Int           P, Q, R;
    HYPRE_Real          cx, cy, cz;
-   HYPRE_Real          ax, ay, az;
+   HYPRE_Real          ax, ay, az, atype;
    HYPRE_Real          hinx,hiny,hinz;
+   HYPRE_Int           sign_prod;
 
    HYPRE_ParCSRMatrix  A;
 
-   HYPRE_Int                 num_procs, myid;
-   HYPRE_Int                 p, q, r;
+   HYPRE_Int           num_procs, myid;
+   HYPRE_Int           p, q, r;
    HYPRE_Real         *values;
 
    /*-----------------------------------------------------------
@@ -5976,6 +5985,8 @@ BuildParDifConv( HYPRE_Int                  argc,
    ax = 1.;
    ay = 1.;
    az = 1.;
+
+   atype = 0;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -6010,6 +6021,11 @@ BuildParDifConv( HYPRE_Int                  argc,
          ax = atof(argv[arg_index++]);
          ay = atof(argv[arg_index++]);
          az = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-atype") == 0 )
+      {
+         arg_index++;
+         atype = atoi(argv[arg_index++]);
       }
       else
       {
@@ -6057,28 +6073,146 @@ BuildParDifConv( HYPRE_Int                  argc,
    /*-----------------------------------------------------------
     * Generate the matrix 
     *-----------------------------------------------------------*/
- 
+   /* values[7]:
+    *    [0]: center
+    *    [1]: X-
+    *    [2]: Y-
+    *    [3]: Z-
+    *    [4]: X+
+    *    [5]: Y+
+    *    [6]: Z+
+    */    
    values = hypre_CTAlloc(HYPRE_Real, 7);
 
-   values[1] = -cx/(hinx*hinx);
-   values[2] = -cy/(hiny*hiny);
-   values[3] = -cz/(hinz*hinz);
-   values[4] = -cx/(hinx*hinx) + ax/hinx;
-   values[5] = -cy/(hiny*hiny) + ay/hiny;
-   values[6] = -cz/(hinz*hinz) + az/hinz;
-
    values[0] = 0.;
-   if (nx > 1)
+
+   if (0 == atype) /* forward scheme for conv */
    {
-      values[0] += 2.0*cx/(hinx*hinx) - 1.*ax/hinx;
+      values[1] = -cx/(hinx*hinx);
+      values[2] = -cy/(hiny*hiny);
+      values[3] = -cz/(hinz*hinz);
+      values[4] = -cx/(hinx*hinx) + ax/hinx;
+      values[5] = -cy/(hiny*hiny) + ay/hiny;
+      values[6] = -cz/(hinz*hinz) + az/hinz;
+
+      if (nx > 1)
+      {
+         values[0] += 2.0*cx/(hinx*hinx) - 1.*ax/hinx;
+      }
+      if (ny > 1)
+      {
+         values[0] += 2.0*cy/(hiny*hiny) - 1.*ay/hiny;
+      }
+      if (nz > 1)
+      {
+         values[0] += 2.0*cz/(hinz*hinz) - 1.*az/hinz;
+      }
+   } 
+   else if (1 == atype) /* backward scheme for conv */
+   {
+      values[1] = -cx/(hinx*hinx) - ax/hinx;
+      values[2] = -cy/(hiny*hiny) - ay/hiny;
+      values[3] = -cz/(hinz*hinz) - az/hinz;
+      values[4] = -cx/(hinx*hinx);
+      values[5] = -cy/(hiny*hiny);
+      values[6] = -cz/(hinz*hinz);
+
+      if (nx > 1)
+      {
+         values[0] += 2.0*cx/(hinx*hinx) + 1.*ax/hinx;
+      }
+      if (ny > 1)
+      {
+         values[0] += 2.0*cy/(hiny*hiny) + 1.*ay/hiny;
+      }
+      if (nz > 1)
+      {
+         values[0] += 2.0*cz/(hinz*hinz) + 1.*az/hinz;
+      }
    }
-   if (ny > 1)
+   else if (3 == atype) /* upwind scheme */
    {
-      values[0] += 2.0*cy/(hiny*hiny) - 1.*ay/hiny;
+      sign_prod = sign_double(cx) * sign_double(ax);
+      if (sign_prod == 1) /* same sign use back scheme */
+      {
+         values[1] = -cx/(hinx*hinx) - ax/hinx;
+         values[4] = -cx/(hinx*hinx);
+         if (nx > 1)
+         {
+            values[0] += 2.0*cx/(hinx*hinx) + 1.*ax/hinx;
+         }
+      }
+      else /* diff sign use forward scheme */
+      {
+         values[1] = -cx/(hinx*hinx);
+         values[4] = -cx/(hinx*hinx) + ax/hinx;
+         if (nx > 1)
+         {
+            values[0] += 2.0*cx/(hinx*hinx) - 1.*ax/hinx;
+         }
+      }
+
+      sign_prod = sign_double(cy) * sign_double(ay);
+      if (sign_prod == 1) /* same sign use back scheme */
+      {
+         values[2] = -cy/(hiny*hiny) - ay/hiny;
+         values[5] = -cy/(hiny*hiny);
+         if (ny > 1)
+         {
+            values[0] += 2.0*cy/(hiny*hiny) + 1.*ay/hiny;
+         }
+      }
+      else /* diff sign use forward scheme */
+      {
+         values[2] = -cy/(hiny*hiny);
+         values[5] = -cy/(hiny*hiny) + ay/hiny;
+         if (ny > 1)
+         {
+            values[0] += 2.0*cy/(hiny*hiny) - 1.*ay/hiny;
+         }
+      }
+
+      sign_prod = sign_double(cz) * sign_double(az);
+      if (sign_prod == 1) /* same sign use back scheme */
+      {
+         values[3] = -cz/(hinz*hinz) - az/hinz;
+         values[6] = -cz/(hinz*hinz);
+         if (nz > 1)
+         {
+            values[0] += 2.0*cz/(hinz*hinz) + 1.*az/hinz;
+         }
+      }
+      else /* diff sign use forward scheme */
+      {
+         values[3] = -cz/(hinz*hinz);
+         values[6] = -cz/(hinz*hinz) + az/hinz;
+         if (nz > 1)
+         {
+            values[0] += 2.0*cz/(hinz*hinz) - 1.*az/hinz;
+         }
+      }
    }
-   if (nz > 1)
+   else /* centered difference scheme */
    {
-      values[0] += 2.0*cz/(hinz*hinz) - 1.*az/hinz;
+      values[1] = -cx/(hinx*hinx) - ax/(2.*hinx);
+      values[2] = -cy/(hiny*hiny) - ay/(2.*hiny);
+      values[3] = -cz/(hinz*hinz) - az/(2.*hinz);
+      values[4] = -cx/(hinx*hinx) + ax/(2.*hinx);
+      values[5] = -cy/(hiny*hiny) + ay/(2.*hiny);
+      values[6] = -cz/(hinz*hinz) + az/(2.*hinz);
+
+      if (nx > 1)
+      {
+         values[0] += 2.0*cx/(hinx*hinx);
+      }
+      if (ny > 1)
+      {
+         values[0] += 2.0*cy/(hiny*hiny);
+      }
+      if (nz > 1)
+      {
+         values[0] += 2.0*cz/(hinz*hinz);
+      }
    }
 
    A = (HYPRE_ParCSRMatrix) GenerateDifConv(hypre_MPI_COMM_WORLD,
