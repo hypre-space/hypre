@@ -76,12 +76,12 @@ co="--enable-debug CC=mpiCC"
 # ./renametest.sh basic $output_dir/basic--with-insure2
 
 co="--enable-debug --with-print-errors"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
-./renametest.sh basic $output_dir/basic--valgrind1
+#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+#./renametest.sh basic $output_dir/basic--valgrind1
 
 co="--enable-debug --enable-global-partition"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
-./renametest.sh basic $output_dir/basic--valgrind2
+#./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+#./renametest.sh basic $output_dir/basic--valgrind2
 
 co="--without-MPI"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
@@ -100,12 +100,12 @@ co="--enable-bigint --enable-debug"
 ./renametest.sh basic $output_dir/basic--enable-bigint
 
 co="--enable-single --enable-debug"
-test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -single
-renametest.sh basic $output_dir/basic--enable-single
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -single
+./renametest.sh basic $output_dir/basic--enable-single
 
 co="--enable-longdouble --enable-debug"
-test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
-renametest.sh basic $output_dir/basic--enable-longdouble
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
+./renametest.sh basic $output_dir/basic--enable-longdouble
 
 co="--enable-maxdim=4 --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
@@ -149,12 +149,12 @@ co="-DHYPRE_BIGINT=ON"
 ./renametest.sh cmake $output_dir/cmake-bigint
 
 co="-DHYPRE_SINGLE=ON"
-test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -single
-renametest.sh cmake $output_dir/cmake-single
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -single
+./renametest.sh cmake $output_dir/cmake-single
 
 co="-DHYPRE_LONG_DOUBLE=ON"
-test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
-renametest.sh cmake $output_dir/cmake-longdouble
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
+./renametest.sh cmake $output_dir/cmake-longdouble
 
 # cmake build doesn't currently support maxdim
 # cmake build doesn't currently support complex

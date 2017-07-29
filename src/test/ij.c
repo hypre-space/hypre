@@ -61,7 +61,7 @@ HYPRE_Int BuildParRhsFromFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_ind
 
 HYPRE_Int BuildParLaplacian (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildParSysLaplacian (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr );
-HYPRE_Int BuildParDifConv (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr, const char * );
+HYPRE_Int BuildParDifConv (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix *A_ptr);
 HYPRE_Int BuildParFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_Int num_functions , HYPRE_ParCSRMatrix *A_ptr );
 HYPRE_Int BuildFuncsFromFiles (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
 HYPRE_Int BuildFuncsFromOneFile (HYPRE_Int argc , char *argv [], HYPRE_Int arg_index , HYPRE_ParCSRMatrix A , HYPRE_Int **dof_func_ptr );
@@ -1341,6 +1341,9 @@ main( hypre_int argc,
       hypre_printf("    -P <Px> <Py> <Pz>    : processor topology\n");
       hypre_printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
       hypre_printf("    -a <ax> <ay> <az>    : convection coefficients\n");
+      hypre_printf("    -atype <type>        : FD scheme for convection \n");
+      hypre_printf("           0=Forward (default)       1=Backward\n");
+      hypre_printf("           2=Centered                3=Upwind\n");
       hypre_printf("\n");
       hypre_printf("  -exact_size            : inserts immediately into ParCSR structure\n");
       hypre_printf("  -storage_low           : allocates not enough storage for aux struct\n");
@@ -1660,8 +1663,7 @@ main( hypre_int argc,
    }
    else if ( build_matrix_type == 5 )
    {
-      /*BuildParDifConv(argc, argv, build_matrix_arg_index, &parcsr_A, "Upwind");*/
-      BuildParDifConv(argc, argv, build_matrix_arg_index, &parcsr_A, "Center");
+      BuildParDifConv(argc, argv, build_matrix_arg_index, &parcsr_A);
    }
    else if ( build_matrix_type == 6 )
    {
@@ -5856,7 +5858,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
    return (0);
 }
 
-static inline int sign_double(double a)
+static inline HYPRE_Int sign_double(HYPRE_Real a)
 {
    return ( (0.0 < a) - (0.0 > a) );
 }
@@ -5874,16 +5876,14 @@ HYPRE_Int
 BuildParDifConv( HYPRE_Int                  argc,
                  char                *argv[],
                  HYPRE_Int                  arg_index,
-                 HYPRE_ParCSRMatrix  *A_ptr,
-                 const char *conv_opt)
+                 HYPRE_ParCSRMatrix  *A_ptr)
 {
    HYPRE_Int           nx, ny, nz;
    HYPRE_Int           P, Q, R;
    HYPRE_Real          cx, cy, cz;
-   HYPRE_Real          ax, ay, az;
+   HYPRE_Real          ax, ay, az, atype;
    HYPRE_Real          hinx,hiny,hinz;
    HYPRE_Int           sign_prod;
-   char                opt = conv_opt[0];
 
    HYPRE_ParCSRMatrix  A;
 
@@ -5918,6 +5918,8 @@ BuildParDifConv( HYPRE_Int                  argc,
    ay = 1.;
    az = 1.;
 
+   atype = 0;
+
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
@@ -5951,6 +5953,11 @@ BuildParDifConv( HYPRE_Int                  argc,
          ax = atof(argv[arg_index++]);
          ay = atof(argv[arg_index++]);
          az = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-atype") == 0 )
+      {
+         arg_index++;
+         atype = atoi(argv[arg_index++]);
       }
       else
       {
@@ -6011,7 +6018,7 @@ BuildParDifConv( HYPRE_Int                  argc,
 
    values[0] = 0.;
 
-   if (opt == 'F') /* forward scheme for conv */
+   if (0 == atype) /* forward scheme for conv */
    {
       values[1] = -cx/(hinx*hinx);
       values[2] = -cy/(hiny*hiny);
@@ -6033,7 +6040,7 @@ BuildParDifConv( HYPRE_Int                  argc,
          values[0] += 2.0*cz/(hinz*hinz) - 1.*az/hinz;
       }
    } 
-   else if (opt == 'B') /* backward scheme for conv */
+   else if (1 == atype) /* backward scheme for conv */
    {
       values[1] = -cx/(hinx*hinx) - ax/hinx;
       values[2] = -cy/(hiny*hiny) - ay/hiny;
@@ -6055,7 +6062,7 @@ BuildParDifConv( HYPRE_Int                  argc,
          values[0] += 2.0*cz/(hinz*hinz) + 1.*az/hinz;
       }
    }
-   else if (opt == 'U') /* upwind scheme */
+   else if (3 == atype) /* upwind scheme */
    {
       sign_prod = sign_double(cx) * sign_double(ax);
       if (sign_prod == 1) /* same sign use back scheme */
