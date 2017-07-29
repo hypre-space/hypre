@@ -177,7 +177,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, int_buf_data, dof_func_offd);
       hypre_ParCSRCommHandleDestroy(comm_handle);   
    }
-    
+
    /*-----------------------------------------------------------------------
     *  First Pass: Determine the nnz of R and the max local size
     *-----------------------------------------------------------------------*/

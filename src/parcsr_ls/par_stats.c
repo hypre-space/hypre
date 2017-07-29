@@ -379,7 +379,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
       if (restri_type == 1)
       {
-	hypre_printf(" Restriction = local approximate ideal restriction \n");
+         hypre_printf(" Restriction = local approximate ideal restriction (AIR-1)\n");
+      } 
+      else if (restri_type == 2)
+      {
+         hypre_printf(" Restriction = local approximate ideal restriction (AIR-2)\n");
       }
 
       if (block_mode)

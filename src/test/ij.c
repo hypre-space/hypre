@@ -2576,13 +2576,15 @@ main( hypre_int argc,
       hypre_BeginTiming(time_index);
 
       HYPRE_BoomerAMGCreate(&amg_solver); 
-      /* RL: specify restriction */
-      hypre_assert(restri_type >= 0);
-      HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
+     
       if (air)
       {
+         /* RL: specify restriction */
+         hypre_assert(restri_type >= 0);
+         HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
          HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       }
+
       /* BM Aug 25, 2006 */
       HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);
@@ -4165,6 +4167,15 @@ main( hypre_int argc,
          if (myid == 0) hypre_printf("Solver: AMG-GMRES\n");
 
          HYPRE_BoomerAMGCreate(&pcg_precond); 
+
+         if (air)
+         {
+            /* RL: specify restriction */
+            hypre_assert(restri_type >= 0);
+            HYPRE_BoomerAMGSetRestriction(pcg_precond, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
+            HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
+         }
+
          HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);
          HYPRE_BoomerAMGSetInterpType(pcg_precond, interp_type);
          HYPRE_BoomerAMGSetPostInterpType(pcg_precond, post_interp_type);
