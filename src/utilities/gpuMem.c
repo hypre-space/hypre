@@ -82,8 +82,8 @@ void hypre_GPUInit(hypre_int use_device){
       HYPRE_DEVICE = use_device;
       gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
     }
-      
-#ifdef HYPRE_USING_OPENMP_OFFLOAD
+    printf("GPU Init called \n");
+#if defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
     omp_set_default_device(HYPRE_DEVICE);
     printf("Set OMP Default device to %d \n",HYPRE_DEVICE);
 #endif

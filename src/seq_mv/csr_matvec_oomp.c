@@ -383,13 +383,18 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    if (!y->mapped) hypre_SeqVectorMapToDevice(y);
    else hypre_SeqVectorUpdateDevice(y);
    
-   //if ((b!=y)&&(!b->mapped))  printf("Mapping B::");
-   if ((b!=y)&&(!b->mapped)) hypre_SeqVectorMapToDevice(b);
+   if (b!=y){
+     if(!b->mapped)  {
+       //printf("Mapping B::");
+       hypre_SeqVectorMapToDevice(b);
+     } else 
+       hypre_SeqVectorUpdateDevice(b);
+   }
 #endif
 
    //hypre_SeqVectorUpdateDevice(x);
    //hypre_SeqVectorUpdateDevice(y);
-   if (b!=y) hypre_SeqVectorUpdateDevice(b);
+  
    if (x == y)
    {
      x_tmp = hypre_SeqVectorCloneDeep(x);
@@ -418,9 +423,10 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
     
    if (x == y) hypre_SeqVectorDestroy(x_tmp);
    //hypre_SeqVectorUpdateHost(y);
-#ifdef HYPRE_USING_OPENMP_OFFLOAD
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    hypre_SeqVectorUnMapFromDevice(y);
    hypre_SeqVectorUnMapFromDevice(x);
+   if ((b!=y)&&(b->mapped)) hypre_SeqVectorUnMapFromDevice(b);
 #endif
    return ierr;
 }
