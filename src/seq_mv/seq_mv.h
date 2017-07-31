@@ -63,7 +63,7 @@ typedef struct
   /* Flag to keeping track of prefetching */
   HYPRE_Int on_device;
 #endif
-#ifdef HYPRE_USE_MAP
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   HYPRE_Int mapped;
 #endif
 
@@ -219,7 +219,7 @@ typedef struct
 #ifdef HYPRE_USE_GPU
   HYPRE_Int on_device;
 #endif
-#ifdef HYPRE_USE_MAP
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   HYPRE_Int mapped;
 #endif
 
@@ -278,7 +278,7 @@ void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A);
 void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A);
 hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a);
 #endif
-#ifdef HYPRE_USE_MAP
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A);
 #endif
 /* csr_matvec.c */
@@ -385,8 +385,9 @@ void hypre_SeqVectorPrefetchToHost(hypre_Vector *x);
 void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index);
 hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x);
 #endif
-#ifdef HYPRE_USE_MAP
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 void hypre_SeqVectorMapToDevice(hypre_Vector *x);
+void hypre_SeqVectorUnMapFromDevice(hypre_Vector *x);
 void hypre_SeqVectorUpdateDevice(hypre_Vector *x);
 void hypre_SeqVectorUpdateHost(hypre_Vector *x);
 #endif

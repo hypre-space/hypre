@@ -40,7 +40,7 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 #ifdef HYPRE_USE_MANAGED
    vector->on_device=0;
 #endif
-#ifdef HYPRE_USE_MAP
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    vector->mapped=0;
 #endif
    hypre_VectorData(vector) = NULL;
@@ -688,15 +688,22 @@ hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x){
 
 
 
-#ifdef HYPRE_USE_MAP
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 
 void hypre_SeqVectorMapToDevice(hypre_Vector *x){
+  //printf("SVmap %p [%p,%p] %d Size = %d\n",x,x->data,x->data+x->size,x->mapped,x->size);
 #pragma omp target enter data map(to:x[0:0])
 #pragma omp target enter data map(to:x->data[0:x->size])
+
   x->mapped=1;
 }
 
-
+void hypre_SeqVectorUnMapFromDevice(hypre_Vector *x){
+  printf("SVmap %p [%p,%p] %d Size = %d\n",x,x->data,x->data+x->size,x->mapped,x->size);
+#pragma omp target exit data map(from:x[0:0])
+#pragma omp target exit data map(from:x->data[0:x->size])
+  x->mapped=0;
+}
 void hypre_SeqVectorUpdateDevice(hypre_Vector *x){
 #pragma omp target update to(x->data[0:x->size])
 }

@@ -374,15 +374,21 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    if (b!=y) hypre_SeqVectorPrefetchToDevice(b);
 #endif
 
-#ifdef HYPRE_USE_MAP
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    if (!A->mapped) hypre_CSRMatrixMapToDevice(A);
+   //printf("Mapping X::");
    if (!x->mapped) hypre_SeqVectorMapToDevice(x);
+   else hypre_SeqVectorUpdateDevice(x);
+   //printf("Mapping Y::");
    if (!y->mapped) hypre_SeqVectorMapToDevice(y);
+   else hypre_SeqVectorUpdateDevice(y);
+   
+   //if ((b!=y)&&(!b->mapped))  printf("Mapping B::");
    if ((b!=y)&&(!b->mapped)) hypre_SeqVectorMapToDevice(b);
 #endif
 
-   hypre_SeqVectorUpdateDevice(x);
-   hypre_SeqVectorUpdateDevice(y);
+   //hypre_SeqVectorUpdateDevice(x);
+   //hypre_SeqVectorUpdateDevice(y);
    if (b!=y) hypre_SeqVectorUpdateDevice(b);
    if (x == y)
    {
@@ -395,10 +401,10 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    int num_teams = (num_rows+num_rows%num_threads)/num_threads;
 #pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(num_threads) is_device_ptr(A_data,A_i,A_j,y_data,b_data,x_data)
 #endif
-#ifdef HYPRE_USING_OPENMP_MAPPED_OFFLOAD
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    int num_threads=64; // >64  for 100% Theoritical occupancy
    int num_teams = (num_rows+num_rows%num_threads)/num_threads;
-#pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(num_threads) 
+#pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(num_threads)
 #endif
    for(i=0;i<num_rows;i++)
      {
@@ -411,6 +417,10 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
      }
     
    if (x == y) hypre_SeqVectorDestroy(x_tmp);
-   hypre_SeqVectorUpdateHost(y);
+   //hypre_SeqVectorUpdateHost(y);
+#ifdef HYPRE_USING_OPENMP_OFFLOAD
+   hypre_SeqVectorUnMapFromDevice(y);
+   hypre_SeqVectorUnMapFromDevice(x);
+#endif
    return ierr;
 }

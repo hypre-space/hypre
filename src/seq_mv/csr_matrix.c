@@ -52,7 +52,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
 #ifdef HYPRE_USE_MANAGED
    matrix->on_device=0;
 #endif
-#ifdef HYPRE_USE_MAP
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    matrix->mapped=0;
 #endif
    return matrix;
@@ -714,7 +714,7 @@ hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a){
 	  && (pointerIsManaged((void*)hypre_CSRMatrixJ(a))));
 }
 #endif
-#ifdef HYPRE_USE_MAP
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A){
   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
