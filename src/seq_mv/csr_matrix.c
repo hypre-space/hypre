@@ -53,7 +53,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    matrix->on_device=0;
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-   matrix->mapped=0;
+   matrix->mapped=-1;
 #endif
    return matrix;
 }
@@ -68,6 +68,9 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
 
    if (matrix)
    {
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+     hypre_CSRMatrixUnMapFromDevice(matrix);
+#endif
       hypre_TFree(hypre_CSRMatrixI(matrix));
       hypre_CSRMatrixI(matrix)    = NULL;
       if (hypre_CSRMatrixRownnz(matrix))
@@ -107,8 +110,7 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
      hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(HYPRE_Int, num_rownnz);*/
    if ( ! hypre_CSRMatrixJ(matrix) && num_nonzeros )
       hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(HYPRE_Int, num_nonzeros);
-
-   return ierr;
+    return ierr;
 }
 
 /*--------------------------------------------------------------------------
@@ -722,10 +724,38 @@ void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A){
   HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
   HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
   HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
+  //printf("MAPPED %p sizes = %d %d \n",A,nnz,num_rows);
 #pragma omp target enter data map(to:A[0:0])
-#pragma omp target enter data map(to:A_data[0:nnz])
-#pragma omp target enter data map(to:A_i[0:num_rows+1])
-#pragma omp target enter data map(to:A_j[0:nnz])
+#pragma omp target enter data map(alloc:A_data[0:nnz]) if (nnz>0)
+#pragma omp target enter data map(alloc:A_i[0:num_rows+1]) if (num_rows>0)
+#pragma omp target enter data map(alloc:A_j[0:nnz]) if (nnz>0)
+  A->mapped=0;
+}
+void hypre_CSRMatrixUpdateToDevice(hypre_CSRMatrix *A){
+  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+  HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
+  //printf("Updating MAtrix...%p \n",A);
+  //#pragma omp target update device(0) to(A[0:0])
+#pragma omp target update device(0) to(A_data[0:nnz]) if (nnz>0)
+#pragma omp target update device(0) to(A_i[0:num_rows+1]) if (num_rows>0)
+#pragma omp target update device(0) to(A_j[0:nnz]) if (nnz>0)
   A->mapped=1;
+  //printf("Done \n");
+}
+void hypre_CSRMatrixUnMapFromDevice(hypre_CSRMatrix *A){
+  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+  HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
+#pragma omp target exit data map(delete:A[0:0])
+#pragma omp target exit data map(delete:A_data[0:nnz]) if (nnz>0)
+#pragma omp target exit data map(delete:A_i[0:num_rows+1]) if (num_rows>0)
+#pragma omp target exit data map(delete:A_j[0:nnz]) if (nnz>0)
 }
 #endif

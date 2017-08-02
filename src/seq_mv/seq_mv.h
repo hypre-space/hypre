@@ -279,7 +279,9 @@ void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A);
 hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a);
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-  void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A);
+void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A);
+void hypre_CSRMatrixUpdateToDevice(hypre_CSRMatrix *A);
+void hypre_CSRMatrixUnMapFromDevice(hypre_CSRMatrix *A);
 #endif
 /* csr_matvec.c */
 // y[offset:end] = alpha*A[offset:end,:]*x + beta*b[offset:end]
