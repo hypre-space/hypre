@@ -39,6 +39,8 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 
 #ifdef HYPRE_USE_MANAGED
    vector->on_device=0;
+   vector->drc=0;
+   vector->hrc=0;
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    vector->mapped=0;
@@ -121,8 +123,7 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
    }
    else
       ++ierr;
-
-
+   UpdateHRC;
    return ierr;
 }
 
@@ -269,6 +270,8 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
   VecSet(hypre_VectorData(v),hypre_VectorSize(v),value,HYPRE_STREAM(4));
   return 0;
 #endif
+
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
@@ -281,7 +284,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    HYPRE_Int      ierr  = 0;
 
    size *=hypre_VectorNumVectors(v);
-
+   SyncVectorToHost(v);
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
 #ifdef HYPRE_USE_MANAGED
    hypre_SeqVectorPrefetchToDevice(v);
@@ -296,7 +299,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
-
+   UpdateHRC(v);
    return ierr;
 }
 
@@ -354,6 +357,8 @@ hypre_SeqVectorCopy( hypre_Vector *x,
            
    HYPRE_Int      ierr = 0;
 
+   SyncVectorToHost(x);
+   SyncVectorToHost(y);
    if (size > size_y) size = size_y;
    size *=hypre_VectorNumVectors(x);
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
@@ -367,7 +372,7 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
-
+   UpdateHRC(y);
    return ierr;
 }
 
@@ -389,7 +394,7 @@ hypre_SeqVectorCloneDeep( hypre_Vector *x )
 
    hypre_SeqVectorInitialize(y);
    hypre_SeqVectorCopy( x, y );
-
+   // UpdateHRC(y); Done in previous statement
    return y;
 }
 
@@ -440,6 +445,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 
    size *=hypre_VectorNumVectors(y);
 
+   SyncVectorToHost(y);
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
 #pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data)
 #elif defined(HYPRE_USING_OPENMP)
@@ -447,7 +453,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #endif
    for (i = 0; i < size; i++)
       y_data[i] *= alpha;
-
+   UpdateHRC(y);
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
@@ -480,7 +486,8 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    HYPRE_Int      ierr = 0;
 
    size *=hypre_VectorNumVectors(x);
-
+   SyncVectorToHost(x);
+   SyncVectorToHost(y);
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
 #ifdef HYPRE_USE_MANAGED
    hypre_SeqVectorPrefetchToDevice(x);
@@ -497,7 +504,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
-
+   UpdateHRC(y);
    return ierr;
 }
 
@@ -514,7 +521,8 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
-
+   SyncVectorToHost(x);
+   SyncVectorToHost(y);
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
@@ -701,6 +709,7 @@ void hypre_SeqVectorMapToDevice(hypre_Vector *x){
 #pragma omp target enter data map(to:x[0:0])
 #pragma omp target enter data map(to:x->data[0:x->size])
     x->mapped=1;
+    SetDRC(x);
   }
 }
 void hypre_SeqVectorMapToDevicePrint(hypre_Vector *x){
@@ -709,6 +718,7 @@ void hypre_SeqVectorMapToDevicePrint(hypre_Vector *x){
 #pragma omp target enter data map(to:x[0:0])
 #pragma omp target enter data map(to:x->data[0:x->size])
   x->mapped=1;
+  SetDRC(x);
   }
   printf("...Done\n");
 }
@@ -721,9 +731,14 @@ void hypre_SeqVectorUnMapFromDevice(hypre_Vector *x){
 }
 void hypre_SeqVectorUpdateDevice(hypre_Vector *x){
 #pragma omp target update to(x->data[0:x->size])
+  SetDRC(x);
 }
 
 void hypre_SeqVectorUpdateHost(hypre_Vector *x){
 #pragma omp target update from(x->data[0:x->size])
+  SetHRC(x);
+}
+void printRC(hypre_Vector *x,char *id){
+  printf("%p At %s HRC = %d , DRC = %d \n",x,id,x->hrc,x->drc);
 }
 #endif

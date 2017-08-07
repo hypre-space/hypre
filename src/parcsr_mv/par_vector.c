@@ -1082,3 +1082,9 @@ hypre_int hypre_ParVectorIsManaged(hypre_ParVector *vector){
   return hypre_SeqVectorIsManaged(hypre_ParVectorLocalVector(vector));
 }
 #endif
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+void hypre_ParVectorUpdateHost(hypre_ParVector *p){
+#pragma omp target update from(p->local_vector->data[0:p->local_vector->size])
+  SetHRC(p->local_vector);
+}
+#endif

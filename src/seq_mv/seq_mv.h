@@ -221,6 +221,8 @@ typedef struct
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   HYPRE_Int mapped;
+  HYPRE_Int drc; /* device ref count */
+  HYPRE_Int hrc; /* host ref count */
 #endif
 
 } hypre_Vector;
@@ -236,6 +238,7 @@ typedef struct
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
 #define hypre_VectorVectorStride(vector) ((vector) -> vecstride )
 #define hypre_VectorIndexStride(vector) ((vector) -> idxstride )
+
 
 #endif
 
@@ -396,6 +399,35 @@ void hypre_SeqVectorUpdateHost(hypre_Vector *x);
 #ifdef __cplusplus
 }
 #endif
-
+inline void UpdateHRC(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  v->hrc++;
+#endif
+}
+inline void UpdateDRC(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  v->drc++;
+#endif
+}
+inline void SetHRC(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  v->hrc=v->drc;
+#endif
+}
+inline void SetDRC(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  v->drc=v->hrc;
+#endif
+}
+inline void SyncVectorToDevice(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  if (v->hrc>v->drc) hypre_SeqVectorUpdateDevice(v);
+#endif
+}
+inline void SyncVectorToHost(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  if (v->drc>v->hrc) hypre_SeqVectorUpdateHost(v);
+#endif
+}
 #endif
 

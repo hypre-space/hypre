@@ -61,7 +61,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
    HYPRE_Real *u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
    HYPRE_Real *f_data = hypre_VectorData(hypre_ParVectorLocalVector(f));
    HYPRE_Real *v_data = hypre_VectorData(hypre_ParVectorLocalVector(v));
-
+   //printRC(hypre_ParVectorLocalVector(u),"STarting....");
    for (sweep = 0; sweep < relax_times; sweep++)
    {
       if (relax_type == 1) /* l1-scaled Jacobi */
@@ -72,14 +72,25 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 	 if (sweep==0){
 	   hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(v));
 	   hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
+
 	 }
+
 #endif
+	 //SyncVectorToHost(hypre_ParVectorLocalVector(v));
+	 //SyncVectorToHost(hypre_ParVectorLocalVector(f));
 #ifdef HYPRE_USE_GPU
 	 VecCopy(v_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(v)),HYPRE_STREAM(4));
 #else
+	 //printRC(hypre_ParVectorLocalVector(v),"Pre-COPY V");
+	 //printRC(hypre_ParVectorLocalVector(f),"Pre-COPY F");
          hypre_ParVectorCopy(f,v);
 #endif
+	 SyncVectorToDevice(hypre_ParVectorLocalVector(v));
+
          hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, v);
+
+	 SyncVectorToHost(hypre_ParVectorLocalVector(v));
+	 SyncVectorToHost(hypre_ParVectorLocalVector(u));
 	 PUSH_RANGE_PAYLOAD("VECSCALE-RELAX",5,num_rows);
 #ifdef HYPRE_USE_GPU
 	 
@@ -94,6 +105,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
          for (i = 0; i < num_rows; i++)
             u_data[i] += v_data[i] / l1_norms[i];
 #endif
+	 UpdateHRC(hypre_ParVectorLocalVector(u));
 	 POP_RANGE;
 	 POP_RANGE;
       }

@@ -433,7 +433,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                  }
                  else /* not CF - so use through AMS */
                  {
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU)|| defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 		   hypre_ParCSRRelax(A_array[level], 
                                        Aux_F,
                                        1,
@@ -559,6 +559,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                  for (i=0; i < local_size; i++)
 		    Ptemp_data[i] = Ztemp_data[i] + beta*Ptemp_data[i];
               }
+
               hypre_ParCSRMatrixMatvec(1.0,A_array[level],Ptemp,0.0,Vtemp);
               alfa = gamma /hypre_ParVectorInnerProd(Ptemp,Vtemp);
               hypre_ParVectorAxpy(alfa,Ptemp,U_array[level]);
@@ -602,6 +603,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             // JSP: avoid unnecessary copy using out-of-place version of SpMV
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[fine_grid], U_array[fine_grid],
                                                beta, F_array[fine_grid], Vtemp);
+	    SyncVectorToHost(hypre_ParVectorLocalVector(Vtemp));
          }
 
          alpha = 1.0;
@@ -614,8 +616,12 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
          else
          {
+	    SyncVectorToHost(hypre_ParVectorLocalVector(Vtemp));
+	    SyncVectorToHost(hypre_ParVectorLocalVector(F_array[coarse_grid]));
             hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
                                       beta,F_array[coarse_grid]);
+	    UpdateHRC(hypre_ParVectorLocalVector(F_array[coarse_grid]));
+	    //SyncVectorToHost(hypre_ParVectorLocalVector(F_array[coarse_grid]));
          }
 
          ++level;
@@ -648,7 +654,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
          else
          {
-            hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid],
+	   hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid],
                                      U_array[coarse_grid],
                                      beta, U_array[fine_grid]);
          }
