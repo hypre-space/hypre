@@ -284,14 +284,20 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    HYPRE_Int      ierr  = 0;
 
    size *=hypre_VectorNumVectors(v);
-   SyncVectorToHost(v);
-#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+#if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   if (!v->mapped) hypre_SeqVectorMapToDevice(v);
+#endif
 #ifdef HYPRE_USE_MANAGED
    hypre_SeqVectorPrefetchToDevice(v);
 #endif
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
 #pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(vector_data)
+#elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   //printf("Vec Constant Value on Device %d %p size = %d \n",omp_target_is_present(vector_data,0),v,size);
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS)
 #elif defined(HYPRE_USING_OPENMP)
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+   printf("Vec Constant Value on Host %d \n",omp_target_is_present(vector_data,0));
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
       vector_data[i] = value;
@@ -299,7 +305,13 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
+   UpdateDRC(v);
+   // 2 lines below required to get exact match with baseline
+   // Not clear why this is the case.
+   SyncVectorToHost(v);
    UpdateHRC(v);
+   
+   //printRC(v,"E _CONS VEC");
    return ierr;
 }
 

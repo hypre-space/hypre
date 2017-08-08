@@ -603,7 +603,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             // JSP: avoid unnecessary copy using out-of-place version of SpMV
             hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[fine_grid], U_array[fine_grid],
                                                beta, F_array[fine_grid], Vtemp);
-	    SyncVectorToHost(hypre_ParVectorLocalVector(Vtemp));
+	    //SyncVectorToHost(hypre_ParVectorLocalVector(Vtemp));
          }
 
          alpha = 1.0;
@@ -616,11 +616,11 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
          else
          {
-	    SyncVectorToHost(hypre_ParVectorLocalVector(Vtemp));
-	    SyncVectorToHost(hypre_ParVectorLocalVector(F_array[coarse_grid]));
+	   //SyncVectorToHost(hypre_ParVectorLocalVector(Vtemp));
+	    //SyncVectorToHost(hypre_ParVectorLocalVector(F_array[coarse_grid]));
             hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
                                       beta,F_array[coarse_grid]);
-	    UpdateHRC(hypre_ParVectorLocalVector(F_array[coarse_grid]));
+	    //UpdateDRC(hypre_ParVectorLocalVector(F_array[coarse_grid]));
 	    //SyncVectorToHost(hypre_ParVectorLocalVector(F_array[coarse_grid]));
          }
 

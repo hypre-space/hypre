@@ -429,5 +429,6 @@ inline void SyncVectorToHost(hypre_Vector *v){
   if (v->drc>v->hrc) hypre_SeqVectorUpdateHost(v);
 #endif
 }
+void printRC(hypre_Vector *x,char *id);
 #endif
 

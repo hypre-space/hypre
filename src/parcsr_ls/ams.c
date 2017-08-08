@@ -89,8 +89,8 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 
          hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, v);
 
-	 SyncVectorToHost(hypre_ParVectorLocalVector(v));
-	 SyncVectorToHost(hypre_ParVectorLocalVector(u));
+	 //SyncVectorToHost(hypre_ParVectorLocalVector(v));
+	 //SyncVectorToHost(hypre_ParVectorLocalVector(u));
 	 PUSH_RANGE_PAYLOAD("VECSCALE-RELAX",5,num_rows);
 #ifdef HYPRE_USE_GPU
 	 
