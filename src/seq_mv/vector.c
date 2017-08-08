@@ -554,8 +554,15 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
-   SyncVectorToHost(x);
-   SyncVectorToHost(y);
+
+#if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   if (!x->mapped) hypre_SeqVectorMapToDevice(x);
+   else SyncVectorToDevice(x);
+   if (!y->mapped) hypre_SeqVectorMapToDevice(y);
+   else SyncVectorToHost(y);
+#endif
+
+
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
@@ -567,6 +574,8 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
    size *=hypre_VectorNumVectors(x);
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
 #pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) reduction(+:result) is_device_ptr(y_data,x_data) map(result)
+#elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) reduction(+:result)  map(result)
 #elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) reduction(+:result) HYPRE_SMP_SCHEDULE
 #endif
