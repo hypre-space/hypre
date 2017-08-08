@@ -463,16 +463,21 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
    HYPRE_Int      ierr = 0;
 
    size *=hypre_VectorNumVectors(y);
+#if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   if (!y->mapped) hypre_SeqVectorMapToDevice(y);
+   else SyncVectorToDevice(y);
+#endif
 
-   SyncVectorToHost(y);
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
 #pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data)
+#elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS)
 #elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
       y_data[i] *= alpha;
-   UpdateHRC(y);
+   UpdateDRC(y);
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
@@ -505,14 +510,23 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    HYPRE_Int      ierr = 0;
 
    size *=hypre_VectorNumVectors(x);
-   SyncVectorToHost(x);
-   SyncVectorToHost(y);
-#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+
+#if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   if (!x->mapped) hypre_SeqVectorMapToDevice(x);
+   else SyncVectorToDevice(x);
+   if (!y->mapped) hypre_SeqVectorMapToDevice(y);
+   else SyncVectorToHost(y);
+#endif
+
 #ifdef HYPRE_USE_MANAGED
    hypre_SeqVectorPrefetchToDevice(x);
    hypre_SeqVectorPrefetchToDevice(y);
 #endif
+
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
 #pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,x_data)
+#elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS)
 #elif defined(HYPRE_USING_OPENMP)
    //printf("AXPY OMP \n");
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
@@ -523,7 +537,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
-   UpdateHRC(y);
+   UpdateDRC(y);
    return ierr;
 }
 

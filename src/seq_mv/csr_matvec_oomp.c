@@ -449,4 +449,5 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex    alpha,
 {
   hypre_CSRMatrixMatvecOutOfPlaceOOMP(alpha,A,x,beta,b,y,offset);
   hypre_SeqVectorUpdateHost(y);
+  return 0;
 }
