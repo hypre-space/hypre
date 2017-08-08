@@ -368,13 +368,20 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    HYPRE_Int      i;
            
    HYPRE_Int      ierr = 0;
-
-   SyncVectorToHost(x);
-   SyncVectorToHost(y);
+#if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   if (!x->mapped) hypre_SeqVectorMapToDevice(x);
+   else SyncVectorToDevice(x);
+   if (!y->mapped) hypre_SeqVectorMapToDevice(y);
+   else SyncVectorToDevice(y);
+   //SyncVectorToDevice(x);
+   //SyncVectorToDevice(y);
+#endif
    if (size > size_y) size = size_y;
    size *=hypre_VectorNumVectors(x);
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
 #pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,x_data)
+#elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) 
 #elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -384,7 +391,7 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
-   UpdateHRC(y);
+   UpdateDRC(y);
    return ierr;
 }
 

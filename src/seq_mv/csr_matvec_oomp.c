@@ -381,22 +381,21 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    }
    //printf("Mapping X::");
    if (!x->mapped) hypre_SeqVectorMapToDevice(x);
-   else if (x->hrc>x->drc) hypre_SeqVectorUpdateDevice(x);
+   else SyncVectorToDevice(x);
    //printf("Mapping Y::");
    if (!y->mapped) hypre_SeqVectorMapToDevice(y);
-   else if (y->hrc>y->drc)  hypre_SeqVectorUpdateDevice(y);
+   else SyncVectorToDevice(y);
    
    if (b!=y){
      if(!b->mapped)  {
        //printf("Mapping B::");
        hypre_SeqVectorMapToDevice(b);
      } else 
-       hypre_SeqVectorUpdateDevice(b);
+       SyncVectorToDevice(b);
    }
 #endif
 
-   //hypre_SeqVectorUpdateDevice(x);
-   //hypre_SeqVectorUpdateDevice(y);
+ 
   
    if (x == y)
    {
