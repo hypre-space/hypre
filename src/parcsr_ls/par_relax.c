@@ -2368,12 +2368,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          /*-----------------------------------------------------------------
           * Copy f into temporary vector.
           *-----------------------------------------------------------------*/
-         PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
+         PUSH_RANGE("RELAX",4);
 #ifdef HYPRE_USE_GPU
-         if (sweep==0){
            hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(Vtemp));
            hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
-         }
          VecCopy(Vtemp_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)),HYPRE_STREAM(4));
 #else
          hypre_ParVectorCopy(f,Vtemp);
