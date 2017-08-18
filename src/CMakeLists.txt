@@ -502,6 +502,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_rap_communication.c
   parcsr_ls/par_rotate_7pt.c
   parcsr_ls/par_vardifconv.c
+  parcsr_ls/par_vardifconv_rs.c
   parcsr_ls/par_relax.c
   parcsr_ls/par_relax_more.c
   parcsr_ls/par_relax_interface.c

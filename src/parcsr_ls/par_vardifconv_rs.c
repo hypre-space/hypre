@@ -17,8 +17,8 @@
 #include "_hypre_parcsr_ls.h"
  
 /* examples in Ruge & Stuben paper */
-static int rs_example = 1;
-static double rs_l = 3.0;
+static HYPRE_Int rs_example = 1;
+static HYPRE_Real rs_l = 3.0;
 
 /*--------------------------------------------------------------------------
  * hypre_GenerateVarDifConv: with the FD discretization and examples 
