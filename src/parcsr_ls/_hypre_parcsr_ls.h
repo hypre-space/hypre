@@ -1534,6 +1534,19 @@ HYPRE_Real gfun ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
 HYPRE_Real rfun ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
 HYPRE_Real bndfun ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
 
+/* par_vardifconv_rs.c */
+HYPRE_ParCSRMatrix GenerateRSVarDifConv ( MPI_Comm comm , HYPRE_Int nx , HYPRE_Int ny , HYPRE_Int nz , HYPRE_Int P , HYPRE_Int Q , HYPRE_Int R , HYPRE_Int p , HYPRE_Int q , HYPRE_Int r , HYPRE_Real eps , HYPRE_ParVector *rhs_ptr, HYPRE_Int type );
+HYPRE_Real afun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
+HYPRE_Real bfun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
+HYPRE_Real cfun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
+HYPRE_Real dfun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
+HYPRE_Real efun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
+HYPRE_Real ffun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
+HYPRE_Real gfun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
+HYPRE_Real rfun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
+HYPRE_Real bndfun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
+
+
 /* pcg_par.c */
 char *hypre_ParKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
 HYPRE_Int hypre_ParKrylovFree ( char *ptr );

@@ -3164,6 +3164,21 @@ GenerateVarDifConv(MPI_Comm         comm,
                    HYPRE_Real       eps,
                    HYPRE_ParVector *rhs_ptr);
 
+HYPRE_ParCSRMatrix
+GenerateRSVarDifConv(MPI_Comm         comm,
+                     HYPRE_Int        nx,
+                     HYPRE_Int        ny,
+                     HYPRE_Int        nz,
+                     HYPRE_Int        P,
+                     HYPRE_Int        Q,
+                     HYPRE_Int        R,
+                     HYPRE_Int        p,
+                     HYPRE_Int        q,
+                     HYPRE_Int        r,
+                     HYPRE_Real       eps,
+                     HYPRE_ParVector *rhs_ptr,
+                     HYPRE_Int        type);
+
 float*
 GenerateCoordinates(MPI_Comm  comm,
                     HYPRE_Int nx,
