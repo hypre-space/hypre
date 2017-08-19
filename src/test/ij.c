@@ -342,7 +342,6 @@ main( hypre_int argc,
    HYPRE_Int i_indx, j_indx, num_rows;
    HYPRE_Real *data = NULL;
 
-
    HYPRE_Int air = 0;
    HYPRE_Int **grid_relax_points = NULL;
    /*-----------------------------------------------------------
@@ -1374,298 +1373,301 @@ main( hypre_int argc,
     * Print usage info
     *-----------------------------------------------------------*/
  
-   if ( (print_usage) && (myid == 0) )
+   if ( print_usage )
    {
-      hypre_printf("\n");
-      hypre_printf("Usage: %s [<options>]\n", argv[0]);
-      hypre_printf("\n");
-      hypre_printf("  -fromfile <filename>       : ");
-      hypre_printf("matrix read from multiple files (IJ format)\n");
-      hypre_printf("  -fromparcsrfile <filename> : ");
-      hypre_printf("matrix read from multiple files (ParCSR format)\n");
-      hypre_printf("  -fromonecsrfile <filename> : ");
-      hypre_printf("matrix read from a single file (CSR format)\n");
-      hypre_printf("\n");
-      hypre_printf("  -laplacian [<options>] : build 5pt 2D laplacian problem (default) \n");
-      hypre_printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
-      hypre_printf("  -9pt [<opts>]          : build 9pt 2D laplacian problem\n");
-      hypre_printf("  -27pt [<opts>]         : build 27pt 3D laplacian problem\n");
-      hypre_printf("  -difconv [<opts>]      : build convection-diffusion problem\n");
-      hypre_printf("    -n <nx> <ny> <nz>    : total problem size \n");
-      hypre_printf("    -P <Px> <Py> <Pz>    : processor topology\n");
-      hypre_printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
-      hypre_printf("    -a <ax> <ay> <az>    : convection coefficients\n");
-      hypre_printf("    -atype <type>        : FD scheme for convection \n");
-      hypre_printf("           0=Forward (default)       1=Backward\n");
-      hypre_printf("           2=Centered                3=Upwind\n");
-      hypre_printf("\n");
-      hypre_printf("  -exact_size            : inserts immediately into ParCSR structure\n");
-      hypre_printf("  -storage_low           : allocates not enough storage for aux struct\n");
-      hypre_printf("  -concrete_parcsr       : use parcsr matrix type as concrete type\n");
-      hypre_printf("\n");
-      hypre_printf("  -rhsfromfile           : ");
-      hypre_printf("rhs read from multiple files (IJ format)\n");
-      hypre_printf("  -rhsfromonefile        : ");
-      hypre_printf("rhs read from a single file (CSR format)\n");
-      hypre_printf("  -rhsparcsrfile        :  ");
-      hypre_printf("rhs read from multiple files (ParCSR format)\n");
-      hypre_printf("  -rhsrand               : rhs is random vector\n");
-      hypre_printf("  -rhsisone              : rhs is vector with unit components (default)\n");
-      hypre_printf("  -xisone                : solution of all ones\n");
-      hypre_printf("  -rhszero               : rhs is zero vector\n");
-      hypre_printf("\n");
-      hypre_printf("  -dt <val>              : specify finite backward Euler time step\n");
-      hypre_printf("                         :    -rhsfromfile, -rhsfromonefile, -rhsrand,\n");
-      hypre_printf("                         :    -rhsrand, or -xisone will be ignored\n");
-      hypre_printf("  -srcfromfile           : ");
-      hypre_printf("backward Euler source read from multiple files (IJ format)\n");
-      hypre_printf("  -srcfromonefile        : ");
-      hypre_printf("backward Euler source read from a single file (IJ format)\n");
-      hypre_printf("  -srcrand               : ");
-      hypre_printf("backward Euler source is random vector with components in range 0 - 1\n");
-      hypre_printf("  -srcisone              : ");
-      hypre_printf("backward Euler source is vector with unit components (default)\n");
-      hypre_printf("  -srczero               : ");
-      hypre_printf("backward Euler source is zero-vector\n");
-      hypre_printf("\n");
-      hypre_printf("  -solver <ID>           : solver ID\n");
-      hypre_printf("       0=AMG               1=AMG-PCG        \n");
-      hypre_printf("       2=DS-PCG            3=AMG-GMRES      \n");
-      hypre_printf("       4=DS-GMRES          5=AMG-CGNR       \n");     
-      hypre_printf("       6=DS-CGNR           7=PILUT-GMRES    \n");     
-      hypre_printf("       8=ParaSails-PCG     9=AMG-BiCGSTAB   \n");
-      hypre_printf("       10=DS-BiCGSTAB     11=PILUT-BiCGSTAB \n");
-      hypre_printf("       12=Schwarz-PCG     13=GSMG           \n");     
-      hypre_printf("       14=GSMG-PCG        15=GSMG-GMRES\n");     
-      hypre_printf("       18=ParaSails-GMRES\n");     
-      hypre_printf("       20=Hybrid solver/ DiagScale, AMG \n");
-      hypre_printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
-      hypre_printf("       45=Euclid-BICGSTAB\n");
-      hypre_printf("       50=DS-LGMRES         51=AMG-LGMRES     \n");
-      hypre_printf("       60=DS-FlexGMRES         61=AMG-FlexGMRES     \n");
-      hypre_printf("\n");
-      hypre_printf("  -cljp                 : CLJP coarsening \n");
-      hypre_printf("  -cljp1                : CLJP coarsening, fixed random \n");
-      hypre_printf("  -cgc                  : CGC coarsening \n");
-      hypre_printf("  -cgce                 : CGC-E coarsening \n");
-      hypre_printf("  -pmis                 : PMIS coarsening \n");
-      hypre_printf("  -pmis1                : PMIS coarsening, fixed random \n");
-      hypre_printf("  -hmis                 : HMIS coarsening (default)\n");
-      hypre_printf("  -ruge                 : Ruge-Stueben coarsening (local)\n");
-      hypre_printf("  -ruge1p               : Ruge-Stueben coarsening 1st pass only(local)\n");
-      hypre_printf("  -ruge3                : third pass on boundary\n");
-      hypre_printf("  -ruge3c               : third pass on boundary, keep c-points\n");
-      hypre_printf("  -falgout              : local Ruge_Stueben followed by CLJP\n");
-      hypre_printf("  -gm                   : use global measures\n");
-      hypre_printf("\n");
-      hypre_printf("  -interptype  <val>    : set interpolation type\n");
-      hypre_printf("       0=Classical modified interpolation  \n");
-      hypre_printf("       1=least squares interpolation (for GSMG only)  \n");
-      hypre_printf("       0=Classical modified interpolation for hyperbolic PDEs \n");
-      hypre_printf("       3=direct interpolation with separation of weights  \n");
-      hypre_printf("       4=multipass interpolation  \n");
-      hypre_printf("       5=multipass interpolation with separation of weights  \n");
-      hypre_printf("       6=extended classical modified interpolation (default) \n");
-      hypre_printf("       7=extended (only if no common C neighbor) interpolation  \n");
-      hypre_printf("       8=standard interpolation  \n");
-      hypre_printf("       9=standard interpolation with separation of weights  \n");
-      hypre_printf("      12=FF interpolation  \n");
-      hypre_printf("      13=FF1 interpolation  \n");
- 
-      hypre_printf("      16=use modified unknown interpolation for a system (w/unknown or hybrid approach) \n");
-      hypre_printf("      17=use non-systems interp = 6 for a system (w/unknown or hybrid approach) \n");
-      hypre_printf("      18=use non-systems interp = 8 for a system (w/unknown or hybrid approach) \n");
-      hypre_printf("      19=use non-systems interp = 0 for a system (w/unknown or hybrid approach) \n");
-      
+      if ( myid == 0 )
+      {
+         hypre_printf("\n");
+         hypre_printf("Usage: %s [<options>]\n", argv[0]);
+         hypre_printf("\n");
+         hypre_printf("  -fromfile <filename>       : ");
+         hypre_printf("matrix read from multiple files (IJ format)\n");
+         hypre_printf("  -fromparcsrfile <filename> : ");
+         hypre_printf("matrix read from multiple files (ParCSR format)\n");
+         hypre_printf("  -fromonecsrfile <filename> : ");
+         hypre_printf("matrix read from a single file (CSR format)\n");
+         hypre_printf("\n");
+         hypre_printf("  -laplacian [<options>] : build 5pt 2D laplacian problem (default) \n");
+         hypre_printf("  -sysL <num functions>  : build SYSTEMS laplacian 7pt operator\n");
+         hypre_printf("  -9pt [<opts>]          : build 9pt 2D laplacian problem\n");
+         hypre_printf("  -27pt [<opts>]         : build 27pt 3D laplacian problem\n");
+         hypre_printf("  -difconv [<opts>]      : build convection-diffusion problem\n");
+         hypre_printf("    -n <nx> <ny> <nz>    : total problem size \n");
+         hypre_printf("    -P <Px> <Py> <Pz>    : processor topology\n");
+         hypre_printf("    -c <cx> <cy> <cz>    : diffusion coefficients\n");
+         hypre_printf("    -a <ax> <ay> <az>    : convection coefficients\n");
+         hypre_printf("    -atype <type>        : FD scheme for convection \n");
+         hypre_printf("           0=Forward (default)       1=Backward\n");
+         hypre_printf("           2=Centered                3=Upwind\n");
+         hypre_printf("\n");
+         hypre_printf("  -exact_size            : inserts immediately into ParCSR structure\n");
+         hypre_printf("  -storage_low           : allocates not enough storage for aux struct\n");
+         hypre_printf("  -concrete_parcsr       : use parcsr matrix type as concrete type\n");
+         hypre_printf("\n");
+         hypre_printf("  -rhsfromfile           : ");
+         hypre_printf("rhs read from multiple files (IJ format)\n");
+         hypre_printf("  -rhsfromonefile        : ");
+         hypre_printf("rhs read from a single file (CSR format)\n");
+         hypre_printf("  -rhsparcsrfile        :  ");
+         hypre_printf("rhs read from multiple files (ParCSR format)\n");
+         hypre_printf("  -rhsrand               : rhs is random vector\n");
+         hypre_printf("  -rhsisone              : rhs is vector with unit components (default)\n");
+         hypre_printf("  -xisone                : solution of all ones\n");
+         hypre_printf("  -rhszero               : rhs is zero vector\n");
+         hypre_printf("\n");
+         hypre_printf("  -dt <val>              : specify finite backward Euler time step\n");
+         hypre_printf("                         :    -rhsfromfile, -rhsfromonefile, -rhsrand,\n");
+         hypre_printf("                         :    -rhsrand, or -xisone will be ignored\n");
+         hypre_printf("  -srcfromfile           : ");
+         hypre_printf("backward Euler source read from multiple files (IJ format)\n");
+         hypre_printf("  -srcfromonefile        : ");
+         hypre_printf("backward Euler source read from a single file (IJ format)\n");
+         hypre_printf("  -srcrand               : ");
+         hypre_printf("backward Euler source is random vector with components in range 0 - 1\n");
+         hypre_printf("  -srcisone              : ");
+         hypre_printf("backward Euler source is vector with unit components (default)\n");
+         hypre_printf("  -srczero               : ");
+         hypre_printf("backward Euler source is zero-vector\n");
+         hypre_printf("\n");
+         hypre_printf("  -solver <ID>           : solver ID\n");
+         hypre_printf("       0=AMG               1=AMG-PCG        \n");
+         hypre_printf("       2=DS-PCG            3=AMG-GMRES      \n");
+         hypre_printf("       4=DS-GMRES          5=AMG-CGNR       \n");     
+         hypre_printf("       6=DS-CGNR           7=PILUT-GMRES    \n");     
+         hypre_printf("       8=ParaSails-PCG     9=AMG-BiCGSTAB   \n");
+         hypre_printf("       10=DS-BiCGSTAB     11=PILUT-BiCGSTAB \n");
+         hypre_printf("       12=Schwarz-PCG     13=GSMG           \n");     
+         hypre_printf("       14=GSMG-PCG        15=GSMG-GMRES\n");     
+         hypre_printf("       18=ParaSails-GMRES\n");     
+         hypre_printf("       20=Hybrid solver/ DiagScale, AMG \n");
+         hypre_printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
+         hypre_printf("       45=Euclid-BICGSTAB\n");
+         hypre_printf("       50=DS-LGMRES         51=AMG-LGMRES     \n");
+         hypre_printf("       60=DS-FlexGMRES         61=AMG-FlexGMRES     \n");
+         hypre_printf("\n");
+         hypre_printf("  -cljp                 : CLJP coarsening \n");
+         hypre_printf("  -cljp1                : CLJP coarsening, fixed random \n");
+         hypre_printf("  -cgc                  : CGC coarsening \n");
+         hypre_printf("  -cgce                 : CGC-E coarsening \n");
+         hypre_printf("  -pmis                 : PMIS coarsening \n");
+         hypre_printf("  -pmis1                : PMIS coarsening, fixed random \n");
+         hypre_printf("  -hmis                 : HMIS coarsening (default)\n");
+         hypre_printf("  -ruge                 : Ruge-Stueben coarsening (local)\n");
+         hypre_printf("  -ruge1p               : Ruge-Stueben coarsening 1st pass only(local)\n");
+         hypre_printf("  -ruge3                : third pass on boundary\n");
+         hypre_printf("  -ruge3c               : third pass on boundary, keep c-points\n");
+         hypre_printf("  -falgout              : local Ruge_Stueben followed by CLJP\n");
+         hypre_printf("  -gm                   : use global measures\n");
+         hypre_printf("\n");
+         hypre_printf("  -interptype  <val>    : set interpolation type\n");
+         hypre_printf("       0=Classical modified interpolation  \n");
+         hypre_printf("       1=least squares interpolation (for GSMG only)  \n");
+         hypre_printf("       0=Classical modified interpolation for hyperbolic PDEs \n");
+         hypre_printf("       3=direct interpolation with separation of weights  \n");
+         hypre_printf("       4=multipass interpolation  \n");
+         hypre_printf("       5=multipass interpolation with separation of weights  \n");
+         hypre_printf("       6=extended classical modified interpolation (default) \n");
+         hypre_printf("       7=extended (only if no common C neighbor) interpolation  \n");
+         hypre_printf("       8=standard interpolation  \n");
+         hypre_printf("       9=standard interpolation with separation of weights  \n");
+         hypre_printf("      12=FF interpolation  \n");
+         hypre_printf("      13=FF1 interpolation  \n");
 
-      hypre_printf("      10=classical block interpolation for nodal systems AMG\n");
-      hypre_printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
-      hypre_printf("      20=same as 10, but don't add weak connect. to diag \n");
-      hypre_printf("      21=same as 11, but don't add weak connect. to diag \n");
-      hypre_printf("      22=classical block interpolation w/Ruge's variant for nodal systems AMG \n");
-      hypre_printf("      23=same as 22, but use row sums for diag scaling matrices,for nodal systems AMG \n");
-      hypre_printf("      24=direct block interpolation for nodal systems AMG\n");
-      hypre_printf("     100=One point interpolation [a Boolean matrix]\n");
-      hypre_printf("\n");
+         hypre_printf("      16=use modified unknown interpolation for a system (w/unknown or hybrid approach) \n");
+         hypre_printf("      17=use non-systems interp = 6 for a system (w/unknown or hybrid approach) \n");
+         hypre_printf("      18=use non-systems interp = 8 for a system (w/unknown or hybrid approach) \n");
+         hypre_printf("      19=use non-systems interp = 0 for a system (w/unknown or hybrid approach) \n");
 
-      /* RL */
-      hypre_printf("  -restritype  <val>    : set restriction type\n");
-      hypre_printf("       0=transpose of the interpolation  \n");
-      hypre_printf("       1=local approximate ideal restriction (AIR)  \n");
-      hypre_printf("\n");
+         hypre_printf("      10=classical block interpolation for nodal systems AMG\n");
+         hypre_printf("      11=classical block interpolation with diagonal blocks for nodal systems AMG\n");
+         hypre_printf("      20=same as 10, but don't add weak connect. to diag \n");
+         hypre_printf("      21=same as 11, but don't add weak connect. to diag \n");
+         hypre_printf("      22=classical block interpolation w/Ruge's variant for nodal systems AMG \n");
+         hypre_printf("      23=same as 22, but use row sums for diag scaling matrices,for nodal systems AMG \n");
+         hypre_printf("      24=direct block interpolation for nodal systems AMG\n");
+         hypre_printf("     100=One point interpolation [a Boolean matrix]\n");
+         hypre_printf("\n");
 
-      hypre_printf("  -rlx  <val>            : relaxation type\n");
-      hypre_printf("       0=Weighted Jacobi  \n");
-      hypre_printf("       1=Gauss-Seidel (very slow!)  \n");
-      hypre_printf("       3=Hybrid Gauss-Seidel  \n");
-      hypre_printf("       4=Hybrid backward Gauss-Seidel  \n");
-      hypre_printf("       6=Hybrid symmetric Gauss-Seidel  \n");
-      hypre_printf("       8= symmetric L1-Gauss-Seidel  \n");
-      hypre_printf("       13= forward L1-Gauss-Seidel  \n");
-      hypre_printf("       14= backward L1-Gauss-Seidel  \n");
-      hypre_printf("       15=CG  \n");
-      hypre_printf("       16=Chebyshev  \n");
-      hypre_printf("       17=FCF-Jacobi  \n");
-      hypre_printf("       18=L1-Jacobi (may be used with -CF) \n");
-      hypre_printf("       9=Gauss elimination (use for coarsest grid only)  \n");
-      hypre_printf("       99=Gauss elimination with pivoting (use for coarsest grid only)  \n");
-      hypre_printf("       20= Nodal Weighted Jacobi (for systems only) \n");
-      hypre_printf("       23= Nodal Hybrid Jacobi/Gauss-Seidel (for systems only) \n");
-      hypre_printf("       26= Nodal Hybrid Symmetric Gauss-Seidel  (for systems only)\n");
-      hypre_printf("       29= Nodal Gauss elimination (use for coarsest grid only)  \n");
-      hypre_printf("  -rlx_coarse  <val>       : set relaxation type for coarsest grid\n");
-      hypre_printf("  -rlx_down    <val>       : set relaxation type for down cycle\n");
-      hypre_printf("  -rlx_up      <val>       : set relaxation type for up cycle\n");
-      hypre_printf("  -cheby_order  <val> : set order (1-4) for Chebyshev poly. smoother (default is 2)\n");
-      hypre_printf("  -cheby_fraction <val> : fraction of the spectrum for Chebyshev poly. smoother (default is .3)\n");
-      hypre_printf("  -nodal  <val>            : nodal system type\n");
-      hypre_printf("       0 = Unknown approach \n");
-      hypre_printf("       1 = Frobenius norm  \n");
-      hypre_printf("       2 = Sum of Abs.value of elements  \n");
-      hypre_printf("       3 = Largest magnitude element (includes its sign)  \n");
-      hypre_printf("       4 = Inf. norm  \n");
-      hypre_printf("       5 = One norm  (note: use with block version only) \n");
-      hypre_printf("       6 = Sum of all elements in block  \n");
-      hypre_printf("  -nodal_diag <val>        :how to treat diag elements\n");
-      hypre_printf("       0 = no special treatment \n");
-      hypre_printf("       1 = make diag = neg.sum of the off_diag  \n");
-      hypre_printf("       2 = make diag = neg. of diag \n");
-      hypre_printf("  -ns <val>              : Use <val> sweeps on each level\n");
-      hypre_printf("                           (default C/F down, F/C up, F/C fine\n");
-      hypre_printf("  -ns_coarse  <val>       : set no. of sweeps for coarsest grid\n");
-      /* RL restore these */
-      hypre_printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
-      hypre_printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");
-      hypre_printf("\n"); 
-      hypre_printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n"); 
-      hypre_printf("  -th   <val>            : set AMG threshold Theta = val \n");
-      hypre_printf("  -tr   <val>            : set AMG interpolation truncation factor = val \n");
-      hypre_printf("  -Pmx  <val>            : set maximal no. of elmts per row for AMG interpolation (default: 4)\n");
-      hypre_printf("  -jtr  <val>            : set truncation threshold for Jacobi interpolation = val \n");
-      hypre_printf("  -Ssw  <val>            : set S-commpkg-switch = val \n");
-      hypre_printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
-      hypre_printf("  -nf <val>              : set number of functions for systems AMG\n");
-      hypre_printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
-    
-      hypre_printf("  -postinterptype <val>  : invokes <val> no. of Jacobi interpolation steps after main interpolation\n");
-      hypre_printf("\n");
-      hypre_printf("  -cgcitr <val>          : set maximal number of coarsening iterations for CGC\n");
-      hypre_printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
-      hypre_printf("                         : 1  PCG  (default)\n");
-      hypre_printf("                         : 2  GMRES\n");
-      hypre_printf("                         : 3  BiCGSTAB\n");
-     
-      hypre_printf("  -w   <val>             : set Jacobi relax weight = val\n");
-      hypre_printf("  -k   <val>             : dimension Krylov space for GMRES\n");
-      hypre_printf("  -aug   <val>           : number of augmentation vectors for LGMRES (-k indicates total approx space size)\n");
+         /* RL */
+         hypre_printf("  -restritype  <val>    : set restriction type\n");
+         hypre_printf("       0=transpose of the interpolation  \n");
+         hypre_printf("       1=local approximate ideal restriction (AIR)  \n");
+         hypre_printf("\n");
 
-      hypre_printf("  -mxl  <val>            : maximum number of levels (AMG, ParaSAILS)\n");
-      hypre_printf("  -tol  <val>            : set solver convergence tolerance = val\n");
-      hypre_printf("  -atol  <val>           : set solver absolute convergence tolerance = val\n");
-      hypre_printf("  -max_iter  <val>       : set max iterations\n");
-      hypre_printf("  -mg_max_iter  <val>    : set max iterations for mg solvers\n");
-      hypre_printf("  -agg_nl  <val>         : set number of aggressive coarsening levels (default:0)\n");
-      hypre_printf("  -np  <val>             : set number of paths of length 2 for aggr. coarsening\n");
-      hypre_printf("\n");
-      hypre_printf("  -sai_th   <val>        : set ParaSAILS threshold = val \n");
-      hypre_printf("  -sai_filt <val>        : set ParaSAILS filter = val \n");
-      hypre_printf("\n");
-      hypre_printf("  -level   <val>         : set k in ILU(k) for Euclid \n");
-      hypre_printf("  -bj <val>              : enable block Jacobi ILU for Euclid \n");
-      hypre_printf("  -ilut <val>            : set drop tolerance for ILUT in Euclid\n");
-      hypre_printf("                           Note ILUT is sequential only!\n");
-      hypre_printf("  -sparseA <val>         : set drop tolerance in ILU(k) for Euclid \n");
-      hypre_printf("  -rowScale <val>        : enable row scaling in Euclid \n");
-      hypre_printf("\n");  
-      hypre_printf("  -drop_tol  <val>       : set threshold for dropping in PILUT\n");
-      hypre_printf("  -nonzeros_to_keep <val>: number of nonzeros in each row to keep\n");
-      hypre_printf("\n");  
-      hypre_printf("  -iout <val>            : set output flag\n");
-      hypre_printf("       0=no output    1=matrix stats\n"); 
-      hypre_printf("       2=cycle stats  3=matrix & cycle stats\n"); 
-      hypre_printf("\n");  
-      hypre_printf("  -dbg <val>             : set debug flag\n");
-      hypre_printf("       0=no debugging\n       1=internal timing\n       2=interpolation truncation\n       3=more detailed timing in coarsening routine\n");
-      hypre_printf("\n");
-      hypre_printf("  -print                 : print out the system\n");
-      hypre_printf("\n");
-      /* begin lobpcg */
+         hypre_printf("  -rlx  <val>            : relaxation type\n");
+         hypre_printf("       0=Weighted Jacobi  \n");
+         hypre_printf("       1=Gauss-Seidel (very slow!)  \n");
+         hypre_printf("       3=Hybrid Gauss-Seidel  \n");
+         hypre_printf("       4=Hybrid backward Gauss-Seidel  \n");
+         hypre_printf("       6=Hybrid symmetric Gauss-Seidel  \n");
+         hypre_printf("       8= symmetric L1-Gauss-Seidel  \n");
+         hypre_printf("       13= forward L1-Gauss-Seidel  \n");
+         hypre_printf("       14= backward L1-Gauss-Seidel  \n");
+         hypre_printf("       15=CG  \n");
+         hypre_printf("       16=Chebyshev  \n");
+         hypre_printf("       17=FCF-Jacobi  \n");
+         hypre_printf("       18=L1-Jacobi (may be used with -CF) \n");
+         hypre_printf("       9=Gauss elimination (use for coarsest grid only)  \n");
+         hypre_printf("       99=Gauss elimination with pivoting (use for coarsest grid only)  \n");
+         hypre_printf("       20= Nodal Weighted Jacobi (for systems only) \n");
+         hypre_printf("       23= Nodal Hybrid Jacobi/Gauss-Seidel (for systems only) \n");
+         hypre_printf("       26= Nodal Hybrid Symmetric Gauss-Seidel  (for systems only)\n");
+         hypre_printf("       29= Nodal Gauss elimination (use for coarsest grid only)  \n");
+         hypre_printf("  -rlx_coarse  <val>       : set relaxation type for coarsest grid\n");
+         hypre_printf("  -rlx_down    <val>       : set relaxation type for down cycle\n");
+         hypre_printf("  -rlx_up      <val>       : set relaxation type for up cycle\n");
+         hypre_printf("  -cheby_order  <val> : set order (1-4) for Chebyshev poly. smoother (default is 2)\n");
+         hypre_printf("  -cheby_fraction <val> : fraction of the spectrum for Chebyshev poly. smoother (default is .3)\n");
+         hypre_printf("  -nodal  <val>            : nodal system type\n");
+         hypre_printf("       0 = Unknown approach \n");
+         hypre_printf("       1 = Frobenius norm  \n");
+         hypre_printf("       2 = Sum of Abs.value of elements  \n");
+         hypre_printf("       3 = Largest magnitude element (includes its sign)  \n");
+         hypre_printf("       4 = Inf. norm  \n");
+         hypre_printf("       5 = One norm  (note: use with block version only) \n");
+         hypre_printf("       6 = Sum of all elements in block  \n");
+         hypre_printf("  -nodal_diag <val>        :how to treat diag elements\n");
+         hypre_printf("       0 = no special treatment \n");
+         hypre_printf("       1 = make diag = neg.sum of the off_diag  \n");
+         hypre_printf("       2 = make diag = neg. of diag \n");
+         hypre_printf("  -ns <val>              : Use <val> sweeps on each level\n");
+         hypre_printf("                           (default C/F down, F/C up, F/C fine\n");
+         hypre_printf("  -ns_coarse  <val>       : set no. of sweeps for coarsest grid\n");
+         /* RL restore these */
+         hypre_printf("  -ns_down    <val>       : set no. of sweeps for down cycle\n");
+         hypre_printf("  -ns_up      <val>       : set no. of sweeps for up cycle\n");
+         hypre_printf("\n");
+         hypre_printf("  -mu   <val>            : set AMG cycles (1=V, 2=W, etc.)\n"); 
+         hypre_printf("  -th   <val>            : set AMG threshold Theta = val \n");
+         hypre_printf("  -tr   <val>            : set AMG interpolation truncation factor = val \n");
+         hypre_printf("  -Pmx  <val>            : set maximal no. of elmts per row for AMG interpolation (default: 4)\n");
+         hypre_printf("  -jtr  <val>            : set truncation threshold for Jacobi interpolation = val \n");
+         hypre_printf("  -Ssw  <val>            : set S-commpkg-switch = val \n");
+         hypre_printf("  -mxrs <val>            : set AMG maximum row sum threshold for dependency weakening \n");
+         hypre_printf("  -nf <val>              : set number of functions for systems AMG\n");
+         hypre_printf("  -numsamp <val>         : set number of sample vectors for GSMG\n");
 
-      hypre_printf("LOBPCG options:\n");
-      hypre_printf("\n");
-      hypre_printf("  -lobpcg                 : run LOBPCG instead of PCG\n");
-      hypre_printf("\n");
-      hypre_printf("  -gen                    : solve generalized EVP with B = Laplacian\n");
-      hypre_printf("\n");
-      hypre_printf("  -con                    : solve constrained EVP using 'vectors.*.*'\n");
-      hypre_printf("                            as constraints (see -vout 1 below)\n");
-      hypre_printf("\n");
-      hypre_printf("  -solver none            : no HYPRE preconditioner is used\n");
-      hypre_printf("\n");
-      hypre_printf("  -itr <val>              : maximal number of LOBPCG iterations\n");
-      hypre_printf("                            (default 100);\n");
-      hypre_printf("\n");
-      hypre_printf("  -vrand <val>            : compute <val> eigenpairs using random\n");
-      hypre_printf("                            initial vectors (default 1)\n");
-      hypre_printf("\n");
-      hypre_printf("  -seed <val>             : use <val> as the seed for the random\n");
-      hypre_printf("                            number generator(default seed is based\n");
-      hypre_printf("                            on the time of the run)\n");
-      hypre_printf("\n");
-      hypre_printf("  -vfromfile              : read initial vectors from files\n");
-      hypre_printf("                            vectors.i.j where i is vector number\n");
-      hypre_printf("                            and j is processor number\n");
-      hypre_printf("\n");
-      hypre_printf("  -orthchk                : check eigenvectors for orthonormality\n");
-      hypre_printf("\n");
-      hypre_printf("  -verb <val>             : verbosity level\n");
-      hypre_printf("  -verb 0                 : no print\n");
-      hypre_printf("  -verb 1                 : print initial eigenvalues and residuals,\n");
-      hypre_printf("                            the iteration number, the number of\n");
-      hypre_printf("                            non-convergent eigenpairs and final\n");
-      hypre_printf("                            eigenvalues and residuals (default)\n");
-      hypre_printf("  -verb 2                 : print eigenvalues and residuals on each\n");
-      hypre_printf("                            iteration\n");
-      hypre_printf("\n");
-      hypre_printf("  -pcgitr <val>           : maximal number of inner PCG iterations\n");
-      hypre_printf("                            for preconditioning (default 1);\n");
-      hypre_printf("                            if <val> = 0 then the preconditioner\n");
-      hypre_printf("                            is applied directly\n");
-      hypre_printf("\n");
-      hypre_printf("  -pcgtol <val>           : residual tolerance for inner iterations\n");
-      hypre_printf("                            (default 0.01)\n");
-      hypre_printf("\n");
-      hypre_printf("  -vout <val>             : file output level\n");
-      hypre_printf("  -vout 0                 : no files created (default)\n");
-      hypre_printf("  -vout 1                 : write eigenvalues to values.txt, residuals\n");
-      hypre_printf("                            to residuals.txt and eigenvectors to \n");
-      hypre_printf("                            vectors.i.j where i is vector number\n");
-      hypre_printf("                            and j is processor number\n");
-      hypre_printf("  -vout 2                 : in addition to the above, write the\n");
-      hypre_printf("                            eigenvalues history (the matrix whose\n");
-      hypre_printf("                            i-th column contains eigenvalues at\n");
-      hypre_printf("                            (i+1)-th iteration) to val_hist.txt and\n");
-      hypre_printf("                            residuals history to res_hist.txt\n");
-      hypre_printf("\nNOTE: in this test driver LOBPCG only works with solvers 1, 2, 8, 12, 14 and 43\n");
-      hypre_printf("\ndefault solver is 1\n");
-      hypre_printf("\n");
+         hypre_printf("  -postinterptype <val>  : invokes <val> no. of Jacobi interpolation steps after main interpolation\n");
+         hypre_printf("\n");
+         hypre_printf("  -cgcitr <val>          : set maximal number of coarsening iterations for CGC\n");
+         hypre_printf("  -solver_type <val>     : sets solver within Hybrid solver\n");
+         hypre_printf("                         : 1  PCG  (default)\n");
+         hypre_printf("                         : 2  GMRES\n");
+         hypre_printf("                         : 3  BiCGSTAB\n");
 
-      /* end lobpcg */
+         hypre_printf("  -w   <val>             : set Jacobi relax weight = val\n");
+         hypre_printf("  -k   <val>             : dimension Krylov space for GMRES\n");
+         hypre_printf("  -aug   <val>           : number of augmentation vectors for LGMRES (-k indicates total approx space size)\n");
 
-      hypre_printf("  -plot_grids            : print out information for plotting the grids\n");
-      hypre_printf("  -plot_file_name <val>  : file name for plotting output\n");
-      hypre_printf("\n");
-      hypre_printf("  -smtype <val>      :smooth type\n");
-      hypre_printf("  -smlv <val>        :smooth num levels\n");
-      hypre_printf("  -ov <val>          :over lap:\n");
-      hypre_printf("  -dom <val>         :domain type\n");
-      hypre_printf("  -use_ns            : use non-symm schwarz smoother\n");
-      hypre_printf("  -var <val>         : schwarz smoother variant (0-3) \n");
-      hypre_printf("  -blk_sm <val>      : same as '-smtype 6 -ov 0 -dom 1 -smlv <val>'\n");
-      hypre_printf("  -nongalerk_tol <val> <list>    : specify the NonGalerkin drop tolerance\n");
-      hypre_printf("                                   and list contains the values, where last value\n");
-      hypre_printf("                                   in list is repeated if val < num_levels in AMG\n");
-      exit(1);
+         hypre_printf("  -mxl  <val>            : maximum number of levels (AMG, ParaSAILS)\n");
+         hypre_printf("  -tol  <val>            : set solver convergence tolerance = val\n");
+         hypre_printf("  -atol  <val>           : set solver absolute convergence tolerance = val\n");
+         hypre_printf("  -max_iter  <val>       : set max iterations\n");
+         hypre_printf("  -mg_max_iter  <val>    : set max iterations for mg solvers\n");
+         hypre_printf("  -agg_nl  <val>         : set number of aggressive coarsening levels (default:0)\n");
+         hypre_printf("  -np  <val>             : set number of paths of length 2 for aggr. coarsening\n");
+         hypre_printf("\n");
+         hypre_printf("  -sai_th   <val>        : set ParaSAILS threshold = val \n");
+         hypre_printf("  -sai_filt <val>        : set ParaSAILS filter = val \n");
+         hypre_printf("\n");
+         hypre_printf("  -level   <val>         : set k in ILU(k) for Euclid \n");
+         hypre_printf("  -bj <val>              : enable block Jacobi ILU for Euclid \n");
+         hypre_printf("  -ilut <val>            : set drop tolerance for ILUT in Euclid\n");
+         hypre_printf("                           Note ILUT is sequential only!\n");
+         hypre_printf("  -sparseA <val>         : set drop tolerance in ILU(k) for Euclid \n");
+         hypre_printf("  -rowScale <val>        : enable row scaling in Euclid \n");
+         hypre_printf("\n");  
+         hypre_printf("  -drop_tol  <val>       : set threshold for dropping in PILUT\n");
+         hypre_printf("  -nonzeros_to_keep <val>: number of nonzeros in each row to keep\n");
+         hypre_printf("\n");  
+         hypre_printf("  -iout <val>            : set output flag\n");
+         hypre_printf("       0=no output    1=matrix stats\n"); 
+         hypre_printf("       2=cycle stats  3=matrix & cycle stats\n"); 
+         hypre_printf("\n");  
+         hypre_printf("  -dbg <val>             : set debug flag\n");
+         hypre_printf("       0=no debugging\n       1=internal timing\n       2=interpolation truncation\n       3=more detailed timing in coarsening routine\n");
+         hypre_printf("\n");
+         hypre_printf("  -print                 : print out the system\n");
+         hypre_printf("\n");
+         /* begin lobpcg */
+
+         hypre_printf("LOBPCG options:\n");
+         hypre_printf("\n");
+         hypre_printf("  -lobpcg                 : run LOBPCG instead of PCG\n");
+         hypre_printf("\n");
+         hypre_printf("  -gen                    : solve generalized EVP with B = Laplacian\n");
+         hypre_printf("\n");
+         hypre_printf("  -con                    : solve constrained EVP using 'vectors.*.*'\n");
+         hypre_printf("                            as constraints (see -vout 1 below)\n");
+         hypre_printf("\n");
+         hypre_printf("  -solver none            : no HYPRE preconditioner is used\n");
+         hypre_printf("\n");
+         hypre_printf("  -itr <val>              : maximal number of LOBPCG iterations\n");
+         hypre_printf("                            (default 100);\n");
+         hypre_printf("\n");
+         hypre_printf("  -vrand <val>            : compute <val> eigenpairs using random\n");
+         hypre_printf("                            initial vectors (default 1)\n");
+         hypre_printf("\n");
+         hypre_printf("  -seed <val>             : use <val> as the seed for the random\n");
+         hypre_printf("                            number generator(default seed is based\n");
+         hypre_printf("                            on the time of the run)\n");
+         hypre_printf("\n");
+         hypre_printf("  -vfromfile              : read initial vectors from files\n");
+         hypre_printf("                            vectors.i.j where i is vector number\n");
+         hypre_printf("                            and j is processor number\n");
+         hypre_printf("\n");
+         hypre_printf("  -orthchk                : check eigenvectors for orthonormality\n");
+         hypre_printf("\n");
+         hypre_printf("  -verb <val>             : verbosity level\n");
+         hypre_printf("  -verb 0                 : no print\n");
+         hypre_printf("  -verb 1                 : print initial eigenvalues and residuals,\n");
+         hypre_printf("                            the iteration number, the number of\n");
+         hypre_printf("                            non-convergent eigenpairs and final\n");
+         hypre_printf("                            eigenvalues and residuals (default)\n");
+         hypre_printf("  -verb 2                 : print eigenvalues and residuals on each\n");
+         hypre_printf("                            iteration\n");
+         hypre_printf("\n");
+         hypre_printf("  -pcgitr <val>           : maximal number of inner PCG iterations\n");
+         hypre_printf("                            for preconditioning (default 1);\n");
+         hypre_printf("                            if <val> = 0 then the preconditioner\n");
+         hypre_printf("                            is applied directly\n");
+         hypre_printf("\n");
+         hypre_printf("  -pcgtol <val>           : residual tolerance for inner iterations\n");
+         hypre_printf("                            (default 0.01)\n");
+         hypre_printf("\n");
+         hypre_printf("  -vout <val>             : file output level\n");
+         hypre_printf("  -vout 0                 : no files created (default)\n");
+         hypre_printf("  -vout 1                 : write eigenvalues to values.txt, residuals\n");
+         hypre_printf("                            to residuals.txt and eigenvectors to \n");
+         hypre_printf("                            vectors.i.j where i is vector number\n");
+         hypre_printf("                            and j is processor number\n");
+         hypre_printf("  -vout 2                 : in addition to the above, write the\n");
+         hypre_printf("                            eigenvalues history (the matrix whose\n");
+         hypre_printf("                            i-th column contains eigenvalues at\n");
+         hypre_printf("                            (i+1)-th iteration) to val_hist.txt and\n");
+         hypre_printf("                            residuals history to res_hist.txt\n");
+         hypre_printf("\nNOTE: in this test driver LOBPCG only works with solvers 1, 2, 8, 12, 14 and 43\n");
+         hypre_printf("\ndefault solver is 1\n");
+         hypre_printf("\n");
+
+         /* end lobpcg */
+
+         hypre_printf("  -plot_grids            : print out information for plotting the grids\n");
+         hypre_printf("  -plot_file_name <val>  : file name for plotting output\n");
+         hypre_printf("\n");
+         hypre_printf("  -smtype <val>      :smooth type\n");
+         hypre_printf("  -smlv <val>        :smooth num levels\n");
+         hypre_printf("  -ov <val>          :over lap:\n");
+         hypre_printf("  -dom <val>         :domain type\n");
+         hypre_printf("  -use_ns            : use non-symm schwarz smoother\n");
+         hypre_printf("  -var <val>         : schwarz smoother variant (0-3) \n");
+         hypre_printf("  -blk_sm <val>      : same as '-smtype 6 -ov 0 -dom 1 -smlv <val>'\n");
+         hypre_printf("  -nongalerk_tol <val> <list>    : specify the NonGalerkin drop tolerance\n");
+         hypre_printf("                                   and list contains the values, where last value\n");
+         hypre_printf("                                   in list is repeated if val < num_levels in AMG\n");
+      }
+
+      goto final;
    }
 
    /*-----------------------------------------------------------
@@ -3779,7 +3781,7 @@ main( hypre_int argc,
 
        if (solver_id == 1)
        {
-          /* use BoomerAMG as preconditioner */
+           /* use BoomerAMG as preconditioner */
            if (myid == 0)
              hypre_printf("Solver: AMG-PCG\n");
 
@@ -5325,9 +5327,12 @@ main( hypre_int argc,
       hypre_TFree(interp_vecs);
    }
    if (nongalerk_tol) hypre_TFree (nongalerk_tol);
+
 /*
   hypre_FinalizeMemoryDebug();
 */
+final: 
+
    hypre_GPUFinalize();
    hypre_MPI_Finalize();
 
@@ -5937,6 +5942,12 @@ BuildParLaplacian( HYPRE_Int                  argc,
    return (0);
 }
 
+/*----------------------------------------------------------------------
+ * returns the sign of a real number
+ *  1 : positive
+ *  0 : zero
+ * -1 : negative
+ *----------------------------------------------------------------------*/
 static inline HYPRE_Int sign_double(HYPRE_Real a)
 {
    return ( (0.0 < a) - (0.0 > a) );
@@ -6887,8 +6898,9 @@ BuildParVarDifConv( HYPRE_Int                  argc,
    HYPRE_ParCSRMatrix  A;
    HYPRE_ParVector  rhs;
 
-   HYPRE_Int                 num_procs, myid;
-   HYPRE_Int                 p, q, r;
+   HYPRE_Int           num_procs, myid;
+   HYPRE_Int           p, q, r;
+   HYPRE_Int           type;
    HYPRE_Real          eps;
 
    /*-----------------------------------------------------------
@@ -6908,6 +6920,9 @@ BuildParVarDifConv( HYPRE_Int                  argc,
    P  = 1;
    Q  = num_procs;
    R  = 1;
+   /* type: 0   : default FD;
+    *       1-3 : FD and examples 1-3 in Ruge-Stuben paper */
+   type = 0;
 
    /*-----------------------------------------------------------
     * Parse command line
@@ -6933,6 +6948,11 @@ BuildParVarDifConv( HYPRE_Int                  argc,
       {
          arg_index++;
          eps  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-vardifconvRS") == 0 )
+      {
+         arg_index++;
+         type = atoi(argv[arg_index++]);
       }
       else
       {
@@ -6974,8 +6994,17 @@ BuildParVarDifConv( HYPRE_Int                  argc,
     * Generate the matrix
     *-----------------------------------------------------------*/
 
-   A = (HYPRE_ParCSRMatrix) GenerateVarDifConv(hypre_MPI_COMM_WORLD,
-                                               nx, ny, nz, P, Q, R, p, q, r, eps, &rhs);
+   if (0 == type)
+   {
+      A = (HYPRE_ParCSRMatrix) GenerateVarDifConv(hypre_MPI_COMM_WORLD,
+                                                  nx, ny, nz, P, Q, R, p, q, r, eps, &rhs);
+   }
+   else
+   {
+      A = (HYPRE_ParCSRMatrix) GenerateRSVarDifConv(hypre_MPI_COMM_WORLD,
+                                                    nx, ny, nz, P, Q, R, p, q, r, eps, &rhs,
+                                                    type);
+   }
 
    *A_ptr = A;
    *rhs_ptr = rhs;
