@@ -17,6 +17,8 @@
 #include "../lapack/hypre_lapack.h"
 #include "../blas/hypre_blas.h"
 
+#define AIR_DEBUG 0
+
 HYPRE_Int
 hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
                               HYPRE_Int            *CF_marker,
@@ -83,7 +85,9 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 
    /* LAPACK */
    HYPRE_Real *DAi, *Dbi;
+#if AIR_DEBUG
    HYPRE_Real *TMPA, *TMPb, *TMPd;
+#endif
    HYPRE_Int *Ipi, lapack_info, ione = 1;
    char charT = 'T';
 
@@ -291,11 +295,14 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    Dbi = hypre_CTAlloc(HYPRE_Real, local_max_size);
    /* pivot */
    Ipi = hypre_CTAlloc(HYPRE_Int, local_max_size);
-   /* XXX FOR DEBUG */
+
+#if AIR_DEBUG
+   /* FOR DEBUG */
    TMPA = hypre_CTAlloc(HYPRE_Real, local_max_size * local_max_size);
    TMPb = hypre_CTAlloc(HYPRE_Real, local_max_size);
    TMPd = hypre_CTAlloc(HYPRE_Real, local_max_size);
-   
+#endif
+
    /*-----------------------------------------------------------------------
     *  Second Pass: Populate R
     *-----------------------------------------------------------------------*/
@@ -516,8 +523,11 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
       {
          /* we have Ai and bi build
           * solve the linear system by LAPACK : LU factorization */
-         memcpy(TMPA, DAi, local_size*local_size*sizeof(double)); /* XXX */
-         memcpy(TMPb, Dbi, local_size*sizeof(double)); /* XXX */
+#if AIR_DEBUG
+         memcpy(TMPA, DAi, local_size*local_size*sizeof(HYPRE_Real));
+         memcpy(TMPb, Dbi, local_size*sizeof(HYPRE_Real)); 
+#endif
+
          hypre_dgetrf(&local_size, &local_size, DAi, &local_size, Ipi,
                &lapack_info);
 
@@ -532,17 +542,19 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
             hypre_assert(lapack_info == 0);
          }
 
-         int one = 1;
-         double alp = 1.0, bet = 0.0;
+#if AIR_DEBUG
+         HYPRE_Int one = 1;
+         HYPRE_Real alp = 1.0, bet = 0.0;
          hypre_dgemv(&charT, &local_size, &local_size, &alp, TMPA, &local_size, Dbi, 
                &one, &bet, TMPd, &one);
          alp = -1.0;
          hypre_daxpy(&local_size, &alp, TMPb, &one, TMPd, &one);
-         double err = hypre_dnrm2(&local_size, TMPd, &one);
+         HYPRE_Real err = hypre_dnrm2(&local_size, TMPd, &one);
          if (err > 1e-8)
          {
             printf("local res norm %e\n", err);
          }
+#endif
       }
       
       /* now we are ready to fill this row of R */
@@ -708,9 +720,11 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    hypre_TFree(marker_offd);
    hypre_TFree(DAi);
    hypre_TFree(Dbi);
+#if AIR_DEBUG
    hypre_TFree(TMPA);
    hypre_TFree(TMPb);
    hypre_TFree(TMPd);
+#endif
    hypre_TFree(Ipi);
    if (num_procs > 1)
    {
