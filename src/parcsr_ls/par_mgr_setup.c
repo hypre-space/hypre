@@ -135,12 +135,13 @@ hypre_MGRSetup( void               *mgr_vdata,
 		hypre_printf("ERROR: Global number of rows minus reserved_coarse_grid_size must be a multiple of block_size ... n = %d, reserved_coarse_size = %d, block_size = %d \n", gnumrows,reserved_coarse_size, block_size);
 		hypre_MPI_Abort(comm, -1);
 	}
-
+        
+        /* Trivial case: simply solve the coarse level problem */
 	if( block_size < 2 || (mgr_data -> max_num_coarse_levels) < 1)
 	{
 		hypre_printf("Warning: Block size is < 2 or number of coarse levels is < 1. \n");
 		hypre_printf("Solving scalar problem on fine grid using coarse level solver \n");
-		/* Trivial case: simply solve the coarse level problem */
+
 		if(use_default_cgrid_solver)
 		{
 			hypre_printf("No coarse grid solver provided. Using default AMG solver ... \n");

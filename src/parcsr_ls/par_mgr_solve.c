@@ -95,7 +95,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    if((mgr_data -> max_num_coarse_levels) == 0)
    {
       /* Do standard AMG solve when only one level */
-      coarse_grid_solver_solve(*cg_solver, A, f, u);
+      coarse_grid_solver_solve(cg_solver, A, f, u);
       return hypre_error_flag;
    }
 
@@ -403,8 +403,8 @@ hypre_MGRCycle( void               *mgr_vdata,
 	   /* Do coarse grid correction solve */
 	   if(cycle_type == 3)
 	   {
-		   /* call coarse grid solver here *
-			  /* default is BoomerAMG */
+		   /* call coarse grid solver here */
+	           /* default is BoomerAMG */
 		   coarse_grid_solver_solve(cg_solver, RAP, F_array[level], U_array[level]);
 		   /**** cycle up ***/
 		   cycle_type = 2;

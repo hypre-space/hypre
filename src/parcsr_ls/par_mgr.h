@@ -100,7 +100,7 @@ typedef struct
    For example, number of well equations
    */
   HYPRE_Int reserved_coarse_size;
-  HYPRE_Int reserved_coarse_indexes;
+  HYPRE_Int *reserved_coarse_indexes;
   
   HYPRE_Int block_form;
 

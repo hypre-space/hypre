@@ -270,10 +270,10 @@ HYPRE_MGRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
    return hypre_MGRGetNumIterations( solver, num_iterations );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_MGRGetResidualNorm
+ * HYPRE_MGRGetFinalRelativeResidualNorm
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRGetResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm )
+HYPRE_MGRGetFinalRelativeResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm )
 {
-   return hypre_MGRGetResidualNorm(solver, res_norm);
+   return hypre_MGRGetFinalRelativeResidualNorm(solver, res_norm);
 }

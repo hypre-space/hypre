@@ -381,7 +381,6 @@ hypre_MGRSetBlockData( void      *mgr_vdata,
   return hypre_error_flag;
 }
 
-  /* 
 /*Set number of points that remain part of the coarse grid throughout the hierarchy */
 HYPRE_Int
 hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata,
@@ -2676,7 +2675,7 @@ hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations )
 
 /* Get residual norms for MGR solver */
 HYPRE_Int
-hypre_MGRGetResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm )
+hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm )
 {
    hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 

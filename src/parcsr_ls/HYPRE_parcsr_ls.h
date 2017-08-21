@@ -3169,7 +3169,7 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize );
  * HYPRE_MGRSetReservedCoarseNodes
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetReservedCoarseSize( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_nodes );
+HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_nodes );
 	
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxType
@@ -3264,7 +3264,7 @@ HYPRE_MGRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
  * HYPRE_MGRGetResidualNorm
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRGetResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm );
+HYPRE_MGRGetFinalRelativeResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm );
 
 /*--------------------------------------------------------------------------
  * Miscellaneous: These probably do not belong in the interface.

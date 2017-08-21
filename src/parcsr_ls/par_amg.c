@@ -3964,6 +3964,8 @@ hypre_BoomerAMGSetCoarseningCpoint(void      *data,
 
 	//if (hypre_ParAMGDataCPointMarkerArray(amg_data) == NULL)
 	C_point_marker_array = hypre_CTAlloc(HYPRE_Int*, cpt_level);
-    C_point_marker_array[0] = cpt_coarse_index;
+        C_point_marker_array[0] = cpt_coarse_index;
 	hypre_ParAMGDataCPointMarkerArray(amg_data) = C_point_marker_array;
+	
+	return ierr;
 }
