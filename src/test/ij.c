@@ -135,7 +135,7 @@ main( hypre_int argc,
    HYPRE_IJVector      *ij_rbm;
 
    HYPRE_ParCSRMatrix  parcsr_A;
-   HYPRE_ParVector     b;
+   HYPRE_ParVector     b = NULL;
    HYPRE_ParVector     x;
    HYPRE_ParVector     *interp_vecs = NULL;
 
@@ -2200,6 +2200,10 @@ main( hypre_int argc,
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
+   else if ( build_rhs_type == 6) 
+   {
+      ij_b = NULL;
+   }
 
    if ( build_src_type == 0 )
    {
@@ -2369,7 +2373,7 @@ main( hypre_int argc,
    {
       if (myid == 0)
       {
-         hypre_printf("  Initial guess is 0 \n");
+         hypre_printf("  Initial guess is random \n");
       }
 
       /* Initial guess */
@@ -2380,9 +2384,12 @@ main( hypre_int argc,
       /* For backward Euler the previous backward Euler iterate (assumed
          random in 0 - 1 here) is usually used as the initial guess */
       values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
+      /* hypre_SeedRand(myid+2747); */
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_cols; i++)
+      {
          values[i] = hypre_Rand();
+      }
       HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
       hypre_TFree(values);
 
@@ -2420,7 +2427,14 @@ main( hypre_int argc,
    if (print_system)
    {
       HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
-      HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
+      if (ij_b)
+      {
+         HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
+      }
+      else if (b)
+      {
+         HYPRE_ParVectorPrint(b, "ParVec.out.b");
+      }
       HYPRE_IJVectorPrint(ij_x, "IJ.out.x0");
 
       /* HYPRE_ParCSRMatrixPrint( parcsr_A, "new_mat.A" );*/
@@ -6842,6 +6856,8 @@ BuildParVarDifConv( HYPRE_Int                  argc,
    P  = 1;
    Q  = num_procs;
    R  = 1;
+   eps = 1.0;
+
    /* type: 0   : default FD;
     *       1-3 : FD and examples 1-3 in Ruge-Stuben paper */
    type = 0;
