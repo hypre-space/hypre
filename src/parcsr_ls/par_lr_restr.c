@@ -1457,6 +1457,8 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_TFree(comm_pkg_FF2_j);
    hypre_TFree(Mapper_offd_A);
    hypre_TFree(Marker_FF2_offd);
+   hypre_TFree(Marker_diag_j);
+   hypre_TFree(Marker_FF2_offd_j);
    hypre_TFree(DAi);
    hypre_TFree(Dbi);
    hypre_TFree(Ipi);
