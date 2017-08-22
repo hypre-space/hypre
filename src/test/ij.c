@@ -2442,7 +2442,6 @@ main( hypre_int argc,
       /* For backward Euler the previous backward Euler iterate (assumed
          random in 0 - 1 here) is usually used as the initial guess */
       values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
-      /* hypre_SeedRand(myid+2747); */
       hypre_SeedRand(myid);
       for (i = 0; i < local_num_cols; i++)
       {
