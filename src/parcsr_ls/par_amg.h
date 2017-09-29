@@ -105,7 +105,6 @@ typedef struct
    HYPRE_Int                  num_levels;
    HYPRE_Real         **l1_norms;
 
-
    /* Block data */
    hypre_ParCSRBlockMatrix **A_block_array;
    hypre_ParCSRBlockMatrix **P_block_array;
@@ -136,8 +135,13 @@ typedef struct
 
    HYPRE_Real          *max_eig_est;
    HYPRE_Real          *min_eig_est;
-   HYPRE_Int                  cheby_order;
+   HYPRE_Int            cheby_eig_est;
+   HYPRE_Int            cheby_order;
+   HYPRE_Int            cheby_variant;
+   HYPRE_Int            cheby_scale;
    HYPRE_Real           cheby_fraction;
+   HYPRE_Real         **cheby_ds;
+   HYPRE_Real         **cheby_coefs;
 
    /* data needed for non-Galerkin option */
    HYPRE_Int           nongalerk_num_tol;
@@ -209,11 +213,13 @@ typedef struct
    HYPRE_Int      additive;
    HYPRE_Int      mult_additive;
    HYPRE_Int      simple;
+   HYPRE_Int      add_last_lvl;
    HYPRE_Int      add_P_max_elmts;
    HYPRE_Real     add_trunc_factor;
    HYPRE_Int      add_rlx_type;
    HYPRE_Real     add_rlx_wt;
    hypre_ParCSRMatrix *Lambda;
+   hypre_ParCSRMatrix *Atilde;
    hypre_ParVector *Rtilde;
    hypre_ParVector *Xtilde;
    HYPRE_Real *D_inv;
@@ -332,9 +338,13 @@ typedef struct
 
 #define hypre_ParAMGDataMaxEigEst(amg_data) ((amg_data)->max_eig_est)	
 #define hypre_ParAMGDataMinEigEst(amg_data) ((amg_data)->min_eig_est)	
+#define hypre_ParAMGDataChebyEigEst(amg_data) ((amg_data)->cheby_eig_est)
+#define hypre_ParAMGDataChebyVariant(amg_data) ((amg_data)->cheby_variant)
+#define hypre_ParAMGDataChebyScale(amg_data) ((amg_data)->cheby_scale)
 #define hypre_ParAMGDataChebyOrder(amg_data) ((amg_data)->cheby_order)
 #define hypre_ParAMGDataChebyFraction(amg_data) ((amg_data)->cheby_fraction)
-
+#define hypre_ParAMGDataChebyDS(amg_data) ((amg_data)->cheby_ds)
+#define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
 
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)
@@ -408,11 +418,13 @@ typedef struct
 #define hypre_ParAMGDataAdditive(amg_data) ((amg_data)->additive)
 #define hypre_ParAMGDataMultAdditive(amg_data) ((amg_data)->mult_additive)
 #define hypre_ParAMGDataSimple(amg_data) ((amg_data)->simple)
+#define hypre_ParAMGDataAddLastLvl(amg_data) ((amg_data)->add_last_lvl)
 #define hypre_ParAMGDataMultAddPMaxElmts(amg_data) ((amg_data)->add_P_max_elmts)
 #define hypre_ParAMGDataMultAddTruncFactor(amg_data) ((amg_data)->add_trunc_factor)
 #define hypre_ParAMGDataAddRelaxType(amg_data) ((amg_data)->add_rlx_type)
 #define hypre_ParAMGDataAddRelaxWt(amg_data) ((amg_data)->add_rlx_wt)
 #define hypre_ParAMGDataLambda(amg_data) ((amg_data)->Lambda)
+#define hypre_ParAMGDataAtilde(amg_data) ((amg_data)->Atilde)
 #define hypre_ParAMGDataRtilde(amg_data) ((amg_data)->Rtilde)
 #define hypre_ParAMGDataXtilde(amg_data) ((amg_data)->Xtilde)
 #define hypre_ParAMGDataDinv(amg_data) ((amg_data)->D_inv)

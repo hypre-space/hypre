@@ -1497,6 +1497,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 
       temp = hypre_UnorderedIntSetCopyToArray(&found_set, &num_cols_offd_C);
       
+      hypre_UnorderedIntSetDestroy(&found_set);
       hypre_TFree(S_ext_i);
       hypre_TFree(S_ext_j);
 

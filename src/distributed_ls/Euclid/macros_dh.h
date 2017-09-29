@@ -34,7 +34,11 @@
 #endif
 
 /* used in Mat_SEQ_PrintTriples, so matlab won't discard zeros (yuck!) */
+#ifdef HYPRE_SINGLE
+#define _MATLAB_ZERO_  1e-30
+#else // default
 #define _MATLAB_ZERO_  1e-100
+#endif
 
 
 /*---------------------------------------------------------------------- 

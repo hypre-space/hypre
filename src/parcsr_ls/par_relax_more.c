@@ -26,52 +26,61 @@ HYPRE_Int hypre_ParCSRMaxEigEstimate(hypre_ParCSRMatrix *A, /* matrix to relax w
                               
    HYPRE_Real e_max;
    HYPRE_Real row_sum, max_norm;
-   HYPRE_Real *col_val;
+   HYPRE_Real *A_diag_data;
+   HYPRE_Real *A_offd_data;
    HYPRE_Real temp;
    HYPRE_Real diag_value;
 
    HYPRE_Int   pos_diag, neg_diag;
-   HYPRE_Int   start_row, end_row;
-   HYPRE_Int   row_length;
-   HYPRE_Int *col_ind;
+   HYPRE_Int  A_num_rows;
+   HYPRE_Int *A_diag_i;
+   HYPRE_Int *A_offd_i;
    HYPRE_Int   j;
-   HYPRE_Int i;
+   HYPRE_Int i, start;
    
 
    /* estimate with the inf-norm of A - should be ok for SPD matrices */
 
-   start_row  = hypre_ParCSRMatrixFirstRowIndex(A);
-   end_row    =  hypre_ParCSRMatrixLastRowIndex(A);
+   A_num_rows  =  hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+   A_diag_i    =  hypre_CSRMatrixI(hypre_ParCSRMatrixDiag(A));
+   A_diag_data =  hypre_CSRMatrixData(hypre_ParCSRMatrixDiag(A));
+   A_offd_i    =  hypre_CSRMatrixI(hypre_ParCSRMatrixOffd(A));
+   A_offd_data =  hypre_CSRMatrixData(hypre_ParCSRMatrixOffd(A));
     
    max_norm = 0.0;
 
    pos_diag = neg_diag = 0;
  
-   for ( i = start_row; i <= end_row; i++ )
+   for ( i = 0; i < A_num_rows; i++ )
    {
-      HYPRE_ParCSRMatrixGetRow((HYPRE_ParCSRMatrix) A, i, &row_length, &col_ind, &col_val);
-
-      row_sum = 0.0;
-
-      for (j = 0; j < row_length; j++)
+      start = A_diag_i[i];
+      diag_value = A_diag_data[start];
+      if (diag_value > 0) 
       {
-         if (j==0) diag_value = fabs(col_val[j]);
-     
-         row_sum += fabs(col_val[j]);
+         pos_diag++;
+      }
+      if (diag_value < 0) 
+      {
+         neg_diag++;
+         diag_value = -diag_value;
+      }
+      row_sum = diag_value;
 
-         if ( col_ind[j] == i && col_val[j] > 0.0 ) pos_diag++;
-         if ( col_ind[j] == i && col_val[j] < 0.0 ) neg_diag++;
+      /*for (j = 0; j < row_length; j++)*/
+      for (j = start+1; j < A_diag_i[i+1]; j++)
+      {
+         row_sum += fabs(A_diag_data[j]);
+      }
+      for (j = A_offd_i[i]; j < A_offd_i[i+1]; j++)
+      {
+         row_sum += fabs(A_offd_data[j]);
       }
       if (scale)
       {
          if (diag_value != 0.0)
             row_sum = row_sum/diag_value;
       }
-      
-
       if ( row_sum > max_norm ) max_norm = row_sum;
-
-      HYPRE_ParCSRMatrixRestoreRow((HYPRE_ParCSRMatrix) A, i, &row_length, &col_ind, &col_val);
    }
 
    /* get max across procs */
