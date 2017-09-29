@@ -19,7 +19,7 @@ Version 2.12.1 released 2017/09/29
 
 - Added support for single and quad precision floating point numbers
 
-- Added new AIR interpolation option to BoomerAMG
+- Added weighted Jacobi (relax_type 7) to be usable on GPU in BoomerAMG
 
 - Various bug fixes
 
