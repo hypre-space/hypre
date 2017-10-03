@@ -41,7 +41,7 @@
  *             method=DEVICE_TO_HOST    - copy from host to host e.g., memcpy
  *             method=DEVICE_TO_DEVICE  - copy from host to host e.g., memcpy
  *       SetExecutionMode
- *             location=LOCATION_DEVICE - execute on the device
+ *             location=LOCATION_DEVICE - execute on the host
  *             location=LOCATION_HOST   - execute on the host    
  *
  *    Using a device, not using managed memory
@@ -115,265 +115,35 @@ memcpy(ptrHost, ptrDevice, sizeof(type)*(count))
 /*--------------------------------------------------------------------------
  * NEW INTERFACE
  *--------------------------------------------------------------------------*/
-#define LOCATION_DEVICE ( 0)
-#define LOCATION_HOST   ( 1)
-#define LOCATION_UNSET  (-1)
+#define HYPRE_LOCATION_DEVICE ( 0)
+#define HYPRE_LOCATION_HOST   ( 1)
+#define HYPRE_LOCATION_UNSET  (-1)
 
 #define HOST_TO_DEVICE   (0)
 #define DEVICE_TO_HOST   (1)
 #define DEVICE_TO_DEVICE (2)
 
 extern HYPRE_Int hypre_exec_policy;
-  
-#if defined(HYPRE_MEMORY_GPU)
+
 /* Using a device, not using managed memory */
 
 #define hypre_TAlloc(type, count, location)\
-({\
-   type *ptr;\
-   if (location==LOCATION_DEVICE)\
-   {\
-      ptr = hypre_DeviceTAlloc(type,count);\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      ptr = hypre_HostTAlloc(type,count);\
-   }\
-   ptr;})
+( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
 
 #define hypre_CTAlloc(type, count, location)\
-({\
-   type *ptr;\
-   if (location==LOCATION_DEVICE)\
-   {\
-      ptr = hypre_DeviceCTAlloc(type,count);\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      ptr = hypre_HostCTAlloc(type,count);\
-   }\
-   ptr;})
+( (type *)hypre_CAlloc(count, sizeof(type), location ) )
   
 #define hypre_TReAlloc(type, count, location)\
-({\
-   type *ptr;\
-   if (location==LOCATION_DEVICE)\
-   {\
-      ptr = hypre_DeviceTReAlloc(type,count);\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      ptr = hypre_HostTReAlloc(type,count);\
-   }\
-   ptr;})
+( (type *)hypre_ReAlloc(count, sizeof(type), location ) )
 
 #define hypre_TFree(type, count, location)\
-({\
-   if (location==LOCATION_DEVICE)\
-   {\
-      hypre_DeviceTFree(type);\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      hypre_HostTFree(type);\
-   }\
-})
+( hypre_Free((size_t)(sizeof(type) * (count)), location ) )
 
-#define hypre_memory_copy(ptrTo, ptrFrom, type, count, method)\
-   if (method==HOST_TO_DEVICE)\
-   {\
-      cudaMemcpy(ptrTo, ptrFrom, sizeof(type)*count, cudaMemcpyHostToDevice);\
-   }\
-   else if (method==DEVICE_TO_HOST)\
-   {\
-      cudaMemcpy(ptrTo, ptrFrom, sizeof(type)*count, cudaMemcpyDeviceToHost);\
-   }\
-   else if (method==DEVICE_TO_DEVICE)\
-   {\
-      cudaMemcpy(ptrTo, ptrFrom, sizeof(type)*count, cudaMemcpyDeviceToDevice);\
-   }
+#define hypre_MemoryCopy(ptrTo, ptrFrom, type, count, locationfrom, locationto)\
+( hypre_Memcpy( ptrTo, ptrFrom, sizeof(type)*count, locationfrom, locationto); )
 
-#define hypre_set_execution_mode(location)\
-     hypre_exec_policy = location;
-
-#elif defined(HYPRE_USE_MANAGED)
-/* Using a device, not using managed memory */
-
-#define hypre_TAlloc(type, count, location)\
-({\
-   type *ptr;\
-   if (location==LOCATION_DEVICE)\
-   {\
-      cudaMallocManaged((void**)&ptr, sizeof(type)*count, cudaMemAttachGlobal);\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      ptr = hypre_HostTAlloc(type,count);\
-   }\
-   ptr;})
-
-#define hypre_CTAlloc(type, count, location)\
-({\
-   type *ptr;\
-   if (location==LOCATION_DEVICE)\
-   {\
-      cudaMallocManaged((void**)&ptr, sizeof(type)*count, cudaMemAttachGlobal);\
-      cudaMemset(ptr, 0, sizeof(type)*count);\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      ptr = hypre_HostCTAlloc(type,count);\
-   }\
-   ptr;})
-  
-#define hypre_TReAlloc(type, count, location)\
-({\
-   type *ptr;\
-   if (location==LOCATION_DEVICE)\
-   {\
-      ptr = hypre_UMTReAlloc(type,count);\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      ptr = hypre_HostTReAlloc(type,count);\
-   }\
-   ptr;})
-
-#define hypre_TFree(type, count, location)\
-({\
-   if (location==LOCATION_DEVICE)\
-   {\
-      hypre_DeviceTFree(type);\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      hypre_HostTFree(type);\
-   }\
-})
-
-#define hypre_memory_copy(ptrTo, ptrFrom, type, count, method)\
-   if (method==HOST_TO_DEVICE)\
-   {\
-   	  if (ptrTo != ptrFrom)\
-      {\
-         cudaMemcpy(ptrTo, ptrFrom, sizeof(type)*count, cudaMemcpyDefault);\
-      }\
-      else\
-      {\
-         ptrTo = ptrFrom;\
-      }\
-   }\
-   else if (method==DEVICE_TO_HOST)\
-   {\
-      if (ptrTo != ptrFrom)\
-      {\
-         cudaMemcpy(ptrTo, ptrFrom, sizeof(type)*count, cudaMemcpyDefault);\
-      }\
-      else\
-      {\
-         ptrTo = ptrFrom;\
-      }\
-   }\
-   else if (method==DEVICE_TO_DEVICE)\
-   {\
-      if (ptrTo != ptrFrom)\
-      {\
-         cudaMemcpy(ptrTo, ptrFrom, sizeof(type)*count, cudaMemcpyDeviceToDevice);\
-      }\
-      else\
-      {\
-         ptrTo = ptrFrom;\
-      }\
-   }
-
-#define hypre_set_execution_mode(location)\
-     hypre_exec_policy = location;
-
-#elif defined(HYPRE_USE_OMP45)
-/* Using OpenMP-4.5 */
-
-#define hypre_TAlloc(type, count, location)\
-({\
-   type *ptr;\
-   HYPRE_Int device_num = omp_get_default_device();\
-   if (location==LOCATION_DEVICE)\
-   {\
-      hypre_omp45_offload(device_num, ptr, type, 0, count, "enter", "alloc");\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      ptr = hypre_HostTAlloc(type,count);\
-   }\
-   ptr;})
-
-#define hypre_CTAlloc(type, count, location)\
-({\
-   type *ptr;\
-   HYPRE_Int device_num = omp_get_default_device();\
-   if (location==LOCATION_DEVICE)\
-   {\
-      hypre_omp45_offload(device_num, ptr, type, 0, count, "enter", "to");\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      ptr = hypre_HostCTAlloc(type,count);\
-   }\
-   ptr;})
- 
-/* how to implement realloc fro omp4.5 */
-#define hypre_TReAlloc(type, count, location)\
-({\
-   type *ptr;\
-   HYPRE_Int device_num = omp_get_default_device();\
-   if (location==LOCATION_DEVICE)\
-   {\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      ptr = hypre_HostTReAlloc(type,count);\
-   }\
-   ptr;})
-
-#define hypre_TFree(type, count, location)\
-({\
-   HYPRE_Int device_num = omp_get_default_device();\
-   if (location==LOCATION_DEVICE)\
-   {\
-      hypre_omp45_offload(device_num, ptr, type, 0, count, "exit", "delete");\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      hypre_HostTFree(type);\
-   }\
-})
-
-/* how to implement device to device copy for Openmp4.5 */
-#define hypre_memory_copy(ptrTo, ptrFrom, type, count, method)\
-   HYPRE_Int device_num = omp_get_default_device();\
-   if (method==HOST_TO_DEVICE)\
-   {\
-      if (ptrTo != ptrFrom)\
-      {\
-         Memcpy(ptrTo, ptrFrom, sizeof(type)*count);\
-      }\
-      hypre_omp45_offload(device_num, ptrTo, ptrFrom, type, 0, count, "update", "to");\
-   }\
-   else if (method==DEVICE_TO_HOST)\
-   {\
-      if (ptrTo != ptrFrom)\
-      {\
-         Memcpy(ptrTo, ptrFrom, sizeof(type)*count);\
-      }\
-      hypre_omp45_offload(device_num, ptrTo, ptrFrom, type, 0, count, "update", "from");\
-   }\
-   else if (method==DEVICE_TO_DEVICE)\
-   {\
-      if (ptrTo != ptrFrom)\
-      {\
-      }\
-   }
-
-#define hypre_set_execution_mode(location)\
+#if defined(HYPRE_USE_OMP45)
+#define hypre_SetExecutionMode(location)\
    if (location==LOCATION_DEVICE)\
    {\
       HYPRE_OMP45_OFFLOAD_ON();\
@@ -382,28 +152,11 @@ extern HYPRE_Int hypre_exec_policy;
    {\
       HYPRE_OMP45_OFFLOAD_OFF();\
    }
-
 #else
-/* Not using a device, not using managed memory */
-
-#define hypre_TAlloc(type, count, location) hypre_HostTAlloc(type,count);
-#define hypre_CTAlloc(type, count, location) hypre_HostCTAlloc(type,count);
-#define hypre_TReAlloc(type, count, location) hypre_HostTReAlloc(type,count);
-#define hypre_TFree(type, count, location) hypre_HostTFree(type);
-
-#define hypre_memory_copy(ptrTo, ptrFrom, type, count, method)\
-   if (ptrTo != ptrFrom)\
-   {\
-      memcpy(ptrTo, ptrFrom, sizeof(type)*count);\
-   }\
-   else\
-   {\
-      ptrTo = ptrFrom;\
-   }
-
-#define hypre_set_execution_mode(location) ;
-
+#define hypre_SetExecutionMode(location)\
+     hypre_exec_policy = location;
 #endif
+
 /*--------------------------------------------------------------------------
  * CURRENT CODE
  *--------------------------------------------------------------------------*/
@@ -611,7 +364,7 @@ if ( cudaerr != cudaSuccess ) {										\
 
 /* hypre_memory.c */
 HYPRE_Int hypre_OutOfMemory ( size_t size );
-char *hypre_MAlloc ( size_t size );
+  char *hypre_MAlloc ( size_t size, HYPRE_Int location );
 char *hypre_CAlloc ( size_t count , size_t elt_size );
 char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc ( char *ptr , size_t size );
