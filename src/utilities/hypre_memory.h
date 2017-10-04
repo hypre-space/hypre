@@ -36,10 +36,10 @@
  *       Malloc(..., location) 
  *             location=LOCATION_DEVICE - host malloc          e.g., malloc
  *             location=LOCATION_HOST   - host malloc          e.g., malloc
- *       MemCopy(..., method)
- *             method=HOST_TO_DEVICE    - copy from host to host e.g., memcpy
- *             method=DEVICE_TO_HOST    - copy from host to host e.g., memcpy
- *             method=DEVICE_TO_DEVICE  - copy from host to host e.g., memcpy
+ *       MemoryCopy(..., locTo,locFrom)
+ *             locTo=LOCATION_HOST,   locFrom=LOCATION_DEVICE  - copy from host to host e.g., memcpy
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_HOST    - copy from host to host e.g., memcpy
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from host to host e.g., memcpy
  *       SetExecutionMode
  *             location=LOCATION_DEVICE - execute on the host
  *             location=LOCATION_HOST   - execute on the host    
@@ -48,10 +48,10 @@
  *       Malloc(..., location) 
  *             location=LOCATION_DEVICE - device malloc        e.g., cudaMalloc
  *             location=LOCATION_HOST   - host malloc          e.g., malloc
- *       MemCopy(..., method)
- *             method=HOST_TO_DEVICE    - copy from host to device e.g., cudaMemcpy
- *             method=DEVICE_TO_HOST    - copy from device to host e.g., cudaMemcpy
- *             method=DEVICE_TO_DEVICE  - copy from device to device e.g., cudaMemcpy
+ *       MemoryCopy(..., locTo,locFrom)
+ *             locTo=LOCATION_HOST,   locFrom=LOCATION_DEVICE  - copy from device to host e.g., cudaMemcpy
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_HOST    - copy from host to device e.g., cudaMemcpy
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from device to device e.g., cudaMemcpy
  *       SetExecutionMode
  *             location=LOCATION_DEVICE - execute on the device
  *             location=LOCATION_HOST   - execute on the host 
@@ -60,18 +60,17 @@
  *       Malloc(..., location) 
  *             location=LOCATION_DEVICE - managed malloc        e.g., cudaMallocManaged
  *             location=LOCATION_HOST   - host malloc          e.g., malloc
- *       MemCopy(..., method)
- *             method=HOST_TO_DEVICE    - no-op
- *             method=DEVICE_TO_HOST    - no-op
- *             method=DEVICE_TO_DEVICE  - copy from device to device e.g., cudaMemcpy
+ *       MemoryCopy(..., locTo,locFrom)
+ *             locTo=LOCATION_HOST,   locFrom=LOCATION_DEVICE  - copy from device to host e.g., cudaMallocManaged
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_HOST    - copy from host to device e.g., cudaMallocManaged
+ *             locTo=LOCATION_DEVICE, locFrom=LOCATION_DEVICE  - copy from device to device e.g., cudaMallocManaged
  *       SetExecutionMode
  *             location=LOCATION_DEVICE - execute on the device
  *             location=LOCATION_HOST   - execute on the host 
  *
  * Questions:
  *
- *    1. Pinned memory?
- *    2. Need to allocate some host-only memory in a unified memory setting?
+ *    1. Pinned memory, prefetch?
  *
  *****************************************************************************/
 
@@ -86,42 +85,11 @@ extern "C" {
 #endif
 
 /*--------------------------------------------------------------------------
- * Interface prototypes (only for the no-device setting for starters)
- *--------------------------------------------------------------------------*/
-
-#define hypre_HostTAlloc(type, count) \
-( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )
-
-#define hypre_HostCTAlloc(type, count) \
-( (type *)hypre_HostfCAlloc((size_t)(count), (size_t)sizeof(type)) )
-
-#define hypre_TReAlloc(ptr, type, count) \
-( (type *)hypre_HostReAlloc((char *)ptr, (size_t)(sizeof(type) * (count))) )
-
-#define hypre_HostTFree(ptr) \
-( hypre_Free((char *)ptr), ptr = NULL )
-
-#define hypre_DeviceTAlloc(type, count)   hypre_TAlloc(type, (count))
-#define hypre_DeviceCTAlloc(type, count)  hypre_CTAlloc(type, (count))
-#define hypre_DeviceTReAlloc(type, count) hypre_TReAlloc(type, (count))
-#define hypre_DeviceTFree(ptr)            hypre_TFree(ptr)
-
-#define hypre_MemCopyToDevice(ptrHost, ptrDevice, type, count) \
-memcpy(ptrDevice, ptrHost, sizeof(type)*(count))
-
-#define hypre_MemCopyFromDevice(ptrHost, ptrDevice, type, count) \
-memcpy(ptrHost, ptrDevice, sizeof(type)*(count))
-
-/*--------------------------------------------------------------------------
  * NEW INTERFACE
  *--------------------------------------------------------------------------*/
 #define HYPRE_LOCATION_DEVICE ( 0)
 #define HYPRE_LOCATION_HOST   ( 1)
 #define HYPRE_LOCATION_UNSET  (-1)
-
-#define HOST_TO_DEVICE   (0)
-#define DEVICE_TO_HOST   (1)
-#define DEVICE_TO_DEVICE (2)
 
 extern HYPRE_Int hypre_exec_policy;
 
@@ -137,10 +105,13 @@ extern HYPRE_Int hypre_exec_policy;
 ( (type *)hypre_ReAlloc(count, sizeof(type), location ) )
 
 #define hypre_TFree(type, count, location)\
-( hypre_Free((size_t)(sizeof(type) * (count)), location ) )
+( hypre_Free((size_t)(sizeof(type) * (count)), location ), ptr = NULL  )
 
-#define hypre_MemoryCopy(ptrTo, ptrFrom, type, count, locationfrom, locationto)\
-( hypre_Memcpy( ptrTo, ptrFrom, sizeof(type)*count, locationfrom, locationto); )
+#define hypre_MemoryCopy(ptrTo, ptrFrom, type, count, locTo, locFrom)	\
+( hypre_Memcpy( ptrTo, ptrFrom, sizeof(type)*count, locTo, locFrom); )
+
+#define hypre_MemoryCopy(ptrTo, ptrFrom, type, count, locTo, locFrom)	\
+( hypre_MemcpyAsync( ptrTo, ptrFrom, sizeof(type)*count, locTo, locFrom); )
 
 #if defined(HYPRE_USE_OMP45)
 #define hypre_SetExecutionMode(location)\
@@ -369,6 +340,8 @@ char *hypre_CAlloc ( size_t count , size_t elt_size );
 char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc ( char *ptr , size_t size );
 void hypre_Free ( char *ptr );
+void hypre_Memcpy( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
+void hypre_MemcpyAsync( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
 char *hypre_CAllocHost( size_t count,size_t elt_size );
 char *hypre_MAllocHost( size_t size );
 char *hypre_ReAllocHost( char   *ptr,size_t  size );

@@ -279,12 +279,12 @@ void
 hypre_Memcpy( char *dst,
 	      char *src,
 	      size_t size,
-	      HYPRE_Int locationfrom,
-	      HYPRE_Int locationto )
+	      HYPRE_Int locdst,
+	      HYPRE_Int locsrc )
 {
    if (src)
    {
-     if ( locationfrom==HYPRE_LOCATION_DEVICE && locationfrom==HYPRE_LOCATION_DEVICE )
+     if ( locdst==HYPRE_LOCATION_DEVICE && locsrc==HYPRE_LOCATION_DEVICE )
      {
         if (dst != src)
         {
@@ -303,7 +303,7 @@ hypre_Memcpy( char *dst,
 	   dst = src;
 	}
      }
-     else if ( locationfrom==HYPRE_LOCATION_HOST && locationfrom==HYPRE_LOCATION_DEVICE )
+     else if ( locdst==HYPRE_LOCATION_DEVICE && locsrc==HYPRE_LOCATION_HOST )
      {
 #if defined(HYPRE_USE_MANAGED)
         memcpy( dst, src, size);
@@ -315,7 +315,7 @@ hypre_Memcpy( char *dst,
 	memcpy( dst, src, size);
 #endif        
      }
-     else if ( locationfrom==HYPRE_LOCATION_DEVICE && locationfrom==HYPRE_LOCATION_HOST )
+     else if ( locdst==HYPRE_LOCATION_HOST && locsrc==HYPRE_LOCATION_DEVICE )
      {
 #if defined(HYPRE_USE_MANAGED)
         memcpy( dst, src, size);
@@ -327,7 +327,7 @@ hypre_Memcpy( char *dst,
 	memcpy( dst, src, size);
 #endif
      }
-     else if ( locationfrom==HYPRE_LOCATION_HOST && locationfrom==HYPRE_LOCATION_HOST )
+     else if ( locdst==HYPRE_LOCATION_HOST && locsrc==HYPRE_LOCATION_HOST )
      {
         if (dst != src)
         {
@@ -355,12 +355,12 @@ void
 hypre_MemcpyAsync( char *dst,
 		   char *src,
 		   size_t size,
-		   HYPRE_Int locationfrom,
-		   HYPRE_Int locationto )
+		   HYPRE_Int locdst,
+		   HYPRE_Int locsrc )
 {
    if (src)
    {
-     if ( locationfrom==HYPRE_LOCATION_DEVICE && locationfrom==HYPRE_LOCATION_DEVICE )
+     if ( locdst==HYPRE_LOCATION_DEVICE && locsrc==HYPRE_LOCATION_DEVICE )
      {
         if (dst != src)
         {
@@ -382,7 +382,7 @@ hypre_MemcpyAsync( char *dst,
 	   cudaMemPrefetchAsync(x, size, device, NULL);
 	}
      }
-     else if ( locationfrom==HYPRE_LOCATION_HOST && locationfrom==HYPRE_LOCATION_DEVICE )
+     else if ( locdst==HYPRE_LOCATION_DEVICE && locsrc==HYPRE_LOCATION_HOST )
      {
 #if defined(HYPRE_USE_MANAGED)
         cudaMemcpyAsync( dst, src, size, cudaMemcpyDefault); 
@@ -394,7 +394,7 @@ hypre_MemcpyAsync( char *dst,
 	memcpy( dst, src, size);
 #endif        
      }
-     else if ( locationfrom==HYPRE_LOCATION_DEVICE && locationfrom==HYPRE_LOCATION_HOST )
+     else if ( locdst==HYPRE_LOCATION_HOST && locsrc==HYPRE_LOCATION_DEVICE )
      {
 #if defined(HYPRE_USE_MANAGED)
         cudaMemcpyAsync( dst, src, size, cudaMemcpyDefault); 
@@ -406,7 +406,7 @@ hypre_MemcpyAsync( char *dst,
 	memcpy( dst, src, size);
 #endif
      }
-     else if ( locationfrom==HYPRE_LOCATION_HOST && locationfrom==HYPRE_LOCATION_HOST )
+     else if ( locdst==HYPRE_LOCATION_HOST && locsrc==HYPRE_LOCATION_HOST )
      {
         if (dst != src)
         {
