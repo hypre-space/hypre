@@ -445,7 +445,11 @@ AddValuesVector( hypre_StructGrid   *grid,
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);
       HYPRE_StructVectorSetBoxValues(vector, ilower, iupper, values);
+#ifdef HYPRE_USE_OMP45
+      hypre_DeviceTFree(values, HYPRE_Real, volume);
+#else
       hypre_DeviceTFree(values);
+#endif
    }
 
    return ierr;

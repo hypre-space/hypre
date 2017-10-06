@@ -53,6 +53,11 @@ typedef struct
    HYPRE_Real           **A_loc;
    HYPRE_Real            *x_loc;
 
+#ifdef HYPRE_USE_OMP45
+   HYPRE_Int              A_loc_size;
+   HYPRE_Int              x_loc_size;
+#endif
+
    /* pointers for vector and matrix data */    
    HYPRE_Real          ***Ap;
    HYPRE_Real           **bp;
@@ -149,8 +154,15 @@ hypre_NodeRelaxDestroy( void *relax_vdata )
       hypre_TFree(relax_data -> compute_pkgs);
       hypre_SStructPVectorDestroy(relax_data -> t);
 
+#ifdef HYPRE_USE_OMP45
+      hypre_DeviceTFree(relax_data -> x_loc, HYPRE_Real, 
+                        relax_data -> x_loc_size);
+      hypre_DeviceTFree((relax_data ->A_loc)[0], HYPRE_Real,
+                        relax_data -> A_loc_size);
+#else
       hypre_DeviceTFree(relax_data -> x_loc);
       hypre_DeviceTFree((relax_data ->A_loc)[0]);
+#endif
       hypre_TFree(relax_data -> A_loc);
       hypre_TFree(relax_data -> bp);
       hypre_TFree(relax_data -> xp);
@@ -282,6 +294,12 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
    x_loc    = hypre_DeviceTAlloc(HYPRE_Real   , hypre_NumThreads()*nvars);
    A_loc    = hypre_TAlloc(HYPRE_Real  *, hypre_NumThreads()*nvars);
    A_loc[0] = hypre_DeviceTAlloc(HYPRE_Real   , hypre_NumThreads()*nvars*nvars);
+
+#ifdef HYPRE_USE_OMP45
+   relax_data->x_loc_size = hypre_NumThreads() * nvars;
+   relax_data->A_loc_size = hypre_NumThreads() * nvars * nvars;
+#endif
+
    for (vi = 1; vi < hypre_NumThreads()*nvars; vi++)
    hypre_LoopBegin(hypre_NumThreads()*nvars,vi)
    {

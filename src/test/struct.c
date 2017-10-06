@@ -185,6 +185,9 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
+#ifdef HYPRE_USE_OMP45
+   HYPRE_OMP45_OFFLOAD_ON();
+#endif
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
@@ -1304,7 +1307,11 @@ main( hypre_int argc,
          HYPRE_StructSMGSetNumPostRelax(solver, n_post);
          HYPRE_StructSMGSetPrintLevel(solver, 1);
          HYPRE_StructSMGSetLogging(solver, 1);
-#if HYPRE_USE_OMP45
+
+#ifdef HYPRE_USE_OMP45
+         /* when the matrix and the vectors were setup on the host,
+          * use the following offloadings to transfer them to the device */
+#if 0
          HYPRE_OMP45_OFFLOAD_ON();
          int device_num = omp_get_default_device();
          HYPRE_OMPOffload(device_num, hypre_StructMatrixData(A), 
@@ -1319,10 +1326,20 @@ main( hypre_int argc,
                           sizeof(HYPRE_Complex)*hypre_StructVectorDataSize(x),
                           "enter", "to");
 #endif
+#endif
 
          HYPRE_StructSMGSetup(solver, A, b, x);
 
          hypre_EndTiming(time_index);
+
+#ifdef HYPRE_USE_OMP45
+         /* use this for the stats of the offloading counts in the setup phase */
+#if 0
+         printf("smg offload to %ld (%ld bytes), from %ld (%ld bytes)\n", 
+                hypre__offload_to_count, hypre__offload_to_byte_count,
+                hypre__offload_from_count, hypre__offload_from_byte_count);
+#endif
+#endif
 
          if ( reps==1 ) {
             hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
@@ -1354,6 +1371,19 @@ main( hypre_int argc,
          HYPRE_StructSMGGetNumIterations(solver, &num_iterations);
          HYPRE_StructSMGGetFinalRelativeResidualNorm(solver, &final_res_norm);
          HYPRE_StructSMGDestroy(solver);
+
+#ifdef HYPRE_USE_OMP45
+         /* use this for the stats of the offloading counts in the solve phase */
+#if 0
+         printf("smg offload to %ld (%ld bytes), from %ld (%ld bytes)\n", 
+                hypre__offload_to_count, hypre__offload_to_byte_count,
+                hypre__offload_from_count, hypre__offload_from_byte_count);
+         //printf("send_realloc %d, recv_realloc %d\n", send_realloc, recv_realloc);
+         printf("update to %ld (%ld bytes), update from %ld (%ld bytes)\n", 
+                hypre__update_to_count, hypre__update_to_byte_count,
+                hypre__update_from_count, hypre__update_from_byte_count);
+#endif
+#endif
       }
 
       /*-----------------------------------------------------------
@@ -1383,21 +1413,6 @@ main( hypre_int argc,
          HYPRE_StructPFMGSetPrintLevel(solver, 1);
          HYPRE_StructPFMGSetLogging(solver, 1);
 
-#if HYPRE_USE_OMP45
-         HYPRE_OMP45_OFFLOAD_ON();
-         int device_num = omp_get_default_device();
-         HYPRE_OMPOffload(device_num, hypre_StructMatrixData(A), 
-                          sizeof(HYPRE_Complex)*hypre_StructMatrixDataSize(A), 
-                          "enter", "to");
-
-         HYPRE_OMPOffload(device_num, hypre_StructVectorData(b), 
-                          sizeof(HYPRE_Complex)*hypre_StructVectorDataSize(b), 
-                          "enter", "to");
-
-         HYPRE_OMPOffload(device_num, hypre_StructVectorData(x), 
-                          sizeof(HYPRE_Complex)*hypre_StructVectorDataSize(x),
-                          "enter", "to");
-#endif
 
          HYPRE_StructPFMGSetup(solver, A, b, x);
 
@@ -2875,8 +2890,11 @@ AddValuesVector( hypre_StructGrid  *gridvector,
       iupper = hypre_BoxIMax(box);
 	  
       HYPRE_StructVectorSetBoxValues(zvector, ilower, iupper, values);
+#ifdef HYPRE_USE_OMP45
+      hypre_DeviceTFree(values, HYPRE_Real, volume);
+#else
       hypre_DeviceTFree(values);
-      
+#endif
 
    }
 
@@ -2979,7 +2997,11 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 	    
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                            stencil_indices, values);
+#ifdef HYPRE_USE_OMP45
+	    hypre_DeviceTFree(values, HYPRE_Real, stencil_size*volume);
+#else
 	    hypre_DeviceTFree(values);
+#endif
 	    
          }
       }
@@ -3055,7 +3077,11 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices+dim, values);
+#ifdef HYPRE_USE_OMP45
+	    hypre_DeviceTFree(values, HYPRE_Real, volume);
+#else
 	    hypre_DeviceTFree(values);
+#endif
          }
       }
    }
@@ -3135,7 +3161,11 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                            stencil_indices, values);
 
+#ifdef HYPRE_USE_OMP45
+            hypre_DeviceTFree(values, HYPRE_Real, stencil_size*volume);
+#else
             hypre_DeviceTFree(values);
+#endif
          }
       }
       else if ( constant_coefficient==1 )
@@ -3239,7 +3269,11 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
+#ifdef HYPRE_USE_OMP45
+            hypre_DeviceTFree(values, HYPRE_Real, volume);
+#else
             hypre_DeviceTFree(values);
+#endif
          }
       }
    }
@@ -3347,7 +3381,11 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
                                               1, stencil_indices, values);
                ilower[ib][d] = j;
             }
+#ifdef HYPRE_USE_OMP45
+	    hypre_DeviceTFree(values, HYPRE_Real, vol[ib]);
+#else
 	    hypre_DeviceTFree(values);
+#endif
          }
       }
    }

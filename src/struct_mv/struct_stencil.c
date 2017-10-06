@@ -38,7 +38,9 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
    hypre_StructStencilRefCount(stencil) = 1;
 
    stencil_shape_h = hypre_CTAlloc(HYPRE_Int, HYPRE_MAXDIM*size);
+#if defined(HYPRE_MEMORY_GPU)   
    hypre_StructStencilShapeDevice(stencil) = hypre_DeviceTAlloc(HYPRE_Int, HYPRE_MAXDIM*size);
+#endif
    for (HYPRE_Int i = 0; i < size; i++)
    {
       for (HYPRE_Int j = 0;j < dim;j++)

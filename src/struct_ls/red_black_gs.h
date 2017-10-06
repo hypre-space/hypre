@@ -219,7 +219,7 @@ typedef struct
 
 #elif defined(HYPRE_USE_OMP45) /* BEGIN OF OMP 4.5 */
 
-#define IF_CLAUSE if (hypre__global_offload)
+/* #define IF_CLAUSE if (hypre__global_offload) */
 
 /* stringification:
  * _Pragma(string-literal), so we need to cast argument to a string

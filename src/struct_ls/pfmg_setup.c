@@ -786,7 +786,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       /* constant_coefficient==0, all coefficients vary with space */
       else
       {
-#if defined(HYPRE_USE_KOKKOS) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_KOKKOS)
         /*FIXME: need reduction for more variables*/
 	HYPRE_Int tmp = 0;
 	hypre_MatrixIndexMove(A, stencil_size, i, tmp, 3);
@@ -1022,13 +1022,14 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
             sqcz += (tcz*tcz);
          }
          hypre_newBoxLoop1ReductionEnd(Ai,sqcz);
+
 #ifdef HYPRE_USE_OMP45
          hypre_StructCleanIndexD(stencil_size, 3);
 #else
          hypre_StructCleanIndexD();
 #endif
 
-#else
+#else  /* for ``#if defined(HYPRE_USE_KOKKOS)'', others go below  */
 
 #if defined(HYPRE_USE_RAJA)
 	 ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cx),cyb(cy),czb(cz),sqcxb(sqcx),sqcyb(sqcy),sqczb(sqcz);
@@ -1051,9 +1052,13 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 #ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
 #endif
-#define HYPRE_BOX_REDUCTION reduction(+:cx,cy,cz,sqcx,sqcy,sqcz)
 
-	 
+#ifdef HYPRE_USE_OMP45
+#define HYPRE_BOX_REDUCTION map(tofrom:cxb,cyb,czb,sqcxb,sqcyb,sqczb) reduction(+:cxb,cyb,czb,sqcxb,sqcyb,sqczb)
+#else
+#define HYPRE_BOX_REDUCTION reduction(+:cxb,cyb,czb,sqcxb,sqcyb,sqczb)
+#endif
+
 #if 0	 
 	 hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
 			     A_dbox, start, stride, Ai);
@@ -1394,7 +1399,8 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 	 }
 #endif
 
-#undef HYPRE_BOX_REDUCTION	 
+#undef HYPRE_BOX_REDUCTION
+
 	 cx = (HYPRE_Real)cxb;
 	 cy = (HYPRE_Real)cyb;
 	 cz = (HYPRE_Real)czb;
@@ -1547,19 +1553,27 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
 	 hypre_newBoxLoop1ReductionEnd(Ai,diag_product_local);
 	 diag_product += (HYPRE_Real) diag_product_local;
 #else
+
 #ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
 #endif
-#define HYPRE_BOX_REDUCTION reduction(*:diag_product)
-	 
+
+#ifdef HYPRE_USE_OMP45
+#define HYPRE_BOX_REDUCTION map(tofrom:diag_product_local) reduction(+:diag_product_local)
+#else
+#define HYPRE_BOX_REDUCTION reduction(+:diag_product_local)
+#endif
          hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
 			     A_dbox, start, stride, Ai);
          {
             diag_product_local += (Ap[Ai] == 0)?1:0;
          }
          hypre_BoxLoop1End(Ai);
+
 	 diag_product += (HYPRE_Real) diag_product_local;
+
 #undef HYPRE_BOX_REDUCTION
+
 #endif
       }
    }

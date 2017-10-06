@@ -79,11 +79,16 @@
 #define hypre_BoxLoop3End    zypre_omp4_dist_BoxLoop3End
 #define hypre_BoxLoop4Begin  zypre_omp4_dist_BoxLoop4Begin
 #define hypre_BoxLoop4End    zypre_omp4_dist_BoxLoop4End
+
 /* reductions */
+#if 1
 #define hypre_newBoxLoop1ReductionBegin   zypre_omp4_dist_Red_BoxLoop1Begin
 #define hypre_newBoxLoop1ReductionEnd    zypre_omp4_dist_Red_BoxLoop1End
 #define hypre_newBoxLoop2ReductionBegin   zypre_omp4_dist_Red_BoxLoop2Begin
 #define hypre_newBoxLoop2ReductionEnd     zypre_omp4_dist_Red_BoxLoop2End
+#endif
+
+#define HYPRE_BOX_REDUCTION 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * host code: declare variables used in the box loop
@@ -140,14 +145,14 @@ HYPRE_Int HYPRE_XCONCAT3(hypre__stride,0,k), HYPRE_XCONCAT3(hypre__stride,1,k), 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * if clause
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define IF_CLAUSE if (hypre__global_offload)
+#define IF_CLAUSE if (hypre__global_offload && hypre__tot > 0)
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * device code for BoxLoop 1, set i1
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 #define zypre_omp4_BoxLoopSet1Body(j, i1) \
-/* */ \
+/* coord in dimension j */ \
 hypre__i = hypre__J % HYPRE_XCONCAT2(hypre__loop_size,j); \
 /* once */ \
 hypre__i_1 = hypre__i * HYPRE_XCONCAT3(hypre__stride,j,1) + HYPRE_XCONCAT3(hypre__box_start_imin,j,1);\
@@ -156,11 +161,14 @@ i1 += hypre__i_1 * hypre__I_1; \
 /* once */ \
 hypre__I_1 *= HYPRE_XCONCAT3(hypre__box_imax_imin,j,1); \
 /* */ \
-hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j);
+hypre__J /= HYPRE_XCONCAT2(hypre__loop_size,j); \
+/* !!! special for BoxLoop1: save the 3-D id */ \
+HYPRE_XCONCAT2(hypre__id,j) = hypre__i;
 
 
 #define zypre_omp4_BoxLoopSet1(i1) \
 HYPRE_Int hypre__I_1, hypre__i, hypre__i_1, hypre__J, i1; \
+HYPRE_Int hypre__id_0, hypre__id_1, hypre__id_2; \
 hypre__I_1 = 1;  hypre__J = hypre__thread;  i1 = 0; \
 /*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet1Body(0, i1) } \
   if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet1Body(1, i1) } \
@@ -314,7 +322,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
    zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
    /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 TEAM_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 HYPRE_BOX_REDUCTION TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
    {\
       zypre_omp4_BoxLoopSet1(i1)
@@ -337,7 +345,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
    zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
    /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 TEAM_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 HYPRE_BOX_REDUCTION TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
    {\
       zypre_omp4_BoxLoopSet2(i1, i2)
@@ -416,17 +424,19 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
 }
 
 
+#if 1
+
+/* no longer needed, use the above BoxLoop's for reductions */
+
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * BoxLoop 1 reduction
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 
-#define zypre_omp4_dist_Red_BoxLoop1Begin(ndim, loop_size,\
-      dbox1, start1, stride1, i1, xsum) \
+#define zypre_omp4_dist_Red_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1, xsum) \
 {\
    /* host code: */ \
    zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
    zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
-   /* xsum = 0.0; */ \
    /* device code: */ \
    _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 map(tofrom: xsum) reduction(+:xsum) TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
@@ -443,16 +453,12 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * BoxLoop 2 reduction
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-
-#define zypre_omp4_dist_Red_BoxLoop2Begin(ndim, loop_size,\
-      dbox1, start1, stride1, i1,\
-      dbox2, start2, stride2, i2, xsum) \
+#define zypre_omp4_dist_Red_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, dbox2, start2, stride2, i2, xsum) \
 {\
    /* host code: */ \
    zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
    zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
    zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
-   /* xsum = 0.0; */ \
    /* device code: */ \
    _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 map(tofrom: xsum) reduction(+:xsum) TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
@@ -465,7 +471,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    }\
 }
 
-
+#endif
 
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -543,7 +549,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 
 #define zypre_omp4_dist_BoxLoop2_v2_Begin(ndim, loop_size, stride1, i1, stride2, i2) \
-{\
+{ \
    /* host code: */ \
    zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
    zypre_omp4_BoxKDeclareInit_v2(1, stride1) \
@@ -551,13 +557,44 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    /* device code: */ \
    _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
-   {\
+   { \
       zypre_omp4_BoxLoopSet2_v2(i1, i2)
 
 
 
-#define zypre_omp4_dist_BoxLoop2_v2_End(...)\
-   }\
+#define zypre_omp4_dist_BoxLoop2_v2_End(...) \
+   } \
 }
 
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Basic Loop
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define hypre_LoopBegin(size, idx) \
+{ \
+   HYPRE_Int idx, hypre__tot = size; \
+   /* device code: */ \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 TEAM_CLAUSE)) \
+   for (idx = 0; idx < hypre__tot; idx++) \
+   {
+
+
+#define hypre_LoopEnd() \
+   } \
+}
+
+#define hypre_LoopBegin0(size, idx) \
+{ \
+   HYPRE_Int idx, hypre__size = size; \
+   for (idx = 0; idx < hypre__size; idx++) \
+   {
+
+
 #endif
+
+/* USE THIS ONLY FOR BOXLOOP1 */
+#define hypre_newBoxLoopGetIndex(index) \
+  index[0] = hypre__id_0; \
+  index[1] = hypre__id_1; \
+  index[2] = hypre__id_2;
+

@@ -368,8 +368,17 @@ extern HYPRE_Long hypre__update_from_byte_count;
    } \
 }
 
-/* DeviceMemset TODO */
-//#define hypre_DeviceMemset(ptr, value, type, count) \
+/* DeviceMemset 
+ * memset: [to] a mapped CPU ptr
+ * memset host memory first and the update the device memory */
+#define hypre_DeviceMemset(ptr, value, type, count) \
+{\
+   HYPRE_Int device_num = omp_get_default_device(); \
+   /* host memset */ \
+   memset(ptr, value, (count)*sizeof(type)); \
+   /* update to device */ \
+   hypre_omp45_offload(device_num, ptr, type, 0, count, "update", "to"); \
+}
 
 /* UMTAlloc TODO */
 #define hypre_UMTAlloc(type, count) hypre_TAlloc(type, count)

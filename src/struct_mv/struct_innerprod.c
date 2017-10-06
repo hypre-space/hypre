@@ -81,7 +81,11 @@ hypre_StructInnerProd( hypre_StructVector *x,
 #ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
 #endif
+#ifdef HYPRE_USE_OMP45
+#define HYPRE_BOX_REDUCTION map(tofrom: local_result) reduction(+:local_result)
+#else
 #define HYPRE_BOX_REDUCTION reduction(+:local_result)
+#endif
       hypre_BoxLoop2Begin(ndim, loop_size,
 			  x_data_box, start, unit_stride, xi,
 			  y_data_box, start, unit_stride, yi);
