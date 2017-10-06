@@ -38,20 +38,21 @@
 
 #include "_hypre_utilities.h"
 
-/*--------------------------------------------------------------------------
- * Static variables
- *--------------------------------------------------------------------------*/
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 __managed__ __device__ static HYPRE_Int Seed = 13579;
 #else
 static HYPRE_Int Seed = 13579;
 #endif
 
+/*-------------------------------------------------------------------------------
+ * Static global variable: Seed
+ * ``... all initial seeds between 1 and 2147483646 (2^31-2) are equally valid''
+ *-------------------------------------------------------------------------------*/
 
-#define a  16807
-#define m  2147483647
-#define q  127773
-#define r  2836
+#define a  16807      /* 7^5 */
+#define m  2147483647 /* 2*31 - 1 */
+#define q  127773     /* m div a */
+#define r  2836       /* m mod a */
 
 /*--------------------------------------------------------------------------
  * Initializes the pseudo-random number generator to a place in the sequence.
@@ -61,6 +62,16 @@ static HYPRE_Int Seed = 13579;
 HYPRE_CUDA_GLOBAL
 void  hypre_SeedRand( HYPRE_Int seed )
 {
+   /* RL: seed must be between 1 and 2^31-2 */
+   if (seed < 1) 
+   {
+      seed = 1;
+   }
+   else if (seed >= m)
+   {
+     seed = m - 1;
+   }
+
    Seed = seed;
 }
 
@@ -100,20 +111,6 @@ HYPRE_Int  hypre_RandI()
 HYPRE_CUDA_GLOBAL
 HYPRE_Real  hypre_Rand()
 {
-/*
-   HYPRE_Int  low, high, test;
-
-   high = Seed / q;
-   low = Seed % q;
-   test = a * low - r * high;
-   if(test > 0)
-   {
-      Seed = test;
-   }
-   else
-   {
-      Seed = test + m;
-   }
-*/
    return ((HYPRE_Real)(hypre_RandI()) / m);
 }
+

@@ -20,7 +20,7 @@
  * Relaxation on the ParCSR matrix A with right-hand side f and
  * initial guess u. Possible values for relax_type are:
  *
- * 1 = l1-scaled Jacobi
+ * 1 = l1-scaled (or weighted) Jacobi
  * 2 = l1-scaled block Gauss-Seidel/SSOR
  * 3 = Kaczmarz
  * 4 = truncated version of 2 (Remark 6.2 in smoothers paper)
@@ -713,6 +713,18 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
             l1_norm[i] = diag;
       }
    }
+   else if (option == 5) /*stores diagonal of A for Jacobi using matvec, rlx 7 */
+   {
+      for (i = 0; i < num_rows; i++)
+      {
+         diag = A_diag_data[A_diag_I[i]];
+         if (diag != 0.0) l1_norm[i] = diag;
+	 else l1_norm[i] = 1.0;
+      }
+      *l1_norm_ptr = l1_norm;
+
+      return hypre_error_flag;
+   }
 
    /* Handle negative definite matrices */
    for (i = 0; i < num_rows; i++)
@@ -1087,7 +1099,7 @@ HYPRE_Int hypre_AMSSetAlphaPoissonMatrix(void *solver,
    ams_data -> A_Pi = A_Pi;
 
    /* Penalize the eliminated degrees of freedom */
-   hypre_ParCSRMatrixSetDiagRows(A_Pi, DBL_MAX);
+   hypre_ParCSRMatrixSetDiagRows(A_Pi, HYPRE_REAL_MAX);
 
    /* Make sure that the first entry in each row is the diagonal one. */
    /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_Pi)); */
@@ -1116,7 +1128,7 @@ HYPRE_Int hypre_AMSSetBetaPoissonMatrix(void *solver,
    else
    {
       /* Penalize the eliminated degrees of freedom */
-      hypre_ParCSRMatrixSetDiagRows(A_G, DBL_MAX);
+      hypre_ParCSRMatrixSetDiagRows(A_G, HYPRE_REAL_MAX);
 
       /* Make sure that the first entry in each row is the diagonal one. */
       /* hypre_CSRMatrixReorder(hypre_ParCSRMatrixDiag(A_G)); */

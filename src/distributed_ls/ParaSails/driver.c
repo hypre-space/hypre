@@ -139,11 +139,11 @@ HYPRE_Int main(HYPRE_Int argc, char *argv[])
 #endif
 	    }
 
-	    hypre_MPI_Bcast(&threshg, 1, hypre_MPI_DOUBLE, 0, hypre_MPI_COMM_WORLD);
-	    hypre_MPI_Bcast(&thresh,  1, hypre_MPI_DOUBLE, 0, hypre_MPI_COMM_WORLD);
+	    hypre_MPI_Bcast(&threshg, 1, hypre_MPI_REAL, 0, hypre_MPI_COMM_WORLD);
+	    hypre_MPI_Bcast(&thresh,  1, hypre_MPI_REAL, 0, hypre_MPI_COMM_WORLD);
 	    hypre_MPI_Bcast(&nlevels, 1, HYPRE_MPI_INT,    0, hypre_MPI_COMM_WORLD);
-	    hypre_MPI_Bcast(&filter,  1, hypre_MPI_DOUBLE, 0, hypre_MPI_COMM_WORLD);
-	    hypre_MPI_Bcast(&loadbal, 1, hypre_MPI_DOUBLE, 0, hypre_MPI_COMM_WORLD);
+	    hypre_MPI_Bcast(&filter,  1, hypre_MPI_REAL, 0, hypre_MPI_COMM_WORLD);
+	    hypre_MPI_Bcast(&loadbal, 1, hypre_MPI_REAL, 0, hypre_MPI_COMM_WORLD);
 
             if (nlevels < 0)
                 break;
@@ -220,9 +220,9 @@ HYPRE_Int main(HYPRE_Int argc, char *argv[])
         time1 = hypre_MPI_Wtime();
 	solve_time = time1-time0;
 
-        hypre_MPI_Reduce(&setup_time, &max_setup_time, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, 
+        hypre_MPI_Reduce(&setup_time, &max_setup_time, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, 
 	    hypre_MPI_COMM_WORLD);
-        hypre_MPI_Reduce(&solve_time, &max_solve_time, 1, hypre_MPI_DOUBLE, hypre_MPI_MAX, 0, 
+        hypre_MPI_Reduce(&solve_time, &max_solve_time, 1, hypre_MPI_REAL, hypre_MPI_MAX, 0, 
 	    hypre_MPI_COMM_WORLD);
 
 	if (mype == 0)

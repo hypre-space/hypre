@@ -582,6 +582,16 @@ HYPRE_Int HYPRE_BoomerAMGSetSimple(HYPRE_Solver solver,
                                    HYPRE_Int    addlvl);
 
 /**
+ * (Optional) Defines last level where additive, mult-additive
+ * or simple cycle is used.
+ * The multiplicative approach is used on levels > add_last_lvl.
+ * 
+ * Can only be used when AMG is used as a preconditioner !!!
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetAddLastLvl(HYPRE_Solver solver,
+                                     HYPRE_Int    add_last_lvl);
+
+/**
  * (Optional) Defines the truncation factor for the 
  * smoothed interpolation used for mult-additive or simple method.
  * The default is 0.
@@ -837,6 +847,31 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyOrder(HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetChebyFraction (HYPRE_Solver solver,
                                            HYPRE_Real   ratio);
+
+/*
+ * (Optional) Defines whether matrix should be scaled.
+ *  The default is 1 (i.e., scaled).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetChebyScale (HYPRE_Solver solver,
+                                           HYPRE_Int   scale);
+/*
+ * (Optional) Defines which polynomial variant should be used.
+ *  The default is 0 (i.e., scaled).
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetChebyVariant (HYPRE_Solver solver,
+                                           HYPRE_Int   variant);
+
+/*
+ * (Optional) Defines how to estimate eigenvalues.
+ *  The default is 10 (i.e., 10 CG iterations are used to find extreme 
+ *  eigenvalues.) If eig_est=0, the largest eigenvalue is estimated
+ *  using Gershgorin, the smallest is set to 0.
+ *  If eig_est is a positive number n, n iterations of CG are used to
+ *  determine the smallest and largest eigenvalue.
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst (HYPRE_Solver solver,
+                                           HYPRE_Int   eig_est);
+
 
 /**
  * (Optional) Enables the use of more complex smoothers.
@@ -3128,6 +3163,21 @@ GenerateVarDifConv(MPI_Comm         comm,
                    HYPRE_Int        r,
                    HYPRE_Real       eps,
                    HYPRE_ParVector *rhs_ptr);
+
+HYPRE_ParCSRMatrix
+GenerateRSVarDifConv(MPI_Comm         comm,
+                     HYPRE_Int        nx,
+                     HYPRE_Int        ny,
+                     HYPRE_Int        nz,
+                     HYPRE_Int        P,
+                     HYPRE_Int        Q,
+                     HYPRE_Int        R,
+                     HYPRE_Int        p,
+                     HYPRE_Int        q,
+                     HYPRE_Int        r,
+                     HYPRE_Real       eps,
+                     HYPRE_ParVector *rhs_ptr,
+                     HYPRE_Int        type);
 
 float*
 GenerateCoordinates(MPI_Comm  comm,

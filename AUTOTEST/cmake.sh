@@ -123,5 +123,5 @@ cd $src_dir
 rm -fr `echo cmbuild/* | sed 's/[^ ]*README.txt//g'`
 rm -fr `echo test/cmbuild/* | sed 's/[^ ]*README.txt//g'`
 rm -fr hypre
-( cd $src_dir/test; rm -f $drivers; cleantest.sh )
+( cd $src_dir/test; rm -f $drivers; ./cleantest.sh )
 

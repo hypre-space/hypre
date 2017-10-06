@@ -1475,7 +1475,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       }
       else
       {
-         dxyz[d] = 1.0e+123;
+         dxyz[d] = HYPRE_REAL_MAX/1000;
       }
    }
 

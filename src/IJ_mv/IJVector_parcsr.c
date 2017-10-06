@@ -1315,7 +1315,8 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       ex_contact_vec_starts[i+1] = -storage-1; /* need negative for next loop */
    }      
 
-   void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);
+   /*void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);*/
+   void_contact_buf = hypre_CAlloc(storage,obj_size_bytes);
    index_ptr = void_contact_buf; /* step through with this index */
 
    /* set up data to be sent to send procs */

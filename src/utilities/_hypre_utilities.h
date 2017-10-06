@@ -122,7 +122,9 @@ extern "C" {
 
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
+#define MPI_FLOAT           hypre_MPI_FLOAT
 #define MPI_DOUBLE          hypre_MPI_DOUBLE           
+#define MPI_LONG_DOUBLE     hypre_MPI_LONG_DOUBLE
 #define MPI_INT             hypre_MPI_INT              
 #define MPI_LONG_LONG_INT   hypre_MPI_INT              
 #define MPI_CHAR            hypre_MPI_CHAR             
@@ -224,13 +226,15 @@ typedef HYPRE_Int  hypre_MPI_Aint;
 
 #define  hypre_MPI_BOTTOM  0x0
 
-#define  hypre_MPI_DOUBLE 0
-#define  hypre_MPI_INT 1
-#define  hypre_MPI_CHAR 2
-#define  hypre_MPI_LONG 3
-#define  hypre_MPI_BYTE 4
-#define  hypre_MPI_REAL 5
-#define  hypre_MPI_COMPLEX 6
+#define  hypre_MPI_FLOAT 0
+#define  hypre_MPI_DOUBLE 1
+#define  hypre_MPI_LONG_DOUBLE 2
+#define  hypre_MPI_INT 3
+#define  hypre_MPI_CHAR 4
+#define  hypre_MPI_LONG 5
+#define  hypre_MPI_BYTE 6
+#define  hypre_MPI_REAL 7
+#define  hypre_MPI_COMPLEX 8
 
 #define  hypre_MPI_SUM 0
 #define  hypre_MPI_MIN 1
@@ -264,7 +268,9 @@ typedef MPI_User_function    hypre_MPI_User_function;
 #define  hypre_MPI_BOTTOM     MPI_BOTTOM
 #define  hypre_MPI_COMM_SELF  MPI_COMM_SELF
 
+#define  hypre_MPI_FLOAT   MPI_FLOAT
 #define  hypre_MPI_DOUBLE  MPI_DOUBLE
+#define  hypre_MPI_LONG_DOUBLE  MPI_LONG_DOUBLE
 /* HYPRE_MPI_INT is defined in HYPRE_utilities.h */
 #define  hypre_MPI_INT     HYPRE_MPI_INT
 #define  hypre_MPI_CHAR    MPI_CHAR
@@ -1633,21 +1639,21 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 #endif
 
 /* hypre_printf.c */
-#ifdef HYPRE_BIGINT
+// #ifdef HYPRE_BIGINT
 HYPRE_Int hypre_printf( const char *format , ... );
 HYPRE_Int hypre_fprintf( FILE *stream , const char *format, ... );
 HYPRE_Int hypre_sprintf( char *s , const char *format, ... );
 HYPRE_Int hypre_scanf( const char *format , ... );
 HYPRE_Int hypre_fscanf( FILE *stream , const char *format, ... );
 HYPRE_Int hypre_sscanf( char *s , const char *format, ... );
-#else
-#define hypre_printf  printf
-#define hypre_fprintf fprintf
-#define hypre_sprintf sprintf
-#define hypre_scanf   scanf
-#define hypre_fscanf  fscanf
-#define hypre_sscanf  sscanf
-#endif
+// #else
+// #define hypre_printf  printf
+// #define hypre_fprintf fprintf
+// #define hypre_sprintf sprintf
+// #define hypre_scanf   scanf
+// #define hypre_fscanf  fscanf
+// #define hypre_sscanf  sscanf
+// #endif
 
 /* hypre_qsort.c */
 void hypre_swap ( HYPRE_Int *v , HYPRE_Int i , HYPRE_Int j );

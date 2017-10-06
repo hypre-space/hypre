@@ -1082,7 +1082,7 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
       }
 
       hypre_MPI_Isend(cval+rp[i], count, HYPRE_MPI_INT, owner, CVAL_TAG, comm_dh, send_req+2*i);
-      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_DOUBLE, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
+      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_REAL, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
     }
   } 
 
@@ -1105,7 +1105,7 @@ void partition_and_distribute_metis_private(Mat_dh A, Mat_dh *Bout)
       }
 
       hypre_MPI_Irecv(cval+rp[i], count, HYPRE_MPI_INT, 0, CVAL_TAG, comm_dh, rcv_req+2*i);
-      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_DOUBLE, 0, AVAL_TAG, comm_dh, rcv_req+2*i+1);
+      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_REAL, 0, AVAL_TAG, comm_dh, rcv_req+2*i+1);
     }
   }
 
@@ -1195,7 +1195,7 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
       }
 
       hypre_MPI_Isend(cval+rp[i], count, HYPRE_MPI_INT, owner, CVAL_TAG, comm_dh, send_req+2*i);
-      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_DOUBLE, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
+      hypre_MPI_Isend(aval+rp[i], count, hypre_MPI_REAL, owner, AVAL_TAG, comm_dh, send_req+2*i+1);
     }
   } 
 
@@ -1218,7 +1218,7 @@ void partition_and_distribute_private(Mat_dh A, Mat_dh *Bout)
       }
 
       hypre_MPI_Irecv(cval+rp[i], count, HYPRE_MPI_INT, 0, CVAL_TAG, comm_dh, rcv_req+2*i);
-      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_DOUBLE, 0, AVAL_TAG, comm_dh, rcv_req+2*i+1);
+      hypre_MPI_Irecv(aval+rp[i], count, hypre_MPI_REAL, 0, AVAL_TAG, comm_dh, rcv_req+2*i+1);
     }
   }
 

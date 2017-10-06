@@ -97,6 +97,9 @@ hypre_BoomerAMGCreate()
    char    *euclidfile;
 
    HYPRE_Int cheby_order;
+   HYPRE_Int cheby_eig_est;
+   HYPRE_Int cheby_variant;
+   HYPRE_Int cheby_scale;
    HYPRE_Real cheby_eig_ratio;
 
    HYPRE_Int block_mode;
@@ -104,6 +107,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int        additive;
    HYPRE_Int        mult_additive;
    HYPRE_Int        simple;
+   HYPRE_Int        add_last_lvl;
    HYPRE_Real   add_trunc_factor;
    HYPRE_Int      add_P_max_elmts;
    HYPRE_Int      add_rlx_type;
@@ -198,6 +202,9 @@ hypre_BoomerAMGCreate()
    outer_wt = 1.0;
 
    cheby_order = 2;
+   cheby_variant = 0;
+   cheby_scale = 1;
+   cheby_eig_est = 10;
    cheby_eig_ratio = .3;
 
    block_mode = 0;
@@ -205,6 +212,7 @@ hypre_BoomerAMGCreate()
    additive = -1;
    mult_additive = -1;
    simple = -1;
+   add_last_lvl = -1;
    add_trunc_factor = 0.0;
    add_P_max_elmts = 0;
    add_rlx_type = 18;
@@ -301,6 +309,9 @@ hypre_BoomerAMGCreate()
 
    hypre_BoomerAMGSetChebyOrder(amg_data, cheby_order);
    hypre_BoomerAMGSetChebyFraction(amg_data, cheby_eig_ratio);
+   hypre_BoomerAMGSetChebyEigEst(amg_data, cheby_eig_est);
+   hypre_BoomerAMGSetChebyVariant(amg_data, cheby_variant);
+   hypre_BoomerAMGSetChebyScale(amg_data, cheby_scale);
 
    hypre_BoomerAMGSetNumIterations(amg_data, num_iterations);
 
@@ -311,6 +322,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMultAddTruncFactor(amg_data, add_trunc_factor);
    hypre_BoomerAMGSetAddRelaxType(amg_data, add_rlx_type);
    hypre_BoomerAMGSetAddRelaxWt(amg_data, add_rlx_wt);
+   hypre_ParAMGDataAddLastLvl(amg_data) = add_last_lvl;
    hypre_ParAMGDataLambda(amg_data) = NULL;
    hypre_ParAMGDataXtilde(amg_data) = NULL;
    hypre_ParAMGDataRtilde(amg_data) = NULL;
@@ -353,8 +365,11 @@ hypre_BoomerAMGCreate()
    /* this can not be set by the user currently */
    hypre_ParAMGDataBlockMode(amg_data) = block_mode;
 
+   /* Stuff for Chebyshev smoothing */
    hypre_ParAMGDataMaxEigEst(amg_data) = NULL;
    hypre_ParAMGDataMinEigEst(amg_data) = NULL;
+   hypre_ParAMGDataChebyDS(amg_data) = NULL;
+   hypre_ParAMGDataChebyCoefs(amg_data) = NULL;
 
    /* BM Oct 22, 2006 */
    hypre_ParAMGDataPlotGrids(amg_data) = 0;
@@ -503,6 +518,14 @@ hypre_BoomerAMGDestroy( void *data )
    if (hypre_ParAMGDataLambda(amg_data))
       hypre_ParCSRMatrixDestroy(hypre_ParAMGDataLambda(amg_data));
 
+   if (hypre_ParAMGDataAtilde(amg_data))
+   {
+      hypre_ParCSRMatrix *Atilde = hypre_ParAMGDataAtilde(amg_data);
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(Atilde));
+      hypre_CSRMatrixDestroy(hypre_ParCSRMatrixOffd(Atilde));
+      hypre_TFree (Atilde);
+   }
+
    if (hypre_ParAMGDataXtilde(amg_data))
       hypre_ParVectorDestroy(hypre_ParAMGDataXtilde(amg_data));
 
@@ -515,6 +538,22 @@ hypre_BoomerAMGDestroy( void *data )
          if (hypre_ParAMGDataL1Norms(amg_data)[i])
            hypre_TFree(hypre_ParAMGDataL1Norms(amg_data)[i]);
       hypre_TFree(hypre_ParAMGDataL1Norms(amg_data));
+   }
+
+   if (hypre_ParAMGDataChebyCoefs(amg_data))
+   {
+      for (i=0; i < num_levels; i++)
+         if (hypre_ParAMGDataChebyCoefs(amg_data)[i])
+           hypre_TFree(hypre_ParAMGDataChebyCoefs(amg_data)[i]);
+      hypre_TFree(hypre_ParAMGDataChebyCoefs(amg_data));
+   }
+
+   if (hypre_ParAMGDataChebyDS(amg_data))
+   {
+      for (i=0; i < num_levels; i++)
+         if (hypre_ParAMGDataChebyDS(amg_data)[i])
+           hypre_TFree(hypre_ParAMGDataChebyDS(amg_data)[i]);
+      hypre_TFree(hypre_ParAMGDataChebyDS(amg_data));
    }
 
    if (hypre_ParAMGDataDinv(amg_data))
@@ -3464,6 +3503,57 @@ hypre_BoomerAMGSetChebyFraction( void     *data,
 
    return hypre_error_flag;
 }
+HYPRE_Int
+hypre_BoomerAMGSetChebyEigEst( void     *data,
+                              HYPRE_Int     cheby_eig_est)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   if (cheby_eig_est < 0)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataChebyEigEst(amg_data) = cheby_eig_est;
+
+   return hypre_error_flag;
+}
+HYPRE_Int
+hypre_BoomerAMGSetChebyVariant( void     *data,
+                              HYPRE_Int     cheby_variant)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataChebyVariant(amg_data) = cheby_variant;
+
+   return hypre_error_flag;
+}
+HYPRE_Int
+hypre_BoomerAMGSetChebyScale( void     *data,
+                              HYPRE_Int     cheby_scale)
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataChebyScale(amg_data) = cheby_scale;
+
+   return hypre_error_flag;
+}
+
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGSetInterpVectors
@@ -3714,6 +3804,23 @@ hypre_BoomerAMGGetSimple( void *data,
    }
 
    *simple = hypre_ParAMGDataSimple(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetAddLastLvl( void *data,
+                          HYPRE_Int   add_last_lvl )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataAddLastLvl(amg_data) = add_last_lvl;
 
    return hypre_error_flag;
 }

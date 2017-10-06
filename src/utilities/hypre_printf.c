@@ -14,7 +14,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#ifdef HYPRE_BIGINT
+// #ifdef HYPRE_BIGINT
 
 /* these prototypes are missing by default for some compilers */
 int vscanf( const char *format , va_list arg );
@@ -42,32 +42,50 @@ new_format( const char *format,
       }
       else if (foundpercent)
       {
+         if (*fp == 'l')
+         {
+            fp++; /* remove 'l' and maybe add it back in switch statement */
+            if (*fp == 'l')
+            {
+               fp++; /* remove second 'l' if present */
+            }
+         }
          switch(*fp)
          {
             case 'd':
+            case 'i':
+#if defined(HYPRE_BIGINT)
                *nfp = 'l'; nfp++;
                *nfp = 'l'; nfp++;
-            case 'c':
+#endif
+               foundpercent = 0; break;
+            case 'f':
             case 'e':
             case 'E':
-            case 'f':
             case 'g':
             case 'G':
-            case 'i':
+#if defined(HYPRE_SINGLE)          /* no modifier */
+#elif defined(HYPRE_LONG_DOUBLE)   /* modify with 'L' */
+               *nfp = 'L'; nfp++;
+#else                              /* modify with 'l' (default is _double_) */
+               *nfp = 'l'; nfp++;
+#endif
+               foundpercent = 0; break;
+            case 'c':
             case 'n':
             case 'o':
             case 'p':
             case 's':
             case 'u':
             case 'x':
-            case 'S':
+            case 'X':
             case '%':
-               foundpercent = 0;
+               foundpercent = 0; break;
          }
       }
       *nfp = *fp; nfp++;
    }
-   *nfp = *fp; nfp++;
+   *nfp = *fp;
 
    *newformat_ptr = newformat;
 
@@ -79,9 +97,7 @@ new_format( const char *format,
 HYPRE_Int
 free_format( char *newformat )
 {
-#ifdef HYPRE_BIGINT
    hypre_TFree(newformat);
-#endif
 
    return 0;
 }
@@ -186,9 +202,9 @@ hypre_sscanf( char *s, const char *format, ...)
    return ierr;
 }
 
-#else
-
-/* this is used only to eliminate compiler warnings */
-HYPRE_Int hypre_printf_empty;
-
-#endif
+// #else
+// 
+// /* this is used only to eliminate compiler warnings */
+// HYPRE_Int hypre_printf_empty;
+// 
+// #endif
