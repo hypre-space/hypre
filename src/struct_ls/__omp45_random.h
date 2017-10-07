@@ -59,6 +59,15 @@ static HYPRE_Int Seed = 13579;
 #pragma omp declare target
 static inline void  hypre_SeedRand_inline( HYPRE_Int seed )
 {
+   if (seed < 1)
+   {
+      seed = 1;
+   }
+   else if (seed >= m)
+   {
+      seed = m - 1;
+   }
+
    Seed = seed;
 }
 #pragma omp end declare target
