@@ -3203,7 +3203,7 @@ main( hypre_int argc,
          mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int, mgr_num_reserved_nodes);
          for(i=0; i<mgr_num_reserved_nodes; i++)
          { /* generate artificial reserved nodes */
-            mgr_reserved_coarse_indexes[i] = 2*i+1;
+            mgr_reserved_coarse_indexes[i] = i;//2*i+1;
          }
       
          /* set MGR data by block */
@@ -3212,9 +3212,9 @@ main( hypre_int argc,
          if(mgr_num_reserved_nodes)HYPRE_MGRSetReservedCoarseNodes(pcg_precond, mgr_num_reserved_nodes, mgr_reserved_coarse_indexes);
       
          /* set intermediate coarse grid strategy */
-         HYPRE_MGRSetNonCpointsToFpoints(pcg_precond, 1);
+         HYPRE_MGRSetNonCpointsToFpoints(pcg_precond, mgr_non_c_to_f);
          /* set F relaxation strategy */
-         HYPRE_MGRSetFRelaxMethod(pcg_precond, 0);
+         HYPRE_MGRSetFRelaxMethod(pcg_precond, mgr_frelax_method);
          /* set relax type for single level F-relaxation and post-relaxation */
          HYPRE_MGRSetRelaxType(pcg_precond, 0);
          HYPRE_MGRSetNumRelaxSweeps(pcg_precond, 2);
@@ -5403,7 +5403,7 @@ main( hypre_int argc,
       mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int, mgr_num_reserved_nodes);
       for(i=0; i<mgr_num_reserved_nodes; i++)
       { /* generate artificial reserved nodes */
-         mgr_reserved_coarse_indexes[i] = 2*i+1;
+         mgr_reserved_coarse_indexes[i] = i;//2*i+1;
       }
       
       /* set MGR data by block */
@@ -5412,9 +5412,9 @@ main( hypre_int argc,
       if(mgr_num_reserved_nodes)HYPRE_MGRSetReservedCoarseNodes(mgr_solver, mgr_num_reserved_nodes, mgr_reserved_coarse_indexes);
       
       /* set intermediate coarse grid strategy */
-      HYPRE_MGRSetNonCpointsToFpoints(mgr_solver, 1);
+      HYPRE_MGRSetNonCpointsToFpoints(mgr_solver, mgr_non_c_to_f);
       /* set F relaxation strategy */
-      HYPRE_MGRSetFRelaxMethod(mgr_solver, 0);
+      HYPRE_MGRSetFRelaxMethod(mgr_solver, mgr_frelax_method);
       /* set relax type for single level F-relaxation and post-relaxation */
       HYPRE_MGRSetRelaxType(mgr_solver, 0);
       HYPRE_MGRSetNumRelaxSweeps(mgr_solver, 2);
@@ -5436,8 +5436,6 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
-/* note: log is written to standard output, not to file */
-      HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
       HYPRE_BoomerAMGSetCycleType(amg_solver, cycle_type);
       HYPRE_BoomerAMGSetNumSweeps(amg_solver, num_sweeps);
       HYPRE_BoomerAMGSetRelaxType(amg_solver, 3);
@@ -5451,8 +5449,16 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetMaxLevels(amg_solver, max_levels);
       HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
       HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
-      HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
-
+      if(mgr_nlevels < 1 || mgr_bsize < 2)
+      {
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, max_iter);
+         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 3);
+      }
+      else
+      {
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
+      }
       /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
       HYPRE_MGRSetCoarseSolver( mgr_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
       
