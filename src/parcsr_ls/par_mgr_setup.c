@@ -146,7 +146,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 			default_cg_solver = (HYPRE_Solver) hypre_BoomerAMGCreate();
 			hypre_BoomerAMGSetMaxIter ( default_cg_solver, (mgr_data -> max_iter) );
 
-			hypre_BoomerAMGSetRelaxOrder( default_cg_solver, 0);
+			hypre_BoomerAMGSetRelaxOrder( default_cg_solver, 1);
 			hypre_BoomerAMGSetPrintLevel(default_cg_solver, 3);
 			/* set setup and solve functions */
 			coarse_grid_solver_setup = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSetup;
@@ -173,6 +173,8 @@ hypre_MGRSetup( void               *mgr_vdata,
 		HYPRE_BoomerAMGSetCpointsToKeep((mgr_data ->coarse_grid_solver), 25,reserved_coarse_size,reserved_coarse_indexes);	
 
 		/* setup coarse grid solver */
+//		hypre_BoomerAMGSetMaxIter ( (mgr_data -> coarse_grid_solver), (mgr_data -> max_iter) );
+//		hypre_BoomerAMGSetPrintLevel((mgr_data -> coarse_grid_solver), 3);
 		coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), A, f, u);
 		(mgr_data -> max_num_coarse_levels) = 0;
 
@@ -486,7 +488,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 
 		hypre_MGRBuildInterp(A_array[lev], CF_marker_array[lev], S, coarse_pnts_global, 1, dof_func_buff, 
                                        debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, 1, interp_type, num_interp_sweeps);
-		//hypre_MGRBuildP( A_array[lev],CF_marker_array[lev],coarse_pnts_global,2,debug_flag,&P);
 		
 		P_array[lev] = P;
 
@@ -502,8 +503,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       		num_restrict_sweeps = 0; /* do injection for restriction */
       		hypre_MGRBuildInterp(AT, CF_marker_array[lev], ST, coarse_pnts_global, 1, dof_func_buff,
                          	debug_flag, trunc_factor, max_elmts, col_offd_ST_to_AT, &RT, last_level, 0, num_restrict_sweeps);
-	  //hypre_MGRBuildP(AT,CF_marker_array[lev],coarse_pnts_global,2,debug_flag,&RT);
-	  //hypre_MGRBuildP(A_array[lev],CF_marker_array[lev],coarse_pnts_global,0,debug_flag,&RT);
+                         	
       		RT_array[lev] = RT;
 
       		/* Compute RAP for next level */

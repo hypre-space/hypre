@@ -1651,18 +1651,22 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix     *A,
    /* Build interpolation operator using (hypre default) */
    if(!last_level)
    {
-	   //hypre_BoomerAMGBuildInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
-	   //	        trunc_factor, max_elmts, col_offd_S_to_A, &P_ptr);
-		hypre_MGRBuildP( A,CF_marker,num_cpts_global,0,debug_flag,&P_ptr);
+           hypre_MGRBuildP( A,CF_marker,num_cpts_global,2,debug_flag,&P_ptr);
+         
+//           hypre_BoomerAMGBuildInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
+//	   	        trunc_factor, max_elmts, col_offd_S_to_A, &P_ptr);		
    }
    /* Do Jacobi interpolation for last level */
    else
    {
-	   if (method <4)
+	   if (method <3)
 	   {
 		   hypre_MGRBuildP( A,CF_marker,num_cpts_global,method,debug_flag,&P_ptr);
+		   /* Could do a few sweeps of Jacobi to further improve P */
+                   // for(i=0; i<numsweeps; i++)
+		   //	 hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker, 0, jac_trunc_threshold, jac_trunc_threshold_minus );
 	   }
-	   else if (method == 5)
+	   else //if (method == 5)
 	   {
 		   /* clone or copy nonzero pattern of A to B */
 		   hypre_ParCSRMatrix	*B;
@@ -1679,7 +1683,7 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix     *A,
 		* If numsweeps = 0, the following step is skipped and P is returned as the
 		* injection operator.
 		* Looping here is equivalent to improving P by Jacobi interpolation
-        */
+           */
 		   for(i=0; i<numsweeps; i++)
 			   hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker,
 										   0, jac_trunc_threshold,
@@ -2473,7 +2477,7 @@ hypre_MGRSetNumRelaxSweeps( void *mgr_vdata, HYPRE_Int nsweeps )
    return hypre_error_flag;
 }
 
-/* Set the relaxation method: 0, 1, 99
+/* Set the F-relaxation strategy: 0=single level, 1=multi level
 */
 HYPRE_Int
 hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method )
