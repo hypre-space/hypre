@@ -70,39 +70,24 @@ HYPRE_MGRSolve( HYPRE_Solver solver,
                                  (hypre_ParVector *) x ) );
 }
 
-
-HYPRE_Int
-HYPRE_MGRSetBlockDataWrapper( HYPRE_Solver solver, 
-                                HYPRE_Int block_size, 
-                                HYPRE_Int coarse_grid_index)
-{
-  return ( hypre_MGRSetBlockDataWrapper( (void *) solver, block_size, coarse_grid_index) );
-}
-
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetBlockData
+ * HYPRE_MGRSetCpointsByBlock
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int
-HYPRE_MGRSetBlockData( HYPRE_Solver solver,
-                         HYPRE_Int  block_size, 
-                         HYPRE_Int num_coarse_points, 
-                         HYPRE_Int  *block_coarse_indexes)
+HYPRE_Int 
+HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver, 
+			HYPRE_Int  block_size, 
+			HYPRE_Int  max_num_levels, 
+			HYPRE_Int *block_num_coarse_points, 
+			HYPRE_Int  **block_coarse_indexes)
 {
-   return( hypre_MGRSetBlockData( (void *) solver, block_size, num_coarse_points, block_coarse_indexes ) );
+   return( hypre_MGRSetCpointsByBlock( (void *) solver, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes));
 }
 
-/*--------------------------------------------------------------------------
- * HYPRE_MGRSetBlockDataExp
- *--------------------------------------------------------------------------*/
-
 HYPRE_Int
-HYPRE_MGRSetBlockDataExp( HYPRE_Solver solver,
-                         HYPRE_Int  block_size,
-                         HYPRE_Int  *num_coarse_points,
-                         HYPRE_Int  **block_coarse_indexes)
-{
-   return( hypre_MGRSetBlockDataExp( (void *) solver, block_size, num_coarse_points, block_coarse_indexes ) );
+HYPRE_MGRSetNonCpointsToFpoints( HYPRE_Solver solver, HYPRE_Int nonCptToFptFlag)
+{   
+   return hypre_MGRSetNonCpointsToFpoints((void *) solver, nonCptToFptFlag);
 }
 
 /*--------------------------------------------------------------------------
@@ -119,15 +104,6 @@ HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
 									   (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_solve,
 									   (HYPRE_Int (*)(void*, void*, void*, void*)) coarse_grid_solver_setup,
 									   (void *) coarse_grid_solver ) );
-}
-
-/*--------------------------------------------------------------------------
- * HYPRE_MGRSetAdditionalCoarseIndices
- *--------------------------------------------------------------------------*/
-HYPRE_Int
-HYPRE_MGRSetAdditionalCoarseIndices( HYPRE_Solver solver, HYPRE_Int num_add_coarse_idx, HYPRE_Int *additional_coarse_indices)
-{
-   return hypre_MGRSetAdditionalCoarseIndices(solver, num_add_coarse_idx, additional_coarse_indices);
 }
 
 /*--------------------------------------------------------------------------
@@ -168,15 +144,9 @@ HYPRE_MGRSetRestrictType(HYPRE_Solver solver, HYPRE_Int restrict_type )
  * HYPRE_MGRSetRelaxMethod
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method )
+HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method )
 {
-   return hypre_MGRSetRelaxMethod(solver, relax_method );
-}
-
-HYPRE_Int
-HYPRE_MGRSetSplittingStrategy(HYPRE_Solver solver, HYPRE_Int splitting_strategy )
-{
-   return hypre_MGRSetSplittingStrategy(solver, splitting_strategy );
+   return hypre_MGRSetFRelaxMethod(solver, relax_method );
 }
 
 /*--------------------------------------------------------------------------

@@ -1142,6 +1142,14 @@ HYPRE_Int HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver  solver,
                                          float        *coordinates);
 
+/*
+ * HYPRE_BoomerAMGSetCpointsToKeep
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
+				HYPRE_Int  cpt_coarse_level,
+				HYPRE_Int  num_cpt_coarse,
+				HYPRE_Int *cpt_coarse_index);
+
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -3124,36 +3132,17 @@ HYPRE_Int HYPRE_MGRSolve( HYPRE_Solver solver,
                          HYPRE_ParVector x      );
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetBlockDataWrapper
+ * HYPRE_Int HYPRE_MGRSetCpointsByBlock
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_MGRSetBlockDataWrapper( HYPRE_Solver solver,
-                         HYPRE_Int  block_size,
-                         HYPRE_Int  block_coarse_index);
-
-/*--------------------------------------------------------------------------
- * HYPRE_MGRSetBlockDataExp
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int HYPRE_MGRSetBlockDataExp( HYPRE_Solver solver,
-                         HYPRE_Int  block_size,
-                         HYPRE_Int  *num_coarse_points,
-                         HYPRE_Int  **block_coarse_indexes);
-
-/*--------------------------------------------------------------------------
- * HYPRE_MGRSetBlockData
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int HYPRE_MGRSetBlockData( HYPRE_Solver solver,
+HYPRE_Int HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
                          HYPRE_Int  block_size, 
-                         HYPRE_Int num_coarse_points, 
-                         HYPRE_Int  *block_coarse_indexes);
-
-/*--------------------------------------------------------------------------
- * HYPRE_MGRSetAdditionalCoarseIndices
- *--------------------------------------------------------------------------*/
+                         HYPRE_Int max_num_levels,
+                         HYPRE_Int *block_coarse_points, 
+                         HYPRE_Int  **block_coarse_indexes);
+                         
 HYPRE_Int
-HYPRE_MGRSetAdditionalCoarseIndices( HYPRE_Solver solver, HYPRE_Int num_add_coarse_idx, HYPRE_Int *additional_coarse_indices);
+HYPRE_MGRSetNonCpointsToFpoints( HYPRE_Solver solver, HYPRE_Int nonCptToFptFlag);
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetMaxCoarseLevels
@@ -3181,10 +3170,7 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type );
  * HYPRE_MGRSetRelaxMethod
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method );
-
-HYPRE_Int
-HYPRE_MGRSetSplittingStrategy(HYPRE_Solver solver, HYPRE_Int splitting_strategy );
+HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method );
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRestrictType

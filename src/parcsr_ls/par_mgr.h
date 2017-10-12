@@ -20,25 +20,21 @@ typedef struct
   // block data
   HYPRE_Int  block_size;
   HYPRE_Int  num_coarse_indexes;
-  HYPRE_Int  *tmp_num_coarse_points;
-  HYPRE_Int  num_additional_coarse_indices;
-  HYPRE_Int  *block_cf_marker;
-  HYPRE_Int  **tmp_block_cf_marker;
-  HYPRE_Int  *additional_coarse_indices;
+  HYPRE_Int  *block_num_coarse_indexes;
+  HYPRE_Int  **block_cf_marker;
 
-   //general data
+  // initial setup data (user provided)
   HYPRE_Int num_coarse_levels;
+  HYPRE_Int *num_coarse_per_level;
+  HYPRE_Int **level_coarse_indexes;  
+
+  //general data
   HYPRE_Int max_num_coarse_levels;
   hypre_ParCSRMatrix **A_array;
-  hypre_ParCSRMatrix ** A_ff_array;
   hypre_ParCSRMatrix **P_array;
-  hypre_ParCSRMatrix **P_f_array;
   hypre_ParCSRMatrix **RT_array;
-  hypre_ParCSRMatrix *P_f;
   hypre_ParCSRMatrix *RAP;
-  hypre_ParCSRMatrix *A_ff;
   HYPRE_Int **CF_marker_array;
-  HYPRE_Int *final_coarse_indexes;
   HYPRE_Int **coarse_indices_lvls;
   hypre_ParVector    **F_array;
   hypre_ParVector    **U_array;
@@ -65,18 +61,10 @@ typedef struct
   HYPRE_Int	max_iter;
   HYPRE_Int	relax_order;
   HYPRE_Int	num_relax_sweeps;
-  HYPRE_Int relax_method;
 
-  HYPRE_Solver *coarse_grid_solver;
+  HYPRE_Solver coarse_grid_solver;
   HYPRE_Int	(*coarse_grid_solver_setup)(void*,void*,void*,void*);
   HYPRE_Int	(*coarse_grid_solver_solve)(void*,void*,void*,void*);
-
-  HYPRE_Solver *fine_grid_solver;
-  HYPRE_Int   (*fine_grid_solver_setup)(void*,void*,void*,void*);
-  HYPRE_Int   (*fine_grid_solver_solve)(void*,void*,void*,void*);
-
-  HYPRE_Solver global_smoother;
-  HYPRE_Solver *aff_solver;
 
   HYPRE_Int	use_default_cgrid_solver;
   HYPRE_Real	omega;
@@ -86,26 +74,30 @@ typedef struct
   hypre_ParVector   *Ztemp;
   hypre_ParVector   *Utemp;
   hypre_ParVector   *Ftemp;
-  hypre_ParVector   **U_fine_array;
-  hypre_ParVector   **F_fine_array;
 
   HYPRE_Real          *diaginv;
   HYPRE_Int           n_block;
   HYPRE_Int           left_size;
-  HYPRE_Int           global_smooth;
+  HYPRE_Int           global_smooth_iters;
   HYPRE_Int           global_smooth_type;
-
+  HYPRE_Solver global_smoother;
   /* 
    Number of points that remain part of the coarse grid throughout the hierarchy.
    For example, number of well equations
    */
   HYPRE_Int reserved_coarse_size;
   HYPRE_Int *reserved_coarse_indexes;
+  HYPRE_Int *reserved_Cpoint_local_indexes;
+ 
+  HYPRE_Int set_non_Cpoints_to_F;
   
-  HYPRE_Int block_form;
+  /* F-relaxation method */
+  HYPRE_Int Frelax_method;
+  /* V-cycle F relaxation method */
+  hypre_ParAMGData    **FrelaxVcycleData;
 
-  HYPRE_Int build_aff;
-  HYPRE_Int splitting_strategy;
+  HYPRE_Int   max_local_lvls;
+  
 } hypre_ParMGRData;
 
 

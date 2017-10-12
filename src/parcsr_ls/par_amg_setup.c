@@ -189,7 +189,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    HYPRE_Int                **C_point_marker_array;
    HYPRE_Int    local_coarse_size;
-   HYPRE_Int    num_C_point_coarse = hypre_ParAMGDataNumCPointCoarse(amg_data);
+   HYPRE_Int    num_C_point_coarse = hypre_ParAMGDataNumCPointKeep(amg_data);
    HYPRE_Int   *C_point_keep;
    
    HYPRE_Int *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
@@ -273,7 +273,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data); 
 
-   C_point_marker_array = hypre_ParAMGDataCPointMarkerArray(amg_data);
+   C_point_marker_array = hypre_ParAMGDataCPointKeepMarkerArray(amg_data);
 
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.setup");
    
@@ -625,7 +625,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    dof_func_array[0] = dof_func;
    hypre_ParAMGDataCFMarkerArray(amg_data) = CF_marker_array;
-   hypre_ParAMGDataCPointMarkerArray(amg_data) = C_point_marker_array;
+   hypre_ParAMGDataCPointKeepMarkerArray(amg_data) = C_point_marker_array;
    hypre_ParAMGDataDofFuncArray(amg_data) = dof_func_array;
    hypre_ParAMGDataAArray(amg_data) = A_array;
    hypre_ParAMGDataPArray(amg_data) = P_array;
@@ -1120,16 +1120,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 		 /*********Set the fixed index to CF_marker*********/
 		 //num_C_point_coarse
 
-		 if (hypre_ParAMGDataCPointCoarseLevel(amg_data) > 0)
+		 if (hypre_ParAMGDataCPointKeepLevel(amg_data) > 0)
 		 {
 			 if (block_mode)
 			 {
-				 printf("Keeping coarsening block is not implement\n");
+				 printf("Keeping coarsening block is not implemented\n");
 			 }
-			 else if  (level < hypre_ParAMGDataCPointCoarseLevel(amg_data))
+			 else if  (level < hypre_ParAMGDataCPointKeepLevel(amg_data))
 			 {
 				 C_point_keep = C_point_marker_array[level];
-				 if (level < hypre_ParAMGDataCPointCoarseLevel(amg_data)-1)
+				 if (level < hypre_ParAMGDataCPointKeepLevel(amg_data)-1)
 					 C_point_marker_array[level+1] = hypre_CTAlloc(HYPRE_Int, num_C_point_coarse);
 				 
 				 for(j = 0;j < num_C_point_coarse;j ++)
@@ -1143,7 +1143,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 				 {
 					 if (CF_marker[j] == 1) local_coarse_size++;
 					 if (CF_marker[j] == 2) {
-						 if (level < hypre_ParAMGDataCPointCoarseLevel(amg_data)-1)
+						 if (level < hypre_ParAMGDataCPointKeepLevel(amg_data)-1)
 							 C_point_marker_array[level+1][k++] = local_coarse_size;
 						 local_coarse_size++;
 						 CF_marker[j] = 1;					 
