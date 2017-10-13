@@ -21,6 +21,8 @@
 
 #define NUM_TEAMS 2048
 #define NUM_THREADS 1024
+//int hypre_CSRMatrixSortHost(hypre_CSRMatrix *A);
+//int mysort(double *data, int *a,int size);
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec
@@ -367,6 +369,40 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
      exit(2);
    }
 
+
+#ifdef HYPRE_USING_CUSPARSE
+   static cusparseHandle_t handle;
+   static cusparseMatDescr_t descr;
+   static HYPRE_Int FirstCall=1;
+   cusparseStatus_t status;
+   static cudaStream_t s[10];
+   static HYPRE_Int myid;
+   if (FirstCall){
+    PUSH_RANGE("FIRST_CALL",4);
+
+    handle=getCusparseHandle();
+    
+    status= cusparseCreateMatDescr(&descr); 
+    if (status != CUSPARSE_STATUS_SUCCESS) {
+      printf("ERROR:: Matrix descriptor initialization failed\n");
+      exit(2);
+    } 
+    
+    cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
+    cusparseSetMatIndexBase(descr,CUSPARSE_INDEX_BASE_ZERO);
+    
+    FirstCall=0;
+    hypre_int jj;
+    for(jj=0;jj<5;jj++)
+      s[jj]=HYPRE_STREAM(jj);
+    nvtxNameCudaStreamA(s[4], "HYPRE_COMPUTE_STREAM");
+    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+    myid++;
+    POP_RANGE;
+  }
+#endif
+
+
 #ifdef HYPRE_USE_MANAGED
    hypre_CSRMatrixPrefetchToDevice(A);
    hypre_SeqVectorPrefetchToDevice(x);
@@ -376,8 +412,12 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    if (A->mapped==-1) {
+     //hypre_CSRMatrixSortHost(A);
      hypre_CSRMatrixMapToDevice(A);
+     //printf("MAPPING %p \n",A);
      hypre_CSRMatrixUpdateToDevice(A);
+     //printf("DONE MAPPING %p \n",A);
+     
    }
    //printf("Mapping X::");
    if (!x->mapped) hypre_SeqVectorMapToDevice(x);
@@ -393,6 +433,11 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
      } else 
        SyncVectorToDevice(b);
    }
+
+
+
+
+
 #endif
 
  
@@ -406,6 +451,32 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
      x_data = hypre_VectorData(x_tmp);
    }
    int i;
+
+
+#ifdef HYPRE_USING_CUSPARSE
+   // gpuErrchk(cudaPeekAtLastError());
+   //gpuErrchk(cudaDeviceSynchronize());
+   
+   if (b!=y){
+#pragma omp target teams  distribute  parallel for private(i)
+     for(i=0;i<y_size;i++) y_data[i] = b_data[i];
+   }
+   
+#pragma omp target data use_device_ptr(A_data,x_data,b_data,y_data,A_i,A_j)
+   cusparseErrchk(cusparseDcsrmv(handle ,
+				 CUSPARSE_OPERATION_NON_TRANSPOSE, 
+				 A->num_rows, A->num_cols, A->num_nonzeros,
+				 &alpha, descr,
+				 A_data ,A_i,A_j,
+				 x_data, &beta, y_data));
+  
+  
+// if (!GetAsyncMode()){
+   //gpuErrchk(cudaPeekAtLastError());
+   //gpuErrchk(cudaDeviceSynchronize());
+   gpuErrchk(cudaStreamSynchronize(s[4]));
+ //}
+#else
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
    int num_threads=64; // >64  for 100% Theoritical occupancy
    int num_teams = (num_rows+num_rows%num_threads)/num_threads;
@@ -426,8 +497,11 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 	 tempx += A_data[jj] * x_data[A_j[jj]];
        }
        y_data[i] = alpha*tempx+beta*b_data[i];
+       yc_data[i]-=y_data[i];
      }
-   UpdateDRC(y);
+#endif
+
+UpdateDRC(y);
    if (x == y) hypre_SeqVectorDestroy(x_tmp);
    //printRC(y,"Inside MatvecOOMP");
    //hypre_SeqVectorUpdateHost(y);
@@ -447,7 +521,22 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex    alpha,
                                  hypre_Vector    *y,
                                  HYPRE_Int        offset     )
 {
+  return 0;
   hypre_CSRMatrixMatvecOutOfPlaceOOMP(alpha,A,x,beta,b,y,offset);
   hypre_SeqVectorUpdateHost(y);
   return 0;
 }
+/* int hypre_CSRMatrixSortHost(hypre_CSRMatrix *A){ */
+/*   HYPRE_Int      ierr=0; */
+/*   HYPRE_Int      num_rows = hypre_CSRMatrixNumRows(A); */
+/*   HYPRE_Int     *A_i = hypre_CSRMatrixI(A); */
+/*   HYPRE_Int     *A_j = hypre_CSRMatrixJ(A); */
+/*   HYPRE_Complex *A_data=hypre_CSRMatrixData(A); */
+
+/*   HYPRE_Int i, j; */
+/*   //printf("hypre_CSRMatrixSortHost\n"); */
+/*   for (i=0; i < num_rows; i++){ */
+/*     //printf("Row %d size %d \n",i,(A_i[i+1]-A_i[i])); */
+/*     mysort(&A_data[A_i[i]],&A_j[A_i[i]],(A_i[i+1]-A_i[i])); */
+/*   } */
+/* } */

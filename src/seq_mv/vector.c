@@ -747,8 +747,9 @@ hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x){
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 
 void hypre_SeqVectorMapToDevice(hypre_Vector *x){
+  if (x==NULL) return;
   if (x->size>0){
-#pragma omp target enter data map(to:x[0:0])
+    //#pragma omp target enter data map(to:x[0:0])
 #pragma omp target enter data map(to:x->data[0:x->size])
     x->mapped=1;
     SetDRC(x);
@@ -757,7 +758,7 @@ void hypre_SeqVectorMapToDevice(hypre_Vector *x){
 void hypre_SeqVectorMapToDevicePrint(hypre_Vector *x){
   printf("SVmap %p [%p,%p] %d Size = %d ",x,x->data,x->data+x->size,x->mapped,x->size);
   if (x->size>0){
-#pragma omp target enter data map(to:x[0:0])
+    //#pragma omp target enter data map(to:x[0:0])
 #pragma omp target enter data map(to:x->data[0:x->size])
   x->mapped=1;
   SetDRC(x);
@@ -767,16 +768,18 @@ void hypre_SeqVectorMapToDevicePrint(hypre_Vector *x){
 
 void hypre_SeqVectorUnMapFromDevice(hypre_Vector *x){
   //printf("map %p [%p,%p] %d Size = %d\n",x,x->data,x->data+x->size,x->mapped,x->size);
-#pragma omp target exit data map(from:x[0:0])
+  //#pragma omp target exit data map(from:x[0:0])
 #pragma omp target exit data map(from:x->data[0:x->size])
   x->mapped=0;
 }
 void hypre_SeqVectorUpdateDevice(hypre_Vector *x){
+  if (x==NULL) return;
 #pragma omp target update to(x->data[0:x->size])
   SetDRC(x);
 }
 
 void hypre_SeqVectorUpdateHost(hypre_Vector *x){
+  if (x==NULL) return;
 #pragma omp target update from(x->data[0:x->size])
   SetHRC(x);
 }

@@ -718,6 +718,7 @@ hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a){
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A){
+  if (A==NULL) return;
   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
@@ -725,13 +726,15 @@ void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A){
   HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
   HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
   //printf("MAPPED %p sizes = %d %d \n",A,nnz,num_rows);
+
 #pragma omp target enter data map(to:A[0:0])
-#pragma omp target enter data map(alloc:A_data[0:nnz]) if (nnz>0)
-#pragma omp target enter data map(alloc:A_i[0:num_rows+1]) if (num_rows>0)
-#pragma omp target enter data map(alloc:A_j[0:nnz]) if (nnz>0)
+#pragma omp target enter data map(alloc:A_data[:nnz]) if (nnz>0)
+#pragma omp target enter data map(alloc:A_i[:num_rows+1]) if (num_rows>0)
+#pragma omp target enter data map(alloc:A_j[:nnz]) if (nnz>0)
   A->mapped=0;
 }
 void hypre_CSRMatrixUpdateToDevice(hypre_CSRMatrix *A){
+  if (A==NULL) return;
   HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
   HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
   HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
@@ -740,9 +743,12 @@ void hypre_CSRMatrixUpdateToDevice(hypre_CSRMatrix *A){
   HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
   //printf("Updating MAtrix...%p \n",A);
   //#pragma omp target update device(0) to(A[0:0])
-#pragma omp target update device(0) to(A_data[0:nnz]) if (nnz>0)
-#pragma omp target update device(0) to(A_i[0:num_rows+1]) if (num_rows>0)
-#pragma omp target update device(0) to(A_j[0:nnz]) if (nnz>0)
+  //printf("Updating MAtrix data...%p %d\n",A_data,nnz);
+#pragma omp target update device(0) to(A_data[:nnz]) if (nnz>0)
+  //printf("Updating MAtrix I ...%p %d\n",A_i,num_rows);
+#pragma omp target update device(0) to(A_i[:num_rows+1]) if (num_rows>0)
+  //printf("Updating MAtrix J ...%p %d\n",A_j,nnz);
+#pragma omp target update device(0) to(A_j[:nnz]) if (nnz>0)
   A->mapped=1;
   //printf("Done \n");
 }
@@ -753,7 +759,7 @@ void hypre_CSRMatrixUnMapFromDevice(hypre_CSRMatrix *A){
   HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
   HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
   HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
-#pragma omp target exit data map(delete:A[0:0])
+  //#pragma omp target exit data map(delete:A[0:0])
 #pragma omp target exit data map(delete:A_data[0:nnz]) if (nnz>0)
 #pragma omp target exit data map(delete:A_i[0:num_rows+1]) if (num_rows>0)
 #pragma omp target exit data map(delete:A_j[0:nnz]) if (nnz>0)

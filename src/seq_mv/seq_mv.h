@@ -399,6 +399,8 @@ void hypre_SeqVectorUpdateHost(hypre_Vector *x);
 #ifdef __cplusplus
 }
 #endif
+
+
 inline void UpdateHRC(hypre_Vector *v){
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   v->hrc++;

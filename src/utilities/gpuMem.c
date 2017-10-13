@@ -5,7 +5,7 @@
 //#if defined(HYPRE_USE_MANAGED) && !defined(HYPRE_USE_GPU)
 //struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1,.memoryHWM=0};
 //#endif
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE)
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -99,6 +99,7 @@ void hypre_GPUInit(hypre_int use_device){
       
     cusparseErrchk(cusparseCreate(&(HYPRE_CUSPARSE_HANDLE)));
     cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,HYPRE_STREAM(4)));
+    //cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,0)); // Cusparse MxV happens in default stream
     cusparseErrchk(cusparseCreateMatDescr(&(HYPRE_CUSPARSE_MAT_DESCR))); 
     cusparseErrchk(cusparseSetMatType(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_MATRIX_TYPE_GENERAL));
     cusparseErrchk(cusparseSetMatIndexBase(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_INDEX_BASE_ZERO));

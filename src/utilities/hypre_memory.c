@@ -147,6 +147,10 @@ hypre_CAlloc( size_t count,
 size_t memsize(const void *ptr){
 return ((size_t*)ptr)[-MEM_PAD_LEN];
 }
+#else
+size_t memsize(const void *ptr){
+  return 0;
+}
 #endif
 /*--------------------------------------------------------------------------
  * hypre_ReAlloc

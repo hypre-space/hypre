@@ -1123,7 +1123,7 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#ifdef HYPRE_USE_MANAGED
+#if defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE)
 #include <cuda_runtime_api.h>
 #include <cusparse.h>
 #include <cublas_v2.h>
@@ -1150,7 +1150,7 @@ hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
 #endif
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) ||   defined(HYPRE_USING_CUSPARSE)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
 
@@ -1279,7 +1279,7 @@ void cudaSafeFree(void *ptr,int padding);
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE)
 #include <cuda_runtime_api.h>
 #define MAX_HGS_ELEMENTS 10
 

@@ -769,7 +769,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
 
    *l1_norm_ptr = l1_norm;
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-#pragma omp target enter data map(to:l1_norm[0:num_rows])
+#pragma omp target enter data map(to:l1_norm[0:num_rows]) if (num_rows>0)
 #endif
    return hypre_error_flag;
 }

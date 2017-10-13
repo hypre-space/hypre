@@ -12,7 +12,7 @@
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE)
 #include <cuda_runtime_api.h>
 #define MAX_HGS_ELEMENTS 10
 

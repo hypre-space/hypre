@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#ifdef HYPRE_USE_MANAGED
+#if defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE)
 #include <cuda_runtime_api.h>
 #include <cusparse.h>
 #include <cublas_v2.h>
@@ -37,7 +37,7 @@ hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
 #endif
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) ||   defined(HYPRE_USING_CUSPARSE)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
 
