@@ -6850,11 +6850,8 @@ fi
 
 if test "$hypre_using_global_partition" = "no"
 then
-   if test "$hypre_using_mpi" != "no"
-   then
       $as_echo "#define HYPRE_NO_GLOBAL_PARTITION 1" >>confdefs.h
 
-   fi
 fi
 
 if test "$hypre_user_chose_blas" = "yes"

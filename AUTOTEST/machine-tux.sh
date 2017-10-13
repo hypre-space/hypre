@@ -91,6 +91,10 @@ co="--with-strict-checking"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--with-strict-checking
 
+co="--with-strict-checking --enable-global-partition"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--with-strict-global
+
 co="--enable-shared"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-shared

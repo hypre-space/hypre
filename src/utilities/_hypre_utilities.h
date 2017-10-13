@@ -136,6 +136,7 @@ extern "C" {
 #define MPI_MIN             hypre_MPI_MIN              
 #define MPI_MAX             hypre_MPI_MAX              
 #define MPI_LOR             hypre_MPI_LOR              
+#define MPI_LAND            hypre_MPI_LAND             
 #define MPI_SUCCESS         hypre_MPI_SUCCESS
 #define MPI_STATUSES_IGNORE hypre_MPI_STATUSES_IGNORE
 
@@ -240,6 +241,7 @@ typedef HYPRE_Int  hypre_MPI_Aint;
 #define  hypre_MPI_MIN 1
 #define  hypre_MPI_MAX 2
 #define  hypre_MPI_LOR 3
+#define  hypre_MPI_LAND 4
 #define  hypre_MPI_SUCCESS 0
 #define  hypre_MPI_STATUSES_IGNORE 0
 
