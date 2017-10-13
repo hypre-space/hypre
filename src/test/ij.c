@@ -89,7 +89,7 @@ extern HYPRE_Int hypre_FlexGMRESModifyPCDefault(void *precond_data, HYPRE_Int it
 #ifdef __cplusplus
 }
 #endif
-#define SECOND_TIME 0
+#define SECOND_TIME 1
  
 hypre_int
 main( hypre_int argc,
@@ -5436,11 +5436,11 @@ main( hypre_int argc,
       /* set F relaxation strategy */
       HYPRE_MGRSetFRelaxMethod(mgr_solver, mgr_frelax_method);
       /* set relax type for single level F-relaxation and post-relaxation */
-      HYPRE_MGRSetRelaxType(mgr_solver, 0);
-      HYPRE_MGRSetNumRelaxSweeps(mgr_solver, 2);
+      HYPRE_MGRSetRelaxType(mgr_solver, mgr_relax_type);
+      HYPRE_MGRSetNumRelaxSweeps(mgr_solver, mgr_num_relax_sweeps);
       /* set interpolation type */
-      HYPRE_MGRSetInterpType(mgr_solver, 2);
-      HYPRE_MGRSetNumInterpSweeps(mgr_solver, 2);
+      HYPRE_MGRSetInterpType(mgr_solver, mgr_interp_type);
+      HYPRE_MGRSetNumInterpSweeps(mgr_solver, mgr_num_interp_sweeps);
       /* set print level */
       HYPRE_MGRSetPrintLevel(mgr_solver, 3);
       /* set max iterations */
@@ -5515,7 +5515,6 @@ main( hypre_int argc,
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);
-      HYPRE_MGRSetCoarseSolver( mgr_solver, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
       HYPRE_MGRSetup(mgr_solver, parcsr_A, b, x);
       HYPRE_MGRSolve(mgr_solver, parcsr_A, b, x);
 #endif
