@@ -88,7 +88,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 	HYPRE_Int    blk_size  = (mgr_data -> block_size);
         HYPRE_Int coarse_size = 0;
   
-	hypre_ParAMGData    **FrelaxVcycleData = NULL;  
+	hypre_ParAMGData    **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);  
 	HYPRE_Int Frelax_method = (mgr_data -> Frelax_method);
 
 	/* ----- begin -----*/
@@ -250,7 +250,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   coarse_size = final_coarse_size;
 
   /* Free Previously allocated data, if any not destroyed */
-  if (A_array || P_array || RT_array || CF_marker_array || FrelaxVcycleData)
+  if (A_array || P_array || RT_array || CF_marker_array)
   {
     for (j = 1; j < (old_num_coarse_levels); j++)
     {
@@ -280,22 +280,32 @@ hypre_MGRSetup( void               *mgr_vdata,
        hypre_TFree(CF_marker_array[j]);
        CF_marker_array[j] = NULL;
          }
-         
-         if (FrelaxVcycleData[j])
-         {
-            hypre_MGRDestroyFrelaxVcycleData(FrelaxVcycleData[j]);
-            FrelaxVcycleData[j] = NULL;
-         }
     }
     hypre_TFree(P_array);
     P_array = NULL;
     hypre_TFree(RT_array);
     RT_array = NULL;
     hypre_TFree(CF_marker_array);
-    CF_marker_array = NULL;
-    hypre_TFree(FrelaxVcycleData);
-    FrelaxVcycleData = NULL;    
+    CF_marker_array = NULL;   
   }
+
+   /* Free previously allocated FrelaxVcycleData if not destroyed
+   */
+   if(FrelaxVcycleData)
+   {
+      for (j = 0; j < old_num_coarse_levels; j++)
+      {
+         if (FrelaxVcycleData[j])
+         {
+            hypre_MGRDestroyFrelaxVcycleData(FrelaxVcycleData[j]);
+            FrelaxVcycleData[j] = NULL;
+         }
+      }
+      hypre_TFree(FrelaxVcycleData);
+      FrelaxVcycleData == NULL;   
+   }
+   // reset pointer to NULL
+   (mgr_data -> FrelaxVcycleData) = FrelaxVcycleData;
 
   /* destroy final coarse grid matrix, if not previously destroyed */
   if((mgr_data -> RAP))
@@ -414,8 +424,6 @@ hypre_MGRSetup( void               *mgr_vdata,
     RT_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels);
   if (CF_marker_array == NULL)
     CF_marker_array = hypre_CTAlloc(HYPRE_Int*, max_num_coarse_levels);
-  if (FrelaxVcycleData == NULL)
-    FrelaxVcycleData = hypre_CTAlloc(hypre_ParAMGData*, max_num_coarse_levels);    
 
   /* set pointers to mgr data */
   (mgr_data -> A_array) = A_array;
@@ -453,7 +461,6 @@ hypre_MGRSetup( void               *mgr_vdata,
   (mgr_data -> F_array) = F_array;
   (mgr_data -> U_array) = U_array;
 
-  (mgr_data -> FrelaxVcycleData) = FrelaxVcycleData;
   /* begin coarsening loop */
 	num_coarsening_levs = max_num_coarse_levels;
 	/* initialize level data matrix here */
@@ -663,9 +670,14 @@ hypre_MGRSetup( void               *mgr_vdata,
       }
    }
    
-   // Setup Vcycle data for Frelax_method > 0 
+   /* Setup Vcycle data for Frelax_method > 0 */
    if(Frelax_method == 1)
    {
+      /* allocate memory and set pointer to (mgr_data -> FrelaxVcycleData) */
+      if(FrelaxVcycleData == NULL)
+         FrelaxVcycleData = hypre_CTAlloc(hypre_ParAMGData*, max_num_coarse_levels);
+      (mgr_data -> FrelaxVcycleData) = FrelaxVcycleData;  
+      /* loop over levels */
       for(i=0; i<(mgr_data->num_coarse_levels); i++)
       { 
          FrelaxVcycleData[i] = (hypre_ParAMGData*) hypre_MGRCreateFrelaxVcycleData();
