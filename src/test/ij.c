@@ -3203,7 +3203,7 @@ main( hypre_int argc,
          mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int, mgr_num_reserved_nodes);
          for(i=0; i<mgr_num_reserved_nodes; i++)
          { /* generate artificial reserved nodes */
-            mgr_reserved_coarse_indexes[i] = i;//2*i+1;
+            mgr_reserved_coarse_indexes[i] = last_local_row-i;//2*i+1;
          }
       
          /* set MGR data by block */
@@ -5403,7 +5403,7 @@ main( hypre_int argc,
       mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int, mgr_num_reserved_nodes);
       for(i=0; i<mgr_num_reserved_nodes; i++)
       { /* generate artificial reserved nodes */
-         mgr_reserved_coarse_indexes[i] = i;//2*i+1;
+         mgr_reserved_coarse_indexes[i] = last_local_row-i;//2*i+1;
       }
       
       /* set MGR data by block */
