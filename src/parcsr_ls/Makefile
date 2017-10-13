@@ -109,6 +109,7 @@ FILES =\
  par_rap_communication.c\
  par_rotate_7pt.c\
  par_vardifconv.c\
+ par_vardifconv_rs.c\
  par_relax.c\
  par_relax_more.c\
  par_relax_interface.c\

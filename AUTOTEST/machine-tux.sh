@@ -91,6 +91,10 @@ co="--with-strict-checking"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--with-strict-checking
 
+co="--with-strict-checking --enable-global-partition"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--with-strict-global
+
 co="--enable-shared"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-shared
@@ -100,12 +104,12 @@ co="--enable-bigint --enable-debug"
 ./renametest.sh basic $output_dir/basic--enable-bigint
 
 co="--enable-single --enable-debug"
-test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -single
-renametest.sh basic $output_dir/basic--enable-single
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -single
+./renametest.sh basic $output_dir/basic--enable-single
 
 co="--enable-longdouble --enable-debug"
-test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
-renametest.sh basic $output_dir/basic--enable-longdouble
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
+./renametest.sh basic $output_dir/basic--enable-longdouble
 
 co="--enable-maxdim=4 --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
@@ -149,12 +153,12 @@ co="-DHYPRE_BIGINT=ON"
 ./renametest.sh cmake $output_dir/cmake-bigint
 
 co="-DHYPRE_SINGLE=ON"
-test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -single
-renametest.sh cmake $output_dir/cmake-single
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -single
+./renametest.sh cmake $output_dir/cmake-single
 
 co="-DHYPRE_LONG_DOUBLE=ON"
-test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
-renametest.sh cmake $output_dir/cmake-longdouble
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
+./renametest.sh cmake $output_dir/cmake-longdouble
 
 # cmake build doesn't currently support maxdim
 # cmake build doesn't currently support complex
