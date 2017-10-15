@@ -1105,11 +1105,12 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    int    localNRows, localNnz, *countArray, irow, jcol, *cscIA, *cscJA;
    int    colNum, index, *etree, permcSpec, lwork, panelSize, relax, info;
    int    *permC, *permR, *diagIA, *diagJA;
-   double *cscAA, diagPivotThresh, dropTol, *rVec, rnorm;
+   double *cscAA, diagPivotThresh, *rVec, rnorm;
    double *diagAA;
    trans_t           trans;
    superlu_options_t slu_options;
    SuperLUStat_t     slu_stat;
+   GlobalLU_t        Glu;
    SuperMatrix superLU_Amat;
    SuperMatrix superLU_Lmat;
    SuperMatrix superLU_Umat;
@@ -1172,7 +1173,6 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    slu_options.SymmetricMode = NO;
    sp_preorder(&slu_options, &superLU_Amat, permC, etree, &AC);
    diagPivotThresh = 1.0;
-   dropTol = 0.0;
    panelSize = sp_ienv(1);
    relax = sp_ienv(2);
    StatInit(&slu_stat);
@@ -1180,9 +1180,12 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    slu_options.ColPerm = MY_PERMC;
    slu_options.DiagPivotThresh = diagPivotThresh;
 
-   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//          etree, NULL, lwork, permC, permR, &superLU_Lmat,
+//          &superLU_Umat, &slu_stat, &info);
+   dgstrf(&slu_options, &AC, relax, panelSize,
           etree, NULL, lwork, permC, permR, &superLU_Lmat,
-          &superLU_Umat, &slu_stat, &info);
+          &superLU_Umat, &Glu, &slu_stat, &info);
 
    Destroy_CompCol_Permuted(&AC);
    Destroy_CompCol_Matrix(&superLU_Amat);

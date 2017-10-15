@@ -15,8 +15,8 @@ include ../../config/Makefile.config
 
 BASE_DIR = ${HYPRE_FEI_BASE_DIR}
 
-SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU/SRC
-SUPERLU_LIB     = -L$(srcdir)/../SuperLU
+#SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU/SRC
+#SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 
 CINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
 CXXINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
@@ -40,7 +40,8 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../../distributed_matrix\
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../fei-base\
- ${SUPERLU_INCLUDE}\
+ -I${SUPERLU_INCLUDE}\
+ -I${DSUPERLU_INCLUDE}\
  ${CINCLUDES}
 
 CXX_COMPILE_FLAGS = \
@@ -60,7 +61,8 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../femli\
  -I$(srcdir)/../fei-base\
- ${SUPERLU_INCLUDE}\
+ -I${SUPERLU_INCLUDE}\
+ -I${DSUPERLU_INCLUDE}\
  ${CXXINCLUDES}
 
 HEADERS =\

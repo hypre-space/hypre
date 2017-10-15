@@ -59,12 +59,13 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    int      nnz, row_num, irow, i, j, rowSize, *cols, *recvCntArray;
    int      *dispArray, itemp, *cntArray, icol, colNum, index;
    int      *etree, permcSpec, lwork, panel_size, relax, info, mypid, nprocs;
-   double   *vals, *csrAA, *gcsrAA, *gcscAA, diagPivotThresh, dropTol;
+   double   *vals, *csrAA, *gcsrAA, *gcscAA, diagPivotThresh;
    MPI_Comm mpiComm;
    hypre_ParCSRMatrix *hypreA;
    SuperMatrix        AC;
    superlu_options_t  slu_options;
    SuperLUStat_t      slu_stat;
+   GlobalLU_t         Glu;
 
    /* ---------------------------------------------------------------
     * fetch matrix
@@ -232,7 +233,6 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    slu_options.SymmetricMode = NO;
    sp_preorder(&slu_options, &superLU_Amat, permC_, etree, &AC);
    diagPivotThresh = 1.0;
-   dropTol = 0.0;
    panel_size = sp_ienv(1);
    relax = sp_ienv(2);
    StatInit(&slu_stat);
@@ -240,9 +240,12 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
    slu_options.ColPerm = MY_PERMC;
    slu_options.DiagPivotThresh = diagPivotThresh;
 
-   dgstrf(&slu_options, &AC, dropTol, relax, panel_size,
+//   dgstrf(&slu_options, &AC, dropTol, relax, panel_size,
+//          etree, NULL, lwork, permC_, permR_, &superLU_Lmat,
+//          &superLU_Umat, &slu_stat, &info);
+   dgstrf(&slu_options, &AC, relax, panel_size,
           etree, NULL, lwork, permC_, permR_, &superLU_Lmat,
-          &superLU_Umat, &slu_stat, &info);
+          &superLU_Umat, &Glu, &slu_stat, &info);
    Destroy_CompCol_Permuted(&AC);
    Destroy_CompCol_Matrix(&superLU_Amat);
    delete [] etree;
