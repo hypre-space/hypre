@@ -1266,9 +1266,6 @@ then
    fi
    if test "$hypre_using_hypre_blas" = "yes"
    then
-      HYPRE_BLAS_SRC_DIR="$HYPRE_SRCDIR/blas"
-      HYPRE_BLAS_FILES="$HYPRE_SRCDIR/blas/*.o"
-dnl      BLAS_DIR="$HYPRE_SRCDIR/hypre/lib"
       BLASLIBDIRS=""
       BLASLIBS=""
       AC_DEFINE(HYPRE_USING_HYPRE_BLAS, 1, [Using internal HYPRE routines])
@@ -1312,9 +1309,6 @@ then
    fi
    if test "$hypre_using_hypre_lapack" = "yes"
    then
-      HYPRE_LAPACK_SRC_DIR="$HYPRE_SRCDIR/lapack"
-      HYPRE_LAPACK_FILES="$HYPRE_SRCDIR/lapack/*.o"
-dnl      LAPACK_DIR="$HYPRE_SRCDIR/hypre/lib"
       LAPACKLIBDIRS=""
       LAPACKLIBS=""
       AC_DEFINE(HYPRE_USING_HYPRE_LAPACK, 1, [Using internal HYPRE routines])
@@ -1790,12 +1784,8 @@ dnl *********************************************************************
 dnl * BLAS & LAPACK related information
 dnl *********************************************************************
 AC_SUBST(HYPRE_KOKKOS_PATH)
-AC_SUBST(HYPRE_BLAS_SRC_DIR)
-AC_SUBST(HYPRE_BLAS_FILES)
 AC_SUBST(BLASLIBDIRS)
 AC_SUBST(BLASLIBS)
-AC_SUBST(HYPRE_LAPACK_SRC_DIR)
-AC_SUBST(HYPRE_LAPACK_FILES)
 AC_SUBST(LAPACKLIBDIRS)
 AC_SUBST(LAPACKLIBS)
 

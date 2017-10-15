@@ -617,12 +617,8 @@ HYPRE_RAJA_INCLUDE
 HYPRE_RAJA_LIB_DIR
 LAPACKLIBS
 LAPACKLIBDIRS
-HYPRE_LAPACK_FILES
-HYPRE_LAPACK_SRC_DIR
 BLASLIBS
 BLASLIBDIRS
-HYPRE_BLAS_FILES
-HYPRE_BLAS_SRC_DIR
 HYPRE_KOKKOS_PATH
 HYPRE_FEI_FEMLI_FILES
 HYPRE_FEI_HYPRE_FILES
@@ -7160,8 +7156,6 @@ $as_echo "$as_me: WARNING: ***************************************" >&2;}
    fi
    if test "$hypre_using_hypre_blas" = "yes"
    then
-      HYPRE_BLAS_SRC_DIR="$HYPRE_SRCDIR/blas"
-      HYPRE_BLAS_FILES="$HYPRE_SRCDIR/blas/*.o"
       BLASLIBDIRS=""
       BLASLIBS=""
 
@@ -7355,8 +7349,6 @@ $as_echo "$as_me: WARNING: ***************************************" >&2;}
    fi
    if test "$hypre_using_hypre_lapack" = "yes"
    then
-      HYPRE_LAPACK_SRC_DIR="$HYPRE_SRCDIR/lapack"
-      HYPRE_LAPACK_FILES="$HYPRE_SRCDIR/lapack/*.o"
       LAPACKLIBDIRS=""
       LAPACKLIBS=""
 
@@ -8157,10 +8149,6 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
-
-
-
-
 
 
 

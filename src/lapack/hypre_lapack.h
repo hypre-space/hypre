@@ -129,3 +129,5 @@
 #define lsame_   hypre_lapack_lsame
 #define xerbla_  hypre_lapack_xerbla
 
+/* this is needed so that lapack can call external BLAS */
+#include "_hypre_blas.h"

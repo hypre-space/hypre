@@ -15,7 +15,7 @@
 
 include ../config/Makefile.config
 
-C_COMPILE_FLAGS = ${INCLUDES} -I.. -I../utilities
+C_COMPILE_FLAGS = ${INCLUDES} -I.. -I../blas -I../utilities
 
 LAPACK_HEADERS =  f2c.h hypre_lapack.h
 LAPACK_FILES = \

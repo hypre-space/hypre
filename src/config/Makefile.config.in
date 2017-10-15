@@ -98,18 +98,14 @@ INCLUDES = @CALIPER_INCLUDE@ @HYPRE_RAJA_INCLUDE@ @HYPRE_KOKKOS_INCLUDE@
 ##################################################################
 ##  LAPACK Library Flags 
 ##################################################################
-HYPRE_LAPACK_SRC_DIR = @HYPRE_LAPACK_SRC_DIR@
-HYPRE_LAPACK_FILES   = @HYPRE_LAPACK_FILES@
-LAPACKLIBS           = @LAPACKLIBS@
-LAPACKLIBDIRS        = @LAPACKLIBDIRS@
+LAPACKLIBS      = @LAPACKLIBS@
+LAPACKLIBDIRS   = @LAPACKLIBDIRS@
 
 ##################################################################
 ##  BLAS Library Flags 
 ##################################################################
-HYPRE_BLAS_SRC_DIR = @HYPRE_BLAS_SRC_DIR@
-HYPRE_BLAS_FILES   = @HYPRE_BLAS_FILES@
-BLASLIBS           = @BLASLIBS@
-BLASLIBDIRS        = @BLASLIBDIRS@
+BLASLIBS        = @BLASLIBS@
+BLASLIBDIRS     = @BLASLIBDIRS@
 
 ##################################################################
 ##  MPI options

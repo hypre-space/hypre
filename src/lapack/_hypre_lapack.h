@@ -19,6 +19,7 @@
 #ifndef HYPRE_LAPACK_H
 #define HYPRE_LAPACK_H
 
+#include "_hypre_utilities.h"
 #include "fortran.h"
 
 #ifdef __cplusplus
