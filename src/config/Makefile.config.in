@@ -10,7 +10,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 ###############################################################################
 ##  All configurable variables are defined in the file named Makefile.config.in
 ##  When Autoconf is run, it will create a file named Makefile.config which
@@ -132,28 +131,38 @@ CALIPER_INCLUDE = @CALIPER_INCLUDE@
 CALIPER_LIBS    = @CALIPER_LIBS@
 
 ##################################################################
+##  SuperLU options
+##################################################################
+SUPERLU_INCLUDE = @SUPERLU_INCLUDE@
+SUPERLU_LIBS    = @SUPERLU_LIBS@
+
+##################################################################
+##  DsuperLU options
+##################################################################
+DSUPERLU_INCLUDE = @DSUPERLU_INCLUDE@
+DSUPERLU_LIBS    = @DSUPERLU_LIBS@
+
+##################################################################
 ##  FEI options
 ##################################################################
 HYPRE_FEI_SRC_DIR       = @HYPRE_FEI_SRC_DIR@
 HYPRE_FEI_BASE_DIR      = @HYPRE_FEI_BASE_DIR@
 HYPRE_FEI_SUBDIRS       = @HYPRE_FEI_SUBDIRS@
-HYPRE_FEI_SUPERLU_FILES = @HYPRE_FEI_SUPERLU_FILES@
 HYPRE_FEI_HYPRE_FILES   = @HYPRE_FEI_HYPRE_FILES@
 HYPRE_FEI_FEMLI_FILES   = @HYPRE_FEI_FEMLI_FILES@
-HYPRE_FEI_CDEFS         = @HYPRE_FEI_CDEFS@
 
 ##################################################################
 ##  RAJA options
 ##################################################################
-HYPRE_RAJA_LIB_DIR       = @HYPRE_RAJA_LIB_DIR@
-HYPRE_RAJA_INCLUDE       = @HYPRE_RAJA_INCLUDE@
-HYPRE_RAJA_LIB           = @HYPRE_RAJA_LIB@
+HYPRE_RAJA_LIB_DIR      = @HYPRE_RAJA_LIB_DIR@
+HYPRE_RAJA_INCLUDE      = @HYPRE_RAJA_INCLUDE@
+HYPRE_RAJA_LIB          = @HYPRE_RAJA_LIB@
 
 ##################################################################
 ##  kokkos options
 ##################################################################
-HYPRE_KOKKOS_SRC_DIR = @HYPRE_KOKKOS_SRC_DIR@
-HYPRE_KOKKOS_LIB_DIR = @HYPRE_KOKKOS_LIB_DIR@
-HYPRE_KOKKOS_INCLUDE = @HYPRE_KOKKOS_INCLUDE@
-HYPRE_KOKKOS_LIB         = @HYPRE_KOKKOS_LIB@
+HYPRE_KOKKOS_SRC_DIR    = @HYPRE_KOKKOS_SRC_DIR@
+HYPRE_KOKKOS_LIB_DIR    = @HYPRE_KOKKOS_LIB_DIR@
+HYPRE_KOKKOS_INCLUDE    = @HYPRE_KOKKOS_INCLUDE@
+HYPRE_KOKKOS_LIB        = @HYPRE_KOKKOS_LIB@
 @HYPRE_KOKKOS_INC_FILE@

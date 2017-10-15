@@ -596,6 +596,10 @@ ac_default_prefix=`pwd`/hypre
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 AR
+DSUPERLU_LIBS
+DSUPERLU_INCLUDE
+SUPERLU_LIBS
+SUPERLU_INCLUDE
 CALIPER_LIBS
 CALIPER_INCLUDE
 HYPRE_NVCC_MAKEFILE
@@ -620,8 +624,6 @@ BLASLIBDIRS
 HYPRE_BLAS_FILES
 HYPRE_BLAS_SRC_DIR
 HYPRE_KOKKOS_PATH
-HYPRE_FEI_CDEFS
-HYPRE_FEI_SUPERLU_FILES
 HYPRE_FEI_FEMLI_FILES
 HYPRE_FEI_HYPRE_FILES
 HYPRE_FEI_SUBDIRS
@@ -763,8 +765,13 @@ with_fei_inc_dir
 with_print_errors
 with_timing
 with_openmp
-with_fei
 with_superlu
+with_superlu_include
+with_superlu_lib
+with_dsuperlu
+with_dsuperlu_include
+with_dsuperlu_lib
+with_fei
 with_mli
 with_MPI
 with_cuda
@@ -1511,8 +1518,20 @@ Optional Packages:
   --with-timing           Use HYPRE timing routines.
   --with-openmp           Use OpenMP. This may affect which compiler is
                           chosen.
+  --with-superlu          Use external SuperLU library.
+  --with-superlu-include=DIR
+                          Directory where SuperLU is installed.
+  --with-superlu-lib=LIBS LIBS is space-separated linkable list (enclosed in
+                          quotes) of libraries needed for SuperLU. OK to use
+                          -L and -l flags in the list
+  --with-dsuperlu         Use external DSuperLU library.
+  --with-dsuperlu-include=DIR
+                          Directory where DSuperLU is installed.
+  --with-dsuperlu-lib=LIBS
+                          LIBS is space-separated linkable list (enclosed in
+                          quotes) of libraries needed for DSuperLU. OK to use
+                          -L and -l flags in the list
   --with-fei              Use internal FEI routines.
-  --with-superlu          Use internal SuperLU routines.
   --with-mli              Use MLI
   --with-MPI              DEFAULT: Compile with MPI. Selecting --without-MPI
                           may affect which compiler is chosen.
@@ -2388,9 +2407,11 @@ hypre_using_cxx=yes
 
 hypre_using_mpi=yes
 
+hypre_using_superlu=no
+hypre_using_dsuperlu=no
+
 hypre_using_fei=yes
-hypre_using_superlu=yes
-hypre_using_mli=yes
+hypre_using_mli=no
 
 hypre_using_openmp=no
 hypre_using_insure=no
@@ -2993,6 +3014,7 @@ fi
 
 
 
+
 # Check whether --with-MPI-include was given.
 if test "${with_MPI_include+set}" = set; then :
   withval=$with_MPI_include; for mpi_dir in $withval; do
@@ -3042,6 +3064,7 @@ fi
 
 
 
+
 # Check whether --with-blas-lib was given.
 if test "${with_blas_lib+set}" = set; then :
   withval=$with_blas_lib; for blas_lib in $withval; do
@@ -3074,6 +3097,7 @@ if test "${with_blas_lib_dirs+set}" = set; then :
  hypre_blas_lib_dir_old_style=yes
 
 fi
+
 
 
 
@@ -3233,16 +3257,6 @@ fi
 
 
 
-# Check whether --with-fei was given.
-if test "${with_fei+set}" = set; then :
-  withval=$with_fei; case "${withval}" in
-    no) hypre_using_fei=no ;;
-    *)  hypre_using_fei=yes ;;
- esac
-
-fi
-
-
 
 # Check whether --with-superlu was given.
 if test "${with_superlu+set}" = set; then :
@@ -3252,6 +3266,83 @@ if test "${with_superlu+set}" = set; then :
  esac
 
 fi
+
+
+if test "x$with_superlu" = "xyes"; then :
+
+$as_echo "#define HAVE_SUPERLU 1" >>confdefs.h
+
+fi
+
+
+# Check whether --with-superlu-include was given.
+if test "${with_superlu_include+set}" = set; then :
+  withval=$with_superlu_include; for superlu_inc_dir in $withval; do
+    SUPERLU_INCLUDE="-I$superlu_inc_dir $SUPERLU_INCLUDE"
+ done
+
+fi
+
+
+
+# Check whether --with-superlu-lib was given.
+if test "${with_superlu_lib+set}" = set; then :
+  withval=$with_superlu_lib; for superlu_lib in $withval; do
+    SUPERLU_LIBS="$SUPERLU_LIBS $superlu_lib"
+ done
+
+fi
+
+
+
+
+# Check whether --with-dsuperlu was given.
+if test "${with_dsuperlu+set}" = set; then :
+  withval=$with_dsuperlu; case "${withval}" in
+    no) hypre_using_dsuperlu=no ;;
+    *)  hypre_using_dsuperlu=yes ;;
+ esac
+
+fi
+
+
+if test "x$with_dsuperlu" = "xyes"; then :
+
+$as_echo "#define HAVE_DSUPERLU 1" >>confdefs.h
+
+fi
+
+
+# Check whether --with-dsuperlu-include was given.
+if test "${with_dsuperlu_include+set}" = set; then :
+  withval=$with_dsuperlu_include; for dsuperlu_inc_dir in $withval; do
+    DSUPERLU_INCLUDE="-I$dsuperlu_inc_dir $DSUPERLU_INCLUDE"
+ done
+
+fi
+
+
+
+# Check whether --with-dsuperlu-lib was given.
+if test "${with_dsuperlu_lib+set}" = set; then :
+  withval=$with_dsuperlu_lib; for dsuperlu_lib in $withval; do
+    DSUPERLU_LIBS="$DSUPERLU_LIBS $dsuperlu_lib"
+ done
+
+fi
+
+
+
+
+# Check whether --with-fei was given.
+if test "${with_fei+set}" = set; then :
+  withval=$with_fei; case "${withval}" in
+    no) hypre_using_fei=no ;;
+    *)  hypre_using_fei=yes ;;
+ esac
+
+fi
+
 
 
 
@@ -3266,6 +3357,7 @@ fi
 
 
 
+
 # Check whether --with-MPI was given.
 if test "${with_MPI+set}" = set; then :
   withval=$with_MPI; case "$withval" in
@@ -3274,6 +3366,7 @@ if test "${with_MPI+set}" = set; then :
  esac
 
 fi
+
 
 
 
@@ -3292,6 +3385,7 @@ fi
 
 
 
+
 # Check whether --with-raja was given.
 if test "${with_raja+set}" = set; then :
   withval=$with_raja; case "$withval" in
@@ -3303,6 +3397,7 @@ else
   hypre_using_raja=no
 
 fi
+
 
 
 
@@ -3417,6 +3512,7 @@ else
   hypre_using_nvcc=no
 
 fi
+
 
 
 
@@ -7274,22 +7370,17 @@ then
    HYPRE_FEI_SRC_DIR="$HYPRE_SRCDIR/FEI_mv"
    HYPRE_FEI_SUBDIRS="fei-hypre"
    HYPRE_FEI_HYPRE_FILES="$HYPRE_SRCDIR/FEI_mv/fei-hypre/*.o"
-   HYPRE_FEI_CDEFS=
-   if test "$hypre_using_superlu" = "yes"
-   then
-      HYPRE_FEI_SUBDIRS="SuperLU $HYPRE_FEI_SUBDIRS"
-      HYPRE_FEI_SUPERLU_FILES="$HYPRE_SRCDIR/FEI_mv/SuperLU/SRC/*.o"
-      HYPRE_FEI_CDEFS="$HYPRE_FEI_CDEFS -DHAVE_SUPERLU"
-   else
-      HYPRE_FEI_SUPERLU_FILES=
-   fi
+   HYPRE_FEI_FEMLI_FILES=
    if test "$hypre_using_mli" = "yes"
    then
-      HYPRE_FEI_SUBDIRS="femli $HYPRE_FEI_SUBDIRS"
-      HYPRE_FEI_FEMLI_FILES="$HYPRE_SRCDIR/FEI_mv/femli/*.o"
-      HYPRE_FEI_CDEFS="$HYPRE_FEI_CDEFS -DHAVE_MLI"
-   else
-      HYPRE_FEI_FEMLI_FILES=
+      if test "$hypre_using_superlu" = "yes"
+      then
+         HYPRE_FEI_SUBDIRS="femli $HYPRE_FEI_SUBDIRS"
+         HYPRE_FEI_FEMLI_FILES="$HYPRE_SRCDIR/FEI_mv/femli/*.o"
+
+$as_echo "#define HAVE_MLI 1" >>confdefs.h
+
+      fi
    fi
    if test "$hypre_user_chose_fei" = "no"
    then
@@ -7348,8 +7439,6 @@ else
    HYPRE_FEI_BASE_DIR=
    HYPRE_FEI_HYPRE_FILES=
    HYPRE_FEI_FEMLI_FILES=
-   HYPRE_FEI_SUPERLU_FILES=
-   HYPRE_FEI_CDEFS=
 fi
 
 if test "$hypre_using_debug" = "yes"
@@ -8068,6 +8157,11 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
+
+
+
+
+
 
 
 

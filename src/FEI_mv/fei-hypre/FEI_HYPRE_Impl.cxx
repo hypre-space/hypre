@@ -21,15 +21,6 @@
 #include <assert.h>
 #include <math.h>
 
-#if HAVE_SUPERLU_20
-#include "dsp_defs.h"
-#include "superlu_util.h"
-#endif
-#if HAVE_SUPERLU
-#include "slu_ddefs.h"
-#include "slu_util.h"
-#endif
-
 /*-------------------------------------------------------------------------
  MPI definitions 
  -------------------------------------------------------------------------*/
@@ -43,6 +34,15 @@
  -------------------------------------------------------------------------*/
 
 #include "FEI_HYPRE_Impl.h"
+
+#ifdef HAVE_SUPERLU_20
+#include "dsp_defs.h"
+#include "superlu_util.h"
+#endif
+#ifdef HAVE_SUPERLU
+#include "slu_ddefs.h"
+#include "slu_util.h"
+#endif
 
 extern "C"
 {
@@ -517,7 +517,7 @@ int FEI_HYPRE_Impl::parameters(int numParams, char **paramString)
 {
    int  i, olevel;
    char param[256], param1[256];
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
    int  nprocs;
 #endif
 
@@ -566,7 +566,7 @@ int FEI_HYPRE_Impl::parameters(int numParams, char **paramString)
          else if ( ! strcmp(param, "gmres") )   solverID_ = 1;
          else if ( ! strcmp(param, "cgs") )     solverID_ = 2;
          else if ( ! strcmp(param, "bicgstab")) solverID_ = 3;
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
          else if ( ! strcmp(param, "superlu") ) 
          {
             MPI_Comm_size( mpiComm_, &nprocs );
@@ -3338,7 +3338,7 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Impl::solveUsingSuperLU()
 {
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
    int    localNRows, localNnz, *countArray, irow, jcol, *cscIA, *cscJA;
    int    colNum, index, *etree, permcSpec, lwork, panelSize, relax, info;
    int    *permC, *permR;
