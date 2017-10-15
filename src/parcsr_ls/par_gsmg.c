@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 /******************************************************************************
  *
  * Geometrically smooth interpolation multigrid
@@ -27,20 +23,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 
-#ifdef HYPRE_USING_ESSL
-#include <essl.h>
-#else
-#include "fortran.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
-HYPRE_Int hypre_F90_NAME_LAPACK(dgels, DGELS)(char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, 
-  HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#include "_hypre_lapack.h"
 
 #ifndef ABS
 #define ABS(x) ((x)>0 ? (x) : -(x))
@@ -732,14 +715,10 @@ hypre_BoomerAMGFitVectors(HYPRE_Int ip, HYPRE_Int n, HYPRE_Int num, const HYPRE_
    for (i=0; i<num; i++)
       b[i] = V[i*n+ip];
 
-#ifdef HYPRE_USING_ESSL
-   dgells(0, a, num, b, num, val, nc, NULL, 1.e-12, num, nc, 1, 
-      &info, work, work_size);
-#else
    {
    char trans = 'N';
    HYPRE_Int  one   = 1;
-   hypre_F90_NAME_LAPACK(dgels, DGELS)(&trans, &num, &nc, &one, a, &num,
+   hypre_dgels(&trans, &num, &nc, &one, a, &num,
       b, &temp, work, &work_size, &info);
 
    if (info != 0)
@@ -749,7 +728,6 @@ hypre_BoomerAMGFitVectors(HYPRE_Int ip, HYPRE_Int n, HYPRE_Int num, const HYPRE_
    for (j=0; j<nc; j++)
       val[j] = b[j];
    }
-#endif
 
    hypre_TFree(b);
    hypre_TFree(a);

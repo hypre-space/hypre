@@ -1,9 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dgetrs_(char *trans, integer *n, integer *nrhs, 
+/* Subroutine */ integer dgetrs_(const char *trans, integer *n, integer *nrhs, 
 	doublereal *a, integer *lda, integer *ipiv, doublereal *b, integer *
 	ldb, integer *info)
 {
@@ -74,7 +76,7 @@
     integer a_dim1, a_offset, b_dim1, b_offset, i__1;
     /* Local variables */
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *,const char *,const char *,const char *, 
+    extern /* Subroutine */ integer dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *), xerbla_(
 	    const char *, integer *), dlaswp_(integer *, doublereal *, 
@@ -159,3 +161,6 @@
 
 } /* dgetrs_ */
 
+#ifdef __cplusplus
+}
+#endif

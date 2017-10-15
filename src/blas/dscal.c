@@ -1,4 +1,6 @@
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*  -- translated by f2c (version 19940927).
    You must link the resulting object file with the libraries:
@@ -8,7 +10,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dscal_(integer *n, doublereal *da, doublereal *dx, 
+/* Subroutine */ integer dscal_(integer *n, doublereal *da, doublereal *dx, 
 	integer *incx)
 {
 
@@ -78,3 +80,6 @@ L40:
     return 0;
 } /* dscal_ */
 
+#ifdef __cplusplus
+}
+#endif

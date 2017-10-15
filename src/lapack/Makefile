@@ -86,7 +86,6 @@ LAPACK_FILES = \
  dsytrd.c\
  ieeeck.c\
  ilaenv.c\
- lapack_utils.c\
  lsame.c\
  xerbla.c
 
@@ -99,6 +98,7 @@ OBJS = ${LAPACK_FILES:.c=.o}
 all: ${OBJS} dlamch.o
 
 install: all
+	cp -fR $(srcdir)/_hypre_lapack.h $(HYPRE_INC_INSTALL)
 
 clean:
 	rm -rf *.o
@@ -112,8 +112,5 @@ distclean: clean
 # compile without optimization
 dlamch.o : dlamch.c ${LAPACK_HEADERS}
 	${CC} ${CFLAGS} -c dlamch.c
-
-ilaenv.o : ilaenv.c ${LAPACK_HEADERS}
-	${CC} ${CFLAGS} -I../blas -c ilaenv.c
 
 ${OBJS}: ${LAPACK_HEADERS}

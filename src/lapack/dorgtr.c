@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dorgtr_(const char *uplo, integer *n, doublereal *a, integer *
+/* Subroutine */ integer dorgtr_(const char *uplo, integer *n, doublereal *a, integer *
 	lda, doublereal *tau, doublereal *work, integer *lwork, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -81,10 +84,10 @@
     static integer iinfo;
     static logical upper;
     static integer nb;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dorgql_(integer *, integer *, integer *, 
+    extern /* Subroutine */ integer dorgql_(integer *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    integer *), dorgqr_(integer *, integer *, integer *, doublereal *,
 	     integer *, doublereal *, doublereal *, integer *, integer *);
@@ -228,4 +231,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

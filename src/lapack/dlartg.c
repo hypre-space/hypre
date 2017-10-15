@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
-#include "math.h"
-/* Subroutine */ HYPRE_Int dlartg_(doublereal *f, doublereal *g, doublereal *cs, 
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dlartg_(doublereal *f, doublereal *g, doublereal *cs, 
 	doublereal *sn, doublereal *r__)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -54,7 +57,7 @@
     integer i__1;
     doublereal d__1, d__2;
     /* Builtin functions */
-    //HYPRE_Real log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
+    doublereal log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
     /* Local variables */
     static integer i__;
     static doublereal scale;
@@ -159,3 +162,6 @@ L30:
 
 } /* dlartg_ */
 
+#ifdef __cplusplus
+}
+#endif

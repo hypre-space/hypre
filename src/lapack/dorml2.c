@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dorml2_(const char *side,const char *trans, integer *m, integer *n, 
+/* Subroutine */ integer dorml2_(const char *side,const char *trans, integer *m, integer *n, 
 	integer *k, doublereal *a, integer *lda, doublereal *tau, doublereal *
 	c__, integer *ldc, doublereal *work, integer *info)
 {
@@ -97,12 +100,12 @@
     /* Local variables */
     static logical left;
     static integer i__;
-    extern /* Subroutine */ HYPRE_Int dlarf_(const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dlarf_(const char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *);
     extern logical lsame_(const char *,const char *);
     static integer i1, i2, i3, ic, jc, mi, ni, nq;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     static logical notran;
     static doublereal aii;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
@@ -209,4 +212,6 @@
 #undef c___ref
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

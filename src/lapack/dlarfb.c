@@ -1,9 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlarfb_(const char *side,const char *trans,const char *direct,const char *
+/* Subroutine */ integer dlarfb_(const char *side,const char *trans,const char *direct,const char *
 	storev, integer *m, integer *n, integer *k, doublereal *v, integer *
 	ldv, doublereal *t, integer *ldt, doublereal *c__, integer *ldc, 
 	doublereal *work, integer *ldwork)
@@ -102,11 +104,11 @@
 	    work_offset, i__1, i__2;
     /* Local variables */
     static integer i__, j;
-    extern /* Subroutine */ HYPRE_Int dgemm_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dgemm_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ HYPRE_Int dcopy_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ integer dcopy_(integer *, doublereal *, integer *, 
 	    doublereal *, integer *), dtrmm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
@@ -704,4 +706,6 @@
 #undef c___ref
 #undef work_ref
 
-
+#ifdef __cplusplus
+}
+#endif

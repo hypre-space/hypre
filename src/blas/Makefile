@@ -22,7 +22,6 @@ C_COMPILE_FLAGS = ${INCLUDES} -I.. -I../utilities
 
 BLAS_HEADERS =  f2c.h  hypre_blas.h
 BLAS_FILES = \
-blas_utils.c\
 dasum.c\
 daxpy.c\
 dcopy.c\
@@ -43,7 +42,10 @@ dtrmm.c\
 dtrmv.c\
 dtrsm.c\
 dtrsv.c\
-idamax.c
+f2c.c\
+idamax.c\
+lsame.c\
+xerbla.c
 
 OBJS = ${BLAS_FILES:.c=.o}
 
@@ -54,6 +56,7 @@ OBJS = ${BLAS_FILES:.c=.o}
 all: ${OBJS}
 
 install: all
+	cp -fR $(srcdir)/_hypre_blas.h $(HYPRE_INC_INSTALL)
 
 clean:
 	rm -rf *.o
