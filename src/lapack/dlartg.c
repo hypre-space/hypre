@@ -57,7 +57,8 @@ extern "C" {
     integer i__1;
     doublereal d__1, d__2;
     /* Builtin functions */
-    doublereal log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
+//    doublereal log(doublereal), pow_di(doublereal *, integer *), sqrt(doublereal);
+    doublereal pow_di(doublereal *, integer *);
     /* Local variables */
     static integer i__;
     static doublereal scale;

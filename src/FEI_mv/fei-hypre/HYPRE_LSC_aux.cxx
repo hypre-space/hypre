@@ -1376,8 +1376,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( HYPreconID_ == HYMLI )
             HYPRE_LSI_MLISetParams(HYPrecon_, params[i]); 
 #else
-         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
-            printf("       HYPRE_LSC::MLI SetParams - MLI unavailable.\n");
+//         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
+//            printf("       HYPRE_LSC::MLI SetParams - MLI unavailable.\n");
 #endif
       }
 
