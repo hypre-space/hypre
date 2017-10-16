@@ -497,7 +497,6 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 	 tempx += A_data[jj] * x_data[A_j[jj]];
        }
        y_data[i] = alpha*tempx+beta*b_data[i];
-       yc_data[i]-=y_data[i];
      }
 #endif
 
