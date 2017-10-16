@@ -48,10 +48,9 @@ mo="-j test"
 ro="-ams -ij -sstruct -struct"
 eo=""
 
-# RDF: Unfortunately, there is no way to pass the inside quotes through to configure
-# co="--enable-debug --with-blas-lib='-L/home/falgout2/codes/blas/BLAS-3.7.1 -lblas -lgfortran'"
-# ./test.sh basic.sh $src_dir -co: $co -mo: $mo
-# ./renametest.sh basic $output_dir/basic-blas
+co="--enable-debug --with-blas-lib=\\'-L/home/falgout2/codes/blas/BLAS-3.7.1 -lblas -lgfortran\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-blas
 
 co="--enable-debug --with-mli --with-superlu --with-superlu-include=/home/falgout2/codes/superlu/SuperLU_5.2.1/SRC"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
