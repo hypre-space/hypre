@@ -302,7 +302,7 @@ hypre_MGRSetup( void               *mgr_vdata,
          }
       }
       hypre_TFree(FrelaxVcycleData);
-      FrelaxVcycleData == NULL;   
+      FrelaxVcycleData = NULL;   
    }
    // reset pointer to NULL
    (mgr_data -> FrelaxVcycleData) = FrelaxVcycleData;
