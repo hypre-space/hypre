@@ -332,7 +332,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 	{
 		hypre_blockRelax_setup(A,blk_size,reserved_coarse_size,&(mgr_data -> diaginv));
 	}
-	else if (global_smooth_type == 3)
+	else if (global_smooth_type == 8)
 	{
 		ierr = HYPRE_EuclidCreate(comm, &(mgr_data -> global_smoother));
 		HYPRE_EuclidSetLevel(mgr_data -> global_smoother, 0);

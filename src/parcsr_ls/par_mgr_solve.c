@@ -210,12 +210,12 @@ hypre_MGRSolve( void               *mgr_vdata,
 	   for (i = 0;i < global_smooth_iters;i ++)
 	  	hypre_block_jacobi(A_array[0],F_array[0],U_array[0],blk_size,n_block,left_size,diaginv,Vtemp);
 	}
-	else if (global_smooth_type == 1 ||global_smooth_type == 6)
+	else if ((global_smooth_type > 0) && (global_smooth_type < 7))
 	{
            for (i = 0;i < global_smooth_iters;i ++)
 		hypre_BoomerAMGRelax(A_array[0], F_array[0], NULL, global_smooth_type-1, 0, 1.0, 0.0, NULL, U_array[0], Vtemp, NULL);
 	}
-	else if (global_smooth_type == 3)//ILU smoother
+	else if (global_smooth_type == 8)//ILU smoother
 	{
 	    for (i = 0;i < global_smooth_iters;i ++)
 		HYPRE_EuclidSolve( (mgr_data -> global_smoother),A_array[0],F_array[0],U_array[0]);

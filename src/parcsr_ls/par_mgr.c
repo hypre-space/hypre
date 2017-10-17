@@ -1624,9 +1624,7 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 	return(0);
 }
 
-/* Setup interpolation operator. This code uses Jacobi relaxation
- * (diagonal scaling) for interpolation at the last level
-*/
+/* Setup interpolation operator */
 HYPRE_Int
 hypre_MGRBuildInterp(hypre_ParCSRMatrix     *A,
 			HYPRE_Int             *CF_marker,
