@@ -1142,8 +1142,13 @@ HYPRE_Int HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver  solver,
                                          float        *coordinates);
 
-/*
- * HYPRE_BoomerAMGSetCpointsToKeep
+/**
+ * (Optional) Fix C points to be kept till a specified coarse level.
+ *
+ * @param solver [IN] solver or preconditioner
+ * @param cpt_coarse_level [IN] coarse level up to which to keep C points
+ * @param num_cpt_coarse [IN] number of C points to be kept
+ * @param cpt_coarse_index [IN] indexes of C points to be kept
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
 				HYPRE_Int  cpt_coarse_level,
