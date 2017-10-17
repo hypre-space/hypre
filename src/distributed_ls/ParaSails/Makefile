@@ -19,6 +19,8 @@ C_COMPILE_FLAGS = \
  -I../..\
  -I$(srcdir)\
  -I$(srcdir)/../..\
+ -I$(srcdir)/../../blas\
+ -I$(srcdir)/../../lapack\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../distributed_matrix\
  ${CINCLUDES}

@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #include "_hypre_parcsr_ls.h"
 #include "float.h"
 #include "ams.h"
@@ -588,13 +584,8 @@ HYPRE_Int hypre_AMESolve(void *esolver)
    lobpcg_Tolerance lobpcg_tol;
    HYPRE_Real *residuals;
 
-#ifdef HYPRE_USING_ESSL
-   blap_fn.dsygv  = dsygv;
-   blap_fn.dpotrf = dpotrf;
-#else
-   blap_fn.dsygv  = hypre_F90_NAME_LAPACK(dsygv,DSYGV);
-   blap_fn.dpotrf = hypre_F90_NAME_LAPACK(dpotrf,DPOTRF);
-#endif
+   blap_fn.dsygv  = hypre_dsygv;
+   blap_fn.dpotrf = hypre_dpotrf;
    lobpcg_tol.relative = ame_data -> rtol;
    lobpcg_tol.absolute = ame_data -> atol;
    residuals = hypre_TAlloc(HYPRE_Real, ame_data -> block_size);

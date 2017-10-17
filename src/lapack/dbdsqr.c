@@ -1,6 +1,9 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
 /*  -- translated by f2c (version 19990503).
    You must link the resulting object file with the libraries:
@@ -14,7 +17,7 @@ static integer c__1 = 1;
 static doublereal c_b49 = 1.;
 static doublereal c_b72 = -1.;
 
-/* Subroutine */ HYPRE_Int dbdsqr_(const char *uplo, integer *n, integer *ncvt, integer *
+/* Subroutine */ integer dbdsqr_(const char *uplo, integer *n, integer *ncvt, integer *
 	nru, integer *ncc, doublereal *d__, doublereal *e, doublereal *vt, 
 	integer *ldvt, doublereal *u, integer *ldu, doublereal *c__, integer *
 	ldc, doublereal *work, integer *info)
@@ -25,7 +28,7 @@ static doublereal c_b72 = -1.;
     doublereal d__1, d__2, d__3, d__4;
 
     /* Builtin functions */
-    HYPRE_Real pow_dd(doublereal *, doublereal *), d_sign(
+    doublereal pow_dd(doublereal *, doublereal *), d_sign(
 	    doublereal *, doublereal *);
 
     /* Local variables */
@@ -36,27 +39,27 @@ static doublereal c_b72 = -1.;
     static doublereal cosl;
     static integer isub, iter;
     static doublereal unfl, sinl, cosr, smin, smax, sinr;
-    extern /* Subroutine */ HYPRE_Int drot_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ integer drot_(integer *, doublereal *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *), dlas2_(
 	    doublereal *, doublereal *, doublereal *, doublereal *, 
 	    doublereal *);
     static doublereal f, g, h__;
     static integer i__, j, m;
     static doublereal r__;
-    extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     extern logical lsame_(const char *,const char *);
     static doublereal oldcs;
-    extern /* Subroutine */ HYPRE_Int dlasr_(const char *,const char *,const char *, integer *, 
+    extern /* Subroutine */ integer dlasr_(const char *,const char *,const char *, integer *, 
 	    integer *, doublereal *, doublereal *, doublereal *, integer *);
     static integer oldll;
     static doublereal shift, sigmn, oldsn;
-    extern /* Subroutine */ HYPRE_Int dswap_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ integer dswap_(integer *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static integer maxit;
     static doublereal sminl, sigmx;
     static logical lower;
-    extern /* Subroutine */ HYPRE_Int dlasq1_(integer *, doublereal *, doublereal *,
+    extern /* Subroutine */ integer dlasq1_(integer *, doublereal *, doublereal *,
 	     doublereal *, integer *), dlasv2_(doublereal *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *);
@@ -64,7 +67,7 @@ static doublereal c_b72 = -1.;
     static integer ll;
     extern doublereal dlamch_(const char *);
     static doublereal sn, mu;
-    extern /* Subroutine */ HYPRE_Int dlartg_(doublereal *, doublereal *, 
+    extern /* Subroutine */ integer dlartg_(doublereal *, doublereal *, 
 	    doublereal *, doublereal *, doublereal *), xerbla_(const char *, 
 	    integer *);
     static doublereal sminoa, thresh;
@@ -893,4 +896,6 @@ L220:
 #undef u_ref
 #undef c___ref
 
-
+#ifdef __cplusplus
+}
+#endif

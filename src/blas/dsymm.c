@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_blas.h"
 #include "f2c.h"
+#include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dsymm_(const char *side,const char *uplo, integer *m, integer *n, 
+/* Subroutine */ integer dsymm_(const char *side,const char *uplo, integer *m, integer *n, 
 	doublereal *alpha, doublereal *a, integer *lda, doublereal *b, 
 	integer *ldb, doublereal *beta, doublereal *c__, integer *ldc)
 {
@@ -13,10 +16,10 @@
     static integer info;
     static doublereal temp1, temp2;
     static integer i__, j, k;
-    extern logical hypre_lsame_(const char *,const char *);
+    extern logical lsame_(const char *,const char *);
     static integer nrowa;
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 #define b_ref(a_1,a_2) b[(a_2)*b_dim1 + a_1]
 #define c___ref(a_1,a_2) c__[(a_2)*c_dim1 + a_1]
@@ -127,17 +130,17 @@
     c_offset = 1 + c_dim1 * 1;
     c__ -= c_offset;
     /* Function Body */
-    if (hypre_lsame_(side, "L")) {
+    if (lsame_(side, "L")) {
 	nrowa = *m;
     } else {
 	nrowa = *n;
     }
-    upper = hypre_lsame_(uplo, "U");
+    upper = lsame_(uplo, "U");
 /*     Test the input parameters. */
     info = 0;
-    if (! hypre_lsame_(side, "L") && ! hypre_lsame_(side, "R")) {
+    if (! lsame_(side, "L") && ! lsame_(side, "R")) {
 	info = 1;
-    } else if (! upper && ! hypre_lsame_(uplo, "L")) {
+    } else if (! upper && ! lsame_(uplo, "L")) {
 	info = 2;
     } else if (*m < 0) {
 	info = 3;
@@ -151,7 +154,7 @@
 	info = 12;
     }
     if (info != 0) {
-	hypre_xerbla_("DSYMM ", &info);
+	xerbla_("DSYMM ", &info);
 	return 0;
     }
 /*     Quick return if possible. */
@@ -184,7 +187,7 @@
 	return 0;
     }
 /*     Start the operations. */
-    if (hypre_lsame_(side, "L")) {
+    if (lsame_(side, "L")) {
 /*        Form  C := alpha*A*B + beta*C. */
 	if (upper) {
 	    i__1 = *n;
@@ -291,3 +294,6 @@
 #undef b_ref
 #undef a_ref
 
+#ifdef __cplusplus
+}
+#endif

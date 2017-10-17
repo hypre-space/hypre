@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dgeqrf_(integer *m, integer *n, doublereal *a, integer *
+/* Subroutine */ integer dgeqrf_(integer *m, integer *n, doublereal *a, integer *
 	lda, doublereal *tau, doublereal *work, integer *lwork, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -90,15 +93,15 @@
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
     /* Local variables */
     static integer i__, k, nbmin, iinfo;
-    extern /* Subroutine */ HYPRE_Int dgeqr2_(integer *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dgeqr2_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
     static integer ib, nb;
-    extern /* Subroutine */ HYPRE_Int dlarfb_(const char *,const char *,const char *,const char *, 
+    extern /* Subroutine */ integer dlarfb_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, integer *, doublereal *, integer *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer nx;
-    extern /* Subroutine */ HYPRE_Int dlarft_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dlarft_(const char *,const char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
@@ -235,4 +238,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

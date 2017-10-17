@@ -10,7 +10,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 include ../config/Makefile.config
 
 ## Euclid specific macros taken from distributed_ls/Euclid
@@ -22,6 +21,8 @@ C_COMPILE_FLAGS =\
  -I../distributed_ls/Euclid\
  -I$(srcdir)\
  -I$(srcdir)/..\
+ -I$(srcdir)/../blas\
+ -I$(srcdir)/../lapack\
  -I$(srcdir)/../multivector\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../krylov\

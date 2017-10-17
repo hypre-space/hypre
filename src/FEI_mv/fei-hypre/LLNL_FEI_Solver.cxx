@@ -24,11 +24,11 @@
 #include "HYPRE.h"
 #include "LLNL_FEI_Solver.h"
 
-#if HAVE_SUPERLU_20
+#ifdef HAVE_SUPERLU_20
 #include "dsp_defs.h"
 #include "superlu_util.h"
 #endif
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
 #include "slu_ddefs.h"
 #include "slu_util.h"
 #endif
@@ -77,7 +77,7 @@ LLNL_FEI_Solver::LLNL_FEI_Solver( MPI_Comm comm )
 int LLNL_FEI_Solver::parameters(int numParams, char **paramString)
 {
    int  i, olevel;
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
    int  nprocs;
 #endif
    char param[256], param1[256];
@@ -124,7 +124,7 @@ int LLNL_FEI_Solver::parameters(int numParams, char **paramString)
          else if ( !strcmp(param, "bicgstab")) solverID_ = 3;
          else if ( !strcmp(param, "superlu") ) 
          {
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
             MPI_Comm_size( mpiComm_, &nprocs );
             if ( nprocs == 1 ) solverID_ = 4;
             else
@@ -1101,15 +1101,16 @@ int LLNL_FEI_Solver::solveUsingBicgstab()
  -------------------------------------------------------------------------*/
 int LLNL_FEI_Solver::solveUsingSuperLU()
 {
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
    int    localNRows, localNnz, *countArray, irow, jcol, *cscIA, *cscJA;
    int    colNum, index, *etree, permcSpec, lwork, panelSize, relax, info;
    int    *permC, *permR, *diagIA, *diagJA;
-   double *cscAA, diagPivotThresh, dropTol, *rVec, rnorm;
+   double *cscAA, diagPivotThresh, *rVec, rnorm;
    double *diagAA;
    trans_t           trans;
    superlu_options_t slu_options;
    SuperLUStat_t     slu_stat;
+   GlobalLU_t        Glu;
    SuperMatrix superLU_Amat;
    SuperMatrix superLU_Lmat;
    SuperMatrix superLU_Umat;
@@ -1172,7 +1173,6 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    slu_options.SymmetricMode = NO;
    sp_preorder(&slu_options, &superLU_Amat, permC, etree, &AC);
    diagPivotThresh = 1.0;
-   dropTol = 0.0;
    panelSize = sp_ienv(1);
    relax = sp_ienv(2);
    StatInit(&slu_stat);
@@ -1180,9 +1180,12 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
    slu_options.ColPerm = MY_PERMC;
    slu_options.DiagPivotThresh = diagPivotThresh;
 
-   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//          etree, NULL, lwork, permC, permR, &superLU_Lmat,
+//          &superLU_Umat, &slu_stat, &info);
+   dgstrf(&slu_options, &AC, relax, panelSize,
           etree, NULL, lwork, permC, permR, &superLU_Lmat,
-          &superLU_Umat, &slu_stat, &info);
+          &superLU_Umat, &Glu, &slu_stat, &info);
 
    Destroy_CompCol_Permuted(&AC);
    Destroy_CompCol_Matrix(&superLU_Amat);

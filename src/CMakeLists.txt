@@ -75,9 +75,7 @@ list (APPEND HYPRE_HEADERS
 )
 
 # Headers and sources: blas
-if (HYPRE_USING_HYPRE_BLAS)
 list (APPEND HYPRE_SOURCES
-  blas/blas_utils.c
   blas/dasum.c
   blas/daxpy.c
   blas/dcopy.c
@@ -98,12 +96,13 @@ list (APPEND HYPRE_SOURCES
   blas/dtrmv.c
   blas/dtrsm.c
   blas/dtrsv.c
+  blas/f2c.c
   blas/idamax.c
+  blas/lsame.c
+  blas/xerbla.c
 )
-endif (HYPRE_USING_HYPRE_BLAS)
 
 # Headers and sources: lapack
-if (HYPRE_USING_HYPRE_LAPACK)
 list (APPEND HYPRE_SOURCES
   lapack/dbdsqr.c
   lapack/dgebd2.c
@@ -173,11 +172,9 @@ list (APPEND HYPRE_SOURCES
   lapack/dsytrd.c
   lapack/ieeeck.c
   lapack/ilaenv.c
-  lapack/lapack_utils.c
   lapack/lsame.c
   lapack/xerbla.c
 )
-endif (HYPRE_USING_HYPRE_LAPACK)
 
 # Headers and sources: utilities
 list (APPEND HYPRE_HEADERS
