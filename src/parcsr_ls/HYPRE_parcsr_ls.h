@@ -686,7 +686,7 @@ HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
  * (Optional) Defines the smoother to be used. It uses the given
  * smoother on the fine grid, the up and 
  * the down cycle and sets the solver on the coarsest level to Gaussian
- * elimination (9). The default is $\ell-1$-Gauss-Seidel, forward solve (13)
+ * elimination (9). The default is $\ell_1$-Gauss-Seidel, forward solve (13)
  * on the down cycle and backward solve (14) on the up cycle.
  *
  * There are the following options for relax\_type:
@@ -2626,9 +2626,8 @@ HYPRE_Int HYPRE_ParCSRHybridSetPrintLevel(HYPRE_Solver solver,
 
 /**
  * (Optional) Sets AMG strength threshold. The default is 0.25.
- * For 2d Laplace operators, 0.25 is a good value, for 3d Laplace
- * operators, 0.5 or 0.6 is a better value. For elasticity problems,
- * a large strength threshold, such as 0.9, is often better.
+ * For elasticity problems, a larger strength threshold, such as 0.7 or 0.8, 
+ * is often better.
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetStrongThreshold(HYPRE_Solver solver,
