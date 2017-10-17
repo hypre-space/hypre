@@ -1,8 +1,11 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Subroutine */ HYPRE_Int dpotrf_(const char *uplo, integer *n, doublereal *a, integer *
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dpotrf_(const char *uplo, integer *n, doublereal *a, integer *
 	lda, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -72,20 +75,20 @@
     integer a_dim1, a_offset, i__1, i__2, i__3, i__4;
     /* Local variables */
     static integer j;
-    extern /* Subroutine */ HYPRE_Int dgemm_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dgemm_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ HYPRE_Int dtrsm_(const char *,const char *,const char *,const char *, 
+    extern /* Subroutine */ integer dtrsm_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, doublereal *, doublereal *, integer *, 
 	    doublereal *, integer *);
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int dsyrk_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dsyrk_(const char *,const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, doublereal *,
 	     integer *), dpotf2_(const char *, integer *, 
 	    doublereal *, integer *, integer *);
     static integer jb, nb;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
@@ -223,4 +226,6 @@ L40:
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

@@ -1,8 +1,11 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Subroutine */ HYPRE_Int dsytd2_(const char *uplo, integer *n, doublereal *a, integer *
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dsytd2_(const char *uplo, integer *n, doublereal *a, integer *
 	lda, doublereal *d__, doublereal *e, doublereal *tau, integer *info)
 {
 /*  -- LAPACK routine (version 3.0) --   
@@ -127,16 +130,16 @@
     extern doublereal ddot_(integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static doublereal taui;
-    extern /* Subroutine */ HYPRE_Int dsyr2_(const char *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dsyr2_(const char *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer i__;
     static doublereal alpha;
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ HYPRE_Int daxpy_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer daxpy_(integer *, doublereal *, doublereal *, 
 	    integer *, doublereal *, integer *);
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int dsymv_(const char *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dsymv_(const char *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    doublereal *, integer *), dlarfg_(integer *, doublereal *,
 	     doublereal *, integer *, doublereal *), xerbla_(const char *, integer *
@@ -280,4 +283,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

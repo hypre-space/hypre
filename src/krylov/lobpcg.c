@@ -29,7 +29,7 @@
 
 static HYPRE_Int
 lobpcg_chol( utilities_FortranMatrix* a, 
-        HYPRE_Int (*dpotrf) (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info) )
+        HYPRE_Int (*dpotrf) (const char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info) )
 {
 
   HYPRE_Int lda, n;
@@ -121,7 +121,7 @@ lobpcg_MultiVectorImplicitQR(
 mv_MultiVectorPtr x, mv_MultiVectorPtr y,
 utilities_FortranMatrix* r,
 mv_MultiVectorPtr z,
-HYPRE_Int (*dpotrf) (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info)
+HYPRE_Int (*dpotrf) (const char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info)
 
 ){
 

@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_blas.h"
 #include "f2c.h"
+#include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dswap_(integer *n, doublereal *dx, integer *incx, 
+/* Subroutine */ integer dswap_(integer *n, doublereal *dx, integer *incx, 
 	doublereal *dy, integer *incy)
 {
     /* System generated locals */
@@ -80,3 +83,6 @@ L40:
     return 0;
 } /* dswap_ */
 
+#ifdef __cplusplus
+}
+#endif

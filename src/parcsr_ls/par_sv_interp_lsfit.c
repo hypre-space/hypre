@@ -1,17 +1,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "Common.h"
-
-
-#ifdef HYPRE_USING_ESSL
-#include <essl.h>
-#else
-HYPRE_Int hypre_F90_NAME_BLAS(dgemm, DGEMM) (char *, char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_BLAS(dgemv, DGEMV) (char *, HYPRE_Int * , HYPRE_Int * , HYPRE_Real *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Real *, HYPRE_Int *);
-
-HYPRE_Int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *b, HYPRE_Int*, HYPRE_Int *);
-
-#endif
+#include "_hypre_blas.h"
+#include "_hypre_lapack.h"
 
 #define ADJUST(a,b)  (adjust_list[(a)*(num_functions-1)+(b)])
 
@@ -414,36 +404,32 @@ HYPRE_Int hypre_BoomerAMGFitInterpVectors( hypre_ParCSRMatrix *A,
        /* now  B_s <-delta*Beta*Beta^T + B_s */ 
        /* usage: DGEMM(TRANSA,TRANSB,M,N,K,ALPHA,A,LDA,B,LDB,BETA,C,LDC)
                  C := alpha*op( A )*op( B ) + beta*C */
-       hypre_F90_NAME_BLAS(dgemm,DGEMM)("N", "T", &num_smooth_vecs, 
-                                        &num_smooth_vecs, &k_size, 
-                                        &delta, Beta, &num_smooth_vecs, Beta, 
-                                        &num_smooth_vecs, &one, B_s, &num_smooth_vecs);
+       hypre_dgemm("N", "T", &num_smooth_vecs, 
+                   &num_smooth_vecs, &k_size, 
+                   &delta, Beta, &num_smooth_vecs, Beta, 
+                   &num_smooth_vecs, &one, B_s, &num_smooth_vecs);
        
        /* now do alpha <- (alpha - beta*w)*/
        /* usage: DGEMV(TRANS,M,N,ALPHA,A,LDA,X,INCX,BETA,Y,INCY)
                  y := alpha*A*x + beta*y */
-       hypre_F90_NAME_BLAS(dgemv,DGEMV)("N", &num_smooth_vecs, &k_size, &mone, 
-                                        Beta, &num_smooth_vecs, w_old, &one_i, 
-                                        &one, alpha, &one_i);
-       
+       hypre_dgemv("N", &num_smooth_vecs, &k_size, &mone, 
+                   Beta, &num_smooth_vecs, w_old, &one_i, 
+                   &one, alpha, &one_i);
       
        /* now get alpha <- inv(B_s)*alpha */
-           /*write over B_s with LU */
-       hypre_F90_NAME_LAPACK(dgetrf, DGETRF)(&num_smooth_vecs, &num_smooth_vecs, 
-                                             B_s, &num_smooth_vecs, piv, &info);
+       /*write over B_s with LU */
+       hypre_dgetrf(&num_smooth_vecs, &num_smooth_vecs, 
+                    B_s, &num_smooth_vecs, piv, &info);
        
-           /*now get alpha  */
-       hypre_F90_NAME_LAPACK(dgetrs, DGETRS)("N", &num_smooth_vecs, &one_i, B_s, 
-                                             &num_smooth_vecs, piv, alpha, 
-                                             &num_smooth_vecs, &info);
-       
-
+       /*now get alpha  */
+       hypre_dgetrs("N", &num_smooth_vecs, &one_i, B_s, 
+                    &num_smooth_vecs, piv, alpha, 
+                    &num_smooth_vecs, &info);
 
        /* now w <- w + (delta)*(Beta)^T*(alpha) */
-       hypre_F90_NAME_BLAS(dgemv,DGEMV)("T", &num_smooth_vecs, &k_size, &delta, 
-                                        Beta, &num_smooth_vecs, alpha, &one_i, 
-                                        &one, w, &one_i);
-
+       hypre_dgemv("T", &num_smooth_vecs, &k_size, &delta, 
+                   Beta, &num_smooth_vecs, alpha, &one_i, 
+                   &one, w, &one_i);
        
        /* note:we have w_old still, but we don't need it unless we
         * want to use it in the future for something */

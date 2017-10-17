@@ -10,22 +10,29 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
-
-
-
-
-
 HYPRE BLAS README file
 
-This is a subset of the CBLAS from netlib.org.
-o The LAPACK/blas auxiliary routine xerbla_ has been
-  renamed through this directory as hypre_xerbla_, to
-  reduce name conflicts with the same routine in the
-  HYPRE lapack directory.
-o The LAPACK/blas auxiliary routine lsame_ has been
-  renamed through this directory as hypre_lsame_, for
-  the same reason as above.
-o The routines xerbla_ and lsame_ have been moved into
-  the blas_utils.c file.
+The source in the HYPRE BLAS and LAPACK is taken from CLAPACK and most recently
+based on release 3.2.1 (though many of the files here are much older).  To add a
+new BLAS or LAPACK routine, copy the file to the appropriate directory, then do
+the following:
 
+- Add C include guards at the beginning and end of the file to allow for C++ compilation
+
+- Change the 'blaswrap.h' include file to either 'hypre_blas.h' or 'hypre_lapack.h'
+
+- Change 'int' to 'integer' to avoid errors in the autotest check-int script
+
+- Add 'const' in front of 'char *' in prototypes as required by C++ (use the
+  warnings from the C++ compiler to determine where the changes are needed)
+
+- Add the #define name changes to 'hypre_blas.h' and/or 'hypre_lapack.h'.
+  Organize things alphabetically and by routine type.  Note that the blas
+  renaming needs to be replicated in 'hypre_lapack.h'.
+
+- Create a hypre_ prototype for the main BLAS and LAPACK routines in either
+  '_hypre_blas.h' or '_hypre_lapack.h'.  Do not create prototypes for auxiliary
+  routines or f2c-library routines.
+
+- To determine which routines are auxiliary routines, look at the comments in
+  the C files (search for 'auxiliary').
