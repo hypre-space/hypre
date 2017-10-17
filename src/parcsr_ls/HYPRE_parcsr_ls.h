@@ -274,7 +274,7 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxRowSum(HYPRE_Solver solver,
  * \hline
  * \end{tabular}
  * 
- * The default is 6. 
+ * The default is 10. 
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCoarsenType(HYPRE_Solver solver,
                                         HYPRE_Int    coarsen_type);
@@ -406,21 +406,21 @@ HYPRE_Int HYPRE_BoomerAMGSetNodalDiag(HYPRE_Solver solver,
  * \hline
  * \end{tabular}
  * 
- * The default is 0. 
+ * The default is ext+i interpolation (interp_type 6) trunctated to at most 4 \\
+ * elements per row. (see HYPRE_BoomerAMGSetPMaxElmts).
  **/
 HYPRE_Int HYPRE_BoomerAMGSetInterpType(HYPRE_Solver solver,
                                        HYPRE_Int    interp_type);
 
 /**
- * (Optional) Defines a truncation factor for the interpolation.
- * The default is 0.
+ * (Optional) Defines a truncation factor for the interpolation. The default is 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetTruncFactor(HYPRE_Solver solver,
                                         HYPRE_Real   trunc_factor);
 
 /**
  * (Optional) Defines the maximal number of elements per row for the interpolation.
- * The default is 0.
+ * The default is 4. To turn off truncation, it needs to be set to 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetPMaxElmts(HYPRE_Solver solver,
                                       HYPRE_Int    P_max_elmts);
@@ -686,7 +686,8 @@ HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
  * (Optional) Defines the smoother to be used. It uses the given
  * smoother on the fine grid, the up and 
  * the down cycle and sets the solver on the coarsest level to Gaussian
- * elimination (9). The default is Gauss-Seidel (3).
+ * elimination (9). The default is $\ell-1$-Gauss-Seidel, forward solve (13)
+ * on the down cycle and backward solve (14) on the up cycle.
  *
  * There are the following options for relax\_type:
  *
@@ -700,6 +701,8 @@ HYPRE_Int HYPRE_BoomerAMGSetGridRelaxType(HYPRE_Solver  solver,
  * 6 & hybrid symmetric Gauss-Seidel or SSOR \\
  * 8 & $\ell_1$-scaled hybrid symmetric Gauss-Seidel\\
  * 9 & Gaussian elimination (only on coarsest level) \\
+ * 13 & $\ell_1$ Gauss-Seidel, forward solve \\
+ * 14 & $\ell_1$ Gauss-Seidel, backward solve \\
  * 15 & CG (warning - not a fixed smoother - may require FGMRES)\\
  * 16 & Chebyshev\\
  * 17 & FCF-Jacobi\\
@@ -743,7 +746,7 @@ HYPRE_Int HYPRE_BoomerAMGSetCycleRelaxType(HYPRE_Solver  solver,
  * \hline
  * \end{tabular}
  *
- * The default is 1 (CF-relaxation).
+ * The default is 0. 
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRelaxOrder(HYPRE_Solver  solver,
                                        HYPRE_Int     relax_order);
@@ -2626,7 +2629,10 @@ HYPRE_Int HYPRE_ParCSRHybridSetLogging(HYPRE_Solver solver,
                                        HYPRE_Int    logging);
 
 /**
- * Set print level (default: 0, no printing).
+ * Set print level (default: 0, no printing)
+ * 2 will print residual norms per iteration
+ * 10 will print AMG setup information if AMG is used
+ * 12 both Setup information and iterations.
  **/
 HYPRE_Int HYPRE_ParCSRHybridSetPrintLevel(HYPRE_Solver solver,
                                           HYPRE_Int    print_level);
@@ -2703,7 +2709,7 @@ HYPRE_ParCSRHybridSetMeasureType(HYPRE_Solver solver,
  * \hline
  * \end{tabular}
  *
- * The default is 6.
+ * The default is 10.
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetCoarsenType(HYPRE_Solver solver,
@@ -2711,7 +2717,7 @@ HYPRE_ParCSRHybridSetCoarsenType(HYPRE_Solver solver,
 
 /*
  * (Optional) Specifies which interpolation operator is used
- * The default is modified ''classical" interpolation.
+ * The default is ext+i interpolation truncated to at most 4 elements per row.
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetInterpType(HYPRE_Solver solver,
@@ -2769,7 +2775,8 @@ HYPRE_ParCSRHybridSetCycleNumSweeps(HYPRE_Solver solver,
  * (Optional) Defines the smoother to be used. It uses the given
  * smoother on the fine grid, the up and
  * the down cycle and sets the solver on the coarsest level to Gaussian
- * elimination (9). The default is Gauss-Seidel (3).
+ * elimination (9). The default is l1-Gauss-Seidel, forward solve on the down
+ * cycle (13) and backward solve on the up cycle (14).
  *
  * There are the following options for relax\_type:
  *
@@ -2779,8 +2786,11 @@ HYPRE_ParCSRHybridSetCycleNumSweeps(HYPRE_Solver solver,
  * 2 &  Gauss-Seidel, interior points in parallel, boundary sequential (slow!) \\
  * 3 &  hybrid Gauss-Seidel or SOR, forward solve \\
  * 4 &  hybrid Gauss-Seidel or SOR, backward solve \\
- * 5 &  hybrid chaotic Gauss-Seidel (works only with OpenMP) \\
  * 6 &  hybrid symmetric Gauss-Seidel or SSOR \\
+ * 8 &  hybrid symmetric l1-Gauss-Seidel or SSOR \\
+ * 13 &  l1-Gauss-Seidel, forward solve \\
+ * 14 &  l1-Gauss-Seidel, backward solve \\
+ * 18 &  l1-Jacobi \\
  * 9 &  Gaussian elimination (only on coarsest level) \\
  * \hline
  * \end{tabular}
@@ -2823,7 +2833,7 @@ HYPRE_ParCSRHybridSetCycleRelaxType(HYPRE_Solver solver,
  * \hline
  * \end{tabular}
  *
- * The default is 1 (CF-relaxation).
+ * The default is 0 (CF-relaxation).
  **/
 HYPRE_Int
 HYPRE_ParCSRHybridSetRelaxOrder(HYPRE_Solver solver,
