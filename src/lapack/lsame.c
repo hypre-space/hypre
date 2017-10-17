@@ -1,7 +1,9 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
 logical lsame_(const char *ca,const char *cb)
 {
@@ -104,3 +106,6 @@ e
     return ret_val;
 } /* lsame_ */
 
+#ifdef __cplusplus
+}
+#endif

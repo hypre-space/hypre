@@ -1,8 +1,11 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Subroutine */ HYPRE_Int dlabrd_(integer *m, integer *n, integer *nb, doublereal *
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dlabrd_(integer *m, integer *n, integer *nb, doublereal *
 	a, integer *lda, doublereal *d__, doublereal *e, doublereal *tauq, 
 	doublereal *taup, doublereal *x, integer *ldx, doublereal *y, integer 
 	*ldy)
@@ -149,7 +152,7 @@
 	    i__3;
     /* Local variables */
     static integer i__;
-    extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
 	    integer *), dgemv_(const char *, integer *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    doublereal *, integer *), dlarfg_(integer *, doublereal *,
@@ -410,4 +413,6 @@
 #undef x_ref
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

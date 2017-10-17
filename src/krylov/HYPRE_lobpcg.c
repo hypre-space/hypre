@@ -10,7 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
 /******************************************************************************
  *
  * HYPRE_LOBPCG interface
@@ -20,35 +19,14 @@
 #include "_hypre_utilities.h"
 
 #include "HYPRE_config.h"
-#ifdef HYPRE_USING_ESSL
-
-#include <essl.h>
-
-#else
-
-#include "fortran.h"
-#ifdef __cplusplus
-extern "C" {
-#endif
-	
-HYPRE_Int hypre_F90_NAME_LAPACK(dsygv, DSYGV)
-   ( HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *n,
-     HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Real *b, HYPRE_Int *ldb, HYPRE_Real *w,
-     HYPRE_Real *work, HYPRE_Int *lwork, /*@out@*/ HYPRE_Int *info
-      );
-HYPRE_Int hypre_F90_NAME_LAPACK( dpotrf, DPOTRF )
-   (const char* uplo, HYPRE_Int* n, HYPRE_Real* aval, HYPRE_Int* lda, HYPRE_Int* ierr );
-#ifdef __cplusplus
-}
-#endif
-
-#endif
 
 #include "HYPRE_lobpcg.h"
 #include "lobpcg.h"
 
 #include "interpreter.h"
 #include "HYPRE_MatvecFunctions.h"
+
+#include "_hypre_lapack.h"
 
 typedef struct
 {
@@ -107,24 +85,14 @@ static HYPRE_Int dsygv_interface (HYPRE_Int *itype, char *jobz, char *uplo, HYPR
                             n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Real *b, HYPRE_Int *ldb,
                             HYPRE_Real *w, HYPRE_Real *work, HYPRE_Int *lwork, HYPRE_Int *info)
 {
-#ifdef HYPRE_USING_ESSL
-   dsygv(*itype, a, *lda, b, *ldb, w, a, *lda, *n, work, *lwork );
-#else
-   hypre_F90_NAME_LAPACK( dsygv, DSYGV )( itype, jobz, uplo, n, 
-                                          a, lda, b, ldb,
-                                          w, work, lwork, info );
-#endif
+   hypre_dsygv(itype, jobz, uplo, n, a, lda, b, ldb, w, work, lwork, info);
    return 0;
 }
 
-static HYPRE_Int dpotrf_interface (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *
+static HYPRE_Int dpotrf_interface (const char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *
                              lda, HYPRE_Int *info)
 {
-#ifdef HYPRE_USING_ESSL
-   dpotrf(uplo, *n, a, *lda, info);
-#else
-   hypre_F90_NAME_LAPACK( dpotrf, DPOTRF )(uplo, n, a, lda, info);
-#endif
+   hypre_dpotrf(uplo, n, a, lda, info);
    return 0;
 }
 
