@@ -476,10 +476,10 @@ one wants to specifically set the up cycle, down cycle or the coarsest grid, wit
 e.g. block, Schwarz, ILU smoothers, it is necessary to use \code{HYPRE_BoomerAMGSetSmoothType}
 and \code{HYPRE_BoomerAMGSetSmoothNumLevels}. There are further parameter choices for the
 individual smoothers, which are described in the reference manual.
-The default relaxation type is hybrid Gauss-Seidel with CF-relaxation (relax first the C-,
-then the F-points) on the down cycle and FC-relaxation on the up-cycle. Note that if
+The default relaxation type is l1-Gauss-Seidel, using a forward solve
+on the down cycle and a backward solve on the up-cycle, to keep symmetry. Note that if
 BoomerAMG is used as a preconditioner for conjugate gradient, it is necessary to use
-a symmetric smoother such as weighted Jacobi or hybrid symmetric Gauss-Seidel.
+a symmetric smoother. Other symmetric options are weighted Jacobi or hybrid symmetric Gauss-Seidel.
 
 \subsection{AMG for systems of PDEs}
  
