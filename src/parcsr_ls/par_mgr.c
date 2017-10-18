@@ -580,8 +580,8 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 
 	HYPRE_Int              jj_counter,jj_counter_offd;
 	HYPRE_Int             *jj_count, *jj_count_offd;
-	HYPRE_Int              jj_begin_row,jj_begin_row_offd;
-	HYPRE_Int              jj_end_row,jj_end_row_offd;
+//	HYPRE_Int              jj_begin_row,jj_begin_row_offd;
+//	HYPRE_Int              jj_end_row,jj_end_row_offd;
 
 	HYPRE_Int              start_indexing = 0; /* start indexing for P_data at 0 */
 
@@ -606,7 +606,7 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 	HYPRE_Int              num_sends;
 	HYPRE_Int              index;
 	HYPRE_Int              ns, ne, size, rest;
-	HYPRE_Int              print_level = 0;
+	
 	HYPRE_Int             *int_buf_data;
 
 	HYPRE_Real       wall_time;  /* for debugging instrumentation  */
@@ -631,7 +631,6 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 	if (debug_flag < 0)
 	{
 		debug_flag = -debug_flag;
-		print_level = 1;
 	}
 
 	if (debug_flag==4) wall_time = time_getWallclockSeconds();
@@ -928,7 +927,6 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 			{
 				/* Diagonal part of P */
 				P_diag_i[i] = jj_counter;
-				jj_begin_row = jj_counter;
 				for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
 				{
 					i1 = A_diag_j[jj];
@@ -958,11 +956,9 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 						jj_counter++;
 					}
 				}
-				jj_end_row = jj_counter;
 
 				/* Off-Diagonal part of P */
 				P_offd_i[i] = jj_counter_offd;
-				jj_begin_row_offd = jj_counter_offd;
 
 				if (num_procs > 1)
 				{
@@ -997,7 +993,6 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 						}
 					}
 				}
-				jj_end_row_offd = jj_counter_offd;
 			}
 			P_offd_i[i+1] = jj_counter_offd;
 		}
@@ -1134,8 +1129,8 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 
 	HYPRE_Int              jj_counter,jj_counter_offd;
 	HYPRE_Int             *jj_count, *jj_count_offd;
-	HYPRE_Int              jj_begin_row,jj_begin_row_offd;
-	HYPRE_Int              jj_end_row,jj_end_row_offd;
+//	HYPRE_Int              jj_begin_row,jj_begin_row_offd;
+//	HYPRE_Int              jj_end_row,jj_end_row_offd;
 
 	HYPRE_Int              start_indexing = 0; /* start indexing for P_data at 0 */
 
@@ -1160,10 +1155,8 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 	HYPRE_Int              num_sends;
 	HYPRE_Int              index;
 	HYPRE_Int              ns, ne, size, rest;
-	HYPRE_Int              print_level = 0;
-	HYPRE_Int             *int_buf_data;
 
-	HYPRE_Real       *drs_indices;
+	HYPRE_Int             *int_buf_data;
 
 	HYPRE_Real       wall_time;  /* for debugging instrumentation  */
 
@@ -1180,7 +1173,6 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 	total_global_cpts = num_cpts_global[num_procs];
 #endif
 
-	drs_indices    = hypre_CTAlloc(HYPRE_Real, n_fine);
 	/*-------------------------------------------------------------------
 	 * Get the CF_marker data for the off-processor columns
 	 *-------------------------------------------------------------------*/
@@ -1188,7 +1180,6 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 	if (debug_flag < 0)
 	{
 		debug_flag = -debug_flag;
-		print_level = 1;
 	}
 
 	if (debug_flag==4) wall_time = time_getWallclockSeconds();
@@ -1489,7 +1480,6 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 			{
 				/* Diagonal part of P */
 				P_diag_i[i] = jj_counter;
-				jj_begin_row = jj_counter;
 				for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++)
 				{
 					i1 = A_diag_j[jj];
@@ -1508,11 +1498,9 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 						jj_counter++;
 					}
 				}
-				jj_end_row = jj_counter;
 
 				/* Off-Diagonal part of P */
 				P_offd_i[i] = jj_counter_offd;
-				jj_begin_row_offd = jj_counter_offd;
 
 				if (num_procs > 1)
 				{
@@ -1536,7 +1524,6 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 						}
 					}
 				}
-				jj_end_row_offd = jj_counter_offd;
 			}
 			P_offd_i[i+1] = jj_counter_offd;
 		}
@@ -1810,7 +1797,6 @@ HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *
 	hypre_ParMGRData   *mgr_data =  (hypre_ParMGRData*) mgr_vdata;
 
 	HYPRE_Int		   num_procs,  my_id;
-	HYPRE_Int              num_threads;
 
 	HYPRE_Int    blk_size  = (mgr_data -> block_size);
 	HYPRE_Int    reserved_coarse_size = (mgr_data -> reserved_coarse_size);
@@ -1835,7 +1821,7 @@ HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *
 	HYPRE_Int              n = hypre_CSRMatrixNumRows(A_diag);
 	HYPRE_Int n_block, left_size,inv_size;
 
-	HYPRE_Real       wall_time;  /* for debugging instrumentation  */
+//	HYPRE_Real       wall_time;  /* for debugging instrumentation  */
 	HYPRE_Int        bidx,bidxm1,bidxp1;
 	HYPRE_Real       * diaginv;
 
@@ -1845,7 +1831,7 @@ HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *
 
 	hypre_MPI_Comm_size(comm,&num_procs);
 	hypre_MPI_Comm_rank(comm,&my_id);
-	num_threads = hypre_NumThreads();
+//	HYPRE_Int num_threads = hypre_NumThreads();
 
 	//printf("n = %d\n",n);
 
@@ -1866,7 +1852,7 @@ HYPRE_Int hypre_block_jacobi_scaling(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *
 
 	hypre_blockRelax_setup(A,blk_size,reserved_coarse_size,&(mgr_data -> diaginv));
 
-	if (debug_flag==4) wall_time = time_getWallclockSeconds();
+//	if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
 	/*-----------------------------------------------------------------------
 	 *  First Pass: Determine size of B and fill in
@@ -2006,14 +1992,14 @@ HYPRE_Int hypre_block_jacobi (hypre_ParCSRMatrix *A,
 	HYPRE_Int             relax_error = 0;
 	HYPRE_Int		   num_sends;
 	HYPRE_Int		   index, start;
-	HYPRE_Int		   num_procs, num_threads, my_id;
+	HYPRE_Int		   num_procs, my_id;
 	HYPRE_Real	    *res;
 
     const HYPRE_Int     nb2 = blk_size*blk_size;
 
 	hypre_MPI_Comm_size(comm,&num_procs);
 	hypre_MPI_Comm_rank(comm,&my_id);
-	num_threads = hypre_NumThreads();
+//	HYPRE_Int num_threads = hypre_NumThreads();
 
 	res = hypre_CTAlloc(HYPRE_Real, blk_size);
 
@@ -2125,7 +2111,7 @@ hypre_blockRelax_setup(hypre_ParCSRMatrix *A,
 	HYPRE_Int             i, j,k;
 	HYPRE_Int             ii, jj;
 	HYPRE_Int             bidx,bidxm1,bidxp1;
-	HYPRE_Int		   num_procs, num_threads, my_id;
+	HYPRE_Int		   num_procs, my_id;
 
     const HYPRE_Int     nb2 = blk_size*blk_size;
 	HYPRE_Int           n_block;
@@ -2135,7 +2121,7 @@ hypre_blockRelax_setup(hypre_ParCSRMatrix *A,
 
 	hypre_MPI_Comm_size(comm,&num_procs);
 	hypre_MPI_Comm_rank(comm,&my_id);
-	num_threads = hypre_NumThreads();
+//	HYPRE_Int num_threads = hypre_NumThreads();
 
 	if (my_id == num_procs)
 	{
@@ -2265,7 +2251,7 @@ hypre_blockRelax(hypre_ParCSRMatrix *A,
 	HYPRE_Int             bidx,bidxm1,bidxp1;
 	HYPRE_Int             relax_error = 0;
 
-	HYPRE_Int		   num_procs, num_threads, my_id;
+	HYPRE_Int		   num_procs, my_id;
 
     const HYPRE_Int     nb2 = blk_size*blk_size;
 	HYPRE_Int           n_block;
@@ -2274,7 +2260,8 @@ hypre_blockRelax(hypre_ParCSRMatrix *A,
 
 	hypre_MPI_Comm_size(comm,&num_procs);
 	hypre_MPI_Comm_rank(comm,&my_id);
-	num_threads = hypre_NumThreads();
+	
+//	HYPRE_Int num_threads = hypre_NumThreads();
 
 	if (my_id == num_procs)
 	{

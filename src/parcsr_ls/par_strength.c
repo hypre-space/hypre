@@ -586,7 +586,7 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
    /* HYPRE_Real         *S_offd_data; */
                  
    HYPRE_Real          diag, row_scale, row_sum;
-   HYPRE_Int                 i, jj_counter, jj, jA, jS;
+   HYPRE_Int                 i, jj, jA, jS;
                       
    HYPRE_Int                 ierr = 0;
 
@@ -749,28 +749,18 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
       if ((fabs(row_sum) > fabs(diag)*max_row_sum) && (max_row_sum < 1.0))
       {
          /* make all dependencies weak */
-         jj_counter = 0;
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
             jj = A_diag_j[jA];
-            //if (CF_marker[jj] == SMRK) {
               S_temp_diag_j[jA] = -1;
-              //jj_counter++;
-            //}
          }
          jS_diag -= A_diag_i[i + 1] - (A_diag_i[i] + 1);
-         //jS_diag -= jj_counter;
 
-         //jj_counter = 0;
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
-            //if (CF_marker[jj] == SMRK) {
               S_temp_offd_j[jA] = -1;
-            //  jj_counter++;
-            //}
          }
          jS_offd -= A_offd_i[i + 1] - A_offd_i[i];
-         //jS_offd -= jj_counter;
       }
       else
       {

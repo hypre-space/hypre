@@ -26,7 +26,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 	HYPRE_Int       cnt,i,j, final_coarse_size, block_size, idx, row, **block_cf_marker;
 	HYPRE_Int	   lev, num_coarsening_levs, last_level, num_c_levels, num_threads,nc,index_i,cflag;
 	HYPRE_Int	   debug_flag = 0;
-	HYPRE_Int      ierr;
 
 	hypre_ParCSRMatrix  *RT = NULL;
 	hypre_ParCSRMatrix  *P = NULL;
@@ -86,7 +85,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 	hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
 	HYPRE_Int             n       = hypre_CSRMatrixNumRows(A_diag);
 	HYPRE_Int    blk_size  = (mgr_data -> block_size);
-        HYPRE_Int coarse_size = 0;
   
 	hypre_ParAMGData    **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);  
 	HYPRE_Int Frelax_method = (mgr_data -> Frelax_method);
@@ -246,8 +244,6 @@ hypre_MGRSetup( void               *mgr_vdata,
   (mgr_data -> level_coarse_indexes) = level_coarse_indexes;
   
   (mgr_data -> num_coarse_per_level) = level_coarse_size;
-  
-  coarse_size = final_coarse_size;
 
   /* Free Previously allocated data, if any not destroyed */
   if (A_array || P_array || RT_array || CF_marker_array)
@@ -334,7 +330,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 	}
 	else if (global_smooth_type == 8)
 	{
-		ierr = HYPRE_EuclidCreate(comm, &(mgr_data -> global_smoother));
+		HYPRE_EuclidCreate(comm, &(mgr_data -> global_smoother));
 		HYPRE_EuclidSetLevel(mgr_data -> global_smoother, 0);
 		HYPRE_EuclidSetBJ(mgr_data -> global_smoother, 1);
 		HYPRE_EuclidSetup(mgr_data -> global_smoother, A, f, u);

@@ -61,11 +61,12 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int		iter, num_procs, my_id;
    HYPRE_Int		Solve_err_flag;
 
+/*
    HYPRE_Real   total_coeffs;
    HYPRE_Real   total_variables;
    HYPRE_Real   operat_cmplxty;
    HYPRE_Real   grid_cmplxty;
-
+*/
    HYPRE_Solver    	cg_solver = (mgr_data -> coarse_grid_solver);
    HYPRE_Int		(*coarse_grid_solver_solve)(void*,void*,void*,void*) = (mgr_data -> coarse_grid_solver_solve);
 
@@ -114,12 +115,12 @@ hypre_MGRSolve( void               *mgr_vdata,
     *-----------------------------------------------------------------------*/
 
    Solve_err_flag = 0;
-
+/*
    total_coeffs = 0;
    total_variables = 0;
    operat_cmplxty = 0;
    grid_cmplxty = 0;
-
+*/
    /*-----------------------------------------------------------------------
     *     write some initial info
     *-----------------------------------------------------------------------*/
@@ -419,7 +420,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata )
     }
   }
 
-  return hypre_error_flag;
+  return Solve_err_flag;
 }
 
 HYPRE_Int
@@ -427,7 +428,7 @@ hypre_MGRCycle( void               *mgr_vdata,
                   hypre_ParVector    **F_array,
                   hypre_ParVector    **U_array )
 {
-   MPI_Comm 	         comm;
+//   MPI_Comm 	         comm;
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
    HYPRE_Int       Solve_err_flag;
@@ -463,7 +464,7 @@ hypre_MGRCycle( void               *mgr_vdata,
   hypre_ParAMGData    **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);   
 
    /* Initialize */
-   comm = hypre_ParCSRMatrixComm(A_array[0]);
+//   comm = hypre_ParCSRMatrixComm(A_array[0]);
    Solve_err_flag = 0;
    Not_Finished = 1;
    cycle_type = 1;
