@@ -1685,30 +1685,30 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix     *A,
 
 void hypre_blas_smat_inv_n4 (HYPRE_Real *a)
 {
-    const double a11 = a[0],  a12 = a[1],  a13 = a[2],  a14 = a[3];
-    const double a21 = a[4],  a22 = a[5],  a23 = a[6],  a24 = a[7];
-    const double a31 = a[8],  a32 = a[9],  a33 = a[10], a34 = a[11];
-    const double a41 = a[12], a42 = a[13], a43 = a[14], a44 = a[15];
+    const HYPRE_Real a11 = a[0],  a12 = a[1],  a13 = a[2],  a14 = a[3];
+    const HYPRE_Real a21 = a[4],  a22 = a[5],  a23 = a[6],  a24 = a[7];
+    const HYPRE_Real a31 = a[8],  a32 = a[9],  a33 = a[10], a34 = a[11];
+    const HYPRE_Real a41 = a[12], a42 = a[13], a43 = a[14], a44 = a[15];
 
-    const double M11 = a22*a33*a44 + a23*a34*a42 + a24*a32*a43 - a22*a34*a43 - a23*a32*a44 - a24*a33*a42;
-    const double M12 = a12*a34*a43 + a13*a32*a44 + a14*a33*a42 - a12*a33*a44 - a13*a34*a42 - a14*a32*a43;
-    const double M13 = a12*a23*a44 + a13*a24*a42 + a14*a22*a43 - a12*a24*a43 - a13*a22*a44 - a14*a23*a42;
-    const double M14 = a12*a24*a33 + a13*a22*a34 + a14*a23*a32 - a12*a23*a34 - a13*a24*a32 - a14*a22*a33;
-    const double M21 = a21*a34*a43 + a23*a31*a44 + a24*a33*a41 - a21*a33*a44 - a23*a34*a41 - a24*a31*a43;
-    const double M22 = a11*a33*a44 + a13*a34*a41 + a14*a31*a43 - a11*a34*a43 - a13*a31*a44 - a14*a33*a41;
-    const double M23 = a11*a24*a43 + a13*a21*a44 + a14*a23*a41 - a11*a23*a44 - a13*a24*a41 - a14*a21*a43;
-    const double M24 = a11*a23*a34 + a13*a24*a31 + a14*a21*a33 - a11*a24*a33 - a13*a21*a34 - a14*a23*a31;
-    const double M31 = a21*a32*a44 + a22*a34*a41 + a24*a31*a42 - a21*a34*a42 - a22*a31*a44 - a24*a32*a41;
-    const double M32 = a11*a34*a42 + a12*a31*a44 + a14*a32*a41 - a11*a32*a44 - a12*a34*a41 - a14*a31*a42;
-    const double M33 = a11*a22*a44 + a12*a24*a41 + a14*a21*a42 - a11*a24*a42 - a12*a21*a44 - a14*a22*a41;
-    const double M34 = a11*a24*a32 + a12*a21*a34 + a14*a22*a31 - a11*a22*a34 - a12*a24*a31 - a14*a21*a32;
-    const double M41 = a21*a33*a42 + a22*a31*a43 + a23*a32*a41 - a21*a32*a43 - a22*a33*a41 - a23*a31*a42;
-    const double M42 = a11*a32*a43 + a12*a33*a41 + a13*a31*a42 - a11*a33*a42 - a12*a31*a43 - a13*a32*a41;
-    const double M43 = a11*a23*a42 + a12*a21*a43 + a13*a22*a41 - a11*a22*a43 - a12*a23*a41 - a13*a21*a42;
-    const double M44 = a11*a22*a33 + a12*a23*a31 + a13*a21*a32 - a11*a23*a32 - a12*a21*a33 - a13*a22*a31;
+    const HYPRE_Real M11 = a22*a33*a44 + a23*a34*a42 + a24*a32*a43 - a22*a34*a43 - a23*a32*a44 - a24*a33*a42;
+    const HYPRE_Real M12 = a12*a34*a43 + a13*a32*a44 + a14*a33*a42 - a12*a33*a44 - a13*a34*a42 - a14*a32*a43;
+    const HYPRE_Real M13 = a12*a23*a44 + a13*a24*a42 + a14*a22*a43 - a12*a24*a43 - a13*a22*a44 - a14*a23*a42;
+    const HYPRE_Real M14 = a12*a24*a33 + a13*a22*a34 + a14*a23*a32 - a12*a23*a34 - a13*a24*a32 - a14*a22*a33;
+    const HYPRE_Real M21 = a21*a34*a43 + a23*a31*a44 + a24*a33*a41 - a21*a33*a44 - a23*a34*a41 - a24*a31*a43;
+    const HYPRE_Real M22 = a11*a33*a44 + a13*a34*a41 + a14*a31*a43 - a11*a34*a43 - a13*a31*a44 - a14*a33*a41;
+    const HYPRE_Real M23 = a11*a24*a43 + a13*a21*a44 + a14*a23*a41 - a11*a23*a44 - a13*a24*a41 - a14*a21*a43;
+    const HYPRE_Real M24 = a11*a23*a34 + a13*a24*a31 + a14*a21*a33 - a11*a24*a33 - a13*a21*a34 - a14*a23*a31;
+    const HYPRE_Real M31 = a21*a32*a44 + a22*a34*a41 + a24*a31*a42 - a21*a34*a42 - a22*a31*a44 - a24*a32*a41;
+    const HYPRE_Real M32 = a11*a34*a42 + a12*a31*a44 + a14*a32*a41 - a11*a32*a44 - a12*a34*a41 - a14*a31*a42;
+    const HYPRE_Real M33 = a11*a22*a44 + a12*a24*a41 + a14*a21*a42 - a11*a24*a42 - a12*a21*a44 - a14*a22*a41;
+    const HYPRE_Real M34 = a11*a24*a32 + a12*a21*a34 + a14*a22*a31 - a11*a22*a34 - a12*a24*a31 - a14*a21*a32;
+    const HYPRE_Real M41 = a21*a33*a42 + a22*a31*a43 + a23*a32*a41 - a21*a32*a43 - a22*a33*a41 - a23*a31*a42;
+    const HYPRE_Real M42 = a11*a32*a43 + a12*a33*a41 + a13*a31*a42 - a11*a33*a42 - a12*a31*a43 - a13*a32*a41;
+    const HYPRE_Real M43 = a11*a23*a42 + a12*a21*a43 + a13*a22*a41 - a11*a22*a43 - a12*a23*a41 - a13*a21*a42;
+    const HYPRE_Real M44 = a11*a22*a33 + a12*a23*a31 + a13*a21*a32 - a11*a23*a32 - a12*a21*a33 - a13*a22*a31;
 
-    const double det = a11*M11 + a12*M21 + a13*M31 + a14*M41;
-    double det_inv;
+    const HYPRE_Real det = a11*M11 + a12*M21 + a13*M31 + a14*M41;
+    HYPRE_Real det_inv;
 
     if ( fabs(det) < 1e-22 ) {
         printf("### WARNING: Matrix is nearly singular! det = %e\n", det);
@@ -2210,7 +2210,7 @@ hypre_blockRelax_setup(hypre_ParCSRMatrix *A,
 		{
 			hypre_blas_mat_inv(diaginv+i*nb2, blk_size);
 		}
-		hypre_blas_mat_inv(diaginv+(int)(blk_size*nb2),left_size);
+		hypre_blas_mat_inv(diaginv+(HYPRE_Int)(blk_size*nb2),left_size);
 	}
 	else
 	{
@@ -2355,7 +2355,7 @@ hypre_blockRelax(hypre_ParCSRMatrix *A,
 		{
 			hypre_blas_mat_inv(diaginv+i*nb2, blk_size);
 		}
-		hypre_blas_mat_inv(diaginv+(int)(blk_size*nb2),left_size);
+		hypre_blas_mat_inv(diaginv+(HYPRE_Int)(blk_size*nb2),left_size);
 		/*
 		for (i = 0;i < n_block; i++)
 		{

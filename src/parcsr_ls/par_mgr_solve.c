@@ -78,7 +78,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int    global_smooth_iters      =  (mgr_data -> global_smooth_iters);
    HYPRE_Int    global_smooth_type =  (mgr_data -> global_smooth_type);
 
-   int i;
+   HYPRE_Int    i;
 
    if(logging > 1)
    {

@@ -73,11 +73,11 @@ FILES =\
  HYPRE_parcsr_lgmres.c\
  HYPRE_parcsr_hybrid.c\
  HYPRE_parcsr_int.c\
+ HYPRE_parcsr_mgr.c\
  HYPRE_parcsr_ParaSails.c\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
  HYPRE_parcsr_schwarz.c\
- HYPRE_parcsr_mgr.c\
  HYPRE_ams.c\
  HYPRE_ads.c\
  HYPRE_ame.c\
@@ -104,6 +104,9 @@ FILES =\
  par_laplace_9pt.c\
  par_laplace.c\
  par_lr_interp.c\
+ par_mgr.c\
+ par_mgr_setup.c\
+ par_mgr_solve.c\
  par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\
@@ -123,9 +126,6 @@ FILES =\
  partial.c\
  pcg_par.c\
  schwarz.c\
- par_mgr.c\
- par_mgr_setup.c\
- par_mgr_solve.c\
  block_tridiag.c\
  ams.c\
  ads.c\
