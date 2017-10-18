@@ -248,7 +248,12 @@ hypre_MGRDestroy( void *data )
     hypre_TFree(mgr_data -> FrelaxVcycleData);
     mgr_data -> FrelaxVcycleData = NULL;
   }  
-
+  /* data for reserved coarse nodes */
+  if(mgr_data -> reserved_coarse_indexes)
+  {
+     hypre_TFree(mgr_data -> reserved_coarse_indexes);
+     (mgr_data -> reserved_coarse_indexes) = NULL;
+  }
   /* coarse level matrix - RAP */
   if ((mgr_data -> RAP))
     hypre_ParCSRMatrixDestroy((mgr_data -> RAP));
@@ -418,6 +423,8 @@ hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata,
 					   HYPRE_Int *reserved_cpt_index)
 {
 	hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+	HYPRE_Int *reserved_coarse_indexes = NULL;
+	HYPRE_Int i;
 
 	if (!mgr_data)
 	{
@@ -431,9 +438,22 @@ hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata,
 	  hypre_error_in_arg(2);
           return hypre_error_flag;
 	}
-
+	/* free data not previously destroyed */
+	if((mgr_data -> reserved_coarse_indexes))
+	{
+	   hypre_TFree((mgr_data -> reserved_coarse_indexes));
+	   (mgr_data -> reserved_coarse_indexes) = NULL;
+	}
+        
+        /* set reserved coarse nodes */
+        if(reserved_coarse_size > 0)
+        {
+           reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int, reserved_coarse_size);
+           for(i=0; i<reserved_coarse_size; i++)
+              reserved_coarse_indexes[i] = reserved_cpt_index[i];
+        }
 	(mgr_data -> reserved_coarse_size) = reserved_coarse_size;
-	(mgr_data -> reserved_coarse_indexes) = reserved_cpt_index;
+	(mgr_data -> reserved_coarse_indexes) = reserved_coarse_indexes;
 	
 	return hypre_error_flag;
 }
