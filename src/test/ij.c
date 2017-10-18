@@ -936,7 +936,8 @@ main( hypre_int argc,
    /* defaults for BoomerAMG */
    if (solver_id == 0 || solver_id == 1 || solver_id == 3 || solver_id == 5
        || solver_id == 9 || solver_id == 13 || solver_id == 14
-       || solver_id == 15 || solver_id == 20 || solver_id == 51 || solver_id == 61)
+       || solver_id == 15 || solver_id == 20 || solver_id == 51 || solver_id == 61 
+       || solver_id == 70 || solver_id == 71)
    {
       strong_threshold = 0.25;
       trunc_factor = 0.;
