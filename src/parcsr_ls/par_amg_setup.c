@@ -1124,7 +1124,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 		 {
 			 if (block_mode)
 			 {
-				 printf("Keeping coarsening block is not implemented\n");
+				 printf("Keeping coarse nodes in block mode is not implemented\n");
 			 }
 			 else if  (level < hypre_ParAMGDataCPointKeepLevel(amg_data))
 			 {
