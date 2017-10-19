@@ -1132,7 +1132,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 				 if (level < hypre_ParAMGDataCPointKeepLevel(amg_data)-1)
 					 C_point_marker_array[level+1] = hypre_CTAlloc(HYPRE_Int, num_C_point_coarse);
 				 
-				 for(j = 0;j < num_C_point_coarse;j ++)
+				 for(j = 0;j < num_C_point_coarse;j++)
 				 {
 					 CF_marker[C_point_keep[j]] = 2;
 				 }

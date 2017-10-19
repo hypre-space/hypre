@@ -3985,7 +3985,7 @@ hypre_BoomerAMGSetCpointsToKeep(void      *data,
 	}
 
 	/* free data not previously destroyed */
-	if((hypre_ParAMGDataNumCPointKeep(amg_data) > 0) && (hypre_ParAMGDataCPointKeepLevel(amg_data) > 0))
+	if(hypre_ParAMGDataCPointKeepLevel(amg_data))
 	{
 	   for(i=0; i<hypre_ParAMGDataCPointKeepLevel(amg_data); i++)
 	   {
