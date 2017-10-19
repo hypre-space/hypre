@@ -53,7 +53,7 @@ typedef struct
 
   HYPRE_Real   **l1_norms;
   HYPRE_Real	final_rel_residual_norm;
-  HYPRE_Real	conv_tol;
+  HYPRE_Real	tol;
   HYPRE_Real	relax_weight;
   HYPRE_Int	relax_type;
   HYPRE_Int	logging;

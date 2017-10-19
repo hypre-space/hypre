@@ -40,7 +40,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    hypre_ParVector    **F_array = (mgr_data -> F_array);
    hypre_ParVector    **U_array = (mgr_data -> U_array);
 
-   HYPRE_Real		tol = (mgr_data -> conv_tol);
+   HYPRE_Real		tol = (mgr_data -> tol);
    HYPRE_Int		logging = (mgr_data -> logging);
    HYPRE_Int		print_level = (mgr_data -> print_level);
    HYPRE_Int		max_iter = (mgr_data -> max_iter);

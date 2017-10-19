@@ -199,20 +199,20 @@ HYPRE_MGRSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
    return hypre_MGRSetLogging(solver, logging );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetMaxIters
+ * HYPRE_MGRSetMaxIter
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetMaxIters( HYPRE_Solver solver, HYPRE_Int max_iter )
+HYPRE_MGRSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
 {
-   return hypre_MGRSetMaxIters( solver, max_iter );
+   return hypre_MGRSetMaxIter( solver, max_iter );
 }
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetConvTol
+ * HYPRE_MGRSetTol
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetConvTol( HYPRE_Solver solver, HYPRE_Real conv_tol )
+HYPRE_MGRSetTol( HYPRE_Solver solver, HYPRE_Real tol )
 {
-   return hypre_MGRSetConvTol( solver, conv_tol );
+   return hypre_MGRSetTol( solver, tol );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetMaxGlobalsmoothIters

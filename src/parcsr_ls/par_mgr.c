@@ -70,7 +70,7 @@ hypre_MGRCreate()
   (mgr_data -> use_default_cgrid_solver) = 1;
   (mgr_data -> omega) = 1.;
   (mgr_data -> max_iter) = 20;
-  (mgr_data -> conv_tol) = 1.0e-7;
+  (mgr_data -> tol) = 1.0e-7;
   (mgr_data -> relax_type) = 0;
   (mgr_data -> relax_order) = 1;
   (mgr_data -> interp_type) = 2;
@@ -2566,7 +2566,7 @@ hypre_MGRSetLogging( void *mgr_vdata, HYPRE_Int logging )
 }
 /* Set max number of iterations for mgr solver */
 HYPRE_Int
-hypre_MGRSetMaxIters( void *mgr_vdata, HYPRE_Int max_iter )
+hypre_MGRSetMaxIter( void *mgr_vdata, HYPRE_Int max_iter )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    (mgr_data -> max_iter) = max_iter;
@@ -2574,10 +2574,10 @@ hypre_MGRSetMaxIters( void *mgr_vdata, HYPRE_Int max_iter )
 }
 /* Set convergence tolerance for mgr solver */
 HYPRE_Int
-hypre_MGRSetConvTol( void *mgr_vdata, HYPRE_Real conv_tol )
+hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   (mgr_data -> conv_tol) = conv_tol;
+   (mgr_data -> tol) = tol;
    return hypre_error_flag;
 }
 /* Set max number of iterations for mgr solver */

@@ -3375,24 +3375,24 @@ HYPRE_Int
 HYPRE_MGRSetLogging( HYPRE_Solver solver, HYPRE_Int logging );
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetMaxIters
+ * HYPRE_MGRSetMaxIter
  *--------------------------------------------------------------------------*/
 /**
  * (Optional) Set maximum number of iterations if used as a solver. Set this to 1 if 
  * MGR is used as a preconditioner. The default is 20.
  **/
 HYPRE_Int
-HYPRE_MGRSetMaxIters( HYPRE_Solver solver, HYPRE_Int max_iter );
+HYPRE_MGRSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetConvTol
+ * HYPRE_MGRSetTol
  *--------------------------------------------------------------------------*/
 /**
- * (Optional) Set the convergence tolerance for the MGR solver. Use conv\_tol = 0.0 if 
+ * (Optional) Set the convergence tolerance for the MGR solver. Use tol = 0.0 if 
  * MGR is used as a preconditioner. The default is 1.e-7. 
  **/
 HYPRE_Int
-HYPRE_MGRSetConvTol( HYPRE_Solver solver, HYPRE_Real conv_tol );
+HYPRE_MGRSetTol( HYPRE_Solver solver, HYPRE_Real tol );
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetMaxGlobalsmoothIters

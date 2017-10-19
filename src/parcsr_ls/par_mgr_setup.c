@@ -111,7 +111,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_printf("Restriction type: %d\n", restrict_type);
       hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
       hypre_printf("Max number of coarse levels: %d\n", (mgr_data -> max_num_coarse_levels));
-      hypre_printf("Tolerance: %e\n", (mgr_data -> conv_tol));
+      hypre_printf("Tolerance: %e\n", (mgr_data -> tol));
    }
 
 

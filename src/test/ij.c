@@ -3245,7 +3245,8 @@ main( hypre_int argc,
          /* set print level */
          HYPRE_MGRSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
-         HYPRE_MGRSetMaxIters(pcg_precond, 1);
+         HYPRE_MGRSetMaxIter(pcg_precond, 1);
+         HYPRE_MGRSetTol(pcg_precond, pc_tol);
       
          /* create AMG coarse grid solver */
       
@@ -3255,7 +3256,6 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetInterpType(amg_solver, 0);
          HYPRE_BoomerAMGSetPostInterpType(amg_solver, post_interp_type);
          HYPRE_BoomerAMGSetCoarsenType(amg_solver, 6);
-         HYPRE_BoomerAMGSetTol(amg_solver, tol);
          HYPRE_BoomerAMGSetPMaxElmts(amg_solver, 0);
          /* note: log is written to standard output, not to file */
          HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
@@ -3273,6 +3273,7 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetSmoothType(amg_solver, smooth_type);
          HYPRE_BoomerAMGSetSmoothNumSweeps(amg_solver, smooth_num_sweeps);
          HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
 
          /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
          HYPRE_MGRSetCoarseSolver( pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
@@ -5445,7 +5446,8 @@ main( hypre_int argc,
       /* set print level */
       HYPRE_MGRSetPrintLevel(mgr_solver, 3);
       /* set max iterations */
-      HYPRE_MGRSetMaxIters(mgr_solver, max_iter);
+      HYPRE_MGRSetMaxIter(mgr_solver, max_iter);
+      HYPRE_MGRSetTol(mgr_solver, tol);
       
       /* create AMG coarse grid solver */
       
@@ -5478,6 +5480,7 @@ main( hypre_int argc,
       else
       {
          HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+         HYPRE_BoomerAMGSetTol(amg_solver, 0.0);
          HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
       }
       /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
