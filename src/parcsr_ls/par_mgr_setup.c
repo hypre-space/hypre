@@ -96,8 +96,8 @@ hypre_MGRSetup( void               *mgr_vdata,
   block_size = (mgr_data -> block_size);
   block_cf_marker = (mgr_data -> block_cf_marker);
   
-    HYPRE_Int **level_coarse_indexes;
-    HYPRE_Int *level_coarse_size;
+    HYPRE_Int **level_coarse_indexes = NULL;
+    HYPRE_Int *level_coarse_size = NULL;
     HYPRE_Int setNonCpointToF = (mgr_data -> set_non_Cpoints_to_F);
     HYPRE_Int *reserved_coarse_indexes = (mgr_data -> reserved_coarse_indexes);
 
@@ -110,26 +110,17 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_printf("Number of interpolation sweeps: %d\n", num_interp_sweeps);
       hypre_printf("Restriction type: %d\n", restrict_type);
       hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
-      hypre_printf("Number of coarse levels: %d\n", (mgr_data -> num_coarse_levels));
       hypre_printf("Max number of coarse levels: %d\n", (mgr_data -> max_num_coarse_levels));
       hypre_printf("Tolerance: %e\n", (mgr_data -> conv_tol));
    }
 
-  /* Initialize local indexes of coarse sets at different levels */
-  HYPRE_Int num_coarse_levels = (mgr_data -> max_num_coarse_levels);
+
+//  HYPRE_Int num_coarse_levels = (mgr_data -> max_num_coarse_levels);
   
   HYPRE_Int nloc =  hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
   HYPRE_Int ilower =  hypre_ParCSRMatrixFirstRowIndex(A);
   HYPRE_Int iupper =  hypre_ParCSRMatrixLastRowIndex(A);
-
-/*
-	gnumrows = hypre_ParCSRMatrixGlobalNumRows(A);
-	if(((gnumrows-reserved_coarse_size) % block_size) != 0)
-	{
-		hypre_printf("ERROR: Global number of rows minus reserved_coarse_grid_size must be a multiple of block_size ... n = %d, reserved_coarse_size = %d, block_size = %d \n", gnumrows,reserved_coarse_size, block_size);
-		hypre_MPI_Abort(comm, -1);
-	}
-*/        
+       
         /* Trivial case: simply solve the coarse level problem */
 	if( block_size < 2 || (mgr_data -> max_num_coarse_levels) < 1)
 	{
@@ -174,14 +165,15 @@ hypre_MGRSetup( void               *mgr_vdata,
 //		hypre_BoomerAMGSetMaxIter ( (mgr_data -> coarse_grid_solver), (mgr_data -> max_iter) );
 //		hypre_BoomerAMGSetPrintLevel((mgr_data -> coarse_grid_solver), 3);
 		coarse_grid_solver_setup((mgr_data -> coarse_grid_solver), A, f, u);
-		(mgr_data -> max_num_coarse_levels) = 0;
+		(mgr_data -> num_coarse_levels) = 0;
 
 		return hypre_error_flag;
 	}
-  
+	
+/*
   if ((mgr_data -> level_coarse_indexes) != NULL)
   {
-     for(i=0; i<num_coarse_levels; i++)
+     for(i=0; i<max_num_coarse_levels; i++)
      {
         if((mgr_data -> level_coarse_indexes)[i] != NULL)
         {
@@ -193,17 +185,19 @@ hypre_MGRSetup( void               *mgr_vdata,
      hypre_TFree((mgr_data -> num_coarse_per_level));
      (mgr_data -> num_coarse_per_level) = NULL;     
   }
-     
-  level_coarse_indexes = hypre_CTAlloc(HYPRE_Int*, num_coarse_levels);
-  for (i = 0; i < num_coarse_levels; i++) 
+*/
+
+   /* Initialize local indexes of coarse sets at different levels */      
+  level_coarse_indexes = hypre_CTAlloc(HYPRE_Int*, max_num_coarse_levels);
+  for (i = 0; i < max_num_coarse_levels; i++) 
   {
      level_coarse_indexes[i] = hypre_CTAlloc(HYPRE_Int,nloc);
   }
 
-  level_coarse_size = hypre_CTAlloc(HYPRE_Int, num_coarse_levels);
+  level_coarse_size = hypre_CTAlloc(HYPRE_Int, max_num_coarse_levels);
 
   // loop over levels
-  for(i=0; i<num_coarse_levels; i++)
+  for(i=0; i<max_num_coarse_levels; i++)
   {
      // loop over rows
      final_coarse_size = 0;
@@ -230,7 +224,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 	{
 		row = reserved_coarse_indexes[i];
 		idx = row % block_size;
-		for(j=0; j<num_coarse_levels; j++)
+		for(j=0; j<max_num_coarse_levels; j++)
 		{
 		   if(block_cf_marker[j][idx] != CMRK)
 		   {
@@ -521,7 +515,7 @@ hypre_MGRSetup( void               *mgr_vdata,
       		      CF_marker_array[lev][level_coarse_indexes[lev+1][i]] = S_CMRK;
       		   }
       		   // next: loop over levels to update indexes
-      		   for(i=lev+1; i<num_coarse_levels; i++)
+      		   for(i=lev+1; i<max_num_coarse_levels; i++)
       		   {
       		      nc = 0;
        		      index_i = 0;
@@ -702,6 +696,19 @@ hypre_MGRSetup( void               *mgr_vdata,
    rel_res_norms = hypre_CTAlloc(HYPRE_Real,(mgr_data -> max_iter));
    (mgr_data -> rel_res_norms) = rel_res_norms;
 
+   /* free level_coarse_indexes data */
+   if ( level_coarse_indexes != NULL)
+   {
+      for(i=0; i<max_num_coarse_levels; i++)
+      {
+         hypre_TFree(level_coarse_indexes[i]);
+      }
+      hypre_TFree( level_coarse_indexes);
+      level_coarse_indexes = NULL;
+      hypre_TFree(level_coarse_size);
+      level_coarse_size = NULL;       
+   }   
+
    return hypre_error_flag;
 }
 
@@ -771,8 +778,8 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
           P_array_local[j] = NULL;
        }
     }
-    // could we go (j=0; j<old_num_levs-1; j++) ??
-    for (j = 0; j < old_num_levels; j++)
+
+    for (j = 0; j < old_num_levels-1; j++)
     {
       if (CF_marker_array_local[j]) 
       {
@@ -849,8 +856,8 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
       hypre_BoomerAMGCreateS(A_array_local[lev_local], 0.25, 0.9, 1, NULL, &S_local);
     }
 
-    hypre_BoomerAMGCoarsenFalgout(S_local, A_array_local[lev_local], 0, 0, &CF_marker_local); 
-    
+//    hypre_BoomerAMGCoarsenFalgout(S_local, A_array_local[lev_local], 0, 0, &CF_marker_local); 
+    hypre_BoomerAMGCoarsen(S_local, A_array_local[lev_local], 0, 0, &CF_marker_local);     
     /* For the lev_local=0, the coarsening routine is called on the fine-grid (the whole matrix) 
      * thus, some C-points of the outer MGR level may have been set to F-points in the coarsening 
      * routine. We need to reset these back to C-points (before building the interpolation operator.
@@ -916,7 +923,8 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   (FrelaxVcycleData[lev] -> F_array) = F_array_local;
   (FrelaxVcycleData[lev] -> U_array) = U_array_local;
   (FrelaxVcycleData[lev] -> CF_marker_array) = CF_marker_array_local;
-  (FrelaxVcycleData[lev] -> num_levels) = lev_local;
+  (FrelaxVcycleData[lev] -> num_levels) = lev_local+1;
+
   if(lev_local > 1)
     hypre_GaussElimSetup(FrelaxVcycleData[lev], lev_local, ge_relax_type);
 

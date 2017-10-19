@@ -111,9 +111,10 @@ hypre_MGRDestroy( void *data )
   HYPRE_Int i;
   HYPRE_Int num_coarse_levels = (mgr_data -> num_coarse_levels);
 
+  /* block info data */
   if ((mgr_data -> block_cf_marker))
   {
-    for (i=0; i < (num_coarse_levels); i++)
+    for (i=0; i < (mgr_data -> max_num_coarse_levels); i++)
     {
        if ((mgr_data -> block_cf_marker)[i])
        {
@@ -123,6 +124,13 @@ hypre_MGRDestroy( void *data )
     hypre_TFree((mgr_data -> block_cf_marker));
     (mgr_data -> block_cf_marker) = NULL;
   }
+
+  if(mgr_data -> block_num_coarse_indexes)
+  {
+     hypre_TFree(mgr_data -> block_num_coarse_indexes);
+     (mgr_data -> block_num_coarse_indexes) = NULL;
+  }
+  
   /* final residual vector */
   if((mgr_data -> residual))
   {
@@ -378,42 +386,60 @@ hypre_MGRSetCpointsByBlock( void      *mgr_vdata,
                          HYPRE_Int  **block_coarse_indexes)
 {
   HYPRE_Int  i,j;
-  HYPRE_Int  **block_cf_marker;
+  HYPRE_Int  **block_cf_marker = NULL;
+  HYPRE_Int *block_num_coarse_indexes = NULL;
 
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-  (mgr_data -> max_num_coarse_levels) = max_num_levels;
 
+  /* free block cf_marker data if not previously destroyed */
   if((mgr_data -> block_cf_marker) != NULL)
   {
-    for (i=0; i < max_num_levels; i++)
+    for (i=0; i < (mgr_data -> max_num_coarse_levels); i++)
     {
       if ((mgr_data -> block_cf_marker)[i])
       {
         hypre_TFree ((mgr_data -> block_cf_marker)[i]);
+        (mgr_data -> block_cf_marker)[i] = NULL;
       }
     }
     hypre_TFree (mgr_data -> block_cf_marker);
+    (mgr_data -> block_cf_marker) = NULL;
   }
+   if((mgr_data -> block_num_coarse_indexes))
+   {
+      hypre_TFree((mgr_data -> block_num_coarse_indexes));
+      (mgr_data -> block_num_coarse_indexes) = NULL;
+   }
+   
+   /* store block cf_marker */
+   block_cf_marker = hypre_CTAlloc(HYPRE_Int *,max_num_levels);
+   for (i = 0; i < max_num_levels; i++) 
+   {
+     block_cf_marker[i] = hypre_CTAlloc(HYPRE_Int,block_size);
+     memset(block_cf_marker[i], FMRK, block_size*sizeof(HYPRE_Int));
+   }  
+   for (i = 0; i < max_num_levels; i++) 
+   {
+     for(j=0; j<block_num_coarse_points[i]; j++) 
+     {
+       (block_cf_marker[i])[block_coarse_indexes[i][j]] = CMRK;
+     }
+   }
+   
+   /* store block_num_coarse_points */
+   if(max_num_levels > 0)
+   {
+      block_num_coarse_indexes = hypre_CTAlloc(HYPRE_Int, max_num_levels);
+      for(i=0; i<max_num_levels; i++)
+         block_num_coarse_indexes[i] = block_num_coarse_points[i];
+   }   
+   /* set block data */
+   (mgr_data -> max_num_coarse_levels) = max_num_levels;
+   (mgr_data -> block_size) = block_size;
+   (mgr_data -> block_num_coarse_indexes) = block_num_coarse_indexes;
+   (mgr_data -> block_cf_marker) = block_cf_marker;
   
-  block_cf_marker = hypre_CTAlloc(HYPRE_Int *,max_num_levels);
-  for (i = 0; i < max_num_levels; i++) 
-  {
-    block_cf_marker[i] = hypre_CTAlloc(HYPRE_Int,block_size);
-    memset(block_cf_marker[i], FMRK, block_size*sizeof(HYPRE_Int));
-  }  
-  
-  (mgr_data -> block_cf_marker) = block_cf_marker;
-
-  for (i = 0; i < max_num_levels; i++) {
-    for(j=0; j<block_num_coarse_points[i]; j++) {
-      (block_cf_marker[i])[block_coarse_indexes[i][j]] = CMRK;
-    }
-  }
-
-  (mgr_data -> block_size) = block_size;
-  (mgr_data -> block_num_coarse_indexes) = block_num_coarse_points;
-
-  return hypre_error_flag;
+   return hypre_error_flag;
 }
 
 /*Set number of points that remain part of the coarse grid throughout the hierarchy */

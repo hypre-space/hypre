@@ -87,9 +87,9 @@ hypre_MGRSolve( void               *mgr_vdata,
 
    (mgr_data -> num_iterations) = 0;
 
-   if((mgr_data -> max_num_coarse_levels) == 0)
+   if((mgr_data -> num_coarse_levels) == 0)
    {
-      /* Do standard AMG solve when only one level */
+      /* Do scalar AMG solve when only one level */
       coarse_grid_solver_solve(cg_solver, A, f, u);
       HYPRE_BoomerAMGGetNumIterations(cg_solver, &iter);
       HYPRE_BoomerAMGGetFinalRelativeResidualNorm(cg_solver, &rel_resnorm);
@@ -337,7 +337,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata )
   hypre_ParVector *Vtemp = (Frelax_data) -> Vtemp;
   hypre_ParVector *Ztemp = (Frelax_data) -> Ztemp;
 
-  HYPRE_Int num_levels = (Frelax_data) -> num_levels;
+  HYPRE_Int num_c_levels = (Frelax_data) -> num_levels-1;
 
   hypre_ParVector *Aux_F = NULL;
   hypre_ParVector *Aux_U = NULL;
@@ -369,7 +369,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata )
                                               Vtemp, 
                                               Ztemp);
       }
-      if ((num_levels > 1) && (level != num_levels))
+      if ((num_c_levels > 0) && (level != num_c_levels))
       {
            fine_grid = level;
            coarse_grid = level + 1;
@@ -390,7 +390,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata )
 
            ++level;
            cycle_param = 1;
-           if (level == num_levels) cycle_param = 3;
+           if (level == num_c_levels) cycle_param = 3;
       }
     } else if (cycle_param == 3) {
       // solve the coarsest grid with Gaussian elimination
