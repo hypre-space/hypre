@@ -1757,7 +1757,7 @@ void hypre_blas_smat_inv_n4 (HYPRE_Real *a)
     HYPRE_Real det_inv;
 
     if ( fabs(det) < 1e-22 ) {
-        printf("### WARNING: Matrix is nearly singular! det = %e\n", det);
+        hypre_printf("### WARNING: Matrix is nearly singular! det = %e\n", det);
         /*
          printf("##----------------------------------------------\n");
          printf("## %12.5e %12.5e %12.5e \n", a0, a1, a2);

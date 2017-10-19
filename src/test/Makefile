@@ -156,10 +156,6 @@ sstruct_fac: sstruct_fac.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
 
-systg_test: systg_test.o
-	@echo  "Building" $@ "... "
-	${LINK_CC} -o $@ $@.o ${CFLAGS} ${LFLAGS}
-
 ij_mv: ij_mv.o
 	@echo  "Building" $@ "... "
 	${LINK_CC} -o $@ $@.o ${LFLAGS}
