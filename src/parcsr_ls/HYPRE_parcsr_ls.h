@@ -3126,6 +3126,7 @@ HYPRE_Int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
  * MGR solver could potentially be used as a foundation 
  * for a physics-based preconditioner. 
  **/                                                       
+/*@{*/
 
 /**
  * Create a solver object
@@ -3195,17 +3196,19 @@ HYPRE_Int HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver,
                          HYPRE_Int  **block_coarse_indexes);
 
 /**
- * (Optional) Set non C-points to F-points. This routine determines how the 
- * coarse points are selected for the next level reduction.
+ * (Optional) Set non C-points to F-points.
+ * This routine determines how the coarse points are selected for the next level
+ * reduction.
  * 
- * @param solver [IN] solver or preconditioner object
- * @param nonCptToFptFlag [IN] :
  * \begin{tabular}{|c|l|} \hline
  * 0 & Allow points not prescribed as C points to be potentially set as C points \\
  * & using classical AMG coarsening strategies (currently uses CLJP-coarsening). \\
  * 1 & Fix points not prescribed as C points to be F points for the next reduction \\
  * \hline
  * \end{tabular}
+ *
+ * @param solver [IN] solver or preconditioner object
+ * @param nonCptToFptFlag [IN] :
  **/                         
 HYPRE_Int
 HYPRE_MGRSetNonCpointsToFpoints( HYPRE_Solver solver, HYPRE_Int nonCptToFptFlag);
@@ -3223,8 +3226,8 @@ HYPRE_MGRSetMaxCoarseLevels( HYPRE_Solver solver, HYPRE_Int maxlev );
  * HYPRE_MGRSetBlockSize
  *--------------------------------------------------------------------------*/
 /**
- * (Optional) Set the system block size. This should match the block size set in 
- * the MGRSetCpointsByBlock routine.
+ * (Optional) Set the system block size.
+ * This should match the block size set in the MGRSetCpointsByBlock routine.
  * The default is 1.
  **/
 HYPRE_Int
@@ -3258,7 +3261,9 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type );
  * HYPRE_MGRSetRelaxMethod
  *--------------------------------------------------------------------------*/
 /**
- * (Optional) Set the strategy for F-relaxation. Options are:
+ * (Optional) Set the strategy for F-relaxation.
+ * Options are:
+ *
  * \begin{tabular}{|c|l|} \hline
  * 0 & Single-level relaxation sweeps for F-relaxation as prescribed by {\tt MGRSetRelaxType} \\
  * 1 & Multi-level relaxation strategy for F-relaxation (V(1,0) cycle currently supported). \\
@@ -3273,9 +3278,11 @@ HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method );
  *--------------------------------------------------------------------------*/
 /** 
  * (Optional) Set the strategy for computing the MGR restriction operator. 
+ *
  * Options are:
+ *
  * \begin{tabular}{|c|l|} \hline
- * 0 & Injection [0 I]^{T} \\
+ * 0 & Injection $[0 I]$ \\
  * 1 & Diagonal scaling (Jacobi) \\
  * 2 & Block Jacobi \\
  * else & Use classical modified interpolation \\
@@ -3294,8 +3301,9 @@ HYPRE_MGRSetRestrictType( HYPRE_Solver solver, HYPRE_Int restrict_type);
 /** 
  * (Optional) Set the strategy for computing the MGR restriction operator. 
  * Options are:
+ *
  * \begin{tabular}{|c|l|} \hline
- * 0 & Injection [0 I]^{T} \\
+ * 0 & Injection $[0 I]^{T}$ \\
  * 1 & Diagonal scaling (Jacobi) \\
  * 2 & Block Jacobi \\
  * else & Use default (classical modified interpolation) \\
@@ -3331,14 +3339,14 @@ HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps );
  * HYPRE_MGRSetCoarseSolver
  *--------------------------------------------------------------------------*/
 /**
- * (Optional) Set the coarse grid solver. Currently uses BoomerAMG.
+ * (Optional) Set the coarse grid solver.
+ * Currently uses BoomerAMG.
+ * The default, if not set, is BoomerAMG with default options.
  *
  * @param solver [IN] solver or preconditioner object
  * @param coarse_grid_solver_solve [IN] solve routine for BoomerAMG
  * @param coarse_grid_solver_setup [IN] setup routine for BoomerAMG
  * @param coarse_grid_solver [IN] BoomerAMG solver 
- *
- * The default, if not set, is BoomerAMG with default options.
  **/
 HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
                              HYPRE_PtrToParSolverFcn  coarse_grid_solver_solve,
@@ -3358,7 +3366,6 @@ HYPRE_Int HYPRE_MGRSetCoarseSolver(HYPRE_Solver          solver,
  * 3 & print both setup and solve information \\
  * \hline
  * \end{tabular} 
- * 
  **/
 HYPRE_Int
 HYPRE_MGRSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level );
@@ -3378,8 +3385,8 @@ HYPRE_MGRSetLogging( HYPRE_Solver solver, HYPRE_Int logging );
  * HYPRE_MGRSetMaxIter
  *--------------------------------------------------------------------------*/
 /**
- * (Optional) Set maximum number of iterations if used as a solver. Set this to 1 if 
- * MGR is used as a preconditioner. The default is 20.
+ * (Optional) Set maximum number of iterations if used as a solver.
+ * Set this to 1 if MGR is used as a preconditioner. The default is 20.
  **/
 HYPRE_Int
 HYPRE_MGRSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
@@ -3388,8 +3395,8 @@ HYPRE_MGRSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
  * HYPRE_MGRSetTol
  *--------------------------------------------------------------------------*/
 /**
- * (Optional) Set the convergence tolerance for the MGR solver. Use tol = 0.0 if 
- * MGR is used as a preconditioner. The default is 1.e-7. 
+ * (Optional) Set the convergence tolerance for the MGR solver.
+ * Use tol = 0.0 if MGR is used as a preconditioner. The default is 1.e-7. 
  **/
 HYPRE_Int
 HYPRE_MGRSetTol( HYPRE_Solver solver, HYPRE_Real tol );
@@ -3408,7 +3415,9 @@ HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int max_iter );
  * HYPRE_MGRSetGlobalsmoothType
  *--------------------------------------------------------------------------*/	
 /**
- * (Optional) Determines type of global smoother. Options are
+ * (Optional) Determines type of global smoother.
+ * Options are:
+ *
  * \begin{tabular}{|c|l|} \hline
  * 0 & block Jacobi (default) \\
  * 1 & Jacobi \\
@@ -3442,6 +3451,11 @@ HYPRE_MGRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
  **/
 HYPRE_Int
 HYPRE_MGRGetFinalRelativeResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm );
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
  * Miscellaneous: These probably do not belong in the interface.
