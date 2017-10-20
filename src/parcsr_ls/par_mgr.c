@@ -727,8 +727,10 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 	jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
 
 	fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 	for (i = 0; i < n_fine; i++) fine_to_coarse[i] = -1;
 
@@ -740,8 +742,10 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 	 *-----------------------------------------------------------------------*/
 
 /* RDF: this looks a little tricky, but doable */
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,i1,jj,ns,ne,size,rest) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 	for (j = 0; j < num_threads; j++)
 	{
@@ -851,8 +855,10 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 
 	fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
 
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,ns,ne,size,rest,coarse_shift) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 	for (j = 0; j < num_threads; j++)
 	{
@@ -898,8 +904,10 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 
 	if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 	for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
 
@@ -919,8 +927,10 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 		}
 	}
 
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,jl,i1,jj,ns,ne,size,rest,P_marker,P_marker_offd,jj_counter,jj_counter_offd,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 	for (jl = 0; jl < num_threads; jl++)
 	{
@@ -1070,8 +1080,10 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 	if (P_offd_size)
 	{
 		P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 		for (i=0; i < num_cols_A_offd; i++)
 			P_marker[i] = 0;
@@ -1094,8 +1106,10 @@ hypre_MGRBuildP( hypre_ParCSRMatrix   *A,
 			col_map_offd_P[i] = index++;
 		}
 
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 		for (i=0; i < P_offd_size; i++)
 			P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
@@ -1276,8 +1290,10 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 	jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
 
 	fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 	for (i = 0; i < n_fine; i++) fine_to_coarse[i] = -1;
 
@@ -1289,8 +1305,10 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 	 *-----------------------------------------------------------------------*/
 
 /* RDF: this looks a little tricky, but doable */
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,i1,jj,ns,ne,size,rest) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 	for (j = 0; j < num_threads; j++)
 	{
@@ -1404,8 +1422,10 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 
 	fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
 
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,ns,ne,size,rest,coarse_shift) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 	for (j = 0; j < num_threads; j++)
 	{
@@ -1451,8 +1471,10 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 
 	if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 	for (i = 0; i < n_fine; i++) fine_to_coarse[i] -= my_first_cpt;
 
@@ -1472,8 +1494,10 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 		}
 	}
 
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,jl,i1,jj,ns,ne,size,rest,P_marker,P_marker_offd,jj_counter,jj_counter_offd,jj_begin_row,jj_end_row,jj_begin_row_offd,jj_end_row_offd) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 	for (jl = 0; jl < num_threads; jl++)
 	{
@@ -1601,8 +1625,10 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 	if (P_offd_size)
 	{
 		P_marker = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 		for (i=0; i < num_cols_A_offd; i++)
 			P_marker[i] = 0;
@@ -1625,8 +1651,10 @@ hypre_MGRBuildPDRS( hypre_ParCSRMatrix   *A,
 			col_map_offd_P[i] = index++;
 		}
 
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 		for (i=0; i < P_offd_size; i++)
 			P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
@@ -2081,8 +2109,10 @@ HYPRE_Int hypre_block_jacobi (hypre_ParCSRMatrix *A,
 	 * Copy current approximation into temporary vector.
 	 *-----------------------------------------------------------------*/
 
+#if 0
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
 #endif
 	for (i = 0; i < n; i++)
 	{
