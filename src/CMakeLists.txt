@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.12.1)
-set (HYPRE_DATE    2017/09/29)
+set (HYPRE_VERSION 2.13.0)
+set (HYPRE_DATE    2017/10/20)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -75,9 +75,7 @@ list (APPEND HYPRE_HEADERS
 )
 
 # Headers and sources: blas
-if (HYPRE_USING_HYPRE_BLAS)
 list (APPEND HYPRE_SOURCES
-  blas/blas_utils.c
   blas/dasum.c
   blas/daxpy.c
   blas/dcopy.c
@@ -98,12 +96,13 @@ list (APPEND HYPRE_SOURCES
   blas/dtrmv.c
   blas/dtrsm.c
   blas/dtrsv.c
+  blas/f2c.c
   blas/idamax.c
+  blas/lsame.c
+  blas/xerbla.c
 )
-endif (HYPRE_USING_HYPRE_BLAS)
 
 # Headers and sources: lapack
-if (HYPRE_USING_HYPRE_LAPACK)
 list (APPEND HYPRE_SOURCES
   lapack/dbdsqr.c
   lapack/dgebd2.c
@@ -173,11 +172,9 @@ list (APPEND HYPRE_SOURCES
   lapack/dsytrd.c
   lapack/ieeeck.c
   lapack/ilaenv.c
-  lapack/lapack_utils.c
   lapack/lsame.c
   lapack/xerbla.c
 )
-endif (HYPRE_USING_HYPRE_LAPACK)
 
 # Headers and sources: utilities
 list (APPEND HYPRE_HEADERS
@@ -466,6 +463,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/HYPRE_parcsr_lgmres.c
   parcsr_ls/HYPRE_parcsr_hybrid.c
   parcsr_ls/HYPRE_parcsr_int.c
+  parcsr_ls/HYPRE_parcsr_mgr.c
   parcsr_ls/HYPRE_parcsr_ParaSails.c
   parcsr_ls/HYPRE_parcsr_pcg.c
   parcsr_ls/HYPRE_parcsr_pilut.c
@@ -496,6 +494,9 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_laplace_9pt.c
   parcsr_ls/par_laplace.c
   parcsr_ls/par_lr_interp.c
+  parcsr_ls/par_mgr.c
+  parcsr_ls/par_mgr_setup.c
+  parcsr_ls/par_mgr_solve.c
   parcsr_ls/par_nongalerkin.c
   parcsr_ls/par_nodal_systems.c
   parcsr_ls/par_rap.c

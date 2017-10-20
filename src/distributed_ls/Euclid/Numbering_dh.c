@@ -111,8 +111,9 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
            space.  The global_to_local hash table may also need
            to be enlarged, but the hash object will take care of that.
          */
+        /* RL : why ``m+num_ext'' instead of ``num_ext+1'' ??? */
         if (m+num_ext >= size) {
-          HYPRE_Int newSize = size*1.5;  /* heuristic */
+          HYPRE_Int newSize = hypre_max(m+num_ext+1, size*1.5);  /* heuristic */
           HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(newSize*sizeof(HYPRE_Int)); CHECK_V_ERROR;
           memcpy(tmp, idx_ext, size*sizeof(size));
           FREE_DH(idx_ext); CHECK_V_ERROR;

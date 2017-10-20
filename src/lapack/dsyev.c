@@ -1,8 +1,11 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Subroutine */ HYPRE_Int dsyev_(const char *jobz,const char *uplo, integer *n, doublereal *a,
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dsyev_(const char *jobz,const char *uplo, integer *n, doublereal *a,
 	 integer *lda, doublereal *w, doublereal *work, integer *lwork, 
 	integer *info)
 {
@@ -91,7 +94,7 @@
     static integer imax;
     static doublereal rmin, rmax;
 /***static integer lopt;***/
-    extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     static doublereal sigma;
     extern logical lsame_(const char *,const char *);
@@ -100,21 +103,21 @@
     static integer nb;
     extern doublereal dlamch_(const char *);
     static integer iscale;
-    extern /* Subroutine */ HYPRE_Int dlascl_(const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dlascl_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, integer *, doublereal *, 
 	    integer *, integer *);
     static doublereal safmin;
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     static doublereal bignum;
     static integer indtau;
-    extern /* Subroutine */ HYPRE_Int dsterf_(integer *, doublereal *, doublereal *,
+    extern /* Subroutine */ integer dsterf_(integer *, doublereal *, doublereal *,
 	     integer *);
     extern doublereal dlansy_(const char *,const char *, integer *, doublereal *, 
 	    integer *, doublereal *);
     static integer indwrk;
-    extern /* Subroutine */ HYPRE_Int dorgtr_(const char *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dorgtr_(const char *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *, integer *), dsteqr_(const char *, integer *, doublereal *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *), 
 	    dsytrd_(const char *, integer *, doublereal *, integer *, doublereal *, 
@@ -259,4 +262,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

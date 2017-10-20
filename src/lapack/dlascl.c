@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlascl_(const char *type__, integer *kl, integer *ku, 
+/* Subroutine */ integer dlascl_(const char *type__, integer *kl, integer *ku, 
 	doublereal *cfrom, doublereal *cto, integer *m, integer *n, 
 	doublereal *a, integer *lda, integer *info)
 {
@@ -88,7 +91,7 @@
     static doublereal cfrom1;
     extern doublereal dlamch_(const char *);
     static doublereal cfromc;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     static doublereal bignum, smlnum, mul, cto1;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 
@@ -313,4 +316,6 @@ L10:
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

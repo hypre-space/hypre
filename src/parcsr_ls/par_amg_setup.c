@@ -187,6 +187,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int rap2 = hypre_ParAMGDataRAP2(amg_data);
    HYPRE_Int keepTranspose = hypre_ParAMGDataKeepTranspose(amg_data);
 
+   HYPRE_Int                **C_point_marker_array;
+   HYPRE_Int    local_coarse_size;
+   HYPRE_Int    num_C_point_coarse = hypre_ParAMGDataNumCPointKeep(amg_data);
+   HYPRE_Int   *C_point_keep;
+   
    HYPRE_Int *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
    HYPRE_Int ns = num_grid_sweeps[1];
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
@@ -267,6 +272,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    P_block_array = hypre_ParAMGDataPBlockArray(amg_data);
 
    grid_relax_type[3] = hypre_ParAMGDataUserCoarseRelaxType(amg_data); 
+
+   C_point_marker_array = hypre_ParAMGDataCPointKeepMarkerArray(amg_data);
 
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.setup");
    
@@ -618,6 +625,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
    dof_func_array[0] = dof_func;
    hypre_ParAMGDataCFMarkerArray(amg_data) = CF_marker_array;
+   hypre_ParAMGDataCPointKeepMarkerArray(amg_data) = C_point_marker_array;
    hypre_ParAMGDataDofFuncArray(amg_data) = dof_func_array;
    hypre_ParAMGDataAArray(amg_data) = A_array;
    hypre_ParAMGDataPArray(amg_data) = P_array;
@@ -1107,6 +1115,43 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
               AN = NULL;
            }
          }
+
+		 		 /**************************************************/
+		 /*********Set the fixed index to CF_marker*********/
+		 //num_C_point_coarse
+
+		 if (hypre_ParAMGDataCPointKeepLevel(amg_data) > 0)
+		 {
+			 if (block_mode)
+			 {
+				 printf("Keeping coarse nodes in block mode is not implemented\n");
+			 }
+			 else if  (level < hypre_ParAMGDataCPointKeepLevel(amg_data))
+			 {
+				 C_point_keep = C_point_marker_array[level];
+				 if (level < hypre_ParAMGDataCPointKeepLevel(amg_data)-1)
+					 C_point_marker_array[level+1] = hypre_CTAlloc(HYPRE_Int, num_C_point_coarse);
+				 
+				 for(j = 0;j < num_C_point_coarse;j++)
+				 {
+					 CF_marker[C_point_keep[j]] = 2;
+				 }
+				 
+				 local_coarse_size = 0;
+				 k = 0;
+				 for (j = 0; j < local_num_vars; j ++)
+				 {
+					 if (CF_marker[j] == 1) local_coarse_size++;
+					 if (CF_marker[j] == 2) {
+						 if (level < hypre_ParAMGDataCPointKeepLevel(amg_data)-1)
+							 C_point_marker_array[level+1][k++] = local_coarse_size;
+						 local_coarse_size++;
+						 CF_marker[j] = 1;					 
+					 }
+				 }
+			 }
+		 }
+		 
    /*****xxxxxxxxxxxxx changes for min_coarse_size */
          /* here we will determine the coarse grid size to be able to determine if it is not smaller 
 	    than requested minimal size */
@@ -1936,8 +1981,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (num_threads == 1) 
 		  hypre_ParCSRComputeL1Norms(A_array[level], 1, NULL, &d_diag);
                else 
-                  hypre_ParCSRComputeL1NormsThreads(A_array[level], 1, 
-			num_threads, NULL, &d_diag);
+                  hypre_ParCSRComputeL1NormsThreads(A_array[level], 1, num_threads, NULL, &d_diag);
             }
             if (ns == 1)
             {

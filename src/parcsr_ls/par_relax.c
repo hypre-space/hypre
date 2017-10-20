@@ -18,20 +18,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "Common.h"
-
-#ifdef HYPRE_USING_ESSL
-#include <essl.h>
-#else
-/* RDF: This needs to be integrated with the hypre blas/lapack stuff */
-#ifdef __cplusplus
-extern "C" {
-#endif
-HYPRE_Int hypre_F90_NAME_LAPACK(dgetrf, DGETRF) (HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dgetrs, DGETRS) (const char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *b, HYPRE_Int*, HYPRE_Int *);
-#ifdef __cplusplus
-}
-#endif
-#endif
+#include "_hypre_lapack.h"
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGRelax
@@ -4135,28 +4122,13 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 
             piv = hypre_CTAlloc(HYPRE_Int, n_global);
 
-           /* write over A with LU */
-#ifdef HYPRE_USING_ESSL
-            dgetrf(n_global, n_global, A_mat, n_global, piv, &info);
-
-#else
-            hypre_F90_NAME_LAPACK(dgetrf, DGETRF)(&n_global, &n_global, 
-                                             A_mat, &n_global, piv, &info);
-#endif
+            /* write over A with LU */
+            hypre_dgetrf(&n_global, &n_global, A_mat, &n_global, piv, &info);
             
-           /*now b_vec = inv(A)*b_vec  */
-#ifdef HYPRE_USING_ESSL
-            dgetrs("N", n_global, &one_i, A_mat, 
-                   n_global, piv, b_vec, 
-                   n_global, &info);
+            /*now b_vec = inv(A)*b_vec  */
+            hypre_dgetrs("N", &n_global, &one_i, A_mat, &n_global, piv, b_vec, &n_global, &info);
 
-#else
-            hypre_F90_NAME_LAPACK(dgetrs, DGETRS)("N", &n_global, &one_i, A_mat, 
-                                             &n_global, piv, b_vec, 
-                                             &n_global, &info);
-#endif
             hypre_TFree(piv);
-            
 
             for (i = 0; i < n; i++)
             {
@@ -4340,25 +4312,11 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
          piv = hypre_CTAlloc(HYPRE_Int, n_global);
 
          /* write over A with LU */
-#ifdef HYPRE_USING_ESSL
-         dgetrf(n_global, n_global, A_tmp, n_global, piv, &my_info);
-
-#else
-         hypre_F90_NAME_LAPACK(dgetrf, DGETRF)(&n_global, &n_global, 
-                                      A_tmp, &n_global, piv, &my_info);
-#endif
+         hypre_dgetrf(&n_global, &n_global, A_tmp, &n_global, piv, &my_info);
             
          /*now b_vec = inv(A)*b_vec  */
-#ifdef HYPRE_USING_ESSL
-         dgetrs("N", n_global, &one_i, A_tmp, 
-                     n_global, piv, b_vec, 
-                     n_global, &my_info);
+         hypre_dgetrs("N", &n_global, &one_i, A_tmp, &n_global, piv, b_vec, &n_global, &my_info);
 
-#else
-         hypre_F90_NAME_LAPACK(dgetrs, DGETRS)("N", &n_global, &one_i, A_tmp, 
-                                             &n_global, piv, b_vec, 
-                                             &n_global, &my_info);
-#endif
          hypre_TFree(piv);
       }
       for (i = 0; i < n; i++)

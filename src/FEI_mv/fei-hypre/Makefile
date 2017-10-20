@@ -10,17 +10,16 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 include ../../config/Makefile.config
 
 BASE_DIR = ${HYPRE_FEI_BASE_DIR}
 
-SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU/SRC
-SUPERLU_LIB     = -L$(srcdir)/../SuperLU
+#SUPERLU_INCLUDE = -I$(srcdir)/../SuperLU/SRC
+#SUPERLU_LIB     = -L$(srcdir)/../SuperLU
 
 CINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
 CXXINCLUDES=${INCLUDES} ${MPIINCLUDE} -I../ml/src/Include
-CDEFS = -DBOOL_NOT_SUPPORTED ${HYPRE_FEI_CDEFS}
+CDEFS = -DBOOL_NOT_SUPPORTED
 CXXDEFS = ${CDEFS} -DMPICH_SKIP_MPICXX
 
 C_COMPILE_FLAGS = \
@@ -41,6 +40,7 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
+ ${DSUPERLU_INCLUDE}\
  ${CINCLUDES}
 
 CXX_COMPILE_FLAGS = \
@@ -61,6 +61,7 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)/../femli\
  -I$(srcdir)/../fei-base\
  ${SUPERLU_INCLUDE}\
+ ${DSUPERLU_INCLUDE}\
  ${CXXINCLUDES}
 
 HEADERS =\

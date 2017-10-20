@@ -33,13 +33,13 @@
 #include "dsuperlu_include.h"
 
 #ifdef HAVE_DSUPERLU
-#include "../DSuperLU/SRC/superlu_ddefs.h"
+#include "superlu_ddefs.h"
 
 typedef struct HYPRE_LSI_DSuperLU_Struct
 {
    MPI_Comm           comm_;
    HYPRE_ParCSRMatrix Amat_;
-   superlu_options_t  options_;
+   superlu_dist_options_t  options_;
    SuperMatrix        sluAmat_;
    ScalePermstruct_t  ScalePermstruct_;
    SuperLUStat_t      stat_;
@@ -186,8 +186,9 @@ int HYPRE_LSI_DSuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    if (sluPtr->outputLevel_ < 2) sluPtr->options_.PrintStat = NO;
    ScalePermstructInit(sluPtr->globalNRows_, sluPtr->globalNRows_,
                        &(sluPtr->ScalePermstruct_));
-   LUstructInit(sluPtr->globalNRows_, sluPtr->globalNRows_, 
-                &(sluPtr->LUstruct_));
+//   LUstructInit(sluPtr->globalNRows_, sluPtr->globalNRows_, 
+//                &(sluPtr->LUstruct_));
+   LUstructInit(sluPtr->globalNRows_, &(sluPtr->LUstruct_));
    sluPtr->berr_[0] = 0.0;
    PStatInit(&(sluPtr->stat_));
    pdgssvx(&(sluPtr->options_), &(sluPtr->sluAmat_), 

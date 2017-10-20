@@ -1,8 +1,11 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Subroutine */ HYPRE_Int dlatrd_(const char *uplo, integer *n, integer *nb, doublereal *
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dlatrd_(const char *uplo, integer *n, integer *nb, doublereal *
 	a, integer *lda, doublereal *e, doublereal *tau, doublereal *w, 
 	integer *ldw)
 {
@@ -152,10 +155,10 @@
 	    integer *);
     static integer i__;
     static doublereal alpha;
-    extern /* Subroutine */ HYPRE_Int dscal_(integer *, doublereal *, doublereal *, 
+    extern /* Subroutine */ integer dscal_(integer *, doublereal *, doublereal *, 
 	    integer *);
     extern logical lsame_(const char *,const char *);
-    extern /* Subroutine */ HYPRE_Int dgemv_(const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dgemv_(const char *, integer *, integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *, integer *), daxpy_(integer *, 
 	    doublereal *, doublereal *, integer *, doublereal *, integer *), 
@@ -330,4 +333,6 @@
 #undef w_ref
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

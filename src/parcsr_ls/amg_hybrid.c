@@ -123,13 +123,13 @@ hypre_AMGHybridCreate( )
    (AMGhybrid_data -> strong_threshold)  = 0.25;
    (AMGhybrid_data -> max_row_sum)  = 0.9;
    (AMGhybrid_data -> trunc_factor)  = 0.0;
-   (AMGhybrid_data -> pmax)  = 0;
+   (AMGhybrid_data -> pmax)  = 4;
    (AMGhybrid_data -> max_levels)  = 25;
    (AMGhybrid_data -> measure_type)  = 0;
-   (AMGhybrid_data -> coarsen_type)  = 6;
-   (AMGhybrid_data -> interp_type)  = 0;
+   (AMGhybrid_data -> coarsen_type)  = 10;
+   (AMGhybrid_data -> interp_type)  = 6;
    (AMGhybrid_data -> cycle_type)  = 1;
-   (AMGhybrid_data -> relax_order)  = 1;
+   (AMGhybrid_data -> relax_order)  = 0;
    (AMGhybrid_data -> max_coarse_size)  = 9;
    (AMGhybrid_data -> min_coarse_size)  = 1;
    (AMGhybrid_data -> seq_threshold)  = 0;
@@ -1860,9 +1860,15 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
 	    boom_grt = hypre_CTAlloc(HYPRE_Int,4);
 	    for (i=0; i < 4; i++)
 	       boom_grt[i] = grid_relax_type[i];
-	    if (solver_type == 1 && grid_relax_type[1] == 3 &&
-		grid_relax_type[2] == 3)
-	       boom_grt[2] = 4;
+   	    hypre_BoomerAMGSetGridRelaxType(pcg_precond, boom_grt);
+         }
+   	 else
+         {
+	    boom_grt = hypre_CTAlloc(HYPRE_Int,4);
+	    boom_grt[0] = 3;
+	    boom_grt[1] = 13;
+	    boom_grt[2] = 14;
+	    boom_grt[3] = 9;
    	    hypre_BoomerAMGSetGridRelaxType(pcg_precond, boom_grt);
          }
    	 if (relax_weight)

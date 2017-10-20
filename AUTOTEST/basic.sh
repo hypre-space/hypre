@@ -75,7 +75,8 @@ rm -fr $output_dir
 mkdir -p $output_dir
 
 # Configure
-./test.sh configure.sh $src_dir $copts
+# NOTE: The use of 'eval' is needed to deal properly with nested quotes in argument lists
+eval ./test.sh configure.sh $src_dir $copts
 mv -f configure.??? $output_dir
 
 # Make

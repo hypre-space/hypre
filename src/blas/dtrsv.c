@@ -1,4 +1,6 @@
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*  -- translated by f2c (version 19940927).
    You must link the resulting object file with the libraries:
@@ -8,7 +10,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dtrsv_(const char *uplo,const char *trans,const char *diag, integer *n, 
+/* Subroutine */ integer dtrsv_(const char *uplo,const char *trans,const char *diag, integer *n, 
 	doublereal *a, integer *lda, doublereal *x, integer *incx)
 {
 
@@ -19,9 +21,9 @@
     static integer info;
     static doublereal temp;
     static integer i, j;
-    extern logical hypre_lsame_(const char *,const char *);
+    extern logical lsame_(const char *,const char *);
     static integer ix, jx, kx;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     static logical nounit;
 
 
@@ -137,12 +139,12 @@
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 
     info = 0;
-    if (! hypre_lsame_(uplo, "U") && ! hypre_lsame_(uplo, "L")) {
+    if (! lsame_(uplo, "U") && ! lsame_(uplo, "L")) {
 	info = 1;
-    } else if (! hypre_lsame_(trans, "N") && ! hypre_lsame_(trans, "T") &&
-	     ! hypre_lsame_(trans, "C")) {
+    } else if (! lsame_(trans, "N") && ! lsame_(trans, "T") &&
+	     ! lsame_(trans, "C")) {
 	info = 2;
-    } else if (! hypre_lsame_(diag, "U") && ! hypre_lsame_(diag, "N")) {
+    } else if (! lsame_(diag, "U") && ! lsame_(diag, "N")) {
 	info = 3;
     } else if (*n < 0) {
 	info = 4;
@@ -152,7 +154,7 @@
 	info = 8;
     }
     if (info != 0) {
-	hypre_xerbla_("DTRSV ", &info);
+	xerbla_("DTRSV ", &info);
 	return 0;
     }
 
@@ -162,7 +164,7 @@
 	return 0;
     }
 
-    nounit = hypre_lsame_(diag, "N");
+    nounit = lsame_(diag, "N");
 
 /*     Set up the start point in X if the increment is not unity. This   
        will be  ( N - 1 )*INCX  too small for descending loops. */
@@ -176,11 +178,11 @@
 /*     Start the operations. In this version the elements of A are   
        accessed sequentially with one pass through A. */
 
-    if (hypre_lsame_(trans, "N")) {
+    if (lsame_(trans, "N")) {
 
 /*        Form  x := inv( A )*x. */
 
-	if (hypre_lsame_(uplo, "U")) {
+	if (lsame_(uplo, "U")) {
 	    if (*incx == 1) {
 		for (j = *n; j >= 1; --j) {
 		    if (X(j) != 0.) {
@@ -253,7 +255,7 @@
 
 /*        Form  x := inv( A' )*x. */
 
-	if (hypre_lsame_(uplo, "U")) {
+	if (lsame_(uplo, "U")) {
 	    if (*incx == 1) {
 		for (j = 1; j <= *n; ++j) {
 		    temp = X(j);
@@ -327,3 +329,6 @@
 
 } /* dtrsv_ */
 
+#ifdef __cplusplus
+}
+#endif
