@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.12.1)
-set (HYPRE_DATE    2017/09/29)
+set (HYPRE_VERSION 2.13.0)
+set (HYPRE_DATE    2017/10/20)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -463,6 +463,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/HYPRE_parcsr_lgmres.c
   parcsr_ls/HYPRE_parcsr_hybrid.c
   parcsr_ls/HYPRE_parcsr_int.c
+  parcsr_ls/HYPRE_parcsr_mgr.c
   parcsr_ls/HYPRE_parcsr_ParaSails.c
   parcsr_ls/HYPRE_parcsr_pcg.c
   parcsr_ls/HYPRE_parcsr_pilut.c
@@ -493,6 +494,9 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_laplace_9pt.c
   parcsr_ls/par_laplace.c
   parcsr_ls/par_lr_interp.c
+  parcsr_ls/par_mgr.c
+  parcsr_ls/par_mgr_setup.c
+  parcsr_ls/par_mgr_solve.c
   parcsr_ls/par_nongalerkin.c
   parcsr_ls/par_nodal_systems.c
   parcsr_ls/par_rap.c
