@@ -19,6 +19,9 @@ Version 2.13.0 released 2017/10/20
 
 - Added new multigrid reduction (MGR) solver
 
+- Added BoomerAMG feature SetCpointsToKeep() to force specific points to keep on
+  all coarse grids, up to a specified coarse level.
+
 - Changed defaults in AMG Hybrid solver to match BoomerAMG defaults
 
 - Updated hypre blas/lapack implementation
