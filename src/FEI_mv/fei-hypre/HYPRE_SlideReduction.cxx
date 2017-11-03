@@ -182,7 +182,7 @@ int HYPRE_SlideReduction::getMatrixNumRows()
    HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
    localNRows   = procNRows[mypid+1] - procNRows[mypid];
    nConstraints = procNConstr_[mypid+1] - procNConstr_[mypid];
-   hypre_TFree( procNRows );
+   hypre_TFree( procNRows,HYPRE_MEMORY_HOST );
    return (localNRows-nConstraints);
 }
 

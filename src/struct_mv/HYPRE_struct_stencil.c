@@ -29,7 +29,7 @@ HYPRE_StructStencilCreate( HYPRE_Int            dim,
 {
    hypre_Index  *shape;
  
-   shape = hypre_CTAlloc(hypre_Index, size);
+   shape = hypre_CTAlloc(hypre_Index,  size, HYPRE_MEMORY_HOST);
  
    *stencil = hypre_StructStencilCreate(dim, size, shape);
 

@@ -82,7 +82,7 @@ main( HYPRE_Int   argc,
    partitioning[2] = 10;
    partitioning[3] = 20;
 */
-   partitioning = hypre_CTAlloc(HYPRE_Int,1+num_procs);
+   partitioning = hypre_CTAlloc(HYPRE_Int, 1+num_procs, HYPRE_MEMORY_HOST);
    hypre_GeneratePartitioning( global_size, num_procs, &partitioning );
 
    vector2 = hypre_VectorToParVector(hypre_MPI_COMM_WORLD,local_vector2,partitioning);

@@ -763,13 +763,13 @@ hypre_MPI_Group_incl( hypre_MPI_Group  group,
    HYPRE_Int  i;
    HYPRE_Int  ierr;
 
-   mpi_ranks = hypre_TAlloc(hypre_int, n);
+   mpi_ranks = hypre_TAlloc(hypre_int,  n, HYPRE_MEMORY_HOST);
    for (i = 0; i < n; i++)
    {
       mpi_ranks[i] = (hypre_int) ranks[i];
    }
    ierr = (HYPRE_Int) MPI_Group_incl(group, (hypre_int)n, mpi_ranks, newgroup);
-   hypre_TFree(mpi_ranks);
+   hypre_TFree(mpi_ranks, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -844,8 +844,8 @@ hypre_MPI_Allgatherv( void               *sendbuf,
    HYPRE_Int  ierr;
 
    MPI_Comm_size(comm, &csize);
-   mpi_recvcounts = hypre_TAlloc(hypre_int, csize);
-   mpi_displs = hypre_TAlloc(hypre_int, csize);
+   mpi_recvcounts = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
+   mpi_displs = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
    for (i = 0; i < csize; i++)
    {
       mpi_recvcounts[i] = (hypre_int) recvcounts[i];
@@ -854,8 +854,8 @@ hypre_MPI_Allgatherv( void               *sendbuf,
    ierr = (HYPRE_Int) MPI_Allgatherv(sendbuf, (hypre_int)sendcount, sendtype,
                                      recvbuf, mpi_recvcounts, mpi_displs, 
                                      recvtype, comm);
-   hypre_TFree(mpi_recvcounts);
-   hypre_TFree(mpi_displs);
+   hypre_TFree(mpi_recvcounts, HYPRE_MEMORY_HOST);
+   hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -896,8 +896,8 @@ hypre_MPI_Gatherv(void               *sendbuf,
    MPI_Comm_rank(comm, &croot);
    if (croot == (hypre_int) root)
    {
-      mpi_recvcounts = hypre_TAlloc(hypre_int, csize);
-      mpi_displs = hypre_TAlloc(hypre_int, csize);
+      mpi_recvcounts = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
+      mpi_displs = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
       for (i = 0; i < csize; i++)
       {
          mpi_recvcounts[i] = (hypre_int) recvcounts[i];
@@ -907,8 +907,8 @@ hypre_MPI_Gatherv(void               *sendbuf,
    ierr = (HYPRE_Int) MPI_Gatherv(sendbuf, (hypre_int)sendcount, sendtype,
                                      recvbuf, mpi_recvcounts, mpi_displs, 
                                      recvtype, (hypre_int) root, comm);
-   hypre_TFree(mpi_recvcounts);
-   hypre_TFree(mpi_displs);
+   hypre_TFree(mpi_recvcounts, HYPRE_MEMORY_HOST);
+   hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -949,8 +949,8 @@ hypre_MPI_Scatterv(void               *sendbuf,
    MPI_Comm_rank(comm, &croot);
    if (croot == (hypre_int) root)
    {
-      mpi_sendcounts = hypre_TAlloc(hypre_int, csize);
-      mpi_displs = hypre_TAlloc(hypre_int, csize);
+      mpi_sendcounts = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
+      mpi_displs = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
       for (i = 0; i < csize; i++)
       {
          mpi_sendcounts[i] = (hypre_int) sendcounts[i];
@@ -960,8 +960,8 @@ hypre_MPI_Scatterv(void               *sendbuf,
    ierr = (HYPRE_Int) MPI_Scatterv(sendbuf, mpi_sendcounts, mpi_displs, sendtype,
                                      recvbuf, (hypre_int) recvcount, 
                                      recvtype, (hypre_int) root, comm);
-   hypre_TFree(mpi_sendcounts);
-   hypre_TFree(mpi_displs);
+   hypre_TFree(mpi_sendcounts, HYPRE_MEMORY_HOST);
+   hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -1245,7 +1245,7 @@ hypre_MPI_Type_struct( HYPRE_Int           count,
    HYPRE_Int  i;
    HYPRE_Int  ierr;
 
-   mpi_array_of_blocklengths = hypre_TAlloc(hypre_int, count);
+   mpi_array_of_blocklengths = hypre_TAlloc(hypre_int,  count, HYPRE_MEMORY_HOST);
    for (i = 0; i < count; i++)
    {
       mpi_array_of_blocklengths[i] = (hypre_int) array_of_blocklengths[i];
@@ -1261,7 +1261,7 @@ hypre_MPI_Type_struct( HYPRE_Int           count,
                                          newtype);
 #endif
 
-   hypre_TFree(mpi_array_of_blocklengths);
+   hypre_TFree(mpi_array_of_blocklengths, HYPRE_MEMORY_HOST);
 
    return ierr;
 }

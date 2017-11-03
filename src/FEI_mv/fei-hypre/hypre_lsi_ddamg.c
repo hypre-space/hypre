@@ -917,7 +917,7 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    HYPRE_ParCSRMatrixGetRowPartitioning(A_csr, &row_partition);
    myBegin = row_partition[myRank];
    myEnd   = row_partition[myRank+1] - 1;
-   hypre_TFree( row_partition );
+   hypre_TFree( row_partition , HYPRE_MEMORY_HOST);
 
    /* --------------------------------------------------------*/
    /* create and load a local matrix                          */

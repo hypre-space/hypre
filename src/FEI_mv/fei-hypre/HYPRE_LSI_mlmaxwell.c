@@ -461,7 +461,7 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    Aee_context->globalEqns = row_partition[nprocs];
    Aee_context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
    for (i=0; i<=nprocs; i++) Aee_context->partition[i] = row_partition[i];
-   hypre_TFree(row_partition);
+   hypre_TFree(row_partition, HYPRE_MEMORY_HOST);
    mh_Aee = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
    HYPRE_LSI_MLConstructMLMatrix(A_ee,mh_Aee,Aee_context->partition,
                                  link->comm,Aee_context); 
@@ -475,7 +475,7 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    Ann_context->globalEqns = row_partition[nprocs];
    Ann_context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
    for (i=0; i<=nprocs; i++) Ann_context->partition[i] = row_partition[i];
-   hypre_TFree(row_partition);
+   hypre_TFree(row_partition, HYPRE_MEMORY_HOST);
    mh_Ann = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
    HYPRE_LSI_MLConstructMLMatrix(link->hypreAnn,mh_Ann,Ann_context->partition,
                                  link->comm,Ann_context); 
@@ -488,7 +488,7 @@ int HYPRE_LSI_MLMaxwellSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_ee,
    G_context->globalEqns = row_partition[nprocs];
    G_context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
    for (i=0; i<=nprocs; i++) G_context->partition[i] = row_partition[i];
-   hypre_TFree(row_partition);
+   hypre_TFree(row_partition, HYPRE_MEMORY_HOST);
    mh_G = (HYPRE_ML_Matrix *) malloc(sizeof(HYPRE_ML_Matrix));
    HYPRE_LSI_MLConstructMLMatrix(link->hypreG,mh_G,G_context->partition,
                                  link->comm,G_context); 

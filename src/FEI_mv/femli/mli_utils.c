@@ -374,7 +374,7 @@ int MLI_Utils_ComputeExtremeRitzValues(hypre_ParCSRMatrix *A, double *ritz,
    endRow      = partition[mypid+1] - 1;
    globalNRows = partition[nprocs];
    localNRows  = endRow - startRow + 1;
-   hypre_TFree( partition );
+   hypre_TFree( partition , HYPRE_MEMORY_HOST);
    maxIter     = 5;
    if ( globalNRows < maxIter ) maxIter = globalNRows;
    ritz[0] = ritz[1] = 0.0;
@@ -1228,7 +1228,7 @@ int MLI_Utils_ComputeLowEnergyLanczos(hypre_ParCSRMatrix *A,
    endRow      = partition[mypid+1] - 1;
    globalNRows = partition[nprocs];
    localNRows  = endRow - startRow + 1;
-   hypre_TFree( partition );
+   hypre_TFree( partition , HYPRE_MEMORY_HOST);
 
    if ( globalNRows < maxIter )
    {

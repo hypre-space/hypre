@@ -50,7 +50,7 @@ hypre_OutOfMemory( size_t size )
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_MAlloc( size_t size )
+ hypre_MAlloc( size_t size , HYPRE_Int location)
 {
    void *ptr;
 
@@ -98,8 +98,8 @@ hypre_MAlloc( size_t size )
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_CAlloc( size_t count,
-              size_t elt_size )
+ hypre_CAlloc( size_t count, 
+              size_t elt_size , HYPRE_Int location)
 {
    void   *ptr;
    size_t  size = count*elt_size;
@@ -116,7 +116,7 @@ hypre_CAlloc( size_t count,
       ptr = _ucalloc_(count, elt_size);
 #elif HYPRE_USE_MANAGED
 #ifdef HYPRE_USE_MANAGED_SCALABLE
-      ptr=(void*)hypre_MAlloc(size);
+      ptr=(void* hypre_MAlloc(size, HYPRE_MEMORY_HOST);
       memset(ptr,0,count*elt_size);
 #else
       gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
@@ -153,17 +153,18 @@ return ((size_t*)ptr)[-MEM_PAD_LEN];
  *--------------------------------------------------------------------------*/
 
 char *
-hypre_ReAlloc( char   *ptr,
-               size_t  size )
+ hypre_ReAlloc( char   *ptr, 
+               size_t  size,
+               HYPRE_Int location)
 {
 #ifdef HYPRE_USE_UMALLOC
    if (ptr == NULL)
    {
-      ptr = hypre_MAlloc(size);
+      ptr = hypre_MAlloc(size, HYPRE_MEMORY_HOST);
    }
    else if (size == 0)
    {
-      hypre_Free(ptr);
+      hypre_Free(ptr, HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -174,16 +175,16 @@ hypre_ReAlloc( char   *ptr,
    if (ptr == NULL)
    {
 
-      ptr = hypre_MAlloc(size);
+      ptr = hypre_MAlloc(size, HYPRE_MEMORY_HOST);
    }
    else if (size == 0)
    {
-     hypre_Free(ptr);
+     hypre_Free(ptr, HYPRE_MEMORY_HOST);
      return NULL;
    }
    else
    {
-     void *nptr = hypre_MAlloc(size);
+     void *nptr = hypre_MAlloc(size, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
      size_t old_size=memsize((void*)ptr);
 #else
@@ -193,7 +194,7 @@ hypre_ReAlloc( char   *ptr,
        memcpy(nptr,ptr,old_size);
      else
        memcpy(nptr,ptr,size);
-     hypre_Free(ptr);
+     hypre_Free(ptr, HYPRE_MEMORY_HOST);
      ptr=(char*) nptr;
    }
 #else
@@ -223,7 +224,8 @@ hypre_ReAlloc( char   *ptr,
  *--------------------------------------------------------------------------*/
 
 void
-hypre_Free( char *ptr )
+ hypre_Free( char *ptr ,
+            HYPRE_Int location)
 {
    if (ptr)
    {

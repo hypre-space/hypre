@@ -1483,10 +1483,10 @@ int HYPRE_LSI_Uzawa::setupPrecon(HYPRE_Solver *precon,HYPRE_ParCSRMatrix Amat,
           HYPRE_BoomerAMGSetStrongThreshold(*precon,paramPtr.AMGThresh_);
           if ( paramPtr.AMGSystemSize_ > 1 )
              HYPRE_BoomerAMGSetNumFunctions(*precon,paramPtr.AMGSystemSize_);
-          nsweeps = hypre_CTAlloc(int,4);
+          nsweeps = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
           for ( i = 0; i < 4; i++ ) nsweeps[i] = paramPtr.AMGNSweeps_;
           HYPRE_BoomerAMGSetNumGridSweeps(*precon, nsweeps);
-          relaxType = hypre_CTAlloc(int,4);
+          relaxType = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
           for ( i = 0; i < 4; i++ ) relaxType[i] = 6;
           HYPRE_BoomerAMGSetGridRelaxType(*precon, relaxType);
           break;

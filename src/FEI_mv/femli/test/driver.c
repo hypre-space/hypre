@@ -969,7 +969,7 @@ int GenerateConvectionDiffusion3D( MPI_Comm comm, int nx, int ny, int nz,
    hypre_GeneratePartitioning(ny,Q,&ny_part);
    hypre_GeneratePartitioning(nz,R,&nz_part);
 
-   global_part = hypre_CTAlloc(int,P*Q*R+1);
+   global_part = hypre_CTAlloc(int, P*Q*R+1, HYPRE_MEMORY_HOST);
 
    global_part[0] = 0;
    cnt = 1;
@@ -996,8 +996,8 @@ int GenerateConvectionDiffusion3D( MPI_Comm comm, int nx, int ny, int nz,
    num_procs = P*Q*R;
 
    local_num_rows = nx_local*ny_local*nz_local;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -1013,7 +1013,7 @@ int GenerateConvectionDiffusion3D( MPI_Comm comm, int nx, int ny, int nz,
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(int, num_cols_offd);
+   col_map_offd = hypre_CTAlloc(int,  num_cols_offd, HYPRE_MEMORY_HOST);
 
    cnt = 1;
    o_cnt = 1;
@@ -1088,13 +1088,13 @@ int GenerateConvectionDiffusion3D( MPI_Comm comm, int nx, int ny, int nz,
       }
    }
 
-   diag_j = hypre_CTAlloc(int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(double, diag_i[local_num_rows]);
+   diag_j = hypre_CTAlloc(int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(double, offd_i[local_num_rows]);
+      offd_j = hypre_CTAlloc(int,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_data = hypre_CTAlloc(double,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
    }
 
    row_index = 0;
@@ -1245,9 +1245,9 @@ int GenerateConvectionDiffusion3D( MPI_Comm comm, int nx, int ny, int nz,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   hypre_TFree(nx_part);
-   hypre_TFree(ny_part);
-   hypre_TFree(nz_part);
+   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
 
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    HYPRE_IJVectorCreate(comm, partition[my_id], partition[my_id+1]-1, &IJrhs);
@@ -1297,7 +1297,7 @@ printf("nx,ny,nz = %d %d %d\n", nx, ny, nz);
    hypre_GeneratePartitioning(ny,Q,&ny_part);
    hypre_GeneratePartitioning(nz,R,&nz_part);
 
-   global_part = hypre_CTAlloc(int,P*Q*R+1);
+   global_part = hypre_CTAlloc(int, P*Q*R+1, HYPRE_MEMORY_HOST);
 
    global_part[0] = 0;
    cnt = 1;
@@ -1324,8 +1324,8 @@ printf("nx,ny,nz = %d %d %d\n", nx, ny, nz);
    num_procs = P*Q*R;
 
    local_num_rows = nx_local*ny_local*nz_local;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -1341,7 +1341,7 @@ printf("nx,ny,nz = %d %d %d\n", nx, ny, nz);
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(int, num_cols_offd);
+   col_map_offd = hypre_CTAlloc(int,  num_cols_offd, HYPRE_MEMORY_HOST);
 
    cnt = 1;
    o_cnt = 1;
@@ -1416,13 +1416,13 @@ printf("nx,ny,nz = %d %d %d\n", nx, ny, nz);
       }
    }
 
-   diag_j = hypre_CTAlloc(int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(double, diag_i[local_num_rows]);
+   diag_j = hypre_CTAlloc(int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(double, offd_i[local_num_rows]);
+      offd_j = hypre_CTAlloc(int,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_data = hypre_CTAlloc(double,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
    }
 
    row_index = 0;
@@ -1574,9 +1574,9 @@ printf("nx,ny,nz = %d %d %d\n", nx, ny, nz);
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   hypre_TFree(nx_part);
-   hypre_TFree(ny_part);
-   hypre_TFree(nz_part);
+   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
 
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    HYPRE_IJVectorCreate(comm, partition[my_id], partition[my_id+1]-1, &IJrhs);
@@ -1624,15 +1624,15 @@ int GenerateRugeStuben1(MPI_Comm comm, double Lval, double epsilon, int n,
    else                           mu_y = 0.5;
 
    grid_size = n * n;
-   global_part = hypre_CTAlloc(int,2);
+   global_part = hypre_CTAlloc(int, 2, HYPRE_MEMORY_HOST);
    global_part[0] = 0;
    global_part[1] = grid_size;
    local_num_rows = grid_size;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
    for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
-   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
-   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   diag_j = hypre_CTAlloc(int,  5*local_num_rows, HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  5*local_num_rows, HYPRE_MEMORY_HOST);
    cnt = 0;
    diag_i[0] = 0;
    for ( j = 0; j < n; j++ ) 
@@ -1726,15 +1726,15 @@ int GenerateRugeStuben2(MPI_Comm comm, double epsilon, int n,
    h = 1.0 / (n + 1.0);
 
    grid_size = n * n;
-   global_part = hypre_CTAlloc(int,2);
+   global_part = hypre_CTAlloc(int, 2, HYPRE_MEMORY_HOST);
    global_part[0] = 0;
    global_part[1] = grid_size;
    local_num_rows = grid_size;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
    for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
-   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
-   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   diag_j = hypre_CTAlloc(int,  5*local_num_rows, HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  5*local_num_rows, HYPRE_MEMORY_HOST);
    cnt = 0;
    diag_i[0] = 0;
    for ( j = 0; j < n; j++ ) 
@@ -1841,15 +1841,15 @@ int GenerateRugeStuben3(MPI_Comm comm, double epsilon, int n,
    h = 1.0 / (n + 1.0);
 
    grid_size = n * n;
-   global_part = hypre_CTAlloc(int,2);
+   global_part = hypre_CTAlloc(int, 2, HYPRE_MEMORY_HOST);
    global_part[0] = 0;
    global_part[1] = grid_size;
    local_num_rows = grid_size;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
    for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
-   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
-   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   diag_j = hypre_CTAlloc(int,  5*local_num_rows, HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  5*local_num_rows, HYPRE_MEMORY_HOST);
    cnt = 0;
    diag_i[0] = 0;
    for ( j = 0; j < n; j++ ) 
@@ -1957,15 +1957,15 @@ int GenerateStuben(MPI_Comm comm, double epsilon, int n,
    h = 1.0 / (n + 1.0);
 
    grid_size = n * n;
-   global_part = hypre_CTAlloc(int,2);
+   global_part = hypre_CTAlloc(int, 2, HYPRE_MEMORY_HOST);
    global_part[0] = 0;
    global_part[1] = grid_size;
    local_num_rows = grid_size;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
    for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
-   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
-   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   diag_j = hypre_CTAlloc(int,  5*local_num_rows, HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  5*local_num_rows, HYPRE_MEMORY_HOST);
    cnt = 0;
    diag_i[0] = 0;
    rhsVec = (double *) malloc(grid_size * sizeof(double));

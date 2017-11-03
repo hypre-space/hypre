@@ -64,7 +64,7 @@ int HYPRE_ParCSRCotreeCreate(MPI_Comm comm, HYPRE_Solver *solver)
    hypre_CotreeData *cotree_data;
    void             *void_data;
  
-   cotree_data = hypre_CTAlloc(hypre_CotreeData, 1);
+   cotree_data = hypre_CTAlloc(hypre_CotreeData,  1, HYPRE_MEMORY_HOST);
    void_data = (void *) cotree_data;
    *solver = (HYPRE_Solver) void_data;
  
@@ -94,7 +94,7 @@ int HYPRE_ParCSRCotreeDestroy(HYPRE_Solver solver)
  
    if (cotree_data)
    {
-      hypre_TFree(cotree_data);
+      hypre_TFree(cotree_data, HYPRE_MEMORY_HOST);
       if ((cotree_data->w) != NULL)
       {
          hypre_ParVectorDestroy(cotree_data->w);

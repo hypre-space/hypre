@@ -31,7 +31,7 @@ new_format( const char *format,
    HYPRE_Int   foundpercent = 0;
 
    newformatlen = 2*strlen(format)+1; /* worst case is all %d's to %lld's */
-   newformat = hypre_TAlloc(char, newformatlen);
+   newformat = hypre_TAlloc(char,  newformatlen, HYPRE_MEMORY_HOST);
 
    nfp = newformat;
    for (fp = format; *fp != '\0'; fp++)
@@ -97,7 +97,7 @@ new_format( const char *format,
 HYPRE_Int
 free_format( char *newformat )
 {
-   hypre_TFree(newformat);
+   hypre_TFree(newformat, HYPRE_MEMORY_HOST);
 
    return 0;
 }

@@ -61,9 +61,9 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
 
    bnnz = block_size * block_size;
 
-   RAP_ext_i = hypre_CTAlloc(HYPRE_Int, send_map_starts[num_sends]+1);
-   jdata_recv_vec_starts = hypre_CTAlloc(HYPRE_Int, num_recvs+1);
-   jdata_send_map_starts = hypre_CTAlloc(HYPRE_Int, num_sends+1);
+   RAP_ext_i = hypre_CTAlloc(HYPRE_Int,  send_map_starts[num_sends]+1, HYPRE_MEMORY_HOST);
+   jdata_recv_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_recvs+1, HYPRE_MEMORY_HOST);
+   jdata_send_map_starts = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
  
 
 
@@ -103,7 +103,7 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
       comm_handle = hypre_ParCSRCommHandleCreate(12,comm_pkg_RT,
                                                  NULL, &RAP_ext_i[1]);
 
-   tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
+   tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
    hypre_ParCSRCommPkgComm(tmp_comm_pkg) = comm;
    hypre_ParCSRCommPkgNumSends(tmp_comm_pkg) = num_recvs;
    hypre_ParCSRCommPkgNumRecvs(tmp_comm_pkg) = num_sends;
@@ -125,8 +125,8 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    num_nonzeros = RAP_ext_i[num_rows];
    if (num_nonzeros)
    {
-      RAP_ext_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros);
-      RAP_ext_data = hypre_CTAlloc(HYPRE_Complex, num_nonzeros*bnnz);
+      RAP_ext_j = hypre_CTAlloc(HYPRE_Int,  num_nonzeros, HYPRE_MEMORY_HOST);
+      RAP_ext_data = hypre_CTAlloc(HYPRE_Complex,  num_nonzeros*bnnz, HYPRE_MEMORY_HOST);
    }
 
    for (i=0; i < num_sends+1; i++)
@@ -157,9 +157,9 @@ hypre_ExchangeRAPBlockData(hypre_CSRBlockMatrix *RAP_int,
    hypre_ParCSRCommHandleDestroy(comm_handle); 
    comm_handle = NULL;
 
-   hypre_TFree(jdata_recv_vec_starts);
-   hypre_TFree(jdata_send_map_starts);
-   hypre_TFree(tmp_comm_pkg);
+   hypre_TFree(jdata_recv_vec_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(jdata_send_map_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(tmp_comm_pkg, HYPRE_MEMORY_HOST);
 
    return RAP_ext;
 }
@@ -374,8 +374,8 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       Ps_ext_j    = hypre_CSRBlockMatrixJ(Ps_ext);
    }
 
-   P_ext_diag_i = hypre_CTAlloc(HYPRE_Int,num_cols_offd_A+1);
-   P_ext_offd_i = hypre_CTAlloc(HYPRE_Int,num_cols_offd_A+1);
+   P_ext_diag_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A+1, HYPRE_MEMORY_HOST);
+   P_ext_offd_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A+1, HYPRE_MEMORY_HOST);
    P_ext_diag_size = 0;
    P_ext_offd_size = 0;
    last_col_diag_P = first_col_diag_P + num_cols_diag_P - 1;
@@ -393,13 +393,13 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    
    if (P_ext_diag_size)
    {
-      P_ext_diag_j = hypre_CTAlloc(HYPRE_Int, P_ext_diag_size);
-      P_ext_diag_data = hypre_CTAlloc(HYPRE_Complex, P_ext_diag_size*bnnz);
+      P_ext_diag_j = hypre_CTAlloc(HYPRE_Int,  P_ext_diag_size, HYPRE_MEMORY_HOST);
+      P_ext_diag_data = hypre_CTAlloc(HYPRE_Complex,  P_ext_diag_size*bnnz, HYPRE_MEMORY_HOST);
    }
    if (P_ext_offd_size)
    {
-      P_ext_offd_j = hypre_CTAlloc(HYPRE_Int, P_ext_offd_size);
-      P_ext_offd_data = hypre_CTAlloc(HYPRE_Complex, P_ext_offd_size*bnnz);
+      P_ext_offd_j = hypre_CTAlloc(HYPRE_Int,  P_ext_offd_size, HYPRE_MEMORY_HOST);
+      P_ext_offd_data = hypre_CTAlloc(HYPRE_Complex,  P_ext_offd_size*bnnz, HYPRE_MEMORY_HOST);
    }
 
    cnt_offd = 0;
@@ -431,7 +431,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
    if (P_ext_offd_size || num_cols_offd_P)
    {
-      temp = hypre_CTAlloc(HYPRE_Int, P_ext_offd_size+num_cols_offd_P);
+      temp = hypre_CTAlloc(HYPRE_Int,  P_ext_offd_size+num_cols_offd_P, HYPRE_MEMORY_HOST);
       for (i=0; i < P_ext_offd_size; i++)
          temp[i] = P_ext_offd_j[i];
       cnt = P_ext_offd_size;
@@ -455,13 +455,13 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    }
  
    if (num_cols_offd_Pext)
-      col_map_offd_Pext = hypre_CTAlloc(HYPRE_Int,num_cols_offd_Pext);
+      col_map_offd_Pext = hypre_CTAlloc(HYPRE_Int, num_cols_offd_Pext, HYPRE_MEMORY_HOST);
 
    for (i=0; i < num_cols_offd_Pext; i++)
       col_map_offd_Pext[i] = temp[i];
 
    if (P_ext_offd_size || num_cols_offd_P)
-      hypre_TFree(temp);
+      hypre_TFree(temp, HYPRE_MEMORY_HOST);
 
    for (i=0 ; i < P_ext_offd_size; i++)
       P_ext_offd_j[i] = hypre_BinarySearch(col_map_offd_Pext,
@@ -469,7 +469,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
                                            num_cols_offd_Pext);
    if (num_cols_offd_P)
    {
-      map_P_to_Pext = hypre_CTAlloc(HYPRE_Int,num_cols_offd_P);
+      map_P_to_Pext = hypre_CTAlloc(HYPRE_Int, num_cols_offd_P, HYPRE_MEMORY_HOST);
 
       cnt = 0;
       for (i=0; i < num_cols_offd_Pext; i++)
@@ -485,12 +485,12 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
     *  are more than one processor and nonzero elements in R_offd
     *-----------------------------------------------------------------------*/
 
-   P_mark_array = hypre_CTAlloc(HYPRE_Int *, num_threads);
-   A_mark_array = hypre_CTAlloc(HYPRE_Int *, num_threads);
+   P_mark_array = hypre_CTAlloc(HYPRE_Int *,  num_threads, HYPRE_MEMORY_HOST);
+   A_mark_array = hypre_CTAlloc(HYPRE_Int *,  num_threads, HYPRE_MEMORY_HOST);
 
    if (num_cols_offd_RT)
    {
-      jj_count = hypre_CTAlloc(HYPRE_Int, num_threads);
+      jj_count = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
 
       for (ii = 0; ii < num_threads; ii++)
       {
@@ -513,10 +513,10 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
          if (num_cols_offd_Pext || num_cols_diag_P)
          {
-            P_mark_array[ii] = hypre_CTAlloc(HYPRE_Int,num_cols_diag_P+num_cols_offd_Pext);
+            P_mark_array[ii] = hypre_CTAlloc(HYPRE_Int, num_cols_diag_P+num_cols_offd_Pext, HYPRE_MEMORY_HOST);
             P_marker = P_mark_array[ii];
          }
-         A_mark_array[ii] = hypre_CTAlloc(HYPRE_Int, num_nz_cols_A);
+         A_mark_array[ii] = hypre_CTAlloc(HYPRE_Int,  num_nz_cols_A, HYPRE_MEMORY_HOST);
          A_marker = A_mark_array[ii];
 
          /*--------------------------------------------------------------------
@@ -688,9 +688,9 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       for (i = 0; i < num_threads-1; i++) jj_count[i+1] += jj_count[i];
     
       RAP_size = jj_count[num_threads-1];
-      RAP_int_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd_RT+1);
-      RAP_int_data = hypre_CTAlloc(HYPRE_Complex, RAP_size*bnnz);
-      RAP_int_j    = hypre_CTAlloc(HYPRE_Int, RAP_size);
+      RAP_int_i = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_RT+1, HYPRE_MEMORY_HOST);
+      RAP_int_data = hypre_CTAlloc(HYPRE_Complex,  RAP_size*bnnz, HYPRE_MEMORY_HOST);
+      RAP_int_j    = hypre_CTAlloc(HYPRE_Int,  RAP_size, HYPRE_MEMORY_HOST);
       RAP_int_i[num_cols_offd_RT] = RAP_size;
 
       /*-----------------------------------------------------------------------
@@ -991,8 +991,8 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
             }
          }
          if (num_cols_offd_Pext || num_cols_diag_P)
-            hypre_TFree(P_mark_array[ii]);
-         hypre_TFree(A_mark_array[ii]);
+            hypre_TFree(P_mark_array[ii], HYPRE_MEMORY_HOST);
+         hypre_TFree(A_mark_array[ii], HYPRE_MEMORY_HOST);
       }
 
       RAP_int = hypre_CSRBlockMatrixCreate(block_size,num_cols_offd_RT,
@@ -1000,7 +1000,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       hypre_CSRBlockMatrixI(RAP_int) = RAP_int_i;
       hypre_CSRBlockMatrixJ(RAP_int) = RAP_int_j;
       hypre_CSRBlockMatrixData(RAP_int) = RAP_int_data;
-      hypre_TFree(jj_count);
+      hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
    }
 
    RAP_ext_size = 0;
@@ -1018,8 +1018,8 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       RAP_int = NULL;
    }
  
-   RAP_diag_i = hypre_CTAlloc(HYPRE_Int, num_cols_diag_P+1);
-   RAP_offd_i = hypre_CTAlloc(HYPRE_Int, num_cols_diag_P+1);
+   RAP_diag_i = hypre_CTAlloc(HYPRE_Int,  num_cols_diag_P+1, HYPRE_MEMORY_HOST);
+   RAP_offd_i = hypre_CTAlloc(HYPRE_Int,  num_cols_diag_P+1, HYPRE_MEMORY_HOST);
 
    first_col_diag_RAP = first_col_diag_P;
    last_col_diag_RAP = first_col_diag_P + num_cols_diag_P - 1;
@@ -1030,7 +1030,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
    if (RAP_ext_size || num_cols_offd_Pext)
    {
-      temp = hypre_CTAlloc(HYPRE_Int,RAP_ext_size+num_cols_offd_Pext);
+      temp = hypre_CTAlloc(HYPRE_Int, RAP_ext_size+num_cols_offd_Pext, HYPRE_MEMORY_HOST);
       cnt = 0;
       for (i=0; i < RAP_ext_size; i++)
          if (RAP_ext_j[i] < first_col_diag_RAP 
@@ -1056,17 +1056,17 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
       /* now evaluate col_map_offd_RAP */
       if (num_cols_offd_RAP)
-         col_map_offd_RAP = hypre_CTAlloc(HYPRE_Int, num_cols_offd_RAP);
+         col_map_offd_RAP = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_RAP, HYPRE_MEMORY_HOST);
 
       for (i=0 ; i < num_cols_offd_RAP; i++)
          col_map_offd_RAP[i] = temp[i];
  
-      hypre_TFree(temp);
+      hypre_TFree(temp, HYPRE_MEMORY_HOST);
    }
 
    if (num_cols_offd_P)
    {
-      map_P_to_RAP = hypre_CTAlloc(HYPRE_Int,num_cols_offd_P);
+      map_P_to_RAP = hypre_CTAlloc(HYPRE_Int, num_cols_offd_P, HYPRE_MEMORY_HOST);
 
       cnt = 0;
       for (i=0; i < num_cols_offd_RAP; i++)
@@ -1079,7 +1079,7 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
 
    if (num_cols_offd_Pext)
    {
-      map_Pext_to_RAP = hypre_CTAlloc(HYPRE_Int,num_cols_offd_Pext);
+      map_Pext_to_RAP = hypre_CTAlloc(HYPRE_Int, num_cols_offd_Pext, HYPRE_MEMORY_HOST);
 
       cnt = 0;
       for (i=0; i < num_cols_offd_RAP; i++)
@@ -1107,8 +1107,8 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
     *  Initialize some stuff.
     *-----------------------------------------------------------------------*/
 
-   jj_cnt_diag = hypre_CTAlloc(HYPRE_Int, num_threads);
-   jj_cnt_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
+   jj_cnt_diag = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
+   jj_cnt_offd = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
 
    for (ii = 0; ii < num_threads; ii++)
    {
@@ -1125,8 +1125,8 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
          ne = (ii+1)*size+rest;
       }
 
-      P_mark_array[ii] = hypre_CTAlloc(HYPRE_Int, num_cols_diag_P+num_cols_offd_RAP);
-      A_mark_array[ii] = hypre_CTAlloc(HYPRE_Int, num_nz_cols_A);
+      P_mark_array[ii] = hypre_CTAlloc(HYPRE_Int,  num_cols_diag_P+num_cols_offd_RAP, HYPRE_MEMORY_HOST);
+      A_mark_array[ii] = hypre_CTAlloc(HYPRE_Int,  num_nz_cols_A, HYPRE_MEMORY_HOST);
       P_marker = P_mark_array[ii];
       A_marker = A_mark_array[ii];
       jj_count_diag = start_indexing;
@@ -1354,21 +1354,21 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    RAP_diag_size = jj_count_diag;
    if (RAP_diag_size)
    { 
-      RAP_diag_data = hypre_CTAlloc(HYPRE_Complex, RAP_diag_size*bnnz);
-      RAP_diag_j    = hypre_CTAlloc(HYPRE_Int, RAP_diag_size);
+      RAP_diag_data = hypre_CTAlloc(HYPRE_Complex,  RAP_diag_size*bnnz, HYPRE_MEMORY_HOST);
+      RAP_diag_j    = hypre_CTAlloc(HYPRE_Int,  RAP_diag_size, HYPRE_MEMORY_HOST);
    } 
  
    RAP_offd_size = jj_count_offd;
    if (RAP_offd_size)
    { 
-      RAP_offd_data = hypre_CTAlloc(HYPRE_Complex, RAP_offd_size*bnnz);
-      RAP_offd_j    = hypre_CTAlloc(HYPRE_Int, RAP_offd_size);
+      RAP_offd_data = hypre_CTAlloc(HYPRE_Complex,  RAP_offd_size*bnnz, HYPRE_MEMORY_HOST);
+      RAP_offd_j    = hypre_CTAlloc(HYPRE_Int,  RAP_offd_size, HYPRE_MEMORY_HOST);
    } 
 
    if (RAP_offd_size == 0 && num_cols_offd_RAP != 0)
    {
       num_cols_offd_RAP = 0;
-      hypre_TFree(col_map_offd_RAP);
+      hypre_TFree(col_map_offd_RAP, HYPRE_MEMORY_HOST);
    }
 
    /*-----------------------------------------------------------------------
@@ -1738,19 +1738,19 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
             }
          }
       }
-      hypre_TFree(P_mark_array[ii]);   
-      hypre_TFree(A_mark_array[ii]);   
+      hypre_TFree(P_mark_array[ii], HYPRE_MEMORY_HOST);   
+      hypre_TFree(A_mark_array[ii], HYPRE_MEMORY_HOST);   
    }
 
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   row_starts = hypre_CTAlloc(HYPRE_Int, 2);
-   col_starts = hypre_CTAlloc(HYPRE_Int, 2);
+   row_starts = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
+   col_starts = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
    for (i = 0; i <= 1; i++) 
       row_starts[i] = col_starts[i] = coarse_partitioning[i];
 #else
-   row_starts = hypre_CTAlloc(HYPRE_Int, num_procs+1);
-   col_starts = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   row_starts = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
+   col_starts = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
    for (i = 0; i <= num_procs; i++) 
       row_starts[i] = col_starts[i] = coarse_partitioning[i];
 #endif
@@ -1800,31 +1800,31 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
       hypre_CSRBlockMatrixDestroy(RAP_ext);
       RAP_ext = NULL;
    }
-   hypre_TFree(P_mark_array);   
-   hypre_TFree(A_mark_array);
-   hypre_TFree(P_ext_diag_i);
-   hypre_TFree(P_ext_offd_i);
-   hypre_TFree(jj_cnt_diag);   
-   hypre_TFree(jj_cnt_offd);   
+   hypre_TFree(P_mark_array, HYPRE_MEMORY_HOST);   
+   hypre_TFree(A_mark_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(P_ext_diag_i, HYPRE_MEMORY_HOST);
+   hypre_TFree(P_ext_offd_i, HYPRE_MEMORY_HOST);
+   hypre_TFree(jj_cnt_diag, HYPRE_MEMORY_HOST);   
+   hypre_TFree(jj_cnt_offd, HYPRE_MEMORY_HOST);   
    if (num_cols_offd_P)
    {
-      hypre_TFree(map_P_to_Pext);
-      hypre_TFree(map_P_to_RAP);
+      hypre_TFree(map_P_to_Pext, HYPRE_MEMORY_HOST);
+      hypre_TFree(map_P_to_RAP, HYPRE_MEMORY_HOST);
    }
    if (num_cols_offd_Pext)
    {
-      hypre_TFree(col_map_offd_Pext);
-      hypre_TFree(map_Pext_to_RAP);
+      hypre_TFree(col_map_offd_Pext, HYPRE_MEMORY_HOST);
+      hypre_TFree(map_Pext_to_RAP, HYPRE_MEMORY_HOST);
    }
    if (P_ext_diag_size)
    {
-      hypre_TFree(P_ext_diag_data);
-      hypre_TFree(P_ext_diag_j);
+      hypre_TFree(P_ext_diag_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(P_ext_diag_j, HYPRE_MEMORY_HOST);
    }
    if (P_ext_offd_size)
    {
-      hypre_TFree(P_ext_offd_data);
-      hypre_TFree(P_ext_offd_j);
+      hypre_TFree(P_ext_offd_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(P_ext_offd_j, HYPRE_MEMORY_HOST);
    }
    free(r_a_products);
    free(r_a_p_products);

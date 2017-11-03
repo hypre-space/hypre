@@ -33,7 +33,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    hypre_SStructPGrid    *pgrid;
    HYPRE_Int              part;
 
-   vector = hypre_TAlloc(hypre_SStructVector, 1);
+   vector = hypre_TAlloc(hypre_SStructVector,  1, HYPRE_MEMORY_HOST);
 
    hypre_SStructVectorComm(vector) = comm;
    hypre_SStructVectorNDim(vector) = hypre_SStructGridNDim(grid);
@@ -41,7 +41,7 @@ HYPRE_SStructVectorCreate( MPI_Comm              comm,
    hypre_SStructVectorObjectType(vector) = HYPRE_SSTRUCT;
    nparts = hypre_SStructGridNParts(grid);
    hypre_SStructVectorNParts(vector) = nparts;
-   pvectors = hypre_TAlloc(hypre_SStructPVector *, nparts);
+   pvectors = hypre_TAlloc(hypre_SStructPVector *,  nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pgrid = hypre_SStructGridPGrid(grid, part);
@@ -100,7 +100,7 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
          {
             hypre_SStructPVectorDestroy(pvectors[part]);
          }
-         hypre_TFree(pvectors);
+         hypre_TFree(pvectors, HYPRE_MEMORY_HOST);
          HYPRE_IJVectorDestroy(hypre_SStructVectorIJVector(vector));
          /* GEC1002 the ijdestroy takes care of the data when the
           *  vector is type HYPRE_SSTRUCT. This is a result that the
@@ -108,14 +108,14 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
           * unlike the structvector                               */                      
 
 	 /* GEC if data has been allocated then free the pointer */
-         hypre_TFree(hypre_SStructVectorDataIndices(vector));
+         hypre_TFree(hypre_SStructVectorDataIndices(vector), HYPRE_MEMORY_HOST);
          
          if (hypre_SStructVectorData(vector) && (vector_type == HYPRE_PARCSR))
 	 {
-            hypre_TFree(hypre_SStructVectorData(vector));
+            hypre_TFree(hypre_SStructVectorData(vector), HYPRE_MEMORY_HOST);
          }
 
-         hypre_TFree(vector);
+         hypre_TFree(vector, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -162,7 +162,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
 
    datasize = hypre_SStructVectorDataSize(vector);
 
-   data = hypre_CTAlloc(HYPRE_Complex, datasize);
+   data = hypre_CTAlloc(HYPRE_Complex,  datasize, HYPRE_MEMORY_HOST);
 
    dataindices = hypre_SStructVectorDataIndices(vector);
 
@@ -241,7 +241,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    {
 	   par_vector = (hypre_ParVector        *)hypre_IJVectorObject(ijvector);
       parlocal_vector = hypre_ParVectorLocalVector(par_vector);
-      hypre_TFree(hypre_VectorData(parlocal_vector));
+      hypre_TFree(hypre_VectorData(parlocal_vector), HYPRE_MEMORY_HOST);
       hypre_VectorData(parlocal_vector) = data ;
    }
 

@@ -271,7 +271,7 @@ int HYPRE_LSI_DDICTSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    context->globalEqns = row_partition[nprocs];
    context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
    for (i=0; i<=nprocs; i++) context->partition[i] = row_partition[i];
-   hypre_TFree( row_partition );
+   hypre_TFree( row_partition , HYPRE_MEMORY_HOST);
    mh_mat = ( MH_Matrix * ) malloc( sizeof( MH_Matrix) );
    context->Amat = mh_mat;
    HYPRE_LSI_MLConstructMHMatrix(A_csr,mh_mat,MPI_COMM_WORLD,

@@ -138,9 +138,9 @@ hypre_ParCSRMatrixFillSmooth(HYPRE_Int nsamples, HYPRE_Real *samples,
 
    num_cols_offd = hypre_CSRMatrixNumCols(S_offd);
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   buf_data = hypre_CTAlloc(HYPRE_Real,hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                                                num_sends));
-   p_offd = hypre_CTAlloc(HYPRE_Real, nsamples*num_cols_offd);
+   buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
+                                                num_sends), HYPRE_MEMORY_HOST);
+   p_offd = hypre_CTAlloc(HYPRE_Real,  nsamples*num_cols_offd, HYPRE_MEMORY_HOST);
    p_ptr = p_offd;
 
    p = samples;
@@ -163,13 +163,13 @@ hypre_ParCSRMatrixFillSmooth(HYPRE_Int nsamples, HYPRE_Real *samples,
       p_offd = p_offd+num_cols_offd;
    }
 
-   hypre_TFree(buf_data);
+   hypre_TFree(buf_data, HYPRE_MEMORY_HOST);
 
    if (num_functions > 1)
    {
-      dof_func_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
-      int_buf_data = hypre_CTAlloc(HYPRE_Int,hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-                                                num_sends));
+      dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
+                                                num_sends), HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -183,7 +183,7 @@ hypre_ParCSRMatrixFillSmooth(HYPRE_Int nsamples, HYPRE_Real *samples,
         dof_func_offd);
 
       hypre_ParCSRCommHandleDestroy(comm_handle);
-      hypre_TFree(int_buf_data);
+      hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    }
 
    for (i = 0; i < n; i++)
@@ -277,9 +277,9 @@ hypre_ParCSRMatrixFillSmooth(HYPRE_Int nsamples, HYPRE_Real *samples,
       hypre_printf("MIN, MAX: %f %f\n", my, mx);
 #endif
 
-   hypre_TFree(p_ptr);
+   hypre_TFree(p_ptr, HYPRE_MEMORY_HOST);
    if (num_functions > 1)
-      hypre_TFree(dof_func_offd);
+      hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
 
    return 0;
 }
@@ -359,9 +359,9 @@ hypre_ParCSRMatrixThreshold(hypre_ParCSRMatrix *A, HYPRE_Real thresh)
            count++;
 
    /* allocate vectors */
-   S_diag_i = hypre_CTAlloc(HYPRE_Int, n+1);
-   S_diag_j = hypre_CTAlloc(HYPRE_Int, count);
-   S_diag_data = hypre_CTAlloc(HYPRE_Real, count);
+   S_diag_i = hypre_CTAlloc(HYPRE_Int,  n+1, HYPRE_MEMORY_HOST);
+   S_diag_j = hypre_CTAlloc(HYPRE_Int,  count, HYPRE_MEMORY_HOST);
+   S_diag_data = hypre_CTAlloc(HYPRE_Real,  count, HYPRE_MEMORY_HOST);
 
    jS = 0;
    for (i = 0; i < n; i++)
@@ -381,9 +381,9 @@ hypre_ParCSRMatrixThreshold(hypre_ParCSRMatrix *A, HYPRE_Real thresh)
    hypre_CSRMatrixNumNonzeros(A_diag) = jS;
 
    /* free the vectors we don't need */
-   hypre_TFree(A_diag_i);
-   hypre_TFree(A_diag_j);
-   hypre_TFree(A_diag_data);
+   hypre_TFree(A_diag_i, HYPRE_MEMORY_HOST);
+   hypre_TFree(A_diag_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(A_diag_data, HYPRE_MEMORY_HOST);
 
    /* assign the new vectors */
    hypre_CSRMatrixI(A_diag) = S_diag_i;
@@ -401,9 +401,9 @@ hypre_ParCSRMatrixThreshold(hypre_ParCSRMatrix *A, HYPRE_Real thresh)
            count++;
 
    /* allocate vectors */
-   S_offd_i = hypre_CTAlloc(HYPRE_Int, n+1);
-   S_offd_j = hypre_CTAlloc(HYPRE_Int, count);
-   S_offd_data = hypre_CTAlloc(HYPRE_Real, count);
+   S_offd_i = hypre_CTAlloc(HYPRE_Int,  n+1, HYPRE_MEMORY_HOST);
+   S_offd_j = hypre_CTAlloc(HYPRE_Int,  count, HYPRE_MEMORY_HOST);
+   S_offd_data = hypre_CTAlloc(HYPRE_Real,  count, HYPRE_MEMORY_HOST);
 
    jS = 0;
    for (i = 0; i < n; i++)
@@ -423,9 +423,9 @@ hypre_ParCSRMatrixThreshold(hypre_ParCSRMatrix *A, HYPRE_Real thresh)
    hypre_CSRMatrixNumNonzeros(A_offd) = jS;
 
    /* free the vectors we don't need */
-   hypre_TFree(A_offd_i);
-   hypre_TFree(A_offd_j);
-   hypre_TFree(A_offd_data);
+   hypre_TFree(A_offd_i, HYPRE_MEMORY_HOST);
+   hypre_TFree(A_offd_j, HYPRE_MEMORY_HOST);
+   hypre_TFree(A_offd_data, HYPRE_MEMORY_HOST);
 
    /* assign the new vectors */
    hypre_CSRMatrixI(A_offd) = S_offd_i;
@@ -539,7 +539,7 @@ hypre_BoomerAMGCreateSmoothVecs(void         *data,
 
 
    /* allocate space for the vectors */
-   bp = hypre_CTAlloc(HYPRE_Real, nsamples*n_local);
+   bp = hypre_CTAlloc(HYPRE_Real,  nsamples*n_local, HYPRE_MEMORY_HOST);
    p = bp;
 
    /* generate random vectors */
@@ -696,9 +696,9 @@ hypre_BoomerAMGFitVectors(HYPRE_Int ip, HYPRE_Int n, HYPRE_Int num, const HYPRE_
       return 0;
 
    work_size = 2000*64;
-   work = hypre_CTAlloc(HYPRE_Real, work_size);
+   work = hypre_CTAlloc(HYPRE_Real,  work_size, HYPRE_MEMORY_HOST);
 
-   a = hypre_CTAlloc(HYPRE_Real, num*nc);
+   a = hypre_CTAlloc(HYPRE_Real,  num*nc, HYPRE_MEMORY_HOST);
    ap = a;
 
    for (j=0; j<nc; j++)
@@ -711,7 +711,7 @@ hypre_BoomerAMGFitVectors(HYPRE_Int ip, HYPRE_Int n, HYPRE_Int num, const HYPRE_
    }
 
    temp = MAX(nc, num);
-   b = hypre_CTAlloc(HYPRE_Real, temp);
+   b = hypre_CTAlloc(HYPRE_Real,  temp, HYPRE_MEMORY_HOST);
    for (i=0; i<num; i++)
       b[i] = V[i*n+ip];
 
@@ -729,9 +729,9 @@ hypre_BoomerAMGFitVectors(HYPRE_Int ip, HYPRE_Int n, HYPRE_Int num, const HYPRE_
       val[j] = b[j];
    }
 
-   hypre_TFree(b);
-   hypre_TFree(a);
-   hypre_TFree(work);
+   hypre_TFree(b, HYPRE_MEMORY_HOST);
+   hypre_TFree(a, HYPRE_MEMORY_HOST);
+   hypre_TFree(work, HYPRE_MEMORY_HOST);
 
    return info;
 }
@@ -845,9 +845,9 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_S_offd);
+   CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_S_offd, HYPRE_MEMORY_HOST);
    if (num_functions > 1 && num_cols_S_offd)
-	dof_func_offd = hypre_CTAlloc(HYPRE_Int, num_cols_S_offd);
+	dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_S_offd, HYPRE_MEMORY_HOST);
 
    if (!comm_pkg)
    {
@@ -856,8 +856,8 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-						num_sends));
+   int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
+						num_sends), HYPRE_MEMORY_HOST);
 
    index = 0;
    for (i = 0; i < num_sends; i++)
@@ -929,11 +929,11 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
 
-   coarse_counter = hypre_CTAlloc(HYPRE_Int, num_threads);
-   jj_count = hypre_CTAlloc(HYPRE_Int, num_threads);
-   jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
+   coarse_counter = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
+   jj_count = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
+   jj_count_offd = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
 
-   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
+   fine_to_coarse = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1019,18 +1019,18 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    P_diag_size = jj_counter;
 
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1);
-   P_diag_j    = hypre_CTAlloc(HYPRE_Int, P_diag_size);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_HOST);
+   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_HOST);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_HOST);
 
    P_diag_i[n_fine] = jj_counter; 
 
 
    P_offd_size = jj_counter_offd;
 
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1);
-   P_offd_j    = hypre_CTAlloc(HYPRE_Int, P_offd_size);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_HOST);
+   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_HOST);
+   P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Intialize some stuff.
@@ -1053,7 +1053,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_S_offd); 
+   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_S_offd, HYPRE_MEMORY_HOST); 
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,ns,ne,size,rest,coarse_shift) HYPRE_SMP_SCHEDULE
@@ -1226,7 +1226,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
    num_cols_P_offd = 0;
    if (P_offd_size)
    {
-      P_marker = hypre_CTAlloc(HYPRE_Int, P_offd_size);
+      P_marker = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
@@ -1247,7 +1247,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
   	}
       }
 
-      col_map_offd_P = hypre_CTAlloc(HYPRE_Int,num_cols_P_offd);
+      col_map_offd_P = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
 
       for (i=0; i < num_cols_P_offd; i++)
          col_map_offd_P[i] = P_marker[i];
@@ -1259,7 +1259,7 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
 					 P_offd_j[i],
 					 num_cols_P_offd);
-      hypre_TFree(P_marker); 
+      hypre_TFree(P_marker, HYPRE_MEMORY_HOST); 
    }
 
    if (num_cols_P_offd)
@@ -1272,14 +1272,14 @@ hypre_BoomerAMGBuildInterpLS( hypre_ParCSRMatrix   *A,
 
    *P_ptr = P;
 
-   hypre_TFree(CF_marker_offd);
-   hypre_TFree(dof_func_offd);
-   hypre_TFree(int_buf_data);
-   hypre_TFree(fine_to_coarse);
-   hypre_TFree(fine_to_coarse_offd);
-   hypre_TFree(coarse_counter);
-   hypre_TFree(jj_count);
-   hypre_TFree(jj_count_offd);
+   hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
+   hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
+   hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
+   hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
 
    if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);
 
@@ -1412,9 +1412,9 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_S_offd);
+   CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_S_offd, HYPRE_MEMORY_HOST);
    if (num_functions > 1 && num_cols_S_offd)
-	dof_func_offd = hypre_CTAlloc(HYPRE_Int, num_cols_S_offd);
+	dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_S_offd, HYPRE_MEMORY_HOST);
 
    if (!comm_pkg)
    {
@@ -1423,8 +1423,8 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-						num_sends));
+   int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
+						num_sends), HYPRE_MEMORY_HOST);
 
    index = 0;
    for (i = 0; i < num_sends; i++)
@@ -1494,11 +1494,11 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
 
-   coarse_counter = hypre_CTAlloc(HYPRE_Int, num_threads);
-   jj_count = hypre_CTAlloc(HYPRE_Int, num_threads);
-   jj_count_offd = hypre_CTAlloc(HYPRE_Int, num_threads);
+   coarse_counter = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
+   jj_count = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
+   jj_count_offd = hypre_CTAlloc(HYPRE_Int,  num_threads, HYPRE_MEMORY_HOST);
 
-   fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
+   fine_to_coarse = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1591,18 +1591,18 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
 
    P_diag_size = jj_counter;
 
-   P_diag_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1);
-   P_diag_j    = hypre_CTAlloc(HYPRE_Int, P_diag_size);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real, P_diag_size);
+   P_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_HOST);
+   P_diag_j    = hypre_CTAlloc(HYPRE_Int,  P_diag_size, HYPRE_MEMORY_HOST);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_HOST);
 
    P_diag_i[n_fine] = jj_counter; 
 
 
    P_offd_size = jj_counter_offd;
 
-   P_offd_i    = hypre_CTAlloc(HYPRE_Int, n_fine+1);
-   P_offd_j    = hypre_CTAlloc(HYPRE_Int, P_offd_size);
-   P_offd_data = hypre_CTAlloc(HYPRE_Real, P_offd_size);
+   P_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_HOST);
+   P_offd_j    = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_HOST);
+   P_offd_data = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Intialize some stuff.
@@ -1625,7 +1625,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
 
    if (debug_flag==4) wall_time = time_getWallclockSeconds();
 
-   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_S_offd); 
+   fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_S_offd, HYPRE_MEMORY_HOST); 
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i,j,ns,ne,size,rest,coarse_shift) HYPRE_SMP_SCHEDULE
@@ -1704,8 +1704,8 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
      jj_counter_offd = 0;
      if (jl > 0) jj_counter_offd = jj_count_offd[jl-1];
 
-     P_marker = hypre_CTAlloc(HYPRE_Int, n_fine);
-     P_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_S_offd);
+     P_marker = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
+     P_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_S_offd, HYPRE_MEMORY_HOST);
 
      for (i = 0; i < n_fine; i++)
      {      
@@ -2043,8 +2043,8 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
 
       P_offd_i[i+1] = jj_counter_offd;
      }
-     hypre_TFree(P_marker);
-     hypre_TFree(P_marker_offd);
+     hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
+     hypre_TFree(P_marker_offd, HYPRE_MEMORY_HOST);
    }
 
    P = hypre_ParCSRMatrixCreate(comm,
@@ -2085,7 +2085,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
    num_cols_P_offd = 0;
    if (P_offd_size)
    {
-      P_marker = hypre_CTAlloc(HYPRE_Int, P_offd_size);
+      P_marker = hypre_CTAlloc(HYPRE_Int,  P_offd_size, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
@@ -2106,7 +2106,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
   	}
       }
 
-      col_map_offd_P = hypre_CTAlloc(HYPRE_Int,num_cols_P_offd);
+      col_map_offd_P = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd, HYPRE_MEMORY_HOST);
 
       for (i=0; i < num_cols_P_offd; i++)
          col_map_offd_P[i] = P_marker[i];
@@ -2118,7 +2118,7 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
 	P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
 					 P_offd_j[i],
 					 num_cols_P_offd);
-      hypre_TFree(P_marker); 
+      hypre_TFree(P_marker, HYPRE_MEMORY_HOST); 
    }
 
    if (num_cols_P_offd)
@@ -2131,14 +2131,14 @@ hypre_BoomerAMGBuildInterpGSMG( hypre_ParCSRMatrix   *A,
 
    *P_ptr = P;
 
-   hypre_TFree(CF_marker_offd);
-   hypre_TFree(dof_func_offd);
-   hypre_TFree(int_buf_data);
-   hypre_TFree(fine_to_coarse);
-   hypre_TFree(fine_to_coarse_offd);
-   hypre_TFree(coarse_counter);
-   hypre_TFree(jj_count);
-   hypre_TFree(jj_count_offd);
+   hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
+   hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(coarse_counter, HYPRE_MEMORY_HOST);
+   hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
+   hypre_TFree(jj_count_offd, HYPRE_MEMORY_HOST);
 
    if (num_procs > 1) hypre_CSRMatrixDestroy(S_ext);
 

@@ -59,7 +59,7 @@ GenerateCoordinates( MPI_Comm comm,
 
    local_num_rows = nx_local*ny_local*nz_local;
  
-   coord = hypre_CTAlloc(float, coorddim*local_num_rows);
+   coord = hypre_CTAlloc(float,  coorddim*local_num_rows, HYPRE_MEMORY_HOST);
      
    cnt = 0;
    for (iz = nz_part[r]; iz < nz_part[r+1]; iz++)
@@ -78,9 +78,9 @@ GenerateCoordinates( MPI_Comm comm,
      }
    }
    
-   hypre_TFree(nx_part);
-   hypre_TFree(ny_part);
-   hypre_TFree(nz_part);
+   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
 
    return coord;
 }

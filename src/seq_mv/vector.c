@@ -76,7 +76,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
    {
       if ( hypre_VectorOwnsData(vector) )
       {
-         hypre_TFree(hypre_VectorData(vector));
+         hypre_TFree(hypre_VectorData(vector), HYPRE_MEMORY_HOST);
       }
       hypre_HostTFree(vector);
    }
@@ -97,7 +97,7 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
    HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
 
    if ( ! hypre_VectorData(vector) )
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size);
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex,  num_vectors*size, HYPRE_MEMORY_HOST);
 
    if ( multivec_storage_method == 0 )
    {

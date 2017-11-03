@@ -42,7 +42,7 @@ hypre_SMGResidualCreate( )
 {
    hypre_SMGResidualData *residual_data;
 
-   residual_data = hypre_CTAlloc(hypre_SMGResidualData, 1);
+   residual_data = hypre_CTAlloc(hypre_SMGResidualData,  1, HYPRE_MEMORY_HOST);
 
    (residual_data -> time_index)  = hypre_InitializeTiming("SMGResidual");
 
@@ -918,7 +918,7 @@ hypre_SMGResidualDestroy( void *residual_vdata )
       hypre_BoxArrayDestroy(residual_data -> base_points);
       hypre_ComputePkgDestroy(residual_data -> compute_pkg );
       hypre_FinalizeTiming(residual_data -> time_index);
-      hypre_TFree(residual_data);
+      hypre_TFree(residual_data, HYPRE_MEMORY_HOST);
    }
 
    return ierr;

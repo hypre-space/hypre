@@ -191,7 +191,7 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
 
    startRow  = row_partition[my_id];
    endRow    = row_partition[my_id+1] - 1;
-   hypre_TFree( row_partition ); 
+   hypre_TFree( row_partition , HYPRE_MEMORY_HOST); 
    poly_ptr->Nrows = endRow - startRow + 1;
 
    max_norm = 0.0;

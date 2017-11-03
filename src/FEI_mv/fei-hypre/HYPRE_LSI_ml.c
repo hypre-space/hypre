@@ -487,7 +487,7 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
     context->globalEqns = row_partition[nprocs];
     context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
     for (i=0; i<=nprocs; i++) context->partition[i] = row_partition[i];
-    hypre_TFree( row_partition );
+    hypre_TFree( row_partition , HYPRE_MEMORY_HOST);
     mh_mat = ( MH_Matrix * ) malloc( sizeof( MH_Matrix) );
     context->Amat = mh_mat;
     HYPRE_LSI_MLConstructMHMatrix(A,mh_mat,link->comm,

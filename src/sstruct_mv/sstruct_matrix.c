@@ -64,7 +64,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    HYPRE_Int              vi, vj;
    HYPRE_Int              i, j, k;
 
-   pmatrix = hypre_TAlloc(hypre_SStructPMatrix, 1);
+   pmatrix = hypre_TAlloc(hypre_SStructPMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_SStructPMatrixComm(pmatrix)     = comm;
    hypre_SStructPMatrixPGrid(pmatrix)    = pgrid;
@@ -73,14 +73,14 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    hypre_SStructPMatrixNVars(pmatrix) = nvars;
 
    /* create sstencils */
-   smaps     = hypre_TAlloc(HYPRE_Int *, nvars);
-   sstencils = hypre_TAlloc(hypre_StructStencil **, nvars);
-   new_sizes  = hypre_TAlloc(HYPRE_Int, nvars);
-   new_shapes = hypre_TAlloc(hypre_Index *, nvars);
+   smaps     = hypre_TAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
+   sstencils = hypre_TAlloc(hypre_StructStencil **,  nvars, HYPRE_MEMORY_HOST);
+   new_sizes  = hypre_TAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
+   new_shapes = hypre_TAlloc(hypre_Index *,  nvars, HYPRE_MEMORY_HOST);
    size = 0;
    for (vi = 0; vi < nvars; vi++)
    {
-      sstencils[vi] = hypre_TAlloc(hypre_StructStencil *, nvars);
+      sstencils[vi] = hypre_TAlloc(hypre_StructStencil *,  nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
          sstencils[vi][vj] = NULL;
@@ -92,7 +92,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
       sstencil_shape = hypre_StructStencilShape(sstencil);
       sstencil_size  = hypre_StructStencilSize(sstencil);
 
-      smaps[vi] = hypre_TAlloc(HYPRE_Int, sstencil_size);
+      smaps[vi] = hypre_TAlloc(HYPRE_Int,  sstencil_size, HYPRE_MEMORY_HOST);
       for (i = 0; i < sstencil_size; i++)
       {
          j = vars[i];
@@ -102,7 +102,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
       {
          if (new_sizes[vj])
          {
-            new_shapes[vj] = hypre_TAlloc(hypre_Index, new_sizes[vj]);
+            new_shapes[vj] = hypre_TAlloc(hypre_Index,  new_sizes[vj], HYPRE_MEMORY_HOST);
             new_sizes[vj] = 0;
          }
       }
@@ -127,14 +127,14 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    }
    hypre_SStructPMatrixSMaps(pmatrix)     = smaps;
    hypre_SStructPMatrixSStencils(pmatrix) = sstencils;
-   hypre_TFree(new_sizes);
-   hypre_TFree(new_shapes);
+   hypre_TFree(new_sizes, HYPRE_MEMORY_HOST);
+   hypre_TFree(new_shapes, HYPRE_MEMORY_HOST);
 
    /* create smatrices */
-   smatrices = hypre_TAlloc(hypre_StructMatrix **, nvars);
+   smatrices = hypre_TAlloc(hypre_StructMatrix **,  nvars, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < nvars; vi++)
    {
-      smatrices[vi] = hypre_TAlloc(hypre_StructMatrix *, nvars);
+      smatrices[vi] = hypre_TAlloc(hypre_StructMatrix *,  nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
          smatrices[vi][vj] = NULL;
@@ -149,10 +149,10 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    hypre_SStructPMatrixSMatrices(pmatrix) = smatrices;
 
    /* create symmetric */
-   symmetric = hypre_TAlloc(HYPRE_Int *, nvars);
+   symmetric = hypre_TAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
    for (vi = 0; vi < nvars; vi++)
    {
-      symmetric[vi] = hypre_TAlloc(HYPRE_Int, nvars);
+      symmetric[vi] = hypre_TAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
       for (vj = 0; vj < nvars; vj++)
       {
          symmetric[vi][vj] = 0;
@@ -161,7 +161,7 @@ hypre_SStructPMatrixCreate( MPI_Comm               comm,
    hypre_SStructPMatrixSymmetric(pmatrix) = symmetric;
 
    hypre_SStructPMatrixSEntriesSize(pmatrix) = size;
-   hypre_SStructPMatrixSEntries(pmatrix) = hypre_TAlloc(HYPRE_Int, size);
+   hypre_SStructPMatrixSEntries(pmatrix) = hypre_TAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST);
 
    hypre_SStructPMatrixRefCount(pmatrix) = 1;
 
@@ -198,23 +198,23 @@ hypre_SStructPMatrixDestroy( hypre_SStructPMatrix *pmatrix )
          for (vi = 0; vi < nvars; vi++)
          {
             HYPRE_SStructStencilDestroy(stencils[vi]);
-            hypre_TFree(smaps[vi]);
+            hypre_TFree(smaps[vi], HYPRE_MEMORY_HOST);
             for (vj = 0; vj < nvars; vj++)
             {
                hypre_StructStencilDestroy(sstencils[vi][vj]);
                hypre_StructMatrixDestroy(smatrices[vi][vj]);
             }
-            hypre_TFree(sstencils[vi]);
-            hypre_TFree(smatrices[vi]);
-            hypre_TFree(symmetric[vi]);
+            hypre_TFree(sstencils[vi], HYPRE_MEMORY_HOST);
+            hypre_TFree(smatrices[vi], HYPRE_MEMORY_HOST);
+            hypre_TFree(symmetric[vi], HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(stencils);
-         hypre_TFree(smaps);
-         hypre_TFree(sstencils);
-         hypre_TFree(smatrices);
-         hypre_TFree(symmetric);
-         hypre_TFree(hypre_SStructPMatrixSEntries(pmatrix));
-         hypre_TFree(pmatrix);
+         hypre_TFree(stencils, HYPRE_MEMORY_HOST);
+         hypre_TFree(smaps, HYPRE_MEMORY_HOST);
+         hypre_TFree(sstencils, HYPRE_MEMORY_HOST);
+         hypre_TFree(smatrices, HYPRE_MEMORY_HOST);
+         hypre_TFree(symmetric, HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructPMatrixSEntries(pmatrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(pmatrix, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -696,7 +696,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    m = 0;
    max_row_size = 0;
    ghost_box = hypre_BoxCreate(ndim);
-   row_sizes = hypre_CTAlloc(HYPRE_Int, nrows);
+   row_sizes = hypre_CTAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
    hypre_SetIndex(stride, 1);
    for (part = 0; part < nparts; part++)
    {
@@ -775,11 +775,11 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
    /* ZTODO: Update row_sizes based on neighbor off-part couplings */
    HYPRE_IJMatrixSetRowSizes (ijmatrix, (const HYPRE_Int *) row_sizes);
 
-   hypre_TFree(row_sizes);
+   hypre_TFree(row_sizes, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixTmpColCoords(matrix) =
-      hypre_CTAlloc(HYPRE_Int, max_row_size);
+      hypre_CTAlloc(HYPRE_Int,  max_row_size, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixTmpCoeffs(matrix) =
-      hypre_CTAlloc(HYPRE_Complex, max_row_size);
+      hypre_CTAlloc(HYPRE_Complex,  max_row_size, HYPRE_MEMORY_HOST);
 
    HYPRE_IJMatrixInitialize(ijmatrix);
 
@@ -1073,7 +1073,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
             } /* end loop through boxman to entries */
 
-            hypre_TFree(boxman_to_entries);
+            hypre_TFree(boxman_to_entries, HYPRE_MEMORY_HOST);
 
          } /* end of ei nentries loop */
 
@@ -1101,7 +1101,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
          }
       } /* end loop through boxman entries */
 
-      hypre_TFree(boxman_entries);
+      hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
       
       hypre_UMTFree(ncols);
       hypre_UMTFree(rows);
@@ -1470,7 +1470,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                if (hypre_BoxVolume(ibox1))
                {
                   tvalues =
-                     hypre_TReAlloc(tvalues, HYPRE_Complex, hypre_BoxVolume(ibox1));
+                     hypre_TReAlloc(tvalues,  HYPRE_Complex,  hypre_BoxVolume(ibox1), HYPRE_MEMORY_HOST);
 
                   if (action >= 0)
                   {
@@ -1526,10 +1526,10 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                   } /* end if action */
                } /* end if nonzero ibox1 */
             } /* end of "from" boxman entries loop */
-            hypre_TFree(frentries);
+            hypre_TFree(frentries, HYPRE_MEMORY_HOST);
          } /* end if nonzero ibox0 */
       } /* end of "to" boxman entries loop */
-      hypre_TFree(toentries);
+      hypre_TFree(toentries, HYPRE_MEMORY_HOST);
    } /* end of entries loop */
 
    hypre_BoxDestroy(box);
@@ -1538,7 +1538,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    hypre_BoxDestroy(ibox1);
    hypre_BoxDestroy(tobox);
    hypre_BoxDestroy(frbox);
-   hypre_TFree(tvalues);
+   hypre_TFree(tvalues, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

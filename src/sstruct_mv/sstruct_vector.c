@@ -50,13 +50,13 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
    hypre_StructGrid      *sgrid;
    HYPRE_Int              var;
  
-   pvector = hypre_TAlloc(hypre_SStructPVector, 1);
+   pvector = hypre_TAlloc(hypre_SStructPVector,  1, HYPRE_MEMORY_HOST);
 
    hypre_SStructPVectorComm(pvector)  = comm;
    hypre_SStructPVectorPGrid(pvector) = pgrid;
    nvars = hypre_SStructPGridNVars(pgrid);
    hypre_SStructPVectorNVars(pvector) = nvars;
-   svectors = hypre_TAlloc(hypre_StructVector *, nvars);
+   svectors = hypre_TAlloc(hypre_StructVector *,  nvars, HYPRE_MEMORY_HOST);
 
    for (var = 0; var < nvars; var++)
    {
@@ -64,7 +64,7 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
       svectors[var] = hypre_StructVectorCreate(comm, sgrid);
    }
    hypre_SStructPVectorSVectors(pvector) = svectors;
-   comm_pkgs = hypre_TAlloc(hypre_CommPkg *, nvars);
+   comm_pkgs = hypre_TAlloc(hypre_CommPkg *,  nvars, HYPRE_MEMORY_HOST);
    for (var = 0; var < nvars; var++)
    {
       comm_pkgs[var] = NULL;
@@ -110,10 +110,10 @@ hypre_SStructPVectorDestroy( hypre_SStructPVector *pvector )
             hypre_CommPkgDestroy(comm_pkgs[var]);
          }
            
-         hypre_TFree(dataindices);
-         hypre_TFree(svectors);
-         hypre_TFree(comm_pkgs);
-         hypre_TFree(pvector);
+         hypre_TFree(dataindices, HYPRE_MEMORY_HOST);
+         hypre_TFree(svectors, HYPRE_MEMORY_HOST);
+         hypre_TFree(comm_pkgs, HYPRE_MEMORY_HOST);
+         hypre_TFree(pvector, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -772,7 +772,7 @@ hypre_SStructPVectorInitializeShell( hypre_SStructPVector *pvector)
    hypre_StructVector  *svector;
 
    pdatasize = 0;
-   pdataindices = hypre_CTAlloc(HYPRE_Int, nvars);
+   pdataindices = hypre_CTAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
 
    for (var =0; var < nvars; var++)
    {
@@ -813,7 +813,7 @@ hypre_SStructVectorInitializeShell( hypre_SStructVector *vector)
    HYPRE_Int               *dataindices;
 
    datasize = 0;
-   dataindices = hypre_CTAlloc(HYPRE_Int, nparts);
+   dataindices = hypre_CTAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pvector = hypre_SStructVectorPVector(vector, part) ;

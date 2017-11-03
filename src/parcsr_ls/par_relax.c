@@ -129,10 +129,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
-			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real,  
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
-	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
         
 	if (num_cols_offd)
 	{
@@ -242,8 +242,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          }
 	 if (num_procs > 1)
          {
-	 hypre_TFree(Vext_data);
-	 hypre_TFree(v_buf_data);
+	 hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+	 hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
          }
       }
       break;
@@ -255,10 +255,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
-			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real,  
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
-	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
         
 	if (num_cols_offd)
 	{
@@ -356,8 +356,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          }
          if (num_procs > 1)
          {
-	   hypre_TFree(Vext_data);
-	   hypre_TFree(v_buf_data);
+	   hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+	   hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
          }
       }
       break;
@@ -391,10 +391,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             v_buf_data = (HYPRE_Real *)persistent_comm_handle->send_data;
             Vext_data = (HYPRE_Real *)persistent_comm_handle->recv_data;
 #else
-            v_buf_data = hypre_CTAlloc(HYPRE_Real, 
-                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+            v_buf_data = hypre_CTAlloc(HYPRE_Real,  
+                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
             
-            Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+            Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
 #endif
             
             if (num_cols_offd)
@@ -851,8 +851,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 #ifndef HYPRE_USING_PERSISTENT_COMM
         if (num_procs > 1)
         {
-	   hypre_TFree(Vext_data);
-	   hypre_TFree(v_buf_data);
+	   hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+	   hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
         }
 #endif
 #ifdef HYPRE_PROFILE
@@ -868,13 +868,13 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
-			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real,  
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
-	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
         
-	status  = hypre_CTAlloc(hypre_MPI_Status,num_recvs+num_sends);
-	requests= hypre_CTAlloc(hypre_MPI_Request, num_recvs+num_sends);
+	status  = hypre_CTAlloc(hypre_MPI_Status, num_recvs+num_sends, HYPRE_MEMORY_HOST);
+	requests= hypre_CTAlloc(hypre_MPI_Request,  num_recvs+num_sends, HYPRE_MEMORY_HOST);
 
 	if (num_cols_offd)
 	{
@@ -995,10 +995,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	}
 	if (num_procs > 1)
 	{
-	hypre_TFree(Vext_data);
-	hypre_TFree(v_buf_data);
-	hypre_TFree(status);
-	hypre_TFree(requests);
+ hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+ hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
+ hypre_TFree(status, HYPRE_MEMORY_HOST);
+ hypre_TFree(requests, HYPRE_MEMORY_HOST);
 	}
       }
       break;
@@ -1011,13 +1011,13 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    	num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
-			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real,  
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
-	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
         
-	status  = hypre_CTAlloc(hypre_MPI_Status,num_recvs+num_sends);
-	requests= hypre_CTAlloc(hypre_MPI_Request, num_recvs+num_sends);
+	status  = hypre_CTAlloc(hypre_MPI_Status, num_recvs+num_sends, HYPRE_MEMORY_HOST);
+	requests= hypre_CTAlloc(hypre_MPI_Request,  num_recvs+num_sends, HYPRE_MEMORY_HOST);
 
 	if (num_cols_offd)
 	{
@@ -1186,10 +1186,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	}
 	if (num_procs > 1)
 	{
-	hypre_TFree(Vext_data);
-	hypre_TFree(v_buf_data);
-	hypre_TFree(status);
-	hypre_TFree(requests);
+ hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+ hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
+ hypre_TFree(status, HYPRE_MEMORY_HOST);
+ hypre_TFree(requests, HYPRE_MEMORY_HOST);
 	}
       }
       break;
@@ -1202,10 +1202,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
-			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real,  
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
-	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
         
 	if (num_cols_offd)
 	{
@@ -1242,7 +1242,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
           {
-	   tmp_data = hypre_CTAlloc(HYPRE_Real,n);
+	   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1292,7 +1292,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }
            }
-           hypre_TFree(tmp_data);
+           hypre_TFree(tmp_data, HYPRE_MEMORY_HOST);
           }
 	  else
           {
@@ -1331,7 +1331,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
 	  {
-	   tmp_data = hypre_CTAlloc(HYPRE_Real,n);
+	   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1383,7 +1383,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
            }     
-           hypre_TFree(tmp_data);
+           hypre_TFree(tmp_data, HYPRE_MEMORY_HOST);
            
 	  }
 	  else
@@ -1431,7 +1431,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
           {
-	   tmp_data = hypre_CTAlloc(HYPRE_Real,n);
+	   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1490,7 +1490,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }
            }
-           hypre_TFree(tmp_data);
+           hypre_TFree(tmp_data, HYPRE_MEMORY_HOST);
            
           }
 	  else
@@ -1536,7 +1536,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          {
 	  if (num_threads > 1)
 	  {
-	   tmp_data = hypre_CTAlloc(HYPRE_Real,n);
+	   tmp_data = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1597,7 +1597,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                }
             }     
            }     
-           hypre_TFree(tmp_data);
+           hypre_TFree(tmp_data, HYPRE_MEMORY_HOST);
 	  }
 	  else
 	  {
@@ -1639,8 +1639,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          }
          if (num_procs > 1)
          {
-	   hypre_TFree(Vext_data);
-	   hypre_TFree(v_buf_data);
+	   hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+	   hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
          }
       }
       break;
@@ -1663,10 +1663,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
 	{
    	num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-   	v_buf_data = hypre_CTAlloc(HYPRE_Real, 
-			hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+   	v_buf_data = hypre_CTAlloc(HYPRE_Real,  
+			hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
-	Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+	Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
         
 	if (num_cols_offd)
 	{
@@ -2343,8 +2343,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
         }
         if (num_procs > 1)
         {
-	   hypre_TFree(Vext_data);
-	   hypre_TFree(v_buf_data);
+	   hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+	   hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
         }
       }
       break;
@@ -2399,10 +2399,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
         {
         num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-        v_buf_data = hypre_CTAlloc(HYPRE_Real,
-                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+        v_buf_data = hypre_CTAlloc(HYPRE_Real, 
+                        hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
-        Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+        Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
 
         if (num_cols_offd)
         {
@@ -3079,8 +3079,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
         }
         if (num_procs > 1)
         {
-           hypre_TFree(Vext_data);
-           hypre_TFree(v_buf_data);
+           hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+           hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
         }
       }
       break;
@@ -3101,10 +3101,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
         {
          num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-         v_buf_data = hypre_CTAlloc(HYPRE_Real,
-                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+         v_buf_data = hypre_CTAlloc(HYPRE_Real, 
+                        hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
-         Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+         Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
 
          if (num_cols_offd)
          {
@@ -3539,8 +3539,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
         }
         if (num_procs > 1)
         {
-           hypre_TFree(Vext_data);
-           hypre_TFree(v_buf_data);
+           hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+           hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
         }
       }
       break;
@@ -3561,10 +3561,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
         {
         num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
 
-        v_buf_data = hypre_CTAlloc(HYPRE_Real,
-                        hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+        v_buf_data = hypre_CTAlloc(HYPRE_Real, 
+                        hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
-        Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+        Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
 
         if (num_cols_offd)
         {
@@ -3999,8 +3999,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
         }
         if (num_procs > 1)
         {
-           hypre_TFree(Vext_data);
-           hypre_TFree(v_buf_data);
+           hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+           hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
         }
       }
       break;
@@ -4029,8 +4029,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
  	    A_CSR_data = hypre_CSRMatrixData(A_CSR);
    	    f_vector_data = hypre_VectorData(f_vector);
 
-            A_mat = hypre_CTAlloc(HYPRE_Real, n_global*n_global);
-            b_vec = hypre_CTAlloc(HYPRE_Real, n_global);    
+            A_mat = hypre_CTAlloc(HYPRE_Real,  n_global*n_global, HYPRE_MEMORY_HOST);
+            b_vec = hypre_CTAlloc(HYPRE_Real,  n_global, HYPRE_MEMORY_HOST);    
 
             /*---------------------------------------------------------------
              *  Load CSR matrix into A_mat.
@@ -4053,8 +4053,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                u_data[i] = b_vec[first_index+i];
             }
 
-	    hypre_TFree(A_mat); 
-            hypre_TFree(b_vec);
+	    hypre_TFree(A_mat, HYPRE_MEMORY_HOST); 
+            hypre_TFree(b_vec, HYPRE_MEMORY_HOST);
             hypre_CSRMatrixDestroy(A_CSR);
             A_CSR = NULL;
             hypre_SeqVectorDestroy(f_vector);
@@ -4101,8 +4101,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
  	    A_CSR_data = hypre_CSRMatrixData(A_CSR);
    	    f_vector_data = hypre_VectorData(f_vector);
 
-            A_mat = hypre_CTAlloc(HYPRE_Real, n_global*n_global);
-            b_vec = hypre_CTAlloc(HYPRE_Real, n_global);    
+            A_mat = hypre_CTAlloc(HYPRE_Real,  n_global*n_global, HYPRE_MEMORY_HOST);
+            b_vec = hypre_CTAlloc(HYPRE_Real,  n_global, HYPRE_MEMORY_HOST);    
 
             /*---------------------------------------------------------------
              *  Load CSR matrix into A_mat.
@@ -4120,7 +4120,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                b_vec[i] = f_vector_data[i];
             }
 
-            piv = hypre_CTAlloc(HYPRE_Int, n_global);
+            piv = hypre_CTAlloc(HYPRE_Int,  n_global, HYPRE_MEMORY_HOST);
 
             /* write over A with LU */
             hypre_dgetrf(&n_global, &n_global, A_mat, &n_global, piv, &info);
@@ -4128,15 +4128,15 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             /*now b_vec = inv(A)*b_vec  */
             hypre_dgetrs("N", &n_global, &one_i, A_mat, &n_global, piv, b_vec, &n_global, &info);
 
-            hypre_TFree(piv);
+            hypre_TFree(piv, HYPRE_MEMORY_HOST);
 
             for (i = 0; i < n; i++)
             {
                u_data[i] = b_vec[first_index+i];
             }
 
-	    hypre_TFree(A_mat); 
-            hypre_TFree(b_vec);
+	    hypre_TFree(A_mat, HYPRE_MEMORY_HOST); 
+            hypre_TFree(b_vec, HYPRE_MEMORY_HOST);
             hypre_CSRMatrixDestroy(A_CSR);
             A_CSR = NULL;
             hypre_SeqVectorDestroy(f_vector);
@@ -4201,9 +4201,9 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       HYPRE_Int first_row_index = hypre_ParCSRMatrixFirstRowIndex(A);
 
       hypre_MPI_Comm_size(new_comm, &new_num_procs);
-      comm_info = hypre_CTAlloc(HYPRE_Int, 2*new_num_procs+1);
-      mat_info = hypre_CTAlloc(HYPRE_Int, new_num_procs);
-      mat_displs = hypre_CTAlloc(HYPRE_Int, new_num_procs+1);
+      comm_info = hypre_CTAlloc(HYPRE_Int,  2*new_num_procs+1, HYPRE_MEMORY_HOST);
+      mat_info = hypre_CTAlloc(HYPRE_Int,  new_num_procs, HYPRE_MEMORY_HOST);
+      mat_displs = hypre_CTAlloc(HYPRE_Int,  new_num_procs+1, HYPRE_MEMORY_HOST);
       info = &comm_info[0];
       displs = &comm_info[new_num_procs];
       hypre_MPI_Allgather(&num_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, new_comm);
@@ -4215,10 +4215,10 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
          mat_displs[i+1] = global_num_rows*displs[i+1];
          mat_info[i] = global_num_rows*info[i];
       }
-      hypre_ParAMGDataBVec(amg_data) = hypre_CTAlloc(HYPRE_Real, global_num_rows);
+      hypre_ParAMGDataBVec(amg_data) = hypre_CTAlloc(HYPRE_Real,  global_num_rows, HYPRE_MEMORY_HOST);
       A_mat_local_size =  global_num_rows*num_rows;
-      A_mat_local = hypre_CTAlloc(HYPRE_Real, A_mat_local_size);
-      A_mat = hypre_CTAlloc(HYPRE_Real, global_num_rows*global_num_rows);
+      A_mat_local = hypre_CTAlloc(HYPRE_Real,  A_mat_local_size, HYPRE_MEMORY_HOST);
+      A_mat = hypre_CTAlloc(HYPRE_Real,  global_num_rows*global_num_rows, HYPRE_MEMORY_HOST);
       /* load local matrix into A_mat_local */
       for (i = 0; i < num_rows; i++)
       {
@@ -4240,20 +4240,20 @@ HYPRE_Int hypre_GaussElimSetup (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       if (relax_type == 99)
       {
           HYPRE_Real *AT_mat;
-	  AT_mat = hypre_CTAlloc(HYPRE_Real, global_num_rows*global_num_rows);
+	  AT_mat = hypre_CTAlloc(HYPRE_Real,  global_num_rows*global_num_rows, HYPRE_MEMORY_HOST);
           for (i=0; i < global_num_rows; i++)
 	     for (jj=0; jj < global_num_rows; jj++)
                  AT_mat[i*global_num_rows + jj] = A_mat[i+ jj*global_num_rows];
           hypre_ParAMGDataAMat(amg_data) = AT_mat;
-          hypre_TFree (A_mat);
+          hypre_TFree(A_mat, HYPRE_MEMORY_HOST);
       }
       else
          hypre_ParAMGDataAMat(amg_data) = A_mat;
       hypre_ParAMGDataCommInfo(amg_data) = comm_info;
       hypre_ParAMGDataNewComm(amg_data) = new_comm;
-      hypre_TFree(mat_info);
-      hypre_TFree(mat_displs);
-      hypre_TFree(A_mat_local);
+      hypre_TFree(mat_info, HYPRE_MEMORY_HOST);
+      hypre_TFree(mat_displs, HYPRE_MEMORY_HOST);
+      hypre_TFree(A_mat_local, HYPRE_MEMORY_HOST);
    }
 
 #ifdef HYPRE_PROFILE
@@ -4298,7 +4298,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
                           b_vec, info, displs,
                           HYPRE_MPI_REAL, new_comm );
 
-      A_tmp = hypre_CTAlloc (HYPRE_Real, n_global*n_global);
+      A_tmp = hypre_CTAlloc(HYPRE_Real,  n_global*n_global, HYPRE_MEMORY_HOST);
       for (i=0; i < n_global*n_global; i++)
          A_tmp[i] = A_mat[i];
 
@@ -4309,7 +4309,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
       else if (relax_type == 99) /* use pivoting */
       {
          HYPRE_Int *piv;
-         piv = hypre_CTAlloc(HYPRE_Int, n_global);
+         piv = hypre_CTAlloc(HYPRE_Int,  n_global, HYPRE_MEMORY_HOST);
 
          /* write over A with LU */
          hypre_dgetrf(&n_global, &n_global, A_tmp, &n_global, piv, &my_info);
@@ -4317,13 +4317,13 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
          /*now b_vec = inv(A)*b_vec  */
          hypre_dgetrs("N", &n_global, &one_i, A_tmp, &n_global, piv, b_vec, &n_global, &my_info);
 
-         hypre_TFree(piv);
+         hypre_TFree(piv, HYPRE_MEMORY_HOST);
       }
       for (i = 0; i < n; i++)
       {
          u_data[i] = b_vec[first_index+i];
       }
-      hypre_TFree(A_tmp);
+      hypre_TFree(A_tmp, HYPRE_MEMORY_HOST);
    }
    if (error_flag) hypre_error(HYPRE_ERROR_GENERIC);
 

@@ -192,7 +192,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
             }           /* if (stencils != NULL) */
          }              /* for (var2= 0; var2< nvars; var2++) */
 
-         hypre_TFree(boxman_entries);
+         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
       }   /* hypre_ForBoxI  ci */
    }      /* for (var1= 0; var1< nvars; var1++) */
 
@@ -417,7 +417,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
             }         /* if (stencils != NULL) */
          }            /* for (var2= 0; var2< nvars; var2++) */
 
-         hypre_TFree(boxman_entries);
+         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
       }  /* hypre_ForBoxI(fi, fgrid_boxes) */
    }     /* for (var1= 0; var1< nvars; var1++) */
 

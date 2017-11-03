@@ -21,7 +21,7 @@ hypre_PFMGCreate( MPI_Comm  comm )
 {
    hypre_PFMGData *pfmg_data;
 
-   pfmg_data = hypre_CTAlloc(hypre_PFMGData, 1);
+   pfmg_data = hypre_CTAlloc(hypre_PFMGData,  1, HYPRE_MEMORY_HOST);
 
    (pfmg_data -> comm)       = comm;
    (pfmg_data -> time_index) = hypre_InitializeTiming("PFMG");
@@ -67,8 +67,8 @@ hypre_PFMGDestroy( void *pfmg_vdata )
    {
       if ((pfmg_data -> logging) > 0)
       {
-         hypre_TFree(pfmg_data -> norms);
-         hypre_TFree(pfmg_data -> rel_norms);
+         hypre_TFree(pfmg_data -> norms, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
 
       if ((pfmg_data -> num_levels) > -1)
@@ -89,10 +89,10 @@ hypre_PFMGDestroy( void *pfmg_vdata )
             hypre_SemiRestrictDestroy(pfmg_data -> restrict_data_l[l]);
             hypre_SemiInterpDestroy(pfmg_data -> interp_data_l[l]);
          }
-         hypre_TFree(pfmg_data -> relax_data_l);
-         hypre_TFree(pfmg_data -> matvec_data_l);
-         hypre_TFree(pfmg_data -> restrict_data_l);
-         hypre_TFree(pfmg_data -> interp_data_l);
+         hypre_TFree(pfmg_data -> relax_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> matvec_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> restrict_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> interp_data_l, HYPRE_MEMORY_HOST);
  
          hypre_StructVectorDestroy(pfmg_data -> tx_l[0]);
          hypre_StructGridDestroy(pfmg_data -> grid_l[0]);
@@ -114,20 +114,20 @@ hypre_PFMGDestroy( void *pfmg_vdata )
          else
 	   {hypre_UMTFree(pfmg_data -> data);}
       
-         hypre_TFree(pfmg_data -> cdir_l);
-         hypre_TFree(pfmg_data -> active_l);
-         hypre_TFree(pfmg_data -> grid_l);
-         hypre_TFree(pfmg_data -> P_grid_l);
-         hypre_TFree(pfmg_data -> A_l);
-         hypre_TFree(pfmg_data -> P_l);
-         hypre_TFree(pfmg_data -> RT_l);
-         hypre_TFree(pfmg_data -> b_l);
-         hypre_TFree(pfmg_data -> x_l);
-         hypre_TFree(pfmg_data -> tx_l);
+         hypre_TFree(pfmg_data -> cdir_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> active_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> grid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> P_grid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> A_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> P_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> RT_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> b_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> x_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(pfmg_data -> tx_l, HYPRE_MEMORY_HOST);
       }
  
       hypre_FinalizeTiming(pfmg_data -> time_index);
-      hypre_TFree(pfmg_data);
+      hypre_TFree(pfmg_data, HYPRE_MEMORY_HOST);
    }
 
    HYPRE_ANNOTATION_END("PFMG.destroy");

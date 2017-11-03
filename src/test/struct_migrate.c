@@ -246,14 +246,14 @@ main( hypre_int argc,
     * prepare space for the extents
     *-----------------------------------------------------------*/
 
-   ilower = hypre_CTAlloc(HYPRE_Int*, nblocks);
-   iupper = hypre_CTAlloc(HYPRE_Int*, nblocks);
-   iupper2 = hypre_CTAlloc(HYPRE_Int*, nblocks);
+   ilower = hypre_CTAlloc(HYPRE_Int*,  nblocks, HYPRE_MEMORY_HOST);
+   iupper = hypre_CTAlloc(HYPRE_Int*,  nblocks, HYPRE_MEMORY_HOST);
+   iupper2 = hypre_CTAlloc(HYPRE_Int*,  nblocks, HYPRE_MEMORY_HOST);
    for (i = 0; i < nblocks; i++)
    {
-      ilower[i] = hypre_CTAlloc(HYPRE_Int, dim);
-      iupper[i] = hypre_CTAlloc(HYPRE_Int, dim);
-      iupper2[i] = hypre_CTAlloc(HYPRE_Int, dim);
+      ilower[i] = hypre_CTAlloc(HYPRE_Int,  dim, HYPRE_MEMORY_HOST);
+      iupper[i] = hypre_CTAlloc(HYPRE_Int,  dim, HYPRE_MEMORY_HOST);
+      iupper2[i] = hypre_CTAlloc(HYPRE_Int,  dim, HYPRE_MEMORY_HOST);
    }
 
    ib = 0;
@@ -388,13 +388,13 @@ main( hypre_int argc,
    
    for (i = 0; i < nblocks; i++)
    {
-      hypre_TFree(ilower[i]);
-      hypre_TFree(iupper[i]);
-      hypre_TFree(iupper2[i]);
+      hypre_TFree(ilower[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(iupper[i], HYPRE_MEMORY_HOST);
+      hypre_TFree(iupper2[i], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(ilower);
-   hypre_TFree(iupper);
-   hypre_TFree(iupper2);
+   hypre_TFree(ilower, HYPRE_MEMORY_HOST);
+   hypre_TFree(iupper, HYPRE_MEMORY_HOST);
+   hypre_TFree(iupper2, HYPRE_MEMORY_HOST);
 
    HYPRE_StructVectorDestroy(from_vector);
    HYPRE_StructVectorDestroy(to_vector);

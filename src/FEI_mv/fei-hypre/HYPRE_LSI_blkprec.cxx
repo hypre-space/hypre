@@ -2168,10 +2168,10 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
           HYPRE_BoomerAMGSetMeasureType(*precon, 1);
           HYPRE_BoomerAMGSetStrongThreshold(*precon,param_ptr.AMGThresh_);
           HYPRE_BoomerAMGSetNumFunctions(*precon, param_ptr.AMGSystemSize_);
-          nsweeps = hypre_CTAlloc(int,4);
+          nsweeps = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
           for ( i = 0; i < 4; i++ ) nsweeps[i] = param_ptr.AMGNSweeps_;
           HYPRE_BoomerAMGSetNumGridSweeps(*precon, nsweeps);
-          relaxType = hypre_CTAlloc(int,4);
+          relaxType = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
           for ( i = 0; i < 4; i++ ) relaxType[i] = param_ptr.AMGRelaxType_;
           HYPRE_BoomerAMGSetGridRelaxType(*precon, relaxType);
           //double relax_wt[25];
@@ -2403,10 +2403,10 @@ int HYPRE_LSI_BlockP::setupSolver(HYPRE_Solver *solver, HYPRE_IJMatrix Amat,
           HYPRE_BoomerAMGSetMeasureType(*solver, 1);
           HYPRE_BoomerAMGSetStrongThreshold(*solver,param_ptr.AMGThresh_);
           HYPRE_BoomerAMGSetNumFunctions(*solver, param_ptr.AMGSystemSize_);
-          nsweeps = hypre_CTAlloc(int,4);
+          nsweeps = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
           for ( i = 0; i < 4; i++ ) nsweeps[i] = param_ptr.AMGNSweeps_;
           HYPRE_BoomerAMGSetNumGridSweeps(*solver, nsweeps);
-          relaxType = hypre_CTAlloc(int,4);
+          relaxType = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
           for ( i = 0; i < 4; i++ ) relaxType[i] = param_ptr.AMGRelaxType_;
           HYPRE_BoomerAMGSetGridRelaxType(*solver, relaxType);
           //double relax_wt[25];

@@ -213,7 +213,7 @@ hypre_DeviceTFree(stencil_shape_d);
 
 #define hypre_StructPreparePrint()\
 HYPRE_Int tot_size = num_values*hypre_BoxVolume(hypre_BoxArrayBox(data_space, hypre_BoxArraySize(box_array)-1));\
-data_host = hypre_CTAlloc(HYPRE_Complex, tot_size);\
+data_host = hypre_CTAlloc(HYPRE_Complex,  tot_size, HYPRE_MEMORY_HOST);\
 hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);
 
 #define hypre_StructPostPrint() hypre_TFree(data_host)

@@ -178,7 +178,7 @@ HYPRE_Int hypre_ParaSailsCreate(MPI_Comm comm, hypre_ParaSails *obj)
    hypre_ParaSails_struct *internal;
 
    internal = (hypre_ParaSails_struct *)
-      hypre_CTAlloc(hypre_ParaSails_struct, 1);
+      hypre_CTAlloc(hypre_ParaSails_struct,  1, HYPRE_MEMORY_HOST);
 
    internal->comm = comm;
    internal->ps   = NULL;
@@ -198,7 +198,7 @@ HYPRE_Int hypre_ParaSailsDestroy(hypre_ParaSails obj)
 
    ParaSailsDestroy(internal->ps);
 
-   hypre_TFree(internal);
+   hypre_TFree(internal, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -357,8 +357,8 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
 
    HYPRE_IJMatrixSetObjectType( *pij_A, HYPRE_PARCSR );
 
-   diag_sizes = hypre_CTAlloc(HYPRE_Int, ps->end_row - ps->beg_row + 1);
-   offdiag_sizes = hypre_CTAlloc(HYPRE_Int, ps->end_row - ps->beg_row + 1);
+   diag_sizes = hypre_CTAlloc(HYPRE_Int,  ps->end_row - ps->beg_row + 1, HYPRE_MEMORY_HOST);
+   offdiag_sizes = hypre_CTAlloc(HYPRE_Int,  ps->end_row - ps->beg_row + 1, HYPRE_MEMORY_HOST);
    local_row = 0;
    for (i=ps->beg_row; i<= ps->end_row; i++)
    {
@@ -377,8 +377,8 @@ hypre_ParaSailsBuildIJMatrix(hypre_ParaSails obj, HYPRE_IJMatrix *pij_A)
    }
    HYPRE_IJMatrixSetDiagOffdSizes( *pij_A, (const HYPRE_Int *) diag_sizes,
                                    (const HYPRE_Int *) offdiag_sizes );
-   hypre_TFree(diag_sizes);
-   hypre_TFree(offdiag_sizes);
+   hypre_TFree(diag_sizes, HYPRE_MEMORY_HOST);
+   hypre_TFree(offdiag_sizes, HYPRE_MEMORY_HOST);
 
    HYPRE_IJMatrixInitialize( *pij_A );
 
