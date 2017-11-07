@@ -2703,8 +2703,8 @@ HYPRE_Int indices_h[stencil_size];\
 HYPRE_Int * stencil_shape_d;\
 HYPRE_Int  stencil_shape_h[size*stencil_size];\
 HYPRE_Complex * data_A = hypre_StructMatrixData(A);\
-indices_d = hypre_DeviceTAlloc(HYPRE_Int, stencil_size);\
-stencil_shape_d = hypre_DeviceTAlloc(HYPRE_Int, size*stencil_size);\
+indices_d =  hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_DEVICE);\
+stencil_shape_d =  hypre_TAlloc(HYPRE_Int,  size*stencil_size, HYPRE_MEMORY_DEVICE);\
 for (HYPRE_Int ii = 0; ii < stencil_size; ii++)\
 {\
    HYPRE_Int jj = 0;\
@@ -2722,8 +2722,8 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
 #define hypre_StructGetIndexD(index,i,index_d) (index_d)
 
 #define hypre_StructCleanIndexD()\
-hypre_DeviceTFree(indices_d);\
-hypre_DeviceTFree(stencil_shape_d);
+ hypre_TFree(indices_d, HYPRE_MEMORY_DEVICE);\
+ hypre_TFree(stencil_shape_d, HYPRE_MEMORY_DEVICE);
 
 #define hypre_StructPreparePrint()\
 HYPRE_Int tot_size = num_values*hypre_BoxVolume(hypre_BoxArrayBox(data_space, hypre_BoxArraySize(box_array)-1));\

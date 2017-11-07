@@ -434,7 +434,7 @@ AddValuesVector( hypre_StructGrid   *grid,
    {
       box      = hypre_BoxArrayBox(gridboxes, ib);
       volume   = hypre_BoxVolume(box);
-      values   = hypre_DeviceCTAlloc(HYPRE_Real, volume);
+      values   =  hypre_CTAlloc(HYPRE_Real,  volume, HYPRE_MEMORY_DEVICE);
 
       hypre_LoopBegin(volume,i)
       {
@@ -445,7 +445,7 @@ AddValuesVector( hypre_StructGrid   *grid,
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);
       HYPRE_StructVectorSetBoxValues(vector, ilower, iupper, values);
-      hypre_DeviceTFree(values);
+       hypre_TFree(values, HYPRE_MEMORY_DEVICE);
    }
 
    return ierr;

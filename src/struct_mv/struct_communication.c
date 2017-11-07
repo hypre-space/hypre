@@ -830,7 +830,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    if (num_sends > 0)
    {
       size = hypre_CommPkgSendBufsize(comm_pkg);
-      send_buffers[0] = hypre_SharedTAlloc(HYPRE_Complex, size);
+      send_buffers[0] =  hypre_TAlloc(HYPRE_Complex,  size, HYPRE_MEMORY_HOST);
       for (i = 1; i < num_sends; i++)
       {
          comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
@@ -848,8 +848,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       if (size > global_send_size)
       {
          if (global_send_size > 0)
-            hypre_DeviceTFree(global_send_buffer);
-         global_send_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
+             hypre_TFree(global_send_buffer, HYPRE_MEMORY_DEVICE);
+         global_send_buffer =  hypre_CTAlloc(HYPRE_Complex,  5*size, HYPRE_MEMORY_DEVICE);
          global_send_size   = 5*size;
       }
       send_buffers_data[0] = global_send_buffer;
@@ -869,7 +869,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    if (num_recvs > 0)
    {
       size = hypre_CommPkgRecvBufsize(comm_pkg);
-      recv_buffers[0] = hypre_SharedTAlloc(HYPRE_Complex, size);
+      recv_buffers[0] =  hypre_TAlloc(HYPRE_Complex,  size, HYPRE_MEMORY_HOST);
       for (i = 1; i < num_recvs; i++)
       {
          comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);
@@ -887,8 +887,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       if (size > global_recv_size)
       {
          if (global_recv_size > 0)
-            hypre_DeviceTFree(global_recv_buffer);
-         global_recv_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
+             hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
+         global_recv_buffer =  hypre_CTAlloc(HYPRE_Complex,  5*size, HYPRE_MEMORY_DEVICE);
          global_recv_size   = 5*size;
       }
       recv_buffers_data[0] = global_recv_buffer;
@@ -1337,11 +1337,11 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    hypre_TFree(hypre_CommHandleStatus(comm_handle), HYPRE_MEMORY_HOST);
    if (num_sends > 0)
    {
-      hypre_SharedTFree(send_buffers[0]);
+       hypre_TFree(send_buffers[0], HYPRE_MEMORY_HOST);
    }
    if (num_recvs > 0)
    {
-      hypre_SharedTFree(recv_buffers[0]);
+       hypre_TFree(recv_buffers[0], HYPRE_MEMORY_HOST);
    }
 
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);

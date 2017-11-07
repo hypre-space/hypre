@@ -111,7 +111,7 @@ hypre_SMGDestroy( void *smg_vdata )
             hypre_StructVectorDestroy(smg_data -> tb_l[l+1]);
             hypre_StructVectorDestroy(smg_data -> tx_l[l+1]);
          }
-         hypre_DeviceTFree(smg_data -> data);
+          hypre_TFree(smg_data -> data, HYPRE_MEMORY_DEVICE);
          hypre_TFree(smg_data -> grid_l, HYPRE_MEMORY_HOST);
          hypre_TFree(smg_data -> PT_grid_l, HYPRE_MEMORY_HOST);
          hypre_TFree(smg_data -> A_l, HYPRE_MEMORY_HOST);

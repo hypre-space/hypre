@@ -100,7 +100,7 @@ hypre_SysPFMGDestroy( void *sys_pfmg_vdata )
             hypre_SStructPVectorDestroy(sys_pfmg_data -> x_l[l+1]);
             hypre_SStructPVectorDestroy(sys_pfmg_data -> tx_l[l+1]);
          }
-         hypre_SharedTFree(sys_pfmg_data -> data);
+          hypre_TFree(sys_pfmg_data -> data, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> cdir_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> active_l, HYPRE_MEMORY_HOST);
          hypre_TFree(sys_pfmg_data -> grid_l, HYPRE_MEMORY_HOST);

@@ -612,8 +612,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       data_size += hypre_StructVectorDataSize(x_l[l+1]);
    }
 
-   //data = hypre_SharedCTAlloc(HYPRE_Real, data_size);
-   data =  hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+   //data =  hypre_CTAlloc(HYPRE_Real,  data_size, HYPRE_MEMORY_HOST);
+   data =   hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
    
    (cyc_red_data -> data) = data;
 
@@ -1208,7 +1208,7 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
          hypre_ComputePkgDestroy(cyc_red_data -> up_compute_pkg_l[l]);
       }
       hypre_BoxArrayDestroy(cyc_red_data -> fine_points_l[l]);
-      hypre_DeviceTFree(cyc_red_data -> data);
+       hypre_TFree(cyc_red_data -> data, HYPRE_MEMORY_DEVICE);
       hypre_TFree(cyc_red_data -> grid_l, HYPRE_MEMORY_HOST);
       hypre_TFree(cyc_red_data -> fine_points_l, HYPRE_MEMORY_HOST);
       hypre_TFree(cyc_red_data -> A_l, HYPRE_MEMORY_HOST);

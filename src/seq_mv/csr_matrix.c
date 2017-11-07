@@ -35,7 +35,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
 {
    hypre_CSRMatrix  *matrix;
 
-   matrix = hypre_HostCTAlloc(hypre_CSRMatrix, 1);
+   matrix =  hypre_CTAlloc(hypre_CSRMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_CSRMatrixData(matrix) = NULL;
    hypre_CSRMatrixI(matrix)    = NULL;
@@ -76,7 +76,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
          hypre_CSRMatrixData(matrix) = NULL;
          hypre_CSRMatrixJ(matrix)    = NULL;
       }
-      hypre_HostTFree(matrix);
+       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       matrix = NULL;
    }
 

@@ -495,7 +495,7 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
       *new_comm_ptr = new_comm;
       return 0;
    }
-   ranks = hypre_HostCTAlloc(HYPRE_Int, new_num_procs+2);
+   ranks =  hypre_CTAlloc(HYPRE_Int,  new_num_procs+2, HYPRE_MEMORY_HOST);
    if (new_num_procs == 1)
    {
       if (participate) my_info = my_id;
@@ -503,8 +503,8 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
    }
    else
    {
-      info = hypre_HostCTAlloc(HYPRE_Int, new_num_procs+2);
-      list_len = hypre_HostCTAlloc(HYPRE_Int, 1);
+      info =  hypre_CTAlloc(HYPRE_Int,  new_num_procs+2, HYPRE_MEMORY_HOST);
+      list_len =  hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
 
 
       if (participate) 
@@ -524,8 +524,8 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
 
       hypre_MPI_Op_free (&hypre_MPI_MERGE);
 
-      hypre_HostTFree(list_len);
-      hypre_HostTFree(info);
+       hypre_TFree(list_len, HYPRE_MEMORY_HOST);
+       hypre_TFree(info, HYPRE_MEMORY_HOST);
    }
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_group(comm, &orig_group);
@@ -534,7 +534,7 @@ HYPRE_Int hypre_GenerateSubComm(MPI_Comm comm, HYPRE_Int participate, MPI_Comm *
    hypre_MPI_Group_free(&new_group);
    hypre_MPI_Group_free(&orig_group);
 
-   hypre_HostTFree(ranks);
+    hypre_TFree(ranks, HYPRE_MEMORY_HOST);
    
    *new_comm_ptr = new_comm;
    

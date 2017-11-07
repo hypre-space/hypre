@@ -599,7 +599,7 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    /* compute recvcounts and displs */
    item_size = 2*ndim + 1;
    sendcount = item_size*hypre_BoxArraySize(boxes);
-   recvcounts = hypre_SharedTAlloc(HYPRE_Int, num_all_procs);
+   recvcounts =  hypre_TAlloc(HYPRE_Int,  num_all_procs, HYPRE_MEMORY_HOST);
    displs = hypre_TAlloc(HYPRE_Int,  num_all_procs, HYPRE_MEMORY_HOST);
    hypre_MPI_Allgather(&sendcount, 1, HYPRE_MPI_INT,
                        recvcounts, 1, HYPRE_MPI_INT, comm);
@@ -613,7 +613,7 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
 
    /* allocate sendbuf and recvbuf */
    sendbuf = hypre_TAlloc(HYPRE_Int,  sendcount, HYPRE_MEMORY_HOST);
-   recvbuf = hypre_SharedTAlloc(HYPRE_Int, recvbuf_size);
+   recvbuf =  hypre_TAlloc(HYPRE_Int,  recvbuf_size, HYPRE_MEMORY_HOST);
 
    /* put local box extents and process number into sendbuf */
    i = 0;
@@ -672,8 +672,8 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
     *-----------------------------------------------------*/
 
    hypre_TFree(sendbuf, HYPRE_MEMORY_HOST);
-   hypre_SharedTFree(recvbuf);
-   hypre_SharedTFree(recvcounts);
+    hypre_TFree(recvbuf, HYPRE_MEMORY_HOST);
+    hypre_TFree(recvcounts, HYPRE_MEMORY_HOST);
    hypre_TFree(displs, HYPRE_MEMORY_HOST);
 
    *all_boxes_ptr   = all_boxes;

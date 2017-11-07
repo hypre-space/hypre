@@ -116,7 +116,7 @@ char *
       ptr = _ucalloc_(count, elt_size);
 #elif HYPRE_USE_MANAGED
 #ifdef HYPRE_USE_MANAGED_SCALABLE
-      ptr=(void* hypre_MAlloc(size, HYPRE_MEMORY_HOST);
+      ptr=(void*)hypre_MAlloc(size, HYPRE_MEMORY_HOST);
       memset(ptr,0,count*elt_size);
 #else
       gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );

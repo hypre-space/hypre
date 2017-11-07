@@ -70,7 +70,7 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
       {
          if (hypre_StructVectorDataAlloced(vector))
          {
-            hypre_DeviceTFree(hypre_StructVectorData(vector));
+             hypre_TFree(hypre_StructVectorData(vector), HYPRE_MEMORY_DEVICE);
          }
          hypre_TFree(hypre_StructVectorDataIndices(vector), HYPRE_MEMORY_HOST);
          hypre_BoxArrayDestroy(hypre_StructVectorDataSpace(vector));
@@ -186,7 +186,7 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
 
    hypre_StructVectorInitializeShell(vector);
 
-   data = hypre_DeviceCTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector));
+   data =  hypre_CTAlloc(HYPRE_Complex,  hypre_StructVectorDataSize(vector), HYPRE_MEMORY_DEVICE);
 
    hypre_StructVectorInitializeData(vector, data);
    hypre_StructVectorDataAlloced(vector) = 1;
@@ -1262,7 +1262,7 @@ hypre_StructVectorClone(
 
    hypre_StructVectorDataSize(y) = data_size;
    hypre_StructVectorDataSpace(y) = hypre_BoxArrayDuplicate(data_space);
-   hypre_StructVectorData(y) = hypre_DeviceCTAlloc(HYPRE_Complex, data_size);
+   hypre_StructVectorData(y) =  hypre_CTAlloc(HYPRE_Complex,  data_size, HYPRE_MEMORY_DEVICE);
    
    hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int,  data_space_size, HYPRE_MEMORY_HOST);
 

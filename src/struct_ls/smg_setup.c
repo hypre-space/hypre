@@ -229,7 +229,7 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_StructVectorInitializeShell(tx_l[l+1]);
    }
 
-   data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+   data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
 
    (smg_data -> data) = data;
 

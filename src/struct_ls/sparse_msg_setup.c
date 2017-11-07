@@ -557,7 +557,7 @@ hypre_SparseMSGSetup( void               *smsg_vdata,
       }
    }
 
-   data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+   data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
    (smsg_data -> data) = data;
 
    hypre_StructVectorInitializeData(t_a[0], data);

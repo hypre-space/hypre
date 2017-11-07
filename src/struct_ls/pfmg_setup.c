@@ -380,11 +380,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructVectorInitializeShell(tx_l[l+1]);
    }
 
-   //data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+   //data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
    if (constant_coefficient == 0)
-      data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+      data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
    else
-      data = hypre_UMCTAlloc(HYPRE_Real,data_size);
+      data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_SHARED);
    
    (pfmg_data -> data) = data;
 

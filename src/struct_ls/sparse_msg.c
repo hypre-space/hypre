@@ -120,7 +120,7 @@ hypre_SparseMSGDestroy( void *smsg_vdata )
             hypre_StructGridDestroy(smsg_data -> Pz_grid_array[l]); 
          }
 
-         hypre_SharedTFree(smsg_data -> data);
+          hypre_TFree(smsg_data -> data, HYPRE_MEMORY_HOST);
 
          hypre_TFree(smsg_data -> relax_array, HYPRE_MEMORY_HOST);
          hypre_TFree(smsg_data -> matvec_array, HYPRE_MEMORY_HOST);

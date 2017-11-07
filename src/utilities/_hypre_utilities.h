@@ -426,49 +426,37 @@ extern "C" {
 #define hypre_FinalizeMemoryDebug()
 
 #define hypre_TAlloc(type, count, location) \
-(type *) hypre_MAlloc((size_t)(sizeof(type) * count), location)
+( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
 
 #define hypre_CTAlloc(type, count, location) \
-(type *) hypre_CAlloc((size_t)(count),  (size_t)sizeof(type), location)
+( (type *)hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location) )
 
 #define hypre_TReAlloc(ptr, type, count, location) \
-(type *) hypre_ReAlloc((char *)ptr,  (size_t)(sizeof(type) * (count)), location)
+( (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) )
 
 #define hypre_TFree(ptr,location) \
 ( hypre_Free((char *)ptr, location), ptr = NULL )
 
-#define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count),HYPRE_MEMORY_HOST)
-#define hypre_SharedCTAlloc(type, count) hypre_CTAlloc(type, (count), HYPRE_MEMORY_HOST)
-#define hypre_SharedTReAlloc(type, count) hypre_TReAlloc(type, (count), HYPRE_MEMORY_HOST)
-#define hypre_SharedTFree(ptr) hypre_TFree(ptr, HYPRE_MEMORY_HOST)
-
-#define hypre_DeviceTAlloc(type, count) hypre_TAlloc(type, (count), HYPRE_MEMORY_HOST)
-#define hypre_DeviceCTAlloc(type, count) hypre_CTAlloc(type, (count), HYPRE_MEMORY_HOST)
-#define hypre_DeviceTReAlloc(type, count) hypre_TReAlloc(type, (count), HYPRE_MEMORY_HOST)
-#define hypre_DeviceTFree(ptr) hypre_TFree(ptr, HYPRE_MEMORY_HOST)
 #define hypre_DataCopyToData(ptrH,ptrD,type,count) memcpy(ptrD, ptrH, sizeof(type)*(count))
 #define hypre_DataCopyFromData(ptrH,ptrD,type,count) memcpy(ptrH, ptrD, sizeof(type)*(count))
 #define hypre_DeviceMemset(ptr,value,type,count)	memset(ptr,value,count*sizeof(type))
-#define hypre_UMTAlloc(type, count) hypre_TAlloc(type, (count), HYPRE_MEMORY_HOST)
-#define hypre_UMCTAlloc(type, count) hypre_CTAlloc(type, (count), HYPRE_MEMORY_HOST)
-#define hypre_UMTReAlloc(type, count) hypre_TReAlloc(type, (count), HYPRE_MEMORY_HOST)
-#define hypre_UMTFree(ptr) hypre_TFree(ptr, HYPRE_MEMORY_HOST)
   
 #define hypre_PinnedTAlloc(type, count)\
 ( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
 
-#define hypre_HostTAlloc(type, count) \
+/*	
+#define  hypre_TAlloc(type,  count, HYPRE_MEMORY_HOST) \
 ( (type *)hypre_MAllocHost((size_t)(sizeof(type) * (count))) )
 
-#define hypre_HostCTAlloc(type, count) \
+#define  hypre_CTAlloc(type,  count, HYPRE_MEMORY_HOST) \
 ( (type *)hypre_CAllocHost((size_t)(count), (size_t)sizeof(type)) )
 
-#define hypre_HostTReAlloc(ptr, type, count) \
+#define  hypre_TReAlloc(ptr,  type,  count, HYPRE_MEMORY_HOST) \
 ( (type *)hypre_ReAllocHost((char *)ptr, (size_t)(sizeof(type) * (count))) )
 
-#define hypre_HostTFree(ptr) \
+#define  hypre_TFree(ptr, HYPRE_MEMORY_HOST) \
 ( hypre_FreeHost((char *)ptr), ptr = NULL )
-
+*/
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/

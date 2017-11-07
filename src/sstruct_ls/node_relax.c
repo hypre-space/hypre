@@ -147,8 +147,8 @@ hypre_NodeRelaxDestroy( void *relax_vdata )
       hypre_TFree(relax_data -> compute_pkgs, HYPRE_MEMORY_HOST);
       hypre_SStructPVectorDestroy(relax_data -> t);
 
-      hypre_UMTFree(relax_data -> x_loc);
-      hypre_UMTFree((relax_data ->A_loc)[0]);
+       hypre_TFree(relax_data -> x_loc, HYPRE_MEMORY_SHARED);
+       hypre_TFree((relax_data ->A_loc)[0], HYPRE_MEMORY_SHARED);
       hypre_TFree(relax_data -> A_loc, HYPRE_MEMORY_HOST);
       hypre_TFree(relax_data -> bp, HYPRE_MEMORY_HOST);
       hypre_TFree(relax_data -> xp, HYPRE_MEMORY_HOST);
@@ -277,9 +277,9 @@ hypre_NodeRelaxSetup(  void                 *relax_vdata,
     * Allocate storage used to invert local diagonal blocks
     *----------------------------------------------------------*/
 
-   x_loc    = hypre_UMTAlloc(HYPRE_Real   , hypre_NumThreads()*nvars);
+   x_loc    =  hypre_TAlloc(HYPRE_Real   ,  hypre_NumThreads()*nvars, HYPRE_MEMORY_SHARED);
    A_loc    = hypre_TAlloc(HYPRE_Real  *,  hypre_NumThreads()*nvars, HYPRE_MEMORY_HOST);
-   A_loc[0] = hypre_UMTAlloc(HYPRE_Real   , hypre_NumThreads()*nvars*nvars);
+   A_loc[0] =  hypre_TAlloc(HYPRE_Real   ,  hypre_NumThreads()*nvars*nvars, HYPRE_MEMORY_SHARED);
    for (vi = 1; vi < hypre_NumThreads()*nvars; vi++)
    {
       A_loc[vi] = A_loc[0] + vi*nvars;

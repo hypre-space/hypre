@@ -103,7 +103,7 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
       {
          if (hypre_StructMatrixDataAlloced(matrix))
          {
-            hypre_DeviceTFree(hypre_StructMatrixData(matrix));
+             hypre_TFree(hypre_StructMatrixData(matrix), HYPRE_MEMORY_DEVICE);
          }
          hypre_CommPkgDestroy(hypre_StructMatrixCommPkg(matrix));
          
@@ -112,7 +112,7 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
             if (hypre_StructMatrixConstantCoefficient(matrix) < 2)
                hypre_TFree(hypre_StructMatrixDataIndices(matrix)[i], HYPRE_MEMORY_HOST);
             else
-               hypre_UMTFree(hypre_StructMatrixDataIndices(matrix)[i]); 
+                hypre_TFree(hypre_StructMatrixDataIndices(matrix)[i], HYPRE_MEMORY_SHARED); 
 	 }
 	 
          hypre_TFree(hypre_StructMatrixDataIndices(matrix), HYPRE_MEMORY_HOST);
@@ -346,7 +346,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
             data_box = hypre_BoxArrayBox(data_space, i);
             data_box_volume  = hypre_BoxVolume(data_box);
 
-            data_indices[i] = hypre_UMCTAlloc(HYPRE_Int, stencil_size);
+            data_indices[i] =  hypre_CTAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_SHARED);
 
             /* set pointers for "stored" coefficients */
             for (j = 0; j < stencil_size; j++)
@@ -433,12 +433,12 @@ hypre_StructMatrixInitialize( hypre_StructMatrix *matrix )
    constant_coefficient = hypre_StructMatrixConstantCoefficient(matrix);
    hypre_StructMatrixInitializeShell(matrix);
 
-   //data = hypre_SharedCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
+   //data =  hypre_CTAlloc(HYPRE_Complex,  hypre_StructMatrixDataSize(matrix), HYPRE_MEMORY_HOST);
    
    if (constant_coefficient == 0)
-      data = hypre_DeviceCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
+      data =  hypre_CTAlloc(HYPRE_Complex,  hypre_StructMatrixDataSize(matrix), HYPRE_MEMORY_DEVICE);
    else
-      data = hypre_UMCTAlloc(HYPRE_Complex, hypre_StructMatrixDataSize(matrix));
+      data =  hypre_CTAlloc(HYPRE_Complex,  hypre_StructMatrixDataSize(matrix), HYPRE_MEMORY_SHARED);
    
    hypre_StructMatrixInitializeData(matrix, data);
    hypre_StructMatrixDataAlloced(matrix) = 1;
