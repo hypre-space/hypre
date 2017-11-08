@@ -63,7 +63,8 @@
  * 1 = no underscores
  * 2 = one underscore
  * 3 = two underscores
- * 4 = caps, no underscores */
+ * 4 = caps, no underscores
+ * 5 = one underscore before and after */
 #define HYPRE_FMANGLE 0
 
 /* Define as in HYPRE_FMANGLE to set the BLAS name mangling scheme */

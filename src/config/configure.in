@@ -696,6 +696,7 @@ AC_DEFUN([AC_HYPRE_SET_FMANGLE],
     one-underscore)      hypre_fmangle=2 ;;
     two-underscores)     hypre_fmangle=3 ;;
     caps-no-underscores) hypre_fmangle=4 ;;
+    one-before-after)    hypre_fmangle=5 ;;
  esac
 ])
 
@@ -704,8 +705,8 @@ AC_ARG_WITH(fmangle,
 AS_HELP_STRING([--with-fmangle=FMANGLE],
                [FMANGLE contains a string indicating the type of name mangling
                 to use when calling hypre from Fortran.  It can be set to:
-                "no-underscores", "one-underscore", "two-underscores", and
-                "caps-no-underscores".]),
+                "no-underscores", "one-underscore", "two-underscores",
+                "caps-no-underscores, and "one-before-after".]),
 [hypre_fmangle=0; AC_HYPRE_SET_FMANGLE],
 [hypre_fmangle=0]
 )
@@ -719,6 +720,7 @@ AC_DEFUN([AC_HYPRE_SET_FMANGLE_BLAS],
     one-underscore)      hypre_fmangle_blas=2 ;;
     two-underscores)     hypre_fmangle_blas=3 ;;
     caps-no-underscores) hypre_fmangle_blas=4 ;;
+    one-before-after)    hypre_fmangle_blas=5 ;;
  esac
 ])
 
@@ -741,6 +743,7 @@ AC_DEFUN([AC_HYPRE_SET_FMANGLE_LAPACK],
     one-underscore)      hypre_fmangle_lapack=2 ;;
     two-underscores)     hypre_fmangle_lapack=3 ;;
     caps-no-underscores) hypre_fmangle_lapack=4 ;;
+    one-before-after)    hypre_fmangle_lapack=5 ;;
  esac
 ])
 
