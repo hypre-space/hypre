@@ -42,17 +42,17 @@ cd %srcdir%\test\cmbuild
 
 rem build release version
 cd %srcdir%\cmbuild
-rem %MSBUILD% HYPRE.vcxproj /t:Rebuild /p:Configuration=Release     >  %outdir%\lib-release.out
-rem %MSBUILD% INSTALL.vcxproj /p:Configuration=Release              >> %outdir%\lib-release.out
+%MSBUILD% HYPRE.vcxproj /t:Rebuild /p:Configuration=Release     >  %outdir%\lib-release.out
+%MSBUILD% INSTALL.vcxproj /p:Configuration=Release              >> %outdir%\lib-release.out
 cd %srcdir%\test\cmbuild
-rem %MSBUILD% ALL_BUILD.vcxproj /t:Rebuild /p:Configuration=Release >  %outdir%\test-release.out
+%MSBUILD% ALL_BUILD.vcxproj /t:Rebuild /p:Configuration=Release >  %outdir%\test-release.out
 
 rem build debug version
 cd %srcdir%\cmbuild
-rem %MSBUILD% HYPRE.vcxproj /t:Rebuild /p:Configuration=Debug       >  %outdir%\lib-debug.out
-rem %MSBUILD% INSTALL.vcxproj /p:Configuration=Debug                >> %outdir%\lib-debug.out
+%MSBUILD% HYPRE.vcxproj /t:Rebuild /p:Configuration=Debug       >  %outdir%\lib-debug.out
+%MSBUILD% INSTALL.vcxproj /p:Configuration=Debug                >> %outdir%\lib-debug.out
 cd %srcdir%\test\cmbuild
-rem %MSBUILD% ALL_BUILD.vcxproj /t:Rebuild /p:Configuration=Release >  %outdir%\test-debug.out
+%MSBUILD% ALL_BUILD.vcxproj /t:Rebuild /p:Configuration=Release >  %outdir%\test-debug.out
 
 rem create error file - inspect output file lines with "Error(s)" substring
 cd %rundir%
