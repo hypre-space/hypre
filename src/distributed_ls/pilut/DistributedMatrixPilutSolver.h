@@ -10,10 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
-
 #ifndef _DISTRIBUTED_MATRIX_PILUT_SOLVER_HEADER
 #define _DISTRIBUTED_MATRIX_PILUT_SOLVER_HEADER
 
@@ -114,14 +110,7 @@ HYPRE_Int Ul_timer;
 #define lu_recv (globals->lu_recv)
 
 
-
 #include "./const.h"
-
-
-/* prototype definitions for BLAS calls that are used */
-HYPRE_Real SNRM2( HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
-HYPRE_Real SDOT(HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *);
-
 
 /*--------------------------------------------------------------------------
  * pilut structures
