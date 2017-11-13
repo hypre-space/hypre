@@ -82,6 +82,7 @@
 #endif
 #else
 #ifdef MACHINE_IS_SOLARIS
+#include "_hypre_blas.h"
 #ifdef USE_SHORT
 #define SNRM2 hypre_snrm2
 #define SDOT hypre_sdot
