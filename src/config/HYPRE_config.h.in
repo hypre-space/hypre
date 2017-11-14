@@ -49,10 +49,10 @@
 /* Define to 1 if using long long int for HYPRE_Int */
 #undef HYPRE_BIGINT
 
-/* Define to 1 if using single precision values */
+/* Define to 1 if using single precision values for HYPRE_Real */
 #undef HYPRE_SINGLE
 
-/* Define to 1 if using long double precision values */
+/* Define to 1 if using quad precision values for HYPRE_Real */
 #undef HYPRE_LONG_DOUBLE
 
 /* Define to 1 if using complex values */
@@ -105,7 +105,8 @@
  * 1 = no underscores
  * 2 = one underscore
  * 3 = two underscores
- * 4 = caps, no underscores */
+ * 4 = caps, no underscores
+ * 5 = one underscore before and after */
 #undef HYPRE_FMANGLE
 
 /* Define as in HYPRE_FMANGLE to set the BLAS name mangling scheme */
@@ -126,3 +127,13 @@
 
 /* Define to 1 if Caliper instrumentation is enabled */
 #undef HYPRE_USING_CALIPER
+
+/* Define to 1 if using SuperLU */
+#undef HAVE_SUPERLU
+
+/* Define to 1 if using DSuperLU */
+#undef HAVE_DSUPERLU
+
+/* Define to 1 if using MLI */
+#undef HAVE_MLI
+

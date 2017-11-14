@@ -533,6 +533,396 @@ hypre_BoomerAMGCreateS(hypre_ParCSRMatrix    *A,
    return (ierr);
 }
 
+/* 
+   Create Strength matrix from CF marker array data. Provides a more 
+   general form to build S for specific nodes of the 'global' matrix
+   (for example, F points or A_FF part), given the entire matrix. 
+   These nodes have the SMRK tag.
+   
+   Currently assumes num_functions == 1, hence separate routine is used 
+   for now. Could possibly be merged with BoomerAMGCreateS() to yield a 
+   more general function.
+ */
+HYPRE_Int
+hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
+                          HYPRE_Real            strength_threshold,
+                          HYPRE_Real            max_row_sum,
+                          HYPRE_Int             *CF_marker,
+                          HYPRE_Int		SMRK,
+                          hypre_ParCSRMatrix    **S_ptr)
+{
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_CREATES] -= hypre_MPI_Wtime();
+#endif
+
+   MPI_Comm          comm            = hypre_ParCSRMatrixComm(A);
+   hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   hypre_CSRMatrix    *A_diag          = hypre_ParCSRMatrixDiag(A);
+   HYPRE_Int          *A_diag_i        = hypre_CSRMatrixI(A_diag);
+   HYPRE_Real         *A_diag_data     = hypre_CSRMatrixData(A_diag);
+
+
+   hypre_CSRMatrix    *A_offd          = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int                *A_offd_i        = hypre_CSRMatrixI(A_offd);
+   HYPRE_Real         *A_offd_data = NULL;
+   HYPRE_Int                *A_diag_j        = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Int                *A_offd_j        = hypre_CSRMatrixJ(A_offd);
+
+   HYPRE_Int          *row_starts      = hypre_ParCSRMatrixRowStarts(A);
+   HYPRE_Int                 num_variables   = hypre_CSRMatrixNumRows(A_diag);
+   HYPRE_Int                 global_num_vars = hypre_ParCSRMatrixGlobalNumRows(A);
+   HYPRE_Int           num_nonzeros_diag;
+   HYPRE_Int           num_nonzeros_offd = 0;
+   HYPRE_Int           num_cols_offd = 0;
+                  
+   hypre_ParCSRMatrix *S;
+   hypre_CSRMatrix    *S_diag;
+   HYPRE_Int                *S_diag_i;
+   HYPRE_Int                *S_diag_j;
+   /* HYPRE_Real         *S_diag_data; */
+   hypre_CSRMatrix    *S_offd;
+   HYPRE_Int                *S_offd_i = NULL;
+   HYPRE_Int                *S_offd_j = NULL;
+   /* HYPRE_Real         *S_offd_data; */
+                 
+   HYPRE_Real          diag, row_scale, row_sum;
+   HYPRE_Int                 i, jj, jA, jS;
+                      
+   HYPRE_Int                 ierr = 0;
+
+   HYPRE_Int *prefix_sum_workspace;
+   
+   /*--------------------------------------------------------------
+    * Compute a  ParCSR strength matrix, S.
+    *
+    * For now, the "strength" of dependence/influence is defined in
+    * the following way: i depends on j if
+    *     aij > hypre_max (k != i) aik,    aii < 0
+    * or
+    *     aij < hypre_min (k != i) aik,    aii >= 0
+    * Then S_ij = 1, else S_ij = 0.
+    *
+    * NOTE: the entries are negative initially, corresponding
+    * to "unaccounted-for" dependence.
+    *----------------------------------------------------------------*/
+
+   num_nonzeros_diag = A_diag_i[num_variables];
+   num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
+
+   A_offd_i = hypre_CSRMatrixI(A_offd);
+   num_nonzeros_offd = A_offd_i[num_variables];
+
+   S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
+      row_starts, row_starts,
+      num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
+/* row_starts is owned by A, col_starts = row_starts */
+   hypre_ParCSRMatrixSetRowStartsOwner(S,0);
+   S_diag = hypre_ParCSRMatrixDiag(S);
+   hypre_CSRMatrixI(S_diag) = hypre_CTAlloc(HYPRE_Int, num_variables+1);
+   hypre_CSRMatrixJ(S_diag) = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag);
+   S_offd = hypre_ParCSRMatrixOffd(S);
+   hypre_CSRMatrixI(S_offd) = hypre_CTAlloc(HYPRE_Int, num_variables+1);
+
+   S_diag_i = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int *S_temp_diag_j = hypre_CSRMatrixJ(S_diag);
+   S_offd_i = hypre_CSRMatrixI(S_offd);
+
+   S_diag_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag);
+/*
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+   for (i = 0; i < num_nonzeros_diag; i++)
+      S_diag_j[i] = 0;
+*/
+
+   HYPRE_Int *S_temp_offd_j = NULL;
+
+   if (num_cols_offd)
+   {
+        A_offd_data = hypre_CSRMatrixData(A_offd);
+        hypre_CSRMatrixJ(S_offd) = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd);
+        S_temp_offd_j = hypre_CSRMatrixJ(S_offd);
+        HYPRE_Int *col_map_offd_S = hypre_TAlloc(HYPRE_Int, num_cols_offd);
+        hypre_ParCSRMatrixColMapOffd(S) = col_map_offd_S;
+
+        S_offd_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd);
+/*
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+        for (i = 0; i < num_nonzeros_offd; i++)
+          S_offd_j[i] = 0;
+*/
+
+        HYPRE_Int *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+        for (i = 0; i < num_cols_offd; i++)
+           col_map_offd_S[i] = col_map_offd_A[i];
+   }
+
+
+  /*-------------------------------------------------------------------
+    * Get the dof_func data for the off-processor columns
+    *-------------------------------------------------------------------*/
+
+   if (!comm_pkg)
+   {
+  hypre_MatvecCommPkgCreate(A);
+
+  comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+   }
+
+   /*HYPRE_Int prefix_sum_workspace[2*(hypre_NumThreads() + 1)];*/
+   prefix_sum_workspace = hypre_TAlloc(HYPRE_Int, 2*(hypre_NumThreads() + 1));
+
+   /* give S same nonzero structure as A */
+
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel private(i,diag,row_scale,row_sum,jA,jS)
+#endif
+   {
+   HYPRE_Int start, stop;
+   hypre_GetSimpleThreadPartition(&start, &stop, num_variables);
+   HYPRE_Int jS_diag = 0, jS_offd = 0;
+
+   for (i = start; i < stop; i++)
+   {
+    if (CF_marker[i] == SMRK) {
+      S_diag_i[i] = jS_diag;
+      if (num_cols_offd)
+      {
+         S_offd_i[i] = jS_offd;
+      }
+
+      diag = A_diag_data[A_diag_i[i]];
+
+      /* compute scaling factor and row sum */
+      row_scale = 0.0;
+      row_sum = diag;
+      if (diag < 0)
+      {
+        for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+        {
+          jj = A_diag_j[jA];
+          if (CF_marker[jj] == SMRK) {
+            row_scale = hypre_max(row_scale, A_diag_data[jA]);
+            row_sum += A_diag_data[jA];
+          }
+        }
+        for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+        {
+          jj = A_offd_j[jA];
+          if (CF_marker[jj] == SMRK) {
+            row_scale = hypre_max(row_scale, A_offd_data[jA]);
+            row_sum += A_offd_data[jA];
+          }
+        }
+      }
+      else
+      {
+        for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+        {
+          jj = A_diag_j[jA];
+          if (CF_marker[jj] == SMRK) {
+            row_scale = hypre_min(row_scale, A_diag_data[jA]);
+            row_sum += A_diag_data[jA];
+          } 
+        }
+        for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+        {
+          jj = A_offd_j[jA];
+          if (CF_marker[jj] == SMRK) {
+            row_scale = hypre_min(row_scale, A_offd_data[jA]);
+            row_sum += A_offd_data[jA];
+          }
+        }
+      } /* diag >= 0*/
+
+      jS_diag += A_diag_i[i + 1] - A_diag_i[i] - 1;
+      jS_offd += A_offd_i[i + 1] - A_offd_i[i];
+
+      /* compute row entries of S */
+      S_temp_diag_j[A_diag_i[i]] = -1;
+      if ((fabs(row_sum) > fabs(diag)*max_row_sum) && (max_row_sum < 1.0))
+      {
+         /* make all dependencies weak */
+         for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+         {
+            jj = A_diag_j[jA];
+              S_temp_diag_j[jA] = -1;
+         }
+         jS_diag -= A_diag_i[i + 1] - (A_diag_i[i] + 1);
+
+         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+         {
+              S_temp_offd_j[jA] = -1;
+         }
+         jS_offd -= A_offd_i[i + 1] - A_offd_i[i];
+      }
+      else
+      {
+        if (diag < 0) 
+        { 
+          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+          {
+            jj = A_diag_j[jA];
+            if (CF_marker[jj] == SMRK) {
+              if (A_diag_data[jA] <= strength_threshold * row_scale)
+              {
+                 S_temp_diag_j[jA] = -1;
+                 --jS_diag;
+              }
+              else
+              {
+                 S_temp_diag_j[jA] = jj;
+              }
+            } else {
+              S_temp_diag_j[jA] = -1;
+            }
+          }
+          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+          {
+            jj = A_offd_j[jA];
+            if (CF_marker[jj] == SMRK) {
+              if (A_offd_data[jA] <= strength_threshold * row_scale)
+              {
+                 S_temp_offd_j[jA] = -1;
+                 --jS_offd;
+              }
+              else
+              {
+                 S_temp_offd_j[jA] = jj;
+              }
+            } else {
+              S_temp_offd_j[jA] = -1;
+            }
+          }
+        } /* diag < 0 */
+        else
+        {
+          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+          {
+            jj = A_diag_j[jA];
+            if (CF_marker[jj] == SMRK) {
+              if (A_diag_data[jA] >= strength_threshold * row_scale)
+              {
+                 S_temp_diag_j[jA] = -1;
+                 --jS_diag;
+              }
+              else
+              {
+                 S_temp_diag_j[jA] = jj;
+              }
+            } else {
+              S_temp_diag_j[jA] = -1;
+            }
+          }
+          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+          {
+            jj = A_offd_j[jA];
+            if (CF_marker[jj] == SMRK) {
+              if (A_offd_data[jA] >= strength_threshold * row_scale)
+              {
+                 S_temp_offd_j[jA] = -1;
+                 --jS_offd;
+              }
+              else
+              {
+                 S_temp_offd_j[jA] = jj;
+              }
+            } else {
+              S_temp_offd_j[jA] = -1;
+            }
+          }
+        } /* diag >= 0 */
+      } /* !((row_sum > max_row_sum) && (max_row_sum < 1.0)) */
+    } /* CF_marker == SMRK */
+    else
+    {
+      S_diag_i[i] = jS_diag;
+      if (num_cols_offd)
+      {
+         S_offd_i[i] = jS_offd;
+      }
+      jS_diag += A_diag_i[i + 1] - A_diag_i[i] - 1;
+      jS_offd += A_offd_i[i + 1] - A_offd_i[i];
+
+      for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+      {
+        S_temp_diag_j[jA] = -1;
+      }
+      jS_diag -= A_diag_i[i + 1] - (A_diag_i[i] + 1);
+
+      for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+      {
+        S_temp_offd_j[jA] = -1;
+      }
+      jS_offd -= A_offd_i[i + 1] - A_offd_i[i];
+    } /* CF_marker != SMRK */
+   } /* for each variable */
+
+   hypre_prefix_sum_pair(&jS_diag, S_diag_i + num_variables, &jS_offd, S_offd_i + num_variables, prefix_sum_workspace);
+
+   /*--------------------------------------------------------------
+    * "Compress" the strength matrix.
+    *
+    * NOTE: S has *NO DIAGONAL ELEMENT* on any row.  Caveat Emptor!
+    *
+    * NOTE: This "compression" section of code may be removed, and
+    * coarsening will still be done correctly.  However, the routine
+    * that builds interpolation would have to be modified first.
+    *----------------------------------------------------------------*/
+
+   for (i = start; i < stop; i++)
+   {
+      S_diag_i[i] += jS_diag;
+      S_offd_i[i] += jS_offd;
+
+      jS = S_diag_i[i];
+      for (jA = A_diag_i[i]; jA < A_diag_i[i+1]; jA++)
+      {
+         if (S_temp_diag_j[jA] > -1)
+         {
+            S_diag_j[jS]    = S_temp_diag_j[jA];
+            jS++;
+         }
+      }
+
+      jS = S_offd_i[i];
+      for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+      {
+         if (S_temp_offd_j[jA] > -1)
+         {
+            S_offd_j[jS]    = S_temp_offd_j[jA];
+            jS++;
+         }
+      }
+   } /* for each variable */
+
+   } /* omp parallel */
+
+   hypre_CSRMatrixNumNonzeros(S_diag) = S_diag_i[num_variables];
+   hypre_CSRMatrixNumNonzeros(S_offd) = S_offd_i[num_variables];
+   hypre_CSRMatrixJ(S_diag) = S_diag_j;
+   hypre_CSRMatrixJ(S_offd) = S_offd_j;
+
+   hypre_ParCSRMatrixCommPkg(S) = NULL;
+
+   *S_ptr        = S;
+
+   hypre_TFree(prefix_sum_workspace);
+   hypre_TFree(S_temp_diag_j);
+   hypre_TFree(S_temp_offd_j);
+
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_CREATES] += hypre_MPI_Wtime();
+#endif
+
+   return (ierr);
+}
 
 /*==========================================================================*/
 /*==========================================================================*/
@@ -1497,6 +1887,7 @@ HYPRE_Int hypre_BoomerAMGCreate2ndS( hypre_ParCSRMatrix *S, HYPRE_Int *CF_marker
 
       temp = hypre_UnorderedIntSetCopyToArray(&found_set, &num_cols_offd_C);
       
+      hypre_UnorderedIntSetDestroy(&found_set);
       hypre_TFree(S_ext_i);
       hypre_TFree(S_ext_j);
 

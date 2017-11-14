@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlaset_(const char *uplo, integer *m, integer *n, doublereal *
+/* Subroutine */ integer dlaset_(const char *uplo, integer *m, integer *n, doublereal *
 	alpha, doublereal *beta, doublereal *a, integer *lda)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -131,4 +134,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

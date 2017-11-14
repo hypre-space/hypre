@@ -1376,8 +1376,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( HYPreconID_ == HYMLI )
             HYPRE_LSI_MLISetParams(HYPrecon_, params[i]); 
 #else
-         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
-            printf("       HYPRE_LSC::MLI SetParams - MLI unavailable.\n");
+//         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
+//            printf("       HYPRE_LSC::MLI SetParams - MLI unavailable.\n");
 #endif
       }
 
@@ -4615,11 +4615,12 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
 
 double HYPRE_LinSysCore::solveUsingSuperLU(int& status)
 {
+  double             rnorm=-1.0;
 #ifdef HAVE_SUPERLU
    int                i, nnz, nrows, ierr;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
    int                nz_ptr, *partition, start_row, end_row;
-   double             *colVal, *new_a, rnorm=-1.0;
+   double             *colVal, *new_a;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    r_csr;
    HYPRE_ParVector    b_csr;
@@ -4793,12 +4794,13 @@ double HYPRE_LinSysCore::solveUsingSuperLU(int& status)
 
 double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
 {
+   double             rnorm=-1.0;
 #ifdef HAVE_SUPERLU
    int                i, nnz, nrows, ierr;
    int                rowSize, *colInd, *new_ia, *new_ja, *ind_array;
    int                nz_ptr;
    int                *partition, start_row, end_row;
-   double             *colVal, *new_a, rnorm=-1.0;
+   double             *colVal, *new_a;
    HYPRE_ParCSRMatrix A_csr;
    HYPRE_ParVector    r_csr;
    HYPRE_ParVector    b_csr;
@@ -4812,6 +4814,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    double             rpg, rcond;
    void               *work=NULL;
    char               equed[1];
+   GlobalLU_t         Glu;
    mem_usage_t        mem_usage;
    superlu_options_t  slu_options;
    SuperLUStat_t      slu_stat;
@@ -4901,7 +4904,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    slu_options.Equil        = YES;
    slu_options.Trans        = NOTRANS;
    slu_options.Fact         = DOFACT;
-   slu_options.IterRefine   = DOUBLE;
+   slu_options.IterRefine   = SLU_DOUBLE;
    slu_options.DiagPivotThresh = 1.0;
    slu_options.PivotGrowth = YES;
    slu_options.ConditionNumber = YES;
@@ -4917,9 +4920,12 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    // solve
    //-------------------------------------------------------------------
 
+//   dgssvx(&slu_options, &A2, perm_c, perm_r, etree,
+//          equed, R, C, &L, &U, work, lwork, &B, &X, 
+//          &rpg, &rcond, ferr, berr, &mem_usage, &slu_stat, &info);
    dgssvx(&slu_options, &A2, perm_c, perm_r, etree,
           equed, R, C, &L, &U, work, lwork, &B, &X, 
-          &rpg, &rcond, ferr, berr, &mem_usage, &slu_stat, &info);
+          &rpg, &rcond, ferr, berr, &Glu, &mem_usage, &slu_stat, &info);
 
    //-------------------------------------------------------------------
    // print SuperLU internal information at the first step

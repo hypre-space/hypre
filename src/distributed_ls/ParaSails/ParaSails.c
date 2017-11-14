@@ -10,9 +10,6 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
 /******************************************************************************
  *
  * ParaSails - Parallel sparse approximate inverse least squares.
@@ -33,6 +30,8 @@
 #include "LoadBal.h"
 #include "ParaSails.h"
 
+#include "_hypre_lapack.h"
+
 #define ROW_PRUNED_REQ_TAG        221
 #define ROW_STORED_REQ_TAG        222
 #define ROW_REPI_TAG              223
@@ -40,20 +39,6 @@
 
 #ifdef ESSL
 #include <essl.h>
-#else
-#ifdef __cplusplus
-extern "C" 
-{	
-#endif
-HYPRE_Int hypre_F90_NAME_LAPACK(dpotrf, DPOTRF)(char *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dpotrs, DPOTRS)(char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, 
-  HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
-HYPRE_Int hypre_F90_NAME_LAPACK(dgels, DGELS)(char *, HYPRE_Int *, HYPRE_Int *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *,
-  HYPRE_Real *, HYPRE_Int *, HYPRE_Real *, HYPRE_Int *, HYPRE_Int *);
-#ifdef __cplusplus
-}
-#endif
-
 #endif
 
 #if 0 /* no longer need this since using 'memset' now */
@@ -1149,7 +1134,7 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         dpps(ahat, len, val, 1);
 #else
         /* Solve local linear system - factor phase */
-        hypre_F90_NAME_LAPACK(dpotrf, DPOTRF)(&uplo, &len, ahat, &len, &info);
+        hypre_dpotrf(&uplo, &len, ahat, &len, &info);
         if (info != 0)
         {
 #if 0
@@ -1163,8 +1148,7 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
         }
 
         /* Solve local linear system - solve phase */
-        hypre_F90_NAME_LAPACK(dpotrs, DPOTRS)(&uplo, &len, &one, ahat, &len, val, &len, 
-          &info);
+        hypre_dpotrs(&uplo, &len, &one, ahat, &len, val, &len, &info);
         if (info != 0)
         {
 #if 0
@@ -1339,7 +1323,7 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
             &info, work, work_size);
 #else
         /* rhs in bhat, and put solution in bhat */
-        hypre_F90_NAME_LAPACK(dgels, DGELS)(&trans, &npat, &len, &one, ahat, &npat,
+        hypre_dgels(&trans, &npat, &len, &one, ahat, &npat,
             bhat, &npat, work, &work_size, &info);
 
         if (info != 0)

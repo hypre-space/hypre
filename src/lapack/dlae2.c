@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlae2_(doublereal *a, doublereal *b, doublereal *c__, 
+/* Subroutine */ integer dlae2_(doublereal *a, doublereal *b, doublereal *c__, 
 	doublereal *rt1, doublereal *rt2)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -117,3 +120,6 @@
 
 } /* dlae2_ */
 
+#ifdef __cplusplus
+}
+#endif

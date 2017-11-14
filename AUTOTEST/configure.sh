@@ -40,12 +40,13 @@ src_dir=`cd $1; pwd`
 shift
 
 # Run configure
+# NOTE: The use of 'eval' is needed to deal properly with nested quotes in argument lists
 cd $src_dir
 if [ "`uname -s`" = "AIX" ]
 then
-   nopoe ./configure $@
+   eval nopoe ./configure $@
 else
-   ./configure $@
+   eval ./configure $@
 fi
 
 # Save config.log, HYPRE_config.h and Makefile.config

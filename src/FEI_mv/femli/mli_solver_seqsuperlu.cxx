@@ -110,12 +110,13 @@ int MLI_Solver_SeqSuperLU::setup( MLI_Matrix *Amat )
    int      nrows, iP, startRow, nnz, *csrIA, *csrJA, *cscJA, *cscIA;
    int      irow, icol, *rowArray, *countArray, colNum, index, nSubRows;
    int      *etree, permcSpec, lwork, panelSize, relax, info, rowCnt;
-   double   *csrAA, *cscAA, dropTol;
+   double   *csrAA, *cscAA;
    hypre_ParCSRMatrix  *hypreA;
    hypre_CSRMatrix     *ADiag;
    SuperMatrix         AC, superLU_Amat;
    superlu_options_t   slu_options;
    SuperLUStat_t       slu_stat;
+   GlobalLU_t          Glu;
 
    /* ---------------------------------------------------------------
     * fetch matrix
@@ -281,14 +282,16 @@ fclose(fp);
          slu_options.Fact = DOFACT;
          slu_options.SymmetricMode = NO;
          sp_preorder(&slu_options, &superLU_Amat, permCs_[iP], etree, &AC);
-         dropTol = 0.0;
          panelSize = sp_ienv(1);
          relax = sp_ienv(2);
          StatInit(&slu_stat);
          lwork = 0;
-         dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//         dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//                etree,NULL,lwork,permCs_[iP],permRs_[iP],
+//                &(superLU_Lmats[iP]),&(superLU_Umats[iP]),&slu_stat,&info);
+         dgstrf(&slu_options, &AC, relax, panelSize,
                 etree,NULL,lwork,permCs_[iP],permRs_[iP],
-                &(superLU_Lmats[iP]),&(superLU_Umats[iP]),&slu_stat,&info);
+                &(superLU_Lmats[iP]),&(superLU_Umats[iP]),&Glu,&slu_stat,&info);
          Destroy_CompCol_Permuted(&AC);
          Destroy_CompCol_Matrix(&superLU_Amat);
          delete [] etree;
@@ -351,14 +354,16 @@ fclose(fp);
          slu_options.Fact = DOFACT;
          slu_options.SymmetricMode = NO;
          sp_preorder(&slu_options, &superLU_Amat, permCs_[iP], etree, &AC);
-         dropTol = 0.0;
          panelSize = sp_ienv(1);
          relax = sp_ienv(2);
          StatInit(&slu_stat);
          lwork = 0;
-         dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//         dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//                etree,NULL,lwork,permRs_[iP],permCs_[iP],&(superLU_Lmats[iP]),
+//                &(superLU_Umats[iP]),&slu_stat,&info);
+         dgstrf(&slu_options, &AC, relax, panelSize,
                 etree,NULL,lwork,permRs_[iP],permCs_[iP],&(superLU_Lmats[iP]),
-                &(superLU_Umats[iP]),&slu_stat,&info);
+                &(superLU_Umats[iP]),&Glu,&slu_stat,&info);
          Destroy_CompCol_Permuted(&AC);
          Destroy_CompCol_Matrix(&superLU_Amat);
          delete [] etree;

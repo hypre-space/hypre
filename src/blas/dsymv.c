@@ -1,4 +1,6 @@
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*  -- translated by f2c (version 19940927).
    You must link the resulting object file with the libraries:
@@ -8,7 +10,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dsymv_(const char *uplo, integer *n, doublereal *alpha, 
+/* Subroutine */ integer dsymv_(const char *uplo, integer *n, doublereal *alpha, 
 	doublereal *a, integer *lda, doublereal *x, integer *incx, doublereal 
 	*beta, doublereal *y, integer *incy)
 {
@@ -20,9 +22,9 @@
     static integer info;
     static doublereal temp1, temp2;
     static integer i, j;
-    extern logical hypre_lsame_(const char *,const char *);
+    extern logical lsame_(const char *,const char *);
     static integer ix, iy, jx, jy, kx, ky;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
 
 
 /*  Purpose   
@@ -129,7 +131,7 @@
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 
     info = 0;
-    if (! hypre_lsame_(uplo, "U") && ! hypre_lsame_(uplo, "L")) {
+    if (! lsame_(uplo, "U") && ! lsame_(uplo, "L")) {
 	info = 1;
     } else if (*n < 0) {
 	info = 2;
@@ -141,7 +143,7 @@
 	info = 10;
     }
     if (info != 0) {
-	hypre_xerbla_("DSYMV ", &info);
+	xerbla_("DSYMV ", &info);
 	return 0;
     }
 
@@ -203,7 +205,7 @@
     if (*alpha == 0.) {
 	return 0;
     }
-    if (hypre_lsame_(uplo, "U")) {
+    if (lsame_(uplo, "U")) {
 
 /*        Form  y  when A is stored in upper triangle. */
 
@@ -287,3 +289,6 @@
 
 } /* dsymv_ */
 
+#ifdef __cplusplus
+}
+#endif

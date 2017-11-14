@@ -19,6 +19,7 @@ MLI_INCLUDES = \
  -I.\
  -I../..\
  -I$(srcdir)\
+ -I$(srcdir)/../../blas\
  -I$(srcdir)/../../lapack\
  -I$(srcdir)/../../utilities\
  -I$(srcdir)/../../IJ_mv\
@@ -31,7 +32,7 @@ MLI_INCLUDES = \
  -I$(srcdir)/../../distributed_ls\
  -I$(srcdir)/../../FEI_mv/fei-hypre\
  -I$(srcdir)/../../FEI_mv/femli\
- -I$(srcdir)/../../FEI_mv/SuperLU/SRC
+ ${SUPERLU_INCLUDE}
 
 C_COMPILE_FLAGS =\
  -DMLI_SUPERLU\

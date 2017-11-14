@@ -10,7 +10,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 include ../config/Makefile.config
 
 ## Euclid specific macros taken from distributed_ls/Euclid
@@ -22,6 +21,8 @@ C_COMPILE_FLAGS =\
  -I../distributed_ls/Euclid\
  -I$(srcdir)\
  -I$(srcdir)/..\
+ -I$(srcdir)/../blas\
+ -I$(srcdir)/../lapack\
  -I$(srcdir)/../multivector\
  -I$(srcdir)/../utilities\
  -I$(srcdir)/../krylov\
@@ -72,6 +73,7 @@ FILES =\
  HYPRE_parcsr_lgmres.c\
  HYPRE_parcsr_hybrid.c\
  HYPRE_parcsr_int.c\
+ HYPRE_parcsr_mgr.c\
  HYPRE_parcsr_ParaSails.c\
  HYPRE_parcsr_pcg.c\
  HYPRE_parcsr_pilut.c\
@@ -102,12 +104,16 @@ FILES =\
  par_laplace_9pt.c\
  par_laplace.c\
  par_lr_interp.c\
+ par_mgr.c\
+ par_mgr_setup.c\
+ par_mgr_solve.c\
  par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\
  par_rap_communication.c\
  par_rotate_7pt.c\
  par_vardifconv.c\
+ par_vardifconv_rs.c\
  par_relax.c\
  par_relax_more.c\
  par_relax_interface.c\

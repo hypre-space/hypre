@@ -1,6 +1,9 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "f2c.h"
+#include "hypre_lapack.h"
 
 /*  -- translated by f2c (version 19990503).
    You must link the resulting object file with the libraries:
@@ -17,7 +20,7 @@ static integer c_n1 = -1;
 static doublereal c_b416 = 0.;
 static doublereal c_b438 = 1.;
 
-/* Subroutine */ HYPRE_Int dgesvd_(char *jobu, char *jobvt, integer *m, integer *n, 
+/* Subroutine */ integer dgesvd_(char *jobu, char *jobvt, integer *m, integer *n, 
 	doublereal *a, integer *lda, doublereal *s, doublereal *u, integer *
 	ldu, doublereal *vt, integer *ldvt, doublereal *work, integer *lwork, 
 	integer *info)
@@ -29,26 +32,26 @@ static doublereal c_b438 = 1.;
     char ch__1[2];
 
     /* Builtin functions   
-       Subroutine */ HYPRE_Int s_cat(char *, char **, integer *, integer *, ftnlen);
+       Subroutine */ integer s_cat(char *, char **, integer *, integer *, ftnlen);
 
     /* Local variables */
     static integer iscl;
     static doublereal anrm;
     static integer ierr, itau, ncvt, nrvt, i__;
-    extern /* Subroutine */ HYPRE_Int dgemm_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dgemm_(const char *,const char *, integer *, integer *, 
 	    integer *, doublereal *, doublereal *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *);
     extern logical lsame_(const char *,const char *);
     static integer chunk, minmn, wrkbl, itaup, itauq, mnthr, iwork;
     static logical wntua, wntva, wntun, wntuo, wntvn, wntvo, wntus, wntvs;
     static integer ie;
-    extern /* Subroutine */ HYPRE_Int dgebrd_(integer *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dgebrd_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
 	     doublereal *, integer *, integer *);
     extern doublereal dlamch_(const char *), dlange_(const char *, integer *, 
 	    integer *, doublereal *, integer *, doublereal *);
     static integer ir, bdspac, iu;
-    extern /* Subroutine */ HYPRE_Int dgelqf_(integer *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dgelqf_(integer *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, integer *, integer *), 
 	    dlascl_(const char *, integer *, integer *, doublereal *, doublereal *, 
 	    integer *, integer *, doublereal *, integer *, integer *),
@@ -63,10 +66,10 @@ static doublereal c_b438 = 1.;
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
 	    integer *);
     static doublereal bignum;
-    extern /* Subroutine */ HYPRE_Int xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
-    extern /* Subroutine */ HYPRE_Int dormbr_(const char *,const char *,const char *, integer *, 
+    extern /* Subroutine */ integer dormbr_(const char *,const char *,const char *, integer *, 
 	    integer *, integer *, doublereal *, integer *, doublereal *, 
 	    doublereal *, integer *, doublereal *, integer *, integer *), dorglq_(integer *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *, 
@@ -4080,4 +4083,6 @@ static doublereal c_b438 = 1.;
 #undef u_ref
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif
