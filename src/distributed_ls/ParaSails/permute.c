@@ -49,9 +49,9 @@ HYPRE_Int permute(FILE *permfile, FILE *infile, FILE *outfile)
     hypre_printf("%d %d %d\n", M, N, nnz);
 
     /* allocate space for whole matrix */
-    ptr = (HYPRE_Int *)    malloc((M+1) * sizeof(HYPRE_Int));
-    ind = (HYPRE_Int *)    malloc(nnz * sizeof(HYPRE_Int));
-    val = (HYPRE_Real *) malloc(nnz * sizeof(HYPRE_Real));
+    ptr = hypre_TAlloc(HYPRE_Int, (M+1) , HYPRE_MEMORY_HOST);
+    ind = hypre_TAlloc(HYPRE_Int, nnz , HYPRE_MEMORY_HOST);
+    val = hypre_TAlloc(HYPRE_Real, nnz , HYPRE_MEMORY_HOST);
     
     /* read the entire matrix */
     k = 0;
@@ -74,8 +74,8 @@ HYPRE_Int permute(FILE *permfile, FILE *infile, FILE *outfile)
     ptr[M] = k;
 
     /* allocate space for permutation vectors */
-    new2old = (HYPRE_Int *) malloc(M * sizeof(HYPRE_Int));
-    old2new = (HYPRE_Int *) malloc(M * sizeof(HYPRE_Int));
+    new2old = hypre_TAlloc(HYPRE_Int, M , HYPRE_MEMORY_HOST);
+    old2new = hypre_TAlloc(HYPRE_Int, M , HYPRE_MEMORY_HOST);
 
     /* read the new2old permutation vector, 0-based */
     for (i=0; i<M; i++)

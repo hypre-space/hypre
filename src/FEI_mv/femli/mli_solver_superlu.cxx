@@ -185,9 +185,9 @@ int MLI_Solver_SuperLU::setup( MLI_Matrix *Amat )
             exit(1);
          }
    }
-   gcscJA = (int *)    malloc( (globalNRows+1) * sizeof(int) );
-   gcscIA = (int *)    malloc( globalNnz * sizeof(int) );
-   gcscAA = (double *) malloc( globalNnz * sizeof(double) );
+   gcscJA = hypre_TAlloc(int,  (globalNRows+1) , HYPRE_MEMORY_HOST);
+   gcscIA = hypre_TAlloc(int,  globalNnz , HYPRE_MEMORY_HOST);
+   gcscAA = hypre_TAlloc(double,  globalNnz , HYPRE_MEMORY_HOST);
    gcscJA[0] = 0;
    nnz = 0;
    for ( icol = 1; icol <= globalNRows; icol++ ) 

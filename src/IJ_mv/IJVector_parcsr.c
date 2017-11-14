@@ -1352,19 +1352,19 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
          index_ptr = (void *) ((char *) void_contact_buf + in*obj_size_bytes);
 
          tmp_int =  num_rows_per_proc[indx];
-         memcpy( index_ptr, &tmp_int, int_size);
+         hypre_TMemcpy( index_ptr,  &tmp_int,  HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
 
          in++;
       }
       /* add row # */   
-      memcpy( index_ptr, &row, int_size);
+      hypre_TMemcpy( index_ptr,  &row,  HYPRE_Int,1 , HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
       in++;
 
       /* add value */
       tmp_complex = off_proc_data[i];
-      memcpy( index_ptr, &tmp_complex, complex_size);
+      hypre_TMemcpy( index_ptr,  &tmp_complex, HYPRE_Complex, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       index_ptr = (void *) ((char *) index_ptr + obj_size_bytes);
       in++;
       
@@ -1450,19 +1450,19 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
       indx = recv_starts[i];
 
       /* get the number of rows for  this recv */
-      memcpy( &row_count, recv_data_ptr, int_size);
+      hypre_TMemcpy( &row_count,  recv_data_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
       indx++;
 
       for (j=0; j < row_count; j++) /* for each row: unpack info */
       {
          /* row # */
-         memcpy( &row, recv_data_ptr, int_size);
+		  hypre_TMemcpy( &row,  recv_data_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 
          /* value */
-         memcpy( &value, recv_data_ptr, complex_size);
+         hypre_TMemcpy( &value,  recv_data_ptr, HYPRE_Complex, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          recv_data_ptr = (void *) ((char *)recv_data_ptr + obj_size_bytes);
          indx++;
 

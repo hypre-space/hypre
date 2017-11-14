@@ -427,7 +427,7 @@ hypre_ParMultiVectorTempRead(MPI_Comm comm, const char *fileName)
       src = temp_vec->local_vector->data;
       count = temp_vec->local_vector->size;
    
-      memcpy(dest,src, count*sizeof(HYPRE_Complex));
+      hypre_TMemcpy(dest, src, HYPRE_Complex, count, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       
    /* destroy current vector */
       hypre_ParVectorDestroy(temp_vec);

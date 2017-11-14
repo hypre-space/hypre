@@ -124,13 +124,13 @@ int HYPRE_LSI_AMGeSetNElements(int nElems)
    printf("LSI_AMGe NElements = %d\n", nElems);
    num_elements = nElems;
    nbytes = num_elements * sizeof(double*);
-   temp_elem_data = (double **) malloc( nbytes );
+   temp_elem_data = hypre_TAlloc( nbytes ,HYPRE_MEMORY_HOST);
    for ( i = 0; i < num_elements; i++ ) temp_elem_data[i] = NULL;
    nbytes = num_elements * sizeof(int*);
-   temp_elem_node = (int **) malloc( nbytes );
+   temp_elem_node = hypre_TAlloc( nbytes ,HYPRE_MEMORY_HOST);
    for ( i = 0; i < num_elements; i++ ) temp_elem_node[i] = NULL;
    nbytes = num_elements * sizeof(int);
-   temp_elem_node_cnt = (int *) malloc( nbytes );
+   temp_elem_node_cnt = hypre_TAlloc( nbytes ,HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -156,7 +156,7 @@ int HYPRE_LSI_AMGeSetBoundary(int size, int *list)
    printf("LSI_AMGe SetBoundary = %d\n", size);
 
    if ( i_dof_on_boundary == NULL )
-      i_dof_on_boundary = (int *) malloc(num_nodes * system_size * sizeof(int));
+      i_dof_on_boundary = hypre_TAlloc(int, num_nodes * system_size , HYPRE_MEMORY_HOST);
    for ( i = 0; i < num_nodes*system_size; i++ ) i_dof_on_boundary[i] = -1;
 
    for ( i = 0; i < size; i++ ) 
@@ -186,11 +186,11 @@ int HYPRE_LSI_AMGePutRow(int row, int length, const double *colVal,
 
       temp_elem_node_cnt[element_count] = length / system_size;
       nbytes = length / system_size * sizeof(int);
-      temp_elem_node[element_count] = (int *) malloc( nbytes );
+      temp_elem_node[element_count] = hypre_TAlloc( nbytes ,HYPRE_MEMORY_HOST);
       for ( i = 0; i < length; i+=system_size ) 
          temp_elem_node[element_count][i/system_size] = (colInd[i]-1)/system_size;
       nbytes = length * length * sizeof(double);
-      temp_elem_data[element_count] = (double *) malloc(nbytes);
+      temp_elem_data[element_count] = hypre_TAlloc(nbytes,HYPRE_MEMORY_HOST);
       temp_elemat_cnt = 0;
       rowLeng = length;
    }
@@ -296,7 +296,7 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
       multiplier = temp_elem_node_cnt[i] * system_size;
       total_length += (multiplier * multiplier);
    }
-   element_data = (double *) malloc(total_length * sizeof(double));
+   element_data = hypre_TAlloc(double, total_length , HYPRE_MEMORY_HOST);
    counter = 0;
    for ( i = 0; i < num_elements; i++ )
    {
@@ -311,8 +311,8 @@ int HYPRE_LSI_AMGeSolve(double *rhs, double *x)
 
    total_length = 0;
    for (i = 0; i < num_elements; i++) total_length += temp_elem_node_cnt[i];
-   i_element_node_0 = (int *) malloc((num_elements + 1) * sizeof(int));
-   j_element_node_0 = (int *) malloc(total_length * sizeof(int));
+   i_element_node_0 = hypre_TAlloc(int, (num_elements + 1) , HYPRE_MEMORY_HOST);
+   j_element_node_0 = hypre_TAlloc(int, total_length , HYPRE_MEMORY_HOST);
    counter = 0;
    for (i = 0; i < num_elements; i++) 
    {

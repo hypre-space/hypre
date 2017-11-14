@@ -3922,7 +3922,7 @@ main( hypre_int argc,
          eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
                                                               blockSize, 
                                                               x );
-         eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
+         eigenvalues = hypre_CTAlloc(HYPRE_Real,  blockSize, HYPRE_MEMORY_HOST);
        
          if ( lobpcgSeed )
             mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
@@ -4092,7 +4092,7 @@ main( hypre_int argc,
          eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
                                                               blockSize, 
                                                               x );
-         eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
+         eigenvalues = hypre_CTAlloc(HYPRE_Real,  blockSize, HYPRE_MEMORY_HOST);
        
          if ( lobpcgSeed )
             mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );

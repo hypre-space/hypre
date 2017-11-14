@@ -67,8 +67,8 @@ static void matvec_timing(MPI_Comm comm, Matrix *mat)
    HYPRE_Int i, mype;
    HYPRE_Int n = mat->end_row - mat->beg_row + 1;
 
-   temp1 = (HYPRE_Real *) calloc(n, sizeof(HYPRE_Real));
-   temp2 = (HYPRE_Real *) calloc(n, sizeof(HYPRE_Real));
+   temp1 = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
+   temp2 = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 
    /* warm-up */
    hypre_MPI_Barrier(comm);

@@ -184,8 +184,8 @@ int MLI_Solver_GMRES::solve(MLI_Vector *b_in, MLI_Vector *u_in)
     *-----------------------------------------------------------------*/
 
    r  = (hypre_ParVector *) rVec_->getVector();
-   p  = (hypre_ParVector **) malloc(sizeof(hypre_ParVector *) * (KDim_+1)); 
-   z  = (hypre_ParVector **) malloc(sizeof(hypre_ParVector *) * (KDim_+1)); 
+   p  = hypre_TAlloc(hypre_ParVector *,  (KDim_+1), HYPRE_MEMORY_HOST); 
+   z  = hypre_TAlloc(hypre_ParVector *,  (KDim_+1), HYPRE_MEMORY_HOST); 
    for ( i = 0; i <= KDim_; i++ )
       p[i] = (hypre_ParVector *) pVec_[i]->getVector();
    for ( i = 0; i <= KDim_; i++ )

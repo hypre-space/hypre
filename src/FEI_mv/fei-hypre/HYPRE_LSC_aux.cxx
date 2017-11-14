@@ -4470,7 +4470,7 @@ void HYPRE_LinSysCore::setupPreconPILUT()
 void HYPRE_LinSysCore::setupPreconBlock()
 {
    HYPRE_Lookup *newLookup;
-   newLookup = (HYPRE_Lookup *) malloc(sizeof(HYPRE_Lookup));
+   newLookup = hypre_TAlloc(HYPRE_Lookup, 1, HYPRE_MEMORY_HOST);
    newLookup->object = (void *) lookup_;
    HYPRE_LSI_BlockPrecondSetLookup( HYPrecon_, newLookup );
    free( newLookup );

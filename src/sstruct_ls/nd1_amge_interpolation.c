@@ -173,8 +173,8 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
       num_bdof = size1 + size2;
       bdof = hypre_CTAlloc(HYPRE_Int,  num_bdof, HYPRE_MEMORY_HOST);
       if (three_dimensional_problem)
-         memcpy(bdof, col_ind1, size1*sizeof(HYPRE_Int));
-      memcpy(bdof+size1, col_ind2, size2*sizeof(HYPRE_Int));
+		 hypre_TMemcpy(bdof,  col_ind1, HYPRE_Int, size1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+      hypre_TMemcpy(bdof+size1,  col_ind2, HYPRE_Int, size2, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
       hypre_qsort0(bdof,0,num_bdof-1);
 
@@ -196,8 +196,8 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             getrow_ierr= hypre_ParCSRMatrixGetRow (Aee, idof[j], &I[j+1], &tmp_J, &tmp_data);
             if (getrow_ierr <0)
                hypre_printf("getrow Aee off proc[%d] = \n",myproc);
-            memcpy(J, tmp_J, I[j+1]*sizeof(HYPRE_Int));
-            memcpy(data, tmp_data, I[j+1]*sizeof(HYPRE_Real));
+            hypre_TMemcpy(J,  tmp_J, HYPRE_Int, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+            hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
             J+= I[j+1];
             data+= I[j+1];
             hypre_ParCSRMatrixRestoreRow (Aee, idof[j], &I[j+1], &tmp_J, &tmp_data);
@@ -224,8 +224,8 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             getrow_ierr= hypre_ParCSRMatrixGetRow (dof_DOF, idof[j], &I[j+1], &tmp_J, &tmp_data);
             if (getrow_ierr >= 0)
             {
-               memcpy(J, tmp_J, I[j+1]*sizeof(HYPRE_Int));
-               memcpy(data, tmp_data, I[j+1]*sizeof(HYPRE_Real));
+			   hypre_TMemcpy(J,  tmp_J, HYPRE_Int, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                J+= I[j+1];
                data+= I[j+1];
                hypre_ParCSRMatrixRestoreRow (dof_DOF, idof[j], &I[j+1], &tmp_J, &tmp_data);
@@ -250,8 +250,8 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
                I[j+1]= (OffProcRows[swap[m]] -> ncols);
                tmp_J = (OffProcRows[swap[m]] -> cols);
                tmp_data= (OffProcRows[swap[m]] -> data);
-               memcpy(J, tmp_J, I[j+1]*sizeof(HYPRE_Int));
-               memcpy(data, tmp_data, I[j+1]*sizeof(HYPRE_Real));
+               hypre_TMemcpy(J,  tmp_J, HYPRE_Int, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                J+= I[j+1];
                data+= I[j+1];
                I[j+1] += I[j];
@@ -263,8 +263,8 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
             getrow_ierr= hypre_ParCSRMatrixGetRow (dof_DOF, bdof[j-num_idof], &I[j+1], &tmp_J, &tmp_data);
             if (getrow_ierr >= 0)
             {
-               memcpy(J, tmp_J, I[j+1]*sizeof(HYPRE_Int));
-               memcpy(data, tmp_data, I[j+1]*sizeof(HYPRE_Real));
+				hypre_TMemcpy(J,  tmp_J, HYPRE_Int, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+				hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                J+= I[j+1];
                data+= I[j+1];
                hypre_ParCSRMatrixRestoreRow (dof_DOF, bdof[j-num_idof], &I[j+1], &tmp_J, &tmp_data);
@@ -290,8 +290,8 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
                I[j+1]= (OffProcRows[swap[m]] -> ncols);
                tmp_J = (OffProcRows[swap[m]] -> cols);
                tmp_data= (OffProcRows[swap[m]] -> data);
-               memcpy(J, tmp_J, I[j+1]*sizeof(HYPRE_Int));
-               memcpy(data, tmp_data, I[j+1]*sizeof(HYPRE_Real));
+               hypre_TMemcpy(J,  tmp_J, HYPRE_Int, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+               hypre_TMemcpy(data,  tmp_data, HYPRE_Real, I[j+1], HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                J+= I[j+1];
                data+= I[j+1];
                I[j+1] += I[j];

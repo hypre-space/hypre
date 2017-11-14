@@ -74,7 +74,7 @@ extern "C" int HYPRE_LSI_UzawaCreate(MPI_Comm mpi_comm, HYPRE_Solver *solver)
 {
    (void) mpi_comm;
    HYPRE_LSI_UzawaStruct *cprecon = (HYPRE_LSI_UzawaStruct *)
-                                     calloc(1, sizeof(HYPRE_LSI_UzawaStruct));
+                                     hypre_CTAlloc(HYPRE_LSI_UzawaStruct, 1, HYPRE_MEMORY_HOST);
    HYPRE_LSI_Uzawa *precon = (HYPRE_LSI_Uzawa *) new HYPRE_LSI_Uzawa(mpi_comm);
    cprecon->precon = (void *) precon;
    (*solver) = (HYPRE_Solver) cprecon;
@@ -1498,8 +1498,8 @@ int HYPRE_LSI_Uzawa::setupPrecon(HYPRE_Solver *precon,HYPRE_ParCSRMatrix Amat,
           break;
       case 5 :
           HYPRE_EuclidCreate( mpiComm_, precon );
-          targv = (char **) malloc( 4 * sizeof(char*) );
-          for ( i = 0; i < 4; i++ ) targv[i] = (char *) malloc(sizeof(char)*50);
+          targv = hypre_TAlloc(char*,  4 , HYPRE_MEMORY_HOST);
+          for ( i = 0; i < 4; i++ ) targv[i] = hypre_TAlloc(char, 50, HYPRE_MEMORY_HOST);
           strcpy(targv[0], "-level");
           sprintf(targv[1], "%1d", paramPtr.EuclidNLevels_);
           strcpy(targv[2], "-sparseA");

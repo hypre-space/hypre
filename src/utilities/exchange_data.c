@@ -367,7 +367,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
             index_ptr = (void *) ((char *) send_response_buf +
                                   max_response_size_bytes);
                
-            memcpy(post_array[post_array_size], index_ptr, size);
+            hypre_TMemcpy(post_array[post_array_size], index_ptr, char,  size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
     
             /*now post any part of the message that is too long with a non-blocking
               send and a different tag */
@@ -386,7 +386,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
          index_ptr = (void *) ((char *) send_response_buf +
                                max_response_size_bytes);
 
-         memcpy(index_ptr, &response_message_size, sizeof(HYPRE_Int));
+         hypre_TMemcpy(index_ptr,  &response_message_size, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          
          /*send the block of data that includes the overhead */        
          /* this is a blocking send - the recv has already been posted */
@@ -505,7 +505,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
          response_recv_buf_starts[i+1] - response_recv_buf_starts[i];
       copy_size = hypre_min(response_message_size, max_response_size);
       
-      memcpy(index_ptr, start_ptr, copy_size*response_obj_size);   
+      hypre_TMemcpy(index_ptr,  start_ptr,  char, copy_size*response_obj_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);   
       /* index_ptr += copy_size*response_obj_size; */  
       index_ptr = (void *) ((char *) index_ptr + copy_size*response_obj_size);  
 

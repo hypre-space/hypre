@@ -1001,7 +1001,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       size = hypre_CommPkgSendBufsize(comm_pkg);
       dptr_host = (HYPRE_Complex *) send_buffers[0];
       dptr      = (HYPRE_Complex *) send_buffers_data[0];
-      hypre_DataCopyFromData(dptr_host, dptr, HYPRE_Complex, size);
+	  hypre_TMemcpy(dptr_host,dptr,HYPRE_Complex,size,HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
    }
 #endif
 
@@ -1016,11 +1016,11 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
          qptr = (HYPRE_Int *) send_buffers[i];
          *qptr = num_entries;
          qptr ++;
-         memcpy(qptr, hypre_CommTypeRemBoxnums(comm_type),
-                num_entries*sizeof(HYPRE_Int));
+         hypre_TMemcpy(qptr,  hypre_CommTypeRemBoxnums(comm_type), 
+					   HYPRE_Int, num_entries, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          qptr += num_entries;
-         memcpy(qptr, hypre_CommTypeRemBoxes(comm_type),
-                num_entries*sizeof(hypre_Box));
+         hypre_TMemcpy(qptr,  hypre_CommTypeRemBoxes(comm_type), 
+					   hypre_Box, num_entries, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          hypre_CommTypeRemBoxnums(comm_type) = NULL;
          hypre_CommTypeRemBoxes(comm_type)   = NULL;
       }
@@ -1232,7 +1232,8 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
       }
       dptr_host = (HYPRE_Complex *) recv_buffers[0];
       dptr      = (HYPRE_Complex *) recv_buffers_data[0];
-      hypre_DataCopyToData(dptr_host, dptr, HYPRE_Complex, size);
+
+	  hypre_TMemcpy( dptr, dptr_host, HYPRE_Complex, size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
    }
 #endif
 

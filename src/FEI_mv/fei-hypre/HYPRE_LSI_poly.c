@@ -52,7 +52,7 @@ int HYPRE_LSI_PolyCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    HYPRE_LSI_Poly *poly_ptr;
    
-   poly_ptr = (HYPRE_LSI_Poly *) malloc(sizeof(HYPRE_LSI_Poly));
+   poly_ptr = hypre_TAlloc(HYPRE_LSI_Poly, 1, HYPRE_MEMORY_HOST);
 
    if (poly_ptr == NULL) return 1;
 
@@ -134,7 +134,7 @@ int HYPRE_LSI_PolySolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
       printf("HYPRE_LSI_PolySolve ERROR : PolySetup not called.\n");
       exit(1);
    }
-   orig_rhs = (double *) malloc( Nrows * sizeof(double) );
+   orig_rhs = hypre_TAlloc(double,  Nrows , HYPRE_MEMORY_HOST);
    for ( i = 0; i < Nrows; i++ ) 
    {
       orig_rhs[i] = rhs[i]; 
@@ -175,7 +175,7 @@ int HYPRE_LSI_PolySetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* ---------------------------------------------------------------- */
 
    order = poly_ptr->order;
-   coefs = (double *) malloc((order+1) * sizeof(double));
+   coefs = hypre_TAlloc(double, (order+1) , HYPRE_MEMORY_HOST);
    poly_ptr->coefficients = coefs;
 
    /* ---------------------------------------------------------------- */

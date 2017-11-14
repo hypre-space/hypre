@@ -129,7 +129,7 @@ int MLI_Solver_ParaSails::setup(MLI_Matrix *Amat_in)
     * set up other auxiliary vectors
     *-----------------------------------------------------------------*/
 
-   funcPtr = (MLI_Function *) malloc( sizeof( MLI_Function ) );
+   funcPtr = hypre_TAlloc( MLI_Function , 1, HYPRE_MEMORY_HOST);
    MLI_Utils_HypreParVectorGetDestroyFunc(funcPtr);
    paramString = new char[20];
    strcpy( paramString, "HYPRE_ParVector" );

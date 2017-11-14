@@ -1262,8 +1262,8 @@ transpose_matrix_create(  HYPRE_Int **i_face_element_pointer,
       first create face_element graph: -------------------------------------
       ====================================================================== */
 
-   i_face_element = (HYPRE_Int *) malloc((num_faces+1) * sizeof(HYPRE_Int));
-   j_face_element = (HYPRE_Int *) malloc(i_element_face[num_elements] * sizeof(HYPRE_Int));
+   i_face_element = hypre_TAlloc(HYPRE_Int, (num_faces+1) , HYPRE_MEMORY_HOST);
+   j_face_element = hypre_TAlloc(HYPRE_Int, i_element_face[num_elements] , HYPRE_MEMORY_HOST);
 
 
    for (i=0; i < num_faces; i++)
@@ -1316,9 +1316,9 @@ matrix_matrix_product(    HYPRE_Int **i_element_edge_pointer,
 
    HYPRE_Int *i_element_edge, *j_element_edge;
 
-   j_local_element_edge = (HYPRE_Int *) malloc((num_edges+1) * sizeof(HYPRE_Int));
+   j_local_element_edge = hypre_TAlloc(HYPRE_Int, (num_edges+1) , HYPRE_MEMORY_HOST);
 
-   i_element_edge = (HYPRE_Int *) malloc((num_elements+1) * sizeof(HYPRE_Int));
+   i_element_edge = hypre_TAlloc(HYPRE_Int, (num_elements+1) , HYPRE_MEMORY_HOST);
 
    for (i=0; i < num_elements+1; i++)
       i_element_edge[i] = 0;
@@ -1366,8 +1366,8 @@ matrix_matrix_product(    HYPRE_Int **i_element_edge_pointer,
 
    i_element_edge[0] = 0;
 
-   j_element_edge = (HYPRE_Int *) malloc(i_element_edge[num_elements]
-                                         * sizeof(HYPRE_Int));
+   j_element_edge = hypre_TAlloc(HYPRE_Int, i_element_edge[num_elements]
+                                         , HYPRE_MEMORY_HOST);
 
    /* fill--in the actual j_element_edge array: --------------------- */
 

@@ -49,7 +49,7 @@
 
 Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
 {
-    Numbering *numb = (Numbering *) malloc(sizeof(Numbering));
+    Numbering *numb = hypre_TAlloc(Numbering, 1, HYPRE_MEMORY_HOST);
     HYPRE_Int row, i, len, *ind;
     HYPRE_Real *val;
     HYPRE_Int num_external = 0;
@@ -60,7 +60,7 @@ Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
     numb->num_loc = mat->end_row - mat->beg_row + 1;
     numb->num_ind = mat->end_row - mat->beg_row + 1;
 
-    numb->local_to_global = (HYPRE_Int *) malloc((numb->num_loc+size) * sizeof(HYPRE_Int));
+    numb->local_to_global = hypre_TAlloc(HYPRE_Int, (numb->num_loc+size) , HYPRE_MEMORY_HOST);
     numb->hash            = HashCreate(2*size+1);
 
     /* Set up the local part of local_to_global */
@@ -86,8 +86,8 @@ Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
 		        /* allocate more space for numbering */
 		        numb->size *= 2;
 		        numb->local_to_global = (HYPRE_Int *) 
-			    realloc(numb->local_to_global, 
-			    (numb->num_loc+numb->size)*sizeof(HYPRE_Int));
+			    hypre_TReAlloc(numb->local_to_global,HYPRE_Int,  
+			    (numb->num_loc+numb->size), HYPRE_MEMORY_HOST);
                         newHash = HashCreate(2*numb->size+1);
 		        HashRehash(numb->hash, newHash);
 		        HashDestroy(numb->hash);
@@ -124,7 +124,7 @@ Numbering *NumberingCreate(Matrix *mat, HYPRE_Int size)
 
 Numbering *NumberingCreateCopy(Numbering *orig)
 {
-    Numbering *numb = (Numbering *) malloc(sizeof(Numbering));
+    Numbering *numb = hypre_TAlloc(Numbering, 1, HYPRE_MEMORY_HOST);
 
     numb->size    = orig->size;
     numb->beg_row = orig->beg_row;
@@ -133,9 +133,9 @@ Numbering *NumberingCreateCopy(Numbering *orig)
     numb->num_ind = orig->num_ind;
 
     numb->local_to_global = 
-        (HYPRE_Int *) malloc((numb->num_loc+numb->size) * sizeof(HYPRE_Int));
-    memcpy(numb->local_to_global, orig->local_to_global, 
-         numb->num_ind*sizeof(HYPRE_Int));
+        hypre_TAlloc(HYPRE_Int, (numb->num_loc+numb->size) , HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(numb->local_to_global,  orig->local_to_global,  
+				  HYPRE_Int, numb->num_ind, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
     numb->hash = HashCreate(2*numb->size+1);
     HashRehash(orig->hash, numb->hash);

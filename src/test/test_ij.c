@@ -2637,7 +2637,7 @@ main( HYPRE_Int   argc,
 	 hypre_assert( constraints != NULL );
        }	
 
-       eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
+       eigenvalues = hypre_CTAlloc(HYPRE_Real,  blockSize, HYPRE_MEMORY_HOST);
 	
        time_index = hypre_InitializeTiming("LOBPCG Solve");
        hypre_BeginTiming(time_index);
@@ -3003,7 +3003,7 @@ main( HYPRE_Int   argc,
 	 hypre_assert( constraints != NULL );
        }	
 
-       eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
+       eigenvalues = hypre_CTAlloc(HYPRE_Real,  blockSize, HYPRE_MEMORY_HOST);
 	
        time_index = hypre_InitializeTiming("LOBPCG Solve");
        hypre_BeginTiming(time_index);

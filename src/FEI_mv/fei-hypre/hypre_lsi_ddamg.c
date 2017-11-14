@@ -108,8 +108,8 @@ int HYPRE_LocalAMGSolve(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* create localb & localx of length = no. of interior nodes*/
    /* --------------------------------------------------------*/
 
-   temp_list = (int *)    malloc(interior_nrows * sizeof(int));
-   temp_vect = (double *) malloc(interior_nrows * sizeof(double));
+   temp_list = hypre_TAlloc(int, interior_nrows , HYPRE_MEMORY_HOST);
+   temp_vect = hypre_TAlloc(double, interior_nrows , HYPRE_MEMORY_HOST);
    for (i = 0; i < interior_nrows; i++) temp_list[i] = i;
    for (i = 0; i < local_nrows; i++) 
    {
@@ -200,8 +200,8 @@ int HYPRE_ApplyExtension(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* create localb & localx of length = no. of interior nodes*/
    /* --------------------------------------------------------*/
 
-   temp_list = (int *)    malloc( interior_nrows * sizeof(int));
-   temp_vect = (double *) malloc( interior_nrows * sizeof(double));
+   temp_list = hypre_TAlloc(int,  interior_nrows , HYPRE_MEMORY_HOST);
+   temp_vect = hypre_TAlloc(double,  interior_nrows , HYPRE_MEMORY_HOST);
    for (i = 0; i < interior_nrows; i++) temp_list[i] = i;
    for (i = 0; i < local_nrows; i++) 
    {
@@ -304,8 +304,8 @@ int HYPRE_ApplyExtensionTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* create localb & localx of length = no. of interior nodes*/
    /* --------------------------------------------------------*/
 
-   temp_list = (int *)    malloc( interior_nrows * sizeof(int));
-   temp_vect = (double *) malloc( interior_nrows * sizeof(double));
+   temp_list = hypre_TAlloc(int,  interior_nrows , HYPRE_MEMORY_HOST);
+   temp_vect = hypre_TAlloc(double,  interior_nrows , HYPRE_MEMORY_HOST);
    for (i=0; i<interior_nrows; i++) temp_list[i] = i;
    for (i=0; i<local_nrows; i++) 
    {
@@ -415,8 +415,8 @@ int HYPRE_ApplyTransform( HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* create localb & localx of length = no. of interior nodes*/
    /* --------------------------------------------------------*/
 
-   temp_list = (int *)    malloc( interior_nrows * sizeof(int));
-   temp_vect = (double *) malloc( interior_nrows * sizeof(double));
+   temp_list = hypre_TAlloc(int,  interior_nrows , HYPRE_MEMORY_HOST);
+   temp_vect = hypre_TAlloc(double,  interior_nrows , HYPRE_MEMORY_HOST);
    for (i = 0; i < interior_nrows; i++) temp_list[i] = i;
    for (i = 0; i < local_nrows; i++) 
    {
@@ -507,8 +507,8 @@ int HYPRE_ApplyTransformTranspose(HYPRE_Solver solver, HYPRE_ParVector x_csr,
    /* create localb & localx of length = no. of interior nodes*/
    /* --------------------------------------------------------*/
 
-   temp_list = (int *)    malloc( interior_nrows * sizeof(int));
-   temp_vect = (double *) malloc( interior_nrows * sizeof(double));
+   temp_list = hypre_TAlloc(int,  interior_nrows , HYPRE_MEMORY_HOST);
+   temp_vect = hypre_TAlloc(double,  interior_nrows , HYPRE_MEMORY_HOST);
    for (i=0; i<interior_nrows; i++) temp_list[i] = i;
    for (i=0; i<local_nrows; i++) 
    {
@@ -586,8 +586,8 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    MPI_Allreduce(&local_intface_nrows, &global_intface_nrows, 1,MPI_INT,
                  MPI_SUM,parComm);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-   itemp_vec  = (int *) malloc( num_procs * sizeof(int));
-   itemp_vec2 = (int *) malloc( num_procs * sizeof(int));
+   itemp_vec  = hypre_TAlloc(int,  num_procs , HYPRE_MEMORY_HOST);
+   itemp_vec2 = hypre_TAlloc(int,  num_procs , HYPRE_MEMORY_HOST);
    for (i = 0; i < num_procs; i++) itemp_vec[i] = 0;
    itemp_vec[myRank] = local_intface_nrows;
    MPI_Allreduce(itemp_vec, itemp_vec2, num_procs, MPI_INT, MPI_SUM, parComm);
@@ -693,16 +693,16 @@ int HYPRE_IntfaceSolve( HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* allocate temporary memory for GMRES                     */
    /* --------------------------------------------------------*/
 
-   darray = (double*) malloc((mlen+1)*sizeof(double));
-   HH = (double**) malloc((mlen+2)*sizeof(double*));
+   darray = hypre_TAlloc(double, (mlen+1), HYPRE_MEMORY_HOST);
+   HH = hypre_TAlloc(double*, (mlen+2), HYPRE_MEMORY_HOST);
    for (i=0; i<=mlen+1; i++)
-      HH[i] = (double*) malloc((mlen+2)*sizeof(double));
-   RS = (double*) malloc((mlen+2)*sizeof(double));
-   S  = (double*) malloc((mlen+2)*sizeof(double));
-   C  = (double*) malloc((mlen+2)*sizeof(double));
-   ws = (double**) malloc((mlen+3)*sizeof(double*));
+      HH[i] = hypre_TAlloc(double, (mlen+2), HYPRE_MEMORY_HOST);
+   RS = hypre_TAlloc(double, (mlen+2), HYPRE_MEMORY_HOST);
+   S  = hypre_TAlloc(double, (mlen+2), HYPRE_MEMORY_HOST);
+   C  = hypre_TAlloc(double, (mlen+2), HYPRE_MEMORY_HOST);
+   ws = hypre_TAlloc(double*, (mlen+3), HYPRE_MEMORY_HOST);
    for (i=0; i<=mlen+2; i++)
-      ws[i] = (double*) malloc(local_intface_nrows*sizeof(double));
+      ws[i] = hypre_TAlloc(double, local_intface_nrows, HYPRE_MEMORY_HOST);
 
    /* --------------------------------------------------------*/
    /* solve using GMRES                                       */
@@ -939,7 +939,7 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    /* find out how many rows are interior rows (remap[i] >= 0)*/
    /* --------------------------------------------------------*/
 
-   remap_array = (int *) malloc(local_nrows * sizeof(int));
+   remap_array = hypre_TAlloc(int, local_nrows , HYPRE_MEMORY_HOST);
    for ( i = 0; i < local_nrows; i++ ) remap_array[i] = 0;
    for ( i = myBegin; i <= myEnd; i++ )
    {
@@ -961,8 +961,8 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
 			0, 0+interior_nrows-1, &localA);
    HYPRE_IJMatrixSetObjectType(localA, HYPRE_PARCSR);
 
-   rowLengths = (int *) malloc(interior_nrows * sizeof(int));
-   offRowLengths = (int *) malloc(local_nrows * sizeof(int));
+   rowLengths = hypre_TAlloc(int, interior_nrows , HYPRE_MEMORY_HOST);
+   offRowLengths = hypre_TAlloc(int, local_nrows , HYPRE_MEMORY_HOST);
    rowCnt = 0;
    maxRowSize = 0;
    for ( i = myBegin; i <= myEnd; i++ )
@@ -989,17 +989,17 @@ int HYPRE_LSI_DDAMGSolve(HYPRE_ParCSRMatrix A_csr, HYPRE_ParVector x_csr,
    }
    HYPRE_IJMatrixSetRowSizes(localA, rowLengths);
    HYPRE_IJMatrixInitialize(localA);
-   newColInd = (int *)    malloc(maxRowSize * sizeof(int));
-   newColVal = (double *) malloc(maxRowSize * sizeof(double));
+   newColInd = hypre_TAlloc(int, maxRowSize , HYPRE_MEMORY_HOST);
+   newColVal = hypre_TAlloc(double, maxRowSize , HYPRE_MEMORY_HOST);
    rowCnt = 0;
-   offColInd = (int **)    malloc(local_nrows * sizeof(int*));
-   offColVal = (double **) malloc(local_nrows * sizeof(double*));
+   offColInd = hypre_TAlloc(int*, local_nrows , HYPRE_MEMORY_HOST);
+   offColVal = hypre_TAlloc(double*, local_nrows , HYPRE_MEMORY_HOST);
    for ( i = 0; i < local_nrows; i++ )
    {
       if ( offRowLengths[i] > 0 )
       {
-         offColInd[i] = (int *)    malloc(offRowLengths[i] * sizeof(int));
-         offColVal[i] = (double *) malloc(offRowLengths[i] * sizeof(double));
+         offColInd[i] = hypre_TAlloc(int, offRowLengths[i] , HYPRE_MEMORY_HOST);
+         offColVal[i] = hypre_TAlloc(double, offRowLengths[i] , HYPRE_MEMORY_HOST);
       }
       else
       {
@@ -1097,8 +1097,8 @@ printf("CHECK 2 = %e\n", ddata);
    local_intface_nrows = myEnd - myBegin + 1 - interior_nrows;
    MPI_Allreduce(&local_intface_nrows, &global_intface_nrows, 1,MPI_INT,
                  MPI_SUM,parComm);
-   itemp_vec  = (int *) malloc( num_procs * sizeof(int) );
-   itemp_vec2 = (int *) malloc( num_procs * sizeof(int) );
+   itemp_vec  = hypre_TAlloc(int,  num_procs , HYPRE_MEMORY_HOST);
+   itemp_vec2 = hypre_TAlloc(int,  num_procs , HYPRE_MEMORY_HOST);
    for (i = 0; i < num_procs; i++) itemp_vec[i] = 0;
    itemp_vec[myRank] = local_intface_nrows;
    MPI_Allreduce(itemp_vec, itemp_vec2, num_procs, MPI_INT, MPI_SUM, parComm);

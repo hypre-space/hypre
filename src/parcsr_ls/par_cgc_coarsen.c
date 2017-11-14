@@ -274,7 +274,7 @@ hypre_BoomerAMGCoarsenCGCb( hypre_ParCSRMatrix    *S,
      LoL_head = NULL;
      LoL_tail = NULL;
      num_left = 0;  /* compute num_left before each RS coarsening loop */
-     memcpy (measure_array,measure_array_master,num_variables*sizeof(HYPRE_Int));
+     hypre_TMemcpy(measure_array, measure_array_master, HYPRE_Int, num_variables, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
      memset (lists,0,sizeof(HYPRE_Int)*num_variables);
      memset (where,0,sizeof(HYPRE_Int)*num_variables);
 

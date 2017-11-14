@@ -339,9 +339,9 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
    {
       fp = fopen("Amat_ee", "r");
       hypre_fscanf(fp, "%d %d", &global_num_rows, &num_nonzeros_diag);
-      diag_i = (HYPRE_Int *) malloc((global_num_rows+1) * sizeof(HYPRE_Int));
-      diag_j = (HYPRE_Int *) malloc(num_nonzeros_diag * sizeof(HYPRE_Int));
-      diag_d = (HYPRE_Complex *) malloc(num_nonzeros_diag * sizeof(HYPRE_Complex));
+      diag_i = hypre_TAlloc(HYPRE_Int, (global_num_rows+1) , HYPRE_MEMORY_HOST);
+      diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_diag , HYPRE_MEMORY_HOST);
+      diag_d = hypre_TAlloc(HYPRE_Complex, num_nonzeros_diag , HYPRE_MEMORY_HOST);
       row = 0;
       nnz = 0;
       diag_i[0] = 0;
@@ -360,8 +360,8 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       fclose(fp);
       hypre_printf("nrows = %d, nnz = %d\n", row+1, nnz);
 
-      row_starts = (HYPRE_Int *) malloc(2 * sizeof(HYPRE_Int));
-      col_starts = (HYPRE_Int *) malloc(2 * sizeof(HYPRE_Int));
+      row_starts = hypre_TAlloc(HYPRE_Int, 2 , HYPRE_MEMORY_HOST);
+      col_starts = hypre_TAlloc(HYPRE_Int, 2 , HYPRE_MEMORY_HOST);
       row_starts[0] = col_starts[0] = 0;
       row_starts[1] = col_starts[1] = global_num_rows;
       num_cols_offd = 0;
@@ -381,9 +381,9 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       fp = fopen("Gmat", "r");
       hypre_fscanf(fp, "%d %d %d", &global_num_rows, &global_num_cols, 
              &num_nonzeros_diag);
-      diag_i = (HYPRE_Int *) malloc((global_num_rows+1) * sizeof(HYPRE_Int));
-      diag_j = (HYPRE_Int *) malloc(num_nonzeros_diag * sizeof(HYPRE_Int));
-      diag_d = (HYPRE_Complex *) malloc(num_nonzeros_diag * sizeof(HYPRE_Complex));
+      diag_i = hypre_TAlloc(HYPRE_Int, (global_num_rows+1) , HYPRE_MEMORY_HOST);
+      diag_j = hypre_TAlloc(HYPRE_Int, num_nonzeros_diag , HYPRE_MEMORY_HOST);
+      diag_d = hypre_TAlloc(HYPRE_Complex, num_nonzeros_diag , HYPRE_MEMORY_HOST);
       row = 0;
       nnz = 0;
       diag_i[0] = 0;
@@ -401,8 +401,8 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
       diag_i[global_num_rows] = nnz;
       fclose(fp);
 
-      row_starts = (HYPRE_Int *) malloc(2 * sizeof(HYPRE_Int));
-      col_starts = (HYPRE_Int *) malloc(2 * sizeof(HYPRE_Int));
+      row_starts = hypre_TAlloc(HYPRE_Int, 2 , HYPRE_MEMORY_HOST);
+      col_starts = hypre_TAlloc(HYPRE_Int, 2 , HYPRE_MEMORY_HOST);
       row_starts[0] = col_starts[0] = 0;
       row_starts[1] = global_num_rows;
       col_starts[1] = global_num_cols;
@@ -422,7 +422,7 @@ HYPRE_Int main( HYPRE_Int   argc, char *argv[] )
 
       hypre_ParCSRMatrixGenSpanningTree(g_matrix, &indices, 0);
       submatrices = (hypre_ParCSRMatrix **) 
-                    malloc(4*sizeof(hypre_ParCSRMatrix*));
+                    hypre_TAlloc(hypre_ParCSRMatrix*, 4, HYPRE_MEMORY_HOST);
       hypre_ParCSRMatrixExtractSubmatrices(par_matrix, indices, &submatrices);
    }
 #endif

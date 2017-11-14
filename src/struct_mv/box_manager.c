@@ -401,7 +401,7 @@ hypre_BoxManDeleteMultipleEntriesAndInfo( hypre_BoxManager *manager,
             to_ptr = hypre_BoxManInfoObject(manager, i);
             from_ptr = hypre_BoxManInfoObject(manager, i+j);
 
-            memcpy(to_ptr, from_ptr, info_size);
+            hypre_TMemcpy(to_ptr,  from_ptr, char, info_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          }
       }
 
@@ -720,7 +720,7 @@ hypre_BoxManAddEntry( hypre_BoxManager *manager,
 
          /*point in the info array */
          index_ptr =  hypre_BoxManInfoObject(manager, nentries);
-         memcpy(index_ptr, info, info_size);
+         hypre_TMemcpy(index_ptr,  info, char, info_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       }
             
       /* inherit and inject the numghost from manager into the entry (as
@@ -1688,7 +1688,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                   /* imin */
                   for (d = 0; d < ndim; d++)
                   {
-                     memcpy( &tmp_int, index_ptr, size);
+					 hypre_TMemcpy( &tmp_int,  index_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                      index_ptr =  (void *) ((char *) index_ptr + size);
                      hypre_IndexD(imin, d) = tmp_int;
                   }
@@ -1696,7 +1696,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                   /*imax */
                   for (d = 0; d < ndim; d++)
                   {
-                     memcpy( &tmp_int, index_ptr, size);
+					 hypre_TMemcpy( &tmp_int,  index_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                      index_ptr =  (void *) ((char *) index_ptr + size);
                      hypre_IndexD(imax, d) = tmp_int;
                   }
@@ -1813,7 +1813,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             for (d = 0; d < ndim; d++)
             {
                tmp_int = hypre_IndexD(index, d);
-               memcpy( index_ptr, &tmp_int, size);
+               hypre_TMemcpy( index_ptr,  &tmp_int, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                index_ptr =  (void *) ((char *) index_ptr + size);
             }
 
@@ -1822,18 +1822,18 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             for (d = 0; d < ndim; d++)
             {
                tmp_int = hypre_IndexD(index, d);
-               memcpy( index_ptr, &tmp_int, size);
+               hypre_TMemcpy( index_ptr,  &tmp_int, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                index_ptr =  (void *) ((char *) index_ptr + size);
             }
 
             /* proc */
             tmp_int = hypre_BoxManEntryProc(entry);
-            memcpy( index_ptr, &tmp_int, size);
+            hypre_TMemcpy( index_ptr,  &tmp_int, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
             index_ptr =  (void *) ((char *) index_ptr + size);
 
             /* id */
             tmp_int = hypre_BoxManEntryId(entry);
-            memcpy( index_ptr, &tmp_int, size);
+            hypre_TMemcpy( index_ptr,  &tmp_int, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
             index_ptr =  (void *) ((char *) index_ptr + size);
    
             /*info object*/
@@ -1841,7 +1841,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             position = hypre_BoxManEntryPosition(entry);
             info = hypre_BoxManInfoObject(manager, position);
 
-            memcpy(index_ptr, info, size);
+            hypre_TMemcpy(index_ptr,  info, char, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
             index_ptr =  (void *) ((char *) index_ptr + size);
        
          } /* end of loop over my entries */
@@ -1882,7 +1882,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             /* imin */
             for (d = 0; d < ndim; d++)
             {
-               memcpy( &tmp_int, index_ptr, size);
+			   hypre_TMemcpy( &tmp_int,  index_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                index_ptr =  (void *) ((char *) index_ptr + size);
                hypre_IndexD(imin, d) = tmp_int;
             }
@@ -1890,7 +1890,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             /*imax */
             for (d = 0; d < ndim; d++)
             {
-               memcpy( &tmp_int, index_ptr, size);
+			   hypre_TMemcpy( &tmp_int,  index_ptr, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                index_ptr =  (void *) ((char *) index_ptr + size);
                hypre_IndexD(imax, d) = tmp_int;
             }
@@ -2109,7 +2109,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
                position = hypre_BoxManEntryPosition(&entries[order_index[i]]);
                info = hypre_BoxManInfoObject(manager, position);
                
-               memcpy(index_ptr, info, info_size);
+               hypre_TMemcpy(index_ptr,  info, char,  info_size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
                index_ptr =  (void *) ((char *) index_ptr + info_size);
                
             }
@@ -2749,7 +2749,7 @@ hypre_FillResponseBoxManAssemble2( void *p_recv_contact_buf,
       for (d = 0; d < ndim; d++)
       {
          tmp_int = hypre_IndexD(index, d);
-         memcpy( index_ptr, &tmp_int, size);
+         hypre_TMemcpy( index_ptr,  &tmp_int, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          index_ptr =  (void *) ((char *) index_ptr + size);
       }
       /* imax */  
@@ -2757,17 +2757,17 @@ hypre_FillResponseBoxManAssemble2( void *p_recv_contact_buf,
       for (d = 0; d < ndim; d++)
       {
          tmp_int = hypre_IndexD(index, d);
-         memcpy( index_ptr, &tmp_int, size);
+         hypre_TMemcpy( index_ptr,  &tmp_int, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
          index_ptr =  (void *) ((char *) index_ptr + size);
       }
       /* proc */
       proc_id =  hypre_BoxManEntryProc(entry);
-      memcpy( index_ptr, &proc_id, size);
+      hypre_TMemcpy( index_ptr,  &proc_id, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       index_ptr =  (void *) ((char *) index_ptr + size);
       
       /* id */
       box_id = hypre_BoxManEntryId(entry);
-      memcpy( index_ptr, &box_id, size);
+      hypre_TMemcpy( index_ptr,  &box_id, HYPRE_Int, 1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       index_ptr =  (void *) ((char *) index_ptr + size);
       
       /*info*/
@@ -2775,7 +2775,7 @@ hypre_FillResponseBoxManAssemble2( void *p_recv_contact_buf,
       position = hypre_BoxManEntryPosition(entry);
       info = hypre_BoxManInfoObject(manager, position);
 
-      memcpy(index_ptr, info, size);
+      hypre_TMemcpy(index_ptr,  info, char, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
       index_ptr =  (void *) ((char *) index_ptr + size);
       

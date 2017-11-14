@@ -106,7 +106,7 @@ int HYPRE_LSI_BlockPrecondCreate(MPI_Comm mpi_comm, HYPRE_Solver *solver)
 {
    (void) mpi_comm;
    HYPRE_LSI_BlockPrecond *cprecon = (HYPRE_LSI_BlockPrecond *)
-                                     calloc(1, sizeof(HYPRE_LSI_BlockPrecond));
+                                     hypre_CTAlloc(HYPRE_LSI_BlockPrecond, 1, HYPRE_MEMORY_HOST);
    HYPRE_LSI_BlockP *precon = (HYPRE_LSI_BlockP *) new HYPRE_LSI_BlockP();
    cprecon->precon = (void *) precon;
    (*solver) = (HYPRE_Solver) cprecon;
@@ -2189,8 +2189,8 @@ int HYPRE_LSI_BlockP::setupPrecon(HYPRE_Solver *precon, HYPRE_IJMatrix Amat,
           break;
       case 5 :
           HYPRE_EuclidCreate( mpi_comm, precon );
-          targv = (char **) malloc( 4 * sizeof(char*) );
-          for ( i = 0; i < 4; i++ ) targv[i] = (char *) malloc(sizeof(char)*50);
+          targv = hypre_TAlloc(char*,  4 , HYPRE_MEMORY_HOST);
+          for ( i = 0; i < 4; i++ ) targv[i] = hypre_TAlloc(char, 50, HYPRE_MEMORY_HOST);
           strcpy(targv[0], "-level");
           sprintf(targv[1], "%1d", param_ptr.EuclidNLevels_);
           strcpy(targv[2], "-sparseA");

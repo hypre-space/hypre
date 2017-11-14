@@ -2011,11 +2011,11 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
       G_diag = hypre_ParCSRMatrixDiag(G_csr);
       T_diag_i = hypre_CSRMatrixI(G_diag);
       T_diag_j = hypre_CSRMatrixJ(G_diag);
-      counts = (HYPRE_Int *) malloc(nrows_G * sizeof(HYPRE_Int));
+      counts = hypre_TAlloc(HYPRE_Int, nrows_G , HYPRE_MEMORY_HOST);
       for (i = 0; i < nrows_G; i++) counts[i] = 0;
       for (i = 0; i < T_diag_i[ncols_G]; i++) counts[T_diag_j[i]]++;
-      G_diag_i = (HYPRE_Int *) malloc((nrows_G+1) * sizeof(HYPRE_Int));
-      G_diag_j = (HYPRE_Int *) malloc(T_diag_i[ncols_G] * sizeof(HYPRE_Int));
+      G_diag_i = hypre_TAlloc(HYPRE_Int, (nrows_G+1) , HYPRE_MEMORY_HOST);
+      G_diag_j = hypre_TAlloc(HYPRE_Int, T_diag_i[ncols_G] , HYPRE_MEMORY_HOST);
       G_diag_i[0] = 0;
       for (i = 1; i <= nrows_G; i++) G_diag_i[i] = G_diag_i[i-1] + counts[i-1];
       for (i = 0; i < ncols_G; i++)
@@ -2034,7 +2034,7 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
 
    /* form G transpose in special form (2 nodes per edge max) */
 
-   GT_diag_mat = (HYPRE_Int *) malloc(2 * ncols_G * sizeof(HYPRE_Int));
+   GT_diag_mat = hypre_TAlloc(HYPRE_Int, 2 * ncols_G , HYPRE_MEMORY_HOST);
    for (i = 0; i < 2 * ncols_G; i++) GT_diag_mat[i] = -1;
    for (i = 0; i < nrows_G; i++)
    {
@@ -2048,11 +2048,11 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
 
    /* BFS on the local matrix graph to find tree */
 
-   nodes_marked = (HYPRE_Int *) malloc(nrows_G * sizeof(HYPRE_Int));
-   edges_marked = (HYPRE_Int *) malloc(ncols_G * sizeof(HYPRE_Int));
+   nodes_marked = hypre_TAlloc(HYPRE_Int, nrows_G , HYPRE_MEMORY_HOST);
+   edges_marked = hypre_TAlloc(HYPRE_Int, ncols_G , HYPRE_MEMORY_HOST);
    for (i = 0; i < nrows_G; i++) nodes_marked[i] = 0; 
    for (i = 0; i < ncols_G; i++) edges_marked[i] = 0; 
-   queue = (HYPRE_Int *) malloc(nrows_G * sizeof(HYPRE_Int));
+   queue = hypre_TAlloc(HYPRE_Int, nrows_G , HYPRE_MEMORY_HOST);
    queue_head = 0;
    queue_tail = 1;
    queue[0] = 0;
@@ -2114,7 +2114,7 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
       if ((nsends+nrecvs) > 0)
       {
          n_proc_array = 0;
-         proc_array = (HYPRE_Int *) malloc((nsends+nrecvs) * sizeof(HYPRE_Int));
+         proc_array = hypre_TAlloc(HYPRE_Int, (nsends+nrecvs) , HYPRE_MEMORY_HOST);
          for (i = 0; i < nsends; i++) proc_array[i] = send_procs[i];
          for (i = 0; i < nrecvs; i++) proc_array[nsends+i] = recv_procs[i];
          hypre_qsort0(proc_array, 0, nsends+nrecvs-1); 
@@ -2123,23 +2123,23 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
             if (proc_array[i] != proc_array[n_proc_array])
                proc_array[n_proc_array++] = proc_array[i];
       }
-      pgraph_i = (HYPRE_Int *) malloc((nprocs+1) * sizeof(HYPRE_Int));
-      recv_cnts = (HYPRE_Int *) malloc(nprocs * sizeof(HYPRE_Int));
+      pgraph_i = hypre_TAlloc(HYPRE_Int, (nprocs+1) , HYPRE_MEMORY_HOST);
+      recv_cnts = hypre_TAlloc(HYPRE_Int, nprocs , HYPRE_MEMORY_HOST);
       hypre_MPI_Allgather(&n_proc_array, 1, HYPRE_MPI_INT, recv_cnts, 1,
                           HYPRE_MPI_INT, comm);
       pgraph_i[0] = 0;
       for (i = 1; i <= nprocs; i++)
          pgraph_i[i] = pgraph_i[i-1] + recv_cnts[i-1];
-      pgraph_j = (HYPRE_Int *) malloc(pgraph_i[nprocs] * sizeof(HYPRE_Int));
+      pgraph_j = hypre_TAlloc(HYPRE_Int, pgraph_i[nprocs] , HYPRE_MEMORY_HOST);
       hypre_MPI_Allgatherv(proc_array, n_proc_array, HYPRE_MPI_INT, pgraph_j,
                            recv_cnts, pgraph_i, HYPRE_MPI_INT, comm);
       free(recv_cnts);
 
       /* BFS on the processor graph to determine parent and children */
 
-      nodes_marked = (HYPRE_Int *) malloc(nprocs * sizeof(HYPRE_Int));
+      nodes_marked = hypre_TAlloc(HYPRE_Int, nprocs , HYPRE_MEMORY_HOST);
       for (i = 0; i < nprocs; i++) nodes_marked[i] = -1; 
-      queue = (HYPRE_Int *) malloc(nprocs * sizeof(HYPRE_Int));
+      queue = hypre_TAlloc(HYPRE_Int, nprocs , HYPRE_MEMORY_HOST);
       queue_head = 0;
       queue_tail = 1;
       node = 0;
@@ -2165,7 +2165,7 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
       if (n_children == 0) {n_children = 0; children = NULL;}
       else
       {
-         children = (HYPRE_Int *) malloc(n_children * sizeof(HYPRE_Int));
+         children = hypre_TAlloc(HYPRE_Int, n_children , HYPRE_MEMORY_HOST);
          n_children = 0;
          for (i = 0; i < nprocs; i++) 
             if (nodes_marked[i] == mypid) children[n_children++] = i;
@@ -2234,7 +2234,7 @@ void hypre_ParCSRMatrixGenSpanningTree( hypre_ParCSRMatrix *G_csr,
    tree_size = 0;
    for (i = 0; i < ncols_G; i++)
       if (edges_marked[i] == 1) tree_size++;
-   t_indices = (HYPRE_Int *) malloc((tree_size+1) * sizeof(HYPRE_Int));
+   t_indices = hypre_TAlloc(HYPRE_Int, (tree_size+1) , HYPRE_MEMORY_HOST);
    t_indices[0] = tree_size;
    tree_size = 1;
    for (i = 0; i < ncols_G; i++)
@@ -2296,8 +2296,8 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
     * compute new matrix dimensions
     * ----------------------------------------------------- */
 
-   proc_offsets1 = (HYPRE_Int *) malloc((nprocs+1) * sizeof(HYPRE_Int));
-   proc_offsets2 = (HYPRE_Int *) malloc((nprocs+1) * sizeof(HYPRE_Int));
+   proc_offsets1 = hypre_TAlloc(HYPRE_Int, (nprocs+1) , HYPRE_MEMORY_HOST);
+   proc_offsets2 = hypre_TAlloc(HYPRE_Int, (nprocs+1) , HYPRE_MEMORY_HOST);
    hypre_MPI_Allgather(&nindices, 1, HYPRE_MPI_INT, proc_offsets1, 1,
                        HYPRE_MPI_INT, comm);
    k = 0;
@@ -2316,7 +2316,7 @@ void hypre_ParCSRMatrixExtractSubmatrices( hypre_ParCSRMatrix *A_csr,
     * assign id's to row and col for later processing
     * ----------------------------------------------------- */
 
-   exp_indices = (HYPRE_Int *) malloc(nrows_A * sizeof(HYPRE_Int));
+   exp_indices = hypre_TAlloc(HYPRE_Int, nrows_A , HYPRE_MEMORY_HOST);
    for (i = 0; i < nrows_A; i++) exp_indices[i] = -1;
    for (i = 0; i < nindices; i++) 
    {
@@ -2654,8 +2654,8 @@ void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr,
     * compute new matrix dimensions
     * ----------------------------------------------------- */
 
-   proc_offsets1 = (HYPRE_Int *) malloc((nprocs+1) * sizeof(HYPRE_Int));
-   proc_offsets2 = (HYPRE_Int *) malloc((nprocs+1) * sizeof(HYPRE_Int));
+   proc_offsets1 = hypre_TAlloc(HYPRE_Int, (nprocs+1) , HYPRE_MEMORY_HOST);
+   proc_offsets2 = hypre_TAlloc(HYPRE_Int, (nprocs+1) , HYPRE_MEMORY_HOST);
    hypre_MPI_Allgather(&nindices, 1, HYPRE_MPI_INT, proc_offsets1, 1,
                        HYPRE_MPI_INT, comm);
    k = 0;
@@ -2674,7 +2674,7 @@ void hypre_ParCSRMatrixExtractRowSubmatrices( hypre_ParCSRMatrix *A_csr,
     * assign id's to row and col for later processing
     * ----------------------------------------------------- */
 
-   exp_indices = (HYPRE_Int *) malloc(nrows_A * sizeof(HYPRE_Int));
+   exp_indices = hypre_TAlloc(HYPRE_Int, nrows_A , HYPRE_MEMORY_HOST);
    for (i = 0; i < nrows_A; i++) exp_indices[i] = -1;
    for (i = 0; i < nindices; i++) 
    {

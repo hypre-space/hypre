@@ -329,8 +329,8 @@ hypre_ParCSRBlockMatrixRAP(hypre_ParCSRBlockMatrix  *RT,
    num_threads = 1;
    
    bnnz = block_size * block_size;
-   r_a_products = (HYPRE_Complex *) malloc(bnnz * sizeof(HYPRE_Complex));
-   r_a_p_products = (HYPRE_Complex *) malloc(bnnz * sizeof(HYPRE_Complex));
+   r_a_products = hypre_TAlloc(HYPRE_Complex, bnnz , HYPRE_MEMORY_HOST);
+   r_a_p_products = hypre_TAlloc(HYPRE_Complex, bnnz , HYPRE_MEMORY_HOST);
 
    if (comm_pkg_RT)
    {

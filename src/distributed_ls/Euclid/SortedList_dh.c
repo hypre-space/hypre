@@ -318,7 +318,7 @@ void lengthen_list_private(SortedList_dh sList)
   SET_INFO("lengthening list");
 
   sList->list = (SRecord*)MALLOC_DH(size * sizeof(SRecord));
-  memcpy(sList->list, tmp, sList->countMax * sizeof(SRecord)); 
+  hypre_TMemcpy(sList->list,  tmp, SRecord, sList->countMax, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST); 
   SET_INFO("doubling size of sList->list");
   FREE_DH(tmp); CHECK_V_ERROR;
   END_FUNC_DH

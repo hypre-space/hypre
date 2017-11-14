@@ -896,7 +896,7 @@ void reduce_timings_private(Euclid_dh ctx)
   if (np_dh > 1) {
     HYPRE_Real bufOUT[TIMING_BINS];
 
-    memcpy(bufOUT, ctx->timing, TIMING_BINS*sizeof(HYPRE_Real));
+    hypre_TMemcpy(bufOUT,  ctx->timing, HYPRE_Real, TIMING_BINS, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
     hypre_MPI_Reduce(bufOUT, ctx->timing, TIMING_BINS, hypre_MPI_REAL, hypre_MPI_MAX, 0, comm_dh);
   }
 

@@ -232,7 +232,7 @@ size_t mempush(const void *ptr, size_t size, hypre_int action){
       fprintf(stderr,"mempush can start only with an insertion or a size call \n");
       return 0;
     }
-    head = (node*)malloc(sizeof(node));
+    head = hypre_TAlloc(node, 1, HYPRE_MEMORY_HOST);
     head->ptr=ptr;
     head->size=size;
     head->next=NULL;
@@ -311,7 +311,7 @@ void memdel(node **head, node *found){
 }
 void meminsert(node **head, const void  *ptr,size_t size){
   node *nhead;
-  nhead = (node*)malloc(sizeof(node));
+  nhead = hypre_TAlloc(node, 1, HYPRE_MEMORY_HOST);
   nhead->ptr=ptr;
   nhead->size=size;
   nhead->next=*head;

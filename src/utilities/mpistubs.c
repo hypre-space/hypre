@@ -216,7 +216,7 @@ hypre_MPI_Allgather( void               *sendbuf,
 
       case hypre_MPI_BYTE:
       {
-         memcpy(recvbuf, sendbuf, sendcount);
+         hypre_Memcpy(recvbuf,  sendbuf,  sendcount, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       } 
       break;
 
@@ -528,7 +528,7 @@ hypre_MPI_Allreduce( void              *sendbuf,
 
       case hypre_MPI_BYTE:
       {
-         memcpy(recvbuf, sendbuf, count);
+         hypre_Memcpy(recvbuf,  sendbuf,  count, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       } 
       break;
 

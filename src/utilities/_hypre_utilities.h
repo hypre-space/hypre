@@ -437,26 +437,14 @@ extern "C" {
 #define hypre_TFree(ptr,location) \
 ( hypre_Free((char *)ptr, location), ptr = NULL )
 
-#define hypre_DataCopyToData(ptrH,ptrD,type,count) memcpy(ptrD, ptrH, sizeof(type)*(count))
-#define hypre_DataCopyFromData(ptrH,ptrD,type,count) memcpy(ptrH, ptrD, sizeof(type)*(count))
+#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
+(hypre_Memcpy((char *)(dst),(char *)(src),(size_t)(sizeof(type) * (count)),locdst, locsrc))
+
 #define hypre_DeviceMemset(ptr,value,type,count)	memset(ptr,value,count*sizeof(type))
   
 #define hypre_PinnedTAlloc(type, count)\
 ( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
 
-/*	
-#define  hypre_TAlloc(type,  count, HYPRE_MEMORY_HOST) \
-( (type *)hypre_MAllocHost((size_t)(sizeof(type) * (count))) )
-
-#define  hypre_CTAlloc(type,  count, HYPRE_MEMORY_HOST) \
-( (type *)hypre_CAllocHost((size_t)(count), (size_t)sizeof(type)) )
-
-#define  hypre_TReAlloc(ptr,  type,  count, HYPRE_MEMORY_HOST) \
-( (type *)hypre_ReAllocHost((char *)ptr, (size_t)(sizeof(type) * (count))) )
-
-#define  hypre_TFree(ptr, HYPRE_MEMORY_HOST) \
-( hypre_FreeHost((char *)ptr), ptr = NULL )
-*/
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/
@@ -476,6 +464,8 @@ char *hypre_SharedMAlloc ( size_t size );
 char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
 char *hypre_SharedReAlloc ( char *ptr , size_t size );
 void hypre_SharedFree ( char *ptr );
+void hypre_Memcpy( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
+void hypre_MemcpyAsync( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );	
 HYPRE_Real *hypre_IncrementSharedDataPtr ( HYPRE_Real *ptr , size_t size );
 
 /* memory_dmalloc.c */
