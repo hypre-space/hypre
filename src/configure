@@ -1502,8 +1502,8 @@ Optional Packages:
   --with-fmangle=FMANGLE  FMANGLE contains a string indicating the type of
                           name mangling to use when calling hypre from
                           Fortran. It can be set to: "no-underscores",
-                          "one-underscore", "two-underscores", and
-                          "caps-no-underscores".
+                          "one-underscore", "two-underscores",
+                          "caps-no-underscores, and "one-before-after".
   --with-fmangle-blas=FMANGLE
                           Name mangling for BLAS. See --with-fmangle.
   --with-fmangle-lapack=FMANGLE
@@ -3142,6 +3142,7 @@ if test "${with_fmangle+set}" = set; then :
     one-underscore)      hypre_fmangle=2 ;;
     two-underscores)     hypre_fmangle=3 ;;
     caps-no-underscores) hypre_fmangle=4 ;;
+    one-before-after)    hypre_fmangle=5 ;;
  esac
 
 else
@@ -3166,6 +3167,7 @@ if test "${with_fmangle_blas+set}" = set; then :
     one-underscore)      hypre_fmangle_blas=2 ;;
     two-underscores)     hypre_fmangle_blas=3 ;;
     caps-no-underscores) hypre_fmangle_blas=4 ;;
+    one-before-after)    hypre_fmangle_blas=5 ;;
  esac
 
 else
@@ -3190,6 +3192,7 @@ if test "${with_fmangle_lapack+set}" = set; then :
     one-underscore)      hypre_fmangle_lapack=2 ;;
     two-underscores)     hypre_fmangle_lapack=3 ;;
     caps-no-underscores) hypre_fmangle_lapack=4 ;;
+    one-before-after)    hypre_fmangle_lapack=5 ;;
  esac
 
 else

@@ -9,17 +9,17 @@ multigrid methods for the solution of large, sparse linear systems of equations
 on massively parallel computers.
 
 Legal stuff (copyright, disclaimer, licensing restrictions, etc.) can be found
-in the file `COPYRIGHT_and_DISCLAIMER'.
+in the file 'COPYRIGHT_and_DISCLAIMER'.
 
-To install HYPRE, please see the Users Manual or the file `INSTALL'.
+To install HYPRE, please see the Users Manual or the file 'INSTALL'.
 
-The HYPRE Users Manual and Reference Manual can be found in the `docs' directory
+The HYPRE Users Manual and Reference Manual can be found in the 'docs' directory
 of this release, and also via the `Software' link on the HYPRE home page.
 
-An overview of the HYPRE release history can be found in the file `CHANGELOG'.
+An overview of the HYPRE release history can be found in the file 'CHANGELOG'.
 
 To subscribe to the mailing list "New Release Announcements (hypre-announce)",
-use the `Mailing Lists' link on the HYPRE home page.
+use the 'Mailing Lists' link on the HYPRE home page.
 
 We appreciate feedback from users of this package.  Please submit comments,
 suggestions, and issue reports to hypre-support@llnl.gov.
