@@ -83,8 +83,8 @@ HYPRE_Int main(HYPRE_Int argc, char *argv[])
     end_row--;
 #endif
 
-    x = (HYPRE_Real *) malloc((end_row-beg_row+1) * sizeof(HYPRE_Real));
-    b = (HYPRE_Real *) malloc((end_row-beg_row+1) * sizeof(HYPRE_Real));
+    x = hypre_TAlloc(HYPRE_Real, (end_row-beg_row+1) , HYPRE_MEMORY_HOST);
+    b = hypre_TAlloc(HYPRE_Real, (end_row-beg_row+1) , HYPRE_MEMORY_HOST);
 
     A = MatrixCreate(hypre_MPI_COMM_WORLD, beg_row, end_row);
 

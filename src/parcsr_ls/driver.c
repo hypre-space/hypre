@@ -240,10 +240,10 @@ main( HYPRE_Int   argc,
    trunc_factor = 0.0;
    cycle_type = 1;
 
-   num_grid_sweeps = hypre_CTAlloc(HYPRE_Int,4);
-   grid_relax_type = hypre_CTAlloc(HYPRE_Int,4);
-   grid_relax_points = hypre_CTAlloc(HYPRE_Int *,4);
-   relax_weight = hypre_CTAlloc(HYPRE_Real,max_levels);
+   num_grid_sweeps = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
+   grid_relax_type = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
+   grid_relax_points = hypre_CTAlloc(HYPRE_Int *, 4, HYPRE_MEMORY_HOST);
+   relax_weight = hypre_CTAlloc(HYPRE_Real, max_levels, HYPRE_MEMORY_HOST);
 
    for (i=0; i < max_levels; i++)
 	relax_weight[i] = 0.0;
@@ -252,7 +252,7 @@ main( HYPRE_Int   argc,
       /* fine grid */
       num_grid_sweeps[0] = 3;
       grid_relax_type[0] = relax_default; 
-      grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int, 4); 
+      grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  4, HYPRE_MEMORY_HOST); 
       grid_relax_points[0][0] = -2;
       grid_relax_points[0][1] = -1;
       grid_relax_points[0][2] = 1;
@@ -260,7 +260,7 @@ main( HYPRE_Int   argc,
       /* down cycle */
       num_grid_sweeps[1] = 4;
       grid_relax_type[1] = relax_default; 
-      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, 4); 
+      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  4, HYPRE_MEMORY_HOST); 
       grid_relax_points[1][0] = -1;
       grid_relax_points[1][1] = 1;
       grid_relax_points[1][2] = -2;
@@ -269,7 +269,7 @@ main( HYPRE_Int   argc,
       /* up cycle */
       num_grid_sweeps[2] = 4;
       grid_relax_type[2] = relax_default; 
-      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, 4); 
+      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  4, HYPRE_MEMORY_HOST); 
       grid_relax_points[2][0] = -2;
       grid_relax_points[2][1] = -2;
       grid_relax_points[2][2] = 1;
@@ -280,28 +280,28 @@ main( HYPRE_Int   argc,
       /* fine grid */
       num_grid_sweeps[0] = 2;
       grid_relax_type[0] = relax_default; 
-      grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int, 2); 
+      grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST); 
       grid_relax_points[0][0] = 1;
       grid_relax_points[0][1] = -1;
   
       /* down cycle */
       num_grid_sweeps[1] = 2;
       grid_relax_type[1] = relax_default; 
-      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, 2); 
+      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST); 
       grid_relax_points[1][0] = 1;
       grid_relax_points[1][1] = -1;
    
       /* up cycle */
       num_grid_sweeps[2] = 2;
       grid_relax_type[2] = relax_default; 
-      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, 2); 
+      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST); 
       grid_relax_points[2][0] = -1;
       grid_relax_points[2][1] = 1;
    }
    /* coarsest grid */
    num_grid_sweeps[3] = 1;
    grid_relax_type[3] = 9;
-   grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int, 1);
+   grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
    grid_relax_points[3][0] = 0;
 
    /* defaults for GMRES */
@@ -1055,7 +1055,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(HYPRE_Real, 4);
+   values = hypre_CTAlloc(HYPRE_Real,  4, HYPRE_MEMORY_HOST);
 
    values[1] = -cx;
    values[2] = -cy;
@@ -1078,7 +1078,7 @@ BuildParLaplacian( HYPRE_Int                  argc,
    A = (HYPRE_ParCSRMatrix) 
 	GenerateLaplacian(hypre_MPI_COMM_WORLD, nx, ny, nz, P, Q, R, p, q, r, values);
 
-   hypre_TFree(values);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
    *A_ptr = A;
 
@@ -1220,7 +1220,7 @@ BuildParDifConv( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(HYPRE_Real, 7);
+   values = hypre_CTAlloc(HYPRE_Real,  7, HYPRE_MEMORY_HOST);
 
    values[1] = -cx/(hinx*hinx);
    values[2] = -cy/(hiny*hiny);
@@ -1246,7 +1246,7 @@ BuildParDifConv( HYPRE_Int                  argc,
    A = (HYPRE_ParCSRMatrix) GenerateDifConv(hypre_MPI_COMM_WORLD,
                                nx, ny, nz, P, Q, R, p, q, r, values);
 
-   hypre_TFree(values);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
    *A_ptr = A;
 
@@ -1474,7 +1474,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(HYPRE_Real, 2);
+   values = hypre_CTAlloc(HYPRE_Real,  2, HYPRE_MEMORY_HOST);
 
    values[1] = -1.0;
 
@@ -1495,7 +1495,7 @@ BuildParLaplacian9pt( HYPRE_Int                  argc,
    A = (HYPRE_ParCSRMatrix) GenerateLaplacian9pt(hypre_MPI_COMM_WORLD,
                                   nx, ny, P, Q, p, q, values);
 
-   hypre_TFree(values);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
    *A_ptr = A;
 
@@ -1600,7 +1600,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(HYPRE_Real, 2);
+   values = hypre_CTAlloc(HYPRE_Real,  2, HYPRE_MEMORY_HOST);
 
    values[0] = 26.0;
    if (nx == 1 || ny == 1 || nz == 1)
@@ -1612,7 +1612,7 @@ BuildParLaplacian27pt( HYPRE_Int                  argc,
    A = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt(hypre_MPI_COMM_WORLD,
                                nx, ny, nz, P, Q, R, p, q, r, values);
 
-   hypre_TFree(values);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
    *A_ptr = A;
 

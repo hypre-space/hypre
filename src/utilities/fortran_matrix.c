@@ -24,7 +24,7 @@ utilities_FortranMatrixCreate(void) {
 
   utilities_FortranMatrix* mtx;
 
-  mtx = (utilities_FortranMatrix*) malloc( sizeof(utilities_FortranMatrix) );
+  mtx = hypre_TAlloc(utilities_FortranMatrix, 1, HYPRE_MEMORY_HOST);
   hypre_assert( mtx != NULL );
 
   mtx->globalHeight = 0;
@@ -46,7 +46,7 @@ utilities_FortranMatrixAllocateData( hypre_longint  h, hypre_longint w,
   if ( mtx->value != NULL && mtx->ownsValues )
     free( mtx->value );
 
-  mtx->value = (HYPRE_Real*) calloc( h*w, sizeof(HYPRE_Real) );
+  mtx->value = hypre_CTAlloc(HYPRE_Real,  h*w, HYPRE_MEMORY_HOST);
   hypre_assert ( mtx->value != NULL );
 
   mtx->globalHeight = h;
@@ -661,7 +661,7 @@ utilities_FortranMatrixUpperInv( utilities_FortranMatrix* u ) {
   n = u->height;
   hypre_assert( u->width == n );
 
-  diag = (HYPRE_Real*)calloc( n, sizeof(HYPRE_Real) );
+  diag = hypre_CTAlloc(HYPRE_Real,  n, HYPRE_MEMORY_HOST);
   hypre_assert( diag != NULL );
 
   jc = u->globalHeight;

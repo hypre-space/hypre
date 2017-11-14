@@ -34,7 +34,7 @@ int MLI_Smoother_Create_Schwarz(void **smoother_obj)
 {
    MLI_Smoother_Schwarz *smoother;
 
-   smoother = hypre_CTAlloc( MLI_Smoother_Schwarz, 1 );
+   smoother = hypre_CTAlloc( MLI_Smoother_Schwarz,  1 , HYPRE_MEMORY_HOST);
    if ( smoother == NULL ) { (*smoother_obj) = NULL; return 1; }
    smoother->Amat = NULL;
 }
@@ -48,7 +48,7 @@ int MLI_Smoother_Destroy_Schwarz(void *smoother_obj)
    MLI_Smoother_Schwarz *smoother;
 
    smoother = (MLI_Smoother_Schwarz *) smoother_obj;
-   if ( smoother != NULL ) hypre_TFree( smoother );
+   if ( smoother != NULL ) hypre_TFree( smoother , HYPRE_MEMORY_HOST);
    return 0;
 }
 
@@ -96,7 +96,7 @@ int MLI_Smoother_Setup_Schwarz(void *smoother_obj,
     * construct a ParaSails smoother object
     *-----------------------------------------------------------------*/
 
-   smoother = hypre_CTAlloc( MLI_Smoother_ParaSails, 1 );
+   smoother = hypre_CTAlloc( MLI_Smoother_ParaSails,  1 , HYPRE_MEMORY_HOST);
    if ( smoother == NULL ) { (*smoother_obj) = NULL; return 1; }
    ps = ParaSailsCreate(comm, start_row, end_row, parasails_factorized);
    ps->loadbal_beta = parasails_loadbal;
@@ -157,7 +157,7 @@ int MLI_Smoother_Apply_ParaSails(void *smoother_obj, hypre_ParCSRMatrix *A,
 
    global_size = hypre_ParVectorGlobalSize(f);
    partition1  = hypre_ParVectorPartitioning(f);
-   partition2  = hypre_CTAlloc( int, num_procs+1 );
+   partition2  = hypre_CTAlloc( int,  num_procs+1 , HYPRE_MEMORY_HOST);
    for ( i = 0; i <= num_procs; i++ ) partition2[i] = partition1[i];
    Vtemp = hypre_ParVectorCreate(comm, global_size, partition2);
    Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
@@ -169,7 +169,7 @@ int MLI_Smoother_Apply_ParaSails(void *smoother_obj, hypre_ParCSRMatrix *A,
 
    hypre_ParVectorCopy(f, Vtemp);
    hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, Vtemp);
-   tmp_data = hypre_CTAlloc( double, n );
+   tmp_data = hypre_CTAlloc( double,  n , HYPRE_MEMORY_HOST);
 
    parasails_factorized = smoother->factorized;
 
@@ -189,7 +189,7 @@ int MLI_Smoother_Apply_ParaSails(void *smoother_obj, hypre_ParCSRMatrix *A,
     * clean up 
     *-----------------------------------------------------------------*/
 
-   hypre_TFree( tmp_data );
+   hypre_TFree( tmp_data , HYPRE_MEMORY_HOST);
 
    return(relax_error); 
 }
@@ -232,7 +232,7 @@ int MLI_Smoother_Apply_ParaSailsTrans(void *smoother_obj,hypre_ParCSRMatrix *A,
 
    global_size = hypre_ParVectorGlobalSize(f);
    partition1  = hypre_ParVectorPartitioning(f);
-   partition2  = hypre_CTAlloc( int, num_procs+1 );
+   partition2  = hypre_CTAlloc( int,  num_procs+1 , HYPRE_MEMORY_HOST);
    for ( i = 0; i <= num_procs; i++ ) partition2[i] = partition1[i];
    Vtemp = hypre_ParVectorCreate(comm, global_size, partition2);
    Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
@@ -244,7 +244,7 @@ int MLI_Smoother_Apply_ParaSailsTrans(void *smoother_obj,hypre_ParCSRMatrix *A,
 
    hypre_ParVectorCopy(f, Vtemp);
    hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, Vtemp);
-   tmp_data = hypre_CTAlloc( double, n );
+   tmp_data = hypre_CTAlloc( double,  n , HYPRE_MEMORY_HOST);
 
    parasails_factorized = smoother->factorized;
 
@@ -264,7 +264,7 @@ int MLI_Smoother_Apply_ParaSailsTrans(void *smoother_obj,hypre_ParCSRMatrix *A,
     * clean up 
     *-----------------------------------------------------------------*/
 
-   hypre_TFree( tmp_data );
+   hypre_TFree( tmp_data , HYPRE_MEMORY_HOST);
 
    return(relax_error); 
 }

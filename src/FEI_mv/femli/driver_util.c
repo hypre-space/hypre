@@ -50,7 +50,7 @@ void testEigen()
    double *matrix, *evalues, *evectors, *daux1, *daux2;
    FILE   *fp;
 
-   matrix = (double *) malloc( mDim * mDim * sizeof(double) );
+   matrix = hypre_TAlloc(double,  mDim * mDim , HYPRE_MEMORY_HOST);
    fp = fopen("test.m", "r");
    if ( fp == NULL )
    {
@@ -58,10 +58,10 @@ void testEigen()
       exit(1);
    }
    for ( i = 0; i < mDim*mDim; i++ ) fscanf(fp, "%lg", &(matrix[i])); 
-   evectors = (double *) malloc( mDim * mDim * sizeof(double) );
-   evalues  = (double *) malloc( mDim * sizeof(double) );
-   daux1    = (double *) malloc( mDim * sizeof(double) );
-   daux2    = (double *) malloc( mDim * sizeof(double) );
+   evectors = hypre_TAlloc(double,  mDim * mDim , HYPRE_MEMORY_HOST);
+   evalues  = hypre_TAlloc(double,  mDim , HYPRE_MEMORY_HOST);
+   daux1    = hypre_TAlloc(double,  mDim , HYPRE_MEMORY_HOST);
+   daux2    = hypre_TAlloc(double,  mDim , HYPRE_MEMORY_HOST);
    mli_computespectrum_(&mDim, &mDim, matrix, evalues, &matz, evectors,
                         daux1, daux2, &ierr);
    for ( i = 0; i < mDim; i++ ) printf("eigenvalue = %e\n", evalues[i]);
@@ -81,13 +81,13 @@ void testMergeSort()
    int i, j, nlist=7, maxLeng=20, **list, **list2, *listLengs;
    int newNList, *newList, *checkList, checkN, checkFlag;
 
-   listLengs = (int *) malloc( nlist * sizeof(int) );
-   list  = (int **) malloc( nlist * sizeof(int*) );
-   list2 = (int **) malloc( nlist * sizeof(int*) );
+   listLengs = hypre_TAlloc(int,  nlist , HYPRE_MEMORY_HOST);
+   list  = hypre_TAlloc(int*,  nlist , HYPRE_MEMORY_HOST);
+   list2 = hypre_TAlloc(int*,  nlist , HYPRE_MEMORY_HOST);
    for ( i = 0; i < nlist; i++ ) 
    {
-      list[i] = (int *) malloc( maxLeng * sizeof(int) );
-      list2[i] = (int *) malloc( maxLeng * sizeof(int) );
+      list[i] = hypre_TAlloc(int,  maxLeng , HYPRE_MEMORY_HOST);
+      list2[i] = hypre_TAlloc(int,  maxLeng , HYPRE_MEMORY_HOST);
    }
    listLengs[0] = 5;
    list[0][0] = 4;
@@ -134,7 +134,7 @@ void testMergeSort()
 /*
    for ( i = 0; i < newNList; i++ ) 
       printf("Merge List %5d = %d\n", i, newList[i]);
-   checkList = (int *) malloc( nlist * maxLeng * sizeof(int) );
+   checkList = hypre_TAlloc(int,  nlist * maxLeng , HYPRE_MEMORY_HOST);
    for ( i = 0; i < nlist; i++ ) 
       for ( j = 0; j < maxLeng; j++ ) checkList[i*maxLeng+j] = list[i][j];
    printf("QSort begins...\n");

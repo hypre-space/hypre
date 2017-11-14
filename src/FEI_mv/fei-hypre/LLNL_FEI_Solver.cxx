@@ -1128,9 +1128,9 @@ int LLNL_FEI_Solver::solveUsingSuperLU()
       for ( jcol = diagIA[irow]; jcol < diagIA[irow+1]; jcol++ )
          countArray[diagJA[jcol]]++;
    localNnz = diagIA[localNRows];
-   cscJA = (int *)    malloc( (localNRows+1) * sizeof(int) );
-   cscIA = (int *)    malloc( localNnz * sizeof(int) );
-   cscAA = (double *) malloc( localNnz * sizeof(double) );
+   cscJA = hypre_TAlloc(int,  (localNRows+1) , HYPRE_MEMORY_HOST);
+   cscIA = hypre_TAlloc(int,  localNnz , HYPRE_MEMORY_HOST);
+   cscAA = hypre_TAlloc(double,  localNnz , HYPRE_MEMORY_HOST);
    cscJA[0] = 0;
    localNnz = 0;
    for ( jcol = 1; jcol <= localNRows; jcol++ )

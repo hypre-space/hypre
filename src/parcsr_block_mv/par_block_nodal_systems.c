@@ -113,13 +113,13 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
 
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   row_starts_AN = hypre_CTAlloc(HYPRE_Int, 2);
+   row_starts_AN = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
    for (i=0; i < 2; i++)
    {
       row_starts_AN[i] = row_starts[i];
    }
 #else
-   row_starts_AN = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   row_starts_AN = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
    for (i=0; i < num_procs+1; i++)
    {
       row_starts_AN[i] = row_starts[i];
@@ -132,15 +132,15 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    /* the diag part */
 
    num_nonzeros_diag = A_diag_i[num_nodes];
-   AN_diag_i = hypre_CTAlloc(HYPRE_Int, num_nodes+1);
+   AN_diag_i = hypre_CTAlloc(HYPRE_Int,  num_nodes+1, HYPRE_MEMORY_HOST);
 
    for (i=0; i <= num_nodes; i++)
    {
       AN_diag_i[i] = A_diag_i[i];
    }
 
-   AN_diag_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_diag);     
-   AN_diag_data = hypre_CTAlloc(HYPRE_Real, num_nonzeros_diag);      
+   AN_diag_j = hypre_CTAlloc(HYPRE_Int,  num_nonzeros_diag, HYPRE_MEMORY_HOST);     
+   AN_diag_data = hypre_CTAlloc(HYPRE_Real,  num_nonzeros_diag, HYPRE_MEMORY_HOST);      
 
 
    AN_diag = hypre_CSRMatrixCreate(num_nodes, num_nodes, num_nonzeros_diag);
@@ -192,7 +192,7 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    /* copy the commpkg */
    if (comm_pkg)
    {
-      comm_pkg_AN = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
+      comm_pkg_AN = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
       hypre_ParCSRCommPkgComm(comm_pkg_AN) = comm;
 
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -206,10 +206,10 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
       send_map_elmts = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
       if (num_sends) 
       {
-         send_procs_AN = hypre_CTAlloc(HYPRE_Int, num_sends);
-         send_map_elmts_AN = hypre_CTAlloc(HYPRE_Int, send_map_starts[num_sends]);
+         send_procs_AN = hypre_CTAlloc(HYPRE_Int,  num_sends, HYPRE_MEMORY_HOST);
+         send_map_elmts_AN = hypre_CTAlloc(HYPRE_Int,  send_map_starts[num_sends], HYPRE_MEMORY_HOST);
       }
-      send_map_starts_AN = hypre_CTAlloc(HYPRE_Int, num_sends+1);
+      send_map_starts_AN = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
       send_map_starts_AN[0] = 0;
       for (i=0; i < num_sends; i++)
       {
@@ -227,8 +227,8 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
 
       recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
       recv_vec_starts = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
-      recv_vec_starts_AN = hypre_CTAlloc(HYPRE_Int, num_recvs+1);
-      if (num_recvs) recv_procs_AN = hypre_CTAlloc(HYPRE_Int, num_recvs);
+      recv_vec_starts_AN = hypre_CTAlloc(HYPRE_Int,  num_recvs+1, HYPRE_MEMORY_HOST);
+      if (num_recvs) recv_procs_AN = hypre_CTAlloc(HYPRE_Int,  num_recvs, HYPRE_MEMORY_HOST);
 
       recv_vec_starts_AN[0] = recv_vec_starts[0];
       for (i=0; i < num_recvs; i++)
@@ -245,21 +245,21 @@ hypre_BoomerAMGBlockCreateNodalA(hypre_ParCSRBlockMatrix *A,
    /* the off-diag part */
 
    num_cols_offd = hypre_CSRBlockMatrixNumCols(A_offd);
-   col_map_offd_AN = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+   col_map_offd_AN = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
    for (i=0; i < num_cols_offd; i++)
    {
       col_map_offd_AN[i] = col_map_offd[i];
    }
 
    num_nonzeros_offd = A_offd_i[num_nodes];
-   AN_offd_i = hypre_CTAlloc(HYPRE_Int, num_nodes+1);
+   AN_offd_i = hypre_CTAlloc(HYPRE_Int,  num_nodes+1, HYPRE_MEMORY_HOST);
    for (i=0; i <= num_nodes; i++)
    {
       AN_offd_i[i] = A_offd_i[i];
    }
       
-   AN_offd_j = hypre_CTAlloc(HYPRE_Int, num_nonzeros_offd);     
-   AN_offd_data = hypre_CTAlloc(HYPRE_Real, num_nonzeros_offd);
+   AN_offd_j = hypre_CTAlloc(HYPRE_Int,  num_nonzeros_offd, HYPRE_MEMORY_HOST);     
+   AN_offd_data = hypre_CTAlloc(HYPRE_Real,  num_nonzeros_offd, HYPRE_MEMORY_HOST);
 
    for (i=0; i< num_nonzeros_offd; i++)
    {

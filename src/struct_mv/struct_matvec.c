@@ -45,7 +45,7 @@ hypre_StructMatvecCreate( )
 {
    hypre_StructMatvecData *matvec_data;
 
-   matvec_data = hypre_CTAlloc(hypre_StructMatvecData, 1);
+   matvec_data = hypre_CTAlloc(hypre_StructMatvecData,  1, HYPRE_MEMORY_HOST);
 
    return (void *) matvec_data;
 }
@@ -1444,7 +1444,7 @@ hypre_StructMatvecDestroy( void *matvec_vdata )
       hypre_StructMatrixDestroy(matvec_data -> A);
       hypre_StructVectorDestroy(matvec_data -> x);
       hypre_ComputePkgDestroy(matvec_data -> compute_pkg );
-      hypre_TFree(matvec_data);
+      hypre_TFree(matvec_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

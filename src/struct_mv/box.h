@@ -189,8 +189,8 @@ HYPRE_Int indices_h[stencil_size];\
 HYPRE_Int * stencil_shape_d;\
 HYPRE_Int  stencil_shape_h[size*stencil_size];\
 HYPRE_Complex * data_A = hypre_StructMatrixData(A);\
-indices_d = hypre_DeviceTAlloc(HYPRE_Int, stencil_size);\
-stencil_shape_d = hypre_DeviceTAlloc(HYPRE_Int, size*stencil_size);\
+indices_d =  hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_DEVICE);\
+stencil_shape_d =  hypre_TAlloc(HYPRE_Int,  size*stencil_size, HYPRE_MEMORY_DEVICE);\
 for (HYPRE_Int ii = 0; ii < stencil_size; ii++)\
 {\
    HYPRE_Int jj = 0;\
@@ -200,21 +200,21 @@ for (HYPRE_Int ii = 0; ii < stencil_size; ii++)\
    for (jj = 1;jj < size;jj++)\
       stencil_shape_h[jj*stencil_size+ii] = hypre_IndexD(stencil_shape[ii], jj);\
 }\
-hypre_DataCopyToData(indices_h,indices_d,HYPRE_Int,stencil_size);\
-hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size);\
+hypre_TMemcpy( indices_d, indices_h, HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );\
+hypre_TMemcpy( stencil_shape_d, stencil_shape_h, HYPRE_Int, size*stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
 
 #define hypre_StructGetMatrixBoxData(A, i, si)  (data_A + indices_d[si])
 
 #define hypre_StructGetIndexD(index,i,index_d) (index_d)
 
 #define hypre_StructCleanIndexD()\
-hypre_DeviceTFree(indices_d);\
-hypre_DeviceTFree(stencil_shape_d);
+ hypre_TFree(indices_d, HYPRE_MEMORY_DEVICE);\
+ hypre_TFree(stencil_shape_d, HYPRE_MEMORY_DEVICE);
 
 #define hypre_StructPreparePrint()\
 HYPRE_Int tot_size = num_values*hypre_BoxVolume(hypre_BoxArrayBox(data_space, hypre_BoxArraySize(box_array)-1));\
-data_host = hypre_CTAlloc(HYPRE_Complex, tot_size);\
-hypre_DataCopyFromData(data_host,data,HYPRE_Complex,tot_size);
+data_host = hypre_CTAlloc(HYPRE_Complex,  tot_size, HYPRE_MEMORY_HOST);\
+hypre_TMemcpy(data_host,data,HYPRE_Complex,tot_size,HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);	\
 
 #define hypre_StructPostPrint() hypre_TFree(data_host)
 

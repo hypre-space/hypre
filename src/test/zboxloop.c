@@ -164,10 +164,10 @@ main( hypre_int argc,
    hypre_CopyBox(x1_data_box, x4_data_box);
 
    size = (nx+2)*(ny+2)*(nz+2);
-   xp1 = hypre_CTAlloc(HYPRE_Real, size);
-   xp2 = hypre_CTAlloc(HYPRE_Real, size);
-   xp3 = hypre_CTAlloc(HYPRE_Real, size);
-   xp4 = hypre_CTAlloc(HYPRE_Real, size);
+   xp1 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
+   xp2 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
+   xp3 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
+   xp4 = hypre_CTAlloc(HYPRE_Real,  size, HYPRE_MEMORY_HOST);
 
    reps = 1000000000/(nx*ny*nz+1000);
 
@@ -452,10 +452,10 @@ main( hypre_int argc,
    hypre_BoxDestroy(x2_data_box);
    hypre_BoxDestroy(x3_data_box);
    hypre_BoxDestroy(x4_data_box);
-   hypre_TFree(xp1);
-   hypre_TFree(xp2);
-   hypre_TFree(xp3);
-   hypre_TFree(xp4);
+   hypre_TFree(xp1, HYPRE_MEMORY_HOST);
+   hypre_TFree(xp2, HYPRE_MEMORY_HOST);
+   hypre_TFree(xp3, HYPRE_MEMORY_HOST);
+   hypre_TFree(xp4, HYPRE_MEMORY_HOST);
 
    /* Finalize MPI */
    hypre_MPI_Finalize();

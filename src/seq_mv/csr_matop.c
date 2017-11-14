@@ -59,8 +59,8 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
    }
 
 
-   marker = hypre_CTAlloc(HYPRE_Int, ncols_A);
-   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1);
+   marker = hypre_CTAlloc(HYPRE_Int,  ncols_A, HYPRE_MEMORY_HOST);
+   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_HOST);
 
    for (ia = 0; ia < ncols_A; ia++)
       marker[ia] = -1;
@@ -124,7 +124,7 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
       }
    }
 
-   hypre_TFree(marker);
+   hypre_TFree(marker, HYPRE_MEMORY_HOST);
    return C;
 }       
 
@@ -170,11 +170,11 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 
    if (nrows_A == ncols_B) allsquare = 1;
 
-   C_i = hypre_CTAlloc(HYPRE_Int, nrows_A+1);
+   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_HOST);
 
    max_num_threads = hypre_NumThreads();
 
-   jj_count = hypre_CTAlloc(HYPRE_Int, max_num_threads);
+   jj_count = hypre_CTAlloc(HYPRE_Int,  max_num_threads, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(ia, ib, ic, ja, jb, num_nonzeros, row_start, counter, a_entry, b_entry)
@@ -200,7 +200,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
        ne = (ii+1)*size+rest;
     }
 
-    B_marker = hypre_CTAlloc(HYPRE_Int, ncols_B);
+    B_marker = hypre_CTAlloc(HYPRE_Int,  ncols_B, HYPRE_MEMORY_HOST);
 
     for (ib = 0; ib < ncols_B; ib++)
       B_marker[ib] = -1;
@@ -294,9 +294,9 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 	}
       }
    }
-   hypre_TFree(B_marker);
+   hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
   } /*end parallel region */
-  hypre_TFree(jj_count);
+  hypre_TFree(jj_count, HYPRE_MEMORY_HOST);
   return C;
 }       
 
@@ -439,11 +439,11 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
       return 0;
    }
 
-   AT_j = hypre_CTAlloc(HYPRE_Int, num_nonzerosAT);
+   AT_j = hypre_CTAlloc(HYPRE_Int,  num_nonzerosAT, HYPRE_MEMORY_HOST);
    hypre_CSRMatrixJ(*AT) = AT_j;
    if (data) 
    {
-      AT_data = hypre_CTAlloc(HYPRE_Complex, num_nonzerosAT);
+      AT_data = hypre_CTAlloc(HYPRE_Complex,  num_nonzerosAT, HYPRE_MEMORY_HOST);
       hypre_CSRMatrixData(*AT) = AT_data;
    }
 
@@ -452,7 +452,7 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
     *-----------------------------------------------------------------*/
 
    HYPRE_Int *bucket = hypre_TAlloc(
-    HYPRE_Int, (num_colsA + 1)*hypre_NumThreads());
+    HYPRE_Int,  (num_colsA + 1)*hypre_NumThreads(), HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel

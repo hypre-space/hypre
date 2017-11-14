@@ -36,7 +36,7 @@ hypre_SemiInterpCreate( )
 {
    hypre_SemiInterpData *interp_data;
 
-   interp_data = hypre_CTAlloc(hypre_SemiInterpData, 1);
+   interp_data = hypre_CTAlloc(hypre_SemiInterpData,  1, HYPRE_MEMORY_HOST);
    (interp_data -> time_index)  = hypre_InitializeTiming("SemiInterp");
 
    return (void *) interp_data;
@@ -329,7 +329,7 @@ hypre_SemiInterpDestroy( void *interp_vdata )
       hypre_StructMatrixDestroy(interp_data -> P);
       hypre_ComputePkgDestroy(interp_data -> compute_pkg);
       hypre_FinalizeTiming(interp_data -> time_index);
-      hypre_TFree(interp_data);
+      hypre_TFree(interp_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

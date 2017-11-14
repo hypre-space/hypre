@@ -138,8 +138,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    dxyz_flag= 0;
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
-      mean = hypre_CTAlloc(HYPRE_Real, 3);
-      deviation = hypre_CTAlloc(HYPRE_Real, 3);
+      mean = hypre_CTAlloc(HYPRE_Real,  3, HYPRE_MEMORY_HOST);
+      deviation = hypre_CTAlloc(HYPRE_Real,  3, HYPRE_MEMORY_HOST);
       hypre_PFMGComputeDxyz(A, dxyz, mean, deviation);
         
       for (d = 0; d < ndim; d++)
@@ -152,17 +152,17 @@ hypre_PFMGSetup( void               *pfmg_vdata,
             break;
          }
       }
-      hypre_TFree(mean);
-      hypre_TFree(deviation);
+      hypre_TFree(mean, HYPRE_MEMORY_HOST);
+      hypre_TFree(deviation, HYPRE_MEMORY_HOST);
    }
 
-   grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
+   grid_l = hypre_TAlloc(hypre_StructGrid *,  max_levels, HYPRE_MEMORY_HOST);
    hypre_StructGridRef(grid, &grid_l[0]);
-   P_grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
+   P_grid_l = hypre_TAlloc(hypre_StructGrid *,  max_levels, HYPRE_MEMORY_HOST);
    P_grid_l[0] = NULL;
-   cdir_l = hypre_TAlloc(HYPRE_Int, max_levels);
-   active_l = hypre_TAlloc(HYPRE_Int, max_levels);
-   relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels);
+   cdir_l = hypre_TAlloc(HYPRE_Int,  max_levels, HYPRE_MEMORY_HOST);
+   active_l = hypre_TAlloc(HYPRE_Int,  max_levels, HYPRE_MEMORY_HOST);
+   relax_weights = hypre_CTAlloc(HYPRE_Real,  max_levels, HYPRE_MEMORY_HOST);
    hypre_SetIndex3(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
    for (l = 0; ; l++)
    {
@@ -318,12 +318,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    }
    rap_type = (pfmg_data -> rap_type);
 
-   A_l  = hypre_TAlloc(hypre_StructMatrix *, num_levels);
-   P_l  = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1);
-   RT_l = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1);
-   b_l  = hypre_TAlloc(hypre_StructVector *, num_levels);
-   x_l  = hypre_TAlloc(hypre_StructVector *, num_levels);
-   tx_l = hypre_TAlloc(hypre_StructVector *, num_levels);
+   A_l  = hypre_TAlloc(hypre_StructMatrix *,  num_levels, HYPRE_MEMORY_HOST);
+   P_l  = hypre_TAlloc(hypre_StructMatrix *,  num_levels - 1, HYPRE_MEMORY_HOST);
+   RT_l = hypre_TAlloc(hypre_StructMatrix *,  num_levels - 1, HYPRE_MEMORY_HOST);
+   b_l  = hypre_TAlloc(hypre_StructVector *,  num_levels, HYPRE_MEMORY_HOST);
+   x_l  = hypre_TAlloc(hypre_StructVector *,  num_levels, HYPRE_MEMORY_HOST);
+   tx_l = hypre_TAlloc(hypre_StructVector *,  num_levels, HYPRE_MEMORY_HOST);
    r_l  = tx_l;
    e_l  = tx_l;
 
@@ -380,11 +380,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructVectorInitializeShell(tx_l[l+1]);
    }
 
-   //data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+   //data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
    if (constant_coefficient == 0)
-      data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
+      data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
    else
-      data = hypre_UMCTAlloc(HYPRE_Real,data_size);
+      data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_SHARED);
    
    (pfmg_data -> data) = data;
 
@@ -435,10 +435,10 @@ hypre_PFMGSetup( void               *pfmg_vdata,
     * Set up multigrid operators and call setup routines
     *-----------------------------------------------------*/
 
-   relax_data_l    = hypre_TAlloc(void *, num_levels);
-   matvec_data_l   = hypre_TAlloc(void *, num_levels);
-   restrict_data_l = hypre_TAlloc(void *, num_levels);
-   interp_data_l   = hypre_TAlloc(void *, num_levels);
+   relax_data_l    = hypre_TAlloc(void *,  num_levels, HYPRE_MEMORY_HOST);
+   matvec_data_l   = hypre_TAlloc(void *,  num_levels, HYPRE_MEMORY_HOST);
+   restrict_data_l = hypre_TAlloc(void *,  num_levels, HYPRE_MEMORY_HOST);
+   interp_data_l   = hypre_TAlloc(void *,  num_levels, HYPRE_MEMORY_HOST);
 
    for (l = 0; l < (num_levels - 1); l++)
    {
@@ -552,7 +552,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          }
       }
    }
-   hypre_TFree(relax_weights);
+   hypre_TFree(relax_weights, HYPRE_MEMORY_HOST);
 
    for (l = 0; l < num_levels; l++)
    {
@@ -574,8 +574,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    if ((pfmg_data -> logging) > 0)
    {
       max_iter = (pfmg_data -> max_iter);
-      (pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter);
-      (pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
+      (pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real,  max_iter, HYPRE_MEMORY_HOST);
+      (pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real,  max_iter, HYPRE_MEMORY_HOST);
    }
 
 #if DEBUG

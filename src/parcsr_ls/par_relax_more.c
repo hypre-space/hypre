@@ -189,8 +189,8 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
    u_data = hypre_VectorData(hypre_ParVectorLocalVector(u));
 
    /* make room for tri-diag matrix */
-    tridiag  = hypre_CTAlloc(HYPRE_Real, max_iter+1);
-    trioffd  = hypre_CTAlloc(HYPRE_Real, max_iter+1);
+    tridiag  = hypre_CTAlloc(HYPRE_Real,  max_iter+1, HYPRE_MEMORY_HOST);
+    trioffd  = hypre_CTAlloc(HYPRE_Real,  max_iter+1, HYPRE_MEMORY_HOST);
     for (i=0; i < max_iter + 1; i++)
     {
        tridiag[i] = 0;
@@ -311,8 +311,8 @@ HYPRE_Int hypre_ParCSRMaxEigEstimateCG(hypre_ParCSRMatrix *A, /* matrix to relax
     /* hypre_printf("linpack max eig est = %g\n", lambda_max);*/
     /* hypre_printf("linpack min eig est = %g\n", lambda_min);*/
   
-    hypre_TFree(tridiag);
-    hypre_TFree(trioffd);
+    hypre_TFree(tridiag, HYPRE_MEMORY_HOST);
+    hypre_TFree(trioffd, HYPRE_MEMORY_HOST);
 
     hypre_ParVectorDestroy(r);
     hypre_ParVectorDestroy(s);
@@ -496,7 +496,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
       }
    }
 
-   orig_u = hypre_CTAlloc(HYPRE_Real, num_rows);
+   orig_u = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_HOST);
 
    if (!scale)
    {
@@ -637,7 +637,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby(hypre_ParCSRMatrix *A, /* matrix to relax with
 
 
 
-   hypre_TFree(orig_u);
+   hypre_TFree(orig_u, HYPRE_MEMORY_HOST);
   
 
    
@@ -1050,10 +1050,10 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     {
        num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
        
-       v_buf_data = hypre_CTAlloc(HYPRE_Real, 
-                                  hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+       v_buf_data = hypre_CTAlloc(HYPRE_Real,  
+                                  hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
        
-       Vext_data = hypre_CTAlloc(HYPRE_Real,num_cols_offd);
+       Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
        
        if (num_cols_offd)
        {
@@ -1161,8 +1161,8 @@ HYPRE_Int  hypre_ParCSRRelax_L1_Jacobi( hypre_ParCSRMatrix *A,
     }
     if (num_procs > 1)
     {
-       hypre_TFree(Vext_data);
-       hypre_TFree(v_buf_data);
+       hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+       hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
     }
 
     return 0;

@@ -149,7 +149,7 @@ hypre_LinkList hypre_create_elt( HYPRE_Int Item )
      * return with error if no space available
      */
 
-    if ( (new_elt_ptr = (hypre_LinkList) malloc (sizeof(hypre_ListElement))) == NULL)
+    if ( (new_elt_ptr = hypre_TAlloc(hypre_ListElement, 1, HYPRE_MEMORY_HOST)) == NULL)
     {
        hypre_error_w_msg(HYPRE_ERROR_GENERIC,"\n create_elt: malloc failed \n\n");
     }

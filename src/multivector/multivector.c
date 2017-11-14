@@ -38,7 +38,7 @@ mv_MultiVectorWrap( mv_InterfaceInterpreter* ii, void * data, HYPRE_Int ownsData
 {
   mv_MultiVectorPtr x;
   
-  x = (mv_MultiVectorPtr) malloc(sizeof(struct mv_MultiVector));
+  x = hypre_TAlloc(struct mv_MultiVector, 1, HYPRE_MEMORY_HOST);
   hypre_assert( x != NULL );
   
   x->interpreter = ii;
@@ -54,7 +54,7 @@ mv_MultiVectorCreateFromSampleVector( void* ii_, HYPRE_Int n, void* sample ) {
   mv_MultiVectorPtr x;
   mv_InterfaceInterpreter* ii = (mv_InterfaceInterpreter*)ii_;
 
-  x = (mv_MultiVectorPtr) malloc(sizeof(struct mv_MultiVector));
+  x = hypre_TAlloc(struct mv_MultiVector, 1, HYPRE_MEMORY_HOST);
   hypre_assert( x != NULL );
   
   x->interpreter = ii;
@@ -74,7 +74,7 @@ mv_MultiVectorCreateCopy( mv_MultiVectorPtr x, HYPRE_Int copyValues ) {
   hypre_assert( x != NULL );
   ii = x->interpreter;
 
-  y = (mv_MultiVectorPtr) malloc(sizeof(struct mv_MultiVector));
+  y = hypre_TAlloc(struct mv_MultiVector, 1, HYPRE_MEMORY_HOST);
   hypre_assert( y != NULL );
   
   data = (ii->CopyCreateMultiVector)( x->data, copyValues );

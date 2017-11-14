@@ -90,9 +90,9 @@ void PCG_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
       return;
    }
 
-   p = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
-   s = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
-   r = (HYPRE_Real *) malloc(n * sizeof(HYPRE_Real));
+   p = hypre_TAlloc(HYPRE_Real, n , HYPRE_MEMORY_HOST);
+   s = hypre_TAlloc(HYPRE_Real, n , HYPRE_MEMORY_HOST);
+   r = hypre_TAlloc(HYPRE_Real, n , HYPRE_MEMORY_HOST);
 
    /* r = b - Ax */
    MatrixMatvec(mat, x, r);  /* r = Ax */

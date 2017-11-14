@@ -304,7 +304,7 @@ void hypre_sort_and_create_inverse_map(
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] -= hypre_MPI_Wtime();
 #endif
 
-   HYPRE_Int *temp = hypre_TAlloc(HYPRE_Int, len);
+   HYPRE_Int *temp = hypre_TAlloc(HYPRE_Int,  len, HYPRE_MEMORY_HOST);
    hypre_merge_sort(in, temp, len, out);
    hypre_UnorderedIntMapCreate(inverse_map, 2*len, 16*hypre_NumThreads());
    HYPRE_Int i;
@@ -337,11 +337,11 @@ void hypre_sort_and_create_inverse_map(
 
    if (*out == in)
    {
-      hypre_TFree(temp);
+      hypre_TFree(temp, HYPRE_MEMORY_HOST);
    }
    else
    {
-      hypre_TFree(in);
+      hypre_TFree(in, HYPRE_MEMORY_HOST);
    }
 
 #ifdef HYPRE_PROFILE

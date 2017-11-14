@@ -441,7 +441,7 @@ ReadData( char         *filename,
 
       /* allocate initial space, and read first input line */
       sdata_size = 0;
-      sdata = hypre_TAlloc(char, memchunk);
+      sdata = hypre_TAlloc(char,  memchunk, HYPRE_MEMORY_HOST);
       sdata_line = fgets(sdata, maxline, file);
 
       s= 0;
@@ -452,7 +452,7 @@ ReadData( char         *filename,
          /* allocate more space, if necessary */
          if ((sdata_size + maxline) > s)
          {
-            sdata = hypre_TReAlloc(sdata, char, (sdata_size + memchunk));
+            sdata = hypre_TReAlloc(sdata,  char,  (sdata_size + memchunk), HYPRE_MEMORY_HOST);
             s= sdata_size + memchunk;
          }
          
@@ -464,7 +464,7 @@ ReadData( char         *filename,
    hypre_MPI_Bcast(&sdata_size, 1, HYPRE_MPI_INT, 0, hypre_MPI_COMM_WORLD);
 
    /* broadcast the data */
-   sdata = hypre_TReAlloc(sdata, char, sdata_size);
+   sdata = hypre_TReAlloc(sdata,  char,  sdata_size, HYPRE_MEMORY_HOST);
    hypre_MPI_Bcast(sdata, sdata_size, hypre_MPI_CHAR, 0, hypre_MPI_COMM_WORLD);
 
    /*-----------------------------------------------------------
@@ -501,13 +501,13 @@ ReadData( char         *filename,
          {
             data.ndim = strtol(sdata_ptr, &sdata_ptr, 10);
             data.nparts = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.pdata = hypre_CTAlloc(ProblemPartData, data.nparts);
+            data.pdata = hypre_CTAlloc(ProblemPartData,  data.nparts, HYPRE_MEMORY_HOST);
          }
          else if ( strcmp(key, "GridSetNumGhost:") == 0 )
          {
             // # GridSetNumGhost: numghost[2*ndim]
             // GridSetNumGhost: [3 3 3 3]
-            data.numghost = hypre_CTAlloc(HYPRE_Int, 2*data.ndim);
+            data.numghost = hypre_CTAlloc(HYPRE_Int,  2*data.ndim, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr, 2*data.ndim, data.numghost);
          }
          else if ( strcmp(key, "GridSetExtents:") == 0 )
@@ -518,11 +518,11 @@ ReadData( char         *filename,
             {
                size = pdata.nboxes + 10;
                pdata.ilowers =
-                  hypre_TReAlloc(pdata.ilowers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.ilowers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.iuppers =
-                  hypre_TReAlloc(pdata.iuppers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.iuppers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.boxsizes =
-                  hypre_TReAlloc(pdata.boxsizes, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.boxsizes,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.ilowers[pdata.nboxes]);
@@ -558,7 +558,7 @@ ReadData( char         *filename,
             part = strtol(sdata_ptr, &sdata_ptr, 10);
             pdata = data.pdata[part];
             pdata.nvars = strtol(sdata_ptr, &sdata_ptr, 10);
-            pdata.vartypes = hypre_CTAlloc(HYPRE_SStructVariable, pdata.nvars);
+            pdata.vartypes = hypre_CTAlloc(HYPRE_SStructVariable,  pdata.nvars, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr, pdata.nvars, pdata.vartypes);
             data.pdata[part] = pdata;
          }
@@ -577,27 +577,27 @@ ReadData( char         *filename,
             {
                size = pdata.glue_nboxes + 10;
                pdata.glue_shared =
-                  hypre_TReAlloc(pdata.glue_shared, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.glue_shared,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.glue_ilowers =
-                  hypre_TReAlloc(pdata.glue_ilowers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.glue_ilowers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.glue_iuppers =
-                  hypre_TReAlloc(pdata.glue_iuppers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.glue_iuppers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.glue_offsets =
-                  hypre_TReAlloc(pdata.glue_offsets, Index, size);
+                  hypre_TReAlloc(pdata.glue_offsets,  Index,  size, HYPRE_MEMORY_HOST);
                pdata.glue_nbor_parts =
-                  hypre_TReAlloc(pdata.glue_nbor_parts, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.glue_nbor_parts,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.glue_nbor_ilowers =
-                  hypre_TReAlloc(pdata.glue_nbor_ilowers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.glue_nbor_ilowers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.glue_nbor_iuppers =
-                  hypre_TReAlloc(pdata.glue_nbor_iuppers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.glue_nbor_iuppers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.glue_nbor_offsets =
-                  hypre_TReAlloc(pdata.glue_nbor_offsets, Index, size);
+                  hypre_TReAlloc(pdata.glue_nbor_offsets,  Index,  size, HYPRE_MEMORY_HOST);
                pdata.glue_index_maps =
-                  hypre_TReAlloc(pdata.glue_index_maps, Index, size);
+                  hypre_TReAlloc(pdata.glue_index_maps,  Index,  size, HYPRE_MEMORY_HOST);
                pdata.glue_index_dirs =
-                  hypre_TReAlloc(pdata.glue_index_dirs, Index, size);
+                  hypre_TReAlloc(pdata.glue_index_dirs,  Index,  size, HYPRE_MEMORY_HOST);
                pdata.glue_primaries =
-                  hypre_TReAlloc(pdata.glue_primaries, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.glue_primaries,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
             }
             pdata.glue_shared[pdata.glue_nboxes] = 0;
             if ( strcmp(key, "GridSetSharedPart:") == 0 )
@@ -671,20 +671,20 @@ ReadData( char         *filename,
                exit(1);
             }
             data.nstencils = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.stencil_sizes   = hypre_CTAlloc(HYPRE_Int, data.nstencils);
-            data.stencil_offsets = hypre_CTAlloc(Index *, data.nstencils);
-            data.stencil_vars    = hypre_CTAlloc(HYPRE_Int *, data.nstencils);
-            data.stencil_values  = hypre_CTAlloc(HYPRE_Real *, data.nstencils);
+            data.stencil_sizes   = hypre_CTAlloc(HYPRE_Int,  data.nstencils, HYPRE_MEMORY_HOST);
+            data.stencil_offsets = hypre_CTAlloc(Index *,  data.nstencils, HYPRE_MEMORY_HOST);
+            data.stencil_vars    = hypre_CTAlloc(HYPRE_Int *,  data.nstencils, HYPRE_MEMORY_HOST);
+            data.stencil_values  = hypre_CTAlloc(HYPRE_Real *,  data.nstencils, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr,
                           data.nstencils, data.stencil_sizes);
             for (s = 0; s < data.nstencils; s++)
             {
                data.stencil_offsets[s] =
-                  hypre_CTAlloc(Index, data.stencil_sizes[s]);
+                  hypre_CTAlloc(Index,  data.stencil_sizes[s], HYPRE_MEMORY_HOST);
                data.stencil_vars[s] =
-                  hypre_CTAlloc(HYPRE_Int, data.stencil_sizes[s]);
+                  hypre_CTAlloc(HYPRE_Int,  data.stencil_sizes[s], HYPRE_MEMORY_HOST);
                data.stencil_values[s] =
-                  hypre_CTAlloc(HYPRE_Real, data.stencil_sizes[s]);
+                  hypre_CTAlloc(HYPRE_Real,  data.stencil_sizes[s], HYPRE_MEMORY_HOST);
             }
          }
          else if ( strcmp(key, "StencilSetEntry:") == 0 )
@@ -716,12 +716,12 @@ ReadData( char         *filename,
                exit(1);
             }
             data.fem_nvars = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.fem_offsets = hypre_CTAlloc(Index, data.fem_nvars);
-            data.fem_vars = hypre_CTAlloc(HYPRE_Int, data.fem_nvars);
-            data.fem_values_full = hypre_CTAlloc(HYPRE_Real *, data.fem_nvars);
+            data.fem_offsets = hypre_CTAlloc(Index,  data.fem_nvars, HYPRE_MEMORY_HOST);
+            data.fem_vars = hypre_CTAlloc(HYPRE_Int,  data.fem_nvars, HYPRE_MEMORY_HOST);
+            data.fem_values_full = hypre_CTAlloc(HYPRE_Real *,  data.fem_nvars, HYPRE_MEMORY_HOST);
             for (i = 0; i < data.fem_nvars; i++)
             {
-               data.fem_values_full[i] = hypre_CTAlloc(HYPRE_Real, data.fem_nvars);
+               data.fem_values_full[i] = hypre_CTAlloc(HYPRE_Real,  data.fem_nvars, HYPRE_MEMORY_HOST);
             }
          }
          else if ( strcmp(key, "FEMStencilSetRow:") == 0 )
@@ -742,7 +742,7 @@ ReadData( char         *filename,
             if (data.fem_rhs_true == 0)
             {
                data.fem_rhs_true = 1;
-               data.fem_rhs_values = hypre_CTAlloc(HYPRE_Real, data.fem_nvars);
+               data.fem_rhs_values = hypre_CTAlloc(HYPRE_Real,  data.fem_nvars, HYPRE_MEMORY_HOST);
             }
             SScanDblArray(sdata_ptr, &sdata_ptr,
                           data.fem_nvars, data.fem_rhs_values);
@@ -755,7 +755,7 @@ ReadData( char         *filename,
             pdata = data.pdata[part];
             if (pdata.stencil_num == NULL)
             {
-               pdata.stencil_num = hypre_CTAlloc(HYPRE_Int, pdata.nvars);
+               pdata.stencil_num = hypre_CTAlloc(HYPRE_Int,  pdata.nvars, HYPRE_MEMORY_HOST);
             }
             pdata.stencil_num[var] = s;
             data.pdata[part] = pdata;
@@ -768,33 +768,33 @@ ReadData( char         *filename,
             {
                size = pdata.graph_nboxes + 10;
                pdata.graph_ilowers =
-                  hypre_TReAlloc(pdata.graph_ilowers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.graph_ilowers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.graph_iuppers =
-                  hypre_TReAlloc(pdata.graph_iuppers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.graph_iuppers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.graph_strides =
-                  hypre_TReAlloc(pdata.graph_strides, Index, size);
+                  hypre_TReAlloc(pdata.graph_strides,  Index,  size, HYPRE_MEMORY_HOST);
                pdata.graph_vars =
-                  hypre_TReAlloc(pdata.graph_vars, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.graph_vars,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.graph_to_parts =
-                  hypre_TReAlloc(pdata.graph_to_parts, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.graph_to_parts,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.graph_to_ilowers =
-                  hypre_TReAlloc(pdata.graph_to_ilowers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.graph_to_ilowers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.graph_to_iuppers =
-                  hypre_TReAlloc(pdata.graph_to_iuppers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.graph_to_iuppers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.graph_to_strides =
-                  hypre_TReAlloc(pdata.graph_to_strides, Index, size);
+                  hypre_TReAlloc(pdata.graph_to_strides,  Index,  size, HYPRE_MEMORY_HOST);
                pdata.graph_to_vars =
-                  hypre_TReAlloc(pdata.graph_to_vars, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.graph_to_vars,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.graph_index_maps =
-                  hypre_TReAlloc(pdata.graph_index_maps, Index, size);
+                  hypre_TReAlloc(pdata.graph_index_maps,  Index,  size, HYPRE_MEMORY_HOST);
                pdata.graph_index_signs =
-                  hypre_TReAlloc(pdata.graph_index_signs, Index, size);
+                  hypre_TReAlloc(pdata.graph_index_signs,  Index,  size, HYPRE_MEMORY_HOST);
                pdata.graph_entries =
-                  hypre_TReAlloc(pdata.graph_entries, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.graph_entries,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.graph_values =
-                  hypre_TReAlloc(pdata.graph_values, HYPRE_Real, size);
+                  hypre_TReAlloc(pdata.graph_values,  HYPRE_Real,  size, HYPRE_MEMORY_HOST);
                pdata.graph_boxsizes =
-                  hypre_TReAlloc(pdata.graph_boxsizes, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.graph_boxsizes,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.graph_ilowers[pdata.graph_nboxes]);
@@ -857,13 +857,13 @@ ReadData( char         *filename,
             {
                size = data.symmetric_num + 10;
                data.symmetric_parts =
-                  hypre_TReAlloc(data.symmetric_parts, HYPRE_Int, size);
+                  hypre_TReAlloc(data.symmetric_parts,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                data.symmetric_vars =
-                  hypre_TReAlloc(data.symmetric_vars, HYPRE_Int, size);
+                  hypre_TReAlloc(data.symmetric_vars,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                data.symmetric_to_vars =
-                  hypre_TReAlloc(data.symmetric_to_vars, HYPRE_Int, size);
+                  hypre_TReAlloc(data.symmetric_to_vars,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                data.symmetric_booleans =
-                  hypre_TReAlloc(data.symmetric_booleans, HYPRE_Int, size);
+                  hypre_TReAlloc(data.symmetric_booleans,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
             }
             data.symmetric_parts[data.symmetric_num] =
                strtol(sdata_ptr, &sdata_ptr, 10);
@@ -887,17 +887,17 @@ ReadData( char         *filename,
             {
                size = pdata.matset_nboxes + 10;
                pdata.matset_ilowers =
-                  hypre_TReAlloc(pdata.matset_ilowers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.matset_ilowers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.matset_iuppers =
-                  hypre_TReAlloc(pdata.matset_iuppers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.matset_iuppers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.matset_strides =
-                  hypre_TReAlloc(pdata.matset_strides, Index, size);
+                  hypre_TReAlloc(pdata.matset_strides,  Index,  size, HYPRE_MEMORY_HOST);
                pdata.matset_vars =
-                  hypre_TReAlloc(pdata.matset_vars, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.matset_vars,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.matset_entries =
-                  hypre_TReAlloc(pdata.matset_entries, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.matset_entries,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.matset_values =
-                  hypre_TReAlloc(pdata.matset_values, HYPRE_Real, size);
+                  hypre_TReAlloc(pdata.matset_values,  HYPRE_Real,  size, HYPRE_MEMORY_HOST);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.matset_ilowers[pdata.matset_nboxes]);
@@ -926,17 +926,17 @@ ReadData( char         *filename,
             {
                size = pdata.matadd_nboxes+10;
                pdata.matadd_ilowers=
-                  hypre_TReAlloc(pdata.matadd_ilowers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.matadd_ilowers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.matadd_iuppers=
-                  hypre_TReAlloc(pdata.matadd_iuppers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.matadd_iuppers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.matadd_vars=
-                  hypre_TReAlloc(pdata.matadd_vars, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.matadd_vars,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.matadd_nentries=
-                  hypre_TReAlloc(pdata.matadd_nentries, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.matadd_nentries,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.matadd_entries=
-                  hypre_TReAlloc(pdata.matadd_entries, HYPRE_Int *, size);
+                  hypre_TReAlloc(pdata.matadd_entries,  HYPRE_Int *,  size, HYPRE_MEMORY_HOST);
                pdata.matadd_values=
-                  hypre_TReAlloc(pdata.matadd_values, HYPRE_Real *, size);
+                  hypre_TReAlloc(pdata.matadd_values,  HYPRE_Real *,  size, HYPRE_MEMORY_HOST);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.matadd_ilowers[pdata.matadd_nboxes]);
@@ -947,11 +947,11 @@ ReadData( char         *filename,
             i= strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.matadd_nentries[pdata.matadd_nboxes]= i;
             pdata.matadd_entries[pdata.matadd_nboxes] =
-               hypre_TAlloc(HYPRE_Int, i);
+               hypre_TAlloc(HYPRE_Int,  i, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr, i,
                           (HYPRE_Int*) pdata.matadd_entries[pdata.matadd_nboxes]);
             pdata.matadd_values[pdata.matadd_nboxes] =
-               hypre_TAlloc(HYPRE_Real, i);
+               hypre_TAlloc(HYPRE_Real,  i, HYPRE_MEMORY_HOST);
             SScanDblArray(sdata_ptr, &sdata_ptr, i,
                           (HYPRE_Real *) pdata.matadd_values[pdata.matadd_nboxes]);
             pdata.matadd_nboxes++;
@@ -965,19 +965,19 @@ ReadData( char         *filename,
             {
                size = pdata.fem_matadd_nboxes+10;
                pdata.fem_matadd_ilowers=
-                  hypre_TReAlloc(pdata.fem_matadd_ilowers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.fem_matadd_ilowers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.fem_matadd_iuppers=
-                  hypre_TReAlloc(pdata.fem_matadd_iuppers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.fem_matadd_iuppers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.fem_matadd_nrows=
-                  hypre_TReAlloc(pdata.fem_matadd_nrows, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.fem_matadd_nrows,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.fem_matadd_rows=
-                  hypre_TReAlloc(pdata.fem_matadd_rows, HYPRE_Int *, size);
+                  hypre_TReAlloc(pdata.fem_matadd_rows,  HYPRE_Int *,  size, HYPRE_MEMORY_HOST);
                pdata.fem_matadd_ncols=
-                  hypre_TReAlloc(pdata.fem_matadd_ncols, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.fem_matadd_ncols,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.fem_matadd_cols=
-                  hypre_TReAlloc(pdata.fem_matadd_cols, HYPRE_Int *, size);
+                  hypre_TReAlloc(pdata.fem_matadd_cols,  HYPRE_Int *,  size, HYPRE_MEMORY_HOST);
                pdata.fem_matadd_values=
-                  hypre_TReAlloc(pdata.fem_matadd_values, HYPRE_Real *, size);
+                  hypre_TReAlloc(pdata.fem_matadd_values,  HYPRE_Real *,  size, HYPRE_MEMORY_HOST);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.fem_matadd_ilowers[pdata.fem_matadd_nboxes]);
@@ -985,16 +985,16 @@ ReadData( char         *filename,
                               pdata.fem_matadd_iuppers[pdata.fem_matadd_nboxes]);
             i= strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.fem_matadd_nrows[pdata.fem_matadd_nboxes]= i;
-            pdata.fem_matadd_rows[pdata.fem_matadd_nboxes] = hypre_TAlloc(HYPRE_Int, i);
+            pdata.fem_matadd_rows[pdata.fem_matadd_nboxes] = hypre_TAlloc(HYPRE_Int,  i, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr, i,
                           (HYPRE_Int*) pdata.fem_matadd_rows[pdata.fem_matadd_nboxes]);
             j= strtol(sdata_ptr, &sdata_ptr, 10);
             pdata.fem_matadd_ncols[pdata.fem_matadd_nboxes]= j;
-            pdata.fem_matadd_cols[pdata.fem_matadd_nboxes] = hypre_TAlloc(HYPRE_Int, j);
+            pdata.fem_matadd_cols[pdata.fem_matadd_nboxes] = hypre_TAlloc(HYPRE_Int,  j, HYPRE_MEMORY_HOST);
             SScanIntArray(sdata_ptr, &sdata_ptr, j,
                           (HYPRE_Int*) pdata.fem_matadd_cols[pdata.fem_matadd_nboxes]);
             pdata.fem_matadd_values[pdata.fem_matadd_nboxes] =
-               hypre_TAlloc(HYPRE_Real, i*j);
+               hypre_TAlloc(HYPRE_Real,  i*j, HYPRE_MEMORY_HOST);
             SScanDblArray(sdata_ptr, &sdata_ptr, i*j,
                           (HYPRE_Real *) pdata.fem_matadd_values[pdata.fem_matadd_nboxes]);
             pdata.fem_matadd_nboxes++;
@@ -1008,13 +1008,13 @@ ReadData( char         *filename,
             {
                size = pdata.rhsadd_nboxes+10;
                pdata.rhsadd_ilowers=
-                  hypre_TReAlloc(pdata.rhsadd_ilowers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.rhsadd_ilowers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.rhsadd_iuppers=
-                  hypre_TReAlloc(pdata.rhsadd_iuppers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.rhsadd_iuppers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.rhsadd_vars=
-                  hypre_TReAlloc(pdata.rhsadd_vars, HYPRE_Int, size);
+                  hypre_TReAlloc(pdata.rhsadd_vars,  HYPRE_Int,  size, HYPRE_MEMORY_HOST);
                pdata.rhsadd_values=
-                  hypre_TReAlloc(pdata.rhsadd_values, HYPRE_Real, size);
+                  hypre_TReAlloc(pdata.rhsadd_values,  HYPRE_Real,  size, HYPRE_MEMORY_HOST);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.rhsadd_ilowers[pdata.rhsadd_nboxes]);
@@ -1035,18 +1035,18 @@ ReadData( char         *filename,
             {
                size = pdata.fem_rhsadd_nboxes+10;
                pdata.fem_rhsadd_ilowers=
-                  hypre_TReAlloc(pdata.fem_rhsadd_ilowers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.fem_rhsadd_ilowers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.fem_rhsadd_iuppers=
-                  hypre_TReAlloc(pdata.fem_rhsadd_iuppers, ProblemIndex, size);
+                  hypre_TReAlloc(pdata.fem_rhsadd_iuppers,  ProblemIndex,  size, HYPRE_MEMORY_HOST);
                pdata.fem_rhsadd_values=
-                  hypre_TReAlloc(pdata.fem_rhsadd_values, HYPRE_Real *, size);
+                  hypre_TReAlloc(pdata.fem_rhsadd_values,  HYPRE_Real *,  size, HYPRE_MEMORY_HOST);
             }
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.fem_rhsadd_ilowers[pdata.fem_rhsadd_nboxes]);
             SScanProblemIndex(sdata_ptr, &sdata_ptr, data.ndim,
                               pdata.fem_rhsadd_iuppers[pdata.fem_rhsadd_nboxes]);
             pdata.fem_rhsadd_values[pdata.fem_rhsadd_nboxes] =
-               hypre_TAlloc(HYPRE_Real, data.fem_nvars);
+               hypre_TAlloc(HYPRE_Real,  data.fem_nvars, HYPRE_MEMORY_HOST);
             SScanDblArray(sdata_ptr, &sdata_ptr, data.fem_nvars,
                           (HYPRE_Real *) pdata.fem_rhsadd_values[pdata.fem_rhsadd_nboxes]);
             pdata.fem_rhsadd_nboxes++;
@@ -1055,13 +1055,13 @@ ReadData( char         *filename,
          else if ( strcmp(key, "ProcessPoolCreate:") == 0 )
          {
             data.ndists++;
-            data.dist_npools= hypre_TReAlloc(data.dist_npools, HYPRE_Int, data.ndists);
-            data.dist_pools= hypre_TReAlloc(data.dist_pools, HYPRE_Int *, data.ndists);
+            data.dist_npools= hypre_TReAlloc(data.dist_npools,  HYPRE_Int,  data.ndists, HYPRE_MEMORY_HOST);
+            data.dist_pools= hypre_TReAlloc(data.dist_pools,  HYPRE_Int *,  data.ndists, HYPRE_MEMORY_HOST);
             data.dist_npools[data.ndists-1] = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.dist_pools[data.ndists-1] = hypre_CTAlloc(HYPRE_Int, data.nparts);
+            data.dist_pools[data.ndists-1] = hypre_CTAlloc(HYPRE_Int,  data.nparts, HYPRE_MEMORY_HOST);
 #if 0
             data.npools = strtol(sdata_ptr, &sdata_ptr, 10);
-            data.pools = hypre_CTAlloc(HYPRE_Int, data.nparts);
+            data.pools = hypre_CTAlloc(HYPRE_Int,  data.nparts, HYPRE_MEMORY_HOST);
 #endif
          }
          else if ( strcmp(key, "ProcessPoolSetPart:") == 0 )
@@ -1091,14 +1091,14 @@ ReadData( char         *filename,
    {
       HYPRE_Int d;
 
-      data.fem_ivalues_full = hypre_CTAlloc(HYPRE_Int *, data.fem_nvars);
-      data.fem_ordering = hypre_CTAlloc(HYPRE_Int, (1+data.ndim)*data.fem_nvars);
-      data.fem_sparsity = hypre_CTAlloc(HYPRE_Int, 2*data.fem_nvars*data.fem_nvars);
-      data.fem_values   = hypre_CTAlloc(HYPRE_Real, data.fem_nvars*data.fem_nvars);
+      data.fem_ivalues_full = hypre_CTAlloc(HYPRE_Int *,  data.fem_nvars, HYPRE_MEMORY_HOST);
+      data.fem_ordering = hypre_CTAlloc(HYPRE_Int,  (1+data.ndim)*data.fem_nvars, HYPRE_MEMORY_HOST);
+      data.fem_sparsity = hypre_CTAlloc(HYPRE_Int,  2*data.fem_nvars*data.fem_nvars, HYPRE_MEMORY_HOST);
+      data.fem_values   = hypre_CTAlloc(HYPRE_Real,  data.fem_nvars*data.fem_nvars, HYPRE_MEMORY_HOST);
 
       for (i = 0; i < data.fem_nvars; i++)
       {
-         data.fem_ivalues_full[i] = hypre_CTAlloc(HYPRE_Int, data.fem_nvars);
+         data.fem_ivalues_full[i] = hypre_CTAlloc(HYPRE_Int,  data.fem_nvars, HYPRE_MEMORY_HOST);
          k = (1+data.ndim)*i;
          data.fem_ordering[k] = data.fem_vars[i];
          for (d = 0; d < data.ndim; d++)
@@ -1120,7 +1120,7 @@ ReadData( char         *filename,
       }
    }
 
-   hypre_TFree(sdata);
+   hypre_TFree(sdata, HYPRE_MEMORY_HOST);
 
    *data_ptr = data; 
    return 0;
@@ -1197,7 +1197,7 @@ DistributeData( ProblemData   global_data,
    data.pools  = data.dist_pools[pooldist];
 
    /* determine first process number in each pool */
-   pool_procs = hypre_CTAlloc(HYPRE_Int, (data.npools+1));
+   pool_procs = hypre_CTAlloc(HYPRE_Int,  (data.npools+1), HYPRE_MEMORY_HOST);
    for (part = 0; part < data.nparts; part++)
    {
       pool = data.pools[part] + 1;
@@ -1238,21 +1238,21 @@ DistributeData( ProblemData   global_data,
          pdata.matset_nboxes = 0;
          for (box = 0; box < pdata.matadd_nboxes; box++)
          {
-            hypre_TFree(pdata.matadd_entries[box]);
-            hypre_TFree(pdata.matadd_values[box]);
+            hypre_TFree(pdata.matadd_entries[box], HYPRE_MEMORY_HOST);
+            hypre_TFree(pdata.matadd_values[box], HYPRE_MEMORY_HOST);
          }
          pdata.matadd_nboxes = 0;
          for (box = 0; box < pdata.fem_matadd_nboxes; box++)
          {
-            hypre_TFree(pdata.fem_matadd_rows[box]);
-            hypre_TFree(pdata.fem_matadd_cols[box]);
-            hypre_TFree(pdata.fem_matadd_values[box]);
+            hypre_TFree(pdata.fem_matadd_rows[box], HYPRE_MEMORY_HOST);
+            hypre_TFree(pdata.fem_matadd_cols[box], HYPRE_MEMORY_HOST);
+            hypre_TFree(pdata.fem_matadd_values[box], HYPRE_MEMORY_HOST);
          }
          pdata.fem_matadd_nboxes = 0;
          pdata.rhsadd_nboxes = 0;
          for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
          {
-            hypre_TFree(pdata.fem_rhsadd_values[box]);
+            hypre_TFree(pdata.fem_rhsadd_values[box], HYPRE_MEMORY_HOST);
          }
          pdata.fem_rhsadd_nboxes = 0;
       }
@@ -1496,8 +1496,8 @@ DistributeData( ProblemData   global_data,
             }
             for (box = i; box < pdata.matadd_nboxes; box++)
             {
-               hypre_TFree(pdata.matadd_entries[box]);
-               hypre_TFree(pdata.matadd_values[box]);
+               hypre_TFree(pdata.matadd_entries[box], HYPRE_MEMORY_HOST);
+               hypre_TFree(pdata.matadd_values[box], HYPRE_MEMORY_HOST);
             }
             pdata.matadd_nboxes = i;
 
@@ -1548,9 +1548,9 @@ DistributeData( ProblemData   global_data,
             }
             for (box = i; box < pdata.fem_matadd_nboxes; box++)
             {
-               hypre_TFree(pdata.fem_matadd_rows[box]);
-               hypre_TFree(pdata.fem_matadd_cols[box]);
-               hypre_TFree(pdata.fem_matadd_values[box]);
+               hypre_TFree(pdata.fem_matadd_rows[box], HYPRE_MEMORY_HOST);
+               hypre_TFree(pdata.fem_matadd_cols[box], HYPRE_MEMORY_HOST);
+               hypre_TFree(pdata.fem_matadd_values[box], HYPRE_MEMORY_HOST);
             }
             pdata.fem_matadd_nboxes = i;
 
@@ -1632,7 +1632,7 @@ DistributeData( ProblemData   global_data,
             }
             for (box = i; box < pdata.fem_rhsadd_nboxes; box++)
             {
-               hypre_TFree(pdata.fem_rhsadd_values[box]);
+               hypre_TFree(pdata.fem_rhsadd_values[box], HYPRE_MEMORY_HOST);
             }
             pdata.fem_rhsadd_nboxes = i;
          }
@@ -1643,12 +1643,12 @@ DistributeData( ProblemData   global_data,
          m[2] = block[part][2];
          if ( (m[0] * m[1] * m[2]) > 1)
          {
-            pdata.ilowers = hypre_TReAlloc(pdata.ilowers, ProblemIndex,
-                                           m[0]*m[1]*m[2]*pdata.nboxes);
-            pdata.iuppers = hypre_TReAlloc(pdata.iuppers, ProblemIndex,
-                                           m[0]*m[1]*m[2]*pdata.nboxes);
-            pdata.boxsizes = hypre_TReAlloc(pdata.boxsizes, HYPRE_Int,
-                                            m[0]*m[1]*m[2]*pdata.nboxes);
+            pdata.ilowers = hypre_TReAlloc(pdata.ilowers,  ProblemIndex, 
+                                           m[0]*m[1]*m[2]*pdata.nboxes, HYPRE_MEMORY_HOST);
+            pdata.iuppers = hypre_TReAlloc(pdata.iuppers,  ProblemIndex, 
+                                           m[0]*m[1]*m[2]*pdata.nboxes, HYPRE_MEMORY_HOST);
+            pdata.boxsizes = hypre_TReAlloc(pdata.boxsizes,  HYPRE_Int, 
+                                            m[0]*m[1]*m[2]*pdata.nboxes, HYPRE_MEMORY_HOST);
             for (box = 0; box < pdata.nboxes; box++)
             {
                n[0] = pdata.iuppers[box][0] - pdata.ilowers[box][0] + 1;
@@ -1824,89 +1824,89 @@ DistributeData( ProblemData   global_data,
 
       if (pdata.nboxes == 0)
       {
-         hypre_TFree(pdata.ilowers);
-         hypre_TFree(pdata.iuppers);
-         hypre_TFree(pdata.boxsizes);
+         hypre_TFree(pdata.ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.boxsizes, HYPRE_MEMORY_HOST);
          pdata.max_boxsize = 0;
       }
 
       if (pdata.glue_nboxes == 0)
       {
-         hypre_TFree(pdata.glue_shared);
-         hypre_TFree(pdata.glue_ilowers);
-         hypre_TFree(pdata.glue_iuppers);
-         hypre_TFree(pdata.glue_offsets);
-         hypre_TFree(pdata.glue_nbor_parts);
-         hypre_TFree(pdata.glue_nbor_ilowers);
-         hypre_TFree(pdata.glue_nbor_iuppers);
-         hypre_TFree(pdata.glue_nbor_offsets);
-         hypre_TFree(pdata.glue_index_maps);
-         hypre_TFree(pdata.glue_index_dirs);
-         hypre_TFree(pdata.glue_primaries);
+         hypre_TFree(pdata.glue_shared, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_offsets, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_nbor_parts, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_nbor_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_nbor_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_nbor_offsets, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_index_maps, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_index_dirs, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_primaries, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.graph_nboxes == 0)
       {
-         hypre_TFree(pdata.graph_ilowers);
-         hypre_TFree(pdata.graph_iuppers);
-         hypre_TFree(pdata.graph_strides);
-         hypre_TFree(pdata.graph_vars);
-         hypre_TFree(pdata.graph_to_parts);
-         hypre_TFree(pdata.graph_to_ilowers);
-         hypre_TFree(pdata.graph_to_iuppers);
-         hypre_TFree(pdata.graph_to_strides);
-         hypre_TFree(pdata.graph_to_vars);
-         hypre_TFree(pdata.graph_index_maps);
-         hypre_TFree(pdata.graph_index_signs);
-         hypre_TFree(pdata.graph_entries);
-         hypre_TFree(pdata.graph_values);
-         hypre_TFree(pdata.graph_boxsizes);
+         hypre_TFree(pdata.graph_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_strides, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_to_parts, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_to_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_to_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_to_strides, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_to_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_index_maps, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_index_signs, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_entries, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_values, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_boxsizes, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.matset_nboxes == 0)
       {
-         hypre_TFree(pdata.matset_ilowers);
-         hypre_TFree(pdata.matset_iuppers);
-         hypre_TFree(pdata.matset_strides);
-         hypre_TFree(pdata.matset_vars);
-         hypre_TFree(pdata.matset_entries);
-         hypre_TFree(pdata.matset_values);
+         hypre_TFree(pdata.matset_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matset_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matset_strides, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matset_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matset_entries, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matset_values, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.matadd_nboxes == 0)
       {
-         hypre_TFree(pdata.matadd_ilowers);
-         hypre_TFree(pdata.matadd_iuppers);
-         hypre_TFree(pdata.matadd_vars);
-         hypre_TFree(pdata.matadd_nentries);
-         hypre_TFree(pdata.matadd_entries);
-         hypre_TFree(pdata.matadd_values);
+         hypre_TFree(pdata.matadd_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matadd_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matadd_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matadd_nentries, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matadd_entries, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matadd_values, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.fem_matadd_nboxes == 0)
       {
-         hypre_TFree(pdata.fem_matadd_ilowers);
-         hypre_TFree(pdata.fem_matadd_iuppers);
-         hypre_TFree(pdata.fem_matadd_nrows);
-         hypre_TFree(pdata.fem_matadd_ncols);
-         hypre_TFree(pdata.fem_matadd_rows);
-         hypre_TFree(pdata.fem_matadd_cols);
-         hypre_TFree(pdata.fem_matadd_values);
+         hypre_TFree(pdata.fem_matadd_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_matadd_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_matadd_nrows, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_matadd_ncols, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_matadd_rows, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_matadd_cols, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_matadd_values, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.rhsadd_nboxes == 0)
       {
-         hypre_TFree(pdata.rhsadd_ilowers);
-         hypre_TFree(pdata.rhsadd_iuppers);
-         hypre_TFree(pdata.rhsadd_vars);
-         hypre_TFree(pdata.rhsadd_values);
+         hypre_TFree(pdata.rhsadd_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.rhsadd_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.rhsadd_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.rhsadd_values, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.fem_rhsadd_nboxes == 0)
       {
-         hypre_TFree(pdata.fem_rhsadd_ilowers);
-         hypre_TFree(pdata.fem_rhsadd_iuppers);
-         hypre_TFree(pdata.fem_rhsadd_values);
+         hypre_TFree(pdata.fem_rhsadd_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_rhsadd_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_rhsadd_values, HYPRE_MEMORY_HOST);
       }
 
       data.pdata[part] = pdata;
@@ -1919,7 +1919,7 @@ DistributeData( ProblemData   global_data,
          hypre_max(data.max_boxsize, data.pdata[part].max_boxsize);
    }
 
-   hypre_TFree(pool_procs);
+   hypre_TFree(pool_procs, HYPRE_MEMORY_HOST);
 
    *data_ptr = data; 
    return 0;
@@ -1941,174 +1941,174 @@ DestroyData( ProblemData   data )
 
       if (pdata.nboxes > 0)
       {
-         hypre_TFree(pdata.ilowers);
-         hypre_TFree(pdata.iuppers);
-         hypre_TFree(pdata.boxsizes);
+         hypre_TFree(pdata.ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.boxsizes, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.nvars > 0)
       {
-         hypre_TFree(pdata.vartypes);
+         hypre_TFree(pdata.vartypes, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.add_nvars > 0)
       {
-         hypre_TFree(pdata.add_indexes);
-         hypre_TFree(pdata.add_vartypes);
+         hypre_TFree(pdata.add_indexes, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.add_vartypes, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.glue_nboxes > 0)
       {
-         hypre_TFree(pdata.glue_shared);
-         hypre_TFree(pdata.glue_ilowers);
-         hypre_TFree(pdata.glue_iuppers);
-         hypre_TFree(pdata.glue_offsets);
-         hypre_TFree(pdata.glue_nbor_parts);
-         hypre_TFree(pdata.glue_nbor_ilowers);
-         hypre_TFree(pdata.glue_nbor_iuppers);
-         hypre_TFree(pdata.glue_nbor_offsets);
-         hypre_TFree(pdata.glue_index_maps);
-         hypre_TFree(pdata.glue_index_dirs);
-         hypre_TFree(pdata.glue_primaries);
+         hypre_TFree(pdata.glue_shared, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_offsets, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_nbor_parts, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_nbor_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_nbor_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_nbor_offsets, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_index_maps, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_index_dirs, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.glue_primaries, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.nvars > 0)
       {
-         hypre_TFree(pdata.stencil_num);
+         hypre_TFree(pdata.stencil_num, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.graph_nboxes > 0)
       {
-         hypre_TFree(pdata.graph_ilowers);
-         hypre_TFree(pdata.graph_iuppers);
-         hypre_TFree(pdata.graph_strides);
-         hypre_TFree(pdata.graph_vars);
-         hypre_TFree(pdata.graph_to_parts);
-         hypre_TFree(pdata.graph_to_ilowers);
-         hypre_TFree(pdata.graph_to_iuppers);
-         hypre_TFree(pdata.graph_to_strides);
-         hypre_TFree(pdata.graph_to_vars);
-         hypre_TFree(pdata.graph_index_maps);
-         hypre_TFree(pdata.graph_index_signs);
-         hypre_TFree(pdata.graph_entries);
-         hypre_TFree(pdata.graph_values);
-         hypre_TFree(pdata.graph_boxsizes);
+         hypre_TFree(pdata.graph_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_strides, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_to_parts, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_to_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_to_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_to_strides, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_to_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_index_maps, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_index_signs, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_entries, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_values, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.graph_boxsizes, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.matset_nboxes > 0)
       {
-         hypre_TFree(pdata.matset_ilowers);
-         hypre_TFree(pdata.matset_iuppers);
-         hypre_TFree(pdata.matset_strides);
-         hypre_TFree(pdata.matset_vars);
-         hypre_TFree(pdata.matset_entries);
-         hypre_TFree(pdata.matset_values);
+         hypre_TFree(pdata.matset_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matset_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matset_strides, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matset_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matset_entries, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matset_values, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.matadd_nboxes > 0)
       {
-         hypre_TFree(pdata.matadd_ilowers);
-         hypre_TFree(pdata.matadd_iuppers);
-         hypre_TFree(pdata.matadd_vars);
-         hypre_TFree(pdata.matadd_nentries);
+         hypre_TFree(pdata.matadd_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matadd_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matadd_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matadd_nentries, HYPRE_MEMORY_HOST);
          for (box = 0; box < pdata.matadd_nboxes; box++)
          {
-            hypre_TFree(pdata.matadd_entries[box]);
-            hypre_TFree(pdata.matadd_values[box]);
+            hypre_TFree(pdata.matadd_entries[box], HYPRE_MEMORY_HOST);
+            hypre_TFree(pdata.matadd_values[box], HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(pdata.matadd_entries);
-         hypre_TFree(pdata.matadd_values);
+         hypre_TFree(pdata.matadd_entries, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.matadd_values, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.fem_matadd_nboxes > 0)
       {
-         hypre_TFree(pdata.fem_matadd_ilowers);
-         hypre_TFree(pdata.fem_matadd_iuppers);
-         hypre_TFree(pdata.fem_matadd_nrows);
-         hypre_TFree(pdata.fem_matadd_ncols);
+         hypre_TFree(pdata.fem_matadd_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_matadd_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_matadd_nrows, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_matadd_ncols, HYPRE_MEMORY_HOST);
          for (box = 0; box < pdata.fem_matadd_nboxes; box++)
          {
-            hypre_TFree(pdata.fem_matadd_rows[box]);
-            hypre_TFree(pdata.fem_matadd_cols[box]);
-            hypre_TFree(pdata.fem_matadd_values[box]);
+            hypre_TFree(pdata.fem_matadd_rows[box], HYPRE_MEMORY_HOST);
+            hypre_TFree(pdata.fem_matadd_cols[box], HYPRE_MEMORY_HOST);
+            hypre_TFree(pdata.fem_matadd_values[box], HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(pdata.fem_matadd_rows);
-         hypre_TFree(pdata.fem_matadd_cols);
-         hypre_TFree(pdata.fem_matadd_values);
+         hypre_TFree(pdata.fem_matadd_rows, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_matadd_cols, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_matadd_values, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.rhsadd_nboxes > 0)
       {
-         hypre_TFree(pdata.rhsadd_ilowers);
-         hypre_TFree(pdata.rhsadd_iuppers);
-         hypre_TFree(pdata.rhsadd_vars);
-         hypre_TFree(pdata.rhsadd_values);
+         hypre_TFree(pdata.rhsadd_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.rhsadd_iuppers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.rhsadd_vars, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.rhsadd_values, HYPRE_MEMORY_HOST);
       }
 
       if (pdata.fem_rhsadd_nboxes > 0)
       {
-         hypre_TFree(pdata.fem_rhsadd_ilowers);
-         hypre_TFree(pdata.fem_rhsadd_iuppers);
+         hypre_TFree(pdata.fem_rhsadd_ilowers, HYPRE_MEMORY_HOST);
+         hypre_TFree(pdata.fem_rhsadd_iuppers, HYPRE_MEMORY_HOST);
          for (box = 0; box < pdata.fem_rhsadd_nboxes; box++)
          {
-            hypre_TFree(pdata.fem_rhsadd_values[box]);
+            hypre_TFree(pdata.fem_rhsadd_values[box], HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(pdata.fem_rhsadd_values);
+         hypre_TFree(pdata.fem_rhsadd_values, HYPRE_MEMORY_HOST);
       }
    }
-   hypre_TFree(data.pdata);
+   hypre_TFree(data.pdata, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(data.numghost);
+   hypre_TFree(data.numghost, HYPRE_MEMORY_HOST);
 
    if (data.nstencils > 0)
    {
       for (s = 0; s < data.nstencils; s++)
       {
-         hypre_TFree(data.stencil_offsets[s]);
-         hypre_TFree(data.stencil_vars[s]);
-         hypre_TFree(data.stencil_values[s]);
+         hypre_TFree(data.stencil_offsets[s], HYPRE_MEMORY_HOST);
+         hypre_TFree(data.stencil_vars[s], HYPRE_MEMORY_HOST);
+         hypre_TFree(data.stencil_values[s], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(data.stencil_sizes);
-      hypre_TFree(data.stencil_offsets);
-      hypre_TFree(data.stencil_vars);
-      hypre_TFree(data.stencil_values);
+      hypre_TFree(data.stencil_sizes, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.stencil_offsets, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.stencil_vars, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.stencil_values, HYPRE_MEMORY_HOST);
    }
 
    if (data.fem_nvars > 0)
    {
       for (s = 0; s < data.fem_nvars; s++)
       {
-         hypre_TFree(data.fem_values_full[s]);
-         hypre_TFree(data.fem_ivalues_full[s]);
+         hypre_TFree(data.fem_values_full[s], HYPRE_MEMORY_HOST);
+         hypre_TFree(data.fem_ivalues_full[s], HYPRE_MEMORY_HOST);
       }
-      hypre_TFree(data.fem_offsets);
-      hypre_TFree(data.fem_vars);
-      hypre_TFree(data.fem_values_full);
-      hypre_TFree(data.fem_ivalues_full);
-      hypre_TFree(data.fem_ordering);
-      hypre_TFree(data.fem_sparsity);
-      hypre_TFree(data.fem_values);
+      hypre_TFree(data.fem_offsets, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.fem_vars, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.fem_values_full, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.fem_ivalues_full, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.fem_ordering, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.fem_sparsity, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.fem_values, HYPRE_MEMORY_HOST);
    }
 
    if (data.fem_rhs_true > 0)
    {
-      hypre_TFree(data.fem_rhs_values);
+      hypre_TFree(data.fem_rhs_values, HYPRE_MEMORY_HOST);
    }
 
    if (data.symmetric_num > 0)
    {
-      hypre_TFree(data.symmetric_parts);
-      hypre_TFree(data.symmetric_vars);
-      hypre_TFree(data.symmetric_to_vars);
-      hypre_TFree(data.symmetric_booleans);
+      hypre_TFree(data.symmetric_parts, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.symmetric_vars, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.symmetric_to_vars, HYPRE_MEMORY_HOST);
+      hypre_TFree(data.symmetric_booleans, HYPRE_MEMORY_HOST);
    }
 
    for (i = 0; i < data.ndists; i++)
    {
-      hypre_TFree(data.dist_pools[i]);
+      hypre_TFree(data.dist_pools[i], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(data.dist_pools);
-   hypre_TFree(data.dist_npools);
+   hypre_TFree(data.dist_pools, HYPRE_MEMORY_HOST);
+   hypre_TFree(data.dist_npools, HYPRE_MEMORY_HOST);
 
    return 0;
 }
@@ -2461,10 +2461,10 @@ main( hypre_int argc,
    nparts = global_data.nparts;
    pooldist = 0;
 
-   parts      = hypre_TAlloc(HYPRE_Int, nparts);
-   refine     = hypre_TAlloc(Index, nparts);
-   distribute = hypre_TAlloc(Index, nparts);
-   block      = hypre_TAlloc(Index, nparts);
+   parts      = hypre_TAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
+   refine     = hypre_TAlloc(Index,  nparts, HYPRE_MEMORY_HOST);
+   distribute = hypre_TAlloc(Index,  nparts, HYPRE_MEMORY_HOST);
+   block      = hypre_TAlloc(Index,  nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       parts[part] = part;
@@ -2830,7 +2830,7 @@ main( hypre_int argc,
     * Set up the stencils
     *-----------------------------------------------------------*/
 
-   stencils = hypre_CTAlloc(HYPRE_SStructStencil, data.nstencils);
+   stencils = hypre_CTAlloc(HYPRE_SStructStencil,  data.nstencils, HYPRE_MEMORY_HOST);
    for (s = 0; s < data.nstencils; s++)
    {
       HYPRE_SStructStencilCreate(data.ndim, data.stencil_sizes[s],
@@ -2954,7 +2954,7 @@ main( hypre_int argc,
     * Set up the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse));
+   values = hypre_TAlloc(HYPRE_Real,  hypre_max(data.max_boxsize,  data.fem_nsparse), HYPRE_MEMORY_HOST);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -3457,7 +3457,7 @@ main( hypre_int argc,
 
       /* Set up the gradient stencils */
 
-      G_stencils = hypre_CTAlloc(HYPRE_SStructStencil, data.ndim);
+      G_stencils = hypre_CTAlloc(HYPRE_SStructStencil,  data.ndim, HYPRE_MEMORY_HOST);
       for (s = 0; s < data.ndim; s++)
       {
          HYPRE_SStructStencilCreate(data.ndim, 2, &G_stencils[s]);
@@ -3610,7 +3610,7 @@ main( hypre_int argc,
    }
 #endif
 
-   hypre_TFree(values);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------
     * Solve the system using SysPFMG or Split
@@ -3817,7 +3817,7 @@ main( hypre_int argc,
 
    if ( lobpcgFlag && (solver_id >= 10) && (solver_id < 20) ) {
 
-      interpreter = hypre_CTAlloc(mv_InterfaceInterpreter,1);
+      interpreter = hypre_CTAlloc(mv_InterfaceInterpreter, 1, HYPRE_MEMORY_HOST);
 
       HYPRE_SStructSetupInterpreter( interpreter );
       HYPRE_SStructSetupMatvec(&matvec_fn);
@@ -3915,7 +3915,7 @@ main( hypre_int argc,
          eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
                                                               blockSize, 
                                                               x );
-         eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
+         eigenvalues = hypre_CTAlloc(HYPRE_Real,  blockSize, HYPRE_MEMORY_HOST);
        
          if ( lobpcgSeed )
             mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
@@ -4085,7 +4085,7 @@ main( hypre_int argc,
          eigenvectors = mv_MultiVectorCreateFromSampleVector( interpreter,
                                                               blockSize, 
                                                               x );
-         eigenvalues = (HYPRE_Real*) calloc( blockSize, sizeof(HYPRE_Real) );
+         eigenvalues = hypre_CTAlloc(HYPRE_Real,  blockSize, HYPRE_MEMORY_HOST);
        
          if ( lobpcgSeed )
             mv_MultiVectorSetRandom( eigenvectors, lobpcgSeed );
@@ -4178,7 +4178,7 @@ main( hypre_int argc,
          free( eigenvalues );
       }
 
-      hypre_TFree( interpreter );
+      hypre_TFree( interpreter , HYPRE_MEMORY_HOST);
 
    }
 
@@ -5651,7 +5651,7 @@ main( hypre_int argc,
       HYPRE_SStructVectorPrint("sstruct.out.x", x, 0);
 
       /* print out with shared data replicated */
-      values = hypre_TAlloc(HYPRE_Real, data.max_boxsize);
+      values = hypre_TAlloc(HYPRE_Real,  data.max_boxsize, HYPRE_MEMORY_HOST);
       for (part = 0; part < data.nparts; part++)
       {
          pdata = data.pdata[part];
@@ -5684,7 +5684,7 @@ main( hypre_int argc,
             fclose(file);
          }
       }
-      hypre_TFree(values);
+      hypre_TFree(values, HYPRE_MEMORY_HOST);
    }
 
    if (myid == 0 /* begin lobpcg */ && !lobpcgFlag /* end lobpcg */)
@@ -5704,7 +5704,7 @@ main( hypre_int argc,
    {
       HYPRE_SStructStencilDestroy(stencils[s]);
    }
-   hypre_TFree(stencils);
+   hypre_TFree(stencils, HYPRE_MEMORY_HOST);
    HYPRE_SStructGraphDestroy(graph);
    HYPRE_SStructMatrixDestroy(A);
    HYPRE_SStructVectorDestroy(b);
@@ -5715,7 +5715,7 @@ main( hypre_int argc,
       {
          HYPRE_SStructStencilDestroy(G_stencils[s]);
       }
-      hypre_TFree(G_stencils);
+      hypre_TFree(G_stencils, HYPRE_MEMORY_HOST);
       HYPRE_SStructGraphDestroy(G_graph);
       HYPRE_SStructGridDestroy(G_grid);
       HYPRE_SStructMatrixDestroy(G);
@@ -5723,10 +5723,10 @@ main( hypre_int argc,
 
    DestroyData(data);
 
-   hypre_TFree(parts);
-   hypre_TFree(refine);
-   hypre_TFree(distribute);
-   hypre_TFree(block);
+   hypre_TFree(parts, HYPRE_MEMORY_HOST);
+   hypre_TFree(refine, HYPRE_MEMORY_HOST);
+   hypre_TFree(distribute, HYPRE_MEMORY_HOST);
+   hypre_TFree(block, HYPRE_MEMORY_HOST);
 
    /* Finalize MPI */
    hypre_GPUFinalize();

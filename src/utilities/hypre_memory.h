@@ -84,250 +84,35 @@
 extern "C" {
 #endif
 
-/*--------------------------------------------------------------------------
- * NEW INTERFACE
- *--------------------------------------------------------------------------*/
-#define HYPRE_LOCATION_DEVICE ( 0)
-#define HYPRE_LOCATION_HOST   ( 1)
-#define HYPRE_LOCATION_UNSET  (-1)
+#define HYPRE_MEMORY_DEVICE ( 0)
+#define HYPRE_MEMORY_HOST   ( 1)
+#define HYPRE_MEMORY_SHARED ( 2)
+#define HYPRE_MEMORY_UNSET  (-1)
 
-extern HYPRE_Int hypre_exec_policy;
+#define HYPRE_CUDA_GLOBAL
 
-/* Using a device, not using managed memory */
+#define hypre_InitMemoryDebug(id)
+#define hypre_FinalizeMemoryDebug()
 
-#define hypre_TAlloc(type, count, location)\
+#define hypre_TAlloc(type, count, location) \
 ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
 
-#define hypre_CTAlloc(type, count, location)\
-( (type *)hypre_CAlloc(count, sizeof(type), location ) )
-  
-#define hypre_TReAlloc(type, count, location)\
-( (type *)hypre_ReAlloc(count, sizeof(type), location ) )
+#define hypre_CTAlloc(type, count, location) \
+( (type *)hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location) )
 
-#define hypre_TFree(type, count, location)\
-( hypre_Free((size_t)(sizeof(type) * (count)), location ), ptr = NULL  )
+#define hypre_TReAlloc(ptr, type, count, location) \
+( (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) )
 
-#define hypre_MemoryCopy(ptrTo, ptrFrom, type, count, locTo, locFrom)	\
-( hypre_Memcpy( ptrTo, ptrFrom, sizeof(type)*count, locTo, locFrom); )
+#define hypre_TFree(ptr,location) \
+( hypre_Free((char *)ptr, location), ptr = NULL )
 
-#define hypre_MemoryCopy(ptrTo, ptrFrom, type, count, locTo, locFrom)	\
-( hypre_MemcpyAsync( ptrTo, ptrFrom, sizeof(type)*count, locTo, locFrom); )
+#define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
+(hypre_Memcpy((char *)(dst),(char *)(src),(size_t)(sizeof(type) * (count)),locdst, locsrc))
 
-#if defined(HYPRE_USE_OMP45)
-#define hypre_SetExecutionMode(location)\
-   if (location==LOCATION_DEVICE)\
-   {\
-      HYPRE_OMP45_OFFLOAD_ON();\
-   }\
-   else if (location==LOCATION_HOST)\
-   {\
-      HYPRE_OMP45_OFFLOAD_OFF();\
-   }
-#else
-#define hypre_SetExecutionMode(location)\
-     hypre_exec_policy = location;
-#endif
-
-/*--------------------------------------------------------------------------
- * CURRENT CODE
- *--------------------------------------------------------------------------*/
-
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-#ifdef __cplusplus
-extern "C++" {
-#endif
-#include <cuda.h>
-#include <cuda_runtime.h>
-#ifdef __cplusplus
-}
-#endif
-#define HYPRE_CUDA_GLOBAL __host__ __device__
-  
-#if defined(HYPRE_MEMORY_GPU)
-#define hypre_DeviceTAlloc(type, count) \
-  ({									\
-    type * ptr;								\
-    cudaError_t cudaerr = cudaMalloc((void**)&ptr,sizeof(type)*(count)); \
-    if ( cudaerr != cudaSuccess ) {					\
-      printf("\n ERROR hypre_DataTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-      HYPRE_Int *p = NULL; *p = 1;						\
-    }									\
-    ptr;})
-	
-#define hypre_DeviceCTAlloc(type, count) \
-	({								   \
-	type * ptr;						   \
-	cudaError_t cudaerr = cudaMalloc((void**)&ptr,sizeof(type)*(count)); \
-	if ( cudaerr != cudaSuccess ) {										\
-		printf("\n hypre_DataCTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-		HYPRE_Int *p = NULL; *p = 1;\
-	}		\
-	cudaMemset(ptr,0,sizeof(type)*(count));	   \
-	ptr;})									   \
-	
-#define hypre_DeviceTReAlloc(ptr, type, count) {type *newptr;				\
-	                                         cudaMalloc((void**)&,sizeof(type)*(count), cudaMemAttachGlobal);	\
-											 memcpy(newptr, ptr, sizeof(type)*(count)); \
-											 cudaFree(ptr);				\
-											 ptr = newptr;}
-#else
- #define hypre_DeviceTAlloc(type, count) \
-	({																	\
-	type * ptr;															\
-	cudaError_t cudaerr = cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);\
-	if ( cudaerr != cudaSuccess ) {										\
-		printf("\n ERROR hypre_DataTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-		HYPRE_Int *p = NULL; *p = 1;\
-	}\
-	ptr;})
-	
-#define hypre_DeviceCTAlloc(type, count) \
-	({								   \
-	type * ptr;						   \
-	cudaError_t cudaerr = cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal); \
-	if ( cudaerr != cudaSuccess ) {										\
-		printf("\n hypre_DataCTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-		HYPRE_Int *p = NULL; *p = 1;\
-	}		\
-	cudaMemset(ptr,0,sizeof(type)*(count));	   \
-	ptr;})									   \
-	
-#define hypre_DeviceTReAlloc(ptr, type, count) {type *newptr;				\
-	                                      cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal);	\
-					      memcpy(newptr, ptr, sizeof(type)*(count)); \
-					      cudaFree(ptr);		\
-					      ptr = newptr;} 
-#endif
-  
-#define hypre_DeviceTFree(ptr) \
-	{											\
-		cudaError_t cudaerr = cudaFree(ptr);							\
-		if ( cudaerr != cudaSuccess ) {									\
-			printf("\n CudaFree : %s in %s(%d) function %s\n",cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-			HYPRE_Int *p = NULL; *p = 1;										\
-		}																\
-	}																	\
-	
-
-#define hypre_DataCopyToData(ptrH,ptrD,type,count)						\
-	{cudaError_t cudaerr = cudaMemcpy(ptrD, ptrH, sizeof(type)*count, cudaMemcpyHostToDevice); \
-if ( cudaerr != cudaSuccess ) {										\
-		printf("\n hypre_DataCopyToData %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-		HYPRE_Int *p = NULL; *p = 1;\
-}							  \
-	}
-	
-	
-#define hypre_DataCopyFromData(ptrH,ptrD,type,count)						\
-	{cudaError_t cudaerr = cudaMemcpy(ptrH, ptrD, sizeof(type)*count, cudaMemcpyDeviceToHost); \
-	if ( cudaerr != cudaSuccess ) {										\
-		printf("\n hypre_DataCTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
-		HYPRE_Int *p = NULL; *p = 1;\
-	}\
-	}
-
-#define hypre_DeviceMemset(ptr,value,type,count)	\
-	cudaMemset(ptr,value,count*sizeof(type));
-	
-#define hypre_UMTAlloc(type, count)				\
-  ({									\
-      type * ptr;								\
-      cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal); \
-      ptr;								\
-  })
-	
-#define hypre_UMCTAlloc(type, count)					\
-  ({									\
-    type * ptr;								\
-    cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal); \
-    cudaMemset(ptr,0,sizeof(type)*(count));				\
-    ptr;})								\
-  
-  
-#define hypre_UMTReAlloc(type, count)\
-  ({							 \
-    type * ptr;								\
-    type *newptr;							\
-    cudaMallocManaged((void**)&newptr,sizeof(type)*(count), cudaMemAttachGlobal); \
-    cudaFree(ptr);							\
-    ptr = newptr;							\
-    ptr;})								\
-  
-#define hypre_UMTFree(ptr) \
-      cudaFree(ptr)
-
-#define hypre_TAlloc(type, count) \
-( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )
-
-#define hypre_CTAlloc(type, count) \
-( (type *)hypre_CAlloc((size_t)(count), (size_t)sizeof(type)) )
-
-#define hypre_TReAlloc(ptr, type, count) \
-( (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count))) )
-
-#define hypre_TFree(ptr) \
-( hypre_Free((char *)ptr), ptr = NULL )
-  
-  //#define hypre_TAlloc(type, count)  hypre_UMTAlloc(type, count)
-  //#define hypre_CTAlloc(type, count) hypre_UMCTAlloc(type, count)
-  //#define hypre_TReAlloc(ptr, type, count) hypre_UMTReAlloc(type, count)
-  //#define hypre_TFree(ptr) hypre_UMTFree(ptr)
-
-#define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count))
-#define hypre_SharedCTAlloc(type, count) hypre_CTAlloc(type, (count))
-#define hypre_SharedTReAlloc(type, count) hypre_TReAlloc(type, (count))
-#define hypre_SharedTFree(ptr) hypre_TFree(ptr)
-#else
-#define HYPRE_CUDA_GLOBAL 
-
-/*--------------------------------------------------------------------------
- * Use standard memory routines
- *--------------------------------------------------------------------------*/
-
-#define hypre_TAlloc(type, count) \
-( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count))) )
-
-#define hypre_CTAlloc(type, count) \
-( (type *)hypre_CAlloc((size_t)(count), (size_t)sizeof(type)) )
-
-#define hypre_TReAlloc(ptr, type, count) \
-( (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count))) )
-
-#define hypre_TFree(ptr) \
-( hypre_Free((char *)ptr), ptr = NULL )
-
-#define hypre_SharedTAlloc(type, count) hypre_TAlloc(type, (count))
-#define hypre_SharedCTAlloc(type, count) hypre_CTAlloc(type, (count))
-#define hypre_SharedTReAlloc(type, count) hypre_TReAlloc(type, (count))
-#define hypre_SharedTFree(ptr) hypre_TFree(ptr)
-
-#define hypre_DeviceTAlloc(type, count) hypre_TAlloc(type, (count))
-#define hypre_DeviceCTAlloc(type, count) hypre_CTAlloc(type, (count))
-#define hypre_DeviceTReAlloc(type, count) hypre_TReAlloc(type, (count))
-#define hypre_DeviceTFree(ptr) hypre_TFree(ptr)
-#define hypre_DataCopyToData(ptrH,ptrD,type,count) memcpy(ptrD, ptrH, sizeof(type)*(count))
-#define hypre_DataCopyFromData(ptrH,ptrD,type,count) memcpy(ptrH, ptrD, sizeof(type)*(count))
 #define hypre_DeviceMemset(ptr,value,type,count)	memset(ptr,value,count*sizeof(type))
-#define hypre_UMTAlloc(type, count) hypre_TAlloc(type, (count))
-#define hypre_UMCTAlloc(type, count) hypre_CTAlloc(type, (count))
-#define hypre_UMTReAlloc(type, count) hypre_TReAlloc(type, (count))
-#define hypre_UMTFree(ptr) hypre_TFree(ptr)
-#endif
   
 #define hypre_PinnedTAlloc(type, count)\
 ( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
-
-#define hypre_HostTAlloc(type, count) \
-( (type *)hypre_MAllocHost((size_t)(sizeof(type) * (count))) )
-
-#define hypre_HostCTAlloc(type, count) \
-( (type *)hypre_CAllocHost((size_t)(count), (size_t)sizeof(type)) )
-
-#define hypre_HostTReAlloc(ptr, type, count) \
-( (type *)hypre_ReAllocHost((char *)ptr, (size_t)(sizeof(type) * (count))) )
-
-#define hypre_HostTFree(ptr) \
-( hypre_FreeHost((char *)ptr), ptr = NULL )
 
 /*--------------------------------------------------------------------------
  * Prototypes
@@ -335,13 +120,11 @@ if ( cudaerr != cudaSuccess ) {										\
 
 /* hypre_memory.c */
 HYPRE_Int hypre_OutOfMemory ( size_t size );
-  char *hypre_MAlloc ( size_t size, HYPRE_Int location );
-char *hypre_CAlloc ( size_t count , size_t elt_size );
+char *hypre_MAlloc( size_t size , HYPRE_Int location );
+char *hypre_CAlloc( size_t count ,  size_t elt_size , HYPRE_Int location);
 char *hypre_MAllocPinned( size_t size );
-char *hypre_ReAlloc ( char *ptr , size_t size );
-void hypre_Free ( char *ptr );
-void hypre_Memcpy( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
-void hypre_MemcpyAsync( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
+char *hypre_ReAlloc( char *ptr ,  size_t size , HYPRE_Int location);
+void hypre_Free( char *ptr , HYPRE_Int location );
 char *hypre_CAllocHost( size_t count,size_t elt_size );
 char *hypre_MAllocHost( size_t size );
 char *hypre_ReAllocHost( char   *ptr,size_t  size );
@@ -350,7 +133,17 @@ char *hypre_SharedMAlloc ( size_t size );
 char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
 char *hypre_SharedReAlloc ( char *ptr , size_t size );
 void hypre_SharedFree ( char *ptr );
+void hypre_Memcpy( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
+void hypre_MemcpyAsync( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );	
 HYPRE_Real *hypre_IncrementSharedDataPtr ( HYPRE_Real *ptr , size_t size );
+
+/* memory_dmalloc.c */
+HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );
+HYPRE_Int hypre_FinalizeMemoryDebugDML( void );
+char *hypre_MAllocDML( HYPRE_Int size , char *file , HYPRE_Int line );
+char *hypre_CAllocDML( HYPRE_Int count , HYPRE_Int elt_size , char *file , HYPRE_Int line );
+char *hypre_ReAllocDML( char *ptr , HYPRE_Int size , char *file , HYPRE_Int line );
+void hypre_FreeDML( char *ptr , char *file , HYPRE_Int line );
 
 #ifdef __cplusplus
 }

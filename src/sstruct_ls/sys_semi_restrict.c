@@ -29,7 +29,7 @@ hypre_SysSemiRestrictCreate( void **sys_restrict_vdata_ptr)
 {
    hypre_SysSemiRestrictData *sys_restrict_data;
 
-   sys_restrict_data = hypre_CTAlloc(hypre_SysSemiRestrictData, 1);
+   sys_restrict_data = hypre_CTAlloc(hypre_SysSemiRestrictData,  1, HYPRE_MEMORY_HOST);
    *sys_restrict_vdata_ptr = (void *) sys_restrict_data;
 
    return hypre_error_flag;
@@ -60,7 +60,7 @@ hypre_SysSemiRestrictSetup( void                 *sys_restrict_vdata,
    HYPRE_Int                   vi;
 
    nvars = hypre_SStructPMatrixNVars(R);
-   srestrict_data = hypre_CTAlloc(void *, nvars);
+   srestrict_data = hypre_CTAlloc(void *,  nvars, HYPRE_MEMORY_HOST);
 
    for (vi = 0; vi < nvars; vi++)
    {
@@ -134,8 +134,8 @@ hypre_SysSemiRestrictDestroy( void *sys_restrict_vdata )
             hypre_SemiRestrictDestroy(srestrict_data[vi]);
          }
       }
-      hypre_TFree(srestrict_data);
-      hypre_TFree(sys_restrict_data);
+      hypre_TFree(srestrict_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(sys_restrict_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

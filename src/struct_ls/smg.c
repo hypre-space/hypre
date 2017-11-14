@@ -21,7 +21,7 @@ hypre_SMGCreate( MPI_Comm  comm )
 {
    hypre_SMGData *smg_data;
 
-   smg_data = hypre_CTAlloc(hypre_SMGData, 1);
+   smg_data = hypre_CTAlloc(hypre_SMGData,  1, HYPRE_MEMORY_HOST);
 
    (smg_data -> comm)        = comm;
    (smg_data -> time_index)  = hypre_InitializeTiming("SMG");
@@ -63,8 +63,8 @@ hypre_SMGDestroy( void *smg_vdata )
    {
       if ((smg_data -> logging) > 0)
       {
-         hypre_TFree(smg_data -> norms);
-         hypre_TFree(smg_data -> rel_norms);
+         hypre_TFree(smg_data -> norms, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
 
       if ((smg_data -> num_levels) > -1)
@@ -81,10 +81,10 @@ hypre_SMGDestroy( void *smg_vdata )
          {
             hypre_SMGResidualDestroy(smg_data -> residual_data_l[l]);
          }
-         hypre_TFree(smg_data -> relax_data_l);
-         hypre_TFree(smg_data -> residual_data_l);
-         hypre_TFree(smg_data -> restrict_data_l);
-         hypre_TFree(smg_data -> interp_data_l);
+         hypre_TFree(smg_data -> relax_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> residual_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> restrict_data_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> interp_data_l, HYPRE_MEMORY_HOST);
  
          hypre_StructVectorDestroy(smg_data -> tb_l[0]);
          hypre_StructVectorDestroy(smg_data -> tx_l[0]);
@@ -111,20 +111,20 @@ hypre_SMGDestroy( void *smg_vdata )
             hypre_StructVectorDestroy(smg_data -> tb_l[l+1]);
             hypre_StructVectorDestroy(smg_data -> tx_l[l+1]);
          }
-         hypre_DeviceTFree(smg_data -> data);
-         hypre_TFree(smg_data -> grid_l);
-         hypre_TFree(smg_data -> PT_grid_l);
-         hypre_TFree(smg_data -> A_l);
-         hypre_TFree(smg_data -> PT_l);
-         hypre_TFree(smg_data -> R_l);
-         hypre_TFree(smg_data -> b_l);
-         hypre_TFree(smg_data -> x_l);
-         hypre_TFree(smg_data -> tb_l);
-         hypre_TFree(smg_data -> tx_l);
+          hypre_TFree(smg_data -> data, HYPRE_MEMORY_DEVICE);
+         hypre_TFree(smg_data -> grid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> PT_grid_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> A_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> PT_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> R_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> b_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> x_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> tb_l, HYPRE_MEMORY_HOST);
+         hypre_TFree(smg_data -> tx_l, HYPRE_MEMORY_HOST);
       }
  
       hypre_FinalizeTiming(smg_data -> time_index);
-      hypre_TFree(smg_data);
+      hypre_TFree(smg_data, HYPRE_MEMORY_HOST);
    }
    
    HYPRE_ANNOTATION_END("SMG.destroy");

@@ -80,7 +80,7 @@ hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha,
       }
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       size = hypre_ParCSRCommPkgSendMapStart(comm_pkg,num_sends)*blk_size;
-      x_buf_data = hypre_CTAlloc(HYPRE_Complex, size);
+      x_buf_data = hypre_CTAlloc(HYPRE_Complex,  size, HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -105,7 +105,7 @@ hypre_ParCSRBlockMatrixMatvec(HYPRE_Complex alpha,
          hypre_CSRBlockMatrixMatvec(alpha,offd,x_tmp,1.0,y_local);    
       hypre_SeqVectorDestroy(x_tmp);
       x_tmp = NULL;
-      hypre_TFree(x_buf_data);
+      hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
    }
    return ierr;
 }
@@ -189,7 +189,7 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    size = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends)*blk_size;
-   y_buf_data = hypre_CTAlloc(HYPRE_Complex, size);
+   y_buf_data = hypre_CTAlloc(HYPRE_Complex,  size, HYPRE_MEMORY_HOST);
 
    y_tmp_data = hypre_VectorData(y_tmp);
    y_local_data = hypre_VectorData(y_local);
@@ -223,7 +223,7 @@ hypre_ParCSRBlockMatrixMatvecT( HYPRE_Complex    alpha,
       }
    }
    
-   hypre_TFree(y_buf_data);
+   hypre_TFree(y_buf_data, HYPRE_MEMORY_HOST);
 
         
    hypre_SeqVectorDestroy(y_tmp);

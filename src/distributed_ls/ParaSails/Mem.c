@@ -49,7 +49,7 @@
 
 Mem *MemCreate()
 {
-    Mem *m = (Mem *) malloc(sizeof(Mem));
+    Mem *m = hypre_TAlloc(Mem, 1, HYPRE_MEMORY_HOST);
 
     m->num_blocks  = 0;  /* number of blocks allocated */
     m->bytes_left  = 0;  /* bytes left in current block */
@@ -105,7 +105,7 @@ char *MemAlloc(Mem *m, HYPRE_Int size)
 	/* Size of requested block */
 	req = MAX(size, MEM_BLOCKSIZE);
 
-        m->avail = (char *) malloc(req);
+        m->avail = hypre_MAlloc(req,HYPRE_MEMORY_HOST);
 
         if (m->avail == NULL)
         {

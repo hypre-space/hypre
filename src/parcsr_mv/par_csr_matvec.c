@@ -134,7 +134,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    }
    else
    {
-      comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*,num_vectors);
+      comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*, num_vectors, HYPRE_MEMORY_HOST);
    }
    hypre_SeqVectorInitialize(x_tmp);
    x_tmp_data = hypre_VectorData(x_tmp);
@@ -142,10 +142,10 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    if (!use_persistent_comm)
    {
-      x_buf_data = hypre_CTAlloc( HYPRE_Complex*, num_vectors );
+      x_buf_data = hypre_CTAlloc( HYPRE_Complex*,  num_vectors , HYPRE_MEMORY_HOST);
       for ( jv=0; jv<num_vectors; ++jv )
-         x_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex, hypre_ParCSRCommPkgSendMapStart
-                                        (comm_pkg, num_sends));
+         x_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex,  hypre_ParCSRCommPkgSendMapStart
+                                        (comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
    }
 
    if ( num_vectors==1 )
@@ -249,7 +249,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
          hypre_ParCSRCommHandleDestroy(comm_handle[jv]);
          comm_handle[jv] = NULL;
       }
-      hypre_TFree(comm_handle);
+      hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
    }
    POP_RANGE;
 #ifdef HYPRE_PROFILE
@@ -266,8 +266,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    x_tmp = NULL;
    if (!use_persistent_comm)
    {
-      for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(x_buf_data[jv]);
-      hypre_TFree(x_buf_data);
+      for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(x_buf_data[jv], HYPRE_MEMORY_HOST);
+      hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
    }
   
 #ifdef HYPRE_PROFILE
@@ -397,17 +397,17 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    }
    else
    {
-      comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*,num_vectors);
+      comm_handle = hypre_CTAlloc(hypre_ParCSRCommHandle*, num_vectors, HYPRE_MEMORY_HOST);
    }
    hypre_SeqVectorInitialize(y_tmp);
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    if (!use_persistent_comm)
    {
-      y_buf_data = hypre_CTAlloc( HYPRE_Complex*, num_vectors );
+      y_buf_data = hypre_CTAlloc( HYPRE_Complex*,  num_vectors , HYPRE_MEMORY_HOST);
       for ( jv=0; jv<num_vectors; ++jv )
-         y_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex, hypre_ParCSRCommPkgSendMapStart
-                                        (comm_pkg, num_sends));
+         y_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex,  hypre_ParCSRCommPkgSendMapStart
+                                        (comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
    }
    y_tmp_data = hypre_VectorData(y_tmp);
    y_local_data = hypre_VectorData(y_local);
@@ -482,7 +482,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
          hypre_ParCSRCommHandleDestroy(comm_handle[jv]);
          comm_handle[jv] = NULL;
       }
-      hypre_TFree(comm_handle);
+      hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
    }
 
 #ifdef HYPRE_PROFILE
@@ -523,8 +523,8 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    y_tmp = NULL;
    if (!use_persistent_comm)
    {
-      for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(y_buf_data[jv]);
-      hypre_TFree(y_buf_data);
+      for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(y_buf_data[jv], HYPRE_MEMORY_HOST);
+      hypre_TFree(y_buf_data, HYPRE_MEMORY_HOST);
    }
 
 #ifdef HYPRE_PROFILE
@@ -611,8 +611,8 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
 
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       if (num_sends)
-         x_buf_data = hypre_CTAlloc(HYPRE_Complex, hypre_ParCSRCommPkgSendMapStart
-                                    (comm_pkg, num_sends));
+         x_buf_data = hypre_CTAlloc(HYPRE_Complex,  hypre_ParCSRCommPkgSendMapStart
+                                    (comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
       index = 0;
       for (i = 0; i < num_sends; i++)
@@ -634,9 +634,9 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
       comm_handle = NULL;
 
       if (num_sends)
-         int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart
-                                      (comm_pkg, num_sends));
-      if (num_cols_offd) CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+         int_buf_data = hypre_CTAlloc(HYPRE_Int,  hypre_ParCSRCommPkgSendMapStart
+                                      (comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
+      if (num_cols_offd) CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -656,9 +656,9 @@ hypre_ParCSRMatrixMatvec_FF( HYPRE_Complex       alpha,
 
       hypre_SeqVectorDestroy(x_tmp);
       x_tmp = NULL;
-      hypre_TFree(x_buf_data);
-      hypre_TFree(int_buf_data);
-      hypre_TFree(CF_marker_offd);
+      hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
    }
 
    return ierr;

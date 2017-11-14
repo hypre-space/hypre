@@ -85,8 +85,8 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-   d_buf_data = hypre_CTAlloc(HYPRE_Real, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
-						num_sends));
+   d_buf_data = hypre_CTAlloc(HYPRE_Real,  hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
+						num_sends), HYPRE_MEMORY_HOST);
 
    index = 0;
    for (i = 0; i < num_sends; i++)
@@ -129,7 +129,7 @@ hypre_ParCSRMatrixScaledNorm( hypre_ParCSRMatrix *A, HYPRE_Real *scnorm)
    hypre_ParVectorDestroy(dinvsqrt);
    hypre_SeqVectorDestroy(sum);
    hypre_SeqVectorDestroy(dis_ext);
-   hypre_TFree(d_buf_data);
+   hypre_TFree(d_buf_data, HYPRE_MEMORY_HOST);
 
    *scnorm = mat_norm;  
    return 0;

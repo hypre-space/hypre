@@ -34,7 +34,7 @@ HYPRE_CSRMatrixCreate( HYPRE_Int  num_rows,
    HYPRE_Int             *matrix_i;
    HYPRE_Int              i;
 
-   matrix_i = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
+   matrix_i = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_HOST);
    matrix_i[0] = 0;
    for (i = 0; i < num_rows; i++)
    {
