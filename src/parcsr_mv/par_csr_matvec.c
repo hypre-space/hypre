@@ -174,7 +174,8 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
       int num_threads=64;
       int num_teams = (end-begin+(end-begin)%num_threads)/num_threads;
-#pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(num_threads) is_device_ptr(x_local_data,x_buf_data,comm_pkg,comm_pkg->send_map_elmts)
+      int *local_send_map_elmts = comm_pkg->send_map_elmts;
+#pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(num_threads) is_device_ptr(x_local_data,x_buf_data,comm_pkg,local_send_map_elmts)
 #elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
@@ -294,7 +295,6 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    POP_RANGE; // PAR_CSR
    return ierr;
 }
-
 HYPRE_Int
 hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
                           hypre_ParCSRMatrix *A,
@@ -304,6 +304,7 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
 {
    return hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y);
 }
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 HYPRE_Int
 hypre_ParCSRMatrixMatvec3( HYPRE_Complex       alpha,
                           hypre_ParCSRMatrix *A,
@@ -325,6 +326,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace3( HYPRE_Complex       alpha,
   hypre_ParCSRMatrixMatvecOutOfPlace(alpha,A,x,beta,b,y);
   hypre_SeqVectorUpdateHost(y->local_vector);
 }
+#endif
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvecT
  *

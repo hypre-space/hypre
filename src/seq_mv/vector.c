@@ -37,13 +37,13 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 
    vector = hypre_HostCTAlloc(hypre_Vector, 1);
 
-#ifdef HYPRE_USE_MANAGED
+#ifdef HYPRE_USE_GPU
    vector->on_device=0;
-   vector->drc=0;
-   vector->hrc=0;
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    vector->mapped=0;
+   vector->drc=0;
+   vector->hrc=0;
 #endif
    hypre_VectorData(vector) = NULL;
    hypre_VectorSize(vector) = size;
