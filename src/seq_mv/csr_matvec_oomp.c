@@ -458,11 +458,17 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    //gpuErrchk(cudaDeviceSynchronize());
    
    if (b!=y){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 #pragma omp target teams  distribute  parallel for private(i)
+#else
+#pragma omp target teams  distribute  parallel for private(i) is_device_ptr(y_data,b_data)
+#endif
      for(i=0;i<y_size;i++) y_data[i] = b_data[i];
    }
    
-#pragma omp target data use_device_ptr(A_data,x_data,b_data,y_data,A_i,A_j)
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+#pragma omp target data use_device_ptr(A_data,x_data,y_data,A_i,A_j)
+#endif
    cusparseErrchk(cusparseDcsrmv(handle ,
 				 CUSPARSE_OPERATION_NON_TRANSPOSE, 
 				 A->num_rows, A->num_cols, A->num_nonzeros,
