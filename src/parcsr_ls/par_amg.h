@@ -233,6 +233,14 @@ typedef struct
 	HYPRE_Int C_point_coarse_level;
 	HYPRE_Int num_C_point_marker;
 	HYPRE_Int   **C_point_marker_array;
+
+#ifdef HYPRE_USE_DSLU
+ /* Parameters and data for SuperLU_Dist */
+   HYPRE_Int slu_level;
+   HYPRE_Int slu_threshold;
+   HYPRE_SLUData *slu_data;
+#endif
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -442,6 +450,13 @@ typedef struct
 
 #define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
 #define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
+
+#ifdef HYPRE_USE_DSLU
+ /* Parameters and data for SuperLU_Dist */
+#define hypre_ParAMGDataSLULevel(amg_data) ((amg_data)->slu_level)
+#define hypre_ParAMGDataSLUThreshold(amg_data) ((amg_data)->slu_threshold)
+#define hypre_ParAMGDataSLUData(amg_data) ((amg_data)->slu_threshold)
+#endif
 
 
 #endif

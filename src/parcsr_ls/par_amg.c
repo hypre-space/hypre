@@ -416,6 +416,12 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataCPointKeepMarkerArray(amg_data) = NULL;
    hypre_ParAMGDataCPointKeepLevel(amg_data) = 0;
    hypre_ParAMGDataNumCPointKeep(amg_data)   = 0;
+
+#ifdef HYPRE_USE_DSLU
+   hypre_ParAMGDataSLULevel(amg_data) = 25;
+   hypre_ParAMGDataSLUThreshold(amg_data) = 0;
+   hypre_ParAMGDataSLUData(amg_data) = NULL;
+#endif
    
    HYPRE_ANNOTATION_END("BoomerAMG.create");
 
@@ -439,6 +445,10 @@ hypre_BoomerAMGDestroy( void *data )
    HYPRE_Int *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
 
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.destroy");
+
+#ifdef HYPRE_USE_DSLU
+   hypre_ParAMGDataSLUDestroy(amg_data);
+#endif
    
    if (hypre_ParAMGDataMaxEigEst(amg_data))
    {

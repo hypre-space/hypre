@@ -197,6 +197,11 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
    HYPRE_Int      add_end;
 
+#ifdef HYPRE_USE_DSLU
+   HYPRE_Int slu_level = hypre_ParAMGDataDSLULevel(amg_data);
+   HYPRE_Int slu_threshold = hypre_ParAMGDataDSLUThreshold(amg_data);
+#endif
+
 #ifdef HYPRE_USE_GPU
    if (!hypre_ParCSRMatrixIsManaged(A)){
      hypre_fprintf(stderr,"ERROR:: INVALID A in hypre_BoomerAMGSetup::Address %p\n",A);
@@ -2233,6 +2238,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_seqAMGSetup( amg_data, level, coarse_threshold);
 
    }
+#ifdef HYPRE_USE_DSLU 
+   else if (  ((slu_threshold >= coarse_threshold) && (coarse_size > slu_threshold)) || (level == slu_level))
+   {
+      hypre_SuperLUDistSetup( amg_data, level, coarse_threshold);
+   }
+#endif
    else if (grid_relax_type[3] == 9 || grid_relax_type[3] == 99)  /*use of Gaussian elimination on coarsest level */
    {
       if (coarse_size <= coarse_threshold)
