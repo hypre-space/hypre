@@ -135,7 +135,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *			    (with pivoting) (old version)
     *-----------------------------------------------------------------------*/
    switch (relax_type)
-   {            
+   {
       case 0: /* Weighted Jacobi */
       {
 	if (num_procs > 1)

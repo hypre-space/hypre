@@ -4428,10 +4428,12 @@ hypre_ParCSRMatrix *hypre_CreateC( hypre_ParCSRMatrix  *A,
 HYPRE_Int
 hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
                                   HYPRE_Int           *CF_marker,
+                                  hypre_ParCSRMatrix  *S,
                                   HYPRE_Int           *num_cpts_global,
                                   HYPRE_Int            num_functions,
                                   HYPRE_Int           *dof_func,
                                   HYPRE_Int            debug_flag,
+                                  HYPRE_Int           *col_offd_S_to_A,
                                   hypre_ParCSRMatrix **P_ptr)
 {
    MPI_Comm 	            comm     = hypre_ParCSRMatrixComm(A);   
@@ -4450,6 +4452,15 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
 
    HYPRE_Int                num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
    //HYPRE_Int               *col_map_offd_A    = hypre_ParCSRMatrixColMapOffd(A);
+   
+   hypre_CSRMatrix         *S_diag   = hypre_ParCSRMatrixDiag(S);
+   HYPRE_Int               *S_diag_i = hypre_CSRMatrixI(S_diag);
+   HYPRE_Int               *S_diag_j = hypre_CSRMatrixJ(S_diag);
+
+   hypre_CSRMatrix         *S_offd   = hypre_ParCSRMatrixOffd(S);   
+   HYPRE_Int               *S_offd_i = hypre_CSRMatrixI(S_offd);
+   HYPRE_Int               *S_offd_j = hypre_CSRMatrixJ(S_offd);
+
    /* Interpolation matrix P */
    hypre_ParCSRMatrix      *P;
    /* csr's */
@@ -4470,7 +4481,7 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
    HYPRE_Int          *dof_func_offd  = NULL;
    /* nnz */
    HYPRE_Int           nnz_diag, nnz_offd, cnt_diag, cnt_offd;
-   HYPRE_Int          *marker_offd;
+   HYPRE_Int          *marker_diag, *marker_offd;
    /* local size */
    HYPRE_Int           n_fine = hypre_CSRMatrixNumRows(A_diag);
    /* number of C-pts */
@@ -4484,7 +4495,7 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
    //HYPRE_Int col_start = hypre_ParCSRMatrixFirstRowIndex(A);
    //HYPRE_Int col_end   = col_start + n_fine;
 
-   HYPRE_Int           i, j, i1, k1, index, start;
+   HYPRE_Int           i, j, i1, j1, k1, index, start;
    HYPRE_Int          *max_abs_cij;
    char               *max_abs_diag_offd;
    HYPRE_Real          max_abs_aij, vv;
@@ -4571,7 +4582,12 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
    cnt_offd = 0;
    max_abs_cij       = hypre_CTAlloc(HYPRE_Int, n_fine);
    max_abs_diag_offd = hypre_CTAlloc(char, n_fine);
-   fine_to_coarse      = hypre_CTAlloc(HYPRE_Int, n_fine);
+   fine_to_coarse    = hypre_CTAlloc(HYPRE_Int, n_fine);
+
+   /* markers initialized as zeros */
+   marker_diag = hypre_CTAlloc(HYPRE_Int, n_fine);
+   marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
+
    for (i = 0; i < n_fine; i++)
    {
       /*--------------------------------------------------------------------
@@ -4585,12 +4601,29 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
          continue;
       }
 
+      /* mark all the strong connections: in S */
+      int MARK = i + 1;
+      /* loop through row i of S, diag part  */
+      for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
+      {
+         marker_diag[S_diag_j[j]] = MARK;
+      }
+      /* loop through row i of S, offd part  */
+      if (num_procs > 1)
+      {
+          for (j = S_offd_i[i]; j < S_offd_i[i+1]; j++)
+          {
+             j1 = col_offd_S_to_A ? col_offd_S_to_A[S_offd_j[j]] : S_offd_j[j];
+             marker_offd[j1] = MARK;
+          }
+      }
+
       fine_to_coarse[i] = -1;
       /*---------------------------------------------------------------------------
        *  If i is an F-pt, interpolation is from the most strongly influencing C-pt
        *  Find this C-pt and save it
        *--------------------------------------------------------------------------*/
-      /* if we failed to find any C-pt, mark this point as an 'n' */
+      /* if we failed to find any strong C-pt, mark this point as an 'n' */
       char marker = 'n';
       /* max abs val */
       max_abs_aij = -1.0;
@@ -4599,8 +4632,29 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
       {
          i1 = A_diag_j[j];
          vv = fabs(A_diag_data[j]);
-         /* it is a C-pt and has abs val larger than what have seen */
-         if (CF_marker[i1] >= 0 && vv > max_abs_aij)
+#if 0
+         /* !!! this is a hack just for code verification purpose !!!
+            it is basically says:
+            1. if we see |a_ij| < 1e-14, force it to be 1e-14
+            2. if we see |a_ij| == the max(|a_ij|) so far exactly, 
+               replace it if the j idx is smaller
+            Reasons:
+            1. numerical round-off for eps-level values
+            2. entries in CSR rows may be listed in different orders
+         */
+         vv = vv < 1e-14 ? 1e-14 : vv;
+         if (CF_marker[i1] >= 0 && marker_diag[i1] == MARK && 
+             vv == max_abs_aij && i1 < max_abs_cij[i])
+         {
+            /* mark it as a 'd' */
+            marker         = 'd';
+            max_abs_cij[i] = i1;
+            max_abs_aij    = vv;
+            continue;
+         }
+#endif
+         /* it is a strong C-pt and has abs val larger than what have seen */
+         if (CF_marker[i1] >= 0 && marker_diag[i1] == MARK && vv > max_abs_aij)
          {
             /* mark it as a 'd' */
             marker         = 'd';
@@ -4615,7 +4669,7 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
          {
             i1 = A_offd_j[j];
             vv = fabs(A_offd_data[j]);
-            if (CF_marker_offd[i1] >= 0 && vv > max_abs_aij)
+            if (CF_marker_offd[i1] >= 0 && marker_offd[i1] == MARK && vv > max_abs_aij)
             {
                /* mark it as an 'o' */
                marker         = 'o';
@@ -4720,8 +4774,7 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
    num_cols_offd_P = 0;
    
    /* marker_offd: all -1 */
-   marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
-   for (i = 0; i< num_cols_A_offd; i++)
+   for (i = 0; i < num_cols_A_offd; i++)
    {
       marker_offd[i] = -1;
    }
@@ -4799,6 +4852,7 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
    hypre_TFree(int_buf_data);
    hypre_TFree(fine_to_coarse);
    hypre_TFree(fine_to_coarse_offd);
+   hypre_TFree(marker_diag);
    hypre_TFree(marker_offd);
    hypre_TFree(max_abs_cij);
    hypre_TFree(max_abs_diag_offd);

@@ -505,8 +505,10 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
               }
 	      else if (old_version)
 	      {
-                 /* printf("cycle %d: relax_type %d, relax_points %d\n", 
-                           cycle_param, relax_type, relax_points); */
+                /* 
+                 printf("cycle %d: relax_type %d, relax_points %d\n", 
+                         cycle_param, relax_type, relax_points);
+                */
                  Solve_err_flag = hypre_BoomerAMGRelax(A_array[level],
                                                      Aux_F,
                                                      CF_marker_array[level],

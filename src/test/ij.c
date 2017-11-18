@@ -108,6 +108,8 @@ main( hypre_int argc,
    HYPRE_Int                 build_rhs_arg_index;
    HYPRE_Int                 build_src_type;
    HYPRE_Int                 build_src_arg_index;
+   HYPRE_Int                 build_x0_type;
+   HYPRE_Int                 build_x0_arg_index;
    HYPRE_Int                 build_funcs_type;
    HYPRE_Int                 build_funcs_arg_index;
    HYPRE_Int                 solver_id;
@@ -368,6 +370,8 @@ main( hypre_int argc,
    build_rhs_arg_index = argc;
    build_src_type = -1;
    build_src_arg_index = argc;
+   build_x0_type = -1;
+   build_x0_arg_index = argc;
    build_funcs_type = 0;
    build_funcs_arg_index = argc;
    IS_type = 1;
@@ -589,6 +593,12 @@ main( hypre_int argc,
          build_src_type      = 4;
          build_rhs_type      = -1;
          build_src_arg_index = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-x0fromfile") == 0 )
+      {
+         arg_index++;
+         build_x0_type       = 0;  
+         build_x0_arg_index  = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-cljp") == 0 )
       {
@@ -1344,9 +1354,10 @@ main( hypre_int argc,
    if (air)
    {
       restri_type = air;    /* Set Restriction to be AIR */
-      interp_type = 100;  /* 1-pt Interp */
-      ns_down = 1;
-      ns_up = 2;
+      interp_type = 100;    /* 1-pt Interp */
+      relax_type = 0;
+      ns_down = 0;
+      ns_up = 3;
       /* this is a 2-D 4-by-k array using double pointers */
       grid_relax_points = hypre_CTAlloc(HYPRE_Int*, 4);
       grid_relax_points[0] = NULL;
@@ -1359,15 +1370,18 @@ main( hypre_int argc,
          grid_relax_points[1][i] = 0;//1;
       }
       /* up cycle: F */
-      for (i=0; i<ns_up; i++)
-      {
-         grid_relax_points[2][i] = -1;
-      }
+      //for (i=0; i<ns_up; i++)
+      //{
+      grid_relax_points[2][0] = -1; // F 
+      grid_relax_points[2][1] = -1; // F
+      grid_relax_points[2][2] =  1; // C
+      //}
       /* coarse: all */
       for (i=0; i<ns_coarse; i++)
       {
          grid_relax_points[3][i] = 0;
       }
+      coarse_threshold = 20;
    }
    /*-----------------------------------------------------------
     * Print usage info
@@ -1428,6 +1442,8 @@ main( hypre_int argc,
          hypre_printf("backward Euler source is vector with unit components (default)\n");
          hypre_printf("  -srczero               : ");
          hypre_printf("backward Euler source is zero-vector\n");
+         hypre_printf("  -x0fromfile           : ");
+         hypre_printf("initial guess x0 read from multiple files (IJ format)\n");
          hypre_printf("\n");
          hypre_printf("  -solver <ID>           : solver ID\n");
          hypre_printf("       0=AMG               1=AMG-PCG        \n");
@@ -2454,6 +2470,29 @@ main( hypre_int argc,
       x = (HYPRE_ParVector) object;
    }
 
+   /* initial guess */
+   if ( build_x0_type == 0 )
+   {
+      if (myid == 0)
+      {
+         hypre_printf("  Initial guess vector read from file %s\n", argv[build_x0_arg_index]);
+      }
+      /* x0 */
+      if (ij_x)
+      {
+         HYPRE_IJVectorDestroy(ij_x);
+      }
+      ierr = HYPRE_IJVectorRead( argv[build_x0_arg_index], hypre_MPI_COMM_WORLD, 
+                                 HYPRE_PARCSR, &ij_x );
+      if (ierr)
+      {
+         hypre_printf("ERROR: Problem reading in x0!\n");
+         exit(1);
+      }
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
+   }
+
    hypre_EndTiming(time_index);
    hypre_PrintTiming("IJ Vector Setup", hypre_MPI_COMM_WORLD);
    hypre_FinalizeTiming(time_index);
@@ -2476,7 +2515,7 @@ main( hypre_int argc,
 	    hypre_printf (" Number of functions = %d \n", num_functions);
       }
    }
- 
+
    /*-----------------------------------------------------------
     * Print out the system and initial guess
     *-----------------------------------------------------------*/
@@ -2500,6 +2539,8 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Solve the system using the hybrid solver
     *-----------------------------------------------------------*/
+
+   /* coarsen_type = 999; // FOR DEBUG */
 
    if (solver_id == 20)
    {
