@@ -21,15 +21,6 @@
 #include <assert.h>
 #include <math.h>
 
-#if HAVE_SUPERLU_20
-#include "dsp_defs.h"
-#include "superlu_util.h"
-#endif
-#if HAVE_SUPERLU
-#include "slu_ddefs.h"
-#include "slu_util.h"
-#endif
-
 /*-------------------------------------------------------------------------
  MPI definitions 
  -------------------------------------------------------------------------*/
@@ -43,6 +34,15 @@
  -------------------------------------------------------------------------*/
 
 #include "FEI_HYPRE_Impl.h"
+
+#ifdef HAVE_SUPERLU_20
+#include "dsp_defs.h"
+#include "superlu_util.h"
+#endif
+#ifdef HAVE_SUPERLU
+#include "slu_ddefs.h"
+#include "slu_util.h"
+#endif
 
 extern "C"
 {
@@ -517,7 +517,7 @@ int FEI_HYPRE_Impl::parameters(int numParams, char **paramString)
 {
    int  i, olevel;
    char param[256], param1[256];
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
    int  nprocs;
 #endif
 
@@ -566,7 +566,7 @@ int FEI_HYPRE_Impl::parameters(int numParams, char **paramString)
          else if ( ! strcmp(param, "gmres") )   solverID_ = 1;
          else if ( ! strcmp(param, "cgs") )     solverID_ = 2;
          else if ( ! strcmp(param, "bicgstab")) solverID_ = 3;
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
          else if ( ! strcmp(param, "superlu") ) 
          {
             MPI_Comm_size( mpiComm_, &nprocs );
@@ -3338,13 +3338,14 @@ int FEI_HYPRE_Impl::solveUsingBicgstab()
  -------------------------------------------------------------------------*/
 int FEI_HYPRE_Impl::solveUsingSuperLU()
 {
-#if HAVE_SUPERLU
+#ifdef HAVE_SUPERLU
    int    localNRows, localNnz, *countArray, irow, jcol, *cscIA, *cscJA;
    int    colNum, index, *etree, permcSpec, lwork, panelSize, relax, info;
    int    *permC, *permR;
-   double *cscAA, diagPivotThresh, dropTol, *rVec, rnorm;
+   double *cscAA, diagPivotThresh, *rVec, rnorm;
    superlu_options_t slu_options;
    SuperLUStat_t     slu_stat;
+   GlobalLU_t        Glu;
    trans_t           trans;
    SuperMatrix superLU_Amat;
    SuperMatrix superLU_Lmat;
@@ -3408,7 +3409,6 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
    slu_options.SymmetricMode = NO;
    sp_preorder(&slu_options, &superLU_Amat, permC, etree, &AC);
    diagPivotThresh = 1.0;
-   dropTol = 0.0;
    panelSize = sp_ienv(1);
    relax = sp_ienv(2);
    StatInit(&slu_stat);
@@ -3417,9 +3417,12 @@ int FEI_HYPRE_Impl::solveUsingSuperLU()
    slu_options.Fact = DOFACT;
    slu_options.DiagPivotThresh = diagPivotThresh;
 
-   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//   dgstrf(&slu_options, &AC, dropTol, relax, panelSize,
+//          etree, NULL, lwork, permC, permR, &superLU_Lmat,
+//          &superLU_Umat, &slu_stat, &info);
+   dgstrf(&slu_options, &AC, relax, panelSize,
           etree, NULL, lwork, permC, permR, &superLU_Lmat,
-          &superLU_Umat, &slu_stat, &info);
+          &superLU_Umat, &Glu, &slu_stat, &info);
 
    Destroy_CompCol_Permuted(&AC);
    Destroy_CompCol_Matrix(&superLU_Amat);

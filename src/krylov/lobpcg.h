@@ -15,6 +15,10 @@
 #ifndef LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS
 #define LOCALLY_OPTIMAL_BLOCK_PRECONDITIONED_CONJUGATE_GRADIENTS
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define PROBLEM_SIZE_TOO_SMALL			       	1
 #define WRONG_BLOCK_SIZE			       	2
 #define WRONG_CONSTRAINTS                               3
@@ -30,17 +34,13 @@ typedef struct {
 typedef struct {
 
 /* these pointers should point to 2 functions providing standard lapack  functionality */
-   HYPRE_Int   (*dpotrf) (char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *
+   HYPRE_Int   (*dpotrf) (const char *uplo, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *
         lda, HYPRE_Int *info);
    HYPRE_Int   (*dsygv) (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *
         n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Real *b, HYPRE_Int *ldb,
         HYPRE_Real *w, HYPRE_Real *work, HYPRE_Int *lwork, HYPRE_Int *info);
 
 } lobpcg_BLASLAPACKFunctions;
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 HYPRE_Int
 lobpcg_solve( mv_MultiVectorPtr blockVectorX,

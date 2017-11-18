@@ -2146,7 +2146,11 @@ void hypre_device_reduction (HYPRE_Real* out,
 #define HYPRE_NEWBOXLOOP_HEADER
 
 #ifdef HYPRE_USING_OPENMP
+#ifdef WIN32
+#define Pragma(x) __pragma(#x)
+#else
 #define Pragma(x) _Pragma(#x)
+#endif
 #define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,HYPRE_BOX_PRIVATE_VAR) HYPRE_SMP_SCHEDULE)
 #define OMPREDUCTION() Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,HYPRE_BOX_PRIVATE_VAR) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #else

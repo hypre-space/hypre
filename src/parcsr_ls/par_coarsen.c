@@ -1118,7 +1118,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
          }
          else
          {
-            if (measure < 0) hypre_printf("negative measure!\n");
+	    if (measure < 0) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"negative measure!\n");
+            /*if (measure < 0) hypre_printf("negative measure!\n");*/
             CF_marker[j] = f_pnt;
             for (k = S_i[j]; k < S_i[j+1]; k++)
             {

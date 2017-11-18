@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlaswp_(integer *n, doublereal *a, integer *lda, integer 
+/* Subroutine */ integer dlaswp_(integer *n, doublereal *a, integer *lda, integer 
 	*k1, integer *k2, integer *ipiv, integer *incx)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -141,4 +144,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

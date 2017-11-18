@@ -27,9 +27,7 @@
 #include "mli_utils.h"
 #include "HYPRE_IJ_mv.h"
 #include "../fei-hypre/HYPRE_parcsr_fgmres.h"
-#ifdef HYPRE_USING_HYPRE_LAPACK
-#include "hypre_lapack.h"
-#endif
+#include "_hypre_lapack.h"
 
 /*--------------------------------------------------------------------------
  * external function 
@@ -1146,12 +1144,6 @@ int MLI_Utils_QR(double *qArray, double *rArray, int nrows, int ncols)
 int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray, 
     double *workArray, int m, int n, int workLen)
 {
-    /* prototype */
-#if 0
-    void hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(char *, char *, integer *, 
-        integer *, doublereal *, int *, doublereal *, doublereal *, integer *, 
-        doublereal *, integer *, doublereal *, integer *, integer *);
-#endif
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
@@ -1161,16 +1153,12 @@ int MLI_Utils_SVD(double *uArray, double *sArray, double *vtArray,
     int info;
     info = -1;
 #else
-    extern int hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(char *, char *, int *, 
-        int *, double *, int *, double *, double *, int *, 
-        double *, int *, double *, int *, int *);
-
     char jobu  = 'O'; /* overwrite input with U */
     char jobvt = 'S'; /* return rows of V in vtArray */
     int  dim = MIN(m,n);
     int  info;
 
-    hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(&jobu, &jobvt, &m, &n, uArray,
+    hypre_dgesvd(&jobu, &jobvt, &m, &n, uArray,
         &m, sArray, (double *) NULL, &m, vtArray, &dim, workArray, 
         &workLen, &info);
 #endif
@@ -1189,17 +1177,13 @@ int MLI_Utils_singular_vectors(int n, double *uArray)
 #ifdef HYPRE_USING_ESSL
     info = -1;
 #else
-
     char jobu  = 'O'; /* overwrite input with U */
     char jobvt = 'N';
     double *sArray = (double *) malloc(n*sizeof(double));
     int workLen = 5*n;
     double *workArray = (double *) malloc(workLen*sizeof(double));
-    extern int hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(char *, char *, int *,
-        int *, double *, int *, double *, double *, int *,
-        double *, int *, double *, int *, int *);
 
-    hypre_F90_NAME_LAPACK(dgesvd, DGESVD)(&jobu, &jobvt, &n, &n, uArray,
+    hypre_dgesvd(&jobu, &jobvt, &n, &n, uArray,
         &n, sArray, NULL, &n, NULL, &n, workArray, &workLen, &info);
 
     free(workArray);

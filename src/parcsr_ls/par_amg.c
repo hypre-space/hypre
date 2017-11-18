@@ -411,9 +411,14 @@ hypre_BoomerAMGCreate()
 
    hypre_ParAMGDataRAP2(amg_data) = 0;
    hypre_ParAMGDataKeepTranspose(amg_data) = 0;
-
-   HYPRE_ANNOTATION_END("BoomerAMG.create");
    
+/* information for preserving indices as coarse grid points */
+   hypre_ParAMGDataCPointKeepMarkerArray(amg_data) = NULL;
+   hypre_ParAMGDataCPointKeepLevel(amg_data) = 0;
+   hypre_ParAMGDataNumCPointKeep(amg_data)   = 0;
+   
+   HYPRE_ANNOTATION_END("BoomerAMG.create");
+
    return (void *) amg_data;
 }
 
@@ -595,6 +600,7 @@ hypre_BoomerAMGDestroy( void *data )
    hypre_TFree(hypre_ParAMGDataPBlockArray(amg_data));
    hypre_TFree(hypre_ParAMGDataPArray(amg_data));
    hypre_TFree(hypre_ParAMGDataCFMarkerArray(amg_data));
+
    if (hypre_ParAMGDataRtemp(amg_data))
       hypre_ParVectorDestroy(hypre_ParAMGDataRtemp(amg_data));
    if (hypre_ParAMGDataPtemp(amg_data))
@@ -702,6 +708,21 @@ hypre_BoomerAMGDestroy( void *data )
 
    if (hypre_ParAMGDataFCoarse(amg_data))
       hypre_ParVectorDestroy(hypre_ParAMGDataFCoarse(amg_data));
+
+   /* destroy Cpoint_keep data */
+   if(hypre_ParAMGDataCPointKeepMarkerArray(amg_data))
+   {
+      for(i=0; i<hypre_ParAMGDataCPointKeepLevel(amg_data); i++)
+      {        
+          if(hypre_ParAMGDataCPointKeepMarkerArray(amg_data)[i])
+          {
+             hypre_TFree(hypre_ParAMGDataCPointKeepMarkerArray(amg_data)[i]);
+             hypre_ParAMGDataCPointKeepMarkerArray(amg_data)[i] = NULL;
+          }
+      }
+      hypre_TFree(hypre_ParAMGDataCPointKeepMarkerArray(amg_data));
+      hypre_ParAMGDataCPointKeepMarkerArray(amg_data) = NULL;
+   }
 
    if (hypre_ParAMGDataAMat(amg_data)) hypre_TFree(hypre_ParAMGDataAMat(amg_data));
    if (hypre_ParAMGDataBVec(amg_data)) hypre_TFree(hypre_ParAMGDataBVec(amg_data));
@@ -3960,3 +3981,74 @@ hypre_BoomerAMGSetKeepTranspose( void   *data,
   return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_BoomerAMGSetCpointsToKeep(void      *data,
+				HYPRE_Int  cpt_coarse_level,
+				HYPRE_Int  num_cpt_coarse,
+				HYPRE_Int *cpt_coarse_index)
+{
+	hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
+
+	HYPRE_Int **C_point_marker_array = NULL;
+	HYPRE_Int *C_point_marker = NULL;
+	HYPRE_Int cpt_level;
+	HYPRE_Int i;
+
+	if (!amg_data)
+	{
+	    hypre_printf("Warning! AMG object empty!\n");
+	    hypre_error_in_arg(1);
+	    return hypre_error_flag;
+	}
+	if(cpt_coarse_level < 0)
+	{
+	   hypre_printf("Warning! cpt_coarse_level < 0 !\n");
+	   hypre_error_in_arg(2);
+           return hypre_error_flag;
+	}
+	if(num_cpt_coarse < 0)
+	{
+	   hypre_printf("Warning! num_cpt_coarse < 0 !\n");
+	   hypre_error_in_arg(2);
+           return hypre_error_flag;
+	}
+
+	/* free data not previously destroyed */
+	if(hypre_ParAMGDataCPointKeepLevel(amg_data))
+	{
+	   for(i=0; i<hypre_ParAMGDataCPointKeepLevel(amg_data); i++)
+	   {
+	      if(hypre_ParAMGDataCPointKeepMarkerArray(amg_data)[i])
+	      {
+	         hypre_TFree(hypre_ParAMGDataCPointKeepMarkerArray(amg_data)[i]);
+	         hypre_ParAMGDataCPointKeepMarkerArray(amg_data)[i] = NULL;
+	      }
+	   }
+	   hypre_TFree(hypre_ParAMGDataCPointKeepMarkerArray(amg_data));
+	   hypre_ParAMGDataCPointKeepMarkerArray(amg_data) = NULL;
+	}
+	/* set Cpoint_keep data */
+	if (hypre_ParAMGDataMaxLevels(amg_data) < cpt_coarse_level)
+	{
+		cpt_level = hypre_ParAMGDataNumLevels(amg_data);
+	} else {
+		cpt_level = cpt_coarse_level;
+	}
+        
+        if(cpt_level)
+        {
+           C_point_marker_array = hypre_CTAlloc(HYPRE_Int*, cpt_level);
+           C_point_marker = hypre_CTAlloc(HYPRE_Int, num_cpt_coarse);
+           /* copy Cpoint indexes */
+           for(i=0; i<num_cpt_coarse; i++)
+           {
+              C_point_marker[i] = cpt_coarse_index[i];
+           }
+           C_point_marker_array[0] = C_point_marker;     
+        }
+	hypre_ParAMGDataCPointKeepMarkerArray(amg_data) = C_point_marker_array;        
+	hypre_ParAMGDataNumCPointKeep(amg_data) = num_cpt_coarse;	
+	hypre_ParAMGDataCPointKeepLevel(amg_data) = cpt_level;
+
+	return hypre_error_flag;
+}

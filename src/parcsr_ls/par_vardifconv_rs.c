@@ -10,12 +10,12 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
-
- 
 #include "_hypre_parcsr_ls.h"
  
+#ifndef M_PI
+#define M_PI 3.14159265358979
+#endif
+
 /* examples in Ruge & Stuben paper */
 static HYPRE_Int rs_example = 1;
 static HYPRE_Real rs_l = 3.0;

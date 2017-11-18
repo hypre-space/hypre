@@ -43,6 +43,16 @@ mkdir -p $output_dir
 src_dir=`cd $1; pwd`
 shift
 
+# Organizing the tests from "fast" to "slow"
+
+# Check for 'int', 'double', and 'MPI_'
+./test.sh check-int.sh $src_dir
+mv -f check-int.??? $output_dir
+./test.sh check-double.sh $src_dir
+mv -f check-double.??? $output_dir
+./test.sh check-mpi.sh $src_dir
+mv -f check-mpi.??? $output_dir
+
 # Basic build and run tests
 mo="-j test"
 ro="-ams -ij -sstruct -struct"
@@ -52,36 +62,15 @@ co=""
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-default
 
-co="--enable-debug"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
-./renametest.sh basic $output_dir/basic-debug1
-
-co="--enable-debug --enable-global-partition"
-RO="-fac"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
-./renametest.sh basic $output_dir/basic-debug2
-
-co="--enable-debug CC=mpiCC"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
-./renametest.sh basic $output_dir/basic-debug-cpp
-
-# co="--with-insure --enable-debug --with-print-errors"
-# MO="test"
-# ./test.sh basic.sh $src_dir -co: $co -mo: $MO -ro: $ro
-# ./renametest.sh basic $output_dir/basic--with-insure1
-# 
-# co="--with-insure --enable-debug --enable-global-partition"
-# MO="test"
-# ./test.sh basic.sh $src_dir -co: $co -mo: $MO -ro: $ro
-# ./renametest.sh basic $output_dir/basic--with-insure2
-
-co="--enable-debug --with-print-errors"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
-./renametest.sh basic $output_dir/basic--valgrind1
-
-co="--enable-debug --enable-global-partition"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
-./renametest.sh basic $output_dir/basic--valgrind2
+# Test linking for different languages (depends on previous compile test)
+link_opts="all++ all77"
+for opt in $link_opts
+do
+   output_subdir=$output_dir/link$opt
+   mkdir -p $output_subdir
+   ./test.sh link.sh $src_dir $opt
+   mv -f link.??? $output_subdir
+done
 
 co="--without-MPI"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
@@ -91,21 +80,21 @@ co="--with-strict-checking"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--with-strict-checking
 
+co="--with-strict-checking --enable-global-partition"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--with-strict-global
+
 co="--enable-shared"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-shared
 
-co="--enable-bigint --enable-debug"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
-./renametest.sh basic $output_dir/basic--enable-bigint
+co="--enable-debug --with-openmp"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic--enable-openmp
 
-co="--enable-single --enable-debug"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -single
-./renametest.sh basic $output_dir/basic--enable-single
-
-co="--enable-longdouble --enable-debug"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
-./renametest.sh basic $output_dir/basic--enable-longdouble
+co="--enable-debug"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
+./renametest.sh basic $output_dir/basic-debug1
 
 co="--enable-maxdim=4 --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: -maxdim
@@ -119,6 +108,35 @@ grep -v make.err basic.err > basic.tmp
 mv basic.tmp basic.err
 ./renametest.sh basic $output_dir/basic--enable-complex
 
+co="--enable-debug --enable-global-partition"
+RO="-fac"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
+./renametest.sh basic $output_dir/basic-debug2
+
+co="--enable-single --enable-debug"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -single
+./renametest.sh basic $output_dir/basic--enable-single
+
+co="--enable-longdouble --enable-debug"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
+./renametest.sh basic $output_dir/basic--enable-longdouble
+
+co="--enable-debug CC=mpiCC"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: $eo
+./renametest.sh basic $output_dir/basic-debug-cpp
+
+co="--enable-bigint --enable-debug"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -eo: -bigint
+./renametest.sh basic $output_dir/basic--enable-bigint
+
+co="--enable-debug --with-print-errors"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+./renametest.sh basic $output_dir/basic--valgrind1
+
+co="--enable-debug --enable-global-partition"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro -rt -valgrind
+./renametest.sh basic $output_dir/basic--valgrind2
+
 # CMake build and run tests
 mo="-j"
 ro="-ams -ij -sstruct -struct"
@@ -127,10 +145,6 @@ eo=""
 co=""
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-default
-
-co="-DCMAKE_BUILD_TYPE=Debug"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: $ro
-./renametest.sh cmake $output_dir/cmake-debug
 
 co="-DHYPRE_NO_GLOBAL_PARTITION=OFF"
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo
@@ -144,10 +158,6 @@ co="-DHYPRE_SHARED=ON"
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh cmake $output_dir/cmake-shared
 
-co="-DHYPRE_BIGINT=ON"
-./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: $ro
-./renametest.sh cmake $output_dir/cmake-bigint
-
 co="-DHYPRE_SINGLE=ON"
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -single
 ./renametest.sh cmake $output_dir/cmake-single
@@ -156,26 +166,16 @@ co="-DHYPRE_LONG_DOUBLE=ON"
 ./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: -longdouble
 ./renametest.sh cmake $output_dir/cmake-longdouble
 
+co="-DCMAKE_BUILD_TYPE=Debug"
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh cmake $output_dir/cmake-debug
+
+co="-DHYPRE_BIGINT=ON"
+./test.sh cmake.sh $src_dir -co: $co -mo: $mo -ro: $ro
+./renametest.sh cmake $output_dir/cmake-bigint
+
 # cmake build doesn't currently support maxdim
 # cmake build doesn't currently support complex
-
-# Test linking for different languages
-link_opts="all++ all77"
-for opt in $link_opts
-do
-   output_subdir=$output_dir/link$opt
-   mkdir -p $output_subdir
-   ./test.sh link.sh $src_dir $opt
-   mv -f link.??? $output_subdir
-done
-
-# Check for 'int', 'double', and 'MPI_'
-./test.sh check-int.sh $src_dir
-mv -f check-int.??? $output_dir
-./test.sh check-double.sh $src_dir
-mv -f check-double.??? $output_dir
-./test.sh check-mpi.sh $src_dir
-mv -f check-mpi.??? $output_dir
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )

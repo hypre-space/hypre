@@ -1,6 +1,9 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
 doublereal dlange_(const char *norm, integer *m, integer *n, doublereal *a, integer 
 	*lda, doublereal *work)
@@ -72,13 +75,13 @@ doublereal dlange_(const char *norm, integer *m, integer *n, doublereal *a, inte
     integer a_dim1, a_offset, i__1, i__2;
     doublereal ret_val, d__1, d__2, d__3;
     /* Builtin functions */
-    /*HYPRE_Real sqrt(doublereal);*/
+    /*doublereal sqrt(doublereal);*/
     /* Local variables */
     static integer i__, j;
     static doublereal scale;
     extern logical lsame_(const char *,const char *);
     static doublereal value;
-    extern /* Subroutine */ HYPRE_Int dlassq_(integer *, doublereal *, integer *, 
+    extern /* Subroutine */ integer dlassq_(integer *, doublereal *, integer *, 
 	    doublereal *, doublereal *);
     static doublereal sum;
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
@@ -174,4 +177,6 @@ doublereal dlange_(const char *norm, integer *m, integer *n, doublereal *a, inte
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dlassq_(integer *n, doublereal *x, integer *incx, 
+/* Subroutine */ integer dlassq_(integer *n, doublereal *x, integer *incx, 
 	doublereal *scale, doublereal *sumsq)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -92,3 +95,6 @@
 
 } /* dlassq_ */
 
+#ifdef __cplusplus
+}
+#endif

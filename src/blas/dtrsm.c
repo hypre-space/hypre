@@ -1,4 +1,6 @@
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*  -- translated by f2c (version 19940927).
    You must link the resulting object file with the libraries:
@@ -8,7 +10,7 @@
 #include "f2c.h"
 #include "hypre_blas.h"
 
-/* Subroutine */ HYPRE_Int dtrsm_(const char *side,const char *uplo,const char *transa,const char *diag, 
+/* Subroutine */ integer dtrsm_(const char *side,const char *uplo,const char *transa,const char *diag, 
 	integer *m, integer *n, doublereal *alpha, doublereal *a, integer *
 	lda, doublereal *b, integer *ldb)
 {
@@ -21,10 +23,10 @@
     static doublereal temp;
     static integer i, j, k;
     static logical lside;
-    extern logical hypre_lsame_(const char *,const char *);
+    extern logical lsame_(const char *,const char *);
     static integer nrowa;
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
     static logical nounit;
 
 
@@ -184,24 +186,24 @@
 #define A(I,J) a[(I)-1 + ((J)-1)* ( *lda)]
 #define B(I,J) b[(I)-1 + ((J)-1)* ( *ldb)]
 
-    lside = hypre_lsame_(side, "L");
+    lside = lsame_(side, "L");
     if (lside) {
 	nrowa = *m;
     } else {
 	nrowa = *n;
     }
-    nounit = hypre_lsame_(diag, "N");
-    upper = hypre_lsame_(uplo, "U");
+    nounit = lsame_(diag, "N");
+    upper = lsame_(uplo, "U");
 
     info = 0;
-    if (! lside && ! hypre_lsame_(side, "R")) {
+    if (! lside && ! lsame_(side, "R")) {
 	info = 1;
-    } else if (! upper && ! hypre_lsame_(uplo, "L")) {
+    } else if (! upper && ! lsame_(uplo, "L")) {
 	info = 2;
-    } else if (! hypre_lsame_(transa, "N") && ! hypre_lsame_(transa, "T") 
-	    && ! hypre_lsame_(transa, "C")) {
+    } else if (! lsame_(transa, "N") && ! lsame_(transa, "T") 
+	    && ! lsame_(transa, "C")) {
 	info = 3;
-    } else if (! hypre_lsame_(diag, "U") && ! hypre_lsame_(diag, "N")) {
+    } else if (! lsame_(diag, "U") && ! lsame_(diag, "N")) {
 	info = 4;
     } else if (*m < 0) {
 	info = 5;
@@ -213,7 +215,7 @@
 	info = 11;
     }
     if (info != 0) {
-	hypre_xerbla_("DTRSM ", &info);
+	xerbla_("DTRSM ", &info);
 	return 0;
     }
 
@@ -239,7 +241,7 @@
 /*     Start the operations. */
 
     if (lside) {
-	if (hypre_lsame_(transa, "N")) {
+	if (lsame_(transa, "N")) {
 
 /*           Form  B := alpha*inv( A )*B. */
 
@@ -327,7 +329,7 @@
 	    }
 	}
     } else {
-	if (hypre_lsame_(transa, "N")) {
+	if (lsame_(transa, "N")) {
 
 /*           Form  B := alpha*B*inv( A ). */
 
@@ -451,3 +453,7 @@
 /*     End of DTRSM . */
 
 } /* dtrsm_ */
+
+#ifdef __cplusplus
+}
+#endif
