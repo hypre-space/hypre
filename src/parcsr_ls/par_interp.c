@@ -4634,7 +4634,7 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
          vv = fabs(A_diag_data[j]);
 #if 0
          /* !!! this is a hack just for code verification purpose !!!
-            it is basically says:
+            it basically says:
             1. if we see |a_ij| < 1e-14, force it to be 1e-14
             2. if we see |a_ij| == the max(|a_ij|) so far exactly, 
                replace it if the j idx is smaller

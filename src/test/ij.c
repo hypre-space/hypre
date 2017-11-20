@@ -614,6 +614,11 @@ main( hypre_int argc,
          build_x0_type       = 0;  
          build_x0_arg_index  = arg_index;
       }
+      else if ( strcmp(argv[arg_index], "-CFfromfile") == 0 )
+      {
+         arg_index++;
+         coarsen_type      = 999;
+      }
       else if ( strcmp(argv[arg_index], "-cljp") == 0 )
       {
          arg_index++;
@@ -2598,8 +2603,6 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Solve the system using the hybrid solver
     *-----------------------------------------------------------*/
-
-   /* coarsen_type = 999; // FOR DEBUG */
 
    if (solver_id == 20)
    {

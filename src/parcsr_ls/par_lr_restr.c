@@ -14,8 +14,8 @@
 
 
 #include "_hypre_parcsr_ls.h"
-#include "../lapack/hypre_lapack.h"
-#include "../blas/hypre_blas.h"
+#include "_hypre_lapack.h"
+#include "_hypre_blas.h"
 
 #define AIR_DEBUG 0
 

@@ -1080,8 +1080,35 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
              fclose(fp);
            }
            else if (coarsen_type)
+           {
                   hypre_BoomerAMGCoarsenRuge(S, A_array[level],
                         measure_type, coarsen_type, debug_flag, &CF_marker);
+                  /* DEBUG: SAVE CF the splitting
+                  int my_id;
+                  MPI_Comm comm = hypre_ParCSRMatrixComm(A_array[level]);
+                  hypre_MPI_Comm_rank(comm, &my_id);
+                  char CFfile[256];
+                  sprintf(CFfile, "hypreCF_%d.txt.%d", level, my_id);
+                  FILE *fp = fopen(CFfile, "w");
+                  for (i=0; i<local_size; i++) 
+                  {
+                     int k = CF_marker[i];
+                     double j;
+                     if (k == 1) {
+                       j = 1.0;
+                     } else if (k == -1) {
+                       j = 0.0;
+                     } else {
+                       if (k < 0) {
+                         CF_marker[i] = -1;
+                       }
+                       j = (double) k;
+                     }
+                     fprintf(fp, "%.18e\n", j);
+                  }
+                  fclose(fp);
+                  */
+           }
            else
                   hypre_BoomerAMGCoarsen(S, A_array[level], 0,
                                       debug_flag, &CF_marker);
@@ -1565,6 +1592,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             /* RL: build restriction */
             if (restri_type)
             {
+
+               /* !!! RL: ensure that CF_marker contains -1 or 1 !!! */
+               for (i = 0; i < hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])); i++)
+               {
+                  CF_marker[i] = CF_marker[i] > 0 ? 1 : -1;
+               }
+
                if (restri_type == 1) /* distance-1 AIR */
                {
                   hypre_BoomerAMGBuildRestrAIR(A_array[level], CF_marker, 
@@ -2380,7 +2414,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          }
 
       }
- 
+
       if (debug_flag==1)
       {
          wall_time = time_getWallclockSeconds() - wall_time;
