@@ -4602,7 +4602,7 @@ hypre_BoomerAMGBuildInterpOnePnt( hypre_ParCSRMatrix  *A,
       }
 
       /* mark all the strong connections: in S */
-      int MARK = i + 1;
+      HYPRE_Int MARK = i + 1;
       /* loop through row i of S, diag part  */
       for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
       {

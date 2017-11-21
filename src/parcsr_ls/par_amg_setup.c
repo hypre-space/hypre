@@ -1039,41 +1039,43 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            else if (coarsen_type == 999) {
              /* RL_DEBUG: read C/F splitting from files */
              /* read from file */
-             int my_id;
+             HYPRE_Int my_id;
              MPI_Comm comm = hypre_ParCSRMatrixComm(A_array[level]);
              hypre_MPI_Comm_rank(comm, &my_id);
-             int first_local_row = hypre_ParCSRMatrixFirstRowIndex(A_array[level]);
-             int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
-             char CFfile[256];
-             sprintf(CFfile, "CF_%d.txt", level);
-             printf("myid %d: level %d, read C/F from file %s, first_row %d, local_size %d\n", 
-                    my_id, level, CFfile, first_local_row, local_size);
+             HYPRE_Int first_local_row = hypre_ParCSRMatrixFirstRowIndex(A_array[level]);
+             HYPRE_Int local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
+             char CFfile[256], line[1024];
+             hypre_sprintf(CFfile, "CF_%d.txt", level);
+             hypre_printf("myid %d: level %d, read C/F from file %s, first_row %d, local_size %d\n", 
+                          my_id, level, CFfile, first_local_row, local_size);
              CF_marker = hypre_CTAlloc(HYPRE_Int, local_size);
              FILE *fp;
              if ((fp = fopen(CFfile, "r")) == NULL) { 
-               printf("cannot open file %s\n", CFfile);
+               hypre_printf("cannot open file %s\n", CFfile);
                exit(0);
-             };
-             int i;
+             }
+             HYPRE_Int i;
              for (i=0; i<first_local_row; i++) {
-               double tmp;
-               fscanf(fp, "%le\n", &tmp);
+               if (fgets(line, 1024, fp) == NULL) { exit(-1); }
+               /*HYPRE_Real tmp; fscanf(fp, "%le\n", &tmp);*/
              }
              for (i=0; i<local_size; i++) {
-               double dj;
-               int j;
-               if (1 != fscanf(fp, "%le\n", &dj)) {
-                 printf("CF file read error\n");
+               HYPRE_Real dj;
+               HYPRE_Int j;
+               //if (1 != fscanf(fp, "%le\n", &dj)) {
+               if (fgets(line, 1024, fp) == NULL) {
+                 hypre_printf("CF file read error\n");
                  exit(0);
                }
-               j = (int) dj;
+               dj = atof(line);
+               j = (HYPRE_Int) dj;
                /* 1: C, 0: F*/
                if (j == 1) {
                  CF_marker[i] = 1;
                } else if (j == 0) {
                  CF_marker[i] = -1;
                } else {
-                 printf("CF Error: %d\n", j);
+                 hypre_printf("CF Error: %d\n", j);
                  exit(0);
                }
              }
@@ -1084,16 +1086,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_BoomerAMGCoarsenRuge(S, A_array[level],
                         measure_type, coarsen_type, debug_flag, &CF_marker);
                   /* DEBUG: SAVE CF the splitting
-                  int my_id;
+                  HYPRE_Int my_id;
                   MPI_Comm comm = hypre_ParCSRMatrixComm(A_array[level]);
                   hypre_MPI_Comm_rank(comm, &my_id);
                   char CFfile[256];
-                  sprintf(CFfile, "hypreCF_%d.txt.%d", level, my_id);
+                  hypre_sprintf(CFfile, "hypreCF_%d.txt.%d", level, my_id);
                   FILE *fp = fopen(CFfile, "w");
                   for (i=0; i<local_size; i++) 
                   {
-                     int k = CF_marker[i];
-                     double j;
+                     HYPRE_Int k = CF_marker[i];
+                     HYPRE_Real j;
                      if (k == 1) {
                        j = 1.0;
                      } else if (k == -1) {
@@ -1102,9 +1104,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                        if (k < 0) {
                          CF_marker[i] = -1;
                        }
-                       j = (double) k;
+                       j = (HYPRE_Real) k;
                      }
-                     fprintf(fp, "%.18e\n", j);
+                     hypre_fprintf(fp, "%.18e\n", j);
                   }
                   fclose(fp);
                   */
@@ -1257,7 +1259,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 		 {
 			 if (block_mode)
 			 {
-				 printf("Keeping coarse nodes in block mode is not implemented\n");
+				 hypre_printf("Keeping coarse nodes in block mode is not implemented\n");
 			 }
 			 else if  (level < hypre_ParAMGDataCPointKeepLevel(amg_data))
 			 {
@@ -1618,7 +1620,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 #if DEBUG_SAVE_ALL_OPS
                char file[256];
-               sprintf(file, "R_%d.mtx", level);
+               hypre_sprintf(file, "R_%d.mtx", level);
                hypre_ParCSRMatrixPrintIJ(R, 1, 1, file);
 #endif
                if (Sabs)
@@ -1714,7 +1716,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 #if DEBUG_SAVE_ALL_OPS
               char file[256];
-              sprintf(file, "P_%d.mtx", level);
+              hypre_sprintf(file, "P_%d.mtx", level);
               hypre_ParCSRMatrixPrintIJ(P, 1, 1, file);
 #endif
            }
@@ -2383,7 +2385,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 #if DEBUG_SAVE_ALL_OPS
             char file[256];
-            sprintf(file, "A_%d.mtx", level+1);
+            hypre_sprintf(file, "A_%d.mtx", level+1);
             hypre_ParCSRMatrixPrintIJ(A_H, 1, 1, file);
 #endif
          }

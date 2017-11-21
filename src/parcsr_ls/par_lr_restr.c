@@ -19,9 +19,9 @@
 
 #define AIR_DEBUG 0
 
-//double time1 = 0.0;
-//double time2 = 0.0;
-//double time3 = 0.0;
+//HYPRE_Real time1 = 0.0;
+//HYPRE_Real time2 = 0.0;
+//HYPRE_Real time3 = 0.0;
 
 HYPRE_Int
 hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
@@ -649,12 +649,12 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                HYPRE_Int c = hypre_CSRMatrixJ(A_offd_FF2)[j];
                hypre_assert(c >= 0 && c < hypre_CSRMatrixNumCols(A_offd_FF2));
                HYPRE_Complex v = hypre_CSRMatrixData(A_offd_FF2)[j];
-               printf("%8d %8d     % e\n", r, c, v);
+               hypre_printf("%8d %8d     % e\n", r, c, v);
             }
          }
-         printf("\n\n");
+         hypre_printf("\n\n");
       }
-      MPI_Barrier(MPI_COMM_WORLD);
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    }
    */
 
@@ -919,7 +919,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
        
       /* Access matrices for the First time, mark the points we want */
       /* diag part of row i */
-//double t1 = hypre_MPI_Wtime();
+//HYPRE_Real t1 = hypre_MPI_Wtime();
       for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
       {
          j1 = S_diag_j[j];
@@ -1058,7 +1058,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       /* now we have marked all rows/cols we want. next we extract the entries 
        * we need from these rows and put them in Ai and bi*/
 
-//double t2 = hypre_MPI_Wtime();
+//HYPRE_Real t2 = hypre_MPI_Wtime();
       /* clear DAi and bi */
       memset(DAi, 0, local_size * local_size * sizeof(HYPRE_Real));
       memset(Dbi, 0, local_size * sizeof(HYPRE_Real));
@@ -1157,31 +1157,31 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          char Buf[4096];
          char Buf2[4096];
          hypre_MPI_Status stat;
-         sprintf(Buf, "size %d\n", local_size);
-         int ii, jj;
+         hypre_sprintf(Buf, "size %d\n", local_size);
+         HYPRE_Int ii, jj;
          for (ii = 0; ii < local_size; ii++)
          {
             for (jj = 0; jj < local_size; jj++)
             {
-               sprintf(Buf+strlen(Buf), "% .1f ", DAi[ii + jj * local_size]);
+               hypre_sprintf(Buf+strlen(Buf), "% .1f ", DAi[ii + jj * local_size]);
             }
-            sprintf(Buf+strlen(Buf), "\n");
+            hypre_sprintf(Buf+strlen(Buf), "\n");
          }
-         sprintf(Buf+strlen(Buf), "\n");
+         hypre_sprintf(Buf+strlen(Buf), "\n");
 
          if (my_id)
          {
-            hypre_MPI_Send(Buf, 4096, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
+            hypre_MPI_Send(Buf, 4096, hypre_MPI_CHAR, 0, 0, hypre_MPI_COMM_WORLD);
          }
 
          if (my_id == 0)
          {
-            fprintf(stdout, "%s\n", Buf);
+            hypre_fprintf(stdout, "%s\n", Buf);
 
             for (i6 = 1; i6 < num_procs; i6++)
             {
-               hypre_MPI_Recv(Buf2, 4096, MPI_CHAR, i6, 0, MPI_COMM_WORLD, &stat);
-               fprintf(stdout, "%s\n", Buf2);
+               hypre_MPI_Recv(Buf2, 4096, hypre_MPI_CHAR, i6, 0, hypre_MPI_COMM_WORLD, &stat);
+               hypre_fprintf(stdout, "%s\n", Buf2);
             }
          }
       }
@@ -1264,7 +1264,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          HYPRE_Real err = hypre_dnrm2(&local_size, TMPd, &one);
          if (err > 1e-8)
          {
-            printf("local res norm %e\n", err);
+            hypre_printf("local res norm %e\n", err);
          }
 #endif
       }
@@ -1310,7 +1310,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
       R_offd_i[ic+1] = cnt_offd;
 
-//double t3 = hypre_MPI_Wtime();
+//HYPRE_Real t3 = hypre_MPI_Wtime();
       /* RESET marker arrays */
       for (j = 0; j < Marker_diag_count; j++)
       {

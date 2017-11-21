@@ -520,6 +520,8 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/ams.c
   parcsr_ls/ads.c
   parcsr_ls/ame.c
+  parcsr_ls/par_restr.c
+  parcsr_ls/par_lr_restr.c
 )
 
 # Headers and sources: struct_mv

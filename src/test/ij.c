@@ -1405,7 +1405,7 @@ main( hypre_int argc,
       relax_type = 0;
       ns_down = 0;
       ns_up = 3;
-      /* this is a 2-D 4-by-k array using double pointers */
+      /* this is a 2-D 4-by-k array using Double pointers */
       grid_relax_points = hypre_CTAlloc(HYPRE_Int*, 4);
       grid_relax_points[0] = NULL;
       grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, ns_down);

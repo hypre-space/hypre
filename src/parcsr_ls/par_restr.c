@@ -552,7 +552,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          HYPRE_Real err = hypre_dnrm2(&local_size, TMPd, &one);
          if (err > 1e-8)
          {
-            printf("local res norm %e\n", err);
+            hypre_printf("local res norm %e\n", err);
          }
 #endif
       }
