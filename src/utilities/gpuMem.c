@@ -2,6 +2,8 @@
 #define _GNU_SOURCE
 #endif
 #include "_hypre_utilities.h"
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
+
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #include <stdlib.h>
 #include <stdint.h>
@@ -221,113 +223,6 @@ cusparseHandle_t getCusparseHandle(){
   return handle;
 }
 
-/* C version of mempush using linked lists */
-
-size_t mempush(const void *ptr, size_t size, hypre_int action){
-  static node* head=NULL;
-  static hypre_int nc=0;
-  node *found=NULL;
-  if (!head){
-    if ((size<=0)||(action==1)) {
-      fprintf(stderr,"mempush can start only with an insertion or a size call \n");
-      return 0;
-    }
-    head = hypre_TAlloc(node, 1, HYPRE_MEMORY_HOST);
-    head->ptr=ptr;
-    head->size=size;
-    head->next=NULL;
-    nc++;
-    return size;
-  } else {
-    // Purge an address
-    if (action==1){
-      found=memfind(head,ptr);
-      if (found){
-	memdel(&head, found);
-	nc--;
-	return 0;
-      } else {
-#ifdef FULL_WARN
-	fprintf(stderr,"ERROR :: Pointer for deletion not found in linked list %p\n",ptr);
-#endif
-	return 0;
-      }
-    } // End purge
-    
-    // Insertion
-    if (size>0){
-      found=memfind(head,ptr);
-      if (found){
-#ifdef FULL_WARN
-	fprintf(stderr,"ERROR :: Pointer for insertion already in use in linked list %p\n",ptr);
-	//printlist(head,nc);
-#endif
-	return 0;
-      } else {
-	nc++;
-	meminsert(&head,ptr,size);
-	return 0;
-      }
-    }
-
-    // Getting allocation size
-    found=memfind(head,ptr);
-    if (found){
-      return found->size;
-    } else{
-#ifdef FULL_WARN
-      fprintf(stderr,"ERROR :: Pointer for size check NOT found in linked list\n");
-#endif
-      return 0;
-    }
-  }
-}
-
-node *memfind(node *head, const void *ptr){
-  node *next;
-  next=head;
-  while(next!=NULL){
-    if (next->ptr==ptr) return next;
-    next=next->next;
-  }
-  return NULL;
-}
-
-void memdel(node **head, node *found){
-  node *next;
-  if (found==*head){
-    next=(*head)->next;
-    free(*head);
-    *head=next;
-    return;
-  }
-  next=*head;
-  while(next->next!=found){
-    next=next->next;
-  }
-  next->next=next->next->next;
-  free(found);
-  return;
-}
-void meminsert(node **head, const void  *ptr,size_t size){
-  node *nhead;
-  nhead = hypre_TAlloc(node, 1, HYPRE_MEMORY_HOST);
-  nhead->ptr=ptr;
-  nhead->size=size;
-  nhead->next=*head;
-  *head=nhead;
-  return;
-}
-
-void printlist(node *head,hypre_int nc){
-  node *next;
-  next=head;
-  printf("Node count %d \n",nc);
-  while(next!=NULL){
-    printf("Address %p of size %zu \n",next->ptr,next->size);
-    next=next->next;
-  }
-}
 
 cudaStream_t getstreamOlde(hypre_int i){
   static hypre_int firstcall=1;
@@ -509,5 +404,115 @@ hypre_int pointerIsManaged(const void *ptr){
     return 0;
   }
   return ptr_att.isManaged;
+}
+
+#endif
+
+/* C version of mempush using linked lists */
+
+size_t mempush(const void *ptr, size_t size, hypre_int action){
+  static node* head=NULL;
+  static hypre_int nc=0;
+  node *found=NULL;
+  if (!head){
+    if ((size<=0)||(action==1)) {
+      fprintf(stderr,"mempush can start only with an insertion or a size call \n");
+      return 0;
+    }
+    head = hypre_TAlloc(node, 1, HYPRE_MEMORY_HOST);
+    head->ptr=ptr;
+    head->size=size;
+    head->next=NULL;
+    nc++;
+    return size;
+  } else {
+    // Purge an address
+    if (action==1){
+      found=memfind(head,ptr);
+      if (found){
+	memdel(&head, found);
+	nc--;
+	return 0;
+      } else {
+#ifdef FULL_WARN
+	fprintf(stderr,"ERROR :: Pointer for deletion not found in linked list %p\n",ptr);
+#endif
+	return 0;
+      }
+    } // End purge
+    
+    // Insertion
+    if (size>0){
+      found=memfind(head,ptr);
+      if (found){
+#ifdef FULL_WARN
+	fprintf(stderr,"ERROR :: Pointer for insertion already in use in linked list %p\n",ptr);
+	//printlist(head,nc);
+#endif
+	return 0;
+      } else {
+	nc++;
+	meminsert(&head,ptr,size);
+	return 0;
+      }
+    }
+
+    // Getting allocation size
+    found=memfind(head,ptr);
+    if (found){
+      return found->size;
+    } else{
+#ifdef FULL_WARN
+      fprintf(stderr,"ERROR :: Pointer for size check NOT found in linked list\n");
+#endif
+      return 0;
+    }
+  }
+}
+
+node *memfind(node *head, const void *ptr){
+  node *next;
+  next=head;
+  while(next!=NULL){
+    if (next->ptr==ptr) return next;
+    next=next->next;
+  }
+  return NULL;
+}
+
+void memdel(node **head, node *found){
+  node *next;
+  if (found==*head){
+    next=(*head)->next;
+    free(*head);
+    *head=next;
+    return;
+  }
+  next=*head;
+  while(next->next!=found){
+    next=next->next;
+  }
+  next->next=next->next->next;
+  free(found);
+  return;
+}
+void meminsert(node **head, const void  *ptr,size_t size){
+  node *nhead;
+  nhead = hypre_TAlloc(node, 1, HYPRE_MEMORY_HOST);
+  nhead->ptr=ptr;
+  nhead->size=size;
+  nhead->next=*head;
+  *head=nhead;
+  return;
+}
+
+void printlist(node *head,hypre_int nc){
+  node *next;
+  next=head;
+  printf("Node count %d \n",nc);
+  while(next!=NULL){
+    printf("Address %p of size %zu \n",next->ptr,next->size);
+    next=next->next;
+  }
 }
 #endif

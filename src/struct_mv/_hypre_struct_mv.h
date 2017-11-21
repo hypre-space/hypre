@@ -2730,7 +2730,7 @@ HYPRE_Int tot_size = num_values*hypre_BoxVolume(hypre_BoxArrayBox(data_space, hy
 data_host = hypre_CTAlloc(HYPRE_Complex,  tot_size, HYPRE_MEMORY_HOST);\
 hypre_TMemcpy(data_host,data,HYPRE_Complex,tot_size,HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);	\
 
-#define hypre_StructPostPrint() hypre_TFree(data_host)
+#define hypre_StructPostPrint() hypre_TFree(data_host,HYPRE_MEMORY_HOST)
 
 #else
 

@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 #ifdef HYPRE_USE_GPU
@@ -23,8 +23,12 @@ void VecSet(double* tgt, int size, double value, cudaStream_t s);
 void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
+#else
+#define hypre_GPUInit(use_device)
+#define hypre_GPUFinalize()
 #endif
 
+#if  defined(HYPRE_USE_MANAGED)
 cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
 cudaEvent_t getevent(hypre_int i);
@@ -37,28 +41,7 @@ void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t 
 void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream);
 cublasHandle_t getCublasHandle();
 cusparseHandle_t getCusparseHandle();
-typedef struct node {
-  const void *ptr;
-  size_t size;
-  struct node *next;
-} node;
-size_t mempush(const void *ptr, size_t size, hypre_int action);
-node *memfind(node *head, const void *ptr);
-void memdel(node **head, node *found);
-void meminsert(node **head, const void *ptr,size_t size);
-void printlist(node *head,hypre_int nc);
-//#define MEM_PAD_LEN 1
-size_t memsize(const void *ptr);
-hypre_int getsetasyncmode(hypre_int mode, hypre_int action);
-void SetAsyncMode(hypre_int mode);
-hypre_int GetAsyncMode();
-void branchStream(hypre_int i, hypre_int j);
-void joinStreams(hypre_int i, hypre_int j, hypre_int k);
-void affs(hypre_int myid);
-hypre_int getcore();
-hypre_int getnuma();
-hypre_int checkDeviceProps();
-hypre_int pointerIsManaged(const void *ptr);
+
 /*
  * Global struct for keeping HYPRE GPU Init state
  */
@@ -92,6 +75,31 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
+
+hypre_int getsetasyncmode(hypre_int mode, hypre_int action);
+void SetAsyncMode(hypre_int mode);
+hypre_int GetAsyncMode();
+void branchStream(hypre_int i, hypre_int j);
+void joinStreams(hypre_int i, hypre_int j, hypre_int k);
+void affs(hypre_int myid);
+hypre_int getcore();
+hypre_int getnuma();
+hypre_int checkDeviceProps();
+hypre_int pointerIsManaged(const void *ptr);
+
+#endif
+typedef struct node {
+  const void *ptr;
+  size_t size;
+  struct node *next;
+} node;
+size_t mempush(const void *ptr, size_t size, hypre_int action);
+node *memfind(node *head, const void *ptr);
+void memdel(node **head, node *found);
+void meminsert(node **head, const void *ptr,size_t size);
+void printlist(node *head,hypre_int nc);
+size_t memsize(const void *ptr);
+
 
 #endif
 

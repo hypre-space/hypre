@@ -18,9 +18,6 @@
 
 #define HYPRE_USE_MANAGED_SCALABLE 1
 #include "_hypre_utilities.h"
-//#include "gpgpu.h"
-//#include "hypre_nvtx.h"
-//#include "gpuMem.h"
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
@@ -77,9 +74,10 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
 		 mempush(ptr,size,0);
 #endif
 #elif defined(HYPRE_MEMORY_GPU)
+		 //gpuErrchk( cudaMalloc((void**)&ptr,size) );
 		 gpuErrchk( cudaMalloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN) );
 		 size_t *sp=(size_t*)ptr;
-		 *sp=size;
+		 cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
 		 ptr=(void*)(&sp[MEM_PAD_LEN]);
 #endif
 #elif defined(HYPRE_USE_OMP45)
@@ -133,14 +131,14 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
 char *
 hypre_CAlloc( size_t count, 
               size_t elt_size,
-			  HYPRE_Int location)
+	      HYPRE_Int location)
 {
    void   *ptr;
    size_t  size = count*elt_size;
 
    if (size > 0)
    {
-	  PUSH_RANGE_PAYLOAD("MALLOC",4,size);
+      PUSH_RANGE_PAYLOAD("MALLOC",4,size);
       if (location==HYPRE_MEMORY_DEVICE)
       {
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
@@ -161,7 +159,7 @@ hypre_CAlloc( size_t count,
 #endif
 #elif defined(HYPRE_MEMORY_GPU)
 		 ptr=(void*)hypre_MAlloc(size,location);
-		 memset(ptr,0,count*elt_size);
+		 cudaMemset(ptr,0,size);
 #endif
 #elif defined(HYPRE_USE_OMP45)
 		 HYPRE_Int device_num = omp_get_default_device();

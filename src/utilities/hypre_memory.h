@@ -89,7 +89,19 @@ extern "C" {
 #define HYPRE_MEMORY_SHARED ( 2)
 #define HYPRE_MEMORY_UNSET  (-1)
 
-#define HYPRE_CUDA_GLOBAL
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#ifdef __cplusplus
+extern "C++" {
+#endif
+#include <cuda.h>
+#include <cuda_runtime.h>
+#ifdef __cplusplus
+}
+#endif
+#define HYPRE_CUDA_GLOBAL __host__ __device__
+#else
+#define HYPRE_CUDA_GLOBAL 
+#endif
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
