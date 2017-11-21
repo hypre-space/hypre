@@ -129,7 +129,8 @@ FILES =\
  block_tridiag.c\
  ams.c\
  ads.c\
- ame.c
+ ame.c\
+ superlu.c
 
 OBJS = ${FILES:.c=.o}
 

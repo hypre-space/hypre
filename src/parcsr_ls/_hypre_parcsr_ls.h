@@ -262,6 +262,14 @@ typedef struct
 	HYPRE_Int C_point_keep_level;
 	HYPRE_Int num_C_point_marker;
 	HYPRE_Int   **C_point_marker_array;
+
+#ifdef HYPRE_USE_DSLU
+ /* Parameters and data for SuperLU_Dist */
+   HYPRE_Int slu_level;
+   HYPRE_Int slu_threshold;
+   HYPRE_SLUData *slu_data;
+#endif
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -471,10 +479,18 @@ typedef struct
 #define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
 #define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
 
-/*indeces for the dof which will keep coarsening to the coarse level */
+/*indices for the dof which will keep coarsening to the coarse level */
 #define hypre_ParAMGDataCPointKeepMarkerArray(amg_data) ((amg_data)-> C_point_marker_array)
 #define hypre_ParAMGDataCPointKeepLevel(amg_data) ((amg_data)-> C_point_keep_level)
 #define hypre_ParAMGDataNumCPointKeep(amg_data) ((amg_data)-> num_C_point_marker)
+
+#ifdef HYPRE_USE_DSLU
+ /* Parameters and data for SuperLU_Dist */
+#define hypre_ParAMGDataSLULevel(amg_data) ((amg_data)->slu_level)
+#define hypre_ParAMGDataSLUThreshold(amg_data) ((amg_data)->slu_threshold)
+#define hypre_ParAMGDataSLUData(amg_data) ((amg_data)->slu_threshold)
+#endif
+
 #endif
 
 
@@ -1654,6 +1670,13 @@ HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 // Accessor functions
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
+
+#ifdef HYPRE_USE_DSLU
+HYPRE_Int hypre_SLUDistSetup( hypre_ParAMGData *amg_data, HYPRE_Int level)
+HYPRE_Int hypre_SLUDistSolve( hypre_ParAMGData *amg_data, hypre_ParVector *b, hypre_ParVector *x);
+HYPRE_Int hypre_SLUDistDestroy( hypre_ParAMGData *amg_data);
+#endif;
+
 	
 #ifdef __cplusplus
 }

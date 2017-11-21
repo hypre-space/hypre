@@ -451,6 +451,11 @@ typedef struct
 #define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
 #define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
 
+/*indices for the dof which will keep coarsening to the coarse level */
+#define hypre_ParAMGDataCPointKeepMarkerArray(amg_data) ((amg_data)-> C_point_marker_array)
+#define hypre_ParAMGDataCPointKeepLevel(amg_data) ((amg_data)-> C_point_keep_level)
+#define hypre_ParAMGDataNumCPointKeep(amg_data) ((amg_data)-> num_C_point_marker)
+
 #ifdef HYPRE_USE_DSLU
  /* Parameters and data for SuperLU_Dist */
 #define hypre_ParAMGDataSLULevel(amg_data) ((amg_data)->slu_level)
