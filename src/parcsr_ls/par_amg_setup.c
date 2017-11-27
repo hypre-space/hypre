@@ -2384,6 +2384,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixDestroy(AP);
 
 #if DEBUG_SAVE_ALL_OPS
+            if (level == 0)
+            {
+               hypre_ParCSRMatrixPrintIJ(A_array[0], 1, 1, "A_0.mtx");
+            }
             char file[256];
             hypre_sprintf(file, "A_%d.mtx", level+1);
             hypre_ParCSRMatrixPrintIJ(A_H, 1, 1, file);
