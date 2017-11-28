@@ -4477,6 +4477,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_down,   1);
+         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_up,     2);
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
