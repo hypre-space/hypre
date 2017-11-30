@@ -158,7 +158,7 @@ main( hypre_int argc,
    HYPRE_Int		       num_functions = 1;
    HYPRE_Int		       num_paths = 1;
    HYPRE_Int		       agg_num_levels = 0;
-   HYPRE_Int		       ns_coarse = 1, ns_down = 1, ns_up = 1;
+   HYPRE_Int		       ns_coarse = 1, ns_down = -1, ns_up = -1;
 
    HYPRE_Int		       time_index;
    MPI_Comm            comm = hypre_MPI_COMM_WORLD;
@@ -2778,8 +2778,14 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNodal(amg_solver, nodal);
       HYPRE_BoomerAMGSetNodalDiag(amg_solver, nodal_diag);
       HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_coarse, 3);
-      HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_down,   1);
-      HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_up,     2);
+      if (ns_down > -1)
+      {
+         HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_down,   1);
+      }
+      if (ns_up > -1)
+      {
+         HYPRE_BoomerAMGSetCycleNumSweeps(amg_solver, ns_up,     2);
+      }
       if (num_functions > 1)
 	 HYPRE_BoomerAMGSetDofFunc(amg_solver, dof_func);
       HYPRE_BoomerAMGSetAdditive(amg_solver, additive);
@@ -4477,8 +4483,14 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetEuBJ(pcg_precond, eu_bj);
          HYPRE_BoomerAMGSetEuSparseA(pcg_precond, eu_sparse_A);
          HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_coarse, 3);
-         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_down,   1);
-         HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_up,     2);
+         if (ns_down > -1)
+         {
+            HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_down,   1);
+         }
+         if (ns_up > -1)
+         {
+            HYPRE_BoomerAMGSetCycleNumSweeps(pcg_precond, ns_up,     2);
+         }
          if (num_functions > 1)
             HYPRE_BoomerAMGSetDofFunc(pcg_precond, dof_func);
          HYPRE_BoomerAMGSetAdditive(pcg_precond, additive);
