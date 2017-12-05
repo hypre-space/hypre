@@ -87,25 +87,19 @@ process 1.  Figure :ref:`fig-struct-grid` shows the code for setting up the grid
 on process 0 (the code for process 1 is similar).
 
 .. |figStructGrid1| image:: figStructGrid1.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figStructGrid2| image:: figStructGrid2.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figStructGrid3| image:: figStructGrid3.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figStructGrid4| image:: figStructGrid4.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 
 .. _fig-struct-grid:
 
-+---------------------+---------------------+
-| 1: |figStructGrid1| | 2: |figStructGrid2| |
-+---------------------+---------------------+
-| 3: |figStructGrid3| | 4: |figStructGrid4| |
-+---------------------+---------------------+
++---------------------+---------------------+---------------------+---------------------+
+| 1: |figStructGrid1| | 2: |figStructGrid2| | 3: |figStructGrid3| | 4: |figStructGrid4| |
++---------------------+---------------------+---------------------+---------------------+
 
 .. code-block:: c
    
@@ -172,23 +166,17 @@ the stencil in Figure :ref:`fig-struct-stencil-a`.  The stencil must be the same
 on all processes.
 
 .. |figStructStenc1| image:: figStructStenc1.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figStructStenc2| image:: figStructStenc2.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figStructStenc3| image:: figStructStenc3.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figStructStenc4| image:: figStructStenc4.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figStructStenc5| image:: figStructStenc5.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figStructStenc6| image:: figStructStenc6.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 
 .. _fig-struct-stencil-b:
 

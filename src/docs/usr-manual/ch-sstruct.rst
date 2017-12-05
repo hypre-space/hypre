@@ -124,23 +124,17 @@ actual distribution is determined by the user and simply described (in parallel)
 through the interface.
 
 .. |figSStructGrid1| image:: figSStructGrid1.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figSStructGrid2| image:: figSStructGrid2.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figSStructGrid3| image:: figSStructGrid3.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figSStructGrid4| image:: figSStructGrid4.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figSStructGrid5| image:: figSStructGrid5.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figSStructGrid6| image:: figSStructGrid6.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 
 .. _fig-sstruct-grid:
     
@@ -264,14 +258,11 @@ referencing index :math:`(0,0)` for the stencil's center.  Figure
    Need to combine this with 7a.
 
 .. |figSStructGraph1| image:: figSStructGraph1.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figSStructGraph2| image:: figSStructGraph2.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 .. |figSStructGraph5| image:: figSStructGraph5.*
-   :scale: 100%
-   :align: middle
+   :width: 100%
 
 .. _fig-sstruct-graph:
 
@@ -370,11 +361,17 @@ six processes such that data associated with part :math:`p` lives on process
 :math:`p`.
 
 .. |figSStructGridFEM1| image:: figSStructGridFEM1.*
+   :width: 100%
 .. |figSStructGridFEM2| image:: figSStructGridFEM2.*
+   :width: 100%
 .. |figSStructGridFEM3| image:: figSStructGridFEM3.*
+   :width: 100%
 .. |figSStructGridFEM4| image:: figSStructGridFEM4.*
+   :width: 100%
 .. |figSStructGridFEM5| image:: figSStructGridFEM5.*
+   :width: 100%
 .. |figSStructGridFEM6| image:: figSStructGridFEM6.*
+   :width: 100%
 
 .. _fig-sstruct-fem-grid:
 
