@@ -841,27 +841,34 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
    /* Prepare send buffers */
 #if defined(HYPRE_MEMORY_GPU)
-   send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends);
-   if (num_sends > 0)
-   {
-      size = hypre_CommPkgSendBufsize(comm_pkg);
-      if (size > global_send_size)
+   if (hypre_exec_policy == LOCATION_GPU)
+   {    
+      send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends);
+      if (num_sends > 0)
       {
-         if (global_send_size > 0)
-         {
-            hypre_DeviceTFree(global_send_buffer);
-         }
-         global_send_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
-         global_send_size   = 5*size;
-      }
-      send_buffers_data[0] = global_send_buffer;
-      for (i = 1; i < num_sends; i++)
-      {
-         comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
-         size = hypre_CommTypeBufsize(comm_type);
-         send_buffers_data[i] = send_buffers_data[i-1] + size;
+	 size = hypre_CommPkgSendBufsize(comm_pkg);
+	 if (size > global_send_size)
+	 {
+	    if (global_send_size > 0)
+	    {
+	       hypre_DeviceTFree(global_send_buffer);
+	    }
+	    global_send_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
+	    global_send_size   = 5*size;
+	 }
+	 send_buffers_data[0] = global_send_buffer;
+	 for (i = 1; i < num_sends; i++)
+	 {
+	    comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
+	    size = hypre_CommTypeBufsize(comm_type);
+	    send_buffers_data[i] = send_buffers_data[i-1] + size;
+	 }
       }
    }
+   else
+   {
+      send_buffers_data = send_buffers;
+   }	 
 #elif defined(HYPRE_USE_OMP45)
    if (hypre__global_offload) 
    {
@@ -913,26 +920,33 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
    /* Prepare recv buffers */
 #if defined(HYPRE_MEMORY_GPU)
-   recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs);
-   if (num_recvs > 0)
+   if (hypre_exec_policy == LOCATION_GPU)
+   {    
+      recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs);
+      if (num_recvs > 0)
+      {
+	 size = hypre_CommPkgRecvBufsize(comm_pkg);
+	 if (size > global_recv_size)
+	 {
+	    if (global_recv_size > 0)
+	    {
+	       hypre_DeviceTFree(global_recv_buffer);
+	    }
+	    global_recv_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
+	    global_recv_size   = 5*size;
+	 }
+	 recv_buffers_data[0] = global_recv_buffer;
+	 for (i = 1; i < num_recvs; i++)
+	 {
+	    comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);
+	    size = hypre_CommTypeBufsize(comm_type);
+	    recv_buffers_data[i] = recv_buffers_data[i-1] + size;
+	 }
+      }
+   }
+   else
    {
-      size = hypre_CommPkgRecvBufsize(comm_pkg);
-      if (size > global_recv_size)
-      {
-         if (global_recv_size > 0)
-         {
-            hypre_DeviceTFree(global_recv_buffer);
-         }
-         global_recv_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
-         global_recv_size   = 5*size;
-      }
-      recv_buffers_data[0] = global_recv_buffer;
-      for (i = 1; i < num_recvs; i++)
-      {
-         comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);
-         size = hypre_CommTypeBufsize(comm_type);
-         recv_buffers_data[i] = recv_buffers_data[i-1] + size;
-      }
+      recv_buffers_data = recv_buffers;
    }
 #elif defined(HYPRE_USE_OMP45)
    if (hypre__global_offload) 
@@ -1066,8 +1080,18 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                }
                hypre_BoxLoop0End();
 #else
-               hypre_DeviceMemset(dptr, 0, HYPRE_Complex, size);
-
+	       if (hypre_exec_policy == LOCATION_GPU)
+	       {
+		  hypre_DeviceMemset(dptr, 0, HYPRE_Complex, size);
+	       }
+	       else
+	       {
+		  hypre_BoxLoop0Begin(ndim, length_array)
+		  {
+		    dptr[idx] = 0.0;
+		  }
+		  hypre_BoxLoop0End();
+	       }
 #endif
                dptr += size;
             }
@@ -1077,7 +1101,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
    /* Copy buffer data from Device to Host */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
-   if (num_sends > 0)
+   if (num_sends > 0 && hypre_exec_policy == LOCATION_GPU)
    {
       HYPRE_Complex  *dptr_host;
       size = hypre_CommPkgSendBufsize(comm_pkg);
@@ -1297,7 +1321,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    /* Copy buffer data from Host to Device */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
-   if (num_recvs > 0)
+   if (num_recvs > 0 && hypre_exec_policy == LOCATION_GPU)
    {
       HYPRE_Complex  *dptr_host;
       HYPRE_Int       size;

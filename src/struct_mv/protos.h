@@ -222,7 +222,10 @@ HYPRE_Int hypre_ComputeBoxnums ( hypre_BoxArray *boxes , HYPRE_Int *procs , HYPR
 HYPRE_Int hypre_StructGridPrint ( FILE *file , hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridRead ( MPI_Comm comm , FILE *file , hypre_StructGrid **grid_ptr );
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_ghost );
-
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) 
+HYPRE_Int hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid);
+HYPRE_Int hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_Int data_location );
+#endif
 /* struct_innerprod.c */
 HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
 
@@ -284,7 +287,7 @@ hypre_StructVector *hypre_StructVectorCreate ( MPI_Comm comm , hypre_StructGrid 
 hypre_StructVector *hypre_StructVectorRef ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorDestroy ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorInitializeShell ( hypre_StructVector *vector );
-HYPRE_Int hypre_StructVectorInitializeData ( hypre_StructVector *vector , HYPRE_Complex *data );
+HYPRE_Int hypre_StructVectorInitializeData ( hypre_StructVector *vector , HYPRE_Complex *data);
 HYPRE_Int hypre_StructVectorInitialize ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorSetValues ( hypre_StructVector *vector , hypre_Index grid_index , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructVectorSetBoxValues ( hypre_StructVector *vector , hypre_Box *set_box , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );
@@ -292,6 +295,7 @@ HYPRE_Int hypre_StructVectorClearValues ( hypre_StructVector *vector , hypre_Ind
 HYPRE_Int hypre_StructVectorClearBoxValues ( hypre_StructVector *vector , hypre_Box *clear_box , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructVectorClearAllValues ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector , HYPRE_Int *num_ghost );
+HYPRE_Int hypre_StructVectorSetDataSize(hypre_StructVector *vector , HYPRE_Int &data_size, HYPRE_Int &data_host_size);
 HYPRE_Int hypre_StructVectorAssemble ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorCopy ( hypre_StructVector *x , hypre_StructVector *y );
 HYPRE_Int hypre_StructVectorSetConstantValues ( hypre_StructVector *vector , HYPRE_Complex values );

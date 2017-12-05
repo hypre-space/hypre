@@ -13,6 +13,11 @@
 #include "_hypre_struct_ls.h"
 #include "pfmg.h"
 
+#ifdef MAX_DEPTH
+#undef MAX_DEPTH
+#endif
+#define MAX_DEPTH 7
+
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
@@ -243,9 +248,12 @@ hypre_PFMGSetupInterpOp_CC0
    hypre_Index           *stencil_shape = hypre_StructStencilShape(stencil);
    HYPRE_Int              stencil_size = hypre_StructStencilSize(stencil);
    HYPRE_Int              warning_cnt= 0;
-
-   hypre_MatrixIndexMove(A, stencil_size, i, cdir,1);
-   
+   HYPRE_Real            *data_A=hypre_StructMatrixStencilData(A)[0];
+   HYPRE_Int             *stencil_A = hypre_StructStencilShapeDevice(stencil);
+   HYPRE_Int             *indices_A = hypre_StructMatrixDataDeviceIndices(A);
+#if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_MANAGED)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
+#endif
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
@@ -262,10 +270,26 @@ hypre_PFMGSetupInterpOp_CC0
 
       for (si = 0; si < stencil_size; si++)
       {
-         Ap = hypre_StructGetMatrixBoxData(A, i, si);
+	//Ap = hypre_StructGetMatrixBoxData(A, i, si);
+	 
         
-         Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
-        
+         //Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
+#if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_MANAGED)	
+	 if (data_location < 1)
+	 {
+	    Ap = data_A + indices_A[i*stencil_size+si];
+	    Astenc = stencil_A[si*HYPRE_MAXDIM+cdir];
+	 }
+	 else
+	 {
+	    Ap = hypre_StructMatrixBoxData(A, i, si);
+	    Astenc = hypre_IndexD(stencil_shape[si], cdir);
+	 }
+#else
+	 Ap = hypre_StructMatrixBoxData(A, i, si);
+	 Astenc = hypre_IndexD(stencil_shape[si], cdir);
+#endif
+
          if (Astenc == 0)
          {
             center += Ap[Ai];

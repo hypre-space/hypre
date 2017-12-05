@@ -729,16 +729,15 @@ struct ColumnSums
 
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <omp.h>
 
 //extern "C++" {
 //#include <RAJA/RAJA.hxx>
 //}
 //using namespace RAJA;
 
-struct cuda_traversal {HYPRE_Int cuda;};
-struct omp_traversal  {HYPRE_Int omp;};
-#define hypre_exec_policy cuda_traversal()
-#define HYPER_LAMBDA [=] __device__
+#define HYPER_LAMBDA [=] __host__  __device__ 
+#define HYPRE_MIN_GPU_SIZE (131072)//(65536)//(8192)//(16384)//(32768)//(65536)
 
 typedef struct hypre_Boxloop_struct
 {
@@ -748,15 +747,6 @@ typedef struct hypre_Boxloop_struct
 	HYPRE_Int bsize0,bsize1,bsize2;
 } hypre_Boxloop;
 
-#define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
-void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line)
-{
-    if (err)
-    {
-      printf("CUDA Error Code[%d]: %s\n %s(%s) Line:%d\n", err, cudaGetErrorString(err), file, fun, line);
-      HYPRE_Int *p = NULL; *p = 1;
-    }
-}
 #define BLOCKSIZE 512
 #define WARP_SIZE 32
 #define BLOCK_SIZE 512
@@ -769,8 +759,8 @@ void CheckError(cudaError_t const err, const char* file, char const* const fun, 
     HYPRE_Int *p = NULL; *p = 1;\
   }									\
   AxCheckError(cudaDeviceSynchronize());				\
-}				      \
-  
+} 
+
 #define hypre_reduce_policy  cuda_reduce<BLOCKSIZE>
 
 extern "C++" {
@@ -783,23 +773,30 @@ __global__ void forall_kernel(LOOP_BODY loop_body, HYPRE_Int length)
 }
 
 template<typename LOOP_BODY>
-void BoxLoopforall (cuda_traversal, HYPRE_Int length, LOOP_BODY loop_body)
-{	
-	size_t const blockSize = BLOCKSIZE;
-	size_t gridSize  = (length + blockSize - 1) / blockSize;
-	if (gridSize == 0) gridSize = 1;
-	
-	//hypre_printf("length= %d, blocksize = %d, gridsize = %d\n",length,blockSize,gridSize);
-	forall_kernel<<<gridSize, blockSize>>>(loop_body,length);
-}
-
-template<typename LOOP_BODY>
-void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
+void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
 {
-
-#pragma omp parallel for schedule(static)
-	for (HYPRE_Int idx = 0;idx < length;idx++)
-		loop_body(idx);
+  
+  if (policy == LOCATION_CPU)
+  {
+    HYPRE_Int idx;
+#pragma omp parallel for 
+    for (idx = 0;idx < length;idx++)
+    { 
+      loop_body(idx);
+    }
+    
+  }
+  else if (policy == LOCATION_GPU)
+  {    
+     size_t const blockSize = BLOCKSIZE;
+     size_t gridSize  = (length + blockSize - 1) / blockSize;
+     if (gridSize == 0) gridSize = 1;	
+     //hypre_printf("length= %d, blocksize = %d, gridsize = %d\n",length,blockSize,gridSize);
+     forall_kernel<<<gridSize, blockSize>>>(loop_body,length);
+  }
+  else if (policy == 2)
+  {
+  }
 }
 }
 
@@ -816,9 +813,25 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
 
 #define hypre_newBoxLoopInit(ndim,loop_size)				\
   HYPRE_Int hypre__tot = 1;						\
-  for (HYPRE_Int hypre_d = 0;hypre_d < ndim;hypre_d ++)					\
-     hypre__tot *= loop_size[hypre_d];
+  for (HYPRE_Int hypre_d = 0;hypre_d < ndim;hypre_d ++)			\
+    hypre__tot *= loop_size[hypre_d];					\
+  if (hypre_box_print)							\
+  {									\
+     HYPRE_Int world_rank;						\
+     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);			\
+     if (world_rank == 0)						\
+       hypre_printf("%s, %s(%d): %s, %d,\n",tmp_print,__FILE__,__LINE__,__FUNCTION__, hypre__tot); \
+  }									\
+  t_start = MPI_Wtime();\
+  time_box = 1;	
 
+  //if (hypre_exec_policy == LOCATION_CPU){printf("CPU: ");} else if (hypre_exec_policy == LOCATION_GPU){printf("GPU: ");} else {printf("UNSET: ");} \
+  //printf("hypre_newBoxLoop (%d) in %s(%d) function %s\n",hypre__tot, __FILE__,__LINE__,__FUNCTION__); 
+
+#define hypre_BasicBoxLoopInit(ndim,loop_size)	\
+  HYPRE_Int hypre__tot = 1;						\
+  for (HYPRE_Int hypre_d = 0;hypre_d < ndim;hypre_d ++)			\
+    hypre__tot *= loop_size[hypre_d];					\
 
 #define hypre_newBoxLoopDeclare(box)\
   hypre_Index local_idx;						\
@@ -827,13 +840,13 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
   idx_local = idx_local / box.lsize0;					\
   hypre_IndexD(local_idx, 1)  = idx_local % box.lsize1;			\
   idx_local = idx_local / box.lsize1;					\
-  hypre_IndexD(local_idx, 2)  = idx_local % box.lsize2;
+  hypre_IndexD(local_idx, 2)  = idx_local % box.lsize2;\
 
 #define hypre_newBoxLoop0Begin(ndim, loop_size)				\
 {									\
-    hypre_newBoxLoopInit(ndim,loop_size);						\
-    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
-    {
+   hypre_newBoxLoopInit(ndim,loop_size);				\
+   BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
+   {
 
 #define hypre_newBoxLoop0End()					\
     });									\
@@ -841,7 +854,7 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
 }
 
 #define hypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)	\
-	hypre_Boxloop databox##k;											\
+        hypre_Boxloop databox##k;					\
 	databox##k.lsize0 = loop_size[0];				\
 	databox##k.strides0 = stride[0];				\
 	databox##k.bstart0  = start[0] - dbox->imin[0];			\
@@ -882,7 +895,7 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
     hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
     BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
     {									\
-      hypre_newBoxLoopDeclare(databox1);					\
+      hypre_newBoxLoopDeclare(databox1);				\
       hypre_BoxLoopIncK(1,databox1,i1);
       
 #define hypre_newBoxLoop1End(i1)				\
@@ -992,7 +1005,7 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
 #define zypre_newBasicBoxLoop1Begin(ndim, loop_size,			\
 				    stride1, i1)			\
 {    		       				                	\
-    hypre_newBoxLoopInit(ndim,loop_size);		        	\
+    hypre_BasicBoxLoopInit(ndim,loop_size);		        	\
     zypre_BasicBoxLoopDataDeclareK(1,ndim,loop_size,stride1);	\
     BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
     {									\
@@ -1003,7 +1016,7 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
 				    stride1, i1,			\
 				    stride2, i2)			\
 {    		       				                	\
-    hypre_newBoxLoopInit(ndim,loop_size);		        	\
+    hypre_BasicBoxLoopInit(ndim,loop_size);		        	\
     zypre_BasicBoxLoopDataDeclareK(1,ndim,loop_size,stride1);	\
     zypre_BasicBoxLoopDataDeclareK(2,ndim,loop_size,stride2);	\
     BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
@@ -1020,8 +1033,10 @@ void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
 
 #define hypre_LoopEnd()					\
    });							\
-   hypre_fence();					\
-}
+}							\
+   
+   //   hypre_fence();					\
+   //}
 
 
 #define MAX_BLOCK BLOCKSIZE
@@ -1045,7 +1060,7 @@ __device__ __forceinline__ T hypre_shfl_xor(T var, int laneMask)
 }
 
 #define RAJA_MAX(a, b) (((b) > (a)) ? (b) : (a))
-  
+
 template <typename T>
 class ReduceSum
 {
@@ -1054,29 +1069,42 @@ public:
    // Constructor takes initial reduction value (default ctor is disabled).
    // Ctor only executes on the host.
    //
-   explicit ReduceSum(T init_val)
+  explicit ReduceSum( T init_val,HYPRE_Int location )
    {
+      data_location = location;
+      
       m_is_copy = false;
 
       m_init_val = init_val;
       m_reduced_val = static_cast<T>(0);
 
       m_myID = getCudaReductionId();
-//    std::cout << "ReduceSum id = " << m_myID << std::endl;
 
-      m_blockdata = getCudaReductionMemBlock(m_myID) ;
-      m_blockoffset = 1;
+      if (data_location == LOCATION_GPU)
+      {
+	 m_blockdata = getCudaReductionMemBlock(m_myID) ;
+	 m_blockoffset = 1;
       
-      // Entire shared memory block must be initialized to zero so
-      // sum reduction is correct.
-      size_t len = RAJA_CUDA_REDUCE_BLOCK_LENGTH;
-      cudaMemset(&m_blockdata[m_blockoffset], 0,
-                 sizeof(CudaReductionBlockDataType)*len); 
+	 // Entire shared memory block must be initialized to zero so
+	 // sum reduction is correct.
+	 size_t len = RAJA_CUDA_REDUCE_BLOCK_LENGTH;
+	 cudaMemset(&m_blockdata[m_blockoffset], 0,
+		    sizeof(CudaReductionBlockDataType)*len); 
 
-      m_max_grid_size = m_blockdata;
-      m_max_grid_size[0] = 0;
+	 m_max_grid_size = m_blockdata;
+	 m_max_grid_size[0] = 0;
 
-      cudaDeviceSynchronize();
+	 cudaDeviceSynchronize();
+      }
+      else if (data_location == LOCATION_CPU)
+      {
+	 m_blockdata = getCPUReductionMemBlock(m_myID);
+	 int nthreads = omp_get_max_threads();
+	 #pragma omp parallel for schedule(static, 1)
+	 for ( int i = 0; i < nthreads; ++i ) {
+	    m_blockdata[i*s_block_offset] = 0 ;
+	 }
+      }
    }
 
    //
@@ -1097,11 +1125,12 @@ public:
    ~ReduceSum< T >()
    {
       if (!m_is_copy) {
+	{
 #if defined( __CUDA_ARCH__ )
 #else
-         releaseCudaReductionId(m_myID);
+	   releaseCudaReductionId(m_myID);
 #endif
-         // OK to perform cudaFree of cudaMalloc vars if needed...
+	}
       }
    }
 
@@ -1109,74 +1138,98 @@ public:
    // Operator to retrieve reduced sum value (before object is destroyed).
    // Accessor only operates on host.
    //
+   __host__ __device__
    operator T()
    {
-      cudaDeviceSynchronize() ;
+     
+     if (data_location == LOCATION_GPU) 
+     {
+        cudaDeviceSynchronize() ;
+	m_blockdata[m_blockoffset] = static_cast<T>(0);
 
-      m_blockdata[m_blockoffset] = static_cast<T>(0);
-
-      size_t grid_size = m_max_grid_size[0];
-      for (size_t i=1; i <= grid_size; ++i) {
-         m_blockdata[m_blockoffset] += m_blockdata[m_blockoffset+i];
-      }
-      m_reduced_val = m_init_val + static_cast<T>(m_blockdata[m_blockoffset]);
-
-      return m_reduced_val;
+	size_t grid_size = m_max_grid_size[0];
+	for (size_t i=1; i <= grid_size; ++i) {
+	   m_blockdata[m_blockoffset] += m_blockdata[m_blockoffset+i];
+	}
+	m_reduced_val = m_init_val + static_cast<T>(m_blockdata[m_blockoffset]);
+     }
+     else if (data_location == LOCATION_CPU)
+     {
+#if defined( __CUDA_ARCH__ )
+#else
+        T tmp_reduced_val = static_cast<T>(0);
+	int nthreads = omp_get_max_threads();
+	for ( int i = 0; i < nthreads; ++i ) {
+	   tmp_reduced_val += static_cast<T>(m_blockdata[i*s_block_offset]);
+	}
+	m_reduced_val = m_init_val + tmp_reduced_val;
+#endif
+     }
+     return m_reduced_val;
    }
 
    //
    // += operator to accumulate arg value in the proper shared
    // memory block location.
    //
-   __device__ 
+   __host__ __device__
    ReduceSum< T > operator+=(T val) const
-   {
-      __shared__ T sd[BLOCK_SIZE];
+   {  
+#if defined( __CUDA_ARCH__ )
+      if (data_location == LOCATION_GPU)
+      {	
+        __shared__ T sd[BLOCK_SIZE];
 
-      if ( blockIdx.x  + blockIdx.y  + blockIdx.z +
-           threadIdx.x + threadIdx.y + threadIdx.z == 0 ) {
-          HYPRE_Int numBlock = gridDim.x * gridDim.y * gridDim.z ;
-          m_max_grid_size[0] = RAJA_MAX( numBlock,  m_max_grid_size[0] );
-      } 
+	if ( blockIdx.x  + blockIdx.y  + blockIdx.z +
+	     threadIdx.x + threadIdx.y + threadIdx.z == 0 ) {
+           HYPRE_Int numBlock = gridDim.x * gridDim.y * gridDim.z ;
+           m_max_grid_size[0] = RAJA_MAX( numBlock,  m_max_grid_size[0] );
+	}
 
        // initialize shared memory
-      for ( HYPRE_Int i = BLOCK_SIZE / 2; i > 0; i /=2 ) {     
+	for ( HYPRE_Int i = BLOCK_SIZE / 2; i > 0; i /=2 ) {     
           // this descends all the way to 1
-          if ( threadIdx.x < i ) {
-              // no need for __syncthreads()
-              sd[threadIdx.x + i] = m_reduced_val;  
-          } 
+           if ( threadIdx.x < i ) {
+	      sd[threadIdx.x + i] = m_reduced_val;  
+	   }
+	}
+	__syncthreads();
+
+	sd[threadIdx.x] = val;
+
+	T temp = 0;
+	__syncthreads();
+
+	for (HYPRE_Int i = BLOCK_SIZE / 2; i >= WARP_SIZE; i /= 2) {
+	   if (threadIdx.x < i) {
+	      sd[threadIdx.x] += sd[threadIdx.x + i];
+	   }
+	   __syncthreads();
+	}
+
+	if (threadIdx.x < WARP_SIZE) {
+	   temp = sd[threadIdx.x];
+	   for (HYPRE_Int i = WARP_SIZE / 2; i > 0; i /= 2) {
+	      temp += hypre_shfl_xor(temp, i);
+	   }
+	}
+
+	// one thread adds to gmem, we skip m_blockdata[m_blockoffset]
+	// because we will be accumlating into this
+	if (threadIdx.x == 0) {
+	   HYPRE_Int blockID = m_blockoffset + 1 + blockIdx.x +
+	     blockIdx.y*gridDim.x +
+	     blockIdx.z*gridDim.x*gridDim.y ;
+	   m_blockdata[blockID] += temp ;
+	}
       }
-      __syncthreads();
-
-      sd[threadIdx.x] = val;
-
-      T temp = 0;
-      __syncthreads();
-
-      for (HYPRE_Int i = BLOCK_SIZE / 2; i >= WARP_SIZE; i /= 2) {
-         if (threadIdx.x < i) {
-            sd[threadIdx.x] += sd[threadIdx.x + i];
-         }
-         __syncthreads();
+#else
+      if (data_location == LOCATION_CPU)
+      {
+         int tid = omp_get_thread_num();
+	 m_blockdata[tid*s_block_offset] += val;
       }
-
-      if (threadIdx.x < WARP_SIZE) {
-         temp = sd[threadIdx.x];
-         for (HYPRE_Int i = WARP_SIZE / 2; i > 0; i /= 2) {
-            temp += hypre_shfl_xor(temp, i);
-         }
-      }
-
-      // one thread adds to gmem, we skip m_blockdata[m_blockoffset]
-      // because we will be accumlating into this
-      if (threadIdx.x == 0) {
-         HYPRE_Int blockID = m_blockoffset + 1 + blockIdx.x +
-                       blockIdx.y*gridDim.x +
-                       blockIdx.z*gridDim.x*gridDim.y ;
-         m_blockdata[blockID] += temp ;
-      }
-
+#endif
       return *this ;
    }
 
@@ -1188,15 +1241,19 @@ private:
 
    bool m_is_copy;
    HYPRE_Int m_myID;
+   HYPRE_Int data_location;
 
    T m_init_val;
    T m_reduced_val;
-
+   static const int s_block_offset = 
+      COHERENCE_BLOCK_SIZE/sizeof(CudaReductionBlockDataType);
    CudaReductionBlockDataType* m_blockdata ;
+   
    HYPRE_Int m_blockoffset;
 
    CudaReductionBlockDataType* m_max_grid_size;
 };
+
 }
 #define hypre_newBoxLoopGetIndex(index)\
   index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
@@ -3151,7 +3208,9 @@ typedef struct hypre_StructGrid_struct
    HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */  
 
    hypre_BoxManager    *boxman;
-
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+   HYPRE_Int            data_location;
+#endif
 } hypre_StructGrid;
 
 /*--------------------------------------------------------------------------
@@ -3182,7 +3241,9 @@ typedef struct hypre_StructGrid_struct
 
 #define hypre_StructGridIDPeriod(grid) \
 hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
-
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#define hypre_StructGridDataLocation(grid)        ((grid) -> data_location)
+#endif
 /*--------------------------------------------------------------------------
  * Looping macros:
  *--------------------------------------------------------------------------*/
@@ -3728,7 +3789,7 @@ typedef struct hypre_StructVector_struct
 
    hypre_BoxArray       *data_space;
 
-   HYPRE_Complex        *data;         /* Pointer to vector data */
+   HYPRE_Complex        *data;         /* Pointer to vector data on device*/
    HYPRE_Int             data_alloced; /* Boolean used for freeing data */
    HYPRE_Int             data_size;    /* Size of vector data */
    HYPRE_Int            *data_indices; /* num-boxes array of indices into
@@ -4000,7 +4061,10 @@ HYPRE_Int hypre_ComputeBoxnums ( hypre_BoxArray *boxes , HYPRE_Int *procs , HYPR
 HYPRE_Int hypre_StructGridPrint ( FILE *file , hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridRead ( MPI_Comm comm , FILE *file , hypre_StructGrid **grid_ptr );
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_ghost );
-
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) 
+HYPRE_Int hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid);
+HYPRE_Int hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_Int data_location );
+#endif
 /* struct_innerprod.c */
 HYPRE_Real hypre_StructInnerProd ( hypre_StructVector *x , hypre_StructVector *y );
 
@@ -4062,7 +4126,7 @@ hypre_StructVector *hypre_StructVectorCreate ( MPI_Comm comm , hypre_StructGrid 
 hypre_StructVector *hypre_StructVectorRef ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorDestroy ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorInitializeShell ( hypre_StructVector *vector );
-HYPRE_Int hypre_StructVectorInitializeData ( hypre_StructVector *vector , HYPRE_Complex *data );
+HYPRE_Int hypre_StructVectorInitializeData ( hypre_StructVector *vector , HYPRE_Complex *data);
 HYPRE_Int hypre_StructVectorInitialize ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorSetValues ( hypre_StructVector *vector , hypre_Index grid_index , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructVectorSetBoxValues ( hypre_StructVector *vector , hypre_Box *set_box , hypre_Box *value_box , HYPRE_Complex *values , HYPRE_Int action , HYPRE_Int boxnum , HYPRE_Int outside );
@@ -4070,6 +4134,7 @@ HYPRE_Int hypre_StructVectorClearValues ( hypre_StructVector *vector , hypre_Ind
 HYPRE_Int hypre_StructVectorClearBoxValues ( hypre_StructVector *vector , hypre_Box *clear_box , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructVectorClearAllValues ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector , HYPRE_Int *num_ghost );
+HYPRE_Int hypre_StructVectorSetDataSize(hypre_StructVector *vector , HYPRE_Int &data_size, HYPRE_Int &data_host_size);
 HYPRE_Int hypre_StructVectorAssemble ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorCopy ( hypre_StructVector *x , hypre_StructVector *y );
 HYPRE_Int hypre_StructVectorSetConstantValues ( hypre_StructVector *vector , HYPRE_Complex values );

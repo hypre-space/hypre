@@ -140,6 +140,7 @@ hypre_SemiInterp( void               *interp_vdata,
    hypre_Index            *stencil_shape;
 
    HYPRE_Int               compute_i, fi, ci, j;
+   hypre_StructVector     *xc_tmp;
 
    /*-----------------------------------------------------------------------
     * Initialize some things
@@ -174,6 +175,26 @@ hypre_SemiInterp( void               *interp_vdata,
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
+#if defined(HYPRE_MEMORY_GPU)
+   HYPRE_Int data_location_f = hypre_StructGridDataLocation(fgrid);
+   HYPRE_Int data_location_c = hypre_StructGridDataLocation(cgrid);
+   if (data_location_f != data_location_c)
+   {
+      xc_tmp = hypre_StructVectorCreate(hypre_MPI_COMM_WORLD, cgrid);
+      hypre_StructVectorSetNumGhost(xc_tmp, hypre_StructVectorNumGhost(xc));
+      hypre_StructGridDataLocation(cgrid) = data_location_f;
+      hypre_StructVectorInitialize(xc_tmp);
+      hypre_StructVectorAssemble(xc_tmp);
+      hypre_DataCopyToData(hypre_StructVectorData(xc),hypre_StructVectorData(xc_tmp),HYPRE_Complex,hypre_StructVectorDataSize(xc));
+      hypre_exec_policy = LOCATION_GPU;
+   }
+   else
+   {
+      xc_tmp = xc;
+   }
+#else
+   xc_tmp = xc;
+#endif
    fi = 0;
    hypre_ForBoxI(ci, cgrid_boxes)
    {
@@ -191,7 +212,7 @@ hypre_SemiInterp( void               *interp_vdata,
       xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(xc), ci);
 
       ep  = hypre_StructVectorBoxData(e, fi);
-      xcp = hypre_StructVectorBoxData(xc, ci);
+      xcp = hypre_StructVectorBoxData(xc_tmp, ci);
 
       hypre_BoxGetSize(compute_box, loop_size);
 
@@ -299,7 +320,13 @@ hypre_SemiInterp( void               *interp_vdata,
          }
       }
    }
-
+#if defined(HYPRE_MEMORY_GPU)
+   if (data_location_f != data_location_c)
+   {
+      hypre_StructVectorDestroy(xc_tmp);
+      hypre_StructGridDataLocation(cgrid) = data_location_c;
+   }
+#endif
    /*-----------------------------------------------------------------------
     * Return
     *-----------------------------------------------------------------------*/

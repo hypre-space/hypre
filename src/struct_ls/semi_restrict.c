@@ -138,7 +138,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
    hypre_Index            *stencil_shape;
 
    HYPRE_Int               compute_i, fi, ci, j;
-
+   hypre_StructVector     *rc_tmp;
    /*-----------------------------------------------------------------------
     * Initialize some things.
     *-----------------------------------------------------------------------*/
@@ -170,6 +170,24 @@ hypre_SemiRestrict( void               *restrict_vdata,
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
+#if defined(HYPRE_MEMORY_GPU)
+   HYPRE_Int data_location_f = hypre_StructGridDataLocation(fgrid);
+   HYPRE_Int data_location_c = hypre_StructGridDataLocation(cgrid);
+   if (data_location_f != data_location_c)
+   {
+      rc_tmp = hypre_StructVectorCreate(hypre_MPI_COMM_WORLD, cgrid);
+      hypre_StructVectorSetNumGhost(rc_tmp, hypre_StructVectorNumGhost(rc));
+      hypre_StructGridDataLocation(cgrid) = data_location_f;
+      hypre_StructVectorInitialize(rc_tmp);
+      hypre_StructVectorAssemble(rc_tmp);
+   }
+   else
+   {
+      rc_tmp = rc;
+   }
+#else
+   rc_tmp = rc;
+#endif
    for (compute_i = 0; compute_i < 2; compute_i++)
    {
       switch(compute_i)
@@ -230,7 +248,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
          rp  = hypre_StructVectorBoxData(r, fi);
          rp0_offset = hypre_BoxOffsetDistance(r_dbox, stencil_shape[0]);
          rp1_offset = hypre_BoxOffsetDistance(r_dbox, stencil_shape[1]);
-         rcp = hypre_StructVectorBoxData(rc, ci);
+         rcp = hypre_StructVectorBoxData(rc_tmp, ci);
 
          hypre_ForBoxI(j, compute_box_a)
          {
@@ -272,7 +290,15 @@ hypre_SemiRestrict( void               *restrict_vdata,
          }
       }
    }
-
+#if defined(HYPRE_MEMORY_GPU)
+   if (data_location_f != data_location_c)
+   {
+      hypre_DataCopyFromData(hypre_StructVectorData(rc),hypre_StructVectorData(rc_tmp),HYPRE_Complex,hypre_StructVectorDataSize(rc_tmp));
+      hypre_StructVectorDestroy(rc_tmp);
+      hypre_exec_policy = LOCATION_CPU;
+      hypre_StructGridDataLocation(cgrid) = data_location_c;
+   }
+#endif
    /*-----------------------------------------------------------------------
     * Return
     *-----------------------------------------------------------------------*/

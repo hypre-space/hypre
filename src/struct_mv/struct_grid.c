@@ -64,7 +64,9 @@ hypre_StructGridCreate( MPI_Comm           comm,
    {
       hypre_StructGridNumGhost(grid)[i] = 1;
    }
-
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+   hypre_StructGridDataLocation(grid) = LOCATION_UNSET;
+#endif
    *grid_ptr = grid;
 
    return hypre_error_flag;
@@ -363,13 +365,12 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
   
       hypre_CopyBox(box, ghostbox);
       hypre_BoxGrowByArray(ghostbox, numghost);    
-      ghostsize += hypre_BoxVolume(ghostbox); 
+      ghostsize += hypre_BoxVolume(ghostbox);
    }
    
    hypre_StructGridLocalSize(grid) = size;
    hypre_StructGridGhlocalSize(grid) = ghostsize;
    hypre_BoxDestroy(ghostbox);
-
    /* if the box manager has been created then we don't need to do the
     * following (because it was done through the coarsening routine) */
    if (!is_boxman)
@@ -855,3 +856,36 @@ hypre_StructGridSetNumGhost( hypre_StructGrid *grid, HYPRE_Int  *num_ghost )
 
    return hypre_error_flag;
 }
+
+
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+HYPRE_Int
+hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid)
+{
+   hypre_Box  *box;
+   hypre_BoxArray  *boxes;
+   HYPRE_Int box_size;
+   HYPRE_Int i;
+   HYPRE_Int        max_box_size = 0;
+   boxes = hypre_StructGridBoxes(grid);
+   hypre_ForBoxI(i, boxes)
+   {
+      box = hypre_BoxArrayBox(hypre_StructGridBoxes(grid), i);
+      box_size = hypre_BoxVolume(box);
+      if (box_size > max_box_size)
+      {
+	 max_box_size = box_size;
+      }
+   }
+   return max_box_size;
+}
+
+HYPRE_Int
+hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_Int data_location )
+{
+   hypre_StructGridDataLocation(grid) = data_location;
+
+   return hypre_error_flag;
+}
+
+#endif

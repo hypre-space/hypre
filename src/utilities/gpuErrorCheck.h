@@ -10,6 +10,9 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#ifndef hypre_GPU_ERROR_HEADER
+#define hypre_GPU_ERROR_HEADER
+
 #ifdef HYPRE_USE_MANAGED
 #include <cuda_runtime_api.h>
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
@@ -35,6 +38,11 @@ hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
 #endif
 
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
+void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
+#endif
+
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
@@ -43,6 +51,7 @@ hypre_int PointerAttributes(const void *ptr);
 #include <stdio.h>
 //#include <cuda_runtime_api.h>
 #include <stdlib.h>
+
 inline const char *cusparseErrorCheck(cusparseStatus_t error)
 {
     switch (error)
@@ -149,5 +158,7 @@ void cudaSafeFree(void *ptr,int padding);
 //size_t mempush(void* ptr, size_t size,int purge);
 //int memloc(void *ptr, int device);
 #endif
+#endif
+
 #endif
 

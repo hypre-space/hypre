@@ -323,6 +323,11 @@ HYPRE_Int HYPRE_StructPFMGGetNumIterations(HYPRE_StructSolver  solver,
 HYPRE_Int HYPRE_StructPFMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                  HYPRE_Real         *norm);
 
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+HYPRE_Int
+HYPRE_StructPFMGSetDeviceLevel( HYPRE_StructSolver  solver,
+				HYPRE_Int   device_level  );
+#endif  
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -439,6 +444,12 @@ HYPRE_Int HYPRE_StructSMGGetNumIterations(HYPRE_StructSolver  solver,
  **/
 HYPRE_Int HYPRE_StructSMGGetFinalRelativeResidualNorm(HYPRE_StructSolver  solver,
                                                 HYPRE_Real         *norm);
+
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+HYPRE_Int
+HYPRE_StructSMGSetDeviceLevel( HYPRE_StructSolver  solver,
+			       HYPRE_Int   device_level  );
+#endif
 
 /*@}*/
 

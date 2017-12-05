@@ -46,8 +46,10 @@ hypre_PFMGCreate( MPI_Comm  comm )
    (pfmg_data -> print_level)      = 0;
 
    /* initialize */
-   (pfmg_data -> num_levels) = -1;
-
+   (pfmg_data -> num_levels)  = -1;
+#if defined(HYPRE_MEMORY_GPU)
+   (pfmg_data -> devicelevel) = -1;
+#endif
    return (void *) pfmg_data;
 }
 
@@ -558,4 +560,15 @@ hypre_PFMGGetFinalRelativeResidualNorm( void   *pfmg_vdata,
    return hypre_error_flag;
 }
 
-
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+HYPRE_Int
+hypre_PFMGSetDeviceLevel( void *pfmg_vdata,
+			  HYPRE_Int   device_level  )
+{
+   hypre_PFMGData *pfmg_data = (hypre_PFMGData *)pfmg_vdata;
+ 
+   (pfmg_data -> devicelevel) = device_level;
+ 
+   return hypre_error_flag;
+}
+#endif

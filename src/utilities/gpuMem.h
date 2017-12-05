@@ -101,11 +101,23 @@ extern struct hypre__global_struct hypre__global_handle ;
 #endif
 
 #if defined(HYPRE_USE_CUDA)
+extern HYPRE_Int hypre_exec_policy;
+extern char tmp_print[10];
+extern HYPRE_Int hypre_box_print;
+extern double  t_start, t_end;
+extern HYPRE_Int time_box ;
+
+#define LOCATION_CPU (1)
+#define LOCATION_GPU (0)
+#define LOCATION_UNSET (-1)
+
 #define RAJA_MAX_REDUCE_VARS (8)
 #define RAJA_CUDA_MAX_NUM_BLOCKS (512*512*512)
 #define RAJA_CUDA_REDUCE_BLOCK_LENGTH RAJA_CUDA_MAX_NUM_BLOCKS
 #define RAJA_CUDA_REDUCE_TALLY_LENGTH RAJA_MAX_REDUCE_VARS
 #define RAJA_CUDA_REDUCE_VAR_MAXSIZE 16
+#define COHERENCE_BLOCK_SIZE 64
+
 typedef HYPRE_Real CudaReductionBlockDataType;
 typedef HYPRE_Int GridSizeType;
 
@@ -113,7 +125,11 @@ typedef HYPRE_Int GridSizeType;
 int getCudaReductionId();
 CudaReductionBlockDataType* getCudaReductionMemBlock(int id);
 void releaseCudaReductionId(int id);
+void initCudaReductionMemBlock();
 void freeCudaReductionMemBlock();
+CudaReductionBlockDataType* getCPUReductionMemBlock(int id);
+void releaseCPUReductionId(int id);
+void freeCPUReductionMemBlock();
 
 #endif
 

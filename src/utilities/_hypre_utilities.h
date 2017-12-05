@@ -1340,6 +1340,9 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#ifndef hypre_GPU_ERROR_HEADER
+#define hypre_GPU_ERROR_HEADER
+
 #ifdef HYPRE_USE_MANAGED
 #include <cuda_runtime_api.h>
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
@@ -1365,6 +1368,11 @@ hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
 #endif
 
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
+void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
+#endif
+
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
@@ -1373,6 +1381,7 @@ hypre_int PointerAttributes(const void *ptr);
 #include <stdio.h>
 //#include <cuda_runtime_api.h>
 #include <stdlib.h>
+
 inline const char *cusparseErrorCheck(cusparseStatus_t error)
 {
     switch (error)
@@ -1481,6 +1490,8 @@ void cudaSafeFree(void *ptr,int padding);
 #endif
 #endif
 
+#endif
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -1584,11 +1595,23 @@ extern struct hypre__global_struct hypre__global_handle ;
 #endif
 
 #if defined(HYPRE_USE_CUDA)
+extern HYPRE_Int hypre_exec_policy;
+extern char tmp_print[10];
+extern HYPRE_Int hypre_box_print;
+extern double  t_start, t_end;
+extern HYPRE_Int time_box ;
+
+#define LOCATION_CPU (1)
+#define LOCATION_GPU (0)
+#define LOCATION_UNSET (-1)
+
 #define RAJA_MAX_REDUCE_VARS (8)
 #define RAJA_CUDA_MAX_NUM_BLOCKS (512*512*512)
 #define RAJA_CUDA_REDUCE_BLOCK_LENGTH RAJA_CUDA_MAX_NUM_BLOCKS
 #define RAJA_CUDA_REDUCE_TALLY_LENGTH RAJA_MAX_REDUCE_VARS
 #define RAJA_CUDA_REDUCE_VAR_MAXSIZE 16
+#define COHERENCE_BLOCK_SIZE 64
+
 typedef HYPRE_Real CudaReductionBlockDataType;
 typedef HYPRE_Int GridSizeType;
 
@@ -1596,7 +1619,11 @@ typedef HYPRE_Int GridSizeType;
 int getCudaReductionId();
 CudaReductionBlockDataType* getCudaReductionMemBlock(int id);
 void releaseCudaReductionId(int id);
+void initCudaReductionMemBlock();
 void freeCudaReductionMemBlock();
+CudaReductionBlockDataType* getCPUReductionMemBlock(int id);
+void releaseCPUReductionId(int id);
+void freeCPUReductionMemBlock();
 
 #endif
 

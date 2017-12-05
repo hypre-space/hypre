@@ -62,6 +62,7 @@ typedef struct
    HYPRE_Int               num_pre_relax;
    HYPRE_Int               num_post_relax;
 
+   HYPRE_Int               max_level;
 } hypre_SMGRelaxData;
 
 /*--------------------------------------------------------------------------
@@ -101,9 +102,9 @@ hypre_SMGRelaxCreate( MPI_Comm  comm )
    (relax_data -> x)                  = NULL;
    (relax_data -> temp_vec)           = NULL;
 
-   (relax_data -> num_pre_relax) = 1;
+   (relax_data -> num_pre_relax)  = 1;
    (relax_data -> num_post_relax) = 1;
-
+   (relax_data -> max_level)      = -1;
    return (void *) relax_data;
 }
 
@@ -271,7 +272,7 @@ hypre_SMGRelax( void               *relax_vdata,
    {
       base_stride = (relax_data -> base_stride);
       base_box_a = (relax_data -> base_box_array);
-      hypre_SMGSetStructVectorConstantValues(x, zero, base_box_a, base_stride); 
+      hypre_SMGSetStructVectorConstantValues(x, zero, base_box_a, base_stride);
    }
 
    /*----------------------------------------------------------
@@ -302,18 +303,23 @@ hypre_SMGRelax( void               *relax_vdata,
          for (j = 0; j < num_spaces; j++)
          {
             is = space_ranks[j];
-
+	    
             hypre_SMGResidual(residual_data[is], A_rem, x, b, temp_vec);
 
             if (stencil_dim > 2)
+	    {
                hypre_SMGSolve(solve_data[is], A_sol, temp_vec, x);
+	    }
             else
+	    {
                hypre_CyclicReduction(solve_data[is], A_sol, temp_vec, x);
+	    }
          }
 
          (relax_data -> num_iterations) = (i + 1);
       }
    }
+   
    /*----------------------------------------------------------
     * Free up memory according to memory_use parameter
     *----------------------------------------------------------*/
@@ -563,6 +569,7 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
          num_stencil_indices++;
       }
    }
+
    A_sol = hypre_StructMatrixCreateMask(A, num_stencil_indices, stencil_indices);
    hypre_StructStencilNDim(hypre_StructMatrixStencil(A_sol)) = stencil_dim - 1;
    hypre_TFree(stencil_indices);
@@ -584,13 +591,14 @@ hypre_SMGRelaxSetupASol( void               *relax_vdata,
          hypre_SMGSetMemoryUse(solve_data[i], (relax_data -> memory_use));
          hypre_SMGSetTol(solve_data[i], 0.0);
          hypre_SMGSetMaxIter(solve_data[i], 1);
-		 
+	 hypre_StructSMGSetMaxLevel(solve_data[i], (relax_data -> max_level));	 
          hypre_SMGSetup(solve_data[i], A_sol, temp_vec, x);
       }
       else
       {
          solve_data[i] = hypre_CyclicReductionCreate(relax_data -> comm);
          hypre_CyclicReductionSetBase(solve_data[i], base_index, base_stride);
+	 //hypre_CyclicReductionSetMaxLevel(solve_data[i], -1);//(relax_data -> max_level)+10);
          hypre_CyclicReductionSetup(solve_data[i], A_sol, temp_vec, x);
       }
    }
@@ -929,3 +937,16 @@ hypre_SMGRelaxSetupBaseBoxArray( void               *relax_vdata,
    return hypre_error_flag;
 }
 
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SMGRelaxSetMaxLevel( void *relax_vdata,
+			   HYPRE_Int   num_max_level )
+{
+   hypre_SMGRelaxData *relax_data = (hypre_SMGRelaxData  *)relax_vdata;
+
+   (relax_data -> max_level) = num_max_level;
+
+   return hypre_error_flag;
+}

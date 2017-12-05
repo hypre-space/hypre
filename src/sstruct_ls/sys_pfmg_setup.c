@@ -152,33 +152,15 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    (sys_pfmg_data -> max_levels) = max_levels;
 
    /* compute dxyz */
-   dxyz_flag= 0;
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
       mean = hypre_CTAlloc(HYPRE_Real, 3);
-      deviation = hypre_CTAlloc(HYPRE_Real, 3);
 
       dxyz_flag = 0;
       for (i = 0; i < nvars; i++)
       {
          hypre_PFMGComputeDxyz(hypre_SStructPMatrixSMatrix(A,i,i), sys_dxyz[i],
-                               mean, deviation);
-
-         /* signal flag if any of the flag has a large (square) coeff. of
-          * variation */
-         if (!dxyz_flag)
-         {
-            for (d = 0; d < dim; d++)
-            {
-               deviation[d] -= mean[d]*mean[d];
-               /* square of coeff. of variation */
-               if (deviation[d]/(mean[d]*mean[d]) > .1)
-               {
-                  dxyz_flag = 1;
-                  break;
-               }
-            }
-         }
+                               mean);
 
          for (d = 0; d < 3; d++)
          {
@@ -219,12 +201,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       beta = 0.0;
       if (cdir != -1)
       {
-         if (dxyz_flag)
-         {
-            relax_weights[l] = 2.0/3.0;
-         }
-
-         else
          {
             for (d = 0; d < dim; d++)
             {

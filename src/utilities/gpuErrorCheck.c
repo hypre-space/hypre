@@ -1,6 +1,17 @@
 
 #include "_hypre_utilities.h"
 
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line)
+{
+    if (err)
+    {
+      printf("CUDA Error Code[%d]: %s\n %s(%s) Line:%d\n", err, cudaGetErrorString(err), file, fun, line);
+      HYPRE_Int *p = NULL; *p = 1;
+    }
+}
+#endif
+
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 #include <signal.h>
 #ifdef HYPRE_USE_GPU

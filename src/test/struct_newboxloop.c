@@ -763,6 +763,16 @@ main( hypre_int argc,
 	   }
 	   HYPRE_StructMatrixSetSymmetric(A, sym);
 	   HYPRE_StructMatrixSetNumGhost(A, A_num_ghost);
+	   if (nx*ny*nz < 1000)
+	   {
+	      hypre_StructMatrixDataLocation(A) = 1;
+	      hypre_exec_policy=LOCATION_CPU;
+	   }
+	   else 
+	   {
+	      hypre_exec_policy=LOCATION_GPU;
+	   }
+	   
 	   HYPRE_StructMatrixInitialize(A);
 	   
 	   /*-----------------------------------------------------------
@@ -782,6 +792,7 @@ main( hypre_int argc,
 		*-----------------------------------------------------------*/
 	   
 	   HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, grid, &b);
+	   if (nx*ny*nz < 1000) hypre_StructVectorDataLocation(b)   = 1;
 	   HYPRE_StructVectorInitialize(b);
 	   
 	   /*-----------------------------------------------------------
@@ -794,6 +805,7 @@ main( hypre_int argc,
 	   HYPRE_StructVectorAssemble(b);
 	   
 	   HYPRE_StructVectorCreate(hypre_MPI_COMM_WORLD, grid, &x);
+	   if (nx*ny*nz < 1000) hypre_StructVectorDataLocation(x)   = 1;
 	   HYPRE_StructVectorInitialize(x);
 	   
 	   AddValuesVector(grid,x,periodx0,1.0);
@@ -1106,7 +1118,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 
    HYPRE_Int ierr=0;
    hypre_BoxArray     *gridboxes;
-   HYPRE_Int           i,s,bi;
+   HYPRE_Int           s,bi;
    hypre_IndexRef      ilower;
    hypre_IndexRef      iupper;
    hypre_Box          *box;

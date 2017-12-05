@@ -2367,7 +2367,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
             +                   a_aw[iA]   * pa[iP1]
             +          rb[iR-rbOffset] * a_aw[iAm1]
             +          ra[iR] * a_bw[iAp1];
- 
+
          rap_cc[iAc] =          a_cc[iA]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pb[iP-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pa[iP]

@@ -167,7 +167,7 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+    BoxLoopforall(hypre_exec_policy,hypre__tot,[=] __device__ (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
@@ -187,15 +187,15 @@ typedef struct
 #define hypre_RedBlackLoopEnd()			\
          }						\
      });						\
-     hypre_fence();					\
 }
-	   
+//     hypre_fence();					\
+
 #define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
 					    bstart,bni,bnj,bi,	\
 					    xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    BoxLoopforall(cuda_traversal(),hypre__tot,[=] __device__ (HYPRE_Int idx) \
+    BoxLoopforall(hypre_exec_policy,hypre__tot,[=] __device__ (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,bi,xi;					\
@@ -214,8 +214,8 @@ typedef struct
 #define hypre_RedBlackConstantcoefLoopEnd()			\
          }						\
      });						\
-     hypre_fence();					\
 }
+//     hypre_fence();					\
 
 #elif defined(HYPRE_USE_OMP45) /* BEGIN OF OMP 4.5 */
 
