@@ -17,10 +17,10 @@ sphinx-build -b latex . latex
 
 Issues and things left to do:
 
-- MathJax is slow to render.  Are we okay with that?  Is there a better alternative?
-- References need to be done
-- Figure images need to be regenerated from original source files
-- How to reference figures?
-- How to combine images in a figure.  Create one PNG file from the combination?
-- Copyright stuff, version numbers, other fine tuning...
+     - MathJax is slow to render.  Are we okay with that?  Is there a better alternative?
+     - References need to be done
+     - How to reference figures?
+     - How to combine images in a figure.  Create one PNG file from the combination?
+     - Copyright stuff, version numbers, other fine tuning...
+DONE - Figure images need to be regenerated from original source files
 
