@@ -129,12 +129,12 @@ main( hypre_int argc,
    HYPRE_Real          final_res_norm;
    void               *object;
 
-   HYPRE_IJMatrix      ij_A; 
+   HYPRE_IJMatrix      ij_A = NULL; 
    HYPRE_IJVector      ij_b;
    HYPRE_IJVector      ij_x;
    HYPRE_IJVector      *ij_rbm;
 
-   HYPRE_ParCSRMatrix  parcsr_A;
+   HYPRE_ParCSRMatrix  parcsr_A = NULL;
    HYPRE_ParVector     b = NULL;
    HYPRE_ParVector     x;
    HYPRE_ParVector     *interp_vecs = NULL;
@@ -2426,7 +2426,14 @@ main( hypre_int argc,
 
    if (print_system)
    {
-      HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
+      if (ij_A)
+      {
+         HYPRE_IJMatrixPrint(ij_A, "IJ.out.A");
+      }
+      else if (parcsr_A)
+      {
+         hypre_ParCSRMatrixPrintIJ(parcsr_A, "IJ.out.A");
+      }
       if (ij_b)
       {
          HYPRE_IJVectorPrint(ij_b, "IJ.out.b");
