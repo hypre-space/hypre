@@ -1,7 +1,11 @@
-#include "hypre_blas.h"
-#include "f2c.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Subroutine */ HYPRE_Int dger_(integer *m, integer *n, doublereal *alpha, 
+#include "f2c.h"
+#include "hypre_blas.h"
+
+/* Subroutine */ integer dger_(integer *m, integer *n, doublereal *alpha, 
 	doublereal *x, integer *incx, doublereal *y, integer *incy, 
 	doublereal *a, integer *lda)
 {
@@ -11,7 +15,7 @@
     static integer info;
     static doublereal temp;
     static integer i__, j, ix, jy, kx;
-    extern /* Subroutine */ HYPRE_Int hypre_xerbla_(const char *, integer *);
+    extern /* Subroutine */ integer xerbla_(const char *, integer *);
 #define a_ref(a_1,a_2) a[(a_2)*a_dim1 + a_1]
 /*  Purpose   
     =======   
@@ -86,7 +90,7 @@
 	info = 9;
     }
     if (info != 0) {
-	hypre_xerbla_("DGER  ", &info);
+	xerbla_("DGER  ", &info);
 	return 0;
     }
 /*     Quick return if possible. */
@@ -141,3 +145,6 @@
 } /* dger_ */
 #undef a_ref
 
+#ifdef __cplusplus
+}
+#endif

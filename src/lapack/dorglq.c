@@ -1,8 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
-/* Subroutine */ HYPRE_Int dorglq_(integer *m, integer *n, integer *k, doublereal *
+/* Subroutine */ integer dorglq_(integer *m, integer *n, integer *k, doublereal *
 	a, integer *lda, doublereal *tau, doublereal *work, integer *lwork, 
 	integer *info)
 {
@@ -82,15 +85,15 @@
     integer a_dim1, a_offset, i__1, i__2, i__3;
     /* Local variables */
     static integer i__, j, l, nbmin, iinfo;
-    extern /* Subroutine */ HYPRE_Int dorgl2_(integer *, integer *, integer *, 
+    extern /* Subroutine */ integer dorgl2_(integer *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *);
     static integer ib, nb, ki, kk;
-    extern /* Subroutine */ HYPRE_Int dlarfb_(const char *,const char *,const char *,const char *, 
+    extern /* Subroutine */ integer dlarfb_(const char *,const char *,const char *,const char *, 
 	    integer *, integer *, integer *, doublereal *, integer *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
 	    integer *);
     static integer nx;
-    extern /* Subroutine */ HYPRE_Int dlarft_(const char *,const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dlarft_(const char *,const char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, integer *), xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
 	    integer *, integer *, ftnlen, ftnlen);
@@ -261,4 +264,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

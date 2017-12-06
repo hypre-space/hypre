@@ -1,8 +1,11 @@
-#include "../blas/hypre_blas.h"
-#include "hypre_lapack.h"
-#include "f2c.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* Subroutine */ HYPRE_Int dsytrd_(const char *uplo, integer *n, doublereal *a, integer *
+#include "f2c.h"
+#include "hypre_lapack.h"
+
+/* Subroutine */ integer dsytrd_(const char *uplo, integer *n, doublereal *a, integer *
 	lda, doublereal *d__, doublereal *e, doublereal *tau, doublereal *
 	work, integer *lwork, integer *info)
 {
@@ -144,12 +147,12 @@
     extern logical lsame_(const char *,const char *);
     static integer nbmin, iinfo;
     static logical upper;
-    extern /* Subroutine */ HYPRE_Int dsytd2_(const char *, integer *, doublereal *, 
+    extern /* Subroutine */ integer dsytd2_(const char *, integer *, doublereal *, 
 	    integer *, doublereal *, doublereal *, doublereal *, integer *), dsyr2k_(const char *,const char *, integer *, integer *, doublereal 
 	    *, doublereal *, integer *, doublereal *, integer *, doublereal *,
 	     doublereal *, integer *);
     static integer nb, kk, nx;
-    extern /* Subroutine */ HYPRE_Int dlatrd_(const char *, integer *, integer *, 
+    extern /* Subroutine */ integer dlatrd_(const char *, integer *, integer *, 
 	    doublereal *, integer *, doublereal *, doublereal *, doublereal *,
 	     integer *), xerbla_(const char *, integer *);
     extern integer ilaenv_(integer *,const char *,const char *, integer *, integer *, 
@@ -339,4 +342,6 @@
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif

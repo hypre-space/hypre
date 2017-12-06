@@ -17,8 +17,8 @@ include config/Makefile.config
 
 # These are the directories for internal blas, lapack and general utilities
 HYPRE_BASIC_DIRS =\
- ${HYPRE_BLAS_SRC_DIR}\
- ${HYPRE_LAPACK_SRC_DIR}\
+ blas\
+ lapack\
  utilities
 
 #These are the directories for multivector

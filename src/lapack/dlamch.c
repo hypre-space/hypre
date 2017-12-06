@@ -1,7 +1,9 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include <stdio.h>
-#include "hypre_lapack.h"
 #include "f2c.h"
+#include "hypre_lapack.h"
 
 doublereal dlamch_(const char *cmach)
 {
@@ -14,7 +16,7 @@ doublereal dlamch_(const char *cmach)
     Purpose   
     =======   
 
-    DLAMCH determines HYPRE_Real precision machine parameters.   
+    DLAMCH determines doublereal precision machine parameters.   
 
     Arguments   
     =========   
@@ -54,7 +56,7 @@ doublereal dlamch_(const char *cmach)
     integer i__1;
     doublereal ret_val;
     /* Builtin functions */
-    HYPRE_Real pow_di(doublereal *, integer *);
+    doublereal pow_di(doublereal *, integer *);
     /* Local variables */
     static doublereal base;
     static integer beta;
@@ -64,7 +66,7 @@ doublereal dlamch_(const char *cmach)
     static doublereal rmin, rmax, t, rmach;
     extern logical lsame_(const char *,const char *);
     static doublereal small, sfmin;
-    extern /* Subroutine */ HYPRE_Int dlamc2_(integer *, integer *, logical *, 
+    extern /* Subroutine */ integer dlamc2_(integer *, integer *, logical *, 
 	    doublereal *, integer *, doublereal *, integer *, doublereal *);
     static integer it;
     static doublereal rnd, eps;
@@ -129,9 +131,7 @@ nding
 
 } /* dlamch_ */
 
-#include "f2c.h"
-
-/* Subroutine */ HYPRE_Int dlamc1_(integer *beta, integer *t, logical *rnd, logical 
+/* Subroutine */ integer dlamc1_(integer *beta, integer *t, logical *rnd, logical 
 	*ieee1)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -252,7 +252,7 @@ L20:
 /* +       END WHILE   
 
           Now compute the base.  a and c  are neighbouring floating po
-HYPRE_Int   
+integer   
           numbers  in the  interval  ( beta**t, beta**( t + 1 ) )  and
  so   
           their difference is beta. Adding 0.25 to c is to ensure that
@@ -342,9 +342,7 @@ L30:
 
 } /* dlamc1_ */
 
-#include "f2c.h"
-
-/* Subroutine */ HYPRE_Int dlamc2_(integer *beta, integer *t, logical *rnd, 
+/* Subroutine */ integer dlamc2_(integer *beta, integer *t, logical *rnd, 
 	doublereal *eps, integer *emin, doublereal *rmin, integer *emax, 
 	doublereal *rmax)
 {
@@ -420,7 +418,7 @@ L30:
     integer i__1;
     doublereal d__1, d__2, d__3, d__4, d__5;
     /* Builtin functions */
-    HYPRE_Real pow_di(doublereal *, integer *);
+    doublereal pow_di(doublereal *, integer *);
     /* Local variables */
     static logical ieee;
     static doublereal half;
@@ -432,11 +430,11 @@ L30:
     static doublereal small;
     static integer gpmin;
     static doublereal third, lrmin, lrmax, sixth;
-    extern /* Subroutine */ HYPRE_Int dlamc1_(integer *, integer *, logical *, 
+    extern /* Subroutine */ integer dlamc1_(integer *, integer *, logical *, 
 	    logical *);
     extern doublereal dlamc3_(doublereal *, doublereal *);
     static logical lieee1;
-    extern /* Subroutine */ HYPRE_Int dlamc4_(integer *, doublereal *, integer *), 
+    extern /* Subroutine */ integer dlamc4_(integer *, doublereal *, integer *), 
 	    dlamc5_(integer *, integer *, integer *, logical *, integer *, 
 	    doublereal *);
     static integer lt, ngnmin, ngpmin;
@@ -594,7 +592,7 @@ w;
 	if (iwarn) {
 	    first = TRUE_;
 	    hypre_printf("\n\n WARNING. The value EMIN may be incorrect:- ");
-	    hypre_printf("EMIN = %8i\n",(HYPRE_Int)lemin);
+	    hypre_printf("EMIN = %8i\n",(integer)lemin);
 	    hypre_printf("If, after inspection, the value EMIN looks acceptable");
             hypre_printf("please comment out \n the IF block as marked within the"); 
             hypre_printf("code of routine DLAMC2, \n otherwise supply EMIN"); 
@@ -647,8 +645,6 @@ ing
 
 } /* dlamc2_ */
 
-#include "f2c.h"
-
 doublereal dlamc3_(doublereal *a, doublereal *b)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -688,9 +684,7 @@ doublereal dlamc3_(doublereal *a, doublereal *b)
 
 } /* dlamc3_ */
 
-#include "f2c.h"
-
-/* Subroutine */ HYPRE_Int dlamc4_(integer *emin, doublereal *start, integer *base)
+/* Subroutine */ integer dlamc4_(integer *emin, doublereal *start, integer *base)
 {
 /*  -- LAPACK auxiliary routine (version 2.0) --   
        Univ. of Tennessee, Univ. of California Berkeley, NAG Ltd.,   
@@ -779,9 +773,7 @@ L10:
 
 } /* dlamc4_ */
 
-#include "f2c.h"
-
-/* Subroutine */ HYPRE_Int dlamc5_(integer *beta, integer *p, integer *emin, 
+/* Subroutine */ integer dlamc5_(integer *beta, integer *p, integer *emin, 
 	logical *ieee, integer *emax, doublereal *rmax)
 {
 /*  -- LAPACK auxiliary routine (version 3.0) --   
@@ -954,3 +946,6 @@ it
 
 } /* dlamc5_ */
 
+#ifdef __cplusplus
+}
+#endif
