@@ -15,6 +15,10 @@ sphinx-build -b html . html
 sphinx-build -b latex . latex
 
 
+Note:
+  - Added '_static/custom.css' file for customizations (document this somewhere)
+
+
 Issues and things left to do:
 
      - MathJax is slow to render.  Are we okay with that?  Is there a better alternative?
