@@ -138,9 +138,11 @@ void Euclid_dhSetup(Euclid_dh ctx)
   bool bj = false;
 
   /* clear error flag if previously setup - DOK */
-  if(isSetup)
-     ierr = HYPRE_GetError(); HYPRE_ClearAllErrors();
-
+  if(isSetup) 
+  {
+     ierr = HYPRE_GetError(); 
+     HYPRE_ClearAllErrors();
+  }
   /*----------------------------------------------------
    * If Euclid was previously setup, print summary of
    * what happened during previous setup/solve
