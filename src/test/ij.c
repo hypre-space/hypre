@@ -132,8 +132,8 @@ main( hypre_int argc,
    void               *object;
 
    HYPRE_IJMatrix      ij_A = NULL; 
-   HYPRE_IJVector      ij_b;
-   HYPRE_IJVector      ij_x;
+   HYPRE_IJVector      ij_b = NULL;
+   HYPRE_IJVector      ij_x = NULL;
    HYPRE_IJVector      *ij_rbm;
 
    HYPRE_ParCSRMatrix  parcsr_A = NULL;
@@ -232,6 +232,7 @@ main( hypre_int argc,
    HYPRE_Real   tol = 1.e-8, pc_tol = 0.;
    HYPRE_Real   atol = 0.0;
    HYPRE_Real   max_row_sum = 1.;
+   HYPRE_Int    converge_type = 0;
 
    HYPRE_Int cheby_order = 2;
    HYPRE_Int cheby_eig_est = 10;
@@ -612,6 +613,12 @@ main( hypre_int argc,
       {
          arg_index++;
          build_x0_type       = 0;  
+         build_x0_arg_index  = arg_index;
+      }
+      else if ( strcmp(argv[arg_index], "-x0rand") == 0 )
+      {
+         arg_index++;
+         build_x0_type       = 1;
          build_x0_arg_index  = arg_index;
       }
       else if ( strcmp(argv[arg_index], "-CFfromfile") == 0 )
@@ -1083,6 +1090,11 @@ main( hypre_int argc,
       {
          arg_index++;
          tol  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-conv_type") == 0 )
+      {
+         arg_index++;
+         converge_type = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-atol") == 0 )
       {
@@ -2537,6 +2549,7 @@ main( hypre_int argc,
    /* initial guess */
    if ( build_x0_type == 0 )
    {
+      /* from file */
       if (myid == 0)
       {
          hypre_printf("  Initial guess vector read from file %s\n", argv[build_x0_arg_index]);
@@ -2553,6 +2566,38 @@ main( hypre_int argc,
          hypre_printf("ERROR: Problem reading in x0!\n");
          exit(1);
       }
+      ierr = HYPRE_IJVectorGetObject( ij_x, &object );
+      x = (HYPRE_ParVector) object;
+   }
+   else if (build_x0_type == 1)
+   {
+      /* random */
+      if (myid == 0)
+      {
+         hypre_printf("  Initial guess is random \n");
+      }
+      
+      if (ij_x)
+      {
+         HYPRE_IJVectorDestroy(ij_x);
+      }
+
+      /* Initial guess */
+      HYPRE_IJVectorCreate(hypre_MPI_COMM_WORLD, first_local_col, last_local_col, &ij_x);
+      HYPRE_IJVectorSetObjectType(ij_x, HYPRE_PARCSR);
+      HYPRE_IJVectorInitialize(ij_x);
+
+      /* For backward Euler the previous backward Euler iterate (assumed
+         random in 0 - 1 here) is usually used as the initial guess */
+      values = hypre_CTAlloc(HYPRE_Real, local_num_cols);
+      hypre_SeedRand(myid);
+      for (i = 0; i < local_num_cols; i++)
+      {
+         values[i] = hypre_Rand();
+      }
+      HYPRE_IJVectorSetValues(ij_x, local_num_cols, NULL, values);
+      hypre_TFree(values);
+
       ierr = HYPRE_IJVectorGetObject( ij_x, &object );
       x = (HYPRE_ParVector) object;
    }
@@ -2592,7 +2637,7 @@ main( hypre_int argc,
       }
       else if (parcsr_A)
       {
-         hypre_ParCSRMatrixPrintIJ(parcsr_A, "IJ.out.A");
+         hypre_ParCSRMatrixPrintIJ(parcsr_A, 0, 0, "IJ.out.A");
       }
       if (ij_b)
       {
@@ -2717,6 +2762,7 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetNumSamples(amg_solver, gsmg_samples);
       HYPRE_BoomerAMGSetCoarsenType(amg_solver, coarsen_type);
       HYPRE_BoomerAMGSetMeasureType(amg_solver, measure_type);
+      HYPRE_BoomerAMGSetConvergeType(amg_solver, converge_type);
       HYPRE_BoomerAMGSetTol(amg_solver, tol);
       HYPRE_BoomerAMGSetStrongThreshold(amg_solver, strong_threshold);
       HYPRE_BoomerAMGSetSeqThreshold(amg_solver, seq_threshold);

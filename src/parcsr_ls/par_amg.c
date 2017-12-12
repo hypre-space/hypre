@@ -72,6 +72,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int      max_iter;
    HYPRE_Int      cycle_type;    
  
+   HYPRE_Int    converge_type;
    HYPRE_Real   tol;
 
    HYPRE_Int      num_sweeps;  
@@ -191,6 +192,7 @@ hypre_BoomerAMGCreate()
    min_iter  = 0;
    max_iter  = 20;
    cycle_type = 1;
+   converge_type = 0;
    tol = 1.0e-7;
 
    num_sweeps = 1;
@@ -295,6 +297,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
    hypre_BoomerAMGSetCycleType(amg_data, cycle_type);
+   hypre_BoomerAMGSetConvergeType(amg_data, converge_type);
    hypre_BoomerAMGSetTol(amg_data, tol); 
    hypre_BoomerAMGSetNumSweeps(amg_data, num_sweeps);
    hypre_BoomerAMGSetCycleRelaxType(amg_data, relax_down, 1);
@@ -1554,8 +1557,53 @@ hypre_BoomerAMGGetCycleType( void  *data,
 }
 
 HYPRE_Int
+hypre_BoomerAMGSetConvergeType( void     *data,
+                                HYPRE_Int type  )
+{
+   /* type 0: default. relative over ||b||
+    *      1:          relative over ||r0||
+    */      
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   /*
+   if ()
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   */
+
+   hypre_ParAMGDataConvergeType(amg_data) = type;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetConvergeType( void      *data,
+                                HYPRE_Int *type  )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *type = hypre_ParAMGDataConvergeType(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_BoomerAMGSetTol( void     *data,
-                    HYPRE_Real    tol  )
+                       HYPRE_Real    tol  )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 

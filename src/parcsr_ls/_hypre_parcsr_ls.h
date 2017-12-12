@@ -109,6 +109,7 @@ typedef struct
    HYPRE_Real     outer_wt;
    HYPRE_Real  *relax_weight; 
    HYPRE_Real  *omega;
+   HYPRE_Int    converge_type;
    HYPRE_Real   tol;
 
    /* problem data */
@@ -308,6 +309,7 @@ typedef struct
 #define hypre_ParAMGDataMinIter(amg_data) ((amg_data)->min_iter)
 #define hypre_ParAMGDataMaxIter(amg_data) ((amg_data)->max_iter)
 #define hypre_ParAMGDataCycleType(amg_data) ((amg_data)->cycle_type)
+#define hypre_ParAMGDataConvergeType(amg_data) ((amg_data)->converge_type)
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
 #define hypre_ParAMGDataNumGridSweeps(amg_data) ((amg_data)->num_grid_sweeps)
 #define hypre_ParAMGDataUserCoarseRelaxType(amg_data) ((amg_data)->user_coarse_relax_type)
@@ -773,6 +775,8 @@ HYPRE_Int HYPRE_BoomerAMGSetSetupType ( HYPRE_Solver solver , HYPRE_Int setup_ty
 HYPRE_Int HYPRE_BoomerAMGSetOldDefault ( HYPRE_Solver solver );
 HYPRE_Int HYPRE_BoomerAMGSetCycleType ( HYPRE_Solver solver , HYPRE_Int cycle_type );
 HYPRE_Int HYPRE_BoomerAMGGetCycleType ( HYPRE_Solver solver , HYPRE_Int *cycle_type );
+HYPRE_Int HYPRE_BoomerAMGSetConvergeType ( HYPRE_Solver solver , HYPRE_Int type );
+HYPRE_Int HYPRE_BoomerAMGGetConvergeType ( HYPRE_Solver solver , HYPRE_Int *type );
 HYPRE_Int HYPRE_BoomerAMGSetTol ( HYPRE_Solver solver , HYPRE_Real tol );
 HYPRE_Int HYPRE_BoomerAMGGetTol ( HYPRE_Solver solver , HYPRE_Real *tol );
 HYPRE_Int HYPRE_BoomerAMGSetNumGridSweeps ( HYPRE_Solver solver , HYPRE_Int *num_grid_sweeps );
@@ -1190,6 +1194,8 @@ HYPRE_Int hypre_BoomerAMGSetSetupType ( void *data , HYPRE_Int setup_type );
 HYPRE_Int hypre_BoomerAMGGetSetupType ( void *data , HYPRE_Int *setup_type );
 HYPRE_Int hypre_BoomerAMGSetCycleType ( void *data , HYPRE_Int cycle_type );
 HYPRE_Int hypre_BoomerAMGGetCycleType ( void *data , HYPRE_Int *cycle_type );
+HYPRE_Int hypre_BoomerAMGSetConvergeType ( void *data , HYPRE_Int type );
+HYPRE_Int hypre_BoomerAMGGetConvergeType ( void *data , HYPRE_Int *type );
 HYPRE_Int hypre_BoomerAMGSetTol ( void *data , HYPRE_Real tol );
 HYPRE_Int hypre_BoomerAMGGetTol ( void *data , HYPRE_Real *tol );
 HYPRE_Int hypre_BoomerAMGSetNumSweeps ( void *data , HYPRE_Int num_sweeps );

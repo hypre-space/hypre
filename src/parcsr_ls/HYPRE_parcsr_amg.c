@@ -457,6 +457,24 @@ HYPRE_BoomerAMGGetCycleType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetConvergeType, HYPRE_BoomerAMGGetConvergeType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetConvergeType( HYPRE_Solver solver,
+                                HYPRE_Int    type    )
+{
+   return( hypre_BoomerAMGSetConvergeType( (void *) solver, type ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetConvergeType( HYPRE_Solver solver,
+                                HYPRE_Int   *type    )
+{
+   return( hypre_BoomerAMGGetConvergeType( (void *) solver, type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetTol, HYPRE_BoomerAMGGetTol
  *--------------------------------------------------------------------------*/
 
