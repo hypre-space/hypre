@@ -131,6 +131,8 @@ FILES =\
  ams.c\
  ads.c\
  ame.c\
+ par_restr.c\
+ par_lr_restr.c\
  superlu.c
 
 OBJS = ${FILES:.c=.o}

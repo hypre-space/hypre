@@ -179,6 +179,14 @@ HYPRE_Int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver  solver,
                                     HYPRE_Int    *dof_func);
 
 /**
+ * (Optional) Set the type convergence checking
+ * 0: (default) norm(r)/norm(b), or norm(r) when b == 0
+ * 1: nomr(r) / norm(r_0)
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetConvergeType(HYPRE_Solver solver,
+                                         HYPRE_Int    type);
+
+/**
  * (Optional) Set the convergence tolerance, if BoomerAMG is used
  * as a solver. If it is used as a preconditioner, it should be set to 0.
  * The default is 1.e-7.
@@ -1053,6 +1061,8 @@ HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
 
 /*
  * (Optional)
+ *  0: transpose of the interpolation
+ *  1: AIR - approximate ideal restriction
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
                                         HYPRE_Int    restr_par);
@@ -3658,6 +3668,7 @@ hypre_ParCSRMultiVectorPrint(void *x_, const char *fileName);
  **/
 void *
 hypre_ParCSRMultiVectorRead(MPI_Comm comm, void *ii_, const char *fileName);
+
 
 /*@}*/
 

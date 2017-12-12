@@ -73,11 +73,12 @@ typedef struct
    HYPRE_Int      relax_order;
    HYPRE_Int      user_coarse_relax_type;   
    HYPRE_Int      user_relax_type;   
-   HYPRE_Int      user_num_sweeps;   
+   HYPRE_Int      user_num_sweeps;
    HYPRE_Real     user_relax_weight;   
    HYPRE_Real     outer_wt;
    HYPRE_Real  *relax_weight; 
    HYPRE_Real  *omega;
+   HYPRE_Int    converge_type;
    HYPRE_Real   tol;
 
    /* problem data */
@@ -286,6 +287,7 @@ typedef struct
 #define hypre_ParAMGDataMinIter(amg_data) ((amg_data)->min_iter)
 #define hypre_ParAMGDataMaxIter(amg_data) ((amg_data)->max_iter)
 #define hypre_ParAMGDataCycleType(amg_data) ((amg_data)->cycle_type)
+#define hypre_ParAMGDataConvergeType(amg_data) ((amg_data)->converge_type)
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
 #define hypre_ParAMGDataNumGridSweeps(amg_data) ((amg_data)->num_grid_sweeps)
 #define hypre_ParAMGDataUserCoarseRelaxType(amg_data) ((amg_data)->user_coarse_relax_type)
