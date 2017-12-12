@@ -132,17 +132,11 @@ void Euclid_dhDestroy(Euclid_dh ctx)
 void Euclid_dhSetup(Euclid_dh ctx)
 {
   START_FUNC_DH
-  HYPRE_Int m, n, beg_row, ierr;
+  HYPRE_Int m, n, beg_row;
   HYPRE_Real t1;
   bool isSetup = ctx->isSetup;
   bool bj = false;
 
-  /* clear error flag if previously setup - DOK */
-  if(isSetup) 
-  {
-     ierr = HYPRE_GetError(); 
-     HYPRE_ClearAllErrors();
-  }
   /*----------------------------------------------------
    * If Euclid was previously setup, print summary of
    * what happened during previous setup/solve
@@ -300,9 +294,6 @@ END_OF_FUNCTION: ;
   ctx->setupCount += 1;  
 
   ctx->isSetup = true;
-
-  /* setup done. Reset error flag - DOK*/
-  hypre_error_flag |= ierr;
 
   END_FUNC_DH
 }
