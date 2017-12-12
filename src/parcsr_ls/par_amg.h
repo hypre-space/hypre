@@ -234,11 +234,10 @@ typedef struct
 	HYPRE_Int num_C_point_marker;
 	HYPRE_Int   **C_point_marker_array;
 
-#ifdef HYPRE_USE_DSLU
+#ifdef HAVE_DSUPERLU
  /* Parameters and data for SuperLU_Dist */
-   HYPRE_Int slu_level;
-   HYPRE_Int slu_threshold;
-   HYPRE_SLUData *slu_data;
+   HYPRE_Int dslu_threshold;
+   HYPRE_Solver dslu_solver;
 #endif
 
 } hypre_ParAMGData;
@@ -456,11 +455,10 @@ typedef struct
 #define hypre_ParAMGDataCPointKeepLevel(amg_data) ((amg_data)-> C_point_keep_level)
 #define hypre_ParAMGDataNumCPointKeep(amg_data) ((amg_data)-> num_C_point_marker)
 
-#ifdef HYPRE_USE_DSLU
+#ifdef HAVE_DSUPERLU
  /* Parameters and data for SuperLU_Dist */
-#define hypre_ParAMGDataSLULevel(amg_data) ((amg_data)->slu_level)
-#define hypre_ParAMGDataSLUThreshold(amg_data) ((amg_data)->slu_threshold)
-#define hypre_ParAMGDataSLUData(amg_data) ((amg_data)->slu_threshold)
+#define hypre_ParAMGDataDSLUThreshold(amg_data) ((amg_data)->dslu_threshold)
+#define hypre_ParAMGDataDSLUSolver(amg_data) ((amg_data)->dslu_solver)
 #endif
 
 

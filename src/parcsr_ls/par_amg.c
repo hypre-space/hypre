@@ -23,7 +23,10 @@
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 #include <assert.h>
-
+#ifdef HAVE_DSUPERLU
+#include <math.h>
+#include "superlu_ddefs.h"
+#endif
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCreate
  *--------------------------------------------------------------------------*/
@@ -417,10 +420,9 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataCPointKeepLevel(amg_data) = 0;
    hypre_ParAMGDataNumCPointKeep(amg_data)   = 0;
 
-#ifdef HYPRE_USE_DSLU
-   hypre_ParAMGDataSLULevel(amg_data) = 25;
-   hypre_ParAMGDataSLUThreshold(amg_data) = 0;
-   hypre_ParAMGDataSLUData(amg_data) = NULL;
+#ifdef HAVE_DSUPERLU
+   hypre_ParAMGDataDSLUThreshold(amg_data) = 0;
+   hypre_ParAMGDataDSLUSolver(amg_data) = NULL;
 #endif
    
    HYPRE_ANNOTATION_END("BoomerAMG.create");
@@ -446,8 +448,9 @@ hypre_BoomerAMGDestroy( void *data )
 
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.destroy");
 
-#ifdef HYPRE_USE_DSLU
-   hypre_ParAMGDataSLUDestroy(amg_data);
+#ifdef HAVE_DSUPERLU
+   if (hypre_ParAMGDataDSLUThreshold(amg_data) > 0)
+      hypre_SLUDistDestroy(hypre_ParAMGDataDSLUSolver(amg_data));
 #endif
    
    if (hypre_ParAMGDataMaxEigEst(amg_data))
@@ -3962,6 +3965,18 @@ hypre_BoomerAMGSetKeepTranspose( void   *data,
   return hypre_error_flag;
 }
 
+#ifdef HAVE_DSUPERLU
+HYPRE_Int
+hypre_BoomerAMGSetDSLUThreshold( void   *data,
+                            HYPRE_Int   dslu_threshold)
+{
+  hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
+
+  hypre_ParAMGDataDSLUThreshold(amg_data) = dslu_threshold;
+  return hypre_error_flag;
+}
+#endif
+
 HYPRE_Int
 hypre_BoomerAMGSetCpointsToKeep(void      *data,
 				HYPRE_Int  cpt_coarse_level,
@@ -4033,3 +4048,4 @@ hypre_BoomerAMGSetCpointsToKeep(void      *data,
 
 	return hypre_error_flag;
 }
+

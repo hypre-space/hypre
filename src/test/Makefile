@@ -23,6 +23,8 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
+ $(SUPERLU_INCLUDE)\
+ $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}\
  ${CDEFS}
 
@@ -31,6 +33,8 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
  -I${HYPRE_BUILD_DIR}/include\
+ $(SUPERLU_INCLUDE)\
+ $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}\
  ${CXXDEFS}
 
@@ -48,6 +52,11 @@ LIBFLAGS = ${LDFLAGS} ${LIBS}
 LFLAGS =\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE\
+ -L/home/yang11/codes/superlu/SuperLU_DIST_5.2.1/lib\
+ -lsuperlu_dist\
+ -L/home/yang11/codes/blas/BLAS-3.7.1\
+ -lblas\
+ -lgfortran\
  ${MPILIBFLAGS}\
  ${LAPACKLIBFLAGS}\
  ${BLASLIBFLAGS}\

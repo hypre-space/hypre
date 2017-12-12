@@ -1704,6 +1704,19 @@ HYPRE_BoomerAMGSetKeepTranspose (HYPRE_Solver solver,
    return (hypre_BoomerAMGSetKeepTranspose ( (void *) solver, keepTranspose ) );
 }
 
+#ifdef HAVE_DSUPERLU
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetDSLUThreshold
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
+                                HYPRE_Int    slu_threshold)
+{
+   return (hypre_BoomerAMGSetDSLUThreshold ( (void *) solver, slu_threshold ) );
+}
+#endif
+
 HYPRE_Int
 HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
 				HYPRE_Int  cpt_coarse_level,

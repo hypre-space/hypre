@@ -32,6 +32,7 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/../matrix_matrix\
  -I$(srcdir)/../IJ_mv\
  -I$(srcdir)/../parcsr_block_mv\
+ $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}
 
 HEADERS =\
