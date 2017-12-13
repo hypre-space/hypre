@@ -23,8 +23,6 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
- $(METIS_INCLUDE)\
- $(PARMETIS_INCLUDE)\
  $(SUPERLU_INCLUDE)\
  $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}\
@@ -35,8 +33,6 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
  -I${HYPRE_BUILD_DIR}/include\
- $(METIS_INCLUDE)\
- $(PARMETIS_INCLUDE)\
  $(SUPERLU_INCLUDE)\
  $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}\
@@ -58,8 +54,6 @@ LFLAGS =\
  -lHYPRE\
  ${DSUPERLU_LIBS}\
  ${SUPERLU_LIBS}\
- ${PARMETIS_LIBS}\
- ${METIS_LIBS}\
  ${MPILIBFLAGS}\
  ${LAPACKLIBFLAGS}\
  ${BLASLIBFLAGS}\

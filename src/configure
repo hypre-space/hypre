@@ -600,10 +600,6 @@ DSUPERLU_LIBS
 DSUPERLU_INCLUDE
 SUPERLU_LIBS
 SUPERLU_INCLUDE
-PARMETIS_LIBS
-PARMETIS_INCLUDE
-METIS_LIBS
-METIS_INCLUDE
 CALIPER_LIBS
 CALIPER_INCLUDE
 HYPRE_NVCC_MAKEFILE
@@ -765,12 +761,6 @@ with_fei_inc_dir
 with_print_errors
 with_timing
 with_openmp
-with_metis
-with_metis_include
-with_metis_lib
-with_parmetis
-with_parmetis_include
-with_parmetis_lib
 with_superlu
 with_superlu_include
 with_superlu_lib
@@ -1524,19 +1514,6 @@ Optional Packages:
   --with-timing           Use HYPRE timing routines.
   --with-openmp           Use OpenMP. This may affect which compiler is
                           chosen.
-  --with-metis            Use external SuperLU library.
-  --with-metis-include=DIR
-                          Directory where SuperLU is installed.
-  --with-metis-lib=LIBS   LIBS is space-separated linkable list (enclosed in
-                          quotes) of libraries needed for SuperLU. OK to use
-                          -L and -l flags in the list
-  --with-parmetis         Use external SuperLU library.
-  --with-parmetis-include=DIR
-                          Directory where SuperLU is installed.
-  --with-parmetis-lib=LIBS
-                          LIBS is space-separated linkable list (enclosed in
-                          quotes) of libraries needed for SuperLU. OK to use
-                          -L and -l flags in the list
   --with-superlu          Use external SuperLU library.
   --with-superlu-include=DIR
                           Directory where SuperLU is installed.
@@ -2426,8 +2403,6 @@ hypre_using_cxx=yes
 
 hypre_using_mpi=yes
 
-hypre_using_metis=no
-hypre_using_parmetis=no
 hypre_using_superlu=no
 hypre_using_dsuperlu=no
 
@@ -3276,82 +3251,6 @@ if test "${with_openmp+set}" = set; then :
  esac
 else
   hypre_using_openmp=no
-
-fi
-
-
-
-
-# Check whether --with-metis was given.
-if test "${with_metis+set}" = set; then :
-  withval=$with_metis; case "${withval}" in
-    no) hypre_using_metis=no ;;
-    *)  hypre_using_metis=yes ;;
- esac
-
-fi
-
-
-if test "x$with_metis" = "xyes"; then :
-
-$as_echo "#define HAVE_METIS 1" >>confdefs.h
-
-fi
-
-
-# Check whether --with-metis-include was given.
-if test "${with_metis_include+set}" = set; then :
-  withval=$with_metis_include; for metis_inc_dir in $withval; do
-    METIS_INCLUDE="-I$metis_inc_dir $METIS_INCLUDE"
- done
-
-fi
-
-
-
-# Check whether --with-metis-lib was given.
-if test "${with_metis_lib+set}" = set; then :
-  withval=$with_metis_lib; for metis_lib in $withval; do
-    METIS_LIBS="$METIS_LIBS $metis_lib"
- done
-
-fi
-
-
-
-
-# Check whether --with-parmetis was given.
-if test "${with_parmetis+set}" = set; then :
-  withval=$with_parmetis; case "${withval}" in
-    no) hypre_using_parmetis=no ;;
-    *)  hypre_using_parmetis=yes ;;
- esac
-
-fi
-
-
-if test "x$with_parmetis" = "xyes"; then :
-
-$as_echo "#define HAVE_PARMETIS 1" >>confdefs.h
-
-fi
-
-
-# Check whether --with-parmetis-include was given.
-if test "${with_parmetis_include+set}" = set; then :
-  withval=$with_parmetis_include; for parmetis_inc_dir in $withval; do
-    PARMETIS_INCLUDE="-I$parmetis_inc_dir $PARMETIS_INCLUDE"
- done
-
-fi
-
-
-
-# Check whether --with-parmetis-lib was given.
-if test "${with_parmetis_lib+set}" = set; then :
-  withval=$with_parmetis_lib; for parmetis_lib in $withval; do
-    PARMETIS_LIBS="$PARMETIS_LIBS $parmetis_lib"
- done
 
 fi
 
@@ -8250,12 +8149,6 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
-
-
-
-
-
-
 
 
 
