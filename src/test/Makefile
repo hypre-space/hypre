@@ -54,9 +54,10 @@ LFLAGS =\
  -lHYPRE\
  -L/home/yang11/codes/superlu/SuperLU_DIST_5.2.1/lib\
  -lsuperlu_dist\
- -L/home/yang11/codes/blas/BLAS-3.7.1\
- -lblas\
- -lgfortran\
+ -L/home/yang11/codes/parmetis/parmetis-4.0.3/build/Linux-x86_64/libparmetis\
+ -lparmetis\
+ -L/home/yang11/codes/parmetis/parmetis-4.0.3/build/Linux-x86_64/libmetis\
+ -lmetis\
  ${MPILIBFLAGS}\
  ${LAPACKLIBFLAGS}\
  ${BLASLIBFLAGS}\
