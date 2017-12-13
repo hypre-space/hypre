@@ -127,6 +127,18 @@ CALIPER_INCLUDE = @CALIPER_INCLUDE@
 CALIPER_LIBS    = @CALIPER_LIBS@
 
 ##################################################################
+##  Metis options
+##################################################################
+METIS_INCLUDE = @METIS_INCLUDE@
+METIS_LIBS    = @METIS_LIBS@
+
+##################################################################
+##  ParMetis options
+##################################################################
+PARMETIS_INCLUDE = @PARMETIS_INCLUDE@
+PARMETIS_LIBS    = @PARMETIS_LIBS@
+
+##################################################################
 ##  SuperLU options
 ##################################################################
 SUPERLU_INCLUDE = @SUPERLU_INCLUDE@

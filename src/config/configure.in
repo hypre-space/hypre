@@ -142,6 +142,8 @@ hypre_using_cxx=yes
 
 hypre_using_mpi=yes
 
+hypre_using_metis=no
+hypre_using_parmetis=no
 hypre_using_superlu=no
 hypre_using_dsuperlu=no
 
@@ -790,6 +792,70 @@ AS_HELP_STRING([--with-openmp],
     no)  hypre_using_openmp=no ;;
  esac],
 [hypre_using_openmp=no]
+)
+
+dnl ***** Metis
+
+AC_ARG_WITH(metis,
+AS_HELP_STRING([--with-metis],
+               [Use external SuperLU library.]),
+[case "${withval}" in
+    no) hypre_using_metis=no ;;
+    *)  hypre_using_metis=yes ;;
+ esac]
+)
+
+AS_IF([test "x$with_metis" = "xyes"],
+      [AC_DEFINE(HAVE_METIS, 1, [Have external SuperLU library.])],
+      [])
+
+AC_ARG_WITH(metis-include,
+AS_HELP_STRING([--with-metis-include=DIR],
+               [Directory where SuperLU is installed.]),
+[for metis_inc_dir in $withval; do
+    METIS_INCLUDE="-I$metis_inc_dir $METIS_INCLUDE"
+ done]
+)
+
+AC_ARG_WITH(metis-lib,
+AS_HELP_STRING([--with-metis-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for SuperLU. OK to use -L and -l flags in the list]),
+[for metis_lib in $withval; do
+    METIS_LIBS="$METIS_LIBS $metis_lib"
+ done]
+)
+
+dnl ***** ParMetis
+
+AC_ARG_WITH(parmetis,
+AS_HELP_STRING([--with-parmetis],
+               [Use external SuperLU library.]),
+[case "${withval}" in
+    no) hypre_using_parmetis=no ;;
+    *)  hypre_using_parmetis=yes ;;
+ esac]
+)
+
+AS_IF([test "x$with_parmetis" = "xyes"],
+      [AC_DEFINE(HAVE_PARMETIS, 1, [Have external SuperLU library.])],
+      [])
+
+AC_ARG_WITH(parmetis-include,
+AS_HELP_STRING([--with-parmetis-include=DIR],
+               [Directory where SuperLU is installed.]),
+[for parmetis_inc_dir in $withval; do
+    PARMETIS_INCLUDE="-I$parmetis_inc_dir $PARMETIS_INCLUDE"
+ done]
+)
+
+AC_ARG_WITH(parmetis-lib,
+AS_HELP_STRING([--with-parmetis-lib=LIBS],
+               [LIBS is space-separated linkable list (enclosed in quotes) of libraries
+                needed for SuperLU. OK to use -L and -l flags in the list]),
+[for parmetis_lib in $withval; do
+    PARMETIS_LIBS="$PARMETIS_LIBS $parmetis_lib"
+ done]
 )
 
 dnl ***** SuperLU
@@ -1822,6 +1888,18 @@ dnl * Caliper instrumentation
 dnl *********************************************************************
 AC_SUBST(CALIPER_INCLUDE)
 AC_SUBST(CALIPER_LIBS)
+
+dnl *********************************************************************
+dnl * Metis instrumentation
+dnl *********************************************************************
+AC_SUBST(METIS_INCLUDE)
+AC_SUBST(METIS_LIBS)
+
+dnl *********************************************************************
+dnl * ParMetis instrumentation
+dnl *********************************************************************
+AC_SUBST(PARMETIS_INCLUDE)
+AC_SUBST(PARMETIS_LIBS)
 
 dnl *********************************************************************
 dnl * SuperLU instrumentation

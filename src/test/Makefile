@@ -23,6 +23,8 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)\
  -I$(srcdir)/..\
  -I${HYPRE_BUILD_DIR}/include\
+ $(METIS_INCLUDE)\
+ $(PARMETIS_INCLUDE)\
  $(SUPERLU_INCLUDE)\
  $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}\
@@ -33,6 +35,8 @@ CXX_COMPILE_FLAGS = \
  -I$(srcdir)/..\
  -I$(srcdir)/../FEI_mv/fei-base\
  -I${HYPRE_BUILD_DIR}/include\
+ $(METIS_INCLUDE)\
+ $(PARMETIS_INCLUDE)\
  $(SUPERLU_INCLUDE)\
  $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}\
@@ -52,12 +56,10 @@ LIBFLAGS = ${LDFLAGS} ${LIBS}
 LFLAGS =\
  -L${HYPRE_BUILD_DIR}/lib\
  -lHYPRE\
- -L/home/yang11/codes/superlu/SuperLU_DIST_5.2.1/lib\
- -lsuperlu_dist\
- -L/home/yang11/codes/parmetis/parmetis-4.0.3/build/Linux-x86_64/libparmetis\
- -lparmetis\
- -L/home/yang11/codes/parmetis/parmetis-4.0.3/build/Linux-x86_64/libmetis\
- -lmetis\
+ ${DSUPERLU_LIBS}\
+ ${SUPERLU_LIBS}\
+ ${PARMETIS_LIBS}\
+ ${METIS_LIBS}\
  ${MPILIBFLAGS}\
  ${LAPACKLIBFLAGS}\
  ${BLASLIBFLAGS}\
