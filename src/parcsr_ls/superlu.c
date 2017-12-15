@@ -26,22 +26,11 @@ hypre_DSLUData;
 
 #endif
 
-HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A)
+HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE_Int print_level)
 {
       /* Par Data Structure variables */
    HYPRE_Int global_num_rows = hypre_ParCSRMatrixGlobalNumRows(A);
    MPI_Comm           comm = hypre_ParCSRMatrixComm(A);
-   /*SuperMatrix super_A;
-   Stype_t stype = SLU_NR;
-   Dtype_t dtype = SLU_D;
-   gridinfo_t data_grid;
-   superlu_dist_options_t options;
-   ScalePermstruct_t ScalePermstruct;
-   LUstruct_t data_LU;
-   SuperLUStat_t data_stat;
-   SOLVEstruct_t data_solve;
-   Mtype_t mtype = SLU_GE;
-   HYPRE_Real anorm;*/
    hypre_CSRMatrix *A_local;
    HYPRE_Int num_rows;
    HYPRE_Int num_procs, my_id;
@@ -84,15 +73,15 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A)
       prows -= 1;
       pcols = num_procs/prows;
    }
+   hypre_printf(" prows %d pcols %d\n", prows, pcols);
 
    superlu_gridinit(comm, prows, pcols, &(dslu_data->dslu_data_grid));
 
    set_default_options_dist(&(dslu_data->dslu_options));
 
-   /*dslu_data->dslu_options.Fact = DOFACT;
-   dslu_data->dslu_options.ColPerm = MMD_AT_PLUS_A;
-   dslu_data->dslu_options.Equil = YES;
-   dslu_data->dslu_options.IterRefine = SLU_DOUBLE;
+   dslu_data->dslu_options.Fact = DOFACT;
+   if (print_level == 0 || print_level == 2) dslu_data->dslu_options.PrintStat = NO;
+   /*dslu_data->dslu_options.IterRefine = SLU_DOUBLE;
    dslu_data->dslu_options.ColPerm = MMD_AT_PLUS_A;
    dslu_data->dslu_options.DiagPivotThresh = 1.0;
    dslu_data->dslu_options.ReplaceTinyPivot = NO; */
@@ -115,23 +104,6 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A)
 
    dslu_data->dslu_options.Fact = FACTORED;
 
-   /*anorm = dplangs((char *)"I", &super_A, &data_grid);
-
-   pdgstrf(&options, global_num_rows, global_num_cols, anorm, &data_LU, &data_grid, &data_stat, info_int);
-
-   dSolveInit(&options, &super_A, &(ScalePermstruct->perm_r), &(ScalePermstruct->perm_c), 1, 
-      &data_LU, &data_grid, &data_solve); */
-
-   /*dslu_data = hypre_CTAlloc(hypre_DSLUData, 1);
-   dslu_data->A_DSLU = super_A;
-   dslu_data->DSLU_options = options;
-   dslu_data->DSLU_data_grid = data_grid;
-   dslu_data->DSLU_data_LU = data_LU;
-   dslu_data->DSLU_data_stat = data_stat;
-   dslu_data->DSLU_ScalePermstruct = ScalePermstruct;
-   dslu_data->DSLU_data_solve = data_solve;
-   dslu_data->global_num_cols = global_num_cols;*/
-
    *solver = (HYPRE_Solver) dslu_data;
    return hypre_error_flag;
 }
@@ -139,26 +111,10 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A)
 HYPRE_Int hypre_SLUDistSolve( void* solver, hypre_ParVector *b, hypre_ParVector *x)
 {
    hypre_DSLUData *dslu_data = (hypre_DSLUData *) solver;
-   /*SuperMatrix *super_A;
-   gridinfo_t data_grid;
-   superlu_dist_options_t options;
-   ScalePermstruct_t ScalePermstruct;
-   LUstruct_t data_LU;
-   SuperLUStat_t data_stat;
-   SOLVEstruct_t data_solve;*/
    HYPRE_Int info = 0;
    HYPRE_Real *B = hypre_VectorData(hypre_ParVectorLocalVector(x));
    HYPRE_Int size = hypre_VectorSize(hypre_ParVectorLocalVector(x));
-   /*super_A = DSLU_data->A_DSLU;
-   options = DSLU_data->DSLU_options;
-   data_grid = DSLU_data->DSLU_data_grid;
-   data_LU = DSLU_data->DSLU_data_LU;
-   data_stat = DSLU_data->DSLU_data_stat;
-   ScalePermstruct = DSLU_data->DSLU_ScalePermstruct;
-   data_solve = DSLU_data->DSLU_data_solve;*/
    HYPRE_Int nrhs = 1;
-
-   /*(dslu_data->dslu_options).Fact = FACTORED;*/
 
    hypre_ParVectorCopy(b,x);
 
@@ -173,21 +129,6 @@ HYPRE_Int hypre_SLUDistSolve( void* solver, hypre_ParVector *b, hypre_ParVector 
 HYPRE_Int hypre_SLUDistDestroy( void* solver)
 {
    hypre_DSLUData *dslu_data = (hypre_DSLUData *) solver;
-   /*SuperMatrix *super_A;
-   gridinfo_t data_grid;
-   superlu_dist_options_t options;
-   ScalePermstruct_t ScalePermstruct;
-   LUstruct_t data_LU;
-   SuperLUStat_t data_stat;
-   SOLVEstruct_t data_solve;
-
-   super_A = DSLU_data->A_DSLU;
-   options = DSLU_data->DSLU_options;
-   data_grid = DSLU_data->DSLU_data_grid;
-   data_LU = DSLU_data->DSLU_data_LU;
-   data_stat = DSLU_data->DSLU_data_stat;
-   ScalePermstruct = DSLU_data->DSLU_ScalePermstruct;
-   data_solve = DSLU_data->DSLU_data_solve; */
 
    PStatFree(&(dslu_data->dslu_data_stat));
    Destroy_CompRowLoc_Matrix_dist(&(dslu_data->A_dslu));

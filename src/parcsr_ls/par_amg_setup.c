@@ -2471,7 +2471,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    else if (  ((dslu_threshold >= coarse_threshold) && (coarse_size > coarse_threshold) && (level != max_levels-1)))
    {
       HYPRE_Solver dslu_solver;
-      hypre_SLUDistSetup(&dslu_solver, A_array[level]);
+      hypre_SLUDistSetup(&dslu_solver, A_array[level], amg_print_level);
       hypre_ParAMGDataDSLUSolver(amg_data) = dslu_solver;
    }
 #endif
