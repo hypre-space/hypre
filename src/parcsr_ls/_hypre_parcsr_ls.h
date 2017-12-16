@@ -44,14 +44,13 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 
 
-
 #ifndef hypre_ParAMG_DATA_HEADER
 #define hypre_ParAMG_DATA_HEADER
 
 #define CUMNUMIT
 
-#include "par_csr_block_matrix.h"
 
+#include "par_csr_block_matrix.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData
@@ -260,9 +259,16 @@ typedef struct
    HYPRE_Int rap2;
    HYPRE_Int keepTranspose;
 /* information for preserving indexes as coarse grid points */
-	HYPRE_Int C_point_keep_level;
-	HYPRE_Int num_C_point_marker;
-	HYPRE_Int   **C_point_marker_array;
+   HYPRE_Int C_point_keep_level;
+   HYPRE_Int num_C_point_marker;
+   HYPRE_Int   **C_point_marker_array;
+
+#ifdef HAVE_DSUPERLU
+ /* Parameters and data for SuperLU_Dist */
+   HYPRE_Int dslu_threshold;
+   HYPRE_Solver dslu_solver;
+#endif
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -473,10 +479,17 @@ typedef struct
 #define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
 #define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
 
-/*indeces for the dof which will keep coarsening to the coarse level */
+/*indices for the dof which will keep coarsening to the coarse level */
 #define hypre_ParAMGDataCPointKeepMarkerArray(amg_data) ((amg_data)-> C_point_marker_array)
 #define hypre_ParAMGDataCPointKeepLevel(amg_data) ((amg_data)-> C_point_keep_level)
 #define hypre_ParAMGDataNumCPointKeep(amg_data) ((amg_data)-> num_C_point_marker)
+
+/* Parameters and data for SuperLU_Dist */
+#ifdef HAVE_DSUPERLU
+#define hypre_ParAMGDataDSLUThreshold(amg_data) ((amg_data)->dslu_threshold)
+#define hypre_ParAMGDataDSLUSolver(amg_data) ((amg_data)->dslu_solver)
+#endif
+
 #endif
 
 
@@ -887,6 +900,9 @@ HYPRE_Int HYPRE_BoomerAMGSetLevelNonGalerkinTol ( HYPRE_Solver solver , HYPRE_Re
 HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol ( HYPRE_Solver solver , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
 HYPRE_Int HYPRE_BoomerAMGSetRAP2 ( HYPRE_Solver solver , HYPRE_Int rap2 );
 HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose ( HYPRE_Solver solver , HYPRE_Int keepTranspose );
+#ifdef HAVE_DSUPERLU
+HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold ( HYPRE_Solver solver , HYPRE_Int slu_threshold );
+#endif
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse,HYPRE_Int *cpt_coarse_index);
 
 /* HYPRE_parcsr_bicgstab.c */
@@ -1316,6 +1332,9 @@ HYPRE_Int hypre_BoomerAMGSetLevelNonGalerkinTol ( void *data , HYPRE_Real nongal
 HYPRE_Int hypre_BoomerAMGSetNonGalerkTol ( void *data , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
 HYPRE_Int hypre_BoomerAMGSetRAP2 ( void *data , HYPRE_Int rap2 );
 HYPRE_Int hypre_BoomerAMGSetKeepTranspose ( void *data , HYPRE_Int keepTranspose );
+#ifdef HAVE_DSUPERLU
+HYPRE_Int hypre_BoomerAMGSetDSLUThreshold ( void *data , HYPRE_Int slu_threshold );
+#endif
 HYPRE_Int hypre_BoomerAMGSetCpointsToKeep(void *data, HYPRE_Int cpt_coarse_level, HYPRE_Int  num_cpt_coarse, HYPRE_Int *cpt_coarse_index);
 
 /* par_amg_setup.c */
@@ -1614,6 +1633,13 @@ HYPRE_Int hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_mar
 
 HYPRE_Int hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
 
+#ifdef HAVE_DSUPERLU
+/* superlu.c */
+HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE_Int print_level);
+HYPRE_Int hypre_SLUDistSolve( void* solver, hypre_ParVector *b, hypre_ParVector *x);
+HYPRE_Int hypre_SLUDistDestroy( void* solver);
+#endif
+
 /* par_mgr.c */
 void *hypre_MGRCreate ( void );
 HYPRE_Int hypre_MGRDestroy ( void *mgr_vdata );
@@ -1666,6 +1692,7 @@ HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 // Accessor functions
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
+
 	
 #ifdef __cplusplus
 }

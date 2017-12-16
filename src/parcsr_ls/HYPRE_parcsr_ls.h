@@ -1154,7 +1154,14 @@ HYPRE_Int HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver  solver,
                                          float        *coordinates);
+#ifdef HAVE_DSUPERLU
+/*
+ * HYPRE_BoomerAMGSetDSLUThreshold
+ **/
 
+HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
+                                HYPRE_Int    slu_threshold);
+#endif
 /**
  * (Optional) Fix C points to be kept till a specified coarse level.
  *

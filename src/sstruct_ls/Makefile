@@ -29,6 +29,8 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../sstruct_mv\
  -I$(srcdir)/../struct_ls\
  -I$(srcdir)/../parcsr_ls\
+ $(SUPERLU_INCLUDE)\
+ $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}
 
 HEADERS =\

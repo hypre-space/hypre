@@ -30,6 +30,10 @@
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_krylov.h"
 
+#ifdef HAVE_DSUPERLU
+#include "superlu_ddefs.h"
+#endif
+
 /* begin lobpcg */
 
 #define NO_SOLVER -9198
@@ -224,6 +228,9 @@ main( hypre_int argc,
 
    HYPRE_Int    rap2=0;
    HYPRE_Int    keepTranspose = 0;
+#ifdef HAVE_DSUPERLU
+   HYPRE_Int    dslu_threshold = -1;
+#endif
    HYPRE_Real   relax_wt; 
    HYPRE_Real   add_relax_wt = 1.0; 
    HYPRE_Real   relax_wt_level; 
@@ -1374,6 +1381,13 @@ main( hypre_int argc,
          arg_index++;
          keepTranspose  = atoi(argv[arg_index++]);
       }
+#ifdef HAVE_DSUPERLU
+      else if ( strcmp(argv[arg_index], "-dslu_th") == 0 )
+      {
+         arg_index++;
+         dslu_threshold  = atoi(argv[arg_index++]);
+      }
+#endif
       else if ( strcmp(argv[arg_index], "-nongalerk_tol") == 0 )
       {
          arg_index++;
@@ -2859,6 +2873,9 @@ main( hypre_int argc,
       HYPRE_BoomerAMGSetMaxIter(amg_solver, mg_max_iter);
       HYPRE_BoomerAMGSetRAP2(amg_solver, rap2);
       HYPRE_BoomerAMGSetKeepTranspose(amg_solver, keepTranspose);
+#ifdef HAVE_DSUPERLU
+      HYPRE_BoomerAMGSetDSLUThreshold(amg_solver, dslu_threshold);
+#endif
       /*HYPRE_BoomerAMGSetNonGalerkTol(amg_solver, nongalerk_num_tol, nongalerk_tol);*/
       if (nongalerk_tol)
       {
@@ -3184,6 +3201,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
+#ifdef HAVE_DSUPERLU
+         HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
+#endif
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -3341,6 +3361,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
+#ifdef HAVE_DSUPERLU
+         HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
+#endif
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -4562,6 +4585,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
+#ifdef HAVE_DSUPERLU
+         HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
+#endif
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -4709,6 +4735,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
+#ifdef HAVE_DSUPERLU
+         HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
+#endif
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -4933,6 +4962,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
+#ifdef HAVE_DSUPERLU
+         HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
+#endif
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -5110,6 +5142,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
+#ifdef HAVE_DSUPERLU
+         HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
+#endif
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -5378,6 +5413,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
+#ifdef HAVE_DSUPERLU
+         HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
+#endif
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
@@ -5596,6 +5634,9 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetMultAddTruncFactor(pcg_precond, add_trunc_factor);
          HYPRE_BoomerAMGSetRAP2(pcg_precond, rap2);
          HYPRE_BoomerAMGSetKeepTranspose(pcg_precond, keepTranspose);
+#ifdef HAVE_DSUPERLU
+         HYPRE_BoomerAMGSetDSLUThreshold(pcg_precond, dslu_threshold);
+#endif
          if (nongalerk_tol)
          {
             HYPRE_BoomerAMGSetNonGalerkinTol(pcg_precond, nongalerk_tol[nongalerk_num_tol-1]);
