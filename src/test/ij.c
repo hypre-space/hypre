@@ -1431,9 +1431,17 @@ main( hypre_int argc,
       /* up cycle: F */
       //for (i=0; i<ns_up; i++)
       //{
-      grid_relax_points[2][0] = -1; // F 
-      grid_relax_points[2][1] = -1; // F
-      grid_relax_points[2][2] =  1; // C
+      if (ns_up == 3)
+      {
+         grid_relax_points[2][0] = -1; // F 
+         grid_relax_points[2][1] = -1; // F
+         grid_relax_points[2][2] =  1; // C
+      }
+      else if (ns_up == 2)
+      {
+         grid_relax_points[2][0] = -1; // F 
+         grid_relax_points[2][1] = -1; // F
+      }
       //}
       /* coarse: all */
       for (i=0; i<ns_coarse; i++)
