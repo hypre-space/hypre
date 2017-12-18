@@ -20,7 +20,7 @@ char *
 hypre_ParKrylovCAlloc( HYPRE_Int count,
                        HYPRE_Int elt_size )
 {
-   return( hypre_CAlloc( count, elt_size ) );
+   return( hypre_CAlloc( count,  elt_size , HYPRE_MEMORY_HOST) );
 }
 
 /*--------------------------------------------------------------------------
@@ -32,7 +32,7 @@ hypre_ParKrylovFree( char *ptr )
 {
    HYPRE_Int ierr = 0;
 
-   hypre_Free( ptr );
+   hypre_Free( ptr , HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -67,7 +67,7 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
    hypre_ParVector **new_vector;
    HYPRE_Int i;
 
-   new_vector = hypre_CTAlloc(hypre_ParVector*,n);
+   new_vector = hypre_CTAlloc(hypre_ParVector*, n, HYPRE_MEMORY_HOST);
    for (i=0; i < n; i++)
    {
       new_vector[i] = hypre_ParVectorCreate( hypre_ParVectorComm(vector),

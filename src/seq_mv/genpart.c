@@ -32,7 +32,7 @@ hypre_GeneratePartitioning(HYPRE_Int length, HYPRE_Int num_procs, HYPRE_Int **pa
    HYPRE_Int i;
 
 
-   part = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   part = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
    size = length / num_procs;
    rest = length - size*num_procs;
    part[0] = 0;
@@ -61,7 +61,7 @@ hypre_GenerateLocalPartitioning(HYPRE_Int length, HYPRE_Int num_procs, HYPRE_Int
    HYPRE_Int *part;
    HYPRE_Int size, rest;
 
-   part = hypre_CTAlloc(HYPRE_Int, 2);
+   part = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
    size = length /num_procs;
    rest = length - size*num_procs;
 

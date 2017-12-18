@@ -27,7 +27,7 @@ hypre_RedBlackGSCreate( MPI_Comm  comm )
 {
    hypre_RedBlackGSData *relax_data;
 
-   relax_data = hypre_CTAlloc(hypre_RedBlackGSData, 1);
+   relax_data = hypre_CTAlloc(hypre_RedBlackGSData,  1, HYPRE_MEMORY_HOST);
 
    (relax_data -> comm)       = comm;
    (relax_data -> time_index) = hypre_InitializeTiming("RedBlackGS");
@@ -63,7 +63,7 @@ hypre_RedBlackGSDestroy( void *relax_vdata )
       hypre_ComputePkgDestroy(relax_data -> compute_pkg);
 
       hypre_FinalizeTiming(relax_data -> time_index);
-      hypre_TFree(relax_data);
+      hypre_TFree(relax_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

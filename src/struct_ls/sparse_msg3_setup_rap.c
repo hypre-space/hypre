@@ -84,7 +84,7 @@ hypre_SparseMSG3CreateRAPOp( hypre_StructMatrix *R,
       {
          RAP_stencil_size = (RAP_stencil_size + 1) / 2;
       }
-      RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+      RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
       for (k = -1; k < 2; k++)
       {
          for (j = -1; j < 2; j++)
@@ -119,7 +119,7 @@ hypre_SparseMSG3CreateRAPOp( hypre_StructMatrix *R,
       {
          RAP_stencil_size = (RAP_stencil_size + 1) / 2;
       }
-      RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+      RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
       for (k = -1; k < 2; k++)
       {
          for (j = -1; j < 2; j++)

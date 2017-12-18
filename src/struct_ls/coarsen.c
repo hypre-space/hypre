@@ -170,7 +170,7 @@ hypre_StructCoarsen( hypre_StructGrid  *fgrid,
 
    /* coarsen my boxes and create the coarse grid ids (same as fgrid) */
    my_boxes = hypre_BoxArrayDuplicate(hypre_StructGridBoxes(fgrid));
-   cids = hypre_TAlloc(HYPRE_Int,  hypre_BoxArraySize(my_boxes));
+   cids = hypre_TAlloc(HYPRE_Int,   hypre_BoxArraySize(my_boxes), HYPRE_MEMORY_HOST);
    for (i = 0; i < hypre_BoxArraySize(my_boxes); i++)
    {
       box = hypre_BoxArrayBox(my_boxes, i);

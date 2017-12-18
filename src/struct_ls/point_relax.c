@@ -65,7 +65,7 @@ hypre_PointRelaxCreate( MPI_Comm  comm )
    hypre_Index           stride;
    hypre_Index           indices[1];
 
-   relax_data = hypre_CTAlloc(hypre_PointRelaxData, 1);
+   relax_data = hypre_CTAlloc(hypre_PointRelaxData,  1, HYPRE_MEMORY_HOST);
 
    (relax_data -> comm)       = comm;
    (relax_data -> time_index) = hypre_InitializeTiming("PointRelax");
@@ -109,7 +109,7 @@ hypre_PointRelaxDestroy( void *relax_vdata )
    {
       for (i = 0; i < (relax_data -> num_pointsets); i++)
       {
-         hypre_TFree(relax_data -> pointset_indices[i]);
+         hypre_TFree(relax_data -> pointset_indices[i], HYPRE_MEMORY_HOST);
       }
       if (relax_data -> compute_pkgs)
       {
@@ -118,18 +118,18 @@ hypre_PointRelaxDestroy( void *relax_vdata )
             hypre_ComputePkgDestroy(relax_data -> compute_pkgs[i]);
          }
       }
-      hypre_TFree(relax_data -> pointset_sizes);
-      hypre_TFree(relax_data -> pointset_ranks);
-      hypre_TFree(relax_data -> pointset_strides);
-      hypre_TFree(relax_data -> pointset_indices);
+      hypre_TFree(relax_data -> pointset_sizes, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> pointset_ranks, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> pointset_strides, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> pointset_indices, HYPRE_MEMORY_HOST);
       hypre_StructMatrixDestroy(relax_data -> A);
       hypre_StructVectorDestroy(relax_data -> b);
       hypre_StructVectorDestroy(relax_data -> x);
       hypre_StructVectorDestroy(relax_data -> t);
-      hypre_TFree(relax_data -> compute_pkgs);
+      hypre_TFree(relax_data -> compute_pkgs, HYPRE_MEMORY_HOST);
 
       hypre_FinalizeTiming(relax_data -> time_index);
-      hypre_TFree(relax_data);
+      hypre_TFree(relax_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -207,7 +207,7 @@ hypre_PointRelaxSetup( void               *relax_vdata,
     * Set up the compute packages
     *----------------------------------------------------------*/
 
-   compute_pkgs = hypre_CTAlloc(hypre_ComputePkg *, num_pointsets);
+   compute_pkgs = hypre_CTAlloc(hypre_ComputePkg *,  num_pointsets, HYPRE_MEMORY_HOST);
 
    for (p = 0; p < num_pointsets; p++)
    {
@@ -1303,20 +1303,20 @@ hypre_PointRelaxSetNumPointsets( void *relax_vdata,
    /* free up old pointset memory */
    for (i = 0; i < (relax_data -> num_pointsets); i++)
    {
-      hypre_TFree(relax_data -> pointset_indices[i]);
+      hypre_TFree(relax_data -> pointset_indices[i], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(relax_data -> pointset_sizes);
-   hypre_TFree(relax_data -> pointset_ranks);
-   hypre_TFree(relax_data -> pointset_strides);
-   hypre_TFree(relax_data -> pointset_indices);
+   hypre_TFree(relax_data -> pointset_sizes, HYPRE_MEMORY_HOST);
+   hypre_TFree(relax_data -> pointset_ranks, HYPRE_MEMORY_HOST);
+   hypre_TFree(relax_data -> pointset_strides, HYPRE_MEMORY_HOST);
+   hypre_TFree(relax_data -> pointset_indices, HYPRE_MEMORY_HOST);
 
    /* alloc new pointset memory */
    (relax_data -> num_pointsets)    = num_pointsets;
-   (relax_data -> pointset_sizes)   = hypre_TAlloc(HYPRE_Int, num_pointsets);
-   (relax_data -> pointset_ranks)   = hypre_TAlloc(HYPRE_Int, num_pointsets);
-   (relax_data -> pointset_strides) = hypre_TAlloc(hypre_Index, num_pointsets);
-   (relax_data -> pointset_indices) = hypre_TAlloc(hypre_Index *,
-                                                   num_pointsets);
+   (relax_data -> pointset_sizes)   = hypre_TAlloc(HYPRE_Int,  num_pointsets, HYPRE_MEMORY_HOST);
+   (relax_data -> pointset_ranks)   = hypre_TAlloc(HYPRE_Int,  num_pointsets, HYPRE_MEMORY_HOST);
+   (relax_data -> pointset_strides) = hypre_TAlloc(hypre_Index,  num_pointsets, HYPRE_MEMORY_HOST);
+   (relax_data -> pointset_indices) = hypre_TAlloc(hypre_Index *, 
+                                                   num_pointsets, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_pointsets; i++)
    {
       (relax_data -> pointset_sizes[i]) = 0;
@@ -1341,11 +1341,11 @@ hypre_PointRelaxSetPointset( void        *relax_vdata,
    HYPRE_Int             i;
 
    /* free up old pointset memory */
-   hypre_TFree(relax_data -> pointset_indices[pointset]);
+   hypre_TFree(relax_data -> pointset_indices[pointset], HYPRE_MEMORY_HOST);
 
    /* alloc new pointset memory */
    (relax_data -> pointset_indices[pointset]) =
-      hypre_TAlloc(hypre_Index, pointset_size);
+      hypre_TAlloc(hypre_Index,  pointset_size, HYPRE_MEMORY_HOST);
 
    (relax_data -> pointset_sizes[pointset]) = pointset_size;
    hypre_CopyIndex(pointset_stride,

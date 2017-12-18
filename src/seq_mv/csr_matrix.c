@@ -35,7 +35,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
 {
    hypre_CSRMatrix  *matrix;
 
-   matrix = hypre_HostCTAlloc(hypre_CSRMatrix, 1);
+   matrix =  hypre_CTAlloc(hypre_CSRMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_CSRMatrixData(matrix) = NULL;
    hypre_CSRMatrixI(matrix)    = NULL;
@@ -65,18 +65,18 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
 
    if (matrix)
    {
-      hypre_TFree(hypre_CSRMatrixI(matrix));
+      hypre_TFree(hypre_CSRMatrixI(matrix), HYPRE_MEMORY_HOST);
       hypre_CSRMatrixI(matrix)    = NULL;
       if (hypre_CSRMatrixRownnz(matrix))
-         hypre_TFree(hypre_CSRMatrixRownnz(matrix));
+         hypre_TFree(hypre_CSRMatrixRownnz(matrix), HYPRE_MEMORY_HOST);
       if ( hypre_CSRMatrixOwnsData(matrix) )
       {
-         hypre_TFree(hypre_CSRMatrixData(matrix));
-         hypre_TFree(hypre_CSRMatrixJ(matrix));
+         hypre_TFree(hypre_CSRMatrixData(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_CSRMatrixJ(matrix), HYPRE_MEMORY_HOST);
          hypre_CSRMatrixData(matrix) = NULL;
          hypre_CSRMatrixJ(matrix)    = NULL;
       }
-      hypre_HostTFree(matrix);
+       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       matrix = NULL;
    }
 
@@ -97,13 +97,13 @@ hypre_CSRMatrixInitialize( hypre_CSRMatrix *matrix )
    HYPRE_Int  ierr=0;
 
    if ( ! hypre_CSRMatrixData(matrix) && num_nonzeros )
-      hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex, num_nonzeros);
+      hypre_CSRMatrixData(matrix) = hypre_CTAlloc(HYPRE_Complex,  num_nonzeros, HYPRE_MEMORY_HOST);
    if ( ! hypre_CSRMatrixI(matrix) )
-      hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
+      hypre_CSRMatrixI(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_HOST);
 /*   if ( ! hypre_CSRMatrixRownnz(matrix) )
-     hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(HYPRE_Int, num_rownnz);*/
+     hypre_CSRMatrixRownnz(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_rownnz, HYPRE_MEMORY_HOST);*/
    if ( ! hypre_CSRMatrixJ(matrix) && num_nonzeros )
-      hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(HYPRE_Int, num_nonzeros);
+      hypre_CSRMatrixJ(matrix)    = hypre_CTAlloc(HYPRE_Int,  num_nonzeros, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -157,7 +157,7 @@ hypre_CSRMatrixSetRownnz( hypre_CSRMatrix *matrix )
    }
    else
    {
-      Arownnz = hypre_CTAlloc(HYPRE_Int, irownnz);
+      Arownnz = hypre_CTAlloc(HYPRE_Int,  irownnz, HYPRE_MEMORY_HOST);
       irownnz = 0;
       for (i=0; i < num_rows; i++)
       {
@@ -199,7 +199,7 @@ hypre_CSRMatrixRead( char *file_name )
 
    hypre_fscanf(fp, "%d", &num_rows);
 
-   matrix_i = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
+   matrix_i = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_HOST);
    for (j = 0; j < num_rows+1; j++)
    {
       hypre_fscanf(fp, "%d", &matrix_i[j]);
@@ -519,7 +519,7 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion(
    }
    else
    {  /* The matrices are offdiagonal blocks. */
-      jC = hypre_CTAlloc( HYPRE_Int, num_cols_B );
+      jC = hypre_CTAlloc( HYPRE_Int,  num_cols_B , HYPRE_MEMORY_HOST);
       num_cols = num_cols_A;  /* initialization; we'll compute the actual value */
       for ( jB=0; jB<num_cols_B; ++jB )
       {
@@ -542,7 +542,7 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion(
       make and load col_map_offd_C */
    if ( col_map_offd_A )
    {
-      *col_map_offd_C = hypre_CTAlloc( HYPRE_Int, num_cols );
+      *col_map_offd_C = hypre_CTAlloc( HYPRE_Int,  num_cols , HYPRE_MEMORY_HOST);
       for ( jA=0; jA<num_cols_A; ++jA )
          (*col_map_offd_C)[jA] = col_map_offd_A[jA];
       for ( jB=0; jB<num_cols_B; ++jB )
@@ -636,7 +636,7 @@ hypre_CSRMatrix * hypre_CSRMatrixUnion(
    }
 
    hypre_assert( mc == num_nonzeros );
-   if (jC) hypre_TFree( jC );
+   if (jC) hypre_TFree( jC , HYPRE_MEMORY_HOST);
 
    return C;
 }

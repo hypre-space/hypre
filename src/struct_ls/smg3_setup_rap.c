@@ -61,7 +61,7 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
       if( A_stencil_size <= 15)
       {
          RAP_stencil_size = 15;
-         RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+         RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
          for (k = -1; k < 2; k++)
          {
             for (j = -1; j < 2; j++)
@@ -88,7 +88,7 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
       else
       {
          RAP_stencil_size = 27;
-         RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+         RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
          for (k = -1; k < 2; k++)
          {
             for (j = -1; j < 2; j++)
@@ -124,7 +124,7 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
       if( A_stencil_size <= 15)
       {
          RAP_stencil_size = 8;
-         RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+         RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
          for (k = -1; k < 1; k++)
          {
             for (j = -1; j < 2; j++)
@@ -155,7 +155,7 @@ hypre_SMG3CreateRAPOp( hypre_StructMatrix *R,
       else
       {
          RAP_stencil_size = 14;
-         RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+         RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
          for (k = -1; k < 1; k++)
          {
             for (j = -1; j < 2; j++)

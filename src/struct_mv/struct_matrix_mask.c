@@ -58,7 +58,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
 
-   mask = hypre_CTAlloc(hypre_StructMatrix, 1);
+   mask = hypre_CTAlloc(hypre_StructMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_StructMatrixComm(mask) = hypre_StructMatrixComm(matrix);
 
@@ -69,7 +69,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
       hypre_StructStencilRef(hypre_StructMatrixUserStencil(matrix));
 
    mask_stencil_size  = num_stencil_indices;
-   mask_stencil_shape = hypre_CTAlloc(hypre_Index, num_stencil_indices);
+   mask_stencil_shape = hypre_CTAlloc(hypre_Index,  num_stencil_indices, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_stencil_indices; i++)
    {
       hypre_CopyIndex(stencil_shape[stencil_indices[i]],
@@ -93,10 +93,10 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
    hypre_StructMatrixDataConstSize(mask) = hypre_StructMatrixDataConstSize(matrix);
    data_space   = hypre_StructMatrixDataSpace(matrix);
    data_indices = hypre_StructMatrixDataIndices(matrix);
-   mask_data_indices = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArraySize(data_space));
+   mask_data_indices = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArraySize(data_space), HYPRE_MEMORY_HOST);
    hypre_ForBoxI(i, data_space)
    {
-      mask_data_indices[i] = hypre_TAlloc(HYPRE_Int, num_stencil_indices);
+      mask_data_indices[i] = hypre_TAlloc(HYPRE_Int,  num_stencil_indices, HYPRE_MEMORY_HOST);
       for (j = 0; j < num_stencil_indices; j++)
       {
          mask_data_indices[i][j] = data_indices[i][stencil_indices[j]];
@@ -106,7 +106,7 @@ hypre_StructMatrixCreateMask( hypre_StructMatrix *matrix,
 
    hypre_StructMatrixSymmetric(mask) = hypre_StructMatrixSymmetric(matrix);
 
-   hypre_StructMatrixSymmElements(mask) = hypre_TAlloc(HYPRE_Int, stencil_size);
+   hypre_StructMatrixSymmElements(mask) = hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       hypre_StructMatrixSymmElements(mask)[i] =

@@ -33,7 +33,7 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 {
    hypre_Vector  *vector;
 
-   vector = hypre_HostCTAlloc(hypre_Vector, 1);
+   vector =  hypre_CTAlloc(hypre_Vector,  1, HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USE_GPU
    vector->on_device=0;
@@ -76,9 +76,9 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
    {
       if ( hypre_VectorOwnsData(vector) )
       {
-         hypre_TFree(hypre_VectorData(vector));
+         hypre_TFree(hypre_VectorData(vector), HYPRE_MEMORY_HOST);
       }
-      hypre_HostTFree(vector);
+       hypre_TFree(vector, HYPRE_MEMORY_HOST);
    }
 
    return ierr;
@@ -97,7 +97,7 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
    HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
 
    if ( ! hypre_VectorData(vector) )
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex, num_vectors*size);
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex,  num_vectors*size, HYPRE_MEMORY_HOST);
 
    if ( multivec_storage_method == 0 )
    {

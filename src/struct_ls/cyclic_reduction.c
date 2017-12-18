@@ -96,7 +96,7 @@ hypre_CyclicReductionCreate( MPI_Comm  comm )
 {
    hypre_CyclicReductionData *cyc_red_data;
 
-   cyc_red_data = hypre_CTAlloc(hypre_CyclicReductionData, 1);
+   cyc_red_data = hypre_CTAlloc(hypre_CyclicReductionData,  1, HYPRE_MEMORY_HOST);
    
    (cyc_red_data -> comm) = comm;
    (cyc_red_data -> ndim) = 3;
@@ -149,7 +149,7 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
    if (!hypre_StructMatrixSymmetric(A))
    {
       Ac_stencil_size = 3;
-      Ac_stencil_shape = hypre_CTAlloc(hypre_Index, Ac_stencil_size);
+      Ac_stencil_shape = hypre_CTAlloc(hypre_Index,  Ac_stencil_size, HYPRE_MEMORY_HOST);
       for (i = -1; i < 2; i++)
       {
          /* Storage for 3 elements (c,w,e) */
@@ -172,7 +172,7 @@ hypre_CycRedCreateCoarseOp( hypre_StructMatrix *A,
    else
    {
       Ac_stencil_size = 2;
-      Ac_stencil_shape = hypre_CTAlloc(hypre_Index, Ac_stencil_size);
+      Ac_stencil_shape = hypre_CTAlloc(hypre_Index,  Ac_stencil_size, HYPRE_MEMORY_HOST);
       for (i = -1; i < 1; i++)
       {
 
@@ -526,7 +526,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    }
    
 
-   grid_l    = hypre_TAlloc(hypre_StructGrid *, num_levels);
+   grid_l    = hypre_TAlloc(hypre_StructGrid *,  num_levels, HYPRE_MEMORY_HOST);
    hypre_StructGridRef(grid, &grid_l[0]);
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
@@ -581,7 +581,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
     * Set up fine points
     *-----------------------------------------------------*/
 
-   fine_points_l   = hypre_TAlloc(hypre_BoxArray *,  num_levels);
+   fine_points_l   = hypre_TAlloc(hypre_BoxArray *,   num_levels, HYPRE_MEMORY_HOST);
 
    for (l = 0; l < (num_levels - 1); l++)
    {
@@ -605,8 +605,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
     * Set up matrix and vector structures
     *-----------------------------------------------------*/
    
-   A_l  = hypre_TAlloc(hypre_StructMatrix *, num_levels);
-   x_l  = hypre_TAlloc(hypre_StructVector *, num_levels);
+   A_l  = hypre_TAlloc(hypre_StructMatrix *,  num_levels, HYPRE_MEMORY_HOST);
+   x_l  = hypre_TAlloc(hypre_StructVector *,  num_levels, HYPRE_MEMORY_HOST);
 
    A_l[0] = hypre_StructMatrixRef(A);
    x_l[0] = hypre_StructVectorRef(x);
@@ -627,9 +627,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_StructVectorSetDataSize(x_l[l+1], &data_size, &data_size_const);
    }
 
-   data =  hypre_DeviceCTAlloc(HYPRE_Real,data_size);
-   data_const = hypre_CTAlloc(HYPRE_Real,data_size_const);
-
+   data =  hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
+   data_const = hypre_CTAlloc(HYPRE_Real,data_size_const,HYPRE_MEMORY_HOST);
    (cyc_red_data -> data) = data;
    (cyc_red_data -> data_const) = data_const;
 #ifdef HYPRE_USE_OMP45
@@ -681,8 +680,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
     * Set up compute packages
     *----------------------------------------------------------*/
 
-   down_compute_pkg_l = hypre_TAlloc(hypre_ComputePkg *, (num_levels - 1));
-   up_compute_pkg_l   = hypre_TAlloc(hypre_ComputePkg *, (num_levels - 1));
+   down_compute_pkg_l = hypre_TAlloc(hypre_ComputePkg *,  (num_levels - 1), HYPRE_MEMORY_HOST);
+   up_compute_pkg_l   = hypre_TAlloc(hypre_ComputePkg *,  (num_levels - 1), HYPRE_MEMORY_HOST);
 
    for (l = 0; l < (num_levels - 1); l++)
    {
@@ -1243,16 +1242,16 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
          hypre_ComputePkgDestroy(cyc_red_data -> up_compute_pkg_l[l]);
       }
       hypre_BoxArrayDestroy(cyc_red_data -> fine_points_l[l]);
-      hypre_DeviceTFree(cyc_red_data -> data);
-      hypre_TFree(cyc_red_data -> grid_l);
-      hypre_TFree(cyc_red_data -> fine_points_l);
-      hypre_TFree(cyc_red_data -> A_l);
-      hypre_TFree(cyc_red_data -> x_l);
-      hypre_TFree(cyc_red_data -> down_compute_pkg_l);
-      hypre_TFree(cyc_red_data -> up_compute_pkg_l);
+       hypre_TFree(cyc_red_data -> data, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(cyc_red_data -> grid_l, HYPRE_MEMORY_HOST);
+      hypre_TFree(cyc_red_data -> fine_points_l, HYPRE_MEMORY_HOST);
+      hypre_TFree(cyc_red_data -> A_l, HYPRE_MEMORY_HOST);
+      hypre_TFree(cyc_red_data -> x_l, HYPRE_MEMORY_HOST);
+      hypre_TFree(cyc_red_data -> down_compute_pkg_l, HYPRE_MEMORY_HOST);
+      hypre_TFree(cyc_red_data -> up_compute_pkg_l, HYPRE_MEMORY_HOST);
 
       hypre_FinalizeTiming(cyc_red_data -> time_index);
-      hypre_TFree(cyc_red_data);
+      hypre_TFree(cyc_red_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

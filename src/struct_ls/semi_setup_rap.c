@@ -91,7 +91,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    {
       RAP_marker_size *= 3;
    }
-   RAP_marker = hypre_CTAlloc(HYPRE_Int, RAP_marker_size);
+   RAP_marker = hypre_CTAlloc(HYPRE_Int,  RAP_marker_size, HYPRE_MEMORY_HOST);
    
    /*-----------------------------------------------------------------------
     * Define RAP_stencil
@@ -182,7 +182,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
    {
       if (dim > 1)
       {
-         not_cdirs = hypre_CTAlloc(HYPRE_Int, dim-1);
+         not_cdirs = hypre_CTAlloc(HYPRE_Int,  dim-1, HYPRE_MEMORY_HOST);
       }
 
       for (d = 1; d < dim; d++)
@@ -226,7 +226,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
 
       if (dim > 1)
       {
-         hypre_TFree(not_cdirs);
+         hypre_TFree(not_cdirs, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -240,7 +240,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
       }
    }
 
-   RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+   RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
 
    stencil_rank= 0;
    for (i = 0; i < RAP_marker_size; i++)
@@ -269,7 +269,7 @@ hypre_SemiCreateRAPOp( hypre_StructMatrix *R,
     *-----------------------------------------------------------------------*/
    hypre_StructMatrixSetNumGhost(RAP, RAP_num_ghost);
 
-   hypre_TFree(RAP_marker);
+   hypre_TFree(RAP_marker, HYPRE_MEMORY_HOST);
 
    return RAP;
 }

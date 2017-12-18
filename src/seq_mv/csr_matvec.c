@@ -546,7 +546,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
    num_threads = hypre_NumThreads();
    if (num_threads > 1)
    {
-      y_data_expand = hypre_CTAlloc(HYPRE_Complex, num_threads*y_size);
+      y_data_expand = hypre_CTAlloc(HYPRE_Complex,  num_threads*y_size, HYPRE_MEMORY_HOST);
 
       if ( num_vectors==1 )
       {
@@ -601,7 +601,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
          }
       }
 
-      hypre_TFree(y_data_expand);
+      hypre_TFree(y_data_expand, HYPRE_MEMORY_HOST);
 
    }
    else 

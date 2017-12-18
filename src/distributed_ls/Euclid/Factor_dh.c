@@ -765,7 +765,7 @@ for (i=0; i<m+offsetLo+offsetHi; ++i) {
   }
 
   /* copy solution from work vector lhs vector */
-  memcpy(lhs, work_x, m*sizeof(HYPRE_Real));
+  hypre_TMemcpy(lhs,  work_x, HYPRE_Real, m, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
   if (debug) {
     hypre_fprintf(logFile, "\nFACT solution: ");
@@ -946,18 +946,18 @@ void Factor_dhReallocate(Factor_dh F, HYPRE_Int used, HYPRE_Int additional)
     F->alloc = alloc;
     tmpI = F->cval;
     F->cval = (HYPRE_Int*)MALLOC_DH(alloc*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    memcpy(F->cval, tmpI, used*sizeof(HYPRE_Int));
+    hypre_TMemcpy(F->cval,  tmpI, HYPRE_Int, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
     FREE_DH(tmpI); CHECK_V_ERROR;
     if (F->fill != NULL) {
       tmpI = F->fill;
       F->fill = (HYPRE_Int*)MALLOC_DH(alloc*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-      memcpy(F->fill, tmpI, used*sizeof(HYPRE_Int));
+      hypre_TMemcpy(F->fill,  tmpI, HYPRE_Int, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       FREE_DH(tmpI); CHECK_V_ERROR;
     }
     if (F->aval != NULL) {
       REAL_DH *tmpF = F->aval;
       F->aval = (REAL_DH*)MALLOC_DH(alloc*sizeof(REAL_DH)); CHECK_V_ERROR;
-      memcpy(F->aval, tmpF, used*sizeof(REAL_DH));
+      hypre_TMemcpy(F->aval,  tmpF, REAL_DH, used, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       FREE_DH(tmpF); CHECK_V_ERROR;
     }
   }

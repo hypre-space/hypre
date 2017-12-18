@@ -51,7 +51,7 @@ hypre_ParCSRCommMultiHandleCreate (HYPRE_Int                   job,
     *--------------------------------------------------------------------*/
 
    num_requests = num_sends + num_recvs;
-   requests = hypre_CTAlloc(hypre_MPI_Request, num_requests);
+   requests = hypre_CTAlloc(hypre_MPI_Request,  num_requests, HYPRE_MEMORY_HOST);
  
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -109,7 +109,7 @@ hypre_ParCSRCommMultiHandleCreate (HYPRE_Int                   job,
     * set up comm_handle and return
     *--------------------------------------------------------------------*/
 
-   comm_handle = hypre_CTAlloc(hypre_ParCSRCommMultiHandle, 1);
+   comm_handle = hypre_CTAlloc(hypre_ParCSRCommMultiHandle,  1, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRCommMultiHandleCommPkg(comm_handle)     = comm_pkg;
    hypre_ParCSRCommMultiHandleSendData(comm_handle)    = send_data;
@@ -128,15 +128,15 @@ hypre_ParCSRCommMultiHandleDestroy(hypre_ParCSRCommMultiHandle *comm_handle)
 
    if (hypre_ParCSRCommMultiHandleNumRequests(comm_handle))
    {
-      status0 = hypre_CTAlloc(hypre_MPI_Status,
-                              hypre_ParCSRCommMultiHandleNumRequests(comm_handle));
+      status0 = hypre_CTAlloc(hypre_MPI_Status, 
+                              hypre_ParCSRCommMultiHandleNumRequests(comm_handle), HYPRE_MEMORY_HOST);
       hypre_MPI_Waitall(hypre_ParCSRCommMultiHandleNumRequests(comm_handle),
                         hypre_ParCSRCommMultiHandleRequests(comm_handle), status0);
-      hypre_TFree(status0);
+      hypre_TFree(status0, HYPRE_MEMORY_HOST);
    }
 
-   hypre_TFree(hypre_ParCSRCommMultiHandleRequests(comm_handle));
-   hypre_TFree(comm_handle);
+   hypre_TFree(hypre_ParCSRCommMultiHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
+   hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
    return ierr;
 }

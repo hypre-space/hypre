@@ -35,7 +35,7 @@ hypre_SemiRestrictCreate( )
 {
    hypre_SemiRestrictData *restrict_data;
 
-   restrict_data = hypre_CTAlloc(hypre_SemiRestrictData, 1);
+   restrict_data = hypre_CTAlloc(hypre_SemiRestrictData,  1, HYPRE_MEMORY_HOST);
 
    (restrict_data -> time_index)  = hypre_InitializeTiming("SemiRestrict");
    
@@ -322,7 +322,7 @@ hypre_SemiRestrictDestroy( void *restrict_vdata )
       hypre_StructMatrixDestroy(restrict_data -> R);
       hypre_ComputePkgDestroy(restrict_data -> compute_pkg);
       hypre_FinalizeTiming(restrict_data -> time_index);
-      hypre_TFree(restrict_data);
+      hypre_TFree(restrict_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

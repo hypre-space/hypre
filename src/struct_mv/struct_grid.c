@@ -40,7 +40,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
    hypre_StructGrid    *grid;
    HYPRE_Int           i;
 
-   grid = hypre_TAlloc(hypre_StructGrid, 1);
+   grid = hypre_TAlloc(hypre_StructGrid,  1, HYPRE_MEMORY_HOST);
 
    hypre_StructGridComm(grid)        = comm;
    hypre_StructGridNDim(grid)        = ndim;
@@ -100,13 +100,13 @@ hypre_StructGridDestroy( hypre_StructGrid *grid )
       if (hypre_StructGridRefCount(grid) == 0)
       {
          hypre_BoxDestroy(hypre_StructGridBoundingBox(grid));
-         hypre_TFree(hypre_StructGridIDs(grid));
+         hypre_TFree(hypre_StructGridIDs(grid), HYPRE_MEMORY_HOST);
          hypre_BoxArrayDestroy(hypre_StructGridBoxes(grid));
 
          hypre_BoxManDestroy(hypre_StructGridBoxMan(grid));
-         hypre_TFree( hypre_StructGridPShifts(grid));
+         hypre_TFree( hypre_StructGridPShifts(grid), HYPRE_MEMORY_HOST);
 
-         hypre_TFree(grid);
+         hypre_TFree(grid, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -155,7 +155,7 @@ hypre_StructGridSetBoxes( hypre_StructGrid *grid,
                           hypre_BoxArray   *boxes )
 {
 
-   hypre_TFree(hypre_StructGridBoxes(grid));
+   hypre_TFree(hypre_StructGridBoxes(grid), HYPRE_MEMORY_HOST);
    hypre_StructGridBoxes(grid) = boxes;
 
    return hypre_error_flag;
@@ -184,7 +184,7 @@ HYPRE_Int
 hypre_StructGridSetIDs( hypre_StructGrid *grid,
                         HYPRE_Int   *ids )
 {
-   hypre_TFree(hypre_StructGridIDs(grid));
+   hypre_TFree(hypre_StructGridIDs(grid), HYPRE_MEMORY_HOST);
    hypre_StructGridIDs(grid) = ids;
 
    return hypre_error_flag;
@@ -199,7 +199,7 @@ hypre_StructGridSetBoxManager( hypre_StructGrid *grid,
                                hypre_BoxManager *boxman )
 {
 
-   hypre_TFree(hypre_StructGridBoxMan(grid));
+   hypre_TFree(hypre_StructGridBoxMan(grid), HYPRE_MEMORY_HOST);
    hypre_StructGridBoxMan(grid) = boxman;
 
    return hypre_error_flag;
@@ -297,7 +297,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
       to set them */
    if (hypre_StructGridIDs(grid) == NULL)
    {
-      ids = hypre_CTAlloc(HYPRE_Int, num_local_boxes);
+      ids = hypre_CTAlloc(HYPRE_Int,  num_local_boxes, HYPRE_MEMORY_HOST);
       for (i=0; i< num_local_boxes; i++)
       {
          ids[i] = i;
@@ -320,7 +320,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    }
    num_periods = hypre_BoxVolume(box);
 
-   pshifts = hypre_CTAlloc(hypre_Index, num_periods);
+   pshifts = hypre_CTAlloc(hypre_Index,  num_periods, HYPRE_MEMORY_HOST);
    pshift = pshifts[0];
    hypre_SetIndex(pshift, 0);
    if (num_periods > 1)
@@ -602,8 +602,8 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    /* compute recvcounts and displs */
    item_size = 2*ndim + 1;
    sendcount = item_size*hypre_BoxArraySize(boxes);
-   recvcounts = hypre_SharedTAlloc(HYPRE_Int, num_all_procs);
-   displs = hypre_TAlloc(HYPRE_Int, num_all_procs);
+   recvcounts =  hypre_TAlloc(HYPRE_Int,  num_all_procs, HYPRE_MEMORY_HOST);
+   displs = hypre_TAlloc(HYPRE_Int,  num_all_procs, HYPRE_MEMORY_HOST);
    hypre_MPI_Allgather(&sendcount, 1, HYPRE_MPI_INT,
                        recvcounts, 1, HYPRE_MPI_INT, comm);
    displs[0] = 0;
@@ -615,8 +615,8 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    }
 
    /* allocate sendbuf and recvbuf */
-   sendbuf = hypre_TAlloc(HYPRE_Int, sendcount);
-   recvbuf = hypre_SharedTAlloc(HYPRE_Int, recvbuf_size);
+   sendbuf = hypre_TAlloc(HYPRE_Int,  sendcount, HYPRE_MEMORY_HOST);
+   recvbuf =  hypre_TAlloc(HYPRE_Int,  recvbuf_size, HYPRE_MEMORY_HOST);
 
    /* put local box extents and process number into sendbuf */
    i = 0;
@@ -645,7 +645,7 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
    /* unpack recvbuf box info */
    all_boxes_size = recvbuf_size / item_size;
    all_boxes   = hypre_BoxArrayCreate(all_boxes_size, ndim);
-   all_procs   = hypre_TAlloc(HYPRE_Int, all_boxes_size);
+   all_procs   = hypre_TAlloc(HYPRE_Int,  all_boxes_size, HYPRE_MEMORY_HOST);
    first_local = -1;
    i = 0;
    b = 0;
@@ -674,10 +674,10 @@ hypre_GatherAllBoxes(MPI_Comm         comm,
     * Return
     *-----------------------------------------------------*/
 
-   hypre_TFree(sendbuf);
-   hypre_SharedTFree(recvbuf);
-   hypre_SharedTFree(recvcounts);
-   hypre_TFree(displs);
+   hypre_TFree(sendbuf, HYPRE_MEMORY_HOST);
+    hypre_TFree(recvbuf, HYPRE_MEMORY_HOST);
+    hypre_TFree(recvcounts, HYPRE_MEMORY_HOST);
+   hypre_TFree(displs, HYPRE_MEMORY_HOST);
 
    *all_boxes_ptr   = all_boxes;
    *all_procs_ptr   = all_procs;
@@ -711,7 +711,7 @@ hypre_ComputeBoxnums(hypre_BoxArray *boxes,
     *-----------------------------------------------------*/
 
    num_boxes = hypre_BoxArraySize(boxes);
-   boxnums = hypre_TAlloc(HYPRE_Int, num_boxes);
+   boxnums = hypre_TAlloc(HYPRE_Int,  num_boxes, HYPRE_MEMORY_HOST);
 
    p = -1;
    for(b = 0; b < num_boxes; b++)

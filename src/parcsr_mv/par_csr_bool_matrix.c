@@ -30,7 +30,7 @@ hypre_CSRBooleanMatrix *hypre_CSRBooleanMatrixCreate(HYPRE_Int num_rows,HYPRE_In
 {
    hypre_CSRBooleanMatrix *matrix;
 
-   matrix = hypre_CTAlloc(hypre_CSRBooleanMatrix, 1);
+   matrix = hypre_CTAlloc(hypre_CSRBooleanMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_CSRBooleanMatrix_Get_I(matrix)     = NULL;
    hypre_CSRBooleanMatrix_Get_J(matrix)     = NULL;
@@ -50,10 +50,10 @@ HYPRE_Int hypre_CSRBooleanMatrixDestroy( hypre_CSRBooleanMatrix *matrix )
 {
    if (matrix)
    {
-      hypre_TFree(hypre_CSRBooleanMatrix_Get_I(matrix));
+      hypre_TFree(hypre_CSRBooleanMatrix_Get_I(matrix), HYPRE_MEMORY_HOST);
       if ( hypre_CSRBooleanMatrix_Get_OwnsData(matrix) )
-         hypre_TFree(hypre_CSRBooleanMatrix_Get_J(matrix));
-      hypre_TFree(matrix);
+         hypre_TFree(hypre_CSRBooleanMatrix_Get_J(matrix), HYPRE_MEMORY_HOST);
+      hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
    return 0;
 }
@@ -68,9 +68,9 @@ HYPRE_Int hypre_CSRBooleanMatrixInitialize( hypre_CSRBooleanMatrix *matrix )
    HYPRE_Int  num_nonzeros = hypre_CSRBooleanMatrix_Get_NNZ(matrix);
 
    if ( ! hypre_CSRBooleanMatrix_Get_I(matrix) )
-      hypre_CSRBooleanMatrix_Get_I(matrix) = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
+      hypre_CSRBooleanMatrix_Get_I(matrix) = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_HOST);
    if ( ! hypre_CSRBooleanMatrix_Get_J(matrix) )
-      hypre_CSRBooleanMatrix_Get_J(matrix) = hypre_CTAlloc(HYPRE_Int, num_nonzeros);
+      hypre_CSRBooleanMatrix_Get_J(matrix) = hypre_CTAlloc(HYPRE_Int,  num_nonzeros, HYPRE_MEMORY_HOST);
 
    return 0;
 }
@@ -115,7 +115,7 @@ hypre_CSRBooleanMatrixRead( const char *file_name )
 
    hypre_fscanf(fp, "%d", &num_rows);
 
-   matrix_i = hypre_CTAlloc(HYPRE_Int, num_rows + 1);
+   matrix_i = hypre_CTAlloc(HYPRE_Int,  num_rows + 1, HYPRE_MEMORY_HOST);
    for (j = 0; j < num_rows+1; j++)
    {
       hypre_fscanf(fp, "%d", &matrix_i[j]);
@@ -210,7 +210,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParCSRBooleanMatrixCreate( MPI_Comm comm,
    HYPRE_Int                     local_num_rows, local_num_cols;
    HYPRE_Int                     first_row_index, first_col_diag;
    
-   matrix = hypre_CTAlloc(hypre_ParCSRBooleanMatrix, 1);
+   matrix = hypre_CTAlloc(hypre_ParCSRBooleanMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_MPI_Comm_rank(comm,&my_id);
    hypre_MPI_Comm_size(comm,&num_procs);
@@ -279,18 +279,18 @@ HYPRE_Int hypre_ParCSRBooleanMatrixDestroy( hypre_ParCSRBooleanMatrix *matrix )
          hypre_CSRBooleanMatrixDestroy(hypre_ParCSRBooleanMatrix_Get_Diag(matrix));
          hypre_CSRBooleanMatrixDestroy(hypre_ParCSRBooleanMatrix_Get_Offd(matrix));
          if (hypre_ParCSRBooleanMatrix_Get_ColMapOffd(matrix))
-            hypre_TFree(hypre_ParCSRBooleanMatrix_Get_ColMapOffd(matrix));
+            hypre_TFree(hypre_ParCSRBooleanMatrix_Get_ColMapOffd(matrix), HYPRE_MEMORY_HOST);
          if (hypre_ParCSRBooleanMatrix_Get_CommPkg(matrix))
             hypre_MatvecCommPkgDestroy(hypre_ParCSRBooleanMatrix_Get_CommPkg(matrix));
       }
       if ( hypre_ParCSRBooleanMatrix_Get_OwnsRowStarts(matrix) )
-         hypre_TFree(hypre_ParCSRBooleanMatrix_Get_RowStarts(matrix));
+         hypre_TFree(hypre_ParCSRBooleanMatrix_Get_RowStarts(matrix), HYPRE_MEMORY_HOST);
       if ( hypre_ParCSRBooleanMatrix_Get_OwnsColStarts(matrix) )
-         hypre_TFree(hypre_ParCSRBooleanMatrix_Get_ColStarts(matrix));
+         hypre_TFree(hypre_ParCSRBooleanMatrix_Get_ColStarts(matrix), HYPRE_MEMORY_HOST);
 
-      hypre_TFree(hypre_ParCSRBooleanMatrix_Get_Rowindices(matrix));
+      hypre_TFree(hypre_ParCSRBooleanMatrix_Get_Rowindices(matrix), HYPRE_MEMORY_HOST);
 
-      hypre_TFree(matrix);
+      hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
 
    return ierr;
@@ -307,8 +307,8 @@ HYPRE_Int hypre_ParCSRBooleanMatrixInitialize( hypre_ParCSRBooleanMatrix *matrix
    hypre_CSRBooleanMatrixInitialize(hypre_ParCSRBooleanMatrix_Get_Diag(matrix));
    hypre_CSRBooleanMatrixInitialize(hypre_ParCSRBooleanMatrix_Get_Offd(matrix));
    hypre_ParCSRBooleanMatrix_Get_ColMapOffd(matrix) = 
-                hypre_CTAlloc(HYPRE_Int,hypre_CSRBooleanMatrix_Get_NCols(
-                hypre_ParCSRBooleanMatrix_Get_Offd(matrix)));
+                hypre_CTAlloc(HYPRE_Int, hypre_CSRBooleanMatrix_Get_NCols(
+                hypre_ParCSRBooleanMatrix_Get_Offd(matrix)), HYPRE_MEMORY_HOST);
    return ierr;
 }
 
@@ -390,8 +390,8 @@ hypre_ParCSRBooleanMatrixRead( MPI_Comm comm, const char *file_name )
 
    hypre_MPI_Comm_rank(comm,&my_id);
    hypre_MPI_Comm_size(comm,&num_procs);
-   row_starts = hypre_CTAlloc(HYPRE_Int, num_procs+1);
-   col_starts = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   row_starts = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
+   col_starts = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
    hypre_sprintf(new_file_d,"%s.D.%d",file_name,my_id);
    hypre_sprintf(new_file_o,"%s.O.%d",file_name,my_id);
    hypre_sprintf(new_file_info,"%s.INFO.%d",file_name,my_id);
@@ -403,7 +403,7 @@ hypre_ParCSRBooleanMatrixRead( MPI_Comm comm, const char *file_name )
            hypre_fscanf(fp, "%d %d", &row_starts[i], &col_starts[i]);
    row_starts[num_procs] = global_num_rows;
    col_starts[num_procs] = global_num_cols;
-   col_map_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+   col_map_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
    for (i=0; i < num_cols_offd; i++)
         hypre_fscanf(fp, "%d", &col_map_offd[i]);
         
@@ -418,7 +418,7 @@ hypre_ParCSRBooleanMatrixRead( MPI_Comm comm, const char *file_name )
 
    if (equal)
    {
-        hypre_TFree(col_starts);
+        hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
         col_starts = row_starts;
    }
    
@@ -433,7 +433,7 @@ hypre_ParCSRBooleanMatrixRead( MPI_Comm comm, const char *file_name )
         offd = hypre_CSRBooleanMatrixCreate(local_num_rows,0,0);
 
         
-   matrix = hypre_CTAlloc(hypre_ParCSRBooleanMatrix, 1);
+   matrix = hypre_CTAlloc(hypre_ParCSRBooleanMatrix,  1, HYPRE_MEMORY_HOST);
    
    hypre_ParCSRBooleanMatrix_Get_Comm(matrix) = comm;
    hypre_ParCSRBooleanMatrix_Get_GlobalNRows(matrix) = global_num_rows;
@@ -658,7 +658,7 @@ HYPRE_Int hypre_ParCSRBooleanMatrixGetRow(hypre_ParCSRBooleanMatrix  *mat,
               hypre_CSRBooleanMatrix_Get_I(Ba)[i];
         if (max < tmp) { max = tmp; }
       }
-      hypre_ParCSRBooleanMatrix_Get_Rowindices(mat) = (HYPRE_Int *) hypre_CTAlloc(HYPRE_Int,max); 
+      hypre_ParCSRBooleanMatrix_Get_Rowindices(mat) = (HYPRE_Int *) hypre_CTAlloc(HYPRE_Int, max, HYPRE_MEMORY_HOST); 
    }
 
    cstart = hypre_ParCSRBooleanMatrix_Get_FirstColDiag(mat);
@@ -803,8 +803,8 @@ hypre_CSRBooleanMatrixToParCSRBooleanMatrix
    global_num_rows = global_data[0];
    global_num_cols = global_data[1];
 
-   local_num_rows = hypre_CTAlloc(HYPRE_Int, num_procs);
-   csr_matrix_datatypes = hypre_CTAlloc(hypre_MPI_Datatype, num_procs);
+   local_num_rows = hypre_CTAlloc(HYPRE_Int,  num_procs, HYPRE_MEMORY_HOST);
+   csr_matrix_datatypes = hypre_CTAlloc(hypre_MPI_Datatype,  num_procs, HYPRE_MEMORY_HOST);
 
    par_matrix = hypre_ParCSRBooleanMatrixCreate (comm, global_num_rows,
         global_num_cols,row_starts,col_starts,0,0,0);
@@ -817,7 +817,7 @@ hypre_CSRBooleanMatrixToParCSRBooleanMatrix
 
    if (my_id == 0)
    {
-        local_num_nonzeros = hypre_CTAlloc(HYPRE_Int, num_procs);
+        local_num_nonzeros = hypre_CTAlloc(HYPRE_Int,  num_procs, HYPRE_MEMORY_HOST);
         for (i=0; i < num_procs-1; i++)
                 local_num_nonzeros[i] = a_i[row_starts[i+1]] 
                                 - a_i[row_starts[i]];
@@ -832,8 +832,8 @@ hypre_CSRBooleanMatrixToParCSRBooleanMatrix
                 num_nonzeros);
    if (my_id == 0)
    {
-        requests = hypre_CTAlloc (hypre_MPI_Request, num_procs-1);
-        status = hypre_CTAlloc(hypre_MPI_Status, num_procs-1);
+        requests = hypre_CTAlloc(hypre_MPI_Request,  num_procs-1, HYPRE_MEMORY_HOST);
+        status = hypre_CTAlloc(hypre_MPI_Status,  num_procs-1, HYPRE_MEMORY_HOST);
         j=0;
         for (i=1; i < num_procs; i++)
         {
@@ -850,9 +850,9 @@ hypre_CSRBooleanMatrixToParCSRBooleanMatrix
         hypre_CSRBooleanMatrix_Get_I(local_A) = a_i;
         hypre_CSRBooleanMatrix_Get_J(local_A) = a_j;
         hypre_MPI_Waitall(num_procs-1,requests,status);
-        hypre_TFree(requests);
-        hypre_TFree(status);
-        hypre_TFree(local_num_nonzeros);
+        hypre_TFree(requests, HYPRE_MEMORY_HOST);
+        hypre_TFree(status, HYPRE_MEMORY_HOST);
+        hypre_TFree(local_num_nonzeros, HYPRE_MEMORY_HOST);
     }
    else
    {
@@ -878,8 +878,8 @@ hypre_CSRBooleanMatrixToParCSRBooleanMatrix
       hypre_CSRBooleanMatrix_Get_J(local_A) = NULL; 
    }      
    hypre_CSRBooleanMatrixDestroy(local_A);
-   hypre_TFree(local_num_rows);
-   hypre_TFree(csr_matrix_datatypes);
+   hypre_TFree(local_num_rows, HYPRE_MEMORY_HOST);
+   hypre_TFree(csr_matrix_datatypes, HYPRE_MEMORY_HOST);
 
    return par_matrix;
 }
@@ -921,7 +921,7 @@ hypre_BooleanGenerateDiagAndOffd(hypre_CSRBooleanMatrix *A,
 
         hypre_CSRBooleanMatrixInitialize(offd);
         offd_i = hypre_CSRBooleanMatrix_Get_I(offd);
-        marker = hypre_CTAlloc(HYPRE_Int,num_cols);
+        marker = hypre_CTAlloc(HYPRE_Int, num_cols, HYPRE_MEMORY_HOST);
 
         for (i=0; i < num_cols; i++)
                 marker[i] = 0;
@@ -952,7 +952,7 @@ hypre_BooleanGenerateDiagAndOffd(hypre_CSRBooleanMatrix *A,
         diag_i[num_rows] = jd;
 
         hypre_ParCSRBooleanMatrix_Get_ColMapOffd(matrix) =
-           hypre_CTAlloc(HYPRE_Int,num_cols_offd);
+           hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
         col_map_offd = hypre_ParCSRBooleanMatrix_Get_ColMapOffd(matrix);
 
         counter = 0;
@@ -987,7 +987,7 @@ hypre_BooleanGenerateDiagAndOffd(hypre_CSRBooleanMatrix *A,
                         diag_j[jd++] = a_j[j]-first_col_diag;
                 }
         }
-        hypre_TFree(marker);
+        hypre_TFree(marker, HYPRE_MEMORY_HOST);
    }
    else 
    {
@@ -1000,7 +1000,7 @@ hypre_BooleanGenerateDiagAndOffd(hypre_CSRBooleanMatrix *A,
         {
                 diag_j[i] = a_j[i];
         }
-        offd_i = hypre_CTAlloc(HYPRE_Int, num_rows+1);
+        offd_i = hypre_CTAlloc(HYPRE_Int,  num_rows+1, HYPRE_MEMORY_HOST);
 
         for (i=0; i < num_rows+1; i++)
         {

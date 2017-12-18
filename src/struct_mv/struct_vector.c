@@ -29,7 +29,7 @@ hypre_StructVectorCreate( MPI_Comm          comm,
    hypre_StructVector  *vector;
    HYPRE_Int            i;
 
-   vector = hypre_CTAlloc(hypre_StructVector, 1);
+   vector = hypre_CTAlloc(hypre_StructVector,  1, HYPRE_MEMORY_HOST);
 
    hypre_StructVectorComm(vector)           = comm;
    hypre_StructGridRef(grid, &hypre_StructVectorGrid(vector));
@@ -74,20 +74,20 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)	   
 	    if (hypre_StructGridDataLocation(grid) < LOCATION_CPU)
 	    {
-	       hypre_DeviceTFree(hypre_StructVectorData(vector));
+	       hypre_TFree(hypre_StructVectorData(vector),HYPRE_MEMORY_DEVICE);
 	    }
 	    else
 	    {
-	       hypre_TFree(hypre_StructVectorData(vector));
+	       hypre_TFree(hypre_StructVectorData(vector),HYPRE_MEMORY_HOST);
 	    }
 #else
-            hypre_DeviceTFree(hypre_StructVectorData(vector));
+            hypre_TFree(hypre_StructVectorData(vector),HYPRE_MEMORY_DEVICE);
 #endif
          }
-         hypre_TFree(hypre_StructVectorDataIndices(vector));
+         hypre_TFree(hypre_StructVectorDataIndices(vector), HYPRE_MEMORY_HOST);
          hypre_BoxArrayDestroy(hypre_StructVectorDataSpace(vector));
          hypre_StructGridDestroy(hypre_StructVectorGrid(vector));
-         hypre_TFree(vector);
+         hypre_TFree(vector, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -151,7 +151,7 @@ hypre_StructVectorInitializeShell( hypre_StructVector *vector )
    if (hypre_StructVectorDataIndices(vector) == NULL)
    {
       data_space = hypre_StructVectorDataSpace(vector);
-      data_indices = hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(data_space));
+      data_indices = hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(data_space), HYPRE_MEMORY_HOST);
 
       data_size = 0;
       hypre_ForBoxI(i, data_space)
@@ -203,14 +203,14 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)   
    if (hypre_StructGridDataLocation(grid) < LOCATION_CPU)
    {
-      data = hypre_DeviceCTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector));
+      data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector),HYPRE_MEMORY_DEVICE);
    }
    else
    {
-      data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector));
+      data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector),HYPRE_MEMORY_HOST);
    }
 #else
-   data = hypre_DeviceCTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector));
+   data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector),HYPRE_MEMORY_DEVICE);
 #endif
 
    hypre_StructVectorInitializeData(vector, data);
@@ -1199,9 +1199,9 @@ hypre_StructVectorClone(
 
    hypre_StructVectorDataSize(y) = data_size;
    hypre_StructVectorDataSpace(y) = hypre_BoxArrayDuplicate(data_space);
-   hypre_StructVectorData(y) = hypre_DeviceCTAlloc(HYPRE_Complex, data_size);
+   hypre_StructVectorData(y) =  hypre_CTAlloc(HYPRE_Complex,  data_size, HYPRE_MEMORY_DEVICE);
    
-   hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int, data_space_size);
+   hypre_StructVectorDataIndices(y) = hypre_CTAlloc(HYPRE_Int,  data_space_size, HYPRE_MEMORY_HOST);
 
    for (i=0; i < data_space_size; i++)
       hypre_StructVectorDataIndices(y)[i] = data_indices[i];

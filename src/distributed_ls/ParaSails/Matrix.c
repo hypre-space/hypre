@@ -43,7 +43,7 @@ Matrix *MatrixCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row)
 {
     HYPRE_Int num_rows, mype, npes;
 
-    Matrix *mat = (Matrix *) malloc(sizeof(Matrix));
+    Matrix *mat = hypre_TAlloc(Matrix, 1, HYPRE_MEMORY_HOST);
 
     mat->comm = comm;
 
@@ -97,7 +97,7 @@ Matrix *MatrixCreateLocal(HYPRE_Int beg_row, HYPRE_Int end_row)
 {
     HYPRE_Int num_rows;
 
-    Matrix *mat = (Matrix *) malloc(sizeof(Matrix));
+    Matrix *mat = hypre_TAlloc(Matrix, 1, HYPRE_MEMORY_HOST);
 
     mat->comm = hypre_MPI_COMM_NULL;
 
@@ -190,10 +190,10 @@ void MatrixSetRow(Matrix *mat, HYPRE_Int row, HYPRE_Int len, HYPRE_Int *ind, HYP
     mat->vals[row] = (HYPRE_Real *) MemAlloc(mat->mem, len*sizeof(HYPRE_Real));
 
     if (ind != NULL)
-        memcpy(mat->inds[row], ind, len*sizeof(HYPRE_Int));
+        hypre_TMemcpy(mat->inds[row],  ind, HYPRE_Int, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
     if (val != NULL)
-        memcpy(mat->vals[row], val, len*sizeof(HYPRE_Real));
+        hypre_TMemcpy(mat->vals[row],  val, HYPRE_Real, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 }
 
 /*--------------------------------------------------------------------------
@@ -558,7 +558,7 @@ void RhsRead(HYPRE_Real *rhs, Matrix *mat, char *filename)
 	{
 	    free(buffer);
 	    buflen = num_local;
-            buffer = (HYPRE_Real *) malloc(buflen * sizeof(HYPRE_Real));
+            buffer = hypre_TAlloc(HYPRE_Real, buflen , HYPRE_MEMORY_HOST);
 	}
 
         for (i=0; i<num_local; i++)
@@ -591,7 +591,7 @@ static void SetupReceives(Matrix *mat, HYPRE_Int reqlen, HYPRE_Int *reqind, HYPR
     /* Allocate recvbuf */
     /* recvbuf has numlocal entires saved for local part of x, used in matvec */
     mat->recvlen = reqlen; /* used for the transpose multiply */
-    mat->recvbuf = (HYPRE_Real *) malloc((reqlen+num_local) * sizeof(HYPRE_Real));
+    mat->recvbuf = hypre_TAlloc(HYPRE_Real, (reqlen+num_local) , HYPRE_MEMORY_HOST);
 
     for (i=0; i<reqlen; i=j) /* j is set below */
     {
@@ -639,8 +639,8 @@ static void SetupSends(Matrix *mat, HYPRE_Int *inlist)
     hypre_MPI_Comm_rank(comm, &mype);
     hypre_MPI_Comm_size(comm, &npes);
 
-    requests = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
-    statuses = (hypre_MPI_Status *)  malloc(npes * sizeof(hypre_MPI_Status));
+    requests = hypre_TAlloc(hypre_MPI_Request, npes , HYPRE_MEMORY_HOST);
+    statuses = hypre_TAlloc(hypre_MPI_Status, npes , HYPRE_MEMORY_HOST);
 
     /* Determine size of and allocate sendbuf and sendind */
     mat->sendlen = 0;
@@ -650,8 +650,8 @@ static void SetupSends(Matrix *mat, HYPRE_Int *inlist)
     mat->sendind = NULL;
     if (mat->sendlen)
     {
-        mat->sendbuf = (HYPRE_Real *) malloc(mat->sendlen * sizeof(HYPRE_Real));
-        mat->sendind = (HYPRE_Int *) malloc(mat->sendlen * sizeof(HYPRE_Int));
+        mat->sendbuf = hypre_TAlloc(HYPRE_Real, mat->sendlen , HYPRE_MEMORY_HOST);
+        mat->sendind = hypre_TAlloc(HYPRE_Int, mat->sendlen , HYPRE_MEMORY_HOST);
     }
 
     j = 0;
@@ -702,14 +702,14 @@ void MatrixComplete(Matrix *mat)
     hypre_MPI_Comm_rank(mat->comm, &mype);
     hypre_MPI_Comm_size(mat->comm, &npes);
 
-    mat->recv_req = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
-    mat->send_req = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
-    mat->recv_req2 = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
-    mat->send_req2 = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
-    mat->statuses = (hypre_MPI_Status *)  malloc(npes * sizeof(hypre_MPI_Status));
+    mat->recv_req = hypre_TAlloc(hypre_MPI_Request, npes , HYPRE_MEMORY_HOST);
+    mat->send_req = hypre_TAlloc(hypre_MPI_Request, npes , HYPRE_MEMORY_HOST);
+    mat->recv_req2 = hypre_TAlloc(hypre_MPI_Request, npes , HYPRE_MEMORY_HOST);
+    mat->send_req2 = hypre_TAlloc(hypre_MPI_Request, npes , HYPRE_MEMORY_HOST);
+    mat->statuses = hypre_TAlloc(hypre_MPI_Status, npes , HYPRE_MEMORY_HOST);
 
-    outlist = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
-    inlist  = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
+    outlist = hypre_CTAlloc(HYPRE_Int, npes, HYPRE_MEMORY_HOST);
+    inlist  = hypre_CTAlloc(HYPRE_Int, npes, HYPRE_MEMORY_HOST);
 
     /* Create Numbering object */
     mat->numb = NumberingCreate(mat, PARASAILS_NROWS);

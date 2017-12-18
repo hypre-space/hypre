@@ -44,13 +44,13 @@ Hash *HashCreate(HYPRE_Int size)
 {
     HYPRE_Int i, *p;
 
-    Hash *h = (Hash *) malloc(sizeof(Hash));
+    Hash *h = hypre_TAlloc(Hash, 1, HYPRE_MEMORY_HOST);
 
     h->size  = size;
     h->num   = 0;
-    h->keys  = (HYPRE_Int *) malloc(size * sizeof(HYPRE_Int));
-    h->table = (HYPRE_Int *) malloc(size * sizeof(HYPRE_Int));
-    h->data  = (HYPRE_Int *) malloc(size * sizeof(HYPRE_Int));
+    h->keys  = hypre_TAlloc(HYPRE_Int, size , HYPRE_MEMORY_HOST);
+    h->table = hypre_TAlloc(HYPRE_Int, size , HYPRE_MEMORY_HOST);
+    h->data  = hypre_TAlloc(HYPRE_Int, size , HYPRE_MEMORY_HOST);
 
     /* Initialize the table to empty */
     p = h->table;

@@ -13,8 +13,7 @@
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
 
-#ifdef HYPRE_USE_MANAGED
-#include <cuda_runtime_api.h>
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
 #define MEM_PAD_LEN 1
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
@@ -49,9 +48,8 @@ void CheckError(cudaError_t const err, const char* file, char const* const fun, 
 #include <cusparse.h>
 #include <cublas_v2.h>
 #include <stdio.h>
-//#include <cuda_runtime_api.h>
+#include <cuda_runtime_api.h>
 #include <stdlib.h>
-
 inline const char *cusparseErrorCheck(cusparseStatus_t error)
 {
     switch (error)
@@ -161,4 +159,3 @@ void cudaSafeFree(void *ptr,int padding);
 #endif
 
 #endif
-

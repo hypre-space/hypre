@@ -37,22 +37,22 @@ DSCG_Iterations = 65
 Final Relative Residual Norm = 5.127733e-17
 
 # Output file: solvers_ij.out.9
-Iterations = 19
-PCG_Iterations = 15
+Iterations = 17
+PCG_Iterations = 13
 DSCG_Iterations = 4
-Final Relative Residual Norm = 4.300066e-17
+Final Relative Residual Norm = 2.361559e-17
 
 # Output file: solvers_ij.out.10
-Iterations = 19
-PCG_Iterations = 17
+Iterations = 16
+PCG_Iterations = 14
 DSCG_Iterations = 2
-Final Relative Residual Norm = 1.715691e-17
+Final Relative Residual Norm = 2.081070e-17
 
 # Output file: solvers_ij.out.11
-Iterations = 12
-PCG_Iterations = 9
+Iterations = 10
+PCG_Iterations = 7
 DSCG_Iterations = 3
-Final Relative Residual Norm = 5.036490e-18
+Final Relative Residual Norm = 1.094045e-17
 
 # Output file: solvers_ij.out.sysh
  Average Convergence Factor = 0.122527

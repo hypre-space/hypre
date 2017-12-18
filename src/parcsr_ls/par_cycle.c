@@ -105,6 +105,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int       smooth_num_levels;
    HYPRE_Int       num_threads, my_id;
 
+   /* RL */
+   HYPRE_Int       restri_type;
+   
    HYPRE_Real    alpha;
    HYPRE_Real  **l1_norms = NULL;
    HYPRE_Real   *l1_norms_level;
@@ -156,7 +159,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    smooth_num_levels   = hypre_ParAMGDataSmoothNumLevels(amg_data);
    l1_norms            = hypre_ParAMGDataL1Norms(amg_data);
    /* smooth_option       = hypre_ParAMGDataSmoothOption(amg_data); */
-
+   /* RL */
+   restri_type = hypre_ParAMGDataRestriction(amg_data); 
+   
    /*max_eig_est = hypre_ParAMGDataMaxEigEst(amg_data);
    min_eig_est = hypre_ParAMGDataMinEigEst(amg_data);
    cheby_fraction = hypre_ParAMGDataChebyFraction(amg_data);*/
@@ -164,7 +169,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
-   lev_counter = hypre_CTAlloc(HYPRE_Int, num_levels);
+   lev_counter = hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
 
    if (hypre_ParAMGDataParticipate(amg_data)) seq_cg = 1;
 
@@ -174,7 +179,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    if (grid_relax_points) old_version = 1;
 
-   num_coeffs = hypre_CTAlloc(HYPRE_Real, num_levels);
+   num_coeffs = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
    num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A_array[0]);
    comm = hypre_ParCSRMatrixComm(A_array[0]);
    hypre_MPI_Comm_rank(comm,&my_id);
@@ -237,7 +242,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          if (local_size < actual_local_size)
          {
             hypre_VectorData(hypre_ParVectorLocalVector(Utemp)) =
-	 	hypre_CTAlloc(HYPRE_Complex, actual_local_size);
+	  hypre_CTAlloc(HYPRE_Complex,  actual_local_size, HYPRE_MEMORY_HOST);
             hypre_ParVectorActualLocalSize(Utemp) = actual_local_size;
          }
          else
@@ -500,10 +505,15 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
               }
 	      else if (old_version)
 	      {
+                /* 
+                 printf("cycle %d: relax_type %d, relax_points %d\n", 
+                         cycle_param, relax_type, relax_points);
+                */
                  Solve_err_flag = hypre_BoomerAMGRelax(A_array[level],
                                                      Aux_F,
                                                      CF_marker_array[level],
-                                                     relax_type, relax_points,
+                                                     relax_type, 
+                                                     relax_points,
                                                      relax_weight[level],
                                                      omega[level],
                                                      l1_norms_level,
@@ -614,8 +624,17 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
          else
          {
-            hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
-                                      beta,F_array[coarse_grid]);
+            if (restri_type)
+            {
+               /* RL: no transpose for R */
+               hypre_ParCSRMatrixMatvec(alpha, R_array[fine_grid], Vtemp,
+                                        beta, F_array[coarse_grid]);
+            }
+            else
+            {
+               hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
+                                         beta,F_array[coarse_grid]);
+            }
          }
 
          ++level;
@@ -672,8 +691,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    
    hypre_ParAMGDataCycleOpCount(amg_data) = cycle_op_count;
 
-   hypre_TFree(lev_counter);
-   hypre_TFree(num_coeffs);
+   hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
+   hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
    if (smooth_num_levels > 0)
    {
      if (smooth_type == 7 || smooth_type == 8 || smooth_type == 9 ||

@@ -1376,8 +1376,8 @@ int HYPRE_LinSysCore::parameters(int numParams, char **params)
          if ( HYPreconID_ == HYMLI )
             HYPRE_LSI_MLISetParams(HYPrecon_, params[i]); 
 #else
-         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
-            printf("       HYPRE_LSC::MLI SetParams - MLI unavailable.\n");
+//         if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 2 && mypid_ == 0 )
+//            printf("       HYPRE_LSC::MLI SetParams - MLI unavailable.\n");
 #endif
       }
 
@@ -4114,42 +4114,42 @@ void HYPRE_LinSysCore::setupPreconBoomerAMG()
    HYPRE_BoomerAMGSetStrongThreshold(HYPrecon_,amgStrongThreshold_);
    HYPRE_BoomerAMGSetTol(HYPrecon_, 0.0e0);
    HYPRE_BoomerAMGSetMaxIter(HYPrecon_, 1);
-   num_sweeps = hypre_CTAlloc(int,4);
+   num_sweeps = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
    for ( i = 0; i < 4; i++ ) num_sweeps[i] = amgNumSweeps_[i];
 
    HYPRE_BoomerAMGSetNumGridSweeps(HYPrecon_, num_sweeps);
-   relax_type = hypre_CTAlloc(int,4);
+   relax_type = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
    for ( i = 0; i < 4; i++ ) relax_type[i] = amgRelaxType_[i];
 
    HYPRE_BoomerAMGSetGridRelaxType(HYPrecon_, relax_type);
-   relax_wt = hypre_CTAlloc(double,amgMaxLevels_);
+   relax_wt = hypre_CTAlloc(double,amgMaxLevels_,HYPRE_MEMORY_HOST);
    for ( i = 0; i < amgMaxLevels_; i++ ) relax_wt[i] = amgRelaxWeight_[i];
    HYPRE_BoomerAMGSetRelaxWeight(HYPrecon_, relax_wt);
 
-   relax_omega = hypre_CTAlloc(double,amgMaxLevels_);
+   relax_omega = hypre_CTAlloc(double,amgMaxLevels_,HYPRE_MEMORY_HOST);
    for ( i = 0; i < amgMaxLevels_; i++ ) relax_omega[i] = amgRelaxOmega_[i];
    HYPRE_BoomerAMGSetOmega(HYPrecon_, relax_omega);
 
    if (amgGridRlxType_) 
    {
-      relax_points = hypre_CTAlloc(int*,4);
-      relax_points[0] = hypre_CTAlloc(int,num_sweeps[0]);
+      relax_points = hypre_CTAlloc(int*,4,HYPRE_MEMORY_HOST);
+      relax_points[0] = hypre_CTAlloc(int,num_sweeps[0],HYPRE_MEMORY_HOST);
       for ( j = 0; j < num_sweeps[0]; j++ ) relax_points[0][j] = 0;
-      relax_points[1] = hypre_CTAlloc(int,2*num_sweeps[1]);
+      relax_points[1] = hypre_CTAlloc(int,2*num_sweeps[1],HYPRE_MEMORY_HOST);
       for ( j = 0; j < num_sweeps[1]; j+=2 ) 
 	 {relax_points[1][j] = -1;relax_points[1][j+1] =  1;}
-      relax_points[2] = hypre_CTAlloc(int,2*num_sweeps[2]);
+      relax_points[2] = hypre_CTAlloc(int,2*num_sweeps[2],HYPRE_MEMORY_HOST);
       for ( j = 0; j < num_sweeps[2]; j+=2 ) 
 	 {relax_points[2][j] = -1;relax_points[2][j+1] =  1;}
-      relax_points[3] = hypre_CTAlloc(int,num_sweeps[3]);
+      relax_points[3] = hypre_CTAlloc(int,num_sweeps[3],HYPRE_MEMORY_HOST);
       for ( j = 0; j < num_sweeps[3]; j++ ) relax_points[3][j] = 0;
    }
    else
    {
-      relax_points = hypre_CTAlloc(int*,4);
+      relax_points = hypre_CTAlloc(int*,4,HYPRE_MEMORY_HOST);
       for ( i = 0; i < 4; i++ ) 
       {
-         relax_points[i] = hypre_CTAlloc(int,num_sweeps[i]);
+         relax_points[i] = hypre_CTAlloc(int,num_sweeps[i],HYPRE_MEMORY_HOST);
          for ( j = 0; j < num_sweeps[i]; j++ ) relax_points[i][j] = 0;
       }
    }
@@ -4470,7 +4470,7 @@ void HYPRE_LinSysCore::setupPreconPILUT()
 void HYPRE_LinSysCore::setupPreconBlock()
 {
    HYPRE_Lookup *newLookup;
-   newLookup = (HYPRE_Lookup *) malloc(sizeof(HYPRE_Lookup));
+   newLookup = hypre_TAlloc(HYPRE_Lookup, 1, HYPRE_MEMORY_HOST);
    newLookup->object = (void *) lookup_;
    HYPRE_LSI_BlockPrecondSetLookup( HYPrecon_, newLookup );
    free( newLookup );
@@ -4530,27 +4530,27 @@ void HYPRE_LinSysCore::solveUsingBoomeramg(int& status)
    HYPRE_BoomerAMGSetMeasureType(HYSolver_, amgMeasureType_);
    HYPRE_BoomerAMGSetStrongThreshold(HYSolver_, amgStrongThreshold_);
 
-   num_sweeps = hypre_CTAlloc(int,4);
+   num_sweeps = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
    for ( i = 0; i < 4; i++ ) num_sweeps[i] = amgNumSweeps_[i];
    HYPRE_BoomerAMGSetNumGridSweeps(HYSolver_, num_sweeps);
 
-   relax_type = hypre_CTAlloc(int,4);
+   relax_type = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
    for ( i = 0; i < 4; i++ ) relax_type[i] = amgRelaxType_[i];
    HYPRE_BoomerAMGSetGridRelaxType(HYSolver_, relax_type);
 
    HYPRE_BoomerAMGSetMaxLevels(HYPrecon_, amgMaxLevels_);
-   relax_wt = hypre_CTAlloc(double, amgMaxLevels_);
+   relax_wt = hypre_CTAlloc(double, amgMaxLevels_,HYPRE_MEMORY_HOST);
    for ( i = 0; i <  amgMaxLevels_; i++ ) relax_wt[i] = amgRelaxWeight_[i];
    HYPRE_BoomerAMGSetRelaxWeight(HYSolver_, relax_wt);
 
-   relax_omega = hypre_CTAlloc(double, amgMaxLevels_);
+   relax_omega = hypre_CTAlloc(double, amgMaxLevels_,HYPRE_MEMORY_HOST);
    for ( i = 0; i <  amgMaxLevels_; i++ ) relax_omega[i] = amgRelaxOmega_[i];
    HYPRE_BoomerAMGSetOmega(HYPrecon_, relax_omega);
 
-   relax_points = hypre_CTAlloc(int*,4);
+   relax_points = hypre_CTAlloc(int*,4,HYPRE_MEMORY_HOST);
    for ( i = 0; i < 4; i++ ) 
    {
-      relax_points[i] = hypre_CTAlloc(int,num_sweeps[i]);
+      relax_points[i] = hypre_CTAlloc(int,num_sweeps[i],HYPRE_MEMORY_HOST);
       for ( j = 0; j < num_sweeps[i]; j++ ) relax_points[i][j] = 0;
    }
    HYPRE_BoomerAMGSetGridRelaxPoints(HYPrecon_, relax_points);
@@ -4814,6 +4814,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    double             rpg, rcond;
    void               *work=NULL;
    char               equed[1];
+   GlobalLU_t         Glu;
    mem_usage_t        mem_usage;
    superlu_options_t  slu_options;
    SuperLUStat_t      slu_stat;
@@ -4903,7 +4904,7 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    slu_options.Equil        = YES;
    slu_options.Trans        = NOTRANS;
    slu_options.Fact         = DOFACT;
-   slu_options.IterRefine   = DOUBLE;
+   slu_options.IterRefine   = SLU_DOUBLE;
    slu_options.DiagPivotThresh = 1.0;
    slu_options.PivotGrowth = YES;
    slu_options.ConditionNumber = YES;
@@ -4919,9 +4920,12 @@ double HYPRE_LinSysCore::solveUsingSuperLUX(int& status)
    // solve
    //-------------------------------------------------------------------
 
+//   dgssvx(&slu_options, &A2, perm_c, perm_r, etree,
+//          equed, R, C, &L, &U, work, lwork, &B, &X, 
+//          &rpg, &rcond, ferr, berr, &mem_usage, &slu_stat, &info);
    dgssvx(&slu_options, &A2, perm_c, perm_r, etree,
           equed, R, C, &L, &U, work, lwork, &B, &X, 
-          &rpg, &rcond, ferr, berr, &mem_usage, &slu_stat, &info);
+          &rpg, &rcond, ferr, berr, &Glu, &mem_usage, &slu_stat, &info);
 
    //-------------------------------------------------------------------
    // print SuperLU internal information at the first step

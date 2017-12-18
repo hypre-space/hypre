@@ -10,7 +10,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-
 include ../config/Makefile.config
 
 all: 

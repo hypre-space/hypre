@@ -71,7 +71,7 @@ HYPRE_Int *hypre_idx_malloc(HYPRE_Int n,const char *msg)
   if (n == 0)
     return NULL;
 
-  ptr = (HYPRE_Int *)malloc(sizeof(HYPRE_Int)*n);
+  ptr = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
     hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Int));
   }
@@ -92,7 +92,7 @@ HYPRE_Int *hypre_idx_malloc_init(HYPRE_Int n, HYPRE_Int ival,const char *msg)
   if (n == 0)
     return NULL;
 
-  ptr = (HYPRE_Int *)malloc(sizeof(HYPRE_Int)*n);
+  ptr = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
     hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Int));
   }
@@ -114,7 +114,7 @@ HYPRE_Real *hypre_fp_malloc(HYPRE_Int n,const char *msg)
   if (n == 0)
     return NULL;
 
-  ptr = (HYPRE_Real *)malloc(sizeof(HYPRE_Real)*n);
+  ptr = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
     hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Real));
   }
@@ -135,7 +135,7 @@ HYPRE_Real *hypre_fp_malloc_init(HYPRE_Int n, HYPRE_Real ival,const char *msg)
   if (n == 0)
     return NULL;
 
-  ptr = (HYPRE_Real *)malloc(sizeof(HYPRE_Real)*n);
+  ptr = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
     hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, n*sizeof(HYPRE_Real));
   }
@@ -158,7 +158,7 @@ void *hypre_mymalloc(HYPRE_Int nbytes,const char *msg)
   if (nbytes == 0)
     return NULL;
 
-  ptr = (void *)malloc(nbytes);
+  ptr = hypre_MAlloc(nbytes,HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
     hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, nbytes);
   }
@@ -198,7 +198,7 @@ void hypre_free_multi(void *ptr1,...)
 **************************************************************************/
 void hypre_memcpy_int( HYPRE_Int *dest, const HYPRE_Int *src, size_t n )
 {
-  if (dest) memcpy(dest, src, n*sizeof(HYPRE_Int));
+   if (dest) hypre_TMemcpy(dest,  src, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 }
 
 /*************************************************************************
@@ -206,7 +206,7 @@ void hypre_memcpy_int( HYPRE_Int *dest, const HYPRE_Int *src, size_t n )
 **************************************************************************/
 void hypre_memcpy_idx( HYPRE_Int *dest, const HYPRE_Int *src, size_t n )
 {
-  if (dest) memcpy(dest, src, n*sizeof(HYPRE_Int));
+   if (dest) hypre_TMemcpy(dest,  src, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 }
 
 /*************************************************************************

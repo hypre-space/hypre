@@ -302,8 +302,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    if (amg_print_level > 1) 
    {
-      num_coeffs       = hypre_CTAlloc(HYPRE_Real, num_levels);
-      num_variables    = hypre_CTAlloc(HYPRE_Real, num_levels);
+      num_coeffs       = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
+      num_variables    = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
       num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
       num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
 
@@ -359,8 +359,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          hypre_printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
       }
 
-      hypre_TFree(num_coeffs);
-      hypre_TFree(num_variables);
+      hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
+      hypre_TFree(num_variables, HYPRE_MEMORY_HOST);
    }
 
    HYPRE_ANNOTATION_END("BoomerAMG.solve");

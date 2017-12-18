@@ -70,7 +70,7 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
        * 5 point coarse grid stencil 
        *--------------------------------------------------------------------*/
       RAP_stencil_size = 5;
-      RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+      RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
       for (j = -1; j < 2; j++)
       {
          for (i = -1; i < 2; i++)
@@ -103,7 +103,7 @@ hypre_PFMGCreateCoarseOp5( hypre_StructMatrix *R,
        * in the standard lexicographic ordering.
        *--------------------------------------------------------------------*/
       RAP_stencil_size = 3;
-      RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+      RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
       for (j = -1; j < 1; j++)
       {
          for (i = -1; i < 1; i++)

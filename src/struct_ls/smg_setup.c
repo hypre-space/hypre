@@ -122,8 +122,8 @@ hypre_SMGSetup( void               *smg_vdata,
    }
    (smg_data -> max_levels) = max_levels;
 
-   grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
-   PT_grid_l = hypre_TAlloc(hypre_StructGrid *, max_levels);
+   grid_l = hypre_TAlloc(hypre_StructGrid *,  max_levels, HYPRE_MEMORY_HOST);
+   PT_grid_l = hypre_TAlloc(hypre_StructGrid *,  max_levels, HYPRE_MEMORY_HOST);
    PT_grid_l[0] = NULL;
    hypre_StructGridRef(grid, &grid_l[0]);
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
@@ -203,13 +203,13 @@ hypre_SMGSetup( void               *smg_vdata,
     * Set up matrix and vector structures
     *-----------------------------------------------------*/
 
-   A_l  = hypre_TAlloc(hypre_StructMatrix *, num_levels);
-   PT_l = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1);
-   R_l  = hypre_TAlloc(hypre_StructMatrix *, num_levels - 1);
-   b_l  = hypre_TAlloc(hypre_StructVector *, num_levels);
-   x_l  = hypre_TAlloc(hypre_StructVector *, num_levels);
-   tb_l = hypre_TAlloc(hypre_StructVector *, num_levels);
-   tx_l = hypre_TAlloc(hypre_StructVector *, num_levels);
+   A_l  = hypre_TAlloc(hypre_StructMatrix *,  num_levels, HYPRE_MEMORY_HOST);
+   PT_l = hypre_TAlloc(hypre_StructMatrix *,  num_levels - 1, HYPRE_MEMORY_HOST);
+   R_l  = hypre_TAlloc(hypre_StructMatrix *,  num_levels - 1, HYPRE_MEMORY_HOST);
+   b_l  = hypre_TAlloc(hypre_StructVector *,  num_levels, HYPRE_MEMORY_HOST);
+   x_l  = hypre_TAlloc(hypre_StructVector *,  num_levels, HYPRE_MEMORY_HOST);
+   tb_l = hypre_TAlloc(hypre_StructVector *,  num_levels, HYPRE_MEMORY_HOST);
+   tx_l = hypre_TAlloc(hypre_StructVector *,  num_levels, HYPRE_MEMORY_HOST);
    r_l  = tx_l;
    e_l  = tx_l;
 
@@ -312,8 +312,8 @@ hypre_SMGSetup( void               *smg_vdata,
 #endif
    }
 
-   data = hypre_DeviceCTAlloc(HYPRE_Real,data_size);
-   data_const = hypre_CTAlloc(HYPRE_Real,data_size_const);
+   data = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
+   data_const = hypre_CTAlloc(HYPRE_Real,data_size_const,HYPRE_MEMORY_HOST);
    //printf("data =%d,data_const=%d,data_location = %d\n",data_size,data_size_const,data_location);
    (smg_data -> data) = data;
    (smg_data -> data_const) = data_const;
@@ -464,10 +464,10 @@ hypre_SMGSetup( void               *smg_vdata,
     * is temporarily changed to temporary data.
     *-----------------------------------------------------*/
 
-   relax_data_l    = hypre_TAlloc(void *, num_levels);
-   residual_data_l = hypre_TAlloc(void *, num_levels);
-   restrict_data_l = hypre_TAlloc(void *, num_levels);
-   interp_data_l   = hypre_TAlloc(void *, num_levels);
+   relax_data_l    = hypre_TAlloc(void *,  num_levels, HYPRE_MEMORY_HOST);
+   residual_data_l = hypre_TAlloc(void *,  num_levels, HYPRE_MEMORY_HOST);
+   restrict_data_l = hypre_TAlloc(void *,  num_levels, HYPRE_MEMORY_HOST);
+   interp_data_l   = hypre_TAlloc(void *,  num_levels, HYPRE_MEMORY_HOST);
 
    /* temporarily set the data for x_l[0] and b_l[0] to temp data */
    b_data = hypre_StructVectorData(b_l[0]);
@@ -596,8 +596,8 @@ hypre_SMGSetup( void               *smg_vdata,
    if ((smg_data -> logging) > 0)
    {
       max_iter = (smg_data -> max_iter);
-      (smg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter);
-      (smg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
+      (smg_data -> norms)     = hypre_TAlloc(HYPRE_Real,  max_iter, HYPRE_MEMORY_HOST);
+      (smg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real,  max_iter, HYPRE_MEMORY_HOST);
    }
 
 #if DEBUG

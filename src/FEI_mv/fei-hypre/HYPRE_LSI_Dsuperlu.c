@@ -33,13 +33,13 @@
 #include "dsuperlu_include.h"
 
 #ifdef HAVE_DSUPERLU
-#include "../DSuperLU/SRC/superlu_ddefs.h"
+#include "superlu_ddefs.h"
 
 typedef struct HYPRE_LSI_DSuperLU_Struct
 {
    MPI_Comm           comm_;
    HYPRE_ParCSRMatrix Amat_;
-   superlu_options_t  options_;
+   superlu_dist_options_t  options_;
    SuperMatrix        sluAmat_;
    ScalePermstruct_t  ScalePermstruct_;
    SuperLUStat_t      stat_;
@@ -64,7 +64,7 @@ int HYPRE_LSI_DSuperLUGenMatrix(HYPRE_Solver solver);
 int HYPRE_LSI_DSuperLUCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    HYPRE_LSI_DSuperLU *sluPtr;
-   sluPtr = (HYPRE_LSI_DSuperLU *) malloc(sizeof(HYPRE_LSI_DSuperLU));
+   sluPtr = hypre_TAlloc(HYPRE_LSI_DSuperLU, 1, HYPRE_MEMORY_HOST);
    assert ( sluPtr != NULL );
    sluPtr->comm_        = comm;
    sluPtr->Amat_        = NULL;
@@ -73,7 +73,7 @@ int HYPRE_LSI_DSuperLUCreate( MPI_Comm comm, HYPRE_Solver *solver )
    sluPtr->startRow_    = 0;
    sluPtr->outputLevel_ = 0;
    sluPtr->setupFlag_   = 0;
-   sluPtr->berr_ = (double *) malloc(sizeof(double));
+   sluPtr->berr_ = hypre_TAlloc(double, 1, HYPRE_MEMORY_HOST);
    *solver = (HYPRE_Solver) sluPtr;
    return 0;
 }
@@ -186,8 +186,9 @@ int HYPRE_LSI_DSuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    if (sluPtr->outputLevel_ < 2) sluPtr->options_.PrintStat = NO;
    ScalePermstructInit(sluPtr->globalNRows_, sluPtr->globalNRows_,
                        &(sluPtr->ScalePermstruct_));
-   LUstructInit(sluPtr->globalNRows_, sluPtr->globalNRows_, 
-                &(sluPtr->LUstruct_));
+//   LUstructInit(sluPtr->globalNRows_, sluPtr->globalNRows_, 
+//                &(sluPtr->LUstruct_));
+   LUstructInit(sluPtr->globalNRows_, &(sluPtr->LUstruct_));
    sluPtr->berr_[0] = 0.0;
    PStatInit(&(sluPtr->stat_));
    pdgssvx(&(sluPtr->options_), &(sluPtr->sluAmat_), 
