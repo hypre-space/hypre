@@ -121,6 +121,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
 {
    HYPRE_Int              P_stored_as_transpose = 0;
    hypre_StructStencil   *stencil;
+
    hypre_StructMatrix    *Ac_tmp;
 
 #if defined(HYPRE_MEMORY_GPU)
@@ -200,6 +201,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
    }
    
    hypre_StructMatrixAssemble(Ac_tmp);
+
 #if defined(HYPRE_MEMORY_GPU)   
    if ( data_location_A != data_location_Ac )
    {

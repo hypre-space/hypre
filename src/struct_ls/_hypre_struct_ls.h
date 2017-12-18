@@ -47,6 +47,7 @@ HYPRE_Int hypre_CyclicReductionSetCDir ( void *cyc_red_vdata , HYPRE_Int cdir );
 HYPRE_Int hypre_CyclicReductionSetBase ( void *cyc_red_vdata , hypre_Index base_index , hypre_Index base_stride );
 HYPRE_Int hypre_CyclicReductionDestroy ( void *cyc_red_vdata );
 HYPRE_Int hypre_CyclicReductionSetMaxLevel( void   *cyc_red_vdata, HYPRE_Int   max_level  );
+
 /* general.c */
 HYPRE_Int hypre_Log2 ( HYPRE_Int p );
 
@@ -233,6 +234,7 @@ HYPRE_Int HYPRE_StructPFMGGetPrintLevel ( HYPRE_StructSolver solver , HYPRE_Int 
 HYPRE_Int HYPRE_StructPFMGGetNumIterations ( HYPRE_StructSolver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_StructPFMGGetFinalRelativeResidualNorm ( HYPRE_StructSolver solver , HYPRE_Real *norm );
 HYPRE_Int hypre_PFMGSetDeviceLevel( void *pfmg_vdata, HYPRE_Int   device_level  );
+
 /* HYPRE_struct_smg.c */
 HYPRE_Int HYPRE_StructSMGCreate ( MPI_Comm comm , HYPRE_StructSolver *solver );
 HYPRE_Int HYPRE_StructSMGDestroy ( HYPRE_StructSolver solver );
@@ -262,6 +264,7 @@ HYPRE_Int HYPRE_StructSMGGetFinalRelativeResidualNorm ( HYPRE_StructSolver solve
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 HYPRE_Int hypre_StructSMGSetDeviceLevel( void   *smg_vdata, HYPRE_Int   device_level);
 #endif
+
 /* HYPRE_struct_sparse_msg.c */
 HYPRE_Int HYPRE_StructSparseMSGCreate ( MPI_Comm comm , HYPRE_StructSolver *solver );
 HYPRE_Int HYPRE_StructSparseMSGDestroy ( HYPRE_StructSolver solver );
@@ -530,6 +533,7 @@ HYPRE_Int hypre_SMGPrintLogging ( void *smg_vdata , HYPRE_Int myid );
 HYPRE_Int hypre_SMGGetFinalRelativeResidualNorm ( void *smg_vdata , HYPRE_Real *relative_residual_norm );
 HYPRE_Int hypre_SMGSetStructVectorConstantValues ( hypre_StructVector *vector , HYPRE_Real values , hypre_BoxArray *box_array , hypre_Index stride );
 HYPRE_Int hypre_StructSMGSetMaxLevel( void   *smg_vdata, HYPRE_Int   max_level  );
+
 /* smg_relax.c */
 void *hypre_SMGRelaxCreate ( MPI_Comm comm );
 HYPRE_Int hypre_SMGRelaxDestroyTempVec ( void *relax_vdata );

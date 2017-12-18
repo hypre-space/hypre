@@ -133,5 +133,19 @@ void freeCPUReductionMemBlock();
 
 #endif
 
+#ifdef HYPRE_USE_OMP45
+HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
+			   const char *type1, const char *type2);
+
+HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
+
+HYPRE_Int HYPRE_OMPOffloadOn();
+
+HYPRE_Int HYPRE_OMPOffloadOff();
+
+HYPRE_Int HYPRE_OMPOffloadStatPrint();
+
+#endif
+
 #endif
 

@@ -453,6 +453,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
       } /* end ForBoxI */
 
    }
+
    hypre_StructMatrixAssemble(Ac);
 
    return hypre_error_flag;
@@ -508,7 +509,8 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    //HYPRE_Int               num_level_GPU = 0;
    //HYPRE_Int               max_box_size  = 0;
    //HYPRE_Int               device_level  =-1;
-#endif   
+#endif
+
    /*-----------------------------------------------------
     * Set up coarse grids
     *-----------------------------------------------------*/
@@ -615,14 +617,14 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
       A_l[l+1] = hypre_CycRedCreateCoarseOp(A_l[l], grid_l[l+1], cdir);
-      hypre_StructMatrixInitializeShell(A_l[l+1]);
+      //hypre_StructMatrixInitializeShell(A_l[l+1]);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
       data_size_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
 
       x_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(x_l[l+1], x_num_ghost);
       hypre_StructVectorInitializeShell(x_l[l+1]);
-      hypre_StructVectorSetDataSize(x_l[l+1],data_size,data_size_const);
+      hypre_StructVectorSetDataSize(x_l[l+1], &data_size, &data_size_const);
    }
 
    data =  hypre_DeviceCTAlloc(HYPRE_Real,data_size);
@@ -752,7 +754,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       }
    }
 #endif
-  
+
    return hypre_error_flag;
 }
 
@@ -878,12 +880,12 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
  
    for (l = 0; l < num_levels - 1 ; l++)
    {
-     {
-       HYPRE_Int world_rank;
-       MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-       //if (world_rank == 0)
-       //	 hypre_printf("%s down %d pre-relaxation,\n",tmp_print, l);
-     }
+      {
+         //HYPRE_Int world_rank;
+         //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+         //if (world_rank == 0)
+         //hypre_printf("%s down %d pre-relaxation,\n",tmp_print, l);
+      }
       /* set cindex and stride */
       hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
@@ -956,7 +958,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             xc_dbox = hypre_BoxArrayBox(hypre_StructVectorDataSpace(x_l[l+1]), ci);
 
             xp  = hypre_StructVectorBoxData(x_l[l], fi);
-	    xcp = hypre_StructVectorBoxData(x_l[l+1], ci);
+            xcp = hypre_StructVectorBoxData(x_l[l+1], ci);
+
             hypre_SetIndex3(index, 0, 0, 0);
             hypre_IndexD(index, cdir) = -1;
             Awp = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
@@ -1002,11 +1005,12 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
     * for zero diagonal that can occur for singlar
     * problems like the full Neumann problem.
     *--------------------------------------------------*/
+
    {
-     HYPRE_Int world_rank;
-     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-     //if (world_rank == 0)
-     //  hypre_printf("%s bottom relaxation,\n",tmp_print);
+      //HYPRE_Int world_rank;
+      //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+      //if (world_rank == 0)
+      //hypre_printf("%s bottom relaxation,\n",tmp_print);
    }
    /* set cindex and stride */
    hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
@@ -1053,10 +1057,10 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
    for (l = (num_levels - 2); l >= 0; l--)
    {
       {
-	 HYPRE_Int world_rank;
-	 MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-	 //if (world_rank == 0)
-	 //   hypre_printf("%s up %d post-relaxation,\n",tmp_print, l);
+	     //HYPRE_Int world_rank;
+	     //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+	     //if (world_rank == 0)
+	     //hypre_printf("%s up %d post-relaxation,\n",tmp_print, l);
       }
       /* set cindex and stride */
       hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
@@ -1156,7 +1160,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi);
                {
-		 xp[xi] -= (Awp[Ai]*xp[xi+xwp_offset] + Aep[Ai]*xp[xi+xep_offset]) / Ap[Ai];
+                  xp[xi] -= (Awp[Ai]*xp[xi+xwp_offset] + Aep[Ai]*xp[xi+xep_offset]) / Ap[Ai];
                }
                hypre_BoxLoop2End(Ai, xi);
             }
@@ -1239,12 +1243,7 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
          hypre_ComputePkgDestroy(cyc_red_data -> up_compute_pkg_l[l]);
       }
       hypre_BoxArrayDestroy(cyc_red_data -> fine_points_l[l]);
-#ifdef HYPRE_USE_OMP45
-      hypre_DeviceTFree(cyc_red_data -> data, HYPRE_Real,
-                        cyc_red_data -> data_size);
-#else
       hypre_DeviceTFree(cyc_red_data -> data);
-#endif
       hypre_TFree(cyc_red_data -> grid_l);
       hypre_TFree(cyc_red_data -> fine_points_l);
       hypre_TFree(cyc_red_data -> A_l);

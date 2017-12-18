@@ -109,12 +109,7 @@ hypre_PFMGDestroy( void *pfmg_vdata )
             hypre_StructVectorDestroy(pfmg_data -> tx_l[l+1]);
          }
 
-#ifdef HYPRE_USE_OMP45
-	 hypre_DeviceTFree(pfmg_data -> data, HYPRE_Real,
-			   pfmg_data -> data_size);
-#else
 	 hypre_DeviceTFree(pfmg_data -> data);
-#endif
 	 hypre_TFree(pfmg_data -> data_const);
 	 
          hypre_TFree(pfmg_data -> cdir_l);

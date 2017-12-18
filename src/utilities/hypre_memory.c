@@ -24,6 +24,25 @@
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
+
+/* global variables for OMP 45 */
+#ifdef HYPRE_USE_OMP45
+HYPRE_Int hypre__global_offload = 0;
+HYPRE_Int hypre__offload_device_num;
+
+/* stats */
+HYPRE_Long hypre__target_allc_count = 0;
+HYPRE_Long hypre__target_free_count = 0;
+HYPRE_Long hypre__target_allc_bytes = 0;
+HYPRE_Long hypre__target_free_bytes = 0;
+
+HYPRE_Long hypre__target_htod_count = 0;
+HYPRE_Long hypre__target_dtoh_count = 0;
+HYPRE_Long hypre__target_htod_bytes = 0;
+HYPRE_Long hypre__target_dtoh_bytes = 0;
+
+#endif
+
 /******************************************************************************
  *
  * Standard routines

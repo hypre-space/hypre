@@ -64,6 +64,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
    {
       hypre_StructGridNumGhost(grid)[i] = 1;
    }
+
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
    hypre_StructGridDataLocation(grid) = LOCATION_UNSET;
 #endif
@@ -371,6 +372,7 @@ hypre_StructGridAssemble( hypre_StructGrid *grid )
    hypre_StructGridLocalSize(grid) = size;
    hypre_StructGridGhlocalSize(grid) = ghostsize;
    hypre_BoxDestroy(ghostbox);
+
    /* if the box manager has been created then we don't need to do the
     * following (because it was done through the coarsening routine) */
    if (!is_boxman)

@@ -77,7 +77,7 @@ hypre_StructStencilDestroy( hypre_StructStencil *stencil )
       if (hypre_StructStencilRefCount(stencil) == 0)
       {
          hypre_TFree(hypre_StructStencilShape(stencil));
-	 hypre_TFree(stencil);
+         hypre_TFree(stencil);
       }
    }
 

@@ -675,11 +675,45 @@ HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num,
    return 0;
 }
 
-HYPRE_Int HYPRE_IsMapped(void *p, HYPRE_Int device_num) {
+HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num)
+{
    if (hypre__global_offload && !omp_target_is_present(p, device_num)) {
       printf("HYPRE mapping error: %p has not been mapped to device %d!\n", p, device_num);
       return 1;
    }
    return 0;
 }
+
+/* OMP offloading switch */
+HYPRE_Int HYPRE_OMPOffloadOn()
+{ 
+   fprintf(stdout, "Hypre OMP 4.5 Mapping/Offloading has been turned on\n");
+   hypre__global_offload = 1;
+   hypre__offload_device_num = omp_get_default_device();
+
+   return 0;
+}
+
+HYPRE_Int HYPRE_OMPOffloadOff()
+{
+   fprintf(stdout, "Hypre OMP 4.5 Mapping/Offloading has been turned off\n");
+   hypre__global_offload = 0;
+
+   return 0;
+}
+
+HYPRE_Int HYPRE_OMPOffloadStatPrint() {
+   hypre_printf("Hypre OMP target memory stats:\n"
+                "      ALLOC   %ld bytes, %ld counts\n"
+                "      FREE    %ld bytes, %ld counts\n"
+                "      HTOD    %ld bytes, %ld counts\n"
+                "      DTOH    %ld bytes, %ld counts\n",
+                hypre__target_allc_bytes, hypre__target_allc_count,
+                hypre__target_free_bytes, hypre__target_free_count,
+                hypre__target_htod_bytes, hypre__target_htod_count,
+                hypre__target_dtoh_bytes, hypre__target_dtoh_count);
+
+   return 0;
+}
+
 #endif

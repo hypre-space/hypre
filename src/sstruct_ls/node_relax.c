@@ -154,15 +154,8 @@ hypre_NodeRelaxDestroy( void *relax_vdata )
       hypre_TFree(relax_data -> compute_pkgs);
       hypre_SStructPVectorDestroy(relax_data -> t);
 
-#ifdef HYPRE_USE_OMP45
-      hypre_DeviceTFree(relax_data -> x_loc, HYPRE_Real, 
-                        relax_data -> x_loc_size);
-      hypre_DeviceTFree((relax_data ->A_loc)[0], HYPRE_Real,
-                        relax_data -> A_loc_size);
-#else
       hypre_DeviceTFree(relax_data -> x_loc);
       hypre_DeviceTFree((relax_data ->A_loc)[0]);
-#endif
       hypre_TFree(relax_data -> A_loc);
       hypre_TFree(relax_data -> bp);
       hypre_TFree(relax_data -> xp);

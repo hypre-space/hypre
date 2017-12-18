@@ -666,6 +666,10 @@ HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,
                 char      ***argv )
 {
+#if defined(HYPRE_USE_OMP45)
+   hypre__offload_device_num = omp_get_initial_device();
+#endif
+
    return (HYPRE_Int) MPI_Init(argc, argv);
 }
 
@@ -675,11 +679,11 @@ hypre_MPI_Finalize( )
 #if defined(HYPRE_USE_OMP45)
    if (global_send_buffer)
    {
-      hypre_DeviceTFree(global_send_buffer, HYPRE_Complex, global_send_size);
+      hypre_DeviceTFree(global_send_buffer);
    }
    if (global_recv_buffer)
    {
-      hypre_DeviceTFree(global_recv_buffer, HYPRE_Complex, global_recv_size);
+      hypre_DeviceTFree(global_recv_buffer);
    }
 #endif
 

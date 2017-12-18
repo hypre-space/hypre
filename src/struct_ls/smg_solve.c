@@ -164,10 +164,10 @@ hypre_SMGSolve( void               *smg_vdata,
       hypre_SMGRelaxSetMaxIter(relax_data_l[0], num_pre_relax);
       hypre_SMGRelaxSetZeroGuess(relax_data_l[0], zero_guess);
       {
-	HYPRE_Int world_rank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-	//if (world_rank == 0)
-	//  hypre_printf("%s down 0 pre-relaxation,\n",tmp_print);
+	     //HYPRE_Int world_rank;
+	     //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+	     //if (world_rank == 0)
+	     //hypre_printf("%s down 0 pre-relaxation,\n",tmp_print);
       }
       hypre_SMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
       zero_guess = 0;
@@ -225,12 +225,12 @@ hypre_SMGSolve( void               *smg_vdata,
             hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 1);
             hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
             hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 1);
-	    {
-	      HYPRE_Int world_rank;
-	      MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-	      //if (world_rank == 0)
-	      //hypre_printf("%s down %d pre-relaxation,\n",tmp_print, l);
-	    }
+	        {
+	         //HYPRE_Int world_rank;
+	         //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+	         //if (world_rank == 0)
+	         //hypre_printf("%s down %d pre-relaxation,\n",tmp_print, l);
+	        }
             hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 
             /* compute residual (b - Ax) */
@@ -257,12 +257,12 @@ hypre_SMGSolve( void               *smg_vdata,
           *--------------------------------------------------*/
 
          hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 1);
-	 {
-	   HYPRE_Int world_rank;
-	   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-	   //if (world_rank == 0)
-	   //  hypre_printf("%s bottom relaxation,\n",tmp_print);
-	 }
+	     {
+	      //HYPRE_Int world_rank;
+	      //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+	      //if (world_rank == 0)
+	      //  hypre_printf("%s bottom relaxation,\n",tmp_print);
+	     }
          hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
 #if DEBUG
          if(hypre_StructStencilNDim(hypre_StructMatrixStencil(A)) == 3)
@@ -295,12 +295,12 @@ hypre_SMGSolve( void               *smg_vdata,
             hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 0);
             hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
             hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 0);
-	    {
-	      HYPRE_Int world_rank;
-	      MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-	      //if (world_rank == 0)
-	      //hypre_printf("%s up %d post-relaxation,\n",tmp_print, l);
-	    }
+	        {
+	        //  HYPRE_Int world_rank;
+	        // MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+	        //if (world_rank == 0)
+	        //hypre_printf("%s up %d post-relaxation,\n",tmp_print, l);
+	        }
             hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
          }
 
@@ -342,10 +342,10 @@ hypre_SMGSolve( void               *smg_vdata,
       hypre_SMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
       hypre_SMGRelaxSetZeroGuess(relax_data_l[0], 0);
       {
-	HYPRE_Int world_rank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-	//if (world_rank == 0)
-	//  hypre_printf("%s up 0 post-relaxation,\n",tmp_print);
+	   //HYPRE_Int world_rank;
+	   //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+	   //if (world_rank == 0)
+	   //hypre_printf("%s up 0 post-relaxation,\n",tmp_print);
       }
       hypre_SMGRelax(relax_data_l[0], A_l[0], b_l[0], x_l[0]);
 

@@ -3754,7 +3754,7 @@ then
    then
       if test "$hypre_using_openmp45" = "yes"
       then
-         for ac_prog in clang-gpu
+         for ac_prog in xlc-gpu clang-gpu
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3889,7 +3889,7 @@ done
    else
       if test "$hypre_using_openmp45" = "yes"
       then
-         for ac_prog in mpiclang-gpu
+         for ac_prog in mpixlc-gpu mpiclang-gpu
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4035,7 +4035,7 @@ then
    then
       if test "$hypre_using_openmp45" = "yes"
       then
-         for ac_prog in clang++-gpu
+         for ac_prog in xlC-gpu clang++-gpu
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4170,7 +4170,7 @@ done
    else
       if test "$hypre_using_openmp45" = "yes"
       then
-         for ac_prog in mpiclang++-gpu
+         for ac_prog in mpixlC-gpu mpiclang++-gpu
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -8174,8 +8174,24 @@ fi
 
 if test "$hypre_using_openmp45" = "yes"
 then
-   CFLAGS+=" -O3 -fopenmp-nonaliased-maps -DHYPRE_USE_OMP45"
-   CXXFLAGS+=" -O3 -fopenmp-nonaliased-maps -DHYPRE_USE_OMP45"
+   CFLAGS+=" -DHYPRE_USE_OMP45"
+   CXXFLAGS+=" -DHYPRE_USE_OMP45"
+   if test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"
+   then
+     CFLAGS+=" -fopenmp-nonaliased-maps"
+   fi
+   if test "$CXX" = "clang++-gpu" || test "$CXX" = "mpiclang++-gpu"
+   then
+     CXXFLAGS+=" -fopenmp-nonaliased-maps"
+   fi
+   if test "$hypre_using_debug" = "yes"
+   then
+      CFLAGS+=" -DHYPRE_OMP45_DEBUG"
+      CXXFLAGS+=" -DHYPRE_OMP45_DEBUG"
+   else
+      CFLAGS+=" -O3"
+      CXXFLAGS+=" -O3"
+   fi
 fi
 
 HYPRE_INSTALLDIR="${prefix}"

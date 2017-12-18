@@ -1028,7 +1028,7 @@ then
    then
       if test "$hypre_using_openmp45" = "yes"
       then
-         AC_CHECK_PROGS(CC, [clang-gpu])
+         AC_CHECK_PROGS(CC, [xlc-gpu clang-gpu])
       fi
 
       if test "$hypre_using_openmp" = "yes"
@@ -1040,7 +1040,7 @@ then
    else
       if test "$hypre_using_openmp45" = "yes"
       then
-         AC_CHECK_PROGS(CC, [mpiclang-gpu])
+         AC_CHECK_PROGS(CC, [mpixlc-gpu mpiclang-gpu])
       fi
       
       if test "$hypre_using_openmp" = "yes"
@@ -1063,7 +1063,7 @@ then
    then
       if test "$hypre_using_openmp45" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [clang++-gpu])
+         AC_CHECK_PROGS(CXX, [xlC-gpu clang++-gpu])
       fi
 
       if test "$hypre_using_openmp" = "yes"
@@ -1075,7 +1075,7 @@ then
    else
       if test "$hypre_using_openmp45" = "yes"
       then
-         AC_CHECK_PROGS(CXX, [mpiclang++-gpu])
+         AC_CHECK_PROGS(CXX, [mpixlC-gpu mpiclang++-gpu])
       fi
 
       if test "$hypre_using_openmp" = "yes"
@@ -1672,8 +1672,24 @@ fi
 
 if test "$hypre_using_openmp45" = "yes"
 then
-   CFLAGS+=" -O3 -fopenmp-nonaliased-maps -DHYPRE_USE_OMP45"
-   CXXFLAGS+=" -O3 -fopenmp-nonaliased-maps -DHYPRE_USE_OMP45"
+   CFLAGS+=" -DHYPRE_USE_OMP45"
+   CXXFLAGS+=" -DHYPRE_USE_OMP45"
+   if [test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"]
+   then
+     CFLAGS+=" -fopenmp-nonaliased-maps"
+   fi
+   if [test "$CXX" = "clang++-gpu" || test "$CXX" = "mpiclang++-gpu"]
+   then
+     CXXFLAGS+=" -fopenmp-nonaliased-maps"
+   fi
+   if test "$hypre_using_debug" = "yes"
+   then
+      CFLAGS+=" -DHYPRE_OMP45_DEBUG"
+      CXXFLAGS+=" -DHYPRE_OMP45_DEBUG"
+   else
+      CFLAGS+=" -O3"
+      CXXFLAGS+=" -O3"
+   fi
 fi
 
 dnl *********************************************************************

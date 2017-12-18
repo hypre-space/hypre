@@ -1356,20 +1356,23 @@ private:
 #define hypre_BoxLoop0End    zypre_omp4_dist_BoxLoop0End
 #define hypre_BoxLoop1Begin  zypre_omp4_dist_BoxLoop1Begin
 #define hypre_BoxLoop1End    zypre_omp4_dist_BoxLoop1End
-#define hypre_BoxBoundaryCopyBegin  zypre_omp4_dist_BoxLoop1_v2_Begin
-#define hypre_BoxBoundaryCopyEnd    zypre_omp4_dist_BoxLoop1_v2_End
+//#define hypre_BoxBoundaryCopyBegin  zypre_omp4_dist_BoxLoop1_v2_Begin
+//#define hypre_BoxBoundaryCopyEnd    zypre_omp4_dist_BoxLoop1_v2_End
+#define hypre_BasicBoxLoop2Begin    zypre_omp4_dist_BoxLoop2_v2_Begin
 #define hypre_BoxDataExchangeBegin  zypre_omp4_dist_BoxLoop2_v2_Begin
 #define hypre_BoxDataExchangeEnd    zypre_omp4_dist_BoxLoop2_v2_End
 #define hypre_BoxLoop2Begin  zypre_omp4_dist_BoxLoop2Begin
 #define hypre_BoxLoop2End    zypre_omp4_dist_BoxLoop2End
 #define hypre_BoxLoop3Begin  zypre_omp4_dist_BoxLoop3Begin
+#if 0
 #define hypre_BoxLoop3_SAME_STRIDE_Begin  zypre_omp4_dist_BoxLoop3_SAME_STRIDE_Begin
+#endif
 #define hypre_BoxLoop3End    zypre_omp4_dist_BoxLoop3End
 #define hypre_BoxLoop4Begin  zypre_omp4_dist_BoxLoop4Begin
 #define hypre_BoxLoop4End    zypre_omp4_dist_BoxLoop4End
 
 /* reductions */
-#if 1
+#if 0
 #define hypre_newBoxLoop1ReductionBegin   zypre_omp4_dist_Red_BoxLoop1Begin
 #define hypre_newBoxLoop1ReductionEnd    zypre_omp4_dist_Red_BoxLoop1End
 #define hypre_newBoxLoop2ReductionBegin   zypre_omp4_dist_Red_BoxLoop2Begin
@@ -1519,6 +1522,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = 1;  hypre__J = hypre__thread;  i1 = i2 = 
   if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet3Body(1, i1, i2, i3) } \
   if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet3Body(2, i1, i2, i3) }
 
+#if 0
 /* - - - - - special Box 3: XXX */
 #define zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(j, i1, i2, i3) \
 /* */ \
@@ -1545,7 +1549,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = 1;  hypre__J = hypre__thread;  i1 = i3 = 
 /*if (hypre__ndim > 0)*/ { zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(0, i1, i2, i3) } \
   if (hypre__ndim > 1)   { zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(1, i1, i2, i3) } \
   if (hypre__ndim > 2)   { zypre_omp4_BoxLoopSet3_SAME_STRIDE_Body(2, i1, i2, i3) }
-
+#endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * device code for BoxLoop 4, set i1, i2, i3, i4
@@ -1712,7 +1716,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
 }
 
 
-#if 1
+#if 0
 
 /* no longer needed, use the above BoxLoop's for reductions */
 
@@ -1871,13 +1875,12 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    } \
 }
 
+#if 0
 #define hypre_LoopBegin0(size, idx) \
 { \
    HYPRE_Int idx, hypre__size = size; \
    for (idx = 0; idx < hypre__size; idx++) \
    {
-
-
 #endif
 
 /* USE THIS ONLY FOR BOXLOOP1 */
@@ -1886,6 +1889,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
   index[1] = hypre__id_1; \
   index[2] = hypre__id_2;
 
+#endif
 #else
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
@@ -2350,15 +2354,9 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
 
 #define hypre_StructGetIndexD(index,i,index_d) (index_d)
 
-#ifdef HYPRE_MEMORY_GPU
 #define hypre_StructCleanIndexD()\
 hypre_DeviceTFree(indices_d);\
 hypre_DeviceTFree(stencil_shape_d);
-#else /* OMP 45 */
-#define hypre_StructCleanIndexD(stencil_size, size)\
-hypre_DeviceTFree(indices_d, HYPRE_Int, stencil_size);\
-hypre_DeviceTFree(stencil_shape_d, HYPRE_Int, size*stencil_size);
-#endif
 
 #else
 
@@ -3288,9 +3286,6 @@ typedef struct hypre_StructStencil_struct
    HYPRE_Int      ndim;    /* Number of dimensions */
 
    HYPRE_Int      ref_count;
-
-   HYPRE_Int     *shape_device;
-  
 } hypre_StructStencil;
 
 /*--------------------------------------------------------------------------
@@ -3301,7 +3296,6 @@ typedef struct hypre_StructStencil_struct
 #define hypre_StructStencilSize(stencil)       ((stencil) -> size)
 #define hypre_StructStencilNDim(stencil)       ((stencil) -> ndim)
 #define hypre_StructStencilRefCount(stencil)   ((stencil) -> ref_count)
-#define hypre_StructStencilShapeDevice(stencil)      ((stencil) -> shape_device)
 
 #define hypre_StructStencilElement(stencil, i) \
 hypre_StructStencilShape(stencil)[i]
@@ -4134,7 +4128,7 @@ HYPRE_Int hypre_StructVectorClearValues ( hypre_StructVector *vector , hypre_Ind
 HYPRE_Int hypre_StructVectorClearBoxValues ( hypre_StructVector *vector , hypre_Box *clear_box , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructVectorClearAllValues ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector , HYPRE_Int *num_ghost );
-HYPRE_Int hypre_StructVectorSetDataSize(hypre_StructVector *vector , HYPRE_Int &data_size, HYPRE_Int &data_host_size);
+HYPRE_Int hypre_StructVectorSetDataSize(hypre_StructVector *vector , HYPRE_Int *data_size, HYPRE_Int *data_host_size);
 HYPRE_Int hypre_StructVectorAssemble ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorCopy ( hypre_StructVector *x , hypre_StructVector *y );
 HYPRE_Int hypre_StructVectorSetConstantValues ( hypre_StructVector *vector , HYPRE_Complex values );

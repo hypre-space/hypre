@@ -840,8 +840,12 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    }
 
    /* Prepare send buffers */
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
 #if defined(HYPRE_MEMORY_GPU)
    if (hypre_exec_policy == LOCATION_GPU)
+#else
+   if (hypre__global_offload)
+#endif
    {    
       send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends);
       if (num_sends > 0)
@@ -868,37 +872,6 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    else
    {
       send_buffers_data = send_buffers;
-   }	 
-#elif defined(HYPRE_USE_OMP45)
-   if (hypre__global_offload) 
-   {
-      send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends);
-      /* OFFLOAD is turned on */
-      if (num_sends > 0)
-      {
-         size = hypre_CommPkgSendBufsize(comm_pkg);
-         if (size > global_send_size)
-         {
-            if (global_send_size > 0)
-            {
-               hypre_DeviceTFree(global_send_buffer, HYPRE_Complex, global_send_size);
-            }
-            global_send_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
-            global_send_size   = 5*size;
-         }
-         send_buffers_data[0] = global_send_buffer;
-         for (i = 1; i < num_sends; i++)
-         {
-            comm_type = hypre_CommPkgSendType(comm_pkg, i-1);
-            size = hypre_CommTypeBufsize(comm_type);
-            send_buffers_data[i] = send_buffers_data[i-1] + size;
-         }
-      }
-   } 
-   else 
-   {
-      /* if OFFLOAD is turned off, just as done for CPU code */
-      send_buffers_data = send_buffers;
    }
 #else
    send_buffers_data = send_buffers;
@@ -919,8 +892,12 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    }
 
    /* Prepare recv buffers */
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
 #if defined(HYPRE_MEMORY_GPU)
    if (hypre_exec_policy == LOCATION_GPU)
+#else
+   if (hypre__global_offload) 
+#endif
    {    
       recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs);
       if (num_recvs > 0)
@@ -946,36 +923,6 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    }
    else
    {
-      recv_buffers_data = recv_buffers;
-   }
-#elif defined(HYPRE_USE_OMP45)
-   if (hypre__global_offload) 
-   {
-      recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs);
-      /* OFFLOAD is turned on */
-      if (num_recvs > 0)
-      {
-         size = hypre_CommPkgRecvBufsize(comm_pkg);
-         if (size > global_recv_size)
-         {
-            if (global_recv_size > 0) {
-               hypre_DeviceTFree(global_recv_buffer, HYPRE_Complex, global_recv_size);
-            }
-            global_recv_buffer = hypre_DeviceCTAlloc(HYPRE_Complex, 5*size);
-            global_recv_size   = 5*size;
-         }
-         recv_buffers_data[0] = global_recv_buffer;
-         for (i = 1; i < num_recvs; i++)
-         {
-            comm_type = hypre_CommPkgRecvType(comm_pkg, i-1);
-            size = hypre_CommTypeBufsize(comm_type);
-            recv_buffers_data[i] = recv_buffers_data[i-1] + size;
-         }
-      }
-   }
-   else 
-   {
-      /* if OFFLOAD is turned off, just as done for CPU code */
       recv_buffers_data = recv_buffers;
    }
 #else
@@ -1017,24 +964,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                kptr = lptr + order[ll]*stride_array[ndim];
 
 #if defined(HYPRE_USE_OMP45)
-               /* This is based on "Idea 2" in box.h */
-               {
-                  HYPRE_Int      n[HYPRE_MAXDIM+1];
-                  HYPRE_Int      s[HYPRE_MAXDIM+1];
-                  HYPRE_Int      N;
-
-                  /* Initialize */
-                  N = 1;
-                  for (d = 0; d < ndim; d++)
-                  {
-                     n[d] = length_array[d];
-                     s[d] = stride_array[d];
-                     N *= n[d];
-                  }
-                  n[ndim] = 2;
-                  s[ndim] = 0;
-
-                  /*
+#if 0
                   HYPRE_Int device_num = omp_get_default_device();
                   if (HYPRE_IsMapped(dptr, device_num)) {
                      printf("i=%d, dptr error\n", i);
@@ -1042,19 +972,12 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                   } else {
                      printf("i=%d, dptr OK\n", i);
                   }
-                  if (HYPRE_IsMapped(kptr, device_num)) {
+                  if (HYPRE_IsOMPPtrMapped(kptr, device_num)) {
                      printf("kptr error\n");
                      exit(0);
                   }
-                  */
-                  /* Emulate ndim nested for loops */
-                  hypre_BoxBoundaryCopyBegin(ndim, n, s, i, idx)
-                  {
-                     dptr[idx] = kptr[i];
-                  }
-                  hypre_BoxBoundaryCopyEnd();
-               }
-#else
+#endif
+#endif
                hypre_BasicBoxLoop2Begin(ndim, length_array,
                                         stride_array, ki,
                                         unitst_array, di);
@@ -1062,7 +985,6 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                   dptr[di] = kptr[ki];
                }
                hypre_BoxLoop2End(ki, di);
-#endif
 
                dptr += unitst_array[ndim];
             }
@@ -1101,7 +1023,11 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
    /* Copy buffer data from Device to Host */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_MEMORY_GPU)
    if (num_sends > 0 && hypre_exec_policy == LOCATION_GPU)
+#else
+   if (num_sends > 0)
+#endif
    {
       HYPRE_Complex  *dptr_host;
       size = hypre_CommPkgSendBufsize(comm_pkg);
@@ -1321,7 +1247,11 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    /* Copy buffer data from Host to Device */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_MEMORY_GPU)
    if (num_recvs > 0 && hypre_exec_policy == LOCATION_GPU)
+#else
+   if (num_recvs > 0)
+#endif
    {
       HYPRE_Complex  *dptr_host;
       HYPRE_Int       size;
@@ -1371,39 +1301,6 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
          {
             kptr = lptr + ll*stride_array[ndim];
 
-#if defined(HYPRE_USE_OMP45)
-            /* This is based on "Idea 2" in box.h */
-            {
-               HYPRE_Int      n[HYPRE_MAXDIM+1];
-               HYPRE_Int      s[HYPRE_MAXDIM+1];
-               HYPRE_Int      N;
-
-               /* Initialize */
-               N = 1;
-               for (d = 0; d < ndim; d++)
-               {
-                  n[d] = length_array[d];
-                  s[d] = stride_array[d];
-                  N *= n[d];
-               }
-               n[ndim] = 2;
-               s[ndim] = 0;
-
-               /* Emulate ndim nested for loops */
-               hypre_BoxBoundaryCopyBegin(ndim, n, s, i, idx)
-               {
-                  if (action > 0)
-                  {
-                     kptr[i] += dptr[idx];
-                  }
-                  else
-                  {
-                     kptr[i] = dptr[idx];
-                  }
-               }
-               hypre_BoxBoundaryCopyEnd();
-            }
-#else
             hypre_BasicBoxLoop2Begin(ndim, length_array,
                                      stride_array, ki,
                                      unitst_array, di);
@@ -1418,7 +1315,6 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
                }
             }
             hypre_BoxLoop2End(ki, di);
-#endif
 
             dptr += unitst_array[ndim];
          }

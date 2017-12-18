@@ -195,15 +195,9 @@ hypre_DataCopyToData(stencil_shape_h,stencil_shape_d,HYPRE_Int,size*stencil_size
 
 #define hypre_StructGetIndexD(index,i,index_d) (index_d)
 
-#ifdef HYPRE_MEMORY_GPU
 #define hypre_StructCleanIndexD()\
 hypre_DeviceTFree(indices_d);\
 hypre_DeviceTFree(stencil_shape_d);
-#else /* OMP 45 */
-#define hypre_StructCleanIndexD(stencil_size, size)\
-hypre_DeviceTFree(indices_d, HYPRE_Int, stencil_size);\
-hypre_DeviceTFree(stencil_shape_d, HYPRE_Int, size*stencil_size);
-#endif
 
 #else
 

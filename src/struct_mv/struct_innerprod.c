@@ -44,7 +44,9 @@ hypre_StructInnerProd( hypre_StructVector *x,
    HYPRE_Int        ndim = hypre_StructVectorNDim(x);               
    HYPRE_Int        i;
    
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)      
    const HYPRE_Int        data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(y));
+#endif
 
    HYPRE_Real       local_result = 0.0;
    
@@ -90,8 +92,8 @@ hypre_StructInnerProd( hypre_StructVector *x,
    //#elif defined(HYPRE_USE_CUDA)
    //ReduceSum<HYPRE_Real> box_sum(local_result);
 #else
-   HYPRE_Real       box_sum;
-   local_result = local_result;
+   HYPRE_Real       box_sum = 0.0;
+   //local_result = local_result;
 #endif
 #ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
@@ -105,15 +107,16 @@ hypre_StructInnerProd( hypre_StructVector *x,
 			  x_data_box, start, unit_stride, xi,
 			  y_data_box, start, unit_stride, yi);
       {
-         box_sum += xp[xi] * hypre_conj(yp[yi]);	 
+         box_sum += xp[xi] * hypre_conj(yp[yi]); 
       }
       hypre_BoxLoop2End(xi, yi);
+
+      local_result += (HYPRE_Real) box_sum;
 #undef HYPRE_BOX_REDUCTION
-      local_result += (HYPRE_Real)box_sum;
 #endif
-      
    }
-   process_result = local_result;
+
+   process_result = (HYPRE_Real) local_result;
 
    hypre_MPI_Allreduce(&process_result, &final_innerprod_result, 1,
                        HYPRE_MPI_REAL, hypre_MPI_SUM, hypre_StructVectorComm(x));

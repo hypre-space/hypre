@@ -108,6 +108,7 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 #else
    Ac_tmp = Ac;
 #endif
+
    stencil = hypre_StructMatrixStencil(A);
 #if OLDRAP
    switch (hypre_StructStencilNDim(stencil)) 

@@ -446,11 +446,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       }
       hypre_BoxLoop2End(Ai, vi);
 
-#ifdef HYPRE_USE_OMP45
-      hypre_StructCleanIndexD(stencil_size, 3);
-#else
       hypre_StructCleanIndexD();	  
-#endif
    }
 
    return ierr;

@@ -564,6 +564,8 @@ if ( cudaerr != cudaSuccess ) {										\
 
 #elif defined(HYPRE_USE_OMP45) /* ifdef at L29 */
 
+// RL: OMP45 BEGIN
+
 #include "omp.h"
 
 /* CPU memory management */
@@ -597,34 +599,35 @@ if ( cudaerr != cudaSuccess ) {										\
 
 /* OpenMP 4.5 GPU memory management */
 /* empty */
-#define HYPRE_CUDA_GLOBAL 
+#define HYPRE_CUDA_GLOBAL
+
+extern HYPRE_Int hypre__global_offload;
+extern HYPRE_Int hypre__offload_device_num;
+
 /* stats */
 #define HYPRE_Long long
-extern HYPRE_Int hypre__global_offload;
-extern HYPRE_Long hypre__offload_to_count;
-extern HYPRE_Long hypre__offload_from_count;
-extern HYPRE_Long hypre__offload_to_byte_count;
-extern HYPRE_Long hypre__offload_from_byte_count;
 
-extern HYPRE_Long hypre__update_to_count;
-extern HYPRE_Long hypre__update_from_count;
-extern HYPRE_Long hypre__update_to_byte_count;
-extern HYPRE_Long hypre__update_from_byte_count;
+extern HYPRE_Long hypre__target_allc_count;
+extern HYPRE_Long hypre__target_free_count;
+extern HYPRE_Long hypre__target_allc_bytes;
+extern HYPRE_Long hypre__target_free_bytes;
+extern HYPRE_Long hypre__target_htod_count;
+extern HYPRE_Long hypre__target_dtoh_count;
+extern HYPRE_Long hypre__target_htod_bytes;
+extern HYPRE_Long hypre__target_dtoh_bytes;
 
-/* DEBUG MODE: check if offloading has effect */
-#define HYPRE_OFFLOAD_DEBUG
-
-#ifdef HYPRE_OFFLOAD_DEBUG
-/* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT] 
-   if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
-   hypre__offload_flag: 0 == OK; 1 == WRONG
- * */
-#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) \
-   HYPRE_Int hypre__offload_flag = \
-   (type[1] == 'n') == omp_target_is_present(hptr, devnum);
+/* DEBUG MODE: check if offloading has effect 
+ * (turned on when configured with --enable-debug) */
+#ifdef HYPRE_OMP45_DEBUG
+   /* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT] 
+      if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
+      hypre__offload_flag: 0 == OK; 1 == WRONG
+    * */
+   #define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) \
+      HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
 #else 
-#define HYPRE_OFFLOAD_FLAG(...) \
-   HYPRE_Int hypre__offload_flag = 0;
+   #define HYPRE_OFFLOAD_FLAG(...) \
+      HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
 #endif
 
 /* OMP 4.5 offloading macro */
@@ -636,14 +639,14 @@ extern HYPRE_Long hypre__update_from_byte_count;
     * type1: ``e(n)ter'', ''e(x)it'', or ``u(p)date'' \
     * type2: ``(a)lloc'', ``(t)o'', ``(d)elete'', ''(f)rom'' \
     */ \
-   datatype *hypre__offload_hptr = hptr; \
+   datatype *hypre__offload_hptr = (datatype *) hptr; \
    /* if hypre__global_offload ==    0, or
     *    hptr (host pointer)   == NULL, 
     *    this offload will be IGNORED */ \
    if (hypre__global_offload && hypre__offload_hptr != NULL) { \
       /* offloading offset and size (in datatype) */ \
       HYPRE_Int hypre__offload_offset = offset, hypre__offload_size = size; \
-      /* in HYPRE_OFFLOAD_DEBUG mode, we test if this offload has effect */ \
+      /* in HYPRE_OMP45_DEBUG mode, we test if this offload has effect */ \
       HYPRE_OFFLOAD_FLAG(devnum, hypre__offload_hptr, type1) \
       if (hypre__offload_flag) { \
          printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%d:%d]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
@@ -652,29 +655,37 @@ extern HYPRE_Long hypre__update_from_byte_count;
          /* printf("[            %s %d] device %d target: %6s %6s, data %p, [%d:%d]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); */ \
          if (type1[1] == 'n' && type2[0] == 't') { \
             /* enter to */\
-            hypre__offload_to_count ++; hypre__offload_to_byte_count += offload_bytes; \
+            hypre__target_allc_count ++; \
+            hypre__target_allc_bytes += offload_bytes; \
+            hypre__target_htod_count ++; \
+            hypre__target_htod_bytes += offload_bytes; \
             _Pragma (HYPRE_XSTR(omp target enter data map(to:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
          } else if (type1[1] == 'n' && type2[0] == 'a') { \
             /* enter alloc */ \
-            hypre__offload_to_count ++; hypre__offload_to_byte_count += offload_bytes; \
+            hypre__target_allc_count ++; \
+            hypre__target_allc_bytes += offload_bytes; \
             _Pragma (HYPRE_XSTR(omp target enter data map(alloc:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
          } else if (type1[1] == 'x' && type2[0] == 'd') { \
             /* exit delete */\
-            hypre__offload_from_count ++; hypre__offload_from_byte_count += offload_bytes; \
+            hypre__target_free_count ++; \
+            hypre__target_free_bytes += offload_bytes; \
             _Pragma (HYPRE_XSTR(omp target exit data map(delete:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
          } else if (type1[1] == 'x' && type2[0] == 'f') {\
             /* exit from */ \
-            hypre__offload_from_count ++; hypre__offload_from_byte_count += offload_bytes; \
+            hypre__target_free_count ++; \
+            hypre__target_free_bytes += offload_bytes; \
+            hypre__target_dtoh_count ++; \
+            hypre__target_dtoh_bytes += offload_bytes; \
             _Pragma (HYPRE_XSTR(omp target exit data map(from:hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
          } else if (type1[1] == 'p' && type2[0] == 't') { \
             /* update to */ \
-            hypre__offload_to_count ++; hypre__offload_to_byte_count += offload_bytes; \
-            hypre__update_to_count ++; hypre__update_to_byte_count += offload_bytes; \
+            hypre__target_htod_count ++; \
+            hypre__target_htod_bytes += offload_bytes; \
             _Pragma (HYPRE_XSTR(omp target update to(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
          } else if (type1[1] == 'p' && type2[0] == 'f') {\
             /* update from */ \
-            hypre__offload_from_count ++; hypre__offload_from_byte_count += offload_bytes; \
-            hypre__update_from_count ++; hypre__update_from_byte_count += offload_bytes; \
+            hypre__target_dtoh_count ++; \
+            hypre__target_dtoh_bytes += offload_bytes; \
             _Pragma (HYPRE_XSTR(omp target update from(hypre__offload_hptr[hypre__offload_offset:hypre__offload_size]))) \
          } else {\
             printf("error: unrecognized offloading type combination!\n"); exit(-1); \
@@ -683,48 +694,53 @@ extern HYPRE_Long hypre__update_from_byte_count;
    } \
 }
 
-/* OMP offloading switch */
-#define HYPRE_OMP45_OFFLOAD_ON() \
-{ \
-   fprintf(stdout, "Hypre OMP 4.5 Mapping/Offloading has been turned on\n"); \
-   hypre__global_offload = 1; \
-}
-
-#define HYPRE_OMP45_OFFLOAD_OFF() \
-{ \
-   fprintf(stdout, "Hypre OMP 4.5 Mapping/Offloading has been turned off\n"); \
-   hypre__global_offload = 0; \
-}
-
 /* NOTE:
  * if HYPRE_OMP45_OFFLOAD is turned off, then the associated 
  * device memory operations in the following macros will have no effect
- */ 
+ */
+
+#define HYPRE_OMP45_SZE_PAD (sizeof(size_t))
+
+#define HYPRE_OMP45_CNT_PAD(type) ((HYPRE_OMP45_SZE_PAD + sizeof(type) - 1) / sizeof(type))
 
 /* Device TAlloc */
 #define hypre_DeviceTAlloc(type, count) \
-({\
-   type *ptr = hypre_TAlloc(type, count); \
-   HYPRE_Int device_num = omp_get_default_device(); \
-   hypre_omp45_offload(device_num, ptr, type, 0, count, "enter", "alloc"); \
-   ptr; \
- })
+(\
+   count == 0 ? NULL : \
+   ({\
+   type *ptr_alloc = hypre_TAlloc(type, count + HYPRE_OMP45_CNT_PAD(type)); \
+   char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD; \
+   size_t size_inuse = sizeof(type) * count; \
+   ((size_t *) ptr_alloc)[0] = size_inuse; \
+   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, type, 0, count, "enter", "alloc"); \
+   (type *) ptr_inuse; \
+    }) \
+)
 
 /* Device CTAlloc */
 #define hypre_DeviceCTAlloc(type, count) \
-({\
-   type *ptr = hypre_CTAlloc(type, count); \
-   HYPRE_Int device_num = omp_get_default_device(); \
-   hypre_omp45_offload(device_num, ptr, type, 0, count, "enter", "to"); \
-   ptr; \
- })
+(\
+   count == 0 ? NULL : \
+   ({\
+   type *ptr_alloc = hypre_CTAlloc(type, count + HYPRE_OMP45_CNT_PAD(type)); \
+   char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD; \
+   size_t size_inuse = sizeof(type) * count; \
+   ((size_t *) ptr_alloc)[0] = size_inuse; \
+   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, type, 0, count, "enter", "to"); \
+   (type*) ptr_inuse; \
+   }) \
+)
 
 /* Device TFree */
-#define hypre_DeviceTFree(ptr, type, count) \
+#define hypre_DeviceTFree(ptr_inuse) \
 {\
-   HYPRE_Int device_num = omp_get_default_device(); \
-   hypre_omp45_offload(device_num, ptr, type, 0, count, "exit", "delete"); \
-   hypre_TFree(ptr); \
+   if (ptr_inuse) \
+   { \
+   char *ptr_alloc = ((char*) ptr_inuse) - HYPRE_OMP45_SZE_PAD; \
+   size_t size_inuse = ((size_t *) ptr_alloc)[0]; \
+   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "exit", "delete"); \
+   hypre_TFree(ptr_alloc); \
+   } \
 }
 
 /* DataCopyToData: HostToDevice 
@@ -732,13 +748,13 @@ extern HYPRE_Long hypre__update_from_byte_count;
  * dest: [to]   a mapped CPU ptr */
 #define hypre_DataCopyToData(src, dest, type, count) \
 {\
-   HYPRE_Int device_num = omp_get_default_device(); \
    /* CPU memcpy */ \
    if (dest != src) { \
       memcpy(dest, src, sizeof(type)*count); \
    } \
    /* update to device */ \
-   hypre_omp45_offload(device_num, dest, type, 0, count, "update", "to"); \
+   size_t size_inuse = sizeof(type) * count; \
+   hypre_omp45_offload(hypre__offload_device_num, dest, type, 0, count, "update", "to"); \
 }
 
 /* DataCopyFromData: DeviceToHost 
@@ -746,9 +762,9 @@ extern HYPRE_Long hypre__update_from_byte_count;
  * dest: [to]   a CPU ptr */
 #define hypre_DataCopyFromData(dest, src, type, count) \
 {\
-   HYPRE_Int device_num = omp_get_default_device(); \
    /* update from device */ \
-   hypre_omp45_offload(device_num, src, type, 0, count, "update", "from"); \
+   size_t size_inuse = sizeof(type) * count; \
+   hypre_omp45_offload(hypre__offload_device_num, src, type, 0, count, "update", "from"); \
    /* CPU memcpy */ \
    if (dest != src) { \
       memcpy(dest, src, sizeof(type)*count); \
@@ -760,11 +776,11 @@ extern HYPRE_Long hypre__update_from_byte_count;
  * memset host memory first and the update the device memory */
 #define hypre_DeviceMemset(ptr, value, type, count) \
 {\
-   HYPRE_Int device_num = omp_get_default_device(); \
    /* host memset */ \
    memset(ptr, value, (count)*sizeof(type)); \
    /* update to device */ \
-   hypre_omp45_offload(device_num, ptr, type, 0, count, "update", "to"); \
+   size_t size_inuse = sizeof(type) * count; \
+   hypre_omp45_offload(hypre__offload_device_num, ptr, type, 0, count, "update", "to"); \
 }
 
 /* UMTAlloc TODO */
@@ -777,6 +793,8 @@ extern HYPRE_Long hypre__update_from_byte_count;
 #define hypre_InitMemoryDebug(id)
 
 #define hypre_FinalizeMemoryDebug()
+
+// RL: OMP45 END
 
 #else /* ifdef at L29 */
 #define HYPRE_CUDA_GLOBAL 
@@ -1624,6 +1642,20 @@ void freeCudaReductionMemBlock();
 CudaReductionBlockDataType* getCPUReductionMemBlock(int id);
 void releaseCPUReductionId(int id);
 void freeCPUReductionMemBlock();
+
+#endif
+
+#ifdef HYPRE_USE_OMP45
+HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
+			   const char *type1, const char *type2);
+
+HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
+
+HYPRE_Int HYPRE_OMPOffloadOn();
+
+HYPRE_Int HYPRE_OMPOffloadOff();
+
+HYPRE_Int HYPRE_OMPOffloadStatPrint();
 
 #endif
 

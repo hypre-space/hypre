@@ -295,7 +295,7 @@ HYPRE_Int hypre_StructVectorClearValues ( hypre_StructVector *vector , hypre_Ind
 HYPRE_Int hypre_StructVectorClearBoxValues ( hypre_StructVector *vector , hypre_Box *clear_box , HYPRE_Int boxnum , HYPRE_Int outside );
 HYPRE_Int hypre_StructVectorClearAllValues ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorSetNumGhost ( hypre_StructVector *vector , HYPRE_Int *num_ghost );
-HYPRE_Int hypre_StructVectorSetDataSize(hypre_StructVector *vector , HYPRE_Int &data_size, HYPRE_Int &data_host_size);
+HYPRE_Int hypre_StructVectorSetDataSize(hypre_StructVector *vector , HYPRE_Int *data_size, HYPRE_Int *data_host_size);
 HYPRE_Int hypre_StructVectorAssemble ( hypre_StructVector *vector );
 HYPRE_Int hypre_StructVectorCopy ( hypre_StructVector *x , hypre_StructVector *y );
 HYPRE_Int hypre_StructVectorSetConstantValues ( hypre_StructVector *vector , HYPRE_Complex values );
