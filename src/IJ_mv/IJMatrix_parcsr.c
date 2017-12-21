@@ -1045,6 +1045,53 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
 
 /******************************************************************************
  *
+ * hypre_IJMatrixSetConstantValuesParCSR
+ *
+ * sets all values in an already assembled IJMatrix to a constant value.
+ * 
+ *****************************************************************************/
+
+HYPRE_Int
+hypre_IJMatrixSetConstantValuesParCSR( hypre_IJMatrix       *matrix,
+                               HYPRE_Complex   value )
+{
+   hypre_ParCSRMatrix *par_matrix;
+   par_matrix = (hypre_ParCSRMatrix *) hypre_IJMatrixObject( matrix );
+
+   if (hypre_IJMatrixAssembleFlag(matrix))  /* matrix already assembled*/
+   {
+      hypre_CSRMatrix *diag, *offd;
+      HYPRE_Int *diag_i, *offd_i;
+      HYPRE_Complex *diag_data, *offd_data;
+      HYPRE_Int num_rows;
+      HYPRE_Int ii;
+      diag = hypre_ParCSRMatrixDiag(par_matrix);
+      offd = hypre_ParCSRMatrixOffd(par_matrix);
+      diag_i = hypre_CSRMatrixI(diag);
+      offd_i = hypre_CSRMatrixI(offd);
+      diag_data = hypre_CSRMatrixData(diag);
+      offd_data = hypre_CSRMatrixData(offd);
+      num_rows = hypre_CSRMatrixNumRows(diag);
+      for (ii=0; ii < diag_i[num_rows]; ii++)
+      {
+         diag_data[ii] = value;
+      }
+      for (ii=0; ii < offd_i[num_rows]; ii++)
+      {
+         offd_data[ii] = value;
+      }
+   }
+   else
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC, 
+         "Matrix not assembled! Required to set constant values!");
+   }
+
+   return hypre_error_flag;
+}
+
+/******************************************************************************
+ *
  * hypre_IJMatrixAddToValuesParCSR
  *
  * adds row values to an IJMatrix 
