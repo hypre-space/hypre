@@ -103,6 +103,7 @@ main( hypre_int argc,
    HYPRE_Int                 print_usage;
    HYPRE_Int                 sparsity_known = 0;
    HYPRE_Int                 add = 0;
+   HYPRE_Int                 check_constant = 0;
    HYPRE_Int                 off_proc = 0;
    HYPRE_Int                 chunk = 0;
    HYPRE_Int                 omp_flag = 0;
@@ -515,6 +516,11 @@ main( hypre_int argc,
       {
          arg_index++;
          omp_flag = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-check_constant") == 0 )
+      {
+         arg_index++;
+         check_constant = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-concrete_parcsr") == 0 )
       {
@@ -2048,17 +2054,25 @@ main( hypre_int argc,
       IJMatrixRead or an IJMatrixAssemble.  After an IJMatrixRead,
       assembly is unnecessary if the sparsity pattern of the matrix is
       not changed somehow.  If one has not used IJMatrixRead, one has
-      the opportunity to IJMatrixAddTo before a IJMatrixAssemble. */
+      the opportunity to IJMatrixAddTo before a IJMatrixAssemble. 
+      This first sets all matrix coefficients to -1 and then adds 7.0
+      to the diagonal to restore the original matrix*/
+
+      if (check_constant)
+         ierr += HYPRE_IJMatrixSetConstantValues( ij_A, -1.0 );
 
       ncols    = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
       rows     = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
       col_inds = hypre_CTAlloc(HYPRE_Int, last_local_row - first_local_row + 1);
       values   = hypre_CTAlloc(HYPRE_Real, last_local_row - first_local_row + 1);
 
+      val = 0.0;
+
+      if (check_constant) val = 7.0;
       if (dt < dt_inf)
-         val = 1./dt;
+         val += 1./dt;
       else 
-         val = 0.;   /* Use zero to avoid unintentional loss of significance */
+         val += 0.0;   /* Use zero to avoid unintentional loss of significance */
 
       for (i = first_local_row; i <= last_local_row; i++)
       {
