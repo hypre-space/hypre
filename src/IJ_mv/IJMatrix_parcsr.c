@@ -1072,10 +1072,16 @@ hypre_IJMatrixSetConstantValuesParCSR( hypre_IJMatrix       *matrix,
       diag_data = hypre_CSRMatrixData(diag);
       offd_data = hypre_CSRMatrixData(offd);
       num_rows = hypre_CSRMatrixNumRows(diag);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii) HYPRE_SMP_SCHEDULE
+#endif
       for (ii=0; ii < diag_i[num_rows]; ii++)
       {
          diag_data[ii] = value;
       }
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(ii) HYPRE_SMP_SCHEDULE
+#endif
       for (ii=0; ii < offd_i[num_rows]; ii++)
       {
          offd_data[ii] = value;
