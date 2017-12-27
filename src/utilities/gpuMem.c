@@ -118,7 +118,6 @@ void hypre_GPUInit(hypre_int use_device){
 void hypre_GPUFinalize(){
   
   cusparseErrchk(cusparseDestroy(HYPRE_CUSPARSE_HANDLE));
-  
   cublasErrchk(cublasDestroy(HYPRE_CUBLAS_HANDLE));
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_MEASURE_GPU_HWM)
   hypre_printf("GPU Memory High Water Mark(per MPI_RANK) %f MB \n",(HYPRE_Real)HYPRE_GPU_HWM/1024/1024);
@@ -133,14 +132,14 @@ void hypre_GPUFinalize(){
 void MemAdviseReadOnly(const void* ptr, hypre_int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
-    if (size==0) printf("WARNING:: Operations with 0 size vector \n");
+    if (size==0) hypre_printf("WARNING:: Operations with 0 size vector \n");
     gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseSetReadMostly,device));
 }
 
 void MemAdviseUnSetReadOnly(const void* ptr, hypre_int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
-    if (size==0) printf("WARNING:: Operations with 0 size vector \n");
+    if (size==0) hypre_printf("WARNING:: Operations with 0 size vector \n");
     gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseUnsetReadMostly,device));
 }
 
@@ -222,7 +221,7 @@ cusparseHandle_t getCusparseHandle(){
     firstcall=0;
     status= cusparseCreate(&handle);
     if (status != CUSPARSE_STATUS_SUCCESS) {
-      printf("ERROR:: CUSPARSE Library initialization failed\n");
+      hypre_printf("ERROR:: CUSPARSE Library initialization failed\n");
       handle=0;
       exit(2);
     }
