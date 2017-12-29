@@ -78,12 +78,14 @@ extern "C++" {
 #define hypre_DeviceCTAlloc(type, count) \
 	({								   \
 	type * ptr;						   \
+        if (count==0) { ptr=NULL;} else { \
 	cudaError_t cudaerr = cudaMallocManaged((void**)&ptr,sizeof(type)*(count), cudaMemAttachGlobal); \
 	if ( cudaerr != cudaSuccess ) {										\
 		printf("\n hypre_DataCTAlloc %lu : %s in %s(%d) function %s\n",sizeof(type)*(count),cudaGetErrorString(cudaerr),__FILE__,__LINE__,__FUNCTION__); \
 		HYPRE_Int *p = NULL; *p = 1;\
 	}		\
 	cudaMemset(ptr,0,sizeof(type)*(count));	   \
+        } \
 	ptr;})									   \
 	
 #define hypre_DeviceTReAlloc(ptr, type, count) {type *newptr;				\

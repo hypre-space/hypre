@@ -349,7 +349,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
    hypre_GPUInit(-1);
-   omp_set_default_device(0);
+   //omp_set_default_device(0);
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
 /*
   hypre_InitMemoryDebug(myid);

@@ -171,7 +171,7 @@ function CheckPath
    while [ "$1" ]
    do
       case $1 in
-         -n*) EXECFILE=$3
+         -n*) EXECFILE=$4
             if [ -x $StartDir/$EXECFILE ] ; then
                cp -f $StartDir/$EXECFILE $EXECFILE
                ExecFileNames="$ExecFileNames $EXECFILE"

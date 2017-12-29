@@ -32,12 +32,12 @@ void hypre_GPUInit(hypre_int use_device){
     HYPRE_DEVICE_COUNT=nDevices;
     
     if (use_device<0){
-      if (nDevices==1){
+      if (nDevices<4){
 	/* with mpibind each process will only see 1 GPU */
 	HYPRE_DEVICE=0;
 	gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
 	cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
-      } else if (nDevices>1) {
+      } else if (nDevices==4) { // THIS IS A HACK THAT WORKS AONLY AT LLNL
 	/* No mpibind or it is a single rank run */
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 	//affs(myid);

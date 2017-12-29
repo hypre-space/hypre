@@ -465,7 +465,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 #endif
      for(i=0;i<y_size;i++) y_data[i] = b_data[i];
    }
-   
+
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 #pragma omp target data use_device_ptr(A_data,x_data,y_data,A_i,A_j)
 #endif

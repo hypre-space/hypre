@@ -21,18 +21,18 @@
 # ams: Run through solvers
 #=============================================================================
 
-mpirun -np 4 ./ams_driver -solver 2 > solvers.out.0
-mpirun -np 4 ./ams_driver -solver 2 -coord > solvers.out.1
-mpirun -np 4 ./ams_driver -solver 2 -h1 > solvers.out.2
-mpirun -np 4 ./ams_driver -solver 2 -h1 -coord > solvers.out.3
-mpirun -np 4 ./ams_driver -solver 3 > solvers.out.4
-mpirun -np 4 ./ams_driver -solver 3 -coord > solvers.out.5
-mpirun -np 4 ./ams_driver -solver 3 -h1 > solvers.out.6
-mpirun -np 4 ./ams_driver -solver 3 -h1 -coord > solvers.out.7
+mpirun -np 4 mpibind ./ams_driver -solver 2 > solvers.out.0
+mpirun -np 4 mpibind ./ams_driver -solver 2 -coord > solvers.out.1
+mpirun -np 4 mpibind ./ams_driver -solver 2 -h1 > solvers.out.2
+mpirun -np 4 mpibind ./ams_driver -solver 2 -h1 -coord > solvers.out.3
+mpirun -np 4 mpibind ./ams_driver -solver 3 > solvers.out.4
+mpirun -np 4 mpibind ./ams_driver -solver 3 -coord > solvers.out.5
+mpirun -np 4 mpibind ./ams_driver -solver 3 -h1 > solvers.out.6
+mpirun -np 4 mpibind ./ams_driver -solver 3 -h1 -coord > solvers.out.7
 
-mpirun -np 4 ./ams_driver -solver 5 -tol 1e-4 > solvers.out.8
-mpirun -np 4 ./ams_driver -solver 5 -tol 1e-4 -coord > solvers.out.9
-mpirun -np 4 ./ams_driver -solver 5 -tol 1e-4 -h1 > solvers.out.10
-mpirun -np 4 ./ams_driver -solver 5 -tol 1e-4 -h1 -coord > solvers.out.11
+mpirun -np 4 mpibind ./ams_driver -solver 5 -tol 1e-4 > solvers.out.8
+mpirun -np 4 mpibind ./ams_driver -solver 5 -tol 1e-4 -coord > solvers.out.9
+mpirun -np 4 mpibind ./ams_driver -solver 5 -tol 1e-4 -h1 > solvers.out.10
+mpirun -np 4 mpibind ./ams_driver -solver 5 -tol 1e-4 -h1 -coord > solvers.out.11
 
-mpirun -np 4 ./ams_driver -solver 3 -type 13 -amgrlx 6 -agg 1 -itype 6 -pmax 4 -ctype 10 -tol 0 -zc -maxit 18 -rr 4 > solvers.out.12
+mpirun -np 4 mpibind ./ams_driver -solver 3 -type 13 -amgrlx 6 -agg 1 -itype 6 -pmax 4 -ctype 10 -tol 0 -zc -maxit 18 -rr 4 > solvers.out.12
