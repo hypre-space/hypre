@@ -311,7 +311,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       /* build the coarse grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU) 
       hypre_StructGridDataLocation(P_grid_l[l+1]) = data_location;
       if (device_level == -1 && num_level_GPU > 0)
       {
@@ -1108,7 +1108,7 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
    }
    else if (constant_coefficient==2)
    {
-      hypre_DataCopyFromData(&Adiag,Ap,HYPRE_Real,1);
+      hypre_TMemcpy(&Adiag,Ap,HYPRE_Real,1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
    diag = 1.0;

@@ -1,7 +1,8 @@
 
 #include "_hypre_utilities.h"
 
-#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+
 #include <signal.h>
 #ifdef HYPRE_USE_GPU
 extern const char *cusparseErrorCheck(cusparseStatus_t error);
@@ -29,7 +30,9 @@ void cudaSafeFree(void *ptr,int padding)
 #ifndef ABORT_ON_RAW_POINTER
 #ifdef FULL_WARN
     if (err==cudaErrorInvalidValue) fprintf(stderr,"WARNING :: Raw pointer passed to cudaSafeFree %p\n",ptr);
-    if (err==cudaErrorInvalidDevice) fprintf(stderr,"WARNING :: cudaSafeFree :: INVALID DEVICE on ptr = %p\n",ptr);
+    else if (err==cudaErrorInvalidDevice) fprintf(stderr,"WARNING :: cudaSafeFree :: INVALID DEVICE on ptr = %p\n",ptr);
+    else if (err==cudaErrorIncompatibleDriverContext) fprintf(stderr,"WARNING :: cudaSafeFree :: Incompatible  Driver Context on ptr = %p\n",ptr);
+    else fprintf(stderr,"Point Attrib check error is %d \n",err);
     //PrintPointerAttributes(ptr);
 #endif
 #else

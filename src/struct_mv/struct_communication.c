@@ -1001,7 +1001,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                   dptr[hypre__thread] = 0.0;
                }
                hypre_BoxLoop0End();
-#else
+#elif defined(HYPRE_MEMORY_GPU)
 	       if (hypre_exec_policy == LOCATION_GPU)
 	       {
 		  hypre_DeviceMemset(dptr, 0, HYPRE_Complex, size);
@@ -1014,6 +1014,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 		  }
 		  hypre_BoxLoop0End();
 	       }
+#else
+               memset(dptr, 0, size*sizeof(HYPRE_Complex));
 #endif
                dptr += size;
             }

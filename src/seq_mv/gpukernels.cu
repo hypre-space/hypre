@@ -1,3 +1,4 @@
+#if defined(HYPRE_USE_GPU)
 #include <stdio.h>
 #include <cuda_runtime.h>
 //#include <cublas_v2.h>
@@ -241,3 +242,4 @@ extern "C"{
     gpuErrchk2(cudaDeviceSynchronize());
   }
 }
+#endif

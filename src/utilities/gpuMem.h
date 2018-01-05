@@ -12,9 +12,10 @@
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 #include <cuda_runtime_api.h>
+#define MAX_HGS_ELEMENTS 10
+
 void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();
 int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
@@ -23,7 +24,7 @@ void VecSet(double* tgt, int size, double value, cudaStream_t s);
 void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
-#endif
+
 
 cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
@@ -59,11 +60,11 @@ hypre_int getcore();
 hypre_int getnuma();
 hypre_int checkDeviceProps();
 hypre_int pointerIsManaged(const void *ptr);
+
 /*
  * Global struct for keeping HYPRE GPU Init state
  */
 
-#define MAX_HGS_ELEMENTS 10
 struct hypre__global_struct{
   hypre_int initd;
   hypre_int device;
@@ -93,11 +94,16 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
 
+#define LOCATION_CPU (1)
+#define LOCATION_GPU (0)
+#define LOCATION_UNSET (-1)
+extern HYPRE_Int hypre_exec_policy;
+
 #else
 
 #define hypre_GPUInit(use_device)
 #define hypre_GPUFinalize()
-
+//#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #endif
 
 #if defined(HYPRE_USE_CUDA)

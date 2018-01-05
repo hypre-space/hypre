@@ -34,7 +34,7 @@
  **************************************************************/
 void hypre_dispose_elt ( hypre_LinkList element_ptr )
 {
-   free( element_ptr );
+   hypre_TFree ( element_ptr, HYPRE_MEMORY_HOST);
 }
 
 

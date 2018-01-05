@@ -479,6 +479,9 @@ extern "C" {
 #define HYPRE_MEMORY_UNSET  (-1)
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+
+#define hypre_DeviceMemset(ptr, value, type, count) 
+
 #ifdef __cplusplus
 extern "C++" {
 #endif
@@ -608,46 +611,6 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
 #define HYPRE_OMP45_SZE_PAD (sizeof(size_t))
 
 #define HYPRE_OMP45_CNT_PAD(elt_size) ((HYPRE_OMP45_SZE_PAD + elt_size - 1) / elt_size)
-
-/* Device TAlloc */
-#define hypre_DeviceTAlloc(type, count) \
-(\
-   count == 0 ? NULL : \
-   ({\
-   type *ptr_alloc = hypre_TAlloc(type, count + HYPRE_OMP45_CNT_PAD(type)); \
-   char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD; \
-   size_t size_inuse = sizeof(type) * count; \
-   ((size_t *) ptr_alloc)[0] = size_inuse; \
-   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, type, 0, count, "enter", "alloc"); \
-   (type *) ptr_inuse; \
-    }) \
-)
-
-/* Device CTAlloc */
-#define hypre_DeviceCTAlloc(type, count) \
-(\
-   count == 0 ? NULL : \
-   ({\
-   type *ptr_alloc = hypre_CTAlloc(type, count + HYPRE_OMP45_CNT_PAD(type)); \
-   char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD; \
-   size_t size_inuse = sizeof(type) * count; \
-   ((size_t *) ptr_alloc)[0] = size_inuse; \
-   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, type, 0, count, "enter", "to"); \
-   (type*) ptr_inuse; \
-   }) \
-)
-
-/* Device TFree */
-#define hypre_DeviceTFree(ptr_inuse) \
-{\
-   if (ptr_inuse) \
-   { \
-   char *ptr_alloc = ((char*) ptr_inuse) - HYPRE_OMP45_SZE_PAD; \
-   size_t size_inuse = ((size_t *) ptr_alloc)[0]; \
-   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "exit", "delete"); \
-   hypre_TFree(ptr_alloc); \
-   } \
-}
 
 /* DataCopyToData: HostToDevice 
  * src:  [from] a CPU ptr 
@@ -1200,9 +1163,12 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
 
-#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#include <cuda_runtime_api.h>
+#include <cusparse.h>
+#include <cublas_v2.h>
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
-#define MEM_PAD_LEN 1
+#define MEM_PAD_LEN 0
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line)
 {
@@ -1224,18 +1190,13 @@ hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
 #endif
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-#define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
-void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
-#endif
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) ||   defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
-#include <cusparse.h>
-#include <cublas_v2.h>
+
 #include <stdio.h>
-#include <cuda_runtime_api.h>
+//#include <cuda_runtime_api.h>
 #include <stdlib.h>
 inline const char *cusparseErrorCheck(cusparseStatus_t error)
 {
@@ -1360,9 +1321,10 @@ void cudaSafeFree(void *ptr,int padding);
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 #include <cuda_runtime_api.h>
+#define MAX_HGS_ELEMENTS 10
+
 void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();
 int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
@@ -1371,7 +1333,7 @@ void VecSet(double* tgt, int size, double value, cudaStream_t s);
 void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
-#endif
+
 
 cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
@@ -1407,11 +1369,11 @@ hypre_int getcore();
 hypre_int getnuma();
 hypre_int checkDeviceProps();
 hypre_int pointerIsManaged(const void *ptr);
+
 /*
  * Global struct for keeping HYPRE GPU Init state
  */
 
-#define MAX_HGS_ELEMENTS 10
 struct hypre__global_struct{
   hypre_int initd;
   hypre_int device;
@@ -1441,11 +1403,16 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
 
+#define LOCATION_CPU (1)
+#define LOCATION_GPU (0)
+#define LOCATION_UNSET (-1)
+extern HYPRE_Int hypre_exec_policy;
+
 #else
 
 #define hypre_GPUInit(use_device)
 #define hypre_GPUFinalize()
-
+//#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #endif
 
 #if defined(HYPRE_USE_CUDA)

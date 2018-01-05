@@ -162,11 +162,21 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
       POP_RANGE;
       SetAsyncMode(1);
-      hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
+      hypre_CSRMatrixMatvecOutOfPlaceOOMP( alpha, diag, x_local, beta, b_local, y_local, 0);
+      //hypre_SeqVectorUpdateHost(y_local);
+      //hypre_SeqVectorUpdateHost(x_local);
+      //hypre_SeqVectorUpdateHost(b_local);
       SetAsyncMode(0);
       //gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(7)));
 #else
-#ifdef HYPRE_USING_OPENMP
+      PUSH_RANGE("MPI_PACK_OMP",4);
+      SyncVectorToHost(x_local);
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+      int num_threads=64;
+      int num_teams = (end-begin+(end-begin)%num_threads)/num_threads;
+      int *local_send_map_elmts = comm_pkg->send_map_elmts;
+#pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(num_threads) is_device_ptr(x_local_data,x_buf_data,comm_pkg,local_send_map_elmts)
+#elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for HYPRE_SMP_SCHEDULE
 #endif
       for (i = begin; i < end; i++)
@@ -178,6 +188,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
             = x_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)];
       }
+      POP_RANGE; // "MPI_PACK_OMP"
 #endif
    }
    else
@@ -230,7 +241,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
    POP_RANGE;
 #ifndef HYPRE_USE_GPU
-   hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
+   hypre_CSRMatrixMatvecOutOfPlaceOOMP( alpha, diag, x_local, beta, b_local, y_local, 0);
 #endif
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();
@@ -256,8 +267,12 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
 
-   if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);    
-
+   //MPI_Barrier(MPI_COMM_WORLD);
+   //hypre_SeqVectorUpdateDevice(x_tmp);
+   UpdateHRC(x_tmp);
+   if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);  
+   //if (num_cols_offd) hypre_SeqVectorUpdateHost(y_local);  
+   //hypre_SeqVectorUpdateHost(x_tmp); 
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] -= hypre_MPI_Wtime();
 #endif
@@ -280,7 +295,6 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    POP_RANGE; // PAR_CSR
    return ierr;
 }
-
 HYPRE_Int
 hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
                           hypre_ParCSRMatrix *A,
@@ -290,7 +304,29 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
 {
    return hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y);
 }
-
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+HYPRE_Int
+hypre_ParCSRMatrixMatvec3( HYPRE_Complex       alpha,
+                          hypre_ParCSRMatrix *A,
+                          hypre_ParVector    *x,
+                          HYPRE_Complex       beta,
+                          hypre_ParVector    *y )
+{
+   int rval=hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y);
+   hypre_SeqVectorUpdateHost(y->local_vector);
+}
+HYPRE_Int
+hypre_ParCSRMatrixMatvecOutOfPlace3( HYPRE_Complex       alpha,
+                                    hypre_ParCSRMatrix *A,
+                                    hypre_ParVector    *x,
+                                    HYPRE_Complex       beta,
+                                    hypre_ParVector    *b,
+                                    hypre_ParVector    *y )
+{
+  hypre_ParCSRMatrixMatvecOutOfPlace(alpha,A,x,beta,b,y);
+  hypre_SeqVectorUpdateHost(y->local_vector);
+}
+#endif
 /*--------------------------------------------------------------------------
  * hypre_ParCSRMatrixMatvecT
  *
@@ -424,6 +460,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       {
          // offdT is optional. Used only if it's present.
          hypre_CSRMatrixMatvec(alpha, A->offdT, x_local, 0.0, y_tmp);
+	 SyncVectorToHost(y_tmp);
       }
       else
       {
@@ -459,6 +496,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       // diagT is optional. Used only if it's present.
       hypre_CSRMatrixMatvec(alpha, A->diagT, x_local, beta, y_local);
+      SyncVectorToHost(y_local);
    }
    else
    {
@@ -518,7 +556,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
                   += y_buf_data[jv][index++];
          }
       }
-        
+   UpdateHRC(y_local);
    hypre_SeqVectorDestroy(y_tmp);
    y_tmp = NULL;
    if (!use_persistent_comm)

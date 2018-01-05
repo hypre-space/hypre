@@ -90,6 +90,9 @@ extern "C" {
 #define HYPRE_MEMORY_UNSET  (-1)
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+
+#define hypre_DeviceMemset(ptr, value, type, count) 
+
 #ifdef __cplusplus
 extern "C++" {
 #endif
@@ -219,46 +222,6 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
 #define HYPRE_OMP45_SZE_PAD (sizeof(size_t))
 
 #define HYPRE_OMP45_CNT_PAD(elt_size) ((HYPRE_OMP45_SZE_PAD + elt_size - 1) / elt_size)
-
-/* Device TAlloc */
-#define hypre_DeviceTAlloc(type, count) \
-(\
-   count == 0 ? NULL : \
-   ({\
-   type *ptr_alloc = hypre_TAlloc(type, count + HYPRE_OMP45_CNT_PAD(type)); \
-   char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD; \
-   size_t size_inuse = sizeof(type) * count; \
-   ((size_t *) ptr_alloc)[0] = size_inuse; \
-   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, type, 0, count, "enter", "alloc"); \
-   (type *) ptr_inuse; \
-    }) \
-)
-
-/* Device CTAlloc */
-#define hypre_DeviceCTAlloc(type, count) \
-(\
-   count == 0 ? NULL : \
-   ({\
-   type *ptr_alloc = hypre_CTAlloc(type, count + HYPRE_OMP45_CNT_PAD(type)); \
-   char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD; \
-   size_t size_inuse = sizeof(type) * count; \
-   ((size_t *) ptr_alloc)[0] = size_inuse; \
-   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, type, 0, count, "enter", "to"); \
-   (type*) ptr_inuse; \
-   }) \
-)
-
-/* Device TFree */
-#define hypre_DeviceTFree(ptr_inuse) \
-{\
-   if (ptr_inuse) \
-   { \
-   char *ptr_alloc = ((char*) ptr_inuse) - HYPRE_OMP45_SZE_PAD; \
-   size_t size_inuse = ((size_t *) ptr_alloc)[0]; \
-   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "exit", "delete"); \
-   hypre_TFree(ptr_alloc); \
-   } \
-}
 
 /* DataCopyToData: HostToDevice 
  * src:  [from] a CPU ptr 

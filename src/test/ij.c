@@ -46,7 +46,6 @@
 
 /* max dt */
 #define DT_INF 1.0e30
-
 HYPRE_Int
 BuildParIsoLaplacian( HYPRE_Int argc, char** argv, HYPRE_ParCSRMatrix *A_ptr );
 
@@ -370,6 +369,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
    hypre_GPUInit(-1);
+   //omp_set_default_device(0);
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
 /*
   hypre_InitMemoryDebug(myid);
@@ -1406,11 +1406,11 @@ main( hypre_int argc,
       ns_down = 0;
       ns_up = 3;
       /* this is a 2-D 4-by-k array using Double pointers */
-      grid_relax_points = hypre_CTAlloc(HYPRE_Int*, 4);
+      grid_relax_points = hypre_CTAlloc(HYPRE_Int*, 4, HYPRE_MEMORY_HOST);
       grid_relax_points[0] = NULL;
-      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, ns_down);
-      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, ns_up);
-      grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int, ns_coarse);
+      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, ns_down, HYPRE_MEMORY_HOST);
+      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, ns_up, HYPRE_MEMORY_HOST);
+      grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int, ns_coarse, HYPRE_MEMORY_HOST);
       /* down cycle: C */
       for (i=0; i<ns_down; i++)
       {

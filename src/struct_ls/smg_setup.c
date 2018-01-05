@@ -168,7 +168,7 @@ hypre_SMGSetup( void               *smg_vdata,
 
       /* build the coarse grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU) 
       hypre_StructGridDataLocation(PT_grid_l[l+1]) = data_location;
       if (device_level == -1 && num_level_GPU > 0)
       {

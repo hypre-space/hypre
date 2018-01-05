@@ -277,7 +277,7 @@ hypre_PFMGSetupInterpOp_CC0
         
          Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
 
-#if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_MANAGED)	
+#if defined(HYPRE_MEMORY_GPU) 
          if (data_location < 1)
          {
             Ap = data_A + indices_A[i*stencil_size+si];
