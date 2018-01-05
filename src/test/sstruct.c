@@ -3113,12 +3113,12 @@ main( hypre_int argc,
             size*= (pdata.matset_iuppers[box][j] -
                     pdata.matset_ilowers[box][j] + 1);
          }
-         //for (j = 0; j < size; j++)
-         //{
-         //   values[j] = pdata.matset_values[box];
-         //}
-	 //hypre_DataCopyToData(data.stencil_values[s],values,HYPRE_Real,data.stencil_sizes[s]);
-	 hypre_DeviceMemset(values,pdata.matset_values[box],HYPRE_Real,size);
+	 
+         hypre_LoopBegin(size,j)
+         {
+	    values[j] = pdata.matset_values[box];
+         }
+	 hypre_LoopEnd()
 	 
          HYPRE_SStructMatrixSetBoxValues(A, part,
                                          pdata.matset_ilowers[box],
@@ -3144,11 +3144,12 @@ main( hypre_int argc,
 
          for (entry = 0; entry < pdata.matadd_nentries[box]; entry++)
          {
-	   //for (j = 0; j < size; j++)
-	   //{
-           //    values[j] = pdata.matadd_values[box][entry];
-           // }
-	    hypre_DeviceMemset(values,pdata.matadd_values[box][entry],HYPRE_Real,size);
+	    hypre_LoopBegin(size,j)
+	    {
+	       values[j] = pdata.matadd_values[box][entry];
+	    }
+	    hypre_LoopEnd()
+
             HYPRE_SStructMatrixAddToBoxValues(A, part, 
                                               pdata.matadd_ilowers[box],
                                               pdata.matadd_iuppers[box],
@@ -3165,12 +3166,12 @@ main( hypre_int argc,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.fem_matadd_nboxes; box++)
       {
-	//for (i = 0; i < data.fem_nsparse; i++)
-	//{
-        //    values[i] = 0.0;
-        // }
-	//LW: HYPRE_SStructMatrixAddFEMValues may run on CPU
-	 hypre_DeviceMemset(values,0.0,HYPRE_Real,data.fem_nsparse);
+	 hypre_LoopBegin(data.fem_nsparse,i)
+	 {
+	    values[i] = 0.0;
+	 }
+	 hypre_LoopEnd()
+
          s = 0;
          for (i = 0; i < pdata.fem_matadd_nrows[box]; i++)
          {
@@ -3218,27 +3219,27 @@ main( hypre_int argc,
    /* Initialize the rhs values */
    if (data.rhs_true)
    {
-     //for (j = 0; j < data.max_boxsize; j++)
-     // {
-     //    values[j] = data.rhs_value;
-     // }
-       hypre_DeviceMemset(values,data.rhs_value,HYPRE_Real,data.max_boxsize);
+      hypre_LoopBegin(data.max_boxsize,j)
+      {
+	 values[j] = data.rhs_value;
+      }
+      hypre_LoopEnd()
    }
    else if (data.fem_rhs_true)
    {
-     //for (j = 0; j < data.max_boxsize; j++)
-     //{
-     //  values[j] = 0.0;
-     //}
-      hypre_DeviceMemset(values,0.0,HYPRE_Real,data.max_boxsize);
+      hypre_LoopBegin(data.max_boxsize,j)
+      {
+         values[j] = 0.0;
+      }
+      hypre_LoopEnd()
    }
    else /* rhs=1 is the default */
    {
-     //for (j = 0; j < data.max_boxsize; j++)
-     //{
-     //  values[j] = 1.0;
-     //}
-      hypre_DeviceMemset(values,1.0,HYPRE_Real,data.max_boxsize);
+      hypre_LoopBegin(data.max_boxsize,j)
+      {
+	 values[j] = 1.0;
+      }
+      hypre_LoopEnd()
    }
    for (part = 0; part < data.nparts; part++)
    {
@@ -3294,11 +3295,11 @@ main( hypre_int argc,
                     pdata.rhsadd_ilowers[box][j] + 1);
          }
 
-         //for (j = 0; j < size; j++)
-         //{
-         //   values[j] = pdata.rhsadd_values[box];
-         //}
-         hypre_DeviceMemset(values,pdata.rhsadd_values[box],HYPRE_Real,size);
+         hypre_LoopBegin(size,j)
+         {
+	    values[j] = pdata.rhsadd_values[box];
+         }
+	 hypre_LoopEnd()
 	 
          HYPRE_SStructVectorAddToBoxValues(b, part, 
                                            pdata.rhsadd_ilowers[box],

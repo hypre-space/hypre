@@ -205,7 +205,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
 #if defined(HYPRE_MEMORY_GPU)   
    if ( data_location_A != data_location_Ac )
    {
-      hypre_DataCopyFromData(hypre_StructMatrixDataConst(Ac),hypre_StructMatrixData(Ac_tmp),HYPRE_Complex,hypre_StructMatrixDataSize(Ac_tmp));
+     hypre_TMemcpy(hypre_StructMatrixDataConst(Ac),hypre_StructMatrixData(Ac_tmp),HYPRE_Complex,hypre_StructMatrixDataSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
       hypre_exec_policy = data_location_Ac;
       hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac)) = data_location_Ac;
       hypre_StructMatrixAssemble(Ac);

@@ -185,7 +185,7 @@ hypre_SemiInterp( void               *interp_vdata,
       hypre_StructGridDataLocation(cgrid) = data_location_f;
       hypre_StructVectorInitialize(xc_tmp);
       hypre_StructVectorAssemble(xc_tmp);
-      hypre_DataCopyToData(hypre_StructVectorData(xc),hypre_StructVectorData(xc_tmp),HYPRE_Complex,hypre_StructVectorDataSize(xc));
+      hypre_TMemcpy(hypre_StructVectorData(xc_tmp), hypre_StructVectorData(xc), HYPRE_Complex,hypre_StructVectorDataSize(xc),HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
       hypre_exec_policy = LOCATION_GPU;
    }
    else

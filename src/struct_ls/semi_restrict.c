@@ -293,7 +293,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
 #if defined(HYPRE_MEMORY_GPU)
    if (data_location_f != data_location_c)
    {
-      hypre_DataCopyFromData(hypre_StructVectorData(rc),hypre_StructVectorData(rc_tmp),HYPRE_Complex,hypre_StructVectorDataSize(rc_tmp));
+      hypre_TMemcpy(hypre_StructVectorData(rc),hypre_StructVectorData(rc_tmp),HYPRE_Complex,hypre_StructVectorDataSize(rc_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
       hypre_StructVectorDestroy(rc_tmp);
       hypre_exec_policy = LOCATION_CPU;
       hypre_StructGridDataLocation(cgrid) = data_location_c;

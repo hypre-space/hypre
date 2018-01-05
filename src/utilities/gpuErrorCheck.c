@@ -1,6 +1,17 @@
 
 #include "_hypre_utilities.h"
 
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line)
+{
+    if (err)
+    {
+      printf("CUDA Error Code[%d]: %s\n %s(%s) Line:%d\n", err, cudaGetErrorString(err), file, fun, line);
+      HYPRE_Int *p = NULL; *p = 1;
+    }
+}
+#endif
+
 #if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
 #include <signal.h>
 #ifdef HYPRE_USE_GPU
@@ -78,7 +89,8 @@ hypre_int PrintPointerAttributes(const void *ptr){
     if (ptr_att.memoryType==cudaMemoryTypeDevice) fprintf(stderr,"Memory is located on device\n");
     fprintf(stderr,"Device associated with this pointer is %d\n",ptr_att.device);
     return HYPRE_MANAGED_POINTER;
-  } else {
+  }
+  else {
     fprintf(stderr,"PrintPointerAttributes:: Non-Managed & non-raw pointer\n Probably pinned host pointer\n");
     if (ptr_att.memoryType==cudaMemoryTypeHost) {
       fprintf(stderr,"Memory is located on host\n");
@@ -90,7 +102,7 @@ hypre_int PrintPointerAttributes(const void *ptr){
     }
     return HYPRE_UNDEFINED_POINTER1;
   }
-  return HYPRE_UNDEFINED_POINTER2;
+  //return HYPRE_UNDEFINED_POINTER2;
 }
 hypre_int PointerAttributes(const void *ptr){
   struct cudaPointerAttributes ptr_att;
@@ -100,12 +112,13 @@ hypre_int PointerAttributes(const void *ptr){
   }
   if (ptr_att.isManaged){
     return HYPRE_MANAGED_POINTER; 
-  } else {
+  }
+  else {
     if (ptr_att.memoryType==cudaMemoryTypeHost) return HYPRE_PINNED_POINTER; /* Host pointer from cudaMallocHost */
     if (ptr_att.memoryType==cudaMemoryTypeDevice) return HYPRE_DEVICE_POINTER ; /* cudadevice pointer */
     return HYPRE_UNDEFINED_POINTER1; /* Shouldn't happen */
   }
-  return HYPRE_UNDEFINED_POINTER2; /* Shouldnt happen */
+  //return HYPRE_UNDEFINED_POINTER2; /* Shouldnt happen */
 }
 
 #endif

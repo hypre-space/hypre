@@ -452,6 +452,13 @@ AS_HELP_STRING([--with-LDFLAGS=ARG],
 [LDFLAGS=$withval]
 )
 
+AC_ARG_WITH(extra-flags,
+AS_HELP_STRING([--with-extra-flags=ARG],
+               [Define extra compile flag, where ARG is a space-separated
+                list (enclosed in quotes) of directories.]),
+[NEWCFLAGS=$withval]
+)
+
 AC_ARG_WITH(extra-incpath,
 AS_HELP_STRING([--with-extra-incpath=PATH],
                [Define extra include path, where PATH is a space-separated
@@ -1642,7 +1649,7 @@ then
    fi
    if test "$hypre_using_cuda" = "yes"
    then
-      LDFLAGS=" -ccbin=$CUDACXX -arch compute_35 -lcudart -lcuda"
+      LDFLAGS=" -ccbin=$CUDACXX -arch compute_35 -lcudart -lcuda  -Xcompiler -fopenmp  "
       HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
       HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
       CC=${CXX}
@@ -1698,9 +1705,9 @@ dnl * Set cuda options
 dnl *********************************************************************
 if test "$hypre_user_chose_cuda" = "yes"
 then
-   LDFLAGS+=" -ccbin=$CUDACXX -arch compute_35 "
-   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA "
-   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA "
+   LDFLAGS+=" -ccbin=$CUDACXX -arch compute_35 -Xcompiler -fopenmp "
+   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA $NEWCFLAGS"
+   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA $NEWCFLAGS"
    if test "$hypre_using_um" != "yes"
    then
 	CFLAGS+=" -DHYPRE_MEMORY_GPU"

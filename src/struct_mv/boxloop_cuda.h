@@ -32,8 +32,7 @@
 //}
 //using namespace RAJA;
 
-#define HYPER_LAMBDA [=] __host__  __device__ 
-#define HYPRE_MIN_GPU_SIZE (131072)//(65536)//(8192)//(16384)//(32768)//(65536)
+#define HYPER_LAMBDA [=] __host__  __device__
 
 typedef struct hypre_Boxloop_struct
 {

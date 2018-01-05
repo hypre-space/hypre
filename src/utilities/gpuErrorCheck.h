@@ -35,12 +35,12 @@ inline void gpuAssert(cudaError_t code, const char *file, int line)
 void cudaSafeFree(void *ptr,int padding);
 hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
-#endif
+#endif // defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 #define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
 void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
-#endif
+#endif // defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
@@ -155,7 +155,7 @@ void cudaSafeFree(void *ptr,int padding);
 //void PrintPointerAttributes(const void *ptr);
 //size_t mempush(void* ptr, size_t size,int purge);
 //int memloc(void *ptr, int device);
-#endif
-#endif
+#endif // __cusparseErrorCheck__
+#endif// defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 
-#endif
+#endif // hypre_GPU_ERROR_HEADER

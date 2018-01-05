@@ -255,7 +255,24 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 
-   hypre_MatrixIndexMove(A, stencil_size, i, cdir,1);
+   //hypre_MatrixIndexMove        (A, stencil_size, i, cdir,1);
+   //#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)
+#if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_OMP45)
+   HYPRE_Int * indices_d;
+   HYPRE_Int indices_h[stencil_size];
+   HYPRE_Int * stencil_shape_d;
+   HYPRE_Int  stencil_shape_h[stencil_size];
+   HYPRE_Complex * data_A = hypre_StructMatrixData(A);
+   indices_d =  hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_DEVICE);
+   stencil_shape_d =  hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE);
+   for (HYPRE_Int ii = 0; ii < stencil_size; ii++)
+   {
+      indices_h[ii]       = hypre_StructMatrixDataIndices(A)[i][ii];
+      stencil_shape_h[ii] = hypre_IndexD(stencil_shape[ii], cdir);
+   }
+   hypre_TMemcpy( indices_d, indices_h, HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
+   hypre_TMemcpy( stencil_shape_d, stencil_shape_h, HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
+#endif
 
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
@@ -273,15 +290,16 @@ hypre_PFMGSetupInterpOp_CC0
 
       for (si = 0; si < stencil_size; si++)
       {
-         Ap = hypre_StructGetMatrixBoxData(A, i, si);
-        
-         Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
+	//Ap = hypre_StructGetMatrixBoxData(A, i, si);
+	//Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
 
 #if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_MANAGED)	
          if (data_location < 1)
          {
-            Ap = data_A + indices_A[i*stencil_size+si];
-            Astenc = stencil_A[si*HYPRE_MAXDIM+cdir];
+	   //Ap = data_A + indices_A[i*stencil_size+si];
+	   //Astenc = stencil_A[si*HYPRE_MAXDIM+cdir];
+	    Ap = hypre_StructGetMatrixBoxData(A, i, si);
+	    Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
          }
          else
          {
@@ -291,6 +309,8 @@ hypre_PFMGSetupInterpOp_CC0
 #else
 	     //Ap = hypre_StructMatrixBoxData(A, i, si);
 	     //Astenc = hypre_IndexD(stencil_shape[si], cdir);
+	 Ap = hypre_StructGetMatrixBoxData(A, i, si);
+	 Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
 #endif
 
          if (Astenc == 0)

@@ -202,7 +202,7 @@ main( hypre_int argc,
 #if defined(HYPRE_USE_CUDA)
    printf("initCudaReductionMemBlock\n");
    initCudaReductionMemBlock();
-   printf("initCudaReductionMemBlock\n");
+   printf("Finish initCudaReductionMemBlock\n");
 #endif
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
