@@ -45,7 +45,7 @@ shift
 
 # Basic build and run tests
 mo="-j test"
-ro="-ams -ij -sstruct -struct"
+ro="-superlu"
 eo=""
 
 co="--enable-debug --with-blas-lib=\\'-L/home/falgout2/codes/blas/BLAS-3.7.1 -lblas -lgfortran\\'"
@@ -57,7 +57,7 @@ co="--enable-debug --with-mli --with-superlu --with-superlu-include=/home/falgou
 ./renametest.sh basic $output_dir/basic-superlu
 
 co="--enable-debug --with-mli --with-superlu --with-superlu-include=/home/falgout2/codes/superlu/SuperLU_5.2.1/SRC --with-dsuperlu --with-dsuperlu-include=/home/falgout2/codes/superlu/SuperLU_DIST_5.2.1/SRC --with-blas-lib=\\'-L/home/falgout2/codes/blas/BLAS-3.7.1 -lblas -lgfortran\\' --with-dsuperlu-lib=\\'-L/home/falgout2/codes/superlu/SuperLU_DIST_5.2.1/lib -lsuperlu_dist -L/home/falgout2/codes/parmetis/parmetis-4.0.3/build/Linux-x86_64/libparmetis -lparmetis -L/home/falgout2/codes/parmetis/parmetis-4.0.3/build/Linux-x86_64/libmetis -lmetis\\'"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-dsuperlu
 
 # Echo to stderr all nonempty error files in $output_dir
