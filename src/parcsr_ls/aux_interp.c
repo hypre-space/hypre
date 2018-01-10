@@ -75,7 +75,7 @@ HYPRE_Int hypre_alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
   }
    
   comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
-					      OUT_marker);
+                                              OUT_marker);
    
   hypre_ParCSRCommHandleDestroy(comm_handle);
   comm_handle = NULL;
@@ -99,7 +99,7 @@ HYPRE_Int hypre_alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
   }
    
   comm_handle = hypre_ParCSRCommHandleCreate( 11, extend_comm_pkg, int_buf_data, 
-					      e_out_marker);
+                                              e_out_marker);
    
   hypre_ParCSRCommHandleDestroy(comm_handle);
   comm_handle = NULL;
@@ -117,89 +117,38 @@ hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, HYPRE_Int newoff, HYPRE_Int
                               hypre_ParCSRCommPkg **extend_comm_pkg)
 
 {
-   
-
-   HYPRE_Int			num_sends;
-   HYPRE_Int			*send_procs;
-   HYPRE_Int			*send_map_starts;
-   HYPRE_Int			*send_map_elmts;
- 
-   HYPRE_Int			num_recvs;
-   HYPRE_Int			*recv_procs;
-   HYPRE_Int			*recv_vec_starts;
-
-   hypre_ParCSRCommPkg	*new_comm_pkg;
-
-   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
-
-   HYPRE_Int first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
-  /* use found instead of col_map_offd in A, and newoff instead 
-      of num_cols_offd*/
-
+   MPI_Comm  comm            = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int first_col_diag  = hypre_ParCSRMatrixFirstColDiag(A);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-
-   HYPRE_Int        row_start=0, row_end=0, col_start = 0, col_end = 0;
-   HYPRE_Int        global_num_cols;
-   hypre_IJAssumedPart   *apart;
-   
-   hypre_ParCSRMatrixGetLocalRange( A,
-                                    &row_start, &row_end ,
-                                    &col_start, &col_end );
-   
-
-   global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A); 
-
+   HYPRE_Int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
    /* Create the assumed partition */
    if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
    {
       hypre_ParCSRMatrixCreateAssumedPartition(A);
    }
-
-   apart = hypre_ParCSRMatrixAssumedPartition(A);
-   
-   hypre_NewCommPkgCreate_core( comm, found, first_col_diag, 
-                                col_start, col_end, 
-                                newoff, global_num_cols,
-                                &num_recvs, &recv_procs, &recv_vec_starts,
-                                &num_sends, &send_procs, &send_map_starts, 
-                                &send_map_elmts, apart);
-
-#else   
-   HYPRE_Int  *col_starts = hypre_ParCSRMatrixColStarts(A);
-   HYPRE_Int	num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
-   
-   hypre_MatvecCommPkgCreate_core
-      (
-         comm, found, first_col_diag, col_starts,
-         num_cols_diag, newoff,
-         first_col_diag, found,
-         1,
-         &num_recvs, &recv_procs, &recv_vec_starts,
-         &num_sends, &send_procs, &send_map_starts,
-         &send_map_elmts
-         );
-
+   hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
+#else
+   HYPRE_Int *col_starts      = hypre_ParCSRMatrixColStarts(A);
+   HYPRE_Int  num_cols_diag   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
+#endif
+   /*-----------------------------------------------------------
+    * setup commpkg
+    *----------------------------------------------------------*/
+   hypre_ParCSRCommPkg *new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
+   *extend_comm_pkg = new_comm_pkg;
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   hypre_ParCSRCommPkgCreateApart ( comm, found, first_col_diag, 
+                                    newoff, global_num_cols,
+                                    apart,
+                                    new_comm_pkg );
+#else
+   hypre_ParCSRCommPkgCreate      ( comm, found, first_col_diag, 
+                                    col_starts,
+                                    num_cols_diag, newoff,
+                                    new_comm_pkg );
 #endif
 
-   new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
-
-   hypre_ParCSRCommPkgComm(new_comm_pkg) = comm;
-
-   hypre_ParCSRCommPkgNumRecvs(new_comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs(new_comm_pkg) = recv_procs;
-   hypre_ParCSRCommPkgRecvVecStarts(new_comm_pkg) = recv_vec_starts;
-   hypre_ParCSRCommPkgNumSends(new_comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgSendProcs(new_comm_pkg) = send_procs;
-   hypre_ParCSRCommPkgSendMapStarts(new_comm_pkg) = send_map_starts;
-   hypre_ParCSRCommPkgSendMapElmts(new_comm_pkg) = send_map_elmts;
-
-
-
-   *extend_comm_pkg = new_comm_pkg;
-   
-
    return hypre_error_flag;
-   
 }
 
 
@@ -214,8 +163,8 @@ HYPRE_Int hypre_ssort(HYPRE_Int *data, HYPRE_Int n)
       si = hypre_index_of_minimum(data,i+1);
       if(i != si)
       {
-	hypre_swap_int(data, i, si);
-	change = 1;
+         hypre_swap_int(data, i, si);
+         change = 1;
       }
     }                                                                       
   return change;
@@ -248,7 +197,7 @@ void hypre_swap_int(HYPRE_Int *data, HYPRE_Int a, HYPRE_Int b)
 
 /* Initialize CF_marker_offd, CF_marker, P_marker, P_marker_offd, tmp */
 void hypre_initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_ftc, HYPRE_Int *offd_ftc, 
-		     HYPRE_Int *diag_pm, HYPRE_Int *offd_pm, HYPRE_Int *tmp_CF)
+                           HYPRE_Int *diag_pm, HYPRE_Int *offd_pm, HYPRE_Int *tmp_CF)
 {
   HYPRE_Int i;
 
@@ -309,10 +258,11 @@ void hypre_initialize_vecs(HYPRE_Int diag_n, HYPRE_Int offd_n, HYPRE_Int *diag_f
 
 /* Find nodes that are offd and are not contained in original offd
  * (neighbors of neighbors) */
-static HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, HYPRE_Int *A_ext_i, HYPRE_Int *A_ext_j, 
-		   HYPRE_Int num_cols_S_offd, HYPRE_Int *col_map_offd, HYPRE_Int col_1, 
-		   HYPRE_Int col_n, HYPRE_Int *Sop_i, HYPRE_Int *Sop_j,
-		   HYPRE_Int *CF_marker_offd)
+static HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_offd, 
+       HYPRE_Int *A_ext_i, HYPRE_Int *A_ext_j, 
+       HYPRE_Int num_cols_S_offd, HYPRE_Int *col_map_offd, HYPRE_Int col_1, 
+       HYPRE_Int col_n, HYPRE_Int *Sop_i, HYPRE_Int *Sop_j,
+       HYPRE_Int *CF_marker_offd)
 {
 #ifdef HYPRE_PROFILE
   hypre_profile_times[HYPRE_TIMER_ID_RENUMBER_COLIDX] -= hypre_MPI_Wtime();
@@ -452,16 +402,16 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_of
       i1 = A_ext_j[j];
       if(i1 < col_1 || i1 >= col_n)
       {
-	  ifound = hypre_BinarySearch(col_map_offd,i1,num_cols_A_offd);
-	  if(ifound == -1)
-	  {
-	      tmp_found[newoff]=i1;
-	      newoff++;
-	  }
-	  else
-	  {
-	      A_ext_j[j] = -ifound-1;
-	  }
+         ifound = hypre_BinarySearch(col_map_offd,i1,num_cols_A_offd);
+         if(ifound == -1)
+         {
+            tmp_found[newoff]=i1;
+            newoff++;
+         }
+         else
+         {
+            A_ext_j[j] = -ifound-1;
+         }
       }
     }
     for (j = Sop_i[i]; j < Sop_i[i+1]; j++)
@@ -469,16 +419,16 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_of
       i1 = Sop_j[j];
       if(i1 < col_1 || i1 >= col_n)
       {
-	  ifound = hypre_BinarySearch(col_map_offd,i1,num_cols_A_offd);
-	  if(ifound == -1)
-	  {
-	      tmp_found[newoff]=i1;
-	      newoff++;
-	  }
-	  else
-	  {
-	      Sop_j[j] = -ifound-1;
-	  }
+         ifound = hypre_BinarySearch(col_map_offd,i1,num_cols_A_offd);
+         if(ifound == -1)
+         {
+            tmp_found[newoff]=i1;
+            newoff++;
+         }
+         else
+         {
+            Sop_j[j] = -ifound-1;
+         }
       }
     }
    }
@@ -511,10 +461,10 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_of
        k1 = Sop_j[kk];
        if(k1 > -1 && (k1 < col_1 || k1 >= col_n))
        { 
-	 got_loc = hypre_BinarySearch(tmp_found,k1,newoff);
-	 if(got_loc > -1)
-	   loc_col = got_loc + num_cols_A_offd;
-	 Sop_j[kk] = -loc_col - 1;
+          got_loc = hypre_BinarySearch(tmp_found,k1,newoff);
+          if(got_loc > -1)
+             loc_col = got_loc + num_cols_A_offd;
+          Sop_j[kk] = -loc_col - 1;
        }
      }
      for (kk = A_ext_i[i]; kk < A_ext_i[i+1]; kk++)
@@ -522,9 +472,9 @@ static HYPRE_Int hypre_new_offd_nodes(HYPRE_Int **found, HYPRE_Int num_cols_A_of
        k1 = A_ext_j[kk];
        if(k1 > -1 && (k1 < col_1 || k1 >= col_n))
        {
-	 got_loc = hypre_BinarySearch(tmp_found,k1,newoff);
-	 loc_col = got_loc + num_cols_A_offd;
-	 A_ext_j[kk] = -loc_col - 1;
+          got_loc = hypre_BinarySearch(tmp_found,k1,newoff);
+          loc_col = got_loc + num_cols_A_offd;
+          A_ext_j[kk] = -loc_col - 1;
        }
      }
    }
@@ -559,7 +509,7 @@ HYPRE_Int hypre_exchange_marker(hypre_ParCSRCommPkg *comm_pkg,
   }
    
   hypre_ParCSRCommHandle *comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
-					      OUT_marker);
+                                                                      OUT_marker);
    
   hypre_ParCSRCommHandleDestroy(comm_handle);
   hypre_TFree(int_buf_data);
@@ -766,16 +716,16 @@ void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNod
        index = P_offd_j[i];
        if (!P_marker[index])
        {
-	 if(tmp_CF_marker_offd[index] >= 0)
-	 {
-	   num_cols_P_offd++;
-	   P_marker[index] = 1;
-	 }
+          if(tmp_CF_marker_offd[index] >= 0)
+          {
+             num_cols_P_offd++;
+             P_marker[index] = 1;
+          }
        }
      }
      
      if (num_cols_P_offd)
-	col_map_offd_P = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd);
+        col_map_offd_P = hypre_CTAlloc(HYPRE_Int, num_cols_P_offd);
      
      index = 0;
      for(i = 0; i < num_cols_P_offd; i++)
@@ -785,8 +735,8 @@ void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNod
      }
      for(i = 0; i < P_offd_size; i++)
        P_offd_j[i] = hypre_BinarySearch(col_map_offd_P,
-					P_offd_j[i],
-					num_cols_P_offd);
+                                        P_offd_j[i],
+                                        num_cols_P_offd);
 
      index = 0;
      for(i = 0; i < num_cols_P_offd; i++)
@@ -805,12 +755,12 @@ void hypre_build_interp_colmap(hypre_ParCSRMatrix *P, HYPRE_Int full_off_procNod
      if(hypre_ssort(col_map_offd_P,num_cols_P_offd))
      {
        for(i = 0; i < P_offd_size; i++)
-	 for(j = 0; j < num_cols_P_offd; j++)
-	   if(P_marker[P_offd_j[i]] == col_map_offd_P[j])
-	   {
-	     P_offd_j[i] = j;
-	     j = num_cols_P_offd;
-	   }
+          for(j = 0; j < num_cols_P_offd; j++)
+             if(P_marker[P_offd_j[i]] == col_map_offd_P[j])
+             {
+                P_offd_j[i] = j;
+                j = num_cols_P_offd;
+             }
      }
 #endif /* HYPRE_CONCURRENT_HOPSCOTCH */
 
