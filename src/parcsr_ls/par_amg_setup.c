@@ -2706,7 +2706,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if (grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || (grid_relax_type[3] == 16 && j== (num_levels-1)))
       {
-         HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);;
+         HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);
          HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
          HYPRE_Real max_eig, min_eig = 0;
          HYPRE_Real *coefs = NULL;
