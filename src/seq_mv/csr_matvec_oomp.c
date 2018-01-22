@@ -466,6 +466,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
      for(i=0;i<y_size;i++) y_data[i] = b_data[i];
    }
 
+   gpuErrchk(cudaDeviceSynchronize());
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 #pragma omp target data use_device_ptr(A_data,x_data,y_data,A_i,A_j)
 #endif
@@ -480,7 +481,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 // if (!GetAsyncMode()){
    //gpuErrchk(cudaPeekAtLastError());
    //gpuErrchk(cudaDeviceSynchronize());
-   gpuErrchk(cudaStreamSynchronize(s[4]));
+   //gpuErrchk(cudaStreamSynchronize(s[4]));
  //}
 #else
 #ifdef HYPRE_USING_OPENMP_OFFLOAD

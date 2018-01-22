@@ -113,8 +113,18 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
       else if (location==HYPRE_MEMORY_HOST)
       {
 #if defined(HYPRE_USE_MANAGED)
+	ptr = malloc(size);
+	//gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+	//mempush(ptr,size,0);
+#ifdef HYPRE_USE_MANAGED_SCALABLE
+	//gpuErrchk( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
+	//size_t *sp=(size_t*)ptr;
+         //*sp=size;
+         //ptr=(void*)(&sp[MEM_PAD_LEN]);
+#else
          gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
          mempush(ptr,size,0);
+#endif
 #else
          ptr = malloc(size);
 #endif
@@ -203,9 +213,11 @@ hypre_CAlloc( size_t count,
       else if (location==HYPRE_MEMORY_HOST)
       {
 #if defined(HYPRE_USE_MANAGED)
-         gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
-         memset(ptr,0,count*elt_size);
-         mempush(ptr,size,0);
+	ptr=(void*)hypre_MAlloc(size, location);
+	memset(ptr,0,count*elt_size);
+	//gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+	//memset(ptr,0,count*elt_size);
+	//mempush(ptr,size,0);
 #else
          ptr = calloc(count, elt_size);
 #endif
@@ -213,9 +225,11 @@ hypre_CAlloc( size_t count,
       else if (location==HYPRE_MEMORY_SHARED)
       {
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-         gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
-         memset(ptr,0,count*elt_size);
-         mempush(ptr,size,0);
+		ptr=(void*)hypre_MAlloc(size, location);
+		memset(ptr,0,count*elt_size);
+		//gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+		//memset(ptr,0,count*elt_size);
+		//mempush(ptr,size,0);
 #else
          ptr = calloc(count, elt_size);
 #endif

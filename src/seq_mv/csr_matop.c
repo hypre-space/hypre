@@ -439,11 +439,11 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
       return 0;
    }
 
-   AT_j = hypre_CTAlloc(HYPRE_Int,  num_nonzerosAT, HYPRE_MEMORY_HOST);
+   AT_j = hypre_CTAlloc(HYPRE_Int,  num_nonzerosAT, HYPRE_MEMORY_SHARED);
    hypre_CSRMatrixJ(*AT) = AT_j;
    if (data) 
    {
-      AT_data = hypre_CTAlloc(HYPRE_Complex,  num_nonzerosAT, HYPRE_MEMORY_HOST);
+      AT_data = hypre_CTAlloc(HYPRE_Complex,  num_nonzerosAT, HYPRE_MEMORY_SHARED);
       hypre_CSRMatrixData(*AT) = AT_data;
    }
 
@@ -452,7 +452,7 @@ HYPRE_Int hypre_CSRMatrixTranspose(hypre_CSRMatrix   *A, hypre_CSRMatrix   **AT,
     *-----------------------------------------------------------------*/
 
    HYPRE_Int *bucket = hypre_TAlloc(
-    HYPRE_Int,  (num_colsA + 1)*hypre_NumThreads(), HYPRE_MEMORY_HOST);
+    HYPRE_Int,  (num_colsA + 1)*hypre_NumThreads(), HYPRE_MEMORY_SHARED);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel

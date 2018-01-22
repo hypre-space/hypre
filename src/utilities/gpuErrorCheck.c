@@ -26,7 +26,6 @@ void cudaSafeFree(void *ptr,int padding)
   err=cudaPointerGetAttributes(&ptr_att,ptr);
   if (err!=cudaSuccess){
     cudaGetLastError(); 
-#define FULL_WARN
 #ifndef ABORT_ON_RAW_POINTER
 #ifdef FULL_WARN
     if (err==cudaErrorInvalidValue) fprintf(stderr,"WARNING :: Raw pointer passed to cudaSafeFree %p\n",ptr);
@@ -70,7 +69,7 @@ void cudaSafeFree(void *ptr,int padding)
 hypre_int PrintPointerAttributes(const void *ptr){
   struct cudaPointerAttributes ptr_att;
   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){
-    cudaGetLastError(); 
+    cudaGetLastError();  // Required to reset error flag on device
     fprintf(stderr,"PrintPointerAttributes:: Raw pointer %p\n",ptr);
     return HYPRE_HOST_POINTER;
   }
@@ -98,7 +97,7 @@ hypre_int PrintPointerAttributes(const void *ptr){
 hypre_int PointerAttributes(const void *ptr){
   struct cudaPointerAttributes ptr_att;
   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){
-     cudaGetLastError(); 
+     cudaGetLastError();  // Required to  reset error flag on device
      return HYPRE_HOST_POINTER;
   }
   if (ptr_att.isManaged){

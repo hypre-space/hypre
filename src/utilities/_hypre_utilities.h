@@ -1168,7 +1168,7 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #include <cusparse.h>
 #include <cublas_v2.h>
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
-#define MEM_PAD_LEN 0
+#define MEM_PAD_LEN 1
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line)
 {

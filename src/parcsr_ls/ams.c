@@ -100,6 +100,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
 	 int num_teams = (num_rows+num_rows%1024)/1024;
 	 //printf("AMS.C %d = %d \n",num_rows,num_teams*1024);
+	 //printf("Ptypes %d %d %d \n",PointerAttributes(u_data),PointerAttributes(v_data),PointerAttributes(l1_norms));
 #pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(1024) is_device_ptr(u_data,v_data,l1_norms)
 #elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 	 int num_teams = (num_rows+num_rows%1024)/1024;
@@ -110,6 +111,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
             u_data[i] += v_data[i] / l1_norms[i];
 #endif
 	 UpdateDRC(hypre_ParVectorLocalVector(u));
+	 //printf("AMS.C DONE %d = %d \n",num_rows,num_teams*1024);
 	 POP_RANGE;
 	 POP_RANGE;
       }
@@ -595,7 +597,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
    HYPRE_Real diag;
-   HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_HOST);
+   HYPRE_Real *l1_norm = hypre_TAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_SHARED);
 
    HYPRE_Int *cf_marker_offd = NULL;
    HYPRE_Int cf_diag;

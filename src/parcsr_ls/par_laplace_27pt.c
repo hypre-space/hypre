@@ -103,8 +103,8 @@ GenerateLaplacian27pt(MPI_Comm comm,
    num_procs = P*Q*R;
 
    local_num_rows = nx_local*ny_local*nz_local;
-   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
-   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
+   offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -140,7 +140,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+   col_map_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_SHARED);
 
    cnt = 0;
    o_cnt = 0;
@@ -723,13 +723,13 @@ GenerateLaplacian27pt(MPI_Comm comm,
       }
    }
 
-   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
-   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_j = hypre_CTAlloc(HYPRE_Int,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
+   diag_data = hypre_CTAlloc(HYPRE_Real,  diag_i[local_num_rows], HYPRE_MEMORY_SHARED);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
-      offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_j = hypre_CTAlloc(HYPRE_Int,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
+      offd_data = hypre_CTAlloc(HYPRE_Real,  offd_i[local_num_rows], HYPRE_MEMORY_SHARED);
    }
 
    nxy = nx_local*ny_local;

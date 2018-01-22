@@ -480,13 +480,13 @@ HYPRE_Int hypre_BoomerAMG_GMExpandInterp( hypre_ParCSRMatrix *A,
    else
       new_ncv = ncv; /* unchanged on level > 0 */
       
-   P_diag_j_new = hypre_CTAlloc(HYPRE_Int,  new_nnz_diag, HYPRE_MEMORY_HOST);
-   P_diag_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_diag, HYPRE_MEMORY_HOST);
-   P_diag_i_new = hypre_CTAlloc(HYPRE_Int,  nv + 1, HYPRE_MEMORY_HOST);
+   P_diag_j_new = hypre_CTAlloc(HYPRE_Int,  new_nnz_diag, HYPRE_MEMORY_SHARED);
+   P_diag_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_diag, HYPRE_MEMORY_SHARED);
+   P_diag_i_new = hypre_CTAlloc(HYPRE_Int,  nv + 1, HYPRE_MEMORY_SHARED);
 
-   P_offd_j_new = hypre_CTAlloc(HYPRE_Int,  new_nnz_offd, HYPRE_MEMORY_HOST);
-   P_offd_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_offd, HYPRE_MEMORY_HOST);
-   P_offd_i_new = hypre_CTAlloc(HYPRE_Int,  nv + 1, HYPRE_MEMORY_HOST);
+   P_offd_j_new = hypre_CTAlloc(HYPRE_Int,  new_nnz_offd, HYPRE_MEMORY_SHARED);
+   P_offd_data_new = hypre_CTAlloc(HYPRE_Real,  new_nnz_offd, HYPRE_MEMORY_SHARED);
+   P_offd_i_new = hypre_CTAlloc(HYPRE_Int,  nv + 1, HYPRE_MEMORY_SHARED);
 
    P_diag_i_new[0] = P_diag_i[0];
    P_offd_i_new[0] = P_offd_i[0];
@@ -1508,7 +1508,7 @@ HYPRE_Int hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
 
    HYPRE_Int i,j, k, pp;
 
-
+   printf(" hypre_BoomerAMGRefineInterp \n");
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int             *A_diag_i = hypre_CSRMatrixI(A_diag);
@@ -1794,8 +1794,8 @@ HYPRE_Int hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
    
      
     /* initialized to zero */
-    P_diag_data_new = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_HOST);
-    P_offd_data_new = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_HOST);
+    P_diag_data_new = hypre_CTAlloc(HYPRE_Real,  P_diag_size, HYPRE_MEMORY_SHARED);
+    P_offd_data_new = hypre_CTAlloc(HYPRE_Real,  P_offd_size, HYPRE_MEMORY_SHARED);
 
 
     j_diag_pos = 0;

@@ -134,7 +134,6 @@ hypre_BoomerAMGBuildInterp( hypre_ParCSRMatrix   *A,
    hypre_MPI_Comm_rank(comm,&my_id);
    num_threads = hypre_NumThreads();
 
-
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    my_first_cpt = num_cpts_global[0];
    if (my_id == (num_procs -1)) total_global_cpts = num_cpts_global[1];
@@ -3040,8 +3039,8 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
                   {   cum_lost_per_thread[i] = num_lost_per_thread[i]; }
               }
           
-              P_diag_j_new = hypre_CTAlloc(HYPRE_Int, P_diag_size, HYPRE_MEMORY_HOST);
-              P_diag_data_new = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_HOST);
+              P_diag_j_new = hypre_CTAlloc(HYPRE_Int, P_diag_size, HYPRE_MEMORY_SHARED);
+              P_diag_data_new = hypre_CTAlloc(HYPRE_Real, P_diag_size, HYPRE_MEMORY_SHARED);
           }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
@@ -3112,8 +3111,8 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
                   {   cum_lost_per_thread[i] = num_lost_offd_per_thread[i]; }
               }
               
-              P_offd_j_new = hypre_CTAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_HOST);
-              P_offd_data_new = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_HOST);
+              P_offd_j_new = hypre_CTAlloc(HYPRE_Int, P_offd_size, HYPRE_MEMORY_SHARED);
+              P_offd_data_new = hypre_CTAlloc(HYPRE_Real, P_offd_size, HYPRE_MEMORY_SHARED);
           }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp barrier
