@@ -64,7 +64,18 @@ hypre_OutOfMemory( size_t size )
 /*--------------------------------------------------------------------------
  * hypre_MAlloc
  *--------------------------------------------------------------------------*/
-
+char *
+hypre_MAllocIns( size_t size , HYPRE_Int location,char *file, int line)
+{
+  char *ret = hypre_MAlloc(size,location);
+  //printf("%s %d %d %p\n",file,line,location,ret);
+  pattr_t *ss=(pattr_t*)hypre_MAlloc(sizeof(pattr_t),HYPRE_MEMORY_HOST);
+  ss->file=file;
+  ss->line=line;
+  ss->type=location;
+  patpush(ret,ss);
+  return ret;
+}
 char *
 hypre_MAlloc( size_t size , HYPRE_Int location)
 {
@@ -165,6 +176,19 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
 /*--------------------------------------------------------------------------
  * hypre_CAlloc
  *--------------------------------------------------------------------------*/
+char *
+hypre_CAllocIns( size_t count, 
+              size_t elt_size,
+		 HYPRE_Int location,char *file, int line){
+  char *ret=hypre_CAlloc(count,elt_size,location);
+  //printf("%s %d %d %p\n",file,line,location,ret);
+  pattr_t *ss=(pattr_t*)hypre_MAlloc(sizeof(pattr_t),HYPRE_MEMORY_HOST);
+  ss->file=file;
+  ss->line=line;
+  ss->type=location;
+  patpush(ret,ss);
+  return ret;
+}
 
 char *
 hypre_CAlloc( size_t count, 
@@ -269,6 +293,18 @@ size_t memsize(const void *ptr){
 /*--------------------------------------------------------------------------
  * hypre_ReAlloc
  *--------------------------------------------------------------------------*/
+char *
+hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, int line)
+{
+  char *ret = hypre_ReAlloc(ptr,size,location);
+  //printf("%s %d %d %p\n",file,line,location,ret);
+  pattr_t *ss=(pattr_t*)hypre_MAlloc(sizeof(pattr_t),HYPRE_MEMORY_HOST);
+  ss->file=file;
+  ss->line=line;
+  ss->type=location;
+  patpush(ret,ss);
+  return ret;
+}
 
 char *
 hypre_ReAlloc( char   *ptr, 

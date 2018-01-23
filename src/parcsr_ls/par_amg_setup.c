@@ -2083,7 +2083,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   hypre_Vector* Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
                   hypre_TFree(hypre_VectorData(Vtemp_local), HYPRE_MEMORY_HOST); 
                   hypre_VectorSize(Vtemp_local) = local_P_sz; 
-                  hypre_VectorData(Vtemp_local) = hypre_CTAlloc(HYPRE_Complex,  local_P_sz, HYPRE_MEMORY_HOST);
+                  hypre_VectorData(Vtemp_local) = hypre_CTAlloc(HYPRE_Complex,  local_P_sz, HYPRE_MEMORY_SHARED);
                   if (Ztemp)
                   {
                      hypre_Vector* Ztemp_local = hypre_ParVectorLocalVector(Ztemp);

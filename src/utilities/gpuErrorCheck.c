@@ -68,6 +68,10 @@ void cudaSafeFree(void *ptr,int padding)
 }
 hypre_int PrintPointerAttributes(const void *ptr){
   struct cudaPointerAttributes ptr_att;
+#ifdef TRACK_MEMORY_ALLOCATIONS
+  pattr_t *ss = patpush(ptr,NULL);
+  if (ss!=NULL) fprintf(stderr,"Pointer %p from line %d of %s TYPE = %d \n",ptr,ss->line,ss->file,ss->type);
+#endif
   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess){
     cudaGetLastError();  // Required to reset error flag on device
     fprintf(stderr,"PrintPointerAttributes:: Raw pointer %p\n",ptr);
@@ -109,5 +113,18 @@ hypre_int PointerAttributes(const void *ptr){
   }
   return HYPRE_UNDEFINED_POINTER2; /* Shouldnt happen */
 }
-
+void assert_check(void *ptr, char *file, int line){
+  if (ptr==NULL) return;
+  pattr_t *ss = patpush(ptr,NULL);
+  if (ss!=NULL){
+  if (ss->type!=2){
+    fprintf(stderr,"ASSERT_MANAGED FAILURE in line %d of file %s type = %d pomitrt = %p\n",line,file,ss->type,ptr);
+    fprintf(stderr,"ASSERT_MANAGED failed on allocation from line %d of %s \n",ss->line,ss->file);
+  }} else {
+    //printf("Address not in map\n Calling PrintPointerAttributes\n");
+    if ( PointerAttributes(ptr)!=HYPRE_MANAGED_POINTER){
+      fprintf(stderr,"ASSERT_MANAGED FAILURE in line %d of file %s \n NO ALLOCATION INFO\n",line,file);
+    }
+  }
+}
 #endif

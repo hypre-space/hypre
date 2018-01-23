@@ -185,8 +185,8 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
   
          if (redundant || my_id == 0)
          {
-            A_seq_i = hypre_CTAlloc(HYPRE_Int,  size+1, HYPRE_MEMORY_HOST);
-            A_seq_offd_i = hypre_CTAlloc(HYPRE_Int,  size+1, HYPRE_MEMORY_HOST);
+            A_seq_i = hypre_CTAlloc(HYPRE_Int,  size+1, HYPRE_MEMORY_SHARED);
+            A_seq_offd_i = hypre_CTAlloc(HYPRE_Int,  size+1, HYPRE_MEMORY_SHARED);
             if (num_functions > 1) seq_dof_func = hypre_CTAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST);
          }
 
@@ -241,8 +241,8 @@ HYPRE_Int hypre_seqAMGSetup( hypre_ParAMGData *amg_data,
             }
 
             total_nnz = displs2[new_num_procs];
-            A_seq_j = hypre_CTAlloc(HYPRE_Int,  total_nnz, HYPRE_MEMORY_HOST);
-            A_seq_data = hypre_CTAlloc(HYPRE_Real,  total_nnz, HYPRE_MEMORY_HOST);
+            A_seq_j = hypre_CTAlloc(HYPRE_Int,  total_nnz, HYPRE_MEMORY_SHARED);
+            A_seq_data = hypre_CTAlloc(HYPRE_Real,  total_nnz, HYPRE_MEMORY_SHARED);
          }
          if (redundant)
          {

@@ -145,7 +145,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       x_buf_data = hypre_CTAlloc( HYPRE_Complex*,  num_vectors , HYPRE_MEMORY_HOST);
       for ( jv=0; jv<num_vectors; ++jv )
          x_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex,  hypre_ParCSRCommPkgSendMapStart
-                                        (comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
+                                        (comm_pkg,  num_sends), HYPRE_MEMORY_SHARED);
    }
 
    if ( num_vectors==1 )
