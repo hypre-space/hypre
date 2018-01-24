@@ -329,6 +329,7 @@ char *hypre_CAlloc( size_t count ,  size_t elt_size , HYPRE_Int location);
 char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, int line);
 char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc( char *ptr ,  size_t size , HYPRE_Int location);
+char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, int line);
 void hypre_Free( char *ptr , HYPRE_Int location );
 char *hypre_CAllocHost( size_t count,size_t elt_size );
 char *hypre_MAllocHost( size_t size );

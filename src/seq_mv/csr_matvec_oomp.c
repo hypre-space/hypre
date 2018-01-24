@@ -38,7 +38,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
                                  hypre_Vector    *y,
                                  HYPRE_Int        offset     )
 {
-  //printf("CALLING OOOMP MATVE\n");
+  printf("CALLING OOOMP MATVE\n");
 #ifdef HYPRE_PROFILE
    HYPRE_Real time_begin = hypre_MPI_Wtime();
 #endif
@@ -522,6 +522,7 @@ UpdateDRC(y);
    //hypre_SeqVectorUnMapFromDevice(x);
    //if ((b!=y)&&(b->mapped)) hypre_SeqVectorUnMapFromDevice(b);
 #endif
+   //printf("DONE WITH OOMP\n");
    return ierr;
 }
 HYPRE_Int

@@ -1767,7 +1767,7 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
 
    hypre_CSRMatrixTranspose( A_diag, &AT_diag, data);
 
-   AT_offd_i = hypre_CTAlloc(HYPRE_Int,  num_cols+1, HYPRE_MEMORY_HOST);
+   AT_offd_i = hypre_CTAlloc(HYPRE_Int,  num_cols+1, HYPRE_MEMORY_SHARED);
 
    if (num_procs > 1)
    {   
@@ -1831,8 +1831,8 @@ hypre_ParCSRMatrixTranspose( hypre_ParCSRMatrix *A,
 
       if (AT_offd_i[num_cols])
       {
-         AT_offd_j = hypre_CTAlloc(HYPRE_Int,  AT_offd_i[num_cols], HYPRE_MEMORY_HOST);
-         if (data) AT_offd_data = hypre_CTAlloc(HYPRE_Complex,  AT_offd_i[num_cols], HYPRE_MEMORY_HOST);
+         AT_offd_j = hypre_CTAlloc(HYPRE_Int,  AT_offd_i[num_cols], HYPRE_MEMORY_SHARED);
+         if (data) AT_offd_data = hypre_CTAlloc(HYPRE_Complex,  AT_offd_i[num_cols], HYPRE_MEMORY_SHARED);
       }
       else
       {

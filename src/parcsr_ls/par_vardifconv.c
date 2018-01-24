@@ -111,7 +111,7 @@ GenerateVarDifConv( MPI_Comm comm,
    local_num_rows = nx_local*ny_local*nz_local;
    diag_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
    offd_i = hypre_CTAlloc(HYPRE_Int,  local_num_rows+1, HYPRE_MEMORY_SHARED);
-   rhs_data = hypre_CTAlloc(HYPRE_Real,  local_num_rows, HYPRE_MEMORY_HOST);
+   rhs_data = hypre_CTAlloc(HYPRE_Real,  local_num_rows, HYPRE_MEMORY_SHARED);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);

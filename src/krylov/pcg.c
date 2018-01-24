@@ -330,7 +330,7 @@ hypre_PCGSolve( void *pcg_vdata,
    /*-----------------------------------------------------------------------
     * Start pcg solve
     *-----------------------------------------------------------------------*/
-
+   printf("PCG 1\n");
    /* compute eps */
    if (two_norm)
    {
@@ -348,7 +348,7 @@ hypre_PCGSolve( void *pcg_vdata,
       if (print_level > 1 && my_id == 0)
           hypre_printf("<C*b,b>: %e\n",bi_prod);
    };
-
+   printf("PCG 1\n");
    /* Since it is does not diminish performance, attempt to return an error flag
       and notify users when they supply bad input. */
    if (bi_prod != 0.) ieee_check = bi_prod/bi_prod; /* INF -> NaN conversion */
