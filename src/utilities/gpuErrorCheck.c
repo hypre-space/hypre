@@ -40,7 +40,9 @@ void cudaSafeFree(void *ptr,int padding)
 #ifndef ABORT_ON_RAW_POINTER
 #ifdef FULL_WARN
     if (err==cudaErrorInvalidValue) fprintf(stderr,"WARNING :: Raw pointer passed to cudaSafeFree %p\n",ptr);
-    if (err==cudaErrorInvalidDevice) fprintf(stderr,"WARNING :: cudaSafeFree :: INVALID DEVICE on ptr = %p\n",ptr);
+    else if (err==cudaErrorInvalidDevice) fprintf(stderr,"WARNING :: cudaSafeFree :: INVALID DEVICE on ptr = %p\n",ptr);
+    else if (err==cudaErrorIncompatibleDriverContext) fprintf(stderr,"WARNING :: cudaSafeFree :: Incompatible  Driver Context on ptr = %p\n",ptr);
+    else fprintf(stderr,"Point Attrib check error is %d \n",err);
     //PrintPointerAttributes(ptr);
 #endif
 #else

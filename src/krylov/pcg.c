@@ -410,11 +410,11 @@ hypre_PCGSolve( void *pcg_vdata,
    /* r = b - Ax */
    (*(pcg_functions->CopyVector))(b, r);
    (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
- 
+   //hypre_ParVectorUpdateHost(r);
    /* p = C*r */
    (*(pcg_functions->ClearVector))(p);
    precond(precond_data, A, r, p);
-
+   
    /* gamma = <r,p> */
    gamma = (*(pcg_functions->InnerProd))(r,p);
 

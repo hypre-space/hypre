@@ -109,10 +109,6 @@ hypre_SMGSetup( void               *smg_vdata,
 
    grid = hypre_StructMatrixGrid(A);
 
-   //if (hypre_StructGridNDim(grid) == hypre_StructStencilNDim(hypre_StructMatrixStencil(A)))
-   //{
-   //  start_t = MPI_Wtime();
-   //}
    /* Compute a new max_levels value based on the grid */
    cbox = hypre_BoxDuplicate(hypre_StructGridBoundingBox(grid));
    max_levels = hypre_Log2(hypre_BoxSizeD(cbox, cdir)) + 2;
@@ -126,16 +122,17 @@ hypre_SMGSetup( void               *smg_vdata,
    PT_grid_l = hypre_TAlloc(hypre_StructGrid *,  max_levels, HYPRE_MEMORY_HOST);
    PT_grid_l[0] = NULL;
    hypre_StructGridRef(grid, &grid_l[0]);
+
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
    data_location = hypre_StructGridDataLocation(grid);
-   if (data_location < LOCATION_CPU)
+   if (data_location != HYPRE_MEMORY_HOST)
    {
       num_level_GPU = max_levels;
    }
    else
    {
       num_level_GPU = 0;
-      device_level = num_level_GPU;
+      device_level  = 0;
    }
    if (hypre_StructGridNDim(grid) != hypre_StructStencilNDim(hypre_StructMatrixStencil(A)))
    {
@@ -176,15 +173,15 @@ hypre_SMGSetup( void               *smg_vdata,
          if (max_box_size < HYPRE_MIN_GPU_SIZE)
          {
 	    num_level_GPU = l+1;
-	    data_location = LOCATION_CPU;
+	    data_location = HYPRE_MEMORY_HOST;
 	    device_level  = num_level_GPU;
-	    printf("num_level_GPU = %d,device_level = %d\n",num_level_GPU,device_level);
+	    //printf("num_level_GPU = %d,device_level = %d\n",num_level_GPU,device_level);
          }
       }
       else if (l+1 == device_level)
       {
 	 num_level_GPU = l+1;
-	 data_location = LOCATION_CPU;
+	 data_location = HYPRE_MEMORY_HOST;
       }
       
       hypre_StructGridDataLocation(grid_l[l+1]) = data_location;
@@ -226,25 +223,13 @@ hypre_SMGSetup( void               *smg_vdata,
    tb_l[0] = hypre_StructVectorCreate(comm, grid_l[0]);
    hypre_StructVectorSetNumGhost(tb_l[0], hypre_StructVectorNumGhost(b));
    hypre_StructVectorInitializeShell(tb_l[0]);
+   hypre_StructVectorSetDataSize(tb_l[0], &data_size, &data_size_const);
 
    tx_l[0] = hypre_StructVectorCreate(comm, grid_l[0]);
    hypre_StructVectorSetNumGhost(tx_l[0], hypre_StructVectorNumGhost(x));
    hypre_StructVectorInitializeShell(tx_l[0]);
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-   if (hypre_StructGridDataLocation(grid_l[0]) < LOCATION_CPU)
-   {
-      data_size += hypre_StructVectorDataSize(tb_l[0]);
-      data_size += hypre_StructVectorDataSize(tx_l[0]);
-   }
-   else
-   {
-      data_size_const += hypre_StructVectorDataSize(tb_l[0]);
-      data_size_const += hypre_StructVectorDataSize(tx_l[0]);
-   }
-#else
-   data_size += hypre_StructVectorDataSize(tb_l[0]);
-   data_size += hypre_StructVectorDataSize(tx_l[0]);
-#endif
+   hypre_StructVectorSetDataSize(tx_l[0], &data_size, &data_size_const);
+
    for (l = 0; l < (num_levels - 1); l++)
    {
       PT_l[l]  = hypre_SMGCreateInterpOp(A_l[l], PT_grid_l[l+1], cdir);
@@ -278,10 +263,12 @@ hypre_SMGSetup( void               *smg_vdata,
       b_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(b_l[l+1], b_num_ghost);
       hypre_StructVectorInitializeShell(b_l[l+1]);
+      hypre_StructVectorSetDataSize(b_l[l+1], &data_size, &data_size_const);
 
       x_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(x_l[l+1], x_num_ghost);
       hypre_StructVectorInitializeShell(x_l[l+1]);
+      hypre_StructVectorSetDataSize(x_l[l+1], &data_size, &data_size_const);
 
       tb_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(tb_l[l+1], hypre_StructVectorNumGhost(b));
@@ -291,24 +278,11 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_StructVectorSetNumGhost(tx_l[l+1], hypre_StructVectorNumGhost(x));
       hypre_StructVectorInitializeShell(tx_l[l+1]);
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-      if (hypre_StructGridDataLocation(grid_l[l+1]) < LOCATION_CPU)
+      if (l+1 == num_level_GPU)
       {
-	 data_size += hypre_StructVectorDataSize(b_l[l+1]);
-	 data_size += hypre_StructVectorDataSize(x_l[l+1]);
+           hypre_StructVectorSetDataSize(tb_l[l+1], &data_size, &data_size_const);
+	   hypre_StructVectorSetDataSize(tx_l[l+1], &data_size, &data_size_const);
       }
-      else
-      {
-	data_size_const += hypre_StructVectorDataSize(b_l[l+1]);
-	data_size_const += hypre_StructVectorDataSize(x_l[l+1]);
-	if (l+1 == num_level_GPU)
-	{
-	   data_size_const += hypre_StructVectorDataSize(tb_l[l+1]);
-	   data_size_const += hypre_StructVectorDataSize(tx_l[l+1]);
-	}
-      }
-#else
-      data_size += hypre_StructVectorDataSize(b_l[l+1]);
-      data_size += hypre_StructVectorDataSize(x_l[l+1]);
 #endif
    }
 
@@ -322,12 +296,10 @@ hypre_SMGSetup( void               *smg_vdata,
 #endif
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-   if (hypre_StructGridNDim(grid) == hypre_StructStencilNDim(hypre_StructMatrixStencil(A)))
-     printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
-#endif
-
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)  
-   if (hypre_StructGridDataLocation(grid_l[0]) < LOCATION_CPU)
+   //if (hypre_StructGridNDim(grid) == hypre_StructStencilNDim(hypre_StructMatrixStencil(A)))
+   //   printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
+   data_location = hypre_StructGridDataLocation(grid_l[0]);
+   if (data_location != HYPRE_MEMORY_HOST)
    {
       hypre_StructVectorInitializeData(tb_l[0], data);
       hypre_StructVectorAssemble(tb_l[0]);
@@ -372,11 +344,19 @@ hypre_SMGSetup( void               *smg_vdata,
       }
 #endif
 
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+      if (l+1 == num_level_GPU)
+      {
+	 data_location = HYPRE_MEMORY_HOST;
+      }
+#endif
+
       hypre_StructMatrixInitializeData(A_l[l+1], data, data_const);
       data += hypre_StructMatrixDataSize(A_l[l+1]);
       data_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
+
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-      if (hypre_StructGridDataLocation(grid_l[l+1]) < LOCATION_CPU)
+      if (data_location != HYPRE_MEMORY_HOST)
       {
 	 hypre_StructVectorInitializeData(b_l[l+1], data);
 	 hypre_StructVectorAssemble(b_l[l+1]);
@@ -484,10 +464,10 @@ hypre_SMGSetup( void               *smg_vdata,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)     
       if (l == num_level_GPU)
       {
-	hypre_exec_policy = LOCATION_CPU;
+	hypre_exec_policy = HYPRE_MEMORY_HOST;
       }
 #endif
-      //printf("smg_setup level %d, exec_policy = %d, \n",l, hypre_exec_policy);
+      //printf("smg_setup level %d/%d, exec_policy = %d, \n",l, num_level_GPU, hypre_exec_policy);
       hypre_SMGSetBIndex(base_index, base_stride, l, bindex);
       hypre_SMGSetBStride(base_index, base_stride, l, bstride);
       hypre_SMGSetCIndex(base_index, base_stride, l, cdir, cindex);
@@ -538,7 +518,6 @@ hypre_SMGSetup( void               *smg_vdata,
          hypre_SMGSetupRestrictOp(A_l[l], R_l[l], tx_l[l], cdir,
                                   cindex, stride);
 #endif
-
       /* set up the restriction routine */
       restrict_data_l[l] = hypre_SemiRestrictCreate();
       hypre_SemiRestrictSetup(restrict_data_l[l], R_l[l], 0, r_l[l], b_l[l+1],
@@ -552,7 +531,7 @@ hypre_SMGSetup( void               *smg_vdata,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)      
    if (l == num_level_GPU)
    {
-      hypre_exec_policy = LOCATION_CPU;
+      hypre_exec_policy = HYPRE_MEMORY_HOST;
    }
 #endif
 
@@ -614,9 +593,9 @@ hypre_SMGSetup( void               *smg_vdata,
       hypre_StructMatrixPrint(filename, A_l[l], 0);
    }
 #endif
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)   
-   if (hypre_StructGridDataLocation(grid) < LOCATION_CPU)
-     hypre_exec_policy = LOCATION_GPU;
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+   if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
+     hypre_exec_policy = HYPRE_MEMORY_DEVICE;
 #endif
    HYPRE_ANNOTATION_END("SMG.setup");
 

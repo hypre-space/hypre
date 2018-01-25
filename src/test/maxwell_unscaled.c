@@ -1588,7 +1588,7 @@ main( hypre_int argc,
     * Set up the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(HYPRE_Real,  data.max_boxsize, HYPRE_MEMORY_HOST);
+   values = hypre_CTAlloc(HYPRE_Real,  data.max_boxsize, HYPRE_MEMORY_SHARED);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -1813,7 +1813,7 @@ main( hypre_int argc,
     * Debugging code
     *-----------------------------------------------------------*/
 
-   hypre_TFree(values, HYPRE_MEMORY_HOST);
+   hypre_TFree(values, HYPRE_MEMORY_SHARED);
 
    if (solver_id == 1)
    {

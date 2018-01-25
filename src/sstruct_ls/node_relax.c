@@ -154,8 +154,8 @@ hypre_NodeRelaxDestroy( void *relax_vdata )
       hypre_TFree(relax_data -> compute_pkgs, HYPRE_MEMORY_HOST);
       hypre_SStructPVectorDestroy(relax_data -> t);
 
-       hypre_TFree(relax_data -> x_loc, HYPRE_MEMORY_DEVICE);
-       hypre_TFree((relax_data ->A_loc)[0], HYPRE_MEMORY_DEVICE);
+      hypre_TFree(relax_data -> x_loc, HYPRE_MEMORY_DEVICE);
+      hypre_TFree((relax_data ->A_loc)[0], HYPRE_MEMORY_DEVICE);
       hypre_TFree(relax_data -> A_loc, HYPRE_MEMORY_HOST);
       hypre_TFree(relax_data -> bp, HYPRE_MEMORY_HOST);
       hypre_TFree(relax_data -> xp, HYPRE_MEMORY_HOST);
@@ -838,18 +838,24 @@ hypre_NodeRelax(  void               *relax_vdata,
                start  = hypre_BoxIMin(compute_box);
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-               hypre_BoxLoop2Begin(ndim, loop_size,
-                                   b_data_box, start, stride, bi,
-                                   t_data_box, start, stride, ti);
-               {
-                  HYPRE_Int vi;
-                  /* Copy rhs into temp vector */ 
-                  for (vi = 0; vi < nvars; vi++)
-                  {
-                     tp[vi][ti] = bp[vi][bi];
-                  }
-               }
-               hypre_BoxLoop2End(bi, ti);
+	       for (vi = 0; vi < nvars; vi++)
+	       {
+		  HYPRE_Real *bpp = hypre_StructVectorBoxData(
+		                 hypre_SStructPVectorSVector(b,vi), i);
+		  HYPRE_Real *tpp = hypre_StructVectorBoxData(
+				 hypre_SStructPVectorSVector(t,vi), i);
+
+		  hypre_BoxLoop2Begin(ndim, loop_size,
+		  		      b_data_box, start, stride, bi,
+		  		      t_data_box, start, stride, ti);
+		  {
+		    //HYPRE_Int vi;
+		     /* Copy rhs into temp vector */ 
+                      //tp[vi][ti] = bp[vi][bi];
+		      tpp[ti] = bpp[bi];
+		  }
+		  hypre_BoxLoop2End(bi, ti);
+	       }
 
                for (vi = 0; vi < nvars; vi++)
                {

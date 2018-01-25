@@ -44,7 +44,8 @@ FILES =\
  HYPRE_vector.c\
  mapped_matrix.c\
  multiblock_matrix.c\
- vector.c
+ vector.c\
+ csr_matvec_oomp.c
 
 OBJS = ${FILES:.c=.o}
 CUOBJS = ${FILES_NVCC:.cu=.o}

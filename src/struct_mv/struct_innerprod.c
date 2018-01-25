@@ -75,7 +75,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
       }
       hypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
 #elif defined(HYPRE_USE_CUDA)
-      ReduceSum<HYPRE_Real> box_sum(local_result,data_location);
+      ReduceSum<HYPRE_Real> box_sum(0,data_location);
 
       hypre_BoxLoop2Begin(ndim, loop_size,
 			  x_data_box, start, unit_stride, xi,

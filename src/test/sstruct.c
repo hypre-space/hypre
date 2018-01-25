@@ -10,11 +10,15 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+
+
 	
 #include "_hypre_utilities.h"
+
 
 #include "HYPRE_sstruct_ls.h"
 #include "HYPRE_struct_ls.h"
@@ -24,6 +28,8 @@
 /* begin lobpcg */
 
 #include <time.h>
+
+
     
 #include "fortran_matrix.h"
 #include "HYPRE_lobpcg.h"
@@ -2123,9 +2129,9 @@ SetCosineVector(   HYPRE_Real  scale,
                    Index   iupper,
                    HYPRE_Real *values)
 {
-  //HYPRE_Int    i, j, k;
-  //HYPRE_Int    count = 0;
-/*
+   HYPRE_Int    i, j, k;
+   HYPRE_Int    count = 0;
+
    for (k = ilower[2]; k <= iupper[2]; k++)
    {
       for (j = ilower[1]; j <= iupper[1]; j++)
@@ -2137,7 +2143,7 @@ SetCosineVector(   HYPRE_Real  scale,
          }
       }
    }
-*/
+   /*
    hypre_Index loop_size,stride,start;
    hypre_Box   *dbox;
 
@@ -2154,6 +2160,7 @@ SetCosineVector(   HYPRE_Real  scale,
       values[count] = scale * cos((id[0]+id[1]+id[2])/10.0);
    }
    hypre_BoxLoop1End(count)
+   */
    return(0);
 }
 
@@ -2428,10 +2435,20 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
+#ifdef HYPRE_USE_OMP45
+   HYPRE_OMPOffloadOn();
+#endif
+
 #if defined(HYPRE_USE_KOKKOS)
    Kokkos::InitArguments args;
    args.num_threads = 10;
    Kokkos::initialize (args);
+#endif
+
+#if defined(HYPRE_USE_CUDA)
+   printf("initCudaReductionMemBlock\n");
+   initCudaReductionMemBlock();
+   printf("Finish initCudaReductionMemBlock\n");
 #endif
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
@@ -2971,7 +2988,8 @@ main( hypre_int argc,
     * Set up the matrix
     *-----------------------------------------------------------*/
 
-   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse),HYPRE_MEMORY_DEVICE);
+   values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse),HYPRE_MEMORY_SHARED);
+   //values_device = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse),HYPRE_MEMORY_DEVICE);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
@@ -3004,12 +3022,10 @@ main( hypre_int argc,
             s = pdata.stencil_num[var];
             for (i = 0; i < data.stencil_sizes[s]; i++)
             {
-	      //for (j = 0; j < pdata.max_boxsize; j++)
-              // {
-              //    values[j] = data.stencil_values[s][i];
-              // }
-	       hypre_TMemcpy(values,data.stencil_values[s],HYPRE_Real,data.stencil_sizes[s],HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
-	      
+               for (j = 0; j < pdata.max_boxsize; j++)
+               {
+                  values[j] = data.stencil_values[s][i];
+               }
                for (box = 0; box < pdata.nboxes; box++)
                {
                   GetVariableBox(pdata.ilowers[box], pdata.iuppers[box],
@@ -3113,13 +3129,10 @@ main( hypre_int argc,
             size*= (pdata.matset_iuppers[box][j] -
                     pdata.matset_ilowers[box][j] + 1);
          }
-	 
-         hypre_LoopBegin(size,j)
+         for (j = 0; j < size; j++)
          {
-	    values[j] = pdata.matset_values[box];
+            values[j] = pdata.matset_values[box];
          }
-	 hypre_LoopEnd()
-	 
          HYPRE_SStructMatrixSetBoxValues(A, part,
                                          pdata.matset_ilowers[box],
                                          pdata.matset_iuppers[box],
@@ -3144,12 +3157,11 @@ main( hypre_int argc,
 
          for (entry = 0; entry < pdata.matadd_nentries[box]; entry++)
          {
-	    hypre_LoopBegin(size,j)
-	    {
-	       values[j] = pdata.matadd_values[box][entry];
-	    }
-	    hypre_LoopEnd()
-
+            for (j = 0; j < size; j++)
+            {
+               values[j] = pdata.matadd_values[box][entry];
+            }
+          
             HYPRE_SStructMatrixAddToBoxValues(A, part, 
                                               pdata.matadd_ilowers[box],
                                               pdata.matadd_iuppers[box],
@@ -3166,12 +3178,10 @@ main( hypre_int argc,
       pdata = data.pdata[part];
       for (box = 0; box < pdata.fem_matadd_nboxes; box++)
       {
-	 hypre_LoopBegin(data.fem_nsparse,i)
-	 {
-	    values[i] = 0.0;
-	 }
-	 hypre_LoopEnd()
-
+         for (i = 0; i < data.fem_nsparse; i++)
+         {
+            values[i] = 0.0;
+         }
          s = 0;
          for (i = 0; i < pdata.fem_matadd_nrows[box]; i++)
          {
@@ -3205,7 +3215,7 @@ main( hypre_int argc,
    /*-----------------------------------------------------------
     * Set up the linear system
     *-----------------------------------------------------------*/
-   
+
    HYPRE_SStructVectorCreate(hypre_MPI_COMM_WORLD, grid, &b);
 
    /* HYPRE_SSTRUCT is the default, so we don't have to call SetObjectType */
@@ -3219,27 +3229,24 @@ main( hypre_int argc,
    /* Initialize the rhs values */
    if (data.rhs_true)
    {
-      hypre_LoopBegin(data.max_boxsize,j)
+      for (j = 0; j < data.max_boxsize; j++)
       {
-	 values[j] = data.rhs_value;
+         values[j] = data.rhs_value;
       }
-      hypre_LoopEnd()
    }
    else if (data.fem_rhs_true)
    {
-      hypre_LoopBegin(data.max_boxsize,j)
+      for (j = 0; j < data.max_boxsize; j++)
       {
          values[j] = 0.0;
       }
-      hypre_LoopEnd()
    }
    else /* rhs=1 is the default */
    {
-      hypre_LoopBegin(data.max_boxsize,j)
+      for (j = 0; j < data.max_boxsize; j++)
       {
-	 values[j] = 1.0;
+         values[j] = 1.0;
       }
-      hypre_LoopEnd()
    }
    for (part = 0; part < data.nparts; part++)
    {
@@ -3295,12 +3302,11 @@ main( hypre_int argc,
                     pdata.rhsadd_ilowers[box][j] + 1);
          }
 
-         hypre_LoopBegin(size,j)
+         for (j = 0; j < size; j++)
          {
-	    values[j] = pdata.rhsadd_values[box];
+            values[j] = pdata.rhsadd_values[box];
          }
-	 hypre_LoopEnd()
-	 
+          
          HYPRE_SStructVectorAddToBoxValues(b, part, 
                                            pdata.rhsadd_ilowers[box],
                                            pdata.rhsadd_iuppers[box],

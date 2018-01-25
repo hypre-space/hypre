@@ -842,7 +842,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    /* Prepare send buffers */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
 #if defined(HYPRE_MEMORY_GPU)
-   if (hypre_exec_policy == LOCATION_GPU)
+   if (hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 #else
    if (hypre__global_offload)
 #endif
@@ -894,7 +894,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    /* Prepare recv buffers */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
 #if defined(HYPRE_MEMORY_GPU)
-   if (hypre_exec_policy == LOCATION_GPU)
+   if (hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 #else
    if (hypre__global_offload) 
 #endif
@@ -1001,8 +1001,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                   dptr[hypre__thread] = 0.0;
                }
                hypre_BoxLoop0End();
-#else
-	       if (hypre_exec_policy == LOCATION_GPU)
+#elif defined(HYPRE_MEMORY_GPU)
+	       if (hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 	       {
 		 //hypre_DeviceMemset(dptr, 0, HYPRE_Complex, size);
 		  hypre_BoxLoop0Begin(ndim, length_array)
@@ -1019,6 +1019,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 		  }
 		  hypre_BoxLoop0End();
 	       }
+#else
+               memset(dptr, 0, size*sizeof(HYPRE_Complex));
 #endif
                dptr += size;
             }
@@ -1029,7 +1031,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    /* Copy buffer data from Device to Host */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
 #if defined(HYPRE_MEMORY_GPU)
-   if (num_sends > 0 && hypre_exec_policy == LOCATION_GPU)
+   if (num_sends > 0 && hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 #else
    if (num_sends > 0)
 #endif
@@ -1038,7 +1040,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       size = hypre_CommPkgSendBufsize(comm_pkg);
       dptr_host = (HYPRE_Complex *) send_buffers[0];
       dptr      = (HYPRE_Complex *) send_buffers_data[0];
-	  hypre_TMemcpy(dptr_host,dptr,HYPRE_Complex,size,HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(dptr_host,dptr,HYPRE_Complex,size,HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
    }
 #endif
 
@@ -1253,7 +1255,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
    /* Copy buffer data from Host to Device */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
 #if defined(HYPRE_MEMORY_GPU)
-   if (num_recvs > 0 && hypre_exec_policy == LOCATION_GPU)
+   if (num_recvs > 0 && hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 #else
    if (num_recvs > 0)
 #endif

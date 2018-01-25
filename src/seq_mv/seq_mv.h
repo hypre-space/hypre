@@ -59,9 +59,12 @@ typedef struct
    HYPRE_Int     *rownnz;
    HYPRE_Int      num_rownnz;
 
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
   /* Flag to keeping track of prefetching */
   HYPRE_Int on_device;
+#endif
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  HYPRE_Int mapped;
 #endif
 
 } hypre_CSRMatrix;
@@ -216,6 +219,11 @@ typedef struct
 #ifdef HYPRE_USE_GPU
   HYPRE_Int on_device;
 #endif
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  HYPRE_Int mapped;
+  HYPRE_Int drc; /* device ref count */
+  HYPRE_Int hrc; /* host ref count */
+#endif
 
 } hypre_Vector;
 
@@ -230,6 +238,7 @@ typedef struct
 #define hypre_VectorMultiVecStorageMethod(vector) ((vector) -> multivec_storage_method)
 #define hypre_VectorVectorStride(vector) ((vector) -> vecstride )
 #define hypre_VectorIndexStride(vector) ((vector) -> idxstride )
+
 
 #endif
 
@@ -267,15 +276,20 @@ HYPRE_Int hypre_CSRMatrixPrintHB ( hypre_CSRMatrix *matrix_input , char *file_na
 HYPRE_Int hypre_CSRMatrixCopy ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A );
 hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int *col_map_offd_A , HYPRE_Int *col_map_offd_B , HYPRE_Int **col_map_offd_C );
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
 void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A);
 void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A);
 hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a);
 #endif
-
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A);
+void hypre_CSRMatrixUpdateToDevice(hypre_CSRMatrix *A);
+void hypre_CSRMatrixUnMapFromDevice(hypre_CSRMatrix *A);
+#endif
 /* csr_matvec.c */
 // y[offset:end] = alpha*A[offset:end,:]*x + beta*b[offset:end]
 HYPRE_Int hypre_CSRMatrixMatvecOutOfPlace ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
+HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 // y = alpha*A + beta*y
 HYPRE_Int hypre_CSRMatrixMatvec ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y );
 HYPRE_Int hypre_CSRMatrixMatvecT ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y );
@@ -366,7 +380,7 @@ HYPRE_Int hypre_SeqVectorScale ( HYPRE_Complex alpha , hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpy ( HYPRE_Complex alpha , hypre_Vector *x , hypre_Vector *y );
 HYPRE_Real hypre_SeqVectorInnerProd ( hypre_Vector *x , hypre_Vector *y );
 HYPRE_Complex hypre_VectorSumElts ( hypre_Vector *vector );
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
 HYPRE_Complex hypre_VectorSumAbsElts ( hypre_Vector *vector );
 HYPRE_Int hypre_SeqVectorCopyDevice ( hypre_Vector *x , hypre_Vector *y );
 HYPRE_Int hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha , hypre_Vector *x , hypre_Vector *y );
@@ -376,9 +390,47 @@ void hypre_SeqVectorPrefetchToHost(hypre_Vector *x);
 void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index);
 hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x);
 #endif
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+void hypre_SeqVectorMapToDevice(hypre_Vector *x);
+void hypre_SeqVectorUnMapFromDevice(hypre_Vector *x);
+void hypre_SeqVectorUpdateDevice(hypre_Vector *x);
+void hypre_SeqVectorUpdateHost(hypre_Vector *x);
+#endif
 #ifdef __cplusplus
 }
 #endif
 
+
+inline void UpdateHRC(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  v->hrc++;
+#endif
+}
+inline void UpdateDRC(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  v->drc++;
+#endif
+}
+inline void SetHRC(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  v->hrc=v->drc;
+#endif
+}
+inline void SetDRC(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  v->drc=v->hrc;
+#endif
+}
+inline void SyncVectorToDevice(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  if (v->hrc>v->drc) hypre_SeqVectorUpdateDevice(v);
+#endif
+}
+inline void SyncVectorToHost(hypre_Vector *v){
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+  if (v->drc>v->hrc) hypre_SeqVectorUpdateHost(v);
+#endif
+}
+void printRC(hypre_Vector *x,char *id);
 #endif
 

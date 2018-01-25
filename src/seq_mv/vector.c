@@ -24,6 +24,8 @@
 #include "gpukernels.h"
 #endif
 
+#define NUM_TEAMS 128
+#define NUM_THREADS 1024
 /*--------------------------------------------------------------------------
  * hypre_SeqVectorCreate
  *--------------------------------------------------------------------------*/
@@ -38,7 +40,11 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 #ifdef HYPRE_USE_GPU
    vector->on_device=0;
 #endif
-
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+   vector->mapped=0;
+   vector->drc=0;
+   vector->hrc=0;
+#endif
    hypre_VectorData(vector) = NULL;
    hypre_VectorSize(vector) = size;
 
@@ -74,6 +80,12 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
 
    if (vector)
    {
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+     if (vector->mapped) {
+       //printf("Unmap in hypre_SeqVectorDestroy\n");
+       hypre_SeqVectorUnMapFromDevice(vector);
+     }
+#endif
       if ( hypre_VectorOwnsData(vector) )
       {
          hypre_TFree(hypre_VectorData(vector), HYPRE_MEMORY_HOST);
@@ -111,8 +123,7 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
    }
    else
       ++ierr;
-
-
+   UpdateHRC;
    return ierr;
 }
 
@@ -259,6 +270,8 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
   VecSet(hypre_VectorData(v),hypre_VectorSize(v),value,HYPRE_STREAM(4));
   return 0;
 #endif
+
+
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
@@ -271,9 +284,20 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    HYPRE_Int      ierr  = 0;
 
    size *=hypre_VectorNumVectors(v);
-
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   if (!v->mapped) hypre_SeqVectorMapToDevice(v);
+#endif
+#ifdef HYPRE_USE_MANAGED
+   hypre_SeqVectorPrefetchToDevice(v);
+#endif
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(vector_data)
+#elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   //printf("Vec Constant Value on Device %d %p size = %d \n",omp_target_is_present(vector_data,0),v,size);
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS)
+#elif defined(HYPRE_USING_OPENMP)
+   printf("Vec Constant Value on Host %d \n",omp_target_is_present(vector_data,0));
+   #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
       vector_data[i] = value;
@@ -281,7 +305,13 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
-
+   UpdateDRC(v);
+   // 2 lines below required to get exact match with baseline
+   // Not clear why this is the case.
+   SyncVectorToHost(v);
+   UpdateHRC(v);
+   
+   //printRC(v,"E _CONS VEC");
    return ierr;
 }
 
@@ -338,10 +368,21 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    HYPRE_Int      i;
            
    HYPRE_Int      ierr = 0;
-
+#if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   if (!x->mapped) hypre_SeqVectorMapToDevice(x);
+   else SyncVectorToDevice(x);
+   if (!y->mapped) hypre_SeqVectorMapToDevice(y);
+   else SyncVectorToDevice(y);
+   //SyncVectorToDevice(x);
+   //SyncVectorToDevice(y);
+#endif
    if (size > size_y) size = size_y;
    size *=hypre_VectorNumVectors(x);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,x_data)
+#elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) 
+#elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
@@ -350,7 +391,7 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
-
+   UpdateDRC(y);
    return ierr;
 }
 
@@ -372,7 +413,7 @@ hypre_SeqVectorCloneDeep( hypre_Vector *x )
 
    hypre_SeqVectorInitialize(y);
    hypre_SeqVectorCopy( x, y );
-
+   // UpdateHRC(y); Done in previous statement
    return y;
 }
 
@@ -422,13 +463,21 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
    HYPRE_Int      ierr = 0;
 
    size *=hypre_VectorNumVectors(y);
+#if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   if (!y->mapped) hypre_SeqVectorMapToDevice(y);
+   else SyncVectorToDevice(y);
+#endif
 
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data)
+#elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS)
+#elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
       y_data[i] *= alpha;
-
+   UpdateDRC(y);
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
@@ -462,7 +511,24 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 
    size *=hypre_VectorNumVectors(x);
 
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   if (!x->mapped) hypre_SeqVectorMapToDevice(x);
+   else SyncVectorToDevice(x);
+   if (!y->mapped) hypre_SeqVectorMapToDevice(y);
+   else SyncVectorToHost(y);
+#endif
+
+#ifdef HYPRE_USE_MANAGED
+   hypre_SeqVectorPrefetchToDevice(x);
+   hypre_SeqVectorPrefetchToDevice(y);
+#endif
+
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,x_data)
+#elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS)
+#elif defined(HYPRE_USING_OPENMP)
+   //printf("AXPY OMP \n");
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
@@ -471,7 +537,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
-
+   UpdateDRC(y);
    return ierr;
 }
 
@@ -489,6 +555,14 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
 
+#if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+   if (!x->mapped) hypre_SeqVectorMapToDevice(x);
+   else SyncVectorToDevice(x);
+   if (!y->mapped) hypre_SeqVectorMapToDevice(y);
+   else SyncVectorToHost(y);
+#endif
+
+
    HYPRE_Complex *x_data = hypre_VectorData(x);
    HYPRE_Complex *y_data = hypre_VectorData(y);
    HYPRE_Int      size   = hypre_VectorSize(x);
@@ -496,15 +570,18 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
    HYPRE_Int      i;
 
    HYPRE_Real     result = 0.0;
-
+   PUSH_RANGE("INNER_PROD",0);
    size *=hypre_VectorNumVectors(x);
-
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) reduction(+:result) is_device_ptr(y_data,x_data) map(result)
+#elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) reduction(+:result)  map(result)
+#elif defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) reduction(+:result) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
-      result += hypre_conj(y_data[i]) * x_data[i];
-
+     result += hypre_conj(y_data[i]) * x_data[i];
+   POP_RANGE;
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
@@ -532,7 +609,7 @@ HYPRE_Complex hypre_VectorSumElts( hypre_Vector *vector )
    return sum;
 }
 
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
 /* Sums of the absolute value of the elements for comparison to cublas device side routine */
 HYPRE_Complex hypre_VectorSumAbsElts( hypre_Vector *vector )
 {
@@ -567,7 +644,9 @@ hypre_SeqVectorCopyDevice( hypre_Vector *x,
   PUSH_RANGE_PAYLOAD("VECCOPYDEVICE",2,size);
   hypre_SeqVectorPrefetchToDevice(x);
   hypre_SeqVectorPrefetchToDevice(y);
+#ifdef HYPRE_USE_GPU
   VecCopy(y_data,x_data,size,HYPRE_STREAM(4));
+#endif
   cudaStreamSynchronize(HYPRE_STREAM(4));
   POP_RANGE;
   return ierr;
@@ -659,5 +738,52 @@ void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index){
 }
 hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x){
   return pointerIsManaged((void*)hypre_VectorData(x));
+}
+#endif
+
+
+
+
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+
+void hypre_SeqVectorMapToDevice(hypre_Vector *x){
+  if (x==NULL) return;
+  if (x->size>0){
+    //#pragma omp target enter data map(to:x[0:0])
+#pragma omp target enter data map(to:x->data[0:x->size])
+    x->mapped=1;
+    SetDRC(x);
+  }
+}
+void hypre_SeqVectorMapToDevicePrint(hypre_Vector *x){
+  printf("SVmap %p [%p,%p] %d Size = %d ",x,x->data,x->data+x->size,x->mapped,x->size);
+  if (x->size>0){
+    //#pragma omp target enter data map(to:x[0:0])
+#pragma omp target enter data map(to:x->data[0:x->size])
+  x->mapped=1;
+  SetDRC(x);
+  }
+  printf("...Done\n");
+}
+
+void hypre_SeqVectorUnMapFromDevice(hypre_Vector *x){
+  //printf("map %p [%p,%p] %d Size = %d\n",x,x->data,x->data+x->size,x->mapped,x->size);
+  //#pragma omp target exit data map(from:x[0:0])
+#pragma omp target exit data map(from:x->data[0:x->size])
+  x->mapped=0;
+}
+void hypre_SeqVectorUpdateDevice(hypre_Vector *x){
+  if (x==NULL) return;
+#pragma omp target update to(x->data[0:x->size])
+  SetDRC(x);
+}
+
+void hypre_SeqVectorUpdateHost(hypre_Vector *x){
+  if (x==NULL) return;
+#pragma omp target update from(x->data[0:x->size])
+  SetHRC(x);
+}
+void printRC(hypre_Vector *x,char *id){
+  printf("%p At %s HRC = %d , DRC = %d \n",x,id,x->hrc,x->drc);
 }
 #endif

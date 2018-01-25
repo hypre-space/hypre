@@ -479,6 +479,9 @@ extern "C" {
 #define HYPRE_MEMORY_UNSET  (-1)
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+
+#define hypre_DeviceMemset(ptr, value, type, count) 
+
 #ifdef __cplusplus
 extern "C++" {
 #endif
@@ -608,46 +611,6 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
 #define HYPRE_OMP45_SZE_PAD (sizeof(size_t))
 
 #define HYPRE_OMP45_CNT_PAD(elt_size) ((HYPRE_OMP45_SZE_PAD + elt_size - 1) / elt_size)
-
-/* Device TAlloc */
-#define hypre_DeviceTAlloc(type, count) \
-(\
-   count == 0 ? NULL : \
-   ({\
-   type *ptr_alloc = hypre_TAlloc(type, count + HYPRE_OMP45_CNT_PAD(type)); \
-   char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD; \
-   size_t size_inuse = sizeof(type) * count; \
-   ((size_t *) ptr_alloc)[0] = size_inuse; \
-   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, type, 0, count, "enter", "alloc"); \
-   (type *) ptr_inuse; \
-    }) \
-)
-
-/* Device CTAlloc */
-#define hypre_DeviceCTAlloc(type, count) \
-(\
-   count == 0 ? NULL : \
-   ({\
-   type *ptr_alloc = hypre_CTAlloc(type, count + HYPRE_OMP45_CNT_PAD(type)); \
-   char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD; \
-   size_t size_inuse = sizeof(type) * count; \
-   ((size_t *) ptr_alloc)[0] = size_inuse; \
-   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, type, 0, count, "enter", "to"); \
-   (type*) ptr_inuse; \
-   }) \
-)
-
-/* Device TFree */
-#define hypre_DeviceTFree(ptr_inuse) \
-{\
-   if (ptr_inuse) \
-   { \
-   char *ptr_alloc = ((char*) ptr_inuse) - HYPRE_OMP45_SZE_PAD; \
-   size_t size_inuse = ((size_t *) ptr_alloc)[0]; \
-   hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "exit", "delete"); \
-   hypre_TFree(ptr_alloc); \
-   } \
-}
 
 /* DataCopyToData: HostToDevice 
  * src:  [from] a CPU ptr 
@@ -1200,9 +1163,10 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
 
-#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#include <cuda_runtime_api.h>
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
-#define MEM_PAD_LEN 1
+#define MEM_PAD_LEN 0
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line)
 {
@@ -1447,11 +1411,15 @@ void printlist(node *head,hypre_int nc);
 //#define MEM_PAD_LEN 1
 size_t memsize(const void *ptr);
 
+#define HYPRE_MIN_GPU_SIZE (131072)//(65536)//(8192)//(16384)//(32768)//(65536)
+
+extern HYPRE_Int hypre_exec_policy;
+
 #else
 
 #define hypre_GPUInit(use_device)
 #define hypre_GPUFinalize()
-
+//#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #endif//defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 
 #if defined(HYPRE_USE_CUDA)
@@ -1460,10 +1428,6 @@ extern char tmp_print[10];
 extern HYPRE_Int hypre_box_print;
 extern double  t_start, t_end;
 extern HYPRE_Int time_box ;
-
-#define LOCATION_CPU (1)
-#define LOCATION_GPU (0)
-#define LOCATION_UNSET (-1)
 
 #define RAJA_MAX_REDUCE_VARS (8)
 #define RAJA_CUDA_MAX_NUM_BLOCKS (512*512*512)
@@ -1498,6 +1462,8 @@ HYPRE_Int HYPRE_OMPOffloadOn();
 HYPRE_Int HYPRE_OMPOffloadOff();
 
 HYPRE_Int HYPRE_OMPOffloadStatPrint();
+
+#define HYPRE_MIN_GPU_SIZE (131072)//(65536)//(8192)//(16384)//(32768)//(65536)
 
 #endif//HYPRE_USE_OMP45
 

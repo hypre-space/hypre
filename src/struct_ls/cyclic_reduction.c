@@ -641,8 +641,9 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       hypre_StructMatrixInitializeData(A_l[l+1], data,data_const);
       data += hypre_StructMatrixDataSize(A_l[l+1]);
       data_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
+
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)      
-      if (data_location < LOCATION_CPU)
+      if (data_location != HYPRE_MEMORY_HOST)
       {	  
 	 hypre_StructVectorInitializeData(x_l[l+1], data);
 	 hypre_StructVectorAssemble(x_l[l+1]);

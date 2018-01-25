@@ -187,7 +187,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
    data_location = hypre_StructGridDataLocation(grid);
-   if (data_location != HYPRE_MEMORY_HOST)//LOCATION_CPU)
+   if (data_location != HYPRE_MEMORY_HOST)
    {
       num_level_GPU = max_levels;
    }
@@ -311,23 +311,23 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       /* build the coarse grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU) 
       hypre_StructGridDataLocation(P_grid_l[l+1]) = data_location;
       if (device_level == -1 && num_level_GPU > 0)
       {
 	 max_box_size = hypre_StructGridGetMaxBoxSize(grid_l[l+1]);
          if (max_box_size < HYPRE_MIN_GPU_SIZE)
          {
-	    num_level_GPU = l+1;
-	    data_location = HYPRE_MEMORY_HOST;
-	    device_level  = num_level_GPU;
-	    //printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
+	        num_level_GPU = l+1;
+	        data_location = HYPRE_MEMORY_HOST;
+	        device_level  = num_level_GPU;
+	        //printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
          }
       }
       else if (l+1 == device_level)
       {
-	 num_level_GPU = l+1;
-	 data_location = HYPRE_MEMORY_HOST;
+	     num_level_GPU = l+1;
+	     data_location = HYPRE_MEMORY_HOST;
       }
       hypre_StructGridDataLocation(grid_l[l+1]) = data_location;
 #endif
@@ -419,7 +419,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
          RT_l[l]   = hypre_PFMGCreateRestrictOp(A_l[l], grid_l[l+1], cdir);
          hypre_StructMatrixInitializeShell(RT_l[l]);
          data_size += hypre_StructMatrixDataSize(RT_l[l]);
-	 data_size_const += hypre_StructMatrixDataConstSize(RT_l[l]);
+	     data_size_const += hypre_StructMatrixDataConstSize(RT_l[l]);
 #endif
       }
 
@@ -428,21 +428,18 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructMatrixInitializeShell(A_l[l+1]);
       data_size += hypre_StructMatrixDataSize(A_l[l+1]);
       data_size_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
-      //printf("A =%d,A_const=%d,data=%d,data_const=%d\n",hypre_StructMatrixDataSize(A_l[l+1]),hypre_StructMatrixDataConstSize(A_l[l+1]),data_size,data_size_const);
       
       b_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(b_l[l+1], b_num_ghost);
       hypre_StructVectorInitializeShell(b_l[l+1]);
       //data_vec_size += hypre_StructVectorDataSize(b_l[l+1]);
       hypre_StructVectorSetDataSize(b_l[l+1], &data_size, &data_size_const);
-      //printf("b =%d,data=%d,data_const=%d\n",hypre_StructVectorDataSize(b_l[l+1]),data_size,data_size_const);
       
       x_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(x_l[l+1], x_num_ghost);
       hypre_StructVectorInitializeShell(x_l[l+1]);
       //data_vec_size += hypre_StructVectorDataSize(x_l[l+1]);
       hypre_StructVectorSetDataSize(x_l[l+1], &data_size, &data_size_const);
-      //printf("x =%d,data=%d,data_const=%d\n",hypre_StructVectorDataSize(x_l[l+1]),data_size,data_size_const);
       
       tx_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(tx_l[l+1], x_num_ghost);
@@ -467,10 +464,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    (pfmg_data -> data_size) = data_size;
    (pfmg_data -> data_size_const) = data_size_const;
 #endif
-   
-   //hypre_StructVectorInitializeData(tx_l[0], data_const);
-   //hypre_StructVectorAssemble(tx_l[0]);
-   //data_const += hypre_StructVectorDataSize(tx_l[0]);
+
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
    data_location = hypre_StructGridDataLocation(grid_l[0]);
    if (data_location != HYPRE_MEMORY_HOST)
@@ -478,14 +472,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructVectorInitializeData(tx_l[0], data);
       hypre_StructVectorAssemble(tx_l[0]);
       data += hypre_StructVectorDataSize(tx_l[0]);
-      //printf("Level 0 is on GPU\n");
    }
    else
    {
       hypre_StructVectorInitializeData(tx_l[0], data_const);
       hypre_StructVectorAssemble(tx_l[0]);
       data_const += hypre_StructVectorDataSize(tx_l[0]);
-      //printf("Level 0 is on CPU\n");
    }
 #else
    hypre_StructVectorInitializeData(tx_l[0], data);
@@ -499,7 +491,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructMatrixInitializeData(P_l[l], data, data_const);
       data += hypre_StructMatrixDataSize(P_l[l]);
       data_const += hypre_StructMatrixDataConstSize(P_l[l]);
-      //printf("size Pl = %d, %d\n",hypre_StructMatrixDataSize(P_l[l]),hypre_StructMatrixDataConstSize(P_l[l]));
 
 #if 0
       /* Allow R != PT for non symmetric case */
@@ -525,36 +516,36 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
       if (data_location != HYPRE_MEMORY_HOST)
       {
-	 hypre_StructVectorInitializeData(b_l[l+1], data);
-	 hypre_StructVectorAssemble(b_l[l+1]);
-	 data += hypre_StructVectorDataSize(b_l[l+1]);
+	     hypre_StructVectorInitializeData(b_l[l+1], data);
+	     hypre_StructVectorAssemble(b_l[l+1]);
+	     data += hypre_StructVectorDataSize(b_l[l+1]);
     
-	 hypre_StructVectorInitializeData(x_l[l+1], data);
-	 hypre_StructVectorAssemble(x_l[l+1]);
-	 data += hypre_StructVectorDataSize(x_l[l+1]);
-	 //printf("Level %d is on on GPU\n",l+1);
-	 hypre_StructVectorInitializeData(tx_l[l+1],
-					  hypre_StructVectorData(tx_l[0]));
-	 hypre_StructVectorAssemble(tx_l[l+1]);
+	     hypre_StructVectorInitializeData(x_l[l+1], data);
+	     hypre_StructVectorAssemble(x_l[l+1]);
+	     data += hypre_StructVectorDataSize(x_l[l+1]);
+	     //printf("Level %d is on on GPU\n",l+1);
+	     hypre_StructVectorInitializeData(tx_l[l+1],
+					      hypre_StructVectorData(tx_l[0]));
+	     hypre_StructVectorAssemble(tx_l[l+1]);
       }
       else
       {
-	 hypre_StructVectorInitializeData(b_l[l+1], data_const);
-	 hypre_StructVectorAssemble(b_l[l+1]);
-	 data_const += hypre_StructVectorDataSize(b_l[l+1]);
+	     hypre_StructVectorInitializeData(b_l[l+1], data_const);
+	     hypre_StructVectorAssemble(b_l[l+1]);
+	     data_const += hypre_StructVectorDataSize(b_l[l+1]);
     
-	 hypre_StructVectorInitializeData(x_l[l+1], data_const);
-	 hypre_StructVectorAssemble(x_l[l+1]);
-	 data_const += hypre_StructVectorDataSize(x_l[l+1]);
-	 //printf("Level %d is on CPU\n",l+1);
-	 if (l+1 == num_level_GPU)
-	 {
-	    hypre_StructVectorInitializeData(tx_l[l+1], data_const);
-	    hypre_StructVectorAssemble(tx_l[l+1]);
-	    data_const += hypre_StructVectorDataSize(tx_l[l+1]);
-	 }
-	 hypre_StructVectorInitializeData(tx_l[l+1], hypre_StructVectorData(tx_l[num_level_GPU]));
-	 hypre_StructVectorAssemble(tx_l[l+1]);
+	     hypre_StructVectorInitializeData(x_l[l+1], data_const);
+	     hypre_StructVectorAssemble(x_l[l+1]);
+	     data_const += hypre_StructVectorDataSize(x_l[l+1]);
+	     //printf("Level %d is on CPU\n",l+1);
+	     if (l+1 == num_level_GPU)
+	     {
+	        hypre_StructVectorInitializeData(tx_l[l+1], data_const);
+	        hypre_StructVectorAssemble(tx_l[l+1]);
+	        data_const += hypre_StructVectorDataSize(tx_l[l+1]);
+	     }
+	     hypre_StructVectorInitializeData(tx_l[l+1], hypre_StructVectorData(tx_l[num_level_GPU]));
+	     hypre_StructVectorAssemble(tx_l[l+1]);
       }
 #else
       hypre_StructVectorInitializeData(b_l[l+1], data);
@@ -1110,7 +1101,7 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
    }
    else if (constant_coefficient==2)
    {
-     hypre_TMemcpy(&Adiag,Ap,HYPRE_Real,1,HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(&Adiag,Ap,HYPRE_Real,1, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    }
 
    diag = 1.0;

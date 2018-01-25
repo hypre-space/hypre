@@ -96,9 +96,9 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    hypre_Box            *cbox;
 
    HYPRE_Real           *relax_weights;
-   HYPRE_Real           *mean, *deviation;
+   HYPRE_Real           *mean;//, *deviation;
    HYPRE_Real            alpha, beta;
-   HYPRE_Int             dxyz_flag;
+   //   HYPRE_Int             dxyz_flag;
 
    HYPRE_Real            min_dxyz;
    HYPRE_Int             cdir, periodic, cmaxsize;
@@ -156,7 +156,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    {
       mean = hypre_CTAlloc(HYPRE_Real,  3, HYPRE_MEMORY_HOST);
 
-      dxyz_flag = 0;
       for (i = 0; i < nvars; i++)
       {
          hypre_PFMGComputeDxyz(hypre_SStructPMatrixSMatrix(A,i,i), sys_dxyz[i],
@@ -168,7 +167,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
          } 
       }
       hypre_TFree(mean, HYPRE_MEMORY_HOST);
-      hypre_TFree(deviation, HYPRE_MEMORY_HOST);
    }
 
    grid_l = hypre_TAlloc(hypre_SStructPGrid *,  max_levels, HYPRE_MEMORY_HOST);

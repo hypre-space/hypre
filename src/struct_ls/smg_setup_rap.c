@@ -191,16 +191,18 @@ hypre_SMGSetupRAPOp( hypre_StructMatrix *R,
 
    }
 #endif
+
    hypre_StructMatrixAssemble(Ac_tmp);
+
 #if defined(HYPRE_MEMORY_GPU)
    if (data_location_A != data_location_Ac)
    {
       
-     hypre_TMemcpy(hypre_StructMatrixData(Ac_tmp), hypre_StructMatrixDataConst(Ac),HYPRE_Complex,hypre_StructMatrixDataSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
-      hypre_exec_policy = LOCATION_CPU;
+     hypre_TMemcpy(hypre_StructMatrixDataConst(Ac), hypre_StructMatrixData(Ac_tmp),HYPRE_Complex,hypre_StructMatrixDataSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+      hypre_exec_policy = HYPRE_MEMORY_HOST;
       hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac)) = data_location_Ac;
       hypre_StructMatrixAssemble(Ac);
-      hypre_exec_policy = LOCATION_GPU;
+      hypre_exec_policy = HYPRE_MEMORY_DEVICE;
       hypre_StructMatrixDestroy(Ac_tmp);
    }
 #endif

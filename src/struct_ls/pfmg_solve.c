@@ -38,7 +38,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                  hypre_StructVector *b,
                  hypre_StructVector *x         )
 {
-	hypre_PFMGData       *pfmg_data = (hypre_PFMGData       *)pfmg_vdata;
+   hypre_PFMGData       *pfmg_data = (hypre_PFMGData       *)pfmg_vdata;
 
    HYPRE_Real            tol             = (pfmg_data -> tol);
    HYPRE_Int             max_iter        = (pfmg_data -> max_iter);
@@ -267,7 +267,6 @@ hypre_PFMGSolve( void               *pfmg_vdata,
             {
                hypre_StructVectorClearAllValues(e_l[l]);
             }
-
             /* interpolate error and correct (x = x + Pe_c) */
             hypre_SemiInterp(interp_data_l[l], P_l[l], x_l[l+1], e_l[l]);
             hypre_StructAxpy(1.0, e_l[l], x_l[l]);
@@ -286,12 +285,14 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             }
          }
-
          if (constant_coefficient)
          {
+#if defined(HYPRE_MEMORY_GPU)
+	   if (hypre_StructGridDataLocation(hypre_StructVectorGrid(e_l[0])) == HYPRE_MEMORY_DEVICE)
+	     hypre_exec_policy = HYPRE_MEMORY_DEVICE;
+ #endif
             hypre_StructVectorClearAllValues(e_l[0]);
          }
-
          /* interpolate error and correct on fine grid (x = x + Pe_c) */
          hypre_SemiInterp(interp_data_l[0], P_l[0], x_l[1], e_l[0]);
          hypre_StructAxpy(1.0, e_l[0], x_l[0]);

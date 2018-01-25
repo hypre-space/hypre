@@ -49,8 +49,11 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixOwnsData(matrix) = 1;
    hypre_CSRMatrixNumRownnz(matrix) = num_rows;
 
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
    matrix->on_device=0;
+#endif
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+   matrix->mapped=-1;
 #endif
    return matrix;
 }
@@ -65,6 +68,9 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
 
    if (matrix)
    {
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+     hypre_CSRMatrixUnMapFromDevice(matrix);
+#endif
       hypre_TFree(hypre_CSRMatrixI(matrix), HYPRE_MEMORY_HOST);
       hypre_CSRMatrixI(matrix)    = NULL;
       if (hypre_CSRMatrixRownnz(matrix))
@@ -674,7 +680,7 @@ HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
 {
    return hypre_CSRMatrixGetLoadBalancedPartitionBoundary(A, hypre_GetThreadNum() + 1);
 }
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USE_MANAGED
 void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
   if (hypre_CSRMatrixNumNonzeros(A)==0) return;
 
@@ -686,7 +692,11 @@ void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
     gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
     gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(5)));
     gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(6)));
+#ifdef HYPRE_USING_OPENMP_OFFLOAD
+    A->on_device=0; // Should be 1 for CUDA code. 0 for OMP for now
+#else
     A->on_device=1;
+#endif
   }
   POP_RANGE;
 }
@@ -705,5 +715,54 @@ hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a){
   return ((pointerIsManaged((void*)hypre_CSRMatrixData(a))) 
 	  && (pointerIsManaged((void*)hypre_CSRMatrixI(a)))
 	  && (pointerIsManaged((void*)hypre_CSRMatrixJ(a))));
+}
+#endif
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+void hypre_CSRMatrixMapToDevice(hypre_CSRMatrix *A){
+  if (A==NULL) return;
+  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+  HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
+  //printf("MAPPED %p sizes = %d %d \n",A,nnz,num_rows);
+
+#pragma omp target enter data map(to:A[0:0])
+#pragma omp target enter data map(alloc:A_data[:nnz]) if (nnz>0)
+#pragma omp target enter data map(alloc:A_i[:num_rows+1]) if (num_rows>0)
+#pragma omp target enter data map(alloc:A_j[:nnz]) if (nnz>0)
+  A->mapped=0;
+}
+void hypre_CSRMatrixUpdateToDevice(hypre_CSRMatrix *A){
+  if (A==NULL) return;
+  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+  HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
+  //printf("Updating MAtrix...%p \n",A);
+  //#pragma omp target update device(0) to(A[0:0])
+  //printf("Updating MAtrix data...%p %d\n",A_data,nnz);
+#pragma omp target update device(0) to(A_data[:nnz]) if (nnz>0)
+  //printf("Updating MAtrix I ...%p %d\n",A_i,num_rows);
+#pragma omp target update device(0) to(A_i[:num_rows+1]) if (num_rows>0)
+  //printf("Updating MAtrix J ...%p %d\n",A_j,nnz);
+#pragma omp target update device(0) to(A_j[:nnz]) if (nnz>0)
+  A->mapped=1;
+  //printf("Done \n");
+}
+void hypre_CSRMatrixUnMapFromDevice(hypre_CSRMatrix *A){
+  HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
+  HYPRE_Int        *A_i      = hypre_CSRMatrixI(A);
+  HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
+  HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A);
+  HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
+  HYPRE_Int         nnz  = hypre_CSRMatrixNumNonzeros(A); 
+  //#pragma omp target exit data map(delete:A[0:0])
+#pragma omp target exit data map(delete:A_data[0:nnz]) if (nnz>0)
+#pragma omp target exit data map(delete:A_i[0:num_rows+1]) if (num_rows>0)
+#pragma omp target exit data map(delete:A_j[0:nnz]) if (nnz>0)
 }
 #endif

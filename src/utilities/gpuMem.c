@@ -1,4 +1,6 @@
-
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #include "_hypre_utilities.h"
 #if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
 
@@ -29,12 +31,12 @@ void hypre_GPUInit(hypre_int use_device){
     HYPRE_DEVICE_COUNT=nDevices;
     
     if (use_device<0){
-      if (nDevices==1){
+      if (nDevices<4){
 	/* with mpibind each process will only see 1 GPU */
 	HYPRE_DEVICE=0;
 	gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
 	cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
-      } else if (nDevices>1) {
+      } else if (nDevices==4) { // THIS IS A HACK THAT WORKS AONLY AT LLNL
 	/* No mpibind or it is a single rank run */
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 	//affs(myid);
@@ -79,7 +81,11 @@ void hypre_GPUInit(hypre_int use_device){
       HYPRE_DEVICE = use_device;
       gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
     }
-      
+    printf("GPU Init called \n");
+#if defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+    omp_set_default_device(HYPRE_DEVICE);
+    printf("Set OMP Default device to %d \n",HYPRE_DEVICE);
+#endif
       /* Create NVTX domain for all the nvtx calls in HYPRE */
       HYPRE_DOMAIN=nvtxDomainCreateA("Hypre");
       
@@ -92,6 +98,7 @@ void hypre_GPUInit(hypre_int use_device){
       
     cusparseErrchk(cusparseCreate(&(HYPRE_CUSPARSE_HANDLE)));
     cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,HYPRE_STREAM(4)));
+    //cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,0)); // Cusparse MxV happens in default stream
     cusparseErrchk(cusparseCreateMatDescr(&(HYPRE_CUSPARSE_MAT_DESCR))); 
     cusparseErrchk(cusparseSetMatType(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_MATRIX_TYPE_GENERAL));
     cusparseErrchk(cusparseSetMatIndexBase(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_INDEX_BASE_ZERO));
@@ -100,7 +107,9 @@ void hypre_GPUInit(hypre_int use_device){
     cublasErrchk(cublasSetStream(HYPRE_CUBLAS_HANDLE,HYPRE_STREAM(4)));
     if (!checkDeviceProps()) hypre_printf("WARNING:: Concurrent memory access not allowed\n");
     /* Check if the arch flags used for compiling the cuda kernels match the device */
+#ifdef HYPRE_USE_GPU
     CudaCompileFlagCheck();
+#endif
   }
 }
 
@@ -123,14 +132,14 @@ void hypre_GPUFinalize(){
 void MemAdviseReadOnly(const void* ptr, hypre_int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
-    if (size==0) printf("WARNING:: Operations with 0 size vector \n");
+    if (size==0) hypre_printf("WARNING:: Operations with 0 size vector \n");
     gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseSetReadMostly,device));
 }
 
 void MemAdviseUnSetReadOnly(const void* ptr, hypre_int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
-    if (size==0) printf("WARNING:: Operations with 0 size vector \n");
+    if (size==0) hypre_printf("WARNING:: Operations with 0 size vector \n");
     gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseUnsetReadMostly,device));
 }
 
@@ -212,7 +221,7 @@ cusparseHandle_t getCusparseHandle(){
     firstcall=0;
     status= cusparseCreate(&handle);
     if (status != CUSPARSE_STATUS_SUCCESS) {
-      printf("ERROR:: CUSPARSE Library initialization failed\n");
+      hypre_printf("ERROR:: CUSPARSE Library initialization failed\n");
       handle=0;
       exit(2);
     }
@@ -517,27 +526,27 @@ void printlist(node *head,hypre_int nc){
 #endif//defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
 
 #if defined(HYPRE_USE_CUDA)
-HYPRE_Int hypre_exec_policy = LOCATION_GPU;
+HYPRE_Int hypre_exec_policy = HYPRE_MEMORY_DEVICE;
 char tmp_print[10] = "";
 HYPRE_Int hypre_box_print = 0;
 double t_start = 0;
 double t_end   = 0;
 HYPRE_Int time_box = 0;
-static bool cuda_reduction_id_used[RAJA_MAX_REDUCE_VARS];
+static HYPRE_Int cuda_reduction_id_used[RAJA_MAX_REDUCE_VARS];
 CudaReductionBlockDataType* s_cuda_reduction_mem_block = 0;
-
+  
 HYPRE_Int getCudaReductionId()
 {
-   static HYPRE_Int first_time_called = true;
+   static HYPRE_Int first_time_called = 1;
    HYPRE_Int id;
    
    if (first_time_called) {
 
       for (id = 0; id < RAJA_MAX_REDUCE_VARS; ++id) {
-         cuda_reduction_id_used[id] = false;
+         cuda_reduction_id_used[id] = 0;
       }
 
-      first_time_called = false;
+      first_time_called = 0;
    }
 
    id = 0;
@@ -550,7 +559,7 @@ HYPRE_Int getCudaReductionId()
       exit(1);
    }
 
-   cuda_reduction_id_used[id] = true;
+   cuda_reduction_id_used[id] = 1;
 
    return id;
 }
@@ -630,7 +639,7 @@ CudaReductionBlockDataType* getCudaReductionMemBlock(int id)
 void releaseCudaReductionId(HYPRE_Int id)
 {
    if ( id < RAJA_MAX_REDUCE_VARS ) {
-      cuda_reduction_id_used[id] = false;
+      cuda_reduction_id_used[id] = 0;
    }
 }
 
@@ -642,8 +651,9 @@ CudaReductionBlockDataType* getCPUReductionMemBlock(int id)
 
    if (s_cuda_reduction_mem_block == 0) {
       HYPRE_Int len = nthreads * RAJA_MAX_REDUCE_VARS;
-      s_cuda_reduction_mem_block = 
-         new CudaReductionBlockDataType[len*block_offset];
+      s_cuda_reduction_mem_block = hypre_CTAlloc(CudaReductionBlockDataType,len*block_offset,HYPRE_MEMORY_HOST);
+      
+      //   new CudaReductionBlockDataType[len*block_offset];
 
       atexit(freeCPUReductionMemBlock);
    }
@@ -654,7 +664,8 @@ CudaReductionBlockDataType* getCPUReductionMemBlock(int id)
 void freeCPUReductionMemBlock()
 {
    if ( s_cuda_reduction_mem_block != 0 ) {
-      delete [] s_cuda_reduction_mem_block;
+     //delete [] s_cuda_reduction_mem_block;
+     hypre_TFree(s_cuda_reduction_mem_block,HYPRE_MEMORY_HOST);
       s_cuda_reduction_mem_block = 0; 
    }
 }
@@ -662,7 +673,7 @@ void freeCPUReductionMemBlock()
 void releaseCPUReductionId(int id)
 {
    if ( id < RAJA_MAX_REDUCE_VARS ) {
-      cuda_reduction_id_used[id] = false;
+      cuda_reduction_id_used[id] = 0;
    }
 }
 

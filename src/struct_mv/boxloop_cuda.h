@@ -71,7 +71,7 @@ template<typename LOOP_BODY>
 void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
 {
   
-  if (policy == LOCATION_CPU)
+  if (policy == HYPRE_MEMORY_HOST)
   {
     HYPRE_Int idx;
 #pragma omp parallel for 
@@ -81,7 +81,7 @@ void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
     }
     
   }
-  else if (policy == LOCATION_GPU)
+  else if (policy == HYPRE_MEMORY_DEVICE)
   {    
      size_t const blockSize = BLOCKSIZE;
      size_t gridSize  = (length + blockSize - 1) / blockSize;
@@ -120,7 +120,6 @@ void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
   t_start = MPI_Wtime();\
   time_box = 1;	
 
-  //if (hypre_exec_policy == LOCATION_CPU){printf("CPU: ");} else if (hypre_exec_policy == LOCATION_GPU){printf("GPU: ");} else {printf("UNSET: ");} \
   //printf("hypre_newBoxLoop (%d) in %s(%d) function %s\n",hypre__tot, __FILE__,__LINE__,__FUNCTION__); 
 
 #define hypre_BasicBoxLoopInit(ndim,loop_size)	\
@@ -328,6 +327,7 @@ void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
 
 #define hypre_LoopEnd()					\
    });							\
+   hypre_fence();					\
 }							\
    
    //   hypre_fence();					\
@@ -375,7 +375,7 @@ public:
 
       m_myID = getCudaReductionId();
 
-      if (data_location == LOCATION_GPU)
+      if (data_location == HYPRE_MEMORY_DEVICE)
       {
 	 m_blockdata = getCudaReductionMemBlock(m_myID) ;
 	 m_blockoffset = 1;
@@ -391,7 +391,7 @@ public:
 
 	 cudaDeviceSynchronize();
       }
-      else if (data_location == LOCATION_CPU)
+      else if (data_location == HYPRE_MEMORY_HOST)
       {
 	 m_blockdata = getCPUReductionMemBlock(m_myID);
 	 int nthreads = omp_get_max_threads();
@@ -437,7 +437,7 @@ public:
    operator T()
    {
      
-     if (data_location == LOCATION_GPU) 
+     if (data_location == HYPRE_MEMORY_DEVICE) 
      {
         cudaDeviceSynchronize() ;
 	m_blockdata[m_blockoffset] = static_cast<T>(0);
@@ -448,7 +448,7 @@ public:
 	}
 	m_reduced_val = m_init_val + static_cast<T>(m_blockdata[m_blockoffset]);
      }
-     else if (data_location == LOCATION_CPU)
+     else if (data_location == HYPRE_MEMORY_HOST)
      {
 #if defined( __CUDA_ARCH__ )
 #else
@@ -471,7 +471,7 @@ public:
    ReduceSum< T > operator+=(T val) const
    {  
 #if defined( __CUDA_ARCH__ )
-      if (data_location == LOCATION_GPU)
+      if (data_location == HYPRE_MEMORY_DEVICE)
       {	
         __shared__ T sd[BLOCK_SIZE];
 
@@ -519,7 +519,7 @@ public:
 	}
       }
 #else
-      if (data_location == LOCATION_CPU)
+      if (data_location == HYPRE_MEMORY_HOST)
       {
          int tid = omp_get_thread_num();
 	 m_blockdata[tid*s_block_offset] += val;

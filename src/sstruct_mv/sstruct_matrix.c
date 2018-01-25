@@ -1466,8 +1466,11 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                hypre_IntersectBoxes(ibox0, frbox, ibox1);
                if (hypre_BoxVolume(ibox1))
                {
-                  tvalues =
-                     hypre_TReAlloc(tvalues,  HYPRE_Complex,  hypre_BoxVolume(ibox1), HYPRE_MEMORY_HOST);
+		 tvalues = hypre_TAlloc(HYPRE_Complex, hypre_BoxVolume(ibox1), HYPRE_MEMORY_SHARED);
+		 
+		 
+		 //tvalues =
+                 //    hypre_TReAlloc(tvalues,  HYPRE_Complex,  hypre_BoxVolume(ibox1), HYPRE_MEMORY_HOST);
 
                   if (action >= 0)
                   {
@@ -1476,6 +1479,9 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      /* copy values into tvalues */
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
+#if defined(HYPRE_MEMORY_GPU)
+		     hypre_exec_policy = HYPRE_MEMORY_HOST;
+#endif
                      hypre_BoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
                                          vbox,  start, stride, vi);
@@ -1483,7 +1489,9 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                         tvalues[mi] = values[ei + vi*nentries];
                      }
                      hypre_BoxLoop2End(mi, vi);
-
+#if defined(HYPRE_MEMORY_GPU)		     
+		     hypre_exec_policy = HYPRE_MEMORY_DEVICE;
+#endif
                      /* put values into UMatrix */
                      hypre_SStructUMatrixSetBoxValues(
                         matrix, part, hypre_BoxIMin(ibox1), hypre_BoxIMax(ibox1),
@@ -1513,6 +1521,8 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      hypre_BoxLoop2End(mi, vi);
 
                   } /* end if action */
+
+		  hypre_TFree(tvalues,HYPRE_MEMORY_SHARED);
                } /* end if nonzero ibox1 */
             } /* end of "from" boxman entries loop */
             hypre_TFree(frentries, HYPRE_MEMORY_HOST);

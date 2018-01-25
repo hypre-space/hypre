@@ -178,6 +178,7 @@ hypre_SemiInterp( void               *interp_vdata,
 #if defined(HYPRE_MEMORY_GPU)
    HYPRE_Int data_location_f = hypre_StructGridDataLocation(fgrid);
    HYPRE_Int data_location_c = hypre_StructGridDataLocation(cgrid);
+   
    if (data_location_f != data_location_c)
    {
       xc_tmp = hypre_StructVectorCreate(hypre_MPI_COMM_WORLD, cgrid);
@@ -186,7 +187,7 @@ hypre_SemiInterp( void               *interp_vdata,
       hypre_StructVectorInitialize(xc_tmp);
       hypre_StructVectorAssemble(xc_tmp);
       hypre_TMemcpy(hypre_StructVectorData(xc_tmp), hypre_StructVectorData(xc), HYPRE_Complex,hypre_StructVectorDataSize(xc),HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
-      hypre_exec_policy = LOCATION_GPU;
+      hypre_exec_policy = HYPRE_MEMORY_DEVICE;
    }
    else
    {

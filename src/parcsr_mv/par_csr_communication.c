@@ -421,8 +421,11 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
       hypre_TFree(status0, HYPRE_MEMORY_HOST);
    }
 
+   //printf("HERE---- 0\n"); // debugging the Invalid Cuda context issue
    hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
+   //printf("HERE 1 %p\n",comm_handle);
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
+   //printf("HERE 2 \n");
 
    return hypre_error_flag;
 }
@@ -843,3 +846,5 @@ hypre_BuildCSRJDataType( HYPRE_Int num_nonzeros,
  
    return hypre_error_flag;
 }
+
+    

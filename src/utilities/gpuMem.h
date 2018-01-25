@@ -101,11 +101,13 @@ size_t memsize(const void *ptr);
 
 #define HYPRE_MIN_GPU_SIZE (131072)//(65536)//(8192)//(16384)//(32768)//(65536)
 
+extern HYPRE_Int hypre_exec_policy;
+
 #else
 
 #define hypre_GPUInit(use_device)
 #define hypre_GPUFinalize()
-
+//#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #endif//defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 
 #if defined(HYPRE_USE_CUDA)
@@ -114,10 +116,6 @@ extern char tmp_print[10];
 extern HYPRE_Int hypre_box_print;
 extern double  t_start, t_end;
 extern HYPRE_Int time_box ;
-
-#define LOCATION_CPU (1)
-#define LOCATION_GPU (0)
-#define LOCATION_UNSET (-1)
 
 #define RAJA_MAX_REDUCE_VARS (8)
 #define RAJA_CUDA_MAX_NUM_BLOCKS (512*512*512)
