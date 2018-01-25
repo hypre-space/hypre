@@ -64,7 +64,18 @@ hypre_OutOfMemory( size_t size )
 /*--------------------------------------------------------------------------
  * hypre_MAlloc
  *--------------------------------------------------------------------------*/
-
+char *
+hypre_MAllocIns( size_t size , HYPRE_Int location,char *file, int line)
+{
+  char *ret = hypre_MAlloc(size,location);
+  //printf("%s %d %d %p\n",file,line,location,ret);
+  pattr_t *ss=(pattr_t*)hypre_MAlloc(sizeof(pattr_t),HYPRE_MEMORY_HOST);
+  ss->file=file;
+  ss->line=line;
+  ss->type=location;
+  patpush(ret,ss);
+  return ret;
+}
 char *
 hypre_MAlloc( size_t size , HYPRE_Int location)
 {
@@ -113,8 +124,18 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
       else if (location==HYPRE_MEMORY_HOST)
       {
 #if defined(HYPRE_USE_MANAGED)
+	ptr = malloc(size);
+	//gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+	//mempush(ptr,size,0);
+#ifdef HYPRE_USE_MANAGED_SCALABLE
+	//gpuErrchk( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
+	//size_t *sp=(size_t*)ptr;
+         //*sp=size;
+         //ptr=(void*)(&sp[MEM_PAD_LEN]);
+#else
          gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
          mempush(ptr,size,0);
+#endif
 #else
          ptr = malloc(size);
 #endif
@@ -155,6 +176,19 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
 /*--------------------------------------------------------------------------
  * hypre_CAlloc
  *--------------------------------------------------------------------------*/
+char *
+hypre_CAllocIns( size_t count, 
+              size_t elt_size,
+		 HYPRE_Int location,char *file, int line){
+  char *ret=hypre_CAlloc(count,elt_size,location);
+  //printf("%s %d %d %p\n",file,line,location,ret);
+  pattr_t *ss=(pattr_t*)hypre_MAlloc(sizeof(pattr_t),HYPRE_MEMORY_HOST);
+  ss->file=file;
+  ss->line=line;
+  ss->type=location;
+  patpush(ret,ss);
+  return ret;
+}
 
 char *
 hypre_CAlloc( size_t count, 
@@ -203,9 +237,11 @@ hypre_CAlloc( size_t count,
       else if (location==HYPRE_MEMORY_HOST)
       {
 #if defined(HYPRE_USE_MANAGED)
-         gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
-         memset(ptr,0,count*elt_size);
-         mempush(ptr,size,0);
+	ptr=(void*)hypre_MAlloc(size, location);
+	memset(ptr,0,count*elt_size);
+	//gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+	//memset(ptr,0,count*elt_size);
+	//mempush(ptr,size,0);
 #else
          ptr = calloc(count, elt_size);
 #endif
@@ -213,9 +249,11 @@ hypre_CAlloc( size_t count,
       else if (location==HYPRE_MEMORY_SHARED)
       {
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-         gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
-         memset(ptr,0,count*elt_size);
-         mempush(ptr,size,0);
+		ptr=(void*)hypre_MAlloc(size, location);
+		memset(ptr,0,count*elt_size);
+		//gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+		//memset(ptr,0,count*elt_size);
+		//mempush(ptr,size,0);
 #else
          ptr = calloc(count, elt_size);
 #endif
@@ -255,6 +293,18 @@ size_t memsize(const void *ptr){
 /*--------------------------------------------------------------------------
  * hypre_ReAlloc
  *--------------------------------------------------------------------------*/
+char *
+hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, int line)
+{
+  char *ret = hypre_ReAlloc(ptr,size,location);
+  //printf("%s %d %d %p\n",file,line,location,ret);
+  pattr_t *ss=(pattr_t*)hypre_MAlloc(sizeof(pattr_t),HYPRE_MEMORY_HOST);
+  ss->file=file;
+  ss->line=line;
+  ss->type=location;
+  patpush(ret,ss);
+  return ret;
+}
 
 char *
 hypre_ReAlloc( char   *ptr, 

@@ -88,7 +88,7 @@ hypre_SeqVectorDestroy( hypre_Vector *vector )
 #endif
       if ( hypre_VectorOwnsData(vector) )
       {
-         hypre_TFree(hypre_VectorData(vector), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_VectorData(vector), HYPRE_MEMORY_SHARED);
       }
        hypre_TFree(vector, HYPRE_MEMORY_HOST);
    }
@@ -109,7 +109,7 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
    HYPRE_Int  multivec_storage_method = hypre_VectorMultiVecStorageMethod(vector);
 
    if ( ! hypre_VectorData(vector) )
-      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex,  num_vectors*size, HYPRE_MEMORY_HOST);
+      hypre_VectorData(vector) = hypre_CTAlloc(HYPRE_Complex,  num_vectors*size, HYPRE_MEMORY_SHARED);
 
    if ( multivec_storage_method == 0 )
    {
@@ -570,6 +570,8 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
    HYPRE_Int      i;
 
    HYPRE_Real     result = 0.0;
+   ASSERT_MANAGED(x_data);
+   ASSERT_MANAGED(y_data);
    PUSH_RANGE("INNER_PROD",0);
    size *=hypre_VectorNumVectors(x);
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
@@ -717,6 +719,7 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
 }
 void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x){
   if (hypre_VectorSize(x)==0) return;
+  ASSERT_MANAGED(hypre_VectorData(x));
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
   gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
   gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
@@ -731,6 +734,7 @@ void hypre_SeqVectorPrefetchToHost(hypre_Vector *x){
 }
 void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index){
   if (hypre_VectorSize(x)==0) return;
+  ASSERT_MANAGED(hypre_VectorData(x));
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
   gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(index)));
   gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(index)));

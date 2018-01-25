@@ -659,15 +659,41 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
-
+#define TRACK_MEMORY_ALLOCATIONS 1
+#ifdef TRACK_MEMORY_ALLOCATIONS
+typedef struct {
+  char *file;
+  int line;
+  int type;} pattr_t;
+pattr_t *patpush(void *ptr, pattr_t *ss);
 #define hypre_TAlloc(type, count, location) \
-( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
+  ( (type *)hypre_MAllocIns((size_t)(sizeof(type) * (count)), location,__FILE__,__LINE__) )
 
 #define hypre_CTAlloc(type, count, location) \
-( (type *)hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location) )
+  ( (type *)hypre_CAllocIns((size_t)(count), (size_t)sizeof(type), location,__FILE__,__LINE__) )
+
+#define hypre_TReAlloc(ptr, type, count, location) \
+  ( (type *)hypre_ReAllocIns((char *)ptr, (size_t)(sizeof(type) * (count)), location,__FILE__,__LINE__) )
+
+void assert_check(void *ptr, char *file, int line);
+
+#define ASSERT_MANAGED(ptr)\
+  ( assert_check((ptr),__FILE__,__LINE__))
+
+#else
+
+#define hypre_TAlloc(type, count, location) \
+  ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
+
+#define hypre_CTAlloc(type, count, location) \
+  ( (type *)hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location) )
 
 #define hypre_TReAlloc(ptr, type, count, location) \
 ( (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) )
+
+#endif
+
+
 
 #define hypre_TFree(ptr,location) \
 ( hypre_Free((char *)ptr, location), ptr = NULL )
@@ -687,9 +713,12 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
 /* hypre_memory.c */
 HYPRE_Int hypre_OutOfMemory ( size_t size );
 char *hypre_MAlloc( size_t size , HYPRE_Int location );
+char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,int line);
 char *hypre_CAlloc( size_t count ,  size_t elt_size , HYPRE_Int location);
+char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, int line);
 char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc( char *ptr ,  size_t size , HYPRE_Int location);
+char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, int line);
 void hypre_Free( char *ptr , HYPRE_Int location );
 char *hypre_CAllocHost( size_t count,size_t elt_size );
 char *hypre_MAllocHost( size_t size );
@@ -1166,7 +1195,7 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 #include <cuda_runtime_api.h>
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
-#define MEM_PAD_LEN 0
+#define MEM_PAD_LEN 1
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 inline void gpuAssert(cudaError_t code, const char *file, int line)
 {
@@ -1174,7 +1203,9 @@ inline void gpuAssert(cudaError_t code, const char *file, int line)
    {
      fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file);
      fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code));
-     exit(2);
+     int *dummy;
+     *dummy=4;
+     abort();
    }
 }
 #define HYPRE_HOST_POINTER 0

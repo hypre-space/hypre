@@ -40,7 +40,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
                                  hypre_Vector    *y,
                                  HYPRE_Int        offset     )
 {
-  //printf("CALLING OOOMP MATVE\n");
+  printf("CALLING OOOMP MATVE\n");
 #ifdef HYPRE_PROFILE
    HYPRE_Real time_begin = hypre_MPI_Wtime();
 #endif
@@ -459,6 +459,12 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    // gpuErrchk(cudaPeekAtLastError());
    //gpuErrchk(cudaDeviceSynchronize());
    
+   ASSERT_MANAGED(A_data);
+   ASSERT_MANAGED(A_i);
+   ASSERT_MANAGED(A_j);
+   ASSERT_MANAGED(x_data);
+   ASSERT_MANAGED(y_data);
+   ASSERT_MANAGED(b_data);
    if (b!=y){
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 #pragma omp target teams  distribute  parallel for private(i)
@@ -468,6 +474,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
      for(i=0;i<y_size;i++) y_data[i] = b_data[i];
    }
 
+   if (A->num_rows>0){
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 #pragma omp target data use_device_ptr(A_data,x_data,y_data,A_i,A_j)
 #endif
@@ -477,7 +484,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 				 &alpha, descr,
 				 A_data ,A_i,A_j,
 				 x_data, &beta, y_data));
-  
+   }
   
 // if (!GetAsyncMode()){
    //gpuErrchk(cudaPeekAtLastError());
@@ -517,6 +524,7 @@ UpdateDRC(y);
    //hypre_SeqVectorUnMapFromDevice(x);
    //if ((b!=y)&&(b->mapped)) hypre_SeqVectorUnMapFromDevice(b);
 #endif
+   //printf("DONE WITH OOMP\n");
    return ierr;
 }
 HYPRE_Int

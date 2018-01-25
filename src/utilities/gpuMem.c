@@ -10,6 +10,7 @@
 
 #include <sched.h>
 #include <errno.h>
+#include <omp.h>
 hypre_int ggc(hypre_int id);
 
 /* Global struct that holds device,library handles etc */

@@ -2152,7 +2152,7 @@ SetCosineVector(   HYPRE_Real  scale,
    hypre_SubtractIndexes(iupper,ilower,3,loop_size);
    hypre_SetIndex(stride,1);
    hypre_SetIndex(start,0);
-   
+   ASSERT_MANAGED(values);
    hypre_BoxLoop1Begin(3,loop_size,dbox,start,stride,count)
    {
       hypre_Index id;
