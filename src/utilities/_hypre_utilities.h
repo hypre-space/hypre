@@ -478,7 +478,7 @@ extern "C" {
 #define HYPRE_MEMORY_SHARED ( 2)
 #define HYPRE_MEMORY_UNSET  (-1)
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) 
 
 #define hypre_DeviceMemset(ptr, value, type, count) 
 
@@ -497,6 +497,15 @@ extern "C++" {
 
 #if defined(HYPRE_USE_OMP45)
 #include "omp.h"
+  
+#ifdef __cplusplus
+extern "C++" {
+#endif
+#include <cuda.h>
+#include <cuda_runtime.h>
+#ifdef __cplusplus
+}
+#endif
 
 /* stringification:
  * _Pragma(string-literal), so we need to cast argument to a string
@@ -659,8 +668,8 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
-#define TRACK_MEMORY_ALLOCATIONS 1
-#ifdef TRACK_MEMORY_ALLOCATIONS
+#define TRACK_MEMORY_ALLOCATIONS 0
+#if 0//TRACK_MEMORY_ALLOCATIONS
 typedef struct {
   char *file;
   int line;
@@ -681,6 +690,8 @@ void assert_check(void *ptr, char *file, int line);
   ( assert_check((ptr),__FILE__,__LINE__))
 
 #else
+
+#define ASSERT_MANAGED(ptr) (ptr)
 
 #define hypre_TAlloc(type, count, location) \
   ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
@@ -713,12 +724,12 @@ void assert_check(void *ptr, char *file, int line);
 /* hypre_memory.c */
 HYPRE_Int hypre_OutOfMemory ( size_t size );
 char *hypre_MAlloc( size_t size , HYPRE_Int location );
-char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,int line);
+//char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,int line);
 char *hypre_CAlloc( size_t count ,  size_t elt_size , HYPRE_Int location);
-char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, int line);
+//char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, int line);
 char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc( char *ptr ,  size_t size , HYPRE_Int location);
-char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, int line);
+//char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, int line);
 void hypre_Free( char *ptr , HYPRE_Int location );
 char *hypre_CAllocHost( size_t count,size_t elt_size );
 char *hypre_MAllocHost( size_t size );
@@ -1217,7 +1228,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line)
 void cudaSafeFree(void *ptr,int padding);
 hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
-#endif // defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
+#endif // defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)|| defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 #define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)

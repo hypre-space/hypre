@@ -38,7 +38,7 @@ inline void gpuAssert(cudaError_t code, const char *file, int line)
 void cudaSafeFree(void *ptr,int padding);
 hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
-#endif // defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
+#endif // defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)|| defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 #define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)

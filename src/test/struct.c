@@ -190,7 +190,7 @@ main( hypre_int argc,
    hypre_MPI_Init(&argc, &argv);
 
 #ifdef HYPRE_USE_OMP45
-   HYPRE_OMPOffloadOn();
+   //HYPRE_OMPOffloadOn();
 #endif
 
 #if defined(HYPRE_USE_KOKKOS)

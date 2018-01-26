@@ -64,6 +64,7 @@ hypre_OutOfMemory( size_t size )
 /*--------------------------------------------------------------------------
  * hypre_MAlloc
  *--------------------------------------------------------------------------*/
+#if 0//TRACK_MEMORY_ALLOCATIONS
 char *
 hypre_MAllocIns( size_t size , HYPRE_Int location,char *file, int line)
 {
@@ -76,6 +77,7 @@ hypre_MAllocIns( size_t size , HYPRE_Int location,char *file, int line)
   patpush(ret,ss);
   return ret;
 }
+#endif
 char *
 hypre_MAlloc( size_t size , HYPRE_Int location)
 {
@@ -143,10 +145,12 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
       else if (location==HYPRE_MEMORY_SHARED)
       {
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-         gpuErrchk( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
+	 gpuErrchk( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
          size_t *sp=(size_t*)ptr;
          *sp=size;
          ptr=(void*)(&sp[MEM_PAD_LEN]);
+#elif defined(HYPRE_USE_OMP45)
+	 cudaMallocManaged(&ptr, size, cudaMemAttachGlobal);
 #else
          ptr = malloc(size);
 #endif
@@ -176,6 +180,7 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
 /*--------------------------------------------------------------------------
  * hypre_CAlloc
  *--------------------------------------------------------------------------*/
+#if 0//TRACK_MEMORY_ALLOCATIONS
 char *
 hypre_CAllocIns( size_t count, 
               size_t elt_size,
@@ -189,7 +194,7 @@ hypre_CAllocIns( size_t count,
   patpush(ret,ss);
   return ret;
 }
-
+#endif
 char *
 hypre_CAlloc( size_t count, 
               size_t elt_size,
@@ -248,7 +253,7 @@ hypre_CAlloc( size_t count,
       }
       else if (location==HYPRE_MEMORY_SHARED)
       {
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
 		ptr=(void*)hypre_MAlloc(size, location);
 		memset(ptr,0,count*elt_size);
 		//gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
@@ -293,6 +298,7 @@ size_t memsize(const void *ptr){
 /*--------------------------------------------------------------------------
  * hypre_ReAlloc
  *--------------------------------------------------------------------------*/
+#if 0//TRACK_MEMORY_ALLOCATIONS
 char *
 hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, int line)
 {
@@ -305,7 +311,7 @@ hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, int li
   patpush(ret,ss);
   return ret;
 }
-
+#endif
 char *
 hypre_ReAlloc( char   *ptr, 
                size_t  size,
@@ -418,6 +424,8 @@ hypre_Free( char *ptr ,
      {
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
         cudaSafeFree(ptr,MEM_PAD_LEN);
+#elif defined(HYPRE_USE_OMP45)
+	cudaFree(ptr);
 #else
         free(ptr);
 #endif

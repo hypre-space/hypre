@@ -244,7 +244,7 @@ HYPRE_SStructVectorInitialize( HYPRE_SStructVector vector )
    {
       par_vector = (hypre_ParVector        *)hypre_IJVectorObject(ijvector);
       parlocal_vector = hypre_ParVectorLocalVector(par_vector);
-      hypre_TFree(hypre_VectorData(parlocal_vector), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_VectorData(parlocal_vector), HYPRE_MEMORY_SHARED);
       hypre_VectorData(parlocal_vector) = data ;
    }
 

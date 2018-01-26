@@ -10,7 +10,7 @@ void CheckError(cudaError_t const err, const char* file, char const* const fun, 
       HYPRE_Int *p = NULL; *p = 1;
     }
 }
-#endif
+#endif //defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 
 #if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
 #include <signal.h>
