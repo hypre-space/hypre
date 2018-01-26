@@ -111,12 +111,16 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
          ptr=(void*)(&sp[MEM_PAD_LEN]);
 #endif
 #elif defined(HYPRE_USE_OMP45)
+#if 0
          void *ptr_alloc = malloc(size + HYPRE_OMP45_SZE_PAD);
          char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
          size_t size_inuse = size;
          ((size_t *) ptr_alloc)[0] = size_inuse;
          hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "enter", "alloc");
          ptr = (void *) ptr_inuse;
+#else
+         ptr = omp_target_alloc(size, hypre__offload_device_num);
+#endif
 #else
          ptr = malloc(size);
 #endif
@@ -224,12 +228,17 @@ hypre_CAlloc( size_t count,
          cudaMemset(ptr,0,size);
 #endif
 #elif defined(HYPRE_USE_OMP45)
+#if 0
          void *ptr_alloc = calloc(count + HYPRE_OMP45_CNT_PAD(elt_size), elt_size);
          char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
          size_t size_inuse = elt_size * count;
          ((size_t *) ptr_alloc)[0] = size_inuse;
          hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "enter", "to");
          ptr = (void*) ptr_inuse;
+#else
+         /* TODO WRONG */
+         ptr = omp_target_alloc(size, hypre__offload_device_num);
+#endif
 #else
          ptr = calloc(count, elt_size);
 #endif
@@ -406,10 +415,14 @@ hypre_Free( char *ptr ,
       cudaSafeFree(ptr,MEM_PAD_LEN);
 #endif
 #elif defined(HYPRE_USE_OMP45)
+#if 0
       char *ptr_alloc = ((char*) ptr) - HYPRE_OMP45_SZE_PAD;
       size_t size_inuse = ((size_t *) ptr_alloc)[0];
       hypre_omp45_offload(hypre__offload_device_num, ptr, char, 0, size_inuse, "exit", "delete");
       free(ptr_alloc);
+#else
+      omp_target_free(ptr, hypre__offload_device_num);
+#endif
 #else
       free(ptr);
 #endif
@@ -455,6 +468,8 @@ hypre_Memcpy( char *dst,
             cudaMemcpy( dst, src, size, cudaMemcpyDeviceToDevice);
 #elif defined(HYPRE_USE_OMP45)
             //TODO
+            printf("OMP45 DEVICE MEMCPY NOT IMPLEMENTED !\n");
+            exit(-1);
 #else
             memcpy( dst, src, size);
 #endif

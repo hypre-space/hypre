@@ -659,8 +659,8 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
-#define TRACK_MEMORY_ALLOCATIONS 1
-#ifdef TRACK_MEMORY_ALLOCATIONS
+#define TRACK_MEMORY_ALLOCATIONS 0
+#if TRACK_MEMORY_ALLOCATIONS
 typedef struct {
   char *file;
   int line;
