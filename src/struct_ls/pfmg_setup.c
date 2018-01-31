@@ -100,7 +100,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             data_size = 0;
    HYPRE_Int             data_size_const = 0;
    HYPRE_Real           *relax_weights;
-   HYPRE_Real           *mean;
+   HYPRE_Real           *mean, *deviation;
    HYPRE_Real            alpha, beta;
 
    hypre_StructMatrix  **A_l;
@@ -127,7 +127,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Real            min_dxyz;
    HYPRE_Int             cdir, periodic, cmaxsize;
    HYPRE_Int             d, l;
-                       
+   HYPRE_Int             dxyz_flag;
+
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
@@ -169,11 +170,24 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    (pfmg_data -> max_levels) = max_levels;
 
    /* compute dxyz */
+   dxyz_flag= 0;
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
       mean = hypre_CTAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
-      hypre_PFMGComputeDxyz(A, dxyz, mean);
+      deviation = hypre_CTAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
+      hypre_PFMGComputeDxyz(A, dxyz, mean, deviation);
+      for (d = 0; d < ndim; d++)
+      {
+         deviation[d] -= mean[d]*mean[d];
+         /* square of coeff. of variation */
+         if (deviation[d]/(mean[d]*mean[d]) > .1)
+         {
+	    dxyz_flag= 1;
+            break;
+         }
+      }
       hypre_TFree(mean, HYPRE_MEMORY_HOST);
+      hypre_TFree(deviation, HYPRE_MEMORY_HOST);
    }
 
    grid_l = hypre_TAlloc(hypre_StructGrid *,  max_levels, HYPRE_MEMORY_HOST);
@@ -220,6 +234,12 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       beta = 0.0;
       if (cdir != -1)
       {
+	 if (dxyz_flag)
+	 {
+	    relax_weights[l] = 2.0/3.0;
+	 }
+
+	 else
          {
             for (d = 0; d < ndim; d++)
             {
@@ -774,7 +794,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 HYPRE_Int
 hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
                        HYPRE_Real         *dxyz,
-                       HYPRE_Real         *mean)
+                       HYPRE_Real         *mean,
+		       HYPRE_Real         *deviation)
 {
    hypre_BoxArray        *compute_boxes;
    //hypre_Box             *compute_box;
@@ -784,7 +805,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
    //HYPRE_Int              Ai;
                         
    //HYPRE_Real            *Ap;
-   HYPRE_Real             cxyz[3], tcxyz[3];
+   HYPRE_Real             cxyz[3], sqcxyz[3], tcxyz[3];
    HYPRE_Real             cxyz_max;
 
    HYPRE_Int              tot_size; 
@@ -815,9 +836,13 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
     * Compute cxyz (use arithmetic mean)
     *----------------------------------------------------------*/
 
-   cxyz[0] = 0.0;
-   cxyz[1] = 0.0;
-   cxyz[2] = 0.0;
+   cxyz[0]  = 0.0;
+   cxyz[1]  = 0.0;
+   cxyz[2]  = 0.0;
+
+   sqcxyz[0] = 0.0;
+   sqcxyz[1] = 0.0;
+   sqcxyz[2] = 0.0;
 
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
@@ -827,18 +852,10 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
 
    hypre_ForBoxI(i, compute_boxes)
    {
-     //compute_box = hypre_BoxArrayBox(compute_boxes, i);
-
-      //A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-
-      //start  = hypre_BoxIMin(compute_box);
-
-      //hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-
       /* all coefficients constant or variable diagonal */
       if ( constant_coefficient )
       {
-         hypre_PFMGComputeDxyz_CS(i, A, cxyz);
+	hypre_PFMGComputeDxyz_CS(i, A, cxyz, sqcxyz);
       }
       /* constant_coefficient==0, all coefficients vary with space */
       else
@@ -846,15 +863,15 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
          switch (stencil_size)
          {
             case 5:
-               hypre_PFMGComputeDxyz_SS5(i, A, cxyz); break;
+	      hypre_PFMGComputeDxyz_SS5(i, A, cxyz, sqcxyz); break;
             case 9:
-               hypre_PFMGComputeDxyz_SS9(i, A, cxyz); break;
+               hypre_PFMGComputeDxyz_SS9(i, A, cxyz, sqcxyz); break;
             case 7:
-               hypre_PFMGComputeDxyz_SS7(i, A, cxyz); break;
+               hypre_PFMGComputeDxyz_SS7(i, A, cxyz, sqcxyz); break;
             case 19:
-               hypre_PFMGComputeDxyz_SS19(i, A, cxyz); break;
+               hypre_PFMGComputeDxyz_SS19(i, A, cxyz, sqcxyz); break;
            case 27:
-               hypre_PFMGComputeDxyz_SS27(i, A, cxyz); break;
+               hypre_PFMGComputeDxyz_SS27(i, A, cxyz, sqcxyz); break;
          }
       }
    }
@@ -869,6 +886,7 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       for (d= 0; d< 3; d++)
       {
          mean[d]= cxyz[d];
+	 deviation[d]= sqcxyz[d];
       }
    }
    /* constant_coefficient==0, all coefficients vary with space */
@@ -881,9 +899,15 @@ hypre_PFMGComputeDxyz( hypre_StructMatrix *A,
       hypre_MPI_Allreduce(tcxyz, cxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
                           hypre_StructMatrixComm(A));
 
+      tcxyz[0] = sqcxyz[0];
+      tcxyz[1] = sqcxyz[1];
+      tcxyz[2] = sqcxyz[2];
+      hypre_MPI_Allreduce(tcxyz, sqcxyz, 3, HYPRE_MPI_REAL, hypre_MPI_SUM,
+                          hypre_StructMatrixComm(A));
       for (d= 0; d< 3; d++)
       {
          mean[d]= cxyz[d]/tot_size;
+	 deviation[d]= sqcxyz[d]/tot_size;
       }
    }
      
@@ -1033,7 +1057,8 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
 HYPRE_Int
 hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
                           hypre_StructMatrix *A,
-                          HYPRE_Real         *cxyz)
+                          HYPRE_Real         *cxyz,
+			  HYPRE_Real         *sqcxyz)
 {
   //hypre_BoxArray        *compute_boxes;
    //hypre_Box             *compute_box;
@@ -1046,16 +1071,10 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
    HYPRE_Int              Ai;
                         
    HYPRE_Real            *Ap;
-   //hypre_Index            loop_size;
-   //hypre_IndexRef         start;
-   //hypre_Index            stride;
-   //hypre_Index           index;
 
    HYPRE_Int              constant_coefficient;
-   //HYPRE_Real           *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
    
-   HYPRE_Real            tcx, tcy, tcz;
-   //HYPRE_Int             data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
+   HYPRE_Real            tcx, tcy, tcz, sqcx, sqcy, sqcz;
    HYPRE_Real            Adiag,diag;
    HYPRE_Int             Astenc,sdiag;
    
@@ -1065,15 +1084,6 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
    stencil_shape = hypre_StructStencilShape(stencil);
    stencil_size  = hypre_StructStencilSize(stencil);
 
-   //hypre_SetIndex3(stride, 1, 1, 1);
-
-   //compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
-   //compute_box = hypre_BoxArrayBox(compute_boxes, i);
-
-   //A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
-   //start  = hypre_BoxIMin(compute_box);
-   //hypre_BoxGetStrideSize(compute_box, stride, loop_size);
-   //hypre_SetIndex3(stride, 1, 1, 1);
    Ai = hypre_CCBoxIndexRank( A_dbox, start );
    constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
 
@@ -1092,6 +1102,10 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
    tcx = cxyz[0];
    tcy = cxyz[1];
    tcz = cxyz[2];
+
+   sqcx = sqcxyz[0];
+   sqcy = sqcxyz[1];
+   sqcz = sqcxyz[2];
 
    /* get sign of diagonal */
    Ap = hypre_StructMatrixBoxData(A, i, sdiag);
@@ -1140,6 +1154,10 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
    cxyz[1] = tcy;
    cxyz[2] = tcz;
 
+   sqcx += (tcx*tcx);
+   sqcy += (tcy*tcy);
+   sqcz += (tcz*tcz);
+
    return hypre_error_flag;
 }
 
@@ -1149,7 +1167,8 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
 HYPRE_Int
 hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi,
                            hypre_StructMatrix *A,
-                           HYPRE_Real         *cxyz)
+                           HYPRE_Real         *cxyz,
+			   HYPRE_Real         *sqcxyz)
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -1170,10 +1189,6 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)  
    HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
-   
-   //stencil       = hypre_StructMatrixStencil(A);
-   //stencil_shape = hypre_StructStencilShape(stencil);
-   //stencil_size  = hypre_StructStencilSize(stencil);
 
    hypre_SetIndex3(stride, 1, 1, 1);
 
@@ -1210,6 +1225,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi,
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
 #if defined(HYPRE_USE_KOKKOS)
+   HYPRE_Real cxb = cxyz[0], cyb = cxyz[1],cqxb = sqcxyz[0], cqyb = sqcxyz[1];
    hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
                                    A_dbox, start, stride, Ai, cxb);
    {
@@ -1237,13 +1253,40 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi,
       cyb += tcy;
    }
    hypre_newBoxLoop1ReductionEnd(Ai,diag_product_local);
+   hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+                                   A_dbox, start, stride, Ai, cqxb);
+   {
+      HYPRE_Real tcx = 0.0;
+      HYPRE_Real diag = 1.0;
+      if (a_cc[Ai] < 0) 
+      {
+         diag = -1.0;
+      }
+      tcx = diag*(a_cw[Ai]+a_ce[Ai]);
+      cqxb += tcx*tcx;
+   }
+   hypre_newBoxLoop1ReductionEnd(Ai,diag_product_local);
+
+   hypre_newBoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
+                                   A_dbox, start, stride, Ai, cqyb);
+   {
+      HYPRE_Real tcy = 0;
+      HYPRE_Real diag = 1;
+      if (a_cc[Ai] < 0)
+      {
+         diag = -1.0;
+      }
+      tcy = diag*(a_cs[Ai]+a_cn[Ai]);
+      cqyb += tcy*tcy;
+   }
+   hypre_newBoxLoop1ReductionEnd(Ai,diag_product_local);
 #else
 #if defined(HYPRE_USE_CUDA)
-   ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location);
+   ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location);
 #elif defined(HYPRE_USE_RAJA)
-   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location);
+   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location);
 #else
-   HYPRE_Real cxb = cxyz[0], cyb = cxyz[1];
+   HYPRE_Real cxb = cxyz[0], cyb = cxyz[1],sqxb = sqcxyz[0], sqyb = sqcxyz[1];
 #endif
 
 #ifdef HYPRE_BOX_REDUCTION
@@ -1251,9 +1294,9 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi,
 #endif
 
 #ifdef HYPRE_USE_OMP45
-#define HYPRE_BOX_REDUCTION map(tofrom:cxb,cyb) reduction(+:cxb,cyb)
+#define HYPRE_BOX_REDUCTION map(tofrom:cxb,cyb,sqxb,sqyb) reduction(+:cxb,cyb,sqxb,sqyb)
 #else
-#define HYPRE_BOX_REDUCTION reduction(+:cxb,cyb)
+#define HYPRE_BOX_REDUCTION reduction(+:cxb,cyb,sqxb,sqyb)
 #endif
    
    hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -1270,6 +1313,8 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi,
 
        cxb += tcx;
        cyb += tcy;
+       sqxb += tcx*tcx;
+       sqyb += tcy*tcy;
    }
    hypre_BoxLoop1End(Ai);
 #undef HYPRE_BOX_REDUCTION
@@ -1279,6 +1324,9 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi,
    cxyz[1] = (HYPRE_Real) cyb;
    cxyz[2] = 0;
 
+   sqcxyz[0] = (HYPRE_Real) sqxb;
+   sqcxyz[1] = (HYPRE_Real) sqyb;
+   sqcxyz[2] = 0;
    return hypre_error_flag;
 }
 
@@ -1287,8 +1335,9 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi,
 
 HYPRE_Int
 hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
-               hypre_StructMatrix *A,
-               HYPRE_Real         *cxyz)
+			   hypre_StructMatrix *A,
+			   HYPRE_Real         *cxyz,
+			   HYPRE_Real         *sqcxyz)
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -1397,20 +1446,20 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    
 #else
 #if defined(HYPRE_USE_CUDA)
-   ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location);
+   ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location);
 #elif defined(HYPRE_USE_RAJA)
-    ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location);
+    ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location);
 #else
-    HYPRE_Real cxb = cxyz[0],cyb = cxyz[1];
+    HYPRE_Real cxb = cxyz[0],cyb = cxyz[1],sqxb = sqcxyz[0], sqyb = sqcxyz[1];
 #endif
 #ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
 #endif
 
 #ifdef HYPRE_USE_OMP45
-#define HYPRE_BOX_REDUCTION map(tofrom:cxb,cyb) reduction(+:cxb,cyb)
+#define HYPRE_BOX_REDUCTION map(tofrom:cxb,cyb,sqxb,sqyb) reduction(+:cxb,cyb,sqxb,sqyb)
 #else
-#define HYPRE_BOX_REDUCTION reduction(+:cxb,cyb)
+#define HYPRE_BOX_REDUCTION reduction(+:cxb,cyb,sqxb,sqyb)
 #endif
    hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                  A_dbox, start, stride, Ai);
@@ -1423,6 +1472,8 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
 
        cxb +=tcx;
        cyb +=tcy;
+       sqxb += tcx*tcx;
+       sqyb += tcy*tcy;
    }
    hypre_BoxLoop1End(Ai);
 #undef HYPRE_BOX_REDUCTION
@@ -1432,6 +1483,9 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    cxyz[1] = (HYPRE_Real)cyb;
    cxyz[2] = 0;
 
+   sqcxyz[0] = (HYPRE_Real) sqxb;
+   sqcxyz[1] = (HYPRE_Real) sqyb;
+   sqcxyz[2] = 0;
    return hypre_error_flag;
 }
 
@@ -1440,8 +1494,9 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
 
 HYPRE_Int
 hypre_PFMGComputeDxyz_SS7( HYPRE_Int bi,
-               hypre_StructMatrix *A,
-               HYPRE_Real         *cxyz)
+			   hypre_StructMatrix *A,
+			   HYPRE_Real         *cxyz,
+			   HYPRE_Real         *sqcxyz)
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -1542,20 +1597,20 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int bi,
    hypre_BoxLoop1End(Ai);
 #else
 #if defined(HYPRE_USE_CUDA)
-   ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location);
+   ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
 #elif defined(HYPRE_USE_RAJA)
-   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location);
+   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
 #else
-   HYPRE_Real cxb = cxyz[0],cyb = cxyz[1],czb = cxyz[2];
+   HYPRE_Real cxb = cxyz[0],cyb = cxyz[1],czb = cxyz[2],sqxb = sqcxyz[0], sqyb = sqcxyz[1], sqzb = sqcxyz[2];
 #endif
 #ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
 #endif
 
 #ifdef HYPRE_USE_OMP45
-#define HYPRE_BOX_REDUCTION map(tofrom:cxb,cyb,czb) reduction(+:cxb,cyb,czb)
+#define HYPRE_BOX_REDUCTION map(tofrom:cxb,cyb,czb,sqxb,sqyb,sqzb) reduction(+:cxb,cyb,czb,sqxb,sqyb,sqzb)
 #else
-#define HYPRE_BOX_REDUCTION reduction(+:cxb,cyb,czb)
+#define HYPRE_BOX_REDUCTION reduction(+:cxb,cyb,czb,sqxb,sqyb,sqzb)
 #endif
 
    hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -1571,6 +1626,9 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int bi,
       cxb +=tcx;
       cyb +=tcy;
       czb +=tcz;
+      sqxb += tcx*tcx;
+      sqyb += tcy*tcy;
+      sqzb += tcz*tcz; 
    }
    hypre_BoxLoop1End(Ai);
 #undef HYPRE_BOX_REDUCTION
@@ -1578,6 +1636,10 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int bi,
    cxyz[0] = (HYPRE_Real)cxb;
    cxyz[1] = (HYPRE_Real)cyb;
    cxyz[2] = (HYPRE_Real)czb;
+
+   sqcxyz[0] = (HYPRE_Real) sqxb;
+   sqcxyz[1] = (HYPRE_Real) sqyb;
+   sqcxyz[2] = (HYPRE_Real) sqzb;
 
    return hypre_error_flag;
 }
@@ -1587,8 +1649,9 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int bi,
 
 HYPRE_Int
 hypre_PFMGComputeDxyz_SS19( HYPRE_Int bi,
-                hypre_StructMatrix *A,
-                HYPRE_Real         *cxyz)
+			    hypre_StructMatrix *A,
+			    HYPRE_Real         *cxyz,
+			    HYPRE_Real         *sqcxyz)
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -1744,20 +1807,20 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int bi,
    hypre_BoxLoop1End(Ai);
 #else
 #if defined(HYPRE_USE_CUDA)
-   ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location);
+   ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
 #elif defined(HYPRE_USE_RAJA)
-   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location);
+   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
 #else
-   HYPRE_Real cxb = cxyz[0],cyb = cxyz[1],czb = cxyz[2];
+   HYPRE_Real cxb = cxyz[0],cyb = cxyz[1],czb = cxyz[2],sqxb = sqcxyz[0], sqyb = sqcxyz[1], sqzb = sqcxyz[2];
 #endif
 #ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
 #endif
 
 #ifdef HYPRE_USE_OMP45
-#define HYPRE_BOX_REDUCTION map(tofrom:cxb,cyb,czb) reduction(+:cxb,cyb,czb)
+#define HYPRE_BOX_REDUCTION map(tofrom:cxb,cyb,czb,sqxb,sqyb,sqzb) reduction(+:cxb,cyb,czb,sqxb,sqyb,sqzb)
 #else
-#define HYPRE_BOX_REDUCTION reduction(+:cxb,cyb,czb)
+#define HYPRE_BOX_REDUCTION reduction(+:cxb,cyb,czb,sqxb,sqyb,sqzb)
 #endif
 
    hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -1773,6 +1836,9 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int bi,
        cxb +=tcx;
        cyb +=tcy;
        czb +=tcz;
+       sqxb += tcx*tcx;
+       sqyb += tcy*tcy;
+       sqzb += tcz*tcz; 
    }
    hypre_BoxLoop1End(Ai);
 #undef HYPRE_BOX_REDUCTION
@@ -1782,6 +1848,9 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int bi,
    cxyz[1] = (HYPRE_Real)cyb;
    cxyz[2] = (HYPRE_Real)czb;
 
+   sqcxyz[0] = (HYPRE_Real) sqxb;
+   sqcxyz[1] = (HYPRE_Real) sqyb;
+   sqcxyz[2] = (HYPRE_Real) sqzb;
    return hypre_error_flag;
 }
 
@@ -1790,8 +1859,9 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int bi,
 
 HYPRE_Int
 hypre_PFMGComputeDxyz_SS27( HYPRE_Int bi,
-                hypre_StructMatrix *A,
-                HYPRE_Real         *cxyz)
+			    hypre_StructMatrix *A,
+			    HYPRE_Real         *cxyz,
+			    HYPRE_Real         *sqcxyz)
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
@@ -1988,20 +2058,20 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int bi,
    hypre_BoxLoop1End(Ai);
 #else
 #if defined(HYPRE_USE_CUDA)
-   ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location);
+   ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
 #elif defined(HYPRE_USE_RAJA)
-    ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location);
+    ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
 #else
-    HYPRE_Real cxb = cxyz[0],cyb = cxyz[1],czb = cxyz[2];
+    HYPRE_Real cxb = cxyz[0],cyb = cxyz[1],czb = cxyz[2],sqxb = sqcxyz[0], sqyb = sqcxyz[1], sqzb = sqcxyz[2];
 #endif
 #ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
 #endif
 
 #ifdef HYPRE_USE_OMP45
-#define HYPRE_BOX_REDUCTION map(tofrom:cxb,cyb,czb) reduction(+:cxb,cyb,czb)
+#define HYPRE_BOX_REDUCTION map(tofrom:cxb,cyb,czb,sqxb,sqyb,sqzb) reduction(+:cxb,cyb,czb,sqxb,sqyb,sqzb)
 #else
-#define HYPRE_BOX_REDUCTION reduction(+:cxb,cyb,czb)
+#define HYPRE_BOX_REDUCTION reduction(+:cxb,cyb,czb,sqxb,sqyb,sqzb)
 #endif
 
    hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -2020,6 +2090,9 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int bi,
        cxb +=tcx;
        cyb +=tcy;
        czb +=tcz;
+       sqxb += tcx*tcx;
+       sqyb += tcy*tcy;
+       sqzb += tcz*tcz; 
    }
    hypre_BoxLoop1End(Ai);
 #undef HYPRE_BOX_REDUCTION
@@ -2029,6 +2102,9 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int bi,
    cxyz[1] = (HYPRE_Real)cyb;
    cxyz[2] = (HYPRE_Real)czb;
 
+   sqcxyz[0] = (HYPRE_Real) sqxb;
+   sqcxyz[1] = (HYPRE_Real) sqyb;
+   sqcxyz[2] = (HYPRE_Real) sqzb;
    return hypre_error_flag;
 }
 

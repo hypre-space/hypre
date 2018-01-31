@@ -838,24 +838,18 @@ hypre_NodeRelax(  void               *relax_vdata,
                start  = hypre_BoxIMin(compute_box);
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-	       for (vi = 0; vi < nvars; vi++)
+	       hypre_BoxLoop2Begin(ndim, loop_size,
+				   b_data_box, start, stride, bi,
+				   t_data_box, start, stride, ti);
 	       {
-		  HYPRE_Real *bpp = hypre_StructVectorBoxData(
-		                 hypre_SStructPVectorSVector(b,vi), i);
-		  HYPRE_Real *tpp = hypre_StructVectorBoxData(
-				 hypre_SStructPVectorSVector(t,vi), i);
-
-		  hypre_BoxLoop2Begin(ndim, loop_size,
-		  		      b_data_box, start, stride, bi,
-		  		      t_data_box, start, stride, ti);
+		  HYPRE_Int vi;
+		  /* Copy rhs into temp vector */
+		  for (vi = 0; vi < nvars; vi++)
 		  {
-		    //HYPRE_Int vi;
-		     /* Copy rhs into temp vector */ 
-                      //tp[vi][ti] = bp[vi][bi];
-		      tpp[ti] = bpp[bi];
+                      tp[vi][ti] = bp[vi][bi];
 		  }
-		  hypre_BoxLoop2End(bi, ti);
 	       }
+	       hypre_BoxLoop2End(bi, ti);
 
                for (vi = 0; vi < nvars; vi++)
                {

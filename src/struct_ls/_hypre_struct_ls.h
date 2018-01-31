@@ -399,14 +399,14 @@ HYPRE_Int hypre_PFMGRelaxSetTempVec ( void *pfmg_relax_vdata , hypre_StructVecto
 
 /* pfmg_setup.c */
 HYPRE_Int hypre_PFMGSetup ( void *pfmg_vdata , hypre_StructMatrix *A , hypre_StructVector *b , hypre_StructVector *x );
-HYPRE_Int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A , HYPRE_Real *dxyz , HYPRE_Real *mean );
+HYPRE_Int hypre_PFMGComputeDxyz ( hypre_StructMatrix *A , HYPRE_Real *dxyz , HYPRE_Real *mean,HYPRE_Real *deviation );
 HYPRE_Int hypre_ZeroDiagonal ( hypre_StructMatrix *A );
-HYPRE_Int hypre_PFMGComputeDxyz_CS( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz);
-HYPRE_Int hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz);
-HYPRE_Int hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz);  
-HYPRE_Int hypre_PFMGComputeDxyz_SS7( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz);
-HYPRE_Int hypre_PFMGComputeDxyz_SS19( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz);
-HYPRE_Int hypre_PFMGComputeDxyz_SS27( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz);
+HYPRE_Int hypre_PFMGComputeDxyz_CS( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz,HYPRE_Real *deviation);
+HYPRE_Int hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz,HYPRE_Real *deviation);
+HYPRE_Int hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz,HYPRE_Real *deviation);  
+HYPRE_Int hypre_PFMGComputeDxyz_SS7( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz,HYPRE_Real *deviation);
+HYPRE_Int hypre_PFMGComputeDxyz_SS19( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz,HYPRE_Real *deviation);
+HYPRE_Int hypre_PFMGComputeDxyz_SS27( HYPRE_Int bi, hypre_StructMatrix *A, HYPRE_Real *cxyz,HYPRE_Real *deviation);
 
 /* pfmg_setup_interp.c */
 hypre_StructMatrix *hypre_PFMGCreateInterpOp ( hypre_StructMatrix *A , hypre_StructGrid *cgrid , HYPRE_Int cdir , HYPRE_Int rap_type );

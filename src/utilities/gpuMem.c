@@ -596,7 +596,7 @@ void initCudaReductionMemBlock()
                            cudaMemAttachGlobal);
 
       if ( cudaerr != cudaSuccess ) {
-	fprintf(stderr,"CUDA ERROR ( Code = %d [%s]): %d,\n",cudaerr,cudaGetErrorString(cudaerr),sizeof(CudaReductionBlockDataType)*len);
+	fprintf(stderr,"CUDA ERROR ( Code = %d [%s]): %d,\n",cudaerr,cudaGetErrorString(cudaerr),(HYPRE_Int)(sizeof(CudaReductionBlockDataType)*len));
          exit(1);
       }
       cudaMemset(s_cuda_reduction_mem_block, 0, 
