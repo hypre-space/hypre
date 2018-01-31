@@ -24,7 +24,7 @@ solvability the right-hand side should be chosen to satisfy compatibility
 conditions.
 
 AMS is based on the auxiliary space methods for definite Maxwell problems
-proposed in [xu-H-curl]_.  For more details, see [ams-jcm]_.
+proposed in [HiXu2006]_.  For more details, see [KoVa2009]_.
 
 
 Overview
@@ -318,7 +318,7 @@ interpolation matrix :math:`{\mathbf \Pi}` which maps (high-order) vector nodal
 finite elements into the (high-order) Nedelec space. In other words,
 :math:`{\mathbf \Pi}` is the (parallel) matrix representation of the
 interpolation mapping from :math:`\mathrm{P}_k^3`/:math:`\mathrm{Q}_k^3` into
-:math:`\mathrm{ND}_k`, see [xu-H-curl]_, [ams-jcm]_.  We require this matrix as
+:math:`\mathrm{ND}_k`, see [HiXu2006]_, [KoVa2009]_.  We require this matrix as
 an input, since in the high-order case its entries very much depend on the
 particular choice of the basis functions in the edge and nodal spaces, as well
 as on the geometry of the mesh elements. The columns of :math:`{\mathbf \Pi}`
@@ -376,7 +376,7 @@ Non-conforming AMR Grids
 ------------------------------------------------------------------------------
 
 AMS could also be applied to problems with adaptive mesh refinement (AMR) posed
-on non-conforming quadrilateral/hexahedral meshes, see [ams-hpamr]_ for more
+on non-conforming quadrilateral/hexahedral meshes, see [GrKo2015]_ for more
 details.
 
 On non-conforming grids (assuming also arbitrarily high-order elements), each
@@ -430,5 +430,5 @@ Similar considerations imply that the conforming Nedelec interpolation matrix
 with :math:`{\mathbf \Pi}_{nc}` computed element-wise as in the previous
 subsection. Note that in the low-order case, :math:`{\mathbf \Pi}_{c}` can be
 computed internally in AMS based only :math:`G_c` and the conforming coordinates
-of the vertices :math:`x_c`/:math:`y_c`/:math:`z_c`, see [ams-hpamr]_.
+of the vertices :math:`x_c`/:math:`y_c`/:math:`z_c`, see [GrKo2015]_.
 

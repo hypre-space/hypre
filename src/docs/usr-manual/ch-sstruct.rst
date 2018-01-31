@@ -76,11 +76,11 @@ Consider the solution of the diffusion equation
 
 on the block-structured grid in Figure :ref:`fig-sstruct-example`, where
 :math:`D` is a scalar diffusion coefficient, and :math:`\sigma \geq 0`.  The
-discretization [JEMorel-RMRoberts-MJShashkov-1998]_ introduces three different
-types of variables: cell-centered, :math:`x`-face, and :math:`y`-face.  The
-three discretization stencils that couple these variables are also given in the
-figure.  The information in this figure is essentially all that is needed to
-describe the nonzero structure of the linear system we wish to solve.
+discretization [MoRS1998]_ introduces three different types of variables:
+cell-centered, :math:`x`-face, and :math:`y`-face.  The three discretization
+stencils that couple these variables are also given in the figure.  The
+information in this figure is essentially all that is needed to describe the
+nonzero structure of the linear system we wish to solve.
 
 .. _fig-sstruct-example:
 
@@ -101,7 +101,7 @@ describe the nonzero structure of the linear system we wish to solve.
 
    Need to combine this with 6a.
 
-.. fig-sstruct-example-parts:
+.. _fig-sstruct-example-parts:
 
 .. figure:: figSStructExample1c.*
    :align: center
@@ -471,10 +471,10 @@ are two parts in this example: part 0 is the global coarse grid and part 1 is
 the single refinement patch.  Note that the coarse unknowns underneath the
 refinement patch (gray dots in Figure :ref:`fig-sstruct-samr-grid`) are not real
 physical unknowns; the solution in this region is given by the values on the
-refinement patch.  In setting up the composite grid matrix [SFMcCormick-1989a]_
-for hypre the equations for these "dummy" unknowns should be uncoupled from the
-other unknowns (this can easily be done by setting all off-diagonal couplings to
-zero in this region).
+refinement patch.  In setting up the composite grid matrix [McCo1989]_ for hypre
+the equations for these "dummy" unknowns should be uncoupled from the other
+unknowns (this can easily be done by setting all off-diagonal couplings to zero
+in this region).
 
 .. _fig-sstruct-samr-grid:
 
@@ -497,8 +497,8 @@ on the global coarse grid; they are separate parts and thus each has its own
 index space.  In this example, we have chosen the indexing such that refinement
 cell :math:`(2i,2j)` lies in the lower left quadrant of coarse cell
 :math:`(i,j)`.  Then the stencil is set up.  In this example we are using a
-finite volume approach resulting in the standard 5-point stencil in Figure
-:ref:`fig-struct-stencil-b` in both parts.
+finite volume approach resulting in the standard 5-point stencil in Section
+:ref:`sec-Struct-Grid` in both parts.
 
 The grid and stencil are used to define all intra-part coupling in the graph,
 the non-zero pattern of the composite grid matrix.  The inter-part coupling at

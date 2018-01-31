@@ -24,7 +24,7 @@ unknown per gridpoint).
 .. figure:: figStructExample1.*
    :align: center
 
-   Figure 2
+   Structured Grid Example
 
    An example 2D structured grid, distributed accross two processors.
 
@@ -67,7 +67,7 @@ The grid is described via a global *index space*, i.e., via integer singles in
 .. figure:: figStructGridBoxes.*
    :align: center
 
-   Figure 3
+   Boxes in Index Space
 
    A box is a collection of abstract cell-centered indices, described by its
    minimum and maximum indices.  Here, two boxes are illustrated.
@@ -83,8 +83,8 @@ associated with box indices in several different ways.
 Each process describes that portion of the grid that it "owns", one box at a
 time.  For example, the global grid in Figure :ref:`fig-struct-example` can be
 described in terms of three boxes, two owned by process 0, and one owned by
-process 1.  Figure :ref:`fig-struct-grid` shows the code for setting up the grid
-on process 0 (the code for process 1 is similar).
+process 1. The following is the code (with visual annotations) for setting up
+the grid on process 0 (the code for process 1 is similar).
 
 .. |figStructGrid1| image:: figStructGrid1.*
    :width: 100%
@@ -94,8 +94,6 @@ on process 0 (the code for process 1 is similar).
    :width: 100%
 .. |figStructGrid4| image:: figStructGrid4.*
    :width: 100%
-
-.. _fig-struct-grid:
 
 +---------------------+---------------------+---------------------+---------------------+
 | 1: |figStructGrid1| | 2: |figStructGrid2| | 3: |figStructGrid3| | 4: |figStructGrid4| |
@@ -120,14 +118,12 @@ on process 0 (the code for process 1 is similar).
        /* Assemble the grid */
    4:  HYPRE_StructGridAssemble(grid);
 
-Code on process 0 for setting up the grid in Figure :ref:`fig-struct-example`.
-
-The "icons" at the top of the figure illustrate the result of the numbered lines
-of code.  The ``Create()`` routine creates an empty 2D grid object that lives on
-the ``MPI_COMM_WORLD`` communicator.  The ``SetExtents()`` routine adds a new
-box to the grid.  The ``Assemble()`` routine is a collective call (i.e., must be
-called on all processes from a common synchronization point), and finalizes the
-grid assembly, making the grid "ready to use".
+The images along the top illustrate the result of the numbered lines of code.
+The ``Create()`` routine creates an empty 2D grid object that lives on the
+``MPI_COMM_WORLD`` communicator.  The ``SetExtents()`` routine adds a new box to
+the grid.  The ``Assemble()`` routine is a collective call (i.e., must be called
+on all processes from a common synchronization point), and finalizes the grid
+assembly, making the grid "ready to use".
 
 
 .. _sec-Struct-Stencil:
@@ -161,9 +157,9 @@ Here, the :math:`(0,0)` entry represents the "center" coefficient, and is the
 0th stencil entry.  The :math:`(0,-1)` entry represents the "south" coefficient,
 and is the 3rd stencil entry.  And so on.
 
-On process 0 or 1, the code in Figure :ref:`fig-struct-stencil-b` will set up
-the stencil in Figure :ref:`fig-struct-stencil-a`.  The stencil must be the same
-on all processes.
+On process 0 or 1, the following code (with visual annotations) will set up the
+stencil in Figure :ref:`fig-struct-stencil-a`.  The stencil must be the same on
+all processes.
 
 .. |figStructStenc1| image:: figStructStenc1.*
    :width: 100%
@@ -177,8 +173,6 @@ on all processes.
    :width: 100%
 .. |figStructStenc6| image:: figStructStenc6.*
    :width: 100%
-
-.. _fig-struct-stencil-b:
 
 +----------------------+----------------------+----------------------+
 | 1: |figStructStenc1| | 2: |figStructStenc2| | 3: |figStructStenc3| |
@@ -205,8 +199,6 @@ on all processes.
          
          /* Thats it!  There is no assemble routine */
       
-Code for setting up the stencil in Figure :ref:`fig-struct-stencil-a`.
-
 The ``Create()`` routine creates an empty 2D, 5-pt stencil object.  The
 ``SetElement()`` routine defines the geometry of the stencil and assigns the
 stencil numbers for each of the stencil entries.  None of the calls are
@@ -235,10 +227,10 @@ the entire grid (except at boundaries; see below):
    \end{array}
    \right ] .
 
-On process 0, the code in Figure :ref:`fig-struct-matrix` will set up matrix
-values associated with the center (entry 0) and south (entry 3) stencil entries
-as given by :eq:`eqn-stencil-laplacian` and Figure~:ref:`fig-struct-matrix`
-(boundaries are ignored here temporarily).
+On process 0, the following code sets up matrix values associated with the
+center (entry 0) and south (entry 3) stencil entries as given by
+:eq:`eqn-stencil-laplacian` and Figure :ref:`fig-struct-stencil-a` (boundaries
+are ignored here temporarily).
 
 .. _fig-struct-matrix:
 
@@ -268,9 +260,6 @@ as given by :eq:`eqn-stencil-laplacian` and Figure~:ref:`fig-struct-matrix`
    
    HYPRE_StructMatrixAssemble(A);
 
-Code for setting up matrix values associated with stencil entries 0 and 3 as
-given by :eq:`eqn-stencil-laplacian` and Figure :ref:`fig-struct-stencil-a`.
-
 The ``Create()`` routine creates an empty matrix object.  The ``Initialize()``
 routine indicates that the matrix coefficients (or values) are ready to be set.
 This routine may or may not involve the allocation of memory for the coefficient
@@ -284,13 +273,13 @@ collective call, and finalizes the matrix assembly, making the matrix "ready to
 use".
 
 Matrix coefficients that reach outside of the boundary should be set to zero.
-For efficiency reasons, hypre does not do this automatically.  The most
-natural time to insure this is when the boundary conditions are being set, and
-this is most naturally done after the coefficients on the grid's interior have
-been set.  For example, during the implementation of the Dirichlet boundary
-condition on the lower boundary of the grid in Figure :ref:`fig-struct-example`,
-the "south" coefficient must be set to zero.  To do this on process 0, the
-code in Figure :ref:`fig-struct-matrix-boundary` could be used:
+For efficiency reasons, hypre does not do this automatically.  The most natural
+time to insure this is when the boundary conditions are being set, and this is
+most naturally done after the coefficients on the grid's interior have been set.
+For example, during the implementation of the Dirichlet boundary condition on
+the lower boundary of the grid in Figure :ref:`fig-struct-example`, the south
+coefficient must be set to zero.  To do this on process 0, the following code
+could be used:
 
 .. _fig-struct-matrix-boundary:
 
@@ -316,9 +305,6 @@ code in Figure :ref:`fig-struct-matrix-boundary` could be used:
    /* complete implementation of boundary conditions */
    ...
 
-Code for adjusting boundary conditions along the lower grid boundary in
-Figure :ref:`fig-struct-example`.
-
 
 .. _sec-Struct-RHS:
 
@@ -330,8 +316,7 @@ Section :ref:`sec-Struct-Matrix` above.  The main difference is that there is no
 stencil (note that a stencil currently does appear in the interface, but this
 will eventually be removed).
 
-On process 0, the code in Figure :ref:`fig-struct-rhs` will set up the
-right-hand-side vector values.
+On process 0, the following code sets up the right-hand-side vector values.
 
 .. _fig-struct-rhs:
 
@@ -353,8 +338,6 @@ right-hand-side vector values.
    HYPRE_StructVectorSetBoxValues(b, ilower[1], iupper[1], values);
    
    HYPRE_StructVectorAssemble(b);
-
-Code for setting up right-hand-side vector values.
 
 The ``Create()`` routine creates an empty vector object.  The ``Initialize()``
 routine indicates that the vector coefficients (or values) are ready to be set.

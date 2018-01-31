@@ -23,7 +23,7 @@ arising in the finite element discretization of the variational problem
 where :math:`{\mathbf W}_h` is the lowest order Raviart-Thomas (face) finite
 element space, and :math:`\alpha>0` and :math:`\beta>0` are scalar, or SPD
 matrix variable coefficients.  It is based on the auxiliary space methods for
-:math:`H(div)` problems proposed in [xu-H-curl]_.
+:math:`H(div)` problems proposed in [HiXu2006]_.
 
 
 Overview
@@ -218,7 +218,7 @@ Raviart-Thomas and Nedelec interpolation matrices :math:`{\mathbf \Pi}_{RT}` and
 into the (high-order) Raviart-Thomas and Nedelec space. In other words, these
 are the (parallel) matrix representation of the interpolation mappings from
 :math:`\mathrm{P}_k^3 / \mathrm{Q}_k^3` into :math:`\mathrm{RT}_{k-1}` and
-:math:`\mathrm{ND}_k`, see [xu-H-curl]_, [ams-jcm]_.  We require these matrices
+:math:`\mathrm{ND}_k`, see [HiXu2006]_, [KoVa2009]_.  We require these matrices
 as inputs, since in the high-order case their entries very much depend on the
 particular choice of the basis functions in the finite element spaces, as well
 as on the geometry of the mesh elements. The columns of the :math:`{\mathbf

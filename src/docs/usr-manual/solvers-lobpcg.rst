@@ -3,14 +3,13 @@ LOBPCG Eigensolver
 ==============================================================================
 
 LOBPCG (Locally Optimal Block Preconditioned Conjugate Gradient) is a simple,
-yet very efficient, algorithm suggested in [LOBPCG-2001]_, [BLOPEX-2007]_,
-[BLOPEXWebPage]_ for computing several smallest eigenpairs of the symmetric
-generalized eigenvalue problem :math:`Ax=\lambda Bx` with large, possibly
-sparse, symmetric matrix :math:`A` and symmetric positive definite matrix
-:math:`B`. The matrix :math:`A` is not assumed to be positive, which also allows
-one to use LOBPCG to compute the largest eigenpairs of :math:`Ax=\lambda Bx`
-simply by solving :math:`-Ax=\mu Bx` for the smallest eigenvalues
-:math:`\mu=-\lambda`.
+yet very efficient, algorithm suggested in [Knya2001]_, [KLAO2007]_, [BLOPEWeb]_
+for computing several smallest eigenpairs of the symmetric generalized
+eigenvalue problem :math:`Ax=\lambda Bx` with large, possibly sparse, symmetric
+matrix :math:`A` and symmetric positive definite matrix :math:`B`. The matrix
+:math:`A` is not assumed to be positive, which also allows one to use LOBPCG to
+compute the largest eigenpairs of :math:`Ax=\lambda Bx` simply by solving
+:math:`-Ax=\mu Bx` for the smallest eigenvalues :math:`\mu=-\lambda`.
 
 LOBPCG simultaneously computes several eigenpairs together, which is controlled
 by the ``blockSize`` parameter, see example ``ex11.c``. The LOBCPG also allows

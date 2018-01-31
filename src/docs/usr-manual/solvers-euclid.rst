@@ -3,13 +3,12 @@ Euclid
 ==============================================================================
 
 The Euclid library is a scalable implementation of the Parallel ILU algorithm
-that was presented at SC99 [DHysom-APothen-1999]_, and published in expanded
-form in the SIAM Journal on Scientific Computing [DHysom-APothen-2001]_.  By
-*scalable* we mean that the factorization (setup) and application (triangular
-solve) timings remain nearly constant when the global problem size is scaled in
-proportion to the number of processors.  As with all ILU preconditioning
-methods, the number of iterations is expected to increase with global problem
-size.
+that was presented at SC99 [HyPo1999]_, and published in expanded form in the
+SIAM Journal on Scientific Computing [HyPo2001]_.  By *scalable* we mean that
+the factorization (setup) and application (triangular solve) timings remain
+nearly constant when the global problem size is scaled in proportion to the
+number of processors.  As with all ILU preconditioning methods, the number of
+iterations is expected to increase with global problem size.
 
 Experimental results have shown that PILU preconditioning is in general more
 effective than Block Jacobi preconditioning for minimizing total solution time.

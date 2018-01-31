@@ -4,7 +4,7 @@ The MLI Package
                                                                                    
 MLI is an object-oriented module that implements the class of algebraic
 multigrid algorithms based on Vanek and Brezina's smoothed aggregation method
-[VaMB96]_, [VaBM01]_.  There are two main algorithms in this module - the
+[VaMB1996]_, [VaBM2001]_.  There are two main algorithms in this module - the
 original smoothed aggregation algorithm and the modified version that uses the
 finite element substructure matrices to construct the prolongation operators.
 As such, the later algorithm can only be used in the finite element context via

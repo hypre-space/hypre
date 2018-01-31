@@ -19,7 +19,7 @@ supported in hypre.
    Example of an unstructured mesh.
 
 FEI refers to a specific interface for black-box finite element solvers,
-originally developed in Sandia National Lab, see [FEI-ref]_.  It differs from
+originally developed in Sandia National Lab, see [ClEA1999]_.  It differs from
 the rest of the conceptual interfaces in hypre in two important aspects: it is
 written in C++, and it does not separate the construction of the linear system
 matrix from the solution process.  A complete description of Sandia's FEI

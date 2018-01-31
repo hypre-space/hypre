@@ -5,10 +5,10 @@ FAC
 FAC is a parallel fast adaptive composite grid solver for finite volume,
 cell-centred discretizations of smooth diffusion coefficient problems.  To be
 precise, it is a FACx algorithm since the patch solves consist of only
-relaxation sweeps. For details of the basic overall algorithms, see
-[SFMcCormick-1989a]_.  Algorithmic particularities include formation of
-non-Galerkin coarse-grid operators (i.e., coarse-grid operators underlying
-refinement patches are automatically generated) and non-stored linear/constant
+relaxation sweeps. For details of the basic overall algorithms, see [McCo1989]_.
+Algorithmic particularities include formation of non-Galerkin coarse-grid
+operators (i.e., coarse-grid operators underlying refinement patches are
+automatically generated) and non-stored linear/constant
 interpolation/restriction operators. Implementation particularities include a
 processor redistribution of the generated coarse-grid operators so that
 intra-level communication between adaptive mesh refinement (AMR) levels during

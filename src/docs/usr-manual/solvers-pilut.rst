@@ -10,13 +10,12 @@ especially when used with many processors.
 
 PILUT is a parallel preconditioner based on Saad's dual-threshold incomplete
 factorization algorithm. The original version of PILUT was done by Karypis and
-Kumar [GKarypis-VKumar-1998]_ in terms of the Cray SHMEM library. The code was
-subsequently modified by the hypre team: SHMEM was replaced by MPI; some
-algorithmic changes were made; and it was software engineered to be
-interoperable with several matrix implementations, including hypre's ParCSR
-format, PETSc's matrices, and ISIS++ RowMatrix. The algorithm produces an
-approximate factorization :math:`L U`, with the preconditioner :math:`M` defined
-by :math:`M = L U`.
+Kumar [KaKu1998]_ in terms of the Cray SHMEM library. The code was subsequently
+modified by the hypre team: SHMEM was replaced by MPI; some algorithmic changes
+were made; and it was software engineered to be interoperable with several
+matrix implementations, including hypre's ParCSR format, PETSc's matrices, and
+ISIS++ RowMatrix. The algorithm produces an approximate factorization :math:`L U`,
+with the preconditioner :math:`M` defined by :math:`M = L U`.
 
 **Note:** PILUT produces a nonsymmetric preconditioner even when the original
 matrix is symmetric. Thus, it is generally inappropriate for preconditioning

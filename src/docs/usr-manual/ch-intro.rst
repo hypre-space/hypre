@@ -7,14 +7,13 @@ Introduction
 
 This manual describes hypre, a software library of high performance
 preconditioners and solvers for the solution of large, sparse linear systems of
-equations on massively parallel computers [RDFalgout-JEJones-UMYang-2004TA]_.
-The hypre library was created with the primary goal of providing users with
-advanced parallel preconditioners.  The library features parallel multigrid
-solvers for both structured and unstructured grid problems.  For ease of use,
-these solvers are accessed from the application code via hypre's conceptual
-linear system interfaces [RDFalgout-JEJones-UMYang-2005a]_ (abbreviated to
-*conceptual interfaces* throughout much of this manual), which allow a variety
-of natural problem descriptions.
+equations on massively parallel computers [FaJY2004]_.  The hypre library was
+created with the primary goal of providing users with advanced parallel
+preconditioners.  The library features parallel multigrid solvers for both
+structured and unstructured grid problems.  For ease of use, these solvers are
+accessed from the application code via hypre's conceptual linear system
+interfaces [FaJY2005]_ (abbreviated to *conceptual interfaces* throughout much
+of this manual), which allow a variety of natural problem descriptions.
 
 This introductory chapter provides an overview of the various features in hypre,
 discusses further sources of information on hypre, and offers suggestions on how
@@ -66,7 +65,7 @@ tailor the installation to match their computing system. Options include debug
 and optimized modes, the ability to change required libraries such as MPI and
 BLAS, a sequential mode, and modes enabling threads for certain solvers.  On
 most systems, however, hypre can be built by simply typing ``configure``
-followed by ``make``, or by using CMake [CMakeWebPage]_.
+followed by ``make``, or by using CMake [CMakeWeb]_.
 
 **Interfaces in multiple languages provide greater flexibility for
 applications:** hypre is written in C (with the exception of the FEI interface,
@@ -119,7 +118,7 @@ Installing hypre
 
 As previously noted, on most systems hypre can be built by simply typing
 ``configure`` followed by ``make`` in the top-level source directory.
-Alternatively, the CMake system [CMakeWebPage]_ can be used, and is the best
+Alternatively, the CMake system [CMakeWeb]_ can be used, and is the best
 approach for building hypre on Windows systems in particular.  For more detailed
 instructions, read the ``INSTALL`` file provided with the hypre distribution or
 refer to the last chapter in this manual.  Note the following requirements:

@@ -9,18 +9,18 @@ curl-curl formulation of the Maxwell equation
 
    \nabla \times \alpha \nabla \times E + \beta E= f, \beta> 0
 
-on semi-structured grids. Details of the algorithm can be found in
-[JonesLee-2006]_.  The solver can be viewed as an operator-dependent
-multiple-coarsening algorithm for the Helmholtz decomposition of the error
-correction. Input to this solver consist of only the linear system and a
-gradient operator. In fact, if the orientation of the edge elements conforms to
-a lexicographical ordering of the nodes of the grid, then the gradient operator
-can be generated with the routine ``HYPRE_MaxwellGrad``: at grid points
-:math:`(i,j,k)` and :math:`(i-1,j,k),` the produced gradient operator takes
-values :math:`1` and :math:`-1` respectively, which is the correct gradient
-operator for the appropriate edge orientation. Since the gradient operator is
-normalized (i.e., :math:`h` independent) the edge finite element must also be
-normalized in the discretization.
+on semi-structured grids. Details of the algorithm can be found in [JoLe2006]_.
+The solver can be viewed as an operator-dependent multiple-coarsening algorithm
+for the Helmholtz decomposition of the error correction. Input to this solver
+consist of only the linear system and a gradient operator. In fact, if the
+orientation of the edge elements conforms to a lexicographical ordering of the
+nodes of the grid, then the gradient operator can be generated with the routine
+``HYPRE_MaxwellGrad``: at grid points :math:`(i,j,k)` and :math:`(i-1,j,k),` the
+produced gradient operator takes values :math:`1` and :math:`-1` respectively,
+which is the correct gradient operator for the appropriate edge
+orientation. Since the gradient operator is normalized (i.e., :math:`h`
+independent) the edge finite element must also be normalized in the
+discretization.
 
 This solver is currently developed for perfectly conducting boundary condition
 (Dirichlet). Hence, the rows and columns of the matrix that corresponding to the
@@ -59,7 +59,7 @@ where :math:`A_{ee}` is the stiffness matrix corresponding to the above
 curl-curl formulation, :math:`A_{nn}` is the nodal Poisson operator created by
 taking the Galerkin product of :math:`A_{ee}` and the gradient operator, and
 :math:`A_{ne}` and :math:`A_{en}` are the nodal-edge coupling operators (see
-[JonesLee-2006]_). The algorithm for this Maxwell solver is based on forming a
+[JoLe2006]_). The algorithm for this Maxwell solver is based on forming a
 multigrid hierarchy to this augmented system using the block-diagonal
 interpolation operator
 

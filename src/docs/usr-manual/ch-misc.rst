@@ -20,8 +20,8 @@ Building the Library
 
 In this and the following several sections, we discuss the steps to install and
 use hypre on a Unix-like operating system, such as Linux, AIX, and Mac OS X.
-Alternatively, the CMake build system [CMakeWebPage]_ can be used, and is the
-best approach for building hypre on Windows systems in particular (see the
+Alternatively, the CMake build system [CMakeWeb]_ can be used, and is the best
+approach for building hypre on Windows systems in particular (see the
 ``INSTALL`` file for details).
 
 After unpacking the hypre tar file, the source code will be in the ``src``

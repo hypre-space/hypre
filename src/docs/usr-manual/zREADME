@@ -17,14 +17,17 @@ sphinx-build -b latex . latex
 
 Note:
   - Added '_static/custom.css' file for customizations (document this somewhere)
+  - To add unicode characters (e.g., umlaut characters), use 'M-x
+    insert-character' in emacs and type in the name of the unicode character
+    (use the web to get a list of names).  For example, '00FB' is "umlaut u".
 
 
 Issues and things left to do:
 
      - MathJax is slow to render.  Are we okay with that?  Is there a better alternative?
-     - References need to be done
      - How to reference figures?
      - How to combine images in a figure.  Create one PNG file from the combination?
      - Copyright stuff, version numbers, other fine tuning...
+DONE - References need to be done
 DONE - Figure images need to be regenerated from original source files
 

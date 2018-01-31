@@ -12,8 +12,8 @@ diffusion equation,
 
 on logically rectangular grids.  The code solves both 2D and 3D problems with
 discretization stencils of up to 9-point in 2D and up to 27-point in 3D.  See
-[SSchaffer-1998a]_, [PNBrown-RDFalgout-JEJones-2000]_, [RDFalgout-JEJones-2000]_
-for details on the algorithm and its parallel implementation/performance.
+[Scha1998]_, [BrFJ2000]_, [FaJo2000]_ for details on the algorithm and its
+parallel implementation/performance.
 
 SMG is a particularly robust method.  The algorithm semicoarsens in the
 z-direction and uses plane smoothing.  The xy plane-solves are effected by one
@@ -25,8 +25,8 @@ PFMG
 ==============================================================================
 
 PFMG is a parallel semicoarsening multigrid solver similar to SMG.  See
-[SFAshby-RDFalgout-1996]_, [RDFalgout-JEJones-2000]_ for details on the
-algorithm and its parallel implementation/performance.
+[AsFa1996]_, [FaJo2000]_ for details on the algorithm and its parallel
+implementation/performance.
 
 The main difference between the two methods is in the smoother: PFMG uses simple
 pointwise smoothing.  As a result, PFMG is not as robust as SMG, but is much

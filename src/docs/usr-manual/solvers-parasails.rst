@@ -16,7 +16,7 @@ the cost of applying the preconditioner.  In advanced usage not described here,
 the pattern of the preconditioner can also be reused to generate preconditioners
 for different matrices in a sequence of linear solves.
 
-For more details about the ParaSails algorithm, see [EChow-2000]_.
+For more details about the ParaSails algorithm, see [Chow2000]_.
 
 
 Parameter Settings
@@ -37,7 +37,7 @@ sparsification is performed by dropping all entries in a symmetrically
 diagonally scaled :math:`A` whose values are less than ``thresh`` in magnitude.
 The parameter ``nlevel`` is equivalent to :math:`m-1`.  Filtering is a
 post-thresholding procedure.  For more details about the algorithm, see
-[EChow-2000]_.
+[Chow2000]_.
 
 The storage required for the ParaSails preconditioner depends on the parameters
 ``thresh`` and ``nlevels``.  The default parameters often produce a

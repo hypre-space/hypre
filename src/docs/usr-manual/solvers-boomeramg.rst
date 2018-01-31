@@ -3,8 +3,8 @@ BoomerAMG
 ==============================================================================
 
 BoomerAMG is a parallel implementation of the algebraic multigrid method
-[Ruge-Stueben-1987]_.  It can be used both as a solver or as a preconditioner.
-The user can choose between various different parallel coarsening techniques,
+[RuSt1987]_.  It can be used both as a solver or as a preconditioner.  The user
+can choose between various different parallel coarsening techniques,
 interpolation and relaxation schemes.  While the default settings work fairly
 well for two-dimensional diffusion problems, for three-dimensional diffusion
 problems, it is recommended to choose a lower complexity coarsening like HMIS or
@@ -32,19 +32,19 @@ Coarsening Options
 
 Coarsening can be set by the user using the function
 ``HYPRE_BoomerAMGSetCoarsenType``. A detailed description of various coarsening
-techniques can be found in [VEHenson-UMYang-2002]_, [UMYang-2005]_.
+techniques can be found in [HeYa2002]_, [Yang2005]_.
 
 Various coarsening techniques are available:
 
 * the Cleary-Luby-Jones-Plassman (CLJP) coarsening,
 * the Falgout coarsening which is a combination of CLJP and the classical RS
   coarsening algorithm,
-* CGC and CGC-E coarsenings [Griebel1]_, [Griebel2]_,
+* CGC and CGC-E coarsenings [GrMS2006a]_, [GrMS2006b]_,
 * PMIS and HMIS coarsening algorithms which lead to coarsenings with lower
-  complexities [DeSterck-Yang-Heys-2004]_ as well as
+  complexities [DeYH2004]_ as well as
 * aggressive coarsening, which can be applied to any of the coarsening
   techniques mentioned above a nd thus achieving much lower complexities and
-  lower memory use [Stueben-1999]_.
+  lower memory use [Stue1999]_.
 
 To use aggressive coarsening the user has to set the number of levels to which
 he wants to apply aggressive coarsening (starting with the finest level) via
@@ -53,7 +53,7 @@ range interpolation, multipass interpolation is always used on levels with
 aggressive coarsening, unless the user specifies another long-range
 interpolation suitable for aggressive coarsening.
 
-Note that the default coarsening is HMIS [DeSterck-Yang-Heys-2004]_.
+Note that the default coarsening is HMIS [DeYH2004]_.
 
 
 Interpolation Options
@@ -61,15 +61,15 @@ Interpolation Options
 
 Various interpolation techniques can be set using ``HYPRE_BoomerAMGSetInterpType``:
 
-* the "classical" interpolation as defined in [Ruge-Stueben-1987]_,
-* direct interpolation [Stueben-1999]_,
-* standard interpolation [Stueben-1999]_,
+* the "classical" interpolation as defined in [RuSt1987]_,
+* direct interpolation [Stue1999]_,
+* standard interpolation [Stue1999]_,
 * an extended "classical" interpolation, which is a long range interpolation and
   is recommended to be used with PMIS and HMIS coarsening for harder problems
-  [DeSterck-Falgout-Nolting-Yang-2008]_,
-* multipass interpolation [Stueben-1999]_,
-* two-stage interpolation [UMYang-2010]_,
-* Jacobi interpolation [Stueben-1999]_,
+  [DFNY2008]_,
+* multipass interpolation [Stue1999]_,
+* two-stage interpolation [Yang2010]_,
+* Jacobi interpolation [Stue1999]_,
 * the "classical" interpolation modified for hyperbolic PDEs.
 
 Jacobi interpolation is only use to improve certain interpolation operators and
@@ -79,8 +79,8 @@ recommended to control complexity and truncate the interpolation operators using
 ``HYPRE_BoomerAMGSetTruncFactor`` and/or ``HYPRE_BoomerAMGSetPMaxElmts``, or
 ``HYPRE_BoomerAMGSetJacobiTruncTheshold`` (for Jacobi interpolation only).
 
-Note that the default interpolation is extended+i interpolation
-[DeSterck-Falgout-Nolting-Yang-2008]_ truncated to 4 elements per row.
+Note that the default interpolation is extended+i interpolation [DFNY2008]_
+truncated to 4 elements per row.
 
 
 Non-Galerkin Options
@@ -105,15 +105,14 @@ Smoother Options
 ------------------------------------------------------------------------------
 
 A good overview of parallel smoothers and their properties can be found in
-[Baker-Falgout-Kolev-UMYang-2011]_. Various of the described relaxation
-techniques are available:
+[BFKY2011]_. Various of the described relaxation techniques are available:
 
 * weighted Jacobi relaxation,
 * a hybrid Gauss-Seidel / Jacobi relaxation scheme, 
 * a symmetric hybrid Gauss-Seidel / Jacobi relaxation scheme, 
 * l1-Gauss-Seidel or Jacobi,
 * Chebyshev smoothers,
-* hybrid block and Schwarz smoothers [UMYang-2004]_,
+* hybrid block and Schwarz smoothers [Yang2004]_,
 * ILU and approximate inverse smoothers.
 
 Point relaxation schemes can be set using ``HYPRE_BoomerAMGSetRelaxType`` or, if
@@ -143,7 +142,7 @@ If the user can provide the near null-space vectors, such as the rigid body
 modes for linear elasticity problems, an interpolation is available that will
 incorporate these vectors with ``HYPRE_BoomerAMGSetInterpVectors`` and
 ``HYPRE_BoomerAMGSetInterpVecVariant``. This can lead to improved convergence
-and scalability [Baker-Kolev-UMYang-2010]_.
+and scalability [BaKY2010]_.
 
 
 Special AMG Cycles
@@ -155,8 +154,8 @@ choose a W-cycle, however for parallel processing this is not recommended, since
 it is not scalable.
 
 BoomerAMG also provides an additive V(1,1)-cycle as well as a mult-additive
-V(1,1)-cycle and a simplified versioni [Vassilevski-UMYang-2014]_. The additive
-variants can only be used with weighted Jacobi or l1-Jacobi smoothing.
+V(1,1)-cycle and a simplified versioni [VaYa2014]_. The additive variants can
+only be used with weighted Jacobi or l1-Jacobi smoothing.
 
 
 Miscellaneous
