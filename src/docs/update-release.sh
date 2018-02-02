@@ -6,7 +6,6 @@ refconf="ref-manual/conf.doxygen"
 version=`../utilities/version -number`
 reldate=`../utilities/version -date`
 usrdate=`date --date=$reldate +'%B %d, %Y'`
-echo $usrdate
 
 # User manual
 sed -e 's/version = .*/version = \x27'$version'\x27/' $usrconf |
