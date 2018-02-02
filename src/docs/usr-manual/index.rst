@@ -6,7 +6,7 @@
 Welcome to hypre's documentation!
 =================================
 
-Contents:
+.. include:: ../copyright.txt
 
 .. toctree::
    :maxdepth: 3
@@ -19,12 +19,4 @@ Contents:
    ch-solvers
    ch-misc
    ch-references
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

@@ -27,7 +27,8 @@ Issues and things left to do:
      - MathJax is slow to render.  Are we okay with that?  Is there a better alternative?
      - How to reference figures?
      - How to combine images in a figure.  Create one PNG file from the combination?
-     - Copyright stuff, version numbers, other fine tuning...
+     - Copyright stuff and date (ref manual)
+DONE - Copyright stuff (user manual), version numbers
 DONE - References need to be done
 DONE - Figure images need to be regenerated from original source files
 
