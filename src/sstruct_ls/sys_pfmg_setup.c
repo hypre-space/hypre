@@ -42,7 +42,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
                     hypre_SStructVector  *b_in,
                     hypre_SStructVector  *x_in        )
 {
-	hypre_SysPFMGData    *sys_pfmg_data = (hypre_SysPFMGData    *)sys_pfmg_vdata;
+   hypre_SysPFMGData    *sys_pfmg_data = (hypre_SysPFMGData    *)sys_pfmg_vdata;
 
    MPI_Comm              comm = (sys_pfmg_data -> comm);
                      
@@ -164,7 +164,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
          hypre_PFMGComputeDxyz(hypre_SStructPMatrixSMatrix(A,i,i), sys_dxyz[i],
                                mean,deviation);
 
-	 /* signal flag if any of the flag has a large (square) coeff. of
+         /* signal flag if any of the flag has a large (square) coeff. of
           * variation */
          if (!dxyz_flag)
          {
@@ -318,7 +318,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       hypre_SysStructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
    }
    num_levels = l + 1;
-  
+
    /*-----------------------------------------------------
     * For fully periodic problems, the coarsest grid
     * problem (a single node) can have zero diagonal
@@ -435,10 +435,10 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
       cdir = cdir_l[l];
-
+      
       hypre_PFMGSetCIndex(cdir, cindex);
       hypre_PFMGSetFIndex(cdir, findex);
-      hypre_PFMGSetStride(cdir, stride);
+      hypre_PFMGSetStride(cdir, stride);     
 
       /* set up interpolation operator */
       hypre_SysPFMGSetupInterpOp(A_l[l], cdir, findex, stride, P_l[l]);
@@ -455,7 +455,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       /* set up the restriction routine */
       hypre_SysSemiRestrictCreate(&restrict_data_l[l]);
       hypre_SysSemiRestrictSetup(restrict_data_l[l], RT_l[l], 1, r_l[l], b_l[l+1],
-                                 cindex, findex, stride);
+                                 cindex, findex, stride);    
    }
 
    /* set up fine grid relaxation */

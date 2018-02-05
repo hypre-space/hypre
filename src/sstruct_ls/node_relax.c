@@ -841,14 +841,14 @@ hypre_NodeRelax(  void               *relax_vdata,
 	       hypre_BoxLoop2Begin(ndim, loop_size,
 				   b_data_box, start, stride, bi,
 				   t_data_box, start, stride, ti);
-	       {
-		  HYPRE_Int vi;
-		  /* Copy rhs into temp vector */
-		  for (vi = 0; vi < nvars; vi++)
-		  {
-                      tp[vi][ti] = bp[vi][bi];
-		  }
-	       }
+               {
+                  HYPRE_Int vi;
+                  /* Copy rhs into temp vector */ 
+                  for (vi = 0; vi < nvars; vi++)
+                  {
+                     tp[vi][ti] = bp[vi][bi];
+                  }
+               }
 	       hypre_BoxLoop2End(bi, ti);
 
                for (vi = 0; vi < nvars; vi++)

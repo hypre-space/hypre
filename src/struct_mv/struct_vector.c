@@ -63,9 +63,9 @@ hypre_StructVectorRef( hypre_StructVector *vector )
 HYPRE_Int 
 hypre_StructVectorDestroy( hypre_StructVector *vector )
 {
-   hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
    if (vector)
    {
+      hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
       hypre_StructVectorRefCount(vector) --;
       if (hypre_StructVectorRefCount(vector) == 0)
       {
