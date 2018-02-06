@@ -74,27 +74,15 @@ hypre_StructInnerProd( hypre_StructVector *x,
 	local_result += xp[xi] * hypre_conj(yp[yi]);
       }
       hypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
-#elif defined(HYPRE_USE_CUDA)
-      ReduceSum<HYPRE_Real> box_sum(0,data_location);
-
-      hypre_BoxLoop2Begin(ndim, loop_size,
-			  x_data_box, start, unit_stride, xi,
-			  y_data_box, start, unit_stride, yi);
-      {
-	 box_sum += xp[xi] * hypre_conj(yp[yi]);
-      }
-      hypre_BoxLoop2End(xi, yi);
-      local_result += (HYPRE_Real)box_sum;
-      //printf("process_result = %f\n",local_result);
 #else
 #if defined(HYPRE_USE_RAJA)
-   ReduceSum<hypre_reduce_policy, HYPRE_Real> box_sum(local_result);
-   //#elif defined(HYPRE_USE_CUDA)
-   //ReduceSum<HYPRE_Real> box_sum(local_result);
+   ReduceSum<hypre_reduce_policy, HYPRE_Real> box_sum(0.0);
+#elif defined(HYPRE_USE_CUDA)
+   ReduceSum<HYPRE_Real> box_sum(0,data_location);
 #else
    HYPRE_Real       box_sum = 0.0;
-   //local_result = local_result;
 #endif
+
 #ifdef HYPRE_BOX_REDUCTION
 #undef HYPRE_BOX_REDUCTION
 #endif

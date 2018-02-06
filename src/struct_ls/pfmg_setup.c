@@ -1284,7 +1284,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int bi,
 #if defined(HYPRE_USE_CUDA)
    ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location);
 #elif defined(HYPRE_USE_RAJA)
-   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location);
+   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),sqxb(sqcxyz[0]),sqyb(sqcxyz[1]);
 #else
    HYPRE_Real cxb = cxyz[0], cyb = cxyz[1],sqxb = sqcxyz[0], sqyb = sqcxyz[1];
 #endif
@@ -1448,7 +1448,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
 #if defined(HYPRE_USE_CUDA)
    ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location);
 #elif defined(HYPRE_USE_RAJA)
-    ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location);
+    ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),sqxb(sqcxyz[0]),sqyb(sqcxyz[1]);
 #else
     HYPRE_Real cxb = cxyz[0],cyb = cxyz[1],sqxb = sqcxyz[0], sqyb = sqcxyz[1];
 #endif
@@ -1599,7 +1599,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int bi,
 #if defined(HYPRE_USE_CUDA)
    ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
 #elif defined(HYPRE_USE_RAJA)
-   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
+   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqxb(sqcxyz[0]),sqyb(sqcxyz[1]), sqzb(sqcxyz[2]);
 #else
    HYPRE_Real cxb = cxyz[0],cyb = cxyz[1],czb = cxyz[2],sqxb = sqcxyz[0], sqyb = sqcxyz[1], sqzb = sqcxyz[2];
 #endif
@@ -1809,7 +1809,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int bi,
 #if defined(HYPRE_USE_CUDA)
    ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
 #elif defined(HYPRE_USE_RAJA)
-   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
+   ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqxb(sqcxyz[0]),sqyb(sqcxyz[1]), sqzb(sqcxyz[2]);
 #else
    HYPRE_Real cxb = cxyz[0],cyb = cxyz[1],czb = cxyz[2],sqxb = sqcxyz[0], sqyb = sqcxyz[1], sqzb = sqcxyz[2];
 #endif
@@ -2060,7 +2060,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int bi,
 #if defined(HYPRE_USE_CUDA)
    ReduceSum<HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
 #elif defined(HYPRE_USE_RAJA)
-    ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0],data_location),cyb(cxyz[1],data_location),czb(cxyz[2],data_location),sqxb(sqcxyz[0],data_location),sqyb(sqcxyz[1],data_location), sqzb(sqcxyz[2],data_location);
+    ReduceSum<hypre_reduce_policy, HYPRE_Real> cxb(cxyz[0]),cyb(cxyz[1]),czb(cxyz[2]),sqxb(sqcxyz[0]),sqyb(sqcxyz[1]), sqzb(sqcxyz[2]);
 #else
     HYPRE_Real cxb = cxyz[0],cyb = cxyz[1],czb = cxyz[2],sqxb = sqcxyz[0], sqyb = sqcxyz[1], sqzb = sqcxyz[2];
 #endif

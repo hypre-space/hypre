@@ -39,7 +39,7 @@
 #include "_hypre_utilities.h"
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-__managed__ __device__ static HYPRE_Int Seed = 13579;
+__managed__ __device__  static HYPRE_Int Seed = 13579;
 #else
 static HYPRE_Int Seed = 13579;
 #endif
@@ -85,7 +85,6 @@ HYPRE_CUDA_GLOBAL
 HYPRE_Int  hypre_RandI()
 {
    HYPRE_Int  low, high, test;
-
    high = Seed / q;
    low = Seed % q;
    test = a * low - r * high;
@@ -111,6 +110,6 @@ HYPRE_Int  hypre_RandI()
 HYPRE_CUDA_GLOBAL
 HYPRE_Real  hypre_Rand()
 {
-   return ((HYPRE_Real)(hypre_RandI()) / m);
+  return ((HYPRE_Real)(hypre_RandI()) / m);
 }
 

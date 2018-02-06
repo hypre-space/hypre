@@ -58,7 +58,11 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
                           v_data_box, start, unit_stride, vi);
       {
 //         vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
-         vp[vi] = 2.0*hypre_Rand() - 1.0;
+#if defined(HYPRE_MEMORY_GPU)
+	 vp[vi] = 1.0;
+#else
+	 vp[vi] = 2.0*hypre_Rand() - 1.0;
+#endif
       }
       hypre_BoxLoop1End(vi);
    }

@@ -841,10 +841,12 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
    /* Prepare send buffers */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    if (hypre_exec_policy == HYPRE_MEMORY_DEVICE)
-#else
+#elif defined(HYPRE_USE_OMP45)
    if (hypre__global_offload)
+#else
+   if (1)
 #endif
    {    
       send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends,HYPRE_MEMORY_HOST);
@@ -893,10 +895,12 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
    /* Prepare recv buffers */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    if (hypre_exec_policy == HYPRE_MEMORY_DEVICE)
+#elif defined(HYPRE_USE_OMP45)
+   if (hypre__global_offload)
 #else
-   if (hypre__global_offload) 
+   if (1)
 #endif
    {    
       recv_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_recvs,HYPRE_MEMORY_HOST);

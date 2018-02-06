@@ -42,16 +42,6 @@ typedef struct hypre_Boxloop_struct
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-#define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
-{
-    if (err)
-    {
-        printf("CUDA Error Code[%d]: %s\n%s() Line:%d\n", err, cudaGetErrorString(err), fun, line);
-		HYPRE_Int *p = NULL; *p = 1;
-    }
-}
-
 #define hypre_exec_policy cuda_exec<BLOCKSIZE>
 #define hypre_reduce_policy  cuda_reduce_atomic<BLOCKSIZE>
 #define hypre_fence() \
