@@ -106,8 +106,18 @@ extern "C++" {
 #define HYPRE_CUDA_GLOBAL 
 #endif
 
+/* OpenMP 4.5 */
 #if defined(HYPRE_USE_OMP45)
 #include "omp.h"
+  
+#ifdef __cplusplus
+extern "C++" {
+#endif
+#include <cuda.h>
+#include <cuda_runtime.h>
+#ifdef __cplusplus
+}
+#endif
 
 /* stringification:
  * _Pragma(string-literal), so we need to cast argument to a string
@@ -119,7 +129,9 @@ extern "C++" {
 
 /* OpenMP 4.5 GPU memory management */
 /* empty */
+#ifndef HYPRE_CUDA_GLOBAL
 #define HYPRE_CUDA_GLOBAL
+#endif
 
 extern HYPRE_Int hypre__global_offload;
 extern HYPRE_Int hypre__offload_device_num;
@@ -251,6 +263,7 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
    } \
 }
 
+#if 0
 /* DeviceMemset 
  * memset: [to] a mapped CPU ptr
  * memset host memory first and the update the device memory */
@@ -262,11 +275,15 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
    size_t size_inuse = sizeof(type) * count; \
    hypre_omp45_offload(hypre__offload_device_num, ptr, type, 0, count, "update", "to"); \
 }
+#endif
 
 #define hypre_InitMemoryDebug(id)
 
 #define hypre_FinalizeMemoryDebug()
-#endif
+
+#endif // OMP45
+
+
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
@@ -292,6 +309,8 @@ void assert_check(void *ptr, char *file, int line);
   ( assert_check((ptr),__FILE__,__LINE__))
 
 #else
+
+#define ASSERT_MANAGED(ptr) (ptr)
 
 #define hypre_TAlloc(type, count, location) \
   ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )

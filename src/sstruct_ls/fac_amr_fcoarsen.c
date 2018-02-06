@@ -3478,6 +3478,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                hypre_CopyIndex(hypre_BoxIMin(&fine_box), cstart);
                hypre_BoxGetSize(&fine_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(a_ptrs)
                hypre_BoxLoop1Begin(ndim, loop_size,
                                    A_dbox, cstart, stridec, iA);
                {
@@ -3491,6 +3493,8 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                   }
                }
                hypre_BoxLoop1End(iA);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             }  /* hypre_ForBoxI(fi, fbox_bdy_ci_fi) */
          }      /* hypre_ForBoxArrayI(arrayi, fbox_bdy_ci) */

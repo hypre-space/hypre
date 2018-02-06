@@ -846,6 +846,9 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
             xcp[0][0]= hypre_StructVectorBoxData(xc_var, boxnums[i]);
 
             hypre_BoxGetSize(own_box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xcp, xcp_temp)
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 xc_temp_dbox, hypre_BoxIMin(own_box), stridec, xfi,
                                 xf_dbox, hypre_BoxIMin(own_box), stridec, xci);
@@ -853,6 +856,8 @@ hypre_FACRestrict2( void                 *  fac_restrict_vdata,
                xcp[0][0][xci]+= xcp_temp[0][0][xfi];
             }
             hypre_BoxLoop2End(xfi, xci);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
          
          }  /* hypre_ForBoxI(i, own_boxes) */
       }     /* hypre_ForBoxI(ci, cgrid_boxes) */

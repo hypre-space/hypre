@@ -377,6 +377,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       hypre_StructMapCoarseToFine(start, cindex, stridev, startv);
       hypre_BoxGetSize(compute_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(stencil_shape_d,vxp,vyp,vzp,data_A,indices_d)
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start,  stride,  Ai,
                           v_dbox, startv, stridev, vi);
@@ -445,6 +447,8 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
          vzp[vi] = lambdaz / (lambdax + lambday + lambdaz);
       }
       hypre_BoxLoop2End(Ai, vi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
       hypre_StructCleanIndexD();	  
    }
@@ -512,6 +516,8 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
       hypre_StructMapCoarseToFine(start, cindex, stridev, startv);
       hypre_BoxGetSize(compute_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(ep,vp)
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(e), loop_size,
                           e_dbox, start,  stride,  ei,
                           v_dbox, startv, stridev, vi);
@@ -519,6 +525,8 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
          ep[ei] *= vp[vi];
       }
       hypre_BoxLoop2End(ei, vi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    return ierr;

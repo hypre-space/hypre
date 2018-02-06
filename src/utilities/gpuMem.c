@@ -2,11 +2,9 @@
 #define _GNU_SOURCE
 #endif
 #include "_hypre_utilities.h"
-//#if defined(HYPRE_USE_MANAGED) && !defined(HYPRE_USE_GPU)
-//struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1,.memoryHWM=0};
-//#endif
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
 
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -233,113 +231,6 @@ cusparseHandle_t getCusparseHandle(){
   return handle;
 }
 
-/* C version of mempush using linked lists */
-
-size_t mempush(const void *ptr, size_t size, hypre_int action){
-  static node* head=NULL;
-  static hypre_int nc=0;
-  node *found=NULL;
-  if (!head){
-    if ((size<=0)||(action==1)) {
-      fprintf(stderr,"mempush can start only with an insertion or a size call \n");
-      return 0;
-    }
-    head = (node*)malloc(sizeof(node));
-    head->ptr=ptr;
-    head->size=size;
-    head->next=NULL;
-    nc++;
-    return size;
-  } else {
-    // Purge an address
-    if (action==1){
-      found=memfind(head,ptr);
-      if (found){
-	memdel(&head, found);
-	nc--;
-	return 0;
-      } else {
-#ifdef FULL_WARN
-	fprintf(stderr,"ERROR :: Pointer for deletion not found in linked list %p\n",ptr);
-#endif
-	return 0;
-      }
-    } // End purge
-    
-    // Insertion
-    if (size>0){
-      found=memfind(head,ptr);
-      if (found){
-#ifdef FULL_WARN
-	fprintf(stderr,"ERROR :: Pointer for insertion already in use in linked list %p\n",ptr);
-	//printlist(head,nc);
-#endif
-	return 0;
-      } else {
-	nc++;
-	meminsert(&head,ptr,size);
-	return 0;
-      }
-    }
-
-    // Getting allocation size
-    found=memfind(head,ptr);
-    if (found){
-      return found->size;
-    } else{
-#ifdef FULL_WARN
-      fprintf(stderr,"ERROR :: Pointer for size check NOT found in linked list\n");
-#endif
-      return 0;
-    }
-  }
-}
-
-node *memfind(node *head, const void *ptr){
-  node *next;
-  next=head;
-  while(next!=NULL){
-    if (next->ptr==ptr) return next;
-    next=next->next;
-  }
-  return NULL;
-}
-
-void memdel(node **head, node *found){
-  node *next;
-  if (found==*head){
-    next=(*head)->next;
-    free(*head);
-    *head=next;
-    return;
-  }
-  next=*head;
-  while(next->next!=found){
-    next=next->next;
-  }
-  next->next=next->next->next;
-  free(found);
-  return;
-}
-void meminsert(node **head, const void  *ptr,size_t size){
-  node *nhead;
-  nhead = (node*)malloc(sizeof(node));
-  nhead->ptr=ptr;
-  nhead->size=size;
-  nhead->next=*head;
-  *head=nhead;
-  return;
-}
-
-void printlist(node *head,hypre_int nc){
-  node *next;
-  next=head;
-  printf("Node count %d \n",nc);
-  while(next!=NULL){
-    printf("Address %p of size %zu \n",next->ptr,next->size);
-    next=next->next;
-  }
-}
 
 cudaStream_t getstreamOlde(hypre_int i){
   static hypre_int firstcall=1;
@@ -523,34 +414,140 @@ hypre_int pointerIsManaged(const void *ptr){
   return ptr_att.isManaged;
 }
 
-#endif //
+#endif // defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 
-#if defined(HYPRE_USE_MANAGED) && !defined(HYPRE_USE_CUDA)
-HYPRE_Int hypre_exec_policy = LOCATION_GPU;
+/* C version of mempush using linked lists */
+
+size_t mempush(const void *ptr, size_t size, hypre_int action){
+  static node* head=NULL;
+  static hypre_int nc=0;
+  node *found=NULL;
+  if (!head){
+    if ((size<=0)||(action==1)) {
+      fprintf(stderr,"mempush can start only with an insertion or a size call \n");
+      return 0;
+    }
+    head = hypre_TAlloc(node, 1, HYPRE_MEMORY_HOST);
+    head->ptr=ptr;
+    head->size=size;
+    head->next=NULL;
+    nc++;
+    return size;
+  } else {
+    // Purge an address
+    if (action==1){
+      found=memfind(head,ptr);
+      if (found){
+	memdel(&head, found);
+	nc--;
+	return 0;
+      } else {
+#ifdef FULL_WARN
+	fprintf(stderr,"ERROR :: Pointer for deletion not found in linked list %p\n",ptr);
 #endif
+	return 0;
+      }
+    } // End purge
+    
+    // Insertion
+    if (size>0){
+      found=memfind(head,ptr);
+      if (found){
+#ifdef FULL_WARN
+	fprintf(stderr,"ERROR :: Pointer for insertion already in use in linked list %p\n",ptr);
+	//printlist(head,nc);
+#endif
+	return 0;
+      } else {
+	nc++;
+	meminsert(&head,ptr,size);
+	return 0;
+      }
+    }
+
+    // Getting allocation size
+    found=memfind(head,ptr);
+    if (found){
+      return found->size;
+    } else{
+#ifdef FULL_WARN
+      fprintf(stderr,"ERROR :: Pointer for size check NOT found in linked list\n");
+#endif
+      return 0;
+    }
+  }
+}
+
+node *memfind(node *head, const void *ptr){
+  node *next;
+  next=head;
+  while(next!=NULL){
+    if (next->ptr==ptr) return next;
+    next=next->next;
+  }
+  return NULL;
+}
+
+void memdel(node **head, node *found){
+  node *next;
+  if (found==*head){
+    next=(*head)->next;
+    free(*head);
+    *head=next;
+    return;
+  }
+  next=*head;
+  while(next->next!=found){
+    next=next->next;
+  }
+  next->next=next->next->next;
+  free(found);
+  return;
+}
+void meminsert(node **head, const void  *ptr,size_t size){
+  node *nhead;
+  nhead = hypre_TAlloc(node, 1, HYPRE_MEMORY_HOST);
+  nhead->ptr=ptr;
+  nhead->size=size;
+  nhead->next=*head;
+  *head=nhead;
+  return;
+}
+
+void printlist(node *head,hypre_int nc){
+  node *next;
+  next=head;
+  printf("Node count %d \n",nc);
+  while(next!=NULL){
+    printf("Address %p of size %zu \n",next->ptr,next->size);
+    next=next->next;
+  }
+}
+
+#endif//defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
 
 #if defined(HYPRE_USE_CUDA)
-HYPRE_Int hypre_exec_policy = LOCATION_GPU;
+HYPRE_Int hypre_exec_policy = HYPRE_MEMORY_DEVICE;
 char tmp_print[10] = "";
 HYPRE_Int hypre_box_print = 0;
 double t_start = 0;
 double t_end   = 0;
 HYPRE_Int time_box = 0;
-static bool cuda_reduction_id_used[RAJA_MAX_REDUCE_VARS];
+static HYPRE_Int cuda_reduction_id_used[RAJA_MAX_REDUCE_VARS];
 CudaReductionBlockDataType* s_cuda_reduction_mem_block = 0;
-
+  
 HYPRE_Int getCudaReductionId()
 {
-   static HYPRE_Int first_time_called = true;
+   static HYPRE_Int first_time_called = 1;
    HYPRE_Int id;
    
    if (first_time_called) {
 
       for (id = 0; id < RAJA_MAX_REDUCE_VARS; ++id) {
-         cuda_reduction_id_used[id] = false;
+         cuda_reduction_id_used[id] = 0;
       }
 
-      first_time_called = false;
+      first_time_called = 0;
    }
 
    id = 0;
@@ -563,7 +560,7 @@ HYPRE_Int getCudaReductionId()
       exit(1);
    }
 
-   cuda_reduction_id_used[id] = true;
+   cuda_reduction_id_used[id] = 1;
 
    return id;
 }
@@ -599,7 +596,7 @@ void initCudaReductionMemBlock()
                            cudaMemAttachGlobal);
 
       if ( cudaerr != cudaSuccess ) {
-	 printf("error\n");
+	fprintf(stderr,"CUDA ERROR ( Code = %d [%s]): %d,\n",cudaerr,cudaGetErrorString(cudaerr),sizeof(CudaReductionBlockDataType)*len);
          exit(1);
       }
       cudaMemset(s_cuda_reduction_mem_block, 0, 
@@ -643,7 +640,7 @@ CudaReductionBlockDataType* getCudaReductionMemBlock(int id)
 void releaseCudaReductionId(HYPRE_Int id)
 {
    if ( id < RAJA_MAX_REDUCE_VARS ) {
-      cuda_reduction_id_used[id] = false;
+      cuda_reduction_id_used[id] = 0;
    }
 }
 
@@ -655,8 +652,9 @@ CudaReductionBlockDataType* getCPUReductionMemBlock(int id)
 
    if (s_cuda_reduction_mem_block == 0) {
       HYPRE_Int len = nthreads * RAJA_MAX_REDUCE_VARS;
-      s_cuda_reduction_mem_block = 
-         new CudaReductionBlockDataType[len*block_offset];
+      s_cuda_reduction_mem_block = hypre_CTAlloc(CudaReductionBlockDataType,len*block_offset,HYPRE_MEMORY_HOST);
+      
+      //   new CudaReductionBlockDataType[len*block_offset];
 
       atexit(freeCPUReductionMemBlock);
    }
@@ -667,7 +665,8 @@ CudaReductionBlockDataType* getCPUReductionMemBlock(int id)
 void freeCPUReductionMemBlock()
 {
    if ( s_cuda_reduction_mem_block != 0 ) {
-      delete [] s_cuda_reduction_mem_block;
+     //delete [] s_cuda_reduction_mem_block;
+     hypre_TFree(s_cuda_reduction_mem_block,HYPRE_MEMORY_HOST);
       s_cuda_reduction_mem_block = 0; 
    }
 }
@@ -675,7 +674,7 @@ void freeCPUReductionMemBlock()
 void releaseCPUReductionId(int id)
 {
    if ( id < RAJA_MAX_REDUCE_VARS ) {
-      cuda_reduction_id_used[id] = false;
+      cuda_reduction_id_used[id] = 0;
    }
 }
 

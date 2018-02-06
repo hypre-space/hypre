@@ -48,7 +48,7 @@ hypre_PFMGCreate( MPI_Comm  comm )
    /* initialize */
    (pfmg_data -> num_levels)  = -1;
 #if defined(HYPRE_MEMORY_GPU)
-   (pfmg_data -> devicelevel) = -1;
+   (pfmg_data -> devicelevel) = 200;
 #endif
    return (void *) pfmg_data;
 }

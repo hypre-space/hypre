@@ -2454,6 +2454,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
    }  /* end of coarsening loop: while (not_finished_coarsening) */
 
+
    /* redundant coarse grid solve */
    if (  (seq_threshold >= coarse_threshold) && (coarse_size > coarse_threshold) && (level != max_levels-1))
    {

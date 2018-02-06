@@ -257,6 +257,9 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                }
 
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(PTp,xp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    x_data_box,  start,  stride,  xi,
                                    PT_data_box, startc, stridec, PTi);
@@ -264,6 +267,8 @@ hypre_SMGSetupInterpOp( void               *relax_data,
                   PTp[PTi] = xp[xi];
                }
                hypre_BoxLoop2End(xi, PTi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
          }
       }

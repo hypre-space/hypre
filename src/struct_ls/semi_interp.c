@@ -178,6 +178,7 @@ hypre_SemiInterp( void               *interp_vdata,
 #if defined(HYPRE_MEMORY_GPU)
    HYPRE_Int data_location_f = hypre_StructGridDataLocation(fgrid);
    HYPRE_Int data_location_c = hypre_StructGridDataLocation(cgrid);
+   
    if (data_location_f != data_location_c)
    {
       xc_tmp = hypre_StructVectorCreate(hypre_MPI_COMM_WORLD, cgrid);
@@ -185,8 +186,8 @@ hypre_SemiInterp( void               *interp_vdata,
       hypre_StructGridDataLocation(cgrid) = data_location_f;
       hypre_StructVectorInitialize(xc_tmp);
       hypre_StructVectorAssemble(xc_tmp);
-      hypre_DataCopyToData(hypre_StructVectorData(xc),hypre_StructVectorData(xc_tmp),HYPRE_Complex,hypre_StructVectorDataSize(xc));
-      hypre_exec_policy = LOCATION_GPU;
+      hypre_TMemcpy(hypre_StructVectorData(xc_tmp), hypre_StructVectorData(xc), HYPRE_Complex,hypre_StructVectorDataSize(xc),HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
+      hypre_exec_policy = HYPRE_MEMORY_DEVICE;
    }
    else
    {
@@ -216,6 +217,8 @@ hypre_SemiInterp( void               *interp_vdata,
 
       hypre_BoxGetSize(compute_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(ep,xcp)
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                           e_dbox, start, stride, ei,
                           xc_dbox, startc, stridec, xci);
@@ -223,6 +226,8 @@ hypre_SemiInterp( void               *interp_vdata,
          ep[ei] = xcp[xci];
       }
       hypre_BoxLoop2End(ei, xci);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    /*-----------------------------------------------------------------------
@@ -297,7 +302,9 @@ hypre_SemiInterp( void               *interp_vdata,
                Pi = hypre_CCBoxIndexRank( P_dbox, startc );
 	       Pp0val = Pp0[Pi];
 	       Pp1val = Pp1[Pi+Pp1_offset];
-	       
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(ep)
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(P), loop_size,
                                    e_dbox, start, stride, ei);
                {
@@ -305,9 +312,13 @@ hypre_SemiInterp( void               *interp_vdata,
                              Pp1val * ep[ei+ep1_offset]);
                }
                hypre_BoxLoop1End(ei);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
             else
             {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(ep,Pp0,Pp1)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                                    P_dbox, startc, stridec, Pi,
                                    e_dbox, start, stride, ei);
@@ -316,6 +327,8 @@ hypre_SemiInterp( void               *interp_vdata,
                              Pp1[Pi+Pp1_offset] * ep[ei+ep1_offset]);
                }
                hypre_BoxLoop2End(Pi, ei);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
          }
       }

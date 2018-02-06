@@ -3081,8 +3081,8 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
               /* Set last entry */
               P_diag_i[n_fine] = P_diag_size ;
               
-              hypre_TFree(P_diag_j, HYPRE_MEMORY_HOST);
-              hypre_TFree(P_diag_data, HYPRE_MEMORY_HOST);
+              hypre_TFree(P_diag_j, HYPRE_MEMORY_SHARED);
+              hypre_TFree(P_diag_data, HYPRE_MEMORY_SHARED);
               hypre_CSRMatrixJ(P_diag) = P_diag_j_new;
               hypre_CSRMatrixData(P_diag) = P_diag_data_new;
               hypre_CSRMatrixNumNonzeros(P_diag) = P_diag_size;
@@ -3154,8 +3154,8 @@ hypre_BoomerAMGInterpTruncation( hypre_ParCSRMatrix *P,
               /* Set last entry */
               P_offd_i[n_fine] = P_offd_size ;
               
-              hypre_TFree(P_offd_j, HYPRE_MEMORY_HOST);
-              hypre_TFree(P_offd_data, HYPRE_MEMORY_HOST);
+              hypre_TFree(P_offd_j, HYPRE_MEMORY_SHARED);
+              hypre_TFree(P_offd_data, HYPRE_MEMORY_SHARED);
               hypre_CSRMatrixJ(P_offd) = P_offd_j_new;
               hypre_CSRMatrixData(P_offd) = P_offd_data_new;
               hypre_CSRMatrixNumNonzeros(P_offd) = P_offd_size;

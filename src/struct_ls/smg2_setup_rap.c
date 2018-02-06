@@ -346,6 +346,9 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
          case 5:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_csw,rb,a_cw,pa,rap_cs,a_cc,a_cs,rap_cse,a_ce,rap_cw,pb,ra,rap_cc,a_cn)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
                                 R_dbox,   cstart, stridec, iR,
@@ -379,6 +382,8 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
                   +                   a_cn[iA]   * pa[iP];
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             
             break;
 
@@ -392,6 +397,9 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
          default:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_csw,rb,a_cw,pa,a_csw,rap_cs,a_cc,a_cs,rap_cse,a_ce,a_cse,rap_cw,pb,ra,a_cnw,rap_cc,a_cn)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
                                 R_dbox,   cstart, stridec, iR,
@@ -435,6 +443,8 @@ hypre_SMG2BuildRAPSym( hypre_StructMatrix *A,
 
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             break;
 
@@ -645,6 +655,9 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
          case 5:
  
             hypre_BoxGetSize(cgrid_box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_cne,ra,a_ce,pb,rap_cn,a_cc,a_cn,rap_cnw,a_cw,rap_ce,rb,pa)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
                                 R_dbox,   cstart, stridec, iR,
@@ -672,6 +685,8 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             break;
 
@@ -683,6 +698,9 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
          default:
             hypre_BoxGetSize(cgrid_box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_cne,ra,a_ce,pb,a_cne,rap_cn,a_cc,a_cn,rap_cnw,a_cw,a_cnw,rap_ce,rb,pa,a_cse)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 PT_dbox,  cstart, stridec, iP,
                                 R_dbox,   cstart, stridec, iR,
@@ -718,6 +736,8 @@ hypre_SMG2BuildRAPNoSym( hypre_StructMatrix *A,
 
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             break;
 
@@ -800,7 +820,8 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
 
          hypre_BoxGetSize(cgrid_box, loop_size);
 
-
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_cw,rap_cse,rap_csw,rap_cc,rap_cs)
          hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                              RAP_dbox, cstart, stridec, iAc);
          {
@@ -810,7 +831,11 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
             rap_cc[iAc] += (2.0 * rap_cs[iAc]);
          }
          hypre_BoxLoop1End(iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_csw,rap_cs,rap_cse)
          hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                              RAP_dbox, cstart, stridec, iAc);
          {
@@ -819,6 +844,8 @@ hypre_SMG2RAPPeriodicSym( hypre_StructMatrix *RAP,
             rap_cse[iAc] = zero;
          }
          hypre_BoxLoop1End(iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
       } /* end ForBoxI */
 
@@ -905,6 +932,8 @@ hypre_SMG2RAPPeriodicNoSym( hypre_StructMatrix *RAP,
 
          hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_cw,rap_cnw,rap_csw,rap_cc,rap_cn,rap_cs,rap_ce,rap_cne,rap_cse)
          hypre_BoxLoop1Begin(hypre_StructMatrixNDim(RAP), loop_size,
                              RAP_dbox, cstart, stridec, iAc);
          {
@@ -921,6 +950,8 @@ hypre_SMG2RAPPeriodicNoSym( hypre_StructMatrix *RAP,
             rap_cse[iAc] = zero;
          }
          hypre_BoxLoop1End(iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
       } /* end ForBoxI */
 

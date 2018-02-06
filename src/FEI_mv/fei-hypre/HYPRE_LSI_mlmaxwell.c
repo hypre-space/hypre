@@ -234,11 +234,10 @@ int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
    int allocated_space, int columns[], double values[], int row_lengths[])
 #endif
 {
+#ifdef HAVE_MLMAXWELL
     int               i, j, ncnt, colindex, rowLeng, rowindex;
     int               nRows, *rowptr, *colInd;
     double            *colVal;
-
-#ifdef HAVE_MLMAXWELL
     MLMaxwell_Context *context;
     HYPRE_ML_Matrix   *Amat;
 
@@ -249,10 +248,6 @@ int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
     rowptr  = Amat->rowptr;
     colInd  = Amat->colnum;
     colVal  = Amat->values;
-#else
-    printf("ML_GetRow : MLMaxwell not activated.\n");
-    return -1;
-#endif
 
     ncnt = 0;
     for (i = 0; i < N_requested_rows; i++)
@@ -271,6 +266,10 @@ int ML_GetRow(void *obj, int N_requested_rows, int requested_rows[],
        }
     }
     return 1;
+#else
+    printf("ML_GetRow : MLMaxwell not activated.\n");
+    return -1;
+#endif
 }
 
 /****************************************************************************/

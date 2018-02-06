@@ -192,6 +192,9 @@ hypre_SMGResidual( void               *residual_vdata,
                rp = hypre_StructVectorBoxData(r, i);
 
                hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,bp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    b_data_box, start, base_stride, bi,
                                    r_data_box, start, base_stride, ri);
@@ -199,6 +202,8 @@ hypre_SMGResidual( void               *residual_vdata,
                   rp[ri] = bp[bi];
                }
                hypre_BoxLoop2End(bi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
          }
          break;
@@ -240,6 +245,9 @@ hypre_SMGResidual( void               *residual_vdata,
 
                hypre_BoxGetStrideSize(compute_box, base_stride,
                                       loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,Ap,xp)
                hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                    A_data_box, start, base_stride, Ai,
                                    x_data_box, start, base_stride, xi,
@@ -248,6 +256,8 @@ hypre_SMGResidual( void               *residual_vdata,
                   rp[ri] -= Ap[Ai] * xp[xi+xp_off];
                }
                hypre_BoxLoop3End(Ai, xi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
          }
       }

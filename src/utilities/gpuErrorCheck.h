@@ -13,10 +13,9 @@
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
 
-#if defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) || defined(HYPRE_USE_OMP45)
+
 #include <cuda_runtime_api.h>
-#include <cusparse.h>
-#include <cublas_v2.h>
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
 #define MEM_PAD_LEN 1
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
@@ -40,15 +39,20 @@ inline void gpuAssert(cudaError_t code, const char *file, int line)
 void cudaSafeFree(void *ptr,int padding);
 hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
-#endif
+#endif // defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)|| defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) ||   defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
+void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
+#endif // defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
-
+#include <cusparse.h>
+#include <cublas_v2.h>
 #include <stdio.h>
-//#include <cuda_runtime_api.h>
+#include <cuda_runtime_api.h>
 #include <stdlib.h>
 inline const char *cusparseErrorCheck(cusparseStatus_t error)
 {
@@ -155,7 +159,7 @@ void cudaSafeFree(void *ptr,int padding);
 //void PrintPointerAttributes(const void *ptr);
 //size_t mempush(void* ptr, size_t size,int purge);
 //int memloc(void *ptr, int device);
-#endif
-#endif
+#endif // __cusparseErrorCheck__
+#endif// defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 
-#endif
+#endif // hypre_GPU_ERROR_HEADER

@@ -30,8 +30,7 @@ extern "C" {
     */
 
     /* Builtin functions */
-    integer s_wsfe(cilist *), i_len_trim(char *, ftnlen), do_fio(integer *, 
-            char *, ftnlen), e_wsfe(void);
+  integer s_wsfe(cilist *), i_len_trim(char *, ftnlen), do_fio(integer *, char *, ftnlen);//, e_wsfe(void);
     /* Subroutine */ integer s_stop(char *, ftnlen);
 
     /* Fortran I/O blocks */

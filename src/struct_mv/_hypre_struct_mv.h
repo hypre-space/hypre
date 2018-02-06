@@ -736,8 +736,7 @@ struct ColumnSums
 //}
 //using namespace RAJA;
 
-#define HYPER_LAMBDA [=] __host__  __device__ 
-#define HYPRE_MIN_GPU_SIZE (131072)//(65536)//(8192)//(16384)//(32768)//(65536)
+#define HYPER_LAMBDA [=] __host__  __device__
 
 typedef struct hypre_Boxloop_struct
 {
@@ -776,7 +775,7 @@ template<typename LOOP_BODY>
 void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
 {
   
-  if (policy == LOCATION_CPU)
+  if (policy == HYPRE_MEMORY_HOST)
   {
     HYPRE_Int idx;
 #pragma omp parallel for 
@@ -786,7 +785,7 @@ void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
     }
     
   }
-  else if (policy == LOCATION_GPU)
+  else if (policy == HYPRE_MEMORY_DEVICE)
   {    
      size_t const blockSize = BLOCKSIZE;
      size_t gridSize  = (length + blockSize - 1) / blockSize;
@@ -825,7 +824,6 @@ void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
   t_start = MPI_Wtime();\
   time_box = 1;	
 
-  //if (hypre_exec_policy == LOCATION_CPU){printf("CPU: ");} else if (hypre_exec_policy == LOCATION_GPU){printf("GPU: ");} else {printf("UNSET: ");} \
   //printf("hypre_newBoxLoop (%d) in %s(%d) function %s\n",hypre__tot, __FILE__,__LINE__,__FUNCTION__); 
 
 #define hypre_BasicBoxLoopInit(ndim,loop_size)	\
@@ -1033,6 +1031,7 @@ void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
 
 #define hypre_LoopEnd()					\
    });							\
+   hypre_fence();					\
 }							\
    
    //   hypre_fence();					\
@@ -1080,7 +1079,7 @@ public:
 
       m_myID = getCudaReductionId();
 
-      if (data_location == LOCATION_GPU)
+      if (data_location == HYPRE_MEMORY_DEVICE)
       {
 	 m_blockdata = getCudaReductionMemBlock(m_myID) ;
 	 m_blockoffset = 1;
@@ -1096,7 +1095,7 @@ public:
 
 	 cudaDeviceSynchronize();
       }
-      else if (data_location == LOCATION_CPU)
+      else if (data_location == HYPRE_MEMORY_HOST)
       {
 	 m_blockdata = getCPUReductionMemBlock(m_myID);
 	 int nthreads = omp_get_max_threads();
@@ -1142,7 +1141,7 @@ public:
    operator T()
    {
      
-     if (data_location == LOCATION_GPU) 
+     if (data_location == HYPRE_MEMORY_DEVICE) 
      {
         cudaDeviceSynchronize() ;
 	m_blockdata[m_blockoffset] = static_cast<T>(0);
@@ -1153,7 +1152,7 @@ public:
 	}
 	m_reduced_val = m_init_val + static_cast<T>(m_blockdata[m_blockoffset]);
      }
-     else if (data_location == LOCATION_CPU)
+     else if (data_location == HYPRE_MEMORY_HOST)
      {
 #if defined( __CUDA_ARCH__ )
 #else
@@ -1176,7 +1175,7 @@ public:
    ReduceSum< T > operator+=(T val) const
    {  
 #if defined( __CUDA_ARCH__ )
-      if (data_location == LOCATION_GPU)
+      if (data_location == HYPRE_MEMORY_DEVICE)
       {	
         __shared__ T sd[BLOCK_SIZE];
 
@@ -1224,7 +1223,7 @@ public:
 	}
       }
 #else
-      if (data_location == LOCATION_CPU)
+      if (data_location == HYPRE_MEMORY_HOST)
       {
          int tid = omp_get_thread_num();
 	 m_blockdata[tid*s_block_offset] += val;
@@ -1342,12 +1341,13 @@ private:
    BOX LOOPS [TEAM DISTRIBUTE VERSION]
    !!! NOTE: THIS CODE ONLY WORKS FOR DIM <= 3 !!!
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+/*
 #define hypre_BoxLoop0For() 
 #define hypre_BoxLoop1For(i1) 
 #define hypre_BoxLoop2For(i1, i2) 
 #define hypre_BoxLoop3For(i1, i2, i3) 
 #define hypre_BoxLoop4For(i1, i2, i3, i4) 
-
+*/
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex  
 #define hypre_BoxLoopSetOneBlock() ; 
 #define hypre_BoxLoopBlock()       0
@@ -1359,8 +1359,8 @@ private:
 //#define hypre_BoxBoundaryCopyBegin  zypre_omp4_dist_BoxLoop1_v2_Begin
 //#define hypre_BoxBoundaryCopyEnd    zypre_omp4_dist_BoxLoop1_v2_End
 #define hypre_BasicBoxLoop2Begin    zypre_omp4_dist_BoxLoop2_v2_Begin
-#define hypre_BoxDataExchangeBegin  zypre_omp4_dist_BoxLoop2_v2_Begin
-#define hypre_BoxDataExchangeEnd    zypre_omp4_dist_BoxLoop2_v2_End
+//#define hypre_BoxDataExchangeBegin  zypre_omp4_dist_BoxLoop2_v2_Begin
+//#define hypre_BoxDataExchangeEnd    zypre_omp4_dist_BoxLoop2_v2_End
 #define hypre_BoxLoop2Begin  zypre_omp4_dist_BoxLoop2Begin
 #define hypre_BoxLoop2End    zypre_omp4_dist_BoxLoop2End
 #define hypre_BoxLoop3Begin  zypre_omp4_dist_BoxLoop3Begin
@@ -1370,6 +1370,10 @@ private:
 #define hypre_BoxLoop3End    zypre_omp4_dist_BoxLoop3End
 #define hypre_BoxLoop4Begin  zypre_omp4_dist_BoxLoop4Begin
 #define hypre_BoxLoop4End    zypre_omp4_dist_BoxLoop4End
+#define hypre_LoopBegin      zypre_LoopBegin
+#define hypre_LoopEnd        zypre_LoopEnd
+
+/* Look for more in struct_ls/red_black_gs.h" */
 
 /* reductions */
 #if 0
@@ -1428,6 +1432,7 @@ HYPRE_Int HYPRE_XCONCAT3(hypre__stride,0,k), HYPRE_XCONCAT3(hypre__stride,1,k), 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * map clause
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define MAP_CLAUSE0
 #define MAP_CLAUSE1 
 #define MAP_CLAUSE2 
 #define MAP_CLAUSE3 
@@ -1438,6 +1443,15 @@ HYPRE_Int HYPRE_XCONCAT3(hypre__stride,0,k), HYPRE_XCONCAT3(hypre__stride,1,k), 
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 #define IF_CLAUSE if (hypre__global_offload && hypre__tot > 0)
 
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * is_device_ptr clause
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+#define DEVICE_VAR 
+#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+#define IS_DEVICE_CLAUSE DEVICE_VAR
+#else
+#define IS_DEVICE_CLAUSE 
+#endif
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * device code for BoxLoop 1, set i1
@@ -1593,7 +1607,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    /* host code: */ \
    zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
    /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 TEAM_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE0 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
    {\
 
@@ -1614,7 +1628,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
    zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
    /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 HYPRE_BOX_REDUCTION TEAM_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 IS_DEVICE_CLAUSE HYPRE_BOX_REDUCTION TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
    {\
       zypre_omp4_BoxLoopSet1(i1)
@@ -1637,7 +1651,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    zypre_omp4_BoxKDeclareInit(1, start1, dbox1, stride1) \
    zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
    /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 HYPRE_BOX_REDUCTION TEAM_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 IS_DEVICE_CLAUSE HYPRE_BOX_REDUCTION TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
    {\
       zypre_omp4_BoxLoopSet2(i1, i2)
@@ -1663,7 +1677,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
    zypre_omp4_BoxKDeclareInit(3, start3, dbox3, stride3) \
    /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE3 TEAM_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE3 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
    {\
       zypre_omp4_BoxLoopSet3(i1, i2, i3)
@@ -1673,6 +1687,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    }\
 }
 
+#if 0
 #define zypre_omp4_dist_BoxLoop3_SAME_STRIDE_Begin(ndim, loop_size, \
       dbox1, start1, stride1, i1, \
       dbox2, start2, stride2, i2, o2, \
@@ -1684,10 +1699,11 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    zypre_omp4_BoxKDeclareInit(2, start2, dbox2, stride2) \
    zypre_omp4_BoxKDeclareInit(3, start3, dbox3, stride3) \
    /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE3 TEAM_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE3 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
    {\
       zypre_omp4_BoxLoopSet3_SAME_STRIDE(i1, i2, o2, i3)
+#endif
  
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * BoxLoop 4
@@ -1705,7 +1721,7 @@ hypre__I_1 = hypre__I_2 = hypre__I_3 = hypre__I_4 = 1;  hypre__J = hypre__thread
    zypre_omp4_BoxKDeclareInit(3, start3, dbox3, stride3) \
    zypre_omp4_BoxKDeclareInit(4, start4, dbox4, stride4) \
    /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE4 TEAM_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE4 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
    {\
       zypre_omp4_BoxLoopSet4(i1, i2, i3, i4)
@@ -1803,7 +1819,7 @@ idx = hypre__J = hypre__thread; i1 = 0; \
    zypre_omp4_BoxLoopDeclareInit(ndim, loop_size) \
    zypre_omp4_BoxKDeclareInit_v2(1, stride1) \
    /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 TEAM_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE1 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
    {\
       zypre_omp4_BoxLoopSet1_v2(i1, idx)
@@ -1847,7 +1863,7 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
    zypre_omp4_BoxKDeclareInit_v2(1, stride1) \
    zypre_omp4_BoxKDeclareInit_v2(2, stride2) \
    /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 TEAM_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++) \
    { \
       zypre_omp4_BoxLoopSet2_v2(i1, i2)
@@ -1862,16 +1878,16 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Basic Loop
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
-#define hypre_LoopBegin(size, idx) \
+#define zypre_LoopBegin(size, idx) \
 { \
    HYPRE_Int idx, hypre__tot = size; \
    /* device code: */ \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 TEAM_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE MAP_CLAUSE2 IS_DEVICE_CLAUSE TEAM_CLAUSE)) \
    for (idx = 0; idx < hypre__tot; idx++) \
    {
 
 
-#define hypre_LoopEnd() \
+#define zypre_LoopEnd() \
    } \
 }
 
@@ -1922,8 +1938,8 @@ hypre__J = hypre__thread;  i1 = i2 = 0; \
 #else
 #define Pragma(x) _Pragma(#x)
 #endif
-#define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,HYPRE_BOX_PRIVATE_VAR) HYPRE_SMP_SCHEDULE)
-#define OMPREDUCTION() Pragma(omp parallel for private(HYPRE_BOX_PRIVATE,HYPRE_BOX_PRIVATE_VAR) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+#define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE)
+#define OMPREDUCTION() Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #else
 #define OMP1
 #define OMPREDUCTION() ;
@@ -3678,34 +3694,33 @@ typedef struct hypre_StructMatrix_struct
    hypre_StructGrid     *grid;
    hypre_StructStencil  *user_stencil;
    hypre_StructStencil  *stencil;
-   HYPRE_Int             num_values;   /* Number of "stored" coefficients */
+   HYPRE_Int             num_values;                /* Number of "stored" coefficients */
 
    hypre_BoxArray       *data_space;
 
-   HYPRE_Complex        *data;         /* Pointer to variable matrix data */
-   HYPRE_Complex        *data_const;   /* Pointer to constant matrix data */
-   HYPRE_Complex       **stencil_data; /* Pointer for each stencil */
-   HYPRE_Int             data_alloced; /* Boolean used for freeing data */
-   HYPRE_Int             data_size;    /* Size of variable matrix data */
-   HYPRE_Int             data_const_size; /* Size of constant matrix data */
-   HYPRE_Int           **data_indices; /* num-boxes by stencil-size array
-                                          of indices into the data array.
-                                          data_indices[b][s] is the starting
-                                          index of matrix data corresponding
-                                          to box b and stencil coefficient s */
-   HYPRE_Int             constant_coefficient;  /* normally 0; set to 1 for
-                                                   constant coefficient matrices
-                                                   or 2 for constant coefficient
-                                                   with variable diagonal */
+   HYPRE_Complex        *data;                      /* Pointer to variable matrix data */
+   HYPRE_Complex        *data_const;                /* Pointer to constant matrix data */
+   HYPRE_Complex       **stencil_data;              /* Pointer for each stencil */
+   HYPRE_Int             data_alloced;              /* Boolean used for freeing data */
+   HYPRE_Int             data_size;                 /* Size of variable matrix data */
+   HYPRE_Int             data_const_size;           /* Size of constant matrix data */
+   HYPRE_Int           **data_indices;              /* num-boxes by stencil-size array
+                                                       of indices into the data array.
+                                                       data_indices[b][s] is the starting
+                                                       index of matrix data corresponding
+                                                       to box b and stencil coefficient s */
+   HYPRE_Int             constant_coefficient;      /* normally 0; set to 1 for
+                                                       constant coefficient matrices
+                                                       or 2 for constant coefficient
+                                                       with variable diagonal */
                       
-   HYPRE_Int             symmetric;    /* Is the matrix symmetric */
-   HYPRE_Int            *symm_elements;/* Which elements are "symmetric" */
-   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each
-                                                     * direction */
+   HYPRE_Int             symmetric;                 /* Is the matrix symmetric */
+   HYPRE_Int            *symm_elements;             /* Which elements are "symmetric" */
+   HYPRE_Int             num_ghost[2*HYPRE_MAXDIM]; /* Num ghost layers in each direction */
                       
-   HYPRE_Int             global_size;  /* Total number of nonzero coeffs */
+   HYPRE_Int             global_size;               /* Total number of nonzero coeffs */
 
-   hypre_CommPkg        *comm_pkg;     /* Info on how to update ghost data */
+   hypre_CommPkg        *comm_pkg;                  /* Info on how to update ghost data */
 
    HYPRE_Int             ref_count;
 

@@ -202,7 +202,7 @@ main( hypre_int argc,
 #if defined(HYPRE_USE_CUDA)
    printf("initCudaReductionMemBlock\n");
    initCudaReductionMemBlock();
-   printf("initCudaReductionMemBlock\n");
+   printf("Finish initCudaReductionMemBlock\n");
 #endif
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
@@ -512,7 +512,7 @@ main( hypre_int argc,
    /*end lobpcg */
 
    sum = read_x0fromfile_param + read_rhsfromfile_param + read_fromfile_param; 
-
+   device_level = nx*ny*nz;
    /*-----------------------------------------------------------
     * Print usage info
     *-----------------------------------------------------------*/
@@ -982,7 +982,7 @@ main( hypre_int argc,
                      }
                break;
          }
-         printf("HYPRE_StructGridCreate\n");
+
          HYPRE_StructGridCreate(hypre_MPI_COMM_WORLD, dim, &grid);
          for (ib = 0; ib < nblocks; ib++)
          {
@@ -996,20 +996,20 @@ main( hypre_int argc,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 	 if (device_level == 0)
 	 {
-	    HYPRE_StructGridSetDataLocation(grid, LOCATION_CPU);
-	    hypre_exec_policy = LOCATION_CPU;
+	    HYPRE_StructGridSetDataLocation(grid, HYPRE_MEMORY_HOST);
+	    hypre_exec_policy = HYPRE_MEMORY_HOST;
 	 }
 	 else
 	 {
 	    HYPRE_Int max_box_size = hypre_StructGridGetMaxBoxSize(grid);
 	    if (max_box_size < 0)//HYPRE_MIN_GPU_SIZE)
 	    {
-	        HYPRE_StructGridSetDataLocation(grid, LOCATION_CPU);
-	        hypre_exec_policy = LOCATION_CPU;
+	        HYPRE_StructGridSetDataLocation(grid, HYPRE_MEMORY_HOST);
+	        hypre_exec_policy = HYPRE_MEMORY_HOST;
 	    }
 	    else
 	    {
-	       HYPRE_StructGridSetDataLocation(grid, LOCATION_GPU);
+	       HYPRE_StructGridSetDataLocation(grid, HYPRE_MEMORY_DEVICE);
 	    }
 	 }
 #endif
@@ -1017,7 +1017,7 @@ main( hypre_int argc,
          /*-----------------------------------------------------------
           * Set up the matrix structure
           *-----------------------------------------------------------*/
-         printf("HYPRE_StructMatrixCreate\n");
+
          HYPRE_StructMatrixCreate(hypre_MPI_COMM_WORLD, grid, stencil, &A);
 
          if ( solver_id == 3 || solver_id == 4 ||
@@ -2920,7 +2920,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
       box      = hypre_BoxArrayBox(gridboxes, ib);
       volume   =  hypre_BoxVolume(box);
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-      if (data_location < LOCATION_CPU)
+      if (data_location != HYPRE_MEMORY_HOST)
       {
          values   = hypre_CTAlloc(HYPRE_Real, volume,HYPRE_MEMORY_DEVICE);
       }
@@ -2940,6 +2940,8 @@ AddValuesVector( hypre_StructGrid  *gridvector,
       if ((dim == 2 && period[0] != 0 && period[1] != 0) ||
           (dim == 3 && period[0] != 0 && period[1] != 0 && period[2] != 0))
       {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
 	 hypre_LoopBegin(volume,i)
          {
             values[i] = 0.0;
@@ -2947,15 +2949,21 @@ AddValuesVector( hypre_StructGrid  *gridvector,
 	    values[volume - 1] = -value;
 	    
          }
-	 hypre_LoopEnd()	   
+	 hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
       }
       else
       {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
 	 hypre_LoopBegin(volume,i)
          {
             values[i] = value;
          }
 	 hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
       }
 
       ilower = hypre_BoxIMin(box);
@@ -3049,7 +3057,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-	        if (data_location < LOCATION_CPU)
+	        if (data_location != HYPRE_MEMORY_HOST)
 	        {
 	           values     = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_DEVICE);
 	        }
@@ -3060,6 +3068,9 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 #else
             values     = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_DEVICE);
 #endif
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
 	    hypre_LoopBegin(volume,d)  
         {
 	       HYPRE_Int i = stencil_size*d;
@@ -3083,6 +3094,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                }
             }
 	    hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -3091,7 +3104,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                                            stencil_indices, values);
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-	    if (data_location < 1)
+	    if (data_location != HYPRE_MEMORY_HOST)
 	    {
 	       hypre_TFree(values,HYPRE_MEMORY_DEVICE);
 	    }
@@ -3166,7 +3179,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-            if (data_location < 1)
+            if (data_location != HYPRE_MEMORY_HOST)
             {
                values   = hypre_CTAlloc(HYPRE_Real, volume,HYPRE_MEMORY_DEVICE);
             }
@@ -3177,18 +3190,22 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 #else
             values   = hypre_CTAlloc(HYPRE_Real, volume,HYPRE_MEMORY_DEVICE);
 #endif
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
             hypre_LoopBegin(volume,i)
             {
                values[i] = center;
             }
             hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 	      
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices+dim, values);
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-            if (data_location < 1)
+            if (data_location == HYPRE_MEMORY_DEVICE)
             {
                hypre_TFree(values,HYPRE_MEMORY_DEVICE);
             }
@@ -3254,6 +3271,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_DEVICE);
 #endif
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
             hypre_LoopBegin(volume,d)  
             {
 	       HYPRE_Int i = stencil_size*d;
@@ -3283,6 +3302,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                }
             }
 	    hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 	    
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -3406,11 +3427,15 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 #endif
             
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
 	    hypre_LoopBegin(volume,i)
             {
                values[i] = center;
             }
 	    hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 	      
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -3522,11 +3547,16 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
 #else
             values = hypre_CTAlloc(HYPRE_Real, vol[ib],HYPRE_MEMORY_DEVICE);
 #endif
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
             hypre_LoopBegin(vol[ib],i)  
             {
                values[i] = 0.0;
             }
             hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             if( ilower[ib][d] == istart[d] && period[d] == 0 )
             {

@@ -464,6 +464,8 @@ hypre_PointRelax( void               *relax_vdata,
                {
                   Ai = hypre_CCBoxIndexRank( A_data_box, start );
                   AAp0 = 1/Ap[Ai];
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp,bp)
                   hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                       b_data_box, start, stride, bi,
                                       x_data_box, start, stride, xi);
@@ -471,11 +473,15 @@ hypre_PointRelax( void               *relax_vdata,
                      xp[xi] = bp[bi] * AAp0;
                   }
                   hypre_BoxLoop2End(bi, xi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
                }
                /* constant_coefficent 0 (variable) or 2 (variable diagonal
                   only) are the same for the diagonal */
                else
                {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                   hypre_BoxLoop3Begin(hypre_StructVectorNDim(x), loop_size,
                                       A_data_box, start, stride, Ai,
                                       b_data_box, start, stride, bi,
@@ -485,6 +491,8 @@ hypre_PointRelax( void               *relax_vdata,
                   }
                   hypre_BoxLoop3End(Ai, bi, xi);
                }
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
          }
       }
@@ -593,6 +601,8 @@ hypre_PointRelax( void               *relax_vdata,
                {
                   start  = hypre_BoxIMin(compute_box);
                   hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap)
                   hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                       A_data_box, start, stride, Ai,
                                       t_data_box, start, stride, ti);
@@ -600,6 +610,8 @@ hypre_PointRelax( void               *relax_vdata,
                      tp[ti] /= Ap[Ai];
                   }
                   hypre_BoxLoop2End(Ai, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
                }
             }
          }
@@ -703,6 +715,9 @@ hypre_PointRelax_core0( void               *relax_vdata,
 
    start  = hypre_BoxIMin(compute_box);
    hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,bp)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        b_data_box, start, stride, bi,
                        t_data_box, start, stride, ti);
@@ -710,6 +725,8 @@ hypre_PointRelax_core0( void               *relax_vdata,
       tp[ti] = bp[bi];
    }
    hypre_BoxLoop2End(bi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
    /* unroll up to depth MAX_DEPTH */
    for (si = 0; si < stencil_size; si += MAX_DEPTH)
@@ -774,6 +791,8 @@ hypre_PointRelax_core0( void               *relax_vdata,
       switch(depth)
       {
          case 7:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
@@ -789,9 +808,13 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap6[Ai] * xp[xi + xoff6];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 6:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
@@ -806,9 +829,13 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap5[Ai] * xp[xi + xoff5];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 5:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,Ap2,Ap3,Ap4,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
@@ -822,9 +849,13 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap4[Ai] * xp[xi + xoff4];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 4:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,Ap2,Ap3,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
@@ -837,9 +868,13 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap3[Ai] * xp[xi + xoff3];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 3:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,Ap2,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
@@ -851,9 +886,13 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap2[Ai] * xp[xi + xoff2];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 2:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
@@ -864,9 +903,13 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap1[Ai] * xp[xi + xoff1];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 1:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
@@ -876,6 +919,8 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap0[Ai] * xp[xi + xoff0];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 0:
@@ -955,6 +1000,9 @@ hypre_PointRelax_core12( void               *relax_vdata,
       For a variable diagonal, this diagonal division is done
       at the end of the computation. */
    Ai = hypre_CCBoxIndexRank( A_data_box, start );
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,bp)
    if ( constant_coefficient==1 ) /* constant diagonal */
    {
       Apd = hypre_StructMatrixBoxData(A, boxarray_id, diag_rank);
@@ -978,8 +1026,9 @@ hypre_PointRelax_core12( void               *relax_vdata,
          tp[ti] = bp[bi];
       }
       hypre_BoxLoop2End(bi, ti);
-
    }
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
    /* unroll up to depth MAX_DEPTH */
    for (si = 0; si < stencil_size; si += MAX_DEPTH)
@@ -1041,6 +1090,8 @@ hypre_PointRelax_core12( void               *relax_vdata,
             break;
       }
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,xp)
       switch(depth)
       {
          case 7:
@@ -1172,7 +1223,8 @@ hypre_PointRelax_core12( void               *relax_vdata,
          case 0:
             break;
       }
-
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    return hypre_error_flag;
@@ -1471,6 +1523,8 @@ HYPRE_Int hypre_relax_wtx( void *relax_vdata, HYPRE_Int pointset,
             start  = hypre_BoxIMin(compute_box);
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp,tp)
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
@@ -1478,6 +1532,8 @@ HYPRE_Int hypre_relax_wtx( void *relax_vdata, HYPRE_Int pointset,
                xp[xi] = weight*tp[ti] + weightc*xp[xi];
             }
             hypre_BoxLoop2End(xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
          }
       }
    }
@@ -1551,6 +1607,8 @@ HYPRE_Int hypre_relax_copy( void *relax_vdata, HYPRE_Int pointset,
             start  = hypre_BoxIMin(compute_box);
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp,tp)
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
@@ -1558,6 +1616,8 @@ HYPRE_Int hypre_relax_copy( void *relax_vdata, HYPRE_Int pointset,
                xp[xi] = tp[ti];
             }
             hypre_BoxLoop2End(xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
          }
       }
    }

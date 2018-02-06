@@ -65,6 +65,11 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
+
+#ifdef HYPRE_USE_OMP45
+   HYPRE_OMPOffloadOn();
+#endif
+
 #if defined(HYPRE_USE_KOKKOS)
    Kokkos::InitArguments args;
    args.num_threads = 10;
@@ -436,11 +441,15 @@ AddValuesVector( hypre_StructGrid   *grid,
       volume   = hypre_BoxVolume(box);
       values   =  hypre_CTAlloc(HYPRE_Real,  volume, HYPRE_MEMORY_DEVICE);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
       hypre_LoopBegin(volume,i)
       {
          values[i] = value;
       }
       hypre_LoopEnd();
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 	
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);

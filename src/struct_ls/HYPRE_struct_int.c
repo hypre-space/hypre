@@ -54,13 +54,16 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
  
       hypre_BoxGetSize(box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(vp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
       {
-//         vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
          vp[vi] = 2.0*hypre_Rand() - 1.0;
       }
       hypre_BoxLoop1End(vi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    return hypre_error_flag;

@@ -495,8 +495,19 @@ extern "C++" {
 #define HYPRE_CUDA_GLOBAL 
 #endif
 
+/* OpenMP 4.5 */
 #if defined(HYPRE_USE_OMP45)
+
 #include "omp.h"
+  
+#ifdef __cplusplus
+extern "C++" {
+#endif
+#include <cuda.h>
+#include <cuda_runtime.h>
+#ifdef __cplusplus
+}
+#endif
 
 /* stringification:
  * _Pragma(string-literal), so we need to cast argument to a string
@@ -508,7 +519,9 @@ extern "C++" {
 
 /* OpenMP 4.5 GPU memory management */
 /* empty */
+#ifndef HYPRE_CUDA_GLOBAL
 #define HYPRE_CUDA_GLOBAL
+#endif
 
 extern HYPRE_Int hypre__global_offload;
 extern HYPRE_Int hypre__offload_device_num;
@@ -640,6 +653,7 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
    } \
 }
 
+#if 0
 /* DeviceMemset 
  * memset: [to] a mapped CPU ptr
  * memset host memory first and the update the device memory */
@@ -651,11 +665,15 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
    size_t size_inuse = sizeof(type) * count; \
    hypre_omp45_offload(hypre__offload_device_num, ptr, type, 0, count, "update", "to"); \
 }
+#endif
 
 #define hypre_InitMemoryDebug(id)
 
 #define hypre_FinalizeMemoryDebug()
-#endif
+
+#endif // OMP45
+
+
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
@@ -681,6 +699,8 @@ void assert_check(void *ptr, char *file, int line);
   ( assert_check((ptr),__FILE__,__LINE__))
 
 #else
+
+#define ASSERT_MANAGED(ptr) (ptr)
 
 #define hypre_TAlloc(type, count, location) \
   ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
@@ -1192,10 +1212,9 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
 
-#if defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) || defined(HYPRE_USE_OMP45)  || defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+
 #include <cuda_runtime_api.h>
-#include <cusparse.h>
-#include <cublas_v2.h>
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
 #define MEM_PAD_LEN 1
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
@@ -1219,15 +1238,20 @@ inline void gpuAssert(cudaError_t code, const char *file, int line)
 void cudaSafeFree(void *ptr,int padding);
 hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
-#endif
+#endif // defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)|| defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) ||   defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
+void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
+#endif // defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
-
+#include <cusparse.h>
+#include <cublas_v2.h>
 #include <stdio.h>
-//#include <cuda_runtime_api.h>
+#include <cuda_runtime_api.h>
 #include <stdlib.h>
 inline const char *cusparseErrorCheck(cusparseStatus_t error)
 {
@@ -1334,10 +1358,10 @@ void cudaSafeFree(void *ptr,int padding);
 //void PrintPointerAttributes(const void *ptr);
 //size_t mempush(void* ptr, size_t size,int purge);
 //int memloc(void *ptr, int device);
-#endif
-#endif
+#endif // __cusparseErrorCheck__
+#endif// defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 
-#endif
+#endif // hypre_GPU_ERROR_HEADER
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -1352,10 +1376,9 @@ void cudaSafeFree(void *ptr,int padding);
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
+#ifdef HYPRE_USE_GPU
 #include <cuda_runtime_api.h>
-#define MAX_HGS_ELEMENTS 10
-
 void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();
 int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
@@ -1364,8 +1387,6 @@ void VecSet(double* tgt, int size, double value, cudaStream_t s);
 void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
-
-
 cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
 cudaEvent_t getevent(hypre_int i);
@@ -1378,18 +1399,6 @@ void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t 
 void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream);
 cublasHandle_t getCublasHandle();
 cusparseHandle_t getCusparseHandle();
-typedef struct node {
-  const void *ptr;
-  size_t size;
-  struct node *next;
-} node;
-size_t mempush(const void *ptr, size_t size, hypre_int action);
-node *memfind(node *head, const void *ptr);
-void memdel(node **head, node *found);
-void meminsert(node **head, const void *ptr,size_t size);
-void printlist(node *head,hypre_int nc);
-//#define MEM_PAD_LEN 1
-size_t memsize(const void *ptr);
 hypre_int getsetasyncmode(hypre_int mode, hypre_int action);
 void SetAsyncMode(hypre_int mode);
 hypre_int GetAsyncMode();
@@ -1400,11 +1409,11 @@ hypre_int getcore();
 hypre_int getnuma();
 hypre_int checkDeviceProps();
 hypre_int pointerIsManaged(const void *ptr);
-
 /*
  * Global struct for keeping HYPRE GPU Init state
  */
 
+#define MAX_HGS_ELEMENTS 10
 struct hypre__global_struct{
   hypre_int initd;
   hypre_int device;
@@ -1433,10 +1442,29 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
+#else
 
-#define LOCATION_CPU (1)
-#define LOCATION_GPU (0)
-#define LOCATION_UNSET (-1)
+#define hypre_GPUInit(use_device)
+#define hypre_GPUFinalize()
+
+#endif // HYPRE_USE_GPU
+
+
+typedef struct node {
+  const void *ptr;
+  size_t size;
+  struct node *next;
+} node;
+size_t mempush(const void *ptr, size_t size, hypre_int action);
+node *memfind(node *head, const void *ptr);
+void memdel(node **head, node *found);
+void meminsert(node **head, const void *ptr,size_t size);
+void printlist(node *head,hypre_int nc);
+//#define MEM_PAD_LEN 1
+size_t memsize(const void *ptr);
+
+#define HYPRE_MIN_GPU_SIZE (131072)//(65536)//(8192)//(16384)//(32768)//(65536)
+
 extern HYPRE_Int hypre_exec_policy;
 
 #else
@@ -1444,7 +1472,7 @@ extern HYPRE_Int hypre_exec_policy;
 #define hypre_GPUInit(use_device)
 #define hypre_GPUFinalize()
 //#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
-#endif
+#endif//defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 
 #if defined(HYPRE_USE_CUDA)
 extern HYPRE_Int hypre_exec_policy;
@@ -1452,10 +1480,6 @@ extern char tmp_print[10];
 extern HYPRE_Int hypre_box_print;
 extern double  t_start, t_end;
 extern HYPRE_Int time_box ;
-
-#define LOCATION_CPU (1)
-#define LOCATION_GPU (0)
-#define LOCATION_UNSET (-1)
 
 #define RAJA_MAX_REDUCE_VARS (8)
 #define RAJA_CUDA_MAX_NUM_BLOCKS (512*512*512)
@@ -1477,7 +1501,7 @@ CudaReductionBlockDataType* getCPUReductionMemBlock(int id);
 void releaseCPUReductionId(int id);
 void freeCPUReductionMemBlock();
 
-#endif
+#endif//defined(HYPRE_USE_CUDA)
 
 #ifdef HYPRE_USE_OMP45
 HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
@@ -1491,9 +1515,11 @@ HYPRE_Int HYPRE_OMPOffloadOff();
 
 HYPRE_Int HYPRE_OMPOffloadStatPrint();
 
-#endif
+#define HYPRE_MIN_GPU_SIZE (131072)//(65536)//(8192)//(16384)//(32768)//(65536)
 
-#endif
+#endif//HYPRE_USE_OMP45
+
+#endif//__GPUMEM_H__
 
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.

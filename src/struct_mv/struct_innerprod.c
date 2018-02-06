@@ -75,7 +75,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
       }
       hypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
 #elif defined(HYPRE_USE_CUDA)
-      ReduceSum<HYPRE_Real> box_sum(local_result,data_location);
+      ReduceSum<HYPRE_Real> box_sum(0,data_location);
 
       hypre_BoxLoop2Begin(ndim, loop_size,
 			  x_data_box, start, unit_stride, xi,
@@ -103,6 +103,8 @@ hypre_StructInnerProd( hypre_StructVector *x,
 #else
 #define HYPRE_BOX_REDUCTION reduction(+:box_sum)
 #endif
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(yp, xp)
       hypre_BoxLoop2Begin(ndim, loop_size,
 			  x_data_box, start, unit_stride, xi,
 			  y_data_box, start, unit_stride, yi);
@@ -110,6 +112,8 @@ hypre_StructInnerProd( hypre_StructVector *x,
          box_sum += xp[xi] * hypre_conj(yp[yi]); 
       }
       hypre_BoxLoop2End(xi, yi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
       local_result += (HYPRE_Real) box_sum;
 #undef HYPRE_BOX_REDUCTION

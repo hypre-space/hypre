@@ -558,6 +558,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_bs,rb,a_cs,pa,rap_bw,a_cw,rap_bc,a_bc,a_cc,rap_be,a_ce,rap_bn,a_cn,rap_cs,pb,ra,rap_cw,rap_csw,rap_cse,rap_cc,a_ac)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -608,6 +610,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
 
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
    else
    {
@@ -628,6 +632,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
       a_ac_offd = a_ac[iA_offd];
       a_ac_offdm1 = a_ac[iA_offdm1];
        
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_bs,rb,pa,rap_bw,rap_bc,a_cc,rap_be,rap_bn,rap_cs,pb,ra,rap_cw,rap_csw,rap_cse,rap_cc)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -678,6 +684,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
 
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    /*      }*/ /* end ForBoxI */
@@ -1289,6 +1297,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
 
    if ( constant_coefficient_A==0 )
    {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_bsw,rb,a_csw,pa,rap_bs,a_cs,a_bs,rap_bse,a_cse,rap_bw,a_cw,a_bw,rap_bc,a_bc,a_cc,rap_be,a_ce,a_be,rap_bnw,a_cnw,rap_bn,a_cn,a_bn,rap_bne,a_cne,rap_csw,pb,ra,rap_cs,a_as,rap_cse,rap_cw,a_aw,rap_cc,a_ac)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -1373,6 +1383,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
 
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
    else
    {
@@ -1415,6 +1427,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
       a_bs_offdm1 = a_bs[iA_offdm1];
       a_bs_offdp1 = a_bs[iA_offdp1];
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_bsw,rb,pa,rap_bs,rap_bse,rap_bw,rap_bc,a_cc,rap_be,rap_bnw,rap_bn,rap_bne,rap_csw,pb,ra,rap_cs,rap_cse,rap_cw,rap_cc)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -1499,6 +1513,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
 
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
 /*      }*/ /* end ForBoxI */
@@ -2278,6 +2294,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_bsw,rb,a_csw,pa,a_bsw,rap_bs,a_cs,a_bs,rap_bse,a_cse,a_bse,rap_bw,a_cw,a_bw,rap_bc,a_bc,a_cc,rap_be,a_ce,a_be,rap_bnw,a_cnw,a_bnw,rap_bn,a_cn,a_bn,rap_bne,a_cne,a_bne,rap_csw,pb,ra,a_asw,rap_cs,a_as,rap_cse,a_ase,rap_cw,a_aw,rap_cc,a_ac)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -2377,6 +2395,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
             +                   a_ac[iA]   * pa[iP];
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
    else
    {
@@ -2433,6 +2453,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
       a_bne_offd = a_bne[iA_offd];
       a_bne_offdm1 = a_bne[iA_offdm1];
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_bsw,rb,pa,rap_bs,rap_bse,rap_bw,rap_bc,a_cc,rap_be,rap_bnw,rap_bn,rap_bne,rap_csw,pb,ra,rap_cs,rap_cse,rap_cw,rap_cc)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -2532,6 +2554,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
             +                   a_ac_offd   * pa[iP];
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
 /*      }*/ /* end ForBoxI */
@@ -3350,6 +3374,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_an,ra,a_cn,pb,rap_ae,a_ce,rap_ac,a_ac,a_cc,rap_aw,a_cw,rap_as,a_cs,rap_cn,rb,pa,rap_ce,rap_cnw,rap_cne)      
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -3391,6 +3417,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
          rap_cne[iAc] = 0.0;
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
    else
    {
@@ -3408,6 +3436,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
       a_ac_offd   = a_ac[iA_offd];
       a_ac_offdp1 = a_ac[iA_offdp1];
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_an,ra,pb,rap_ae,rap_ac,a_cc,rap_aw,rap_as,rap_cn,rb,pa,rap_ce,rap_cnw,rap_cne)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -3449,6 +3479,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
          rap_cne[iAc] = 0.0;
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
 /*      }*/ /* end ForBoxI */
@@ -4033,7 +4065,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
-
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_ane,ra,a_cne,pb,rap_an,a_cn,a_an,rap_anw,a_cnw,rap_ae,a_ce,a_ae,rap_ac,a_ac,a_cc,rap_aw,a_cw,a_aw,rap_ase,a_cse,rap_as,a_cs,a_as,rap_asw,a_csw,rap_cne,rb,pa,rap_cn,a_bn,rap_cnw,rap_ce,a_be)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -4110,6 +4143,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
 
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
    else
    {
@@ -4149,6 +4184,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
       a_bn_offd = a_bn[iA_offd];
       a_bn_offdp1 = a_bn[iA_offdp1];
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_ane,ra,pb,rap_an,rap_anw,rap_ae,rap_ac,a_cc,rap_aw,rap_ase,rap_as,rap_asw,rap_cne,rb,pa,rap_cn,rap_cnw,rap_ce)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -4224,6 +4261,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
 
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
 /*      }*/ /* end ForBoxI */
@@ -4977,7 +5016,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
-
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_ane,ra,a_cne,pb,a_ane,rap_an,a_cn,a_an,rap_anw,a_cnw,a_anw,rap_ae,a_ce,a_ae,rap_ac,a_ac,a_cc,rap_aw,a_cw,a_aw,rap_ase,a_cse,a_ase,rap_as,a_cs,a_as,rap_asw,a_csw,a_asw,rap_cne,rb,pa,a_bne,rap_cn,a_bn,rap_cnw,a_bnw,rap_ce,a_be)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -5071,6 +5111,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
 
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
    else
    {
@@ -5124,6 +5166,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
       a_be_offd = a_be[iA_offd];
       a_be_offdp1 = a_be[iA_offdp1];
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_ane,ra,pb,rap_an,rap_anw,rap_ae,rap_ac,a_cc,rap_aw,rap_ase,rap_as,rap_asw,rap_cne,rb,pa,rap_cn,rap_cnw,rap_ce)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -5215,6 +5259,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
 
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    /*      }*/ /* end ForBoxI */

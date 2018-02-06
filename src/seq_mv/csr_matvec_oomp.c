@@ -16,6 +16,8 @@
  *
  *****************************************************************************/
 
+//#if defined(HYPRE_USE_MANAGED)
+
 #include "seq_mv.h"
 #include <assert.h>
 
@@ -536,7 +538,9 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex    alpha,
 {
   return 0;
   hypre_CSRMatrixMatvecOutOfPlaceOOMP(alpha,A,x,beta,b,y,offset);
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD 
   hypre_SeqVectorUpdateHost(y);
+#endif
   return 0;
 }
 /* int hypre_CSRMatrixSortHost(hypre_CSRMatrix *A){ */
@@ -553,3 +557,4 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex    alpha,
 /*     mysort(&A_data[A_i[i]],&A_j[A_i[i]],(A_i[i+1]-A_i[i])); */
 /*   } */
 /* } */
+//#endif

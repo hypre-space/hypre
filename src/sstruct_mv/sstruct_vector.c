@@ -623,11 +623,16 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
                         
    HYPRE_Int             nparts, nvars;
    HYPRE_Int             part, var, i;
-
+#if defined(HYPRE_MEMORY_GPU)
+   HYPRE_Complex        *pardata_device;
+#endif  
    hypre_SetIndex(stride, 1);
 
    parvector = hypre_SStructVectorParVector(vector);
    pardata = hypre_VectorData(hypre_ParVectorLocalVector(parvector));
+#if defined(HYPRE_MEMORY_GPU)
+   pardata_device = hypre_TAlloc(HYPRE_Complex, hypre_VectorSize(hypre_ParVectorLocalVector(parvector)) ,HYPRE_MEMORY_DEVICE);
+#endif
    pari = 0;
    nparts = hypre_SStructVectorNParts(vector);
    for (part = 0; part < nparts; part++)
@@ -649,17 +654,32 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
             yp = hypre_StructVectorBoxData(y, i);
 
             hypre_BoxGetSize(box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(pardata,yp)
             hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
                                 y_data_box, start, stride, yi,
                                 box,        start, stride, bi);
             {
-               pardata[pari+bi] = yp[yi];
+#if defined(HYPRE_MEMORY_GPU)
+	       pardata_device[pari+bi] = yp[yi];
+#else
+	       pardata[pari+bi] = yp[yi];
+#endif
             }
             hypre_BoxLoop2End(yi, bi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
+
             pari += hypre_BoxVolume(box);
          }
       }
    }
+
+#if defined(HYPRE_MEMORY_GPU)	
+   hypre_TMemcpy(pardata, pardata_device, HYPRE_Complex, hypre_VectorSize(hypre_ParVectorLocalVector(parvector)), HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+   hypre_TFree(pardata_device,HYPRE_MEMORY_DEVICE);
+#endif  
 
    *parvector_ptr = hypre_SStructVectorParVector(vector);
 
@@ -701,13 +721,19 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                         
    HYPRE_Int             nparts, nvars;
    HYPRE_Int             part, var, i;
-
+#if defined(HYPRE_MEMORY_GPU)
+   HYPRE_Complex        *pardata_device;
+#endif
    if (parvector != NULL)
    {
       hypre_SetIndex(stride, 1);
 
       parvector = hypre_SStructVectorParVector(vector);
       pardata = hypre_VectorData(hypre_ParVectorLocalVector(parvector));
+#if defined(HYPRE_MEMORY_GPU)
+      pardata_device = hypre_TAlloc(HYPRE_Complex, hypre_VectorSize(hypre_ParVectorLocalVector(parvector)) ,HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(pardata_device, pardata, HYPRE_Complex, hypre_VectorSize(hypre_ParVectorLocalVector(parvector)), HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
+#endif
       pari = 0;
       nparts = hypre_SStructVectorNParts(vector);
       for (part = 0; part < nparts; part++)
@@ -729,19 +755,31 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                yp = hypre_StructVectorBoxData(y, i);
 
                hypre_BoxGetSize(box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(yp, pardata)
                hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
                                    y_data_box, start, stride, yi,
                                    box,        start, stride, bi);
                {
-                  yp[yi] = pardata[pari+bi];
+#if defined(HYPRE_MEMORY_GPU)		 
+                  yp[yi] = pardata_device[pari+bi];
+#else
+		  yp[yi] = pardata[pari+bi];
+#endif
                }
                hypre_BoxLoop2End(yi, bi);
+#undef DEVICE_VAR
+#define DEVICE_VAR
+
                pari += hypre_BoxVolume(box);
             }
          }
       }
    }
-
+#if defined(HYPRE_MEMORY_GPU)   
+   hypre_TFree(pardata_device,HYPRE_MEMORY_DEVICE);
+#endif
    return hypre_error_flag;
 }
 /*------------------------------------------------------------------

@@ -184,6 +184,7 @@ function CheckPath
                ExecFileNames="$ExecFileNames $EXECFILE"
                return 0
             else
+		echo $EXECFILE
                echo "Cannot find executable!!!"
                return 1
             fi

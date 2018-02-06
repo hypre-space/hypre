@@ -66,7 +66,7 @@ hypre_StructGridCreate( MPI_Comm           comm,
    }
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-   hypre_StructGridDataLocation(grid) = LOCATION_UNSET;
+   hypre_StructGridDataLocation(grid) = HYPRE_MEMORY_DEVICE;
 #endif
    *grid_ptr = grid;
 
