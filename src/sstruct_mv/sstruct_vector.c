@@ -654,6 +654,9 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
             yp = hypre_StructVectorBoxData(y, i);
 
             hypre_BoxGetSize(box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(pardata,yp)
             hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
                                 y_data_box, start, stride, yi,
                                 box,        start, stride, bi);
@@ -665,6 +668,9 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
 #endif
             }
             hypre_BoxLoop2End(yi, bi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
+
             pari += hypre_BoxVolume(box);
          }
       }
@@ -749,6 +755,9 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                yp = hypre_StructVectorBoxData(y, i);
 
                hypre_BoxGetSize(box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(yp, pardata)
                hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
                                    y_data_box, start, stride, yi,
                                    box,        start, stride, bi);
@@ -760,6 +769,9 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
 #endif
                }
                hypre_BoxLoop2End(yi, bi);
+#undef DEVICE_VAR
+#define DEVICE_VAR
+
                pari += hypre_BoxVolume(box);
             }
          }

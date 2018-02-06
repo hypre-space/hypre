@@ -215,6 +215,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                                             i,
                                                                             stencil_shape);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(fac_smatrix_vals, smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size, 
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
@@ -222,6 +224,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                      fac_smatrix_vals[iAc]= smatrix_vals[iA];
                   }
                   hypre_BoxLoop2End(iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                }  /* for (j = 0; j < stencil_size; j++) */
             }     /* hypre_ForBoxI(i, grid_boxes) */
@@ -268,6 +272,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                                             i,
                                                                             stencil_shape);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(fac_smatrix_vals, smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size, 
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
@@ -275,6 +281,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                      fac_smatrix_vals[iAc]= smatrix_vals[iA];
                   }
                   hypre_BoxLoop2End(iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                }  /* for (k = 0; k< stencil_size; k++) */
             }      /* hypre_ForBoxI(j, own_composite_cbox) */
@@ -402,6 +410,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                              cbox,
                                                              stencil_shape);
       
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(fac_smatrix_vals, smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
@@ -409,6 +419,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                      fac_smatrix_vals[iAc]= smatrix_vals[iA];
                   }
                   hypre_BoxLoop2End(iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                }  /* for (k = 0; k < stencil_size; k++) */
             }     /* hypre_ForBoxI(j, cgrid_boxes) */

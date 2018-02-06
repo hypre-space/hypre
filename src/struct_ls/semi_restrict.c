@@ -55,7 +55,7 @@ hypre_SemiRestrictSetup( void               *restrict_vdata,
                          hypre_Index         findex,
                          hypre_Index         stride                )
 {
-	hypre_SemiRestrictData *restrict_data = (hypre_SemiRestrictData *)restrict_vdata;
+   hypre_SemiRestrictData *restrict_data = (hypre_SemiRestrictData *)restrict_vdata;
 
    hypre_StructGrid       *grid;
    hypre_StructStencil    *stencil;
@@ -267,6 +267,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
 
 	       Rp0val = Rp0[Ri+Rp0_offset];
 	       Rp1val = Rp1[Ri];
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rcp,rp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(R), loop_size,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);
@@ -275,9 +277,13 @@ hypre_SemiRestrict( void               *restrict_vdata,
                                        Rp1val * rp[ri+rp1_offset]);
                }
                hypre_BoxLoop2End(ri, rci);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
             else
             {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rcp,rp,Rp0,Rp1)
                hypre_BoxLoop3Begin(hypre_StructMatrixNDim(R), loop_size,
                                    R_dbox,  startc, stridec, Ri,
                                    r_dbox,  start,  stride,  ri,
@@ -287,6 +293,8 @@ hypre_SemiRestrict( void               *restrict_vdata,
                                        Rp1[Ri]            * rp[ri+rp1_offset]);
                }
                hypre_BoxLoop3End(Ri, ri, rci);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
          }
       }

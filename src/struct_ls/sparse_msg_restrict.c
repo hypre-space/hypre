@@ -222,6 +222,9 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
             hypre_StructMapCoarseToFine(startc, cindex, strideR, startR);
 
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rcp,rp,Rp0,rp0,Rp1,rp1)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(R), loop_size,
                                 R_dbox,  startR, strideR, Ri,
                                 r_dbox,  start,  stride,  ri,
@@ -231,6 +234,8 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
                                     Rp1[Ri] * rp1[ri]);
             }
             hypre_BoxLoop3End(Ri, ri, rci);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
          }
       }
    }

@@ -333,6 +333,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
       {
          hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(ac_cw, a_cw, a_cc, ac_cc, a_ce, ac_ce)
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, fstart, stridef, iA,
                              Ac_dbox, cstart, stridec, iAc);
@@ -340,16 +342,18 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             HYPRE_Int iAm1 = iA - offsetA;
             HYPRE_Int iAp1 = iA + offsetA;
 
-            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
+            ac_cw[iAc] = - a_cw[iA] * a_cw[iAm1] / a_cc[iAm1];
 
             ac_cc[iAc] = a_cc[iA]
                - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
                - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
 
-            ac_ce[iAc] = - a_ce[iA] *a_ce[iAp1] / a_cc[iAp1];
+            ac_ce[iAc] = - a_ce[iA] * a_ce[iAp1] / a_cc[iAp1];
 
          }
          hypre_BoxLoop2End(iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
       }
 
       /*-----------------------------------------------
@@ -360,6 +364,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
       {
          hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(ac_cw, a_cw, a_cc, ac_cc, a_ce)
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, fstart, stridef, iA,
                              Ac_dbox, cstart, stridec, iAc);
@@ -367,13 +373,15 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             HYPRE_Int iAm1 = iA - offsetA;
             HYPRE_Int iAp1 = iA + offsetA;
 
-            ac_cw[iAc] = - a_cw[iA] *a_cw[iAm1] / a_cc[iAm1];
+            ac_cw[iAc] = - a_cw[iA] * a_cw[iAm1] / a_cc[iAm1];
 
             ac_cc[iAc] = a_cc[iA]
                - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
                - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
          }
          hypre_BoxLoop2End(iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
       }
 
    } /* end ForBoxI */
@@ -423,6 +431,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
          {
             hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(ac_cc, ac_cw, ac_ce)
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                 Ac_dbox, cstart, stridec, iAc);
             {
@@ -431,6 +441,8 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
                ac_ce[iAc]  =  0.0;
             }
             hypre_BoxLoop1End(iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
          }
 
          /*-----------------------------------------------
@@ -441,13 +453,17 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
          {
             hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(ac_cc, ac_cw)
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                 Ac_dbox, cstart, stridec, iAc);
             {
-               ac_cc[iAc] += (2.0  *  ac_cw[iAc]);
+               ac_cc[iAc] += (2.0 * ac_cw[iAc]);
                ac_cw[iAc]  =  0.0;
             }
             hypre_BoxLoop1End(iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
          }
 
       } /* end ForBoxI */
@@ -850,7 +866,9 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
       hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
       hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
-          
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp, bp)
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_dbox, start, base_stride, xi,
                           b_dbox, start, base_stride, bi);
@@ -858,6 +876,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          xp[xi] = bp[bi];
       }
       hypre_BoxLoop2End(xi, bi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    /*--------------------------------------------------
@@ -906,6 +926,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
          hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp, Ap)
          hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                              A_dbox, start, stride, Ai,
                              x_dbox, start, stride, xi);
@@ -913,6 +935,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             xp[xi] /= Ap[Ai]; 
          }
          hypre_BoxLoop2End(Ai, xi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
       }
 
       /* Step 2 */
@@ -982,6 +1006,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
                            
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xcp, xp, Awp, xwp, Aep, xep)
                hypre_BoxLoop3Begin(hypre_StructVectorNDim(x), loop_size,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi,
@@ -991,6 +1017,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                       Aep[Ai] * xep[xi+xep_offset];
                }
                hypre_BoxLoop3End(Ai, xi, xci);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
          }
       }
@@ -1031,6 +1059,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
       hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp, Ap)
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           A_dbox, start, stride, Ai,
                           x_dbox, start, stride, xi);
@@ -1041,6 +1071,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          }
       }
       hypre_BoxLoop2End(Ai, xi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    /*--------------------------------------------------
@@ -1094,6 +1126,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
          hypre_BoxGetSize(compute_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp, xcp)
          hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                              x_dbox, start, stride, xi,
                              xc_dbox, startc, stridec, xci);
@@ -1101,6 +1135,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             xp[xi] = xcp[xci];
          }
          hypre_BoxLoop2End(xi, xci);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
       }
 
       /* Step 2 */
@@ -1156,6 +1192,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                hypre_CopyIndex(hypre_BoxIMin(compute_box), start);
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp, Awp, Aep, Ap)
                hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi);
@@ -1163,6 +1201,8 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                   xp[xi] -= (Awp[Ai]*xp[xi+xwp_offset] + Aep[Ai]*xp[xi+xep_offset]) / Ap[Ai];
                }
                hypre_BoxLoop2End(Ai, xi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
          }
       }

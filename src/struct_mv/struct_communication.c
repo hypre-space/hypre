@@ -967,21 +967,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
             {
                kptr = lptr + order[ll]*stride_array[ndim];
 
-#if defined(HYPRE_USE_OMP45)
-#if 0
-                  HYPRE_Int device_num = omp_get_default_device();
-                  if (HYPRE_IsMapped(dptr, device_num)) {
-                     printf("i=%d, dptr error\n", i);
-                     exit(0);
-                  } else {
-                     printf("i=%d, dptr OK\n", i);
-                  }
-                  if (HYPRE_IsOMPPtrMapped(kptr, device_num)) {
-                     printf("kptr error\n");
-                     exit(0);
-                  }
-#endif
-#endif
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(dptr, kptr)
                hypre_BasicBoxLoop2Begin(ndim, length_array,
                                         stride_array, ki,
                                         unitst_array, di);
@@ -989,6 +976,8 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                   dptr[di] = kptr[ki];
                }
                hypre_BoxLoop2End(ki, di);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                dptr += unitst_array[ndim];
             }
@@ -999,12 +988,19 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                {
                   size *= length_array[d];
                }
+
 #if defined(HYPRE_USE_OMP45)
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(dptr, kptr)
                hypre_BoxLoop0Begin(ndim, length_array)
                {
                   dptr[hypre__thread] = 0.0;
                }
                hypre_BoxLoop0End();
+#undef DEVICE_VAR
+#define DEVICE_VAR 
+
 #elif defined(HYPRE_MEMORY_GPU)
 	       if (hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 	       {
@@ -1313,6 +1309,8 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
          {
             kptr = lptr + ll*stride_array[ndim];
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(kptr, dptr)
             hypre_BasicBoxLoop2Begin(ndim, length_array,
                                      stride_array, ki,
                                      unitst_array, di);
@@ -1327,6 +1325,8 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
                }
             }
             hypre_BoxLoop2End(ki, di);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             dptr += unitst_array[ndim];
          }
@@ -1442,7 +1442,8 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                fr_dpl = fr_dp + (order[ll])*fr_stride_array[ndim];
                to_dpl = to_dp + (      ll )*to_stride_array[ndim];
 
-#if defined(HYPRE_USE_OMP45)
+//#if defined(HYPRE_USE_OMP45)
+#if 0
                /* This is based on "Idea 2" in box.h */
                {
                   //HYPRE_Int      i[HYPRE_MAXDIM+1];
@@ -1485,6 +1486,8 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                   hypre_BoxDataExchangeEnd();
                }
 #else
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(to_dpl, fr_dpl)
                hypre_BasicBoxLoop2Begin(ndim, length_array,
                                         fr_stride_array, fi,
                                         to_stride_array, ti);
@@ -1501,6 +1504,8 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                   }
                }
                hypre_BoxLoop2End(fi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 #endif
             }
          }

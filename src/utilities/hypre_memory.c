@@ -23,7 +23,7 @@
 #endif
 
 /* global variables for OMP 45 */
-#ifdef HYPRE_USE_OMP45
+#if defined(HYPRE_USE_OMP45)
 HYPRE_Int hypre__global_offload = 0;
 HYPRE_Int hypre__offload_device_num;
 
@@ -64,7 +64,8 @@ hypre_OutOfMemory( size_t size )
 /*--------------------------------------------------------------------------
  * hypre_MAlloc
  *--------------------------------------------------------------------------*/
-#if 0//TRACK_MEMORY_ALLOCATIONS
+
+#if TRACK_MEMORY_ALLOCATIONS
 char *
 hypre_MAllocIns( size_t size , HYPRE_Int location,char *file, int line)
 {
@@ -78,6 +79,7 @@ hypre_MAllocIns( size_t size , HYPRE_Int location,char *file, int line)
   return ret;
 }
 #endif
+
 char *
 hypre_MAlloc( size_t size , HYPRE_Int location)
 {
@@ -112,7 +114,13 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
          cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
          ptr=(void*)(&sp[MEM_PAD_LEN]);
 #endif
-#elif defined(HYPRE_USE_OMP45)
+#elif defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+         ptr = omp_target_alloc(size+sizeof(size_t)*MEM_PAD_LEN, hypre__offload_device_num);
+         /*gpuErrchk( cudaMalloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN) );*/
+         size_t *sp=(size_t*)ptr;
+         cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
+         ptr=(void*)(&sp[MEM_PAD_LEN]);
+#elif defined(HYPRE_USE_OMP45) 
          void *ptr_alloc = malloc(size + HYPRE_OMP45_SZE_PAD);
          char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
          size_t size_inuse = size;
@@ -144,13 +152,11 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
       }
       else if (location==HYPRE_MEMORY_SHARED)
       {
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
 	 gpuErrchk( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
          size_t *sp=(size_t*)ptr;
          *sp=size;
          ptr=(void*)(&sp[MEM_PAD_LEN]);
-#elif defined(HYPRE_USE_OMP45)
-	 cudaMallocManaged(&ptr, size, cudaMemAttachGlobal);
 #else
          ptr = malloc(size);
 #endif
@@ -180,7 +186,7 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
 /*--------------------------------------------------------------------------
  * hypre_CAlloc
  *--------------------------------------------------------------------------*/
-#if 0//TRACK_MEMORY_ALLOCATIONS
+#if TRACK_MEMORY_ALLOCATIONS
 char *
 hypre_CAllocIns( size_t count, 
               size_t elt_size,
@@ -195,6 +201,7 @@ hypre_CAllocIns( size_t count,
   return ret;
 }
 #endif
+
 char *
 hypre_CAlloc( size_t count, 
               size_t elt_size,
@@ -228,6 +235,9 @@ hypre_CAlloc( size_t count,
          ptr=(void*)hypre_MAlloc(size,location);
          cudaMemset(ptr,0,size);
 #endif
+#elif defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+         ptr=(void*)hypre_MAlloc(size,location);
+         cudaMemset(ptr,0,size);
 #elif defined(HYPRE_USE_OMP45)
          void *ptr_alloc = calloc(count + HYPRE_OMP45_CNT_PAD(elt_size), elt_size);
          char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
@@ -248,17 +258,17 @@ hypre_CAlloc( size_t count,
 	//memset(ptr,0,count*elt_size);
 	//mempush(ptr,size,0);
 #else
-         ptr = calloc(count, elt_size);
+        ptr = calloc(count, elt_size);
 #endif
       }
       else if (location==HYPRE_MEMORY_SHARED)
       {
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
-		ptr=(void*)hypre_MAlloc(size, location);
-		memset(ptr,0,count*elt_size);
-		//gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
-		//memset(ptr,0,count*elt_size);
-		//mempush(ptr,size,0);
+         ptr=(void*)hypre_MAlloc(size, location);
+         memset(ptr,0,count*elt_size);
+         //gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+         //memset(ptr,0,count*elt_size);
+         //mempush(ptr,size,0);
 #else
          ptr = calloc(count, elt_size);
 #endif
@@ -298,7 +308,8 @@ size_t memsize(const void *ptr){
 /*--------------------------------------------------------------------------
  * hypre_ReAlloc
  *--------------------------------------------------------------------------*/
-#if 0//TRACK_MEMORY_ALLOCATIONS
+
+#if TRACK_MEMORY_ALLOCATIONS
 char *
 hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, int line)
 {
@@ -312,6 +323,7 @@ hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, int li
   return ret;
 }
 #endif
+
 char *
 hypre_ReAlloc( char   *ptr, 
                size_t  size,
@@ -411,6 +423,9 @@ hypre_Free( char *ptr ,
 #elif defined(HYPRE_MEMORY_GPU)
       cudaSafeFree(ptr,MEM_PAD_LEN);
 #endif
+#elif defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+      omp_target_free(ptr, hypre__offload_device_num);
+      /*cudaSafeFree(ptr,MEM_PAD_LEN);*/
 #elif defined(HYPRE_USE_OMP45)
       char *ptr_alloc = ((char*) ptr) - HYPRE_OMP45_SZE_PAD;
       size_t size_inuse = ((size_t *) ptr_alloc)[0];
@@ -422,10 +437,8 @@ hypre_Free( char *ptr ,
      }
      else if (location==HYPRE_MEMORY_SHARED)
      {
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
         cudaSafeFree(ptr,MEM_PAD_LEN);
-#elif defined(HYPRE_USE_OMP45)
-	cudaFree(ptr);
 #else
         free(ptr);
 #endif
@@ -459,10 +472,12 @@ hypre_Memcpy( char *dst,
          {
 #if defined(HYPRE_USE_MANAGED)
             memcpy( dst, src, size);
-#elif defined(HYPRE_MEMORY_GPU)
+#elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45_TARGET_ALLOC)
             cudaMemcpy( dst, src, size, cudaMemcpyDeviceToDevice);
 #elif defined(HYPRE_USE_OMP45)
             //TODO
+            printf("OMP45 DEVICE MEMCPY NOT IMPLEMENTED !\n");
+            exit(-1);
 #else
             memcpy( dst, src, size);
 #endif
@@ -476,7 +491,7 @@ hypre_Memcpy( char *dst,
       {
 #if defined(HYPRE_USE_MANAGED)
          memcpy( dst, src, size);
-#elif defined(HYPRE_MEMORY_GPU)
+#elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45_TARGET_ALLOC)
          cudaMemcpy( dst, src, size, cudaMemcpyHostToDevice);
 #elif defined(HYPRE_USE_OMP45)
          memcpy(dst, src, size);
@@ -489,7 +504,7 @@ hypre_Memcpy( char *dst,
       {
 #if defined(HYPRE_USE_MANAGED)
          memcpy( dst, src, size);
-#elif defined(HYPRE_MEMORY_GPU)
+#elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45_TARGET_ALLOC)
          cudaMemcpy( dst, src, size, cudaMemcpyDeviceToHost);
 #elif defined(HYPRE_USE_OMP45)
          hypre_omp45_offload(hypre__offload_device_num, src, char, 0, size, "update", "from");
@@ -537,7 +552,7 @@ hypre_MemcpyAsync( char *dst,
         {
 #if defined(HYPRE_USE_MANAGED)
 	   cudaMemcpyAsync( dst, src, size, cudaMemcpyDefault, HYPRE_STREAM(0)); 
-#elif defined(HYPRE_MEMORY_GPU)
+#elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45_TARGET_ALLOC)
 	   //cudaMemcpyAsync( dst, src, size, cudaMemcpyDeviceDevice,0);
 #elif defined(HYPRE_USE_OMP45)
 	   //TODO
@@ -559,7 +574,7 @@ hypre_MemcpyAsync( char *dst,
      {
 #if defined(HYPRE_USE_MANAGED)
         cudaMemcpyAsync( dst, src, size, cudaMemcpyDefault, HYPRE_STREAM(0)); 
-#elif defined(HYPRE_MEMORY_GPU)
+#elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45_TARGET_ALLOC)
 	//cudaMemcpyAsync( dst, src, size, cudaMemcpyHostToDevice);
 #elif defined(HYPRE_USE_OMP45)
 	memcpy(dst, src, size);
@@ -572,7 +587,7 @@ hypre_MemcpyAsync( char *dst,
      {
 #if defined(HYPRE_USE_MANAGED)
         cudaMemcpyAsync( dst, src, size, cudaMemcpyDefault, HYPRE_STREAM(0)); 
-#elif defined(HYPRE_MEMORY_GPU)
+#elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45_TARGET_ALLOC)
 	//cudaMemcpyAsync( dst, src, size, cudaMemcpyDeviceToHost);
 #elif defined(HYPRE_USE_OMP45)
 	hypre_omp45_offload(hypre__offload_device_num, src, char, 0, size, "update", "from");

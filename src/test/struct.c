@@ -190,7 +190,7 @@ main( hypre_int argc,
    hypre_MPI_Init(&argc, &argv);
 
 #ifdef HYPRE_USE_OMP45
-   //HYPRE_OMPOffloadOn();
+   HYPRE_OMPOffloadOn();
 #endif
 
 #if defined(HYPRE_USE_KOKKOS)
@@ -2940,6 +2940,8 @@ AddValuesVector( hypre_StructGrid  *gridvector,
       if ((dim == 2 && period[0] != 0 && period[1] != 0) ||
           (dim == 3 && period[0] != 0 && period[1] != 0 && period[2] != 0))
       {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
 	 hypre_LoopBegin(volume,i)
          {
             values[i] = 0.0;
@@ -2947,15 +2949,21 @@ AddValuesVector( hypre_StructGrid  *gridvector,
 	    values[volume - 1] = -value;
 	    
          }
-	 hypre_LoopEnd()	   
+	 hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
       }
       else
       {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
 	 hypre_LoopBegin(volume,i)
          {
             values[i] = value;
          }
 	 hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
       }
 
       ilower = hypre_BoxIMin(box);
@@ -3060,6 +3068,9 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 #else
             values     = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_DEVICE);
 #endif
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
 	    hypre_LoopBegin(volume,d)  
         {
 	       HYPRE_Int i = stencil_size*d;
@@ -3083,6 +3094,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                }
             }
 	    hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -3177,11 +3190,15 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 #else
             values   = hypre_CTAlloc(HYPRE_Real, volume,HYPRE_MEMORY_DEVICE);
 #endif
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
             hypre_LoopBegin(volume,i)
             {
                values[i] = center;
             }
             hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 	      
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -3254,6 +3271,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_DEVICE);
 #endif
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
             hypre_LoopBegin(volume,d)  
             {
 	       HYPRE_Int i = stencil_size*d;
@@ -3283,6 +3302,8 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
                }
             }
 	    hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 	    
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -3406,11 +3427,15 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 #endif
             
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
 	    hypre_LoopBegin(volume,i)
             {
                values[i] = center;
             }
 	    hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 	      
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -3522,11 +3547,16 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
 #else
             values = hypre_CTAlloc(HYPRE_Real, vol[ib],HYPRE_MEMORY_DEVICE);
 #endif
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(values)
             hypre_LoopBegin(vol[ib],i)  
             {
                values[i] = 0.0;
             }
             hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             if( ilower[ib][d] == istart[d] && period[d] == 0 )
             {

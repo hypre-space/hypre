@@ -282,7 +282,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    x_tmp = NULL;
    if (!use_persistent_comm)
    {
-      for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(x_buf_data[jv], HYPRE_MEMORY_HOST);
+      for ( jv=0; jv<num_vectors; ++jv ) hypre_TFree(x_buf_data[jv], HYPRE_MEMORY_SHARED);
       hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
    }
   
@@ -296,6 +296,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    POP_RANGE; // PAR_CSR
    return ierr;
 }
+
 HYPRE_Int
 hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
                           hypre_ParCSRMatrix *A,
@@ -305,6 +306,7 @@ hypre_ParCSRMatrixMatvec( HYPRE_Complex       alpha,
 {
    return hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y);
 }
+
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 HYPRE_Int
 hypre_ParCSRMatrixMatvec3( HYPRE_Complex       alpha,

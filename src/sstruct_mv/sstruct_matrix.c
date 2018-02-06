@@ -1461,16 +1461,15 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                   }
                }
 
-               hypre_BoxManEntryGetExtents(
-                  frentries[fri], hypre_BoxIMin(frbox), hypre_BoxIMax(frbox));
+               hypre_BoxManEntryGetExtents( frentries[fri], hypre_BoxIMin(frbox), 
+                                            hypre_BoxIMax(frbox) );
                hypre_IntersectBoxes(ibox0, frbox, ibox1);
                if (hypre_BoxVolume(ibox1))
                {
 		 tvalues = hypre_TAlloc(HYPRE_Complex, hypre_BoxVolume(ibox1), HYPRE_MEMORY_SHARED);
 		 
-		 
 		 //tvalues =
-                 //    hypre_TReAlloc(tvalues,  HYPRE_Complex,  hypre_BoxVolume(ibox1), HYPRE_MEMORY_HOST);
+                 //hypre_TReAlloc(tvalues,  HYPRE_Complex,  hypre_BoxVolume(ibox1), HYPRE_MEMORY_HOST);
 
                   if (action >= 0)
                   {
@@ -1479,9 +1478,17 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      /* copy values into tvalues */
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
+
+                     /* TO DO: currently on CPU with UM */
 #if defined(HYPRE_MEMORY_GPU)
 		     hypre_exec_policy = HYPRE_MEMORY_HOST;
 #endif
+#if defined(HYPRE_USE_OMP45)
+                     HYPRE_OMPOffloadOff();
+#endif
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tvalues)
                      hypre_BoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
                                          vbox,  start, stride, vi);
@@ -1489,16 +1496,21 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                         tvalues[mi] = values[ei + vi*nentries];
                      }
                      hypre_BoxLoop2End(mi, vi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
+
 #if defined(HYPRE_MEMORY_GPU)		     
 		     hypre_exec_policy = HYPRE_MEMORY_DEVICE;
 #endif
+#if defined(HYPRE_USE_OMP45)
+                     HYPRE_OMPOffloadOn();
+#endif
                      /* put values into UMatrix */
-                     hypre_SStructUMatrixSetBoxValues(
-                        matrix, part, hypre_BoxIMin(ibox1), hypre_BoxIMax(ibox1),
-                        var, 1, &entry, tvalues, action);
+                     hypre_SStructUMatrixSetBoxValues( matrix, part, hypre_BoxIMin(ibox1), 
+                                                       hypre_BoxIMax(ibox1),
+                                                       var, 1, &entry, tvalues, action);
                      /* zero out values in PMatrix (possibly in ghost) */
-                     hypre_StructMatrixClearBoxValues(
-                        smatrix, ibox1, 1, &sentry, -1, 1);
+                     hypre_StructMatrixClearBoxValues(smatrix, ibox1, 1, &sentry, -1, 1);
                   }
                   else
                   {
@@ -1512,6 +1524,13 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      /* copy tvalues into values */
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
+
+#if defined(HYPRE_USE_OMP45)
+                     HYPRE_OMPOffloadOff();
+#endif
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tvalues)
                      hypre_BoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
                                          vbox,  start, stride, vi);
@@ -1519,7 +1538,12 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                         values[ei + vi*nentries] = tvalues[mi];
                      }
                      hypre_BoxLoop2End(mi, vi);
+#undef DEVICE_VAR
+#define DEVICE_VAR
 
+#if defined(HYPRE_USE_OMP45)
+                     HYPRE_OMPOffloadOn();
+#endif
                   } /* end if action */
 
 		  hypre_TFree(tvalues,HYPRE_MEMORY_SHARED);

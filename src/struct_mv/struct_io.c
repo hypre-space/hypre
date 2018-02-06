@@ -42,18 +42,26 @@ hypre_PrintBoxArrayData( FILE            *file,
                    
    HYPRE_Int        i, j, d;
    HYPRE_Complex    value;
-   HYPRE_Complex *data_host;
+   HYPRE_Complex   *data_host, *data_host_saved;
    /*----------------------------------------
     * Print data
     *----------------------------------------*/
-
-#if defined(HYPRE_MEMORY_GPU)
-   HYPRE_Int tot_size = num_values*hypre_BoxVolume(hypre_BoxArrayBox(data_space, hypre_BoxArraySize(box_array)-1));
-   data_host = hypre_CTAlloc(HYPRE_Complex, tot_size,HYPRE_MEMORY_HOST);
-   hypre_TMemcpy(data_host,data,HYPRE_Complex,tot_size,HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+   HYPRE_Int tot_size = 0;
+   hypre_ForBoxI(i, box_array)
+   {
+      data_box = hypre_BoxArrayBox(data_space, i);
+      data_box_volume = hypre_BoxVolume(data_box);
+      tot_size += num_values * data_box_volume;
+   }
+   data_host = hypre_CTAlloc(HYPRE_Complex, tot_size, HYPRE_MEMORY_HOST);
+   printf("tot_size %d\n", tot_size);
+   hypre_TMemcpy(data_host, data, HYPRE_Complex, tot_size,
+                 HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 #else
    data_host = data;
 #endif
+   data_host_saved = data_host;
  
    hypre_SetIndex(stride, 1);
 
@@ -95,9 +103,9 @@ hypre_PrintBoxArrayData( FILE            *file,
       data_host += num_values*data_box_volume;
    }
 
-#if defined(HYPRE_MEMORY_GPU)
-   hypre_TFree(data_host,HYPRE_MEMORY_DEVICE);
-#endif   
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+   hypre_TFree(data_host_saved, HYPRE_MEMORY_HOST);
+#endif
    
    return hypre_error_flag;
 }

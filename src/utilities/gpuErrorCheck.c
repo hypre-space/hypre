@@ -12,7 +12,8 @@ void CheckError(cudaError_t const err, const char* file, char const* const fun, 
 }
 #endif //defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 
-#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
+
 #include <signal.h>
 #ifdef HYPRE_USE_GPU
 extern const char *cusparseErrorCheck(cusparseStatus_t error);
@@ -126,6 +127,8 @@ hypre_int PointerAttributes(const void *ptr){
   }
   //return HYPRE_UNDEFINED_POINTER2; /* Shouldnt happen */
 }
+
+#if 0
 void assert_check(void *ptr, char *file, int line){
   if (ptr==NULL) return;
 #if TRACK_MEMORY_ALLOCATIONS
@@ -147,4 +150,6 @@ void assert_check(void *ptr, char *file, int line){
   }
 #endif
 }
+#endif
+
 #endif

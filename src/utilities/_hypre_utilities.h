@@ -478,7 +478,7 @@ extern "C" {
 #define HYPRE_MEMORY_SHARED ( 2)
 #define HYPRE_MEMORY_UNSET  (-1)
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) 
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 
 #define hypre_DeviceMemset(ptr, value, type, count) 
 
@@ -495,6 +495,7 @@ extern "C++" {
 #define HYPRE_CUDA_GLOBAL 
 #endif
 
+/* OpenMP 4.5 */
 #if defined(HYPRE_USE_OMP45)
 #include "omp.h"
   
@@ -517,7 +518,9 @@ extern "C++" {
 
 /* OpenMP 4.5 GPU memory management */
 /* empty */
+#ifndef HYPRE_CUDA_GLOBAL
 #define HYPRE_CUDA_GLOBAL
+#endif
 
 extern HYPRE_Int hypre__global_offload;
 extern HYPRE_Int hypre__offload_device_num;
@@ -649,6 +652,7 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
    } \
 }
 
+#if 0
 /* DeviceMemset 
  * memset: [to] a mapped CPU ptr
  * memset host memory first and the update the device memory */
@@ -660,16 +664,20 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
    size_t size_inuse = sizeof(type) * count; \
    hypre_omp45_offload(hypre__offload_device_num, ptr, type, 0, count, "update", "to"); \
 }
+#endif
 
 #define hypre_InitMemoryDebug(id)
 
 #define hypre_FinalizeMemoryDebug()
-#endif
+
+#endif // OMP45
+
+
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
 #define TRACK_MEMORY_ALLOCATIONS 0
-#if 0//TRACK_MEMORY_ALLOCATIONS
+#if TRACK_MEMORY_ALLOCATIONS
 typedef struct {
   char *file;
   int line;
@@ -724,12 +732,12 @@ void assert_check(void *ptr, char *file, int line);
 /* hypre_memory.c */
 HYPRE_Int hypre_OutOfMemory ( size_t size );
 char *hypre_MAlloc( size_t size , HYPRE_Int location );
-//char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,int line);
+char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,int line);
 char *hypre_CAlloc( size_t count ,  size_t elt_size , HYPRE_Int location);
-//char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, int line);
+char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, int line);
 char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc( char *ptr ,  size_t size , HYPRE_Int location);
-//char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, int line);
+char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, int line);
 void hypre_Free( char *ptr , HYPRE_Int location );
 char *hypre_CAllocHost( size_t count,size_t elt_size );
 char *hypre_MAllocHost( size_t size );

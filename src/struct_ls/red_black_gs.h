@@ -226,8 +226,8 @@ typedef struct
  * The three dots as last argument of the macro tells compiler that this is a variadic macro. 
  * I.e. this is a macro that receives variable number of arguments. 
  */
-#define HYPRE_STR(s...) #s
-#define HYPRE_XSTR(s...) HYPRE_STR(s)
+//#define HYPRE_STR(s...) #s
+//#define HYPRE_XSTR(s...) HYPRE_STR(s)
 
 #define hypre_RedBlackLoopInit()
 
@@ -238,7 +238,7 @@ typedef struct
 {                                                                       \
    HYPRE_Int hypre__thread, hypre__tot = nk*nj*((ni+1)/2);              \
    /* device code: */                                                   \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE IS_DEVICE_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++)     \
    {                                                                    \
         HYPRE_Int idx_local = hypre__thread;                            \
@@ -269,7 +269,7 @@ typedef struct
 {                                                                     \
    HYPRE_Int hypre__thread, hypre__tot = nk*nj*((ni+1)/2);            \
    /* device code: */                                                 \
-   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE)) \
+   _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE IS_DEVICE_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++)   \
    {                                                                  \
         HYPRE_Int idx_local = hypre__thread;                          \
