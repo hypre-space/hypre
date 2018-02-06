@@ -55,7 +55,7 @@ PASSFAIL=$(awk -v filename="$SNAME" 'BEGIN{{FS=" "}
             tau = (val - $NF)/val;
             # get absolute value of tau
             tau = tau < 0 ? -tau : tau;
-            if(tau < tol)
+            if(tau < tol) || ((val-$NF) < 1e-8 && (val-$NF) >-1e-8)
                #print "PASSED"
                continue;
             else

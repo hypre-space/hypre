@@ -18,7 +18,7 @@
 #endif
 
 /* TODO consider adding it to semistruct header files */
-#define HYPRE_MAXVARS 10
+#define HYPRE_MAXVARS 4
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
@@ -731,7 +731,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                   /*------------------------------------------------
                    * Invert intra-nodal coupling 
                    *----------------------------------------------*/
-                  //gselim(A_loc, x_loc, nvars);
+                  gselim(A_loc, x_loc, nvars);
 
                   /*------------------------------------------------
                    * Copy solution from local storage.
@@ -932,7 +932,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                   /*------------------------------------------------
                    * Invert intra-nodal coupling
                    *----------------------------------------------*/
-                  //gselim(A_loc, x_loc, nvars);
+                  gselim(A_loc, x_loc, nvars);
 
                   /*------------------------------------------------
                    * Copy solution from local storage.

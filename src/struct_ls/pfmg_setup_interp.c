@@ -297,7 +297,7 @@ hypre_PFMGSetupInterpOp_CC0
    //HYPRE_Real            *data_A=hypre_StructMatrixStencilData(A)[0];
    //HYPRE_Int             *stencil_A = hypre_StructStencilShapeDevice(stencil);
    //HYPRE_Int             *indices_A = hypre_StructMatrixDataDeviceIndices(A);
-#if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU)
    HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 

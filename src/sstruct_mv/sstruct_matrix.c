@@ -253,11 +253,13 @@ hypre_SStructPMatrixInitialize( hypre_SStructPMatrix *pmatrix )
             /* hypre_StructMatrixSetNumGhost(smatrix, num_ghost); */
             hypre_StructMatrixInitialize(smatrix);
             /* needed to get AddTo accumulation correct between processors */
+	    
             hypre_StructMatrixClearGhostValues(smatrix);
+	    
          }
       }
    }
-
+   
    hypre_SStructPMatrixAccumulated(pmatrix) = 0;
 
    return hypre_error_flag;

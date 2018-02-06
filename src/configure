@@ -8267,8 +8267,8 @@ fi
 
 if test "$hypre_using_openmp45" = "yes"
 then
-   CFLAGS+=" -DHYPRE_USE_OMP45"
-   CXXFLAGS+=" -DHYPRE_USE_OMP45"
+   CFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC"
+   CXXFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC"
    if test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"
    then
      CFLAGS+=" -fopenmp-nonaliased-maps"

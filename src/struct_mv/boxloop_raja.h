@@ -38,7 +38,7 @@ typedef struct hypre_Boxloop_struct
 
 #define BLOCKSIZE 256
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU)
 #include <cuda.h>
 #include <cuda_runtime.h>
 

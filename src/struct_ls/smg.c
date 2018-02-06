@@ -522,7 +522,7 @@ hypre_StructSMGSetMaxLevel( void   *smg_vdata,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU)
 HYPRE_Int
 hypre_StructSMGSetDeviceLevel( void   *smg_vdata,
 			       HYPRE_Int   device_level  )

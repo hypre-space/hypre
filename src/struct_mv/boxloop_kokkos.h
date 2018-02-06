@@ -38,7 +38,7 @@ typedef struct hypre_Boxloop_struct
    HYPRE_Int bsize0,bsize1,bsize2;
 } hypre_Boxloop;
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU)
 #include <cuda.h>
 #include <cuda_runtime.h>
 #define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)

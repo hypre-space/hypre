@@ -4,7 +4,7 @@
 #include "_hypre_utilities.h"
 #if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
 
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_MANAGED)
 #include <stdlib.h>
 #include <stdint.h>
 

@@ -261,7 +261,7 @@ HYPRE_Int HYPRE_StructSMGSetPrintLevel ( HYPRE_StructSolver solver , HYPRE_Int p
 HYPRE_Int HYPRE_StructSMGGetPrintLevel ( HYPRE_StructSolver solver , HYPRE_Int *print_level );
 HYPRE_Int HYPRE_StructSMGGetNumIterations ( HYPRE_StructSolver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_StructSMGGetFinalRelativeResidualNorm ( HYPRE_StructSolver solver , HYPRE_Real *norm );
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_MEMORY_GPU)
 HYPRE_Int hypre_StructSMGSetDeviceLevel( void   *smg_vdata, HYPRE_Int   device_level);
 #endif
 

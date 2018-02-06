@@ -45,7 +45,7 @@ hypre_int PointerAttributes(const void *ptr);
 void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
 #endif // defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
 #include <cusparse.h>

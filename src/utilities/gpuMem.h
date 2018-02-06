@@ -13,7 +13,8 @@
 #define  __GPUMEM_H__
 
 #if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
-#ifdef HYPRE_USE_GPU
+
+#if 1 //HYPRE_USE_GPU
 #include <cuda_runtime_api.h>
 void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();
@@ -45,6 +46,7 @@ hypre_int getcore();
 hypre_int getnuma();
 hypre_int checkDeviceProps();
 hypre_int pointerIsManaged(const void *ptr);
+
 /*
  * Global struct for keeping HYPRE GPU Init state
  */
@@ -65,19 +67,21 @@ struct hypre__global_struct{
 
 extern struct hypre__global_struct hypre__global_handle ;
 
-/*
- * Macros for accessing elements of the global handle
- */
+#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
+#define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
 #define HYPRE_GPU_HANDLE hypre__global_handle.initd
 #define HYPRE_CUBLAS_HANDLE hypre__global_handle.cublas_handle
 #define HYPRE_CUSPARSE_HANDLE hypre__global_handle.cusparse_handle
 #define HYPRE_DEVICE hypre__global_handle.device
 #define HYPRE_DEVICE_COUNT hypre__global_handle.device_count
 #define HYPRE_CUSPARSE_MAT_DESCR hypre__global_handle.cusparse_mat_descr
-#define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
-#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
+
+/*
+ * Macros for accessing elements of the global handle
+ */
+
 #else
 
 #define hypre_GPUInit(use_device)
