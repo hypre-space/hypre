@@ -25,8 +25,8 @@ inline void gpuAssert(cudaError_t code, const char *file, int line)
    {
      fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file);
      fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code));
-     int *dummy;
-     *dummy=4;
+     //int *dummy;
+     //*dummy=4;
      abort();
    }
 }

@@ -48,7 +48,7 @@ hypre_SysSemiRestrictSetup( void                 *sys_restrict_vdata,
                             hypre_Index           findex,
                             hypre_Index           stride                )
 {
-	hypre_SysSemiRestrictData  *sys_restrict_data = (hypre_SysSemiRestrictData  *)sys_restrict_vdata;
+   hypre_SysSemiRestrictData  *sys_restrict_data = (hypre_SysSemiRestrictData  *)sys_restrict_vdata;
    void                      **srestrict_data;
 
    HYPRE_Int                   nvars;
@@ -69,7 +69,7 @@ hypre_SysSemiRestrictSetup( void                 *sys_restrict_vdata,
       r_s  = hypre_SStructPVectorSVector(r, vi);
       srestrict_data[vi] = hypre_SemiRestrictCreate( );
       hypre_SemiRestrictSetup( srestrict_data[vi], R_s, R_stored_as_transpose,
-                               r_s, rc_s, cindex, findex, stride);
+                               r_s, rc_s, cindex, findex, stride);      
    }
 
    (sys_restrict_data -> nvars)        = nvars;

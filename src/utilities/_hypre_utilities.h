@@ -497,7 +497,6 @@ extern "C++" {
 
 /* OpenMP 4.5 */
 #if defined(HYPRE_USE_OMP45)
-
 #include "omp.h"
   
 #ifdef __cplusplus
@@ -1212,7 +1211,7 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
 
-#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) || defined(HYPRE_USE_OMP45)  || defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) || defined(HYPRE_USE_OMP45)
 
 #include <cuda_runtime_api.h>
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
@@ -1224,8 +1223,8 @@ inline void gpuAssert(cudaError_t code, const char *file, int line)
    {
      fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file);
      fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code));
-     int *dummy;
-     *dummy=4;
+     //int *dummy;
+     //*dummy=4;
      abort();
    }
 }

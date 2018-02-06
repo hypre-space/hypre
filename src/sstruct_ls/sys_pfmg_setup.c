@@ -318,7 +318,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       hypre_SysStructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
    }
    num_levels = l + 1;
-  
+
    /*-----------------------------------------------------
     * For fully periodic problems, the coarsest grid
     * problem (a single node) can have zero diagonal
@@ -432,9 +432,6 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    restrict_data_l = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
    interp_data_l   = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
 
-HYPRE_Int myid;
-hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-
    for (l = 0; l < (num_levels - 1); l++)
    {
       cdir = cdir_l[l];
@@ -449,21 +446,7 @@ hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
       /* set up the coarse grid operator */
       hypre_SysPFMGSetupRAPOp(RT_l[l], A_l[l], P_l[l],
                               cdir, cindex, stride, A_l[l+1]);
-/*
-printf("%s %s %d: l = %d\n", __FILE__, __func__, __LINE__, l);
-char fn[1024];
-sprintf(fn, "A%d.mtx", l);
-hypre_SStructPMatrixPrint(fn, A_l[l], 0);
-sprintf(fn, "RT%d.mtx", l);
-hypre_SStructPMatrixPrint(fn, RT_l[l], 0);
-sprintf(fn, "P%d.mtx", l);
-hypre_SStructPMatrixPrint(fn, P_l[l], 0);
-if (l == 1)
-{
-  hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-  exit(0);
-}
-*/
+
       /* set up the interpolation routine */
       hypre_SysSemiInterpCreate(&interp_data_l[l]);
       hypre_SysSemiInterpSetup(interp_data_l[l], P_l[l], 0, x_l[l+1], e_l[l],

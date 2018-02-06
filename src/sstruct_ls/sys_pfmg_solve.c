@@ -106,7 +106,7 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
       /* eps = (tol^2) */
       hypre_SStructPInnerProd(b_l[0], b_l[0], &b_dot_b);
       eps = tol*tol;
-
+      
       /* if rhs is zero, return a zero solution */
       if (b_dot_b == 0.0)
       {
@@ -216,6 +216,8 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SStructPVectorPrint(filename, x_l[l], 0);
             hypre_sprintf(filename, "zout_rdown.%02d", l);
             hypre_SStructPVectorPrint(filename, r_l[l], 0);
+	    hypre_sprintf(filename, "zout_RT.%02d", l);
+	    hypre_SStructPMatrixPrint(filename, RT_l[l], 0);
             hypre_sprintf(filename, "zout_b.%02d", l+1);
             hypre_SStructPVectorPrint(filename, b_l[l+1], 0);
 #endif
@@ -277,7 +279,6 @@ hypre_SysPFMGSolve( void                 *sys_pfmg_vdata,
             hypre_SStructPInnerProd(x_l[0], x_l[0], &x_dot_x);
          }
       }
-
       /* fine grid post-relaxation */
       hypre_SysPFMGRelaxSetPostRelax(relax_data_l[0]);
       hypre_SysPFMGRelaxSetMaxIter(relax_data_l[0], num_post_relax);
