@@ -93,11 +93,18 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
       if (location==HYPRE_MEMORY_DEVICE)
       {
 #if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
-         ptr = omp_target_alloc(size+sizeof(size_t)*MEM_PAD_LEN, hypre__offload_device_num);
-         /*gpuErrchk( cudaMalloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN) );*/
+         //ptr = omp_target_alloc(size+sizeof(size_t)*MEM_PAD_LEN, hypre__offload_device_num);
+         gpuErrchk( cudaMalloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN) );
          size_t *sp=(size_t*)ptr;
          cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
          ptr=(void*)(&sp[MEM_PAD_LEN]);
+#elif defined(HYPRE_USE_OMP45) 
+         void *ptr_alloc = malloc(size + HYPRE_OMP45_SZE_PAD);
+         char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
+         size_t size_inuse = size;
+         ((size_t *) ptr_alloc)[0] = size_inuse;
+         hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "enter", "alloc");
+         ptr = (void *) ptr_inuse;
 #elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 #ifdef HYPRE_USE_UMALLOC
          HYPRE_Int threadid = hypre_GetThreadID();
@@ -122,13 +129,6 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
          cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
          ptr=(void*)(&sp[MEM_PAD_LEN]);
 #endif//HYPRE_USE_UMALLOC| HYPRE_USE_MANAGED| HYPRE_MEMORY_GPU
-#elif defined(HYPRE_USE_OMP45) 
-         void *ptr_alloc = malloc(size + HYPRE_OMP45_SZE_PAD);
-         char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
-         size_t size_inuse = size;
-         ((size_t *) ptr_alloc)[0] = size_inuse;
-         hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "enter", "alloc");
-         ptr = (void *) ptr_inuse;
 #else
          ptr = malloc(size);
 #endif
@@ -209,6 +209,13 @@ hypre_CAlloc( size_t count,
 #if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
          ptr=(void*)hypre_MAlloc(size,location);
          cudaMemset(ptr,0,size);
+#elif defined(HYPRE_USE_OMP45)
+         void *ptr_alloc = calloc(count + HYPRE_OMP45_CNT_PAD(elt_size), elt_size);
+         char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
+         size_t size_inuse = elt_size * count;
+         ((size_t *) ptr_alloc)[0] = size_inuse;
+         hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "enter", "to");
+         ptr = (void*) ptr_inuse;
 #elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 #ifdef HYPRE_USE_UMALLOC
 #ifdef HYPRE_USE_MANAGED
@@ -229,13 +236,6 @@ hypre_CAlloc( size_t count,
          ptr=(void*)hypre_MAlloc(size,location);
          cudaMemset(ptr,0,size);
 #endif
-#elif defined(HYPRE_USE_OMP45)
-         void *ptr_alloc = calloc(count + HYPRE_OMP45_CNT_PAD(elt_size), elt_size);
-         char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
-         size_t size_inuse = elt_size * count;
-         ((size_t *) ptr_alloc)[0] = size_inuse;
-         hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "enter", "to");
-         ptr = (void*) ptr_inuse;
 #else
          ptr = calloc(count, elt_size);
 #endif
@@ -392,8 +392,13 @@ hypre_Free( char *ptr ,
      if (location==HYPRE_MEMORY_DEVICE)
      {
 #if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
-      omp_target_free(ptr, hypre__offload_device_num);
-      /*cudaSafeFree(ptr,MEM_PAD_LEN);*/
+      //omp_target_free(ptr, hypre__offload_device_num);
+      cudaSafeFree(ptr,MEM_PAD_LEN);
+#elif defined(HYPRE_USE_OMP45)
+      char *ptr_alloc = ((char*) ptr) - HYPRE_OMP45_SZE_PAD;
+      size_t size_inuse = ((size_t *) ptr_alloc)[0];
+      hypre_omp45_offload(hypre__offload_device_num, ptr, char, 0, size_inuse, "exit", "delete");
+      free(ptr_alloc);
 #elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 #ifdef HYPRE_USE_UMALLOC
       HYPRE_Int threadid = hypre_GetThreadID();
@@ -411,11 +416,6 @@ hypre_Free( char *ptr ,
 #elif defined(HYPRE_MEMORY_GPU)
       cudaSafeFree(ptr,MEM_PAD_LEN);
 #endif
-#elif defined(HYPRE_USE_OMP45)
-      char *ptr_alloc = ((char*) ptr) - HYPRE_OMP45_SZE_PAD;
-      size_t size_inuse = ((size_t *) ptr_alloc)[0];
-      hypre_omp45_offload(hypre__offload_device_num, ptr, char, 0, size_inuse, "exit", "delete");
-      free(ptr_alloc);
 #else
       free(ptr);
 #endif
