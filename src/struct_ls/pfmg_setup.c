@@ -1164,6 +1164,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
 #define DEVICE_VAR 
 
 #undef HYPRE_BOX_REDUCTION
+#define HYPRE_BOX_REDUCTION 
 #endif
 
    cxyz[0] = (HYPRE_Real) cxb;
@@ -1321,6 +1322,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
 #define DEVICE_VAR
 
 #undef HYPRE_BOX_REDUCTION
+#define HYPRE_BOX_REDUCTION 
 #endif
 
    cxyz[0] = (HYPRE_Real) cxb;
@@ -1475,6 +1477,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
 #define DEVICE_VAR
 
 #undef HYPRE_BOX_REDUCTION
+#define HYPRE_BOX_REDUCTION 
 #endif
 
    cxyz[0] = (HYPRE_Real) cxb;
@@ -1684,6 +1687,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
 #define DEVICE_VAR 
 
 #undef HYPRE_BOX_REDUCTION
+#define HYPRE_BOX_REDUCTION 
 #endif
 
    cxyz[0] = (HYPRE_Real) cxb;
@@ -1942,6 +1946,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
 #define DEVICE_VAR 
 
 #undef HYPRE_BOX_REDUCTION
+#define HYPRE_BOX_REDUCTION 
 #endif
 
    cxyz[0] = (HYPRE_Real) cxb;
@@ -2061,6 +2066,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
          diag_product += (HYPRE_Real) diag_product_local;
 
 #undef HYPRE_BOX_REDUCTION
+#define HYPRE_BOX_REDUCTION 
 
 #endif
       }

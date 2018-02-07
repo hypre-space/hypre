@@ -24,16 +24,16 @@
 #define HYPRE_NEWBOXLOOP_HEADER
 
 #ifdef HYPRE_USING_OPENMP
+#define HYPRE_BOX_REDUCTION 
 #ifdef WIN32
 #define Pragma(x) __pragma(#x)
 #else
 #define Pragma(x) _Pragma(#x)
 #endif
-#define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE)
-#define OMPREDUCTION() Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+/* #define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE) */
+#define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #else
 #define OMP1
-#define OMPREDUCTION() ;
 #endif
 
 typedef struct hypre_Boxloop_struct

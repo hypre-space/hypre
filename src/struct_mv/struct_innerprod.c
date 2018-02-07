@@ -105,6 +105,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
 
       local_result += (HYPRE_Real) box_sum;
 #undef HYPRE_BOX_REDUCTION
+#define HYPRE_BOX_REDUCTION 
 #endif
    }
 
