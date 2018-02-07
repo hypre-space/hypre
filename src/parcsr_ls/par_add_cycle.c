@@ -733,11 +733,11 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
       if (level != 0)
       {
          tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(F_array[level]));
-         if (tmp_data) hypre_TFree(tmp_data, HYPRE_MEMORY_HOST);
+         if (tmp_data) hypre_TFree(tmp_data, HYPRE_MEMORY_SHARED);
          hypre_VectorData(hypre_ParVectorLocalVector(F_array[level])) = &r_data[row_start];
          hypre_VectorOwnsData(hypre_ParVectorLocalVector(F_array[level])) = 0;
          tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(U_array[level]));
-         if (tmp_data) hypre_TFree(tmp_data, HYPRE_MEMORY_HOST);
+         if (tmp_data) hypre_TFree(tmp_data, HYPRE_MEMORY_SHARED);
          hypre_VectorData(hypre_ParVectorLocalVector(U_array[level])) = &x_data[row_start];
          hypre_VectorOwnsData(hypre_ParVectorLocalVector(U_array[level])) = 0;
       }
@@ -1076,11 +1076,11 @@ HYPRE_Int hypre_CreateDinv(void *amg_vdata)
       if (level != 0)
       {
          tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(F_array[level]));
-         if (tmp_data) hypre_TFree(tmp_data, HYPRE_MEMORY_HOST);
+         if (tmp_data) hypre_TFree(tmp_data, HYPRE_MEMORY_SHARED);
          hypre_VectorData(hypre_ParVectorLocalVector(F_array[level])) = &r_data[l1_start];
          hypre_VectorOwnsData(hypre_ParVectorLocalVector(F_array[level])) = 0;
          tmp_data = hypre_VectorData(hypre_ParVectorLocalVector(U_array[level]));
-         if (tmp_data) hypre_TFree(tmp_data, HYPRE_MEMORY_HOST);
+         if (tmp_data) hypre_TFree(tmp_data, HYPRE_MEMORY_SHARED);
          hypre_VectorData(hypre_ParVectorLocalVector(U_array[level])) = &x_data[l1_start];
          hypre_VectorOwnsData(hypre_ParVectorLocalVector(U_array[level])) = 0;
       }

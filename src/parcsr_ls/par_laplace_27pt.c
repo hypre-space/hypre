@@ -140,7 +140,7 @@ GenerateLaplacian27pt(MPI_Comm comm,
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_SHARED);
+   col_map_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
 
    cnt = 0;
    o_cnt = 0;

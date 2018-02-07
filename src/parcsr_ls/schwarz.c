@@ -855,7 +855,7 @@ HYPRE_Int hypre_MPSchwarzSolve(hypre_ParCSRMatrix *par_A,
       }
    }
 
-   if (num_procs > 1) hypre_TFree(rhs, HYPRE_MEMORY_HOST);
+   if (num_procs > 1) hypre_TFree(rhs, HYPRE_MEMORY_SHARED);
 
    return hypre_error_flag;
 }

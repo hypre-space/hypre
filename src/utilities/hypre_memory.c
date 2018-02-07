@@ -417,6 +417,7 @@ hypre_Free( char *ptr ,
       hypre_omp45_offload(hypre__offload_device_num, ptr, char, 0, size_inuse, "exit", "delete");
       free(ptr_alloc);
 #else
+      ASSERT_HOST(ptr);
       free(ptr);
 #endif
      }
@@ -425,11 +426,13 @@ hypre_Free( char *ptr ,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
         cudaSafeFree(ptr,MEM_PAD_LEN);
 #else
+	ASSERT_HOST(ptr);
         free(ptr);
 #endif
      }
      else
      {
+       ASSERT_HOST(ptr);
         free(ptr);
      }
    }
