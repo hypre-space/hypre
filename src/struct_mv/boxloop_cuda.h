@@ -45,6 +45,10 @@ typedef struct hypre_Boxloop_struct
 #define BLOCKSIZE 512
 #define WARP_SIZE 32
 #define BLOCK_SIZE 512
+
+#define hypre_fence()
+
+/*
 #define hypre_fence() \
 {		      \
   cudaError err = cudaGetLastError();		\
@@ -55,6 +59,7 @@ typedef struct hypre_Boxloop_struct
   }									\
   AxCheckError(cudaDeviceSynchronize());				\
 } 
+*/
 
 #define hypre_reduce_policy  cuda_reduce<BLOCKSIZE>
 
