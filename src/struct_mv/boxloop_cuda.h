@@ -349,7 +349,7 @@ __device__ __forceinline__ T hypre_shfl_xor(T var, int laneMask)
   Tunion.var = var;
 
   for(int i = 0; i < int_sizeof_T; ++i) {
-    Tunion.arr[i] = __shfl_xor(Tunion.arr[i], laneMask);
+    Tunion.arr[i] = __shfl_xor_sync(0xFFFFFFFF, Tunion.arr[i], laneMask);
   }
   return Tunion.var;
 }

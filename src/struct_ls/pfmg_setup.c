@@ -132,7 +132,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             b_num_ghost[]  = {0, 0, 0, 0, 0, 0};
    HYPRE_Int             x_num_ghost[]  = {1, 1, 1, 1, 1, 1};
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    HYPRE_Int             num_level_GPU = 0;
    HYPRE_Int             data_location = 0;
    HYPRE_Int             max_box_size  = 0;
@@ -201,7 +201,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels, HYPRE_MEMORY_HOST);
    hypre_SetIndex3(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    data_location = hypre_StructGridDataLocation(grid);
    if (data_location != HYPRE_MEMORY_HOST)
    {
@@ -333,7 +333,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
       /* build the coarse grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_CUDA) 
       hypre_StructGridDataLocation(P_grid_l[l+1]) = data_location;
       if (device_level == -1 && num_level_GPU > 0)
       {
@@ -466,7 +466,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       tx_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(tx_l[l+1], x_num_ghost);
       hypre_StructVectorInitializeShell(tx_l[l+1]);
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
       if (l+1 == num_level_GPU)
       {
            hypre_StructVectorSetDataSize(tx_l[l+1], &data_size, &data_size_const);
@@ -476,14 +476,14 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    data = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
    data_const = hypre_CTAlloc(HYPRE_Real, data_size_const, HYPRE_MEMORY_HOST);
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
 #endif
 
    (pfmg_data -> data) = data;
    (pfmg_data -> data_const) = data_const;
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    data_location = hypre_StructGridDataLocation(grid_l[0]);
    if (data_location != HYPRE_MEMORY_HOST)
    {
@@ -520,7 +520,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       }
 #endif
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
       if (l+1 == num_level_GPU)
       {
 	 data_location = HYPRE_MEMORY_HOST;
@@ -531,7 +531,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       data += hypre_StructMatrixDataSize(A_l[l+1]);
       data_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
       if (data_location != HYPRE_MEMORY_HOST)
       {
 	     hypre_StructVectorInitializeData(b_l[l+1], data);
@@ -607,7 +607,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    for (l = 0; l < (num_levels - 1); l++)
    {
      //start_t = MPI_Wtime();
-#if defined(HYPRE_MEMORY_GPU)    
+#if defined(HYPRE_USE_CUDA)    
       if (l == num_level_GPU)
       {
 	 hypre_exec_policy = HYPRE_MEMORY_HOST;
@@ -645,7 +645,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
                               cindex, findex, stride);
    }
 
-#if defined(HYPRE_MEMORY_GPU)   
+#if defined(HYPRE_USE_CUDA)   
    if (l == num_level_GPU)
    {
       hypre_exec_policy = HYPRE_MEMORY_HOST;
@@ -668,7 +668,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       active_l[l] = 0;
    }
 
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_CUDA) 
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
       hypre_exec_policy = HYPRE_MEMORY_DEVICE;
@@ -1027,7 +1027,7 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    hypre_Index            stride;
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_CUDA) 
    HYPRE_Int              data_location = hypre_StructGridDataLocation(
                                           hypre_StructMatrixGrid(A) );
 #endif
@@ -1195,7 +1195,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn;
    HYPRE_Real            *a_csw, *a_cse, *a_cne, *a_cnw;
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_CUDA) 
    HYPRE_Int              data_location = hypre_StructGridDataLocation(
                                           hypre_StructMatrixGrid(A) );
 #endif
@@ -1350,7 +1350,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
    hypre_Index            stride;
    hypre_Index            index;
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
-#if defined(HYPRE_MEMORY_GPU)   
+#if defined(HYPRE_USE_CUDA)   
    HYPRE_Int              data_location = hypre_StructGridDataLocation(
                                           hypre_StructMatrixGrid(A) );
 #endif
@@ -1506,7 +1506,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
    HYPRE_Real            *a_cc, *a_cw, *a_ce, *a_cs, *a_cn, *a_ac, *a_bc;
    HYPRE_Real            *a_csw, *a_cse, *a_cne, *a_cnw;
    HYPRE_Real            *a_aw, *a_ae, *a_as, *a_an, *a_bw, *a_be, *a_bs, *a_bn;
-#if defined(HYPRE_MEMORY_GPU)    
+#if defined(HYPRE_USE_CUDA)    
    HYPRE_Int              data_location = hypre_StructGridDataLocation(
                                           hypre_StructMatrixGrid(A) );
 #endif
@@ -1719,7 +1719,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
    HYPRE_Real            *a_aw, *a_ae, *a_as, *a_an, *a_bw, *a_be, *a_bs, *a_bn;
    HYPRE_Real            *a_asw, *a_ase, *a_ane, *a_anw,*a_bsw, *a_bse, *a_bne, *a_bnw;
 
-#if defined(HYPRE_MEMORY_GPU)    
+#if defined(HYPRE_USE_CUDA)    
    HYPRE_Int              data_location = hypre_StructGridDataLocation(
                                           hypre_StructMatrixGrid(A) );
 #endif
@@ -1981,7 +1981,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
    HYPRE_Int              zero_diag = 0;
 
    HYPRE_Int              constant_coefficient; 
-#if defined(HYPRE_MEMORY_GPU)  
+#if defined(HYPRE_USE_CUDA)  
    HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 

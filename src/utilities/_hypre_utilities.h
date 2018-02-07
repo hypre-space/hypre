@@ -1376,7 +1376,7 @@ void cudaSafeFree(void *ptr,int padding);
 
 #if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
 
-#if 1 //HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 #include <cuda_runtime_api.h>
 void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();

@@ -287,10 +287,10 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          }
          if (constant_coefficient)
          {
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
 	   if (hypre_StructGridDataLocation(hypre_StructVectorGrid(e_l[0])) == HYPRE_MEMORY_DEVICE)
 	     hypre_exec_policy = HYPRE_MEMORY_DEVICE;
- #endif
+#endif
             hypre_StructVectorClearAllValues(e_l[0]);
          }
          /* interpolate error and correct on fine grid (x = x + Pe_c) */

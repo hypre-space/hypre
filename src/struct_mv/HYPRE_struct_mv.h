@@ -478,7 +478,7 @@ HYPRE_Int HYPRE_CommPkgDestroy(HYPRE_CommPkg comm_pkg);
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
 HYPRE_Int
 HYPRE_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_Int data_location );
 #endif

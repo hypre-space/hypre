@@ -1043,7 +1043,7 @@ __device__ __forceinline__ T hypre_shfl_xor(T var, int laneMask)
   Tunion.var = var;
 
   for(int i = 0; i < int_sizeof_T; ++i) {
-    Tunion.arr[i] = __shfl_xor(Tunion.arr[i], laneMask);
+    Tunion.arr[i] = __shfl_xor_sync(0xFFFFFFFF, Tunion.arr[i], laneMask);
   }
   return Tunion.var;
 }
@@ -3218,7 +3218,7 @@ typedef struct hypre_StructGrid_struct
    HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */  
 
    hypre_BoxManager    *boxman;
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_CUDA) 
    HYPRE_Int            data_location;
 #endif
 } hypre_StructGrid;
@@ -3251,7 +3251,7 @@ typedef struct hypre_StructGrid_struct
 
 #define hypre_StructGridIDPeriod(grid) \
 hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_CUDA) 
 #define hypre_StructGridDataLocation(grid)        ((grid) -> data_location)
 #endif
 /*--------------------------------------------------------------------------
@@ -4066,7 +4066,7 @@ HYPRE_Int hypre_ComputeBoxnums ( hypre_BoxArray *boxes , HYPRE_Int *procs , HYPR
 HYPRE_Int hypre_StructGridPrint ( FILE *file , hypre_StructGrid *grid );
 HYPRE_Int hypre_StructGridRead ( MPI_Comm comm , FILE *file , hypre_StructGrid **grid_ptr );
 HYPRE_Int hypre_StructGridSetNumGhost ( hypre_StructGrid *grid , HYPRE_Int *num_ghost );
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
 HYPRE_Int hypre_StructGridGetMaxBoxSize(hypre_StructGrid *grid);
 HYPRE_Int hypre_StructGridSetDataLocation( HYPRE_StructGrid grid, HYPRE_Int data_location );
 #endif

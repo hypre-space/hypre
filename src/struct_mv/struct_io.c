@@ -55,7 +55,6 @@ hypre_PrintBoxArrayData( FILE            *file,
       tot_size += num_values * data_box_volume;
    }
    data_host = hypre_CTAlloc(HYPRE_Complex, tot_size, HYPRE_MEMORY_HOST);
-   printf("tot_size %d\n", tot_size);
    hypre_TMemcpy(data_host, data, HYPRE_Complex, tot_size,
                  HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
 #else
