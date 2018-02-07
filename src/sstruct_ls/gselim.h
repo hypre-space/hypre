@@ -14,7 +14,7 @@
       }				  \
       else			  \
       {  			  \
-         hypre_printf("Zero diag\n");\
+         /*hypre_printf("Zero diag\n");*/\
       }				  \
    }				  \
    else/* A is nxn. Forward elimination */\

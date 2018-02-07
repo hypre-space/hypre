@@ -14,10 +14,12 @@
 #include "_hypre_parcsr_ls.h"
 
 #include "gselim.h"
+
+/*
 #if defined(HYPRE_USE_OMP45)
 #include "__omp45_gselim.h"
 #endif
-
+*/
 /* TODO consider adding it to semistruct header files */
 #define HYPRE_MAXVARS 4
 
