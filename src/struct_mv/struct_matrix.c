@@ -114,10 +114,6 @@ hypre_StructMatrixDestroy( hypre_StructMatrix *matrix )
             hypre_TFree(hypre_StructMatrixDataIndices(matrix)[0],HYPRE_MEMORY_HOST);
          }
          hypre_TFree(hypre_StructMatrixDataIndices(matrix),HYPRE_MEMORY_HOST);
-#if 0//defined(HYPRE_MEMORY_GPU)
-	 if (hypre_StructMatrixDataDeviceIndices(matrix))
-	    hypre_TFree(hypre_StructMatrixDataDeviceIndices(matrix),HYPRE_MEMORY_DEVICE);
-#endif
          hypre_BoxArrayDestroy(hypre_StructMatrixDataSpace(matrix));
          hypre_TFree(hypre_StructMatrixSymmElements(matrix), HYPRE_MEMORY_HOST);
          hypre_StructStencilDestroy(hypre_StructMatrixUserStencil(matrix));
@@ -398,7 +394,7 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
        * if data location has not been set outside, set up the data location
        * based on the total number of  
        *-----------------------------------------------------------------------*/
-#if defined(HYPRE_MEMORY_GPU)// || defined(HYPRE_USE_MANAGED)      
+#if defined(HYPRE_USE_CUDA)     
       if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
       {
 	 data_const_size = data_size + data_const_size;
@@ -408,21 +404,10 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
       hypre_StructMatrixDataSize(matrix)      = data_size;
       hypre_StructMatrixDataConstSize(matrix) = data_const_size;
 
-#if 0
-      //defined(HYPRE_MEMORY_GPU)
-      if (hypre_BoxArraySize(data_space) > 0)
-      {
-	 HYPRE_Int * indices_d;
-	 indices_d = hypre_TAlloc(HYPRE_Int, stencil_size*hypre_BoxArraySize(data_space),HYPRE_MEMORY_DEVICE);
-	 hypre_TMemcpy(indices_d,data_indices[0],HYPRE_Int,stencil_size*hypre_BoxArraySize(data_space),HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
-	 hypre_StructMatrixDataDeviceIndices(matrix) = indices_d;
-      }
-#else
       if (hypre_BoxArraySize(data_space) > 0)
       {
 	 hypre_StructMatrixDataDeviceIndices(matrix) = data_indices[0];
       }
-#endif
    }
 
    /*-----------------------------------------------------------------------
@@ -471,7 +456,7 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
    {
       for (i = 0; i < stencil_size; i++)
       {
-#if defined(HYPRE_MEMORY_GPU)// || defined(HYPRE_USE_MANAGED)       
+#if defined(HYPRE_USE_CUDA)   
          if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
          {
             stencil_data[i] = hypre_StructMatrixData(matrix);
@@ -499,7 +484,7 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
          /* diagonal, variable coefficient */
          if (hypre_IndexEqual(stencil_shape[i], 0, ndim))
          {
-#if defined(HYPRE_MEMORY_GPU)// 	  
+#if defined(HYPRE_USE_CUDA) 	  
             if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
             {
                stencil_data[i] = hypre_StructMatrixData(matrix);
@@ -1365,7 +1350,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    if ( constant_coefficient==0 ) 
    {
       comm_num_values = mat_num_values;
-#if defined(HYPRE_MEMORY_GPU)// 
+#if defined(HYPRE_USE_CUDA) 
       if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
 	matrix_data_comm = hypre_StructMatrixDataConst(matrix);
 #endif      
@@ -1377,7 +1362,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    else /* constant_coefficient==2 */
    {
       comm_num_values = 1;
-#if defined(HYPRE_MEMORY_GPU)// 
+#if defined(HYPRE_USE_CUDA) 
       if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
       {
 	  stencil = hypre_StructMatrixStencil(matrix);
@@ -1780,7 +1765,7 @@ hypre_StructMatrixMigrate( hypre_StructMatrix *from_matrix,
       stencil_size = hypre_StructStencilSize(stencil);
       hypre_assert(stencil_size ==
                    hypre_StructStencilSize( hypre_StructMatrixStencil(to_matrix) ) );
-#if defined(HYPRE_MEMORY_GPU) //
+#if defined(HYPRE_USE_CUDA)
       if (hypre_StructGridDataLocation(hypre_StructMatrixGrid(from_matrix)) == HYPRE_MEMORY_HOST)
       {
 	 stencil = hypre_StructMatrixStencil(from_matrix);

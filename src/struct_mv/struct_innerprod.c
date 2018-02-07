@@ -44,7 +44,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
    HYPRE_Int        ndim = hypre_StructVectorNDim(x);               
    HYPRE_Int        i;
    
-#if defined(HYPRE_MEMORY_GPU)       
+#if defined(HYPRE_USE_CUDA)       
    const HYPRE_Int        data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(y));
 #endif
 

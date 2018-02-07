@@ -297,13 +297,13 @@ hypre_PFMGSetupInterpOp_CC0
    //HYPRE_Real            *data_A=hypre_StructMatrixStencilData(A)[0];
    //HYPRE_Int             *stencil_A = hypre_StructStencilShapeDevice(stencil);
    //HYPRE_Int             *indices_A = hypre_StructMatrixDataDeviceIndices(A);
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 
    //hypre_MatrixIndexMove        (A, stencil_size, i, cdir,1);
    //#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)
-#if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_CUDA)|| defined(HYPRE_USE_OMP45)
    HYPRE_Int * indices_d;
    HYPRE_Int indices_h[stencil_size];
    HYPRE_Int * stencil_shape_d;
@@ -343,7 +343,7 @@ hypre_PFMGSetupInterpOp_CC0
 	//Ap = hypre_StructGetMatrixBoxData(A, i, si);
 	//Astenc = hypre_StructGetIndexD(stencil_shape[si], cdir,stencil_shape_d[si]);
 
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_CUDA) 
          if (data_location < 1)
          {
 	   //Ap = data_A + indices_A[i*stencil_size+si];

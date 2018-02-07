@@ -170,7 +170,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    HYPRE_Int data_location_f = hypre_StructGridDataLocation(fgrid);
    HYPRE_Int data_location_c = hypre_StructGridDataLocation(cgrid);
 
@@ -299,7 +299,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
          }
       }
    }
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    if (data_location_f != data_location_c)
    {
       hypre_TMemcpy(hypre_StructVectorData(rc),hypre_StructVectorData(rc_tmp),HYPRE_Complex,hypre_StructVectorDataSize(rc_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
