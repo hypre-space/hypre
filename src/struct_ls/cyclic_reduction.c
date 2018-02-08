@@ -517,14 +517,10 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
                     
    HYPRE_Int               l;
    HYPRE_Int               flop_divisor;
-                         
+
    HYPRE_Int               x_num_ghost[] = {0, 0, 0, 0, 0, 0};
-#if defined(HYPRE_MEMORY_GPU)
-   //HYPRE_Int               i;
+#if defined(HYPRE_USE_CUDA)
    HYPRE_Int               data_location = 0;
-   //HYPRE_Int               num_level_GPU = 0;
-   //HYPRE_Int               max_box_size  = 0;
-   //HYPRE_Int               device_level  =-1;
 #endif
 
    /*-----------------------------------------------------
@@ -545,7 +541,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    grid_l    = hypre_TAlloc(hypre_StructGrid *,  num_levels, HYPRE_MEMORY_HOST);
    hypre_StructGridRef(grid, &grid_l[0]);
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    data_location = hypre_StructGridDataLocation(grid);
 #endif
    for (l = 0; ; l++)
@@ -571,7 +567,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
 
       /* coarsen the grid */
       hypre_StructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
       hypre_StructGridDataLocation(grid_l[l+1]) = data_location;
 #endif      
    }
@@ -658,7 +654,7 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
       data += hypre_StructMatrixDataSize(A_l[l+1]);
       data_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
       if (data_location != HYPRE_MEMORY_HOST)
       {	  
 	 hypre_StructVectorInitializeData(x_l[l+1], data);

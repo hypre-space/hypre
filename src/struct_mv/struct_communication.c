@@ -1002,23 +1002,11 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 #define DEVICE_VAR 
 
 #elif defined(HYPRE_MEMORY_GPU)
-	       if (hypre_exec_policy == HYPRE_MEMORY_DEVICE)
+	       hypre_BoxLoop0Begin(ndim, length_array)
 	       {
-		 //hypre_DeviceMemset(dptr, 0, HYPRE_Complex, size);
-		  hypre_BoxLoop0Begin(ndim, length_array)
-		  {
-		    dptr[idx] = 0.0;
-		  }
-		  hypre_BoxLoop0End();
+		  dptr[idx] = 0.0;
 	       }
-	       else
-	       {
-		  hypre_BoxLoop0Begin(ndim, length_array)
-		  {
-		    dptr[idx] = 0.0;
-		  }
-		  hypre_BoxLoop0End();
-	       }
+	       hypre_BoxLoop0End();
 #else
                memset(dptr, 0, size*sizeof(HYPRE_Complex));
 #endif
@@ -1442,50 +1430,6 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                fr_dpl = fr_dp + (order[ll])*fr_stride_array[ndim];
                to_dpl = to_dp + (      ll )*to_stride_array[ndim];
 
-//#if defined(HYPRE_USE_OMP45)
-#if 0
-               /* This is based on "Idea 2" in box.h */
-               {
-                  //HYPRE_Int      i[HYPRE_MAXDIM+1];
-                  HYPRE_Int      n[HYPRE_MAXDIM+1];
-                  HYPRE_Int      fs[HYPRE_MAXDIM+1],  ts[HYPRE_MAXDIM+1];
-                  HYPRE_Complex *fp[HYPRE_MAXDIM+1], *tp[HYPRE_MAXDIM+1];
-                  HYPRE_Int      N,d;
-
-                  /* Initialize */
-                  N = 1;
-                  n[ndim]  = 2;
-                  fs[ndim] = 0;
-                  ts[ndim] = 0;
-                  fp[ndim] = fr_dp + (order[ll])*fr_stride_array[ndim];
-                  tp[ndim] = to_dp + (      ll )*to_stride_array[ndim];
-                  for (d = 0; d < ndim; d++)
-                  {
-                     n[d]  = length_array[d];
-                     fs[d] = fr_stride_array[d];
-                     ts[d] = to_stride_array[d];
-                     fp[d] = fp[ndim];
-                     tp[d] = tp[ndim];
-                     N *= n[d];
-                  }
-
-                  /* Emulate ndim nested for loops */
-                  hypre_BoxDataExchangeBegin(ndim, n, fs, i1, ts, i2)
-                  {
-                     if (action > 0)
-                     {
-                        /* add the data to existing values in memory */
-                        to_dpl[i2] += fr_dpl[i1];
-                     }
-                     else
-                     {
-                        /* copy the data over existing values in memory */
-                        to_dpl[i2] = fr_dpl[i1];
-                     }
-                  }
-                  hypre_BoxDataExchangeEnd();
-               }
-#else
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(to_dpl, fr_dpl)
                hypre_BasicBoxLoop2Begin(ndim, length_array,
@@ -1506,7 +1450,6 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                hypre_BoxLoop2End(fi, ti);
 #undef DEVICE_VAR
 #define DEVICE_VAR 
-#endif
             }
          }
       }

@@ -244,7 +244,7 @@ HYPRE_StructSMGGetFinalRelativeResidualNorm( HYPRE_StructSolver  solver,
    return( hypre_SMGGetFinalRelativeResidualNorm( (void *) solver, norm ) );
 }
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
 HYPRE_Int
 HYPRE_StructSMGSetDeviceLevel( HYPRE_StructSolver  solver,
 			       HYPRE_Int   device_level  )

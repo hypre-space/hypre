@@ -124,7 +124,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
 
    hypre_StructMatrix    *Ac_tmp;
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    HYPRE_Int data_location_A = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
    HYPRE_Int data_location_Ac = hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac));
    HYPRE_Int constant_coefficient = hypre_StructMatrixConstantCoefficient(A);
@@ -202,7 +202,7 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
    
    hypre_StructMatrixAssemble(Ac_tmp);
 
-#if defined(HYPRE_MEMORY_GPU)   
+#if defined(HYPRE_USE_CUDA)   
    if ( data_location_A != data_location_Ac )
    {
      if (constant_coefficient == 0)

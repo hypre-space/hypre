@@ -39,7 +39,7 @@ for i in $TNUMS
 do
   tail -3 ${TNAME}.out.${i}  > ${TNAME}.testdata
   tail -3 ${TNAME}.out.1${i} > ${TNAME}.testdata.temp
-  diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+  (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 done
 
 #=============================================================================

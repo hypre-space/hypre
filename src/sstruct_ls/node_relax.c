@@ -13,10 +13,13 @@
 #include "_hypre_sstruct_ls.h"
 #include "_hypre_parcsr_ls.h"
 
+#include "gselim.h"
+
+/*
 #if defined(HYPRE_USE_OMP45)
 #include "__omp45_gselim.h"
 #endif
-
+*/
 /* TODO consider adding it to semistruct header files */
 #define HYPRE_MAXVARS 4
 
@@ -731,8 +734,8 @@ hypre_NodeRelax(  void                 *relax_vdata,
                   /*------------------------------------------------
                    * Invert intra-nodal coupling 
                    *----------------------------------------------*/
-                  gselim(A_loc, x_loc, nvars);
-
+                  //gselim(A_loc, x_loc, nvars);
+		  hypre_gselim_inline(A_loc,x_loc,nvars);
                   /*------------------------------------------------
                    * Copy solution from local storage.
                    *----------------------------------------------*/
@@ -932,8 +935,8 @@ hypre_NodeRelax(  void                 *relax_vdata,
                   /*------------------------------------------------
                    * Invert intra-nodal coupling
                    *----------------------------------------------*/
-                  gselim(A_loc, x_loc, nvars);
-
+                  //gselim(A_loc, x_loc, nvars);
+		  hypre_gselim_inline(A_loc,x_loc,nvars);
                   /*------------------------------------------------
                    * Copy solution from local storage.
                    *----------------------------------------------*/
