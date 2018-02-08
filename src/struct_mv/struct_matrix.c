@@ -435,12 +435,14 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
 				  HYPRE_Complex      *data_const)
 {
    HYPRE_Int             ndim = hypre_StructMatrixNDim(matrix);
-   hypre_StructGrid     *grid = hypre_StructMatrixGrid(matrix);
    HYPRE_Int constant_coefficient;
    hypre_StructStencil  *stencil;
    hypre_Index          *stencil_shape;
    HYPRE_Complex       **stencil_data;
    HYPRE_Int stencil_size, i;
+#if defined(HYPRE_USE_CUDA)
+   hypre_StructGrid     *grid = hypre_StructMatrixGrid(matrix);
+#endif
    hypre_StructMatrixData(matrix) = data;
    hypre_StructMatrixDataConst(matrix) = data_const;
    hypre_StructMatrixDataAlloced(matrix) = 0;
@@ -1213,9 +1215,10 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
    HYPRE_Int             *num_ghost = hypre_StructMatrixNumGhost(matrix);
 
    HYPRE_Int              comm_num_values, mat_num_values, constant_coefficient;
+#if defined(HYPRE_USE_CUDA)   
    HYPRE_Int              stencil_size;
    hypre_StructStencil   *stencil;
-
+#endif
    hypre_CommInfo        *comm_info;
    hypre_CommPkg         *comm_pkg;
 
