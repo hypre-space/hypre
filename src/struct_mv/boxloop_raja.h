@@ -44,12 +44,16 @@ typedef struct hypre_Boxloop_struct
 
 #define hypre_exec_policy cuda_exec<BLOCKSIZE>
 #define hypre_reduce_policy  cuda_reduce_atomic<BLOCKSIZE>
+#if 1
+#define hypre_fence()
+#else
 #define hypre_fence() \
 cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
 printf("\n ERROR zypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
 }\
 AxCheckError(cudaDeviceSynchronize());
+#endif
 
 #elif defined(HYPRE_USE_OPENMP)
    #define hypre_exec_policy      omp_for_exec
@@ -90,21 +94,6 @@ AxCheckError(cudaDeviceSynchronize());
   idx_local = idx_local / box.lsize1;					\
   hypre_IndexD(local_idx, 2)  = idx_local % box.lsize2;
 
-
-
-
-#define zypre_newBoxLoop0Begin(ndim, loop_size)				\
-{									\
-   zypre_newBoxLoopInit(ndim,loop_size);				\
-   forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
-   {
-
-
-#define zypre_newBoxLoop0End()					\
-	});				      			\
-	hypre_fence();      \
-}
-
 #define zypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)	\
    hypre_Boxloop databox##k;						\
    databox##k.lsize0 = loop_size[0];					\
@@ -139,6 +128,18 @@ AxCheckError(cudaDeviceSynchronize());
       databox##k.bstart2  = 0;				        	\
       databox##k.bsize2   = 0;				                \
    }
+
+#define zypre_newBoxLoop0Begin(ndim, loop_size)				\
+{									\
+   zypre_newBoxLoopInit(ndim,loop_size);				\
+   forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
+   {
+
+
+#define zypre_newBoxLoop0End()					\
+	});				      			\
+	hypre_fence();      \
+}
 
 #define zypre_newBoxLoop1Begin(ndim, loop_size,				\
 			       dbox1, start1, stride1, i1)		\

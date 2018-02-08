@@ -27,11 +27,6 @@
 #include <cuda_runtime.h>
 #include <omp.h>
 
-//extern "C++" {
-//#include <RAJA/RAJA.hxx>
-//}
-//using namespace RAJA;
-
 #define HYPER_LAMBDA [=] __host__  __device__
 
 typedef struct hypre_Boxloop_struct
@@ -46,9 +41,9 @@ typedef struct hypre_Boxloop_struct
 #define WARP_SIZE 32
 #define BLOCK_SIZE 512
 
+#if 1
 #define hypre_fence()
-
-/*
+#else
 #define hypre_fence() \
 {		      \
   cudaError err = cudaGetLastError();		\
@@ -59,7 +54,7 @@ typedef struct hypre_Boxloop_struct
   }									\
   AxCheckError(cudaDeviceSynchronize());				\
 } 
-*/
+#endif
 
 #define hypre_reduce_policy  cuda_reduce<BLOCKSIZE>
 

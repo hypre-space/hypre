@@ -848,7 +848,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 #else
    if (1)
 #endif
-   {    
+   {
       send_buffers_data = hypre_TAlloc(HYPRE_Complex *, num_sends,HYPRE_MEMORY_HOST);
       if (num_sends > 0)
       {
@@ -907,6 +907,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
       if (num_recvs > 0)
       {
 	 size = hypre_CommPkgRecvBufsize(comm_pkg);
+
 	 if (size > global_recv_size)
 	 {
 	    if (global_recv_size > 0)
@@ -966,7 +967,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
             if (order[ll] > -1)
             {
                kptr = lptr + order[ll]*stride_array[ndim];
-
+	       
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(dptr, kptr)
                hypre_BasicBoxLoop2Begin(ndim, length_array,
@@ -977,7 +978,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                }
                hypre_BoxLoop2End(ki, di);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
+#define DEVICE_VAR
 
                dptr += unitst_array[ndim];
             }
@@ -1018,7 +1019,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 
    /* Copy buffer data from Device to Host */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    if (num_sends > 0 && hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 #else
    if (num_sends > 0)
@@ -1242,7 +1243,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    /* Copy buffer data from Host to Device */
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_CUDA)
    if (num_recvs > 0 && hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 #else
    if (num_recvs > 0)
