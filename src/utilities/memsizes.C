@@ -21,6 +21,7 @@ extern "C"{
       } else
 	return got->second;
     }
+    return NULL;
   }
   
 }

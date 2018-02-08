@@ -3634,8 +3634,8 @@ hypre_ParCSRMatrix *hypre_ParTMatmul( hypre_ParCSRMatrix  *A,
         hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
         hypre_TFree(B_marker_offd, HYPRE_MEMORY_HOST);
      } /*end parallel region */
-     hypre_TFree(C_diag_array, HYPRE_MEMORY_HOST);
-     hypre_TFree(C_offd_array, HYPRE_MEMORY_HOST);
+     hypre_TFree(C_diag_array, HYPRE_MEMORY_SHARED);
+     hypre_TFree(C_offd_array, HYPRE_MEMORY_SHARED);
    }
 
    /*C = hypre_ParCSRMatrixCreate(comm, n_cols_A, n_cols_B, col_starts_A,

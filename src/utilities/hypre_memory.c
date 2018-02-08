@@ -65,7 +65,7 @@ hypre_OutOfMemory( size_t size )
  * hypre_MAlloc
  *--------------------------------------------------------------------------*/
 
-#if TRACK_MEMORY_ALLOCATIONS
+#if defined(TRACK_MEMORY_ALLOCATIONS)
 char *
 hypre_MAllocIns( size_t size , HYPRE_Int location,char *file, int line)
 {
@@ -175,7 +175,7 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
 /*--------------------------------------------------------------------------
  * hypre_CAlloc
  *--------------------------------------------------------------------------*/
-#if TRACK_MEMORY_ALLOCATIONS
+#if defined(TRACK_MEMORY_ALLOCATIONS)
 char *
 hypre_CAllocIns( size_t count, 
               size_t elt_size,
@@ -294,7 +294,7 @@ size_t memsize(const void *ptr){
  * hypre_ReAlloc
  *--------------------------------------------------------------------------*/
 
-#if TRACK_MEMORY_ALLOCATIONS
+#if defined(TRACK_MEMORY_ALLOCATIONS)
 char *
 hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, int line)
 {
@@ -417,6 +417,7 @@ hypre_Free( char *ptr ,
       cudaSafeFree(ptr,MEM_PAD_LEN);
 #endif
 #else
+      ASSERT_HOST(ptr);
       free(ptr);
 #endif
      }
@@ -425,11 +426,13 @@ hypre_Free( char *ptr ,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
         cudaSafeFree(ptr,MEM_PAD_LEN);
 #else
+	ASSERT_HOST(ptr);
         free(ptr);
 #endif
      }
      else
      {
+       ASSERT_HOST(ptr);
         free(ptr);
      }
    }

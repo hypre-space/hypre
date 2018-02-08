@@ -1,7 +1,7 @@
 #if defined(HYPRE_USE_GPU)
 #include <stdio.h>
 #include <cuda_runtime.h>
-//#include <cublas_v2.h>
+#include <cublas_v2.h>
 #include "_hypre_utilities.h"
 #define gpuErrchk2(ans) { gpuAssert2((ans), __FILE__, __LINE__); }
 inline void gpuAssert2(cudaError_t code, const char *file, hypre_int line)

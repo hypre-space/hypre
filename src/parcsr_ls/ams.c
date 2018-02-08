@@ -977,7 +977,7 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
       HYPRE_BoomerAMGDestroy(ams_data -> B_G0);
 
    if (ams_data -> A_l1_norms)
-      hypre_TFree(ams_data -> A_l1_norms, HYPRE_MEMORY_HOST);
+      hypre_TFree(ams_data -> A_l1_norms, HYPRE_MEMORY_SHARED);
 
    /* G, x, y ,z, Gx, Gy and Gz are not destroyed */
 

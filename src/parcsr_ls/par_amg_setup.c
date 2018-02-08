@@ -2081,7 +2081,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                if (local_sz < local_P_sz)
                {
                   hypre_Vector* Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
-                  hypre_TFree(hypre_VectorData(Vtemp_local), HYPRE_MEMORY_HOST); 
+                  hypre_TFree(hypre_VectorData(Vtemp_local), HYPRE_MEMORY_SHARED); 
                   hypre_VectorSize(Vtemp_local) = local_P_sz; 
                   hypre_VectorData(Vtemp_local) = hypre_CTAlloc(HYPRE_Complex,  local_P_sz, HYPRE_MEMORY_SHARED);
                   if (Ztemp)
@@ -2183,7 +2183,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                hypre_ParCSRMatrixOwnsColStarts(P) = 0; 
                if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H); 
                /*hypre_ParCSRMatrixDestroy(P); */
-               hypre_TFree(d_diag, HYPRE_MEMORY_HOST); 
+               hypre_TFree(d_diag, HYPRE_MEMORY_SHARED); 
                /* Set NonGalerkin drop tol on each level */
                if (level < nongalerk_num_tol) nongalerk_tol_l = nongalerk_tol[level];
                if (nongal_tol_array) nongalerk_tol_l = nongal_tol_array[level];

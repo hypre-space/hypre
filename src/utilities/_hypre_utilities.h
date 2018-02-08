@@ -676,8 +676,8 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
-#define TRACK_MEMORY_ALLOCATIONS 0
-#if TRACK_MEMORY_ALLOCATIONS
+//#define TRACK_MEMORY_ALLOCATIONS 1
+#if defined(TRACK_MEMORY_ALLOCATIONS)
 typedef struct {
   char *file;
   int line;
@@ -694,12 +694,20 @@ pattr_t *patpush(void *ptr, pattr_t *ss);
 
 void assert_check(void *ptr, char *file, int line);
 
+void assert_check_host(void *ptr, char *file, int line);
+
+
 #define ASSERT_MANAGED(ptr)\
   ( assert_check((ptr),__FILE__,__LINE__))
+
+#define ASSERT_HOST(ptr)\
+  ( assert_check_host((ptr),__FILE__,__LINE__))
 
 #else
 
 #define ASSERT_MANAGED(ptr) (ptr)
+
+#define ASSERT_HOST(ptr) (ptr)
 
 #define hypre_TAlloc(type, count, location) \
   ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
