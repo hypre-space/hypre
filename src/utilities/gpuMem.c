@@ -25,6 +25,9 @@ void hypre_GPUInit(hypre_int use_device){
   hypre_int myid;
   hypre_int nDevices;
   hypre_int device;
+#if defined(TRACK_MEMORY_ALLOCATIONS)
+  hypre_printf("\n\n\n WARNING :: TRACK_MEMORY_ALLOCATIONS IS ON \n\n");
+#endif
   if (!HYPRE_GPU_HANDLE){
     HYPRE_GPU_HANDLE=1;
     HYPRE_DEVICE=0;

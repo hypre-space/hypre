@@ -80,7 +80,7 @@ void cudaSafeFree(void *ptr,int padding)
 
 hypre_int PrintPointerAttributes(const void *ptr){
   struct cudaPointerAttributes ptr_att;
-#if TRACK_MEMORY_ALLOCATIONS
+#if defined(TRACK_MEMORY_ALLOCATIONS)
   pattr_t *ss = patpush(ptr,NULL);
   if (ss!=NULL) fprintf(stderr,"Pointer %p from line %d of %s TYPE = %d \n",ptr,ss->line,ss->file,ss->type);
 #endif
@@ -127,7 +127,7 @@ hypre_int PointerAttributes(const void *ptr){
   }
   //return HYPRE_UNDEFINED_POINTER2; /* Shouldnt happen */
 }
-
+#if defined(TRACK_MEMORY_ALLOCATIONS)
 void assert_check(void *ptr, char *file, int line){
   if (ptr==NULL) return;
   pattr_t *ss = patpush(ptr,NULL);
@@ -168,5 +168,5 @@ void assert_check_host(void *ptr, char *file, int line){
     }
   
 }
-
+#endif
 #endif
