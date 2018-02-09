@@ -85,7 +85,6 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
 
    HYPRE_Int         ierr = 0;
    hypre_Vector	    *x_tmp = NULL;
-   hypre_Vector	    *b_tmp = NULL;
 
    /*---------------------------------------------------------------------
     *  Check for size compatibility.  Matvec returns ierr = 1 if

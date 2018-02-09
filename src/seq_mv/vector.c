@@ -578,8 +578,8 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
    HYPRE_Int      i;
 
    HYPRE_Real     result = 0.0;
-   ASSERT_MANAGED(x_data);
-   ASSERT_MANAGED(y_data);
+   //ASSERT_MANAGED(x_data);
+   //ASSERT_MANAGED(y_data);
    PUSH_RANGE("INNER_PROD",0);
    size *=hypre_VectorNumVectors(x);
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)

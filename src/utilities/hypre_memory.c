@@ -409,7 +409,7 @@ hypre_Free( char *ptr ,
 #endif /* end HYPRE_USE_MANAGED_SCALABLE */
 #endif /* end HYPRE_USE_UMALLOC */
 #else /*else HYPRE_USE_OMP45_TARGET_ALLOC */
-      ASSERT_HOST(ptr);
+      //ASSERT_HOST(ptr);
       free(ptr);
 #endif /*end HYPRE_USE_OMP45_TARGET_ALLOC */
      }
