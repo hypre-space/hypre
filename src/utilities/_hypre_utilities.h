@@ -498,6 +498,7 @@ extern "C++" {
 /* OpenMP 4.5 */
 #if defined(HYPRE_USE_OMP45)
 #include "omp.h"
+#define HYPRE_Long long
   
 #ifdef __cplusplus
 extern "C++" {

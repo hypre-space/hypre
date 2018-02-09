@@ -109,6 +109,7 @@ extern "C++" {
 /* OpenMP 4.5 */
 #if defined(HYPRE_USE_OMP45)
 #include "omp.h"
+#define HYPRE_Long long
   
 #ifdef __cplusplus
 extern "C++" {
@@ -315,9 +316,9 @@ void assert_check_host(void *ptr, char *file, int line);
 
 #else
 
-#define ASSERT_MANAGED(ptr) ()
+#define ASSERT_MANAGED(ptr) (ptr)
 
-#define ASSERT_HOST(ptr) ()
+#define ASSERT_HOST(ptr) (ptr)
 
 #define hypre_TAlloc(type, count, location) \
   ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
