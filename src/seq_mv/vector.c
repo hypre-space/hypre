@@ -123,7 +123,9 @@ hypre_SeqVectorInitialize( hypre_Vector *vector )
    }
    else
       ++ierr;
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD   
    UpdateHRC;
+#endif
    return ierr;
 }
 
@@ -305,13 +307,14 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
+
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    UpdateDRC(v);
    // 2 lines below required to get exact match with baseline
    // Not clear why this is the case.
    SyncVectorToHost(v);
    UpdateHRC(v);
-   
-   //printRC(v,"E _CONS VEC");
+#endif  
    return ierr;
 }
 
@@ -373,8 +376,6 @@ hypre_SeqVectorCopy( hypre_Vector *x,
    else SyncVectorToDevice(x);
    if (!y->mapped) hypre_SeqVectorMapToDevice(y);
    else SyncVectorToDevice(y);
-   //SyncVectorToDevice(x);
-   //SyncVectorToDevice(y);
 #endif
    if (size > size_y) size = size_y;
    size *=hypre_VectorNumVectors(x);
@@ -391,7 +392,10 @@ hypre_SeqVectorCopy( hypre_Vector *x,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
+
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD   
    UpdateDRC(y);
+#endif
    return ierr;
 }
 
@@ -477,7 +481,9 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
 #endif
    for (i = 0; i < size; i++)
       y_data[i] *= alpha;
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    UpdateDRC(y);
+#endif
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
@@ -537,7 +543,9 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] += hypre_MPI_Wtime();
 #endif
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
    UpdateDRC(y);
+#endif
    return ierr;
 }
 
@@ -570,8 +578,8 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
    HYPRE_Int      i;
 
    HYPRE_Real     result = 0.0;
-   ASSERT_MANAGED(x_data);
-   ASSERT_MANAGED(y_data);
+   //ASSERT_MANAGED(x_data);
+   //ASSERT_MANAGED(y_data);
    PUSH_RANGE("INNER_PROD",0);
    size *=hypre_VectorNumVectors(x);
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
@@ -678,7 +686,7 @@ hypre_SeqVectorAxpyDevice( HYPRE_Complex alpha,
     firstcall=0;
   }
   cublasErrchk(cublasDaxpy(handle,(HYPRE_Int)size,&alpha,x_data,1,y_data,1));
-  gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+  hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
   POP_RANGE;
   return ierr;
 }
@@ -711,7 +719,7 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
 		  x_data, 1,
 		  y_data, 1,
 		  &result);
-  gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+  hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
   POP_RANGE;
   POP_RANGE;
   return result;
@@ -721,23 +729,23 @@ void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x){
   if (hypre_VectorSize(x)==0) return;
   ASSERT_MANAGED(hypre_VectorData(x));
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
-  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
-  gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+  hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
+  hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
   POP_RANGE;
 }
 void hypre_SeqVectorPrefetchToHost(hypre_Vector *x){
   if (hypre_VectorSize(x)==0) return;
   PUSH_RANGE("hypre_SeqVectorPrefetchToHost",0);
-  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
-  gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+  hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
+  hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
   POP_RANGE;
 }
 void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index){
   if (hypre_VectorSize(x)==0) return;
   ASSERT_MANAGED(hypre_VectorData(x));
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
-  gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(index)));
-  gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(index)));
+  hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(index)));
+  hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(index)));
   POP_RANGE;
 }
 hypre_int hypre_SeqVectorIsManaged(hypre_Vector *x){
@@ -756,7 +764,9 @@ void hypre_SeqVectorMapToDevice(hypre_Vector *x){
     //#pragma omp target enter data map(to:x[0:0])
 #pragma omp target enter data map(to:x->data[0:x->size])
     x->mapped=1;
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
     SetDRC(x);
+#endif
   }
 }
 void hypre_SeqVectorMapToDevicePrint(hypre_Vector *x){
@@ -765,7 +775,9 @@ void hypre_SeqVectorMapToDevicePrint(hypre_Vector *x){
     //#pragma omp target enter data map(to:x[0:0])
 #pragma omp target enter data map(to:x->data[0:x->size])
   x->mapped=1;
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   SetDRC(x);
+#endif
   }
   printf("...Done\n");
 }
@@ -779,13 +791,17 @@ void hypre_SeqVectorUnMapFromDevice(hypre_Vector *x){
 void hypre_SeqVectorUpdateDevice(hypre_Vector *x){
   if (x==NULL) return;
 #pragma omp target update to(x->data[0:x->size])
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   SetDRC(x);
+#endif
 }
 
 void hypre_SeqVectorUpdateHost(hypre_Vector *x){
   if (x==NULL) return;
 #pragma omp target update from(x->data[0:x->size])
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   SetHRC(x);
+#endif
 }
 void printRC(hypre_Vector *x,char *id){
   printf("%p At %s HRC = %d , DRC = %d \n",x,id,x->hrc,x->drc);

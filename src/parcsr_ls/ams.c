@@ -85,8 +85,9 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 	 //printRC(hypre_ParVectorLocalVector(f),"Pre-COPY F");
          hypre_ParVectorCopy(f,v);
 #endif
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 	 SyncVectorToDevice(hypre_ParVectorLocalVector(v));
-
+#endif
          hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, v);
 
 	 //SyncVectorToHost(hypre_ParVectorLocalVector(v));
@@ -110,7 +111,9 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
          for (i = 0; i < num_rows; i++)
             u_data[i] += v_data[i] / l1_norms[i];
 #endif
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD	 
 	 UpdateDRC(hypre_ParVectorLocalVector(u));
+#endif
 	 //printf("AMS.C DONE %d = %d \n",num_rows,num_teams*1024);
 	 POP_RANGE;
 	 POP_RANGE;
@@ -977,7 +980,7 @@ HYPRE_Int hypre_AMSDestroy(void *solver)
       HYPRE_BoomerAMGDestroy(ams_data -> B_G0);
 
    if (ams_data -> A_l1_norms)
-      hypre_TFree(ams_data -> A_l1_norms, HYPRE_MEMORY_HOST);
+      hypre_TFree(ams_data -> A_l1_norms, HYPRE_MEMORY_SHARED);
 
    /* G, x, y ,z, Gx, Gy and Gz are not destroyed */
 

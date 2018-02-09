@@ -59,12 +59,16 @@ typedef struct hypre_Boxloop_struct
 
 #define hypre_exec_policy cuda_exec<BLOCKSIZE>
 #define hypre_reduce_policy  cuda_reduce_atomic<BLOCKSIZE>
+#if 1
+#define hypre_fence()
+#else
 #define hypre_fence() \
 cudaError err = cudaGetLastError();\
 if ( cudaSuccess != err ) {\
 printf("\n ERROR zypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
 }\
-AxCheckError(cudaDeviceSynchronize());
+hypre_CheckErrorDevice(cudaDeviceSynchronize());
+#endif
 
 #elif defined(HYPRE_USE_OPENMP)
    #define hypre_exec_policy      omp_for_exec
@@ -105,21 +109,6 @@ AxCheckError(cudaDeviceSynchronize());
   idx_local = idx_local / box.lsize1;					\
   hypre_IndexD(local_idx, 2)  = idx_local % box.lsize2;
 
-
-
-
-#define zypre_newBoxLoop0Begin(ndim, loop_size)				\
-{									\
-   zypre_newBoxLoopInit(ndim,loop_size);				\
-   forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
-   {
-
-
-#define zypre_newBoxLoop0End()					\
-	});				      			\
-	hypre_fence();      \
-}
-
 #define zypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)	\
    hypre_Boxloop databox##k;						\
    databox##k.lsize0 = loop_size[0];					\
@@ -154,6 +143,18 @@ AxCheckError(cudaDeviceSynchronize());
       databox##k.bstart2  = 0;				        	\
       databox##k.bsize2   = 0;				                \
    }
+
+#define zypre_newBoxLoop0Begin(ndim, loop_size)				\
+{									\
+   zypre_newBoxLoopInit(ndim,loop_size);				\
+   forall< hypre_exec_policy >(0, hypre__tot, [=] RAJA_DEVICE (HYPRE_Int idx) \
+   {
+
+
+#define zypre_newBoxLoop0End()					\
+	});				      			\
+	hypre_fence();      \
+}
 
 #define zypre_newBoxLoop1Begin(ndim, loop_size,				\
 			       dbox1, start1, stride1, i1)		\
@@ -363,28 +364,24 @@ typedef struct hypre_Boxloop_struct
 #if defined(HYPRE_MEMORY_GPU)
 #include <cuda.h>
 #include <cuda_runtime.h>
-#define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
-{
-   if (err)
-   {
-      printf("CUDA Error Code[%d]: %s\n%s() Line:%d\n", err, cudaGetErrorString(err), fun, line);
-   }
-}
-#define BLOCKSIZE 256
 
+#define BLOCKSIZE 256
+#if 1
+#define hypre_fence()
+#else
 #define hypre_fence()				\
    cudaError err = cudaGetLastError();		\
    if ( cudaSuccess != err ) {						\
      printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
    }									\
-   AxCheckError(cudaDeviceSynchronize());
+   hypre_CheckErrorDevice(cudaDeviceSynchronize());
+#endif
 #elif defined(HYPRE_USE_OPENMP)
-   #define hypre_fence() ;
+   #define hypre_fence()
 #elif defined(HYPRE_USING_OPENMP_ACC)
    #define hypre_fence()  
 #else
-   #define hypre_fence();
+   #define hypre_fence()
 #endif
 
 #define hypre_newBoxLoopInit(ndim,loop_size)				\
@@ -456,6 +453,7 @@ void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int li
 
 #define hypre_newBoxLoop0End(i1)					\
    });									\
+   hypre_fence();\
 }
 
 
@@ -545,28 +543,38 @@ void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int li
 	hypre_Boxloop databox##k;					\
 	databox##k.lsize0 = loop_size[0];				\
 	databox##k.strides0 = stride[0];				\
+	databox##k.bstart0  = 0;					\
+	databox##k.bsize0   = 0;					\
 	if (ndim > 1)							\
 	{								\
 	    databox##k.lsize1 = loop_size[1];				\
 	    databox##k.strides1 = stride[1];				\
+	    databox##k.bstart1  = 0;					\
+	    databox##k.bsize1   = 0;					\
 	}								\
 	else						        	\
 	{							       	\
 		databox##k.lsize1 = 1;				       	\
 		databox##k.strides1 = 0;		       		\
+		databox##k.bstart1  = 0;				\
+		databox##k.bsize1   = 0;				\
 	}								\
 	if (ndim == 3)							\
 	{								\
 	    databox##k.lsize2 = loop_size[2];				\
 	    databox##k.strides2 = stride[2];				\
+	    databox##k.bstart2  = 0;					\
+	    databox##k.bsize2   = 0;					\
 	}								\
 	else								\
 	{								\
 	    databox##k.lsize2 = 1;					\
 	    databox##k.strides2 = 0;					\
+	    databox##k.bstart2  = 0;					\
+	    databox##k.bsize2   = 0;					\
 	}
 
-#define zypre_newBasicBoxLoop2Begin(ndim, loop_size,			\
+#define hypre_newBasicBoxLoop2Begin(ndim, loop_size,			\
 				    stride1, i1,			\
 				    stride2, i2)			\
 {    		       				                	\
@@ -665,7 +673,7 @@ struct ColumnSums
 };
 }
 
-#define hypre_newBoxLoopSetOneBlock() {}
+#define hypre_newBoxLoopSetOneBlock()
 
 #define hypre_newBoxLoopGetIndex(index)\
   index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
@@ -689,7 +697,7 @@ struct ColumnSums
 #define hypre_BoxLoop4For        hypre_newBoxLoop4For
 #define hypre_BoxLoop4End        hypre_newBoxLoop4End
 
-#define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
+#define hypre_BasicBoxLoop2Begin hypre_newBasicBoxLoop2Begin
 #endif
 #elif defined(HYPRE_USE_CUDA)
 /*BHEADER**********************************************************************
@@ -721,11 +729,6 @@ struct ColumnSums
 #include <cuda_runtime.h>
 #include <omp.h>
 
-//extern "C++" {
-//#include <RAJA/RAJA.hxx>
-//}
-//using namespace RAJA;
-
 #define HYPER_LAMBDA [=] __host__  __device__
 
 typedef struct hypre_Boxloop_struct
@@ -740,9 +743,9 @@ typedef struct hypre_Boxloop_struct
 #define WARP_SIZE 32
 #define BLOCK_SIZE 512
 
+#if 1
 #define hypre_fence()
-
-/*
+#else
 #define hypre_fence() \
 {		      \
   cudaError err = cudaGetLastError();		\
@@ -751,9 +754,9 @@ typedef struct hypre_Boxloop_struct
     printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
     HYPRE_Int *p = NULL; *p = 1;\
   }									\
-  AxCheckError(cudaDeviceSynchronize());				\
+  hypre_CheckErrorDevice(cudaDeviceSynchronize());				\
 } 
-*/
+#endif
 
 #define hypre_reduce_policy  cuda_reduce<BLOCKSIZE>
 
@@ -1027,11 +1030,7 @@ void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
 #define hypre_LoopEnd()					\
    });							\
    hypre_fence();					\
-}							\
-   
-   //   hypre_fence();					\
-   //}
-
+}
 
 #define MAX_BLOCK BLOCKSIZE
 
@@ -1251,9 +1250,6 @@ private:
 }
 #define hypre_newBoxLoopGetIndex(index)\
   index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
-
-//#define hypre_newBoxLoopGetIndex(index)			\
-//  index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
   
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 

@@ -1,19 +1,8 @@
 #if defined(HYPRE_USE_GPU)
 #include <stdio.h>
 #include <cuda_runtime.h>
-//#include <cublas_v2.h>
+#include <cublas_v2.h>
 #include "_hypre_utilities.h"
-#define gpuErrchk2(ans) { gpuAssert2((ans), __FILE__, __LINE__); }
-inline void gpuAssert2(cudaError_t code, const char *file, hypre_int line)
-{
-   if (code != cudaSuccess) 
-   {
-     printf("GPUassert2: %s %s %d\n", cudaGetErrorString(code), file, line);
-     exit(2);
-   }
-}
-
-
 
 extern "C"{
   __global__
@@ -41,16 +30,16 @@ extern "C"{
     const hypre_int tpb=64;
     hypre_int num_blocks=num_rows/tpb+1;
 #ifdef CATCH_LAUNCH_ERRORS
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
     MemPrefetchSized(l1_norm,num_rows*sizeof(HYPRE_Complex),HYPRE_DEVICE,s);
     VecScaleKernel<<<num_blocks,tpb,0,s>>>(u,v,l1_norm,num_rows);
 #ifdef CATCH_LAUNCH_ERRORS    
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
-    gpuErrchk2(cudaStreamSynchronize(s));
+    hypre_CheckErrorDevice(cudaStreamSynchronize(s));
     POP_RANGE;
   }
 }
@@ -70,7 +59,7 @@ extern "C"{
     //MemPrefetch(tgt,0,s);
     //MemPrefetch(src,0,s);
     VecCopyKernel<<<num_blocks,tpb,0,s>>>(tgt,src,size);
-    //gpuErrchk2(cudaStreamSynchronize(s));
+    //hypre_CheckErrorDevice(cudaStreamSynchronize(s));
     POP_RANGE;
   }
 }
@@ -104,20 +93,20 @@ extern "C"{
     hypre_int tpb=64;
     hypre_int num_blocks=(end-begin)/tpb+1;
 #ifdef CATCH_LAUNCH_ERRORS
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
     PackOnDeviceKernel<<<num_blocks,tpb,0,s>>>(send_data,x_local_data,send_map,begin,end);
 #ifdef CATCH_LAUNCH_ERRORS
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
     PUSH_RANGE("PACK_PREFETCH",1);
 #ifndef HYPRE_GPU_USE_PINNED
     MemPrefetchSized((void*)send_data,(end-begin)*sizeof(HYPRE_Complex),cudaCpuDeviceId,s);
 #endif
     POP_RANGE;
-    //gpuErrchk2(cudaStreamSynchronize(s));
+    //hypre_CheckErrorDevice(cudaStreamSynchronize(s));
   }
 }
   
@@ -140,15 +129,15 @@ extern "C"{
     hypre_int num_blocks=num_rows/64+1;
     
 #ifdef CATCH_LAUNCH_ERRORS
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
     VecScaleScalarKernel<<<num_blocks,64,0,s>>>(u,alpha,num_rows);
 #ifdef CATCH_LAUNCH_ERRORS
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
-    gpuErrchk2(cudaStreamSynchronize(s));
+    hypre_CheckErrorDevice(cudaStreamSynchronize(s));
     POP_RANGE;
     return 0;
   }
@@ -189,16 +178,16 @@ void SpMVCudaKernelZB(HYPRE_Complex* __restrict__ y,HYPRE_Complex alpha, const H
     hypre_int num_threads=64;
     hypre_int num_blocks=num_rows/num_threads+1;
 #ifdef CATCH_LAUNCH_ERRORS
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif    
     if (beta==0.0)
       SpMVCudaKernelZB<<<num_blocks,num_threads>>>(y,alpha,A_data,A_i,A_j,x,num_rows);
     else
       SpMVCudaKernel<<<num_blocks,num_threads>>>(y,alpha,A_data,A_i,A_j,x,beta,num_rows);
 #ifdef CATCH_LAUNCH_ERRORS
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
 
 }
@@ -229,8 +218,8 @@ extern "C"{
 	cudaGetDeviceProperties(&props, i);
 	cudarch_actual=props.major*100+props.minor*10;
     }
-    gpuErrchk2(cudaPeekAtLastError());
-    gpuErrchk2(cudaDeviceSynchronize());
+    hypre_CheckErrorDevice(cudaPeekAtLastError());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
     CompileFlagSafetyCheck<<<1,1,0,0>>>(cudarch_actual);
     cudaError_t code=cudaPeekAtLastError();
     if (code != cudaSuccess)
@@ -239,7 +228,7 @@ extern "C"{
 	fprintf(stderr,"ERROR :: Check if compile arch flags match actual device arch = sm_%d\n",cudarch_actual/10);
 	exit(2);
       }
-    gpuErrchk2(cudaDeviceSynchronize());
+    hypre_CheckErrorDevice(cudaDeviceSynchronize());
   }
 }
 #endif

@@ -65,13 +65,13 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
 {
    if (vector)
    {
-      hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
       hypre_StructVectorRefCount(vector) --;
       if (hypre_StructVectorRefCount(vector) == 0)
       {
          if (hypre_StructVectorDataAlloced(vector))
          {
-#if defined(HYPRE_USE_CUDA) 	   
+#if defined(HYPRE_USE_CUDA)
+	    hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
 	    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
 	    {
 	       hypre_TFree(hypre_StructVectorData(vector),HYPRE_MEMORY_DEVICE);
@@ -197,10 +197,10 @@ HYPRE_Int
 hypre_StructVectorInitialize( hypre_StructVector *vector )
 {
    HYPRE_Complex *data;
-   hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
 
    hypre_StructVectorInitializeShell(vector);
-#if defined(HYPRE_USE_CUDA)    
+#if defined(HYPRE_USE_CUDA)
+   hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
       data = hypre_CTAlloc(HYPRE_Complex, hypre_StructVectorDataSize(vector),HYPRE_MEMORY_DEVICE);
@@ -627,8 +627,8 @@ hypre_StructVectorSetDataSize(hypre_StructVector *vector,
 			      HYPRE_Int          *data_size,
 			      HYPRE_Int          *data_host_size)
 {
+#if defined(HYPRE_USE_CUDA)
    hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
-#if defined(HYPRE_USE_CUDA)    
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
       *data_size += hypre_StructVectorDataSize(vector);

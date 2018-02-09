@@ -137,16 +137,15 @@ extern HYPRE_Int hypre__global_offload;
 extern HYPRE_Int hypre__offload_device_num;
 
 /* stats */
-#define HYPRE_Long long
 
-extern HYPRE_Long hypre__target_allc_count;
-extern HYPRE_Long hypre__target_free_count;
-extern HYPRE_Long hypre__target_allc_bytes;
-extern HYPRE_Long hypre__target_free_bytes;
-extern HYPRE_Long hypre__target_htod_count;
-extern HYPRE_Long hypre__target_dtoh_count;
-extern HYPRE_Long hypre__target_htod_bytes;
-extern HYPRE_Long hypre__target_dtoh_bytes;
+extern hypre_longint hypre__target_allc_count;
+extern hypre_longint hypre__target_free_count;
+extern hypre_longint hypre__target_allc_bytes;
+extern hypre_longint hypre__target_free_bytes;
+extern hypre_longint hypre__target_htod_count;
+extern hypre_longint hypre__target_dtoh_count;
+extern hypre_longint hypre__target_htod_bytes;
+extern hypre_longint hypre__target_dtoh_bytes;
 
 /* DEBUG MODE: check if offloading has effect 
  * (turned on when configured with --enable-debug) */
@@ -167,7 +166,7 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
 {\
    /* devnum: device number \
     * hptr: host poiter \
-    * datatype: e.g., int, float, double, ... \
+    * datatype \
     * type1: ``e(n)ter'', ''e(x)it'', or ``u(p)date'' \
     * type2: ``(a)lloc'', ``(t)o'', ``(d)elete'', ''(f)rom'' \
     */ \
@@ -287,8 +286,8 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
 
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
-#define TRACK_MEMORY_ALLOCATIONS 0
-#if TRACK_MEMORY_ALLOCATIONS
+//#define TRACK_MEMORY_ALLOCATIONS 1
+#if defined(TRACK_MEMORY_ALLOCATIONS)
 typedef struct {
   char *file;
   int line;
@@ -305,12 +304,20 @@ pattr_t *patpush(void *ptr, pattr_t *ss);
 
 void assert_check(void *ptr, char *file, int line);
 
+void assert_check_host(void *ptr, char *file, int line);
+
+
 #define ASSERT_MANAGED(ptr)\
   ( assert_check((ptr),__FILE__,__LINE__))
 
+#define ASSERT_HOST(ptr)\
+  ( assert_check_host((ptr),__FILE__,__LINE__))
+
 #else
 
-#define ASSERT_MANAGED(ptr) (ptr)
+#define ASSERT_MANAGED(ptr) ()
+
+#define ASSERT_HOST(ptr) ()
 
 #define hypre_TAlloc(type, count, location) \
   ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
@@ -345,10 +352,10 @@ HYPRE_Int hypre_OutOfMemory ( size_t size );
 char *hypre_MAlloc( size_t size , HYPRE_Int location );
 char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,int line);
 char *hypre_CAlloc( size_t count ,  size_t elt_size , HYPRE_Int location);
-char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, int line);
+char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, HYPRE_Int line);
 char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc( char *ptr ,  size_t size , HYPRE_Int location);
-char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, int line);
+char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, HYPRE_Int line);
 void hypre_Free( char *ptr , HYPRE_Int location );
 char *hypre_CAllocHost( size_t count,size_t elt_size );
 char *hypre_MAllocHost( size_t size );

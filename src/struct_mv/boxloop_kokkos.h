@@ -41,28 +41,24 @@ typedef struct hypre_Boxloop_struct
 #if defined(HYPRE_MEMORY_GPU)
 #include <cuda.h>
 #include <cuda_runtime.h>
-#define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
-{
-   if (err)
-   {
-      printf("CUDA Error Code[%d]: %s\n%s() Line:%d\n", err, cudaGetErrorString(err), fun, line);
-   }
-}
-#define BLOCKSIZE 256
 
+#define BLOCKSIZE 256
+#if 1
+#define hypre_fence()
+#else
 #define hypre_fence()				\
    cudaError err = cudaGetLastError();		\
    if ( cudaSuccess != err ) {						\
      printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
    }									\
-   AxCheckError(cudaDeviceSynchronize());
+   hypre_CheckErrorDevice(cudaDeviceSynchronize());
+#endif
 #elif defined(HYPRE_USE_OPENMP)
-   #define hypre_fence() ;
+   #define hypre_fence()
 #elif defined(HYPRE_USING_OPENMP_ACC)
    #define hypre_fence()  
 #else
-   #define hypre_fence();
+   #define hypre_fence()
 #endif
 
 #define hypre_newBoxLoopInit(ndim,loop_size)				\
@@ -134,6 +130,7 @@ void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int li
 
 #define hypre_newBoxLoop0End(i1)					\
    });									\
+   hypre_fence();\
 }
 
 
@@ -223,28 +220,38 @@ void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int li
 	hypre_Boxloop databox##k;					\
 	databox##k.lsize0 = loop_size[0];				\
 	databox##k.strides0 = stride[0];				\
+	databox##k.bstart0  = 0;					\
+	databox##k.bsize0   = 0;					\
 	if (ndim > 1)							\
 	{								\
 	    databox##k.lsize1 = loop_size[1];				\
 	    databox##k.strides1 = stride[1];				\
+	    databox##k.bstart1  = 0;					\
+	    databox##k.bsize1   = 0;					\
 	}								\
 	else						        	\
 	{							       	\
 		databox##k.lsize1 = 1;				       	\
 		databox##k.strides1 = 0;		       		\
+		databox##k.bstart1  = 0;				\
+		databox##k.bsize1   = 0;				\
 	}								\
 	if (ndim == 3)							\
 	{								\
 	    databox##k.lsize2 = loop_size[2];				\
 	    databox##k.strides2 = stride[2];				\
+	    databox##k.bstart2  = 0;					\
+	    databox##k.bsize2   = 0;					\
 	}								\
 	else								\
 	{								\
 	    databox##k.lsize2 = 1;					\
 	    databox##k.strides2 = 0;					\
+	    databox##k.bstart2  = 0;					\
+	    databox##k.bsize2   = 0;					\
 	}
 
-#define zypre_newBasicBoxLoop2Begin(ndim, loop_size,			\
+#define hypre_newBasicBoxLoop2Begin(ndim, loop_size,			\
 				    stride1, i1,			\
 				    stride2, i2)			\
 {    		       				                	\
@@ -343,7 +350,7 @@ struct ColumnSums
 };
 }
 
-#define hypre_newBoxLoopSetOneBlock() {}
+#define hypre_newBoxLoopSetOneBlock()
 
 #define hypre_newBoxLoopGetIndex(index)\
   index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
@@ -367,5 +374,5 @@ struct ColumnSums
 #define hypre_BoxLoop4For        hypre_newBoxLoop4For
 #define hypre_BoxLoop4End        hypre_newBoxLoop4End
 
-#define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
+#define hypre_BasicBoxLoop2Begin hypre_newBasicBoxLoop2Begin
 #endif
