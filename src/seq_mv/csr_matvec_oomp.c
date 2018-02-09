@@ -23,8 +23,6 @@
 
 #define NUM_TEAMS 2048
 #define NUM_THREADS 1024
-//int hypre_CSRMatrixSortHost(hypre_CSRMatrix *A);
-//int mysort(double *data, int *a,int size);
 
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvec
@@ -327,7 +325,6 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
                                  hypre_Vector    *y,
                                  HYPRE_Int        offset     )
 {
-  //printf("CALLING OOOMP MATVE\n");
 #ifdef HYPRE_PROFILE
    HYPRE_Real time_begin = hypre_MPI_Wtime();
 #endif
@@ -340,15 +337,13 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A) + offset;
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
    HYPRE_Int         num_rows = hypre_CSRMatrixNumRows(A) - offset;
+#ifdef HYPRE_USING_CUSPARSE
    HYPRE_Int         num_cols = hypre_CSRMatrixNumCols(A);
-   /*HYPRE_Int         num_nnz  = hypre_CSRMatrixNumNonzeros(A);*/
+   HYPRE_Int         num_nnz  = hypre_CSRMatrixNumNonzeros(A);
 
    HYPRE_Int        *A_rownnz = hypre_CSRMatrixRownnz(A);
    HYPRE_Int         num_rownnz = hypre_CSRMatrixNumRownnz(A);
 
-   HYPRE_Complex    *x_data = hypre_VectorData(x);
-   HYPRE_Complex    *b_data = hypre_VectorData(b) + offset;
-   HYPRE_Complex    *y_data = hypre_VectorData(y) + offset;
    HYPRE_Int         x_size = hypre_VectorSize(x);
    HYPRE_Int         b_size = hypre_VectorSize(b) - offset;
    HYPRE_Int         y_size = hypre_VectorSize(y) - offset;
@@ -359,9 +354,12 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    HYPRE_Int         vecstride_b = hypre_VectorVectorStride(b);*/
    HYPRE_Int         idxstride_x = hypre_VectorIndexStride(x);
    HYPRE_Int         vecstride_x = hypre_VectorVectorStride(x);
-
  
    HYPRE_Real        xpar=0.7;
+#endif
+   HYPRE_Complex    *x_data = hypre_VectorData(x);
+   HYPRE_Complex    *b_data = hypre_VectorData(b) + offset;
+   HYPRE_Complex    *y_data = hypre_VectorData(y) + offset;
 
    HYPRE_Int         ierr = 0;
    hypre_Vector	    *x_tmp = NULL;
@@ -435,15 +433,8 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
      } else 
        SyncVectorToDevice(b);
    }
-
-
-
-
-
 #endif
 
- 
-  
    if (x == y)
    {
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
@@ -456,8 +447,6 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 
 
 #ifdef HYPRE_USING_CUSPARSE
-   // gpuErrchk(cudaPeekAtLastError());
-   //gpuErrchk(cudaDeviceSynchronize());
    
    ASSERT_MANAGED(A_data);
    ASSERT_MANAGED(A_i);
@@ -480,17 +469,13 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 #endif
    cusparseErrchk(cusparseDcsrmv(handle ,
 				 CUSPARSE_OPERATION_NON_TRANSPOSE, 
-				 A->num_rows, A->num_cols, A->num_nonzeros,
+				 num_rows, num_cols, num_nnz,
 				 &alpha, descr,
 				 A_data ,A_i,A_j,
 				 x_data, &beta, y_data));
    }
   
-// if (!GetAsyncMode()){
-   //gpuErrchk(cudaPeekAtLastError());
-   //gpuErrchk(cudaDeviceSynchronize());
-   gpuErrchk(cudaStreamSynchronize(s[4]));
- //}
+   hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
 #else
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
    int num_threads=64; // >64  for 100% Theoritical occupancy
@@ -514,8 +499,9 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
        y_data[i] = alpha*tempx+beta*b_data[i];
      }
 #endif
-
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 UpdateDRC(y);
+#endif
    if (x == y) hypre_SeqVectorDestroy(x_tmp);
    //printRC(y,"Inside MatvecOOMP");
    //hypre_SeqVectorUpdateHost(y);

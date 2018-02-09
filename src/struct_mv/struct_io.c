@@ -42,11 +42,12 @@ hypre_PrintBoxArrayData( FILE            *file,
                    
    HYPRE_Int        i, j, d;
    HYPRE_Complex    value;
-   HYPRE_Complex   *data_host, *data_host_saved;
+   HYPRE_Complex   *data_host;
    /*----------------------------------------
     * Print data
     *----------------------------------------*/
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+   HYPRE_Complex   *data_host_saved;
    HYPRE_Int tot_size = 0;
    hypre_ForBoxI(i, box_array)
    {
@@ -57,10 +58,10 @@ hypre_PrintBoxArrayData( FILE            *file,
    data_host = hypre_CTAlloc(HYPRE_Complex, tot_size, HYPRE_MEMORY_HOST);
    hypre_TMemcpy(data_host, data, HYPRE_Complex, tot_size,
                  HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
+   data_host_saved = data_host;
 #else
    data_host = data;
 #endif
-   data_host_saved = data_host;
  
    hypre_SetIndex(stride, 1);
 

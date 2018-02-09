@@ -400,37 +400,27 @@ void hypre_SeqVectorUpdateHost(hypre_Vector *x);
 }
 #endif
 
-
-inline void UpdateHRC(hypre_Vector *v){
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+inline void UpdateHRC(hypre_Vector *v){
   v->hrc++;
-#endif
 }
 inline void UpdateDRC(hypre_Vector *v){
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   v->drc++;
-#endif
 }
 inline void SetHRC(hypre_Vector *v){
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   v->hrc=v->drc;
-#endif
 }
 inline void SetDRC(hypre_Vector *v){
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   v->drc=v->hrc;
-#endif
 }
 inline void SyncVectorToDevice(hypre_Vector *v){
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   if (v->hrc>v->drc) hypre_SeqVectorUpdateDevice(v);
-#endif
 }
 inline void SyncVectorToHost(hypre_Vector *v){
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   if (v->drc>v->hrc) hypre_SeqVectorUpdateHost(v);
-#endif
 }
+#endif
+
 void printRC(hypre_Vector *x,char *id);
 #endif
 

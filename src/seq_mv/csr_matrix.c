@@ -693,12 +693,12 @@ void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
     ASSERT_MANAGED(hypre_CSRMatrixData(A));
     ASSERT_MANAGED(hypre_CSRMatrixI(A));
     ASSERT_MANAGED(hypre_CSRMatrixJ(A));
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(5)));
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(6)));
-    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
-    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(5)));
-    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(6)));
+    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
+    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(5)));
+    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),HYPRE_DEVICE,HYPRE_STREAM(6)));
+    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
+    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(5)));
+    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(6)));
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
     A->on_device=0; // Should be 1 for CUDA code. 0 for OMP for now
 #else
@@ -711,10 +711,10 @@ void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A){
   PUSH_RANGE("hypre_CSRMatrixPrefetchToDevice",0);
   if (A->on_device){
     A->on_device=0;
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
-    gpuErrchk(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
-    gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixData(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Complex),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixI(A),(hypre_CSRMatrixNumRows(A)+1)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_CSRMatrixJ(A),hypre_CSRMatrixNumNonzeros(A)*sizeof(HYPRE_Int),cudaCpuDeviceId,HYPRE_STREAM(4)));
+    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
   }
   POP_RANGE;
 }

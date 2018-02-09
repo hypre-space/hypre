@@ -67,7 +67,7 @@ hypre_OutOfMemory( size_t size )
 
 #if defined(TRACK_MEMORY_ALLOCATIONS)
 char *
-hypre_MAllocIns( size_t size , HYPRE_Int location,char *file, int line)
+hypre_MAllocIns( size_t size , HYPRE_Int location,char *file, HYPRE_Int line)
 {
   char *ret = hypre_MAlloc(size,location);
   //printf("%s %d %d %p\n",file,line,location,ret);
@@ -93,45 +93,44 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
       if (location==HYPRE_MEMORY_DEVICE)
       {
 #if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
-         //ptr = omp_target_alloc(size+sizeof(size_t)*MEM_PAD_LEN, hypre__offload_device_num);
-         gpuErrchk( cudaMalloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN) );
+	/*ptr = omp_target_alloc(size+sizeof(size_t)*MEM_PAD_LEN, hypre__offload_device_num);*/
+         hypre_CheckErrorDevice( cudaMalloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN) );
          size_t *sp=(size_t*)ptr;
          cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
          ptr=(void*)(&sp[MEM_PAD_LEN]);
-#elif defined(HYPRE_USE_OMP45) 
+#elif defined(HYPRE_USE_OMP45) /*else HYPRE_USE_OMP45_TARGET_ALLOC */
          void *ptr_alloc = malloc(size + HYPRE_OMP45_SZE_PAD);
          char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
          size_t size_inuse = size;
          ((size_t *) ptr_alloc)[0] = size_inuse;
          hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "enter", "alloc");
          ptr = (void *) ptr_inuse;
-#elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#elif defined(HYPRE_MEMORY_GPU) /*else HYPRE_USE_OMP45_TARGET_ALLOC */
+         hypre_CheckErrorDevice( cudaMalloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN) );
+         size_t *sp=(size_t*)ptr;
+         cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
+         ptr=(void*)(&sp[MEM_PAD_LEN]);
+#elif defined(HYPRE_USE_MANAGED)
 #ifdef HYPRE_USE_UMALLOC
          HYPRE_Int threadid = hypre_GetThreadID();
 #ifdef HYPRE_USE_MANAGED
          printf("ERROR HYPRE_USE_UMALLOC AND HYPRE_USE_MANAGED are mutually exclusive\n");
-#endif//HYPRE_USE_MANAGED
+#endif/* HYPRE_USE_MANAGED */
          ptr = _umalloc_(size);	 
-#elif HYPRE_USE_MANAGED
+#elif HYPRE_USE_MANAGED /*else HYPRE_USE_UMALLOC */
 #ifdef HYPRE_USE_MANAGED_SCALABLE
-         gpuErrchk( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
+         hypre_CheckErrorDevice( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
          size_t *sp=(size_t*)ptr;
          *sp=size;
          ptr=(void*)(&sp[MEM_PAD_LEN]);
-#else
-         gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+#else /* HYPRE_USE_MANAGED_SCALABLE */
+         hypre_CheckErrorDevice( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
          mempush(ptr,size,0);
-#endif//HYPRE_USE_MANAGED_SCALABLE
-#elif defined(HYPRE_MEMORY_GPU)
-         //gpuErrchk( cudaMalloc((void**)&ptr,size) );
-         gpuErrchk( cudaMalloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN) );
-         size_t *sp=(size_t*)ptr;
-         cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
-         ptr=(void*)(&sp[MEM_PAD_LEN]);
-#endif//HYPRE_USE_UMALLOC| HYPRE_USE_MANAGED| HYPRE_MEMORY_GPU
-#else
+#endif/* HYPRE_USE_MANAGED_SCALABLE */
+#endif /* end HYPRE_USE_UMALLOC*/
+#else /*else HYPRE_USE_OMP45_TARGET_ALLOC */
          ptr = malloc(size);
-#endif
+#endif /*end HYPRE_USE_OMP45_TARGET_ALLOC */
       }
       else if (location==HYPRE_MEMORY_HOST)
       {
@@ -140,7 +139,7 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
       else if (location==HYPRE_MEMORY_SHARED)
       {
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
-	 gpuErrchk( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
+	 hypre_CheckErrorDevice( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE));
          size_t *sp=(size_t*)ptr;
          *sp=size;
          ptr=(void*)(&sp[MEM_PAD_LEN]);
@@ -179,7 +178,7 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
 char *
 hypre_CAllocIns( size_t count, 
               size_t elt_size,
-		 HYPRE_Int location,char *file, int line){
+		 HYPRE_Int location,char *file, HYPRE_Int line){
   char *ret=hypre_CAlloc(count,elt_size,location);
   //printf("%s %d %d %p\n",file,line,location,ret);
   pattr_t *ss=(pattr_t*)hypre_MAlloc(sizeof(pattr_t),HYPRE_MEMORY_HOST);
@@ -206,39 +205,36 @@ hypre_CAlloc( size_t count,
 #endif
       if (location==HYPRE_MEMORY_DEVICE)
       {
-#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+#if defined(HYPRE_USE_OMP45_TARGET_ALLOC) || defined(HYPRE_MEMORY_GPU)
          ptr=(void*)hypre_MAlloc(size,location);
          cudaMemset(ptr,0,size);
-#elif defined(HYPRE_USE_OMP45)
+#elif defined(HYPRE_USE_OMP45) /* else HYPRE_USE_OMP45_TARGET_ALLOC */
          void *ptr_alloc = calloc(count + HYPRE_OMP45_CNT_PAD(elt_size), elt_size);
          char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
          size_t size_inuse = elt_size * count;
          ((size_t *) ptr_alloc)[0] = size_inuse;
          hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "enter", "to");
          ptr = (void*) ptr_inuse;
-#elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#elif defined(HYPRE_USE_MANAGED)/* else HYPRE_USE_OMP45_TARGET_ALLOC */
 #ifdef HYPRE_USE_UMALLOC
 #ifdef HYPRE_USE_MANAGED
          printf("ERROR HYPRE_USE_UMALLOC AND HYPRE_USE_MANAGED are mutually exclusive\n");
-#endif
+#endif /* end HYPRE_USE_MANAGED */
          HYPRE_Int threadid = hypre_GetThreadID();
          ptr = _ucalloc_(count, elt_size);     
-#elif HYPRE_USE_MANAGED
+#elif HYPRE_USE_MANAGED /*else HYPRE_USE_UMALLOC */
 #ifdef HYPRE_USE_MANAGED_SCALABLE
-         ptr=(void*)hypre_MAlloc(size, HYPRE_MEMORY_HOST);
+         ptr=(void*)hypre_MAlloc(size, location);
          memset(ptr,0,count*elt_size);
-#else
-         gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+#else /* else HYPRE_USE_MANAGED_SCALABLE */
+         hypre_CheckErrorDevice( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
          memset(ptr,0,count*elt_size);
          mempush(ptr,size,0);
-#endif
-#elif defined(HYPRE_MEMORY_GPU)
-         ptr=(void*)hypre_MAlloc(size,location);
-         cudaMemset(ptr,0,size);
-#endif
-#else
+#endif /* end HYPRE_USE_MANAGED_SCALABLE */
+#endif/*end HYPRE_USE_UMALLOC */
+#else /* else HYPRE_USE_OMP45_TARGET_ALLOC */
          ptr = calloc(count, elt_size);
-#endif
+#endif /* end HYPRE_USE_OMP45_TARGET_ALLOC */
       }
       else if (location==HYPRE_MEMORY_HOST)
       {
@@ -249,9 +245,6 @@ hypre_CAlloc( size_t count,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
          ptr=(void*)hypre_MAlloc(size, location);
          memset(ptr,0,count*elt_size);
-         //gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
-         //memset(ptr,0,count*elt_size);
-         //mempush(ptr,size,0);
 #else
          ptr = calloc(count, elt_size);
 #endif
@@ -296,7 +289,7 @@ size_t memsize(const void *ptr){
 
 #if defined(TRACK_MEMORY_ALLOCATIONS)
 char *
-hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, int line)
+hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, HYPRE_Int line)
 {
   char *ret = hypre_ReAlloc(ptr,size,location);
   //printf("%s %d %d %p\n",file,line,location,ret);
@@ -394,45 +387,49 @@ hypre_Free( char *ptr ,
 #if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
       //omp_target_free(ptr, hypre__offload_device_num);
       cudaSafeFree(ptr,MEM_PAD_LEN);
-#elif defined(HYPRE_USE_OMP45)
+#elif defined(HYPRE_USE_OMP45)/*else HYPRE_USE_OMP45_TARGET_ALLOC */
       char *ptr_alloc = ((char*) ptr) - HYPRE_OMP45_SZE_PAD;
       size_t size_inuse = ((size_t *) ptr_alloc)[0];
       hypre_omp45_offload(hypre__offload_device_num, ptr, char, 0, size_inuse, "exit", "delete");
       free(ptr_alloc);
-#elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#elif defined(HYPRE_MEMORY_GPU) /*else HYPRE_USE_OMP45_TARGET_ALLOC */
+      cudaSafeFree(ptr,MEM_PAD_LEN);
+#elif defined(HYPRE_USE_MANAGED)/*else HYPRE_USE_OMP45_TARGET_ALLOC */
 #ifdef HYPRE_USE_UMALLOC
       HYPRE_Int threadid = hypre_GetThreadID();
 
       _ufree_(ptr);
-#elif HYPRE_USE_MANAGED
+#elif HYPRE_USE_MANAGED /* else HYPRE_USE_UMALLOC */
       //size_t size=mempush(ptr,0,0);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
       cudaSafeFree(ptr,MEM_PAD_LEN);
-#else
+#else/* else HYPRE_USE_MANAGED_SCALABLE */
       mempush(ptr,0,1);
       cudaSafeFree(ptr,0);
-#endif
-      //gpuErrchk(cudaFree((void*)ptr));
-#elif defined(HYPRE_MEMORY_GPU)
-      cudaSafeFree(ptr,MEM_PAD_LEN);
-#endif
-#else
+#endif /* end HYPRE_USE_MANAGED_SCALABLE */
+#endif /* end HYPRE_USE_UMALLOC */
+#else /*else HYPRE_USE_OMP45_TARGET_ALLOC */
       ASSERT_HOST(ptr);
       free(ptr);
-#endif
+#endif /*end HYPRE_USE_OMP45_TARGET_ALLOC */
      }
      else if (location==HYPRE_MEMORY_SHARED)
      {
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
         cudaSafeFree(ptr,MEM_PAD_LEN);
-#else
+#if defined(TRACK_MEMORY_ALLOCATIONS)
 	ASSERT_HOST(ptr);
+#endif
+
+#else
         free(ptr);
 #endif
      }
      else
      {
+#if defined(TRACK_MEMORY_ALLOCATIONS)
        ASSERT_HOST(ptr);
+#endif
         free(ptr);
      }
    }
@@ -613,28 +610,28 @@ hypre_MAllocPinned( size_t size )
    {
 #if defined(HYPRE_USE_GPU)
      PUSH_RANGE_PAYLOAD("MALLOC",2,size);
-#endif
+#endif /* HYPRE_USE_GPU */
 #ifdef HYPRE_USE_UMALLOC
       HYPRE_Int threadid = hypre_GetThreadID();
 #ifdef HYPRE_USE_MANAGED
       printf("ERROR HYPRE_USE_UMALLOC AND HYPRE_USE_MANAGED are mutually exclusive\n");
-#endif
+#endif /* HYPRE_USE_MANAGED */
       ptr = _umalloc_(size);
-#elif HYPRE_USE_MANAGED
+#elif HYPRE_USE_MANAGED /*else HYPRE_USE_UMALLOC*/
 #ifdef HYPRE_USE_MANAGED_SCALABLE
 #ifdef HYPRE_GPU_USE_PINNED
-      gpuErrchk( cudaHostAlloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,cudaHostAllocMapped));
-#else
-      gpuErrchk( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
-#endif
+      hypre_CheckErrorDevice( cudaHostAlloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,cudaHostAllocMapped));
+#else /* else HYPRE_GPU_USE_PINNED */
+      hypre_CheckErrorDevice( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
+#endif /* end HYPRE_GPU_USE_PINNED */
       size_t *sp=(size_t*)ptr;
       *sp=size;
       ptr=(void*)(&sp[MEM_PAD_LEN]);
-#else
-      gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
+#else /* else HYPRE_USE_MANAGED_SCALABLE */
+      hypre_CheckErrorDevice( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
       mempush(ptr,size,0);
-#endif
-#else
+#endif /* end HYPRE_USE_MANAGED_SCALABLE */
+#else /*else HYPRE_USE_UMALLOC */
       ptr = malloc(size);
 #endif
 
