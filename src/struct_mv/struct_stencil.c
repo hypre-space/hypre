@@ -28,7 +28,6 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
                            hypre_Index  *shape )
 {
    hypre_StructStencil   *stencil;
-   HYPRE_Int *stencil_shape_h;
    HYPRE_Int i,j;
 
    stencil = hypre_TAlloc(hypre_StructStencil, 1, HYPRE_MEMORY_HOST);
@@ -37,16 +36,6 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
    hypre_StructStencilSize(stencil)     = size;
    hypre_StructStencilNDim(stencil)      = dim;
    hypre_StructStencilRefCount(stencil) = 1;
-
-   stencil_shape_h = hypre_CTAlloc(HYPRE_Int, HYPRE_MAXDIM*size,HYPRE_MEMORY_HOST);
-
-   for (i = 0; i < size; i++)
-   {
-      for (j = 0;j < dim;j++)
-      {
-	 stencil_shape_h[i*HYPRE_MAXDIM+j] = hypre_IndexD(shape[i], j);
-      }
-   }
 
    return stencil;
 }
