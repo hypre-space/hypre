@@ -383,7 +383,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
          hypre_BoxGetSize(int_box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(datap, values)
+#define DEVICE_VAR is_device_ptr(datap,values)
          if (action > 0)
          {
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
@@ -695,7 +695,7 @@ hypre_StructVectorCopy( hypre_StructVector *x,
       hypre_BoxGetSize(box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(yp, xp)
+#define DEVICE_VAR is_device_ptr(yp,xp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, unit_stride, vi);
       {

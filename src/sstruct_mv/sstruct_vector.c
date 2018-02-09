@@ -757,7 +757,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                hypre_BoxGetSize(box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(yp, pardata)
+#define DEVICE_VAR is_device_ptr(yp,pardata)
                hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
                                    y_data_box, start, stride, yi,
                                    box,        start, stride, bi);

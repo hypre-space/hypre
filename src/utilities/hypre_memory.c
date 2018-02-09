@@ -456,9 +456,9 @@ hypre_Memcpy( char *dst,
 #elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45_TARGET_ALLOC)
             cudaMemcpy( dst, src, size, cudaMemcpyDeviceToDevice);
 #elif defined(HYPRE_USE_OMP45)
-            //TODO
-            printf("OMP45 DEVICE MEMCPY NOT IMPLEMENTED !\n");
-            exit(-1);
+            hypre_omp45_offload(hypre__offload_device_num, src, char, 0, size, "update", "from");
+            memcpy(dst, src, size);
+            hypre_omp45_offload(hypre__offload_device_num, dst, char, 0, size, "update", "to");
 #else
             memcpy( dst, src, size);
 #endif

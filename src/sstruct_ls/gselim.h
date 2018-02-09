@@ -12,10 +12,6 @@
       {				  \
 	 x[0] = x[0]/A[0];	  \
       }				  \
-      else			  \
-      {  			  \
-         /*hypre_printf("Zero diag\n");*/\
-      }				  \
    }				  \
    else/* A is nxn. Forward elimination */\
    {					  \

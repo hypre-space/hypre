@@ -3057,23 +3057,23 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
 #if defined(HYPRE_MEMORY_GPU) 
-	        if (data_location != HYPRE_MEMORY_HOST)
-	        {
-	           values     = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_DEVICE);
-	        }
-	        else
-	        {
-	           values     = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_HOST);
-	        }
+            if (data_location != HYPRE_MEMORY_HOST)
+            {
+               values     = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_DEVICE);
+            }
+            else
+            {
+               values     = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_HOST);
+            }
 #else
             values     = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_DEVICE);
 #endif
 
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(values)
-	    hypre_LoopBegin(volume,d)  
-        {
-	       HYPRE_Int i = stencil_size*d;
+            hypre_LoopBegin(volume,d)  
+            {
+               HYPRE_Int i = stencil_size*d;
                switch (dim)
                {
                   case 1:

@@ -712,6 +712,7 @@ HYPRE_Int HYPRE_OMPOffloadOff()
 {
    fprintf(stdout, "Hypre OMP 4.5 Mapping/Offloading has been turned off\n");
    hypre__global_offload = 0;
+   hypre__offload_device_num = omp_get_initial_device();
 
    return 0;
 }

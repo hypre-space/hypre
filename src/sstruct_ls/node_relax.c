@@ -829,7 +829,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(tp, bp)
+#define DEVICE_VAR is_device_ptr(tp,bp)
                hypre_BoxLoop2Begin(ndim, loop_size,
 		  		   b_data_box, start, stride, bi,
 		  		   t_data_box, start, stride, ti);
