@@ -845,6 +845,17 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      }
                      hypre_BoxLoop2End(datai, dvali);
                   }
+                  else if (action == -2)
+                  {
+                     hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
+                                         data_box,data_start,data_stride,datai,
+                                         dval_box,dval_start,dval_stride,dvali);
+                     {
+                        values[dvali] = datap[datai];
+                        datap[datai] = 0;
+                     }
+                     hypre_BoxLoop2End(datai, dvali);
+                  }
                   else
                   {
                      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
@@ -852,10 +863,6 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                                          dval_box,dval_start,dval_stride,dvali);
                      {
                         values[dvali] = datap[datai];
-                        if (action == -2)
-                        {
-                           datap[datai] = 0;
-                        }
                      }
                      hypre_BoxLoop2End(datai, dvali);
                   }

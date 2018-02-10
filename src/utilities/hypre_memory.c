@@ -28,15 +28,15 @@ HYPRE_Int hypre__global_offload = 0;
 HYPRE_Int hypre__offload_device_num;
 
 /* stats */
-HYPRE_Long hypre__target_allc_count = 0;
-HYPRE_Long hypre__target_free_count = 0;
-HYPRE_Long hypre__target_allc_bytes = 0;
-HYPRE_Long hypre__target_free_bytes = 0;
+size_t hypre__target_allc_count = 0;
+size_t hypre__target_free_count = 0;
+size_t hypre__target_allc_bytes = 0;
+size_t hypre__target_free_bytes = 0;
 
-HYPRE_Long hypre__target_htod_count = 0;
-HYPRE_Long hypre__target_dtoh_count = 0;
-HYPRE_Long hypre__target_htod_bytes = 0;
-HYPRE_Long hypre__target_dtoh_bytes = 0;
+size_t hypre__target_htod_count = 0;
+size_t hypre__target_dtoh_count = 0;
+size_t hypre__target_htod_bytes = 0;
+size_t hypre__target_dtoh_bytes = 0;
 
 #endif
 
@@ -98,11 +98,14 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
          size_t *sp=(size_t*)ptr;
          cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
          ptr=(void*)(&sp[MEM_PAD_LEN]);
+         /* XXX XXX XXX XXX XXX XXX */
+         cudaDeviceSynchronize();
 #elif defined(HYPRE_USE_OMP45) /*else HYPRE_USE_OMP45_TARGET_ALLOC */
          void *ptr_alloc = malloc(size + HYPRE_OMP45_SZE_PAD);
          char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
          size_t size_inuse = size;
          ((size_t *) ptr_alloc)[0] = size_inuse;
+         //printf("Malloc: try to map %ld bytes\n", size_inuse);
          hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "enter", "alloc");
          ptr = (void *) ptr_inuse;
 #elif defined(HYPRE_MEMORY_GPU) /*else HYPRE_USE_OMP45_TARGET_ALLOC */
@@ -209,10 +212,13 @@ hypre_CAlloc( size_t count,
          ptr=(void*)hypre_MAlloc(size,location);
          cudaMemset(ptr,0,size);
 #elif defined(HYPRE_USE_OMP45) /* else HYPRE_USE_OMP45_TARGET_ALLOC */
-         void *ptr_alloc = calloc(count + HYPRE_OMP45_CNT_PAD(elt_size), elt_size);
+         //void *ptr_alloc = calloc(count + HYPRE_OMP45_CNT_PAD(elt_size), elt_size);
+         void *ptr_alloc = malloc(size + HYPRE_OMP45_SZE_PAD);
          char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
-         size_t size_inuse = elt_size * count;
+         size_t size_inuse = size;
          ((size_t *) ptr_alloc)[0] = size_inuse;
+         memset(ptr_inuse, 0, size_inuse);
+         //printf("Calloc: try to map %ld bytes\n", size_inuse);
          hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "enter", "to");
          ptr = (void*) ptr_inuse;
 #elif defined(HYPRE_USE_MANAGED)/* else HYPRE_USE_OMP45_TARGET_ALLOC */
@@ -511,6 +517,14 @@ hypre_Memcpy( char *dst,
          fflush(stdout);
          hypre_error(HYPRE_ERROR_MEMORY);
       }
+
+#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+      /* XXX XXX XXX XXX XXX XXX */
+      if ( locdst == HYPRE_MEMORY_DEVICE || locsrc == HYPRE_MEMORY_DEVICE )
+      {
+         cudaDeviceSynchronize();
+      }
+#endif
    }
 }
 
