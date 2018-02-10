@@ -225,7 +225,7 @@ hypre_CAlloc( size_t count,
          ptr = _ucalloc_(count, elt_size);     
 #elif HYPRE_USE_MANAGED
 #ifdef HYPRE_USE_MANAGED_SCALABLE
-         ptr=(void*)hypre_MAlloc(size, HYPRE_MEMORY_HOST);
+         ptr=(void*)hypre_MAlloc(size, location);
          memset(ptr,0,count*elt_size);
 #else
          gpuErrchk( cudaMallocManaged(&ptr,size,CUDAMEMATTACHTYPE) );
@@ -340,7 +340,7 @@ hypre_ReAlloc( char   *ptr,
    }
    else
    {
-      void *nptr = hypre_MAlloc(size, HYPRE_MEMORY_HOST);
+      void *nptr = hypre_MAlloc(size, location);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
       size_t old_size=memsize((void*)ptr);
 #else
@@ -430,10 +430,11 @@ hypre_Free( char *ptr ,
         free(ptr);
 #endif
      }
-     else
+     else // HYPRE_MEMORY_HOST
      {
+       
        ASSERT_HOST(ptr);
-        free(ptr);
+       free(ptr);
      }
    }
 }
@@ -510,9 +511,12 @@ hypre_Memcpy( char *dst,
       }
       else
       {
-         hypre_printf("Wrong memory location.\n");
-         fflush(stdout);
-         hypre_error(HYPRE_ERROR_MEMORY);
+	if ( locdst==HYPRE_MEMORY_SHARED && locsrc==HYPRE_MEMORY_SHARED ) memcpy( dst, src, size);
+	else {
+	  hypre_printf("Wrong memory location.\n");
+	  fflush(stdout);
+	  hypre_error(HYPRE_ERROR_MEMORY);
+	}
       }
    }
 }

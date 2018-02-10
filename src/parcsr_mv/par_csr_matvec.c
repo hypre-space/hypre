@@ -74,7 +74,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
     *--------------------------------------------------------------------*/
    PUSH_RANGE_PAYLOAD("PAR_CSR_MATVEC",5,x_size);
    hypre_assert( idxstride>0 );
-
+ 
    if (num_cols != x_size)
       ierr = 11;
 
@@ -147,7 +147,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
          x_buf_data[jv] = hypre_CTAlloc(HYPRE_Complex,  hypre_ParCSRCommPkgSendMapStart
                                         (comm_pkg,  num_sends), HYPRE_MEMORY_SHARED);
    }
-
+   
    if ( num_vectors==1 )
    {
       HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
@@ -158,11 +158,24 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       PackOnDevice((HYPRE_Complex*)persistent_comm_handle->send_data,x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
       //PrintPointerAttributes(persistent_comm_handle->send_data);
 #else
+#if defined(DEBUG_PACK_ON_DEVICE)
+      gpuErrchk(cudaPeekAtLastError());
+      gpuErrchk(cudaDeviceSynchronize());
+      ASSERT_MANAGED(x_buf_data[0]);
+      ASSERT_MANAGED(x_local_data);
+      ASSERT_MANAGED(hypre_ParCSRCommPkgSendMapElmts(comm_pkg));
+#endif
       PackOnDevice((HYPRE_Complex*)x_buf_data[0],x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
+#if defined(DEBUG_PACK_ON_DEVICE)
+      gpuErrchk(cudaPeekAtLastError());
+      gpuErrchk(cudaDeviceSynchronize());
+#endif
 #endif
       POP_RANGE;
       SetAsyncMode(1);
-      hypre_CSRMatrixMatvecOutOfPlaceOOMP( alpha, diag, x_local, beta, b_local, y_local, 0);
+      gpuErrchk(cudaPeekAtLastError());
+      gpuErrchk(cudaDeviceSynchronize());
+      hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
       //hypre_SeqVectorUpdateHost(y_local);
       //hypre_SeqVectorUpdateHost(x_local);
       //hypre_SeqVectorUpdateHost(b_local);
@@ -242,7 +255,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
    POP_RANGE;
 #ifndef HYPRE_USE_GPU
-   hypre_CSRMatrixMatvecOutOfPlaceOOMP( alpha, diag, x_local, beta, b_local, y_local, 0);
+   hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
 #endif
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] -= hypre_MPI_Wtime();

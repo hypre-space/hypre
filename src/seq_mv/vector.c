@@ -720,6 +720,7 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
 void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x){
   if (hypre_VectorSize(x)==0) return;
   ASSERT_MANAGED(hypre_VectorData(x));
+  //PrintPointerAttributes(hypre_VectorData(x));
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
   gpuErrchk(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
   gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));

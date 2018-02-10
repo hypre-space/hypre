@@ -688,7 +688,7 @@ HYPRE_Int hypre_CreateLambda(void *amg_vdata)
    if (num_rows_L) D_data = hypre_CTAlloc(HYPRE_Real, num_rows_L, HYPRE_MEMORY_HOST);
    if (send_data_L)
    {
-      L_send_map_elmts = hypre_CTAlloc(HYPRE_Int,  send_data_L, HYPRE_MEMORY_HOST);
+      L_send_map_elmts = hypre_CTAlloc(HYPRE_Int,  send_data_L, HYPRE_MEMORY_SHARED);
       buf_data = hypre_CTAlloc(HYPRE_Real, send_data_L, HYPRE_MEMORY_HOST);
    }
    if (num_cols_offd_L)

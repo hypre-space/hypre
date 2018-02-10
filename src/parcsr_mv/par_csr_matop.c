@@ -3124,7 +3124,7 @@ hypre_ParCSRMatrixAminvDB( hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *B,
    recv_vec_starts_C = hypre_CTAlloc(HYPRE_Int,  num_recvs_B+1, HYPRE_MEMORY_HOST);
    send_procs_C = hypre_CTAlloc(HYPRE_Int,  num_sends_B, HYPRE_MEMORY_HOST);
    send_map_starts_C = hypre_CTAlloc(HYPRE_Int,  num_sends_B+1, HYPRE_MEMORY_HOST);
-   send_map_elmts_C = hypre_CTAlloc(HYPRE_Int,  send_map_starts_B[num_sends_B], HYPRE_MEMORY_HOST);
+   send_map_elmts_C = hypre_CTAlloc(HYPRE_Int,  send_map_starts_B[num_sends_B], HYPRE_MEMORY_SHARED);
 
    for (i=0; i < num_recvs_B; i++)
       recv_procs_C[i] = recv_procs_B[i];

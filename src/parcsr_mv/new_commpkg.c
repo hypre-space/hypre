@@ -375,7 +375,7 @@ hypre_NewCommPkgCreate_core(
    send_proc_obj.vec_starts = hypre_CTAlloc(HYPRE_Int,  send_proc_obj.storage_length + 1, HYPRE_MEMORY_HOST); 
    send_proc_obj.vec_starts[0] = 0;
    send_proc_obj.element_storage_length = num_cols_off_d;
-   send_proc_obj.elements = hypre_CTAlloc(HYPRE_Int,  send_proc_obj.element_storage_length, HYPRE_MEMORY_HOST);
+   send_proc_obj.elements = hypre_CTAlloc(HYPRE_Int,  send_proc_obj.element_storage_length, HYPRE_MEMORY_SHARED);
 
    response_obj2.fill_response = hypre_FillResponseIJDetermineSendProcs;
    response_obj2.data1 = NULL;
@@ -497,7 +497,7 @@ hypre_NewCommPkgCreate_core(
    }
    else
    {
-      hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_HOST);
+      hypre_TFree(send_proc_obj.elements, HYPRE_MEMORY_SHARED);
       send_proc_obj.elements = NULL;
    }
    
@@ -830,7 +830,7 @@ hypre_FillResponseIJDetermineSendProcs(void *p_recv_contact_buf,
       elength = hypre_max(contact_size, 50);   
       elength += index;
       send_proc_obj->elements = hypre_TReAlloc(send_proc_obj->elements,  
-					       HYPRE_Int,  elength, HYPRE_MEMORY_HOST);
+					       HYPRE_Int,  elength, HYPRE_MEMORY_SHARED);
       send_proc_obj->element_storage_length = elength; 
    }
    /*populate send_proc_obj*/
