@@ -49,7 +49,7 @@ hypre_PrintBoxArrayData( FILE            *file,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
    HYPRE_Complex   *data_host_saved;
    HYPRE_Int tot_size = 0;
-   hypre_ForBoxI(i, box_array)
+   hypre_ForBoxI(i, data_space)
    {
       data_box = hypre_BoxArrayBox(data_space, i);
       data_box_volume = hypre_BoxVolume(data_box);

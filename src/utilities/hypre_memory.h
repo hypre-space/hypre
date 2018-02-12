@@ -138,14 +138,14 @@ extern HYPRE_Int hypre__offload_device_num;
 
 /* stats */
 
-extern hypre_longint hypre__target_allc_count;
-extern hypre_longint hypre__target_free_count;
-extern hypre_longint hypre__target_allc_bytes;
-extern hypre_longint hypre__target_free_bytes;
-extern hypre_longint hypre__target_htod_count;
-extern hypre_longint hypre__target_dtoh_count;
-extern hypre_longint hypre__target_htod_bytes;
-extern hypre_longint hypre__target_dtoh_bytes;
+extern size_t hypre__target_allc_count;
+extern size_t hypre__target_free_count;
+extern size_t hypre__target_allc_bytes;
+extern size_t hypre__target_free_bytes;
+extern size_t hypre__target_htod_count;
+extern size_t hypre__target_dtoh_count;
+extern size_t hypre__target_htod_bytes;
+extern size_t hypre__target_dtoh_bytes;
 
 /* DEBUG MODE: check if offloading has effect 
  * (turned on when configured with --enable-debug) */
@@ -176,13 +176,13 @@ extern hypre_longint hypre__target_dtoh_bytes;
     *    this offload will be IGNORED */ \
    if (hypre__global_offload && hypre__offload_hptr != NULL) { \
       /* offloading offset and size (in datatype) */ \
-      HYPRE_Int hypre__offload_offset = offset, hypre__offload_size = count; \
+      size_t hypre__offload_offset = offset, hypre__offload_size = count; \
       /* in HYPRE_OMP45_DEBUG mode, we test if this offload has effect */ \
       HYPRE_OFFLOAD_FLAG(devnum, hypre__offload_hptr, type1) \
       if (hypre__offload_flag) { \
-         printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%d:%d]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
+         printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%ld:%ld]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
       } else { \
-         HYPRE_Int offload_bytes = count * sizeof(datatype); \
+         size_t offload_bytes = count * sizeof(datatype); \
          /* printf("[            %s %d] device %d target: %6s %6s, data %p, [%d:%d]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); */ \
          if (type1[1] == 'n' && type2[0] == 't') { \
             /* enter to */\
@@ -315,9 +315,9 @@ void assert_check_host(void *ptr, char *file, int line);
 
 #else
 
-#define ASSERT_MANAGED(ptr) ()
+#define ASSERT_MANAGED(ptr) (ptr)
 
-#define ASSERT_HOST(ptr) ()
+#define ASSERT_HOST(ptr) (ptr)
 
 #define hypre_TAlloc(type, count, location) \
   ( (type *)hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )

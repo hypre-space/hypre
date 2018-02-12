@@ -3071,31 +3071,35 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
 
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(values)
-	    hypre_LoopBegin(volume,d)  
-        {
-	       HYPRE_Int i = stencil_size*d;
-               switch (dim)
-               {
-                  case 1:
-                     values[i  ] = west;
-                     values[i+1] = center;
-                     break;
-                  case 2:
-                     values[i  ] = west;
-                     values[i+1] = south;
-                     values[i+2] = center;
-                     break;
-                  case 3:
-                     values[i  ] = west;
-                     values[i+1] = south;
-                     values[i+2] = bottom;
-                     values[i+3] = center;
-                     break;
-               }
+            if (dim == 1)
+            {
+               hypre_LoopBegin(volume, d)
+                  HYPRE_Int i = stencil_size * d;
+                  values[i    ] = west;
+                  values[i + 1] = center;
+               hypre_LoopEnd()
             }
-	    hypre_LoopEnd()
+            else if (dim == 2)
+            {
+               hypre_LoopBegin(volume, d)
+                  HYPRE_Int i = stencil_size * d;
+                  values[i    ] = west;
+                  values[i + 1] = south;
+                  values[i + 2] = center;
+               hypre_LoopEnd()
+            }
+            else if (dim == 3)
+            {
+               hypre_LoopBegin(volume, d)
+                  HYPRE_Int i = stencil_size * d;
+                  values[i    ] = west;
+                  values[i + 1] = south;
+                  values[i + 2] = bottom;
+                  values[i + 3] = center;
+               hypre_LoopEnd()
+            }
 #undef DEVICE_VAR
-#define DEVICE_VAR 
+#define DEVICE_VAR
 
             ilower = hypre_BoxIMin(box);
             iupper = hypre_BoxIMax(box);
@@ -3548,6 +3552,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
             values = hypre_CTAlloc(HYPRE_Real, vol[ib],HYPRE_MEMORY_DEVICE);
 #endif
 
+            /* RL: if used CTAlloc, then don't need to set 0.0 */
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(values)
             hypre_LoopBegin(vol[ib],i)  
@@ -3556,7 +3561,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
             }
             hypre_LoopEnd()
 #undef DEVICE_VAR
-#define DEVICE_VAR 
+#define DEVICE_VAR
 
             if( ilower[ib][d] == istart[d] && period[d] == 0 )
             {

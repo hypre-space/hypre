@@ -155,7 +155,7 @@ hypre_GetCommPkgRTFromCommPkgA( hypre_ParCSRMatrix *RT,
  * generate send_map_elmts
  *--------------------------------------------------------------------------*/
 
-   send_map_elmts_RT = hypre_CTAlloc(HYPRE_Int, send_map_starts_RT[num_sends_RT], HYPRE_MEMORY_HOST);
+   send_map_elmts_RT = hypre_CTAlloc(HYPRE_Int, send_map_starts_RT[num_sends_RT], HYPRE_MEMORY_SHARED);
 
    j = 0;
    for (i=0; i < num_sends_RT; i++)

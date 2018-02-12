@@ -232,7 +232,7 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
       hypre_BoxGetSize(box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(xp, yp, Ap)
+#define DEVICE_VAR is_device_ptr(xp,yp,Ap)
       hypre_BoxLoop3Begin(hypre_StructVectorNDim(Hx), loop_size,
                           A_data_box, start, stride, Ai,
                           x_data_box, start, stride, xi,
