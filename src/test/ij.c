@@ -356,6 +356,10 @@ main( hypre_int argc,
    HYPRE_Int mgr_num_relax_sweeps = 2;
    HYPRE_Int mgr_interp_type = 2;
    HYPRE_Int mgr_num_interp_sweeps = 2;
+   HYPRE_Int mgr_gsmooth_type = 0;
+   HYPRE_Int mgr_num_gsmooth_sweeps = 1;
+   HYPRE_Int mgr_restrict_type = 0;
+   HYPRE_Int mgr_num_restrict_sweeps = 0;   
    /* end mgr options */
 
    HYPRE_Real     *nongalerk_tol = NULL;
@@ -950,6 +954,46 @@ main( hypre_int argc,
       {                /* mgr F-relaxation strategy: single/ multi level */
          arg_index++;        
          mgr_frelax_method = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_relax_type") == 0 )
+      {                /* relax type for "single level" F-relaxation */
+         arg_index++;        
+         mgr_relax_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_relax_sweeps") == 0 )
+      {                /* number of relaxation sweeps */
+         arg_index++;        
+         mgr_num_relax_sweeps = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_interp_type") == 0 )
+      {                /* interpolation type */
+         arg_index++;        
+         mgr_interp_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_interp_sweeps") == 0 )
+      {                /* number of interpolation sweeps*/
+         arg_index++;        
+         mgr_num_interp_sweeps = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_gsmooth_type") == 0 )
+      {                /* global smoother type */
+         arg_index++;        
+         mgr_gsmooth_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_gsmooth_sweeps") == 0 )
+      {                /* number of global smooth sweeps*/
+         arg_index++;        
+         mgr_num_gsmooth_sweeps = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_restrict_type") == 0 )
+      {                /* restriction type */
+         arg_index++;        
+         mgr_restrict_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-mgr_restrict_sweeps") == 0 )
+      {                /* number of restriction sweeps*/
+         arg_index++;        
+         mgr_num_restrict_sweeps = atoi(argv[arg_index++]);
       }
       /* end mgr options */
       else
@@ -1547,7 +1591,8 @@ main( hypre_int argc,
          hypre_printf("       45=Euclid-BICGSTAB\n");
          hypre_printf("       50=DS-LGMRES         51=AMG-LGMRES     \n");
          hypre_printf("       60=DS-FlexGMRES         61=AMG-FlexGMRES     \n");
-	 hypre_printf("       70=MGR             71=MGR-PCG   72=MGR-FlexGMRES    \n");
+	 hypre_printf("       70=MGR             71=MGR-PCG  \n");
+	 hypre_printf("       72=MGR-FlexGMRES  73=MGR-BICGSTAB  \n");
          hypre_printf("\n");
          hypre_printf("  -cljp                 : CLJP coarsening \n");
          hypre_printf("  -cljp1                : CLJP coarsening, fixed random \n");
@@ -5208,16 +5253,19 @@ main( hypre_int argc,
          /* set F relaxation strategy */
          HYPRE_MGRSetFRelaxMethod(pcg_precond, mgr_frelax_method);
          /* set relax type for single level F-relaxation and post-relaxation */
-         HYPRE_MGRSetRelaxType(pcg_precond, 0);
-         HYPRE_MGRSetNumRelaxSweeps(pcg_precond, 2);
+         HYPRE_MGRSetRelaxType(pcg_precond, mgr_relax_type);
+         HYPRE_MGRSetNumRelaxSweeps(pcg_precond, mgr_num_relax_sweeps);
          /* set interpolation type */
-         HYPRE_MGRSetInterpType(pcg_precond, 2);
-         HYPRE_MGRSetNumInterpSweeps(pcg_precond, 2);
+         HYPRE_MGRSetInterpType(pcg_precond, mgr_interp_type);
+         HYPRE_MGRSetNumInterpSweeps(pcg_precond, mgr_num_interp_sweeps);
          /* set print level */
          HYPRE_MGRSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
          HYPRE_MGRSetMaxIter(pcg_precond, 1);
          HYPRE_MGRSetTol(pcg_precond, pc_tol);
+
+         HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
+         HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );   
       
          /* create AMG coarse grid solver */
       
@@ -5312,7 +5360,31 @@ main( hypre_int argc,
       {
          HYPRE_BoomerAMGDestroy(pcg_precond);
       }
+      else if(solver_id == 72)
+      {     
+         /* free memory */
+         if(mgr_num_cindexes)
+            hypre_TFree(mgr_num_cindexes);
+         mgr_num_cindexes = NULL; 
+      
+         if(mgr_reserved_coarse_indexes)
+            hypre_TFree(mgr_reserved_coarse_indexes);
+         mgr_reserved_coarse_indexes = NULL; 
+      
+         if(mgr_cindexes)
+         {
+            for( i=0; i<mgr_nlevels; i++)
+            {
+            if(mgr_cindexes[i])
+               hypre_TFree(mgr_cindexes[i]);
+            }
+            hypre_TFree(mgr_cindexes);
+            mgr_cindexes = NULL;
+         }
 
+         HYPRE_BoomerAMGDestroy(amg_solver);
+         HYPRE_MGRDestroy(pcg_precond);
+      }
       if (myid == 0)
       {
          hypre_printf("\n");
@@ -5326,7 +5398,7 @@ main( hypre_int argc,
     * Solve the system using BiCGSTAB 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 9 || solver_id == 10 || solver_id == 11 || solver_id == 45)
+   if (solver_id == 9 || solver_id == 10 || solver_id == 11 || solver_id == 45 || solver_id == 73)
    {
       time_index = hypre_InitializeTiming("BiCGSTAB Setup");
       hypre_BeginTiming(time_index);
@@ -5503,7 +5575,86 @@ main( hypre_int argc,
                                   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                                   pcg_precond);
       }
- 
+      else if (solver_id == 73)
+      {
+         /* use MGR preconditioning */
+         if (myid == 0) hypre_printf("Solver:  MGR-BICGSTAB\n");
+      
+         HYPRE_MGRCreate(&pcg_precond);
+
+         mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int, mgr_nlevels);
+         for(i=0; i<mgr_nlevels; i++)
+         { /* assume 1 coarse index per level */
+            mgr_num_cindexes[i] = 1;
+         }
+         mgr_cindexes = hypre_CTAlloc(HYPRE_Int*, mgr_nlevels);
+         for(i=0; i<mgr_nlevels; i++)
+         {
+            mgr_cindexes[i] = hypre_CTAlloc(HYPRE_Int, mgr_num_cindexes[i]);
+         }
+         for(i=0; i<mgr_nlevels; i++)
+         { /* assume coarse point is at index 0 */
+            mgr_cindexes[i][0] = 2;
+         }
+
+         mgr_reserved_coarse_indexes = hypre_CTAlloc(HYPRE_Int, mgr_num_reserved_nodes);
+         for(i=0; i<mgr_num_reserved_nodes; i++)
+         { 
+            /* Generate 'artificial' reserved nodes. Assumes these are ordered last in the system */
+            mgr_reserved_coarse_indexes[i] = last_local_row-i;//2*i+1;
+            hypre_printf("mgr_reserved_coarse_indexes[i] = %d \n", mgr_reserved_coarse_indexes[i]);
+         }
+      
+         /* set MGR data by block */
+         HYPRE_MGRSetCpointsByBlock( pcg_precond, mgr_bsize, mgr_nlevels, mgr_num_cindexes,mgr_cindexes);
+         /* set reserved coarse nodes */
+         if(mgr_num_reserved_nodes)HYPRE_MGRSetReservedCoarseNodes(pcg_precond, mgr_num_reserved_nodes, mgr_reserved_coarse_indexes);
+      
+         /* set intermediate coarse grid strategy */
+         HYPRE_MGRSetNonCpointsToFpoints(pcg_precond, mgr_non_c_to_f);
+         /* set F relaxation strategy */
+         HYPRE_MGRSetFRelaxMethod(pcg_precond, mgr_frelax_method);
+         /* set relax type for single level F-relaxation and post-relaxation */
+         HYPRE_MGRSetRelaxType(pcg_precond, mgr_relax_type);
+         HYPRE_MGRSetNumRelaxSweeps(pcg_precond, mgr_num_relax_sweeps);
+         /* set interpolation type */
+         HYPRE_MGRSetRestrictType(pcg_precond, mgr_restrict_type);
+         HYPRE_MGRSetNumRestrictSweeps(pcg_precond, mgr_num_restrict_sweeps);
+         HYPRE_MGRSetInterpType(pcg_precond, mgr_interp_type);
+         HYPRE_MGRSetNumInterpSweeps(pcg_precond, mgr_num_interp_sweeps);
+         /* set print level */
+         HYPRE_MGRSetPrintLevel(pcg_precond, 1);
+         /* set max iterations */
+         HYPRE_MGRSetMaxIter(pcg_precond, 1);
+         HYPRE_MGRSetTol(pcg_precond, pc_tol);
+
+         HYPRE_MGRSetGlobalsmoothType(pcg_precond, mgr_gsmooth_type);
+         HYPRE_MGRSetMaxGlobalsmoothIters( pcg_precond, mgr_num_gsmooth_sweeps );
+      
+         /* create AMG coarse grid solver */
+
+         HYPRE_BoomerAMGCreate(&amg_solver); 
+         HYPRE_BoomerAMGSetTol(amg_solver, pc_tol);         
+         HYPRE_BoomerAMGSetPrintLevel(amg_solver, 1);
+
+         HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+
+         HYPRE_BoomerAMGSetCycleType(amg_solver, 1);
+         HYPRE_BoomerAMGSetNumSweeps(amg_solver, 1);
+         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 14, 1);
+         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 14, 2);
+         HYPRE_BoomerAMGSetCycleRelaxType(amg_solver, 9, 3);
+         /* set the MGR coarse solver. Comment out to use default CG solver in MGR */
+         HYPRE_MGRSetCoarseSolver( pcg_precond, HYPRE_BoomerAMGSolve, HYPRE_BoomerAMGSetup, amg_solver);
+
+      
+         /* setup MGR-BiCGSTAB solver */
+	 HYPRE_BiCGSTABSetMaxIter(pcg_solver, mg_max_iter);
+         HYPRE_BiCGSTABSetPrecond(pcg_solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_MGRSolve,
+				   (HYPRE_PtrToSolverFcn) HYPRE_MGRSetup,
+                                   pcg_precond);
+      } 
       HYPRE_BiCGSTABSetup(pcg_solver, (HYPRE_Matrix)parcsr_A, 
                           (HYPRE_Vector)b, (HYPRE_Vector)x);
  
@@ -5549,7 +5700,31 @@ main( hypre_int argc,
       {
          HYPRE_EuclidDestroy(pcg_precond);
       }
+      else if(solver_id == 73)
+      {     
+         /* free memory */
+         if(mgr_num_cindexes)
+            hypre_TFree(mgr_num_cindexes);
+         mgr_num_cindexes = NULL; 
+      
+         if(mgr_reserved_coarse_indexes)
+            hypre_TFree(mgr_reserved_coarse_indexes);
+         mgr_reserved_coarse_indexes = NULL; 
+      
+         if(mgr_cindexes)
+         {
+            for( i=0; i<mgr_nlevels; i++)
+            {
+            if(mgr_cindexes[i])
+               hypre_TFree(mgr_cindexes[i]);
+            }
+            hypre_TFree(mgr_cindexes);
+            mgr_cindexes = NULL;
+         }
 
+         HYPRE_BoomerAMGDestroy(amg_solver);
+         HYPRE_MGRDestroy(pcg_precond);
+      }
       if (myid == 0)
       {
          hypre_printf("\n");
@@ -5778,6 +5953,8 @@ main( hypre_int argc,
       HYPRE_MGRSetRelaxType(mgr_solver, mgr_relax_type);
       HYPRE_MGRSetNumRelaxSweeps(mgr_solver, mgr_num_relax_sweeps);
       /* set interpolation type */
+      HYPRE_MGRSetRestrictType(mgr_solver, mgr_restrict_type);
+      HYPRE_MGRSetNumRestrictSweeps(mgr_solver, mgr_num_restrict_sweeps);
       HYPRE_MGRSetInterpType(mgr_solver, mgr_interp_type);
       HYPRE_MGRSetNumInterpSweeps(mgr_solver, mgr_num_interp_sweeps);
       /* set print level */
@@ -5785,6 +5962,9 @@ main( hypre_int argc,
       /* set max iterations */
       HYPRE_MGRSetMaxIter(mgr_solver, max_iter);
       HYPRE_MGRSetTol(mgr_solver, tol);
+
+      HYPRE_MGRSetGlobalsmoothType(mgr_solver, mgr_gsmooth_type);
+      HYPRE_MGRSetMaxGlobalsmoothIters( mgr_solver, mgr_num_gsmooth_sweeps );
       
       /* create AMG coarse grid solver */
       
@@ -5836,7 +6016,7 @@ main( hypre_int argc,
       
       /* MGR solve */
       HYPRE_MGRSolve(mgr_solver, parcsr_A, b, x);
-
+      
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
