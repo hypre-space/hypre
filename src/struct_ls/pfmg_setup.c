@@ -405,19 +405,8 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    tx_l[0] = hypre_StructVectorCreate(comm, grid_l[0]);
    hypre_StructVectorSetNumGhost(tx_l[0], x_num_ghost);
    hypre_StructVectorInitializeShell(tx_l[0]);
-   //data_vec_size += hypre_StructVectorDataSize(tx_l[0]);
 
    hypre_StructVectorSetDataSize(tx_l[0], &data_size, &data_size_const);
-
-   //printf("tx =%d,data = %d,data_const = %d\n",hypre_StructVectorDataSize(tx_l[0]),data_size,data_size_const);
-
-   //end_t = MPI_Wtime();
-   //total_t = (double)(end_t - start_t);
-   //hypre_MPI_Allreduce(&total_t, &wall_time, 1,
-   //                    hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
-   //if (myrank == 0)
-   //  printf("Total time for PFMG initialization: %f\n", wall_time  );
-   //start_t = MPI_Wtime();
 
    for (l = 0; l < (num_levels - 1); l++)
    {
@@ -427,7 +416,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_StructMatrixInitializeShell(P_l[l]);
       data_size += hypre_StructMatrixDataSize(P_l[l]);
       data_size_const += hypre_StructMatrixDataConstSize(P_l[l]);
-      //printf("P =%d,P_const=%d,data = %d,data_const = %d\n",hypre_StructMatrixDataSize(P_l[l]),hypre_StructMatrixDataConstSize(P_l[l]),data_size,data_size_const);
+
       if (hypre_StructMatrixSymmetric(A))
       {
          RT_l[l] = P_l[l];
@@ -454,13 +443,11 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       b_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(b_l[l+1], b_num_ghost);
       hypre_StructVectorInitializeShell(b_l[l+1]);
-      //data_vec_size += hypre_StructVectorDataSize(b_l[l+1]);
       hypre_StructVectorSetDataSize(b_l[l+1], &data_size, &data_size_const);
 
       x_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
       hypre_StructVectorSetNumGhost(x_l[l+1], x_num_ghost);
       hypre_StructVectorInitializeShell(x_l[l+1]);
-      //data_vec_size += hypre_StructVectorDataSize(x_l[l+1]);
       hypre_StructVectorSetDataSize(x_l[l+1], &data_size, &data_size_const);
 
       tx_l[l+1] = hypre_StructVectorCreate(comm, grid_l[l+1]);
@@ -477,7 +464,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    data = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
    data_const = hypre_CTAlloc(HYPRE_Real, data_size_const, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USE_CUDA)
-   printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
+   hypre_printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
 #endif
 
    (pfmg_data -> data) = data;
@@ -503,7 +490,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    data += hypre_StructVectorDataSize(tx_l[0]);
 #endif
 
-   //printf("level 0: %d\n",hypre_StructMatrixDataLocation(A_l[0]));
    for (l = 0; l < (num_levels - 1); l++)
    {
       hypre_StructMatrixInitializeData(P_l[l], data, data_const);
@@ -541,7 +527,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 	     hypre_StructVectorInitializeData(x_l[l+1], data);
 	     hypre_StructVectorAssemble(x_l[l+1]);
 	     data += hypre_StructVectorDataSize(x_l[l+1]);
-	     //printf("Level %d is on on GPU\n",l+1);
 	     hypre_StructVectorInitializeData(tx_l[l+1],
 					      hypre_StructVectorData(tx_l[0]));
 	     hypre_StructVectorAssemble(tx_l[l+1]);
@@ -555,7 +540,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 	     hypre_StructVectorInitializeData(x_l[l+1], data_const);
 	     hypre_StructVectorAssemble(x_l[l+1]);
 	     data_const += hypre_StructVectorDataSize(x_l[l+1]);
-	     //printf("Level %d is on CPU\n",l+1);
 	     if (l+1 == num_level_GPU)
 	     {
 	        hypre_StructVectorInitializeData(tx_l[l+1], data_const);
@@ -589,12 +573,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    (pfmg_data -> r_l)  = r_l;
    (pfmg_data -> e_l)  = e_l;
 
-   //end_t = MPI_Wtime();
-   //total_t = (double)(end_t - start_t);
-   //hypre_MPI_Allreduce(&total_t, &wall_time, 1,
-   //                    hypre_MPI_DOUBLE, hypre_MPI_MAX, comm);
-   //if (myrank == 0)
-   //  printf("Total time for PFMG load data: %f\n", wall_time );
    /*-----------------------------------------------------
     * Set up multigrid operators and call setup routines
     *-----------------------------------------------------*/
@@ -606,7 +584,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-     //start_t = MPI_Wtime();
 #if defined(HYPRE_USE_CUDA)    
       if (l == num_level_GPU)
       {
@@ -651,7 +628,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       hypre_exec_policy = HYPRE_MEMORY_HOST;
    }
 #endif
-   //start_t = MPI_Wtime();
 
    /*-----------------------------------------------------
     * Check for zero diagonal on coarsest grid, occurs with

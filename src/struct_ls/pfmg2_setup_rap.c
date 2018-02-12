@@ -468,7 +468,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
    if ( constant_coefficient_A == 0 )
    {
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(rap_csw, rb, a_cw, pa, rap_cs, a_cc, a_cs, rap_cse, a_ce, rap_cw, pb, ra, rap_cc, a_cn)
+#define DEVICE_VAR is_device_ptr(rap_csw,rb,a_cw,pa,rap_cs,a_cc,a_cs,rap_cse,a_ce,rap_cw,pb,ra,rap_cc,a_cn)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -521,7 +521,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
       a_ce_offdm1 = a_ce[iA_offdm1];
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(rap_csw, rb, pa, rap_cs, a_cc, rap_cse, rap_cw, pb, ra, rap_cc)
+#define DEVICE_VAR is_device_ptr(rap_csw,rb,pa,rap_cs,a_cc,rap_cse,rap_cw,pb,ra,rap_cc)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -989,7 +989,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
    if ( constant_coefficient_A == 0 )
    {
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(rap_csw, rb, a_cw, pa, a_csw, rap_cs, a_cc, a_cs, rap_cse, a_ce, a_cse, rap_cw, pb, ra, a_cnw, rap_cc, a_cn)
+#define DEVICE_VAR is_device_ptr(rap_csw,rb,a_cw,pa,a_csw,rap_cs,a_cc,a_cs,rap_cse,a_ce,a_cse,rap_cw,pb,ra,a_cnw,rap_cc,a_cn)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -1059,7 +1059,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
       a_cnw_offdm1 = a_cnw[iA_offdm1];
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(rap_csw, rb, pa, rap_cs, a_cc, rap_cse, rap_cw, pb, ra, rap_cc)
+#define DEVICE_VAR is_device_ptr(rap_csw,rb,pa,rap_cs,a_cc,rap_cse,rap_cw,pb,ra,rap_cc)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -1663,7 +1663,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
       /*hypre_printf("nosym 5.0.0\n");*/
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(rap_cne, ra, a_ce, pb, rap_cn, a_cc, a_cn, rap_cnw, a_cw, rap_ce, rb, pa)
+#define DEVICE_VAR is_device_ptr(rap_cne,ra,a_ce,pb,rap_cn,a_cc,a_cn,rap_cnw,a_cw,rap_ce,rb,pa)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -1709,7 +1709,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
       a_ce_offdp1 = a_ce[iA_offdp1];
  
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(rap_cne, ra, pb, rap_cn, a_cc, rap_cnw, rap_ce, rb, pa)
+#define DEVICE_VAR is_device_ptr(rap_cne,ra,pb,rap_cn,a_cc,rap_cnw,rap_ce,rb,pa)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,

@@ -969,7 +969,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                kptr = lptr + order[ll]*stride_array[ndim];
 	       
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(dptr, kptr)
+#define DEVICE_VAR is_device_ptr(dptr,kptr)
                hypre_BasicBoxLoop2Begin(ndim, length_array,
                                         stride_array, ki,
                                         unitst_array, di);
@@ -993,7 +993,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 #if defined(HYPRE_USE_OMP45)
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(dptr, kptr)
+#define DEVICE_VAR is_device_ptr(dptr,kptr)
                hypre_BoxLoop0Begin(ndim, length_array)
                {
                   dptr[hypre__thread] = 0.0;
@@ -1299,7 +1299,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
             kptr = lptr + ll*stride_array[ndim];
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(kptr, dptr)
+#define DEVICE_VAR is_device_ptr(kptr,dptr)
             hypre_BasicBoxLoop2Begin(ndim, length_array,
                                      stride_array, ki,
                                      unitst_array, di);
@@ -1432,7 +1432,7 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                to_dpl = to_dp + (      ll )*to_stride_array[ndim];
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(to_dpl, fr_dpl)
+#define DEVICE_VAR is_device_ptr(to_dpl,fr_dpl)
                hypre_BasicBoxLoop2Begin(ndim, length_array,
                                         fr_stride_array, fi,
                                         to_stride_array, ti);

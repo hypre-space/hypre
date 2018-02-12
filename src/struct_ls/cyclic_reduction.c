@@ -72,10 +72,6 @@ typedef struct
 
    HYPRE_Real           *data;
    HYPRE_Real           *data_const;
-#if HYPRE_USE_OMP45
-   HYPRE_Int            data_size;
-   HYPRE_Int            data_size_const;
-#endif
    hypre_StructMatrix  **A_l;
    hypre_StructVector  **x_l;
 
@@ -334,7 +330,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
          hypre_BoxGetSize(cgrid_box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(ac_cw, a_cw, a_cc, ac_cc, a_ce, ac_ce)
+#define DEVICE_VAR is_device_ptr(ac_cw,a_cw,a_cc,ac_cc,a_ce,ac_ce)
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, fstart, stridef, iA,
                              Ac_dbox, cstart, stridec, iAc);
@@ -342,13 +338,12 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             HYPRE_Int iAm1 = iA - offsetA;
             HYPRE_Int iAp1 = iA + offsetA;
 
-            ac_cw[iAc] = - a_cw[iA] * a_cw[iAm1] / a_cc[iAm1];
+            ac_cw[iAc] = -a_cw[iA] * a_cw[iAm1] / a_cc[iAm1];
 
-            ac_cc[iAc] = a_cc[iA]
-               - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
-               - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+            ac_cc[iAc] = a_cc[iA] - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1] - 
+                         a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
 
-            ac_ce[iAc] = - a_ce[iA] * a_ce[iAp1] / a_cc[iAp1];
+            ac_ce[iAc] = -a_ce[iA] * a_ce[iAp1] / a_cc[iAp1];
 
          }
          hypre_BoxLoop2End(iA, iAc);
@@ -365,7 +360,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
          hypre_BoxGetSize(cgrid_box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(ac_cw, a_cw, a_cc, ac_cc, a_ce)
+#define DEVICE_VAR is_device_ptr(ac_cw,a_cw,a_cc,ac_cc,a_ce)
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, fstart, stridef, iA,
                              Ac_dbox, cstart, stridec, iAc);
@@ -373,11 +368,10 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             HYPRE_Int iAm1 = iA - offsetA;
             HYPRE_Int iAp1 = iA + offsetA;
 
-            ac_cw[iAc] = - a_cw[iA] * a_cw[iAm1] / a_cc[iAm1];
+            ac_cw[iAc] = -a_cw[iA] * a_cw[iAm1] / a_cc[iAm1];
 
-            ac_cc[iAc] = a_cc[iA]
-               - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1]   
-               - a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
+            ac_cc[iAc] = a_cc[iA] - a_cw[iA] * a_ce[iAm1] / a_cc[iAm1] - 
+                         a_ce[iA] * a_cw[iAp1] / a_cc[iAp1];   
          }
          hypre_BoxLoop2End(iA, iAc);
 #undef DEVICE_VAR
@@ -432,7 +426,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             hypre_BoxGetSize(cgrid_box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(ac_cc, ac_cw, ac_ce)
+#define DEVICE_VAR is_device_ptr(ac_cc,ac_cw,ac_ce)
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                 Ac_dbox, cstart, stridec, iAc);
             {
@@ -454,7 +448,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
             hypre_BoxGetSize(cgrid_box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(ac_cc, ac_cw)
+#define DEVICE_VAR is_device_ptr(ac_cc,ac_cw)
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                 Ac_dbox, cstart, stridec, iAc);
             {
@@ -643,14 +637,10 @@ hypre_CyclicReductionSetup( void               *cyc_red_vdata,
    data_const = hypre_CTAlloc(HYPRE_Real,data_size_const,HYPRE_MEMORY_HOST);
    (cyc_red_data -> data) = data;
    (cyc_red_data -> data_const) = data_const;
-#ifdef HYPRE_USE_OMP45
-   (cyc_red_data -> data_size) = data_size;
-   (cyc_red_data -> data_size_const) = data_size_const;
-#endif
 
    for (l = 0; l < (num_levels - 1); l++)
    {
-      hypre_StructMatrixInitializeData(A_l[l+1], data,data_const);
+      hypre_StructMatrixInitializeData(A_l[l+1], data, data_const);
       data += hypre_StructMatrixDataSize(A_l[l+1]);
       data_const += hypre_StructMatrixDataConstSize(A_l[l+1]);
 
@@ -864,7 +854,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(xp, bp)
+#define DEVICE_VAR is_device_ptr(xp,bp)
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_dbox, start, base_stride, xi,
                           b_dbox, start, base_stride, bi);
@@ -896,12 +886,6 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
  
    for (l = 0; l < num_levels - 1 ; l++)
    {
-      {
-         //HYPRE_Int world_rank;
-         //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-         //if (world_rank == 0)
-         //hypre_printf("%s down %d pre-relaxation,\n",tmp_print, l);
-      }
       /* set cindex and stride */
       hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
@@ -923,7 +907,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(xp, Ap)
+#define DEVICE_VAR is_device_ptr(xp,Ap)
          hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                              A_dbox, start, stride, Ai,
                              x_dbox, start, stride, xi);
@@ -984,7 +968,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             hypre_IndexD(index, cdir) = -1;
             Awp = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
             xwp = hypre_StructVectorBoxData(x_l[l], fi);
-//RL:PTR_OFFSET
+            //RL:PTR_OFFSET
             HYPRE_Int xwp_offset = hypre_BoxOffsetDistance(x_dbox, index);
 
             hypre_SetIndex3(index, 0, 0, 0);
@@ -1003,7 +987,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
                            
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(xcp, xp, Awp, xwp, Aep, xep)
+#define DEVICE_VAR is_device_ptr(xcp,xp,Awp,xwp,Aep,xep)
                hypre_BoxLoop3Begin(hypre_StructVectorNDim(x), loop_size,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi,
@@ -1029,13 +1013,6 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
     * for zero diagonal that can occur for singlar
     * problems like the full Neumann problem.
     *--------------------------------------------------*/
-
-   {
-      //HYPRE_Int world_rank;
-      //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-      //if (world_rank == 0)
-      //hypre_printf("%s bottom relaxation,\n",tmp_print);
-   }
    /* set cindex and stride */
    hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
    hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
@@ -1056,7 +1033,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(xp, Ap)
+#define DEVICE_VAR is_device_ptr(xp,Ap)
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           A_dbox, start, stride, Ai,
                           x_dbox, start, stride, xi);
@@ -1084,12 +1061,6 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
 
    for (l = (num_levels - 2); l >= 0; l--)
    {
-      {
-	     //HYPRE_Int world_rank;
-	     //MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-	     //if (world_rank == 0)
-	     //hypre_printf("%s up %d post-relaxation,\n",tmp_print, l);
-      }
       /* set cindex and stride */
       hypre_CycRedSetCIndex(base_index, base_stride, l, cdir, cindex);
       hypre_CycRedSetStride(base_index, base_stride, l, cdir, stride);
@@ -1123,7 +1094,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          hypre_BoxGetSize(compute_box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(xp, xcp)
+#define DEVICE_VAR is_device_ptr(xp,xcp)
          hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                              x_dbox, start, stride, xi,
                              xc_dbox, startc, stridec, xci);
@@ -1171,7 +1142,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
             hypre_SetIndex3(index, 0, 0, 0);
             hypre_IndexD(index, cdir) = -1;
             Awp = hypre_StructMatrixExtractPointerByIndex(A_l[l], fi, index);
-//RL PTROFFSET
+            //RL PTROFFSET
             xwp = hypre_StructVectorBoxData(x_l[l], fi);
             HYPRE_Int xwp_offset = hypre_BoxOffsetDistance(x_dbox, index);
 
@@ -1189,7 +1160,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(xp, Awp, Aep, Ap)
+#define DEVICE_VAR is_device_ptr(xp,Awp,Aep,Ap)
                hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi);
@@ -1279,7 +1250,7 @@ hypre_CyclicReductionDestroy( void *cyc_red_vdata )
          hypre_ComputePkgDestroy(cyc_red_data -> up_compute_pkg_l[l]);
       }
       hypre_BoxArrayDestroy(cyc_red_data -> fine_points_l[l]);
-       hypre_TFree(cyc_red_data -> data, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(cyc_red_data -> data, HYPRE_MEMORY_DEVICE);
       hypre_TFree(cyc_red_data -> grid_l, HYPRE_MEMORY_HOST);
       hypre_TFree(cyc_red_data -> fine_points_l, HYPRE_MEMORY_HOST);
       hypre_TFree(cyc_red_data -> A_l, HYPRE_MEMORY_HOST);

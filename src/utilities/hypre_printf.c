@@ -17,9 +17,11 @@
 // #ifdef HYPRE_BIGINT
 
 /* these prototypes are missing by default for some compilers */
+/*
 int vscanf( const char *format , va_list arg );
 int vfscanf( FILE *stream , const char *format, va_list arg );
 int vsscanf( const char *s , const char *format, va_list arg );
+*/
 
 HYPRE_Int
 new_format( const char *format,

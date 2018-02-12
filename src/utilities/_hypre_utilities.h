@@ -526,16 +526,15 @@ extern HYPRE_Int hypre__global_offload;
 extern HYPRE_Int hypre__offload_device_num;
 
 /* stats */
-#define HYPRE_Long long
 
-extern HYPRE_Long hypre__target_allc_count;
-extern HYPRE_Long hypre__target_free_count;
-extern HYPRE_Long hypre__target_allc_bytes;
-extern HYPRE_Long hypre__target_free_bytes;
-extern HYPRE_Long hypre__target_htod_count;
-extern HYPRE_Long hypre__target_dtoh_count;
-extern HYPRE_Long hypre__target_htod_bytes;
-extern HYPRE_Long hypre__target_dtoh_bytes;
+extern size_t hypre__target_allc_count;
+extern size_t hypre__target_free_count;
+extern size_t hypre__target_allc_bytes;
+extern size_t hypre__target_free_bytes;
+extern size_t hypre__target_htod_count;
+extern size_t hypre__target_dtoh_count;
+extern size_t hypre__target_htod_bytes;
+extern size_t hypre__target_dtoh_bytes;
 
 /* DEBUG MODE: check if offloading has effect 
  * (turned on when configured with --enable-debug) */
@@ -556,7 +555,7 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
 {\
    /* devnum: device number \
     * hptr: host poiter \
-    * datatype: e.g., int, float, double, ... \
+    * datatype \
     * type1: ``e(n)ter'', ''e(x)it'', or ``u(p)date'' \
     * type2: ``(a)lloc'', ``(t)o'', ``(d)elete'', ''(f)rom'' \
     */ \
@@ -566,13 +565,13 @@ extern HYPRE_Long hypre__target_dtoh_bytes;
     *    this offload will be IGNORED */ \
    if (hypre__global_offload && hypre__offload_hptr != NULL) { \
       /* offloading offset and size (in datatype) */ \
-      HYPRE_Int hypre__offload_offset = offset, hypre__offload_size = count; \
+      size_t hypre__offload_offset = offset, hypre__offload_size = count; \
       /* in HYPRE_OMP45_DEBUG mode, we test if this offload has effect */ \
       HYPRE_OFFLOAD_FLAG(devnum, hypre__offload_hptr, type1) \
       if (hypre__offload_flag) { \
-         printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%d:%d]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
+         printf("[!NO Effect! %s %d] device %d target: %6s %6s, data %p, [%ld:%ld]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); exit(0); \
       } else { \
-         HYPRE_Int offload_bytes = count * sizeof(datatype); \
+         size_t offload_bytes = count * sizeof(datatype); \
          /* printf("[            %s %d] device %d target: %6s %6s, data %p, [%d:%d]\n", __FILE__, __LINE__, devnum, type1, type2, (void *)hypre__offload_hptr, hypre__offload_offset, hypre__offload_size); */ \
          if (type1[1] == 'n' && type2[0] == 't') { \
             /* enter to */\
@@ -742,10 +741,10 @@ HYPRE_Int hypre_OutOfMemory ( size_t size );
 char *hypre_MAlloc( size_t size , HYPRE_Int location );
 char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,int line);
 char *hypre_CAlloc( size_t count ,  size_t elt_size , HYPRE_Int location);
-char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, int line);
+char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, HYPRE_Int line);
 char *hypre_MAllocPinned( size_t size );
 char *hypre_ReAlloc( char *ptr ,  size_t size , HYPRE_Int location);
-char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, int line);
+char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, HYPRE_Int line);
 void hypre_Free( char *ptr , HYPRE_Int location );
 char *hypre_CAllocHost( size_t count,size_t elt_size );
 char *hypre_MAllocHost( size_t size );
@@ -1218,23 +1217,16 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) || defined(HYPRE_USE_OMP45)
+#define hypre_CheckErrorDevice(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
+void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
+#endif
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) || defined(HYPRE_USE_OMP45)
 #include <cuda_runtime_api.h>
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
 #define MEM_PAD_LEN 1
-#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line)
-{
-   if (code != cudaSuccess) 
-   {
-     fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file);
-     fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code));
-     //int *dummy;
-     //*dummy=4;
-     abort();
-   }
-}
+
 #define HYPRE_HOST_POINTER 0
 #define HYPRE_MANAGED_POINTER 1
 #define HYPRE_PINNED_POINTER 2
@@ -1245,11 +1237,6 @@ void cudaSafeFree(void *ptr,int padding);
 hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
 #endif // defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)|| defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
-
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-#define AxCheckError(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
-void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
-#endif // defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
 
 #if defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
@@ -1331,16 +1318,7 @@ inline const char *cublasErrorCheck(cublasStatus_t error)
     }
 
 }
-//#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-//inline void gpuAssert(cudaError_t code, const char *file, int line)
-//{
-//   if (code != cudaSuccess) 
-//   {
-//     fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file);
-//     fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code));
-//     exit(2);
-//   }
-//}
+
 #define cusparseErrchk(ans) { cusparseAssert((ans), __FILE__, __LINE__); }
 inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
 {
@@ -1359,11 +1337,6 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
      fprintf(stderr,"CUBLAS ERROR : %s \n", cublasErrorCheck(code));
    }
 }
-//int PointerType(const void *ptr);
-void cudaSafeFree(void *ptr,int padding);
-//void PrintPointerAttributes(const void *ptr);
-//size_t mempush(void* ptr, size_t size,int purge);
-//int memloc(void *ptr, int device);
 #endif // __cusparseErrorCheck__
 #endif// defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 
@@ -1382,9 +1355,9 @@ void cudaSafeFree(void *ptr,int padding);
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 
-#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)
-
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+
+#if defined(HYPRE_USE_MANAGED)
 #include <cuda_runtime_api.h>
 void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();
@@ -1452,12 +1425,7 @@ extern struct hypre__global_struct hypre__global_handle ;
  * Macros for accessing elements of the global handle
  */
 
-#else
-
-#define hypre_GPUInit(use_device)
-#define hypre_GPUFinalize()
-
-#endif // HYPRE_USE_GPU
+#endif /* HYPRE_USE_MANAGED */
 
 
 typedef struct node {
@@ -1470,19 +1438,14 @@ node *memfind(node *head, const void *ptr);
 void memdel(node **head, node *found);
 void meminsert(node **head, const void *ptr,size_t size);
 void printlist(node *head,hypre_int nc);
-//#define MEM_PAD_LEN 1
 size_t memsize(const void *ptr);
-
-#define HYPRE_MIN_GPU_SIZE (131072)//(65536)//(8192)//(16384)//(32768)//(65536)
-
-extern HYPRE_Int hypre_exec_policy;
 
 #else
 
 #define hypre_GPUInit(use_device)
 #define hypre_GPUFinalize()
-//#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
-#endif//defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+
+#endif /* defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED) */
 
 #if defined(HYPRE_USE_CUDA)
 extern HYPRE_Int hypre_exec_policy;
@@ -1490,6 +1453,7 @@ extern char tmp_print[10];
 extern HYPRE_Int hypre_box_print;
 extern double  t_start, t_end;
 extern HYPRE_Int time_box ;
+#define HYPRE_MIN_GPU_SIZE (131072)
 
 #define RAJA_MAX_REDUCE_VARS (8)
 #define RAJA_CUDA_MAX_NUM_BLOCKS (512*512*512)
@@ -1511,7 +1475,7 @@ CudaReductionBlockDataType* getCPUReductionMemBlock(int id);
 void releaseCPUReductionId(int id);
 void freeCPUReductionMemBlock();
 
-#endif//defined(HYPRE_USE_CUDA)
+#endif/* defined(HYPRE_USE_CUDA) */
 
 #ifdef HYPRE_USE_OMP45
 HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
@@ -1525,11 +1489,11 @@ HYPRE_Int HYPRE_OMPOffloadOff();
 
 HYPRE_Int HYPRE_OMPOffloadStatPrint();
 
-#define HYPRE_MIN_GPU_SIZE (131072)//(65536)//(8192)//(16384)//(32768)//(65536)
+#define HYPRE_MIN_GPU_SIZE (131072)
 
-#endif//HYPRE_USE_OMP45
+#endif/* HYPRE_USE_OMP45 */
 
-#endif//__GPUMEM_H__
+#endif/* __GPUMEM_H__ */
 
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.

@@ -862,7 +862,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
 				x->data, &beta, y->data+offset));
   
   if (!GetAsyncMode()){
-  gpuErrchk(cudaStreamSynchronize(s[4]));
+  hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
   }
   POP_RANGE;
   

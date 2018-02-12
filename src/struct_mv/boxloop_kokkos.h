@@ -51,7 +51,7 @@ typedef struct hypre_Boxloop_struct
    if ( cudaSuccess != err ) {						\
      printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
    }									\
-   AxCheckError(cudaDeviceSynchronize());
+   hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
 #elif defined(HYPRE_USE_OPENMP)
    #define hypre_fence()

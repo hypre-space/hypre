@@ -494,7 +494,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                hypre_BoxGetSize(sgrid_box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(values, A_smatrix_value)
+#define DEVICE_VAR is_device_ptr(values,A_smatrix_value)
                hypre_BoxLoop2Begin(ndim, loop_size,
                                    sgrid_box, box_start, stride, k,
                                    A_smatrix_dbox, box_start, stride, iA);
@@ -569,7 +569,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                   hypre_BoxGetSize(sgrid_box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(values, A_smatrix_value)
+#define DEVICE_VAR is_device_ptr(values,A_smatrix_value)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       sgrid_box, box_start, stride, k,
                                       A_smatrix_dbox, box_start, stride, iA);
@@ -830,7 +830,7 @@ hypre_FacSetup2( void                 *fac_vdata,
             hypre_BoxGetSize(sgrid_box, loop_size);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(values, A_smatrix_value)
+#define DEVICE_VAR is_device_ptr(values,A_smatrix_value)
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 sgrid_box, box_start, stride, k,
                                 A_smatrix_dbox, box_start, stride, iA);

@@ -52,7 +52,7 @@ typedef struct hypre_Boxloop_struct
     printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
     HYPRE_Int *p = NULL; *p = 1;\
   }									\
-  AxCheckError(cudaDeviceSynchronize());				\
+  hypre_CheckErrorDevice(cudaDeviceSynchronize());				\
 } 
 #endif
 
@@ -328,11 +328,7 @@ void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
 #define hypre_LoopEnd()					\
    });							\
    hypre_fence();					\
-}							\
-   
-   //   hypre_fence();					\
-   //}
-
+}
 
 #define MAX_BLOCK BLOCKSIZE
 
@@ -552,9 +548,6 @@ private:
 }
 #define hypre_newBoxLoopGetIndex(index)\
   index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
-
-//#define hypre_newBoxLoopGetIndex(index)			\
-//  index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
   
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 

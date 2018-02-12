@@ -159,31 +159,33 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
       //PrintPointerAttributes(persistent_comm_handle->send_data);
 #else
 #if defined(DEBUG_PACK_ON_DEVICE)
-      gpuErrchk(cudaPeekAtLastError());
-      gpuErrchk(cudaDeviceSynchronize());
+      hypre_CheckErrorDevice(cudaPeekAtLastError());
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
       ASSERT_MANAGED(x_buf_data[0]);
       ASSERT_MANAGED(x_local_data);
       ASSERT_MANAGED(hypre_ParCSRCommPkgSendMapElmts(comm_pkg));
 #endif
       PackOnDevice((HYPRE_Complex*)x_buf_data[0],x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
 #if defined(DEBUG_PACK_ON_DEVICE)
-      gpuErrchk(cudaPeekAtLastError());
-      gpuErrchk(cudaDeviceSynchronize());
+      hypre_CheckErrorDevice(cudaPeekAtLastError());
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
 #endif
       POP_RANGE;
       SetAsyncMode(1);
-      gpuErrchk(cudaPeekAtLastError());
-      gpuErrchk(cudaDeviceSynchronize());
+      hypre_CheckErrorDevice(cudaPeekAtLastError());
+      hypre_CheckErrorDevice(cudaDeviceSynchronize());
       hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
       //hypre_SeqVectorUpdateHost(y_local);
       //hypre_SeqVectorUpdateHost(x_local);
       //hypre_SeqVectorUpdateHost(b_local);
       SetAsyncMode(0);
-      //gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(7)));
 #else
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD 
       PUSH_RANGE("MPI_PACK_OMP",4);
       SyncVectorToHost(x_local);
+#endif
+
 #if defined(HYPRE_USING_OPENMP_OFFLOAD_NOT_USED)
       int num_threads=64;
       int num_teams = (end-begin+(end-begin)%num_threads)/num_threads;
@@ -283,7 +285,9 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 
    //MPI_Barrier(MPI_COMM_WORLD);
    //hypre_SeqVectorUpdateDevice(x_tmp);
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD   
    UpdateHRC(x_tmp);
+#endif
    if (num_cols_offd) hypre_CSRMatrixMatvec( alpha, offd, x_tmp, 1.0, y_local);  
    //if (num_cols_offd) hypre_SeqVectorUpdateHost(y_local);  
    //hypre_SeqVectorUpdateHost(x_tmp); 
@@ -304,7 +308,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
 #endif
    POP_RANGE;
 #ifdef HYPRE_USE_GPU
-   gpuErrchk(cudaStreamSynchronize(HYPRE_STREAM(4)));
+   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
 #endif
    POP_RANGE; // PAR_CSR
    return ierr;
@@ -476,7 +480,9 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       {
          // offdT is optional. Used only if it's present.
          hypre_CSRMatrixMatvec(alpha, A->offdT, x_local, 0.0, y_tmp);
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD 
 	 SyncVectorToHost(y_tmp);
+#endif
       }
       else
       {
@@ -512,7 +518,9 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    {
       // diagT is optional. Used only if it's present.
       hypre_CSRMatrixMatvec(alpha, A->diagT, x_local, beta, y_local);
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD 
       SyncVectorToHost(y_local);
+#endif
    }
    else
    {
@@ -572,7 +580,9 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
                   += y_buf_data[jv][index++];
          }
       }
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD   
    UpdateHRC(y_local);
+#endif
    hypre_SeqVectorDestroy(y_tmp);
    y_tmp = NULL;
    if (!use_persistent_comm)

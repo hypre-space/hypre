@@ -216,7 +216,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                                             stencil_shape);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(fac_smatrix_vals, smatrix_vals)
+#define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size, 
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
@@ -273,7 +273,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                                             stencil_shape);
 
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(fac_smatrix_vals, smatrix_vals)
+#define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size, 
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
@@ -411,7 +411,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                              stencil_shape);
       
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(fac_smatrix_vals, smatrix_vals)
+#define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
