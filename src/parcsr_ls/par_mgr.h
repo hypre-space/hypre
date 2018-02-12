@@ -42,7 +42,8 @@ typedef struct
   HYPRE_Real    *rel_res_norms;
 
   HYPRE_Real   max_row_sum;
-  HYPRE_Real	num_interp_sweeps;
+  HYPRE_Int	num_interp_sweeps;
+  HYPRE_Int	num_restrict_sweeps;
   HYPRE_Int    interp_type;
   HYPRE_Int   restrict_type;
   HYPRE_Real   strong_threshold;
@@ -97,6 +98,8 @@ typedef struct
   hypre_ParAMGData    **FrelaxVcycleData;
 
   HYPRE_Int   max_local_lvls;
+  
+  HYPRE_Int   print_coarse_system;
   
 } hypre_ParMGRData;
 
