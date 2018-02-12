@@ -1705,10 +1705,10 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix     *A,
 			HYPRE_Int	      method,
 			HYPRE_Int	      numsweeps)
 {
-   HYPRE_Int i;
+//   HYPRE_Int i;
    hypre_ParCSRMatrix    *P_ptr = NULL;
-   HYPRE_Real		 jac_trunc_threshold = trunc_factor;
-   HYPRE_Real		 jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
+//   HYPRE_Real		 jac_trunc_threshold = trunc_factor;
+//   HYPRE_Real		 jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
 
    /* Build interpolation operator using (hypre default) */
    if(!last_level)
@@ -1722,8 +1722,8 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix     *A,
 	   {
 		   hypre_MGRBuildP( A,CF_marker,num_cpts_global,method,debug_flag,&P_ptr);
 		   /* Could do a few sweeps of Jacobi to further improve P */
-                    for(i=0; i<numsweeps; i++)
-		   	 hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker, 0, jac_trunc_threshold, jac_trunc_threshold_minus );
+                    //for(i=0; i<numsweeps; i++)
+		   //	 hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker, 0, jac_trunc_threshold, jac_trunc_threshold_minus );
 	   }
 	   else
 	   {
@@ -1738,10 +1738,10 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix     *A,
 		    * If numsweeps = 0, the following step is skipped and P is returned as is.
 		    * Looping here is equivalent to improving P by Jacobi interpolation
                    */
-		   for(i=0; i<numsweeps; i++)
-			   hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker,
-										   0, jac_trunc_threshold,
-										   jac_trunc_threshold_minus );
+//		   for(i=0; i<numsweeps; i++)
+//			   hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker,
+//										   0, jac_trunc_threshold,
+//										   jac_trunc_threshold_minus );
 	   }
 
    }
