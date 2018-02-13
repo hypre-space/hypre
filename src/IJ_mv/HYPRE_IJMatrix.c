@@ -386,6 +386,33 @@ HYPRE_IJMatrixSetValues( HYPRE_IJMatrix       matrix,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetConstantValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixSetConstantValues( HYPRE_IJMatrix matrix, HYPRE_Complex value)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+         return( hypre_IJMatrixSetConstantValuesParCSR( ijmatrix, value));
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixAddToValues
  *--------------------------------------------------------------------------*/
 
@@ -551,12 +578,6 @@ HYPRE_IJMatrixGetValues( HYPRE_IJMatrix matrix,
    if (!ijmatrix)
    {
       hypre_error_in_arg(1);
-      return hypre_error_flag;
-   }
-
-   if (nrows < 0)
-   {
-      hypre_error_in_arg(2);
       return hypre_error_flag;
    }
 

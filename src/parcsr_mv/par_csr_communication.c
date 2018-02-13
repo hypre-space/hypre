@@ -43,7 +43,7 @@ static CommPkgJobType getJobTypeOf(HYPRE_Int job)
  */
 hypre_ParCSRPersistentCommHandle *
 hypre_ParCSRPersistentCommHandleCreate( HYPRE_Int job,
-			                               hypre_ParCSRCommPkg *comm_pkg,
+                                        hypre_ParCSRCommPkg *comm_pkg,
                                         void *send_data,
                                         void *recv_data)
 {
@@ -421,11 +421,8 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
       hypre_TFree(status0, HYPRE_MEMORY_HOST);
    }
 
-   //printf("HERE---- 0\n"); // debugging the Invalid Cuda context issue
    hypre_TFree(hypre_ParCSRCommHandleRequests(comm_handle), HYPRE_MEMORY_HOST);
-   //printf("HERE 1 %p\n",comm_handle);
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
-   //printf("HERE 2 \n");
 
    return hypre_error_flag;
 }
@@ -438,26 +435,22 @@ hypre_ParCSRCommHandleDestroy( hypre_ParCSRCommHandle *comm_handle )
 */
 
 void
-hypre_MatvecCommPkgCreate_core(
+hypre_ParCSRCommPkgCreate_core(
    /* input args: */
-   MPI_Comm comm,
-   HYPRE_Int * col_map_offd,
-   HYPRE_Int first_col_diag,
-   HYPRE_Int * col_starts,
-   HYPRE_Int num_cols_diag,
-   HYPRE_Int num_cols_offd,
-   HYPRE_Int firstColDiag,
-   HYPRE_Int * colMapOffd,
-   HYPRE_Int data,  /* = 1 for a matrix with floating-point data,
-                       = 0 for Boolean matrix */
+   MPI_Comm   comm,
+   HYPRE_Int *col_map_offd,
+   HYPRE_Int  first_col_diag,
+   HYPRE_Int *col_starts,
+   HYPRE_Int  num_cols_diag,
+   HYPRE_Int  num_cols_offd,
    /* pointers to output args: */
-   HYPRE_Int * p_num_recvs,
-   HYPRE_Int ** p_recv_procs,
-   HYPRE_Int ** p_recv_vec_starts,
-   HYPRE_Int * p_num_sends,
-   HYPRE_Int ** p_send_procs,
-   HYPRE_Int ** p_send_map_starts,
-   HYPRE_Int ** p_send_map_elmts
+   HYPRE_Int  *p_num_recvs,
+   HYPRE_Int **p_recv_procs,
+   HYPRE_Int **p_recv_vec_starts,
+   HYPRE_Int  *p_num_sends,
+   HYPRE_Int **p_send_procs,
+   HYPRE_Int **p_send_map_starts,
+   HYPRE_Int **p_send_map_elmts
    )
 {
    HYPRE_Int    i, j;
@@ -494,8 +487,7 @@ hypre_MatvecCommPkgCreate_core(
    j = 0;
    for (i=0; i < num_cols_offd; i++)
    {
-      if (num_cols_diag) proc_num = hypre_min(num_procs-1,offd_col / 
-                                              num_cols_diag);
+      if (num_cols_diag) proc_num = hypre_min(num_procs-1, offd_col / num_cols_diag);
       while (col_starts[proc_num] > offd_col )
          proc_num = proc_num-1;
       while (col_starts[proc_num+1]-1 < offd_col )
@@ -660,6 +652,49 @@ hypre_MatvecCommPkgCreate_core(
    *p_send_map_elmts = send_map_elmts;
 }
 
+
+HYPRE_Int
+hypre_ParCSRCommPkgCreate
+(
+   /* inputs */
+   MPI_Comm   comm,
+   HYPRE_Int *col_map_offd,
+   HYPRE_Int  first_col_diag,
+   HYPRE_Int *col_starts,
+   HYPRE_Int  num_cols_diag,
+   HYPRE_Int  num_cols_offd,
+   /* output */
+   hypre_ParCSRCommPkg *comm_pkg
+)
+{
+   HYPRE_Int  num_sends;
+   HYPRE_Int *send_procs;
+   HYPRE_Int *send_map_starts;
+   HYPRE_Int *send_map_elmts;
+ 
+   HYPRE_Int  num_recvs;
+   HYPRE_Int *recv_procs;
+   HYPRE_Int *recv_vec_starts;
+
+   hypre_ParCSRCommPkgCreate_core
+      ( comm, col_map_offd, first_col_diag, col_starts,
+        num_cols_diag, num_cols_offd, 
+        &num_recvs, &recv_procs, &recv_vec_starts,
+        &num_sends, &send_procs, &send_map_starts,
+        &send_map_elmts );
+
+   hypre_ParCSRCommPkgComm         (comm_pkg) = comm;
+   hypre_ParCSRCommPkgNumRecvs     (comm_pkg) = num_recvs;
+   hypre_ParCSRCommPkgRecvProcs    (comm_pkg) = recv_procs;
+   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
+   hypre_ParCSRCommPkgNumSends     (comm_pkg) = num_sends;
+   hypre_ParCSRCommPkgSendProcs    (comm_pkg) = send_procs;
+   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
+   hypre_ParCSRCommPkgSendMapElmts (comm_pkg) = send_map_elmts;
+   
+   return hypre_error_flag;
+}
+
 /* ----------------------------------------------------------------------
  * hypre_MatvecCommPkgCreate
  * generates the comm_pkg for A 
@@ -670,90 +705,38 @@ hypre_MatvecCommPkgCreate_core(
 HYPRE_Int
 hypre_MatvecCommPkgCreate ( hypre_ParCSRMatrix *A )
 {
-   HYPRE_Int            num_sends;
-   HYPRE_Int           *send_procs;
-   HYPRE_Int           *send_map_starts;
-   HYPRE_Int           *send_map_elmts;
- 
-   HYPRE_Int            num_recvs;
-   HYPRE_Int           *recv_procs;
-   HYPRE_Int           *recv_vec_starts;
-   
-   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
-   hypre_ParCSRCommPkg *comm_pkg;
-
-   HYPRE_Int    first_col_diag = hypre_ParCSRMatrixFirstColDiag(A);
-
-   HYPRE_Int   *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
-
-   HYPRE_Int    num_cols_offd = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
-
+   MPI_Comm   comm            = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int  first_col_diag  = hypre_ParCSRMatrixFirstColDiag(A);
+   HYPRE_Int *col_map_offd    = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Int  num_cols_offd   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-
-   HYPRE_Int             row_start=0, row_end=0, col_start = 0, col_end = 0;
-   HYPRE_Int             global_num_cols;
-   hypre_IJAssumedPart  *apart;
-   
-   /*-----------------------------------------------------------
-    * get parcsr_A information 
-    *----------------------------------------------------------*/
-
-   hypre_ParCSRMatrixGetLocalRange(A, &row_start, &row_end, &col_start, &col_end);
-
-   global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A); 
-
+   HYPRE_Int  global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A); 
    /* Create the assumed partition */
    if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
    {
       hypre_ParCSRMatrixCreateAssumedPartition(A);
    }
-
-   apart = hypre_ParCSRMatrixAssumedPartition(A);
-   
-   /*-----------------------------------------------------------
-    * get commpkg info information 
-    *----------------------------------------------------------*/
-
-   hypre_NewCommPkgCreate_core( comm, col_map_offd, first_col_diag, 
-                                col_start, col_end, 
-                                num_cols_offd, global_num_cols,
-                                &num_recvs, &recv_procs, &recv_vec_starts,
-                                &num_sends, &send_procs, &send_map_starts, 
-                                &send_map_elmts, apart);
-
+   hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
 #else
-   
-   HYPRE_Int  *col_starts = hypre_ParCSRMatrixColStarts(A);
-   HYPRE_Int    num_cols_diag = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
-
-   hypre_MatvecCommPkgCreate_core
-      ( comm, col_map_offd, first_col_diag, col_starts,
-        num_cols_diag, num_cols_offd,
-        first_col_diag, col_map_offd,
-        1,
-        &num_recvs, &recv_procs, &recv_vec_starts,
-        &num_sends, &send_procs, &send_map_starts,
-        &send_map_elmts );
-
+   HYPRE_Int *col_starts      = hypre_ParCSRMatrixColStarts(A);
+   HYPRE_Int  num_cols_diag   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
 #endif
-
    /*-----------------------------------------------------------
     * setup commpkg
     *----------------------------------------------------------*/
-
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
-
-   hypre_ParCSRCommPkgComm(comm_pkg) = comm;
-
-   hypre_ParCSRCommPkgNumRecvs(comm_pkg) = num_recvs;
-   hypre_ParCSRCommPkgRecvProcs(comm_pkg) = recv_procs;
-   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg) = recv_vec_starts;
-   hypre_ParCSRCommPkgNumSends(comm_pkg) = num_sends;
-   hypre_ParCSRCommPkgSendProcs(comm_pkg) = send_procs;
-   hypre_ParCSRCommPkgSendMapStarts(comm_pkg) = send_map_starts;
-   hypre_ParCSRCommPkgSendMapElmts(comm_pkg) = send_map_elmts;
-
+   hypre_ParCSRCommPkg *comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1,HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixCommPkg(A) = comm_pkg;
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   hypre_ParCSRCommPkgCreateApart ( comm, col_map_offd, first_col_diag, 
+                                    num_cols_offd, global_num_cols,
+                                    apart,
+                                    comm_pkg );
+#else
+   hypre_ParCSRCommPkgCreate      ( comm, col_map_offd, first_col_diag, 
+                                    col_starts,
+                                    num_cols_diag, num_cols_offd, 
+                                    comm_pkg );
+#endif
 
    return hypre_error_flag;
 }
@@ -846,5 +829,3 @@ hypre_BuildCSRJDataType( HYPRE_Int num_nonzeros,
  
    return hypre_error_flag;
 }
-
-    

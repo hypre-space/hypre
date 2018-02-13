@@ -457,6 +457,24 @@ HYPRE_BoomerAMGGetCycleType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetConvergeType, HYPRE_BoomerAMGGetConvergeType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetConvergeType( HYPRE_Solver solver,
+                                HYPRE_Int    type    )
+{
+   return( hypre_BoomerAMGSetConvergeType( (void *) solver, type ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetConvergeType( HYPRE_Solver solver,
+                                HYPRE_Int   *type    )
+{
+   return( hypre_BoomerAMGGetConvergeType( (void *) solver, type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetTol, HYPRE_BoomerAMGGetTol
  *--------------------------------------------------------------------------*/
 
@@ -1703,6 +1721,19 @@ HYPRE_BoomerAMGSetKeepTranspose (HYPRE_Solver solver,
 {
    return (hypre_BoomerAMGSetKeepTranspose ( (void *) solver, keepTranspose ) );
 }
+
+#ifdef HAVE_DSUPERLU
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetDSLUThreshold
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
+                                HYPRE_Int    slu_threshold)
+{
+   return (hypre_BoomerAMGSetDSLUThreshold ( (void *) solver, slu_threshold ) );
+}
+#endif
 
 HYPRE_Int
 HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,

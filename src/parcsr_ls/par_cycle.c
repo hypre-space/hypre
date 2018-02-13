@@ -322,6 +322,12 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
       {
          hypre_seqAMGCycle(amg_data, level, F_array, U_array);
       }
+#ifdef HAVE_DSUPERLU
+      else if (cycle_param == 3 && hypre_ParAMGDataDSLUSolver(amg_data) != NULL)
+      {
+         hypre_SLUDistSolve(hypre_ParAMGDataDSLUSolver(amg_data), Aux_F, Aux_U);
+      }
+#endif
       else
       {
 
