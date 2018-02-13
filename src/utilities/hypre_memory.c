@@ -424,7 +424,7 @@ hypre_Free( char *ptr ,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
         cudaSafeFree(ptr,MEM_PAD_LEN);
 #else
-	ASSERT_HOST(ptr);
+		//ASSERT_HOST(ptr);
         free(ptr);
 #endif
      }

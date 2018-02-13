@@ -3418,10 +3418,10 @@ main( hypre_int argc,
    
       time_index = hypre_InitializeTiming("PCG Solve");
       hypre_BeginTiming(time_index);
-      printf("PRE_PCG_SOLVE\n");
+
       HYPRE_PCGSolve(pcg_solver, (HYPRE_Matrix)parcsr_A, 
                      (HYPRE_Vector)b, (HYPRE_Vector)x);
-      printf("POST_PCG_SOLVE\n");
+
       hypre_EndTiming(time_index);
       hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
       hypre_FinalizeTiming(time_index);
