@@ -1379,6 +1379,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    }
 
    hypre_assert(i1 == num_cols_offd_R);
+   //printf("FF2_offd_len %d, num_cols_offd_R %d\n", FF2_offd_len, num_cols_offd_R);
 
    /* now, adjust R_offd_j to local idx w.r.t FF2_offd
     * by searching */

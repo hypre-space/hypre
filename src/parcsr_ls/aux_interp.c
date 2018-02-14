@@ -109,49 +109,6 @@ HYPRE_Int hypre_alt_insert_new_nodes(hypre_ParCSRCommPkg *comm_pkg,
   return hypre_error_flag;
 } 
 
-/* AHB 11/06 : alternate to the extend function below - creates a
- * second comm pkg based on found - this makes it easier to use the
- * global partition*/
-HYPRE_Int
-hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, HYPRE_Int newoff, HYPRE_Int *found, 
-                              hypre_ParCSRCommPkg **extend_comm_pkg)
-
-{
-   MPI_Comm  comm            = hypre_ParCSRMatrixComm(A);
-   HYPRE_Int first_col_diag  = hypre_ParCSRMatrixFirstColDiag(A);
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-   HYPRE_Int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
-   /* Create the assumed partition */
-   if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
-   {
-      hypre_ParCSRMatrixCreateAssumedPartition(A);
-   }
-   hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
-#else
-   HYPRE_Int *col_starts      = hypre_ParCSRMatrixColStarts(A);
-   HYPRE_Int  num_cols_diag   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
-#endif
-   /*-----------------------------------------------------------
-    * setup commpkg
-    *----------------------------------------------------------*/
-   hypre_ParCSRCommPkg *new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
-   *extend_comm_pkg = new_comm_pkg;
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-   hypre_ParCSRCommPkgCreateApart ( comm, found, first_col_diag, 
-                                    newoff, global_num_cols,
-                                    apart,
-                                    new_comm_pkg );
-#else
-   hypre_ParCSRCommPkgCreate      ( comm, found, first_col_diag, 
-                                    col_starts,
-                                    num_cols_diag, newoff,
-                                    new_comm_pkg );
-#endif
-
-   return hypre_error_flag;
-}
-
-
 /* sort for non-ordered arrays */
 HYPRE_Int hypre_ssort(HYPRE_Int *data, HYPRE_Int n)
 {
@@ -594,8 +551,7 @@ HYPRE_Int hypre_exchange_interp_data(
 
   /* AHB - create a new comm package just for extended info -
      this will work better with the assumed partition*/
-  hypre_ParCSRFindExtendCommPkg(A, newoff, found, 
-      extend_comm_pkg);
+  hypre_ParCSRFindExtendCommPkg(A, newoff, found, extend_comm_pkg);
 
   *CF_marker_offd = hypre_TReAlloc(*CF_marker_offd, HYPRE_Int, *full_off_procNodes);
   hypre_exchange_marker(*extend_comm_pkg, CF_marker, *CF_marker_offd + A_ext_rows);
