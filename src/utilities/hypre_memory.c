@@ -98,7 +98,9 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
          size_t *sp=(size_t*)ptr;
          cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
          ptr=(void*)(&sp[MEM_PAD_LEN]);
-         /* XXX XXX XXX XXX XXX XXX */
+         /* XXX XXX XXX XXX XXX XXX
+          * IT SEEMS OMP4.5 ALLOC VERSION NEEDS THIS (WHY?)
+          * XXX XXX XXX XXX XXX XXX*/
          cudaDeviceSynchronize();
 #elif defined(HYPRE_USE_OMP45) /*else HYPRE_USE_OMP45_TARGET_ALLOC */
          void *ptr_alloc = malloc(size + HYPRE_OMP45_SZE_PAD);
@@ -520,10 +522,12 @@ hypre_Memcpy( char *dst,
 
 #if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
       /* XXX XXX XXX XXX XXX XXX */
+      /*
       if ( locdst == HYPRE_MEMORY_DEVICE || locsrc == HYPRE_MEMORY_DEVICE )
       {
          cudaDeviceSynchronize();
       }
+      */
 #endif
    }
 }
