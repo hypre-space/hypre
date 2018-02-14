@@ -341,7 +341,7 @@ hypre_ReAlloc( char   *ptr,
    }
    else
    {
-      void *nptr = hypre_MAlloc(size, HYPRE_MEMORY_HOST);
+      void *nptr = hypre_MAlloc(size, location);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
       size_t old_size=memsize((void*)ptr);
 #else
@@ -425,11 +425,8 @@ hypre_Free( char *ptr ,
      {
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
         cudaSafeFree(ptr,MEM_PAD_LEN);
-#if defined(TRACK_MEMORY_ALLOCATIONS)
-	ASSERT_HOST(ptr);
-#endif
-
 #else
+		//ASSERT_HOST(ptr);
         free(ptr);
 #endif
      }
@@ -514,10 +511,14 @@ hypre_Memcpy( char *dst,
          }
       }
       else
-      {
+      {	
+	/* This needs to be fixes for speed */
+	if ( locdst==HYPRE_MEMORY_SHARED && locsrc==HYPRE_MEMORY_SHARED ) memcpy( dst, src, size);
+	else {
          hypre_printf("Wrong memory location.\n");
          fflush(stdout);
          hypre_error(HYPRE_ERROR_MEMORY);
+	}
       }
 
 #if defined(HYPRE_USE_OMP45_TARGET_ALLOC)

@@ -292,7 +292,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
 	 //y_data[i] *= alpha;
 	 }
      } else {
-       printf("Main work loop 2 %d offset = %d alpha =%lf beta = %lf \n",num_rows,offset,alpha,beta);
+		 /*printf("Main work loop 2 %d offset = %d alpha =%lf beta = %lf \n",num_rows,offset,alpha,beta);*/
 #ifdef HYPRE_USING_OPENMP_OFFLOAD22
 #pragma omp target teams  distribute  parallel for private(i,j,jj,tempx) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS) is_device_ptr(y_data,A_data,x_data,A_i,A_j)
 #endif
@@ -442,7 +442,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
      x_tmp = hypre_SeqVectorCloneDeep(x);
      x_data = hypre_VectorData(x_tmp);
    }
-   int i;
+   HYPRE_Int i;
 
 
 #ifdef HYPRE_USING_CUSPARSE
@@ -477,13 +477,13 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
 #else
 #ifdef HYPRE_USING_OPENMP_OFFLOAD
-   int num_threads=64; // >64  for 100% Theoritical occupancy
-   int num_teams = (num_rows+num_rows%num_threads)/num_threads;
+   HYPRE_Int num_threads=64; // >64  for 100% Theoritical occupancy
+   HYPRE_Int num_teams = (num_rows+num_rows%num_threads)/num_threads;
 #pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(num_threads) is_device_ptr(A_data,A_i,A_j,y_data,b_data,x_data) schedule(static,1)
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-   int num_threads=64; // >64  for 100% Theoritical occupancy
-   int num_teams = (num_rows+num_rows%num_threads)/num_threads;
+   HYPRE_Int num_threads=64; // >64  for 100% Theoritical occupancy
+   HYPRE_Int num_teams = (num_rows+num_rows%num_threads)/num_threads;
    //   printf("Matvec with %d teams & %d tehreads \n",num_teams,num_threads);
    //   printf("Mapping map %d %d %d %d\n",omp_target_is_present(A,0),omp_target_is_present(A_data,0),omp_target_is_present(A_i,0),omp_target_is_present(A_j,0));
 #pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(num_threads) schedule(static,1)
@@ -491,7 +491,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
    for(i=0;i<num_rows;i++)
      {
        HYPRE_Complex tempx = 0.0;
-       int jj;
+       HYPRE_Int jj;
        for (jj = A_i[i]; jj < A_i[i+1]; jj++){
 	 tempx += A_data[jj] * x_data[A_j[jj]];
        }
@@ -528,7 +528,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex    alpha,
 #endif
   return 0;
 }
-/* int hypre_CSRMatrixSortHost(hypre_CSRMatrix *A){ */
+/* HYPRE_Int hypre_CSRMatrixSortHost(hypre_CSRMatrix *A){ */
 /*   HYPRE_Int      ierr=0; */
 /*   HYPRE_Int      num_rows = hypre_CSRMatrixNumRows(A); */
 /*   HYPRE_Int     *A_i = hypre_CSRMatrixI(A); */

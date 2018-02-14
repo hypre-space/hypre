@@ -1134,16 +1134,14 @@ hypre_BooleanMatvecCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
    HYPRE_Int	num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(A));
    HYPRE_Int	num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(A));
 
-   hypre_MatvecCommPkgCreate_core
-      (
-         comm, col_map_offd, first_col_diag, col_starts,
-         num_cols_diag, num_cols_offd,
-         first_col_diag, col_map_offd,
-         1,
-         &num_recvs, &recv_procs, &recv_vec_starts,
-         &num_sends, &send_procs, &send_map_starts,
-         &send_map_elmts
-         );
+   hypre_ParCSRCommPkgCreate_core
+   (
+      comm, col_map_offd, first_col_diag, col_starts,
+      num_cols_diag, num_cols_offd,
+      &num_recvs, &recv_procs, &recv_vec_starts,
+      &num_sends, &send_procs, &send_map_starts,
+      &send_map_elmts
+   );
 
    comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
 

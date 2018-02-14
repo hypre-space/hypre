@@ -209,12 +209,11 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
       else
          /* constant_coefficient == 0 , all coefficients in A vary */
       {
-	//printf("Stencil size = %d: %d,%d\n",stencil_size,Pstenc0, Pstenc1);
-	/*
+/*	
 	hypre_PFMGSetupInterpOp_CC0
             ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
               P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-	*/
+*/	
 
 	switch (stencil_size)
 	{
@@ -237,11 +236,6 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 	   hypre_PFMGSetupInterpOp_CC0_SS15
 	     ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
 	       P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
-/*	   
-           hypre_PFMGSetupInterpOp_CC0
-	     ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
-	       P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-*/
            break;
 	case 19:
 	   hypre_PFMGSetupInterpOp_CC0_SS19
@@ -253,11 +247,13 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 	     ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
 	       P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, P_stencil_shape );
 	   break;
-        default:
+	default:
+		 hypre_PFMGSetupInterpOp_CC0
+            ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
+              P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
            hypre_printf("hypre error: unsupported stencil size %d\n", stencil_size);
            hypre_MPI_Abort(hypre_MPI_COMM_WORLD, 1);
 	};
-
       }
    }
 

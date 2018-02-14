@@ -700,7 +700,6 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
  
-   HYPRE_Int        col_start = 0, col_end = 0;
    HYPRE_Int        num_recvs, *recv_procs, *recv_vec_starts;
 
    HYPRE_Int        num_sends, *send_procs, *send_map_starts;
@@ -721,10 +720,6 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
    /*-----------------------------------------------------------
     * get parcsr_A information 
     *----------------------------------------------------------*/
-
-   col_start =  hypre_ParCSRBlockMatrixFirstColDiag(A);
-   col_end =  hypre_ParCSRBlockMatrixLastColDiag(A);
-   
    col_map_off_d =  hypre_ParCSRBlockMatrixColMapOffd(A);
    num_cols_off_d = hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixOffd(A));
    
@@ -746,12 +741,11 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
     * get commpkg info information 
     *----------------------------------------------------------*/
 
-   hypre_NewCommPkgCreate_core( comm, col_map_off_d, first_col_diag, 
-                                col_start, col_end, 
-                                num_cols_off_d, global_num_cols,
-                                &num_recvs, &recv_procs, &recv_vec_starts,
-                                &num_sends, &send_procs, &send_map_starts, 
-                                &send_map_elmts, apart);
+   hypre_ParCSRCommPkgCreateApart_core( comm, col_map_off_d, first_col_diag, 
+                                        num_cols_off_d, global_num_cols,
+                                        &num_recvs, &recv_procs, &recv_vec_starts,
+                                        &num_sends, &send_procs, &send_map_starts, 
+                                        &send_map_elmts, apart);
 
    if (!num_recvs)
    {
@@ -787,9 +781,9 @@ hypre_BlockMatvecCommPkgCreate(hypre_ParCSRBlockMatrix *A)
    HYPRE_Int    num_cols_diag = hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixDiag(A));
    HYPRE_Int    num_cols_offd = hypre_CSRBlockMatrixNumCols(hypre_ParCSRBlockMatrixOffd(A));
 
-   hypre_MatvecCommPkgCreate_core(comm, col_map_offd, first_col_diag, 
-                                  col_starts, num_cols_diag, num_cols_offd, first_col_diag, 
-                                  col_map_offd, 1, &num_recvs, &recv_procs, &recv_vec_starts,
+   hypre_ParCSRCommPkgCreate_core(comm, col_map_offd, first_col_diag, 
+                                  col_starts, num_cols_diag, num_cols_offd, 
+                                  &num_recvs, &recv_procs, &recv_vec_starts,
                                   &num_sends, &send_procs, &send_map_starts, &send_map_elmts);
 
 #endif

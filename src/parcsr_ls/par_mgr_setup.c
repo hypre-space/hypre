@@ -497,9 +497,9 @@ hypre_MGRSetup( void               *mgr_vdata,
       		if (strong_threshold > S_commpkg_switch)
          		hypre_BoomerAMGCreateSCommPkg(AT, ST, &col_offd_ST_to_AT);
 
-      		num_restrict_sweeps = 0; /* do injection for restriction */
+      		num_restrict_sweeps = (mgr_data -> num_restrict_sweeps); /* restriction */
       		hypre_MGRBuildInterp(AT, CF_marker_array[lev], ST, coarse_pnts_global, 1, dof_func_buff,
-                         	debug_flag, trunc_factor, max_elmts, col_offd_ST_to_AT, &RT, last_level, 0, num_restrict_sweeps);
+                         	debug_flag, trunc_factor, max_elmts, col_offd_ST_to_AT, &RT, last_level, restrict_type, num_restrict_sweeps);
                          	
       		RT_array[lev] = RT;
 

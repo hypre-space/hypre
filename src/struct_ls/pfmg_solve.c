@@ -158,7 +158,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       hypre_StructCopy(b_l[0], r_l[0]);
       hypre_StructMatvecCompute(matvec_data_l[0],
                                 -1.0, A_l[0], x_l[0], 1.0, r_l[0]);
-
+	  //printf("Level 0: r_l = %.30e\n",hypre_StructInnerProd(r_l[0], r_l[0]));
       /* convergence check */
       if (tol > 0.0)
       {
@@ -192,6 +192,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
       {
          /* restrict fine grid residual */
          hypre_SemiRestrict(restrict_data_l[0], RT_l[0], r_l[0], b_l[1]);
+		 //printf("Level 1: b_l = %.30e\n",hypre_StructInnerProd(b_l[1], b_l[1]));
 #if DEBUG
          hypre_sprintf(filename, "zout_xdown.%02d", 0);
          hypre_StructVectorPrint(filename, x_l[0], 0);
@@ -214,7 +215,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                hypre_PFMGRelaxSetMaxIter(relax_data_l[l], num_pre_relax);
                hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 1);
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
-
+			   //printf("Level %d: x_l = %.30e\n",l, hypre_StructInnerProd(x_l[l], x_l[l]));
                /* compute residual (b - Ax) */
                hypre_StructCopy(b_l[l], r_l[l]);
                hypre_StructMatvecCompute(matvec_data_l[l],
@@ -226,9 +227,10 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                hypre_StructVectorSetConstantValues(x_l[l], 0.0);
                hypre_StructCopy(b_l[l], r_l[l]);
             }
-
+			//printf("Level %d: r_l = %.30e\n",l, hypre_StructInnerProd(r_l[l], r_l[l]));
             /* restrict residual */
             hypre_SemiRestrict(restrict_data_l[l], RT_l[l], r_l[l], b_l[l+1]);
+			//printf("Level %d: b_l = %.30e\n",l+1, hypre_StructInnerProd(b_l[l+1], b_l[l+1]));
 #if DEBUG
             hypre_sprintf(filename, "zout_xdown.%02d", l);
             hypre_StructVectorPrint(filename, x_l[l], 0);
@@ -256,7 +258,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_sprintf(filename, "zout_xbottom.%02d", l);
          hypre_StructVectorPrint(filename, x_l[l], 0);
 #endif
-
+		 //printf("Level %d: x_l = %.30e\n",l, hypre_StructInnerProd(x_l[l], x_l[l]));
          /*--------------------------------------------------
           * Up cycle
           *--------------------------------------------------*/
@@ -284,6 +286,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
                hypre_PFMGRelaxSetZeroGuess(relax_data_l[l], 0);
                hypre_PFMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
             }
+			//printf("Level %d: x_l = %.15e\n",l, hypre_StructInnerProd(x_l[l], x_l[l]));
          }
          if (constant_coefficient)
          {
@@ -302,6 +305,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          hypre_sprintf(filename, "zout_xup.%02d", 0);
          hypre_StructVectorPrint(filename, x_l[0], 0);
 #endif
+		 //printf("Level 0: x_l = %.15e\n", hypre_StructInnerProd(x_l[0], x_l[0]));
       }
 
       /* part of convergence check */

@@ -298,7 +298,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
    //printf("Vec Constant Value on Device %d %p size = %d \n",omp_target_is_present(vector_data,0),v,size);
 #pragma omp target teams  distribute  parallel for private(i) num_teams(NUM_TEAMS) thread_limit(NUM_THREADS)
 #elif defined(HYPRE_USING_OPENMP)
-   printf("Vec Constant Value on Host %d \n",omp_target_is_present(vector_data,0));
+   //printf("Vec Constant Value on Host %d \n",omp_target_is_present(vector_data,0));
    #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < size; i++)
@@ -728,6 +728,7 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
 void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x){
   if (hypre_VectorSize(x)==0) return;
   ASSERT_MANAGED(hypre_VectorData(x));
+  //PrintPointerAttributes(hypre_VectorData(x));
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
   hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));

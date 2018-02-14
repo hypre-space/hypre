@@ -4,7 +4,7 @@ Final Relative Residual Norm = 3.246673e-05
 
 # Output file: solvers_struct.out.1
 Iterations = 6
-Final Relative Residual Norm = 2.055852e-05
+Final Relative Residual Norm = 2.055850e-05
 
 # Output file: solvers_struct.out.2
 Iterations = 16
@@ -40,23 +40,23 @@ Residual   8.52039884193800e-05
 
 # Output file: solvers_struct.out.11.lobpcg
 Iterations = 6
-Final Relative Residual Norm = 2.112822e-05
+Final Relative Residual Norm = 2.112817e-05
 
 # Output file: solvers_struct.out.11.lobpcg.1
-Eigenvalue lambda   1.84366270899773e-01
-Residual   3.14826756948605e-05
+Eigenvalue lambda   1.84366181492805e-01
+Residual   3.16434197884519e-05
 
 # Output file: solvers_struct.out.11.lobpcg.3
-Iteration 11 	bsize 2 	maxres   6.89935637637973e-04
-Iteration 12 	bsize 2 	maxres   2.52041267231107e-04
-Iteration 13 	bsize 1 	maxres   7.04026824678294e-05
+Iteration 11 	bsize 2 	maxres   6.89531618263572e-04
+Iteration 12 	bsize 2 	maxres   2.52014782745391e-04
+Iteration 13 	bsize 1 	maxres   7.00048913131468e-05
 
-Eigenvalue lambda   1.84366539120674e-01
-Eigenvalue lambda   2.50883042812347e-01
-Eigenvalue lambda   3.60092163085938e-01
-Residual   5.59787331440020e-05
-Residual   2.58176805800758e-05
-Residual   7.04026824678294e-05
+Eigenvalue lambda   1.84366345405579e-01
+Eigenvalue lambda   2.50880867242813e-01
+Eigenvalue lambda   3.60090494155884e-01
+Residual   5.61281849513762e-05
+Residual   2.61230034084292e-05
+Residual   7.00048913131468e-05
 
 # Output file: solvers_struct.out.17.lobpcg
 Iterations = 20

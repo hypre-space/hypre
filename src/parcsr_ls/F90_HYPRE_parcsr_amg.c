@@ -2002,6 +2002,24 @@ hypre_F90_IFACE(hypre_boomeramgsetseqthrshold, HYPRE_BOOMERAMGSETSEQTHRSHOLD)
            hypre_F90_PassInt (seq_th) ) );
 }
 
+#ifdef HAVE_DSUPERLU
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetDSLUThreshold
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetdsluthrshold, HYPRE_BOOMERAMGSETDSLUTHRSHOLD)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *dslu_th,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGSetDSLUThreshold(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (dslu_th) ) );
+}
+#endif
+
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetRedundant
  *--------------------------------------------------------------------------*/

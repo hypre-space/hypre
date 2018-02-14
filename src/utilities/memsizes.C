@@ -1,6 +1,8 @@
 #include <unordered_map>
 #include <iostream>
 
+#include "_hypre_utilities.h"
+
 using namespace std;
 
 extern "C"{

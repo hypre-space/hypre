@@ -109,18 +109,7 @@ void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
 #define hypre_newBoxLoopInit(ndim,loop_size)				\
   HYPRE_Int hypre__tot = 1;						\
   for (HYPRE_Int hypre_d = 0;hypre_d < ndim;hypre_d ++)			\
-    hypre__tot *= loop_size[hypre_d];					\
-  if (hypre_box_print)							\
-  {									\
-     HYPRE_Int world_rank;						\
-     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);			\
-     if (world_rank == 0)						\
-       hypre_printf("%s, %s(%d): %s, %d,\n",tmp_print,__FILE__,__LINE__,__FUNCTION__, hypre__tot); \
-  }									\
-  t_start = MPI_Wtime();\
-  time_box = 1;	
-
-  //printf("hypre_newBoxLoop (%d) in %s(%d) function %s\n",hypre__tot, __FILE__,__LINE__,__FUNCTION__); 
+    hypre__tot *= loop_size[hypre_d];
 
 #define hypre_BasicBoxLoopInit(ndim,loop_size)	\
   HYPRE_Int hypre__tot = 1;						\
@@ -334,17 +323,17 @@ void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
 
 extern "C++" {
 template<typename T>
-__device__ __forceinline__ T hypre_shfl_xor(T var, int laneMask)
+__device__ __forceinline__ T hypre_shfl_xor(T var, HYPRE_Int laneMask)
 {
-  const int int_sizeof_T = 
-      (sizeof(T) + sizeof(int) - 1) / sizeof(int);
+  const HYPRE_Int int_sizeof_T = 
+      (sizeof(T) + sizeof(HYPRE_Int) - 1) / sizeof(HYPRE_Int);
   union {
     T var;
-    int arr[int_sizeof_T];
+    HYPRE_Int arr[int_sizeof_T];
   } Tunion;
   Tunion.var = var;
 
-  for(int i = 0; i < int_sizeof_T; ++i) {
+  for(HYPRE_Int i = 0; i < int_sizeof_T; ++i) {
     Tunion.arr[i] = __shfl_xor_sync(0xFFFFFFFF, Tunion.arr[i], laneMask);
   }
   return Tunion.var;
@@ -390,9 +379,9 @@ public:
       else if (data_location == HYPRE_MEMORY_HOST)
       {
 	 m_blockdata = getCPUReductionMemBlock(m_myID);
-	 int nthreads = omp_get_max_threads();
+	 HYPER_Int nthreads = omp_get_max_threads();
 	 #pragma omp parallel for schedule(static, 1)
-	 for ( int i = 0; i < nthreads; ++i ) {
+	 for (HYPRE_Int i = 0; i < nthreads; ++i ) {
 	    m_blockdata[i*s_block_offset] = 0 ;
 	 }
       }
@@ -448,9 +437,9 @@ public:
      {
 #if defined( __CUDA_ARCH__ )
 #else
-        T tmp_reduced_val = static_cast<T>(0);
-	int nthreads = omp_get_max_threads();
-	for ( int i = 0; i < nthreads; ++i ) {
+		 T tmp_reduced_val = static_cast<T>(0);
+	HYPRE_Int nthreads = omp_get_max_threads();
+	for ( HYPRE_Int i = 0; i < nthreads; ++i ) {
 	   tmp_reduced_val += static_cast<T>(m_blockdata[i*s_block_offset]);
 	}
 	m_reduced_val = m_init_val + tmp_reduced_val;
@@ -517,8 +506,8 @@ public:
 #else
       if (data_location == HYPRE_MEMORY_HOST)
       {
-         int tid = omp_get_thread_num();
-	 m_blockdata[tid*s_block_offset] += val;
+         HYPRE_Int tid = omp_get_thread_num();
+		 m_blockdata[tid*s_block_offset] += val;
       }
 #endif
       return *this ;
@@ -536,7 +525,7 @@ private:
 
    T m_init_val;
    T m_reduced_val;
-   static const int s_block_offset = 
+   static const HYPRE_Int s_block_offset = 
       COHERENCE_BLOCK_SIZE/sizeof(CudaReductionBlockDataType);
    CudaReductionBlockDataType* m_blockdata ;
    

@@ -200,6 +200,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real    wall_time;   /* for debugging instrumentation */
    HYPRE_Int      add_end;
 
+#ifdef HAVE_DSUPERLU
+   HYPRE_Int dslu_threshold = hypre_ParAMGDataDSLUThreshold(amg_data);
+#endif
+
 #ifdef HYPRE_USE_GPU
    if (!hypre_ParCSRMatrixIsManaged(A)){
      hypre_fprintf(stderr,"ERROR:: INVALID A in hypre_BoomerAMGSetup::Address %p\n",A);
@@ -2447,6 +2451,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       {
 	 HYPRE_Int max_thresh = hypre_max(coarse_threshold, seq_threshold);
+#ifdef HAVE_DSUPERLU
+	 max_thresh = hypre_max(max_thresh, dslu_threshold);
+#endif
          if ( (level == max_levels-1) || (coarse_size <= max_thresh) )
          {
             not_finished_coarsening = 0;
@@ -2461,6 +2468,14 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       hypre_seqAMGSetup( amg_data, level, coarse_threshold);
 
    }
+#ifdef HAVE_DSUPERLU
+   else if (  ((dslu_threshold >= coarse_threshold) && (coarse_size > coarse_threshold) && (level != max_levels-1)))
+   {
+      HYPRE_Solver dslu_solver;
+      hypre_SLUDistSetup(&dslu_solver, A_array[level], amg_print_level);
+      hypre_ParAMGDataDSLUSolver(amg_data) = dslu_solver;
+   }
+#endif
    else if (grid_relax_type[3] == 9 || grid_relax_type[3] == 99)  /*use of Gaussian elimination on coarsest level */
    {
       if (coarse_size <= coarse_threshold)
@@ -2692,7 +2707,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
       }
       else if (grid_relax_type[1] == 16 || grid_relax_type[2] == 16 || (grid_relax_type[3] == 16 && j== (num_levels-1)))
       {
-         HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);;
+         HYPRE_Int scale = hypre_ParAMGDataChebyScale(amg_data);
          HYPRE_Int variant = hypre_ParAMGDataChebyVariant(amg_data);
          HYPRE_Real max_eig, min_eig = 0;
          HYPRE_Real *coefs = NULL;

@@ -23,7 +23,10 @@
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 #include <assert.h>
-
+#ifdef HAVE_DSUPERLU
+#include <math.h>
+#include "superlu_ddefs.h"
+#endif
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCreate
  *--------------------------------------------------------------------------*/
@@ -72,6 +75,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int      max_iter;
    HYPRE_Int      cycle_type;    
  
+   HYPRE_Int    converge_type;
    HYPRE_Real   tol;
 
    HYPRE_Int      num_sweeps;  
@@ -191,6 +195,7 @@ hypre_BoomerAMGCreate()
    min_iter  = 0;
    max_iter  = 20;
    cycle_type = 1;
+   converge_type = 0;
    tol = 1.0e-7;
 
    num_sweeps = 1;
@@ -295,6 +300,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMinIter(amg_data, min_iter);
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
    hypre_BoomerAMGSetCycleType(amg_data, cycle_type);
+   hypre_BoomerAMGSetConvergeType(amg_data, converge_type);
    hypre_BoomerAMGSetTol(amg_data, tol); 
    hypre_BoomerAMGSetNumSweeps(amg_data, num_sweeps);
    hypre_BoomerAMGSetCycleRelaxType(amg_data, relax_down, 1);
@@ -416,6 +422,11 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataCPointKeepMarkerArray(amg_data) = NULL;
    hypre_ParAMGDataCPointKeepLevel(amg_data) = 0;
    hypre_ParAMGDataNumCPointKeep(amg_data)   = 0;
+
+#ifdef HAVE_DSUPERLU
+   hypre_ParAMGDataDSLUThreshold(amg_data) = 0;
+   hypre_ParAMGDataDSLUSolver(amg_data) = NULL;
+#endif
    
    HYPRE_ANNOTATION_END("BoomerAMG.create");
 
@@ -439,6 +450,11 @@ hypre_BoomerAMGDestroy( void *data )
    HYPRE_Int *grid_relax_type = hypre_ParAMGDataGridRelaxType(amg_data);
 
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.destroy");
+
+#ifdef HAVE_DSUPERLU
+   if (hypre_ParAMGDataDSLUThreshold(amg_data) > 0)
+      hypre_SLUDistDestroy(hypre_ParAMGDataDSLUSolver(amg_data));
+#endif
    
    if (hypre_ParAMGDataMaxEigEst(amg_data))
    {
@@ -1554,8 +1570,53 @@ hypre_BoomerAMGGetCycleType( void  *data,
 }
 
 HYPRE_Int
+hypre_BoomerAMGSetConvergeType( void     *data,
+                                HYPRE_Int type  )
+{
+   /* type 0: default. relative over ||b||
+    *      1:          relative over ||r0||
+    */      
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   /*
+   if ()
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   */
+
+   hypre_ParAMGDataConvergeType(amg_data) = type;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetConvergeType( void      *data,
+                                HYPRE_Int *type  )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *type = hypre_ParAMGDataConvergeType(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_BoomerAMGSetTol( void     *data,
-                    HYPRE_Real    tol  )
+                       HYPRE_Real    tol  )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
 
@@ -3981,6 +4042,18 @@ hypre_BoomerAMGSetKeepTranspose( void   *data,
   return hypre_error_flag;
 }
 
+#ifdef HAVE_DSUPERLU
+HYPRE_Int
+hypre_BoomerAMGSetDSLUThreshold( void   *data,
+                            HYPRE_Int   dslu_threshold)
+{
+  hypre_ParAMGData *amg_data = (hypre_ParAMGData*) data;
+
+  hypre_ParAMGDataDSLUThreshold(amg_data) = dslu_threshold;
+  return hypre_error_flag;
+}
+#endif
+
 HYPRE_Int
 hypre_BoomerAMGSetCpointsToKeep(void      *data,
 				HYPRE_Int  cpt_coarse_level,
@@ -4052,3 +4125,4 @@ hypre_BoomerAMGSetCpointsToKeep(void      *data,
 
 	return hypre_error_flag;
 }
+

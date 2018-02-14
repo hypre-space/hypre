@@ -28,7 +28,6 @@ hypre_StructStencilCreate( HYPRE_Int     dim,
                            hypre_Index  *shape )
 {
    hypre_StructStencil   *stencil;
-   HYPRE_Int i,j;
 
    stencil = hypre_TAlloc(hypre_StructStencil, 1, HYPRE_MEMORY_HOST);
 

@@ -188,7 +188,6 @@ typedef struct
          }						\
      });						\
 }
-//     hypre_fence();					\
 
 #define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
 					    bstart,bni,bnj,bi,	\
@@ -215,7 +214,6 @@ typedef struct
          }						\
      });						\
 }
-//     hypre_fence();					\
 
 #elif defined(HYPRE_USE_OMP45) /* BEGIN OF OMP 4.5 */
 

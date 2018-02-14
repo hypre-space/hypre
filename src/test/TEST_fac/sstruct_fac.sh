@@ -30,9 +30,9 @@ diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 
-tail -3 ${TNAME}.out.8 > ${TNAME}.testdata
-tail -3 ${TNAME}.out.9 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+#tail -3 ${TNAME}.out.8 > ${TNAME}.testdata
+#tail -3 ${TNAME}.out.9 > ${TNAME}.testdata.temp
+#diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 #=============================================================================
 

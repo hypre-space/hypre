@@ -44,14 +44,13 @@ typedef struct { HYPRE_Int prev; HYPRE_Int next; } Link;
 
 
 
-
 #ifndef hypre_ParAMG_DATA_HEADER
 #define hypre_ParAMG_DATA_HEADER
 
 #define CUMNUMIT
 
-#include "par_csr_block_matrix.h"
 
+#include "par_csr_block_matrix.h"
 
 /*--------------------------------------------------------------------------
  * hypre_ParAMGData
@@ -109,6 +108,7 @@ typedef struct
    HYPRE_Real     outer_wt;
    HYPRE_Real  *relax_weight; 
    HYPRE_Real  *omega;
+   HYPRE_Int    converge_type;
    HYPRE_Real   tol;
 
    /* problem data */
@@ -259,9 +259,16 @@ typedef struct
    HYPRE_Int rap2;
    HYPRE_Int keepTranspose;
 /* information for preserving indexes as coarse grid points */
-	HYPRE_Int C_point_keep_level;
-	HYPRE_Int num_C_point_marker;
-	HYPRE_Int   **C_point_marker_array;
+   HYPRE_Int C_point_keep_level;
+   HYPRE_Int num_C_point_marker;
+   HYPRE_Int   **C_point_marker_array;
+
+#ifdef HAVE_DSUPERLU
+ /* Parameters and data for SuperLU_Dist */
+   HYPRE_Int dslu_threshold;
+   HYPRE_Solver dslu_solver;
+#endif
+
 } hypre_ParAMGData;
 
 /*--------------------------------------------------------------------------
@@ -308,6 +315,7 @@ typedef struct
 #define hypre_ParAMGDataMinIter(amg_data) ((amg_data)->min_iter)
 #define hypre_ParAMGDataMaxIter(amg_data) ((amg_data)->max_iter)
 #define hypre_ParAMGDataCycleType(amg_data) ((amg_data)->cycle_type)
+#define hypre_ParAMGDataConvergeType(amg_data) ((amg_data)->converge_type)
 #define hypre_ParAMGDataTol(amg_data) ((amg_data)->tol)
 #define hypre_ParAMGDataNumGridSweeps(amg_data) ((amg_data)->num_grid_sweeps)
 #define hypre_ParAMGDataUserCoarseRelaxType(amg_data) ((amg_data)->user_coarse_relax_type)
@@ -471,10 +479,17 @@ typedef struct
 #define hypre_ParAMGDataRAP2(amg_data) ((amg_data)->rap2)
 #define hypre_ParAMGDataKeepTranspose(amg_data) ((amg_data)->keepTranspose)
 
-/*indeces for the dof which will keep coarsening to the coarse level */
+/*indices for the dof which will keep coarsening to the coarse level */
 #define hypre_ParAMGDataCPointKeepMarkerArray(amg_data) ((amg_data)-> C_point_marker_array)
 #define hypre_ParAMGDataCPointKeepLevel(amg_data) ((amg_data)-> C_point_keep_level)
 #define hypre_ParAMGDataNumCPointKeep(amg_data) ((amg_data)-> num_C_point_marker)
+
+/* Parameters and data for SuperLU_Dist */
+#ifdef HAVE_DSUPERLU
+#define hypre_ParAMGDataDSLUThreshold(amg_data) ((amg_data)->dslu_threshold)
+#define hypre_ParAMGDataDSLUSolver(amg_data) ((amg_data)->dslu_solver)
+#endif
+
 #endif
 
 
@@ -773,6 +788,8 @@ HYPRE_Int HYPRE_BoomerAMGSetSetupType ( HYPRE_Solver solver , HYPRE_Int setup_ty
 HYPRE_Int HYPRE_BoomerAMGSetOldDefault ( HYPRE_Solver solver );
 HYPRE_Int HYPRE_BoomerAMGSetCycleType ( HYPRE_Solver solver , HYPRE_Int cycle_type );
 HYPRE_Int HYPRE_BoomerAMGGetCycleType ( HYPRE_Solver solver , HYPRE_Int *cycle_type );
+HYPRE_Int HYPRE_BoomerAMGSetConvergeType ( HYPRE_Solver solver , HYPRE_Int type );
+HYPRE_Int HYPRE_BoomerAMGGetConvergeType ( HYPRE_Solver solver , HYPRE_Int *type );
 HYPRE_Int HYPRE_BoomerAMGSetTol ( HYPRE_Solver solver , HYPRE_Real tol );
 HYPRE_Int HYPRE_BoomerAMGGetTol ( HYPRE_Solver solver , HYPRE_Real *tol );
 HYPRE_Int HYPRE_BoomerAMGSetNumGridSweeps ( HYPRE_Solver solver , HYPRE_Int *num_grid_sweeps );
@@ -883,6 +900,9 @@ HYPRE_Int HYPRE_BoomerAMGSetLevelNonGalerkinTol ( HYPRE_Solver solver , HYPRE_Re
 HYPRE_Int HYPRE_BoomerAMGSetNonGalerkTol ( HYPRE_Solver solver , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
 HYPRE_Int HYPRE_BoomerAMGSetRAP2 ( HYPRE_Solver solver , HYPRE_Int rap2 );
 HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose ( HYPRE_Solver solver , HYPRE_Int keepTranspose );
+#ifdef HAVE_DSUPERLU
+HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold ( HYPRE_Solver solver , HYPRE_Int slu_threshold );
+#endif
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse,HYPRE_Int *cpt_coarse_index);
 
 /* HYPRE_parcsr_bicgstab.c */
@@ -1190,6 +1210,8 @@ HYPRE_Int hypre_BoomerAMGSetSetupType ( void *data , HYPRE_Int setup_type );
 HYPRE_Int hypre_BoomerAMGGetSetupType ( void *data , HYPRE_Int *setup_type );
 HYPRE_Int hypre_BoomerAMGSetCycleType ( void *data , HYPRE_Int cycle_type );
 HYPRE_Int hypre_BoomerAMGGetCycleType ( void *data , HYPRE_Int *cycle_type );
+HYPRE_Int hypre_BoomerAMGSetConvergeType ( void *data , HYPRE_Int type );
+HYPRE_Int hypre_BoomerAMGGetConvergeType ( void *data , HYPRE_Int *type );
 HYPRE_Int hypre_BoomerAMGSetTol ( void *data , HYPRE_Real tol );
 HYPRE_Int hypre_BoomerAMGGetTol ( void *data , HYPRE_Real *tol );
 HYPRE_Int hypre_BoomerAMGSetNumSweeps ( void *data , HYPRE_Int num_sweeps );
@@ -1310,6 +1332,9 @@ HYPRE_Int hypre_BoomerAMGSetLevelNonGalerkinTol ( void *data , HYPRE_Real nongal
 HYPRE_Int hypre_BoomerAMGSetNonGalerkTol ( void *data , HYPRE_Int nongalerk_num_tol , HYPRE_Real *nongalerk_tol );
 HYPRE_Int hypre_BoomerAMGSetRAP2 ( void *data , HYPRE_Int rap2 );
 HYPRE_Int hypre_BoomerAMGSetKeepTranspose ( void *data , HYPRE_Int keepTranspose );
+#ifdef HAVE_DSUPERLU
+HYPRE_Int hypre_BoomerAMGSetDSLUThreshold ( void *data , HYPRE_Int slu_threshold );
+#endif
 HYPRE_Int hypre_BoomerAMGSetCpointsToKeep(void *data, HYPRE_Int cpt_coarse_level, HYPRE_Int  num_cpt_coarse, HYPRE_Int *cpt_coarse_index);
 
 /* par_amg_setup.c */
@@ -1608,6 +1633,13 @@ HYPRE_Int hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_mar
 
 HYPRE_Int hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix *A, HYPRE_Int *CF_marker, hypre_ParCSRMatrix *S, HYPRE_Int *num_cpts_global, HYPRE_Int num_functions, HYPRE_Int *dof_func, HYPRE_Int debug_flag, HYPRE_Real trunc_factor, HYPRE_Int max_elmts, HYPRE_Int *col_offd_S_to_A, hypre_ParCSRMatrix **R_ptr);
 
+#ifdef HAVE_DSUPERLU
+/* superlu.c */
+HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE_Int print_level);
+HYPRE_Int hypre_SLUDistSolve( void* solver, hypre_ParVector *b, hypre_ParVector *x);
+HYPRE_Int hypre_SLUDistDestroy( void* solver);
+#endif
+
 /* par_mgr.c */
 void *hypre_MGRCreate ( void );
 HYPRE_Int hypre_MGRDestroy ( void *mgr_vdata );
@@ -1615,7 +1647,7 @@ HYPRE_Int hypre_MGRCycle( void *mgr_vdata, hypre_ParVector **F_array, hypre_ParV
 void *hypre_MGRCreateFrelaxVcycleData();
 HYPRE_Int hypre_MGRDestroyFrelaxVcycleData( void *mgr_vdata );
 HYPRE_Int hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int level);
-HYPRE_Int hypre_MGRFrelaxVcycle ( void *mgr_vdata );
+HYPRE_Int hypre_MGRFrelaxVcycle ( void *mgr_vdata, hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRSetCpointsByBlock( void *mgr_vdata, HYPRE_Int  block_size, HYPRE_Int  max_num_levels, HYPRE_Int *block_num_coarse_points, HYPRE_Int  **block_coarse_indexes);
 HYPRE_Int hypre_MGRCoarsen(hypre_ParCSRMatrix *S,  hypre_ParCSRMatrix *A,HYPRE_Int final_coarse_size,HYPRE_Int *final_coarse_indexes,HYPRE_Int debug_flag,HYPRE_Int **CF_marker,HYPRE_Int last_level);
 HYPRE_Int hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_nodes);
@@ -1653,6 +1685,7 @@ HYPRE_Int hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int interpType);
 HYPRE_Int hypre_MGRSetInterpType( void *mgr_vdata, HYPRE_Int interpType);
 HYPRE_Int hypre_MGRSetNumRelaxSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetNumInterpSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
+HYPRE_Int hypre_MGRSetNumRestrictSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetPrintLevel( void *mgr_vdata, HYPRE_Int print_level );
 HYPRE_Int hypre_MGRSetLogging( void *mgr_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_MGRSetMaxIter( void *mgr_vdata, HYPRE_Int max_iter );
@@ -1660,6 +1693,7 @@ HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 // Accessor functions
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
+
 	
 #ifdef __cplusplus
 }
