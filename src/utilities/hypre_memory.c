@@ -327,7 +327,7 @@ hypre_ReAlloc( char   *ptr,
    }
    else if (location == HYPRE_MEMORY_DEVICE)
    {
-      // TODO: for DEVICE only memory
+      // TODO: How to do it for NONUNIFIED DEVICE memory
 #if defined(HYPRE_USE_MANAGED)
       void *new_ptr = hypre_MAlloc(size, location);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
