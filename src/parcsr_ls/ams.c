@@ -99,12 +99,12 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
 #else
          /* u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1 */
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
-	 int num_teams = (num_rows+num_rows%1024)/1024;
+	 HYPRE_Int num_teams = (num_rows+num_rows%1024)/1024;
 	 //printf("AMS.C %d = %d \n",num_rows,num_teams*1024);
 	 //printf("Ptypes %d %d %d \n",PointerAttributes(u_data),PointerAttributes(v_data),PointerAttributes(l1_norms));
 #pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(1024) is_device_ptr(u_data,v_data,l1_norms)
 #elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
-	 int num_teams = (num_rows+num_rows%1024)/1024;
+	 HYPRE_Int num_teams = (num_rows+num_rows%1024)/1024;
 #pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(1024)
 
 #endif

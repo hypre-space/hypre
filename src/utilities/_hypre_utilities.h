@@ -679,8 +679,8 @@ extern size_t hypre__target_dtoh_bytes;
 #if defined(TRACK_MEMORY_ALLOCATIONS)
 typedef struct {
   char *file;
-  int line;
-  int type;} pattr_t;
+  HYPRE_Int line;
+  HYPRE_Int type;} pattr_t;
 pattr_t *patpush(void *ptr, pattr_t *ss);
 #define hypre_TAlloc(type, count, location) \
   ( (type *)hypre_MAllocIns((size_t)(sizeof(type) * (count)), location,__FILE__,__LINE__) )
@@ -691,9 +691,9 @@ pattr_t *patpush(void *ptr, pattr_t *ss);
 #define hypre_TReAlloc(ptr, type, count, location) \
   ( (type *)hypre_ReAllocIns((char *)ptr, (size_t)(sizeof(type) * (count)), location,__FILE__,__LINE__) )
 
-void assert_check(void *ptr, char *file, int line);
+void assert_check(void *ptr, char *file, HYPRE_Int line);
 
-void assert_check_host(void *ptr, char *file, int line);
+void assert_check_host(void *ptr, char *file, HYPRE_Int line);
 
 
 #define ASSERT_MANAGED(ptr)\
@@ -739,7 +739,7 @@ void assert_check_host(void *ptr, char *file, int line);
 /* hypre_memory.c */
 HYPRE_Int hypre_OutOfMemory ( size_t size );
 char *hypre_MAlloc( size_t size , HYPRE_Int location );
-char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,int line);
+char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,HYPRE_Int line);
 char *hypre_CAlloc( size_t count ,  size_t elt_size , HYPRE_Int location);
 char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, HYPRE_Int line);
 char *hypre_MAllocPinned( size_t size );

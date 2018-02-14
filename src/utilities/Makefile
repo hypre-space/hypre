@@ -59,8 +59,8 @@ FILES =\
  hypre_merge_sort.c\
  hypre_hopscotch_hash.c\
  gpuErrorCheck.c\
- gpuMem.c\
- memsizes.C
+ gpuMem.c
+ #memsizes.C
 
 OBJS = ${FILES:.c=.o}
 
