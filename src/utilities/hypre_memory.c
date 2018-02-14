@@ -310,75 +310,70 @@ hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, HYPRE_
 }
 #endif
 
+
 char *
 hypre_ReAlloc( char   *ptr, 
                size_t  size,
                HYPRE_Int location)
 {
-#ifdef HYPRE_USE_UMALLOC
-   if (ptr == NULL)
+   if (size == 0)
+   {
+      hypre_Free(ptr, location);
+      ptr = NULL;
+   } 
+   else if (ptr == NULL)
    {
       ptr = hypre_MAlloc(size, location);
    }
-   else if (size == 0)
+   else if (location == HYPRE_MEMORY_DEVICE)
    {
-      hypre_Free(ptr, location);
-   }
-   else
-   {
-      HYPRE_Int threadid = hypre_GetThreadID();
-      ptr = (char*)_urealloc_(ptr, size);
-   }
-#elif HYPRE_USE_MANAGED
-   if (ptr == NULL)
-   {
-      ptr = hypre_MAlloc(size, location);
-   }
-   else if (size == 0)
-   {
-      hypre_Free(ptr, location);
-      return NULL;
-   }
-   else
-   {
-      void *nptr = hypre_MAlloc(size, location);
+      // TODO: for DEVICE only memory
+#if defined(HYPRE_USE_MANAGED)
+      void *new_ptr = hypre_MAlloc(size, location);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
-      size_t old_size=memsize((void*)ptr);
+      size_t old_size = memsize((void*)ptr);
 #else
-      size_t old_size=mempush((void*)ptr,0,0);
+      size_t old_size = mempush((void*)ptr, 0, 0);
 #endif
-      if (size > old_size)
-      {
-         hypre_Memcpy(nptr,ptr,old_size,location,location);
-      }
-      else
-      {
-         hypre_Memcpy(nptr,ptr,size,location,location);
-      }
-      hypre_Free(ptr, location);
-      ptr=(char*) nptr;
-   }
+      size_t smaller_size = size > old_size ? old_size : size;
+      hypre_Memcpy(new_ptr, ptr, smaller_size, location, location);
 #else
-   if (ptr == NULL)
-   {
-      ptr = (char*)malloc(size);
+      ptr = (char*) realloc(ptr, size);
+#endif
    }
-   else
+   else if (location == HYPRE_MEMORY_HOST)
    {
       ptr = (char*)realloc(ptr, size);
    }
+   else if (location == HYPRE_MEMORY_SHARED)
+   {
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
+      void *new_ptr = hypre_MAlloc(size, location);
+#ifdef HYPRE_USE_MANAGED_SCALABLE
+      size_t old_size = memsize((void*)ptr);
+#else
+      size_t old_size = mempush((void*)ptr, 0, 0);
 #endif
+      size_t smaller_size = size > old_size ? old_size : size;
+      hypre_Memcpy(new_ptr, ptr, smaller_size, location, location);
+#else
+      ptr = (char*)realloc(ptr, size);
+#endif
+   }
+   else
+   {
+      hypre_printf("Wrong memory location. Only HYPRE_LOCATION_DEVICE and HYPRE_LOCATION_HOST are avaible\n");
+      fflush(stdout);
+      hypre_error(HYPRE_ERROR_MEMORY);
+   }
 
-#if 1
    if ((ptr == NULL) && (size > 0))
    {
       hypre_OutOfMemory(size);
    }
-#endif
 
    return ptr;
 }
-
 
 /*--------------------------------------------------------------------------
  * hypre_Free
@@ -426,7 +421,7 @@ hypre_Free( char *ptr ,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
         cudaSafeFree(ptr,MEM_PAD_LEN);
 #else
-		//ASSERT_HOST(ptr);
+        //ASSERT_HOST(ptr);
         free(ptr);
 #endif
      }
