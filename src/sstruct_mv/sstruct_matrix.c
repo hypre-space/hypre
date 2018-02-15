@@ -1527,6 +1527,9 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
 
+#if defined(HYPRE_USE_CUDA)
+		     hypre_exec_policy = HYPRE_MEMORY_HOST;
+#endif
 #if defined(HYPRE_USE_OMP45)
                      HYPRE_OMPOffloadOff();
 #endif
@@ -1543,6 +1546,9 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
 #undef DEVICE_VAR
 #define DEVICE_VAR
 
+#if defined(HYPRE_USE_CUDA)
+		     hypre_exec_policy = HYPRE_MEMORY_DEVICE;
+#endif
 #if defined(HYPRE_USE_OMP45)
                      HYPRE_OMPOffloadOn();
 #endif
