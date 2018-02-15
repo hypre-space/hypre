@@ -2989,7 +2989,6 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    values = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse), HYPRE_MEMORY_SHARED);
-   //values_device = hypre_TAlloc(HYPRE_Real, hypre_max(data.max_boxsize, data.fem_nsparse),HYPRE_MEMORY_DEVICE);
 
    HYPRE_SStructMatrixCreate(hypre_MPI_COMM_WORLD, graph, &A);
 
