@@ -1742,9 +1742,9 @@ fi
 
 if test "$hypre_using_openmp45" = "yes"
 then
-   CFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -I /usr/local/cuda/include $NEWCFLAGS"
-   CXXFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -I /usr/local/cuda/include $NEWCFLAGS"
-   LIBS+=" -L /usr/local/cuda/lib64 -lcudart"
+   CFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -I${CUDA_HOME}/include $NEWCFLAGS"
+   CXXFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -I${CUDA_HOME}/include $NEWCFLAGS"
+   LIBS+=" -L${CUDA_HOME}/lib64 -lcudart"
    if [test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"]
    then
      CFLAGS+=" -fopenmp-nonaliased-maps"

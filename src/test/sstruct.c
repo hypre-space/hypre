@@ -2435,9 +2435,6 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-#ifdef HYPRE_USE_OMP45
-   HYPRE_OMPOffloadOn();
-#endif
 
 #if defined(HYPRE_USE_KOKKOS)
    Kokkos::InitArguments args;
@@ -2455,6 +2452,11 @@ main( hypre_int argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    hypre_GPUInit(-1);
    hypre_InitMemoryDebug(myid);
+
+#ifdef HYPRE_USE_OMP45
+   HYPRE_OMPOffloadOn();
+#endif
+
 
    /*-----------------------------------------------------------
     * Read input file
@@ -5762,7 +5764,8 @@ main( hypre_int argc,
    hypre_TFree(refine, HYPRE_MEMORY_HOST);
    hypre_TFree(distribute, HYPRE_MEMORY_HOST);
    hypre_TFree(block, HYPRE_MEMORY_HOST);
-hypre_FinalizeMemoryDebug();
+   hypre_FinalizeMemoryDebug();
+
    /* Finalize MPI */
    hypre_GPUFinalize();
 #if defined(HYPRE_USE_KOKKOS)

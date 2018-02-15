@@ -31,15 +31,23 @@ void hypre_GPUInit(hypre_int use_device){
   if (!HYPRE_GPU_HANDLE){
     HYPRE_GPU_HANDLE=1;
     HYPRE_DEVICE=0;
-    hypre_CheckErrorDevice(cudaGetDeviceCount(&nDevices));
+    //hypre_CheckErrorDevice(cudaGetDeviceCount(&nDevices));
+
+    /* XXX */
+    nDevices = 1;
     HYPRE_DEVICE_COUNT=nDevices;
     
+    /* TODO cannot use nDevices to check if mpibind is used, need to rewrite 
+     * E.g., NP=5 on 2 nodes, nDevices=1,1,1,1,4 */
+
     if (use_device<0){
       if (nDevices<4){
 	/* with mpibind each process will only see 1 GPU */
 	HYPRE_DEVICE=0;
 	hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
 	cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
+        //hypre_printf("num Devices %d\n", nDevices);
+
       } else if (nDevices==4) { // THIS IS A HACK THAT WORKS AONLY AT LLNL
 	/* No mpibind or it is a single rank run */
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -704,16 +712,17 @@ HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num)
 /* OMP offloading switch */
 HYPRE_Int HYPRE_OMPOffloadOn()
 { 
-   fprintf(stdout, "Hypre OMP 4.5 Mapping/Offloading has been turned on\n");
    hypre__global_offload = 1;
    hypre__offload_device_num = omp_get_default_device();
+   hypre_fprintf(stdout, "Hypre OMP 4.5 offloading has been turned on. Device %d\n",
+                 hypre__offload_device_num);
 
    return 0;
 }
 
 HYPRE_Int HYPRE_OMPOffloadOff()
 {
-   fprintf(stdout, "Hypre OMP 4.5 Mapping/Offloading has been turned off\n");
+   fprintf(stdout, "Hypre OMP 4.5 offloading has been turned off\n");
    hypre__global_offload = 0;
    hypre__offload_device_num = omp_get_initial_device();
 
