@@ -2437,6 +2437,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       if (!block_mode)
       {
+         /* dropping in A_H */
+         hypre_ParCSRMatrixDropSmallEntries(A_H, hypre_ParAMGDataADropTol(amg_data));
          hypre_ParCSRMatrixSetNumNonzeros(A_H);
          hypre_ParCSRMatrixSetDNumNonzeros(A_H);
          A_array[level] = A_H;

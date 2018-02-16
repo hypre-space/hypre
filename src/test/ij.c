@@ -187,6 +187,7 @@ main( hypre_int argc,
    HYPRE_Real dt = dt_inf;
 
    /* parameters for BoomerAMG */
+   HYPRE_Real   A_drop_tol = 0.0;
    HYPRE_Real   strong_threshold;
    HYPRE_Real   trunc_factor;
    HYPRE_Real   jacobi_trunc_threshold;
@@ -1068,6 +1069,11 @@ main( hypre_int argc,
       {
          arg_index++;
          coarse_threshold  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-adroptol") == 0 )
+      {
+         arg_index++;
+         A_drop_tol  = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-min_cs") == 0 )
       {
@@ -2791,6 +2797,8 @@ main( hypre_int argc,
          HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
       }
 
+      /* RL */
+      HYPRE_BoomerAMGSetADropTol(amg_solver, A_drop_tol);
       /* BM Aug 25, 2006 */
       HYPRE_BoomerAMGSetCGCIts(amg_solver, cgcits);
       HYPRE_BoomerAMGSetInterpType(amg_solver, interp_type);

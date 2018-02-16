@@ -49,6 +49,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Real   S_commpkg_switch;
    HYPRE_Real   CR_rate;
    HYPRE_Real   CR_strong_th;
+   HYPRE_Real   A_drop_tol;
    HYPRE_Int      interp_type;
    HYPRE_Int      sep_weight;
    HYPRE_Int      coarsen_type;
@@ -167,6 +168,7 @@ hypre_BoomerAMGCreate()
    num_CR_relax_steps = 2;
    CR_rate = 0.7;
    CR_strong_th = 0;
+   A_drop_tol = 0.0;
    IS_type = 1;
    CR_use_CG = 0;
    cgc_its = 1;
@@ -278,6 +280,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetNumCRRelaxSteps(amg_data, num_CR_relax_steps);
    hypre_BoomerAMGSetCRRate(amg_data, CR_rate);
    hypre_BoomerAMGSetCRStrongTh(amg_data, CR_strong_th);
+   hypre_BoomerAMGSetADropTol(amg_data, A_drop_tol);
    hypre_BoomerAMGSetISType(amg_data, IS_type);
    hypre_BoomerAMGSetCRUseCG(amg_data, CR_use_CG);
    hypre_BoomerAMGSetCGCIts(amg_data, cgc_its);
@@ -3060,7 +3063,7 @@ hypre_BoomerAMGSetCRRate( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetCRStrongTh( void     *data,
-                          HYPRE_Real    CR_strong_th )
+                              HYPRE_Real    CR_strong_th )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
  
@@ -3070,6 +3073,26 @@ hypre_BoomerAMGSetCRStrongTh( void     *data,
       return hypre_error_flag;
    } 
    hypre_ParAMGDataCRStrongTh(amg_data) = CR_strong_th;
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * Indicates the drop tolerance for A-matrices from the 2nd level of AMG
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_BoomerAMGSetADropTol( void     *data,
+                            HYPRE_Real  A_drop_tol )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataADropTol(amg_data) = A_drop_tol;
 
    return hypre_error_flag;
 }
