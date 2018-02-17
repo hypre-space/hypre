@@ -47,7 +47,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 	/* pointers to mgr data */
 	HYPRE_Int  use_default_cgrid_solver = (mgr_data -> use_default_cgrid_solver);
 	HYPRE_Int  logging = (mgr_data -> logging);
-	HYPRE_Int  print_level = (mgr_data -> print_level);
+//	HYPRE_Int  print_level = (mgr_data -> print_level);
 	HYPRE_Int  relax_type = (mgr_data -> relax_type);
 	HYPRE_Int  relax_order = (mgr_data -> relax_order);
 	HYPRE_Int  interp_type = (mgr_data -> interp_type);

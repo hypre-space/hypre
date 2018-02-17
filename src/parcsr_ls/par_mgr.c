@@ -2780,4 +2780,6 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
    hypre_printf("Number of global smoother sweeps: %d\n", (mgr_data ->global_smooth_iters));   
    hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
    hypre_printf("Stopping tolerance: %e\n", (mgr_data -> tol));
+   
+   return hypre_error_flag;
 }
