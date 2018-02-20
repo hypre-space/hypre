@@ -235,6 +235,7 @@ typedef struct
                                 xstart,xni,xnj,xi)                      \
 {                                                                       \
    HYPRE_Int hypre__thread, hypre__tot = nk*nj*((ni+1)/2);              \
+   HYPRE_BOXLOOP_ENTRY_PRINT                                            \
    /* device code: */                                                   \
    _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE IS_DEVICE_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++)     \
@@ -266,6 +267,7 @@ typedef struct
                                             xstart,xni,xnj,xi)        \
 {                                                                     \
    HYPRE_Int hypre__thread, hypre__tot = nk*nj*((ni+1)/2);            \
+   HYPRE_BOXLOOP_ENTRY_PRINT                                          \
    /* device code: */                                                 \
    _Pragma (HYPRE_XSTR(omp target teams distribute parallel for IF_CLAUSE IS_DEVICE_CLAUSE)) \
    for (hypre__thread=0; hypre__thread<hypre__tot; hypre__thread++)   \
