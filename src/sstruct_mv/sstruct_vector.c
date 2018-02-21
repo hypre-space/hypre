@@ -660,7 +660,7 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
                                 y_data_box, start, stride, yi,
                                 box,        start, stride, bi);
             {
-	           pardata[pari+bi] = yp[yi];
+               pardata[pari+bi] = yp[yi];
             }
             hypre_BoxLoop2End(yi, bi);
 #undef DEVICE_VAR
