@@ -403,7 +403,9 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
    /* set values inside the grid */
    hypre_StructMatrixSetBoxValues(smatrix, box, value_box, nentries, sentries,
                                   values, action, -1, 0);
-
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_OMP45)
+   hypre_CheckErrorDevice(cudaDeviceSynchronize());
+#endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
    {
@@ -1482,31 +1484,19 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      hypre_BoxGetSize(ibox1, loop_size);
 
                      /* TO DO: currently on CPU with UM */
-#if defined(HYPRE_USE_CUDA)
-		     hypre_exec_policy = HYPRE_MEMORY_HOST;
-#endif
-#if defined(HYPRE_USE_OMP45)
-                     HYPRE_OMPOffloadOff();
-#endif
 
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(tvalues)
-                     hypre_BoxLoop2Begin(ndim, loop_size,
+                     hypre_SerialBoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
                                          vbox,  start, stride, vi);
                      {
                         tvalues[mi] = values[ei + vi*nentries];
                      }
-                     hypre_BoxLoop2End(mi, vi);
+                     hypre_SerialBoxLoop2End(mi, vi);
 #undef DEVICE_VAR
 #define DEVICE_VAR 
 
-#if defined(HYPRE_USE_CUDA)
-		     hypre_exec_policy = HYPRE_MEMORY_DEVICE;
-#endif
-#if defined(HYPRE_USE_OMP45)
-                     HYPRE_OMPOffloadOn();
-#endif
                      /* put values into UMatrix */
                      hypre_SStructUMatrixSetBoxValues( matrix, part, hypre_BoxIMin(ibox1), 
                                                        hypre_BoxIMax(ibox1),
@@ -1527,31 +1517,17 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
 
-#if defined(HYPRE_USE_CUDA)
-		     hypre_exec_policy = HYPRE_MEMORY_HOST;
-#endif
-#if defined(HYPRE_USE_OMP45)
-                     HYPRE_OMPOffloadOff();
-#endif
-
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(tvalues)
-                     hypre_BoxLoop2Begin(ndim, loop_size,
+                     hypre_SerialBoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
                                          vbox,  start, stride, vi);
                      {
                         values[ei + vi*nentries] = tvalues[mi];
                      }
-                     hypre_BoxLoop2End(mi, vi);
+                     hypre_SerialBoxLoop2End(mi, vi);
 #undef DEVICE_VAR
 #define DEVICE_VAR
-
-#if defined(HYPRE_USE_CUDA)
-		     hypre_exec_policy = HYPRE_MEMORY_DEVICE;
-#endif
-#if defined(HYPRE_USE_OMP45)
-                     HYPRE_OMPOffloadOn();
-#endif
                   } /* end if action */
 
 		  hypre_TFree(tvalues,HYPRE_MEMORY_SHARED);

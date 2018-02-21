@@ -112,6 +112,7 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
          ptr = (void *) ptr_inuse;
 #elif defined(HYPRE_MEMORY_GPU) /*else HYPRE_USE_OMP45_TARGET_ALLOC */
          hypre_CheckErrorDevice( cudaMalloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN) );
+	 hypre_CheckErrorDevice(cudaDeviceSynchronize());
          size_t *sp=(size_t*)ptr;
          cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
          ptr=(void*)(&sp[MEM_PAD_LEN]);
@@ -355,7 +356,7 @@ hypre_ReAlloc( char   *ptr,
       size_t old_size = mempush((void*)ptr, 0, 0);
 #endif
       size_t smaller_size = size > old_size ? old_size : size;
-      hypre_Memcpy(new_ptr, ptr, smaller_size, location, location);
+      hypre_Memcpy((char*)new_ptr, ptr, smaller_size, location, location);
 #else
       ptr = (char*)realloc(ptr, size);
 #endif
