@@ -256,6 +256,9 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
    /* set values inside the grid */
    hypre_StructVectorSetBoxValues(svector, box, value_box, values, action, -1, 0);
 
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_OMP45)
+   hypre_CheckErrorDevice(cudaDeviceSynchronize());
+#endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
    {

@@ -101,10 +101,8 @@ HYPRE_SStructVectorDestroy( HYPRE_SStructVector vector )
             hypre_SStructPVectorDestroy(pvectors[part]);
          }
          hypre_TFree(pvectors, HYPRE_MEMORY_HOST);
-	 //#if defined(HYPRE_MEMORY_GPU)
-	 //#else
          HYPRE_IJVectorDestroy(hypre_SStructVectorIJVector(vector));
-	 //#endif
+
          /* GEC1002 the ijdestroy takes care of the data when the
           *  vector is type HYPRE_SSTRUCT. This is a result that the
           * ijvector does not use the owndata flag in the data structure
