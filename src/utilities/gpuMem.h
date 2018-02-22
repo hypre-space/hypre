@@ -122,6 +122,8 @@ extern HYPRE_Int time_box ;
 typedef HYPRE_Real CudaReductionBlockDataType;
 typedef HYPRE_Int GridSizeType;
 
+#define hypre_SetDeviceOn() hypre_exec_policy = HYPRE_MEMORY_DEVICE
+#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
 
 int getCudaReductionId();
 CudaReductionBlockDataType* getCudaReductionMemBlock(int id);
@@ -148,6 +150,8 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 
 #define HYPRE_MIN_GPU_SIZE (131072)
 
+#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
+#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
 #endif/* HYPRE_USE_OMP45 */
 
 #endif/* __GPUMEM_H__ */

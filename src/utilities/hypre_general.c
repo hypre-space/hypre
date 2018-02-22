@@ -55,4 +55,8 @@ hypre_finalize()
 #if defined(HYPRE_USE_KOKKOS)
    Kokkos::finalize ();
 #endif
+
+#if defined(HYPRE_USE_CUDA)
+   freeCudaReductionMemBlock();
+#endif
 }

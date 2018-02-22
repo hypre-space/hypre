@@ -167,7 +167,7 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    BoxLoopforall(hypre_exec_policy,hypre__tot,[=] __device__ (HYPRE_Int idx) \
+    BoxLoopforall(hypre_exec_policy,hypre__tot, HYPRE_LAMBDA (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
@@ -194,7 +194,7 @@ typedef struct
 					    xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    BoxLoopforall(hypre_exec_policy,hypre__tot,[=] __device__ (HYPRE_Int idx) \
+    BoxLoopforall(hypre_exec_policy,hypre__tot, HYPRE_LAMBDA (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,bi,xi;					\

@@ -284,7 +284,7 @@ main( hypre_int argc,
       v_num_ghost[i] = num_ghost[i];
    }
 
-   device_level = -1;
+   device_level = nx*ny*nz;
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
@@ -299,6 +299,7 @@ main( hypre_int argc,
          nx = atoi(argv[arg_index++]);
          ny = atoi(argv[arg_index++]);
          nz = atoi(argv[arg_index++]);
+	 device_level = nx*ny*nz;
       }
       else if ( strcmp(argv[arg_index], "-istart") == 0 )
       {
@@ -515,7 +516,7 @@ main( hypre_int argc,
    /*end lobpcg */
 
    sum = read_x0fromfile_param + read_rhsfromfile_param + read_fromfile_param; 
-   device_level = nx*ny*nz;
+
    /*-----------------------------------------------------------
     * Print usage info
     *-----------------------------------------------------------*/
@@ -1000,7 +1001,7 @@ main( hypre_int argc,
 	 if (device_level == 0)
 	 {
 	    HYPRE_StructGridSetDataLocation(grid, HYPRE_MEMORY_HOST);
-	    hypre_exec_policy = HYPRE_MEMORY_HOST;
+	    hypre_SetDeviceOff();
 	 }
 	 else
 	 {
@@ -1008,7 +1009,7 @@ main( hypre_int argc,
 	    if (max_box_size < 0)//HYPRE_MIN_GPU_SIZE)
 	    {
 	        HYPRE_StructGridSetDataLocation(grid, HYPRE_MEMORY_HOST);
-	        hypre_exec_policy = HYPRE_MEMORY_HOST;
+	        hypre_SetDeviceOff();
 	    }
 	    else
 	    {

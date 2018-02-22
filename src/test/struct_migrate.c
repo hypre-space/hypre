@@ -66,6 +66,8 @@ main( hypre_int argc,
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
+   hypre_init();
+/*
 #ifdef HYPRE_USE_OMP45
    HYPRE_OMPOffloadOn();
 #endif
@@ -75,6 +77,7 @@ main( hypre_int argc,
    args.num_threads = 10;
    Kokkos::initialize (args);
 #endif
+*/
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
@@ -406,9 +409,13 @@ main( hypre_int argc,
    HYPRE_StructVectorDestroy(check_vector);
 
    /* Finalize MPI */
+/*
 #if defined(HYPRE_USE_KOKKOS)
    Kokkos::finalize ();
 #endif
+*/
+   hypre_finalize();
+
    hypre_MPI_Finalize();
 
    return (0);

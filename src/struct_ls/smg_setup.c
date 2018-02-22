@@ -464,10 +464,10 @@ hypre_SMGSetup( void               *smg_vdata,
 #if defined(HYPRE_USE_CUDA)  
       if (l == num_level_GPU)
       {
-	hypre_exec_policy = HYPRE_MEMORY_HOST;
+	 hypre_SetDeviceOff();
       }
 #endif
-      //printf("smg_setup level %d/%d, exec_policy = %d, \n",l, num_level_GPU, hypre_exec_policy);
+
       hypre_SMGSetBIndex(base_index, base_stride, l, bindex);
       hypre_SMGSetBStride(base_index, base_stride, l, bstride);
       hypre_SMGSetCIndex(base_index, base_stride, l, cdir, cindex);
@@ -531,7 +531,7 @@ hypre_SMGSetup( void               *smg_vdata,
 #if defined(HYPRE_USE_CUDA)      
    if (l == num_level_GPU)
    {
-      hypre_exec_policy = HYPRE_MEMORY_HOST;
+      hypre_SetDeviceOff();
    }
 #endif
 
@@ -595,7 +595,7 @@ hypre_SMGSetup( void               *smg_vdata,
 #endif
 #if defined(HYPRE_USE_CUDA)
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
-     hypre_exec_policy = HYPRE_MEMORY_DEVICE;
+      hypre_SetDeviceOn();
 #endif
    HYPRE_ANNOTATION_END("SMG.setup");
 

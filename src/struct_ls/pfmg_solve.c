@@ -292,7 +292,7 @@ hypre_PFMGSolve( void               *pfmg_vdata,
          {
 #if defined(HYPRE_USE_CUDA)
 	   if (hypre_StructGridDataLocation(hypre_StructVectorGrid(e_l[0])) == HYPRE_MEMORY_DEVICE)
-	     hypre_exec_policy = HYPRE_MEMORY_DEVICE;
+	      hypre_SetDeviceOn();
 #endif
             hypre_StructVectorClearAllValues(e_l[0]);
          }
