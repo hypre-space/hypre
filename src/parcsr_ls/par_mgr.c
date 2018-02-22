@@ -2756,3 +2756,30 @@ hypre_MGRPrintCoarseSystem( void *mgr_vdata, HYPRE_Int print_flag)
    
    return hypre_error_flag;
 }
+
+/* Print solver params */
+HYPRE_Int
+hypre_MGRWriteSolverParams(void *mgr_vdata)
+{
+   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;      
+   hypre_printf("MGR Setup parameters: \n");   
+   hypre_printf("Max number of coarse levels: %d\n", (mgr_data -> max_num_coarse_levels));
+   hypre_printf("Block size: %d\n", (mgr_data -> block_size));   
+   hypre_printf("Number of coarse indexes: %d\n", (mgr_data -> num_coarse_indexes));
+   hypre_printf("reserved coarse nodes size: %d\n", (mgr_data -> reserved_coarse_size));   
+   
+   hypre_printf("\n MGR Solver Parameters: \n");
+   hypre_printf("F-relaxation Method: %d\n", (mgr_data -> Frelax_method));
+   hypre_printf("Relax type: %d\n", (mgr_data -> relax_type));
+   hypre_printf("Number of relax sweeps: %d\n", (mgr_data -> num_relax_sweeps));
+   hypre_printf("Interpolation type: %d\n", (mgr_data -> interp_type));
+   hypre_printf("Number of interpolation sweeps: %d\n", (mgr_data -> num_interp_sweeps));
+   hypre_printf("Restriction type: %d\n", (mgr_data -> restrict_type));
+   hypre_printf("Number of restriction sweeps: %d\n", (mgr_data -> num_restrict_sweeps));
+   hypre_printf("Global smoother type: %d\n", (mgr_data ->global_smooth_type));
+   hypre_printf("Number of global smoother sweeps: %d\n", (mgr_data ->global_smooth_iters));   
+   hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
+   hypre_printf("Stopping tolerance: %e\n", (mgr_data -> tol));
+   
+   return hypre_error_flag;
+}

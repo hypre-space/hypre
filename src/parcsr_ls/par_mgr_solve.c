@@ -108,8 +108,8 @@ hypre_MGRSolve( void               *mgr_vdata,
    /*-----------------------------------------------------------------------
     *    Write the solver parameters
     *-----------------------------------------------------------------------*/
-//   if (my_id == 0 && print_level > 1)
-//      hypre_MGRWriteSolverParams(mgr_data);
+   if (my_id == 0 && print_level > 1)
+      hypre_MGRWriteSolverParams(mgr_data);
 
    /*-----------------------------------------------------------------------
     *    Initialize the solver error flag and assorted bookkeeping variables
