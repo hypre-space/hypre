@@ -3364,7 +3364,7 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
    HYPRE_Int num_cols_offd = hypre_CSRMatrixNumCols(A_offd);
 
    HYPRE_Real diag;
-   HYPRE_Real *l1_norm = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_HOST);
+   HYPRE_Real *l1_norm = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_SHARED);
    HYPRE_Int ii, ns, ne, rest, size;
 
    HYPRE_Int *cf_marker_offd = NULL;
