@@ -1475,6 +1475,8 @@ main( hypre_int argc,
          grid_relax_points[3][i] = 0;
       }
       coarse_threshold = 20;
+      /* does not support aggressive coarsening */
+      agg_num_levels = 0;
    }
    /*-----------------------------------------------------------
     * Print usage info

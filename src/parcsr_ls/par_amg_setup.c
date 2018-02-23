@@ -842,9 +842,6 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          fine_size = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
       }
       
-
-
-
       if (level > 0)
       {   
 
@@ -990,7 +987,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	       col_offd_Sabs_to_A = NULL;
 	       if (strong_threshold > S_commpkg_switch)
                {
-                  hypre_BoomerAMGCreateSCommPkg(A_array[level],Sabs, &col_offd_Sabs_to_A);
+                  hypre_BoomerAMGCreateSCommPkg(A_array[level], Sabs, &col_offd_Sabs_to_A);
                }
             }
 	 }
@@ -1116,8 +1113,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                   */
            }
            else
-                  hypre_BoomerAMGCoarsen(S, A_array[level], 0,
-                                      debug_flag, &CF_marker);
+              hypre_BoomerAMGCoarsen(S, A_array[level], 0,
+                                     debug_flag, &CF_marker);
            if (level < agg_num_levels)
            {
                hypre_BoomerAMGCoarseParms(comm, local_num_vars,
@@ -1255,114 +1252,130 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            }
          }
 
-		 		 /**************************************************/
-		 /*********Set the fixed index to CF_marker*********/
-		 //num_C_point_coarse
+         /**************************************************/
+         /*********Set the fixed index to CF_marker*********/
+         //num_C_point_coarse
 
-		 if (hypre_ParAMGDataCPointKeepLevel(amg_data) > 0)
-		 {
-			 if (block_mode)
-			 {
-				 hypre_printf("Keeping coarse nodes in block mode is not implemented\n");
-			 }
-			 else if  (level < hypre_ParAMGDataCPointKeepLevel(amg_data))
-			 {
-				 C_point_keep = C_point_marker_array[level];
-				 if (level < hypre_ParAMGDataCPointKeepLevel(amg_data)-1)
-					 C_point_marker_array[level+1] = hypre_CTAlloc(HYPRE_Int, num_C_point_coarse);
-				 
-				 for(j = 0;j < num_C_point_coarse;j++)
-				 {
-					 CF_marker[C_point_keep[j]] = 2;
-				 }
-				 
-				 local_coarse_size = 0;
-				 k = 0;
-				 for (j = 0; j < local_num_vars; j ++)
-				 {
-					 if (CF_marker[j] == 1) local_coarse_size++;
-					 if (CF_marker[j] == 2) {
-						 if (level < hypre_ParAMGDataCPointKeepLevel(amg_data)-1)
-							 C_point_marker_array[level+1][k++] = local_coarse_size;
-						 local_coarse_size++;
-						 CF_marker[j] = 1;					 
-					 }
-				 }
-			 }
-		 }
-		 
-   /*****xxxxxxxxxxxxx changes for min_coarse_size */
+         if (hypre_ParAMGDataCPointKeepLevel(amg_data) > 0)
+         {
+            if (block_mode)
+            {
+               hypre_printf("Keeping coarse nodes in block mode is not implemented\n");
+            }
+            else if  (level < hypre_ParAMGDataCPointKeepLevel(amg_data))
+            {
+               C_point_keep = C_point_marker_array[level];
+               if (level < hypre_ParAMGDataCPointKeepLevel(amg_data)-1)
+                  C_point_marker_array[level+1] = hypre_CTAlloc(HYPRE_Int, num_C_point_coarse);
+
+               for(j = 0;j < num_C_point_coarse;j++)
+               {
+                  CF_marker[C_point_keep[j]] = 2;
+               }
+
+               local_coarse_size = 0;
+               k = 0;
+               for (j = 0; j < local_num_vars; j ++)
+               {
+                  if (CF_marker[j] == 1) local_coarse_size++;
+                  if (CF_marker[j] == 2) {
+                     if (level < hypre_ParAMGDataCPointKeepLevel(amg_data)-1)
+                        C_point_marker_array[level+1][k++] = local_coarse_size;
+                     local_coarse_size++;
+                     CF_marker[j] = 1;					 
+                  }
+               }
+            }
+         }
+
+         /*****xxxxxxxxxxxxx changes for min_coarse_size */
          /* here we will determine the coarse grid size to be able to determine if it is not smaller 
 	    than requested minimal size */
          if (level >= agg_num_levels)
          {
-          if (block_mode )
-          {
-            hypre_BoomerAMGCoarseParms(comm,
-                                       hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(AN)),
-                                       1, NULL, CF_marker, NULL, &coarse_pnts_global);
-          }
-          else
-          {
-            hypre_BoomerAMGCoarseParms(comm, local_num_vars,
-                                       num_functions, dof_func_array[level], CF_marker,
-                                       &coarse_dof_func,&coarse_pnts_global);
-          }
-#ifdef HYPRE_NO_GLOBAL_PARTITION
-          if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global[1];
-          hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_INT, num_procs-1, comm);
-#else
-          coarse_size = coarse_pnts_global[num_procs];
-#endif
-          /* if no coarse-grid, stop coarsening, and set the
-           * coarsest solve to be a single sweep of default smoother or smoother set by user */
-          if ((coarse_size == 0) || (coarse_size == fine_size))
-          {
-             HYPRE_Int *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
-             HYPRE_Int **grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
-             if (grid_relax_type[3] == 9 || grid_relax_type[3] == 99
-                 || grid_relax_type[3] == 19 || grid_relax_type[3] == 98)
-	     {
-	        grid_relax_type[3] = grid_relax_type[0];
-	        num_grid_sweeps[3] = 1;
-	        if (grid_relax_points) grid_relax_points[3][0] = 0; 
-	     }
-	     if (S) hypre_ParCSRMatrixDestroy(S);
-	     if (SN) hypre_ParCSRMatrixDestroy(SN);
-	     if (AN) hypre_ParCSRMatrixDestroy(AN);
-             hypre_TFree(CF_marker);
-             hypre_TFree(coarse_pnts_global);
-             if (level > 0)
-             {
-                /* note special case treatment of CF_marker is necessary
-                 * to do CF relaxation correctly when num_levels = 1 */
-                hypre_TFree(CF_marker_array[level]);
-                hypre_ParVectorDestroy(F_array[level]);
-                hypre_ParVectorDestroy(U_array[level]);
-             }
-             coarse_size = fine_size;
-             break; 
-          }
-
-          if (coarse_size < min_coarse_size)
-          {
-	    if (S) hypre_ParCSRMatrixDestroy(S);
-	    if (SN) hypre_ParCSRMatrixDestroy(SN);
-	    if (AN) hypre_ParCSRMatrixDestroy(AN);
-	    if (num_functions > 1) hypre_TFree(coarse_dof_func);
-	    hypre_TFree(CF_marker);
-            hypre_TFree(coarse_pnts_global);
-            if (level > 0)
+            if (block_mode )
             {
-               hypre_ParVectorDestroy(F_array[level]);
-               hypre_ParVectorDestroy(U_array[level]);
+               hypre_BoomerAMGCoarseParms(comm,
+                     hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(AN)),
+                     1, NULL, CF_marker, NULL, &coarse_pnts_global);
             }
-            coarse_size = fine_size;
-            break; 
-          }
+            else
+            {
+               hypre_BoomerAMGCoarseParms(comm, local_num_vars,
+                     num_functions, dof_func_array[level], CF_marker,
+                     &coarse_dof_func,&coarse_pnts_global);
+            }
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+            if (my_id == (num_procs -1)) coarse_size = coarse_pnts_global[1];
+            hypre_MPI_Bcast(&coarse_size, 1, HYPRE_MPI_INT, num_procs-1, comm);
+#else
+            coarse_size = coarse_pnts_global[num_procs];
+#endif
+            /* if no coarse-grid, stop coarsening, and set the
+             * coarsest solve to be a single sweep of default smoother or smoother set by user */
+            if ((coarse_size == 0) || (coarse_size == fine_size))
+            {
+               HYPRE_Int *num_grid_sweeps = hypre_ParAMGDataNumGridSweeps(amg_data);
+               HYPRE_Int **grid_relax_points = hypre_ParAMGDataGridRelaxPoints(amg_data);
+               if (grid_relax_type[3] ==  9 || grid_relax_type[3] == 99 || 
+                   grid_relax_type[3] == 19 || grid_relax_type[3] == 98)
+               {
+                  grid_relax_type[3] = grid_relax_type[0];
+                  num_grid_sweeps[3] = 1;
+                  if (grid_relax_points) grid_relax_points[3][0] = 0; 
+               }
+               if (S) hypre_ParCSRMatrixDestroy(S);
+               if (SN) hypre_ParCSRMatrixDestroy(SN);
+               if (AN) hypre_ParCSRMatrixDestroy(AN);
+               hypre_TFree(CF_marker);
+               hypre_TFree(coarse_pnts_global);
+               if (level > 0)
+               {
+                  /* note special case treatment of CF_marker is necessary
+                   * to do CF relaxation correctly when num_levels = 1 */
+                  hypre_TFree(CF_marker_array[level]);
+                  hypre_ParVectorDestroy(F_array[level]);
+                  hypre_ParVectorDestroy(U_array[level]);
+               }
+               coarse_size = fine_size;
+
+               if (Sabs)
+               {
+                  hypre_ParCSRMatrixDestroy(Sabs);
+                  Sabs = NULL;
+               }
+               hypre_TFree(col_offd_Sabs_to_A);
+               
+               break;
+            }
+
+            if (coarse_size < min_coarse_size)
+            {
+               if (S) hypre_ParCSRMatrixDestroy(S);
+               if (SN) hypre_ParCSRMatrixDestroy(SN);
+               if (AN) hypre_ParCSRMatrixDestroy(AN);
+               if (num_functions > 1) hypre_TFree(coarse_dof_func);
+               hypre_TFree(CF_marker);
+               hypre_TFree(coarse_pnts_global);
+               if (level > 0)
+               {
+                  hypre_ParVectorDestroy(F_array[level]);
+                  hypre_ParVectorDestroy(U_array[level]);
+               }
+               coarse_size = fine_size;
+
+               if (Sabs)
+               {
+                  hypre_ParCSRMatrixDestroy(Sabs);
+                  Sabs = NULL;
+               }
+               hypre_TFree(col_offd_Sabs_to_A);
+
+               break; 
+            }
          }
 
-   /*****xxxxxxxxxxxxx changes for min_coarse_size  end */
+         /*****xxxxxxxxxxxxx changes for min_coarse_size  end */
          if (level < agg_num_levels)
          {
             if (nodal == 0)
@@ -1950,8 +1963,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
       /* if no coarse-grid, stop coarsening, and set the
        * coarsest solve to be a single sweep of Jacobi */
-      if ((coarse_size == 0) ||
-          (coarse_size == fine_size))
+      if ( (coarse_size == 0) || (coarse_size == fine_size) )
       {
          HYPRE_Int     *num_grid_sweeps =
             hypre_ParAMGDataNumGridSweeps(amg_data);
