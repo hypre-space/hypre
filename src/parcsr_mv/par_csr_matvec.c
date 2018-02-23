@@ -561,11 +561,6 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-	 //printf("LOCAL DATA %d pointer = %p start = %d \n",i,y_local_data,start);
-	 //ASSERT_HOST(y_local_data);
-	 //ASSERT_HOST(&hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j));
-	 for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++) if (hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)>=y_local->size) printf("BOINGGG %d %d \n",hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j),y_local->size);
-	 //for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++) printf("%f\n", y_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]);
          for (j = start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
             y_local_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)]
 #ifdef HYPRE_USING_PERSISTENT_COMM
