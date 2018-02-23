@@ -679,6 +679,8 @@ extern size_t hypre__target_dtoh_bytes;
 #if defined(TRACK_MEMORY_ALLOCATIONS)
 typedef struct {
   char *file;
+  size_t size;
+  void *end;
   HYPRE_Int line;
   HYPRE_Int type;} pattr_t;
 pattr_t *patpush(void *ptr, pattr_t *ss);

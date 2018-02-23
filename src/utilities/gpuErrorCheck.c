@@ -141,6 +141,7 @@ void assert_check(void *ptr, char *file, int line){
     {
       if ( PointerAttributes(ptr)!=HYPRE_MANAGED_POINTER){
 	fprintf(stderr,"ASSERT_MANAGED FAILURE in line %d of file %s \n NO ALLOCATION INFO\n",line,file);
+	PrintPointerAttributes(ptr);
       }
     }
   
@@ -153,7 +154,7 @@ void assert_check_host(void *ptr, char *file, int line){
       if (ss->type!=HYPRE_MEMORY_HOST)
 	{
 	  fprintf(stderr,"ASSERT_HOST FAILURE in line %d of file %s type = %d pomitrt = %p\n",line,file,ss->type,ptr);
-	  fprintf(stderr,"ASSERT_HOST failed on allocation from line %d of %s \n",ss->line,ss->file);
+	  fprintf(stderr,"ASSERT_HOST failed on allocation from line %d of %s of size %d bytes \n",ss->line,ss->file,ss->size);
 	}
     }
   else
