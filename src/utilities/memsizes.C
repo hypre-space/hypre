@@ -6,11 +6,12 @@
 using namespace std;
 
 extern "C"{
+/*
   typedef struct {
     char *file;
     HYPRE_Int line;
     HYPRE_Int type;} pattr_t;
-  
+  */
   pattr_t *patpush(void *ptr, pattr_t *ss){
     static std::unordered_map<void*,pattr_t *> map;
     if (ss!=NULL) {
