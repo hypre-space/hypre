@@ -137,7 +137,6 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    HYPRE_Int             data_location = 0;
    HYPRE_Int             max_box_size  = 0;
    HYPRE_Int             device_level  = (pfmg_data -> devicelevel);
-   //HYPRE_Real            start_t, end_t, total_t,wall_time;
    HYPRE_Int             myrank;
    hypre_MPI_Comm_rank(comm, &myrank );
 #endif
@@ -644,7 +643,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
       active_l[l] = 0;
    }
 
-#if defined(HYPRE_USE_CUDA) 
+#if defined(HYPRE_USE_CUDA)
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
       hypre_SetDeviceOn();

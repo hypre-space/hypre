@@ -345,6 +345,12 @@ hypre_StructMatrixInitializeShell( hypre_StructMatrix *matrix )
       {
          hypre_assert( constant_coefficient == 2 );
          data_const_size += stencil_size;
+#if defined(HYPRE_USE_CUDA)     
+      if (hypre_StructGridDataLocation(grid) == HYPRE_MEMORY_HOST)
+      {
+	 data_size += stencil_size;/* all constant coeffs at the beginning */
+      }
+#endif
          /* ... this allocates a little more space than is absolutely necessary */
          hypre_ForBoxI(i, data_space)
          {
@@ -497,7 +503,7 @@ hypre_StructMatrixInitializeData( hypre_StructMatrix *matrix,
             }
             else
             {
-               stencil_data[i] = hypre_StructMatrixDataConst(matrix) + stencil_size;
+               stencil_data[i] = hypre_StructMatrixDataConst(matrix);
             }
 #else
             stencil_data[i] = hypre_StructMatrixData(matrix);
