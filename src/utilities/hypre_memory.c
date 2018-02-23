@@ -365,7 +365,7 @@ hypre_ReAlloc( char   *ptr,
       size_t smaller_size = size > old_size ? old_size : size;
       hypre_Memcpy((char*)new_ptr, ptr, smaller_size, location, location);
       hypre_Free(ptr,location);
-      ptr=new_ptr;
+      ptr=(char*)new_ptr;
 #else
       ptr = (char*)realloc(ptr, size);
 #endif
@@ -645,7 +645,6 @@ hypre_MAllocPinned( size_t size )
 #ifdef HYPRE_USE_MANAGED_SCALABLE
 #ifdef HYPRE_GPU_USE_PINNED
       hypre_CheckErrorDevice( cudaHostAlloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,cudaHostAllocMapped));
-
 #else /* else HYPRE_GPU_USE_PINNED */
       hypre_CheckErrorDevice( cudaMallocManaged(&ptr,size+sizeof(size_t)*MEM_PAD_LEN,CUDAMEMATTACHTYPE) );
 #endif /* end HYPRE_GPU_USE_PINNED */
@@ -705,5 +704,4 @@ hypre_MAllocHost( size_t size )
 
    return (char*)ptr;
 }
-
 
