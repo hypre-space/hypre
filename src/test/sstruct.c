@@ -2435,7 +2435,8 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-
+   hypre_init();
+/*
 #if defined(HYPRE_USE_KOKKOS)
    Kokkos::InitArguments args;
    args.num_threads = 10;
@@ -2447,7 +2448,6 @@ main( hypre_int argc,
    initCudaReductionMemBlock();
    printf("Finish initCudaReductionMemBlock\n");
 #endif
-
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    hypre_GPUInit(-1);
@@ -2456,8 +2456,9 @@ main( hypre_int argc,
 #ifdef HYPRE_USE_OMP45
    HYPRE_OMPOffloadOn();
 #endif
-
-
+*/
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    /*-----------------------------------------------------------
     * Read input file
     *-----------------------------------------------------------*/
@@ -5766,10 +5767,14 @@ main( hypre_int argc,
    hypre_FinalizeMemoryDebug();
 
    /* Finalize MPI */
+   /*
    hypre_GPUFinalize();
 #if defined(HYPRE_USE_KOKKOS)
    Kokkos::finalize ();
 #endif
+   */
+   hypre_finalize();
+
    hypre_MPI_Finalize();
 
    return (0);

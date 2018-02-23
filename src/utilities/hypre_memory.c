@@ -75,6 +75,8 @@ hypre_MAllocIns( size_t size , HYPRE_Int location,char *file, HYPRE_Int line)
   ss->file=file;
   ss->line=line;
   ss->type=location;
+  ss->size=size;
+  ss->end=(void*)(ret+size);
   patpush(ret,ss);
   return ret;
 }
@@ -191,6 +193,8 @@ hypre_CAllocIns( size_t count,
   ss->file=file;
   ss->line=line;
   ss->type=location;
+  ss->size=count*elt_size;
+  ss->end=(void*)(ret+ss->size);
   patpush(ret,ss);
   return ret;
 }
@@ -306,6 +310,8 @@ hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, HYPRE_
   ss->file=file;
   ss->line=line;
   ss->type=location;
+  ss->size=size;
+  ss->end=(void*)(ret+size);
   patpush(ret,ss);
   return ret;
 }
@@ -351,12 +357,14 @@ hypre_ReAlloc( char   *ptr,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
       void *new_ptr = hypre_MAlloc(size, location);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
+      ASSERT_MANAGED(ptr);
       size_t old_size = memsize((void*)ptr);
 #else
       size_t old_size = mempush((void*)ptr, 0, 0);
 #endif
       size_t smaller_size = size > old_size ? old_size : size;
       hypre_Memcpy((char*)new_ptr, ptr, smaller_size, location, location);
+      ptr=new_ptr;
 #else
       ptr = (char*)realloc(ptr, size);
 #endif
@@ -413,7 +421,7 @@ hypre_Free( char *ptr ,
 #endif /* end HYPRE_USE_MANAGED_SCALABLE */
 #endif /* end HYPRE_USE_UMALLOC */
 #else /*else HYPRE_USE_OMP45_TARGET_ALLOC */
-      //ASSERT_HOST(ptr);
+      ASSERT_HOST(ptr);
       free(ptr);
 #endif /*end HYPRE_USE_OMP45_TARGET_ALLOC */
      }

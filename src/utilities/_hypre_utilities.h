@@ -681,6 +681,8 @@ extern size_t hypre__target_dtoh_bytes;
 #if defined(TRACK_MEMORY_ALLOCATIONS)
 typedef struct {
   char *file;
+  size_t size;
+  void *end;
   HYPRE_Int line;
   HYPRE_Int type;} pattr_t;
 pattr_t *patpush(void *ptr, pattr_t *ss);
@@ -1467,6 +1469,8 @@ extern HYPRE_Int time_box ;
 typedef HYPRE_Real CudaReductionBlockDataType;
 typedef HYPRE_Int GridSizeType;
 
+#define hypre_SetDeviceOn() hypre_exec_policy = HYPRE_MEMORY_DEVICE
+#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
 
 int getCudaReductionId();
 CudaReductionBlockDataType* getCudaReductionMemBlock(int id);
@@ -1493,6 +1497,8 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 
 #define HYPRE_MIN_GPU_SIZE (131072)
 
+#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
+#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
 #endif/* HYPRE_USE_OMP45 */
 
 #endif/* __GPUMEM_H__ */
@@ -1532,6 +1538,10 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 #define hypre_creal(value) value
 #define hypre_cimag(value) 0.0
 #endif
+
+/* hypre_general.c */
+void hypre_init();
+void hypre_finalize();
 
 /* hypre_printf.c */
 // #ifdef HYPRE_BIGINT

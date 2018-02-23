@@ -587,7 +587,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 #if defined(HYPRE_USE_CUDA)    
       if (l == num_level_GPU)
       {
-	 hypre_exec_policy = HYPRE_MEMORY_HOST;
+	 hypre_SetDeviceOff();
       }
 #endif
       cdir = cdir_l[l];
@@ -625,7 +625,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 #if defined(HYPRE_USE_CUDA)   
    if (l == num_level_GPU)
    {
-      hypre_exec_policy = HYPRE_MEMORY_HOST;
+      hypre_SetDeviceOff();
    }
 #endif
 
@@ -647,7 +647,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 #if defined(HYPRE_USE_CUDA) 
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
-      hypre_exec_policy = HYPRE_MEMORY_DEVICE;
+      hypre_SetDeviceOn();
    }
 #endif
    /* set up fine grid relaxation */

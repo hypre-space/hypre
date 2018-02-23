@@ -60,7 +60,8 @@ FILES =\
  hypre_hopscotch_hash.c\
  gpuErrorCheck.c\
  gpuMem.c\
- memsizes.C
+ hypre_general.c
+ #memsizes.C
 
 OBJS = ${FILES:.c=.o}
 

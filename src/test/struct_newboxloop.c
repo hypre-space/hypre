@@ -769,12 +769,12 @@ main( hypre_int argc,
 	   //if (nx*ny*nz < 1000)
 	   //{
 	      HYPRE_StructGridSetDataLocation(grid, HYPRE_MEMORY_HOST);
-	      hypre_exec_policy=HYPRE_MEMORY_HOST;
+	      hypre_SetDeviceOff();
 	      //}
 	      //else 
 	      //{
 	      //HYPRE_StructGridSetDataLocation(grid, HYPRE_MEMORY_DEVICE);
-	      //hypre_exec_policy=HYPRE_MEMORY_DEVICE;
+	      //hypre_SetDeviceOn();
 	      //}
 	   
 	   HYPRE_StructMatrixInitialize(A);
