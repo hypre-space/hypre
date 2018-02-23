@@ -357,14 +357,14 @@ hypre_ReAlloc( char   *ptr,
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
       void *new_ptr = hypre_MAlloc(size, location);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
-      ASSERT_MANAGED(ptr);
+      /*ASSERT_MANAGED(ptr);*/
       size_t old_size = memsize((void*)ptr);
 #else
       size_t old_size = mempush((void*)ptr, 0, 0);
 #endif
       size_t smaller_size = size > old_size ? old_size : size;
       hypre_Memcpy((char*)new_ptr, ptr, smaller_size, location, location);
-      ptr=new_ptr;
+      ptr= (char*) new_ptr;
 #else
       ptr = (char*)realloc(ptr, size);
 #endif

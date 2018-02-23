@@ -743,7 +743,7 @@ typedef struct hypre_Boxloop_struct
 #define WARP_SIZE 32
 #define BLOCK_SIZE 512
 
-#if 1
+#if 0
 #define hypre_fence()
 /*printf("\n hypre_newBoxLoop in %s(%d) function %s\n",__FILE__,__LINE__,__FUNCTION__);*/
 #else

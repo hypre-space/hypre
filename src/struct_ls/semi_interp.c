@@ -187,7 +187,6 @@ hypre_SemiInterp( void               *interp_vdata,
       hypre_StructVectorInitialize(xc_tmp);
       hypre_StructVectorAssemble(xc_tmp);
       hypre_TMemcpy(hypre_StructVectorData(xc_tmp), hypre_StructVectorData(xc), HYPRE_Complex,hypre_StructVectorDataSize(xc),HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
-      hypre_SetDeviceOn();
    }
    else
    {

@@ -304,7 +304,6 @@ hypre_SemiRestrict( void               *restrict_vdata,
    {
       hypre_TMemcpy(hypre_StructVectorData(rc),hypre_StructVectorData(rc_tmp),HYPRE_Complex,hypre_StructVectorDataSize(rc_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
       hypre_StructVectorDestroy(rc_tmp);
-      hypre_SetDeviceOff();
       hypre_StructGridDataLocation(cgrid) = data_location_c;
    }
 #endif

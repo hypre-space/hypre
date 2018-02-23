@@ -368,7 +368,6 @@ hypre_PFMGSetupInterpOp_CC0
             mrk0++;
          if (si == si1 && Ap[Ai] == 0.0)
             mrk1++;
-	 //printf("%d, %d, %e, %e, %e, %e\n",si, Astenc, Ap[Ai], center, Pp0[Pi], Pp1[Pi]);
       }
 
       if (!center)
@@ -393,7 +392,6 @@ hypre_PFMGSetupInterpOp_CC0
          Pp0[Pi] = 0.0;
       if (mrk1 != 0)
          Pp1[Pi] = 0.0;
-      //printf("%d: Pp0[%d] = %e, Pp1 = %e\n",Ai, Pi,Pp0[Pi],Pp1[Pi]);
    }
    hypre_BoxLoop2End(Ai, Pi);
 #undef DEVICE_VAR
@@ -545,6 +543,9 @@ hypre_PFMGSetupInterpOp_CC2
    HYPRE_Int              diag_rank;
    HYPRE_Int              warning_cnt= 0;
 
+#if defined(HYPRE_USE_CUDA)
+   HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
+#endif
    hypre_SetIndex3(diag_index, 0, 0, 0);
    diag_rank = hypre_StructStencilElementRank(stencil, diag_index);
 
@@ -600,7 +601,7 @@ hypre_PFMGSetupInterpOp_CC2
       si = diag_rank;
       
       hypre_MatrixIndexMove(A, stencil_size, i, si, 1);
-
+      //Ap = hypre_StructGetMatrixBoxData(A, i, si);
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(Pp0,Pp1,data_A,indices_d)
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
@@ -620,17 +621,29 @@ hypre_PFMGSetupInterpOp_CC2
          center = center_offd;
          mrk0 = mrk0_offd;
          mrk1 = mrk1_offd;
-         
-         Ap = hypre_StructGetMatrixBoxData(A, i, si);
+
+#if defined(HYPRE_USE_CUDA)
+         if (data_location == HYPRE_MEMORY_DEVICE)
+         {
+	    Ap = hypre_StructGetMatrixBoxData(A, i, si);
+         }
+         else
+         {
+            Ap = hypre_StructMatrixBoxData(A, i, si);
+         }
+#else
+	 Ap = hypre_StructGetMatrixBoxData(A, i, si);
+#endif
+         //Ap = hypre_StructGetMatrixBoxData(A, i, si);
          //Astenc = hypre_IndexD(stencil_shape[si], cdir);
          //hypre_assert( Astenc==0 );
 
          center += Ap[Ai];
 
-         if (si == si0 && Ap[Ai] == 0.0)
-            mrk0++;
-         if (si == si1 && Ap[Ai] == 0.0)
-            mrk1++;
+         //if (si == si0 && Ap[Ai] == 0.0)
+         //   mrk0++;
+         //if (si == si1 && Ap[Ai] == 0.0)
+         //   mrk1++;
 
          if (!center)
          {
@@ -667,7 +680,7 @@ hypre_PFMGSetupInterpOp_CC2
 #undef DEVICE_VAR
 #define DEVICE_VAR
 
-      //hypre_StructCleanIndexD();
+      hypre_StructCleanIndexD();
    }
 
    if (warning_cnt)
