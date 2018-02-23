@@ -364,6 +364,7 @@ hypre_ReAlloc( char   *ptr,
 #endif
       size_t smaller_size = size > old_size ? old_size : size;
       hypre_Memcpy((char*)new_ptr, ptr, smaller_size, location, location);
+      hypre_Free(ptr,location);
       ptr=new_ptr;
 #else
       ptr = (char*)realloc(ptr, size);
