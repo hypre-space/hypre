@@ -151,6 +151,38 @@ HYPRE_Int HYPRE_IJMatrixAddToValues(HYPRE_IJMatrix       matrix,
                                     const HYPRE_Complex *values);
 
 /**
+ * Sets values for {\tt nrows} rows or partial rows of the matrix.
+ *
+ * Same as IJMatrixSetValues, but with an additional {\tt row_indexes} array
+ * that provides indexes into the {\tt cols} and {\tt values} arrays.  Because
+ * of this, there can be gaps between the row data in these latter two arrays.
+ *
+ **/
+HYPRE_Int HYPRE_IJMatrixSetValues2(HYPRE_IJMatrix       matrix,
+                                   HYPRE_Int            nrows,
+                                   HYPRE_Int           *ncols,
+                                   const HYPRE_Int     *rows,
+                                   const HYPRE_Int     *row_indexes,
+                                   const HYPRE_Int     *cols,
+                                   const HYPRE_Complex *values);
+
+/**
+ * Adds to values for {\tt nrows} rows or partial rows of the matrix.  
+ *
+ * Same as IJMatrixAddToValues, but with an additional {\tt row_indexes} array
+ * that provides indexes into the {\tt cols} and {\tt values} arrays.  Because
+ * of this, there can be gaps between the row data in these latter two arrays.
+ *
+ **/
+HYPRE_Int HYPRE_IJMatrixAddToValues2(HYPRE_IJMatrix       matrix,
+                                     HYPRE_Int            nrows,
+                                     HYPRE_Int           *ncols,
+                                     const HYPRE_Int     *rows,
+                                     const HYPRE_Int     *row_indexes,
+                                     const HYPRE_Int     *cols,
+                                     const HYPRE_Complex *values);
+
+/**
  * Finalize the construction of the matrix before using.
  **/
 HYPRE_Int HYPRE_IJMatrixAssemble(HYPRE_IJMatrix matrix);

@@ -681,6 +681,10 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
 
    HYPRE_IJMatrixSetObjectType(ijmatrix, HYPRE_PARCSR);
 
+#ifdef HYPRE_USING_OPENMP
+   HYPRE_IJMatrixSetOMPFlag(ijmatrix, 1); /* Use OpenMP */
+#endif
+
    if (matrix_type == HYPRE_SSTRUCT || matrix_type == HYPRE_STRUCT)
    {
       rowstart = hypre_SStructGridGhstartRank(grid);
@@ -951,9 +955,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
    hypre_BoxManEntry   **boxman_to_entries;
    HYPRE_Int             nboxman_to_entries;
    HYPRE_Int             nrows;
-   HYPRE_Int            *ncols;
-   HYPRE_Int            *rows;
-   HYPRE_Int            *cols;
+   HYPRE_Int            *ncols, *rows, *row_indexes, *cols;
    HYPRE_Complex        *ijvalues;
    hypre_Box            *box, *vbox;
    hypre_Box            *to_box;
@@ -981,18 +983,12 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
       map_box = hypre_BoxCreate(ndim);
       int_box = hypre_BoxCreate(ndim);
 
-      nrows    = hypre_BoxVolume(vbox)*nentries;
-      ncols    = hypre_UMCTAlloc(HYPRE_Int, nrows);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-      for (i = 0; i < nrows; i++)
-      {
-         ncols[i] = 1;
-      }
-      rows     = hypre_UMCTAlloc(HYPRE_Int, nrows);
-      cols     = hypre_UMCTAlloc(HYPRE_Int, nrows);
-      ijvalues = hypre_UMCTAlloc(HYPRE_Complex, nrows);
+      nrows       = hypre_BoxVolume(vbox);
+      ncols       = hypre_UMCTAlloc(HYPRE_Int, nrows);
+      rows        = hypre_UMCTAlloc(HYPRE_Int, nrows);
+      row_indexes = hypre_UMCTAlloc(HYPRE_Int, nrows);
+      cols        = hypre_UMCTAlloc(HYPRE_Int, nrows*nentries);
+      ijvalues    = hypre_UMCTAlloc(HYPRE_Complex, nrows*nentries);
 
       hypre_SetIndex(stride, 1);
 
@@ -1005,12 +1001,25 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
          hypre_CopyBox(vbox, box);
          hypre_BoxManEntryGetExtents(boxman_entries[ii],
-                                     hypre_BoxIMin(map_box),
-                                     hypre_BoxIMax(map_box));
+                                     hypre_BoxIMin(map_box), hypre_BoxIMax(map_box));
          hypre_IntersectBoxes(box, map_box, int_box);
          hypre_CopyBox(int_box, box);
+
+         /* For each index in 'box', compute a row with nentries columns */
+         
+         /* The first pass may produce rows with less than nentries columns, but
+          * these will be filled in before calling IJSetValues() below. */
             
-         nrows = 0;
+         nrows = hypre_BoxVolume(box);
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+         for (i = 0; i < nrows; i++)
+         {
+            ncols[i] = 0;
+            row_indexes[i] = i*nentries;
+         }
+
          for (ei = 0; ei < nentries; ei++)
          {
             entry = entries[ei];
@@ -1025,12 +1034,10 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
             for (jj = 0; jj < nboxman_to_entries; jj++)
             {
-               hypre_SStructBoxManEntryGetStrides(boxman_to_entries[jj], 
-                                                  cs, matrix_type);
+               hypre_SStructBoxManEntryGetStrides(boxman_to_entries[jj], cs, matrix_type);
 
                hypre_BoxManEntryGetExtents(boxman_to_entries[jj],
-                                           hypre_BoxIMin(map_box),
-                                           hypre_BoxIMax(map_box));
+                                           hypre_BoxIMin(map_box), hypre_BoxIMax(map_box));
                hypre_IntersectBoxes(to_box, map_box, int_box);
                   
                hypre_CopyIndex(hypre_BoxIMin(int_box), index);
@@ -1042,34 +1049,35 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                hypre_CopyIndex(hypre_BoxIMin(int_box), index);
                hypre_SStructBoxManEntryGetGlobalRank(boxman_entries[ii],
                                                      index, &row_base, matrix_type);
-                     
+
                start = hypre_BoxIMin(int_box);
                hypre_BoxGetSize(int_box, loop_size);
-               /*FIXME: It has to be the old boxloop */
+               /*FIXME: Currently works only for the default boxloop (see GetIndex below) */
                zypre_BoxLoop2Begin(ndim, loop_size,
-                                   int_box, start, stride, mi,
-                                   vbox,    start, stride, vi);
+                                   box,  start, stride, mi,
+                                   vbox, start, stride, vi);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                zypre_BoxLoop2For(mi, vi)
                {
                   hypre_Index index;
-                  HYPRE_Int   d;
-                  
-                  hypre_BoxLoopGetIndex(index);
-                  rows[nrows + mi] = row_base;
-                  cols[nrows + mi] = col_base;
+                  HYPRE_Int   d, ci;
+
+                  hypre_BoxLoopGetIndex(index); /* FIXME (see comment above) */
+
+                  ci = mi*nentries + ncols[mi];
+                  rows[mi] = row_base;
+                  cols[ci] = col_base;
                   for (d = 0; d < ndim; d++)
                   {
-                     rows[nrows + mi] += index[d]*rs[d];
-                     cols[nrows + mi] += index[d]*cs[d];
+                     rows[mi] += index[d]*rs[d];
+                     cols[ci] += index[d]*cs[d];
                   }
-                  ijvalues[nrows + mi] = values[ei + vi*nentries];
+                  ijvalues[ci] = values[ei + vi*nentries];
+                  ncols[mi]++;
                }
                zypre_BoxLoop2End(mi, vi);
-
-               nrows += hypre_BoxVolume(int_box);
 
             } /* end loop through boxman to entries */
 
@@ -1077,34 +1085,36 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
          } /* end of ei nentries loop */
 
-         /*------------------------------------------
-          * set IJ values one stencil entry at a time
-          *------------------------------------------*/
+         /* Fill in missing columns before calling IJSetValues() */
             
          if (action > 0)
          {
-            HYPRE_IJMatrixAddToValues(ijmatrix, nrows, ncols,
-                                      (const HYPRE_Int *) rows,
-                                      (const HYPRE_Int *) cols,
-                                      (const HYPRE_Complex *) ijvalues);
+            HYPRE_IJMatrixAddToValues2(ijmatrix, nrows, ncols,
+                                       (const HYPRE_Int *) rows,
+                                       (const HYPRE_Int *) row_indexes,
+                                       (const HYPRE_Int *) cols,
+                                       (const HYPRE_Complex *) ijvalues);
          }
          else if (action > -1)
          {
-            HYPRE_IJMatrixSetValues(ijmatrix, nrows, ncols,
-                                    (const HYPRE_Int *) rows,
-                                    (const HYPRE_Int *) cols,
-                                    (const HYPRE_Complex *) ijvalues);
+            HYPRE_IJMatrixSetValues2(ijmatrix, nrows, ncols,
+                                     (const HYPRE_Int *) rows,
+                                     (const HYPRE_Int *) row_indexes,
+                                     (const HYPRE_Int *) cols,
+                                     (const HYPRE_Complex *) ijvalues);
          }
          else
          {
             HYPRE_IJMatrixGetValues(ijmatrix, nrows, ncols, rows, cols, values);
          }
+
       } /* end loop through boxman entries */
 
       hypre_TFree(boxman_entries);
       
       hypre_UMTFree(ncols);
       hypre_UMTFree(rows);
+      hypre_UMTFree(row_indexes);
       hypre_UMTFree(cols);
       hypre_UMTFree(ijvalues);
 
