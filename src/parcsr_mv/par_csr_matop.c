@@ -3969,8 +3969,8 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
    HYPRE_Int       *A_ext_i = NULL;
    HYPRE_Int       *A_ext_j = NULL;
 
-   HYPRE_Complex *dense_all = hypre_CTAlloc(HYPRE_Complex, num_blocks*blockSize*blockSize);
-   HYPRE_Complex *dense = dense_all;
+   HYPRE_Real *dense_all = hypre_CTAlloc(HYPRE_Complex, num_blocks*blockSize*blockSize);
+   HYPRE_Real *dense = dense_all;
    HYPRE_Int *IPIV  = hypre_TAlloc(HYPRE_Int, blockSize);
    HYPRE_Complex *dgetri_work = NULL;
    HYPRE_Int      dgetri_lwork = -1, lapack_info;
@@ -4159,7 +4159,7 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
       if (lapack_info == 0)
       {
          HYPRE_Int query = -1;
-         HYPRE_Complex lwork_opt;
+         HYPRE_Real lwork_opt;
          /* query the optimal size of work */
          hypre_dgetri(&s, dense, &blockSize, IPIV, &lwork_opt, &query, &lapack_info);
        
@@ -4177,7 +4177,7 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
       }
 
       /* filter out *zeros* */
-      HYPRE_Complex Fnorm = 0.0;
+      HYPRE_Real Fnorm = 0.0;
       for (i = 0; i < s; i++)
       {
          for (j = 0; j < s; j++)
@@ -4889,7 +4889,7 @@ hypre_ParcsrAdd( HYPRE_Complex alpha,
    hypre_ParCSRMatrixColMapOffd(C) = col_map_offd_C;
 
    hypre_ParCSRMatrixSetNumNonzeros(C);
-   hypre_ParCSRMatrixDNumNonzeros(C) = (double) hypre_ParCSRMatrixNumNonzeros(C);
+   hypre_ParCSRMatrixDNumNonzeros(C) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(C);
    
    /* create CommPkg of C */
    hypre_MatvecCommPkgCreate(C);

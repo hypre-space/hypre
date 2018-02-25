@@ -17,7 +17,7 @@
 void hypre_union2(HYPRE_Int n1, HYPRE_Int *arr1, HYPRE_Int n2, HYPRE_Int *arr2, HYPRE_Int *n3, HYPRE_Int *arr3,
                   HYPRE_Int *map1, HYPRE_Int *map2)
 {
-   int i = 0, j = 0, k = 0;
+   HYPRE_Int i = 0, j = 0, k = 0;
    while (i < n1 && j < n2)
    {
       if (arr1[i] < arr2[j])

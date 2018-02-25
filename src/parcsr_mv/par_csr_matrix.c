@@ -2250,7 +2250,7 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    hypre_CSRMatrixNumNonzeros(A_diag) = nnz_diag;
    hypre_CSRMatrixNumNonzeros(A_offd) = nnz_offd;
    hypre_ParCSRMatrixSetNumNonzeros(A);
-   hypre_ParCSRMatrixDNumNonzeros(A) = (double) hypre_ParCSRMatrixNumNonzeros(A);
+   hypre_ParCSRMatrixDNumNonzeros(A) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(A);
 
    for (i = 0, k = 0; i < num_cols_A_offd; i++)
    {

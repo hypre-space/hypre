@@ -161,4 +161,6 @@ extern "C" {
 
 #undef a_ref
 
-
+#ifdef __cplusplus
+}
+#endif
