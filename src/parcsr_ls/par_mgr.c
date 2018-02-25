@@ -55,6 +55,7 @@ hypre_MGRCreate()
 
   (mgr_data -> num_iterations) = 0;
   (mgr_data -> num_interp_sweeps) = 1;
+  (mgr_data -> num_restrict_sweeps) = 1;
   (mgr_data -> trunc_factor) = 0.0;
   (mgr_data -> max_row_sum) = 0.9;
   (mgr_data -> strong_threshold) = 0.25;
@@ -96,6 +97,8 @@ hypre_MGRCreate()
   (mgr_data -> Frelax_method) = 0;
   (mgr_data -> FrelaxVcycleData) = NULL;
   (mgr_data -> max_local_lvls) = 10;
+  
+  (mgr_data -> print_coarse_system) = 0;
 
   return (void *) mgr_data;
 }
@@ -1702,18 +1705,15 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix     *A,
 			HYPRE_Int	      method,
 			HYPRE_Int	      numsweeps)
 {
-   HYPRE_Int i;
+//   HYPRE_Int i;
    hypre_ParCSRMatrix    *P_ptr = NULL;
-   HYPRE_Real		 jac_trunc_threshold = trunc_factor;
-   HYPRE_Real		 jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
+//   HYPRE_Real		 jac_trunc_threshold = trunc_factor;
+//   HYPRE_Real		 jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
 
    /* Build interpolation operator using (hypre default) */
    if(!last_level)
    {
-           hypre_MGRBuildP( A,CF_marker,num_cpts_global,2,debug_flag,&P_ptr);
-         
-//           hypre_BoomerAMGBuildInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
-//	   	        trunc_factor, max_elmts, col_offd_S_to_A, &P_ptr);		
+           hypre_MGRBuildP( A,CF_marker,num_cpts_global,2,debug_flag,&P_ptr);	
    }
    /* Do Jacobi interpolation for last level */
    else
@@ -1722,32 +1722,26 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix     *A,
 	   {
 		   hypre_MGRBuildP( A,CF_marker,num_cpts_global,method,debug_flag,&P_ptr);
 		   /* Could do a few sweeps of Jacobi to further improve P */
-                   // for(i=0; i<numsweeps; i++)
+                    //for(i=0; i<numsweeps; i++)
 		   //	 hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker, 0, jac_trunc_threshold, jac_trunc_threshold_minus );
 	   }
-	   else //if (method == 5)
+	   else
 	   {
-		   /* clone or copy nonzero pattern of A to B */
-		   hypre_ParCSRMatrix	*B;
-		   hypre_ParCSRMatrixClone( A, &B, 0 );
-		   /* Build interp with B to initialize P as injection [0 I] operator */
-		   hypre_BoomerAMGBuildInterp(B, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
-									  trunc_factor, max_elmts, col_offd_S_to_A, &P_ptr);
-		   hypre_ParCSRMatrixDestroy(B);
 
+		   /* Classical modified interpolation */
+		   hypre_BoomerAMGBuildInterp(A, CF_marker, S, num_cpts_global,1, NULL,debug_flag,
+								  trunc_factor, max_elmts, col_offd_S_to_A, &P_ptr);
 
-	   /* Do k steps of Jacobi build W for P = [-W I].
-		* Note that BoomerAMGJacobiInterp assumes you have some initial P,
-		* hence we need to initialize P as above, before calling this routine.
-		* If numsweeps = 0, the following step is skipped and P is returned as the
-		* injection operator.
-		* Looping here is equivalent to improving P by Jacobi interpolation
-           */
-		   for(i=0; i<numsweeps; i++)
-			   hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker,
-										   0, jac_trunc_threshold,
-										   jac_trunc_threshold_minus );
-
+	           /* Do k steps of Jacobi build W for P = [-W I].
+		    * Note that BoomerAMGJacobiInterp assumes you have some initial P,
+		    * hence we need to initialize P as above, before calling this routine.
+		    * If numsweeps = 0, the following step is skipped and P is returned as is.
+		    * Looping here is equivalent to improving P by Jacobi interpolation
+                   */
+//		   for(i=0; i<numsweeps; i++)
+//			   hypre_BoomerAMGJacobiInterp(A, &P_ptr, S,1, NULL, CF_marker,
+//										   0, jac_trunc_threshold,
+//										   jac_trunc_threshold_minus );
 	   }
 
    }
@@ -2558,6 +2552,17 @@ hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int restrict_type)
    return hypre_error_flag;
 }
 
+/* Set the number of Jacobi interpolation iterations
+ * for computing interpolation operator
+*/
+HYPRE_Int
+hypre_MGRSetNumRestrictSweeps( void *mgr_vdata, HYPRE_Int nsweeps )
+{
+   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   (mgr_data -> num_restrict_sweeps) = nsweeps;
+   return hypre_error_flag;
+}
+
 /* Set the type of the interpolation
  * for computing interpolation operator
 */
@@ -2677,4 +2682,104 @@ hypre_MGRBuildAff( MPI_Comm comm, HYPRE_Int local_num_variables, HYPRE_Int num_f
 
   hypre_TFree(CF_marker_copy);
   return 0;
+}
+
+/* Get pointer to coarse grid matrix for MGR solver */
+HYPRE_Int
+hypre_MGRGetCoarseGridMatrix( void *mgr_vdata, hypre_ParCSRMatrix **RAP )
+{
+   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+
+   if (!mgr_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (mgr_data -> RAP == NULL)
+   {
+      hypre_printf(" Coarse grid matrix is NULL. Please make sure MGRSetup() is called \n");
+      return hypre_error_flag;
+   }
+   RAP = &mgr_data->RAP;
+
+   return hypre_error_flag;
+}
+
+/* Get pointer to coarse grid solution for MGR solver */
+HYPRE_Int
+hypre_MGRGetCoarseGridSolution( void *mgr_vdata, hypre_ParVector **sol )
+{
+   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+
+   if (!mgr_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (mgr_data -> U_array == NULL)
+   {
+      hypre_printf(" MGR solution array is NULL. Please make sure MGRSetup() and MGRSolve() are called \n");
+      return hypre_error_flag;
+   }
+   sol = &mgr_data->U_array[mgr_data->num_coarse_levels];
+
+   return hypre_error_flag;
+}
+
+/* Get pointer to coarse grid solution for MGR solver */
+HYPRE_Int
+hypre_MGRGetCoarseGridRHS( void *mgr_vdata, hypre_ParVector **rhs )
+{
+   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+
+   if (!mgr_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (mgr_data -> F_array == NULL)
+   {
+      hypre_printf(" MGR RHS array is NULL. Please make sure MGRSetup() and MGRSolve() are called \n");
+      return hypre_error_flag;
+   }
+   rhs = &mgr_data->F_array[mgr_data->num_coarse_levels];
+
+   return hypre_error_flag;
+}
+
+/* Print coarse grid linear system (for debugging)*/
+HYPRE_Int
+hypre_MGRPrintCoarseSystem( void *mgr_vdata, HYPRE_Int print_flag)
+{
+   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   mgr_data->print_coarse_system = print_flag;
+   
+   return hypre_error_flag;
+}
+
+/* Print solver params */
+HYPRE_Int
+hypre_MGRWriteSolverParams(void *mgr_vdata)
+{
+   hypre_ParMGRData  *mgr_data = (hypre_ParMGRData*) mgr_vdata;      
+   hypre_printf("MGR Setup parameters: \n");   
+   hypre_printf("Max number of coarse levels: %d\n", (mgr_data -> max_num_coarse_levels));
+   hypre_printf("Block size: %d\n", (mgr_data -> block_size));   
+   hypre_printf("Number of coarse indexes: %d\n", (mgr_data -> num_coarse_indexes));
+   hypre_printf("reserved coarse nodes size: %d\n", (mgr_data -> reserved_coarse_size));   
+   
+   hypre_printf("\n MGR Solver Parameters: \n");
+   hypre_printf("F-relaxation Method: %d\n", (mgr_data -> Frelax_method));
+   hypre_printf("Relax type: %d\n", (mgr_data -> relax_type));
+   hypre_printf("Number of relax sweeps: %d\n", (mgr_data -> num_relax_sweeps));
+   hypre_printf("Interpolation type: %d\n", (mgr_data -> interp_type));
+   hypre_printf("Number of interpolation sweeps: %d\n", (mgr_data -> num_interp_sweeps));
+   hypre_printf("Restriction type: %d\n", (mgr_data -> restrict_type));
+   hypre_printf("Number of restriction sweeps: %d\n", (mgr_data -> num_restrict_sweeps));
+   hypre_printf("Global smoother type: %d\n", (mgr_data ->global_smooth_type));
+   hypre_printf("Number of global smoother sweeps: %d\n", (mgr_data ->global_smooth_iters));   
+   hypre_printf("Max number of iterations: %d\n", (mgr_data -> max_iter));
+   hypre_printf("Stopping tolerance: %e\n", (mgr_data -> tol));
+   
+   return hypre_error_flag;
 }

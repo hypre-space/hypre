@@ -3313,6 +3313,16 @@ HYPRE_Int
 HYPRE_MGRSetRestrictType( HYPRE_Solver solver, HYPRE_Int restrict_type);
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRSetNumRestrictSweeps
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set number of restriction sweeps.
+ * This option is for restrict\_type > 2.
+ **/
+HYPRE_Int
+HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps );    
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRSetInterpType
  *--------------------------------------------------------------------------*/
 /** 

@@ -182,6 +182,16 @@ HYPRE_MGRSetNumInterpSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
 {
    return hypre_MGRSetNumInterpSweeps(solver, nsweeps);
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetNumRestrictSweeps
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
+{
+   return hypre_MGRSetNumRestrictSweeps(solver, nsweeps);
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetPrintLevel
  *--------------------------------------------------------------------------*/

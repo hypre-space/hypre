@@ -46,6 +46,7 @@ hypre_MGRSolve( void               *mgr_vdata,
    HYPRE_Int		max_iter = (mgr_data -> max_iter);
    HYPRE_Real		*norms = (mgr_data -> rel_res_norms);
    hypre_ParVector     	*Vtemp = (mgr_data -> Vtemp);
+   hypre_ParVector     	*Utemp = (mgr_data -> Utemp);
    hypre_ParVector     	*residual;
 
    HYPRE_Real           alpha = -1;
@@ -107,8 +108,8 @@ hypre_MGRSolve( void               *mgr_vdata,
    /*-----------------------------------------------------------------------
     *    Write the solver parameters
     *-----------------------------------------------------------------------*/
-//   if (my_id == 0 && print_level > 1)
-//      hypre_MGRWriteSolverParams(mgr_data);
+   if (my_id == 0 && print_level > 1)
+      hypre_MGRWriteSolverParams(mgr_data);
 
    /*-----------------------------------------------------------------------
     *    Initialize the solver error flag and assorted bookkeeping variables
@@ -136,13 +137,13 @@ hypre_MGRSolve( void               *mgr_vdata,
    {
      if ( logging > 1 ) {
         hypre_ParVectorCopy(F_array[0], residual );
-        if (tol > 0)
+        if (tol > 0.0)
 	   hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, residual );
            resnorm = sqrt(hypre_ParVectorInnerProd( residual, residual ));
      }
      else {
         hypre_ParVectorCopy(F_array[0], Vtemp);
-        if (tol > 0)
+        if (tol > 0.0)
            hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0], beta, Vtemp);
         resnorm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
      }
@@ -216,10 +217,17 @@ hypre_MGRSolve( void               *mgr_vdata,
            for (i = 0;i < global_smooth_iters;i ++)
 		hypre_BoomerAMGRelax(A_array[0], F_array[0], NULL, global_smooth_type-1, 0, 1.0, 0.0, NULL, U_array[0], Vtemp, NULL);
 	}
-	else if (global_smooth_type == 8)//ILU smoother
+	else if (global_smooth_type == 8)//EUCLID ILU smoother
 	{
 	    for (i = 0;i < global_smooth_iters;i ++)
-		HYPRE_EuclidSolve( (mgr_data -> global_smoother),A_array[0],F_array[0],U_array[0]);
+	    {
+	        // compute residual
+                hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[0], U_array[0], beta, F_array[0], Vtemp);	
+                // solve    
+		HYPRE_EuclidSolve( (mgr_data -> global_smoother),A_array[0],Vtemp,Utemp);
+		// update solution
+                hypre_ParVectorAxpy(beta, Utemp, U_array[0]);				
+            }
         }
     }
 
@@ -311,7 +319,7 @@ hypre_MGRSolve( void               *mgr_vdata,
 }
 
 HYPRE_Int
-hypre_MGRFrelaxVcycle ( void   *Frelax_vdata )
+hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVector *u )
 {
   hypre_ParAMGData   *Frelax_data = (hypre_ParAMGData*) Frelax_vdata;
   
@@ -480,6 +488,16 @@ hypre_MGRCycle( void               *mgr_vdata,
 		   /* call coarse grid solver here */
 	           /* default is BoomerAMG */
 		   coarse_grid_solver_solve(cg_solver, RAP, F_array[level], U_array[level]);
+
+		   // DEBUG: print the coarse system indicated by mgr_data ->print_coarse_system
+		   if(mgr_data -> print_coarse_system)
+		   {
+		      HYPRE_ParCSRMatrixPrint(RAP, "RAP_mat");
+		      HYPRE_ParVectorPrint(F_array[level], "RAP_rhs");
+		      HYPRE_ParVectorPrint(U_array[level], "RAP_sol");	
+		      mgr_data -> print_coarse_system--;	      		      
+		   }
+
 		   /**** cycle up ***/
 		   cycle_type = 2;
 	   }
@@ -496,12 +514,14 @@ hypre_MGRCycle( void               *mgr_vdata,
                    { /* (single level) relaxation for A_ff */
 		      if (relax_type == 18)
 		      {
+		        for(i=0; i<nsweeps; i++)
 		         hypre_ParCSRRelax_L1_Jacobi(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
 						   relax_points, relax_weight, relax_l1_norms[fine_grid],
 		   				   U_array[fine_grid], Vtemp);
 		      }
 		      else if(relax_type == 8 || relax_type == 13 || relax_type == 14)
 		      {
+		        for(i=0; i<nsweeps; i++)
 		         hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
 		   						relax_type, relax_points, relax_weight,
 		   						omega, relax_l1_norms[fine_grid], U_array[fine_grid], Vtemp, Ztemp);
@@ -516,7 +536,8 @@ hypre_MGRCycle( void               *mgr_vdata,
                    else if (Frelax_method == 1) 
       		   {
                       /* v-cycle smoother for A_ff */
-                      hypre_MGRFrelaxVcycle(FrelaxVcycleData[level]);
+		      for(i=0; i<nsweeps; i++)
+                         hypre_MGRFrelaxVcycle(FrelaxVcycleData[level], F_array[level], U_array[level]);
                    } 
                    else 
                    {
@@ -526,12 +547,9 @@ hypre_MGRCycle( void               *mgr_vdata,
                             omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
                    }
 		   // Update residual and compute coarse-grid rhs
-		   // hypre_ParVectorCopy(F_array[fine_grid],Vtemp);
 		   alpha = -1.0;
 		   beta = 1.0;
 
-		  // hypre_ParCSRMatrixMatvec(alpha, A_array[fine_grid], U_array[fine_grid],
-		  //							beta, Vtemp);
 		   hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[fine_grid], U_array[fine_grid],
                                          beta, F_array[fine_grid], Vtemp);
 
