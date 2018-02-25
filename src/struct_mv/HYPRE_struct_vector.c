@@ -102,8 +102,8 @@ HYPRE_StructVectorSetBoxValues2( HYPRE_StructVector  vector,
                                  HYPRE_Int          *viupper,
                                  HYPRE_Complex      *values )
 {
-   hypre_Box          *set_box, *value_box;
-   HYPRE_Int           d;
+   hypre_Box  *set_box, *value_box;
+   HYPRE_Int   d;
 
    /* This creates boxes with zeroed-out extents */
    set_box = hypre_BoxCreate(hypre_StructVectorNDim(vector));
@@ -175,8 +175,8 @@ HYPRE_StructVectorAddToBoxValues2( HYPRE_StructVector  vector,
                                    HYPRE_Int          *viupper,
                                    HYPRE_Complex      *values )
 {
-   hypre_Box          *set_box, *value_box;
-   HYPRE_Int           d;
+   hypre_Box  *set_box, *value_box;
+   HYPRE_Int   d;
 
    /* This creates boxes with zeroed-out extents */
    set_box = hypre_BoxCreate(hypre_StructVectorNDim(vector));

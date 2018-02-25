@@ -149,8 +149,8 @@ HYPRE_StructMatrixSetBoxValues2( HYPRE_StructMatrix  matrix,
                                  HYPRE_Int          *viupper,
                                  HYPRE_Complex      *values )
 {
-   hypre_Box          *set_box, *value_box;
-   HYPRE_Int           d;
+   hypre_Box  *set_box, *value_box;
+   HYPRE_Int   d;
 
    /* This creates boxes with zeroed-out extents */
    set_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
@@ -187,8 +187,8 @@ HYPRE_StructMatrixGetBoxValues2( HYPRE_StructMatrix  matrix,
                                  HYPRE_Int          *viupper,
                                  HYPRE_Complex      *values )
 {
-   hypre_Box          *set_box, *value_box;
-   HYPRE_Int           d;
+   hypre_Box  *set_box, *value_box;
+   HYPRE_Int   d;
 
    /* This creates boxes with zeroed-out extents */
    set_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
@@ -281,8 +281,8 @@ HYPRE_StructMatrixAddToBoxValues2( HYPRE_StructMatrix  matrix,
                                    HYPRE_Int          *viupper,
                                    HYPRE_Complex      *values )
 {
-   hypre_Box          *set_box, *value_box;
-   HYPRE_Int           d;
+   hypre_Box  *set_box, *value_box;
+   HYPRE_Int   d;
 
    /* This creates boxes with zeroed-out extents */
    set_box = hypre_BoxCreate(hypre_StructMatrixNDim(matrix));
