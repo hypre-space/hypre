@@ -1280,6 +1280,7 @@ hypre_SStructMatrixSetValues( HYPRE_SStructMatrix  matrix,
          }
          hypre_SStructMatrixSetInterPartValues(matrix, part, set_box, var, nSentries, entries,
                                                set_box, values, action);
+         hypre_BoxDestroy(set_box);
       }
    }
 
