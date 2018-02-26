@@ -1009,9 +1009,6 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
           * insert it into an nentries-length segment of 'cols' and 'ijvalues'.
           * This may result in gaps, but IJSetValues2() is designed for that. */
 
-         /* The first pass may produce rows with less than nentries columns, but
-          * these will be filled in before calling IJSetValues() below. */
-
          nrows = hypre_BoxVolume(box);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
