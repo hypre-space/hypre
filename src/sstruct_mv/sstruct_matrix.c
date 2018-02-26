@@ -915,9 +915,21 @@ hypre_SStructUMatrixSetValues( hypre_SStructMatrix *matrix,
  * (action > 0): add-to values
  * (action = 0): set values
  * (action < 0): get values
-
+ *
  * 9/09 - AB: modified to use the box manager- here we need to check the
  *            neighbor box manager also
+ *
+ * To illustrate what is computed below before calling IJSetValues2(), consider
+ * the following example of a 5-pt stencil (c,w,e,s,n) on a 3x2 grid (the 'x' in
+ * arrays 'cols' and 'ijvalues' indicates "no data"):
+ *
+ *   nrows       = 6
+ *   ncols       = 3         4         3         3         4         3
+ *   rows        = 0         1         2         3         4         5
+ *   row_indexes = 0         5         10        15        20        25
+ *   cols        = . . . x x . . . . x . . . x x . . . x x . . . . x . . . x x
+ *   ijvalues    = . . . x x . . . . x . . . x x . . . x x . . . . x . . . x x
+ *   entry       = c e n     c w e n   c w n     c e s     c w e s   c w s    
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
@@ -993,7 +1005,9 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
          hypre_IntersectBoxes(box, map_box, int_box);
          hypre_CopyBox(int_box, box);
 
-         /* For each index in 'box', compute a row with nentries columns */
+         /* For each index in 'box', compute a row of length <= nentries and
+          * insert it into an nentries-length segment of 'cols' and 'ijvalues'.
+          * This may result in gaps, but IJSetValues2() is designed for that. */
 
          /* The first pass may produce rows with less than nentries columns, but
           * these will be filled in before calling IJSetValues() below. */
@@ -1072,8 +1086,6 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
             hypre_TFree(boxman_to_entries);
 
          } /* end of ei nentries loop */
-
-         /* Fill in missing columns before calling IJSetValues() */
 
          if (action > 0)
          {
