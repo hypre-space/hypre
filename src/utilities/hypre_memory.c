@@ -18,6 +18,7 @@
 
 #define HYPRE_USE_MANAGED_SCALABLE 1
 #include "_hypre_utilities.h"
+#include "../struct_mv/_hypre_struct_mv.h"
 #ifdef HYPRE_USE_UMALLOC
 #undef HYPRE_USE_UMALLOC
 #endif
@@ -95,15 +96,14 @@ hypre_MAlloc( size_t size , HYPRE_Int location)
       if (location==HYPRE_MEMORY_DEVICE)
       {
 #if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
-	/*ptr = omp_target_alloc(size+sizeof(size_t)*MEM_PAD_LEN, hypre__offload_device_num);*/
-         hypre_CheckErrorDevice( cudaMalloc(&ptr,size+sizeof(size_t)*MEM_PAD_LEN) );
-         size_t *sp=(size_t*)ptr;
-         cudaMemset(ptr,size,sizeof(size_t)*MEM_PAD_LEN);
-         ptr=(void*)(&sp[MEM_PAD_LEN]);
-         /* XXX XXX XXX XXX XXX XXX
-          * IT SEEMS OMP4.5 ALLOC VERSION NEEDS THIS (WHY?)
-          * XXX XXX XXX XXX XXX XXX*/
-         cudaDeviceSynchronize();
+         /* ptr = omp_target_alloc(size+sizeof(size_t)*MEM_PAD_LEN, hypre__offload_device_num); */
+         hypre_CheckErrorDevice( cudaMalloc(&ptr, size + sizeof(size_t)*MEM_PAD_LEN) );
+         size_t *sp = (size_t*) ptr;
+#pragma omp target is_device_ptr(sp)
+         {
+            sp[0] = size;
+         }
+         ptr = (void*) (&sp[MEM_PAD_LEN]);
 #elif defined(HYPRE_USE_OMP45) /*else HYPRE_USE_OMP45_TARGET_ALLOC */
          void *ptr_alloc = malloc(size + HYPRE_OMP45_SZE_PAD);
          char *ptr_inuse = (char *) ptr_alloc + HYPRE_OMP45_SZE_PAD;
@@ -201,9 +201,7 @@ hypre_CAllocIns( size_t count,
 #endif
 
 char *
-hypre_CAlloc( size_t count, 
-              size_t elt_size,
-              HYPRE_Int location)
+hypre_CAlloc( size_t count, size_t elt_size, HYPRE_Int location)
 {
    void   *ptr;
    size_t  size = count*elt_size;
@@ -215,9 +213,19 @@ hypre_CAlloc( size_t count,
 #endif
       if (location==HYPRE_MEMORY_DEVICE)
       {
-#if defined(HYPRE_USE_OMP45_TARGET_ALLOC) || defined(HYPRE_MEMORY_GPU)
-         ptr=(void*)hypre_MAlloc(size,location);
-         cudaMemset(ptr,0,size);
+#if defined(HYPRE_USE_OMP45_TARGET_ALLOC) 
+         ptr = (void*) hypre_MAlloc(size, location);
+         char *char_ptr = (char *) ptr;
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(char_ptr)
+         hypre_LoopBegin(size, k)
+         {
+            char_ptr[k] = 0;
+         }
+         hypre_LoopEnd()
+#undef DEVICE_VAR
+#define DEVICE_VAR
+         /* cudaDeviceSynchronize(); */
 #elif defined(HYPRE_USE_OMP45) /* else HYPRE_USE_OMP45_TARGET_ALLOC */
          //void *ptr_alloc = calloc(count + HYPRE_OMP45_CNT_PAD(elt_size), elt_size);
          void *ptr_alloc = malloc(size + HYPRE_OMP45_SZE_PAD);
@@ -228,6 +236,9 @@ hypre_CAlloc( size_t count,
          //printf("Calloc: try to map %ld bytes\n", size_inuse);
          hypre_omp45_offload(hypre__offload_device_num, ptr_inuse, char, 0, size_inuse, "enter", "to");
          ptr = (void*) ptr_inuse;
+#elif defined(HYPRE_MEMORY_GPU)
+         ptr = (void*) hypre_MAlloc(size, location);
+         cudaMemset(ptr, 0, size);
 #elif defined(HYPRE_USE_MANAGED)/* else HYPRE_USE_OMP45_TARGET_ALLOC */
 #ifdef HYPRE_USE_UMALLOC
 #ifdef HYPRE_USE_MANAGED
@@ -256,7 +267,7 @@ hypre_CAlloc( size_t count,
       else if (location==HYPRE_MEMORY_SHARED)
       {
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
-         ptr=(void*)hypre_MAlloc(size, location);
+         ptr = (void*) hypre_MAlloc(size, location);
          memset(ptr,0,count*elt_size);
 #else
          ptr = calloc(count, elt_size);
@@ -302,7 +313,7 @@ size_t memsize(const void *ptr){
 
 #if defined(TRACK_MEMORY_ALLOCATIONS)
 char *
-hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, HYPRE_Int line)
+hypre_ReAllocIns( char *ptr, size_t size, HYPRE_Int location, char *file, HYPRE_Int line)
 {
   char *ret = hypre_ReAlloc(ptr,size,location);
   //printf("%s %d %d %p\n",file,line,location,ret);
@@ -319,9 +330,7 @@ hypre_ReAllocIns( char *ptr, size_t size , HYPRE_Int location,char *file, HYPRE_
 
 
 char *
-hypre_ReAlloc( char   *ptr, 
-               size_t  size,
-               HYPRE_Int location)
+hypre_ReAlloc( char *ptr, size_t size, HYPRE_Int location)
 {
    if (size == 0)
    {
@@ -335,6 +344,7 @@ hypre_ReAlloc( char   *ptr,
    else if (location == HYPRE_MEMORY_DEVICE)
    {
       // TODO: How to do it for NONUNIFIED DEVICE memory
+#if 0
 #if defined(HYPRE_USE_MANAGED)
       void *new_ptr = hypre_MAlloc(size, location);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
@@ -346,6 +356,10 @@ hypre_ReAlloc( char   *ptr,
       hypre_Memcpy(new_ptr, ptr, smaller_size, location, location);
 #else
       ptr = (char*) realloc(ptr, size);
+#endif
+#else
+      hypre_printf("hypre error: ReAlloc for device memory has not been implemented\n");
+      exit(0);
 #endif
    }
    else if (location == HYPRE_MEMORY_HOST)

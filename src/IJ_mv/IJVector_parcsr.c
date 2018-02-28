@@ -1316,7 +1316,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    }      
 
    /*void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);*/
-   void_contact_buf = hypre_CAlloc(storage, obj_size_bytes, HYPRE_MEMORY_HOST);
+   void_contact_buf = hypre_CTAlloc(char, storage*obj_size_bytes, HYPRE_MEMORY_HOST);
    index_ptr = void_contact_buf; /* step through with this index */
 
    /* set up data to be sent to send procs */
@@ -1411,7 +1411,7 @@ hypre_IJVectorAssembleOffProcValsPar( hypre_IJVector *vector,
    send_proc_obj.vec_starts[0] = 0;
    send_proc_obj.element_storage_length = storage + 20;
    send_proc_obj.v_elements =
-      hypre_MAlloc(obj_size_bytes*send_proc_obj.element_storage_length, HYPRE_MEMORY_HOST);
+      hypre_TAlloc(char, obj_size_bytes*send_proc_obj.element_storage_length, HYPRE_MEMORY_HOST);
 
    response_obj2.fill_response = hypre_FillResponseIJOffProcVals;
    response_obj2.data1 = NULL;

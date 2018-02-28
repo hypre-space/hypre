@@ -210,12 +210,12 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
    response_obj->send_response_storage = max_response_size;
 
    /*send_response_buf = hypre_MAlloc(max_response_total_bytes);*/
-   send_response_buf = hypre_CAlloc(max_response_size+overhead,  response_obj_size, HYPRE_MEMORY_HOST);
+   send_response_buf = hypre_CTAlloc(char, (max_response_size+overhead)*response_obj_size, HYPRE_MEMORY_HOST);
       
    /*allocate space for inital recv array for the responses - give each processor
      size max_response_size */
 
-   initial_recv_buf = hypre_MAlloc(max_response_total_bytes*num_contacts, HYPRE_MEMORY_HOST);
+   initial_recv_buf = hypre_TAlloc(char, max_response_total_bytes*num_contacts, HYPRE_MEMORY_HOST);
    response_recv_buf_starts =   hypre_CTAlloc(HYPRE_Int,  num_contacts+1, HYPRE_MEMORY_HOST);  
 
    contact_ptrs = hypre_TAlloc( void *,  num_contacts, HYPRE_MEMORY_HOST);
@@ -328,8 +328,8 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
          /* do we have enough space to recv it? */
          if(contact_size > recv_contact_buf_size) 
          {
-			 recv_contact_buf = hypre_ReAlloc((char*)recv_contact_buf,  
-                                             contact_obj_size*contact_size, HYPRE_MEMORY_HOST);
+            recv_contact_buf = hypre_TReAlloc((char*)recv_contact_buf,  
+                                              char, contact_obj_size*contact_size, HYPRE_MEMORY_HOST);
             recv_contact_buf_size = contact_size;
          } 
 
@@ -362,7 +362,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
             /* this should not happen often (unless a poor max_size has been chosen)
                - so we will allocate space for the data as needed */
             size = post_size*response_obj_size;
-            post_array[post_array_size] =  hypre_MAlloc(size, HYPRE_MEMORY_HOST); 
+            post_array[post_array_size] =  hypre_TAlloc(char, size, HYPRE_MEMORY_HOST); 
             /* index_ptr =  send_response_buf + max_response_size_bytes */;
             index_ptr = (void *) ((char *) send_response_buf +
                                   max_response_size_bytes);
@@ -494,7 +494,7 @@ HYPRE_Int hypre_DataExchangeList(HYPRE_Int num_contacts,
    post_ptrs = hypre_TAlloc(void *,  num_post_recvs, HYPRE_MEMORY_HOST);
 
    /*second loop to post any recvs and set up recv_response_buf */
-   response_recv_buf = hypre_MAlloc(total_size*response_obj_size, HYPRE_MEMORY_HOST);
+   response_recv_buf = hypre_TAlloc(char, total_size*response_obj_size, HYPRE_MEMORY_HOST);
    index_ptr = response_recv_buf;
    start_ptr = initial_recv_buf;
    count = 0;

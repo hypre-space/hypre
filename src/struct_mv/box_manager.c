@@ -459,7 +459,7 @@ hypre_BoxManCreate( HYPRE_Int max_nentries,
    hypre_BoxManEntries(manager)  = hypre_CTAlloc(hypre_BoxManEntry,  max_nentries, HYPRE_MEMORY_HOST);
 
    hypre_BoxManInfoObjects(manager) = NULL;
-   hypre_BoxManInfoObjects(manager) = hypre_MAlloc(max_nentries*info_size, HYPRE_MEMORY_HOST);
+   hypre_BoxManInfoObjects(manager) = hypre_TAlloc(char, max_nentries*info_size, HYPRE_MEMORY_HOST);
 
    hypre_BoxManIndexTable(manager) = NULL;
    
@@ -534,7 +534,7 @@ hypre_BoxManIncSize ( hypre_BoxManager *manager,
    entries = hypre_TReAlloc(entries,  hypre_BoxManEntry,  max_nentries, HYPRE_MEMORY_HOST);
    ids = hypre_TReAlloc(ids,  HYPRE_Int,  max_nentries, HYPRE_MEMORY_HOST);
    procs =  hypre_TReAlloc(procs,  HYPRE_Int,  max_nentries, HYPRE_MEMORY_HOST);
-   info = (void *) hypre_ReAlloc((char *)info,  max_nentries*info_size, HYPRE_MEMORY_HOST);
+   info = (void *) hypre_TReAlloc((char *)info, char, max_nentries*info_size, HYPRE_MEMORY_HOST);
 
    /* update manager */
    hypre_BoxManMaxNEntries(manager) = max_nentries;
@@ -1797,8 +1797,8 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
 
          /* populate the send buffer with my entries (note: these are
             sorted above by increasing id */
-         send_buf = hypre_MAlloc(send_count_bytes, HYPRE_MEMORY_HOST);
-         recv_buf = hypre_MAlloc(recv_buf_size_bytes, HYPRE_MEMORY_HOST);
+         send_buf = hypre_TAlloc(char, send_count_bytes, HYPRE_MEMORY_HOST);
+         recv_buf = hypre_TAlloc(char, recv_buf_size_bytes, HYPRE_MEMORY_HOST);
 
          index_ptr = send_buf; /* step through send_buf with this pointer */
          /* loop over my entries */  
@@ -2094,7 +2094,7 @@ hypre_BoxManAssemble( hypre_BoxManager *manager )
             size = nentries - index;
             new_entries =  hypre_CTAlloc(hypre_BoxManEntry,  size, HYPRE_MEMORY_HOST);
             
-            new_info = hypre_MAlloc(size*info_size, HYPRE_MEMORY_HOST);
+            new_info = hypre_TAlloc(char, size*info_size, HYPRE_MEMORY_HOST);
             index_ptr = new_info;
             
             for (i= 0; i< size; i++)
@@ -2731,7 +2731,7 @@ hypre_FillResponseBoxManAssemble2( void *p_recv_contact_buf,
    {
       response_obj->send_response_storage =  num_my_entries; 
       size =  entry_size_bytes*(response_obj->send_response_storage + overhead);
-      send_response_buf = hypre_ReAlloc( (char*)send_response_buf,  size, HYPRE_MEMORY_HOST);
+      send_response_buf = hypre_TReAlloc( (char*)send_response_buf, char, size, HYPRE_MEMORY_HOST);
       *p_send_response_buf = send_response_buf;  
    }
 

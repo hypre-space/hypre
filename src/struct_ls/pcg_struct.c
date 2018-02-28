@@ -19,7 +19,7 @@ char *
 hypre_StructKrylovCAlloc( HYPRE_Int count,
                           HYPRE_Int elt_size )
 {
-   return( hypre_CAlloc( count,  elt_size , HYPRE_MEMORY_HOST) );
+   return( hypre_CTAlloc(char, count * elt_size, HYPRE_MEMORY_HOST) );
 }
 
 /*--------------------------------------------------------------------------

@@ -416,7 +416,7 @@ HYPRE_SStructSplitSolve( HYPRE_SStructSolver solver,
          py = hypre_SStructVectorPVector(y, part);
          for (vi = 0; vi < nvars[part]; vi++)
          {
-			 ssolve = (HYPRE_Int (*)(void *, hypre_StructMatrix *, hypre_StructVector *, hypre_StructVector *))ssolver_solve[part][vi];
+            ssolve = (HYPRE_Int (*)(void *, hypre_StructMatrix *, hypre_StructVector *, hypre_StructVector *))ssolver_solve[part][vi];
             sdata  = ssolver_data[part][vi];
             sA = hypre_SStructPMatrixSMatrix(pA, vi, vi);
             sx = hypre_SStructPVectorSVector(px, vi);

@@ -2173,7 +2173,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    hypre_TFree(num_elements_total, HYPRE_MEMORY_HOST);
 
    /*void_contact_buf = hypre_MAlloc(storage*obj_size_bytes);*/
-   void_contact_buf = hypre_CAlloc(storage,  obj_size_bytes, HYPRE_MEMORY_HOST);
+   void_contact_buf = hypre_CTAlloc(char, storage*obj_size_bytes, HYPRE_MEMORY_HOST);
    index_ptr = void_contact_buf; /* step through with this index */
 
    /* for each proc: #rows, row #, no. elements, 
@@ -2292,7 +2292,7 @@ hypre_IJMatrixAssembleOffProcValsParCSR( hypre_IJMatrix *matrix,
    send_proc_obj.vec_starts[0] = 0;
    send_proc_obj.element_storage_length = storage + 20;
    send_proc_obj.v_elements =
-      hypre_MAlloc(obj_size_bytes*send_proc_obj.element_storage_length, HYPRE_MEMORY_HOST);
+      hypre_TAlloc(char, obj_size_bytes*send_proc_obj.element_storage_length, HYPRE_MEMORY_HOST);
 
    response_obj2.fill_response = hypre_FillResponseIJOffProcVals;
    response_obj2.data1 = NULL;
@@ -2479,8 +2479,8 @@ hypre_FillResponseIJOffProcVals(void      *p_recv_contact_buf,
    {
       elength = hypre_max(contact_size, 100);   
       elength += index;
-      send_proc_obj->v_elements = hypre_ReAlloc((char*)send_proc_obj->v_elements,  
-                                                elength*object_size, HYPRE_MEMORY_HOST);
+      send_proc_obj->v_elements = hypre_TReAlloc((char*)send_proc_obj->v_elements,  
+                                                 char, elength*object_size, HYPRE_MEMORY_HOST);
       send_proc_obj->element_storage_length = elength; 
    }
    /*populate send_proc_obj*/

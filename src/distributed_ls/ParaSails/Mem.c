@@ -105,7 +105,7 @@ char *MemAlloc(Mem *m, HYPRE_Int size)
 	/* Size of requested block */
 	req = MAX(size, MEM_BLOCKSIZE);
 
-        m->avail = hypre_MAlloc(req,HYPRE_MEMORY_HOST);
+        m->avail = hypre_TAlloc(char, req, HYPRE_MEMORY_HOST);
 
         if (m->avail == NULL)
         {

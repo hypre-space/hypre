@@ -158,7 +158,7 @@ void *hypre_mymalloc(HYPRE_Int nbytes,const char *msg)
   if (nbytes == 0)
     return NULL;
 
-  ptr = hypre_MAlloc(nbytes,HYPRE_MEMORY_HOST);
+  ptr = hypre_TAlloc(char, nbytes, HYPRE_MEMORY_HOST);
   if (ptr == NULL) {
     hypre_errexit("***Memory allocation failed for %s. Requested size: %d bytes", msg, nbytes);
   }
