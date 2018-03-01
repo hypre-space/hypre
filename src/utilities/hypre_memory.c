@@ -475,10 +475,10 @@ hypre_Memcpy( char *dst,
       {
          if (dst != src)
          {
-#if defined(HYPRE_USE_MANAGED)
-            memcpy( dst, src, size);
-#elif defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45_TARGET_ALLOC)
             cudaMemcpy( dst, src, size, cudaMemcpyDeviceToDevice);
+#elif defined(HYPRE_USE_MANAGED)
+            memcpy( dst, src, size);
 #elif defined(HYPRE_USE_OMP45)
             hypre_omp45_offload(hypre__offload_device_num, src, char, 0, size, "update", "from");
             memcpy(dst, src, size);
@@ -539,16 +539,6 @@ hypre_Memcpy( char *dst,
          hypre_error(HYPRE_ERROR_MEMORY);
 	}
       }
-
-#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
-      /* XXX XXX XXX XXX XXX XXX */
-      /*
-      if ( locdst == HYPRE_MEMORY_DEVICE || locsrc == HYPRE_MEMORY_DEVICE )
-      {
-         cudaDeviceSynchronize();
-      }
-      */
-#endif
    }
 }
 

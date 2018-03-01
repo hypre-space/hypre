@@ -34,7 +34,7 @@ void hypre_GPUInit(hypre_int use_device){
     hypre_CheckErrorDevice(cudaGetDeviceCount(&nDevices));
 
     /* XXX */
-    //nDevices = 1;
+    nDevices = 1; /* DO NOT COMMENT ME OUT AGAIN! nDevices does NOT WORK !!!! */
     HYPRE_DEVICE_COUNT=nDevices;
     
     /* TODO cannot use nDevices to check if mpibind is used, need to rewrite 

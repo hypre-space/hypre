@@ -149,7 +149,7 @@ hypre_using_fei=yes
 hypre_using_mli=no
 
 hypre_using_openmp=no
-hypre_using_openmp45=no
+hypre_using_openmp_offload=no
 hypre_using_insure=no
 hypre_using_cuda=no
 hypre_using_gpu=no
@@ -800,15 +800,15 @@ AS_HELP_STRING([--with-openmp],
 [hypre_using_openmp=no]
 )
 
-AC_ARG_WITH(openmp45,
-AS_HELP_STRING([--with-openmp45],
-               [Use OpenMP 4.5.  This may affect which compiler is chosen.]),
+AC_ARG_WITH(openmp-offload,
+AS_HELP_STRING([--with-openmp-offload],
+               [Use OpenMP Offload (4.5).  This may affect which compiler is chosen.]),
 [case "${withval}" in
-    yes) hypre_using_openmp45=yes
-         AC_DEFINE([HYPRE_USING_OPENMP_4_5],1,[Enable OpenMP 4.5]) ;;
-    no)  hypre_using_openmp45=no ;;
+    yes) hypre_using_openmp_offload=yes
+         AC_DEFINE([HYPRE_USING_OPENMP_OFFLOAD],1,[Enable OpenMP Offload (4.5)]) ;;
+    no)  hypre_using_openmp_offload=no ;;
  esac],
-[hypre_using_openmp45=no]
+[hypre_using_openmp_offload=no]
 )
 
 dnl ***** SuperLU
@@ -1112,7 +1112,7 @@ if test "$hypre_user_chose_ccompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
    then
-      if test "$hypre_using_openmp45" = "yes"
+      if test "$hypre_using_openmp_offload" = "yes"
       then
          AC_CHECK_PROGS(CC, [xlc-gpu clang-gpu])
       fi
@@ -1124,7 +1124,7 @@ then
          AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
       fi
    else
-      if test "$hypre_using_openmp45" = "yes"
+      if test "$hypre_using_openmp_offload" = "yes"
       then
          AC_CHECK_PROGS(CC, [mpixlc-gpu mpiclang-gpu])
       fi
@@ -1147,7 +1147,7 @@ if test "$hypre_user_chose_cxxcompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
    then
-      if test "$hypre_using_openmp45" = "yes"
+      if test "$hypre_using_openmp_offload" = "yes"
       then
          AC_CHECK_PROGS(CXX, [xlC-gpu clang++-gpu])
       fi
@@ -1159,7 +1159,7 @@ then
          AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
       fi
    else
-      if test "$hypre_using_openmp45" = "yes"
+      if test "$hypre_using_openmp_offload" = "yes"
       then
          AC_CHECK_PROGS(CXX, [mpixlC-gpu mpiclang++-gpu])
       fi
@@ -1575,11 +1575,11 @@ dnl *********************************************************************
 if test "$hypre_using_nvcc" = "yes"
 then
    AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
-   NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I $(CUDA_HOME)/include"
-   NVCCLIBS="-L $(CUDA_HOME)/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+   NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include"
+   NVCCLIBS="-L${CUDA_HOME}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
    HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
-   CFLAGS="${CFLAGS} -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED "
-   CXXFLAGS="${CXXFLAGS} -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED "
+   CFLAGS="${CFLAGS} -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include"
+   CXXFLAGS="${CXXFLAGS} -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include"
 else
    NVCCFLAGS=
    NVCCLIBS=
@@ -1599,9 +1599,9 @@ then
    if test "$hypre_using_cuda" = "yes"
       then
         RAJAFLAGS=" -lRAJA "
-	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -arch compute_35 -lcudart -lcuda $RAJAFLAGS "
-   	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register -Xcompiler $RAJAFLAGS "
-   	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register  $RAJAFLAGS "
+	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -gencode arch=compute_60,\"code=sm_60\" -lcudart -lcuda $RAJAFLAGS "
+   	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register -Xcompiler $RAJAFLAGS "
+   	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register  $RAJAFLAGS "
    	if test "$hypre_using_um" != "yes"
    	then
 		CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
@@ -1617,7 +1617,7 @@ then
 		CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU " 
 		LDFLAGS+="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
 		AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
-		NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I $(CUDA_HOME)/include"
+		NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include"
    		NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
    		HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
    	fi
@@ -1649,13 +1649,13 @@ then
    fi
    if test "$hypre_using_cuda" = "yes"
    then
-      LDFLAGS=" -ccbin=$CUDACXX -arch compute_35 -lcudart -lcuda  -Xcompiler -fopenmp  "
+      LDFLAGS=" -ccbin=$CUDACXX -gencode arch=compute_60,\"code=sm_60\" -lcudart -lcuda  -Xcompiler -fopenmp  "
       HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
       HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
       CC=${CXX}
       LINK_CC=$LINK_CXX
-      CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS "
-      CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS "
+      CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS "
+      CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS "
       if test "$hypre_using_um" != "yes"
       then
           CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
@@ -1705,9 +1705,9 @@ dnl * Set cuda options
 dnl *********************************************************************
 if test "$hypre_user_chose_cuda" = "yes"
 then
-   LDFLAGS+=" -ccbin=$CUDACXX -arch compute_35 -Xcompiler -fopenmp "
-   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA $NEWCFLAGS"
-   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -arch compute_35 --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA $NEWCFLAGS"
+   LDFLAGS+=" -ccbin=$CUDACXX -gencode arch=compute_60,\"code=sm_60\" -Xcompiler -fopenmp "
+   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA $NEWCFLAGS"
+   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA $NEWCFLAGS"
    if test "$hypre_using_um" != "yes"
    then
 	CFLAGS+=" -DHYPRE_MEMORY_GPU"
@@ -1720,10 +1720,9 @@ then
    else
 	CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
    	CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
-	LDFLAGS+="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
 	AC_DEFINE(HYPRE_USING_NVCC, 1, [Using nvcc compiler])
-	NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I $(CUDA_HOME)/include"
-   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+	NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include"
+   NVCCLIBS="-L${CUDA_HOME}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
    HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
    fi
 fi
@@ -1731,8 +1730,8 @@ fi
 if test "$hypre_using_um" = "yes"
 then
    LDFLAGS+=" -lcudart -lcuda "
-   CFLAGS+=" -DHYPRE_USE_MANAGED -I /usr/local/cuda/include "
-   CXXFLAGS+=" -DHYPRE_USE_MANAGED -I /usr/local/cuda/include "
+   CFLAGS+=" -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include "
+   CXXFLAGS+=" -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include "
 fi
 
 if test "$hypre_using_openmp" = "yes"
@@ -1740,11 +1739,11 @@ then
    AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support])
 fi
 
-if test "$hypre_using_openmp45" = "yes"
+if test "$hypre_using_openmp_offload" = "yes"
 then
-   CFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -I${CUDA_HOME}/include $NEWCFLAGS"
-   CXXFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -I${CUDA_HOME}/include $NEWCFLAGS"
-   LIBS+=" -L${CUDA_HOME}/lib64 -lcudart"
+   CFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include $NEWCFLAGS"
+   CXXFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include $NEWCFLAGS"
+   LIBS+=" -L${CUDA_HOME}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
    if [test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"]
    then
      CFLAGS+=" -fopenmp-nonaliased-maps"

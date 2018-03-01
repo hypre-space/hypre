@@ -182,7 +182,7 @@ main( hypre_int argc,
    HYPRE_MatvecFunctions matvec_fn;
    /* end lobpcg */
 
-   HYPRE_Int device_level;
+   //HYPRE_Int device_level = -2;
    /*-----------------------------------------------------------
     * Initialize some stuff
     *-----------------------------------------------------------*/
@@ -284,7 +284,7 @@ main( hypre_int argc,
       v_num_ghost[i] = num_ghost[i];
    }
 
-   device_level = nx*ny*nz;
+   //device_level = nx*ny*nz;
    /*-----------------------------------------------------------
     * Parse command line
     *-----------------------------------------------------------*/
@@ -299,7 +299,7 @@ main( hypre_int argc,
          nx = atoi(argv[arg_index++]);
          ny = atoi(argv[arg_index++]);
          nz = atoi(argv[arg_index++]);
-	 device_level = nx*ny*nz;
+	 //device_level = nx*ny*nz;
       }
       else if ( strcmp(argv[arg_index], "-istart") == 0 )
       {
@@ -496,11 +496,13 @@ main( hypre_int argc,
          arg_index++;
          printLevel = atoi(argv[arg_index++]);
       }
+      /*
       else if ( strcmp(argv[arg_index], "-devicelevel") == 0 )
-      {			      /* lobpcg: print level */
+      {			      
          arg_index++;
          device_level = atoi(argv[arg_index++]);
       }
+      */
       /* end lobpcg */
       else
       {
@@ -694,7 +696,7 @@ main( hypre_int argc,
       hypre_printf("  relax           = %d\n", relax);
       hypre_printf("  jump            = %d\n", jump);
       hypre_printf("  solver ID       = %d\n", solver_id);
-      hypre_printf("  Device level    = %d\n", device_level);
+      /* hypre_printf("  Device level    = %d\n", device_level); */
    }
 
    if (myid == 0 && sum > 0)
@@ -998,6 +1000,8 @@ main( hypre_int argc,
          HYPRE_StructGridAssemble(grid);
 	 
 #if defined(HYPRE_USE_CUDA)
+         HYPRE_StructGridSetDataLocation(grid, HYPRE_MEMORY_DEVICE);
+         /*
 	 if (device_level == 0)
 	 {
 	    HYPRE_StructGridSetDataLocation(grid, HYPRE_MEMORY_HOST);
@@ -1016,6 +1020,7 @@ main( hypre_int argc,
 	       HYPRE_StructGridSetDataLocation(grid, HYPRE_MEMORY_DEVICE);
 	    }
 	 }
+         */
 #endif
 	 
          /*-----------------------------------------------------------
@@ -1347,7 +1352,7 @@ main( hypre_int argc,
          HYPRE_StructSMGSetPrintLevel(solver, 1);
          HYPRE_StructSMGSetLogging(solver, 1);
 #if defined(HYPRE_USE_CUDA) 
-         HYPRE_StructSMGSetDeviceLevel(solver,device_level);
+         //HYPRE_StructSMGSetDeviceLevel(solver,device_level);
 #endif
 
 #if defined(HYPRE_USE_CUDA)
@@ -1420,7 +1425,7 @@ main( hypre_int argc,
          HYPRE_StructPFMGSetLogging(solver, 1);
 
 #if defined(HYPRE_USE_CUDA) 
-         HYPRE_StructPFMGSetDeviceLevel(solver,device_level);
+         //HYPRE_StructPFMGSetDeviceLevel(solver,device_level);
 #endif
 
          HYPRE_StructPFMGSetup(solver, A, b, x);
@@ -1569,7 +1574,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetLogging(precond, 0);
 
 #if defined(HYPRE_USE_CUDA) 
-            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                  (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -1597,7 +1602,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-            HYPRE_StructPFMGSetDeviceLevel(precond,device_level);
+            //HYPRE_StructPFMGSetDeviceLevel(precond,device_level);
 #endif
             HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                  (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -1734,7 +1739,7 @@ main( hypre_int argc,
                HYPRE_StructSMGSetPrintLevel(precond, 0);
                HYPRE_StructSMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA)
-               HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+               //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
                HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -1762,7 +1767,7 @@ main( hypre_int argc,
                HYPRE_StructPFMGSetPrintLevel(precond, 0);
                HYPRE_StructPFMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-               HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+               //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
                HYPRE_PCGSetPrecond( (HYPRE_Solver) solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -1968,7 +1973,7 @@ main( hypre_int argc,
                HYPRE_StructSMGSetPrintLevel(precond, 0);
                HYPRE_StructSMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-               HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+               //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
                HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
                                        (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -1996,7 +2001,7 @@ main( hypre_int argc,
                HYPRE_StructPFMGSetPrintLevel(precond, 0);
                HYPRE_StructPFMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-               HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+               //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
                HYPRE_LOBPCGSetPrecond( (HYPRE_Solver) solver,
                                        (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -2212,7 +2217,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_StructHybridSetPrecond(solver,
                                          HYPRE_StructSMGSolve,
@@ -2240,7 +2245,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-            HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+            //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_StructHybridSetPrecond(solver,
                                          HYPRE_StructPFMGSolve,
@@ -2336,7 +2341,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -2364,7 +2369,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-            HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+            //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_GMRESSetPrecond( (HYPRE_Solver)solver,
                                    (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -2487,7 +2492,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)solver,
                                       (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -2515,7 +2520,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-            HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+            //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_BiCGSTABSetPrecond( (HYPRE_Solver)solver,
                                       (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -2638,7 +2643,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_LGMRESSetPrecond( (HYPRE_Solver)solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -2666,7 +2671,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA) 
-            HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+            //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_LGMRESSetPrecond( (HYPRE_Solver)solver,
                                     (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,
@@ -2736,7 +2741,7 @@ main( hypre_int argc,
             HYPRE_StructSMGSetPrintLevel(precond, 0);
             HYPRE_StructSMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA)
-            HYPRE_StructSMGSetDeviceLevel(precond, device_level);
+            //HYPRE_StructSMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver)solver,
                                        (HYPRE_PtrToSolverFcn) HYPRE_StructSMGSolve,
@@ -2764,7 +2769,7 @@ main( hypre_int argc,
             HYPRE_StructPFMGSetPrintLevel(precond, 0);
             HYPRE_StructPFMGSetLogging(precond, 0);
 #if defined(HYPRE_USE_CUDA)
-            HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
+            //HYPRE_StructPFMGSetDeviceLevel(precond, device_level);
 #endif
             HYPRE_FlexGMRESSetPrecond( (HYPRE_Solver)solver,
                                        (HYPRE_PtrToSolverFcn) HYPRE_StructPFMGSolve,

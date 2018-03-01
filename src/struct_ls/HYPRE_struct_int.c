@@ -70,7 +70,7 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
       {
-#if 0//defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_MEMORY_GPU)
 	 vp[vi] = rand_device[idx];
 #else
 	 vp[vi] = 2.0*hypre_Rand() - 1.0;
