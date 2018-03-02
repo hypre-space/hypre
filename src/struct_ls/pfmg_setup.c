@@ -455,7 +455,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
 #if defined(HYPRE_USE_CUDA)
       if (l+1 == num_level_GPU)
       {
-           hypre_StructVectorSetDataSize(tx_l[l+1], &data_size, &data_size_const);
+         hypre_StructVectorSetDataSize(tx_l[l+1], &data_size, &data_size_const);
       }
 #endif
    }
@@ -463,7 +463,7 @@ hypre_PFMGSetup( void               *pfmg_vdata,
    data = hypre_CTAlloc(HYPRE_Real, data_size, HYPRE_MEMORY_DEVICE);
    data_const = hypre_CTAlloc(HYPRE_Real, data_size_const, HYPRE_MEMORY_HOST);
 #if defined(HYPRE_USE_CUDA)
-   hypre_printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
+   //hypre_printf("num_level_GPU = %d,device_level = %d / %d\n",num_level_GPU,device_level,num_levels);
 #endif
 
    (pfmg_data -> data) = data;

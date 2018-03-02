@@ -396,6 +396,9 @@ void hypre_SeqVectorUnMapFromDevice(hypre_Vector *x);
 void hypre_SeqVectorUpdateDevice(hypre_Vector *x);
 void hypre_SeqVectorUpdateHost(hypre_Vector *x);
 #endif
+
+HYPRE_Int hypre_CSRMatrixMatvecOutOfPlaceOOMP3( HYPRE_Complex alpha, hypre_CSRMatrix *A, hypre_Vector *x, HYPRE_Complex beta, hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset);
+
 #ifdef __cplusplus
 }
 #endif

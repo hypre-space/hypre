@@ -1257,7 +1257,14 @@ hypre_int PointerAttributes(const void *ptr);
 #if defined(HYPRE_USE_MANAGED)
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
+#ifdef __cplusplus
+/* MUST HAVE extern C++ for C++ cusparse.h and the headers therein */
+extern "C++" {
+#endif
 #include <cusparse.h>
+#ifdef __cplusplus
+}
+#endif
 #include <cublas_v2.h>
 #include <stdio.h>
 #include <cuda_runtime_api.h>
