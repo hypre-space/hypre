@@ -884,16 +884,17 @@ hypre_ParVectorPrintIJ( hypre_ParVector *vector,
 
    hypre_fprintf(file, "%d \n", global_size);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   for (i=0; i <= 2; i++)
+   for (i=0; i < 2; i++)
    {
-      hypre_fprintf(file, "%d \n", partitioning[i] + base_j);
+      hypre_fprintf(file, "%d ", partitioning[i] + base_j);
    }
 #else
    for (i=0; i <= num_procs; i++)
    {
-      hypre_fprintf(file, "%d \n", partitioning[i] + base_j);
+      hypre_fprintf(file, "%d ", partitioning[i] + base_j);
    }
 #endif
+   hypre_fprintf(file, "\n");
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
    part0 = partitioning[0];

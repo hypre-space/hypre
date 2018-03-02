@@ -60,7 +60,7 @@ typedef struct
 {
 
    /* setup params */
-   HYPRE_Int      max_levels;
+   HYPRE_Int     max_levels;
    HYPRE_Real   strong_threshold;
    HYPRE_Real   max_row_sum;
    HYPRE_Real   trunc_factor;
@@ -70,6 +70,7 @@ typedef struct
    HYPRE_Real   S_commpkg_switch;
    HYPRE_Real   CR_rate;
    HYPRE_Real   CR_strong_th;
+   HYPRE_Real   A_drop_tol;
    HYPRE_Int      measure_type;
    HYPRE_Int      setup_type;
    HYPRE_Int      coarsen_type;
@@ -302,6 +303,7 @@ typedef struct
 #define hypre_ParAMGDataNumCRRelaxSteps(amg_data) ((amg_data)->num_CR_relax_steps)
 #define hypre_ParAMGDataCRRate(amg_data) ((amg_data)->CR_rate)
 #define hypre_ParAMGDataCRStrongTh(amg_data) ((amg_data)->CR_strong_th)
+#define hypre_ParAMGDataADropTol(amg_data) ((amg_data)->A_drop_tol)
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
@@ -643,7 +645,6 @@ HYPRE_Int hypre_ParCSRRelaxThreads ( hypre_ParCSRMatrix *A , hypre_ParVector *f 
 
 /* aux_interp.c */
 HYPRE_Int hypre_alt_insert_new_nodes ( hypre_ParCSRCommPkg *comm_pkg , hypre_ParCSRCommPkg *extend_comm_pkg , HYPRE_Int *IN_marker , HYPRE_Int full_off_procNodes , HYPRE_Int *OUT_marker );
-HYPRE_Int hypre_ParCSRFindExtendCommPkg ( hypre_ParCSRMatrix *A , HYPRE_Int newoff , HYPRE_Int *found , hypre_ParCSRCommPkg **extend_comm_pkg );
 HYPRE_Int hypre_ssort ( HYPRE_Int *data , HYPRE_Int n );
 HYPRE_Int hypre_index_of_minimum ( HYPRE_Int *data , HYPRE_Int n );
 void hypre_swap_int ( HYPRE_Int *data , HYPRE_Int a , HYPRE_Int b );
@@ -867,6 +868,7 @@ HYPRE_Int HYPRE_BoomerAMGSetAggP12MaxElmts ( HYPRE_Solver solver , HYPRE_Int agg
 HYPRE_Int HYPRE_BoomerAMGSetNumCRRelaxSteps ( HYPRE_Solver solver , HYPRE_Int num_CR_relax_steps );
 HYPRE_Int HYPRE_BoomerAMGSetCRRate ( HYPRE_Solver solver , HYPRE_Real CR_rate );
 HYPRE_Int HYPRE_BoomerAMGSetCRStrongTh ( HYPRE_Solver solver , HYPRE_Real CR_strong_th );
+HYPRE_Int HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver, HYPRE_Real    A_drop_tol  );
 HYPRE_Int HYPRE_BoomerAMGSetISType ( HYPRE_Solver solver , HYPRE_Int IS_type );
 HYPRE_Int HYPRE_BoomerAMGSetCRUseCG ( HYPRE_Solver solver , HYPRE_Int CR_use_CG );
 HYPRE_Int HYPRE_BoomerAMGSetGSMG ( HYPRE_Solver solver , HYPRE_Int gsmg );
@@ -1279,6 +1281,7 @@ HYPRE_Int hypre_BoomerAMGSetAggP12TruncFactor ( void *data , HYPRE_Real agg_P12_
 HYPRE_Int hypre_BoomerAMGSetNumCRRelaxSteps ( void *data , HYPRE_Int num_CR_relax_steps );
 HYPRE_Int hypre_BoomerAMGSetCRRate ( void *data , HYPRE_Real CR_rate );
 HYPRE_Int hypre_BoomerAMGSetCRStrongTh ( void *data , HYPRE_Real CR_strong_th );
+HYPRE_Int hypre_BoomerAMGSetADropTol( void     *data, HYPRE_Real  A_drop_tol );
 HYPRE_Int hypre_BoomerAMGSetISType ( void *data , HYPRE_Int IS_type );
 HYPRE_Int hypre_BoomerAMGSetCRUseCG ( void *data , HYPRE_Int CR_use_CG );
 HYPRE_Int hypre_BoomerAMGSetNumPoints ( void *data , HYPRE_Int num_points );

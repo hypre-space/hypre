@@ -3626,6 +3626,13 @@ HYPRE_Int HYPRE_BoomerAMGSetCRStrongTh(HYPRE_Solver solver,
                                        HYPRE_Real   CR_strong_th);
 
 /*
+ * (Optional) Defines drop tolerance for A-matrices from the 2nd level of AMG
+ * The default is 0.0.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver, 
+                            HYPRE_Real    A_drop_tol  );
+/*
  * (Optional) Defines whether to use CG 
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCRUseCG(HYPRE_Solver solver,

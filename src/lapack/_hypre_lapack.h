@@ -43,6 +43,7 @@ extern "C" {
 #define hypre_dgesvd  hypre_F90_NAME_LAPACK(dgesvd,DGESVD)
 #define hypre_dgetf2  hypre_F90_NAME_LAPACK(dgetf2,DGETF2)
 #define hypre_dgetrf  hypre_F90_NAME_LAPACK(dgetrf,DGETRF)
+#define hypre_dgetri  hypre_F90_NAME_LAPACK(dgetri,DGETRI)
 #define hypre_dgetrs  hypre_F90_NAME_LAPACK(dgetrs,DGETRS)
 #define hypre_dlasq1  hypre_F90_NAME_LAPACK(dlasq1,DLASQ1)
 #define hypre_dlasq2  hypre_F90_NAME_LAPACK(dlasq2,DLASQ2)
@@ -71,6 +72,8 @@ extern "C" {
 #define hypre_dsygv   hypre_F90_NAME_LAPACK(dsygv ,DSYGV )
 #define hypre_dsytd2  hypre_F90_NAME_LAPACK(dsytd2,DSYTD2)
 #define hypre_dsytrd  hypre_F90_NAME_LAPACK(dsytrd,DSYTRD)
+#define hypre_dtrti2  hypre_F90_NAME_LAPACK(dtrtri,DTRTI2)
+#define hypre_dtrtri  hypre_F90_NAME_LAPACK(dtrtri,DTRTRI)
 
 #endif
 
@@ -110,6 +113,9 @@ HYPRE_Int hypre_dgetf2 ( HYPRE_Int *m , HYPRE_Int *n , HYPRE_Real *a , HYPRE_Int
 
 /* dgetrf.c */
 HYPRE_Int hypre_dgetrf ( HYPRE_Int *m , HYPRE_Int *n , HYPRE_Real *a , HYPRE_Int *lda , HYPRE_Int *ipiv , HYPRE_Int *info );
+
+/* dgetri.c */
+HYPRE_Int hypre_dgetri ( HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *ipiv, HYPRE_Real *work, HYPRE_Int *lwork, HYPRE_Int *info);
 
 /* dgetrs.c */
 HYPRE_Int hypre_dgetrs ( const char *trans , HYPRE_Int *n , HYPRE_Int *nrhs , HYPRE_Real *a , HYPRE_Int *lda , HYPRE_Int *ipiv , HYPRE_Real *b , HYPRE_Int *ldb , HYPRE_Int *info );
@@ -194,6 +200,13 @@ HYPRE_Int hypre_dsytd2 (const char *uplo , HYPRE_Int *n , HYPRE_Real *a , HYPRE_
 
 /* dsytrd.c */
 HYPRE_Int hypre_dsytrd (const char *uplo , HYPRE_Int *n , HYPRE_Real *a , HYPRE_Int *lda , HYPRE_Real *d__ , HYPRE_Real *e , HYPRE_Real *tau , HYPRE_Real *work , HYPRE_Int *lwork , HYPRE_Int *info );
+
+/* dtrti2.c */
+HYPRE_Int hypre_dtrti2 (const char *uplo, const char *diag, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info);
+
+/* dtrtri.c */
+HYPRE_Int hypre_dtrtri (const char *uplo, const char *diag, HYPRE_Int *n, HYPRE_Real *a, HYPRE_Int *lda, HYPRE_Int *info);
+
 
 #ifdef __cplusplus
 }

@@ -114,6 +114,7 @@ list (APPEND HYPRE_SOURCES
   lapack/dgeqrf.c
   lapack/dgesvd.c
   lapack/dgetrf.c
+  lapack/dgetri.c
   lapack/dgetrs.c
   lapack/dgetf2.c
   lapack/dlabad.c
@@ -170,6 +171,8 @@ list (APPEND HYPRE_SOURCES
   lapack/dsygv.c
   lapack/dsytd2.c
   lapack/dsytrd.c
+  lapack/dtrti2.c
+  lapack/dtrtri.c
   lapack/ieeeck.c
   lapack/ilaenv.c
   lapack/lsame.c

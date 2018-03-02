@@ -36,3 +36,5 @@ the following:
 
 - To determine which routines are auxiliary routines, look at the comments in
   the C files (search for 'auxiliary').
+
+- Add the filename in Makefile

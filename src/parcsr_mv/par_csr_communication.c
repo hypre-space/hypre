@@ -777,6 +777,51 @@ hypre_MatvecCommPkgDestroy( hypre_ParCSRCommPkg *comm_pkg )
    return hypre_error_flag;
 }
 
+/* AHB 11/06 : alternate to the extend function below - creates a
+ * second comm pkg based on indices - this makes it easier to use the
+ * global partition
+ * RL: reanme and move it here
+ * */
+HYPRE_Int
+hypre_ParCSRFindExtendCommPkg(hypre_ParCSRMatrix *A, HYPRE_Int indices_len, HYPRE_Int *indices, 
+                              hypre_ParCSRCommPkg **extend_comm_pkg)
+
+{
+   MPI_Comm  comm            = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int first_col_diag  = hypre_ParCSRMatrixFirstColDiag(A);
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   HYPRE_Int global_num_cols = hypre_ParCSRMatrixGlobalNumCols(A);
+   /* Create the assumed partition */
+   if  (hypre_ParCSRMatrixAssumedPartition(A) == NULL)
+   {
+      hypre_ParCSRMatrixCreateAssumedPartition(A);
+   }
+   hypre_IJAssumedPart *apart = hypre_ParCSRMatrixAssumedPartition(A);
+#else
+   HYPRE_Int *col_starts      = hypre_ParCSRMatrixColStarts(A);
+   HYPRE_Int  num_cols_diag   = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
+#endif
+   /*-----------------------------------------------------------
+    * setup commpkg
+    *----------------------------------------------------------*/
+   hypre_ParCSRCommPkg *new_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
+   *extend_comm_pkg = new_comm_pkg;
+#ifdef HYPRE_NO_GLOBAL_PARTITION
+   hypre_ParCSRCommPkgCreateApart ( comm, indices, first_col_diag, 
+                                    indices_len, global_num_cols,
+                                    apart,
+                                    new_comm_pkg );
+#else
+   hypre_ParCSRCommPkgCreate      ( comm, indices, first_col_diag, 
+                                    col_starts,
+                                    num_cols_diag, indices_len,
+                                    new_comm_pkg );
+#endif
+
+   return hypre_error_flag;
+}
+
+
 HYPRE_Int
 hypre_BuildCSRMatrixMPIDataType( HYPRE_Int num_nonzeros,
                                  HYPRE_Int num_rows,
@@ -830,3 +875,4 @@ hypre_BuildCSRJDataType( HYPRE_Int num_nonzeros,
  
    return hypre_error_flag;
 }
+

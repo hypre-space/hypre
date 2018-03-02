@@ -185,7 +185,7 @@ typedef struct
    HYPRE_Int      coorddim;
    float    *coordinates;
 
- /* data for fitting vectors in interpolation */
+   /* data for fitting vectors in interpolation */
    HYPRE_Int               num_interp_vectors;
    HYPRE_Int               num_levels_interp_vectors; /* not set by user */
    hypre_ParVector **interp_vectors;
@@ -198,19 +198,19 @@ typedef struct
    HYPRE_Int               smooth_interp_vectors;
    HYPRE_Real       *expandp_weights; /* currently not set by user */
 
- /* enable redundant coarse grid solve */
+   /* enable redundant coarse grid solve */
    HYPRE_Solver   coarse_solver;
    hypre_ParCSRMatrix  *A_coarse;
    hypre_ParVector  *f_coarse;
    hypre_ParVector  *u_coarse;
    MPI_Comm   new_comm;
 
- /* store matrix, vector and communication info for Gaussian elimination */
+   /* store matrix, vector and communication info for Gaussian elimination */
    HYPRE_Real *A_mat;
    HYPRE_Real *b_vec;
    HYPRE_Int *comm_info;
 
- /* information for multiplication with Lambda - additive AMG */
+   /* information for multiplication with Lambda - additive AMG */
    HYPRE_Int      additive;
    HYPRE_Int      mult_additive;
    HYPRE_Int      simple;
@@ -225,15 +225,15 @@ typedef struct
    hypre_ParVector *Xtilde;
    HYPRE_Real *D_inv;
 
- /* Use 2 mat-mat-muls instead of triple product*/
+   /* Use 2 mat-mat-muls instead of triple product*/
    HYPRE_Int rap2;
 
    HYPRE_Int keepTranspose;
 	
-/* information for preserving indeces as coarse grid points */
-	HYPRE_Int C_point_coarse_level;
-	HYPRE_Int num_C_point_marker;
-	HYPRE_Int   **C_point_marker_array;
+   /* information for preserving indeces as coarse grid points */
+   HYPRE_Int C_point_coarse_level;
+   HYPRE_Int num_C_point_marker;
+   HYPRE_Int   **C_point_marker_array;
 
 #ifdef HAVE_DSUPERLU
  /* Parameters and data for SuperLU_Dist */

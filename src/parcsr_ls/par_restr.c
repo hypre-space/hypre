@@ -109,7 +109,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);   
-   hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_rank(comm, &my_id);
 
    /*-------------- global number of C points and my start position */
 #ifdef HYPRE_NO_GLOBAL_PARTITION
