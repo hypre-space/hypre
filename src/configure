@@ -8282,8 +8282,8 @@ then
       CFLAGS+=" -DHYPRE_OMP45_DEBUG"
       CXXFLAGS+=" -DHYPRE_OMP45_DEBUG"
    else
-      CFLAGS+=" -O3"
-      CXXFLAGS+=" -O3"
+      CFLAGS+=" -O2"
+      CXXFLAGS+=" -O2"
    fi
 fi
 
