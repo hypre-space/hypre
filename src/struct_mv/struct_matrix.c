@@ -717,7 +717,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          data_box,data_start,data_stride,datai,
                                          dval_box,dval_start,dval_stride,dvali);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop2For(datai, dvali)
@@ -731,7 +731,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          data_box,data_start,data_stride,datai,
                                          dval_box,dval_start,dval_stride,dvali);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop2For(datai, dvali)
@@ -745,7 +745,7 @@ hypre_StructMatrixSetBoxValues( hypre_StructMatrix *matrix,
                      hypre_BoxLoop2Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                          data_box,data_start,data_stride,datai,
                                          dval_box,dval_start,dval_stride,dvali);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop2For(datai, dvali)
@@ -1084,7 +1084,7 @@ hypre_StructMatrixClearBoxValues( hypre_StructMatrix *matrix,
                
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                    data_box,data_start,data_stride,datai);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop1For(datai)
@@ -1216,7 +1216,7 @@ hypre_StructMatrixAssemble( hypre_StructMatrix *matrix )
 
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                    data_box, start, stride, datai);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop1For(datai)
@@ -1460,7 +1460,7 @@ hypre_StructMatrixClearGhostValues( hypre_StructMatrix *matrix )
                      
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(matrix), loop_size,
                                    m_data_box, start, unit_stride, mi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop1For(mi)
@@ -1875,7 +1875,7 @@ hypre_StructMatrixClearBoundary( hypre_StructMatrix *matrix)
                hypre_BoxGetSize(tmp_box, loop_size);
                start = hypre_BoxIMin(tmp_box);
                hypre_BoxLoop1Begin(ndim, loop_size, data_box, start, stride, ixyz);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop1For(ixyz)

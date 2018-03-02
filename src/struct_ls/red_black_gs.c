@@ -289,7 +289,7 @@ hypre_RedBlackGS( void               *relax_vdata,
                }
 
                hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
@@ -414,7 +414,7 @@ hypre_RedBlackGS( void               *relax_vdata,
                {
                   case 7:
                      hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
@@ -436,7 +436,7 @@ hypre_RedBlackGS( void               *relax_vdata,
 
                   case 5:
                      hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
@@ -456,7 +456,7 @@ hypre_RedBlackGS( void               *relax_vdata,
 
                   case 3:
                      hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_RedBlackLoopBegin(ni,nj,nk,redblack,

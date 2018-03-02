@@ -54,7 +54,7 @@ hypre_SMGAxpy( HYPRE_Real          alpha,
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, base_stride, xi,
                           y_data_box, start, base_stride, yi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(xi, yi)

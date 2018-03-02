@@ -557,7 +557,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -627,7 +627,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -731,7 +731,7 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -1216,7 +1216,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -1277,7 +1277,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -1373,7 +1373,7 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop4For(iP, iR, iA, iAc)

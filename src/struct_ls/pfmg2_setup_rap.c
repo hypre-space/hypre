@@ -470,7 +470,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -523,7 +523,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS5_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -990,7 +990,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -1060,7 +1060,7 @@ hypre_PFMG2BuildRAPSym_onebox_FSS9_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -1662,7 +1662,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -1708,7 +1708,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS5_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -2156,7 +2156,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -2217,7 +2217,7 @@ hypre_PFMG2BuildRAPNoSym_onebox_FSS9_CC0(
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
                           RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop4For(iP, iR, iA, iAc)

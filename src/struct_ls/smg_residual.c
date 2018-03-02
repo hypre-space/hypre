@@ -195,7 +195,7 @@ hypre_SMGResidual( void               *residual_vdata,
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    b_data_box, start, base_stride, bi,
                                    r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(bi, ri)
@@ -247,7 +247,7 @@ hypre_SMGResidual( void               *residual_vdata,
                                    A_data_box, start, base_stride, Ai,
                                    x_data_box, start, base_stride, xi,
                                    r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop3For(Ai, xi, ri)

@@ -245,7 +245,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(R), loop_size,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(ri, rci)
@@ -261,7 +261,7 @@ hypre_SemiRestrict( void               *restrict_vdata,
                                    R_dbox,  startc, stridec, Ri,
                                    r_dbox,  start,  stride,  ri,
                                    rc_dbox, startc, stridec, rci);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop3For(Ri, ri, rci)

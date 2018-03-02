@@ -496,7 +496,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                hypre_BoxLoop2Begin(ndim, loop_size,
                                    sgrid_box, box_start, stride, k,
                                    A_smatrix_dbox, box_start, stride, iA);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(k, iA)
@@ -571,7 +571,7 @@ hypre_FacSetup2( void                 *fac_vdata,
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       sgrid_box, box_start, stride, k,
                                       A_smatrix_dbox, box_start, stride, iA);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                   hypre_BoxLoop2For(k, iA)
@@ -832,7 +832,7 @@ hypre_FacSetup2( void                 *fac_vdata,
             hypre_BoxLoop2Begin(ndim, loop_size,
                                 sgrid_box, box_start, stride, k,
                                 A_smatrix_dbox, box_start, stride, iA);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,k,iA) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(k, iA)

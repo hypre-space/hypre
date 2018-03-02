@@ -367,7 +367,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
                              P_dbox, cstart, stridec, iP,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop3For(iP, iA, iAc)
@@ -438,7 +438,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop2For(iA, iAc)
@@ -473,7 +473,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, bfstart, stridef, iA,
                                 RAP_dbox, bcstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(iA, iAc)

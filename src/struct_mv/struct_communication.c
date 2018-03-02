@@ -966,7 +966,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
                hypre_BasicBoxLoop2Begin(ndim, length_array,
                                         stride_array, ki,
                                         unitst_array, di);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(ki, di)
@@ -1301,7 +1301,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
             hypre_BasicBoxLoop2Begin(ndim, length_array,
                                      stride_array, ki,
                                      unitst_array, di);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(ki, di)
@@ -1464,7 +1464,7 @@ hypre_ExchangeLocalData( hypre_CommPkg *comm_pkg,
                hypre_BasicBoxLoop2Begin(ndim, length_array,
                                         fr_stride_array, fi,
                                         to_stride_array, ti);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(fi, ti)

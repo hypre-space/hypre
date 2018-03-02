@@ -119,7 +119,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start,  stride,  Ai,
                           v_dbox, startv, stridev, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,vi,lambdax,lambday,lambdaz,si,Ap,Astenc,lambda_max,dir) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(Ai, vi)
@@ -284,7 +284,7 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(e), loop_size,
                           e_dbox, start,  stride,  ei,
                           v_dbox, startv, stridev, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,ei,vi) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(ei, vi)
@@ -386,7 +386,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start,  stride,  Ai,
                           v_dbox, startv, stridev, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(Ai, vi)
@@ -525,7 +525,7 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(e), loop_size,
                           e_dbox, start,  stride,  ei,
                           v_dbox, startv, stridev, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(ei, vi)

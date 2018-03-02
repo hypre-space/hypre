@@ -689,7 +689,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                                    A_data_box, start, stride, Ai,
                                    b_data_box, start, stride, bi,
                                    x_data_box, start, stride, xi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop3For(Ai, bi, xi)
@@ -823,7 +823,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                hypre_BoxLoop2Begin(ndim, loop_size,
                                    b_data_box, start, stride, bi,
                                    t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ti,vi) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(bi, ti)
@@ -860,7 +860,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                                                   A_data_box, start, stride, Ai,
                                                   x_data_box, start, stride, xi,
                                                   t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ti) HYPRE_SMP_SCHEDULE
 #endif
                               hypre_BoxLoop3For(Ai,xi,ti)
@@ -892,7 +892,7 @@ hypre_NodeRelax(  void               *relax_vdata,
                hypre_BoxLoop2Begin(ndim, loop_size,
                                    A_data_box, start, stride, Ai,
                                    t_data_box, start, stride, ti);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(Ai, ti)

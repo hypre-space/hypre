@@ -362,7 +362,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
                                 data_box,data_start,data_stride,datai,
                                 dval_box,dval_start,dval_stride,dvali);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(datai, dvali)
@@ -376,7 +376,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
                                 data_box,data_start,data_stride,datai,
                                 dval_box,dval_start,dval_stride,dvali);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(datai, dvali)
@@ -390,7 +390,7 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(vector), loop_size,
                                 data_box,data_start,data_stride,datai,
                                 dval_box,dval_start,dval_stride,dvali);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,datai,dvali) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(datai, dvali)
@@ -536,7 +536,7 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
 
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                              data_box,data_start,data_stride,datai);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop1For(datai)
@@ -570,7 +570,7 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
 
    hypre_BoxLoop1Begin(1, imax,
                        box, imin, imin, datai);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
    hypre_BoxLoop1For(datai)
@@ -656,7 +656,7 @@ hypre_StructVectorCopy( hypre_StructVector *x,
 
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, unit_stride, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For(vi)
@@ -708,7 +708,7 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
 
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop1For(vi)
@@ -772,7 +772,7 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
 /* RDF: This won't work as written with threading on */
        
 #if 0
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE ) HYPRE_SMP_SCHEDULE
 #endif
 #else
@@ -835,7 +835,7 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                              v_data_box, start, unit_stride, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop1For(vi)
@@ -909,7 +909,7 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
             start = hypre_BoxIMin(bbox);
             hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                                 v_data_box, start, stride, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE ) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop1For(vi)
@@ -956,7 +956,7 @@ hypre_StructVectorScaleValues( hypre_StructVector *vector, HYPRE_Complex factor 
 
    hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                        box, imin, imin, datai);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
    hypre_BoxLoop1For(datai)
@@ -1220,7 +1220,7 @@ hypre_StructVectorMaxValue( hypre_StructVector *vector,
 /*FIXME: must run sequentially*/
       zypre_BoxLoop1Begin(ndim, loop_size,
                           box, imin, unit_stride, datai);      
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       zypre_BoxLoop1For(datai)

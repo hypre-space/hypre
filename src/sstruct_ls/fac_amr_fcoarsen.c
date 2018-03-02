@@ -1875,7 +1875,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
                                             A_dbox, fstart, stridef, iA,
                                             crse_dbox, cstart, stridec, iAc);
 #if 0
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc,i,rank,index1,index2,m,l,k,j,iA_shift_z,iA_shift_zy,iA_shift_zyx,stencil_i,sum,vals) HYPRE_SMP_SCHEDULE
 #endif
 #endif
@@ -3480,7 +3480,7 @@ hypre_AMR_FCoarsen( hypre_SStructMatrix  *   A,
 
                hypre_BoxLoop1Begin(ndim, loop_size,
                                    A_dbox, cstart, stridec, iA);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,i) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop1For(iA)

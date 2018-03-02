@@ -249,7 +249,7 @@ hypre_PFMGSetupInterpOp_CC0
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        A_dbox, start, stride, Ai,
                        P_dbox, startc, stridec, Pi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
    hypre_BoxLoop2For(Ai, Pi)
@@ -518,7 +518,7 @@ hypre_PFMGSetupInterpOp_CC2
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start, stride, Ai,
                           P_dbox, startc, stridec, Pi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(Ai, Pi)

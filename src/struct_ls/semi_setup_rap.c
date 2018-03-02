@@ -479,7 +479,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
             rap_ptrS = hypre_StructMatrixBoxData(RAP, ci, RAPloop);
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                 RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop1For(iAc)
@@ -555,7 +555,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                             R_dbox, cstart, stridec, iR,
                                             A_dbox, fstart, stridef, iA,
                                             RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                         hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -592,7 +592,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                             R_dbox, cstart, stridec, iR,
                                             A_dbox, fstart, stridef, iA,
                                             RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                         hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -666,7 +666,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                          R_dbox, cstart, stridec, iR,
                                          A_dbox, fstart, stridef, iA,
                                          RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -736,7 +736,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                                          R_dbox, cstart, stridec, iR,
                                          A_dbox, fstart, stridef, iA,
                                          RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop4For(iP, iR, iA, iAc)
@@ -845,7 +845,7 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
 
                      hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                          RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,iAc) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop1For(iAc)

@@ -198,7 +198,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                           e_dbox,  start,  stride,  ei,
                           xc_dbox, startc, stridec, xci);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(ei, xci)
@@ -258,7 +258,7 @@ hypre_SparseMSGInterp( void               *interp_vdata,
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                                 P_dbox, startP, strideP, Pi,
                                 e_dbox, start,  stride,  ei);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop2For(Pi, ei)

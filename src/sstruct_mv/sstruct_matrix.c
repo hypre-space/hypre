@@ -735,7 +735,7 @@ hypre_SStructUMatrixInitialize( hypre_SStructMatrix *matrix )
             hypre_BoxGetSize(box, loop_size);
             hypre_BoxLoop1Begin(hypre_SStructMatrixNDim(matrix), loop_size,
                                 ghost_box, start, stride, mi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,mi) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop1For(mi)
@@ -983,7 +983,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
 
       nrows    = hypre_BoxVolume(vbox)*nentries;
       ncols    = hypre_UMCTAlloc(HYPRE_Int, nrows);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
       for (i = 0; i < nrows; i++)
@@ -1049,7 +1049,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                zypre_BoxLoop2Begin(ndim, loop_size,
                                    int_box, start, stride, mi,
                                    vbox,    start, stride, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                zypre_BoxLoop2For(mi, vi)
@@ -1482,7 +1482,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      hypre_BoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
                                          vbox,  start, stride, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop2For(mi, vi)
@@ -1514,7 +1514,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      hypre_BoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
                                          vbox,  start, stride, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                      hypre_BoxLoop2For(mi, vi)

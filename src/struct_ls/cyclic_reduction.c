@@ -330,7 +330,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, fstart, stridef, iA,
                              Ac_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop2For(iA, iAc)
@@ -361,7 +361,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, fstart, stridef, iA,
                              Ac_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop2For(iA, iAc)
@@ -427,7 +427,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                 Ac_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop1For(iAc)
@@ -449,7 +449,7 @@ hypre_CycRedSetupCoarseOp( hypre_StructMatrix *A,
 
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                 Ac_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
             hypre_BoxLoop1For(iAc)
@@ -818,7 +818,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           x_dbox, start, base_stride, xi,
                           b_dbox, start, base_stride, bi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(xi, bi)
@@ -871,7 +871,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                              A_dbox, start, stride, Ai,
                              x_dbox, start, stride, xi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop2For(Ai, xi)
@@ -950,7 +950,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi,
                                    xc_dbox, startc, stridec, xci);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop3For(Ai, xi, xci)
@@ -995,7 +995,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                           A_dbox, start, stride, Ai,
                           x_dbox, start, stride, xi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
       hypre_BoxLoop2For(Ai, xi)
@@ -1055,7 +1055,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
          hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                              x_dbox, start, stride, xi,
                              xc_dbox, startc, stridec, xci);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE,xi,xci) HYPRE_SMP_SCHEDULE
 #endif
          hypre_BoxLoop2For(xi, xci)
@@ -1120,7 +1120,7 @@ hypre_CyclicReduction( void               *cyc_red_vdata,
                hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                    A_dbox, start, stride, Ai,
                                    x_dbox, start, stride, xi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                hypre_BoxLoop2For(Ai, xi)
