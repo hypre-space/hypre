@@ -206,13 +206,13 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 
 #ifdef HYPRE_USE_GPU
    if (!hypre_ParCSRMatrixIsManaged(A)){
-     hypre_fprintf(stderr,"ERROR:: INVALID A in hypre_BoomerAMGSetup::Address %p\n",A);
+     hypre_fprintf(stderr,"WARNING:: INVALID A in hypre_BoomerAMGSetup::Address %p\n",A);
      //exit(2);
    } else if(!hypre_ParVectorIsManaged(f)){
-     hypre_fprintf(stderr,"ERROR:: INVALID f in hypre_BoomerAMGSetup::Address %p\n",f);
+     hypre_fprintf(stderr,"WARNING:: INVALID f in hypre_BoomerAMGSetup::Address %p\n",f);
      //exit(2);
    } else if (!hypre_ParVectorIsManaged(u)){
-     hypre_fprintf(stderr,"ERROR:: INVALID u in hypre_BoomerAMGSetup::Address %p\n",u);
+     hypre_fprintf(stderr,"WARNING:: INVALID u in hypre_BoomerAMGSetup::Address %p\n",u);
      //exit(2);
    } 
 #endif

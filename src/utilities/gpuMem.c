@@ -420,6 +420,7 @@ hypre_int checkDeviceProps(){
 hypre_int pointerIsManaged(const void *ptr){
   struct cudaPointerAttributes ptr_att;
   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess) {
+    cudaGetLastError(); 
     return 0;
   }
   return ptr_att.isManaged;
