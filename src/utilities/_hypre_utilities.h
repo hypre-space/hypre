@@ -708,10 +708,8 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
 
 #else
 
-#define ASSERT_MANAGED(ptr) (ptr)
-
-#define ASSERT_HOST(ptr) (ptr)
-
+/* These Allocs are with printfs, for debug */
+#if 0 
 #define hypre_TAlloc(type, count, location) \
 (\
  /*printf("[%s:%d] MALLOC %ld B\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))) ,*/ \
@@ -731,6 +729,19 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
  /* printf("[%s:%d] TReALLOC %ld B\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))) , */ \
  (type *)hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) \
 )
+
+#else
+
+#define hypre_TAlloc(type, count, location) \
+( (type *) hypre_MAlloc((size_t)(sizeof(type) * (count)), location) )
+
+#define hypre_CTAlloc(type, count, location) \
+( (type *) hypre_CAlloc((size_t)(count), (size_t)sizeof(type), location) )
+
+#define hypre_TReAlloc(ptr, type, count, location) \
+( (type *) hypre_ReAlloc((char *)ptr, (size_t)(sizeof(type) * (count)), location) )
+
+#endif
 
 #endif
 

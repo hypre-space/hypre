@@ -197,6 +197,7 @@ list (APPEND HYPRE_SOURCES
   utilities/hypre_ap.c
   utilities/hypre_complex.c
   utilities/hypre_error.c
+  utilities/hypre_general.c
   utilities/hypre_hopscotch_hash.c
   utilities/hypre_memory.c
   utilities/hypre_merge_sort.c

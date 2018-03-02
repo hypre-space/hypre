@@ -384,7 +384,7 @@ hypre_ParCSRMatrixMatvecT( HYPRE_Complex       alpha,
    HYPRE_Int         ierr  = 0;
 
    if (y==NULL) {
-     printf("NULLY %p\b",y);
+     printf("NULLY %p\b", (void*) y);
      return 1;
    }
    /*---------------------------------------------------------------------

@@ -436,7 +436,9 @@ hypre_Free( char *ptr ,
 #endif /* end HYPRE_USE_MANAGED_SCALABLE */
 #endif /* end HYPRE_USE_UMALLOC */
 #else /*else HYPRE_USE_OMP45_TARGET_ALLOC */
+#ifdef TRACK_MEMORY_ALLOCATIONS
       ASSERT_HOST(ptr);
+#endif
       free(ptr);
 #endif /*end HYPRE_USE_OMP45_TARGET_ALLOC */
      }
