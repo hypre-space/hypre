@@ -318,7 +318,8 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
   ( assert_check_host((ptr),__FILE__,__LINE__))
 
 #else
-
+#define ASSERT_MANAGED(ptr) (ptr)
+#define ASSERT_HOST(ptr) (ptr)
 /* These Allocs are with printfs, for debug */
 #if 0 
 #define hypre_TAlloc(type, count, location) \
