@@ -447,12 +447,15 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP( HYPRE_Complex    alpha,
 
 #ifdef HYPRE_USING_CUSPARSE
    
+#if defined(TRACK_MEMORY_ALLOCATIONS)
    ASSERT_MANAGED(A_data);
    ASSERT_MANAGED(A_i);
    ASSERT_MANAGED(A_j);
    ASSERT_MANAGED(x_data);
    ASSERT_MANAGED(y_data);
    ASSERT_MANAGED(b_data);
+#endif
+
    if (b!=y){
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
 #pragma omp target teams  distribute  parallel for private(i)

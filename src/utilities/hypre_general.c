@@ -21,7 +21,13 @@
 void
 hypre_init()
 {
+   /*
    HYPRE_Int  num_procs, myid;
+   
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   */
+
 #if defined(HYPRE_USE_KOKKOS)
    Kokkos::InitArguments args;
    args.num_threads = 10;
@@ -32,10 +38,11 @@ hypre_init()
    initCudaReductionMemBlock();
 #endif
 
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
    hypre_GPUInit(-1);
-   hypre_InitMemoryDebug(myid);
+#endif
+
+   /* hypre_InitMemoryDebug(myid); */
 
 #ifdef HYPRE_USE_OMP45
    HYPRE_OMPOffloadOn();
@@ -51,7 +58,10 @@ hypre_init()
 void
 hypre_finalize()
 {
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
    hypre_GPUFinalize();
+#endif
+
 #if defined(HYPRE_USE_KOKKOS)
    Kokkos::finalize ();
 #endif
@@ -60,3 +70,4 @@ hypre_finalize()
    freeCudaReductionMemBlock();
 #endif
 }
+

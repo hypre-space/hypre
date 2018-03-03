@@ -15,11 +15,6 @@
 
 #include "gselim.h"
 
-/*
-#if defined(HYPRE_USE_OMP45)
-#include "__omp45_gselim.h"
-#endif
-*/
 /* TODO consider adding it to semistruct header files */
 #define HYPRE_MAXVARS 4
 
@@ -711,7 +706,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                                    b_data_box, start, stride, bi,
                                    x_data_box, start, stride, xi);
                {
-                  HYPRE_Int vi, vj;
+                  HYPRE_Int vi, vj, err;
                   //HYPRE_Real *A_loc = tA_loc + hypre_BoxLoopBlock() * nvars * nvars;
                   //HYPRE_Real *x_loc = tx_loc + hypre_BoxLoopBlock() * nvars;
                   HYPRE_Real A_loc[HYPRE_MAXVARS * HYPRE_MAXVARS];
@@ -734,8 +729,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                   /*------------------------------------------------
                    * Invert intra-nodal coupling 
                    *----------------------------------------------*/
-                  //gselim(A_loc, x_loc, nvars);
-		  hypre_gselim_inline(A_loc,x_loc,nvars);
+		  hypre_gselim(A_loc, x_loc, nvars, err);
                   /*------------------------------------------------
                    * Copy solution from local storage.
                    *----------------------------------------------*/
@@ -909,7 +903,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                                    A_data_box, start, stride, Ai,
                                    t_data_box, start, stride, ti);
                {
-                  HYPRE_Int vi, vj;
+                  HYPRE_Int vi, vj, err;
                   /*
                   HYPRE_Real *A_loc = tA_loc + hypre_BoxLoopBlock() * nvars * nvars;
                   HYPRE_Real *x_loc = tx_loc + hypre_BoxLoopBlock() * nvars;
@@ -935,8 +929,7 @@ hypre_NodeRelax(  void                 *relax_vdata,
                   /*------------------------------------------------
                    * Invert intra-nodal coupling
                    *----------------------------------------------*/
-                  //gselim(A_loc, x_loc, nvars);
-		  hypre_gselim_inline(A_loc,x_loc,nvars);
+		  hypre_gselim(A_loc, x_loc, nvars, err);
                   /*------------------------------------------------
                    * Copy solution from local storage.
                    *----------------------------------------------*/

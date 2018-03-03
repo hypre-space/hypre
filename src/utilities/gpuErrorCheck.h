@@ -12,32 +12,44 @@
 
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) || defined(HYPRE_USE_OMP45)
-#define hypre_CheckErrorDevice(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
-void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
+
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
+
+//#include <cuda_runtime_api.h>
+#ifdef __cplusplus
+extern "C++" {
+#endif
+#include <cuda.h>
+#include <cuda_runtime.h>
+#ifdef __cplusplus
+}
 #endif
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) || defined(HYPRE_USE_OMP45)
-#include <cuda_runtime_api.h>
+#define hypre_CheckErrorDevice(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
 #define MEM_PAD_LEN 1
-
 #define HYPRE_HOST_POINTER 0
 #define HYPRE_MANAGED_POINTER 1
 #define HYPRE_PINNED_POINTER 2
 #define HYPRE_DEVICE_POINTER 3
 #define HYPRE_UNDEFINED_POINTER1 4
 #define HYPRE_UNDEFINED_POINTER2 5
+
+void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
 void cudaSafeFree(void *ptr,int padding);
 hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
-#endif // defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_MANAGED)|| defined(HYPRE_USING_CUSPARSE) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 
-#if defined(HYPRE_USE_MANAGED)
+#endif 
+
+/* CUBLAS and CUSPARSE related */
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USING_CUSPARSE)
+
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
-#ifdef __cplusplus
+
 /* MUST HAVE extern C++ for C++ cusparse.h and the headers therein */
+#ifdef __cplusplus
 extern "C++" {
 #endif
 #include <cusparse.h>
@@ -45,9 +57,7 @@ extern "C++" {
 }
 #endif
 #include <cublas_v2.h>
-#include <stdio.h>
 #include <cuda_runtime_api.h>
-#include <stdlib.h>
 inline const char *cusparseErrorCheck(cusparseStatus_t error)
 {
     switch (error)
@@ -83,6 +93,7 @@ inline const char *cusparseErrorCheck(cusparseStatus_t error)
     }
     
 }
+
 inline const char *cublasErrorCheck(cublasStatus_t error)
 {
     switch (error)
@@ -130,6 +141,7 @@ inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
      fprintf(stderr,"CUSPARSE ERROR : %s \n", cusparseErrorCheck(code));
    }
 }
+
 #define cublasErrchk(ans){ cublasAssert((ans), __FILE__, __LINE__); }
 inline void cublasAssert(cublasStatus_t code, const char *file, int line)
 {
@@ -140,6 +152,6 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
    }
 }
 #endif // __cusparseErrorCheck__
-#endif// defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#endif // defined(HYPRE_USE_GPU)
 
 #endif // hypre_GPU_ERROR_HEADER

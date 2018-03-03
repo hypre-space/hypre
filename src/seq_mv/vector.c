@@ -727,7 +727,9 @@ HYPRE_Real   hypre_SeqVectorInnerProdDevice( hypre_Vector *x,
 }
 void hypre_SeqVectorPrefetchToDevice(hypre_Vector *x){
   if (hypre_VectorSize(x)==0) return;
+#if defined(TRACK_MEMORY_ALLOCATIONS)
   ASSERT_MANAGED(hypre_VectorData(x));
+#endif
   //PrintPointerAttributes(hypre_VectorData(x));
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
   hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(4)));
@@ -743,7 +745,9 @@ void hypre_SeqVectorPrefetchToHost(hypre_Vector *x){
 }
 void hypre_SeqVectorPrefetchToDeviceInStream(hypre_Vector *x, HYPRE_Int index){
   if (hypre_VectorSize(x)==0) return;
+#if defined(TRACK_MEMORY_ALLOCATIONS)
   ASSERT_MANAGED(hypre_VectorData(x));
+#endif
   PUSH_RANGE("hypre_SeqVectorPrefetchToDevice",0);
   hypre_CheckErrorDevice(cudaMemPrefetchAsync(hypre_VectorData(x),hypre_VectorSize(x)*sizeof(HYPRE_Complex),HYPRE_DEVICE,HYPRE_STREAM(index)));
   hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(index)));

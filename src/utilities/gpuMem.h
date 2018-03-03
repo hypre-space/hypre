@@ -67,6 +67,10 @@ struct hypre__global_struct{
 
 extern struct hypre__global_struct hypre__global_handle ;
 
+/*
+ * Macros for accessing elements of the global handle
+ */
+
 #define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
 #define HYPRE_GPU_HANDLE hypre__global_handle.initd
@@ -78,12 +82,7 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
 
-/*
- * Macros for accessing elements of the global handle
- */
-
 #endif /* HYPRE_USE_MANAGED */
-
 
 typedef struct node {
   const void *ptr;
@@ -97,12 +96,8 @@ void meminsert(node **head, const void *ptr,size_t size);
 void printlist(node *head,hypre_int nc);
 size_t memsize(const void *ptr);
 
-#else
+#endif /* defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) */
 
-#define hypre_GPUInit(use_device)
-#define hypre_GPUFinalize()
-
-#endif /* defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED) */
 
 #if defined(HYPRE_USE_CUDA)
 extern HYPRE_Int hypre_exec_policy;
@@ -136,6 +131,7 @@ void freeCPUReductionMemBlock();
 
 #endif/* defined(HYPRE_USE_CUDA) */
 
+
 #ifdef HYPRE_USE_OMP45
 HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
 			   const char *type1, const char *type2);
@@ -152,6 +148,7 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 
 #define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
 #define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
+
 #endif/* HYPRE_USE_OMP45 */
 
 #endif/* __GPUMEM_H__ */

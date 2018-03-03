@@ -2435,34 +2435,15 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+
+   /* GPU Init stuff inside */
    hypre_init();
-/*
-#if defined(HYPRE_USE_KOKKOS)
-   Kokkos::InitArguments args;
-   args.num_threads = 10;
-   Kokkos::initialize (args);
-#endif
 
-#if defined(HYPRE_USE_CUDA)
-   printf("initCudaReductionMemBlock\n");
-   initCudaReductionMemBlock();
-   printf("Finish initCudaReductionMemBlock\n");
-#endif
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   hypre_GPUInit(-1);
-   hypre_InitMemoryDebug(myid);
-
-#ifdef HYPRE_USE_OMP45
-   HYPRE_OMPOffloadOn();
-#endif
-*/
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    /*-----------------------------------------------------------
     * Read input file
     *-----------------------------------------------------------*/
-
    arg_index = 1;
 
    /* parse command line for input file name */
@@ -3083,7 +3064,7 @@ main( hypre_int argc,
           *                  values_ilower, values_iupper, values);
           */
 
-/* since we have already tested SetBoxValues above, use SetValues here */
+         /* since we have already tested SetBoxValues above, use SetValues here */
 #if 0
          for (j = 0; j < pdata.graph_boxsizes[box]; j++)
          {
@@ -5764,18 +5745,14 @@ main( hypre_int argc,
    hypre_TFree(refine, HYPRE_MEMORY_HOST);
    hypre_TFree(distribute, HYPRE_MEMORY_HOST);
    hypre_TFree(block, HYPRE_MEMORY_HOST);
-   hypre_FinalizeMemoryDebug();
+   /*hypre_FinalizeMemoryDebug(); */
 
-   /* Finalize MPI */
-   /*
-   hypre_GPUFinalize();
-#if defined(HYPRE_USE_KOKKOS)
-   Kokkos::finalize ();
-#endif
-   */
+   /* GPU finalize stuff inside */
    hypre_finalize();
 
+   /* Finalize MPI */
    hypre_MPI_Finalize();
 
    return (0);
 }
+

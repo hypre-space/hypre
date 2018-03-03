@@ -703,7 +703,7 @@ HYPRE_Int  hypre_BoomerAMGRelaxT( hypre_ParCSRMatrix *A,
                b_vec[i] = f_vector_data[i];
             }
 
-            relax_error = gselim(A_mat,b_vec,n_global);
+            hypre_gselim(A_mat, b_vec, n_global, relax_error);
 
             for (i = 0; i < n; i++)
             {

@@ -188,35 +188,15 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-
-   hypre_init();
-
-/*
-#ifdef HYPRE_USE_OMP45
-   HYPRE_OMPOffloadOn();
-#endif
-
-#if defined(HYPRE_USE_KOKKOS)
-   Kokkos::InitArguments args;
-   args.num_threads = 10;
-   Kokkos::initialize (args);
-#endif
-
-#if defined(HYPRE_USE_CUDA)
-   hypre_printf("initCudaReductionMemBlock\n");
-   initCudaReductionMemBlock();
-   hypre_printf("Finish initCudaReductionMemBlock\n");
-#endif
-*/
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
+   /* GPU Init stuff inside */
+   hypre_init();
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
 #endif
-
-   hypre_InitMemoryDebug(myid);
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -2877,19 +2857,12 @@ main( hypre_int argc,
       for ( i = 0; i < (dim + 1); i++)
          hypre_TFree(offsets[i], HYPRE_MEMORY_HOST);
       hypre_TFree(offsets, HYPRE_MEMORY_HOST);
-
-      hypre_FinalizeMemoryDebug();
-
    }
 
-   /* Finalize MPI */
-/*
-#if defined(HYPRE_USE_KOKKOS)
-   Kokkos::finalize ();
-#endif
-*/
+   /* GPU finalize stuff inside */
    hypre_finalize();
 
+   /* Finalize MPI */
    hypre_MPI_Finalize();
 
 #ifdef HYPRE_USE_OMP45

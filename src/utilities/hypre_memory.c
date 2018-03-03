@@ -371,7 +371,9 @@ hypre_ReAlloc( char *ptr, size_t size, HYPRE_Int location)
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
       void *new_ptr = hypre_MAlloc(size, location);
 #ifdef HYPRE_USE_MANAGED_SCALABLE
+#if defined(TRACK_MEMORY_ALLOCATIONS)
       ASSERT_MANAGED(ptr);
+#endif
       size_t old_size = memsize((void*)ptr);
 #else
       size_t old_size = mempush((void*)ptr, 0, 0);

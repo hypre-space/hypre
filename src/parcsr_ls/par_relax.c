@@ -4046,7 +4046,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                b_vec[i] = f_vector_data[i];
             }
 
-            relax_error = gselim(A_mat,b_vec,n_global);
+            hypre_gselim(A_mat,b_vec,n_global,relax_error);
 
             for (i = 0; i < n; i++)
             {
@@ -4304,7 +4304,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
 
       if (relax_type == 9)
       {
-         error_flag = gselim(A_tmp,b_vec,n_global);
+         hypre_gselim(A_tmp,b_vec,n_global,error_flag);
       }
       else if (relax_type == 99) /* use pivoting */
       {
@@ -4334,7 +4334,7 @@ HYPRE_Int hypre_GaussElimSolve (hypre_ParAMGData *amg_data, HYPRE_Int level, HYP
    return hypre_error_flag;
 }
 
-HYPRE_CUDA_GLOBAL
+#if 0
 HYPRE_Int gselim(HYPRE_Real *A,
                  HYPRE_Real *x,
                  HYPRE_Int n)
@@ -4398,7 +4398,7 @@ HYPRE_Int gselim(HYPRE_Real *A,
        return(err_flag);
     }
 }
-
+#endif
          
 
 

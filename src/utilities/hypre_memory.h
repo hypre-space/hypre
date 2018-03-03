@@ -89,18 +89,7 @@ extern "C" {
 #define HYPRE_MEMORY_SHARED ( 2)
 #define HYPRE_MEMORY_UNSET  (-1)
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-
-#define hypre_DeviceMemset(ptr, value, type, count) 
-
-#ifdef __cplusplus
-extern "C++" {
-#endif
-#include <cuda.h>
-#include <cuda_runtime.h>
-#ifdef __cplusplus
-}
-#endif
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_CUDA)
 #define HYPRE_CUDA_GLOBAL __host__ __device__
 #else
 #define HYPRE_CUDA_GLOBAL 
@@ -108,17 +97,9 @@ extern "C++" {
 
 /* OpenMP 4.5 */
 #if defined(HYPRE_USE_OMP45)
+
 #include "omp.h"
   
-#ifdef __cplusplus
-extern "C++" {
-#endif
-#include <cuda.h>
-#include <cuda_runtime.h>
-#ifdef __cplusplus
-}
-#endif
-
 /* stringification:
  * _Pragma(string-literal), so we need to cast argument to a string
  * The three dots as last argument of the macro tells compiler that this is a variadic macro. 
@@ -128,16 +109,10 @@ extern "C++" {
 #define HYPRE_XSTR(s...) HYPRE_STR(s)
 
 /* OpenMP 4.5 GPU memory management */
-/* empty */
-#ifndef HYPRE_CUDA_GLOBAL
-#define HYPRE_CUDA_GLOBAL
-#endif
-
 extern HYPRE_Int hypre__global_offload;
 extern HYPRE_Int hypre__offload_device_num;
 
 /* stats */
-
 extern size_t hypre__target_allc_count;
 extern size_t hypre__target_free_count;
 extern size_t hypre__target_allc_bytes;
@@ -148,17 +123,18 @@ extern size_t hypre__target_htod_bytes;
 extern size_t hypre__target_dtoh_bytes;
 
 /* DEBUG MODE: check if offloading has effect 
- * (turned on when configured with --enable-debug) */
+ * (it is turned on when configured with --enable-debug) */
+
 #ifdef HYPRE_OMP45_DEBUG
-   /* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT] 
-      if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
-      hypre__offload_flag: 0 == OK; 1 == WRONG
-    * */
-   #define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) \
-      HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
+/* if we ``enter'' an address, it should not exist in device [o.w NO EFFECT] 
+   if we ``exit'' or ''update'' an address, it should exist in device [o.w ERROR]
+hypre__offload_flag: 0 == OK; 1 == WRONG
+ */
+#define HYPRE_OFFLOAD_FLAG(devnum, hptr, type) \
+   HYPRE_Int hypre__offload_flag = (type[1] == 'n') == omp_target_is_present(hptr, devnum);
 #else 
-   #define HYPRE_OFFLOAD_FLAG(...) \
-      HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
+#define HYPRE_OFFLOAD_FLAG(...) \
+   HYPRE_Int hypre__offload_flag = 0; /* non-debug mode, always OK */
 #endif
 
 /* OMP 4.5 offloading macro */
@@ -276,27 +252,27 @@ extern size_t hypre__target_dtoh_bytes;
 }
 #endif
 
-#define hypre_InitMemoryDebug(id)
-
-#define hypre_FinalizeMemoryDebug()
-
 #endif // OMP45
 
-
-
+/*
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
+*/
+
 
 //#define TRACK_MEMORY_ALLOCATIONS
 
 #if defined(TRACK_MEMORY_ALLOCATIONS)
+
 typedef struct {
   char *file;
   size_t size;
   void *end;
   HYPRE_Int line;
   HYPRE_Int type;} pattr_t;
+
 pattr_t *patpush(void *ptr, pattr_t *ss);
+
 #define hypre_TAlloc(type, count, location) \
   ( (type *)hypre_MAllocIns((size_t)(sizeof(type) * (count)), location,__FILE__,__LINE__) )
 
@@ -318,10 +294,10 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
   ( assert_check_host((ptr),__FILE__,__LINE__))
 
 #else
-#define ASSERT_MANAGED(ptr) (ptr)
-#define ASSERT_HOST(ptr) (ptr)
+
+#if 0
+
 /* These Allocs are with printfs, for debug */
-#if 0 
 #define hypre_TAlloc(type, count, location) \
 (\
  /*printf("[%s:%d] MALLOC %ld B\n", __FILE__,__LINE__, (size_t)(sizeof(type) * (count))) ,*/ \
@@ -357,16 +333,12 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
 
 #endif
 
-
-
 #define hypre_TFree(ptr,location) \
 ( hypre_Free((char *)ptr, location), ptr = NULL )
 
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
 (hypre_Memcpy((char *)(dst),(char *)(src),(size_t)(sizeof(type) * (count)),locdst, locsrc))
 
-//#define hypre_DeviceMemset(ptr,value,type,count)	memset(ptr,value,count*sizeof(type))
-  
 #define hypre_PinnedTAlloc(type, count)\
 ( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
 

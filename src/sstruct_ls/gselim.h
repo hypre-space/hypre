@@ -1,17 +1,22 @@
 #ifndef GSELIM_H
 #define GSELIM_H
 
-#define hypre_gselim_inline(A,x,n)\
+#define hypre_gselim(A,x,n,error) \
 {				  \
    HYPRE_Int    j,k,m;		  \
    HYPRE_Real factor;		  \
    HYPRE_Real divA;		  \
-   if (n==1)  /* A is 1x1 */	  \
+   error = 0;                     \
+   if (n == 1)  /* A is 1x1 */	  \
    {				  \
       if (A[0] != 0.0)		  \
       {				  \
 	 x[0] = x[0]/A[0];	  \
       }				  \
+      else                        \
+      {                           \
+         error++;                 \
+      }                           \
    }				  \
    else/* A is nxn. Forward elimination */\
    {					  \
