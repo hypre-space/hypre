@@ -19,6 +19,7 @@
 #include "_hypre_parcsr_ls.h"
 #include "Common.h"
 #include "_hypre_lapack.h"
+#include "../sstruct_ls/gselim.h"
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGRelax

@@ -1333,17 +1333,12 @@ main( hypre_int argc,
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
 
+   /* GPU Init stuff inside */
    hypre_init();
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-/*   
-   hypre_GPUInit(-1);
-#ifdef HYPRE_USE_OMP45
-   HYPRE_OMPOffloadOn();
-#endif
-*/
    /*-----------------------------------------------------------
     * Read input file
     *-----------------------------------------------------------*/
@@ -1903,12 +1898,10 @@ main( hypre_int argc,
    hypre_TFree(distribute, HYPRE_MEMORY_HOST);
    hypre_TFree(block, HYPRE_MEMORY_HOST);
 
-   /* Finalize MPI */
-   /*
-   hypre_GPUFinalize();
-   */
+   /* GPU finalize stuff inside */
    hypre_finalize();
 
+   /* Finalize MPI */
    hypre_MPI_Finalize();
 
    return (0);

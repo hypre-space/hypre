@@ -84,10 +84,10 @@
 extern "C" {
 #endif
 
+#define HYPRE_MEMORY_UNSET  (-1)
 #define HYPRE_MEMORY_DEVICE ( 0)
 #define HYPRE_MEMORY_HOST   ( 1)
 #define HYPRE_MEMORY_SHARED ( 2)
-#define HYPRE_MEMORY_UNSET  (-1)
 
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_CUDA)
 #define HYPRE_CUDA_GLOBAL __host__ __device__
@@ -205,10 +205,6 @@ hypre__offload_flag: 0 == OK; 1 == WRONG
  * if HYPRE_OMP45_OFFLOAD is turned off, then the associated 
  * device memory operations in the following macros will have no effect
  */
-
-#define HYPRE_OMP45_SZE_PAD (sizeof(size_t))
-
-#define HYPRE_OMP45_CNT_PAD(elt_size) ((HYPRE_OMP45_SZE_PAD + elt_size - 1) / elt_size)
 
 /* DataCopyToData: HostToDevice 
  * src:  [from] a CPU ptr 
@@ -347,16 +343,26 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
  *--------------------------------------------------------------------------*/
 
 /* hypre_memory.c */
+#if 0
 HYPRE_Int hypre_OutOfMemory ( size_t size );
 char *hypre_MAlloc( size_t size, HYPRE_Int location );
 char *hypre_CAlloc( size_t count,  size_t elt_size , HYPRE_Int location );
 char *hypre_ReAlloc( char *ptr ,  size_t size , HYPRE_Int location );
-
+void hypre_Free( char *ptr , HYPRE_Int location );
+void hypre_Memcpy( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
 char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, HYPRE_Int line);
 char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, HYPRE_Int line);
 char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,HYPRE_Int line);
+#else
+void * hypre_MAlloc(size_t size, HYPRE_Int location);
+void * hypre_CAlloc( size_t count, size_t elt_size, HYPRE_Int location);
+void * hypre_ReAlloc(void *ptr, size_t size, HYPRE_Int location);
+void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc_src);
+void * hypre_Memset(void *ptr, int value, size_t num, HYPRE_Int location);
+void   hypre_Free(void *ptr, HYPRE_Int location);
+#endif
 char *hypre_MAllocPinned( size_t size );
-void hypre_Free( char *ptr , HYPRE_Int location );
+/*
 char *hypre_CAllocHost( size_t count,size_t elt_size );
 char *hypre_MAllocHost( size_t size );
 char *hypre_ReAllocHost( char   *ptr,size_t  size );
@@ -365,9 +371,9 @@ char *hypre_SharedMAlloc ( size_t size );
 char *hypre_SharedCAlloc ( size_t count , size_t elt_size );
 char *hypre_SharedReAlloc ( char *ptr , size_t size );
 void hypre_SharedFree ( char *ptr );
-void hypre_Memcpy( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
 void hypre_MemcpyAsync( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );	
 HYPRE_Real *hypre_IncrementSharedDataPtr ( HYPRE_Real *ptr , size_t size );
+*/
 
 /* memory_dmalloc.c */
 HYPRE_Int hypre_InitMemoryDebugDML( HYPRE_Int id );

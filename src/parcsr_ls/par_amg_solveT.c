@@ -22,6 +22,7 @@
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
+#include "../sstruct_ls/gselim.h"
 
 /*--------------------------------------------------------------------
  * hypre_BoomerAMGSolveT

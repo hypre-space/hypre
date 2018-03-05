@@ -15,18 +15,18 @@
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
-char *
+void *
 hypre_StructKrylovCAlloc( HYPRE_Int count,
                           HYPRE_Int elt_size )
 {
-   return( hypre_CTAlloc(char, count * elt_size, HYPRE_MEMORY_HOST) );
+   return ( (void*) hypre_CTAlloc(char, count * elt_size, HYPRE_MEMORY_HOST) );
 }
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_StructKrylovFree( char *ptr )
+hypre_StructKrylovFree( void *ptr )
 {
    hypre_Free( ptr , HYPRE_MEMORY_HOST);
 

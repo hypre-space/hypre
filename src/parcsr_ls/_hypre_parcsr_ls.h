@@ -22,7 +22,6 @@
 #include "seq_mv.h"
 #include "_hypre_parcsr_mv.h"
 #include "HYPRE_lobpcg.h"
-#include "../sstruct_ls/gselim.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -1590,8 +1589,8 @@ HYPRE_Real bndfun_rs ( HYPRE_Real xx , HYPRE_Real yy , HYPRE_Real zz );
 
 
 /* pcg_par.c */
-char *hypre_ParKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
-HYPRE_Int hypre_ParKrylovFree ( char *ptr );
+void *hypre_ParKrylovCAlloc ( HYPRE_Int count , HYPRE_Int elt_size );
+HYPRE_Int hypre_ParKrylovFree ( void *ptr );
 void *hypre_ParKrylovCreateVector ( void *vvector );
 void *hypre_ParKrylovCreateVectorArray ( HYPRE_Int n , void *vvector );
 HYPRE_Int hypre_ParKrylovDestroyVector ( void *vvector );
