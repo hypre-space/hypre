@@ -166,6 +166,9 @@ void MemAdviseSetPrefLocHost(const void *ptr){
   hypre_CheckErrorDevice(cudaMemAdvise(ptr,mempush(ptr,0,0),cudaMemAdviseSetPreferredLocation,cudaCpuDeviceId));
 }
 
+size_t memsize(const void *ptr){
+   return ((size_t*)ptr)[-MEM_PAD_LEN];
+}
 
 void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream){
   if (ptr==NULL) return;

@@ -500,6 +500,7 @@ extern "C" {
 /* OpenMP 4.5 GPU memory management */
 extern HYPRE_Int hypre__global_offload;
 extern HYPRE_Int hypre__offload_device_num;
+extern HYPRE_Int hypre__offload_host_num;
 
 /* stats */
 extern size_t hypre__target_allc_count;

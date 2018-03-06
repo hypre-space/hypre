@@ -130,10 +130,9 @@ hypre_GetPadMemsize(void *ptr, HYPRE_Int location)
    {
       return *sp;
    }
-#else
+#endif
    /* no stored size for host memory */
    return 0;
-#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -315,7 +314,8 @@ hypre_DeviceFree(void *ptr)
    size_t size = ((size_t *) ptr)[-MEM_PAD_LEN];
    hypre_omp45_offload(hypre__offload_device_num, ptr, char, 0, size, "exit", "delete");
 #else
-   cudaSafeFree(ptr, MEM_PAD_LEN);
+   cudaFree((size_t *) ptr - MEM_PAD_LEN);
+   /* cudaSafeFree(ptr, MEM_PAD_LEN); */
 #endif
 #endif
 }
@@ -325,7 +325,8 @@ hypre_UnifiedFree(void *ptr)
 {
 #if HYPRE_MEMORY_ENV != HOST_MEM_ONLY
    /* with UM, managed memory free */
-   cudaSafeFree(ptr, MEM_PAD_LEN);
+   cudaFree((size_t *) ptr - MEM_PAD_LEN);
+   /* cudaSafeFree(ptr, MEM_PAD_LEN); */
 #endif
 }
 
@@ -509,6 +510,11 @@ hypre_Memset(void *ptr, int value, size_t num, HYPRE_Int location)
 
    location = hypre_RedefMemLocation(location);
 
+#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+   unsigned char *ucptr = (unsigned char *) ptr;
+   unsigned char ucvalue = (unsigned char) value;
+#endif
+
    switch (location) 
    {
       case HYPRE_MEMORY_HOST :
@@ -519,13 +525,11 @@ hypre_Memset(void *ptr, int value, size_t num, HYPRE_Int location)
       case HYPRE_MEMORY_DEVICE :
          /* memset device memory */
 #if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
-         unsigned char *ucptr = (unsigned char *) ptr;
-         unsigned char ucvalue = (unsigned char) value;
 #undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(char_ptr)
+#define DEVICE_VAR is_device_ptr(ucptr)
          hypre_LoopBegin(num, k)
          {
-            ucchar[k] = ucvalue;
+            ucptr[k] = ucvalue;
          }
          hypre_LoopEnd()
 #undef DEVICE_VAR
@@ -536,6 +540,7 @@ hypre_Memset(void *ptr, int value, size_t num, HYPRE_Int location)
 #else
          cudaMemset(ptr, value, num);
 #endif
+         break;
       case HYPRE_MEMORY_SHARED :
          /* memset unified memory */
          memset(ptr, value, num);
