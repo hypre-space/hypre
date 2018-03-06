@@ -359,7 +359,7 @@ void * hypre_MAlloc(size_t size, HYPRE_Int location);
 void * hypre_CAlloc( size_t count, size_t elt_size, HYPRE_Int location);
 void * hypre_ReAlloc(void *ptr, size_t size, HYPRE_Int location);
 void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc_src);
-void * hypre_Memset(void *ptr, int value, size_t num, HYPRE_Int location);
+void * hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location);
 void   hypre_Free(void *ptr, HYPRE_Int location);
 #endif
 char *hypre_MAllocPinned( size_t size );
