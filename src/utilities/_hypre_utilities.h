@@ -459,7 +459,7 @@ HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int com
  *
  * Questions:
  *
- *    1. Pinned memory, prefetch?
+ *    1. prefetch?
  *
  *****************************************************************************/
 
@@ -473,10 +473,11 @@ HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int com
 extern "C" {
 #endif
 
-#define HYPRE_MEMORY_UNSET  (-1)
-#define HYPRE_MEMORY_DEVICE ( 0)
-#define HYPRE_MEMORY_HOST   ( 1)
-#define HYPRE_MEMORY_SHARED ( 2)
+#define HYPRE_MEMORY_UNSET         (-1)
+#define HYPRE_MEMORY_DEVICE        ( 0)
+#define HYPRE_MEMORY_HOST          ( 1)
+#define HYPRE_MEMORY_SHARED        ( 2)
+#define HYPRE_MEMORY_HOST_PINNED   ( 3)
 
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_CUDA)
 #define HYPRE_CUDA_GLOBAL __host__ __device__
@@ -591,53 +592,6 @@ hypre__offload_flag: 0 == OK; 1 == WRONG
    } \
 }
 
-/* NOTE:
- * if HYPRE_OMP45_OFFLOAD is turned off, then the associated 
- * device memory operations in the following macros will have no effect
- */
-
-/* DataCopyToData: HostToDevice 
- * src:  [from] a CPU ptr 
- * dest: [to]   a mapped CPU ptr */
-#define hypre_DataCopyToData(src, dest, type, count) \
-{\
-   /* CPU memcpy */ \
-   if (dest != src) { \
-      memcpy(dest, src, sizeof(type)*count); \
-   } \
-   /* update to device */ \
-   size_t size_inuse = sizeof(type) * count; \
-   hypre_omp45_offload(hypre__offload_device_num, dest, type, 0, count, "update", "to"); \
-}
-
-/* DataCopyFromData: DeviceToHost 
- * src:  [from] a mapped CPU ptr
- * dest: [to]   a CPU ptr */
-#define hypre_DataCopyFromData(dest, src, type, count) \
-{\
-   /* update from device */ \
-   size_t size_inuse = sizeof(type) * count; \
-   hypre_omp45_offload(hypre__offload_device_num, src, type, 0, count, "update", "from"); \
-   /* CPU memcpy */ \
-   if (dest != src) { \
-      memcpy(dest, src, sizeof(type)*count); \
-   } \
-}
-
-#if 0
-/* DeviceMemset 
- * memset: [to] a mapped CPU ptr
- * memset host memory first and the update the device memory */
-#define hypre_DeviceMemset(ptr, value, type, count) \
-{\
-   /* host memset */ \
-   memset(ptr, value, (count)*sizeof(type)); \
-   /* update to device */ \
-   size_t size_inuse = sizeof(type) * count; \
-   hypre_omp45_offload(hypre__offload_device_num, ptr, type, 0, count, "update", "to"); \
-}
-#endif
-
 #endif // OMP45
 
 /*
@@ -647,7 +601,6 @@ hypre__offload_flag: 0 == OK; 1 == WRONG
 
 
 //#define TRACK_MEMORY_ALLOCATIONS
-
 #if defined(TRACK_MEMORY_ALLOCATIONS)
 
 typedef struct {
@@ -725,24 +678,16 @@ void assert_check_host(void *ptr, char *file, HYPRE_Int line);
 #define hypre_TMemcpy(dst, src, type, count, locdst, locsrc) \
 (hypre_Memcpy((char *)(dst),(char *)(src),(size_t)(sizeof(type) * (count)),locdst, locsrc))
 
-#define hypre_PinnedTAlloc(type, count)\
-( (type *)hypre_MAllocPinned((size_t)(sizeof(type) * (count))) )
-
 /*--------------------------------------------------------------------------
  * Prototypes
  *--------------------------------------------------------------------------*/
 
 /* hypre_memory.c */
 #if 0
-HYPRE_Int hypre_OutOfMemory ( size_t size );
-char *hypre_MAlloc( size_t size, HYPRE_Int location );
-char *hypre_CAlloc( size_t count,  size_t elt_size , HYPRE_Int location );
-char *hypre_ReAlloc( char *ptr ,  size_t size , HYPRE_Int location );
-void hypre_Free( char *ptr , HYPRE_Int location );
-void hypre_Memcpy( char *dst, char *src, size_t size, HYPRE_Int locdst, HYPRE_Int locsrc );
 char *hypre_CAllocIns( size_t count ,  size_t elt_size , HYPRE_Int location,char *file, HYPRE_Int line);
 char *hypre_ReAllocIns( char *ptr ,  size_t size , HYPRE_Int location,char *file, HYPRE_Int line);
 char *hypre_MAllocIns( size_t size , HYPRE_Int location,char *file,HYPRE_Int line);
+char *hypre_MAllocPinned( size_t size );
 #else
 void * hypre_MAlloc(size_t size, HYPRE_Int location);
 void * hypre_CAlloc( size_t count, size_t elt_size, HYPRE_Int location);
@@ -751,7 +696,6 @@ void   hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_
 void * hypre_Memset(void *ptr, int value, size_t num, HYPRE_Int location);
 void   hypre_Free(void *ptr, HYPRE_Int location);
 #endif
-char *hypre_MAllocPinned( size_t size );
 /*
 char *hypre_CAllocHost( size_t count,size_t elt_size );
 char *hypre_MAllocHost( size_t size );
@@ -1131,25 +1075,6 @@ void hypre_error_handler(const char *filename, HYPRE_Int line, HYPRE_Int ierr, c
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
-//#define CUDAMEMATTACHTYPE cudaMemAttachGlobal
-//#define CUDAMEMATTACHTYPE cudaMemAttachHost
-#define HYPRE_GPU_USE_PINNED 1
-#define HYPRE_USE_MANAGED_SCALABLE 1
-#endif
-
-/*BHEADER**********************************************************************
- * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
- * Produced at the Lawrence Livermore National Laboratory.
- * This file is part of HYPRE.  See file COPYRIGHT for details.
- *
- * HYPRE is free software; you can redistribute it and/or modify it under the
- * terms of the GNU Lesser General Public License (as published by the Free
- * Software Foundation) version 2.1 dated February 1999.
- *
- * $Revision$
- ***********************************************************************EHEADER*/
-
 #ifdef USE_NVTX
 #include "nvToolsExt.h"
 #include "nvToolsExtCudaRt.h"
@@ -1382,6 +1307,9 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
 #define  __GPUMEM_H__
 
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+
+#define HYPRE_USE_MANAGED_SCALABLE 1
+#define HYPRE_GPU_USE_PINNED 1
 
 #if defined(HYPRE_USE_MANAGED)
 #include <cuda_runtime_api.h>

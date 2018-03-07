@@ -2,6 +2,18 @@
 #define _GNU_SOURCE
 #endif
 #include "_hypre_utilities.h"
+
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) 
+size_t memsize(const void *ptr){
+   return ((size_t*)ptr)[-MEM_PAD_LEN];
+}
+#else
+size_t memsize(const void *ptr){
+  return 0;
+}
+#endif
+
+
 #if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
 
 #if defined(HYPRE_USE_MANAGED)
@@ -164,10 +176,6 @@ void MemAdviseSetPrefLocDevice(const void *ptr, hypre_int device){
 void MemAdviseSetPrefLocHost(const void *ptr){
   if (ptr==NULL) return;
   hypre_CheckErrorDevice(cudaMemAdvise(ptr,mempush(ptr,0,0),cudaMemAdviseSetPreferredLocation,cudaCpuDeviceId));
-}
-
-size_t memsize(const void *ptr){
-   return ((size_t*)ptr)[-MEM_PAD_LEN];
 }
 
 void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream){
