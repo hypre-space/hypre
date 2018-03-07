@@ -3632,6 +3632,12 @@ HYPRE_Int HYPRE_BoomerAMGSetCRStrongTh(HYPRE_Solver solver,
 HYPRE_Int
 HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver, 
                             HYPRE_Real    A_drop_tol  );
+
+/* drop the entries that are not on the diagonal and smaller than
+ * its row norm: type 1: 1-norm, 2: 2-norm, -1: infinity norm */
+HYPRE_Int
+HYPRE_BoomerAMGSetADropType( HYPRE_Solver  solver,
+                             HYPRE_Int     A_drop_type  );
 /*
  * (Optional) Defines whether to use CG 
  **/

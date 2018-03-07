@@ -2155,9 +2155,12 @@ hypre_ParCSRMatrix * hypre_ParCSRMatrixUnion( hypre_ParCSRMatrix * A,
 }
 
 
+/* drop the entries that are not on the diagonal and smaller than
+ * its row norm: type 1: 1-norm, 2: 2-norm, -1: infinity norm */
 HYPRE_Int
 hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
-                                    HYPRE_Real tol)
+                                    HYPRE_Real tol,
+                                    HYPRE_Int type)
 {
    HYPRE_Int i, j, k, nnz_diag, nnz_offd, A_diag_i_i, A_offd_i_i;
    
@@ -2177,6 +2180,7 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    HYPRE_Int *col_map_offd_A  = hypre_ParCSRMatrixColMapOffd(A);
    HYPRE_Int *marker_offd = NULL;
  
+   HYPRE_Int first_row  = hypre_ParCSRMatrixFirstRowIndex(A);
    HYPRE_Int nrow_local = hypre_CSRMatrixNumRows(A_diag);
    HYPRE_Int my_id, num_procs;
    /* MPI size and rank*/
@@ -2194,30 +2198,55 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
    for (i = 0; i < nrow_local; i++)
    {
       /* compute row norm */
-      HYPRE_Real row_2nrm = 0.0;
+      HYPRE_Real row_nrm = 0.0;
       for (j = A_diag_i_i; j < A_diag_i[i+1]; j++)
       {
          HYPRE_Complex v = A_diag_a[j];
-         row_2nrm += v*v;
+         if (type == 1)
+         {
+            row_nrm += fabs(v);
+         }
+         else if (type == 2)
+         {
+            row_nrm += v*v;
+         }
+         else
+         {
+            row_nrm = hypre_max(row_nrm, fabs(v));
+         }
       }
       if (num_procs > 1)
       {
          for (j = A_offd_i_i; j < A_offd_i[i+1]; j++)
          {
             HYPRE_Complex v = A_offd_a[j];
-            row_2nrm += v*v;
+            if (type == 1)
+            {
+               row_nrm += fabs(v);
+            }
+            else if (type == 2)
+            {
+               row_nrm += v*v;
+            }
+            else
+            {
+               row_nrm = hypre_max(row_nrm, fabs(v));
+            }
          }
       }
 
-      row_2nrm = sqrt(row_2nrm);
+      if (type == 2)
+      {
+         row_nrm = sqrt(row_nrm);
+      }
 
       /* drop small entries based on tol and row norm */
       for (j = A_diag_i_i; j < A_diag_i[i+1]; j++)
       {
+         HYPRE_Int     col = A_diag_j[j];
          HYPRE_Complex val = A_diag_a[j];
-         if (fabs(val) >= tol * row_2nrm)
+         if (i == col || fabs(val) >= tol * row_nrm)
          {
-            HYPRE_Int col = A_diag_j[j];
             A_diag_j[nnz_diag] = col;
             A_diag_a[nnz_diag] = val;
             nnz_diag ++;
@@ -2227,10 +2256,12 @@ hypre_ParCSRMatrixDropSmallEntries( hypre_ParCSRMatrix *A,
       {
          for (j = A_offd_i_i; j < A_offd_i[i+1]; j++)
          {
+            HYPRE_Int     col = A_offd_j[j];
             HYPRE_Complex val = A_offd_a[j];
-            if (fabs(val) >= tol * row_2nrm)
+            /* in normal cases: diagonal entry should not
+             * appear in A_offd (but this can still be possible) */
+            if (i + first_row == col_map_offd_A[col] || fabs(val) >= tol * row_nrm)
             {
-               HYPRE_Int col = A_offd_j[j];
                if (0 == marker_offd[col])
                {
                   marker_offd[col] = 1;

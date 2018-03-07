@@ -40,6 +40,8 @@ typedef struct
    HYPRE_Real   S_commpkg_switch;
    HYPRE_Real   CR_rate;
    HYPRE_Real   CR_strong_th;
+   HYPRE_Real   A_drop_tol;
+   HYPRE_Int    A_drop_type;
    HYPRE_Int      measure_type;
    HYPRE_Int      setup_type;
    HYPRE_Int      coarsen_type;
@@ -227,7 +229,6 @@ typedef struct
 
    /* Use 2 mat-mat-muls instead of triple product*/
    HYPRE_Int rap2;
-
    HYPRE_Int keepTranspose;
 	
    /* information for preserving indeces as coarse grid points */
@@ -274,13 +275,15 @@ typedef struct
 #define hypre_ParAMGDataNumCRRelaxSteps(amg_data) ((amg_data)->num_CR_relax_steps)
 #define hypre_ParAMGDataCRRate(amg_data) ((amg_data)->CR_rate)
 #define hypre_ParAMGDataCRStrongTh(amg_data) ((amg_data)->CR_strong_th)
+#define hypre_ParAMGDataADropTol(amg_data) ((amg_data)->A_drop_tol)
+#define hypre_ParAMGDataADropType(amg_data) ((amg_data)->A_drop_type)
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
- #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
- #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
- #define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
- #define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
+#define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
+#define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
+#define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
+#define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
 
 /* solve params */
 
@@ -462,7 +465,6 @@ typedef struct
 #define hypre_ParAMGDataDSLUThreshold(amg_data) ((amg_data)->dslu_threshold)
 #define hypre_ParAMGDataDSLUSolver(amg_data) ((amg_data)->dslu_solver)
 #endif
-
 
 #endif
 

@@ -50,6 +50,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Real   CR_rate;
    HYPRE_Real   CR_strong_th;
    HYPRE_Real   A_drop_tol;
+   HYPRE_Int    A_drop_type;
    HYPRE_Int      interp_type;
    HYPRE_Int      sep_weight;
    HYPRE_Int      coarsen_type;
@@ -169,6 +170,7 @@ hypre_BoomerAMGCreate()
    CR_rate = 0.7;
    CR_strong_th = 0;
    A_drop_tol = 0.0;
+   A_drop_type = -1;
    IS_type = 1;
    CR_use_CG = 0;
    cgc_its = 1;
@@ -281,6 +283,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetCRRate(amg_data, CR_rate);
    hypre_BoomerAMGSetCRStrongTh(amg_data, CR_strong_th);
    hypre_BoomerAMGSetADropTol(amg_data, A_drop_tol);
+   hypre_BoomerAMGSetADropType(amg_data, A_drop_type);
    hypre_BoomerAMGSetISType(amg_data, IS_type);
    hypre_BoomerAMGSetCRUseCG(amg_data, CR_use_CG);
    hypre_BoomerAMGSetCGCIts(amg_data, cgc_its);
@@ -3082,7 +3085,7 @@ hypre_BoomerAMGSetCRStrongTh( void     *data,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGSetADropTol( void     *data,
+hypre_BoomerAMGSetADropTol( void       *data,
                             HYPRE_Real  A_drop_tol )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
@@ -3097,6 +3100,21 @@ hypre_BoomerAMGSetADropTol( void     *data,
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_BoomerAMGSetADropType( void      *data,
+                             HYPRE_Int  A_drop_type )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   hypre_ParAMGDataADropType(amg_data) = A_drop_type;
+
+   return hypre_error_flag;
+}
 /*--------------------------------------------------------------------------
  * Indicates which independent set algorithm is used for CR
  *--------------------------------------------------------------------------*/

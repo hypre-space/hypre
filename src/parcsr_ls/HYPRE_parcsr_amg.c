@@ -1372,9 +1372,16 @@ HYPRE_BoomerAMGSetCRStrongTh( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver,
-                         HYPRE_Real    A_drop_tol  )
+                            HYPRE_Real    A_drop_tol  )
 {
    return( hypre_BoomerAMGSetADropTol( (void *) solver, A_drop_tol ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGSetADropType( HYPRE_Solver  solver,
+                             HYPRE_Int     A_drop_type  )
+{
+   return( hypre_BoomerAMGSetADropType( (void *) solver, A_drop_type ) );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetISType
