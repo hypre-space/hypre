@@ -572,7 +572,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
  * (*** interpreted as an unsigned char ***)"
  *--------------------------------------------------------------------------*/
 void *
-hypre_Memset(void *ptr, int value, size_t num, HYPRE_Int location)
+hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)
 {
    if (ptr == NULL || num == 0)
    {
