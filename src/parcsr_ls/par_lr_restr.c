@@ -19,9 +19,15 @@
 
 #define AIR_DEBUG 0
 
-//HYPRE_Real time1 = 0.0;
-//HYPRE_Real time2 = 0.0;
-//HYPRE_Real time3 = 0.0;
+/*
+HYPRE_Real air_time0 = 0.0;
+HYPRE_Real air_time_comm = 0.0;
+HYPRE_Real air_time1 = 0.0;
+HYPRE_Real air_time2 = 0.0;
+HYPRE_Real air_time3 = 0.0;
+HYPRE_Real air_time4 = 0.0;
+*/
+
 
 HYPRE_Int
 hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
@@ -34,8 +40,10 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                                    HYPRE_Real            trunc_factor,
                                    HYPRE_Int             max_elmts,
                                    HYPRE_Int            *col_offd_S_to_A,
-                                   hypre_ParCSRMatrix  **R_ptr) {
-   
+                                   hypre_ParCSRMatrix  **R_ptr) 
+{
+   /* HYPRE_Real t0 = hypre_MPI_Wtime(); */
+
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    hypre_ParCSRCommHandle  *comm_handle;
@@ -133,6 +141,10 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    /* ghost rows: offd F and F2-pts */
    hypre_CSRMatrix *A_offd_FF2   = NULL;
    
+   /*
+   HYPRE_Real tcomm = hypre_MPI_Wtime();
+   */
+
    /* MPI size and rank*/
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm, &my_id);
@@ -683,6 +695,13 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    /* marker */
    Marker_FF2_offd = hypre_CTAlloc(HYPRE_Int, FF2_offd_len);
 
+   /*
+   tcomm = hypre_MPI_Wtime() - tcomm;
+   air_time_comm += tcomm;
+
+   HYPRE_Real t1 = hypre_MPI_Wtime();
+   */
+
    /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     *  First Pass: Determine the nnz of R and the max local size
     *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -828,6 +847,11 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       local_max_size = hypre_max(local_max_size, local_size);
    } /* for (i=0,...) */
  
+   /*
+   t1 = hypre_MPI_Wtime() - t1;
+   air_time1 += t1;
+   */
+
    /* this is because of the indentity matrix in C part
     * each C-pt has an entry 1.0 */
    cnt_diag += n_cpts;
@@ -876,6 +900,8 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    //   Marker_recv_SF_list[i] = -1;
    //}
 
+   //printf("AIR: max local dense solve size %d\n", local_max_size);
+
    /* the local matrix and rhs (dense) 
     * column-major as always by BLAS/LAPACK */
    /* matrix */
@@ -900,6 +926,10 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    /* indicators for RRi of being local (0) or offd (1) */
    KKi = hypre_CTAlloc(HYPRE_Int, local_max_size);
 
+   /*
+   HYPRE_Real t2 = hypre_MPI_Wtime();
+   */
+
    /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     *                        Second Pass: Populate R
     *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
@@ -919,7 +949,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
        
       /* Access matrices for the First time, mark the points we want */
       /* diag part of row i */
-//HYPRE_Real t1 = hypre_MPI_Wtime();
       for (j = S_diag_i[i]; j < S_diag_i[i+1]; j++)
       {
          j1 = S_diag_j[j];
@@ -1049,16 +1078,12 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
          }
       }
 
-//t1 = hypre_MPI_Wtime() - t1;
-//time1 += t1;
-
       hypre_assert(local_size <= local_max_size);
 
       /* Second, copy values to local system: Ai and bi from A */
       /* now we have marked all rows/cols we want. next we extract the entries 
        * we need from these rows and put them in Ai and bi*/
 
-//HYPRE_Real t2 = hypre_MPI_Wtime();
       /* clear DAi and bi */
       memset(DAi, 0, local_size * local_size * sizeof(HYPRE_Real));
       memset(Dbi, 0, local_size * sizeof(HYPRE_Real));
@@ -1224,9 +1249,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
       hypre_assert(rr <= local_size);
 
-//t2 = hypre_MPI_Wtime() - t2;
-//time2 += t2;
-
       if (local_size > 0)
       {
          /*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1310,7 +1332,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
       R_offd_i[ic+1] = cnt_offd;
 
-//HYPRE_Real t3 = hypre_MPI_Wtime();
       /* RESET marker arrays */
       for (j = 0; j < Marker_diag_count; j++)
       {
@@ -1335,18 +1356,24 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
       }
       */
 
-//t3 = hypre_MPI_Wtime() - t3;
-//time3 += t3;
-
       /* next C-pt */
       ic++;
    } /* outermost loop, for (i=0,...), for each C-pt find restriction */
 
+   /*
+   hypre_MPI_Barrier(comm);
+   t2 = hypre_MPI_Wtime() - t2;
+   air_time2 += t2;
+   */
 
    hypre_assert(ic == n_cpts)
    hypre_assert(cnt_diag == nnz_diag)
    hypre_assert(cnt_offd == nnz_offd)
    
+   /*
+   HYPRE_Real t3 = hypre_MPI_Wtime();
+   */
+
    /* num of cols in the offd part of R */
    num_cols_offd_R = 0;
    /* to this point, Marker_FF2_offd should be all -1 */
@@ -1423,8 +1450,20 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    
    hypre_ParCSRMatrixColMapOffd(R) = col_map_offd_R;
 
+   /*
+   t3 = hypre_MPI_Wtime() - t3;
+   air_time3 += t3;
+
+   HYPRE_Real t4 = hypre_MPI_Wtime();
+   */
+
    /* create CommPkg of R */
    hypre_MatvecCommPkgCreate(R);
+
+   /*
+   t4 = hypre_MPI_Wtime() - t4;
+   air_time4 += t4;
+   */
 
    *R_ptr = R;
 
@@ -1470,6 +1509,11 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 #endif
    hypre_TFree(RRi);
    hypre_TFree(KKi);
+
+   /*
+   t0 = hypre_MPI_Wtime() - t0;
+   air_time0 += t0;
+   */
 
    return 0;
 }

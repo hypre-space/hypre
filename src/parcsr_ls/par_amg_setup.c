@@ -28,6 +28,10 @@
  * hypre_BoomerAMGSetup
  *****************************************************************************/
 
+/*
+HYPRE_Real air_time_rap = 0.0;
+*/
+
 HYPRE_Int
 hypre_BoomerAMGSetup( void               *amg_vdata,
                    hypre_ParCSRMatrix *A,
@@ -2383,6 +2387,9 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          {
             /* Use two matrix products to generate A_H */
             hypre_ParCSRMatrix *AP = NULL;
+            /* 
+            HYPRE_Real t1 = hypre_MPI_Wtime();
+            */
             AP  = hypre_ParMatmul(A_array[level], P_array[level]);
             A_H = hypre_ParMatmul(R_array[level], AP);
             /* RL: XXX NEED TO CHECK THIS WITH UMY */
@@ -2392,12 +2399,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
             /* R gives up her RowStarts */
             hypre_ParCSRMatrixOwnsRowStarts(R_array[level]) = 0;
-            if (num_procs > 1) 
-            {
-               hypre_MatvecCommPkgCreate(A_H);
-            }
             /* Delete AP */
             hypre_ParCSRMatrixDestroy(AP);
+            /*
+            t1 = hypre_MPI_Wtime() - t1;
+            air_time_rap += t1;
+            */
 
 #if DEBUG_SAVE_ALL_OPS
             if (level == 0)
@@ -2418,7 +2425,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
             hypre_ParCSRMatrixOwnsRowStarts(A_H) = 1;
             hypre_ParCSRMatrixOwnsColStarts(A_H) = 0;
             hypre_ParCSRMatrixOwnsColStarts(P_array[level]) = 0;
-            if (num_procs > 1) hypre_MatvecCommPkgCreate(A_H);
+            if (num_procs > 1)
+            {
+               hypre_MatvecCommPkgCreate(A_H);
+            }
             /* Delete AP */
             hypre_ParCSRMatrixDestroy(Q);
          }
@@ -2452,8 +2462,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
          /* dropping in A_H */
          hypre_ParCSRMatrixDropSmallEntries(A_H, hypre_ParAMGDataADropTol(amg_data),
                                             hypre_ParAMGDataADropType(amg_data));
-         hypre_ParCSRMatrixSetNumNonzeros(A_H);
-         hypre_ParCSRMatrixSetDNumNonzeros(A_H);
+         /* if CommPkg for A_H was not built */
+         if (num_procs > 1 && hypre_ParCSRMatrixCommPkg(A_H) == NULL)
+         {
+            hypre_MatvecCommPkgCreate(A_H);
+         }
+         if (hypre_ParAMGDataADropTol(amg_data) <= 0.0)
+         {
+            hypre_ParCSRMatrixSetNumNonzeros(A_H);
+            hypre_ParCSRMatrixSetDNumNonzeros(A_H);
+         }
          A_array[level] = A_H;
       }
       
