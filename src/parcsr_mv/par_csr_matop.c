@@ -4470,6 +4470,10 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
    
    hypre_ParCSRMatrixColMapOffd(Anew) = col_map_offd_A_new;
 
+   hypre_ParCSRMatrixSetNumNonzeros(Anew);
+   hypre_ParCSRMatrixDNumNonzeros(Anew) = (HYPRE_Real) hypre_ParCSRMatrixNumNonzeros(Anew);
+   //printf("nnz_diag %d --> %d, nnz_offd %d --> %d\n", nnz_diag, nnz_diag_new, nnz_offd, nnz_offd_new);
+
    /* create CommPkg of Anew */
    hypre_MatvecCommPkgCreate(Anew);
 

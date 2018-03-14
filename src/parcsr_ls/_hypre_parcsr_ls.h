@@ -62,6 +62,7 @@ typedef struct
    /* setup params */
    HYPRE_Int     max_levels;
    HYPRE_Real   strong_threshold;
+   HYPRE_Real   strong_thresholdR; /* theta for build R: defines strong F neighbors */
    HYPRE_Real   max_row_sum;
    HYPRE_Real   trunc_factor;
    HYPRE_Real   agg_trunc_factor;
@@ -284,6 +285,8 @@ typedef struct
 #define hypre_ParAMGDataMaxLevels(amg_data) ((amg_data)->max_levels)
 #define hypre_ParAMGDataStrongThreshold(amg_data) \
 ((amg_data)->strong_threshold)
+#define hypre_ParAMGDataStrongThresholdR(amg_data) \
+((amg_data)->strong_thresholdR)
 #define hypre_ParAMGDataMaxRowSum(amg_data) ((amg_data)->max_row_sum)
 #define hypre_ParAMGDataTruncFactor(amg_data) ((amg_data)->trunc_factor)
 #define hypre_ParAMGDataAggTruncFactor(amg_data) ((amg_data)->agg_trunc_factor)
@@ -769,6 +772,8 @@ HYPRE_Int HYPRE_BoomerAMGSetRedundant ( HYPRE_Solver solver , HYPRE_Int redundan
 HYPRE_Int HYPRE_BoomerAMGGetRedundant ( HYPRE_Solver solver , HYPRE_Int *redundant );
 HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold ( HYPRE_Solver solver , HYPRE_Real strong_threshold );
 HYPRE_Int HYPRE_BoomerAMGGetStrongThreshold ( HYPRE_Solver solver , HYPRE_Real *strong_threshold );
+HYPRE_Int HYPRE_BoomerAMGSetStrongThresholdR ( HYPRE_Solver solver , HYPRE_Real strong_threshold );
+HYPRE_Int HYPRE_BoomerAMGGetStrongThresholdR ( HYPRE_Solver solver , HYPRE_Real *strong_threshold );
 HYPRE_Int HYPRE_BoomerAMGSetMaxRowSum ( HYPRE_Solver solver , HYPRE_Real max_row_sum );
 HYPRE_Int HYPRE_BoomerAMGGetMaxRowSum ( HYPRE_Solver solver , HYPRE_Real *max_row_sum );
 HYPRE_Int HYPRE_BoomerAMGSetTruncFactor ( HYPRE_Solver solver , HYPRE_Real trunc_factor );
@@ -1190,6 +1195,8 @@ HYPRE_Int hypre_BoomerAMGSetRedundant ( void *data , HYPRE_Int redundant );
 HYPRE_Int hypre_BoomerAMGGetRedundant ( void *data , HYPRE_Int *redundant );
 HYPRE_Int hypre_BoomerAMGSetStrongThreshold ( void *data , HYPRE_Real strong_threshold );
 HYPRE_Int hypre_BoomerAMGGetStrongThreshold ( void *data , HYPRE_Real *strong_threshold );
+HYPRE_Int hypre_BoomerAMGSetStrongThresholdR ( void *data , HYPRE_Real strong_threshold );
+HYPRE_Int hypre_BoomerAMGGetStrongThresholdR ( void *data , HYPRE_Real *strong_threshold );
 HYPRE_Int hypre_BoomerAMGSetMaxRowSum ( void *data , HYPRE_Real max_row_sum );
 HYPRE_Int hypre_BoomerAMGGetMaxRowSum ( void *data , HYPRE_Real *max_row_sum );
 HYPRE_Int hypre_BoomerAMGSetTruncFactor ( void *data , HYPRE_Real trunc_factor );
