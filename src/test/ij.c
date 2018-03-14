@@ -190,6 +190,7 @@ main( hypre_int argc,
    HYPRE_Real   A_drop_tol = 0.0;
    HYPRE_Int    A_drop_type = -1;
    HYPRE_Real   strong_threshold;
+   HYPRE_Real   strong_thresholdR;
    HYPRE_Real   trunc_factor;
    HYPRE_Real   jacobi_trunc_threshold;
    HYPRE_Real   S_commpkg_switch = 1.0;
@@ -1039,7 +1040,7 @@ main( hypre_int argc,
        || solver_id == 15 || solver_id == 20 || solver_id == 51 || solver_id == 61 
        || solver_id == 70 || solver_id == 71 || solver_id == 72)
    {
-      strong_threshold = 0.25;
+      strong_threshold = strong_thresholdR = 0.25;
       trunc_factor = 0.;
       jacobi_trunc_threshold = 0.01;
       cycle_type = 1;
@@ -1144,6 +1145,11 @@ main( hypre_int argc,
       {
          arg_index++;
          strong_threshold  = atof(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-thR") == 0 )
+      {
+         arg_index++;
+         strong_thresholdR  = atof(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-CF") == 0 )
       {
@@ -2848,6 +2854,7 @@ main( hypre_int argc,
          hypre_assert(restri_type >= 0);
          HYPRE_BoomerAMGSetRestriction(amg_solver, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
          HYPRE_BoomerAMGSetGridRelaxPoints(amg_solver, grid_relax_points);
+         HYPRE_BoomerAMGSetStrongThresholdR(amg_solver, strong_thresholdR);
       }
 
       /* RL */
@@ -4568,6 +4575,7 @@ main( hypre_int argc,
             hypre_assert(restri_type >= 0);
             HYPRE_BoomerAMGSetRestriction(pcg_precond, restri_type); /* 0: P^T, 1: AIR, 2: AIR-2 */
             HYPRE_BoomerAMGSetGridRelaxPoints(pcg_precond, grid_relax_points);
+            HYPRE_BoomerAMGSetStrongThresholdR(amg_solver, strong_thresholdR);
          }
 
          HYPRE_BoomerAMGSetCGCIts(pcg_precond, cgcits);

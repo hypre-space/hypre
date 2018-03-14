@@ -41,6 +41,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int      max_coarse_size;
    HYPRE_Int      min_coarse_size;
    HYPRE_Real   strong_threshold;
+   HYPRE_Real   strong_threshold_R;
    HYPRE_Real   max_row_sum;
    HYPRE_Real   trunc_factor;
    HYPRE_Real   agg_trunc_factor;
@@ -143,6 +144,7 @@ hypre_BoomerAMGCreate()
    seq_threshold = 0;
    redundant = 0;
    strong_threshold = 0.25;
+   strong_threshold_R = 0.25;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
    agg_trunc_factor = 0.0;
@@ -257,6 +259,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMaxCoarseSize(amg_data, max_coarse_size);
    hypre_BoomerAMGSetMinCoarseSize(amg_data, min_coarse_size);
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
+   hypre_BoomerAMGSetStrongThresholdR(amg_data, strong_threshold_R);
    hypre_BoomerAMGSetMaxRowSum(amg_data, max_row_sum);
    hypre_BoomerAMGSetTruncFactor(amg_data, trunc_factor);
    hypre_BoomerAMGSetAggTruncFactor(amg_data, agg_trunc_factor);
@@ -1062,6 +1065,46 @@ hypre_BoomerAMGGetStrongThreshold( void     *data,
    } 
 
    *strong_threshold = hypre_ParAMGDataStrongThreshold(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGSetStrongThresholdR( void         *data,
+                                    HYPRE_Real    strong_threshold )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   if (strong_threshold < 0 || strong_threshold > 1)
+   {
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataStrongThresholdR(amg_data) = strong_threshold;
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_BoomerAMGGetStrongThresholdR( void       *data,
+                                    HYPRE_Real *strong_threshold )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *strong_threshold = hypre_ParAMGDataStrongThresholdR(amg_data);
 
    return hypre_error_flag;
 }

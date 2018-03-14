@@ -978,14 +978,16 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	    }
 
 
-            /* for AIR, need absolute value SOC */
+            /* for AIR, need absolute value SOC: use a different threshold */
             if (restri_type) 
             {
-	       hypre_BoomerAMGCreateSabs(A_array[level], strong_threshold, 1.0, 
+               HYPRE_Real           strong_thresholdR;
+               strong_thresholdR = hypre_ParAMGDataStrongThresholdR(amg_data);
+	       hypre_BoomerAMGCreateSabs(A_array[level], strong_thresholdR, 1.0, 
 				         num_functions, dof_func_array[level], &Sabs);
 
 	       col_offd_Sabs_to_A = NULL;
-	       if (strong_threshold > S_commpkg_switch)
+	       if (strong_thresholdR > S_commpkg_switch)
                {
                   hypre_BoomerAMGCreateSCommPkg(A_array[level], Sabs, &col_offd_Sabs_to_A);
                }
@@ -994,8 +996,8 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
 	 else
 	 {
 	    hypre_BoomerAMGCreateSmoothDirs(amg_data, A_array[level],
-	       SmoothVecs, strong_threshold, 
-               num_functions, dof_func_array[level], &S);
+	                                    SmoothVecs, strong_threshold, 
+                                            num_functions, dof_func_array[level], &S);
 	 }
 
 
