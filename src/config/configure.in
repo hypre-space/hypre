@@ -149,7 +149,7 @@ hypre_using_fei=yes
 hypre_using_mli=no
 
 hypre_using_openmp=no
-hypre_using_openmp_offload=no
+hypre_using_device_openmp=no
 hypre_using_insure=no
 hypre_using_cuda=no
 hypre_using_gpu=no
@@ -800,15 +800,14 @@ AS_HELP_STRING([--with-openmp],
 [hypre_using_openmp=no]
 )
 
-AC_ARG_WITH(openmp-offload,
-AS_HELP_STRING([--with-openmp-offload],
-               [Use OpenMP Offload (4.5).  This may affect which compiler is chosen.]),
+AC_ARG_WITH(device-openmp,
+AS_HELP_STRING([--with-device-openmp],
+               [Use OpenMP 4.5 Device Directives.  This may affect which compiler is chosen.]),
 [case "${withval}" in
-    yes) hypre_using_openmp_offload=yes
-         AC_DEFINE([HYPRE_USING_OPENMP_OFFLOAD],1,[Enable OpenMP Offload (4.5)]) ;;
-    no)  hypre_using_openmp_offload=no ;;
+    yes) hypre_using_device_openmp=yes ;;
+    no)  hypre_using_device_openmp=no ;;
  esac],
-[hypre_using_openmp_offload=no]
+[hypre_using_device_openmp=no]
 )
 
 dnl ***** SuperLU
@@ -1112,7 +1111,7 @@ if test "$hypre_user_chose_ccompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
    then
-      if test "$hypre_using_openmp_offload" = "yes"
+      if test "$hypre_using_device_openmp" = "yes"
       then
          AC_CHECK_PROGS(CC, [xlc-gpu clang-gpu])
       fi
@@ -1124,7 +1123,7 @@ then
          AC_CHECK_PROGS(CC, [xlc xlC icc icpc gcc g++ pgcc pgCC cc CC kcc KCC])
       fi
    else
-      if test "$hypre_using_openmp_offload" = "yes"
+      if test "$hypre_using_device_openmp" = "yes"
       then
          AC_CHECK_PROGS(CC, [mpixlc-gpu mpiclang-gpu])
       fi
@@ -1147,7 +1146,7 @@ if test "$hypre_user_chose_cxxcompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
    then
-      if test "$hypre_using_openmp_offload" = "yes"
+      if test "$hypre_using_device_openmp" = "yes"
       then
          AC_CHECK_PROGS(CXX, [xlC-gpu clang++-gpu])
       fi
@@ -1159,7 +1158,7 @@ then
          AC_CHECK_PROGS(CXX, [xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc])
       fi
    else
-      if test "$hypre_using_openmp_offload" = "yes"
+      if test "$hypre_using_device_openmp" = "yes"
       then
          AC_CHECK_PROGS(CXX, [mpixlC-gpu mpiclang++-gpu])
       fi
@@ -1739,7 +1738,12 @@ then
    AC_DEFINE([HYPRE_USING_OPENMP],1,[Enable OpenMP support])
 fi
 
-if test "$hypre_using_openmp_offload" = "yes"
+if test "$hypre_using_device_openmp" = "yes"
+then
+   AC_DEFINE([HYPRE_USING_DEVICE_OPENMP],1,[Enable OpenMP 4.5 device directives])
+fi
+
+if test "$hypre_using_device_openmp" = "yes"
 then
    CFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include $NEWCFLAGS"
    CXXFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include $NEWCFLAGS"

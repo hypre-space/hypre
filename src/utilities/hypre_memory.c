@@ -57,7 +57,11 @@ size_t hypre__target_dtoh_bytes = 0;
 
 /* if  true, DeviceMalloc is always device-only malloc no matter what UM is
  * if false, DeviceMalloc becomes UM malloc when with UM */
+#if defined(HYPRE_USE_MANAGED) && !defined(HYPRE_USE_CUDA) && !defined(HYPRE_USE_OMP45)
+#define DEVICE_ALWARYS_DEVICE 0
+#else
 #define DEVICE_ALWARYS_DEVICE 1
+#endif
 
 /******************************************************************************
  *

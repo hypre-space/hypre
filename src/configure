@@ -762,7 +762,7 @@ with_fei_inc_dir
 with_print_errors
 with_timing
 with_openmp
-with_openmp_offload
+with_device_openmp
 with_superlu
 with_superlu_include
 with_superlu_lib
@@ -1519,8 +1519,8 @@ Optional Packages:
   --with-timing           Use HYPRE timing routines.
   --with-openmp           Use OpenMP. This may affect which compiler is
                           chosen.
-  --with-openmp-offload   Use OpenMP Offload (4.5). This may affect which
-                          compiler is chosen.
+  --with-device-openmp    Use OpenMP 4.5 Device Directives. This may affect
+                          which compiler is chosen.
   --with-superlu          Use external SuperLU library.
   --with-superlu-include=DIR
                           Directory where SuperLU is installed.
@@ -2417,7 +2417,7 @@ hypre_using_fei=yes
 hypre_using_mli=no
 
 hypre_using_openmp=no
-hypre_using_openmp_offload=no
+hypre_using_device_openmp=no
 hypre_using_insure=no
 hypre_using_cuda=no
 hypre_using_gpu=no
@@ -3272,17 +3272,14 @@ fi
 
 
 
-# Check whether --with-openmp-offload was given.
-if test "${with_openmp_offload+set}" = set; then :
-  withval=$with_openmp_offload; case "${withval}" in
-    yes) hypre_using_openmp_offload=yes
-
-$as_echo "#define HYPRE_USING_OPENMP_OFFLOAD 1" >>confdefs.h
- ;;
-    no)  hypre_using_openmp_offload=no ;;
+# Check whether --with-device-openmp was given.
+if test "${with_device_openmp+set}" = set; then :
+  withval=$with_device_openmp; case "${withval}" in
+    yes) hypre_using_device_openmp=yes ;;
+    no)  hypre_using_device_openmp=no ;;
  esac
 else
-  hypre_using_openmp_offload=no
+  hypre_using_device_openmp=no
 
 fi
 
@@ -3859,7 +3856,7 @@ if test "$hypre_user_chose_ccompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
    then
-      if test "$hypre_using_openmp_offload" = "yes"
+      if test "$hypre_using_device_openmp" = "yes"
       then
          for ac_prog in xlc-gpu clang-gpu
 do
@@ -3994,7 +3991,7 @@ done
 
       fi
    else
-      if test "$hypre_using_openmp_offload" = "yes"
+      if test "$hypre_using_device_openmp" = "yes"
       then
          for ac_prog in mpixlc-gpu mpiclang-gpu
 do
@@ -4140,7 +4137,7 @@ if test "$hypre_user_chose_cxxcompilers" = "no"
 then
    if test "$hypre_using_mpi" = "no"
    then
-      if test "$hypre_using_openmp_offload" = "yes"
+      if test "$hypre_using_device_openmp" = "yes"
       then
          for ac_prog in xlC-gpu clang++-gpu
 do
@@ -4275,7 +4272,7 @@ done
 
       fi
    else
-      if test "$hypre_using_openmp_offload" = "yes"
+      if test "$hypre_using_device_openmp" = "yes"
       then
          for ac_prog in mpixlC-gpu mpiclang++-gpu
 do
@@ -8264,7 +8261,14 @@ $as_echo "#define HYPRE_USING_OPENMP 1" >>confdefs.h
 
 fi
 
-if test "$hypre_using_openmp_offload" = "yes"
+if test "$hypre_using_device_openmp" = "yes"
+then
+
+$as_echo "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
+
+fi
+
+if test "$hypre_using_device_openmp" = "yes"
 then
    CFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include $NEWCFLAGS"
    CXXFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include $NEWCFLAGS"
