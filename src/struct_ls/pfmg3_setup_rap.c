@@ -564,7 +564,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
                           A_dbox, fstart, stridef, iA,
-                          RAP_dbox, cstart, stridec, iAc);
+                          RAP_dbox, cstart, stridec, iAc)
       {
          HYPRE_Int iAm1 = iA - zOffsetA;
          HYPRE_Int iAp1 = iA + zOffsetA;

@@ -30,25 +30,24 @@
 #else
 #define Pragma(x) _Pragma(#x)
 #endif
-/* #define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE) */
 #define OMP1 Pragma(omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #else
 #define OMP1
 #endif
 
 typedef struct hypre_Boxloop_struct
-  {
-    HYPRE_Int lsize0,lsize1,lsize2;
-    HYPRE_Int strides0,strides1,strides2;
-    HYPRE_Int bstart0,bstart1,bstart2;
-    HYPRE_Int bsize0,bsize1,bsize2;
-  }hypre_Boxloop;
+{
+   HYPRE_Int lsize0,lsize1,lsize2;
+   HYPRE_Int strides0,strides1,strides2;
+   HYPRE_Int bstart0,bstart1,bstart2;
+   HYPRE_Int bsize0,bsize1,bsize2;
+} hypre_Boxloop;
 
 #define zypre_newBoxLoop0Begin(ndim, loop_size)				\
 {\
-   zypre_BoxLoopDeclare();									\
-   zypre_BoxLoopInit(ndim, loop_size);						\
-   OMP1\
+   zypre_BoxLoopDeclare();                                              \
+   zypre_BoxLoopInit(ndim, loop_size);				        \
+   OMP1 \
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
       zypre_BoxLoopSet();\
@@ -76,6 +75,7 @@ typedef struct hypre_Boxloop_struct
    OMP1									\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++) \
    {									\
+      HYPRE_Int i1;							\
       zypre_BoxLoopSet();						\
       zypre_BoxLoopSetK(1, i1);						\
       for (hypre__J = 0; hypre__J < hypre__JN; hypre__J++)		\
@@ -98,7 +98,7 @@ typedef struct hypre_Boxloop_struct
 			       dbox1, start1, stride1, i1,		\
 			       dbox2, start2, stride2, i2)		\
 {									\
-   HYPRE_Int i1,i2;				\
+   HYPRE_Int i1, i2;				\
    zypre_BoxLoopDeclare();\
    zypre_BoxLoopDeclareK(1);\
    zypre_BoxLoopDeclareK(2);\
@@ -108,6 +108,7 @@ typedef struct hypre_Boxloop_struct
    OMP1\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)	\
    {\
+      HYPRE_Int i1, i2; \
       zypre_BoxLoopSet();\
       zypre_BoxLoopSetK(1, i1);\
       zypre_BoxLoopSetK(2, i2);\
@@ -134,7 +135,7 @@ typedef struct hypre_Boxloop_struct
 			       dbox2, start2, stride2, i2,		\
 			       dbox3, start3, stride3, i3)		\
 {									\
-   HYPRE_Int i1,i2,i3;							\
+   HYPRE_Int i1, i2, i3;							\
    zypre_BoxLoopDeclare();									\
    zypre_BoxLoopDeclareK(1);								\
    zypre_BoxLoopDeclareK(2);								\
@@ -146,6 +147,7 @@ typedef struct hypre_Boxloop_struct
    OMP1\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)	\
    {\
+      HYPRE_Int i1, i2, i3; \
       zypre_BoxLoopSet();\
       zypre_BoxLoopSetK(1, i1);\
       zypre_BoxLoopSetK(2, i2);\
@@ -175,7 +177,7 @@ typedef struct hypre_Boxloop_struct
                             dbox3, start3, stride3, i3,\
                             dbox4, start4, stride4, i4)\
 {\
-   HYPRE_Int i1,i2,i3,i4;\
+   HYPRE_Int i1, i2, i3, i4; \
    zypre_BoxLoopDeclare();\
    zypre_BoxLoopDeclareK(1);\
    zypre_BoxLoopDeclareK(2);\
@@ -189,6 +191,7 @@ typedef struct hypre_Boxloop_struct
    OMP1\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)\
    {\
+      HYPRE_Int i1, i2, i3, i4; \
       zypre_BoxLoopSet();\
       zypre_BoxLoopSetK(1, i1);\
       zypre_BoxLoopSetK(2, i2);\
@@ -219,7 +222,7 @@ typedef struct hypre_Boxloop_struct
 				    stride1, i1,		\
 				    stride2, i2)		\
 {\
-   HYPRE_Int i1,i2;\
+   HYPRE_Int i1, i2; \
    zypre_BoxLoopDeclare();\
    zypre_BoxLoopDeclareK(1);\
    zypre_BoxLoopDeclareK(2);\
@@ -229,6 +232,7 @@ typedef struct hypre_Boxloop_struct
    OMP1\
    for (hypre__block = 0; hypre__block < hypre__num_blocks; hypre__block++)	\
    {\
+      HYPRE_Int i1, i2; \
       zypre_BoxLoopSet();\
       zypre_BoxLoopSetK(1, i1);\
       zypre_BoxLoopSetK(2, i2);\
@@ -248,7 +252,7 @@ typedef struct hypre_Boxloop_struct
   }							\
 }
 
-#define hypre_newBoxLoopGetIndex zypre_BoxLoopGetIndex  
+#define hypre_newBoxLoopGetIndex zypre_BoxLoopGetIndex
 #define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 #define hypre_BoxLoopSetOneBlock zypre_BoxLoopSetOneBlock
 #define hypre_BoxLoopBlock       zypre_BoxLoopBlock
@@ -261,7 +265,7 @@ typedef struct hypre_Boxloop_struct
 #define hypre_BoxLoop3Begin      zypre_newBoxLoop3Begin
 #define hypre_BoxLoop3End        zypre_newBoxLoop3End
 #define hypre_BoxLoop4Begin      zypre_newBoxLoop4Begin
-#define hypre_BoxLoop4End        zypre_BoxLoop4End
+#define hypre_BoxLoop4End        zypre_newBoxLoop4End
 #define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
 
 #endif
