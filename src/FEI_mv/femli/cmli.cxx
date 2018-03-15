@@ -704,7 +704,7 @@ extern "C" int MLI_VectorDestroy( CMLI_Vector *cvector )
 extern "C" CMLI_Solver *MLI_SolverCreate(char *name)
 {
    MLI_Solver  *mli_solver;
-   CMLI_Solver *cmli_solver = hypre_CTAlloc(MLI_Solver, 1, HYPRE_MEMORY_HOST);
+   CMLI_Solver *cmli_solver = hypre_CTAlloc(CMLI_Solver, 1, HYPRE_MEMORY_HOST);
 
    mli_solver = MLI_Solver_CreateFromName( name );
    cmli_solver->solver_ = (void *) mli_solver;
@@ -760,7 +760,7 @@ extern "C" int MLI_SolverSetParams(CMLI_Solver *solver, char *param_string,
 extern "C" CMLI_Mapper *MLI_MapperCreate()
 {
    MLI_Mapper  *mli_mapper;
-   CMLI_Mapper *cmli_mapper = hypre_CTAlloc(MLI_Mapper, 1, HYPRE_MEMORY_HOST);
+   CMLI_Mapper *cmli_mapper = hypre_CTAlloc(CMLI_Mapper, 1, HYPRE_MEMORY_HOST);
 
    mli_mapper = new MLI_Mapper();
    cmli_mapper->mapper_ = (void *) mli_mapper;

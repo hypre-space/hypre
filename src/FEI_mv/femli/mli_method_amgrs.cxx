@@ -392,7 +392,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
 
       /* ------construct processor maps for the coarse grid------------- */
 
-      coarsePartition = (int *) hypre_CTAlloc(int, nprocs+1);
+      coarsePartition = (int *) hypre_CTAlloc(int, nprocs+1, HYPRE_MEMORY_HOST);
       coarsePartition[0] = 0;
       MPI_Allgather(&coarseNRows, 1, MPI_INT, &(coarsePartition[1]),
 		    1, MPI_INT, comm);
@@ -430,8 +430,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
             delete mli_ATmat;
             hypre_ParCSRMatrixDestroy(hypreST);
          }
-         hypre_TFree( coarsePartition );
-         if ( CFMarkers != NULL ) hypre_TFree( CFMarkers );
+         hypre_TFree( coarsePartition , HYPRE_MEMORY_HOST);
+         if ( CFMarkers != NULL ) hypre_TFree( CFMarkers , HYPRE_MEMORY_HOST);
          if ( hypreS  != NULL ) hypre_ParCSRMatrixDestroy(hypreS);
          if ( hypreS2 != NULL ) hypre_ParCSRMatrixDestroy(hypreS2);
          if ( coarsenScheme_ == MLI_METHOD_AMGRS_CR )
@@ -559,8 +559,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), paramString, NULL);
          mli->setRestriction(level, mli_Rmat);
       }
-      if ( CFMarkers != NULL ) hypre_TFree( CFMarkers );
-      //if ( coarsePartition != NULL ) hypre_TFree( coarsePartition );
+      if ( CFMarkers != NULL ) hypre_TFree( CFMarkers , HYPRE_MEMORY_HOST);
+      //if ( coarsePartition != NULL ) hypre_TFree( coarsePartition , HYPRE_MEMORY_HOST);
 
       startTime = MLI_Utils_WTime();
 
