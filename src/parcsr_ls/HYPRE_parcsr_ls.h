@@ -1075,6 +1075,15 @@ HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
                                         HYPRE_Int    restr_par);
 
+/**
+ * (Optional) Defines the drop tolerance for the A-matrices 
+ * from the 2nd level of AMG.
+ * The default is 0.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver, 
+                            HYPRE_Real    A_drop_tol  );
+
 /*
  * (Optional) Name of file to which BoomerAMG will print;
  * cf HYPRE\_BoomerAMGSetPrintLevel.  (Presently this is ignored).
@@ -3633,14 +3642,6 @@ HYPRE_Int HYPRE_BoomerAMGSetCRRate(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetCRStrongTh(HYPRE_Solver solver,
                                        HYPRE_Real   CR_strong_th);
 
-/**
- * (Optional) Defines the dropp tolerance for the A-matrices 
- * from the 2nd level of AMG.
- * The default is 0.
- **/
-HYPRE_Int
-HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver, 
-                            HYPRE_Real    A_drop_tol  );
 /*
  * (Optional) Defines whether to use CG 
  **/
