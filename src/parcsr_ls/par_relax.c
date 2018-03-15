@@ -1544,7 +1544,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,res0,res2,rest,size) HYPRE_SMP_SCHEDULE
 #endif
            for (j = 0; j < num_threads; j++)
 	   {
@@ -2009,7 +2009,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,res0,res2,rest,size) HYPRE_SMP_SCHEDULE
 #endif
            for (j = 0; j < num_threads; j++)
 	   {
@@ -2178,7 +2178,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
            for (i = 0; i < n; i++)
 	      tmp_data[i] = u_data[i];
 #ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,rest,size) HYPRE_SMP_SCHEDULE
+#pragma omp parallel for private(i,ii,j,jj,ns,ne,res,res0,res2,rest,size) HYPRE_SMP_SCHEDULE
 #endif
            for (j = 0; j < num_threads; j++)
 	   {
