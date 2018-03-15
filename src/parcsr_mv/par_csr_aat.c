@@ -59,8 +59,8 @@ void hypre_ParAat_RowSizes(
    HYPRE_Int last_col_diag_C;
    HYPRE_Int start_indexing = 0; /* start indexing for C_data at 0 */
 
-   *C_diag_i = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A+1);
-   *C_offd_i = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A+1);
+   *C_diag_i = hypre_CTAlloc(HYPRE_Int,  num_rows_diag_A+1, HYPRE_MEMORY_HOST);
+   *C_offd_i = hypre_CTAlloc(HYPRE_Int,  num_rows_diag_A+1, HYPRE_MEMORY_HOST);
 
    last_col_diag_C = first_row_index_A + num_rows_diag_A - 1;
 
@@ -403,7 +403,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
     *  Allocate marker array.
     *-----------------------------------------------------------------------*/
 
-   B_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A+num_rows_A_ext );
+   B_marker = hypre_CTAlloc(HYPRE_Int,  num_rows_diag_A+num_rows_A_ext , HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
@@ -443,12 +443,12 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
     *-----------------------------------------------------------------------*/
  
    last_col_diag_C = first_row_index_A + num_rows_diag_A - 1;
-   C_diag_data = hypre_CTAlloc(HYPRE_Complex, C_diag_size);
-   C_diag_j    = hypre_CTAlloc(HYPRE_Int, C_diag_size);
+   C_diag_data = hypre_CTAlloc(HYPRE_Complex,  C_diag_size, HYPRE_MEMORY_HOST);
+   C_diag_j    = hypre_CTAlloc(HYPRE_Int,  C_diag_size, HYPRE_MEMORY_HOST);
    if (C_offd_size)
    { 
-      C_offd_data = hypre_CTAlloc(HYPRE_Complex, C_offd_size);
-      C_offd_j    = hypre_CTAlloc(HYPRE_Int, C_offd_size);
+      C_offd_data = hypre_CTAlloc(HYPRE_Complex,  C_offd_size, HYPRE_MEMORY_HOST);
+      C_offd_j    = hypre_CTAlloc(HYPRE_Int,  C_offd_size, HYPRE_MEMORY_HOST);
    } 
 
    /*-----------------------------------------------------------------------
@@ -752,8 +752,8 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
    num_cols_offd_C = count;
 
    if (num_cols_offd_C) {
-      col_map_offd_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_C);
-      new_C_offd_j = hypre_CTAlloc(HYPRE_Int,C_offd_size);
+      col_map_offd_C = hypre_CTAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
+      new_C_offd_j = hypre_CTAlloc(HYPRE_Int, C_offd_size, HYPRE_MEMORY_HOST);
       /* ... a bit big, but num_cols_offd_C is too small.  It might be worth
          computing the correct size, which is sum( no. columns in row i, over all rows i )
       */
@@ -763,7 +763,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
          col_map_offd_C[ new_C_offd_j[i] ] = A_ext_row_map[ C_offd_j[i] ];
       }
 
-      hypre_TFree(C_offd_j);
+      hypre_TFree(C_offd_j, HYPRE_MEMORY_HOST);
       C_offd_j = new_C_offd_j;
 
    }
@@ -796,7 +796,7 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
 
    }
    else
-      hypre_TFree(C_offd_i);
+      hypre_TFree(C_offd_i, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Free B_ext and marker array.
@@ -807,9 +807,9 @@ hypre_ParCSRMatrix *hypre_ParCSRAAt( hypre_ParCSRMatrix  *A )
       hypre_CSRMatrixDestroy(A_ext);
       A_ext = NULL;
    }
-   hypre_TFree(B_marker);
+   hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
    if ( num_rows_diag_A != n_rows_A )
-      hypre_TFree(A_ext_row_map);
+      hypre_TFree(A_ext_row_map, HYPRE_MEMORY_HOST);
 
    return C;
    

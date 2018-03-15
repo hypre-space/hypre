@@ -117,7 +117,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    HYPRE_SStructGridCreate(comm, ndim, nparts, &edge_grid);
 
    vartype_node = HYPRE_SSTRUCT_VARIABLE_NODE;
-   vartype_edges= hypre_TAlloc(HYPRE_SStructVariable, ndim);
+   vartype_edges= hypre_TAlloc(HYPRE_SStructVariable,  ndim, HYPRE_MEMORY_HOST);
 
    /* Assuming the same edge variable types on all parts */
    pgrid   = hypre_SStructGridPGrid(grid, 0);
@@ -281,8 +281,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       }
    }
 
-   eflag = hypre_CTAlloc(HYPRE_Int, nrows);
-   nflag = hypre_CTAlloc(HYPRE_Int, nnodes);
+   eflag = hypre_CTAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
+   nflag = hypre_CTAlloc(HYPRE_Int,  nnodes, HYPRE_MEMORY_HOST);
 
    /* Set eflag to have the number of nodes connected to an edge (2) and
       nflag to have the number of edges connect to a node. */
@@ -363,7 +363,7 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
        *-----------------------------------------------------------------*/
       pgrid    = hypre_SStructGridPGrid(edge_grid, part);
       nvars    = hypre_SStructPGridNVars(pgrid);
-      direction= hypre_TAlloc(HYPRE_Int, 2); /* only two directions at most */
+      direction= hypre_TAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST); /* only two directions at most */
       for (m= 0; m< nvars; m++)
       {
          var_grid= hypre_SStructPGridSGrid(pgrid, m);
@@ -488,18 +488,18 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
          }  /* hypre_ForBoxI(j, boxes) */
       }     /* for (m= 0; m< nvars; m++) */
 
-      hypre_TFree(direction); 
+      hypre_TFree(direction, HYPRE_MEMORY_HOST); 
    }  /* for (part= 0; part< nparts; part++) */
 
    /* set vals. Will have more memory than is needed- extra allotted
       for repeated nodes. */
-   inode= hypre_CTAlloc(HYPRE_Int, nrows);
-   ncols= hypre_CTAlloc(HYPRE_Int, nrows);
+   inode= hypre_CTAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
+   ncols= hypre_CTAlloc(HYPRE_Int,  nrows, HYPRE_MEMORY_HOST);
 
    /* each row can have at most two columns */
    k= 2*nrows;
-   jedge= hypre_CTAlloc(HYPRE_Int, k);
-   vals = hypre_TAlloc(HYPRE_Real, k);
+   jedge= hypre_CTAlloc(HYPRE_Int,  k, HYPRE_MEMORY_HOST);
+   vals = hypre_TAlloc(HYPRE_Real,  k, HYPRE_MEMORY_HOST);
    for (i= 0; i< k; i++)
    {
       vals[i]=-1.0;
@@ -508,8 +508,8 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
    /* to get the correct col connection to each node, we need to offset
       index ijk. Determine these. Assuming the same var ordering for each 
       part. Note that these are not the variable offsets. */
-   offsets   = hypre_TAlloc(hypre_Index, ndim);
-   varoffsets= hypre_TAlloc(hypre_Index, ndim);
+   offsets   = hypre_TAlloc(hypre_Index,  ndim, HYPRE_MEMORY_HOST);
+   varoffsets= hypre_TAlloc(hypre_Index,  ndim, HYPRE_MEMORY_HOST);
    for (i= 0; i< ndim; i++)
    {
       j= vartype_edges[i];
@@ -753,9 +753,9 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
       }     /* for (n= 0; n< nvars; n++) */
    }        /* for (part= 0; part< nparts; part++) */
 
-   hypre_TFree(offsets);
-   hypre_TFree(varoffsets);
-   hypre_TFree(vartype_edges);
+   hypre_TFree(offsets, HYPRE_MEMORY_HOST);
+   hypre_TFree(varoffsets, HYPRE_MEMORY_HOST);
+   hypre_TFree(vartype_edges, HYPRE_MEMORY_HOST);
    HYPRE_SStructGridDestroy(node_grid);
    HYPRE_SStructGridDestroy(edge_grid);
 
@@ -764,12 +764,12 @@ hypre_Maxwell_Grad(hypre_SStructGrid    *grid)
                            (const HYPRE_Real*) vals);
    HYPRE_IJMatrixAssemble(T_grad);
 
-   hypre_TFree(eflag);
-   hypre_TFree(nflag);
-   hypre_TFree(ncols);
-   hypre_TFree(inode);
-   hypre_TFree(jedge);
-   hypre_TFree(vals);
+   hypre_TFree(eflag, HYPRE_MEMORY_HOST);
+   hypre_TFree(nflag, HYPRE_MEMORY_HOST);
+   hypre_TFree(ncols, HYPRE_MEMORY_HOST);
+   hypre_TFree(inode, HYPRE_MEMORY_HOST);
+   hypre_TFree(jedge, HYPRE_MEMORY_HOST);
+   hypre_TFree(vals, HYPRE_MEMORY_HOST);
 
    parcsr_grad= (hypre_ParCSRMatrix *) hypre_IJMatrixObject(T_grad);
    HYPRE_IJMatrixSetObjectType(T_grad, -1);

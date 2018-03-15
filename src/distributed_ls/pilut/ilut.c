@@ -43,40 +43,40 @@ HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, Factor
 #endif
 
   /* Allocate memory for ldu */
-  if (ldu->lsrowptr) hypre_TFree(ldu->lsrowptr);
+  if (ldu->lsrowptr) hypre_TFree(ldu->lsrowptr, HYPRE_MEMORY_HOST);
   ldu->lsrowptr = hypre_idx_malloc(ddist->ddist_lnrows, "hypre_ILUT: ldu->lsrowptr");
 
-  if (ldu->lerowptr) hypre_TFree(ldu->lerowptr);
+  if (ldu->lerowptr) hypre_TFree(ldu->lerowptr, HYPRE_MEMORY_HOST);
   ldu->lerowptr = hypre_idx_malloc(ddist->ddist_lnrows, "hypre_ILUT: ldu->lerowptr");
 
-  if (ldu->lcolind) hypre_TFree(ldu->lcolind);
+  if (ldu->lcolind) hypre_TFree(ldu->lcolind, HYPRE_MEMORY_HOST);
   ldu->lcolind  = hypre_idx_malloc_init(maxnz*ddist->ddist_lnrows, 0, "hypre_ILUT: ldu->lcolind");
 
-  if (ldu->lvalues) hypre_TFree(ldu->lvalues);
+  if (ldu->lvalues) hypre_TFree(ldu->lvalues, HYPRE_MEMORY_HOST);
   ldu->lvalues  =  hypre_fp_malloc_init(maxnz*ddist->ddist_lnrows, 0, "hypre_ILUT: ldu->lvalues");
 
-  if (ldu->usrowptr) hypre_TFree(ldu->usrowptr);
+  if (ldu->usrowptr) hypre_TFree(ldu->usrowptr, HYPRE_MEMORY_HOST);
   ldu->usrowptr = hypre_idx_malloc(ddist->ddist_lnrows, "hypre_ILUT: ldu->usrowptr");
 
-  if (ldu->uerowptr) hypre_TFree(ldu->uerowptr);
+  if (ldu->uerowptr) hypre_TFree(ldu->uerowptr, HYPRE_MEMORY_HOST);
   ldu->uerowptr = hypre_idx_malloc(ddist->ddist_lnrows, "hypre_ILUT: ldu->uerowptr");
 
-  if (ldu->ucolind) hypre_TFree(ldu->ucolind);
+  if (ldu->ucolind) hypre_TFree(ldu->ucolind, HYPRE_MEMORY_HOST);
   ldu->ucolind  = hypre_idx_malloc_init(maxnz*ddist->ddist_lnrows, 0, "hypre_ILUT: ldu->ucolind");
 
-  if (ldu->uvalues) hypre_TFree(ldu->uvalues);
+  if (ldu->uvalues) hypre_TFree(ldu->uvalues, HYPRE_MEMORY_HOST);
   ldu->uvalues  =  hypre_fp_malloc_init(maxnz*ddist->ddist_lnrows, 0.0, "hypre_ILUT: ldu->uvalues");
 
-  if (ldu->dvalues) hypre_TFree(ldu->dvalues);
+  if (ldu->dvalues) hypre_TFree(ldu->dvalues, HYPRE_MEMORY_HOST);
   ldu->dvalues = hypre_fp_malloc(ddist->ddist_lnrows, "hypre_ILUT: ldu->dvalues");
 
-  if (ldu->nrm2s) hypre_TFree(ldu->nrm2s);
+  if (ldu->nrm2s) hypre_TFree(ldu->nrm2s, HYPRE_MEMORY_HOST);
   ldu->nrm2s   = hypre_fp_malloc_init(ddist->ddist_lnrows, 0.0, "hypre_ILUT: ldu->nrm2s");
 
-  if (ldu->perm) hypre_TFree(ldu->perm);
+  if (ldu->perm) hypre_TFree(ldu->perm, HYPRE_MEMORY_HOST);
   ldu->perm  = hypre_idx_malloc_init(ddist->ddist_lnrows, 0, "hypre_ILUT: ldu->perm");
 
-  if (ldu->iperm) hypre_TFree(ldu->iperm);
+  if (ldu->iperm) hypre_TFree(ldu->iperm, HYPRE_MEMORY_HOST);
   ldu->iperm = hypre_idx_malloc_init(ddist->ddist_lnrows, 0, "hypre_ILUT: ldu->iperm");
 
   firstrow = ddist->ddist_rowdist[mype];
@@ -143,10 +143,10 @@ HYPRE_Int hypre_ILUT(DataDistType *ddist, HYPRE_DistributedMatrix matrix, Factor
 
   /*hypre_free_multi(rmat.rmat_rnz, rmat.rmat_rrowlen, 
              rmat.rmat_rcolind, rmat.rmat_rvalues, -1);*/
-  hypre_TFree(rmat.rmat_rnz);
-  hypre_TFree(rmat.rmat_rrowlen);
-  hypre_TFree(rmat.rmat_rcolind);
-  hypre_TFree(rmat.rmat_rvalues);
+  hypre_TFree(rmat.rmat_rnz, HYPRE_MEMORY_HOST);
+  hypre_TFree(rmat.rmat_rrowlen, HYPRE_MEMORY_HOST);
+  hypre_TFree(rmat.rmat_rcolind, HYPRE_MEMORY_HOST);
+  hypre_TFree(rmat.rmat_rvalues, HYPRE_MEMORY_HOST);
 
   return( ierr );
 }

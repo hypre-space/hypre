@@ -44,7 +44,7 @@ hypre_BiCGSTABFunctionsCreate(
 {
    hypre_BiCGSTABFunctions * bicgstab_functions;
    bicgstab_functions = (hypre_BiCGSTABFunctions *)
-      hypre_CTAlloc( hypre_BiCGSTABFunctions, 1 );
+      hypre_CTAlloc( hypre_BiCGSTABFunctions,  1 , HYPRE_MEMORY_HOST);
 
    bicgstab_functions->CreateVector = CreateVector;
    bicgstab_functions->DestroyVector = DestroyVector;
@@ -72,7 +72,7 @@ hypre_BiCGSTABCreate( hypre_BiCGSTABFunctions * bicgstab_functions )
 {
    hypre_BiCGSTABData *bicgstab_data;
  
-   bicgstab_data = hypre_CTAlloc( hypre_BiCGSTABData, 1);
+   bicgstab_data = hypre_CTAlloc( hypre_BiCGSTABData,  1, HYPRE_MEMORY_HOST);
  
    bicgstab_data->functions = bicgstab_functions;
 
@@ -112,7 +112,7 @@ hypre_BiCGSTABDestroy( void *bicgstab_vdata )
    {
       hypre_BiCGSTABFunctions *bicgstab_functions = bicgstab_data->functions;
       if ( (bicgstab_data -> norms) != NULL )
-            hypre_TFree(bicgstab_data -> norms);
+            hypre_TFree(bicgstab_data -> norms, HYPRE_MEMORY_HOST);
  
       (*(bicgstab_functions->MatvecDestroy))(bicgstab_data -> matvec_data);
  
@@ -123,8 +123,8 @@ hypre_BiCGSTABDestroy( void *bicgstab_vdata )
       (*(bicgstab_functions->DestroyVector))(bicgstab_data -> p);
       (*(bicgstab_functions->DestroyVector))(bicgstab_data -> q);
  
-      hypre_TFree(bicgstab_data);
-      hypre_TFree(bicgstab_functions);
+      hypre_TFree(bicgstab_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(bicgstab_functions, HYPRE_MEMORY_HOST);
    }
  
    return(hypre_error_flag);
@@ -181,7 +181,7 @@ hypre_BiCGSTABSetup( void *bicgstab_vdata,
    if ((bicgstab_data->logging)>0 || (bicgstab_data->print_level) > 0)
    {
       if ((bicgstab_data -> norms) == NULL)
-         (bicgstab_data -> norms) = hypre_CTAlloc(HYPRE_Real, max_iter + 1);
+         (bicgstab_data -> norms) = hypre_CTAlloc(HYPRE_Real,  max_iter + 1, HYPRE_MEMORY_HOST);
    }
    if ((bicgstab_data -> print_level) > 0)
    {

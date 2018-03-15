@@ -50,13 +50,13 @@ PrunedRows *PrunedRowsCreate(Matrix *mat, HYPRE_Int size, DiagScale *diag_scale,
     HYPRE_Int row, len, *ind, count, j, *data;
     HYPRE_Real *val, temp;
 
-    PrunedRows *p = (PrunedRows *) malloc(sizeof(PrunedRows));
+    PrunedRows *p = hypre_TAlloc(PrunedRows, 1, HYPRE_MEMORY_HOST);
 
     p->mem  = MemCreate();
     p->size = MAX(size, mat->end_row - mat->beg_row + 1);
 
-    p->len = (HYPRE_Int *)  malloc(p->size * sizeof(HYPRE_Int));
-    p->ind = (HYPRE_Int **) malloc(p->size * sizeof(HYPRE_Int *));
+    p->len = hypre_TAlloc(HYPRE_Int, p->size , HYPRE_MEMORY_HOST);
+    p->ind = hypre_TAlloc(HYPRE_Int *, p->size , HYPRE_MEMORY_HOST);
 
     /* Prune and store the rows on the local processor */
 
@@ -126,8 +126,8 @@ void PrunedRowsPut(PrunedRows *p, HYPRE_Int index, HYPRE_Int len, HYPRE_Int *ind
 #ifdef PARASAILS_DEBUG
 	hypre_printf("StoredRows resize %d\n", p->size);
 #endif
-	p->len = (HYPRE_Int *)  realloc(p->len, p->size * sizeof(HYPRE_Int));
-	p->ind = (HYPRE_Int **) realloc(p->ind, p->size * sizeof(HYPRE_Int *));
+	p->len = hypre_TReAlloc(p->len,HYPRE_Int,  p->size , HYPRE_MEMORY_HOST);
+	p->ind = hypre_TReAlloc(p->ind,HYPRE_Int *,  p->size , HYPRE_MEMORY_HOST);
     }
 
     p->len[index] = len;

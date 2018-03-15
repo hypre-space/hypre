@@ -718,7 +718,7 @@ int MLI_Solver_BJacobi::buildBlocks()
       blockSolvers_ = new MLI_Solver_SeqSuperLU*[nBlocks_];
       for ( iB = 0; iB < nBlocks_; iB++ ) 
          blockSolvers_[iB] = new MLI_Solver_SeqSuperLU(sName);
-      funcPtr = (MLI_Function *) malloc( sizeof(MLI_Function) );
+      funcPtr = hypre_TAlloc(MLI_Function, 1, HYPRE_MEMORY_HOST);
    }
    else
    {

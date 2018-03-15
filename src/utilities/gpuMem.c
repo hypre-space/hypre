@@ -2,12 +2,27 @@
 #define _GNU_SOURCE
 #endif
 #include "_hypre_utilities.h"
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) 
+size_t memsize(const void *ptr){
+   return ((size_t*)ptr)[-MEM_PAD_LEN];
+}
+#else
+size_t memsize(const void *ptr){
+  return 0;
+}
+#endif
+
+
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+
+#if defined(HYPRE_USE_MANAGED)
 #include <stdlib.h>
 #include <stdint.h>
 
 #include <sched.h>
 #include <errno.h>
+#include <omp.h>
 hypre_int ggc(hypre_int id);
 
 /* Global struct that holds device,library handles etc */
@@ -22,19 +37,30 @@ void hypre_GPUInit(hypre_int use_device){
   hypre_int myid;
   hypre_int nDevices;
   hypre_int device;
+#if defined(TRACK_MEMORY_ALLOCATIONS)
+  hypre_printf("\n\n\n WARNING :: TRACK_MEMORY_ALLOCATIONS IS ON \n\n");
+#endif /* TRACK_MEMORY_ALLOCATIONS */
   if (!HYPRE_GPU_HANDLE){
     HYPRE_GPU_HANDLE=1;
     HYPRE_DEVICE=0;
-    gpuErrchk(cudaGetDeviceCount(&nDevices));
+    hypre_CheckErrorDevice(cudaGetDeviceCount(&nDevices));
+
+    /* XXX */
+    nDevices = 1; /* DO NOT COMMENT ME OUT AGAIN! nDevices does NOT WORK !!!! */
     HYPRE_DEVICE_COUNT=nDevices;
     
+    /* TODO cannot use nDevices to check if mpibind is used, need to rewrite 
+     * E.g., NP=5 on 2 nodes, nDevices=1,1,1,1,4 */
+
     if (use_device<0){
-      if (nDevices==1){
+      if (nDevices<4){
 	/* with mpibind each process will only see 1 GPU */
 	HYPRE_DEVICE=0;
-	gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
+	hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
 	cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
-      } else if (nDevices>1) {
+        //hypre_printf("num Devices %d\n", nDevices);
+
+      } else if (nDevices==4) { // THIS IS A HACK THAT WORKS AONLY AT LLNL
 	/* No mpibind or it is a single rank run */
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 	//affs(myid);
@@ -49,7 +75,7 @@ void hypre_GPUInit(hypre_int use_device){
 	if (round_robin){
 	  /* Round robin allocation of GPUs. Does not account for affinities */
 	  HYPRE_DEVICE=myNodeid%nDevices; 
-	  gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
+	  hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
 	  cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
 	  hypre_printf("WARNING:: Code running without mpibind\n");
 	  hypre_printf("Global ID = %d , Node ID %d running on device %d of %d \n",myid,myNodeid,HYPRE_DEVICE,nDevices);
@@ -63,7 +89,7 @@ void hypre_GPUInit(hypre_int use_device){
 	  MPI_Comm_size(numa_comm, &NumaSize);
 	  hypre_int domain_devices=nDevices/2; /* Again hardwired for 2 NUMA domains */
 	  HYPRE_DEVICE = getnuma()*2+myNumaId%domain_devices;
-	  gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
+	  hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
 	  hypre_printf("WARNING:: Code running without mpibind\n");
 	  hypre_printf("NUMA %d GID %d , NodeID %d NumaID %d running on device %d (RR=%d) of %d \n",getnuma(),myid,myNodeid,myNumaId,HYPRE_DEVICE,myNodeid%nDevices,nDevices);
 	  
@@ -77,21 +103,26 @@ void hypre_GPUInit(hypre_int use_device){
       }
     } else {
       HYPRE_DEVICE = use_device;
-      gpuErrchk(cudaSetDevice(HYPRE_DEVICE));
+      hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
     }
-      
+    printf("GPU Init called \n");
+#if defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+    omp_set_default_device(HYPRE_DEVICE);
+    printf("Set OMP Default device to %d \n",HYPRE_DEVICE);
+#endif /* defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD */
       /* Create NVTX domain for all the nvtx calls in HYPRE */
       HYPRE_DOMAIN=nvtxDomainCreateA("Hypre");
       
       /* Initialize streams */
       hypre_int jj;
       for(jj=0;jj<MAX_HGS_ELEMENTS;jj++)
-	gpuErrchk(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)),cudaStreamNonBlocking));
+	 hypre_CheckErrorDevice(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)),cudaStreamNonBlocking));
       
       /* Initialize the library handles and streams */
       
     cusparseErrchk(cusparseCreate(&(HYPRE_CUSPARSE_HANDLE)));
     cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,HYPRE_STREAM(4)));
+    //cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,0)); // Cusparse MxV happens in default stream
     cusparseErrchk(cusparseCreateMatDescr(&(HYPRE_CUSPARSE_MAT_DESCR))); 
     cusparseErrchk(cusparseSetMatType(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_MATRIX_TYPE_GENERAL));
     cusparseErrchk(cusparseSetMatIndexBase(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_INDEX_BASE_ZERO));
@@ -100,7 +131,9 @@ void hypre_GPUInit(hypre_int use_device){
     cublasErrchk(cublasSetStream(HYPRE_CUBLAS_HANDLE,HYPRE_STREAM(4)));
     if (!checkDeviceProps()) hypre_printf("WARNING:: Concurrent memory access not allowed\n");
     /* Check if the arch flags used for compiling the cuda kernels match the device */
+#ifdef HYPRE_USE_GPU
     CudaCompileFlagCheck();
+#endif /* HYPRE_USE_GPU */
   }
 }
 
@@ -112,39 +145,38 @@ void hypre_GPUFinalize(){
   cublasErrchk(cublasDestroy(HYPRE_CUBLAS_HANDLE));
 #if defined(HYPRE_USE_GPU) && defined(HYPRE_MEASURE_GPU_HWM)
   hypre_printf("GPU Memory High Water Mark(per MPI_RANK) %f MB \n",(HYPRE_Real)HYPRE_GPU_HWM/1024/1024);
-#endif
+#endif /* defined(HYPRE_USE_GPU) && defined(HYPRE_MEASURE_GPU_HWM) */
   /* Destroy streams */
   hypre_int jj;
   for(jj=0;jj<MAX_HGS_ELEMENTS;jj++)
-    gpuErrchk(cudaStreamDestroy(HYPRE_STREAM(jj)));
+     hypre_CheckErrorDevice(cudaStreamDestroy(HYPRE_STREAM(jj)));
   
 }
 
 void MemAdviseReadOnly(const void* ptr, hypre_int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
-    if (size==0) printf("WARNING:: Operations with 0 size vector \n");
-    gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseSetReadMostly,device));
+    if (size==0) hypre_printf("WARNING:: Operations with 0 size vector \n");
+    hypre_CheckErrorDevice(cudaMemAdvise(ptr,size,cudaMemAdviseSetReadMostly,device));
 }
 
 void MemAdviseUnSetReadOnly(const void* ptr, hypre_int device){
   if (ptr==NULL) return;
     size_t size=mempush(ptr,0,0);
-    if (size==0) printf("WARNING:: Operations with 0 size vector \n");
-    gpuErrchk(cudaMemAdvise(ptr,size,cudaMemAdviseUnsetReadMostly,device));
+    if (size==0) hypre_printf("WARNING:: Operations with 0 size vector \n");
+    hypre_CheckErrorDevice(cudaMemAdvise(ptr,size,cudaMemAdviseUnsetReadMostly,device));
 }
 
 
 void MemAdviseSetPrefLocDevice(const void *ptr, hypre_int device){
   if (ptr==NULL) return;
-  gpuErrchk(cudaMemAdvise(ptr,mempush(ptr,0,0),cudaMemAdviseSetPreferredLocation,device));
+  hypre_CheckErrorDevice(cudaMemAdvise(ptr,mempush(ptr,0,0),cudaMemAdviseSetPreferredLocation,device));
 }
 
 void MemAdviseSetPrefLocHost(const void *ptr){
   if (ptr==NULL) return;
-  gpuErrchk(cudaMemAdvise(ptr,mempush(ptr,0,0),cudaMemAdviseSetPreferredLocation,cudaCpuDeviceId));
+  hypre_CheckErrorDevice(cudaMemAdvise(ptr,mempush(ptr,0,0),cudaMemAdviseSetPreferredLocation,cudaCpuDeviceId));
 }
-
 
 void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream){
   if (ptr==NULL) return;
@@ -153,11 +185,11 @@ void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream){
   PUSH_RANGE("MemPreFetchForce",4);
   /* Do a prefetch every time until a possible UM bug is fixed */
   if (size>0){
-    PrintPointerAttributes(ptr);
-     gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
-    gpuErrchk(cudaStreamSynchronize(stream));
-    POP_RANGE;
-  return;
+     PrintPointerAttributes(ptr);
+     hypre_CheckErrorDevice(cudaMemPrefetchAsync(ptr,size,device,stream));
+     hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
+     POP_RANGE;
+     return;
   } 
   return;
 }
@@ -167,7 +199,7 @@ void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream){
   if (ptr==NULL) return;
   size_t size=memsize(ptr);
   PUSH_RANGE_PAYLOAD("MemPreFetchForce",4,size);
-  gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
+  hypre_CheckErrorDevice(cudaMemPrefetchAsync(ptr,size,device,stream));
   POP_RANGE;
   return;
 }
@@ -177,7 +209,7 @@ void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t 
   PUSH_RANGE_DOMAIN("MemPreFetchSized",4,0);
   /* Do a prefetch every time until a possible UM bug is fixed */
   if (size>0){
-    gpuErrchk(cudaMemPrefetchAsync(ptr,size,device,stream));
+    hypre_CheckErrorDevice(cudaMemPrefetchAsync(ptr,size,device,stream));
     POP_RANGE_DOMAIN(0);
     return;
   } 
@@ -212,7 +244,7 @@ cusparseHandle_t getCusparseHandle(){
     firstcall=0;
     status= cusparseCreate(&handle);
     if (status != CUSPARSE_STATUS_SUCCESS) {
-      printf("ERROR:: CUSPARSE Library initialization failed\n");
+      hypre_printf("ERROR:: CUSPARSE Library initialization failed\n");
       handle=0;
       exit(2);
     }
@@ -221,113 +253,6 @@ cusparseHandle_t getCusparseHandle(){
   return handle;
 }
 
-/* C version of mempush using linked lists */
-
-size_t mempush(const void *ptr, size_t size, hypre_int action){
-  static node* head=NULL;
-  static hypre_int nc=0;
-  node *found=NULL;
-  if (!head){
-    if ((size<=0)||(action==1)) {
-      fprintf(stderr,"mempush can start only with an insertion or a size call \n");
-      return 0;
-    }
-    head = (node*)malloc(sizeof(node));
-    head->ptr=ptr;
-    head->size=size;
-    head->next=NULL;
-    nc++;
-    return size;
-  } else {
-    // Purge an address
-    if (action==1){
-      found=memfind(head,ptr);
-      if (found){
-	memdel(&head, found);
-	nc--;
-	return 0;
-      } else {
-#ifdef FULL_WARN
-	fprintf(stderr,"ERROR :: Pointer for deletion not found in linked list %p\n",ptr);
-#endif
-	return 0;
-      }
-    } // End purge
-    
-    // Insertion
-    if (size>0){
-      found=memfind(head,ptr);
-      if (found){
-#ifdef FULL_WARN
-	fprintf(stderr,"ERROR :: Pointer for insertion already in use in linked list %p\n",ptr);
-	//printlist(head,nc);
-#endif
-	return 0;
-      } else {
-	nc++;
-	meminsert(&head,ptr,size);
-	return 0;
-      }
-    }
-
-    // Getting allocation size
-    found=memfind(head,ptr);
-    if (found){
-      return found->size;
-    } else{
-#ifdef FULL_WARN
-      fprintf(stderr,"ERROR :: Pointer for size check NOT found in linked list\n");
-#endif
-      return 0;
-    }
-  }
-}
-
-node *memfind(node *head, const void *ptr){
-  node *next;
-  next=head;
-  while(next!=NULL){
-    if (next->ptr==ptr) return next;
-    next=next->next;
-  }
-  return NULL;
-}
-
-void memdel(node **head, node *found){
-  node *next;
-  if (found==*head){
-    next=(*head)->next;
-    free(*head);
-    *head=next;
-    return;
-  }
-  next=*head;
-  while(next->next!=found){
-    next=next->next;
-  }
-  next->next=next->next->next;
-  free(found);
-  return;
-}
-void meminsert(node **head, const void  *ptr,size_t size){
-  node *nhead;
-  nhead = (node*)malloc(sizeof(node));
-  nhead->ptr=ptr;
-  nhead->size=size;
-  nhead->next=*head;
-  *head=nhead;
-  return;
-}
-
-void printlist(node *head,hypre_int nc){
-  node *next;
-  next=head;
-  printf("Node count %d \n",nc);
-  while(next!=NULL){
-    printf("Address %p of size %zu \n",next->ptr,next->size);
-    next=next->next;
-  }
-}
 
 cudaStream_t getstreamOlde(hypre_int i){
   static hypre_int firstcall=1;
@@ -336,7 +261,7 @@ cudaStream_t getstreamOlde(hypre_int i){
   if (firstcall){
     hypre_int jj;
     for(jj=0;jj<MAXSTREAMS;jj++)
-      gpuErrchk(cudaStreamCreateWithFlags(&s[jj],cudaStreamNonBlocking));
+      hypre_CheckErrorDevice(cudaStreamCreateWithFlags(&s[jj],cudaStreamNonBlocking));
     //printf("Created streams ..\n");
     firstcall=0;
   }
@@ -365,7 +290,7 @@ cudaEvent_t getevent(hypre_int i){
   if (firstcall){
     hypre_int jj;
     for(jj=0;jj<MAXEVENTS;jj++)
-      gpuErrchk(cudaEventCreateWithFlags(&s[jj],cudaEventDisableTiming));
+       hypre_CheckErrorDevice(cudaEventCreateWithFlags(&s[jj],cudaEventDisableTiming));
     //printf("Created events ..\n");
     firstcall=0;
   }
@@ -390,15 +315,15 @@ hypre_int GetAsyncMode(){
 }
 
 void branchStream(hypre_int i, hypre_int j){
-  gpuErrchk(cudaEventRecord(getevent(i),HYPRE_STREAM(i)));
-  gpuErrchk(cudaStreamWaitEvent(HYPRE_STREAM(j),getevent(i),0));
+   hypre_CheckErrorDevice(cudaEventRecord(getevent(i),HYPRE_STREAM(i)));
+   hypre_CheckErrorDevice(cudaStreamWaitEvent(HYPRE_STREAM(j),getevent(i),0));
 }
 
 void joinStreams(hypre_int i, hypre_int j, hypre_int k){
-  gpuErrchk(cudaEventRecord(getevent(i),HYPRE_STREAM(i)));
-  gpuErrchk(cudaEventRecord(getevent(j),HYPRE_STREAM(j)));
-  gpuErrchk(cudaStreamWaitEvent(HYPRE_STREAM(k),getevent(i),0));
-  gpuErrchk(cudaStreamWaitEvent(HYPRE_STREAM(k),getevent(j),0));
+   hypre_CheckErrorDevice(cudaEventRecord(getevent(i),HYPRE_STREAM(i)));
+   hypre_CheckErrorDevice(cudaEventRecord(getevent(j),HYPRE_STREAM(j)));
+   hypre_CheckErrorDevice(cudaStreamWaitEvent(HYPRE_STREAM(k),getevent(i),0));
+   hypre_CheckErrorDevice(cudaStreamWaitEvent(HYPRE_STREAM(k),getevent(j),0));
 }
 
 void affs(hypre_int myid){
@@ -499,15 +424,337 @@ hypre_int getnuma(){
 }
 hypre_int checkDeviceProps(){
   struct cudaDeviceProp prop;
-  gpuErrchk(cudaGetDeviceProperties(&prop, HYPRE_DEVICE));
+  hypre_CheckErrorDevice(cudaGetDeviceProperties(&prop, HYPRE_DEVICE));
   HYPRE_GPU_CMA=prop.concurrentManagedAccess;
   return HYPRE_GPU_CMA;
 }
 hypre_int pointerIsManaged(const void *ptr){
   struct cudaPointerAttributes ptr_att;
   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess) {
+    cudaGetLastError(); 
     return 0;
   }
   return ptr_att.isManaged;
 }
+
+#endif /* HYPRE_USE_MANAGED */
+
+/* C version of mempush using linked lists */
+
+size_t mempush(const void *ptr, size_t size, hypre_int action){
+  static node* head=NULL;
+  static hypre_int nc=0;
+  node *found=NULL;
+  if (!head){
+    if ((size<=0)||(action==1)) {
+      fprintf(stderr,"mempush can start only with an insertion or a size call \n");
+      return 0;
+    }
+    head = hypre_TAlloc(node, 1, HYPRE_MEMORY_HOST);
+    head->ptr=ptr;
+    head->size=size;
+    head->next=NULL;
+    nc++;
+    return size;
+  } else {
+    // Purge an address
+    if (action==1){
+      found=memfind(head,ptr);
+      if (found){
+	memdel(&head, found);
+	nc--;
+	return 0;
+      } else {
+#ifdef FULL_WARN
+	fprintf(stderr,"ERROR :: Pointer for deletion not found in linked list %p\n",ptr);
+#endif
+	return 0;
+      }
+    } // End purge
+    
+    // Insertion
+    if (size>0){
+      found=memfind(head,ptr);
+      if (found){
+#ifdef FULL_WARN
+	fprintf(stderr,"ERROR :: Pointer for insertion already in use in linked list %p\n",ptr);
+	//printlist(head,nc);
+#endif
+	return 0;
+      } else {
+	nc++;
+	meminsert(&head,ptr,size);
+	return 0;
+      }
+    }
+
+    // Getting allocation size
+    found=memfind(head,ptr);
+    if (found){
+      return found->size;
+    } else{
+#ifdef FULL_WARN
+      fprintf(stderr,"ERROR :: Pointer for size check NOT found in linked list\n");
+#endif
+      return 0;
+    }
+  }
+}
+
+node *memfind(node *head, const void *ptr){
+  node *next;
+  next=head;
+  while(next!=NULL){
+    if (next->ptr==ptr) return next;
+    next=next->next;
+  }
+  return NULL;
+}
+
+void memdel(node **head, node *found){
+  node *next;
+  if (found==*head){
+    next=(*head)->next;
+    free(*head);
+    *head=next;
+    return;
+  }
+  next=*head;
+  while(next->next!=found){
+    next=next->next;
+  }
+  next->next=next->next->next;
+  free(found);
+  return;
+}
+void meminsert(node **head, const void  *ptr,size_t size){
+  node *nhead;
+  nhead = hypre_TAlloc(node, 1, HYPRE_MEMORY_HOST);
+  nhead->ptr=ptr;
+  nhead->size=size;
+  nhead->next=*head;
+  *head=nhead;
+  return;
+}
+
+void printlist(node *head,hypre_int nc){
+  node *next;
+  next=head;
+  printf("Node count %d \n",nc);
+  while(next!=NULL){
+    printf("Address %p of size %zu \n",next->ptr,next->size);
+    next=next->next;
+  }
+}
+
+#endif /* defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) */
+
+#if defined(HYPRE_USE_CUDA)
+HYPRE_Int hypre_exec_policy = HYPRE_MEMORY_DEVICE;
+char tmp_print[10] = "";
+HYPRE_Int hypre_box_print = 0;
+HYPRE_Real t_start = 0;
+HYPRE_Real t_end   = 0;
+HYPRE_Int time_box = 0;
+static HYPRE_Int cuda_reduction_id_used[RAJA_MAX_REDUCE_VARS];
+CudaReductionBlockDataType* s_cuda_reduction_mem_block = 0;
+  
+HYPRE_Int getCudaReductionId()
+{
+   static HYPRE_Int first_time_called = 1;
+   HYPRE_Int id;
+   
+   if (first_time_called) {
+
+      for (id = 0; id < RAJA_MAX_REDUCE_VARS; ++id) {
+         cuda_reduction_id_used[id] = 0;
+      }
+
+      first_time_called = 0;
+   }
+
+   id = 0;
+   while ( id < RAJA_MAX_REDUCE_VARS && cuda_reduction_id_used[id] ) {
+     id++;
+   }
+
+   if ( id >= RAJA_MAX_REDUCE_VARS ) {
+      printf("error\n");
+      exit(1);
+   }
+
+   cuda_reduction_id_used[id] = 1;
+
+   return id;
+}
+
+void freeCudaReductionMemBlock()
+{
+   if ( s_cuda_reduction_mem_block != 0 ) {
+      cudaError_t cudaerr = cudaFree(s_cuda_reduction_mem_block);
+      s_cuda_reduction_mem_block = 0;
+      if (cudaerr != cudaSuccess) {
+	printf("Error\n");
+         exit(1);
+       }
+   }
+}
+
+void initCudaReductionMemBlock()
+{
+   //
+   // For each reducer object, we want a chunk of managed memory that
+   // holds RAJA_CUDA_REDUCE_BLOCK_LENGTH slots for the reduction 
+   // value for each thread, a single slot for the global reduced value
+   // across grid blocks, and a single slot for the max grid size.  
+   //
+   HYPRE_Int block_offset = RAJA_CUDA_REDUCE_BLOCK_LENGTH + 1 + 1 + 1;
+
+   if (s_cuda_reduction_mem_block == 0) {
+      HYPRE_Int len = RAJA_MAX_REDUCE_VARS * block_offset;
+
+      cudaError_t cudaerr = 
+         cudaMallocManaged((void **)&s_cuda_reduction_mem_block,
+                           sizeof(CudaReductionBlockDataType)*len,
+                           cudaMemAttachGlobal);
+
+      if ( cudaerr != cudaSuccess ) {
+	fprintf(stderr,"CUDA ERROR ( Code = %d [%s]): %d,\n",cudaerr,cudaGetErrorString(cudaerr),(HYPRE_Int)(sizeof(CudaReductionBlockDataType)*len));
+         exit(1);
+      }
+      cudaMemset(s_cuda_reduction_mem_block, 0, 
+                 sizeof(CudaReductionBlockDataType)*len);
+
+      atexit(freeCudaReductionMemBlock);
+   }
+}
+
+CudaReductionBlockDataType* getCudaReductionMemBlock(HYPRE_Int id)
+{
+   //
+   // For each reducer object, we want a chunk of managed memory that
+   // holds RAJA_CUDA_REDUCE_BLOCK_LENGTH slots for the reduction 
+   // value for each thread, a single slot for the global reduced value
+   // across grid blocks, and a single slot for the max grid size.  
+   //
+   HYPRE_Int block_offset = RAJA_CUDA_REDUCE_BLOCK_LENGTH + 1 + 1 + 1;
+
+   if (s_cuda_reduction_mem_block == 0) {
+      HYPRE_Int len = RAJA_MAX_REDUCE_VARS * block_offset;
+
+      cudaError_t cudaerr = 
+         cudaMallocManaged((void **)&s_cuda_reduction_mem_block,
+                           sizeof(CudaReductionBlockDataType)*len,
+                           cudaMemAttachGlobal);
+
+      if ( cudaerr != cudaSuccess ) {
+	 printf("error\n");
+         exit(1);
+      }
+      cudaMemset(s_cuda_reduction_mem_block, 0, 
+                 sizeof(CudaReductionBlockDataType)*len);
+
+      atexit(freeCudaReductionMemBlock);
+   }
+
+   return &(s_cuda_reduction_mem_block[id * block_offset]) ;
+}
+
+void releaseCudaReductionId(HYPRE_Int id)
+{
+   if ( id < RAJA_MAX_REDUCE_VARS ) {
+      cuda_reduction_id_used[id] = 0;
+   }
+}
+
+CudaReductionBlockDataType* getCPUReductionMemBlock(HYPRE_Int id)
+{
+   HYPRE_Int nthreads = 1;
+
+   HYPRE_Int block_offset = COHERENCE_BLOCK_SIZE/sizeof(CudaReductionBlockDataType);
+
+   if (s_cuda_reduction_mem_block == 0) {
+      HYPRE_Int len = nthreads * RAJA_MAX_REDUCE_VARS;
+      s_cuda_reduction_mem_block = hypre_CTAlloc(CudaReductionBlockDataType,len*block_offset,HYPRE_MEMORY_HOST);
+      
+      //   new CudaReductionBlockDataType[len*block_offset];
+
+      atexit(freeCPUReductionMemBlock);
+   }
+
+   return &(s_cuda_reduction_mem_block[nthreads * id * block_offset]) ;
+}
+
+void freeCPUReductionMemBlock()
+{
+   if ( s_cuda_reduction_mem_block != 0 ) {
+     //delete [] s_cuda_reduction_mem_block;
+     hypre_TFree(s_cuda_reduction_mem_block,HYPRE_MEMORY_HOST);
+      s_cuda_reduction_mem_block = 0; 
+   }
+}
+
+void releaseCPUReductionId(HYPRE_Int id)
+{
+   if ( id < RAJA_MAX_REDUCE_VARS ) {
+      cuda_reduction_id_used[id] = 0;
+   }
+}
+
+#endif//defined(HYPRE_USE_CUDA)
+
+#ifdef HYPRE_USE_OMP45
+/* num: number of bytes */
+HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
+			   const char *type1, const char *type2) {
+   hypre_omp45_offload(device, ptr, char, 0, num, type1, type2);
+
+   return 0;
+}
+
+HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num)
+{
+   if (hypre__global_offload && !omp_target_is_present(p, device_num)) {
+      printf("HYPRE mapping error: %p has not been mapped to device %d!\n", p, device_num);
+      return 1;
+   }
+   return 0;
+}
+
+/* OMP offloading switch */
+HYPRE_Int HYPRE_OMPOffloadOn()
+{ 
+   hypre__global_offload = 1;
+   hypre__offload_device_num = omp_get_default_device();
+   hypre__offload_host_num   = omp_get_initial_device();
+   hypre_fprintf(stdout, "Hypre OMP 4.5 offloading has been turned on. Device %d\n",
+                 hypre__offload_device_num);
+
+   return 0;
+}
+
+HYPRE_Int HYPRE_OMPOffloadOff()
+{
+   fprintf(stdout, "Hypre OMP 4.5 offloading has been turned off\n");
+   hypre__global_offload = 0;
+   hypre__offload_device_num = omp_get_initial_device();
+   hypre__offload_host_num   = omp_get_initial_device();
+
+   return 0;
+}
+
+HYPRE_Int HYPRE_OMPOffloadStatPrint() {
+   hypre_printf("Hypre OMP target memory stats:\n"
+                "      ALLOC   %ld bytes, %ld counts\n"
+                "      FREE    %ld bytes, %ld counts\n"
+                "      HTOD    %ld bytes, %ld counts\n"
+                "      DTOH    %ld bytes, %ld counts\n",
+                hypre__target_allc_bytes, hypre__target_allc_count,
+                hypre__target_free_bytes, hypre__target_free_count,
+                hypre__target_htod_bytes, hypre__target_htod_count,
+                hypre__target_dtoh_bytes, hypre__target_dtoh_count);
+
+   return 0;
+}
+
 #endif

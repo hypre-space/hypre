@@ -58,7 +58,7 @@ void Vec_dhCopy(Vec_dh x, Vec_dh y)
   if (x->vals == NULL) SET_V_ERROR("x->vals is NULL");
   if (y->vals == NULL) SET_V_ERROR("y->vals is NULL");
   if (x->n != y->n) SET_V_ERROR("x and y are different lengths");
-  memcpy(y->vals, x->vals, x->n*sizeof(HYPRE_Real));
+  hypre_TMemcpy(y->vals,  x->vals, HYPRE_Real, x->n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   END_FUNC_DH
 }
 

@@ -115,7 +115,7 @@ void Numbering_dhSetup(Numbering_dh numb, Mat_dh mat)
         if (m+num_ext >= size) {
           HYPRE_Int newSize = hypre_max(m+num_ext+1, size*1.5);  /* heuristic */
           HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(newSize*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-          memcpy(tmp, idx_ext, size*sizeof(size));
+          hypre_TMemcpy(tmp,  idx_ext, size, size, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
           FREE_DH(idx_ext); CHECK_V_ERROR;
           size = numb->size = newSize;
           numb->idx_ext = idx_ext = tmp;

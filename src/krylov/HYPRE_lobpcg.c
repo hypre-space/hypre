@@ -144,7 +144,7 @@ hypre_LOBPCGDestroy( void *pcg_vdata )
     
       lobpcg_clean( &(pcg_data->lobpcgData) );
 
-      hypre_TFree( pcg_vdata );
+      hypre_TFree( pcg_vdata , HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -470,7 +470,7 @@ HYPRE_LOBPCGCreate( mv_InterfaceInterpreter* ii, HYPRE_MatvecFunctions* mv,
 {
    hypre_LOBPCGData *pcg_data;
 
-   pcg_data = hypre_CTAlloc(hypre_LOBPCGData,1);
+   pcg_data = hypre_CTAlloc(hypre_LOBPCGData, 1, HYPRE_MEMORY_HOST);
 
    (pcg_data->precondFunctions).Precond = NULL;
    (pcg_data->precondFunctions).PrecondSetup = NULL;

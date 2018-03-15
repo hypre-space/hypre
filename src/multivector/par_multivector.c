@@ -36,7 +36,7 @@ hypre_ParMultiVectorCreate(MPI_Comm comm, HYPRE_Int global_size, HYPRE_Int *part
    hypre_ParMultiVector *vector;
    HYPRE_Int num_procs, my_id;
    
-   vector = hypre_CTAlloc(hypre_ParMultiVector, 1);
+   vector = hypre_CTAlloc(hypre_ParMultiVector,  1, HYPRE_MEMORY_HOST);
    
    hypre_MPI_Comm_rank(comm, &my_id);
    
@@ -76,9 +76,9 @@ hypre_ParMultiVectorDestroy( hypre_ParMultiVector *pm_vector )
          hypre_SeqMultivectorDestroy(hypre_ParMultiVectorLocalVector(pm_vector));
       
       if ( hypre_ParMultiVectorOwnsPartitioning(pm_vector) )
-         hypre_TFree(hypre_ParMultiVectorPartitioning(pm_vector));
+         hypre_TFree(hypre_ParMultiVectorPartitioning(pm_vector), HYPRE_MEMORY_HOST);
       
-      hypre_TFree(pm_vector);
+      hypre_TFree(pm_vector, HYPRE_MEMORY_HOST);
    }
    return 0;
 }
@@ -427,7 +427,7 @@ hypre_ParMultiVectorTempRead(MPI_Comm comm, const char *fileName)
       src = temp_vec->local_vector->data;
       count = temp_vec->local_vector->size;
    
-      memcpy(dest,src, count*sizeof(HYPRE_Complex));
+      hypre_TMemcpy(dest, src, HYPRE_Complex, count, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       
    /* destroy current vector */
       hypre_ParVectorDestroy(temp_vec);

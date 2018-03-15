@@ -29,7 +29,7 @@ void * hypre_ADSCreate()
 {
    hypre_ADSData *ads_data;
 
-   ads_data = hypre_CTAlloc(hypre_ADSData, 1);
+   ads_data = hypre_CTAlloc(hypre_ADSData,  1, HYPRE_MEMORY_HOST);
 
    /* Default parameters */
 
@@ -163,12 +163,12 @@ HYPRE_Int hypre_ADSDestroy(void *solver)
       hypre_ParVectorDestroy(ads_data -> g2);
 
    if (ads_data -> A_l1_norms)
-      hypre_TFree(ads_data -> A_l1_norms);
+      hypre_TFree(ads_data -> A_l1_norms, HYPRE_MEMORY_HOST);
 
    /* C, G, x, y and z are not destroyed */
 
    if (ads_data)
-      hypre_TFree(ads_data);
+      hypre_TFree(ads_data, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -531,7 +531,7 @@ HYPRE_Int hypre_ADSComputePi(hypre_ParCSRMatrix *A,
          hypre_MPI_Comm_size(comm, &num_procs);
          col_starts_size = num_procs+1;
 #endif
-         col_starts = hypre_TAlloc(HYPRE_Int,col_starts_size);
+         col_starts = hypre_TAlloc(HYPRE_Int, col_starts_size, HYPRE_MEMORY_HOST);
          for (i = 0; i < col_starts_size; i++)
             col_starts[i] = 3 * col_starts_F2V[i];
 
