@@ -61,7 +61,6 @@ FILES =\
  gpuErrorCheck.c\
  gpuMem.c\
  hypre_general.c
- #memsizes.C
 
 OBJS = ${FILES:.c=.o}
 
