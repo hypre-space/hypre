@@ -222,7 +222,6 @@ typedef struct hypre_Boxloop_struct
 				    stride1, i1,		\
 				    stride2, i2)		\
 {\
-   HYPRE_Int i1, i2; \
    zypre_BoxLoopDeclare();\
    zypre_BoxLoopDeclareK(1);\
    zypre_BoxLoopDeclareK(2);\

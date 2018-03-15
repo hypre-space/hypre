@@ -375,19 +375,6 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
    ik += hypre__i[hypre__d]*hypre__sk##k[hypre__d];\
 }
 
-#define zypre_BasicBoxLoopInitK(k, stridek) \
-hypre__sk##k[0] = stridek[0];\
-hypre__ikinc##k[0] = 0;\
-for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
-{\
-   hypre__sk##k[hypre__d] = stridek[hypre__d];\
-   hypre__ikinc##k[hypre__d] = hypre__ikinc##k[hypre__d-1] +\
-      hypre__sk##k[hypre__d] - hypre__n[hypre__d-1]*hypre__sk##k[hypre__d-1];\
-}\
-hypre__i0inc##k = hypre__sk##k[0];\
-hypre__ikinc##k[hypre__ndim] = 0;\
-hypre__ikstart##k = 0
-
 #define zypre_BoxLoopInc1() \
 hypre__d = 1;\
 while ((hypre__i[hypre__d]+2) > hypre__n[hypre__d])\
@@ -611,6 +598,20 @@ for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
 }
 
 /*-----------------------------------*/
+
+#define zypre_BasicBoxLoopInitK(k, stridek) \
+hypre__sk##k[0] = stridek[0];\
+hypre__ikinc##k[0] = 0;\
+for (hypre__d = 1; hypre__d < hypre__ndim; hypre__d++)\
+{\
+   hypre__sk##k[hypre__d] = stridek[hypre__d];\
+   hypre__ikinc##k[hypre__d] = hypre__ikinc##k[hypre__d-1] +\
+      hypre__sk##k[hypre__d] - hypre__n[hypre__d-1]*hypre__sk##k[hypre__d-1];\
+}\
+hypre__i0inc##k = hypre__sk##k[0];\
+hypre__ikinc##k[hypre__ndim] = 0;\
+hypre__ikstart##k = 0
+
 #define zypre_BasicBoxLoop2Begin(ndim, loop_size,\
                                  stride1, i1,\
                                  stride2, i2)\
