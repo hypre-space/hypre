@@ -201,7 +201,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
    A_pmatrix=  hypre_SStructMatrixPMatrix(fac_A, part_crse);
    nvars    =  hypre_SStructPMatrixNVars(A_pmatrix);
 
-   fgrid_cinterface_extents= hypre_TAlloc(hypre_BoxArrayArray **, nvars);
+   fgrid_cinterface_extents= hypre_TAlloc(hypre_BoxArrayArray **,  nvars, HYPRE_MEMORY_HOST);
    for (var1= 0; var1< nvars; var1++)
    {
       fboxman= hypre_SStructGridBoxManager(grid, part_fine, var1);
@@ -209,8 +209,8 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
       cgrid= hypre_SStructPGridSGrid(hypre_SStructPMatrixPGrid(A_pmatrix), var1);
       cgrid_boxes= hypre_StructGridBoxes(cgrid); 
-      fgrid_cinterface_extents[var1]= hypre_TAlloc(hypre_BoxArrayArray *, 
-                                                   hypre_BoxArraySize(cgrid_boxes));
+      fgrid_cinterface_extents[var1]= hypre_TAlloc(hypre_BoxArrayArray *,  
+                                                   hypre_BoxArraySize(cgrid_boxes), HYPRE_MEMORY_HOST);
 
       hypre_ForBoxI(ci, cgrid_boxes)
       {
@@ -254,7 +254,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                                          hypre_BoxArrayArrayBoxArray(fgrid_cinterface_extents[var1][ci], i) );
             }
          }
-         hypre_TFree(boxman_entries);
+         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
 
       }  /* hypre_ForBoxI(ci, cgrid_boxes) */
    }     /* for (var1= 0; var1< nvars; var1++) */
@@ -285,8 +285,8 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
           * These are needed in collapsing the unstructured connections to
           * a stencil connection.
           *------------------------------------------------------------------*/
-         stencil_ranks= hypre_TAlloc(HYPRE_Int, stencil_size);
-         rank_stencils= hypre_TAlloc(HYPRE_Int, max_stencil_size);
+         stencil_ranks= hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
+         rank_stencils= hypre_TAlloc(HYPRE_Int,  max_stencil_size, HYPRE_MEMORY_HOST);
          for (i= 0; i< max_stencil_size; i++)
          {
             rank_stencils[i]= -1;
@@ -307,7 +307,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
 
          smatrix_var = hypre_SStructPMatrixSMatrix(A_pmatrix, var1, var1);
 
-         a_ptrs   = hypre_TAlloc(HYPRE_Real *, stencil_size);
+         a_ptrs   = hypre_TAlloc(HYPRE_Real *,  stencil_size, HYPRE_MEMORY_HOST);
          hypre_ForBoxI(ci, cgrid_boxes)
          {
             cgrid_box= hypre_BoxArrayBox(cgrid_boxes, ci);
@@ -393,7 +393,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                             * extract only the connections to level part_fine and the
                             * correct variable.
                             *-----------------------------------------------------------*/
-                           temp1= hypre_CTAlloc(HYPRE_Int, nUentries);
+                           temp1= hypre_CTAlloc(HYPRE_Int,  nUentries, HYPRE_MEMORY_HOST);
                            cnt1= 0;
                            for (i=0; i< nUentries; i++)
                            {
@@ -404,11 +404,11 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                               }
                            }
 
-                           ncols= hypre_TAlloc(HYPRE_Int, cnt1);
-                           rows = hypre_TAlloc(HYPRE_Int, cnt1);
-                           cols = hypre_TAlloc(HYPRE_Int, cnt1);
-                           temp2= hypre_TAlloc(HYPRE_Int, cnt1);
-                           vals = hypre_CTAlloc(HYPRE_Real, cnt1);
+                           ncols= hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+                           rows = hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+                           cols = hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+                           temp2= hypre_TAlloc(HYPRE_Int,  cnt1, HYPRE_MEMORY_HOST);
+                           vals = hypre_CTAlloc(HYPRE_Real,  cnt1, HYPRE_MEMORY_HOST);
 
                            for (i= 0; i< cnt1; i++)
                            {
@@ -435,7 +435,7 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                               }
                            }  /* for (i= 0; i< cnt1; i++) */
 
-                           hypre_TFree(temp1);
+                           hypre_TFree(temp1, HYPRE_MEMORY_HOST);
 
                            HYPRE_IJMatrixGetValues(ij_A, cnt1, ncols, rows, cols, vals);
                            for (i= 0; i< cnt1; i++)
@@ -443,9 +443,9 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                               a_ptrs[centre][iA]+= vals[i];
                            }
 
-                           hypre_TFree(ncols);
-                           hypre_TFree(rows);
-                           hypre_TFree(cols);
+                           hypre_TFree(ncols, HYPRE_MEMORY_HOST);
+                           hypre_TFree(rows, HYPRE_MEMORY_HOST);
+                           hypre_TFree(cols, HYPRE_MEMORY_HOST);
 
                            /* compute the connection to the coarsened fine box */
                            for (i= 0; i< cnt1; i++)
@@ -459,8 +459,8 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
                                  }
                               }
                            }
-                           hypre_TFree(vals);
-                           hypre_TFree(temp2);
+                           hypre_TFree(vals, HYPRE_MEMORY_HOST);
+                           hypre_TFree(temp2, HYPRE_MEMORY_HOST);
 
                            /* centre connection which preserves the row sum */
                            for (i= 0; i< stencil_size; i++)
@@ -479,9 +479,9 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
             }     /* hypre_ForBoxArrayI(fi, cinterface_arrays) */
          }        /* hypre_ForBoxI(ci, cgrid_boxes) */
 
-         hypre_TFree(a_ptrs);
-         hypre_TFree(stencil_ranks);
-         hypre_TFree(rank_stencils);
+         hypre_TFree(a_ptrs, HYPRE_MEMORY_HOST);
+         hypre_TFree(stencil_ranks, HYPRE_MEMORY_HOST);
+         hypre_TFree(rank_stencils, HYPRE_MEMORY_HOST);
       }   /* if (stencils != NULL) */
    }      /* end var1 */
 
@@ -495,9 +495,9 @@ hypre_AMR_CFCoarsen( hypre_SStructMatrix  *   A,
       {
          hypre_BoxArrayArrayDestroy(fgrid_cinterface_extents[var1][ci]);
       }
-      hypre_TFree(fgrid_cinterface_extents[var1]);
+      hypre_TFree(fgrid_cinterface_extents[var1], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(fgrid_cinterface_extents);
+   hypre_TFree(fgrid_cinterface_extents, HYPRE_MEMORY_HOST);
 
    return 0;
 }

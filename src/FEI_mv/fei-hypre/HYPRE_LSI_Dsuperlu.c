@@ -30,8 +30,6 @@
  * Distributed SUPERLU include files
  *-------------------------------------------------------------------------*/
 
-#include "dsuperlu_include.h"
-
 #ifdef HAVE_DSUPERLU
 #include "superlu_ddefs.h"
 
@@ -64,7 +62,7 @@ int HYPRE_LSI_DSuperLUGenMatrix(HYPRE_Solver solver);
 int HYPRE_LSI_DSuperLUCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    HYPRE_LSI_DSuperLU *sluPtr;
-   sluPtr = (HYPRE_LSI_DSuperLU *) malloc(sizeof(HYPRE_LSI_DSuperLU));
+   sluPtr = hypre_TAlloc(HYPRE_LSI_DSuperLU, 1, HYPRE_MEMORY_HOST);
    assert ( sluPtr != NULL );
    sluPtr->comm_        = comm;
    sluPtr->Amat_        = NULL;
@@ -73,7 +71,7 @@ int HYPRE_LSI_DSuperLUCreate( MPI_Comm comm, HYPRE_Solver *solver )
    sluPtr->startRow_    = 0;
    sluPtr->outputLevel_ = 0;
    sluPtr->setupFlag_   = 0;
-   sluPtr->berr_ = (double *) malloc(sizeof(double));
+   sluPtr->berr_ = hypre_TAlloc(double, 1, HYPRE_MEMORY_HOST);
    *solver = (HYPRE_Solver) sluPtr;
    return 0;
 }

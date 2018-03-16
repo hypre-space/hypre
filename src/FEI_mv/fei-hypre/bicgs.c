@@ -72,7 +72,7 @@ void * hypre_BiCGSCreate( )
 {
    hypre_BiCGSData *bicgs_data;
  
-   bicgs_data = hypre_CTAlloc(hypre_BiCGSData, 1);
+   bicgs_data = hypre_CTAlloc(hypre_BiCGSData,  1, HYPRE_MEMORY_HOST);
  
    /* set defaults */
    (bicgs_data -> tol)            = 1.0e-06;
@@ -110,7 +110,7 @@ int hypre_BiCGSDestroy( void *bicgs_vdata )
    {
       if ((bicgs_data -> logging) > 0)
       {
-         hypre_TFree(bicgs_data -> norms);
+         hypre_TFree(bicgs_data -> norms, HYPRE_MEMORY_HOST);
       }
  
       hypre_ParKrylovMatvecDestroy(bicgs_data -> matvec_data);
@@ -124,7 +124,7 @@ int hypre_BiCGSDestroy( void *bicgs_vdata )
       hypre_ParKrylovDestroyVector(bicgs_data -> t1);
       hypre_ParKrylovDestroyVector(bicgs_data -> t2);
  
-      hypre_TFree(bicgs_data);
+      hypre_TFree(bicgs_data, HYPRE_MEMORY_HOST);
    }
  
    return(ierr);
@@ -178,7 +178,7 @@ int hypre_BiCGSSetup( void *bicgs_vdata, void *A, void *b, void *x         )
    if ((bicgs_data -> logging) > 0)
    {
       if ((bicgs_data -> norms) == NULL)
-         (bicgs_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
+         (bicgs_data -> norms) = hypre_CTAlloc(double,  max_iter + 1, HYPRE_MEMORY_HOST);
       if ((bicgs_data -> log_file_name) == NULL)
 		  (bicgs_data -> log_file_name) = (char*)"bicgs.out.log";
    }

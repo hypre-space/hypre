@@ -186,7 +186,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    HYPRE_Int pass_length;
    HYPRE_Int *tmp_marker, *tmp_marker_offd;
    HYPRE_Int *tmp_array,  *tmp_array_offd;
-   HYPRE_Int * max_num_threads = hypre_CTAlloc(HYPRE_Int, 1);
+   HYPRE_Int * max_num_threads = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
    HYPRE_Int * cnt_nz_per_thread;
    HYPRE_Int * cnt_nz_offd_per_thread;
    
@@ -195,8 +195,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    /* Initialize threading variables */
    max_num_threads[0] = hypre_NumThreads();
-   cnt_nz_per_thread = hypre_CTAlloc(HYPRE_Int, max_num_threads[0]);
-   cnt_nz_offd_per_thread = hypre_CTAlloc(HYPRE_Int, max_num_threads[0]);
+   cnt_nz_per_thread = hypre_CTAlloc(HYPRE_Int,  max_num_threads[0], HYPRE_MEMORY_HOST);
+   cnt_nz_offd_per_thread = hypre_CTAlloc(HYPRE_Int,  max_num_threads[0], HYPRE_MEMORY_HOST);
    for(i=0; i < max_num_threads[0]; i++)
    {
        cnt_nz_offd_per_thread[i] = 0;
@@ -259,7 +259,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
     *  Intialize counters and allocate mapping vector.
     *-----------------------------------------------------------------------*/
 
-   if (n_fine) fine_to_coarse = hypre_CTAlloc(HYPRE_Int, n_fine);
+   if (n_fine) fine_to_coarse = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
 
    n_coarse = 0;
    n_SF = 0;
@@ -271,17 +271,17 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       else if (CF_marker[i] == -3) n_SF++;
 
    pass_array_size = n_fine-n_coarse-n_SF;
-   if (pass_array_size) pass_array = hypre_CTAlloc(HYPRE_Int, pass_array_size);
-   pass_pointer = hypre_CTAlloc(HYPRE_Int, max_num_passes+1);
-   if (n_fine) assigned = hypre_CTAlloc(HYPRE_Int, n_fine);
-   P_diag_i = hypre_CTAlloc(HYPRE_Int, n_fine+1);
-   P_offd_i = hypre_CTAlloc(HYPRE_Int, n_fine+1);
-   if (n_coarse) C_array = hypre_CTAlloc(HYPRE_Int, n_coarse);
+   if (pass_array_size) pass_array = hypre_CTAlloc(HYPRE_Int,  pass_array_size, HYPRE_MEMORY_HOST);
+   pass_pointer = hypre_CTAlloc(HYPRE_Int,  max_num_passes+1, HYPRE_MEMORY_HOST);
+   if (n_fine) assigned = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
+   P_diag_i = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
+   P_offd_i = hypre_CTAlloc(HYPRE_Int,  n_fine+1, HYPRE_MEMORY_SHARED);
+   if (n_coarse) C_array = hypre_CTAlloc(HYPRE_Int,  n_coarse, HYPRE_MEMORY_HOST);
 
    if (num_cols_offd)
    {
-      CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
-      if (num_functions > 1) dof_func_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+      CF_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+      if (num_functions > 1) dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
    }
 
    if (num_procs > 1)
@@ -294,7 +294,7 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       recv_procs = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
       recv_vec_start = hypre_ParCSRCommPkgRecvVecStarts(comm_pkg);
       if (send_map_start[num_sends])
-         int_buf_data = hypre_CTAlloc(HYPRE_Int, send_map_start[num_sends]);
+         int_buf_data = hypre_CTAlloc(HYPRE_Int,  send_map_start[num_sends], HYPRE_MEMORY_HOST);
    }
 
    
@@ -340,10 +340,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    if (num_cols_offd)
    {
-      assigned_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
-      map_S_to_new = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
-      fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
-      new_col_map_offd = hypre_CTAlloc(HYPRE_Int, n_coarse_offd);
+      assigned_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+      map_S_to_new = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+      fine_to_coarse_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+      new_col_map_offd = hypre_CTAlloc(HYPRE_Int,  n_coarse_offd, HYPRE_MEMORY_HOST);
    }
 
    /*-----------------------------------------------------------------------
@@ -425,10 +425,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       hypre_ParCSRCommHandleDestroy(comm_handle);
    }
 
-   new_recv_vec_start = hypre_CTAlloc(HYPRE_Int,num_recvs+1);
+   new_recv_vec_start = hypre_CTAlloc(HYPRE_Int, num_recvs+1, HYPRE_MEMORY_HOST);
 
    if (n_coarse_offd)
-      C_array_offd = hypre_CTAlloc(HYPRE_Int,n_coarse_offd);
+      C_array_offd = hypre_CTAlloc(HYPRE_Int, n_coarse_offd, HYPRE_MEMORY_HOST);
 
    cnt = 0;
    new_recv_vec_start[0] = 0;
@@ -453,11 +453,11 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    }
 
    cnt = 0;
-   hypre_TFree(fine_to_coarse_offd);
+   hypre_TFree(fine_to_coarse_offd, HYPRE_MEMORY_HOST);
 
    if (col_offd_S_to_A)
    {
-      map_A_to_S = hypre_CTAlloc(HYPRE_Int,num_cols_offd_A);
+      map_A_to_S = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A, HYPRE_MEMORY_HOST);
       for (i=0; i < num_cols_offd_A; i++)
       {
         if (cnt < num_cols_offd && col_map_offd_A[i] == col_map_offd[cnt])
@@ -596,33 +596,33 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       }
    }
 
-   hypre_TFree(int_buf_data);
+   hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
 
    num_passes = pass;
 
-   P_diag_pass = hypre_CTAlloc(HYPRE_Int*,num_passes); /* P_diag_pass[i] will contain
+   P_diag_pass = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST); /* P_diag_pass[i] will contain
                                  all column numbers for points of pass i */
 
-   P_diag_pass[1] = hypre_CTAlloc(HYPRE_Int,cnt_nz);
+   P_diag_pass[1] = hypre_CTAlloc(HYPRE_Int, cnt_nz, HYPRE_MEMORY_HOST);
 
-   P_diag_start = hypre_CTAlloc(HYPRE_Int, n_fine); /* P_diag_start[i] contains
+   P_diag_start = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST); /* P_diag_start[i] contains
            pointer to begin of column numbers in P_pass for point i,
            P_diag_i[i+1] contains number of columns for point i */
 
-   P_offd_start = hypre_CTAlloc(HYPRE_Int, n_fine);
+   P_offd_start = hypre_CTAlloc(HYPRE_Int,  n_fine, HYPRE_MEMORY_HOST);
 
    if (num_procs > 1)
    {
-      P_offd_pass = hypre_CTAlloc(HYPRE_Int*,num_passes);
+      P_offd_pass = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
 
       if (cnt_nz_offd)
-         P_offd_pass[1] = hypre_CTAlloc(HYPRE_Int,cnt_nz_offd);
+         P_offd_pass[1] = hypre_CTAlloc(HYPRE_Int, cnt_nz_offd, HYPRE_MEMORY_HOST);
       else
          P_offd_pass[1] = NULL;
 
-      new_elmts = hypre_CTAlloc(HYPRE_Int*,num_passes);
+      new_elmts = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
 
-      new_counter = hypre_CTAlloc(HYPRE_Int, num_passes+1);
+      new_counter = hypre_CTAlloc(HYPRE_Int,  num_passes+1, HYPRE_MEMORY_HOST);
 
       new_counter[0] = 0;
       new_counter[1] = n_coarse_offd;
@@ -663,14 +663,14 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
    if (num_procs > 1)
    {
-      tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,1);
-      Pext_send_map_start = hypre_CTAlloc(HYPRE_Int*,num_passes);
-      Pext_recv_vec_start = hypre_CTAlloc(HYPRE_Int*,num_passes);
-      Pext_pass = hypre_CTAlloc(HYPRE_Int*,num_passes);
-      Pext_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd+1);
-      if (num_cols_offd) Pext_start = hypre_CTAlloc(HYPRE_Int, num_cols_offd);
+      tmp_comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
+      Pext_send_map_start = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
+      Pext_recv_vec_start = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
+      Pext_pass = hypre_CTAlloc(HYPRE_Int*, num_passes, HYPRE_MEMORY_HOST);
+      Pext_i = hypre_CTAlloc(HYPRE_Int,  num_cols_offd+1, HYPRE_MEMORY_HOST);
+      if (num_cols_offd) Pext_start = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
       if (send_map_start[num_sends])
-         P_ncols = hypre_CTAlloc(HYPRE_Int,send_map_start[num_sends]);
+         P_ncols = hypre_CTAlloc(HYPRE_Int, send_map_start[num_sends], HYPRE_MEMORY_HOST);
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif 
@@ -690,8 +690,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       
       if (num_procs > 1)
       {
-         Pext_send_map_start[pass] = hypre_CTAlloc(HYPRE_Int, num_sends+1);
-         Pext_recv_vec_start[pass] = hypre_CTAlloc(HYPRE_Int, num_recvs+1);
+         Pext_send_map_start[pass] = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
+         Pext_recv_vec_start[pass] = hypre_CTAlloc(HYPRE_Int,  num_recvs+1, HYPRE_MEMORY_HOST);
          Pext_send_size = 0;
          Pext_send_map_start[pass][0] = 0;
          
@@ -718,8 +718,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
          if (Pext_send_size > old_Pext_send_size)
          {
-            hypre_TFree(Pext_send_buffer);
-            Pext_send_buffer = hypre_CTAlloc(HYPRE_Int, Pext_send_size);
+            hypre_TFree(Pext_send_buffer, HYPRE_MEMORY_HOST);
+            Pext_send_buffer = hypre_CTAlloc(HYPRE_Int,  Pext_send_size, HYPRE_MEMORY_HOST);
          }
          old_Pext_send_size = Pext_send_size;
       }
@@ -791,8 +791,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
          if (Pext_recv_size)
          {
-            Pext_pass[pass] = hypre_CTAlloc(HYPRE_Int, Pext_recv_size);
-            new_elmts[pass-1] = hypre_CTAlloc(HYPRE_Int,Pext_recv_size);
+            Pext_pass[pass] = hypre_CTAlloc(HYPRE_Int,  Pext_recv_size, HYPRE_MEMORY_HOST);
+            new_elmts[pass-1] = hypre_CTAlloc(HYPRE_Int, Pext_recv_size, HYPRE_MEMORY_HOST);
          }
          else
          {
@@ -806,8 +806,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
          if (Pext_recv_size > old_Pext_recv_size)
          {
-            hypre_TFree(loc);
-            loc = hypre_CTAlloc(HYPRE_Int,Pext_recv_size);
+            hypre_TFree(loc, HYPRE_MEMORY_HOST);
+            loc = hypre_CTAlloc(HYPRE_Int, Pext_recv_size, HYPRE_MEMORY_HOST);
          }
          old_Pext_recv_size = Pext_recv_size;
       }
@@ -908,18 +908,18 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
        
           /* This block of code is to go to the top of the parallel region starting before 
            * the loop over num_passes. */
-          P_marker = hypre_CTAlloc(HYPRE_Int, n_coarse); /* marks points to see if they're counted */
+          P_marker = hypre_CTAlloc(HYPRE_Int,  n_coarse, HYPRE_MEMORY_HOST); /* marks points to see if they're counted */
           for (i=0; i < n_coarse; i++)
           {   P_marker[i] = -1; }
           if (new_num_cols_offd == local_index+1) 
           {
-             P_marker_offd = hypre_CTAlloc(HYPRE_Int,new_num_cols_offd);
+             P_marker_offd = hypre_CTAlloc(HYPRE_Int, new_num_cols_offd, HYPRE_MEMORY_HOST);
              for (i=0; i < new_num_cols_offd; i++)
              {   P_marker_offd[i] = -1; }
           }
           else if (n_coarse_offd) 
           {
-             P_marker_offd = hypre_CTAlloc(HYPRE_Int, n_coarse_offd);
+             P_marker_offd = hypre_CTAlloc(HYPRE_Int,  n_coarse_offd, HYPRE_MEMORY_HOST);
              for (i=0; i < n_coarse_offd; i++)
              {   P_marker_offd[i] = -1; }
           }
@@ -1040,9 +1040,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
               total_nz_offd += cnt_nz_offd;
               
               /* Allocate P_diag_pass and P_offd_pass for all threads */
-              P_diag_pass[pass] = hypre_CTAlloc(HYPRE_Int, cnt_nz);
+              P_diag_pass[pass] = hypre_CTAlloc(HYPRE_Int,  cnt_nz, HYPRE_MEMORY_HOST);
               if (cnt_nz_offd)
-                 P_offd_pass[pass] = hypre_CTAlloc(HYPRE_Int, cnt_nz_offd);
+                 P_offd_pass[pass] = hypre_CTAlloc(HYPRE_Int,  cnt_nz_offd, HYPRE_MEMORY_HOST);
               else if (num_procs > 1)
                  P_offd_pass[pass] = NULL;
           }
@@ -1124,30 +1124,30 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
              }
           }
           
-          hypre_TFree(P_marker);
+          hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
           if ( (n_coarse_offd) || (new_num_cols_offd  == local_index+1) )
-          {    hypre_TFree(P_marker_offd); }
+          {    hypre_TFree(P_marker_offd, HYPRE_MEMORY_HOST); }
 
       } /* End parallel region */
    }
 
    
-   hypre_TFree(loc);
-   hypre_TFree(P_ncols);
-   hypre_TFree(Pext_send_buffer);
-   hypre_TFree(new_recv_vec_start);
-   hypre_TFree(cnt_nz_per_thread);
-   hypre_TFree(cnt_nz_offd_per_thread);
-   hypre_TFree(max_num_threads);
+   hypre_TFree(loc, HYPRE_MEMORY_HOST);
+   hypre_TFree(P_ncols, HYPRE_MEMORY_HOST);
+   hypre_TFree(Pext_send_buffer, HYPRE_MEMORY_HOST);
+   hypre_TFree(new_recv_vec_start, HYPRE_MEMORY_HOST);
+   hypre_TFree(cnt_nz_per_thread, HYPRE_MEMORY_HOST);
+   hypre_TFree(cnt_nz_offd_per_thread, HYPRE_MEMORY_HOST);
+   hypre_TFree(max_num_threads, HYPRE_MEMORY_HOST);
    
-   P_diag_j = hypre_CTAlloc(HYPRE_Int,total_nz);
-   P_diag_data = hypre_CTAlloc(HYPRE_Real,total_nz);
+   P_diag_j = hypre_CTAlloc(HYPRE_Int, total_nz, HYPRE_MEMORY_SHARED);
+   P_diag_data = hypre_CTAlloc(HYPRE_Real, total_nz, HYPRE_MEMORY_SHARED);
 
    
    if (total_nz_offd)
    {
-      P_offd_j = hypre_CTAlloc(HYPRE_Int,total_nz_offd);
-      P_offd_data = hypre_CTAlloc(HYPRE_Real,total_nz_offd);
+      P_offd_j = hypre_CTAlloc(HYPRE_Int, total_nz_offd, HYPRE_MEMORY_SHARED);
+      P_offd_data = hypre_CTAlloc(HYPRE_Real, total_nz_offd, HYPRE_MEMORY_SHARED);
    }
 
    for (i=0; i < n_fine; i++)
@@ -1184,12 +1184,12 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
            * weights only over each thread's range of rows.  Rows are divided
            * up evenly amongst the threads. */ 
 
-          P_marker = hypre_CTAlloc(HYPRE_Int,n_fine);
+          P_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
           for (i=0; i < n_fine; i++)
           {   P_marker[i] = -1; }
           if (num_cols_offd)
           {
-             P_marker_offd = hypre_CTAlloc(HYPRE_Int,num_cols_offd);
+             P_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
              for (i=0; i < num_cols_offd; i++)
                 P_marker_offd[i] = -1;
           }
@@ -1287,19 +1287,19 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                    P_offd_data[j] *= beta;
           }
 
-          hypre_TFree(P_marker);
+          hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
           if (num_cols_offd)
-          {    hypre_TFree(P_marker_offd); }
+          {    hypre_TFree(P_marker_offd, HYPRE_MEMORY_HOST); }
       } /* End Parallel Region */
 
       old_Pext_send_size = 0;
       old_Pext_recv_size = 0;
 
       /*if (!col_offd_S_to_A) hypre_TFree(map_A_to_new);*/
-      if (n_coarse) hypre_TFree(C_array);
-      hypre_TFree(C_array_offd);
-      hypre_TFree(P_diag_pass[1]);
-      if (num_procs > 1) hypre_TFree(P_offd_pass[1]);
+      if (n_coarse) hypre_TFree(C_array, HYPRE_MEMORY_HOST);
+      hypre_TFree(C_array_offd, HYPRE_MEMORY_HOST);
+      hypre_TFree(P_diag_pass[1], HYPRE_MEMORY_HOST);
+      if (num_procs > 1) hypre_TFree(P_offd_pass[1], HYPRE_MEMORY_HOST);
   
 
       for (pass = 2; pass < num_passes; pass++)
@@ -1310,8 +1310,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             Pext_send_size = Pext_send_map_start[pass][num_sends];
             if (Pext_send_size > old_Pext_send_size)
             {
-               hypre_TFree(Pext_send_data);
-               Pext_send_data = hypre_CTAlloc(HYPRE_Real, Pext_send_size);
+               hypre_TFree(Pext_send_data, HYPRE_MEMORY_HOST);
+               Pext_send_data = hypre_CTAlloc(HYPRE_Real,  Pext_send_size, HYPRE_MEMORY_HOST);
             }
             old_Pext_send_size = Pext_send_size;
 
@@ -1346,8 +1346,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
             if (Pext_recv_size > old_Pext_recv_size)
             {
-               hypre_TFree(Pext_data);
-               Pext_data = hypre_CTAlloc(HYPRE_Real, Pext_recv_size);
+               hypre_TFree(Pext_data, HYPRE_MEMORY_HOST);
+               Pext_data = hypre_CTAlloc(HYPRE_Real,  Pext_recv_size, HYPRE_MEMORY_HOST);
             }
             old_Pext_recv_size = Pext_recv_size;
 
@@ -1355,8 +1355,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                 Pext_send_data, Pext_data);
             hypre_ParCSRCommHandleDestroy(comm_handle);
 
-            hypre_TFree(Pext_send_map_start[pass]);
-            hypre_TFree(Pext_recv_vec_start[pass]);
+            hypre_TFree(Pext_send_map_start[pass], HYPRE_MEMORY_HOST);
+            hypre_TFree(Pext_recv_vec_start[pass], HYPRE_MEMORY_HOST);
          }
          
          pass_length = pass_pointer[pass+1]-pass_pointer[pass];
@@ -1369,12 +1369,12 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
              * weights only over each thread's range of rows.  Rows are divided
              * up evenly amongst the threads. */ 
 
-             P_marker = hypre_CTAlloc(HYPRE_Int,n_fine);
+             P_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
              for (i=0; i < n_fine; i++)
              {   P_marker[i] = -1; }
              if (num_cols_offd)
              {
-                P_marker_offd = hypre_CTAlloc(HYPRE_Int,num_cols_offd);
+                P_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST);
                 for (i=0; i < num_cols_offd; i++)
                    P_marker_offd[i] = -1;
              }
@@ -1382,11 +1382,11 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
              C_array = NULL; 
              C_array_offd = NULL; 
              if (n_coarse) 
-             {   C_array = hypre_CTAlloc(HYPRE_Int, n_coarse); }
+             {   C_array = hypre_CTAlloc(HYPRE_Int,  n_coarse, HYPRE_MEMORY_HOST); }
              if (new_num_cols_offd > n_coarse_offd)
-             {   C_array_offd = hypre_CTAlloc(HYPRE_Int, new_num_cols_offd); }
+             {   C_array_offd = hypre_CTAlloc(HYPRE_Int,  new_num_cols_offd, HYPRE_MEMORY_HOST); }
              else if (n_coarse_offd)
-             {   C_array_offd = hypre_CTAlloc(HYPRE_Int, n_coarse_offd); }
+             {   C_array_offd = hypre_CTAlloc(HYPRE_Int,  n_coarse_offd, HYPRE_MEMORY_HOST); }
 
              /* Compute this thread's range of pass_length */
              my_thread_num = hypre_GetThreadNum();
@@ -1546,19 +1546,19 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                       P_offd_data[j] *= beta;
              }
 
-             hypre_TFree(C_array);
-             hypre_TFree(C_array_offd);
-             hypre_TFree(P_marker);
+             hypre_TFree(C_array, HYPRE_MEMORY_HOST);
+             hypre_TFree(C_array_offd, HYPRE_MEMORY_HOST);
+             hypre_TFree(P_marker, HYPRE_MEMORY_HOST);
              if (num_cols_offd)
-             {   hypre_TFree(P_marker_offd); }
+             {   hypre_TFree(P_marker_offd, HYPRE_MEMORY_HOST); }
              
          } /* End OMP Parallel Section */
       
-         hypre_TFree(P_diag_pass[pass]);
+         hypre_TFree(P_diag_pass[pass], HYPRE_MEMORY_HOST);
          if (num_procs > 1)
          {
-            hypre_TFree(P_offd_pass[pass]);
-            hypre_TFree(Pext_pass[pass]);
+            hypre_TFree(P_offd_pass[pass], HYPRE_MEMORY_HOST);
+            hypre_TFree(Pext_pass[pass], HYPRE_MEMORY_HOST);
          }
       } /* End num_passes for-loop */
    }
@@ -1578,10 +1578,10 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
            /* Initialize thread-wise variables */
            tmp_marker = NULL;
            if (n_fine) 
-           {   tmp_marker = hypre_CTAlloc(HYPRE_Int,n_fine); }
+           {   tmp_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST); }
            tmp_marker_offd = NULL;
            if (num_cols_offd) 
-           {   tmp_marker_offd = hypre_CTAlloc(HYPRE_Int,num_cols_offd); }
+           {   tmp_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST); }
            for (i=0; i < n_fine; i++)
            {   tmp_marker[i] = -1; }
            for (i=0; i < num_cols_offd; i++)
@@ -1654,17 +1654,17 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
              for (j=P_offd_i[i1]; j < cnt_offd; j++)
                 P_offd_data[j] *= alfa;
           }
-          hypre_TFree(tmp_marker);
-          hypre_TFree(tmp_marker_offd);
+          hypre_TFree(tmp_marker, HYPRE_MEMORY_HOST);
+          hypre_TFree(tmp_marker_offd, HYPRE_MEMORY_HOST);
       } /* end OMP parallel region */
 
       old_Pext_send_size = 0;
       old_Pext_recv_size = 0;
 
-      if (n_coarse) hypre_TFree(C_array);
-      hypre_TFree(C_array_offd);
-      hypre_TFree(P_diag_pass[1]);
-      if (num_procs > 1) hypre_TFree(P_offd_pass[1]);
+      if (n_coarse) hypre_TFree(C_array, HYPRE_MEMORY_HOST);
+      hypre_TFree(C_array_offd, HYPRE_MEMORY_HOST);
+      hypre_TFree(P_diag_pass[1], HYPRE_MEMORY_HOST);
+      if (num_procs > 1) hypre_TFree(P_offd_pass[1], HYPRE_MEMORY_HOST);
       
       for (pass = 2; pass < num_passes; pass++)
       {
@@ -1674,8 +1674,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
             Pext_send_size = Pext_send_map_start[pass][num_sends];
             if (Pext_send_size > old_Pext_send_size)
             {
-               hypre_TFree(Pext_send_data);
-               Pext_send_data = hypre_CTAlloc(HYPRE_Real, Pext_send_size);
+               hypre_TFree(Pext_send_data, HYPRE_MEMORY_HOST);
+               Pext_send_data = hypre_CTAlloc(HYPRE_Real,  Pext_send_size, HYPRE_MEMORY_HOST);
             }
             old_Pext_send_size = Pext_send_size;
 
@@ -1714,8 +1714,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
 
             if (Pext_recv_size > old_Pext_recv_size)
             {
-               hypre_TFree(Pext_data);
-               Pext_data = hypre_CTAlloc(HYPRE_Real, Pext_recv_size);
+               hypre_TFree(Pext_data, HYPRE_MEMORY_HOST);
+               Pext_data = hypre_CTAlloc(HYPRE_Real,  Pext_recv_size, HYPRE_MEMORY_HOST);
             }
             old_Pext_recv_size = Pext_recv_size;
 
@@ -1723,8 +1723,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                 Pext_send_data, Pext_data);
             hypre_ParCSRCommHandleDestroy(comm_handle);
 
-            hypre_TFree(Pext_send_map_start[pass]);
-            hypre_TFree(Pext_recv_vec_start[pass]);
+            hypre_TFree(Pext_send_map_start[pass], HYPRE_MEMORY_HOST);
+            hypre_TFree(Pext_recv_vec_start[pass], HYPRE_MEMORY_HOST);
          }
 
          pass_length = pass_pointer[pass+1]-pass_pointer[pass];
@@ -1740,18 +1740,18 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
              /* Initialize thread-wise variables */
              tmp_marker = NULL;
              if (n_fine) 
-             {    tmp_marker = hypre_CTAlloc(HYPRE_Int,n_fine); }
+             {    tmp_marker = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST); }
              tmp_marker_offd = NULL;
              if (num_cols_offd) 
-             {    tmp_marker_offd = hypre_CTAlloc(HYPRE_Int,num_cols_offd); }
+             {    tmp_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST); }
              tmp_array = NULL;
              if (n_coarse) 
-             {    tmp_array = hypre_CTAlloc(HYPRE_Int,n_coarse); }
+             {    tmp_array = hypre_CTAlloc(HYPRE_Int, n_coarse, HYPRE_MEMORY_HOST); }
              tmp_array_offd = NULL;
              if (new_num_cols_offd > n_coarse_offd) 
-             {    tmp_array_offd = hypre_CTAlloc(HYPRE_Int,new_num_cols_offd); }
+             {    tmp_array_offd = hypre_CTAlloc(HYPRE_Int, new_num_cols_offd, HYPRE_MEMORY_HOST); }
              else
-             {    tmp_array_offd = hypre_CTAlloc(HYPRE_Int,n_coarse_offd);}
+             {    tmp_array_offd = hypre_CTAlloc(HYPRE_Int, n_coarse_offd, HYPRE_MEMORY_HOST);}
              for (i=0; i < n_fine; i++)
              {    tmp_marker[i] = -1; }
              for (i=0; i < num_cols_offd; i++)
@@ -1870,42 +1870,42 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
                 for (j=P_offd_i[i1]; j < P_offd_i[i1+1]; j++)
                P_offd_data[j] *= alfa;
              }
-             hypre_TFree(tmp_marker);
-             hypre_TFree(tmp_marker_offd);
-             hypre_TFree(tmp_array);
-             hypre_TFree(tmp_array_offd);
+             hypre_TFree(tmp_marker, HYPRE_MEMORY_HOST);
+             hypre_TFree(tmp_marker_offd, HYPRE_MEMORY_HOST);
+             hypre_TFree(tmp_array, HYPRE_MEMORY_HOST);
+             hypre_TFree(tmp_array_offd, HYPRE_MEMORY_HOST);
          } /* End OMP Parallel Section */
 
-         hypre_TFree(P_diag_pass[pass]);
+         hypre_TFree(P_diag_pass[pass], HYPRE_MEMORY_HOST);
          if (num_procs > 1)
          {
-            hypre_TFree(P_offd_pass[pass]);
-            hypre_TFree(Pext_pass[pass]);
+            hypre_TFree(P_offd_pass[pass], HYPRE_MEMORY_HOST);
+            hypre_TFree(Pext_pass[pass], HYPRE_MEMORY_HOST);
          }
       }
    }
 
-   hypre_TFree(CF_marker_offd);
-   hypre_TFree(Pext_send_map_start);
-   hypre_TFree(Pext_recv_vec_start);
-   hypre_TFree(dof_func_offd);
-   hypre_TFree(Pext_send_data);
-   hypre_TFree(Pext_data);
-   hypre_TFree(P_diag_pass);
-   hypre_TFree(P_offd_pass);
-   hypre_TFree(Pext_pass);
-   hypre_TFree(P_diag_start);
-   hypre_TFree(P_offd_start);
-   hypre_TFree(Pext_start);
-   hypre_TFree(Pext_i);
-   hypre_TFree(fine_to_coarse);
-   hypre_TFree(assigned);
-   hypre_TFree(assigned_offd);
-   hypre_TFree(pass_pointer);
-   hypre_TFree(pass_array);
-   hypre_TFree(map_S_to_new);
-   hypre_TFree(map_A_to_S);
-   if (num_procs > 1) hypre_TFree(tmp_comm_pkg);
+   hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(Pext_send_map_start, HYPRE_MEMORY_HOST);
+   hypre_TFree(Pext_recv_vec_start, HYPRE_MEMORY_HOST);
+   hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(Pext_send_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(Pext_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(P_diag_pass, HYPRE_MEMORY_HOST);
+   hypre_TFree(P_offd_pass, HYPRE_MEMORY_HOST);
+   hypre_TFree(Pext_pass, HYPRE_MEMORY_HOST);
+   hypre_TFree(P_diag_start, HYPRE_MEMORY_HOST);
+   hypre_TFree(P_offd_start, HYPRE_MEMORY_HOST);
+   hypre_TFree(Pext_start, HYPRE_MEMORY_HOST);
+   hypre_TFree(Pext_i, HYPRE_MEMORY_HOST);
+   hypre_TFree(fine_to_coarse, HYPRE_MEMORY_HOST);
+   hypre_TFree(assigned, HYPRE_MEMORY_HOST);
+   hypre_TFree(assigned_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(pass_pointer, HYPRE_MEMORY_HOST);
+   hypre_TFree(pass_array, HYPRE_MEMORY_HOST);
+   hypre_TFree(map_S_to_new, HYPRE_MEMORY_HOST);
+   hypre_TFree(map_A_to_S, HYPRE_MEMORY_HOST);
+   if (num_procs > 1) hypre_TFree(tmp_comm_pkg, HYPRE_MEMORY_HOST);
 
     P = hypre_ParCSRMatrixCreate(comm,
                                 hypre_ParCSRMatrixGlobalNumRows(A),
@@ -1944,9 +1944,9 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
    if (P_offd_size)
    {
       if (new_num_cols_offd > num_cols_offd)
-      {   P_marker_offd = hypre_CTAlloc(HYPRE_Int,new_num_cols_offd); }
+      {   P_marker_offd = hypre_CTAlloc(HYPRE_Int, new_num_cols_offd, HYPRE_MEMORY_HOST); }
       else
-      {   P_marker_offd = hypre_CTAlloc(HYPRE_Int,num_cols_offd); }
+      {   P_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_offd, HYPRE_MEMORY_HOST); }
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
@@ -1964,8 +1964,8 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
          }
       }
 
-      col_map_offd_P = hypre_CTAlloc(HYPRE_Int,num_cols_offd_P);
-      permute = hypre_CTAlloc(HYPRE_Int, new_counter[num_passes-1]);
+      col_map_offd_P = hypre_CTAlloc(HYPRE_Int, num_cols_offd_P, HYPRE_MEMORY_HOST);
+      permute = hypre_CTAlloc(HYPRE_Int,  new_counter[num_passes-1], HYPRE_MEMORY_HOST);
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
@@ -2004,16 +2004,16 @@ hypre_BoomerAMGBuildMultipass( hypre_ParCSRMatrix  *A,
       for (i=0; i < P_offd_size; i++)
       {   P_offd_j[i] = permute[P_offd_j[i]]; }
 
-      hypre_TFree(P_marker_offd);
+      hypre_TFree(P_marker_offd, HYPRE_MEMORY_HOST);
    }
    if (num_procs > 1)
    {
       for (i=0; i < num_passes-1; i++)
-         hypre_TFree(new_elmts[i]);
+         hypre_TFree(new_elmts[i], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(permute);
-   hypre_TFree(new_elmts);
-   hypre_TFree(new_counter);
+   hypre_TFree(permute, HYPRE_MEMORY_HOST);
+   hypre_TFree(new_elmts, HYPRE_MEMORY_HOST);
+   hypre_TFree(new_counter, HYPRE_MEMORY_HOST);
 
    if (num_cols_offd_P)
    {

@@ -225,7 +225,7 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
     *------------------------------------------------------*/
       
    i_tmp0 = 2 * hypre_BoxArraySize(boxes);
-   block_index[0] = hypre_TAlloc(HYPRE_Int, 3 * i_tmp0);
+   block_index[0] = hypre_TAlloc(HYPRE_Int,  3 * i_tmp0, HYPRE_MEMORY_HOST);
    block_sz[0] = 0;
    for (d = 1; d < 3; d++)
    {
@@ -284,7 +284,7 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
     * Set up the block array
     *------------------------------------------------------*/
       
-   block = hypre_CTAlloc(HYPRE_Int, block_volume);
+   block = hypre_CTAlloc(HYPRE_Int,  block_volume, HYPRE_MEMORY_HOST);
       
    hypre_ForBoxI(bi, boxes)
    {
@@ -428,8 +428,8 @@ hypre_UnionBoxes( hypre_BoxArray *boxes )
     * Clean up and return
     *---------------------------------------------------------*/
 
-   hypre_TFree(block_index[0]);
-   hypre_TFree(block);
+   hypre_TFree(block_index[0], HYPRE_MEMORY_HOST);
+   hypre_TFree(block, HYPRE_MEMORY_HOST);
    
    return hypre_error_flag;
 }
@@ -456,7 +456,7 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
    HYPRE_Int                i, j, size, min_size, array;
 
    size= hypre_BoxArraySize(boxes);
-   rotated_box= hypre_CTAlloc(hypre_Box, 1);
+   rotated_box= hypre_CTAlloc(hypre_Box,  1, HYPRE_MEMORY_HOST);
    rotated_array= hypre_BoxArrayArrayCreate(5, hypre_BoxArrayNDim(boxes));
 
    for (i= 0; i< 5; i++)
@@ -536,7 +536,7 @@ hypre_MinUnionBoxes( hypre_BoxArray *boxes )
 
       } /*switch(i) */
    }    /* for (i= 0; i< 5; i++) */
-   hypre_TFree(rotated_box);
+   hypre_TFree(rotated_box, HYPRE_MEMORY_HOST);
 
    hypre_UnionBoxes(boxes);
 

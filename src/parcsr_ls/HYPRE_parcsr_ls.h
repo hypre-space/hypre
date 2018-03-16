@@ -179,6 +179,14 @@ HYPRE_Int HYPRE_BoomerAMGSetDofFunc(HYPRE_Solver  solver,
                                     HYPRE_Int    *dof_func);
 
 /**
+ * (Optional) Set the type convergence checking
+ * 0: (default) norm(r)/norm(b), or norm(r) when b == 0
+ * 1: nomr(r) / norm(r_0)
+ **/
+HYPRE_Int HYPRE_BoomerAMGSetConvergeType(HYPRE_Solver solver,
+                                         HYPRE_Int    type);
+
+/**
  * (Optional) Set the convergence tolerance, if BoomerAMG is used
  * as a solver. If it is used as a preconditioner, it should be set to 0.
  * The default is 1.e-7.
@@ -1051,13 +1059,30 @@ HYPRE_Int HYPRE_BoomerAMGSetEuSparseA(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
                                  HYPRE_Int    eu_bj);
 
-/*
- * (Optional)
- *  0: transpose of the interpolation
- *  1: AIR - approximate ideal restriction
+/**
+ * (Optional) Defines which parallel restriction operator is used.
+ * There are the following options for restr\_type: 
+ * 
+ * \begin{tabular}{|c|l|} \hline
+ *  0 & $P^T$ - Transpose of the interpolation operator \\
+ *  1 & AIR-1 - Approximate Ideal Restriction (distance 1) \\
+ *  2 & AIR-2 - Approximate Ideal Restriction (distance 2) \\
+ * \hline
+ * \end{tabular}
+ *
+ * The default is 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
                                         HYPRE_Int    restr_par);
+
+/**
+ * (Optional) Defines the drop tolerance for the A-matrices 
+ * from the 2nd level of AMG.
+ * The default is 0.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver, 
+                            HYPRE_Real    A_drop_tol  );
 
 /*
  * (Optional) Name of file to which BoomerAMG will print;
@@ -1146,7 +1171,14 @@ HYPRE_Int HYPRE_BoomerAMGSetCoordDim (HYPRE_Solver solver,
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCoordinates (HYPRE_Solver  solver,
                                          float        *coordinates);
+#ifdef HAVE_DSUPERLU
+/*
+ * HYPRE_BoomerAMGSetDSLUThreshold
+ **/
 
+HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
+                                HYPRE_Int    slu_threshold);
+#endif
 /**
  * (Optional) Fix C points to be kept till a specified coarse level.
  *
@@ -3296,6 +3328,16 @@ HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method );
  **/
 HYPRE_Int
 HYPRE_MGRSetRestrictType( HYPRE_Solver solver, HYPRE_Int restrict_type);
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetNumRestrictSweeps
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set number of restriction sweeps.
+ * This option is for restrict\_type > 2.
+ **/
+HYPRE_Int
+HYPRE_MGRSetNumRestrictSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps );    
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetInterpType

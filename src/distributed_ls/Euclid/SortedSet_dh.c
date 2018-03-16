@@ -65,7 +65,7 @@ void SortedSet_dhInsert(SortedSet_dh ss, HYPRE_Int idx)
   if (! isInserted) {
     if (ct == n) {
       HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(n*2*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-      memcpy(tmp, list, n*sizeof(HYPRE_Int));
+      hypre_TMemcpy(tmp,  list, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       FREE_DH(list); CHECK_V_ERROR;
       list = ss->list = tmp;
       ss->n *= 2;

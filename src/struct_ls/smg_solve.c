@@ -54,7 +54,7 @@ hypre_SMGSolve( void               *smg_vdata,
                 hypre_StructVector *x         )
 {
 
-	hypre_SMGData        *smg_data = (hypre_SMGData        *)smg_vdata;
+   hypre_SMGData        *smg_data = (hypre_SMGData        *)smg_vdata;
 
    HYPRE_Real            tol             = (smg_data -> tol);
    HYPRE_Int             max_iter        = (smg_data -> max_iter);
@@ -173,7 +173,6 @@ hypre_SMGSolve( void               *smg_vdata,
       if (tol > 0.0)
       {
          r_dot_r = hypre_StructInnerProd(r_l[0], r_l[0]);
-
          if (logging > 0)
          {
             norms[i] = sqrt(r_dot_r);
@@ -225,7 +224,7 @@ hypre_SMGSolve( void               *smg_vdata,
             /* compute residual (b - Ax) */
             hypre_SMGResidual(residual_data_l[l],
                               A_l[l], x_l[l], b_l[l], r_l[l]);
-
+ 
             /* restrict residual */
             hypre_SemiRestrict(restrict_data_l[l], R_l[l], r_l[l], b_l[l+1]);
 #if DEBUG
@@ -278,7 +277,7 @@ hypre_SMGSolve( void               *smg_vdata,
             hypre_SMGRelaxSetRegSpaceRank(relax_data_l[l], 1, 0);
             hypre_SMGRelaxSetMaxIter(relax_data_l[l], num_post_relax);
             hypre_SMGRelaxSetZeroGuess(relax_data_l[l], 0);
-            hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
+            hypre_SMGRelax(relax_data_l[l], A_l[l], b_l[l], x_l[l]); 
          }
 
          /* interpolate error and correct on fine grid (x = x + Pe_c) */

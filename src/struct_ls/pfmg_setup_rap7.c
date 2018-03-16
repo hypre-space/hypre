@@ -71,7 +71,7 @@ hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R,
        * 7 point coarse grid stencil 
        *--------------------------------------------------------------------*/
       RAP_stencil_size = 7;
-      RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+      RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
       for (k = -1; k < 2; k++)
       {
          for (j = -1; j < 2; j++)
@@ -107,7 +107,7 @@ hypre_PFMGCreateCoarseOp7( hypre_StructMatrix *R,
        * in the standard lexicographic ordering.
        *--------------------------------------------------------------------*/
       RAP_stencil_size = 4;
-      RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+      RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
       for (k = -1; k < 1; k++)
       {
          for (j = -1; j < 1; j++)
@@ -264,8 +264,9 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
       hypre_SetIndex3(index_temp,0,0,1);
       MapIndex(index_temp, cdir, index);
-      pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index) -
-         hypre_BoxOffsetDistance(P_dbox, index);
+      pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
+      //RL PTROFFSET
+      HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
  
       /*-----------------------------------------------------------------
        * Extract pointers for 7-point fine grid operator:
@@ -363,14 +364,12 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
       {
          hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_cb,a_cb,pa,rap_ca,a_ca,pb,a_cw,a_ce,a_cs,a_cn,rap_cw,rap_ce,rap_cs,rap_cn,rap_cc,a_cc)
          hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                              P_dbox, cstart, stridec, iP,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop3For(iP, iA, iAc)
          {
             HYPRE_Int iAm1,iAp1,iPm1,iPp1;
             HYPRE_Real west,east,south,north;
@@ -382,7 +381,7 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
             iPp1 = iP + OffsetP;
 
             rap_cb[iAc] = a_cb[iA] * pa[iPm1];
-            rap_ca[iAc] = a_ca[iA] * pb[iPp1];
+            rap_ca[iAc] = a_ca[iA] * pb[iPp1-pbOffset];
 
             west  = a_cw[iA] + 0.5 * a_cw[iAm1] + 0.5 * a_cw[iAp1];
             east  = a_ce[iA] + 0.5 * a_ce[iAm1] + 0.5 * a_ce[iAp1];
@@ -404,10 +403,12 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
             rap_cc[iAc] = a_cc[iA] 
                + a_cw[iA] + a_ce[iA] + a_cs[iA] + a_cn[iA]
-               + a_cb[iA] * pb[iP] + a_ca[iA] * pa[iP]
+               + a_cb[iA] * pb[iP-pbOffset] + a_ca[iA] * pa[iP]
                - west - east - south - north;
          }
          hypre_BoxLoop3End(iP, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
       }
 
       else if ( constant_coefficient==1 )
@@ -435,17 +436,17 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
 
          hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_cc,a_cc)
          hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                              A_dbox, fstart, stridef, iA,
                              RAP_dbox, cstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc) HYPRE_SMP_SCHEDULE
-#endif
-         hypre_BoxLoop2For(iA, iAc)
          {
             rap_cc[iAc] = 2.0*a_cc[iA] + center_int;
          }
          hypre_BoxLoop2End(iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
          hypre_CopyBox(cgrid_box, fcbox);
          hypre_StructMapCoarseToFine(hypre_BoxIMin(fcbox), cindex, cstride,
@@ -470,17 +471,18 @@ hypre_PFMGBuildCoarseOp7( hypre_StructMatrix *A,
             hypre_BoxGetSize(bdy_box, loop_size);
             bfstart = hypre_BoxIMin(bdy_box);
             hypre_StructMapFineToCoarse(bfstart, cindex, cstride, bcstart);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_cc,a_cc)
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_dbox, bfstart, stridef, iA,
                                 RAP_dbox, bcstart, stridec, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,iA,iAc) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(iA, iAc)
             {
                rap_cc[iAc] -= 0.5*a_cc[iA] + center_bdy;
             }
             hypre_BoxLoop2End(iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
          }
       }
 

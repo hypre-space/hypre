@@ -262,7 +262,7 @@
 <a name="line255">255</a>          <font color="#2040a0">verbosity</font> <font color="4444FF">=</font> <font color="#FF0000">0</font><font color="4444FF">;</font>
 <a name="line256">256</a> 
 <a name="line257">257</a>       <font color="#444444">/* define an interpreter for the ParCSR interface */</font>
-<a name="line258">258</a>       <font color="#2040a0">interpreter</font> <font color="4444FF">=</font> <font color="#2040a0">hypre_CTAlloc</font><font color="4444FF">(</font><font color="#2040a0">mv_InterfaceInterpreter</font>,<font color="#FF0000">1</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line258">258</a>       <font color="#2040a0">interpreter</font> <font color="4444FF">=</font> <font color="#2040a0">hypre_CTAlloc</font><font color="4444FF">(</font><font color="#2040a0">mv_InterfaceInterpreter</font>, <font color="#FF0000">1</font>, <font color="#2040a0">HYPRE_MEMORY_HOST</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line259">259</a>       <font color="#2040a0">HYPRE_ParCSRSetupInterpreter</font><font color="4444FF">(</font><font color="#2040a0">interpreter</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line260">260</a>       <font color="#2040a0">HYPRE_ParCSRSetupMatvec</font><font color="4444FF">(</font><font color="4444FF">&amp;</font><font color="#2040a0">matvec_fn</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line261">261</a> 
@@ -308,8 +308,8 @@
 <a name="line301">301</a>       <font color="#444444">/* clean-up */</font>
 <a name="line302">302</a>       <font color="#2040a0">HYPRE_BoomerAMGDestroy</font><font color="4444FF">(</font><font color="#2040a0">precond</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line303">303</a>       <font color="#2040a0">HYPRE_LOBPCGDestroy</font><font color="4444FF">(</font><font color="#2040a0">lobpcg_solver</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line304">304</a>       <font color="#2040a0">hypre_TFree</font><font color="4444FF">(</font><font color="#2040a0">eigenvalues</font><font color="4444FF">)</font><font color="4444FF">;</font>
-<a name="line305">305</a>       <font color="#2040a0">hypre_TFree</font><font color="4444FF">(</font><font color="#2040a0">interpreter</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line304">304</a>       <font color="#2040a0">hypre_TFree</font><font color="4444FF">(</font><font color="#2040a0">eigenvalues</font>, <font color="#2040a0">HYPRE_MEMORY_HOST</font><font color="4444FF">)</font><font color="4444FF">;</font>
+<a name="line305">305</a>       <font color="#2040a0">hypre_TFree</font><font color="4444FF">(</font><font color="#2040a0">interpreter</font>, <font color="#2040a0">HYPRE_MEMORY_HOST</font><font color="4444FF">)</font><font color="4444FF">;</font>
 <a name="line306">306</a>    <font color="4444FF"><strong>}</strong></font>
 <a name="line307">307</a> 
 <a name="line308">308</a>    <font color="#444444">/* Save the solution for GLVis visualization, see vis/glvis-ex11.sh */</font>

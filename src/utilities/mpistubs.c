@@ -12,12 +12,18 @@
 
 #include "_hypre_utilities.h"
 
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+extern HYPRE_Complex *global_recv_buffer, *global_send_buffer;
+extern HYPRE_Int      global_recv_size, global_send_size;
+
+#endif
+
 /******************************************************************************
  * This routine is the same in both the sequential and normal cases
  *
  * The 'comm' argument for MPI_Comm_f2c is MPI_Fint, which is always the size of
  * a Fortran integer and hence usually the size of hypre_int.
- *****************************************************************************/
+ ****************************************************************************/
 
 hypre_MPI_Comm
 hypre_MPI_Comm_f2c( hypre_int comm )
@@ -216,7 +222,7 @@ hypre_MPI_Allgather( void               *sendbuf,
 
       case hypre_MPI_BYTE:
       {
-         memcpy(recvbuf, sendbuf, sendcount);
+         hypre_Memcpy(recvbuf,  sendbuf,  sendcount, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       } 
       break;
 
@@ -528,7 +534,7 @@ hypre_MPI_Allreduce( void              *sendbuf,
 
       case hypre_MPI_BYTE:
       {
-         memcpy(recvbuf, sendbuf, count);
+         hypre_Memcpy(recvbuf,  sendbuf,  count, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
       } 
       break;
 
@@ -660,12 +666,28 @@ HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,
                 char      ***argv )
 {
+#if defined(HYPRE_USE_OMP45)
+   hypre__offload_device_num = omp_get_initial_device();
+   hypre__offload_host_num   = omp_get_initial_device();
+#endif
+
    return (HYPRE_Int) MPI_Init(argc, argv);
 }
 
 HYPRE_Int
 hypre_MPI_Finalize( )
 {
+#if defined(HYPRE_USE_OMP45)
+   if (global_send_buffer)
+   {
+     hypre_TFree(global_send_buffer, HYPRE_MEMORY_DEVICE);
+   }
+   if (global_recv_buffer)
+   {
+     hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
+   }
+#endif
+
    return (HYPRE_Int) MPI_Finalize();
 }
 
@@ -763,13 +785,13 @@ hypre_MPI_Group_incl( hypre_MPI_Group  group,
    HYPRE_Int  i;
    HYPRE_Int  ierr;
 
-   mpi_ranks = hypre_TAlloc(hypre_int, n);
+   mpi_ranks = hypre_TAlloc(hypre_int,  n, HYPRE_MEMORY_HOST);
    for (i = 0; i < n; i++)
    {
       mpi_ranks[i] = (hypre_int) ranks[i];
    }
    ierr = (HYPRE_Int) MPI_Group_incl(group, (hypre_int)n, mpi_ranks, newgroup);
-   hypre_TFree(mpi_ranks);
+   hypre_TFree(mpi_ranks, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -844,8 +866,8 @@ hypre_MPI_Allgatherv( void               *sendbuf,
    HYPRE_Int  ierr;
 
    MPI_Comm_size(comm, &csize);
-   mpi_recvcounts = hypre_TAlloc(hypre_int, csize);
-   mpi_displs = hypre_TAlloc(hypre_int, csize);
+   mpi_recvcounts = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
+   mpi_displs = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
    for (i = 0; i < csize; i++)
    {
       mpi_recvcounts[i] = (hypre_int) recvcounts[i];
@@ -854,8 +876,8 @@ hypre_MPI_Allgatherv( void               *sendbuf,
    ierr = (HYPRE_Int) MPI_Allgatherv(sendbuf, (hypre_int)sendcount, sendtype,
                                      recvbuf, mpi_recvcounts, mpi_displs, 
                                      recvtype, comm);
-   hypre_TFree(mpi_recvcounts);
-   hypre_TFree(mpi_displs);
+   hypre_TFree(mpi_recvcounts, HYPRE_MEMORY_HOST);
+   hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -896,8 +918,8 @@ hypre_MPI_Gatherv(void               *sendbuf,
    MPI_Comm_rank(comm, &croot);
    if (croot == (hypre_int) root)
    {
-      mpi_recvcounts = hypre_TAlloc(hypre_int, csize);
-      mpi_displs = hypre_TAlloc(hypre_int, csize);
+      mpi_recvcounts = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
+      mpi_displs = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
       for (i = 0; i < csize; i++)
       {
          mpi_recvcounts[i] = (hypre_int) recvcounts[i];
@@ -907,8 +929,8 @@ hypre_MPI_Gatherv(void               *sendbuf,
    ierr = (HYPRE_Int) MPI_Gatherv(sendbuf, (hypre_int)sendcount, sendtype,
                                      recvbuf, mpi_recvcounts, mpi_displs, 
                                      recvtype, (hypre_int) root, comm);
-   hypre_TFree(mpi_recvcounts);
-   hypre_TFree(mpi_displs);
+   hypre_TFree(mpi_recvcounts, HYPRE_MEMORY_HOST);
+   hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -949,8 +971,8 @@ hypre_MPI_Scatterv(void               *sendbuf,
    MPI_Comm_rank(comm, &croot);
    if (croot == (hypre_int) root)
    {
-      mpi_sendcounts = hypre_TAlloc(hypre_int, csize);
-      mpi_displs = hypre_TAlloc(hypre_int, csize);
+      mpi_sendcounts = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
+      mpi_displs = hypre_TAlloc(hypre_int,  csize, HYPRE_MEMORY_HOST);
       for (i = 0; i < csize; i++)
       {
          mpi_sendcounts[i] = (hypre_int) sendcounts[i];
@@ -960,8 +982,8 @@ hypre_MPI_Scatterv(void               *sendbuf,
    ierr = (HYPRE_Int) MPI_Scatterv(sendbuf, mpi_sendcounts, mpi_displs, sendtype,
                                      recvbuf, (hypre_int) recvcount, 
                                      recvtype, (hypre_int) root, comm);
-   hypre_TFree(mpi_sendcounts);
-   hypre_TFree(mpi_displs);
+   hypre_TFree(mpi_sendcounts, HYPRE_MEMORY_HOST);
+   hypre_TFree(mpi_displs, HYPRE_MEMORY_HOST);
 
    return ierr;
 }
@@ -1245,7 +1267,7 @@ hypre_MPI_Type_struct( HYPRE_Int           count,
    HYPRE_Int  i;
    HYPRE_Int  ierr;
 
-   mpi_array_of_blocklengths = hypre_TAlloc(hypre_int, count);
+   mpi_array_of_blocklengths = hypre_TAlloc(hypre_int,  count, HYPRE_MEMORY_HOST);
    for (i = 0; i < count; i++)
    {
       mpi_array_of_blocklengths[i] = (hypre_int) array_of_blocklengths[i];
@@ -1261,7 +1283,7 @@ hypre_MPI_Type_struct( HYPRE_Int           count,
                                          newtype);
 #endif
 
-   hypre_TFree(mpi_array_of_blocklengths);
+   hypre_TFree(mpi_array_of_blocklengths, HYPRE_MEMORY_HOST);
 
    return ierr;
 }

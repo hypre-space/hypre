@@ -156,7 +156,7 @@ HYPRE_ParCSRMatrixGetRowPartitioning( HYPRE_ParCSRMatrix   matrix,
                        &num_procs);
    row_starts = hypre_ParCSRMatrixRowStarts((hypre_ParCSRMatrix *) matrix);
    if (!row_starts) return -1;
-   row_partitioning = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   row_partitioning = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
    for (i=0; i < num_procs + 1; i++)
       row_partitioning[i] = row_starts[i];
 
@@ -185,7 +185,7 @@ HYPRE_ParCSRMatrixGetColPartitioning( HYPRE_ParCSRMatrix   matrix,
                        &num_procs);
    col_starts = hypre_ParCSRMatrixColStarts((hypre_ParCSRMatrix *) matrix);
    if (!col_starts) return -1;
-   col_partitioning = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   col_partitioning = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
    for (i=0; i < num_procs + 1; i++)
       col_partitioning[i] = col_starts[i];
 

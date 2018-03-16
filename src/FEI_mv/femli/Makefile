@@ -33,6 +33,7 @@ MLI_INCLUDES = \
  -I$(srcdir)/../../FEI_mv/fei-hypre\
  -I$(srcdir)/../../FEI_mv/femli\
  ${SUPERLU_INCLUDE}
+# ${DSUPERLU_INCLUDE}
 
 C_COMPILE_FLAGS =\
  -DMLI_SUPERLU\

@@ -716,7 +716,7 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
    /* and which macroelement the current element belongs to               */
    /* ------------------------------------------------------------------- */
 
-   macroLabels = (int *) malloc( localNElems * sizeof(int) );
+   macroLabels = hypre_TAlloc(int,  localNElems , HYPRE_MEMORY_HOST);
    for ( ii = 0; ii < localNElems; ii++ ) macroLabels[ii] = -1;
 
    /* ------------------------------------------------------------------- */
@@ -724,7 +724,7 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
    /* for agglomeration so that no duplication will be done.              */
    /* ------------------------------------------------------------------- */
 
-   noRoot = (int *) malloc( localNElems * sizeof(int) );
+   noRoot = hypre_TAlloc(int,  localNElems , HYPRE_MEMORY_HOST);
    for ( ii = 0; ii < localNElems; ii++ ) noRoot[ii] = 0;
 
    /* ------------------------------------------------------------------- */
@@ -734,8 +734,8 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
    /* possible macroelement).                                             */
    /* ------------------------------------------------------------------- */
 
-   denseRow   = (int *) malloc( localNElems * sizeof(int) );
-   denseRow2  = (int *) malloc( localNElems * sizeof(int) );
+   denseRow   = hypre_TAlloc(int,  localNElems , HYPRE_MEMORY_HOST);
+   denseRow2  = hypre_TAlloc(int,  localNElems , HYPRE_MEMORY_HOST);
    for ( ii = 0; ii < localNElems; ii++ ) denseRow[ii] = denseRow2[ii] = 0;
 
    /* ------------------------------------------------------------------- */
@@ -743,9 +743,9 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
    /* that preserves nice geometric shapes                                */
    /* ------------------------------------------------------------------- */
 
-   macroIA = (int *) malloc( (localNElems/3+1) * sizeof(int) );
-   macroJA = (int *) malloc( (localNElems/3+1) * 216 * sizeof(int) );
-   macroAA = (int *) malloc( (localNElems/3+1) * 216 * sizeof(int) );
+   macroIA = hypre_TAlloc(int,  (localNElems/3+1) , HYPRE_MEMORY_HOST);
+   macroJA = hypre_TAlloc(int,  (localNElems/3+1) * 216 , HYPRE_MEMORY_HOST);
+   macroAA = hypre_TAlloc(int,  (localNElems/3+1) * 216 , HYPRE_MEMORY_HOST);
 
    /* ------------------------------------------------------------------- */
    /* allocate memory for the output data (assume no more than 60 elements*/
@@ -753,7 +753,7 @@ void MLI_FEDataAgglomerateElemsLocal(MLI_Matrix *elemMatrix,
    /* ------------------------------------------------------------------- */
 
    nMacros = 0;
-   macroLists = (int *) malloc( 60 * sizeof(int) );
+   macroLists = hypre_TAlloc(int,  60 , HYPRE_MEMORY_HOST);
 
    /* ------------------------------------------------------------------- */
    /* search for initial element (one with least number of neighbors)     */
@@ -1104,14 +1104,14 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
     * this array is used to determine which element has been agglomerated
     *-----------------------------------------------------------------*/
 
-   macroLabels = (int *) malloc( localNElems * sizeof(int) );
+   macroLabels = hypre_TAlloc(int,  localNElems , HYPRE_MEMORY_HOST);
    for ( ielem = 0; ielem < localNElems; ielem++ ) macroLabels[ielem] = -1;
 
    /*-----------------------------------------------------------------
     * this array is used to expand a sparse row into a full row 
     *-----------------------------------------------------------------*/
 
-   denseRow = (int *) malloc( localNElems * sizeof(int) );
+   denseRow = hypre_TAlloc(int,  localNElems , HYPRE_MEMORY_HOST);
    for ( ielem = 0; ielem < localNElems; ielem++ ) denseRow[ielem] = 0;
 
    /*-----------------------------------------------------------------
@@ -1120,8 +1120,8 @@ void MLI_FEDataAgglomerateElemsLocalOld(MLI_Matrix *elemMatrix,
     *-----------------------------------------------------------------*/
 
    nMacros = 0;
-   macroSizes = (int *) malloc( localNElems/2 * sizeof(int) );
-   macroList  = (int *) malloc( 100 * sizeof(int) );
+   macroSizes = hypre_TAlloc(int,  localNElems/2 , HYPRE_MEMORY_HOST);
+   macroList  = hypre_TAlloc(int,  100 , HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------
     * loop through all elements for agglomeration
