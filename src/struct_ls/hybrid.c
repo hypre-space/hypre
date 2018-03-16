@@ -57,7 +57,7 @@ hypre_HybridCreate( MPI_Comm  comm )
 {
    hypre_HybridData *hybrid_data;
 
-   hybrid_data = hypre_CTAlloc(hypre_HybridData, 1);
+   hybrid_data = hypre_CTAlloc(hypre_HybridData,  1, HYPRE_MEMORY_HOST);
 
    (hybrid_data -> comm)        = comm;
    (hybrid_data -> time_index)  = hypre_InitializeTiming("Hybrid");
@@ -98,7 +98,7 @@ hypre_HybridDestroy( void  *hybrid_vdata )
 
    if (hybrid_data)
    {
-      hypre_TFree(hybrid_data);
+      hypre_TFree(hybrid_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

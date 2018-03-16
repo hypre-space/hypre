@@ -38,7 +38,7 @@ hypre_SparseMSGInterpCreate( )
 {
    hypre_SparseMSGInterpData *interp_data;
 
-   interp_data = hypre_CTAlloc(hypre_SparseMSGInterpData, 1);
+   interp_data = hypre_CTAlloc(hypre_SparseMSGInterpData,  1, HYPRE_MEMORY_HOST);
    (interp_data -> time_index)  = hypre_InitializeTiming("SparseMSGInterp");
 
    return (void *) interp_data;
@@ -195,17 +195,17 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
       hypre_BoxGetSize(compute_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(ep,xcp)
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                           e_dbox,  start,  stride,  ei,
                           xc_dbox, startc, stridec, xci);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(ei, xci)
       {
          ep[ei] = xcp[xci];
       }
       hypre_BoxLoop2End(ei, xci);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    /*-----------------------------------------------------------------------
@@ -255,18 +255,18 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(ep,Pp0,ep0,Pp1,ep1)
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                                 P_dbox, startP, strideP, Pi,
                                 e_dbox, start,  stride,  ei);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(Pi, ei)
             {
                ep[ei] =  (Pp0[Pi] * ep0[ei] +
                           Pp1[Pi] * ep1[ei]);
             }
             hypre_BoxLoop2End(Pi, ei);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
          }
       }
    }
@@ -297,7 +297,7 @@ hypre_SparseMSGInterpDestroy( void *interp_vdata )
       hypre_StructMatrixDestroy(interp_data -> P);
       hypre_ComputePkgDestroy(interp_data -> compute_pkg);
       hypre_FinalizeTiming(interp_data -> time_index);
-      hypre_TFree(interp_data);
+      hypre_TFree(interp_data, HYPRE_MEMORY_HOST);
    }
 
    return ierr;

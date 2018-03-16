@@ -67,7 +67,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
    if (order < 1)
       order = 1;
 
-   coefs = hypre_CTAlloc(HYPRE_Real, order+1);
+   coefs = hypre_CTAlloc(HYPRE_Real,  order+1, HYPRE_MEMORY_HOST);
    /* we are using the order of p(A) */
    cheby_order = order -1;
    
@@ -163,7 +163,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Setup(hypre_ParCSRMatrix *A, /* matrix to rela
    if (scale)
    {
       /*grab 1/sqrt(diagonal) */
-      ds_data = hypre_CTAlloc(HYPRE_Real, num_rows);
+      ds_data = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_HOST);
       
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(j,diag) HYPRE_SMP_SCHEDULE 
@@ -220,7 +220,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to rela
    /* we are using the order of p(A) */
    cheby_order = order -1;
    
-   orig_u = hypre_CTAlloc(HYPRE_Real, num_rows);
+   orig_u = hypre_CTAlloc(HYPRE_Real,  num_rows, HYPRE_MEMORY_HOST);
 
    if (!scale)
    {
@@ -331,7 +331,7 @@ HYPRE_Int hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to rela
 
    }/* end of scaling code */
 
-   hypre_TFree(orig_u);
+   hypre_TFree(orig_u, HYPRE_MEMORY_HOST);
   
    return hypre_error_flag;
 }

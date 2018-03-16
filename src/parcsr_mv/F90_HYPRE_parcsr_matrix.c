@@ -114,7 +114,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixprint, HYPRE_PARCSRMATRIXPRINT)
    HYPRE_Int i;
    char *c_file_name;
 
-   c_file_name = hypre_CTAlloc(char, *fort_file_name_size);
+   c_file_name = hypre_CTAlloc(char,  *fort_file_name_size, HYPRE_MEMORY_HOST);
 
    for (i = 0; i < *fort_file_name_size; i++)
    {
@@ -126,7 +126,7 @@ hypre_F90_IFACE(hypre_parcsrmatrixprint, HYPRE_PARCSRMATRIXPRINT)
            hypre_F90_PassObj (HYPRE_ParCSRMatrix, matrix),
            (char *)              c_file_name ) );
 
-   hypre_TFree(c_file_name);
+   hypre_TFree(c_file_name, HYPRE_MEMORY_HOST);
 
 }
 

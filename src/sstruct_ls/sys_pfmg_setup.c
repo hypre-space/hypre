@@ -42,7 +42,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
                     hypre_SStructVector  *b_in,
                     hypre_SStructVector  *x_in        )
 {
-	hypre_SysPFMGData    *sys_pfmg_data = (hypre_SysPFMGData    *)sys_pfmg_vdata;
+   hypre_SysPFMGData    *sys_pfmg_data = (hypre_SysPFMGData    *)sys_pfmg_vdata;
 
    MPI_Comm              comm = (sys_pfmg_data -> comm);
                      
@@ -125,10 +125,10 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
     * Allocate arrays for mesh sizes for each diagonal block
     *--------------------------------------------------------*/
    nvars    = hypre_SStructPMatrixNVars(A);
-   sys_dxyz = hypre_TAlloc(HYPRE_Real *, nvars);
+   sys_dxyz = hypre_TAlloc(HYPRE_Real *, nvars, HYPRE_MEMORY_HOST);
    for ( i = 0; i < nvars; i++)
    {
-      sys_dxyz[i] = hypre_TAlloc(HYPRE_Real, 3);
+      sys_dxyz[i] = hypre_TAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
    }
    
    /*-----------------------------------------------------
@@ -155,8 +155,8 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    dxyz_flag= 0;
    if ((dxyz[0] == 0) || (dxyz[1] == 0) || (dxyz[2] == 0))
    {
-      mean = hypre_CTAlloc(HYPRE_Real, 3);
-      deviation = hypre_CTAlloc(HYPRE_Real, 3);
+      mean      = hypre_CTAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
+      deviation = hypre_CTAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
 
       dxyz_flag = 0;
       for (i = 0; i < nvars; i++)
@@ -185,17 +185,17 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
             dxyz[d] += sys_dxyz[i][d];
          } 
       }
-      hypre_TFree(mean);
-      hypre_TFree(deviation);
+      hypre_TFree(mean     , HYPRE_MEMORY_HOST);
+      hypre_TFree(deviation, HYPRE_MEMORY_HOST);
    }
 
-   grid_l = hypre_TAlloc(hypre_SStructPGrid *, max_levels);
+   grid_l = hypre_TAlloc(hypre_SStructPGrid *, max_levels, HYPRE_MEMORY_HOST);
    grid_l[0] = grid;
-   P_grid_l = hypre_TAlloc(hypre_SStructPGrid *, max_levels);
+   P_grid_l = hypre_TAlloc(hypre_SStructPGrid *, max_levels, HYPRE_MEMORY_HOST);
    P_grid_l[0] = NULL;
-   cdir_l = hypre_TAlloc(HYPRE_Int, max_levels);
-   active_l = hypre_TAlloc(HYPRE_Int, max_levels);
-   relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels);
+   cdir_l = hypre_TAlloc(HYPRE_Int, max_levels, HYPRE_MEMORY_HOST);
+   active_l = hypre_TAlloc(HYPRE_Int, max_levels, HYPRE_MEMORY_HOST);
+   relax_weights = hypre_CTAlloc(HYPRE_Real, max_levels, HYPRE_MEMORY_HOST);
    hypre_SetIndex3(coarsen, 1, 1, 1); /* forces relaxation on finest grid */
    for (l = 0; ; l++)
    {
@@ -318,7 +318,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
       hypre_SysStructCoarsen(grid_l[l], cindex, stride, 1, &grid_l[l+1]);
    }
    num_levels = l + 1;
-  
+
    /*-----------------------------------------------------
     * For fully periodic problems, the coarsest grid
     * problem (a single node) can have zero diagonal
@@ -343,9 +343,9 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    hypre_BoxDestroy(cbox);
    for ( i = 0; i < nvars; i++)
    {
-      hypre_TFree(sys_dxyz[i]);
+      hypre_TFree(sys_dxyz[i], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(sys_dxyz);
+   hypre_TFree(sys_dxyz, HYPRE_MEMORY_HOST);
    
 
    /* set all levels active if skip_relax = 0 */
@@ -367,12 +367,12 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
     * Set up matrix and vector structures
     *-----------------------------------------------------*/
 
-   A_l  = hypre_TAlloc(hypre_SStructPMatrix *, num_levels);
-   P_l  = hypre_TAlloc(hypre_SStructPMatrix *, num_levels - 1);
-   RT_l = hypre_TAlloc(hypre_SStructPMatrix *, num_levels - 1);
-   b_l  = hypre_TAlloc(hypre_SStructPVector *, num_levels);
-   x_l  = hypre_TAlloc(hypre_SStructPVector *, num_levels);
-   tx_l = hypre_TAlloc(hypre_SStructPVector *, num_levels);
+   A_l  = hypre_TAlloc(hypre_SStructPMatrix *, num_levels    , HYPRE_MEMORY_HOST);
+   P_l  = hypre_TAlloc(hypre_SStructPMatrix *, num_levels - 1, HYPRE_MEMORY_HOST);
+   RT_l = hypre_TAlloc(hypre_SStructPMatrix *, num_levels - 1, HYPRE_MEMORY_HOST);
+   b_l  = hypre_TAlloc(hypre_SStructPVector *, num_levels    , HYPRE_MEMORY_HOST);
+   x_l  = hypre_TAlloc(hypre_SStructPVector *, num_levels    , HYPRE_MEMORY_HOST);
+   tx_l = hypre_TAlloc(hypre_SStructPVector *, num_levels    , HYPRE_MEMORY_HOST);
    r_l  = tx_l;
    e_l  = tx_l;
 
@@ -427,10 +427,10 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
     * Set up multigrid operators and call setup routines
     *-----------------------------------------------------*/
 
-   relax_data_l    = hypre_TAlloc(void *, num_levels);
-   matvec_data_l   = hypre_TAlloc(void *, num_levels);
-   restrict_data_l = hypre_TAlloc(void *, num_levels);
-   interp_data_l   = hypre_TAlloc(void *, num_levels);
+   relax_data_l    = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   matvec_data_l   = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   restrict_data_l = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
+   interp_data_l   = hypre_TAlloc(void *, num_levels, HYPRE_MEMORY_HOST);
 
    for (l = 0; l < (num_levels - 1); l++)
    {
@@ -514,7 +514,7 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
          hypre_SysPFMGRelaxSetup(relax_data_l[l], A_l[l], b_l[l], x_l[l]);
       }
    }
-   hypre_TFree(relax_weights);
+   hypre_TFree(relax_weights, HYPRE_MEMORY_HOST);
 
    for (l = 0; l < num_levels; l++)
    {
@@ -535,8 +535,8 @@ hypre_SysPFMGSetup( void                 *sys_pfmg_vdata,
    if ((sys_pfmg_data -> logging) > 0)
    {
       max_iter = (sys_pfmg_data -> max_iter);
-      (sys_pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter);
-      (sys_pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter);
+      (sys_pfmg_data -> norms)     = hypre_TAlloc(HYPRE_Real, max_iter, HYPRE_MEMORY_HOST);
+      (sys_pfmg_data -> rel_norms) = hypre_TAlloc(HYPRE_Real, max_iter, HYPRE_MEMORY_HOST);
    }
 
 #if DEBUG
@@ -594,12 +594,12 @@ hypre_SysStructCoarsen( hypre_SStructPGrid  *fgrid,
    nvars     = hypre_SStructPGridNVars(fgrid);
    vartypes  = hypre_SStructPGridVarTypes(fgrid);
 
-   cgrid = hypre_TAlloc(hypre_SStructPGrid, 1);
+   cgrid = hypre_TAlloc(hypre_SStructPGrid, 1, HYPRE_MEMORY_HOST);
 
    hypre_SStructPGridComm(cgrid)     = comm;
    hypre_SStructPGridNDim(cgrid)     = ndim;
    hypre_SStructPGridNVars(cgrid)    = nvars;
-   new_vartypes = hypre_TAlloc(hypre_SStructVariable, nvars);
+   new_vartypes = hypre_TAlloc(hypre_SStructVariable, nvars, HYPRE_MEMORY_HOST);
    for (i = 0; i < nvars; i++)
    {
       new_vartypes[i] = vartypes[i];

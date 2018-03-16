@@ -52,10 +52,12 @@ PASSFAIL=$(awk -v filename="$SNAME" 'BEGIN{{FS=" "}
          # floating point field comparison         
          if($NF != int($NF))
          {
-            tau = (val - $NF)/val;
+            if (val == 0.0) {dev = 1.0}
+            else {dev = val}
+            tau = (val - $NF)/dev;
             # get absolute value of tau
             tau = tau < 0 ? -tau : tau;
-            if(tau < tol)
+            if(tau < tol || (val-$NF < tol && val-$NF >-tol))
                #print "PASSED"
                continue;
             else

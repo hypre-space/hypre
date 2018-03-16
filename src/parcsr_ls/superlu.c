@@ -43,7 +43,7 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
    hypre_MPI_Comm_size(comm, &num_procs);
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   dslu_data = hypre_CTAlloc(hypre_DSLUData, 1);
+   dslu_data = hypre_CTAlloc(hypre_DSLUData, 1, HYPRE_MEMORY_HOST);
 
    /* Merge diag and offd into one matrix (global ids) */
    A_local = hypre_MergeDiagAndOffd(A);
@@ -94,7 +94,7 @@ HYPRE_Int hypre_SLUDistSetup( HYPRE_Solver *solver, hypre_ParCSRMatrix *A, HYPRE
 
    dslu_data->global_num_rows = global_num_rows;
 
-   dslu_data->berr = hypre_CTAlloc(HYPRE_Real, 1);
+   dslu_data->berr = hypre_CTAlloc(HYPRE_Real, 1, HYPRE_MEMORY_HOST);
    dslu_data->berr[0] = 0.0;
 
    pdgssvx(&(dslu_data->dslu_options), &(dslu_data->A_dslu), 
@@ -138,8 +138,8 @@ HYPRE_Int hypre_SLUDistDestroy( void* solver)
    if (dslu_data->dslu_options.SolveInitialized)
       dSolveFinalize(&(dslu_data->dslu_options), &(dslu_data->dslu_solve));
    superlu_gridexit(&(dslu_data->dslu_data_grid));
-   hypre_TFree(dslu_data->berr); 
-   hypre_TFree(dslu_data); 
+   hypre_TFree(dslu_data->berr, HYPRE_MEMORY_HOST); 
+   hypre_TFree(dslu_data, HYPRE_MEMORY_HOST); 
    return hypre_error_flag;
 }
 #endif

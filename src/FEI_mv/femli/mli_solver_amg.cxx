@@ -61,15 +61,15 @@ int MLI_Solver_AMG::setup(MLI_Matrix *mat)
    HYPRE_BoomerAMGSetPrintLevel(precond_, 1);
    HYPRE_BoomerAMGSetCoarsenType(precond_, 0);
    HYPRE_BoomerAMGSetStrongThreshold(precond_, 0.8);
-   nSweeps = (int *) malloc(4 * sizeof(int));
+   nSweeps = hypre_TAlloc(int, 4 , HYPRE_MEMORY_HOST);
    for (i = 0; i < 4; i++) nSweeps[i] = 1;
    HYPRE_BoomerAMGSetNumGridSweeps(precond_, nSweeps);
-   rTypes = (int *) malloc(4 * sizeof(int));
+   rTypes = hypre_TAlloc(int, 4 , HYPRE_MEMORY_HOST);
    for (i = 0; i < 4; i++) rTypes[i] = 6;
-   relaxWt = (double *) malloc(25 * sizeof(double));
+   relaxWt = hypre_TAlloc(double, 25 , HYPRE_MEMORY_HOST);
    for (i = 0; i < 25; i++) relaxWt[i] = 1.0;
    HYPRE_BoomerAMGSetRelaxWeight(precond_, relaxWt);
-   relaxOmega = (double *) malloc(25 * sizeof(double));
+   relaxOmega = hypre_TAlloc(double, 25 , HYPRE_MEMORY_HOST);
    for (i = 0; i < 25; i++) relaxOmega[i] = 1.0;
    HYPRE_BoomerAMGSetOmega(precond_, relaxOmega);
    HYPRE_BoomerAMGSetup(precond_, (HYPRE_ParCSRMatrix) hypreA, 

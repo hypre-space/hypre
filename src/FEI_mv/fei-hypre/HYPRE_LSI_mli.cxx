@@ -169,7 +169,7 @@ HYPRE_MLI_SFEI;
 extern "C"
 int HYPRE_LSI_MLICreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
-   HYPRE_LSI_MLI *mli_object = (HYPRE_LSI_MLI *) malloc(sizeof(HYPRE_LSI_MLI));
+   HYPRE_LSI_MLI *mli_object = hypre_TAlloc(HYPRE_LSI_MLI, 1, HYPRE_MEMORY_HOST);
    *solver = (HYPRE_Solver) mli_object;
    mli_object->mpiComm_             = comm;
    mli_object->outputLevel_         = 0;
@@ -1651,7 +1651,7 @@ void *HYPRE_LSI_MLIFEDataCreate( MPI_Comm mpi_comm )
 {
 #ifdef HAVE_MLI
    HYPRE_MLI_FEData *hypre_fedata;
-   hypre_fedata = (HYPRE_MLI_FEData *) malloc( sizeof(HYPRE_MLI_FEData) );  
+   hypre_fedata = hypre_TAlloc(HYPRE_MLI_FEData, 1, HYPRE_MEMORY_HOST);  
    hypre_fedata->comm_          = mpi_comm;
    hypre_fedata->fedata_        = NULL;
    hypre_fedata->fedataOwn_     = 0;
@@ -1901,7 +1901,7 @@ void *HYPRE_LSI_MLISFEICreate( MPI_Comm mpiComm )
 {
 #ifdef HAVE_MLI
    HYPRE_MLI_SFEI *hypre_sfei;
-   hypre_sfei = (HYPRE_MLI_SFEI *) malloc( sizeof(HYPRE_MLI_SFEI) );  
+   hypre_sfei = hypre_TAlloc(HYPRE_MLI_SFEI, 1, HYPRE_MEMORY_HOST);  
    hypre_sfei->comm_    = mpiComm;
    hypre_sfei->sfei_    = new MLI_SFEI(mpiComm);;
    hypre_sfei->sfeiOwn_ = 1;

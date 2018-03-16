@@ -1482,16 +1482,18 @@ part[]
   }
 
   /* compute permutation vector */
-  { HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
-    memcpy(tmp, beg_row, blocks*sizeof(HYPRE_Int));
-    for (i=0; i<m; ++i) {
-      bk = part[i];  /* block to which row i belongs */
-      new = tmp[bk];
-      tmp[bk] += 1;
-      o2n[i] = new;
-      n2o[new] = i;
-    }
-    FREE_DH(tmp);
+  {
+	 HYPRE_Int *tmp = (HYPRE_Int*)MALLOC_DH(blocks*sizeof(HYPRE_Int)); CHECK_V_ERROR;
+	 hypre_TMemcpy(tmp,  beg_row, HYPRE_Int, blocks, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+	 for (i=0; i<m; ++i)
+	 {
+		bk = part[i];  /* block to which row i belongs */
+		new = tmp[bk];
+		tmp[bk] += 1;
+		o2n[i] = new;
+		n2o[new] = i;
+	 }
+	 FREE_DH(tmp);
   }
 
   FREE_DH(part); CHECK_V_ERROR;

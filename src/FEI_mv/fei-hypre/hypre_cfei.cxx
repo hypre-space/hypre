@@ -27,7 +27,7 @@ extern "C" HYPRE_FEI_Impl *HYPRE_FEI_create( MPI_Comm comm )
 {
    HYPRE_FEI_Impl *cfei;
    LLNL_FEI_Impl  *lfei;
-   cfei = (HYPRE_FEI_Impl *) malloc(sizeof(HYPRE_FEI_Impl));
+   cfei = hypre_TAlloc(HYPRE_FEI_Impl, 1, HYPRE_MEMORY_HOST);
    lfei = new LLNL_FEI_Impl(comm);
    cfei->fei_ = (void *) lfei;
    return (cfei);

@@ -35,7 +35,7 @@ extern "C" int
 HYPRE_FEMeshCreate(MPI_Comm comm, HYPRE_FEMesh *meshptr)
 {
    HYPRE_FEMesh myMesh;
-   myMesh = (HYPRE_FEMesh) malloc(sizeof(HYPRE_FEMesh));
+   myMesh = (HYPRE_FEMesh) hypre_TAlloc(HYPRE_FEMesh, 1, HYPRE_MEMORY_HOST);
    myMesh->comm_   = comm;
    myMesh->linSys_ = NULL;
    myMesh->feiPtr_ = NULL;

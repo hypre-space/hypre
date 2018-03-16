@@ -10,39 +10,54 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#ifdef HYPRE_USE_MANAGED
-#include <cuda_runtime_api.h>
+#ifndef hypre_GPU_ERROR_HEADER
+#define hypre_GPU_ERROR_HEADER
+
+#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
+
+//#include <cuda_runtime_api.h>
+#ifdef __cplusplus
+extern "C++" {
+#endif
+#include <cuda.h>
+#include <cuda_runtime.h>
+#ifdef __cplusplus
+}
+#endif
+
+#define hypre_CheckErrorDevice(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
 #define MEM_PAD_LEN 1
-#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-inline void gpuAssert(cudaError_t code, const char *file, int line)
-{
-   if (code != cudaSuccess) 
-   {
-     fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file);
-     fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code));
-     exit(2);
-   }
-}
 #define HYPRE_HOST_POINTER 0
 #define HYPRE_MANAGED_POINTER 1
 #define HYPRE_PINNED_POINTER 2
 #define HYPRE_DEVICE_POINTER 3
 #define HYPRE_UNDEFINED_POINTER1 4
 #define HYPRE_UNDEFINED_POINTER2 5
+
+void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line);
 void cudaSafeFree(void *ptr,int padding);
 hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
-#endif
 
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#endif 
+
+/* CUBLAS and CUSPARSE related */
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USING_CUSPARSE)
+
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
+
+/* MUST HAVE extern C++ for C++ cusparse.h and the headers therein */
+#ifdef __cplusplus
+extern "C++" {
+#endif
 #include <cusparse.h>
+#ifdef __cplusplus
+}
+#endif
 #include <cublas_v2.h>
-#include <stdio.h>
-//#include <cuda_runtime_api.h>
-#include <stdlib.h>
+#include <cuda_runtime_api.h>
 inline const char *cusparseErrorCheck(cusparseStatus_t error)
 {
     switch (error)
@@ -78,6 +93,7 @@ inline const char *cusparseErrorCheck(cusparseStatus_t error)
     }
     
 }
+
 inline const char *cublasErrorCheck(cublasStatus_t error)
 {
     switch (error)
@@ -115,16 +131,7 @@ inline const char *cublasErrorCheck(cublasStatus_t error)
     }
 
 }
-//#define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
-//inline void gpuAssert(cudaError_t code, const char *file, int line)
-//{
-//   if (code != cudaSuccess) 
-//   {
-//     fprintf(stderr,"CUDA ERROR ( Code = %d) in line %d of file %s\n",code,line,file);
-//     fprintf(stderr,"CUDA ERROR : %s \n", cudaGetErrorString(code));
-//     exit(2);
-//   }
-//}
+
 #define cusparseErrchk(ans) { cusparseAssert((ans), __FILE__, __LINE__); }
 inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
 {
@@ -134,6 +141,7 @@ inline void cusparseAssert(cusparseStatus_t code, const char *file, int line)
      fprintf(stderr,"CUSPARSE ERROR : %s \n", cusparseErrorCheck(code));
    }
 }
+
 #define cublasErrchk(ans){ cublasAssert((ans), __FILE__, __LINE__); }
 inline void cublasAssert(cublasStatus_t code, const char *file, int line)
 {
@@ -143,11 +151,7 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
      fprintf(stderr,"CUBLAS ERROR : %s \n", cublasErrorCheck(code));
    }
 }
-//int PointerType(const void *ptr);
-void cudaSafeFree(void *ptr,int padding);
-//void PrintPointerAttributes(const void *ptr);
-//size_t mempush(void* ptr, size_t size,int purge);
-//int memloc(void *ptr, int device);
-#endif
-#endif
+#endif // __cusparseErrorCheck__
+#endif // defined(HYPRE_USE_GPU)
 
+#endif // hypre_GPU_ERROR_HEADER

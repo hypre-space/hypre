@@ -42,7 +42,7 @@ hypre_SMGResidualCreate( )
 {
    hypre_SMGResidualData *residual_data;
 
-   residual_data = hypre_CTAlloc(hypre_SMGResidualData, 1);
+   residual_data = hypre_CTAlloc(hypre_SMGResidualData,  1, HYPRE_MEMORY_HOST);
 
    (residual_data -> time_index)  = hypre_InitializeTiming("SMGResidual");
 
@@ -223,17 +223,18 @@ hypre_SMGResidual( void               *residual_vdata,
                rp = hypre_StructVectorBoxData(r, i);
 
                hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,bp)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                    b_data_box, start, base_stride, bi,
                                    r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,bi,ri) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop2For(bi, ri)
                {
                   rp[ri] = bp[bi];
                }
                hypre_BoxLoop2End(bi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
          }
          break;
@@ -593,14 +594,13 @@ hypre_SMGResidual( void               *residual_vdata,
                case 1:
    
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,Ap0,xp0)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, ri)
                   {
 
                      rp[ri] = rp[ri]
@@ -608,20 +608,21 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                   break;
 
                case 3:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, ri)
                   {
  
                      rp[ri] = rp[ri]
@@ -631,20 +632,21 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                   break;
 
                case 5:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, ri)
                   {
  
                      rp[ri] = rp[ri]
@@ -656,20 +658,21 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                   break;
 
                case 7:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4,Ap5,xp5,Ap6,xp6)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, ri)
                   {
 
                      rp[ri] = rp[ri]
@@ -683,20 +686,21 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                   break;
 
                case 9:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4,Ap5,xp5,Ap6,xp6,Ap7,xp7,Ap8,xp8)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, ri)
                   {
    
                      rp[ri] = rp[ri]
@@ -712,20 +716,21 @@ hypre_SMGResidual( void               *residual_vdata,
    
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                   break;
 
                case 15:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4,Ap5,xp5,Ap6,xp6,Ap7,xp7,Ap8,xp8,Ap9,xp9,Ap10,xp10,Ap11,xp11,Ap12,xp12,Ap13,xp13,Ap14,xp14)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, ri)
                   {
    
                      rp[ri] = rp[ri]
@@ -747,20 +752,21 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                   break;
 
                case 19:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4,Ap5,xp5,Ap6,xp6,Ap7,xp7,Ap8,xp8,Ap9,xp9,Ap10,xp10,Ap11,xp11,Ap12,xp12,Ap13,xp13,Ap14,xp14,Ap15,xp15,Ap16,xp16,Ap17,xp17,Ap18,xp18)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, ri)
                   {
    
                      rp[ri] = rp[ri]
@@ -786,20 +792,21 @@ hypre_SMGResidual( void               *residual_vdata,
    
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    
                   break;
    
                case 27:
 
                   hypre_BoxGetStrideSize(compute_box, base_stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,Ap0,xp0,Ap1,xp1,Ap2,xp2,Ap3,xp3,Ap4,xp4,Ap5,xp5,Ap6,xp6,Ap7,xp7,Ap8,xp8,Ap9,xp9,Ap10,xp10,Ap11,xp11,Ap12,xp12,Ap13,xp13,Ap14,xp14,Ap15,xp15,Ap16,xp16,Ap17,xp17,Ap18,xp18,Ap19,xp19,Ap20,xp20,Ap21,xp21,Ap22,xp22,Ap23,xp23,Ap24,xp24,Ap25,xp25,Ap26,xp26)
                   hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                       A_data_box, start, base_stride, Ai,
                                       x_data_box, start, base_stride, xi,
                                       r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, xi, ri)
                   {
    
                      rp[ri] = rp[ri]
@@ -833,6 +840,8 @@ hypre_SMGResidual( void               *residual_vdata,
 
                   }
                   hypre_BoxLoop3End(Ai, xi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    
                   break;
 
@@ -846,18 +855,19 @@ hypre_SMGResidual( void               *residual_vdata,
 
                      hypre_BoxGetStrideSize(compute_box, base_stride,
                                             loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rp,Ap0,xp0)
                      hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                          A_data_box, start, base_stride, Ai,
                                          x_data_box, start, base_stride, xi,
                                          r_data_box, start, base_stride, ri);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,Ai,xi,ri) HYPRE_SMP_SCHEDULE
-#endif
-                     hypre_BoxLoop3For(Ai, xi, ri)
                      {
                         rp[ri] -= Ap0[Ai] * xp0[xi];
                      }
                      hypre_BoxLoop3End(Ai, xi, ri);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
                   }
             }
          }
@@ -918,7 +928,7 @@ hypre_SMGResidualDestroy( void *residual_vdata )
       hypre_BoxArrayDestroy(residual_data -> base_points);
       hypre_ComputePkgDestroy(residual_data -> compute_pkg );
       hypre_FinalizeTiming(residual_data -> time_index);
-      hypre_TFree(residual_data);
+      hypre_TFree(residual_data, HYPRE_MEMORY_HOST);
    }
 
    return ierr;

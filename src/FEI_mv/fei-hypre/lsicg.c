@@ -62,7 +62,7 @@ void *hypre_LSICGCreate( )
 {
    hypre_LSICGData *lsicg_data;
  
-   lsicg_data = hypre_CTAlloc(hypre_LSICGData, 1);
+   lsicg_data = hypre_CTAlloc(hypre_LSICGData,  1, HYPRE_MEMORY_HOST);
  
    /* set defaults */
    (lsicg_data -> tol)            = 1.0e-06;
@@ -97,7 +97,7 @@ int hypre_LSICGDestroy( void *lsicg_vdata )
       hypre_ParKrylovDestroyVector(lsicg_data -> p);
       hypre_ParKrylovDestroyVector(lsicg_data -> ap);
       hypre_ParKrylovDestroyVector(lsicg_data -> z);
-      hypre_TFree(lsicg_data);
+      hypre_TFree(lsicg_data, HYPRE_MEMORY_HOST);
    }
    return(ierr);
 }

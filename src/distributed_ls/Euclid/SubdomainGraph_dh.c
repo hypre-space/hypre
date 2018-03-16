@@ -322,7 +322,7 @@ void init_seq_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
     for (i=0; i<blocks; ++i) s->row_count[i] = rpp;
     s->row_count[blocks-1] = m - rpp*(blocks-1);
   }
-  memcpy(s->beg_rowP, s->beg_row, blocks*sizeof(HYPRE_Int));
+  hypre_TMemcpy(s->beg_rowP,  s->beg_row, HYPRE_Int, blocks, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
 
   /*-----------------------------------------------------------------
@@ -501,7 +501,7 @@ void init_mpi_private(SubdomainGraph_dh s, HYPRE_Int blocks, bool bj, void *A)
   if (!bj) {
     hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, s->beg_row, 1, HYPRE_MPI_INT, comm_dh);
     hypre_MPI_Allgather(&m, 1, HYPRE_MPI_INT, s->row_count, 1, HYPRE_MPI_INT, comm_dh);
-    memcpy(s->beg_rowP, s->beg_row, np_dh*sizeof(HYPRE_Int));
+    hypre_TMemcpy(s->beg_rowP,  s->beg_row, HYPRE_Int, np_dh, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
   } else {
     s->beg_row[myid_dh] = beg_row;
     s->beg_rowP[myid_dh] = beg_row;
@@ -1012,7 +1012,7 @@ hypre_fprintf(stderr, "\n");
     if (nabors[i]) myNabors[nz++] = i;
   }
   s->allCount = nz;
-  memcpy(nabors, myNabors, nz*sizeof(HYPRE_Int));
+  hypre_TMemcpy(nabors,  myNabors, HYPRE_Int, nz, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
 
   if (marker != NULL) { FREE_DH(marker); CHECK_V_ERROR; }
   if (myNabors != NULL) { FREE_DH(myNabors); CHECK_V_ERROR; }

@@ -122,6 +122,27 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
    HYPRE_Int              P_stored_as_transpose = 0;
    hypre_StructStencil   *stencil;
 
+   hypre_StructMatrix    *Ac_tmp;
+
+#if defined(HYPRE_USE_CUDA)
+   HYPRE_Int data_location_A = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
+   HYPRE_Int data_location_Ac = hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac));
+   HYPRE_Int constant_coefficient = hypre_StructMatrixConstantCoefficient(Ac);
+   if ( data_location_A != data_location_Ac )
+   {
+      Ac_tmp = hypre_PFMGCreateRAPOp(R, A, P, hypre_StructMatrixGrid(Ac), cdir, rap_type);
+      hypre_StructMatrixSymmetric(Ac_tmp) = hypre_StructMatrixSymmetric(Ac);
+      hypre_StructMatrixConstantCoefficient(Ac_tmp) = hypre_StructMatrixConstantCoefficient(Ac);
+      hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac)) = data_location_A;
+      HYPRE_StructMatrixInitialize(Ac_tmp);
+   }
+   else
+   {
+      Ac_tmp = Ac;
+   }
+#else
+   Ac_tmp = Ac;
+#endif
    stencil = hypre_StructMatrixStencil(A);
 
    if (rap_type == 0)
@@ -132,13 +153,13 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
             /*--------------------------------------------------------------------
              *    Set lower triangular (+ diagonal) coefficients
              *--------------------------------------------------------------------*/
-            hypre_PFMG2BuildRAPSym(A, P, R, cdir, cindex, cstride, Ac);
+            hypre_PFMG2BuildRAPSym(A, P, R, cdir, cindex, cstride, Ac_tmp);
 
             /*--------------------------------------------------------------------
              *    For non-symmetric A, set upper triangular coefficients as well
              *--------------------------------------------------------------------*/
             if(!hypre_StructMatrixSymmetric(A))
-               hypre_PFMG2BuildRAPNoSym(A, P, R, cdir, cindex, cstride, Ac);
+               hypre_PFMG2BuildRAPNoSym(A, P, R, cdir, cindex, cstride, Ac_tmp);
 
             break;
 
@@ -147,13 +168,13 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
             /*--------------------------------------------------------------------
              *    Set lower triangular (+ diagonal) coefficients
              *--------------------------------------------------------------------*/
-            hypre_PFMG3BuildRAPSym(A, P, R, cdir, cindex, cstride, Ac);
+            hypre_PFMG3BuildRAPSym(A, P, R, cdir, cindex, cstride, Ac_tmp);
 
             /*--------------------------------------------------------------------
              *    For non-symmetric A, set upper triangular coefficients as well
              *--------------------------------------------------------------------*/
             if(!hypre_StructMatrixSymmetric(A))
-               hypre_PFMG3BuildRAPNoSym(A, P, R, cdir, cindex, cstride, Ac);
+               hypre_PFMG3BuildRAPNoSym(A, P, R, cdir, cindex, cstride, Ac_tmp);
 
             break;
       } 
@@ -164,11 +185,11 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
       switch (hypre_StructStencilNDim(stencil)) 
       {
          case 2:
-            hypre_PFMGBuildCoarseOp5(A, P, R, cdir, cindex, cstride, Ac);
+            hypre_PFMGBuildCoarseOp5(A, P, R, cdir, cindex, cstride, Ac_tmp);
             break;
 
          case 3:
-            hypre_PFMGBuildCoarseOp7(A, P, R, cdir, cindex, cstride, Ac);
+            hypre_PFMGBuildCoarseOp7(A, P, R, cdir, cindex, cstride, Ac_tmp);
             break;
       } 
    }
@@ -176,10 +197,38 @@ hypre_PFMGSetupRAPOp( hypre_StructMatrix *R,
    else if (rap_type == 2)
    {
       hypre_SemiBuildRAP(A, P, R, cdir, cindex, cstride,
-                         P_stored_as_transpose, Ac);
+                         P_stored_as_transpose, Ac_tmp);
    }
+   
+   hypre_StructMatrixAssemble(Ac_tmp);
 
-   hypre_StructMatrixAssemble(Ac);
+#if defined(HYPRE_USE_CUDA)   
+   if ( data_location_A != data_location_Ac )
+   {
+     if (constant_coefficient == 0)
+     {	 
+        hypre_TMemcpy(hypre_StructMatrixDataConst(Ac),hypre_StructMatrixData(Ac_tmp),HYPRE_Complex,hypre_StructMatrixDataSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+     }
+     else if (constant_coefficient == 1)
+     {
+        hypre_TMemcpy(hypre_StructMatrixDataConst(Ac),hypre_StructMatrixDataConst(Ac_tmp),HYPRE_Complex,hypre_StructMatrixDataConstSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_HOST);
+     }
+     else if (constant_coefficient == 2)
+     {
+        hypre_TMemcpy(hypre_StructMatrixDataConst(Ac),hypre_StructMatrixDataConst(Ac_tmp),HYPRE_Complex,hypre_StructMatrixDataConstSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_HOST);
+	hypre_StructStencil *stencil_c       = hypre_StructMatrixStencil(Ac);
+	HYPRE_Int stencil_size  = hypre_StructStencilSize(stencil_c);
+	HYPRE_Complex       *Acdiag = hypre_StructMatrixDataConst(Ac) + stencil_size;
+	hypre_TMemcpy(Acdiag, hypre_StructMatrixData(Ac_tmp),HYPRE_Complex,hypre_StructMatrixDataSize(Ac_tmp),HYPRE_MEMORY_HOST,HYPRE_MEMORY_DEVICE);
+     }
+     
+      hypre_exec_policy = data_location_Ac;
+      hypre_StructGridDataLocation(hypre_StructMatrixGrid(Ac)) = data_location_Ac;
+      hypre_StructMatrixAssemble(Ac);
+      hypre_exec_policy = data_location_A;
+      hypre_StructMatrixDestroy(Ac_tmp);
+   }
+#endif
 
    return hypre_error_flag;
 }

@@ -182,7 +182,7 @@ int HYPRE_SlideReduction::getMatrixNumRows()
    HYPRE_ParCSRMatrixGetRowPartitioning( A_csr, &procNRows );
    localNRows   = procNRows[mypid+1] - procNRows[mypid];
    nConstraints = procNConstr_[mypid+1] - procNConstr_[mypid];
-   hypre_TFree( procNRows );
+   hypre_TFree( procNRows,HYPRE_MEMORY_HOST );
    return (localNRows-nConstraints);
 }
 
@@ -2843,9 +2843,9 @@ fclose(fp);
 #if 0
 FILE *fp2 = fopen("invCT.m","w");
 #endif
-   Imat = (double **) malloc( maxBlkSize * sizeof(double*) );
+   Imat = hypre_TAlloc(double*,  maxBlkSize , HYPRE_MEMORY_HOST);
    for ( ir = 0; ir < maxBlkSize; ir++ )
-      Imat[ir] = (double *) malloc( maxBlkSize * sizeof(double) );
+      Imat[ir] = hypre_TAlloc(double,  maxBlkSize , HYPRE_MEMORY_HOST);
 
    for ( ig = 0; ig < nGroups; ig++ )
    {
@@ -3032,9 +3032,9 @@ fclose(fp2);
    // invert the (2,1) block of A22 
    //------------------------------------------------------------------
 
-   Imat = (double **) malloc( maxBlkSize * sizeof(double*) );
+   Imat = hypre_TAlloc(double*,  maxBlkSize , HYPRE_MEMORY_HOST);
    for ( ir = 0; ir < maxBlkSize; ir++ )
-      Imat[ir] = (double *) malloc( maxBlkSize * sizeof(double) );
+      Imat[ir] = hypre_TAlloc(double,  maxBlkSize , HYPRE_MEMORY_HOST);
 
    for ( ig = 0; ig < nGroups; ig++ )
    {
@@ -3693,7 +3693,7 @@ double HYPRE_SlideReduction::matrixCondEst(int globalRowID, int globalColID,
          rowIndices[matDim++] = endRow - nConstraints + irow + 1;
    }
    hypre_qsort0(rowIndices, 0, matDim-1);
-   matrix = (double **) malloc( matDim * sizeof(double*) );
+   matrix = hypre_TAlloc(double*,  matDim , HYPRE_MEMORY_HOST);
    localSlaveEqns = new int[nConstraints];
    localSlaveAuxs = new int[nConstraints];
    for ( irow = 0; irow < nConstraints; irow++ ) 
@@ -3705,7 +3705,7 @@ double HYPRE_SlideReduction::matrixCondEst(int globalRowID, int globalColID,
 
    for ( irow = 0; irow < matDim; irow++ ) 
    {
-      matrix[irow] = (double *) malloc( matDim * sizeof(double) );
+      matrix[irow] = hypre_TAlloc(double,  matDim , HYPRE_MEMORY_HOST);
       for ( jcol = 0; jcol < matDim; jcol++ ) matrix[irow][jcol] = 0.0;
    }
    for ( irow = 0; irow < matDim; irow++ ) 

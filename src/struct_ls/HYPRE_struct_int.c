@@ -13,6 +13,10 @@
 #include "_hypre_struct_ls.h"
 #include "temp_multivector.h"
 
+#if defined(HYPRE_USE_OMP45)
+#include "__omp45_random.h"
+#endif
+
 HYPRE_Int 
 hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
                                    HYPRE_Int seed )
@@ -49,18 +53,36 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       vp = hypre_StructVectorBoxData(vector, i);
  
       hypre_BoxGetSize(box, loop_size);
-
+#if defined(HYPRE_MEMORY_GPU)
+      hypre_newBoxLoopInit(hypre_StructVectorNDim(vector),loop_size);
+      HYPRE_Real *rand_host = hypre_TAlloc(HYPRE_Real, hypre__tot, HYPRE_MEMORY_HOST);
+      HYPRE_Real *rand_device = hypre_TAlloc(HYPRE_Real, hypre__tot, HYPRE_MEMORY_DEVICE);
+      HYPRE_Int  idx = 0;
+      hypre_SerialBoxLoop0Begin(hypre_StructVectorNDim(vector),loop_size)
+      {
+	 rand_host[idx++] = 2.0*hypre_Rand() - 1.0;
+      }
+      hypre_SerialBoxLoop0End()
+      hypre_TMemcpy(rand_device, rand_host, HYPRE_Real, hypre__tot, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+#endif
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(vp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop1For(vi)
       {
-//         vp[vi] = 2.0*rand()/RAND_MAX - 1.0;
-         vp[vi] = 2.0*hypre_Rand() - 1.0;
+#if defined(HYPRE_MEMORY_GPU)
+	 vp[vi] = rand_device[idx];
+#else
+	 vp[vi] = 2.0*hypre_Rand() - 1.0;
+#endif
       }
       hypre_BoxLoop1End(vi);
+#undef DEVICE_VAR
+#define DEVICE_VAR
+#if defined(HYPRE_MEMORY_GPU)
+      hypre_TFree(rand_device, HYPRE_MEMORY_DEVICE);
+      hypre_TFree(rand_host, HYPRE_MEMORY_HOST);
+#endif
    }
 
    return hypre_error_flag;

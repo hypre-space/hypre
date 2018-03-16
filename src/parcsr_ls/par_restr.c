@@ -130,12 +130,12 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    /* CF marker for the off-diag columns */
    if (num_cols_A_offd)
    {
-      CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
+      CF_marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd,HYPRE_MEMORY_HOST);
    }
    /* function type indicator for the off-diag columns */
    if (num_functions > 1 && num_cols_A_offd)
    {
-      dof_func_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
+      dof_func_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd,HYPRE_MEMORY_HOST);
    }
    /* if CommPkg of A is not present, create it */
    if (!comm_pkg)
@@ -147,7 +147,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    /* send buffer, of size send_map_starts[num_sends]), 
     * i.e., number of entries to send */
-   int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends));
+   int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends),HYPRE_MEMORY_HOST);
    /* copy CF markers of elements to send to buffer 
     * RL: why copy them with two for loops? Why not just loop through all in one */
    index = 0;
@@ -239,15 +239,15 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    nnz_offd = cnt_offd;
 
    /*------------- allocate arrays */
-   R_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_cpts+1);
-   R_diag_j    = hypre_CTAlloc(HYPRE_Int,  nnz_diag);
-   R_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag);
+   R_diag_i    = hypre_CTAlloc(HYPRE_Int,  n_cpts+1,HYPRE_MEMORY_HOST);
+   R_diag_j    = hypre_CTAlloc(HYPRE_Int,  nnz_diag,HYPRE_MEMORY_HOST);
+   R_diag_data = hypre_CTAlloc(HYPRE_Real, nnz_diag,HYPRE_MEMORY_HOST);
 
    /* not in ``if num_procs > 1'', 
     * allocation needed even for empty CSR */
-   R_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_cpts+1);
-   R_offd_j    = hypre_CTAlloc(HYPRE_Int,  nnz_offd);
-   R_offd_data = hypre_CTAlloc(HYPRE_Real, nnz_offd);
+   R_offd_i    = hypre_CTAlloc(HYPRE_Int,  n_cpts+1,HYPRE_MEMORY_HOST);
+   R_offd_j    = hypre_CTAlloc(HYPRE_Int,  nnz_offd,HYPRE_MEMORY_HOST);
+   R_offd_data = hypre_CTAlloc(HYPRE_Real, nnz_offd,HYPRE_MEMORY_HOST);
 
    /* redundant */
    R_diag_i[0] = 0;
@@ -276,12 +276,12 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    /* marker array: if this point is i's strong F neighbors
     *             >=  0: yes, and is the local dense id 
     *             == -1: no */
-   marker_diag = hypre_CTAlloc(HYPRE_Int, n_fine);
+   marker_diag = hypre_CTAlloc(HYPRE_Int, n_fine, HYPRE_MEMORY_HOST);
    for (i = 0; i < n_fine; i++)
    {
       marker_diag[i] = -1;
    }
-   marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd);
+   marker_offd = hypre_CTAlloc(HYPRE_Int, num_cols_A_offd, HYPRE_MEMORY_HOST);
    for (i = 0; i< num_cols_A_offd; i++)
    {
       marker_offd[i] = -1;
@@ -290,17 +290,17 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    /* the local matrix and rhs (dense) 
     * column-major as always by BLAS/LAPACK */
    /* matrix */
-   DAi = hypre_CTAlloc(HYPRE_Real, local_max_size * local_max_size);
+   DAi = hypre_CTAlloc(HYPRE_Real, local_max_size * local_max_size, HYPRE_MEMORY_HOST);
    /* rhs */
-   Dbi = hypre_CTAlloc(HYPRE_Real, local_max_size);
+   Dbi = hypre_CTAlloc(HYPRE_Real, local_max_size, HYPRE_MEMORY_HOST);
    /* pivot */
-   Ipi = hypre_CTAlloc(HYPRE_Int, local_max_size);
+   Ipi = hypre_CTAlloc(HYPRE_Int, local_max_size, HYPRE_MEMORY_HOST);
 
 #if AIR_DEBUG
    /* FOR DEBUG */
-   TMPA = hypre_CTAlloc(HYPRE_Real, local_max_size * local_max_size);
-   TMPb = hypre_CTAlloc(HYPRE_Real, local_max_size);
-   TMPd = hypre_CTAlloc(HYPRE_Real, local_max_size);
+   TMPA = hypre_CTAlloc(HYPRE_Real, local_max_size * local_max_size, HYPRE_MEMORY_HOST);
+   TMPb = hypre_CTAlloc(HYPRE_Real, local_max_size, HYPRE_MEMORY_HOST);
+   TMPd = hypre_CTAlloc(HYPRE_Real, local_max_size, HYPRE_MEMORY_HOST);
 #endif
 
    /*-----------------------------------------------------------------------
@@ -656,7 +656,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 
    /* col_map_offd_R: the col indices of the offd of R
     * we first keep them be the offd-idx of A */
-   col_map_offd_R = hypre_CTAlloc(HYPRE_Int, num_cols_offd_R);
+   col_map_offd_R = hypre_CTAlloc(HYPRE_Int, num_cols_offd_R, HYPRE_MEMORY_HOST);
    for (i = 0, i1 = 0; i < num_cols_A_offd; i++)
    {
       if (marker_offd[i] == 1)
@@ -713,19 +713,19 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
    *R_ptr = R;
 
    /* free workspace */
-   hypre_TFree(CF_marker_offd);
-   hypre_TFree(dof_func_offd);
-   hypre_TFree(int_buf_data);
-   hypre_TFree(marker_diag);
-   hypre_TFree(marker_offd);
-   hypre_TFree(DAi);
-   hypre_TFree(Dbi);
+   hypre_TFree(CF_marker_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(dof_func_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
+   hypre_TFree(marker_diag, HYPRE_MEMORY_HOST);
+   hypre_TFree(marker_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(DAi, HYPRE_MEMORY_HOST);
+   hypre_TFree(Dbi, HYPRE_MEMORY_HOST);
 #if AIR_DEBUG
-   hypre_TFree(TMPA);
-   hypre_TFree(TMPb);
-   hypre_TFree(TMPd);
+   hypre_TFree(TMPA, HYPRE_MEMORY_HOST);
+   hypre_TFree(TMPb, HYPRE_MEMORY_HOST);
+   hypre_TFree(TMPd, HYPRE_MEMORY_HOST);
 #endif
-   hypre_TFree(Ipi);
+   hypre_TFree(Ipi, HYPRE_MEMORY_HOST);
    if (num_procs > 1)
    {
       hypre_CSRMatrixDestroy(A_ext);

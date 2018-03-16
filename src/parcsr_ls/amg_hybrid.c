@@ -91,7 +91,7 @@ hypre_AMGHybridCreate( )
 {
    hypre_AMGHybridData *AMGhybrid_data;
 
-   AMGhybrid_data = hypre_CTAlloc(hypre_AMGHybridData, 1);
+   AMGhybrid_data = hypre_CTAlloc(hypre_AMGHybridData,  1, HYPRE_MEMORY_HOST);
 
    (AMGhybrid_data -> time_index)  = hypre_InitializeTiming("AMGHybrid");
 
@@ -171,37 +171,37 @@ hypre_AMGHybridDestroy( void  *AMGhybrid_vdata )
    
       if (AMGhybrid_data -> num_grid_sweeps)  
       {
-         hypre_TFree( (AMGhybrid_data -> num_grid_sweeps) );
+         hypre_TFree( (AMGhybrid_data -> num_grid_sweeps) , HYPRE_MEMORY_HOST);
          (AMGhybrid_data -> num_grid_sweeps) = NULL;
       }
       if (AMGhybrid_data -> grid_relax_type)  
       {
-         hypre_TFree( (AMGhybrid_data -> grid_relax_type) );
+         hypre_TFree( (AMGhybrid_data -> grid_relax_type) , HYPRE_MEMORY_HOST);
          (AMGhybrid_data -> grid_relax_type) = NULL;
       }
       if (AMGhybrid_data -> grid_relax_points)  
       {
          for (i=0; i < 4; i++)
-            hypre_TFree( (AMGhybrid_data -> grid_relax_points)[i] );
-         hypre_TFree( (AMGhybrid_data -> grid_relax_points) );
+            hypre_TFree( (AMGhybrid_data -> grid_relax_points)[i] , HYPRE_MEMORY_HOST);
+         hypre_TFree( (AMGhybrid_data -> grid_relax_points) , HYPRE_MEMORY_HOST);
          (AMGhybrid_data -> grid_relax_points) = NULL;
       }
       if (AMGhybrid_data -> relax_weight)  
       {
-         hypre_TFree( (AMGhybrid_data -> relax_weight) );
+         hypre_TFree( (AMGhybrid_data -> relax_weight) , HYPRE_MEMORY_HOST);
          (AMGhybrid_data -> relax_weight) = NULL;
       }
       if (AMGhybrid_data -> omega)  
       {
-         hypre_TFree( (AMGhybrid_data -> omega) );
+         hypre_TFree( (AMGhybrid_data -> omega) , HYPRE_MEMORY_HOST);
          (AMGhybrid_data -> omega) = NULL;
       }
       if (AMGhybrid_data -> dof_func)  
       {
-         hypre_TFree( (AMGhybrid_data -> dof_func) );
+         hypre_TFree( (AMGhybrid_data -> dof_func) , HYPRE_MEMORY_HOST);
          (AMGhybrid_data -> dof_func) = NULL;
       }
-      hypre_TFree(AMGhybrid_data);
+      hypre_TFree(AMGhybrid_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -763,7 +763,7 @@ hypre_AMGHybridSetNumSweeps( void *AMGhybrid_vdata,
    }
 
    if ((AMGhybrid_data -> num_grid_sweeps) == NULL)
-      (AMGhybrid_data -> num_grid_sweeps) = hypre_CTAlloc(HYPRE_Int,4);
+      (AMGhybrid_data -> num_grid_sweeps) = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
    num_grid_sweeps = (AMGhybrid_data -> num_grid_sweeps);
    for (i=0; i < 3; i++)
    {
@@ -807,7 +807,7 @@ hypre_AMGHybridSetCycleNumSweeps( void *AMGhybrid_vdata,
    num_grid_sweeps = (AMGhybrid_data -> num_grid_sweeps);
    if (num_grid_sweeps == NULL)
    {
-      (AMGhybrid_data -> num_grid_sweeps) = hypre_CTAlloc(HYPRE_Int,4);
+      (AMGhybrid_data -> num_grid_sweeps) = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
       num_grid_sweeps = (AMGhybrid_data -> num_grid_sweeps);
       for (i=0; i < 4; i++)
       {
@@ -836,7 +836,7 @@ hypre_AMGHybridSetRelaxType( void *AMGhybrid_vdata,
    }
 
    if ((AMGhybrid_data -> grid_relax_type) == NULL )
-      (AMGhybrid_data -> grid_relax_type) = hypre_CTAlloc(HYPRE_Int,4);
+      (AMGhybrid_data -> grid_relax_type) = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
    grid_relax_type = (AMGhybrid_data -> grid_relax_type);
    for (i=0; i < 3; i++)
       grid_relax_type[i] = relax_type;
@@ -874,7 +874,7 @@ hypre_AMGHybridSetCycleRelaxType( void *AMGhybrid_vdata,
    grid_relax_type = (AMGhybrid_data -> grid_relax_type);
    if (grid_relax_type == NULL )
    {
-      (AMGhybrid_data -> grid_relax_type) = hypre_CTAlloc(HYPRE_Int,4);
+      (AMGhybrid_data -> grid_relax_type) = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
       grid_relax_type = (AMGhybrid_data -> grid_relax_type);
       for (i=0; i < 3; i++)
          grid_relax_type[i] = 3;
@@ -1001,7 +1001,7 @@ hypre_AMGHybridSetNumGridSweeps( void *AMGhybrid_vdata,
    }
 
    if ((AMGhybrid_data -> num_grid_sweeps) != NULL)
-      hypre_TFree((AMGhybrid_data -> num_grid_sweeps));
+      hypre_TFree((AMGhybrid_data -> num_grid_sweeps), HYPRE_MEMORY_HOST);
    (AMGhybrid_data -> num_grid_sweeps) = num_grid_sweeps;
 
    return hypre_error_flag;
@@ -1028,7 +1028,7 @@ hypre_AMGHybridSetGridRelaxType( void *AMGhybrid_vdata,
    }
 
    if ((AMGhybrid_data -> grid_relax_type) != NULL )
-      hypre_TFree((AMGhybrid_data -> grid_relax_type));
+      hypre_TFree((AMGhybrid_data -> grid_relax_type), HYPRE_MEMORY_HOST);
    (AMGhybrid_data -> grid_relax_type) = grid_relax_type;
 
    return hypre_error_flag;
@@ -1055,7 +1055,7 @@ hypre_AMGHybridSetGridRelaxPoints( void *AMGhybrid_vdata,
    }
 
    if ((AMGhybrid_data -> grid_relax_points) != NULL )
-      hypre_TFree((AMGhybrid_data -> grid_relax_points));
+      hypre_TFree((AMGhybrid_data -> grid_relax_points), HYPRE_MEMORY_HOST);
    (AMGhybrid_data -> grid_relax_points) = grid_relax_points;
 
    return hypre_error_flag;
@@ -1082,7 +1082,7 @@ hypre_AMGHybridSetRelaxWeight( void *AMGhybrid_vdata,
    }
 
    if ((AMGhybrid_data -> relax_weight) != NULL )
-      hypre_TFree((AMGhybrid_data -> relax_weight));
+      hypre_TFree((AMGhybrid_data -> relax_weight), HYPRE_MEMORY_HOST);
    (AMGhybrid_data -> relax_weight) = relax_weight;
 
    return hypre_error_flag;
@@ -1109,7 +1109,7 @@ hypre_AMGHybridSetOmega( void *AMGhybrid_vdata,
    }
 
    if ((AMGhybrid_data -> omega) != NULL )
-      hypre_TFree((AMGhybrid_data -> omega));
+      hypre_TFree((AMGhybrid_data -> omega), HYPRE_MEMORY_HOST);
    (AMGhybrid_data -> omega) = omega;
 
    return hypre_error_flag;
@@ -1136,7 +1136,7 @@ hypre_AMGHybridSetRelaxWt( void *AMGhybrid_vdata,
    relax_wt_array = (AMGhybrid_data -> relax_weight);
    if (relax_wt_array == NULL)
    {
-      relax_wt_array = hypre_CTAlloc(HYPRE_Real,num_levels);
+      relax_wt_array = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
       (AMGhybrid_data -> relax_weight) = relax_wt_array;
    }
    for (i=0; i < num_levels; i++)
@@ -1174,7 +1174,7 @@ hypre_AMGHybridSetLevelRelaxWt( void   *AMGhybrid_vdata,
    relax_wt_array = (AMGhybrid_data -> relax_weight);
    if (relax_wt_array == NULL)
    {
-      relax_wt_array = hypre_CTAlloc(HYPRE_Real,num_levels);
+      relax_wt_array = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
       for (i=0; i < num_levels; i++)
          relax_wt_array[i] = 1.0;
       (AMGhybrid_data -> relax_weight) = relax_wt_array;
@@ -1205,7 +1205,7 @@ hypre_AMGHybridSetOuterWt( void *AMGhybrid_vdata,
    outer_wt_array = (AMGhybrid_data -> omega);
    if (outer_wt_array == NULL)
    {
-      outer_wt_array = hypre_CTAlloc(HYPRE_Real,num_levels);
+      outer_wt_array = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
       (AMGhybrid_data -> omega) = outer_wt_array;
    }
    for (i=0; i < num_levels; i++)
@@ -1243,7 +1243,7 @@ hypre_AMGHybridSetLevelOuterWt( void   *AMGhybrid_vdata,
    outer_wt_array = (AMGhybrid_data -> omega);
    if (outer_wt_array == NULL)
    {
-      outer_wt_array = hypre_CTAlloc(HYPRE_Real,num_levels);
+      outer_wt_array = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
       for (i=0; i < num_levels; i++)
          outer_wt_array[i] = 1.0;
       (AMGhybrid_data -> omega) = outer_wt_array;
@@ -1299,7 +1299,7 @@ hypre_AMGHybridSetDofFunc( void *AMGhybrid_vdata,
    }
 
    if ((AMGhybrid_data -> dof_func) != NULL )
-      hypre_TFree((AMGhybrid_data -> dof_func));
+      hypre_TFree((AMGhybrid_data -> dof_func), HYPRE_MEMORY_HOST);
    (AMGhybrid_data -> dof_func) = dof_func;
 
    return hypre_error_flag;
@@ -1857,14 +1857,14 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          hypre_BoomerAMGSetNodal(pcg_precond, nodal);
    	 if (grid_relax_type)
          {
-	    boom_grt = hypre_CTAlloc(HYPRE_Int,4);
+	    boom_grt = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
 	    for (i=0; i < 4; i++)
 	       boom_grt[i] = grid_relax_type[i];
    	    hypre_BoomerAMGSetGridRelaxType(pcg_precond, boom_grt);
          }
    	 else
          {
-	    boom_grt = hypre_CTAlloc(HYPRE_Int,4);
+	    boom_grt = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
 	    boom_grt[0] = 3;
 	    boom_grt[1] = 13;
 	    boom_grt[2] = 14;
@@ -1873,30 +1873,30 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          }
    	 if (relax_weight)
          {
-	    boom_rlxw = hypre_CTAlloc(HYPRE_Real,max_levels);
+	    boom_rlxw = hypre_CTAlloc(HYPRE_Real, max_levels, HYPRE_MEMORY_HOST);
 	    for (i=0; i < max_levels; i++)
 	       boom_rlxw[i] = relax_weight[i];
             hypre_BoomerAMGSetRelaxWeight(pcg_precond, boom_rlxw);
          }
    	 if (omega)
          {
-	    boom_omega = hypre_CTAlloc(HYPRE_Real,max_levels);
+	    boom_omega = hypre_CTAlloc(HYPRE_Real, max_levels, HYPRE_MEMORY_HOST);
 	    for (i=0; i < max_levels; i++)
 	       boom_omega[i] = omega[i];
             hypre_BoomerAMGSetOmega(pcg_precond, boom_omega);
          }
    	 if (num_grid_sweeps)
          {	
-	    boom_ngs = hypre_CTAlloc(HYPRE_Int,4);
+	    boom_ngs = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
 	    for (i=0; i < 4; i++)
 	       boom_ngs[i] = num_grid_sweeps[i];
             hypre_BoomerAMGSetNumGridSweeps(pcg_precond, boom_ngs);
    	    if (grid_relax_points)
             {
-	       boom_grp = hypre_CTAlloc(HYPRE_Int*,4);
+	       boom_grp = hypre_CTAlloc(HYPRE_Int*, 4, HYPRE_MEMORY_HOST);
 	       for (i=0; i < 4; i++)
  	       {
-	          boom_grp[i] = hypre_CTAlloc(HYPRE_Int, num_grid_sweeps[i]);
+	          boom_grp[i] = hypre_CTAlloc(HYPRE_Int,  num_grid_sweeps[i], HYPRE_MEMORY_HOST);
 	          for (j=0; j < num_grid_sweeps[i]; j++)
 		     boom_grp[i][j] = grid_relax_points[i][j];
     	       }
@@ -1905,7 +1905,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
          }
    	 if (dof_func)
          {
-	    boom_dof_func = hypre_CTAlloc(HYPRE_Int,num_variables);
+	    boom_dof_func = hypre_CTAlloc(HYPRE_Int, num_variables, HYPRE_MEMORY_HOST);
 	    for (i=0; i < num_variables; i++)
 	       boom_dof_func[i] = dof_func[i];
             hypre_BoomerAMGSetDofFunc(pcg_precond, boom_dof_func);
