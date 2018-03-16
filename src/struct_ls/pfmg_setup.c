@@ -903,8 +903,8 @@ hypre_PFMGComputeDxyz_CS( HYPRE_Int i,
    HYPRE_Int              constant_coefficient;
    
    HYPRE_Real            tcx, tcy, tcz;
-   HYPRE_Real            Adiag,diag;
-   HYPRE_Int             Astenc,sdiag;
+   HYPRE_Real            Adiag = 0, diag;
+   HYPRE_Int             Astenc, sdiag = 0;
    
    HYPRE_Int             si;
    
