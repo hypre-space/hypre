@@ -195,9 +195,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   AApd= 1.0/Ap[Ai];
 
                   hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
 
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp)
@@ -219,10 +216,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   Anj = hypre_BoxSizeY(A_dbox);
 
                   hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                   hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
@@ -359,10 +352,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   {
                      case 7:
                         hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp)
                         hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
@@ -386,10 +375,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 
                      case 5:
                         hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp)
                         hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
@@ -410,10 +395,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 
                      case 3:
                         hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp)
                         hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
@@ -443,10 +424,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   {
                      case 7:
                         hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                         hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
@@ -470,10 +447,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 
                      case 5:
                         hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                         hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
@@ -495,10 +468,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 
                      case 3:
                         hypre_RedBlackLoopInit();
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                         hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
