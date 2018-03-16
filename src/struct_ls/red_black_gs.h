@@ -314,16 +314,16 @@ typedef struct
 #else
 #define Pragma(x) _Pragma(#x)
 #endif
-#define OMP1 Pragma(omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+#define OMPRB1 Pragma(omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
 #else
-#define OMP1
+#define OMPRB1
 #endif
 
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,  \
 				Astart,Ani,Anj,Ai,  \
 				bstart,bni,bnj,bi,  \
 				xstart,xni,xnj,xi)  \
-   OMP1 \
+   OMPRB1 \
    for (hypre__kk = 0; hypre__kk < nk; hypre__kk++) \
    {\
       HYPRE_Int ii,jj,Ai,bi,xi;\
@@ -345,7 +345,7 @@ typedef struct
 #define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack, \
                                             bstart,bni,bnj,bi, \
                                             xstart,xni,xnj,xi) \
-   OMP1 \
+   OMPRB1 \
    for (hypre__kk = 0; hypre__kk < nk; hypre__kk++)\
    {\
       HYPRE_Int ii,jj,bi,xi;\
