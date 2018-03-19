@@ -238,6 +238,8 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxLevels(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold(HYPRE_Solver solver,
                                             HYPRE_Real   strong_threshold);
 
+HYPRE_Int HYPRE_BoomerAMGSetStrongThresholdR(HYPRE_Solver solver,
+                                             HYPRE_Real   strong_threshold);
 /**
  * (Optional) Defines the largest strength threshold for which 
  * the strength matrix S uses the communication package of the operator A.
