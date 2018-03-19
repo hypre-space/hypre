@@ -17,7 +17,7 @@
 #include "_hypre_lapack.h"
 #include "_hypre_blas.h"
 
-#define AIR_DEBUG 1
+#define AIR_DEBUG 0
 
 /*
 HYPRE_Real air_time0 = 0.0;
@@ -1510,7 +1510,7 @@ printf("\n");
             gmresAi = (hypre_GMRESData *) hypre_GMRESCreate( gmres_functions );
             hypre_GMRESSetPrecond(gmresAi, hypre_CSRDiagPrecond, hypre_CSRDiagPrecondSetup, Ai_diaginv);
             //hypre_GMRESSetPrecond(gmresAi, hypre_KrylovIdentity, hypre_KrylovIdentitySetup, NULL);
-            hypre_GMRESSetPrintLevel(gmresAi, 2);
+            hypre_GMRESSetPrintLevel(gmresAi, 0);
             hypre_GMRESSetKDim(gmresAi, local_size);
             hypre_GMRESSetTol(gmresAi, gmresAi_tol);
             hypre_GMRESSetup(gmresAi, csrAi, vbi, vxi);
