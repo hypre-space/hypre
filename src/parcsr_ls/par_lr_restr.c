@@ -135,13 +135,15 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
 
    HYPRE_Int nnzAi, allocAi;
    /* if the size of local system is larger than dense_switch, use GMRES */
-   HYPRE_Int dense_switch = 8;
+   HYPRE_Int dense_switch = 128;
    char Aisol_method;
    hypre_CSRMatrix *csrAi = NULL;
    HYPRE_Int *csrAi_i = NULL, *csrAi_j = NULL;
    HYPRE_Complex *csrAi_a = NULL, *Ai_diaginv = NULL;
    hypre_GMRESData *gmresAi;
-   HYPRE_Real gmresAi_tol = 1e-6;
+   HYPRE_Int gmresAi_maxit = 1000;
+   HYPRE_Real gmresAi_tol = 1e-3;
+   HYPRE_Int gmresAi_diagprec = 0;
 
    HYPRE_Int my_id, num_procs;
    HYPRE_Int total_global_cpts/*, my_first_cpt*/;
@@ -955,7 +957,10 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    /* for using GMRES (sparse) */
    hypre_GMRESFunctions *gmres_functions;
    /* Diag precond */
-   Ai_diaginv = hypre_TAlloc(HYPRE_Complex, local_max_size, HYPRE_MEMORY_HOST);
+   if (gmresAi_diagprec)
+   {
+      Ai_diaginv = hypre_TAlloc(HYPRE_Complex, local_max_size, HYPRE_MEMORY_HOST);
+   }
    vxi = hypre_SeqVectorCreate(local_max_size);
    vbi = hypre_SeqVectorCreate(local_max_size);
    hypre_SeqVectorInitialize(vxi);
@@ -1204,7 +1209,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                         csrAi_j[nnzAi] = cc;
                         csrAi_a[nnzAi++] = vv;
 
-                        if (rr == cc)
+                        if (gmresAi_diagprec && rr == cc)
                         {
                            Ai_diaginv[rr] = 1.0 / vv;
                         }
@@ -1240,7 +1245,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                            csrAi_j[nnzAi] = cc;
                            csrAi_a[nnzAi++] = vv;
 
-                           if (rr == cc)
+                           if (gmresAi_diagprec && rr == cc)
                            {
                               Ai_diaginv[rr] = 1.0 / vv;
                            }
@@ -1281,7 +1286,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                      csrAi_j[nnzAi] = cc;
                      csrAi_a[nnzAi++] = vv;
 
-                     if (rr == cc)
+                     if (gmresAi_diagprec && rr == cc)
                      {
                         Ai_diaginv[rr] = 1.0 / vv;
                      }
@@ -1322,7 +1327,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
                            csrAi_j[nnzAi] = cc;
                            csrAi_a[nnzAi++] = vv;
 
-                           if (rr == cc)
+                           if (gmresAi_diagprec && rr == cc)
                            {
                               Ai_diaginv[rr] = 1.0 / vv;
                            }
@@ -1508,10 +1513,18 @@ printf("\n");
                               hypre_CSRDiagPrecond );
 
             gmresAi = (hypre_GMRESData *) hypre_GMRESCreate( gmres_functions );
-            hypre_GMRESSetPrecond(gmresAi, hypre_CSRDiagPrecond, hypre_CSRDiagPrecondSetup, Ai_diaginv);
-            //hypre_GMRESSetPrecond(gmresAi, hypre_KrylovIdentity, hypre_KrylovIdentitySetup, NULL);
+            if (gmresAi_diagprec)
+            {
+               hypre_GMRESSetPrecond(gmresAi, hypre_CSRDiagPrecond, hypre_CSRDiagPrecondSetup, Ai_diaginv);
+            }
+            else
+            {
+               hypre_GMRESSetPrecond(gmresAi, hypre_KrylovIdentity, hypre_KrylovIdentitySetup, NULL);
+            }
             hypre_GMRESSetPrintLevel(gmresAi, 0);
-            hypre_GMRESSetKDim(gmresAi, local_size);
+            HYPRE_Int kdim = hypre_min(gmresAi_maxit, local_size);
+            hypre_GMRESSetMaxIter(gmresAi, kdim);
+            hypre_GMRESSetKDim(gmresAi, kdim);
             hypre_GMRESSetTol(gmresAi, gmresAi_tol);
             hypre_GMRESSetup(gmresAi, csrAi, vbi, vxi);
             hypre_GMRESSolve(gmresAi, csrAi, vbi, vxi);
