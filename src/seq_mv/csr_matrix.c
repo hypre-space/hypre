@@ -82,7 +82,7 @@ hypre_CSRMatrixDestroy( hypre_CSRMatrix *matrix )
          hypre_CSRMatrixData(matrix) = NULL;
          hypre_CSRMatrixJ(matrix)    = NULL;
       }
-       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
+      hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       matrix = NULL;
    }
 

@@ -44,7 +44,7 @@ hypre_ParKrylovFree( void *ptr )
 void *
 hypre_ParKrylovCreateVector( void *vvector )
 {
-	hypre_ParVector *vector = (hypre_ParVector *) vvector;
+   hypre_ParVector *vector = (hypre_ParVector *) vvector;
    hypre_ParVector *new_vector;
 
    new_vector = hypre_ParVectorCreate( hypre_ParVectorComm(vector),

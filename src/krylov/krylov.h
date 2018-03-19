@@ -119,8 +119,8 @@ typedef struct
   HYPRE_Int  (*ScaleVector)   ( HYPRE_Complex alpha , void *x );
   HYPRE_Int  (*Axpy)          ( HYPRE_Complex alpha , void *x , void *y );
   HYPRE_Int  (*CommInfo)      ( void *A , HYPRE_Int *my_id , HYPRE_Int *num_procs );
-	HYPRE_Int  (*precond_setup) (void *vdata , void *A , void *b , void *x);
-	HYPRE_Int  (*precond)       (void *vdata , void *A , void *b , void *x);
+  HYPRE_Int  (*precond_setup) (void *vdata , void *A , void *b , void *x);
+  HYPRE_Int  (*precond)       (void *vdata , void *A , void *b , void *x);
 
 } hypre_BiCGSTABFunctions;
 
@@ -450,8 +450,8 @@ typedef struct
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
 
-	HYPRE_Int    (*precond)       (void *vdata , void *A , void *b , void *x);
-	HYPRE_Int    (*precond_setup) (void *vdata , void *A , void *b , void *x);
+   HYPRE_Int    (*precond)       (void *vdata , void *A , void *b , void *x);
+   HYPRE_Int    (*precond_setup) (void *vdata , void *A , void *b , void *x);
 
 } hypre_GMRESFunctions;
 
@@ -461,36 +461,36 @@ typedef struct
 
 typedef struct
 {
-   HYPRE_Int      k_dim;
-   HYPRE_Int      min_iter;
-   HYPRE_Int      max_iter;
-   HYPRE_Int      rel_change;
-   HYPRE_Int      skip_real_r_check;
-   HYPRE_Int      stop_crit;
-   HYPRE_Int      converged;
+   HYPRE_Int    k_dim;
+   HYPRE_Int    min_iter;
+   HYPRE_Int    max_iter;
+   HYPRE_Int    rel_change;
+   HYPRE_Int    skip_real_r_check;
+   HYPRE_Int    stop_crit;
+   HYPRE_Int    converged;
    HYPRE_Real   tol;
    HYPRE_Real   cf_tol;
    HYPRE_Real   a_tol;
    HYPRE_Real   rel_residual_norm;
 
-   void  *A;
-   void  *r;
-   void  *w;
-   void  *w_2;
+   void   *A;
+   void   *r;
+   void   *w;
+   void   *w_2;
    void  **p;
 
-   void    *matvec_data;
-   void    *precond_data;
+   void   *matvec_data;
+   void   *precond_data;
 
-   hypre_GMRESFunctions * functions;
+   hypre_GMRESFunctions *functions;
 
    /* log info (always logged) */
-   HYPRE_Int      num_iterations;
+   HYPRE_Int num_iterations;
  
    HYPRE_Int     print_level; /* printing when print_level>0 */
    HYPRE_Int     logging;  /* extra computations for logging when logging>0 */
-   HYPRE_Real  *norms;
-   char    *log_file_name;
+   HYPRE_Real   *norms;
+   char         *log_file_name;
 
 } hypre_GMRESData;
 
@@ -616,8 +616,8 @@ typedef struct
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
 
-	HYPRE_Int    (*precond)       (void *vdata , void *A , void *b , void *x);
-	HYPRE_Int    (*precond_setup) (void *vdata , void *A , void *b , void *x);
+   HYPRE_Int    (*precond)       (void *vdata , void *A , void *b , void *x);
+   HYPRE_Int    (*precond_setup) (void *vdata , void *A , void *b , void *x);
 
 } hypre_LGMRESFunctions;
 
@@ -960,8 +960,8 @@ typedef struct
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
 
-	HYPRE_Int    (*precond)(void *vdata , void *A , void *b , void *x);
-	HYPRE_Int    (*precond_setup)(void *vdata , void *A , void *b , void *x);
+   HYPRE_Int    (*precond)(void *vdata , void *A , void *b , void *x);
+   HYPRE_Int    (*precond_setup)(void *vdata , void *A , void *b , void *x);
 
 } hypre_PCGFunctions;
 
@@ -1104,7 +1104,7 @@ HYPRE_Int hypre_BiCGSTABSetConvergenceFactorTol ( void *bicgstab_vdata , HYPRE_R
 HYPRE_Int hypre_BiCGSTABSetMinIter ( void *bicgstab_vdata , HYPRE_Int min_iter );
 HYPRE_Int hypre_BiCGSTABSetMaxIter ( void *bicgstab_vdata , HYPRE_Int max_iter );
 HYPRE_Int hypre_BiCGSTABSetStopCrit ( void *bicgstab_vdata , HYPRE_Int stop_crit );
-	HYPRE_Int hypre_BiCGSTABSetPrecond ( void *bicgstab_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
+HYPRE_Int hypre_BiCGSTABSetPrecond ( void *bicgstab_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
 HYPRE_Int hypre_BiCGSTABGetPrecond ( void *bicgstab_vdata , HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_BiCGSTABSetLogging ( void *bicgstab_vdata , HYPRE_Int logging );
 HYPRE_Int hypre_BiCGSTABSetPrintLevel ( void *bicgstab_vdata , HYPRE_Int print_level );
@@ -1122,7 +1122,7 @@ HYPRE_Int hypre_CGNRSetTol ( void *cgnr_vdata , HYPRE_Real tol );
 HYPRE_Int hypre_CGNRSetMinIter ( void *cgnr_vdata , HYPRE_Int min_iter );
 HYPRE_Int hypre_CGNRSetMaxIter ( void *cgnr_vdata , HYPRE_Int max_iter );
 HYPRE_Int hypre_CGNRSetStopCrit ( void *cgnr_vdata , HYPRE_Int stop_crit );
-	HYPRE_Int hypre_CGNRSetPrecond ( void *cgnr_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precondT )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
+HYPRE_Int hypre_CGNRSetPrecond ( void *cgnr_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precondT )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
 HYPRE_Int hypre_CGNRGetPrecond ( void *cgnr_vdata , HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_CGNRSetLogging ( void *cgnr_vdata , HYPRE_Int logging );
 HYPRE_Int hypre_CGNRGetNumIterations ( void *cgnr_vdata , HYPRE_Int *num_iterations );
@@ -1152,7 +1152,7 @@ HYPRE_Int hypre_GMRESSetSkipRealResidualCheck ( void *gmres_vdata , HYPRE_Int sk
 HYPRE_Int hypre_GMRESGetSkipRealResidualCheck ( void *gmres_vdata , HYPRE_Int *skip_real_r_check );
 HYPRE_Int hypre_GMRESSetStopCrit ( void *gmres_vdata , HYPRE_Int stop_crit );
 HYPRE_Int hypre_GMRESGetStopCrit ( void *gmres_vdata , HYPRE_Int *stop_crit );
-	HYPRE_Int hypre_GMRESSetPrecond ( void *gmres_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
+HYPRE_Int hypre_GMRESSetPrecond ( void *gmres_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
 HYPRE_Int hypre_GMRESGetPrecond ( void *gmres_vdata , HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_GMRESSetPrintLevel ( void *gmres_vdata , HYPRE_Int level );
 HYPRE_Int hypre_GMRESGetPrintLevel ( void *gmres_vdata , HYPRE_Int *level );
@@ -1182,7 +1182,7 @@ HYPRE_Int hypre_FlexGMRESSetMaxIter ( void *fgmres_vdata , HYPRE_Int max_iter );
 HYPRE_Int hypre_FlexGMRESGetMaxIter ( void *fgmres_vdata , HYPRE_Int *max_iter );
 HYPRE_Int hypre_FlexGMRESSetStopCrit ( void *fgmres_vdata , HYPRE_Int stop_crit );
 HYPRE_Int hypre_FlexGMRESGetStopCrit ( void *fgmres_vdata , HYPRE_Int *stop_crit );
-	HYPRE_Int hypre_FlexGMRESSetPrecond ( void *fgmres_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
+HYPRE_Int hypre_FlexGMRESSetPrecond ( void *fgmres_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
 HYPRE_Int hypre_FlexGMRESGetPrecond ( void *fgmres_vdata , HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_FlexGMRESSetPrintLevel ( void *fgmres_vdata , HYPRE_Int level );
 HYPRE_Int hypre_FlexGMRESGetPrintLevel ( void *fgmres_vdata , HYPRE_Int *level );
@@ -1216,7 +1216,7 @@ HYPRE_Int hypre_LGMRESSetMaxIter ( void *lgmres_vdata , HYPRE_Int max_iter );
 HYPRE_Int hypre_LGMRESGetMaxIter ( void *lgmres_vdata , HYPRE_Int *max_iter );
 HYPRE_Int hypre_LGMRESSetStopCrit ( void *lgmres_vdata , HYPRE_Int stop_crit );
 HYPRE_Int hypre_LGMRESGetStopCrit ( void *lgmres_vdata , HYPRE_Int *stop_crit );
-	HYPRE_Int hypre_LGMRESSetPrecond ( void *lgmres_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
+HYPRE_Int hypre_LGMRESSetPrecond ( void *lgmres_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
 HYPRE_Int hypre_LGMRESGetPrecond ( void *lgmres_vdata , HYPRE_Solver *precond_data_ptr );
 HYPRE_Int hypre_LGMRESSetPrintLevel ( void *lgmres_vdata , HYPRE_Int level );
 HYPRE_Int hypre_LGMRESGetPrintLevel ( void *lgmres_vdata , HYPRE_Int *level );
@@ -1410,7 +1410,7 @@ HYPRE_Int hypre_PCGGetRecomputeResidualP ( void *pcg_vdata , HYPRE_Int *recomput
 HYPRE_Int hypre_PCGSetStopCrit ( void *pcg_vdata , HYPRE_Int stop_crit );
 HYPRE_Int hypre_PCGGetStopCrit ( void *pcg_vdata , HYPRE_Int *stop_crit );
 HYPRE_Int hypre_PCGGetPrecond ( void *pcg_vdata , HYPRE_Solver *precond_data_ptr );
-	HYPRE_Int hypre_PCGSetPrecond ( void *pcg_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
+HYPRE_Int hypre_PCGSetPrecond ( void *pcg_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
 HYPRE_Int hypre_PCGSetPrintLevel ( void *pcg_vdata , HYPRE_Int level );
 HYPRE_Int hypre_PCGGetPrintLevel ( void *pcg_vdata , HYPRE_Int *level );
 HYPRE_Int hypre_PCGSetLogging ( void *pcg_vdata , HYPRE_Int level );
