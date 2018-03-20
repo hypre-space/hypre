@@ -21,13 +21,15 @@
 #define USE_HYPRE_GMRES 0
 
 #if !USE_HYPRE_GMRES
-static void fgmresT(hypre_CSRMatrix *A, 
+static void fgmresT(HYPRE_Int n,
+                    hypre_CSRMatrix *A, 
                     HYPRE_Complex *b, 
                     HYPRE_Real tol, 
                     HYPRE_Int kdim,
                     HYPRE_Complex *x, 
                     HYPRE_Real *relres,
-                    HYPRE_Int *iter);
+                    HYPRE_Int *iter,
+                    HYPRE_Int job);
 #endif
 /*
 HYPRE_Real air_time0 = 0.0;
@@ -979,6 +981,12 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    csrAi_a = hypre_TAlloc(HYPRE_Complex, allocAi, HYPRE_MEMORY_HOST);
    csrAi_i[0] = 0;
 
+#if !USE_HYPRE_GMRES
+   HYPRE_Int kdim_max = hypre_min(gmresAi_maxit, local_max_size);
+   // alloc memory 
+   fgmresT(local_max_size, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -1);
+#endif
+
 #if AIR_DEBUG
    /* FOR DEBUG */
    TMPA = hypre_CTAlloc(HYPRE_Real, local_max_size * local_max_size, HYPRE_MEMORY_HOST);
@@ -987,6 +995,7 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    tmpv = hypre_SeqVectorCreate(local_max_size);
    hypre_SeqVectorInitialize(tmpv);
 #endif
+
    /*- - - - - - - - - - - - - - - - - - - - - - - - - 
     * space to save row indices of the local problem,
     * if diag, save the local indices,
@@ -1546,8 +1555,8 @@ printf("\n");
             hypre_GMRESGetNumIterations(gmresAi, &gmresAi_niter);
             hypre_GMRESDestroy(gmresAi);
 #else
-            fgmresT(csrAi, hypre_VectorData(vbi), gmresAi_tol, kdim, hypre_VectorData(vxi), 
-                    &gmresAi_res, &gmresAi_niter);
+            fgmresT(local_size, csrAi, hypre_VectorData(vbi), gmresAi_tol, kdim, hypre_VectorData(vxi), 
+                    &gmresAi_res, &gmresAi_niter, 0);
 #endif
             // printf("local_size %d, niter = %d\n", local_size, gmresAi_niter);
 
@@ -1801,6 +1810,10 @@ printf("\n");
    hypre_TFree(RRi, HYPRE_MEMORY_HOST);
    hypre_TFree(KKi, HYPRE_MEMORY_HOST);
 
+#if !USE_HYPRE_GMRES
+   fgmresT(0, NULL, NULL, 0.0, kdim_max, NULL, NULL, NULL, -2);
+#endif
+
    /*
    t0 = hypre_MPI_Wtime() - t0;
    air_time0 += t0;
@@ -1836,24 +1849,43 @@ static inline void csrmvT(hypre_CSRMatrix *A, HYPRE_Complex *x, HYPRE_Complex *y
    }
 }
 
-static void fgmresT(hypre_CSRMatrix *A, 
+static void fgmresT(HYPRE_Int n,
+                    hypre_CSRMatrix *A, 
                     HYPRE_Complex *b, 
                     HYPRE_Real tol, 
                     HYPRE_Int kdim,
                     HYPRE_Complex *x, 
                     HYPRE_Real *relres,
-                    HYPRE_Int *iter) {
+                    HYPRE_Int *iter,
+                    HYPRE_Int job) {
 
-  HYPRE_Int n = hypre_CSRMatrixNumRows(A), one=1, i, j, k;
-  HYPRE_Complex *V, *Z, *H, *c, *s, *rs, *v, *z, *w;
+  HYPRE_Int one=1, i, j, k;
+  static HYPRE_Complex *V=NULL, *Z=NULL, *H=NULL, *c=NULL, *s=NULL, *rs=NULL;
+  HYPRE_Complex *v, *z, *w;
   HYPRE_Real t, normr, normr0, tolr;
 
-  V  = hypre_TAlloc(HYPRE_Complex, n*(kdim+1),    HYPRE_MEMORY_HOST);
-  Z  = hypre_TAlloc(HYPRE_Complex, n*kdim,        HYPRE_MEMORY_HOST);
-  H  = hypre_TAlloc(HYPRE_Complex, (kdim+1)*kdim, HYPRE_MEMORY_HOST);
-  c  = hypre_TAlloc(HYPRE_Complex, kdim,          HYPRE_MEMORY_HOST);
-  s  = hypre_TAlloc(HYPRE_Complex, kdim,          HYPRE_MEMORY_HOST);
-  rs = hypre_TAlloc(HYPRE_Complex, kdim+1,        HYPRE_MEMORY_HOST);
+  if (job == -1)
+  {
+     V  = hypre_TAlloc(HYPRE_Complex, n*(kdim+1),    HYPRE_MEMORY_HOST);
+     Z  = hypre_TAlloc(HYPRE_Complex, n*kdim,        HYPRE_MEMORY_HOST);
+     H  = hypre_TAlloc(HYPRE_Complex, (kdim+1)*kdim, HYPRE_MEMORY_HOST);
+     c  = hypre_TAlloc(HYPRE_Complex, kdim,          HYPRE_MEMORY_HOST);
+     s  = hypre_TAlloc(HYPRE_Complex, kdim,          HYPRE_MEMORY_HOST);
+     rs = hypre_TAlloc(HYPRE_Complex, kdim+1,        HYPRE_MEMORY_HOST);
+     return;
+  }
+  else if (job == -2)
+  {
+     hypre_TFree(V,  HYPRE_MEMORY_HOST);
+     hypre_TFree(Z,  HYPRE_MEMORY_HOST);
+     hypre_TFree(H,  HYPRE_MEMORY_HOST);
+     hypre_TFree(c,  HYPRE_MEMORY_HOST);
+     hypre_TFree(s,  HYPRE_MEMORY_HOST);
+     hypre_TFree(rs, HYPRE_MEMORY_HOST);
+     return;
+  }
+
+  n = hypre_CSRMatrixNumRows(A);
 
   /* XXX: x_0 is all ZERO !!! so r0 = b */
   v = V;
@@ -1942,13 +1974,6 @@ static void fgmresT(hypre_CSRMatrix *A,
 
   *relres = normr / normr0;
   *iter = i;
-
-  hypre_TFree(V,  HYPRE_MEMORY_HOST);
-  hypre_TFree(Z,  HYPRE_MEMORY_HOST);
-  hypre_TFree(H,  HYPRE_MEMORY_HOST);
-  hypre_TFree(c,  HYPRE_MEMORY_HOST);
-  hypre_TFree(s,  HYPRE_MEMORY_HOST);
-  hypre_TFree(rs, HYPRE_MEMORY_HOST);
 }
 
 #endif
