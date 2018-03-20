@@ -18,7 +18,17 @@
 #include "_hypre_blas.h"
 
 #define AIR_DEBUG 0
+#define USE_HYPRE_GMRES 0
 
+#if !USE_HYPRE_GMRES
+static void fgmresT(hypre_CSRMatrix *A, 
+                    HYPRE_Complex *b, 
+                    HYPRE_Real tol, 
+                    HYPRE_Int kdim,
+                    HYPRE_Complex *x, 
+                    HYPRE_Real *relres,
+                    HYPRE_Int *iter);
+#endif
 /*
 HYPRE_Real air_time0 = 0.0;
 HYPRE_Real air_time_comm = 0.0;
@@ -140,7 +150,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    hypre_CSRMatrix *csrAi = NULL;
    HYPRE_Int *csrAi_i = NULL, *csrAi_j = NULL;
    HYPRE_Complex *csrAi_a = NULL, *Ai_diaginv = NULL;
-   hypre_GMRESData *gmresAi;
    HYPRE_Int gmresAi_maxit = 1000;
    HYPRE_Real gmresAi_tol = 1e-3;
    HYPRE_Int gmresAi_diagprec = 0;
@@ -954,8 +963,6 @@ hypre_BoomerAMGBuildRestrDist2AIR( hypre_ParCSRMatrix   *A,
    /* pivot */
    Ipi = hypre_CTAlloc(HYPRE_Int, max_dense, HYPRE_MEMORY_HOST);
 
-   /* for using GMRES (sparse) */
-   hypre_GMRESFunctions *gmres_functions;
    /* Diag precond */
    if (gmresAi_diagprec)
    {
@@ -1491,7 +1498,15 @@ printf("\n");
             hypre_CSRMatrixNumRows(csrAi) = local_size;
             hypre_CSRMatrixNumCols(csrAi) = local_size;
             hypre_CSRMatrixNumNonzeros(csrAi) = nnzAi;
-      
+
+            HYPRE_Real gmresAi_res;
+            HYPRE_Int  gmresAi_niter;
+            HYPRE_Int kdim = hypre_min(gmresAi_maxit, local_size);
+
+#if USE_HYPRE_GMRES
+            /* for using GMRES (sparse) */
+            hypre_GMRESFunctions *gmres_functions;
+            hypre_GMRESData *gmresAi;
             gmres_functions = hypre_GMRESFunctionsCreate (
                               hypre_CAlloc, 
                               hypre_KrylovFree, 
@@ -1522,19 +1537,25 @@ printf("\n");
                hypre_GMRESSetPrecond(gmresAi, hypre_KrylovIdentity, hypre_KrylovIdentitySetup, NULL);
             }
             hypre_GMRESSetPrintLevel(gmresAi, 0);
-            HYPRE_Int kdim = hypre_min(gmresAi_maxit, local_size);
             hypre_GMRESSetMaxIter(gmresAi, kdim);
             hypre_GMRESSetKDim(gmresAi, kdim);
             hypre_GMRESSetTol(gmresAi, gmresAi_tol);
             hypre_GMRESSetup(gmresAi, csrAi, vbi, vxi);
             hypre_GMRESSolve(gmresAi, csrAi, vbi, vxi);
-            HYPRE_Real gmresAi_res;
             hypre_GMRESGetFinalRelativeResidualNorm(gmresAi, &gmresAi_res);
+            hypre_GMRESGetNumIterations(gmresAi, &gmresAi_niter);
+            hypre_GMRESDestroy(gmresAi);
+#else
+            fgmresT(csrAi, hypre_VectorData(vbi), gmresAi_tol, kdim, hypre_VectorData(vxi), 
+                    &gmresAi_res, &gmresAi_niter);
+#endif
+            // printf("local_size %d, niter = %d\n", local_size, gmresAi_niter);
+
             if (gmresAi_res > gmresAi_tol)
             {
                printf("gmres not converge to %e: final_res %e\n", gmresAi_tol, gmresAi_res);
             }
-            hypre_GMRESDestroy(gmresAi);
+
 #if AIR_DEBUG
             HYPRE_Real err, nrmb;
             hypre_VectorSize(tmpv) = local_size;
@@ -1788,3 +1809,146 @@ printf("\n");
    return 0;
 }
 
+#if !USE_HYPRE_GMRES
+
+#define EPSILON 1e-18
+#define EPSIMAC 1e-16
+
+/* TODO: */
+static inline void csrmvT(hypre_CSRMatrix *A, HYPRE_Complex *x, HYPRE_Complex *y)
+{
+   HYPRE_Int i, j, n = hypre_CSRMatrixNumRows(A), *ia, *ja;
+   HYPRE_Complex *aa;
+ 
+   ia = hypre_CSRMatrixI(A);
+   ja = hypre_CSRMatrixJ(A);
+   aa = hypre_CSRMatrixData(A);
+
+   memset(y, 0, n*sizeof(HYPRE_Complex));
+
+   for (i = 0; i < n; i++)
+   {
+      HYPRE_Complex xi = x[i];
+      for (j = ia[i]; j < ia[i+1]; j++)
+      {
+         y[ja[j]] += xi * aa[j];
+      }
+   }
+}
+
+static void fgmresT(hypre_CSRMatrix *A, 
+                    HYPRE_Complex *b, 
+                    HYPRE_Real tol, 
+                    HYPRE_Int kdim,
+                    HYPRE_Complex *x, 
+                    HYPRE_Real *relres,
+                    HYPRE_Int *iter) {
+
+  HYPRE_Int n = hypre_CSRMatrixNumRows(A), one=1, i, j, k;
+  HYPRE_Complex *V, *Z, *H, *c, *s, *rs, *v, *z, *w;
+  HYPRE_Real t, normr, normr0, tolr;
+
+  V  = hypre_TAlloc(HYPRE_Complex, n*(kdim+1),    HYPRE_MEMORY_HOST);
+  Z  = hypre_TAlloc(HYPRE_Complex, n*kdim,        HYPRE_MEMORY_HOST);
+  H  = hypre_TAlloc(HYPRE_Complex, (kdim+1)*kdim, HYPRE_MEMORY_HOST);
+  c  = hypre_TAlloc(HYPRE_Complex, kdim,          HYPRE_MEMORY_HOST);
+  s  = hypre_TAlloc(HYPRE_Complex, kdim,          HYPRE_MEMORY_HOST);
+  rs = hypre_TAlloc(HYPRE_Complex, kdim+1,        HYPRE_MEMORY_HOST);
+
+  /* XXX: x_0 is all ZERO !!! so r0 = b */
+  v = V;
+  memcpy(v, b, n*sizeof(HYPRE_Complex));
+  normr0 = sqrt(hypre_ddot(&n, v, &one, v, &one));
+  
+  if (normr0 < EPSIMAC)
+  {
+     return;
+  }
+
+  tolr = tol * normr0;
+
+  rs[0] = normr0;
+  t = 1.0 / normr0;
+  hypre_dscal(&n, &t, v, &one);
+  i = 0;
+  while (i < kdim)
+  {
+     i++;
+     // zi = M^{-1} * vi;
+     v = V + (i-1) * n;
+     z = Z + (i-1) * n;
+     memcpy(z, v, n*sizeof(HYPRE_Complex));
+     // w = v_{i+1} = A * zi
+     w = V + i * n;
+     csrmvT(A, z, w);
+     // modified Gram-schmidt
+     for (j = 0; j < i; j++)
+     {
+        v = V + j * n;
+        H[j+(i-1)*kdim] = t = hypre_ddot(&n, v, &one, w, &one);
+        t = -t;
+        hypre_daxpy(&n, &t, v, &one, w, &one);
+     }
+     H[i+(i-1)*kdim] = t = sqrt(hypre_ddot(&n, w, &one, w, &one));
+     if (fabs(t) > EPSILON)
+     {
+        t = 1.0 / t;
+        hypre_dscal(&n, &t, w, &one);
+     }
+     // Least square problem of H
+     for (j = 1; j < i; j++)
+     {
+        t = H[j-1+(i-1)*kdim];
+        H[j-1+(i-1)*kdim] =  c[j-1]*t + s[j-1]*H[j+(i-1)*kdim];
+        H[j+(i-1)*kdim]   = -s[j-1]*t + c[j-1]*H[j+(i-1)*kdim];
+     }
+     double hii  = H[i-1+(i-1)*kdim];
+     double hii1 = H[i+(i-1)*kdim];
+     double gam = sqrt(hii*hii + hii1*hii1);
+
+     if (fabs(gam) < EPSILON)
+     {
+        gam = EPSIMAC;
+     }
+     c[i-1] = hii / gam;
+     s[i-1] = hii1 / gam;
+     rs[i]   = -s[i-1] * rs[i-1];
+     rs[i-1] =  c[i-1] * rs[i-1];
+     // residue norm
+     H[i-1+(i-1)*kdim] = c[i-1]*hii + s[i-1]*hii1;
+     normr = fabs(rs[i]);
+     if (normr <= tolr) 
+     {
+        break;
+     }
+  }
+
+  // solve the upper triangular system
+  rs[i-1] /= H[i-1+(i-1)*kdim];
+  for (k = i-2; k >= 0; k--)
+  {
+     for (j = k+1; j < i; j++)
+     {
+        rs[k] -= H[k+j*kdim]*rs[j];
+     }
+     rs[k] /= H[k+k*kdim];
+  }
+  // get solution
+  for (j = 0; j < i; j++)
+  {
+     z = Z + j * n;
+     hypre_daxpy(&n, rs+j, z, &one, x, &one);
+  }
+
+  *relres = normr / normr0;
+  *iter = i;
+
+  hypre_TFree(V,  HYPRE_MEMORY_HOST);
+  hypre_TFree(Z,  HYPRE_MEMORY_HOST);
+  hypre_TFree(H,  HYPRE_MEMORY_HOST);
+  hypre_TFree(c,  HYPRE_MEMORY_HOST);
+  hypre_TFree(s,  HYPRE_MEMORY_HOST);
+  hypre_TFree(rs, HYPRE_MEMORY_HOST);
+}
+
+#endif
