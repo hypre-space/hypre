@@ -511,32 +511,32 @@ HYPRE_Int hypre_set_precond_params(HYPRE_Int precond_id, void *precond)
            /* fine grid */
           num_grid_sweeps[0] = num_sweep;
           grid_relax_type[0] = relax_default;
-          hypre_TFree (grid_relax_points[0]);
-          grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int, num_sweep);
+          hypre_TFree(grid_relax_points[0], HYPRE_MEMORY_HOST);
+          grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
           for (i=0; i<num_sweep; i++)
              grid_relax_points[0][i] = 0;
     
           /* down cycle */
           num_grid_sweeps[1] = num_sweep;
           grid_relax_type[1] = relax_default;
-          hypre_TFree (grid_relax_points[1]);
-          grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, num_sweep);
+          hypre_TFree(grid_relax_points[1], HYPRE_MEMORY_HOST);
+          grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
           for (i=0; i<num_sweep; i++)
              grid_relax_points[1][i] = 0;
     
           /* up cycle */
           num_grid_sweeps[2] = num_sweep;
           grid_relax_type[2] = relax_default;
-          hypre_TFree (grid_relax_points[2]);
-          grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, num_sweep);
+          hypre_TFree(grid_relax_points[2], HYPRE_MEMORY_HOST);
+          grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  num_sweep, HYPRE_MEMORY_HOST);
           for (i=0; i<num_sweep; i++)
              grid_relax_points[2][i] = 0;
     
           /* coarsest grid */
           num_grid_sweeps[3] = 1;
           grid_relax_type[3] = 9;
-          hypre_TFree (grid_relax_points[3]);
-          grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int, 1);
+          hypre_TFree(grid_relax_points[3], HYPRE_MEMORY_HOST);
+          grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
           grid_relax_points[3][0] = 0;
  
           HYPRE_BoomerAMGCreate(precond); 

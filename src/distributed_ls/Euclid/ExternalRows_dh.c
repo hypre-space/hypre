@@ -503,9 +503,9 @@ void send_external_rows_private(ExternalRows_dh er)
   for (i=first_bdry, j=0; i<m; ++i, ++j) {
     HYPRE_Int tmp = (rp[i+1] - diag[i]);
 
-    memcpy(cvalSend+offset, cval+diag[i], tmp*sizeof(HYPRE_Int));
-    memcpy(fillSend+offset, fill+diag[i], tmp*sizeof(HYPRE_Int));
-    memcpy(avalSend+offset, aval+diag[i], tmp*sizeof(HYPRE_Real));
+    hypre_TMemcpy(cvalSend+offset,  cval+diag[i], HYPRE_Int, tmp, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(fillSend+offset,  fill+diag[i], HYPRE_Int, tmp, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+    hypre_TMemcpy(avalSend+offset,  aval+diag[i], HYPRE_Real, tmp, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
     offset += tmp;
   }
 

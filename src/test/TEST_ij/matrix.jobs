@@ -44,3 +44,5 @@ mpirun -np 2 ./ij -test_ij -solver 2 -max_iter 5 -chunk 1 -omp 1 -exact_size > m
 mpirun -np 2 ./ij -test_ij -solver 2 -max_iter 5 -chunk 1 -omp 1 > matrix.out.10
 
 mpirun -np 3 ./ij -fromfile test.A -rhsfromfile test.b > matrix.out.11
+
+mpirun -np 2 ./ij -test_ij -solver 2 -max_iter 5 -chunk 1 -add 1 -check_constant 1 > matrix.out.12

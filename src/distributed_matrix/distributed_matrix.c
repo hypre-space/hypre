@@ -35,7 +35,7 @@ hypre_DistributedMatrixCreate( MPI_Comm     context  )
 {
    hypre_DistributedMatrix    *matrix;
 
-   matrix = hypre_CTAlloc(hypre_DistributedMatrix, 1);
+   matrix = hypre_CTAlloc(hypre_DistributedMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_DistributedMatrixContext(matrix) = context;
    hypre_DistributedMatrixM(matrix)    = -1;
@@ -72,7 +72,7 @@ hypre_DistributedMatrixDestroy( hypre_DistributedMatrix *matrix )
 #ifdef HYPRE_TIMING
    hypre_FinalizeTiming ( matrix->GetRow_timer );
 #endif
-   hypre_TFree(matrix);
+   hypre_TFree(matrix, HYPRE_MEMORY_HOST);
 
    return(0);
 }
@@ -85,7 +85,7 @@ HYPRE_Int
 hypre_DistributedMatrixLimitedDestroy( hypre_DistributedMatrix *matrix )
 {
 
-   hypre_TFree(matrix);
+   hypre_TFree(matrix, HYPRE_MEMORY_HOST);
 
    return(0);
 }

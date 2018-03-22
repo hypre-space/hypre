@@ -106,8 +106,8 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
     * are also the same. Thus, the rows, cols, etc. for the IJ_matrix are
     * the same.
     *--------------------------------------------------------------------------*/
-   ncols= hypre_CTAlloc(HYPRE_Int, nUventries);
-   rows = hypre_CTAlloc(HYPRE_Int, nUventries);
+   ncols= hypre_CTAlloc(HYPRE_Int,  nUventries, HYPRE_MEMORY_HOST);
+   rows = hypre_CTAlloc(HYPRE_Int,  nUventries, HYPRE_MEMORY_HOST);
 
    tot_cols= 0;
    for (i= 0; i< nUventries; i++)
@@ -115,7 +115,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
       Uventry= Uventries[iUventries[i]];
       tot_cols+= hypre_SStructUVEntryNUEntries(Uventry);
    }
-   cols = hypre_CTAlloc(HYPRE_Int, tot_cols);
+   cols = hypre_CTAlloc(HYPRE_Int,  tot_cols, HYPRE_MEMORY_HOST);
 
    k    = 0;
    for (i= 0; i< nUventries; i++)
@@ -136,25 +136,25 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
       }
    }
 
-   values= hypre_CTAlloc(HYPRE_Real, tot_cols);
+   values= hypre_CTAlloc(HYPRE_Real,  tot_cols, HYPRE_MEMORY_HOST);
    HYPRE_IJMatrixGetValues(ij_A, nUventries, ncols, rows, cols, values);
 
    HYPRE_IJMatrixSetValues(hypre_SStructMatrixIJMatrix(fac_A), nUventries,
                            ncols, (const HYPRE_Int *) rows, (const HYPRE_Int *) cols,
                            (const HYPRE_Real *) values);
-   hypre_TFree(ncols);
-   hypre_TFree(rows);
-   hypre_TFree(cols);
-   hypre_TFree(values);
+   hypre_TFree(ncols, HYPRE_MEMORY_HOST);
+   hypre_TFree(rows, HYPRE_MEMORY_HOST);
+   hypre_TFree(cols, HYPRE_MEMORY_HOST);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
-   owninfo = hypre_CTAlloc(hypre_SStructOwnInfoData  **, nparts);
+   owninfo = hypre_CTAlloc(hypre_SStructOwnInfoData  **,  nparts, HYPRE_MEMORY_HOST);
    for (part= (nparts-1); part> 0; part--)
    {
       f_pgrid= hypre_SStructGridPGrid(fac_grid, part);
       c_pgrid= hypre_SStructGridPGrid(fac_grid, part-1);
 
       nvars  = hypre_SStructPGridNVars(f_pgrid);
-      owninfo[part] = hypre_CTAlloc(hypre_SStructOwnInfoData   *, nvars);
+      owninfo[part] = hypre_CTAlloc(hypre_SStructOwnInfoData   *,  nvars, HYPRE_MEMORY_HOST);
 
       for (var1= 0; var1< nvars; var1++)
       {
@@ -215,17 +215,17 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                                             i,
                                                                             stencil_shape);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size, 
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(iA, iAc)
                   {
                      fac_smatrix_vals[iAc]= smatrix_vals[iA];
                   }
                   hypre_BoxLoop2End(iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                }  /* for (j = 0; j < stencil_size; j++) */
             }     /* hypre_ForBoxI(i, grid_boxes) */
@@ -272,17 +272,17 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                                             i,
                                                                             stencil_shape);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size, 
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(iA, iAc)
                   {
                      fac_smatrix_vals[iAc]= smatrix_vals[iA];
                   }
                   hypre_BoxLoop2End(iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                }  /* for (k = 0; k< stencil_size; k++) */
             }      /* hypre_ForBoxI(j, own_composite_cbox) */
@@ -342,7 +342,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
       hypre_SStructPGridAssemble(temp_pgrid);
 
       /* reference the sstruct_stencil of fac_pmatrix- to be used in temp_pmatrix */
-      temp_sstencils= hypre_CTAlloc(hypre_SStructStencil *, nvars);
+      temp_sstencils= hypre_CTAlloc(hypre_SStructStencil *,  nvars, HYPRE_MEMORY_HOST);
       fac_pmatrix= hypre_SStructMatrixPMatrix(fac_A, part-1);
       for (i=0; i< nvars; i++)
       {
@@ -410,17 +410,17 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
                                                              cbox,
                                                              stencil_shape);
       
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(fac_smatrix_vals,smatrix_vals)
                   hypre_BoxLoop2Begin(ndim, loop_size,
                                       smatrix_dbox, ilower, stride, iA,
                                       fac_smatrix_dbox, ilower, stride, iAc);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(iA, iAc)
                   {
                      fac_smatrix_vals[iAc]= smatrix_vals[iA];
                   }
                   hypre_BoxLoop2End(iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                }  /* for (k = 0; k < stencil_size; k++) */
             }     /* hypre_ForBoxI(j, cgrid_boxes) */
@@ -429,7 +429,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
          hypre_SStructOwnInfoDataDestroy(owninfo[part][var1]);
       }           /* for (var1= 0; var1< nvars; var1++) */
 
-      hypre_TFree(owninfo[part]);
+      hypre_TFree(owninfo[part], HYPRE_MEMORY_HOST);
 
       /*-----------------------------------------------------------------------
        * Communication of off-process coarse data. A communication pkg is 
@@ -483,7 +483,7 @@ hypre_AMR_RAP( hypre_SStructMatrix  *A,
 
    }  /* for (part= 0; part< nparts; part++) */
 
-   hypre_TFree(owninfo);
+   hypre_TFree(owninfo, HYPRE_MEMORY_HOST);
 
    HYPRE_SStructMatrixAssemble(fac_A);
 

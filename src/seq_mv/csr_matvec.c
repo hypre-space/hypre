@@ -46,6 +46,16 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
    hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
 #endif
 #endif
+
+#ifdef HYPRE_USING_OPENMP_OFFLOAD
+   PUSH_RANGE_PAYLOAD("MATVEC-OMP",0, hypre_CSRMatrixNumRows(A));
+   HYPRE_Int ret=hypre_CSRMatrixMatvecOutOfPlaceOOMP( alpha,A,x,beta,b,y,offset);
+   POP_RANGE;
+  return ret;
+#ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_MATVEC] += hypre_MPI_Wtime() - time_begin;
+#endif
+#endif
    HYPRE_Complex    *A_data   = hypre_CSRMatrixData(A);
    HYPRE_Int        *A_i      = hypre_CSRMatrixI(A) + offset;
    HYPRE_Int        *A_j      = hypre_CSRMatrixJ(A);
@@ -427,6 +437,18 @@ hypre_CSRMatrixMatvec( HYPRE_Complex    alpha,
    return hypre_CSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y, 0);
 }
 
+#if defined (HYPRE_USE_MANAGED)
+HYPRE_Int
+hypre_CSRMatrixMatvec3( HYPRE_Complex    alpha,
+                       hypre_CSRMatrix *A,
+                       hypre_Vector    *x,
+                       HYPRE_Complex    beta,
+                       hypre_Vector    *y     )
+{
+   return hypre_CSRMatrixMatvecOutOfPlaceOOMP3(alpha, A, x, beta, y, y, 0);
+}
+#endif
+
 /*--------------------------------------------------------------------------
  * hypre_CSRMatrixMatvecT
  *
@@ -546,7 +568,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
    num_threads = hypre_NumThreads();
    if (num_threads > 1)
    {
-      y_data_expand = hypre_CTAlloc(HYPRE_Complex, num_threads*y_size);
+      y_data_expand = hypre_CTAlloc(HYPRE_Complex,  num_threads*y_size, HYPRE_MEMORY_HOST);
 
       if ( num_vectors==1 )
       {
@@ -601,7 +623,7 @@ hypre_CSRMatrixMatvecT( HYPRE_Complex    alpha,
          }
       }
 
-      hypre_TFree(y_data_expand);
+      hypre_TFree(y_data_expand, HYPRE_MEMORY_HOST);
 
    }
    else 
@@ -840,7 +862,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
 				x->data, &beta, y->data+offset));
   
   if (!GetAsyncMode()){
-  gpuErrchk(cudaStreamSynchronize(s[4]));
+  hypre_CheckErrorDevice(cudaStreamSynchronize(s[4]));
   }
   POP_RANGE;
   

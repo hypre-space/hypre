@@ -45,7 +45,7 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    HYPRE_Int               part, vi, vj, i;
    HYPRE_Int               size, rectangular;
 
-   matrix = hypre_TAlloc(hypre_SStructMatrix, 1);
+   matrix = hypre_TAlloc(hypre_SStructMatrix,  1, HYPRE_MEMORY_HOST);
 
    hypre_SStructMatrixComm(matrix)  = comm;
    hypre_SStructMatrixNDim(matrix)  = hypre_SStructGraphNDim(graph);
@@ -54,11 +54,11 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    /* compute S/U-matrix split */
    nparts = hypre_SStructGraphNParts(graph);
    hypre_SStructMatrixNParts(matrix) = nparts;
-   splits = hypre_TAlloc(HYPRE_Int **, nparts);
+   splits = hypre_TAlloc(HYPRE_Int **,  nparts, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixSplits(matrix) = splits;
-   pmatrices = hypre_TAlloc(hypre_SStructPMatrix *, nparts);
+   pmatrices = hypre_TAlloc(hypre_SStructPMatrix *,  nparts, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixPMatrices(matrix) = pmatrices;
-   symmetric = hypre_TAlloc(HYPRE_Int **, nparts);
+   symmetric = hypre_TAlloc(HYPRE_Int **,  nparts, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixSymmetric(matrix) = symmetric;
    /* is this a rectangular matrix? */
    rectangular = 0;
@@ -70,15 +70,15 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
    {
       pgrid = hypre_SStructGraphPGrid(graph, part);
       nvars = hypre_SStructPGridNVars(pgrid);
-      splits[part] = hypre_TAlloc(HYPRE_Int *, nvars);
-      symmetric[part] = hypre_TAlloc(HYPRE_Int *, nvars);
+      splits[part] = hypre_TAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
+      symmetric[part] = hypre_TAlloc(HYPRE_Int *,  nvars, HYPRE_MEMORY_HOST);
       for (vi = 0; vi < nvars; vi++)
       {
          stencil_size  = hypre_SStructStencilSize(stencils[part][vi]);
          stencil_vars  = hypre_SStructStencilVars(stencils[part][vi]);
          pstencil_size = 0;
-         splits[part][vi] = hypre_TAlloc(HYPRE_Int, stencil_size);
-         symmetric[part][vi] = hypre_TAlloc(HYPRE_Int, nvars);
+         splits[part][vi] = hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
+         symmetric[part][vi] = hypre_TAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
          for (i = 0; i < stencil_size; i++)
          {
             /* for rectangular matrices, put all coefficients in U-matrix */
@@ -128,9 +128,9 @@ HYPRE_SStructMatrixCreate( MPI_Comm              comm,
          size = hypre_max(size, hypre_SStructStencilSize(stencils[part][vi]));
       }
    }
-   hypre_SStructMatrixSEntries(matrix) = hypre_TAlloc(HYPRE_Int, size);
+   hypre_SStructMatrixSEntries(matrix) = hypre_TAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST);
    size += hypre_SStructGraphUEMaxSize(graph);
-   hypre_SStructMatrixUEntries(matrix) = hypre_TAlloc(HYPRE_Int, size);
+   hypre_SStructMatrixUEntries(matrix) = hypre_TAlloc(HYPRE_Int,  size, HYPRE_MEMORY_HOST);
    hypre_SStructMatrixEntriesSize(matrix) = size;
    hypre_SStructMatrixTmpColCoords(matrix) = NULL;
    hypre_SStructMatrixTmpCoeffs(matrix)    = NULL;
@@ -179,23 +179,23 @@ HYPRE_SStructMatrixDestroy( HYPRE_SStructMatrix matrix )
             nvars = hypre_SStructPGridNVars(pgrid);
             for (var = 0; var < nvars; var++)
             {
-               hypre_TFree(splits[part][var]);
-               hypre_TFree(symmetric[part][var]);
+               hypre_TFree(splits[part][var], HYPRE_MEMORY_HOST);
+               hypre_TFree(symmetric[part][var], HYPRE_MEMORY_HOST);
             }
-            hypre_TFree(splits[part]);
-            hypre_TFree(symmetric[part]);
+            hypre_TFree(splits[part], HYPRE_MEMORY_HOST);
+            hypre_TFree(symmetric[part], HYPRE_MEMORY_HOST);
             hypre_SStructPMatrixDestroy(pmatrices[part]);
          }
          HYPRE_SStructGraphDestroy(graph);
-         hypre_TFree(splits);
-         hypre_TFree(pmatrices);
-         hypre_TFree(symmetric);
+         hypre_TFree(splits, HYPRE_MEMORY_HOST);
+         hypre_TFree(pmatrices, HYPRE_MEMORY_HOST);
+         hypre_TFree(symmetric, HYPRE_MEMORY_HOST);
          HYPRE_IJMatrixDestroy(hypre_SStructMatrixIJMatrix(matrix));
-         hypre_TFree(hypre_SStructMatrixSEntries(matrix));
-         hypre_TFree(hypre_SStructMatrixUEntries(matrix));
-         hypre_TFree(hypre_SStructMatrixTmpColCoords(matrix));
-         hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix));
-         hypre_TFree(matrix);
+         hypre_TFree(hypre_SStructMatrixSEntries(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructMatrixUEntries(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructMatrixTmpColCoords(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(hypre_SStructMatrixTmpCoeffs(matrix), HYPRE_MEMORY_HOST);
+         hypre_TFree(matrix, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -239,7 +239,7 @@ HYPRE_SStructMatrixInitialize( HYPRE_SStructMatrix matrix )
    {
       pgrid = hypre_SStructGraphPGrid(graph, part);
       nvars = hypre_SStructPGridNVars(pgrid);
-      pstencils = hypre_TAlloc(hypre_SStructStencil *, nvars);
+      pstencils = hypre_TAlloc(hypre_SStructStencil *,  nvars, HYPRE_MEMORY_HOST);
       for (var = 0; var < nvars; var++)
       {
          split = hypre_SStructMatrixSplit(matrix, part, var);
@@ -685,8 +685,8 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
          num_values = hypre_StructMatrixNumValues(recv_matrix);
          symm = hypre_StructMatrixSymmElements(recv_matrix);
          stencil_size = hypre_StructStencilSize(recv_stencil);
-         v_to_s = hypre_TAlloc(HYPRE_Int, num_values);
-         s_to_v = hypre_TAlloc(HYPRE_Int, stencil_size);
+         v_to_s = hypre_TAlloc(HYPRE_Int,  num_values, HYPRE_MEMORY_HOST);
+         s_to_v = hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_HOST);
          for (si = 0, i = 0; si < stencil_size; si++)
          {
             s_to_v[si] = -1;
@@ -698,8 +698,8 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
             }
          }
          hypre_CommInfoGetTransforms(comm_info, &num_transforms, &coords, &dirs);
-         orders = hypre_TAlloc(HYPRE_Int *, num_transforms);
-         order = hypre_TAlloc(HYPRE_Int, num_values);
+         orders = hypre_TAlloc(HYPRE_Int *,  num_transforms, HYPRE_MEMORY_HOST);
+         order = hypre_TAlloc(HYPRE_Int,  num_values, HYPRE_MEMORY_HOST);
          for (ti = 0; ti < num_transforms; ti++)
          {
             for (i = 0; i < num_values; i++)
@@ -719,7 +719,7 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
                }
             }
             /* want order to indicate the natural order on the remote process */
-            orders[ti] = hypre_TAlloc(HYPRE_Int, num_values);
+            orders[ti] = hypre_TAlloc(HYPRE_Int,  num_values, HYPRE_MEMORY_HOST);
             for (i = 0; i < num_values; i++)
             {
                orders[ti][i] = -1;
@@ -732,9 +732,9 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
                }
             }
          }
-         hypre_TFree(v_to_s);
-         hypre_TFree(s_to_v);
-         hypre_TFree(order);
+         hypre_TFree(v_to_s, HYPRE_MEMORY_HOST);
+         hypre_TFree(s_to_v, HYPRE_MEMORY_HOST);
+         hypre_TFree(order, HYPRE_MEMORY_HOST);
 
          /* want to communicate and add ghost data to real data */
          hypre_CommPkgCreate(comm_info,
@@ -752,9 +752,9 @@ HYPRE_SStructMatrixAssemble( HYPRE_SStructMatrix matrix )
 
          for (ti = 0; ti < num_transforms; ti++)
          {
-            hypre_TFree(orders[ti]);
+            hypre_TFree(orders[ti], HYPRE_MEMORY_HOST);
          }
-         hypre_TFree(orders);
+         hypre_TFree(orders, HYPRE_MEMORY_HOST);
       }
    }
 

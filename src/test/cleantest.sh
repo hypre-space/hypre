@@ -49,4 +49,5 @@ do
    rm -f $testdir/*out*
    rm -f $testdir/*log*
    rm -f $testdir/*.fil
+   rm -f $testdir/*.core
 done

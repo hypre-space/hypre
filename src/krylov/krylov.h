@@ -21,9 +21,10 @@
 
 #include "_hypre_utilities.h"
 
-#define hypre_CTAllocF(type, count, funcs) ( (type *)(*(funcs->CAlloc))((size_t)(count), (size_t)sizeof(type)) )
+#define hypre_CTAllocF(type, count, funcs, location) \
+( (type *)(*(funcs->CAlloc))((size_t)(count), (size_t)sizeof(type), location) )
 
-#define hypre_TFreeF( ptr, funcs ) ( (*(funcs->Free))((char *)ptr), ptr = NULL )
+#define hypre_TFreeF( ptr, funcs ) ( (*(funcs->Free))((void *)ptr), ptr = NULL )
 
 #ifdef __cplusplus
 extern "C" {
@@ -83,8 +84,8 @@ extern "C" {
  **/
 
 /* functions in pcg_struct.c which aren't used here:
-char *hypre_ParKrylovCAlloc( HYPRE_Int count , HYPRE_Int elt_size );
-HYPRE_Int hypre_ParKrylovFree( char *ptr );
+void *hypre_ParKrylovCAlloc( HYPRE_Int count , HYPRE_Int elt_size );
+HYPRE_Int hypre_ParKrylovFree( void *ptr );
 void *hypre_ParKrylovCreateVectorArray( HYPRE_Int n , void *vvector );
 HYPRE_Int hypre_ParKrylovMatvecT( void *matvec_data , HYPRE_Real alpha , void *A , void *x , HYPRE_Real beta , void *y );
 */
@@ -432,8 +433,8 @@ hypre_CGNRCreate( hypre_CGNRFunctions *cgnr_functions );
 
 typedef struct
 {
-   char *       (*CAlloc)        ( size_t count, size_t elt_size );
-   HYPRE_Int    (*Free)          ( char *ptr );
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location );
+   HYPRE_Int    (*Free)          ( void *ptr );
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs );
    void *       (*CreateVector)  ( void *vector );
@@ -512,8 +513,8 @@ extern "C" {
 
 hypre_GMRESFunctions *
 hypre_GMRESFunctionsCreate(
-   char *       (*CAlloc)        ( size_t count, size_t elt_size ),
-   HYPRE_Int    (*Free)          ( char *ptr ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+   HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
    void *       (*CreateVector)  ( void *vector ),
@@ -598,8 +599,8 @@ hypre_GMRESCreate( hypre_GMRESFunctions *gmres_functions );
 
 typedef struct
 {
-   char *       (*CAlloc)        ( size_t count, size_t elt_size );
-   HYPRE_Int    (*Free)          ( char *ptr );
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location );
+   HYPRE_Int    (*Free)          ( void *ptr );
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs );
    void *       (*CreateVector)  ( void *vector );
@@ -685,8 +686,8 @@ extern "C" {
 
 hypre_LGMRESFunctions *
 hypre_LGMRESFunctionsCreate(
-   char *       (*CAlloc)        ( size_t count, size_t elt_size ),
-   HYPRE_Int    (*Free)          ( char *ptr ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location),
+   HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
    void *       (*CreateVector)  ( void *vector ),
@@ -771,8 +772,8 @@ hypre_LGMRESCreate( hypre_LGMRESFunctions *lgmres_functions );
 
 typedef struct
 {
-   char *       (*CAlloc)        ( size_t count, size_t elt_size );
-   HYPRE_Int    (*Free)          ( char *ptr );
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location );
+   HYPRE_Int    (*Free)          ( void *ptr );
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs );
    void *       (*CreateVector)  ( void *vector );
@@ -854,8 +855,8 @@ extern "C" {
 
 hypre_FlexGMRESFunctions *
 hypre_FlexGMRESFunctionsCreate(
-   char *       (*CAlloc)        ( size_t count, size_t elt_size ),
-   HYPRE_Int    (*Free)          ( char *ptr ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+   HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
    void *       (*CreateVector)  ( void *vector ),
@@ -943,8 +944,8 @@ hypre_FlexGMRESCreate( hypre_FlexGMRESFunctions *fgmres_functions );
 
 typedef struct
 {
-   char *       (*CAlloc)        ( size_t count, size_t elt_size );
-   HYPRE_Int    (*Free)          ( char *ptr );
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location );
+   HYPRE_Int    (*Free)          ( void *ptr );
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs );
    void *       (*CreateVector)  ( void *vector );
@@ -1058,8 +1059,8 @@ extern "C" {
 
 hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
-   char *       (*CAlloc)        ( size_t count, size_t elt_size ),
-   HYPRE_Int    (*Free)          ( char *ptr ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+   HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
    void *       (*CreateVector)  ( void *vector ),

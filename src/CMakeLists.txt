@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.13.0)
-set (HYPRE_DATE    2017/10/20)
+set (HYPRE_VERSION 2.14.0)
+set (HYPRE_DATE    2018/03/16)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -114,6 +114,7 @@ list (APPEND HYPRE_SOURCES
   lapack/dgeqrf.c
   lapack/dgesvd.c
   lapack/dgetrf.c
+  lapack/dgetri.c
   lapack/dgetrs.c
   lapack/dgetf2.c
   lapack/dlabad.c
@@ -170,6 +171,8 @@ list (APPEND HYPRE_SOURCES
   lapack/dsygv.c
   lapack/dsytd2.c
   lapack/dsytrd.c
+  lapack/dtrti2.c
+  lapack/dtrtri.c
   lapack/ieeeck.c
   lapack/ilaenv.c
   lapack/lsame.c
@@ -194,6 +197,7 @@ list (APPEND HYPRE_SOURCES
   utilities/hypre_ap.c
   utilities/hypre_complex.c
   utilities/hypre_error.c
+  utilities/hypre_general.c
   utilities/hypre_hopscotch_hash.c
   utilities/hypre_memory.c
   utilities/hypre_merge_sort.c
@@ -201,14 +205,12 @@ list (APPEND HYPRE_SOURCES
   utilities/hypre_prefix_sum.c
   utilities/hypre_printf.c
   utilities/hypre_qsort.c
-  utilities/memory_dmalloc.c
   utilities/mpistubs.c
   utilities/qsplit.c
   utilities/random.c
   utilities/threading.c
   utilities/timer.c
   utilities/timing.c
-  utilities/umalloc_local.c
 )
 
 # Headers and sources: multivector
@@ -520,6 +522,8 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/ams.c
   parcsr_ls/ads.c
   parcsr_ls/ame.c
+  parcsr_ls/par_restr.c
+  parcsr_ls/par_lr_restr.c
 )
 
 # Headers and sources: struct_mv
@@ -803,10 +807,14 @@ if (MSVC)
   set_source_files_properties (seq_mv/csr_matop.c               PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_mv/par_csr_matop.c        PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_mv/par_csr_matvec.c       PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/ams.c                  PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/aux_interp.c           PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_add_cycle.c        PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_amg_setup.c        PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_coarsen.c          PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_cgc_coarsen.c      PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_jacobi_interp.c    PROPERTIES COMPILE_FLAGS /TP)
+  set_source_files_properties (parcsr_ls/par_mgr_setup.c        PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_rap.c              PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_relax.c            PROPERTIES COMPILE_FLAGS /TP)
   set_source_files_properties (parcsr_ls/par_strength.c         PROPERTIES COMPILE_FLAGS /TP)

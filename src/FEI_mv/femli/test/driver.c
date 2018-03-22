@@ -115,7 +115,7 @@ testProb = 0;
       p = mypid % P;
       q = (( mypid - p)/P) % Q;
       r = ( mypid - p - P*q)/( P*Q );
-      values = (double *) calloc(9, sizeof(double));
+      values = hypre_CTAlloc(double, 9, HYPRE_MEMORY_HOST);
       values[3] = -1.0;
       values[2] = -1.0;
       values[1] = -1.0;
@@ -186,13 +186,13 @@ printf("generate problem done\n");
       free( partition );
       if ( scaleFlag == 1 ) 
       {
-         scaleVec  = (double *) malloc(localSize*sizeof(double));
+         scaleVec  = hypre_TAlloc(double, localSize, HYPRE_MEMORY_HOST);
          for ( j = startRow; j < startRow+localSize; j++ ) 
             scaleVec[j-startRow] = 1.0e6 * (0.5 * random() / RAND_MAX + 1.0e-1);
          HYPRE_IJMatrixCreate(MPI_COMM_WORLD, startRow, startRow+localSize-1,
                               startRow, startRow+localSize-1, &newIJA);
          HYPRE_IJMatrixSetObjectType(newIJA, HYPRE_PARCSR);
-         rowCnts = (int *) malloc( localSize * sizeof(int) );
+         rowCnts = hypre_TAlloc(int,  localSize , HYPRE_MEMORY_HOST);
          for ( j = startRow; j < startRow+localSize; j++ ) 
          {
             HYPRE_ParCSRMatrixGetRow(HYPREA,j,&rowSize,&colInd,NULL);
@@ -220,8 +220,8 @@ printf("generate problem done\n");
       } 
       else if ( scaleFlag == 2 ) 
       {
-         scaleVec  = (double *) malloc(localSize*sizeof(double));
-         gscaleVec = (double *) malloc(globalSize*sizeof(double));
+         scaleVec  = hypre_TAlloc(double, localSize, HYPRE_MEMORY_HOST);
+         gscaleVec = hypre_TAlloc(double, globalSize, HYPRE_MEMORY_HOST);
          for ( j = startRow; j < startRow+localSize; j++ ) 
             scaleVec[j-startRow] = 1.0e6 * (0.5 * random() / RAND_MAX + 1.0e-1);
          alpha = 0.0;
@@ -232,8 +232,8 @@ printf("generate problem done\n");
             if (scaleVec[j-startRow] < beta) beta = scaleVec[j-startRow]; 
          }
          printf("scaling min/max = %e %e %d\n", beta, alpha, RAND_MAX);
-         procCnts = (int *) malloc( nprocs * sizeof(int) );
-         offsets   = (int *) malloc( nprocs * sizeof(int) );
+         procCnts = hypre_TAlloc(int,  nprocs , HYPRE_MEMORY_HOST);
+         offsets   = hypre_TAlloc(int,  nprocs , HYPRE_MEMORY_HOST);
          MPI_Allgather(&localSize,1,MPI_INT,procCnts,1,MPI_INT,MPI_COMM_WORLD);
          offsets[0] = 0;
          for ( j = 1; j < nprocs; j++ )
@@ -245,7 +245,7 @@ printf("generate problem done\n");
          HYPRE_IJMatrixCreate(MPI_COMM_WORLD, startRow, startRow+localSize-1,
                               startRow, startRow+localSize-1, &newIJA);
          HYPRE_IJMatrixSetObjectType(newIJA, HYPRE_PARCSR);
-         rowCnts = (int *) malloc( localSize * sizeof(int) );
+         rowCnts = hypre_TAlloc(int,  localSize , HYPRE_MEMORY_HOST);
          for ( j = startRow; j < startRow+localSize; j++ ) 
          {
             HYPRE_ParCSRMatrixGetRow(HYPREA,j,&rowSize,&colInd,NULL);
@@ -270,14 +270,14 @@ printf("generate problem done\n");
          HYPRE_IJMatrixSetObjectType(newIJA, -1);
          HYPRE_IJMatrixDestroy(newIJA);
          free( gscaleVec );
-         nullVecs = ( double *) malloc(localSize * sizeof(double));
+         nullVecs = hypre_TAlloc(double, localSize , HYPRE_MEMORY_HOST);
          for ( j = 0; j < localSize; j++ ) nullVecs[j] = 1.0 / scaleVec[j]; 
          free( scaleVec );
       }
       if ( scaleFlag2 == 1 ) 
       {
-         scaleVec  = (double *) malloc(localSize*sizeof(double));
-         gscaleVec = (double *) malloc(globalSize*sizeof(double));
+         scaleVec  = hypre_TAlloc(double, localSize, HYPRE_MEMORY_HOST);
+         gscaleVec = hypre_TAlloc(double, globalSize, HYPRE_MEMORY_HOST);
          for ( j = startRow; j < startRow+localSize; j++ ) 
          {
             scaleVec[j-startRow] = 0.0;
@@ -295,8 +295,8 @@ printf("generate problem done\n");
             }
             scaleVec[j] = 1.0/sqrt(scaleVec[j]); 
          }
-         procCnts = (int *) malloc( nprocs * sizeof(int) );
-         offsets   = (int *) malloc( nprocs * sizeof(int) );
+         procCnts = hypre_TAlloc(int,  nprocs , HYPRE_MEMORY_HOST);
+         offsets   = hypre_TAlloc(int,  nprocs , HYPRE_MEMORY_HOST);
          MPI_Allgather(&localSize,1,MPI_INT,procCnts,1,MPI_INT,MPI_COMM_WORLD);
          offsets[0] = 0;
          for ( j = 1; j < nprocs; j++ )
@@ -308,7 +308,7 @@ printf("generate problem done\n");
          HYPRE_IJMatrixCreate(MPI_COMM_WORLD, startRow, startRow+localSize-1,
                               startRow, startRow+localSize-1, &newIJA);
          HYPRE_IJMatrixSetObjectType(newIJA, HYPRE_PARCSR);
-         rowCnts = (int *) malloc( localSize * sizeof(int) );
+         rowCnts = hypre_TAlloc(int,  localSize , HYPRE_MEMORY_HOST);
          for ( j = startRow; j < startRow+localSize; j++ ) 
          {
             HYPRE_ParCSRMatrixGetRow(HYPREA,j,&rowSize,&colInd,NULL);
@@ -338,7 +338,7 @@ printf("generate problem done\n");
          HYPRE_IJMatrixSetObjectType(newIJA, -1);
          HYPRE_IJMatrixDestroy(newIJA);
          free( gscaleVec );
-         nullVecs = ( double *) malloc(localSize * sizeof(double));
+         nullVecs = hypre_TAlloc(double, localSize , HYPRE_MEMORY_HOST);
          for ( j = 0; j < localSize; j++ ) nullVecs[j] = 1.0 / scaleVec[j]; 
          free( scaleVec );
       } else nullVecs = NULL;
@@ -384,7 +384,7 @@ printf("generate problem done\n");
       startRow   = partition[mypid];
       localSize  = partition[mypid+1] - startRow;
       free( partition );
-      rhsVector = ( double *) malloc(localSize * sizeof(double));
+      rhsVector = hypre_TAlloc(double, localSize , HYPRE_MEMORY_HOST);
       status = MLI_Utils_DoubleParVectorRead(rhsFname, MPI_COMM_WORLD, 
                                localSize, startRow, rhsVector);
       if ( status < 0 )
@@ -401,7 +401,7 @@ printf("generate problem done\n");
       HYPRE_IJVectorAssemble(IJrhs);
       if ( rhsVector != NULL )
       {
-         colInd = (int *) malloc(localSize * sizeof(int));
+         colInd = hypre_TAlloc(int, localSize , HYPRE_MEMORY_HOST);
          for (j = 0; j < localSize; j++) colInd[j] = startRow + j;
          HYPRE_IJVectorSetValues(IJrhs, localSize, (const int *) colInd,
                                  (const double *) rhsVector);
@@ -416,8 +416,8 @@ printf("generate problem done\n");
 
       if ( scaleFlag2 == 1 ) 
       {
-         scaleVec  = (double *) malloc(localSize*sizeof(double));
-         gscaleVec = (double *) malloc(globalSize*sizeof(double));
+         scaleVec  = hypre_TAlloc(double, localSize, HYPRE_MEMORY_HOST);
+         gscaleVec = hypre_TAlloc(double, globalSize, HYPRE_MEMORY_HOST);
          for ( j = startRow; j < startRow+localSize; j++ ) 
          {
             scaleVec[j-startRow] = 0.0;
@@ -435,8 +435,8 @@ printf("generate problem done\n");
             }
             scaleVec[j] = 1.0/sqrt(scaleVec[j]); 
          }
-         procCnts = (int *) malloc( nprocs * sizeof(int) );
-         offsets   = (int *) malloc( nprocs * sizeof(int) );
+         procCnts = hypre_TAlloc(int,  nprocs , HYPRE_MEMORY_HOST);
+         offsets   = hypre_TAlloc(int,  nprocs , HYPRE_MEMORY_HOST);
          MPI_Allgather(&localSize,1,MPI_INT,procCnts,1,MPI_INT,MPI_COMM_WORLD);
          offsets[0] = 0;
          for ( j = 1; j < nprocs; j++ )
@@ -448,7 +448,7 @@ printf("generate problem done\n");
          HYPRE_IJMatrixCreate(MPI_COMM_WORLD, startRow, startRow+localSize-1,
                               startRow, startRow+localSize-1, &newIJA);
          HYPRE_IJMatrixSetObjectType(newIJA, HYPRE_PARCSR);
-         rowCnts = (int *) malloc( localSize * sizeof(int) );
+         rowCnts = hypre_TAlloc(int,  localSize , HYPRE_MEMORY_HOST);
          for ( j = startRow; j < startRow+localSize; j++ ) 
          {
             HYPRE_ParCSRMatrixGetRow(HYPREA,j,&rowSize,&colInd,NULL);
@@ -478,12 +478,12 @@ printf("generate problem done\n");
          HYPRE_IJMatrixSetObjectType(newIJA, -1);
          HYPRE_IJMatrixDestroy(newIJA);
          free( gscaleVec );
-         nullVecs = ( double *) malloc(localSize * sizeof(double));
+         nullVecs = hypre_TAlloc(double, localSize , HYPRE_MEMORY_HOST);
          for ( j = 0; j < localSize; j++ ) nullVecs[j] = 1.0 / scaleVec[j]; 
          free( scaleVec );
       } else nullVecs = NULL;
 #if 0
-      nullVecs = ( double *) malloc(localSize * nullDim * sizeof(double));
+      nullVecs = hypre_TAlloc(double, localSize * nullDim , HYPRE_MEMORY_HOST);
 /*
       MLI_Utils_DoubleParVectorRead("rigid_body_mode01",MPI_COMM_WORLD,
                               localSize, startRow, nullVecs);
@@ -625,7 +625,7 @@ printf("generate problem done\n");
       startRow   = partition[mypid];
       localSize  = partition[mypid+1] - startRow;
       free( partition );
-      rhsVector = ( double *) malloc(localSize * sizeof(double));
+      rhsVector = hypre_TAlloc(double, localSize , HYPRE_MEMORY_HOST);
       for (j = 0; j < localSize; j++) rhsVector[j] = 1.0;
       HYPRE_ParCSRMatrixGetRowPartitioning(HYPREA, &partition);
       HYPRE_IJVectorCreate(MPI_COMM_WORLD, partition[mypid],
@@ -634,7 +634,7 @@ printf("generate problem done\n");
       HYPRE_IJVectorSetObjectType(IJrhs, HYPRE_PARCSR);
       HYPRE_IJVectorInitialize(IJrhs);
       HYPRE_IJVectorAssemble(IJrhs);
-      colInd = (int *) malloc(localSize * sizeof(int));
+      colInd = hypre_TAlloc(int, localSize , HYPRE_MEMORY_HOST);
       for (j = 0; j < localSize; j++) colInd[j] = startRow + j;
       HYPRE_IJVectorSetValues(IJrhs, localSize, (const int *) colInd,
                               (const double *) rhsVector);
@@ -652,7 +652,7 @@ printf("generate problem done\n");
    hypre_ParVectorInitialize( sol );
    hypre_ParVectorSetConstantValues( sol, 0.0 );
 
-   funcPtr = (MLI_Function *) malloc( sizeof( MLI_Function ) );
+   funcPtr = hypre_TAlloc( MLI_Function , 1, HYPRE_MEMORY_HOST);
    MLI_Utils_HypreParVectorGetDestroyFunc(funcPtr);
    csol = MLI_VectorCreate(sol, "HYPRE_ParVector", funcPtr);
    crhs = MLI_VectorCreate(rhs, "HYPRE_ParVector", funcPtr);
@@ -692,7 +692,7 @@ amgMethod = 1;
       }
       MPI_Bcast(&nsweeps, 1, MPI_INT, 0, MPI_COMM_WORLD);
       if ( nsweeps <= 0 ) nsweeps = 1;
-      weights = (double *) malloc( sizeof(double)*nsweeps );
+      weights = hypre_TAlloc(double, nsweeps , HYPRE_MEMORY_HOST);
       //if ( mypid == 0 )
       //{
       //   printf("RSAMG relaxation weights = ");
@@ -749,7 +749,7 @@ MLI_MethodSetParams(cmliMethod, "useInjectionForR", 0, NULL);
 */
 nsweeps = 1;
       if ( nsweeps <= 0 ) nsweeps = 1;
-      weights = (double *) malloc( sizeof(double)*nsweeps );
+      weights = hypre_TAlloc(double, nsweeps , HYPRE_MEMORY_HOST);
 /*
       if ( mypid == 0 )
       {
@@ -802,7 +802,7 @@ j = 0;
       }
       MPI_Bcast(&nsweeps, 1, MPI_INT, 0, MPI_COMM_WORLD);
       if ( nsweeps <= 0 ) nsweeps = 1;
-      weights = (double *) malloc( sizeof(double)*nsweeps );
+      weights = hypre_TAlloc(double, nsweeps , HYPRE_MEMORY_HOST);
       //weights[0] = 2.0 / 3.0;
       weights[0] = 1.0 / 1.0;
       MPI_Bcast(&weights[0], 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
@@ -969,7 +969,7 @@ int GenerateConvectionDiffusion3D( MPI_Comm comm, int nx, int ny, int nz,
    hypre_GeneratePartitioning(ny,Q,&ny_part);
    hypre_GeneratePartitioning(nz,R,&nz_part);
 
-   global_part = hypre_CTAlloc(int,P*Q*R+1);
+   global_part = hypre_CTAlloc(int, P*Q*R+1, HYPRE_MEMORY_HOST);
 
    global_part[0] = 0;
    cnt = 1;
@@ -996,8 +996,8 @@ int GenerateConvectionDiffusion3D( MPI_Comm comm, int nx, int ny, int nz,
    num_procs = P*Q*R;
 
    local_num_rows = nx_local*ny_local*nz_local;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -1013,7 +1013,7 @@ int GenerateConvectionDiffusion3D( MPI_Comm comm, int nx, int ny, int nz,
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(int, num_cols_offd);
+   col_map_offd = hypre_CTAlloc(int,  num_cols_offd, HYPRE_MEMORY_HOST);
 
    cnt = 1;
    o_cnt = 1;
@@ -1088,13 +1088,13 @@ int GenerateConvectionDiffusion3D( MPI_Comm comm, int nx, int ny, int nz,
       }
    }
 
-   diag_j = hypre_CTAlloc(int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(double, diag_i[local_num_rows]);
+   diag_j = hypre_CTAlloc(int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(double, offd_i[local_num_rows]);
+      offd_j = hypre_CTAlloc(int,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_data = hypre_CTAlloc(double,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
    }
 
    row_index = 0;
@@ -1245,9 +1245,9 @@ int GenerateConvectionDiffusion3D( MPI_Comm comm, int nx, int ny, int nz,
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   hypre_TFree(nx_part);
-   hypre_TFree(ny_part);
-   hypre_TFree(nz_part);
+   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
 
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    HYPRE_IJVectorCreate(comm, partition[my_id], partition[my_id+1]-1, &IJrhs);
@@ -1297,7 +1297,7 @@ printf("nx,ny,nz = %d %d %d\n", nx, ny, nz);
    hypre_GeneratePartitioning(ny,Q,&ny_part);
    hypre_GeneratePartitioning(nz,R,&nz_part);
 
-   global_part = hypre_CTAlloc(int,P*Q*R+1);
+   global_part = hypre_CTAlloc(int, P*Q*R+1, HYPRE_MEMORY_HOST);
 
    global_part[0] = 0;
    cnt = 1;
@@ -1324,8 +1324,8 @@ printf("nx,ny,nz = %d %d %d\n", nx, ny, nz);
    num_procs = P*Q*R;
 
    local_num_rows = nx_local*ny_local*nz_local;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
 
    P_busy = hypre_min(nx,P);
    Q_busy = hypre_min(ny,Q);
@@ -1341,7 +1341,7 @@ printf("nx,ny,nz = %d %d %d\n", nx, ny, nz);
 
    if (!local_num_rows) num_cols_offd = 0;
 
-   col_map_offd = hypre_CTAlloc(int, num_cols_offd);
+   col_map_offd = hypre_CTAlloc(int,  num_cols_offd, HYPRE_MEMORY_HOST);
 
    cnt = 1;
    o_cnt = 1;
@@ -1416,13 +1416,13 @@ printf("nx,ny,nz = %d %d %d\n", nx, ny, nz);
       }
    }
 
-   diag_j = hypre_CTAlloc(int, diag_i[local_num_rows]);
-   diag_data = hypre_CTAlloc(double, diag_i[local_num_rows]);
+   diag_j = hypre_CTAlloc(int,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  diag_i[local_num_rows], HYPRE_MEMORY_HOST);
 
    if (num_procs > 1)
    {
-      offd_j = hypre_CTAlloc(int, offd_i[local_num_rows]);
-      offd_data = hypre_CTAlloc(double, offd_i[local_num_rows]);
+      offd_j = hypre_CTAlloc(int,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
+      offd_data = hypre_CTAlloc(double,  offd_i[local_num_rows], HYPRE_MEMORY_HOST);
    }
 
    row_index = 0;
@@ -1574,9 +1574,9 @@ printf("nx,ny,nz = %d %d %d\n", nx, ny, nz);
       hypre_CSRMatrixData(offd) = offd_data;
    }
 
-   hypre_TFree(nx_part);
-   hypre_TFree(ny_part);
-   hypre_TFree(nz_part);
+   hypre_TFree(nx_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(ny_part, HYPRE_MEMORY_HOST);
+   hypre_TFree(nz_part, HYPRE_MEMORY_HOST);
 
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    HYPRE_IJVectorCreate(comm, partition[my_id], partition[my_id+1]-1, &IJrhs);
@@ -1624,15 +1624,15 @@ int GenerateRugeStuben1(MPI_Comm comm, double Lval, double epsilon, int n,
    else                           mu_y = 0.5;
 
    grid_size = n * n;
-   global_part = hypre_CTAlloc(int,2);
+   global_part = hypre_CTAlloc(int, 2, HYPRE_MEMORY_HOST);
    global_part[0] = 0;
    global_part[1] = grid_size;
    local_num_rows = grid_size;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
    for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
-   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
-   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   diag_j = hypre_CTAlloc(int,  5*local_num_rows, HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  5*local_num_rows, HYPRE_MEMORY_HOST);
    cnt = 0;
    diag_i[0] = 0;
    for ( j = 0; j < n; j++ ) 
@@ -1726,15 +1726,15 @@ int GenerateRugeStuben2(MPI_Comm comm, double epsilon, int n,
    h = 1.0 / (n + 1.0);
 
    grid_size = n * n;
-   global_part = hypre_CTAlloc(int,2);
+   global_part = hypre_CTAlloc(int, 2, HYPRE_MEMORY_HOST);
    global_part[0] = 0;
    global_part[1] = grid_size;
    local_num_rows = grid_size;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
    for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
-   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
-   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   diag_j = hypre_CTAlloc(int,  5*local_num_rows, HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  5*local_num_rows, HYPRE_MEMORY_HOST);
    cnt = 0;
    diag_i[0] = 0;
    for ( j = 0; j < n; j++ ) 
@@ -1841,15 +1841,15 @@ int GenerateRugeStuben3(MPI_Comm comm, double epsilon, int n,
    h = 1.0 / (n + 1.0);
 
    grid_size = n * n;
-   global_part = hypre_CTAlloc(int,2);
+   global_part = hypre_CTAlloc(int, 2, HYPRE_MEMORY_HOST);
    global_part[0] = 0;
    global_part[1] = grid_size;
    local_num_rows = grid_size;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
    for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
-   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
-   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   diag_j = hypre_CTAlloc(int,  5*local_num_rows, HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  5*local_num_rows, HYPRE_MEMORY_HOST);
    cnt = 0;
    diag_i[0] = 0;
    for ( j = 0; j < n; j++ ) 
@@ -1957,18 +1957,18 @@ int GenerateStuben(MPI_Comm comm, double epsilon, int n,
    h = 1.0 / (n + 1.0);
 
    grid_size = n * n;
-   global_part = hypre_CTAlloc(int,2);
+   global_part = hypre_CTAlloc(int, 2, HYPRE_MEMORY_HOST);
    global_part[0] = 0;
    global_part[1] = grid_size;
    local_num_rows = grid_size;
-   diag_i = hypre_CTAlloc(int, local_num_rows+1);
-   offd_i = hypre_CTAlloc(int, local_num_rows+1);
+   diag_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
+   offd_i = hypre_CTAlloc(int,  local_num_rows+1, HYPRE_MEMORY_HOST);
    for ( i = 0; i <= local_num_rows; i++ ) offd_i[i] = 0; 
-   diag_j = hypre_CTAlloc(int, 5*local_num_rows);
-   diag_data = hypre_CTAlloc(double, 5*local_num_rows);
+   diag_j = hypre_CTAlloc(int,  5*local_num_rows, HYPRE_MEMORY_HOST);
+   diag_data = hypre_CTAlloc(double,  5*local_num_rows, HYPRE_MEMORY_HOST);
    cnt = 0;
    diag_i[0] = 0;
-   rhsVec = (double *) malloc(grid_size * sizeof(double));
+   rhsVec = hypre_TAlloc(double, grid_size , HYPRE_MEMORY_HOST);
    for ( j = 0; j < n; j++ ) 
    {
       for ( i = 0; i < n; i++ ) 
@@ -2037,7 +2037,7 @@ int GenerateStuben(MPI_Comm comm, double epsilon, int n,
    free( partition );
    HYPRE_IJVectorSetObjectType(IJrhs, HYPRE_PARCSR);
    HYPRE_IJVectorInitialize(IJrhs);
-   colInd = (int *) malloc(grid_size * sizeof(int));
+   colInd = hypre_TAlloc(int, grid_size , HYPRE_MEMORY_HOST);
    for (j = 0; j < grid_size; j++) colInd[j] = j;
    HYPRE_IJVectorSetValues(IJrhs, grid_size, (const int *) colInd,
                                  (const double *) rhsVec);

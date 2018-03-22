@@ -457,6 +457,24 @@ HYPRE_BoomerAMGGetCycleType( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetConvergeType, HYPRE_BoomerAMGGetConvergeType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetConvergeType( HYPRE_Solver solver,
+                                HYPRE_Int    type    )
+{
+   return( hypre_BoomerAMGSetConvergeType( (void *) solver, type ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetConvergeType( HYPRE_Solver solver,
+                                HYPRE_Int   *type    )
+{
+   return( hypre_BoomerAMGGetConvergeType( (void *) solver, type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetTol, HYPRE_BoomerAMGGetTol
  *--------------------------------------------------------------------------*/
 
@@ -535,10 +553,10 @@ HYPRE_BoomerAMGInitGridRelaxation( HYPRE_Int     **num_grid_sweeps_ptr,
    HYPRE_Int **grid_relax_points;
    HYPRE_Real *relax_weights;
 
-   *num_grid_sweeps_ptr   = hypre_CTAlloc(HYPRE_Int, 4);
-   *grid_relax_type_ptr   = hypre_CTAlloc(HYPRE_Int, 4);
-   *grid_relax_points_ptr = hypre_CTAlloc(HYPRE_Int*, 4);
-   *relax_weights_ptr     = hypre_CTAlloc(HYPRE_Real, max_levels);
+   *num_grid_sweeps_ptr   = hypre_CTAlloc(HYPRE_Int,  4, HYPRE_MEMORY_HOST);
+   *grid_relax_type_ptr   = hypre_CTAlloc(HYPRE_Int,  4, HYPRE_MEMORY_HOST);
+   *grid_relax_points_ptr = hypre_CTAlloc(HYPRE_Int*,  4, HYPRE_MEMORY_HOST);
+   *relax_weights_ptr     = hypre_CTAlloc(HYPRE_Real,  max_levels, HYPRE_MEMORY_HOST);
 
    num_grid_sweeps   = *num_grid_sweeps_ptr;
    grid_relax_type   = *grid_relax_type_ptr;
@@ -550,7 +568,7 @@ HYPRE_BoomerAMGInitGridRelaxation( HYPRE_Int     **num_grid_sweeps_ptr,
       /* fine grid */
       num_grid_sweeps[0] = 3;
       grid_relax_type[0] = 3;
-      grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int, 4);
+      grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  4, HYPRE_MEMORY_HOST);
       grid_relax_points[0][0] = -2;
       grid_relax_points[0][1] = -1;
       grid_relax_points[0][2] = 1;
@@ -558,7 +576,7 @@ HYPRE_BoomerAMGInitGridRelaxation( HYPRE_Int     **num_grid_sweeps_ptr,
       /* down cycle */
       num_grid_sweeps[1] = 4;
       grid_relax_type[1] = 3;
-      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, 4);
+      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  4, HYPRE_MEMORY_HOST);
       grid_relax_points[1][0] = -1;
       grid_relax_points[1][1] = 1;
       grid_relax_points[1][2] = -2;
@@ -567,7 +585,7 @@ HYPRE_BoomerAMGInitGridRelaxation( HYPRE_Int     **num_grid_sweeps_ptr,
       /* up cycle */
       num_grid_sweeps[2] = 4;
       grid_relax_type[2] = 3;
-      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, 4);
+      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  4, HYPRE_MEMORY_HOST);
       grid_relax_points[2][0] = -2;
       grid_relax_points[2][1] = -2;
       grid_relax_points[2][2] = 1;
@@ -578,28 +596,28 @@ HYPRE_BoomerAMGInitGridRelaxation( HYPRE_Int     **num_grid_sweeps_ptr,
       /* fine grid */
       num_grid_sweeps[0] = 2;
       grid_relax_type[0] = 3;
-      grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int, 2);
+      grid_relax_points[0] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
       grid_relax_points[0][0] = 1;
       grid_relax_points[0][1] = -1;
  
       /* down cycle */
       num_grid_sweeps[1] = 2;
       grid_relax_type[1] = 3;
-      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int, 2);
+      grid_relax_points[1] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
       grid_relax_points[1][0] = 1;
       grid_relax_points[1][1] = -1;
   
       /* up cycle */
       num_grid_sweeps[2] = 2;
       grid_relax_type[2] = 3;
-      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int, 2);
+      grid_relax_points[2] = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
       grid_relax_points[2][0] = -1;
       grid_relax_points[2][1] = 1;
    }
    /* coarsest grid */
    num_grid_sweeps[3] = 1;
    grid_relax_type[3] = 3;
-   grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int, 1);
+   grid_relax_points[3] = hypre_CTAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
    grid_relax_points[3][0] = 0;
 
    for (i = 0; i < max_levels; i++)
@@ -1352,6 +1370,12 @@ HYPRE_BoomerAMGSetCRStrongTh( HYPRE_Solver  solver,
    return( hypre_BoomerAMGSetCRStrongTh( (void *) solver, CR_strong_th ) );
 }
 
+HYPRE_Int
+HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver,
+                         HYPRE_Real    A_drop_tol  )
+{
+   return( hypre_BoomerAMGSetADropTol( (void *) solver, A_drop_tol ) );
+}
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetISType
  *--------------------------------------------------------------------------*/
@@ -1703,6 +1727,19 @@ HYPRE_BoomerAMGSetKeepTranspose (HYPRE_Solver solver,
 {
    return (hypre_BoomerAMGSetKeepTranspose ( (void *) solver, keepTranspose ) );
 }
+
+#ifdef HAVE_DSUPERLU
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetDSLUThreshold
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
+                                HYPRE_Int    slu_threshold)
+{
+   return (hypre_BoomerAMGSetDSLUThreshold ( (void *) solver, slu_threshold ) );
+}
+#endif
 
 HYPRE_Int
 HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,

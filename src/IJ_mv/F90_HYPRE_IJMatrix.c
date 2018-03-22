@@ -101,6 +101,23 @@ hypre_F90_IFACE(hypre_ijmatrixsetvalues, HYPRE_IJMATRIXSETVALUES)
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_IJMatrixSetConstantValues
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_ijmatrixsetconstantvalues, HYPRE_IJMATRIXSETCONSTANTVALUES)
+   ( hypre_F90_Obj *matrix,
+     hypre_F90_Complex *value,
+     hypre_F90_Int *ierr    )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_IJMatrixSetConstantValues(
+           hypre_F90_PassObj (HYPRE_IJMatrix, matrix),
+           hypre_F90_PassComplex (value)  ) );
+
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_IJMatrixAddToValues
  *--------------------------------------------------------------------------*/
 

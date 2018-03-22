@@ -10,6 +10,47 @@
 
 #define SWAP(T, a, b) do { T tmp = a; a = b; b = tmp; } while (0)
 
+/* union of two sorted (in ascending order) array arr1 and arr2 into arr3
+ * Assumption: no duplicates in arr1 and arr2
+ * arr3 should have enough space on entry 
+ * map1 and map2 map arr1 and arr2 to arr3 */
+void hypre_union2(HYPRE_Int n1, HYPRE_Int *arr1, HYPRE_Int n2, HYPRE_Int *arr2, HYPRE_Int *n3, HYPRE_Int *arr3,
+                  HYPRE_Int *map1, HYPRE_Int *map2)
+{
+   HYPRE_Int i = 0, j = 0, k = 0;
+   while (i < n1 && j < n2)
+   {
+      if (arr1[i] < arr2[j])
+      {
+         if (map1) { map1[i] = k; }
+         arr3[k++] = arr1[i++];
+      }
+      else if (arr1[i] > arr2[j])
+      {
+         if (map2) { map2[j] = k; }
+         arr3[k++] = arr2[j++];
+      }
+      else /* == */
+      {
+         if (map1) { map1[i] = k; }
+         if (map2) { map2[j] = k; }
+         arr3[k++] = arr1[i++];
+         j++;
+      }
+   }
+   while (i < n1)
+   {
+      if (map1) { map1[i] = k; }
+      arr3[k++] = arr1[i++];
+   }
+   while (j < n2)
+   {
+      if (map2) { map2[j] = k; }
+      arr3[k++] = arr2[j++];
+   }
+   *n3 = k;
+}
+
 static void hypre_merge(HYPRE_Int *first1, HYPRE_Int *last1, HYPRE_Int *first2, HYPRE_Int *last2, HYPRE_Int *out)
 {
    for ( ; first1 != last1; ++out)
@@ -304,7 +345,7 @@ void hypre_sort_and_create_inverse_map(
    hypre_profile_times[HYPRE_TIMER_ID_MERGE] -= hypre_MPI_Wtime();
 #endif
 
-   HYPRE_Int *temp = hypre_TAlloc(HYPRE_Int, len);
+   HYPRE_Int *temp = hypre_TAlloc(HYPRE_Int,  len, HYPRE_MEMORY_HOST);
    hypre_merge_sort(in, temp, len, out);
    hypre_UnorderedIntMapCreate(inverse_map, 2*len, 16*hypre_NumThreads());
    HYPRE_Int i;
@@ -337,11 +378,11 @@ void hypre_sort_and_create_inverse_map(
 
    if (*out == in)
    {
-      hypre_TFree(temp);
+      hypre_TFree(temp, HYPRE_MEMORY_HOST);
    }
    else
    {
-      hypre_TFree(in);
+      hypre_TFree(in, HYPRE_MEMORY_HOST);
    }
 
 #ifdef HYPRE_PROFILE
