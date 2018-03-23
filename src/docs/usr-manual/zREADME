@@ -24,9 +24,11 @@ Note:
 
 Issues and things left to do:
 
+     - Remember to change 'checklist' in hypre-dev repo when this branch is merged
      - MathJax is slow to render.  Are we okay with that?  Is there a better alternative?
      - How to reference figures?
      - How to combine images in a figure.  Create one PNG file from the combination?
+     - Add the hypre logo somehow
      - Copyright stuff and date (ref manual)
 DONE - Copyright stuff (user manual), version numbers
 DONE - References need to be done
