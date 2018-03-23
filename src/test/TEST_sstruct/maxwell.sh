@@ -16,6 +16,14 @@
 
 
 TNAME=`basename $0 .sh`
+CONVTOL=$1
+
+# Set default check tolerance
+if [ x$CONVTOL = "x" ];
+then
+    CONVTOL=0.0
+fi
+#echo "tol = $CONVTOL"
 
 #=============================================================================
 # no test comparison for now. Just a holder file with fake tests. Hard to
@@ -24,17 +32,17 @@ TNAME=`basename $0 .sh`
 
 tail -3 ${TNAME}.out.0 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.0 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 
 #=============================================================================
 tail -3 ${TNAME}.out.1 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.1 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 
 #=============================================================================
 tail -3 ${TNAME}.out.2 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.2 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 
 #=============================================================================
 # compare with baseline case
@@ -61,7 +69,7 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+   (../runcheck.sh ${TNAME}.out ${TNAME}.saved $CONVTOL) >&2
 fi
 
 #=============================================================================

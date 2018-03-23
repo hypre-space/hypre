@@ -76,6 +76,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    HYPRE_Int      num_levels; 
    HYPRE_Int      coarsen_type;
    HYPRE_Int      interp_type;
+   HYPRE_Int      restri_type;
    HYPRE_Int      agg_interp_type;
    HYPRE_Int      measure_type;
    HYPRE_Int      agg_num_levels;
@@ -168,6 +169,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
    coarsen_type = hypre_ParAMGDataCoarsenType(amg_data);
    interp_type = hypre_ParAMGDataInterpType(amg_data);
+   restri_type = hypre_ParAMGDataRestriction(amg_data); /* RL */
    agg_interp_type = hypre_ParAMGDataAggInterpType(amg_data);
    measure_type = hypre_ParAMGDataMeasureType(amg_data);
    smooth_type = hypre_ParAMGDataSmoothType(amg_data);
@@ -200,11 +202,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 
    block_mode = hypre_ParAMGDataBlockMode(amg_data);
 
-   send_buff     = hypre_CTAlloc(HYPRE_Real, 6);
+   send_buff     = hypre_CTAlloc(HYPRE_Real,  6, HYPRE_MEMORY_HOST);
 #ifdef HYPRE_NO_GLOBAL_PARTITION
-   gather_buff = hypre_CTAlloc(HYPRE_Real,6);    
+   gather_buff = hypre_CTAlloc(HYPRE_Real, 6, HYPRE_MEMORY_HOST);    
 #else
-   gather_buff = hypre_CTAlloc(HYPRE_Real,6*num_procs);    
+   gather_buff = hypre_CTAlloc(HYPRE_Real, 6*num_procs, HYPRE_MEMORY_HOST);    
 #endif
 
    if (my_id==0)
@@ -370,8 +372,19 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
 	hypre_printf(" Interpolation = block direct interpolation \n");
 	hypre_printf("                 for nodal systems AMG\n");
       }
+      else if (interp_type == 100)
+      {
+	hypre_printf(" Interpolation = one-point interpolation \n");
+      }
 
-
+      if (restri_type == 1)
+      {
+         hypre_printf(" Restriction = local approximate ideal restriction (AIR-1)\n");
+      } 
+      else if (restri_type == 2)
+      {
+         hypre_printf(" Restriction = local approximate ideal restriction (AIR-2)\n");
+      }
 
       if (block_mode)
       {
@@ -396,10 +409,10 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
     *  Enter Statistics Loop
     *-----------------------------------------------------*/
 
-   num_coeffs = hypre_CTAlloc(HYPRE_Real,num_levels);
-   num_mem = hypre_CTAlloc(HYPRE_Real,num_levels);
+   num_coeffs = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
+   num_mem = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
 
-   num_variables = hypre_CTAlloc(HYPRE_Real,num_levels);
+   num_variables = hypre_CTAlloc(HYPRE_Real, num_levels, HYPRE_MEMORY_HOST);
 
    for (level = 0; level < num_levels; level++)
    { 
@@ -1144,11 +1157,11 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
                hypre_printf( " Outer relaxation weight %f level %d\n",omega[j],j);
    }
 
-   hypre_TFree(num_coeffs);
-   hypre_TFree(num_mem);
-   hypre_TFree(num_variables);
-   hypre_TFree(send_buff);
-   hypre_TFree(gather_buff);
+   hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
+   hypre_TFree(num_mem, HYPRE_MEMORY_HOST);
+   hypre_TFree(num_variables, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_buff, HYPRE_MEMORY_HOST);
+   hypre_TFree(gather_buff, HYPRE_MEMORY_HOST);
    
    return(0);
 }  

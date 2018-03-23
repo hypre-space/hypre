@@ -126,8 +126,8 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
    	Bs_ext_j    = hypre_CSRBooleanMatrix_Get_J(Bs_ext);
    }
 
-   B_ext_diag_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A+1);
-   B_ext_offd_i = hypre_CTAlloc(HYPRE_Int, num_cols_offd_A+1);
+   B_ext_diag_i = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_A+1, HYPRE_MEMORY_HOST);
+   B_ext_offd_i = hypre_CTAlloc(HYPRE_Int,  num_cols_offd_A+1, HYPRE_MEMORY_HOST);
    B_ext_diag_size = 0;
    B_ext_offd_size = 0;
    last_col_diag_B = first_col_diag_B + num_cols_diag_B -1;
@@ -144,10 +144,10 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
    }
 
    if (B_ext_diag_size)
-      B_ext_diag_j = hypre_CTAlloc(HYPRE_Int, B_ext_diag_size);
+      B_ext_diag_j = hypre_CTAlloc(HYPRE_Int,  B_ext_diag_size, HYPRE_MEMORY_HOST);
 
    if (B_ext_offd_size)
-      B_ext_offd_j = hypre_CTAlloc(HYPRE_Int, B_ext_offd_size);
+      B_ext_offd_j = hypre_CTAlloc(HYPRE_Int,  B_ext_offd_size, HYPRE_MEMORY_HOST);
 
    cnt_offd = 0;
    cnt_diag = 0;
@@ -173,7 +173,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
    cnt = 0;
    if (B_ext_offd_size || num_cols_offd_B)
    {
-      temp = hypre_CTAlloc(HYPRE_Int, B_ext_offd_size+num_cols_offd_B);
+      temp = hypre_CTAlloc(HYPRE_Int,  B_ext_offd_size+num_cols_offd_B, HYPRE_MEMORY_HOST);
       for (i=0; i < B_ext_offd_size; i++)
          temp[i] = B_ext_offd_j[i];
       cnt = B_ext_offd_size;
@@ -197,13 +197,13 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
    }
 
    if (num_cols_offd_C)
-        col_map_offd_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_C);
+        col_map_offd_C = hypre_CTAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
 
    for (i=0; i < num_cols_offd_C; i++)
       col_map_offd_C[i] = temp[i];
 
    if (B_ext_offd_size || num_cols_offd_B)
-      hypre_TFree(temp);
+      hypre_TFree(temp, HYPRE_MEMORY_HOST);
 
    for (i=0 ; i < B_ext_offd_size; i++)
       B_ext_offd_j[i] = hypre_BinarySearch(col_map_offd_C,
@@ -211,7 +211,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
                                            num_cols_offd_C);
    if (num_cols_offd_B)
    {
-      map_B_to_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_B);
+      map_B_to_C = hypre_CTAlloc(HYPRE_Int, num_cols_offd_B, HYPRE_MEMORY_HOST);
 
       cnt = 0;
       for (i=0; i < num_cols_offd_C; i++)
@@ -243,10 +243,10 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
     *-----------------------------------------------------------------------*/
  
    last_col_diag_B = first_col_diag_B + num_cols_diag_B - 1;
-   C_diag_j    = hypre_CTAlloc(HYPRE_Int, C_diag_size);
+   C_diag_j    = hypre_CTAlloc(HYPRE_Int,  C_diag_size, HYPRE_MEMORY_HOST);
    if (C_offd_size)
    { 
-   	C_offd_j    = hypre_CTAlloc(HYPRE_Int, C_offd_size);
+   	C_offd_j    = hypre_CTAlloc(HYPRE_Int,  C_offd_size, HYPRE_MEMORY_HOST);
    } 
 
 
@@ -259,7 +259,7 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
    *  Allocate marker array.
     *-----------------------------------------------------------------------*/
 
-   B_marker = hypre_CTAlloc(HYPRE_Int, num_cols_diag_B+num_cols_offd_C);
+   B_marker = hypre_CTAlloc(HYPRE_Int,  num_cols_diag_B+num_cols_offd_C, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
@@ -412,14 +412,14 @@ hypre_ParCSRBooleanMatrix *hypre_ParBooleanMatmul
     *  Free B_ext and marker array.
     *-----------------------------------------------------------------------*/
 
-   hypre_TFree(B_marker);   
-   hypre_TFree(B_ext_diag_i);
+   hypre_TFree(B_marker, HYPRE_MEMORY_HOST);   
+   hypre_TFree(B_ext_diag_i, HYPRE_MEMORY_HOST);
    if (B_ext_diag_size)
-      hypre_TFree(B_ext_diag_j);   
-   hypre_TFree(B_ext_offd_i);
+      hypre_TFree(B_ext_diag_j, HYPRE_MEMORY_HOST);   
+   hypre_TFree(B_ext_offd_i, HYPRE_MEMORY_HOST);
    if (B_ext_offd_size)
-      hypre_TFree(B_ext_offd_j);   
-   if (num_cols_offd_B) hypre_TFree(map_B_to_C);
+      hypre_TFree(B_ext_offd_j, HYPRE_MEMORY_HOST);   
+   if (num_cols_offd_B) hypre_TFree(map_B_to_C, HYPRE_MEMORY_HOST);
 
    return C;
    
@@ -662,7 +662,7 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
    *  Allocate marker array.
     *-----------------------------------------------------------------------*/
 
-   B_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag_A+num_rows_A_ext );
+   B_marker = hypre_CTAlloc(HYPRE_Int,  num_rows_diag_A+num_rows_A_ext , HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Initialize some stuff.
@@ -702,10 +702,10 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
     *-----------------------------------------------------------------------*/
  
    last_col_diag_C = first_row_index_A + num_rows_diag_A - 1;
-   C_diag_j    = hypre_CTAlloc(HYPRE_Int, C_diag_size);
+   C_diag_j    = hypre_CTAlloc(HYPRE_Int,  C_diag_size, HYPRE_MEMORY_HOST);
    if (C_offd_size)
    { 
-   	C_offd_j    = hypre_CTAlloc(HYPRE_Int, C_offd_size);
+   	C_offd_j    = hypre_CTAlloc(HYPRE_Int,  C_offd_size, HYPRE_MEMORY_HOST);
    } 
 
 
@@ -973,8 +973,8 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
    num_cols_offd_C = count;
 
    if (num_cols_offd_C) {
-      col_map_offd_C = hypre_CTAlloc(HYPRE_Int,num_cols_offd_C);
-      new_C_offd_j = hypre_CTAlloc(HYPRE_Int,C_offd_size);
+      col_map_offd_C = hypre_CTAlloc(HYPRE_Int, num_cols_offd_C, HYPRE_MEMORY_HOST);
+      new_C_offd_j = hypre_CTAlloc(HYPRE_Int, C_offd_size, HYPRE_MEMORY_HOST);
       /* ... a bit big, but num_cols_offd_C is too small.  It might be worth
          computing the correct size, which is sum( no. columns in row i, over all rows i )
       */
@@ -984,7 +984,7 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
          col_map_offd_C[ new_C_offd_j[i] ] = A_ext_row_map[ C_offd_j[i] ];
       }
 
-      hypre_TFree(C_offd_j);
+      hypre_TFree(C_offd_j, HYPRE_MEMORY_HOST);
       C_offd_j = new_C_offd_j;
 
    }
@@ -1014,7 +1014,7 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
 
    }
    else
-	hypre_TFree(C_offd_i);
+ hypre_TFree(C_offd_i, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------------
     *  Free B_ext and marker array.
@@ -1025,9 +1025,9 @@ hypre_ParCSRBooleanMatrix * hypre_ParBooleanAAt( hypre_ParCSRBooleanMatrix  * A 
       hypre_CSRBooleanMatrixDestroy(A_ext);
       A_ext = NULL;
    }
-   hypre_TFree(B_marker);
+   hypre_TFree(B_marker, HYPRE_MEMORY_HOST);
    if ( num_rows_diag_A != n_rows_A )
-      hypre_TFree(A_ext_row_map);
+      hypre_TFree(A_ext_row_map, HYPRE_MEMORY_HOST);
 
    return C;
    
@@ -1084,7 +1084,7 @@ hypre_BooleanMatTCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
       &send_map_elmts
       );
 
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
+   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRCommPkgComm(comm_pkg) = comm;
 
@@ -1134,18 +1134,16 @@ hypre_BooleanMatvecCommPkgCreate ( hypre_ParCSRBooleanMatrix *A)
    HYPRE_Int	num_cols_diag = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Diag(A));
    HYPRE_Int	num_cols_offd = hypre_CSRBooleanMatrix_Get_NCols(hypre_ParCSRBooleanMatrix_Get_Offd(A));
 
-   hypre_MatvecCommPkgCreate_core
-      (
-         comm, col_map_offd, first_col_diag, col_starts,
-         num_cols_diag, num_cols_offd,
-         first_col_diag, col_map_offd,
-         1,
-         &num_recvs, &recv_procs, &recv_vec_starts,
-         &num_sends, &send_procs, &send_map_starts,
-         &send_map_elmts
-         );
+   hypre_ParCSRCommPkgCreate_core
+   (
+      comm, col_map_offd, first_col_diag, col_starts,
+      num_cols_diag, num_cols_offd,
+      &num_recvs, &recv_procs, &recv_vec_starts,
+      &num_sends, &send_procs, &send_map_starts,
+      &send_map_elmts
+   );
 
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
+   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRCommPkgComm(comm_pkg) = comm;
 

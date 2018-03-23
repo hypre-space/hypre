@@ -14,6 +14,7 @@ TestDirNames=""            # string of names of TEST_* directories used
 HOST=`hostname`
 NumThreads=0               # number of OpenMP threads to use if > 0
 Valgrind=""                # string to add to MpirunString when using valgrind
+mpibind=""                 # string to add to MpirunString when using mpibind
 
 function usage
 {
@@ -29,6 +30,7 @@ function usage
    printf "    -nthreads <n>  use 'n' OpenMP threads\n"
    printf "    -tol <tol>     use relative tolerance 'tol' to compare numeric test values\n"
    printf "    -valgrind      use valgrind memory checker\n"
+   printf "    -mpibind       use mpibind\n"
    printf "    -n|-norun      turn off execute mode, echo what would be run\n"
    printf "    -t|-trace      echo each command\n"
    printf "    -D <var>       define <var> when running tests\n"
@@ -91,6 +93,11 @@ function MpirunString
             RunString="srun -p pdebug -n$*"
          fi
          ;;
+      surface*)
+         shift
+         RunString="srun -n$*"
+         ;;
+
       *)
          shift
          if [ $NumThreads -gt 0 ] ; then
@@ -98,7 +105,7 @@ function MpirunString
          fi
          RunString="$RunPrefix $1"
          shift
-         RunString="$RunString $Valgrind $*"
+         RunString="$RunString $mpibind $Valgrind $*"
          ;;
    esac
 }
@@ -177,6 +184,7 @@ function CheckPath
                ExecFileNames="$ExecFileNames $EXECFILE"
                return 0
             else
+		echo $EXECFILE
                echo "Cannot find executable!!!"
                return 1
             fi
@@ -449,6 +457,10 @@ do
       -valgrind)
          shift
          Valgrind="valgrind -q --suppressions=`pwd`/runtest.valgrind --leak-check=yes --track-origins=yes"
+         ;;
+      -mpibind)
+         shift
+         mpibind="mpibind"
          ;;
       -n|-norun)
          NoRun=1

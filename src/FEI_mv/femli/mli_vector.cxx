@@ -156,10 +156,10 @@ MLI_Vector *MLI_Vector::clone()
    MPI_Comm_rank(comm,&mypid);
    MPI_Comm_size(comm,&nprocs);
    vpartition = hypre_ParVectorPartitioning(vec);
-   partitioning = hypre_CTAlloc(int,nprocs+1);
+   partitioning = hypre_CTAlloc(int,nprocs+1, HYPRE_MEMORY_HOST);
    for ( i = 0; i < nprocs+1; i++ ) partitioning[i] = vpartition[i];
    globalSize = hypre_ParVectorGlobalSize(vec);
-   newVec = hypre_CTAlloc(hypre_ParVector, 1);
+   newVec = hypre_CTAlloc(hypre_ParVector, 1, HYPRE_MEMORY_HOST);
    hypre_ParVectorComm(newVec) = comm;
    hypre_ParVectorGlobalSize(newVec) = globalSize;
    hypre_ParVectorFirstIndex(newVec) = partitioning[mypid];

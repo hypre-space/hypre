@@ -31,7 +31,7 @@ hypre_SysPFMGRelaxCreate( MPI_Comm  comm )
 {
    hypre_SysPFMGRelaxData *sys_pfmg_relax_data;
 
-   sys_pfmg_relax_data = hypre_CTAlloc(hypre_SysPFMGRelaxData, 1);
+   sys_pfmg_relax_data = hypre_CTAlloc(hypre_SysPFMGRelaxData,  1, HYPRE_MEMORY_HOST);
    (sys_pfmg_relax_data -> relax_data) = hypre_NodeRelaxCreate(comm);
    (sys_pfmg_relax_data -> relax_type) = 0;        /* Weighted Jacobi */
 
@@ -49,7 +49,7 @@ hypre_SysPFMGRelaxDestroy( void *sys_pfmg_relax_vdata )
    if (sys_pfmg_relax_data)
    {
       hypre_NodeRelaxDestroy(sys_pfmg_relax_data -> relax_data);
-      hypre_TFree(sys_pfmg_relax_data);
+      hypre_TFree(sys_pfmg_relax_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

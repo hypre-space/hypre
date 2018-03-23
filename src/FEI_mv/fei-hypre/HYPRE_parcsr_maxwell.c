@@ -64,7 +64,7 @@ int HYPRE_ParCSRCotreeCreate(MPI_Comm comm, HYPRE_Solver *solver)
    hypre_CotreeData *cotree_data;
    void             *void_data;
  
-   cotree_data = hypre_CTAlloc(hypre_CotreeData, 1);
+   cotree_data = hypre_CTAlloc(hypre_CotreeData,  1, HYPRE_MEMORY_HOST);
    void_data = (void *) cotree_data;
    *solver = (HYPRE_Solver) void_data;
  
@@ -94,7 +94,7 @@ int HYPRE_ParCSRCotreeDestroy(HYPRE_Solver solver)
  
    if (cotree_data)
    {
-      hypre_TFree(cotree_data);
+      hypre_TFree(cotree_data, HYPRE_MEMORY_HOST);
       if ((cotree_data->w) != NULL)
       {
          hypre_ParVectorDestroy(cotree_data->w);
@@ -160,7 +160,7 @@ int HYPRE_ParCSRCotreeSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
    cotree_data->Aee = (hypre_ParCSRMatrix *) A;
    hypre_ParCSRMatrixGenSpanningTree(cotree_data->Gen, &tindices, 1);
-   submatrices = (hypre_ParCSRMatrix **) malloc(sizeof(hypre_ParCSRMatrix *));
+   submatrices = hypre_TAlloc(hypre_ParCSRMatrix *, 1, HYPRE_MEMORY_HOST);
    hypre_ParCSRMatrixExtractSubmatrices(cotree_data->Aee, tindices,
                                         &submatrices);
    cotree_data->Att = submatrices[0];
@@ -177,7 +177,7 @@ int HYPRE_ParCSRCotreeSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
    comm = hypre_ParCSRMatrixComm((hypre_ParCSRMatrix *) A);
    MPI_Comm_size(comm, &nprocs);
    partition = hypre_ParVectorPartitioning((hypre_ParVector *) b);
-   new_partition = (int *) malloc((nprocs+1) * sizeof(int));
+   new_partition = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
    for (ii = 0; ii <= nprocs; ii++) new_partition[ii] = partition[ii];
 /*   partition = hypre_ParVectorPartitioning((hypre_ParVector *) b);  */
    new_vector = hypre_ParVectorCreate(hypre_ParVectorComm((hypre_ParVector *)b),

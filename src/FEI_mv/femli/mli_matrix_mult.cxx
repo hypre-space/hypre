@@ -365,14 +365,14 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
     * matrix matrix multiply - perform the actual multiplication
     * ----------------------------------------------------------------------*/
 
-   CDiagIA = (int *)    malloc( (CNRows+1) * sizeof(int) );
-   CDiagJA = (int *)    malloc( CDiagNnz * sizeof(int) );
-   CDiagAA = (double *) malloc( CDiagNnz * sizeof(double) );
-   COffdIA = (int *)    malloc( (CNRows+1) * sizeof(int) );
+   CDiagIA = hypre_TAlloc(int,  (CNRows+1) , HYPRE_MEMORY_HOST);
+   CDiagJA = hypre_TAlloc(int,  CDiagNnz , HYPRE_MEMORY_HOST);
+   CDiagAA = hypre_TAlloc(double,  CDiagNnz , HYPRE_MEMORY_HOST);
+   COffdIA = hypre_TAlloc(int,  (CNRows+1) , HYPRE_MEMORY_HOST);
    if ( COffdNnz > 0 )
    {
-      COffdJA = (int *)    malloc( COffdNnz * sizeof(int) );
-      COffdAA = (double *) malloc( COffdNnz * sizeof(double) );
+      COffdJA = hypre_TAlloc(int,  COffdNnz , HYPRE_MEMORY_HOST);
+      COffdAA = hypre_TAlloc(double,  COffdNnz , HYPRE_MEMORY_HOST);
    }
    else
    {
@@ -384,7 +384,7 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
    for ( ib = 0; ib < CNRows; ib++ ) CDiagReg[ib] = -1;
    for ( ib = 0; ib < CExtNCols; ib++ ) COffdReg[ib] = -1;
    CColMap = NULL;
-   if (COffdNCols > 0) CColMap = (int *) malloc(COffdNCols * sizeof(int));
+   if (COffdNCols > 0) CColMap = hypre_TAlloc(int, COffdNCols , HYPRE_MEMORY_HOST);
    for ( ia = 0; ia < BExtNRows; ia++ ) CColMap[ia] = BColMap[ia];
    for ( ia = BExtNRows; ia < COffdNCols; ia++ ) 
       CColMap[ia] = extColList[ia-BExtNRows];
@@ -586,8 +586,8 @@ void MLI_Matrix_MatMatMult( MLI_Matrix *Amat, MLI_Matrix *Bmat,
    }
 #endif
 
-   CRowStarts = (int *) malloc( (nprocs+1) * sizeof(int) );
-   CColStarts = (int *) malloc( (nprocs+1) * sizeof(int) );
+   CRowStarts = hypre_TAlloc(int,  (nprocs+1) , HYPRE_MEMORY_HOST);
+   CColStarts = hypre_TAlloc(int,  (nprocs+1) , HYPRE_MEMORY_HOST);
    for ( ia = 0; ia <= nprocs; ia++ ) CRowStarts[ia] = ARowStarts[ia];
    for ( ia = 0; ia <= nprocs; ia++ ) CColStarts[ia] = BColStarts[ia];
    hypreC = hypre_ParCSRMatrixCreate(mpiComm, CNRows, CNCols, CRowStarts,

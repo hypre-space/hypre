@@ -86,14 +86,14 @@ hypre_ParCSRMultiVectorRead( MPI_Comm comm, void* ii_, const char* fileName ) {
   if ( n == 0 )
     return NULL;
 
-  x = (mv_TempMultiVector*) malloc(sizeof(mv_TempMultiVector));
+  x = hypre_TAlloc(mv_TempMultiVector, 1, HYPRE_MEMORY_HOST);
   hypre_assert( x != NULL );
   
   x->interpreter = ii;
 
   x->numVectors = n;
   
-  x->vector = (void**) calloc( n, sizeof(void*) );
+  x->vector = hypre_CTAlloc(void*,  n, HYPRE_MEMORY_HOST);
   hypre_assert( x->vector != NULL );
 
   x->ownsVectors = 1;

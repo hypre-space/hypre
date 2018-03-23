@@ -9,11 +9,15 @@
  *
  * $Revision$
  ***********************************************************************EHEADER*/
-
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
-#ifdef HYPRE_USE_GPU
+
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+
+#define HYPRE_USE_MANAGED_SCALABLE 1
+#define HYPRE_GPU_USE_PINNED 1
+
+#if defined(HYPRE_USE_MANAGED)
 #include <cuda_runtime_api.h>
 void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();
@@ -23,8 +27,6 @@ void VecSet(double* tgt, int size, double value, cudaStream_t s);
 void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
-#endif
-
 cudaStream_t getstreamOlde(hypre_int i);
 nvtxDomainHandle_t getdomain(hypre_int i);
 cudaEvent_t getevent(hypre_int i);
@@ -37,18 +39,6 @@ void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t 
 void MemPrefetchForce(const void *ptr,hypre_int device,cudaStream_t stream);
 cublasHandle_t getCublasHandle();
 cusparseHandle_t getCusparseHandle();
-typedef struct node {
-  const void *ptr;
-  size_t size;
-  struct node *next;
-} node;
-size_t mempush(const void *ptr, size_t size, hypre_int action);
-node *memfind(node *head, const void *ptr);
-void memdel(node **head, node *found);
-void meminsert(node **head, const void *ptr,size_t size);
-void printlist(node *head,hypre_int nc);
-//#define MEM_PAD_LEN 1
-size_t memsize(const void *ptr);
 hypre_int getsetasyncmode(hypre_int mode, hypre_int action);
 void SetAsyncMode(hypre_int mode);
 hypre_int GetAsyncMode();
@@ -59,6 +49,7 @@ hypre_int getcore();
 hypre_int getnuma();
 hypre_int checkDeviceProps();
 hypre_int pointerIsManaged(const void *ptr);
+
 /*
  * Global struct for keeping HYPRE GPU Init state
  */
@@ -82,23 +73,86 @@ extern struct hypre__global_struct hypre__global_handle ;
 /*
  * Macros for accessing elements of the global handle
  */
+
+#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
+#define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
 #define HYPRE_GPU_HANDLE hypre__global_handle.initd
 #define HYPRE_CUBLAS_HANDLE hypre__global_handle.cublas_handle
 #define HYPRE_CUSPARSE_HANDLE hypre__global_handle.cusparse_handle
 #define HYPRE_DEVICE hypre__global_handle.device
 #define HYPRE_DEVICE_COUNT hypre__global_handle.device_count
 #define HYPRE_CUSPARSE_MAT_DESCR hypre__global_handle.cusparse_mat_descr
-#define HYPRE_STREAM(index) (hypre__global_handle.streams[index])
-#define HYPRE_DOMAIN  hypre__global_handle.nvtx_domain
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
 
-#endif
+#endif /* HYPRE_USE_MANAGED */
 
-#else
+typedef struct node {
+  const void *ptr;
+  size_t size;
+  struct node *next;
+} node;
+size_t mempush(const void *ptr, size_t size, hypre_int action);
+node *memfind(node *head, const void *ptr);
+void memdel(node **head, node *found);
+void meminsert(node **head, const void *ptr,size_t size);
+void printlist(node *head,hypre_int nc);
+size_t memsize(const void *ptr);
 
-#define hypre_GPUInit(use_device)
-#define hypre_GPUFinalize()
+#endif /* defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) */
 
-#endif
+
+#if defined(HYPRE_USE_CUDA)
+extern HYPRE_Int hypre_exec_policy;
+extern char tmp_print[10];
+extern HYPRE_Int hypre_box_print;
+extern double  t_start, t_end;
+extern HYPRE_Int time_box ;
+#define HYPRE_MIN_GPU_SIZE (131072)
+
+#define RAJA_MAX_REDUCE_VARS (8)
+#define RAJA_CUDA_MAX_NUM_BLOCKS (512*512*512)
+#define RAJA_CUDA_REDUCE_BLOCK_LENGTH RAJA_CUDA_MAX_NUM_BLOCKS
+#define RAJA_CUDA_REDUCE_TALLY_LENGTH RAJA_MAX_REDUCE_VARS
+#define RAJA_CUDA_REDUCE_VAR_MAXSIZE 16
+#define COHERENCE_BLOCK_SIZE 64
+
+typedef HYPRE_Real CudaReductionBlockDataType;
+typedef HYPRE_Int GridSizeType;
+
+#define hypre_SetDeviceOn() hypre_exec_policy = HYPRE_MEMORY_DEVICE
+#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
+
+int getCudaReductionId();
+CudaReductionBlockDataType* getCudaReductionMemBlock(int id);
+void releaseCudaReductionId(int id);
+void initCudaReductionMemBlock();
+void freeCudaReductionMemBlock();
+CudaReductionBlockDataType* getCPUReductionMemBlock(int id);
+void releaseCPUReductionId(int id);
+void freeCPUReductionMemBlock();
+
+#endif/* defined(HYPRE_USE_CUDA) */
+
+
+#ifdef HYPRE_USE_OMP45
+HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
+			   const char *type1, const char *type2);
+
+HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
+
+HYPRE_Int HYPRE_OMPOffloadOn();
+
+HYPRE_Int HYPRE_OMPOffloadOff();
+
+HYPRE_Int HYPRE_OMPOffloadStatPrint();
+
+#define HYPRE_MIN_GPU_SIZE (131072)
+
+#define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
+#define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
+
+#endif/* HYPRE_USE_OMP45 */
+
+#endif/* __GPUMEM_H__ */
 

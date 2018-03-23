@@ -39,14 +39,16 @@ then
       if [ -f $i ] # This check is important in the case that there are no .err files
       then
          testname=`basename $i .err`
-         rm -fr $testname.???
+         # Use explicit extensions to avoid removing '.bat' files
+         rm -fr $testname.err $testname.dir $testname.out $testname.fil
       fi
    done
 else
    while [ "$*" ]
    do
       testname=$1
-      rm -fr $testname.???
+      # Use explicit extensions to avoid removing '.bat' files
+      rm -fr $testname.err $testname.dir $testname.out $testname.fil
       shift
    done
 fi

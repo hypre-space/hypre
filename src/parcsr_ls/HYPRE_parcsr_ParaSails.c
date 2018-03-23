@@ -67,7 +67,7 @@ HYPRE_ParCSRParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    Secret *secret;
    
-   secret = (Secret *) malloc(sizeof(Secret));
+   secret = hypre_TAlloc(Secret, 1, HYPRE_MEMORY_HOST);
 
    if (secret == NULL)
    {
@@ -305,7 +305,7 @@ HYPRE_ParaSailsCreate( MPI_Comm comm, HYPRE_Solver *solver )
 {
    Secret *secret;
    
-   secret = (Secret *) malloc(sizeof(Secret));
+   secret = hypre_TAlloc(Secret, 1, HYPRE_MEMORY_HOST);
 
    if (secret == NULL)
    {

@@ -79,7 +79,7 @@ int HYPRE_ParCSR_SuperLUCreate( MPI_Comm comm, HYPRE_Solver *solver )
       printf("HYPRE_ParCSR_SuperLUCreate ERROR - too many processors.\n");
       return -1;
    }
-   sluPtr = (HYPRE_SuperLU *) malloc(sizeof(HYPRE_SuperLU));
+   sluPtr = hypre_TAlloc(HYPRE_SuperLU, 1, HYPRE_MEMORY_HOST);
    assert ( sluPtr != NULL );
    sluPtr->factorized_  = 0;
    sluPtr->permR_       = NULL;
@@ -182,14 +182,14 @@ int HYPRE_ParCSR_SuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
    /* convert the csr matrix into csc matrix                           */
    /* ---------------------------------------------------------------- */
 
-   colLengs = (int *) malloc(nrows * sizeof(int));
+   colLengs = hypre_TAlloc(int, nrows , HYPRE_MEMORY_HOST);
    for ( irow = 0; irow < nrows; irow++ ) colLengs[irow] = 0;
    for ( irow = 0; irow < nrows; irow++ )
       for ( jcol = AdiagI[irow]; jcol < AdiagI[irow+1]; jcol++ )
          colLengs[AdiagJ[jcol]]++;
-   cscJ = (int *)    malloc( (nrows+1) * sizeof(int) );
-   cscI = (int *)    malloc( nnz * sizeof(int) );
-   cscA = (double *) malloc( nnz * sizeof(double) );
+   cscJ = hypre_TAlloc(int,  (nrows+1) , HYPRE_MEMORY_HOST);
+   cscI = hypre_TAlloc(int,  nnz , HYPRE_MEMORY_HOST);
+   cscA = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST);
    cscJ[0] = 0;
    nnz = 0;
    for ( jcol = 1; jcol <= nrows; jcol++ )
@@ -222,9 +222,9 @@ int HYPRE_ParCSR_SuperLUSetup(HYPRE_Solver solver, HYPRE_ParCSRMatrix A_csr,
                                                                                 
    dCreate_CompCol_Matrix(&sluAmat,nrows,nrows,cscJ[nrows],cscA,cscI,
                           cscJ, SLU_NC, SLU_D, SLU_GE);
-   etree   = (int *) malloc(nrows * sizeof(int));
-   sluPtr->permC_  = (int *) malloc(nrows * sizeof(int));
-   sluPtr->permR_  = (int *) malloc(nrows * sizeof(int));
+   etree   = hypre_TAlloc(int, nrows , HYPRE_MEMORY_HOST);
+   sluPtr->permC_  = hypre_TAlloc(int, nrows , HYPRE_MEMORY_HOST);
+   sluPtr->permR_  = hypre_TAlloc(int, nrows , HYPRE_MEMORY_HOST);
    permcSpec = 0;
    get_perm_c(permcSpec, &sluAmat, sluPtr->permC_);
    slu_options.Fact = DOFACT;

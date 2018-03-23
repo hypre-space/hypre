@@ -51,7 +51,7 @@ hypre_SchwarzCreate()
    use_nonsymm = 0;
    relax_weight = 1.0;
      
-   schwarz_data = hypre_CTAlloc(hypre_SchwarzData,1);
+   schwarz_data = hypre_CTAlloc(hypre_SchwarzData, 1, HYPRE_MEMORY_HOST);
 
    hypre_SchwarzSetVariant(schwarz_data, variant); 
    hypre_SchwarzSetDomainType(schwarz_data, domain_type);
@@ -79,19 +79,19 @@ hypre_SchwarzDestroy( void *data )
 	hypre_SchwarzData  *schwarz_data = (hypre_SchwarzData*) data;
 
    if (hypre_SchwarzDataScale(schwarz_data))
-      hypre_TFree (hypre_SchwarzDataScale(schwarz_data));
+      hypre_TFree(hypre_SchwarzDataScale(schwarz_data), HYPRE_MEMORY_HOST);
    if (hypre_SchwarzDataDofFunc(schwarz_data))
-      hypre_TFree (hypre_SchwarzDataDofFunc(schwarz_data));
+      hypre_TFree(hypre_SchwarzDataDofFunc(schwarz_data), HYPRE_MEMORY_HOST);
    hypre_CSRMatrixDestroy(hypre_SchwarzDataDomainStructure(schwarz_data));
    if (hypre_SchwarzDataVariant(schwarz_data) == 3)
       hypre_CSRMatrixDestroy(hypre_SchwarzDataABoundary(schwarz_data));
    hypre_ParVectorDestroy(hypre_SchwarzDataVtemp(schwarz_data));
 
    if (hypre_SchwarzDataPivots(schwarz_data))
-      hypre_TFree (hypre_SchwarzDataPivots(schwarz_data));
+      hypre_TFree(hypre_SchwarzDataPivots(schwarz_data), HYPRE_MEMORY_HOST);
 
 
-   hypre_TFree(schwarz_data);
+   hypre_TFree(schwarz_data, HYPRE_MEMORY_HOST);
    return hypre_error_flag;
 
 }

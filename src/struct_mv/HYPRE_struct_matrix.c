@@ -376,4 +376,3 @@ HYPRE_StructMatrixClearBoundary( HYPRE_StructMatrix matrix )
 {
    return( hypre_StructMatrixClearBoundary(matrix) );
 }
-

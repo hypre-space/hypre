@@ -92,7 +92,7 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
    }
    if (num_functions > 1)
    {
-      coarse_dof_func = hypre_CTAlloc(HYPRE_Int,local_coarse_size);
+      coarse_dof_func = hypre_CTAlloc(HYPRE_Int, local_coarse_size, HYPRE_MEMORY_HOST);
 
       local_coarse_size = 0;
       for (i=0; i < local_num_variables; i++)
@@ -108,7 +108,7 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
    {
       HYPRE_Int scan_recv;
       
-      coarse_pnts_global = hypre_CTAlloc(HYPRE_Int,2);
+      coarse_pnts_global = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
       hypre_MPI_Scan(&local_coarse_size, &scan_recv, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
       /* first point in my range */ 
       coarse_pnts_global[0] = scan_recv - local_coarse_size;
@@ -119,7 +119,7 @@ hypre_BoomerAMGCoarseParms(MPI_Comm comm,
       
 
 #else
-   coarse_pnts_global = hypre_CTAlloc(HYPRE_Int,num_procs+1);
+   coarse_pnts_global = hypre_CTAlloc(HYPRE_Int, num_procs+1, HYPRE_MEMORY_HOST);
 
    hypre_MPI_Allgather(&local_coarse_size,1,HYPRE_MPI_INT,&coarse_pnts_global[1],
 		1,HYPRE_MPI_INT,comm);

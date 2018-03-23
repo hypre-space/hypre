@@ -155,7 +155,7 @@ int MLI_Solver_HSchwarz::calcOmega()
    amgData->smooth_num_levels = 1;
    amgData->smooth_num_sweeps = one;
 
-   smoother = hypre_CTAlloc(HYPRE_Solver, one);
+   smoother = hypre_CTAlloc(HYPRE_Solver, one, HYPRE_MEMORY_HOST);
    amgData->smoother = smoother;
    HYPRE_SchwarzCreate(&smoother[0]);
    HYPRE_SchwarzSetNumFunctions(smoother[0], blkSize_);
@@ -170,7 +170,7 @@ int MLI_Solver_HSchwarz::calcOmega()
    HYPRE_SchwarzSetup(smoother[0], (HYPRE_ParCSRMatrix) A, 
                       (HYPRE_ParVector) vTemp, (HYPRE_ParVector) vTemp);
    smoother_ = smoother[0];
-   hypre_TFree(amgData);
+   hypre_TFree(amgData, HYPRE_MEMORY_HOST);
    delete [] amgData->A_array;
    delete [] amgData->CF_marker_array;
    return 0;

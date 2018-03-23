@@ -60,6 +60,7 @@
 #define dgesvd_  hypre_dgesvd
 #define dgetf2_  hypre_dgetf2
 #define dgetrf_  hypre_dgetrf
+#define dgetri_  hypre_dgetri
 #define dgetrs_  hypre_dgetrs
 #define dlasq1_  hypre_dlasq1
 #define dlasq2_  hypre_dlasq2
@@ -88,6 +89,8 @@
 #define dsygv_   hypre_dsygv
 #define dsytd2_  hypre_dsytd2
 #define dsytrd_  hypre_dsytrd
+#define dtrti2_  hypre_dtrti2
+#define dtrtri_  hypre_dtrtri
 
 /* lapack auxiliary routines */
 #define dlabad_  hypre_dlabad

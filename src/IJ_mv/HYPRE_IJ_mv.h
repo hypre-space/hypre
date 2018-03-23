@@ -127,6 +127,13 @@ HYPRE_Int HYPRE_IJMatrixSetValues(HYPRE_IJMatrix       matrix,
                                   const HYPRE_Complex *values);
 
 /**
+ * Sets all  matrix coefficients of an already assembled matrix to
+ * {\tt value}
+ **/
+HYPRE_Int HYPRE_IJMatrixSetConstantValues(HYPRE_IJMatrix       matrix,
+                                          HYPRE_Complex value);
+
+/**
  * Adds to values for {\tt nrows} rows or partial rows of the matrix.  
  * Usage details are analogous to \Ref{HYPRE_IJMatrixSetValues}.  
  * Adds to any previous values at the specified locations, or, if 
@@ -167,8 +174,11 @@ HYPRE_Int HYPRE_IJMatrixGetRowCounts(HYPRE_IJMatrix  matrix,
 
 /**
  * Gets values for {\tt nrows} rows or partial rows of the matrix.  
- * Usage details are
+ * Usage details are mostly
  * analogous to \Ref{HYPRE_IJMatrixSetValues}.
+ * Note that if nrows is negative, the routine will return
+ * the column_indices and matrix coefficients of the
+ * (-nrows) rows contained in rows.
  **/
 HYPRE_Int HYPRE_IJMatrixGetValues(HYPRE_IJMatrix  matrix,
                                   HYPRE_Int       nrows,

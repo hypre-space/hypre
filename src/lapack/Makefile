@@ -29,6 +29,7 @@ LAPACK_FILES = \
  dgeqrf.c\
  dgesvd.c\
  dgetrf.c\
+ dgetri.c\
  dgetrs.c\
  dgetf2.c\
  dlabad.c\
@@ -84,6 +85,8 @@ LAPACK_FILES = \
  dsygv.c\
  dsytd2.c\
  dsytrd.c\
+ dtrtri.c\
+ dtrti2.c\
  ieeeck.c\
  ilaenv.c\
  lsame.c\

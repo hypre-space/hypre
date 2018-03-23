@@ -37,7 +37,7 @@ hypre_SparseMSGRestrictCreate( )
 {
    hypre_SparseMSGRestrictData *restrict_data;
 
-   restrict_data = hypre_CTAlloc(hypre_SparseMSGRestrictData, 1);
+   restrict_data = hypre_CTAlloc(hypre_SparseMSGRestrictData,  1, HYPRE_MEMORY_HOST);
 
    (restrict_data -> time_index) = hypre_InitializeTiming("SparseMSGRestrict");
    
@@ -222,19 +222,20 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
             hypre_StructMapCoarseToFine(startc, cindex, strideR, startR);
 
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rcp,rp,Rp0,rp0,Rp1,rp1)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(R), loop_size,
                                 R_dbox,  startR, strideR, Ri,
                                 r_dbox,  start,  stride,  ri,
                                 rc_dbox, startc, stridec, rci);
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop3For(Ri, ri, rci)
             {
                rcp[rci] = rp[ri] + (Rp0[Ri] * rp0[ri] +
                                     Rp1[Ri] * rp1[ri]);
             }
             hypre_BoxLoop3End(Ri, ri, rci);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
          }
       }
    }
@@ -265,7 +266,7 @@ hypre_SparseMSGRestrictDestroy( void *restrict_vdata )
       hypre_StructMatrixDestroy(restrict_data -> R);
       hypre_ComputePkgDestroy(restrict_data -> compute_pkg);
       hypre_FinalizeTiming(restrict_data -> time_index);
-      hypre_TFree(restrict_data);
+      hypre_TFree(restrict_data, HYPRE_MEMORY_HOST);
    }
 
    return ierr;

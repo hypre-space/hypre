@@ -30,7 +30,7 @@ hypre_MultiblockMatrixCreate( )
 {
    hypre_MultiblockMatrix  *matrix;
 
-   matrix = hypre_CTAlloc(hypre_MultiblockMatrix, 1);
+   matrix = hypre_CTAlloc(hypre_MultiblockMatrix,  1, HYPRE_MEMORY_HOST);
 
    return ( matrix );
 }
@@ -47,11 +47,11 @@ hypre_MultiblockMatrixDestroy( hypre_MultiblockMatrix *matrix )
    if (matrix)
    {
       for(i=0; i < hypre_MultiblockMatrixNumSubmatrices(matrix); i++)
-         hypre_TFree(hypre_MultiblockMatrixSubmatrix(matrix,i));
-      hypre_TFree(hypre_MultiblockMatrixSubmatrices(matrix));
-      hypre_TFree(hypre_MultiblockMatrixSubmatrixTypes(matrix));
+         hypre_TFree(hypre_MultiblockMatrixSubmatrix(matrix, i), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_MultiblockMatrixSubmatrices(matrix), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_MultiblockMatrixSubmatrixTypes(matrix), HYPRE_MEMORY_HOST);
 
-      hypre_TFree(matrix);
+      hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
 
    return ierr;
@@ -69,10 +69,10 @@ hypre_MultiblockMatrixLimitedDestroy( hypre_MultiblockMatrix *matrix )
 
    if (matrix)
    {
-      hypre_TFree(hypre_MultiblockMatrixSubmatrices(matrix));
-      hypre_TFree(hypre_MultiblockMatrixSubmatrixTypes(matrix));
+      hypre_TFree(hypre_MultiblockMatrixSubmatrices(matrix), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_MultiblockMatrixSubmatrixTypes(matrix), HYPRE_MEMORY_HOST);
 
-      hypre_TFree(matrix);
+      hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
 
    return ierr;
@@ -92,10 +92,10 @@ hypre_MultiblockMatrixInitialize( hypre_MultiblockMatrix *matrix )
       return(-1);
 
    hypre_MultiblockMatrixSubmatrixTypes(matrix) = 
-      hypre_CTAlloc( HYPRE_Int, hypre_MultiblockMatrixNumSubmatrices(matrix) );
+      hypre_CTAlloc( HYPRE_Int,  hypre_MultiblockMatrixNumSubmatrices(matrix) , HYPRE_MEMORY_HOST);
 
    hypre_MultiblockMatrixSubmatrices(matrix) = 
-      hypre_CTAlloc( void *, hypre_MultiblockMatrixNumSubmatrices(matrix) );
+      hypre_CTAlloc( void *,  hypre_MultiblockMatrixNumSubmatrices(matrix) , HYPRE_MEMORY_HOST);
 
    return ierr;
 }

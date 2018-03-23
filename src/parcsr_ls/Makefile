@@ -32,6 +32,7 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/../matrix_matrix\
  -I$(srcdir)/../IJ_mv\
  -I$(srcdir)/../parcsr_block_mv\
+ $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}
 
 HEADERS =\
@@ -129,7 +130,10 @@ FILES =\
  block_tridiag.c\
  ams.c\
  ads.c\
- ame.c
+ ame.c\
+ par_restr.c\
+ par_lr_restr.c\
+ superlu.c
 
 OBJS = ${FILES:.c=.o}
 

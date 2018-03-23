@@ -698,10 +698,10 @@ hypre_F90_IFACE(hypre_boomeramginitgridrelaxatn, HYPRE_BOOMERAMGINITGRIDRELAXATN
      hypre_F90_Int *max_levels,
      hypre_F90_Int *ierr               )
 {
-   *num_grid_sweeps   = (hypre_F90_Obj) hypre_CTAlloc(HYPRE_Int*, 1);
-   *grid_relax_type   = (hypre_F90_Obj) hypre_CTAlloc(HYPRE_Int*, 1);
-   *grid_relax_points = (hypre_F90_Obj) hypre_CTAlloc(HYPRE_Int**, 1);
-   *relax_weights     = (hypre_F90_Obj) hypre_CTAlloc(HYPRE_Real*, 1);
+   *num_grid_sweeps   = (hypre_F90_Obj) hypre_CTAlloc(HYPRE_Int*,  1, HYPRE_MEMORY_HOST);
+   *grid_relax_type   = (hypre_F90_Obj) hypre_CTAlloc(HYPRE_Int*,  1, HYPRE_MEMORY_HOST);
+   *grid_relax_points = (hypre_F90_Obj) hypre_CTAlloc(HYPRE_Int**,  1, HYPRE_MEMORY_HOST);
+   *relax_weights     = (hypre_F90_Obj) hypre_CTAlloc(HYPRE_Real*,  1, HYPRE_MEMORY_HOST);
 
    *ierr = (hypre_F90_Int)
       ( HYPRE_BoomerAMGInitGridRelaxation(
@@ -733,10 +733,10 @@ hypre_F90_IFACE(hypre_boomeramgfingridrelaxatn, HYPRE_BOOMERAMGFINGRIDRELAXATN)
    char *ptr_grid_relax_points = (char *) *grid_relax_points;
    char *ptr_relax_weights     = (char *) *relax_weights;
 
-   hypre_TFree(ptr_num_grid_sweeps);
-   hypre_TFree(ptr_grid_relax_type);
-   hypre_TFree(ptr_grid_relax_points);
-   hypre_TFree(ptr_relax_weights);
+   hypre_TFree(ptr_num_grid_sweeps, HYPRE_MEMORY_HOST);
+   hypre_TFree(ptr_grid_relax_type, HYPRE_MEMORY_HOST);
+   hypre_TFree(ptr_grid_relax_points, HYPRE_MEMORY_HOST);
+   hypre_TFree(ptr_relax_weights, HYPRE_MEMORY_HOST);
 
    *ierr = 0;
 }
@@ -2001,6 +2001,24 @@ hypre_F90_IFACE(hypre_boomeramgsetseqthrshold, HYPRE_BOOMERAMGSETSEQTHRSHOLD)
            hypre_F90_PassObj (HYPRE_Solver, solver),
            hypre_F90_PassInt (seq_th) ) );
 }
+
+#ifdef HAVE_DSUPERLU
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetDSLUThreshold
+ *--------------------------------------------------------------------------*/
+
+void
+hypre_F90_IFACE(hypre_boomeramgsetdsluthrshold, HYPRE_BOOMERAMGSETDSLUTHRSHOLD)
+   ( hypre_F90_Obj *solver,
+     hypre_F90_Int *dslu_th,
+     hypre_F90_Int *ierr          )
+{
+   *ierr = (hypre_F90_Int)
+      ( HYPRE_BoomerAMGSetDSLUThreshold(
+           hypre_F90_PassObj (HYPRE_Solver, solver),
+           hypre_F90_PassInt (dslu_th) ) );
+}
+#endif
 
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetRedundant

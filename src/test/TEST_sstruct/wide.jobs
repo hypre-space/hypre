@@ -11,6 +11,6 @@
 # $Revision$
 #EHEADER**********************************************************************
 
-mpirun -np 1 ./sstruct -in sstruct.in.wide.2D -r 10 10 1 -P 1 1 1 -solver 239 > wide.out.1
-mpirun -np 4 ./sstruct -in sstruct.in.wide.2D -r  5  5 1 -P 2 2 1 -solver 239 > wide.out.4
+mpirun -np 1  ./sstruct -in sstruct.in.wide.2D -r 10 10 1 -P 1 1 1 -solver 239 > wide.out.1
+mpirun -np 4  ./sstruct -in sstruct.in.wide.2D -r  5  5 1 -P 2 2 1 -solver 239 > wide.out.4
 

@@ -45,6 +45,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    HYPRE_Int      cycle_count;
    HYPRE_Int      num_levels;
    /* HYPRE_Int      num_unknowns; */
+   HYPRE_Int    converge_type;
    HYPRE_Real   tol;
 
    HYPRE_Int block_mode;
@@ -90,7 +91,6 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParVector  *Residual;
 
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.solve");
-      
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm,&my_id);
 
@@ -104,6 +104,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    F_array          = hypre_ParAMGDataFArray(amg_data);
    U_array          = hypre_ParAMGDataUArray(amg_data);
 
+   converge_type    = hypre_ParAMGDataConvergeType(amg_data);
    tol              = hypre_ParAMGDataTol(amg_data);
    min_iter         = hypre_ParAMGDataMinIter(amg_data);
    max_iter         = hypre_ParAMGDataMaxIter(amg_data);
@@ -198,15 +199,25 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
         return hypre_error_flag;
      }
 
+     /* r0 */
      resid_nrm_init = resid_nrm;
-     rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
-     if (rhs_norm)
+
+     if (0 == converge_type)
      {
-       relative_resid = resid_nrm_init / rhs_norm;
+        rhs_norm = sqrt(hypre_ParVectorInnerProd(f, f));
+        if (rhs_norm)
+        {
+           relative_resid = resid_nrm_init / rhs_norm;
+        }
+        else
+        {
+           relative_resid = resid_nrm_init;
+        }
      }
      else
      {
-       relative_resid = resid_nrm_init;
+        /* converge_type != 0, test convergence with ||r|| / ||r0|| */
+        relative_resid = 1.0;
      }
    }
    else
@@ -219,27 +230,24 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       hypre_printf("                                            relative\n");
       hypre_printf("               residual        factor       residual\n");
       hypre_printf("               --------        ------       --------\n");
-      hypre_printf("    Initial    %e                 %e\n",resid_nrm_init,
-              relative_resid);
+      hypre_printf("    Initial    %e                 %e\n", resid_nrm_init,
+                   relative_resid);
    }
 
    /*-----------------------------------------------------------------------
     *    Main V-cycle loop
     *-----------------------------------------------------------------------*/
    
-   while ((relative_resid >= tol || cycle_count < min_iter)
-          && cycle_count < max_iter)
+   while ( (relative_resid >= tol || cycle_count < min_iter) && cycle_count < max_iter )
    {
-      hypre_ParAMGDataCycleOpCount(amg_data) = 0;   
+      hypre_ParAMGDataCycleOpCount(amg_data) = 0;
       /* Op count only needed for one cycle */
-
       if ((additive < 0 || additive >= num_levels) 
 	   && (mult_additive < 0 || mult_additive >= num_levels)
 	   && (simple < 0 || simple >= num_levels) )
          hypre_BoomerAMGCycle(amg_data, F_array, U_array); 
       else
          hypre_BoomerAMGAdditiveCycle(amg_data); 
-
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
@@ -257,15 +265,29 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
            resid_nrm = sqrt(hypre_ParVectorInnerProd(Vtemp, Vtemp));
         }
 
-        if (old_resid) conv_factor = resid_nrm / old_resid;
-        else conv_factor = resid_nrm;
-        if (rhs_norm)
+        if (old_resid) 
         {
-           relative_resid = resid_nrm / rhs_norm;
+           conv_factor = resid_nrm / old_resid;
+        }
+        else 
+        {
+           conv_factor = resid_nrm;
+        }
+
+        if (0 == converge_type)
+        {
+           if (rhs_norm)
+           {
+              relative_resid = resid_nrm / rhs_norm;
+           }
+           else
+           {
+              relative_resid = resid_nrm;
+           }
         }
         else
         {
-           relative_resid = resid_nrm;
+           relative_resid = resid_nrm / resid_nrm_init;
         }
 
         hypre_ParAMGDataRelativeResidualNorm(amg_data) = relative_resid;
@@ -281,7 +303,7 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
       if (my_id == 0 && amg_print_level > 1)
       { 
          hypre_printf("    Cycle %2d   %e    %f     %e \n", cycle_count,
-                 resid_nrm, conv_factor, relative_resid);
+                      resid_nrm, conv_factor, relative_resid);
       }
    }
 
@@ -302,8 +324,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    if (amg_print_level > 1) 
    {
-      num_coeffs       = hypre_CTAlloc(HYPRE_Real, num_levels);
-      num_variables    = hypre_CTAlloc(HYPRE_Real, num_levels);
+      num_coeffs       = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
+      num_variables    = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
       num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
       num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
 
@@ -359,10 +381,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          hypre_printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
       }
 
-      hypre_TFree(num_coeffs);
-      hypre_TFree(num_variables);
+      hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
+      hypre_TFree(num_variables, HYPRE_MEMORY_HOST);
    }
-
    HYPRE_ANNOTATION_END("BoomerAMG.solve");
    
    return hypre_error_flag;

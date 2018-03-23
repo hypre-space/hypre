@@ -314,7 +314,7 @@ main( HYPRE_Int   argc,
    }
       
    
-   loop_times = hypre_CTAlloc(HYPRE_Real, loop);
+   loop_times = hypre_CTAlloc(HYPRE_Real,  loop, HYPRE_MEMORY_HOST);
    
 
 
@@ -528,7 +528,7 @@ main( HYPRE_Int   argc,
 
 #if time_gather
                   
-            info = hypre_CTAlloc(HYPRE_Int, num_procs);
+            info = hypre_CTAlloc(HYPRE_Int,  num_procs, HYPRE_MEMORY_HOST);
             
             hypre_MPI_Allgather(bcast_rows, 1, HYPRE_MPI_INT, info, 1, HYPRE_MPI_INT, hypre_MPI_COMM_WORLD); 
 
@@ -864,7 +864,7 @@ myBuildParLaplacian27pt( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(HYPRE_Real, 2);
+   values = hypre_CTAlloc(HYPRE_Real,  2, HYPRE_MEMORY_HOST);
 
    values[0] = 26.0;
    if (nx == 1 || ny == 1 || nz == 1)
@@ -876,7 +876,7 @@ myBuildParLaplacian27pt( HYPRE_Int                  argc,
    A = (HYPRE_ParCSRMatrix) GenerateLaplacian27pt(hypre_MPI_COMM_WORLD,
                                nx, ny, nz, P, Q, R, p, q, r, values);
 
-   hypre_TFree(values);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
    *A_ptr = A;
 
@@ -997,7 +997,7 @@ myBuildParLaplacian( HYPRE_Int                  argc,
     * Generate the matrix 
     *-----------------------------------------------------------*/
  
-   values = hypre_CTAlloc(HYPRE_Real, 4);
+   values = hypre_CTAlloc(HYPRE_Real,  4, HYPRE_MEMORY_HOST);
 
    values[1] = -cx;
    values[2] = -cy;
@@ -1020,7 +1020,7 @@ myBuildParLaplacian( HYPRE_Int                  argc,
    A = (HYPRE_ParCSRMatrix) GenerateLaplacian(hypre_MPI_COMM_WORLD, nx, ny, nz, 
 					      P, Q, R, p, q, r, values);
 
-   hypre_TFree(values);
+   hypre_TFree(values, HYPRE_MEMORY_HOST);
 
 
    *A_ptr = A;

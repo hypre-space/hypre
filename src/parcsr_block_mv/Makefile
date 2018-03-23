@@ -26,6 +26,8 @@ C_COMPILE_FLAGS = \
  -I$(srcdir)/../parcsr_ls\
  -I$(srcdir)/../IJ_mv\
  -I$(srcdir)/../krylov\
+ $(SUPERLU_INCLUDE)\
+ $(DSUPERLU_INCLUDE)\
  ${CINCLUDES}
 
 LFLAGS = \

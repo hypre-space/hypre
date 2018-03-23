@@ -34,8 +34,8 @@
 
 hypre_PCGFunctions *
 hypre_PCGFunctionsCreate(
-   char *       (*CAlloc)        ( size_t count, size_t elt_size ),
-   HYPRE_Int    (*Free)          ( char *ptr ),
+   void *       (*CAlloc)        ( size_t count, size_t elt_size, HYPRE_Int location ),
+   HYPRE_Int    (*Free)          ( void *ptr ),
    HYPRE_Int    (*CommInfo)      ( void  *A, HYPRE_Int   *my_id,
                                    HYPRE_Int   *num_procs ),
    void *       (*CreateVector)  ( void *vector ),
@@ -55,7 +55,7 @@ hypre_PCGFunctionsCreate(
 {
    hypre_PCGFunctions * pcg_functions;
    pcg_functions = (hypre_PCGFunctions *)
-      CAlloc( 1, sizeof(hypre_PCGFunctions) );
+      CAlloc( 1, sizeof(hypre_PCGFunctions), HYPRE_MEMORY_HOST );
 
    pcg_functions->CAlloc = CAlloc;
    pcg_functions->Free = Free;
@@ -86,7 +86,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
 {
    hypre_PCGData *pcg_data;
 
-   pcg_data = hypre_CTAllocF(hypre_PCGData, 1, pcg_functions);
+   pcg_data = hypre_CTAllocF(hypre_PCGData, 1, pcg_functions, HYPRE_MEMORY_HOST);
 
    pcg_data -> functions = pcg_functions;
 
@@ -231,12 +231,12 @@ hypre_PCGSetup( void *pcg_vdata,
       if ( (pcg_data -> norms) != NULL )
          hypre_TFreeF( pcg_data -> norms, pcg_functions );
       (pcg_data -> norms)     = hypre_CTAllocF( HYPRE_Real, max_iter + 1,
-                                                pcg_functions);
+                                                pcg_functions, HYPRE_MEMORY_HOST);
 
       if ( (pcg_data -> rel_norms) != NULL )
          hypre_TFreeF( pcg_data -> rel_norms, pcg_functions );
       (pcg_data -> rel_norms) = hypre_CTAllocF( HYPRE_Real, max_iter + 1,
-                                                pcg_functions );
+                                                pcg_functions, HYPRE_MEMORY_HOST );
    }
 
    return hypre_error_flag;
@@ -409,8 +409,10 @@ hypre_PCGSolve( void *pcg_vdata,
 
    /* r = b - Ax */
    (*(pcg_functions->CopyVector))(b, r);
+
    (*(pcg_functions->Matvec))(matvec_data, -1.0, A, x, 1.0, r);
- 
+
+   //hypre_ParVectorUpdateHost(r);
    /* p = C*r */
    (*(pcg_functions->ClearVector))(p);
    precond(precond_data, A, r, p);
