@@ -130,9 +130,9 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
    hypre_IJMatrixGlobalFirstCol(ijmatrix) = col0;
    hypre_IJMatrixGlobalNumRows(ijmatrix) = rowN - row0 + 1;
    hypre_IJMatrixGlobalNumCols(ijmatrix) = colN - col0 + 1;
-   
+
    hypre_TFree(info, HYPRE_MEMORY_HOST);
-   
+
 
 #else
 
@@ -165,7 +165,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
          hypre_TFree(info, HYPRE_MEMORY_HOST);
          hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
          hypre_TFree(row_partitioning, HYPRE_MEMORY_HOST);
-   	 return hypre_error_flag;
+         return hypre_error_flag;
       }
       else
          row_partitioning[i+1] = recv_buf[i4+4];
@@ -186,20 +186,20 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
       col_partitioning = row_partitioning;
    else
    {
-      col_partitioning = hypre_CTAlloc(HYPRE_Int,num_procs+1);
+      col_partitioning = hypre_CTAlloc(HYPRE_Int, num_procs+1, HYPRE_MEMORY_HOST);
       col_partitioning[0] = recv_buf[2];
       for (i=0; i < num_procs-1; i++)
       {
          i4 = 4*i;
          if (recv_buf[i4+3] != recv_buf[i4+6]-1)
          {
-           hypre_error(HYPRE_ERROR_GENERIC);
-           hypre_TFree(ijmatrix, HYPRE_MEMORY_HOST);
-           hypre_TFree(info, HYPRE_MEMORY_HOST);
-           hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
-           hypre_TFree(row_partitioning, HYPRE_MEMORY_HOST);
-           hypre_TFree(col_partitioning, HYPRE_MEMORY_HOST);
-   	   return hypre_error_flag;
+            hypre_error(HYPRE_ERROR_GENERIC);
+            hypre_TFree(ijmatrix, HYPRE_MEMORY_HOST);
+            hypre_TFree(info, HYPRE_MEMORY_HOST);
+            hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
+            hypre_TFree(row_partitioning, HYPRE_MEMORY_HOST);
+            hypre_TFree(col_partitioning, HYPRE_MEMORY_HOST);
+            return hypre_error_flag;
          }
          else
             col_partitioning[i+1] = recv_buf[i4+6];
@@ -213,10 +213,10 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
       row_partitioning[0];
    hypre_IJMatrixGlobalNumCols(ijmatrix) = col_partitioning[num_procs] -
       col_partitioning[0];
-   
+
    hypre_TFree(info, HYPRE_MEMORY_HOST);
    hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
-   
+
 #endif
 
    hypre_IJMatrixRowPartitioning(ijmatrix) = row_partitioning;
@@ -244,7 +244,7 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
    if (ijmatrix)
    {
       if (hypre_IJMatrixRowPartitioning(ijmatrix) ==
-                      hypre_IJMatrixColPartitioning(ijmatrix))
+          hypre_IJMatrixColPartitioning(ijmatrix))
          hypre_TFree(hypre_IJMatrixRowPartitioning(ijmatrix), HYPRE_MEMORY_HOST);
       else
       {
@@ -262,7 +262,7 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
       }
    }
 
-   hypre_TFree(ijmatrix, HYPRE_MEMORY_HOST); 
+   hypre_TFree(ijmatrix, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -426,10 +426,36 @@ HYPRE_IJMatrixSetValues( HYPRE_IJMatrix       matrix,
    }
 
    /* Compute row_indexes and call Values2 routine (TODO: add OpenMP)*/
-   row_indexes = hypre_CTAlloc(HYPRE_Int, nrows);
+   row_indexes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
    hypre_PrefixSumInt(nrows, ncols, row_indexes);
    HYPRE_IJMatrixSetValues2(matrix, nrows, ncols, rows, row_indexes, cols, values);
-   hypre_TFree(row_indexes);
+   hypre_TFree(row_indexes, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_IJMatrixSetConstantValues( HYPRE_IJMatrix matrix, HYPRE_Complex value)
+{
+   hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
+
+   if (!ijmatrix)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
+      return( hypre_IJMatrixSetConstantValuesParCSR( ijmatrix, value));
+   }
+   else
+   {
+      hypre_error_in_arg(1);
+   }
 
    return hypre_error_flag;
 }
@@ -494,10 +520,10 @@ HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix       matrix,
    }
 
    /* Compute row_indexes and call Values2 routine */
-   row_indexes = hypre_CTAlloc(HYPRE_Int, nrows);
+   row_indexes = hypre_CTAlloc(HYPRE_Int, nrows, HYPRE_MEMORY_HOST);
    hypre_PrefixSumInt(nrows, ncols, row_indexes);
    HYPRE_IJMatrixAddToValues2(matrix, nrows, ncols, rows, row_indexes, cols, values);
-   hypre_TFree(row_indexes);
+   hypre_TFree(row_indexes, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
