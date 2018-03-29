@@ -1697,6 +1697,9 @@ HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
 
+/* par_ilu.c */
+void *hypre_ILUCreate ( void );
+HYPRE_Int hypre_ILUDestroy ( void *ilu_vdata );
 	
 #ifdef __cplusplus
 }

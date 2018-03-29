@@ -3502,6 +3502,30 @@ HYPRE_MGRGetFinalRelativeResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_nor
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
+/**
+ * @name ParCSR ILU Solver
+ *
+ * (Parallel) ILU smoother 
+ **/                                                       
+/*@{*/
+
+/**
+ * Create a solver object
+ **/
+HYPRE_Int HYPRE_ILUCreate( HYPRE_Solver *solver );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUDestroy
+ *--------------------------------------------------------------------------*/
+/**
+ * Destroy a solver object
+ **/
+HYPRE_Int HYPRE_ILUDestroy( HYPRE_Solver solver );
+
+/*@}*/
+
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
 
 /*--------------------------------------------------------------------------
  * Miscellaneous: These probably do not belong in the interface.
