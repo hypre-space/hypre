@@ -18,6 +18,10 @@
 #define PRINT_CF 0
 
 #define DEBUG_SAVE_ALL_OPS 0
+
+extern HYPRE_Int AIR_TOT_SOL_SIZE;
+extern HYPRE_Int AIR_MAX_SOL_SIZE;
+
 /*****************************************************************************
  *
  * Routine for driving the setup phase of AMG
@@ -2903,7 +2907,10 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    /*-----------------------------------------------------------------------
     * Print some stuff
     *-----------------------------------------------------------------------*/
-
+   /*
+   hypre_printf("Proc %d: AIR_TOT_SOL_SIZE %d, MAX %d\n", 
+                my_id, AIR_TOT_SOL_SIZE, AIR_MAX_SOL_SIZE);
+   */
    if (amg_print_level == 1 || amg_print_level == 3)
       hypre_BoomerAMGSetupStats(amg_data,A);
 
