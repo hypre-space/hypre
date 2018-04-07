@@ -2907,67 +2907,81 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    if (amg_print_level == 1 || amg_print_level == 3)
       hypre_BoomerAMGSetupStats(amg_data,A);
 
-/* print out CF info to plot grids in matlab (see 'tools/AMGgrids.m') */
+   /* print out CF info to plot grids in matlab (see 'tools/AMGgrids.m') */
 
    if (hypre_ParAMGDataPlotGrids(amg_data))
    {
-     HYPRE_Int *CF, *CFc, *itemp;
-     FILE* fp;
-     char filename[256];
-     HYPRE_Int coorddim = hypre_ParAMGDataCoordDim (amg_data);
-     float *coordinates = hypre_ParAMGDataCoordinates (amg_data);
-                                                                                
-     if (!coordinates) coorddim=0;
-                                                                                
+      HYPRE_Int *CF, *CFc, *itemp;
+      FILE* fp;
+      char filename[256];
+      HYPRE_Int coorddim = hypre_ParAMGDataCoordDim (amg_data);
+      float *coordinates = hypre_ParAMGDataCoordinates (amg_data);
 
-     if (block_mode)
-        local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[0]));
-     else      
-        local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+      if (!coordinates) coorddim=0;
 
-     CF = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
-     CFc = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
 
-     for (level = (num_levels - 2); level >= 0; level--)
-     {
-      /* swap pointers */
-        itemp = CFc;
-        CFc = CF;
-        CF = itemp;
-        if (block_mode)
-           local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[level]));
-        else
-           local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
-      
-
-      for (i = 0, j = 0; i < local_size; i++)
+      if (block_mode)
       {
-         /* if a C-point */
-         CF[i] = 0;
-         if (CF_marker_array[level][i] > -1)
+         local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[0]));
+      }
+      else
+      {
+         local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+      }
+
+      CF  = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
+      CFc = hypre_CTAlloc(HYPRE_Int, local_size, HYPRE_MEMORY_HOST);
+
+      for (level = (num_levels - 2); level >= 0; level--)
+      {
+         /* swap pointers */
+         itemp = CFc;
+         CFc = CF;
+         CF = itemp;
+         if (block_mode)
          {
-            CF[i] = CFc[j] + 1;
-            j++;
+            local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[level]));
+         }
+         else
+         {
+            local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level]));
+         }
+
+         for (i = 0, j = 0; i < local_size; i++)
+         {
+            /* if a C-point */
+            CF[i] = 0;
+            if (CF_marker_array[level][i] > -1)
+            {
+               CF[i] = CFc[j] + 1;
+               j++;
+            }
          }
       }
-     }
-     if (block_mode)
-        local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[0]));
-     else
-        local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
-     hypre_sprintf (filename,"%s.%05d",hypre_ParAMGDataPlotFileName (amg_data),my_id);     fp = fopen(filename, "w");
+      if (block_mode)
+      {
+         local_size = hypre_CSRMatrixNumRows(hypre_ParCSRBlockMatrixDiag(A_block_array[0]));
+      }
+      else
+      {
+         local_size = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
+      }
+      hypre_sprintf (filename,"%s.%05d",hypre_ParAMGDataPlotFileName (amg_data),my_id);
+      fp = fopen(filename, "w");
 
-     for (i = 0; i < local_size; i++)
-     {
-       for (j = 0; j < coorddim; j++)
-         hypre_fprintf (fp,"%f ",coordinates[coorddim*i+j]);
-       hypre_fprintf(fp, "%d\n", CF[i]);
-     }
-     fclose(fp);
+      for (i = 0; i < local_size; i++)
+      {
+         for (j = 0; j < coorddim; j++)
+         {
+            hypre_fprintf (fp,"%f ",coordinates[coorddim*i+j]);
+         }
+         hypre_fprintf(fp, "%d\n", CF[i]);
+      }
+      fclose(fp);
 
-     hypre_TFree(CF, HYPRE_MEMORY_HOST);
-     hypre_TFree(CFc, HYPRE_MEMORY_HOST);
-  }
+      hypre_TFree(CF, HYPRE_MEMORY_HOST);
+      hypre_TFree(CFc, HYPRE_MEMORY_HOST);
+   }
 
 /* print out matrices on all levels  */
 #if DEBUG
