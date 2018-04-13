@@ -272,6 +272,7 @@ HYPRE_Int hypre_CSRMatrixSetDataOwner ( hypre_CSRMatrix *matrix , HYPRE_Int owns
 HYPRE_Int hypre_CSRMatrixSetRownnz ( hypre_CSRMatrix *matrix );
 hypre_CSRMatrix *hypre_CSRMatrixRead ( char *file_name );
 HYPRE_Int hypre_CSRMatrixPrint ( hypre_CSRMatrix *matrix , char *file_name );
+HYPRE_Int hypre_CSRMatrixPrintCOO( hypre_CSRMatrix *matrix, char *file_name );
 HYPRE_Int hypre_CSRMatrixPrintHB ( hypre_CSRMatrix *matrix_input , char *file_name );
 HYPRE_Int hypre_CSRMatrixCopy ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int copy_data );
 hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A );

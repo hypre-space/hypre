@@ -294,6 +294,9 @@ hypre_BoomerAMGCoarsen( hypre_ParCSRMatrix    *S,
             if (measure_array[i] >= 1.0 ||
                 (S_diag_i[i+1]-S_diag_i[i]) > 0)
             {
+               /*
+               printf("i=%d, measure %f, %d\n", i, measure_array[i], S_diag_i[i+1]-S_diag_i[i]);
+               */
                CF_marker[i] = 0;
                graph_array[cnt++] = i;
             }
@@ -1065,13 +1068,13 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       col_n = col_0+num_variables; */
       if (meas_type)
       {
-	 for (i=0; i < num_nonzeros; i++)
+         for (i=0; i < num_nonzeros; i++)
          {
-	    index = S_ext_j[i] - first_col;
-	    if (index > -1 && index < num_variables)
-		measure_array[index]++;
-         } 
-      } 
+            index = S_ext_j[i] - first_col;
+            if (index > -1 && index < num_variables)
+               measure_array[index]++;
+         }
+      }
    }
 
    /*---------------------------------------------------
@@ -1107,8 +1110,8 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
       }
    } 
 
-   for (j = 0; j < num_variables; j++) 
-   {    
+   for (j = 0; j < num_variables; j++)
+   {
       measure = measure_array[j];
       if (CF_marker[j] != SF_PT && CF_marker[j] != SC_PT)
       {
@@ -1118,9 +1121,12 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
          }
          else
          {
-	    if (measure < 0) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"negative measure!\n");
+            if (measure < 0) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"negative measure!\n");
             /*if (measure < 0) hypre_printf("negative measure!\n");*/
             CF_marker[j] = f_pnt;
+            /*
+            printf("j %d, measure %d, %d %d\n", j, measure, S_i[j+1]-S_i[j], ST_i[j+1]-ST_i[j]);
+            */
             for (k = S_i[j]; k < S_i[j+1]; k++)
             {
                nabor = S_j[k];
@@ -1129,15 +1135,15 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
                   if (nabor < j)
                   {
                      new_meas = measure_array[nabor];
-	             if (new_meas > 0)
-                        hypre_remove_point(&LoL_head, &LoL_tail, new_meas, 
-                               nabor, lists, where);
+                     if (new_meas > 0)
+                        hypre_remove_point(&LoL_head, &LoL_tail, new_meas,
+                                           nabor, lists, where);
 
                      new_meas = ++(measure_array[nabor]);
                      hypre_enter_on_lists(&LoL_head, &LoL_tail, new_meas,
-                                 nabor, lists, where);
+                                          nabor, lists, where);
                   }
-	          else
+                  else
                   {
                      new_meas = ++(measure_array[nabor]);
                   }
@@ -1715,10 +1721,10 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
        *------------------------------------------------*/
       if (num_procs > 1)
       {
-      comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg, CF_marker_offd, 
-   			int_buf_data);
-    
-      hypre_ParCSRCommHandleDestroy(comm_handle);   
+         comm_handle = hypre_ParCSRCommHandleCreate(12, comm_pkg, CF_marker_offd, 
+                                                    int_buf_data);
+
+         hypre_ParCSRCommHandleDestroy(comm_handle);   
       }
    
       /* only CF_marker entries from larger procs are accepted  
@@ -1902,7 +1908,7 @@ hypre_BoomerAMGCoarsenRuge( hypre_ParCSRMatrix    *S,
    	hypre_CSRMatrixDestroy(S_ext); 
    
    *CF_marker_ptr   = CF_marker;
-   
+
    return (ierr);
 }
 

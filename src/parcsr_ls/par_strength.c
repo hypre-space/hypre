@@ -986,11 +986,11 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
 
 HYPRE_Int
 hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
-                       HYPRE_Real             strength_threshold,
-                       HYPRE_Real             max_row_sum,
-                       HYPRE_Int                    num_functions,
-                       HYPRE_Int                   *dof_func,
-                       hypre_ParCSRMatrix   **S_ptr)
+                          HYPRE_Real             strength_threshold,
+                          HYPRE_Real             max_row_sum,
+                          HYPRE_Int              num_functions,
+                          HYPRE_Int             *dof_func,
+                          hypre_ParCSRMatrix   **S_ptr)
 {
    MPI_Comm 	       comm            = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -1054,9 +1054,9 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    num_nonzeros_offd = A_offd_i[num_variables];
 
    S = hypre_ParCSRMatrixCreate(comm, global_num_vars, global_num_vars,
-			row_starts, row_starts,
-			num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
-/* row_starts is owned by A, col_starts = row_starts */
+                                row_starts, row_starts,
+                                num_cols_offd, num_nonzeros_diag, num_nonzeros_offd);
+   /* row_starts is owned by A, col_starts = row_starts */
    hypre_ParCSRMatrixSetRowStartsOwner(S,0);
    S_diag = hypre_ParCSRMatrixDiag(S);
    hypre_CSRMatrixI(S_diag) = hypre_CTAlloc(HYPRE_Int,  num_variables+1, HYPRE_MEMORY_HOST);
@@ -1077,39 +1077,39 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
         S_offd_j = hypre_CSRMatrixJ(S_offd);
         hypre_ParCSRMatrixColMapOffd(S) = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
         if (num_functions > 1)
-	   dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
+           dof_func_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
    }
 
 
-  /*-------------------------------------------------------------------
+   /*-------------------------------------------------------------------
     * Get the dof_func data for the off-processor columns
     *-------------------------------------------------------------------*/
 
    if (!comm_pkg)
    {
-	hypre_MatvecCommPkgCreate(A);
+      hypre_MatvecCommPkgCreate(A);
 
-	comm_pkg = hypre_ParCSRMatrixCommPkg(A); 
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
    }
 
    num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
    if (num_functions > 1)
    {
-      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg, 
-						num_sends), HYPRE_MEMORY_HOST);
+      int_buf_data = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRCommPkgSendMapStart(comm_pkg,
+                                                                              num_sends), HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
       {
-	 start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
-	 for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
-		int_buf_data[index++] 
-		 = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+         start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+         for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++)
+            int_buf_data[index++]
+                  = dof_func[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
       }
-	
-      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data, 
-	dof_func_offd);
 
-      hypre_ParCSRCommHandleDestroy(comm_handle);   
+      comm_handle = hypre_ParCSRCommHandleCreate( 11, comm_pkg, int_buf_data,
+                                                  dof_func_offd);
+
+      hypre_ParCSRCommHandleDestroy(comm_handle);
       hypre_TFree(int_buf_data, HYPRE_MEMORY_HOST);
    }
 
@@ -1128,35 +1128,35 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
       row_sum = diag;
       if (num_functions > 1)
       {
-            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
-            {
-               if (dof_func[i] == dof_func[A_diag_j[jA]])
-               {
-                  row_scale = hypre_max(row_scale, fabs(A_diag_data[jA]));
-                  row_sum += fabs(A_diag_data[jA]);
-               }
-            }
-            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
-            {
-               if (dof_func[i] == dof_func_offd[A_offd_j[jA]])
-               {
-                  row_scale = hypre_max(row_scale, fabs(A_offd_data[jA]));
-                  row_sum += fabs(A_offd_data[jA]);
-               }
-            }
-      }
-      else
-      {
-            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+         for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+         {
+            if (dof_func[i] == dof_func[A_diag_j[jA]])
             {
                row_scale = hypre_max(row_scale, fabs(A_diag_data[jA]));
                row_sum += fabs(A_diag_data[jA]);
             }
-            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+         }
+         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+         {
+            if (dof_func[i] == dof_func_offd[A_offd_j[jA]])
             {
                row_scale = hypre_max(row_scale, fabs(A_offd_data[jA]));
                row_sum += fabs(A_offd_data[jA]);
             }
+         }
+      }
+      else
+      {
+         for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+         {
+            row_scale = hypre_max(row_scale, fabs(A_diag_data[jA]));
+            row_sum += fabs(A_diag_data[jA]);
+         }
+         for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+         {
+            row_scale = hypre_max(row_scale, fabs(A_offd_data[jA]));
+            row_sum += fabs(A_offd_data[jA]);
+         }
       }
 
       /* compute row entries of S */
@@ -1176,40 +1176,40 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
       else
       {
          if (num_functions > 1)
-         { 
-               for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+         {
+            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+            {
+               if (fabs(A_diag_data[jA]) <= strength_threshold * row_scale
+                   || dof_func[i] != dof_func[A_diag_j[jA]])
                {
-                  if (fabs(A_diag_data[jA]) <= strength_threshold * row_scale
-                      || dof_func[i] != dof_func[A_diag_j[jA]])
-                  {
-                     S_diag_j[jA] = -1;
-                  }
+                  S_diag_j[jA] = -1;
                }
-               for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            }
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            {
+               if (fabs(A_offd_data[jA]) <= strength_threshold * row_scale
+                   || dof_func[i] != dof_func_offd[A_offd_j[jA]])
                {
-                  if (fabs(A_offd_data[jA]) <= strength_threshold * row_scale
-                      || dof_func[i] != dof_func_offd[A_offd_j[jA]])
-                  {
-                     S_offd_j[jA] = -1;
-                  }
+                  S_offd_j[jA] = -1;
                }
+            }
          }
          else
          {
-               for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+            for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
+            {
+               if (fabs(A_diag_data[jA]) <= strength_threshold * row_scale)
                {
-                  if (fabs(A_diag_data[jA]) <= strength_threshold * row_scale)
-                  {
-                     S_diag_j[jA] = -1;
-                  }
+                  S_diag_j[jA] = -1;
                }
-               for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            }
+            for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
+            {
+               if (fabs(A_offd_data[jA]) <= strength_threshold * row_scale)
                {
-                  if (fabs(A_offd_data[jA]) <= strength_threshold * row_scale)
-                  {
-                     S_offd_j[jA] = -1;
-                  }
+                  S_offd_j[jA] = -1;
                }
+            }
          }
       }
    }
@@ -1224,7 +1224,7 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
     * that builds interpolation would have to be modified first.
     *----------------------------------------------------------------*/
 
-/* RDF: not sure if able to thread this loop */
+   /* RDF: not sure if able to thread this loop */
    jS = 0;
    for (i = 0; i < num_variables; i++)
    {
@@ -1241,7 +1241,7 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
    S_diag_i[num_variables] = jS;
    hypre_CSRMatrixNumNonzeros(S_diag) = jS;
 
-/* RDF: not sure if able to thread this loop */
+   /* RDF: not sure if able to thread this loop */
    jS = 0;
    for (i = 0; i < num_variables; i++)
    {
