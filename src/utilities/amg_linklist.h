@@ -29,15 +29,15 @@ extern "C" {
 
 struct double_linked_list
 {
-       HYPRE_Int                        data;
-       struct double_linked_list *next_elt;
-       struct double_linked_list *prev_elt;
-       HYPRE_Int                        head;
-       HYPRE_Int                        tail;
+   HYPRE_Int                  data;
+   struct double_linked_list *next_elt;
+   struct double_linked_list *prev_elt;
+   HYPRE_Int                  head;
+   HYPRE_Int                  tail;
 };
 
 typedef struct double_linked_list hypre_ListElement;
-typedef hypre_ListElement  *hypre_LinkList;  
+typedef hypre_ListElement *hypre_LinkList;  
 
 #ifdef __cplusplus
 }
