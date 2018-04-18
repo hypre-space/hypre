@@ -1523,6 +1523,9 @@ void hypre_qsort3i ( HYPRE_Int *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left
 void hypre_qsort3_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort4_abs ( HYPRE_Real *v , HYPRE_Int *w , HYPRE_Int *z , HYPRE_Int *y , HYPRE_Int left , HYPRE_Int right );
 void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
+void hypre_topo_sort(HYPRE_Int *row_ptr, HYPRE_Int *col_inds, HYPRE_Real *data, HYPRE_Int *ordering, HYPRE_Int n);
+void hypre_topo_sort_submat(HYPRE_Int *row_ptr, HYPRE_Int *col_inds, HYPRE_Real *data, HYPRE_Int *ordering, HYPRE_Int n, HYPRE_Int *cf_marker, HYPRE_Int CF);
+
 
 /* qsplit.c */
 HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );

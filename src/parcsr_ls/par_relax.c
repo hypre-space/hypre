@@ -118,6 +118,11 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     relax_type = 6 -> hybrid: SSOR-J mix off-processor, SSOR on-processor
     *     		    with outer relaxation parameters 
     *     relax_type = 7 -> Jacobi (uses Matvec), only needed in CGNR
+    *     relax_type = 8 -> hybrid L1 Symm. Gauss-Seidel
+    *     relax_type = 9 -> On-processor direct forward solve for matrices with
+    *              triangular structure (indices need not be ordered triangular)
+    *     relax_type = 13 -> hybrid L1 Gauss-Seidel forward solve
+    *     relax_type = 14 -> hybrid L1 Gauss-Seidel backward solve
     *     relax_type = 19-> Direct Solve, (old version)
     *     relax_type = 29-> Direct solve: use gaussian elimination & BLAS 
     *			    (with pivoting) (old version)
@@ -3083,6 +3088,167 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
            hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
            hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
         }
+      }
+      break;
+
+
+
+
+      case 9:
+      {
+         if (num_procs > 1) {
+            num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+            v_buf_data = hypre_CTAlloc(HYPRE_Real, 
+                           hypre_ParCSRCommPkgSendMapStart(comm_pkg,num_sends),
+                           HYPRE_MEMORY_HOST);
+            Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);
+           
+            if (num_cols_offd) {
+               A_offd_j = hypre_CSRMatrixJ(A_offd);
+               A_offd_data = hypre_CSRMatrixData(A_offd);
+            }
+
+            index = 0;
+            for (i = 0; i < num_sends; i++) {
+               start = hypre_ParCSRCommPkgSendMapStart(comm_pkg, i);
+               for (j=start; j < hypre_ParCSRCommPkgSendMapStart(comm_pkg, i+1); j++) {
+                  v_buf_data[index++] = u_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j)];
+               }
+            }
+
+            comm_handle = hypre_ParCSRCommHandleCreate(1,comm_pkg,v_buf_data,Vext_data);
+            hypre_ParCSRCommHandleDestroy(comm_handle);
+            comm_handle = NULL;
+         }
+
+         /*-----------------------------------------------------------------
+          * Get ordering of matrix TODO
+          *-----------------------------------------------------------------*/
+         if (not_ordered) {
+            hypre_topo_sort(A_diag_i, A_diag_j, A_diag_data, *ordering, n);
+         }
+         HYPRE_Real *residual = calloc(n, sizeof(HYPRE_Int));
+
+         /*-----------------------------------------------------------------
+          * Relax all points.
+          *-----------------------------------------------------------------*/
+         if (relax_points == 0) {
+            // Compute residual at all points
+            for (i = 0; i < n; i++) {
+               residual[i] = f_data[i];
+               for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++) {
+                  ii = A_diag_j[jj];
+                  residual[i] -= A_diag_data[jj] * u_data[ii];
+               }
+               for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++) {
+                  ii = A_offd_j[jj];
+                  residual[i] -= A_offd_data[jj] * Vext_data[ii];
+               }
+            }
+         
+            // Invert on-processor (triangular) block, z = D^{-1}r_k. This
+            // loop does a Gauss-Seidel sweep in the order specified by the
+            // ordered[] array. Values of z stored in r.
+            for (i=0; i<n; i++) {
+               HYPRE_Int row = ordering[i];
+               if (row < 0) {
+                  continue;
+               }
+               HYPRE_Real diag = 0.0;
+               HYPRE_Real rhs = residual[row];
+
+               // Get diagonal entry and move off-diagonal to right-hand-side
+               for (jj=A_diag_i[row]; jj<A_diag_i[row+1]; jj++) {
+                  HYPRE_Int col = A_diag_j[jj];
+                  if (col == row) {
+                     diag = A_diag_data[jj];
+                  }
+                  else {
+                     rhs -= A_diag_data[jj]*residual[col];
+                  }
+               }
+
+               // Solve for solution in this row with check that diagonal is nnz.
+               if (diag == 0) {
+                  residual[row] = 0.0;
+               }
+               else{
+                  residual[row] = rhs / diag;
+               }
+            }
+
+            // Add correction, x_{k+1} = x_k + D^{-1}r_k = x_k + z. 
+            for (i = 0; i < n; i++) {
+               u_data[i] += residual[i];
+            }
+         }
+
+         /*-----------------------------------------------------------------
+          * Relax only C or F points as determined by relax_points.
+          *-----------------------------------------------------------------*/
+         else {
+            for (i = 0; i < n; i++) {
+               // If i is of the right type ( C or F ), compute residual
+               if (cf_marker[i] == relax_points) {
+                  residual[i] = f_data[i];
+                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++) {
+                     ii = A_diag_j[jj];
+                     residual[i] -= A_diag_data[jj] * u_data[ii];
+                  }
+                  for (jj = A_offd_i[i]; jj < A_offd_i[i+1]; jj++) {
+                     ii = A_offd_j[jj];
+                     residual[i] -= A_offd_data[jj] * Vext_data[ii];
+                  }
+               }
+            }
+
+            // Invert on-processor (triangular) C-point or F-point block,
+            // z = D^{-1}r_k. This loop does a Gauss-Seidel sweep in the
+            // order specified by the ordered[] array. Values of z stored
+            // in r. Non-marked points in r are zero.
+            for (i=0; i<n; i++) {
+               HYPRE_Int row = ordering[i];
+               if (row < 0) {
+                  continue;
+               }
+               if (cf_marker[row] != relax_points) {
+                  continue;
+               }
+               HYPRE_Real diag = 0;
+               HYPRE_Real rhs = residual[row];
+
+               // Get diagonal entry and move off-diagonal to right-hand-side
+               for (jj=A_diag_i[row]; jj<A_diag_i[row+1]; jj++) {
+                  HYPRE_Int col = A_diag_j[jj];
+                  if (col == row) {
+                     diag = data[jj];
+                  }
+                  else {
+                     rhs -= data[jj]*residual[col];
+                  }
+               }
+
+               // Solve for solution in this row with check that diagonal is nnz.
+               if (diag == 0) {
+                  residual[row] = 0.0;
+               }
+               else{
+                  residual[row] = rhs / diag;
+               }
+            }
+            // Add correction, x_{k+1} = x_k + D^{-1}r_k = x_k + z. 
+            for (i = 0; i < n; i++) {
+               if (cf_marker[i] == relax_points) {
+                  u_data[i] += residual[i];
+               }
+            }
+         }
+
+         free(residual);
+         if (num_procs > 1) {
+            hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
+            hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
+         }
       }
       break;
 
