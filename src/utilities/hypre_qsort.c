@@ -466,6 +466,7 @@ void hypre_topo_sort_submat(HYPRE_Int *row_ptr,
                             HYPRE_Int *cf_marker,
                             HYPRE_Int CF)
 {
+   HYPRE_Int i;
    HYPRE_Int *visited = calloc(n, sizeof(HYPRE_Int));
    HYPRE_Int order_ind = 0;
    HYPRE_Int temp_row = 0;
@@ -474,8 +475,8 @@ void hypre_topo_sort_submat(HYPRE_Int *row_ptr,
                               visited, ordering, &order_ind, cf_marker, CF);
       temp_row += 1;    // TODO : what if temp_row > n?
    }
-   for (order_ind<n; order_ind++) {
-      ordering[order_ind] = -1;
+   for (i=order_ind; i<n; i++) {
+      ordering[i] = -1;
    }
    free(visited);
 }

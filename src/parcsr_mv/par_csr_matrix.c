@@ -112,11 +112,12 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    hypre_ParCSRMatrixGlobalNumCols(matrix) = global_num_cols;
    hypre_ParCSRMatrixFirstRowIndex(matrix) = first_row_index;
    hypre_ParCSRMatrixFirstColDiag(matrix) = first_col_diag;
- 
+
    hypre_ParCSRMatrixLastRowIndex(matrix) = first_row_index + local_num_rows - 1;
    hypre_ParCSRMatrixLastColDiag(matrix) = first_col_diag + local_num_cols - 1;
 
    hypre_ParCSRMatrixColMapOffd(matrix) = NULL;
+   hypre_ParCSRMatrixProcOrdering(matrix) = NULL;
 
    hypre_ParCSRMatrixAssumedPartition(matrix) = NULL;
 
@@ -185,7 +186,8 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
 
       if (hypre_ParCSRMatrixAssumedPartition(matrix))
          hypre_AssumedPartitionDestroy(hypre_ParCSRMatrixAssumedPartition(matrix));
-
+      if (hypre_ParCSRMatrixProcOrdering(matrix) )
+            hypre_TFree(hypre_ParCSRMatrixProcOrdering(matrix), HYPRE_MEMORY_HOST);   
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
 

@@ -3091,9 +3091,6 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
       }
       break;
 
-
-
-
       case 9:
       {
          if (num_procs > 1) {
@@ -3121,11 +3118,11 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             comm_handle = NULL;
          }
 
-         /*-----------------------------------------------------------------
-          * Get ordering of matrix TODO
-          *-----------------------------------------------------------------*/
-         if (not_ordered) {
-            hypre_topo_sort(A_diag_i, A_diag_j, A_diag_data, *ordering, n);
+          // Check for ordering of matrix. If stored, get pointer, otherwise
+          // compute ordering and point matrix variable to array.
+         HYPRE_Int *proc_ordering = hypre_ParCSRMatrixProcOrdering(A);
+         if (!proc_ordering) {
+            hypre_topo_sort(A_diag_i, A_diag_j, A_diag_data, proc_ordering, n);
          }
          HYPRE_Real *residual = calloc(n, sizeof(HYPRE_Int));
 
@@ -3150,7 +3147,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             // loop does a Gauss-Seidel sweep in the order specified by the
             // ordered[] array. Values of z stored in r.
             for (i=0; i<n; i++) {
-               HYPRE_Int row = ordering[i];
+               HYPRE_Int row = proc_ordering[i];
                if (row < 0) {
                   continue;
                }
@@ -3207,7 +3204,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             // order specified by the ordered[] array. Values of z stored
             // in r. Non-marked points in r are zero.
             for (i=0; i<n; i++) {
-               HYPRE_Int row = ordering[i];
+               HYPRE_Int row = proc_ordering[i];
                if (row < 0) {
                   continue;
                }
@@ -3221,10 +3218,10 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                for (jj=A_diag_i[row]; jj<A_diag_i[row+1]; jj++) {
                   HYPRE_Int col = A_diag_j[jj];
                   if (col == row) {
-                     diag = data[jj];
+                     diag = A_diag_data[jj];
                   }
                   else {
-                     rhs -= data[jj]*residual[col];
+                     rhs -= A_diag_data[jj]*residual[col];
                   }
                }
 
