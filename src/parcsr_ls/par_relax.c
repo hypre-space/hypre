@@ -25,17 +25,17 @@
  * hypre_BoomerAMGRelax
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
-                           hypre_ParVector    *f,
-                           HYPRE_Int                *cf_marker,
-                           HYPRE_Int                 relax_type,
-                           HYPRE_Int                 relax_points,
-                           HYPRE_Real          relax_weight,
-                           HYPRE_Real          omega,
-                           HYPRE_Real         *l1_norms,
-                           hypre_ParVector    *u,
-                           hypre_ParVector    *Vtemp,
-                           hypre_ParVector    *Ztemp )
+HYPRE_Int  hypre_BoomerAMGRelax(hypre_ParCSRMatrix *A,
+                                hypre_ParVector    *f,
+                                HYPRE_Int          *cf_marker,
+                                HYPRE_Int           relax_type,
+                                HYPRE_Int           relax_points,
+                                HYPRE_Real          relax_weight,
+                                HYPRE_Real          omega,
+                                HYPRE_Real         *l1_norms,
+                                hypre_ParVector    *u,
+                                hypre_ParVector    *Vtemp,
+                                hypre_ParVector    *Ztemp )
 {
    MPI_Comm	   comm = hypre_ParCSRMatrixComm(A);
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -119,14 +119,21 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
     *     		    with outer relaxation parameters 
     *     relax_type = 7 -> Jacobi (uses Matvec), only needed in CGNR
     *     relax_type = 8 -> hybrid L1 Symm. Gauss-Seidel
-    *     relax_type = 9 -> On-processor direct forward solve for matrices with
-    *              triangular structure (indices need not be ordered triangular)
+    *     relax_type = 10 -> On-processor direct forward solve for matrices with
+    *                        triangular structure (indices need not be ordered
+    *                        triangular)
     *     relax_type = 13 -> hybrid L1 Gauss-Seidel forward solve
     *     relax_type = 14 -> hybrid L1 Gauss-Seidel backward solve
+    *     relax_type = 15 -> CG
+    *     relax_type = 16 -> Scaled Chebyshev
+    *     relax_type = 17 -> FCF-Jacobi
+    *     relax_type = 18 -> L1-Jacobi
+    *     relax_type = 9, 99, 98 -> Direct solve, Gaussian elimination
     *     relax_type = 19-> Direct Solve, (old version)
     *     relax_type = 29-> Direct solve: use gaussian elimination & BLAS 
     *			    (with pivoting) (old version)
     *-----------------------------------------------------------------------*/
+   
    switch (relax_type)
    {
       case 0: /* Weighted Jacobi */
@@ -1044,8 +1051,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          /*-----------------------------------------------------------------
           * Relax interior points first
           *-----------------------------------------------------------------*/
-          if (relax_points == 0)
-          {
+         if (relax_points == 0)
+         {
             for (i = 0; i < n; i++)	
             {
 
@@ -1065,9 +1072,9 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                   u_data[i] = res / A_diag_data[A_diag_i[i]];
                }
             }
-          }
-          else
-          {
+         }
+         else
+         {
             for (i = 0; i < n; i++)
             {
 
@@ -1077,8 +1084,8 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                 *-----------------------------------------------------------*/
              
                if (cf_marker[i] == relax_points 
-               			&& (A_offd_i[i+1]-A_offd_i[i]) == zero 
-				&& A_diag_data[A_diag_i[i]] != zero)
+               	 && (A_offd_i[i+1]-A_offd_i[i]) == zero 
+				       && A_diag_data[A_diag_i[i]] != zero)
                {
                   res = f_data[i];
                   for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++)
@@ -1089,7 +1096,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                   u_data[i] = res / A_diag_data[A_diag_i[i]];
                }
             }     
-          }
+         }
 	for (p = 0; p < num_procs; p++)
 	{
 	jr = 0;
@@ -3091,7 +3098,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
       }
       break;
 
-      case 9:
+      case 10:
       {
          if (num_procs > 1) {
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
@@ -3118,13 +3125,18 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             comm_handle = NULL;
          }
 
-          // Check for ordering of matrix. If stored, get pointer, otherwise
-          // compute ordering and point matrix variable to array.
-         HYPRE_Int *proc_ordering = hypre_ParCSRMatrixProcOrdering(A);
-         if (!proc_ordering) {
+         // Check for ordering of matrix. If stored, get pointer, otherwise
+         // compute ordering and point matrix variable to array.
+         HYPRE_Int *proc_ordering;
+         if (!hypre_ParCSRMatrixProcOrdering(A)) {
+            proc_ordering = malloc(n*sizeof(HYPRE_Int));
             hypre_topo_sort(A_diag_i, A_diag_j, A_diag_data, proc_ordering, n);
+            hypre_ParCSRMatrixProcOrdering(A) = proc_ordering;
          }
-         HYPRE_Real *residual = calloc(n, sizeof(HYPRE_Int));
+         else {
+            proc_ordering = hypre_ParCSRMatrixProcOrdering(A);
+         }
+         HYPRE_Real *residual = calloc(n, sizeof(HYPRE_Real));
 
          /*-----------------------------------------------------------------
           * Relax all points.
@@ -3133,7 +3145,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
             // Compute residual at all points
             for (i = 0; i < n; i++) {
                residual[i] = f_data[i];
-               for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++) {
+               for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++) {
                   ii = A_diag_j[jj];
                   residual[i] -= A_diag_data[jj] * u_data[ii];
                }
@@ -3188,7 +3200,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
                // If i is of the right type ( C or F ), compute residual
                if (cf_marker[i] == relax_points) {
                   residual[i] = f_data[i];
-                  for (jj = A_diag_i[i]+1; jj < A_diag_i[i+1]; jj++) {
+                  for (jj = A_diag_i[i]; jj < A_diag_i[i+1]; jj++) {
                      ii = A_diag_j[jj];
                      residual[i] -= A_diag_data[jj] * u_data[ii];
                   }
@@ -3242,6 +3254,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
          }
 
          free(residual);
+         // free(proc_ordering);          // DEBUG
          if (num_procs > 1) {
             hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
             hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);
