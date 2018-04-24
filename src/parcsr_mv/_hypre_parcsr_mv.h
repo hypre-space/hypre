@@ -358,6 +358,11 @@ typedef struct hypre_ParCSRMatrix_struct
                                               no_global_partition option is used
                                               (compile-time option)*/
 
+   /* Save block diagonal inverse */
+   HYPRE_Int             bdiag_size;
+   HYPRE_Complex        *bdiaginv;
+   hypre_ParCSRCommPkg  *bdiaginv_comm_pkg;
+
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -804,9 +809,9 @@ void hypre_ParCSRPersistentCommHandleWait(hypre_ParCSRPersistentCommHandle *comm
 
 HYPRE_Int hypre_ParcsrGetExternalRows( hypre_ParCSRMatrix *A, HYPRE_Int indices_len, HYPRE_Int *indices, hypre_CSRMatrix **A_ext, hypre_ParCSRCommPkg **commpkg_out);
 
-HYPRE_Int hypre_ParvecBdiagInvScal( hypre_ParVector *b, HYPRE_Int blockSize, hypre_ParVector **bs, HYPRE_Complex *bdiaginv, hypre_ParCSRCommPkg *comm_pkg);
+HYPRE_Int hypre_ParvecBdiagInvScal( hypre_ParVector *b, HYPRE_Int blockSize, hypre_ParVector **bs, hypre_ParCSRMatrix *A);
 
-HYPRE_Int hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix *A, HYPRE_Int blockSize, hypre_ParCSRMatrix **As, HYPRE_Complex **bdiaginv, hypre_ParCSRCommPkg **commpkg_out);
+HYPRE_Int hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix *A, HYPRE_Int blockSize, hypre_ParCSRMatrix **As);
 
 /* par_csr_matop_marked.c */
 void hypre_ParMatmul_RowSizes_Marked ( HYPRE_Int **C_diag_i , HYPRE_Int **C_offd_i , HYPRE_Int **B_marker , HYPRE_Int *A_diag_i , HYPRE_Int *A_diag_j , HYPRE_Int *A_offd_i , HYPRE_Int *A_offd_j , HYPRE_Int *B_diag_i , HYPRE_Int *B_diag_j , HYPRE_Int *B_offd_i , HYPRE_Int *B_offd_j , HYPRE_Int *B_ext_diag_i , HYPRE_Int *B_ext_diag_j , HYPRE_Int *B_ext_offd_i , HYPRE_Int *B_ext_offd_j , HYPRE_Int *map_B_to_C , HYPRE_Int *C_diag_size , HYPRE_Int *C_offd_size , HYPRE_Int num_rows_diag_A , HYPRE_Int num_cols_offd_A , HYPRE_Int allsquare , HYPRE_Int num_cols_diag_B , HYPRE_Int num_cols_offd_B , HYPRE_Int num_cols_offd_C , HYPRE_Int *CF_marker , HYPRE_Int *dof_func , HYPRE_Int *dof_func_offd );

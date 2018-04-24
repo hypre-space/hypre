@@ -3779,8 +3779,7 @@ HYPRE_Int
 hypre_ParvecBdiagInvScal( hypre_ParVector     *b,
                           HYPRE_Int            blockSize,
                           hypre_ParVector    **bs,
-                          HYPRE_Complex       *bdiaginv,
-                          hypre_ParCSRCommPkg *comm_pkg)
+                          hypre_ParCSRMatrix  *A)
 {
    MPI_Comm         comm     = hypre_ParCSRMatrixComm(b);
    HYPRE_Int        num_procs, my_id;
@@ -3794,11 +3793,16 @@ hypre_ParvecBdiagInvScal( hypre_ParVector     *b,
    HYPRE_Int end_row     = last_row + 1; /* one past-the-last */
    HYPRE_Int first_row_block = first_row / blockSize * blockSize;
    HYPRE_Int end_row_block   = hypre_min( (last_row / blockSize + 1) * blockSize, nrow_global );
-  
+
+   hypre_assert(blockSize == A->bdiag_size);
+   HYPRE_Complex *bdiaginv = A->bdiaginv;
+   hypre_ParCSRCommPkg *comm_pkg = A->bdiaginv_comm_pkg;
+
+   HYPRE_Complex *dense = bdiaginv;
+
    //for (i=first_row_block; i < end_row; i+=blockSize) ;
    //printf("===[%d %d), [ %d %d ) %d === \n", first_row, end_row, first_row_block, end_row_block, i);
 
-   HYPRE_Complex *dense = bdiaginv;
    /* local vector of b */
    hypre_Vector    *b_local      = hypre_ParVectorLocalVector(b);
    HYPRE_Complex   *b_local_data = hypre_VectorData(b_local);
@@ -3904,9 +3908,7 @@ hypre_ParvecBdiagInvScal( hypre_ParVector     *b,
 HYPRE_Int
 hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
                           HYPRE_Int             blockSize,
-                          hypre_ParCSRMatrix  **As,
-                          HYPRE_Complex       **bdiaginv,
-                          hypre_ParCSRCommPkg **commpkg_out )
+                          hypre_ParCSRMatrix  **As)
 {
    MPI_Comm         comm     = hypre_ParCSRMatrixComm(A);
    HYPRE_Int        num_procs, my_id;
@@ -4018,7 +4020,9 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
 
    hypre_assert(j == num_ext_rows);
 
-   hypre_ParcsrGetExternalRows(A, num_ext_rows, ext_indices, &A_ext, commpkg_out);
+   hypre_ParcsrGetExternalRows(A, num_ext_rows, ext_indices, &A_ext,
+                               &A->bdiaginv_comm_pkg);
+
    hypre_TFree(ext_indices, HYPRE_MEMORY_HOST);
 
    A_ext_i = hypre_CSRMatrixI(A_ext);
@@ -4480,7 +4484,7 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
 
    *As = Anew;
 
-   /* free workspace */
+   /*
    if (bdiaginv)
    {
       *bdiaginv = dense_all;
@@ -4489,6 +4493,12 @@ hypre_ParcsrBdiagInvScal( hypre_ParCSRMatrix   *A,
    {
       hypre_TFree(dense_all, HYPRE_MEMORY_HOST);
    }
+   */
+   /* save diagonal blocks in A */
+   A->bdiag_size = blockSize;
+   A->bdiaginv = dense_all;
+
+   /* free workspace */
    hypre_TFree(IPIV, HYPRE_MEMORY_HOST);
    hypre_TFree(dgetri_work, HYPRE_MEMORY_HOST);
    hypre_TFree(marker_diag, HYPRE_MEMORY_HOST);

@@ -141,6 +141,10 @@ hypre_ParCSRMatrixCreate( MPI_Comm comm,
    hypre_ParCSRMatrixRowvalues(matrix) = NULL;
    hypre_ParCSRMatrixGetrowactive(matrix) = 0;
 
+   matrix->bdiaginv = NULL;
+   matrix->bdiaginv_comm_pkg = NULL;
+   matrix->bdiag_size = -1;
+
    return matrix;
 }
 
@@ -185,6 +189,12 @@ hypre_ParCSRMatrixDestroy( hypre_ParCSRMatrix *matrix )
 
       if (hypre_ParCSRMatrixAssumedPartition(matrix))
          hypre_AssumedPartitionDestroy(hypre_ParCSRMatrixAssumedPartition(matrix));
+
+      hypre_TFree(matrix->bdiaginv, HYPRE_MEMORY_HOST);
+      if (matrix->bdiaginv_comm_pkg)
+      {
+         hypre_MatvecCommPkgDestroy(matrix->bdiaginv_comm_pkg);
+      }
 
       hypre_TFree(matrix, HYPRE_MEMORY_HOST);
    }
