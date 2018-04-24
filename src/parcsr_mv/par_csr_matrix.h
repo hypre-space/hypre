@@ -80,6 +80,10 @@ typedef struct hypre_ParCSRMatrix_struct
                                               no_global_partition option is used
                                               (compile-time option)*/
 
+   /* Array to store ordering of local diagonal block to relax. In particular,
+   used for triangulr matrices that are not ordered to be triangular. */
+   HYPRE_Int            *proc_ordering;
+
 } hypre_ParCSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -115,6 +119,7 @@ hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(matrix))
 #define hypre_ParCSRMatrixRowvalues(matrix)       ((matrix) -> rowvalues)
 #define hypre_ParCSRMatrixGetrowactive(matrix)    ((matrix) -> getrowactive)
 #define hypre_ParCSRMatrixAssumedPartition(matrix) ((matrix) -> assumed_partition)
+#define hypre_ParCSRMatrixProcOrdering(matrix)    ((matrix) -> proc_ordering)
 
 /*--------------------------------------------------------------------------
  * Parallel CSR Boolean Matrix

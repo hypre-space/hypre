@@ -369,5 +369,115 @@ void hypre_qsort_abs(HYPRE_Real *w,
 }
 
 
+// Recursive DFS search.
+void hypre_search_row(HYPRE_Int row,
+                      HYPRE_Int *row_ptr,
+                      HYPRE_Int *col_inds,
+                      HYPRE_Real *data,
+                      HYPRE_Int *visited,
+                      HYPRE_Int *ordering,
+                      HYPRE_Int *order_ind)
+{
+   HYPRE_Int j;
+   // If this row has not been visited, call recursive DFS on nonzero
+   // column entries 
+   if (!visited[row]) {
+      visited[row] = 1;
+      for (j=row_ptr[row]; j<row_ptr[row+1]; j++) {
+         HYPRE_Int col = col_inds[j];
+         hypre_search_row(col, row_ptr, col_inds, data,
+                         visited, ordering, order_ind);
+      }
+      // Add node to ordering *after* it has been searched
+      ordering[*order_ind] = row;
+      *order_ind += 1;
+   }
+}
 
+
+// Recursive DFS search
+void hypre_search_row_submat(HYPRE_Int row,
+                             HYPRE_Int *row_ptr,
+                             HYPRE_Int *col_inds,
+                             HYPRE_Real *data,
+                             HYPRE_Int *visited,
+                             HYPRE_Int *ordering,
+                             HYPRE_Int *order_ind,
+                             HYPRE_Int *cf_marker,
+                             HYPRE_Int CF)
+{
+   HYPRE_Int j;
+   // Check that row is appropriate marker (C or F) and has not been visited.
+   // Then call recursive DFS on nonzero column entries.
+   if ( (cf_marker[row] == CF) && (!visited[row]) ) {
+      visited[row] = 1;
+      for (j=row_ptr[row]; j<row_ptr[row+1]; j++) {
+         HYPRE_Int col = col_inds[j];
+         hypre_search_row_submat(col, row_ptr, col_inds, data, visited,
+                                ordering, order_ind, cf_marker, CF);
+      }
+      // Add node to ordering *after* it has been searched
+      ordering[*order_ind] = row;
+      *order_ind += 1;
+   }
+}
+
+
+// Find topological ordering on acyclic CSR matrix. That is, find ordering
+// of matrix to be triangular.
+//
+// INPUT
+// -----
+//    - rowptr[], colinds[], data[] form a CSR structure for nxn matrix
+//    - ordering[] should be empty array of length n
+//    - row is the row to start the search from
+void hypre_topo_sort(HYPRE_Int *row_ptr,
+                     HYPRE_Int *col_inds,
+                     HYPRE_Real *data,
+                     HYPRE_Int *ordering,
+                     HYPRE_Int n)
+{
+   HYPRE_Int *visited = calloc(n, sizeof(HYPRE_Int));
+   HYPRE_Int order_ind = 0;
+   HYPRE_Int temp_row = 0;
+   while (order_ind < n) {
+      hypre_search_row(temp_row, row_ptr, col_inds, data,
+                       visited, ordering, &order_ind);
+      temp_row += 1;    // TODO : what if temp_row > n?
+   }
+   free(visited);
+}
+
+
+// Find topological ordering on acyclic CSR submatrix. That is, find ordering
+// of matrix to be triangular, where submatrix indices, i, are denoted by
+// cf_marker[i] == CF. 
+//
+// INPUT
+// -----
+//    - rowptr[], colinds[], data[] form a CSR structure for nxn matrix
+//    - ordering[] should be empty array of length n
+//    - row is the row to start the search from
+void hypre_topo_sort_submat(HYPRE_Int *row_ptr,
+                            HYPRE_Int *col_inds,
+                            HYPRE_Real *data,
+                            HYPRE_Int *ordering,
+                            HYPRE_Int n,
+                            HYPRE_Int *cf_marker,
+                            HYPRE_Int CF)
+{
+   HYPRE_Int i;
+   HYPRE_Int *visited = calloc(n, sizeof(HYPRE_Int));
+   HYPRE_Int order_ind = 0;
+   HYPRE_Int temp_row = 0;
+   while (order_ind < n) {
+      hypre_search_row_submat(temp_row, row_ptr, col_inds, data,
+                              visited, ordering, &order_ind, cf_marker, CF);
+      temp_row += 1;    // TODO : what if temp_row > n?
+   }
+   for (i=order_ind; i<n; i++) {
+      ordering[i] = -1;
+   }
+   free(visited);
+}
 
