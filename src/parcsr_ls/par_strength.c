@@ -1125,7 +1125,7 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
 
       /* compute scaling factor and row sum */
       row_scale = 0.0;
-      row_sum = diag;
+      row_sum = fabs(diag);
       if (num_functions > 1)
       {
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
@@ -1160,8 +1160,8 @@ hypre_BoomerAMGCreateSabs(hypre_ParCSRMatrix    *A,
       }
 
       /* compute row entries of S */
-      S_diag_j[A_diag_i[i]] = -1;
-      if ((fabs(row_sum) > fabs(diag)*max_row_sum) && (max_row_sum < 1.0))
+      S_diag_j[A_diag_i[i]] = -1; /* reject diag entry */
+      if ( fabs(row_sum) < fabs(diag)*(2.0-max_row_sum) && max_row_sum < 1.0 )
       {
          /* make all dependencies weak */
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)

@@ -95,6 +95,7 @@ typedef struct
    HYPRE_Int      seq_threshold;
    HYPRE_Int      redundant;
    HYPRE_Int      participate;
+   HYPRE_Int      Sabs;
 
    /* solve params */
    HYPRE_Int      max_iter;
@@ -287,6 +288,7 @@ typedef struct
 ((amg_data)->strong_threshold)
 #define hypre_ParAMGDataStrongThresholdR(amg_data) \
 ((amg_data)->strong_thresholdR)
+#define hypre_ParAMGDataSabs(amg_data) (amg_data->Sabs)
 #define hypre_ParAMGDataMaxRowSum(amg_data) ((amg_data)->max_row_sum)
 #define hypre_ParAMGDataTruncFactor(amg_data) ((amg_data)->trunc_factor)
 #define hypre_ParAMGDataAggTruncFactor(amg_data) ((amg_data)->agg_trunc_factor)
@@ -313,10 +315,10 @@ typedef struct
 #define hypre_ParAMGDataISType(amg_data) ((amg_data)->IS_type)
 #define hypre_ParAMGDataCRUseCG(amg_data) ((amg_data)->CR_use_CG)
 #define hypre_ParAMGDataL1Norms(amg_data) ((amg_data)->l1_norms)
- #define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
- #define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
- #define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
- #define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
+#define hypre_ParAMGDataCGCIts(amg_data) ((amg_data)->cgc_its)
+#define hypre_ParAMGDataMaxCoarseSize(amg_data) ((amg_data)->max_coarse_size)
+#define hypre_ParAMGDataMinCoarseSize(amg_data) ((amg_data)->min_coarse_size)
+#define hypre_ParAMGDataSeqThreshold(amg_data) ((amg_data)->seq_threshold)
 
 /* solve params */
 
@@ -792,6 +794,7 @@ HYPRE_Int HYPRE_BoomerAMGSetStrongThreshold ( HYPRE_Solver solver , HYPRE_Real s
 HYPRE_Int HYPRE_BoomerAMGGetStrongThreshold ( HYPRE_Solver solver , HYPRE_Real *strong_threshold );
 HYPRE_Int HYPRE_BoomerAMGSetStrongThresholdR ( HYPRE_Solver solver , HYPRE_Real strong_threshold );
 HYPRE_Int HYPRE_BoomerAMGGetStrongThresholdR ( HYPRE_Solver solver , HYPRE_Real *strong_threshold );
+HYPRE_Int HYPRE_BoomerAMGSetSabs ( HYPRE_Solver solver , HYPRE_Int Sabs );
 HYPRE_Int HYPRE_BoomerAMGSetMaxRowSum ( HYPRE_Solver solver , HYPRE_Real max_row_sum );
 HYPRE_Int HYPRE_BoomerAMGGetMaxRowSum ( HYPRE_Solver solver , HYPRE_Real *max_row_sum );
 HYPRE_Int HYPRE_BoomerAMGSetTruncFactor ( HYPRE_Solver solver , HYPRE_Real trunc_factor );
@@ -1215,6 +1218,7 @@ HYPRE_Int hypre_BoomerAMGSetStrongThreshold ( void *data , HYPRE_Real strong_thr
 HYPRE_Int hypre_BoomerAMGGetStrongThreshold ( void *data , HYPRE_Real *strong_threshold );
 HYPRE_Int hypre_BoomerAMGSetStrongThresholdR ( void *data , HYPRE_Real strong_threshold );
 HYPRE_Int hypre_BoomerAMGGetStrongThresholdR ( void *data , HYPRE_Real *strong_threshold );
+HYPRE_Int hypre_BoomerAMGSetSabs ( void *data , HYPRE_Int Sabs );
 HYPRE_Int hypre_BoomerAMGSetMaxRowSum ( void *data , HYPRE_Real max_row_sum );
 HYPRE_Int hypre_BoomerAMGGetMaxRowSum ( void *data , HYPRE_Real *max_row_sum );
 HYPRE_Int hypre_BoomerAMGSetTruncFactor ( void *data , HYPRE_Real trunc_factor );

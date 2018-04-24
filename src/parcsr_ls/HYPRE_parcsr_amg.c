@@ -227,6 +227,15 @@ HYPRE_BoomerAMGGetStrongThresholdR( HYPRE_Solver solver,
    return( hypre_BoomerAMGGetStrongThresholdR( (void *) solver,
                                               strong_threshold ) );
 }
+
+HYPRE_Int
+HYPRE_BoomerAMGSetSabs( HYPRE_Solver solver,
+                        HYPRE_Int    Sabs  )
+{
+   return( hypre_BoomerAMGSetSabs( (void *) solver,
+                                   Sabs ) );
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetMaxRowSum, HYPRE_BoomerAMGGetMaxRowSum
  *--------------------------------------------------------------------------*/

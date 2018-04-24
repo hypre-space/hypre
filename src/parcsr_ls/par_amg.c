@@ -42,6 +42,7 @@ hypre_BoomerAMGCreate()
    HYPRE_Int      min_coarse_size;
    HYPRE_Real   strong_threshold;
    HYPRE_Real   strong_threshold_R;
+   HYPRE_Int    Sabs;
    HYPRE_Real   max_row_sum;
    HYPRE_Real   trunc_factor;
    HYPRE_Real   agg_trunc_factor;
@@ -145,6 +146,7 @@ hypre_BoomerAMGCreate()
    redundant = 0;
    strong_threshold = 0.25;
    strong_threshold_R = 0.25;
+   Sabs = 0;
    max_row_sum = 0.9;
    trunc_factor = 0.0;
    agg_trunc_factor = 0.0;
@@ -260,6 +262,7 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMinCoarseSize(amg_data, min_coarse_size);
    hypre_BoomerAMGSetStrongThreshold(amg_data, strong_threshold);
    hypre_BoomerAMGSetStrongThresholdR(amg_data, strong_threshold_R);
+   hypre_BoomerAMGSetSabs(amg_data, Sabs);
    hypre_BoomerAMGSetMaxRowSum(amg_data, max_row_sum);
    hypre_BoomerAMGSetTruncFactor(amg_data, trunc_factor);
    hypre_BoomerAMGSetAggTruncFactor(amg_data, agg_trunc_factor);
@@ -1105,6 +1108,24 @@ hypre_BoomerAMGGetStrongThresholdR( void       *data,
    } 
 
    *strong_threshold = hypre_ParAMGDataStrongThresholdR(amg_data);
+
+   return hypre_error_flag;
+}
+
+
+HYPRE_Int
+hypre_BoomerAMGSetSabs( void         *data,
+                        HYPRE_Int     Sabs )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+
+   hypre_ParAMGDataSabs(amg_data) = Sabs != 0;
 
    return hypre_error_flag;
 }
