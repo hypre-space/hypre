@@ -1171,6 +1171,8 @@ HYPRE_Int HYPRE_ParCSRPCGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num
 HYPRE_Int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
 HYPRE_Int HYPRE_ParCSRDiagScaleSetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParCSRDiagScale ( HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx );
+HYPRE_Int HYPRE_ParCSROnProcTriSetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx );
+HYPRE_Int HYPRE_ParCSROnProcTriSolve ( HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx );
 
 /* HYPRE_parcsr_pilut.c */
 HYPRE_Int HYPRE_ParCSRPilutCreate ( MPI_Comm comm , HYPRE_Solver *solver );

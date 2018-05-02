@@ -60,8 +60,12 @@ HYPRE_Int  hypre_BoomerAMGRelax(hypre_ParCSRMatrix *A,
    hypre_Vector   *f_local = hypre_ParVectorLocalVector(f);
    HYPRE_Real     *f_data  = hypre_VectorData(f_local);
 
-   hypre_Vector   *Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
-   HYPRE_Real     *Vtemp_data = hypre_VectorData(Vtemp_local);
+   hypre_Vector   *Vtemp_local;
+   HYPRE_Real     *Vtemp_data;
+   if (relax_type != 10) {
+      Vtemp_local = hypre_ParVectorLocalVector(Vtemp);
+      Vtemp_data = hypre_VectorData(Vtemp_local);
+   }
    HYPRE_Real 	  *Vext_data = NULL;
    HYPRE_Real 	  *v_buf_data;
    HYPRE_Real 	  *tmp_data;
@@ -3254,7 +3258,6 @@ HYPRE_Int  hypre_BoomerAMGRelax(hypre_ParCSRMatrix *A,
          }
 
          free(residual);
-         // free(proc_ordering);          // DEBUG
          if (num_procs > 1) {
             hypre_TFree(Vext_data, HYPRE_MEMORY_HOST);
             hypre_TFree(v_buf_data, HYPRE_MEMORY_HOST);

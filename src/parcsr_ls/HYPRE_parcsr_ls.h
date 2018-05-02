@@ -2243,6 +2243,18 @@ HYPRE_Int HYPRE_ParCSRDiagScale(HYPRE_Solver       solver,
                                 HYPRE_ParVector    Hy,
                                 HYPRE_ParVector    Hx);
 
+/* Setup routine for on-processor triangular solve as preconditioning. */
+HYPRE_Int HYPRE_ParCSROnProcTriSetup(HYPRE_Solver       solver,
+                                     HYPRE_ParCSRMatrix HA,
+                                     HYPRE_ParVector    Hy,
+                                     HYPRE_ParVector    Hx);
+
+/* Solve routine for on-processor triangular solve as preconditioning. */
+HYPRE_Int HYPRE_ParCSROnProcTriSolve(HYPRE_Solver       solver,
+                                     HYPRE_ParCSRMatrix HA,
+                                     HYPRE_ParVector    Hy,
+                                     HYPRE_ParVector    Hx);
+
 /*@}*/
 
 /*--------------------------------------------------------------------------

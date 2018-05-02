@@ -219,3 +219,45 @@ HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 {
    return( HYPRE_GMRESGetFinalRelativeResidualNorm( solver, norm ) );
 }
+
+
+/*--------------------------------------------------------------------------
+ * Setup routine for on-processor triangular solve as preconditioning. 
+ *--------------------------------------------------------------------------*/
+HYPRE_Int HYPRE_ParCSROnProcTriSetup(HYPRE_Solver       solver,
+                                     HYPRE_ParCSRMatrix HA,
+                                     HYPRE_ParVector    Hy,
+                                     HYPRE_ParVector    Hx)
+{   
+   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
+   
+   // Check for and get topological ordering of matrix
+   if (!hypre_ParCSRMatrixProcOrdering(A)) {
+      hypre_CSRMatrix *A_diag  = hypre_ParCSRMatrixDiag(A);
+      HYPRE_Real *A_diag_data  = hypre_CSRMatrixData(A_diag);
+      HYPRE_Int *A_diag_i      = hypre_CSRMatrixI(A_diag);
+      HYPRE_Int *A_diag_j      = hypre_CSRMatrixJ(A_diag);
+      HYPRE_Int n              = hypre_CSRMatrixNumRows(A_diag);
+      HYPRE_Int *proc_ordering = malloc(n*sizeof(HYPRE_Int));
+      hypre_topo_sort(A_diag_i, A_diag_j, A_diag_data, proc_ordering, n);
+      hypre_ParCSRMatrixProcOrdering(A) = proc_ordering;
+   }
+   return 0;
+}
+
+
+/*--------------------------------------------------------------------------
+ * Solve routine for on-processor triangular solve as preconditioning. 
+ *--------------------------------------------------------------------------*/
+HYPRE_Int HYPRE_ParCSROnProcTriSolve(HYPRE_Solver       solver,
+                                     HYPRE_ParCSRMatrix HA,
+                                     HYPRE_ParVector    Hy,
+                                     HYPRE_ParVector    Hx)
+{
+   hypre_ParCSRMatrix *A = (hypre_ParCSRMatrix *) HA;
+   hypre_ParVector    *y = (hypre_ParVector *) Hy;
+   hypre_ParVector    *x = (hypre_ParVector *) Hx;
+   HYPRE_Int ierr = 0;
+   ierr = hypre_BoomerAMGRelax(A,y,NULL,10,0,1,1,NULL,x,NULL,NULL);
+   return ierr;
+}
