@@ -470,8 +470,14 @@ hypre_MGRCycle( void               *mgr_vdata,
 
   HYPRE_Int            Frelax_method = (mgr_data -> Frelax_method);   
   hypre_ParAMGData    **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);   
+  
+  HYPRE_Int      restrict_type = (mgr_data -> restrict_type);
+  HYPRE_Int      use_air = 0;
 
    /* Initialize */
+   if(restrict_type > 3)
+      use_air = 1;
+      
 //   comm = hypre_ParCSRMatrixComm(A_array[0]);
    Solve_err_flag = 0;
    Not_Finished = 1;
@@ -556,9 +562,17 @@ hypre_MGRCycle( void               *mgr_vdata,
 		   alpha = 1.0;
 		   beta = 0.0;
 
-		   hypre_ParCSRMatrixMatvecT(alpha,RT_array[fine_grid],Vtemp,
-									 beta,F_array[coarse_grid]);
-
+                   if (use_air)
+                   {
+                      /* no transpose necessary for R */
+                      hypre_ParCSRMatrixMatvec(alpha, RT_array[fine_grid], Vtemp,
+                                               beta, F_array[coarse_grid]);
+                   }
+                   else
+                   {
+		          hypre_ParCSRMatrixMatvecT(alpha,RT_array[fine_grid],Vtemp,
+			  						 beta,F_array[coarse_grid]);
+                   }
 		   // initialize coarse grid solution array
 		   hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0);
 

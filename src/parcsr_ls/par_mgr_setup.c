@@ -51,7 +51,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 	HYPRE_Int  relax_type = (mgr_data -> relax_type);
 	HYPRE_Int  relax_order = (mgr_data -> relax_order);
 	HYPRE_Int  interp_type = (mgr_data -> interp_type);
-  HYPRE_Int  restrict_type = (mgr_data -> restrict_type);
+        HYPRE_Int  restrict_type = (mgr_data -> restrict_type);
 	HYPRE_Int num_interp_sweeps = (mgr_data -> num_interp_sweeps);
 	HYPRE_Int num_restrict_sweeps = (mgr_data -> num_interp_sweeps);
 	HYPRE_Int	max_elmts = (mgr_data -> P_max_elmts);
@@ -88,13 +88,19 @@ hypre_MGRSetup( void               *mgr_vdata,
   
 	hypre_ParAMGData    **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);  
 	HYPRE_Int Frelax_method = (mgr_data -> Frelax_method);
-
+        
+        HYPRE_Int use_air = 0;
 	/* ----- begin -----*/
+    
+    if(restrict_type == 4)
+       use_air = 1;
+    else if(restrict_type == 5)
+       use_air = 2;
 
 	num_threads = hypre_NumThreads();
 
-  block_size = (mgr_data -> block_size);
-  block_cf_marker = (mgr_data -> block_cf_marker);
+    block_size = (mgr_data -> block_size);
+    block_cf_marker = (mgr_data -> block_cf_marker);
   
     HYPRE_Int **level_coarse_indexes = NULL;
     HYPRE_Int *level_coarse_size = NULL;
@@ -478,25 +484,84 @@ hypre_MGRSetup( void               *mgr_vdata,
                                        debug_flag, trunc_factor, max_elmts, col_offd_S_to_A, &P, 1, interp_type, num_interp_sweeps);
 		
 		P_array[lev] = P;
+                
+                if(use_air)
+                {
+                   /* for AIR, need absolute value SOC */
 
-      		/* Build AT (transpose A) */
-      		hypre_ParCSRMatrixTranspose(A_array[lev], &AT, 1);
+	           hypre_BoomerAMGCreateSabs(A_array[lev], strong_threshold, 1.0, 
+				         1, NULL, &ST);
 
-      		/* Build new strength matrix */
-      		hypre_BoomerAMGCreateS(AT, strong_threshold, max_row_sum, 1, NULL, &ST);
-      		/* use appropriate communication package for Strength matrix */
-      		if (strong_threshold > S_commpkg_switch)
-         		hypre_BoomerAMGCreateSCommPkg(AT, ST, &col_offd_ST_to_AT);
+//	           col_offd_ST_to_AT = NULL;
+	           if (strong_threshold > S_commpkg_switch)
+                   {
+                      hypre_BoomerAMGCreateSCommPkg(A_array[lev], ST, &col_offd_ST_to_AT);
+                   }
 
-      		num_restrict_sweeps = (mgr_data -> num_restrict_sweeps); /* restriction */
-      		hypre_MGRBuildInterp(AT, CF_marker_array[lev], ST, coarse_pnts_global, 1, dof_func_buff,
+               /* !!! Ensure that CF_marker contains -1 or 1 !!! */
+/*
+               for (i = 0; i < hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A_array[level])); i++)
+               {
+                  CF_marker[i] = CF_marker[i] > 0 ? 1 : -1;
+               }
+*/
+                   if (use_air == 1) /* distance-1 AIR */
+                   {
+                      hypre_BoomerAMGBuildRestrAIR(A_array[lev], CF_marker_array[lev], 
+                                               ST, coarse_pnts_global, 1, 
+                                               dof_func_buff, 
+                                               debug_flag, trunc_factor, max_elmts, 
+                                               col_offd_ST_to_AT, &RT );
+                   }
+                   else /* distance-2 AIR */
+                   {
+                      hypre_BoomerAMGBuildRestrDist2AIR(A_array[lev], CF_marker_array[lev], 
+                                                    ST, coarse_pnts_global, 1, 
+                                                    dof_func_buff, 
+                                                    debug_flag, trunc_factor, max_elmts, 
+                                                    col_offd_ST_to_AT, &RT );
+                   }
+
+                   RT_array[lev] = RT;
+
+                   /* Use two matrix products to generate A_H */
+                   hypre_ParCSRMatrix *AP = NULL;
+                   AP  = hypre_ParMatmul(A_array[lev], P_array[lev]);
+                   RAP_ptr = hypre_ParMatmul(RT, AP);
+                   /* RL: XXX NEED TO CHECK THIS WITH UMY */
+                   hypre_ParCSRMatrixOwnsRowStarts(RAP_ptr) = 1;
+                   hypre_ParCSRMatrixOwnsColStarts(RAP_ptr) = 0;
+                   /* P gives up her ColStarts */
+                   hypre_ParCSRMatrixOwnsColStarts(P_array[lev]) = 0;
+                   /* R gives up her RowStarts */
+                   hypre_ParCSRMatrixOwnsRowStarts(RT) = 0;
+                   if (num_procs > 1) 
+                   {
+                      hypre_MatvecCommPkgCreate(RAP_ptr);
+                   }
+                   /* Delete AP */
+                   hypre_ParCSRMatrixDestroy(AP);
+                }
+                else
+                {
+      		   /* Build AT (transpose A) */
+      		   hypre_ParCSRMatrixTranspose(A_array[lev], &AT, 1);
+
+      		   /* Build new strength matrix */
+      		   hypre_BoomerAMGCreateS(AT, strong_threshold, max_row_sum, 1, NULL, &ST);
+      		   /* use appropriate communication package for Strength matrix */
+      		   if (strong_threshold > S_commpkg_switch)
+         	   	hypre_BoomerAMGCreateSCommPkg(AT, ST, &col_offd_ST_to_AT);
+
+         		num_restrict_sweeps = (mgr_data -> num_restrict_sweeps); /* restriction */
+        		hypre_MGRBuildInterp(AT, CF_marker_array[lev], ST, coarse_pnts_global, 1, dof_func_buff,
                          	debug_flag, trunc_factor, max_elmts, col_offd_ST_to_AT, &RT, last_level, restrict_type, num_restrict_sweeps);
                          	
-      		RT_array[lev] = RT;
+        		RT_array[lev] = RT;
 
-      		/* Compute RAP for next level */
-      		hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
-      		
+        		/* Compute RAP for next level */
+        		hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
+      		}
       		/* Update coarse level indexes for next levels */
       		if (lev < num_coarsening_levs - 1) 
       		{

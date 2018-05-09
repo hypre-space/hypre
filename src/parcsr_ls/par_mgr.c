@@ -1710,12 +1710,12 @@ hypre_MGRBuildInterp(hypre_ParCSRMatrix     *A,
 //   HYPRE_Real		 jac_trunc_threshold = trunc_factor;
 //   HYPRE_Real		 jac_trunc_threshold_minus = 0.5*jac_trunc_threshold;
 
-   /* Build interpolation operator using (hypre default) */
+   /* Do Jacobi interpolation for intermediate levels */
    if(!last_level)
    {
            hypre_MGRBuildP( A,CF_marker,num_cpts_global,2,debug_flag,&P_ptr);	
    }
-   /* Do Jacobi interpolation for last level */
+   /* Interpolation for last level */
    else
    {
 	   if (method <3)
