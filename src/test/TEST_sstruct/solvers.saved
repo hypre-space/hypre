@@ -105,18 +105,18 @@ Iterations = 24
 Final Relative Residual Norm = 6.654613e-07
 
 # Output file: solvers.out.11.lobpcg.1
-Eigenvalue lambda   1.34880853049745e+00
-Residual   1.27609473406123e-04
+Eigenvalue lambda   1.34880853049719e+00
+Residual   1.27609473238620e-04
 
 # Output file: solvers.out.11.lobpcg.4
-Eigenvalue lambda   1.34880848246853e+00
-Eigenvalue lambda   1.36560847743866e+00
-Eigenvalue lambda   1.47908699650267e+00
-Eigenvalue lambda   1.49589925889085e+00
-Residual   2.34138605050087e-06
-Residual   2.11050112570845e-06
-Residual   2.34273161452232e-06
-Residual   4.55133814558691e-06
+Eigenvalue lambda   1.34880848246868e+00
+Eigenvalue lambda   1.36560847743149e+00
+Eigenvalue lambda   1.47908699638228e+00
+Eigenvalue lambda   1.49589925867103e+00
+Residual   2.34138563461796e-06
+Residual   2.11050112612293e-06
+Residual   2.34272528133832e-06
+Residual   4.55132485053271e-06
 
 # Output file: solvers.out.18.lobpcg
 Iterations = 25

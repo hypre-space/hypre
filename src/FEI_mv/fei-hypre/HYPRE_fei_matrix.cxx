@@ -35,7 +35,7 @@ extern "C" int
 HYPRE_FEMatrixCreate(MPI_Comm comm, HYPRE_FEMesh mesh, HYPRE_FEMatrix *matrix)
 {
    HYPRE_FEMatrix myMatrix;
-   myMatrix = (HYPRE_FEMatrix) malloc(sizeof(HYPRE_FEMatrix));
+   myMatrix = (HYPRE_FEMatrix) hypre_TAlloc(HYPRE_FEMatrix, 1, HYPRE_MEMORY_HOST);
    myMatrix->comm_ = comm;
    myMatrix->mesh_ = mesh;
    (*matrix) = myMatrix;

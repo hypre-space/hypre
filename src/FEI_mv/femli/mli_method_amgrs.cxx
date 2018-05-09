@@ -392,7 +392,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
 
       /* ------construct processor maps for the coarse grid------------- */
 
-      coarsePartition = (int *) hypre_CTAlloc(int, nprocs+1);
+      coarsePartition = (int *) hypre_CTAlloc(int, nprocs+1, HYPRE_MEMORY_HOST);
       coarsePartition[0] = 0;
       MPI_Allgather(&coarseNRows, 1, MPI_INT, &(coarsePartition[1]),
 		    1, MPI_INT, comm);
@@ -430,8 +430,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
             delete mli_ATmat;
             hypre_ParCSRMatrixDestroy(hypreST);
          }
-         hypre_TFree( coarsePartition );
-         if ( CFMarkers != NULL ) hypre_TFree( CFMarkers );
+         hypre_TFree( coarsePartition , HYPRE_MEMORY_HOST);
+         if ( CFMarkers != NULL ) hypre_TFree( CFMarkers , HYPRE_MEMORY_HOST);
          if ( hypreS  != NULL ) hypre_ParCSRMatrixDestroy(hypreS);
          if ( hypreS2 != NULL ) hypre_ParCSRMatrixDestroy(hypreS2);
          if ( coarsenScheme_ == MLI_METHOD_AMGRS_CR )
@@ -559,8 +559,8 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          mli_Rmat = new MLI_Matrix(mli_Pmat->getMatrix(), paramString, NULL);
          mli->setRestriction(level, mli_Rmat);
       }
-      if ( CFMarkers != NULL ) hypre_TFree( CFMarkers );
-      //if ( coarsePartition != NULL ) hypre_TFree( coarsePartition );
+      if ( CFMarkers != NULL ) hypre_TFree( CFMarkers , HYPRE_MEMORY_HOST);
+      //if ( coarsePartition != NULL ) hypre_TFree( coarsePartition , HYPRE_MEMORY_HOST);
 
       startTime = MLI_Utils_WTime();
 
@@ -576,7 +576,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          //if (hypre_ParCSRMatrixOwnsRowStarts(hypreCA) == 0)
          //{
          //   rowColStarts = hypre_ParCSRMatrixRowStarts(hypreR);
-         //   newRowColStarts = (int *) malloc((nprocs+1) * sizeof(int));
+         //   newRowColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
          //   for (irow = 0; irow <= nprocs; irow++) 
          //      newRowColStarts[irow] = rowColStarts[irow];
          //   hypre_ParCSRMatrixRowStarts(hypreCA) = newRowColStarts;
@@ -585,7 +585,7 @@ int MLI_Method_AMGRS::setup( MLI *mli )
          //if (hypre_ParCSRMatrixOwnsColStarts(hypreCA) == 0)
          //{
          //   rowColStarts = hypre_ParCSRMatrixColStarts(hypreAP);
-         //   newRowColStarts = (int *) malloc((nprocs+1) * sizeof(int));
+         //   newRowColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
          //   for (irow = 0; irow <= nprocs; irow++) 
          //      newRowColStarts[irow] = rowColStarts[irow];
          //   hypre_ParCSRMatrixColStarts(hypreCA) = newRowColStarts;
@@ -1210,12 +1210,12 @@ MLI_Matrix *MLI_Method_AMGRS::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       hypre_ParCSRMatrixTranspose(hyprePFF, &hyprePFFT, 1);
       hypreAfc = hypre_ParMatmul(hyprePFFT, hypreAPFC);
       rowStarts = hypre_ParCSRMatrixRowStarts(hyprePFFT);
-      newRowStarts = (int *) malloc((nprocs+1) * sizeof(int));
+      newRowStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
       for (irow = 0; irow <= nprocs; irow++) 
          newRowStarts[irow] = rowStarts[irow];
       hypre_ParCSRMatrixRowStarts(hypreAfc) = newRowStarts;
       colStarts = hypre_ParCSRMatrixColStarts(hypreAPFC);
-      newColStarts = (int *) malloc((nprocs+1) * sizeof(int));
+      newColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
       for (irow = 0; irow <= nprocs; irow++) 
          newColStarts[irow] = colStarts[irow];
       hypre_ParCSRMatrixColStarts(hypreAfc) = newColStarts;
@@ -1617,7 +1617,7 @@ MLI_Matrix *MLI_Method_AMGRS::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
       }
       hypre_ParCSRMatrixOwnsColStarts(hypreInvD) = 0;
       rowStarts = hypre_ParCSRMatrixRowStarts(hypreA);
-      newRowStarts = (int *) malloc((nprocs+1) * sizeof(int));
+      newRowStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
       for (irow = 0; irow <= nprocs; irow++) 
          newRowStarts[irow] = rowStarts[irow];
       hypre_ParCSRMatrixRowStarts(hypreP) = newRowStarts;

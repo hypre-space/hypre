@@ -60,9 +60,9 @@ void HYPRE_LSI_Get_IJAMatrixFromFile(double **val, int **ia,
        printf("Error : nrows,nnz = %d %d\n", Nrows, nnz);
        exit(1);
     }
-    mat_ia = (int *) malloc((Nrows+1) * sizeof(int));
-    mat_ja = (int *) malloc( nnz * sizeof(int));
-    mat_a  = (double *) malloc( nnz * sizeof(double));
+    mat_ia = hypre_TAlloc(int, (Nrows+1) , HYPRE_MEMORY_HOST);
+    mat_ja = hypre_TAlloc(int,  nnz , HYPRE_MEMORY_HOST);
+    mat_a  = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST);
     mat_ia[0] = 0;
 
     curr_row = 0;
@@ -105,7 +105,7 @@ void HYPRE_LSI_Get_IJAMatrixFromFile(double **val, int **ia,
        exit(1);
     }
     fflush(stdout);
-    rhs_local  = (double *) malloc( Nrows * sizeof(double));
+    rhs_local  = hypre_TAlloc(double,  Nrows , HYPRE_MEMORY_HOST);
     m = 0;
     for ( k = 0; k < ncnt; k++ ) {
        fscanf(fp, "%d %lg", &rnum, &dtemp);
@@ -210,8 +210,8 @@ int HYPRE_LSI_GetParCSRMatrix(HYPRE_IJMatrix Amat, int nrows, int nnz,
     {
        ierr = HYPRE_ParCSRMatrixGetRow(A_csr,i,&rowSize,&colInd,&colVal);
        assert(!ierr);
-       colInd2 = (int *)    malloc(rowSize * sizeof(int));
-       colVal2 = (double *) malloc(rowSize * sizeof(double));
+       colInd2 = hypre_TAlloc(int, rowSize , HYPRE_MEMORY_HOST);
+       colVal2 = hypre_TAlloc(double, rowSize , HYPRE_MEMORY_HOST);
        for ( j = 0; j < rowSize; j++ )
        {
           colInd2[j] = colInd[j];
@@ -324,9 +324,9 @@ int HYPRE_LSI_SplitDSort2(double *dlist, int nlist, int *ilist, int limit)
    }
    count1 = 0;
    count2 = 0;
-   iarray1 = (int *)   malloc( 2 * nlist * sizeof(int) );
+   iarray1 = hypre_TAlloc(int,  2 * nlist , HYPRE_MEMORY_HOST);
    iarray2 = iarray1 + nlist;
-   darray1 = (double*) malloc( 2 * nlist * sizeof(double) );
+   darray1 = hypre_TAlloc(double,  2 * nlist , HYPRE_MEMORY_HOST);
    darray2 = darray1 + nlist;
 
    if ( darray2 == NULL )
@@ -451,11 +451,11 @@ int HYPRE_LSI_Cuthill(int n, int *ia, int *ja, double *aa, int *order_array,
    int    root, norder, mindeg, *ia2, *ja2;
    double *aa2;
 
-   nz_array = (int *) malloc( n * sizeof(int) );
+   nz_array = hypre_TAlloc(int,  n , HYPRE_MEMORY_HOST);
    nnz      = ia[n];
    for ( i = 0; i < n; i++ ) nz_array[i] = ia[i+1] - ia[i];
-   tag_array = (int *) malloc( n * sizeof(int) );
-   queue     = (int *) malloc( n * sizeof(int) );
+   tag_array = hypre_TAlloc(int,  n , HYPRE_MEMORY_HOST);
+   queue     = hypre_TAlloc(int,  n , HYPRE_MEMORY_HOST);
    for ( i = 0; i < n; i++ ) tag_array[i] = 0;
    norder = 0;
    mindeg = 10000000;
@@ -500,9 +500,9 @@ int HYPRE_LSI_Cuthill(int n, int *ia, int *ja, double *aa, int *order_array,
          for ( j = 0; j < n; j++ )
             if ( tag_array[j] == 0 ) queue[nqueue++] = j;
    }   
-   ia2 = (int *) malloc( (n+1) * sizeof(int) );
-   ja2 = (int *) malloc( nnz * sizeof(int) );
-   aa2 = (double *) malloc( nnz * sizeof(double) );
+   ia2 = hypre_TAlloc(int,  (n+1) , HYPRE_MEMORY_HOST);
+   ja2 = hypre_TAlloc(int,  nnz , HYPRE_MEMORY_HOST);
+   aa2 = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST);
    ia2[0] = 0;
    nnz = 0;
    for ( i = 0; i < n; i++ )
@@ -540,9 +540,9 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
    if ( ndim == 1 ) 
    {
       if ( habs(Amat[0][0]) <= 1.0e-16 ) return -1;
-      Bmat = (double **) malloc( ndim * sizeof(double*) );
+      Bmat = hypre_TAlloc(double*,  ndim , HYPRE_MEMORY_HOST);
       for ( i = 0; i < ndim; i++ ) 
-         Bmat[i] = (double *) malloc( ndim * sizeof(double) ); 
+         Bmat[i] = hypre_TAlloc(double,  ndim , HYPRE_MEMORY_HOST); 
       Bmat[0][0] = 1.0 / Amat[0][0];
       (*Cmat) = Bmat;
       return 0;
@@ -551,9 +551,9 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
    {
       denom = Amat[0][0] * Amat[1][1] - Amat[0][1] * Amat[1][0];
       if ( habs( denom ) <= 1.0e-16 ) return -1;
-      Bmat = (double **) malloc( ndim * sizeof(double*) );
+      Bmat = hypre_TAlloc(double*,  ndim , HYPRE_MEMORY_HOST);
       for ( i = 0; i < ndim; i++ ) 
-         Bmat[i] = (double *) malloc( ndim * sizeof(double) ); 
+         Bmat[i] = hypre_TAlloc(double,  ndim , HYPRE_MEMORY_HOST); 
       Bmat[0][0] = Amat[1][1] / denom;
       Bmat[1][1] = Amat[0][0] / denom;
       Bmat[0][1] = - ( Amat[0][1] / denom );
@@ -563,10 +563,10 @@ int HYPRE_LSI_MatrixInverse( double **Amat, int ndim, double ***Cmat )
    }
    else
    {
-      Bmat = (double **) malloc( ndim * sizeof(double*) );
+      Bmat = hypre_TAlloc(double*,  ndim , HYPRE_MEMORY_HOST);
       for ( i = 0; i < ndim; i++ ) 
       { 
-         Bmat[i] = (double *) malloc( ndim * sizeof(double) ); 
+         Bmat[i] = hypre_TAlloc(double,  ndim , HYPRE_MEMORY_HOST); 
          for ( j = 0; j < ndim; j++ ) Bmat[i][j] = 0.0;
          Bmat[i][i] = 1.0;
       } 
@@ -651,9 +651,9 @@ int HYPRE_LSI_PartitionMatrix( int nRows, int startRow, int *rowLengths,
    /* search for constraint rows                                     */
    /*----------------------------------------------------------------*/
 
-   localLabels = (int *) malloc( actualNRows * sizeof(int) );
+   localLabels = hypre_TAlloc(int,  actualNRows , HYPRE_MEMORY_HOST);
    for ( irow = 0; irow < actualNRows; irow++ ) localLabels[irow] = -1;
-   indSet = (int *) malloc( actualNRows * sizeof(int) );
+   indSet = hypre_TAlloc(int,  actualNRows , HYPRE_MEMORY_HOST);
    
    labelNum = 0;
    rowCnt   = actualNRows;

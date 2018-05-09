@@ -34,7 +34,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
 
    /* set up stencil_shape */
    stencil_size = 2;
-   stencil_shape = hypre_CTAlloc(hypre_Index, stencil_size);
+   stencil_shape = hypre_CTAlloc(hypre_Index,  stencil_size, HYPRE_MEMORY_HOST);
    for (i = 0; i < stencil_size; i++)
    {
       hypre_SetIndex3(stencil_shape[i], 0, 0, 0);
@@ -45,7 +45,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
    /* set up P_stencils */
    ndim = hypre_StructStencilNDim(hypre_SStructPMatrixSStencil(A, 0, 0));
    nvars = hypre_SStructPMatrixNVars(A);
-   P_stencils = hypre_CTAlloc(hypre_SStructStencil *, nvars);
+   P_stencils = hypre_CTAlloc(hypre_SStructStencil *,  nvars, HYPRE_MEMORY_HOST);
    for (s = 0; s < nvars; s++)
    {
       HYPRE_SStructStencilCreate(ndim, stencil_size, &P_stencils[s]);
@@ -60,7 +60,7 @@ hypre_SysPFMGCreateInterpOp( hypre_SStructPMatrix *A,
    hypre_SStructPMatrixCreate(hypre_SStructPMatrixComm(A), cgrid,
                               P_stencils, &P);
 
-   hypre_TFree(stencil_shape);
+   hypre_TFree(stencil_shape, HYPRE_MEMORY_HOST);
 
    return P;
 }

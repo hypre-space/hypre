@@ -29,7 +29,7 @@ hypre_JacobiCreate( MPI_Comm  comm )
    hypre_Index       stride;
    hypre_Index       indices[1];
 
-   jacobi_data = hypre_CTAlloc(hypre_JacobiData, 1);
+   jacobi_data = hypre_CTAlloc(hypre_JacobiData,  1, HYPRE_MEMORY_HOST);
    relax_data = hypre_PointRelaxCreate(comm);
    hypre_PointRelaxSetNumPointsets(relax_data, 1);
    hypre_SetIndex3(stride, 1, 1, 1);
@@ -52,7 +52,7 @@ hypre_JacobiDestroy( void *jacobi_vdata )
    if (jacobi_data)
    {
       hypre_PointRelaxDestroy(jacobi_data -> relax_data);
-      hypre_TFree(jacobi_data);
+      hypre_TFree(jacobi_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

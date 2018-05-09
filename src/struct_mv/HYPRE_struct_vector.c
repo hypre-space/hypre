@@ -342,4 +342,3 @@ HYPRE_StructVectorClone( HYPRE_StructVector x,
 
    return hypre_error_flag;
 }
-

@@ -89,7 +89,7 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
     HYPRE_Int iter;
     HYPRE_Real rel_resid;
 
-    HYPRE_Real *H  = (HYPRE_Real *) malloc(dim*(dim+1) * sizeof(HYPRE_Real));
+    HYPRE_Real *H  = hypre_TAlloc(HYPRE_Real, dim*(dim+1) , HYPRE_MEMORY_HOST);
 
     /* local problem size */
     HYPRE_Int n = mat->end_row - mat->beg_row + 1;
@@ -98,12 +98,12 @@ void FGMRES_ParaSails(Matrix *mat, ParaSails *ps, HYPRE_Real *b, HYPRE_Real *x,
     HYPRE_Int i, j, k;
     HYPRE_Real beta, resid0;
 
-    HYPRE_Real *s  = (HYPRE_Real *) malloc((dim+1) * sizeof(HYPRE_Real));
-    HYPRE_Real *cs = (HYPRE_Real *) malloc(dim * sizeof(HYPRE_Real));
-    HYPRE_Real *sn = (HYPRE_Real *) malloc(dim * sizeof(HYPRE_Real));
+    HYPRE_Real *s  = hypre_TAlloc(HYPRE_Real, (dim+1) , HYPRE_MEMORY_HOST);
+    HYPRE_Real *cs = hypre_TAlloc(HYPRE_Real, dim , HYPRE_MEMORY_HOST);
+    HYPRE_Real *sn = hypre_TAlloc(HYPRE_Real, dim , HYPRE_MEMORY_HOST);
 
-    HYPRE_Real *V  = (HYPRE_Real *) malloc(n*(dim+1) * sizeof(HYPRE_Real));
-    HYPRE_Real *W  = (HYPRE_Real *) malloc(n*dim * sizeof(HYPRE_Real));
+    HYPRE_Real *V  = hypre_TAlloc(HYPRE_Real, n*(dim+1) , HYPRE_MEMORY_HOST);
+    HYPRE_Real *W  = hypre_TAlloc(HYPRE_Real, n*dim , HYPRE_MEMORY_HOST);
 
     MPI_Comm comm = mat->comm;
     hypre_MPI_Comm_rank(comm, &mype);

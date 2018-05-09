@@ -5208,13 +5208,13 @@ int HYPRE_LinSysCore::launchSolver(int& solveStatus, int &iterations)
          HYPRE_ParCSRHybridSetCoarsenType(HYSolver_, amgCoarsenType_);
          HYPRE_ParCSRHybridSetMeasureType(HYSolver_, amgMeasureType_);
          HYPRE_ParCSRHybridSetStrongThreshold(HYSolver_,amgStrongThreshold_);
-         numSweeps = hypre_CTAlloc(int,4);
+         numSweeps = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
          for ( i = 0; i < 4; i++ ) numSweeps[i] = amgNumSweeps_[i];
          HYPRE_ParCSRHybridSetNumGridSweeps(HYSolver_, numSweeps);
-         relaxType = hypre_CTAlloc(int,4);
+         relaxType = hypre_CTAlloc(int,4,HYPRE_MEMORY_HOST);
          for ( i = 0; i < 4; i++ ) relaxType[i] = amgRelaxType_[i];
          HYPRE_ParCSRHybridSetGridRelaxType(HYSolver_, relaxType);
-         relaxWt = hypre_CTAlloc(double,25);
+         relaxWt = hypre_CTAlloc(double,25,HYPRE_MEMORY_HOST);
          for ( i = 0; i < 25; i++ ) relaxWt[i] = amgRelaxWeight_[i];
          HYPRE_ParCSRHybridSetRelaxWeight(HYSolver_, relaxWt);
          if ( (HYOutputLevel_ & HYFEI_SPECIALMASK) >= 1 )

@@ -27,7 +27,7 @@ hypre_ComputeInfoCreate( hypre_CommInfo       *comm_info,
 {
    hypre_ComputeInfo  *compute_info;
 
-   compute_info = hypre_TAlloc(hypre_ComputeInfo, 1);
+   compute_info = hypre_TAlloc(hypre_ComputeInfo,  1, HYPRE_MEMORY_HOST);
 
    hypre_ComputeInfoCommInfo(compute_info)  = comm_info;
    hypre_ComputeInfoIndtBoxes(compute_info) = indt_boxes;
@@ -91,7 +91,7 @@ hypre_ComputeInfoProjectComp( hypre_ComputeInfo  *compute_info,
 HYPRE_Int
 hypre_ComputeInfoDestroy( hypre_ComputeInfo  *compute_info )
 {
-   hypre_TFree(compute_info);
+   hypre_TFree(compute_info, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }
@@ -285,7 +285,7 @@ hypre_ComputePkgCreate( hypre_ComputeInfo     *compute_info,
    hypre_ComputePkg  *compute_pkg;
    hypre_CommPkg     *comm_pkg;
 
-   compute_pkg = hypre_CTAlloc(hypre_ComputePkg, 1);
+   compute_pkg = hypre_CTAlloc(hypre_ComputePkg,  1, HYPRE_MEMORY_HOST);
 
    hypre_CommPkgCreate(hypre_ComputeInfoCommInfo(compute_info),
                        data_space, data_space, num_values, NULL, 0,
@@ -327,7 +327,7 @@ hypre_ComputePkgDestroy( hypre_ComputePkg *compute_pkg )
 
       hypre_StructGridDestroy(hypre_ComputePkgGrid(compute_pkg));
 
-      hypre_TFree(compute_pkg);
+      hypre_TFree(compute_pkg, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

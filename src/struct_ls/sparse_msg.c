@@ -30,7 +30,7 @@ hypre_SparseMSGCreate( MPI_Comm  comm )
 {
    hypre_SparseMSGData *smsg_data;
 
-   smsg_data = hypre_CTAlloc(hypre_SparseMSGData, 1);
+   smsg_data = hypre_CTAlloc(hypre_SparseMSGData,  1, HYPRE_MEMORY_HOST);
 
    (smsg_data -> comm)       = comm;
    (smsg_data -> time_index) = hypre_InitializeTiming("SparseMSG");
@@ -77,8 +77,8 @@ hypre_SparseMSGDestroy( void *smsg_vdata )
    {
       if ((smsg_data -> logging) > 0)
       {
-         hypre_TFree(smsg_data -> norms);
-         hypre_TFree(smsg_data -> rel_norms);
+         hypre_TFree(smsg_data -> norms, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> rel_norms, HYPRE_MEMORY_HOST);
       }
 
       if ((smsg_data -> num_levels) > 1)
@@ -120,35 +120,35 @@ hypre_SparseMSGDestroy( void *smsg_vdata )
             hypre_StructGridDestroy(smsg_data -> Pz_grid_array[l]); 
          }
 
-         hypre_SharedTFree(smsg_data -> data);
+          hypre_TFree(smsg_data -> data, HYPRE_MEMORY_HOST);
 
-         hypre_TFree(smsg_data -> relax_array);
-         hypre_TFree(smsg_data -> matvec_array);
-         hypre_TFree(smsg_data -> restrictx_array);
-         hypre_TFree(smsg_data -> restricty_array);
-         hypre_TFree(smsg_data -> restrictz_array);
-         hypre_TFree(smsg_data -> interpx_array);
-         hypre_TFree(smsg_data -> interpy_array);
-         hypre_TFree(smsg_data -> interpz_array);
-         hypre_TFree(smsg_data -> A_array);
-         hypre_TFree(smsg_data -> Px_array);
-         hypre_TFree(smsg_data -> Py_array);
-         hypre_TFree(smsg_data -> Pz_array);
-         hypre_TFree(smsg_data -> RTx_array);
-         hypre_TFree(smsg_data -> RTy_array);
-         hypre_TFree(smsg_data -> RTz_array);
-         hypre_TFree(smsg_data -> b_array);
-         hypre_TFree(smsg_data -> x_array);
-         hypre_TFree(smsg_data -> t_array);
-         hypre_TFree(smsg_data -> r_array);
-         hypre_TFree(smsg_data -> grid_array);
-         hypre_TFree(smsg_data -> Px_grid_array);
-         hypre_TFree(smsg_data -> Py_grid_array);
-         hypre_TFree(smsg_data -> Pz_grid_array);
+         hypre_TFree(smsg_data -> relax_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> matvec_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> restrictx_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> restricty_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> restrictz_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> interpx_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> interpy_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> interpz_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> A_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> Px_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> Py_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> Pz_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> RTx_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> RTy_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> RTz_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> b_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> x_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> t_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> r_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> grid_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> Px_grid_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> Py_grid_array, HYPRE_MEMORY_HOST);
+         hypre_TFree(smsg_data -> Pz_grid_array, HYPRE_MEMORY_HOST);
       }
  
       hypre_FinalizeTiming(smsg_data -> time_index);
-      hypre_TFree(smsg_data);
+      hypre_TFree(smsg_data, HYPRE_MEMORY_HOST);
    }
 #endif
 /* RDF */

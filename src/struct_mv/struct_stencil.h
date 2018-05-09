@@ -33,7 +33,6 @@ typedef struct hypre_StructStencil_struct
    HYPRE_Int      ndim;    /* Number of dimensions */
 
    HYPRE_Int      ref_count;
-
 } hypre_StructStencil;
 
 /*--------------------------------------------------------------------------
