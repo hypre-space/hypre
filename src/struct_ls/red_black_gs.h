@@ -43,6 +43,7 @@ typedef struct
 } hypre_RedBlackGSData;
 
 #ifdef HYPRE_USE_RAJA
+
 #define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
@@ -99,8 +100,10 @@ typedef struct
          }						\
      });						\
      hypre_fence();					\
-}  
+}
+
 #elif defined(HYPRE_USE_KOKKOS)
+
 #define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
@@ -158,7 +161,9 @@ typedef struct
      });						\
      hypre_fence();					\
 }  
+
 #elif defined(HYPRE_USE_CUDA)
+
 #define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
@@ -215,8 +220,9 @@ typedef struct
      });						\
 }
 
-#elif defined(HYPRE_USE_OMP45) /* BEGIN OF OMP 4.5 */
+#elif defined(HYPRE_USE_OMP45) 
 
+/* BEGIN OF OMP 4.5 */
 /* #define IF_CLAUSE if (hypre__global_offload) */
 
 /* stringification:
@@ -290,27 +296,43 @@ typedef struct
          }                                                            \
      }                                                                \
 }
-
 /* END OF OMP 4.5 */
+
 #else
+
+/* CPU */
 #define HYPRE_REDBLACK_PRIVATE hypre__kk
+
 #define hypre_RedBlackLoopInit()\
 {\
    HYPRE_Int hypre__kk;
 
-#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
-				Astart,Ani,Anj,Ai,\
-				bstart,bni,bnj,bi,\
-				xstart,xni,xnj,xi)\
-   for (hypre__kk = 0; hypre__kk < nk; hypre__kk++)\
+#ifdef HYPRE_USING_OPENMP
+#define HYPRE_BOX_REDUCTION 
+#ifdef WIN32
+#define Pragma(x) __pragma(#x)
+#else
+#define Pragma(x) _Pragma(#x)
+#endif
+#define OMPRB1 Pragma(omp parallel for private(HYPRE_REDBLACK_PRIVATE) HYPRE_BOX_REDUCTION HYPRE_SMP_SCHEDULE)
+#else
+#define OMPRB1
+#endif
+
+#define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,  \
+				Astart,Ani,Anj,Ai,  \
+				bstart,bni,bnj,bi,  \
+				xstart,xni,xnj,xi)  \
+   OMPRB1 \
+   for (hypre__kk = 0; hypre__kk < nk; hypre__kk++) \
    {\
       HYPRE_Int ii,jj,Ai,bi,xi;\
       for (jj = 0; jj < nj; jj++)\
       {\
          ii = (hypre__kk + jj + redblack) % 2;\
-         Ai = Astart + hypre__kk*Anj*Ani + jj*Ani + ii;\
-         bi = bstart + hypre__kk*bnj*bni + jj*bni + ii;\
-         xi = xstart + hypre__kk*xnj*xni + jj*xni + ii;\
+         Ai = Astart + hypre__kk*Anj*Ani + jj*Ani + ii; \
+         bi = bstart + hypre__kk*bnj*bni + jj*bni + ii; \
+         xi = xstart + hypre__kk*xnj*xni + jj*xni + ii; \
          for (; ii < ni; ii+=2, Ai+=2, bi+=2, xi+=2)\
          {
 
@@ -320,9 +342,10 @@ typedef struct
    }\
 }
 
-#define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,\
-                                            bstart,bni,bnj,bi,\
-                                            xstart,xni,xnj,xi)\
+#define hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack, \
+                                            bstart,bni,bnj,bi, \
+                                            xstart,xni,xnj,xi) \
+   OMPRB1 \
    for (hypre__kk = 0; hypre__kk < nk; hypre__kk++)\
    {\
       HYPRE_Int ii,jj,bi,xi;\
