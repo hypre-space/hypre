@@ -32,7 +32,7 @@ typedef struct
   hypre_ParVector    *residual;
   HYPRE_Real    *rel_res_norms;  
   HYPRE_Int  	num_iterations;
-  HYPRE_Real   **l1_norms;
+  HYPRE_Real   *l1_norms;
   HYPRE_Real	final_rel_residual_norm;
   HYPRE_Real	tol;
   HYPRE_Int	logging;
