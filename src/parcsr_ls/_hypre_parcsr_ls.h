@@ -1700,6 +1700,16 @@ HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *re
 /* par_ilu.c */
 void *hypre_ILUCreate ( void );
 HYPRE_Int hypre_ILUDestroy ( void *ilu_vdata );
+HYPRE_Int hypre_ILUSetFillLevel( void *ilu_vdata, HYPRE_Int fill_lev );
+HYPRE_Int hypre_ILUSetMaxNnzPerRow( void *ilu_vdata, HYPRE_Int nzmax );
+HYPRE_Int hypre_ILUSetDropThreshold( void *ilu_vdata, HYPRE_Real threshold );
+HYPRE_Int hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type );
+HYPRE_Int hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter );
+HYPRE_Int hypre_ILUSetTol( void *ilu_vdata, HYPRE_Real tol );
+HYPRE_Int hypre_ILUSetup( void *ilu_vdata, hypre_ParCSRMatrix *A, hypre_ParVector    *f, hypre_ParVector    *u );
+HYPRE_Int hypre_ILUSolve( void *ilu_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector  *u );
+HYPRE_Int hypre_ILUSetPrintLevel( void *ilu_vdata, HYPRE_Int print_level );
+HYPRE_Int hypre_ILUSetLogging( void *ilu_vdata, HYPRE_Int logging );
 	
 #ifdef __cplusplus
 }

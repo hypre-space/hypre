@@ -34,8 +34,9 @@ hypre_ILUCreate()
   (ilu_data -> matL) = NULL;
   (ilu_data -> matD) = NULL;
   (ilu_data -> matU) = NULL;
-  (ilu_data -> droptol) = 1.0e-6;
+  (ilu_data -> droptol) = 1.0e-3;
   (ilu_data -> lfil) = 10;
+  (ilu_data -> maxRowNnz) = 1000;
   (ilu_data -> CF_marker_array) = NULL;
 
   (ilu_data -> F) = NULL;
@@ -54,6 +55,8 @@ hypre_ILUCreate()
   (ilu_data -> print_level) = 0;
 
   (ilu_data -> l1_norms) = NULL;
+  
+  (ilu_data -> ilu_type) = 0;
 
   return (void *) ilu_data;
 }
@@ -122,4 +125,74 @@ hypre_ILUDestroy( void *data )
   hypre_TFree(ilu_data, HYPRE_MEMORY_HOST);
 
   return hypre_error_flag;
+}
+/*--------------------------------------------------------------------------
+ *--------------------------------------------------------------------------*/
+/* set fill level (for ilu(k)) */
+HYPRE_Int
+hypre_ILUSetFillLevel( void *ilu_vdata, HYPRE_Int fill_lev )
+{
+  hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+  (ilu_data -> lfil) = fill_lev;
+
+  return hypre_error_flag;
+}
+/* set max non-zeros per row in factors (for ilut) */
+HYPRE_Int
+hypre_ILUSetMaxNnzPerRow( void *ilu_vdata, HYPRE_Int nzmax )
+{
+  hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+  (ilu_data -> maxRowNnz) = nzmax;
+
+  return hypre_error_flag;
+}
+/* set threshold for dropping in LU factors (for ilut) */
+HYPRE_Int
+hypre_ILUSetDropThreshold( void *ilu_vdata, HYPRE_Real threshold )
+{
+  hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+  (ilu_data -> droptol) = threshold;
+
+  return hypre_error_flag;
+}
+/* set ILU factorization type */
+HYPRE_Int
+hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
+{
+  hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
+  (ilu_data -> ilu_type) = ilu_type;
+
+  return hypre_error_flag;
+}
+/* Set max number of iterations for ILU solver */
+HYPRE_Int
+hypre_ILUSetMaxIter( void *ilu_vdata, HYPRE_Int max_iter )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   (ilu_data -> max_iter) = max_iter;
+   return hypre_error_flag;
+}
+/* Set convergence tolerance for ILU solver */
+HYPRE_Int
+hypre_ILUSetTol( void *ilu_vdata, HYPRE_Real tol )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   (ilu_data -> tol) = tol;
+   return hypre_error_flag;
+}
+/* Set print level for ilu solver */
+HYPRE_Int
+hypre_ILUSetPrintLevel( void *ilu_vdata, HYPRE_Int print_level )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   (ilu_data -> print_level) = print_level;
+   return hypre_error_flag;
+}
+/* Set print level for ilu solver */
+HYPRE_Int
+hypre_ILUSetLogging( void *ilu_vdata, HYPRE_Int logging )
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   (ilu_data -> logging) = logging;
+   return hypre_error_flag;
 }

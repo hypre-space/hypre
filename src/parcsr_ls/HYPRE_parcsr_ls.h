@@ -3522,6 +3522,102 @@ HYPRE_Int HYPRE_ILUCreate( HYPRE_Solver *solver );
  **/
 HYPRE_Int HYPRE_ILUDestroy( HYPRE_Solver solver );
 
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetMaxIter
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set maximum number of iterations if used as a solver.
+ * Set this to 1 if ILU is used as a preconditioner. The default is 5.
+ **/
+HYPRE_Int
+HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetTol
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set the convergence tolerance for the ILU smoother.
+ * Use tol = 0.0 if ILU is used as a preconditioner. The default is 1.e-7. 
+ **/
+HYPRE_Int
+HYPRE_ILUSetTol( HYPRE_Solver solver, HYPRE_Real tol );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetFillLevel
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set the fill level, k, for level-based ILU(k)
+ * The default is 0 (for ILU(0)). 
+ **/
+HYPRE_Int
+HYPRE_ILUSetFillLevel( HYPRE_Solver solver, HYPRE_Int lfil );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetMaxNnzPerRow
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set the max non-zeros per row in L and U factors (for ilut)
+ * The default is 1000. 
+ **/
+HYPRE_Int
+HYPRE_ILUSetMaxNnzPerRow( HYPRE_Solver solver, HYPRE_Int nzmax );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetDropThreshold
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set the threshold for dropping in L and U factors (for ilut).
+ * Any fill-in less than this threshold is dropped in the factorization.
+ * The default is 1.0e-3. 
+ **/
+HYPRE_Int
+HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetType
+ *--------------------------------------------------------------------------*/
+/**
+ * Set the type of ILU factorization.
+ * Options for {\tt ilu\_type} are:
+ *
+ * \begin{tabular}{|c|l|} \hline
+ * 0 & BJ with ilu(0) (default) \\
+ * 1 & BJ with ilut \\
+ * \hline
+ * \end{tabular}  
+ **/
+HYPRE_Int
+HYPRE_ILUSetType( HYPRE_Solver solver, HYPRE_Int ilu_type );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetPrintLevel
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set the print level to print setup and solve information.
+ *
+ * \begin{tabular}{|c|l|} \hline
+ * 0 & no printout (default) \\
+ * 1 & print setup information \\
+ * 2 & print solve information \\
+ * 3 & print both setup and solve information \\
+ * \hline
+ * \end{tabular} 
+ **/
+HYPRE_Int
+HYPRE_ILUSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetLogging
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Requests logging of solver diagnostics.
+ * Requests additional computations for diagnostic and similar
+ * data to be logged by the user. Default to 0 for do nothing.  The latest
+ * residual will be available if logging > 1.
+ **/
+HYPRE_Int
+HYPRE_ILUSetLogging( HYPRE_Solver solver, HYPRE_Int logging );
+
 /*@}*/
 
 /*--------------------------------------------------------------------------

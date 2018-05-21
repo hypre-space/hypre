@@ -38,3 +38,99 @@ HYPRE_ILUDestroy( HYPRE_Solver solver )
    return( hypre_ILUDestroy( (void *) solver ) );
 }
 
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetup
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+HYPRE_ILUSetup( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      )
+{
+   return( hypre_ILUSetup( (void *) solver,
+                                 (hypre_ParCSRMatrix *) A,
+                                 (hypre_ParVector *) b,
+                                 (hypre_ParVector *) x ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSolve
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+HYPRE_ILUSolve( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      )
+{
+   return( hypre_ILUSolve( (void *) solver,
+                                 (hypre_ParCSRMatrix *) A,
+                                 (hypre_ParVector *) b,
+                                 (hypre_ParVector *) x ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetPrintLevel
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level )
+{
+   return hypre_ILUSetPrintLevel( solver, print_level );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetLogging
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetLogging( HYPRE_Solver solver, HYPRE_Int logging )
+{
+   return hypre_ILUSetLogging(solver, logging );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetMaxIter
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetMaxIter( HYPRE_Solver solver, HYPRE_Int max_iter )
+{
+   return hypre_ILUSetMaxIter( solver, max_iter );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetTol
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetTol( HYPRE_Solver solver, HYPRE_Real tol )
+{
+   return hypre_ILUSetTol( solver, tol );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetDropThreshold
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold )
+{
+   return hypre_ILUSetDropThreshold( solver, threshold );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetMaxNnzPerRow
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetMaxNnzPerRow( HYPRE_Solver solver, HYPRE_Int nzmax )
+{
+   return hypre_ILUSetMaxNnzPerRow( solver, nzmax );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetFillLevel
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetFillLevel( HYPRE_Solver solver, HYPRE_Int lfil )
+{
+   return hypre_ILUSetFillLevel( solver, lfil );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetType
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetType( HYPRE_Solver solver, HYPRE_Int ilu_type )
+{
+   return hypre_ILUSetType( solver, ilu_type );
+}

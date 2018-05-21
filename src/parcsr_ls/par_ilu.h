@@ -25,6 +25,7 @@ typedef struct
   hypre_ParCSRMatrix *matU;
   HYPRE_Real	     droptol;
   HYPRE_Real	     lfil;
+  HYPRE_Int	     maxRowNnz;
   HYPRE_Int *CF_marker_array;
   hypre_ParVector    *F;
   hypre_ParVector    *U;
@@ -37,6 +38,8 @@ typedef struct
   HYPRE_Int	logging;
   HYPRE_Int	print_level;
   HYPRE_Int	max_iter;
+  
+  HYPRE_Int	ilu_type;
 
   /* temp vectors for solve phase */
   hypre_ParVector   *Utemp;
