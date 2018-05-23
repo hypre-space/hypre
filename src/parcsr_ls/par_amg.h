@@ -104,7 +104,11 @@ typedef struct
    HYPRE_Int                **dof_point_array;
    HYPRE_Int                **point_dof_map_array;
    HYPRE_Int                  num_levels;
-   HYPRE_Real         **l1_norms;
+   HYPRE_Real         **l1_norms
+
+   /* composide grid data for AMG-DD */
+   hypre_ParCompGrid       **compGrid;
+   hypre_ParCompGridCommPkg *compGridCommPkg;;
 
    /* Block data */
    hypre_ParCSRBlockMatrix **A_block_array;
@@ -359,6 +363,10 @@ typedef struct
 #define hypre_ParAMGDataChebyFraction(amg_data) ((amg_data)->cheby_fraction)
 #define hypre_ParAMGDataChebyDS(amg_data) ((amg_data)->cheby_ds)
 #define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
+
+/* composite grid data */
+#define hypre_ParAMGDataCompGrid(amg_data) ((amg_data)->compGrid)
+#define hypre_ParAMGDataCompGridCommPkg(amg_data) ((amg_data)->compGridCommPkg)
 
 /* block */
 #define hypre_ParAMGDataABlockArray(amg_data) ((amg_data)->A_block_array)

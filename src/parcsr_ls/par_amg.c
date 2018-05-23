@@ -336,6 +336,8 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataXtilde(amg_data) = NULL;
    hypre_ParAMGDataRtilde(amg_data) = NULL;
    hypre_ParAMGDataDinv(amg_data) = NULL;
+   hypre_ParAMGDataCompGrid(amg_data) = NULL;
+   hypre_ParAMGDataCompGridCommPkg(amg_data) = NULL;
 
 #ifdef CUMNUMIT
    hypre_ParAMGDataCumNumIterations(amg_data) = cum_num_iterations;
@@ -751,6 +753,18 @@ hypre_BoomerAMGDestroy( void *data )
    {
        hypre_MPI_Comm_free (&new_comm);
    }
+
+   // get rid of comp grids
+   if (hypre_ParAMGDataCompGrid(amg_data))
+   {
+      for (i = 0; i < num_levels; i++)
+      {
+         hypre_ParCompGridDestroy(hypre_ParAMGDataCompGrid(amg_data)[i]);
+      }
+      hypre_TFree(hypre_ParAMGDataCompGrid(amg_data), HYPRE_MEMORY_HOST);
+      hypre_ParCompGridCommPkgDestroy(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   }
+
    hypre_TFree(amg_data, HYPRE_MEMORY_HOST);
 
    HYPRE_ANNOTATION_END("BoomerAMG.destroy");
