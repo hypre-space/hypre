@@ -22,11 +22,7 @@ Project( hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c
 
 HYPRE_Int
 Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c, HYPRE_Complex *f_f, 
-			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_real_nodes_f, HYPRE_Int num_nodes_c, HYPRE_Int num_real_nodes_c );
-
-HYPRE_Int
-RestrictOld( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c, HYPRE_Complex *f_f, 
-			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_real_nodes_f, HYPRE_Int num_nodes_c, HYPRE_Int num_real_nodes_c );
+			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_nodes_c );
 
 HYPRE_Int
 Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPRE_Int num_real_nodes, HYPRE_Int num_nodes );
@@ -80,8 +76,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 		// Relax on the real nodes
 		Relax( A_rows[i], u[i], f[i], num_real_nodes[i], num_nodes[i] );
 		// Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
-		Restrict( A_rows[i], A_rows[i+1], P_rows[i], u[i], u[i+1], f[i], f[i+1], num_nodes[i], num_real_nodes[i], num_nodes[i+1], num_real_nodes[i+1] );
-		// RestrictOld( A_rows[i], A_rows[i+1], P_rows[i], u[i], u[i+1], f[i], f[i+1], num_nodes[i], num_real_nodes[i], num_nodes[i+1], num_real_nodes[i+1] );
+		Restrict( A_rows[i], A_rows[i+1], P_rows[i], u[i], u[i+1], f[i], f[i+1], num_nodes[i], num_nodes[i+1] );
 	}
 
 	//  ... solve on coarsest level ...
@@ -134,7 +129,7 @@ Project( hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c
 
 HYPRE_Int
 Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c, HYPRE_Complex *f_f, 
-			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_real_nodes_f, HYPRE_Int num_nodes_c, HYPRE_Int num_real_nodes_c )
+			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_nodes_c )
 {
 
 	HYPRE_Int   myid;
@@ -152,7 +147,6 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 
 
 	// Calculate fine grid residuals and restrict
-	// int no_residual_counter = 0;
 	for (i = 0; i < num_nodes_f; i++)
 	{
 		// Get row of A
@@ -197,7 +191,6 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 	}
 
 	// Set residual on coarse grid where there was no restriction from fine grid
-	// int restriction_counter = 0;
 	for (i = 0; i < num_nodes_c; i++)
 	{
 		if (coarse_res_marker[i] != 2)
@@ -222,126 +215,6 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 	hypre_TFree(res, HYPRE_MEMORY_HOST);
 	hypre_TFree(restrict_res, HYPRE_MEMORY_HOST);
 	hypre_TFree(coarse_res_marker, HYPRE_MEMORY_HOST);
-
-	return 0;
-}
-
-HYPRE_Int
-RestrictOld( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c, HYPRE_Complex *f_f, 
-			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_real_nodes_f, HYPRE_Int num_nodes_c, HYPRE_Int num_real_nodes_c )
-{
-
-	HYPRE_Int   myid;
-	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-
-	HYPRE_Int 					i, j; // loop variables
-	hypre_ParCompMatrixRow 		*row; // variable to store required matrix rows
-	HYPRE_Complex 				*res, *restrict_res;
-	HYPRE_Int 					*restrict_marker; // markers to denote which C-points are restricted to from the fine grid
-	HYPRE_Int 					*no_res_calc_marker; // !!! For debugging purposes only !!!
-
-	// Allocate space for the calculated residual, temporary restricted residual, and the restriction marker
-	res = hypre_CTAlloc(HYPRE_Complex, num_nodes_f, HYPRE_MEMORY_HOST);
-	restrict_res = hypre_CTAlloc(HYPRE_Complex, num_nodes_c, HYPRE_MEMORY_HOST);
-	restrict_marker = hypre_CTAlloc(HYPRE_Int, num_nodes_c, HYPRE_MEMORY_HOST); 
-	no_res_calc_marker = hypre_CTAlloc(HYPRE_Int, num_nodes_f, HYPRE_MEMORY_HOST); // !!! For debugging purposes only !!!
-
-
-	// Calculate fine grid residuals and restrict
-	int no_residual_counter = 0;
-	for (i = 0; i < num_nodes_f; i++)
-	{
-		// Get row of A
-		row = A_rows_f[i];
-
-		// Initialize res to RHS
-		res[i] = f_f[i];
-
-		// Loop over entries in A
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-		{
-			// If -1 index encountered, disregard skip this computation (don't need a residual here)
-			if ( hypre_ParCompMatrixRowLocalIndices(row)[j] == -1 )
-			{
-				no_residual_counter++;
-				no_res_calc_marker[i] = 1;
-				if (i < num_real_nodes_f) printf("Residual not calculated for real dof! -1 index occured.\n");
-				break;
-			}
-			// Otherwise just subtract off A_ij * u_j
-			else res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_f[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
-		}
-	}
-	if (no_residual_counter > (0.5)*(num_nodes_f - num_real_nodes_f)) hypre_printf("Num nodes where no residual calculated / num ghost nodes = %f\n", ((float) no_residual_counter) / ((float) num_nodes_f - num_real_nodes_f));
-
-	// Restrict from real nodes
-	for (i = 0; i < num_real_nodes_f; i++)
-	{
-		// Get row of P associated with node i
-		row = P_rows[i];
-
-		// Loop over entries in P
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-		{
-			// Add contribution to restricted residual and mark this as a node that should be restricted to from ghost nodes
-			restrict_res[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] += hypre_ParCompMatrixRowData(row)[j] * res[i];
-			if (no_res_calc_marker[i]) printf("Rank %d: Used a residual that was not fully calculated!!! num_nodes_f = %d, num_real_nodes_f = %d, i = %d\n", myid, num_nodes_f, num_real_nodes_f, i);
-			restrict_marker[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] = 1;
-			// Debugging: make sure local indices in P are appropriate (i.e. they point to something on this procs coarse grid and aren't -1)
-			if ( (hypre_ParCompMatrixRowLocalIndices(row)[j] > num_nodes_c - 1) || (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) ) printf("Real rows of P: local index = %d, i = %d, j = %d, num_nodes = %d\n", hypre_ParCompMatrixRowLocalIndices(row)[j], i, j, num_nodes_c);
-		}
-	}
-
-	// Restrict from ghost nodes where needed
-	for (i = num_real_nodes_f; i < num_nodes_f; i++)
-	{
-		// Get row of P associated with node i
-		row = P_rows[i];
-
-		// Loop over entries in P
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-		{
-			// If the coarse point was restricted to from a real node, add contribution to restricted residual
-			if (restrict_marker[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] == 1) restrict_res[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] += hypre_ParCompMatrixRowData(row)[j] * res[i];
-			if (restrict_marker[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] == 1 && no_res_calc_marker[i]) printf("Rank %d: Used a residual that was not fully calculated!!! num_nodes_f = %d, num_real_nodes_f = %d, i = %d\n", myid, num_nodes_f, num_real_nodes_f, i);
-			if ( (hypre_ParCompMatrixRowLocalIndices(row)[j] > num_nodes_c - 1) || (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) ) printf("Ghost rows of P: local index = %d, i = %d, j = %d, num_nodes = %d\n", hypre_ParCompMatrixRowLocalIndices(row)[j], i, j, num_nodes_c);
-		}
-	}
-
-	// Set residual on coarse grid where there was no restriction from fine grid
-	int restriction_counter = 0;
-	for (i = 0; i < num_nodes_c; i++)
-	{
-		if (!restrict_marker[i])
-		{
-			restrict_res[i] = f_c[i];
-			// Loop over row of coarse grid operator 
-			row = A_rows_c[i];
-			for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-			{
-				if ( hypre_ParCompMatrixRowLocalIndices(row)[j] == -1 )
-				{
-					if (i < num_real_nodes_c) printf("Rank %d: Real node %d on coarse grid got bad residual calculation\n", myid, i);
-					break;
-				}
-				else restrict_res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_c[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
-			}
-		}
-		// Debugging: count up how many coarse grid nodes are restricted to from the fine grid
-		else restriction_counter++;
-	}
-
-	// Now restrict_res should hold all appropriate restricted residaul values, so copy into f_c
-	for (i = 0; i < num_nodes_c; i++) f_c[i] = restrict_res[i];
-
-	// Zero out initial guess on coarse grid
-	for (i = 0; i < num_nodes_c; i++) u_c[i] = 0;
-
-	// Cleanup memory
-	hypre_TFree(res, HYPRE_MEMORY_HOST);
-	hypre_TFree(restrict_res, HYPRE_MEMORY_HOST);
-	hypre_TFree(restrict_marker, HYPRE_MEMORY_HOST);
-	hypre_TFree(no_res_calc_marker, HYPRE_MEMORY_HOST);
 
 	return 0;
 }

@@ -153,6 +153,8 @@ typedef struct
    HYPRE_Int        *global_indices;
    HYPRE_Int        *coarse_global_indices; 
    HYPRE_Int        *coarse_local_indices; 
+   HYPRE_Int        *ghost_marker;
+
 
    hypre_UnorderedIntMap   *global_to_local_index_map;
 
@@ -177,6 +179,7 @@ typedef struct
 #define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
+#define hypre_ParCompGridGhostMarker(compGrid)           ((compGrid) -> ghost_marker)
 #define hypre_ParCompGridGlobalToLocalIndexMap(compGrid)           ((compGrid) -> global_to_local_index_map)
 #define hypre_ParCompGridARows(compGrid)           ((compGrid) -> A_rows)
 #define hypre_ParCompGridPRows(compGrid)           ((compGrid) -> P_rows)
