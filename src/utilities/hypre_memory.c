@@ -58,9 +58,9 @@ size_t hypre__target_dtoh_bytes = 0;
 /* if  true, DeviceMalloc is always device-only malloc no matter what UM is
  * if false, DeviceMalloc becomes UM malloc when with UM */
 #if defined(HYPRE_USE_MANAGED) && !defined(HYPRE_USE_CUDA) && !defined(HYPRE_USE_OMP45)
-#define DEVICE_ALWARYS_DEVICE 0
+#define DEVICE_ALWAYS_DEVICE 0
 #else
-#define DEVICE_ALWARYS_DEVICE 1
+#define DEVICE_ALWAYS_DEVICE 1
 #endif
 
 /******************************************************************************
@@ -83,7 +83,7 @@ static inline HYPRE_Int hypre_RedefMemLocation(HYPRE_Int location)
 
    if (location == HYPRE_MEMORY_DEVICE)
    {
-#if !DEVICE_ALWARYS_DEVICE && HYPRE_MEMORY_ENV == DEVC_MEM_WTUM
+#if !DEVICE_ALWAYS_DEVICE && HYPRE_MEMORY_ENV == DEVC_MEM_WTUM
       return HYPRE_MEMORY_SHARED;
 #else
       return HYPRE_MEMORY_DEVICE;
