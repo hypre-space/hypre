@@ -16,7 +16,6 @@
 #include "_hypre_utilities.h"
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
-// #include "hypre_hopscotch_hash.h"
 
 #define DEBUG_COMP_GRID 1 // if true, prints out what is stored in the comp grids for each processor to a file
 #define DEBUGGING_MESSAGES 1 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
@@ -99,7 +98,7 @@ FillResponseForLocateGhostNodes(void *p_recv_contact_buf, HYPRE_Int contact_size
  *****************************************************************************/
 
 HYPRE_Int
-hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int padding, HYPRE_Int use_map )
+hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int padding )
 {
    HYPRE_Int numGhostLayers = 4;
    #if DEBUG_COMP_GRID
@@ -233,7 +232,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    hypre_ParCSRMatrixMatvec(alpha, A_array[0], U_array[0],
                         beta, F_array[0]);
 
-   compGrid[0] = hypre_ParCompGridCreate(use_map);
+   compGrid[0] = hypre_ParCompGridCreate();
    hypre_ParCompGridInitialize( compGrid[0], F_array[0], CF_marker_array[0], proc_first_index[1], A_array[0], P_array[0] );
 
    for (level = 0; level < num_levels-1; level++)
@@ -243,7 +242,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
       hypre_ParCSRMatrixMatvecT(alpha,P_array[level],F_array[level],
                             beta,F_array[level+1]);
 
-      compGrid[level+1] = hypre_ParCompGridCreate(use_map);
+      compGrid[level+1] = hypre_ParCompGridCreate();
       // if (myid == 3) hypre_printf("Initialize level %d\n", level+1);
       if (level != num_levels-2) hypre_ParCompGridInitialize( compGrid[level+1], F_array[level+1], CF_marker_array[level+1], proc_first_index[level+2], A_array[level+1], P_array[level+1] );
       else hypre_ParCompGridInitialize( compGrid[level+1], F_array[level+1], CF_marker_array[level+1], 0, A_array[level+1], NULL );
@@ -1134,6 +1133,8 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCSRCommPkg *commPkg, H
    // Allocate the buffer
    HYPRE_Complex *send_buffer = hypre_CTAlloc(HYPRE_Complex, *buffer_size, HYPRE_MEMORY_HOST);
 
+   hypre_printf("Rank %d: done allocating buffer for proc %d\n", myid, processor);
+
    // Pack the buffer
    cnt = 0;
    send_buffer[cnt++] = (HYPRE_Complex) num_psi_levels;
@@ -1886,12 +1887,6 @@ AddToCompGrid( hypre_ParCompGrid **compGrid, hypre_ParCompGrid **psiComposite, H
       // copy data into compGrid
       hypre_ParCompGridCopyNode( psiComposite[current_level], compGrid[current_level], i, num_nodes );
 
-      // Add to the global to local mapping
-      if (hypre_ParCompGridGlobalToLocalIndexMap(compGrid[current_level]))
-         hypre_UnorderedIntMapPutIfAbsent( hypre_ParCompGridGlobalToLocalIndexMap(compGrid[current_level]), hypre_ParCompGridGlobalIndices(psiComposite[current_level])[i], num_nodes);
-      // if (myid == 0) printf("  Added: [ %d , %d ]\n", hypre_ParCompGridGlobalIndices(psiComposite[current_level])[i], num_nodes);
-      // if (myid == 0) printf("  Get %d = %d\n", hypre_ParCompGridGlobalIndices(psiComposite[current_level])[i], hypre_UnorderedIntMapGet( hypre_ParCompGridGlobalToLocalIndexMap(compGrid[current_level]), hypre_ParCompGridGlobalIndices(psiComposite[current_level])[i]) );
-
       // generate the receive map for this proc on this level
       recv_map_send[current_level][i] = num_nodes;
       recv_map_size[current_level]++;
@@ -1931,10 +1926,6 @@ AddToCompGrid( hypre_ParCompGrid **compGrid, hypre_ParCompGrid **psiComposite, H
             // copy data into compGrid
             hypre_ParCompGridCopyNode( psiComposite[level], compGrid[level], i, i );
 
-            // Add to the global to local mapping
-            if (hypre_ParCompGridGlobalToLocalIndexMap(compGrid[level]))
-               hypre_UnorderedIntMapPutIfAbsent( hypre_ParCompGridGlobalToLocalIndexMap(compGrid[level]), hypre_ParCompGridGlobalIndices(psiComposite[level])[i], i);
-
             // generate the receive map for this proc on this level
             recv_map_send[level][i] = i;
             recv_map_size[level]++;
@@ -1951,22 +1942,14 @@ AddToCompGrid( hypre_ParCompGrid **compGrid, hypre_ParCompGrid **psiComposite, H
             add_flag = 0;
             if ( hypre_ParCompGridGlobalIndices(psiComposite[level])[i] < proc_first_index[level] || hypre_ParCompGridGlobalIndices(psiComposite[level])[i] > proc_last_index[level] )
             {
-               // Look up global index in hash table
-               if (hypre_ParCompGridGlobalToLocalIndexMap(compGrid[level]))
+               add_flag = 1;
+               // search over nodes added to this comp grid (i.e. those with local index greater than num_owned_nodes) !!! linear search !!!
+               for (j = hypre_ParCompGridNumNodes(compGrid[level]) - 1; j >= hypre_ParCompGridNumOwnedNodes(compGrid[level]); j--) // Note: doing the search backward (hopefully shorter)
                {
-                  if (hypre_UnorderedIntMapGet( hypre_ParCompGridGlobalToLocalIndexMap(compGrid[level]), hypre_ParCompGridGlobalIndices(psiComposite[level])[i]) < 0) add_flag = 1;
-               }
-               else
-               {
-                  add_flag = 1;
-                  // search over nodes added to this comp grid (i.e. those with local index greater than num_owned_nodes) !!! linear search !!!
-                  for (j = hypre_ParCompGridNumNodes(compGrid[level]) - 1; j >= hypre_ParCompGridNumOwnedNodes(compGrid[level]); j--) // Note: doing the search backward (hopefully shorter)
+                  if ( hypre_ParCompGridGlobalIndices(psiComposite[level])[i] == hypre_ParCompGridGlobalIndices(compGrid[level])[j] )
                   {
-                     if ( hypre_ParCompGridGlobalIndices(psiComposite[level])[i] == hypre_ParCompGridGlobalIndices(compGrid[level])[j] )
-                     {
-                        add_flag = 0;
-                        break;
-                     }
+                     add_flag = 0;
+                     break;
                   }
                }
             }
@@ -1979,10 +1962,6 @@ AddToCompGrid( hypre_ParCompGrid **compGrid, hypre_ParCompGrid **psiComposite, H
 
                // copy data into compGrid
                hypre_ParCompGridCopyNode( psiComposite[level], compGrid[level], i, num_nodes );
-
-               // Add to the global to local mapping
-               if (hypre_ParCompGridGlobalToLocalIndexMap(compGrid[level]))
-                  hypre_UnorderedIntMapPutIfAbsent( hypre_ParCompGridGlobalToLocalIndexMap(compGrid[level]), hypre_ParCompGridGlobalIndices(psiComposite[level])[i], num_nodes);
 
                // generate the receive map for this proc on this level
                recv_map_send[level][i] = num_nodes;
@@ -2548,9 +2527,7 @@ UnpackGhostNodeResponse( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYP
             hypre_ParCompGridF(compGrid[level])[ unpackIndex ] = response_buf[cnt++];
             hypre_ParCompGridGlobalIndices(compGrid[level])[ unpackIndex ] = response_buf[cnt++];
             hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[ unpackIndex ] = response_buf[cnt++];
-            if (hypre_ParCompGridGlobalToLocalIndexMap(compGrid[level]))
-               hypre_UnorderedIntMapPutIfAbsent(hypre_ParCompGridGlobalToLocalIndexMap(compGrid[level]), hypre_ParCompGridGlobalIndices(compGrid[level])[ unpackIndex ], unpackIndex);
-
+            
             // Make sure soln value u is zero
             hypre_ParCompGridU(compGrid[level])[ unpackIndex ] = 0.0;
 
