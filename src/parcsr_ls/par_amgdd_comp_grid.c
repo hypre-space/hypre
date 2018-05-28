@@ -528,7 +528,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                }
                else
                {
-                  for (k = hypre_ParCompGridNumNodes(compGrid[level]) - 1; k >= hypre_ParCompGridNumOwnedNodes(compGrid[level]); k--) // Note: doing the search backward (hopefully shorter)
+                  for (k = hypre_ParCompGridNumNodes(compGrid[level]) - 1; k >= hypre_ParCompGridNumOwnedNodes(compGrid[level]); k--) // !!! Linear search !!! Note: doing the search backward (hopefully shorter)
                   {
                      if ( global_index == hypre_ParCompGridGlobalIndices(compGrid[level])[k] )
                      {
@@ -624,7 +624,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                   }
                   else
                   {
-                     for (k = hypre_ParCompGridNumNodes(compGrid[level+1]) - 1; k >= hypre_ParCompGridNumOwnedNodes(compGrid[level+1]); k--) // Note: doing the search backward (hopefully shorter)
+                     for (k = hypre_ParCompGridNumNodes(compGrid[level+1]) - 1; k >= hypre_ParCompGridNumOwnedNodes(compGrid[level+1]); k--) // !!! Linear search !!! Note: doing the search backward (hopefully shorter)
                      {
                         if ( global_index == hypre_ParCompGridGlobalIndices(compGrid[level+1])[k] )
                         {
@@ -639,7 +639,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
          }
          if (hypre_ParCompGridGlobalToLocalIndexMap(compGrid[level]) == NULL)
          {
-            // Insert into P one level up (this level is in the domain of P one level up) !!! Whoa... this is pretty bad: we are basically looping over all of P for each node added. Yikes... !!!
+            // Insert into P one level up (this level is in the domain of P one level up) !!! Linear search. Whoa... this is pretty bad: we are basically looping over all of P for each node added. Yikes... !!!
             if (level != 0)
             {
                // Search over old rows of P to find where we need to update local indices to account for this new added node

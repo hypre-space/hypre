@@ -25,7 +25,7 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 			HYPRE_Complex *f_c, HYPRE_Int num_nodes_f, HYPRE_Int num_nodes_c );
 
 HYPRE_Int
-Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPRE_Int num_real_nodes, HYPRE_Int num_nodes );
+Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPRE_Int *ghost_marker, HYPRE_Int num_nodes );
 
 HYPRE_Int
 hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
@@ -51,6 +51,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 
 	HYPRE_Complex     **u = hypre_CTAlloc(HYPRE_Complex*, num_levels, HYPRE_MEMORY_HOST );
 	HYPRE_Complex     **f = hypre_CTAlloc(HYPRE_Complex*, num_levels, HYPRE_MEMORY_HOST );
+	HYPRE_Complex 		**ghost_marker = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST );
 
 	hypre_ParCompMatrixRow 	***A_rows = hypre_CTAlloc(hypre_ParCompMatrixRow**, num_levels, HYPRE_MEMORY_HOST );
 	hypre_ParCompMatrixRow  ***P_rows = hypre_CTAlloc(hypre_ParCompMatrixRow**, num_levels, HYPRE_MEMORY_HOST );
@@ -62,6 +63,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 
 		u[level] = hypre_ParCompGridU(compGrid[level]);
 		f[level] = hypre_ParCompGridF(compGrid[level]);
+		ghost_marker[level] = hypre_ParCompGridGhostMarker(compGrid[level]);
 
 		A_rows[level] = hypre_ParCompGridARows(compGrid[level]);
 		P_rows[level] = hypre_ParCompGridPRows(compGrid[level]);
@@ -74,20 +76,20 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 	for (i = 0; i < num_levels - 1; i++)
 	{
 		// Relax on the real nodes
-		Relax( A_rows[i], u[i], f[i], num_real_nodes[i], num_nodes[i] );
+		Relax( A_rows[i], u[i], f[i], ghost_marker[i], num_nodes[i] );
 		// Restrict the residual at all fine points (real and ghost) and set residual at coarse points not under the fine grid
 		Restrict( A_rows[i], A_rows[i+1], P_rows[i], u[i], u[i+1], f[i], f[i+1], num_nodes[i], num_nodes[i+1] );
 	}
 
 	//  ... solve on coarsest level ...
-	for (i = 0; i < numCoarseRelax; i++) Relax( A_rows[num_levels-1], u[num_levels-1], f[num_levels-1], num_real_nodes[num_levels-1], num_nodes[num_levels-1] );
+	for (i = 0; i < numCoarseRelax; i++) Relax( A_rows[num_levels-1], u[num_levels-1], f[num_levels-1], ghost_marker[level], num_nodes[num_levels-1] );
 
 	// ... and work back up to the finest
 	for (i = num_levels - 2; i > -1; i--)
 	{
 		// Project up and relax
 		Project(  P_rows[i], u[i], u[i+1], num_nodes[i] );
-		Relax( A_rows[i], u[i], f[i], num_real_nodes[i], num_nodes[i] );
+		Relax( A_rows[i], u[i], f[i], ghost_marker[i], num_nodes[i] );
 	}
 
 	// Cleanup memory
@@ -220,7 +222,7 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 }
 
 HYPRE_Int
-Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPRE_Int num_real_nodes, HYPRE_Int num_nodes )
+Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPRE_Int *ghost_marker, HYPRE_Int num_nodes )
 {
 	HYPRE_Int 					i, j; // loop variables
 	hypre_ParCompMatrixRow 		*row; // variable to store required matrix rows
@@ -228,42 +230,45 @@ Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPR
 
 
 	// Debugging: mesure residual before
-	HYPRE_Complex res, res_norm_before = 0.0, res_norm_after = 0.0;
-	for (i = 0; i < num_real_nodes; i++)
-	{
-		row = A_rows[i];
-		res = f[i];
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++) res -= hypre_ParCompMatrixRowData(row)[j] * u[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
-		res_norm_before += res*res;
-	}
+	// HYPRE_Complex res, res_norm_before = 0.0, res_norm_after = 0.0;
+	// for (i = 0; i < num_real_nodes; i++)
+	// {
+	// 	row = A_rows[i];
+	// 	res = f[i];
+	// 	for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++) res -= hypre_ParCompMatrixRowData(row)[j] * u[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
+	// 	res_norm_before += res*res;
+	// }
 
 	// Do Gauss-Seidel relaxation on the real nodes
-	for (i = 0; i < num_real_nodes; i++)
+	for (i = 0; i < num_nodes; i++)
 	{
-		// Get row of A
-		row = A_rows[i];
-
-		// Initialize u as RHS
-		u[i] = f[i];
-		diag = 0.0;
-
-		// Loop over entries in A
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+		if (!ghost_marker[i])
 		{
-			// Debugging: make sure we have the full neighborhood for all real nodes
-			if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
-			// If this is the diagonal, store for later division
-			if (hypre_ParCompMatrixRowLocalIndices(row)[j] == i) diag = hypre_ParCompMatrixRowData(row)[j];
-			// Else, subtract off A_ij*u_j
-			else
-			{
-				u[i] -= hypre_ParCompMatrixRowData(row)[j] * u[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
-			}
-		}
+			// Get row of A
+			row = A_rows[i];
 
-		// Divide by diagonal
-		if (diag == 0.0) printf("Tried to divide by zero diagonal!\n");
-		u[i] /= diag;
+			// Initialize u as RHS
+			u[i] = f[i];
+			diag = 0.0;
+
+			// Loop over entries in A
+			for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+			{
+				// Debugging: make sure we have the full neighborhood for all real nodes
+				if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
+				// If this is the diagonal, store for later division
+				if (hypre_ParCompMatrixRowLocalIndices(row)[j] == i) diag = hypre_ParCompMatrixRowData(row)[j];
+				// Else, subtract off A_ij*u_j
+				else
+				{
+					u[i] -= hypre_ParCompMatrixRowData(row)[j] * u[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
+				}
+			}
+
+			// Divide by diagonal
+			if (diag == 0.0) printf("Tried to divide by zero diagonal!\n");
+			u[i] /= diag;
+		}
 	}
 
 	// Debugging: mesure residual after
