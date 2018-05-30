@@ -933,7 +933,7 @@ hypre_BoomerAMGSetupStats( void               *amg_vdata,
       hypre_printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
       hypre_printf( "  Maximum number of cycles:         %d \n",max_iter);
       hypre_printf( "  Stopping Tolerance:               %e \n",tol); 
-      hypre_printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
+      hypre_printf( "  Cycle type (0 = F, 1 = V, 2 = W.):  %d\n\n", cycle_type);
 
       if (additive == 0 || mult_additive == 0 || simple == 0)
       {
@@ -1228,7 +1228,7 @@ HYPRE_Int    hypre_BoomerAMGWriteSolverParams(void* data)
       hypre_printf("\n\nBoomerAMG SOLVER PARAMETERS:\n\n");
       hypre_printf( "  Maximum number of cycles:         %d \n",max_iter);
       hypre_printf( "  Stopping Tolerance:               %e \n",tol); 
-      hypre_printf( "  Cycle type (1 = V, 2 = W, etc.):  %d\n\n", cycle_type);
+      hypre_printf( "  Cycle type (0 = F, 1 = V, 2 = W.):  %d\n\n", cycle_type);
       hypre_printf( "  Relaxation Parameters:\n");
       hypre_printf( "   Visiting Grid:                     down   up  coarse\n");
       hypre_printf( "            Number of sweeps:         %4d   %2d  %4d \n",

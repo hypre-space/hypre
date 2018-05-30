@@ -28,6 +28,26 @@
 #include <caliper/cali.h>
 #endif
 
+HYPRE_Int V_cycle(HYPRE_Int visits)
+{
+   if (visits == 1) return -1;
+   else return 1;
+}
+
+HYPRE_Int F_cycle(HYPRE_Int visits)
+{
+   if (visits == 1) return -1;
+   else if (visits % 2 == 0) return -1;
+   else return 1;
+}
+
+HYPRE_Int W_cycle(HYPRE_Int visits)
+{
+   if (visits % 3 == 0) return 1;
+   else return -1;
+}
+
+
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCycle
  *--------------------------------------------------------------------------*/
@@ -79,7 +99,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    HYPRE_Int      cheby_order;
 
  /* Local variables  */
-   HYPRE_Int      *lev_counter;
+   HYPRE_Int      *num_visits;
    HYPRE_Int       Solve_err_flag;
    HYPRE_Int       k;
    HYPRE_Int       i, j, jj;
@@ -169,7 +189,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    cycle_op_count = hypre_ParAMGDataCycleOpCount(amg_data);
 
-   lev_counter = hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
+   num_visits = hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
 
    if (hypre_ParAMGDataParticipate(amg_data)) seq_cg = 1;
 
@@ -214,12 +234,16 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
     *        is set to the max of (lev_counter[k],cycle_type)
     *---------------------------------------------------------------------*/
 
-   Not_Finished = 1;
+   // Set function pointer for cycle type
+   HYPRE_Int (*NextLevel)(HYPRE_Int);
+   if (cycle_type == 1) NextLevel = &V_cycle;
+   else if (cycle_type == 2) NextLevel = &W_cycle;
+   else NextLevel = &F_cycle;
 
-   lev_counter[0] = 1;
-   for (k = 1; k < num_levels; ++k)
+   Not_Finished = 1;
+   for (k = 0; k < num_levels; ++k)
    {
-      lev_counter[k] = cycle_type;
+      num_visits[k] = 0;
    }
 
    level = 0;
@@ -261,6 +285,9 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    
    while (Not_Finished)
    {
+      // Increment number of visits to grid
+      num_visits[level]++;
+
       if (num_levels > 1)
       {
          local_size
@@ -592,9 +619,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
        * Decrement the control counter and determine which grid to visit next
        *-----------------------------------------------------------------*/
 
-      --lev_counter[level];
 
-      if (lev_counter[level] >= 0 && level != num_levels-1)
+      if ( (level != num_levels-1) && ((*NextLevel)(num_visits[level]) < 0) )
       {
          /*---------------------------------------------------------------
           * Visit coarser level next.
@@ -657,7 +683,6 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
          }
 
          ++level;
-         lev_counter[level] = hypre_max(lev_counter[level],cycle_type);
          cycle_param = 1;
          if (level == num_levels-1) cycle_param = 3;
 
@@ -711,7 +736,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    
    hypre_ParAMGDataCycleOpCount(amg_data) = cycle_op_count;
 
-   hypre_TFree(lev_counter, HYPRE_MEMORY_HOST);
+   hypre_TFree(num_visits, HYPRE_MEMORY_HOST);
    hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
    if (smooth_num_levels > 0)
    {
