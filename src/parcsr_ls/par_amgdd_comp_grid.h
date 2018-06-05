@@ -123,9 +123,7 @@ typedef struct
 {
    HYPRE_Int       num_nodes; // total number of nodes including real and ghost nodes
    HYPRE_Int		 num_owned_nodes; // number of nodes owned by this proc in the original partition
-   HYPRE_Int       num_real_nodes; // number of real nodes (num_nodes - num_ghost_nodes)
    HYPRE_Int		 mem_size;
-   HYPRE_Int       map_size;
 
    HYPRE_Complex     *u;
    HYPRE_Complex     *f;
@@ -148,7 +146,6 @@ typedef struct
 
 #define hypre_ParCompGridNumNodes(compGrid)           ((compGrid) -> num_nodes)
 #define hypre_ParCompGridNumOwnedNodes(compGrid)           ((compGrid) -> num_owned_nodes)
-#define hypre_ParCompGridNumRealNodes(compGrid)           ((compGrid) -> num_real_nodes)
 #define hypre_ParCompGridMemSize(compGrid)           ((compGrid) -> mem_size)
 #define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
 #define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)

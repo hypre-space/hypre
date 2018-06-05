@@ -143,7 +143,6 @@ typedef struct
 {
    HYPRE_Int       num_nodes; // total number of nodes including real and ghost nodes
    HYPRE_Int       num_owned_nodes; // number of nodes owned by this proc in the original partition
-   HYPRE_Int       num_real_nodes; // number of real nodes (num_nodes - num_ghost_nodes)
    HYPRE_Int       mem_size;
 
    HYPRE_Complex     *u;
@@ -167,7 +166,6 @@ typedef struct
 
 #define hypre_ParCompGridNumNodes(compGrid)           ((compGrid) -> num_nodes)
 #define hypre_ParCompGridNumOwnedNodes(compGrid)           ((compGrid) -> num_owned_nodes)
-#define hypre_ParCompGridNumRealNodes(compGrid)           ((compGrid) -> num_real_nodes)
 #define hypre_ParCompGridMemSize(compGrid)           ((compGrid) -> mem_size)
 #define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
 #define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
@@ -1845,7 +1843,7 @@ HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations 
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
 
 /* par_amgdd_cycle.c */
-HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int plot_iteration );
+HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int plot_iteration, HYPRE_Int first_iteration );
 
 /* par_amgdd_res_comm.c */
 HYPRE_Int hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int padding );
