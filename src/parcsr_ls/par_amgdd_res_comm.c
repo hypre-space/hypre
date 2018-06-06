@@ -1212,11 +1212,11 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
 
    // Update add_flag by recursively adding neighbors
    // hypre_printf("Rank %d: About to call RecursivelyFindNeighborNodes()\n", myid);
-   if (myid == 0)
+   if (myid == 1)
    {
-      // hypre_printf("num_searching_procs = %d, searching procs = ", num_searching_procs);
-      // for (i = 0; i < num_searching_procs; i++) hypre_printf("%d ", searching_procs[i]);
-      // hypre_printf("\n");
+      hypre_printf("num_searching_procs = %d, searching procs = ", num_searching_procs);
+      for (i = 0; i < num_searching_procs; i++) hypre_printf("%d ", searching_procs[i]);
+      hypre_printf("\n");
    }
    for (i = 0; i < num_searching_procs; i++)
    {
@@ -1225,47 +1225,48 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
       if (!request_nodes[proc_index])
       {
          request_nodes[proc_index] = hypre_CTAlloc( HYPRE_Int, 2*hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)), HYPRE_MEMORY_HOST );
-         if (myid == 0)
+         if (myid == 1)
          {
-            // hypre_printf("num cols offd = %d, global indices = ", hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)));
-            // for (j = 0; j < hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)); j++) hypre_printf("%d ", hypre_ParCSRMatrixColMapOffd(A)[j]);
-            // hypre_printf("\n");
+            hypre_printf("num cols offd = %d, global indices = ", hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)));
+            for (j = 0; j < hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)); j++) hypre_printf("%d ", hypre_ParCSRMatrixColMapOffd(A)[j]);
+            hypre_printf("\n");
          }
          // hypre_printf("Rank %d: request_nodes[%d] allocated to size %d\n", myid, proc_index, 2*hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)));
       }
-      if (myid == 0)
+      if (myid == 1)
       {
-         // hypre_printf("num_starting_nodes[%d] = %d, starting_nodes = ", proc_index, num_starting_nodes[proc_index]);
-         // for (j = 0; j < num_starting_nodes[proc_index]; j++) hypre_printf("%d ", starting_nodes[proc_index][j]);
-         // hypre_printf("\n");
-         // hypre_printf("add_flag[%d] before finding neighbor nodes: ", proc_index);
-         // for (j = 0; j < hypre_ParCSRMatrixNumRows(A); j++) hypre_printf("%d ", add_flag[proc_index][j]);
-         // hypre_printf("\n");
+         hypre_printf("num_starting_nodes[%d] = %d, starting_nodes = ", proc_index, num_starting_nodes[proc_index]);
+         for (j = 0; j < num_starting_nodes[proc_index]; j++) hypre_printf("%d ", starting_nodes[proc_index][j]);
+         hypre_printf("\n");
+         hypre_printf("add_flag[%d] before finding neighbor nodes: ", proc_index);
+         for (j = 0; j < hypre_ParCSRMatrixNumRows(A); j++) hypre_printf("%d ", add_flag[proc_index][j]);
+         hypre_printf("\n");
       }
       for (j = 0; j < num_starting_nodes[proc_index]; j++)
       {
          RecursivelyFindNeighborNodes( starting_nodes[proc_index][j], add_flag[proc_index][ starting_nodes[proc_index][j] ] - 1, compGrid, add_flag[proc_index], request_nodes[proc_index], &(num_request_nodes[proc_index]) );
       }
 
-      if (myid == 0)
+      if (myid == 1)
       {
-         // hypre_printf("add_flag[%d] after finding neighbor nodes: ", proc_index);
-         // for (j = 0; j < hypre_ParCSRMatrixNumRows(A); j++) hypre_printf("%d ", add_flag[proc_index][j]);
-         // hypre_printf("\n");
+         hypre_printf("add_flag[%d] after finding neighbor nodes: ", proc_index);
+         for (j = 0; j < hypre_ParCSRMatrixNumRows(A); j++) hypre_printf("%d ", add_flag[proc_index][j]);
+         hypre_printf("\n");
       }
 
       num_starting_nodes[proc_index] = 0;
    }
 
+   // Debugging:
    // hypre_printf("Rank %d: Done with RecursivelyFindNeighborNodes()\n", myid);
-   if (myid == 0)
+   if (myid == 1)
    {
       for (i = 0; i < num_searching_procs; i++)
       {
          HYPRE_Int proc_index = searching_procs[i];
-         // hypre_printf("num_request_nodes[%d] = %d, request nodes = ", proc_index, num_request_nodes[0]);
-         // for (i = 0; i < num_request_nodes[proc_index]; i++) hypre_printf("%d ", request_nodes[proc_index][2*i]);
-         // hypre_printf("\n");
+         hypre_printf("num_request_nodes[%d] = %d, request nodes = ", proc_index, num_request_nodes[0]);
+         for (i = 0; i < num_request_nodes[proc_index]; i++) hypre_printf("%d ", request_nodes[proc_index][2*i]);
+         hypre_printf("\n");
       }
    }
 
@@ -1350,6 +1351,22 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
    // Wait 
    hypre_MPI_Waitall(2*num_neighboring_procs, &(requests[2*num_neighboring_procs]), &(statuses[2*num_neighboring_procs]));
 
+
+   // Debugging:
+   if (myid == 1)
+   {
+      for (i = 0; i < num_neighboring_procs; i++)
+      {
+         hypre_printf("recv_buffer[%d] = ",i);
+         for (j = 0; j < recv_sizes[i]; j++)
+         {
+            hypre_printf("%d ", recv_buffers[i][j]);
+         }
+         hypre_printf("\n");
+      }
+   }
+
+
    // Unpack recieved messages and update add_flag where appropriate
    // hypre_printf("Rank %d: About to unpack recvs\n", myid);
    HYPRE_Int num_new_searching_procs = 0;
@@ -1359,6 +1376,7 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
    {
       cnt = 0;
       HYPRE_Int num_incoming_procs = recv_buffers[i][cnt++];
+      if (myid == 1) hypre_printf("unpacking buffer %d\n", i);
       for (j = 0; j < num_incoming_procs; j++)
       {
          HYPRE_Int incoming_proc = recv_buffers[i][cnt++];
@@ -1366,6 +1384,14 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
          // See whether we already have an add_flag array setup for this proc (and check to avoid info for our rank)
          if (incoming_proc != myid)
          {
+            if (myid == 1) 
+            {
+               hypre_printf("incoming_proc = %d\n", incoming_proc);
+               hypre_printf("send_procs = ");
+               for (k = 0; k < (*num_send_procs); k++) hypre_printf("%d ", send_procs[k]);
+               hypre_printf("\n");
+            }
+
             HYPRE_Int local_proc_index = -1;
             HYPRE_Int new_procs_to_search = 0;
             // Look for an add_flag already set up for this processor
@@ -1380,15 +1406,20 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
                starting_nodes[local_proc_index] = hypre_CTAlloc(HYPRE_Int, num_incoming_nodes, HYPRE_MEMORY_HOST);
                new_procs_to_search = 1;
             }
+            if (myid == 1) hypre_printf("local_proc_index = %d\n", local_proc_index);
             for (k = 0; k < num_incoming_nodes; k++)
             {
-               HYPRE_Int local_index = recv_buffers[i][cnt++] - hypre_ParCSRMatrixFirstRowIndex(A); // !!! double check that this is right !!!
+               HYPRE_Int local_index = recv_buffers[i][cnt++] - hypre_ParCompGridGlobalIndices(compGrid)[0]; 
                HYPRE_Int incoming_flag = recv_buffers[i][cnt++];
-               if (incoming_flag > add_flag[local_proc_index][local_index])
+               if (local_index >=0 && local_index < hypre_ParCSRMatrixNumRows(A))
                {
-                  add_flag[local_proc_index][local_index] = incoming_flag;
-                  starting_nodes[local_proc_index][num_starting_nodes[ local_proc_index]++ ] = local_index;
-                  new_procs_to_search = 1;
+                  if (myid == 1) hypre_printf("local_index = %d\n", local_index);
+                  if (incoming_flag > add_flag[local_proc_index][local_index])
+                  {
+                     add_flag[local_proc_index][local_index] = incoming_flag;
+                     starting_nodes[local_proc_index][num_starting_nodes[ local_proc_index]++ ] = local_index;
+                     new_procs_to_search = 1;
+                  }
                }
             }
             if (new_procs_to_search)
@@ -1401,7 +1432,11 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
                new_searching_procs[num_new_searching_procs++] = local_proc_index;
             }
          }
-         else cnt += 2*num_incoming_nodes;
+         else
+         {
+            if (myid == 1) hypre_printf("skipping add flag for my self\n");
+            cnt += 2*num_incoming_nodes;
+         }
       }
    }
   
@@ -1451,7 +1486,7 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
          {
             add_flag[index] = m;
             // Recursively call to find distance m-1 neighbors of index
-            RecursivelyFindNeighborNodes(index, m-1, compGrid, add_flag, request_nodes, num_request_nodes);
+            if (m-1 > 0) RecursivelyFindNeighborNodes(index, m-1, compGrid, add_flag, request_nodes, num_request_nodes);
          }
       }
       // otherwise note this as a starting node to request from neighboring procs
@@ -1459,7 +1494,7 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
       {
          // Check whether we have already requested this node (!!! linear search !!!)
          HYPRE_Int global_index = hypre_ParCompMatrixRowGlobalIndices(A_row)[i];
-         // if (myid == 0) hypre_printf("looking for global_index = %d\n", global_index);
+         // if (myid == 1) hypre_printf("looking for global_index = %d\n", global_index);
          HYPRE_Int add_requeset = 1;
          for (j = 0; j < (*num_request_nodes); j++)
          {
@@ -1795,7 +1830,7 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
          {
             add_flag[index] = m;
             // Recursively call to find distance m-1 neighbors of index
-            RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, add_flag_coarse, need_coarse_info, nodes_to_add, padding);
+            if (m-1 > 0) RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, add_flag_coarse, need_coarse_info, nodes_to_add, padding);
          }
       }
    }
