@@ -73,6 +73,7 @@ typedef struct
    HYPRE_Int         **recv_procs; // procs to recv from on each level
    HYPRE_Int         **send_map_starts; // send map starts from comm pkg of A^eta on each level
    HYPRE_Int         **send_map_elmts; // send map elmts from comm pkg of A^eta on each level
+   HYPRE_Int         **ghost_marker; // marks send elmts as ghost or real dofs for the associated processor
 
 	HYPRE_Int 			**send_buffer_size; // size of send buffer on each level for each proc
 	HYPRE_Int 			**recv_buffer_size; // size of recv buffer on each level for each proc
@@ -99,6 +100,7 @@ typedef struct
  #define hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)           ((compGridCommPkg) -> recv_procs)
  #define hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)           ((compGridCommPkg) -> send_map_starts)
  #define hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)           ((compGridCommPkg) -> send_map_elmts)
+ #define hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)           ((compGridCommPkg) -> ghost_marker)
  #define hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)		((compGridCommPkg) -> send_buffer_size)
  #define hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)		((compGridCommPkg) -> recv_buffer_size)
  #define hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)			((compGridCommPkg) -> num_send_nodes)

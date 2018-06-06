@@ -80,7 +80,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 	}
 
 	//  ... solve on coarsest level ...
-	for (i = 0; i < numCoarseRelax; i++) Relax( A_rows[num_levels-1], u[num_levels-1], f[num_levels-1], ghost_marker[num_levels-1], num_nodes[num_levels-1] );
+	for (i = 0; i < numCoarseRelax; i++) Relax( A_rows[num_levels-1], u[num_levels-1], f[num_levels-1], NULL, num_nodes[num_levels-1] );
 
 	// ... and work back up to the finest
 	for (i = num_levels - 2; i > -1; i--)
@@ -222,13 +222,16 @@ HYPRE_Int
 Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPRE_Int *ghost_marker, HYPRE_Int num_nodes )
 {
 	HYPRE_Int 					i, j; // loop variables
+   HYPRE_Int               is_ghost;
 	hypre_ParCompMatrixRow 		*row; // variable to store required matrix rows
 	HYPRE_Complex 				diag; // placeholder for the diagonal of A
 
 	// Do Gauss-Seidel relaxation on the real nodes
 	for (i = 0; i < num_nodes; i++)
 	{
-		if (!ghost_marker[i])
+      if (ghost_marker) is_ghost = ghost_marker[i];
+      else is_ghost = 0;
+		if (!is_ghost)
 		{
 			// Get row of A
 			row = A_rows[i];
