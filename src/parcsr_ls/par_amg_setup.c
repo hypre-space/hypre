@@ -38,12 +38,12 @@ HYPRE_Real air_time_rap = 0.0;
 
 HYPRE_Int
 hypre_BoomerAMGSetup( void               *amg_vdata,
-                   hypre_ParCSRMatrix *A,
-                   hypre_ParVector    *f,
-                   hypre_ParVector    *u         )
+                      hypre_ParCSRMatrix *A,
+                      hypre_ParVector    *f,
+                      hypre_ParVector    *u )
 {
-   MPI_Comm 	      comm = hypre_ParCSRMatrixComm(A);
-   hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
+   MPI_Comm 	         comm = hypre_ParCSRMatrixComm(A);
+   hypre_ParAMGData    *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
 
@@ -56,12 +56,12 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    hypre_ParVector     *Ztemp = NULL;
    hypre_ParCSRMatrix **P_array;
    hypre_ParCSRMatrix **R_array;
-   hypre_ParVector    *Residual_array;
-   HYPRE_Int                **CF_marker_array;
-   HYPRE_Int                **dof_func_array;
-   HYPRE_Int                 *dof_func;
-   HYPRE_Int                 *col_offd_S_to_A, *col_offd_Sabs_to_A = NULL;
-   HYPRE_Int                 *col_offd_SN_to_AN;
+   hypre_ParVector     *Residual_array;
+   HYPRE_Int          **CF_marker_array;
+   HYPRE_Int          **dof_func_array;
+   HYPRE_Int           *dof_func;
+   HYPRE_Int           *col_offd_S_to_A, *col_offd_Sabs_to_A = NULL;
+   HYPRE_Int           *col_offd_SN_to_AN;
    HYPRE_Real          *relax_weight;
    HYPRE_Real          *omega;
    HYPRE_Real           schwarz_relax_wt = 1;
@@ -72,29 +72,29 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Real           trunc_factor, jacobi_trunc_threshold;
    HYPRE_Real           agg_trunc_factor, agg_P12_trunc_factor;
    HYPRE_Real           S_commpkg_switch;
-   HYPRE_Real  		CR_rate;
-   HYPRE_Int      relax_order;
-   HYPRE_Int      max_levels;
-   HYPRE_Int      amg_logging;
-   HYPRE_Int      amg_print_level;
-   HYPRE_Int      debug_flag;
-   HYPRE_Int      dbg_flg;
-   HYPRE_Int      local_num_vars;
-   HYPRE_Int      P_max_elmts;
-   HYPRE_Int      agg_P_max_elmts;
-   HYPRE_Int      agg_P12_max_elmts;
-   HYPRE_Int      IS_type;
-   HYPRE_Int      num_CR_relax_steps;
-   HYPRE_Int      CR_use_CG;
-   HYPRE_Int      cgc_its; /* BM Aug 25, 2006 */
-   HYPRE_Int      mult_additive = hypre_ParAMGDataMultAdditive(amg_data);
-   HYPRE_Int      additive = hypre_ParAMGDataAdditive(amg_data);
-   HYPRE_Int      simple = hypre_ParAMGDataSimple(amg_data);
-   HYPRE_Int      add_last_lvl = hypre_ParAMGDataAddLastLvl(amg_data);
-   HYPRE_Int      add_P_max_elmts = hypre_ParAMGDataMultAddPMaxElmts(amg_data);
-   HYPRE_Real     add_trunc_factor = hypre_ParAMGDataMultAddTruncFactor(amg_data);
-   HYPRE_Int      add_rlx = hypre_ParAMGDataAddRelaxType(amg_data);
-   HYPRE_Real     add_rlx_wt = hypre_ParAMGDataAddRelaxWt(amg_data);
+   HYPRE_Real  		   CR_rate;
+   HYPRE_Int            relax_order;
+   HYPRE_Int            max_levels;
+   HYPRE_Int            amg_logging;
+   HYPRE_Int            amg_print_level;
+   HYPRE_Int            debug_flag;
+   HYPRE_Int            dbg_flg;
+   HYPRE_Int            local_num_vars;
+   HYPRE_Int            P_max_elmts;
+   HYPRE_Int            agg_P_max_elmts;
+   HYPRE_Int            agg_P12_max_elmts;
+   HYPRE_Int            IS_type;
+   HYPRE_Int            num_CR_relax_steps;
+   HYPRE_Int            CR_use_CG;
+   HYPRE_Int            cgc_its; /* BM Aug 25, 2006 */
+   HYPRE_Int            mult_additive = hypre_ParAMGDataMultAdditive(amg_data);
+   HYPRE_Int            additive = hypre_ParAMGDataAdditive(amg_data);
+   HYPRE_Int            simple = hypre_ParAMGDataSimple(amg_data);
+   HYPRE_Int            add_last_lvl = hypre_ParAMGDataAddLastLvl(amg_data);
+   HYPRE_Int            add_P_max_elmts = hypre_ParAMGDataMultAddPMaxElmts(amg_data);
+   HYPRE_Real           add_trunc_factor = hypre_ParAMGDataMultAddTruncFactor(amg_data);
+   HYPRE_Int            add_rlx = hypre_ParAMGDataAddRelaxType(amg_data);
+   HYPRE_Real           add_rlx_wt = hypre_ParAMGDataAddRelaxWt(amg_data);
 
    hypre_ParCSRBlockMatrix **A_block_array, **P_block_array, **R_block_array;
 
@@ -128,7 +128,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int       setup_type;
    HYPRE_Int       fine_size;
    HYPRE_Int       rest, tms, indx;
-   HYPRE_Real    size;
+   HYPRE_Real      size;
    HYPRE_Int       not_finished_coarsening = 1;
    HYPRE_Int       coarse_threshold = hypre_ParAMGDataMaxCoarseSize(amg_data);
    HYPRE_Int       min_coarse_size = hypre_ParAMGDataMinCoarseSize(amg_data);
@@ -1667,12 +1667,24 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                                                debug_flag, trunc_factor, P_max_elmts,
                                                col_offd_Sabs_to_A, &R );
                }
-               else /* distance-2 AIR */
+               else if (restri_type == 2) /* distance-2 AIR */
                {
                   hypre_BoomerAMGBuildRestrDist2AIR(A_array[level], CF_marker,
                                                     Sabs, coarse_pnts_global, 1, NULL,
                                                     debug_flag, trunc_factor, P_max_elmts,
                                                     col_offd_Sabs_to_A, &R );
+               }
+               else
+               {
+                  HYPRE_Int NeumannAIRDeg = restri_type - 3;
+
+                  hypre_assert(NeumannAIRDeg >= 0);
+
+                  hypre_BoomerAMGBuildRestrNeumannAIR(A_array[level], CF_marker,
+                                                      Sabs, coarse_pnts_global, 1, NULL,
+                                                      NeumannAIRDeg,
+                                                      debug_flag, trunc_factor, P_max_elmts,
+                                                      col_offd_Sabs_to_A, &R );
                }
 
 #if DEBUG_SAVE_ALL_OPS

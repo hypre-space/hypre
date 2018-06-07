@@ -97,7 +97,7 @@ HYPRE_BoomerAMGSolveT( HYPRE_Solver solver,
 
 HYPRE_Int
 HYPRE_BoomerAMGSetRestriction( HYPRE_Solver solver,
-                               HYPRE_Int          restr_par  )
+                               HYPRE_Int    restr_par  )
 {
    return( hypre_BoomerAMGSetRestriction( (void *) solver, restr_par ) );
 }

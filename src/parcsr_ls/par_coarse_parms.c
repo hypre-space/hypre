@@ -61,13 +61,13 @@
 /*--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_BoomerAMGCoarseParms(MPI_Comm comm,
-		           HYPRE_Int      local_num_variables,
-		           HYPRE_Int      num_functions,
-		           HYPRE_Int     *dof_func,
-		           HYPRE_Int     *CF_marker, 
-                      	   HYPRE_Int    **coarse_dof_func_ptr, 
-                      	   HYPRE_Int    **coarse_pnts_global_ptr) 
+hypre_BoomerAMGCoarseParms(MPI_Comm    comm,
+                           HYPRE_Int   local_num_variables,
+                           HYPRE_Int   num_functions,
+                           HYPRE_Int  *dof_func,
+                           HYPRE_Int  *CF_marker,
+                           HYPRE_Int **coarse_dof_func_ptr,
+                           HYPRE_Int **coarse_pnts_global_ptr)
 {
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_COARSE_PARAMS] -= hypre_MPI_Wtime();

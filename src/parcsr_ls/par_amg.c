@@ -785,7 +785,8 @@ hypre_BoomerAMGSetRestriction( void *data,
  
    /* RL: currently, only 0: R = P^T
     *                     1: AIR
-    *                    >1: AIR-2
+    *                     2: AIR-2
+    *                     k(k>=3): Neumann AIR of degree k-3
     */
    if (restr_par < 0)
    {

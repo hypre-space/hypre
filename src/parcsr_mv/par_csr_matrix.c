@@ -224,8 +224,8 @@ hypre_ParCSRMatrixInitialize( hypre_ParCSRMatrix *matrix )
    hypre_CSRMatrixInitialize(hypre_ParCSRMatrixDiag(matrix));
    hypre_CSRMatrixInitialize(hypre_ParCSRMatrixOffd(matrix));
    hypre_ParCSRMatrixColMapOffd(matrix) = 
-      hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(
-                       hypre_ParCSRMatrixOffd(matrix)), HYPRE_MEMORY_HOST);
+      hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(matrix)), 
+                    HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

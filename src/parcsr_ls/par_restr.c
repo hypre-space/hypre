@@ -30,7 +30,8 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
                               HYPRE_Real            trunc_factor,
                               HYPRE_Int             max_elmts,
                               HYPRE_Int            *col_offd_S_to_A,
-                              hypre_ParCSRMatrix  **R_ptr) {
+                              hypre_ParCSRMatrix  **R_ptr)
+{
    
    MPI_Comm                 comm     = hypre_ParCSRMatrixComm(A);
    hypre_ParCSRCommPkg     *comm_pkg = hypre_ParCSRMatrixCommPkg(A);
@@ -529,7 +530,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
 #endif
 
          hypre_dgetrf(&local_size, &local_size, DAi, &local_size, Ipi,
-               &lapack_info);
+                      &lapack_info);
 
          hypre_assert(lapack_info == 0);
 
@@ -546,7 +547,7 @@ hypre_BoomerAMGBuildRestrAIR( hypre_ParCSRMatrix   *A,
          HYPRE_Int one = 1;
          HYPRE_Real alp = 1.0, bet = 0.0;
          hypre_dgemv(&charT, &local_size, &local_size, &alp, TMPA, &local_size, Dbi, 
-               &one, &bet, TMPd, &one);
+                     &one, &bet, TMPd, &one);
          alp = -1.0;
          hypre_daxpy(&local_size, &alp, TMPb, &one, TMPd, &one);
          HYPRE_Real err = hypre_dnrm2(&local_size, TMPd, &one);
