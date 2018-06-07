@@ -110,6 +110,8 @@ FILES =\
  par_mgr_setup.c\
  par_mgr_solve.c\
  par_ilu.c\
+ par_ilu_setup.c \
+ par_ilu_solve.c \
  par_nongalerkin.c\
  par_nodal_systems.c\
  par_rap.c\

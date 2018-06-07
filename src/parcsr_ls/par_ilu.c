@@ -35,9 +35,10 @@ hypre_ILUCreate()
   (ilu_data -> matD) = NULL;
   (ilu_data -> matU) = NULL;
   (ilu_data -> droptol) = 1.0e-3;
-  (ilu_data -> lfil) = 10;
+  (ilu_data -> lfil) = 0;
   (ilu_data -> maxRowNnz) = 1000;
   (ilu_data -> CF_marker_array) = NULL;
+  (ilu_data -> perm) = NULL;
 
   (ilu_data -> F) = NULL;
   (ilu_data -> U) = NULL;
@@ -56,7 +57,10 @@ hypre_ILUCreate()
 
   (ilu_data -> l1_norms) = NULL;
   
+  (ilu_data -> operator_complexity) = 0.;
+  
   (ilu_data -> ilu_type) = 0;
+  (ilu_data -> nLU) = 0;
 
   return (void *) ilu_data;
 }
@@ -120,7 +124,12 @@ hypre_ILUDestroy( void *data )
     hypre_TFree((ilu_data -> CF_marker_array), HYPRE_MEMORY_HOST);
     (ilu_data -> CF_marker_array) = NULL;
   }
-
+  /* permutation array */
+  if((ilu_data -> perm))
+  {
+    hypre_TFree((ilu_data -> perm), HYPRE_MEMORY_HOST);
+    (ilu_data -> perm) = NULL;
+  }
   /* ilu data */
   hypre_TFree(ilu_data, HYPRE_MEMORY_HOST);
 
@@ -130,10 +139,10 @@ hypre_ILUDestroy( void *data )
  *--------------------------------------------------------------------------*/
 /* set fill level (for ilu(k)) */
 HYPRE_Int
-hypre_ILUSetFillLevel( void *ilu_vdata, HYPRE_Int fill_lev )
+hypre_ILUSetLevelOfFill( void *ilu_vdata, HYPRE_Int lfil )
 {
   hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
-  (ilu_data -> lfil) = fill_lev;
+  (ilu_data -> lfil) = lfil;
 
   return hypre_error_flag;
 }
@@ -196,3 +205,94 @@ hypre_ILUSetLogging( void *ilu_vdata, HYPRE_Int logging )
    (ilu_data -> logging) = logging;
    return hypre_error_flag;
 }
+/* Get number of iterations for ILU solver */
+HYPRE_Int
+hypre_ILUGetNumIterations( void *ilu_vdata, HYPRE_Int *num_iterations )
+{
+   hypre_ParILUData  *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   if (!ilu_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   *num_iterations = ilu_data->num_iterations;
+
+   return hypre_error_flag;
+}
+
+/* Get residual norms for ILU solver */
+HYPRE_Int
+hypre_ILUGetFinalRelativeResidualNorm( void *ilu_vdata, HYPRE_Real *res_norm )
+{
+   hypre_ParILUData  *ilu_data = (hypre_ParILUData*) ilu_vdata;
+
+   if (!ilu_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   *res_norm = ilu_data->final_rel_residual_norm;
+
+   return hypre_error_flag;
+}
+/* 
+   Quicksort of the elements in a from low to high. The elements
+   in b are permuted according to the sorted a. lo and hi are the 
+   extents of the region of the array a, that is to be sorted.
+*/
+/* commented out to use current version hypre_qsort1(...)
+HYPRE_Int 
+hypre_quickSortIR (HYPRE_Int *a, HYPRE_Real *b, const HYPRE_Int lo, const HYPRE_Int hi)
+{
+   HYPRE_Int i=lo, j=hi;
+   HYPRE_Int v;
+   HYPRE_Int mid = (lo+hi)>>1;
+   HYPRE_Int x=ceil(a[mid]);
+   HYPRE_Real q;
+   //  partition
+   do
+   {
+      while (a[i]<x) i++;
+      while (a[j]>x) j--;
+      if (i<=j)
+      {
+          v=a[i]; a[i]=a[j]; a[j]=v;
+          q=b[i]; b[i]=b[j]; b[j]=q;
+          i++; j--;
+      }
+   } while (i<=j);
+   //  recursion
+   if (lo<j) quickSortIR(a, b, lo, j);
+   if (i<hi) quickSortIR(a, b, i, hi);
+   
+   return hypre_error_flag;
+}
+*/
+/* Print solver params */
+HYPRE_Int
+hypre_ILUWriteSolverParams(void *ilu_vdata)
+{
+   hypre_ParILUData  *ilu_data = (hypre_ParILUData*) ilu_vdata;      
+   hypre_printf("ILU Setup parameters: \n");   
+   hypre_printf("ILU factorization type: %d : ", (ilu_data -> ilu_type));
+   switch(ilu_data -> ilu_type){
+      case 0: hypre_printf("Block Jacobi with ILU(%d) \n", (ilu_data -> lfil));
+              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         break;
+      case 1: hypre_printf("Block Jacobi with ILUT \n");
+              hypre_printf("drop tolerance = %e \n", (ilu_data -> droptol));
+              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         break;
+      default: hypre_printf("Unknown type \n");
+         break;
+   }
+     
+   hypre_printf("\n ILU Solver Parameters: \n");  
+   hypre_printf("Max number of iterations: %d\n", (ilu_data -> max_iter));
+   hypre_printf("Stopping tolerance: %e\n", (ilu_data -> tol));
+   
+   return hypre_error_flag;
+}
+

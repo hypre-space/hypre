@@ -24,9 +24,10 @@ typedef struct
   HYPRE_Real	     *matD;
   hypre_ParCSRMatrix *matU;
   HYPRE_Real	     droptol;
-  HYPRE_Real	     lfil;
+  HYPRE_Int	     lfil;
   HYPRE_Int	     maxRowNnz;
   HYPRE_Int *CF_marker_array;
+  HYPRE_Int    *perm;
   hypre_ParVector    *F;
   hypre_ParVector    *U;
   hypre_ParVector    *residual;
@@ -35,11 +36,14 @@ typedef struct
   HYPRE_Real   *l1_norms;
   HYPRE_Real	final_rel_residual_norm;
   HYPRE_Real	tol;
+  HYPRE_Real    operator_complexity;
+
   HYPRE_Int	logging;
   HYPRE_Int	print_level;
   HYPRE_Int	max_iter;
   
   HYPRE_Int	ilu_type;
+  HYPRE_Int     nLU;
 
   /* temp vectors for solve phase */
   hypre_ParVector   *Utemp;
@@ -56,6 +60,7 @@ typedef struct
 #define FPT(i, bsize) (((i) % (bsize)) == FMRK)
 #define CPT(i, bsize) (((i) % (bsize)) == CMRK)
 
-#define SMALLREAL 1e-20
+#define MAT_TOL 1e-14
+#define EXPAND_FACT 1.3
 
 #endif

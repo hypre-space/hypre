@@ -122,9 +122,9 @@ HYPRE_ILUSetMaxNnzPerRow( HYPRE_Solver solver, HYPRE_Int nzmax )
  * HYPRE_ILUSetFillLevel
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_ILUSetFillLevel( HYPRE_Solver solver, HYPRE_Int lfil )
+HYPRE_ILUSetLevelOfFill( HYPRE_Solver solver, HYPRE_Int lfil )
 {
-   return hypre_ILUSetFillLevel( solver, lfil );
+   return hypre_ILUSetLevelOfFill( solver, lfil );
 }
 /*--------------------------------------------------------------------------
  * HYPRE_ILUSetType
@@ -133,4 +133,20 @@ HYPRE_Int
 HYPRE_ILUSetType( HYPRE_Solver solver, HYPRE_Int ilu_type )
 {
    return hypre_ILUSetType( solver, ilu_type );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUGetNumIterations
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations )
+{
+   return hypre_ILUGetNumIterations( solver, num_iterations );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUGetFinalRelativeResidualNorm
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUGetFinalRelativeResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm )
+{
+   return hypre_ILUGetFinalRelativeResidualNorm(solver, res_norm);
 }

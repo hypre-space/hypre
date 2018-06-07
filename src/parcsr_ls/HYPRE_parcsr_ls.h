@@ -3523,6 +3523,41 @@ HYPRE_Int HYPRE_ILUCreate( HYPRE_Solver *solver );
 HYPRE_Int HYPRE_ILUDestroy( HYPRE_Solver solver );
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ILUSetup
+ *--------------------------------------------------------------------------*/
+/**
+ * Setup the ILU solver or preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver {\tt SetPrecond} function.  
+ *
+ * @param solver [IN] object to be set up.
+ * @param A [IN] ParCSR matrix used to construct the solver/preconditioner.
+ * @param b right-hand-side of the linear system to be solved (Ignored by this function).
+ * @param x approximate solution of the linear system to be solved (Ignored by this function).  
+ **/
+HYPRE_Int HYPRE_ILUSetup( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSolve
+ *--------------------------------------------------------------------------*/
+ /**
+ * Solve the system or apply ILU as a preconditioner.
+ * If used as a preconditioner, this function should be passed
+ * to the iterative solver {\tt SetPrecond} function.
+ *
+ * @param solver [IN] solver or preconditioner object to be applied.
+ * @param A [IN] ParCSR matrix, matrix of the linear system to be solved
+ * @param b [IN] right hand side of the linear system to be solved
+ * @param x [OUT] approximated solution of the linear system to be solved
+ **/
+HYPRE_Int HYPRE_ILUSolve( HYPRE_Solver solver,
+                         HYPRE_ParCSRMatrix A,
+                         HYPRE_ParVector b,
+                         HYPRE_ParVector x      );
+
+/*--------------------------------------------------------------------------
  * HYPRE_ILUSetMaxIter
  *--------------------------------------------------------------------------*/
 /**
@@ -3543,14 +3578,14 @@ HYPRE_Int
 HYPRE_ILUSetTol( HYPRE_Solver solver, HYPRE_Real tol );
 
 /*--------------------------------------------------------------------------
- * HYPRE_ILUSetFillLevel
+ * HYPRE_ILUSetLevelOfFill
  *--------------------------------------------------------------------------*/
 /**
- * (Optional) Set the fill level, k, for level-based ILU(k)
+ * (Optional) Set the level of fill k, for level-based ILU(k)
  * The default is 0 (for ILU(0)). 
  **/
 HYPRE_Int
-HYPRE_ILUSetFillLevel( HYPRE_Solver solver, HYPRE_Int lfil );
+HYPRE_ILUSetLevelOfFill( HYPRE_Solver solver, HYPRE_Int lfil );
 
 /*--------------------------------------------------------------------------
  * HYPRE_ILUSetMaxNnzPerRow
@@ -3617,6 +3652,24 @@ HYPRE_ILUSetPrintLevel( HYPRE_Solver solver, HYPRE_Int print_level );
  **/
 HYPRE_Int
 HYPRE_ILUSetLogging( HYPRE_Solver solver, HYPRE_Int logging );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUGetNumIterations
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Return the number of ILU iterations.
+ **/
+HYPRE_Int
+HYPRE_ILUGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUGetResidualNorm
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Return the norm of the final relative residual.
+ **/
+HYPRE_Int
+HYPRE_ILUGetFinalRelativeResidualNorm(  HYPRE_Solver solver, HYPRE_Real *res_norm );
 
 /*@}*/
 
