@@ -361,6 +361,13 @@ main( hypre_int argc,
    HYPRE_Int mgr_restrict_type = 0;
    HYPRE_Int mgr_num_restrict_sweeps = 0;   
    /* end mgr options */
+   
+   /* hypre_ILU options */
+   HYPRE_Int ilu_type = 0;
+   HYPRE_Int ilu_lfil = 0;
+   HYPRE_Real ilu_droptol = 1.0e-2;
+   HYPRE_Int ilu_max_row_nnz = 1000;
+   /* end hypre ILU options */
 
    HYPRE_Real     *nongalerk_tol = NULL;
    HYPRE_Int       nongalerk_num_tol = 0;
@@ -1000,6 +1007,28 @@ main( hypre_int argc,
          mgr_num_restrict_sweeps = atoi(argv[arg_index++]);
       }
       /* end mgr options */
+      /* begin ilu options*/
+      else if ( strcmp(argv[arg_index], "-ilu_type") == 0 )
+      {                /* ilu_type */
+         arg_index++;        
+         ilu_type = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_lfil") == 0 )
+      {                /* level of fill */
+         arg_index++;        
+         ilu_lfil = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_droptol") == 0 )
+      {                /* drop tolerance */
+         arg_index++;        
+         ilu_droptol = atoi(argv[arg_index++]);
+      }      
+      else if ( strcmp(argv[arg_index], "-ilu_max_row_nnz") == 0 )
+      {                /* Max number of nonzeros to keep per row */
+         arg_index++;        
+         ilu_max_row_nnz = atoi(argv[arg_index++]);
+      }
+      /* end ilu options */
       else
       {
          arg_index++;
@@ -1604,6 +1633,8 @@ main( hypre_int argc,
          hypre_printf("       60=DS-FlexGMRES         61=AMG-FlexGMRES     \n");
 	 hypre_printf("       70=MGR             71=MGR-PCG  \n");
 	 hypre_printf("       72=MGR-FlexGMRES  73=MGR-BICGSTAB  \n");
+	 hypre_printf("       80=ILU      81=ILU-GMRES  \n");	 
+	 hypre_printf("       82=ILU-FlexGMRES  \n");	 
          hypre_printf("\n");
          hypre_printf("  -cljp                 : CLJP coarsening \n");
          hypre_printf("  -cljp1                : CLJP coarsening, fixed random \n");
@@ -1841,6 +1872,14 @@ main( hypre_int argc,
          hypre_printf("  -mgr_frelax_method   1           : Use a 'multi-level smoother' strategy \n");  
          hypre_printf("                                     for F-relaxation \n");      
          /* end MGR options */
+         /* hypre ILU options */
+         hypre_printf("  -ilu_type   <val>                : set ILU factorization type = val\n");      
+         hypre_printf("  -ilu_type   0                    : Block Jacobi with ILU(k) variants \n");      
+         hypre_printf("  -ilu_type   1                    : Block Jacobi with ILUT \n");      
+         hypre_printf("  -ilu_lfil   <val>                : set level of fill (k) for ILU(k) = val\n");      
+         hypre_printf("  -ilu_droptol   <val>             : set drop tolerance threshold for ILUT = val \n");      
+         hypre_printf("  -ilu_max_row_nnz   <val>         : set max. num of nonzeros to keep per row = val \n");          
+         /* end ILU options */
       }
 
       goto final;
@@ -4536,7 +4575,7 @@ main( hypre_int argc,
     *-----------------------------------------------------------*/
 
    if (solver_id == 3 || solver_id == 4 || solver_id == 7 ||
-       solver_id == 15 || solver_id == 18 || solver_id == 44)
+       solver_id == 15 || solver_id == 18 || solver_id == 44 || solver_id == 81)
    {
       time_index = hypre_InitializeTiming("GMRES Setup");
       hypre_BeginTiming(time_index);
@@ -4858,7 +4897,29 @@ main( hypre_int argc,
                                 (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
                                 pcg_precond);
       }
- 
+      else if (solver_id == 81)
+      {
+         /* use hypre_ILU preconditioning */
+         if (myid == 0) hypre_printf("Solver:  ILU-GMRES\n");
+         
+         /* create precon */
+         HYPRE_ILUCreate(&pcg_precond);    
+         HYPRE_ILUSetType(pcg_precond, ilu_type);
+         HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
+         /* set print level */
+         HYPRE_ILUSetPrintLevel(pcg_precond, 1);
+         /* set max iterations */
+         HYPRE_ILUSetMaxIter(pcg_precond, 1);
+         HYPRE_ILUSetTol(pcg_precond, pc_tol);                
+
+         /* setup ILU-GMRES solver */
+	 HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
+         HYPRE_GMRESSetPrecond(pcg_solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,
+				   (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
+                                   pcg_precond);
+      }
+       
       HYPRE_GMRESGetPrecond(pcg_solver, &pcg_precond_gotten);
       if (pcg_precond_gotten != pcg_precond)
       {
@@ -4916,6 +4977,10 @@ main( hypre_int argc,
       else if (solver_id == 44)
       {
          HYPRE_EuclidDestroy(pcg_precond);
+      }
+      else if (solver_id == 81)
+      {
+         HYPRE_ILUDestroy(pcg_precond);
       }
 
       if (myid == 0)
@@ -5111,7 +5176,7 @@ main( hypre_int argc,
     * Solve the system using FlexGMRES 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 60 || solver_id == 61 || solver_id == 72)
+   if (solver_id == 60 || solver_id == 61 || solver_id == 72 || solver_id == 82)
    {
       time_index = hypre_InitializeTiming("FlexGMRES Setup");
       hypre_BeginTiming(time_index);
@@ -5316,6 +5381,28 @@ main( hypre_int argc,
 				   (HYPRE_PtrToSolverFcn) HYPRE_MGRSetup,
                                    pcg_precond);
       }
+      else if (solver_id == 82)
+      {
+         /* use hypre_ILU preconditioning */
+         if (myid == 0) hypre_printf("Solver:  ILU-FlexGMRES\n");
+         
+         /* create precon */
+         HYPRE_ILUCreate(&pcg_precond);    
+         HYPRE_ILUSetType(pcg_precond, ilu_type);
+         HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
+         /* set print level */
+         HYPRE_ILUSetPrintLevel(pcg_precond, 2);
+         /* set max iterations */
+         HYPRE_ILUSetMaxIter(pcg_precond, 1);
+         HYPRE_ILUSetTol(pcg_precond, pc_tol);                
+
+         /* setup MGR-PCG solver */
+	 HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
+         HYPRE_FlexGMRESSetPrecond(pcg_solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,
+				   (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
+                                   pcg_precond);
+      }
       else if (solver_id == 60)
       {
          /* use diagonal scaling as preconditioner */
@@ -5396,6 +5483,10 @@ main( hypre_int argc,
 
          HYPRE_BoomerAMGDestroy(amg_solver);
          HYPRE_MGRDestroy(pcg_precond);
+      }
+      else if(solver_id == 82)
+      {
+         HYPRE_ILUDestroy(pcg_precond);
       }
       if (myid == 0)
       {
@@ -6074,6 +6165,70 @@ main( hypre_int argc,
 
       HYPRE_BoomerAMGDestroy(amg_solver);      
       HYPRE_MGRDestroy(mgr_solver);
+   }
+
+   /*-----------------------------------------------------------
+    * Solve the system using hypre_ILU
+    *-----------------------------------------------------------*/   
+
+   if (solver_id == 80)
+   {
+      if (myid == 0) hypre_printf("Solver:  hypre_ILU\n");
+      time_index = hypre_InitializeTiming("hypre_ILU Setup");
+      hypre_BeginTiming(time_index);
+      
+      HYPRE_Solver ilu_solver;
+      HYPRE_ILUCreate(&ilu_solver); 
+
+      /* set ilu type */
+      HYPRE_ILUSetType(ilu_solver, ilu_type);
+      /* set level of fill */
+      HYPRE_ILUSetLevelOfFill(ilu_solver, ilu_lfil);
+      /* set print level */
+      HYPRE_ILUSetPrintLevel(ilu_solver, 2);
+      /* set max iterations */
+      HYPRE_ILUSetMaxIter(ilu_solver, max_iter);
+      HYPRE_ILUSetTol(ilu_solver, tol);
+      
+      /* setup hypre_ILU solver */
+      HYPRE_ILUSetup(ilu_solver, parcsr_A, b, x);
+
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Setup phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+ 
+      time_index = hypre_InitializeTiming("hypre_ILU Solve");
+      hypre_BeginTiming(time_index);
+      
+      /* hypre_ILU solve */
+      HYPRE_ILUSolve(ilu_solver, parcsr_A, b, x);
+      
+      hypre_EndTiming(time_index);
+      hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
+      hypre_FinalizeTiming(time_index);
+      hypre_ClearTiming();
+
+      HYPRE_ILUGetNumIterations(ilu_solver, &num_iterations);
+      HYPRE_ILUGetFinalRelativeResidualNorm(ilu_solver, &final_res_norm);
+
+      if (myid == 0)
+      {
+         hypre_printf("\n");
+         hypre_printf("hypre_ILU Iterations = %d\n", num_iterations);
+         hypre_printf("Final Relative Residual Norm = %e\n", final_res_norm);
+         hypre_printf("\n");
+      }
+
+#if SECOND_TIME
+      /* run a second time to check for memory leaks */
+      HYPRE_ParVectorSetRandomValues(x, 775);
+      HYPRE_ILUSetup(ilu_solver, parcsr_A, b, x);
+      HYPRE_ILUSolve(ilu_solver, parcsr_A, b, x);
+#endif
+      
+      /* free memory */
+      HYPRE_ILUDestroy(ilu_solver);
    }
 
    /*-----------------------------------------------------------
