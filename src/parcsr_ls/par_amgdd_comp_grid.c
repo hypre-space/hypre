@@ -287,7 +287,7 @@ hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int size, HYPRE_In
 }
 
 HYPRE_Int
-hypre_ParCompGridDynamicResize ( hypre_ParCompGrid *compGrid )
+hypre_ParCompGridDynamicResize ( hypre_ParCompGrid *compGrid, HYPRE_Int need_coarse_info )
 {
    // This function doubles allocated memory if num_nodes is close to mem_size (final size of comp grid is unknown)
    // num_nodes is not reset, since we don't know how many actual new nodes will be added
@@ -301,7 +301,7 @@ hypre_ParCompGridDynamicResize ( hypre_ParCompGrid *compGrid )
       hypre_ParCompGridU(compGrid) = hypre_TReAlloc(hypre_ParCompGridU(compGrid), HYPRE_Complex, 2*mem_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridF(compGrid) = hypre_TReAlloc(hypre_ParCompGridF(compGrid), HYPRE_Complex, 2*mem_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridGlobalIndices(compGrid), HYPRE_Int, 2*mem_size, HYPRE_MEMORY_HOST);
-      if (hypre_ParCompGridCoarseGlobalIndices(compGrid))
+      if (need_coarse_info)
       {
          hypre_ParCompGridGhostMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridGhostMarker(compGrid), HYPRE_Int, 2*mem_size, HYPRE_MEMORY_HOST);
          hypre_ParCompGridCoarseGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridCoarseGlobalIndices(compGrid), HYPRE_Int, 2*mem_size, HYPRE_MEMORY_HOST);
@@ -313,7 +313,7 @@ hypre_ParCompGridDynamicResize ( hypre_ParCompGrid *compGrid )
       for (i = mem_size; i < 2*mem_size; i++)
       {
          hypre_ParCompGridARows(compGrid)[i] = NULL;
-         if (hypre_ParCompGridCoarseGlobalIndices(compGrid)) hypre_ParCompGridPRows(compGrid)[i] = NULL;
+         if (need_coarse_info) hypre_ParCompGridPRows(compGrid)[i] = NULL;
       } 
       hypre_ParCompGridMemSize(compGrid) = 2*mem_size;    
    }
@@ -322,7 +322,7 @@ hypre_ParCompGridDynamicResize ( hypre_ParCompGrid *compGrid )
 }
 
 HYPRE_Int
-hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size )
+hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info )
 {
    // This function reallocates exactly enough memory to hold a comp grid of size new_size
    // num_nodes and mem_size are set to new_size. Use this when exact size of new comp grid is known.
@@ -333,7 +333,7 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size )
    hypre_ParCompGridU(compGrid) = hypre_TReAlloc(hypre_ParCompGridU(compGrid), HYPRE_Complex, new_size, HYPRE_MEMORY_HOST);
    hypre_ParCompGridF(compGrid) = hypre_TReAlloc(hypre_ParCompGridF(compGrid), HYPRE_Complex, new_size, HYPRE_MEMORY_HOST);
    hypre_ParCompGridGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
-   if (hypre_ParCompGridCoarseGlobalIndices(compGrid))
+   if (need_coarse_info)
    {
       hypre_ParCompGridGhostMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridGhostMarker(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridCoarseGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridCoarseGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
@@ -345,7 +345,7 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size )
    for (i = mem_size; i < new_size; i++)
    {
       hypre_ParCompGridARows(compGrid)[i] = NULL;
-      if (hypre_ParCompGridCoarseGlobalIndices(compGrid)) hypre_ParCompGridPRows(compGrid)[i] = NULL;
+      if (need_coarse_info) hypre_ParCompGridPRows(compGrid)[i] = NULL;
    } 
    hypre_ParCompGridMemSize(compGrid) = new_size;
    hypre_ParCompGridNumNodes(compGrid) = new_size;    
