@@ -278,17 +278,17 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    }
 
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
-   // for (level = 0; level < num_levels; level++)
-   for (level = 1; level < 2; level++)
+   for (level = 0; level < num_levels; level++)
+   // for (level = 1; level < 2; level++)
    {
-      hypre_printf("      Rank %d: SetupNearestProcessorNeighbors() Level %d\n", myid, level);
+      // hypre_printf("      Rank %d: SetupNearestProcessorNeighbors() Level %d\n", myid, level);
       SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding);
    }
    
 
    // Debugging: dump info on the compGridCommPkg
-   // for (i = 0; i < num_levels; i++)
-   for (i = 1; i < 2; i++)
+   for (i = 0; i < num_levels; i++)
+   // for (i = 1; i < 2; i++)
    {
       hypre_sprintf(filename, "outputs/CompGrids/initCompGridCommPkgRank%dLevel%d.txt",myid,i);
       FILE *file = fopen(filename,"w");
@@ -311,9 +311,9 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
 
 
 
-   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   hypre_MPI_Finalize();
-   exit(0);
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // hypre_MPI_Finalize();
+   // exit(0);
    // if (myid == 0) hypre_printf("     \n\nAll ranks done with SetupNearestProcessorNeighbors()\n\n\n");
    // hypre_printf("Here is rank %d\n",myid);
 
@@ -994,13 +994,19 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
    // Setup initial num_starting_nodes and starting_nodes (these are the starting nodes when searching for long distance neighbors)
    HYPRE_Int *num_starting_nodes = hypre_CTAlloc( HYPRE_Int, (padding+4)*num_sends, HYPRE_MEMORY_HOST );
    HYPRE_Int **starting_nodes = hypre_CTAlloc( HYPRE_Int*, (padding+4)*num_sends, HYPRE_MEMORY_HOST );
+   HYPRE_Int max_num_starting_nodes = 0;
    for (i = 0; i < num_sends; i++)
    {
       start = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
       finish = hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);
       search_proc_marker[i] = 1;
       num_starting_nodes[i] = finish - start;
-      starting_nodes[i] = hypre_CTAlloc( HYPRE_Int, num_starting_nodes[i], HYPRE_MEMORY_HOST );
+      if (num_starting_nodes[i] > max_num_starting_nodes) max_num_starting_nodes = num_starting_nodes[i];
+   }
+   for (i = 0; i < num_sends; i++)
+   {
+      start = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
+      starting_nodes[i] = hypre_CTAlloc( HYPRE_Int, max_num_starting_nodes, HYPRE_MEMORY_HOST );
       for (j = 0; j < num_starting_nodes[i]; j++)
       {
          starting_nodes[i][j] = hypre_ParCSRCommPkgSendMapElmt(commPkg, j + start );
@@ -1111,37 +1117,37 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
    HYPRE_Int      i,j,k,cnt;
 
 
-   hypre_printf("Rank %d: inside RecursivelyFindNeighborProcessors %d\n",myid, *recursive_proc_find_cnt);
+   // hypre_printf("Rank %d: inside RecursivelyFindNeighborProcessors %d\n",myid, *recursive_proc_find_cnt);
 
 
 
-   FILE *file;
-   char filename[256];
-   hypre_sprintf(filename, "outputs/recursive_start_rank%d_recurse%d.txt",myid,*recursive_proc_find_cnt);
-   file = fopen(filename,"w");
-   hypre_fprintf(file,"num_send_procs = %d\nsend_procs = ",(*num_send_procs));
-   for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",send_procs[i]);
-   hypre_fprintf(file,"\n");
-   hypre_fprintf(file,"search_proc_marker = ");
-   for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",search_proc_marker[i]);
-   hypre_fprintf(file,"\n");
-   for (i = 0; i < (*num_send_procs); i++)
-   {
-      hypre_fprintf(file,"\nproc %d:\n",send_procs[i]);
-      hypre_fprintf(file,"num_starting_nodes = %d\nstarting_nodes = ",num_starting_nodes[i]);
-      for (j = 0; j < num_starting_nodes[i]; j++)
-      {
-         hypre_fprintf(file,"%d ",starting_nodes[i][j]);
-      }
-      hypre_fprintf(file,"\n");
-      hypre_fprintf(file,"add_flag = ");
-      for (j = 0; j < hypre_ParCSRMatrixNumRows(A); j++)
-      {
-         hypre_fprintf(file,"%d ",add_flag[i][j]);
-      }
-      hypre_fprintf(file,"\n");
-   }
-   fclose(file);
+   // FILE *file;
+   // char filename[256];
+   // hypre_sprintf(filename, "outputs/recursive_start_rank%d_recurse%d.txt",myid,*recursive_proc_find_cnt);
+   // file = fopen(filename,"w");
+   // hypre_fprintf(file,"num_send_procs = %d\nsend_procs = ",(*num_send_procs));
+   // for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",send_procs[i]);
+   // hypre_fprintf(file,"\n");
+   // hypre_fprintf(file,"search_proc_marker = ");
+   // for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",search_proc_marker[i]);
+   // hypre_fprintf(file,"\n");
+   // for (i = 0; i < (*num_send_procs); i++)
+   // {
+   //    hypre_fprintf(file,"\nproc %d:\n",send_procs[i]);
+   //    hypre_fprintf(file,"num_starting_nodes = %d\nstarting_nodes = ",num_starting_nodes[i]);
+   //    for (j = 0; j < num_starting_nodes[i]; j++)
+   //    {
+   //       hypre_fprintf(file,"%d ",starting_nodes[i][j]);
+   //    }
+   //    hypre_fprintf(file,"\n");
+   //    hypre_fprintf(file,"add_flag = ");
+   //    for (j = 0; j < hypre_ParCSRMatrixNumRows(A); j++)
+   //    {
+   //       hypre_fprintf(file,"%d ",add_flag[i][j]);
+   //    }
+   //    hypre_fprintf(file,"\n");
+   // }
+   // fclose(file);
 
 
 
@@ -1191,39 +1197,39 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
 
 
 
-   hypre_sprintf(filename, "outputs/recursive_after_node_search_rank%d_recurse%d.txt",myid,*recursive_proc_find_cnt);
-   file = fopen(filename,"w");
-   hypre_fprintf(file,"num_send_procs = %d\nsend_procs = ",(*num_send_procs));
-   for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",send_procs[i]);
-   hypre_fprintf(file,"\n");
-   hypre_fprintf(file,"search_proc_marker = ");
-   for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",search_proc_marker[i]);
-   hypre_fprintf(file,"\n");
-   for (i = 0; i < (*num_send_procs); i++)
-   {
-      if (search_proc_marker[i])
-      {
-         hypre_fprintf(file,"\nproc %d:\n",send_procs[i]);
-         hypre_fprintf(file,"num_request_nodes = %d\nrequest_nodes = ",num_request_nodes[i]);
-         for (j = 0; j < 2*num_request_nodes[i]; j++)
-         {
-            hypre_fprintf(file,"%d ",request_nodes[i][j]);
-         }
-         hypre_fprintf(file,"\n");
-      }
-   }
-   hypre_fprintf(file,"\n");
-   for (i = 0; i < (*num_send_procs); i++)
-   {
-      hypre_fprintf(file,"\nproc %d:\n",send_procs[i]);
-      hypre_fprintf(file,"add_flag = ");
-      for (j = 0; j < hypre_ParCSRMatrixNumRows(A); j++)
-      {
-         hypre_fprintf(file,"%d ",add_flag[i][j]);
-      }
-      hypre_fprintf(file,"\n");
-   }
-   fclose(file);
+   // hypre_sprintf(filename, "outputs/recursive_after_node_search_rank%d_recurse%d.txt",myid,*recursive_proc_find_cnt);
+   // file = fopen(filename,"w");
+   // hypre_fprintf(file,"num_send_procs = %d\nsend_procs = ",(*num_send_procs));
+   // for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",send_procs[i]);
+   // hypre_fprintf(file,"\n");
+   // hypre_fprintf(file,"search_proc_marker = ");
+   // for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",search_proc_marker[i]);
+   // hypre_fprintf(file,"\n");
+   // for (i = 0; i < (*num_send_procs); i++)
+   // {
+   //    if (search_proc_marker[i])
+   //    {
+   //       hypre_fprintf(file,"\nproc %d:\n",send_procs[i]);
+   //       hypre_fprintf(file,"num_request_nodes = %d\nrequest_nodes = ",num_request_nodes[i]);
+   //       for (j = 0; j < 2*num_request_nodes[i]; j++)
+   //       {
+   //          hypre_fprintf(file,"%d ",request_nodes[i][j]);
+   //       }
+   //       hypre_fprintf(file,"\n");
+   //    }
+   // }
+   // hypre_fprintf(file,"\n");
+   // for (i = 0; i < (*num_send_procs); i++)
+   // {
+   //    hypre_fprintf(file,"\nproc %d:\n",send_procs[i]);
+   //    hypre_fprintf(file,"add_flag = ");
+   //    for (j = 0; j < hypre_ParCSRMatrixNumRows(A); j++)
+   //    {
+   //       hypre_fprintf(file,"%d ",add_flag[i][j]);
+   //    }
+   //    hypre_fprintf(file,"\n");
+   // }
+   // fclose(file);
 
    // Exchange message sizes
    HYPRE_Int send_size = 1;
@@ -1254,14 +1260,14 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
 
 
 
-   hypre_sprintf(filename, "outputs/recursive_buffer_sizes_rank%d_recurse%d.txt",myid,*recursive_proc_find_cnt);
-   file = fopen(filename,"w");
-   hypre_fprintf(file,"send size = %d\nrecv sizes = \n",send_size);
-   for (i = 0; i < num_neighboring_procs; i++)
-   {
-      hypre_fprintf(file,"%d from proc %d\n",recv_sizes[i],send_procs[i]);
-   }
-   fclose(file);
+   // hypre_sprintf(filename, "outputs/recursive_buffer_sizes_rank%d_recurse%d.txt",myid,*recursive_proc_find_cnt);
+   // file = fopen(filename,"w");
+   // hypre_fprintf(file,"send size = %d\nrecv sizes = \n",send_size);
+   // for (i = 0; i < num_neighboring_procs; i++)
+   // {
+   //    hypre_fprintf(file,"%d from proc %d\n",recv_sizes[i],send_procs[i]);
+   // }
+   // fclose(file);
 
 
 
@@ -1287,7 +1293,7 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
    // If I stop this processor when it both sends and recvs no new info, I still run into cases where another proc tries to send it info on the next recursion step, resulting in getting stuck at a wait !!!
    HYPRE_Int all_finished;
    hypre_MPI_Allreduce(&finished, &all_finished, 1, HYPRE_MPI_INT, MPI_MAX, subComm);
-   if (all_finished) hypre_printf("Rank %d: finished on recurse %d\n",myid,*recursive_proc_find_cnt);
+   // if (all_finished) hypre_printf("Rank %d: finished on recurse %d\n",myid,*recursive_proc_find_cnt);
    if (all_finished) return 0;
 
    // Allocate recv buffers
@@ -1334,18 +1340,18 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
 
 
 
-   hypre_sprintf(filename, "outputs/recursive_buffers_rank%d_recurse%d.txt",myid,*recursive_proc_find_cnt);
-   file = fopen(filename,"w");
-   hypre_fprintf(file,"send_buffer = ");
-   for (i = 0; i < send_size; i++) hypre_fprintf(file,"%d ",send_buffer[i]);
-   hypre_fprintf(file,"\n");
-   for (i = 0; i < num_neighboring_procs; i++)
-   {
-      hypre_fprintf(file,"recv_buffers[%d] (from proc %d) = ",i,send_procs[i]);
-      for (j = 0; j < recv_sizes[i]; j++) hypre_fprintf(file,"%d ",recv_buffers[i][j]);
-      hypre_fprintf(file,"\n");
-   }
-   fclose(file);
+   // hypre_sprintf(filename, "outputs/recursive_buffers_rank%d_recurse%d.txt",myid,*recursive_proc_find_cnt);
+   // file = fopen(filename,"w");
+   // hypre_fprintf(file,"send_buffer = ");
+   // for (i = 0; i < send_size; i++) hypre_fprintf(file,"%d ",send_buffer[i]);
+   // hypre_fprintf(file,"\n");
+   // for (i = 0; i < num_neighboring_procs; i++)
+   // {
+   //    hypre_fprintf(file,"recv_buffers[%d] (from proc %d) = ",i,send_procs[i]);
+   //    for (j = 0; j < recv_sizes[i]; j++) hypre_fprintf(file,"%d ",recv_buffers[i][j]);
+   //    hypre_fprintf(file,"\n");
+   // }
+   // fclose(file);
 
 
    // Debugging:
@@ -1411,7 +1417,7 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
                   if (incoming_flag > add_flag[local_proc_index][local_index])
                   {
                      add_flag[local_proc_index][local_index] = incoming_flag;
-                     starting_nodes[local_proc_index][num_starting_nodes[ local_proc_index]++ ] = local_index;
+                     starting_nodes[local_proc_index][ num_starting_nodes[local_proc_index]++ ] = local_index;
                      search_proc_marker[local_proc_index] = 1;
                   }
                }
@@ -1435,31 +1441,31 @@ RecursivelyFindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatr
 
 
 
-   hypre_sprintf(filename, "outputs/recursive_end_rank%d_recurse%d.txt",myid,*recursive_proc_find_cnt);
-   file = fopen(filename,"w");
-   hypre_fprintf(file,"num_send_procs = %d\nsend_procs = ",(*num_send_procs));
-   for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",send_procs[i]);
-   hypre_fprintf(file,"\n");
-   hypre_fprintf(file,"search_proc_marker = ");
-   for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",search_proc_marker[i]);
-   hypre_fprintf(file,"\n");
-   for (i = 0; i < (*num_send_procs); i++)
-   {
-      hypre_fprintf(file,"\nproc %d:\n",send_procs[i]);
-      hypre_fprintf(file,"num_starting_nodes = %d\nstarting_nodes = ",num_starting_nodes[i]);
-      for (j = 0; j < num_starting_nodes[i]; j++)
-      {
-         hypre_fprintf(file,"%d ",starting_nodes[i][j]);
-      }
-      hypre_fprintf(file,"\n");
-      hypre_fprintf(file,"add_flag = ");
-      for (j = 0; j < hypre_ParCSRMatrixNumRows(A); j++)
-      {
-         hypre_fprintf(file,"%d ",add_flag[i][j]);
-      }
-      hypre_fprintf(file,"\n");
-   }
-   fclose(file);
+   // hypre_sprintf(filename, "outputs/recursive_end_rank%d_recurse%d.txt",myid,*recursive_proc_find_cnt);
+   // file = fopen(filename,"w");
+   // hypre_fprintf(file,"num_send_procs = %d\nsend_procs = ",(*num_send_procs));
+   // for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",send_procs[i]);
+   // hypre_fprintf(file,"\n");
+   // hypre_fprintf(file,"search_proc_marker = ");
+   // for (i = 0; i < (*num_send_procs); i++) hypre_fprintf(file,"%d ",search_proc_marker[i]);
+   // hypre_fprintf(file,"\n");
+   // for (i = 0; i < (*num_send_procs); i++)
+   // {
+   //    hypre_fprintf(file,"\nproc %d:\n",send_procs[i]);
+   //    hypre_fprintf(file,"num_starting_nodes = %d\nstarting_nodes = ",num_starting_nodes[i]);
+   //    for (j = 0; j < num_starting_nodes[i]; j++)
+   //    {
+   //       hypre_fprintf(file,"%d ",starting_nodes[i][j]);
+   //    }
+   //    hypre_fprintf(file,"\n");
+   //    hypre_fprintf(file,"add_flag = ");
+   //    for (j = 0; j < hypre_ParCSRMatrixNumRows(A); j++)
+   //    {
+   //       hypre_fprintf(file,"%d ",add_flag[i][j]);
+   //    }
+   //    hypre_fprintf(file,"\n");
+   // }
+   // fclose(file);
 
 
    // Recurse
@@ -1660,7 +1666,7 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
             // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
-            RecursivelyBuildPsiComposite(i, 4, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
+            if (add_flag[level][i] == 5) RecursivelyBuildPsiComposite(i, 4, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
          }
 
          // Count up the buffer size
