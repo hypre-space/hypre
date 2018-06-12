@@ -118,7 +118,7 @@ Project( hypre_ParCompMatrixRow **P_rows, HYPRE_Complex *u_f, HYPRE_Complex *u_c
 		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
 		{
 			// Debugging: make sure everyone has full interpolation stencil
-			// if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) printf("A point doesn't have its full interpolation stencil! P row %d, entry %d is < 0\n",i,j);
+			if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) printf("A point doesn't have its full interpolation stencil! P row %d, entry %d is < 0\n",i,j);
 			// Update fine grid solution with coarse projection
 			u_f[i] += hypre_ParCompMatrixRowData(row)[j] * u_c[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
 		}
@@ -244,7 +244,7 @@ Relax( hypre_ParCompMatrixRow **A_rows, HYPRE_Complex *u, HYPRE_Complex *f, HYPR
 			for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
 			{
 				// Debugging: make sure we have the full neighborhood for all real nodes
-				// if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
+				if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) printf("Real node doesn't have its full stencil in A! row %d, entry %d\n",i,j);
 				// If this is the diagonal, store for later division
 				if (hypre_ParCompMatrixRowLocalIndices(row)[j] == i) diag = hypre_ParCompMatrixRowData(row)[j];
 				// Else, subtract off A_ij*u_j

@@ -44,25 +44,10 @@ HYPRE_Int
 RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, 
    HYPRE_Int need_coarse_info, HYPRE_Int *nodes_to_add, HYPRE_Int padding);
 
-HYPRE_Int 
-GeneratePsiComposite( hypre_ParCompGrid **psiComposite, hypre_ParCompGrid **compGrid, hypre_ParCSRCommPkg *commPkg, HYPRE_Int *send_flag_buffer_size, HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels );
-
-HYPRE_Int
-GetBufferSize( hypre_ParCompGrid **psiComposite, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int num_psi_levels );
-
-HYPRE_Complex*
-PackSendBuffer( hypre_ParCompGrid **psiComposite, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int num_psi_levels, HYPRE_Int buffer_size );
-
 HYPRE_Int
 UnpackRecvBufferNew( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, HYPRE_Int **recv_map_send, 
       HYPRE_Int *recv_map_size, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, 
-      HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index, HYPRE_Int *num_added_nodes, HYPRE_Int *num_incoming_nodes );
-
-HYPRE_Int
-UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **psiComposite, HYPRE_Int current_level, HYPRE_Int num_levels );
-
-HYPRE_Int
-AddToCompGrid(hypre_ParCompGrid **compGrid, hypre_ParCompGrid **psiComposite, HYPRE_Int **recv_map_send, HYPRE_Int *recv_map_size, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int num_psi_levels, HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index, HYPRE_Int *num_added_nodes );
+      HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index, HYPRE_Int *num_added_nodes, HYPRE_Int *num_incoming_nodes, HYPRE_Int buffer_number );
 
 HYPRE_Int
 PackRecvMapSendBuffer(HYPRE_Int **recv_map_send, HYPRE_Int *recv_map_send_buffer, HYPRE_Int *num_incoming_nodes, HYPRE_Int current_level, HYPRE_Int num_levels);
@@ -275,6 +260,8 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
    {
       hypre_sprintf(filename, "outputs/CompGrids/initCompGridRank%dLevel%d.txt", myid, i);
       hypre_ParCompGridDebugPrint( compGrid[i], filename );
+      hypre_sprintf(filename, "outputs/CompGrids/plotInitCompGridRank%dLevel%d.txt", myid, i);
+      hypre_ParCompGridMatlabPlot( compGrid[i], filename );
    }
 
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
@@ -293,21 +280,26 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
       hypre_sprintf(filename, "outputs/CompGrids/initCompGridCommPkgRank%dLevel%d.txt",myid,i);
       FILE *file = fopen(filename,"w");
       num_sends = hypre_ParCompGridCommPkgNumSends(compGridCommPkg)[i];
-      fprintf(file, "global size = %d\n", hypre_ParCSRMatrixGlobalNumRows(A_array[i]));
-      fprintf(file, "num_sends = %d, send_procs = ", num_sends);
+      // fprintf(file, "global size = %d\n", hypre_ParCSRMatrixGlobalNumRows(A_array[i]));
+      // fprintf(file, "num_sends = %d, send_procs = ", num_sends);
       if (num_sends)
       {
-         for (j = 0; j < num_sends; j++) fprintf(file, "%d ", hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[i][j]);
-         fprintf(file,"\n");
-         fprintf(file, "send_map_starts = ");
+         // for (j = 0; j < num_sends; j++) fprintf(file, "%d ", hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[i][j]);
+         // fprintf(file,"\n");
+         // fprintf(file, "send_map_starts = ");
          for (j = 0; j < num_sends+1; j++) fprintf(file, "%d ", hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i][j]);
          fprintf(file,"\n");
-         fprintf(file, "send_map_elmts = ");
+         // fprintf(file, "send_map_elmts = ");
          for (j = 0; j < hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i][num_sends]; j++) fprintf(file, "%d ", hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg)[i][j]);
+         fprintf(file,"\n");
+         // fprintf(file, "ghost_marker = ");
+         for (j = 0; j < hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg)[i][num_sends]; j++) fprintf(file, "%d ", hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg)[i][j]);
          fprintf(file,"\n");
       }
       fclose(file);
    }
+
+
 
 
 
@@ -465,7 +457,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
          // for (i = 0; i < num_recvs; i++)
          // {
          //    FILE *file;
-         //    hypre_sprintf(filename, "outputs/recv_buffer_level%d_rank%d.txt", level, myid);
+         //    hypre_sprintf(filename, "outputs/recv_buffer%d_level%d_rank%d.txt",i, level, myid);
          //    file = fopen(filename, "w");
          //    for (j = 0; j < recv_buffer_size[level][i]; j++)
          //       fprintf(file, "%f\n", recv_buffer[i][j]);
@@ -501,7 +493,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
             // #endif
             // AddToCompGrid(compGrid, psiComposite_recv[i], recv_map_send[i], recv_map_size[i], &(recv_map_send_buffer_size[i]), level, num_levels, num_psi_levels_recv[i], proc_first_index, proc_last_index, num_added_nodes );
          
-            UnpackRecvBufferNew(recv_buffer[i], compGrid, recv_map_send[i], recv_map_size[i], &(recv_map_send_buffer_size[i]), level, num_levels, proc_first_index, proc_last_index, num_added_nodes, num_incoming_nodes[i]);
+            UnpackRecvBufferNew(recv_buffer[i], compGrid, recv_map_send[i], recv_map_size[i], &(recv_map_send_buffer_size[i]), level, num_levels, proc_first_index, proc_last_index, num_added_nodes, num_incoming_nodes[i], i);
          }
 
          if (timers) hypre_EndTiming(timers[4]);
@@ -666,6 +658,15 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
       #if DEBUGGING_MESSAGES
       hypre_printf("      Rank %d: done with level %d\n", myid, level);
       #endif 
+
+      #if DEBUG_COMP_GRID
+      for (i = level; i < num_levels; i++)
+      {
+         // hypre_sprintf(filename, "/p/lscratchd/wbm/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
+         hypre_sprintf(filename, "outputs/CompGrids/level%dCompGridRank%dLevel%d.txt", level, myid, i);
+         hypre_ParCompGridMatlabPlot( compGrid[i], filename );
+      }
+      #endif
    }
 
 
@@ -675,6 +676,8 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int pa
       // hypre_sprintf(filename, "/p/lscratchd/wbm/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
       hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
       hypre_ParCompGridDebugPrint( compGrid[level], filename );
+      hypre_sprintf(filename, "outputs/CompGrids/plotCompGridRank%dLevel%d.txt", myid, level);
+      hypre_ParCompGridMatlabPlot( compGrid[level], filename );
       if (myid == 0)
       {
          FILE             *file;
@@ -1611,6 +1614,18 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
          }
       }
    }
+
+
+
+   FILE *file;
+   char filename[256];
+   sprintf(filename,"outputs/add_flag_before_rank%d_processor_%d_current_level%d_level%d.txt", myid, processor, current_level, current_level+1);
+   file = fopen(filename,"w");
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[current_level+1]); i++) fprintf(file,"%d ", add_flag[current_level+1][i]);
+   fclose(file);
+
+
+
    // Count up the buffer size for the starting nodes
    num_send_nodes[current_level] = finish - start;
    send_node_indices[current_level] = hypre_CTAlloc( HYPRE_Int, num_send_nodes[current_level], HYPRE_MEMORY_HOST );
@@ -1649,12 +1664,20 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
          // Expand by the padding on this level and add coarse grid counterparts if applicable
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
-            if (add_flag[level][i])
+            if (add_flag[level][i] == padding + 1)
             {
                // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
                if (need_coarse_info) RecursivelyBuildPsiComposite(i, padding, compGrid[level], add_flag[level], add_flag[level+1], need_coarse_info, &nodes_to_add, padding);
                else RecursivelyBuildPsiComposite(i, padding, compGrid[level], add_flag[level], NULL, need_coarse_info, &nodes_to_add, padding);
             }
+         }
+
+         if (level == current_level + 1)
+         {
+            sprintf(filename,"outputs/add_flag_after_real_rank%d_processor_%d_current_level%d_level%d.txt", myid, processor, current_level, current_level+1);
+            file = fopen(filename,"w");
+            for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[current_level+1]); i++) fprintf(file,"%d ", add_flag[current_level+1][i]);
+            fclose(file);
          }
 
          // Expand by the number of ghost layers (4)
@@ -1668,6 +1691,16 @@ PackSendBufferNew( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compG
             // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
             if (add_flag[level][i] == 5) RecursivelyBuildPsiComposite(i, 4, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
          }
+
+         if (level == current_level + 1)
+         {
+            sprintf(filename,"outputs/add_flag_after_ghost_rank%d_processor_%d_current_level%d_level%d.txt", myid, processor, current_level, current_level+1);
+            file = fopen(filename,"w");
+            for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[current_level+1]); i++) fprintf(file,"%d ", add_flag[current_level+1][i]);
+            fclose(file);
+         }
+
+
 
          // Count up the buffer size
          // fprintf(file,"add_flag level %d:\n", level);
@@ -1847,7 +1880,7 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
       index = hypre_ParCompMatrixRowLocalIndices(A_row)[i];
 
       // If the neighbor info is available on this proc
-      if (index > 0)
+      if (index >= 0)
       {
          // And if we still need to visit this index (note that add_flag[index] = m means we have already added all distance m-1 neighbors of index)
          if (add_flag[index] < m)
@@ -1857,6 +1890,7 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
             if (m-1 > 0) RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, add_flag_coarse, need_coarse_info, nodes_to_add, padding);
          }
       }
+      else hypre_printf("HEY! Ran into a -1 index when building Psi_c\n");
    }
 
    // Flag this node on the next coarsest level if applicable
@@ -1877,7 +1911,7 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
 HYPRE_Int
 UnpackRecvBufferNew( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, HYPRE_Int **recv_map_send, 
       HYPRE_Int *recv_map_size, HYPRE_Int *recv_map_send_buffer_size, HYPRE_Int current_level, HYPRE_Int num_levels, 
-      HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index, HYPRE_Int *num_added_nodes, HYPRE_Int *num_incoming_nodes )
+      HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index, HYPRE_Int *num_added_nodes, HYPRE_Int *num_incoming_nodes, HYPRE_Int buffer_number )
 {
 
    HYPRE_Int            level, i, j;
@@ -1888,11 +1922,17 @@ UnpackRecvBufferNew( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, H
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
 
+   FILE *file;
+   char filename[256];
+   sprintf(filename,"outputs/plot_recv_buffer%d_rank%d_level%d.txt", buffer_number, myid, current_level);
+   file = fopen(filename,"w");
+
    // initialize the counter
    HYPRE_Int            cnt = 0;
 
    // get the number of levels received
    num_psi_levels = (HYPRE_Int) recv_buffer[cnt++];
+   fprintf(file, "%d\n", num_psi_levels);
 
    // Init the recv_map_send_buffer_size !!! I think this can just be set a priori instead of counting it up in this function... !!!
    *recv_map_send_buffer_size = num_levels - current_level;
@@ -1900,13 +1940,16 @@ UnpackRecvBufferNew( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, H
    // On the first level, all info will be new, so copy in all nodes
    num_nodes = (HYPRE_Int) recv_buffer[cnt++];
    num_incoming_nodes[current_level] = num_nodes;
+   fprintf(file, "%d\n", num_nodes);
    offset = hypre_ParCompGridNumNodes(compGrid[current_level]);
    if (num_nodes + offset > hypre_ParCompGridMemSize(compGrid[current_level])) 
       hypre_ParCompGridResize(compGrid[current_level], num_nodes + offset, current_level != num_levels-1); // !!! Is there a better way to manage memory? !!!
    for (i = 0; i < num_nodes; i++)
    {
       hypre_ParCompGridGlobalIndices(compGrid[current_level])[i+offset] = (HYPRE_Int) recv_buffer[cnt++];
+      fprintf(file, "%d ", hypre_ParCompGridGlobalIndices(compGrid[current_level])[i+offset]);
    }
+   fprintf(file,"\n");
    for (i = 0; i < num_nodes; i++)
    {
       hypre_ParCompGridF(compGrid[current_level])[i+offset] = recv_buffer[cnt++];
@@ -1923,7 +1966,9 @@ UnpackRecvBufferNew( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, H
       for (i = 0; i < num_nodes; i++)
       {
          hypre_ParCompGridGhostMarker(compGrid[current_level])[i+offset] = (HYPRE_Int) recv_buffer[cnt++];
+         fprintf(file,"%d ", hypre_ParCompGridGhostMarker(compGrid[current_level])[i+offset]);
       }
+      fprintf(file,"\n");
       for (i = 0; i < num_nodes; i++)
       {
          hypre_ParCompGridCoarseGlobalIndices(compGrid[current_level])[i+offset] = (HYPRE_Int) recv_buffer[cnt++];
@@ -1982,6 +2027,7 @@ UnpackRecvBufferNew( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, H
    {
       // get the number of nodes on this level
       num_nodes = (HYPRE_Int) recv_buffer[cnt++];
+      fprintf(file,"%d\n", num_nodes);
       num_incoming_nodes[level] = num_nodes;
       level_start = cnt;
 
@@ -2000,8 +2046,8 @@ UnpackRecvBufferNew( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, H
                if (hypre_ParCompGridGlobalIndices(compGrid[level])[j] == global_index)
                {
                   add_flag[i] = 0;
-                  // Check if the incoming node is a real node. If so, update the existing dof to be a real node.
-                  if (level != num_levels-1) if (!((HYPRE_Int) recv_buffer[cnt + 2*num_nodes])) hypre_ParCompGridGhostMarker(compGrid[level])[j] = 0;
+                  // Check if the incoming node is a real node. If so, update the existing dof to be a real node. !!!! trying subtracting one in the index for recv_buf below... think this is right??? !!!!
+                  if (level != num_levels-1) if (!((HYPRE_Int) recv_buffer[cnt - 1 + 2*num_nodes])) hypre_ParCompGridGhostMarker(compGrid[level])[j] = 0;
                }
             }
             if (add_flag[i]) add_node_cnt++;
@@ -2020,8 +2066,10 @@ UnpackRecvBufferNew( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, H
       for (i = 0; i < num_nodes; i++)
       {
          if (add_flag[i]) hypre_ParCompGridGlobalIndices(compGrid[level])[offset + add_node_cnt++] = (HYPRE_Int) recv_buffer[cnt];
+         fprintf(file,"%d ", (HYPRE_Int) recv_buffer[cnt]);
          cnt++;
       }
+      fprintf(file,"\n");
       add_node_cnt = 0;
       for (i = 0; i < num_nodes; i++)
       {
@@ -2062,8 +2110,10 @@ UnpackRecvBufferNew( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, H
                // if (!&(hypre_ParCompGridGhostMarker(compGrid[level])[offset + add_node_cnt])) hypre_printf("\n\nHEY! Rank %d, Level %d, ghost marker [%d] has bad address \n\n\n",myid,level,offset+add_node_cnt);
                hypre_ParCompGridGhostMarker(compGrid[level])[offset + add_node_cnt++] = (HYPRE_Int) recv_buffer[cnt];
             } 
+            fprintf(file,"%d ", (HYPRE_Int) recv_buffer[cnt]);
             cnt++;
          }
+         fprintf(file,"\n");
          add_node_cnt = 0;
          for (i = 0; i < num_nodes; i++)
          {
@@ -2138,7 +2188,7 @@ UnpackRecvBufferNew( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, H
       hypre_TFree(add_flag, HYPRE_MEMORY_HOST);
    }
 
-
+   fclose(file);
 
 
    return 0;

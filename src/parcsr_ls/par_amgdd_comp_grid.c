@@ -788,6 +788,47 @@ hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filenam
 }
 
 
+HYPRE_Int 
+hypre_ParCompGridMatlabPlot( hypre_ParCompGrid *compGrid, const char* filename)
+{
+
+   // Get composite grid information
+   HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
+
+   HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
+   HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
+   HYPRE_Int        *ghost_marker = hypre_ParCompGridGhostMarker(compGrid);
+
+   // Print info to given filename   
+   FILE             *file;
+   file = fopen(filename,"w");
+   HYPRE_Int i;
+
+   for (i = 0; i < num_nodes; i++)
+   {
+      hypre_fprintf(file, "%d ", global_indices[i]);
+   }
+   if (coarse_global_indices)
+   {
+      hypre_fprintf(file, "\n");
+      for (i = 0; i < num_nodes; i++)
+      {
+         hypre_fprintf(file, "%d ", ghost_marker[i]);
+      }
+      hypre_fprintf(file, "\n");
+      for (i = 0; i < num_nodes; i++)
+      {
+         hypre_fprintf(file, "%d ", coarse_global_indices[i]);
+      }
+   }
+   hypre_fprintf(file, "\n");
+
+   fclose(file);
+
+   return 0;
+}
+
+
 hypre_ParCompMatrixRow *
 hypre_ParCompMatrixRowCreate ()
 {
