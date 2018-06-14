@@ -84,7 +84,7 @@ FILES =\
  HYPRE_ame.c\
  par_amg.c\
  par_amgdd_comp_grid.c\
- par_amgdd_res_comm.c\
+ par_amgdd_setup.c\
  par_amgdd_cycle.c\
  par_amgdd_fac_cycle.c\
  par_amg_setup.c\

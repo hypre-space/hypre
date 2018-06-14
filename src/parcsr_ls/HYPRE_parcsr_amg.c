@@ -1749,3 +1749,14 @@ HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
 {
    return (hypre_BoomerAMGSetCpointsToKeep( (void *) solver, cpt_coarse_level, num_cpt_coarse, cpt_coarse_index));
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGDDSetup
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+HYPRE_BoomerAMGDDCompGridSetup( HYPRE_Solver solver,
+                      HYPRE_Int padding     )
+{
+   return ( hypre_BoomerAMGDDCompGridSetup( (void *) solver, padding, NULL, 0 ) );
+}

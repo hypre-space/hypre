@@ -82,11 +82,6 @@ typedef struct
 	HYPRE_Int 			****send_flag; // flags which nodes to send after composite grid is built
 	HYPRE_Int 			****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
 
-   // CommPkg needed for subsequent ghost node residual communication
-   HYPRE_Int         **numGhostFromProc; // numGhostFromProc[proc][level]
-   HYPRE_Int         ***ghostGlobalIndex; // ghostGlobalIndex[proc][level][index]
-   HYPRE_Int         ***ghostUnpackIndex; // ghostUnpackIndex[proc][level][index]
-
 } hypre_ParCompGridCommPkg;
 
 /*--------------------------------------------------------------------------
@@ -106,9 +101,6 @@ typedef struct
  #define hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)			((compGridCommPkg) -> num_send_nodes)
  #define hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)				((compGridCommPkg) -> send_flag)
  #define hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)				((compGridCommPkg) -> recv_map)
- #define hypre_ParCompGridCommPkgNumGhostFromProc(compGridCommPkg)            ((compGridCommPkg) -> numGhostFromProc)
- #define hypre_ParCompGridCommPkgGhostGlobalIndex(compGridCommPkg)            ((compGridCommPkg) -> ghostGlobalIndex)
- #define hypre_ParCompGridCommPkgGhostUnpackIndex(compGridCommPkg)            ((compGridCommPkg) -> ghostUnpackIndex)
 
 
 

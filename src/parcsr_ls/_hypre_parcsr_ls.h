@@ -103,11 +103,6 @@ typedef struct
    HYPRE_Int         ****send_flag; // flags which nodes to send after composite grid is built
    HYPRE_Int         ****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
 
-   // Info needed for subsequent ghost node residual communication
-   HYPRE_Int         **numGhostFromProc; // numGhostFromProc[proc][level]
-   HYPRE_Int         ***ghostGlobalIndex; // ghostGlobalIndex[proc][level][index]
-   HYPRE_Int         ***ghostUnpackIndex; // ghostUnpackIndex[proc][level][index]
-
 } hypre_ParCompGridCommPkg;
 
 /*--------------------------------------------------------------------------
@@ -127,9 +122,6 @@ typedef struct
  #define hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)       ((compGridCommPkg) -> num_send_nodes)
  #define hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)           ((compGridCommPkg) -> send_flag)
  #define hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)            ((compGridCommPkg) -> recv_map)
- #define hypre_ParCompGridCommPkgNumGhostFromProc(compGridCommPkg)            ((compGridCommPkg) -> numGhostFromProc)
- #define hypre_ParCompGridCommPkgGhostGlobalIndex(compGridCommPkg)            ((compGridCommPkg) -> ghostGlobalIndex)
- #define hypre_ParCompGridCommPkgGhostUnpackIndex(compGridCommPkg)            ((compGridCommPkg) -> ghostUnpackIndex)
 
 
 
@@ -1053,6 +1045,7 @@ HYPRE_Int HYPRE_BoomerAMGSetKeepTranspose ( HYPRE_Solver solver , HYPRE_Int keep
 HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold ( HYPRE_Solver solver , HYPRE_Int slu_threshold );
 #endif
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep( HYPRE_Solver solver, HYPRE_Int cpt_coarse_level, HYPRE_Int num_cpt_coarse,HYPRE_Int *cpt_coarse_index);
+HYPRE_Int HYPRE_BoomerAMGDDCompGridSetup( HYPRE_Solver solver, HYPRE_Int padding );
 
 /* HYPRE_parcsr_bicgstab.c */
 HYPRE_Int HYPRE_ParCSRBiCGSTABCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -1846,10 +1839,10 @@ HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *re
 
 /* par_amgdd_cycle.c */
 HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int plot_iteration, HYPRE_Int first_iteration );
-
-/* par_amgdd_res_comm.c */
-HYPRE_Int hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int *timers, HYPRE_Int padding );
 HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata );
+
+/* par_amgdd_setup.c */
+HYPRE_Int hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *timers, HYPRE_Int use_barriers );
 
 /* par_amgdd_fac_cycle.c */
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata );
