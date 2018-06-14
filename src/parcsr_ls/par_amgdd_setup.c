@@ -56,12 +56,12 @@ UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_I
 
 /*****************************************************************************
  *
- * Routine for communicating the composite grid residuals in AMG-DD
- *
+ * Routine for setting up the composite grids in AMG-DD
+ 
  *****************************************************************************/
 
 /*****************************************************************************
- * hypre_AMGDD_res_comm
+ * hypre_BoomerAMGDDCompGridSetup
  *****************************************************************************/
 
 HYPRE_Int
