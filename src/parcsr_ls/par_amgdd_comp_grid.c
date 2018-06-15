@@ -441,7 +441,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                local_index = global_index - proc_first_index[level];
                hypre_ParCompMatrixRowLocalIndices(row)[j] = local_index;
 
-               // if we need to insert an entry into the matrix
+               // if we need to insert an entry into the matrix (!!! Note that I'm assuming a symmetric matrix here !!!)
                if ( local_index < hypre_ParCompGridNumNodes(compGrid[level]) - num_added_nodes[level] )
                {
                   // get the row to insert into and its size
