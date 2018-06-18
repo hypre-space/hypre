@@ -13,6 +13,14 @@
 
 
 TNAME=`basename $0 .sh`
+CONVTOL=$1
+
+# Set default check tolerance
+if [ x$CONVTOL = "x" ];
+then
+    CONVTOL=0.0
+fi
+#echo "tol = $CONVTOL"
 
 #=============================================================================
 # Check SetNeighborBox for ${TNAME} problems (2D)
@@ -20,7 +28,7 @@ TNAME=`basename $0 .sh`
 
 tail -3 ${TNAME}.out.20 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.21 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 
 #=============================================================================
 # Check SetNeighborBox for ${TNAME} problems (3D)
@@ -28,7 +36,7 @@ diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 tail -3 ${TNAME}.out.30 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.31 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 
 #=============================================================================
 # Check SysPFMG for power-of-two and non-power-of-two systems
@@ -36,15 +44,15 @@ diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 
 tail -3 ${TNAME}.out.40 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.41 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 tail -3 ${TNAME}.out.42 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 
 tail -3 ${TNAME}.out.50 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.51 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 tail -3 ${TNAME}.out.52 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 
 #=============================================================================
 # Check PFMG, SMG, and SysPFMG for problems with period larger than the grid
@@ -53,15 +61,15 @@ diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
 # First check that sstruct and struct are the same here
 tail -3 ${TNAME}.out.60 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.61 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 tail -3 ${TNAME}.out.62 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.63 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 
 # Also check that PFMG and SysPFMG are the same
 tail -3 ${TNAME}.out.66 > ${TNAME}.testdata
 tail -3 ${TNAME}.out.67 > ${TNAME}.testdata.temp
-diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+(../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 
 #=============================================================================
 # Check that reverse communication used to AddValues still works
@@ -76,7 +84,7 @@ TNUM="81 82 83 84 85"
 for i in $TNUM
 do
   tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
-  diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+  (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 done
 
 tail -3 ${TNAME}.out.90 > ${TNAME}.testdata
@@ -84,7 +92,7 @@ TNUM="91 92 93 94 95"
 for i in $TNUM
 do
   tail -3 ${TNAME}.out.$i > ${TNAME}.testdata.temp
-  diff ${TNAME}.testdata ${TNAME}.testdata.temp >&2
+  (../runcheck.sh ${TNAME}.testdata ${TNAME}.testdata.temp $CONVTOL) >&2
 done
 
 #=============================================================================
@@ -118,7 +126,7 @@ if [ "$OUT_COUNT" != "$SAVED_COUNT" ]; then
 fi
 
 if [ -z $HYPRE_NO_SAVED ]; then
-   diff -U3 -bI"time" ${TNAME}.saved ${TNAME}.out >&2
+    (../runcheck.sh ${TNAME}.out ${TNAME}.saved $CONVTOL) >&2
 fi
 
 #=============================================================================

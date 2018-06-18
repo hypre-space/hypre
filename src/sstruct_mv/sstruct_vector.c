@@ -50,13 +50,13 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
    hypre_StructGrid      *sgrid;
    HYPRE_Int              var;
  
-   pvector = hypre_TAlloc(hypre_SStructPVector, 1);
+   pvector = hypre_TAlloc(hypre_SStructPVector,  1, HYPRE_MEMORY_HOST);
 
    hypre_SStructPVectorComm(pvector)  = comm;
    hypre_SStructPVectorPGrid(pvector) = pgrid;
    nvars = hypre_SStructPGridNVars(pgrid);
    hypre_SStructPVectorNVars(pvector) = nvars;
-   svectors = hypre_TAlloc(hypre_StructVector *, nvars);
+   svectors = hypre_TAlloc(hypre_StructVector *,  nvars, HYPRE_MEMORY_HOST);
 
    for (var = 0; var < nvars; var++)
    {
@@ -64,7 +64,7 @@ hypre_SStructPVectorCreate( MPI_Comm               comm,
       svectors[var] = hypre_StructVectorCreate(comm, sgrid);
    }
    hypre_SStructPVectorSVectors(pvector) = svectors;
-   comm_pkgs = hypre_TAlloc(hypre_CommPkg *, nvars);
+   comm_pkgs = hypre_TAlloc(hypre_CommPkg *,  nvars, HYPRE_MEMORY_HOST);
    for (var = 0; var < nvars; var++)
    {
       comm_pkgs[var] = NULL;
@@ -110,10 +110,10 @@ hypre_SStructPVectorDestroy( hypre_SStructPVector *pvector )
             hypre_CommPkgDestroy(comm_pkgs[var]);
          }
            
-         hypre_TFree(dataindices);
-         hypre_TFree(svectors);
-         hypre_TFree(comm_pkgs);
-         hypre_TFree(pvector);
+         hypre_TFree(dataindices, HYPRE_MEMORY_HOST);
+         hypre_TFree(svectors, HYPRE_MEMORY_HOST);
+         hypre_TFree(comm_pkgs, HYPRE_MEMORY_HOST);
+         hypre_TFree(pvector, HYPRE_MEMORY_HOST);
       }
    }
 
@@ -256,6 +256,9 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
    /* set values inside the grid */
    hypre_StructVectorSetBoxValues(svector, box, value_box, values, action, -1, 0);
 
+#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_OMP45)
+   hypre_CheckErrorDevice(cudaDeviceSynchronize());
+#endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
    if (action != 0)
    {
@@ -628,6 +631,7 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
 
    parvector = hypre_SStructVectorParVector(vector);
    pardata = hypre_VectorData(hypre_ParVectorLocalVector(parvector));
+
    pari = 0;
    nparts = hypre_SStructVectorNParts(vector);
    for (part = 0; part < nparts; part++)
@@ -649,17 +653,19 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
             yp = hypre_StructVectorBoxData(y, i);
 
             hypre_BoxGetSize(box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(pardata,yp)
             hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
                                 y_data_box, start, stride, yi,
                                 box,        start, stride, bi);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(yi, bi)
             {
                pardata[pari+bi] = yp[yi];
             }
             hypre_BoxLoop2End(yi, bi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
+
             pari += hypre_BoxVolume(box);
          }
       }
@@ -705,13 +711,19 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                         
    HYPRE_Int             nparts, nvars;
    HYPRE_Int             part, var, i;
-
+#if 0//defined(HYPRE_MEMORY_GPU)
+   HYPRE_Complex        *pardata_device;
+#endif
    if (parvector != NULL)
    {
       hypre_SetIndex(stride, 1);
 
       parvector = hypre_SStructVectorParVector(vector);
       pardata = hypre_VectorData(hypre_ParVectorLocalVector(parvector));
+#if 0//defined(HYPRE_MEMORY_GPU)
+      pardata_device = hypre_TAlloc(HYPRE_Complex, hypre_VectorSize(hypre_ParVectorLocalVector(parvector)) ,HYPRE_MEMORY_DEVICE);
+      hypre_TMemcpy(pardata_device, pardata, HYPRE_Complex, hypre_VectorSize(hypre_ParVectorLocalVector(parvector)), HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
+#endif
       pari = 0;
       nparts = hypre_SStructVectorNParts(vector);
       for (part = 0; part < nparts; part++)
@@ -733,23 +745,31 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                yp = hypre_StructVectorBoxData(y, i);
 
                hypre_BoxGetSize(box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(yp,pardata)
                hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
                                    y_data_box, start, stride, yi,
                                    box,        start, stride, bi);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-               hypre_BoxLoop2For(yi, bi)
                {
-                  yp[yi] = pardata[pari+bi];
+#if 0//defined(HYPRE_MEMORY_GPU)		 
+                  yp[yi] = pardata_device[pari+bi];
+#else
+		  yp[yi] = pardata[pari+bi];
+#endif
                }
                hypre_BoxLoop2End(yi, bi);
+#undef DEVICE_VAR
+#define DEVICE_VAR
+
                pari += hypre_BoxVolume(box);
             }
          }
       }
    }
-
+#if 0//defined(HYPRE_MEMORY_GPU)   
+   hypre_TFree(pardata_device,HYPRE_MEMORY_DEVICE);
+#endif
    return hypre_error_flag;
 }
 /*------------------------------------------------------------------
@@ -772,7 +792,7 @@ hypre_SStructPVectorInitializeShell( hypre_SStructPVector *pvector)
    hypre_StructVector  *svector;
 
    pdatasize = 0;
-   pdataindices = hypre_CTAlloc(HYPRE_Int, nvars);
+   pdataindices = hypre_CTAlloc(HYPRE_Int,  nvars, HYPRE_MEMORY_HOST);
 
    for (var =0; var < nvars; var++)
    {
@@ -813,7 +833,7 @@ hypre_SStructVectorInitializeShell( hypre_SStructVector *vector)
    HYPRE_Int               *dataindices;
 
    datasize = 0;
-   dataindices = hypre_CTAlloc(HYPRE_Int, nparts);
+   dataindices = hypre_CTAlloc(HYPRE_Int,  nparts, HYPRE_MEMORY_HOST);
    for (part = 0; part < nparts; part++)
    {
       pvector = hypre_SStructVectorPVector(vector, part) ;

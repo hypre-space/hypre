@@ -91,7 +91,6 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    hypre_ParVector  *Residual;
 
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.solve");
-      
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm,&my_id);
 
@@ -243,14 +242,12 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
    {
       hypre_ParAMGDataCycleOpCount(amg_data) = 0;
       /* Op count only needed for one cycle */
-
       if ((additive < 0 || additive >= num_levels) 
 	   && (mult_additive < 0 || mult_additive >= num_levels)
 	   && (simple < 0 || simple >= num_levels) )
          hypre_BoomerAMGCycle(amg_data, F_array, U_array); 
       else
          hypre_BoomerAMGAdditiveCycle(amg_data); 
-
       /*---------------------------------------------------------------
        *    Compute  fine-grid residual and residual norm
        *----------------------------------------------------------------*/
@@ -327,8 +324,8 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
 
    if (amg_print_level > 1) 
    {
-      num_coeffs       = hypre_CTAlloc(HYPRE_Real, num_levels);
-      num_variables    = hypre_CTAlloc(HYPRE_Real, num_levels);
+      num_coeffs       = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
+      num_variables    = hypre_CTAlloc(HYPRE_Real,  num_levels, HYPRE_MEMORY_HOST);
       num_coeffs[0]    = hypre_ParCSRMatrixDNumNonzeros(A);
       num_variables[0] = hypre_ParCSRMatrixGlobalNumRows(A);
 
@@ -384,10 +381,9 @@ hypre_BoomerAMGSolve( void               *amg_vdata,
          hypre_printf("                   cycle = %f\n\n\n\n",cycle_cmplxty);
       }
 
-      hypre_TFree(num_coeffs);
-      hypre_TFree(num_variables);
+      hypre_TFree(num_coeffs, HYPRE_MEMORY_HOST);
+      hypre_TFree(num_variables, HYPRE_MEMORY_HOST);
    }
-
    HYPRE_ANNOTATION_END("BoomerAMG.solve");
    
    return hypre_error_flag;

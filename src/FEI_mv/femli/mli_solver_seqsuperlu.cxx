@@ -239,9 +239,9 @@ fclose(fp);
          }
          nnz = 0;
          for ( irow = 0; irow < nSubRows; irow++ ) nnz += countArray[irow];
-         cscJA = (int *)    malloc( (nSubRows+1) * sizeof(int) );
-         cscIA = (int *)    malloc( nnz * sizeof(int) );
-         cscAA = (double *) malloc( nnz * sizeof(double) );
+         cscJA = hypre_TAlloc(int,  (nSubRows+1) , HYPRE_MEMORY_HOST);
+         cscIA = hypre_TAlloc(int,  nnz , HYPRE_MEMORY_HOST);
+         cscAA = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST);
          cscJA[0] = 0;
          nnz = 0;
          for ( icol = 1; icol <= nSubRows; icol++ ) 
@@ -309,9 +309,9 @@ fclose(fp);
                countArray[csrJA[icol]]++;
             }
          }
-         cscJA = (int *)    malloc( (nrows+1) * sizeof(int) );
-         cscAA = (double *) malloc( nnz * sizeof(double) );
-         cscIA = (int *)    malloc( nnz * sizeof(int) );
+         cscJA = hypre_TAlloc(int,  (nrows+1) , HYPRE_MEMORY_HOST);
+         cscAA = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST);
+         cscIA = hypre_TAlloc(int,  nnz , HYPRE_MEMORY_HOST);
          cscJA[0] = 0;
          nnz = 0;
          for ( icol = 1; icol <= nrows; icol++ ) 

@@ -101,10 +101,10 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    hypre_BoxInit(&intersect, ndim);
 
    /* bounding global ranks of this processor & allocate boundary box markers. */
-   upper_rank= hypre_CTAlloc(HYPRE_Int, num_levels);
-   lower_rank= hypre_CTAlloc(HYPRE_Int, num_levels);
+   upper_rank= hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
+   lower_rank= hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
 
-   boxes_with_bdry= hypre_TAlloc(HYPRE_Int *, num_levels);
+   boxes_with_bdry= hypre_TAlloc(HYPRE_Int *,  num_levels, HYPRE_MEMORY_HOST);
    for (i= 0; i< num_levels; i++)
    {
       grid = grid_l[i];
@@ -124,7 +124,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
 
       sgrid= hypre_SStructPGridCellSGrid(pgrid);
       box_array= hypre_StructGridBoxes(sgrid);
-      boxes_with_bdry[i]= hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(box_array));
+      boxes_with_bdry[i]= hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(box_array), HYPRE_MEMORY_HOST);
    }
  
    /*-----------------------------------------------------------------------------
@@ -139,8 +139,8 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
     *-----------------------------------------------------------------------------*/
    if (num_levels > 1)
    {
-      cbox_mapping= hypre_CTAlloc(HYPRE_Int *, num_levels);
-      fbox_mapping= hypre_CTAlloc(HYPRE_Int *, num_levels);
+      cbox_mapping= hypre_CTAlloc(HYPRE_Int *,  num_levels, HYPRE_MEMORY_HOST);
+      fbox_mapping= hypre_CTAlloc(HYPRE_Int *,  num_levels, HYPRE_MEMORY_HOST);
    }
    for (i= 0; i< (num_levels-1); i++)
    {
@@ -149,7 +149,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       cell_fgrid= hypre_SStructPGridCellSGrid(pgrid);
       fboxes= hypre_StructGridBoxes(cell_fgrid);
       nfboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_fgrid));
-      fbox_mapping[i]= hypre_CTAlloc(HYPRE_Int, nfboxes);
+      fbox_mapping[i]= hypre_CTAlloc(HYPRE_Int,  nfboxes, HYPRE_MEMORY_HOST);
 
       grid = grid_l[i+1];
       pgrid= hypre_SStructGridPGrid(grid, 0); /* assuming one part */
@@ -157,7 +157,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       cboxes= hypre_StructGridBoxes(cell_cgrid);
       nboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_cgrid));
 
-      cbox_mapping[i+1]= hypre_CTAlloc(HYPRE_Int, nboxes);
+      cbox_mapping[i+1]= hypre_CTAlloc(HYPRE_Int,  nboxes, HYPRE_MEMORY_HOST);
 
       /* assuming if i1 > i2 and (box j1) is coarsened from (box i1)
          and (box j2) from (box i2), then j1 > j2. */
@@ -187,8 +187,8 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       }     /* hypre_ForBoxI(j, fboxes) */
    }        /* for (i= 0; i< (num_levels-1); i++) */
          
-   bdry= hypre_TAlloc(hypre_BoxArrayArray ***, num_levels);
-   npts= hypre_CTAlloc(HYPRE_Int, num_levels);
+   bdry= hypre_TAlloc(hypre_BoxArrayArray ***,  num_levels, HYPRE_MEMORY_HOST);
+   npts= hypre_CTAlloc(HYPRE_Int,  num_levels, HYPRE_MEMORY_HOST);
 
    /* finest level boundary determination */
    grid = grid_l[0];
@@ -236,11 +236,11 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       cboxes= hypre_StructGridBoxes(cell_cgrid);
       nboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_cgrid));
 
-      bdry[i]= hypre_TAlloc(hypre_BoxArrayArray **, nboxes);
+      bdry[i]= hypre_TAlloc(hypre_BoxArrayArray **,  nboxes, HYPRE_MEMORY_HOST);
       p= 2*(ndim-1);
       for (j= 0; j< nboxes; j++)
       {
-         bdry[i][j]= hypre_TAlloc(hypre_BoxArrayArray *, nvars+1);
+         bdry[i][j]= hypre_TAlloc(hypre_BoxArrayArray *,  nvars+1, HYPRE_MEMORY_HOST);
 
          /* cell grid boxarrayarray */
          bdry[i][j][0]= hypre_BoxArrayArrayCreate(2*ndim, ndim);
@@ -423,11 +423,11 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    {
       if (fbox_mapping[i])
       {
-         hypre_TFree(fbox_mapping[i]);
+         hypre_TFree(fbox_mapping[i], HYPRE_MEMORY_HOST);
       }
       if (cbox_mapping[i+1])
       {
-         hypre_TFree(cbox_mapping[i+1]);
+         hypre_TFree(cbox_mapping[i+1], HYPRE_MEMORY_HOST);
       }
 
       grid = grid_l[i+1];
@@ -438,13 +438,13 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
    }
    if (num_levels > 1)
    {
-      hypre_TFree(fbox_mapping);
-      hypre_TFree(cbox_mapping);
+      hypre_TFree(fbox_mapping, HYPRE_MEMORY_HOST);
+      hypre_TFree(cbox_mapping, HYPRE_MEMORY_HOST);
    }
 
    /* find the ranks for the boundary points */
-   BdryRanks_l    = hypre_TAlloc(HYPRE_Int *, num_levels);
-   BdryRanksCnts_l= hypre_TAlloc(HYPRE_Int  , num_levels);
+   BdryRanks_l    = hypre_TAlloc(HYPRE_Int *,  num_levels, HYPRE_MEMORY_HOST);
+   BdryRanksCnts_l= hypre_TAlloc(HYPRE_Int  ,  num_levels, HYPRE_MEMORY_HOST);
 
    /* loop over levels and extract boundary ranks. Only extract unique
       ranks */
@@ -457,7 +457,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
       cboxes= hypre_StructGridBoxes(cell_cgrid);
       nboxes= hypre_BoxArraySize(hypre_StructGridBoxes(cell_cgrid));
  
-      ranks= hypre_TAlloc(HYPRE_Int, npts[i]);
+      ranks= hypre_TAlloc(HYPRE_Int,  npts[i], HYPRE_MEMORY_HOST);
       cnt= 0;
       for (j= 0; j< nboxes; j++)
       {
@@ -501,10 +501,10 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
             hypre_BoxArrayArrayDestroy(bdry[i][j][k+1]);
          }
          hypre_BoxArrayArrayDestroy(bdry[i][j][0]);
-         hypre_TFree(bdry[i][j]);
+         hypre_TFree(bdry[i][j], HYPRE_MEMORY_HOST);
         
       }  /* for (j= 0; j< nboxes; j++) */
-      hypre_TFree(bdry[i]);
+      hypre_TFree(bdry[i], HYPRE_MEMORY_HOST);
 
       /* mark all ranks that are outside this processor to -1 */
       for (j= 0; j< cnt; j++)
@@ -541,7 +541,7 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
                l++;
             }
          }
-         BdryRanks_l[i]= hypre_TAlloc(HYPRE_Int, l);
+         BdryRanks_l[i]= hypre_TAlloc(HYPRE_Int,  l, HYPRE_MEMORY_HOST);
          BdryRanksCnts_l[i]= l;
 
          l= 0;
@@ -562,17 +562,17 @@ hypre_Maxwell_PhysBdy( hypre_SStructGrid      **grid_l,
          BdryRanksCnts_l[i]= 0;
       }
 
-      hypre_TFree(ranks);
-      hypre_TFree(boxes_with_bdry[i]);
+      hypre_TFree(ranks, HYPRE_MEMORY_HOST);
+      hypre_TFree(boxes_with_bdry[i], HYPRE_MEMORY_HOST);
 
    }  /* for (i= 0; i< num_levels; i++) */
 
-   hypre_TFree(boxes_with_bdry);
-   hypre_TFree(lower_rank);
-   hypre_TFree(upper_rank);
+   hypre_TFree(boxes_with_bdry, HYPRE_MEMORY_HOST);
+   hypre_TFree(lower_rank, HYPRE_MEMORY_HOST);
+   hypre_TFree(upper_rank, HYPRE_MEMORY_HOST);
 
-   hypre_TFree(bdry);
-   hypre_TFree(npts);
+   hypre_TFree(bdry, HYPRE_MEMORY_HOST);
+   hypre_TFree(npts, HYPRE_MEMORY_HOST);
 
    *BdryRanksl_ptr    = BdryRanks_l;
    *BdryRanksCntsl_ptr= BdryRanksCnts_l;

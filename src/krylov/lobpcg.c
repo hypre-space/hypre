@@ -77,7 +77,7 @@ HYPRE_Int   (*dsygv) (HYPRE_Int *itype, char *jobz, char *uplo, HYPRE_Int *
   ldb = utilities_FortranMatrixGlobalHeight( mtxB );
   lwork = 10*n;
 
-  work = (HYPRE_Real*)calloc( lwork, sizeof(HYPRE_Real) );
+  work = hypre_CTAlloc(HYPRE_Real,  lwork, HYPRE_MEMORY_HOST);
 
   (*dsygv)( &itype, &jobz, &uplo, &n, 
 				       a, &lda, b, &ldb,
@@ -489,7 +489,7 @@ es" argument */
   historyColumn = utilities_FortranMatrixCreate();
   
   /* initializing soft locking mask */
-  activeMask = (HYPRE_Int*)calloc( sizeX, sizeof(HYPRE_Int) );
+  activeMask = hypre_CTAlloc(HYPRE_Int,  sizeX, HYPRE_MEMORY_HOST);
   hypre_assert( activeMask != NULL );
   for ( i = 0; i < sizeX; i++ )
     activeMask[i] = 1;

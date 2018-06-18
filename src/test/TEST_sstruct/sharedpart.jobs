@@ -13,27 +13,27 @@
 
 
 # These produce the same rel residual
-mpirun -np 1 ./sstruct -in sstruct.in.reduced3D -solver 28 \
+mpirun -np 1  ./sstruct -in sstruct.in.reduced3D -solver 28 \
  > sharedpart.out.0
-mpirun -np 3 ./sstruct -in sstruct.in.reduced3D -solver 28 -pooldist 1 \
+mpirun -np 3  ./sstruct -in sstruct.in.reduced3D -solver 28 -pooldist 1 \
  > sharedpart.out.1
-mpirun -np 1 ./sstruct -in sstruct.in.reduced3D-4 -solver 28 \
+mpirun -np 1  ./sstruct -in sstruct.in.reduced3D-4 -solver 28 \
  > sharedpart.out.2
-mpirun -np 3 ./sstruct -in sstruct.in.reduced3D-4 -solver 28 -pooldist 1 \
+mpirun -np 3  ./sstruct -in sstruct.in.reduced3D-4 -solver 28 -pooldist 1 \
  > sharedpart.out.3
 
 # These produce the same rel residual
-mpirun -np 1 ./sstruct -in sstruct.in.enhanced3D -solver 28 \
+mpirun -np 1  ./sstruct -in sstruct.in.enhanced3D -solver 28 \
  > sharedpart.out.10
-mpirun -np 7 ./sstruct -in sstruct.in.enhanced3D -solver 28 -pooldist 1 \
+mpirun -np 7  ./sstruct -in sstruct.in.enhanced3D -solver 28 -pooldist 1 \
  > sharedpart.out.11
 
 # Check AMG
-mpirun -np 3 ./sstruct -in sstruct.in.reduced3D -solver 20 -pooldist 1 \
+mpirun -np 3  ./sstruct -in sstruct.in.reduced3D -solver 20 -pooldist 1 \
  > sharedpart.out.50
-mpirun -np 7 ./sstruct -in sstruct.in.enhanced3D -solver 20 -pooldist 1 \
+mpirun -np 7  ./sstruct -in sstruct.in.enhanced3D -solver 20 -pooldist 1 \
  > sharedpart.out.51
-mpirun -np 3 ./sstruct -in sstruct.in.reduced3D-4 -solver 20 -pooldist 1 \
+mpirun -np 3  ./sstruct -in sstruct.in.reduced3D-4 -solver 20 -pooldist 1 \
  > sharedpart.out.52
-mpirun -np 5 ./sstruct -in sstruct.in.fe_rhombus5 -solver 20 \
+mpirun -np 5  ./sstruct -in sstruct.in.fe_rhombus5 -solver 20 \
  > sharedpart.out.53

@@ -137,7 +137,7 @@ hypre_SparseMSGSolve( void               *smsg_vdata,
       }
    }
 
-   restrict_count = hypre_TAlloc(HYPRE_Int, num_all_grids);
+   restrict_count = hypre_TAlloc(HYPRE_Int,  num_all_grids, HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------
     * Do V-cycles:

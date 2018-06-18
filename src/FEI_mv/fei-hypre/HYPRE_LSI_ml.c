@@ -158,7 +158,7 @@ int MH_ExchBdry(double *vec, void *obj)
    nRows       = Amat->Nrows;
 
    if ( recvProcCnt > 0 )
-      request = (MPI_Request *) malloc( recvProcCnt * sizeof( MPI_Request ));
+      request = hypre_TAlloc( MPI_Request ,  recvProcCnt , HYPRE_MEMORY_HOST);
    msgid = 234;
    offset = nRows;
    for ( i = 0; i < recvProcCnt; i++ )
@@ -173,7 +173,7 @@ int MH_ExchBdry(double *vec, void *obj)
    {
       dest = sendProc[i];
       leng = sendLeng[i] * sizeof( double );
-      dbuf = (double *) malloc( leng * sizeof(double) );
+      dbuf = hypre_TAlloc(double,  leng , HYPRE_MEMORY_HOST);
       tempList = sendList[i];
       for ( j = 0; j < sendLeng[i]; j++ ) {
          dbuf[j] = vec[tempList[j]];
@@ -232,11 +232,11 @@ int MH_ExchBdryBack(double *vec, void *obj, int *length, double **outvec,
 
    if ( sendProcCnt > 0 )
    {
-      request = (MPI_Request *) malloc( sendProcCnt * sizeof( MPI_Request ));
+      request = hypre_TAlloc( MPI_Request ,  sendProcCnt , HYPRE_MEMORY_HOST);
       leng = 0;
       for ( i = 0; i < sendProcCnt; i++ ) leng += sendLeng[i];
-      (*outvec) = (double *) malloc(leng * sizeof(double));
-      (*outindices) = (int *) malloc(leng * sizeof(int));
+      (*outvec) = hypre_TAlloc(double, leng , HYPRE_MEMORY_HOST);
+      (*outindices) = hypre_TAlloc(int, leng , HYPRE_MEMORY_HOST);
       (*length) = leng;
       offset = 0;
       for ( i = 0; i < sendProcCnt; i++ ) 
@@ -306,7 +306,7 @@ int MH_MatVec(void *obj, int leng1, double p[], int leng2, double ap[])
 
     length = nRows;
     for ( i = 0; i < Amat->recvProcCnt; i++ ) length += Amat->recvLeng[i];
-    dbuf = (double *) malloc( length * sizeof( double ) );
+    dbuf = hypre_TAlloc( double ,  length , HYPRE_MEMORY_HOST);
     for ( i = 0; i < nRows; i++ ) dbuf[i] = p[i];
     MH_ExchBdry(dbuf, obj);
     for ( i = 0 ; i < nRows; i++ ) 
@@ -368,7 +368,7 @@ int HYPRE_LSI_MLCreate( MPI_Comm comm, HYPRE_Solver *solver)
 #ifdef HAVE_ML
     /* create an internal ML data structure */
 
-    MH_Link *link = (MH_Link *) malloc( sizeof( MH_Link ) );
+    MH_Link *link = hypre_TAlloc( MH_Link , 1, HYPRE_MEMORY_HOST);
     if ( link == NULL ) return 1;   
 
     /* fill in all other default parameters */
@@ -481,14 +481,14 @@ int HYPRE_LSI_MLSetup( HYPRE_Solver solver, HYPRE_ParCSRMatrix A,
 
     HYPRE_ParCSRMatrixGetRowPartitioning( A, &row_partition );
     localEqns  = row_partition[my_id+1] - row_partition[my_id];
-    context = (MH_Context *) malloc(sizeof(MH_Context));
+    context = hypre_TAlloc(MH_Context, 1, HYPRE_MEMORY_HOST);
     link->contxt = context;
     context->comm = link->comm;
     context->globalEqns = row_partition[nprocs];
-    context->partition = (int *) malloc(sizeof(int)*(nprocs+1));
+    context->partition = hypre_TAlloc(int, (nprocs+1), HYPRE_MEMORY_HOST);
     for (i=0; i<=nprocs; i++) context->partition[i] = row_partition[i];
-    hypre_TFree( row_partition );
-    mh_mat = ( MH_Matrix * ) malloc( sizeof( MH_Matrix) );
+    hypre_TFree( row_partition , HYPRE_MEMORY_HOST);
+    mh_mat = hypre_TAlloc( MH_Matrix, 1, HYPRE_MEMORY_HOST);
     context->Amat = mh_mat;
     HYPRE_LSI_MLConstructMHMatrix(A,mh_mat,link->comm,
                                   context->partition,context); 
@@ -1022,8 +1022,8 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
     /* block information                                        */
     /* -------------------------------------------------------- */
 
-    diagSize    = (int*) malloc( sizeof(int) * localEqns );
-    offdiagSize = (int*) malloc( sizeof(int) * localEqns );
+    diagSize    = hypre_TAlloc(int,  localEqns , HYPRE_MEMORY_HOST);
+    offdiagSize = hypre_TAlloc(int,  localEqns , HYPRE_MEMORY_HOST);
     num_bdry = 0;
     for ( i = startRow; i <= endRow; i++ )
     {
@@ -1051,7 +1051,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
     externLeng = 0;
     for ( i = 0; i < localEqns; i++ ) externLeng += offdiagSize[i];
     if ( externLeng > 0 )
-         externList = (int *) malloc( sizeof(int) * externLeng);
+         externList = hypre_TAlloc(int,  externLeng, HYPRE_MEMORY_HOST);
     else externList = NULL;
     externLeng = 0;
     for ( i = startRow; i <= endRow; i++ )
@@ -1082,9 +1082,9 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
 
     nnz = 0; 
     for ( i = 0; i < localEqns; i++ ) nnz += diagSize[i] + offdiagSize[i]; 
-    rowptr  = (int *)    malloc( (localEqns + 1) * sizeof(int) ); 
-    columns = (int *)    malloc( nnz * sizeof(int) ); 
-    values  = (double *) malloc( nnz * sizeof(double) ); 
+    rowptr  = hypre_TAlloc(int,  (localEqns + 1) , HYPRE_MEMORY_HOST); 
+    columns = hypre_TAlloc(int,  nnz , HYPRE_MEMORY_HOST); 
+    values  = hypre_TAlloc(double,  nnz , HYPRE_MEMORY_HOST); 
     rowptr[0] = 0; 
     for ( i = 1; i <= localEqns; i++ ) 
        rowptr[i] = rowptr[i-1] + diagSize[i-1] + offdiagSize[i-1];
@@ -1153,7 +1153,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        /* remote processor (assume sequential mapping)          */
        /* ----------------------------------------------------- */ 
 
-       tempCnt = (int *) malloc( sizeof(int) * nprocs );
+       tempCnt = hypre_TAlloc(int,  nprocs , HYPRE_MEMORY_HOST);
        for ( i = 0; i < nprocs; i++ ) tempCnt[i] = 0;
        for ( i = 0; i < externLeng; i++ )
        {
@@ -1175,8 +1175,8 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        recvProcCnt = 0;
        for ( i = 0; i < nprocs; i++ )
           if ( tempCnt[i] > 0 ) recvProcCnt++;
-       recvLeng = (int*) malloc( sizeof(int) * recvProcCnt );
-       recvProc = (int*) malloc( sizeof(int) * recvProcCnt );
+       recvLeng = hypre_TAlloc(int,  recvProcCnt , HYPRE_MEMORY_HOST);
+       recvProc = hypre_TAlloc(int,  recvProcCnt , HYPRE_MEMORY_HOST);
        recvProcCnt = 0;
        for ( i = 0; i < nprocs; i++ )
        {
@@ -1192,7 +1192,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        /* has to send data to                                   */
        /* ----------------------------------------------------- */ 
 
-       sendLeng = (int *) malloc( nprocs * sizeof(int) );
+       sendLeng = hypre_TAlloc(int,  nprocs , HYPRE_MEMORY_HOST);
        for ( i = 0; i < nprocs; i++ ) tempCnt[i] = 0;
        for ( i = 0; i < recvProcCnt; i++ ) tempCnt[recvProc[i]] = 1;
        MPI_Allreduce(tempCnt, sendLeng, nprocs, MPI_INT, MPI_SUM, comm );
@@ -1200,9 +1200,9 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        free( sendLeng );
        if ( sendProcCnt > 0 )
        {
-          sendLeng = (int *)  malloc( sendProcCnt * sizeof(int) );
-          sendProc = (int *)  malloc( sendProcCnt * sizeof(int) );
-          sendList = (int **) malloc( sendProcCnt * sizeof(int*) );
+          sendLeng = hypre_TAlloc(int,  sendProcCnt , HYPRE_MEMORY_HOST);
+          sendProc = hypre_TAlloc(int,  sendProcCnt , HYPRE_MEMORY_HOST);
+          sendList = hypre_TAlloc(int*,  sendProcCnt , HYPRE_MEMORY_HOST);
        }
        else 
        {
@@ -1225,7 +1225,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
           MPI_Recv((void*) &sendLeng[i],1,MPI_INT,MPI_ANY_SOURCE,msgid,
                    comm,&status);
           sendProc[i] = status.MPI_SOURCE;
-          sendList[i] = (int *) malloc( sendLeng[i] * sizeof(int) );
+          sendList[i] = hypre_TAlloc(int,  sendLeng[i] , HYPRE_MEMORY_HOST);
           if ( sendList[i] == NULL ) 
              printf("allocate problem %d \n", sendLeng[i]);
        }
@@ -1253,7 +1253,7 @@ int HYPRE_LSI_MLConstructMHMatrix(HYPRE_ParCSRMatrix A, MH_Matrix *mh_mat,
        /* ----------------------------------------------------- */ 
 
        if ( sendProcCnt > 0 )
-          Request = (MPI_Request *) malloc(sendProcCnt * sizeof(MPI_Request));
+          Request = hypre_TAlloc(MPI_Request, sendProcCnt , HYPRE_MEMORY_HOST);
 
        msgid = 540;
        for ( i = 0; i < sendProcCnt; i++ ) 

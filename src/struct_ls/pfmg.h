@@ -58,6 +58,11 @@ typedef struct
    hypre_StructGrid    **P_grid_l;
                     
    HYPRE_Real           *data;
+   HYPRE_Real           *data_const;
+#ifdef HYPRE_USE_OMP45
+   HYPRE_Int             data_size;
+   HYPRE_Int             data_size_const;	
+#endif  
    hypre_StructMatrix  **A_l;
    hypre_StructMatrix  **P_l;
    hypre_StructMatrix  **RT_l;
@@ -83,6 +88,9 @@ typedef struct
    HYPRE_Int             logging;
    HYPRE_Real           *norms;
    HYPRE_Real           *rel_norms;
+#if defined(HYPRE_USE_CUDA)
+  HYPRE_Int             devicelevel;
+#endif
 
 } hypre_PFMGData;
 

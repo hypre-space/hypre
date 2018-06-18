@@ -595,7 +595,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       HYPRE_SStructVectorInitialize(x);
 #endif
 
-      values = (HYPRE_Real*) calloc((n*n), sizeof(HYPRE_Real));
+      values = hypre_CTAlloc(HYPRE_Real, (n*n), HYPRE_MEMORY_HOST);
 
       /* Set the values of b in left-to-right, bottom-to-top order */
       for (k = 0, j = 0; j < n; j++)
@@ -666,7 +666,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
                                                       to the offsets */
          HYPRE_Real *values;
 
-         values = (HYPRE_Real*) calloc(5*(n*n), sizeof(HYPRE_Real));
+         values = hypre_CTAlloc(HYPRE_Real, 5*(n*n), HYPRE_MEMORY_HOST);
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -704,7 +704,7 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
          HYPRE_Int stencil_indices[3] = {0, 1, 2};
          HYPRE_Real *values;
 
-         values = (HYPRE_Real*) calloc(3*(n*n), sizeof(HYPRE_Real));
+         values = hypre_CTAlloc(HYPRE_Real, 3*(n*n), HYPRE_MEMORY_HOST);
 
          /* The order is left-to-right, bottom-to-top */
          for (k = 0, j = 0; j < n; j++)
@@ -752,8 +752,8 @@ HYPRE_Int main (HYPRE_Int argc, char *argv[])
       else
          nentries = 3;
 
-      values  = (HYPRE_Real*) calloc(nentries*n, sizeof(HYPRE_Real));
-      bvalues = (HYPRE_Real*) calloc(n, sizeof(HYPRE_Real));
+      values  = hypre_CTAlloc(HYPRE_Real, nentries*n, HYPRE_MEMORY_HOST);
+      bvalues = hypre_CTAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
 
       /* The stencil at the boundary nodes is 1-0-0-0-0. Because
          we have I x_b = u_0; */

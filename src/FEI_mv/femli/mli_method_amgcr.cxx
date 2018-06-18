@@ -632,12 +632,12 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       hypre_ParCSRMatrixTranspose(hyprePFF, &hyprePFFT, 1);
       hypreAfc = hypre_ParMatmul(hyprePFFT, hypreAPFC);
       rowStarts = hypre_ParCSRMatrixRowStarts(hyprePFFT);
-      newRowStarts = (int *) malloc((nprocs+1) * sizeof(int));
+      newRowStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
       for (irow = 0; irow <= nprocs; irow++) 
          newRowStarts[irow] = rowStarts[irow];
       hypre_ParCSRMatrixRowStarts(hypreAfc) = newRowStarts;
       colStarts = hypre_ParCSRMatrixColStarts(hypreAPFC);
-      newColStarts = (int *) malloc((nprocs+1) * sizeof(int));
+      newColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
       for (irow = 0; irow <= nprocs; irow++) 
          newColStarts[irow] = colStarts[irow];
       hypre_ParCSRMatrixColStarts(hypreAfc) = newColStarts;
@@ -651,11 +651,11 @@ MLI_Matrix *MLI_Method_AMGCR::performCR(MLI_Matrix *mli_Amat, int *indepSet,
       MLI_Matrix_ComputePtAP(mli_PFFMat, mli_Amat, &mli_AffMat);
       hypreAff  = (hypre_ParCSRMatrix *) mli_AffMat->getMatrix();
       colStarts = hypre_ParCSRMatrixColStarts(hyprePFF);
-      newColStarts = (int *) malloc((nprocs+1) * sizeof(int));
+      newColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
       for (irow = 0; irow <= nprocs; irow++) 
          newColStarts[irow] = colStarts[irow];
       hypre_ParCSRMatrixColStarts(hypreAff) = newColStarts;
-      newColStarts = (int *) malloc((nprocs+1) * sizeof(int));
+      newColStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
       for (irow = 0; irow <= nprocs; irow++) 
          newColStarts[irow] = colStarts[irow];
       hypre_ParCSRMatrixRowStarts(hypreAff) = newColStarts;
@@ -1142,7 +1142,7 @@ MLI_Matrix *MLI_Method_AMGCR::createPmat(int *indepSet, MLI_Matrix *mli_Amat,
       }
       hypre_ParCSRMatrixOwnsColStarts(hypreInvD) = 0;
       rowStarts = hypre_ParCSRMatrixRowStarts(hypreA);
-      newRowStarts = (int *) malloc((nprocs+1) * sizeof(int));
+      newRowStarts = hypre_TAlloc(int, (nprocs+1) , HYPRE_MEMORY_HOST);
       for (irow = 0; irow <= nprocs; irow++) 
          newRowStarts[irow] = rowStarts[irow];
       hypre_ParCSRMatrixRowStarts(hypreP) = newRowStarts;

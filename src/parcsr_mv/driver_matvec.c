@@ -54,7 +54,7 @@ main( HYPRE_Int   argc,
    	hypre_printf(" read input\n");
    }
 /*   row_starts = hypre_CTAlloc(HYPRE_Int,4);
-   col_starts = hypre_CTAlloc(HYPRE_Int,4);
+   col_starts = hypre_CTAlloc(HYPRE_Int, 4, HYPRE_MEMORY_HOST);
    row_starts[0] = 0;
    row_starts[1] = 3;
    row_starts[2] = 3;

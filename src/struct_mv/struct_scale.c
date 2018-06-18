@@ -51,16 +51,16 @@ hypre_StructScale( HYPRE_Complex       alpha,
 
       hypre_BoxGetSize(box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(yp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(y), loop_size,
                           y_data_box, start, unit_stride, yi);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop1For(yi)
       {
          yp[yi] *= alpha;
       }
       hypre_BoxLoop1End(yi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    return hypre_error_flag;

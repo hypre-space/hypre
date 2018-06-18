@@ -231,18 +231,18 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
 
       hypre_BoxGetSize(box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp,yp,Ap)
       hypre_BoxLoop3Begin(hypre_StructVectorNDim(Hx), loop_size,
                           A_data_box, start, stride, Ai,
                           x_data_box, start, stride, xi,
                           y_data_box, start, stride, yi);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop3For(Ai, xi, yi)
       {
          xp[xi] = yp[yi] / Ap[Ai];
       }
       hypre_BoxLoop3End(Ai, xi, yi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    return hypre_error_flag;

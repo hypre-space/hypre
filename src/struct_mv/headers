@@ -54,6 +54,11 @@ cat >> $INTERNAL_HEADER <<@
 cat boxloop_cuda.h                >> $INTERNAL_HEADER
 
 cat >> $INTERNAL_HEADER <<@
+#elif defined(HYPRE_USE_OMP45)
+@
+cat boxloop_omp45.h                >> $INTERNAL_HEADER
+
+cat >> $INTERNAL_HEADER <<@
 #else
 @
 

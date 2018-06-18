@@ -64,7 +64,7 @@ void *hypre_FGMRESCreate()
 {
    hypre_FGMRESData *fgmres_data;
  
-   fgmres_data = hypre_CTAlloc(hypre_FGMRESData, 1);
+   fgmres_data = hypre_CTAlloc(hypre_FGMRESData,  1, HYPRE_MEMORY_HOST);
  
    /* set defaults */
 
@@ -101,7 +101,7 @@ int hypre_FGMRESDestroy( void *fgmres_vdata )
    if (fgmres_data)
    {
       if ( (fgmres_data->logging) > 0 && (fgmres_data->norms != NULL) )
-         hypre_TFree( fgmres_data -> norms );
+         hypre_TFree( fgmres_data -> norms , HYPRE_MEMORY_HOST);
       if ( (fgmres_data->matvec_data) != NULL )
          hypre_ParKrylovMatvecDestroy(fgmres_data -> matvec_data);
       if ( (fgmres_data-> r) != NULL )
@@ -112,15 +112,15 @@ int hypre_FGMRESDestroy( void *fgmres_vdata )
       {
          for (i = 0; i < (fgmres_data -> k_dim+1); i++)
             hypre_ParKrylovDestroyVector((fgmres_data -> p)[i]);
-         hypre_TFree( fgmres_data -> p );
+         hypre_TFree( fgmres_data -> p , HYPRE_MEMORY_HOST);
       }
       if ( (fgmres_data-> z) != NULL )
       {
          for (i = 0; i < (fgmres_data -> k_dim+1); i++)
             hypre_ParKrylovDestroyVector((fgmres_data -> z)[i]);
-         hypre_TFree( fgmres_data -> z );
+         hypre_TFree( fgmres_data -> z , HYPRE_MEMORY_HOST);
       }
-      hypre_TFree( fgmres_data );
+      hypre_TFree( fgmres_data , HYPRE_MEMORY_HOST);
    }
    return(ierr);
 }
@@ -157,7 +157,7 @@ int hypre_FGMRESSetup( void *fgmres_vdata, void *A, void *b, void *x )
    if ((fgmres_data -> logging) > 0)
    {
       if ((fgmres_data -> norms) == NULL)
-         (fgmres_data -> norms) = hypre_CTAlloc(double, max_iter + 1);
+         (fgmres_data -> norms) = hypre_CTAlloc(double,  max_iter + 1, HYPRE_MEMORY_HOST);
       if ((fgmres_data -> log_file_name) == NULL)
 		  (fgmres_data -> log_file_name) = (char*) "fgmres.out.log";
    }
@@ -199,11 +199,11 @@ int hypre_FGMRESSolve(void  *fgmres_vdata, void  *A, void  *b, void  *x)
    /* initialize work arrays */
 
    if (logging > 0) norms = (fgmres_data -> norms);
-   rs = hypre_CTAlloc(double, k_dim+1); 
-   c  = hypre_CTAlloc(double, k_dim); 
-   s  = hypre_CTAlloc(double, k_dim); 
-   hh = hypre_CTAlloc(double*, k_dim+1); 
-   for (i=0; i < k_dim+1; i++) hh[i] = hypre_CTAlloc(double, k_dim); 
+   rs = hypre_CTAlloc(double,  k_dim+1, HYPRE_MEMORY_HOST); 
+   c  = hypre_CTAlloc(double,  k_dim, HYPRE_MEMORY_HOST); 
+   s  = hypre_CTAlloc(double,  k_dim, HYPRE_MEMORY_HOST); 
+   hh = hypre_CTAlloc(double*,  k_dim+1, HYPRE_MEMORY_HOST); 
+   for (i=0; i < k_dim+1; i++) hh[i] = hypre_CTAlloc(double,  k_dim, HYPRE_MEMORY_HOST); 
    hypre_ParKrylovCopyVector(b,p[0]);
 
    /* compute initial residual */
@@ -356,12 +356,12 @@ int hypre_FGMRESSolve(void  *fgmres_vdata, void  *A, void  *b, void  *x)
 
    if (iter >= max_iter && r_norm > epsilon) ierr = 1;
 
-   hypre_TFree(c); 
-   hypre_TFree(s); 
-   hypre_TFree(rs);
+   hypre_TFree(c, HYPRE_MEMORY_HOST); 
+   hypre_TFree(s, HYPRE_MEMORY_HOST); 
+   hypre_TFree(rs, HYPRE_MEMORY_HOST);
  
-   for (i=0; i < k_dim+1; i++) hypre_TFree(hh[i]);
-   hypre_TFree(hh); 
+   for (i=0; i < k_dim+1; i++) hypre_TFree(hh[i], HYPRE_MEMORY_HOST);
+   hypre_TFree(hh, HYPRE_MEMORY_HOST); 
 
    return ierr;
 }

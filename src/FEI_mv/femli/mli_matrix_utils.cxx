@@ -233,7 +233,7 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
    }
    HYPRE_ParCSRMatrixGetRowPartitioning((HYPRE_ParCSRMatrix) A, &partition);
    startRow   = partition[mypid];
-   hypre_TFree( partition );
+   hypre_TFree( partition , HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------
     * fetch matrix communication information (off_nrows)
@@ -247,7 +247,7 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
    nRecvs     = hypre_ParCSRCommPkgNumRecvs(commPkg);
    recvProcs  = hypre_ParCSRCommPkgRecvProcs(commPkg);
    recvStarts = hypre_ParCSRCommPkgRecvVecStarts(commPkg);
-   requests = hypre_CTAlloc( MPI_Request, nRecvs+nSends );
+   requests = hypre_CTAlloc( MPI_Request, nRecvs+nSends , HYPRE_MEMORY_HOST);
    totalSends  = sendStarts[nSends];
    totalRecvs  = recvStarts[nRecvs];
    (*offNRows) = totalRecvs;
@@ -267,7 +267,7 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
       MPI_Irecv(&((*offRowLengths)[offset]),length,MPI_INT,proc,13278,comm, 
                 &requests[reqNum++]);
    }
-   if ( totalSends > 0 ) isendBuf = hypre_CTAlloc( int, totalSends );
+   if ( totalSends > 0 ) isendBuf = hypre_CTAlloc( int, totalSends , HYPRE_MEMORY_HOST);
    index = totalSendNnz = 0;
    for (i = 0; i < nSends; i++)
    {
@@ -286,10 +286,10 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
       MPI_Isend(&isendBuf[offset], length, MPI_INT, proc, 13278, comm, 
                 &requests[reqNum++]);
    }
-   status = hypre_CTAlloc(MPI_Status, reqNum);
+   status = hypre_CTAlloc(MPI_Status, reqNum, HYPRE_MEMORY_HOST);
    MPI_Waitall( reqNum, requests, status );
-   hypre_TFree( status );
-   if ( totalSends > 0 ) hypre_TFree( isendBuf );
+   hypre_TFree( status , HYPRE_MEMORY_HOST);
+   if ( totalSends > 0 ) hypre_TFree( isendBuf , HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------
     * construct row indices 
@@ -306,7 +306,7 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
       MPI_Irecv(&(rowIndices[offset]), length, MPI_INT, proc, 13279, comm, 
                 &requests[reqNum++]);
    }
-   if ( totalSends > 0 ) isendBuf = hypre_CTAlloc( int, totalSends );
+   if ( totalSends > 0 ) isendBuf = hypre_CTAlloc( int, totalSends , HYPRE_MEMORY_HOST);
    index = 0;
    for (i = 0; i < nSends; i++)
    {
@@ -322,10 +322,10 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
       MPI_Isend(&isendBuf[offset], length, MPI_INT, proc, 13279, comm, 
                 &requests[reqNum++]);
    }
-   status = hypre_CTAlloc(MPI_Status, reqNum);
+   status = hypre_CTAlloc(MPI_Status, reqNum, HYPRE_MEMORY_HOST);
    MPI_Waitall( reqNum, requests, status );
-   hypre_TFree( status );
-   if ( totalSends > 0 ) hypre_TFree( isendBuf );
+   hypre_TFree( status , HYPRE_MEMORY_HOST);
+   if ( totalSends > 0 ) hypre_TFree( isendBuf , HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------
     * construct offCols 
@@ -350,7 +350,7 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
                 &requests[reqNum++]);
       totalRecvNnz += curNnz;
    }
-   if ( totalSendNnz > 0 ) isendBuf = hypre_CTAlloc( int, totalSendNnz );
+   if ( totalSendNnz > 0 ) isendBuf = hypre_CTAlloc( int, totalSendNnz , HYPRE_MEMORY_HOST);
    index = totalSendNnz = 0;
    for (i = 0; i < nSends; i++)
    {
@@ -371,10 +371,10 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
       MPI_Isend(&isendBuf[base], length, MPI_INT, proc, 13280, comm, 
                 &requests[reqNum++]);
    }
-   status = hypre_CTAlloc(MPI_Status, reqNum);
+   status = hypre_CTAlloc(MPI_Status, reqNum, HYPRE_MEMORY_HOST);
    MPI_Waitall( reqNum, requests, status );
-   hypre_TFree( status );
-   if ( totalSendNnz > 0 ) hypre_TFree( isendBuf );
+   hypre_TFree( status , HYPRE_MEMORY_HOST);
+   if ( totalSendNnz > 0 ) hypre_TFree( isendBuf , HYPRE_MEMORY_HOST);
 
    /*-----------------------------------------------------------------
     * construct offVals 
@@ -392,7 +392,7 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
                 &requests[reqNum++]);
       totalRecvNnz += curNnz;
    }
-   if ( totalSendNnz > 0 ) dsendBuf = hypre_CTAlloc( double, totalSendNnz );
+   if ( totalSendNnz > 0 ) dsendBuf = hypre_CTAlloc( double, totalSendNnz , HYPRE_MEMORY_HOST);
    index = totalSendNnz = 0;
    for (i = 0; i < nSends; i++)
    {
@@ -413,12 +413,12 @@ int MLI_Matrix_GetOverlappedMatrix(MLI_Matrix *mli_mat, int *offNRows,
       MPI_Isend(&dsendBuf[base], length, MPI_DOUBLE, proc, 13281, comm, 
                 &requests[reqNum++]);
    }
-   status = hypre_CTAlloc(MPI_Status, reqNum);
+   status = hypre_CTAlloc(MPI_Status, reqNum, HYPRE_MEMORY_HOST);
    MPI_Waitall( reqNum, requests, status );
-   hypre_TFree( status );
-   if ( totalSendNnz > 0 ) hypre_TFree( dsendBuf );
+   hypre_TFree( status , HYPRE_MEMORY_HOST);
+   if ( totalSendNnz > 0 ) hypre_TFree( dsendBuf , HYPRE_MEMORY_HOST);
 
-   if ( nSends+nRecvs > 0 ) hypre_TFree( requests );
+   if ( nSends+nRecvs > 0 ) hypre_TFree( requests , HYPRE_MEMORY_HOST);
 
    (*offCols) = cols;
    (*offVals) = vals;
