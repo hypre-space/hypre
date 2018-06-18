@@ -31,9 +31,9 @@ HYPRE_SStructStencilCreate( HYPRE_Int             ndim,
    hypre_StructStencil   *sstencil;
    HYPRE_Int             *vars;
 
-   stencil = hypre_TAlloc(hypre_SStructStencil, 1);
+   stencil = hypre_TAlloc(hypre_SStructStencil,  1, HYPRE_MEMORY_HOST);
    HYPRE_StructStencilCreate(ndim, size, &sstencil);
-   vars = hypre_CTAlloc(HYPRE_Int, hypre_StructStencilSize(sstencil));
+   vars = hypre_CTAlloc(HYPRE_Int,  hypre_StructStencilSize(sstencil), HYPRE_MEMORY_HOST);
 
    hypre_SStructStencilSStencil(stencil) = sstencil;
    hypre_SStructStencilVars(stencil)     = vars;
@@ -56,8 +56,8 @@ HYPRE_SStructStencilDestroy( HYPRE_SStructStencil stencil )
       if (hypre_SStructStencilRefCount(stencil) == 0)
       {
          HYPRE_StructStencilDestroy(hypre_SStructStencilSStencil(stencil));
-         hypre_TFree(hypre_SStructStencilVars(stencil));
-         hypre_TFree(stencil);
+         hypre_TFree(hypre_SStructStencilVars(stencil), HYPRE_MEMORY_HOST);
+         hypre_TFree(stencil, HYPRE_MEMORY_HOST);
       }
    }
 

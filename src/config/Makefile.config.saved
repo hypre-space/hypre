@@ -1,0 +1,164 @@
+#BHEADER**********************************************************************
+# Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
+# Produced at the Lawrence Livermore National Laboratory.
+# This file is part of HYPRE.  See file COPYRIGHT for details.
+#
+# HYPRE is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License (as published by the Free
+# Software Foundation) version 2.1 dated February 1999.
+#
+# $Revision$
+#EHEADER**********************************************************************
+
+###############################################################################
+##  All configurable variables are defined in the file named Makefile.config.in
+##  When Autoconf is run, it will create a file named Makefile.config which
+##  will have all of the configurable variables replaced with their values.
+###############################################################################
+
+
+
+srcdir = .
+top_srcdir = ..
+prefix = /g/g92/li50/workspace/hypre/src/hypre
+exec_prefix = ${prefix}
+
+
+
+HYPRE_RELEASE_NAME    = hypre
+HYPRE_RELEASE_VERSION = 2.13.0
+HYPRE_RELEASE_DATE    = 2017/10/20
+HYPRE_RELEASE_TIME    = 00:00:00
+HYPRE_RELEASE_BUGS    = hypre-support@llnl.gov
+
+HYPRE_SRC_TOP_DIR = /g/g92/li50/workspace/hypre/src
+HYPRE_BUILD_DIR   = /g/g92/li50/workspace/hypre/src/hypre
+
+HYPRE_INSTALL_DIR = NONE
+HYPRE_LIB_INSTALL = ${exec_prefix}/lib
+HYPRE_INC_INSTALL = ${prefix}/include
+
+HYPRE_LIB_SUFFIX = .a
+
+.SUFFIXES:
+.SUFFIXES: .o .f .c .C .cxx .cc .cu
+
+.f.o:
+	$(FC) $(FFLAGS) -c $< 
+.c.o:
+	$(CC) $(CFLAGS) -c $< 
+.C.o:
+	$(CXX) $(CXXFLAGS) -c $<
+.cxx.o:
+	$(CXX) $(CXXFLAGS) -c $<
+.cc.o:
+	$(CXX) $(CXXFLAGS) -c $<
+.cu.o:
+	$(NVCC) $(NVCCFLAGS) -c $<
+
+FC       = mpif77
+FFLAGS   = -O2 -g $(FC_COMPILE_FLAGS)
+
+CC       = mpixlc-gpu
+CFLAGS   = -O -O3 -DHYPRE_USE_OMP45 -DHAVE_CONFIG_H $(C_COMPILE_FLAGS)
+
+CXX      = mpixlC-gpu
+CXXFLAGS = -O -O3 -DHYPRE_USE_OMP45 -DHAVE_CONFIG_H $(CXX_COMPILE_FLAGS)
+
+NVCC 	  = nvcc
+NVCCFLAGS = 
+NVCCLIBS  = 
+
+LINK_FC  = mpif77
+LINK_CC  = mpixlc-gpu
+LINK_CXX = mpixlC-gpu
+
+BUILD_FC_SHARED     = 
+BUILD_CC_SHARED     = 
+BUILD_CXX_SHARED    = 
+SHARED_COMPILE_FLAG = 
+SHARED_BUILD_FLAG   = 
+SHARED_SET_SONAME   = 
+SHARED_OPTIONS      = 
+
+BUILD_PYTHON = 0
+PYTHON       = 
+
+BUILD_JAVA = 0
+
+AR     = ar -rcu
+RANLIB = ranlib
+
+LDFLAGS = 
+LIBS    =    -lstdc++ -lm     
+FLIBS   = 
+
+INCLUDES =   
+
+##################################################################
+##  LAPACK Library Flags 
+##################################################################
+LAPACKLIBS      = 
+LAPACKLIBDIRS   = 
+
+##################################################################
+##  BLAS Library Flags 
+##################################################################
+BLASLIBS        = 
+BLASLIBDIRS     = 
+
+##################################################################
+##  MPI options
+##################################################################
+MPIINCLUDE = 
+MPILIBDIRS = 
+MPILIBS    =  
+MPIFLAGS   = 
+
+##################################################################
+##  NVCC options
+##################################################################
+HYPRE_NVCC_MAKEFILE = Makefile.empty
+
+##################################################################
+##  Caliper options
+##################################################################
+CALIPER_INCLUDE = 
+CALIPER_LIBS    = 
+
+##################################################################
+##  SuperLU options
+##################################################################
+SUPERLU_INCLUDE = 
+SUPERLU_LIBS    = 
+
+##################################################################
+##  DsuperLU options
+##################################################################
+DSUPERLU_INCLUDE = 
+DSUPERLU_LIBS    = 
+
+##################################################################
+##  FEI options
+##################################################################
+HYPRE_FEI_SRC_DIR       = /g/g92/li50/workspace/hypre/src/FEI_mv
+HYPRE_FEI_BASE_DIR      = /g/g92/li50/workspace/hypre/src/FEI_mv/fei-base
+HYPRE_FEI_SUBDIRS       = fei-hypre
+HYPRE_FEI_HYPRE_FILES   = /g/g92/li50/workspace/hypre/src/FEI_mv/fei-hypre/*.o
+HYPRE_FEI_FEMLI_FILES   = 
+
+##################################################################
+##  RAJA options
+##################################################################
+HYPRE_RAJA_LIB_DIR      = 
+HYPRE_RAJA_INCLUDE      = 
+HYPRE_RAJA_LIB          = 
+
+##################################################################
+##  kokkos options
+##################################################################
+HYPRE_KOKKOS_SRC_DIR    = 
+HYPRE_KOKKOS_LIB_DIR    = 
+HYPRE_KOKKOS_INCLUDE    = 
+HYPRE_KOKKOS_LIB        = 
+

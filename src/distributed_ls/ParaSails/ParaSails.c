@@ -71,7 +71,7 @@ HYPRE_Int FindNumReplies(MPI_Comm comm, HYPRE_Int *replies_list)
     hypre_MPI_Comm_rank(comm, &mype);
     hypre_MPI_Comm_size(comm, &npes);
 
-    replies_list2 = (HYPRE_Int *) malloc(npes * sizeof(HYPRE_Int));
+    replies_list2 = hypre_TAlloc(HYPRE_Int, npes , HYPRE_MEMORY_HOST);
 
     hypre_MPI_Allreduce(replies_list, replies_list2, npes, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
     num_replies = replies_list2[mype];
@@ -165,7 +165,7 @@ static void ReceiveRequest(MPI_Comm comm, HYPRE_Int *source, HYPRE_Int tag, HYPR
     {
         free(*buffer);
         *buflen = *count;
-        *buffer = (HYPRE_Int *) malloc(*buflen * sizeof(HYPRE_Int));
+        *buffer = hypre_TAlloc(HYPRE_Int, *buflen , HYPRE_MEMORY_HOST);
     }
 
     hypre_MPI_Recv(*buffer, *count, HYPRE_MPI_INT, *source, tag, comm, &status);
@@ -346,7 +346,7 @@ static void SendReplyStoredRows(MPI_Comm comm, Numbering *numb,
         *indbufp++ = len;
         /* memcpy(indbufp, ind, sizeof(HYPRE_Int)*len); */
         NumberingLocalToGlobal(numb, len, ind, indbufp);
-        memcpy(valbufp, val, sizeof(HYPRE_Real)*len);
+        hypre_TMemcpy(valbufp,  val, HYPRE_Real, len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
         indbufp += len;
         valbufp += len;
     }
@@ -434,8 +434,8 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
     Mem *mem;
 
     hypre_MPI_Comm_size(comm, &npes);
-    requests = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
-    statuses = (hypre_MPI_Status *) malloc(npes * sizeof(hypre_MPI_Status));
+    requests = hypre_TAlloc(hypre_MPI_Request, npes , HYPRE_MEMORY_HOST);
+    statuses = hypre_TAlloc(hypre_MPI_Status, npes , HYPRE_MEMORY_HOST);
 
     /* Merged pattern of pruned rows on this processor */
 
@@ -450,7 +450,7 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
     /* Loop to construct pattern of pruned rows on this processor */
 
     bufferlen = 10; /* size will grow if get a long msg */
-    buffer = (HYPRE_Int *) malloc(bufferlen * sizeof(HYPRE_Int));
+    buffer = hypre_TAlloc(HYPRE_Int, bufferlen , HYPRE_MEMORY_HOST);
 
     for (level=1; level<=num_levels; level++)
     {
@@ -462,7 +462,7 @@ static void ExchangePrunedRows(MPI_Comm comm, Matrix *M, Numbering *numb,
         /* Convert local row numbers to global row numbers */
         NumberingLocalToGlobal(numb, len, ind, ind);
 
-        replies_list = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
+        replies_list = hypre_CTAlloc(HYPRE_Int, npes, HYPRE_MEMORY_HOST);
 
         SendRequests(comm, ROW_PRUNED_REQ_TAG, M, len, ind, &num_requests, replies_list);
 
@@ -522,8 +522,8 @@ static void ExchangePrunedRowsExt(MPI_Comm comm, Matrix *M, Numbering *numb,
     Mem *mem;
 
     hypre_MPI_Comm_size(comm, &npes);
-    requests = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
-    statuses = (hypre_MPI_Status *) malloc(npes * sizeof(hypre_MPI_Status));
+    requests = hypre_TAlloc(hypre_MPI_Request, npes , HYPRE_MEMORY_HOST);
+    statuses = hypre_TAlloc(hypre_MPI_Status, npes , HYPRE_MEMORY_HOST);
 
     /* Merged pattern of pruned rows on this processor */
 
@@ -538,7 +538,7 @@ static void ExchangePrunedRowsExt(MPI_Comm comm, Matrix *M, Numbering *numb,
     /* Loop to construct pattern of pruned rows on this processor */
 
     bufferlen = 10; /* size will grow if get a long msg */
-    buffer = (HYPRE_Int *) malloc(bufferlen * sizeof(HYPRE_Int));
+    buffer = hypre_TAlloc(HYPRE_Int, bufferlen , HYPRE_MEMORY_HOST);
 
     for (level=0; level<=num_levels; level++)  /* MUST DO THIS AT LEAST ONCE */
     {
@@ -550,7 +550,7 @@ static void ExchangePrunedRowsExt(MPI_Comm comm, Matrix *M, Numbering *numb,
         /* Convert local row numbers to global row numbers */
         NumberingLocalToGlobal(numb, len, ind, ind);
 
-        replies_list = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
+        replies_list = hypre_CTAlloc(HYPRE_Int, npes, HYPRE_MEMORY_HOST);
 
         SendRequests(comm, ROW_PRUNED_REQ_TAG, M, len, ind, &num_requests, replies_list);
 
@@ -610,8 +610,8 @@ static void ExchangePrunedRowsExt2(MPI_Comm comm, Matrix *M, Numbering *numb,
     Mem *mem;
 
     hypre_MPI_Comm_size(comm, &npes);
-    requests = (hypre_MPI_Request *) malloc(npes * sizeof(hypre_MPI_Request));
-    statuses = (hypre_MPI_Status *) malloc(npes * sizeof(hypre_MPI_Status));
+    requests = hypre_TAlloc(hypre_MPI_Request, npes , HYPRE_MEMORY_HOST);
+    statuses = hypre_TAlloc(hypre_MPI_Status, npes , HYPRE_MEMORY_HOST);
 
     /* Merged pattern of pruned rows on this processor */
 
@@ -642,7 +642,7 @@ static void ExchangePrunedRowsExt2(MPI_Comm comm, Matrix *M, Numbering *numb,
     /* Now get rows from pruned_rows_global */
 
     bufferlen = 10; /* size will grow if get a long msg */
-    buffer = (HYPRE_Int *) malloc(bufferlen * sizeof(HYPRE_Int));
+    buffer = hypre_TAlloc(HYPRE_Int, bufferlen , HYPRE_MEMORY_HOST);
 
     /* DO THIS ONCE */
     {
@@ -654,7 +654,7 @@ static void ExchangePrunedRowsExt2(MPI_Comm comm, Matrix *M, Numbering *numb,
         /* Convert local row numbers to global row numbers */
         NumberingLocalToGlobal(numb, len, ind, ind);
 
-        replies_list = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
+        replies_list = hypre_CTAlloc(HYPRE_Int, npes, HYPRE_MEMORY_HOST);
 
         SendRequests(comm, ROW_PRUNED_REQ_TAG, M, len, ind, &num_requests, replies_list);
 
@@ -746,7 +746,7 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
     /* Convert local row numbers to global row numbers */
     NumberingLocalToGlobal(numb, len, ind, ind);
 
-    replies_list = (HYPRE_Int *) calloc(npes, sizeof(HYPRE_Int));
+    replies_list = hypre_CTAlloc(HYPRE_Int, npes, HYPRE_MEMORY_HOST);
 
     SendRequests(comm, ROW_STORED_REQ_TAG, A, len, ind, &num_requests, replies_list);
 
@@ -755,12 +755,12 @@ static void ExchangeStoredRows(MPI_Comm comm, Matrix *A, Matrix *M,
 
     if (num_replies)
     {
-        requests = (hypre_MPI_Request *) malloc(num_replies * sizeof(hypre_MPI_Request));
-        statuses = (hypre_MPI_Status *) malloc(num_replies * sizeof(hypre_MPI_Status));
+        requests = hypre_TAlloc(hypre_MPI_Request, num_replies , HYPRE_MEMORY_HOST);
+        statuses = hypre_TAlloc(hypre_MPI_Status, num_replies , HYPRE_MEMORY_HOST);
     }
 
     bufferlen = 10; /* size will grow if get a long msg */
-    buffer = (HYPRE_Int *) malloc(bufferlen * sizeof(HYPRE_Int));
+    buffer = hypre_TAlloc(HYPRE_Int, bufferlen , HYPRE_MEMORY_HOST);
 
     for (i=0; i<num_replies; i++)
     {
@@ -1019,7 +1019,7 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
 #endif
 
     /* Allocate and initialize full length marker array */
-    marker = (HYPRE_Int *) malloc(numb->num_ind * sizeof(HYPRE_Int));
+    marker = hypre_TAlloc(HYPRE_Int, numb->num_ind , HYPRE_MEMORY_HOST);
     for (i=0; i<numb->num_ind; i++)
         marker[i] = -1;
 
@@ -1033,9 +1033,9 @@ static HYPRE_Int ComputeValuesSym(StoredRows *stored_rows, Matrix *mat,
     }
 
 #ifdef ESSL
-    ahat = (HYPRE_Real *) malloc(maxlen*(maxlen+1)/2 * sizeof(HYPRE_Real));
+    ahat = hypre_TAlloc(HYPRE_Real, maxlen*(maxlen+1)/2 , HYPRE_MEMORY_HOST);
 #else
-    ahat = (HYPRE_Real *) malloc(maxlen*maxlen * sizeof(HYPRE_Real));
+    ahat = hypre_TAlloc(HYPRE_Real, maxlen*maxlen , HYPRE_MEMORY_HOST);
 #endif
 
     /* Compute values for row "row" of approximate inverse */
@@ -1207,7 +1207,7 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
 
     HYPRE_Int npat;
     HYPRE_Int pattsize = 1000;
-    HYPRE_Int *patt = (HYPRE_Int *) malloc(pattsize*sizeof(HYPRE_Int));
+    HYPRE_Int *patt = hypre_TAlloc(HYPRE_Int, pattsize, HYPRE_MEMORY_HOST);
 
     HYPRE_Int info;
 
@@ -1221,13 +1221,13 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
     /* Allocate and initialize marker array */
     /* Since numb already knows about the indices of the external rows that
        will be needed, numb_ind is the maximum size of the marker array */
-    marker = (HYPRE_Int *) malloc(numb->num_ind * sizeof(HYPRE_Int));
+    marker = hypre_TAlloc(HYPRE_Int, numb->num_ind , HYPRE_MEMORY_HOST);
     for (i=0; i<numb->num_ind; i++)
         marker[i] = -1;
 
-    bhat = (HYPRE_Real *) malloc(bhat_size * sizeof(HYPRE_Real));
-    ahat = (HYPRE_Real *) malloc(ahat_size * sizeof(HYPRE_Real));
-    work = (HYPRE_Real *) calloc(work_size,  sizeof(HYPRE_Real));
+    bhat = hypre_TAlloc(HYPRE_Real, bhat_size , HYPRE_MEMORY_HOST);
+    ahat = hypre_TAlloc(HYPRE_Real, ahat_size , HYPRE_MEMORY_HOST);
+    work = hypre_CTAlloc(HYPRE_Real, work_size, HYPRE_MEMORY_HOST);
 
     /* Compute values for row "row" of approximate inverse */
     for (row=local_beg_row; row<=mat->end_row; row++)
@@ -1260,7 +1260,7 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
                     if (npat >= pattsize)
                     {
                         pattsize = npat*2;
-                        patt = (HYPRE_Int *) realloc(patt, pattsize*sizeof(HYPRE_Int));
+                        patt = hypre_TReAlloc(patt,HYPRE_Int,  pattsize, HYPRE_MEMORY_HOST);
                     }
                     patt[npat++] = ind2[j];
                 }
@@ -1271,7 +1271,7 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
         {
             free(ahat);
             ahat_size = len*npat;
-            ahat = (HYPRE_Real *) malloc(ahat_size * sizeof(HYPRE_Real));
+            ahat = hypre_TAlloc(HYPRE_Real, ahat_size , HYPRE_MEMORY_HOST);
         }
 
         /* Initialize ahat to zero */
@@ -1300,7 +1300,7 @@ static HYPRE_Int ComputeValuesNonsym(StoredRows *stored_rows, Matrix *mat,
         {
             free(bhat);
             bhat_size = npat;
-            bhat = (HYPRE_Real *) malloc(bhat_size * sizeof(HYPRE_Real));
+            bhat = hypre_TAlloc(HYPRE_Real, bhat_size , HYPRE_MEMORY_HOST);
         }
 
         /* Set the right-hand side, bhat */
@@ -1384,7 +1384,7 @@ static HYPRE_Real SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
        i-th smallest element - buffer will grow if necessary */
     HYPRE_Real *buffer;
     HYPRE_Int buflen = 10;
-    buffer = (HYPRE_Real *) malloc(buflen * sizeof(HYPRE_Real));
+    buffer = hypre_TAlloc(HYPRE_Real, buflen , HYPRE_MEMORY_HOST);
 
     for (row=0; row<=A->end_row - A->beg_row; row++)
     {
@@ -1394,7 +1394,7 @@ static HYPRE_Real SelectThresh(MPI_Comm comm, Matrix *A, DiagScale *diag_scale,
         {
             free(buffer);
             buflen = len;
-            buffer = (HYPRE_Real *) malloc(buflen * sizeof(HYPRE_Real));
+            buffer = hypre_TAlloc(HYPRE_Real, buflen , HYPRE_MEMORY_HOST);
         }
 
         /* Copy the scaled absolute values into a work buffer */
@@ -1438,7 +1438,7 @@ static HYPRE_Real SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
        i-th smallest element - buffer will grow if necessary */
     HYPRE_Real *buffer;
     HYPRE_Int buflen = 10;
-    buffer = (HYPRE_Real *) malloc(buflen * sizeof(HYPRE_Real));
+    buffer = hypre_TAlloc(HYPRE_Real, buflen , HYPRE_MEMORY_HOST);
 
     for (row=0; row<=M->end_row - M->beg_row; row++)
     {
@@ -1448,7 +1448,7 @@ static HYPRE_Real SelectFilter(MPI_Comm comm, Matrix *M, DiagScale *diag_scale,
         {
             free(buffer);
             buflen = len;
-            buffer = (HYPRE_Real *) malloc(buflen * sizeof(HYPRE_Real));
+            buffer = hypre_TAlloc(HYPRE_Real, buflen , HYPRE_MEMORY_HOST);
         }
 
         if (symmetric == 0)
@@ -1532,7 +1532,7 @@ static void Rescale(Matrix *M, StoredRows *stored_rows, HYPRE_Int num_ind)
     HYPRE_Real accum, prod;
 
     /* Allocate full-length workspace */
-    w = (HYPRE_Real *) calloc(num_ind, sizeof(HYPRE_Real));
+    w = hypre_CTAlloc(HYPRE_Real, num_ind, HYPRE_MEMORY_HOST);
 
     /* Loop over rows */
     for (row=0; row<=M->end_row - M->beg_row; row++)
@@ -1597,7 +1597,7 @@ static void Rescale(Matrix *M, StoredRows *stored_rows, HYPRE_Int num_ind)
 
 ParaSails *ParaSailsCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row, HYPRE_Int sym)
 {
-    ParaSails *ps = (ParaSails *) malloc(sizeof(ParaSails));
+    ParaSails *ps = hypre_TAlloc(ParaSails, 1, HYPRE_MEMORY_HOST);
     HYPRE_Int npes;
 
     ps->symmetric          = sym;
@@ -1616,8 +1616,8 @@ ParaSails *ParaSailsCreate(MPI_Comm comm, HYPRE_Int beg_row, HYPRE_Int end_row, 
 
     hypre_MPI_Comm_size(comm, &npes);
 
-    ps->beg_rows = (HYPRE_Int *) malloc(npes * sizeof(HYPRE_Int));
-    ps->end_rows = (HYPRE_Int *) malloc(npes * sizeof(HYPRE_Int));
+    ps->beg_rows = hypre_TAlloc(HYPRE_Int, npes , HYPRE_MEMORY_HOST);
+    ps->end_rows = hypre_TAlloc(HYPRE_Int, npes , HYPRE_MEMORY_HOST);
 
     hypre_MPI_Allgather(&beg_row, 1, HYPRE_MPI_INT, ps->beg_rows, 1, HYPRE_MPI_INT, comm);
     hypre_MPI_Allgather(&end_row, 1, HYPRE_MPI_INT, ps->end_rows, 1, HYPRE_MPI_INT, comm);
@@ -2016,7 +2016,7 @@ void ParaSailsStatsValues(ParaSails *ps, Matrix *A)
 	1, hypre_MPI_REAL, hypre_MPI_MAX, comm);
 
     if (!mype)
-        setup_times = (HYPRE_Real *) malloc(npes * sizeof(HYPRE_Real));
+        setup_times = hypre_TAlloc(HYPRE_Real, npes , HYPRE_MEMORY_HOST);
 
     temp = ps->setup_pattern_time + ps->setup_values_time;
     hypre_MPI_Gather(&temp, 1, hypre_MPI_REAL, setup_times, 1, hypre_MPI_REAL, 0, comm);

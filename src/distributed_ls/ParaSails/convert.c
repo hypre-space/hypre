@@ -49,8 +49,8 @@ HYPRE_Int convert(FILE *infile, FILE *outfile)
     offset = ftell(infile);
 
     /* allocate space for row counts */
-    counts   = (HYPRE_Int *) calloc(M+1, sizeof(HYPRE_Int));
-    pointers = (HYPRE_Int *) malloc((M+1) * sizeof(HYPRE_Int));
+    counts   = hypre_CTAlloc(HYPRE_Int, M+1, HYPRE_MEMORY_HOST);
+    pointers = hypre_TAlloc(HYPRE_Int, (M+1) , HYPRE_MEMORY_HOST);
 
     /* read the entire matrix */
     ret = hypre_fscanf(infile, "%d %d %lf\n", &row, &col, &value);
@@ -64,8 +64,8 @@ HYPRE_Int convert(FILE *infile, FILE *outfile)
     }
 
     /* allocate space for whole matrix */
-    ind = (HYPRE_Int *)    malloc(nnz * sizeof(HYPRE_Int));
-    val = (HYPRE_Real *) malloc(nnz * sizeof(HYPRE_Real));
+    ind = hypre_TAlloc(HYPRE_Int, nnz , HYPRE_MEMORY_HOST);
+    val = hypre_TAlloc(HYPRE_Real, nnz , HYPRE_MEMORY_HOST);
     
     /* set pointer to beginning of each row */
     pointers[1] = 0;

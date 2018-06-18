@@ -103,11 +103,11 @@ hypre_ParCSRMatrixMatMultiVec(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
     * allocate temporary and send buffers and communication handle
     *--------------------------------------------------------------------*/
 
-   x_buf_data = hypre_CTAlloc(HYPRE_Complex, num_vec_sends*send_leng);
+   x_buf_data = hypre_CTAlloc(HYPRE_Complex,  num_vec_sends*send_leng, HYPRE_MEMORY_HOST);
    x_tmp = hypre_SeqMultivectorCreate( num_cols_offd, num_vectors );
    hypre_SeqMultivectorInitialize(x_tmp);
    x_tmp_data = hypre_MultivectorData(x_tmp);
-   comm_handle = hypre_CTAlloc(hypre_ParCSRCommMultiHandle, 1);
+   comm_handle = hypre_CTAlloc(hypre_ParCSRCommMultiHandle,  1, HYPRE_MEMORY_HOST);
 
    /*---------------------------------------------------------------------
     * put the send data into the send buffer
@@ -142,14 +142,14 @@ hypre_ParCSRMatrixMatMultiVec(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
    
    hypre_ParCSRCommMultiHandleDestroy(comm_handle);
    comm_handle = NULL;
-   hypre_TFree(comm_handle);
+   hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
    if (num_cols_offd)
       hypre_CSRMatrixMultiMatvec(alpha, offd, x_tmp, 1.0, y_local);    
 
    hypre_SeqMultivectorDestroy(x_tmp);
    x_tmp = NULL;
-   hypre_TFree(x_buf_data);
+   hypre_TFree(x_buf_data, HYPRE_MEMORY_HOST);
   
    return ierr;
 }
@@ -229,11 +229,11 @@ hypre_ParCSRMatrixMultiMatVecT(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
     * allocate temporary and send buffers and communication handle
     *--------------------------------------------------------------------*/
 
-   y_buf_data = hypre_CTAlloc(HYPRE_Complex, num_vec_sends*send_leng);
+   y_buf_data = hypre_CTAlloc(HYPRE_Complex,  num_vec_sends*send_leng, HYPRE_MEMORY_HOST);
    y_tmp = hypre_SeqMultivectorCreate( num_cols_offd, num_vectors );
    hypre_SeqMultivectorInitialize(y_tmp);
    y_tmp_data = hypre_MultivectorData(y_tmp);
-   comm_handle = hypre_CTAlloc(hypre_ParCSRCommMultiHandle, 1);
+   comm_handle = hypre_CTAlloc(hypre_ParCSRCommMultiHandle,  1, HYPRE_MEMORY_HOST);
    
    /*---------------------------------------------------------------------
     * put the send data into the send buffer
@@ -268,14 +268,14 @@ hypre_ParCSRMatrixMultiMatVecT(HYPRE_Complex alpha, hypre_ParCSRMatrix *A,
    
    hypre_ParCSRCommMultiHandleDestroy(comm_handle);
    comm_handle = NULL;
-   hypre_TFree(comm_handle);
+   hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
    if (num_cols_offd)
       hypre_CSRMatrixMultiMatvecT(alpha, offd, y_tmp, 1.0, y_local);    
 
    hypre_SeqMultivectorDestroy(y_tmp);
    y_tmp = NULL;
-   hypre_TFree(y_buf_data);
+   hypre_TFree(y_buf_data, HYPRE_MEMORY_HOST);
   
    return ierr;
 }

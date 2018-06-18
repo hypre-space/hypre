@@ -165,7 +165,7 @@ hypre_MatTCommPkgCreate_core (
    hypre_MPI_Comm_size(comm, &num_procs);  
    hypre_MPI_Comm_rank(comm, &my_id);
 
-   info = hypre_CTAlloc(HYPRE_Int, num_procs);
+   info = hypre_CTAlloc(HYPRE_Int,  num_procs, HYPRE_MEMORY_HOST);
 
 /* ----------------------------------------------------------------------
  * determine which processors to receive from (set proc_mark) and num_recvs,
@@ -236,12 +236,12 @@ hypre_MatTCommPkgCreate_core (
  * indices of elements (in this order)
  * ---------------------------------------------------------------------*/
 
-   displs = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   displs = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
    displs[0] = 0;
    for (i=1; i < num_procs+1; i++)
 	displs[i] = displs[i-1]+info[i-1]; 
-   recv_buf = hypre_CTAlloc(HYPRE_Int, displs[num_procs]); 
-   tmp = hypre_CTAlloc(HYPRE_Int, local_info);
+   recv_buf = hypre_CTAlloc(HYPRE_Int,  displs[num_procs], HYPRE_MEMORY_HOST); 
+   tmp = hypre_CTAlloc(HYPRE_Int,  local_info, HYPRE_MEMORY_HOST);
 
    j = 0;
    for (i=0; i < num_procs; i++) {
@@ -284,10 +284,10 @@ hypre_MatTCommPkgCreate_core (
    num_sends = num_procs;   /* may turn out to be less, but we can't know yet */
    num_elmts = (num_procs-1)*num_rows_diag;
    /* ... a crude upper bound; should try to do better even if more comm required */
-   send_procs = hypre_CTAlloc(HYPRE_Int, num_sends);
-   send_map_starts = hypre_CTAlloc(HYPRE_Int, num_sends+1);
-   send_map_elmts = hypre_CTAlloc(HYPRE_Int, num_elmts);
-   row_marker = hypre_CTAlloc(HYPRE_Int,num_rows_diag);
+   send_procs = hypre_CTAlloc(HYPRE_Int,  num_sends, HYPRE_MEMORY_HOST);
+   send_map_starts = hypre_CTAlloc(HYPRE_Int,  num_sends+1, HYPRE_MEMORY_HOST);
+   send_map_elmts = hypre_CTAlloc(HYPRE_Int,  num_elmts, HYPRE_MEMORY_HOST);
+   row_marker = hypre_CTAlloc(HYPRE_Int, num_rows_diag, HYPRE_MEMORY_HOST);
  
    index = 0;
    index2 = 0; 
@@ -370,8 +370,8 @@ hypre_MatTCommPkgCreate_core (
    num_sends = index;  /* no. of proc. rows will be sent to */
 
 /* Compute receive arrays recv_procs, recv_vec_starts ... */
-   recv_procs = hypre_CTAlloc(HYPRE_Int, num_recvs);
-   recv_vec_starts = hypre_CTAlloc(HYPRE_Int, num_recvs+1);
+   recv_procs = hypre_CTAlloc(HYPRE_Int,  num_recvs, HYPRE_MEMORY_HOST);
+   recv_vec_starts = hypre_CTAlloc(HYPRE_Int,  num_recvs+1, HYPRE_MEMORY_HOST);
    j2 = 0;
    for (i=0; i < num_procs; i++) {
       if ( i!=my_id ) { recv_procs[j2] = i; j2++; };
@@ -395,8 +395,8 @@ hypre_MatTCommPkgCreate_core (
      may be much slower than Allgather or may be a bit faster depending on
      implementations
 */
-   send_buf = hypre_CTAlloc( HYPRE_Int, 3*num_sends );
-   all_num_sends3 = hypre_CTAlloc( HYPRE_Int, num_procs );
+   send_buf = hypre_CTAlloc( HYPRE_Int,  3*num_sends , HYPRE_MEMORY_HOST);
+   all_num_sends3 = hypre_CTAlloc( HYPRE_Int,  num_procs , HYPRE_MEMORY_HOST);
 
    /* scatter-gather num_sends, to set up the size for the main comm. step */
    i = 3*num_sends;
@@ -405,7 +405,7 @@ hypre_MatTCommPkgCreate_core (
    for ( p=0; p<num_procs; ++p ) {
       displs[p+1] = displs[p] + all_num_sends3[p];
    };
-   recv_sz_buf = hypre_CTAlloc( HYPRE_Int, displs[num_procs] );
+   recv_sz_buf = hypre_CTAlloc( HYPRE_Int,  displs[num_procs] , HYPRE_MEMORY_HOST);
    
    /* scatter-gather size of row info to send, and proc. to send to */
    index = 0;
@@ -452,14 +452,14 @@ hypre_MatTCommPkgCreate_core (
           my_id, num_recvs, recv_sz_buf[0], recv_sz_buf[1], recv_sz_buf[2] );
 #endif
 
-   hypre_TFree(send_buf);
-   hypre_TFree(all_num_sends3);
-   hypre_TFree(tmp);
-   hypre_TFree(recv_buf);
-   hypre_TFree(displs);
-   hypre_TFree(info);
-   hypre_TFree(recv_sz_buf);
-   hypre_TFree(row_marker);
+   hypre_TFree(send_buf, HYPRE_MEMORY_HOST);
+   hypre_TFree(all_num_sends3, HYPRE_MEMORY_HOST);
+   hypre_TFree(tmp, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
+   hypre_TFree(displs, HYPRE_MEMORY_HOST);
+   hypre_TFree(info, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_sz_buf, HYPRE_MEMORY_HOST);
+   hypre_TFree(row_marker, HYPRE_MEMORY_HOST);
 
 
    /* finish up with the hand-coded call-by-reference... */
@@ -523,7 +523,7 @@ hypre_MatTCommPkgCreate ( hypre_ParCSRMatrix *A)
       &send_map_elmts
       );
 
-   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg, 1);
+   comm_pkg = hypre_CTAlloc(hypre_ParCSRCommPkg,  1, HYPRE_MEMORY_HOST);
 
    hypre_ParCSRCommPkgComm(comm_pkg) = comm;
 

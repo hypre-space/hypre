@@ -39,14 +39,15 @@
 #include "_hypre_utilities.h"
 
 #if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
-__managed__ __device__
+__managed__ __device__  static HYPRE_Int Seed = 13579;
+#else
+static HYPRE_Int Seed = 13579;
 #endif
 
 /*-------------------------------------------------------------------------------
  * Static global variable: Seed
  * ``... all initial seeds between 1 and 2147483646 (2^31-2) are equally valid''
  *-------------------------------------------------------------------------------*/
-static HYPRE_Int Seed = 13579;
 
 #define a  16807      /* 7^5 */
 #define m  2147483647 /* 2*31 - 1 */
@@ -84,7 +85,6 @@ HYPRE_CUDA_GLOBAL
 HYPRE_Int  hypre_RandI()
 {
    HYPRE_Int  low, high, test;
-
    high = Seed / q;
    low = Seed % q;
    test = a * low - r * high;
@@ -110,6 +110,6 @@ HYPRE_Int  hypre_RandI()
 HYPRE_CUDA_GLOBAL
 HYPRE_Real  hypre_Rand()
 {
-   return ((HYPRE_Real)(hypre_RandI()) / m);
+  return ((HYPRE_Real)(hypre_RandI()) / m);
 }
 

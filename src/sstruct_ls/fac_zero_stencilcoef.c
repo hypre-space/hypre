@@ -171,17 +171,17 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                                                                            stencil_shape);
                            hypre_BoxGetSize(shift_ibox, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(ac_ptr)
                            hypre_BoxLoop1Begin(ndim, loop_size,
                                                ac_dbox, hypre_BoxIMin(shift_ibox),
                                                stride, iac);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                           hypre_BoxLoop1For(iac)
                            {
                               ac_ptr[iac] = 0.0;
                            }
                            hypre_BoxLoop1End(iac);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
                         }   /* if ( hypre_BoxVolume(shift_ibox) ) */
 
                         hypre_BoxDestroy(shift_ibox);
@@ -192,7 +192,7 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
             }           /* if (stencils != NULL) */
          }              /* for (var2= 0; var2< nvars; var2++) */
 
-         hypre_TFree(boxman_entries);
+         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
       }   /* hypre_ForBoxI  ci */
    }      /* for (var1= 0; var1< nvars; var1++) */
 
@@ -396,17 +396,17 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
 
                         hypre_BoxGetSize(&intersect_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(a_ptr)
                         hypre_BoxLoop1Begin(ndim, loop_size,
                                             a_dbox, hypre_BoxIMin(&intersect_box),
                                             stride, ia);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                        hypre_BoxLoop1For(ia)
                         {
                            a_ptr[ia] = 0.0;
                         }
                         hypre_BoxLoop1End(ia);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
                      }  /* hypre_ForBoxI(fj, intersect_boxes) */
 
@@ -417,7 +417,7 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
             }         /* if (stencils != NULL) */
          }            /* for (var2= 0; var2< nvars; var2++) */
 
-         hypre_TFree(boxman_entries);
+         hypre_TFree(boxman_entries, HYPRE_MEMORY_HOST);
       }  /* hypre_ForBoxI(fi, fgrid_boxes) */
    }     /* for (var1= 0; var1< nvars; var1++) */
 

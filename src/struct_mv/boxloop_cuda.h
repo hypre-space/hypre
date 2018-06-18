@@ -25,11 +25,9 @@
 
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <omp.h>
 
-struct cuda_traversal {HYPRE_Int cuda;};
-struct omp_traversal  {HYPRE_Int omp;};
-#define hypre_exec_policy cuda_traversal()
-#define HYPER_LAMBDA [=] __device__
+#define HYPRE_LAMBDA [=] __host__  __device__
 
 typedef struct hypre_Boxloop_struct
 {
@@ -39,23 +37,27 @@ typedef struct hypre_Boxloop_struct
 	HYPRE_Int bsize0,bsize1,bsize2;
 } hypre_Boxloop;
 
-#define AxCheckError(err) CheckError(err, __FUNCTION__, __LINE__)
-inline void CheckError(cudaError_t const err, char const* const fun, const HYPRE_Int line)
-{
-    if (err)
-    {
-        printf("CUDA Error Code[%d]: %s\n%s() Line:%d\n", err, cudaGetErrorString(err), fun, line);
-    }
-}
-#define BLOCKSIZE 128
+#define BLOCKSIZE 512
+#define WARP_SIZE 32
+#define BLOCK_SIZE 512
 
+#if 0
+#define hypre_fence()
+/*printf("\n hypre_newBoxLoop in %s(%d) function %s\n",__FILE__,__LINE__,__FUNCTION__);*/
+#else
 #define hypre_fence() \
+{		      \
   cudaError err = cudaGetLastError();		\
-if ( cudaSuccess != err )\
-{\
-   printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__);\
-}									\
-AxCheckError(cudaDeviceSynchronize());
+  if ( cudaSuccess != err )			\
+  {									\
+    printf("\n ERROR hypre_newBoxLoop: %s in %s(%d) function %s\n",cudaGetErrorString(err),__FILE__,__LINE__,__FUNCTION__); \
+    HYPRE_Int *p = NULL; *p = 1;\
+  }									\
+  hypre_CheckErrorDevice(cudaDeviceSynchronize());				\
+} 
+#endif
+
+#define hypre_reduce_policy  cuda_reduce<BLOCKSIZE>
 
 extern "C++" {
 template <typename LOOP_BODY>
@@ -67,105 +69,68 @@ __global__ void forall_kernel(LOOP_BODY loop_body, HYPRE_Int length)
 }
 
 template<typename LOOP_BODY>
-void BoxLoopforall (cuda_traversal, HYPRE_Int length, LOOP_BODY loop_body)
-{	
-	size_t const blockSize = 128;
-	size_t gridSize  = (length + blockSize - 1) / blockSize;
-	if (gridSize == 0) gridSize = 1;
-	
-	//hypre_printf("length= %d, blocksize = %d, gridsize = %d\n",length,blockSize,gridSize);
-	forall_kernel<<<gridSize, blockSize>>>(loop_body,length);
-}
-
-template<typename LOOP_BODY>
-void BoxLoopforall (omp_traversal, HYPRE_Int length, LOOP_BODY loop_body)
+void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
 {
-
-#pragma omp parallel for schedule(static)
-	for (HYPRE_Int idx = 0;idx < length;idx++)
-		loop_body(idx);
-}
-
-#define zypre_BoxLoopIncK(k,box,i)					\
-{       								\
-HYPRE_Int idx = idx_local;						\
-local_idx  = idx % box.lsize0;					\
-idx        = idx / box.lsize0;					\
-i += (local_idx*box.strides0 + box.bstart0) * hypre_boxD##k;		\
-hypre_boxD##k *= hypre_max(0, box.bsize0 + 1);			\
-local_idx  = idx % box.lsize1;					\
-idx        = idx / box.lsize1;					\
-i += (local_idx*box.strides1 + box.bstart1) * hypre_boxD##k;		\
-hypre_boxD##k *= hypre_max(0, box.bsize1 + 1);			\
-local_idx  = idx % box.lsize2;					\
-idx  = idx / box.lsize2;					\
-i += (local_idx*box.strides2 + box.bstart2) * hypre_boxD##k;		\
-hypre_boxD##k *= hypre_max(0, box.bsize2 + 1);			\
-}
-
-
-template<class T>
-__global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
-				hypre_Boxloop box1)
-{
-    HYPRE_Int id = (blockIdx.x * blockDim.x) + threadIdx.x;
-    HYPRE_Int local_idx;
-    HYPRE_Int idx_local = id;
-    HYPRE_Int hypre_boxD1 = 1;
-    HYPRE_Int i1 = 0;
-    //// reducted output
-    __shared__ T shared_cache [BLOCKSIZE];
-    T sum = 1;
-    local_idx  = idx_local % box1.lsize0;
-    idx_local  = idx_local / box1.lsize0;
-    i1 += (local_idx*box1.strides0 + box1.bstart0) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize0 + 1);
-    local_idx  = idx_local % box1.lsize1;
-    idx_local  = idx_local / box1.lsize1;
-    i1 += (local_idx*box1.strides1 + box1.bstart1) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize1 + 1);	
-    local_idx  = idx_local % box1.lsize2;	      
-    idx_local  = idx_local / box1.lsize2;		      
-    i1 += (local_idx*box1.strides2 + box1.bstart2) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize2 + 1);	
-    if (id < hypre__tot)
-      sum = a[i1];
-    *(shared_cache + threadIdx.x) = sum;
-    
-    __syncthreads();
-    
-    ///////// sum of internal cache
-    
-    HYPRE_Int i;    
-    
-    for (i=(BLOCKSIZE /2); i>0 ; i= i/2){
-      if (threadIdx.x < i){
-	*(shared_cache + threadIdx.x) *= *(shared_cache + threadIdx.x + i);
-      }
-      __syncthreads();
+  
+  if (policy == HYPRE_MEMORY_HOST)
+  {
+    HYPRE_Int idx;
+#pragma omp parallel for 
+    for (idx = 0;idx < length;idx++)
+    { 
+      loop_body(idx);
     }
     
-    if ( threadIdx.x == 0){
-      *(b+ blockIdx.x) = shared_cache[0];
-    }
+  }
+  else if (policy == HYPRE_MEMORY_DEVICE)
+  {    
+     size_t const blockSize = BLOCKSIZE;
+     size_t gridSize  = (length + blockSize - 1) / blockSize;
+     if (gridSize == 0) gridSize = 1;	
+     //hypre_printf("length= %d, blocksize = %d, gridsize = %d\n",length,blockSize,gridSize);
+     forall_kernel<<<gridSize, blockSize>>>(loop_body,length);
+  }
+  else if (policy == 2)
+  {
+  }
 }
 }
 
-#define hypre_BoxLoopInit(ndim,loop_size)					\
-	HYPRE_Int hypre__tot = 1;											\
-	for (HYPRE_Int i = 0;i < ndim;i ++)									\
-		hypre__tot *= loop_size[i];
 
+#define hypre_BoxLoopIncK(k,box,hypre__i)					\
+   HYPRE_Int hypre_boxD##k = 1;						\
+   HYPRE_Int hypre__i = 0;							\
+   hypre__i += (hypre_IndexD(local_idx, 0)*box.strides0 + box.bstart0) * hypre_boxD##k;	\
+   hypre_boxD##k *= hypre_max(0, box.bsize0 + 1);			\
+   hypre__i += (hypre_IndexD(local_idx, 1)*box.strides1 + box.bstart1) * hypre_boxD##k; \
+   hypre_boxD##k *= hypre_max(0, box.bsize1 + 1);			\
+   hypre__i += (hypre_IndexD(local_idx, 2)*box.strides2 + box.bstart2) * hypre_boxD##k; \
+   hypre_boxD##k *= hypre_max(0, box.bsize2 + 1);
 
-#define hypre_newBoxLoopDeclare()\
-	HYPRE_Int hypre__i,hypre__j,hypre__k;\
-	HYPRE_Int idx_local = idx;
+#define hypre_newBoxLoopInit(ndim,loop_size)				\
+  HYPRE_Int hypre__tot = 1;						\
+  for (HYPRE_Int hypre_d = 0;hypre_d < ndim;hypre_d ++)			\
+    hypre__tot *= loop_size[hypre_d];
+
+#define hypre_BasicBoxLoopInit(ndim,loop_size)	\
+  HYPRE_Int hypre__tot = 1;						\
+  for (HYPRE_Int hypre_d = 0;hypre_d < ndim;hypre_d ++)			\
+    hypre__tot *= loop_size[hypre_d];					\
+
+#define hypre_newBoxLoopDeclare(box)\
+  hypre_Index local_idx;						\
+  HYPRE_Int idx_local = idx;						\
+  hypre_IndexD(local_idx, 0)  = idx_local % box.lsize0;			\
+  idx_local = idx_local / box.lsize0;					\
+  hypre_IndexD(local_idx, 1)  = idx_local % box.lsize1;			\
+  idx_local = idx_local / box.lsize1;					\
+  hypre_IndexD(local_idx, 2)  = idx_local % box.lsize2;\
 
 #define hypre_newBoxLoop0Begin(ndim, loop_size)				\
 {									\
-    hypre_BoxLoopInit(ndim,loop_size);						\
-    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
-    {
+   hypre_newBoxLoopInit(ndim,loop_size);				\
+   BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
+   {
 
 #define hypre_newBoxLoop0End()					\
     });									\
@@ -173,7 +138,7 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 }
 
 #define hypre_BoxLoopDataDeclareK(k,ndim,loop_size,dbox,start,stride)	\
-	hypre_Boxloop databox##k;											\
+        hypre_Boxloop databox##k;					\
 	databox##k.lsize0 = loop_size[0];				\
 	databox##k.strides0 = stride[0];				\
 	databox##k.bstart0  = start[0] - dbox->imin[0];			\
@@ -210,25 +175,12 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 #define hypre_newBoxLoop1Begin(ndim, loop_size,				\
 			       dbox1, start1, stride1, i1)		\
 {									\
-    hypre_BoxLoopInit(ndim,loop_size);				\
+    hypre_newBoxLoopInit(ndim,loop_size);				\
     hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
-    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
+    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
     {									\
-      hypre_newBoxLoopDeclare();					\
-      HYPRE_Int hypre_boxD1 = 1;					\
-      HYPRE_Int i1 = 0;							\
-      hypre__i  = idx_local % databox1.lsize0;				\
-      idx_local = idx_local / databox1.lsize0;				\
-      i1 += (hypre__i*databox1.strides0 + databox1.bstart0) * hypre_boxD1; \
-      hypre_boxD1 *= hypre_max(0, databox1.bsize0 + 1);			\
-      hypre__j  = idx_local % databox1.lsize1;				\
-      idx_local = idx_local / databox1.lsize1;				\
-      i1 += (hypre__j*databox1.strides1 + databox1.bstart1) * hypre_boxD1; \
-      hypre_boxD1 *= hypre_max(0, databox1.bsize1 + 1);			\
-      hypre__k  = idx_local % databox1.lsize2;				\
-      idx_local = idx_local / databox1.lsize2;				\
-      i1 += (hypre__k*databox1.strides2 + databox1.bstart2) * hypre_boxD1; \
-      hypre_boxD1 *= hypre_max(0, databox1.bsize2 + 1);
+      hypre_newBoxLoopDeclare(databox1);				\
+      hypre_BoxLoopIncK(1,databox1,i1);
       
 #define hypre_newBoxLoop1End(i1)				\
     });									\
@@ -239,32 +191,14 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 			       dbox1, start1, stride1, i1,		\
 			       dbox2, start2, stride2, i2)		\
 {									\
-    hypre_BoxLoopInit(ndim,loop_size);						\
+    hypre_newBoxLoopInit(ndim,loop_size);						\
     hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
     hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);	\
-    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
+    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
     {									\
-        hypre_newBoxLoopDeclare()					\
-        HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1;			\
-	HYPRE_Int i1 = 0, i2 = 0;					\
-	hypre__i  = idx_local % databox1.lsize0;			\
-	idx_local  = idx_local / databox1.lsize0;			\
-	i1 += (hypre__i*databox1.strides0 + databox1.bstart0) * hypre_boxD1; \
-	hypre_boxD1 *= hypre_max(0, databox1.bsize0 + 1);		\
-	i2 += (hypre__i*databox2.strides0 + databox2.bstart0) * hypre_boxD2; \
-	hypre_boxD2 *= hypre_max(0, databox2.bsize0 + 1);		\
-	hypre__j  = idx_local % databox1.lsize1;			\
-	idx_local  = idx_local / databox1.lsize1;			\
-	i1 += (hypre__j*databox1.strides1 + databox1.bstart1) * hypre_boxD1; \
-	hypre_boxD1 *= hypre_max(0, databox1.bsize1 + 1);		\
-	i2 += (hypre__j*databox2.strides1 + databox2.bstart1) * hypre_boxD2; \
-	hypre_boxD2 *= hypre_max(0, databox2.bsize1 + 1);		\
-	hypre__k  = idx_local % databox1.lsize2;			\
-	idx_local  = idx_local / databox1.lsize2;			\
-	i1 += (hypre__k*databox1.strides2 + databox1.bstart2) * hypre_boxD1; \
-	hypre_boxD1 *= hypre_max(0, databox1.bsize2 + 1);		\
-	i2 += (hypre__k*databox2.strides2 + databox2.bstart2) * hypre_boxD2; \
-	hypre_boxD2 *= hypre_max(0, databox2.bsize2 + 1);		\
+       hypre_newBoxLoopDeclare(databox1);				\
+       hypre_BoxLoopIncK(1,databox1,i1);				\
+       hypre_BoxLoopIncK(2,databox2,i2);
 
 #define hypre_newBoxLoop2End(i1, i2)			\
     });							\
@@ -276,39 +210,16 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 			       dbox2, start2, stride2, i2,		\
 			       dbox3, start3, stride3, i3)		\
 {									\
-    hypre_BoxLoopInit(ndim,loop_size);						\
+    hypre_newBoxLoopInit(ndim,loop_size);						\
     hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
     hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);	\
     hypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3);	\
-    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
+    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
     {									\
-	hypre_newBoxLoopDeclare();					\
-	HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1,hypre_boxD3 = 1; \
-	HYPRE_Int i1 = 0, i2 = 0, i3 = 0;				\
-	hypre__i  = idx_local % databox1.lsize0;				\
-	idx_local  = idx_local / databox1.lsize0;				\
-	i1 += (hypre__i*databox1.strides0 + databox1.bstart0) * hypre_boxD1;	\
-	hypre_boxD1 *= hypre_max(0, databox1.bsize0 + 1);			\
-	i2 += (hypre__i*databox2.strides0 + databox2.bstart0) * hypre_boxD2;	\
-	hypre_boxD2 *= hypre_max(0, databox2.bsize0 + 1);			\
-	i3 += (hypre__i*databox3.strides0 + databox3.bstart0) * hypre_boxD3;	\
-	hypre_boxD3 *= hypre_max(0, databox3.bsize0 + 1);			\
-	hypre__j   = idx_local % databox1.lsize1;				\
-	idx_local  = idx_local / databox1.lsize1;				\
-	i1 += (hypre__j*databox1.strides1 + databox1.bstart1) * hypre_boxD1;	\
-	hypre_boxD1 *= hypre_max(0, databox1.bsize1 + 1);			\
-	i2 += (hypre__j*databox2.strides1 + databox2.bstart1) * hypre_boxD2;	\
-	hypre_boxD2 *= hypre_max(0, databox2.bsize1 + 1);			\
-	i3 += (hypre__j*databox3.strides1 + databox3.bstart1) * hypre_boxD3;	\
-	hypre_boxD3 *= hypre_max(0, databox3.bsize1 + 1);			\
-	hypre__k  = idx_local % databox1.lsize2;				\
-	idx_local  = idx_local / databox1.lsize2;				\
-	i1 += (hypre__k*databox1.strides2 + databox1.bstart2) * hypre_boxD1;	\
-	hypre_boxD1 *= hypre_max(0, databox1.bsize2 + 1);			\
-	i2 += (hypre__k*databox2.strides2 + databox2.bstart2) * hypre_boxD2;	\
-	hypre_boxD2 *= hypre_max(0, databox2.bsize2 + 1);			\
-	i3 += (hypre__k*databox3.strides2 +databox3.bstart2) * hypre_boxD3;	\
-	hypre_boxD3 *= hypre_max(0, databox3.bsize2 + 1);			\
+        hypre_newBoxLoopDeclare(databox1);				\
+	hypre_BoxLoopIncK(1,databox1,i1);				\
+	hypre_BoxLoopIncK(2,databox2,i2);				\
+	hypre_BoxLoopIncK(3,databox3,i3);
 	
 
 #define hypre_newBoxLoop3End(i1, i2,i3)			\
@@ -322,380 +233,321 @@ __global__ void reduction_mult (T * a, T * b, HYPRE_Int hypre__tot,
 			       dbox3, start3, stride3, i3,		\
 			       dbox4, start4, stride4, i4)		\
 {								       \
-     hypre_BoxLoopInit(ndim,loop_size);			       \
+     hypre_newBoxLoopInit(ndim,loop_size);			       \
      hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1); \
      hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2); \
      hypre_BoxLoopDataDeclareK(3,ndim,loop_size,dbox3,start3,stride3); \
      hypre_BoxLoopDataDeclareK(4,ndim,loop_size,dbox4,start4,stride4); \
-     BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
+     BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
      {									\
-        hypre_newBoxLoopDeclare();					\
-	HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1,hypre_boxD3 = 1,hypre_boxD4 = 1; \
-	HYPRE_Int i1 = 0, i2 = 0, i3 = 0,i4 = 0;			\
-	hypre__i  = idx_local % databox1.lsize0;			\
-	idx_local  = idx_local / databox1.lsize0;			\
-	i1 += (hypre__i*databox1.strides0 + databox1.bstart0) * hypre_boxD1; \
-	hypre_boxD1 *= hypre_max(0, databox1.bsize0 + 1);		\
-	i2 += (hypre__i*databox2.strides0 + databox2.bstart0) * hypre_boxD2; \
-	hypre_boxD2 *= hypre_max(0, databox2.bsize0 + 1);		\
-	i3 += (hypre__i*databox3.strides0 + databox3.bstart0) * hypre_boxD3; \
-	hypre_boxD3 *= hypre_max(0, databox3.bsize0 + 1);		\
-	i4 += (hypre__i*databox4.strides0 + databox4.bstart0) * hypre_boxD4; \
-	hypre_boxD4 *= hypre_max(0, databox4.bsize0 + 1);		\
-	hypre__j  = idx_local % databox1.lsize1;			\
-	idx_local  = idx_local / databox1.lsize1;			\
-	i1 += (hypre__j*databox1.strides1 + databox1.bstart1) * hypre_boxD1; \
-	hypre_boxD1 *= hypre_max(0, databox1.bsize1 + 1);		\
-	i2 += (hypre__j*databox2.strides1 + databox2.bstart1) * hypre_boxD2; \
-	hypre_boxD2 *= hypre_max(0, databox2.bsize1 + 1);		\
-	i3 += (hypre__j*databox3.strides1 + databox3.bstart1) * hypre_boxD3; \
-	hypre_boxD3 *= hypre_max(0, databox3.bsize1 + 1);		\
-	i4 += (hypre__j*databox4.strides1 + databox4.bstart1) * hypre_boxD4; \
-	hypre_boxD4 *= hypre_max(0, databox4.bsize1 + 1);		\
-	hypre__k  = idx_local % databox1.lsize2;			\
-	idx_local  = idx_local / databox1.lsize2;			\
-	i1 += (hypre__k*databox1.strides2 + databox1.bstart2) * hypre_boxD1; \
-	hypre_boxD1 *= hypre_max(0, databox1.bsize2 + 1);		\
-	i2 += (hypre__k*databox2.strides2 + databox2.bstart2) * hypre_boxD2; \
-	hypre_boxD2 *= hypre_max(0, databox2.bsize2 + 1);		\
-	i3 += (hypre__k*databox3.strides2 + databox3.bstart2) * hypre_boxD3; \
-	hypre_boxD3 *= hypre_max(0, databox3.bsize2 + 1);		\
-	i4 += (hypre__k*databox4.strides2 + databox4.bstart2) * hypre_boxD4; \
-	hypre_boxD4 *= hypre_max(0, databox4.bsize2 + 1);		\
+        hypre_newBoxLoopDeclare(databox1);				\
+	hypre_BoxLoopIncK(1,databox1,i1);				\
+	hypre_BoxLoopIncK(2,databox2,i2);				\
+	hypre_BoxLoopIncK(3,databox3,i3);				\
+	hypre_BoxLoopIncK(4,databox4,i4);
 		
 #define hypre_newBoxLoop4End(i1, i2, i3, i4)	\
     });						\
     hypre_fence();				\
 }
 
-#define MAX_BLOCK 512
+#define zypre_BasicBoxLoopDataDeclareK(k,ndim,loop_size,stride)		\
+	hypre_Boxloop databox##k;					\
+	databox##k.lsize0   = loop_size[0];				\
+	databox##k.strides0 = stride[0];				\
+	databox##k.bstart0  = 0;					\
+	databox##k.bsize0   = 0;					\
+	if (ndim > 1)							\
+	{								\
+	   databox##k.lsize1   = loop_size[1];				\
+	   databox##k.strides1 = stride[1];				\
+	   databox##k.bstart1  = 0;					\
+	   databox##k.bsize1   = 0;					\
+	}								\
+	else						        	\
+	{							       	\
+	   databox##k.lsize1   = 1;				       	\
+	   databox##k.strides1 = 0;					\
+	   databox##k.bstart1  = 0;					\
+	   databox##k.bsize1   = 0;					\
+	}								\
+	if (ndim == 3)							\
+	{								\
+	   databox##k.lsize2   = loop_size[2];				\
+	   databox##k.strides2 = stride[2];				\
+	   databox##k.bstart2  = 0;				        \
+	   databox##k.bsize2   = 0;			                \
+	}								\
+	else								\
+	{								\
+	    databox##k.lsize2   = 1;					\
+	    databox##k.strides2 = 0;					\
+	    databox##k.bstart2  = 0;					\
+	    databox##k.bsize2   = 0;					\
+	}
 
-extern "C++" {
-template<class T>
-__inline__ __device__
-HYPRE_Int fake_shfl_down(T val, HYPRE_Int offset, HYPRE_Int width=32) {
-  static __shared__ T shared[MAX_BLOCK];
-  HYPRE_Int lane=threadIdx.x%32;
+#define zypre_newBasicBoxLoop1Begin(ndim, loop_size,			\
+				    stride1, i1)			\
+{    		       				                	\
+    hypre_BasicBoxLoopInit(ndim,loop_size);		        	\
+    zypre_BasicBoxLoopDataDeclareK(1,ndim,loop_size,stride1);	\
+    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
+    {									\
+        hypre_newBoxLoopDeclare(databox1);					\
+        hypre_BoxLoopIncK(1,databox1,i1);					\
+	
+#define zypre_newBasicBoxLoop2Begin(ndim, loop_size,			\
+				    stride1, i1,			\
+				    stride2, i2)			\
+{    		       				                	\
+    hypre_BasicBoxLoopInit(ndim,loop_size);		        	\
+    zypre_BasicBoxLoopDataDeclareK(1,ndim,loop_size,stride1);	\
+    zypre_BasicBoxLoopDataDeclareK(2,ndim,loop_size,stride2);	\
+    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPRE_LAMBDA (HYPRE_Int idx) \
+    {									\
+        hypre_newBoxLoopDeclare(databox1);					\
+        hypre_BoxLoopIncK(1,databox1,i1);					\
+        hypre_BoxLoopIncK(2,databox2,i2);				\
 
-  shared[threadIdx.x]=val;
-  __syncthreads();
-
-  val = (lane+offset<width) ? shared[threadIdx.x+offset] : 0;
-  __syncthreads();
-
-  return val;
-}
-
-template<class T>  
-__inline__ __device__
-HYPRE_Real warpReduceSum (T val) {
-  for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
-    val += __shfl_down(val,offset);
-  return val;
-}
-
-
-template<class T> 
-__inline__ __device__
-HYPRE_Real blockReduceSum(T val) {
-  static __shared__ T shared[32];
-  HYPRE_Int lane=threadIdx.x%warpSize;
-  HYPRE_Int wid=threadIdx.x/warpSize;
-  val=warpReduceSum<T>(val);
-
-  //write reduced value to shared memory
-  if(lane==0) shared[wid]=val;
-  __syncthreads();
-
-  //ensure we only grab a value from shared memory if that warp existed
-  val = (threadIdx.x<blockDim.x/warpSize) ? shared[lane] : HYPRE_Int(0);
-  if(wid==0) val=warpReduceSum<T>(val);
-
-  return val;
-}
-
-template<class T>
-__global__ void hypre_device_reduce_stable_kernel(T*a, T*b, T* out, HYPRE_Int N,
-						  hypre_Boxloop box1,hypre_Boxloop box2) {
-  HYPRE_Int local_idx;
-  HYPRE_Int idx_local;
-  HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1;
-  HYPRE_Int i1 = 0, i2 = 0;
-  T sum=T(0);
-  HYPRE_Int i;
-  
-  for(i=blockIdx.x*blockDim.x+threadIdx.x;i<N;i+=blockDim.x*gridDim.x)
-  {
-    idx_local = i;
-    local_idx  = idx_local % box1.lsize0;
-    idx_local  = idx_local / box1.lsize0;
-    i1 += (local_idx*box1.strides0 + box1.bstart0) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize0 + 1);
-    i2 += (local_idx*box2.strides0 + box2.bstart0) * hypre_boxD2;
-    hypre_boxD2 *= hypre_max(0, box2.bsize0 + 1);
-    local_idx  = idx_local % box1.lsize1;
-    idx_local  = idx_local / box1.lsize1;
-    i1 += (local_idx*box1.strides1 + box1.bstart1) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize1 + 1);
-    i2 += (local_idx*box2.strides1 + box2.bstart1) * hypre_boxD2;   
-    hypre_boxD2 *= hypre_max(0, box2.bsize1 + 1);	
-    local_idx  = idx_local % box1.lsize2;	      
-    idx_local  = idx_local / box1.lsize2;		      
-    i1 += (local_idx*box1.strides2 + box1.bstart2) * hypre_boxD1;
-    hypre_boxD1 *= hypre_max(0, box1.bsize2 + 1);	
-    i2 += (local_idx*box2.strides2 + box2.bstart2) * hypre_boxD2;
-    hypre_boxD2 *= hypre_max(0, box2.bsize2 + 1);
-    sum += a[i1] * hypre_conj(b[i2]);
-  }
-  sum=blockReduceSum<T>(sum);
-  if(threadIdx.x==0)
-    out[blockIdx.x]=sum;
-}
-
-template<class T>       
-__global__ void hypre_device_reduce_stable_kernel2(T *in, T* out, HYPRE_Int N) {
-  T sum=T(0);
-  for(HYPRE_Int i=blockIdx.x*blockDim.x+threadIdx.x;i<N;i+=blockDim.x*gridDim.x) {
-    sum+=in[i];
-  }
-  sum=blockReduceSum<T>(sum);
-  if(threadIdx.x==0)
-    out[blockIdx.x]=sum;
-}
-
-template<class T>   
-void hypre_device_reduce_stable(T*a,T*b, T* out, HYPRE_Int N,
-				hypre_Boxloop box1,hypre_Boxloop box2) {
-  HYPRE_Int threads=512;
-  HYPRE_Int blocks=min((N+threads-1)/threads,1024);
-
-  hypre_device_reduce_stable_kernel<T><<<blocks,threads>>>(a,b,out,N,box1,box2);
-  hypre_device_reduce_stable_kernel2<T><<<1,1024>>>(out,out,blocks); 
-}
-
-}
-
-extern "C++" {
-template <typename LOOP_BODY>
-__global__ void hypre_device_reduction_kernel(HYPRE_Real* out,
-					      HYPRE_Int N,hypre_Boxloop box1,hypre_Boxloop box2,
-					      LOOP_BODY loop_body)
-{
-    HYPRE_Int local_idx;
-    HYPRE_Int idx_local;
-    HYPRE_Int hypre_boxD1 = 1,hypre_boxD2 = 1;
-    HYPRE_Int i1 = 0, i2 = 0;
-    HYPRE_Real sum = HYPRE_Real(0);
-    HYPRE_Int i;
-    
-    for(i=blockIdx.x*blockDim.x+threadIdx.x;i<N;i+=blockDim.x*gridDim.x)
-      {
-	idx_local = i;
-	local_idx  = idx_local % box1.lsize0;
-	idx_local  = idx_local / box1.lsize0;
-	i1 += (local_idx*box1.strides0 + box1.bstart0) * hypre_boxD1;
-	hypre_boxD1 *= hypre_max(0, box1.bsize0 + 1);
-	i2 += (local_idx*box2.strides0 + box2.bstart0) * hypre_boxD2;
-	hypre_boxD2 *= hypre_max(0, box2.bsize0 + 1);
-	local_idx  = idx_local % box1.lsize1;
-	idx_local  = idx_local / box1.lsize1;
-	i1 += (local_idx*box1.strides1 + box1.bstart1) * hypre_boxD1;
-	hypre_boxD1 *= hypre_max(0, box1.bsize1 + 1);
-	i2 += (local_idx*box2.strides1 + box2.bstart1) * hypre_boxD2;   
-	hypre_boxD2 *= hypre_max(0, box2.bsize1 + 1);	
-	local_idx  = idx_local % box1.lsize2;	      
-	idx_local  = idx_local / box1.lsize2;		      
-	i1 += (local_idx*box1.strides2 + box1.bstart2) * hypre_boxD1;
-	hypre_boxD1 *= hypre_max(0, box1.bsize2 + 1);	
-	i2 += (local_idx*box2.strides2 + box2.bstart2) * hypre_boxD2;
-	hypre_boxD2 *= hypre_max(0, box2.bsize2 + 1);
-	sum = loop_body(i1,i2,sum);
-      }
-    sum=blockReduceSum<HYPRE_Real>(sum);
-    if(threadIdx.x==0)
-      out[blockIdx.x]=sum;
-}
-
-template<typename LOOP_BODY>
-void hypre_device_reduction (HYPRE_Real* out,
-			     HYPRE_Int N,hypre_Boxloop box1,hypre_Boxloop box2,
-			     LOOP_BODY loop_body)
-{	
-  HYPRE_Int threads=512;
-  HYPRE_Int blocks=min((N+threads-1)/threads,1024);
-
-  hypre_device_reduction_kernel<<<blocks,threads>>>(out,N,box1,box2,loop_body);
-  hypre_device_reduce_stable_kernel2<HYPRE_Real><<<1,1024>>>(out,out,blocks);
-
-}
-}
-
-#define hypre_newBoxLoop1ReductionBegin(ndim, loop_size,		\
-					dbox1, start1, stride1, i1, sum) \
-{    									   \
-   HYPRE_Real sum_old = sum;						\
-   sum = 0.0;								\
-   hypre_BoxLoopInit(ndim,loop_size);					\
-   hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
-   HYPRE_Real *d_c;							\
-   cudaMalloc((void**) &d_c, 1024 * sizeof(HYPRE_Real));		\
-   hypre_device_reduction(d_c,hypre__tot,databox1,databox1,HYPER_LAMBDA(HYPRE_Int i1, HYPRE_Int i2, HYPRE_Real sum) \
-   {
-
-#define hypre_newBoxLoop1ReductionEnd(i1, sum)			\
-       return sum;								\
-   });									\
-  cudaMemcpy(&sum,d_c,sizeof(HYPRE_Real),cudaMemcpyDeviceToHost);	\
-  sum += sum_old;							\
-  cudaFree(d_c);							\
-}
-
-#define hypre_newBoxLoop2ReductionBegin(ndim, loop_size,		\
-					dbox1, start1, stride1, i1,	\
-					dbox2, start2, stride2, i2,sum) \
-{    									   \
-   HYPRE_Real sum_old = sum;						\
-   sum = 0.0;								\
-   hypre_BoxLoopInit(ndim,loop_size);					\
-   hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	\
-   hypre_BoxLoopDataDeclareK(2,ndim,loop_size,dbox2,start2,stride2);	\
-   HYPRE_Real *d_c;							\
-   cudaMalloc((void**) &d_c, 1024 * sizeof(HYPRE_Real));		\
-   hypre_device_reduction(d_c,hypre__tot,databox1,databox2,HYPER_LAMBDA(HYPRE_Int i1, HYPRE_Int i2, HYPRE_Real sum) \
-   {
-
-#define hypre_newBoxLoop2ReductionEnd(i1, i2, sum)			\
-      return sum;								\
-   });									\
-  cudaMemcpy(&sum,d_c,sizeof(HYPRE_Real),cudaMemcpyDeviceToHost);	\
-  sum += sum_old;							\
-  cudaFree(d_c);							\
-}
-
-
-
-#define hypre_newBoxLoop1ReductionMult(ndim, loop_size,			  \
-				       dbox1, start1, stride1, i1,xp,sum) \
-{    									  \
-   HYPRE_Real sum_old = sum;\
-   sum = 1.0;\
-   hypre_BoxLoopInit(ndim,loop_size);				  \
-   hypre_BoxLoopDataDeclareK(1,ndim,loop_size,dbox1,start1,stride1);	  \
-   HYPRE_Int n_blocks = (hypre__tot+BLOCKSIZE-1)/BLOCKSIZE;		  \
-   HYPRE_Real *d_b;				        		  \
-   HYPRE_Real * b = new HYPRE_Real[n_blocks];				  \
-   cudaMalloc((void**) &d_b, n_blocks * sizeof(HYPRE_Real));			\
-   reduction_mult<HYPRE_Real><<< n_blocks ,BLOCKSIZE>>>(xp,d_b,hypre__tot,databox1);		\
-   hypre_fence();							\
-   for (HYPRE_Int j = 0 ; j< n_blocks ; ++j){								\
-     sum *= b[j];							\
-   }	  		\
-   delete [] b;		\
-   sum *=sum_old;\
-}
 
 #define hypre_LoopBegin(size,idx)					\
-{    														\
-	BoxLoopforall(hypre_exec_policy,size,HYPER_LAMBDA (HYPRE_Int idx) \
-	{
+{									\
+   BoxLoopforall(hypre_exec_policy,size,HYPRE_LAMBDA (HYPRE_Int idx)	\
+   {
 
 #define hypre_LoopEnd()					\
-	});											\
-        hypre_fence();\
+   });							\
+   hypre_fence();					\
 }
 
-#define hypre_BoxBoundaryCopyBegin(ndim, loop_size, stride1, i1, idx) 	\
-{    														\
-    HYPRE_Int hypre__tot = 1;											\
-    hypre_Boxloop databox1;						\
-    databox1.lsize0 = loop_size[0];					\
-    databox1.lsize1 = loop_size[1];					\
-    databox1.lsize2 = loop_size[2];					\
-    databox1.strides0 = stride1[0];					\
-    databox1.strides1 = stride1[1];					\
-    databox1.strides2 = stride1[2];					\
-    for (HYPRE_Int d = 0;d < ndim;d ++)					\
-    {									\
-	hypre__tot *= loop_size[d];					\
-    }									\
-    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
-    {									\
-	    hypre_newBoxLoopDeclare()											\
-	    HYPRE_Int i1 = 0;											\
-	    hypre__i  = idx_local % databox1.lsize0;			\
-	    idx_local  = idx_local / databox1.lsize0;			\
-	    i1 += hypre__i*databox1.strides0;				\
-	    hypre__j  = idx_local % databox1.lsize1;			\
-	    idx_local  = idx_local / databox1.lsize1;			\
-	    i1 += hypre__j*databox1.strides1;				\
-	    hypre__k  = idx_local % databox1.lsize2;			\
-	    idx_local  = idx_local / databox1.lsize2;			\
-	    i1 += hypre__k*databox1.strides2;				\
-		
-#define hypre_BoxBoundaryCopyEnd()				\
-    });									\
-    hypre_fence();							\
+#define MAX_BLOCK BLOCKSIZE
+
+extern "C++" {
+template<typename T>
+__device__ __forceinline__ T hypre_shfl_xor(T var, HYPRE_Int laneMask)
+{
+  const HYPRE_Int int_sizeof_T = 
+      (sizeof(T) + sizeof(HYPRE_Int) - 1) / sizeof(HYPRE_Int);
+  union {
+    T var;
+    HYPRE_Int arr[int_sizeof_T];
+  } Tunion;
+  Tunion.var = var;
+
+  for(HYPRE_Int i = 0; i < int_sizeof_T; ++i) {
+    Tunion.arr[i] =
+#ifndef CUDART_VERSION
+      #error CUDART_VERSION Undefined!
+#elif (CUDART_VERSION >= 9000)
+      __shfl_xor_sync(0xFFFFFFFF, Tunion.arr[i], laneMask);
+#elif (CUDART_VERSION <= 8000)
+      __shfl_xor(Tunion.arr[i], laneMask);
+#endif
+  }
+  return Tunion.var;
 }
 
-#define hypre_BoxDataExchangeBegin(ndim, loop_size,				\
-                                   stride1, i1,	\
-                                   stride2, i2)	\
-{    														\
-    HYPRE_Int hypre__tot = 1;											\
-    hypre_Boxloop databox1,databox2;					\
-    databox1.lsize0 = loop_size[0];					\
-    databox1.lsize1 = loop_size[1];									\
-    databox1.lsize2 = loop_size[2];					\
-    databox1.strides0 = stride1[0];					\
-    databox1.strides1 = stride1[1];					\
-    databox1.strides2 = stride1[2];					\
-    databox2.lsize0 = loop_size[0];					\
-    databox2.lsize1 = loop_size[1];									\
-    databox2.lsize2 = loop_size[2];					\
-    databox2.strides0 = stride2[0];					\
-    databox2.strides1 = stride2[1];					\
-    databox2.strides2 = stride2[2];					\
-    for (HYPRE_Int d = 0;d < ndim;d ++)					\
-      {									\
-	hypre__tot *= loop_size[d];					\
-      }									\
-    BoxLoopforall(hypre_exec_policy,hypre__tot,HYPER_LAMBDA (HYPRE_Int idx) \
-    {									\
-        hypre_newBoxLoopDeclare()					\
-	HYPRE_Int i1 = 0, i2 = 0;					\
-	hypre__i  = idx_local % databox1.lsize0;			\
-	idx_local  = idx_local / databox1.lsize0;			\
-	i1 += hypre__i*databox1.strides0;				\
-	i2 += hypre__i*databox2.strides0;				\
-	hypre__j  = idx_local % databox1.lsize1;			\
-	idx_local  = idx_local / databox1.lsize1;			\
-	i1 += hypre__j*databox1.strides1;				\
-	i2 += hypre__j*databox2.strides1;				\
-	hypre__k  = idx_local % databox1.lsize2;			\
-	idx_local  = idx_local / databox1.lsize2;			\
-	i1 += hypre__k*databox1.strides2;				\
-	i2 += hypre__k*databox2.strides2;
+#define RAJA_MAX(a, b) (((b) > (a)) ? (b) : (a))
 
+template <typename T>
+class ReduceSum
+{
+public:
+   //
+   // Constructor takes initial reduction value (default ctor is disabled).
+   // Ctor only executes on the host.
+   //
+  explicit ReduceSum( T init_val,HYPRE_Int location )
+   {
+      data_location = location;
+      
+      m_is_copy = false;
 
-#define hypre_BoxDataExchangeEnd()				\
-     });								\
-     hypre_fence();							\
+      m_init_val = init_val;
+      m_reduced_val = static_cast<T>(0);
+
+      m_myID = getCudaReductionId();
+
+      if (data_location == HYPRE_MEMORY_DEVICE)
+      {
+	 m_blockdata = getCudaReductionMemBlock(m_myID) ;
+	 m_blockoffset = 1;
+      
+	 // Entire shared memory block must be initialized to zero so
+	 // sum reduction is correct.
+	 size_t len = RAJA_CUDA_REDUCE_BLOCK_LENGTH;
+	 cudaMemset(&m_blockdata[m_blockoffset], 0,
+		    sizeof(CudaReductionBlockDataType)*len); 
+
+	 m_max_grid_size = m_blockdata;
+	 m_max_grid_size[0] = 0;
+
+	 cudaDeviceSynchronize();
+      }
+      else if (data_location == HYPRE_MEMORY_HOST)
+      {
+	 m_blockdata = getCPUReductionMemBlock(m_myID);
+	 HYPRE_Int nthreads = omp_get_max_threads();
+	 #pragma omp parallel for schedule(static, 1)
+	 for (HYPRE_Int i = 0; i < nthreads; ++i ) {
+	    m_blockdata[i*s_block_offset] = 0 ;
+	 }
+      }
+   }
+
+   //
+   // Copy ctor executes on both host and device.
+   //
+   __host__ __device__ 
+   ReduceSum( const ReduceSum< T >& other )
+   {
+      *this = other;
+      m_is_copy = true;
+   }
+
+   //
+   // Destructor executes on both host and device.
+   // Destruction on host releases the unique id for others to use. 
+   //
+   __host__ __device__ 
+   ~ReduceSum< T >()
+   {
+      if (!m_is_copy) {
+	{
+#if defined( __CUDA_ARCH__ )
+#else
+	   releaseCudaReductionId(m_myID);
+#endif
+	}
+      }
+   }
+
+   //
+   // Operator to retrieve reduced sum value (before object is destroyed).
+   // Accessor only operates on host.
+   //
+   __host__ __device__
+   operator T()
+   {
+     
+     if (data_location == HYPRE_MEMORY_DEVICE) 
+     {
+        cudaDeviceSynchronize() ;
+	m_blockdata[m_blockoffset] = static_cast<T>(0);
+
+	size_t grid_size = m_max_grid_size[0];
+	for (size_t i=1; i <= grid_size; ++i) {
+	   m_blockdata[m_blockoffset] += m_blockdata[m_blockoffset+i];
+	}
+	m_reduced_val = m_init_val + static_cast<T>(m_blockdata[m_blockoffset]);
+     }
+     else if (data_location == HYPRE_MEMORY_HOST)
+     {
+#if defined( __CUDA_ARCH__ )
+#else
+		 T tmp_reduced_val = static_cast<T>(0);
+	HYPRE_Int nthreads = omp_get_max_threads();
+	for ( HYPRE_Int i = 0; i < nthreads; ++i ) {
+	   tmp_reduced_val += static_cast<T>(m_blockdata[i*s_block_offset]);
+	}
+	m_reduced_val = m_init_val + tmp_reduced_val;
+#endif
+     }
+     return m_reduced_val;
+   }
+
+   //
+   // += operator to accumulate arg value in the proper shared
+   // memory block location.
+   //
+   __host__ __device__
+   ReduceSum< T > operator+=(T val) const
+   {  
+#if defined( __CUDA_ARCH__ )
+      if (data_location == HYPRE_MEMORY_DEVICE)
+      {	
+        __shared__ T sd[BLOCK_SIZE];
+
+	if ( blockIdx.x  + blockIdx.y  + blockIdx.z +
+	     threadIdx.x + threadIdx.y + threadIdx.z == 0 ) {
+           HYPRE_Int numBlock = gridDim.x * gridDim.y * gridDim.z ;
+           m_max_grid_size[0] = RAJA_MAX( numBlock,  m_max_grid_size[0] );
+	}
+
+       // initialize shared memory
+	for ( HYPRE_Int i = BLOCK_SIZE / 2; i > 0; i /=2 ) {     
+          // this descends all the way to 1
+           if ( threadIdx.x < i ) {
+	      sd[threadIdx.x + i] = m_reduced_val;  
+	   }
+	}
+	__syncthreads();
+
+	sd[threadIdx.x] = val;
+
+	T temp = 0;
+	__syncthreads();
+
+	for (HYPRE_Int i = BLOCK_SIZE / 2; i >= WARP_SIZE; i /= 2) {
+	   if (threadIdx.x < i) {
+	      sd[threadIdx.x] += sd[threadIdx.x + i];
+	   }
+	   __syncthreads();
+	}
+
+	if (threadIdx.x < WARP_SIZE) {
+	   temp = sd[threadIdx.x];
+	   for (HYPRE_Int i = WARP_SIZE / 2; i > 0; i /= 2) {
+	      temp += hypre_shfl_xor(temp, i);
+	   }
+	}
+
+	// one thread adds to gmem, we skip m_blockdata[m_blockoffset]
+	// because we will be accumlating into this
+	if (threadIdx.x == 0) {
+	   HYPRE_Int blockID = m_blockoffset + 1 + blockIdx.x +
+	     blockIdx.y*gridDim.x +
+	     blockIdx.z*gridDim.x*gridDim.y ;
+	   m_blockdata[blockID] += temp ;
+	}
+      }
+#else
+      if (data_location == HYPRE_MEMORY_HOST)
+      {
+         HYPRE_Int tid = omp_get_thread_num();
+		 m_blockdata[tid*s_block_offset] += val;
+      }
+#endif
+      return *this ;
+   }
+
+private:
+   //
+   // Default ctor is declared private and not implemented.
+   //
+   ReduceSum< T >();
+
+   bool m_is_copy;
+   HYPRE_Int m_myID;
+   HYPRE_Int data_location;
+
+   T m_init_val;
+   T m_reduced_val;
+   static const HYPRE_Int s_block_offset = 
+      COHERENCE_BLOCK_SIZE/sizeof(CudaReductionBlockDataType);
+   CudaReductionBlockDataType* m_blockdata ;
+   
+   HYPRE_Int m_blockoffset;
+
+   CudaReductionBlockDataType* m_max_grid_size;
+};
+
 }
+#define hypre_newBoxLoopGetIndex(index)\
+  index[0] = hypre_IndexD(local_idx, 0); index[1] = hypre_IndexD(local_idx, 1); index[2] = hypre_IndexD(local_idx, 2);
   
-#define hypre_newBoxLoop0For()
+#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex
 
-#define hypre_newBoxLoop1For(i1)
-
-#define hypre_newBoxLoop2For(i1, i2) 
- 
-#define hypre_newBoxLoop3For(i1, i2, i3)
-
-#define hypre_newBoxLoop4For(i1, i2, i3, i4)
-
-#define hypre_newBoxLoopGetIndex(index)					\
-  index[0] = hypre__i; index[1] = hypre__j; index[2] = hypre__k
-  
-#define hypre_BoxLoopGetIndex    zypre_BoxLoopGetIndex  
 #define hypre_BoxLoopSetOneBlock() ; 
 #define hypre_BoxLoopBlock()       0
 
@@ -714,4 +566,7 @@ void hypre_device_reduction (HYPRE_Real* out,
 #define hypre_BoxLoop4Begin      hypre_newBoxLoop4Begin
 #define hypre_BoxLoop4For        hypre_newBoxLoop4For
 #define hypre_BoxLoop4End        hypre_newBoxLoop4End
+
+#define hypre_BasicBoxLoop1Begin zypre_newBasicBoxLoop1Begin 
+#define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin 
 #endif

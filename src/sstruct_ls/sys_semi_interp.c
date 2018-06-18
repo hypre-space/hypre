@@ -30,7 +30,7 @@ hypre_SysSemiInterpCreate( void **sys_interp_vdata_ptr )
 {
    hypre_SysSemiInterpData *sys_interp_data;
 
-   sys_interp_data = hypre_CTAlloc(hypre_SysSemiInterpData, 1);
+   sys_interp_data = hypre_CTAlloc(hypre_SysSemiInterpData,  1, HYPRE_MEMORY_HOST);
    *sys_interp_vdata_ptr = (void *) sys_interp_data;
 
    return hypre_error_flag;
@@ -61,7 +61,7 @@ hypre_SysSemiInterpSetup( void                 *sys_interp_vdata,
    HYPRE_Int                 vi;
 
    nvars = hypre_SStructPMatrixNVars(P);
-   sinterp_data = hypre_CTAlloc(void *, nvars);
+   sinterp_data = hypre_CTAlloc(void *,  nvars, HYPRE_MEMORY_HOST);
 
    for (vi = 0; vi < nvars; vi++)
    {
@@ -134,8 +134,8 @@ hypre_SysSemiInterpDestroy( void *sys_interp_vdata )
             hypre_SemiInterpDestroy(sinterp_data[vi]);
          }
       }
-      hypre_TFree(sinterp_data);
-      hypre_TFree(sys_interp_data);
+      hypre_TFree(sinterp_data, HYPRE_MEMORY_HOST);
+      hypre_TFree(sys_interp_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;

@@ -84,7 +84,7 @@ hypre_SparseMSG3CreateRAPOp( hypre_StructMatrix *R,
       {
          RAP_stencil_size = (RAP_stencil_size + 1) / 2;
       }
-      RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+      RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
       for (k = -1; k < 2; k++)
       {
          for (j = -1; j < 2; j++)
@@ -119,7 +119,7 @@ hypre_SparseMSG3CreateRAPOp( hypre_StructMatrix *R,
       {
          RAP_stencil_size = (RAP_stencil_size + 1) / 2;
       }
-      RAP_stencil_shape = hypre_CTAlloc(hypre_Index, RAP_stencil_size);
+      RAP_stencil_shape = hypre_CTAlloc(hypre_Index,  RAP_stencil_size, HYPRE_MEMORY_HOST);
       for (k = -1; k < 2; k++)
       {
          for (j = -1; j < 2; j++)
@@ -552,15 +552,13 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_bs,rb,a_cs,pa,rap_bw,a_cw,rap_bc,a_bc,a_cc,rap_be,a_ce,rap_bn,a_cn,rap_cs,pb,ra,rap_cw,rap_csw,rap_cse,rap_cc,a_ac)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {           
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
@@ -606,6 +604,8 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
 
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             break;
 
@@ -622,15 +622,13 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_bsw,rb,a_csw,pa,rap_bs,a_cs,a_bs,rap_bse,a_cse,rap_bw,a_cw,a_bw,rap_bc,a_bc,a_cc,rap_be,a_ce,a_be,rap_bnw,a_cnw,rap_bn,a_cn,a_bn,rap_bne,a_cne,rap_csw,pb,ra,rap_cs,a_as,rap_cse,rap_cw,a_aw,rap_cc,a_ac)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
@@ -710,6 +708,8 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
 
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             break;
 
@@ -726,15 +726,13 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_bsw,rb,a_csw,pa,a_bsw,rap_bs,a_cs,a_bs,rap_bse,a_cse,a_bse,rap_bw,a_cw,a_bw,rap_bc,a_bc,a_cc,rap_be,a_ce,a_be,rap_bnw,a_cnw,a_bnw,rap_bn,a_cn,a_bn,rap_bne,a_cne,a_bne,rap_csw,pb,ra,a_asw,rap_cs,a_as,rap_cse,a_ase,rap_cw,a_aw,rap_cc,a_ac)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
@@ -829,6 +827,8 @@ hypre_SparseMSG3BuildRAPSym( hypre_StructMatrix *A,
                   +                   a_ac[iA]   * pa[iP];
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             break;
 
@@ -1211,15 +1211,14 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
          case 7:
 
             hypre_BoxGetSize(cgrid_box, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_an,ra,a_cn,pb,rap_ae,a_ce,rap_ac,a_ac,a_cc,rap_aw,a_cw,rap_as,a_cs,rap_cn,rb,pa,rap_ce,rap_cnw,rap_cne)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
@@ -1256,6 +1255,8 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
                rap_cne[iAc] = 0.0;
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             break;
 
@@ -1272,15 +1273,13 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_ane,ra,a_cne,pb,rap_an,a_cn,a_an,rap_anw,a_cnw,rap_ae,a_ce,a_ae,rap_ac,a_ac,a_cc,rap_aw,a_cw,a_aw,rap_ase,a_cse,rap_as,a_cs,a_as,rap_asw,a_csw,rap_cne,rb,pa,rap_cn,a_bn,rap_cnw,rap_ce,a_be)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
@@ -1352,6 +1351,8 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             break;
 
@@ -1368,15 +1369,13 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             hypre_BoxGetSize(cgrid_box, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(rap_ane,ra,a_cne,pb,a_ane,rap_an,a_cn,a_an,rap_anw,a_cnw,a_anw,rap_ae,a_ce,a_ae,rap_ac,a_ac,a_cc,rap_aw,a_cw,a_aw,rap_ase,a_cse,a_ase,rap_as,a_cs,a_as,rap_asw,a_csw,a_asw,rap_cne,rb,pa,a_bne,rap_cn,a_bn,rap_cnw,a_bnw,rap_ce,a_be)
             hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                 P_dbox, Pstart, stridePR, iP,
                                 R_dbox, Pstart, stridePR, iR,
                                 A_dbox, fstart, stridef,  iA,
                                 RAP_dbox, cstart, stridec, iAc);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop4For(iP, iR, iA, iAc)
             {
                HYPRE_Int iAm1 = iA - zOffsetA;
                HYPRE_Int iAp1 = iA + zOffsetA;
@@ -1465,6 +1464,8 @@ hypre_SparseMSG3BuildRAPNoSym( hypre_StructMatrix *A,
 
             }
             hypre_BoxLoop4End(iP, iR, iA, iAc);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
             break;
 

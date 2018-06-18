@@ -15,6 +15,16 @@
 # recent release.
 #=============================================================================
 
+Version 2.14.0 released 2018/03/16
+
+- New GPU release uses CUDA or OpenMP4.5.  AMG setup phase is not yet ported.
+
+- New AIR AMG solver.
+
+- Added SuperLU_Dist as a coarse grid solver option.
+
+- Various bug fixes.
+
 Version 2.13.0 released 2017/10/20
 
 - Added new multigrid reduction (MGR) solver

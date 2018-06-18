@@ -53,14 +53,14 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
    sendboxes  = hypre_BoxArrayArrayDuplicate(sendinfo -> send_boxes);
    send_rboxes= hypre_BoxArrayArrayDuplicate(sendinfo -> send_boxes);
 
-   sprocesses   = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArrayArraySize(send_rboxes));
-   send_rboxnums= hypre_CTAlloc(HYPRE_Int *, hypre_BoxArrayArraySize(send_rboxes));
+   sprocesses   = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArrayArraySize(send_rboxes), HYPRE_MEMORY_HOST);
+   send_rboxnums= hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArrayArraySize(send_rboxes), HYPRE_MEMORY_HOST);
 
    hypre_ForBoxArrayI(i, sendboxes)
    {
       boxarray= hypre_BoxArrayArrayBoxArray(sendboxes, i);
-      sprocesses[i]   = hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(boxarray));
-      send_rboxnums[i]= hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(boxarray));
+      sprocesses[i]   = hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
+      send_rboxnums[i]= hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
 
       hypre_ForBoxI(j, boxarray)
       {
@@ -70,16 +70,16 @@ hypre_SStructAMRInterCommunication( hypre_SStructSendInfoData *sendinfo,
    }
 
    recvboxes  = hypre_BoxArrayArrayDuplicate(recvinfo -> recv_boxes);
-   rprocesses = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArrayArraySize(recvboxes));
+   rprocesses = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArrayArraySize(recvboxes), HYPRE_MEMORY_HOST);
 
    /* dummy pointer for CommInfoCreate */
-   recv_rboxnums = hypre_CTAlloc(HYPRE_Int *, hypre_BoxArrayArraySize(recvboxes));
+   recv_rboxnums = hypre_CTAlloc(HYPRE_Int *,  hypre_BoxArrayArraySize(recvboxes), HYPRE_MEMORY_HOST);
 
    hypre_ForBoxArrayI(i, recvboxes)
    {
       boxarray= hypre_BoxArrayArrayBoxArray(recvboxes, i);
-      rprocesses[i]= hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(boxarray));
-      recv_rboxnums[i]= hypre_CTAlloc(HYPRE_Int, hypre_BoxArraySize(boxarray));
+      rprocesses[i]= hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
+      recv_rboxnums[i]= hypre_CTAlloc(HYPRE_Int,  hypre_BoxArraySize(boxarray), HYPRE_MEMORY_HOST);
 
       hypre_ForBoxI(j, boxarray)
       {

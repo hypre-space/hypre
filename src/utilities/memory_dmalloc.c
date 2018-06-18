@@ -37,8 +37,8 @@ hypre_InitMemoryDebugDML( HYPRE_Int id  )
    HYPRE_Int  *iptr;
 
    /* do this to get the Debug Malloc Library started/initialized */
-   iptr = hypre_TAlloc(HYPRE_Int, 1);
-   hypre_TFree(iptr);
+   iptr = hypre_TAlloc(HYPRE_Int,  1, HYPRE_MEMORY_HOST);
+   hypre_TFree(iptr, HYPRE_MEMORY_HOST);
 
    dmalloc_logpath = dmalloc_logpath_memory;
    hypre_sprintf(dmalloc_logpath, "dmalloc.log.%04d", id);

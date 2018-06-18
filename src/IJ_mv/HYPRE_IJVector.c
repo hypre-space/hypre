@@ -41,7 +41,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    HYPRE_Int i, i2;
 #endif
 
-   vec = hypre_CTAlloc(hypre_IJVector, 1);
+   vec = hypre_CTAlloc(hypre_IJVector,  1, HYPRE_MEMORY_HOST);
    
    if (!vec)
    {  
@@ -55,7 +55,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    if (jlower > jupper+1 || jlower < 0)
    {
       hypre_error_in_arg(2);
-      hypre_TFree(vec);
+      hypre_TFree(vec, HYPRE_MEMORY_HOST);
       return hypre_error_flag;
    }
    if (jupper < -1)
@@ -67,7 +67,7 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
 
 #ifdef HYPRE_NO_GLOBAL_PARTITION
 
-   partitioning = hypre_CTAlloc(HYPRE_Int, 2);
+   partitioning = hypre_CTAlloc(HYPRE_Int,  2, HYPRE_MEMORY_HOST);
 
    partitioning[0] = jlower;
    partitioning[1] = jupper+1;
@@ -94,9 +94,9 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    
 #else
 
-   info = hypre_CTAlloc(HYPRE_Int,2);
-   recv_buf = hypre_CTAlloc(HYPRE_Int, 2*num_procs);
-   partitioning = hypre_CTAlloc(HYPRE_Int, num_procs+1);
+   info = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
+   recv_buf = hypre_CTAlloc(HYPRE_Int,  2*num_procs, HYPRE_MEMORY_HOST);
+   partitioning = hypre_CTAlloc(HYPRE_Int,  num_procs+1, HYPRE_MEMORY_HOST);
 
    info[0] = jlower;
    info[1] = jupper;
@@ -111,10 +111,10 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
       {
          /*hypre_printf("Inconsistent partitioning -- HYPRE_IJVectorCreate\n");  */
 	 hypre_error(HYPRE_ERROR_GENERIC);
-         hypre_TFree(info);
-         hypre_TFree(recv_buf);
-         hypre_TFree(partitioning);
-         hypre_TFree(vec);
+         hypre_TFree(info, HYPRE_MEMORY_HOST);
+         hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
+         hypre_TFree(partitioning, HYPRE_MEMORY_HOST);
+         hypre_TFree(vec, HYPRE_MEMORY_HOST);
          return hypre_error_flag;
       }
       else
@@ -123,8 +123,8 @@ HYPRE_IJVectorCreate( MPI_Comm        comm,
    i2 = (num_procs-1)*2;
    partitioning[num_procs] = recv_buf[i2+1]+1;
 
-   hypre_TFree(info);
-   hypre_TFree(recv_buf);
+   hypre_TFree(info, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
 
 
    hypre_IJVectorGlobalFirstRow(vec) = partitioning[0];
@@ -161,7 +161,7 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
    } 
 
    if (hypre_IJVectorPartitioning(vec))
-      hypre_TFree(hypre_IJVectorPartitioning(vec));
+      hypre_TFree(hypre_IJVectorPartitioning(vec), HYPRE_MEMORY_HOST);
 
    if (hypre_IJVectorAssumedPart(vec))
 	   hypre_AssumedPartitionDestroy((hypre_IJAssumedPart*)hypre_IJVectorAssumedPart(vec));
@@ -181,7 +181,7 @@ HYPRE_IJVectorDestroy( HYPRE_IJVector vector )
       return hypre_error_flag;
    }
 
-   hypre_TFree(vec);
+   hypre_TFree(vec, HYPRE_MEMORY_HOST);
 
    return hypre_error_flag;
 }

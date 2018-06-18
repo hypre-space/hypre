@@ -1059,13 +1059,30 @@ HYPRE_Int HYPRE_BoomerAMGSetEuSparseA(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetEuBJ(HYPRE_Solver solver,
                                  HYPRE_Int    eu_bj);
 
-/*
- * (Optional)
- *  0: transpose of the interpolation
- *  1: AIR - approximate ideal restriction
+/**
+ * (Optional) Defines which parallel restriction operator is used.
+ * There are the following options for restr\_type: 
+ * 
+ * \begin{tabular}{|c|l|} \hline
+ *  0 & $P^T$ - Transpose of the interpolation operator \\
+ *  1 & AIR-1 - Approximate Ideal Restriction (distance 1) \\
+ *  2 & AIR-2 - Approximate Ideal Restriction (distance 2) \\
+ * \hline
+ * \end{tabular}
+ *
+ * The default is 0.
  **/
 HYPRE_Int HYPRE_BoomerAMGSetRestriction(HYPRE_Solver solver,
                                         HYPRE_Int    restr_par);
+
+/**
+ * (Optional) Defines the drop tolerance for the A-matrices 
+ * from the 2nd level of AMG.
+ * The default is 0.
+ **/
+HYPRE_Int
+HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver, 
+                            HYPRE_Real    A_drop_tol  );
 
 /*
  * (Optional) Name of file to which BoomerAMG will print;
@@ -3625,13 +3642,6 @@ HYPRE_Int HYPRE_BoomerAMGSetCRRate(HYPRE_Solver solver,
 HYPRE_Int HYPRE_BoomerAMGSetCRStrongTh(HYPRE_Solver solver,
                                        HYPRE_Real   CR_strong_th);
 
-/*
- * (Optional) Defines drop tolerance for A-matrices from the 2nd level of AMG
- * The default is 0.0.
- **/
-HYPRE_Int
-HYPRE_BoomerAMGSetADropTol( HYPRE_Solver  solver, 
-                            HYPRE_Real    A_drop_tol  );
 /*
  * (Optional) Defines whether to use CG 
  **/

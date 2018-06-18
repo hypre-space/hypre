@@ -65,7 +65,7 @@ hypre_PointRelaxCreate( MPI_Comm  comm )
    hypre_Index           stride;
    hypre_Index           indices[1];
 
-   relax_data = hypre_CTAlloc(hypre_PointRelaxData, 1);
+   relax_data = hypre_CTAlloc(hypre_PointRelaxData,  1, HYPRE_MEMORY_HOST);
 
    (relax_data -> comm)       = comm;
    (relax_data -> time_index) = hypre_InitializeTiming("PointRelax");
@@ -109,7 +109,7 @@ hypre_PointRelaxDestroy( void *relax_vdata )
    {
       for (i = 0; i < (relax_data -> num_pointsets); i++)
       {
-         hypre_TFree(relax_data -> pointset_indices[i]);
+         hypre_TFree(relax_data -> pointset_indices[i], HYPRE_MEMORY_HOST);
       }
       if (relax_data -> compute_pkgs)
       {
@@ -118,18 +118,18 @@ hypre_PointRelaxDestroy( void *relax_vdata )
             hypre_ComputePkgDestroy(relax_data -> compute_pkgs[i]);
          }
       }
-      hypre_TFree(relax_data -> pointset_sizes);
-      hypre_TFree(relax_data -> pointset_ranks);
-      hypre_TFree(relax_data -> pointset_strides);
-      hypre_TFree(relax_data -> pointset_indices);
+      hypre_TFree(relax_data -> pointset_sizes, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> pointset_ranks, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> pointset_strides, HYPRE_MEMORY_HOST);
+      hypre_TFree(relax_data -> pointset_indices, HYPRE_MEMORY_HOST);
       hypre_StructMatrixDestroy(relax_data -> A);
       hypre_StructVectorDestroy(relax_data -> b);
       hypre_StructVectorDestroy(relax_data -> x);
       hypre_StructVectorDestroy(relax_data -> t);
-      hypre_TFree(relax_data -> compute_pkgs);
+      hypre_TFree(relax_data -> compute_pkgs, HYPRE_MEMORY_HOST);
 
       hypre_FinalizeTiming(relax_data -> time_index);
-      hypre_TFree(relax_data);
+      hypre_TFree(relax_data, HYPRE_MEMORY_HOST);
    }
 
    return hypre_error_flag;
@@ -207,7 +207,7 @@ hypre_PointRelaxSetup( void               *relax_vdata,
     * Set up the compute packages
     *----------------------------------------------------------*/
 
-   compute_pkgs = hypre_CTAlloc(hypre_ComputePkg *, num_pointsets);
+   compute_pkgs = hypre_CTAlloc(hypre_ComputePkg *,  num_pointsets, HYPRE_MEMORY_HOST);
 
    for (p = 0; p < num_pointsets; p++)
    {
@@ -464,35 +464,35 @@ hypre_PointRelax( void               *relax_vdata,
                {
                   Ai = hypre_CCBoxIndexRank( A_data_box, start );
                   AAp0 = 1/Ap[Ai];
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp,bp)
                   hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                       b_data_box, start, stride, bi,
                                       x_data_box, start, stride, xi);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(bi, xi)
                   {
                      xp[xi] = bp[bi] * AAp0;
                   }
                   hypre_BoxLoop2End(bi, xi);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
                }
                /* constant_coefficent 0 (variable) or 2 (variable diagonal
                   only) are the same for the diagonal */
                else
                {
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                   hypre_BoxLoop3Begin(hypre_StructVectorNDim(x), loop_size,
                                       A_data_box, start, stride, Ai,
                                       b_data_box, start, stride, bi,
                                       x_data_box, start, stride, xi);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop3For(Ai, bi, xi)
                   {
                      xp[xi] = bp[bi] / Ap[Ai];
                   }
                   hypre_BoxLoop3End(Ai, bi, xi);
                }
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             }
          }
       }
@@ -601,17 +601,17 @@ hypre_PointRelax( void               *relax_vdata,
                {
                   start  = hypre_BoxIMin(compute_box);
                   hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap)
                   hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                       A_data_box, start, stride, Ai,
                                       t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-                  hypre_BoxLoop2For(Ai, ti)
                   {
                      tp[ti] /= Ap[Ai];
                   }
                   hypre_BoxLoop2End(Ai, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
                }
             }
          }
@@ -715,17 +715,18 @@ hypre_PointRelax_core0( void               *relax_vdata,
 
    start  = hypre_BoxIMin(compute_box);
    hypre_BoxGetStrideSize(compute_box, stride, loop_size);
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,bp)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                        b_data_box, start, stride, bi,
                        t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-   hypre_BoxLoop2For(bi, ti)
    {
       tp[ti] = bp[bi];
    }
    hypre_BoxLoop2End(bi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
    /* unroll up to depth MAX_DEPTH */
    for (si = 0; si < stencil_size; si += MAX_DEPTH)
@@ -790,14 +791,12 @@ hypre_PointRelax_core0( void               *relax_vdata,
       switch(depth)
       {
          case 7:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,Ap6,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop3For(Ai, xi, ti)
             {
                tp[ti] -=
                   Ap0[Ai] * xp[xi + xoff0] +
@@ -809,17 +808,17 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap6[Ai] * xp[xi + xoff6];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 6:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,Ap2,Ap3,Ap4,Ap5,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop3For(Ai, xi, ti)
             {
                tp[ti] -=
                   Ap0[Ai] * xp[xi + xoff0] +
@@ -830,17 +829,17 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap5[Ai] * xp[xi + xoff5];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 5:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,Ap2,Ap3,Ap4,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop3For(Ai, xi, ti)
             {
                tp[ti] -=
                   Ap0[Ai] * xp[xi + xoff0] +
@@ -850,17 +849,17 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap4[Ai] * xp[xi + xoff4];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 4:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,Ap2,Ap3,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop3For(Ai, xi, ti)
             {
                tp[ti] -=
                   Ap0[Ai] * xp[xi + xoff0] +
@@ -869,17 +868,17 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap3[Ai] * xp[xi + xoff3];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 3:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,Ap2,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop3For(Ai, xi, ti)
             {
                tp[ti] -=
                   Ap0[Ai] * xp[xi + xoff0] +
@@ -887,39 +886,41 @@ hypre_PointRelax_core0( void               *relax_vdata,
                   Ap2[Ai] * xp[xi + xoff2];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 2:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,Ap1,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop3For(Ai, xi, ti)
             {
                tp[ti] -=
                   Ap0[Ai] * xp[xi + xoff0] +
                   Ap1[Ai] * xp[xi + xoff1];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 1:
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,Ap0,xp)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(A), loop_size,
                                 A_data_box, start, stride, Ai,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop3For(Ai, xi, ti)
             {
                tp[ti] -=
                   Ap0[Ai] * xp[xi + xoff0];
             }
             hypre_BoxLoop3End(Ai, xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
             break;
 
          case 0:
@@ -999,6 +1000,9 @@ hypre_PointRelax_core12( void               *relax_vdata,
       For a variable diagonal, this diagonal division is done
       at the end of the computation. */
    Ai = hypre_CCBoxIndexRank( A_data_box, start );
+
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,bp)
    if ( constant_coefficient==1 ) /* constant diagonal */
    {
       Apd = hypre_StructMatrixBoxData(A, boxarray_id, diag_rank);
@@ -1007,10 +1011,6 @@ hypre_PointRelax_core12( void               *relax_vdata,
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           b_data_box, start, stride, bi,
                           t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(bi, ti)
       {
          tp[ti] = AApd * bp[bi];
       }
@@ -1022,16 +1022,13 @@ hypre_PointRelax_core12( void               *relax_vdata,
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           b_data_box, start, stride, bi,
                           t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-      hypre_BoxLoop2For(bi, ti)
       {
          tp[ti] = bp[bi];
       }
       hypre_BoxLoop2End(bi, ti);
-
    }
+#undef DEVICE_VAR
+#define DEVICE_VAR 
 
    /* unroll up to depth MAX_DEPTH */
    for (si = 0; si < stencil_size; si += MAX_DEPTH)
@@ -1093,6 +1090,8 @@ hypre_PointRelax_core12( void               *relax_vdata,
             break;
       }
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(tp,xp)
       switch(depth)
       {
          case 7:
@@ -1106,10 +1105,6 @@ hypre_PointRelax_core12( void               *relax_vdata,
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(xi, ti)
             {
                tp[ti] -=
                   AAp0 * xp[xi + xoff0] +
@@ -1133,10 +1128,6 @@ hypre_PointRelax_core12( void               *relax_vdata,
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(xi, ti)
             {
                tp[ti] -=
                   AAp0 * xp[xi + xoff0] +
@@ -1158,10 +1149,6 @@ hypre_PointRelax_core12( void               *relax_vdata,
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(xi, ti)
             {
                tp[ti] -=
                   AAp0 * xp[xi + xoff0] +
@@ -1181,10 +1168,6 @@ hypre_PointRelax_core12( void               *relax_vdata,
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(xi, ti)
             {
                tp[ti] -=
                   AAp0 * xp[xi + xoff0] +
@@ -1202,10 +1185,6 @@ hypre_PointRelax_core12( void               *relax_vdata,
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(xi, ti)
             {
                tp[ti] -=
                   AAp0 * xp[xi + xoff0] +
@@ -1221,10 +1200,6 @@ hypre_PointRelax_core12( void               *relax_vdata,
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(xi, ti)
             {
                tp[ti] -=
                   AAp0 * xp[xi + xoff0] +
@@ -1238,10 +1213,6 @@ hypre_PointRelax_core12( void               *relax_vdata,
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(xi, ti)
             {
                tp[ti] -=
                   AAp0 * xp[xi + xoff0];
@@ -1252,7 +1223,8 @@ hypre_PointRelax_core12( void               *relax_vdata,
          case 0:
             break;
       }
-
+#undef DEVICE_VAR
+#define DEVICE_VAR 
    }
 
    return hypre_error_flag;
@@ -1383,20 +1355,20 @@ hypre_PointRelaxSetNumPointsets( void *relax_vdata,
    /* free up old pointset memory */
    for (i = 0; i < (relax_data -> num_pointsets); i++)
    {
-      hypre_TFree(relax_data -> pointset_indices[i]);
+      hypre_TFree(relax_data -> pointset_indices[i], HYPRE_MEMORY_HOST);
    }
-   hypre_TFree(relax_data -> pointset_sizes);
-   hypre_TFree(relax_data -> pointset_ranks);
-   hypre_TFree(relax_data -> pointset_strides);
-   hypre_TFree(relax_data -> pointset_indices);
+   hypre_TFree(relax_data -> pointset_sizes, HYPRE_MEMORY_HOST);
+   hypre_TFree(relax_data -> pointset_ranks, HYPRE_MEMORY_HOST);
+   hypre_TFree(relax_data -> pointset_strides, HYPRE_MEMORY_HOST);
+   hypre_TFree(relax_data -> pointset_indices, HYPRE_MEMORY_HOST);
 
    /* alloc new pointset memory */
    (relax_data -> num_pointsets)    = num_pointsets;
-   (relax_data -> pointset_sizes)   = hypre_TAlloc(HYPRE_Int, num_pointsets);
-   (relax_data -> pointset_ranks)   = hypre_TAlloc(HYPRE_Int, num_pointsets);
-   (relax_data -> pointset_strides) = hypre_TAlloc(hypre_Index, num_pointsets);
-   (relax_data -> pointset_indices) = hypre_TAlloc(hypre_Index *,
-                                                   num_pointsets);
+   (relax_data -> pointset_sizes)   = hypre_TAlloc(HYPRE_Int,  num_pointsets, HYPRE_MEMORY_HOST);
+   (relax_data -> pointset_ranks)   = hypre_TAlloc(HYPRE_Int,  num_pointsets, HYPRE_MEMORY_HOST);
+   (relax_data -> pointset_strides) = hypre_TAlloc(hypre_Index,  num_pointsets, HYPRE_MEMORY_HOST);
+   (relax_data -> pointset_indices) = hypre_TAlloc(hypre_Index *, 
+                                                   num_pointsets, HYPRE_MEMORY_HOST);
    for (i = 0; i < num_pointsets; i++)
    {
       (relax_data -> pointset_sizes[i]) = 0;
@@ -1421,11 +1393,11 @@ hypre_PointRelaxSetPointset( void        *relax_vdata,
    HYPRE_Int             i;
 
    /* free up old pointset memory */
-   hypre_TFree(relax_data -> pointset_indices[pointset]);
+   hypre_TFree(relax_data -> pointset_indices[pointset], HYPRE_MEMORY_HOST);
 
    /* alloc new pointset memory */
    (relax_data -> pointset_indices[pointset]) =
-      hypre_TAlloc(hypre_Index, pointset_size);
+      hypre_TAlloc(hypre_Index,  pointset_size, HYPRE_MEMORY_HOST);
 
    (relax_data -> pointset_sizes[pointset]) = pointset_size;
    hypre_CopyIndex(pointset_stride,
@@ -1551,17 +1523,17 @@ HYPRE_Int hypre_relax_wtx( void *relax_vdata, HYPRE_Int pointset,
             start  = hypre_BoxIMin(compute_box);
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp,tp)
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(xi, ti)
             {
                xp[xi] = weight*tp[ti] + weightc*xp[xi];
             }
             hypre_BoxLoop2End(xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
          }
       }
    }
@@ -1635,17 +1607,17 @@ HYPRE_Int hypre_relax_copy( void *relax_vdata, HYPRE_Int pointset,
             start  = hypre_BoxIMin(compute_box);
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
+#undef DEVICE_VAR
+#define DEVICE_VAR is_device_ptr(xp,tp)
             hypre_BoxLoop2Begin(hypre_StructVectorNDim(x), loop_size,
                                 x_data_box, start, stride, xi,
                                 t_data_box, start, stride, ti);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
-#endif
-            hypre_BoxLoop2For(xi, ti)
             {
                xp[xi] = tp[ti];
             }
             hypre_BoxLoop2End(xi, ti);
+#undef DEVICE_VAR
+#define DEVICE_VAR 
          }
       }
    }

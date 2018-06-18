@@ -88,10 +88,6 @@ co="--enable-shared"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-shared
 
-co="--enable-debug --with-openmp"
-./test.sh basic.sh $src_dir -co: $co -mo: $mo
-./renametest.sh basic $output_dir/basic--enable-openmp
-
 co="--enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug1
@@ -112,6 +108,11 @@ co="--enable-debug --enable-global-partition"
 RO="-fac"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO -eo: $eo
 ./renametest.sh basic $output_dir/basic-debug2
+
+co="--with-openmp"
+RO="-ams -ij -sstruct -struct -rt -D HYPRE_NO_SAVED -nthreads 2"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $RO
+./renametest.sh basic $output_dir/basic--with-openmp
 
 co="--enable-single --enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: -single

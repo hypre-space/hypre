@@ -17,8 +17,8 @@
 
 
 
-mpirun -np 1 ./sstruct -in zsstruct.in.cube -r 10 10 10 -rhsone -solver 28 \
+mpirun -np 1  ./sstruct -in zsstruct.in.cube -r 10 10 10 -rhsone -solver 28 \
  > zcube.out.0
 
-mpirun -np 1 ./sstruct -in zsstruct.in.bcube -r 10 10 10 -rhsone -solver 28 \
+mpirun -np 1  ./sstruct -in zsstruct.in.bcube -r 10 10 10 -rhsone -solver 28 \
  > zcube.out.1
