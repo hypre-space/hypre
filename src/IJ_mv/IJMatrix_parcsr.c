@@ -805,7 +805,7 @@ hypre_IJMatrixSetValuesParCSR( hypre_IJMatrix       *matrix,
    }
    else
    {
-	   aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
+      aux_matrix = (hypre_AuxParCSRMatrix *) hypre_IJMatrixTranslator(matrix);
       row_space = hypre_AuxParCSRMatrixRowSpace(aux_matrix);
       row_length = hypre_AuxParCSRMatrixRowLength(aux_matrix);
       need_aux = hypre_AuxParCSRMatrixNeedAux(aux_matrix);

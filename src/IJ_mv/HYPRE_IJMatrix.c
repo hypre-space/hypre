@@ -57,6 +57,7 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
    hypre_IJMatrixObjectType(ijmatrix)   = HYPRE_UNITIALIZED;
    hypre_IJMatrixAssembleFlag(ijmatrix) = 0;
    hypre_IJMatrixPrintLevel(ijmatrix) = 0;
+   hypre_IJMatrixOMPFlag(ijmatrix) = 0;
 
    hypre_MPI_Comm_size(comm,&num_procs);
    hypre_MPI_Comm_rank(comm, &myid);
