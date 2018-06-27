@@ -1188,9 +1188,9 @@ HYPRE_Int HYPRE_BoomerAMGSetDSLUThreshold (HYPRE_Solver solver,
  * @param cpt_coarse_index [IN] indexes of C points to be kept
  **/
 HYPRE_Int HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
-				HYPRE_Int  cpt_coarse_level,
-				HYPRE_Int  num_cpt_coarse,
-				HYPRE_Int *cpt_coarse_index);
+            HYPRE_Int  cpt_coarse_level,
+            HYPRE_Int  num_cpt_coarse,
+            HYPRE_Int *cpt_coarse_index);
 
 /*@}*/
 
@@ -3148,7 +3148,7 @@ HYPRE_Int HYPRE_ParCSRCGNRGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
 
 /*--------------------------------------------------------------------------
  *--------------------------------------------------------------------------*/
-	
+   
 /**
  * @name ParCSR MGR Solver
  *
@@ -3278,7 +3278,7 @@ HYPRE_MGRSetBlockSize( HYPRE_Solver solver, HYPRE_Int bsize );
  **/
 HYPRE_Int
 HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_nodes );
-	
+   
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRelaxType
  *--------------------------------------------------------------------------*/
@@ -3459,7 +3459,7 @@ HYPRE_MGRSetMaxGlobalsmoothIters( HYPRE_Solver solver, HYPRE_Int smooth_iter );
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetGlobalsmoothType
- *--------------------------------------------------------------------------*/	
+ *--------------------------------------------------------------------------*/   
 /**
  * (Optional) Determines type of global smoother.
  * Options for {\tt smooth\_type} are:
@@ -3607,6 +3607,32 @@ HYPRE_ILUSetMaxNnzPerRow( HYPRE_Solver solver, HYPRE_Int nzmax );
  **/
 HYPRE_Int
 HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetDropThresholdArray
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set the array of thresholds for dropping in ilut.
+ * Any fill-in less than thresholds is dropped in the factorization.
+ * threshold[0]: threshold for matrix B (upper left).
+ * threshold[1]: threshold for matrix E and F.
+ * threshold[2]: threshold for matrix S (Schur Complement).
+ * The default is 1.0e-3. 
+ **/
+HYPRE_Int
+HYPRE_ILUSetDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetSchurMaxIter
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set maximum number of iterations for Schur System.
+ * For ILU-GMRES, this is the maximum number of iterations for GMRES
+ * If the dimension of GMRES is less than this value, also update it
+ * The default is 5.
+ **/
+HYPRE_Int
+HYPRE_ILUSetSchurMaxIter( HYPRE_Solver solver, HYPRE_Int ss_max_iter );
 
 /*--------------------------------------------------------------------------
  * HYPRE_ILUSetType

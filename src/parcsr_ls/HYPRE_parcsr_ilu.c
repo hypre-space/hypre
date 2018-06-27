@@ -111,6 +111,22 @@ HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold )
    return hypre_ILUSetDropThreshold( solver, threshold );
 }
 /*--------------------------------------------------------------------------
+ * HYPRE_ILUSetDropThresholdArray
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold )
+{
+   return hypre_ILUSetDropThresholdArray( solver, threshold );
+}
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetSchurMaxIter
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_ILUSetSchurMaxIter( HYPRE_Solver solver, HYPRE_Int ss_max_iter )
+{
+   return hypre_ILUSetSchurSolverMaxIter( solver, ss_max_iter );
+}
+/*--------------------------------------------------------------------------
  * HYPRE_ILUSetMaxNnzPerRow
  *--------------------------------------------------------------------------*/
 HYPRE_Int

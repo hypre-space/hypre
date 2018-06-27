@@ -367,6 +367,7 @@ main( hypre_int argc,
    HYPRE_Int ilu_lfil = 0;
    HYPRE_Real ilu_droptol = 1.0e-2;
    HYPRE_Int ilu_max_row_nnz = 1000;
+   HYPRE_Int ilu_schur_max_iter = 3;
    /* end hypre ILU options */
 
    HYPRE_Real     *nongalerk_tol = NULL;
@@ -1021,12 +1022,17 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-ilu_droptol") == 0 )
       {                /* drop tolerance */
          arg_index++;        
-         ilu_droptol = atoi(argv[arg_index++]);
+         ilu_droptol = atof(argv[arg_index++]);
       }      
       else if ( strcmp(argv[arg_index], "-ilu_max_row_nnz") == 0 )
       {                /* Max number of nonzeros to keep per row */
          arg_index++;        
          ilu_max_row_nnz = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-ilu_schur_max_iter") == 0 )
+      {                /* Max number of iterations for schur system solver */
+         arg_index++;        
+         ilu_schur_max_iter = atoi(argv[arg_index++]);
       }
       /* end ilu options */
       else
@@ -1631,10 +1637,10 @@ main( hypre_int argc,
          hypre_printf("       45=Euclid-BICGSTAB\n");
          hypre_printf("       50=DS-LGMRES         51=AMG-LGMRES     \n");
          hypre_printf("       60=DS-FlexGMRES         61=AMG-FlexGMRES     \n");
-	 hypre_printf("       70=MGR             71=MGR-PCG  \n");
-	 hypre_printf("       72=MGR-FlexGMRES  73=MGR-BICGSTAB  \n");
-	 hypre_printf("       80=ILU      81=ILU-GMRES  \n");	 
-	 hypre_printf("       82=ILU-FlexGMRES  \n");	 
+	     hypre_printf("       70=MGR             71=MGR-PCG  \n");
+	     hypre_printf("       72=MGR-FlexGMRES  73=MGR-BICGSTAB  \n");
+	     hypre_printf("       80=ILU      81=ILU-GMRES  \n");	 
+	     hypre_printf("       82=ILU-FlexGMRES  \n");	 
          hypre_printf("\n");
          hypre_printf("  -cljp                 : CLJP coarsening \n");
          hypre_printf("  -cljp1                : CLJP coarsening, fixed random \n");
@@ -1879,6 +1885,7 @@ main( hypre_int argc,
          hypre_printf("  -ilu_lfil   <val>                : set level of fill (k) for ILU(k) = val\n");      
          hypre_printf("  -ilu_droptol   <val>             : set drop tolerance threshold for ILUT = val \n");      
          hypre_printf("  -ilu_max_row_nnz   <val>         : set max. num of nonzeros to keep per row = val \n");          
+         hypre_printf("  -ilu_schur_max_iter   <val>      : set max. num of iteration for GMRES Schur = val \n");
          /* end ILU options */
       }
 
@@ -4910,7 +4917,13 @@ main( hypre_int argc,
          HYPRE_ILUSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
          HYPRE_ILUSetMaxIter(pcg_precond, 1);
-         HYPRE_ILUSetTol(pcg_precond, pc_tol);                
+         HYPRE_ILUSetTol(pcg_precond, pc_tol);
+         /* set max number of nonzeros per row */
+         HYPRE_ILUSetMaxNnzPerRow(pcg_precond,ilu_max_row_nnz);
+         /* set the droptol */
+         HYPRE_ILUSetDropThreshold(pcg_precond,ilu_droptol);  
+         /* set max iterations for Schur system solve */                
+         HYPRE_ILUSetSchurMaxIter( pcg_precond, ilu_schur_max_iter );              
 
          /* setup ILU-GMRES solver */
 	 HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
@@ -5391,10 +5404,16 @@ main( hypre_int argc,
          HYPRE_ILUSetType(pcg_precond, ilu_type);
          HYPRE_ILUSetLevelOfFill(pcg_precond, ilu_lfil);
          /* set print level */
-         HYPRE_ILUSetPrintLevel(pcg_precond, 2);
+         HYPRE_ILUSetPrintLevel(pcg_precond, 1);
          /* set max iterations */
          HYPRE_ILUSetMaxIter(pcg_precond, 1);
-         HYPRE_ILUSetTol(pcg_precond, pc_tol);                
+         HYPRE_ILUSetTol(pcg_precond, pc_tol);
+         /* set max number of nonzeros per row */
+         HYPRE_ILUSetMaxNnzPerRow(pcg_precond,ilu_max_row_nnz);
+         /* set the droptol */
+         HYPRE_ILUSetDropThreshold(pcg_precond,ilu_droptol);
+         /* set max iterations for Schur system solve */                
+         HYPRE_ILUSetSchurMaxIter( pcg_precond, ilu_schur_max_iter );              
 
          /* setup MGR-PCG solver */
 	 HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
@@ -6188,7 +6207,13 @@ main( hypre_int argc,
       HYPRE_ILUSetPrintLevel(ilu_solver, 2);
       /* set max iterations */
       HYPRE_ILUSetMaxIter(ilu_solver, max_iter);
+      /* set max number of nonzeros per row */
+      HYPRE_ILUSetMaxNnzPerRow(ilu_solver,ilu_max_row_nnz);
+      /* set the droptol */
+      HYPRE_ILUSetDropThreshold(ilu_solver,ilu_droptol);
       HYPRE_ILUSetTol(ilu_solver, tol);
+      /* set max iterations for Schur system solve */                
+      HYPRE_ILUSetSchurMaxIter( ilu_solver, ilu_schur_max_iter ); 
       
       /* setup hypre_ILU solver */
       HYPRE_ILUSetup(ilu_solver, parcsr_A, b, x);
