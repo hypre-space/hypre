@@ -21,6 +21,7 @@ hypre_ILUSetup( void               *ilu_vdata,
 {
    MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
    hypre_ParILUData     *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   hypre_ParILUData     *schur_precond_ilu;
 
    HYPRE_Int            i;
 // HYPRE_Int            num_threads;
@@ -43,11 +44,12 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParCSRMatrix   *matU = (ilu_data -> matU);
    hypre_ParCSRMatrix   *matS = (ilu_data -> matS);
    HYPRE_Real           nnzS/* total nnz in S */;
+   HYPRE_Int            nnzS_offd;
    HYPRE_Int            size_C/* total size of coarse grid */;
    
    HYPRE_Int            n = hypre_CSRMatrixNumRows(hypre_ParCSRMatrixDiag(A));
    HYPRE_Int            m;/* m = n-LU */
-// HYPRE_Int            num_procs,  my_id;
+   HYPRE_Int            num_procs,  my_id;
 
    hypre_ParVector      *Utemp;
    hypre_ParVector      *Ftemp;
@@ -67,8 +69,8 @@ hypre_ILUSetup( void               *ilu_vdata,
 
    //num_threads = hypre_NumThreads();
 
-   //hypre_MPI_Comm_size(comm,&num_procs);
-   //hypre_MPI_Comm_rank(comm,&my_id);
+   hypre_MPI_Comm_size(comm,&num_procs);
+   hypre_MPI_Comm_rank(comm,&my_id);
 
    /* Free Previously allocated data, if any not destroyed */
    if(matL)
@@ -160,7 +162,6 @@ hypre_ILUSetup( void               *ilu_vdata,
         }
      (ilu_data -> schur_precond) = NULL;
    } 
-
    /* start to create working vectors */
    Utemp = hypre_ParVectorCreate(hypre_ParCSRMatrixComm(A),
                           hypre_ParCSRMatrixGlobalNumRows(A),
@@ -175,7 +176,6 @@ hypre_ILUSetup( void               *ilu_vdata,
    hypre_ParVectorInitialize(Ftemp);
    hypre_ParVectorSetPartitioningOwner(Ftemp,0);
    (ilu_data ->Ftemp) = Ftemp;
-
    /* set matrix, solution and rhs pointers */
    matA = A;
    F_array = f;
@@ -191,9 +191,9 @@ hypre_ILUSetup( void               *ilu_vdata,
       nLU = (ilu_data -> nLU);
    }
    m = n - nLU;
-   
    /* factorization */
-   switch(ilu_type){
+   switch(ilu_type)
+   {
       case 0: hypre_ILUSetupILUK(matA, fill_level, perm, n, &matL, &matD, &matU, &matS); //BJ + hypre_iluk()
          break;
       case 1: hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, n, &matL, &matD, &matU, &matS); //BJ + hypre_ilut()
@@ -204,9 +204,10 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
       default: hypre_ILUSetupILU0(matA, perm, n, &matL, &matD, &matU, &matS);//BJ + hypre_ilu0()
          break;
-        }
+   }
    /* setup Schur solver */
-   switch(ilu_type){
+   switch(ilu_type)
+   {
       case 10: case 11: 
          if(matS)
          {
@@ -303,14 +304,30 @@ hypre_ILUSetup( void               *ilu_vdata,
       nnzS = hypre_ParCSRMatrixDNumNonzeros(matS);
       /* if we have Schur system need to reduce it from size_C */
       size_C -= hypre_ParCSRMatrixGlobalNumRows(matS);
+      switch(ilu_type)
+      {
+         case 10: case 11:
+            /* now we need to compute the preoconditioner */
+            schur_precond_ilu = (hypre_ParILUData*) (ilu_data -> schur_precond);
+            /* borrow i for local nnz of S */
+            i = hypre_CSRMatrixNumNonzeros(hypre_ParCSRMatrixOffd(matS));
+            hypre_MPI_Allreduce(&i, &nnzS_offd, 1, HYPRE_MPI_INT, hypre_MPI_SUM, comm);
+            nnzS = nnzS * (schur_precond_ilu -> operator_complexity) +nnzS_offd;
+            break;
+         default:
+            break;
+      }
    }
    
-   (ilu_data -> operator_complexity) =   ((HYPRE_Real)size_C + nnzS +
-                                                hypre_ParCSRMatrixDNumNonzeros(matL) + 
-                                                hypre_ParCSRMatrixDNumNonzeros(matU)) / 
-                                                hypre_ParCSRMatrixDNumNonzeros(matA);                                         
-      
-// hypre_printf("ILU SETUP: operator complexity = %f  \n", ilu_data -> operator_complexity);
+   /* switch to compute complexity */
+   (ilu_data -> operator_complexity) =  ((HYPRE_Real)size_C + nnzS +
+                                          hypre_ParCSRMatrixDNumNonzeros(matL) + 
+                                          hypre_ParCSRMatrixDNumNonzeros(matU)) / 
+                                          hypre_ParCSRMatrixDNumNonzeros(matA);
+   if (my_id == 0)
+   {
+      hypre_printf("ILU SETUP: operator complexity = %f  \n", ilu_data -> operator_complexity);
+   }
 
    if ( logging > 1 ) {
       residual =
@@ -353,6 +370,7 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
    hypre_ParCSRCommHandle   *comm_handle;
    HYPRE_Int                num_sends, begin, end;
    HYPRE_Int                *send_buf = NULL;
+   MPI_Status               *comm_status;
    
    /* data objects for A */
    hypre_CSRMatrix          *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -791,7 +809,9 @@ hypre_ILUSetupILU0(hypre_ParCSRMatrix *A, HYPRE_Int *perm, HYPRE_Int nLU,
       /* main communication */
       comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, send_buf, S_offd_colmap);
       /* need this to synchronize, Isend & Irecv used in above functions */
-      MPI_Barrier(comm);
+      comm_status = hypre_TAlloc(MPI_Status,hypre_ParCSRCommHandleNumRequests(comm_handle),HYPRE_MEMORY_HOST);
+      MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),hypre_ParCSRCommHandleRequests(comm_handle),comm_status);
+      hypre_TFree(comm_status,HYPRE_MEMORY_HOST);
 
       /* setup index */
       hypre_ParCSRMatrixColMapOffd(matS) = S_offd_colmap;
@@ -1291,6 +1311,7 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
    HYPRE_Int               i, ii, j, k, k1, k2, k3, kl, ku, jpiv, col, icol;
    HYPRE_Int               *iw;
    MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
+   MPI_Comm                schur_comm;
 
    /* data objects for A */
    hypre_CSRMatrix         *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -1333,6 +1354,8 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
    hypre_ParCSRCommPkg     *comm_pkg;
    hypre_ParCSRCommHandle  *comm_handle;
    HYPRE_Int               *send_buf = NULL;
+   MPI_Status              *comm_status;
+   
    /* problem size */
    HYPRE_Int               n;
    HYPRE_Int               m;
@@ -1669,8 +1692,9 @@ hypre_ILUSetupILUK(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Int *perm, HYPRE
       /* main communication */
       comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, send_buf, S_offd_colmap);
       /* need this to synchronize, Isend & Irecv used in above functions */
-      MPI_Barrier(comm);
-
+      comm_status = hypre_TAlloc(MPI_Status,hypre_ParCSRCommHandleNumRequests(comm_handle),HYPRE_MEMORY_HOST);
+      MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),hypre_ParCSRCommHandleRequests(comm_handle),comm_status);
+      hypre_TFree(comm_status,HYPRE_MEMORY_HOST);
       /* setup index */
       hypre_ParCSRMatrixColMapOffd(matS) = S_offd_colmap;
          
@@ -1819,6 +1843,7 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
    HYPRE_Int                total_rows;
    HYPRE_Int                num_sends;
    HYPRE_Int                begin, end;
+   MPI_Status               *comm_status;
    
    /* data objects for A */
    hypre_CSRMatrix          *A_diag = hypre_ParCSRMatrixDiag(A);
@@ -2431,7 +2456,9 @@ hypre_ILUSetupILUT(hypre_ParCSRMatrix *A, HYPRE_Int lfil, HYPRE_Real *tol,
       /* main communication */
       comm_handle = hypre_ParCSRCommHandleCreate(11, comm_pkg, send_buf, S_offd_colmap);
       /* need this to synchronize, Isend & Irecv used in above functions */
-      MPI_Barrier(comm);
+      comm_status = hypre_TAlloc(MPI_Status,hypre_ParCSRCommHandleNumRequests(comm_handle),HYPRE_MEMORY_HOST);
+      MPI_Waitall(hypre_ParCSRCommHandleNumRequests(comm_handle),hypre_ParCSRCommHandleRequests(comm_handle),comm_status);
+      hypre_TFree(comm_status,HYPRE_MEMORY_HOST);
 
       /* setup index */
       hypre_ParCSRMatrixColMapOffd(matS) = S_offd_colmap;
