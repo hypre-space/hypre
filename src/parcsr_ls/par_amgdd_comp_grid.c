@@ -603,7 +603,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                // otherwise find local index via binary search
                else
                {
-                  local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index);
+                  local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, 0);
                }
                hypre_ParCompMatrixRowLocalIndices(row)[j] = local_index;
 
@@ -634,7 +634,7 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                // if this node is repeated on the next coarsest grid, figure out its local index
                if ( coarse_global_index != -1)
                {
-                  hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], coarse_global_index);
+                  hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], coarse_global_index, 0);
                }
                // otherwise set it to -1
                else hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = -1;
@@ -655,7 +655,8 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
    {
       // Get first and last owned global indices on the next level (domain of P)
       first = hypre_ParCompGridGlobalIndices(compGrid[level+1])[0];
-      last = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridNumOwnedNodes(compGrid[level+1]) - 1];
+      if (hypre_ParCompGridNumOwnedNodes(compGrid[level+1])) last = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridNumOwnedNodes(compGrid[level+1]) - 1];
+      else last = 0;
       // Look for missing local indices in the owned nodes
       for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid[level]); i++)
       {
@@ -665,7 +666,7 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
             if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) 
             {
                // Binary search to find local index
-               hypre_ParCompMatrixRowLocalIndices(row)[j] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], hypre_ParCompMatrixRowGlobalIndices(row)[j]);
+               hypre_ParCompMatrixRowLocalIndices(row)[j] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], hypre_ParCompMatrixRowGlobalIndices(row)[j], 0);
             }
          }
       }
@@ -679,13 +680,13 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
             // If global index is owned, simply calculate
             if (global_index >= first && global_index <= last) hypre_ParCompMatrixRowLocalIndices(row)[j] = global_index - first;
             // Otherwise, binary search
-            else hypre_ParCompMatrixRowLocalIndices(row)[j] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index);
+            else hypre_ParCompMatrixRowLocalIndices(row)[j] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0);
          }
       }
    }
 }
 
-HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index )
+HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search )
 {
    HYPRE_Int      left = hypre_ParCompGridNumOwnedNodes(compGrid);
    HYPRE_Int      right = hypre_ParCompGridNumNodes(compGrid) - 1;
@@ -699,8 +700,9 @@ HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, 
       else return index;
    }
 
-   // If binary search fails to find an exact match, return the index of the first element greater than global_index
-   return left;
+   // If binary search fails to find an exact match, return the index of the first element greater than global_index or -1
+   if (allow_failed_search) return left;
+   else return -1;
 }
 
 HYPRE_Int

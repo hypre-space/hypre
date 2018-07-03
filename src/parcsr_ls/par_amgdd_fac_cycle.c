@@ -168,6 +168,7 @@ Restrict( hypre_ParCompMatrixRow **A_rows_f, hypre_ParCompMatrixRow **A_rows_c, 
 			}
 			// Otherwise just subtract off A_ij * u_j
 			else res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_f[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
+			if (hypre_ParCompMatrixRowLocalIndices(row)[j] >= num_nodes_f) printf("Rank %d, index %d is out of bounds, num_nodes_f = %d\n", myid, hypre_ParCompMatrixRowLocalIndices(row)[j], num_nodes_f);
 		}
 	}
 	

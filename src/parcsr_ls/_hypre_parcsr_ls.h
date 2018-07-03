@@ -1857,7 +1857,7 @@ HYPRE_Int hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_s
 HYPRE_Int hypre_ParCompGridCopyNode( hypre_ParCompGrid *compGrid, hypre_ParCompGrid *compGridCopy, HYPRE_Int index, HYPRE_Int copyIndex);
 HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int num_levels, HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index );
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels );
-HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index );
+HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search );
 HYPRE_Int hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename );
 HYPRE_Int hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filename );
 hypre_ParCompMatrixRow *hypre_ParCompMatrixRowCreate ();

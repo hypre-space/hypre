@@ -265,9 +265,9 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
 
             // !!! Debugging: !!!
             FILE *file;
-            sprintf(filename,"outputs/send_buffer%d_rank%d.txt",i,myid);
+            sprintf(filename,"outputs/send_buffer%d_level%d_rank%d.txt",i,level,myid);
             file = fopen(filename,"w");
-            for (j = 0; j < send_buffer_size[level][i]; j++) fprintf(file,"%d ", send_buffer[i][j]);
+            for (j = 0; j < send_buffer_size[level][i]; j++) fprintf(file,"%f\n", send_buffer[i][j]);
             fclose(file);
 
 
@@ -368,7 +368,44 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
          
          if (timers) hypre_BeginTiming(timers[5]);
          
+
+
+
+
+
+         #if DEBUG_COMP_GRID
+         for (i = 0; i < num_levels; i++)
+         {
+            hypre_sprintf(filename, "outputs/CompGrids/beforeLocalIndicesLevel%dCompGridRank%dLevel%d.txt", level, myid, i);
+            hypre_ParCompGridDebugPrint( compGrid[i], filename );
+            // hypre_sprintf(filename, "outputs/CompGrids/plotCompGridRank%dLevel%d.txt", myid, level);
+            // hypre_ParCompGridMatlabPlot( compGrid[level], filename );
+            if (myid == 0)
+            {
+               FILE             *file;
+               // hypre_sprintf(filename,"/p/lscratchd/wbm/CompGrids/global_num_nodes.txt");
+               hypre_sprintf(filename,"outputs/CompGrids/global_num_nodes.txt");
+               file = fopen(filename,"w");
+               hypre_fprintf(file, "%d\n", hypre_ParCSRMatrixGlobalNumRows(A_array[0]) );
+               fclose(file);
+               // Print info on how to read files
+               // hypre_sprintf(filename,"/p/lscratchd/wbm/CompGrids/info.txt");
+               hypre_sprintf(filename,"outputs/CompGrids/info.txt");
+               file = fopen(filename,"w");
+               hypre_fprintf(file, "num_nodes\nmem_size\nnum_owned_nodes\nsolution values\nresidual values\nglobal indices\ncoarse global indices\ncoarse local indices\nrows of matrix A: size, data, global indices, local indices\nrows of matrix P: size, data, global indices, local indices\nghost P rows: size, data, global indices, local indices\n");
+               fclose(file);
+            }
+         }
+         #endif
+
+
+
+
+
+
+
          hypre_ParCompGridSetupLocalIndices(compGrid, num_added_nodes, num_levels, proc_first_index, proc_last_index);
+         if (level == 0) hypre_ParCompGridSetupLocalIndicesP(compGrid, num_levels);
          
          if (timers) hypre_EndTiming(timers[5]);
 
@@ -1088,7 +1125,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          else
          {
             // Binary search to find where to insert
-            insert_owned_position = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], first_owned);
+            insert_owned_position = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], first_owned, 1);
          }
 
          // Generate the send_flag in global index ordering
@@ -1407,17 +1444,31 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, HYPR
       HYPRE_Int incoming_cnt = 0;
       HYPRE_Int *compGrid_dest = hypre_CTAlloc(HYPRE_Int, num_nonowned_nodes, HYPRE_MEMORY_HOST);
       HYPRE_Int *incoming_dest = hypre_CTAlloc(HYPRE_Int, num_incoming_nodes[level], HYPRE_MEMORY_HOST);
-      while (cnt < num_incoming_nodes[level] && compGrid_cnt < num_nonowned_nodes)
+
+
+      // !!! Debugging: !!!
+      // if (myid == 2)
+      // {
+      //    printf("current_level = %d, level = %d\n", current_level, level);
+      //    printf("incoming_cnt = %d, num_incoming_nodes = %d, compGrid_cnt = %d, num_nonowned_nodes = %d\n", incoming_cnt, num_incoming_nodes[level], compGrid_cnt, num_nonowned_nodes);
+      // }
+
+
+
+      while (incoming_cnt < num_incoming_nodes[level] && compGrid_cnt < num_nonowned_nodes)
       {
          HYPRE_Int incoming_global_index = recv_buffer[cnt];
          HYPRE_Int compGrid_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ compGrid_cnt + num_owned_nodes ];
-         if (incoming_global_index < proc_first_index[level] || incoming_global_index > proc_last_index[level])
+         // if (myid == 2) printf("incoming_global_index = %d, compGrid_global_index = %d, proc_first_index = %d, proc_last_index = %d\n", incoming_global_index, compGrid_global_index, proc_first_index[level], proc_last_index[level]);
+         if (incoming_global_index >= proc_first_index[level] && incoming_global_index <= proc_last_index[level])
          {
+            // if (myid == 2) printf("incoming marked as owned\n");
             incoming_dest[incoming_cnt++] = -1;
             cnt++;
          }
          else if (incoming_global_index == compGrid_global_index)
          {
+            // if (myid == 2) printf("incoming marked as redundant\n");
             incoming_dest[incoming_cnt++] = -1;
             // Check whether incoming redundant node is a real node (if so, ensure that the node is marked real in the comp grid)
             if (level != num_levels-1) if ( !( (HYPRE_Int) recv_buffer[cnt + 2*num_incoming_nodes[level]] ) ) hypre_ParCompGridGhostMarker(compGrid[level])[compGrid_cnt + num_owned_nodes] = 0;
@@ -1425,44 +1476,63 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, HYPR
          }
          else if (incoming_global_index < compGrid_global_index)
          {
+            // if (myid == 2) printf("incoming assigned dest = %d\n", dest);
             incoming_dest[incoming_cnt++] = dest++;
             cnt++;
             add_node_cnt++;
          }
          else
          {
+            // if (myid == 2) printf("comp grid assigned dest %d\n", dest);
             compGrid_dest[compGrid_cnt++] = dest++;
          }
       }
+      // !!! Debugging: !!!
+      // if (myid == 2)
+      // {
+      //    printf("incoming_cnt = %d, num_incoming_nodes = %d, compGrid_cnt = %d, num_nonowned_nodes = %d\n", incoming_cnt, num_incoming_nodes[level], compGrid_cnt, num_nonowned_nodes);
+      // }
       while (incoming_cnt < num_incoming_nodes[level])
       {
          HYPRE_Int incoming_global_index = recv_buffer[cnt];
-         if (incoming_global_index < proc_first_index[level] || incoming_global_index > proc_last_index[level])
+         // if (myid == 2) printf("incoming_global_index = %d\n", incoming_global_index);
+         if (incoming_global_index >= proc_first_index[level] && incoming_global_index <= proc_last_index[level])
          {
+            // if (myid == 2) printf("marked as owned\n");
             incoming_dest[incoming_cnt++] = -1;
             cnt++;
          }
          else
          {
-            incoming_dest[cnt++] = dest++;
+            // if (myid == 2) printf("incoming assigend dest %d\n",dest);
+            incoming_dest[incoming_cnt++] = dest++;
             add_node_cnt++;
+            cnt++;
          }
       }
+      // !!! Debugging: !!!
+      // if (myid == 2)
+      // {
+      //    printf("incoming_cnt = %d, num_incoming_nodes = %d, compGrid_cnt = %d, num_nonowned_nodes = %d\n", incoming_cnt, num_incoming_nodes[level], compGrid_cnt, num_nonowned_nodes);
+      // }
       while (compGrid_cnt < num_nonowned_nodes)
       {
+         // if (myid == 2) printf("comp grid assigend dest %d\n",dest);
          compGrid_dest[compGrid_cnt++] = dest++;
       }
       num_added_nodes[level] += add_node_cnt;
 
 
       // !!! Debugging: !!!
-      if (myid == 0 && current_level == 3 && level == 3)
-      {
-         printf("num_added_nodes = %d\n",num_added_nodes[level]);
-         printf("incoming_dest = ");
-         for (i = 0; i < num_incoming_nodes[level]; i++) printf("%d ", incoming_dest[i]);
-         printf("\n");
-      }
+      // if (myid == 2)
+      // {
+      //    printf("num_added_nodes = %d\n",num_added_nodes[level]);
+      //    printf("incoming_dest = ");
+      //    for (i = 0; i < num_incoming_nodes[level]; i++) printf("%d ", incoming_dest[i]);
+      //    printf("\ncompGrid_dest = ");
+      //    for (i = 0; i < num_nonowned_nodes; i++) printf("%d ", compGrid_dest[i]);
+      //    printf("\n");
+      // }
 
 
 
@@ -1477,7 +1547,9 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, HYPR
       for (i = num_nonowned_nodes - 1; i >= 0; i--)
          hypre_ParCompGridF(compGrid[level])[ compGrid_dest[i] ] = hypre_ParCompGridF(compGrid[level])[i + num_owned_nodes];
       for (i = num_nonowned_nodes - 1; i >= 0; i--)
+      {
          hypre_ParCompGridARows(compGrid[level])[ compGrid_dest[i] ] = hypre_ParCompGridARows(compGrid[level])[i + num_owned_nodes];
+      }
       if (level != num_levels-1)
       {
          for (i = num_nonowned_nodes - 1; i >= 0; i--)
@@ -1487,7 +1559,9 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, HYPR
          for (i = num_nonowned_nodes - 1; i >= 0; i--)
             hypre_ParCompGridCoarseLocalIndices(compGrid[level])[ compGrid_dest[i] ] = hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i + num_owned_nodes];
          for (i = num_nonowned_nodes - 1; i >= 0; i--)
+         {
             hypre_ParCompGridPRows(compGrid[level])[ compGrid_dest[i] ] = hypre_ParCompGridPRows(compGrid[level])[i + num_owned_nodes];
+         }
       }
 
       // Now copy in the new nodes to their appropriate positions
@@ -1523,8 +1597,6 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, HYPR
       {
          if (incoming_dest[i] >= 0)
          {
-            // If there was an old row at this position, destroy it
-            if (hypre_ParCompGridARows(compGrid[level])[ incoming_dest[i] ]) hypre_ParCompMatrixRowDestroy( hypre_ParCompGridARows(compGrid[level])[ incoming_dest[i] ] );
             // get the row length of matrix A
             row_size = (HYPRE_Int) recv_buffer[cnt++];
             // Create row and allocate space
@@ -1533,6 +1605,7 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, HYPR
             hypre_ParCompMatrixRowData( hypre_ParCompGridARows( compGrid[level] )[ incoming_dest[i] ] ) = hypre_CTAlloc(HYPRE_Complex, row_size, HYPRE_MEMORY_HOST);
             hypre_ParCompMatrixRowGlobalIndices( hypre_ParCompGridARows( compGrid[level] )[ incoming_dest[i] ] ) = hypre_CTAlloc(HYPRE_Int, row_size, HYPRE_MEMORY_HOST);
             hypre_ParCompMatrixRowLocalIndices( hypre_ParCompGridARows( compGrid[level] )[ incoming_dest[i] ] ) = hypre_CTAlloc(HYPRE_Int, row_size, HYPRE_MEMORY_HOST);
+
             // copy matrix entries of matrix A
             for (j = 0; j < row_size; j++)
             {
@@ -1543,22 +1616,10 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, HYPR
             {
                hypre_ParCompMatrixRowGlobalIndices( hypre_ParCompGridARows( compGrid[level] )[ incoming_dest[i] ] )[j] = (HYPRE_Int) recv_buffer[cnt++];
             }
-         }
-         else
-         {
-            row_size = (HYPRE_Int) recv_buffer[cnt++];
-            cnt += 2*row_size;
-         }
-      }
-      if (level != num_levels-1)
-      {
-         for (i = 0; i < num_incoming_nodes[level]; i++)
-         {
-            if (incoming_dest[i] >= 0)
+            // If not on coarsest level, do the same for P
+            if (level != num_levels-1)
             {
-               // If there was an old row at this position, destroy it
-               if (hypre_ParCompGridPRows(compGrid[level])[ incoming_dest[i] ]) hypre_ParCompMatrixRowDestroy( hypre_ParCompGridPRows(compGrid[level])[ incoming_dest[i] ] );
-               // get the row length of matrix A
+               // get the row length of matrix P
                row_size = (HYPRE_Int) recv_buffer[cnt++];
                // Create row and allocate space
                hypre_ParCompGridPRows(compGrid[level])[ incoming_dest[i] ] = hypre_ParCompMatrixRowCreate();
@@ -1566,18 +1627,23 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid, HYPR
                hypre_ParCompMatrixRowData( hypre_ParCompGridPRows( compGrid[level] )[ incoming_dest[i] ] ) = hypre_CTAlloc(HYPRE_Complex, row_size, HYPRE_MEMORY_HOST);
                hypre_ParCompMatrixRowGlobalIndices( hypre_ParCompGridPRows( compGrid[level] )[ incoming_dest[i] ] ) = hypre_CTAlloc(HYPRE_Int, row_size, HYPRE_MEMORY_HOST);
                hypre_ParCompMatrixRowLocalIndices( hypre_ParCompGridPRows( compGrid[level] )[ incoming_dest[i] ] ) = hypre_CTAlloc(HYPRE_Int, row_size, HYPRE_MEMORY_HOST);
-               // copy matrix entries of matrix A
+               // copy matrix entries of matrix P
                for (j = 0; j < row_size; j++)
                {
                   hypre_ParCompMatrixRowData( hypre_ParCompGridPRows( compGrid[level] )[ incoming_dest[i] ] )[j] = recv_buffer[cnt++];
                }
-               // copy global indices of matrix A
+               // copy global indices of matrix P
                for (j = 0; j < row_size; j++)
                {
                   hypre_ParCompMatrixRowGlobalIndices( hypre_ParCompGridPRows( compGrid[level] )[ incoming_dest[i] ] )[j] = (HYPRE_Int) recv_buffer[cnt++];
                }
             }
-            else
+         }
+         else
+         {
+            row_size = (HYPRE_Int) recv_buffer[cnt++];
+            cnt += 2*row_size;
+            if (level != num_levels-1)
             {
                row_size = (HYPRE_Int) recv_buffer[cnt++];
                cnt += 2*row_size;
