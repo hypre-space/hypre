@@ -782,7 +782,6 @@ hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filenam
 
 }
 
-
 HYPRE_Int 
 hypre_ParCompGridMatlabPlot( hypre_ParCompGrid *compGrid, const char* filename)
 {
@@ -823,6 +822,65 @@ hypre_ParCompGridMatlabPlot( hypre_ParCompGrid *compGrid, const char* filename)
    return 0;
 }
 
+HYPRE_Int
+hypre_ParCompGridMatlabAMatrixDump( hypre_ParCompGrid *compGrid, const char* filename)
+{
+   // Get composite grid information
+   HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
+
+   HYPRE_Int                     *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
+   hypre_ParCompMatrixRow        **A_rows = hypre_ParCompGridARows(compGrid);
+
+   // Print info to given filename   
+   FILE             *file;
+   file = fopen(filename,"w");
+   HYPRE_Int i,j,row_size;
+
+   for (i = 0; i < num_nodes; i++)
+   {
+      row_size = hypre_ParCompMatrixRowSize(A_rows[i]);
+      for (j = 0; j < row_size; j++)
+      {
+         hypre_fprintf(file, "%d ", global_indices[i]);
+         hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowGlobalIndices(A_rows[i])[j]);
+         hypre_fprintf(file, "%f\n", hypre_ParCompMatrixRowData(A_rows[i])[j]);
+      }
+   }
+
+   fclose(file);
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* filename)
+{
+   // Get composite grid information
+   HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
+
+   HYPRE_Int                     *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
+   hypre_ParCompMatrixRow        **P_rows = hypre_ParCompGridPRows(compGrid);
+
+   // Print info to given filename   
+   FILE             *file;
+   file = fopen(filename,"w");
+   HYPRE_Int i,j,row_size;
+
+   for (i = 0; i < num_nodes; i++)
+   {
+      row_size = hypre_ParCompMatrixRowSize(P_rows[i]);
+      for (j = 0; j < row_size; j++)
+      {
+         hypre_fprintf(file, "%d ", global_indices[i]);
+         hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowGlobalIndices(P_rows[i])[j]);
+         hypre_fprintf(file, "%f\n", hypre_ParCompMatrixRowData(P_rows[i])[j]);
+      }
+   }
+
+   fclose(file);
+
+   return 0;
+}
 
 hypre_ParCompMatrixRow *
 hypre_ParCompMatrixRowCreate ()

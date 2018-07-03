@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 0 // if true, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 1 // if true, prints out what is stored in the comp grids for each processor to a file
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
@@ -488,6 +488,22 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
       #if DEBUGGING_MESSAGES
       hypre_printf("      Rank %d: done with level %d\n", myid, level);
       #endif 
+
+
+      #if DEBUG_COMP_GRID
+      for (i = level; i < num_levels; i++)
+      {
+         hypre_sprintf(filename, "outputs/CompGrids/setupLevel%dCompGridRank%dLevel%d.txt", level, myid, i);
+         hypre_ParCompGridMatlabPlot( compGrid[i], filename );
+         hypre_sprintf(filename, "outputs/CompGrids/setupLevel%dACompRank%dLevel%d.txt", level, myid, i);
+         hypre_ParCompGridMatlabAMatrixDump( compGrid[i], filename );
+         if (i != num_levels-1)
+         {
+            hypre_sprintf(filename, "outputs/CompGrids/setupLevel%dPCompRank%dLevel%d.txt", level, myid, i);
+            hypre_ParCompGridMatlabPMatrixDump( compGrid[i], filename );
+         }
+      }
+      #endif
    }
 
 
@@ -496,9 +512,16 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
    {
       // hypre_sprintf(filename, "/p/lscratchd/wbm/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
       hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
-      hypre_ParCompGridDebugPrint( compGrid[level], filename );
+      // hypre_ParCompGridDebugPrint( compGrid[level], filename );
       // hypre_sprintf(filename, "outputs/CompGrids/plotCompGridRank%dLevel%d.txt", myid, level);
-      // hypre_ParCompGridMatlabPlot( compGrid[level], filename );
+      hypre_ParCompGridMatlabPlot( compGrid[level], filename );
+      hypre_sprintf(filename, "outputs/CompGrids/setupACompRank%dLevel%d.txt", myid, level);
+      hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename );
+      if (level != num_levels-1)
+      {
+         hypre_sprintf(filename, "outputs/CompGrids/setupPCompRank%dLevel%d.txt", myid, level);
+         hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename );
+      }
       if (myid == 0)
       {
          FILE             *file;
