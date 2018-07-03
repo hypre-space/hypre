@@ -1859,6 +1859,9 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPR
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels );
 HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search );
 HYPRE_Int hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename );
+HYPRE_Int hypre_ParCompGridMatlabPlot( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filename );
 hypre_ParCompMatrixRow *hypre_ParCompMatrixRowCreate ();
 HYPRE_Int hypre_ParCompMatrixRowDestroy ( hypre_ParCompMatrixRow *row );

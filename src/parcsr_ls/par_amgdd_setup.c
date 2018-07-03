@@ -540,31 +540,19 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
 
 
       #if DEBUG_COMP_GRID
-      for (i = 0; i < num_levels; i++)
+      for (i = level; i < num_levels; i++)
       {
          hypre_sprintf(filename, "outputs/CompGrids/setupLevel%dCompGridRank%dLevel%d.txt", level, myid, i);
-         hypre_ParCompGridDebugPrint( compGrid[i], filename );
-         // hypre_sprintf(filename, "outputs/CompGrids/plotCompGridRank%dLevel%d.txt", myid, level);
-         // hypre_ParCompGridMatlabPlot( compGrid[level], filename );
-         if (myid == 0)
+         hypre_ParCompGridMatlabPlot( compGrid[i], filename );
+         hypre_sprintf(filename, "outputs/CompGrids/setupLevel%dACompRank%dLevel%d.txt", level, myid, i);
+         hypre_ParCompGridMatlabAMatrixDump( compGrid[i], filename );
+         if (i != num_levels-1)
          {
-            FILE             *file;
-            // hypre_sprintf(filename,"/p/lscratchd/wbm/CompGrids/global_num_nodes.txt");
-            hypre_sprintf(filename,"outputs/CompGrids/global_num_nodes.txt");
-            file = fopen(filename,"w");
-            hypre_fprintf(file, "%d\n", hypre_ParCSRMatrixGlobalNumRows(A_array[0]) );
-            fclose(file);
-            // Print info on how to read files
-            // hypre_sprintf(filename,"/p/lscratchd/wbm/CompGrids/info.txt");
-            hypre_sprintf(filename,"outputs/CompGrids/info.txt");
-            file = fopen(filename,"w");
-            hypre_fprintf(file, "num_nodes\nmem_size\nnum_owned_nodes\nsolution values\nresidual values\nglobal indices\ncoarse global indices\ncoarse local indices\nrows of matrix A: size, data, global indices, local indices\nrows of matrix P: size, data, global indices, local indices\nghost P rows: size, data, global indices, local indices\n");
-            fclose(file);
+            hypre_sprintf(filename, "outputs/CompGrids/setupLevel%dPCompRank%dLevel%d.txt", level, myid, i);
+            hypre_ParCompGridMatlabPMatrixDump( compGrid[i], filename );
          }
       }
       #endif
-
-
    }
 
 
@@ -573,9 +561,16 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
    {
       // hypre_sprintf(filename, "/p/lscratchd/wbm/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
       hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
-      hypre_ParCompGridDebugPrint( compGrid[level], filename );
+      // hypre_ParCompGridDebugPrint( compGrid[level], filename );
       // hypre_sprintf(filename, "outputs/CompGrids/plotCompGridRank%dLevel%d.txt", myid, level);
-      // hypre_ParCompGridMatlabPlot( compGrid[level], filename );
+      hypre_ParCompGridMatlabPlot( compGrid[level], filename );
+      hypre_sprintf(filename, "outputs/CompGrids/setupACompRank%dLevel%d.txt", myid, level);
+      hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename );
+      if (level != num_levels-1)
+      {
+         hypre_sprintf(filename, "outputs/CompGrids/setupPCompRank%dLevel%d.txt", myid, level);
+         hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename );
+      }
       if (myid == 0)
       {
          FILE             *file;
