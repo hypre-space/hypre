@@ -415,34 +415,39 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
    hypre_ParCompMatrixRow     *row, *insert_row;
    HYPRE_Int      row_size, global_index, coarse_global_index, local_index, insert_row_size;
 
-   HYPRE_Int   myid, num_procs;
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-
    for (level = 0; level < num_levels; level++)
    {
-      // loop over indices of nodes added to the comp grid on this level
-      for (i = hypre_ParCompGridNumNodes(compGrid[level]) - num_added_nodes[level]; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+      // If we have added nodes on this level
+      if (num_added_nodes[level])
       {
-         // fix up the local indices for the matrix A row info
-         row = hypre_ParCompGridARows(compGrid[level])[i];
-         row_size = hypre_ParCompMatrixRowSize(row);
-         for (j = 0; j < row_size; j++)
+         // loop over indices of non-owned nodes on this level
+         for (i = hypre_ParCompGridNumOwnedNodes(compGrid[level]); i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
-            // initialize local index to -1 (it will be set to another value only if we can find the global index somewhere in this comp grid)
-            hypre_ParCompMatrixRowLocalIndices(row)[j] = -1;
-
-            global_index = hypre_ParCompMatrixRowGlobalIndices(row)[j];
-
-            // if global index of j'th row entry is owned by this proc, then local index is calculable
-            if ( global_index >= proc_first_index[level] && global_index <= proc_last_index[level] )
+            // fix up the local indices for the matrix A row info
+            row = hypre_ParCompGridARows(compGrid[level])[i];
+            row_size = hypre_ParCompMatrixRowSize(row);
+            for (j = 0; j < row_size; j++)
             {
-               // set local index for entry in this row of the matrix
-               local_index = global_index - proc_first_index[level];
+               // initialize local index to -1 (it will be set to another value only if we can find the global index somewhere in this comp grid)
+               local_index = -1;
+
+               global_index = hypre_ParCompMatrixRowGlobalIndices(row)[j];
+
+               // if global index of j'th row entry is owned by this proc, then local index is calculable
+               if ( global_index >= proc_first_index[level] && global_index <= proc_last_index[level] )
+               {
+                  // set local index for entry in this row of the matrix
+                  local_index = global_index - proc_first_index[level];
+               }
+               // otherwise find local index via binary search
+               else
+               {
+                  local_index = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], global_index, 0);
+               }
                hypre_ParCompMatrixRowLocalIndices(row)[j] = local_index;
 
-               // if we need to insert an entry into the matrix
-               if ( local_index < hypre_ParCompGridNumNodes(compGrid[level]) - num_added_nodes[level] )
+               // if we need to insert an entry into the matrix (!!! Note that I'm assuming a symmetric matrix here !!!)
+               if ( local_index < hypre_ParCompGridNumOwnedNodes(compGrid[level]) && local_index >= 0 )
                {
                   // get the row to insert into and its size
                   insert_row = hypre_ParCompGridARows(compGrid[level])[local_index];
@@ -458,123 +463,85 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                   }
                }
             }
-            // otherwise search over added nodes
-            else
-            {
-               for (k = hypre_ParCompGridNumNodes(compGrid[level]) - 1; k >= hypre_ParCompGridNumOwnedNodes(compGrid[level]); k--) // !!! Linear search !!! Note: doing the search backward (hopefully shorter)
-               {
-                  if ( global_index == hypre_ParCompGridGlobalIndices(compGrid[level])[k] )
-                  {
-                     local_index = k;
-                     hypre_ParCompMatrixRowLocalIndices(row)[j] = local_index;
 
-                     // if we need to insert an entry into the matrix
-                     if ( local_index < hypre_ParCompGridNumNodes(compGrid[level]) - num_added_nodes[level] )
-                     {
-                        // get the row to insert into and its size
-                        insert_row = hypre_ParCompGridARows(compGrid[level])[local_index];
-                        insert_row_size = hypre_ParCompMatrixRowSize(insert_row);
-                        // search over the row to find the appropriate global index and insert local index
-                        for (l = 0; l < insert_row_size; l++)
-                        {
-                           if ( hypre_ParCompMatrixRowGlobalIndices(insert_row)[l] == hypre_ParCompGridGlobalIndices(compGrid[level])[i] )
-                           {
-                              hypre_ParCompMatrixRowLocalIndices(insert_row)[l] = i;
-                              break;
-                           }
-                        }
-                     }
-                     break;
-                  }
+            // if we are not on the coarsest level
+            if (level != num_levels-1)
+            {
+               // fix up the coarse local indices
+               coarse_global_index = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i];
+
+               // if this node is repeated on the next coarsest grid, figure out its local index
+               if ( coarse_global_index != -1)
+               {
+                  hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], coarse_global_index, 0);
                }
+               // otherwise set it to -1
+               else hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = -1;
             }
-         }
-
-         // if we are not on the coarsest level
-         if (level != num_levels-1)
-         {
-            // fix up the coarse local indices
-            coarse_global_index = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i];
-
-            // if this node is repeated on the next coarsest grid, figure out its local index
-            if ( coarse_global_index != -1)
-            {
-               // if global coarse index is owned by this proc on next level down, then local coarse index is easy
-               if ( coarse_global_index >= proc_first_index[level+1] && coarse_global_index <= proc_last_index[level+1] )
-               {
-                  hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = coarse_global_index - proc_first_index[level+1];
-               }
-               // otherwise, have to search over added nodes
-               else
-               {
-                  for (j = hypre_ParCompGridNumNodes(compGrid[level+1]) - 1; j >= hypre_ParCompGridNumOwnedNodes(compGrid[level+1]); j--) // Note: doing the search backward (hopefully shorter)
-                  {
-                     if ( coarse_global_index == hypre_ParCompGridGlobalIndices(compGrid[level+1])[j] )
-                     {
-                        hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = j;
-                        break;
-                     }
-                  }
-               }
-
-               if ( hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] < 0 ) printf("Warning: coarse point beneath fine point isn't in comp grid\n");
-            }
-            // otherwise set it to -1
-            else hypre_ParCompGridCoarseLocalIndices(compGrid[level])[i] = -1;
-            
-            // fix up the local indices for the matrix P row info
-            row = hypre_ParCompGridPRows(compGrid[level])[i];
-            row_size = hypre_ParCompMatrixRowSize(row);
-            for (j = 0; j < row_size; j++)
-            {
-               // initialize local index to -1 (it will be set to another value only if we can find the global index somewhere in this comp grid one level down)
-               hypre_ParCompMatrixRowLocalIndices(row)[j] = -1;
-
-               global_index = hypre_ParCompMatrixRowGlobalIndices(row)[j];
-               // if global index of j'th row entry is owned by this proc one level down, then local index is easy
-               if ( global_index >= proc_first_index[level+1] && global_index <= proc_last_index[level+1] )
-               {
-                  // set local index for entry in this row of the matrix
-                  local_index = global_index - proc_first_index[level+1];
-                  hypre_ParCompMatrixRowLocalIndices(row)[j] = local_index;
-               }
-               // otherwise, have to search over nodes
-               else
-               {
-                  for (k = hypre_ParCompGridNumNodes(compGrid[level+1]) - 1; k >= hypre_ParCompGridNumOwnedNodes(compGrid[level+1]); k--) // !!! Linear search !!! Note: doing the search backward (hopefully shorter)
-                  {
-                     if ( global_index == hypre_ParCompGridGlobalIndices(compGrid[level+1])[k] )
-                     {
-                        local_index = k;
-                        hypre_ParCompMatrixRowLocalIndices(row)[j] = local_index;
-                        break;
-                     }
-                  }
-               }
-            }
-         }
-         // Insert into P one level up (this level is in the domain of P one level up) !!! Linear search. Whoa... this is pretty bad: we are basically looping over all of P for each node added. Yikes... !!!
-         if (level != 0)
-         {
-            // Search over old rows of P to find where we need to update local indices to account for this new added node
-            for (j = 0; j < hypre_ParCompGridNumNodes(compGrid[level-1]) - num_added_nodes[level-1]; j++)
-            {
-               row = hypre_ParCompGridPRows(compGrid[level-1])[j];
-               row_size = hypre_ParCompMatrixRowSize(row);
-               for (k = 0; k < row_size; k++)
-               {
-                  if (hypre_ParCompGridGlobalIndices(compGrid[level])[i] == hypre_ParCompMatrixRowGlobalIndices(row)[k] )
-                  {
-                     hypre_ParCompMatrixRowLocalIndices(row)[k] = i;
-                     break;
-                  }
-               }
-            } 
          }
       }
    }
 
    return 0;
+}
+
+HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels )
+{
+   HYPRE_Int                  i,j,level,global_index,first,last;
+   hypre_ParCompMatrixRow     *row;
+
+   for (level = 0; level < num_levels-1; level++)
+   {
+      // Get first and last owned global indices on the next level (domain of P)
+      first = hypre_ParCompGridGlobalIndices(compGrid[level+1])[0];
+      if (hypre_ParCompGridNumOwnedNodes(compGrid[level+1])) last = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridNumOwnedNodes(compGrid[level+1]) - 1];
+      else last = 0;
+      // Look for missing local indices in the owned nodes
+      for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid[level]); i++)
+      {
+         row = hypre_ParCompGridPRows(compGrid[level])[i];
+         for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+         {
+            if (hypre_ParCompMatrixRowLocalIndices(row)[j] < 0) 
+            {
+               // Binary search to find local index
+               hypre_ParCompMatrixRowLocalIndices(row)[j] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], hypre_ParCompMatrixRowGlobalIndices(row)[j], 0);
+            }
+         }
+      }
+      // Setup all local indices for non-owned nodes
+      for (i = hypre_ParCompGridNumOwnedNodes(compGrid[level]); i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+      {
+         row = hypre_ParCompGridPRows(compGrid[level])[i];
+         for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+         {
+            global_index = hypre_ParCompMatrixRowGlobalIndices(row)[j];
+            // If global index is owned, simply calculate
+            if (global_index >= first && global_index <= last) hypre_ParCompMatrixRowLocalIndices(row)[j] = global_index - first;
+            // Otherwise, binary search
+            else hypre_ParCompMatrixRowLocalIndices(row)[j] = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level+1], global_index, 0);
+         }
+      }
+   }
+}
+
+HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search )
+{
+   HYPRE_Int      left = hypre_ParCompGridNumOwnedNodes(compGrid);
+   HYPRE_Int      right = hypre_ParCompGridNumNodes(compGrid) - 1;
+   HYPRE_Int      index;
+
+   while (left <= right)
+   {
+      index = (left + right) / 2;
+      if (hypre_ParCompGridGlobalIndices(compGrid)[index] < global_index) left = index + 1;
+      else if (hypre_ParCompGridGlobalIndices(compGrid)[index] > global_index) right = index - 1;
+      else return index;
+   }
+
+   // If binary search fails to find an exact match, return the index of the first element greater than global_index or -1
+   if (allow_failed_search) return left;
+   else return -1;
 }
 
 HYPRE_Int
@@ -782,7 +749,6 @@ hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filenam
 
 }
 
-
 HYPRE_Int 
 hypre_ParCompGridMatlabPlot( hypre_ParCompGrid *compGrid, const char* filename)
 {
@@ -823,6 +789,65 @@ hypre_ParCompGridMatlabPlot( hypre_ParCompGrid *compGrid, const char* filename)
    return 0;
 }
 
+HYPRE_Int
+hypre_ParCompGridMatlabAMatrixDump( hypre_ParCompGrid *compGrid, const char* filename)
+{
+   // Get composite grid information
+   HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
+
+   HYPRE_Int                     *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
+   hypre_ParCompMatrixRow        **A_rows = hypre_ParCompGridARows(compGrid);
+
+   // Print info to given filename   
+   FILE             *file;
+   file = fopen(filename,"w");
+   HYPRE_Int i,j,row_size;
+
+   for (i = 0; i < num_nodes; i++)
+   {
+      row_size = hypre_ParCompMatrixRowSize(A_rows[i]);
+      for (j = 0; j < row_size; j++)
+      {
+         hypre_fprintf(file, "%d ", global_indices[i]);
+         hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowGlobalIndices(A_rows[i])[j]);
+         hypre_fprintf(file, "%f\n", hypre_ParCompMatrixRowData(A_rows[i])[j]);
+      }
+   }
+
+   fclose(file);
+
+   return 0;
+}
+
+HYPRE_Int
+hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* filename)
+{
+   // Get composite grid information
+   HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
+
+   HYPRE_Int                     *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
+   hypre_ParCompMatrixRow        **P_rows = hypre_ParCompGridPRows(compGrid);
+
+   // Print info to given filename   
+   FILE             *file;
+   file = fopen(filename,"w");
+   HYPRE_Int i,j,row_size;
+
+   for (i = 0; i < num_nodes; i++)
+   {
+      row_size = hypre_ParCompMatrixRowSize(P_rows[i]);
+      for (j = 0; j < row_size; j++)
+      {
+         hypre_fprintf(file, "%d ", global_indices[i]);
+         hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowGlobalIndices(P_rows[i])[j]);
+         hypre_fprintf(file, "%f\n", hypre_ParCompMatrixRowData(P_rows[i])[j]);
+      }
+   }
+
+   fclose(file);
+
+   return 0;
+}
 
 hypre_ParCompMatrixRow *
 hypre_ParCompMatrixRowCreate ()
