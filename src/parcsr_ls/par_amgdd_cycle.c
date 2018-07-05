@@ -286,20 +286,9 @@ PackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *send_buffer, HYPRE_Int **send
 {
    HYPRE_Int                  level,i,cnt = 0;
 
-   HYPRE_Int   myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-
-   FILE *file;
-   char filename[256];
-
    // pack the send buffer
    for (level = current_level; level < num_levels; level++)
    {
-      sprintf(filename,"outputs/send_flag_rank%d_current_level%d_proc%d_level%d.txt", myid, current_level, proc, level);
-      file = fopen(filename,"w");
-      for (i = 0; i < num_send_nodes[level]; i++) fprintf(file, "%d ", hypre_ParCompGridGlobalIndices(compGrid[level])[ send_flag[level][i] ]);
-      fclose(file);
-
       // store number of nodes to send on this level
       send_buffer[cnt++] = num_send_nodes[level];
 
@@ -316,22 +305,11 @@ UnpackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *recv_buffer, HYPRE_Int **re
 {
    HYPRE_Int                  level,i,cnt = 0, map_cnt, num_nodes;
 
-   HYPRE_Int   myid;
-   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-
-   FILE *file;
-   char filename[256];
-
    // loop over levels
    for (level = current_level; level < num_levels; level++)
    {
       // get number of nodes to unpack on this level
       num_nodes = recv_buffer[cnt++];
-
-      sprintf(filename,"outputs/recv_map_rank%d_current_level%d_proc%d_level%d.txt", myid, current_level, proc, level);
-      file = fopen(filename,"w");
-      for (i = 0; i < num_nodes; i++) fprintf(file, "%d ", hypre_ParCompGridGlobalIndices(compGrid[level])[ recv_map[level][i] ]);
-      fclose(file);
 
       for (i = 0; i < num_nodes; i++)
       {

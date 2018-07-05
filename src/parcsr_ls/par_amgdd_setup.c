@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 1 // if true, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 0 // if true, prints out what is stored in the comp grids for each processor to a file
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
@@ -223,7 +223,6 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
       #endif
       if ( proc_last_index[level] >= proc_first_index[level] && num_sends ) // If there are any owned nodes on this level
       {
-
          // allocate space for the buffers, buffer sizes, requests and status, psiComposite_send, psiComposite_recv, send and recv maps
          requests = hypre_CTAlloc(hypre_MPI_Request, num_sends + num_recvs, HYPRE_MEMORY_HOST );
          status = hypre_CTAlloc(hypre_MPI_Status, num_sends + num_recvs, HYPRE_MEMORY_HOST );
@@ -1004,22 +1003,6 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
       if (need_coarse_info) (*buffer_size) += 2*hypre_ParCompMatrixRowSize(hypre_ParCompGridPRows(compGrid[current_level])[send_elmt]) + 1;
    }
    
-
-
-   // !!! Debugging: !!!
-   FILE *file;
-   char filename[256];
-   sprintf(filename,"outputs/before_send_flag_rank%d_current_level%d_proc%d_level%d.txt", myid, current_level, processor, current_level);
-   file = fopen(filename,"w");
-   for (i = 0; i < num_send_nodes[current_level]; i++)
-   {
-      fprintf(file,"%d ", hypre_ParCompGridGlobalIndices(compGrid[current_level])[ send_flag[current_level][i] ]);
-   }
-   fclose(file);
-
-
-
-
    // Now build out the psi_c composite grid (along with required ghost nodes) on coarser levels
    for (level = current_level + 1; level < num_levels; level++)
    {
@@ -1378,8 +1361,6 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid,
          }
       }
 
-
-
       // Fix up the send_flag and recv_map from previous levels
       for (i = current_level; i < num_levels; i++)
       {
@@ -1414,11 +1395,6 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid,
             }
          }
       }
-
-
-
-
-
 
       // Now copy in the new nodes to their appropriate positions
       cnt = level_start;
@@ -1511,15 +1487,6 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid,
       // clean up memory
       hypre_TFree(compGrid_dest, HYPRE_MEMORY_HOST);
    }
-
-   // !!! Debugging: !!!
-   // FILE *file;
-   // char filename[256];
-   // sprintf(filename,"outputs/before_recv_map_rank%d_current_level%d_proc%d_level%d.txt", myid, current_level, recv_rank, current_level);
-   // file = fopen(filename,"w");
-   // for (i = 0; i < num_incoming_nodes[buffer_number][current_level]; i++) fprintf(file, "%d ", hypre_ParCompGridGlobalIndices(compGrid[level])[ recv_map_send[current_level][i] ]);
-   // fclose(file);
-
 
    return 0;
 }
