@@ -1206,20 +1206,3 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
 
    return 0;
 }
-
-HYPRE_Int
-hypre_ParCompGridCommPkgDebugPrint( hypre_ParCompGridCommPkg *compGridCommPkg, const char* filename  )
-{
-   HYPRE_Int   num_procs;
-   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-
-   HYPRE_Int         i, j, k;
-
-   FILE *file;
-   file = fopen(filename,"w");
-
-
-   fclose(file);
-
-   return 0;
-}
