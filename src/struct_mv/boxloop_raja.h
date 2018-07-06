@@ -24,7 +24,7 @@
 #define HYPRE_NEWBOXLOOP_HEADER
 
 extern "C++" {
-#include <RAJA/RAJA.hxx>
+#include <RAJA/RAJA.hpp>
 }
 using namespace RAJA;
 
