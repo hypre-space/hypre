@@ -810,7 +810,7 @@ hypre_ParCompGridMatlabAMatrixDump( hypre_ParCompGrid *compGrid, const char* fil
       {
          hypre_fprintf(file, "%d ", global_indices[i]);
          hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowGlobalIndices(A_rows[i])[j]);
-         hypre_fprintf(file, "%f\n", hypre_ParCompMatrixRowData(A_rows[i])[j]);
+         hypre_fprintf(file, "%e\n", hypre_ParCompMatrixRowData(A_rows[i])[j]);
       }
    }
 
@@ -840,7 +840,7 @@ hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* fil
       {
          hypre_fprintf(file, "%d ", global_indices[i]);
          hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowGlobalIndices(P_rows[i])[j]);
-         hypre_fprintf(file, "%f\n", hypre_ParCompMatrixRowData(P_rows[i])[j]);
+         hypre_fprintf(file, "%e\n", hypre_ParCompMatrixRowData(P_rows[i])[j]);
       }
    }
 
