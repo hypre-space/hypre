@@ -1050,7 +1050,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                zypre_BoxLoop2Begin(ndim, loop_size,
                                    int_box, start, stride, mi,
                                    vbox,    start, stride, vi);
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                zypre_BoxLoop2For(mi, vi)

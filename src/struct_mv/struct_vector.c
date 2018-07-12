@@ -812,7 +812,7 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
 /* RDF: This won't work as written with threading on */
        
 #if 0
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE ) HYPRE_SMP_SCHEDULE
 #endif
 #else

@@ -2142,7 +2142,7 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
 #undef HYPRE_BOX_REDUCTION
 #endif
 
-#ifdef HYPRE_USE_OMP45
+#if defined(HYPRE_USE_OMP45) && !defined(HYPRE_USE_RAJA)
 #define HYPRE_BOX_REDUCTION map(tofrom:diag_product_local) reduction(+:diag_product_local)
 #else
 #define HYPRE_BOX_REDUCTION reduction(+:diag_product_local)
