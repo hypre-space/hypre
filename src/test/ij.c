@@ -365,9 +365,10 @@ main( hypre_int argc,
    /* hypre_ILU options */
    HYPRE_Int ilu_type = 0;
    HYPRE_Int ilu_lfil = 0;
-   HYPRE_Real ilu_droptol = 1.0e-2;
+   HYPRE_Real ilu_droptol = 1.0e-02;
    HYPRE_Int ilu_max_row_nnz = 1000;
    HYPRE_Int ilu_schur_max_iter = 3;
+   HYPRE_Real ilu_nsh_droptol = 1.0e-02;
    /* end hypre ILU options */
 
    HYPRE_Real     *nongalerk_tol = NULL;
@@ -1034,6 +1035,11 @@ main( hypre_int argc,
          arg_index++;        
          ilu_schur_max_iter = atoi(argv[arg_index++]);
       }
+      else if ( strcmp(argv[arg_index], "-ilu_nsh_droptol") == 0 )
+      {                /* Max number of iterations for schur system solver */
+         arg_index++;        
+         ilu_nsh_droptol = atof(argv[arg_index++]);
+      }
       /* end ilu options */
       else
       {
@@ -1634,7 +1640,7 @@ main( hypre_int argc,
          hypre_printf("       18=ParaSails-GMRES\n");     
          hypre_printf("       20=Hybrid solver/ DiagScale, AMG \n");
          hypre_printf("       43=Euclid-PCG      44=Euclid-GMRES   \n");
-         hypre_printf("       45=Euclid-BICGSTAB\n");
+         hypre_printf("       45=Euclid-BICGSTAB 46=Euclid-FlexGMRES\n");
          hypre_printf("       50=DS-LGMRES         51=AMG-LGMRES     \n");
          hypre_printf("       60=DS-FlexGMRES         61=AMG-FlexGMRES     \n");
 	     hypre_printf("       70=MGR             71=MGR-PCG  \n");
@@ -1885,7 +1891,8 @@ main( hypre_int argc,
          hypre_printf("  -ilu_lfil   <val>                : set level of fill (k) for ILU(k) = val\n");      
          hypre_printf("  -ilu_droptol   <val>             : set drop tolerance threshold for ILUT = val \n");      
          hypre_printf("  -ilu_max_row_nnz   <val>         : set max. num of nonzeros to keep per row = val \n");          
-         hypre_printf("  -ilu_schur_max_iter   <val>      : set max. num of iteration for GMRES Schur = val \n");
+         hypre_printf("  -ilu_schur_max_iter   <val>      : set max. num of iteration for GMRES/NSH Schur = val \n");
+         hypre_printf("  -ilu_nsh_droptol   <val>         : set drop tolerance threshold for NSH = val \n");
          /* end ILU options */
       }
 
@@ -4923,7 +4930,11 @@ main( hypre_int argc,
          /* set the droptol */
          HYPRE_ILUSetDropThreshold(pcg_precond,ilu_droptol);  
          /* set max iterations for Schur system solve */                
-         HYPRE_ILUSetSchurMaxIter( pcg_precond, ilu_schur_max_iter );              
+         HYPRE_ILUSetSchurMaxIter( pcg_precond, ilu_schur_max_iter );
+         if(ilu_type == 20 || ilu_type == 21)
+         {
+			 HYPRE_ILUSetNSHDropThreshold( pcg_precond, ilu_nsh_droptol);
+		 }              
 
          /* setup ILU-GMRES solver */
 	 HYPRE_GMRESSetMaxIter(pcg_solver, mg_max_iter);
@@ -5189,7 +5200,7 @@ main( hypre_int argc,
     * Solve the system using FlexGMRES 
     *-----------------------------------------------------------*/
 
-   if (solver_id == 60 || solver_id == 61 || solver_id == 72 || solver_id == 82)
+   if (solver_id == 60 || solver_id == 61 || solver_id == 72 || solver_id == 82 || solver_id == 46)
    {
       time_index = hypre_InitializeTiming("FlexGMRES Setup");
       hypre_BeginTiming(time_index);
@@ -5394,6 +5405,29 @@ main( hypre_int argc,
 				   (HYPRE_PtrToSolverFcn) HYPRE_MGRSetup,
                                    pcg_precond);
       }
+      else if (solver_id == 46)
+      {
+         /* use Euclid preconditioning */
+         if (myid == 0) hypre_printf("Solver: Euclid-FlexGMRES\n");
+
+         HYPRE_EuclidCreate(hypre_MPI_COMM_WORLD, &pcg_precond);
+
+         if (eu_level > -1) HYPRE_EuclidSetLevel(pcg_precond, eu_level);
+         if (eu_ilut) HYPRE_EuclidSetILUT(pcg_precond, eu_ilut);
+         if (eu_sparse_A) HYPRE_EuclidSetSparseA(pcg_precond, eu_sparse_A);
+         if (eu_row_scale) HYPRE_EuclidSetRowScale(pcg_precond, eu_row_scale);
+         if (eu_bj) HYPRE_EuclidSetBJ(pcg_precond, eu_bj);
+         HYPRE_EuclidSetStats(pcg_precond, eu_stats);
+         HYPRE_EuclidSetMem(pcg_precond, eu_mem);
+         /*HYPRE_EuclidSetParams(pcg_precond, argc, argv);*/            
+
+         /* setup MGR-PCG solver */
+	     HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
+         HYPRE_FlexGMRESSetPrecond(pcg_solver,
+				   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSolve,
+				   (HYPRE_PtrToSolverFcn) HYPRE_EuclidSetup,
+                                   pcg_precond);
+      }
       else if (solver_id == 82)
       {
          /* use hypre_ILU preconditioning */
@@ -5413,10 +5447,14 @@ main( hypre_int argc,
          /* set the droptol */
          HYPRE_ILUSetDropThreshold(pcg_precond,ilu_droptol);
          /* set max iterations for Schur system solve */                
-         HYPRE_ILUSetSchurMaxIter( pcg_precond, ilu_schur_max_iter );              
+         HYPRE_ILUSetSchurMaxIter( pcg_precond, ilu_schur_max_iter );
+         if(ilu_type == 20 || ilu_type == 21)
+         {
+			 HYPRE_ILUSetNSHDropThreshold( pcg_precond, ilu_nsh_droptol);
+		 }              
 
          /* setup MGR-PCG solver */
-	 HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
+	     HYPRE_FlexGMRESSetMaxIter(pcg_solver, mg_max_iter);
          HYPRE_FlexGMRESSetPrecond(pcg_solver,
 				   (HYPRE_PtrToSolverFcn) HYPRE_ILUSolve,
 				   (HYPRE_PtrToSolverFcn) HYPRE_ILUSetup,
@@ -6214,6 +6252,13 @@ main( hypre_int argc,
       HYPRE_ILUSetTol(ilu_solver, tol);
       /* set max iterations for Schur system solve */                
       HYPRE_ILUSetSchurMaxIter( ilu_solver, ilu_schur_max_iter ); 
+      
+      /* setting for NSH */
+      if(ilu_type == 20 || ilu_type == 21)
+      {
+		 HYPRE_ILUSetNSHDropThreshold( ilu_solver, ilu_nsh_droptol);
+	  }              
+
       
       /* setup hypre_ILU solver */
       HYPRE_ILUSetup(ilu_solver, parcsr_A, b, x);

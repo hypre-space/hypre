@@ -42,9 +42,9 @@ hypre_ILUCreate()
   
    (ilu_data -> droptol) = hypre_TAlloc(HYPRE_Real,3,HYPRE_MEMORY_HOST);
    (ilu_data -> own_droptol_data) = 1;
-   (ilu_data -> droptol)[0] = 1.0e-03;/* droptol for B */
-   (ilu_data -> droptol)[1] = 1.0e-03;/* droptol for E and F */
-   (ilu_data -> droptol)[2] = 1.0e-03;/* droptol for S */
+   (ilu_data -> droptol)[0] = 1.0e-02;/* droptol for B */
+   (ilu_data -> droptol)[1] = 1.0e-02;/* droptol for E and F */
+   (ilu_data -> droptol)[2] = 1.0e-02;/* droptol for S */
    (ilu_data -> lfil) = 0;
    (ilu_data -> maxRowNnz) = 1000;
    (ilu_data -> CF_marker_array) = NULL;
@@ -71,27 +71,8 @@ hypre_ILUCreate()
   
    (ilu_data -> ilu_type) = 0;
    (ilu_data -> nLU) = 0;
-  
-   /* default data for schur solver */
-   (ilu_data -> ss_kDim) = 5;
-   (ilu_data -> ss_max_iter) = 5;
-   (ilu_data -> ss_tol) = 0.0e-00;
-   (ilu_data -> ss_absolute_tol) = 0.0;
-   (ilu_data -> ss_logging) = 1;
-   (ilu_data -> ss_print_level) = 0;
-   (ilu_data -> ss_rel_change) = 0;
    
-   /* default data for schur precond 
-    * default ILUT
-    */
-   (ilu_data -> sp_ilu_type) = 1;
-   (ilu_data -> sp_ilu_lfil) = 3;
-   (ilu_data -> sp_ilu_max_row_nnz) = 1000;
-   (ilu_data -> sp_own_droptol_data) = 0;
-   (ilu_data -> sp_ilu_droptol) = (ilu_data -> droptol);/* use same droptol */
-   (ilu_data -> sp_print_level) = 0;
-   (ilu_data -> sp_max_iter) = 1;
-   (ilu_data -> sp_tol) = 0.0e-00;
+   /* see hypre_ILUSetType for more default values */
    
    return (void *) ilu_data;
 }
@@ -169,6 +150,9 @@ hypre_ILUDestroy( void *data )
      switch(ilu_data -> ilu_type){
       case 10: case 11: 
          HYPRE_ParCSRGMRESDestroy(ilu_data -> schur_solver); //GMRES for Schur
+         break;
+      case 20: case 21:
+         hypre_NSHDestroy(hypre_ParILUDataSchurSolver(ilu_data));
          break;
       default:
          break;
@@ -272,6 +256,64 @@ hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
 {
    hypre_ParILUData *ilu_data = (hypre_ParILUData*) ilu_vdata;
    (ilu_data -> ilu_type) = ilu_type;
+   /* reset default value, not a large cost 
+    * assume we won't change back from
+    */
+   switch(ilu_type)
+   {
+      /* NSH type */
+      case 20: case 21:
+         /* set NSH Solver parameters */
+         hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data) = 5;
+         hypre_ParILUDataSchurNSHSolveTol(ilu_data) = 1.0e-09;
+         hypre_ParILUDataSchurSolverLogging(ilu_data) = 0;
+         hypre_ParILUDataSchurSolverPrintLevel(ilu_data) = 0;
+         if(hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data))
+         {
+            hypre_TFree(hypre_ParILUDataSchurNSHDroptol(ilu_data), HYPRE_MEMORY_HOST);
+         }
+         hypre_ParILUDataSchurNSHDroptol(ilu_data) = hypre_ParILUDataDroptol(ilu_data);
+         hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data) = 0;
+         
+         /* set NHS inverse parameters */
+         hypre_ParILUDataSchurNSHMaxNumIter(ilu_data) = 2;/* kDim */
+         hypre_ParILUDataSchurNSHMaxRowNnz(ilu_data) = 1000;
+         hypre_ParILUDataSchurNSHTol(ilu_data) = 1.0e-09;
+         
+         /* set MR inverse parameters */
+         hypre_ParILUDataSchurMRMaxIter(ilu_data) = 5;
+         hypre_ParILUDataSchurMRColVersion(ilu_data) = 0;/* sp_lfil */
+         hypre_ParILUDataSchurMRMaxRowNnz(ilu_data) = 200;
+         hypre_ParILUDataSchurMRTol(ilu_data) = 1.0e-09;
+         break;
+      case 10: case 11:
+         /* default data for schur solver */
+         hypre_ParILUDataSchurGMRESKDim(ilu_data) = 5;
+         hypre_ParILUDataSchurGMRESTol(ilu_data)=1.0e-09;
+         hypre_ParILUDataSchurGMRESAbsoluteTol(ilu_data) = 0.0;
+         hypre_ParILUDataSchurSolverLogging(ilu_data) = 0;
+         hypre_ParILUDataSchurSolverPrintLevel(ilu_data) = 0;
+         hypre_ParILUDataSchurGMRESRelChange(ilu_data) = 0;
+         
+         /* default data for schur precond 
+          * default ILU0
+          */
+         hypre_ParILUDataSchurPrecondIluType(ilu_data) = 0;
+         hypre_ParILUDataSchurPrecondIluLfil(ilu_data) = 0;
+         hypre_ParILUDataSchurPrecondIluMaxRowNnz(ilu_data) = 1000;
+         if(hypre_ParILUDataSchurPrecondOwnDroptolData(ilu_data))
+         {
+            hypre_TFree(hypre_ParILUDataSchurPrecondIluDroptol(ilu_data), HYPRE_MEMORY_HOST);
+         }
+         hypre_ParILUDataSchurPrecondIluDroptol(ilu_data) = hypre_ParILUDataDroptol(ilu_data);/* use same droptol */
+         hypre_ParILUDataSchurPrecondOwnDroptolData(ilu_data) = 0;
+         hypre_ParILUDataSchurPrecondPrintLevel(ilu_data) = 0;
+         hypre_ParILUDataSchurPrecondMaxIter(ilu_data) = 1;
+         hypre_ParILUDataSchurPrecondTol(ilu_data) = 1.0e-09;
+         break;
+      default:
+         break;
+   }
 
    return hypre_error_flag;
 }
@@ -320,11 +362,22 @@ HYPRE_Int
 hypre_ILUSetSchurSolverMaxIter( void *ilu_vdata, HYPRE_Int ss_max_iter )
 {
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
-   (ilu_data -> ss_max_iter) = ss_max_iter;
-   /* avoid restart */
-   if((ilu_data -> ss_kDim) < ss_max_iter)
+   switch(hypre_ParILUDataIluType(ilu_data))
    {
-      (ilu_data -> ss_kDim) = ss_max_iter;
+      case 10: case 11:
+         /* GMRES 
+          * To avoid restart, GMRES kDim is equal to max num iter
+          */
+         hypre_ParILUDataSchurGMRESKDim(ilu_data) = ss_max_iter;
+         break;
+      case 20: case 21:
+         /* set max num iter if use NSH solve */
+         hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data) = ss_max_iter;
+         break;
+      default:
+         /* warning */
+         printf("Current type has no Schur System\n");
+         break;
    }
    return hypre_error_flag;
 }
@@ -392,14 +445,31 @@ hypre_ILUSetSchurPrecondILUMaxNnzPerRow( void *ilu_vdata, HYPRE_Int sp_ilu_max_r
    (ilu_data -> sp_ilu_max_row_nnz) = sp_ilu_max_row_nnz;
    return hypre_error_flag;
 }
-/* Set IUL drop threshold for ILUT for Precond of Schur System */
+/* Set IUL drop threshold for ILUT for Precond of Schur System 
+ * We don't want to influence the original ILU, so create new array if not own data
+ */
 HYPRE_Int
 hypre_ILUSetSchurPrecondILUDropThreshold( void *ilu_vdata, HYPRE_Real sp_ilu_droptol )
 {
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
-   (ilu_data -> sp_ilu_droptol)[0] = sp_ilu_droptol;
-   (ilu_data -> sp_ilu_droptol)[1] = sp_ilu_droptol;
-   (ilu_data -> sp_ilu_droptol)[2] = sp_ilu_droptol;
+   if(hypre_ParILUDataSchurPrecondOwnDroptolData(ilu_data))
+   {
+      /* if we own data, just change our own data */
+      (ilu_data -> sp_ilu_droptol)[0] = sp_ilu_droptol;
+      (ilu_data -> sp_ilu_droptol)[1] = sp_ilu_droptol;
+      (ilu_data -> sp_ilu_droptol)[2] = sp_ilu_droptol;
+   }
+   else
+   {
+      /* if we share data with other, create new one 
+       * becuase as default we use data from ILU, so we don't want to change it
+       */
+      hypre_ParILUDataSchurPrecondIluDroptol(ilu_data) = hypre_TAlloc(HYPRE_Real, 3, HYPRE_MEMORY_HOST);
+      hypre_ParILUDataSchurPrecondOwnDroptolData(ilu_data) = 1;
+      hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)[0] = sp_ilu_droptol;
+      hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)[1] = sp_ilu_droptol;
+      hypre_ParILUDataSchurPrecondIluDroptol(ilu_data)[2] = sp_ilu_droptol;
+   }
    return hypre_error_flag;
 }
 /* Set array of IUL drop threshold for ILUT for Precond of Schur System */
@@ -448,6 +518,41 @@ hypre_ILUSetSchurPrecondTol( void *ilu_vdata, HYPRE_Int sp_tol )
    (ilu_data -> sp_tol) = sp_tol;
    return hypre_error_flag;
 }
+/* Set tolorance for NSH for Schur System 
+ * We don't want to influence the original ILU, so create new array if not own data
+ */
+HYPRE_Int
+hypre_ILUSetSchurNSHDropThreshold( void *ilu_vdata, HYPRE_Real threshold)
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   if(hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data))
+   {
+      hypre_ParILUDataSchurNSHDroptol(ilu_data) = hypre_TAlloc(HYPRE_Real, 2, HYPRE_MEMORY_HOST);
+      hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data) = 1;
+      hypre_ParILUDataSchurNSHDroptol(ilu_data)[0] = threshold;
+      hypre_ParILUDataSchurNSHDroptol(ilu_data)[1] = threshold;
+   }
+   else
+   {
+      hypre_ParILUDataSchurNSHDroptol(ilu_data)[0] = threshold;
+      hypre_ParILUDataSchurNSHDroptol(ilu_data)[1] = threshold;
+   }
+   return hypre_error_flag;
+}
+/* Set tolorance array for NSH for Schur System */
+HYPRE_Int
+hypre_ILUSetSchurNSHDropThresholdArray( void *ilu_vdata, HYPRE_Real *threshold)
+{
+   hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
+   if(hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data))
+   {
+      hypre_TFree(hypre_ParILUDataSchurNSHDroptol(ilu_data), HYPRE_MEMORY_HOST);
+      hypre_ParILUDataSchurNSHOwnDroptolData(ilu_data) = 0;
+   }
+   hypre_ParILUDataSchurNSHDroptol(ilu_data) = threshold;
+   return hypre_error_flag;
+}
+
 /* Get number of iterations for ILU solver */
 HYPRE_Int
 hypre_ILUGetNumIterations( void *ilu_vdata, HYPRE_Int *num_iterations )
@@ -463,7 +568,6 @@ hypre_ILUGetNumIterations( void *ilu_vdata, HYPRE_Int *num_iterations )
 
    return hypre_error_flag;
 }
-
 /* Get residual norms for ILU solver */
 HYPRE_Int
 hypre_ILUGetFinalRelativeResidualNorm( void *ilu_vdata, HYPRE_Real *res_norm )
@@ -480,13 +584,14 @@ hypre_ILUGetFinalRelativeResidualNorm( void *ilu_vdata, HYPRE_Real *res_norm )
    return hypre_error_flag;
 }
 /* 
-   Quicksort of the elements in a from low to high. The elements
-   in b are permuted according to the sorted a. lo and hi are the 
-   extents of the region of the array a, that is to be sorted.
+ * Quicksort of the elements in a from low to high. 
+ * The elements in b are permuted according to the sorted a. 
+ * The elements in iw are permuted reverse according to the sorted a as it's index
+ *   ie, iw[a1] and iw[a2] will be switched if a1 and a2 are switched
+ * lo and hi are the extents of the region of the array a, that is to be sorted.
 */
-/* commented out to use current version hypre_qsort1(...)
 HYPRE_Int 
-hypre_quickSortIR (HYPRE_Int *a, HYPRE_Real *b, const HYPRE_Int lo, const HYPRE_Int hi)
+hypre_quickSortIR (HYPRE_Int *a, HYPRE_Real *b, HYPRE_Int *iw, const HYPRE_Int lo, const HYPRE_Int hi)
 {
    HYPRE_Int i=lo, j=hi;
    HYPRE_Int v;
@@ -502,16 +607,16 @@ hypre_quickSortIR (HYPRE_Int *a, HYPRE_Real *b, const HYPRE_Int lo, const HYPRE_
       {
           v=a[i]; a[i]=a[j]; a[j]=v;
           q=b[i]; b[i]=b[j]; b[j]=q;
+          v=iw[a[i]];iw[a[i]]=iw[a[j]];iw[a[j]]=v;
           i++; j--;
       }
    } while (i<=j);
    //  recursion
-   if (lo<j) quickSortIR(a, b, lo, j);
-   if (i<hi) quickSortIR(a, b, i, hi);
+   if (lo<j) hypre_quickSortIR(a, b, iw, lo, j);
+   if (i<hi) hypre_quickSortIR(a, b, iw, i, hi);
    
    return hypre_error_flag;
 }
-*/
 /* Print solver params */
 HYPRE_Int
 hypre_ILUWriteSolverParams(void *ilu_vdata)
@@ -524,20 +629,30 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 1: hypre_printf("Block Jacobi with ILUT \n");
-              hypre_printf("drop tolerance = %e \n", (ilu_data -> droptol));
+              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
               hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 10: 
-              hypre_printf("GMRES with ILU(%d) \n", (ilu_data -> lfil));
+              hypre_printf("ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
       case 11: 
-              hypre_printf("GMRES with ILUT \n");
-              hypre_printf("drop tolerance = %e \n", (ilu_data -> droptol));
+              hypre_printf("ILU-GMRES with ILUT \n");
+              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
               hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
+      case 20: 
+              hypre_printf("Newton–Schulz–Hotelling with ILU(%d) \n", (ilu_data -> lfil));
+              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         break;
+      case 21: 
+              hypre_printf("Newton–Schulz–Hotelling with ILUT \n");
+              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         break;  
       default: hypre_printf("Unknown type \n");
          break;
    }
@@ -966,20 +1081,971 @@ hypre_ILUGetPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
    return hypre_error_flag;
 }
 
-/* Extract a sub SCR matrix from the original matrix
- * row_start and row_end: array on length 2, start and end of sub matrix's row/col
- * B: the return matrix
- * HAVENT FINISHED YET
+
+
+
+/* NSH create and solve and help functions */
+
+/* Create */
+void *
+hypre_NSHCreate()
+{
+   hypre_ParNSHData  *nsh_data;
+
+   nsh_data = hypre_CTAlloc(hypre_ParNSHData,  1, HYPRE_MEMORY_HOST);
+   
+   /* general data */
+   hypre_ParNSHDataMatA(nsh_data) = NULL;
+   hypre_ParNSHDataMatM(nsh_data) = NULL;
+   hypre_ParNSHDataF(nsh_data) = NULL;
+   hypre_ParNSHDataU(nsh_data) = NULL;
+   hypre_ParNSHDataResidual(nsh_data) = NULL;
+   hypre_ParNSHDataRelResNorms(nsh_data) = NULL;
+   hypre_ParNSHDataNumIterations(nsh_data) = 0;
+   hypre_ParNSHDataL1Norms(nsh_data) = NULL;
+   hypre_ParNSHDataFinalRelResidualNorm(nsh_data) = 0.0;
+   hypre_ParNSHDataTol(nsh_data) = 1e-09;
+   hypre_ParNSHDataLogging(nsh_data) = 2;
+   hypre_ParNSHDataPrintLevel(nsh_data) = 2;
+   hypre_ParNSHDataMaxIter(nsh_data) = 5;
+   
+   hypre_ParNSHDataOperatorComplexity(nsh_data) = 0.0;
+   hypre_ParNSHDataDroptol(nsh_data) = hypre_TAlloc(HYPRE_Real,2,HYPRE_MEMORY_HOST);
+   hypre_ParNSHDataOwnDroptolData(nsh_data) = 1;
+   hypre_ParNSHDataDroptol(nsh_data)[0] = 1.0e-02;/* droptol for MR */
+   hypre_ParNSHDataDroptol(nsh_data)[1] = 1.0e-02;/* droptol for NSH */
+   hypre_ParNSHDataUTemp(nsh_data) = NULL;
+   hypre_ParNSHDataFTemp(nsh_data) = NULL;
+   
+   /* MR data */
+   hypre_ParNSHDataMRMaxIter(nsh_data) = 5;
+   hypre_ParNSHDataMRTol(nsh_data) = 1e-09;
+   hypre_ParNSHDataMRMaxRowNnz(nsh_data) = 800;
+   hypre_ParNSHDataMRColVersion(nsh_data) = 0;
+   
+   /* NSH data */
+   hypre_ParNSHDataNSHMaxIter(nsh_data) = 2;
+   hypre_ParNSHDataNSHTol(nsh_data) = 1e-09;
+   hypre_ParNSHDataNSHMaxRowNnz(nsh_data) = 1000;
+   
+   return (void *) nsh_data;
+}
+
+/* Destroy */
+HYPRE_Int
+hypre_NSHDestroy( void *data )
+{
+   hypre_ParNSHData * nsh_data = (hypre_ParNSHData*) data;
+   
+   /* residual */ 
+   if(hypre_ParNSHDataResidual(nsh_data))
+   {
+      hypre_ParVectorDestroy( hypre_ParNSHDataResidual(nsh_data) );
+      hypre_ParNSHDataResidual(nsh_data) = NULL;
+   }
+   
+   /* residual norms */
+   if(hypre_ParNSHDataRelResNorms(nsh_data))
+   {
+      hypre_TFree( hypre_ParNSHDataRelResNorms(nsh_data), HYPRE_MEMORY_HOST );
+      hypre_ParNSHDataRelResNorms(nsh_data) = NULL;
+   }
+   
+   /* l1 norms */
+   if(hypre_ParNSHDataL1Norms(nsh_data))
+   {
+      hypre_TFree( hypre_ParNSHDataL1Norms(nsh_data), HYPRE_MEMORY_HOST );
+      hypre_ParNSHDataL1Norms(nsh_data) = NULL;
+   }
+   
+   /* temp arrays */ 
+   if(hypre_ParNSHDataUTemp(nsh_data))
+   {
+      hypre_ParVectorDestroy( hypre_ParNSHDataUTemp(nsh_data) );
+      hypre_ParNSHDataUTemp(nsh_data) = NULL;
+   }
+   if(hypre_ParNSHDataFTemp(nsh_data))
+   {
+      hypre_ParVectorDestroy( hypre_ParNSHDataFTemp(nsh_data) );
+      hypre_ParNSHDataFTemp(nsh_data) = NULL;
+   }
+   
+   /* approx inverse matrix */
+   if(hypre_ParNSHDataMatM(nsh_data))
+   {
+      hypre_ParCSRMatrixDestroy( hypre_ParNSHDataMatM(nsh_data) );
+      hypre_ParNSHDataMatM(nsh_data) = NULL;
+   }
+   
+   /* droptol array */
+  if(hypre_ParNSHDataOwnDroptolData(nsh_data))
+  {
+     hypre_TFree(hypre_ParNSHDataDroptol(nsh_data), HYPRE_MEMORY_HOST);
+     hypre_ParNSHDataOwnDroptolData(nsh_data) = 0;
+     hypre_ParNSHDataDroptol(nsh_data) = NULL;
+  }
+
+   /* nsh data */
+   hypre_TFree(nsh_data, HYPRE_MEMORY_HOST);
+
+   return hypre_error_flag;
+}
+
+/* Print solver params */
+HYPRE_Int
+hypre_NSHWriteSolverParams(void *nsh_vdata)
+{
+   hypre_ParNSHData  *nsh_data = (hypre_ParNSHData*) nsh_vdata;      
+   hypre_printf("Newton–Schulz–Hotelling Setup parameters: \n");
+   hypre_printf("NSH max iterations = %d \n", hypre_ParNSHDataNSHMaxIter(nsh_data));
+   hypre_printf("NSH drop tolerance = %e \n", hypre_ParNSHDataDroptol(nsh_data)[1]);
+   hypre_printf("NSH max nnz per row = %d \n", hypre_ParNSHDataNSHMaxRowNnz(nsh_data));
+   hypre_printf("MR max iterations = %d \n", hypre_ParNSHDataMRMaxIter(nsh_data));
+   hypre_printf("MR drop tolerance = %e \n", hypre_ParNSHDataDroptol(nsh_data)[0]);
+   hypre_printf("MR max nnz per row = %d \n", hypre_ParNSHDataMRMaxRowNnz(nsh_data));
+   hypre_printf("Operator Complexity (Fill factor) = %f \n", hypre_ParNSHDataOperatorComplexity(nsh_data));
+   hypre_printf("\n Newton–Schulz–Hotelling Solver Parameters: \n");  
+   hypre_printf("Max number of iterations: %d\n", hypre_ParNSHDataMaxIter(nsh_data));
+   hypre_printf("Stopping tolerance: %e\n", hypre_ParNSHDataTol(nsh_data));
+   
+   return hypre_error_flag;
+}
+
+/* set print level */
+HYPRE_Int
+hypre_NSHSetPrintLevel( void *nsh_vdata, HYPRE_Int print_level )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataPrintLevel(nsh_data) = print_level;
+   return hypre_error_flag;
+}
+/* set logging level */
+HYPRE_Int
+hypre_NSHSetLogging( void *nsh_vdata, HYPRE_Int logging )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataLogging(nsh_data) = logging;
+   return hypre_error_flag;
+}
+/* set max iteration */
+HYPRE_Int
+hypre_NSHSetMaxIter( void *nsh_vdata, HYPRE_Int max_iter )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataMaxIter(nsh_data) = max_iter;
+   return hypre_error_flag;
+}
+/* set solver iteration tol */
+HYPRE_Int
+hypre_NSHSetTol( void *nsh_vdata, HYPRE_Real tol )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataTol(nsh_data) = tol;
+   return hypre_error_flag;
+}
+/* set global solver */
+HYPRE_Int
+hypre_NSHSetGlobalSolver( void *nsh_vdata, HYPRE_Int global_solver )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataGlobalSolver(nsh_data) = global_solver;
+   return hypre_error_flag;
+}
+/* set all droptols */
+HYPRE_Int
+hypre_NSHSetDropThreshold( void *nsh_vdata, HYPRE_Real droptol )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataDroptol(nsh_data)[0] = droptol;
+   hypre_ParNSHDataDroptol(nsh_data)[1] = droptol;
+   return hypre_error_flag;
+}
+/* set array of droptols */
+HYPRE_Int
+hypre_NSHSetDropThresholdArray( void *nsh_vdata, HYPRE_Real *droptol )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   if(hypre_ParNSHDataOwnDroptolData(nsh_data))
+   {
+      hypre_TFree(hypre_ParNSHDataDroptol(nsh_data),HYPRE_MEMORY_HOST);
+      hypre_ParNSHDataOwnDroptolData(nsh_data) = 0;
+   }
+   hypre_ParNSHDataDroptol(nsh_data) = droptol;
+   return hypre_error_flag;
+}
+/* set own data */
+HYPRE_Int
+hypre_NSHSetOwnDroptolData( void *nsh_vdata, HYPRE_Int own_droptol_data )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataOwnDroptolData(nsh_data) = own_droptol_data;
+   return hypre_error_flag;
+}
+/* set MR max iter */
+HYPRE_Int
+hypre_NSHSetMRMaxIter( void *nsh_vdata, HYPRE_Int mr_max_iter )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataMRMaxIter(nsh_data) = mr_max_iter;
+   return hypre_error_flag;
+}
+/* set MR tol */
+HYPRE_Int
+hypre_NSHSetMRTol( void *nsh_vdata, HYPRE_Real mr_tol )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataMRTol(nsh_data) = mr_tol;
+   return hypre_error_flag;
+}
+/* set MR max nonzeros of a row */
+HYPRE_Int
+hypre_NSHSetMRMaxRowNnz( void *nsh_vdata, HYPRE_Int mr_max_row_nnz )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataMRMaxRowNnz(nsh_data) = mr_max_row_nnz;
+   return hypre_error_flag;
+}
+/* set MR version, column version or global version */
+HYPRE_Int
+hypre_NSHSetColVersion( void *nsh_vdata, HYPRE_Int mr_col_version )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataMRColVersion(nsh_data) = mr_col_version;
+   return hypre_error_flag;
+}
+/* set NSH max iter */
+HYPRE_Int
+hypre_NSHSetNSHMaxIter( void *nsh_vdata, HYPRE_Int nsh_max_iter )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataNSHMaxIter(nsh_data) = nsh_max_iter;
+   return hypre_error_flag;
+}
+/* set NSH tol */
+HYPRE_Int
+hypre_NSHSetNSHTol( void *nsh_vdata, HYPRE_Real nsh_tol )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataNSHTol(nsh_data) = nsh_tol;
+   return hypre_error_flag;
+}
+/* set NSH max nonzeros of a row */
+HYPRE_Int
+hypre_NSHSetNSHMaxRowNnz( void *nsh_vdata, HYPRE_Int nsh_max_row_nnz )
+{
+   hypre_ParNSHData   *nsh_data = (hypre_ParNSHData*) nsh_vdata;
+   hypre_ParNSHDataNSHMaxRowNnz(nsh_data) = nsh_max_row_nnz;
+   return hypre_error_flag;
+}
+
+
+/* Compute the F norm of CSR matrix
+ * A: the target CSR matrix
+ * norm_io: output
  */
 HYPRE_Int
-hypre_CSRMatrixExtractSubMatrix(hypre_CSRMatrix *A, HYPRE_Int *row_start, HYPRE_Int *col_start, hypre_CSRMatrix **B)
+hypre_CSRMatrixNormFro(hypre_CSRMatrix *A, HYPRE_Real *norm_io)
 {
-   /* first get basic information of the submatrix */
-   HYPRE_Int num_rows = row_start[1] - row_start[0];
-   HYPRE_Int num_cols = col_start[1] - col_start[0];
-   HYPRE_Int num_nonzeors = 0;
-   hypre_CSRMatrix *outmat;
-   //outmat = hypre_CSRMatrixCreate(num_rows, num_cols, num_nonzeros);
-   *B = outmat;
+   HYPRE_Real norm = 0.0;
+   HYPRE_Real *data = hypre_CSRMatrixData(A);
+   HYPRE_Int i,k;
+   k = hypre_CSRMatrixNumNonzeros(A);
+   /* main loop */
+   for(i = 0 ; i < k ; i ++)
+   {
+      norm += data[i] * data[i];
+   }
+   *norm_io = sqrt(norm);
+   return hypre_error_flag;
+   
+}
+
+/* Compute the norm of I-A where I is identity matrix and A is a CSR matrix
+ * A: the target CSR matrix
+ * norm_io: the output
+ */
+HYPRE_Int
+hypre_CSRMatrixResNormFro(hypre_CSRMatrix *A, HYPRE_Real *norm_io)
+{
+   HYPRE_Real norm = 0.0, value;
+   HYPRE_Int i, j, k1, k2, n;
+   HYPRE_Int *idx = hypre_CSRMatrixI(A);
+   HYPRE_Int *cols = hypre_CSRMatrixJ(A);
+   HYPRE_Real *data = hypre_CSRMatrixData(A);
+   n = hypre_CSRMatrixNumRows(A);
+   /* main loop to sum up data */
+   for(i = 0 ; i < n ; i ++)
+   {
+      k1 = idx[i];
+      k2 = idx[i+1];
+      /* check if we have diagonal in A */
+      if(k2 > k1)
+      {
+         if(cols[k1] == i)
+         {
+            /* reduce 1 on diagonal */
+            value = data[k1] - 1.0;
+            norm += value * value;
+         }
+         else
+         {
+            /* we don't have diagonal in A, so we need to add 1 to norm */
+            norm += 1.0;
+            norm += data[k1] * data[k1];
+         }
+      }
+      else
+      {
+         /* we don't have diagonal in A, so we need to add 1 to norm */
+         norm += 1.0;
+      }
+      /* and the rest of the code */
+      for(j = k1 + 1 ; j < k2 ; j ++)
+      {
+         norm += data[j] * data[j];
+      }
+   }
+   *norm_io = sqrt(norm);
+   return hypre_error_flag;
+}
+
+/* Compute the F norm of ParCSR matrix
+ * A: the target CSR matrix
+ */
+HYPRE_Int
+hypre_ParCSRMatrixNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io)
+{
+   HYPRE_Real local_norm = 0.0;
+   HYPRE_Real global_norm;
+   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+   
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   
+   hypre_CSRMatrixNormFro(A_diag, &local_norm);
+   /* use global_norm to store offd for now */
+   hypre_CSRMatrixNormFro(A_offd, &global_norm);
+   
+   /* square and sum them */
+   local_norm *= local_norm;
+   local_norm += global_norm*global_norm;
+   
+   /* do communication to get global total sum */
+   hypre_MPI_Allreduce(&local_norm, &global_norm, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+
+   *norm_io = sqrt(global_norm);
+   return hypre_error_flag;
+   
+}
+
+/* Compute the F norm of ParCSR matrix
+ * Norm of I-A
+ * A: the target CSR matrix
+ */
+HYPRE_Int
+hypre_ParCSRMatrixResNormFro(hypre_ParCSRMatrix *A, HYPRE_Real *norm_io)
+{
+   HYPRE_Real local_norm = 0.0;
+   HYPRE_Real global_norm;
+   MPI_Comm comm = hypre_ParCSRMatrixComm(A);
+   
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   
+   /* compute I-A for diagonal */
+   hypre_CSRMatrixResNormFro(A_diag, &local_norm);
+   /* use global_norm to store offd for now */
+   hypre_CSRMatrixNormFro(A_offd, &global_norm);
+   
+   /* square and sum them */
+   local_norm *= local_norm;
+   local_norm += global_norm*global_norm;
+   
+   /* do communication to get global total sum */
+   hypre_MPI_Allreduce(&local_norm, &global_norm, 1, HYPRE_MPI_REAL, hypre_MPI_SUM, comm);
+
+   *norm_io = sqrt(global_norm);
+   return hypre_error_flag;
+   
+}
+
+/* Compute the trace of CSR matrix
+ * A: the target CSR matrix
+ * trace_io: the output trace
+ */
+HYPRE_Int
+hypre_CSRMatrixTrace(hypre_CSRMatrix *A, HYPRE_Real *trace_io)
+{
+   HYPRE_Real trace = 0.0;
+   HYPRE_Int *idx = hypre_CSRMatrixI(A);
+   HYPRE_Int *cols = hypre_CSRMatrixJ(A);
+   HYPRE_Real *data = hypre_CSRMatrixData(A);
+   HYPRE_Int i,k1,k2,n;
+   n = hypre_CSRMatrixNumRows(A);
+   for(i = 0 ; i < n ; i ++)
+   {
+      k1 = idx[i];
+      k2 = idx[i+1];
+      if(cols[k1] == i && k2 > k1)
+      {
+         /* only add when diagonal is nonzero */
+         trace += data[k1];
+      }
+   }
+   
+   *trace_io = trace;
+   return hypre_error_flag;
+   
+}
+
+/* Scale CSR matrix A = scalar * A
+ * A: the target CSR matrix
+ * scalar: real number
+ */
+HYPRE_Int
+hypre_CSRMatrixScale(hypre_CSRMatrix *A, HYPRE_Real scalar)
+{
+   HYPRE_Real *data = hypre_CSRMatrixData(A);
+   HYPRE_Int i,k;
+   k = hypre_CSRMatrixNumNonzeros(A);
+   for(i = 0 ; i < k ; i ++)
+   {
+      data[i] *= scalar;
+   }
+   return hypre_error_flag;
+}
+
+/* Scale ParCSR matrix A = scalar * A
+ * A: the target CSR matrix
+ * scalar: real number
+ */
+HYPRE_Int
+hypre_ParCSRMatrixScale(hypre_ParCSRMatrix *A, HYPRE_Real scalar)
+{
+   hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   /* each thread scale local diag and offd */
+   hypre_CSRMatrixScale(A_diag, scalar);
+   hypre_CSRMatrixScale(A_offd, scalar);
+   return hypre_error_flag;
+}
+
+/* Apply dropping to CSR matrix
+ * A: the target CSR matrix
+ * droptol: all entries have smaller absolute value than this will be dropped
+ * max_row_nnz: max nonzoers allowed for each row, only largest max_row_nnz kept
+ * we NEVER drop diagonal entry if exists
+ */
+HYPRE_Int
+hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max_row_nnz)
+{
+   HYPRE_Int      i, j, k1, k2, has_diag;
+   HYPRE_Int      *idx, len, drop_len;
+   HYPRE_Real     *data, value, itol, norm;
+   
+   /* info of matrix A */
+   HYPRE_Int      n = hypre_CSRMatrixNumRows(A);
+   HYPRE_Int      m = hypre_CSRMatrixNumCols(A);
+   HYPRE_Int      *A_i = hypre_CSRMatrixI(A);
+   HYPRE_Int      *A_j = hypre_CSRMatrixJ(A);
+   HYPRE_Real     *A_data = hypre_CSRMatrixData(A);
+   HYPRE_Real     nnzA = hypre_CSRMatrixNumNonzeros(A);
+   
+   /* new data */
+   HYPRE_Int      *new_i;
+   HYPRE_Int      *new_j;
+   HYPRE_Real     *new_data;
+   
+   /* memory */
+   HYPRE_Int      capacity;
+   HYPRE_Int      ctrA;
+   
+   /* setup */
+   capacity = nnzA*0.3+1;
+   ctrA = 0;
+   new_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_HOST);
+   new_j = hypre_TAlloc(HYPRE_Int, capacity, HYPRE_MEMORY_HOST);
+   new_data = hypre_TAlloc(HYPRE_Real, capacity, HYPRE_MEMORY_HOST);
+   
+   idx = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_HOST);
+   data = hypre_TAlloc(HYPRE_Real, m, HYPRE_MEMORY_HOST);
+   
+   /* start of main loop */
+   new_i[0] = 0;
+   for(i = 0 ; i < n ; i ++)
+   {
+      len = 0;
+      k1 = A_i[i];
+      k2 = A_i[i+1];
+      /* compute droptol for current row */
+      norm = 0.0;
+      for(j = k1 ; j < k2 ; j ++)
+      {
+         norm += fabs(A_data[j]);
+      }
+      if(k2 > k1)
+      {
+         norm /= (HYPRE_Real)(k2 - k1);
+      }
+      itol = droptol * norm;
+      /* we don't want to drop the diagonal entry, so use an if statement here */
+      if(A_j[k1] == i)
+      {
+         /* we have diagonal entry, skip it */
+         idx[len] = A_j[k1];
+         data[len++] = A_data[k1];
+         for(j = k1 + 1 ; j < k2 ; j ++)
+         {
+            value = A_data[j];
+            if(fabs(value) < itol)
+            {
+               /* skip small element */
+               continue;
+            }
+            idx[len] = A_j[j];
+            data[len++] = A_data[j];
+         }
+         
+         /* now apply drop on length */
+         if(len > max_row_nnz)
+         {
+            drop_len = max_row_nnz;
+            hypre_ILUMaxQSplitRabsI( data + 1, idx + 1, 0, drop_len - 1 , len - 2);
+         }
+         else
+         {
+            /* don't need to sort, we keep all of them */
+            drop_len = len;
+         }
+         
+         /* copy data */
+         while(ctrA + drop_len > capacity)
+         {
+            capacity = capacity * EXPAND_FACT + 1;
+            new_j = hypre_TReAlloc(new_j, HYPRE_Int, capacity, HYPRE_MEMORY_HOST);
+            new_data = hypre_TReAlloc(new_data, HYPRE_Real, capacity, HYPRE_MEMORY_HOST);
+         }
+         hypre_TMemcpy( new_j + ctrA, idx,HYPRE_Int, drop_len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy( new_data + ctrA, data,HYPRE_Real, drop_len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         ctrA += drop_len;
+         new_i[i+1] = ctrA;
+      }
+      else
+      {
+         /* we don't have diagonal entry */
+         for(j = k1 ; j < k2 ; j ++)
+         {
+            value = A_data[j];
+            if(fabs(value)<itol)
+            {
+               /* skip small element */
+               continue;
+            }
+            idx[len] = A_j[j];
+            data[len++] = A_data[j];
+         }
+         
+         /* now apply drop on length */
+         if(len > max_row_nnz)
+         {
+            drop_len = max_row_nnz;
+            hypre_ILUMaxQSplitRabsI( data, idx, 0, drop_len, len - 1);
+         }
+         else
+         {
+            /* don't need to sort, we keep all of them */
+            drop_len = len;
+         }
+         
+         /* copy data */
+         while(ctrA + drop_len > capacity)
+         {
+            capacity = capacity * EXPAND_FACT + 1;
+            new_j = hypre_TReAlloc(new_j, HYPRE_Int, capacity, HYPRE_MEMORY_HOST);
+            new_data = hypre_TReAlloc(new_data, HYPRE_Real, capacity, HYPRE_MEMORY_HOST);
+         }
+         hypre_TMemcpy( new_j + ctrA, idx,HYPRE_Int, drop_len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         hypre_TMemcpy( new_data + ctrA, data,HYPRE_Real, drop_len, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+         ctrA += drop_len;
+         new_i[i+1] = ctrA;
+      }
+   }/* end of main loop */
+   /* destory data if A own them */
+   if(hypre_CSRMatrixOwnsData(A))
+   {
+      hypre_TFree(A_i, HYPRE_MEMORY_HOST);
+      hypre_TFree(A_j, HYPRE_MEMORY_HOST);
+      hypre_TFree(A_data, HYPRE_MEMORY_HOST);
+   }
+   
+   hypre_CSRMatrixI(A) = new_i;
+   hypre_CSRMatrixJ(A) = new_j;
+   hypre_CSRMatrixData(A) = new_data;
+   hypre_CSRMatrixNumNonzeros(A) = ctrA;
+   hypre_CSRMatrixOwnsData(A) = 1;
+   
+   hypre_TFree(idx, HYPRE_MEMORY_HOST);
+   hypre_TFree(data, HYPRE_MEMORY_HOST);
+   
+   return hypre_error_flag;
+}
+
+/* Compute the inverse with MR of original CSR matrix
+ * Global(not by each column) and out place version
+ * A: the input matrix
+ * M: the output matrix
+ * droptol: the dropping tolorance
+ * tol: when to stop the iteration
+ * eps_tol: to avoid divide by 0
+ * max_row_nnz: max number of nonzeros per row
+ * max_iter: max number of iterations
+ * print_level: the print level of this algorithm
+ */
+HYPRE_Int
+hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMatrix **M, HYPRE_Real droptol, 
+                                               HYPRE_Real tol, HYPRE_Real eps_tol, HYPRE_Int max_row_nnz, HYPRE_Int max_iter, 
+                                               HYPRE_Int print_level )
+{
+   HYPRE_Int         i, k1, k2, j;
+   HYPRE_Real        value, trace1, trace2, alpha, r_norm, z_norm;
+   
+   /* martix A */
+   HYPRE_Int         *A_i = hypre_CSRMatrixI(matA);
+   HYPRE_Int         *A_j = hypre_CSRMatrixJ(matA);
+   HYPRE_Real        *A_data = hypre_CSRMatrixData(matA);
+   
+   /* complexity */
+   HYPRE_Real        nnzA = hypre_CSRMatrixNumNonzeros(matA);
+   HYPRE_Real        nnzM;
+   
+   /* inverse matrix */
+   hypre_CSRMatrix   *inM = *M;
+   hypre_CSRMatrix   *matM;
+   HYPRE_Int         *M_i;
+   HYPRE_Int         *M_j;
+   HYPRE_Real        *M_data;
+   
+   /* idendity matrix */
+   hypre_CSRMatrix   *matI;
+   HYPRE_Int         *I_i;
+   HYPRE_Int         *I_j;
+   HYPRE_Real        *I_data;
+   
+   /* helper matrices */
+   hypre_CSRMatrix   *matR;
+   hypre_CSRMatrix   *matR_temp;
+   hypre_CSRMatrix   *matZ;
+   hypre_CSRMatrix   *matC;
+   hypre_CSRMatrix   *matW;
+   
+   HYPRE_Real        time_s, time_e;
+   
+   HYPRE_Int         n = hypre_CSRMatrixNumRows(matA);
+   
+   if(n == 0)
+   {
+      *M = NULL;
+      return hypre_error_flag;
+   }
+   
+   /* create initial guess and matrix I */
+   matM = hypre_CSRMatrixCreate(n,n,n);
+   M_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_HOST);
+   M_j = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   M_data = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
+   
+   matI = hypre_CSRMatrixCreate(n,n,n);
+   I_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_HOST);
+   I_j = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   I_data = hypre_TAlloc(HYPRE_Real, n, HYPRE_MEMORY_HOST);
+   
+   /* now loop to create initial guess */
+   M_i[0] = 0;
+   I_i[0] = 0;
+   for(i = 0 ; i < n ; i ++)
+   {
+      M_i[i+1] = i+1;
+      M_j[i] = i;
+      k1 = A_i[i];
+      k2 = A_i[i+1];
+      if(k2 > k1)
+      {
+         if(A_j[k1] == i)
+         {
+            value = A_data[k1];
+            if(fabs(value) < MAT_TOL)
+            {
+               value = 1.0;
+            }
+            M_data[i] = 1.0/value;
+         }
+         else
+         {
+            M_data[i] = 1.0;
+         }
+      }
+      else
+      {
+         M_data[i] = 1.0;
+      }
+      I_i[i+1] = i+1;
+      I_j[i] = i;
+      I_data[i] = 1.0;
+   }
+   
+   hypre_CSRMatrixI(matM) = M_i;
+   hypre_CSRMatrixJ(matM) = M_j;
+   hypre_CSRMatrixData(matM) = M_data;
+   hypre_CSRMatrixOwnsData(matM) = 1;
+   
+   hypre_CSRMatrixI(matI) = I_i;
+   hypre_CSRMatrixJ(matI) = I_j;
+   hypre_CSRMatrixData(matI) = I_data;
+   hypre_CSRMatrixOwnsData(matI) = 1;
+   
+   /* now start the main loop */
+   if(print_level > 1)
+   {
+      /* time the iteration */
+      time_s = hypre_MPI_Wtime();
+   }
+   
+   /* main loop */
+   for(i = 0 ; i < max_iter ; i ++)
+   {
+      nnzM = hypre_CSRMatrixNumNonzeros(matM);
+      /* R = I - AM */
+      matR_temp = hypre_CSRMatrixMultiply(matA,matM);
+      
+      hypre_CSRMatrixScale(matR_temp, -1.0);
+      
+      matR = hypre_CSRMatrixAdd(matI,matR_temp);
+      hypre_CSRMatrixDestroy(matR_temp);
+      
+      /* r_norm */
+      hypre_CSRMatrixNormFro(matR, &r_norm);
+      if(r_norm < tol)
+      {
+         break;
+      }
+      
+      /* Z = MR and dropping */
+      matZ = hypre_CSRMatrixMultiply(matM, matR);
+      //hypre_CSRMatrixNormFro(matZ, &z_norm);
+      hypre_CSRMatrixDropInplace(matZ, droptol, max_row_nnz);
+      
+      /* C = A*Z */
+      matC = hypre_CSRMatrixMultiply(matA, matZ);
+      
+      /* W = R' * C */
+      hypre_CSRMatrixTranspose(matR,&matR_temp,1);
+      matW = hypre_CSRMatrixMultiply(matR_temp,matC);
+      
+      /* trace and alpha */
+      hypre_CSRMatrixTrace(matW, &trace1);
+      hypre_CSRMatrixNormFro(matC, &trace2);
+      trace2 *= trace2;
+      
+      if(fabs(trace2) < eps_tol)
+      {
+         break;
+      }
+      
+      alpha = trace1 / trace2;
+      
+      /* M - M + alpha * Z */
+      hypre_CSRMatrixScale(matZ, alpha);
+      
+      hypre_CSRMatrixDestroy(matR);
+      matR = hypre_CSRMatrixAdd(matM, matZ);
+      hypre_CSRMatrixDestroy(matM);
+      matM = matR;
+      
+      hypre_CSRMatrixDestroy(matZ);
+      hypre_CSRMatrixDestroy(matW);
+      hypre_CSRMatrixDestroy(matC);
+      hypre_CSRMatrixDestroy(matR_temp);
+      
+   }/* end of main loop i for compute inverse matrix */
+   
+   /* time if we need to print */
+   if(print_level > 1)
+   {
+      time_e = hypre_MPI_Wtime();
+      if(i == 0)
+      {
+         i = 1;
+      }
+      printf("matrix size %5d\nfinal norm at loop %5d is %16.12f, time per iteration is %16.12f, complexity is %16.12f out of maximum %16.12f\n",n,i,r_norm, (time_e-time_s)/i, nnzM/nnzA, n/nnzA*n);
+   }
+   
+   hypre_CSRMatrixDestroy(matI);
+   if(inM)
+   {
+      hypre_CSRMatrixDestroy(inM);
+   }
+   *M = matM;
+   
+   return hypre_error_flag;
+   
+}
+
+/* Compute inverse with NSH method
+ * Use MR to get local initial guess
+ * A: input matrix
+ * M: output matrix
+ * droptol: droptol array. droptol[0] for MR and droptol[1] for NSH.
+ * mr_tol: tol for stop iteration for MR
+ * nsh_tol: tol for stop iteration for NSH
+ * esp_tol: tol for avoid divide by 0
+ * mr_max_row_nnz: max number of nonzeros for MR
+ * nsh_max_row_nnz: max number of nonzeros for NSH
+ * mr_max_iter: max number of iterations for MR
+ * nsh_max_iter: max number of iterations for NSH
+ * mr_col_version: column version of global version
+ */
+HYPRE_Int
+hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_Real *droptol, HYPRE_Real mr_tol, 
+                            HYPRE_Real nsh_tol, HYPRE_Real eps_tol, HYPRE_Int mr_max_row_nnz, HYPRE_Int nsh_max_row_nnz, 
+                            HYPRE_Int mr_max_iter, HYPRE_Int nsh_max_iter, HYPRE_Int mr_col_version,
+                            HYPRE_Int print_level)
+{
+   HYPRE_Int               i;
+   
+   /* data slots for matrices */
+   hypre_ParCSRMatrix      *matM = NULL;
+   hypre_ParCSRMatrix      *inM = *M;
+   hypre_ParCSRMatrix      *AM,*MAM;
+   HYPRE_Real              norm, s_norm;
+   MPI_Comm                comm = hypre_ParCSRMatrixComm(A);
+   HYPRE_Int               myid;
+   
+   
+   hypre_CSRMatrix         *A_diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix         *M_diag = NULL;
+   hypre_CSRMatrix         *M_offd;
+   HYPRE_Int               *M_offd_i;
+   
+   HYPRE_Real              time_s, time_e;
+   
+   HYPRE_Int               n = hypre_CSRMatrixNumRows(A_diag);
+   
+   /* setup */
+   hypre_MPI_Comm_rank(comm, &myid);
+   
+   M_offd_i = hypre_TAlloc(HYPRE_Int, n+1, HYPRE_MEMORY_HOST);
+   
+   if(mr_col_version)
+   {
+      printf("Column version is not yet support, switch to global version\n");
+   }
+   
+   /* call MR to build loacl initial matrix 
+    * droptol here should be larger
+    * we want same number for MR and NSH to let user set them eaiser
+    * but we don't want a too dense MR initial guess
+    */
+   hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(A_diag, &M_diag, droptol[0] * 5.0, mr_tol, eps_tol, mr_max_row_nnz, mr_max_iter, print_level );
+   
+   /* create empty offdiagonal */
+   for(i = 0 ; i <= n ; i ++)
+   {
+      M_offd_i[i] = 0;
+   }
+   
+   /* create parCSR matM */
+   matM = hypre_ParCSRMatrixCreate( comm,
+                       hypre_ParCSRMatrixGlobalNumRows(A),
+                       hypre_ParCSRMatrixGlobalNumRows(A),
+                       hypre_ParCSRMatrixRowStarts(A),
+                       hypre_ParCSRMatrixColStarts(A),
+                       0,
+                       hypre_CSRMatrixNumNonzeros(M_diag),
+                       0 );
+
+   hypre_CSRMatrixDestroy(hypre_ParCSRMatrixDiag(matM));
+   hypre_ParCSRMatrixDiag(matM) = M_diag;
+   
+   M_offd = hypre_ParCSRMatrixOffd(matM);
+   hypre_CSRMatrixI(M_offd) = M_offd_i;
+   hypre_CSRMatrixOwnsData(M_offd) = 1;
+   
+   hypre_ParCSRMatrixSetColStartsOwner(matM,0);
+   hypre_ParCSRMatrixSetRowStartsOwner(matM,0);
+   
+   /* now start NSH 
+    * Mj+1 = 2Mj - MjAMj
+    */
+   
+   AM = hypre_ParMatmul(A, matM);
+   hypre_ParCSRMatrixResNormFro(AM, &norm);
+   s_norm = norm;
+   hypre_ParCSRMatrixDestroy(AM);
+   if(print_level > 1)
+   {
+      if(myid == 0)
+      {
+         printf("before NSH the norm is %16.12f\n", norm);
+      }
+      time_s = hypre_MPI_Wtime();
+   }
+   
+   for(i = 0 ; i < nsh_max_iter ; i ++)
+   {
+      /* compute XjAXj */
+      AM = hypre_ParMatmul(A, matM);
+      hypre_ParCSRMatrixResNormFro(AM, &norm);
+      if(norm < nsh_tol)
+      {
+         break;
+      }
+      MAM = hypre_ParMatmul(matM, AM);
+      hypre_ParCSRMatrixDestroy(AM);
+      
+      /* apply dropping */
+      //hypre_ParCSRMatrixNormFro(MAM, &norm);
+      /* this function has already built with norm */
+      hypre_ParCSRMatrixDropSmallEntries(MAM, droptol[1]);
+      
+      /* update Mj+1 = 2Mj - MjAMj 
+       * the result holds it own start/end data!
+       */
+      hypre_ParcsrAdd(2.0, matM,-1.0, MAM, &AM);
+      hypre_ParCSRMatrixDestroy(matM);
+      matM = AM;
+      
+      /* destroy */
+      hypre_ParCSRMatrixDestroy(MAM);
+   }
+   
+   if(print_level > 1)
+   {
+      time_e = hypre_MPI_Wtime();
+      /* at this point of time, norm has to be already computed */
+      if(i == 0)
+      {
+         i = 1;
+      }
+      if(myid == 0)
+      {
+         printf("after %5d NSH iterations the norm is %16.12f, time per iteration is %16.12f\n", i, norm, (time_e-time_s)/i);
+      }
+   }
+   
+   if(s_norm < norm)
+   {
+      /* the residual norm increase after NSH iteration, need to let user know */
+      if(myid == 0)
+      {
+         printf("Warning: NSH divergence, probably bad approximate invese matrix.\n");
+      }
+   }
+   
+   if(inM)
+   {
+      hypre_ParCSRMatrixDestroy(inM);
+   }
+   *M = matM;
+   
    return hypre_error_flag;
 }

@@ -3603,7 +3603,7 @@ HYPRE_ILUSetMaxNnzPerRow( HYPRE_Solver solver, HYPRE_Int nzmax );
 /**
  * (Optional) Set the threshold for dropping in L and U factors (for ilut).
  * Any fill-in less than this threshold is dropped in the factorization.
- * The default is 1.0e-3. 
+ * The default is 1.0e-2. 
  **/
 HYPRE_Int
 HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
@@ -3617,18 +3617,43 @@ HYPRE_ILUSetDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
  * threshold[0]: threshold for matrix B (upper left).
  * threshold[1]: threshold for matrix E and F.
  * threshold[2]: threshold for matrix S (Schur Complement).
- * The default is 1.0e-3. 
+ * The default is 1.0e-2. 
  **/
 HYPRE_Int
 HYPRE_ILUSetDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold );
 
 /*--------------------------------------------------------------------------
+ * HYPRE_ILUSetNSHDropThreshold
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set the threshold for dropping in Newton–Schulz–Hotelling iteration (for NHS-ILU).
+ * Any entries less than this threshold is dropped when forming the approximate inverse matrix.
+ * The default is 1.0e-2.  
+ **/
+HYPRE_Int
+HYPRE_ILUSetNSHDropThreshold( HYPRE_Solver solver, HYPRE_Real threshold );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ILUSetNSHDropThresholdArray
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set the array of thresholds for dropping Newton–Schulz–Hotelling iteration (for NHS-ILU).
+ * Any fill-in less than thresholds is dropped when forming the approximate inverse matrix.
+ * threshold[0]: threshold for Minimal Residual iteration (create initial guess for NSH).
+ * threshold[1]: threshold for Newton–Schulz–Hotelling iteration.
+ * The default is 1.0e-2. 
+ **/
+HYPRE_Int
+HYPRE_ILUSetNSHDropThresholdArray( HYPRE_Solver solver, HYPRE_Real *threshold );
+
+/*--------------------------------------------------------------------------
  * HYPRE_ILUSetSchurMaxIter
  *--------------------------------------------------------------------------*/
 /**
- * (Optional) Set maximum number of iterations for Schur System.
- * For ILU-GMRES, this is the maximum number of iterations for GMRES
- * If the dimension of GMRES is less than this value, also update it
+ * (Optional) Set maximum number of iterations for Schur System Solve.
+ * For ILU-GMRES, this is the maximum number of iterations for GMRES.
+ * The dimension of GMRES is set equal to this value to avoid restart.
+ * For ILU-NSH, this is the maximum number of iterations for NSH solve.
  * The default is 5.
  **/
 HYPRE_Int
