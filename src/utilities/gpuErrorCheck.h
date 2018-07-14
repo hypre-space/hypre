@@ -13,7 +13,7 @@
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
 
 //#include <cuda_runtime_api.h>
 #ifdef __cplusplus
@@ -152,6 +152,6 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
    }
 }
 #endif // __cusparseErrorCheck__
-#endif // defined(HYPRE_USE_GPU)
+#endif
 
 #endif // hypre_GPU_ERROR_HEADER

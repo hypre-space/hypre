@@ -169,7 +169,7 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
-#if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU)|| defined(HYPRE_USE_OMP45)
 
 #define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)\
 HYPRE_Int * indices_d;\

@@ -268,7 +268,7 @@ HYPRE_Int
 hypre_SeqVectorSetConstantValues( hypre_Vector *v,
                                   HYPRE_Complex value )
 {
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
   VecSet(hypre_VectorData(v),hypre_VectorSize(v),value,HYPRE_STREAM(4));
   return 0;
 #endif
@@ -356,7 +356,7 @@ HYPRE_Int
 hypre_SeqVectorCopy( hypre_Vector *x,
                      hypre_Vector *y )
 {
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
   return hypre_SeqVectorCopyDevice(x,y);
 #endif
 #ifdef HYPRE_PROFILE
@@ -456,7 +456,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
    
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
    return VecScaleScalar(y->data,alpha, hypre_VectorSize(y),HYPRE_STREAM(4));
 #endif
    HYPRE_Complex *y_data = hypre_VectorData(y);
@@ -500,7 +500,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
                      hypre_Vector *x,
                      hypre_Vector *y     )
 {
-#ifdef  HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
   return hypre_SeqVectorAxpyDevice(alpha,x,y);
 #endif
 #ifdef HYPRE_PROFILE
@@ -556,7 +556,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
                                        hypre_Vector *y )
 {
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
   return hypre_SeqVectorInnerProdDevice(x,y);
 #endif
 #ifdef HYPRE_PROFILE

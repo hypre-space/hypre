@@ -20,7 +20,7 @@ FILE      *file;
 #endif
 
 /* This is needed to do communication in the GPU case */
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_OMP45)
 HYPRE_Complex* global_recv_buffer = NULL;
 HYPRE_Complex* global_send_buffer = NULL;
 HYPRE_Int      global_recv_size = 0;
@@ -840,7 +840,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    }
 
    /* Prepare send buffers */
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_OMP45)
 #if defined(HYPRE_USE_CUDA)
    if (hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 #elif defined(HYPRE_USE_OMP45)
@@ -894,7 +894,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    }
 
    /* Prepare recv buffers */
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_OMP45)
 #if defined(HYPRE_USE_CUDA)
    if (hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 #elif defined(HYPRE_USE_OMP45)
@@ -1002,7 +1002,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
 #undef DEVICE_VAR
 #define DEVICE_VAR 
 
-#elif defined(HYPRE_MEMORY_GPU)
+#elif defined(HYPRE_USE_GPU)
 	       hypre_BoxLoop0Begin(ndim, length_array)
 	       {
 		  dptr[idx] = 0.0;
@@ -1018,7 +1018,7 @@ hypre_InitializeCommunication( hypre_CommPkg     *comm_pkg,
    }
 
    /* Copy buffer data from Device to Host */
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_OMP45)
 #if defined(HYPRE_USE_CUDA)
    if (num_sends > 0 && hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 #else
@@ -1176,7 +1176,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    HYPRE_Int            i, j, d, ll;
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_OMP45)
    HYPRE_Complex      **send_buffers_data = hypre_CommHandleSendBuffersDevice(comm_handle);
 #endif
    HYPRE_Complex      **recv_buffers_data = hypre_CommHandleRecvBuffersDevice(comm_handle);
@@ -1242,7 +1242,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
     *--------------------------------------------------------------------*/
 
    /* Copy buffer data from Host to Device */
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_OMP45)
 #if defined(HYPRE_USE_CUDA)
    if (num_recvs > 0 && hypre_exec_policy == HYPRE_MEMORY_DEVICE)
 #else
@@ -1265,7 +1265,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
       dptr_host = (HYPRE_Complex *) recv_buffers[0];
       dptr      = (HYPRE_Complex *) recv_buffers_data[0];
 
-	  hypre_TMemcpy( dptr, dptr_host, HYPRE_Complex, size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
+      hypre_TMemcpy( dptr, dptr_host, HYPRE_Complex, size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
    }
 #endif
 
@@ -1345,7 +1345,7 @@ hypre_FinalizeCommunication( hypre_CommHandle *comm_handle )
 
    hypre_TFree(comm_handle, HYPRE_MEMORY_HOST);
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_OMP45)
    if (send_buffers == send_buffers_data) 
    {
       hypre_TFree(send_buffers, HYPRE_MEMORY_HOST);

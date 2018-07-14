@@ -25,16 +25,18 @@
 
 #include <cuda.h>
 #include <cuda_runtime.h>
+#ifdef HYPRE_USING_OPENMP
 #include <omp.h>
+#endif
 
 #define HYPRE_LAMBDA [=] __host__  __device__
 
 typedef struct hypre_Boxloop_struct
 {
-	HYPRE_Int lsize0,lsize1,lsize2;
-	HYPRE_Int strides0,strides1,strides2;
-	HYPRE_Int bstart0,bstart1,bstart2;
-	HYPRE_Int bsize0,bsize1,bsize2;
+   HYPRE_Int lsize0,lsize1,lsize2;
+   HYPRE_Int strides0,strides1,strides2;
+   HYPRE_Int bstart0,bstart1,bstart2;
+   HYPRE_Int bsize0,bsize1,bsize2;
 } hypre_Boxloop;
 
 #define BLOCKSIZE 512
@@ -63,9 +65,9 @@ extern "C++" {
 template <typename LOOP_BODY>
 __global__ void forall_kernel(LOOP_BODY loop_body, HYPRE_Int length)
 {
-	HYPRE_Int idx = blockDim.x * blockIdx.x + threadIdx.x;
-	if (idx < length)
-		loop_body(idx);
+   HYPRE_Int idx = blockDim.x * blockIdx.x + threadIdx.x;
+   if (idx < length)
+      loop_body(idx);
 }
 
 template<typename LOOP_BODY>
@@ -75,12 +77,13 @@ void BoxLoopforall (HYPRE_Int policy, HYPRE_Int length, LOOP_BODY loop_body)
   if (policy == HYPRE_MEMORY_HOST)
   {
     HYPRE_Int idx;
-#pragma omp parallel for 
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for HYPRE_SMP_SCHEDULE
+#endif
     for (idx = 0;idx < length;idx++)
     { 
       loop_body(idx);
     }
-    
   }
   else if (policy == HYPRE_MEMORY_DEVICE)
   {    
@@ -358,42 +361,47 @@ public:
    // Ctor only executes on the host.
    //
   explicit ReduceSum( T init_val,HYPRE_Int location )
-   {
-      data_location = location;
+  {
+     data_location = location;
       
-      m_is_copy = false;
+     m_is_copy = false;
 
-      m_init_val = init_val;
-      m_reduced_val = static_cast<T>(0);
+     m_init_val = init_val;
+     m_reduced_val = static_cast<T>(0);
 
-      m_myID = getCudaReductionId();
+     m_myID = getCudaReductionId();
 
-      if (data_location == HYPRE_MEMORY_DEVICE)
-      {
-	 m_blockdata = getCudaReductionMemBlock(m_myID) ;
-	 m_blockoffset = 1;
+     if (data_location == HYPRE_MEMORY_DEVICE)
+     {
+        m_blockdata = getCudaReductionMemBlock(m_myID) ;
+        m_blockoffset = 1;
       
-	 // Entire shared memory block must be initialized to zero so
-	 // sum reduction is correct.
-	 size_t len = RAJA_CUDA_REDUCE_BLOCK_LENGTH;
-	 cudaMemset(&m_blockdata[m_blockoffset], 0,
-		    sizeof(CudaReductionBlockDataType)*len); 
+        // Entire shared memory block must be initialized to zero so
+        // sum reduction is correct.
+        size_t len = RAJA_CUDA_REDUCE_BLOCK_LENGTH;
+        cudaMemset(&m_blockdata[m_blockoffset], 0,
+                   sizeof(CudaReductionBlockDataType)*len); 
 
-	 m_max_grid_size = m_blockdata;
-	 m_max_grid_size[0] = 0;
+        m_max_grid_size = m_blockdata;
+        m_max_grid_size[0] = 0;
 
-	 cudaDeviceSynchronize();
-      }
-      else if (data_location == HYPRE_MEMORY_HOST)
-      {
-	 m_blockdata = getCPUReductionMemBlock(m_myID);
-	 HYPRE_Int nthreads = omp_get_max_threads();
-	 #pragma omp parallel for schedule(static, 1)
-	 for (HYPRE_Int i = 0; i < nthreads; ++i ) {
-	    m_blockdata[i*s_block_offset] = 0 ;
-	 }
-      }
-   }
+        cudaDeviceSynchronize();
+     }
+     else if (data_location == HYPRE_MEMORY_HOST)
+     {
+        m_blockdata = getCPUReductionMemBlock(m_myID);
+#ifdef HYPRE_USING_OPENMP
+        HYPRE_Int nthreads = omp_get_max_threads();
+        #pragma omp parallel for schedule(static, 1)
+#else
+        HYPRE_Int nthreads = 1;
+#endif
+        for (HYPRE_Int i = 0; i < nthreads; ++i )
+        {
+           m_blockdata[i*s_block_offset] = 0 ;
+        }
+     }
+  }
 
    //
    // Copy ctor executes on both host and device.
@@ -445,8 +453,12 @@ public:
      {
 #if defined( __CUDA_ARCH__ )
 #else
-		 T tmp_reduced_val = static_cast<T>(0);
+        T tmp_reduced_val = static_cast<T>(0);
+#ifdef HYPRE_USING_OPENMP
 	HYPRE_Int nthreads = omp_get_max_threads();
+#else
+	HYPRE_Int nthreads = 1;
+#endif
 	for ( HYPRE_Int i = 0; i < nthreads; ++i ) {
 	   tmp_reduced_val += static_cast<T>(m_blockdata[i*s_block_offset]);
 	}
@@ -514,8 +526,12 @@ public:
 #else
       if (data_location == HYPRE_MEMORY_HOST)
       {
+#ifdef HYPRE_USING_OPENMP
          HYPRE_Int tid = omp_get_thread_num();
-		 m_blockdata[tid*s_block_offset] += val;
+#else
+         HYPRE_Int tid = 0;
+#endif
+         m_blockdata[tid*s_block_offset] += val;
       }
 #endif
       return *this ;

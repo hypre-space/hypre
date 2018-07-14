@@ -25,6 +25,8 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/../utilities\
  ${CINCLUDES}
 
+CU_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
+
 HEADERS =\
  csr_matrix.h\
  HYPRE_seq_mv.h\

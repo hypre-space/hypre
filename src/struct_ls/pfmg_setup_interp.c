@@ -295,25 +295,27 @@ hypre_PFMGSetupInterpOp_CC0
    HYPRE_Int              data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
 
-#if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_OMP45)
-   HYPRE_Int * indices_d;
+#if defined(HYPRE_USE_GPU)|| defined(HYPRE_USE_OMP45)
+   HYPRE_Int *indices_d;
    HYPRE_Int indices_h[stencil_size];
-   HYPRE_Int * stencil_shape_d;
-   HYPRE_Int  stencil_shape_h[stencil_size];
+   HYPRE_Int *stencil_shape_d;
+   HYPRE_Int stencil_shape_h[stencil_size];
    HYPRE_Complex * data_A = hypre_StructMatrixData(A);
-   indices_d =  hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_DEVICE);
-   stencil_shape_d =  hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE);
+   /* TODO RPL: NOT FREED ? */
+   indices_d       = hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE);
+   stencil_shape_d = hypre_TAlloc(HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE);
    for (HYPRE_Int ii = 0; ii < stencil_size; ii++)
    {
       indices_h[ii]       = hypre_StructMatrixDataIndices(A)[i][ii];
       stencil_shape_h[ii] = hypre_IndexD(stencil_shape[ii], cdir);
    }
-   hypre_TMemcpy( indices_d, indices_h, HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
-   hypre_TMemcpy( stencil_shape_d, stencil_shape_h, HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
+   hypre_TMemcpy( indices_d, indices_h, HYPRE_Int, stencil_size,
+                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
+   hypre_TMemcpy( stencil_shape_d, stencil_shape_h, HYPRE_Int, stencil_size, 
+                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
 #endif
 
-//TODO NOTE: Pay attention to GetMatrixBoxData: device ptr hidden inside
-//stencil_shape is not used, so not declared as device_ptr !!!
+// TODO NOTE: Pay attention to GetMatrixBoxData: device ptr, indices_d, hidden inside (see box.h)
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(Pp0,Pp1,stencil_shape_d,data_A,indices_d)
    hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,

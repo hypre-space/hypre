@@ -632,7 +632,7 @@ hypre_StructMatrixSetValues( hypre_StructMatrix *matrix,
                {
                   matp = hypre_StructMatrixBoxDataValue(matrix, i, stencil_indices[s], grid_index);
                }
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_OMP45)
 	       if (action > 0)
                {
 		  HYPRE_Complex matval;

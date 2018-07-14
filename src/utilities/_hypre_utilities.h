@@ -1150,7 +1150,7 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
 
 //#include <cuda_runtime_api.h>
 #ifdef __cplusplus
@@ -1289,7 +1289,7 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
    }
 }
 #endif // __cusparseErrorCheck__
-#endif // defined(HYPRE_USE_GPU)
+#endif
 
 #endif // hypre_GPU_ERROR_HEADER
 /*BHEADER**********************************************************************
@@ -1353,13 +1353,13 @@ struct hypre__global_struct{
   hypre_int initd;
   hypre_int device;
   hypre_int device_count;
+  size_t memoryHWM;
   cublasHandle_t cublas_handle;
   cusparseHandle_t cusparse_handle;
   cusparseMatDescr_t cusparse_mat_descr;
   cudaStream_t streams[MAX_HGS_ELEMENTS];
   nvtxDomainHandle_t nvtx_domain;
   hypre_int concurrent_managed_access;
-  size_t memoryHWM;
 };
 
 extern struct hypre__global_struct hypre__global_handle ;

@@ -100,8 +100,23 @@
 /* Enable OpenMP support */
 #undef HYPRE_USING_OPENMP
 
-/* Enable OpenMP on device */
+/* Define to 1 if enabling GPU support */
+#undef HYPRE_USE_GPU
+
+/* Define to 1 if using OpenMP on device */
 #undef HYPRE_USING_DEVICE_OPENMP
+
+/* Define to 1 if using CUDA */
+#undef HYPRE_USE_CUDA
+
+/* Define to 1 if using RAJA */
+#undef HYPRE_USE_RAJA
+
+/* Define to 1 if using HYPRE MEMORY MODEL:UNIFIED */
+#undef HYPRE_USE_MANAGED
+
+/* Define to 1 if using NVIDIA Tools Extension (NVTX) */
+#undef USE_NVTX
 
 /* Define as follows to set the Fortran name mangling scheme:
  * 0 = unspecified
@@ -124,9 +139,6 @@
 
 /* As HYPRE_FC_FUNC, but for C identifiers containing underscores. */
 #undef FC_FUNC_
-
-/* Define to 1 if nvcc is enabled */
-#undef HYPRE_USING_NVCC
 
 /* Define to 1 if Caliper instrumentation is enabled */
 #undef HYPRE_USING_CALIPER

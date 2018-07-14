@@ -603,8 +603,9 @@ SUPERLU_INCLUDE
 CALIPER_LIBS
 CALIPER_INCLUDE
 HYPRE_NVCC_MAKEFILE
-NVCCLIBS
-NVCCFLAGS
+HYPRE_CUDA_LIBS
+HYPRE_CUDA_INCL
+CUFLAGS
 KOKKOS_LIBS
 HYPRE_KOKKOS_LIB
 HYPRE_KOKKOS_INC_FILE
@@ -649,6 +650,7 @@ LINK_FC
 FFLAGS
 HOSTNAME
 HYPRE_ARCH
+CUCC
 EGREP
 GREP
 CPP
@@ -666,7 +668,6 @@ LDFLAGS
 CFLAGS
 RANLIB
 SET_MAKE
-CUDACXX
 FC
 CXX
 CC
@@ -3563,278 +3564,6 @@ if test "${with_caliper_lib+set}" = set; then :
 
 fi
 
-
-if test "$hypre_using_cuda" = "yes"
-then
-	hypre_using_fortran=no
-	for ac_prog in nvcc
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CXX+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CXX"; then
-  ac_cv_prog_CXX="$CXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CXX="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CXX=$ac_cv_prog_CXX
-if test -n "$CXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CXX" >&5
-$as_echo "$CXX" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CXX" && break
-done
-
-	for ac_prog in nvcc
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CC+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CC"; then
-  ac_cv_prog_CC="$CC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CC="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CC=$ac_cv_prog_CC
-if test -n "$CC"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CC" >&5
-$as_echo "$CC" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CC" && break
-done
-
-	if test "$hypre_user_chose_cxxcompilers" = "no"
-	then
-	   if test "$hypre_using_mpi" = "no"
-	   then
-	      if test "$hypre_using_openmp" = "yes"
-	      then
-	         for ac_prog in xlC_r xlc_r icpc icc g++ gcc pgCC pgcc CC cc KCC kcc
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CUDACXX+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CUDACXX"; then
-  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUDACXX="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CUDACXX=$ac_cv_prog_CUDACXX
-if test -n "$CUDACXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
-$as_echo "$CUDACXX" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CUDACXX" && break
-done
-
-              else
-		 for ac_prog in xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CUDACXX+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CUDACXX"; then
-  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUDACXX="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CUDACXX=$ac_cv_prog_CUDACXX
-if test -n "$CUDACXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
-$as_echo "$CUDACXX" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CUDACXX" && break
-done
-
-	      fi
-	   else
-	      if test "$hypre_using_openmp" = "yes"
-	      then
-	         for ac_prog in mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CUDACXX+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CUDACXX"; then
-  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUDACXX="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CUDACXX=$ac_cv_prog_CUDACXX
-if test -n "$CUDACXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
-$as_echo "$CUDACXX" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CUDACXX" && break
-done
-
-	      else
-	         for ac_prog in mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CUDACXX+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CUDACXX"; then
-  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUDACXX="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CUDACXX=$ac_cv_prog_CUDACXX
-if test -n "$CUDACXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
-$as_echo "$CUDACXX" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CUDACXX" && break
-done
-
-	      fi
-	   fi
-	fi
-fi
 
 if test "$hypre_user_chose_ccompilers" = "no"
 then
@@ -7807,7 +7536,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|cxx|xlC|xlC_r|mpxlC|mpixlcxx|mpixlcxx_r|mpCC)
+      CC|cxx|xlC|xlC_r|mpxlC|mpixlC|mpixlcxx|mpixlcxx_r|mpCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp"
@@ -8060,59 +7789,21 @@ fi
 if test "$hypre_user_chose_raja" = "yes"
 then
    RAJA_LIBS=" $HYPRE_RAJA_LIB_DIR $HYPRE_RAJA_LIB "
-   if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"
+
+$as_echo "#define HYPRE_USE_RAJA 1" >>confdefs.h
+
+
+      CC=${CXX}
+   LINK_CC=${LINK_CXX}
+
+
+   if test "$hypre_using_cuda" != "yes"
    then
-   	CFLAGS+=" -+ "
-   fi
-   if test "$hypre_using_cuda" = "yes"
-      then
-        RAJAFLAGS=" -lRAJA "
-	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -gencode arch=compute_60,\"code=sm_60\" -lcudart -lcuda $RAJAFLAGS "
-   	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register -Xcompiler $RAJAFLAGS "
-   	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register  $RAJAFLAGS "
-   	if test "$hypre_using_um" != "yes"
-   	then
-		CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
-	   	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
-$as_echo "$as_me: *******************************************************" >&6;}
-       		{ $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-raja and --with-cuda without unified memory." >&5
-$as_echo "$as_me: Configuring with --with-raja and --with-cuda without unified memory." >&6;}
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
-$as_echo "$as_me: It only works for struct interface." >&6;}
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: Try to confiure with --wiht-raja --with-cuda --enable-unified-memory" >&5
-$as_echo "$as_me: Try to confiure with --wiht-raja --with-cuda --enable-unified-memory" >&6;}
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: to use the cuda feature for the whole package" >&5
-$as_echo "$as_me: to use the cuda feature for the whole package" >&6;}
-       		{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
-$as_echo "$as_me: *******************************************************" >&6;}
-	else
-		CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
-		CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
-		LDFLAGS+="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-
-$as_echo "#define HYPRE_USING_NVCC 1" >>confdefs.h
-
-		NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include"
-   		NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-   		HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
-   	fi
-	hypre_user_chose_cuda=no
-   else
-   	if test "$hypre_using_openmp" = "yes"
-	then
-	   CC=${CXX}
-	   CFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA -DHYPRE_USE_OPENMP "
-	   CXXFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA -DHYPRE_USE_OPENMP "
-	   hypre_using_openmp=no
-	else
-	   CC=${CXX}
-   	   CFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA "
-   	   CXXFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA "
-	   LDFLAGS+="/usr/tcetmp/packages/xl/xl-beta-2017.05.08/lib/libibmc++.so.1"
-	fi
+      CFLAGS="${CFLAGS} --std=c++11"
+      CXXFLAGS="${CXXFLAGS} --std=c++11"
    fi
 fi
+
 
 if test "$hypre_user_chose_kokkos" = "yes"
 then
@@ -8185,41 +7876,102 @@ $as_echo "#define HYPRE_USING_NVCC 1" >>confdefs.h
 fi
 if test "$hypre_user_chose_cuda" = "yes"
 then
-   LDFLAGS+=" -ccbin=$CUDACXX -gencode arch=compute_60,\"code=sm_60\" -Xcompiler -fopenmp "
-   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA $NEWCFLAGS"
-   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA $NEWCFLAGS"
-   if test "$hypre_using_um" != "yes"
+
+$as_echo "#define HYPRE_USE_GPU 1" >>confdefs.h
+
+
+   if test "$hypre_user_chose_raja" != "yes"
    then
-	CFLAGS+=" -DHYPRE_MEMORY_GPU"
-	CXXFLAGS+=" -DHYPRE_MEMORY_GPU"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
-$as_echo "$as_me: *******************************************************" >&6;}
-       	{ $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-cuda=yes without unified memory." >&5
-$as_echo "$as_me: Configuring with --with-cuda=yes without unified memory." >&6;}
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
-$as_echo "$as_me: It only works for struct interface." >&6;}
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
-$as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
-       	{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
-$as_echo "$as_me: *******************************************************" >&6;}
-   else
-	CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_MEMORY_GPU"
-   	CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_MEMORY_GPU"
 
-$as_echo "#define HYPRE_USING_NVCC 1" >>confdefs.h
+$as_echo "#define HYPRE_USE_CUDA 1" >>confdefs.h
 
-	NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -DHYPRE_MEMORY_GPU -I${CUDA_HOME}/include"
-   NVCCLIBS="-L${CUDA_HOME}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
    fi
+
+      for ac_prog in nvcc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_CUCC+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$CUCC"; then
+  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CUCC="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+CUCC=$ac_cv_prog_CUCC
+if test -n "$CUCC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
+$as_echo "$CUCC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 
-if test "$hypre_using_um" = "yes"
-then
-   LDFLAGS+=" -lcudart -lcuda "
-   CFLAGS+=" -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include "
-   CXXFLAGS+=" -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include "
+
+  test -n "$CUCC" && break
+done
+
+   NVCCBIN=${CXX}
+   CC=${CUCC}
+   CXX=${CUCC}
+   LINK_CC=${CXX}
+   LINK_CXX=${CXX}
+
+      if test "x$HYPRE_CUDA_SM" = "x"
+   then
+      HYPRE_CUDA_SM=60
+   fi
+
+   CUFLAGS+="-O2 -ccbin=$NVCCBIN -gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\" -expt-extended-lambda -dc --std=c++11 -Xcompiler -Wno-deprecated-register --x cu"
+   CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
+   CFLAGS=${CXXFLAGS}
+   LDFLAGS="-ccbin=$NVCCBIN -gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\" -Xcompiler \"${LDFLAGS}\""
+   HYPRE_CUDA_INCL="-I${CUDA_PATH}/include"
+   HYPRE_CUDA_LIBS="-L${CUDA_PATH}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
 fi
+
+if test "$hypre_using_um" != "yes"
+then
+      if test "$hypre_user_chose_cuda" = "yes"
+   then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-cuda=yes without unified memory." >&5
+$as_echo "$as_me: Configuring with --with-cuda=yes without unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
+$as_echo "$as_me: It only works for struct interface." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
+$as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
+   fi
+else
+      HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
+
+$as_echo "#define HYPRE_USE_MANAGED 1" >>confdefs.h
+
+
+$as_echo "#define USE_NVTX 1" >>confdefs.h
+
+      fi
 
 if test "$hypre_using_openmp" = "yes"
 then
@@ -8233,13 +7985,9 @@ then
 
 $as_echo "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
 
-fi
-
-if test "$hypre_using_device_openmp" = "yes"
-then
-   CFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include $NEWCFLAGS"
-   CXXFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include $NEWCFLAGS"
-   LIBS+=" -L${CUDA_HOME}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+   CFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_PATH}/include $NEWCFLAGS"
+   CXXFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_PATH}/include $NEWCFLAGS"
+   LIBS+=" -L${CUDA_PATH}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
    if test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"
    then
      CFLAGS+=" -fopenmp-nonaliased-maps"
@@ -8366,6 +8114,7 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
+
 
 
 

@@ -38,7 +38,7 @@ hypre_init()
    initCudaReductionMemBlock();
 #endif
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
    hypre_GPUInit(-1);
 #endif
 
@@ -58,7 +58,7 @@ hypre_init()
 void
 hypre_finalize()
 {
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
    hypre_GPUFinalize();
 #endif
 

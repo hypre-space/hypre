@@ -152,7 +152,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
       HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
       PUSH_RANGE("PERCOMM2DEVICE",4);
 #ifdef HYPRE_USING_PERSISTENT_COMM
       PackOnDevice((HYPRE_Complex*)persistent_comm_handle->send_data,x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
@@ -306,7 +306,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
    POP_RANGE;
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
 #endif
    POP_RANGE; // PAR_CSR

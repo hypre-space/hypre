@@ -711,7 +711,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                         
    HYPRE_Int             nparts, nvars;
    HYPRE_Int             part, var, i;
-#if 0//defined(HYPRE_MEMORY_GPU)
+#if 0//defined(HYPRE_USE_GPU)
    HYPRE_Complex        *pardata_device;
 #endif
    if (parvector != NULL)
@@ -720,7 +720,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
 
       parvector = hypre_SStructVectorParVector(vector);
       pardata = hypre_VectorData(hypre_ParVectorLocalVector(parvector));
-#if 0//defined(HYPRE_MEMORY_GPU)
+#if 0//defined(HYPRE_USE_GPU)
       pardata_device = hypre_TAlloc(HYPRE_Complex, hypre_VectorSize(hypre_ParVectorLocalVector(parvector)) ,HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(pardata_device, pardata, HYPRE_Complex, hypre_VectorSize(hypre_ParVectorLocalVector(parvector)), HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
 #endif
@@ -752,7 +752,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                                    y_data_box, start, stride, yi,
                                    box,        start, stride, bi);
                {
-#if 0//defined(HYPRE_MEMORY_GPU)		 
+#if 0//defined(HYPRE_USE_GPU)		 
                   yp[yi] = pardata_device[pari+bi];
 #else
 		  yp[yi] = pardata[pari+bi];
@@ -767,7 +767,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
          }
       }
    }
-#if 0//defined(HYPRE_MEMORY_GPU)   
+#if 0//defined(HYPRE_USE_GPU)   
    hypre_TFree(pardata_device,HYPRE_MEMORY_DEVICE);
 #endif
    return hypre_error_flag;

@@ -38,7 +38,7 @@ typedef struct hypre_Boxloop_struct
    HYPRE_Int bsize0,bsize1,bsize2;
 } hypre_Boxloop;
 
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_GPU)
 #include <cuda.h>
 #include <cuda_runtime.h>
 

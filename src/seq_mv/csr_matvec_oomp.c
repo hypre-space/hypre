@@ -42,7 +42,7 @@ hypre_CSRMatrixMatvecOutOfPlaceOOMP2( HYPRE_Complex    alpha,
 #ifdef HYPRE_PROFILE
    HYPRE_Real time_begin = hypre_MPI_Wtime();
 #endif
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
    PUSH_RANGE_PAYLOAD("MATVEC_OOMP",0, hypre_CSRMatrixNumRows(A));
    HYPRE_Int ret=hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset);
    POP_RANGE;

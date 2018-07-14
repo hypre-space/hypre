@@ -1,7 +1,6 @@
-
 #include "_hypre_utilities.h"
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD) || defined(HYPRE_USE_OMP45)
 void CheckError(cudaError_t const err, const char* file, char const* const fun, const HYPRE_Int line)
 {
     if (err)
@@ -10,17 +9,16 @@ void CheckError(cudaError_t const err, const char* file, char const* const fun, 
       HYPRE_Int *p = NULL; *p = 1;
     }
 }
-#endif //defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED)
+#endif
 
 //#include <signal.h>
 #ifdef HYPRE_USE_GPU
 extern const char *cusparseErrorCheck(cusparseStatus_t error);
 extern void gpuAssert(cudaError_t code, const char *file, int line);
 extern void cusparseAssert(cusparseStatus_t code, const char *file, int line);
-#endif /* HYPRE_USE_GPU */
+#endif
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
-
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
 /*
   cudaSafeFree frees Managed memory allocated in hypre_MAlloc,hypre_CAlloc and hypre_ReAlloc
   It checks if the memory is managed before freeing and emits a warning if it is not memory
@@ -167,4 +165,4 @@ void assert_check_host(void *ptr, char *file, int line){
   
 }
 #endif /* TRACK_MEMORY_ALLOCATIONS */
-#endif /* defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45) */
+#endif 

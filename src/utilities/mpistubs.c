@@ -12,7 +12,7 @@
 
 #include "_hypre_utilities.h"
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_OMP45)
 extern HYPRE_Complex *global_recv_buffer, *global_send_buffer;
 extern HYPRE_Int      global_recv_size, global_send_size;
 

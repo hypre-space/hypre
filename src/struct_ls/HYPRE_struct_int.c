@@ -53,7 +53,8 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       vp = hypre_StructVectorBoxData(vector, i);
  
       hypre_BoxGetSize(box, loop_size);
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_GPU)
+      /* TODO: RPL: WHY CANNOT USE GPU RAND ? */
       hypre_newBoxLoopInit(hypre_StructVectorNDim(vector),loop_size);
       HYPRE_Real *rand_host = hypre_TAlloc(HYPRE_Real, hypre__tot, HYPRE_MEMORY_HOST);
       HYPRE_Real *rand_device = hypre_TAlloc(HYPRE_Real, hypre__tot, HYPRE_MEMORY_DEVICE);
@@ -65,12 +66,13 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_SerialBoxLoop0End()
       hypre_TMemcpy(rand_device, rand_host, HYPRE_Real, hypre__tot, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 #endif
+
 #undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(vp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
       {
-#if defined(HYPRE_MEMORY_GPU)
+#if defined(HYPRE_USE_GPU)
 	 vp[vi] = rand_device[idx];
 #else
 	 vp[vi] = 2.0*hypre_Rand() - 1.0;
@@ -79,7 +81,8 @@ hypre_StructVectorSetRandomValues( hypre_StructVector *vector,
       hypre_BoxLoop1End(vi);
 #undef DEVICE_VAR
 #define DEVICE_VAR
-#if defined(HYPRE_MEMORY_GPU)
+
+#if defined(HYPRE_USE_GPU)
       hypre_TFree(rand_device, HYPRE_MEMORY_DEVICE);
       hypre_TFree(rand_host, HYPRE_MEMORY_HOST);
 #endif

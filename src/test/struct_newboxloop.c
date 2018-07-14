@@ -1054,7 +1054,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
    hypre_Box          *box;
    HYPRE_Real         *values;
    HYPRE_Int          volume,dim;
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
    HYPRE_Int          data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(zvector));
 #endif
 
@@ -1066,7 +1066,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
    {
       box      = hypre_BoxArrayBox(gridboxes, ib);
       volume   =  hypre_BoxVolume(box);
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
       if (data_location != HYPRE_MEMORY_HOST)
       {
          values   = hypre_CTAlloc(HYPRE_Real, volume,HYPRE_MEMORY_DEVICE);
@@ -1110,7 +1110,7 @@ AddValuesVector( hypre_StructGrid  *gridvector,
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);
       HYPRE_StructVectorSetBoxValues(zvector, ilower, iupper, values);
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
       if (data_location < 1)
       {
           hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -1160,7 +1160,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
    HYPRE_Int          *stencil_indices;
    HYPRE_Int           stencil_size;
    HYPRE_Int           constant_coefficient;
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
    HYPRE_Int           data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
    
@@ -1196,7 +1196,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
 	    if (data_location != HYPRE_MEMORY_HOST)
 	    {
 	       values     = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_DEVICE);
@@ -1236,7 +1236,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                            stencil_indices, values);
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
 	    if (data_location != HYPRE_MEMORY_HOST)
 	    {
 	       hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -1310,7 +1310,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
             if (data_location != HYPRE_MEMORY_HOST)
             {
                values   = hypre_CTAlloc(HYPRE_Real, volume,HYPRE_MEMORY_DEVICE);
@@ -1332,7 +1332,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices+dim, values);
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
             if (data_location == HYPRE_MEMORY_DEVICE)
             {
                hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -1386,7 +1386,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
             if (data_location < 1)
             {
                values   = hypre_CTAlloc(HYPRE_Real, stencil_size*volume,HYPRE_MEMORY_DEVICE);
@@ -1433,7 +1433,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, stencil_size,
                                            stencil_indices, values);
 
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
 	    if (data_location < 1)
 	    {
                hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -1536,7 +1536,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
          {
             box      = hypre_BoxArrayBox(gridboxes, bi);
             volume   =  hypre_BoxVolume(box);
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
 	    if (data_location < 1)
 	    {
 	       values   = hypre_CTAlloc(HYPRE_Real, volume,HYPRE_MEMORY_DEVICE);
@@ -1558,7 +1558,7 @@ AddValuesMatrix(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,
             iupper = hypre_BoxIMax(box);
             HYPRE_StructMatrixSetBoxValues(A, ilower, iupper, 1,
                                            stencil_indices, values);
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
             if (data_location < 1)
 	    {
                hypre_TFree(values,HYPRE_MEMORY_DEVICE);
@@ -1602,7 +1602,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
    HYPRE_Int          volume, dim;
    HYPRE_Int         *stencil_indices;
    HYPRE_Int          constant_coefficient;
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
    HYPRE_Int          data_location = hypre_StructGridDataLocation(hypre_StructMatrixGrid(A));
 #endif
    gridboxes       = hypre_StructGridBoxes(gridmatrix);
@@ -1652,7 +1652,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
       {
          for (ib = 0; ib < size; ib++)
          {
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
             if (data_location < 1)
             {
                values = hypre_CTAlloc(HYPRE_Real, vol[ib],HYPRE_MEMORY_DEVICE);
@@ -1689,7 +1689,7 @@ SetStencilBndry(HYPRE_StructMatrix A,HYPRE_StructGrid gridmatrix,HYPRE_Int* peri
                                               1, stencil_indices, values);
                ilower[ib][d] = j;
             }
-#if defined(HYPRE_MEMORY_GPU) 
+#if defined(HYPRE_USE_GPU) 
 	    if (data_location < 1)
 	    {
 	       hypre_TFree(values,HYPRE_MEMORY_DEVICE);

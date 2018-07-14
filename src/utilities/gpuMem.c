@@ -3,7 +3,7 @@
 #endif
 #include "_hypre_utilities.h"
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) 
+#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) 
 size_t memsize(const void *ptr){
    return ((size_t*)ptr)[-MEM_PAD_LEN];
 }
@@ -23,16 +23,19 @@ size_t memsize(const void *ptr){
 #include <sched.h>
 #include <errno.h>
 #include <omp.h>
+#include <mpi.h>
+
 hypre_int ggc(hypre_int id);
 
 /* Global struct that holds device,library handles etc */
-struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1,.memoryHWM=0};
+struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1, .memoryHWM=0};
 
 
 /* Initialize GPU branch of Hypre AMG */
 /* use_device =-1 */
 /* Application passes device number it is using or -1 to let Hypre decide on which device to use */
-void hypre_GPUInit(hypre_int use_device){
+void hypre_GPUInit(hypre_int use_device)
+{
   char pciBusId[80];
   hypre_int myid;
   hypre_int nDevices;
@@ -60,7 +63,7 @@ void hypre_GPUInit(hypre_int use_device){
 	cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
         //hypre_printf("num Devices %d\n", nDevices);
 
-      } else if (nDevices==4) { // THIS IS A HACK THAT WORKS AONLY AT LLNL
+      } else if (nDevices==4) { // THIS IS A HACK THAT WORKS ONLY AT LLNL
 	/* No mpibind or it is a single rank run */
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 	//affs(myid);

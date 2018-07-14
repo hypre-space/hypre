@@ -1,8 +1,10 @@
-#if defined(HYPRE_USE_GPU)
+#include "_hypre_utilities.h"
 #include <stdio.h>
+
+#if defined(HYPRE_USE_GPU)
+
 #include <cuda_runtime.h>
 #include <cublas_v2.h>
-#include "_hypre_utilities.h"
 
 extern "C"{
   __global__
@@ -231,4 +233,5 @@ extern "C"{
     hypre_CheckErrorDevice(cudaDeviceSynchronize());
   }
 }
+
 #endif
