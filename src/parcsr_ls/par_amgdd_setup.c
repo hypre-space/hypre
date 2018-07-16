@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
@@ -29,11 +29,13 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    HYPRE_Int *search_proc_marker,
    HYPRE_Int *num_request_nodes, HYPRE_Int **request_nodes,
    HYPRE_Int *num_send_procs, HYPRE_Int *send_procs, 
-   HYPRE_Int num_neighboring_procs );
+   HYPRE_Int num_neighboring_procs
+   , HYPRE_Int level, HYPRE_Int iteration );
 
 HYPRE_Int
 RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, 
-   HYPRE_Int *request_nodes, HYPRE_Int *num_request_nodes );
+   HYPRE_Int *request_nodes, HYPRE_Int *num_request_nodes
+   , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int proc );
 
 HYPRE_Complex*
 PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, HYPRE_Int *send_flag_buffer_size, 
@@ -291,9 +293,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
          }
       
          // wait for all buffer sizes to be received
-         if (level == 3) printf("Rank %d, level %d, waiting on buffer sizes\n", myid, level);
          hypre_MPI_Waitall( num_sends + num_recvs, requests, status );
-         if (level == 3) printf("Rank %d, level %d, done waiting on buffer sizes\n", myid, level);
 
          if (timers) hypre_EndTiming(timers[2]);
 
@@ -326,9 +326,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
          }
 
          // wait for buffers to be received
-         if (level == 3) printf("Rank %d, level %d, waiting on buffers\n", myid, level);
          hypre_MPI_Waitall( num_sends + num_recvs, requests, status );
-         if (level == 3) printf("Rank %d, level %d, done waiting on buffers\n", myid, level);
 
          #if DEBUGGING_MESSAGES
          hypre_printf("      Rank %d: done waiting on buffers\n", myid);
@@ -705,7 +703,8 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
             search_proc_marker,
             num_request_nodes, request_nodes,
             &num_sends, send_procs, 
-            hypre_ParCSRCommPkgNumSends(commPkg)); // Note that num_sends may change here
+            hypre_ParCSRCommPkgNumSends(commPkg)
+            , level, i); // Note that num_sends may change here
       }
 
       #if DEBUG_COMP_GRID
@@ -827,7 +826,8 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    HYPRE_Int *search_proc_marker,
    HYPRE_Int *num_request_nodes, HYPRE_Int **request_nodes,
    HYPRE_Int *num_send_procs, HYPRE_Int *send_procs, 
-   HYPRE_Int num_neighboring_procs )
+   HYPRE_Int num_neighboring_procs
+   , HYPRE_Int level, HYPRE_Int iteration )
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -845,7 +845,8 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
          for (j = 0; j < num_starting_nodes[i]; j++)
          {
             if (add_flag[i][ starting_nodes[i][j] ] - 1 > 0)
-               RecursivelyFindNeighborNodes( starting_nodes[i][j], add_flag[i][ starting_nodes[i][j] ] - 1, compGrid, add_flag[i], request_nodes[i], &(num_request_nodes[i]) );
+               RecursivelyFindNeighborNodes( starting_nodes[i][j], add_flag[i][ starting_nodes[i][j] ] - 1, compGrid, add_flag[i], request_nodes[i], &(num_request_nodes[i])
+               , level, iteration, send_procs[i] );
          }
 
          num_starting_nodes[i] = 0;
@@ -982,6 +983,10 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
                   }
                }
             }
+            else
+            {
+               cnt += 2*num_incoming_nodes;
+            }
          }
          else
          {
@@ -1002,7 +1007,8 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
 
 HYPRE_Int
 RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, 
-   HYPRE_Int *request_nodes, HYPRE_Int *num_request_nodes )
+   HYPRE_Int *request_nodes, HYPRE_Int *num_request_nodes
+   , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int proc )
 {
    HYPRE_Int         i,j,index,coarse_grid_index;
    hypre_ParCompMatrixRow *A_row = hypre_ParCompGridARows(compGrid)[node];
@@ -1023,8 +1029,14 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
          if (add_flag[index] < m)
          {
             add_flag[index] = m;
+
+            // !!! Debugging: !!!
+            // if (level == 3 proc == 1 && hypre_ParCompGridGlobalIndices(compGrid)[index] == 1496) printf("Set add_flag = %d at 819 on rank %d\n", m, myid);
+
+
             // Recursively call to find distance m-1 neighbors of index
-            if (m-1 > 0) RecursivelyFindNeighborNodes(index, m-1, compGrid, add_flag, request_nodes, num_request_nodes);
+            if (m-1 > 0) RecursivelyFindNeighborNodes(index, m-1, compGrid, add_flag, request_nodes, num_request_nodes
+               , level, iteration, proc);
          }
       }
       // otherwise note this as a starting node to request from neighboring procs
@@ -1038,11 +1050,21 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
             if (request_nodes[2*j] == global_index)
             {
                add_requeset = 0;
-               if (m > request_nodes[2*j+1]) request_nodes[2*j+1] = m;
+               if (m > request_nodes[2*j+1])
+               {
+                  request_nodes[2*j+1] = m;
+                  // if (level == 3 global_index == 1496 && proc == 1) printf("Changed request m value for 1496 to m = %d, rank %d, iteration\n", m, myid, iteration);
+                  // if (level == 3 global_index == 1322 && proc == 1) printf("Changed request m value for 1322 to m = %d, rank %d, iteration\n", m, myid, iteration);
+               }
             }
          }
          if (add_requeset)
          {
+
+            // !!! Debugging: !!!
+            // if (level == 3 global_index == 1496 && proc == 1) printf("Requesting 1496 on rank %d, m = %d, iteration %d\n", myid, m, iteration);
+            // if (level == 3 global_index == 1322 && proc == 1) printf("Requesting 1322 on rank %d, m = %d, iteration %d\n", myid, m, iteration);
+
             request_nodes[2*(*num_request_nodes)] = global_index;
             request_nodes[2*(*num_request_nodes)+1] = m; 
             (*num_request_nodes)++;
