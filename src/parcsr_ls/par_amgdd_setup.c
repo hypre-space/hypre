@@ -288,7 +288,6 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
          // send the buffer sizes
          for (i = 0; i < num_sends; i++)
          {
-            // send_buffer_size[level][i] = GetBufferSize( psiComposite_send[i], level, num_levels, num_psi_levels_send[i] );
             hypre_MPI_Isend(&(send_buffer_size[level][i]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 0, comm, &requests[request_counter++]);
          }
       
@@ -613,7 +612,6 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
    {
       hypre_ParCompGridCommPkgNumSends(compGridCommPkg)[level] = num_sends;
       hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg)[level] = num_sends;
-      // printf("Rank %d: nothing to do on level %d\n", myid, level);
    }
    else
    {
@@ -629,10 +627,6 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
          finish = hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);
          for (j = start; j < finish; j++) add_flag[i][ hypre_ParCSRCommPkgSendMapElmt(commPkg,j) ] = padding + 4; // must be set to padding + numGhostLayers (note that the starting nodes are already distance 1 from their neighbors on the adjacent processor)
       }
-
-
-      // !!! Debugging: !!!
-      if (myid == 14 && level == 3) for (i = 0; i < num_sends; i++) if (send_procs[i] == 0) printf("At line 737, 14 sends to 0\n");
 
       // Setup initial num_starting_nodes and starting_nodes (these are the starting nodes when searching for long distance neighbors) !!! I don't think I actually have a good upper bound on sizes here... how to properly allocate/reallocate these? !!!
       HYPRE_Int *num_starting_nodes = hypre_CTAlloc( HYPRE_Int, (padding+4)*num_sends, HYPRE_MEMORY_HOST );
@@ -910,7 +904,6 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
       }
    }
    send_buffer[0] = num_request_procs;
-   // hypre_printf("Rank %d: posting sends\n", myid);
    for (i = 0; i < num_neighboring_procs; i++)
    {
       hypre_MPI_Isend(send_buffer, send_size, HYPRE_MPI_INT, send_procs[i], 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
@@ -1029,11 +1022,6 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
          if (add_flag[index] < m)
          {
             add_flag[index] = m;
-
-            // !!! Debugging: !!!
-            // if (level == 3 proc == 1 && hypre_ParCompGridGlobalIndices(compGrid)[index] == 1496) printf("Set add_flag = %d at 819 on rank %d\n", m, myid);
-
-
             // Recursively call to find distance m-1 neighbors of index
             if (m-1 > 0) RecursivelyFindNeighborNodes(index, m-1, compGrid, add_flag, request_nodes, num_request_nodes
                , level, iteration, proc);
@@ -1053,18 +1041,11 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
                if (m > request_nodes[2*j+1])
                {
                   request_nodes[2*j+1] = m;
-                  // if (level == 3 global_index == 1496 && proc == 1) printf("Changed request m value for 1496 to m = %d, rank %d, iteration\n", m, myid, iteration);
-                  // if (level == 3 global_index == 1322 && proc == 1) printf("Changed request m value for 1322 to m = %d, rank %d, iteration\n", m, myid, iteration);
                }
             }
          }
          if (add_requeset)
          {
-
-            // !!! Debugging: !!!
-            // if (level == 3 global_index == 1496 && proc == 1) printf("Requesting 1496 on rank %d, m = %d, iteration %d\n", myid, m, iteration);
-            // if (level == 3 global_index == 1322 && proc == 1) printf("Requesting 1322 on rank %d, m = %d, iteration %d\n", myid, m, iteration);
-
             request_nodes[2*(*num_request_nodes)] = global_index;
             request_nodes[2*(*num_request_nodes)+1] = m; 
             (*num_request_nodes)++;
