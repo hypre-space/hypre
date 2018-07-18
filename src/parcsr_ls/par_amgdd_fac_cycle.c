@@ -50,7 +50,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 
 	HYPRE_Complex     **u = hypre_CTAlloc(HYPRE_Complex*, num_levels, HYPRE_MEMORY_HOST );
 	HYPRE_Complex     **f = hypre_CTAlloc(HYPRE_Complex*, num_levels, HYPRE_MEMORY_HOST );
-	HYPRE_Complex 		**ghost_marker = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST );
+	HYPRE_Int 		   **ghost_marker = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST );
 
 	hypre_ParCompMatrixRow 	***A_rows = hypre_CTAlloc(hypre_ParCompMatrixRow**, num_levels, HYPRE_MEMORY_HOST );
 	hypre_ParCompMatrixRow  ***P_rows = hypre_CTAlloc(hypre_ParCompMatrixRow**, num_levels, HYPRE_MEMORY_HOST );

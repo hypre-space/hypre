@@ -18,18 +18,20 @@
 #include "par_csr_block_matrix.h"	
 
 #define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_ADD_FLAG 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
 SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding );
 
 HYPRE_Int
-FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPRE_Int **add_flag,
-   HYPRE_Int *num_starting_nodes, HYPRE_Int **starting_nodes,
-   HYPRE_Int *search_proc_marker,
-   HYPRE_Int *num_request_nodes, HYPRE_Int **request_nodes,
-   HYPRE_Int *num_send_procs, HYPRE_Int *send_procs, 
-   HYPRE_Int num_neighboring_procs
+FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPRE_Int ***add_flag,
+   HYPRE_Int **num_starting_nodes, HYPRE_Int ***starting_nodes,
+   HYPRE_Int **search_proc_marker,
+   HYPRE_Int **num_request_nodes, HYPRE_Int ***request_nodes,
+   HYPRE_Int *num_send_procs, HYPRE_Int **send_procs, 
+   HYPRE_Int num_neighboring_procs,
+   HYPRE_Int *send_proc_array_size
    , HYPRE_Int level, HYPRE_Int iteration );
 
 HYPRE_Int
@@ -39,7 +41,7 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
 
 HYPRE_Complex*
 PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, HYPRE_Int *send_flag_buffer_size, 
-   HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding );
+   HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int send_rank );
 
 HYPRE_Int
 RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, 
@@ -199,6 +201,9 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
    {
       sprintf(filename, "outputs/A_rank%d_level%d.txt", myid, level);
       hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename);
+      // hypre_sprintf(filename, "/p/lscratchd/wbm/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
+      hypre_sprintf(filename, "outputs/CompGrids/initCompGridRank%dLevel%d.txt", myid, level);
+      hypre_ParCompGridDebugPrint( compGrid[level], filename );
    }
    #endif
 
@@ -267,7 +272,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
             send_flag[level][i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
             num_send_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
             send_buffer[i] = PackSendBuffer( compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
-                                             &(send_flag_buffer_size[i]), send_flag[level][i], num_send_nodes[level][i], i, level, num_levels, padding );
+                                             &(send_flag_buffer_size[i]), send_flag[level][i], num_send_nodes[level][i], i, level, num_levels, padding, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i] );
          }
          #if DEBUGGING_MESSAGES
          printf("      Rank %d: Done packing send buffers\n", myid);
@@ -498,15 +503,14 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
       #endif 
    }
 
-
    #if DEBUG_COMP_GRID
    for (level = 0; level < num_levels; level++)
    {
       // hypre_sprintf(filename, "/p/lscratchd/wbm/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
       hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
-      // hypre_ParCompGridDebugPrint( compGrid[level], filename );
+      hypre_ParCompGridDebugPrint( compGrid[level], filename );
       // hypre_sprintf(filename, "outputs/CompGrids/plotCompGridRank%dLevel%d.txt", myid, level);
-      hypre_ParCompGridMatlabPlot( compGrid[level], filename );
+      // hypre_ParCompGridMatlabPlot( compGrid[level], filename );
       hypre_sprintf(filename, "outputs/CompGrids/setupACompRank%dLevel%d.txt", myid, level);
       hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename );
 
@@ -585,7 +589,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
    // Get the default (distance 1) number of send procs
    HYPRE_Int      num_sends = hypre_ParCSRCommPkgNumSends(commPkg);
 
-   #if DEBUG_COMP_GRID
+   #if DEBUG_ADD_FLAG
    // Check to make sure original matrix has symmetric send/recv relationship !!! I should really have a check to make sure the matrix is actually symmetric !!!
    HYPRE_Int num_recvs = hypre_ParCSRCommPkgNumRecvs(commPkg);
    if (num_sends == num_recvs)
@@ -616,9 +620,12 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
    else
    {
       // Initialize add_flag (this is how we will track nodes to send to each proc until routine finishes)
-      HYPRE_Int      *send_procs = hypre_CTAlloc( HYPRE_Int, (padding+4)*num_sends, HYPRE_MEMORY_HOST); // Note: in the worst case, we extend the number of procs to send to by padding+4 times
-      HYPRE_Int      **add_flag = hypre_CTAlloc( HYPRE_Int*, (padding+4)*num_sends, HYPRE_MEMORY_HOST);
-      HYPRE_Int      *search_proc_marker = hypre_CTAlloc(HYPRE_Int, (padding+4)*num_sends, HYPRE_MEMORY_HOST);
+      // Note: several allocations occur below for arrays that are meant to store objects/info for each proc that we end up sending to
+      // This number is unknown a priori, so we start with double the number of initial send procs and reallocate as necessary inside FindNeighborProcessors()
+      HYPRE_Int      send_proc_array_size = 2*num_sends;
+      HYPRE_Int      *send_procs = hypre_CTAlloc( HYPRE_Int, send_proc_array_size, HYPRE_MEMORY_HOST);
+      HYPRE_Int      **add_flag = hypre_CTAlloc( HYPRE_Int*, send_proc_array_size, HYPRE_MEMORY_HOST);
+      HYPRE_Int      *search_proc_marker = hypre_CTAlloc(HYPRE_Int, send_proc_array_size, HYPRE_MEMORY_HOST);
       for (i = 0; i < num_sends; i++)
       {
          send_procs[i] = hypre_ParCSRCommPkgSendProc(commPkg,i);
@@ -629,8 +636,8 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       }
 
       // Setup initial num_starting_nodes and starting_nodes (these are the starting nodes when searching for long distance neighbors) !!! I don't think I actually have a good upper bound on sizes here... how to properly allocate/reallocate these? !!!
-      HYPRE_Int *num_starting_nodes = hypre_CTAlloc( HYPRE_Int, (padding+4)*num_sends, HYPRE_MEMORY_HOST );
-      HYPRE_Int **starting_nodes = hypre_CTAlloc( HYPRE_Int*, (padding+4)*num_sends, HYPRE_MEMORY_HOST );
+      HYPRE_Int *num_starting_nodes = hypre_CTAlloc( HYPRE_Int, send_proc_array_size, HYPRE_MEMORY_HOST );
+      HYPRE_Int **starting_nodes = hypre_CTAlloc( HYPRE_Int*, send_proc_array_size, HYPRE_MEMORY_HOST );
       HYPRE_Int max_num_starting_nodes = 0;
       for (i = 0; i < num_sends; i++)
       {
@@ -651,14 +658,14 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       }
 
       // Find my own send nodes and communicate with neighbors to find off-processor long-range connections
-      HYPRE_Int *num_request_nodes = hypre_CTAlloc(HYPRE_Int, (padding+4)*num_sends, HYPRE_MEMORY_HOST);
-      HYPRE_Int **request_nodes = hypre_CTAlloc(HYPRE_Int*, (padding+4)*num_sends, HYPRE_MEMORY_HOST);
+      HYPRE_Int *num_request_nodes = hypre_CTAlloc(HYPRE_Int, send_proc_array_size, HYPRE_MEMORY_HOST);
+      HYPRE_Int **request_nodes = hypre_CTAlloc(HYPRE_Int*, send_proc_array_size, HYPRE_MEMORY_HOST);
 
       FILE *file;
       char filename[256];
       for (i = 0; i < 3 + padding; i++)
       {
-         #if DEBUG_COMP_GRID
+         #if DEBUG_ADD_FLAG
          for (j = 0; j < num_sends; j++)
          {
             sprintf(filename,"outputs/add_flag_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, i);
@@ -692,16 +699,17 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
          }
          #endif
 
-         FindNeighborProcessors(compGrid, A, add_flag, 
-            num_starting_nodes, starting_nodes, 
-            search_proc_marker,
-            num_request_nodes, request_nodes,
-            &num_sends, send_procs, 
-            hypre_ParCSRCommPkgNumSends(commPkg)
+         FindNeighborProcessors(compGrid, A, &(add_flag), 
+            &(num_starting_nodes), &(starting_nodes), 
+            &(search_proc_marker),
+            &(num_request_nodes), &(request_nodes),
+            &num_sends, &(send_procs), 
+            hypre_ParCSRCommPkgNumSends(commPkg),
+            &(send_proc_array_size)
             , level, i); // Note that num_sends may change here
       }
 
-      #if DEBUG_COMP_GRID
+      #if DEBUG_ADD_FLAG
       for (j = 0; j < num_sends; j++)
       {
          sprintf(filename,"outputs/add_flag_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, 3+padding);
@@ -785,7 +793,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
    }
 
 
-   #if DEBUG_COMP_GRID
+   #if DEBUG_ADD_FLAG
    // Check to make sure what we end up with has symmetric send/recv relationship 
    HYPRE_Int max_size;
    HYPRE_Int   num_procs;
@@ -815,12 +823,13 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
 }
 
 HYPRE_Int
-FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPRE_Int **add_flag,
-   HYPRE_Int *num_starting_nodes, HYPRE_Int **starting_nodes,
-   HYPRE_Int *search_proc_marker,
-   HYPRE_Int *num_request_nodes, HYPRE_Int **request_nodes,
-   HYPRE_Int *num_send_procs, HYPRE_Int *send_procs, 
-   HYPRE_Int num_neighboring_procs
+FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPRE_Int ***add_flag,
+   HYPRE_Int **num_starting_nodes, HYPRE_Int ***starting_nodes,
+   HYPRE_Int **search_proc_marker,
+   HYPRE_Int **num_request_nodes, HYPRE_Int ***request_nodes,
+   HYPRE_Int *num_send_procs, HYPRE_Int **send_procs, 
+   HYPRE_Int num_neighboring_procs,
+   HYPRE_Int *send_proc_array_size
    , HYPRE_Int level, HYPRE_Int iteration )
 {
    HYPRE_Int   myid;
@@ -831,19 +840,19 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    // Update add_flag by recursively adding neighbors
    for (i = 0; i < (*num_send_procs); i++)
    {
-      if (search_proc_marker[i])
+      if ((*search_proc_marker)[i])
       {
-         num_request_nodes[i] = 0;
-         if (!request_nodes[i]) request_nodes[i] = hypre_CTAlloc( HYPRE_Int, 2*hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)), HYPRE_MEMORY_HOST );
+         (*num_request_nodes)[i] = 0;
+         if (!(*request_nodes)[i]) (*request_nodes)[i] = hypre_CTAlloc( HYPRE_Int, 2*hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)), HYPRE_MEMORY_HOST );
 
-         for (j = 0; j < num_starting_nodes[i]; j++)
+         for (j = 0; j < (*num_starting_nodes)[i]; j++)
          {
-            if (add_flag[i][ starting_nodes[i][j] ] - 1 > 0)
-               RecursivelyFindNeighborNodes( starting_nodes[i][j], add_flag[i][ starting_nodes[i][j] ] - 1, compGrid, add_flag[i], request_nodes[i], &(num_request_nodes[i])
-               , level, iteration, send_procs[i] );
+            if ((*add_flag)[i][ (*starting_nodes)[i][j] ] - 1 > 0)
+               RecursivelyFindNeighborNodes( (*starting_nodes)[i][j], (*add_flag)[i][ (*starting_nodes)[i][j] ] - 1, compGrid, (*add_flag)[i], (*request_nodes)[i], &((*num_request_nodes)[i])
+               , level, iteration, (*send_procs)[i] );
          }
 
-         num_starting_nodes[i] = 0;
+         (*num_starting_nodes)[i] = 0;
       }
    }
 
@@ -851,11 +860,11 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    HYPRE_Int send_size = 1;
    for (i = 0; i < (*num_send_procs); i++)
    {
-      if (search_proc_marker[i])
+      if ((*search_proc_marker)[i])
       {
-         if (num_request_nodes[i])
+         if ((*num_request_nodes)[i])
          {
-            send_size += 2*num_request_nodes[i] + 2;
+            send_size += 2*(*num_request_nodes)[i] + 2;
          }
       }
    }
@@ -865,8 +874,8 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    HYPRE_Int request_cnt = 0;
    for (i = 0; i < num_neighboring_procs; i++)
    {
-      hypre_MPI_Irecv(&(recv_sizes[i]), 1, HYPRE_MPI_INT, send_procs[i], 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
-      hypre_MPI_Isend(&send_size, 1, HYPRE_MPI_INT, send_procs[i], 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
+      hypre_MPI_Irecv(&(recv_sizes[i]), 1, HYPRE_MPI_INT, (*send_procs)[i], 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
+      hypre_MPI_Isend(&send_size, 1, HYPRE_MPI_INT, (*send_procs)[i], 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
    }
 
    // Wait on the recv sizes
@@ -879,7 +888,7 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    // Post the recvs
    for (i = 0; i < num_neighboring_procs; i++)
    {
-      hypre_MPI_Irecv(recv_buffers[i], recv_sizes[i], HYPRE_MPI_INT, send_procs[i], 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
+      hypre_MPI_Irecv(recv_buffers[i], recv_sizes[i], HYPRE_MPI_INT, (*send_procs)[i], 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
    }
    
    // Setup the send buffer and post the sends
@@ -888,17 +897,17 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    HYPRE_Int num_request_procs = 0;
    for (i = 0; i < (*num_send_procs); i++)
    {
-      if (search_proc_marker[i])
+      if ((*search_proc_marker)[i])
       {
-         if (num_request_nodes[i])
+         if ((*num_request_nodes)[i])
          {
             num_request_procs++;
-            send_buffer[cnt++] = send_procs[i];
-            send_buffer[cnt++] = num_request_nodes[i];
-            for (j = 0; j < num_request_nodes[i]; j++)
+            send_buffer[cnt++] = (*send_procs)[i];
+            send_buffer[cnt++] = (*num_request_nodes)[i];
+            for (j = 0; j < (*num_request_nodes)[i]; j++)
             {
-               send_buffer[cnt++] = request_nodes[i][2*j];
-               send_buffer[cnt++] = request_nodes[i][2*j+1];
+               send_buffer[cnt++] = (*request_nodes)[i][2*j];
+               send_buffer[cnt++] = (*request_nodes)[i][2*j+1];
             }
          }
       }
@@ -906,14 +915,14 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    send_buffer[0] = num_request_procs;
    for (i = 0; i < num_neighboring_procs; i++)
    {
-      hypre_MPI_Isend(send_buffer, send_size, HYPRE_MPI_INT, send_procs[i], 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
+      hypre_MPI_Isend(send_buffer, send_size, HYPRE_MPI_INT, (*send_procs)[i], 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
    }
 
    // Wait 
    hypre_MPI_Waitall(2*num_neighboring_procs, &(requests[2*num_neighboring_procs]), &(statuses[2*num_neighboring_procs]));
 
    // Reset search_proc_marker
-   for (i = 0; i < (*num_send_procs); i++) search_proc_marker[i] = 0;
+   for (i = 0; i < (*num_send_procs); i++) (*search_proc_marker)[i] = 0;
 
    // Unpack recieved messages and update add_flag where appropriate
    for (i = 0; i < num_neighboring_procs; i++)
@@ -931,7 +940,7 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
             // Look for an add_flag already set up for this processor
             HYPRE_Int local_proc_index = -1;
             HYPRE_Int add_proc = 0;
-            for (k = 0; k < (*num_send_procs); k++) if (send_procs[k] == incoming_proc) local_proc_index = k;
+            for (k = 0; k < (*num_send_procs); k++) if ((*send_procs)[k] == incoming_proc) local_proc_index = k;
             // If we didn't find one, this is a new proc that we may or may not need to account for
             if (local_proc_index < 0)
             {
@@ -951,10 +960,35 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
                {
                   local_proc_index = (*num_send_procs);
                   (*num_send_procs)++;
-                  send_procs[local_proc_index] = incoming_proc;
-                  add_flag[local_proc_index] = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A), HYPRE_MEMORY_HOST);
-                  starting_nodes[local_proc_index] = hypre_CTAlloc(HYPRE_Int, num_incoming_nodes, HYPRE_MEMORY_HOST);
-                  search_proc_marker[local_proc_index] = 1;
+
+                  // Note: we may need to grow several arrays here
+                  if ((*num_send_procs) > (*send_proc_array_size))
+                  {
+                     (*send_proc_array_size) = 2*(*send_proc_array_size);
+                     (*send_procs) = hypre_TReAlloc((*send_procs), HYPRE_Int, (*send_proc_array_size), HYPRE_MEMORY_HOST);
+                     (*add_flag) = hypre_TReAlloc((*add_flag), HYPRE_Int*, (*send_proc_array_size), HYPRE_MEMORY_HOST);
+                     (*search_proc_marker) = hypre_TReAlloc((*search_proc_marker), HYPRE_Int, (*send_proc_array_size), HYPRE_MEMORY_HOST);
+                     (*num_starting_nodes) = hypre_TReAlloc((*num_starting_nodes), HYPRE_Int, (*send_proc_array_size), HYPRE_MEMORY_HOST);
+                     (*starting_nodes) = hypre_TReAlloc((*starting_nodes), HYPRE_Int*, (*send_proc_array_size), HYPRE_MEMORY_HOST);
+                     (*num_request_nodes) = hypre_TReAlloc((*num_request_nodes), HYPRE_Int, (*send_proc_array_size), HYPRE_MEMORY_HOST);
+                     (*request_nodes) = hypre_TReAlloc((*request_nodes), HYPRE_Int*, (*send_proc_array_size), HYPRE_MEMORY_HOST);
+                     for (k = local_proc_index; k < (*send_proc_array_size); k++)
+                     {
+                        (*send_procs)[k] = 0;
+                        (*add_flag)[k] = NULL;
+                        (*search_proc_marker)[k] = 0;
+                        (*num_starting_nodes)[k] = 0;
+                        (*starting_nodes)[k] = NULL;
+                        (*num_request_nodes)[k] = 0;
+                        (*request_nodes)[k] = NULL;
+                     }
+                  }
+
+                  // Now
+                  (*send_procs)[local_proc_index] = incoming_proc;
+                  (*add_flag)[local_proc_index] = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A), HYPRE_MEMORY_HOST);
+                  (*starting_nodes)[local_proc_index] = hypre_CTAlloc(HYPRE_Int, num_incoming_nodes, HYPRE_MEMORY_HOST);
+                  (*search_proc_marker)[local_proc_index] = 1;
                }
             }
             else add_proc = 1;
@@ -967,11 +1001,11 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
                   HYPRE_Int incoming_flag = recv_buffers[i][cnt++];
                   if (local_index >=0 && local_index < hypre_ParCSRMatrixNumRows(A))
                   {
-                     if (incoming_flag > add_flag[local_proc_index][local_index])
+                     if (incoming_flag > (*add_flag)[local_proc_index][local_index])
                      {
-                        add_flag[local_proc_index][local_index] = incoming_flag;
-                        starting_nodes[local_proc_index][ num_starting_nodes[local_proc_index]++ ] = local_index;
-                        search_proc_marker[local_proc_index] = 1;
+                        (*add_flag)[local_proc_index][local_index] = incoming_flag;
+                        (*starting_nodes)[local_proc_index][ (*num_starting_nodes)[local_proc_index]++ ] = local_index;
+                        (*search_proc_marker)[local_proc_index] = 1;
                      }
                   }
                }
@@ -1059,7 +1093,7 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
 HYPRE_Complex*
 PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, 
    HYPRE_Int *send_flag_buffer_size, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes,
-   HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding )
+   HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int send_rank )
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -1180,19 +1214,23 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
          ghost_marker[level] = hypre_CTAlloc( HYPRE_Int, num_send_nodes[level], HYPRE_MEMORY_HOST );
          cnt =  0;
          HYPRE_Int insert_owned_position;
-         HYPRE_Int first_owned = hypre_ParCompGridGlobalIndices(compGrid[level])[0];
-         HYPRE_Int last_owned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridNumOwnedNodes(compGrid[level]) - 1 ];
-         HYPRE_Int first_nonowned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridNumOwnedNodes(compGrid[level]) ];
-         HYPRE_Int last_nonowned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) - 1 ];
-
-         // Find where to insert owned nodes in the list of all comp grid nodes (such that they are ordered according to global index)
-         if (last_owned < first_nonowned) insert_owned_position = hypre_ParCompGridNumOwnedNodes(compGrid[level]);
-         else if (first_owned > last_nonowned) insert_owned_position = hypre_ParCompGridNumNodes(compGrid[level]);
-         else
+         if (hypre_ParCompGridNumOwnedNodes(compGrid[level]))
          {
-            // Binary search to find where to insert
-            insert_owned_position = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], first_owned, 1);
+            HYPRE_Int first_owned = hypre_ParCompGridGlobalIndices(compGrid[level])[0];
+            HYPRE_Int last_owned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridNumOwnedNodes(compGrid[level]) - 1 ];
+            HYPRE_Int first_nonowned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridNumOwnedNodes(compGrid[level]) ];
+            HYPRE_Int last_nonowned = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) - 1 ];
+
+            // Find where to insert owned nodes in the list of all comp grid nodes (such that they are ordered according to global index)
+            if (last_owned < first_nonowned) insert_owned_position = hypre_ParCompGridNumOwnedNodes(compGrid[level]);
+            else if (first_owned > last_nonowned) insert_owned_position = hypre_ParCompGridNumNodes(compGrid[level]);
+            else
+            {
+               // Binary search to find where to insert
+               insert_owned_position = hypre_ParCompGridLocalIndexBinarySearch(compGrid[level], first_owned, 1);
+            }
          }
+         else insert_owned_position = 0;
 
          // Generate the send_flag in global index ordering
          // !!!!! TODO: Want to also get rid of potential redundancy on coarser levels here !!!!!!
@@ -1336,6 +1374,17 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
             add_flag[index] = m;
             // Recursively call to find distance m-1 neighbors of index
             if (m-1 > 0) RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, add_flag_coarse, need_coarse_info, nodes_to_add, padding);
+         }
+         // If m = 1, we won't do another recursive call, so make sure to flag the coarse grid here if applicable
+         if (need_coarse_info && m == 1)
+         {
+            coarse_grid_index = hypre_ParCompGridCoarseLocalIndices(compGrid)[index];
+            if ( coarse_grid_index != -1 ) 
+            {
+               // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
+               add_flag_coarse[ coarse_grid_index ] = padding+1;
+               *nodes_to_add = 1;
+            }
          }
       }
       else hypre_printf("Error! Ran into a -1 index when building Psi_c\n");
