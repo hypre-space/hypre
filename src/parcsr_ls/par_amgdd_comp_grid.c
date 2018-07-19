@@ -750,34 +750,81 @@ hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filenam
 }
 
 HYPRE_Int 
-hypre_ParCompGridMatlabPlot( hypre_ParCompGrid *compGrid, const char* filename)
+hypre_ParCompGridDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
 
    // Get composite grid information
-   HYPRE_Int       num_nodes = hypre_ParCompGridNumNodes(compGrid);
-
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
    HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
    HYPRE_Int        *ghost_marker = hypre_ParCompGridGhostMarker(compGrid);
+
+   // Get the position where the owned nodes should go in order to output arrays sorted by global index
+   HYPRE_Int insert_owned_position;
+   if (hypre_ParCompGridNumOwnedNodes(compGrid))
+   {
+      HYPRE_Int first_owned = hypre_ParCompGridGlobalIndices(compGrid)[0];
+      HYPRE_Int last_owned = hypre_ParCompGridGlobalIndices(compGrid)[ hypre_ParCompGridNumOwnedNodes(compGrid) - 1 ];
+      HYPRE_Int first_nonowned = hypre_ParCompGridGlobalIndices(compGrid)[ hypre_ParCompGridNumOwnedNodes(compGrid) ];
+      HYPRE_Int last_nonowned = hypre_ParCompGridGlobalIndices(compGrid)[ hypre_ParCompGridNumNodes(compGrid) - 1 ];
+
+      // Find where to insert owned nodes in the list of all comp grid nodes (such that they are ordered according to global index)
+      if (last_owned < first_nonowned) insert_owned_position = hypre_ParCompGridNumOwnedNodes(compGrid);
+      else if (first_owned > last_nonowned) insert_owned_position = hypre_ParCompGridNumNodes(compGrid);
+      else
+      {
+         // Binary search to find where to insert
+         insert_owned_position = hypre_ParCompGridLocalIndexBinarySearch(compGrid, first_owned, 1);
+      }
+   }
+   else insert_owned_position = 0;
 
    // Print info to given filename   
    FILE             *file;
    file = fopen(filename,"w");
    HYPRE_Int i;
 
-   for (i = 0; i < num_nodes; i++)
+   // Global indices
+   for (i = hypre_ParCompGridNumOwnedNodes(compGrid); i < insert_owned_position; i++)
    {
       hypre_fprintf(file, "%d ", global_indices[i]);
    }
+   for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+   {
+      hypre_fprintf(file, "%d ", global_indices[i]);
+   }
+   for (i = insert_owned_position; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   {
+      hypre_fprintf(file, "%d ", global_indices[i]);
+   }
+
    if (coarse_global_indices)
    {
+      // Ghost marker
       hypre_fprintf(file, "\n");
-      for (i = 0; i < num_nodes; i++)
+      for (i = hypre_ParCompGridNumOwnedNodes(compGrid); i < insert_owned_position; i++)
+      {
+         hypre_fprintf(file, "%d ", ghost_marker[i]);
+      }
+      for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+      {
+         hypre_fprintf(file, "%d ", ghost_marker[i]);
+      }
+      for (i = insert_owned_position; i < hypre_ParCompGridNumNodes(compGrid); i++)
       {
          hypre_fprintf(file, "%d ", ghost_marker[i]);
       }
       hypre_fprintf(file, "\n");
-      for (i = 0; i < num_nodes; i++)
+
+      // Coarse global indices
+      for (i = hypre_ParCompGridNumOwnedNodes(compGrid); i < insert_owned_position; i++)
+      {
+         hypre_fprintf(file, "%d ", coarse_global_indices[i]);
+      }
+      for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
+      {
+         hypre_fprintf(file, "%d ", coarse_global_indices[i]);
+      }
+      for (i = insert_owned_position; i < hypre_ParCompGridNumNodes(compGrid); i++)
       {
          hypre_fprintf(file, "%d ", coarse_global_indices[i]);
       }
