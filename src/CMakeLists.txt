@@ -478,6 +478,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/par_amgdd_cycle.c
   parcsr_ls/par_amgdd_fac_cycle.c
   parcsr_ls/par_amgdd_setup.c
+  parcsr_ls/par_amgdd_test.c
   parcsr_ls/par_amg_setup.c
   parcsr_ls/par_amg_solve.c
   parcsr_ls/par_amg_solveT.c
