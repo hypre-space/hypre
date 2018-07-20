@@ -508,8 +508,8 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
    for (level = 0; level < num_levels; level++)
    {
       hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
-      // hypre_ParCompGridDebugPrint( compGrid[level], filename );
-      hypre_ParCompGridDump( compGrid[level], filename );
+      hypre_ParCompGridDebugPrint( compGrid[level], filename );
+      // hypre_ParCompGridDump( compGrid[level], filename );
       #if DEBUG_COMP_GRID == 2
       hypre_sprintf(filename, "outputs/CompGrids/setupACompRank%dLevel%d.txt", myid, level);
       hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename );
@@ -522,6 +522,24 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
       #endif
    }
    #endif
+
+   // Finalize the compGrids
+   for (level = 0; level < num_levels; level++)
+   {
+      hypre_ParCompGridFinalize(compGrid[level]);
+   }
+
+
+   #if DEBUG_COMP_GRID
+   for (level = 0; level < num_levels; level++)
+   {
+      hypre_sprintf(filename, "outputs/CompGrids/afterFinalizeCompGridRank%dLevel%d.txt", myid, level);
+      hypre_ParCompGridDebugPrint( compGrid[level], filename );
+      // hypre_ParCompGridDump( compGrid[level], filename );
+   }
+   #endif
+
+
 
    // store communication info in compGridCommPkg
    hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg) = send_buffer_size;
