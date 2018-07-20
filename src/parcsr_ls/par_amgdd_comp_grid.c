@@ -391,6 +391,31 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid *compGrid )
       hypre_ParCompGridPRows(compGrid) = NULL;
    }
 
+
+
+
+
+
+
+
+
+!!!!!!!!!!!!!!!!! Setup the coarse residual marker !!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
    return 0;
 }
 
