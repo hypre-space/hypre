@@ -146,9 +146,18 @@ typedef struct
    HYPRE_Int        *coarse_global_indices; 
    HYPRE_Int        *coarse_local_indices; 
    HYPRE_Int        *ghost_marker;
+   HYPRE_Int        *coarse_residual_marker;
 
    hypre_ParCompMatrixRow  **A_rows;
    hypre_ParCompMatrixRow  **P_rows;
+
+   HYPRE_Int        *A_rowptr;
+   HYPRE_Int        *A_colind;
+   HYPRE_Complex    *A_data;
+
+   HYPRE_Int        *P_rowptr;
+   HYPRE_Int        *P_colind;
+   HYPRE_Complex    *P_data;
 
 
 
@@ -167,8 +176,15 @@ typedef struct
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
 #define hypre_ParCompGridGhostMarker(compGrid)           ((compGrid) -> ghost_marker)
+#define hypre_ParCompGridCoarseResidualMarker(compGrid)           ((compGrid) -> coarse_residual_marker)
 #define hypre_ParCompGridARows(compGrid)           ((compGrid) -> A_rows)
 #define hypre_ParCompGridPRows(compGrid)           ((compGrid) -> P_rows)
+#define hypre_ParCompGridARowPtr(compGrid)         ((compGrid) -> A_rowptr)
+#define hypre_ParCompGridAColInd(compGrid)         ((compGrid) -> A_colind)
+#define hypre_ParCompGridAData(compGrid)           ((compGrid) -> A_data)
+#define hypre_ParCompGridPRowPtr(compGrid)         ((compGrid) -> P_rowptr)
+#define hypre_ParCompGridPColInd(compGrid)         ((compGrid) -> P_colind)
+#define hypre_ParCompGridPData(compGrid)           ((compGrid) -> P_data)
 
 #endif
 
@@ -1849,11 +1865,13 @@ HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hy
 
 /* par_amgdd_fac_cycle.c */
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata );
+HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_part );
 
 /* par_amgdd_comp_grid.c */
 hypre_ParCompGrid *hypre_ParCompGridCreate ();
 HYPRE_Int hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid );
 HYPRE_Int hypre_ParCompGridInitialize( hypre_ParCompGrid *compGrid, hypre_ParVector *residual, HYPRE_Int *CF_marker_array, HYPRE_Int coarseStart, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P );
+HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels );
 HYPRE_Int hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int size, HYPRE_Int need_coarse_info );
 HYPRE_Int hypre_ParCompGridDynamicResize ( hypre_ParCompGrid *compGrid, HYPRE_Int need_coarse_info );
 HYPRE_Int hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info );
@@ -1862,8 +1880,10 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPR
 HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels );
 HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search );
 HYPRE_Int hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename );
-HYPRE_Int hypre_ParCompGridMatlabPlot( hypre_ParCompGrid *compGrid, const char* filename);
-HYPRE_Int hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridUDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridFDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridMatlabAMatrixDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filename );
 hypre_ParCompMatrixRow *hypre_ParCompMatrixRowCreate ();
