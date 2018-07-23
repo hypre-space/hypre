@@ -1865,6 +1865,7 @@ HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hy
 
 /* par_amgdd_fac_cycle.c */
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata );
+HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_part );
 
 /* par_amgdd_comp_grid.c */
 hypre_ParCompGrid *hypre_ParCompGridCreate ();
