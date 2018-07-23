@@ -47,7 +47,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
   	// Do FAC V-cycle 
 
 	// ... work down to coarsest ...
-	for (i = 0; i < num_levels - 1; i++)
+	for (level = 0; level < num_levels - 1; level++)
 	{
 		// Relax on the real nodes
 		Relax( compGrid[level] );
@@ -56,10 +56,10 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 	}
 
 	//  ... solve on coarsest level ...
-	for (i = 0; i < numCoarseRelax; i++) Relax( compGrid[level] );
+	for (i = 0; i < numCoarseRelax; i++) Relax( compGrid[num_levels-1] );
 
 	// ... and work back up to the finest
-	for (i = num_levels - 2; i > -1; i--)
+	for (level = num_levels - 2; level > -1; level--)
 	{
 		// Project up and relax
 		Project( compGrid[level], compGrid[level+1] );

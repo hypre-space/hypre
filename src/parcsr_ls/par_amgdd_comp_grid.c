@@ -398,16 +398,7 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels )
          hypre_ParCompGridPRows(compGrid[level]) = NULL;
       }
 
-
-
-
-
-
-
       // Setup the coarse residual marker for use in FAC cycles
-
-
-
       if (level != 0)
       {
          hypre_ParCompGridCoarseResidualMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST); // mark the coarse dofs as we restrict (or don't) to make sure they are all updated appropriately: 0 = nothing has happened yet, 1 = has incomplete residual info, 2 = restricted to from fine grid
@@ -445,18 +436,6 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels )
             }
          }
       }
-
-
-
-
-
-
-
-
-
-
-
-
    }
 
    return 0;
@@ -1085,6 +1064,44 @@ hypre_ParCompGridDump( hypre_ParCompGrid *compGrid, const char* filename)
    return 0;
 }
 
+HYPRE_Int 
+hypre_ParCompGridUDump( hypre_ParCompGrid *compGrid, const char* filename)
+{
+   // Print u to given filename   
+   FILE             *file;
+   file = fopen(filename,"w");
+   HYPRE_Int i;
+
+   // Global indices
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   {
+      hypre_fprintf(file, "%e ", hypre_ParCompGridU(compGrid)[i]);
+   }
+
+   fclose(file);
+
+   return 0;
+}
+
+HYPRE_Int 
+hypre_ParCompGridFDump( hypre_ParCompGrid *compGrid, const char* filename)
+{
+   // Print u to given filename   
+   FILE             *file;
+   file = fopen(filename,"w");
+   HYPRE_Int i;
+
+   // Global indices
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   {
+      hypre_fprintf(file, "%e ", hypre_ParCompGridF(compGrid)[i]);
+   }
+
+   fclose(file);
+
+   return 0;
+}
+
 HYPRE_Int
 hypre_ParCompGridMatlabAMatrixDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
@@ -1099,14 +1116,31 @@ hypre_ParCompGridMatlabAMatrixDump( hypre_ParCompGrid *compGrid, const char* fil
    file = fopen(filename,"w");
    HYPRE_Int i,j,row_size;
 
-   for (i = 0; i < num_nodes; i++)
+   if (A_rows)
    {
-      row_size = hypre_ParCompMatrixRowSize(A_rows[i]);
-      for (j = 0; j < row_size; j++)
+      for (i = 0; i < num_nodes; i++)
       {
-         hypre_fprintf(file, "%d ", global_indices[i]);
-         hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowGlobalIndices(A_rows[i])[j]);
-         hypre_fprintf(file, "%e\n", hypre_ParCompMatrixRowData(A_rows[i])[j]);
+         row_size = hypre_ParCompMatrixRowSize(A_rows[i]);
+         for (j = 0; j < row_size; j++)
+         {
+            // hypre_fprintf(file, "%d ", global_indices[i]);
+            // hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowGlobalIndices(A_rows[i])[j]);
+            hypre_fprintf(file, "%d ", i);
+            hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowLocalIndices(A_rows[i])[j]);
+            hypre_fprintf(file, "%e\n", hypre_ParCompMatrixRowData(A_rows[i])[j]);
+         }
+      }
+   }
+   else if (hypre_ParCompGridARowPtr(compGrid))
+   {
+      for (i = 0; i < num_nodes; i++)
+      {
+         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+         {
+            hypre_fprintf(file, "%d ", i);
+            hypre_fprintf(file, "%d ", hypre_ParCompGridAColInd(compGrid)[j]);
+            hypre_fprintf(file, "%e\n", hypre_ParCompGridAData(compGrid)[j]);
+         }
       }
    }
 
@@ -1129,14 +1163,31 @@ hypre_ParCompGridMatlabPMatrixDump( hypre_ParCompGrid *compGrid, const char* fil
    file = fopen(filename,"w");
    HYPRE_Int i,j,row_size;
 
-   for (i = 0; i < num_nodes; i++)
+   if (P_rows)
    {
-      row_size = hypre_ParCompMatrixRowSize(P_rows[i]);
-      for (j = 0; j < row_size; j++)
+      for (i = 0; i < num_nodes; i++)
       {
-         hypre_fprintf(file, "%d ", global_indices[i]);
-         hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowGlobalIndices(P_rows[i])[j]);
-         hypre_fprintf(file, "%e\n", hypre_ParCompMatrixRowData(P_rows[i])[j]);
+         row_size = hypre_ParCompMatrixRowSize(P_rows[i]);
+         for (j = 0; j < row_size; j++)
+         {
+            // hypre_fprintf(file, "%d ", global_indices[i]);
+            // hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowGlobalIndices(P_rows[i])[j]);
+            hypre_fprintf(file, "%d ", i);
+            hypre_fprintf(file, "%d ", hypre_ParCompMatrixRowLocalIndices(P_rows[i])[j]);
+            hypre_fprintf(file, "%e\n", hypre_ParCompMatrixRowData(P_rows[i])[j]);
+         }
+      }
+   }
+   else if (hypre_ParCompGridPRowPtr(compGrid))
+   {
+      for (i = 0; i < num_nodes; i++)
+      {
+         for (j = hypre_ParCompGridPRowPtr(compGrid)[i]; j < hypre_ParCompGridPRowPtr(compGrid)[i+1]; j++)
+         {
+            hypre_fprintf(file, "%d ", i);
+            hypre_fprintf(file, "%d ", hypre_ParCompGridPColInd(compGrid)[j]);
+            hypre_fprintf(file, "%e\n", hypre_ParCompGridPData(compGrid)[j]);
+         }
       }
    }
 
