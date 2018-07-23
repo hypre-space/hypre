@@ -524,12 +524,8 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
    #endif
 
    // Finalize the compGrids
-   for (level = 0; level < num_levels; level++)
-   {
-      hypre_ParCompGridFinalize(compGrid[level]);
-   }
-
-
+   hypre_ParCompGridFinalize(compGrid, num_levels);
+   
    #if DEBUG_COMP_GRID
    for (level = 0; level < num_levels; level++)
    {

@@ -73,7 +73,6 @@ HYPRE_Int
 Project( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
 {
 	HYPRE_Int 					i, j; // loop variables
-	hypre_ParCompMatrixRow 		*row; // row of matrix P
 
 	// Loop over nodes on the fine grid
 	for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
@@ -82,9 +81,9 @@ Project( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
 		for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
 		{
 			// Debugging: make sure everyone has full interpolation stencil
-			if (hypre_ParCompGridPColInd(compGrid)[j] < 0) printf("A point doesn't have its full interpolation stencil! P row %d, entry %d is < 0\n",i,j);
+			if (hypre_ParCompGridPColInd(compGrid_f)[j] < 0) printf("A point doesn't have its full interpolation stencil! P row %d, entry %d is < 0\n",i,j);
 			// Update fine grid solution with coarse projection
-			hypre_ParCompGridU(compGrid_f)[i] += hypre_ParCompGridPData(compGrid)[j] * hypre_ParCompGridU(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ];
+			hypre_ParCompGridU(compGrid_f)[i] += hypre_ParCompGridPData(compGrid_f)[j] * hypre_ParCompGridU(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ];
 		}
 	}
 	return 0;
@@ -98,86 +97,60 @@ Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
 	HYPRE_Int 					i, j, k; // loop variables
-	hypre_ParCompMatrixRow 		*row; // variable to store required matrix rows
-	HYPRE_Complex 				*res, *restrict_res;
-	HYPRE_Int 					*coarse_res_marker; 
 
-	// Allocate space for the calculated residual, temporary restricted residual, and the restriction marker
-	res = hypre_CTAlloc(HYPRE_Complex, num_nodes_f, HYPRE_MEMORY_HOST);
-	restrict_res = hypre_CTAlloc(HYPRE_Complex, num_nodes_c, HYPRE_MEMORY_HOST);
-	coarse_res_marker = hypre_CTAlloc(HYPRE_Int, num_nodes_c, HYPRE_MEMORY_HOST); // mark the coarse dofs as we restrict (or don't) to make sure they are all updated appropriately: 0 = nothing has happened yet, 1 = has incomplete residual info, 2 = restricted to from fine grid
-
-
-	// Calculate fine grid residuals and restrict
-	for (i = 0; i < num_nodes_f; i++)
+	// Zero out coarse grid right hand side where we will restrict from fine grid
+	for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++)
 	{
-		// Get row of A
-		row = A_rows_f[i];
+		if (hypre_ParCompGridCoarseResidualMarker(compGrid_c)[i] == 2) hypre_ParCompGridF(compGrid_c)[i] = 0.0;
+	}
 
+	// Calculate fine grid residuals and restrict where appropriate
+	for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
+	{
 		// Initialize res to RHS
-		res[i] = f_f[i];
+		HYPRE_Complex res = hypre_ParCompGridF(compGrid_f)[i];
+		HYPRE_Int do_restrict = 1;
 
 		// Loop over entries in A
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+		for (j = hypre_ParCompGridARowPtr(compGrid_f)[i]; j < hypre_ParCompGridARowPtr(compGrid_f)[i+1]; j++)
 		{
 			// If -1 index encountered, mark the coarse grid connections to this node (don't want to restrict to these)
-			if ( hypre_ParCompMatrixRowLocalIndices(row)[j] == -1 )
+			if ( hypre_ParCompGridAColInd(compGrid_f)[j] == -1 )
 			{
-				for (k = 0; k < hypre_ParCompMatrixRowSize(P_rows[i]); k++)
-				{
-					coarse_res_marker[ hypre_ParCompMatrixRowLocalIndices(P_rows[i])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
-				}
+				do_restrict = 0;
 				break;
 			}
 			// Otherwise just subtract off A_ij * u_j
-			else res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_f[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
-			if (hypre_ParCompMatrixRowLocalIndices(row)[j] >= num_nodes_f) printf("Rank %d, index %d is out of bounds, num_nodes_f = %d\n", myid, hypre_ParCompMatrixRowLocalIndices(row)[j], num_nodes_f);
+			else res -= hypre_ParCompGridAData(compGrid_f)[j] * hypre_ParCompGridU(compGrid_f)[ hypre_ParCompGridAColInd(compGrid_f)[j] ];
+			if (hypre_ParCompGridAColInd(compGrid_f)[j] >= hypre_ParCompGridNumNodes(compGrid_f)) printf("Rank %d, index %d is out of bounds, num_nodes_f = %d\n", myid, hypre_ParCompGridAColInd(compGrid_f)[j], hypre_ParCompGridNumNodes(compGrid_f));
+		}
+		if (do_restrict)
+		{
+			for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
+			{
+				if (hypre_ParCompGridCoarseResidualMarker(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] == 2)
+					hypre_ParCompGridF(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] += res*hypre_ParCompGridPData(compGrid_f)[j];
+			}
 		}
 	}
 	
-	// Restrict where we have complete residual information
-	for (i = 0; i < num_nodes_f; i++)
+	// Set residual on coarse grid where there was no (or incorrect) restriction from fine grid
+	for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++)
 	{
-		// Get row of P associated with node i
-		row = P_rows[i];
-
-		// Loop over entries in P
-		for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+		if (hypre_ParCompGridCoarseResidualMarker(compGrid_c)[i] != 2)
 		{
-			// Add contribution to restricted residual where appropriate
-			if (coarse_res_marker[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] != 1) 
+			for (j = hypre_ParCompGridARowPtr(compGrid_c)[i]; j < hypre_ParCompGridARowPtr(compGrid_c)[i+1]; j++)
 			{
-				restrict_res[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] += hypre_ParCompMatrixRowData(row)[j] * res[i];
-				coarse_res_marker[ hypre_ParCompMatrixRowLocalIndices(row)[j] ] = 2; // Mark coarse dofs that successfully recieve their value from restriction from the fine grid
+            if (hypre_ParCompGridAColInd(compGrid_c)[j] >= 0) 
+         	{
+         		hypre_ParCompGridF(compGrid_c)[i] -= hypre_ParCompGridAData(compGrid_c)[j] * hypre_ParCompGridU(compGrid_c)[ hypre_ParCompGridAColInd(compGrid_c)[j] ];
+         	}
 			}
 		}
 	}
-
-	// Set residual on coarse grid where there was no restriction from fine grid
-	for (i = 0; i < num_nodes_c; i++)
-	{
-		if (coarse_res_marker[i] != 2)
-		{
-			restrict_res[i] = f_c[i];
-			// Loop over row of coarse grid operator 
-			row = A_rows_c[i];
-			for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
-			{
-            if (hypre_ParCompMatrixRowLocalIndices(row)[j] >= 0) restrict_res[i] -= hypre_ParCompMatrixRowData(row)[j] * u_c[ hypre_ParCompMatrixRowLocalIndices(row)[j] ];
-			}
-		}
-	}
-
-	// Now restrict_res should hold all appropriate restricted residaul values, so copy into f_c
-	for (i = 0; i < num_nodes_c; i++) f_c[i] = restrict_res[i];
 
 	// Zero out initial guess on coarse grid
-	for (i = 0; i < num_nodes_c; i++) u_c[i] = 0;
-
-	// Cleanup memory
-	hypre_TFree(res, HYPRE_MEMORY_HOST);
-	hypre_TFree(restrict_res, HYPRE_MEMORY_HOST);
-	hypre_TFree(coarse_res_marker, HYPRE_MEMORY_HOST);
+	for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++) hypre_ParCompGridU(compGrid_c)[i] = 0.0;
 
 	return 0;
 }
@@ -187,7 +160,6 @@ Relax( hypre_ParCompGrid *compGrid )
 {
 	HYPRE_Int 					i, j; // loop variables
    HYPRE_Int               is_ghost;
-	hypre_ParCompMatrixRow 		*row; // variable to store required matrix rows
 	HYPRE_Complex 				diag; // placeholder for the diagonal of A
 
 	// Do Gauss-Seidel relaxation on the real nodes

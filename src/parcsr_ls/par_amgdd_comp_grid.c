@@ -37,6 +37,7 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
    hypre_ParCompGridGhostMarker(compGrid) = NULL;
+   hypre_ParCompGridCoarseResidualMarker(compGrid) = NULL;
    hypre_ParCompGridARows(compGrid) = NULL;
    hypre_ParCompGridPRows(compGrid) = NULL;
 
@@ -83,6 +84,11 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridGhostMarker(compGrid))
    {
       hypre_TFree(hypre_ParCompGridGhostMarker(compGrid), HYPRE_MEMORY_HOST);
+   }
+
+   if (hypre_ParCompGridCoarseResidualMarker(compGrid))
+   {
+      hypre_TFree(hypre_ParCompGridCoarseResidualMarker(compGrid), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_ParCompGridARows(compGrid))
@@ -297,124 +303,161 @@ hypre_ParCompGridInitialize ( hypre_ParCompGrid *compGrid, hypre_ParVector *resi
 }
 
 HYPRE_Int
-hypre_ParCompGridFinalize( hypre_ParCompGrid *compGrid )
+hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels )
 {
-   HYPRE_Int i,j,cnt;
-
-   // Clean up memory for things we don't need anymore
-   if (hypre_ParCompGridGlobalIndices(compGrid))
+   HYPRE_Int i,j,k,cnt,level;
+   for (level = 0; level < num_levels; level++)
    {
-      hypre_TFree(hypre_ParCompGridGlobalIndices(compGrid), HYPRE_MEMORY_HOST);
-      hypre_ParCompGridGlobalIndices(compGrid) = NULL;
-   }
-   if (hypre_ParCompGridCoarseGlobalIndices(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridCoarseGlobalIndices(compGrid), HYPRE_MEMORY_HOST);
-      hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
-   }
-   if (hypre_ParCompGridCoarseLocalIndices(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridCoarseLocalIndices(compGrid), HYPRE_MEMORY_HOST);
-      hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
-   }
-
-   // Count the number of nonzeros in A
-   cnt = 0;
-   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++) cnt += hypre_ParCompMatrixRowSize( hypre_ParCompGridARows(compGrid)[i] );
-
-   // Allocate space for A
-   hypre_ParCompGridARowPtr(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid) + 1, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridAColInd(compGrid) = hypre_CTAlloc(HYPRE_Int, cnt, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridAData(compGrid) = hypre_CTAlloc(HYPRE_Complex, cnt, HYPRE_MEMORY_HOST);
-
-   // Setup CSR representation of A
-   cnt = 0;
-   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
-   {
-      hypre_ParCompGridARowPtr(compGrid)[i] = cnt;
-      hypre_ParCompMatrixRow *row = hypre_ParCompGridARows(compGrid)[i];
-      for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+      // Clean up memory for things we don't need anymore
+      if (hypre_ParCompGridGlobalIndices(compGrid[level]))
       {
-         hypre_ParCompGridAColInd(compGrid)[cnt] = hypre_ParCompMatrixRowLocalIndices(row)[j];
-         hypre_ParCompGridAData(compGrid)[cnt] = hypre_ParCompMatrixRowData(row)[j];
-         cnt++;
+         hypre_TFree(hypre_ParCompGridGlobalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_ParCompGridGlobalIndices(compGrid[level]) = NULL;
       }
-   }
-   hypre_ParCompGridARowPtr(compGrid)[ hypre_ParCompGridNumNodes(compGrid) ] = cnt;
-
-   // If we have a P matrix
-   if (hypre_ParCompGridPRows(compGrid))
-   {
-      // Count the number of nonzeros in P
-      cnt = 0;
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++) cnt += hypre_ParCompMatrixRowSize( hypre_ParCompGridPRows(compGrid)[i] );
-
-      // Allocate space for P
-      hypre_ParCompGridPRowPtr(compGrid) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid) + 1, HYPRE_MEMORY_HOST);
-      hypre_ParCompGridPColInd(compGrid) = hypre_CTAlloc(HYPRE_Int, cnt, HYPRE_MEMORY_HOST);
-      hypre_ParCompGridPData(compGrid) = hypre_CTAlloc(HYPRE_Complex, cnt, HYPRE_MEMORY_HOST);
-
-      // Setup CSR representation of P
-      cnt = 0;
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+      if (hypre_ParCompGridCoarseGlobalIndices(compGrid[level]))
       {
-         hypre_ParCompGridPRowPtr(compGrid)[i] = cnt;
-         hypre_ParCompMatrixRow *row = hypre_ParCompGridPRows(compGrid)[i];
+         hypre_TFree(hypre_ParCompGridCoarseGlobalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_ParCompGridCoarseGlobalIndices(compGrid[level]) = NULL;
+      }
+      if (hypre_ParCompGridCoarseLocalIndices(compGrid[level]))
+      {
+         hypre_TFree(hypre_ParCompGridCoarseLocalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_ParCompGridCoarseLocalIndices(compGrid[level]) = NULL;
+      }
+
+      // Count the number of nonzeros in A
+      cnt = 0;
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) cnt += hypre_ParCompMatrixRowSize( hypre_ParCompGridARows(compGrid[level])[i] );
+
+      // Allocate space for A
+      hypre_ParCompGridARowPtr(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]) + 1, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridAColInd(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, cnt, HYPRE_MEMORY_HOST);
+      hypre_ParCompGridAData(compGrid[level]) = hypre_CTAlloc(HYPRE_Complex, cnt, HYPRE_MEMORY_HOST);
+
+      // Setup CSR representation of A
+      cnt = 0;
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+      {
+         hypre_ParCompGridARowPtr(compGrid[level])[i] = cnt;
+         hypre_ParCompMatrixRow *row = hypre_ParCompGridARows(compGrid[level])[i];
          for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
          {
-            hypre_ParCompGridPColInd(compGrid)[cnt] = hypre_ParCompMatrixRowLocalIndices(row)[j];
-            hypre_ParCompGridPData(compGrid)[cnt] = hypre_ParCompMatrixRowData(row)[j];
+            hypre_ParCompGridAColInd(compGrid[level])[cnt] = hypre_ParCompMatrixRowLocalIndices(row)[j];
+            hypre_ParCompGridAData(compGrid[level])[cnt] = hypre_ParCompMatrixRowData(row)[j];
             cnt++;
          }
       }
-      hypre_ParCompGridPRowPtr(compGrid)[ hypre_ParCompGridNumNodes(compGrid) ] = cnt;
-   }
+      hypre_ParCompGridARowPtr(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) ] = cnt;
 
-   // Clean up memory for the previous matrix representations
-   if (hypre_ParCompGridARows(compGrid))
-   {
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+      // If we have a P matrix
+      if (hypre_ParCompGridPRows(compGrid[level]))
       {
-         hypre_ParCompMatrixRowDestroy(hypre_ParCompGridARows(compGrid)[i]);
-      }
-      hypre_TFree(hypre_ParCompGridARows(compGrid), HYPRE_MEMORY_HOST);
-      hypre_ParCompGridARows(compGrid) = NULL;
-   }
+         // Count the number of nonzeros in P
+         cnt = 0;
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) cnt += hypre_ParCompMatrixRowSize( hypre_ParCompGridPRows(compGrid[level])[i] );
 
-   if (hypre_ParCompGridPRows(compGrid))
-   {
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+         // Allocate space for P
+         hypre_ParCompGridPRowPtr(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]) + 1, HYPRE_MEMORY_HOST);
+         hypre_ParCompGridPColInd(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, cnt, HYPRE_MEMORY_HOST);
+         hypre_ParCompGridPData(compGrid[level]) = hypre_CTAlloc(HYPRE_Complex, cnt, HYPRE_MEMORY_HOST);
+
+         // Setup CSR representation of P
+         cnt = 0;
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            hypre_ParCompGridPRowPtr(compGrid[level])[i] = cnt;
+            hypre_ParCompMatrixRow *row = hypre_ParCompGridPRows(compGrid[level])[i];
+            for (j = 0; j < hypre_ParCompMatrixRowSize(row); j++)
+            {
+               hypre_ParCompGridPColInd(compGrid[level])[cnt] = hypre_ParCompMatrixRowLocalIndices(row)[j];
+               hypre_ParCompGridPData(compGrid[level])[cnt] = hypre_ParCompMatrixRowData(row)[j];
+               cnt++;
+            }
+         }
+         hypre_ParCompGridPRowPtr(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) ] = cnt;
+      }
+
+      // Clean up memory for the previous matrix representations
+      if (hypre_ParCompGridARows(compGrid[level]))
       {
-         hypre_ParCompMatrixRowDestroy(hypre_ParCompGridPRows(compGrid)[i]);
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            hypre_ParCompMatrixRowDestroy(hypre_ParCompGridARows(compGrid[level])[i]);
+         }
+         hypre_TFree(hypre_ParCompGridARows(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_ParCompGridARows(compGrid[level]) = NULL;
       }
-      hypre_TFree(hypre_ParCompGridPRows(compGrid), HYPRE_MEMORY_HOST);
-      hypre_ParCompGridPRows(compGrid) = NULL;
+
+      if (hypre_ParCompGridPRows(compGrid[level]))
+      {
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            hypre_ParCompMatrixRowDestroy(hypre_ParCompGridPRows(compGrid[level])[i]);
+         }
+         hypre_TFree(hypre_ParCompGridPRows(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_ParCompGridPRows(compGrid[level]) = NULL;
+      }
+
+
+
+
+
+
+
+      // Setup the coarse residual marker for use in FAC cycles
+
+
+
+      if (level != 0)
+      {
+         hypre_ParCompGridCoarseResidualMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST); // mark the coarse dofs as we restrict (or don't) to make sure they are all updated appropriately: 0 = nothing has happened yet, 1 = has incomplete residual info, 2 = restricted to from fine grid
+
+
+         // Look at fine grid A matrix
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level-1]); i++)
+         {
+            // Loop over entries in A
+            for (j = hypre_ParCompGridARowPtr(compGrid[level-1])[i]; j < hypre_ParCompGridARowPtr(compGrid[level-1])[i+1]; j++)
+            {
+               // If -1 index encountered, mark the coarse grid connections to this node (don't want to restrict to these)
+               if ( hypre_ParCompGridAColInd(compGrid[level-1])[j] == -1 )
+               {
+                  for (k = hypre_ParCompGridPRowPtr(compGrid[level-1])[i]; k < hypre_ParCompGridPRowPtr(compGrid[level-1])[i+1]; k++)
+                  {
+                     hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
+                  }
+                  break;
+               }
+            }
+         }
+         
+         // Mark where we have complete residual information
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level-1]); i++)
+         {
+            // Loop over entries in P
+            for (j = hypre_ParCompGridPRowPtr(compGrid[level-1])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level-1])[i+1]; j++)
+            {
+               // Add contribution to restricted residual where appropriate
+               if (hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] != 1) 
+               {
+                  hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] = 2; // Mark coarse dofs that successfully recieve their value from restriction from the fine grid
+               }
+            }
+         }
+      }
+
+
+
+
+
+
+
+
+
+
+
+
    }
-
-
-
-
-
-
-
-
-
-!!!!!!!!!!!!!!!!! Setup the coarse residual marker !!!!!!!!!!!!!!!!!!!!!!!!
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
    return 0;
 }

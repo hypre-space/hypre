@@ -126,6 +126,7 @@ typedef struct
    HYPRE_Int        *coarse_global_indices; 
    HYPRE_Int        *coarse_local_indices; 
    HYPRE_Int        *ghost_marker;
+   HYPRE_Int        *coarse_residual_marker;
 
    hypre_ParCompMatrixRow 	**A_rows;
    hypre_ParCompMatrixRow  **P_rows;
@@ -155,6 +156,7 @@ typedef struct
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
 #define hypre_ParCompGridGhostMarker(compGrid)           ((compGrid) -> ghost_marker)
+#define hypre_ParCompGridCoarseResidualMarker(compGrid)           ((compGrid) -> coarse_residual_marker)
 #define hypre_ParCompGridARows(compGrid)           ((compGrid) -> A_rows)
 #define hypre_ParCompGridPRows(compGrid)           ((compGrid) -> P_rows)
 #define hypre_ParCompGridARowPtr(compGrid)         ((compGrid) -> A_rowptr)
