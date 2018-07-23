@@ -50,6 +50,8 @@ typedef struct hypre_ParILUData_struct
    /* temp vectors for solve phase */
    hypre_ParVector      *Utemp;
    hypre_ParVector      *Ftemp;
+   HYPRE_Real           *uext;
+   HYPRE_Real           *fext;
    
    /* data structure sor solving Schur System */
    HYPRE_Solver         schur_solver;
@@ -110,6 +112,8 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataNLU(ilu_data)                          ((ilu_data) -> nLU)
 #define hypre_ParILUDataUTemp(ilu_data)                        ((ilu_data) -> Utemp)
 #define hypre_ParILUDataFTemp(ilu_data)                        ((ilu_data) -> Ftemp)
+#define hypre_ParILUDataUExt(ilu_data)                         ((ilu_data) -> uext)
+#define hypre_ParILUDataFExt(ilu_data)                         ((ilu_data) -> fext)
 #define hypre_ParILUDataSchurSolver(ilu_data)                  ((ilu_data) -> schur_solver)
 #define hypre_ParILUDataSchurPrecond(ilu_data)                 ((ilu_data) -> schur_precond)
 #define hypre_ParILUDataRhs(ilu_data)                          ((ilu_data) -> rhs)

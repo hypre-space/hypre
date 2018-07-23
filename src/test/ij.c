@@ -1887,7 +1887,13 @@ main( hypre_int argc,
          /* hypre ILU options */
          hypre_printf("  -ilu_type   <val>                : set ILU factorization type = val\n");      
          hypre_printf("  -ilu_type   0                    : Block Jacobi with ILU(k) variants \n");      
-         hypre_printf("  -ilu_type   1                    : Block Jacobi with ILUT \n");      
+         hypre_printf("  -ilu_type   1                    : Block Jacobi with ILUT \n");   
+         hypre_printf("  -ilu_type   10                   : GMRES with ILU(k) variants \n");      
+         hypre_printf("  -ilu_type   11                   : GMRES with ILUT \n"); 
+         hypre_printf("  -ilu_type   20                   : NSH with ILU(k) variants \n");      
+         hypre_printf("  -ilu_type   21                   : NSH with ILUT \n"); 
+         hypre_printf("  -ilu_type   30                   : RAS with ILU(k) variants \n");      
+         hypre_printf("  -ilu_type   31                   : RAS with ILUT \n");    
          hypre_printf("  -ilu_lfil   <val>                : set level of fill (k) for ILU(k) = val\n");      
          hypre_printf("  -ilu_droptol   <val>             : set drop tolerance threshold for ILUT = val \n");      
          hypre_printf("  -ilu_max_row_nnz   <val>         : set max. num of nonzeros to keep per row = val \n");          

@@ -54,6 +54,8 @@ hypre_ILUCreate()
    (ilu_data -> U) = NULL;
    (ilu_data -> Utemp) = NULL;
    (ilu_data -> Ftemp) = NULL;
+   (ilu_data -> uext) = NULL;
+   (ilu_data -> fext) = NULL;
    (ilu_data -> residual) = NULL;
    (ilu_data -> rel_res_norms) = NULL;
 
@@ -107,6 +109,16 @@ hypre_ILUDestroy( void *data )
     hypre_ParVectorDestroy( (ilu_data -> Ftemp) );
     (ilu_data -> Ftemp) = NULL;
   }
+  if(hypre_ParILUDataUExt(ilu_data))
+  {
+    hypre_TFree(hypre_ParILUDataUExt(ilu_data), HYPRE_MEMORY_HOST);
+    hypre_ParILUDataUExt(ilu_data) = NULL;
+  }
+  if(hypre_ParILUDataFExt(ilu_data))
+  {
+    hypre_TFree(hypre_ParILUDataFExt(ilu_data), HYPRE_MEMORY_HOST);
+    hypre_ParILUDataFExt(ilu_data) = NULL;
+  }
   if((ilu_data -> rhs))
   {
     hypre_ParVectorDestroy( (ilu_data -> rhs) );
@@ -118,7 +130,7 @@ hypre_ILUDestroy( void *data )
     (ilu_data -> x) = NULL;
   }
   /* l1_norms */
-  if ((ilu_data -> l1_norms))
+  if((ilu_data -> l1_norms))
   {
     hypre_TFree((ilu_data -> l1_norms), HYPRE_MEMORY_HOST);
     (ilu_data -> l1_norms) = NULL;
@@ -152,7 +164,7 @@ hypre_ILUDestroy( void *data )
          HYPRE_ParCSRGMRESDestroy(ilu_data -> schur_solver); //GMRES for Schur
          break;
       case 20: case 21:
-         hypre_NSHDestroy(hypre_ParILUDataSchurSolver(ilu_data));
+         hypre_NSHDestroy(hypre_ParILUDataSchurSolver(ilu_data));//NSH for Schur
          break;
       default:
          break;
@@ -281,7 +293,7 @@ hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
          hypre_ParILUDataSchurNSHTol(ilu_data) = 1.0e-09;
          
          /* set MR inverse parameters */
-         hypre_ParILUDataSchurMRMaxIter(ilu_data) = 5;
+         hypre_ParILUDataSchurMRMaxIter(ilu_data) = 2;
          hypre_ParILUDataSchurMRColVersion(ilu_data) = 0;/* sp_lfil */
          hypre_ParILUDataSchurMRMaxRowNnz(ilu_data) = 200;
          hypre_ParILUDataSchurMRTol(ilu_data) = 1.0e-09;
@@ -375,8 +387,9 @@ hypre_ILUSetSchurSolverMaxIter( void *ilu_vdata, HYPRE_Int ss_max_iter )
          hypre_ParILUDataSchurNSHSolveMaxIter(ilu_data) = ss_max_iter;
          break;
       default:
-         /* warning */
-         printf("Current type has no Schur System\n");
+         /* warning - not open yet
+          * printf("Current type has no Schur System\n");
+          */
          break;
    }
    return hypre_error_flag;
@@ -625,10 +638,12 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
    hypre_printf("ILU Setup parameters: \n");   
    hypre_printf("ILU factorization type: %d : ", (ilu_data -> ilu_type));
    switch(ilu_data -> ilu_type){
-      case 0: hypre_printf("Block Jacobi with ILU(%d) \n", (ilu_data -> lfil));
+      case 0: 
+              hypre_printf("Block Jacobi with ILU(%d) \n", (ilu_data -> lfil));
               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
          break;
-      case 1: hypre_printf("Block Jacobi with ILUT \n");
+      case 1: 
+              hypre_printf("Block Jacobi with ILUT \n");
               hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
               hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
@@ -652,7 +667,17 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
               hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
               hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
-         break;  
+         break; 
+      case 30:
+              hypre_printf("RAS with ILU(%d) \n", (ilu_data -> lfil));
+              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         break;
+      case 31: 
+              hypre_printf("RAS with ILUT \n");
+              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         break;
       default: hypre_printf("Unknown type \n");
          break;
    }
@@ -1081,8 +1106,330 @@ hypre_ILUGetPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
    return hypre_error_flag;
 }
 
+/* Build the expanded matrix for RAS-1
+ * 
+ * A: input ParCSR matrix
+ * E_i, E_j, E_data: information for external matrix
+ * rperm: reverse permutation to build real index, rperm[old] = new
+ */
+HYPRE_Int
+hypre_ILUBuildRASExternalMatrix(hypre_ParCSRMatrix *A, HYPRE_Int *rperm, HYPRE_Int **E_i, HYPRE_Int **E_j, HYPRE_Real **E_data)
+{
+   HYPRE_Int                i, j, k, l, row, k1, k2, k3, lend, leno, col, l1, l2;
+   
+   /* data objects for communication */
+   MPI_Comm                 comm = hypre_ParCSRMatrixComm(A);
+   hypre_ParCSRCommPkg      *comm_pkg;
+   hypre_ParCSRCommPkg      *comm_pkg_tmp;
+   hypre_ParCSRCommHandle   *comm_handle_count;
+   hypre_ParCSRCommHandle   *comm_handle_marker;
+   hypre_ParCSRCommHandle   *comm_handle_j;
+   hypre_ParCSRCommHandle   *comm_handle_data;
+   HYPRE_Int                *col_starts;
+   HYPRE_Int                total_rows;
+   HYPRE_Int                num_sends;
+   HYPRE_Int                num_recvs;
+   HYPRE_Int                begin, end;
+   HYPRE_Int                my_id,num_procs,proc_id;
+   
+   /* data objects for buffers in communication */
+   HYPRE_Int                *send_map;
+   HYPRE_Int                *send_count = NULL,*send_disp = NULL;
+   HYPRE_Int                *send_count_offd = NULL;
+   HYPRE_Int                *recv_count = NULL,*recv_disp = NULL,*recv_marker = NULL;
+   HYPRE_Int                *send_buf_int = NULL, *recv_buf_int = NULL;
+   HYPRE_Real               *send_buf_real = NULL, *recv_buf_real = NULL;
+   HYPRE_Int                *send_disp_comm = NULL, *recv_disp_comm = NULL;
+   
+   /* data objects for A */
+   hypre_CSRMatrix          *A_diag = hypre_ParCSRMatrixDiag(A);
+   hypre_CSRMatrix          *A_offd = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int                *A_col_starts = hypre_ParCSRMatrixColStarts(A);
+   HYPRE_Int                *A_offd_colmap = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Real               *A_diag_data = hypre_CSRMatrixData(A_diag);
+   HYPRE_Int                *A_diag_i = hypre_CSRMatrixI(A_diag);
+   HYPRE_Int                *A_diag_j = hypre_CSRMatrixJ(A_diag);
+   HYPRE_Int                *A_offd_i = hypre_CSRMatrixI(A_offd);
+   HYPRE_Int                *A_offd_j = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Real               *A_offd_data = hypre_CSRMatrixData(A_offd);
+   
+   /* size */
+   HYPRE_Int                n = hypre_CSRMatrixNumCols(A_diag);
+   HYPRE_Int                m = hypre_CSRMatrixNumCols(A_offd);
+   
+   /* 1: setup part
+    * allocate memory and setup working array
+    */
+   
+   /* MPI stuff */
+   hypre_MPI_Comm_size(comm, &num_procs);
+   hypre_MPI_Comm_rank(comm, &my_id);
+   
+   /* now check communication package */
+   comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   /* create if not yet built */
+   if(!comm_pkg)
+   {
+      hypre_MatvecCommPkgCreate(A);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   }
+   
+   /* get communication information */
+   send_map = hypre_ParCSRCommPkgSendMapElmts(comm_pkg);
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   send_disp_comm = hypre_TAlloc(HYPRE_Int, num_sends + 1, HYPRE_MEMORY_HOST);
+   begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg,0);
+   end = hypre_ParCSRCommPkgSendMapStart(comm_pkg,num_sends);
+   total_rows = end - begin;
+   num_recvs = hypre_ParCSRCommPkgNumRecvs(comm_pkg);
+   recv_disp_comm = hypre_TAlloc(HYPRE_Int, num_recvs + 1, HYPRE_MEMORY_HOST);
+   
+   /* create buffers */
+   send_count = hypre_TAlloc(HYPRE_Int, total_rows, HYPRE_MEMORY_HOST);
+   send_disp = hypre_TAlloc(HYPRE_Int, total_rows + 1, HYPRE_MEMORY_HOST);
+   send_count_offd = hypre_CTAlloc(HYPRE_Int, total_rows, HYPRE_MEMORY_HOST);
+   recv_count = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_HOST);
+   recv_marker = hypre_TAlloc(HYPRE_Int, m, HYPRE_MEMORY_HOST);
+   recv_disp = hypre_TAlloc(HYPRE_Int, m + 1, HYPRE_MEMORY_HOST);
+   
+   /* 2: communication part 1 to get amount of send and recv */
+   
+   /* first we need to know the global start */ 
+   col_starts = hypre_TAlloc(HYPRE_Int, num_procs + 1, HYPRE_MEMORY_HOST);
+   hypre_MPI_Allgather(A_col_starts+1,1,HYPRE_MPI_INT,col_starts+1,1,HYPRE_MPI_INT,comm);
+   col_starts[0] = 0;
+   
+   send_disp[0] = 0;
+   send_disp_comm[0] = 0;
+   /* now loop to know how many to send per row */
+   for( i = 0 ; i < num_sends ; i ++ )
+   {
+      /* update disp for comm package */
+      send_disp_comm[i+1] = send_disp_comm[i];
+      /* get the proc we are sending to */
+      proc_id = hypre_ParCSRCommPkgSendProc(comm_pkg,i);
+      /* set start end of this proc */
+      l1 = hypre_ParCSRCommPkgSendMapStart(comm_pkg,i);
+      l2 = hypre_ParCSRCommPkgSendMapStart(comm_pkg,i + 1);
+      /* loop through rows we need to send */
+      for( j = l1 ; j < l2 ; j ++ )
+      {
+         /* reset length */
+         leno = lend = 0;
+         /* we need to send out this row */
+         row = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+         
+         /* check how many we need to send from diagonal first */
+         k1 = A_diag_i[row], k2 = A_diag_i[row+1];
+         for( k = k1 ; k < k2 ; k ++ )
+         {
+            col = A_diag_j[k];
+            if(hypre_BinarySearch(send_map+l1,col,l2-l1) >=0 )
+            {
+               lend++;
+            }
+         }
+         
+         /* check how many we need to send from offdiagonal */
+         k1 = A_offd_i[row], k2 = A_offd_i[row+1];
+         for( k = k1 ; k < k2 ; k ++ )
+         {
+            /* get real column number of this offdiagonal column */
+            col = A_offd_colmap[A_offd_j[k]];
+            if(col >= col_starts[proc_id] && col < col_starts[proc_id+1])
+            {
+               /* this column is in diagonal range of proc_id
+                * everything in diagonal range need to be in the factorization
+                */
+               leno++;
+            }
+         }
+         send_count_offd[j] = leno;
+         send_count[j] = leno + lend;
+         send_disp[j+1] = send_disp[j] + send_count[j];
+         send_disp_comm[i+1] += send_count[j];
+      }
+   }
+   
+   /* 3: new communication to know how many we need to reveive for each external row
+    * main communication, 11 is integer 
+    */
+   comm_handle_count = hypre_ParCSRCommHandleCreate(11, comm_pkg, send_count, recv_count);
+   comm_handle_marker = hypre_ParCSRCommHandleCreate(11, comm_pkg, send_count_offd, recv_marker);
+   hypre_ParCSRCommHandleDestroy(comm_handle_count);
+   hypre_ParCSRCommHandleDestroy(comm_handle_marker);
+   
+   recv_disp[0] = 0;
+   recv_disp_comm[0] = 0;
+   /* now build the recv disp array */
+   for(i = 0 ; i < num_recvs ; i ++)
+   {
+      recv_disp_comm[i+1] = recv_disp_comm[i];
+      k1 = hypre_ParCSRCommPkgRecvVecStart( comm_pkg, i );
+      k2 = hypre_ParCSRCommPkgRecvVecStart( comm_pkg, i + 1 );
+      for(j = k1 ; j < k2 ; j ++)
+      {
+         recv_disp[j+1] = recv_disp[j] + recv_count[j];
+         recv_disp_comm[i+1] += recv_count[j];
+      }
+   }
+   
+   /* 4: ready to start real communication
+    * now we know how many we need to send out, create send/recv buffers 
+    */
+   send_buf_int = hypre_TAlloc(HYPRE_Int, send_disp[total_rows], HYPRE_MEMORY_HOST);
+   send_buf_real = hypre_TAlloc(HYPRE_Real, send_disp[total_rows], HYPRE_MEMORY_HOST);
+   recv_buf_int = hypre_TAlloc(HYPRE_Int, recv_disp[m], HYPRE_MEMORY_HOST);
+   recv_buf_real = hypre_TAlloc(HYPRE_Real, recv_disp[m], HYPRE_MEMORY_HOST);
+   
+   /* fill send buffer */
+   for( i = 0 ; i < num_sends ; i ++ )
+   {
+      /* get the proc we are sending to */
+      proc_id = hypre_ParCSRCommPkgSendProc(comm_pkg,i);
+      /* set start end of this proc */
+      l1 = hypre_ParCSRCommPkgSendMapStart(comm_pkg,i);
+      l2 = hypre_ParCSRCommPkgSendMapStart(comm_pkg,i + 1);
+      /* loop through rows we need to apply communication */
+      for( j = l1 ; j < l2 ; j ++ )
+      {
+         /* reset length 
+          * one remark here, the diagonal we send becomes
+          *    off diagonal part for reciver
+          */
+         leno = send_disp[j];
+         lend = leno + send_count_offd[j];
+         /* we need to send out this row */
+         row = hypre_ParCSRCommPkgSendMapElmt(comm_pkg,j);
+         
+         /* fill diagonal first */
+         k1 = A_diag_i[row], k2 = A_diag_i[row+1];
+         for( k = k1 ; k < k2 ; k ++ )
+         {
+            col = A_diag_j[k];
+            if(hypre_BinarySearch(send_map+l1,col,l2-l1) >=0)
+            {
+               send_buf_real[lend] = A_diag_data[k];
+               /* the diag part becomes offd for recv part, so update index 
+                * set up to global index
+                * set it to be nagetive
+                */
+               send_buf_int[lend++] = col + col_starts[my_id];
+            }
+         }
+         
+         /* fill offdiagonal */
+         k1 = A_offd_i[row], k2 = A_offd_i[row+1];
+         for( k = k1 ; k < k2 ; k ++ )
+         {
+            /* get real column number of this offdiagonal column */
+            col = A_offd_colmap[A_offd_j[k]];
+            if(col >= col_starts[proc_id] && col < col_starts[proc_id+1])
+            {
+               /* this column is in diagonal range of proc_id
+                * everything in diagonal range need to be in the factorization
+                */
+               send_buf_real[leno] = A_offd_data[k];
+               /* the offd part becomes diagonal for recv part, so update index */
+               send_buf_int[leno++] = col - col_starts[proc_id];
+            }
+         }
+      }
+   }
+   
+   /* now build new comm_pkg for this communication */
+   comm_pkg_tmp = hypre_CTAlloc(hypre_ParCSRCommPkg, 1, HYPRE_MEMORY_HOST);
+   hypre_ParCSRCommPkgComm         (comm_pkg_tmp) = comm;
+   hypre_ParCSRCommPkgNumSends     (comm_pkg_tmp) = num_sends;
+   hypre_ParCSRCommPkgSendProcs    (comm_pkg_tmp) = hypre_ParCSRCommPkgSendProcs(comm_pkg);
+   hypre_ParCSRCommPkgSendMapStarts(comm_pkg_tmp) = send_disp_comm;
+   hypre_ParCSRCommPkgNumRecvs     (comm_pkg_tmp) = num_recvs;
+   hypre_ParCSRCommPkgRecvProcs    (comm_pkg_tmp) = hypre_ParCSRCommPkgRecvProcs(comm_pkg);
+   hypre_ParCSRCommPkgRecvVecStarts(comm_pkg_tmp) = recv_disp_comm;
+   
+   /* communication */
+   comm_handle_j = hypre_ParCSRCommHandleCreate(11, comm_pkg_tmp, send_buf_int, recv_buf_int);
+   comm_handle_data = hypre_ParCSRCommHandleCreate(1, comm_pkg_tmp, send_buf_real, recv_buf_real);
+   hypre_ParCSRCommHandleDestroy(comm_handle_j);
+   hypre_ParCSRCommHandleDestroy(comm_handle_data);
+   
+   /* 5: finish and free 
+    * free some of them first
+    */ 
+   
+   hypre_TFree(send_disp_comm, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_disp_comm, HYPRE_MEMORY_HOST);
+   hypre_TFree(comm_pkg_tmp, HYPRE_MEMORY_HOST);
+   hypre_TFree(col_starts, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_count, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_disp, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_count_offd, HYPRE_MEMORY_HOST);
+   hypre_TFree(recv_count, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_buf_int, HYPRE_MEMORY_HOST);
+   hypre_TFree(send_buf_real, HYPRE_MEMORY_HOST);
+   
+   *E_i = recv_disp;
+   *E_j = recv_buf_int;
+   *E_data = recv_buf_real;
+   
+   /* Update the index to be real index */
+   for(i = 0 ; i < m ; i ++ )
+   {
+      k1 = recv_disp[i];
+      k2 = recv_disp[i] + recv_marker[i];
+      k3 = recv_disp[i+1];
+      for(j = k1 ; j < k2 ; j ++ )
+      {
+         recv_buf_int[j] = rperm[recv_buf_int[j]];
+      }
+      for(j = k2 ; j < k3 ; j ++)
+      {
+         col = recv_buf_int[j];
+         recv_buf_int[j] = hypre_BinarySearch( A_offd_colmap, col, m) + n;
+      }
+   }
+   
+   hypre_TFree(recv_marker, HYPRE_MEMORY_HOST);
+   return hypre_error_flag;
+}
 
-
+/* This function sort offdiagonal map as well as J array for offdiagonal part
+ * A: The input CSR matrix
+ */
+HYPRE_Int
+hypre_ILUSortOffdColmap(hypre_ParCSRMatrix *A)
+{
+   HYPRE_Int i;
+   hypre_CSRMatrix *A_offd = hypre_ParCSRMatrixOffd(A);
+   HYPRE_Int *A_offd_j = hypre_CSRMatrixJ(A_offd);
+   HYPRE_Int *A_offd_colmap = hypre_ParCSRMatrixColMapOffd(A);
+   HYPRE_Int len = hypre_CSRMatrixNumCols(A_offd);
+   HYPRE_Int nnz = hypre_CSRMatrixNumNonzeros(A_offd);
+   HYPRE_Int *perm = hypre_TAlloc(HYPRE_Int,len,HYPRE_MEMORY_HOST);
+   HYPRE_Int *rperm = hypre_TAlloc(HYPRE_Int,len,HYPRE_MEMORY_HOST);
+   
+   for(i = 0 ; i < len ; i ++)
+   {
+      perm[i] = i;
+   }
+   
+   hypre_qsort2i(A_offd_colmap,perm,0,len-1);
+   
+   for(i = 0 ; i < len ; i ++)
+   {
+      rperm[perm[i]] = i;
+   }
+   
+   for(i = 0 ; i < nnz ; i ++)
+   {
+      A_offd_j[i] = rperm[A_offd_j[i]];
+   }
+   
+   hypre_TFree(perm,HYPRE_MEMORY_HOST);
+   hypre_TFree(rperm,HYPRE_MEMORY_HOST);
+   
+   return hypre_error_flag;
+}
 
 /* NSH create and solve and help functions */
 
@@ -1118,7 +1465,7 @@ hypre_NSHCreate()
    hypre_ParNSHDataFTemp(nsh_data) = NULL;
    
    /* MR data */
-   hypre_ParNSHDataMRMaxIter(nsh_data) = 5;
+   hypre_ParNSHDataMRMaxIter(nsh_data) = 2;
    hypre_ParNSHDataMRTol(nsh_data) = 1e-09;
    hypre_ParNSHDataMRMaxRowNnz(nsh_data) = 800;
    hypre_ParNSHDataMRColVersion(nsh_data) = 0;
@@ -1617,7 +1964,6 @@ hypre_CSRMatrixDropInplace(hypre_CSRMatrix *A, HYPRE_Real droptol, HYPRE_Int max
             /* don't need to sort, we keep all of them */
             drop_len = len;
          }
-         
          /* copy data */
          while(ctrA + drop_len > capacity)
          {
@@ -1741,12 +2087,6 @@ hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(hypre_CSRMatrix *matA, hypre_CSRMat
    HYPRE_Real        time_s, time_e;
    
    HYPRE_Int         n = hypre_CSRMatrixNumRows(matA);
-   
-   if(n == 0)
-   {
-      *M = NULL;
-      return hypre_error_flag;
-   }
    
    /* create initial guess and matrix I */
    matM = hypre_CSRMatrixCreate(n,n,n);
@@ -1945,7 +2285,7 @@ hypre_ILUParCSRInverseNSH(hypre_ParCSRMatrix *A, hypre_ParCSRMatrix **M, HYPRE_R
     * we want same number for MR and NSH to let user set them eaiser
     * but we don't want a too dense MR initial guess
     */
-   hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(A_diag, &M_diag, droptol[0] * 5.0, mr_tol, eps_tol, mr_max_row_nnz, mr_max_iter, print_level );
+   hypre_ILUCSRMatrixInverseSelfPrecondMRGlobal(A_diag, &M_diag, droptol[0] * 10.0, mr_tol, eps_tol, mr_max_row_nnz, mr_max_iter, print_level );
    
    /* create empty offdiagonal */
    for(i = 0 ; i <= n ; i ++)

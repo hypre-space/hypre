@@ -57,6 +57,8 @@ hypre_ILUSolve( void               *ilu_vdata,
    HYPRE_Real           *norms = (ilu_data -> rel_res_norms);
    hypre_ParVector      *Ftemp = (ilu_data -> Ftemp);
    hypre_ParVector      *Utemp = (ilu_data -> Utemp);
+   HYPRE_Real           *fext = hypre_ParILUDataFExt(ilu_data);
+   HYPRE_Real           *uext = hypre_ParILUDataUExt(ilu_data);
    hypre_ParVector      *residual;
 
    HYPRE_Real           alpha = -1;
@@ -220,6 +222,9 @@ hypre_ILUSolve( void               *ilu_vdata,
       case 20: case 21:
          hypre_ILUSolveSchurNSH(matA, f, u, perm, nLU, matL, matD, matU, matS, 
                            Utemp, Ftemp, schur_solver, rhs, x); //MR+NSH
+         break;
+      case 30: case 31:
+         hypre_ILUSolveLURAS(matA, f, u, perm, matL, matD, matU, Utemp, Utemp, fext, uext); //RAS
          break;
       default: 
          hypre_ILUSolveLU(matA, f, u, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
@@ -739,7 +744,192 @@ hypre_ILUSolveLU(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
 }
 
 
+/* Incomplete LU solve RAS
+ * L, D and U factors only have local scope (no off-diagonal processor terms)
+ * so apart from the residual calculation (which uses A), the solves with the 
+ * L and U factors are local.
+ * fext and uext are tempory arrays for external data
+*/
 
+HYPRE_Int
+hypre_ILUSolveLURAS(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
+                  hypre_ParVector    *u, HYPRE_Int *perm, 
+                  hypre_ParCSRMatrix *L, 
+                  HYPRE_Real* D, hypre_ParCSRMatrix *U,
+                  hypre_ParVector *ftemp, hypre_ParVector *utemp,
+                  HYPRE_Real *fext, HYPRE_Real *uext)
+{
+   
+   hypre_ParCSRCommPkg        *comm_pkg;
+   hypre_ParCSRCommHandle     *comm_handle;
+   HYPRE_Int                  num_sends, begin, end;
+   
+   hypre_CSRMatrix            *L_diag = hypre_ParCSRMatrixDiag(L);
+   HYPRE_Real                 *L_diag_data = hypre_CSRMatrixData(L_diag);
+   HYPRE_Int                  *L_diag_i = hypre_CSRMatrixI(L_diag);
+   HYPRE_Int                  *L_diag_j = hypre_CSRMatrixJ(L_diag);
+
+   hypre_CSRMatrix            *U_diag = hypre_ParCSRMatrixDiag(U);
+   HYPRE_Real                 *U_diag_data = hypre_CSRMatrixData(U_diag);
+   HYPRE_Int                  *U_diag_i = hypre_CSRMatrixI(U_diag);
+   HYPRE_Int                  *U_diag_j = hypre_CSRMatrixJ(U_diag);
+   
+   HYPRE_Int                  n = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixDiag(A));
+   HYPRE_Int                  m = hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A));
+   HYPRE_Int                  buffer_size;
+   HYPRE_Int                  n_total = m + n;
+   
+   HYPRE_Int                  idx;
+   HYPRE_Int                  jcol;
+   HYPRE_Int                  col;
+   
+   hypre_Vector               *utemp_local = hypre_ParVectorLocalVector(utemp);
+   HYPRE_Real                 *utemp_data  = hypre_VectorData(utemp_local);
+   
+   hypre_Vector               *ftemp_local = hypre_ParVectorLocalVector(ftemp);
+   HYPRE_Real                 *ftemp_data  = hypre_VectorData(ftemp_local);      
+
+   HYPRE_Real                 alpha;
+   HYPRE_Real                 beta;   
+   HYPRE_Int                  i, j, k1, k2;
+   
+   /* begin */
+   alpha = -1.0;
+   beta = 1.0;
+   
+   /* prepare for communication */
+   comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   /* setup if not yet built */
+   if(!comm_pkg)
+   {
+      hypre_MatvecCommPkgCreate(A);
+      comm_pkg = hypre_ParCSRMatrixCommPkg(A);
+   }
+
+   /* Initialize Utemp to zero. 
+    * This is necessary for correctness, when we use optimized 
+    * vector operations in the case where sizeof(L, D or U) < sizeof(A)
+   */
+   //hypre_ParVectorSetConstantValues( utemp, 0.);
+   /* compute residual */
+   hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A, u, beta, f, ftemp);
+   
+   /* communication to get external data */
+   
+   /* get total num of send */
+   num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
+   begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg,0);
+   end = hypre_ParCSRCommPkgSendMapStart(comm_pkg,num_sends);
+   
+   /* copy new index into send_buf */
+   for(i = begin ; i < end ; i ++)
+   {
+      /* all we need is just send out data, we don't need to worry about the
+       *    permutation of offd part, actually we don't need to worry about
+       *    permutation at all
+       * borrow uext as send buffer .
+       */
+      uext[i-begin] = ftemp_data[hypre_ParCSRCommPkgSendMapElmt(comm_pkg,i)]; 
+   }
+         
+   /* main communication */
+   comm_handle = hypre_ParCSRCommHandleCreate(1, comm_pkg, uext, fext);
+   hypre_ParCSRCommHandleDestroy(comm_handle);
+   
+   /* L solve - Forward solve */
+   for( i = 0 ; i < n_total ; i ++)
+   {
+      k1 = L_diag_i[i] ; k2 = L_diag_i[i+1];
+      if( i < n )
+      {
+         /* diag part */
+         utemp_data[perm[i]] = ftemp_data[perm[i]];
+         for(j=k1; j <k2; j++) 
+         {
+            col = L_diag_j[j];
+            if( col < n )
+            {
+               utemp_data[perm[i]] -= L_diag_data[j] * utemp_data[perm[col]];
+            }
+            else
+            {
+               jcol = col - n;
+               utemp_data[perm[i]] -= L_diag_data[j] * uext[jcol];
+            }
+         }
+      }
+      else
+      {
+         /* offd part */
+         idx = i - n;
+         uext[idx] = fext[idx];
+         for(j=k1; j <k2; j++) 
+         {
+            col = L_diag_j[j];
+            if(col < n)
+            {
+               uext[idx] -= L_diag_data[j] * utemp_data[perm[col]];
+            }
+            else
+            {
+               jcol = col - n;
+               uext[idx] -= L_diag_data[j] * uext[jcol];
+            }
+         }
+      }
+   }
+   
+   /*-------------------- U solve - Backward substitution */    
+   for( i = n_total-1; i >= 0; i-- ) 
+   {
+      /* first update with the remaining (off-diagonal) entries of U */
+      k1 = U_diag_i[i] ; k2 = U_diag_i[i+1];
+      if( i < n )
+      {
+         /* diag part */
+         for(j=k1; j <k2; j++) 
+         {
+            col = U_diag_j[j];
+            if( col < n )
+            {
+               utemp_data[perm[i]] -= U_diag_data[j] * utemp_data[perm[col]];
+            }
+            else
+            {
+               jcol = col - n;
+               utemp_data[perm[i]] -= U_diag_data[j] * uext[jcol];
+            }
+         }
+         /* diagonal scaling (contribution from D. Note: D is stored as its inverse) */
+         utemp_data[perm[i]] *= D[i];
+      }
+      else
+      {
+         /* 2nd part of offd */
+         idx = i - n;
+         for(j=k1; j <k2; j++) 
+         {
+            col = U_diag_j[j];
+            if( col < n )
+            {
+               uext[idx] -= U_diag_data[j] * utemp_data[perm[col]];
+            }
+            else
+            {
+               jcol = col - n;
+               uext[idx] -= U_diag_data[j] * uext[jcol];
+            }
+         }
+         /* diagonal scaling (contribution from D. Note: D is stored as its inverse) */
+         uext[idx] *= D[i];
+      }
+             
+   }   
+   /* Update solution */
+   hypre_ParVectorAxpy(beta, utemp, u);
+   
+   return hypre_error_flag;
+}
 
 
 /* solve functions for NSH */
