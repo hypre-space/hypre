@@ -27,6 +27,9 @@ TestBoomerAMGSolve( void               *amg_vdata,
 HYPRE_Int
 SetSuppressRelax(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_Int proc);
 
+HYPRE_Real
+GetTestCompositeResidual(hypre_ParCSRMatrix *A, hypre_ParVector *U_comp, hypre_ParVector *res, hypre_Vector *relax_marker);
+
 HYPRE_Int
 TestBoomerAMGCycle( void              *amg_vdata,
                    hypre_ParVector  **F_array,
@@ -59,6 +62,7 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   hypre_ParVectorCopy(f, res);
   hypre_ParCSRMatrixMatvec(-1.0, A, u, 1.0, res );
 
+
   // Loop over processors
   HYPRE_Int proc;
   for (proc = 0; proc < num_procs; proc++)
@@ -80,21 +84,15 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
     hypre_ParVectorSetConstantValues(U_comp,0);
 
     // Perform AMG solve with suppressed relaxation
-    hypre_BoomerAMGSetMaxIter(amg_data, 20);
-    // HYPRE_Real norm = sqrt( hypre_ParVectorInnerProd(U_comp, U_comp) );
-    // if (myid == 0) printf("Before TestBoomerAMGSolve(), U_comp norm = %e\n", norm);
-    // norm = 0.0;
-    // for (level = 0; level < num_levels; level++)
-    //   norm += sqrt( hypre_ParVectorInnerProd(relax_marker[level], relax_marker[level]) );
-    // if (myid == 0) printf("Before TestBoomerAMGSolve(), relax_marker norm = %e\n", norm);
-    TestBoomerAMGSolve(amg_data, A, res, U_comp, relax_marker);
-    // norm = sqrt( hypre_ParVectorInnerProd(U_comp, U_comp) );
-    // if (myid == 0) printf("After TestBoomerAMGSolve(), U_comp norm = %e\n", norm);
-    // norm = 0.0;
-    // for (level = 0; level < num_levels; level++)
-    //   norm += sqrt( hypre_ParVectorInnerProd(relax_marker[level], relax_marker[level]) );
-    // if (myid == 0) printf("After TestBoomerAMGSolve(), relax_marker norm = %e\n", norm);
-
+    HYPRE_Int i,j;
+    for (i = 0; i < 20; i++)
+    {
+      hypre_BoomerAMGSetMaxIter(amg_data, 1);
+      TestBoomerAMGSolve(amg_data, A, res, U_comp, relax_marker);
+      HYPRE_Real res_norm = GetTestCompositeResidual(A, U_comp, res, hypre_ParVectorLocalVector(relax_marker[0]));
+      if (myid == 0) printf("Res norm = %e\n", res_norm);
+    }
+    
     // Update the values in the global solution for this proc
     if (myid == proc)
     {
@@ -114,15 +112,30 @@ SetSuppressRelax(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_
   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
   // Broadcast the number of nodes in the composite gird on this level for the root proc
-  HYPRE_Int num_nodes;
-  if (myid == proc) num_nodes = hypre_ParCompGridNumNodes(compGrid);
+  HYPRE_Int num_nodes = 0;
+  HYPRE_Int is_ghost;
+  if (myid == proc)
+  {
+    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+    {
+      if (hypre_ParCompGridGhostMarker(compGrid)) is_ghost = hypre_ParCompGridGhostMarker(compGrid)[i];
+      else is_ghost = 0;
+      if (!is_ghost) num_nodes++;
+    }
+  }
   hypre_MPI_Bcast(&num_nodes, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
   // Broadcast the global indices of the dofs in the composite grid
   HYPRE_Int *global_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
   if (myid == proc)
   {
-    for (i = 0; i < num_nodes; i++) global_indices[i] = hypre_ParCompGridGlobalIndices(compGrid)[i];
+    HYPRE_Int cnt = 0;
+    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+    {
+      if (hypre_ParCompGridGhostMarker(compGrid)) is_ghost = hypre_ParCompGridGhostMarker(compGrid)[i];
+      else is_ghost = 0;
+      if (!is_ghost) global_indices[cnt++] = hypre_ParCompGridGlobalIndices(compGrid)[i];
+    }
   }
   hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
@@ -140,7 +153,32 @@ SetSuppressRelax(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_
   return 0;
 }
 
+HYPRE_Real
+GetTestCompositeResidual(hypre_ParCSRMatrix *A, hypre_ParVector *U_comp, hypre_ParVector *res, hypre_Vector *relax_marker)
+{
 
+  hypre_ParVector *intermediate_res = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(res), hypre_ParVectorPartitioning(res));
+  hypre_ParVectorInitialize(intermediate_res);
+
+  // Do the residual calculation in parallel
+  hypre_ParVectorCopy(res, intermediate_res);
+  hypre_ParCSRMatrixMatvec(-1.0, A, U_comp, 1.0, intermediate_res );
+  hypre_Vector *local_res = hypre_ParVectorLocalVector(intermediate_res);
+
+  // Locally find the residual norm counting only real nodes, then reduce over processors to get overall res norm
+  HYPRE_Real local_res_norm = 0;
+  HYPRE_Int i;
+  for (i = 0; i < hypre_VectorSize(local_res); i++)
+  {
+    if (hypre_VectorData(relax_marker)[i]) local_res_norm += hypre_VectorData(local_res)[i]*hypre_VectorData(local_res)[i];
+  }
+  HYPRE_Int res_norm;
+  hypre_MPI_Reduce(&local_res_norm, &res_norm, 1, HYPRE_MPI_REAL, MPI_SUM, 0, hypre_MPI_COMM_WORLD);
+
+  hypre_ParVectorDestroy(intermediate_res);
+
+  return sqrt(res_norm);
+}
 
 
 

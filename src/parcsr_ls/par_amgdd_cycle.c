@@ -18,6 +18,9 @@
 HYPRE_Int
 AddSolution( void *amg_vdata );
 
+HYPRE_Real
+GetCompositeResidual(hypre_ParCompGrid *compGrid);
+
 HYPRE_Int
 ZeroInitialGuess( void *amg_vdata );
 
@@ -44,10 +47,19 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int p
 	// Set zero initial guess for all comp grids on all levels
 	ZeroInitialGuess( amg_vdata );
 
+   // Get initial composite grid residual
+   HYPRE_Real init_res_norm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+   if (myid == 0) printf("Error reduction = %e\n", init_res_norm/init_res_norm);
+
 	// Do the cycles
 	for (i = 0; i < num_comp_cycles; i++)
 	{
 		hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
+
+      // Measure convergence of FAC cycle
+      HYPRE_Real new_res_norm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+      if (myid == 0) printf("Error reduction = %e\n", new_res_norm/init_res_norm);
+
 	}
 
 	// Update fine grid solution
@@ -69,6 +81,26 @@ AddSolution( void *amg_vdata )
    	for (i = 0; i < num_owned_nodes; i++) u[i] += u_comp[i];
 
    	return 0;
+}
+
+HYPRE_Real
+GetCompositeResidual(hypre_ParCompGrid *compGrid)
+{
+   HYPRE_Int i,j;
+   HYPRE_Real res_norm = 0.0;
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   {
+      if (!hypre_ParCompGridGhostMarker(compGrid)[i])
+      {
+         HYPRE_Real res = hypre_ParCompGridF(compGrid)[i];
+         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+         {
+            res -= hypre_ParCompGridAData(compGrid)[j] * hypre_ParCompGridU(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ];
+         }
+         res_norm += res*res;
+      }
+   }
+   return sqrt(res_norm);
 }
 
 HYPRE_Int
