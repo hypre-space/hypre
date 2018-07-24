@@ -305,11 +305,13 @@ hypre_ParCompGridInitialize ( hypre_ParCompGrid *compGrid, hypre_ParVector *resi
 HYPRE_Int
 hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels )
 {
+   HYPRE_Int delete_global_indices = 0;
+
    HYPRE_Int i,j,k,cnt,level;
    for (level = 0; level < num_levels; level++)
    {
       // Clean up memory for things we don't need anymore
-      if (hypre_ParCompGridGlobalIndices(compGrid[level]))
+      if (hypre_ParCompGridGlobalIndices(compGrid[level]) && delete_global_indices)
       {
          hypre_TFree(hypre_ParCompGridGlobalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
          hypre_ParCompGridGlobalIndices(compGrid[level]) = NULL;
