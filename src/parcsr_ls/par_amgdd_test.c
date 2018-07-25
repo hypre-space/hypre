@@ -10,6 +10,8 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#define MEASURE_TEST_COMP_RES 1
+
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"
@@ -42,7 +44,8 @@ HYPRE_Int
 hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
                    hypre_ParCSRMatrix *A,
                    hypre_ParVector    *f,
-                   hypre_ParVector    *u                 )
+                   hypre_ParVector    *u,
+                   HYPRE_Int          num_comp_cycles                 )
 {
   // We will simulate an AMG-DD cycle by performing standard, parallel AMG V-cycles with suppressed relaxation to generate the solutions for each subproblem
 
@@ -85,14 +88,30 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
 
     // Perform AMG solve with suppressed relaxation
     HYPRE_Int i,j;
-    for (i = 0; i < 20; i++)
+    #if MEASURE_TEST_COMP_RES
+    HYPRE_Real *res_norm = hypre_CTAlloc(HYPRE_Real, num_comp_cycles, HYPRE_MEMORY_HOST);
+    #endif
+    for (i = 0; i < num_comp_cycles; i++)
     {
       hypre_BoomerAMGSetMaxIter(amg_data, 1);
       TestBoomerAMGSolve(amg_data, A, res, U_comp, relax_marker);
-      HYPRE_Real res_norm = GetTestCompositeResidual(A, U_comp, res, hypre_ParVectorLocalVector(relax_marker[0]));
-      if (myid == 0) printf("Res norm = %e\n", res_norm);
+      #if MEASURE_TEST_COMP_RES
+      res_norm[i] = GetTestCompositeResidual(A, U_comp, res, hypre_ParVectorLocalVector(relax_marker[0]));
+      #endif
     }
-    
+
+    #if MEASURE_TEST_COMP_RES
+    if (myid == 0)
+    {
+      FILE *file;
+      char filename[256];
+      sprintf(filename, "outputs/test_comp_res_proc%d.txt", proc);
+      file = fopen(filename, "w");
+      for (i = 0; i < num_comp_cycles; i++) fprintf(file, "%e ", res_norm[i]);
+      fclose(file);
+    }
+    #endif
+
     // Update the values in the global solution for this proc
     if (myid == proc)
     {
@@ -100,6 +119,7 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
       hypre_SeqVectorAxpy( 1.0, hypre_ParVectorLocalVector(U_comp), hypre_ParVectorLocalVector(u));
     }
   }
+
 
   return 0;
 }
@@ -172,18 +192,14 @@ GetTestCompositeResidual(hypre_ParCSRMatrix *A, hypre_ParVector *U_comp, hypre_P
   {
     if (hypre_VectorData(relax_marker)[i]) local_res_norm += hypre_VectorData(local_res)[i]*hypre_VectorData(local_res)[i];
   }
-  HYPRE_Int res_norm;
-  hypre_MPI_Reduce(&local_res_norm, &res_norm, 1, HYPRE_MPI_REAL, MPI_SUM, 0, hypre_MPI_COMM_WORLD);
+  HYPRE_Real res_norm = 0;
+  MPI_Reduce(&local_res_norm, &res_norm, 1, HYPRE_MPI_REAL, MPI_SUM, 0, hypre_MPI_COMM_WORLD);
 
+  hypre_ParVectorSetPartitioningOwner(intermediate_res, 0);
   hypre_ParVectorDestroy(intermediate_res);
 
   return sqrt(res_norm);
 }
-
-
-
-
-
 
 
 

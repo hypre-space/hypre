@@ -10,6 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#define MEASURE_COMP_RES 1
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -47,20 +48,30 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int p
 	// Set zero initial guess for all comp grids on all levels
 	ZeroInitialGuess( amg_vdata );
 
-   // Get initial composite grid residual
-   HYPRE_Real init_res_norm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
-   if (myid == 0) printf("Error reduction = %e\n", init_res_norm/init_res_norm);
+   #if MEASURE_COMP_RES
+   HYPRE_Real *res_norm = hypre_CTAlloc(HYPRE_Real, num_comp_cycles, HYPRE_MEMORY_HOST);
+   #endif
 
 	// Do the cycles
 	for (i = 0; i < num_comp_cycles; i++)
 	{
 		hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
 
+      #if MEASURE_COMP_RES
       // Measure convergence of FAC cycle
-      HYPRE_Real new_res_norm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
-      if (myid == 0) printf("Error reduction = %e\n", new_res_norm/init_res_norm);
+      res_norm[i] = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+      #endif
 
 	}
+
+   #if MEASURE_COMP_RES
+   FILE *file;
+   char filename[256];
+   sprintf(filename, "outputs/comp_res_proc%d.txt", myid);
+   file = fopen(filename, "w");
+   for (i = 0; i < num_comp_cycles; i++) fprintf(file, "%e ", res_norm[i]);
+   fclose(file);
+   #endif
 
 	// Update fine grid solution
 	AddSolution( amg_vdata );
