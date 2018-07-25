@@ -1067,6 +1067,25 @@ hypre_ParCompGridDump( hypre_ParCompGrid *compGrid, const char* filename)
 }
 
 HYPRE_Int 
+hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename)
+{
+   // Print u to given filename   
+   FILE             *file;
+   file = fopen(filename,"w");
+   HYPRE_Int i;
+
+   // Global indices
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   {
+      hypre_fprintf(file, "%d\n", hypre_ParCompGridGlobalIndices(compGrid)[i]);
+   }
+
+   fclose(file);
+
+   return 0;
+}
+
+HYPRE_Int 
 hypre_ParCompGridUDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
    // Print u to given filename   
@@ -1077,7 +1096,7 @@ hypre_ParCompGridUDump( hypre_ParCompGrid *compGrid, const char* filename)
    // Global indices
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      hypre_fprintf(file, "%e ", hypre_ParCompGridU(compGrid)[i]);
+      hypre_fprintf(file, "%e\n", hypre_ParCompGridU(compGrid)[i]);
    }
 
    fclose(file);
@@ -1096,7 +1115,7 @@ hypre_ParCompGridFDump( hypre_ParCompGrid *compGrid, const char* filename)
    // Global indices
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      hypre_fprintf(file, "%e ", hypre_ParCompGridF(compGrid)[i]);
+      hypre_fprintf(file, "%e\n", hypre_ParCompGridF(compGrid)[i]);
    }
 
    fclose(file);

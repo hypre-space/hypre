@@ -49,7 +49,11 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int p
 	ZeroInitialGuess( amg_vdata );
 
    #if MEASURE_COMP_RES
-   HYPRE_Real *res_norm = hypre_CTAlloc(HYPRE_Real, num_comp_cycles, HYPRE_MEMORY_HOST);
+   HYPRE_Real *res_norm = hypre_CTAlloc(HYPRE_Real, num_comp_cycles+1, HYPRE_MEMORY_HOST);
+   HYPRE_Complex *u0 = hypre_CTAlloc(HYPRE_Complex, num_comp_cycles+1, HYPRE_MEMORY_HOST);
+   // Measure convergence of FAC cycle
+   res_norm[0] = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+   u0[0] = hypre_ParCompGridU(hypre_ParAMGDataCompGrid(amg_data)[0])[0];
    #endif
 
 	// Do the cycles
@@ -59,7 +63,8 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int p
 
       #if MEASURE_COMP_RES
       // Measure convergence of FAC cycle
-      res_norm[i] = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+      res_norm[i+1] = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+      u0[i+1] = hypre_ParCompGridU(hypre_ParAMGDataCompGrid(amg_data)[0])[0];
       #endif
 
 	}
@@ -69,7 +74,8 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int p
    char filename[256];
    sprintf(filename, "outputs/comp_res_proc%d.txt", myid);
    file = fopen(filename, "w");
-   for (i = 0; i < num_comp_cycles; i++) fprintf(file, "%e ", res_norm[i]);
+   for (i = 0; i < num_comp_cycles+1; i++) fprintf(file, "%e ", res_norm[i]);
+   fprintf(file, "\n");
    fclose(file);
    #endif
 
@@ -111,6 +117,7 @@ GetCompositeResidual(hypre_ParCompGrid *compGrid)
          res_norm += res*res;
       }
    }
+
    return sqrt(res_norm);
 }
 
