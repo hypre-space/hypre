@@ -17,12 +17,12 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 2 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_ADD_FLAG 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
-SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding );
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers );
 
 HYPRE_Int
 FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPRE_Int ***add_flag,
@@ -41,7 +41,7 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
 
 HYPRE_Complex*
 PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, HYPRE_Int *send_flag_buffer_size, 
-   HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int send_rank );
+   HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int send_rank );
 
 HYPRE_Int
 RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, 
@@ -72,7 +72,7 @@ UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_I
  *****************************************************************************/
 
 HYPRE_Int
-hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *timers, HYPRE_Int use_barriers )
+hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *timers, HYPRE_Int use_barriers )
 {
    char filename[256];
 
@@ -196,15 +196,15 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
       else hypre_ParCompGridInitialize( compGrid[level+1], F_array[level+1], CF_marker_array[level+1], 0, A_array[level+1], NULL );
    }
 
-   #if DEBUG_COMP_GRID
+   #if DEBUG_COMP_GRID == 2
    for (level = 0; level < num_levels; level++)
    {
       sprintf(filename, "outputs/AMG_hierarchy/A_rank%d_level%d.txt", myid, level);
       hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename);
-      #if DEBUG_COMP_GRID == 2
+      sprintf(filename, "outputs/AMG_hierarchy/P_rank%d_level%d.txt", myid, level);
+      hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename);
       hypre_sprintf(filename, "outputs/CompGrids/initCompGridRank%dLevel%d.txt", myid, level);
       hypre_ParCompGridDebugPrint( compGrid[level], filename );
-      #endif
    }
    #endif
 
@@ -215,7 +215,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
    if (timers) hypre_BeginTiming(timers[0]);
    for (level = 0; level < num_levels; level++)
    {
-      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding);
+      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers);
    }
    if (timers) hypre_EndTiming(timers[0]);
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -273,7 +273,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
             send_flag[level][i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
             num_send_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
             send_buffer[i] = PackSendBuffer( compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
-                                             &(send_flag_buffer_size[i]), send_flag[level][i], num_send_nodes[level][i], i, level, num_levels, padding, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i] );
+                                             &(send_flag_buffer_size[i]), send_flag[level][i], num_send_nodes[level][i], i, level, num_levels, padding, num_ghost_layers, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i] );
          }
          #if DEBUGGING_MESSAGES
          printf("      Rank %d: Done packing send buffers\n", myid);
@@ -513,6 +513,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
       hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
       hypre_ParCompGridDebugPrint( compGrid[level], filename );
       // hypre_ParCompGridDump( compGrid[level], filename );
+      #if DEBUG_COMP_GRID == 2
       hypre_sprintf(filename, "outputs/CompGrids/setupACompRank%dLevel%d.txt", myid, level);
       hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename );
       if (level != num_levels-1)
@@ -520,6 +521,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
          hypre_sprintf(filename, "outputs/CompGrids/setupPCompRank%dLevel%d.txt", myid, level);
          hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename );
       }
+      #endif
    }
    #endif
 
@@ -564,7 +566,7 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int *t
 
 
 HYPRE_Int
-SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding )
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers )
 {
    HYPRE_Int               i,j,cnt;
    HYPRE_Int               num_nodes = hypre_ParCSRMatrixNumRows(A);
@@ -620,7 +622,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
          add_flag[i] = hypre_CTAlloc( HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
          start = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
          finish = hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);
-         for (j = start; j < finish; j++) add_flag[i][ hypre_ParCSRCommPkgSendMapElmt(commPkg,j) ] = padding + 4; // must be set to padding + numGhostLayers (note that the starting nodes are already distance 1 from their neighbors on the adjacent processor)
+         for (j = start; j < finish; j++) add_flag[i][ hypre_ParCSRCommPkgSendMapElmt(commPkg,j) ] = padding + num_ghost_layers; // must be set to padding + numGhostLayers (note that the starting nodes are already distance 1 from their neighbors on the adjacent processor)
       }
 
       // Setup initial num_starting_nodes and starting_nodes (these are the starting nodes when searching for long distance neighbors) !!! I don't think I actually have a good upper bound on sizes here... how to properly allocate/reallocate these? !!!
@@ -651,7 +653,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
 
       FILE *file;
       char filename[256];
-      for (i = 0; i < 3 + padding; i++)
+      for (i = 0; i < padding + num_ghost_layers - 1; i++)
       {
          #if DEBUG_ADD_FLAG
          for (j = 0; j < num_sends; j++)
@@ -700,7 +702,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       #if DEBUG_ADD_FLAG
       for (j = 0; j < num_sends; j++)
       {
-         sprintf(filename,"outputs/add_flag_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, 3+padding);
+         sprintf(filename,"outputs/add_flag_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, padding + num_ghost_layers - 1);
          file = fopen(filename,"w");
          HYPRE_Int k;
          for (k = 0; k < num_nodes; k++)
@@ -715,7 +717,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
          fclose(file);
          if (num_request_nodes[j])
          {
-            sprintf(filename,"outputs/request_nodes_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, 3+padding);
+            sprintf(filename,"outputs/request_nodes_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, padding + num_ghost_layers - 1);
             file = fopen(filename,"w");
             for (k = 0; k < num_request_nodes[j]; k++)
             {
@@ -1081,7 +1083,7 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
 HYPRE_Complex*
 PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, 
    HYPRE_Int *send_flag_buffer_size, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes,
-   HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int send_rank )
+   HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int send_rank )
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -1107,7 +1109,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
    // Mark the nodes to send (including Psi_c grid plus ghost nodes)
 
    // Start by adding the nodes listed by the compGridCommPkg on this level and their coarse grid counterparts if applicable
-   // Note that the compGridCommPkg is set up to list all nodes within the padding plus 4 ghost layers
+   // Note that the compGridCommPkg is set up to list all nodes within the padding plus ghost layers
    (*send_flag_buffer_size) += finish - start;
    if (need_coarse_info)
    {
@@ -1171,16 +1173,16 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
             }
          }
 
-         // Expand by the number of ghost layers (4)
+         // Expand by the number of ghost layers 
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
-            if (add_flag[level][i] > 1) add_flag[level][i] = 6;
-            else if (add_flag[level][i] == 1) add_flag[level][i] = 5;
+            if (add_flag[level][i] > 1) add_flag[level][i] = num_ghost_layers + 2;
+            else if (add_flag[level][i] == 1) add_flag[level][i] = num_ghost_layers + 1;
          }
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
             // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
-            if (add_flag[level][i] == 5) RecursivelyBuildPsiComposite(i, 4, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
+            if (add_flag[level][i] == num_ghost_layers + 1) RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
          }
 
          // Count up the buffer size
@@ -1227,7 +1229,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
             if (add_flag[level][i] > 0) 
             {
                send_flag[level][cnt] = i;
-               if (add_flag[level][i] < 5) ghost_marker[level][cnt] = 1;
+               if (add_flag[level][i] < num_ghost_layers + 1) ghost_marker[level][cnt] = 1;
                cnt++;
             }
          }
@@ -1236,7 +1238,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
             if (add_flag[level][i] > 0) 
             {
                send_flag[level][cnt] = i;
-               if (add_flag[level][i] < 5) ghost_marker[level][cnt] = 1;
+               if (add_flag[level][i] < num_ghost_layers + 1) ghost_marker[level][cnt] = 1;
                cnt++;
             }
          }
@@ -1245,7 +1247,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
             if (add_flag[level][i] > 0) 
             {
                send_flag[level][cnt] = i;
-               if (add_flag[level][i] < 5) ghost_marker[level][cnt] = 1;
+               if (add_flag[level][i] < num_ghost_layers + 1) ghost_marker[level][cnt] = 1;
                cnt++;
             }
          }
