@@ -796,13 +796,15 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
 
    HYPRE_Int         i,j;
 
-   // Print info on how to read generated files
-
+   // Measure number of ghost nodes
+   HYPRE_Int num_ghost = 0;
+   if (ghost_marker) for (i = 0; i < num_nodes; i++) if (ghost_marker[i]) num_ghost++;
 
    // Print info to given filename   
    FILE             *file;
    file = fopen(filename,"w");
-   hypre_fprintf(file, "Num nodes: %d\nMem size: %d\nNum owned nodes: %d\n", num_nodes, mem_size, num_owned_nodes);
+   hypre_fprintf(file, "Num nodes: %d\nMem size: %d\nNum owned nodes: %d\nNum real dofs: %d\nNum ghost dofs: %d\n", 
+      num_nodes, mem_size, num_owned_nodes, num_nodes - num_ghost, num_ghost);
    hypre_fprintf(file, "u:\n");
    for (i = 0; i < num_nodes; i++)
    {

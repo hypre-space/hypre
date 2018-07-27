@@ -750,7 +750,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
          if (add_flag[i][j] > 0) 
          {
             send_map_elmts[cnt] = j;
-            if (add_flag[i][j] > 4) ghost_marker[cnt] = 0;
+            if (add_flag[i][j] > num_ghost_layers) ghost_marker[cnt] = 0;
             else ghost_marker[cnt] = 1;
             cnt++;
          }
