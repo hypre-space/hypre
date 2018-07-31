@@ -46,6 +46,9 @@ typedef struct hypre_ParILUData_struct
    
    HYPRE_Int            ilu_type;
    HYPRE_Int            nLU;
+   
+   /* used when schur block is formed */
+   HYPRE_Int            *u_end;
  
    /* temp vectors for solve phase */
    hypre_ParVector      *Utemp;
@@ -110,6 +113,7 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataMaxIter(ilu_data)                      ((ilu_data) -> max_iter)
 #define hypre_ParILUDataIluType(ilu_data)                      ((ilu_data) -> ilu_type)
 #define hypre_ParILUDataNLU(ilu_data)                          ((ilu_data) -> nLU)
+#define hypre_ParILUDataUEnd(ilu_data)                         ((ilu_data) -> u_end)
 #define hypre_ParILUDataUTemp(ilu_data)                        ((ilu_data) -> Utemp)
 #define hypre_ParILUDataFTemp(ilu_data)                        ((ilu_data) -> Ftemp)
 #define hypre_ParILUDataUExt(ilu_data)                         ((ilu_data) -> uext)

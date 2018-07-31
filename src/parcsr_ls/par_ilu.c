@@ -73,6 +73,7 @@ hypre_ILUCreate()
   
    (ilu_data -> ilu_type) = 0;
    (ilu_data -> nLU) = 0;
+   (ilu_data -> u_end) = NULL;
    
    /* see hypre_ILUSetType for more default values */
    
@@ -134,6 +135,13 @@ hypre_ILUDestroy( void *data )
   {
     hypre_TFree((ilu_data -> l1_norms), HYPRE_MEMORY_HOST);
     (ilu_data -> l1_norms) = NULL;
+  }
+  
+  /* u_end */
+  if(hypre_ParILUDataUEnd(ilu_data))
+  {
+    hypre_TFree(hypre_ParILUDataUEnd(ilu_data), HYPRE_MEMORY_HOST);
+    hypre_ParILUDataUEnd(ilu_data) = NULL;
   }
 
   /* Factors */
