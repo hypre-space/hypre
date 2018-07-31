@@ -61,6 +61,12 @@ PackRecvMapSendBuffer(HYPRE_Int **recv_map_send, HYPRE_Int *recv_map_send_buffer
 HYPRE_Int
 UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_Int *send_buffer_size, HYPRE_Int *num_send_nodes, HYPRE_Int current_level, HYPRE_Int num_levels);
 
+HYPRE_Int
+TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int num_ghost_layers);
+
+HYPRE_Int
+TestCompGrids2(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels);
+
 /*****************************************************************************
  *
  * Routine for setting up the composite grids in AMG-DD
@@ -506,9 +512,17 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int nu
       #endif 
    }
 
+   #if DEBUG_COMP_GRID
+   TestCompGrids1(compGrid, num_levels, padding, num_ghost_layers);
+   #endif
+
    // Finalize the compGrids
    hypre_ParCompGridFinalize(compGrid, num_levels);
-   
+
+   #if DEBUG_COMP_GRID
+   TestCompGrids2(compGrid, num_levels);
+   #endif
+
    #if DEBUG_COMP_GRID
    for (level = 0; level < num_levels; level++)
    {
@@ -657,40 +671,6 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       char filename[256];
       for (i = 0; i < padding + num_ghost_layers - 1; i++)
       {
-         #if DEBUG_PROC_NEIGHBORS
-         for (j = 0; j < num_sends; j++)
-         {
-            sprintf(filename,"outputs/add_flag_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, i);
-            file = fopen(filename,"w");
-            HYPRE_Int k;
-            for (k = 0; k < num_nodes; k++)
-            {
-               fprintf(file, "%d ", add_flag[j][k]);
-            }
-            fprintf(file, "\n");
-            for (k = 0; k < num_nodes; k++)
-            {
-               fprintf(file, "%d ", hypre_ParCompGridGlobalIndices(compGrid)[k]);
-            }
-            fclose(file);
-            if (num_request_nodes[j])
-            {
-               sprintf(filename,"outputs/request_nodes_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, i);
-               file = fopen(filename,"w");
-               for (k = 0; k < num_request_nodes[j]; k++)
-               {
-                  fprintf(file, "%d ", request_nodes[j][2*k]);
-               }
-               fprintf(file, "\n");
-               for (k = 0; k < num_request_nodes[j]; k++)
-               {
-                  fprintf(file, "%d ", request_nodes[j][2*k+1]);
-               }
-               fclose(file);
-            }
-         }
-         #endif
-
          FindNeighborProcessors(compGrid, A, &(add_flag), 
             &(num_starting_nodes), &(starting_nodes), 
             &(search_proc_marker),
@@ -704,7 +684,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       #if DEBUG_PROC_NEIGHBORS
       for (j = 0; j < num_sends; j++)
       {
-         sprintf(filename,"outputs/add_flag_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, padding + num_ghost_layers - 1);
+         sprintf(filename,"outputs/add_flag_level%d_proc%d_rank%d.txt", level, send_procs[j], myid);
          file = fopen(filename,"w");
          HYPRE_Int k;
          for (k = 0; k < num_nodes; k++)
@@ -717,21 +697,21 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
             fprintf(file, "%d ", hypre_ParCompGridGlobalIndices(compGrid)[k]);
          }
          fclose(file);
-         if (num_request_nodes[j])
-         {
-            sprintf(filename,"outputs/request_nodes_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, padding + num_ghost_layers - 1);
-            file = fopen(filename,"w");
-            for (k = 0; k < num_request_nodes[j]; k++)
-            {
-               fprintf(file, "%d ", request_nodes[j][2*k]);
-            }
-            fprintf(file, "\n");
-            for (k = 0; k < num_request_nodes[j]; k++)
-            {
-               fprintf(file, "%d ", request_nodes[j][2*k+1]);
-            }
-            fclose(file);
-         }
+         // if (num_request_nodes[j])
+         // {
+         //    sprintf(filename,"outputs/request_nodes_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, padding + num_ghost_layers - 1);
+         //    file = fopen(filename,"w");
+         //    for (k = 0; k < num_request_nodes[j]; k++)
+         //    {
+         //       fprintf(file, "%d ", request_nodes[j][2*k]);
+         //    }
+         //    fprintf(file, "\n");
+         //    for (k = 0; k < num_request_nodes[j]; k++)
+         //    {
+         //       fprintf(file, "%d ", request_nodes[j][2*k+1]);
+         //    }
+         //    fclose(file);
+         // }
       }
       #endif
 
@@ -1443,7 +1423,7 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid,
 
       while (incoming_cnt < num_incoming_nodes[buffer_number][level] && compGrid_cnt < num_nonowned_nodes)
       {
-         HYPRE_Int incoming_global_index = recv_buffer[cnt];
+         HYPRE_Int incoming_global_index = (HYPRE_Int) recv_buffer[cnt];
          HYPRE_Int compGrid_global_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ compGrid_cnt + num_owned_nodes ];
          if (incoming_global_index >= proc_first_index[level] && incoming_global_index <= proc_last_index[level])
          {
@@ -1470,7 +1450,7 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid,
       }
       while (incoming_cnt < num_incoming_nodes[buffer_number][level])
       {
-         HYPRE_Int incoming_global_index = recv_buffer[cnt];
+         HYPRE_Int incoming_global_index = (HYPRE_Int) recv_buffer[cnt];
          if (incoming_global_index >= proc_first_index[level] && incoming_global_index <= proc_last_index[level])
          {
             incoming_dest[incoming_cnt++] = -1;
@@ -1561,7 +1541,7 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid,
       {   
          if (incoming_dest[i] >= 0)
          {
-            hypre_ParCompGridGlobalIndices(compGrid[level])[ incoming_dest[i] ] = recv_buffer[cnt];
+            hypre_ParCompGridGlobalIndices(compGrid[level])[ incoming_dest[i] ] = (HYPRE_Int) recv_buffer[cnt];
             num_recv_nodes[current_level][buffer_number][level]++;
          }
          cnt++;
@@ -1575,12 +1555,12 @@ UnpackRecvBuffer( HYPRE_Complex *recv_buffer, hypre_ParCompGrid **compGrid,
       {
          for (i = 0; i < num_incoming_nodes[buffer_number][level]; i++) 
          {   
-            if (incoming_dest[i] >= 0) hypre_ParCompGridGhostMarker(compGrid[level])[ incoming_dest[i] ] = recv_buffer[cnt];
+            if (incoming_dest[i] >= 0) hypre_ParCompGridGhostMarker(compGrid[level])[ incoming_dest[i] ] = (HYPRE_Int) recv_buffer[cnt];
             cnt++;
          }
          for (i = 0; i < num_incoming_nodes[buffer_number][level]; i++) 
          {   
-            if (incoming_dest[i] >= 0) hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[ incoming_dest[i] ] = recv_buffer[cnt];
+            if (incoming_dest[i] >= 0) hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[ incoming_dest[i] ] = (HYPRE_Int) recv_buffer[cnt];
             cnt++;
          }
       }
@@ -1708,3 +1688,132 @@ UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_I
    return 0;
 }
 
+HYPRE_Int
+TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int num_ghost_layers)
+{
+   // TEST 1: See whether the parallel composite grid algorithm algorithm has constructed a composite grid with 
+   // the same shape (and ghost node info) as we expect from serial, top-down composite grid generation
+   HYPRE_Int            level,i;
+   HYPRE_Int            need_coarse_info, nodes_to_add = 1;
+   HYPRE_Int            **add_flag = hypre_CTAlloc( HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST );
+
+   // Allocate add_flag on each level and mark the owned dofs on the finest grid
+   for (level = 0; level < num_levels; level++) add_flag[level] = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST);
+   for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid[0]); i++) add_flag[0][i] = padding + 1;
+
+   // Serially generate comp grid from top down
+   // Note that if nodes that should be present in the comp grid are not found, we will be alerted by the error message in RecursivelyBuildPsiComposite()
+   for (level = 0; level < num_levels; level++)
+   {
+      // if there are nodes to add on this grid
+      if (nodes_to_add)
+      {
+         nodes_to_add = 0;
+
+         // see whether we need coarse info on this level
+         if (level != num_levels-1) need_coarse_info = 1;
+         else need_coarse_info = 0;
+
+         // Expand by the padding on this level and add coarse grid counterparts if applicable
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            if (add_flag[level][i] == padding + 1)
+            {
+               // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
+               if (need_coarse_info) RecursivelyBuildPsiComposite(i, padding, compGrid[level], add_flag[level], add_flag[level+1], need_coarse_info, &nodes_to_add, padding);
+               else RecursivelyBuildPsiComposite(i, padding, compGrid[level], add_flag[level], NULL, need_coarse_info, &nodes_to_add, padding);
+            }
+         }
+
+         // Expand by the number of ghost layers 
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            if (add_flag[level][i] > 1) add_flag[level][i] = num_ghost_layers + 2;
+            else if (add_flag[level][i] == 1) add_flag[level][i] = num_ghost_layers + 1;
+         }
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
+            if (add_flag[level][i] == num_ghost_layers + 1) RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
+         }
+      }
+      else break;
+
+      // Check whether add_flag has any zeros (zeros indicate that we have extra nodes in the comp grid that don't belong)
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) if (add_flag[level][i] == 0) printf("Error: extra nodes present in comp grid\n");
+
+      // Check to make sure we have the correct identification of ghost nodes
+      if (level != num_levels-1)
+      {
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) 
+         {
+            if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridGhostMarker(compGrid[level])[i] == 0) 
+               printf("Error: dof that should have been marked as ghost was marked as real\n");
+            if (add_flag[level][i] > num_ghost_layers && hypre_ParCompGridGhostMarker(compGrid[level])[i] == 1) 
+               printf("Error: dof that should have been marked as real was marked as ghost\n");
+         }
+      }
+   }
+
+   return 0;
+}
+
+HYPRE_Int
+TestCompGrids2(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels)
+{
+   // TEST 2: See if the composite grid is set up such that restriction can occur correctly
+   // The CoarseResidualMarker shows where we have all the required info to restrict a correct residual
+   // Here we mark the locations where a restricted residual (rather than a residual just recalculated on the coarse grid) is REQUIRED (i.e. where is the coarse grid residual affected by fine grid relaxation)
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   HYPRE_Int            level,i,j;
+   for (level = 0; level < num_levels-1; level++)
+   { 
+      HYPRE_Int *needs_restrict = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level+1]), HYPRE_MEMORY_HOST);
+      // For dof in the comp grid
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+      {
+         // Look at the row of A for dof
+         HYPRE_Int find_restrict_range = 0;
+         for (j = hypre_ParCompGridARowPtr(compGrid[level])[i]; j < hypre_ParCompGridARowPtr(compGrid[level])[i+1]; j++)
+         {
+            // If dof is connected through A to a real node
+            if (hypre_ParCompGridAColInd(compGrid[level])[j] >= 0)
+            {
+               HYPRE_Int is_ghost;
+               if (level != num_levels-1) is_ghost = hypre_ParCompGridGhostMarker(compGrid[level])[ hypre_ParCompGridAColInd(compGrid[level])[j] ];
+               else is_ghost = 0;
+               if (is_ghost == 0)
+               {
+                  // Then the residual here will change, so find where that residual will propogate on the coarse grid
+                  find_restrict_range = 1;
+                  break;
+               }
+            }
+         }
+         // If dof was connected to a real node
+         if (find_restrict_range)
+         {
+            // Look at the row of P for dof
+            for (j = hypre_ParCompGridPRowPtr(compGrid[level])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level])[i+1]; j++)
+            {
+               // Mark everything in the restriction range of dof
+               needs_restrict[ hypre_ParCompGridPColInd(compGrid[level])[j] ] = 1;
+            }
+         }
+      }
+      // Now check against the coarse residual marker
+      // That is, coarse residual marker shows where we CAN restrict a correct residual and needs_restrict shows where we NEED to restrict a correct residual
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level+1]); i++)
+      {
+         if (needs_restrict[i])
+         {
+            if (hypre_ParCompGridCoarseResidualMarker(compGrid[level+1])[i] != 2)
+               printf("Error: Need residual to be restricted at a location where it is not possible: proc %d, level %d, global index %d\n", myid, level+1, hypre_ParCompGridGlobalIndices(compGrid[level+1])[i]);
+         }
+      }
+      hypre_TFree(needs_restrict, HYPRE_MEMORY_HOST);
+   }
+
+   return 0;
+}
