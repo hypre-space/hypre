@@ -16,7 +16,7 @@
 #include "par_csr_block_matrix.h"	
 
 #define DEBUG_FAC 0
-#define DUMP_INTERMEDIATE_SOLNS 1
+#define DUMP_INTERMEDIATE_SOLNS 0
 
 HYPRE_Int
 FAC_Project( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c );

@@ -17,8 +17,8 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 2 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
-#define DEBUG_ADD_FLAG 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
+#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_PROC_NEIGHBORS 1 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
@@ -196,15 +196,17 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int nu
       else hypre_ParCompGridInitialize( compGrid[level+1], F_array[level+1], CF_marker_array[level+1], 0, A_array[level+1], NULL );
    }
 
-   #if DEBUG_COMP_GRID == 2
+   #if DEBUG_COMP_GRID
    for (level = 0; level < num_levels; level++)
    {
       sprintf(filename, "outputs/AMG_hierarchy/A_rank%d_level%d.txt", myid, level);
       hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename);
-      sprintf(filename, "outputs/AMG_hierarchy/P_rank%d_level%d.txt", myid, level);
-      hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename);
-      hypre_sprintf(filename, "outputs/CompGrids/initCompGridRank%dLevel%d.txt", myid, level);
-      hypre_ParCompGridDebugPrint( compGrid[level], filename );
+      sprintf(filename, "outputs/AMG_hierarchy/coarse_global_indices_rank%d_level%d.txt", myid, level);
+      hypre_ParCompGridCoarseGlobalIndicesDump( compGrid[level], filename);
+      // sprintf(filename, "outputs/AMG_hierarchy/P_rank%d_level%d.txt", myid, level);
+      // hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename);
+      // hypre_sprintf(filename, "outputs/CompGrids/initCompGridRank%dLevel%d.txt", myid, level);
+      // hypre_ParCompGridDebugPrint( compGrid[level], filename );
    }
    #endif
 
@@ -511,17 +513,17 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int nu
    for (level = 0; level < num_levels; level++)
    {
       hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
-      hypre_ParCompGridDebugPrint( compGrid[level], filename );
-      // hypre_ParCompGridDump( compGrid[level], filename );
-      #if DEBUG_COMP_GRID == 2
-      hypre_sprintf(filename, "outputs/CompGrids/setupACompRank%dLevel%d.txt", myid, level);
-      hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename );
-      if (level != num_levels-1)
-      {
-         hypre_sprintf(filename, "outputs/CompGrids/setupPCompRank%dLevel%d.txt", myid, level);
-         hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename );
-      }
-      #endif
+      // hypre_ParCompGridDebugPrint( compGrid[level], filename );
+      hypre_ParCompGridDumpSorted( compGrid[level], filename );
+      // #if DEBUG_COMP_GRID == 2
+      // hypre_sprintf(filename, "outputs/CompGrids/setupACompRank%dLevel%d.txt", myid, level);
+      // hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename );
+      // if (level != num_levels-1)
+      // {
+      //    hypre_sprintf(filename, "outputs/CompGrids/setupPCompRank%dLevel%d.txt", myid, level);
+      //    hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename );
+      // }
+      // #endif
    }
    #endif
 
@@ -579,7 +581,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
    // Get the default (distance 1) number of send procs
    HYPRE_Int      num_sends = hypre_ParCSRCommPkgNumSends(commPkg);
 
-   #if DEBUG_ADD_FLAG
+   #if DEBUG_PROC_NEIGHBORS
    // Check to make sure original matrix has symmetric send/recv relationship !!! I should really have a check to make sure the matrix is actually symmetric !!!
    HYPRE_Int num_recvs = hypre_ParCSRCommPkgNumRecvs(commPkg);
    if (num_sends == num_recvs)
@@ -655,7 +657,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       char filename[256];
       for (i = 0; i < padding + num_ghost_layers - 1; i++)
       {
-         #if DEBUG_ADD_FLAG
+         #if DEBUG_PROC_NEIGHBORS
          for (j = 0; j < num_sends; j++)
          {
             sprintf(filename,"outputs/add_flag_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, i);
@@ -699,7 +701,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
             , level, i); // Note that num_sends may change here
       }
 
-      #if DEBUG_ADD_FLAG
+      #if DEBUG_PROC_NEIGHBORS
       for (j = 0; j < num_sends; j++)
       {
          sprintf(filename,"outputs/add_flag_level%d_proc%d_rank%d_i%d.txt", level, send_procs[j], myid, padding + num_ghost_layers - 1);
@@ -783,7 +785,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
    }
 
 
-   #if DEBUG_ADD_FLAG
+   #if DEBUG_PROC_NEIGHBORS
    // Check to make sure what we end up with has symmetric send/recv relationship 
    HYPRE_Int max_size;
    HYPRE_Int   num_procs;

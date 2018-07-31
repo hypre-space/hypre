@@ -1013,7 +1013,7 @@ hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filenam
 }
 
 HYPRE_Int 
-hypre_ParCompGridDump( hypre_ParCompGrid *compGrid, const char* filename)
+hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename)
 {
    // Check whether we have anything to dump
    if (!hypre_ParCompGridGlobalIndices(compGrid))
@@ -1024,7 +1024,6 @@ hypre_ParCompGridDump( hypre_ParCompGrid *compGrid, const char* filename)
 
    // Get composite grid information
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
-   HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
    HYPRE_Int        *ghost_marker = hypre_ParCompGridGhostMarker(compGrid);
 
    // Get the position where the owned nodes should go in order to output arrays sorted by global index
@@ -1066,7 +1065,7 @@ hypre_ParCompGridDump( hypre_ParCompGrid *compGrid, const char* filename)
       hypre_fprintf(file, "%d ", global_indices[i]);
    }
 
-   if (coarse_global_indices)
+   if (ghost_marker)
    {
       // Ghost marker
       hypre_fprintf(file, "\n");
@@ -1083,20 +1082,6 @@ hypre_ParCompGridDump( hypre_ParCompGrid *compGrid, const char* filename)
          hypre_fprintf(file, "%d ", ghost_marker[i]);
       }
       hypre_fprintf(file, "\n");
-
-      // Coarse global indices
-      for (i = hypre_ParCompGridNumOwnedNodes(compGrid); i < insert_owned_position; i++)
-      {
-         hypre_fprintf(file, "%d ", coarse_global_indices[i]);
-      }
-      for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid); i++)
-      {
-         hypre_fprintf(file, "%d ", coarse_global_indices[i]);
-      }
-      for (i = insert_owned_position; i < hypre_ParCompGridNumNodes(compGrid); i++)
-      {
-         hypre_fprintf(file, "%d ", coarse_global_indices[i]);
-      }
    }
    hypre_fprintf(file, "\n");
 
@@ -1108,7 +1093,6 @@ hypre_ParCompGridDump( hypre_ParCompGrid *compGrid, const char* filename)
 HYPRE_Int 
 hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
-   // Print u to given filename   
    FILE             *file;
    file = fopen(filename,"w");
    HYPRE_Int i;
@@ -1127,18 +1111,41 @@ hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* fil
 HYPRE_Int 
 hypre_ParCompGridGhostMarkerDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
-   // Print u to given filename   
-   FILE             *file;
-   file = fopen(filename,"w");
-   HYPRE_Int i;
-
-   // Global indices
-   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   if (hypre_ParCompGridGhostMarker(compGrid))
    {
-      hypre_fprintf(file, "%d\n", hypre_ParCompGridGhostMarker(compGrid)[i]);
+      FILE             *file;
+      file = fopen(filename,"w");
+      HYPRE_Int i;
+
+      // Global indices
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+      {
+         hypre_fprintf(file, "%d\n", hypre_ParCompGridGhostMarker(compGrid)[i]);
+      }
+
+      fclose(file);
    }
 
-   fclose(file);
+   return 0;
+}
+
+HYPRE_Int 
+hypre_ParCompGridCoarseGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename)
+{
+   if (hypre_ParCompGridCoarseGlobalIndices(compGrid))
+   {
+      FILE             *file;
+      file = fopen(filename,"w");
+      HYPRE_Int i;
+
+      // Global indices
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+      {
+         hypre_fprintf(file, "%d\n", hypre_ParCompGridCoarseGlobalIndices(compGrid)[i]);
+      }
+
+      fclose(file);
+   }
 
    return 0;
 }
@@ -1146,18 +1153,20 @@ hypre_ParCompGridGhostMarkerDump( hypre_ParCompGrid *compGrid, const char* filen
 HYPRE_Int 
 hypre_ParCompGridCoarseResidualMarkerDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
-   // Print u to given filename   
-   FILE             *file;
-   file = fopen(filename,"w");
-   HYPRE_Int i;
-
-   // Global indices
-   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   if (hypre_ParCompGridCoarseResidualMarker(compGrid))
    {
-      hypre_fprintf(file, "%d\n", hypre_ParCompGridCoarseResidualMarker(compGrid)[i]);
-   }
+      FILE             *file;
+      file = fopen(filename,"w");
+      HYPRE_Int i;
 
-   fclose(file);
+      // Global indices
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+      {
+         hypre_fprintf(file, "%d\n", hypre_ParCompGridCoarseResidualMarker(compGrid)[i]);
+      }
+
+      fclose(file);
+   }
 
    return 0;
 }
@@ -1165,7 +1174,6 @@ hypre_ParCompGridCoarseResidualMarkerDump( hypre_ParCompGrid *compGrid, const ch
 HYPRE_Int 
 hypre_ParCompGridUDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
-   // Print u to given filename   
    FILE             *file;
    file = fopen(filename,"w");
    HYPRE_Int i;
@@ -1184,7 +1192,6 @@ hypre_ParCompGridUDump( hypre_ParCompGrid *compGrid, const char* filename)
 HYPRE_Int 
 hypre_ParCompGridFDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
-   // Print u to given filename   
    FILE             *file;
    file = fopen(filename,"w");
    HYPRE_Int i;
