@@ -1854,7 +1854,7 @@ HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations 
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
 
 /* par_amgdd_cycle.c */
-HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int plot_iteration, HYPRE_Int first_iteration );
+HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int num_comp_cycles, HYPRE_Int plot_iteration, HYPRE_Int first_iteration );
 HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata );
 
 /* par_amgdd_setup.c */

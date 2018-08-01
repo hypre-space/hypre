@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #define MEASURE_TEST_COMP_RES 0
-#define DUMP_INTERMEDIATE_TEST_SOLNS 1
+#define DUMP_INTERMEDIATE_TEST_SOLNS 0
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -1324,10 +1324,6 @@ TestBoomerAMGCycle( void              *amg_vdata,
       #if DUMP_INTERMEDIATE_TEST_SOLNS
       sprintf(filename, "outputs/f%d_level%d", proc, level+1);
       hypre_ParVectorPrint(F_array[coarse_grid], filename);
-      if (my_id == 1 && coarse_grid == 1 && proc == 0)
-      {
-        printf("At 2490, F after = %e\n", hypre_VectorData(hypre_ParVectorLocalVector(F_array[coarse_grid]))[1]);
-      }
       #endif
 
 

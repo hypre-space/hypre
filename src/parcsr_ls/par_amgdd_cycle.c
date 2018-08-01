@@ -36,7 +36,7 @@ HYPRE_Int
 TestResComm(hypre_ParAMGData *amg_data);
 
 HYPRE_Int
-hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int plot_iteration, HYPRE_Int first_iteration )
+hypre_BoomerAMGDD_Cycle( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int num_comp_cycles, HYPRE_Int plot_iteration, HYPRE_Int first_iteration )
 {
 	HYPRE_Int   myid;
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -45,6 +45,11 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int p
 	hypre_ParAMGData	*amg_data = amg_vdata;
 	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
   	HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+
+   // Set the fine grid operator, left-hand side, and right-hand side
+   hypre_ParAMGDataAArray(amg_data)[0] = A;
+   hypre_ParAMGDataUArray(amg_data)[0] = u;
+   hypre_ParAMGDataFArray(amg_data)[0] = f;
 
 	// Form residual and do residual communication
 	if (!first_iteration) hypre_BoomerAMGDDResidualCommunication( amg_vdata );
