@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #define MEASURE_COMP_RES 0
-#define TEST_RES_COMM 0
+#define TEST_RES_COMM 1
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -451,6 +451,7 @@ TestResComm(hypre_ParAMGData *amg_data)
    HYPRE_Int global_test_passed;
    hypre_MPI_Allreduce(&test_passed, &global_test_passed, 1, HYPRE_MPI_INT, MPI_MIN, hypre_MPI_COMM_WORLD);
    if (myid == 0 && global_test_passed) printf("Residual communication test passed!\n");
+   else if (myid == 0 && !global_test_passed) printf("Residual communication test FAILED!\n");
 
    return 0;
 }
