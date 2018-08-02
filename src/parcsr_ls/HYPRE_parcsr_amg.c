@@ -1756,7 +1756,8 @@ HYPRE_BoomerAMGSetCpointsToKeep(HYPRE_Solver solver,
 
 HYPRE_Int 
 HYPRE_BoomerAMGDDCompGridSetup( HYPRE_Solver solver,
-                      HYPRE_Int padding     )
+                      HYPRE_Int padding,
+                      HYPRE_Int num_ghost_layers     )
 {
-   return ( hypre_BoomerAMGDDCompGridSetup( (void *) solver, padding, NULL, 0 ) );
+   return ( hypre_BoomerAMGDDCompGridSetup( (void *) solver, padding, num_ghost_layers, NULL, 0 ) );
 }

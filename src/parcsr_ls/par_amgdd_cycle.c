@@ -10,6 +10,8 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
+#define MEASURE_COMP_RES 0
+#define TEST_RES_COMM 0
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -17,6 +19,9 @@
 
 HYPRE_Int
 AddSolution( void *amg_vdata );
+
+HYPRE_Real
+GetCompositeResidual(hypre_ParCompGrid *compGrid);
 
 HYPRE_Int
 ZeroInitialGuess( void *amg_vdata );
@@ -28,7 +33,10 @@ HYPRE_Int
 UnpackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *recv_buffer, HYPRE_Int **recv_map, hypre_ParCompGrid **compGrid, HYPRE_Int current_level, HYPRE_Int num_levels );
 
 HYPRE_Int
-hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int plot_iteration, HYPRE_Int first_iteration )
+TestResComm(hypre_ParAMGData *amg_data);
+
+HYPRE_Int
+hypre_BoomerAMGDD_Cycle( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int num_comp_cycles, HYPRE_Int plot_iteration, HYPRE_Int first_iteration )
 {
 	HYPRE_Int   myid;
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -38,22 +46,53 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int num_comp_cycles, HYPRE_Int p
 	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
   	HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
 
+   // Set the fine grid operator, left-hand side, and right-hand side
+   hypre_ParAMGDataAArray(amg_data)[0] = A;
+   hypre_ParAMGDataUArray(amg_data)[0] = u;
+   hypre_ParAMGDataFArray(amg_data)[0] = f;
+
 	// Form residual and do residual communication
-	if (!first_iteration) hypre_BoomerAMGDDResidualCommunication( amg_vdata );
+   HYPRE_Int test_failed = 0;
+	if (!first_iteration) test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata );
 
 	// Set zero initial guess for all comp grids on all levels
 	ZeroInitialGuess( amg_vdata );
+
+   #if MEASURE_COMP_RES
+   HYPRE_Real *res_norm = hypre_CTAlloc(HYPRE_Real, num_comp_cycles+1, HYPRE_MEMORY_HOST);
+   HYPRE_Complex *u0 = hypre_CTAlloc(HYPRE_Complex, num_comp_cycles+1, HYPRE_MEMORY_HOST);
+   // Measure convergence of FAC cycle
+   res_norm[0] = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+   u0[0] = hypre_ParCompGridU(hypre_ParAMGDataCompGrid(amg_data)[0])[0];
+   #endif
 
 	// Do the cycles
 	for (i = 0; i < num_comp_cycles; i++)
 	{
 		hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
+
+      #if MEASURE_COMP_RES
+      // Measure convergence of FAC cycle
+      res_norm[i+1] = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+      u0[i+1] = hypre_ParCompGridU(hypre_ParAMGDataCompGrid(amg_data)[0])[0];
+      #endif
+
 	}
+
+   #if MEASURE_COMP_RES
+   FILE *file;
+   char filename[256];
+   sprintf(filename, "outputs/comp_res_proc%d.txt", myid);
+   file = fopen(filename, "w");
+   for (i = 0; i < num_comp_cycles+1; i++) fprintf(file, "%e ", res_norm[i]);
+   fprintf(file, "\n");
+   fclose(file);
+   #endif
 
 	// Update fine grid solution
 	AddSolution( amg_vdata );
 
-	return 0;
+	return test_failed;
 }
 
 HYPRE_Int
@@ -69,6 +108,27 @@ AddSolution( void *amg_vdata )
    	for (i = 0; i < num_owned_nodes; i++) u[i] += u_comp[i];
 
    	return 0;
+}
+
+HYPRE_Real
+GetCompositeResidual(hypre_ParCompGrid *compGrid)
+{
+   HYPRE_Int i,j;
+   HYPRE_Real res_norm = 0.0;
+   for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
+   {
+      if (!hypre_ParCompGridGhostMarker(compGrid)[i])
+      {
+         HYPRE_Real res = hypre_ParCompGridF(compGrid)[i];
+         for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
+         {
+            res -= hypre_ParCompGridAData(compGrid)[j] * hypre_ParCompGridU(compGrid)[ hypre_ParCompGridAColInd(compGrid)[j] ];
+         }
+         res_norm += res*res;
+      }
+   }
+
+   return sqrt(res_norm);
 }
 
 HYPRE_Int
@@ -205,9 +265,6 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       }
    }
 
-   // Copy RHS back into F_array[0]
-   hypre_ParVectorCopy(Vtemp,F_array[0]);
-
    /* Outer loop over levels:
    Start from coarsest level and work up to finest */
    for (level = num_levels-1; level > -1; level--)
@@ -273,12 +330,23 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    hypre_printf("Finished residual communication on rank %d\n", myid);
    #endif
 
+   #if TEST_RES_COMM
+   HYPRE_Int test_failed = TestResComm(amg_data);
+   #endif
+
+   // Copy RHS back into F_array[0]
+   hypre_ParVectorCopy(Vtemp,F_array[0]);
+
    // Cleanup memory
    hypre_TFree(proc_first_index, HYPRE_MEMORY_HOST);
    hypre_TFree(proc_last_index, HYPRE_MEMORY_HOST);
    hypre_TFree(global_nodes, HYPRE_MEMORY_HOST);
    
+   #if TEST_RES_COMM
+   return test_failed;
+   #else
    return 0;
+   #endif
 }
 
 HYPRE_Int
@@ -318,4 +386,72 @@ UnpackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *recv_buffer, HYPRE_Int **re
    }
 
    return 0;
+}
+
+HYPRE_Int
+TestResComm(hypre_ParAMGData *amg_data)
+{
+   // Get MPI info
+   HYPRE_Int myid, num_procs;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
+
+   // Get info from the amg data structure
+   hypre_ParCompGrid **compGrid = hypre_ParAMGDataCompGrid(amg_data);
+   HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+
+   HYPRE_Int test_failed = 0;
+
+   // For each processor and each level broadcast the residual data and global indices out and check agains the owning procs
+   HYPRE_Int proc;
+   for (proc = 0; proc < num_procs; proc++)
+   {
+      HYPRE_Int level;
+      for (level = 0; level < num_levels; level++)
+      {
+         // Broadcast the number of nodes
+         HYPRE_Int num_nodes = 0;
+         if (myid == proc) num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
+         hypre_MPI_Bcast(&num_nodes, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
+
+         // Broadcast the composite residual
+         HYPRE_Complex *comp_res;
+         if (myid == proc) comp_res = hypre_ParCompGridF(compGrid[level]);
+         else comp_res = hypre_CTAlloc(HYPRE_Complex, num_nodes, HYPRE_MEMORY_HOST);
+         hypre_MPI_Bcast(comp_res, num_nodes, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
+
+         // Broadcast the global indices
+         HYPRE_Int *global_indices;
+         if (myid == proc) global_indices = hypre_ParCompGridGlobalIndices(compGrid[level]);
+         else global_indices = hypre_CTAlloc(HYPRE_Int, num_nodes, HYPRE_MEMORY_HOST);
+         hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
+
+         // Now, each processors checks their owned residual value against the composite residual
+         HYPRE_Int i;
+         HYPRE_Int proc_first_index = hypre_ParCompGridGlobalIndices(compGrid[level])[0];
+         HYPRE_Int proc_last_index;
+         if (hypre_ParCompGridNumOwnedNodes(compGrid[level])) proc_last_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridNumOwnedNodes(compGrid[level]) - 1 ];
+         else proc_last_index = proc_first_index - 1;
+         for (i = 0; i < num_nodes; i++)
+         {
+            if (global_indices[i] <= proc_last_index && global_indices[i] >= proc_first_index)
+            {
+               if (comp_res[i] != hypre_VectorData(hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[level]))[global_indices[i] - proc_first_index] )
+               {
+                  printf("Error: on proc %d has incorrect residual at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                  test_failed = 1;
+               }
+            }
+         }
+
+         // Clean up memory
+         if (myid != proc) 
+         {
+            hypre_TFree(comp_res, HYPRE_MEMORY_HOST);
+            hypre_TFree(global_indices, HYPRE_MEMORY_HOST);
+         }
+      }
+   }
+
+   return test_failed;
 }
