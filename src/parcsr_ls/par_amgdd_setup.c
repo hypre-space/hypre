@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
@@ -516,15 +516,20 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int nu
    }
 
    #if DEBUG_COMP_GRID
-   TestCompGrids1(compGrid, num_levels, padding, num_ghost_layers);
+   HYPRE_Int test_failed = 0;
+   HYPRE_Int error_code;
+   error_code = TestCompGrids1(compGrid, num_levels, padding, num_ghost_layers);
+   if (error_code) test_failed = 1;
    #endif
 
    // Finalize the compGrids
    hypre_ParCompGridFinalize(compGrid, num_levels);
 
    #if DEBUG_COMP_GRID
-   TestCompGrids2(compGrid, num_levels);
-   TestCompGrids3(compGrid, num_levels, hypre_ParAMGDataAArray(amg_data), hypre_ParAMGDataPArray(amg_data), hypre_ParAMGDataFArray(amg_data));
+   error_code = TestCompGrids2(compGrid, num_levels);
+   if (error_code) test_failed = 1;
+   error_code = TestCompGrids3(compGrid, num_levels, hypre_ParAMGDataAArray(amg_data), hypre_ParAMGDataPArray(amg_data), hypre_ParAMGDataFArray(amg_data));
+   if (error_code) test_failed = 1;
    #endif
 
    #if DEBUG_COMP_GRID == 2
@@ -581,7 +586,11 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int nu
    hypre_TFree(proc_first_index, HYPRE_MEMORY_HOST);
    hypre_TFree(proc_last_index, HYPRE_MEMORY_HOST);
    
+   #if DEBUG_COMP_GRID
+   return test_failed;
+   #else
    return 0;
+   #endif
 }  
 
 
@@ -1334,6 +1343,7 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
 {
    HYPRE_Int         i,index,coarse_grid_index;
    hypre_ParCompMatrixRow *A_row = hypre_ParCompGridARows(compGrid)[node];
+   HYPRE_Int error_code = 0;
 
    // Look at neighbors
    for (i = 0; i < hypre_ParCompMatrixRowSize(A_row); i++)
@@ -1349,7 +1359,7 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
          {
             add_flag[index] = m;
             // Recursively call to find distance m-1 neighbors of index
-            if (m-1 > 0) RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, add_flag_coarse, need_coarse_info, nodes_to_add, padding);
+            if (m-1 > 0) error_code = RecursivelyBuildPsiComposite(index, m-1, compGrid, add_flag, add_flag_coarse, need_coarse_info, nodes_to_add, padding);
          }
          // If m = 1, we won't do another recursive call, so make sure to flag the coarse grid here if applicable
          if (need_coarse_info && m == 1)
@@ -1363,7 +1373,11 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
             }
          }
       }
-      else hypre_printf("Error! Ran into a -1 index when building Psi_c\n");
+      else
+      {
+         error_code = 1; 
+         hypre_printf("Error! Ran into a -1 index when building Psi_c\n");
+      }
    }
 
    // Flag this node on the next coarsest level if applicable
@@ -1378,7 +1392,7 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
       }
    }
 
-   return 0;
+   return error_code;
 }
 
 HYPRE_Int
@@ -1700,6 +1714,8 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int pad
    HYPRE_Int            level,i;
    HYPRE_Int            need_coarse_info, nodes_to_add = 1;
    HYPRE_Int            **add_flag = hypre_CTAlloc( HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST );
+   HYPRE_Int            test_failed = 0;
+   HYPRE_Int            error_code;
 
    // Allocate add_flag on each level and mark the owned dofs on the finest grid
    for (level = 0; level < num_levels; level++) add_flag[level] = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST);
@@ -1724,8 +1740,9 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int pad
             if (add_flag[level][i] == padding + 1)
             {
                // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
-               if (need_coarse_info) RecursivelyBuildPsiComposite(i, padding, compGrid[level], add_flag[level], add_flag[level+1], need_coarse_info, &nodes_to_add, padding);
-               else RecursivelyBuildPsiComposite(i, padding, compGrid[level], add_flag[level], NULL, need_coarse_info, &nodes_to_add, padding);
+               if (need_coarse_info) error_code = RecursivelyBuildPsiComposite(i, padding, compGrid[level], add_flag[level], add_flag[level+1], need_coarse_info, &nodes_to_add, padding);
+               else error_code = RecursivelyBuildPsiComposite(i, padding, compGrid[level], add_flag[level], NULL, need_coarse_info, &nodes_to_add, padding);
+               if (error_code) test_failed = 1;
             }
          }
 
@@ -1738,13 +1755,18 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int pad
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
          {
             // Recursively add the region of ghost nodes (do not add any coarse nodes underneath)
-            if (add_flag[level][i] == num_ghost_layers + 1) RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
+            if (add_flag[level][i] == num_ghost_layers + 1) error_code = RecursivelyBuildPsiComposite(i, num_ghost_layers, compGrid[level], add_flag[level], NULL, 0, NULL, 0);
+            if (error_code) test_failed = 1;
          }
       }
       else break;
 
       // Check whether add_flag has any zeros (zeros indicate that we have extra nodes in the comp grid that don't belong)
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) if (add_flag[level][i] == 0) printf("Error: extra nodes present in comp grid\n");
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) if (add_flag[level][i] == 0) 
+      {
+         test_failed = 1;
+         printf("Error: extra nodes present in comp grid\n");
+      }
 
       // Check to make sure we have the correct identification of ghost nodes
       if (level != num_levels-1)
@@ -1752,14 +1774,20 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int pad
          for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) 
          {
             if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridGhostMarker(compGrid[level])[i] == 0) 
+            {
+               test_failed = 1;
                printf("Error: dof that should have been marked as ghost was marked as real\n");
+            }
             if (add_flag[level][i] > num_ghost_layers && hypre_ParCompGridGhostMarker(compGrid[level])[i] == 1) 
+            {
+               test_failed = 1;
                printf("Error: dof that should have been marked as real was marked as ghost\n");
+            }
          }
       }
    }
 
-   return 0;
+   return test_failed;
 }
 
 HYPRE_Int
@@ -1771,6 +1799,7 @@ TestCompGrids2(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels)
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    HYPRE_Int            level,i,j;
+   HYPRE_Int test_failed = 0;
    for (level = 0; level < num_levels-1; level++)
    { 
       HYPRE_Int *needs_restrict = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level+1]), HYPRE_MEMORY_HOST);
@@ -1813,24 +1842,32 @@ TestCompGrids2(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels)
          if (needs_restrict[i])
          {
             if (hypre_ParCompGridCoarseResidualMarker(compGrid[level+1])[i] != 2)
+            {
+               test_failed = 1;
                printf("Error: Need residual to be restricted at a location where it is not possible: proc %d, level %d, global index %d\n", myid, level+1, hypre_ParCompGridGlobalIndices(compGrid[level+1])[i]);
+            }
          }
       }
       hypre_TFree(needs_restrict, HYPRE_MEMORY_HOST);
    }
 
-   return 0;
+   return test_failed;
 }
 
 HYPRE_Int
 TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRMatrix **A, hypre_ParCSRMatrix **P, hypre_ParVector **F)
 {
+   // TEST 3: See whether the dofs in the composite grid have the correct info.
+   // Each processor in turn will broadcast out the info associate with its composite grids on each level.
+   // The processors owning the original info will check to make sure their info matches the comp grid info that was broadcasted out.
+   // This occurs for the matrix info (row pointer, column indices, and data for A and P) and the initial right-hand side 
+   
    // Get MPI info
    HYPRE_Int myid, num_procs;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
-   HYPRE_Int test_passed = 1;
+   HYPRE_Int test_failed = 0;
 
    // For each processor and each level broadcast the residual data and global indices out and check agains the owning procs
    HYPRE_Int proc;
@@ -1950,7 +1987,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                if (comp_res[i] != hypre_VectorData(hypre_ParVectorLocalVector(F[level]))[global_indices[i] - proc_first_index] )
                {
                   printf("Error: proc %d has incorrect residual at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
-                  test_passed = 0;
+                  test_failed = 1;
                }
                HYPRE_Int row_size;
                HYPRE_Int *row_col_ind;
@@ -1959,7 +1996,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                if (row_size != A_rowPtr[i+1] - A_rowPtr[i])
                {
                   printf("Error: proc %d has incorrect row size at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
-                  test_passed = 0;
+                  test_failed = 1;
                }
                HYPRE_Int j;
                for (j = A_rowPtr[i]; j < A_rowPtr[i+1]; j++)
@@ -1978,7 +2015,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                         else if (global_indices[index] > row_col_ind[j - A_rowPtr[i]]) right = index - 1;
                         else
                         {
-                           test_passed = 0;
+                           test_failed = 1;
                            printf("Error: proc %d has -1 col ind in A where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                         }
                      }
@@ -1991,7 +2028,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                         else if (global_indices[index] > row_col_ind[j - A_rowPtr[i]]) right = index - 1;
                         else
                         {
-                           test_passed = 0;
+                           test_failed = 1;
                            printf("Error: proc %d has -1 col ind in A where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                         }
                      }
@@ -1999,12 +2036,12 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                   else if (global_indices[ A_colInd[j] ] != row_col_ind[j - A_rowPtr[i]])
                   {
                      printf("Error: proc %d has incorrect A col index at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
-                     test_passed = 0;
+                     test_failed = 1;
                   }
                   if (A_data[j] != row_values[j - A_rowPtr[i]])
                   {
                      printf("Error: proc %d has incorrect A data at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
-                     test_passed = 0;
+                     test_failed = 1;
                   }
                }
                hypre_ParCSRMatrixRestoreRow( A[level], i, &row_size, &row_col_ind, &row_values );
@@ -2014,7 +2051,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                   if (row_size != P_rowPtr[i+1] - P_rowPtr[i])
                   {
                      printf("Error: proc %d has incorrect row size at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
-                     test_passed = 0;
+                     test_failed = 1;
                   }
                   for (j = P_rowPtr[i]; j < P_rowPtr[i+1]; j++)
                   {
@@ -2032,7 +2069,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                            else if (coarse_global_indices[index] > row_col_ind[j - P_rowPtr[i]]) right = index - 1;
                            else
                            {
-                              test_passed = 0;
+                              test_failed = 1;
                               printf("Error: proc %d has -1 col ind in P where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                            }
                         }
@@ -2045,7 +2082,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                            else if (coarse_global_indices[index] > row_col_ind[j - P_rowPtr[i]]) right = index - 1;
                            else
                            {
-                              test_passed = 0;
+                              test_failed = 1;
                               printf("Error: proc %d has -1 col ind in P where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                            }
                         }
@@ -2053,12 +2090,12 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                      else if (coarse_global_indices[ P_colInd[j] ] != row_col_ind[j - P_rowPtr[i]])
                      {
                         printf("Error: proc %d has incorrect P col index at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
-                        test_passed = 0;
+                        test_failed = 1;
                      }
                      if (P_data[j] != row_values[j - P_rowPtr[i]])
                      {
                         printf("Error: proc %d has incorrect P data at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
-                        test_passed = 0;
+                        test_failed = 1;
                      }
                   }
                   hypre_ParCSRMatrixRestoreRow( P[level], i, &row_size, &row_col_ind, &row_values );
@@ -2085,10 +2122,5 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
       }
    }
 
-   HYPRE_Int global_test_passed;
-   hypre_MPI_Allreduce(&test_passed, &global_test_passed, 1, HYPRE_MPI_INT, MPI_MIN, hypre_MPI_COMM_WORLD);
-   if (myid == 0 && global_test_passed) printf("Comp grid info test passed!\n");
-   else if (myid == 0 && !global_test_passed) printf("Comp grid info test FAILED!\n");
-
-   return 0;
+   return test_failed;
 }

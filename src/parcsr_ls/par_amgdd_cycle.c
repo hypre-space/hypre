@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #define MEASURE_COMP_RES 0
-#define TEST_RES_COMM 1
+#define TEST_RES_COMM 0
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -52,7 +52,8 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector
    hypre_ParAMGDataFArray(amg_data)[0] = f;
 
 	// Form residual and do residual communication
-	if (!first_iteration) hypre_BoomerAMGDDResidualCommunication( amg_vdata );
+   HYPRE_Int test_failed = 0;
+	if (!first_iteration) test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata );
 
 	// Set zero initial guess for all comp grids on all levels
 	ZeroInitialGuess( amg_vdata );
@@ -91,7 +92,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector
 	// Update fine grid solution
 	AddSolution( amg_vdata );
 
-	return 0;
+	return test_failed;
 }
 
 HYPRE_Int
@@ -330,7 +331,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    #endif
 
    #if TEST_RES_COMM
-   TestResComm(amg_data);
+   HYPRE_Int test_failed = TestResComm(amg_data);
    #endif
 
    // Copy RHS back into F_array[0]
@@ -341,7 +342,11 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    hypre_TFree(proc_last_index, HYPRE_MEMORY_HOST);
    hypre_TFree(global_nodes, HYPRE_MEMORY_HOST);
    
+   #if TEST_RES_COMM
+   return test_failed;
+   #else
    return 0;
+   #endif
 }
 
 HYPRE_Int
@@ -395,7 +400,7 @@ TestResComm(hypre_ParAMGData *amg_data)
    hypre_ParCompGrid **compGrid = hypre_ParAMGDataCompGrid(amg_data);
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
 
-   HYPRE_Int test_passed = 1;
+   HYPRE_Int test_failed = 0;
 
    // For each processor and each level broadcast the residual data and global indices out and check agains the owning procs
    HYPRE_Int proc;
@@ -434,7 +439,7 @@ TestResComm(hypre_ParAMGData *amg_data)
                if (comp_res[i] != hypre_VectorData(hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[level]))[global_indices[i] - proc_first_index] )
                {
                   printf("Error: on proc %d has incorrect residual at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
-                  test_passed = 0;
+                  test_failed = 1;
                }
             }
          }
@@ -448,10 +453,5 @@ TestResComm(hypre_ParAMGData *amg_data)
       }
    }
 
-   HYPRE_Int global_test_passed;
-   hypre_MPI_Allreduce(&test_passed, &global_test_passed, 1, HYPRE_MPI_INT, MPI_MIN, hypre_MPI_COMM_WORLD);
-   if (myid == 0 && global_test_passed) printf("Residual communication test passed!\n");
-   else if (myid == 0 && !global_test_passed) printf("Residual communication test FAILED!\n");
-
-   return 0;
+   return test_failed;
 }
