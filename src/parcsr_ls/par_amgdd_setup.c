@@ -519,7 +519,11 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int nu
    HYPRE_Int test_failed = 0;
    HYPRE_Int error_code;
    error_code = TestCompGrids1(compGrid, num_levels, padding, num_ghost_layers);
-   if (error_code) test_failed = 1;
+   if (error_code)
+   {
+      printf("TestCompGrids1 failed!\n");
+      test_failed = 1;
+   }
    #endif
 
    // Finalize the compGrids
@@ -527,9 +531,17 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int nu
 
    #if DEBUG_COMP_GRID
    error_code = TestCompGrids2(compGrid, num_levels);
-   if (error_code) test_failed = 1;
+   if (error_code)
+   {
+      printf("TestCompGrids2 failed!\n");
+      test_failed = 1;
+   }
    error_code = TestCompGrids3(compGrid, num_levels, hypre_ParAMGDataAArray(amg_data), hypre_ParAMGDataPArray(amg_data), hypre_ParAMGDataFArray(amg_data));
-   if (error_code) test_failed = 1;
+   if (error_code)
+   {
+      printf("TestCompGrids3 failed!\n");
+      test_failed = 1;
+   }
    #endif
 
    #if DEBUG_COMP_GRID == 2
@@ -1376,7 +1388,7 @@ RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
       else
       {
          error_code = 1; 
-         hypre_printf("Error! Ran into a -1 index when building Psi_c\n");
+         // hypre_printf("Error! Ran into a -1 index when building Psi_c\n");
       }
    }
 
@@ -1765,7 +1777,7 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int pad
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) if (add_flag[level][i] == 0) 
       {
          test_failed = 1;
-         printf("Error: extra nodes present in comp grid\n");
+         // printf("Error: extra nodes present in comp grid\n");
       }
 
       // Check to make sure we have the correct identification of ghost nodes
@@ -1776,12 +1788,12 @@ TestCompGrids1(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int pad
             if (add_flag[level][i] < num_ghost_layers + 1 && hypre_ParCompGridGhostMarker(compGrid[level])[i] == 0) 
             {
                test_failed = 1;
-               printf("Error: dof that should have been marked as ghost was marked as real\n");
+               // printf("Error: dof that should have been marked as ghost was marked as real\n");
             }
             if (add_flag[level][i] > num_ghost_layers && hypre_ParCompGridGhostMarker(compGrid[level])[i] == 1) 
             {
                test_failed = 1;
-               printf("Error: dof that should have been marked as real was marked as ghost\n");
+               // printf("Error: dof that should have been marked as real was marked as ghost\n");
             }
          }
       }
@@ -1844,7 +1856,7 @@ TestCompGrids2(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels)
             if (hypre_ParCompGridCoarseResidualMarker(compGrid[level+1])[i] != 2)
             {
                test_failed = 1;
-               printf("Error: Need residual to be restricted at a location where it is not possible: proc %d, level %d, global index %d\n", myid, level+1, hypre_ParCompGridGlobalIndices(compGrid[level+1])[i]);
+               // printf("Error: Need residual to be restricted at a location where it is not possible: proc %d, level %d, global index %d\n", myid, level+1, hypre_ParCompGridGlobalIndices(compGrid[level+1])[i]);
             }
          }
       }
@@ -1986,7 +1998,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
             {
                if (comp_res[i] != hypre_VectorData(hypre_ParVectorLocalVector(F[level]))[global_indices[i] - proc_first_index] )
                {
-                  printf("Error: proc %d has incorrect residual at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                  // printf("Error: proc %d has incorrect residual at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                   test_failed = 1;
                }
                HYPRE_Int row_size;
@@ -1995,7 +2007,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                hypre_ParCSRMatrixGetRow( A[level], global_indices[i], &row_size, &row_col_ind, &row_values );
                if (row_size != A_rowPtr[i+1] - A_rowPtr[i])
                {
-                  printf("Error: proc %d has incorrect row size at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                  // printf("Error: proc %d has incorrect row size at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                   test_failed = 1;
                }
                HYPRE_Int j;
@@ -2016,7 +2028,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                         else
                         {
                            test_failed = 1;
-                           printf("Error: proc %d has -1 col ind in A where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                           // printf("Error: proc %d has -1 col ind in A where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                         }
                      }
                      left = num_owned_nodes;
@@ -2029,18 +2041,18 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                         else
                         {
                            test_failed = 1;
-                           printf("Error: proc %d has -1 col ind in A where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                           // printf("Error: proc %d has -1 col ind in A where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                         }
                      }
                   }
                   else if (global_indices[ A_colInd[j] ] != row_col_ind[j - A_rowPtr[i]])
                   {
-                     printf("Error: proc %d has incorrect A col index at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                     // printf("Error: proc %d has incorrect A col index at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                      test_failed = 1;
                   }
                   if (A_data[j] != row_values[j - A_rowPtr[i]])
                   {
-                     printf("Error: proc %d has incorrect A data at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                     // printf("Error: proc %d has incorrect A data at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                      test_failed = 1;
                   }
                }
@@ -2050,7 +2062,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                   hypre_ParCSRMatrixGetRow( P[level], global_indices[i], &row_size, &row_col_ind, &row_values );
                   if (row_size != P_rowPtr[i+1] - P_rowPtr[i])
                   {
-                     printf("Error: proc %d has incorrect row size at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                     // printf("Error: proc %d has incorrect row size at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                      test_failed = 1;
                   }
                   for (j = P_rowPtr[i]; j < P_rowPtr[i+1]; j++)
@@ -2070,7 +2082,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                            else
                            {
                               test_failed = 1;
-                              printf("Error: proc %d has -1 col ind in P where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                              // printf("Error: proc %d has -1 col ind in P where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                            }
                         }
                         left = num_coarse_owned_nodes;
@@ -2083,18 +2095,18 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
                            else
                            {
                               test_failed = 1;
-                              printf("Error: proc %d has -1 col ind in P where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                              // printf("Error: proc %d has -1 col ind in P where it should not at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                            }
                         }
                      }
                      else if (coarse_global_indices[ P_colInd[j] ] != row_col_ind[j - P_rowPtr[i]])
                      {
-                        printf("Error: proc %d has incorrect P col index at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                        // printf("Error: proc %d has incorrect P col index at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                         test_failed = 1;
                      }
                      if (P_data[j] != row_values[j - P_rowPtr[i]])
                      {
-                        printf("Error: proc %d has incorrect P data at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
+                        // printf("Error: proc %d has incorrect P data at global index %d on level %d, checked by rank %d\n", proc, global_indices[i], level, myid);
                         test_failed = 1;
                      }
                   }
