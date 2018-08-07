@@ -30,6 +30,8 @@ typedef struct hypre_ParILUData_struct
    HYPRE_Int            maxRowNnz;
    HYPRE_Int            *CF_marker_array;
    HYPRE_Int            *perm;
+   HYPRE_Int            *qperm;
+   HYPRE_Real           tol_ddPQ;
    hypre_ParVector      *F;
    hypre_ParVector      *U;
    hypre_ParVector      *residual;
@@ -46,6 +48,7 @@ typedef struct hypre_ParILUData_struct
    
    HYPRE_Int            ilu_type;
    HYPRE_Int            nLU;
+   HYPRE_Int            nI;
    
    /* used when schur block is formed */
    HYPRE_Int            *u_end;
@@ -99,6 +102,9 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataMaxRowNnz(ilu_data)                    ((ilu_data) -> maxRowNnz)
 #define hypre_ParILUDataCFMarkerArray(ilu_data)                ((ilu_data) -> CF_marker_array)
 #define hypre_ParILUDataPerm(ilu_data)                         ((ilu_data) -> perm)
+#define hypre_ParILUDataPPerm(ilu_data)                        ((ilu_data) -> perm)
+#define hypre_ParILUDataQPerm(ilu_data)                        ((ilu_data) -> qperm)
+#define hypre_ParILUDataTolDDPQ(ilu_data)                      ((ilu_data) -> tol_ddPQ)
 #define hypre_ParILUDataF(ilu_data)                            ((ilu_data) -> F)
 #define hypre_ParILUDataU(ilu_data)                            ((ilu_data) -> U)
 #define hypre_ParILUDataResidual(ilu_data)                     ((ilu_data) -> residual)
@@ -113,6 +119,7 @@ typedef struct hypre_ParILUData_struct
 #define hypre_ParILUDataMaxIter(ilu_data)                      ((ilu_data) -> max_iter)
 #define hypre_ParILUDataIluType(ilu_data)                      ((ilu_data) -> ilu_type)
 #define hypre_ParILUDataNLU(ilu_data)                          ((ilu_data) -> nLU)
+#define hypre_ParILUDataNI(ilu_data)                           ((ilu_data) -> nI)
 #define hypre_ParILUDataUEnd(ilu_data)                         ((ilu_data) -> u_end)
 #define hypre_ParILUDataUTemp(ilu_data)                        ((ilu_data) -> Utemp)
 #define hypre_ParILUDataFTemp(ilu_data)                        ((ilu_data) -> Ftemp)
