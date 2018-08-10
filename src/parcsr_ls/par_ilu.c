@@ -171,7 +171,7 @@ hypre_ILUDestroy( void *data )
   if(ilu_data -> schur_solver)
   {
      switch(ilu_data -> ilu_type){
-      case 10: case 11: 
+      case 10: case 11: case 40: case 41:
          HYPRE_ParCSRGMRESDestroy(ilu_data -> schur_solver); //GMRES for Schur
          break;
       case 20: case 21:
@@ -185,7 +185,7 @@ hypre_ILUDestroy( void *data )
   if(ilu_data -> schur_precond)
   {
      switch(ilu_data -> ilu_type){
-      case 10: case 11: 
+      case 10: case 11: case 40: case 41:
          HYPRE_ILUDestroy(ilu_data -> schur_precond); //ILU as precond for Schur
          break;
       default:
@@ -314,7 +314,7 @@ hypre_ILUSetType( void *ilu_vdata, HYPRE_Int ilu_type )
          hypre_ParILUDataSchurMRMaxRowNnz(ilu_data)            = 200;
          hypre_ParILUDataSchurMRTol(ilu_data)                  = 1.0e-09;
          break;
-      case 10: case 11:
+      case 10: case 11: case 40: case 41: 
          /* default data for schur solver */
          hypre_ParILUDataSchurGMRESKDim(ilu_data)              = 5;
          hypre_ParILUDataSchurGMRESTol(ilu_data)               = 1.0e-09;
@@ -392,7 +392,7 @@ hypre_ILUSetSchurSolverMaxIter( void *ilu_vdata, HYPRE_Int ss_max_iter )
    hypre_ParILUData   *ilu_data = (hypre_ParILUData*) ilu_vdata;
    switch(hypre_ParILUDataIluType(ilu_data))
    {
-      case 10: case 11:
+      case 10: case 11: case 40: case 41:
          /* GMRES 
           * To avoid restart, GMRES kDim is equal to max num iter
           */
@@ -690,6 +690,16 @@ hypre_ILUWriteSolverParams(void *ilu_vdata)
          break;
       case 31: 
               hypre_printf("RAS with ILUT \n");
+              hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
+              hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
+              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         break;
+      case 40:
+              hypre_printf("ddPQ-ILU-GMRES with ILU(%d) \n", (ilu_data -> lfil));
+              hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
+         break;
+      case 41: 
+              hypre_printf("ddPQ-ILU-GMRES with ILUT \n");
               hypre_printf("drop tolerance for B = %e, E&F = %e, S = %e \n", hypre_ParILUDataDroptol(ilu_data)[0],hypre_ParILUDataDroptol(ilu_data)[1],hypre_ParILUDataDroptol(ilu_data)[2]);
               hypre_printf("Max nnz per row = %d \n", (ilu_data -> maxRowNnz));
               hypre_printf("Operator Complexity (Fill factor) = %f \n", (ilu_data -> operator_complexity));
@@ -1081,7 +1091,7 @@ hypre_ILUMaxRabs(HYPRE_Real *array_data, HYPRE_Int *array_j, HYPRE_Int start, HY
       for(i = start ; i < end ; i ++)
       {
          col = rperm[array_j[i]];
-         if(col < 0)
+         if(col > nLU)
          {
             /* this old column is in new external part */
             continue;
@@ -1180,7 +1190,7 @@ hypre_ILUGetPermddPQPre(HYPRE_Int n, HYPRE_Int nLU, HYPRE_Int *A_diag_i, HYPRE_I
       if(weight[ii] > gtol)
       {
          weight[nB_pre] /= (HYPRE_Real)(jnnz[ii]);
-         pperm_pre[nB_pre] = rperm[ii];
+         pperm_pre[nB_pre] = perm[ii];
          qperm_pre[nB_pre++] = A_diag_j[jcol[ii]];
       }
    }
@@ -1228,7 +1238,7 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
    /* 1: Setup and create memory
     */
    
-   pperm             = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   pperm             = NULL;
    qperm             = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    rpperm            = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
    rqperm            = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
@@ -1246,16 +1256,10 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
    /* build reverse permutation array 
     * rperm[old] = new
     */ 
-   for(i = 0 ; i < nLU ; i ++)
+   for(i = 0 ; i < n ; i ++)
    {
       rpperm[pperm[i]] = i;
    }
-   for(i = nLU ; i < n ; i ++)
-   {
-      rpperm[pperm[i]] = -1;
-   }
-   
-   hypre_TMemcpy(rqperm,rpperm,HYPRE_Int,n,HYPRE_MEMORY_HOST,HYPRE_MEMORY_HOST);
    
    /* build place holder for pre selection pairs */
    pperm_pre = hypre_TAlloc(HYPRE_Int, nLU, HYPRE_MEMORY_HOST);
@@ -1268,13 +1272,14 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
     * Greedy selection
     */
    
-   /* perm[new] = old */
+   /* rperm[old] = new */
    for(i = 0 ; i < nLU ; i ++)
    {
-      pperm[i] = -1;
+      rpperm[pperm[i]] = -1;
    }
    
-   hypre_TMemcpy( qperm, pperm, HYPRE_Int, nLU, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy( rqperm, rpperm, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy( qperm, pperm, HYPRE_Int, n, HYPRE_MEMORY_HOST, HYPRE_MEMORY_HOST);
    
    /* we sort from small to large, so we need to go from back to start 
     * we only need nB_pre to start the loop, after that we could use it for size of B
@@ -1285,10 +1290,10 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
       jcol = qperm_pre[i];
       
       /* this col is not yet taken */
-      if(rqperm[jcol] >= 0)
+      if(rqperm[jcol] < 0)
       {
-         rqperm[jcol] = -1;
-         rpperm[irow] = -1;
+         rpperm[irow] = nB_pre;
+         rqperm[jcol] = nB_pre;
          pperm[nB_pre] = irow;
          qperm[nB_pre++] = jcol;
       }
@@ -1301,7 +1306,7 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
    nLU = nB_pre;
    for(i = 0 ; i < n ; i ++)
    {
-      if(rpperm[i] >= 0)
+      if(rpperm[i] < 0)
       {
          pperm[nB_pre++] = i;
       }
@@ -1309,7 +1314,7 @@ hypre_ILUGetPermddPQ(hypre_ParCSRMatrix *A, HYPRE_Int **io_pperm, HYPRE_Int **io
    nB_pre = nLU;
    for(i = 0 ; i < n ; i ++)
    {
-      if(rqperm[i] >= 0)
+      if(rqperm[i] < 0)
       {
          qperm[nB_pre++] = i;
       }
@@ -1399,7 +1404,7 @@ hypre_ILUGetPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
    
    /* set out values */
    *nLU = first;
-   if(*perm != NULL) hypre_TFree(*perm,HYPRE_MEMORY_HOST);
+   if((*perm) != NULL) hypre_TFree(*perm,HYPRE_MEMORY_HOST);
    *perm = temp_perm;
    
    hypre_TFree(marker, HYPRE_MEMORY_HOST);

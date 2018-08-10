@@ -212,7 +212,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    matA = A;
    F_array = f;
    U_array = u;
-
+   
    // create perm arary if necessary
    if(perm == NULL)
    {
@@ -228,10 +228,6 @@ hypre_ILUSetup( void               *ilu_vdata,
             hypre_ILUGetPerm(matA, &perm, &nLU);
             break;
       }
-   }
-   else
-   {
-      nLU = hypre_ParILUDataNLU(ilu_data);
    }
    m = n - nLU;
    /* factorization */
@@ -253,9 +249,9 @@ hypre_ILUSetup( void               *ilu_vdata,
          break;
       case 31: hypre_ILUSetupILUTRAS(matA, max_row_elmts, droptol, perm, nLU, &matL, &matD, &matU); //RAS + hypre_ilut()
          break;
-      case 40: hypre_ILUSetupILUK(matA, fill_level, perm, qperm, nLU, nI, &matL, &matD, &matU, &matS, &u_end); //ARMS + hypre_iluk()
+      case 40: hypre_ILUSetupILUK(matA, fill_level, perm, qperm, nLU, nI, &matL, &matD, &matU, &matS, &u_end); //ddPQ + GMRES + hypre_iluk()
          break;
-      case 41: hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, qperm, nLU, nI, &matL, &matD, &matU, &matS, &u_end); //ARMS + hypre_ilut()
+      case 41: hypre_ILUSetupILUT(matA, max_row_elmts, droptol, perm, qperm, nLU, nI, &matL, &matD, &matU, &matS, &u_end); //ddPQ + GMRES + hypre_ilut()
          break;
       default: hypre_ILUSetupILU0(matA, perm, perm, n, n, &matL, &matD, &matU, &matS, &u_end);//BJ + hypre_ilu0()
          break;
@@ -263,7 +259,7 @@ hypre_ILUSetup( void               *ilu_vdata,
    /* setup Schur solver */
    switch(ilu_type)
    {
-      case 10: case 11: 
+      case 10: case 11: case 40: case 41:
          if(matS)
          {
             /* setup GMRES parameters */
@@ -282,8 +278,8 @@ hypre_ILUSetup( void               *ilu_vdata,
             HYPRE_ILUCreate               (&schur_precond);    
             HYPRE_ILUSetType              (schur_precond, (ilu_data -> sp_ilu_type));
             HYPRE_ILUSetLevelOfFill       (schur_precond, (ilu_data -> sp_ilu_lfil));
-            HYPRE_ILUSetMaxNnzPerRow      (schur_precond,(ilu_data -> sp_ilu_max_row_nnz));
-            HYPRE_ILUSetDropThresholdArray(schur_precond,(ilu_data -> sp_ilu_droptol));
+            HYPRE_ILUSetMaxNnzPerRow      (schur_precond, (ilu_data -> sp_ilu_max_row_nnz));
+            HYPRE_ILUSetDropThresholdArray(schur_precond, (ilu_data -> sp_ilu_droptol));
             hypre_ILUSetOwnDropThreshold  (schur_precond, 0);/* using exist droptol */
             HYPRE_ILUSetPrintLevel        (schur_precond, (ilu_data -> sp_print_level));
             HYPRE_ILUSetMaxIter           (schur_precond, (ilu_data -> sp_max_iter));
@@ -416,7 +412,7 @@ hypre_ILUSetup( void               *ilu_vdata,
       size_C -= hypre_ParCSRMatrixGlobalNumRows(matS);
       switch(ilu_type)
       {
-         case 10: case 11:
+         case 10: case 11: case 40: case 41:
             /* now we need to compute the preoconditioner */
             schur_precond_ilu = (hypre_ParILUData*) (ilu_data -> schur_precond);
             /* borrow i for local nnz of S */

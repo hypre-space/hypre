@@ -559,6 +559,17 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                }
             }
          }
+         else if (hypre_ParAMGDataSmoothType(amg_data) == 5)
+         {
+            for (i=0; i < smooth_num_levels; i++)
+            {
+               if (smoother[i]) 
+               {
+                  HYPRE_ILUDestroy(smoother[i]);
+                  smoother[i] = NULL;
+               }
+            }
+         }
          else if (hypre_ParAMGDataSmoothType(amg_data) == 6)
          {
             for (i=0; i < smooth_num_levels; i++)
@@ -2812,10 +2823,29 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
            HYPRE_EuclidSetParamsFromFile(smoother[j],euclidfile); 
         HYPRE_EuclidSetLevel(smoother[j],eu_level); 
         if (eu_bj)
-           HYPRE_EuclidSetBJ(smoother[j],eu_bj); 
+           HYPRE_EuclidSetBJ(smoother[j],eu_bj);
         if (eu_sparse_A)
            HYPRE_EuclidSetSparseA(smoother[j],eu_sparse_A); 
         HYPRE_EuclidSetup(smoother[j],
+                          (HYPRE_ParCSRMatrix) A_array[j],
+                          (HYPRE_ParVector) F_array[j],
+                          (HYPRE_ParVector) U_array[j]); 
+     }
+     else if ((smooth_type == 5 || smooth_type == 15) && smooth_num_levels > j)
+     {
+        HYPRE_ILUCreate( &smoother[j]);
+        if (eu_bj)
+        {
+           HYPRE_ILUSetType(smoother[j],0);
+           HYPRE_ILUSetMaxIter(smoother[j],2);
+        }
+        else
+        {
+           HYPRE_ILUSetType(smoother[j],30);
+           HYPRE_ILUSetMaxIter(smoother[j],1);
+        }
+        HYPRE_ILUSetLevelOfFill(smoother[j],eu_level); 
+        HYPRE_ILUSetup(smoother[j],
                           (HYPRE_ParCSRMatrix) A_array[j],
                           (HYPRE_ParVector) F_array[j],
                           (HYPRE_ParVector) U_array[j]); 

@@ -896,6 +896,7 @@ HYPRE_Int HYPRE_BoomerAMGSetChebyEigEst (HYPRE_Solver solver,
  * 8 & ParaSails & HYPRE\_BoomerAMGSetSym, HYPRE\_BoomerAMGSetLevel, \\
  *   &  &  HYPRE\_BoomerAMGSetFilter, HYPRE\_BoomerAMGSetThreshold \\
  * 9 & Euclid & HYPRE\_BoomerAMGSetEuclidFile \\
+ * 5 & ParILUK & HYPRE_ILUSetLevelOfFill & HYPRE_ILUSetType \\
  * \hline
  * \end{tabular}
  *

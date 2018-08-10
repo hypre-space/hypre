@@ -38,6 +38,7 @@ hypre_ILUSolve( void               *ilu_vdata,
    /* get matrices */
    HYPRE_Int            ilu_type       = hypre_ParILUDataIluType(ilu_data);
    HYPRE_Int            *perm          = hypre_ParILUDataPerm(ilu_data);
+   HYPRE_Int            *qperm         = hypre_ParILUDataQPerm(ilu_data);
    hypre_ParCSRMatrix   *matA          = hypre_ParILUDataMatA(ilu_data);
    hypre_ParCSRMatrix   *matL          = hypre_ParILUDataMatL(ilu_data);
    HYPRE_Real           *matD          = hypre_ParILUDataMatD(ilu_data);   
@@ -217,7 +218,7 @@ hypre_ILUSolve( void               *ilu_vdata,
          hypre_ILUSolveLU(matA, f, u, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
          break;
       case 10: case 11: 
-         hypre_ILUSolveSchurGMRES(matA, f, u, perm, nLU, matL, matD, matU, matS, 
+         hypre_ILUSolveSchurGMRES(matA, f, u, perm, perm, nLU, matL, matD, matU, matS, 
                            Utemp, Ftemp, schur_solver, schur_precond, rhs, x, u_end); //GMRES
          break;
       case 20: case 21:
@@ -226,6 +227,10 @@ hypre_ILUSolve( void               *ilu_vdata,
          break;
       case 30: case 31:
          hypre_ILUSolveLURAS(matA, f, u, perm, matL, matD, matU, Utemp, Utemp, fext, uext); //RAS
+         break;
+      case 40: case 41: 
+         hypre_ILUSolveSchurGMRES(matA, f, u, perm, qperm, nLU, matL, matD, matU, matS, 
+                           Utemp, Ftemp, schur_solver, schur_precond, rhs, x, u_end); //GMRES
          break;
       default: 
          hypre_ILUSolveLU(matA, f, u, perm, n, matL, matD, matU, Utemp, Ftemp); //BJ
@@ -330,7 +335,7 @@ hypre_ILUSolve( void               *ilu_vdata,
 
 HYPRE_Int
 hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
-                  hypre_ParVector    *u, HYPRE_Int *perm, 
+                  hypre_ParVector    *u, HYPRE_Int *perm, HYPRE_Int *qperm,
                   HYPRE_Int nLU, hypre_ParCSRMatrix *L, 
                   HYPRE_Real* D, hypre_ParCSRMatrix *U,
                   hypre_ParCSRMatrix *S,
@@ -386,11 +391,11 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    /* now update with L to solve */
    for(i = 0 ; i < nLU ; i ++)
    {
-      utemp_data[perm[i]] = ftemp_data[perm[i]];
+      utemp_data[qperm[i]] = ftemp_data[perm[i]];
       k1 = L_diag_i[i] ; k2 = L_diag_i[i+1];
       for(j = k1 ; j < k2 ; j ++)
       {
-         utemp_data[perm[i]] -= L_diag_data[j] * utemp_data[perm[L_diag_j[j]]];
+         utemp_data[qperm[i]] -= L_diag_data[j] * utemp_data[qperm[L_diag_j[j]]];
       }
    }
    
@@ -403,7 +408,7 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
       for(j = k1 ; j < k2 ; j ++)
       {
          col = L_diag_j[j];
-         ftemp_data[perm[i]] -= L_diag_data[j] * utemp_data[perm[col]];
+         ftemp_data[perm[i]] -= L_diag_data[j] * utemp_data[qperm[col]];
       }
    }
    
@@ -432,7 +437,7 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
       /* copy value back to original */
       for(i = nLU ; i < n ; i ++)
       {
-         utemp_data[perm[i]] = x_data[i-nLU];
+         utemp_data[qperm[i]] = x_data[i-nLU];
       }
    }
    
@@ -445,17 +450,17 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
    {
       for(i = 0 ; i < nLU ; i ++)
       {
-         ftemp_data[perm[i]] = utemp_data[perm[i]];
+         ftemp_data[perm[i]] = utemp_data[qperm[i]];
          k1 = u_end[i] ; k2 = U_diag_i[i+1];
          for(j = k1 ; j < k2 ; j ++)
          {
             col = U_diag_j[j];
-            ftemp_data[perm[i]] -= U_diag_data[j] * utemp_data[perm[col]];
+            ftemp_data[perm[i]] -= U_diag_data[j] * utemp_data[qperm[col]];
          }
       }
       for(i = 0 ; i < nLU ; i ++)
       {
-         utemp_data[perm[i]] = ftemp_data[perm[i]];
+         utemp_data[qperm[i]] = ftemp_data[perm[i]];
       }
    }
    
@@ -467,9 +472,9 @@ hypre_ILUSolveSchurGMRES(hypre_ParCSRMatrix *A, hypre_ParVector    *f,
       for(j = k1 ; j < k2 ; j ++)
       {
          col = U_diag_j[j];
-         utemp_data[perm[i]] -= U_diag_data[j] * utemp_data[perm[col]];
+         utemp_data[qperm[i]] -= U_diag_data[j] * utemp_data[qperm[col]];
       }
-      utemp_data[perm[i]] *= D[i];
+      utemp_data[qperm[i]] *= D[i];
    }
    
    /* done, now everything are in u_temp, update solution */
