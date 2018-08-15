@@ -37,7 +37,6 @@ hypre_ParCompGridCreate ()
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
    hypre_ParCompGridGhostMarker(compGrid) = NULL;
-   hypre_ParCompGridOwningProc(compGrid) = NULL;
    hypre_ParCompGridCoarseResidualMarker(compGrid) = NULL;
    hypre_ParCompGridARows(compGrid) = NULL;
    hypre_ParCompGridPRows(compGrid) = NULL;
@@ -85,11 +84,6 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
    if (hypre_ParCompGridGhostMarker(compGrid))
    {
       hypre_TFree(hypre_ParCompGridGhostMarker(compGrid), HYPRE_MEMORY_HOST);
-   }
-
-   if (hypre_ParCompGridOwningProc(compGrid))
-   {
-      hypre_TFree(hypre_ParCompGridOwningProc(compGrid), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_ParCompGridCoarseResidualMarker(compGrid))
@@ -296,8 +290,6 @@ hypre_ParCompGridInitialize ( hypre_ParCompGrid *compGrid, hypre_ParVector *resi
    hypre_ParCompGridCoarseLocalIndices(compGrid) = coarse_local_indices_comp;
    if (CF_marker_array) hypre_ParCompGridGhostMarker(compGrid) = hypre_CTAlloc( HYPRE_Int, 2*num_nodes, HYPRE_MEMORY_HOST );
    else hypre_ParCompGridGhostMarker(compGrid) = NULL;
-   hypre_ParCompGridOwningProc(compGrid) = hypre_CTAlloc( HYPRE_Int, 2*num_nodes, HYPRE_MEMORY_HOST);
-   for (i = 0; i < num_nodes; i++) hypre_ParCompGridOwningProc(compGrid)[i] = myid;
    hypre_ParCompGridARows(compGrid) = A_rows;
    hypre_ParCompGridPRows(compGrid) = P_rows;
 
@@ -465,7 +457,6 @@ hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int size, HYPRE_In
    hypre_ParCompGridU(compGrid) = hypre_CTAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
    hypre_ParCompGridF(compGrid) = hypre_CTAlloc(HYPRE_Complex, size, HYPRE_MEMORY_HOST);
    hypre_ParCompGridGlobalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridOwningProc(compGrid) = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
    if (need_coarse_info)
    {
       hypre_ParCompGridGhostMarker(compGrid) = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
@@ -490,8 +481,6 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
    // Re allocate to given size
    hypre_ParCompGridU(compGrid) = hypre_TReAlloc(hypre_ParCompGridU(compGrid), HYPRE_Complex, new_size, HYPRE_MEMORY_HOST);
    hypre_ParCompGridF(compGrid) = hypre_TReAlloc(hypre_ParCompGridF(compGrid), HYPRE_Complex, new_size, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
-   hypre_ParCompGridOwningProc(compGrid) = hypre_TReAlloc(hypre_ParCompGridOwningProc(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
    if (need_coarse_info)
    {
       hypre_ParCompGridGhostMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridGhostMarker(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
@@ -522,7 +511,6 @@ hypre_ParCompGridCopyNode ( hypre_ParCompGrid *compGrid, hypre_ParCompGrid *comp
    hypre_ParCompGridU(compGridCopy)[copyIndex] = hypre_ParCompGridU(compGrid)[index];
    hypre_ParCompGridF(compGridCopy)[copyIndex] = hypre_ParCompGridF(compGrid)[index];
    hypre_ParCompGridGlobalIndices(compGridCopy)[copyIndex] = hypre_ParCompGridGlobalIndices(compGrid)[index];
-   hypre_ParCompGridOwningProc(compGridCopy)[copyIndex] = hypre_ParCompGridOwningProc(compGrid)[index];
    if (hypre_ParCompGridCoarseGlobalIndices(compGrid))
    {
       hypre_ParCompGridGhostMarker(compGridCopy)[copyIndex] = hypre_ParCompGridGhostMarker(compGrid)[index];
@@ -732,7 +720,6 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    HYPRE_Complex     *f = hypre_ParCompGridF(compGrid);
 
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
-   HYPRE_Int        *owning_proc = hypre_ParCompGridOwningProc(compGrid);
    HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
    HYPRE_Int        *coarse_local_indices = hypre_ParCompGridCoarseLocalIndices(compGrid);
    HYPRE_Int        *ghost_marker = hypre_ParCompGridGhostMarker(compGrid);
@@ -777,12 +764,6 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
       {
          hypre_fprintf(file, "%d ", global_indices[i]);
       }
-   }
-   hypre_fprintf(file, "\n");
-   hypre_fprintf(file, "owning_proc:\n");
-   for (i = 0; i < num_nodes; i++)
-   {
-      hypre_fprintf(file, "%d ", owning_proc[i]);
    }
    if (ghost_marker)
    {

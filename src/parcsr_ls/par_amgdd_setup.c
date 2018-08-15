@@ -81,7 +81,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
  *****************************************************************************/
 
 HYPRE_Int
-hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *timers, HYPRE_Int use_barriers )
+hypre_BoomerAMGDDSetup( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers )
 {
    char filename[256];
 
@@ -89,17 +89,25 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int nu
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
+   MPI_Comm 	      comm;
+   hypre_ParAMGData   *amg_data = amg_vdata;
+
+   // If the underlying AMG data structure has not yet been set up, call BoomerAMGSetup()
+   if (!hypre_ParAMGDataAArray(amg_data))
+      hypre_BoomerAMGSetup(amg_vdata, A, b, x);
+
+
+
    #if DEBUGGING_MESSAGES
    hypre_printf("Began comp grid setup on rank %d\n", myid);
    #endif
-
-   MPI_Comm 	      comm;
-   hypre_ParAMGData   *amg_data = amg_vdata;
 
    /* Data Structure variables */
  
    // level counters, indices, and parameters
    HYPRE_Int                  num_levels;
+   HYPRE_Int                  padding;
+   HYPRE_Int                  num_ghost_layers;
    HYPRE_Real                 alpha, beta;
    HYPRE_Int                  level,i,j,k,cnt;
    HYPRE_Int                  *num_psi_levels_send;
@@ -151,6 +159,8 @@ hypre_BoomerAMGDDCompGridSetup( void *amg_vdata, HYPRE_Int padding, HYPRE_Int nu
    Vtemp = hypre_ParAMGDataVtemp(amg_data);
    CF_marker_array = hypre_ParAMGDataCFMarkerArray(amg_data);
    num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   padding = hypre_ParAMGDataAMGDDPadding(amg_data);
+   num_ghost_layers = hypre_ParAMGDataAMGDDNumGhostLayers(amg_data);
 
    // get first and last global indices on each level for this proc
    proc_first_index = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);

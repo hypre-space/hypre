@@ -107,6 +107,11 @@ typedef struct
    HYPRE_Real         **l1_norms
 
    /* composide grid data for AMG-DD */
+   HYPRE_Int                 min_fac_iter;
+   HYPRE_Int                 max_fac_iter;
+   HYPRE_Real                fac_tol;
+   HYPRE_Int                 padding;
+   HYPRE_Int                 num_ghost_layers;
    hypre_ParCompGrid       **compGrid;
    hypre_ParCompGridCommPkg *compGridCommPkg;;
 
@@ -365,6 +370,11 @@ typedef struct
 #define hypre_ParAMGDataChebyCoefs(amg_data) ((amg_data)->cheby_coefs)
 
 /* composite grid data */
+#define hypre_ParAMGDataMinFACIter(amg_data) ((amg_data)->min_fac_iter)
+#define hypre_ParAMGDataMaxFACIter(amg_data) ((amg_data)->max_fac_iter)
+#define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
+#define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->padding)
+#define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
 #define hypre_ParAMGDataCompGrid(amg_data) ((amg_data)->compGrid)
 #define hypre_ParAMGDataCompGridCommPkg(amg_data) ((amg_data)->compGridCommPkg)
 
