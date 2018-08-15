@@ -157,6 +157,7 @@ hypre_ParCompGridInitialize ( hypre_ParCompGrid *compGrid, hypre_ParVector *resi
    HYPRE_Complex     *residual_data = hypre_VectorData(residual_local);
 
    HYPRE_Int         num_nodes = hypre_VectorSize(residual_local);   
+
    hypre_ParCompGridNumNodes(compGrid) = num_nodes;
    hypre_ParCompGridNumOwnedNodes(compGrid) = num_nodes;
    hypre_ParCompGridMemSize(compGrid) = 2*num_nodes;
@@ -481,6 +482,7 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
    // Re allocate to given size
    hypre_ParCompGridU(compGrid) = hypre_TReAlloc(hypre_ParCompGridU(compGrid), HYPRE_Complex, new_size, HYPRE_MEMORY_HOST);
    hypre_ParCompGridF(compGrid) = hypre_TReAlloc(hypre_ParCompGridF(compGrid), HYPRE_Complex, new_size, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
    if (need_coarse_info)
    {
       hypre_ParCompGridGhostMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridGhostMarker(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
