@@ -1850,7 +1850,7 @@ HYPRE_BoomerAMGDDSetup( HYPRE_Solver solver,
                       HYPRE_ParVector b,
                       HYPRE_ParVector x    )
 {
-   return ( hypre_BoomerAMGDDCompGridSetup( (void *) solver, 
+   return ( hypre_BoomerAMGDDSetup( (void *) solver, 
                                  (hypre_ParCSRMatrix *) A,
                                  (hypre_ParVector *) b,
                                  (hypre_ParVector *) x,

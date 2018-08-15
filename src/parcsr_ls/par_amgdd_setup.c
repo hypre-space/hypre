@@ -77,7 +77,7 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
  *****************************************************************************/
 
 /*****************************************************************************
- * hypre_BoomerAMGDDCompGridSetup
+ * hypre_BoomerAMGDDSetup
  *****************************************************************************/
 
 HYPRE_Int
