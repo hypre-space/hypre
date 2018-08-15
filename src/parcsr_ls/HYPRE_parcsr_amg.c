@@ -1761,3 +1761,21 @@ HYPRE_BoomerAMGDDCompGridSetup( HYPRE_Solver solver,
 {
    return ( hypre_BoomerAMGDDCompGridSetup( (void *) solver, padding, num_ghost_layers, NULL, 0 ) );
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSolve
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+HYPRE_BoomerAMGDDSolve( HYPRE_Solver solver,
+                      HYPRE_ParCSRMatrix A,
+                      HYPRE_ParVector b,
+                      HYPRE_ParVector x      )
+{
+
+
+   return( hypre_BoomerAMGDDSolve( (void *) solver,
+                                 (hypre_ParCSRMatrix *) A,
+                                 (hypre_ParVector *) b,
+                                 (hypre_ParVector *) x ) );
+}
