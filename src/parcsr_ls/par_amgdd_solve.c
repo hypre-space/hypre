@@ -38,7 +38,8 @@ HYPRE_Int
 hypre_BoomerAMGDDSolve( void *amg_vdata,
                                  hypre_ParCSRMatrix *A,
                                  hypre_ParVector *f,
-                                 hypre_ParVector *u )
+                                 hypre_ParVector *u,
+                                 HYPRE_Int *bandwidth_cost )
 {
 
    HYPRE_Int test_failed = 0;
@@ -97,7 +98,7 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
    while ( (relative_resid >= tol || cycle_count < min_iter) && cycle_count < max_iter )
    {
       // Do the AMGDD cycle
-      error_code = hypre_BoomerAMGDD_Cycle(amg_vdata);
+      error_code = hypre_BoomerAMGDD_Cycle(amg_vdata, bandwidth_cost);
       if (error_code) test_failed = 1;
 
       // Calculate a new resiudal
@@ -138,7 +139,7 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
 
 
 HYPRE_Int
-hypre_BoomerAMGDD_Cycle( void *amg_vdata )
+hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int *bandwidth_cost )
 {
 	HYPRE_Int   myid;
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -154,7 +155,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 
 	// Form residual and do residual communication
    HYPRE_Int test_failed = 0;
-	test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata );
+	test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata, bandwidth_cost );
 
 	// Set zero initial guess for all comp grids on all levels
 	ZeroInitialGuess( amg_vdata );
@@ -246,7 +247,7 @@ ZeroInitialGuess( void *amg_vdata )
 }
 
 HYPRE_Int 
-hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
+hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *bandwidth_cost )
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -383,6 +384,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
             send_buffer[i] = hypre_CTAlloc(HYPRE_Complex, send_buffer_size[level][i], HYPRE_MEMORY_HOST);
             PackResidualBuffer(send_procs[level][i], send_buffer[i], send_flag[level][i], num_send_nodes[level][i], compGrid, compGridCommPkg, i, level, num_levels);
             hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
+            if (bandwidth_cost) (*bandwidth_cost) += send_buffer_size[level][i]*sizeof(HYPRE_Complex);
          }
 
          // wait for buffers to be received

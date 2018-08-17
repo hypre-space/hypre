@@ -22,7 +22,7 @@
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
-SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers );
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *bandwidth_cost );
 
 HYPRE_Int
 FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPRE_Int ***add_flag,
@@ -32,7 +32,7 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    HYPRE_Int *num_send_procs, HYPRE_Int **send_procs, 
    HYPRE_Int num_neighboring_procs,
    HYPRE_Int *send_proc_array_size
-   , HYPRE_Int level, HYPRE_Int iteration );
+   , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int *bandwidth_cost );
 
 HYPRE_Int
 RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, 
@@ -84,7 +84,13 @@ TestCompGrids3(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, hypre_ParCSRM
  *****************************************************************************/
 
 HYPRE_Int
-hypre_BoomerAMGDDSetup( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers )
+hypre_BoomerAMGDDSetup( void *amg_vdata, 
+                        hypre_ParCSRMatrix *A, 
+                        hypre_ParVector *b, 
+                        hypre_ParVector *x, 
+                        HYPRE_Int *timers, 
+                        HYPRE_Int use_barriers,
+                        HYPRE_Int *bandwidth_cost )
 {
    char filename[256];
 
@@ -239,7 +245,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector 
    if (timers) hypre_BeginTiming(timers[0]);
    for (level = 0; level < num_levels; level++)
    {
-      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers);
+      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, bandwidth_cost);
    }
    if (timers) hypre_EndTiming(timers[0]);
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -319,6 +325,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector 
          for (i = 0; i < num_sends; i++)
          {
             hypre_MPI_Isend(&(send_buffer_size[level][i]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 0, comm, &requests[request_counter++]);
+            if (bandwidth_cost) (*bandwidth_cost) += sizeof(HYPRE_Int);
          }
       
          // wait for all buffer sizes to be received
@@ -352,6 +359,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector 
             #endif
 
             hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_COMPLEX, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 1, comm, &requests[request_counter++]);
+            if (bandwidth_cost) (*bandwidth_cost) += send_buffer_size[level][i]*sizeof(HYPRE_Complex);
          }
 
          // wait for buffers to be received
@@ -433,6 +441,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector 
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
             PackRecvMapSendBuffer(recv_map_send[i], recv_map_send_buffer[i], num_incoming_nodes[i], level, num_levels);
             hypre_MPI_Isend( recv_map_send_buffer[i], recv_map_send_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &requests[request_counter++]);
+            if (bandwidth_cost) (*bandwidth_cost) += recv_map_send_buffer_size[i]*sizeof(HYPRE_Int);
          }
 
          // wait for maps to be received
@@ -635,7 +644,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector 
 
 
 HYPRE_Int
-SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers )
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *bandwidth_cost )
 {
    HYPRE_Int               i,j,cnt;
    HYPRE_Int               num_nodes = hypre_ParCSRMatrixNumRows(A);
@@ -731,7 +740,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
             &num_sends, &(send_procs), 
             hypre_ParCSRCommPkgNumSends(commPkg),
             &(send_proc_array_size)
-            , level, i); // Note that num_sends may change here
+            , level, i, bandwidth_cost); // Note that num_sends may change here
       }
 
       #if DEBUG_PROC_NEIGHBORS
@@ -855,7 +864,7 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    HYPRE_Int *num_send_procs, HYPRE_Int **send_procs, 
    HYPRE_Int num_neighboring_procs,
    HYPRE_Int *send_proc_array_size
-   , HYPRE_Int level, HYPRE_Int iteration )
+   , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int *bandwidth_cost )
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -901,6 +910,7 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    {
       hypre_MPI_Irecv(&(recv_sizes[i]), 1, HYPRE_MPI_INT, (*send_procs)[i], 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
       hypre_MPI_Isend(&send_size, 1, HYPRE_MPI_INT, (*send_procs)[i], 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
+      if (bandwidth_cost) (*bandwidth_cost) += sizeof(HYPRE_Int);
    }
 
    // Wait on the recv sizes
@@ -941,6 +951,7 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    for (i = 0; i < num_neighboring_procs; i++)
    {
       hypre_MPI_Isend(send_buffer, send_size, HYPRE_MPI_INT, (*send_procs)[i], 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
+      if (bandwidth_cost) (*bandwidth_cost) += send_size*sizeof(HYPRE_Int);
    }
 
    // Wait 

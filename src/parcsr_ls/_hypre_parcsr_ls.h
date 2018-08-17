@@ -1891,12 +1891,13 @@ HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
 
-/* par_amgdd_cycle.c */
-HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata );
-HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata );
+/* par_amgdd_solve.c */
+HYPRE_Int hypre_BoomerAMGDDSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,hypre_ParVector *x, HYPRE_Int *bandwidth_cost );
+HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int *bandwidth_cost );
+HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *bandwidth_cost );
 
 /* par_amgdd_setup.c */
-HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers );
+HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers, HYPRE_Int *bandwidth_cost );
 
 /* par_amgdd_test.c */
 HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);

@@ -1854,7 +1854,7 @@ HYPRE_BoomerAMGDDSetup( HYPRE_Solver solver,
                                  (hypre_ParCSRMatrix *) A,
                                  (hypre_ParVector *) b,
                                  (hypre_ParVector *) x,
-                                  NULL, 0 ) );
+                                  NULL, 0, NULL ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -1872,5 +1872,6 @@ HYPRE_BoomerAMGDDSolve( HYPRE_Solver solver,
    return( hypre_BoomerAMGDDSolve( (void *) solver,
                                  (hypre_ParCSRMatrix *) A,
                                  (hypre_ParVector *) b,
-                                 (hypre_ParVector *) x ) );
+                                 (hypre_ParVector *) x,
+                                 NULL ) );
 }
