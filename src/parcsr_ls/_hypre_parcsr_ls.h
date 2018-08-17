@@ -137,6 +137,7 @@ typedef struct
 {
    HYPRE_Int       num_nodes; // total number of nodes including real and ghost nodes
    HYPRE_Int       num_owned_nodes; // number of nodes owned by this proc in the original partition
+   HYPRE_Int       num_real_nodes; // number of real nodes
    HYPRE_Int       mem_size;
 
    HYPRE_Complex     *u;
@@ -145,7 +146,7 @@ typedef struct
    HYPRE_Int        *global_indices;
    HYPRE_Int        *coarse_global_indices; 
    HYPRE_Int        *coarse_local_indices; 
-   HYPRE_Int        *ghost_marker;
+   HYPRE_Int        *real_dof_marker;
    HYPRE_Int        *coarse_residual_marker;
 
    hypre_ParCompMatrixRow  **A_rows;
@@ -169,13 +170,14 @@ typedef struct
 
 #define hypre_ParCompGridNumNodes(compGrid)           ((compGrid) -> num_nodes)
 #define hypre_ParCompGridNumOwnedNodes(compGrid)           ((compGrid) -> num_owned_nodes)
+#define hypre_ParCompGridNumRealNodes(compGrid)           ((compGrid) -> num_real_nodes)
 #define hypre_ParCompGridMemSize(compGrid)           ((compGrid) -> mem_size)
 #define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
 #define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
 #define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
-#define hypre_ParCompGridGhostMarker(compGrid)           ((compGrid) -> ghost_marker)
+#define hypre_ParCompGridRealDofMarker(compGrid)           ((compGrid) -> real_dof_marker)
 #define hypre_ParCompGridCoarseResidualMarker(compGrid)           ((compGrid) -> coarse_residual_marker)
 #define hypre_ParCompGridARows(compGrid)           ((compGrid) -> A_rows)
 #define hypre_ParCompGridPRows(compGrid)           ((compGrid) -> P_rows)
@@ -1897,7 +1899,7 @@ HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata );
 HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers );
 
 /* par_amgdd_test.c */
-HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int num_comp_cycles);
+HYPRE_Int hypre_BoomerAMGDDTestSolve( void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u);
 
 /* par_amgdd_fac_cycle.c */
 HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata );
@@ -1908,6 +1910,7 @@ hypre_ParCompGrid *hypre_ParCompGridCreate ();
 HYPRE_Int hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid );
 HYPRE_Int hypre_ParCompGridInitialize( hypre_ParCompGrid *compGrid, hypre_ParVector *residual, HYPRE_Int *CF_marker_array, HYPRE_Int coarseStart, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P );
 HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels );
+HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int padding );
 HYPRE_Int hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int size, HYPRE_Int need_coarse_info );
 HYPRE_Int hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info );
 HYPRE_Int hypre_ParCompGridCopyNode( hypre_ParCompGrid *compGrid, hypre_ParCompGrid *compGridCopy, HYPRE_Int index, HYPRE_Int copyIndex);
@@ -1917,7 +1920,7 @@ HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, 
 HYPRE_Int hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename );
 HYPRE_Int hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename);
-HYPRE_Int hypre_ParCompGridGhostMarkerDump( hypre_ParCompGrid *compGrid, const char* filename);
+HYPRE_Int hypre_ParCompGridRealDofMarkerDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridCoarseGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridCoarseResidualMarkerDump( hypre_ParCompGrid *compGrid, const char* filename);
 HYPRE_Int hypre_ParCompGridUDump( hypre_ParCompGrid *compGrid, const char* filename);

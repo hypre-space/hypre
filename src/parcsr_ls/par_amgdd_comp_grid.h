@@ -117,6 +117,7 @@ typedef struct
 {
    HYPRE_Int       num_nodes; // total number of nodes including real and ghost nodes
    HYPRE_Int		 num_owned_nodes; // number of nodes owned by this proc in the original partition
+   HYPRE_Int       num_real_nodes; // number of real nodes
    HYPRE_Int		 mem_size;
 
    HYPRE_Complex     *u;
@@ -125,7 +126,7 @@ typedef struct
    HYPRE_Int        *global_indices;
    HYPRE_Int        *coarse_global_indices; 
    HYPRE_Int        *coarse_local_indices; 
-   HYPRE_Int        *ghost_marker;
+   HYPRE_Int        *real_dof_marker;
    HYPRE_Int        *coarse_residual_marker;
 
    hypre_ParCompMatrixRow 	**A_rows;
@@ -149,13 +150,14 @@ typedef struct
 
 #define hypre_ParCompGridNumNodes(compGrid)           ((compGrid) -> num_nodes)
 #define hypre_ParCompGridNumOwnedNodes(compGrid)           ((compGrid) -> num_owned_nodes)
+#define hypre_ParCompGridNumRealNodes(compGrid)           ((compGrid) -> num_real_nodes)
 #define hypre_ParCompGridMemSize(compGrid)           ((compGrid) -> mem_size)
 #define hypre_ParCompGridU(compGrid)           ((compGrid) -> u)
 #define hypre_ParCompGridF(compGrid)           ((compGrid) -> f)
 #define hypre_ParCompGridGlobalIndices(compGrid)           ((compGrid) -> global_indices)
 #define hypre_ParCompGridCoarseGlobalIndices(compGrid)           ((compGrid) -> coarse_global_indices)
 #define hypre_ParCompGridCoarseLocalIndices(compGrid)           ((compGrid) -> coarse_local_indices)
-#define hypre_ParCompGridGhostMarker(compGrid)           ((compGrid) -> ghost_marker)
+#define hypre_ParCompGridRealDofMarker(compGrid)           ((compGrid) -> real_dof_marker)
 #define hypre_ParCompGridCoarseResidualMarker(compGrid)           ((compGrid) -> coarse_residual_marker)
 #define hypre_ParCompGridARows(compGrid)           ((compGrid) -> A_rows)
 #define hypre_ParCompGridPRows(compGrid)           ((compGrid) -> P_rows)

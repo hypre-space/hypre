@@ -282,7 +282,7 @@ HYPRE_Int
 FAC_Jacobi( hypre_ParCompGrid *compGrid )
 {
    HYPRE_Int               i, j; // loop variables
-   HYPRE_Int               is_ghost;
+   HYPRE_Int               is_real;
    HYPRE_Complex           diag; // placeholder for the diagonal of A
 
    // Temporary vector to calculate Jacobi sweep
@@ -291,9 +291,9 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
    // Do Gauss-Seidel relaxation on the real nodes
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridGhostMarker(compGrid)) is_ghost = hypre_ParCompGridGhostMarker(compGrid)[i];
-      else is_ghost = 0;
-      if (!is_ghost)
+      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
+      else is_real = 1;
+      if (is_real)
       {
          // Initialize u as RHS
          u_temp[i] = hypre_ParCompGridF(compGrid)[i];
@@ -323,9 +323,9 @@ FAC_Jacobi( hypre_ParCompGrid *compGrid )
    // Copy over relaxed vector
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridGhostMarker(compGrid)) is_ghost = hypre_ParCompGridGhostMarker(compGrid)[i];
-      else is_ghost = 0;
-      if (!is_ghost)
+      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
+      else is_real = 1;
+      if (is_real)
       {
          hypre_ParCompGridU(compGrid)[i] = u_temp[i];
       }
@@ -339,15 +339,15 @@ HYPRE_Int
 FAC_GaussSeidel( hypre_ParCompGrid *compGrid )
 {
    HYPRE_Int               i, j; // loop variables
-   HYPRE_Int               is_ghost;
+   HYPRE_Int               is_real;
    HYPRE_Complex           diag; // placeholder for the diagonal of A
 
    // Do Gauss-Seidel relaxation on the real nodes
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      if (hypre_ParCompGridGhostMarker(compGrid)) is_ghost = hypre_ParCompGridGhostMarker(compGrid)[i];
-      else is_ghost = 0;
-      if (!is_ghost)
+      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
+      else is_real = 1;
+      if (is_real)
       {
          // Initialize u as RHS
          hypre_ParCompGridU(compGrid)[i] = hypre_ParCompGridF(compGrid)[i];

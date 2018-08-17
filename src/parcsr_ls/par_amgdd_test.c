@@ -48,8 +48,7 @@ HYPRE_Int
 hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
                    hypre_ParCSRMatrix *A,
                    hypre_ParVector    *f,
-                   hypre_ParVector    *u,
-                   HYPRE_Int          num_comp_cycles                 )
+                   hypre_ParVector    *u                )
 {
   // We will simulate an AMG-DD cycle by performing standard, parallel AMG V-cycles with suppressed relaxation to generate the solutions for each subproblem
 
@@ -62,6 +61,7 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
   hypre_ParVector  *U_comp = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(u), hypre_ParVectorPartitioning(u));
   hypre_ParVectorInitialize(U_comp);
+  HYPRE_Int num_comp_cycles = hypre_ParAMGDataMaxFACIter(amg_data);
 
   // Generate the residual and store in f
   hypre_ParVector *res = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(f), hypre_ParVectorPartitioning(f));
@@ -140,14 +140,14 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_In
 
   // Broadcast the number of nodes in the composite gird on this level for the root proc
   HYPRE_Int num_nodes = 0;
-  HYPRE_Int is_ghost;
+  HYPRE_Int is_real;
   if (myid == proc)
   {
     for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
     {
-      if (hypre_ParCompGridGhostMarker(compGrid)) is_ghost = hypre_ParCompGridGhostMarker(compGrid)[i];
-      else is_ghost = 0;
-      if (!is_ghost) num_nodes++;
+      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
+      else is_real = 1;
+      if (is_real) num_nodes++;
     }
   }
   hypre_MPI_Bcast(&num_nodes, 1, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
@@ -159,9 +159,9 @@ SetRelaxMarker(hypre_ParCompGrid *compGrid, hypre_Vector *relax_marker, HYPRE_In
     HYPRE_Int cnt = 0;
     for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
     {
-      if (hypre_ParCompGridGhostMarker(compGrid)) is_ghost = hypre_ParCompGridGhostMarker(compGrid)[i];
-      else is_ghost = 0;
-      if (!is_ghost) global_indices[cnt++] = hypre_ParCompGridGlobalIndices(compGrid)[i];
+      if (hypre_ParCompGridRealDofMarker(compGrid)) is_real = hypre_ParCompGridRealDofMarker(compGrid)[i];
+      else is_real = 1;
+      if (is_real) global_indices[cnt++] = hypre_ParCompGridGlobalIndices(compGrid)[i];
     }
   }
   hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);

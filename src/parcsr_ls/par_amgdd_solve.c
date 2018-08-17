@@ -43,7 +43,7 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
 
    HYPRE_Int test_failed = 0;
    HYPRE_Int error_code;
-   HYPRE_Int cycle_count;
+   HYPRE_Int cycle_count = 0;
    HYPRE_Real alpha, beta;
    HYPRE_Real resid_nrm, resid_nrm_init, rhs_norm, relative_resid;
 
@@ -143,7 +143,8 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 	HYPRE_Int   myid;
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-	HYPRE_Int i,j,k,level,cycle_count;
+	HYPRE_Int i,j,k,level;
+   HYPRE_Int cycle_count = 0;
 	hypre_ParAMGData	*amg_data = amg_vdata;
 	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
   	HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
@@ -181,7 +182,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 	}
 
 	// Update fine grid solution
-	AddSolution( amg_vdata );
+   AddSolution( amg_vdata );
 
 	return test_failed;
 }
@@ -190,15 +191,15 @@ HYPRE_Int
 AddSolution( void *amg_vdata )
 {
 	hypre_ParAMGData	*amg_data = amg_vdata;
-   	HYPRE_Complex 		*u = hypre_VectorData( hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[0] ) );
-   	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
-   	HYPRE_Complex 		*u_comp = hypre_ParCompGridU(compGrid[0]);
-   	HYPRE_Int 			num_owned_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[0]);
-   	HYPRE_Int 			i;
+	HYPRE_Complex 		*u = hypre_VectorData( hypre_ParVectorLocalVector( hypre_ParAMGDataUArray(amg_data)[0] ) );
+	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
+	HYPRE_Complex 		*u_comp = hypre_ParCompGridU(compGrid[0]);
+	HYPRE_Int 			num_owned_nodes = hypre_ParCompGridNumOwnedNodes(compGrid[0]);
+	HYPRE_Int 			i;
 
-   	for (i = 0; i < num_owned_nodes; i++) u[i] += u_comp[i];
+	for (i = 0; i < num_owned_nodes; i++) u[i] += u_comp[i];
 
-   	return 0;
+	return 0;
 }
 
 HYPRE_Real
@@ -208,7 +209,7 @@ GetCompositeResidual(hypre_ParCompGrid *compGrid)
    HYPRE_Real res_norm = 0.0;
    for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
    {
-      if (!hypre_ParCompGridGhostMarker(compGrid)[i])
+      if (hypre_ParCompGridRealDofMarker(compGrid)[i])
       {
          HYPRE_Real res = hypre_ParCompGridF(compGrid)[i];
          for (j = hypre_ParCompGridARowPtr(compGrid)[i]; j < hypre_ParCompGridARowPtr(compGrid)[i+1]; j++)
