@@ -79,6 +79,7 @@ typedef struct
 	HYPRE_Int 			**recv_buffer_size; // size of recv buffer on each level for each proc
 
 	HYPRE_Int 			***num_send_nodes; // number of nodes to send on each composite level
+   HYPRE_Int         ***num_recv_nodes; // number of nodes to recv on each composite level
 	HYPRE_Int 			****send_flag; // flags which nodes to send after composite grid is built
 	HYPRE_Int 			****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
 
@@ -99,6 +100,7 @@ typedef struct
  #define hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)		((compGridCommPkg) -> send_buffer_size)
  #define hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)		((compGridCommPkg) -> recv_buffer_size)
  #define hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)			((compGridCommPkg) -> num_send_nodes)
+ #define hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)       ((compGridCommPkg) -> num_recv_nodes)
  #define hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)				((compGridCommPkg) -> send_flag)
  #define hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)				((compGridCommPkg) -> recv_map)
 

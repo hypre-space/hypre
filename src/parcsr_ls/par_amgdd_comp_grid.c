@@ -1347,6 +1347,7 @@ hypre_ParCompGridCommPkgCreate()
    hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg) = NULL;
+   hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendFlag(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgRecvMap(compGridCommPkg) = NULL;
 
@@ -1372,6 +1373,7 @@ hypre_ParCompGridCommPkgCreateAndAllocate(HYPRE_Int num_levels)
    hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgSendFlag(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int***, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgRecvMap(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int***, num_levels, HYPRE_MEMORY_HOST);
 
@@ -1494,6 +1496,19 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
          hypre_TFree( hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)[i], HYPRE_MEMORY_HOST );
       }
       hypre_TFree( hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg), HYPRE_MEMORY_HOST );
+   }
+
+   if ( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg) )
+   {
+      for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
+      {
+         for (j = 0; j < hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg)[i]; j++)
+         {
+            hypre_TFree( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[i][j], HYPRE_MEMORY_HOST );
+         }
+         hypre_TFree( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[i], HYPRE_MEMORY_HOST );
+      }
+      hypre_TFree( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg), HYPRE_MEMORY_HOST );
    }
 
    if ( hypre_ParCompGridCommPkgNumSends(compGridCommPkg) )

@@ -38,7 +38,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 
 	HYPRE_Int level, i, j; // loop variables
 	HYPRE_Int numCoarseRelax = 20; // number of relaxations used to solve the coarse grid
-   HYPRE_Int relax_type = 0;
+   HYPRE_Int relax_type = 1;
 
 	// Get the AMG structure
   	hypre_ParAMGData   *amg_data = amg_vdata;

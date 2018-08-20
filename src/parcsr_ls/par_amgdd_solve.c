@@ -29,7 +29,7 @@ HYPRE_Int
 PackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *send_buffer, HYPRE_Int **send_flag, HYPRE_Int *num_send_nodes, hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels );
 
 HYPRE_Int
-UnpackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *recv_buffer, HYPRE_Int **recv_map, hypre_ParCompGrid **compGrid, HYPRE_Int current_level, HYPRE_Int num_levels );
+UnpackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *recv_buffer, HYPRE_Int **recv_map, HYPRE_Int *num_recv_nodes, hypre_ParCompGrid **compGrid, HYPRE_Int current_level, HYPRE_Int num_levels );
 
 HYPRE_Int
 TestResComm(hypre_ParAMGData *amg_data);
@@ -38,8 +38,7 @@ HYPRE_Int
 hypre_BoomerAMGDDSolve( void *amg_vdata,
                                  hypre_ParCSRMatrix *A,
                                  hypre_ParVector *f,
-                                 hypre_ParVector *u,
-                                 HYPRE_Int *bandwidth_cost )
+                                 hypre_ParVector *u )
 {
 
    HYPRE_Int test_failed = 0;
@@ -98,7 +97,7 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
    while ( (relative_resid >= tol || cycle_count < min_iter) && cycle_count < max_iter )
    {
       // Do the AMGDD cycle
-      error_code = hypre_BoomerAMGDD_Cycle(amg_vdata, bandwidth_cost);
+      error_code = hypre_BoomerAMGDD_Cycle(amg_vdata);
       if (error_code) test_failed = 1;
 
       // Calculate a new resiudal
@@ -139,7 +138,7 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
 
 
 HYPRE_Int
-hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int *bandwidth_cost )
+hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 {
 	HYPRE_Int   myid;
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -155,7 +154,7 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int *bandwidth_cost )
 
 	// Form residual and do residual communication
    HYPRE_Int test_failed = 0;
-	test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata, bandwidth_cost );
+	test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata );
 
 	// Set zero initial guess for all comp grids on all levels
 	ZeroInitialGuess( amg_vdata );
@@ -176,11 +175,14 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int *bandwidth_cost )
       if (fac_tol > 0.)
       {
          resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
-         relative_resid = resid_nrm / resid_nrm_init;   
+         relative_resid = resid_nrm / resid_nrm_init;
+         if (myid == 0) printf("   iteration %d, relative_resid = %e\n", cycle_count, relative_resid);
       }
       ++cycle_count;
 
 	}
+
+   if (myid == 0) printf("FAC tol = %e, num cycles = %d\n", fac_tol, cycle_count);
 
 	// Update fine grid solution
    AddSolution( amg_vdata );
@@ -247,7 +249,7 @@ ZeroInitialGuess( void *amg_vdata )
 }
 
 HYPRE_Int 
-hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *bandwidth_cost )
+hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -284,6 +286,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *bandwidth_co
    HYPRE_Int                  **send_buffer_size;
    HYPRE_Int                  **recv_buffer_size;
    HYPRE_Int                  ***num_send_nodes;
+   HYPRE_Int                  ***num_recv_nodes;
    HYPRE_Int                  ****send_flag;
    HYPRE_Int                  ****recv_map;
 
@@ -316,6 +319,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *bandwidth_co
    send_buffer_size = hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg);
    recv_buffer_size = hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg);
    num_send_nodes = hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg);
+   num_recv_nodes = hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg);
    send_flag = hypre_ParCompGridCommPkgSendFlag(compGridCommPkg);
    recv_map = hypre_ParCompGridCommPkgRecvMap(compGridCommPkg);
 
@@ -384,7 +388,6 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *bandwidth_co
             send_buffer[i] = hypre_CTAlloc(HYPRE_Complex, send_buffer_size[level][i], HYPRE_MEMORY_HOST);
             PackResidualBuffer(send_procs[level][i], send_buffer[i], send_flag[level][i], num_send_nodes[level][i], compGrid, compGridCommPkg, i, level, num_levels);
             hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
-            if (bandwidth_cost) (*bandwidth_cost) += send_buffer_size[level][i]*sizeof(HYPRE_Complex);
          }
 
          // wait for buffers to be received
@@ -394,7 +397,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *bandwidth_co
          for (i = 0; i < num_recvs; i++)
          {
             // unpack the buffers
-            UnpackResidualBuffer(recv_procs[level][i], recv_buffer[i], recv_map[level][i], compGrid, level, num_levels);
+            UnpackResidualBuffer(recv_procs[level][i], recv_buffer[i], recv_map[level][i], num_recv_nodes[level][i], compGrid, level, num_levels);
          }
 
          // clean up memory for this level
@@ -441,10 +444,6 @@ PackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *send_buffer, HYPRE_Int **send
    // pack the send buffer
    for (level = current_level; level < num_levels; level++)
    {
-      // store number of nodes to send on this level
-      send_buffer[cnt++] = num_send_nodes[level];
-
-      // pack up nodes marked in send_flag
       for (i = 0; i < num_send_nodes[level]; i++) send_buffer[cnt++] = hypre_ParCompGridF(compGrid[level])[ send_flag[level][i] ];
    }
 
@@ -453,20 +452,14 @@ PackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *send_buffer, HYPRE_Int **send
 }
 
 HYPRE_Int
-UnpackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *recv_buffer, HYPRE_Int **recv_map, hypre_ParCompGrid **compGrid, HYPRE_Int current_level, HYPRE_Int num_levels)
+UnpackResidualBuffer( HYPRE_Int proc, HYPRE_Complex *recv_buffer, HYPRE_Int **recv_map, HYPRE_Int *num_recv_nodes, hypre_ParCompGrid **compGrid, HYPRE_Int current_level, HYPRE_Int num_levels)
 {
    HYPRE_Int                  level,i,cnt = 0, map_cnt, num_nodes;
 
    // loop over levels
    for (level = current_level; level < num_levels; level++)
    {
-      // get number of nodes to unpack on this level
-      num_nodes = recv_buffer[cnt++];
-
-      for (i = 0; i < num_nodes; i++)
-      {
-         hypre_ParCompGridF(compGrid[level])[ recv_map[level][i] ] = recv_buffer[cnt++];
-      }
+      for (i = 0; i < num_recv_nodes[level]; i++) hypre_ParCompGridF(compGrid[level])[ recv_map[level][i] ] = recv_buffer[cnt++];
    }
 
    return 0;

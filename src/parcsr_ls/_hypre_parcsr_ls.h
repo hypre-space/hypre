@@ -100,6 +100,7 @@ typedef struct
    HYPRE_Int         **recv_buffer_size; // size of recv buffer on each level for each proc
 
    HYPRE_Int         ***num_send_nodes; // number of nodes to send on each composite level
+   HYPRE_Int         ***num_recv_nodes; // number of nodes to recv on each composite level
    HYPRE_Int         ****send_flag; // flags which nodes to send after composite grid is built
    HYPRE_Int         ****recv_map; // mapping from recv buffer to appropriate local indices on each comp grid
 
@@ -120,6 +121,7 @@ typedef struct
  #define hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg)     ((compGridCommPkg) -> send_buffer_size)
  #define hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg)     ((compGridCommPkg) -> recv_buffer_size)
  #define hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg)       ((compGridCommPkg) -> num_send_nodes)
+ #define hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)       ((compGridCommPkg) -> num_recv_nodes)
  #define hypre_ParCompGridCommPkgSendFlag(compGridCommPkg)           ((compGridCommPkg) -> send_flag)
  #define hypre_ParCompGridCommPkgRecvMap(compGridCommPkg)            ((compGridCommPkg) -> recv_map)
 
@@ -1892,9 +1894,9 @@ HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations 
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
 
 /* par_amgdd_solve.c */
-HYPRE_Int hypre_BoomerAMGDDSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,hypre_ParVector *x, HYPRE_Int *bandwidth_cost );
-HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata, HYPRE_Int *bandwidth_cost );
-HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata, HYPRE_Int *bandwidth_cost );
+HYPRE_Int hypre_BoomerAMGDDSolve( void *solver, hypre_ParCSRMatrix *A, hypre_ParVector *b,hypre_ParVector *x );
+HYPRE_Int hypre_BoomerAMGDD_Cycle( void *amg_vdata );
+HYPRE_Int hypre_BoomerAMGDDResidualCommunication( void *amg_vdata );
 
 /* par_amgdd_setup.c */
 HYPRE_Int hypre_BoomerAMGDDSetup(  void *amg_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *b, hypre_ParVector *x, HYPRE_Int *timers, HYPRE_Int use_barriers, HYPRE_Int *bandwidth_cost );
