@@ -21,6 +21,9 @@
 #include <stdio.h>
 #include <math.h>
 
+HYPRE_Int
+RecursivelyMarkRealDofs(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, HYPRE_Int padding);
+
 hypre_ParCompGrid *
 hypre_ParCompGridCreate ()
 {
@@ -30,13 +33,14 @@ hypre_ParCompGridCreate ()
 
    hypre_ParCompGridNumNodes(compGrid) = 0;
    hypre_ParCompGridNumOwnedNodes(compGrid) = 0;
+   hypre_ParCompGridNumRealNodes(compGrid) = 0;
    hypre_ParCompGridMemSize(compGrid) = 0;
    hypre_ParCompGridU(compGrid) = NULL;
    hypre_ParCompGridF(compGrid) = NULL;
    hypre_ParCompGridGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = NULL;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = NULL;
-   hypre_ParCompGridGhostMarker(compGrid) = NULL;
+   hypre_ParCompGridRealDofMarker(compGrid) = NULL;
    hypre_ParCompGridCoarseResidualMarker(compGrid) = NULL;
    hypre_ParCompGridARows(compGrid) = NULL;
    hypre_ParCompGridPRows(compGrid) = NULL;
@@ -81,9 +85,9 @@ hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid )
       hypre_TFree(hypre_ParCompGridCoarseLocalIndices(compGrid), HYPRE_MEMORY_HOST);
    }
 
-   if (hypre_ParCompGridGhostMarker(compGrid))
+   if (hypre_ParCompGridRealDofMarker(compGrid))
    {
-      hypre_TFree(hypre_ParCompGridGhostMarker(compGrid), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridRealDofMarker(compGrid), HYPRE_MEMORY_HOST);
    }
 
    if (hypre_ParCompGridCoarseResidualMarker(compGrid))
@@ -157,8 +161,10 @@ hypre_ParCompGridInitialize ( hypre_ParCompGrid *compGrid, hypre_ParVector *resi
    HYPRE_Complex     *residual_data = hypre_VectorData(residual_local);
 
    HYPRE_Int         num_nodes = hypre_VectorSize(residual_local);   
+
    hypre_ParCompGridNumNodes(compGrid) = num_nodes;
    hypre_ParCompGridNumOwnedNodes(compGrid) = num_nodes;
+   hypre_ParCompGridNumRealNodes(compGrid) = num_nodes;
    hypre_ParCompGridMemSize(compGrid) = 2*num_nodes;
 
 
@@ -288,8 +294,6 @@ hypre_ParCompGridInitialize ( hypre_ParCompGrid *compGrid, hypre_ParVector *resi
    hypre_ParCompGridGlobalIndices(compGrid) = global_indices_comp;
    hypre_ParCompGridCoarseGlobalIndices(compGrid) = coarse_global_indices_comp;
    hypre_ParCompGridCoarseLocalIndices(compGrid) = coarse_local_indices_comp;
-   if (CF_marker_array) hypre_ParCompGridGhostMarker(compGrid) = hypre_CTAlloc( HYPRE_Int, 2*num_nodes, HYPRE_MEMORY_HOST );
-   else hypre_ParCompGridGhostMarker(compGrid) = NULL;
    hypre_ParCompGridARows(compGrid) = A_rows;
    hypre_ParCompGridPRows(compGrid) = P_rows;
 
@@ -307,6 +311,9 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels )
 {
    HYPRE_Int delete_global_indices = 0;
    HYPRE_Int delete_old_matrices = 0;
+
+   HYPRE_Int *add_flag_fine = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[0]), HYPRE_MEMORY_HOST);
+   HYPRE_Int *add_flag_coarse;
 
    HYPRE_Int i,j,k,cnt,level;
    for (level = 0; level < num_levels; level++)
@@ -448,6 +455,48 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels )
 }
 
 HYPRE_Int
+hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int padding )
+{
+   HYPRE_Int *add_flag_fine = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[0]), HYPRE_MEMORY_HOST);
+   HYPRE_Int *add_flag_coarse;
+
+   HYPRE_Int i,level;
+   for (level = 0; level < num_levels; level++)
+   {
+      // Allocate the real dof marker
+      if (level != num_levels-1) hypre_ParCompGridRealDofMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST);
+
+      // Mark the real dofs
+      if (level == 0)
+      {
+         for (i = 0; i < hypre_ParCompGridNumOwnedNodes(compGrid[level]); i++) add_flag_fine[i] = padding + 1;
+      }
+      else
+      {
+         add_flag_fine = add_flag_coarse;
+      }
+
+      // Expand by the padding on this level and add coarse grid counterparts
+      if (level != num_levels-1)
+      {
+         add_flag_coarse = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level+1]), HYPRE_MEMORY_HOST);
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            if (add_flag_fine[i] == padding + 1)
+            {
+               // Recursively add the region of padding (flagging coarse nodes on the next level if applicable)
+               hypre_ParCompGridRealDofMarker(compGrid[level])[i] = 1;
+               RecursivelyMarkRealDofs(i, padding, compGrid[level], add_flag_fine, add_flag_coarse, padding);
+            }
+         }
+      }
+      hypre_TFree(add_flag_fine, HYPRE_MEMORY_HOST);
+   }
+
+   return 0;
+}
+
+HYPRE_Int
 hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int size, HYPRE_Int need_coarse_info )
 {
    hypre_ParCompGridNumNodes(compGrid) = size;
@@ -459,7 +508,6 @@ hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int size, HYPRE_In
    hypre_ParCompGridGlobalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
    if (need_coarse_info)
    {
-      hypre_ParCompGridGhostMarker(compGrid) = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridCoarseGlobalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridCoarseLocalIndices(compGrid) = hypre_CTAlloc(HYPRE_Int, size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridPRows(compGrid) = hypre_CTAlloc(hypre_ParCompMatrixRow*, size, HYPRE_MEMORY_HOST);
@@ -484,7 +532,6 @@ hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE
    hypre_ParCompGridGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
    if (need_coarse_info)
    {
-      hypre_ParCompGridGhostMarker(compGrid) = hypre_TReAlloc(hypre_ParCompGridGhostMarker(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridCoarseGlobalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridCoarseGlobalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridCoarseLocalIndices(compGrid) = hypre_TReAlloc(hypre_ParCompGridCoarseLocalIndices(compGrid), HYPRE_Int, new_size, HYPRE_MEMORY_HOST);
       hypre_ParCompGridPRows(compGrid) = hypre_TReAlloc(hypre_ParCompGridPRows(compGrid), hypre_ParCompMatrixRow*, new_size, HYPRE_MEMORY_HOST);
@@ -514,7 +561,8 @@ hypre_ParCompGridCopyNode ( hypre_ParCompGrid *compGrid, hypre_ParCompGrid *comp
    hypre_ParCompGridGlobalIndices(compGridCopy)[copyIndex] = hypre_ParCompGridGlobalIndices(compGrid)[index];
    if (hypre_ParCompGridCoarseGlobalIndices(compGrid))
    {
-      hypre_ParCompGridGhostMarker(compGridCopy)[copyIndex] = hypre_ParCompGridGhostMarker(compGrid)[index];
+      if (hypre_ParCompGridRealDofMarker(compGridCopy) && hypre_ParCompGridRealDofMarker(compGrid)) 
+         hypre_ParCompGridRealDofMarker(compGridCopy)[copyIndex] = hypre_ParCompGridRealDofMarker(compGrid)[index];
       hypre_ParCompGridCoarseGlobalIndices(compGridCopy)[copyIndex] = hypre_ParCompGridCoarseGlobalIndices(compGrid)[index];
       hypre_ParCompGridCoarseLocalIndices(compGridCopy)[copyIndex] = hypre_ParCompGridCoarseLocalIndices(compGrid)[index];
    }
@@ -617,9 +665,17 @@ hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num
                   }
                }
             }
+         }
+      }
 
-            // if we are not on the coarsest level
-            if (level != num_levels-1)
+      
+      // if we are not on the coarsest level
+      if (level != num_levels-1)
+      {
+         if (num_added_nodes[level] || num_added_nodes[level+1])
+         {
+            // loop over indices of non-owned nodes on this level
+            for (i = hypre_ParCompGridNumOwnedNodes(compGrid[level]); i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
             {
                // fix up the coarse local indices
                coarse_global_index = hypre_ParCompGridCoarseGlobalIndices(compGrid[level])[i];
@@ -715,7 +771,7 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
    HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
    HYPRE_Int        *coarse_local_indices = hypre_ParCompGridCoarseLocalIndices(compGrid);
-   HYPRE_Int        *ghost_marker = hypre_ParCompGridGhostMarker(compGrid);
+   HYPRE_Int        *ghost_marker = hypre_ParCompGridRealDofMarker(compGrid);
 
    hypre_ParCompMatrixRow  **A_rows = hypre_ParCompGridARows(compGrid);
    hypre_ParCompMatrixRow  **P_rows = hypre_ParCompGridPRows(compGrid);
@@ -895,7 +951,7 @@ hypre_ParCompGridPrintSolnRHS ( hypre_ParCompGrid *compGrid, const char* filenam
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
    HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
    HYPRE_Int        *coarse_local_indices = hypre_ParCompGridCoarseLocalIndices(compGrid);
-   HYPRE_Int        *ghost_marker = hypre_ParCompGridGhostMarker(compGrid);
+   HYPRE_Int        *ghost_marker = hypre_ParCompGridRealDofMarker(compGrid);
 
    HYPRE_Int         i;
 
@@ -957,7 +1013,7 @@ hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename)
 
    // Get composite grid information
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
-   HYPRE_Int        *ghost_marker = hypre_ParCompGridGhostMarker(compGrid);
+   HYPRE_Int        *ghost_marker = hypre_ParCompGridRealDofMarker(compGrid);
 
    // Get the position where the owned nodes should go in order to output arrays sorted by global index
    HYPRE_Int insert_owned_position;
@@ -1042,9 +1098,9 @@ hypre_ParCompGridGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* fil
 }
 
 HYPRE_Int 
-hypre_ParCompGridGhostMarkerDump( hypre_ParCompGrid *compGrid, const char* filename)
+hypre_ParCompGridRealDofMarkerDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
-   if (hypre_ParCompGridGhostMarker(compGrid))
+   if (hypre_ParCompGridRealDofMarker(compGrid))
    {
       FILE             *file;
       file = fopen(filename,"w");
@@ -1053,7 +1109,7 @@ hypre_ParCompGridGhostMarkerDump( hypre_ParCompGrid *compGrid, const char* filen
       // Global indices
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
       {
-         hypre_fprintf(file, "%d\n", hypre_ParCompGridGhostMarker(compGrid)[i]);
+         hypre_fprintf(file, "%d\n", hypre_ParCompGridRealDofMarker(compGrid)[i]);
       }
 
       fclose(file);
@@ -1065,12 +1121,12 @@ hypre_ParCompGridGhostMarkerDump( hypre_ParCompGrid *compGrid, const char* filen
 HYPRE_Int 
 hypre_ParCompGridCoarseGlobalIndicesDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
-   if (hypre_ParCompGridCoarseGlobalIndices(compGrid))
-   {
       FILE             *file;
       file = fopen(filename,"w");
       HYPRE_Int i;
 
+   if (hypre_ParCompGridCoarseGlobalIndices(compGrid))
+   {
       // Global indices
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
       {
@@ -1086,12 +1142,12 @@ hypre_ParCompGridCoarseGlobalIndicesDump( hypre_ParCompGrid *compGrid, const cha
 HYPRE_Int 
 hypre_ParCompGridCoarseResidualMarkerDump( hypre_ParCompGrid *compGrid, const char* filename)
 {
-   if (hypre_ParCompGridCoarseResidualMarker(compGrid))
-   {
       FILE             *file;
       file = fopen(filename,"w");
       HYPRE_Int i;
 
+   if (hypre_ParCompGridCoarseResidualMarker(compGrid))
+   {
       // Global indices
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++)
       {
@@ -1291,8 +1347,35 @@ hypre_ParCompGridCommPkgCreate()
    hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg) = NULL;
+   hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendFlag(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgRecvMap(compGridCommPkg) = NULL;
+
+   return compGridCommPkg;
+}
+
+hypre_ParCompGridCommPkg*
+hypre_ParCompGridCommPkgCreateAndAllocate(HYPRE_Int num_levels)
+{
+   hypre_ParCompGridCommPkg   *compGridCommPkg;
+
+   compGridCommPkg = hypre_CTAlloc(hypre_ParCompGridCommPkg, 1, HYPRE_MEMORY_HOST);
+
+
+   hypre_ParCompGridCommPkgNumLevels(compGridCommPkg) = num_levels;
+   hypre_ParCompGridCommPkgNumSends(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgSendMapStarts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgSendMapElmts(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgGhostMarker(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgRecvBufferSize(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgSendFlag(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int***, num_levels, HYPRE_MEMORY_HOST);
+   hypre_ParCompGridCommPkgRecvMap(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int***, num_levels, HYPRE_MEMORY_HOST);
 
    return compGridCommPkg;
 }
@@ -1415,6 +1498,19 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
       hypre_TFree( hypre_ParCompGridCommPkgNumSendNodes(compGridCommPkg), HYPRE_MEMORY_HOST );
    }
 
+   if ( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg) )
+   {
+      for (i = 0; i < hypre_ParCompGridCommPkgNumLevels(compGridCommPkg); i++)
+      {
+         for (j = 0; j < hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg)[i]; j++)
+         {
+            hypre_TFree( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[i][j], HYPRE_MEMORY_HOST );
+         }
+         hypre_TFree( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg)[i], HYPRE_MEMORY_HOST );
+      }
+      hypre_TFree( hypre_ParCompGridCommPkgNumRecvNodes(compGridCommPkg), HYPRE_MEMORY_HOST );
+   }
+
    if ( hypre_ParCompGridCommPkgNumSends(compGridCommPkg) )
    {
       hypre_TFree( hypre_ParCompGridCommPkgNumSends(compGridCommPkg), HYPRE_MEMORY_HOST );
@@ -1429,4 +1525,56 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
    hypre_TFree(compGridCommPkg, HYPRE_MEMORY_HOST);
 
    return 0;
+}
+
+HYPRE_Int
+RecursivelyMarkRealDofs(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, HYPRE_Int padding)
+{
+   HYPRE_Int         i,index,coarse_grid_index;
+   hypre_ParCompMatrixRow *A_row = hypre_ParCompGridARows(compGrid)[node];
+   HYPRE_Int error_code = 0;
+
+   // Look at neighbors
+   for (i = 0; i < hypre_ParCompMatrixRowSize(A_row); i++)
+   {
+      // Get the index of the neighbor
+      index = hypre_ParCompMatrixRowLocalIndices(A_row)[i];
+
+      // If the neighbor info is available on this proc
+      if (index >= 0)
+      {
+         // And if we still need to visit this index (note that add_flag[index] = m means we have already added all distance m-1 neighbors of index)
+         if (add_flag[index] < m)
+         {
+            add_flag[index] = m;
+            hypre_ParCompGridRealDofMarker(compGrid)[index] = 1;
+            // Recursively call to find distance m-1 neighbors of index
+            if (m-1 > 0) error_code = RecursivelyMarkRealDofs(index, m-1, compGrid, add_flag, add_flag_coarse, padding);
+         }
+         // If m = 1, we won't do another recursive call, so make sure to flag the coarse grid here if applicable
+         if (m == 1)
+         {
+            coarse_grid_index = hypre_ParCompGridCoarseLocalIndices(compGrid)[index];
+            if ( coarse_grid_index != -1 ) 
+            {
+               // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
+               add_flag_coarse[ coarse_grid_index ] = padding+1;
+            }
+         }
+      }
+      else
+      {
+         error_code = 1; 
+      }
+   }
+
+   // Flag this node on the next coarsest level 
+   coarse_grid_index = hypre_ParCompGridCoarseLocalIndices(compGrid)[node];
+   if ( coarse_grid_index != -1 ) 
+   {
+      // Again, need to set the add_flag to the appropriate value in order to recursively find neighbors on the next level
+      add_flag_coarse[ coarse_grid_index ] = padding+1;
+   }
+
+   return error_code;
 }
