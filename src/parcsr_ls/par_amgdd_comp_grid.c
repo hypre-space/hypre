@@ -464,7 +464,7 @@ hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num
    for (level = 0; level < num_levels; level++)
    {
       // Allocate the real dof marker
-      hypre_ParCompGridRealDofMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST);
+      if (level != num_levels-1) hypre_ParCompGridRealDofMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST);
 
       // Mark the real dofs
       if (level == 0)

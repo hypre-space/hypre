@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 0
+#define TEST_RES_COMM 1
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -65,7 +65,7 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
    beta = 1.0;
    hypre_ParCSRMatrixMatvec(alpha, A, u, beta, f);
    resid_nrm = sqrt(hypre_ParVectorInnerProd(f,f));
-   
+
    // Setup convergence tolerance info
    resid_nrm_init = resid_nrm;
    if (tol > 0.)
@@ -164,9 +164,11 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    if (fac_tol > 0.) resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
    HYPRE_Real resid_nrm_init = resid_nrm;
    HYPRE_Real relative_resid = 1.;
+   HYPRE_Real conv_fact = 0;
    
 	// Do the cycles
-   while ( (relative_resid >= fac_tol || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
+   // while ( (relative_resid >= fac_tol || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
+   while ( (conv_fact <= fac_tol || conv_fact >= 1.0 || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
    {
       // Do FAC cycle
 		hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
@@ -175,14 +177,14 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
       if (fac_tol > 0.)
       {
          resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+         conv_fact = resid_nrm / (relative_resid * resid_nrm_init);
          relative_resid = resid_nrm / resid_nrm_init;
-         if (myid == 0) printf("   iteration %d, relative_resid = %e\n", cycle_count, relative_resid);
       }
       ++cycle_count;
-
+      hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
 	}
 
-   if (myid == 0) printf("FAC tol = %e, num cycles = %d\n", fac_tol, cycle_count);
+
 
 	// Update fine grid solution
    AddSolution( amg_vdata );

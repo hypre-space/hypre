@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
@@ -611,15 +611,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
       // hypre_ParCompGridDebugPrint( compGrid[level], filename );
       hypre_ParCompGridDumpSorted( compGrid[level], filename );
-      // #if DEBUG_COMP_GRID == 2
-      // hypre_sprintf(filename, "outputs/CompGrids/setupACompRank%dLevel%d.txt", myid, level);
-      // hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename );
-      // if (level != num_levels-1)
-      // {
-      //    hypre_sprintf(filename, "outputs/CompGrids/setupPCompRank%dLevel%d.txt", myid, level);
-      //    hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename );
-      // }
-      // #endif
+      #if DEBUG_COMP_GRID == 2
+      hypre_sprintf(filename, "outputs/CompGrids/setupACompRank%dLevel%d.txt", myid, level);
+      hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename );
+      if (level != num_levels-1)
+      {
+         hypre_sprintf(filename, "outputs/CompGrids/setupPCompRank%dLevel%d.txt", myid, level);
+         hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename );
+      }
+      #endif
    }
    #endif
 

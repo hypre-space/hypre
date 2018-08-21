@@ -175,6 +175,7 @@ typedef struct
    /* log info */
    HYPRE_Int      logging;
    HYPRE_Int      num_iterations;
+   HYPRE_Int      num_fac_iterations;
 #ifdef CUMNUMIT
    HYPRE_Int      cum_num_iterations;
 #endif
@@ -402,6 +403,7 @@ typedef struct
 /* log info data */
 #define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
+#define hypre_ParAMGDataNumFACIterations(amg_data) ((amg_data)->num_fac_iterations)
 #ifdef CUMNUMIT
 #define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
 #endif

@@ -358,6 +358,7 @@ typedef struct
    /* log info */
    HYPRE_Int      logging;
    HYPRE_Int      num_iterations;
+   HYPRE_Int      num_fac_iterations;
 #ifdef CUMNUMIT
    HYPRE_Int      cum_num_iterations;
 #endif
@@ -582,6 +583,7 @@ typedef struct
 /* log info data */
 #define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
+#define hypre_ParAMGDataNumFACIterations(amg_data) ((amg_data)->num_fac_iterations)
 #ifdef CUMNUMIT
 #define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
 #endif
@@ -1004,6 +1006,7 @@ HYPRE_Int HYPRE_BoomerAMGSetDebugFlag ( HYPRE_Solver solver , HYPRE_Int debug_fl
 HYPRE_Int HYPRE_BoomerAMGGetDebugFlag ( HYPRE_Solver solver , HYPRE_Int *debug_flag );
 HYPRE_Int HYPRE_BoomerAMGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_BoomerAMGGetCumNumIterations ( HYPRE_Solver solver , HYPRE_Int *cum_num_iterations );
+HYPRE_Int HYPRE_BoomerAMGGetNumFACIterations ( HYPRE_Solver solver, HYPRE_Int *num_fac_iterations );
 HYPRE_Int HYPRE_BoomerAMGGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
 HYPRE_Int HYPRE_BoomerAMGGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *rel_resid_norm );
 HYPRE_Int HYPRE_BoomerAMGSetVariant ( HYPRE_Solver solver , HYPRE_Int variant );
@@ -1485,6 +1488,7 @@ HYPRE_Int hypre_BoomerAMGSetDofFunc ( void *data , HYPRE_Int *dof_func );
 HYPRE_Int hypre_BoomerAMGSetPointDofMap ( void *data , HYPRE_Int *point_dof_map );
 HYPRE_Int hypre_BoomerAMGSetDofPoint ( void *data , HYPRE_Int *dof_point );
 HYPRE_Int hypre_BoomerAMGGetNumIterations ( void *data , HYPRE_Int *num_iterations );
+HYPRE_Int hypre_BoomerAMGGetNumFACIterations ( void *data , HYPRE_Int *num_fac_iterations );
 HYPRE_Int hypre_BoomerAMGGetCumNumIterations ( void *data , HYPRE_Int *cum_num_iterations );
 HYPRE_Int hypre_BoomerAMGGetResidual ( void *data , hypre_ParVector **resid );
 HYPRE_Int hypre_BoomerAMGGetRelResidualNorm ( void *data , HYPRE_Real *rel_resid_norm );

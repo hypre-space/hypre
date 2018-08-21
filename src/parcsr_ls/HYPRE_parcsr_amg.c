@@ -992,6 +992,17 @@ HYPRE_BoomerAMGGetNumIterations( HYPRE_Solver  solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGGetNumFACIterations
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int 
+HYPRE_BoomerAMGDGetNumFACIterations ( HYPRE_Solver solver, 
+                                       HYPRE_Int *fac_num_iterations )
+{
+  return ( hypre_BoomerAMGGetNumFACIterations( (void *) solver, fac_num_iterations ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGGetCumNumIterations
  *--------------------------------------------------------------------------*/
 

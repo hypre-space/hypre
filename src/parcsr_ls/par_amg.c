@@ -3435,6 +3435,22 @@ hypre_BoomerAMGGetNumIterations( void     *data,
 }
 
 HYPRE_Int
+hypre_BoomerAMGGetNumFACIterations( void     *data,
+                              HYPRE_Int      *num_fac_iterations )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+   *num_fac_iterations = hypre_ParAMGDataNumFACIterations(amg_data);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
 hypre_BoomerAMGGetCumNumIterations( void     *data,
                                     HYPRE_Int      *cum_num_iterations )
 {

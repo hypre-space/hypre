@@ -15,7 +15,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_FAC 0
+#define DEBUG_FAC 1
 #define DUMP_INTERMEDIATE_SOLNS 0
 
 HYPRE_Int
@@ -38,7 +38,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 
 	HYPRE_Int level, i, j; // loop variables
 	HYPRE_Int numCoarseRelax = 20; // number of relaxations used to solve the coarse grid
-   HYPRE_Int relax_type = 1;
+   HYPRE_Int relax_type = 0;
 
 	// Get the AMG structure
   	hypre_ParAMGData   *amg_data = amg_vdata;
