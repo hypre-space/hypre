@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
@@ -466,9 +466,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          // finalize the recv maps and get final recv buffer size
          for (i = 0; i < num_recvs; i++)
          {
-            // buffers will store number of nodes on each level
-            recv_buffer_size[level][i] = num_levels - level;
-
             // allocate space for each level of the receive map for this proc
             recv_map[level][i] = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
 
@@ -716,19 +713,17 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       // Setup initial num_starting_nodes and starting_nodes (these are the starting nodes when searching for long distance neighbors) !!! I don't think I actually have a good upper bound on sizes here... how to properly allocate/reallocate these? !!!
       HYPRE_Int *num_starting_nodes = hypre_CTAlloc( HYPRE_Int, send_proc_array_size, HYPRE_MEMORY_HOST );
       HYPRE_Int **starting_nodes = hypre_CTAlloc( HYPRE_Int*, send_proc_array_size, HYPRE_MEMORY_HOST );
-      HYPRE_Int max_num_starting_nodes = 0;
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
          finish = hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);
          search_proc_marker[i] = 1;
          num_starting_nodes[i] = finish - start;
-         if (num_starting_nodes[i] > max_num_starting_nodes) max_num_starting_nodes = num_starting_nodes[i];
       }
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
-         starting_nodes[i] = hypre_CTAlloc( HYPRE_Int, max_num_starting_nodes, HYPRE_MEMORY_HOST );
+         starting_nodes[i] = hypre_CTAlloc( HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)), HYPRE_MEMORY_HOST );
          for (j = 0; j < num_starting_nodes[i]; j++)
          {
             starting_nodes[i][j] = hypre_ParCSRCommPkgSendMapElmt(commPkg, j + start );
@@ -1761,7 +1756,7 @@ UnpackSendFlagBuffer(HYPRE_Int *send_flag_buffer, HYPRE_Int **send_flag, HYPRE_I
 {
    HYPRE_Int      level, i, cnt, num_nodes;
    cnt = 0;
-   *send_buffer_size = num_levels - current_level;
+   *send_buffer_size = 0;
    for (level = current_level; level < num_levels; level++)
    {
       num_nodes = send_flag_buffer[cnt++];
