@@ -468,7 +468,7 @@ hypre_MGRCycle( void               *mgr_vdata,
    HYPRE_Real    alpha;
    HYPRE_Real    beta;
 
-  HYPRE_Int            Frelax_method = (mgr_data -> Frelax_method);   
+  HYPRE_Int            *Frelax_method = (mgr_data -> Frelax_method);   
   hypre_ParAMGData    **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);   
   
   HYPRE_Int      restrict_type = (mgr_data -> restrict_type);
@@ -516,7 +516,7 @@ hypre_MGRCycle( void               *mgr_vdata,
 		   /* Relax solution - F-relaxation */
 		   relax_points = -1;
 
-                   if (Frelax_method == 0) 
+                   if (Frelax_method[level] == 0) 
                    { /* (single level) relaxation for A_ff */
 		      if (relax_type == 18)
 		      {
@@ -539,7 +539,7 @@ hypre_MGRCycle( void               *mgr_vdata,
 			                 relax_type,relax_points,relax_weight,omega,NULL, U_array[fine_grid], Vtemp, Ztemp);
 		      }
                    }
-                   else if (Frelax_method == 1) 
+                   else if (Frelax_method[level] == 1) 
       		   {
                       /* v-cycle smoother for A_ff */
 		      for(i=0; i<nsweeps; i++)

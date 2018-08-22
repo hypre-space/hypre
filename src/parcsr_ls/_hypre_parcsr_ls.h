@@ -1651,6 +1651,7 @@ HYPRE_Int hypre_MGRDestroyFrelaxVcycleData( void *mgr_vdata );
 HYPRE_Int hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata, hypre_ParCSRMatrix *A, hypre_ParVector *f, hypre_ParVector *u, HYPRE_Int level);
 HYPRE_Int hypre_MGRFrelaxVcycle ( void *mgr_vdata, hypre_ParVector *f, hypre_ParVector *u );
 HYPRE_Int hypre_MGRSetCpointsByBlock( void *mgr_vdata, HYPRE_Int  block_size, HYPRE_Int  max_num_levels, HYPRE_Int *block_num_coarse_points, HYPRE_Int  **block_coarse_indexes);
+HYPRE_Int hypre_MGRSetCpointsByBlockExp( void *mgr_vdata, HYPRE_Int  block_size, HYPRE_Int  max_num_levels, HYPRE_Int *begin_idx_array, HYPRE_Int *block_num_coarse_points, HYPRE_Int  **block_coarse_indexes);
 HYPRE_Int hypre_MGRCoarsen(hypre_ParCSRMatrix *S,  hypre_ParCSRMatrix *A,HYPRE_Int final_coarse_size,HYPRE_Int *final_coarse_indexes,HYPRE_Int debug_flag,HYPRE_Int **CF_marker,HYPRE_Int last_level);
 HYPRE_Int hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata, HYPRE_Int reserved_coarse_size, HYPRE_Int *reserved_coarse_nodes);
 HYPRE_Int hypre_MGRSetMaxGlobalsmoothIters( void *mgr_vdata, HYPRE_Int max_iter );
@@ -1683,7 +1684,7 @@ HYPRE_Int hypre_MGRSetFineSolverMaxLevels( void *systg_vdata, HYPRE_Int fine_sol
 HYPRE_Int hypre_MGRSetMaxCoarseLevels( void *mgr_vdata, HYPRE_Int maxlev );
 HYPRE_Int hypre_MGRSetBlockSize( void *mgr_vdata, HYPRE_Int bsize );
 HYPRE_Int hypre_MGRSetRelaxType( void *mgr_vdata, HYPRE_Int relax_type );
-HYPRE_Int hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method);
+HYPRE_Int hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method);
 HYPRE_Int hypre_MGRSetRestrictType( void *mgr_vdata, HYPRE_Int interpType);
 HYPRE_Int hypre_MGRSetInterpType( void *mgr_vdata, HYPRE_Int interpType);
 HYPRE_Int hypre_MGRSetNumRelaxSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
@@ -1692,6 +1693,7 @@ HYPRE_Int hypre_MGRSetNumRestrictSweeps( void *mgr_vdata, HYPRE_Int nsweeps );
 HYPRE_Int hypre_MGRSetPrintLevel( void *mgr_vdata, HYPRE_Int print_level );
 HYPRE_Int hypre_MGRSetLogging( void *mgr_vdata, HYPRE_Int logging );
 HYPRE_Int hypre_MGRSetMaxIter( void *mgr_vdata, HYPRE_Int max_iter );
+HYPRE_Int hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts);
 HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 // Accessor functions
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );

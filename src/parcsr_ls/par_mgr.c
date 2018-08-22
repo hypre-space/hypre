@@ -93,12 +93,15 @@ hypre_MGRCreate()
   (mgr_data -> global_smooth_type) = 0;
   
   (mgr_data -> set_non_Cpoints_to_F) = 0;
-  
-  (mgr_data -> Frelax_method) = 0;
+  (mgr_data -> idx_array) = NULL;
+
+  (mgr_data -> Frelax_method) = NULL;
   (mgr_data -> FrelaxVcycleData) = NULL;
   (mgr_data -> max_local_lvls) = 10;
   
   (mgr_data -> print_coarse_system) = 0;
+
+  (mgr_data -> set_c_points_method) = 0;
 
   return (void *) mgr_data;
 }
@@ -247,6 +250,9 @@ hypre_MGRDestroy( void *data )
    hypre_TFree((mgr_data -> reserved_Cpoint_local_indexes), HYPRE_MEMORY_HOST);
   	(mgr_data -> reserved_Cpoint_local_indexes) = NULL;
   }
+  /* Frelax_method */
+  if ((mgr_data) -> Frelax_method)
+    hypre_TFree((mgr_data) -> Frelax_method, HYPRE_MEMORY_HOST);
 
   /* data for V-cycle F-relaxation */
   if (mgr_data -> FrelaxVcycleData) {
@@ -380,6 +386,30 @@ hypre_MGRSetNonCpointsToFpoints( void      *mgr_vdata, HYPRE_Int nonCptToFptFlag
    return hypre_error_flag;
 }
 
+HYPRE_Int
+hypre_MGRSetCpointsByBlockExp( void  *mgr_vdata,
+                          HYPRE_Int  block_size,
+                          HYPRE_Int  max_num_levels,
+                          HYPRE_Int  *begin_idx_array,
+                          HYPRE_Int  *block_num_coarse_points,
+                          HYPRE_Int  **block_coarse_indexes)
+{
+  hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+  HYPRE_Int i;
+  if((mgr_data -> idx_array) != NULL) {
+    hypre_TFree(mgr_data -> idx_array, HYPRE_MEMORY_HOST);
+    (mgr_data -> idx_array) = NULL;
+  }
+  HYPRE_Int *index_array = hypre_CTAlloc(HYPRE_Int, block_size+1, HYPRE_MEMORY_HOST);
+  for (i = 0; i < block_size + 1; i++) {
+    index_array[i] = *(begin_idx_array+i);
+  }
+  hypre_MGRSetCpointsByBlock(mgr_data, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes);
+  (mgr_data -> idx_array) = index_array;
+  (mgr_data -> set_c_points_method) = 1;
+  return hypre_error_flag;
+}
+
 /* Initialize/ set block data information */
 HYPRE_Int
 hypre_MGRSetCpointsByBlock( void      *mgr_vdata,
@@ -441,6 +471,7 @@ hypre_MGRSetCpointsByBlock( void      *mgr_vdata,
    (mgr_data -> block_size) = block_size;
    (mgr_data -> block_num_coarse_indexes) = block_num_coarse_indexes;
    (mgr_data -> block_cf_marker) = block_cf_marker;
+   (mgr_data -> set_c_points_method) = 0;
   
    return hypre_error_flag;
 }
@@ -2535,10 +2566,19 @@ hypre_MGRSetNumRelaxSweeps( void *mgr_vdata, HYPRE_Int nsweeps )
 /* Set the F-relaxation strategy: 0=single level, 1=multi level
 */
 HYPRE_Int
-hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int relax_method )
+hypre_MGRSetFRelaxMethod( void *mgr_vdata, HYPRE_Int *relax_method )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
-   (mgr_data -> Frelax_method) = relax_method;
+   HYPRE_Int i;
+   if((mgr_data -> Frelax_method) != NULL) {
+     hypre_TFree(mgr_data -> Frelax_method, HYPRE_MEMORY_HOST);
+     (mgr_data -> Frelax_method) = NULL;
+   }
+   HYPRE_Int *Frelax_method = hypre_CTAlloc(HYPRE_Int, mgr_data -> max_num_coarse_levels, HYPRE_MEMORY_HOST);
+   for (i=0; i < mgr_data -> max_num_coarse_levels; i++) {
+      Frelax_method[i] = relax_method[i];
+   }
+   (mgr_data -> Frelax_method) = Frelax_method;
    return hypre_error_flag;
 }
 /* Set the type of the restriction type
@@ -2630,6 +2670,14 @@ hypre_MGRSetGlobalsmoothType( void *mgr_vdata, HYPRE_Int iter_type )
 {
    hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
    (mgr_data -> global_smooth_type) = iter_type;
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_MGRSetPMaxElmts( void *mgr_vdata, HYPRE_Int P_max_elmts)
+{
+   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
+   (mgr_data -> P_max_elmts) = P_max_elmts;
    return hypre_error_flag;
 }
 
@@ -2769,7 +2817,7 @@ hypre_MGRWriteSolverParams(void *mgr_vdata)
    hypre_printf("reserved coarse nodes size: %d\n", (mgr_data -> reserved_coarse_size));   
    
    hypre_printf("\n MGR Solver Parameters: \n");
-   hypre_printf("F-relaxation Method: %d\n", (mgr_data -> Frelax_method));
+   //hypre_printf("F-relaxation Method: %d\n", (mgr_data -> Frelax_method));
    hypre_printf("Relax type: %d\n", (mgr_data -> relax_type));
    hypre_printf("Number of relax sweeps: %d\n", (mgr_data -> num_relax_sweeps));
    hypre_printf("Interpolation type: %d\n", (mgr_data -> interp_type));

@@ -3211,11 +3211,33 @@ HYPRE_Int HYPRE_MGRSolve( HYPRE_Solver solver,
                          HYPRE_ParVector x      );
 
 /*--------------------------------------------------------------------------
+ * HYPRE_Int HYPRE_MGRSetCpointsByBlockExp
+ *--------------------------------------------------------------------------*/
+/**
+ * Set the block data (by block) and prescribe the coarse indexes per block 
+ * for each reduction level.
+ *
+ * @param solver [IN] solver or preconditioner object
+ * @param block_size [IN] system block size
+ * @param max_num_levels [IN] maximum number of reduction levels
+ * @param num_block_coarse_points [IN] number of coarse points per block per level
+ * @param block_coarse_indexes [IN] index for each block coarse point per level
+ **/
+HYPRE_Int HYPRE_MGRSetCpointsByBlockExp( HYPRE_Solver solver,
+                         HYPRE_Int  block_size, 
+                         HYPRE_Int max_num_levels,
+                         HYPRE_Int *idx_array, 
+                         HYPRE_Int *num_block_coarse_points, 
+                         HYPRE_Int  **block_coarse_indexes);
+
+/*--------------------------------------------------------------------------
  * HYPRE_Int HYPRE_MGRSetCpointsByBlock
  *--------------------------------------------------------------------------*/
 /**
- * Set the block data and prescribe the coarse indexes per block 
+ * Set the block data (by grid points) and prescribe the coarse indexes per block 
  * for each reduction level.
+ * TODO: Rename the function to reflect the fact that the unknowns are ordered 
+ * by grid points.
  *
  * @param solver [IN] solver or preconditioner object
  * @param block_size [IN] system block size
@@ -3305,7 +3327,7 @@ HYPRE_MGRSetRelaxType(HYPRE_Solver solver, HYPRE_Int relax_type );
  * \end{tabular} 
  **/
 HYPRE_Int
-HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int relax_method );
+HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method );
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetRestrictType
@@ -3488,6 +3510,15 @@ HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int smooth_type );
  **/
 HYPRE_Int
 HYPRE_MGRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetPMaxElmts
+ *--------------------------------------------------------------------------*/
+/**
+ * (Optional) Set the number of maximum points for interpolation operator.
+ **/
+HYPRE_Int
+HYPRE_MGRSetPMaxElmts( HYPRE_Solver solver, HYPRE_Int P_max_elmts);
 
 /*--------------------------------------------------------------------------
  * HYPRE_MGRGetResidualNorm
