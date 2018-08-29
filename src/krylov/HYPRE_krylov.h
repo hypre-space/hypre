@@ -797,6 +797,182 @@ HYPRE_Int HYPRE_LGMRESGetPrintLevel(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_LGMRESGetConverged(HYPRE_Solver  solver,
                              HYPRE_Int          *converged);
 
+/**** added by KS ****** */
+/**
+ * @name COGMRES Solver
+ **/
+/*@{*/
+
+/**
+ * Prepare to solve the system.  The coefficient data in {\tt b} and {\tt x} is
+ * ignored here, but information about the layout of the data may be used.
+ **/
+HYPRE_Int HYPRE_COGMRESSetup(HYPRE_Solver solver,
+                         HYPRE_Matrix A,
+                         HYPRE_Vector b,
+                         HYPRE_Vector x);
+
+/**
+ * Solve the system.
+ **/
+HYPRE_Int HYPRE_COGMRESSolve(HYPRE_Solver solver,
+                         HYPRE_Matrix A,
+                         HYPRE_Vector b,
+                         HYPRE_Vector x);
+
+/**
+ * (Optional) Set the convergence tolerance.
+ **/
+HYPRE_Int HYPRE_COGMRESSetTol(HYPRE_Solver solver,
+                          HYPRE_Real   tol);
+
+/**
+ * (Optional) Set the absolute convergence tolerance (default is 0). 
+ * If one desires
+ * the convergence test to check the absolute convergence tolerance {\it only}, then
+ * set the relative convergence tolerance to 0.0.  (The convergence test is 
+ * $\|r\| \leq$ max(relative$\_$tolerance$\ast \|b\|$, absolute$\_$tolerance).)
+ *
+ **/
+HYPRE_Int HYPRE_COGMRESSetAbsoluteTol(HYPRE_Solver solver,
+                                  HYPRE_Real   a_tol);
+
+/*
+ * RE-VISIT
+ **/
+HYPRE_Int HYPRE_COGMRESSetConvergenceFactorTol(HYPRE_Solver solver, HYPRE_Real cf_tol);
+
+/*
+ * RE-VISIT
+ **/
+HYPRE_Int HYPRE_COGMRESSetMinIter(HYPRE_Solver solver, HYPRE_Int min_iter);
+
+/**
+ * (Optional) Set maximum number of iterations.
+ **/
+HYPRE_Int HYPRE_COGMRESSetMaxIter(HYPRE_Solver solver,
+                              HYPRE_Int          max_iter);
+
+/**
+ * (Optional) Set the maximum size of the Krylov space.
+ **/
+HYPRE_Int HYPRE_COGMRESSetKDim(HYPRE_Solver solver,
+                           HYPRE_Int          k_dim);
+
+/**
+ * (Optional) Set the number of orthogonalizations in COGMRES.
+ **/
+HYPRE_Int HYPRE_COGMRESSetCGS2(HYPRE_Solver solver,
+                           HYPRE_Int          cgs2);
+
+/**
+ * (Optional) Set the preconditioner to use.
+ **/
+HYPRE_Int HYPRE_COGMRESSetPrecond(HYPRE_Solver         solver,
+                              HYPRE_PtrToSolverFcn precond,
+                              HYPRE_PtrToSolverFcn precond_setup,
+                              HYPRE_Solver         precond_solver);
+
+/**
+ * (Optional) Set the amount of logging to do.
+ **/
+HYPRE_Int HYPRE_COGMRESSetLogging(HYPRE_Solver solver,
+                              HYPRE_Int          logging);
+
+/**
+ * (Optional) Set the amount of printing to do to the screen.
+ **/
+HYPRE_Int HYPRE_COGMRESSetPrintLevel(HYPRE_Solver solver,
+                                 HYPRE_Int          level);
+
+/**
+ * Return the number of iterations taken.
+ **/
+HYPRE_Int HYPRE_COGMRESGetNumIterations(HYPRE_Solver  solver,
+                                    HYPRE_Int          *num_iterations);
+
+/**
+ * Return the norm of the final relative residual.
+ **/
+HYPRE_Int HYPRE_COGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
+                                                HYPRE_Real   *norm);
+
+/**
+ * Return the residual.
+ **/
+HYPRE_Int HYPRE_COGMRESGetResidual(HYPRE_Solver   solver,
+                               void         **residual);
+
+/**
+ **/
+HYPRE_Int HYPRE_COGMRESGetTol(HYPRE_Solver  solver,
+                          HYPRE_Real   *tol);
+
+/*
+ * RE-VISIT
+ **/
+HYPRE_Int HYPRE_COGMRESGetConvergenceFactorTol(HYPRE_Solver solver, HYPRE_Real *cf_tol);
+
+/*
+ * RE-VISIT
+ **/
+//HYPRE_Int HYPRE_COGMRESGetStopCrit(HYPRE_Solver solver, HYPRE_Int *stop_crit);
+//HYPRE_Int HYPRE_COGMRESSetStopCrit(HYPRE_Solver solver, HYPRE_Int *stop_crit);
+
+/*
+ * RE-VISIT
+ **/
+HYPRE_Int HYPRE_COGMRESGetMinIter(HYPRE_Solver solver, HYPRE_Int *min_iter);
+
+/**
+ **/
+HYPRE_Int HYPRE_COGMRESGetMaxIter(HYPRE_Solver  solver,
+                              HYPRE_Int          *max_iter);
+
+/**
+ **/
+HYPRE_Int HYPRE_COGMRESGetKDim(HYPRE_Solver  solver,
+                           HYPRE_Int          *k_dim);
+
+/**
+ **/
+HYPRE_Int HYPRE_COGMRESGetCGS2(HYPRE_Solver  solver,
+                           HYPRE_Int          *cgs2);
+
+/**
+ **/
+HYPRE_Int HYPRE_COGMRESGetPrecond(HYPRE_Solver  solver,
+                              HYPRE_Solver *precond_data_ptr);
+
+/**
+ **/
+HYPRE_Int HYPRE_COGMRESGetLogging(HYPRE_Solver  solver,
+                              HYPRE_Int          *level);
+
+/**
+ **/
+HYPRE_Int HYPRE_COGMRESGetPrintLevel(HYPRE_Solver  solver,
+                                 HYPRE_Int          *level);
+
+/**
+ **/
+HYPRE_Int HYPRE_COGMRESGetConverged(HYPRE_Solver  solver,
+                                HYPRE_Int          *converged);
+
+/**
+ * (Optional) Set a user-defined function to modify solve-time preconditioner
+ * attributes.
+ **/
+HYPRE_Int HYPRE_COGMRESSetModifyPC(HYPRE_Solver           solver,
+                               HYPRE_PtrToModifyPCFcn modify_pc);
+
+
+
+
+/****** KS code ends here **************************************************/
+
+
+
 /*@}*/
 
 /*--------------------------------------------------------------------------

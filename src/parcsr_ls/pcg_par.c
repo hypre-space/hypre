@@ -66,7 +66,10 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
    hypre_ParVector *vector = (hypre_ParVector *) vvector;
    hypre_ParVector **new_vector;
    HYPRE_Int i;
+   //HYPRE_Complex *array_data;
 
+   //size = hypre_VectorSize(hypre_ParVectorLocalVector(vector));
+   //array_data = hypre_CTAlloc(HYPRE_Complex, (n*size), HYPRE_MEMORY_SHARED);
    new_vector = hypre_CTAlloc(hypre_ParVector*, n, HYPRE_MEMORY_HOST);
    for (i=0; i < n; i++)
    {
@@ -74,6 +77,9 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
                                              hypre_ParVectorGlobalSize(vector),	
                                              hypre_ParVectorPartitioning(vector) );
       hypre_ParVectorSetPartitioningOwner(new_vector[i],0);
+      //if (i) hypre_VectorOwnsData(hypre_ParVectorLocalVector(new_vector[i]))=0;
+      //hypre_VectorData(hypre_ParVectorLocalVector(vector)) = &array_data[i*size];
+      //hypre_ParVectorActualLocalSize(new_vector[i]) = size;
       hypre_ParVectorInitialize(new_vector[i]);
    }
 
@@ -167,6 +173,28 @@ hypre_ParKrylovInnerProd( void *x,
                                       (hypre_ParVector *) y ) );
 }
 
+/*--------------------------------------------------------------------------
+ * hypre_ParKrylovMassInnerProd 
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_ParKrylovMassInnerProd( void *x, 
+                          void **y, HYPRE_Int k, void  * result )
+{
+   return ( hypre_ParVectorMassInnerProd( (hypre_ParVector *) x,(hypre_ParVector **) y, k, (HYPRE_Real*)result ) );
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_ParKrylovMassDotpTwo
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+hypre_ParKrylovMassDotpTwo( void *x, void *y, 
+                          void **z, HYPRE_Int k, void  *result_x, void *result_y )
+{
+   return ( hypre_ParVectorMassDotpTwo( (hypre_ParVector *) x, (hypre_ParVector *) y, (hypre_ParVector **) z, k, 
+            (HYPRE_Real *)result_x, (HYPRE_Real *)result_y ) );
+}
+
+
 
 /*--------------------------------------------------------------------------
  * hypre_ParKrylovCopyVector
@@ -213,6 +241,21 @@ hypre_ParKrylovAxpy( HYPRE_Complex alpha,
    return ( hypre_ParVectorAxpy( alpha, (hypre_ParVector *) x,
                                  (hypre_ParVector *) y ) );
 }
+
+/*--------------------------------------------------------------------------
+ * hypre_ParKrylovMassAxpy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_ParKrylovMassAxpy( HYPRE_Real * alpha,
+                     void   **x,
+                     void   *y ,
+                     HYPRE_Int k){
+   return ( hypre_ParVectorMassAxpy( alpha, (hypre_ParVector **) x,
+                                 (hypre_ParVector *) y ,  k));
+}
+
+
 
 /*--------------------------------------------------------------------------
  * hypre_ParKrylovCommInfo

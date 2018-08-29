@@ -70,6 +70,7 @@ FILES =\
  HYPRE_parcsr_cgnr.c\
  HYPRE_parcsr_Euclid.c\
  HYPRE_parcsr_gmres.c\
+ HYPRE_parcsr_cogmres.c\
  HYPRE_parcsr_flexgmres.c\
  HYPRE_parcsr_lgmres.c\
  HYPRE_parcsr_hybrid.c\

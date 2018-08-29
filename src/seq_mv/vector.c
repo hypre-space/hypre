@@ -550,6 +550,42 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
 }
 
 /*--------------------------------------------------------------------------
+ * hypre_SeqVectorMassAxpy
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_SeqVectorMassAxpy( HYPRE_Complex *alpha,
+                     hypre_Vector **x,
+                     hypre_Vector  *y, HYPRE_Int k)
+{
+   HYPRE_Complex **x_data;
+   HYPRE_Complex  *y_data = hypre_VectorData(y);
+   HYPRE_Int       size   = hypre_VectorSize(x[0]);
+           
+   HYPRE_Int      i, j;
+           
+   size *=hypre_VectorNumVectors(x[0]);
+
+   x_data = hypre_TAlloc(HYPRE_Complex *, k, HYPRE_MEMORY_SHARED);
+
+   for (i=0; i < k; i++)
+      x_data[i] = hypre_VectorData(x[i]);
+
+   for (j = 0; j < k; j++)
+   {
+#if defined(HYPRE_USING_OPENMP)
+#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < size; i++)
+         y_data[i] += alpha[j] * x_data[j][i];
+   }
+
+   hypre_TFree(x_data, HYPRE_MEMORY_SHARED);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
  * hypre_SeqVectorInnerProd
  *--------------------------------------------------------------------------*/
 
@@ -560,6 +596,7 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
   return hypre_SeqVectorInnerProdDevice(x,y);
 #endif
 #ifdef HYPRE_PROFILE
+   hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
 
@@ -597,6 +634,85 @@ HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
 #endif
 
    return result;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorMassInnerProd
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_SeqVectorMassInnerProd( hypre_Vector *x,
+                       hypre_Vector **y, HYPRE_Int k, HYPRE_Real *result)
+{
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex **y_data;
+   HYPRE_Real res;
+   HYPRE_Int      size   = hypre_VectorSize(x);
+           
+   HYPRE_Int      i, j;
+
+   size *=hypre_VectorNumVectors(x);
+
+   y_data = hypre_TAlloc(HYPRE_Complex *, k, HYPRE_MEMORY_SHARED);
+   for (i=0; i < k; i++)
+      y_data[i] = hypre_VectorData(y[i]);
+
+   for (j = 0; j < k; j++)
+   {
+      res = 0;
+#if defined(HYPRE_USING_OPENMP)
+#pragma omp parallel for private(i) reduction(+:res) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < size; i++)
+         res += hypre_conj(y_data[j][i]) * x_data[i];
+      result[j] = res;
+   }
+
+   hypre_TFree(y_data, HYPRE_MEMORY_SHARED);
+
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_SeqVectorMassDotpTwo
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int hypre_SeqVectorMassDotpTwo( hypre_Vector *x, hypre_Vector *y,
+                       hypre_Vector **z, HYPRE_Int k, 
+                       HYPRE_Real *result_x, HYPRE_Real *result_y)
+{
+   HYPRE_Complex *x_data = hypre_VectorData(x);
+   HYPRE_Complex *y_data = hypre_VectorData(y);
+   HYPRE_Complex **z_data;
+   HYPRE_Real res_x, res_y;
+   HYPRE_Int      size   = hypre_VectorSize(x);
+           
+   HYPRE_Int      i, j;
+
+   size *=hypre_VectorNumVectors(x);
+
+   z_data = hypre_TAlloc(HYPRE_Complex *, k, HYPRE_MEMORY_SHARED);
+   for (i=0; i < k; i++)
+      z_data[i] = hypre_VectorData(z[i]);
+
+   for (j = 0; j < k; j++)
+   {
+      res_x = 0;
+      res_y = 0;
+#if defined(HYPRE_USING_OPENMP)
+#pragma omp parallel for private(i) reduction(+:res_x,res_y) HYPRE_SMP_SCHEDULE
+#endif
+      for (i = 0; i < size; i++)
+      {
+         res_x += hypre_conj(z_data[j][i]) * x_data[i];
+         res_y += hypre_conj(z_data[j][i]) * y_data[i];
+      }
+      result_x[j] = res_x;
+      result_y[j] = res_y;
+   }
+
+   hypre_TFree(z_data, HYPRE_MEMORY_SHARED);
+
+   return hypre_error_flag;
 }
 
 /*--------------------------------------------------------------------------

@@ -30,6 +30,7 @@ HEADERS =\
  bicgstab.h\
  cgnr.h\
  gmres.h\
+ cogmres.h\
  flexgmres.h\
  lgmres.h\
  pcg.h\
@@ -41,11 +42,13 @@ FILES =\
  bicgstab.c\
  cgnr.c\
  gmres.c\
+ cogmres.c\
  flexgmres.c\
  lgmres.c\
  HYPRE_bicgstab.c\
  HYPRE_cgnr.c\
  HYPRE_gmres.c\
+ HYPRE_cogmres.c\
  HYPRE_lgmres.c\
  HYPRE_flexgmres.c\
  HYPRE_pcg.c\

@@ -2313,6 +2313,76 @@ HYPRE_Int HYPRE_ParCSRGMRESGetNumIterations(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                         HYPRE_Real   *norm);
 
+/* ParCSR CO-GMRES, author: KS */
+
+/**
+ * Create a solver object.
+ **/
+HYPRE_Int HYPRE_ParCSRCOGMRESCreate(MPI_Comm      comm,
+                                  HYPRE_Solver *solver);
+
+/**
+ * Destroy a solver object.
+ **/
+HYPRE_Int HYPRE_ParCSRCOGMRESDestroy(HYPRE_Solver solver);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetup(HYPRE_Solver       solver,
+                                 HYPRE_ParCSRMatrix A,
+                                 HYPRE_ParVector    b,
+                                 HYPRE_ParVector    x);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSolve(HYPRE_Solver       solver,
+                                 HYPRE_ParCSRMatrix A,
+                                 HYPRE_ParVector    b,
+                                 HYPRE_ParVector    x);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetKDim(HYPRE_Solver solver,
+                                   HYPRE_Int    k_dim);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetCGS2(HYPRE_Solver solver,
+                                   HYPRE_Int    cgs2);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetTol(HYPRE_Solver solver,
+                                  HYPRE_Real   tol);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetAbsoluteTol(HYPRE_Solver solver,
+                                          HYPRE_Real   a_tol);
+
+/*
+ * RE-VISIT
+ **/
+HYPRE_Int HYPRE_ParCSRCOGMRESSetMinIter(HYPRE_Solver solver,
+                                      HYPRE_Int    min_iter);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetMaxIter(HYPRE_Solver solver,
+                                      HYPRE_Int    max_iter);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetPrecond(HYPRE_Solver             solver,
+                                      HYPRE_PtrToParSolverFcn  precond,
+                                      HYPRE_PtrToParSolverFcn  precond_setup,
+                                      HYPRE_Solver             precond_solver);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESGetPrecond(HYPRE_Solver  solver,
+                                      HYPRE_Solver *precond_data);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetLogging(HYPRE_Solver solver,
+                                      HYPRE_Int    logging);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetPrintLevel(HYPRE_Solver solver,
+                                         HYPRE_Int    print_level);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESGetNumIterations(HYPRE_Solver  solver,
+                                            HYPRE_Int    *num_iterations);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
+                                                        HYPRE_Real   *norm);
+
+
+
+/* end of parCSR CO-GMRES */
+
+
+
 /*@}*/
 
 /*--------------------------------------------------------------------------
