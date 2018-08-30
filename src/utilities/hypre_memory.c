@@ -291,7 +291,6 @@ hypre_MAlloc_core(size_t size, HYPRE_Int zeroinit, HYPRE_Int location)
 
    if (!ptr)
    {
-      printf("%d\n", location);
       hypre_OutOfMemory(size);
       exit(0);
    }

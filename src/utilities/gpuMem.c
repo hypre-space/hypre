@@ -3,13 +3,10 @@
 #endif
 #include "_hypre_utilities.h"
 
-
-#include <stdlib.h>
-#include <stdint.h>
-#include <sched.h>
-#include <errno.h>
-#include <omp.h>
-#include <mpi.h>
+//#include <stdlib.h>
+//#include <stdint.h>
+//#include <sched.h>
+//#include <errno.h>
 
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
 size_t memsize(const void *ptr){
@@ -70,42 +67,45 @@ void hypre_GPUInit(hypre_int use_device)
         //hypre_printf("num Devices %d\n", nDevices);
       }
       else if (nDevices==4)
-      { // THIS IS A HACK THAT WORKS ONLY AT LLNL
-	/* No mpibind or it is a single rank run */
-	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-	//affs(myid);
-	MPI_Comm node_comm;
-	MPI_Info info;
-	MPI_Info_create(&info);
-	MPI_Comm_split_type(hypre_MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, myid, info, &node_comm);
-	hypre_int round_robin=1;
-	hypre_int myNodeid, NodeSize;
-	MPI_Comm_rank(node_comm, &myNodeid);
-	MPI_Comm_size(node_comm, &NodeSize);
-	if (round_robin){
-	  /* Round robin allocation of GPUs. Does not account for affinities */
-	  HYPRE_DEVICE=myNodeid%nDevices; 
-	  hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
-	  cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
-	  hypre_printf("WARNING:: Code running without mpibind\n");
-	  hypre_printf("Global ID = %d , Node ID %d running on device %d of %d \n",myid,myNodeid,HYPRE_DEVICE,nDevices);
-	} else {
-	  /* Try to set the GPU based on process binding */
-	  /* works correcly for all cases */
-	  MPI_Comm numa_comm;
-	  MPI_Comm_split(node_comm,getnuma(),myNodeid,&numa_comm);
-	  hypre_int myNumaId,NumaSize;
-	  MPI_Comm_rank(numa_comm, &myNumaId);
-	  MPI_Comm_size(numa_comm, &NumaSize);
-	  hypre_int domain_devices=nDevices/2; /* Again hardwired for 2 NUMA domains */
-	  HYPRE_DEVICE = getnuma()*2+myNumaId%domain_devices;
-	  hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
-	  hypre_printf("WARNING:: Code running without mpibind\n");
-	  hypre_printf("NUMA %d GID %d , NodeID %d NumaID %d running on device %d (RR=%d) of %d \n",getnuma(),myid,myNodeid,myNumaId,HYPRE_DEVICE,myNodeid%nDevices,nDevices);
-	  
-	}
-	
-	MPI_Info_free(&info);
+      {
+         // THIS IS A HACK THAT WORKS ONLY AT LLNL
+         /* No mpibind or it is a single rank run */
+         hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+         //affs(myid);
+         hypre_MPI_Comm node_comm;
+         hypre_MPI_Info info;
+         hypre_MPI_Info_create(&info);
+         hypre_MPI_Comm_split_type(hypre_MPI_COMM_WORLD, hypre_MPI_COMM_TYPE_SHARED, myid, info, &node_comm);
+         hypre_int round_robin=1;
+         hypre_int myNodeid, NodeSize;
+         hypre_MPI_Comm_rank(node_comm, &myNodeid);
+         hypre_MPI_Comm_size(node_comm, &NodeSize);
+         if (round_robin)
+         {
+            /* Round robin allocation of GPUs. Does not account for affinities */
+            HYPRE_DEVICE=myNodeid%nDevices; 
+            hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
+            cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
+            hypre_printf("WARNING:: Code running without mpibind\n");
+            hypre_printf("Global ID = %d , Node ID %d running on device %d of %d \n",myid,myNodeid,HYPRE_DEVICE,nDevices);
+         }
+         else
+         {
+            /* Try to set the GPU based on process binding */
+            /* works correcly for all cases */
+            hypre_MPI_Comm numa_comm;
+            hypre_MPI_Comm_split(node_comm,getnuma(),myNodeid,&numa_comm);
+            hypre_int myNumaId,NumaSize;
+            hyper_MPI_Comm_rank(numa_comm, &myNumaId);
+            hypre_MPI_Comm_size(numa_comm, &NumaSize);
+            hypre_int domain_devices=nDevices/2; /* Again hardwired for 2 NUMA domains */
+            HYPRE_DEVICE = getnuma()*2+myNumaId%domain_devices;
+            hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
+            hypre_printf("WARNING:: Code running without mpibind\n");
+            hypre_printf("NUMA %d GID %d , NodeID %d NumaID %d running on device %d (RR=%d) of %d \n",getnuma(),myid,myNodeid,myNumaId,HYPRE_DEVICE,myNodeid%nDevices,nDevices);
+
+         }
+         hypre_MPI_Info_free(&info);
       }
       else
       {
@@ -566,6 +566,9 @@ void printlist(node *head,hypre_int nc){
 #endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
+
+#include <omp.h>
+
 /* num: number of bytes */
 HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
 			   const char *type1, const char *type2) {

@@ -108,17 +108,19 @@ extern "C" {
  * and is defined in `HYPRE_utilities.h'.
  *--------------------------------------------------------------------------*/
 
-#define MPI_Comm            hypre_MPI_Comm            
-#define MPI_Group           hypre_MPI_Group            
-#define MPI_Request         hypre_MPI_Request          
-#define MPI_Datatype        hypre_MPI_Datatype         
-#define MPI_Status          hypre_MPI_Status           
-#define MPI_Op              hypre_MPI_Op               
-#define MPI_Aint            hypre_MPI_Aint             
+#define MPI_Comm            hypre_MPI_Comm
+#define MPI_Group           hypre_MPI_Group
+#define MPI_Request         hypre_MPI_Request
+#define MPI_Datatype        hypre_MPI_Datatype
+#define MPI_Status          hypre_MPI_Status
+#define MPI_Op              hypre_MPI_Op
+#define MPI_Aint            hypre_MPI_Aint
+#define MPI_Info            hypre_MPI_Info
 
-#define MPI_COMM_WORLD      hypre_MPI_COMM_WORLD       
-#define MPI_COMM_NULL       hypre_MPI_COMM_NULL
-#define MPI_COMM_SELF       hypre_MPI_COMM_SELF
+#define MPI_COMM_WORLD       hypre_MPI_COMM_WORLD
+#define MPI_COMM_NULL        hypre_MPI_COMM_NULL
+#define MPI_COMM_SELF        hypre_MPI_COMM_SELF
+#define MPI_COMM_TYPE_SHARED hypre_MPI_COMM_TYPE_SHARED
 
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
@@ -161,6 +163,7 @@ extern "C" {
 #define MPI_Comm_rank       hypre_MPI_Comm_rank        
 #define MPI_Comm_free       hypre_MPI_Comm_free        
 #define MPI_Comm_split      hypre_MPI_Comm_split        
+#define MPI_Comm_split_type hypre_MPI_Comm_split_type
 #define MPI_Group_incl      hypre_MPI_Group_incl       
 #define MPI_Group_free      hypre_MPI_Group_free        
 #define MPI_Address         hypre_MPI_Address        
@@ -201,6 +204,7 @@ extern "C" {
 #define MPI_Op_free         hypre_MPI_Op_free        
 #define MPI_Op_create       hypre_MPI_Op_create
 #define MPI_User_function   hypre_MPI_User_function
+#define MPI_Info_create     hypre_MPI_Info_create
 
 /*--------------------------------------------------------------------------
  * Types, etc.
@@ -218,12 +222,16 @@ typedef struct
    HYPRE_Int hypre_MPI_SOURCE;
    HYPRE_Int hypre_MPI_TAG;
 } hypre_MPI_Status;
+
 typedef HYPRE_Int  hypre_MPI_Op;
 typedef HYPRE_Int  hypre_MPI_Aint;
+typedef HYPRE_Int  hypre_MPI_Info;
 
-#define  hypre_MPI_COMM_SELF 1
-#define  hypre_MPI_COMM_WORLD 0
+#define  hypre_MPI_COMM_SELF   1
+#define  hypre_MPI_COMM_WORLD  0
 #define  hypre_MPI_COMM_NULL  -1
+
+#define  hypre_MPI_COMM_TYPE_SHARED 0
 
 #define  hypre_MPI_BOTTOM  0x0
 
@@ -263,12 +271,14 @@ typedef MPI_Datatype hypre_MPI_Datatype;
 typedef MPI_Status   hypre_MPI_Status;
 typedef MPI_Op       hypre_MPI_Op;
 typedef MPI_Aint     hypre_MPI_Aint;
+typedef MPI_Info     hypre_MPI_Info;
 typedef MPI_User_function    hypre_MPI_User_function;
 
-#define  hypre_MPI_COMM_WORLD MPI_COMM_WORLD
-#define  hypre_MPI_COMM_NULL  MPI_COMM_NULL
-#define  hypre_MPI_BOTTOM     MPI_BOTTOM
-#define  hypre_MPI_COMM_SELF  MPI_COMM_SELF
+#define  hypre_MPI_COMM_WORLD         MPI_COMM_WORLD
+#define  hypre_MPI_COMM_NULL          MPI_COMM_NULL
+#define  hypre_MPI_BOTTOM             MPI_BOTTOM
+#define  hypre_MPI_COMM_SELF          MPI_COMM_SELF
+#define  hypre_MPI_COMM_TYPE_SHARED   MPI_COMM_TYPE_SHARED 
 
 #define  hypre_MPI_FLOAT   MPI_FLOAT
 #define  hypre_MPI_DOUBLE  MPI_DOUBLE
@@ -362,6 +372,9 @@ HYPRE_Int hypre_MPI_Type_commit( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
 HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int commute , hypre_MPI_Op *op );
+HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
+HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
+HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 
 #ifdef __cplusplus
 }
@@ -1481,8 +1494,6 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 
 #if defined(HYPRE_USING_CUDA)
 
-#include <omp.h>
-
 extern "C++" {
 
 extern void *cuda_reduce_buffer;
@@ -1705,278 +1716,6 @@ struct ReduceSum
 } // extern "C++"
 
 #endif
-
-
-
-
-
-
-
-
-
-
-#if defined(HYPRE_USING_CUDA)
-
-extern HYPRE_Int hypre_exec_policy;
-extern char tmp_print[10];
-extern HYPRE_Int hypre_box_print;
-extern double  t_start, t_end;
-extern HYPRE_Int time_box ;
-#define HYPRE_MIN_GPU_SIZE (131072)
-
-#define RAJA_MAX_REDUCE_VARS (8)
-#define RAJA_CUDA_MAX_NUM_BLOCKS (512*512*512)
-#define RAJA_CUDA_REDUCE_BLOCK_LENGTH RAJA_CUDA_MAX_NUM_BLOCKS
-#define RAJA_CUDA_REDUCE_TALLY_LENGTH RAJA_MAX_REDUCE_VARS
-#define RAJA_CUDA_REDUCE_VAR_MAXSIZE 16
-#define COHERENCE_BLOCK_SIZE 64
-
-#define BLOCKSIZE 512
-#define WARP_SIZE 32
-#define BLOCK_SIZE 512
-
-typedef HYPRE_Real CudaReductionBlockDataType;
-typedef HYPRE_Int GridSizeType;
-
-#define hypre_SetDeviceOn() hypre_exec_policy = HYPRE_MEMORY_DEVICE
-#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
-
-int getCudaReductionId();
-CudaReductionBlockDataType* getCudaReductionMemBlock(int id);
-void releaseCudaReductionId(int id);
-void initCudaReductionMemBlock();
-void freeCudaReductionMemBlock();
-CudaReductionBlockDataType* getCPUReductionMemBlock(int id);
-void releaseCPUReductionId(int id);
-void freeCPUReductionMemBlock();
-
-
-
-extern "C++" {
-
-template<typename T>
-__device__ __forceinline__ T hypre_shfl_xor(T var, HYPRE_Int laneMask)
-{
-  const HYPRE_Int int_sizeof_T = 
-      (sizeof(T) + sizeof(HYPRE_Int) - 1) / sizeof(HYPRE_Int);
-  union {
-    T var;
-    HYPRE_Int arr[int_sizeof_T];
-  } Tunion;
-  Tunion.var = var;
-
-  for(HYPRE_Int i = 0; i < int_sizeof_T; ++i) {
-    Tunion.arr[i] =
-#ifndef CUDART_VERSION
-      #error CUDART_VERSION Undefined!
-#elif (CUDART_VERSION >= 9000)
-      __shfl_xor_sync(0xFFFFFFFF, Tunion.arr[i], laneMask);
-#elif (CUDART_VERSION <= 8000)
-      __shfl_xor(Tunion.arr[i], laneMask);
-#endif
-  }
-  return Tunion.var;
-}
-
-#define RAJA_MAX(a, b) (((b) > (a)) ? (b) : (a))
-
-template <typename T>
-class ReduceSum2
-{
-public:
-   //
-   // Constructor takes initial reduction value (default ctor is disabled).
-   // Ctor only executes on the host.
-   //
-  explicit ReduceSum2( T init_val,HYPRE_Int location )
-   {
-      data_location = location;
-      
-      m_is_copy = false;
-
-      m_init_val = init_val;
-      m_reduced_val = static_cast<T>(0);
-
-      m_myID = getCudaReductionId();
-
-      if (data_location == HYPRE_MEMORY_DEVICE)
-      {
-	 m_blockdata = getCudaReductionMemBlock(m_myID) ;
-	 m_blockoffset = 1;
-      
-	 // Entire shared memory block must be initialized to zero so
-	 // sum reduction is correct.
-	 size_t len = RAJA_CUDA_REDUCE_BLOCK_LENGTH;
-	 cudaMemset(&m_blockdata[m_blockoffset], 0,
-		    sizeof(CudaReductionBlockDataType)*len); 
-
-	 m_max_grid_size = m_blockdata;
-	 m_max_grid_size[0] = 0;
-
-	 cudaDeviceSynchronize();
-      }
-      else if (data_location == HYPRE_MEMORY_HOST)
-      {
-	 m_blockdata = getCPUReductionMemBlock(m_myID);
-	 HYPRE_Int nthreads = omp_get_max_threads();
-	 #pragma omp parallel for schedule(static, 1)
-	 for (HYPRE_Int i = 0; i < nthreads; ++i ) {
-	    m_blockdata[i*s_block_offset] = 0 ;
-	 }
-      }
-   }
-
-   //
-   // Copy ctor executes on both host and device.
-   //
-   __host__ __device__ 
-   ReduceSum2( const ReduceSum2< T >& other )
-   {
-      *this = other;
-      m_is_copy = true;
-   }
-
-   //
-   // Destructor executes on both host and device.
-   // Destruction on host releases the unique id for others to use. 
-   //
-   __host__ __device__ 
-   ~ReduceSum2< T >()
-   {
-      if (!m_is_copy) {
-	{
-#if defined( __CUDA_ARCH__ )
-#else
-	   releaseCudaReductionId(m_myID);
-#endif
-	}
-      }
-   }
-
-   //
-   // Operator to retrieve reduced sum value (before object is destroyed).
-   // Accessor only operates on host.
-   //
-   __host__ __device__
-   operator T()
-   {
-     
-     if (data_location == HYPRE_MEMORY_DEVICE) 
-     {
-        cudaDeviceSynchronize() ;
-	m_blockdata[m_blockoffset] = static_cast<T>(0);
-
-	size_t grid_size = m_max_grid_size[0];
-	for (size_t i=1; i <= grid_size; ++i) {
-	   m_blockdata[m_blockoffset] += m_blockdata[m_blockoffset+i];
-	}
-	m_reduced_val = m_init_val + static_cast<T>(m_blockdata[m_blockoffset]);
-     }
-     else if (data_location == HYPRE_MEMORY_HOST)
-     {
-#if defined( __CUDA_ARCH__ )
-#else
-		 T tmp_reduced_val = static_cast<T>(0);
-	HYPRE_Int nthreads = omp_get_max_threads();
-	for ( HYPRE_Int i = 0; i < nthreads; ++i ) {
-	   tmp_reduced_val += static_cast<T>(m_blockdata[i*s_block_offset]);
-	}
-	m_reduced_val = m_init_val + tmp_reduced_val;
-#endif
-     }
-     return m_reduced_val;
-   }
-
-   //
-   // += operator to accumulate arg value in the proper shared
-   // memory block location.
-   //
-   __host__ __device__
-   ReduceSum2< T > operator+=(T val) const
-   {  
-#if defined( __CUDA_ARCH__ )
-      if (data_location == HYPRE_MEMORY_DEVICE)
-      {	
-        __shared__ T sd[BLOCK_SIZE];
-
-	if ( blockIdx.x  + blockIdx.y  + blockIdx.z +
-	     threadIdx.x + threadIdx.y + threadIdx.z == 0 ) {
-           HYPRE_Int numBlock = gridDim.x * gridDim.y * gridDim.z ;
-           m_max_grid_size[0] = RAJA_MAX( numBlock,  m_max_grid_size[0] );
-	}
-
-       // initialize shared memory
-	for ( HYPRE_Int i = BLOCK_SIZE / 2; i > 0; i /=2 ) {     
-          // this descends all the way to 1
-           if ( threadIdx.x < i ) {
-	      sd[threadIdx.x + i] = m_reduced_val;  
-	   }
-	}
-	__syncthreads();
-
-	sd[threadIdx.x] = val;
-
-	T temp = 0;
-	__syncthreads();
-
-	for (HYPRE_Int i = BLOCK_SIZE / 2; i >= WARP_SIZE; i /= 2) {
-	   if (threadIdx.x < i) {
-	      sd[threadIdx.x] += sd[threadIdx.x + i];
-	   }
-	   __syncthreads();
-	}
-
-	if (threadIdx.x < WARP_SIZE) {
-	   temp = sd[threadIdx.x];
-	   for (HYPRE_Int i = WARP_SIZE / 2; i > 0; i /= 2) {
-	      temp += hypre_shfl_xor(temp, i);
-	   }
-	}
-
-	// one thread adds to gmem, we skip m_blockdata[m_blockoffset]
-	// because we will be accumlating into this
-	if (threadIdx.x == 0) {
-	   HYPRE_Int blockID = m_blockoffset + 1 + blockIdx.x +
-	     blockIdx.y*gridDim.x +
-	     blockIdx.z*gridDim.x*gridDim.y ;
-	   m_blockdata[blockID] += temp ;
-	}
-      }
-#else
-      if (data_location == HYPRE_MEMORY_HOST)
-      {
-         HYPRE_Int tid = omp_get_thread_num();
-         m_blockdata[tid*s_block_offset] += val;
-      }
-#endif
-      return *this ;
-   }
-
-private:
-   //
-   // Default ctor is declared private and not implemented.
-   //
-   ReduceSum2< T >();
-
-   bool m_is_copy;
-   HYPRE_Int m_myID;
-   HYPRE_Int data_location;
-
-   T m_init_val;
-   T m_reduced_val;
-   static const HYPRE_Int s_block_offset = 
-      COHERENCE_BLOCK_SIZE/sizeof(CudaReductionBlockDataType);
-   CudaReductionBlockDataType* m_blockdata ;
-   
-   HYPRE_Int m_blockoffset;
-
-   CudaReductionBlockDataType* m_max_grid_size;
-};
-
-}
-
-#endif
-
 
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.

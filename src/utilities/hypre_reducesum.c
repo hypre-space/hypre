@@ -35,7 +35,7 @@ void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out)
    T tmp[1024];
    hypre_TMemcpy(tmp, d_arr, T, N, HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
    *h_out = 0.0;
-   for (int i=0; i<N; i++)
+   for (HYPRE_Int i=0; i<N; i++)
    {
       *h_out += tmp[i];
    }

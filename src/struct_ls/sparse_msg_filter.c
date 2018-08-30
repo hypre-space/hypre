@@ -335,7 +335,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_Index            stride;
    hypre_Index            stridev;
                         
-   HYPRE_Int              i, nboxes;
+   HYPRE_Int              i;
 
    /*----------------------------------------------------------
     * Initialize some things
@@ -359,7 +359,6 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_SetIndex3(cindex, 0, 0, 0);
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
-   nboxes        = hypre_BoxArraySize(compute_boxes);
    
    HYPRE_Int     **data_indices = hypre_StructMatrixDataIndices(A);
    HYPRE_Complex  *matrixA_data = hypre_StructMatrixData(A);
@@ -367,6 +366,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_Index    *stencil_shape_d;
 
 #if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)) && (HYPRE_MEMORY_HOST_ACT != HYPRE_MEMORY_SHARED)
+   HYPRE_Int nboxes = hypre_BoxArraySize(compute_boxes);
    data_indices_d  = hypre_TAlloc(HYPRE_Int,   stencil_size*nboxes, HYPRE_MEMORY_DEVICE);
    stencil_shape_d = hypre_TAlloc(hypre_Index, stencil_size,        HYPRE_MEMORY_DEVICE);
    hypre_TMemcpy(data_indices_d, data_indices[0], HYPRE_Int, stencil_size*nboxes,
@@ -374,7 +374,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, 
                  HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
 #else
-   data_indices_d  = data_indices[i];
+   data_indices_d  = data_indices[0];
    stencil_shape_d = stencil_shape;
 #endif
 
