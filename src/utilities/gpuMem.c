@@ -3,11 +3,6 @@
 #endif
 #include "_hypre_utilities.h"
 
-//#include <stdlib.h>
-//#include <stdint.h>
-//#include <sched.h>
-//#include <errno.h>
-
 #if defined(HYPRE_USING_UNIFIED_MEMORY)
 size_t memsize(const void *ptr){
    return ((size_t*)ptr)[-HYPRE_MEM_PAD_LEN];
@@ -96,7 +91,7 @@ void hypre_GPUInit(hypre_int use_device)
             hypre_MPI_Comm numa_comm;
             hypre_MPI_Comm_split(node_comm,getnuma(),myNodeid,&numa_comm);
             hypre_int myNumaId,NumaSize;
-            hyper_MPI_Comm_rank(numa_comm, &myNumaId);
+            hypre_MPI_Comm_rank(numa_comm, &myNumaId);
             hypre_MPI_Comm_size(numa_comm, &NumaSize);
             hypre_int domain_devices=nDevices/2; /* Again hardwired for 2 NUMA domains */
             HYPRE_DEVICE = getnuma()*2+myNumaId%domain_devices;
@@ -343,6 +338,9 @@ void joinStreams(hypre_int i, hypre_int j, hypre_int k){
    hypre_CheckErrorDevice(cudaStreamWaitEvent(HYPRE_STREAM(k),getevent(i),0));
    hypre_CheckErrorDevice(cudaStreamWaitEvent(HYPRE_STREAM(k),getevent(j),0));
 }
+
+#include <sched.h>
+#include <errno.h>
 
 void affs(hypre_int myid){
   const hypre_int NCPUS=160;

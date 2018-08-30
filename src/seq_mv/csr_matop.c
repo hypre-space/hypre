@@ -60,7 +60,7 @@ hypre_CSRMatrixAdd( hypre_CSRMatrix *A,
 
 
    marker = hypre_CTAlloc(HYPRE_Int,  ncols_A, HYPRE_MEMORY_HOST);
-   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_HOST);
+   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_SHARED);
 
    for (ia = 0; ia < ncols_A; ia++)
       marker[ia] = -1;
