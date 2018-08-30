@@ -196,7 +196,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
 
                   hypre_RedBlackLoopInit();
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp)
                   hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
                                                       bstart,bni,bnj,bi,
@@ -206,7 +205,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   }
                   hypre_RedBlackConstantcoefLoopEnd();                  
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                }
 
                else      /* variable coefficient diag */
@@ -216,7 +214,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   Anj = hypre_BoxSizeY(A_dbox);
 
                   hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                   hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                           Astart,Ani,Anj,Ai,
@@ -227,7 +224,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   }
                   hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                }
 
             }
@@ -352,7 +348,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   {
                      case 7:
                         hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp)
                         hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
                                                             bstart,bni,bnj,bi,
@@ -369,13 +364,11 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         }
                         hypre_RedBlackConstantcoefLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                         
                         break;
 
                      case 5:
                         hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp)
                         hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
                                                             bstart,bni,bnj,bi,
@@ -390,12 +383,10 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         }
                         hypre_RedBlackConstantcoefLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                         break;
 
                      case 3:
                         hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp)
                         hypre_RedBlackConstantcoefLoopBegin(ni,nj,nk,redblack,
                                                             bstart,bni,bnj,bi,
@@ -408,7 +399,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         }
                         hypre_RedBlackConstantcoefLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                         break;
                   }
 
@@ -424,7 +414,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                   {
                      case 7:
                         hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                         hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                                 Astart,Ani,Anj,Ai,
@@ -442,12 +431,10 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         }
                         hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                         break;
 
                      case 5:
                         hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                         hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                                 Astart,Ani,Anj,Ai,
@@ -463,12 +450,10 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         }
                         hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                         break;
 
                      case 3:
                         hypre_RedBlackLoopInit();
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,bp,Ap)
                         hypre_RedBlackLoopBegin(ni,nj,nk,redblack,
                                                 Astart,Ani,Anj,Ai,
@@ -482,7 +467,6 @@ hypre_RedBlackConstantCoefGS( void               *relax_vdata,
                         }
                         hypre_RedBlackLoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                         break;
 
                   }  /* switch(stencil_size) */

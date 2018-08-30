@@ -403,7 +403,8 @@ hypre_SStructPMatrixSetBoxValues( hypre_SStructPMatrix *pmatrix,
    /* set values inside the grid */
    hypre_StructMatrixSetBoxValues(smatrix, box, value_box, nentries, sentries,
                                   values, action, -1, 0);
-#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_OMP45)
+   /* TODO: Why need DeviceSync? */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
@@ -1050,7 +1051,7 @@ hypre_SStructUMatrixSetBoxValues( hypre_SStructMatrix *matrix,
                zypre_BoxLoop2Begin(ndim, loop_size,
                                    int_box, start, stride, mi,
                                    vbox,    start, stride, vi);
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
+#if defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(HYPRE_BOX_PRIVATE) HYPRE_SMP_SCHEDULE
 #endif
                zypre_BoxLoop2For(mi, vi)
@@ -1485,7 +1486,6 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
 
                      /* TO DO: currently on CPU with UM */
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(tvalues)
                      hypre_SerialBoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
@@ -1495,7 +1495,6 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      }
                      hypre_SerialBoxLoop2End(mi, vi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                      /* put values into UMatrix */
                      hypre_SStructUMatrixSetBoxValues( matrix, part, hypre_BoxIMin(ibox1), 
@@ -1517,7 +1516,6 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      start = hypre_BoxIMin(ibox1);
                      hypre_BoxGetSize(ibox1, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(tvalues)
                      hypre_SerialBoxLoop2Begin(ndim, loop_size,
                                          ibox1, start, stride, mi,
@@ -1527,7 +1525,6 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
                      }
                      hypre_SerialBoxLoop2End(mi, vi);
 #undef DEVICE_VAR
-#define DEVICE_VAR
                   } /* end if action */
 
 		  hypre_TFree(tvalues,HYPRE_MEMORY_SHARED);

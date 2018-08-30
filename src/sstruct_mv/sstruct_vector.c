@@ -256,7 +256,8 @@ hypre_SStructPVectorSetBoxValues( hypre_SStructPVector *pvector,
    /* set values inside the grid */
    hypre_StructVectorSetBoxValues(svector, box, value_box, values, action, -1, 0);
 
-#if defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_OMP45)
+   /* TODO: Why need DeviceSync? */
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    hypre_CheckErrorDevice(cudaDeviceSynchronize());
 #endif
    /* set (AddTo/Get) or clear (Set) values outside the grid in ghost zones */
@@ -654,7 +655,6 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
 
             hypre_BoxGetSize(box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(pardata,yp)
             hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
                                 y_data_box, start, stride, yi,
@@ -664,7 +664,6 @@ hypre_SStructVectorParConvert( hypre_SStructVector  *vector,
             }
             hypre_BoxLoop2End(yi, bi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
             pari += hypre_BoxVolume(box);
          }
@@ -711,7 +710,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                         
    HYPRE_Int             nparts, nvars;
    HYPRE_Int             part, var, i;
-#if 0//defined(HYPRE_USE_GPU)
+#if 0//defined(HYPRE_USING_GPU)
    HYPRE_Complex        *pardata_device;
 #endif
    if (parvector != NULL)
@@ -720,7 +719,7 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
 
       parvector = hypre_SStructVectorParVector(vector);
       pardata = hypre_VectorData(hypre_ParVectorLocalVector(parvector));
-#if 0//defined(HYPRE_USE_GPU)
+#if 0//defined(HYPRE_USING_GPU)
       pardata_device = hypre_TAlloc(HYPRE_Complex, hypre_VectorSize(hypre_ParVectorLocalVector(parvector)) ,HYPRE_MEMORY_DEVICE);
       hypre_TMemcpy(pardata_device, pardata, HYPRE_Complex, hypre_VectorSize(hypre_ParVectorLocalVector(parvector)), HYPRE_MEMORY_DEVICE,HYPRE_MEMORY_HOST);
 #endif
@@ -746,13 +745,12 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
 
                hypre_BoxGetSize(box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(yp,pardata)
                hypre_BoxLoop2Begin(hypre_SStructVectorNDim(vector), loop_size,
                                    y_data_box, start, stride, yi,
                                    box,        start, stride, bi);
                {
-#if 0//defined(HYPRE_USE_GPU)		 
+#if 0//defined(HYPRE_USING_GPU)		 
                   yp[yi] = pardata_device[pari+bi];
 #else
 		  yp[yi] = pardata[pari+bi];
@@ -760,14 +758,13 @@ hypre_SStructVectorParRestore( hypre_SStructVector *vector,
                }
                hypre_BoxLoop2End(yi, bi);
 #undef DEVICE_VAR
-#define DEVICE_VAR
 
                pari += hypre_BoxVolume(box);
             }
          }
       }
    }
-#if 0//defined(HYPRE_USE_GPU)   
+#if 0//defined(HYPRE_USING_GPU)   
    hypre_TFree(pardata_device,HYPRE_MEMORY_DEVICE);
 #endif
    return hypre_error_flag;

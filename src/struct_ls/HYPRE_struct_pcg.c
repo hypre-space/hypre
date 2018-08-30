@@ -231,7 +231,6 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
 
       hypre_BoxGetSize(box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(xp,yp,Ap)
       hypre_BoxLoop3Begin(hypre_StructVectorNDim(Hx), loop_size,
                           A_data_box, start, stride, Ai,
@@ -242,7 +241,6 @@ HYPRE_StructDiagScale( HYPRE_StructSolver solver,
       }
       hypre_BoxLoop3End(Ai, xi, yi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
    }
 
    return hypre_error_flag;

@@ -480,7 +480,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
          if (coarse_symm_elements[RAPloop] == -1)
          {
             rap_ptrS = hypre_StructMatrixBoxData(RAP, ci, RAPloop);
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_ptrS)
             hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                 RAP_dbox, cstart, stridec, iAc);
@@ -489,7 +488,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
             }
             hypre_BoxLoop1End(iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
          }
       }
 
@@ -553,7 +551,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                          * the (up,up) path contributes to a non-stored entry
                          * in RAP.
                          *--------------------------------------------------*/
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_ptrS,a_ptr,ra,pa,rb,pb,rap_ptrD)
                         hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                             P_dbox, cstart, stridec, iP,
@@ -582,7 +579,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         }
                         hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                      }
                      else
                      {
@@ -590,7 +586,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                          * If A stencil index is not (0,0,0) or RAP is
                          * nonsymmetric, all 5 paths are calculated.
                          *--------------------------------------------------*/
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_ptrS,a_ptr,rap_ptrU,ra,pb,pa,rb,rap_ptrD)
                         hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                             P_dbox, cstart, stridec, iP,
@@ -621,7 +616,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         }
                         hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                      }
 
                      break;
@@ -664,7 +658,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         symm_path_multiplier = 2;
                      }
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_ptrS,a_ptr,pb,rap_ptrD,pa,ra,rb)
                      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                          P_dbox, cstart, stridec, iP,
@@ -693,7 +686,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      }
                      hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                      break;
 
@@ -734,7 +726,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                         symm_path_multiplier = 2;
                      }
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_ptrU,a_ptr,pb,rap_ptrS,pa,ra,rb)
                      hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                                          P_dbox, cstart, stridec, iP,
@@ -763,7 +754,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      }
                      hypre_BoxLoop4End(iP, iR, iA, iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                      break;
                } /* end of switch */
@@ -845,7 +835,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      {
                         symm_path_multiplier = 2;
                      }
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rap_ptrS,rap_ptrD)
                      hypre_BoxLoop1Begin(hypre_StructMatrixNDim(A), loop_size,
                                          RAP_dbox, cstart, stridec, iAc);
@@ -857,7 +846,6 @@ hypre_SemiBuildRAP( hypre_StructMatrix *A,
                      }
                      hypre_BoxLoop1End(iAc);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                      break;
 

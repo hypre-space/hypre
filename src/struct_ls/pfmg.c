@@ -47,7 +47,7 @@ hypre_PFMGCreate( MPI_Comm  comm )
 
    /* initialize */
    (pfmg_data -> num_levels)  = -1;
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
    (pfmg_data -> devicelevel) = 200;
 #endif
    return (void *) pfmg_data;
@@ -555,7 +555,7 @@ hypre_PFMGGetFinalRelativeResidualNorm( void   *pfmg_vdata,
    return hypre_error_flag;
 }
 
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
 HYPRE_Int
 hypre_PFMGSetDeviceLevel( void *pfmg_vdata,
 			  HYPRE_Int   device_level  )

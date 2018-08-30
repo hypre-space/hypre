@@ -130,7 +130,7 @@ hypre_int main (hypre_int argc, char *argv[])
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    /* GPU Init stuff inside */
-   hypre_init();
+   hypre_init(argc, argv);
    
    /* Set defaults */
    solver_id = 3;

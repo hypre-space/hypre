@@ -12,6 +12,10 @@
 
 #include "_hypre_utilities.h"
 
+#if defined(HYPRE_USING_KOKKOS)
+#include <Kokkos_Core.hpp>
+#endif
+
 /******************************************************************************
  *
  * hypre initialization
@@ -19,7 +23,7 @@
  *****************************************************************************/
 
 void
-hypre_init()
+hypre_init( hypre_int argc, char *argv[])
 {
    /*
    HYPRE_Int  num_procs, myid;
@@ -27,24 +31,29 @@ hypre_init()
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
    */
-
-#if defined(HYPRE_USE_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS)
+   /*
    Kokkos::InitArguments args;
    args.num_threads = 10;
    Kokkos::initialize (args);
+   */
+   Kokkos::initialize (argc, argv);
 #endif
 
-#if defined(HYPRE_USE_CUDA)
-   initCudaReductionMemBlock();
+#if defined(HYPRE_USING_CUDA)
+   if (!cuda_reduce_buffer)
+   {
+      cuda_reduce_buffer = hypre_TAlloc(HYPRE_double6, 1024, HYPRE_MEMORY_DEVICE);
+   }
 #endif
 
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
    hypre_GPUInit(-1);
 #endif
 
    /* hypre_InitMemoryDebug(myid); */
 
-#ifdef HYPRE_USE_OMP45
+#if defined(HYPRE_USING_DEVICE_OPENMP)
    HYPRE_OMPOffloadOn();
 #endif
 }
@@ -58,16 +67,16 @@ hypre_init()
 void
 hypre_finalize()
 {
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USING_UNIFIED_MEMORY)
    hypre_GPUFinalize();
 #endif
 
-#if defined(HYPRE_USE_KOKKOS)
+#if defined(HYPRE_USING_KOKKOS)
    Kokkos::finalize ();
 #endif
 
-#if defined(HYPRE_USE_CUDA)
-   freeCudaReductionMemBlock();
+#if defined(HYPRE_USING_CUDA)
+   hypre_TFree(cuda_reduce_buffer, HYPRE_MEMORY_DEVICE);
 #endif
 }
 

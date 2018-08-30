@@ -18,7 +18,7 @@
 
 #include "_hypre_parcsr_mv.h"
 #include <assert.h>
-//#ifdef HYPRE_USE_GPU
+//#ifdef HYPRE_USING_GPU
 //extern "C"
 //{
 //void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_Int *send_map, HYPRE_Int begin,HYPRE_Int end,cudaStream_t s);
@@ -152,7 +152,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    {
       HYPRE_Int begin = hypre_ParCSRCommPkgSendMapStart(comm_pkg, 0);
       HYPRE_Int end   = hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends);
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
       PUSH_RANGE("PERCOMM2DEVICE",4);
 #ifdef HYPRE_USING_PERSISTENT_COMM
       PackOnDevice((HYPRE_Complex*)persistent_comm_handle->send_data,x_local_data,hypre_ParCSRCommPkgSendMapElmts(comm_pkg),begin,end,HYPRE_STREAM(4));
@@ -256,7 +256,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_HALO_EXCHANGE] += hypre_MPI_Wtime();
 #endif
    POP_RANGE;
-#ifndef HYPRE_USE_GPU
+#ifndef HYPRE_USING_GPU
    hypre_CSRMatrixMatvecOutOfPlace( alpha, diag, x_local, beta, b_local, y_local, 0);
 #endif
 #ifdef HYPRE_PROFILE
@@ -306,7 +306,7 @@ hypre_ParCSRMatrixMatvecOutOfPlace( HYPRE_Complex       alpha,
    hypre_profile_times[HYPRE_TIMER_ID_PACK_UNPACK] += hypre_MPI_Wtime();
 #endif
    POP_RANGE;
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    hypre_CheckErrorDevice(cudaStreamSynchronize(HYPRE_STREAM(4)));
 #endif
    POP_RANGE; // PAR_CSR

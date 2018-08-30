@@ -100,23 +100,47 @@
 /* Enable OpenMP support */
 #undef HYPRE_USING_OPENMP
 
-/* Define to 1 if enabling GPU support */
-#undef HYPRE_USE_GPU
+/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * MEMORY
+ *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
 
-/* Define to 1 if using OpenMP on device */
+/* Define to 1 if using host memory only */
+#undef HYPRE_USING_HOST_MEMORY
+
+/* Define to 1 if using device memory without UM */
+#undef HYPRE_USING_DEVICE_MEMORY
+
+/* Define to 1 if using unified memory */
+#undef HYPRE_USING_UNIFIED_MEMORY
+
+/*- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * EXECUTION
+ *- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
+/* Define to 1 if executing on device with CUDA */
+#undef HYPRE_USING_CUDA
+
+/* Define to 1 if executing on device with OpenMP  */
 #undef HYPRE_USING_DEVICE_OPENMP
 
-/* Define to 1 if using CUDA */
-#undef HYPRE_USE_CUDA
+/* Define to 1 if using OpenMP on device [target alloc version] */
+#undef HYPRE_DEVICE_OPENMP_ALLOC
 
-/* Define to 1 if using RAJA */
-#undef HYPRE_USE_RAJA
+/* Define to 1 if using OpenMP on device [target mapped version] */
+#undef HYPRE_DEVICE_OPENMP_MAPPED
 
-/* Define to 1 if using HYPRE MEMORY MODEL:UNIFIED */
-#undef HYPRE_USE_MANAGED
+/* Define to 1 if executing on host/device with RAJA */
+#undef HYPRE_USING_RAJA
+
+/* Define to 1 if executing on host/device with KOKKOS */
+#undef HYPRE_USING_KOKKOS
 
 /* Define to 1 if using NVIDIA Tools Extension (NVTX) */
 #undef USE_NVTX
+
+/* FIXME: replace this with USING_CUDA */
+#undef HYPRE_USING_GPU
+
+
 
 /* Define as follows to set the Fortran name mangling scheme:
  * 0 = unspecified

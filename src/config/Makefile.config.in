@@ -53,8 +53,8 @@ HYPRE_LIB_SUFFIX = @HYPRE_LIBSUFFIX@
 	$(CXX) $(CXXFLAGS) -c $<
 .cc.o:
 	$(CXX) $(CXXFLAGS) -c $<
-.cu.o:
-	$(CUCC) $(CUFLAGS) -c $<
+#.cu.o:
+#	$(CUCC) $(CUFLAGS) -c $<
 
 FC       = @FC@
 FFLAGS   = @FFLAGS@ @FCFLAGS@ $(FC_COMPILE_FLAGS)
@@ -65,8 +65,8 @@ CFLAGS   = @CFLAGS@ @DEFS@ $(C_COMPILE_FLAGS)
 CXX      = @CXX@
 CXXFLAGS = @CXXFLAGS@ @DEFS@ $(CXX_COMPILE_FLAGS)
 
-CUCC 	 = @CUCC@
-CUFLAGS  = @CUFLAGS@ @DEFS@ ${CU_COMPILE_FLAGS}
+#CUCC 	 = @CUCC@
+#CUFLAGS  = @CUFLAGS@ @DEFS@ ${CU_COMPILE_FLAGS}
 
 LINK_FC  = @LINK_FC@
 LINK_CC  = @LINK_CC@
@@ -158,7 +158,6 @@ HYPRE_RAJA_LIB          = @HYPRE_RAJA_LIB@
 ##################################################################
 ##  kokkos options
 ##################################################################
-HYPRE_KOKKOS_SRC_DIR    = @HYPRE_KOKKOS_SRC_DIR@
 HYPRE_KOKKOS_LIB_DIR    = @HYPRE_KOKKOS_LIB_DIR@
 HYPRE_KOKKOS_INCLUDE    = @HYPRE_KOKKOS_INCLUDE@
 HYPRE_KOKKOS_LIB        = @HYPRE_KOKKOS_LIB@

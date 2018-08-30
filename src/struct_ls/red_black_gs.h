@@ -42,9 +42,8 @@ typedef struct
 
 } hypre_RedBlackGSData;
 
-#ifdef HYPRE_USE_RAJA
+#ifdef HYPRE_USING_RAJA
 
-#define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
@@ -52,7 +51,7 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    forall< hypre_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
+    forall< hypre_raja_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,Ai,bi,xi;					\
@@ -80,7 +79,7 @@ typedef struct
 				xstart,xni,xnj,xi)	\
 {					  \
     HYPRE_Int hypre__tot = nk*nj*((ni+1)/2);				\
-    forall< hypre_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
+    forall< hypre_raja_exec_policy >(RangeSegment(0, hypre__tot), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
     {									\
         HYPRE_Int idx_local = idx;					\
 	HYPRE_Int ii,jj,kk,bi,xi;					\
@@ -102,9 +101,8 @@ typedef struct
      hypre_fence();					\
 }
 
-#elif defined(HYPRE_USE_KOKKOS)
+#elif defined(HYPRE_USING_KOKKOS)
 
-#define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
@@ -162,9 +160,8 @@ typedef struct
      hypre_fence();					\
 }  
 
-#elif defined(HYPRE_USE_CUDA)
+#elif defined(HYPRE_USING_CUDA)
 
-#define HYPRE_REDBLACK_PRIVATE hypre__global_error
 #define hypre_RedBlackLoopInit()
 #define hypre_RedBlackLoopBegin(ni,nj,nk,redblack,\
 				Astart,Ani,Anj,Ai,	\
@@ -220,7 +217,7 @@ typedef struct
      });						\
 }
 
-#elif defined(HYPRE_USE_OMP45) 
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
 
 /* BEGIN OF OMP 4.5 */
 /* #define IF_CLAUSE if (hypre__global_offload) */
@@ -363,3 +360,4 @@ typedef struct
    }\
 }
 #endif
+

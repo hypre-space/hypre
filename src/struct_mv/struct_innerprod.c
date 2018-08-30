@@ -44,8 +44,8 @@ hypre_StructInnerProd( hypre_StructVector *x,
    HYPRE_Int        ndim = hypre_StructVectorNDim(x);               
    HYPRE_Int        i;
    
-#if defined(HYPRE_USE_CUDA)       
-   const HYPRE_Int        data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(y));
+#if defined(HYPRE_USING_CUDA)       
+   //const HYPRE_Int  data_location = hypre_StructGridDataLocation(hypre_StructVectorGrid(y));
 #endif
 
    HYPRE_Real       local_result = 0.0;
@@ -66,47 +66,40 @@ hypre_StructInnerProd( hypre_StructVector *x,
      
       hypre_BoxGetSize(box, loop_size);
 
-#if defined(HYPRE_USE_KOKKOS)
-      hypre_newBoxLoop2ReductionBegin(ndim, loop_size,
-				      x_data_box, start, unit_stride, xi,
-				      y_data_box, start, unit_stride, yi,local_result);
-      {
-	local_result += xp[xi] * hypre_conj(yp[yi]);
-      }
-      hypre_newBoxLoop2ReductionEnd(xi, yi, local_result);
+#if defined(HYPRE_USING_KOKKOS)
+      HYPRE_Real box_sum = 0.0;
+#elif defined(HYPRE_USING_RAJA)
+      ReduceSum<hypre_raja_reduce_policy, HYPRE_Real> box_sum(0.0);
+#elif defined(HYPRE_USING_CUDA)
+      ReduceSum<HYPRE_Real> box_sum(0.0);
 #else
-#if defined(HYPRE_USE_RAJA)
-   ReduceSum<hypre_reduce_policy, HYPRE_Real> box_sum(0.0);
-#elif defined(HYPRE_USE_CUDA)
-   ReduceSum<HYPRE_Real> box_sum(0,data_location);
-#else
-   HYPRE_Real       box_sum = 0.0;
+      HYPRE_Real box_sum = 0.0;
 #endif
 
-#ifdef HYPRE_BOX_REDUCTION
+#ifdef HYPRE_BOX_REDUCTION 
 #undef HYPRE_BOX_REDUCTION
 #endif
-#ifdef HYPRE_USE_OMP45
+
+#if defined(HYPRE_USING_KOKKOS)
+#define HYPRE_BOX_REDUCTION box_sum
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
 #define HYPRE_BOX_REDUCTION map(tofrom: box_sum) reduction(+:box_sum)
 #else
 #define HYPRE_BOX_REDUCTION reduction(+:box_sum)
 #endif
-#undef DEVICE_VAR
+
 #define DEVICE_VAR is_device_ptr(yp,xp)
-      hypre_BoxLoop2Begin(ndim, loop_size,
-			  x_data_box, start, unit_stride, xi,
-			  y_data_box, start, unit_stride, yi);
+      hypre_BoxLoop2ReductionBegin(ndim, loop_size,
+                                   x_data_box, start, unit_stride, xi,
+                                   y_data_box, start, unit_stride, yi,
+                                   box_sum)
       {
-         box_sum += xp[xi] * hypre_conj(yp[yi]); 
+         HYPRE_Real tmp = xp[xi] * hypre_conj(yp[yi]); 
+         box_sum += tmp; 
       }
-      hypre_BoxLoop2End(xi, yi);
-#undef DEVICE_VAR
-#define DEVICE_VAR 
+      hypre_BoxLoop2ReductionEnd(xi, yi, box_sum);
 
       local_result += (HYPRE_Real) box_sum;
-#undef HYPRE_BOX_REDUCTION
-#define HYPRE_BOX_REDUCTION 
-#endif
    }
 
    process_result = (HYPRE_Real) local_result;

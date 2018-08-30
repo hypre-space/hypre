@@ -12,11 +12,9 @@
 
 #include "_hypre_utilities.h"
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_OMP45)
+/* declared in "struct_communication.c" */
 extern HYPRE_Complex *global_recv_buffer, *global_send_buffer;
 extern HYPRE_Int      global_recv_size, global_send_size;
-
-#endif
 
 /******************************************************************************
  * This routine is the same in both the sequential and normal cases
@@ -666,7 +664,7 @@ HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,
                 char      ***argv )
 {
-#if defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
    hypre__offload_device_num = omp_get_initial_device();
    hypre__offload_host_num   = omp_get_initial_device();
 #endif
@@ -677,7 +675,6 @@ hypre_MPI_Init( hypre_int   *argc,
 HYPRE_Int
 hypre_MPI_Finalize( )
 {
-#if defined(HYPRE_USE_OMP45)
    if (global_send_buffer)
    {
      hypre_TFree(global_send_buffer, HYPRE_MEMORY_DEVICE);
@@ -686,7 +683,6 @@ hypre_MPI_Finalize( )
    {
      hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
    }
-#endif
 
    return (HYPRE_Int) MPI_Finalize();
 }

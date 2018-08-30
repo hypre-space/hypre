@@ -175,7 +175,7 @@ hypre_SemiInterp( void               *interp_vdata,
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
    cgrid_ids = hypre_StructGridIDs(cgrid);
 
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
    HYPRE_Int data_location_f = hypre_StructGridDataLocation(fgrid);
    HYPRE_Int data_location_c = hypre_StructGridDataLocation(cgrid);
    
@@ -216,7 +216,6 @@ hypre_SemiInterp( void               *interp_vdata,
 
       hypre_BoxGetSize(compute_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(ep,xcp)
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                           e_dbox, start, stride, ei,
@@ -226,7 +225,6 @@ hypre_SemiInterp( void               *interp_vdata,
       }
       hypre_BoxLoop2End(ei, xci);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
    }
 
    /*-----------------------------------------------------------------------
@@ -302,7 +300,6 @@ hypre_SemiInterp( void               *interp_vdata,
 	       Pp0val = Pp0[Pi];
 	       Pp1val = Pp1[Pi+Pp1_offset];
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(ep)
                hypre_BoxLoop1Begin(hypre_StructMatrixNDim(P), loop_size,
                                    e_dbox, start, stride, ei);
@@ -312,11 +309,9 @@ hypre_SemiInterp( void               *interp_vdata,
                }
                hypre_BoxLoop1End(ei);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
             }
             else
             {
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(ep,Pp0,Pp1)
                hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                                    P_dbox, startc, stridec, Pi,
@@ -327,12 +322,11 @@ hypre_SemiInterp( void               *interp_vdata,
                }
                hypre_BoxLoop2End(Pi, ei);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
             }
          }
       }
    }
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
    if (data_location_f != data_location_c)
    {
       hypre_StructVectorDestroy(xc_tmp);

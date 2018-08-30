@@ -37,7 +37,7 @@ hypre_CSRMatrixMatvecOutOfPlace( HYPRE_Complex    alpha,
 #ifdef HYPRE_PROFILE
    HYPRE_Real time_begin = hypre_MPI_Wtime();
 #endif
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    PUSH_RANGE_PAYLOAD("MATVEC",0, hypre_CSRMatrixNumRows(A));
    HYPRE_Int ret=hypre_CSRMatrixMatvecDevice( alpha,A,x,beta,b,y,offset);
    POP_RANGE;
@@ -437,7 +437,7 @@ hypre_CSRMatrixMatvec( HYPRE_Complex    alpha,
    return hypre_CSRMatrixMatvecOutOfPlace(alpha, A, x, beta, y, y, 0);
 }
 
-#if defined (HYPRE_USE_MANAGED)
+#if defined (HYPRE_USING_UNIFIED_MEMORY)
 HYPRE_Int
 hypre_CSRMatrixMatvec3( HYPRE_Complex    alpha,
                        hypre_CSRMatrix *A,
@@ -796,7 +796,7 @@ hypre_CSRMatrixMatvec_FF( HYPRE_Complex    alpha,
 
    return ierr;
 }
-#if defined(HYPRE_USE_GPU) && defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
 HYPRE_Int
 hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
                        hypre_CSRMatrix *A,

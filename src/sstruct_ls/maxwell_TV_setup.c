@@ -388,11 +388,6 @@ hypre_MaxwellTV_Setup(void                 *maxwell_vdata,
                hypre_CopyIndex(hypre_BoxIMin(box_piece), start);
 
                hypre_SerialBoxLoop0Begin(ndim, loop_size);
-#if 0 /* Are private static arrays a problem? */
-#if defined(HYPRE_USING_OPENMP) && !defined(HYPRE_USE_RAJA)
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE,lindex,index,rank) HYPRE_SMP_SCHEDULE
-#endif
-#endif
                {
                   hypre_BoxLoopGetIndex(lindex);
                   hypre_SetIndex3(index, lindex[0], lindex[1], lindex[2]);

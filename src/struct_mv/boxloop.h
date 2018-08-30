@@ -267,4 +267,19 @@ typedef struct hypre_Boxloop_struct
 #define hypre_BoxLoop4End        zypre_newBoxLoop4End
 #define hypre_BasicBoxLoop2Begin zypre_newBasicBoxLoop2Begin
 
+/* Reduction */
+#define hypre_BoxLoop1ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, reducesum) \
+        hypre_BoxLoop1Begin(ndim, loop_size, dbox1, start1, stride1, i1)
+
+#define hypre_BoxLoop1ReductionEnd(i1, reducesum) \
+        hypre_BoxLoop1End(i1)
+
+#define hypre_BoxLoop2ReductionBegin(ndim, loop_size, dbox1, start1, stride1, i1, \
+                                                      dbox2, start2, stride2, i2, reducesum) \
+        hypre_BoxLoop2Begin(ndim, loop_size, dbox1, start1, stride1, i1, \
+                                             dbox2, start2, stride2, i2)
+
+#define hypre_BoxLoop2ReductionEnd(i1, i2, reducesum) \
+        hypre_BoxLoop2End(i1, i2)
+
 #endif

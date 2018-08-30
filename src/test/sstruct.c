@@ -2439,7 +2439,7 @@ main( hypre_int argc,
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
    /* GPU Init stuff inside */
-   hypre_init();
+   hypre_init(argc, argv);
 
    /*-----------------------------------------------------------
     * Read input file

@@ -1,10 +1,10 @@
-#include "_hypre_utilities.h"
-#include <stdio.h>
+#include "seq_mv.h"
 
-#if defined(HYPRE_USE_GPU)
+//#include <stdio.h>
+//#include <cuda_runtime.h>
+//#include <cublas_v2.h>
 
-#include <cuda_runtime.h>
-#include <cublas_v2.h>
+#if defined(HYPRE_USING_GPU)
 
 extern "C"{
   __global__

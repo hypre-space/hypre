@@ -1334,7 +1334,7 @@ main( hypre_int argc,
    hypre_MPI_Init(&argc, &argv);
 
    /* GPU Init stuff inside */
-   hypre_init();
+   hypre_init(argc, argv);
 
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);

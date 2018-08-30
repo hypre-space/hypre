@@ -22,8 +22,8 @@
 #undef HYPRE_USE_UMALLOC
 #endif
 
-/* global variables for OMP 45 */
-#if defined(HYPRE_USE_OMP45)
+/* global variables for device OpenMP */
+#if defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre__global_offload = 0;
 HYPRE_Int hypre__offload_device_num;
 HYPRE_Int hypre__offload_host_num;
@@ -39,30 +39,6 @@ size_t hypre__target_htod_bytes = 0;
 size_t hypre__target_dtoh_bytes = 0;
 #endif
 
-/* Memory Environment */
-/* Host memory only */
-#define HOST_MEM_ONLY 0
-/* Device memory without unified memory */
-#define DEVC_MEM_WOUM 1
-/* Device memory with    unified memory */
-#define DEVC_MEM_WTUM 2
-
-#if defined(HYPRE_USE_MANAGED)
-#define HYPRE_MEMORY_ENV DEVC_MEM_WTUM
-#elif defined(HYPRE_USE_CUDA) || defined(HYPRE_USE_OMP45) || defined(HYPRE_USE_GPU)
-#define HYPRE_MEMORY_ENV DEVC_MEM_WOUM
-#else
-#define HYPRE_MEMORY_ENV HOST_MEM_ONLY
-#endif
-
-/* if  true, DeviceMalloc is always device-only malloc no matter what UM is
- * if false, DeviceMalloc becomes UM malloc when with UM */
-#if defined(HYPRE_USE_MANAGED) && !defined(HYPRE_USE_CUDA) && !defined(HYPRE_USE_OMP45)
-#define DEVICE_ALWAYS_DEVICE 0
-#else
-#define DEVICE_ALWAYS_DEVICE 1
-#endif
-
 /******************************************************************************
  *
  * Helper routines
@@ -70,42 +46,31 @@ size_t hypre__target_dtoh_bytes = 0;
  *****************************************************************************/
 /*--------------------------------------------------------------------------
  * hypre_RedefMemLocation
+ *   Redefine location based on the selected memory model in hypre_memory.h
  *--------------------------------------------------------------------------*/
 static inline HYPRE_Int hypre_RedefMemLocation(HYPRE_Int location)
 {
-#if HYPRE_MEMORY_ENV == HOST_MEM_ONLY
-   return HYPRE_MEMORY_HOST;
-#else
    if (location == HYPRE_MEMORY_HOST)
    {
-      return HYPRE_MEMORY_HOST;
+      return HYPRE_MEMORY_HOST_ACT;
    }
 
    if (location == HYPRE_MEMORY_DEVICE)
    {
-#if !DEVICE_ALWAYS_DEVICE && HYPRE_MEMORY_ENV == DEVC_MEM_WTUM
-      return HYPRE_MEMORY_SHARED;
-#else
-      return HYPRE_MEMORY_DEVICE;
-#endif
+      return HYPRE_MEMORY_DEVICE_ACT;
    }
 
    if (location == HYPRE_MEMORY_SHARED)
    {
-#if HYPRE_MEMORY_ENV == DEVC_MEM_WTUM
-      return HYPRE_MEMORY_SHARED;
-#else
-      return HYPRE_MEMORY_DEVICE;
-#endif
+      return HYPRE_MEMORY_SHARED_ACT;
    }
 
    if (location == HYPRE_MEMORY_HOST_PINNED)
    {
-      return HYPRE_MEMORY_HOST_PINNED;
+      return HYPRE_MEMORY_HOST_PINNED_ACT;
    }
 
    return HYPRE_MEMORY_UNSET;
-#endif
 }
 
 /*--------------------------------------------------------------------------
@@ -122,33 +87,37 @@ hypre_OutOfMemory(size_t size)
 static inline void
 hypre_WrongMemoryLocation()
 {
-   hypre_printf("Wrong memory location! ", 
-                "Only HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE and HYPRE_MEMORY_SHARED are avaible\n");
+   hypre_printf("Wrong HYPRE MEMORY location: ", 
+                "Only HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_SHARED, ",
+                "and HYPRE_MEMORY_HOST_PINNED are supported!\n");
    fflush(stdout);
    hypre_error(HYPRE_ERROR_MEMORY);
 }
 
 /*--------------------------------------------------------------------------
  * hypre_GetPadMemsize: 
- * Device/HostPinned malloc stores the size in bytes at beginning size_t
+ * Device/HostPinned malloc stores the size in bytes at the beginning size_t
  *--------------------------------------------------------------------------*/
 static inline size_t 
 hypre_GetPadMemsize(void *ptr, HYPRE_Int location)
 {
-#if HYPRE_MEMORY_ENV != HOST_MEM_ONLY
+   location = hypre_RedefMemLocation(location);
+   
    /* no stored size for host memory */
    if (location == HYPRE_MEMORY_HOST)
    {
       return 0;
    }
 
-   size_t *sp = (size_t*) ptr - MEM_PAD_LEN;
+   size_t *sp = (size_t*) ptr - HYPRE_MEM_PAD_LEN;
 
    if (location == HYPRE_MEMORY_DEVICE)
    {
-#if !defined(HYPRE_USE_OMP45_TARGET_ALLOC) && defined(HYPRE_USE_OMP45)
+      /* special case for mapped device openmp; size available on host memory */
+#if defined(HYPRE_DEVICE_OPENMP_MAPPED)
       return *sp;
 #else
+      /* copy size from device memory */
       size_t size;
       hypre_Memcpy(&size, sp, sizeof(size_t), HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE);
       return size;
@@ -167,7 +136,6 @@ hypre_GetPadMemsize(void *ptr, HYPRE_Int location)
 
    hypre_WrongMemoryLocation();
 
-#endif
    /* no stored size for host memory */
    return 0;
 }
@@ -186,7 +154,7 @@ static inline void *
 hypre_HostMalloc(size_t size, HYPRE_Int zeroinit)
 {
    void *ptr = NULL;
-   
+
    if (zeroinit)
    {
       ptr = calloc(size, 1);
@@ -203,39 +171,39 @@ static inline void *
 hypre_DeviceMalloc(size_t size, HYPRE_Int zeroinit)
 {
    void *ptr = NULL;
-#if HYPRE_MEMORY_ENV != HOST_MEM_ONLY
+
    /* without UM, device alloc */
-#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
    /* omp target alloc */
-   ptr = omp_target_alloc(size + sizeof(size_t)*MEM_PAD_LEN, hypre__offload_device_num);
+   ptr = omp_target_alloc(size + sizeof(size_t)*HYPRE_MEM_PAD_LEN, hypre__offload_device_num);
    size_t *sp = (size_t*) ptr;
 #pragma omp target is_device_ptr(sp)
    {
       sp[0] = size;
    }
-   ptr = (void*) (&sp[MEM_PAD_LEN]);
-#elif defined(HYPRE_USE_OMP45)
+   ptr = (void*) (&sp[HYPRE_MEM_PAD_LEN]);
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
    /* omp target map */
-   ptr = malloc(size + sizeof(size_t)*MEM_PAD_LEN);
+   ptr = malloc(size + sizeof(size_t)*HYPRE_MEM_PAD_LEN);
    size_t *sp = (size_t*) ptr;
    sp[0] = size;
-   ptr = (void *) (&sp[MEM_PAD_LEN]);
+   ptr = (void *) (&sp[HYPRE_MEM_PAD_LEN]);
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "enter", "alloc");
-#else
+#elif defined(HYPRE_USING_CUDA)
    /* cudaMalloc */
-   hypre_CheckErrorDevice( cudaMalloc(&ptr, size + sizeof(size_t)*MEM_PAD_LEN) );
+   hypre_CheckErrorDevice( cudaMalloc(&ptr, size + sizeof(size_t)*HYPRE_MEM_PAD_LEN) );
    hypre_CheckErrorDevice( cudaDeviceSynchronize() );
    hypre_Memcpy(ptr, &size, sizeof(size_t), HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
    size_t *sp = (size_t*) ptr;
-   ptr = (void*) (&sp[MEM_PAD_LEN]);
+   ptr = (void*) (&sp[HYPRE_MEM_PAD_LEN]);
 #endif
 
    /* after device alloc, memset to 0 */
-   if (zeroinit)
+   if (ptr && zeroinit)
    {
       hypre_Memset(ptr, 0, size, HYPRE_MEMORY_DEVICE);
    }
-#endif
+
    return ptr;
 }
 
@@ -243,12 +211,14 @@ static inline void *
 hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
 {
    void *ptr = NULL;
-#if HYPRE_MEMORY_ENV != HOST_MEM_ONLY
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* with UM, managed memory alloc */
-   hypre_CheckErrorDevice( cudaMallocManaged(&ptr, size + sizeof(size_t)*MEM_PAD_LEN, CUDAMEMATTACHTYPE) );
+   hypre_CheckErrorDevice( cudaMallocManaged(&ptr, size + sizeof(size_t)*HYPRE_MEM_PAD_LEN, 
+                           CUDAMEMATTACHTYPE) );
    size_t *sp = (size_t*) ptr;
    sp[0] = size;
-   ptr = (void*) (&sp[MEM_PAD_LEN]);
+   ptr = (void*) (&sp[HYPRE_MEM_PAD_LEN]);
 
    /* after UM alloc, memset to 0 */
    if (zeroinit)
@@ -256,6 +226,7 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
       hypre_Memset(ptr, 0, size, HYPRE_MEMORY_SHARED);
    }
 #endif
+
    return ptr;
 }
 
@@ -263,27 +234,28 @@ static inline void *
 hypre_HostPinnedMalloc(size_t size, HYPRE_Int zeroinit)
 {
    void *ptr = NULL;
-#if HYPRE_MEMORY_ENV != HOST_MEM_ONLY
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* TODO which one of the following two? */ 
-   /* hypre_CheckErrorDevice( cudaHostAlloc(&ptr,size + sizeof(size_t)*MEM_PAD_LEN,
+   /* hypre_CheckErrorDevice( cudaHostAlloc(&ptr,size + sizeof(size_t)*HYPRE_MEM_PAD_LEN,
                                             cudaHostAllocMapped)); */
-   hypre_CheckErrorDevice( cudaMallocHost(&ptr, size + sizeof(size_t)*MEM_PAD_LEN) );
+   hypre_CheckErrorDevice( cudaMallocHost(&ptr, size + sizeof(size_t)*HYPRE_MEM_PAD_LEN) );
    size_t *sp = (size_t*) ptr;
    sp[0] = size;
-   ptr = (void*) (&sp[MEM_PAD_LEN]);
+   ptr = (void*) (&sp[HYPRE_MEM_PAD_LEN]);
 
    /* after host alloc, memset to 0 */
    if (zeroinit)
    {
       hypre_Memset(ptr, 0, size, HYPRE_MEMORY_HOST_PINNED);
    }
-
 #endif
+
    return ptr;
 }
 
 static inline void *
-hypre_MAllocWithInit(size_t size, HYPRE_Int zeroinit, HYPRE_Int location)
+hypre_MAlloc_core(size_t size, HYPRE_Int zeroinit, HYPRE_Int location)
 {
    if (size == 0)
    {
@@ -319,7 +291,9 @@ hypre_MAllocWithInit(size_t size, HYPRE_Int zeroinit, HYPRE_Int location)
 
    if (!ptr)
    {
+      printf("%d\n", location);
       hypre_OutOfMemory(size);
+      exit(0);
    }
 
    return ptr;
@@ -328,14 +302,13 @@ hypre_MAllocWithInit(size_t size, HYPRE_Int zeroinit, HYPRE_Int location)
 void *
 hypre_MAlloc(size_t size, HYPRE_Int location)
 {
-   return hypre_MAllocWithInit(size, 0, location);
+   return hypre_MAlloc_core(size, 0, location);
 }
 
 void *
 hypre_CAlloc( size_t count, size_t elt_size, HYPRE_Int location)
 {
-   size_t size = count * elt_size;
-   return hypre_MAllocWithInit(size, 1, location);
+   return hypre_MAlloc_core(count * elt_size, 1, location);
 }
 
 
@@ -352,39 +325,37 @@ hypre_HostFree(void *ptr)
 static inline void 
 hypre_DeviceFree(void *ptr)
 {
-#if HYPRE_MEMORY_ENV != HOST_MEM_ONLY
    /* without UM, device free */
-#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
    size_t *sp = (size_t *) ptr;
-   ptr = (void *) (&sp[-MEM_PAD_LEN]);
+   ptr = (void *) (&sp[-HYPRE_MEM_PAD_LEN]);
    omp_target_free(ptr, hypre__offload_device_num);
-#elif defined(HYPRE_USE_OMP45)
-   size_t size = ((size_t *) ptr)[-MEM_PAD_LEN];
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
+   size_t size = ((size_t *) ptr)[-HYPRE_MEM_PAD_LEN];
    HYPRE_OMPOffload(hypre__offload_device_num, ptr, size, "exit", "delete");
-#else
-   /* cudaFree((size_t *) ptr - MEM_PAD_LEN); */
-   cudaSafeFree(ptr, MEM_PAD_LEN);
-#endif
+#elif defined(HYPRE_USING_CUDA)
+   /* cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN); */
+   cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }
 
 static inline void 
 hypre_UnifiedFree(void *ptr)
 {
-#if HYPRE_MEMORY_ENV != HOST_MEM_ONLY
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* with UM, managed memory free */
-   /* cudaFree((size_t *) ptr - MEM_PAD_LEN); */
-   cudaSafeFree(ptr, MEM_PAD_LEN);
+   /* cudaFree((size_t *) ptr - HYPRE_MEM_PAD_LEN); */
+   cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }
 
 static inline void 
 hypre_HostPinnedFree(void *ptr)
 {
-#if HYPRE_MEMORY_ENV != HOST_MEM_ONLY
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
    /* page-locked memory on the host */
-   /* cudaFreeHost((size_t *) ptr - MEM_PAD_LEN); */
-   cudaSafeFree(ptr, MEM_PAD_LEN);
+   /* cudaFreeHost((size_t *) ptr - HYPRE_MEM_PAD_LEN); */
+   cudaSafeFree(ptr, HYPRE_MEM_PAD_LEN);
 #endif
 }
 
@@ -395,7 +366,7 @@ hypre_Free(void *ptr, HYPRE_Int location)
    {
       return;
    }
-   
+
    location = hypre_RedefMemLocation(location);
 
    switch (location) 
@@ -505,7 +476,7 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
    /* 9: Host   <-- Host, Host   <-- Shared, Host   <-- Pinned,
     *    Shared <-- Host, Shared <-- Shared, Shared <-- Pinned, 
     *    Pinned <-- Host, Pinned <-- Shared, Pinned <-- Pinned. 
-    *              (i.e, with Device involved)
+    *              (i.e, without Device involved)
     */
    if (loc_dst != HYPRE_MEMORY_DEVICE && loc_src != HYPRE_MEMORY_DEVICE)
    {
@@ -513,23 +484,24 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
       return;
    }
 
-#if HYPRE_MEMORY_ENV != HOST_MEM_ONLY
    /* 2: Shared <-- Device, Device <-- Shared */
    if (loc_dst == HYPRE_MEMORY_SHARED || loc_src == HYPRE_MEMORY_SHARED)
    {
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
       cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice);
+#endif
       return;
    }
 
    /* 2: Device <-- Host, Device <-- Pinned */
    if ( loc_dst == HYPRE_MEMORY_DEVICE && (loc_src == HYPRE_MEMORY_HOST || loc_src == HYPRE_MEMORY_HOST_PINNED) )
    {
-#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
       omp_target_memcpy(dst, src, size, 0, 0, hypre__offload_device_num, hypre__offload_host_num);
-#elif defined(HYPRE_USE_OMP45)
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
       memcpy(dst, src, size);
       HYPRE_OMPOffload(hypre__offload_device_num, dst, size, "update", "to");
-#else
+#elif defined(HYPRE_USING_CUDA)
       cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice);
 #endif
       return;
@@ -539,12 +511,12 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
    /* 2: Host <-- Device, Pinned <-- Device */
    if ( (loc_dst == HYPRE_MEMORY_HOST || loc_dst == HYPRE_MEMORY_HOST_PINNED) && loc_src == HYPRE_MEMORY_DEVICE )
    {
-#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
       omp_target_memcpy(dst, src, size, 0, 0, hypre__offload_host_num, hypre__offload_device_num);
-#elif defined(HYPRE_USE_OMP45)
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
       HYPRE_OMPOffload(hypre__offload_device_num, src, size, "update", "from");
       memcpy(dst, src, size);
-#else
+#elif defined(HYPRE_USING_CUDA)
       cudaMemcpy( dst, src, size, cudaMemcpyDeviceToHost);
 #endif
       return;
@@ -554,18 +526,17 @@ hypre_Memcpy(void *dst, void *src, size_t size, HYPRE_Int loc_dst, HYPRE_Int loc
    /* 1: Device <-- Device */
    if (loc_dst == HYPRE_MEMORY_DEVICE && loc_src == HYPRE_MEMORY_DEVICE)
    {
-#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
       omp_target_memcpy(dst, src, size, 0, 0, hypre__offload_device_num, hypre__offload_device_num);
-#elif defined(HYPRE_USE_OMP45)
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
       HYPRE_OMPOffload(hypre__offload_device_num, src, size, "update", "from");
       memcpy(dst, src, size);
       HYPRE_OMPOffload(hypre__offload_device_num, dst, size, "update", "to");
-#else
+#elif defined(HYPRE_USING_CUDA)
       cudaMemcpy(dst, src, size, cudaMemcpyDeviceToDevice);
 #endif
       return;
    }
-#endif
 
    hypre_WrongMemoryLocation();
 }
@@ -585,7 +556,7 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)
 
    location = hypre_RedefMemLocation(location);
 
-#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
+#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
    unsigned char *ucptr = (unsigned char *) ptr;
    unsigned char ucvalue = (unsigned char) value;
 #endif
@@ -598,11 +569,9 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)
          /* memset host pinned memory */
          memset(ptr, value, num);
          break;
-#if HYPRE_MEMORY_ENV != HOST_MEM_ONLY
       case HYPRE_MEMORY_DEVICE :
          /* memset device memory */
-#if defined(HYPRE_USE_OMP45_TARGET_ALLOC)
-#undef DEVICE_VAR
+#if defined(HYPRE_DEVICE_OPENMP_ALLOC)
 #define DEVICE_VAR is_device_ptr(ucptr)
          hypre_LoopBegin(num, k)
          {
@@ -610,11 +579,10 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)
          }
          hypre_LoopEnd()
 #undef DEVICE_VAR
-#define DEVICE_VAR
-#elif defined(HYPRE_USE_OMP45)
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
          memset(ptr, value, num);
-         HYPRE_OMPOffload(hypre__offload_device_num, ptr, num, "enter", "to");
-#else
+         HYPRE_OMPOffload(hypre__offload_device_num, ptr, num, "update", "to");
+#elif defined(HYPRE_USING_CUDA)
          cudaMemset(ptr, value, num);
 #endif
          break;
@@ -622,7 +590,6 @@ hypre_Memset(void *ptr, HYPRE_Int value, size_t num, HYPRE_Int location)
          /* memset unified memory */
          memset(ptr, value, num);
          break;
-#endif
       default :
          /* unrecognized location */         
          hypre_WrongMemoryLocation();

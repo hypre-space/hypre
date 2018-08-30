@@ -12,12 +12,18 @@
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_MIN_GPU_SIZE (131072)
+extern HYPRE_Int hypre_exec_policy;
+#define hypre_SetDeviceOn()  hypre_exec_policy = HYPRE_MEMORY_DEVICE
+#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
+#endif /* #if defined(HYPRE_USING_CUDA) */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #define HYPRE_USE_MANAGED_SCALABLE 1
 #define HYPRE_GPU_USE_PINNED 1
 
-#if defined(HYPRE_USE_MANAGED)
 #include <cuda_runtime_api.h>
 void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();
@@ -85,7 +91,6 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
 
-#endif /* HYPRE_USE_MANAGED */
 
 typedef struct node {
   const void *ptr;
@@ -99,43 +104,10 @@ void meminsert(node **head, const void *ptr,size_t size);
 void printlist(node *head,hypre_int nc);
 size_t memsize(const void *ptr);
 
-#endif /* defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) */
+#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
 
 
-#if defined(HYPRE_USE_CUDA)
-extern HYPRE_Int hypre_exec_policy;
-extern char tmp_print[10];
-extern HYPRE_Int hypre_box_print;
-extern double  t_start, t_end;
-extern HYPRE_Int time_box ;
-#define HYPRE_MIN_GPU_SIZE (131072)
-
-#define RAJA_MAX_REDUCE_VARS (8)
-#define RAJA_CUDA_MAX_NUM_BLOCKS (512*512*512)
-#define RAJA_CUDA_REDUCE_BLOCK_LENGTH RAJA_CUDA_MAX_NUM_BLOCKS
-#define RAJA_CUDA_REDUCE_TALLY_LENGTH RAJA_MAX_REDUCE_VARS
-#define RAJA_CUDA_REDUCE_VAR_MAXSIZE 16
-#define COHERENCE_BLOCK_SIZE 64
-
-typedef HYPRE_Real CudaReductionBlockDataType;
-typedef HYPRE_Int GridSizeType;
-
-#define hypre_SetDeviceOn() hypre_exec_policy = HYPRE_MEMORY_DEVICE
-#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
-
-int getCudaReductionId();
-CudaReductionBlockDataType* getCudaReductionMemBlock(int id);
-void releaseCudaReductionId(int id);
-void initCudaReductionMemBlock();
-void freeCudaReductionMemBlock();
-CudaReductionBlockDataType* getCPUReductionMemBlock(int id);
-void releaseCPUReductionId(int id);
-void freeCPUReductionMemBlock();
-
-#endif/* defined(HYPRE_USE_CUDA) */
-
-
-#ifdef HYPRE_USE_OMP45
+#if defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
 			   const char *type1, const char *type2);
 
@@ -152,7 +124,7 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 #define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
 #define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
 
-#endif/* HYPRE_USE_OMP45 */
+#endif /* #if defined(HYPRE_USING_DEVICE_OPENMP) */
 
 #endif/* __GPUMEM_H__ */
 
