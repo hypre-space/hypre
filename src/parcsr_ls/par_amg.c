@@ -345,6 +345,10 @@ hypre_BoomerAMGCreate()
    hypre_ParAMGDataXtilde(amg_data) = NULL;
    hypre_ParAMGDataRtilde(amg_data) = NULL;
    hypre_ParAMGDataDinv(amg_data) = NULL;
+
+   hypre_ParAMGDataAMGDDPadding(amg_data) = 1;
+   hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) = 6;
+   hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data) = 0;
    hypre_ParAMGDataCompGrid(amg_data) = NULL;
    hypre_ParAMGDataCompGridCommPkg(amg_data) = NULL;
 
@@ -1453,22 +1457,6 @@ hypre_BoomerAMGGetMaxIter( void     *data,
    return hypre_error_flag;
 } 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 HYPRE_Int
 hypre_BoomerAMGSetMinFACIter( void     *data,
                         HYPRE_Int       min_fac_iter )
@@ -1635,6 +1623,40 @@ hypre_BoomerAMGGetAMGDDNumGhostLayers( void     *data,
    } 
 
    *num_ghost_layers = hypre_ParAMGDataAMGDDNumGhostLayers(amg_data);
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGSetAMGDDUseTransitionLevel( void     *data,
+                        HYPRE_Int       use_transition_level )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data) = use_transition_level;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetAMGDDUseTransitionLevel( void     *data,
+                        HYPRE_Int *     use_transition_level )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *use_transition_level = hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data);
 
    return hypre_error_flag;
 } 

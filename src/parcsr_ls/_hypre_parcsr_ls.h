@@ -87,6 +87,7 @@ typedef struct
 {
    // Info needed for subsequent psi_c residual communication
    HYPRE_Int         num_levels; // levels in the amg hierarchy
+   HYPRE_Int         transition_level; // transition level used for adaptive AMG-RD (at this level and below, each proc owns the global grids)
    HYPRE_Int         *num_sends; // num procs to send to on each level
    HYPRE_Int         *num_recvs; // num procs to recv from on each level
 
@@ -111,6 +112,7 @@ typedef struct
  *--------------------------------------------------------------------------*/
 
  #define hypre_ParCompGridCommPkgNumLevels(compGridCommPkg)          ((compGridCommPkg) -> num_levels)
+ #define hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg)          ((compGridCommPkg) -> transition_level)
  #define hypre_ParCompGridCommPkgNumSends(compGridCommPkg)           ((compGridCommPkg) -> num_sends)
  #define hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg)           ((compGridCommPkg) -> num_recvs)
  #define hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)           ((compGridCommPkg) -> send_procs)
@@ -295,6 +297,7 @@ typedef struct
    HYPRE_Real                fac_tol;
    HYPRE_Int                 padding;
    HYPRE_Int                 num_ghost_layers;
+   HYPRE_Int                 use_transition_level;
    hypre_ParCompGrid       **compGrid;
    hypre_ParCompGridCommPkg *compGridCommPkg;
 
@@ -556,6 +559,7 @@ typedef struct
 #define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
 #define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->padding)
 #define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
+#define hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data) ((amg_data)->use_transition_level)
 #define hypre_ParAMGDataCompGrid(amg_data) ((amg_data)->compGrid)
 #define hypre_ParAMGDataCompGridCommPkg(amg_data) ((amg_data)->compGridCommPkg)
 
@@ -962,6 +966,8 @@ HYPRE_Int HYPRE_BoomerAMGSetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int paddi
 HYPRE_Int HYPRE_BoomerAMGGetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int *padding );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDNumGhostLayers ( HYPRE_Solver solver , HYPRE_Int num_ghost_layers );
 HYPRE_Int HYPRE_BoomerAMGGetAMGDDNumGhostLayers ( HYPRE_Solver solver , HYPRE_Int *num_ghost_layers );
+HYPRE_Int HYPRE_BoomerAMGSetAMGDDUseTransitionLevel ( HYPRE_Solver solver , HYPRE_Int use_transition_level );
+HYPRE_Int HYPRE_BoomerAMGGetAMGDDUseTransitionLevel ( HYPRE_Solver solver , HYPRE_Int *use_transition_level );
 HYPRE_Int HYPRE_BoomerAMGSetCoarsenType ( HYPRE_Solver solver , HYPRE_Int coarsen_type );
 HYPRE_Int HYPRE_BoomerAMGGetCoarsenType ( HYPRE_Solver solver , HYPRE_Int *coarsen_type );
 HYPRE_Int HYPRE_BoomerAMGSetMeasureType ( HYPRE_Solver solver , HYPRE_Int measure_type );
@@ -1403,6 +1409,8 @@ HYPRE_Int hypre_BoomerAMGSetAMGDDPadding ( void *data , HYPRE_Int padding );
 HYPRE_Int hypre_BoomerAMGGetAMGDDPadding ( void *data , HYPRE_Int *padding );
 HYPRE_Int hypre_BoomerAMGSetAMGDDNumGhostLayers ( void *data , HYPRE_Int num_ghost_layers );
 HYPRE_Int hypre_BoomerAMGGetAMGDDNumGhostLayers ( void *data , HYPRE_Int *num_ghost_layers );
+HYPRE_Int hypre_BoomerAMGSetAMGDDUseTransitionLevel ( void *data , HYPRE_Int use_transition_level );
+HYPRE_Int hypre_BoomerAMGGetAMGDDUseTransitionLevel ( void *data , HYPRE_Int *use_transition_level );
 HYPRE_Int hypre_BoomerAMGSetCoarsenType ( void *data , HYPRE_Int coarsen_type );
 HYPRE_Int hypre_BoomerAMGGetCoarsenType ( void *data , HYPRE_Int *coarsen_type );
 HYPRE_Int hypre_BoomerAMGSetMeasureType ( void *data , HYPRE_Int measure_type );
@@ -1916,13 +1924,14 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_par
 hypre_ParCompGrid *hypre_ParCompGridCreate ();
 HYPRE_Int hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid );
 HYPRE_Int hypre_ParCompGridInitialize( hypre_ParCompGrid *compGrid, hypre_ParVector *residual, HYPRE_Int *CF_marker_array, HYPRE_Int coarseStart, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P );
-HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels );
+HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level );
 HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int padding );
 HYPRE_Int hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int size, HYPRE_Int need_coarse_info );
+HYPRE_Int hypre_ParCompGridSetSizeMatricesOnly ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int A_nnz, HYPRE_Int P_nnz );
 HYPRE_Int hypre_ParCompGridResize ( hypre_ParCompGrid *compGrid, HYPRE_Int new_size, HYPRE_Int need_coarse_info );
 HYPRE_Int hypre_ParCompGridCopyNode( hypre_ParCompGrid *compGrid, hypre_ParCompGrid *compGridCopy, HYPRE_Int index, HYPRE_Int copyIndex);
 HYPRE_Int hypre_ParCompGridSetupLocalIndices( hypre_ParCompGrid **compGrid, HYPRE_Int *num_added_nodes, HYPRE_Int num_levels, HYPRE_Int *proc_first_index, HYPRE_Int *proc_last_index );
-HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels );
+HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level );
 HYPRE_Int hypre_ParCompGridLocalIndexBinarySearch( hypre_ParCompGrid *compGrid, HYPRE_Int global_index, HYPRE_Int allow_failed_search );
 HYPRE_Int hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename );
 HYPRE_Int hypre_ParCompGridDumpSorted( hypre_ParCompGrid *compGrid, const char* filename);

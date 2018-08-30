@@ -112,6 +112,7 @@ typedef struct
    HYPRE_Real                fac_tol;
    HYPRE_Int                 padding;
    HYPRE_Int                 num_ghost_layers;
+   HYPRE_Int                 use_transition_layer;
    hypre_ParCompGrid       **compGrid;
    hypre_ParCompGridCommPkg *compGridCommPkg;;
 
@@ -376,6 +377,7 @@ typedef struct
 #define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
 #define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->padding)
 #define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
+#define hypre_ParAMGDataAMGDDUseTransitionLayer(amg_data) ((amg_data)->use_transition_layer)
 #define hypre_ParAMGDataCompGrid(amg_data) ((amg_data)->compGrid)
 #define hypre_ParAMGDataCompGridCommPkg(amg_data) ((amg_data)->compGridCommPkg)
 

@@ -15,7 +15,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_FAC 0
+#define DEBUG_FAC 1
 #define DUMP_INTERMEDIATE_SOLNS 0
 
 HYPRE_Int
@@ -38,7 +38,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 
 	HYPRE_Int level, i, j; // loop variables
 	HYPRE_Int numCoarseRelax = 20; // number of relaxations used to solve the coarse grid
-   HYPRE_Int relax_type = 0;
+   HYPRE_Int relax_type = 1;
 
 	// Get the AMG structure
   	hypre_ParAMGData   *amg_data = amg_vdata;
@@ -124,7 +124,7 @@ hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_part )
 
    HYPRE_Int level, i, j; // loop variables
    HYPRE_Int numCoarseRelax = 20; // number of relaxations used to solve the coarse grid
-   HYPRE_Int relax_type = 0;
+   HYPRE_Int relax_type = 1;
 
    // Get the AMG structure
    hypre_ParAMGData   *amg_data = amg_vdata;
@@ -194,13 +194,13 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
 		if (hypre_ParCompGridCoarseResidualMarker(compGrid_c)[i] == 2) hypre_ParCompGridF(compGrid_c)[i] = 0.0;
 	}
 
-   #if DUMP_INTERMEDIATE_SOLNS
-   sprintf(filename, "outputs/comp_r%d_level%d", myid, level);
-   FILE *file;
-   file = fopen(filename, "w");
-   HYPRE_Int *bad_restrict_indices = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid_f), HYPRE_MEMORY_HOST);
-   HYPRE_Int num_bad_restrict = 0;
-   #endif
+   // #if DUMP_INTERMEDIATE_SOLNS
+   // sprintf(filename, "outputs/comp_r%d_level%d", myid, level);
+   // FILE *file;
+   // file = fopen(filename, "w");
+   // HYPRE_Int *bad_restrict_indices = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid_f), HYPRE_MEMORY_HOST);
+   // HYPRE_Int num_bad_restrict = 0;
+   // #endif
 
 	// Calculate fine grid residuals and FAC_restrict where appropriate
 	for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_f); i++)
@@ -216,26 +216,35 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
 			if ( hypre_ParCompGridAColInd(compGrid_f)[j] == -1 )
 			{
 				do_FAC_restrict = 0;
-            #if DUMP_INTERMEDIATE_SOLNS
-            bad_restrict_indices[num_bad_restrict++] = hypre_ParCompGridGlobalIndices(compGrid_f)[i];
-            #endif
+            // #if DUMP_INTERMEDIATE_SOLNS
+            // bad_restrict_indices[num_bad_restrict++] = hypre_ParCompGridGlobalIndices(compGrid_f)[i];
+            // #endif
 				break;
 			}
 			// Otherwise just subtract off A_ij * u_j
-			else res -= hypre_ParCompGridAData(compGrid_f)[j] * hypre_ParCompGridU(compGrid_f)[ hypre_ParCompGridAColInd(compGrid_f)[j] ];
-			if (hypre_ParCompGridAColInd(compGrid_f)[j] >= hypre_ParCompGridNumNodes(compGrid_f)) printf("Rank %d, index %d is out of bounds, num_nodes_f = %d\n", myid, hypre_ParCompGridAColInd(compGrid_f)[j], hypre_ParCompGridNumNodes(compGrid_f));
-		}
+			else 
+         {
+            #if DEBUG_FAC
+            if (hypre_ParCompGridAColInd(compGrid_f)[j] >= hypre_ParCompGridNumNodes(compGrid_f)) printf("Rank %d, A col index %d is out of bounds, num_nodes_f = %d\n", myid, hypre_ParCompGridAColInd(compGrid_f)[j], hypre_ParCompGridNumNodes(compGrid_f));
+            #endif
+            res -= hypre_ParCompGridAData(compGrid_f)[j] * hypre_ParCompGridU(compGrid_f)[ hypre_ParCompGridAColInd(compGrid_f)[j] ];
+         }	
+      }
 		if (do_FAC_restrict)
 		{
 			for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
 			{
+            #if DEBUG_FAC
+            if (hypre_ParCompGridPColInd(compGrid_f)[j] < 0) printf("Rank %d, P has -1 col index when restricting\n", myid);
+            else if (hypre_ParCompGridPColInd(compGrid_f)[j] >= hypre_ParCompGridNumNodes(compGrid_c)) printf("Rank %d, P col index out of bounds when restricting\n", myid);
+            #endif
 				if (hypre_ParCompGridCoarseResidualMarker(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] == 2)
 					hypre_ParCompGridF(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] += res*hypre_ParCompGridPData(compGrid_f)[j];
 			}
 		}
-      #if DUMP_INTERMEDIATE_SOLNS
-      fprintf(file, "%.14e\n", res);
-      #endif
+      // #if DUMP_INTERMEDIATE_SOLNS
+      // fprintf(file, "%.14e\n", res);
+      // #endif
 	}
 	
 	// Set residual on coarse grid where there was no (or incorrect) FAC_restriction from fine grid
@@ -247,22 +256,25 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
 			{
             if (hypre_ParCompGridAColInd(compGrid_c)[j] >= 0) 
          	{
+               #if DEBUG_FAC
+               if (hypre_ParCompGridAColInd(compGrid_c)[j] >= hypre_ParCompGridNumNodes(compGrid_c)) printf("Rank %d, A col index is out of bounds when calculating coarse grid residual\n", myid);
+               #endif
          		hypre_ParCompGridF(compGrid_c)[i] -= hypre_ParCompGridAData(compGrid_c)[j] * hypre_ParCompGridU(compGrid_c)[ hypre_ParCompGridAColInd(compGrid_c)[j] ];
          	}
 			}
 		}
 	}
 
-   #if DUMP_INTERMEDIATE_SOLNS
-   fclose(file);
-   sprintf(filename, "outputs/comp_bad_restrict%d_level%d", myid, level);
-   file = fopen(filename,"w");
-   for (i = 0; i < num_bad_restrict; i++) fprintf(file, "%d\n", bad_restrict_indices[i]);
-   fclose(file);
-   hypre_TFree(bad_restrict_indices, HYPRE_MEMORY_HOST);
-   sprintf(filename, "outputs/comp_f%d_level%d", myid, level+1);
-   hypre_ParCompGridFDump(compGrid_c,filename);
-   #endif
+   // #if DUMP_INTERMEDIATE_SOLNS
+   // fclose(file);
+   // sprintf(filename, "outputs/comp_bad_restrict%d_level%d", myid, level);
+   // file = fopen(filename,"w");
+   // for (i = 0; i < num_bad_restrict; i++) fprintf(file, "%d\n", bad_restrict_indices[i]);
+   // fclose(file);
+   // hypre_TFree(bad_restrict_indices, HYPRE_MEMORY_HOST);
+   // sprintf(filename, "outputs/comp_f%d_level%d", myid, level+1);
+   // hypre_ParCompGridFDump(compGrid_c,filename);
+   // #endif
 
 	// Zero out initial guess on coarse grid
 	for (i = 0; i < hypre_ParCompGridNumNodes(compGrid_c); i++) hypre_ParCompGridU(compGrid_c)[i] = 0.0;
