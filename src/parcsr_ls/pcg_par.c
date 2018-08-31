@@ -44,7 +44,7 @@ hypre_ParKrylovFree( void *ptr )
 void *
 hypre_ParKrylovCreateVector( void *vvector )
 {
-	hypre_ParVector *vector = (hypre_ParVector *) vvector;
+   hypre_ParVector *vector = (hypre_ParVector *) vvector;
    hypre_ParVector *new_vector;
 
    new_vector = hypre_ParVectorCreate( hypre_ParVectorComm(vector),
@@ -58,18 +58,21 @@ hypre_ParKrylovCreateVector( void *vvector )
 
 /*--------------------------------------------------------------------------
  * hypre_ParKrylovCreateVectorArray
+ * Note: one array will be allocated for all vectors, with vector 0 owning
+ * the data, vector i will have data[i*size] assigned, not owning data
  *--------------------------------------------------------------------------*/
 
 void *
 hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
 {
    hypre_ParVector *vector = (hypre_ParVector *) vvector;
+   
    hypre_ParVector **new_vector;
-   HYPRE_Int i;
-   //HYPRE_Complex *array_data;
+   HYPRE_Int i, size;
+   HYPRE_Complex *array_data;
 
-   //size = hypre_VectorSize(hypre_ParVectorLocalVector(vector));
-   //array_data = hypre_CTAlloc(HYPRE_Complex, (n*size), HYPRE_MEMORY_SHARED);
+   size = hypre_VectorSize(hypre_ParVectorLocalVector(vector));
+   array_data = hypre_CTAlloc(HYPRE_Complex, (n*size), HYPRE_MEMORY_SHARED);
    new_vector = hypre_CTAlloc(hypre_ParVector*, n, HYPRE_MEMORY_HOST);
    for (i=0; i < n; i++)
    {
@@ -77,10 +80,10 @@ hypre_ParKrylovCreateVectorArray(HYPRE_Int n, void *vvector )
                                              hypre_ParVectorGlobalSize(vector),	
                                              hypre_ParVectorPartitioning(vector) );
       hypre_ParVectorSetPartitioningOwner(new_vector[i],0);
-      //if (i) hypre_VectorOwnsData(hypre_ParVectorLocalVector(new_vector[i]))=0;
-      //hypre_VectorData(hypre_ParVectorLocalVector(vector)) = &array_data[i*size];
-      //hypre_ParVectorActualLocalSize(new_vector[i]) = size;
+      hypre_VectorData(hypre_ParVectorLocalVector(new_vector[i])) = &array_data[i*size];
       hypre_ParVectorInitialize(new_vector[i]);
+      if (i) hypre_VectorOwnsData(hypre_ParVectorLocalVector(new_vector[i]))=0;
+      hypre_ParVectorActualLocalSize(new_vector[i]) = size;
    }
 
    return ( (void *) new_vector );
