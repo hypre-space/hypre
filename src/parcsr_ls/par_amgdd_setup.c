@@ -252,26 +252,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       }   
    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    #if DEBUG_COMP_GRID == 2
    for (level = 0; level < num_levels; level++)
    {
@@ -285,19 +265,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       // hypre_ParCompGridDebugPrint( compGrid[level], filename );
    }
    #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
 
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
    if (timers) hypre_BeginTiming(timers[0]);
@@ -665,17 +632,15 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    for (level = 0; level < num_levels; level++)
    {
       hypre_sprintf(filename, "outputs/CompGrids/setupCompGridRank%dLevel%d.txt", myid, level);
-      // hypre_ParCompGridDebugPrint( compGrid[level], filename );
-      hypre_ParCompGridDumpSorted( compGrid[level], filename );
-      #if DEBUG_COMP_GRID == 2
-      hypre_sprintf(filename, "outputs/CompGrids/setupACompRank%dLevel%d.txt", myid, level);
-      hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename );
-      if (level != num_levels-1)
-      {
-         hypre_sprintf(filename, "outputs/CompGrids/setupPCompRank%dLevel%d.txt", myid, level);
-         hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename );
-      }
-      #endif
+      hypre_ParCompGridDebugPrint( compGrid[level], filename );
+      // hypre_ParCompGridDumpSorted( compGrid[level], filename );
+      // hypre_sprintf(filename, "outputs/CompGrids/setupACompRank%dLevel%d.txt", myid, level);
+      // hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename );
+      // if (level != num_levels-1)
+      // {
+      //    hypre_sprintf(filename, "outputs/CompGrids/setupPCompRank%dLevel%d.txt", myid, level);
+      //    hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename );
+      // }
    }
    #endif
 
@@ -1298,10 +1263,12 @@ PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int transition_level, HYPRE_I
    {
       // Get num nodes and num non zeros for matrices on this level
       hypre_ParCSRMatrix *A = hypre_ParAMGDataAArray(amg_data)[level];
-      hypre_ParCSRMatrix *P = hypre_ParAMGDataPArray(amg_data)[level];
+      hypre_ParCSRMatrix *P = NULL;
+      if (level != num_levels-1) P = hypre_ParAMGDataPArray(amg_data)[level];
       HYPRE_Int num_nodes = hypre_ParCSRMatrixNumRows(A);
       HYPRE_Int A_nnz = hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixDiag(A) ) + hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixOffd(A) );
-      HYPRE_Int P_nnz = hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixDiag(A) ) + hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixOffd(A) ); 
+      HYPRE_Int P_nnz = 0;
+      if (level != num_levels-1) P_nnz = hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixDiag(P) ) + hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixOffd(P) ); 
       // Increment the buffer size appropriately
       buffer_sizes[0] += 3;
       buffer_sizes[0] += 2*num_nodes;
@@ -1322,8 +1289,8 @@ PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int transition_level, HYPRE_I
       if (level != num_levels-1) P = hypre_ParAMGDataPArray(amg_data)[level];
       HYPRE_Int num_nodes = hypre_ParCSRMatrixNumRows(A);
       HYPRE_Int A_nnz = hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixDiag(A) ) + hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixOffd(A) );
-      HYPRE_Int P_nnz;
-      if (level != num_levels-1) P_nnz = hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixDiag(A) ) + hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixOffd(A) ); 
+      HYPRE_Int P_nnz = 0;
+      if (level != num_levels-1) P_nnz = hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixDiag(P) ) + hypre_CSRMatrixNumNonzeros( hypre_ParCSRMatrixOffd(P) ); 
       HYPRE_Int first_index = hypre_ParVectorFirstIndex( hypre_ParAMGDataUArray(amg_data)[level] );
       // Save the header data for this level
       (*int_buffer)[int_cnt++] = num_nodes;
@@ -1354,17 +1321,17 @@ PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int transition_level, HYPRE_I
          // Save the row ptr for P
          for (i = 0; i < num_nodes; i++)
          {
-            hypre_ParCSRMatrixGetRow( A, first_index + i, &row_size, &row_col_ind, &row_values );
+            hypre_ParCSRMatrixGetRow( P, first_index + i, &row_size, &row_col_ind, &row_values );
             (*int_buffer)[int_cnt++] = row_size;
-            hypre_ParCSRMatrixRestoreRow( A, first_index + i, &row_size, &row_col_ind, &row_values );
+            hypre_ParCSRMatrixRestoreRow( P, first_index + i, &row_size, &row_col_ind, &row_values );
          }
          // Save the col indices and values for P
          for (i = 0; i < num_nodes; i++)
          {
-            hypre_ParCSRMatrixGetRow( A, first_index + i, &row_size, &row_col_ind, &row_values );
+            hypre_ParCSRMatrixGetRow( P, first_index + i, &row_size, &row_col_ind, &row_values );
             for (j = 0; j < row_size; j++) (*int_buffer)[int_cnt++] = row_col_ind[j];
             for (j = 0; j < row_size; j++) (*complex_buffer)[complex_cnt++] = row_values[j];
-            hypre_ParCSRMatrixRestoreRow( A, first_index + i, &row_size, &row_col_ind, &row_values );
+            hypre_ParCSRMatrixRestoreRow( P, first_index + i, &row_size, &row_col_ind, &row_values );
          }
       }
    }
@@ -1382,23 +1349,49 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int *recv_int_buffer, HYPRE
 
    // Loop over levels and generate new global comp grids 
    HYPRE_Int level,proc,i,j;
+   HYPRE_Int max_res_buffer_size = 0;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
 
+   // Get the global number of nodes and number of nonzeros for the matrices (read in from buffer)
+   HYPRE_Int *res_num_recv_nodes = hypre_CTAlloc(HYPRE_Int, num_procs, HYPRE_MEMORY_HOST);
+   HYPRE_Int *global_num_nodes = hypre_CTAlloc(HYPRE_Int, num_levels - transition_level, HYPRE_MEMORY_HOST);
+   HYPRE_Int *global_A_nnz = hypre_CTAlloc(HYPRE_Int, num_levels - transition_level, HYPRE_MEMORY_HOST);
+   HYPRE_Int *global_P_nnz = hypre_CTAlloc(HYPRE_Int, num_levels - transition_level, HYPRE_MEMORY_HOST);
+   for (proc = 0; proc < num_procs; proc++)
+   {
+      HYPRE_Int int_cnt = max_buffer_sizes[0]*proc;
+      for (level = transition_level; level < num_levels; level++)
+      {
+         // Read header info for this proc
+         HYPRE_Int num_nodes = recv_int_buffer[int_cnt++];
+         if (level == transition_level)
+         {
+            if (num_nodes > max_res_buffer_size) max_res_buffer_size = num_nodes;
+            res_num_recv_nodes[proc] = num_nodes;
+         }
+         HYPRE_Int A_nnz = recv_int_buffer[int_cnt++];
+         HYPRE_Int P_nnz = 0;
+         if (level != num_levels-1) P_nnz = recv_int_buffer[int_cnt++];
 
+         // Add the global totals
+         global_num_nodes[level - transition_level] += num_nodes;
+         global_A_nnz[level - transition_level] += A_nnz;
+         if (level != num_levels-1) global_P_nnz[level - transition_level] += P_nnz;
+
+         // Increment counter appropriately
+         int_cnt += num_nodes + A_nnz;
+         if (level != num_levels-1) int_cnt += num_nodes + P_nnz;
+      }
+   }
+
+   // Create and allocate the comp grids
    for (level = transition_level; level < num_levels; level++)
    {
-      // Get global info for this level
-      HYPRE_Int global_num_nodes = hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[level]);
-      HYPRE_Int global_A_nnz = hypre_ParCSRMatrixNumNonzeros(hypre_ParAMGDataAArray(amg_data)[level]);
-      HYPRE_Int global_P_nnz = 0;
-      if (level != num_levels-1) global_P_nnz = hypre_ParCSRMatrixNumNonzeros(hypre_ParAMGDataPArray(amg_data)[level]);
-
-      // Create compGrid on this level and allocate space for matrices
       hypre_ParCompGrid *compGrid = hypre_ParCompGridCreate();
       hypre_ParAMGDataCompGrid(amg_data)[level] = compGrid;
-      hypre_ParCompGridSetSizeMatricesOnly (compGrid, global_num_nodes, global_A_nnz, global_P_nnz );
+      hypre_ParCompGridSetSizeMatricesOnly(compGrid, global_num_nodes[level - transition_level], global_A_nnz[level - transition_level], global_P_nnz[level - transition_level]);
       hypre_ParCompGridNumOwnedNodes(compGrid) = hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[level]);
-      hypre_ParCompGridNumRealNodes(compGrid) = global_num_nodes;
+      hypre_ParCompGridNumRealNodes(compGrid) = global_num_nodes[level - transition_level];
    }
 
    // Now get matrix info from all processors from recv_buffer
@@ -1477,6 +1470,13 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int *recv_int_buffer, HYPRE
          globalPNnzCnt_start[level - transition_level] = globalPNnzCnt;
       }
    }
+
+   hypre_ParCompGridCommPkgMaxResidualBufferSize(hypre_ParAMGDataCompGridCommPkg(amg_data)) = max_res_buffer_size;
+   hypre_ParCompGridCommPkgResNumRecvNodes(hypre_ParAMGDataCompGridCommPkg(amg_data)) = res_num_recv_nodes;
+
+   hypre_TFree(global_num_nodes, HYPRE_MEMORY_HOST);
+   hypre_TFree(global_A_nnz, HYPRE_MEMORY_HOST);
+   hypre_TFree(global_P_nnz, HYPRE_MEMORY_HOST);
    hypre_TFree(globalRowCnt_start, HYPRE_MEMORY_HOST);
    hypre_TFree(globalANnzCnt_start, HYPRE_MEMORY_HOST);
    hypre_TFree(globalPNnzCnt_start, HYPRE_MEMORY_HOST);

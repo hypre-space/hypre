@@ -253,8 +253,9 @@ ZeroInitialGuess( void *amg_vdata )
 HYPRE_Int 
 hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 {
-   HYPRE_Int   myid;
+   HYPRE_Int   myid, num_procs;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
    #if DEBUGGING_MESSAGES
    hypre_printf("Began residual communication on rank %d\n", myid);
@@ -316,6 +317,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    compGridCommPkg = hypre_ParAMGDataCompGridCommPkg(amg_data);
 
    // get info from comp grid comm pkg
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg);
    send_procs = hypre_ParCompGridCommPkgSendProcs(compGridCommPkg);
    recv_procs = hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg);
    send_buffer_size = hypre_ParCompGridCommPkgSendBufferSize(compGridCommPkg);
@@ -357,9 +359,22 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       }
    }
 
+   // Do Allgather of transition level 
+   residual_local = hypre_ParVectorLocalVector(F_array[transition_level]);
+   residual_data = hypre_VectorData(residual_local);
+   HYPRE_Complex *transition_level_recv_buf = hypre_CTAlloc(HYPRE_Complex, num_procs*hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg), HYPRE_MEMORY_HOST);
+   MPI_Allgather(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, transition_level_recv_buf, hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
+   HYPRE_Int cnt = 0;
+   HYPRE_Int proc;
+   for (proc = 0; proc < num_procs; proc++)
+   {
+      HYPRE_Int buf_cnt = hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg)*proc;
+      for (i = 0; i < hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg)[proc]; i++) hypre_ParCompGridF(compGrid[transition_level])[cnt++] = transition_level_recv_buf[buf_cnt++];
+   }
+
    /* Outer loop over levels:
    Start from coarsest level and work up to finest */
-   for (level = num_levels-1; level > -1; level--)
+   for (level = transition_level - 1; level >= 0; level--)
    {      
       // Get some communication info
       comm = hypre_ParCSRMatrixComm(A_array[level]);

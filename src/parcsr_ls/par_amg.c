@@ -1560,6 +1560,40 @@ hypre_BoomerAMGGetFACTol( void     *data,
 } 
 
 HYPRE_Int
+hypre_BoomerAMGSetFACRelaxType( void     *data,
+                        HYPRE_Real       fac_relax_type )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataFACRelaxType(amg_data) = fac_relax_type;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetFACRelaxType( void     *data,
+                        HYPRE_Real *     fac_relax_type )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *fac_relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
 hypre_BoomerAMGSetAMGDDPadding( void     *data,
                         HYPRE_Int       padding )
 {
