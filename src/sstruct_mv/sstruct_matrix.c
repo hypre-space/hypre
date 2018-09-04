@@ -1544,7 +1544,7 @@ hypre_SStructMatrixSetInterPartValues( HYPRE_SStructMatrix  matrix,
    hypre_BoxDestroy(ibox1);
    hypre_BoxDestroy(tobox);
    hypre_BoxDestroy(frbox);
-   hypre_TFree(tvalues, HYPRE_MEMORY_HOST);
+   hypre_TFree(tvalues, HYPRE_MEMORY_SHARED);
 
    return hypre_error_flag;
 }
