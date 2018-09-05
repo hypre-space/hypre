@@ -6628,8 +6628,8 @@ BuildParLaplacian( HYPRE_Int                  argc,
    ny = 10;
    nz = 10;
 
-   P  = num_procs;
-   Q  = 1;
+   P  = 1;
+   Q  = num_procs;
    R  = 1;
 
    cx = 1.;
@@ -7116,8 +7116,8 @@ BuildParDifConv( HYPRE_Int                  argc,
    ny = 10;
    nz = 10;
 
-   P  = num_procs;;
-   Q  = 1;
+   P  = 1;
+   Q  = num_procs;
    R  = 1;
 
    cx = 1.;

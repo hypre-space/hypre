@@ -692,20 +692,6 @@ HYPRE_ParVector HYPRE_ParVectorCloneShallow ( HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorScale ( HYPRE_Complex value , HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParVectorAxpy ( HYPRE_Complex alpha , HYPRE_ParVector x , HYPRE_ParVector y );
 HYPRE_Int HYPRE_ParVectorInnerProd ( HYPRE_ParVector x , HYPRE_ParVector y , HYPRE_Real *prod );
-// added by KS
-// mass inner product with x being multiple vectors.
-/*
- *void hypre_ParKrylovMassInnerProd ( void *x , void **y, int k, void *result );
-void hypre_ParKrylovMassAxpy( HYPRE_Real *alpha, void **x, void *y, HYPRE_Int k);
- hypre_ParVectorMassInnerProd( hypre_ParVector *x,
-    hypre_ParVector **y, int k, HYPRE_Real *result  ){
- * */
-//HYPRE_Int HYPRE_ParVectorMassInnerProd ( HYPRE_ParVector x , HYPRE_ParVector *y , HYPRE_Int k, HYPRE_Real *prod );
-//HYPRE_Int HYPRE_ParVectorMassAxpy      ( HYPRE_Real *alpha, HYPRE_ParVector *x, HYPRE_ParVector y, HYPRE_Int k);  
-
-// end of KS code
-
-
 HYPRE_Int HYPRE_VectorToParVector ( MPI_Comm comm , HYPRE_Vector b , HYPRE_Int *partitioning , HYPRE_ParVector *vector );
 
 /* new_commpkg.c */

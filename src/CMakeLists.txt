@@ -240,12 +240,14 @@ list (APPEND HYPRE_HEADERS
 list (APPEND HYPRE_SOURCES
   krylov/bicgstab.c
   krylov/cgnr.c
+  krylov/cogmres.c
   krylov/gmres.c
   krylov/flexgmres.c
   krylov/lgmres.c
   krylov/HYPRE_bicgstab.c
   krylov/HYPRE_cgnr.c
   krylov/HYPRE_gmres.c
+  krylov/HYPRE_cogmres.c
   krylov/HYPRE_lgmres.c
   krylov/HYPRE_flexgmres.c
   krylov/HYPRE_pcg.c
@@ -445,6 +447,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/F90_HYPRE_parcsr_cgnr.c
   parcsr_ls/F90_HYPRE_parcsr_Euclid.c
   parcsr_ls/F90_HYPRE_parcsr_gmres.c
+  parcsr_ls/F90_HYPRE_parcsr_cogmres.c
   parcsr_ls/F90_HYPRE_parcsr_flexgmres.c
   parcsr_ls/F90_HYPRE_parcsr_lgmres.c
   parcsr_ls/F90_HYPRE_parcsr_hybrid.c
