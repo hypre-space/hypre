@@ -447,6 +447,7 @@ list (APPEND HYPRE_SOURCES
   parcsr_ls/F90_HYPRE_parcsr_cgnr.c
   parcsr_ls/F90_HYPRE_parcsr_Euclid.c
   parcsr_ls/F90_HYPRE_parcsr_gmres.c
+  parcsr_ls/F90_HYPRE_parcsr_cogmres.c
   parcsr_ls/F90_HYPRE_parcsr_flexgmres.c
   parcsr_ls/F90_HYPRE_parcsr_lgmres.c
   parcsr_ls/F90_HYPRE_parcsr_hybrid.c
