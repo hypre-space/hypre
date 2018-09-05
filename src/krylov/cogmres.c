@@ -41,13 +41,13 @@ hypre_COGMRESFunctionsCreate(
                                    void *x, HYPRE_Complex beta, void *y ),
    HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
    HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
-   HYPRE_Int    (*MassInnerProd) (void *x, void **y, HYPRE_Int k, void *result),
-   HYPRE_Int    (*MassDotpTwo)   (void *x, void *y, void **z, HYPRE_Int k, void *result_x, void *result_y),
+   HYPRE_Int    (*MassInnerProd) (void *x, void **y, HYPRE_Int k, HYPRE_Int unroll, void *result),
+   HYPRE_Int    (*MassDotpTwo)   (void *x, void *y, void **z, HYPRE_Int k, HYPRE_Int unroll, void *result_x, void *result_y),
    HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
    HYPRE_Int    (*ClearVector)   ( void *x ),
    HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
    HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),      
-   HYPRE_Int    (*MassAxpy)      ( HYPRE_Real *alpha, void **x, void *y, HYPRE_Int k),   
+   HYPRE_Int    (*MassAxpy)      ( HYPRE_Real *alpha, void **x, void *y, HYPRE_Int k, HYPRE_Int unroll),   
    HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
    HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
    )
@@ -95,7 +95,7 @@ hypre_COGMRESCreate( hypre_COGMRESFunctions *cogmres_functions )
 
    /* set defaults */
    (cogmres_data -> k_dim)          = 5;
-   (cogmres_data -> cgs2)           = 1; /* if 2 performs reorthogonalization */
+   (cogmres_data -> cgs)            = 1; /* if 2 performs reorthogonalization */
    (cogmres_data -> tol)            = 1.0e-06; /* relative residual tol */
    (cogmres_data -> cf_tol)         = 0.0;
    (cogmres_data -> a_tol)          = 0.0; /* abs. residual tol */
@@ -114,6 +114,7 @@ hypre_COGMRESCreate( hypre_COGMRESFunctions *cogmres_functions )
    (cogmres_data -> matvec_data)    = NULL;
    (cogmres_data -> norms)          = NULL;
    (cogmres_data -> log_file_name)  = NULL;
+   (cogmres_data -> unroll)         = 0;
 
    return (void *) cogmres_data;
 }
@@ -255,7 +256,8 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
    hypre_COGMRESData      *cogmres_data      = (hypre_COGMRESData *)cogmres_vdata;
    hypre_COGMRESFunctions *cogmres_functions = cogmres_data->functions;
    HYPRE_Int     k_dim             = (cogmres_data -> k_dim);
-   HYPRE_Int     cgs2              = (cogmres_data -> cgs2);
+   HYPRE_Int     unroll            = (cogmres_data -> unroll);
+   HYPRE_Int     cgs               = (cogmres_data -> cgs);
    HYPRE_Int     min_iter          = (cogmres_data -> min_iter);
    HYPRE_Int     max_iter          = (cogmres_data -> max_iter);
    HYPRE_Int     rel_change        = (cogmres_data -> rel_change);
@@ -503,11 +505,9 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
          for (j=0; j<i; j++)
             rv[j]  = 0;
 
-         if (cgs2 > 1)
+         if (cgs > 1)
          {
-            (*(cogmres_functions->MassDotpTwo))((void *) p[i], p[i-1], p, i, &hh[itmp], &uu[itmp]);
-            //(*(cogmres_functions->MassInnerProd))((void *) p[i], p, i, &hh[itmp]);
-            //(*(cogmres_functions->MassInnerProd))((void *) p[i-1], p, i, &uu[itmp]);
+            (*(cogmres_functions->MassDotpTwo))((void *) p[i], p[i-1], p, i, unroll, &hh[itmp], &uu[itmp]);
             for (j=0; j<i-1; j++) uu[j*(k_dim+1)+i-1] = uu[itmp+j];
             for (j=0; j<i; j++) rv[j] = hh[itmp+j];
             for (k=0; k < i; k++)
@@ -522,12 +522,12 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
          }
          else
          {
-            (*(cogmres_functions->MassInnerProd))((void *) p[i], p, i, &hh[itmp]);
+            (*(cogmres_functions->MassInnerProd))((void *) p[i], p, i, unroll, &hh[itmp]);
             for (j=0; j<i; j++)
                hh[itmp+j]  = -hh[itmp+j];
          }
 
-         (*(cogmres_functions->MassAxpy))(&hh[itmp],p,p[i], i);
+         (*(cogmres_functions->MassAxpy))(&hh[itmp],p,p[i], i, unroll);
          for (j=0; j<i; j++)
             hh[itmp+j]  = -hh[itmp+j];
          t = sqrt( (*(cogmres_functions->InnerProd))(p[i],p[i]) );
@@ -872,24 +872,46 @@ hypre_COGMRESGetKDim( void   *cogmres_vdata,
 }
 
 /*--------------------------------------------------------------------------
- * hypre_COGMRESSetCGS2, hypre_COGMRESGetCGS2
+ * hypre_COGMRESSetUnroll, hypre_COGMRESGetUnroll
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_COGMRESSetCGS2( void   *cogmres_vdata,
-        HYPRE_Int   cgs2 )
+hypre_COGMRESSetUnroll( void   *cogmres_vdata,
+        HYPRE_Int   unroll )
 {
    hypre_COGMRESData *cogmres_data =(hypre_COGMRESData *) cogmres_vdata;
-   (cogmres_data -> cgs2) = cgs2;
+   (cogmres_data -> unroll) = unroll;
    return hypre_error_flag;
 }
 
 HYPRE_Int
-hypre_COGMRESGetCGS2( void   *cogmres_vdata,
-        HYPRE_Int * cgs2 )
+hypre_COGMRESGetUnroll( void   *cogmres_vdata,
+        HYPRE_Int * unroll )
 {
    hypre_COGMRESData *cogmres_data = (hypre_COGMRESData *)cogmres_vdata;
-   *cgs2 = (cogmres_data -> cgs2);
+   *unroll = (cogmres_data -> unroll);
+   return hypre_error_flag;
+}
+
+/*--------------------------------------------------------------------------
+ * hypre_COGMRESSetCGS, hypre_COGMRESGetCGS
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+hypre_COGMRESSetCGS( void   *cogmres_vdata,
+        HYPRE_Int   cgs )
+{
+   hypre_COGMRESData *cogmres_data =(hypre_COGMRESData *) cogmres_vdata;
+   (cogmres_data -> cgs) = cgs;
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_COGMRESGetCGS( void   *cogmres_vdata,
+        HYPRE_Int * cgs )
+{
+   hypre_COGMRESData *cogmres_data = (hypre_COGMRESData *)cogmres_vdata;
+   *cgs = (cogmres_data -> cgs);
    return hypre_error_flag;
 }
 

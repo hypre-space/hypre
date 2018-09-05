@@ -413,7 +413,7 @@ hypre_ParVectorAxpy( HYPRE_Complex    alpha,
 HYPRE_Int
 hypre_ParVectorMassAxpy( HYPRE_Complex   *alpha,
                      hypre_ParVector **x,
-                     hypre_ParVector *y, HYPRE_Int k )
+                     hypre_ParVector *y, HYPRE_Int k, HYPRE_Int unroll )
 {
    HYPRE_Int i;
    hypre_Vector **x_local;
@@ -423,7 +423,7 @@ hypre_ParVectorMassAxpy( HYPRE_Complex   *alpha,
    for (i=0; i < k; i++)
       x_local[i] = hypre_ParVectorLocalVector(x[i]);
            
-   hypre_SeqVectorMassAxpy( alpha, x_local, y_local, k);
+   hypre_SeqVectorMassAxpy( alpha, x_local, y_local, k, unroll);
 
    hypre_TFree(x_local, HYPRE_MEMORY_SHARED);
 
@@ -463,7 +463,7 @@ hypre_ParVectorInnerProd( hypre_ParVector *x,
 
 HYPRE_Int
 hypre_ParVectorMassInnerProd( hypre_ParVector *x,
-                              hypre_ParVector **y, HYPRE_Int k,
+                              hypre_ParVector **y, HYPRE_Int k, HYPRE_Int unroll,
                               HYPRE_Real *result )
 {
    MPI_Comm      comm    = hypre_ParVectorComm(x);
@@ -478,7 +478,7 @@ hypre_ParVectorMassInnerProd( hypre_ParVector *x,
 
    local_result = hypre_CTAlloc(HYPRE_Real, k, HYPRE_MEMORY_SHARED);
 
-   hypre_SeqVectorMassInnerProd(x_local, y_local, k, local_result);
+   hypre_SeqVectorMassInnerProd(x_local, y_local, k, unroll, local_result);
    
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] -= hypre_MPI_Wtime();
@@ -501,7 +501,7 @@ hypre_ParVectorMassInnerProd( hypre_ParVector *x,
 
 HYPRE_Int
 hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y,
-                              hypre_ParVector **z, HYPRE_Int k,
+                              hypre_ParVector **z, HYPRE_Int k, HYPRE_Int unroll,
                               HYPRE_Real *result_x, HYPRE_Real *result_y )
 {
    MPI_Comm      comm    = hypre_ParVectorComm(x);
@@ -518,7 +518,7 @@ hypre_ParVectorMassDotpTwo ( hypre_ParVector *x, hypre_ParVector *y,
    local_result = hypre_CTAlloc(HYPRE_Real, 2*k, HYPRE_MEMORY_SHARED);
    result = hypre_CTAlloc(HYPRE_Real, 2*k, HYPRE_MEMORY_SHARED);
 
-   hypre_SeqVectorMassDotpTwo(x_local, y_local, z_local, k, &local_result[0], &local_result[k]);
+   hypre_SeqVectorMassDotpTwo(x_local, y_local, z_local, k, unroll, &local_result[0], &local_result[k]);
    
 #ifdef HYPRE_PROFILE
    hypre_profile_times[HYPRE_TIMER_ID_ALL_REDUCE] -= hypre_MPI_Wtime();

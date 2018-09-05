@@ -276,7 +276,8 @@ main( hypre_int argc,
    /* parameters for GMRES */
    HYPRE_Int	    k_dim;
    /* parameters for COGMRES */
-   HYPRE_Int	    cgs2;
+   HYPRE_Int	    cgs = 1;
+   HYPRE_Int	    unroll = 0;
    /* parameters for LGMRES */
    HYPRE_Int	    aug_dim;
    /* parameters for GSMG */
@@ -1071,7 +1072,8 @@ main( hypre_int argc,
    /* defaults for GMRES */
 
    k_dim = 5;
-   cgs2 = 1;
+   cgs = 1;
+   unroll = 0;
 
    /* defaults for LGMRES - should use a larger k_dim, though*/
    aug_dim = 2;
@@ -1087,7 +1089,12 @@ main( hypre_int argc,
       else if ( strcmp(argv[arg_index], "-cgs") == 0 )
       {
          arg_index++;
-         cgs2 = atoi(argv[arg_index++]);
+         cgs = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-unroll") == 0 )
+      {
+         arg_index++;
+         unroll = atoi(argv[arg_index++]);
       }
       else if ( strcmp(argv[arg_index], "-aug") == 0 )
       {
@@ -5768,7 +5775,8 @@ main( hypre_int argc,
  
       HYPRE_ParCSRCOGMRESCreate(hypre_MPI_COMM_WORLD, &pcg_solver);
       HYPRE_COGMRESSetKDim(pcg_solver, k_dim);
-      HYPRE_COGMRESSetCGS2(pcg_solver, cgs2);
+      HYPRE_COGMRESSetUnroll(pcg_solver, unroll);
+      HYPRE_COGMRESSetCGS(pcg_solver, cgs);
       HYPRE_COGMRESSetMaxIter(pcg_solver, max_iter);
       HYPRE_COGMRESSetTol(pcg_solver, tol);
       HYPRE_COGMRESSetAbsoluteTol(pcg_solver, atol);

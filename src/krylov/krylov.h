@@ -615,13 +615,13 @@ extern "C" {
         void *x, HYPRE_Complex beta, void *y );
     HYPRE_Int    (*MatvecDestroy) ( void *matvec_data );
     HYPRE_Real   (*InnerProd)     ( void *x, void *y );
-    HYPRE_Int    (*MassInnerProd) ( void *x, void **p, HYPRE_Int k, void *result);
-    HYPRE_Int    (*MassDotpTwo)   ( void *x, void *y, void **p, HYPRE_Int k, void *result_x, void *result_y);
+    HYPRE_Int    (*MassInnerProd) ( void *x, void **p, HYPRE_Int k, HYPRE_Int unroll, void *result);
+    HYPRE_Int    (*MassDotpTwo)   ( void *x, void *y, void **p, HYPRE_Int k, HYPRE_Int unroll, void *result_x, void *result_y);
     HYPRE_Int    (*CopyVector)    ( void *x, void *y );
     HYPRE_Int    (*ClearVector)   ( void *x );
     HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x );
     HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y );
-    HYPRE_Int    (*MassAxpy)      ( HYPRE_Real * alpha, void **x, void *y, HYPRE_Int k);
+    HYPRE_Int    (*MassAxpy)      ( HYPRE_Real * alpha, void **x, void *y, HYPRE_Int k, HYPRE_Int unroll);
     HYPRE_Int    (*precond)       (void *vdata , void *A , void *b , void *x);
     HYPRE_Int    (*precond_setup) (void *vdata , void *A , void *b , void *x);
 
@@ -637,7 +637,8 @@ extern "C" {
   typedef struct
   {
     HYPRE_Int      k_dim;
-    HYPRE_Int      cgs2;
+    HYPRE_Int      unroll;
+    HYPRE_Int      cgs;
     HYPRE_Int      min_iter;
     HYPRE_Int      max_iter;
     HYPRE_Int      rel_change;
@@ -700,13 +701,13 @@ extern "C" {
           HYPRE_Int    (*Matvec)        ( void *matvec_data, HYPRE_Complex alpha, void *A, void *x, HYPRE_Complex beta, void *y ),
           HYPRE_Int    (*MatvecDestroy) ( void *matvec_data ),
           HYPRE_Real   (*InnerProd)     ( void *x, void *y ),
-          HYPRE_Int    (*MassInnerProd) ( void *x, void **p, HYPRE_Int k, void *result),
-          HYPRE_Int    (*MassDotpTwo)   ( void *x, void *y, void **p, HYPRE_Int k, void *result_x, void *result_y),
+          HYPRE_Int    (*MassInnerProd) ( void *x, void **p, HYPRE_Int k, HYPRE_Int unroll, void *result),
+          HYPRE_Int    (*MassDotpTwo)   ( void *x, void *y, void **p, HYPRE_Int k, HYPRE_Int unroll, void *result_x, void *result_y),
           HYPRE_Int    (*CopyVector)    ( void *x, void *y ),
           HYPRE_Int    (*ClearVector)   ( void *x ),
           HYPRE_Int    (*ScaleVector)   ( HYPRE_Complex alpha, void *x ),
           HYPRE_Int    (*Axpy)          ( HYPRE_Complex alpha, void *x, void *y ),
-          HYPRE_Int    (*MassAxpy)      ( HYPRE_Real *alpha, void **x, void *y, HYPRE_Int k),
+          HYPRE_Int    (*MassAxpy)      ( HYPRE_Real *alpha, void **x, void *y, HYPRE_Int k, HYPRE_Int unroll),
           HYPRE_Int    (*PrecondSetup)  ( void *vdata, void *A, void *b, void *x ),
           HYPRE_Int    (*Precond)       ( void *vdata, void *A, void *b, void *x )
           );
@@ -1342,8 +1343,10 @@ extern "C" {
   HYPRE_Int hypre_COGMRESSolve ( void *gmres_vdata , void *A , void *b , void *x );
   HYPRE_Int hypre_COGMRESSetKDim ( void *gmres_vdata , HYPRE_Int k_dim );
   HYPRE_Int hypre_COGMRESGetKDim ( void *gmres_vdata , HYPRE_Int *k_dim );
-  HYPRE_Int hypre_COGMRESSetCGS2 ( void *gmres_vdata , HYPRE_Int cgs2 );
-  HYPRE_Int hypre_COGMRESGetCGS2 ( void *gmres_vdata , HYPRE_Int *cgs2 );
+  HYPRE_Int hypre_COGMRESSetUnroll ( void *gmres_vdata , HYPRE_Int unroll );
+  HYPRE_Int hypre_COGMRESGetUnroll ( void *gmres_vdata , HYPRE_Int *unroll );
+  HYPRE_Int hypre_COGMRESSetCGS ( void *gmres_vdata , HYPRE_Int cgs );
+  HYPRE_Int hypre_COGMRESGetCGS ( void *gmres_vdata , HYPRE_Int *cgs );
   HYPRE_Int hypre_COGMRESSetTol ( void *gmres_vdata , HYPRE_Real tol );
   HYPRE_Int hypre_COGMRESGetTol ( void *gmres_vdata , HYPRE_Real *tol );
   HYPRE_Int hypre_COGMRESSetAbsoluteTol ( void *gmres_vdata , HYPRE_Real a_tol );
@@ -1504,8 +1507,10 @@ extern "C" {
   HYPRE_Int HYPRE_COGMRESSolve ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
   HYPRE_Int HYPRE_COGMRESSetKDim ( HYPRE_Solver solver , HYPRE_Int k_dim );
   HYPRE_Int HYPRE_COGMRESGetKDim ( HYPRE_Solver solver , HYPRE_Int *k_dim );
-  HYPRE_Int HYPRE_COGMRESSetCGS2 ( HYPRE_Solver solver , HYPRE_Int cgs2 );
-  HYPRE_Int HYPRE_COGMRESGetCGS2 ( HYPRE_Solver solver , HYPRE_Int *cgs2 );
+  HYPRE_Int HYPRE_COGMRESSetUnroll ( HYPRE_Solver solver , HYPRE_Int unroll );
+  HYPRE_Int HYPRE_COGMRESGetUnroll ( HYPRE_Solver solver , HYPRE_Int *unroll );
+  HYPRE_Int HYPRE_COGMRESSetCGS ( HYPRE_Solver solver , HYPRE_Int cgs );
+  HYPRE_Int HYPRE_COGMRESGetCGS ( HYPRE_Solver solver , HYPRE_Int *cgs );
   HYPRE_Int HYPRE_COGMRESSetTol ( HYPRE_Solver solver , HYPRE_Real tol );
   HYPRE_Int HYPRE_COGMRESGetTol ( HYPRE_Solver solver , HYPRE_Real *tol );
   HYPRE_Int HYPRE_COGMRESSetAbsoluteTol ( HYPRE_Solver solver , HYPRE_Real a_tol );

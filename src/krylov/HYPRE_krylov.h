@@ -860,10 +860,17 @@ HYPRE_Int HYPRE_COGMRESSetKDim(HYPRE_Solver solver,
                            HYPRE_Int          k_dim);
 
 /**
- * (Optional) Set the number of orthogonalizations in COGMRES.
+ * (Optional) Set number of unrolling in mass funcyions in COGMRES 
+ * Can be 4 or 8. Default: no unrolling.
  **/
-HYPRE_Int HYPRE_COGMRESSetCGS2(HYPRE_Solver solver,
-                           HYPRE_Int          cgs2);
+HYPRE_Int HYPRE_COGMRESSetUnroll(HYPRE_Solver solver,
+                           HYPRE_Int          unroll);
+
+/**
+ * (Optional) Set the number of orthogonalizations in COGMRES (at most 2).
+ **/
+HYPRE_Int HYPRE_COGMRESSetCGS(HYPRE_Solver solver,
+                           HYPRE_Int          cgs);
 
 /**
  * (Optional) Set the preconditioner to use.
@@ -936,8 +943,13 @@ HYPRE_Int HYPRE_COGMRESGetKDim(HYPRE_Solver  solver,
 
 /**
  **/
-HYPRE_Int HYPRE_COGMRESGetCGS2(HYPRE_Solver  solver,
-                           HYPRE_Int          *cgs2);
+HYPRE_Int HYPRE_COGMRESGetUnroll(HYPRE_Solver  solver,
+                           HYPRE_Int          *unroll);
+
+/**
+ **/
+HYPRE_Int HYPRE_COGMRESGetCGS(HYPRE_Solver  solver,
+                           HYPRE_Int          *cgs);
 
 /**
  **/

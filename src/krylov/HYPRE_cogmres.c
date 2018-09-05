@@ -84,21 +84,39 @@ HYPRE_COGMRESGetKDim( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_COGMRESSetCGS2, HYPRE_COGMRESGetCGS2
+ * HYPRE_COGMRESSetUnroll, HYPRE_COGMRESGetUnroll
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-HYPRE_COGMRESSetCGS2( HYPRE_Solver solver,
-                          HYPRE_Int             cgs2    )
+HYPRE_COGMRESSetUnroll( HYPRE_Solver solver,
+                          HYPRE_Int             unroll    )
 {
-   return( hypre_COGMRESSetCGS2( (void *) solver, cgs2 ) );
+   return( hypre_COGMRESSetUnroll( (void *) solver, unroll ) );
 }
 
 HYPRE_Int
-HYPRE_COGMRESGetCGS2( HYPRE_Solver solver,
-                          HYPRE_Int           * cgs2    )
+HYPRE_COGMRESGetUnroll( HYPRE_Solver solver,
+                          HYPRE_Int           * unroll    )
 {
-   return( hypre_COGMRESGetCGS2( (void *) solver, cgs2 ) );
+   return( hypre_COGMRESGetUnroll( (void *) solver, unroll ) );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_COGMRESSetCGS, HYPRE_COGMRESGetCGS
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_COGMRESSetCGS( HYPRE_Solver solver,
+                          HYPRE_Int             cgs    )
+{
+   return( hypre_COGMRESSetCGS( (void *) solver, cgs ) );
+}
+
+HYPRE_Int
+HYPRE_COGMRESGetCGS( HYPRE_Solver solver,
+                          HYPRE_Int           * cgs    )
+{
+   return( hypre_COGMRESGetCGS( (void *) solver, cgs ) );
 }
 
 /*--------------------------------------------------------------------------

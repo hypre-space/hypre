@@ -181,9 +181,9 @@ hypre_ParKrylovInnerProd( void *x,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_ParKrylovMassInnerProd( void *x, 
-                          void **y, HYPRE_Int k, void  * result )
+                          void **y, HYPRE_Int k, HYPRE_Int unroll, void  * result )
 {
-   return ( hypre_ParVectorMassInnerProd( (hypre_ParVector *) x,(hypre_ParVector **) y, k, (HYPRE_Real*)result ) );
+   return ( hypre_ParVectorMassInnerProd( (hypre_ParVector *) x,(hypre_ParVector **) y, k, unroll, (HYPRE_Real*)result ) );
 }
 
 /*--------------------------------------------------------------------------
@@ -191,10 +191,10 @@ hypre_ParKrylovMassInnerProd( void *x,
  *--------------------------------------------------------------------------*/
 HYPRE_Int
 hypre_ParKrylovMassDotpTwo( void *x, void *y, 
-                          void **z, HYPRE_Int k, void  *result_x, void *result_y )
+                          void **z, HYPRE_Int k, HYPRE_Int unroll, void  *result_x, void *result_y )
 {
    return ( hypre_ParVectorMassDotpTwo( (hypre_ParVector *) x, (hypre_ParVector *) y, (hypre_ParVector **) z, k, 
-            (HYPRE_Real *)result_x, (HYPRE_Real *)result_y ) );
+            unroll, (HYPRE_Real *)result_x, (HYPRE_Real *)result_y ) );
 }
 
 
@@ -253,9 +253,10 @@ HYPRE_Int
 hypre_ParKrylovMassAxpy( HYPRE_Real * alpha,
                      void   **x,
                      void   *y ,
-                     HYPRE_Int k){
+                     HYPRE_Int k, HYPRE_Int unroll)
+{
    return ( hypre_ParVectorMassAxpy( alpha, (hypre_ParVector **) x,
-                                 (hypre_ParVector *) y ,  k));
+                                 (hypre_ParVector *) y ,  k, unroll));
 }
 
 
