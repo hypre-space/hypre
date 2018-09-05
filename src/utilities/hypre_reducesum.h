@@ -1,5 +1,14 @@
 #if defined(HYPRE_USING_CUDA)
 
+
+#ifndef CUDART_VERSION
+#error CUDART_VERSION Undefined!
+#elif (CUDART_VERSION >= 9000)
+#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down_sync(mask, var, delta)
+#elif (CUDART_VERSION <= 8000)
+#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down(var, delta);
+#endif
+
 extern "C++" {
 
 extern void *cuda_reduce_buffer;
@@ -83,7 +92,7 @@ HYPRE_Real warpReduceSum(HYPRE_Real val)
 #ifdef __CUDA_ARCH__
   for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
   {
-    val += __shfl_down_sync(0xFFFFFFFF, val, offset);
+    val += WARP_SHFL_DOWN(0xFFFFFFFF, val, offset);
   }
 #endif
   return val;
@@ -94,10 +103,10 @@ HYPRE_double4 warpReduceSum(HYPRE_double4 val) {
 #ifdef __CUDA_ARCH__
   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
   {
-    val.x += __shfl_down_sync(0xFFFFFFFF, val.x, offset);
-    val.y += __shfl_down_sync(0xFFFFFFFF, val.y, offset);
-    val.z += __shfl_down_sync(0xFFFFFFFF, val.z, offset);
-    val.w += __shfl_down_sync(0xFFFFFFFF, val.w, offset);
+    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
+    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
+    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
+    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
   }
 #endif
   return val;
@@ -108,12 +117,12 @@ HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
 #ifdef __CUDA_ARCH__
   for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
   {
-    val.x += __shfl_down_sync(0xFFFFFFFF, val.x, offset);
-    val.y += __shfl_down_sync(0xFFFFFFFF, val.y, offset);
-    val.z += __shfl_down_sync(0xFFFFFFFF, val.z, offset);
-    val.w += __shfl_down_sync(0xFFFFFFFF, val.w, offset);
-    val.u += __shfl_down_sync(0xFFFFFFFF, val.u, offset);
-    val.v += __shfl_down_sync(0xFFFFFFFF, val.v, offset);
+    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
+    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
+    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
+    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
+    val.u += WARP_SHFL_DOWN(0xFFFFFFFF, val.u, offset);
+    val.v += WARP_SHFL_DOWN(0xFFFFFFFF, val.v, offset);
   }
 #endif
   return val;

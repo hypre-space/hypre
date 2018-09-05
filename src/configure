@@ -4245,7 +4245,7 @@ done
 
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC
+         for ac_prog in mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4288,7 +4288,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC
+         for ac_prog in mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -7617,7 +7617,7 @@ fi
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
-      g++|gCC|mpig++|mpicxx|mpiCC)
+      g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -fopenmp"
@@ -7730,7 +7730,7 @@ fi
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
-      g++|gCC|mpig++|mpicxx|mpiCC)
+      g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -fopenmp"
@@ -8320,10 +8320,6 @@ $as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >
       { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
 $as_echo "$as_me: ***********************************************************" >&6;}
    fi
-else
-
-$as_echo "#define HYPRE_USE_MANAGED 1" >>confdefs.h
-
 fi
 
 if test "$hypre_using_openmp" = "yes"
