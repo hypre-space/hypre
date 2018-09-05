@@ -54,6 +54,7 @@ FILES =\
  F90_HYPRE_parcsr_cgnr.c\
  F90_HYPRE_parcsr_Euclid.c\
  F90_HYPRE_parcsr_gmres.c\
+ F90_HYPRE_parcsr_cogmres.c\
  F90_HYPRE_parcsr_flexgmres.c\
  F90_HYPRE_parcsr_lgmres.c\
  F90_HYPRE_parcsr_hybrid.c\
