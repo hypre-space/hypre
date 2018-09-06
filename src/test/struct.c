@@ -191,8 +191,8 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
-   /* GPU Init stuff inside */
-   hypre_init(argc, argv);
+   /* Initialize Hypre */
+   HYPRE_Init(argc, argv);
 
 #ifdef HYPRE_DEBUG
    cegdb(&argc, &argv, myid);
@@ -2872,8 +2872,8 @@ main( hypre_int argc,
       hypre_TFree(offsets, HYPRE_MEMORY_HOST);
    }
 
-   /* GPU finalize stuff inside */
-   hypre_finalize();
+   /* Finalize Hypre */
+   HYPRE_Finalize();
 
    /* Finalize MPI */
    hypre_MPI_Finalize();

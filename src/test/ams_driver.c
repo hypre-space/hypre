@@ -129,8 +129,8 @@ hypre_int main (hypre_int argc, char *argv[])
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
 
-   /* GPU Init stuff inside */
-   hypre_init(argc, argv);
+   /* Initialize Hypre */
+   HYPRE_Init(argc, argv);
    
    /* Set defaults */
    solver_id = 3;
@@ -756,9 +756,10 @@ hypre_int main (hypre_int argc, char *argv[])
    if (zero_cond)
       HYPRE_ParVectorDestroy(interior_nodes);
    
-   /* GPU finalize stuff inside */
-   hypre_finalize();
+   /* Finalize Hypre */
+   HYPRE_Finalize();
 
+   /* Finalize MPI */
    hypre_MPI_Finalize();
 
    if (HYPRE_GetError() && !myid)

@@ -35,8 +35,8 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 #endif
 
 /* hypre_general.c */
-void hypre_init( hypre_int argc, char *argv[]);
-void hypre_finalize();
+void HYPRE_Init( hypre_int argc, char *argv[] );
+void HYPRE_Finalize();
 
 /* hypre_printf.c */
 // #ifdef HYPRE_BIGINT
