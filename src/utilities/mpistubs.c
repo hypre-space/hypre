@@ -12,10 +12,6 @@
 
 #include "_hypre_utilities.h"
 
-/* declared in "struct_communication.c" */
-extern HYPRE_Complex *global_recv_buffer, *global_send_buffer;
-extern HYPRE_Int      global_recv_size, global_send_size;
-
 /******************************************************************************
  * This routine is the same in both the sequential and normal cases
  *

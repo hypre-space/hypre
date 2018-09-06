@@ -68,6 +68,10 @@ HYPRE_Init( hypre_int argc, char *argv[] )
  *
  *****************************************************************************/
 
+/* declared in "struct_communication.c" */
+extern HYPRE_Complex *global_recv_buffer, *global_send_buffer;
+extern HYPRE_Int      global_recv_size, global_send_size;
+
 void
 HYPRE_Finalize()
 {
