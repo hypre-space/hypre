@@ -17,12 +17,12 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
 HYPRE_Int
-SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *bandwidth_cost );
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost );
 
 HYPRE_Int
 FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPRE_Int ***add_flag,
@@ -32,7 +32,7 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    HYPRE_Int *num_send_procs, HYPRE_Int **send_procs, 
    HYPRE_Int num_neighboring_procs,
    HYPRE_Int *send_proc_array_size
-   , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int *bandwidth_cost );
+   , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int *communication_cost );
 
 HYPRE_Int
 RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, 
@@ -40,14 +40,14 @@ RecursivelyFindNeighborNodes(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *com
    , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int proc );
 
 HYPRE_Int FindTransitionLevel(hypre_ParAMGData *amg_data);
-HYPRE_Int AllgatherCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int transition_level);
+HYPRE_Int AllgatherCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int transition_level, HYPRE_Int *communication_cost);
 HYPRE_Int PackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int transition_level, HYPRE_Int **int_buffer, HYPRE_Complex **complex_buffer, HYPRE_Int *buffer_sizes);
 HYPRE_Int UnpackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int *recv_int_buffer, HYPRE_Complex *recv_complex_buffer, HYPRE_Int *max_buffer_sizes, HYPRE_Int transition_level);
 
 HYPRE_Complex*
 PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, HYPRE_Int *send_flag_buffer_size, 
    HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes, HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, 
-   HYPRE_Int num_ghost_layers, HYPRE_Int send_rank, HYPRE_Int *bandwidth_cost );
+   HYPRE_Int num_ghost_layers, HYPRE_Int send_rank, HYPRE_Int *communication_cost );
 
 HYPRE_Int
 RecursivelyBuildPsiComposite(HYPRE_Int node, HYPRE_Int m, hypre_ParCompGrid *compGrid, HYPRE_Int *add_flag, HYPRE_Int *add_flag_coarse, 
@@ -96,7 +96,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
                         hypre_ParVector *x, 
                         HYPRE_Int *timers, 
                         HYPRE_Int use_barriers,
-                        HYPRE_Int *bandwidth_cost )
+                        HYPRE_Int *communication_cost )
 {
    char filename[256];
 
@@ -210,18 +210,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    recv_map = hypre_CTAlloc(HYPRE_Int***, num_levels, HYPRE_MEMORY_HOST);
    num_recv_nodes = hypre_CTAlloc(HYPRE_Int**, num_levels, HYPRE_MEMORY_HOST);
 
-
-
-
-
-
    // assign compGrid and compGridCommPkg info to the amg structure
    hypre_ParAMGDataCompGrid(amg_data) = compGrid;
    hypre_ParAMGDataCompGridCommPkg(amg_data) = compGridCommPkg;
-
-
-
-
 
    // If needed, find the transition level and initialize comp grids above and below the transition as appropriate
    if (use_transition_level)
@@ -230,7 +221,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg) = transition_level;
 
       // Do all gather so that all processors own the coarsest levels of the AMG hierarchy
-      AllgatherCoarseLevels(amg_data, transition_level);
+      AllgatherCoarseLevels(amg_data, transition_level, communication_cost);
 
       // Initialize composite grids above the transition level
       for (level = 0; level < transition_level; level++)
@@ -271,8 +262,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    for (level = 0; level < transition_level; level++)
    {
       // !!! For now, not counting bandwidth cost here !!!
-      // SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, bandwidth_cost);
-      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, NULL);
+      SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);
    }
    if (timers) hypre_EndTiming(timers[0]);
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
@@ -331,9 +321,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             num_send_nodes[level][i] = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
             send_buffer[i] = PackSendBuffer( compGrid, compGridCommPkg, &(send_buffer_size[level][i]), 
                                              &(send_flag_buffer_size[i]), send_flag, num_send_nodes, i, level, num_levels, padding, 
-                                             num_ghost_layers, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], bandwidth_cost );
+                                             num_ghost_layers, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], communication_cost );
             
-            if (bandwidth_cost) for (j = 0; j < num_levels; j++) bandwidth_cost[5*level + 1] += num_send_nodes[level][i][j];
+            if (communication_cost) for (j = 0; j < num_levels; j++) communication_cost[8*level + 1] += num_send_nodes[level][i][j];
          }
          #if DEBUGGING_MESSAGES
          printf("      Rank %d: Done packing send buffers\n", myid);
@@ -355,7 +345,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          for (i = 0; i < num_sends; i++)
          {
             hypre_MPI_Isend(&(send_buffer_size[level][i]), 1, HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 0, comm, &requests[request_counter++]);
-            if (bandwidth_cost) bandwidth_cost[5*level] += sizeof(HYPRE_Int);
+            if (communication_cost) communication_cost[8*level] += sizeof(HYPRE_Int);
+            if (communication_cost) communication_cost[8*level + 5]++;
          }
       
          // wait for all buffer sizes to be received
@@ -389,7 +380,8 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             #endif
 
             hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_COMPLEX, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 1, comm, &requests[request_counter++]);
-            if (bandwidth_cost) bandwidth_cost[5*level] += send_buffer_size[level][i]*sizeof(HYPRE_Complex);
+            if (communication_cost) communication_cost[8*level] += send_buffer_size[level][i]*sizeof(HYPRE_Complex);
+            if (communication_cost) communication_cost[8*level + 5]++;
          }
 
          // wait for buffers to be received
@@ -462,7 +454,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          {
             send_flag_buffer[i] = hypre_CTAlloc(HYPRE_Int, send_flag_buffer_size[i], HYPRE_MEMORY_HOST);
             hypre_MPI_Irecv( send_flag_buffer[i], send_flag_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)[level][i], 2, comm, &requests[request_counter++]);
-            if (bandwidth_cost) bandwidth_cost[5*level] += send_flag_buffer_size[i]*sizeof(HYPRE_Int);
+            if (communication_cost) communication_cost[8*level] += send_flag_buffer_size[i]*sizeof(HYPRE_Int);
          }
 
          // send recv_map_send to procs received from to become their send maps - NOTE: we want to send this info from procs we received from
@@ -472,6 +464,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
             recv_map_send_buffer[i] = hypre_CTAlloc(HYPRE_Int, recv_map_send_buffer_size[i], HYPRE_MEMORY_HOST);
             PackRecvMapSendBuffer(recv_map_send[i], recv_map_send_buffer[i], num_incoming_nodes[i], level, num_levels);
             hypre_MPI_Isend( recv_map_send_buffer[i], recv_map_send_buffer_size[i], HYPRE_MPI_INT, hypre_ParCompGridCommPkgRecvProcs(compGridCommPkg)[level][i], 2, comm, &requests[request_counter++]);
+            if (communication_cost) communication_cost[8*level + 5]++;
          }
 
          // wait for maps to be received
@@ -597,16 +590,16 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    hypre_ParCompGridFinalize(compGrid, num_levels, transition_level);
 
    // Count up the bandwidth cost for subsequent residual communications
-   if (bandwidth_cost)
+   if (communication_cost)
    {
       for (level = 0; level < num_levels; level++)
       {
          for (i = 0; i < hypre_ParCompGridCommPkgNumSends(compGridCommPkg)[level]; i++)
          {
-            bandwidth_cost[5*level+2] += send_buffer_size[level][i]*sizeof(HYPRE_Complex);
+            communication_cost[8*level+2] += send_buffer_size[level][i]*sizeof(HYPRE_Complex);
             for (j = 0; j < num_levels; j++)
             {
-               bandwidth_cost[5*level+3] += num_send_nodes[level][i][j];
+               communication_cost[8*level+3] += num_send_nodes[level][i][j];
             }
          }
       }
@@ -671,7 +664,7 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
 
 
 HYPRE_Int
-SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *bandwidth_cost )
+SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int level, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int *communication_cost )
 {
    HYPRE_Int               i,j,cnt;
    HYPRE_Int               num_nodes = hypre_ParCSRMatrixNumRows(A);
@@ -765,7 +758,7 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
             &num_sends, &(send_procs), 
             hypre_ParCSRCommPkgNumSends(commPkg),
             &(send_proc_array_size)
-            , level, i, bandwidth_cost); // Note that num_sends may change here
+            , level, i, communication_cost); // Note that num_sends may change here
       }
 
       #if DEBUG_PROC_NEIGHBORS
@@ -889,7 +882,7 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    HYPRE_Int *num_send_procs, HYPRE_Int **send_procs, 
    HYPRE_Int num_neighboring_procs,
    HYPRE_Int *send_proc_array_size
-   , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int *bandwidth_cost )
+   , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int *communication_cost )
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -935,7 +928,8 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    {
       hypre_MPI_Irecv(&(recv_sizes[i]), 1, HYPRE_MPI_INT, (*send_procs)[i], 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
       hypre_MPI_Isend(&send_size, 1, HYPRE_MPI_INT, (*send_procs)[i], 4, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
-      if (bandwidth_cost) (*bandwidth_cost) += sizeof(HYPRE_Int);
+      if (communication_cost) communication_cost[8*level + 6] += sizeof(HYPRE_Int);
+      if (communication_cost) communication_cost[8*level + 7]++;
    }
 
    // Wait on the recv sizes
@@ -976,7 +970,8 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    for (i = 0; i < num_neighboring_procs; i++)
    {
       hypre_MPI_Isend(send_buffer, send_size, HYPRE_MPI_INT, (*send_procs)[i], 5, hypre_MPI_COMM_WORLD, &(requests[request_cnt++]));
-      if (bandwidth_cost) (*bandwidth_cost) += send_size*sizeof(HYPRE_Int);
+      if (communication_cost) communication_cost[8*level + 6] += send_size*sizeof(HYPRE_Int);
+      if (communication_cost) communication_cost[8*level + 7]++;
    }
 
    // Wait 
@@ -1156,15 +1151,16 @@ FindTransitionLevel(hypre_ParAMGData *amg_data)
 {
    HYPRE_Int i;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   HYPRE_Int use_transition_level = hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data);
    HYPRE_Int local_transition, global_transition;
 
    // Loop over levels, starting at the coarsest
    for (i = num_levels - 1; i >= 0; i--)
    {
-      // If this proc owns nodes on this level, note this level and leave the loop
-      if (hypre_ParCSRMatrixNumRows( hypre_ParAMGDataAArray(amg_data)[i]) )
+      // If this proc owns (use_transition_level) nodes on this level, note this level and leave the loop
+      if ( hypre_ParCSRMatrixNumRows( hypre_ParAMGDataAArray(amg_data)[i] ) )
       {
-         local_transition = i;
+         local_transition = i + use_transition_level - 1;
          break;
       }
    }
@@ -1176,7 +1172,7 @@ FindTransitionLevel(hypre_ParAMGData *amg_data)
 }
 
 HYPRE_Int
-AllgatherCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int transition_level)
+AllgatherCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int transition_level, HYPRE_Int *communication_cost)
 {
    // Get MPI comm size
    HYPRE_Int   num_procs;
@@ -1191,6 +1187,12 @@ AllgatherCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int transition_level)
    // Do an allreduce to find the maximum buffer size
    HYPRE_Int *max_buffer_sizes = hypre_CTAlloc(HYPRE_Int, 2, HYPRE_MEMORY_HOST);
    hypre_MPI_Allreduce(buffer_sizes, max_buffer_sizes, 2, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
+   if (communication_cost)
+   {
+      HYPRE_Int num_stages = (HYPRE_Int) (log(num_procs)/log(2));
+      communication_cost[8*transition_level] += 2*num_stages;
+      communication_cost[8*transition_level + 5] += num_stages;
+   }
 
    // !!! Remove: !!!
    // FILE *file;
@@ -1211,7 +1213,13 @@ AllgatherCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int transition_level)
    
    MPI_Iallgather(send_int_buffer, buffer_sizes[0], HYPRE_MPI_INT, recv_int_buffer, max_buffer_sizes[0], HYPRE_MPI_INT, hypre_MPI_COMM_WORLD, &(request[0]));
    MPI_Iallgather(send_complex_buffer, buffer_sizes[1], HYPRE_MPI_COMPLEX, recv_complex_buffer, max_buffer_sizes[1], HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD, &(request[1]));
-   
+   if (communication_cost)
+   {
+      HYPRE_Int num_stages = (HYPRE_Int) (log(num_procs)/log(2));
+      communication_cost[8*transition_level] += num_stages*buffer_sizes[0] + num_stages*buffer_sizes[1];
+      communication_cost[8*transition_level + 5] += 2*num_stages;
+      communication_cost[8*transition_level + 2] += num_stages*sizeof(HYPRE_Complex)*hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[transition_level]);
+   }
    hypre_MPI_Waitall(2, request, status);
 
    // !!! Remove: !!!
@@ -1487,7 +1495,7 @@ UnpackCoarseLevels(hypre_ParAMGData *amg_data, HYPRE_Int *recv_int_buffer, HYPRE
 HYPRE_Complex*
 PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGridCommPkg, HYPRE_Int *buffer_size, 
    HYPRE_Int *send_flag_buffer_size, HYPRE_Int ****send_flag, HYPRE_Int ***num_send_nodes,
-   HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int send_rank, HYPRE_Int *bandwidth_cost )
+   HYPRE_Int processor, HYPRE_Int current_level, HYPRE_Int num_levels, HYPRE_Int padding, HYPRE_Int num_ghost_layers, HYPRE_Int send_rank, HYPRE_Int *communication_cost )
 {
    HYPRE_Int   myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
@@ -1537,7 +1545,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
    // Count up the buffer size for the starting nodes
    num_send_nodes[current_level][processor][current_level] = finish - start;
    send_flag[current_level][processor][current_level] = hypre_CTAlloc( HYPRE_Int, num_send_nodes[current_level][processor][current_level], HYPRE_MEMORY_HOST );
-   if (bandwidth_cost) bandwidth_cost[5*current_level + 4] += num_send_nodes[current_level][processor][current_level];
+   if (communication_cost) communication_cost[8*current_level + 4] += num_send_nodes[current_level][processor][current_level];
 
    (*buffer_size) += 2;
    if (current_level != transition_level-1) (*buffer_size) += 2*num_send_nodes[current_level][processor][current_level];
@@ -1595,7 +1603,7 @@ PackSendBuffer( hypre_ParCompGrid **compGrid, hypre_ParCompGridCommPkg *compGrid
                num_send_nodes[current_level][processor][level]++;
             }
          }
-         if (bandwidth_cost) bandwidth_cost[5*current_level + 4] += num_send_nodes[current_level][processor][level];
+         if (communication_cost) communication_cost[8*current_level + 4] += num_send_nodes[current_level][processor][level];
 
          // Save the indices (in global index ordering) so I don't have to keep looping over all nodes in compGrid when I pack the buffer
          send_flag[current_level][processor][level] = hypre_CTAlloc( HYPRE_Int, num_send_nodes[current_level][processor][level], HYPRE_MEMORY_HOST );
