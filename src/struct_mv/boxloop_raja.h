@@ -280,7 +280,7 @@ hypre_CheckErrorDevice(cudaDeviceSynchronize());
 
 #define hypre_LoopBegin(size,idx)                                                           \
 {                                                                                           \
-   forall< hypre_raja_exec_policy >(RangeSegment(0, size), [=] hypre_RAJA_DEVICE (HYPRE_Int idx)	\
+   forall< hypre_raja_exec_policy >(RangeSegment(0, size), [=] hypre_RAJA_DEVICE (HYPRE_Int idx) \
    {
 
 #define hypre_LoopEnd()                                                        \

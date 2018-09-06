@@ -1,5 +1,4 @@
-#if defined(HYPRE_USING_CUDA)
-
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
 
 #ifndef CUDART_VERSION
 #error CUDART_VERSION Undefined!

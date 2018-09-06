@@ -80,9 +80,7 @@ hypre_StructInnerProd( hypre_StructVector *x,
 #undef HYPRE_BOX_REDUCTION
 #endif
 
-#if defined(HYPRE_USING_KOKKOS)
-#define HYPRE_BOX_REDUCTION box_sum
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
 #define HYPRE_BOX_REDUCTION map(tofrom: box_sum) reduction(+:box_sum)
 #else
 #define HYPRE_BOX_REDUCTION reduction(+:box_sum)

@@ -1039,60 +1039,48 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    hypre_SetIndex3(index,  0,  1, 0);
    a_cn = hypre_StructMatrixExtractPointerByIndex(A, bi, index);
 
-#ifdef HYPRE_BOX_REDUCTION 
-#undef HYPRE_BOX_REDUCTION
-#endif
-
    // FIXME TODO HOW TO DO KOKKOS IN ONE BOXLOOP ?
 #if defined(HYPRE_USING_KOKKOS)
 
    HYPRE_Real cxb = cxyz[0];
-#define HYPRE_BOX_REDUCTION cxb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, cxb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
       cxb += tcx;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
    HYPRE_Real cyb = cxyz[1];
-#define HYPRE_BOX_REDUCTION cyb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, cyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cn[Ai] + a_cs[Ai]);
       cyb += tcy;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
    HYPRE_Real sqcxb = sqcxyz[0];
-#define HYPRE_BOX_REDUCTION sqcxb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, sqcxb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
       sqcxb += tcx * tcx;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
    HYPRE_Real sqcyb = sqcxyz[1];
-#define HYPRE_BOX_REDUCTION sqcyb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, sqcyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cn[Ai] + a_cs[Ai]);
       sqcyb += tcy * tcy;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
 #else /* kokkos */
 
@@ -1107,6 +1095,10 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    cyb = cxyz[1];
    sqcxb = sqcxyz[0];
    sqcyb = sqcxyz[1];
+#endif
+
+#ifdef HYPRE_BOX_REDUCTION 
+#undef HYPRE_BOX_REDUCTION
 #endif
 
 #ifdef HYPRE_USING_DEVICE_OPENMP
@@ -1137,7 +1129,6 @@ hypre_PFMGComputeDxyz_SS5( HYPRE_Int           bi,
    }
    hypre_BoxLoop1ReductionEnd(Ai, sum4)
 #undef DEVICE_VAR
-#undef HYPRE_BOX_REDUCTION
 
 #endif /* kokkos */
 
@@ -1241,52 +1232,44 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
 #if defined(HYPRE_USING_KOKKOS)
 
    HYPRE_Real cxb = cxyz[0];
-#define HYPRE_BOX_REDUCTION cxb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, cxb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       cxb += tcx;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
    HYPRE_Real cyb = cxyz[1];
-#define HYPRE_BOX_REDUCTION cyb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, cyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       cyb += tcy;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
    HYPRE_Real sqcxb = sqcxyz[0];
-#define HYPRE_BOX_REDUCTION sqcxb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, sqcxb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       sqcxb += tcx*tcx;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
    HYPRE_Real sqcyb = sqcxyz[1];
-#define HYPRE_BOX_REDUCTION sqcyb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, sqcyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       sqcyb += tcy*tcy;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);   
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
 #else /* kokkos */
 
@@ -1316,7 +1299,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
 
 #define DEVICE_VAR is_device_ptr(a_cc,a_cw,a_ce,a_csw,a_cse,a_cnw,a_cne,a_cs,a_cn)
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai, sum4);
+                                A_dbox, start, stride, Ai, sum4)
    {
        HYPRE_Real tcx, tcy;
        HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
@@ -1334,7 +1317,7 @@ hypre_PFMGComputeDxyz_SS9( HYPRE_Int bi,
        sqcyb += tcy * tcy;
 #endif
    }
-   hypre_BoxLoop1ReductionEnd(Ai, sum4);
+   hypre_BoxLoop1ReductionEnd(Ai, sum4)
 #undef DEVICE_VAR
 
 #endif /* kokkos */
@@ -1424,76 +1407,64 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
 #if defined(HYPRE_USING_KOKKOS)
 
    HYPRE_Real cxb = cxyz[0];
-#define HYPRE_BOX_REDUCTION cxb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, cxb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
       cxb += tcx;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
    HYPRE_Real cyb = cxyz[1];
-#define HYPRE_BOX_REDUCTION cyb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, cyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai]);
       cyb += tcy;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
    HYPRE_Real czb = cxyz[2];
-#define HYPRE_BOX_REDUCTION czb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, czb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai]);
       czb += tcz;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, czb)
 
    HYPRE_Real sqcxb = sqcxyz[0];
-#define HYPRE_BOX_REDUCTION sqcxb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, sqcxb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai]);
       sqcxb += tcx*tcx;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
    HYPRE_Real sqcyb = sqcxyz[1];
-#define HYPRE_BOX_REDUCTION sqcyb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, sqcyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai]);
       sqcyb += tcy*tcy;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
    HYPRE_Real sqczb = sqcxyz[2];
-#define HYPRE_BOX_REDUCTION sqczb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, sqczb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai]);
       sqczb += tcz*tcz;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqczb)
 
 #else /* kokkos */
 
@@ -1525,7 +1496,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
 
 #define DEVICE_VAR is_device_ptr(a_cc,a_cw,a_ce,a_cs,a_cn,a_ac,a_bc)
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai, sum6);
+                                A_dbox, start, stride, Ai, sum6)
    {
       HYPRE_Real tcx, tcy, tcz;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
@@ -1545,7 +1516,7 @@ hypre_PFMGComputeDxyz_SS7( HYPRE_Int           bi,
       sqczb += tcz * tcz;
 #endif
    }
-   hypre_BoxLoop1ReductionEnd(Ai, sum6);
+   hypre_BoxLoop1ReductionEnd(Ai, sum6)
 #undef DEVICE_VAR
 
 #endif /* kokkos */
@@ -1691,76 +1662,64 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
 #if defined(HYPRE_USING_KOKKOS)
 
    HYPRE_Real cxb = cxyz[0];
-#define HYPRE_BOX_REDUCTION cxb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, cxb)
    {
        HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
        HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
        cxb += tcx;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
    HYPRE_Real cyb = cxyz[1];
-#define HYPRE_BOX_REDUCTION cyb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, cyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       cyb += tcy;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
    HYPRE_Real czb = cxyz[2];
-#define HYPRE_BOX_REDUCTION czb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, czb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
       czb += tcz;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, czb)
 
    HYPRE_Real sqcxb = sqcxyz[0];
-#define HYPRE_BOX_REDUCTION sqcxb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, sqcxb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcx = -diag * (a_cw[Ai] + a_ce[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       sqcxb += tcx*tcx;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
    HYPRE_Real sqcyb = sqcxyz[1];
-#define HYPRE_BOX_REDUCTION sqcyb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, sqcyb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcy = -diag * (a_cs[Ai] + a_cn[Ai] + a_an[Ai] + a_as[Ai] + a_bn[Ai] + a_bs[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai]);
       sqcyb += tcy*tcy;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqcyb)
 
    HYPRE_Real sqczb = sqcxyz[2];
-#define HYPRE_BOX_REDUCTION sqczb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, sqczb)
    {
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
       HYPRE_Real tcz = -diag * (a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_an[Ai] + a_as[Ai] +  a_bw[Ai]  + a_be[Ai] +  a_bn[Ai] +  a_bs[Ai]);
       sqczb += tcz*tcz;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqczb)
 
 #else /* kokkos */
 
@@ -1792,7 +1751,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
 
 #define DEVICE_VAR is_device_ptr(a_cc,a_cw,a_ce,a_aw,a_ae,a_bw,a_be,a_csw,a_cse,a_cnw,a_cne,a_cs,a_cn,a_an,a_as,a_bn,a_bs,a_ac,a_bc)
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai, sum6);
+                                A_dbox, start, stride, Ai, sum6)
    {
       HYPRE_Real tcx, tcy, tcz;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
@@ -1813,7 +1772,7 @@ hypre_PFMGComputeDxyz_SS19( HYPRE_Int           bi,
       sqczb += tcz * tcz;
 #endif
    }
-   hypre_BoxLoop1ReductionEnd(Ai, sum6);
+   hypre_BoxLoop1ReductionEnd(Ai, sum6)
 #undef DEVICE_VAR
 
 #endif /* kokkos */
@@ -1999,9 +1958,8 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
 #if defined(HYPRE_USING_KOKKOS)
    
    HYPRE_Real cxb = cxyz[0];
-#define HYPRE_BOX_REDUCTION cxb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai)
+                                A_dbox, start, stride, Ai, cxb)
    {
       HYPRE_Real tcx;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
@@ -2009,13 +1967,11 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
       cxb += tcx;
    }
-   hypre_BoxLoop1ReductionEnd(Ai)
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, cxb)
 
    HYPRE_Real cyb = cxyz[1];
-#define HYPRE_BOX_REDUCTION cyb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai)
+                                A_dbox, start, stride, Ai, cyb)
    {
       HYPRE_Real tcy;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
@@ -2023,13 +1979,11 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
       cyb += tcy;
    }
-   hypre_BoxLoop1ReductionEnd(Ai)
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, cyb)
 
    HYPRE_Real czb = cxyz[2];
-#define HYPRE_BOX_REDUCTION czb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai)
+                                A_dbox, start, stride, Ai, czb)
    {
       HYPRE_Real tcz;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
@@ -2037,13 +1991,11 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
       czb += tcz;
    }
-   hypre_BoxLoop1ReductionEnd(Ai)
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, czb)
 
    HYPRE_Real sqcxb = sqcxyz[0];
-#define HYPRE_BOX_REDUCTION sqcxb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai)
+                                A_dbox, start, stride, Ai, sqcxb)
    {
       HYPRE_Real tcx;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
@@ -2051,13 +2003,11 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       tcx -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
       sqcxb += tcx*tcx;
    }
-   hypre_BoxLoop1ReductionEnd(Ai)
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqcxb)
 
    HYPRE_Real sqcyb = sqcxyz[1];
-#define HYPRE_BOX_REDUCTION sqcyb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai);
+                                A_dbox, start, stride, Ai, sqcyb);
    {
       HYPRE_Real tcy;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
@@ -2065,13 +2015,11 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       tcy -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
       sqcyb += tcy*tcy;
    }
-   hypre_BoxLoop1ReductionEnd(Ai);
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqcyb);
 
    HYPRE_Real sqczb = sqcxyz[2];
-#define HYPRE_BOX_REDUCTION sqczb
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai)
+                                A_dbox, start, stride, Ai, sqczb)
    {
       HYPRE_Real tcz;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
@@ -2079,8 +2027,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       tcz -= diag * (a_asw[Ai] + a_ase[Ai] + a_anw[Ai] + a_ane[Ai] + a_bsw[Ai] + a_bse[Ai] + a_bnw[Ai] + a_bne[Ai]);
       sqczb += tcz*tcz;
    }
-   hypre_BoxLoop1ReductionEnd(Ai)
-#undef HYPRE_BOX_REDUCTION
+   hypre_BoxLoop1ReductionEnd(Ai, sqczb)
 
 #else /* kokkos */
 
@@ -2112,7 +2059,7 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
 
 #define DEVICE_VAR is_device_ptr(a_cc,a_cw,a_ce,a_aw,a_ae,a_bw,a_be,a_csw,a_cse,a_cnw,a_cne,a_asw,a_ase,a_anw,a_ane,a_bsw,a_bse,a_bnw,a_bne,a_cs,a_cn,a_an,a_as,a_bn,a_bs,a_ac,a_bc)
    hypre_BoxLoop1ReductionBegin(hypre_StructMatrixNDim(A), loop_size,
-                                A_dbox, start, stride, Ai, sum6);
+                                A_dbox, start, stride, Ai, sum6)
    {
       HYPRE_Real tcx = 0, tcy = 0, tcz = 0;
       HYPRE_Real diag = a_cc[Ai] < 0.0 ? -1.0 : 1.0;
@@ -2137,9 +2084,8 @@ hypre_PFMGComputeDxyz_SS27( HYPRE_Int           bi,
       sqczb += tcz * tcz;
 #endif
    }
-   hypre_BoxLoop1ReductionEnd(Ai, sum6);
+   hypre_BoxLoop1ReductionEnd(Ai, sum6)
 #undef DEVICE_VAR
-#undef HYPRE_BOX_REDUCTION
 
 #endif /* kokkos */
 
@@ -2229,9 +2175,11 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
          HYPRE_Real diag_product_local = diag_product;
 #endif
 
-#if defined(HYPRE_USING_KOKKOS)
-#define HYPRE_BOX_REDUCTION diag_product_local
-#elif defined(HYPRE_USING_DEVICE_OPENMP)
+#ifdef HYPRE_BOX_REDUCTION
+#undef HYPRE_BOX_REDUCTION
+#endif
+
+#if defined(HYPRE_USING_DEVICE_OPENMP)
 #define HYPRE_BOX_REDUCTION map(tofrom:diag_product_local) reduction(+:diag_product_local)
 #else
 #define HYPRE_BOX_REDUCTION reduction(+:diag_product_local)
@@ -2255,9 +2203,6 @@ hypre_ZeroDiagonal( hypre_StructMatrix *A )
          hypre_BoxLoop1ReductionEnd(Ai, diag_product_local);
 
          diag_product += (HYPRE_Real) diag_product_local;
-
-//printf("6: %e \n", diag_product);
-
       }
    }
 

@@ -1,6 +1,6 @@
 #include "_hypre_utilities.h"
 
-#if defined(HYPRE_USING_CUDA)
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
 
 void *cuda_reduce_buffer = NULL;
 
@@ -48,5 +48,5 @@ template void OneBlockReduce<HYPRE_double6>(HYPRE_double6 *d_arr, HYPRE_Int N, H
 
 } /* extern "C++" { */
 
-#endif//defined(HYPRE_USING_CUDA)
+#endif
 
