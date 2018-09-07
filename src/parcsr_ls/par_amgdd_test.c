@@ -62,6 +62,9 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   hypre_ParVector  *U_comp = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(u), hypre_ParVectorPartitioning(u));
   hypre_ParVectorInitialize(U_comp);
   HYPRE_Int num_comp_cycles = hypre_ParAMGDataMaxFACIter(amg_data);
+  HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+  HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+  if (transition_level < 0) transition_level = num_levels;
 
   // Generate the residual and store in f
   hypre_ParVector *res = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(f), hypre_ParVectorPartitioning(f));
@@ -76,7 +79,6 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   {
     // Setup vectors on each level that dictate where relaxation should be suppressed
     HYPRE_Int level;
-    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
     hypre_ParVector  **relax_marker = hypre_CTAlloc(hypre_ParVector*, num_levels, HYPRE_MEMORY_HOST);
     for (level = 0; level < num_levels; level++)
     {
@@ -84,7 +86,8 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
       relax_marker[level] = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(U_comp), hypre_ParVectorPartitioning(U_comp));
       hypre_ParVectorInitialize(relax_marker[level]);
       // Now set the values according to the relevant comp grid
-      SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], hypre_ParVectorLocalVector(relax_marker[level]), proc);
+      if (level < transition_level) SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], hypre_ParVectorLocalVector(relax_marker[level]), proc);
+      else hypre_ParVectorSetConstantValues(relax_marker[level], 1.0);
     }
 
     // Set the initial guess for the AMG solve to 0

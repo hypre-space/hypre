@@ -846,7 +846,7 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    HYPRE_Int        *global_indices = hypre_ParCompGridGlobalIndices(compGrid);
    HYPRE_Int        *coarse_global_indices = hypre_ParCompGridCoarseGlobalIndices(compGrid);
    HYPRE_Int        *coarse_local_indices = hypre_ParCompGridCoarseLocalIndices(compGrid);
-   HYPRE_Int        *ghost_marker = hypre_ParCompGridRealDofMarker(compGrid);
+   HYPRE_Int        *real_dof_marker = hypre_ParCompGridRealDofMarker(compGrid);
 
    hypre_ParCompMatrixRow  **A_rows = hypre_ParCompGridARows(compGrid);
    hypre_ParCompMatrixRow  **P_rows = hypre_ParCompGridPRows(compGrid);
@@ -861,14 +861,14 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
    HYPRE_Int         i,j;
 
    // Measure number of ghost nodes
-   HYPRE_Int num_ghost = 0;
-   if (ghost_marker) for (i = 0; i < num_nodes; i++) if (ghost_marker[i]) num_ghost++;
+   HYPRE_Int num_real = 0;
+   if (real_dof_marker) for (i = 0; i < num_nodes; i++) if (real_dof_marker[i]) num_real++;
 
    // Print info to given filename   
    FILE             *file;
    file = fopen(filename,"w");
-   hypre_fprintf(file, "Num nodes: %d\nMem size: %d\nNum owned nodes: %d\nNum real dofs: %d\nNum ghost dofs: %d\n", 
-      num_nodes, mem_size, num_owned_nodes, num_nodes - num_ghost, num_ghost);
+   hypre_fprintf(file, "Num nodes: %d\nMem size: %d\nNum owned nodes: %d\nNum ghost dofs: %d\nNum real dofs: %d\n", 
+      num_nodes, mem_size, num_owned_nodes, num_nodes - num_real, num_real);
    hypre_fprintf(file, "u:\n");
    for (i = 0; i < num_nodes; i++)
    {
@@ -889,13 +889,13 @@ hypre_ParCompGridDebugPrint ( hypre_ParCompGrid *compGrid, const char* filename 
          hypre_fprintf(file, "%d ", global_indices[i]);
       }
    }
-   if (ghost_marker)
+   if (real_dof_marker)
    {
       hypre_fprintf(file, "\n");
-      hypre_fprintf(file, "ghost_marker:\n");
+      hypre_fprintf(file, "real_dof_marker:\n");
       for (i = 0; i < num_nodes; i++)
       {
-         hypre_fprintf(file, "%d ", ghost_marker[i]);
+         hypre_fprintf(file, "%d ", real_dof_marker[i]);
       }
    }
    if (coarse_global_indices)
@@ -1413,6 +1413,8 @@ hypre_ParCompGridCommPkgCreate()
 
    hypre_ParCompGridCommPkgNumLevels(compGridCommPkg) = 0;
    hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg) = -1;
+   hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg) = 0;
+   hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgNumSends(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) = NULL;
@@ -1463,6 +1465,11 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
    HYPRE_Int         i, j, k;
+
+   if ( hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg) )
+   {
+      hypre_TFree(hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg), HYPRE_MEMORY_HOST);
+   }
 
    if ( hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) )
    {

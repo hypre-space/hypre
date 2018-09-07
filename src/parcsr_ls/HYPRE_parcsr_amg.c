@@ -433,6 +433,24 @@ HYPRE_BoomerAMGGetFACTol( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFACRelaxType
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFACRelaxType( HYPRE_Solver solver,
+                           HYPRE_Real          fac_relax_type  )
+{
+   return( hypre_BoomerAMGSetFACRelaxType( (void *) solver, fac_relax_type ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFACRelaxType( HYPRE_Solver solver,
+                           HYPRE_Real        * fac_relax_type  )
+{
+   return( hypre_BoomerAMGGetFACRelaxType( (void *) solver, fac_relax_type ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetAMGDDPadding
  *--------------------------------------------------------------------------*/
 

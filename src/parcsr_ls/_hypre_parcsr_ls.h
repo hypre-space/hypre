@@ -88,6 +88,8 @@ typedef struct
    // Info needed for subsequent psi_c residual communication
    HYPRE_Int         num_levels; // levels in the amg hierarchy
    HYPRE_Int         transition_level; // transition level used for adaptive AMG-RD (at this level and below, each proc owns the global grids)
+   HYPRE_Int         max_res_buffer_size;
+   HYPRE_Int         *res_num_recv_nodes;
    HYPRE_Int         *num_sends; // num procs to send to on each level
    HYPRE_Int         *num_recvs; // num procs to recv from on each level
 
@@ -113,6 +115,8 @@ typedef struct
 
  #define hypre_ParCompGridCommPkgNumLevels(compGridCommPkg)          ((compGridCommPkg) -> num_levels)
  #define hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg)          ((compGridCommPkg) -> transition_level)
+ #define hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg)    ((compGridCommPkg) -> max_res_buffer_size)
+ #define hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg)    ((compGridCommPkg) -> res_num_recv_nodes)
  #define hypre_ParCompGridCommPkgNumSends(compGridCommPkg)           ((compGridCommPkg) -> num_sends)
  #define hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg)           ((compGridCommPkg) -> num_recvs)
  #define hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)           ((compGridCommPkg) -> send_procs)
@@ -361,7 +365,8 @@ typedef struct
    /* log info */
    HYPRE_Int      logging;
    HYPRE_Int      num_iterations;
-   HYPRE_Int      num_fac_iterations;
+   HYPRE_Int      num_fac_iterations;\
+   HYPRE_Int      fac_relax_type;
 #ifdef CUMNUMIT
    HYPRE_Int      cum_num_iterations;
 #endif
@@ -588,6 +593,7 @@ typedef struct
 #define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
 #define hypre_ParAMGDataNumFACIterations(amg_data) ((amg_data)->num_fac_iterations)
+#define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
 #ifdef CUMNUMIT
 #define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
 #endif
@@ -962,6 +968,8 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxFACIter ( HYPRE_Solver solver , HYPRE_Int max_fac
 HYPRE_Int HYPRE_BoomerAMGGetMaxFACIter ( HYPRE_Solver solver , HYPRE_Int *max_fac_iter );
 HYPRE_Int HYPRE_BoomerAMGSetFACTol ( HYPRE_Solver solver , HYPRE_Real fac_tol );
 HYPRE_Int HYPRE_BoomerAMGGetFACTol ( HYPRE_Solver solver , HYPRE_Real *fac_tol );
+HYPRE_Int HYPRE_BoomerAMGSetFACRelaxType ( HYPRE_Solver solver , HYPRE_Real fac_relax_type );
+HYPRE_Int HYPRE_BoomerAMGGetFACRelaxType ( HYPRE_Solver solver , HYPRE_Real *fac_relax_type );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int padding );
 HYPRE_Int HYPRE_BoomerAMGGetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int *padding );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDNumGhostLayers ( HYPRE_Solver solver , HYPRE_Int num_ghost_layers );
@@ -1405,6 +1413,8 @@ HYPRE_Int hypre_BoomerAMGSetMaxFACIter ( void *data , HYPRE_Int max_fac_iter );
 HYPRE_Int hypre_BoomerAMGGetMaxFACIter ( void *data , HYPRE_Int *max_fac_iter );
 HYPRE_Int hypre_BoomerAMGSetFACTol ( void *data , HYPRE_Real fac_tol );
 HYPRE_Int hypre_BoomerAMGGetFACTol ( void *data , HYPRE_Real *fac_tol );
+HYPRE_Int hypre_BoomerAMGSetFACRelaxType ( void *data , HYPRE_Real fac_relax_type );
+HYPRE_Int hypre_BoomerAMGGetFACRelaxType ( void *data , HYPRE_Real *fac_relax_type );
 HYPRE_Int hypre_BoomerAMGSetAMGDDPadding ( void *data , HYPRE_Int padding );
 HYPRE_Int hypre_BoomerAMGGetAMGDDPadding ( void *data , HYPRE_Int *padding );
 HYPRE_Int hypre_BoomerAMGSetAMGDDNumGhostLayers ( void *data , HYPRE_Int num_ghost_layers );
