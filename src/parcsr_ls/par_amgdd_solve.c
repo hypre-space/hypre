@@ -339,17 +339,24 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       global_nodes[level] = hypre_ParCSRMatrixGlobalNumRows(A_array[level]);
    }
 
-   // Restrict residual down to all levels and initialize composite grids
-   for (level = 0; level < num_levels-1; level++)
+   // Restrict residual down to all levels (or just to the transition level) and initialize composite grids
+   for (level = 0; level < transition_level-1; level++)
    {
       alpha = 1.0;
       beta = 0.0;
       hypre_ParCSRMatrixMatvecT(alpha,P_array[level],F_array[level],
                             beta,F_array[level+1]);
    }
+   if (transition_level != num_levels)
+   {
+      alpha = 1.0;
+      beta = 0.0;
+      hypre_ParCSRMatrixMatvecT(alpha,P_array[transition_level-1],F_array[transition_level-1],
+                            beta,F_array[transition_level]);
+   }
 
    // copy new restricted residual into comp grid structure
-   for (level = 0; level < num_levels; level++)
+   for (level = 0; level < transition_level; level++)
    {
       // Access the residual data
       residual_local = hypre_ParVectorLocalVector(F_array[level]);
@@ -497,15 +504,18 @@ TestResComm(hypre_ParAMGData *amg_data)
    // Get info from the amg data structure
    hypre_ParCompGrid **compGrid = hypre_ParAMGDataCompGrid(amg_data);
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
+   if (transition_level < 0) transition_level = num_levels;
 
    HYPRE_Int test_failed = 0;
 
    // For each processor and each level broadcast the residual data and global indices out and check agains the owning procs
    HYPRE_Int proc;
+   HYPRE_Int i;
    for (proc = 0; proc < num_procs; proc++)
    {
       HYPRE_Int level;
-      for (level = 0; level < num_levels; level++)
+      for (level = 0; level < transition_level; level++)
       {
          // Broadcast the number of nodes
          HYPRE_Int num_nodes = 0;
@@ -525,11 +535,8 @@ TestResComm(hypre_ParAMGData *amg_data)
          hypre_MPI_Bcast(global_indices, num_nodes, HYPRE_MPI_INT, proc, hypre_MPI_COMM_WORLD);
 
          // Now, each processors checks their owned residual value against the composite residual
-         HYPRE_Int i;
-         HYPRE_Int proc_first_index = hypre_ParCompGridGlobalIndices(compGrid[level])[0];
-         HYPRE_Int proc_last_index;
-         if (hypre_ParCompGridNumOwnedNodes(compGrid[level])) proc_last_index = hypre_ParCompGridGlobalIndices(compGrid[level])[ hypre_ParCompGridNumOwnedNodes(compGrid[level]) - 1 ];
-         else proc_last_index = proc_first_index - 1;
+         HYPRE_Int proc_first_index = hypre_ParVectorFirstIndex(hypre_ParAMGDataUArray(amg_data)[level]);
+         HYPRE_Int proc_last_index = hypre_ParVectorLastIndex(hypre_ParAMGDataUArray(amg_data)[level]);
          for (i = 0; i < num_nodes; i++)
          {
             if (global_indices[i] <= proc_last_index && global_indices[i] >= proc_first_index)
@@ -548,6 +555,37 @@ TestResComm(hypre_ParAMGData *amg_data)
             hypre_TFree(comp_res, HYPRE_MEMORY_HOST);
             hypre_TFree(global_indices, HYPRE_MEMORY_HOST);
          }
+      }
+      if (transition_level != num_levels)
+      {
+         HYPRE_Int num_nodes = hypre_ParCompGridNumNodes(compGrid[transition_level]);
+
+         // Broadcast the composite residual
+         HYPRE_Complex *comp_res;
+         if (myid == proc) comp_res = hypre_ParCompGridF(compGrid[transition_level]);
+         else comp_res = hypre_CTAlloc(HYPRE_Complex, num_nodes, HYPRE_MEMORY_HOST);
+         hypre_MPI_Bcast(comp_res, num_nodes, HYPRE_MPI_COMPLEX, proc, hypre_MPI_COMM_WORLD);
+
+         // Now, each processors checks their owned residual value against the composite residual
+         HYPRE_Int proc_first_index = hypre_ParVectorFirstIndex(hypre_ParAMGDataUArray(amg_data)[transition_level]);
+         HYPRE_Int proc_last_index = hypre_ParVectorLastIndex(hypre_ParAMGDataUArray(amg_data)[transition_level]);
+         for (i = 0; i < num_nodes; i++)
+         {
+            if (i <= proc_last_index && i >= proc_first_index)
+            {
+               if (comp_res[i] != hypre_VectorData(hypre_ParVectorLocalVector(hypre_ParAMGDataFArray(amg_data)[transition_level]))[i - proc_first_index] )
+               {
+                  // printf("Error: on proc %d has incorrect residual at global index %d on transition_level %d, checked by rank %d\n", proc, i, transition_level, myid);
+                  test_failed = 1;
+               }
+            }
+         }
+
+         // Clean up memory
+         if (myid != proc) 
+         {
+            hypre_TFree(comp_res, HYPRE_MEMORY_HOST);
+         }         
       }
    }
 
