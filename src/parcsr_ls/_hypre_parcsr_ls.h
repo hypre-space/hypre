@@ -1001,6 +1001,27 @@ HYPRE_Int HYPRE_ParCSRGMRESSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print
 HYPRE_Int HYPRE_ParCSRGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
 
+
+/*HYPRE_parcsr_cogmres.c*/
+HYPRE_Int HYPRE_ParCSRCOGMRESCreate ( MPI_Comm comm , HYPRE_Solver *solver );
+HYPRE_Int HYPRE_ParCSRCOGMRESDestroy ( HYPRE_Solver solver );
+HYPRE_Int HYPRE_ParCSRCOGMRESSetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+HYPRE_Int HYPRE_ParCSRCOGMRESSolve ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector b , HYPRE_ParVector x );
+HYPRE_Int HYPRE_ParCSRCOGMRESSetKDim ( HYPRE_Solver solver , HYPRE_Int k_dim );
+HYPRE_Int HYPRE_ParCSRCOGMRESSetCGS2 ( HYPRE_Solver solver , HYPRE_Int cgs2 );
+HYPRE_Int HYPRE_ParCSRCOGMRESSetTol ( HYPRE_Solver solver , HYPRE_Real tol );
+HYPRE_Int HYPRE_ParCSRCOGMRESSetAbsoluteTol ( HYPRE_Solver solver , HYPRE_Real a_tol );
+HYPRE_Int HYPRE_ParCSRCOGMRESSetMinIter ( HYPRE_Solver solver , HYPRE_Int min_iter );
+HYPRE_Int HYPRE_ParCSRCOGMRESSetMaxIter ( HYPRE_Solver solver , HYPRE_Int max_iter );
+HYPRE_Int HYPRE_ParCSRCOGMRESSetPrecond ( HYPRE_Solver solver , HYPRE_PtrToParSolverFcn precond , HYPRE_PtrToParSolverFcn precond_setup , HYPRE_Solver precond_solver );
+HYPRE_Int HYPRE_ParCSRCOGMRESGetPrecond ( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
+HYPRE_Int HYPRE_ParCSRCOGMRESSetLogging ( HYPRE_Solver solver , HYPRE_Int logging );
+HYPRE_Int HYPRE_ParCSRCOGMRESSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
+HYPRE_Int HYPRE_ParCSRCOGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
+HYPRE_Int HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+
+
+
 /* HYPRE_parcsr_hybrid.c */
 HYPRE_Int HYPRE_ParCSRHybridCreate ( HYPRE_Solver *solver );
 HYPRE_Int HYPRE_ParCSRHybridDestroy ( HYPRE_Solver solver );
@@ -1599,6 +1620,9 @@ HYPRE_Int hypre_ParKrylovMatvec ( void *matvec_data , HYPRE_Complex alpha , void
 HYPRE_Int hypre_ParKrylovMatvecT ( void *matvec_data , HYPRE_Complex alpha , void *A , void *x , HYPRE_Complex beta , void *y );
 HYPRE_Int hypre_ParKrylovMatvecDestroy ( void *matvec_data );
 HYPRE_Real hypre_ParKrylovInnerProd ( void *x , void *y );
+HYPRE_Int hypre_ParKrylovMassInnerProd ( void *x , void **y, HYPRE_Int k, HYPRE_Int unroll, void *result );
+HYPRE_Int hypre_ParKrylovMassDotpTwo ( void *x , void *y , void **z, HYPRE_Int k, HYPRE_Int unroll, void *result_x, void *result_y );
+HYPRE_Int hypre_ParKrylovMassAxpy( HYPRE_Complex *alpha, void **x, void *y, HYPRE_Int k, HYPRE_Int unroll);
 HYPRE_Int hypre_ParKrylovCopyVector ( void *x , void *y );
 HYPRE_Int hypre_ParKrylovClearVector ( void *x );
 HYPRE_Int hypre_ParKrylovScaleVector ( HYPRE_Complex alpha , void *x );

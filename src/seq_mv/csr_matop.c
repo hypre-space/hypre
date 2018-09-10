@@ -170,7 +170,7 @@ hypre_CSRMatrixMultiply( hypre_CSRMatrix *A,
 
    if (nrows_A == ncols_B) allsquare = 1;
 
-   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_HOST);
+   C_i = hypre_CTAlloc(HYPRE_Int,  nrows_A+1, HYPRE_MEMORY_SHARED);
 
    max_num_threads = hypre_NumThreads();
 
