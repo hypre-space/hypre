@@ -83,7 +83,7 @@ hypre_OutOfMemory(size_t size)
    fflush(stdout);
    hypre_error(HYPRE_ERROR_MEMORY);
 }
-   
+
 static inline void
 hypre_WrongMemoryLocation()
 {
@@ -102,7 +102,7 @@ static inline size_t
 hypre_GetPadMemsize(void *ptr, HYPRE_Int location)
 {
    location = hypre_RedefMemLocation(location);
-   
+
    /* no stored size for host memory */
    if (location == HYPRE_MEMORY_HOST)
    {
