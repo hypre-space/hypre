@@ -35,7 +35,7 @@ hypre_SeqVectorZeroBCValues(hypre_Vector *v,
    HYPRE_Int      i;
    HYPRE_Int      ierr  = 0;
 
-#ifdef HYPRE_USING_OPENMP
+#if defined(HYPRE_USING_OPENMP)
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
    for (i = 0; i < nrows; i++)

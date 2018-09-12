@@ -65,21 +65,11 @@ main( hypre_int argc,
 
    /* Initialize MPI */
    hypre_MPI_Init(&argc, &argv);
-
-   hypre_init();
-/*
-#ifdef HYPRE_USE_OMP45
-   HYPRE_OMPOffloadOn();
-#endif
-
-#if defined(HYPRE_USE_KOKKOS)
-   Kokkos::InitArguments args;
-   args.num_threads = 10;
-   Kokkos::initialize (args);
-#endif
-*/
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+
+   /* Initialize Hypre */
+   HYPRE_Init(argc, argv);
 
    /*-----------------------------------------------------------
     * Set defaults
@@ -408,14 +398,10 @@ main( hypre_int argc,
    HYPRE_StructVectorDestroy(to_vector);
    HYPRE_StructVectorDestroy(check_vector);
 
-   /* Finalize MPI */
-/*
-#if defined(HYPRE_USE_KOKKOS)
-   Kokkos::finalize ();
-#endif
-*/
-   hypre_finalize();
+   /* Finalize Hypre */
+   HYPRE_Finalize();
 
+   /* Finalize MPI */
    hypre_MPI_Finalize();
 
    return (0);
@@ -448,7 +434,6 @@ AddValuesVector( hypre_StructGrid   *grid,
       volume   = hypre_BoxVolume(box);
       values   =  hypre_CTAlloc(HYPRE_Real,  volume, HYPRE_MEMORY_DEVICE);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(values)
       hypre_LoopBegin(volume,i)
       {
@@ -456,7 +441,6 @@ AddValuesVector( hypre_StructGrid   *grid,
       }
       hypre_LoopEnd();
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 	
       ilower = hypre_BoxIMin(box);
       iupper = hypre_BoxIMax(box);

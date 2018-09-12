@@ -90,14 +90,76 @@ extern "C" {
 #define HYPRE_MEMORY_SHARED        ( 2)
 #define HYPRE_MEMORY_HOST_PINNED   ( 3)
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_CUDA)
+/*==================================================================   
+ *       default def of memory location selected based memory env
+ *   +-------------------------------------------------------------+
+ *   |                           |          HYPRE_MEMORY_*         |
+ *   |        MEM \ LOC          | HOST | DEVICE | SHARED | PINNED |
+ *   |---------------------------+---------------+-----------------|
+ *   | HYPRE_USING_HOST_MEMORY   | HOST | HOST   | HOST   | HOST   |
+ *   |---------------------------+---------------+-------- --------|
+ *   | HYPRE_USING_DEVICE_MEMORY | HOST | DEVICE | DEVICE | PINNED |
+ *   |---------------------------+---------------+-----------------|
+ *   | HYPRE_USING_UNIFIED_MEMORY| HOST | DEVICE | SHARED | PINNED |
+ *   +-------------------------------------------------------------+
+ *==================================================================*/
+
+#if defined(HYPRE_USING_HOST_MEMORY)
+
+/* default memory model without device (host only) */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
+
+#elif defined(HYPRE_USING_DEVICE_MEMORY)
+
+/* default memory model with device and without unified memory */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
+
+#elif defined(HYPRE_USING_UNIFIED_MEMORY)
+
+/* default memory model with device and with unified memory */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_SHARED
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
+
+#else
+
+/* default */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
+
+#endif
+
+/* the above definitions might be overridden to customize a memory location */
+/* #undef  HYPRE_MEMORY_HOST_ACT */
+/* #undef  HYPRE_MEMORY_DEVICE_ACT */
+/* #undef  HYPRE_MEMORY_SHARED_ACT */
+/* #undef  HYPRE_MEMORY_PINNED_ACT */
+/* #define HYPRE_MEMORY_HOST_ACT    HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_DEVICE_ACT  HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_SHARED_ACT  HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_PINNED_ACT  HYPRE_MEMORY_? */
+
+#define HYPRE_MEM_PAD_LEN 1
+
+/*
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_CUDA_GLOBAL __host__ __device__
 #else
 #define HYPRE_CUDA_GLOBAL 
 #endif
+*/
 
 /* OpenMP 4.5 */
-#if defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
 
 #include "omp.h"
   
@@ -109,7 +171,7 @@ extern "C" {
 #define HYPRE_STR(s...) #s
 #define HYPRE_XSTR(s...) HYPRE_STR(s)
 
-/* OpenMP 4.5 GPU memory management */
+/* OpenMP 4.5 device memory management */
 extern HYPRE_Int hypre__global_offload;
 extern HYPRE_Int hypre__offload_device_num;
 extern HYPRE_Int hypre__offload_host_num;
@@ -203,14 +265,12 @@ hypre__offload_flag: 0 == OK; 1 == WRONG
    } \
 }
 
-#endif // OMP45
+#endif /*  #if defined(HYPRE_USING_DEVICE_OPENMP) */
 
 /*
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
 */
-
-
 //#define TRACK_MEMORY_ALLOCATIONS
 #if defined(TRACK_MEMORY_ALLOCATIONS)
 

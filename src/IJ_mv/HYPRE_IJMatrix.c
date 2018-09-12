@@ -169,7 +169,9 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
          return hypre_error_flag;
       }
       else
+      {
          row_partitioning[i+1] = recv_buf[i4+4];
+      }
 
       if ((square && (recv_buf[i4]   != recv_buf[i4+2])) ||
           (recv_buf[i4+1] != recv_buf[i4+3])  )
@@ -181,10 +183,14 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
    row_partitioning[num_procs] = recv_buf[i4+1]+1;
 
    if ((recv_buf[i4] != recv_buf[i4+2]) || (recv_buf[i4+1] != recv_buf[i4+3]))
+   {
       square = 0;
+   }
 
    if (square)
+   {
       col_partitioning = row_partitioning;
+   }
    else
    {
       col_partitioning = hypre_CTAlloc(HYPRE_Int, num_procs+1, HYPRE_MEMORY_HOST);
@@ -203,17 +209,19 @@ HYPRE_IJMatrixCreate( MPI_Comm        comm,
             return hypre_error_flag;
          }
          else
+         {
             col_partitioning[i+1] = recv_buf[i4+6];
+         }
       }
       col_partitioning[num_procs] = recv_buf[num_procs*4-1]+1;
    }
 
    hypre_IJMatrixGlobalFirstRow(ijmatrix) = row_partitioning[0];
    hypre_IJMatrixGlobalFirstCol(ijmatrix) = col_partitioning[0];
-   hypre_IJMatrixGlobalNumRows(ijmatrix) = row_partitioning[num_procs] -
-      row_partitioning[0];
-   hypre_IJMatrixGlobalNumCols(ijmatrix) = col_partitioning[num_procs] -
-      col_partitioning[0];
+   hypre_IJMatrixGlobalNumRows(ijmatrix)  = row_partitioning[num_procs] -
+                                            row_partitioning[0];
+   hypre_IJMatrixGlobalNumCols(ijmatrix)  = col_partitioning[num_procs] -
+                                            col_partitioning[0];
 
    hypre_TFree(info, HYPRE_MEMORY_HOST);
    hypre_TFree(recv_buf, HYPRE_MEMORY_HOST);
@@ -246,16 +254,22 @@ HYPRE_IJMatrixDestroy( HYPRE_IJMatrix matrix )
    {
       if (hypre_IJMatrixRowPartitioning(ijmatrix) ==
           hypre_IJMatrixColPartitioning(ijmatrix))
+      {
          hypre_TFree(hypre_IJMatrixRowPartitioning(ijmatrix), HYPRE_MEMORY_HOST);
+      }
       else
       {
          hypre_TFree(hypre_IJMatrixRowPartitioning(ijmatrix), HYPRE_MEMORY_HOST);
          hypre_TFree(hypre_IJMatrixColPartitioning(ijmatrix), HYPRE_MEMORY_HOST);
       }
       if hypre_IJMatrixAssumedPart(ijmatrix)
-                                     hypre_AssumedPartitionDestroy((hypre_IJAssumedPart*)hypre_IJMatrixAssumedPart(ijmatrix));
+      {
+         hypre_AssumedPartitionDestroy((hypre_IJAssumedPart*)hypre_IJMatrixAssumedPart(ijmatrix));
+      }
       if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+      {
          hypre_IJMatrixDestroyParCSR( ijmatrix );
+      }
       else if ( hypre_IJMatrixObjectType(ijmatrix) != -1 )
       {
          hypre_error_in_arg(1);
@@ -283,7 +297,9 @@ HYPRE_IJMatrixInitialize( HYPRE_IJMatrix matrix )
    }
 
    if ( hypre_IJMatrixObjectType(ijmatrix) == HYPRE_PARCSR )
+   {
       hypre_IJMatrixInitializeParCSR( ijmatrix ) ;
+   }
    else
    {
       hypre_error_in_arg(1);
@@ -382,7 +398,9 @@ HYPRE_IJMatrixSetValues( HYPRE_IJMatrix       matrix,
    HYPRE_Int      *row_indexes;
 
    if (nrows == 0)
+   {
       return hypre_error_flag;
+   }
 
    if (!ijmatrix)
    {
@@ -476,7 +494,9 @@ HYPRE_IJMatrixAddToValues( HYPRE_IJMatrix       matrix,
    HYPRE_Int      *row_indexes;
 
    if (nrows == 0)
+   {
       return hypre_error_flag;
+   }
 
    if (!ijmatrix)
    {
@@ -544,7 +564,9 @@ HYPRE_IJMatrixSetValues2( HYPRE_IJMatrix       matrix,
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
    if (nrows == 0)
+   {
       return hypre_error_flag;
+   }
 
    if (!ijmatrix)
    {
@@ -622,7 +644,9 @@ HYPRE_IJMatrixAddToValues2( HYPRE_IJMatrix       matrix,
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
    if (nrows == 0)
+   {
       return hypre_error_flag;
+   }
 
    if (!ijmatrix)
    {
@@ -721,7 +745,10 @@ HYPRE_IJMatrixGetRowCounts( HYPRE_IJMatrix matrix,
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
-   if (nrows == 0) return hypre_error_flag;
+   if (nrows == 0)
+   {
+      return hypre_error_flag;
+   }
 
    if (!ijmatrix)
    {
@@ -772,7 +799,10 @@ HYPRE_IJMatrixGetValues( HYPRE_IJMatrix matrix,
 {
    hypre_IJMatrix *ijmatrix = (hypre_IJMatrix *) matrix;
 
-   if (nrows == 0) return hypre_error_flag;
+   if (nrows == 0)
+   {
+      return hypre_error_flag;
+   }
 
    if (!ijmatrix)
    {
@@ -1064,9 +1094,13 @@ HYPRE_IJMatrixRead( const char     *filename,
          return hypre_error_flag;
       }
       if (I < ilower || I > iupper)
+      {
          HYPRE_IJMatrixAddToValues(matrix, 1, &ncols, &I, &J, &value);
+      }
       else
+      {
          HYPRE_IJMatrixSetValues(matrix, 1, &ncols, &I, &J, &value);
+      }
    }
 
    HYPRE_IJMatrixAssemble(matrix);

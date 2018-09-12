@@ -12,12 +12,6 @@
 
 #include "_hypre_utilities.h"
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_OMP45)
-extern HYPRE_Complex *global_recv_buffer, *global_send_buffer;
-extern HYPRE_Int      global_recv_size, global_send_size;
-
-#endif
-
 /******************************************************************************
  * This routine is the same in both the sequential and normal cases
  *
@@ -656,6 +650,23 @@ hypre_MPI_Op_free( hypre_MPI_Op *op )
 {
    return(0);
 }
+
+
+HYPRE_Int hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
+{
+   return (0);
+}
+
+HYPRE_Int hypre_MPI_Info_create( hypre_MPI_Info *info )
+{
+   return (0);
+}
+
+HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info )
+{
+   return (0);
+}
+
 /******************************************************************************
  * MPI stubs to do casting of HYPRE_Int and hypre_int correctly
  *****************************************************************************/
@@ -666,28 +677,12 @@ HYPRE_Int
 hypre_MPI_Init( hypre_int   *argc,
                 char      ***argv )
 {
-#if defined(HYPRE_USE_OMP45)
-   hypre__offload_device_num = omp_get_initial_device();
-   hypre__offload_host_num   = omp_get_initial_device();
-#endif
-
    return (HYPRE_Int) MPI_Init(argc, argv);
 }
 
 HYPRE_Int
 hypre_MPI_Finalize( )
 {
-#if defined(HYPRE_USE_OMP45)
-   if (global_send_buffer)
-   {
-     hypre_TFree(global_send_buffer, HYPRE_MEMORY_DEVICE);
-   }
-   if (global_recv_buffer)
-   {
-     hypre_TFree(global_recv_buffer, HYPRE_MEMORY_DEVICE);
-   }
-#endif
-
    return (HYPRE_Int) MPI_Finalize();
 }
 
@@ -1310,6 +1305,24 @@ HYPRE_Int
 hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute, hypre_MPI_Op *op )
 {
    return (HYPRE_Int) MPI_Op_create(function, commute, op);
+}
+
+HYPRE_Int 
+hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
+{
+   return (HYPRE_Int) MPI_Comm_split_type(comm, split_type, key, info, newcomm );
+}
+
+HYPRE_Int
+hypre_MPI_Info_create( hypre_MPI_Info *info )
+{
+   return (HYPRE_Int) MPI_Info_create(info);
+}
+
+HYPRE_Int
+hypre_MPI_Info_free( hypre_MPI_Info *info )
+{
+   return (HYPRE_Int) MPI_Info_free(info);
 }
 
 #endif

@@ -108,17 +108,19 @@ extern "C" {
  * and is defined in `HYPRE_utilities.h'.
  *--------------------------------------------------------------------------*/
 
-#define MPI_Comm            hypre_MPI_Comm            
-#define MPI_Group           hypre_MPI_Group            
-#define MPI_Request         hypre_MPI_Request          
-#define MPI_Datatype        hypre_MPI_Datatype         
-#define MPI_Status          hypre_MPI_Status           
-#define MPI_Op              hypre_MPI_Op               
-#define MPI_Aint            hypre_MPI_Aint             
+#define MPI_Comm            hypre_MPI_Comm
+#define MPI_Group           hypre_MPI_Group
+#define MPI_Request         hypre_MPI_Request
+#define MPI_Datatype        hypre_MPI_Datatype
+#define MPI_Status          hypre_MPI_Status
+#define MPI_Op              hypre_MPI_Op
+#define MPI_Aint            hypre_MPI_Aint
+#define MPI_Info            hypre_MPI_Info
 
-#define MPI_COMM_WORLD      hypre_MPI_COMM_WORLD       
-#define MPI_COMM_NULL       hypre_MPI_COMM_NULL
-#define MPI_COMM_SELF       hypre_MPI_COMM_SELF
+#define MPI_COMM_WORLD       hypre_MPI_COMM_WORLD
+#define MPI_COMM_NULL        hypre_MPI_COMM_NULL
+#define MPI_COMM_SELF        hypre_MPI_COMM_SELF
+#define MPI_COMM_TYPE_SHARED hypre_MPI_COMM_TYPE_SHARED
 
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
@@ -161,6 +163,7 @@ extern "C" {
 #define MPI_Comm_rank       hypre_MPI_Comm_rank        
 #define MPI_Comm_free       hypre_MPI_Comm_free        
 #define MPI_Comm_split      hypre_MPI_Comm_split        
+#define MPI_Comm_split_type hypre_MPI_Comm_split_type
 #define MPI_Group_incl      hypre_MPI_Group_incl       
 #define MPI_Group_free      hypre_MPI_Group_free        
 #define MPI_Address         hypre_MPI_Address        
@@ -201,6 +204,7 @@ extern "C" {
 #define MPI_Op_free         hypre_MPI_Op_free        
 #define MPI_Op_create       hypre_MPI_Op_create
 #define MPI_User_function   hypre_MPI_User_function
+#define MPI_Info_create     hypre_MPI_Info_create
 
 /*--------------------------------------------------------------------------
  * Types, etc.
@@ -218,12 +222,16 @@ typedef struct
    HYPRE_Int hypre_MPI_SOURCE;
    HYPRE_Int hypre_MPI_TAG;
 } hypre_MPI_Status;
+
 typedef HYPRE_Int  hypre_MPI_Op;
 typedef HYPRE_Int  hypre_MPI_Aint;
+typedef HYPRE_Int  hypre_MPI_Info;
 
-#define  hypre_MPI_COMM_SELF 1
-#define  hypre_MPI_COMM_WORLD 0
+#define  hypre_MPI_COMM_SELF   1
+#define  hypre_MPI_COMM_WORLD  0
 #define  hypre_MPI_COMM_NULL  -1
+
+#define  hypre_MPI_COMM_TYPE_SHARED 0
 
 #define  hypre_MPI_BOTTOM  0x0
 
@@ -263,12 +271,14 @@ typedef MPI_Datatype hypre_MPI_Datatype;
 typedef MPI_Status   hypre_MPI_Status;
 typedef MPI_Op       hypre_MPI_Op;
 typedef MPI_Aint     hypre_MPI_Aint;
+typedef MPI_Info     hypre_MPI_Info;
 typedef MPI_User_function    hypre_MPI_User_function;
 
-#define  hypre_MPI_COMM_WORLD MPI_COMM_WORLD
-#define  hypre_MPI_COMM_NULL  MPI_COMM_NULL
-#define  hypre_MPI_BOTTOM     MPI_BOTTOM
-#define  hypre_MPI_COMM_SELF  MPI_COMM_SELF
+#define  hypre_MPI_COMM_WORLD         MPI_COMM_WORLD
+#define  hypre_MPI_COMM_NULL          MPI_COMM_NULL
+#define  hypre_MPI_BOTTOM             MPI_BOTTOM
+#define  hypre_MPI_COMM_SELF          MPI_COMM_SELF
+#define  hypre_MPI_COMM_TYPE_SHARED   MPI_COMM_TYPE_SHARED 
 
 #define  hypre_MPI_FLOAT   MPI_FLOAT
 #define  hypre_MPI_DOUBLE  MPI_DOUBLE
@@ -362,6 +372,9 @@ HYPRE_Int hypre_MPI_Type_commit( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
 HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int commute , hypre_MPI_Op *op );
+HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
+HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
+HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
 
 #ifdef __cplusplus
 }
@@ -479,14 +492,76 @@ extern "C" {
 #define HYPRE_MEMORY_SHARED        ( 2)
 #define HYPRE_MEMORY_HOST_PINNED   ( 3)
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_CUDA)
+/*==================================================================   
+ *       default def of memory location selected based memory env
+ *   +-------------------------------------------------------------+
+ *   |                           |          HYPRE_MEMORY_*         |
+ *   |        MEM \ LOC          | HOST | DEVICE | SHARED | PINNED |
+ *   |---------------------------+---------------+-----------------|
+ *   | HYPRE_USING_HOST_MEMORY   | HOST | HOST   | HOST   | HOST   |
+ *   |---------------------------+---------------+-------- --------|
+ *   | HYPRE_USING_DEVICE_MEMORY | HOST | DEVICE | DEVICE | PINNED |
+ *   |---------------------------+---------------+-----------------|
+ *   | HYPRE_USING_UNIFIED_MEMORY| HOST | DEVICE | SHARED | PINNED |
+ *   +-------------------------------------------------------------+
+ *==================================================================*/
+
+#if defined(HYPRE_USING_HOST_MEMORY)
+
+/* default memory model without device (host only) */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
+
+#elif defined(HYPRE_USING_DEVICE_MEMORY)
+
+/* default memory model with device and without unified memory */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
+
+#elif defined(HYPRE_USING_UNIFIED_MEMORY)
+
+/* default memory model with device and with unified memory */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_DEVICE
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_SHARED
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST_PINNED
+
+#else
+
+/* default */
+#define HYPRE_MEMORY_HOST_ACT         HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_DEVICE_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_SHARED_ACT       HYPRE_MEMORY_HOST
+#define HYPRE_MEMORY_HOST_PINNED_ACT  HYPRE_MEMORY_HOST
+
+#endif
+
+/* the above definitions might be overridden to customize a memory location */
+/* #undef  HYPRE_MEMORY_HOST_ACT */
+/* #undef  HYPRE_MEMORY_DEVICE_ACT */
+/* #undef  HYPRE_MEMORY_SHARED_ACT */
+/* #undef  HYPRE_MEMORY_PINNED_ACT */
+/* #define HYPRE_MEMORY_HOST_ACT    HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_DEVICE_ACT  HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_SHARED_ACT  HYPRE_MEMORY_? */
+/* #define HYPRE_MEMORY_PINNED_ACT  HYPRE_MEMORY_? */
+
+#define HYPRE_MEM_PAD_LEN 1
+
+/*
+#if defined(HYPRE_USING_CUDA)
 #define HYPRE_CUDA_GLOBAL __host__ __device__
 #else
 #define HYPRE_CUDA_GLOBAL 
 #endif
+*/
 
 /* OpenMP 4.5 */
-#if defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USING_DEVICE_OPENMP)
 
 #include "omp.h"
   
@@ -498,7 +573,7 @@ extern "C" {
 #define HYPRE_STR(s...) #s
 #define HYPRE_XSTR(s...) HYPRE_STR(s)
 
-/* OpenMP 4.5 GPU memory management */
+/* OpenMP 4.5 device memory management */
 extern HYPRE_Int hypre__global_offload;
 extern HYPRE_Int hypre__offload_device_num;
 extern HYPRE_Int hypre__offload_host_num;
@@ -592,14 +667,12 @@ hypre__offload_flag: 0 == OK; 1 == WRONG
    } \
 }
 
-#endif // OMP45
+#endif /*  #if defined(HYPRE_USING_DEVICE_OPENMP) */
 
 /*
 #define hypre_InitMemoryDebug(id)
 #define hypre_FinalizeMemoryDebug()
 */
-
-
 //#define TRACK_MEMORY_ALLOCATIONS
 #if defined(TRACK_MEMORY_ALLOCATIONS)
 
@@ -1150,7 +1223,7 @@ static const int num_colors = sizeof(colors)/sizeof(uint32_t);
 #ifndef hypre_GPU_ERROR_HEADER
 #define hypre_GPU_ERROR_HEADER
 
-#if defined(HYPRE_MEMORY_GPU) || defined(HYPRE_USE_MANAGED) || defined(HYPRE_USE_OMP45)
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 //#include <cuda_runtime_api.h>
 #ifdef __cplusplus
@@ -1164,7 +1237,6 @@ extern "C++" {
 
 #define hypre_CheckErrorDevice(err) CheckError(err,__FILE__, __FUNCTION__, __LINE__)
 #define CUDAMEMATTACHTYPE cudaMemAttachGlobal
-#define MEM_PAD_LEN 1
 #define HYPRE_HOST_POINTER 0
 #define HYPRE_MANAGED_POINTER 1
 #define HYPRE_PINNED_POINTER 2
@@ -1177,15 +1249,11 @@ void cudaSafeFree(void *ptr,int padding);
 hypre_int PrintPointerAttributes(const void *ptr);
 hypre_int PointerAttributes(const void *ptr);
 
-#endif 
-
 /* CUBLAS and CUSPARSE related */
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USING_CUSPARSE)
-
 #ifndef __cusparseErrorCheck__
 #define __cusparseErrorCheck__
 
-/* MUST HAVE extern C++ for C++ cusparse.h and the headers therein */
+/* MUST HAVE " extern "C++" " for C++ header cusparse.h, and the headers therein */
 #ifdef __cplusplus
 extern "C++" {
 #endif
@@ -1266,7 +1334,6 @@ inline const char *cublasErrorCheck(cublasStatus_t error)
         default:
 	    return "Unknown error in cublasErrorCheck";
     }
-
 }
 
 #define cusparseErrchk(ans) { cusparseAssert((ans), __FILE__, __LINE__); }
@@ -1288,10 +1355,13 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
      fprintf(stderr,"CUBLAS ERROR : %s \n", cublasErrorCheck(code));
    }
 }
+
 #endif // __cusparseErrorCheck__
-#endif // defined(HYPRE_USE_GPU)
+
+#endif // #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #endif // hypre_GPU_ERROR_HEADER
+
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory.
@@ -1306,12 +1376,18 @@ inline void cublasAssert(cublasStatus_t code, const char *file, int line)
 #ifndef __GPUMEM_H__
 #define  __GPUMEM_H__
 
-#if defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED)
+#if defined(HYPRE_USING_CUDA)
+#define HYPRE_MIN_GPU_SIZE (131072)
+extern HYPRE_Int hypre_exec_policy;
+#define hypre_SetDeviceOn()  hypre_exec_policy = HYPRE_MEMORY_DEVICE
+#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
+#endif /* #if defined(HYPRE_USING_CUDA) */
+
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 
 #define HYPRE_USE_MANAGED_SCALABLE 1
 #define HYPRE_GPU_USE_PINNED 1
 
-#if defined(HYPRE_USE_MANAGED)
 #include <cuda_runtime_api.h>
 void hypre_GPUInit(hypre_int use_device);
 void hypre_GPUFinalize();
@@ -1353,13 +1429,13 @@ struct hypre__global_struct{
   hypre_int initd;
   hypre_int device;
   hypre_int device_count;
+  size_t memoryHWM;
   cublasHandle_t cublas_handle;
   cusparseHandle_t cusparse_handle;
   cusparseMatDescr_t cusparse_mat_descr;
   cudaStream_t streams[MAX_HGS_ELEMENTS];
   nvtxDomainHandle_t nvtx_domain;
   hypre_int concurrent_managed_access;
-  size_t memoryHWM;
 };
 
 extern struct hypre__global_struct hypre__global_handle ;
@@ -1379,7 +1455,6 @@ extern struct hypre__global_struct hypre__global_handle ;
 #define HYPRE_GPU_CMA hypre__global_handle.concurrent_managed_access
 #define HYPRE_GPU_HWM hypre__global_handle.memoryHWM
 
-#endif /* HYPRE_USE_MANAGED */
 
 typedef struct node {
   const void *ptr;
@@ -1393,43 +1468,10 @@ void meminsert(node **head, const void *ptr,size_t size);
 void printlist(node *head,hypre_int nc);
 size_t memsize(const void *ptr);
 
-#endif /* defined(HYPRE_USE_GPU) || defined(HYPRE_USE_MANAGED) */
+#endif /* #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP) */
 
 
-#if defined(HYPRE_USE_CUDA)
-extern HYPRE_Int hypre_exec_policy;
-extern char tmp_print[10];
-extern HYPRE_Int hypre_box_print;
-extern double  t_start, t_end;
-extern HYPRE_Int time_box ;
-#define HYPRE_MIN_GPU_SIZE (131072)
-
-#define RAJA_MAX_REDUCE_VARS (8)
-#define RAJA_CUDA_MAX_NUM_BLOCKS (512*512*512)
-#define RAJA_CUDA_REDUCE_BLOCK_LENGTH RAJA_CUDA_MAX_NUM_BLOCKS
-#define RAJA_CUDA_REDUCE_TALLY_LENGTH RAJA_MAX_REDUCE_VARS
-#define RAJA_CUDA_REDUCE_VAR_MAXSIZE 16
-#define COHERENCE_BLOCK_SIZE 64
-
-typedef HYPRE_Real CudaReductionBlockDataType;
-typedef HYPRE_Int GridSizeType;
-
-#define hypre_SetDeviceOn() hypre_exec_policy = HYPRE_MEMORY_DEVICE
-#define hypre_SetDeviceOff() hypre_exec_policy = HYPRE_MEMORY_HOST
-
-int getCudaReductionId();
-CudaReductionBlockDataType* getCudaReductionMemBlock(int id);
-void releaseCudaReductionId(int id);
-void initCudaReductionMemBlock();
-void freeCudaReductionMemBlock();
-CudaReductionBlockDataType* getCPUReductionMemBlock(int id);
-void releaseCPUReductionId(int id);
-void freeCPUReductionMemBlock();
-
-#endif/* defined(HYPRE_USE_CUDA) */
-
-
-#ifdef HYPRE_USE_OMP45
+#if defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
 			   const char *type1, const char *type2);
 
@@ -1446,9 +1488,242 @@ HYPRE_Int HYPRE_OMPOffloadStatPrint();
 #define hypre_SetDeviceOn() HYPRE_OMPOffloadOn()
 #define hypre_SetDeviceOff() HYPRE_OMPOffloadOff()
 
-#endif/* HYPRE_USE_OMP45 */
+#endif /* #if defined(HYPRE_USING_DEVICE_OPENMP) */
 
 #endif/* __GPUMEM_H__ */
+
+#if !defined(HYPRE_USING_RAJA) && !defined(HYPRE_USING_KOKKOS) && defined(HYPRE_USING_CUDA)
+
+#ifndef CUDART_VERSION
+#error CUDART_VERSION Undefined!
+#elif (CUDART_VERSION >= 9000)
+#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down_sync(mask, var, delta)
+#elif (CUDART_VERSION <= 8000)
+#define WARP_SHFL_DOWN(mask, var, delta)  __shfl_down(var, delta);
+#endif
+
+extern "C++" {
+
+extern void *cuda_reduce_buffer;
+
+template<typename T> void OneBlockReduce(T *d_arr, HYPRE_Int N, T *h_out);
+
+struct HYPRE_double4
+{
+   HYPRE_Real x,y,z,w;
+
+   __host__ __device__
+   HYPRE_double4() {}
+
+   __host__ __device__
+   HYPRE_double4(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4)
+   {
+      x = x1;
+      y = x2;
+      z = x3;
+      w = x4;
+   }
+
+   __host__ __device__
+   void operator=(HYPRE_Real val)
+   {
+      x = y = z = w = val;
+   }
+
+   __host__ __device__
+   void operator+=(HYPRE_double4 rhs)
+   {
+      x += rhs.x;
+      y += rhs.y;
+      z += rhs.z;
+      w += rhs.w;
+   }
+
+};
+
+struct HYPRE_double6
+{
+   HYPRE_Real x,y,z,w,u,v;
+ 
+   __host__ __device__
+   HYPRE_double6() {}
+
+   __host__ __device__
+   HYPRE_double6(HYPRE_Real x1, HYPRE_Real x2, HYPRE_Real x3, HYPRE_Real x4, 
+                 HYPRE_Real x5, HYPRE_Real x6)
+   {
+      x = x1;
+      y = x2;
+      z = x3;
+      w = x4;
+      u = x5;
+      v = x6;
+   }
+
+   __host__ __device__
+   void operator=(HYPRE_Real val)
+   {
+      x = y = z = w = u = v = val;
+   }
+
+   __host__ __device__
+   void operator+=(HYPRE_double6 rhs)
+   {
+      x += rhs.x;
+      y += rhs.y;
+      z += rhs.z;
+      w += rhs.w;
+      u += rhs.u;
+      v += rhs.v;
+   }
+
+};
+
+__inline__ __host__ __device__
+HYPRE_Real warpReduceSum(HYPRE_Real val)
+{
+#ifdef __CUDA_ARCH__
+  for (HYPRE_Int offset = warpSize/2; offset > 0; offset /= 2)
+  {
+    val += WARP_SHFL_DOWN(0xFFFFFFFF, val, offset);
+  }
+#endif
+  return val;
+}
+
+__inline__ __host__ __device__
+HYPRE_double4 warpReduceSum(HYPRE_double4 val) {
+#ifdef __CUDA_ARCH__
+  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+  {
+    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
+    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
+    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
+    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
+  }
+#endif
+  return val;
+}
+
+__inline__ __host__ __device__
+HYPRE_double6 warpReduceSum(HYPRE_double6 val) {
+#ifdef __CUDA_ARCH__
+  for (HYPRE_Int offset = warpSize / 2; offset > 0; offset /= 2)
+  {
+    val.x += WARP_SHFL_DOWN(0xFFFFFFFF, val.x, offset);
+    val.y += WARP_SHFL_DOWN(0xFFFFFFFF, val.y, offset);
+    val.z += WARP_SHFL_DOWN(0xFFFFFFFF, val.z, offset);
+    val.w += WARP_SHFL_DOWN(0xFFFFFFFF, val.w, offset);
+    val.u += WARP_SHFL_DOWN(0xFFFFFFFF, val.u, offset);
+    val.v += WARP_SHFL_DOWN(0xFFFFFFFF, val.v, offset);
+  }
+#endif
+  return val;
+}
+
+template <typename T>
+__inline__ __host__ __device__
+T blockReduceSum(T val) 
+{
+#ifdef __CUDA_ARCH__
+   //static __shared__ T shared[32]; // Shared mem for 32 partial sums
+   __shared__ T shared[32];        // Shared mem for 32 partial sums
+   HYPRE_Int lane = threadIdx.x % warpSize;
+   HYPRE_Int wid  = threadIdx.x / warpSize;
+
+   val = warpReduceSum(val);       // Each warp performs partial reduction
+
+   if (lane == 0)
+   {
+      shared[wid] = val;          // Write reduced value to shared memory
+   }
+
+   __syncthreads();               // Wait for all partial reductions
+
+   //read from shared memory only if that warp existed
+   if (threadIdx.x < blockDim.x / warpSize)
+   {
+      val = shared[lane];
+   }
+   else
+   {
+      val = 0.0;
+   }
+
+   if (wid == 0)
+   {
+      val = warpReduceSum(val); //Final reduce within first warp
+   }
+
+#endif
+   return val;
+}
+
+/* Reducer class */
+template <typename T>
+struct ReduceSum
+{
+   T init;                    /* initial value passed in */
+   mutable T __thread_sum;    /* place to hold local sum of a thread,
+                                 and partial sum of a block */
+   T *d_buf;                  /* place to store partial sum of a block */
+   HYPRE_Int nblocks;         /* number of blocks used in the first round */
+
+   __host__
+   ReduceSum(T val)
+   {
+      init = val;
+      __thread_sum = 0.0;
+      d_buf = (T*) cuda_reduce_buffer;
+      //d_buf = hypre_CTAlloc(T, 1024, HYPRE_MEMORY_DEVICE);
+   }
+
+   __host__ __device__ 
+   ReduceSum(const ReduceSum<T>& other)
+   {
+      *this = other;
+   }
+
+   __host__ __device__
+   void BlockReduce() const
+   {
+#ifdef __CUDA_ARCH__
+      __thread_sum = blockReduceSum(__thread_sum);
+      if (threadIdx.x == 0)
+      {                                   
+         d_buf[blockIdx.x] = __thread_sum;
+      }
+#endif
+   }
+   
+   __host__ __device__ 
+   void operator+=(T val) const
+   {
+      __thread_sum += val;
+   }
+
+   /* we invoke the 2nd reduction at the time we want the sum from the reducer
+    * class */
+   __host__
+   operator T()
+   {
+      T val;
+      /* 2nd reduction with only *one* block */
+      OneBlockReduce(d_buf, nblocks, &val);
+      val += init;
+      //hypre_TFree(d_buf, HYPRE_MEMORY_DEVICE);
+      return val;
+   }
+
+   __host__ __device__ 
+   ~ReduceSum<T>()
+   {
+   }
+};
+
+} // extern "C++"
+
+#endif
 
 /*BHEADER**********************************************************************
  * Copyright (c) 2008,  Lawrence Livermore National Security, LLC.
@@ -1487,8 +1762,8 @@ HYPRE_Real    hypre_cimag( HYPRE_Complex value );
 #endif
 
 /* hypre_general.c */
-void hypre_init();
-void hypre_finalize();
+void HYPRE_Init( hypre_int argc, char *argv[] );
+void HYPRE_Finalize();
 
 /* hypre_printf.c */
 // #ifdef HYPRE_BIGINT
@@ -1528,9 +1803,9 @@ void hypre_qsort_abs ( HYPRE_Real *w , HYPRE_Int left , HYPRE_Int right );
 HYPRE_Int hypre_DoubleQuickSplit ( HYPRE_Real *values , HYPRE_Int *indices , HYPRE_Int list_length , HYPRE_Int NumberKept );
 
 /* random.c */
-HYPRE_CUDA_GLOBAL void hypre_SeedRand ( HYPRE_Int seed );
-HYPRE_CUDA_GLOBAL HYPRE_Int hypre_RandI ( void );
-HYPRE_CUDA_GLOBAL HYPRE_Real hypre_Rand ( void );
+/* HYPRE_CUDA_GLOBAL */ void hypre_SeedRand ( HYPRE_Int seed );
+/* HYPRE_CUDA_GLOBAL */ HYPRE_Int hypre_RandI ( void );
+/* HYPRE_CUDA_GLOBAL */ HYPRE_Real hypre_Rand ( void );
 
 /* hypre_prefix_sum.c */
 /**

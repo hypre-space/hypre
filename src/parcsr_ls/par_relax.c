@@ -2357,7 +2357,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           * Copy f into temporary vector.
           *-----------------------------------------------------------------*/
          PUSH_RANGE("RELAX",4);
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
            hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(Vtemp));
            hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
          VecCopy(Vtemp_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(Vtemp)),HYPRE_STREAM(4));
@@ -2369,7 +2369,7 @@ HYPRE_Int  hypre_BoomerAMGRelax( hypre_ParCSRMatrix *A,
           *-----------------------------------------------------------------*/
 
             hypre_ParCSRMatrixMatvec(-relax_weight,A, u, relax_weight, Vtemp);
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
          VecScale(u_data,Vtemp_data,l1_norms,n,HYPRE_STREAM(4));
 #else
             for (i = 0; i < n; i++)

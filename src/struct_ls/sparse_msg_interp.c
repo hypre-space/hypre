@@ -195,7 +195,6 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
       hypre_BoxGetSize(compute_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(ep,xcp)
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                           e_dbox,  start,  stride,  ei,
@@ -205,7 +204,6 @@ hypre_SparseMSGInterp( void               *interp_vdata,
       }
       hypre_BoxLoop2End(ei, xci);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
    }
 
    /*-----------------------------------------------------------------------
@@ -255,7 +253,6 @@ hypre_SparseMSGInterp( void               *interp_vdata,
 
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(ep,Pp0,ep0,Pp1,ep1)
             hypre_BoxLoop2Begin(hypre_StructMatrixNDim(P), loop_size,
                                 P_dbox, startP, strideP, Pi,
@@ -266,7 +263,6 @@ hypre_SparseMSGInterp( void               *interp_vdata,
             }
             hypre_BoxLoop2End(Pi, ei);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
          }
       }
    }
