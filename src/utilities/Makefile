@@ -64,7 +64,7 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_utilities-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -98,7 +98,7 @@ libHYPRE_utilities.a: ${OBJS}
 	${AR} $@ *.o
 	${RANLIB} $@
 
-libHYPRE_utilities.so: ${OBJS}
+libHYPRE_utilities.so libHYPRE_utilities.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

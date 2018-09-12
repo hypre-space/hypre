@@ -59,7 +59,7 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_ParaSails-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_ParaSails-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -86,7 +86,7 @@ libHYPRE_ParaSails.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_ParaSails.so: ${OBJS}
+libHYPRE_ParaSails.so libHYPRE_ParaSails.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

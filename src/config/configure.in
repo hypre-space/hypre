@@ -1413,6 +1413,8 @@ dnl *********************************************************************
 if test "$hypre_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
+   SHARED_SET_SONAME="-Wl,-soname,"
+   SHARED_OPTIONS="-Wl,-z,defs"
    case $hypre_platform in
       AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
                           SHARED_BUILD_FLAG="-G"
@@ -1420,6 +1422,11 @@ dnl                          LINK_F77="${F77} -brtl"
                           LINK_FC="${FC} -brtl"
                           LINK_CC="${CC} -brtl"
                           LINK_CXX="${CXX} -brtl" ;;
+      DARWIN* | darwin* | Darwin*) SHARED_COMPILE_FLAG="-fPIC"
+                                   SHARED_BUILD_FLAG="-dynamiclib -undefined dynamic_lookup"
+				   HYPRE_LIBSUFFIX=".dylib"
+				   SHARED_SET_SONAME="-install_name @rpath/"
+				   SHARED_OPTIONS="-undefined error" ;;
                        *) SHARED_COMPILE_FLAG="-fPIC"
                           SHARED_BUILD_FLAG="-shared" ;;
    esac
@@ -1435,8 +1442,6 @@ dnl   BUILD_F77_SHARED="${F77} ${SHARED_BUILD_FLAG}"
       BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
-   SHARED_SET_SONAME="-Wl,-soname,"
-   SHARED_OPTIONS="-Wl,-z,defs"
 fi
 
 BUILD_PYTHON=0
