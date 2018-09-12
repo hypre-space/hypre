@@ -651,7 +651,7 @@ hypre_MPI_Op_free( hypre_MPI_Op *op )
    return(0);
 }
 
-
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
 HYPRE_Int hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
 {
    return (0);
@@ -666,6 +666,7 @@ HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info )
 {
    return (0);
 }
+#endif
 
 /******************************************************************************
  * MPI stubs to do casting of HYPRE_Int and hypre_int correctly
@@ -1307,7 +1308,8 @@ hypre_MPI_Op_create( hypre_MPI_User_function *function, hypre_int commute, hypre
    return (HYPRE_Int) MPI_Op_create(function, commute, op);
 }
 
-HYPRE_Int 
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+HYPRE_Int
 hypre_MPI_Comm_split_type( hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm )
 {
    return (HYPRE_Int) MPI_Comm_split_type(comm, split_type, key, info, newcomm );
@@ -1324,5 +1326,6 @@ hypre_MPI_Info_free( hypre_MPI_Info *info )
 {
    return (HYPRE_Int) MPI_Info_free(info);
 }
+#endif
 
 #endif

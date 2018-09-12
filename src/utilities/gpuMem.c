@@ -24,146 +24,145 @@ hypre_int ggc(hypre_int id);
 /* Global struct that holds device,library handles etc */
 struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1, .memoryHWM=0};
 
-
 /* Initialize GPU branch of Hypre AMG */
 /* use_device =-1 */
 /* Application passes device number it is using or -1 to let Hypre decide on which device to use */
 void hypre_GPUInit(hypre_int use_device)
 {
-  char pciBusId[80];
-  hypre_int myid;
-  hypre_int nDevices;
-  hypre_int device;
+   char pciBusId[80];
+   hypre_int myid;
+   hypre_int nDevices;
+   hypre_int device;
 #if defined(TRACK_MEMORY_ALLOCATIONS)
-  hypre_printf("\n\n\n WARNING :: TRACK_MEMORY_ALLOCATIONS IS ON \n\n");
+   hypre_printf("\n\n\n WARNING :: TRACK_MEMORY_ALLOCATIONS IS ON \n\n");
 #endif /* TRACK_MEMORY_ALLOCATIONS */
 
-  if (!HYPRE_GPU_HANDLE)
-  {
-    HYPRE_GPU_HANDLE=1;
-    HYPRE_DEVICE=0;
-    hypre_CheckErrorDevice(cudaGetDeviceCount(&nDevices));
+   if (!HYPRE_GPU_HANDLE)
+   {
+      HYPRE_GPU_HANDLE=1;
+      HYPRE_DEVICE=0;
+      hypre_CheckErrorDevice(cudaGetDeviceCount(&nDevices));
 
-    /* XXX */
-    nDevices = 1; /* DO NOT COMMENT ME OUT AGAIN! nDevices does NOT WORK !!!! */
-    HYPRE_DEVICE_COUNT=nDevices;
-    
-    /* TODO cannot use nDevices to check if mpibind is used, need to rewrite 
-     * E.g., NP=5 on 2 nodes, nDevices=1,1,1,1,4 */
+      /* XXX */
+      nDevices = 1; /* DO NOT COMMENT ME OUT AGAIN! nDevices does NOT WORK !!!! */
+      HYPRE_DEVICE_COUNT=nDevices;
 
-    if (use_device<0)
-    {
-      if (nDevices<4)
+      /* TODO cannot use nDevices to check if mpibind is used, need to rewrite 
+       * E.g., NP=5 on 2 nodes, nDevices=1,1,1,1,4 */
+
+      if (use_device<0)
       {
-	/* with mpibind each process will only see 1 GPU */
-	HYPRE_DEVICE=0;
-	hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
-	cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
-        //hypre_printf("num Devices %d\n", nDevices);
-      }
-      else if (nDevices==4)
-      {
-         // THIS IS A HACK THAT WORKS ONLY AT LLNL
-         /* No mpibind or it is a single rank run */
-         hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
-         //affs(myid);
-         hypre_MPI_Comm node_comm;
-         hypre_MPI_Info info;
-         hypre_MPI_Info_create(&info);
-         hypre_MPI_Comm_split_type(hypre_MPI_COMM_WORLD, hypre_MPI_COMM_TYPE_SHARED, myid, info, &node_comm);
-         hypre_int round_robin=1;
-         hypre_int myNodeid, NodeSize;
-         hypre_MPI_Comm_rank(node_comm, &myNodeid);
-         hypre_MPI_Comm_size(node_comm, &NodeSize);
-         if (round_robin)
+         if (nDevices<4)
          {
-            /* Round robin allocation of GPUs. Does not account for affinities */
-            HYPRE_DEVICE=myNodeid%nDevices; 
+            /* with mpibind each process will only see 1 GPU */
+            HYPRE_DEVICE=0;
             hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
             cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
-            hypre_printf("WARNING:: Code running without mpibind\n");
-            hypre_printf("Global ID = %d , Node ID %d running on device %d of %d \n",myid,myNodeid,HYPRE_DEVICE,nDevices);
+            //hypre_printf("num Devices %d\n", nDevices);
+         }
+         else if (nDevices==4)
+         {
+            // THIS IS A HACK THAT WORKS ONLY AT LLNL
+            /* No mpibind or it is a single rank run */
+            hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
+            //affs(myid);
+            hypre_MPI_Comm node_comm;
+            hypre_MPI_Info info;
+            hypre_MPI_Info_create(&info);
+            hypre_MPI_Comm_split_type(hypre_MPI_COMM_WORLD, hypre_MPI_COMM_TYPE_SHARED, myid, info, &node_comm);
+            hypre_int round_robin=1;
+            hypre_int myNodeid, NodeSize;
+            hypre_MPI_Comm_rank(node_comm, &myNodeid);
+            hypre_MPI_Comm_size(node_comm, &NodeSize);
+            if (round_robin)
+            {
+               /* Round robin allocation of GPUs. Does not account for affinities */
+               HYPRE_DEVICE=myNodeid%nDevices; 
+               hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
+               cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
+               hypre_printf("WARNING:: Code running without mpibind\n");
+               hypre_printf("Global ID = %d , Node ID %d running on device %d of %d \n",myid,myNodeid,HYPRE_DEVICE,nDevices);
+            }
+            else
+            {
+               /* Try to set the GPU based on process binding */
+               /* works correcly for all cases */
+               hypre_MPI_Comm numa_comm;
+               hypre_MPI_Comm_split(node_comm,getnuma(),myNodeid,&numa_comm);
+               hypre_int myNumaId,NumaSize;
+               hypre_MPI_Comm_rank(numa_comm, &myNumaId);
+               hypre_MPI_Comm_size(numa_comm, &NumaSize);
+               hypre_int domain_devices=nDevices/2; /* Again hardwired for 2 NUMA domains */
+               HYPRE_DEVICE = getnuma()*2+myNumaId%domain_devices;
+               hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
+               hypre_printf("WARNING:: Code running without mpibind\n");
+               hypre_printf("NUMA %d GID %d , NodeID %d NumaID %d running on device %d (RR=%d) of %d \n",getnuma(),myid,myNodeid,myNumaId,HYPRE_DEVICE,myNodeid%nDevices,nDevices);
+
+            }
+            hypre_MPI_Info_free(&info);
          }
          else
          {
-            /* Try to set the GPU based on process binding */
-            /* works correcly for all cases */
-            hypre_MPI_Comm numa_comm;
-            hypre_MPI_Comm_split(node_comm,getnuma(),myNodeid,&numa_comm);
-            hypre_int myNumaId,NumaSize;
-            hypre_MPI_Comm_rank(numa_comm, &myNumaId);
-            hypre_MPI_Comm_size(numa_comm, &NumaSize);
-            hypre_int domain_devices=nDevices/2; /* Again hardwired for 2 NUMA domains */
-            HYPRE_DEVICE = getnuma()*2+myNumaId%domain_devices;
-            hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
-            hypre_printf("WARNING:: Code running without mpibind\n");
-            hypre_printf("NUMA %d GID %d , NodeID %d NumaID %d running on device %d (RR=%d) of %d \n",getnuma(),myid,myNodeid,myNumaId,HYPRE_DEVICE,myNodeid%nDevices,nDevices);
-
+            /* No device found  */
+            hypre_fprintf(stderr,"ERROR:: NO GPUS found \n");
+            exit(2);
          }
-         hypre_MPI_Info_free(&info);
       }
       else
       {
-	/* No device found  */
-	hypre_fprintf(stderr,"ERROR:: NO GPUS found \n");
-	exit(2);
+         HYPRE_DEVICE = use_device;
+         hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
       }
-    }
-    else
-    {
-      HYPRE_DEVICE = use_device;
-      hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
-    }
 
 #if defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
-    omp_set_default_device(HYPRE_DEVICE);
-    printf("Set OMP Default device to %d \n",HYPRE_DEVICE);
+      omp_set_default_device(HYPRE_DEVICE);
+      printf("Set OMP Default device to %d \n",HYPRE_DEVICE);
 #endif
 
       /* Create NVTX domain for all the nvtx calls in HYPRE */
       HYPRE_DOMAIN=nvtxDomainCreateA("Hypre");
-      
+
       /* Initialize streams */
       hypre_int jj;
       for(jj=0;jj<MAX_HGS_ELEMENTS;jj++)
-	 hypre_CheckErrorDevice(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)),cudaStreamNonBlocking));
-      
+         hypre_CheckErrorDevice(cudaStreamCreateWithFlags(&(HYPRE_STREAM(jj)),cudaStreamNonBlocking));
+
       /* Initialize the library handles and streams */
-      
-    cusparseErrchk(cusparseCreate(&(HYPRE_CUSPARSE_HANDLE)));
-    cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,HYPRE_STREAM(4)));
-    //cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,0)); // Cusparse MxV happens in default stream
-    cusparseErrchk(cusparseCreateMatDescr(&(HYPRE_CUSPARSE_MAT_DESCR))); 
-    cusparseErrchk(cusparseSetMatType(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_MATRIX_TYPE_GENERAL));
-    cusparseErrchk(cusparseSetMatIndexBase(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_INDEX_BASE_ZERO));
 
-    cublasErrchk(cublasCreate(&(HYPRE_CUBLAS_HANDLE)));
-    cublasErrchk(cublasSetStream(HYPRE_CUBLAS_HANDLE,HYPRE_STREAM(4)));
-    if (!checkDeviceProps()) hypre_printf("WARNING:: Concurrent memory access not allowed\n");
+      cusparseErrchk(cusparseCreate(&(HYPRE_CUSPARSE_HANDLE)));
+      cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,HYPRE_STREAM(4)));
+      //cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,0)); // Cusparse MxV happens in default stream
+      cusparseErrchk(cusparseCreateMatDescr(&(HYPRE_CUSPARSE_MAT_DESCR))); 
+      cusparseErrchk(cusparseSetMatType(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_MATRIX_TYPE_GENERAL));
+      cusparseErrchk(cusparseSetMatIndexBase(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_INDEX_BASE_ZERO));
 
-    /* Check if the arch flags used for compiling the cuda kernels match the device */
+      cublasErrchk(cublasCreate(&(HYPRE_CUBLAS_HANDLE)));
+      cublasErrchk(cublasSetStream(HYPRE_CUBLAS_HANDLE,HYPRE_STREAM(4)));
+      if (!checkDeviceProps()) hypre_printf("WARNING:: Concurrent memory access not allowed\n");
+
+      /* Check if the arch flags used for compiling the cuda kernels match the device */
 #if defined(HYPRE_USING_GPU)
-    CudaCompileFlagCheck();
+      CudaCompileFlagCheck();
 #endif
-  }
+   }
 }
 
 
 void hypre_GPUFinalize()
 {
-  
-  cusparseErrchk(cusparseDestroy(HYPRE_CUSPARSE_HANDLE));
-  
-  cublasErrchk(cublasDestroy(HYPRE_CUBLAS_HANDLE));
+   cusparseErrchk(cusparseDestroy(HYPRE_CUSPARSE_HANDLE));
+
+   cublasErrchk(cublasDestroy(HYPRE_CUBLAS_HANDLE));
 
 #if defined(HYPRE_MEASURE_GPU_HWM)
-  hypre_printf("GPU Memory High Water Mark(per MPI_RANK) %f MB \n",(HYPRE_Real)HYPRE_GPU_HWM/1024/1024);
-#endif 
-  /* Destroy streams */
-  hypre_int jj;
-  for(jj=0;jj<MAX_HGS_ELEMENTS;jj++)
-     hypre_CheckErrorDevice(cudaStreamDestroy(HYPRE_STREAM(jj)));
-  
+   hypre_printf("GPU Memory High Water Mark(per MPI_RANK) %f MB \n",(HYPRE_Real)HYPRE_GPU_HWM/1024/1024);
+#endif
+   /* Destroy streams */
+   hypre_int jj;
+   for(jj=0;jj<MAX_HGS_ELEMENTS;jj++)
+   {
+      hypre_CheckErrorDevice(cudaStreamDestroy(HYPRE_STREAM(jj)));
+   }
 }
 
 void MemAdviseReadOnly(const void* ptr, hypre_int device){
@@ -349,31 +348,31 @@ void affs(hypre_int myid){
   hypre_int cpus[NCPUS],i;
   hypre_int retval=sched_getaffinity(0, size,mask);
   if (!retval){
-    for(i=0;i<NCPUS;i++){
-      if (CPU_ISSET(i,mask)) 
-	cpus[i]=1; 
-      else
-	cpus[i]=0;
-    }
-    printf("Node(%d)::",myid);
-    for(i=0;i<160;i++)printf("%d",cpus[i]);
-    printf("\n");
+     for(i=0;i<NCPUS;i++){
+        if (CPU_ISSET(i,mask)) 
+           cpus[i]=1; 
+        else
+           cpus[i]=0;
+     }
+     printf("Node(%d)::",myid);
+     for(i=0;i<160;i++)printf("%d",cpus[i]);
+     printf("\n");
   } else {
-    fprintf(stderr,"sched_affinity failed\n");
-    switch(errno){
-    case EFAULT:
-      printf("INVALID MEMORY ADDRESS\n");
-      break;
-    case EINVAL:
-      printf("EINVAL:: NO VALID CPUS\n");
-      break;
-    default:
-      printf("%d something else\n",errno);
-    }
+     fprintf(stderr,"sched_affinity failed\n");
+     switch(errno){
+        case EFAULT:
+           printf("INVALID MEMORY ADDRESS\n");
+           break;
+        case EINVAL:
+           printf("EINVAL:: NO VALID CPUS\n");
+           break;
+        default:
+           printf("%d something else\n",errno);
+     }
   }
-  
+
   CPU_FREE(mask);
-  
+
 }
 hypre_int getcore(){
   const hypre_int NCPUS=160;
@@ -384,8 +383,8 @@ hypre_int getcore(){
   if (!retval){
     for(i=0;i<NCPUS;i+=20){
       if (CPU_ISSET(i,mask)) {
-	CPU_FREE(mask);
-	return i;
+         CPU_FREE(mask);
+         return i;
       }
     }
   } else {
@@ -403,7 +402,7 @@ hypre_int getcore(){
   }
   return 0;
   CPU_FREE(mask);
-  
+
 }
 hypre_int getnuma(){
   const hypre_int NCPUS=160;
@@ -471,47 +470,47 @@ size_t mempush(const void *ptr, size_t size, hypre_int action){
     nc++;
     return size;
   } else {
-    // Purge an address
-    if (action==1){
-      found=memfind(head,ptr);
-      if (found){
-	memdel(&head, found);
-	nc--;
-	return 0;
-      } else {
+     // Purge an address
+     if (action==1){
+        found=memfind(head,ptr);
+        if (found){
+           memdel(&head, found);
+           nc--;
+           return 0;
+        } else {
 #ifdef FULL_WARN
-	fprintf(stderr,"ERROR :: Pointer for deletion not found in linked list %p\n",ptr);
+           fprintf(stderr,"ERROR :: Pointer for deletion not found in linked list %p\n",ptr);
 #endif
-	return 0;
-      }
-    } // End purge
-    
-    // Insertion
-    if (size>0){
-      found=memfind(head,ptr);
-      if (found){
-#ifdef FULL_WARN
-	fprintf(stderr,"ERROR :: Pointer for insertion already in use in linked list %p\n",ptr);
-	//printlist(head,nc);
-#endif
-	return 0;
-      } else {
-	nc++;
-	meminsert(&head,ptr,size);
-	return 0;
-      }
-    }
+           return 0;
+        }
+     } // End purge
 
-    // Getting allocation size
-    found=memfind(head,ptr);
-    if (found){
-      return found->size;
-    } else{
+     // Insertion
+     if (size>0){
+        found=memfind(head,ptr);
+        if (found){
 #ifdef FULL_WARN
-      fprintf(stderr,"ERROR :: Pointer for size check NOT found in linked list\n");
+           fprintf(stderr,"ERROR :: Pointer for insertion already in use in linked list %p\n",ptr);
+           //printlist(head,nc);
 #endif
-      return 0;
-    }
+           return 0;
+        } else {
+           nc++;
+           meminsert(&head,ptr,size);
+           return 0;
+        }
+     }
+
+     // Getting allocation size
+     found=memfind(head,ptr);
+     if (found){
+        return found->size;
+     } else{
+#ifdef FULL_WARN
+        fprintf(stderr,"ERROR :: Pointer for size check NOT found in linked list\n");
+#endif
+        return 0;
+     }
   }
 }
 
@@ -569,7 +568,7 @@ void printlist(node *head,hypre_int nc){
 
 /* num: number of bytes */
 HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
-			   const char *type1, const char *type2) {
+                           const char *type1, const char *type2) {
    hypre_omp45_offload(device, ptr, char, 0, num, type1, type2);
 
    return 0;
