@@ -73,7 +73,7 @@ DRIVER_FILES =\
 OBJS = ${FILES:.c=.o}
 DRIVER_OBJS = ${DRIVER_FILES:.c=.o}
 
-SONAME = libHYPRE_parcsr_mv-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_parcsr_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -129,7 +129,7 @@ libHYPRE_parcsr_mv.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_parcsr_mv.so: ${OBJS}
+libHYPRE_parcsr_mv.so libHYPRE_parcsr_mv.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@
