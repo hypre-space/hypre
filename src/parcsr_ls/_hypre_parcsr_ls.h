@@ -1628,7 +1628,7 @@ HYPRE_Int hypre_ParKrylovMatvecDestroy ( void *matvec_data );
 HYPRE_Real hypre_ParKrylovInnerProd ( void *x , void *y );
 HYPRE_Int hypre_ParKrylovMassInnerProd ( void *x , void **y, HYPRE_Int k, HYPRE_Int unroll, void *result );
 HYPRE_Int hypre_ParKrylovMassDotpTwo ( void *x , void *y , void **z, HYPRE_Int k, HYPRE_Int unroll, void *result_x, void *result_y );
-HYPRE_Int hypre_ParKrylovMassAxpy( HYPRE_Real *alpha, void **x, void *y, HYPRE_Int k, HYPRE_Int unroll);
+HYPRE_Int hypre_ParKrylovMassAxpy( HYPRE_Complex *alpha, void **x, void *y, HYPRE_Int k, HYPRE_Int unroll);
 HYPRE_Int hypre_ParKrylovCopyVector ( void *x , void *y );
 HYPRE_Int hypre_ParKrylovClearVector ( void *x );
 HYPRE_Int hypre_ParKrylovScaleVector ( HYPRE_Complex alpha , void *x );

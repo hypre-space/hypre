@@ -386,8 +386,8 @@ main( hypre_int argc,
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs );
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
    
-   /* GPU Init stuff inside */
-   hypre_init();
+   /* Initialize Hypre */
+   HYPRE_Init(argc, argv);
 
    //omp_set_default_device(0);
    //nvtxDomainHandle_t domain = nvtxDomainCreateA("Domain_A");
@@ -6451,9 +6451,10 @@ main( hypre_int argc,
 */
  final: 
 
-   /* GPU finalize stuff inside */
-   hypre_finalize();
+   /* Finalize Hypre */
+   HYPRE_Finalize();
    
+   /* Finalize MPI */
    hypre_MPI_Finalize();
 
    return (0);

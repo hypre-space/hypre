@@ -17,7 +17,7 @@
  *****************************************************************************/
 
 #include "seq_mv.h"
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USING_GPU
 #include "gpukernels.h"
 #endif
 #ifdef HYPRE_PROFILE
@@ -49,7 +49,7 @@ hypre_CSRMatrixCreate( HYPRE_Int num_rows,
    hypre_CSRMatrixOwnsData(matrix) = 1;
    hypre_CSRMatrixNumRownnz(matrix) = num_rows;
 
-#ifdef HYPRE_USE_MANAGED
+#ifdef HYPRE_USING_UNIFIED_MEMORY
    matrix->on_device=0;
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
@@ -683,7 +683,7 @@ HYPRE_Int hypre_CSRMatrixGetLoadBalancedPartitionEnd(hypre_CSRMatrix *A)
 {
    return hypre_CSRMatrixGetLoadBalancedPartitionBoundary(A, hypre_GetThreadNum() + 1);
 }
-#ifdef HYPRE_USE_MANAGED
+#ifdef HYPRE_USING_UNIFIED_MEMORY
 void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A){
   if (hypre_CSRMatrixNumNonzeros(A)==0) return;
 

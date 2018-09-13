@@ -2350,8 +2350,11 @@ HYPRE_Int HYPRE_ParCSRCOGMRESSolve(HYPRE_Solver       solver,
 HYPRE_Int HYPRE_ParCSRCOGMRESSetKDim(HYPRE_Solver solver,
                                    HYPRE_Int    k_dim);
 
-HYPRE_Int HYPRE_ParCSRCOGMRESSetCGS2(HYPRE_Solver solver,
-                                   HYPRE_Int    cgs2);
+HYPRE_Int HYPRE_ParCSRCOGMRESSetUnroll(HYPRE_Solver solver,
+                                   HYPRE_Int    unroll);
+
+HYPRE_Int HYPRE_ParCSRCOGMRESSetCGS(HYPRE_Solver solver,
+                                   HYPRE_Int    cgs);
 
 HYPRE_Int HYPRE_ParCSRCOGMRESSetTol(HYPRE_Solver solver,
                                   HYPRE_Real   tol);

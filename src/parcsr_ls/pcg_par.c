@@ -250,7 +250,7 @@ hypre_ParKrylovAxpy( HYPRE_Complex alpha,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
-hypre_ParKrylovMassAxpy( HYPRE_Real * alpha,
+hypre_ParKrylovMassAxpy( HYPRE_Complex * alpha,
                      void   **x,
                      void   *y ,
                      HYPRE_Int k, HYPRE_Int unroll)

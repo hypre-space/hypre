@@ -305,17 +305,22 @@ HYPRE_Int hypre_ND1AMGeInterpolation (hypre_ParCSRMatrix       * Aee,
 
       /* Insert Pi in dof_DOF */
       {
-         HYPRE_Int * ncols = hypre_CTAlloc(HYPRE_Int,  num_idof, HYPRE_MEMORY_HOST);
+         HYPRE_Int * ncols = hypre_CTAlloc(HYPRE_Int, num_idof, HYPRE_MEMORY_HOST);
+         HYPRE_Int * idof_indexes = hypre_CTAlloc(HYPRE_Int, num_idof, HYPRE_MEMORY_HOST);
 
          for (j = 0; j < num_idof; j++)
+         {
             ncols[j] = num_DOF;
+            idof_indexes[j] = j*num_DOF;
+         }
 
          hypre_IJMatrixAddToValuesParCSR (IJ_dof_DOF,
-                                          num_idof, ncols, idof,
+                                          num_idof, ncols, idof, idof_indexes,
                                           hypre_CSRMatrixJ(P),
                                           hypre_CSRMatrixData(P));
 
          hypre_TFree(ncols, HYPRE_MEMORY_HOST);
+         hypre_TFree(idof_indexes, HYPRE_MEMORY_HOST);
       }
 
       hypre_TFree(DOF, HYPRE_MEMORY_HOST);

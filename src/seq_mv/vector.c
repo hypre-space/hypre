@@ -18,7 +18,7 @@
 
 #include "seq_mv.h"
 #include <assert.h>
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USING_GPU
 #include <cublas_v2.h>
 #include <cusparse.h>
 #include "gpukernels.h"
@@ -37,7 +37,7 @@ hypre_SeqVectorCreate( HYPRE_Int size )
 
    vector =  hypre_CTAlloc(hypre_Vector,  1, HYPRE_MEMORY_HOST);
 
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USING_GPU
    vector->on_device=0;
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
@@ -268,7 +268,7 @@ HYPRE_Int
 hypre_SeqVectorSetConstantValues( hypre_Vector *v,
                                   HYPRE_Complex value )
 {
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
   VecSet(hypre_VectorData(v),hypre_VectorSize(v),value,HYPRE_STREAM(4));
   return 0;
 #endif
@@ -289,7 +289,7 @@ hypre_SeqVectorSetConstantValues( hypre_Vector *v,
 #if defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
    if (!v->mapped) hypre_SeqVectorMapToDevice(v);
 #endif
-#ifdef HYPRE_USE_MANAGED
+#ifdef HYPRE_USING_UNIFIED_MEMORY
    hypre_SeqVectorPrefetchToDevice(v);
 #endif
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
@@ -356,7 +356,7 @@ HYPRE_Int
 hypre_SeqVectorCopy( hypre_Vector *x,
                      hypre_Vector *y )
 {
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
   return hypre_SeqVectorCopyDevice(x,y);
 #endif
 #ifdef HYPRE_PROFILE
@@ -456,7 +456,7 @@ hypre_SeqVectorScale( HYPRE_Complex alpha,
    hypre_profile_times[HYPRE_TIMER_ID_BLAS1] -= hypre_MPI_Wtime();
 #endif
    
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    return VecScaleScalar(y->data,alpha, hypre_VectorSize(y),HYPRE_STREAM(4));
 #endif
    HYPRE_Complex *y_data = hypre_VectorData(y);
@@ -500,7 +500,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
                      hypre_Vector *x,
                      hypre_Vector *y     )
 {
-#ifdef  HYPRE_USE_GPU
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
   return hypre_SeqVectorAxpyDevice(alpha,x,y);
 #endif
 #ifdef HYPRE_PROFILE
@@ -524,7 +524,7 @@ hypre_SeqVectorAxpy( HYPRE_Complex alpha,
    else SyncVectorToHost(y);
 #endif
 
-#ifdef HYPRE_USE_MANAGED
+#ifdef HYPRE_USING_UNIFIED_MEMORY
    hypre_SeqVectorPrefetchToDevice(x);
    hypre_SeqVectorPrefetchToDevice(y);
 #endif
@@ -792,7 +792,7 @@ hypre_SeqVectorMassAxpy( HYPRE_Complex *alpha,
 HYPRE_Real   hypre_SeqVectorInnerProd( hypre_Vector *x,
                                        hypre_Vector *y )
 {
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
   return hypre_SeqVectorInnerProdDevice(x,y);
 #endif
 #ifdef HYPRE_PROFILE
@@ -1816,7 +1816,7 @@ HYPRE_Complex hypre_VectorSumElts( hypre_Vector *vector )
    return sum;
 }
 
-#ifdef HYPRE_USE_MANAGED
+#ifdef HYPRE_USING_UNIFIED_MEMORY
 /* Sums of the absolute value of the elements for comparison to cublas device side routine */
 HYPRE_Complex hypre_VectorSumAbsElts( hypre_Vector *vector )
 {
@@ -1851,7 +1851,7 @@ hypre_SeqVectorCopyDevice( hypre_Vector *x,
   PUSH_RANGE_PAYLOAD("VECCOPYDEVICE",2,size);
   hypre_SeqVectorPrefetchToDevice(x);
   hypre_SeqVectorPrefetchToDevice(y);
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USING_GPU
   VecCopy(y_data,x_data,size,HYPRE_STREAM(4));
 #endif
   cudaStreamSynchronize(HYPRE_STREAM(4));
