@@ -223,3 +223,35 @@ HYPRE_VectorToParVector( MPI_Comm         comm,
       hypre_VectorToParVector (comm, (hypre_Vector *) b, partitioning);
    return hypre_error_flag;
 }
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParVectorGetValues
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParVectorGetValues( HYPRE_ParVector vector,
+                          HYPRE_Int       num_values,
+                          HYPRE_Int      *indices,
+                          HYPRE_Complex  *values)
+{
+   hypre_ParVector *par_vector = (hypre_ParVector *) vector;
+
+   if (!par_vector)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   }
+   if (num_values < 0)
+   { 
+      hypre_error_in_arg(2);
+      return hypre_error_flag;
+   }
+   if (!values)
+   { 
+      hypre_error_in_arg(4);
+      return hypre_error_flag;
+   }
+
+   hypre_ParVectorGetValues(par_vector, num_values, indices, values);      
+   return hypre_error_flag;
+}

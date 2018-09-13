@@ -221,6 +221,18 @@ HYPRE_ParCSRPCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
    return( HYPRE_PCGGetFinalRelativeResidualNorm( solver, norm ) );
 }
 
+
+/*--------------------------------------------------------------------------
+ * HYPRE_ParCSRPCGGetResidual
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_ParCSRPCGGetResidual( HYPRE_Solver  solver,
+                                      HYPRE_ParVector *residual   )
+{
+   return( HYPRE_PCGGetResidual( solver, residual ) );
+}
+
 /*--------------------------------------------------------------------------
  * HYPRE_ParCSRDiagScaleSetup
  *--------------------------------------------------------------------------*/
