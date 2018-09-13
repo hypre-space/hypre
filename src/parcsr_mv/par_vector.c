@@ -1197,3 +1197,61 @@ void hypre_ParVectorUpdateHost(hypre_ParVector *p){
   SetHRC(p->local_vector);
 }
 #endif
+
+HYPRE_Int
+hypre_ParVectorGetValues(hypre_ParVector *vector,
+                         HYPRE_Int num_values,
+                         HYPRE_Int *indices,
+                         HYPRE_Complex *values)
+{
+   HYPRE_Int i, j, first_index, last_index, index;
+   hypre_Vector *local_vector;
+   HYPRE_Complex *data;
+
+   first_index = hypre_ParVectorFirstIndex(vector);
+   last_index = hypre_ParVectorLastIndex(vector);
+   local_vector = hypre_ParVectorLocalVector(vector);
+   data = hypre_VectorData(local_vector);
+
+   if (hypre_VectorOwnsData(local_vector) == 0)
+   {
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Vector does not own data! -- hypre_ParVectorGetValues.");
+      return hypre_error_flag;
+   }
+
+   if (indices)
+   {
+      for (i=0; i < num_values; i++)
+      {
+         index = indices[i];
+         if (index < first_index || index > last_index)
+         {
+            hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Index out of range! -- hypre_ParVectorGetValues.");
+            return hypre_error_flag;
+         }
+      }
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(i,j) HYPRE_SMP_SCHEDULE
+#endif
+      for (j = 0; j < num_values; j++)
+      {
+         i = indices[j] - first_index;
+         values[j] = data[i];
+      }
+   }
+   else
+   {
+      if (num_values > hypre_VectorSize(local_vector))
+      {
+         hypre_error_in_arg(2);
+         return hypre_error_flag;
+      }
+#ifdef HYPRE_USING_OPENMP
+#pragma omp parallel for private(j) HYPRE_SMP_SCHEDULE
+#endif
+      for (j = 0; j < num_values; j++)
+         values[j] = data[j];
+   }
+
+   return hypre_error_flag;
+}

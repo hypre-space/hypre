@@ -2218,6 +2218,11 @@ HYPRE_Int HYPRE_ParCSRPCGGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                       HYPRE_Real   *norm);
+/**
+ * Returns the residual.
+ **/
+HYPRE_Int HYPRE_ParCSRPCGGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
 
 /**
  * Setup routine for diagonal preconditioning.
@@ -2312,6 +2317,12 @@ HYPRE_Int HYPRE_ParCSRGMRESGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                         HYPRE_Real   *norm);
+/**
+ * Returns the residual.
+ **/
+HYPRE_Int HYPRE_ParCSRGMRESGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
+
 
 /* ParCSR CO-GMRES, author: KS */
 
@@ -2376,6 +2387,12 @@ HYPRE_Int HYPRE_ParCSRCOGMRESGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                         HYPRE_Real   *norm);
+/**
+ * Returns the residual.
+ **/
+HYPRE_Int HYPRE_ParCSRCOGMRESGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
+
 
 
 
@@ -2456,6 +2473,10 @@ HYPRE_Int HYPRE_ParCSRFlexGMRESGetNumIterations(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                             HYPRE_Real   *norm);
 
+HYPRE_Int HYPRE_ParCSRFlexGMRESGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
+
+
 HYPRE_Int HYPRE_ParCSRFlexGMRESSetModifyPC( HYPRE_Solver           solver,
                                             HYPRE_PtrToModifyPCFcn modify_pc);
    
@@ -2533,6 +2554,9 @@ HYPRE_Int HYPRE_ParCSRLGMRESGetNumIterations(HYPRE_Solver  solver,
 HYPRE_Int HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                          HYPRE_Real   *norm);
 
+HYPRE_Int HYPRE_ParCSRLGMRESGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
+
 /*@}*/
 
 /*--------------------------------------------------------------------------
@@ -2601,6 +2625,9 @@ HYPRE_Int HYPRE_ParCSRBiCGSTABGetNumIterations(HYPRE_Solver  solver,
 
 HYPRE_Int HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm(HYPRE_Solver  solver,
                                                            HYPRE_Real   *norm);
+
+HYPRE_Int HYPRE_ParCSRBiCGSTABGetResidual(HYPRE_Solver     solver,
+                                     HYPRE_ParVector *residual);
 
 /*@}*/
 

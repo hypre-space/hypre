@@ -923,6 +923,7 @@ HYPRE_Int HYPRE_ParCSRBiCGSTABSetLogging ( HYPRE_Solver solver , HYPRE_Int loggi
 HYPRE_Int HYPRE_ParCSRBiCGSTABSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
 HYPRE_Int HYPRE_ParCSRBiCGSTABGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_ParCSRBiCGSTABGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+HYPRE_Int HYPRE_ParCSRBiCGSTABGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
 
 /* HYPRE_parcsr_block.c */
 HYPRE_Int HYPRE_BlockTridiagCreate ( HYPRE_Solver *solver );
@@ -981,6 +982,7 @@ HYPRE_Int HYPRE_ParCSRFlexGMRESSetLogging ( HYPRE_Solver solver , HYPRE_Int logg
 HYPRE_Int HYPRE_ParCSRFlexGMRESSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
 HYPRE_Int HYPRE_ParCSRFlexGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_ParCSRFlexGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+HYPRE_Int HYPRE_ParCSRFlexGMRESGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
 HYPRE_Int HYPRE_ParCSRFlexGMRESSetModifyPC ( HYPRE_Solver solver , HYPRE_PtrToModifyPCFcn modify_pc );
 
 /* HYPRE_parcsr_gmres.c */
@@ -1000,6 +1002,7 @@ HYPRE_Int HYPRE_ParCSRGMRESSetLogging ( HYPRE_Solver solver , HYPRE_Int logging 
 HYPRE_Int HYPRE_ParCSRGMRESSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
 HYPRE_Int HYPRE_ParCSRGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_ParCSRGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+HYPRE_Int HYPRE_ParCSRGMRESGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
 
 
 /*HYPRE_parcsr_cogmres.c*/
@@ -1019,6 +1022,7 @@ HYPRE_Int HYPRE_ParCSRCOGMRESSetLogging ( HYPRE_Solver solver , HYPRE_Int loggin
 HYPRE_Int HYPRE_ParCSRCOGMRESSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
 HYPRE_Int HYPRE_ParCSRCOGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_ParCSRCOGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+HYPRE_Int HYPRE_ParCSRCOGMRESGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
 
 
 
@@ -1107,6 +1111,7 @@ HYPRE_Int HYPRE_ParCSRLGMRESSetLogging ( HYPRE_Solver solver , HYPRE_Int logging
 HYPRE_Int HYPRE_ParCSRLGMRESSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
 HYPRE_Int HYPRE_ParCSRLGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_ParCSRLGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+HYPRE_Int HYPRE_ParCSRLGMRESGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
 
 /* HYPRE_parcsr_ParaSails.c */
 HYPRE_Int HYPRE_ParCSRParaSailsCreate ( MPI_Comm comm , HYPRE_Solver *solver );
@@ -1159,6 +1164,7 @@ HYPRE_Int HYPRE_ParCSRPCGSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int level )
 HYPRE_Int HYPRE_ParCSRPCGSetLogging ( HYPRE_Solver solver , HYPRE_Int level );
 HYPRE_Int HYPRE_ParCSRPCGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
 HYPRE_Int HYPRE_ParCSRPCGGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
+HYPRE_Int HYPRE_ParCSRPCGGetResidual ( HYPRE_Solver solver , HYPRE_ParVector *residual );
 HYPRE_Int HYPRE_ParCSRDiagScaleSetup ( HYPRE_Solver solver , HYPRE_ParCSRMatrix A , HYPRE_ParVector y , HYPRE_ParVector x );
 HYPRE_Int HYPRE_ParCSRDiagScale ( HYPRE_Solver solver , HYPRE_ParCSRMatrix HA , HYPRE_ParVector Hy , HYPRE_ParVector Hx );
 
