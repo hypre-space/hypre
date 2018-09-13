@@ -27,6 +27,8 @@
 #    6: DS_CGNR
 #    7: PILUT_GMRES
 #    8: ParaSails_PCG
+#   16: BoomerAMG_COGMRES
+#   17: DS_COGMRES
 #   20: Hybrid_PCG
 #
 
@@ -56,6 +58,13 @@ mpirun -np 2 ./ij -solver 20 -rhsrand > solvers.out.8
 mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand > solvers.out.9
 mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand -solver_type 2 > solvers.out.10
 mpirun -np 2 ./ij -solver 20 -cf 0.5 -rhsrand -solver_type 3 > solvers.out.11
+mpirun -np 2 ./ij -solver 16 -rhsrand > solvers.out.12
+mpirun -np 2 ./ij -solver 17 -rhsrand > solvers.out.13
+mpirun -np 2 ./ij -solver 17 -rhsrand -cgs 2 > solvers.out.14
+mpirun -np 2 ./ij -solver 17 -rhsrand -cgs 2 -unroll 8 > solvers.out.15
+mpirun -np 2 ./ij -solver 17 -rhsrand -unroll 4 > solvers.out.16
+mpirun -np 2 ./ij -solver 3 -rhsrand -check_residual > solvers.out.17
+mpirun -np 2 ./ij -solver 4 -rhsrand -check_residual > solvers.out.18
 
 #systems AMG run ...unknown approach, hybrid approach, nodal approach
 mpirun -np 2 ./ij -n 20 20 20 -sysL 2 -nf 2 > solvers.out.sysu

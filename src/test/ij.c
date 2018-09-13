@@ -144,11 +144,13 @@ main( hypre_int argc,
    HYPRE_ParVector     b = NULL;
    HYPRE_ParVector     x;
    HYPRE_ParVector     *interp_vecs = NULL;
+   HYPRE_ParVector     residual = NULL;
 
    HYPRE_Solver        amg_solver;
    HYPRE_Solver        pcg_solver;
    HYPRE_Solver        pcg_precond=NULL, pcg_precond_gotten;
 
+   HYPRE_Int                 check_residual = 0;
    HYPRE_Int                 num_procs, myid;
    HYPRE_Int                 local_row;
    HYPRE_Int                *row_sizes;
@@ -1095,6 +1097,11 @@ main( hypre_int argc,
       {
          arg_index++;
          unroll = atoi(argv[arg_index++]);
+      }
+      else if ( strcmp(argv[arg_index], "-check_residual") == 0 )
+      {
+         arg_index++;
+         check_residual = 1;
       }
       else if ( strcmp(argv[arg_index], "-aug") == 0 )
       {
@@ -4908,6 +4915,28 @@ main( hypre_int argc,
  
       HYPRE_GMRESGetNumIterations(pcg_solver, &num_iterations);
       HYPRE_GMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);
+
+      if (check_residual)
+      {
+         HYPRE_Int *indices;
+         HYPRE_Int num_values = 20;
+         HYPRE_ParCSRGMRESGetResidual(pcg_solver, &residual);
+         HYPRE_ParCSRMatrixGetLocalRange( parcsr_A,
+                                              &first_local_row, &last_local_row ,
+                                              &first_local_col, &last_local_col );
+         local_num_rows = last_local_row - first_local_row + 1;
+         if (local_num_rows < 20) num_values = local_num_rows;
+         indices = hypre_CTAlloc(HYPRE_Int, num_values, HYPRE_MEMORY_HOST);
+         values = hypre_CTAlloc(HYPRE_Real, num_values, HYPRE_MEMORY_HOST);
+         for (i=0; i < num_values; i++)
+            indices[i] = first_local_row+i;
+         HYPRE_ParVectorGetValues((HYPRE_ParVector) residual,num_values,indices,values);
+         for (i=0; i < num_values; i++)
+             if (myid ==0) hypre_printf("index %d value %e\n", i, values[i]);
+         hypre_TFree(indices, HYPRE_MEMORY_HOST);
+         hypre_TFree(values, HYPRE_MEMORY_HOST);
+      }
+
 #if SECOND_TIME
       /* run a second time to check for memory leaks */
       HYPRE_ParVectorSetRandomValues(x, 775);

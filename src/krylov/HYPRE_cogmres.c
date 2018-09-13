@@ -311,10 +311,11 @@ HYPRE_COGMRESGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
  * HYPRE_COGMRESGetResidual
  *--------------------------------------------------------------------------*/
 
-HYPRE_Int HYPRE_COGMRESGetResidual( HYPRE_Solver solver, void **residual )
+HYPRE_Int HYPRE_COGMRESGetResidual( HYPRE_Solver solver, void *residual )
 {
    /* returns a pointer to the residual vector */
-   return hypre_COGMRESGetResidual( (void *) solver, residual );
+   return hypre_COGMRESGetResidual( (void *) solver, (void **) residual );
+
 }
 
 /*--------------------------------------------------------------------------

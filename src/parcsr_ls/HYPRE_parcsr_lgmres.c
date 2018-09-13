@@ -227,5 +227,5 @@ HYPRE_Int
 HYPRE_ParCSRLGMRESGetResidual( HYPRE_Solver  solver,
                                HYPRE_ParVector *residual)
 {
-   return( HYPRE_LGMRESGetResidual( solver, residual ) );
+   return( HYPRE_LGMRESGetResidual( solver, (void *) residual ) );
 }

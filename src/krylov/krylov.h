@@ -1454,7 +1454,7 @@ extern "C" {
   HYPRE_Int HYPRE_BiCGSTABSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int print_level );
   HYPRE_Int HYPRE_BiCGSTABGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
   HYPRE_Int HYPRE_BiCGSTABGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
-  HYPRE_Int HYPRE_BiCGSTABGetResidual ( HYPRE_Solver solver , void **residual );
+  HYPRE_Int HYPRE_BiCGSTABGetResidual ( HYPRE_Solver solver , void *residual );
 
   /* HYPRE_cgnr.c */
   HYPRE_Int HYPRE_CGNRDestroy ( HYPRE_Solver solver );
@@ -1500,7 +1500,7 @@ extern "C" {
   HYPRE_Int HYPRE_GMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
   HYPRE_Int HYPRE_GMRESGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
   HYPRE_Int HYPRE_GMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
-  HYPRE_Int HYPRE_GMRESGetResidual ( HYPRE_Solver solver , void **residual );
+  HYPRE_Int HYPRE_GMRESGetResidual ( HYPRE_Solver solver , void *residual );
 
   /* HYPRE_cogmres.c */
   HYPRE_Int HYPRE_COGMRESSetup ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
@@ -1534,7 +1534,7 @@ extern "C" {
   HYPRE_Int HYPRE_COGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
   HYPRE_Int HYPRE_COGMRESGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
   HYPRE_Int HYPRE_COGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
-  HYPRE_Int HYPRE_COGMRESGetResidual ( HYPRE_Solver solver , void **residual );
+  HYPRE_Int HYPRE_COGMRESGetResidual ( HYPRE_Solver solver , void *residual );
 
   /* HYPRE_flexgmres.c */
   HYPRE_Int HYPRE_FlexGMRESSetup ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
@@ -1560,7 +1560,7 @@ extern "C" {
   HYPRE_Int HYPRE_FlexGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
   HYPRE_Int HYPRE_FlexGMRESGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
   HYPRE_Int HYPRE_FlexGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
-  HYPRE_Int HYPRE_FlexGMRESGetResidual ( HYPRE_Solver solver , void **residual );
+  HYPRE_Int HYPRE_FlexGMRESGetResidual ( HYPRE_Solver solver , void *residual );
   HYPRE_Int HYPRE_FlexGMRESSetModifyPC ( HYPRE_Solver solver , HYPRE_Int (*modify_pc )(HYPRE_Solver ,HYPRE_Int ,HYPRE_Real ));
 
   /* HYPRE_lgmres.c */
@@ -1589,7 +1589,7 @@ extern "C" {
   HYPRE_Int HYPRE_LGMRESGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
   HYPRE_Int HYPRE_LGMRESGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
   HYPRE_Int HYPRE_LGMRESGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
-  HYPRE_Int HYPRE_LGMRESGetResidual ( HYPRE_Solver solver , void **residual );
+  HYPRE_Int HYPRE_LGMRESGetResidual ( HYPRE_Solver solver , void *residual );
 
   /* HYPRE_pcg.c */
   HYPRE_Int HYPRE_PCGSetup ( HYPRE_Solver solver , HYPRE_Matrix A , HYPRE_Vector b , HYPRE_Vector x );
@@ -1625,7 +1625,7 @@ extern "C" {
   HYPRE_Int HYPRE_PCGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
   HYPRE_Int HYPRE_PCGGetConverged ( HYPRE_Solver solver , HYPRE_Int *converged );
   HYPRE_Int HYPRE_PCGGetFinalRelativeResidualNorm ( HYPRE_Solver solver , HYPRE_Real *norm );
-  HYPRE_Int HYPRE_PCGGetResidual ( HYPRE_Solver solver , void **residual );
+  HYPRE_Int HYPRE_PCGGetResidual ( HYPRE_Solver solver , void *residual );
 
   /* pcg.c */
   void *hypre_PCGCreate ( hypre_PCGFunctions *pcg_functions );

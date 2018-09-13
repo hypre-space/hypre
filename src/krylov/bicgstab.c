@@ -411,7 +411,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
 	   alpha = res/temp;
 	else 
 	{
-	   hypre_error_w_msg(HYPRE_GENERIC,"BiCGSTAB broke down!! divide by near zero\n");
+	   hypre_error_w_msg(HYPRE_ERROR_GENERIC,"BiCGSTAB broke down!! divide by near zero\n");
 	   return hypre_error_flag;
 	}
 	(*(bicgstab_functions->Axpy))(alpha,v,x);
@@ -482,7 +482,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
           beta = 1.0/res;
        else
        {
-	  hypre_error_w_msg(HYPRE_GENERIC,"BiCGSTAB broke down!! res=0 \n");
+	  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"BiCGSTAB broke down!! res=0 \n");
 	  return hypre_error_flag;
        }
        res = (*(bicgstab_functions->InnerProd))(r0,r);
@@ -492,7 +492,7 @@ hypre_BiCGSTABSolve(void  *bicgstab_vdata,
            (*(bicgstab_functions->ScaleVector))((beta*alpha/gamma),p);
        else
        {
-	  hypre_error_w_msg(HYPRE_GENERIC,"BiCGSTAB broke down!! gamma=0 \n");
+	  hypre_error_w_msg(HYPRE_ERROR_GENERIC,"BiCGSTAB broke down!! gamma=0 \n");
 	  return hypre_error_flag;
        }
        (*(bicgstab_functions->Axpy))(1.0,r,p);

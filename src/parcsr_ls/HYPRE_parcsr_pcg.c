@@ -230,7 +230,7 @@ HYPRE_Int
 HYPRE_ParCSRPCGGetResidual( HYPRE_Solver  solver,
                                       HYPRE_ParVector *residual   )
 {
-   return( HYPRE_PCGGetResidual( solver, residual ) );
+   return( HYPRE_PCGGetResidual( solver, (void *) residual ) );
 }
 
 /*--------------------------------------------------------------------------

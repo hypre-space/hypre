@@ -215,5 +215,5 @@ HYPRE_Int
 HYPRE_ParCSRBiCGSTABGetResidual( HYPRE_Solver  solver,
                                  HYPRE_ParVector *residual)
 {
-   return( HYPRE_BiCGSTABGetResidual( solver, residual ) );
+   return( HYPRE_BiCGSTABGetResidual( solver, (void *) residual ) );
 }
