@@ -33,12 +33,6 @@
 extern "C" {
 #endif
 
-/* 
- * Before a version of HYPRE goes out the door, increment the version
- * number and check in this file (for CVS to substitute the Date).
- */
-#define HYPRE_Version() "HYPRE_RELEASE_NAME Date Compiled: " __DATE__ " " __TIME__
-
 /*--------------------------------------------------------------------------
  * Big int stuff
  *--------------------------------------------------------------------------*/
@@ -132,6 +126,32 @@ HYPRE_Int HYPRE_ClearAllErrors();
 
 /* Clears the given error code from the hypre error flag */
 HYPRE_Int HYPRE_ClearError(HYPRE_Int hypre_error_code);
+
+/*--------------------------------------------------------------------------
+ * HYPRE Version routines
+ *--------------------------------------------------------------------------*/
+
+/* RDF: This macro is used by the FEI code.  Want to eventually remove. */
+#define HYPRE_VERSION "HYPRE_RELEASE_NAME Date Compiled: " __DATE__ " " __TIME__
+
+/**
+ * Allocates and returns a string with version number information in it.
+ **/
+HYPRE_Int
+HYPRE_Version( char **version_ptr );
+
+/**
+ * Returns version number information in integer form.  Use 'NULL' for values
+ * not needed.  The boolean {\tt release} indicates that the release is an
+ * official release.  The argument {\tt single} is a single sortable integer
+ * representation of the release number.
+ **/
+HYPRE_Int
+HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
+                     HYPRE_Int  *minor_ptr,
+                     HYPRE_Int  *patch_ptr,
+                     HYPRE_Int  *release_ptr,
+                     HYPRE_Int  *single_ptr );
 
 /*--------------------------------------------------------------------------
  * HYPRE AP user functions

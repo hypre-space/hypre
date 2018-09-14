@@ -5335,7 +5335,7 @@ char *HYPRE_LinSysCore::getVersion()
 {
    static char extVersion[100];
    char        hypre[200], hypreVersion[50], ctmp[50];
-   sprintf(hypre, "%s", HYPRE_Version());
+   sprintf(hypre, "%s", HYPRE_VERSION);
    sscanf(hypre, "%s %s", ctmp, hypreVersion);
    sprintf(extVersion, "%s-%s", HYPRE_FEI_Version(), hypreVersion);
    return extVersion;
