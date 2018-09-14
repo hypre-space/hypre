@@ -189,6 +189,7 @@ list (APPEND HYPRE_HEADERS
   utilities/fortran_matrix.h
 )
 list (APPEND HYPRE_SOURCES
+  utilities/HYPRE_version.c
   utilities/amg_linklist.c
   utilities/binsearch.c
   utilities/exchange_data.c
