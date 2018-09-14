@@ -153,6 +153,12 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
                      HYPRE_Int  *release_ptr,
                      HYPRE_Int  *single_ptr );
 
+/**
+ * Allocates and returns a string with build options in it.
+ **/
+HYPRE_Int
+HYPRE_BuildOpts( char **build_opts_ptr );
+
 /*--------------------------------------------------------------------------
  * HYPRE AP user functions
  *--------------------------------------------------------------------------*/
