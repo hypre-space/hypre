@@ -13,8 +13,8 @@
 
 include ../config/Makefile.config
 
-FILES_NVCC =
-include $(HYPRE_NVCC_MAKEFILE)
+#FILES_NVCC = gpukernels.cu
+#include $(HYPRE_NVCC_MAKEFILE)
 
 CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
 
@@ -24,6 +24,8 @@ C_COMPILE_FLAGS =\
  -I$(srcdir)/..\
  -I$(srcdir)/../utilities\
  ${CINCLUDES}
+
+CU_COMPILE_FLAGS = ${C_COMPILE_FLAGS}
 
 HEADERS =\
  csr_matrix.h\
@@ -45,12 +47,13 @@ FILES =\
  mapped_matrix.c\
  multiblock_matrix.c\
  vector.c\
- csr_matvec_oomp.c
+ csr_matvec_oomp.c\
+ gpukernels.c
 
 OBJS = ${FILES:.c=.o}
-CUOBJS = ${FILES_NVCC:.cu=.o}
+#CUOBJS = ${FILES_NVCC:.cu=.o}
 
-SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_seq_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -81,7 +84,7 @@ libHYPRE_seq_mv.a: ${OBJS} ${CUOBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_seq_mv.so: ${OBJS} ${CUOBJS}
+libHYPRE_seq_mv.so libHYPRE_seq_mv.dylib: ${OBJS} ${CUOBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

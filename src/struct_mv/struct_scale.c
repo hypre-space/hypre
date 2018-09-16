@@ -51,7 +51,6 @@ hypre_StructScale( HYPRE_Complex       alpha,
 
       hypre_BoxGetSize(box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(yp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(y), loop_size,
                           y_data_box, start, unit_stride, yi);
@@ -60,7 +59,6 @@ hypre_StructScale( HYPRE_Complex       alpha,
       }
       hypre_BoxLoop1End(yi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
    }
 
    return hypre_error_flag;

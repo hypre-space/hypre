@@ -223,7 +223,6 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
 
             hypre_BoxGetStrideSize(compute_box, stride, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(rcp,rp,Rp0,rp0,Rp1,rp1)
             hypre_BoxLoop3Begin(hypre_StructMatrixNDim(R), loop_size,
                                 R_dbox,  startR, strideR, Ri,
@@ -235,7 +234,6 @@ hypre_SparseMSGRestrict( void               *restrict_vdata,
             }
             hypre_BoxLoop3End(Ri, ri, rci);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
          }
       }
    }

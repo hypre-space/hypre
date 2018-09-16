@@ -419,18 +419,19 @@ hypre_GMRESSolve(void  *gmres_vdata,
    if ( print_level>1 && my_id == 0 )
    {
       if (b_norm > 0.0)
-         {hypre_printf("=============================================\n\n");
-          hypre_printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
-          hypre_printf("-----    ------------    ---------- ------------\n");
+      {
+         hypre_printf("=============================================\n\n");
+         hypre_printf("Iters     resid.norm     conv.rate  rel.res.norm\n");
+         hypre_printf("-----    ------------    ---------- ------------\n");
       
-          }
-
+      }
       else
-         {hypre_printf("=============================================\n\n");
-          hypre_printf("Iters     resid.norm     conv.rate\n");
-          hypre_printf("-----    ------------    ----------\n");
+      {
+         hypre_printf("=============================================\n\n");
+         hypre_printf("Iters     resid.norm     conv.rate\n");
+         hypre_printf("-----    ------------    ----------\n");
       
-          };
+      };
    }
 
 
@@ -669,7 +670,7 @@ hypre_GMRESSolve(void  *gmres_vdata,
                  }
                  num_rel_change_check++;
               }
-           else /* no relative change */
+              else /* no relative change */
               {
                  break;
               }

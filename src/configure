@@ -593,6 +593,42 @@ PACKAGE_URL=''
 
 ac_unique_file="HYPRE.h"
 ac_default_prefix=`pwd`/hypre
+# Factoring default headers for most tests.
+ac_includes_default="\
+#include <stdio.h>
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+# include <sys/stat.h>
+#endif
+#ifdef STDC_HEADERS
+# include <stdlib.h>
+# include <stddef.h>
+#else
+# ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+# endif
+#endif
+#ifdef HAVE_STRING_H
+# if !defined STDC_HEADERS && defined HAVE_MEMORY_H
+#  include <memory.h>
+# endif
+# include <string.h>
+#endif
+#ifdef HAVE_STRINGS_H
+# include <strings.h>
+#endif
+#ifdef HAVE_INTTYPES_H
+# include <inttypes.h>
+#endif
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif"
+
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 AR
@@ -602,15 +638,14 @@ SUPERLU_LIBS
 SUPERLU_INCLUDE
 CALIPER_LIBS
 CALIPER_INCLUDE
-HYPRE_NVCC_MAKEFILE
-NVCCLIBS
-NVCCFLAGS
+HYPRE_CUDA_LIBS
+HYPRE_CUDA_INCL
+CUFLAGS
+HYPRE_KOKKOS_INC_FILE
 KOKKOS_LIBS
 HYPRE_KOKKOS_LIB
-HYPRE_KOKKOS_INC_FILE
 HYPRE_KOKKOS_INCLUDE
 HYPRE_KOKKOS_LIB_DIR
-HYPRE_KOKKOS_SRC_DIR
 RAJA_LIBS
 HYPRE_RAJA_LIB
 HYPRE_RAJA_INCLUDE
@@ -649,6 +684,7 @@ LINK_FC
 FFLAGS
 HOSTNAME
 HYPRE_ARCH
+CUCC
 EGREP
 GREP
 CPP
@@ -666,7 +702,6 @@ LDFLAGS
 CFLAGS
 RANLIB
 SET_MAKE
-CUDACXX
 FC
 CXX
 CC
@@ -740,7 +775,8 @@ enable_fortran
 enable_unified_memory
 with_LD
 with_LDFLAGS
-with_extra_flags
+with_extra_CFLAGS
+with_extra_CXXFLAGS
 with_extra_incpath
 with_extra_ldpath
 with_insure
@@ -779,10 +815,10 @@ with_raja_include
 with_raja_lib
 with_raja_libs
 with_raja_lib_dirs
+with_kokkos_lib_dirs
 with_kokkos_include
 with_kokkos_lib
 with_kokkos_libs
-with_kokkos_dirs
 with_caliper
 with_caliper_include
 with_caliper_lib
@@ -1441,7 +1477,11 @@ Optional Packages:
                           will be overridden.
   --with-LDFLAGS=ARG      User can manually set linker flags. The 'LDFLAGS'
                           environment variable will be overridden.
-  --with-extra-flags=ARG  Define extra compile flag, where ARG is a
+  --with-extra-CFLAGS=ARG Define extra C compile flag, where ARG is a
+                          space-separated list (enclosed in quotes) of
+                          directories.
+  --with-extra-CXXFLAGS=ARG
+                          Define extra C++ compile flag, where ARG is a
                           space-separated list (enclosed in quotes) of
                           directories.
   --with-extra-incpath=PATH
@@ -1559,6 +1599,12 @@ Optional Packages:
                           --with-raja-libs, e.g "usr/lib /usr/local/lib". The
                           options --with-raja-libs and --raja-blas-lib-dirs
                           must be used together.
+  --with-kokkos-lib-dirs=DIRS
+                          DIRS is space-separated list (enclosed in quotes) of
+                          directories containing the libraries and
+                          Makefile.kokkos is assumed to be in DIRS/../ . The
+                          options --with-kokkos-libs and --with-kokkos-dirs
+                          must be used together.
   --with-kokkos-include=DIR
                           User specifies that KOKKOS headers is in DIR. The
                           options --with-kokkos-include --with-kokkos-libs and
@@ -1570,10 +1616,6 @@ Optional Packages:
                           libraries needed for KOKKOS (base name only). The
                           options --with-kokkos-libs and --with-kokkos-dirs
                           must be used together.
-  --with-kokkos-dirs=DIRS DIRS is space-separated list (enclosed in quotes) of
-                          directories containing Makefile.kokkos. The options
-                          --with-kokkos-libs and --with-kokkos-dirs must be
-                          used together.
   --with-caliper          Use Caliper instrumentation (default is NO).
   --with-caliper-include=DIR
                           Directory where Caliper is installed.
@@ -1956,6 +1998,166 @@ fi
   as_fn_set_status $ac_retval
 
 } # ac_fn_c_try_cpp
+
+# ac_fn_c_check_header_mongrel LINENO HEADER VAR INCLUDES
+# -------------------------------------------------------
+# Tests whether HEADER exists, giving a warning if it cannot be compiled using
+# the include files in INCLUDES and setting the cache variable VAR
+# accordingly.
+ac_fn_c_check_header_mongrel ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  if eval \${$3+:} false; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 usability" >&5
+$as_echo_n "checking $2 usability... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+#include <$2>
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_header_compiler=yes
+else
+  ac_header_compiler=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking $2 presence" >&5
+$as_echo_n "checking $2 presence... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <$2>
+_ACEOF
+if ac_fn_c_try_cpp "$LINENO"; then :
+  ac_header_preproc=yes
+else
+  ac_header_preproc=no
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in #((
+  yes:no: )
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: $2: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: $2: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: $2:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: $2: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: $2:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: $2: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: $2: proceeding with the compiler's result" >&2;}
+    ;;
+esac
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  eval "$3=\$ac_header_compiler"
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+fi
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_c_check_header_mongrel
+
+# ac_fn_c_try_run LINENO
+# ----------------------
+# Try to link conftest.$ac_ext, and return whether this succeeded. Assumes
+# that executables *can* be run.
+ac_fn_c_try_run ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && { ac_try='./conftest$ac_exeext'
+  { { case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_try") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; }; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: program exited with status $ac_status" >&5
+       $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+       ac_retval=$ac_status
+fi
+  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_c_try_run
+
+# ac_fn_c_check_header_compile LINENO HEADER VAR INCLUDES
+# -------------------------------------------------------
+# Tests whether HEADER exists and can be compiled using the include files in
+# INCLUDES, setting the cache variable VAR accordingly.
+ac_fn_c_check_header_compile ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$4
+#include <$2>
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$3=yes"
+else
+  eval "$3=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_c_check_header_compile
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -2425,6 +2627,8 @@ hypre_using_caliper=no
 hypre_user_gave_caliper_lib=no
 hypre_user_gave_caliper_inc=no
 
+hypre_found_cuda=no
+
 hypre_blas_lib_old_style=no
 hypre_blas_lib_dir_old_style=no
 hypre_lapack_lib_old_style=no
@@ -2791,11 +2995,20 @@ fi
 
 
 
-# Check whether --with-extra-flags was given.
-if test "${with_extra_flags+set}" = set; then :
-  withval=$with_extra_flags; NEWCFLAGS=$withval
+# Check whether --with-extra-CFLAGS was given.
+if test "${with_extra_CFLAGS+set}" = set; then :
+  withval=$with_extra_CFLAGS; EXTRA_CFLAGS=$withval
 
 fi
+
+
+
+# Check whether --with-extra-CXXFLAGS was given.
+if test "${with_extra_CXXFLAGS+set}" = set; then :
+  withval=$with_extra_CXXFLAGS; EXTRA_CXXFLAGS=$withval
+
+fi
+
 
 
 
@@ -3442,7 +3655,7 @@ fi
 # Check whether --with-raja-include was given.
 if test "${with_raja_include+set}" = set; then :
   withval=$with_raja_include; for raja_dir in $withval; do
-    HYPRE_RAJA_INCLUDE="$HYPRE_RAJA_INCLUDE -I$raja_dir"
+    HYPRE_RAJA_INCLUDE="-I$raja_dir $HYPRE_RAJA_INCLUDE"
  done;
  hypre_user_chose_raja=yes
 
@@ -3453,7 +3666,7 @@ fi
 # Check whether --with-raja-lib was given.
 if test "${with_raja_lib+set}" = set; then :
   withval=$with_raja_lib; for raja_lib in $withval; do
-       HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB $raja_lib"
+       HYPRE_RAJA_LIB="$raja_lib $HYPRE_RAJA_LIB"
  done;
 hypre_user_chose_raja=yes
 
@@ -3464,7 +3677,7 @@ fi
 # Check whether --with-raja-libs was given.
 if test "${with_raja_libs+set}" = set; then :
   withval=$with_raja_libs; for raja_lib in $withval; do
-    HYPRE_RAJA_LIB="$HYPRE_RAJA_LIB -l$raja_lib"
+    HYPRE_RAJA_LIB="-l$raja_lib $HYPRE_RAJA_LIB"
  done;
 hypre_user_chose_raja=yes
 
@@ -3483,10 +3696,21 @@ fi
 
 
 
+# Check whether --with-kokkos-lib-dirs was given.
+if test "${with_kokkos_lib_dirs+set}" = set; then :
+  withval=$with_kokkos_lib_dirs; for kokkos_lib_dir in $withval; do
+    HYPRE_KOKKOS_LIB_DIR="-L$kokkos_lib_dir $HYPRE_KOKKOS_LIB_DIR"
+ done;
+hypre_user_chose_kokkos=yes
+
+fi
+
+
+
 # Check whether --with-kokkos-include was given.
 if test "${with_kokkos_include+set}" = set; then :
   withval=$with_kokkos_include; for kokkos_dir in $withval; do
-HYPRE_KOKKOS_INCLUDE="$HYPRE_KOKKOS_INCLUDE -I$kokkos_dir"
+HYPRE_KOKKOS_INCLUDE="-I$kokkos_dir $HYPRE_KOKKOS_INCLUDE"
 done;
 hypre_user_chose_kokkos=yes
 
@@ -3497,7 +3721,7 @@ fi
 # Check whether --with-kokkos-lib was given.
 if test "${with_kokkos_lib+set}" = set; then :
   withval=$with_kokkos_lib; for kokkos_lib in $withval; do
-       HYPRE_KOKKOS_LIB="$HYPRE_KOKKOS_LIB $kokkos_lib"
+       HYPRE_KOKKOS_LIB="$kokkos_lib $HYPRE_KOKKOS_LIB"
  done;
 hypre_user_chose_kokkos=yes
 
@@ -3508,18 +3732,7 @@ fi
 # Check whether --with-kokkos-libs was given.
 if test "${with_kokkos_libs+set}" = set; then :
   withval=$with_kokkos_libs; for kokkos_lib in $withval; do
-    HYPRE_KOKKOS_LIB="$HYPRE_KOKKOS_LIB -l$kokkos_lib"
- done;
-hypre_user_chose_kokkos=yes
-
-fi
-
-
-
-# Check whether --with-kokkos-dirs was given.
-if test "${with_kokkos_dirs+set}" = set; then :
-  withval=$with_kokkos_dirs; for kokkos_lib_dir in $withval; do
-    HYPRE_KOKKOS_SRC_DIR="$kokkos_lib_dir"
+    HYPRE_KOKKOS_LIB="-l$kokkos_lib $HYPRE_KOKKOS_LIB"
  done;
 hypre_user_chose_kokkos=yes
 
@@ -3563,278 +3776,6 @@ if test "${with_caliper_lib+set}" = set; then :
 
 fi
 
-
-if test "$hypre_using_cuda" = "yes"
-then
-	hypre_using_fortran=no
-	for ac_prog in nvcc
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CXX+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CXX"; then
-  ac_cv_prog_CXX="$CXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CXX="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CXX=$ac_cv_prog_CXX
-if test -n "$CXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CXX" >&5
-$as_echo "$CXX" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CXX" && break
-done
-
-	for ac_prog in nvcc
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CC+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CC"; then
-  ac_cv_prog_CC="$CC" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CC="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CC=$ac_cv_prog_CC
-if test -n "$CC"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CC" >&5
-$as_echo "$CC" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CC" && break
-done
-
-	if test "$hypre_user_chose_cxxcompilers" = "no"
-	then
-	   if test "$hypre_using_mpi" = "no"
-	   then
-	      if test "$hypre_using_openmp" = "yes"
-	      then
-	         for ac_prog in xlC_r xlc_r icpc icc g++ gcc pgCC pgcc CC cc KCC kcc
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CUDACXX+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CUDACXX"; then
-  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUDACXX="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CUDACXX=$ac_cv_prog_CUDACXX
-if test -n "$CUDACXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
-$as_echo "$CUDACXX" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CUDACXX" && break
-done
-
-              else
-		 for ac_prog in xlC xlc icpc icc g++ gcc pgCC pgcc CC cc KCC kcc
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CUDACXX+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CUDACXX"; then
-  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUDACXX="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CUDACXX=$ac_cv_prog_CUDACXX
-if test -n "$CUDACXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
-$as_echo "$CUDACXX" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CUDACXX" && break
-done
-
-	      fi
-	   else
-	      if test "$hypre_using_openmp" = "yes"
-	      then
-	         for ac_prog in mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CUDACXX+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CUDACXX"; then
-  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUDACXX="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CUDACXX=$ac_cv_prog_CUDACXX
-if test -n "$CUDACXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
-$as_echo "$CUDACXX" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CUDACXX" && break
-done
-
-	      else
-	         for ac_prog in mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_CUDACXX+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$CUDACXX"; then
-  ac_cv_prog_CUDACXX="$CUDACXX" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_CUDACXX="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-CUDACXX=$ac_cv_prog_CUDACXX
-if test -n "$CUDACXX"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUDACXX" >&5
-$as_echo "$CUDACXX" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$CUDACXX" && break
-done
-
-	      fi
-	   fi
-	fi
-fi
 
 if test "$hypre_user_chose_ccompilers" = "no"
 then
@@ -4304,7 +4245,7 @@ done
 
       if test "$hypre_using_openmp" = "yes"
       then
-         for ac_prog in mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC
+         for ac_prog in mpxlC mpixlcxx_r mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4347,7 +4288,7 @@ fi
 done
 
       else
-         for ac_prog in mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpiCC mpicxx mpipgCC
+         for ac_prog in mpxlC mpixlcxx mpixlC mpiicpc mpig++ mpic++ mpicxx mpiCC mpipgCC
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -7676,7 +7617,7 @@ fi
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
-      g++|gCC|mpig++|mpicxx|mpiCC)
+      g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -fopenmp"
@@ -7770,7 +7711,7 @@ then
           LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
-      cc|xlc|xlc_r|mpxlc|mpixlc|mpixlc_r|mpcc)
+      cc|xlc|xlc_r|mpxlc|mpixlc|mpixlc_r|mpixlc-gpu|mpcc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qsmp=omp"
@@ -7789,7 +7730,7 @@ fi
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
-      g++|gCC|mpig++|mpicxx|mpiCC)
+      g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -fopenmp"
@@ -7807,7 +7748,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|cxx|xlC|xlC_r|mpxlC|mpixlcxx|mpixlcxx_r|mpCC)
+      CC|cxx|xlC|xlC_r|mpxlC|mpixlC|mpixlC-gpu|mpixlcxx|mpixlcxx_r|mpCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp"
@@ -7859,6 +7800,9 @@ then
 fi
 fi
 
+CFLAGS="${CFLAGS} ${EXTRA_CFLAGS}"
+CXXFLAGS="${CXXFLAGS} ${EXTRA_CXXFLAGS}"
+
 hypre_platform=`uname`
 case $hypre_platform in
    AIX* | aix* | Aix*) LDFLAGS="${LDFLAGS} -blpdata"
@@ -7876,12 +7820,19 @@ HYPRE_LIBSUFFIX=".a"
 if test "$hypre_using_shared" = "yes"
 then
    HYPRE_LIBSUFFIX=".so"
+   SHARED_SET_SONAME="-Wl,-soname,"
+   SHARED_OPTIONS="-Wl,-z,defs"
    case $hypre_platform in
       AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
                           SHARED_BUILD_FLAG="-G"
                           LINK_FC="${FC} -brtl"
                           LINK_CC="${CC} -brtl"
                           LINK_CXX="${CXX} -brtl" ;;
+      DARWIN* | darwin* | Darwin*) SHARED_COMPILE_FLAG="-fPIC"
+                                   SHARED_BUILD_FLAG="-dynamiclib -undefined dynamic_lookup"
+				   HYPRE_LIBSUFFIX=".dylib"
+				   SHARED_SET_SONAME="-install_name @rpath/"
+				   SHARED_OPTIONS="-undefined error" ;;
                        *) SHARED_COMPILE_FLAG="-fPIC"
                           SHARED_BUILD_FLAG="-shared" ;;
    esac
@@ -7896,8 +7847,6 @@ then
       BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
    fi
    BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
-   SHARED_SET_SONAME="-Wl,-soname,"
-   SHARED_OPTIONS="-Wl,-z,defs"
 fi
 
 BUILD_PYTHON=0
@@ -8057,168 +8006,325 @@ $as_echo "$as_me: WARNING: *****************************************************
    fi
 fi
 
-if test "$hypre_user_chose_raja" = "yes"
+
+if test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes" || test "$hypre_using_um" = "yes"
+then
+   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
+$as_echo_n "checking for ANSI C header files... " >&6; }
+if ${ac_cv_header_stdc+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <float.h>
+
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_header_stdc=yes
+else
+  ac_cv_header_stdc=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+if test $ac_cv_header_stdc = yes; then
+  # SunOS 4.x string.h does not declare mem*, contrary to ANSI.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <string.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "memchr" >/dev/null 2>&1; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # ISC 2.0.2 stdlib.h does not declare free, contrary to ANSI.
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <stdlib.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "free" >/dev/null 2>&1; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f conftest*
+
+fi
+
+if test $ac_cv_header_stdc = yes; then
+  # /bin/cc in Irix-4.0.5 gets non-ANSI ctype macros unless using -ansi.
+  if test "$cross_compiling" = yes; then :
+  :
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <ctype.h>
+#include <stdlib.h>
+#if ((' ' & 0x0FF) == 0x020)
+# define ISLOWER(c) ('a' <= (c) && (c) <= 'z')
+# define TOUPPER(c) (ISLOWER(c) ? 'A' + ((c) - 'a') : (c))
+#else
+# define ISLOWER(c) \
+		   (('a' <= (c) && (c) <= 'i') \
+		     || ('j' <= (c) && (c) <= 'r') \
+		     || ('s' <= (c) && (c) <= 'z'))
+# define TOUPPER(c) (ISLOWER(c) ? ((c) | 0x40) : (c))
+#endif
+
+#define XOR(e, f) (((e) && !(f)) || (!(e) && (f)))
+int
+main ()
+{
+  int i;
+  for (i = 0; i < 256; i++)
+    if (XOR (islower (i), ISLOWER (i))
+	|| toupper (i) != TOUPPER (i))
+      return 2;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+
+else
+  ac_cv_header_stdc=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_header_stdc" >&5
+$as_echo "$ac_cv_header_stdc" >&6; }
+if test $ac_cv_header_stdc = yes; then
+
+$as_echo "#define STDC_HEADERS 1" >>confdefs.h
+
+fi
+
+# On IRIX 5.3, sys/types and inttypes.h are conflicting.
+for ac_header in sys/types.h sys/stat.h stdlib.h string.h memory.h strings.h \
+		  inttypes.h stdint.h unistd.h
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
+"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+for ac_header in "${CUDA_HOME}/include/cuda.h"
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+ hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}
+fi
+
+done
+
+
+   if test "x$hypre_found_cuda" != "xyes"
+   then
+      for ac_header in "${CUDA_PATH}/include/cuda.h"
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+ hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_PATH}
+fi
+
+done
+
+   fi
+
+   if test "x$hypre_found_cuda" != "xyes"
+   then
+      as_fn_error $? "unable to find cuda.h ... Ensure that CUDA_HOME or CUDA_PATH is set" "$LINENO" 5
+   fi
+fi
+
+if test "x$hypre_user_chose_raja" = "xyes"
 then
    RAJA_LIBS=" $HYPRE_RAJA_LIB_DIR $HYPRE_RAJA_LIB "
-   if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"
+
+$as_echo "#define HYPRE_USING_RAJA 1" >>confdefs.h
+
+
+   if test "$hypre_using_cuda" != "yes"
    then
-   	CFLAGS+=" -+ "
-   fi
-   if test "$hypre_using_cuda" = "yes"
+      if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"
       then
-        RAJAFLAGS=" -lRAJA "
-	LDFLAGS=" -ccbin=$CUDACXX -expt-extended-lambda -Xcompiler -fopenmp -gencode arch=compute_60,\"code=sm_60\" -lcudart -lcuda $RAJAFLAGS "
-   	CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register -Xcompiler $RAJAFLAGS "
-   	CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp --x cu -lcudart -lcuda -DHYPRE_USE_RAJA -Xcompiler -Wno-deprecated-register  $RAJAFLAGS "
-   	if test "$hypre_using_um" != "yes"
-   	then
-		CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
-	   	CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
-$as_echo "$as_me: *******************************************************" >&6;}
-       		{ $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-raja and --with-cuda without unified memory." >&5
-$as_echo "$as_me: Configuring with --with-raja and --with-cuda without unified memory." >&6;}
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
-$as_echo "$as_me: It only works for struct interface." >&6;}
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: Try to confiure with --wiht-raja --with-cuda --enable-unified-memory" >&5
-$as_echo "$as_me: Try to confiure with --wiht-raja --with-cuda --enable-unified-memory" >&6;}
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: to use the cuda feature for the whole package" >&5
-$as_echo "$as_me: to use the cuda feature for the whole package" >&6;}
-       		{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
-$as_echo "$as_me: *******************************************************" >&6;}
-	else
-		CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
-		CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
-		LDFLAGS+="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-
-$as_echo "#define HYPRE_USING_NVCC 1" >>confdefs.h
-
-		NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include"
-   		NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-   		HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
-   	fi
-	hypre_user_chose_cuda=no
-   else
-   	if test "$hypre_using_openmp" = "yes"
-	then
-	   CC=${CXX}
-	   CFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA -DHYPRE_USE_OPENMP "
-	   CXXFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA -DHYPRE_USE_OPENMP "
-	   hypre_using_openmp=no
-	else
-	   CC=${CXX}
-   	   CFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA "
-   	   CXXFLAGS+=" -std=c++11 -DHYPRE_USE_RAJA "
-	   LDFLAGS+="/usr/tcetmp/packages/xl/xl-beta-2017.05.08/lib/libibmc++.so.1"
-	fi
+         CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
+      fi
    fi
-fi
 
-if test "$hypre_user_chose_kokkos" = "yes"
-then
-   if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"
-   then
-   	CFLAGS+=" -+ "
-   fi
-   if test "$hypre_using_cuda" = "yes"
-   then
-      LDFLAGS=" -ccbin=$CUDACXX -gencode arch=compute_60,\"code=sm_60\" -lcudart -lcuda  -Xcompiler -fopenmp  "
-      HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
-      HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
       CC=${CXX}
-      LINK_CC=$LINK_CXX
-      CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS "
-      CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp --x cu -DHYPRE_USE_KOKKOS "
-      if test "$hypre_using_um" != "yes"
-      then
-          CFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
-	  CXXFLAGS+=" -DHYPRE_MEMORY_GPU=1 "
-          { $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
-$as_echo "$as_me: *******************************************************" >&6;}
-	  { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-kokkos and --with-cuda, but not with unified memory" >&5
-$as_echo "$as_me: Configuring with --with-kokkos and --with-cuda, but not with unified memory" >&6;}
-	  { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
-$as_echo "$as_me: It only works for struct interface." >&6;}
-	  { $as_echo "$as_me:${as_lineno-$LINENO}: Try to confiure with --wiht-raja --with-cuda --enable-unified-memory" >&5
-$as_echo "$as_me: Try to confiure with --wiht-raja --with-cuda --enable-unified-memory" >&6;}
-	  { $as_echo "$as_me:${as_lineno-$LINENO}: to use the cuda feature for the whole package" >&5
-$as_echo "$as_me: to use the cuda feature for the whole package" >&6;}
-	  { $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
-$as_echo "$as_me: *******************************************************" >&6;}
-      else
-	  CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
-	  CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU "
-	  LDFLAGS+="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-
-$as_echo "#define HYPRE_USING_NVCC 1" >>confdefs.h
-
-	NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
-   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
-      fi
-      hypre_user_chose_cuda=no
-   else
-      if test "$hypre_using_openmp" = "yes"
-      then
-         CC=${CXX}
-	 CFLAGS+=" -fopenmp -std=c++11 -DHYPRE_USE_KOKKOS -DHYPRE_USE_OPENMP"
-	 CXXFLAGS+=" -fopenmp -std=c++11 -DHYPRE_USE_KOKKOS -DHYPRE_USE_OPENMP"
-	 HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
-	 HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
-	 hypre_using_openmp=no
-      else
-      	 CC=${CXX}
-	 CFLAGS+=" -std=c++11 -DHYPRE_USE_KOKKOS "
-	 CXXFLAGS+=" -std=c++11 -DHYPRE_USE_KOKKOS "
-	 HYPRE_KOKKOS_INC_FILE="include $HYPRE_KOKKOS_SRC_DIR/Makefile.kokkos"
-	 HYPRE_KOKKOS_LIB_DIR="-L$HYPRE_KOKKOS_SRC_DIR/lib"
-	 LDFLAGS+="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-
-$as_echo "#define HYPRE_USING_NVCC 1" >>confdefs.h
-
-	NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -I /usr/local/cuda/include"
-   NVCCLIBS="-L /usr/local/cuda/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
-      fi
-  fi
-  KOKKOS_LIBS=" $HYPRE_KOKKOS_LIB_DIR $HYPRE_KOKKOS_LIB "
+   LINK_CC=${LINK_CXX}
+   CFLAGS=${CXXFLAGS}
 fi
+
+if test "x$hypre_user_chose_kokkos" = "xyes"
+then
+   KOKKOS_LIBS="$HYPRE_KOKKOS_LIB_DIR $HYPRE_KOKKOS_LIB"
+
+$as_echo "#define HYPRE_USING_KOKKOS 1" >>confdefs.h
+
+
+   if test "$hypre_using_cuda" != "yes"
+   then
+      if test "$CXX" = "mpixlC" || test "$CXX" = "xlC_r"
+      then
+         CXXFLAGS="${CXXFLAGS} -+ -std=c++11"
+      fi
+   fi
+
+      CC=${CXX}
+   LINK_CC=${LINK_CXX}
+   CFLAGS=${CXXFLAGS}
+fi
+
 if test "$hypre_user_chose_cuda" = "yes"
 then
-   LDFLAGS+=" -ccbin=$CUDACXX -gencode arch=compute_60,\"code=sm_60\" -Xcompiler -fopenmp "
-   CFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA $NEWCFLAGS"
-   CXXFLAGS+=" -ccbin=$CUDACXX -expt-extended-lambda -gencode arch=compute_60,\"code=sm_60\" -dc --std=c++11 -Xcompiler -fopenmp -Xcompiler -Wno-deprecated-register --x cu -DHYPRE_USE_CUDA $NEWCFLAGS"
-   if test "$hypre_using_um" != "yes"
-   then
-	CFLAGS+=" -DHYPRE_MEMORY_GPU"
-	CXXFLAGS+=" -DHYPRE_MEMORY_GPU"
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
-$as_echo "$as_me: *******************************************************" >&6;}
-       	{ $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-cuda=yes without unified memory." >&5
-$as_echo "$as_me: Configuring with --with-cuda=yes without unified memory." >&6;}
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
-$as_echo "$as_me: It only works for struct interface." >&6;}
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
-$as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
-       	{ $as_echo "$as_me:${as_lineno-$LINENO}: *******************************************************" >&5
-$as_echo "$as_me: *******************************************************" >&6;}
-   else
-	CFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_MEMORY_GPU"
-   	CXXFLAGS+=" -DUSE_NVTX -DHYPRE_USE_GPU -DHYPRE_MEMORY_GPU"
 
-$as_echo "#define HYPRE_USING_NVCC 1" >>confdefs.h
+$as_echo "#define HYPRE_USING_GPU 1" >>confdefs.h
 
-	NVCCFLAGS="-O3 -arch=sm_60  -ccbin=xlc  -I ../hypre/include -I /usr/tcetmp/packages/spectrum_mpi/spectrum_mpi-10.1-xl-gcc-4.9.3/mpi/include/ -DUSE_NVTX -c -DHYPRE_USE_GPU -DHYPRE_USE_MANAGED -DHYPRE_MEMORY_GPU -I${CUDA_HOME}/include"
-   NVCCLIBS="-L${CUDA_HOME}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
-   HYPRE_NVCC_MAKEFILE="Makefile.nvcc"
-   fi
+
+
+$as_echo "#define HYPRE_USING_CUDA 1" >>confdefs.h
+
+
+$as_echo "#define USE_NVTX 1" >>confdefs.h
+
+
+      for ac_prog in nvcc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_CUCC+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$CUCC"; then
+  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CUCC="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+CUCC=$ac_cv_prog_CUCC
+if test -n "$CUCC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
+$as_echo "$CUCC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 
-if test "$hypre_using_um" = "yes"
+
+  test -n "$CUCC" && break
+done
+
+   NVCCBIN=${CXX}
+   CC=${CUCC}
+   CXX=${CUCC}
+   LINK_CC=${CXX}
+   LINK_CXX=${CXX}
+
+      if test "x$HYPRE_CUDA_SM" = "x"
+   then
+      HYPRE_CUDA_SM=60
+   fi
+
+   CUFLAGS+="-O2 -ccbin=$NVCCBIN -gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\" -expt-extended-lambda -dc --std=c++11 -Xcompiler -Wno-deprecated-register --x cu"
+   CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
+   CFLAGS=${CXXFLAGS}
+   LDFLAGS="-ccbin=$NVCCBIN -gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\" -Xcompiler \"${LDFLAGS}\""
+   HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
+   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+fi
+
+if test "$hypre_using_um" != "yes"
 then
-   LDFLAGS+=" -lcudart -lcuda "
-   CFLAGS+=" -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include "
-   CXXFLAGS+=" -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include "
+      if test "$hypre_user_chose_cuda" = "yes"
+   then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-cuda=yes without unified memory." >&5
+$as_echo "$as_me: Configuring with --with-cuda=yes without unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
+$as_echo "$as_me: It only works for struct interface." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
+$as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
+   fi
+   if test "$hypre_using_device_openmp" = "yes"
+   then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Configuring with --with-device-openmp=yes without unified memory." >&5
+$as_echo "$as_me: Configuring with --with-device-openmp=yes without unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: It only works for struct interface." >&5
+$as_echo "$as_me: It only works for struct interface." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Use --enable-unified-memory to compile with unified memory." >&5
+$as_echo "$as_me: Use --enable-unified-memory to compile with unified memory." >&6;}
+      { $as_echo "$as_me:${as_lineno-$LINENO}: ***********************************************************" >&5
+$as_echo "$as_me: ***********************************************************" >&6;}
+   fi
 fi
 
 if test "$hypre_using_openmp" = "yes"
@@ -8231,30 +8337,94 @@ fi
 if test "$hypre_using_device_openmp" = "yes"
 then
 
+$as_echo "#define USE_NVTX 1" >>confdefs.h
+
+
 $as_echo "#define HYPRE_USING_DEVICE_OPENMP 1" >>confdefs.h
 
+
+$as_echo "#define HYPRE_DEVICE_OPENMP_ALLOC 1" >>confdefs.h
+
+
+   for ac_prog in nvcc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if ${ac_cv_prog_CUCC+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$CUCC"; then
+  ac_cv_prog_CUCC="$CUCC" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CUCC="$ac_prog"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+fi
+fi
+CUCC=$ac_cv_prog_CUCC
+if test -n "$CUCC"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $CUCC" >&5
+$as_echo "$CUCC" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 
-if test "$hypre_using_device_openmp" = "yes"
-then
-   CFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include $NEWCFLAGS"
-   CXXFLAGS+=" -DHYPRE_USE_OMP45 -DHYPRE_USE_OMP45_TARGET_ALLOC -DHYPRE_USING_CUSPARSE -DUSE_NVTX -DHYPRE_USING_OPENMP_OFFLOAD -DHYPRE_USE_MANAGED -I${CUDA_HOME}/include $NEWCFLAGS"
-   LIBS+=" -L${CUDA_HOME}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+
+  test -n "$CUCC" && break
+done
+
+
+   CFLAGS="${CFLAGS} -DHYPRE_USING_CUSPARSE -DHYPRE_USING_OPENMP_OFFLOAD"
+   CXXFLAGS="${CXXFLAGS} -DHYPRE_USING_CUSPARSE -DHYPRE_USING_OPENMP_OFFLOAD"
+
    if test "$CC" = "clang-gpu" || test "$CC" = "mpiclang-gpu"
    then
-     CFLAGS+=" -fopenmp-nonaliased-maps"
+      CFLAGS+=" -fopenmp-nonaliased-maps"
    fi
    if test "$CXX" = "clang++-gpu" || test "$CXX" = "mpiclang++-gpu"
    then
-     CXXFLAGS+=" -fopenmp-nonaliased-maps"
+      CXXFLAGS+=" -fopenmp-nonaliased-maps"
    fi
    if test "$hypre_using_debug" = "yes"
    then
       CFLAGS+=" -DHYPRE_OMP45_DEBUG"
       CXXFLAGS+=" -DHYPRE_OMP45_DEBUG"
+   fi
+
+   HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
+   HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+fi
+
+if test "x$hypre_using_um" = "xyes"
+then
+
+$as_echo "#define HYPRE_USING_UNIFIED_MEMORY 1" >>confdefs.h
+
+else
+   if test "x$hypre_user_chose_cuda" = "xyes" || test "x$hypre_using_device_openmp" = "xyes"
+   then
+
+$as_echo "#define HYPRE_USING_DEVICE_MEMORY 1" >>confdefs.h
+
    else
-      CFLAGS+=" -O2"
-      CXXFLAGS+=" -O2"
+
+$as_echo "#define HYPRE_USING_HOST_MEMORY 1" >>confdefs.h
+
    fi
 fi
 
@@ -8366,7 +8536,6 @@ $as_echo "$HYPRE_ARCH" >&6; }
          fi
          ;;
    esac
-
 
 
 
