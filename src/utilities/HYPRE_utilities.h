@@ -142,15 +142,13 @@ HYPRE_Version( char **version_ptr );
 
 /**
  * Returns version number information in integer form.  Use 'NULL' for values
- * not needed.  The boolean {\tt release} indicates that the release is an
- * official release.  The argument {\tt single} is a single sortable integer
+ * not needed.  The argument {\tt single} is a single sortable integer
  * representation of the release number.
  **/
 HYPRE_Int
 HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
                      HYPRE_Int  *minor_ptr,
                      HYPRE_Int  *patch_ptr,
-                     HYPRE_Int  *release_ptr,
                      HYPRE_Int  *single_ptr );
 
 /**

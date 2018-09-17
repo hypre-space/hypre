@@ -2465,10 +2465,9 @@ main( hypre_int argc,
       }
       else if ( strcmp(argv[arg_index], "-vernum") == 0 )
       {
-         HYPRE_Int major, minor, patch, release, single;
-         HYPRE_VersionNumber(&major, &minor, &patch, &release, &single);
+         HYPRE_Int major, minor, patch, single;
+         HYPRE_VersionNumber(&major, &minor, &patch, &single);
          hypre_printf("HYPRE Version %d.%d.%d\n", major, minor, patch);
-         hypre_printf("HYPRE Release = %d\n", release);
          hypre_printf("HYPRE Single = %d\n", single);
          exit(1);
       }

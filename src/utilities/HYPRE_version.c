@@ -46,10 +46,9 @@ HYPRE_Int
 HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
                      HYPRE_Int  *minor_ptr,
                      HYPRE_Int  *patch_ptr,
-                     HYPRE_Int  *release_ptr,
                      HYPRE_Int  *single_ptr )
 {
-   HYPRE_Int  major, minor, patch, release, single;
+   HYPRE_Int  major, minor, patch, single;
    HYPRE_Int  nums[3], i, j;
    char      *ptr = HYPRE_RELEASE_VERSION;
    
@@ -71,9 +70,6 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
    minor = nums[1];
    patch = nums[2];
 
-   /* Fix this */
-   release = 1;
-
    /* Compute a single, unique, sortable number representation of the release.
     * This assumes 2 digits for each subnumber, so 2.14.0 becomes 21400. */
    single = major*10000 + minor*100 + patch;
@@ -81,7 +77,6 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
    if (major_ptr)   {*major_ptr   = major;}
    if (minor_ptr)   {*minor_ptr   = minor;}
    if (patch_ptr)   {*patch_ptr   = patch;}
-   if (release_ptr) {*release_ptr = release;}
    if (single_ptr)  {*single_ptr  = single;}
 
    return hypre_error_flag;
