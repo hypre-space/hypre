@@ -7817,38 +7817,6 @@ LINK_CXX="${CXX}"
 
 HYPRE_LIBSUFFIX=".a"
 
-if test "$hypre_using_shared" = "yes"
-then
-   HYPRE_LIBSUFFIX=".so"
-   SHARED_SET_SONAME="-Wl,-soname,"
-   SHARED_OPTIONS="-Wl,-z,defs"
-   case $hypre_platform in
-      AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
-                          SHARED_BUILD_FLAG="-G"
-                          LINK_FC="${FC} -brtl"
-                          LINK_CC="${CC} -brtl"
-                          LINK_CXX="${CXX} -brtl" ;;
-      DARWIN* | darwin* | Darwin*) SHARED_COMPILE_FLAG="-fPIC"
-                                   SHARED_BUILD_FLAG="-dynamiclib -undefined dynamic_lookup"
-				   HYPRE_LIBSUFFIX=".dylib"
-				   SHARED_SET_SONAME="-install_name @rpath/"
-				   SHARED_OPTIONS="-undefined error" ;;
-                       *) SHARED_COMPILE_FLAG="-fPIC"
-                          SHARED_BUILD_FLAG="-shared" ;;
-   esac
-   FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
-   CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
-   CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
-   BUILD_FC_SHARED="${FC} ${SHARED_BUILD_FLAG}"
-   if test "$hypre_using_fei" = "yes"
-   then
-      BUILD_CC_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
-   else
-      BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
-   fi
-   BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
-fi
-
 BUILD_PYTHON=0
 PYTHON=""
 if test "$hypre_using_python" = "yes"
@@ -8408,6 +8376,44 @@ done
 
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
+fi
+
+if test "$hypre_using_shared" = "yes"
+then
+   HYPRE_LIBSUFFIX=".so"
+   if test "x$CXX" = "xnvcc" || test "x$CC" = "xnvcc"
+   then
+      SHARED_SET_SONAME="-Xlinker=-soname,"
+      SHARED_OPTIONS="-Xlinker=-z,defs"
+      SHARED_COMPILE_FLAG="-Xcompiler \"-fPIC\""
+   else
+      SHARED_SET_SONAME="-Wl,-soname,"
+      SHARED_OPTIONS="-Wl,-z,defs"
+      SHARED_COMPILE_FLAG="-fPIC"
+   fi
+   case $hypre_platform in
+      AIX* | aix* | Aix*) SHARED_COMPILE_FLAG="-qmkshrobj"
+                          SHARED_BUILD_FLAG="-G"
+                          LINK_FC="${FC} -brtl"
+                          LINK_CC="${CC} -brtl"
+                          LINK_CXX="${CXX} -brtl" ;;
+      DARWIN* | darwin* | Darwin*) SHARED_BUILD_FLAG="-dynamiclib -undefined dynamic_lookup"
+                                   HYPRE_LIBSUFFIX=".dylib"
+                                   SHARED_SET_SONAME="-install_name @rpath/"
+                                   SHARED_OPTIONS="-undefined error" ;;
+                       *) SHARED_BUILD_FLAG="-shared" ;;
+   esac
+   FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
+   CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
+   CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"
+   BUILD_FC_SHARED="${FC} ${SHARED_BUILD_FLAG}"
+   if test "$hypre_using_fei" = "yes"
+   then
+      BUILD_CC_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
+   else
+      BUILD_CC_SHARED="${CC} ${SHARED_BUILD_FLAG}"
+   fi
+   BUILD_CXX_SHARED="${CXX} ${SHARED_BUILD_FLAG}"
 fi
 
 if test "x$hypre_using_um" = "xyes"
