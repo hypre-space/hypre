@@ -887,7 +887,7 @@ HYPRE_Int hypre_ParVectorMassInnerProd ( hypre_ParVector *x , hypre_ParVector **
 HYPRE_Int hypre_ParVectorMassDotpTwo ( hypre_ParVector *x , hypre_ParVector *y , hypre_ParVector **z, HYPRE_Int k, HYPRE_Int unroll, HYPRE_Real *prod_x , HYPRE_Real *prod_y );
 HYPRE_Int hypre_ParVectorMassAxpy ( HYPRE_Complex *alpha, hypre_ParVector **x, hypre_ParVector *y, HYPRE_Int k, HYPRE_Int unroll);  
 HYPRE_Int hypre_ParVectorGetValues ( hypre_ParVector *vector, HYPRE_Int num_values, HYPRE_Int *indices , HYPRE_Complex *values);
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USING_GPU
 hypre_int hypre_ParVectorIsManaged(hypre_ParVector *vector);
 #endif
 
