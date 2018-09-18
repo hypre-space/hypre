@@ -71,32 +71,32 @@ HYPRE_MGRSolve( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetCpointsByBlockExp
+ * HYPRE_MGRSetCpointsByGlobalBlock
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_MGRSetCpointsByBlockExp( HYPRE_Solver solver, 
+HYPRE_MGRSetCpointsByGlobalBlock( HYPRE_Solver solver, 
       HYPRE_Int  block_size, 
       HYPRE_Int  max_num_levels, 
       HYPRE_Int  *idx_array,
       HYPRE_Int  *block_num_coarse_points, 
       HYPRE_Int  **block_coarse_indexes)
 {
-   return( hypre_MGRSetCpointsByBlockExp( (void *) solver, block_size, max_num_levels, idx_array, block_num_coarse_points, block_coarse_indexes));
+   return( hypre_MGRSetCpointsByGlobalBlock( (void *) solver, block_size, max_num_levels, idx_array, block_num_coarse_points, block_coarse_indexes));
 }
 
 /*--------------------------------------------------------------------------
- * HYPRE_MGRSetCpointsByBlock
+ * HYPRE_MGRSetCpointsByLocalBlock
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int 
-HYPRE_MGRSetCpointsByBlock( HYPRE_Solver solver, 
+HYPRE_MGRSetCpointsByLocalBlock( HYPRE_Solver solver, 
 			HYPRE_Int  block_size, 
 			HYPRE_Int  max_num_levels, 
 			HYPRE_Int  *block_num_coarse_points, 
 			HYPRE_Int  **block_coarse_indexes)
 {
-   return( hypre_MGRSetCpointsByBlock( (void *) solver, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes));
+   return( hypre_MGRSetCpointsByLocalBlock( (void *) solver, block_size, max_num_levels, block_num_coarse_points, block_coarse_indexes));
 }
 
 HYPRE_Int
@@ -150,7 +150,7 @@ HYPRE_MGRSetReservedCoarseNodes( HYPRE_Solver solver, HYPRE_Int reserved_coarse_
  * HYPRE_MGRSetRestrictType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetRestrictType(HYPRE_Solver solver, HYPRE_Int restrict_type )
+HYPRE_MGRSetRestrictType(HYPRE_Solver solver, HYPRE_Int *restrict_type )
 {
    return hypre_MGRSetRestrictType(solver, restrict_type );
 }
@@ -162,6 +162,15 @@ HYPRE_Int
 HYPRE_MGRSetFRelaxMethod(HYPRE_Solver solver, HYPRE_Int *relax_method )
 {
    return hypre_MGRSetFRelaxMethod(solver, relax_method );
+}
+
+/*--------------------------------------------------------------------------
+ * HYPRE_MGRSetRelaxNumFunctions
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRSetFRelaxNumFunctions(HYPRE_Solver solver, HYPRE_Int *num_functions)
+{
+   return hypre_MGRSetFRelaxNumFunctions(solver, num_functions);
 }
 
 /*--------------------------------------------------------------------------
@@ -184,7 +193,7 @@ HYPRE_MGRSetNumRelaxSweeps( HYPRE_Solver solver, HYPRE_Int nsweeps )
  * HYPRE_MGRSetInterpType
  *--------------------------------------------------------------------------*/
 HYPRE_Int
-HYPRE_MGRSetInterpType( HYPRE_Solver solver, HYPRE_Int interpType )
+HYPRE_MGRSetInterpType( HYPRE_Solver solver, HYPRE_Int *interpType )
 {
    return hypre_MGRSetInterpType(solver, interpType);
 }

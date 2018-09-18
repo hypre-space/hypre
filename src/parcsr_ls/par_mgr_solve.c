@@ -328,7 +328,7 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
   HYPRE_Int cycle_param = 1;
   HYPRE_Int j, Solve_err_flag, local_size, coarse_grid, fine_grid;
 
-  HYPRE_Int num_sweeps = 1;
+  HYPRE_Int num_sweeps = 3;
   HYPRE_Int relax_order = 1;
   HYPRE_Int relax_type = 3;
   HYPRE_Int relax_weight = 1;
@@ -345,12 +345,16 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
   hypre_ParVector *Vtemp = (Frelax_data) -> Vtemp;
   hypre_ParVector *Ztemp = (Frelax_data) -> Ztemp;
 
-  HYPRE_Int num_c_levels = (Frelax_data) -> num_levels-1;
+  HYPRE_Int num_c_levels = (Frelax_data) -> num_levels;
 
   hypre_ParVector *Aux_F = NULL;
   hypre_ParVector *Aux_U = NULL;
 
   HYPRE_Real alpha, beta;
+  HYPRE_Int  *grid_relax_type = hypre_ParAMGDataGridRelaxType(Frelax_data);
+
+  F_array[0] = f;
+  U_array[0] = u;
 
   while (Not_Finished)
   {
@@ -379,51 +383,67 @@ hypre_MGRFrelaxVcycle ( void   *Frelax_vdata, hypre_ParVector *f, hypre_ParVecto
       }
       if ((num_c_levels > 0) && (level != num_c_levels))
       {
-           fine_grid = level;
-           coarse_grid = level + 1;
+        fine_grid = level;
+        coarse_grid = level + 1;
 
-           hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0); 
-            
-           alpha = -1.0;
-           beta = 1.0;
+        hypre_ParVectorSetConstantValues(U_array[coarse_grid], 0.0); 
+          
+        alpha = -1.0;
+        beta = 1.0;
 
-           // JSP: avoid unnecessary copy using out-of-place version of SpMV
-           hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[fine_grid], U_array[fine_grid],
-                                              beta, F_array[fine_grid], Vtemp);
+        // JSP: avoid unnecessary copy using out-of-place version of SpMV
+        hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[fine_grid], U_array[fine_grid],
+                                            beta, F_array[fine_grid], Vtemp);
 
-           alpha = 1.0;
-           beta = 0.0;
-           hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
-                                        beta,F_array[coarse_grid]);
+        alpha = 1.0;
+        beta = 0.0;
+        hypre_ParCSRMatrixMatvecT(alpha,R_array[fine_grid],Vtemp,
+                                      beta,F_array[coarse_grid]);
 
-           ++level;
-           cycle_param = 1;
-           if (level == num_c_levels) cycle_param = 3;
+        ++level;
+        cycle_param = 1;
+        if (level == num_c_levels)
+        {
+          if (grid_relax_type[3] == 9)
+            cycle_param = 3;
+          else
+            cycle_param = 2;
+        }
       }
-    } else if (cycle_param == 3) {
+      else
+      {
+        Not_Finished = 0;
+      }
+    } 
+    else if (cycle_param == 3) 
+    {
       // solve the coarsest grid with Gaussian elimination
       hypre_GaussElimSolve(Frelax_data, level, 9);
       cycle_param = 2;
-    } else if (cycle_param == 2) {
-        /*---------------------------------------------------------------
-        * Visit finer level next.
-        * Interpolate and add correction using hypre_ParCSRMatrixMatvec.
-        * Reset counters and cycling parameters for finer level.
-        *--------------------------------------------------------------*/
+    } 
+    else if (cycle_param == 2) 
+    {
+      /*---------------------------------------------------------------
+      * Visit finer level next.
+      * Interpolate and add correction using hypre_ParCSRMatrixMatvec.
+      * Reset counters and cycling parameters for finer level.
+      *--------------------------------------------------------------*/
 
-        fine_grid = level - 1;
-        coarse_grid = level;
-        alpha = 1.0;
-        beta = 1.0;
+      fine_grid = level - 1;
+      coarse_grid = level;
+      alpha = 1.0;
+      beta = 1.0;
 
-        hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid], 
-                                 U_array[coarse_grid],
-                                 beta, U_array[fine_grid]);            
+      hypre_ParCSRMatrixMatvec(alpha, P_array[fine_grid], 
+                               U_array[coarse_grid],
+                               beta, U_array[fine_grid]);            
 
-        --level;
-        cycle_param = 2;
-        if (level == 0) cycle_param = 99;
-    } else {
+      --level;
+      cycle_param = 2;
+      if (level == 0) cycle_param = 99;
+    } 
+    else 
+    {
       Not_Finished = 0;
     }
   }
@@ -462,21 +482,25 @@ hypre_MGRCycle( void               *mgr_vdata,
    hypre_ParVector     	*Vtemp = (mgr_data -> Vtemp);
    hypre_ParVector     	*Ztemp = (mgr_data -> Ztemp);
 
+   //hypre_ParVector      **U_fine_array = (mgr_data -> U_fine_array);
+   //hypre_ParVector      **F_fine_array = (mgr_data -> F_fine_array);
+   //HYPRE_Int      (*fine_grid_solver_solve)(void*, void*, void*, void*) = (mgr_data -> fine_grid_solver_solve);
+   //hypre_ParCSRMatrix   **A_ff_array = (mgr_data -> A_ff_array);
+
    HYPRE_Int            i, relax_points;
    HYPRE_Int           	num_coarse_levels = (mgr_data -> num_coarse_levels);
 
    HYPRE_Real    alpha;
    HYPRE_Real    beta;
 
-  HYPRE_Int            *Frelax_method = (mgr_data -> Frelax_method);   
+  HYPRE_Int           *Frelax_method = (mgr_data -> Frelax_method);   
   hypre_ParAMGData    **FrelaxVcycleData = (mgr_data -> FrelaxVcycleData);   
   
-  HYPRE_Int      restrict_type = (mgr_data -> restrict_type);
+  HYPRE_Int      *restrict_type = (mgr_data -> restrict_type);
   HYPRE_Int      use_air = 0;
 
    /* Initialize */
-   if(restrict_type > 3)
-      use_air = 1;
+
       
 //   comm = hypre_ParCSRMatrixComm(A_array[0]);
    Solve_err_flag = 0;
@@ -498,9 +522,12 @@ hypre_MGRCycle( void               *mgr_vdata,
 		   // DEBUG: print the coarse system indicated by mgr_data ->print_coarse_system
 		   if(mgr_data -> print_coarse_system)
 		   {
-		      HYPRE_ParCSRMatrixPrint(RAP, "RAP_mat");
-		      HYPRE_ParVectorPrint(F_array[level], "RAP_rhs");
-		      HYPRE_ParVectorPrint(U_array[level], "RAP_sol");	
+		      //HYPRE_ParCSRMatrixPrint(RAP, "RAP_mat");
+		      //HYPRE_ParVectorPrint(F_array[level], "RAP_rhs");
+		      //HYPRE_ParVectorPrint(U_array[level], "RAP_sol");	
+          hypre_ParCSRMatrixPrintIJ(RAP, 1, 1, "RAP_mat");
+          hypre_ParVectorPrintIJ(F_array[level], 1, "RAP_rhs");
+          hypre_ParVectorPrintIJ(U_array[level], 1, "RAP_sol");
 		      mgr_data -> print_coarse_system--;	      		      
 		   }
 
@@ -540,11 +567,35 @@ hypre_MGRCycle( void               *mgr_vdata,
 		      }
                    }
                    else if (Frelax_method[level] == 1) 
-      		   {
+            		   {
                       /* v-cycle smoother for A_ff */
-		      for(i=0; i<nsweeps; i++)
+                      //HYPRE_Real convergence_factor_frelax;
+                      // compute residual before solve
+                      //  hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
+                      //                                    U_array[level], 1.0, F_array[level], Vtemp);
+                      //  convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp);
+                        for(i=0; i<nsweeps; i++) 
+                        {
+
                          hypre_MGRFrelaxVcycle(FrelaxVcycleData[level], F_array[level], U_array[level]);
+                        }
+                      // compute residual after solve
+                      //hypre_ParCSRMatrixMatvecOutOfPlace(-1.0, A_array[level],
+                      //                                  U_array[level], 1.0, F_array[level], Vtemp);
+                      //convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp)/convergence_factor_frelax;
+                      //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
                    } 
+                   /*
+                   else if (Frelax_method[level] == 99)
+                   {
+                      hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
+                      hypre_MGRAddVectorR(CF_marker[fine_grid], FMRK, 1.0, F_array[fine_grid], 0.0, &(F_fine_array[coarse_grid]));
+                      hypre_ParVectorSetConstantValues(U_fine_array[coarse_grid], 0.0);
+                      fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid], A_ff_array[fine_grid], F_fine_array[coarse_grid], U_fine_array[coarse_grid]);
+                      hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
+                      //hypre_ParVectorPrintIJ(U_array[fine_grid],1,"U_after_solve");
+                   }
+                   */
                    else 
                    {
                       for (i=0; i<nsweeps; i++)
@@ -561,6 +612,9 @@ hypre_MGRCycle( void               *mgr_vdata,
 
 		   alpha = 1.0;
 		   beta = 0.0;
+
+                   if (restrict_type[fine_grid] > 3)
+                     use_air = 1;      
 
                    if (use_air)
                    {
