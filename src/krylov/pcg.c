@@ -716,7 +716,7 @@ hypre_PCGSolve( void *pcg_vdata,
    if ( print_level > 1 && my_id==0 )
       hypre_printf("\n\n");
 
-  if (i >= max_iter && (i_prod/bi_prod) >= eps) hypre_error(HYPRE_ERROR_CONV);
+  if (i >= max_iter && (i_prod/bi_prod) >= eps && eps > 0) hypre_error(HYPRE_ERROR_CONV);
 
    (pcg_data -> num_iterations) = i;
    if (bi_prod > 0.0)
