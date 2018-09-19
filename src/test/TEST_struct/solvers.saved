@@ -68,15 +68,15 @@ Residual   2.74559569275018e-07
 
 # Output file: solvers.out.17.lobpcg.5
 Eigenvalue lambda   1.84366453091761e-01
-Eigenvalue lambda   2.50882493969758e-01
-Eigenvalue lambda   3.60090369737186e-01
-Eigenvalue lambda   4.20845334658611e-01
-Eigenvalue lambda   4.20845334658816e-01
-Residual   2.41984718651313e-07
-Residual   1.16310823945663e-06
-Residual   6.95498018578113e-07
-Residual   7.11395856759138e-07
-Residual   7.20734654889730e-07
+Eigenvalue lambda   2.50882493969754e-01
+Eigenvalue lambda   3.60090369737181e-01
+Eigenvalue lambda   4.20845334658550e-01
+Eigenvalue lambda   4.20845334658985e-01
+Residual   2.50212530703055e-07
+Residual   1.21296920560361e-06
+Residual   7.17050537726402e-07
+Residual   8.69189255964679e-07
+Residual   8.69185724273522e-07
 
 # Output file: solvers.out.18.lobpcg
 Iterations = 32
