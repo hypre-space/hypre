@@ -21,12 +21,12 @@ Version 2.15.0 released 2018/09/21
   SetBoxValues2() for Struct/SStruct and IJSetValues2().
 
 - GPU-related changes: improved build process; fixed Raja and Kokkos ports of
-  Struct/SStruct.
+  Struct/SStruct; new boxloop reduction implementation without unified memory.
 
 - Added a new GMRES variant COGMRES, with reduced communication, which is based
   on classical Gram-Schmidt with a reorthogonalization option.
 
-- Added functions HYPRE_ParVectorGetValues, HYPRE_ParCSRPCGGetResidual, 
+- Added functions HYPRE_ParVectorGetValues, HYPRE_ParCSRPCGGetResidual,
   HYPRE_ParCSRGMRESGetResidual, HYPRE_ParCSRBiCGSTABGetResidual, and more.
 
 - Various bug fixes.
