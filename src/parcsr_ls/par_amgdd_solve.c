@@ -167,12 +167,13 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    HYPRE_Real conv_fact = 0;
    
 	// Do the cycles
-   if (fac_tol == 0)
+   if (fac_tol == 0.0)
    {
       while ( cycle_count < max_fac_iter )
       {
          // Do FAC cycle
          hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
+         if (myid == 0) printf("did fac cycle %d\n", cycle_count);
 
          ++cycle_count;
          hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
@@ -259,10 +260,15 @@ ZeroInitialGuess( void *amg_vdata )
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
 	hypre_ParAMGData	*amg_data = amg_vdata;
-   hypre_ParCompGrid 	*compGrid = hypre_ParAMGDataCompGrid(amg_data)[0];
    HYPRE_Int i;
 
-	for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++) hypre_ParCompGridU(compGrid)[i] = 0.0;
+   HYPRE_Int level;
+   for (level = 0; level < hypre_ParAMGDataNumLevels(amg_data); level++)
+   // for (level = 0; level < 1; level++)
+   {
+      hypre_ParCompGrid    *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++) hypre_ParCompGridU(compGrid)[i] = 0.0;
+   }
 	
 	return 0;
 }
