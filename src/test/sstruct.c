@@ -2170,7 +2170,7 @@ PrintUsage( char *progname,
    {
       hypre_printf("\n");
       hypre_printf("Usage: %s [-in <filename>] [<options>]\n", progname);
-      hypre_printf("       %s -help | -version | -vernum\n", progname);
+      hypre_printf("       %s -help | -version | -vernum | -buildinfo\n", progname);
       hypre_printf("\n");
       hypre_printf("  -in <filename> : input file (default is `%s')\n",
                    infile_default);
@@ -2469,6 +2469,15 @@ main( hypre_int argc,
          HYPRE_VersionNumber(&major, &minor, &patch, &single);
          hypre_printf("HYPRE Version %d.%d.%d\n", major, minor, patch);
          hypre_printf("HYPRE Single = %d\n", single);
+         exit(1);
+      }
+      else if ( strcmp(argv[arg_index], "-buildinfo") == 0 )
+      {
+         #include "HYPRE_buildinfo.h"
+         char *buildinfo_string;
+         HYPRE_BuildInfo(&buildinfo_string);
+         hypre_printf("%s\n", buildinfo_string);
+         hypre_TFree(buildinfo_string, HYPRE_MEMORY_HOST);
          exit(1);
       }
    }
