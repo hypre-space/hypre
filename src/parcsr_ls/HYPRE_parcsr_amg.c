@@ -433,19 +433,37 @@ HYPRE_BoomerAMGGetFACTol( HYPRE_Solver solver,
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_BoomerAMGSetFACNumRelax
+ *--------------------------------------------------------------------------*/
+
+HYPRE_Int
+HYPRE_BoomerAMGSetFACNumRelax( HYPRE_Solver solver,
+                           HYPRE_Int          fac_num_relax  )
+{
+   return( hypre_BoomerAMGSetFACNumRelax( (void *) solver, fac_num_relax ) );
+}
+
+HYPRE_Int
+HYPRE_BoomerAMGGetFACNumRelax( HYPRE_Solver solver,
+                           HYPRE_Int        * fac_num_relax  )
+{
+   return( hypre_BoomerAMGGetFACNumRelax( (void *) solver, fac_num_relax ) );
+}
+
+/*--------------------------------------------------------------------------
  * HYPRE_BoomerAMGSetFACRelaxType
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
 HYPRE_BoomerAMGSetFACRelaxType( HYPRE_Solver solver,
-                           HYPRE_Real          fac_relax_type  )
+                           HYPRE_Int          fac_relax_type  )
 {
    return( hypre_BoomerAMGSetFACRelaxType( (void *) solver, fac_relax_type ) );
 }
 
 HYPRE_Int
 HYPRE_BoomerAMGGetFACRelaxType( HYPRE_Solver solver,
-                           HYPRE_Real        * fac_relax_type  )
+                           HYPRE_Int        * fac_relax_type  )
 {
    return( hypre_BoomerAMGGetFACRelaxType( (void *) solver, fac_relax_type ) );
 }

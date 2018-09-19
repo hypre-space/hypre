@@ -110,6 +110,8 @@ typedef struct
    HYPRE_Int                 min_fac_iter;
    HYPRE_Int                 max_fac_iter;
    HYPRE_Real                fac_tol;
+   HYPRE_Int                 fac_relax_type;
+   HYPRE_Int                 fac_num_relax;
    HYPRE_Int                 padding;
    HYPRE_Int                 num_ghost_layers;
    HYPRE_Int                 use_transition_layer;
@@ -177,7 +179,6 @@ typedef struct
    HYPRE_Int      logging;
    HYPRE_Int      num_iterations;
    HYPRE_Int      num_fac_iterations;
-   HYPRE_Int      fac_relax_type;
 #ifdef CUMNUMIT
    HYPRE_Int      cum_num_iterations;
 #endif
@@ -376,6 +377,8 @@ typedef struct
 #define hypre_ParAMGDataMinFACIter(amg_data) ((amg_data)->min_fac_iter)
 #define hypre_ParAMGDataMaxFACIter(amg_data) ((amg_data)->max_fac_iter)
 #define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
+#define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
+#define hypre_ParAMGDataFACNumRelax(amg_data) ((amg_data)->fac_num_relax)
 #define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->padding)
 #define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
 #define hypre_ParAMGDataAMGDDUseTransitionLayer(amg_data) ((amg_data)->use_transition_layer)
@@ -407,7 +410,6 @@ typedef struct
 #define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
 #define hypre_ParAMGDataNumFACIterations(amg_data) ((amg_data)->num_fac_iterations)
-#define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
 #ifdef CUMNUMIT
 #define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
 #endif

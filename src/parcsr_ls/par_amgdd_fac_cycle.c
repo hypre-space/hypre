@@ -48,6 +48,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
    HYPRE_Int transition_level = hypre_ParCompGridCommPkgTransitionLevel(hypre_ParAMGDataCompGridCommPkg(amg_data));
    if (transition_level < 0) transition_level = num_levels;
    HYPRE_Int relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
+   HYPRE_Int numRelax = hypre_ParAMGDataFACNumRelax(amg_data);
 
 	// Get the composite grid
   	hypre_ParCompGrid          **compGrid = hypre_ParAMGDataCompGrid(amg_data);
@@ -78,7 +79,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 	for (level = 0; level < num_levels - 1; level++)
 	{
 		// Relax on the real nodes
-      FAC_Relax( compGrid[level], relax_type );
+      for (i = 0; i < numRelax; i++) FAC_Relax( compGrid[level], relax_type );
 
       #if DUMP_INTERMEDIATE_SOLNS
       sprintf(filename, "outputs/comp_u%d_level%d_relax1", myid, level);
@@ -109,7 +110,7 @@ hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
       hypre_ParCompGridUDump(compGrid[level],filename);
       #endif
 
-		FAC_Relax( compGrid[level], relax_type );
+		for (i = 0; i < numRelax; i++) FAC_Relax( compGrid[level], relax_type );
       
       #if DUMP_INTERMEDIATE_SOLNS
       sprintf(filename, "outputs/comp_u%d_level%d_relax2", myid, level);
@@ -181,11 +182,9 @@ FAC_Project( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c )
 		// Loop over entries in row of P
 		for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
 		{
-			#if DEBUG_FAC
-			if (hypre_ParCompGridPColInd(compGrid_f)[j] < 0) printf("A point doesn't have its full interpolation stencil! P row %d, entry %d is < 0\n",i,j);
-			#endif
          // Update fine grid solution with coarse FAC_projection
-			hypre_ParCompGridU(compGrid_f)[i] += hypre_ParCompGridPData(compGrid_f)[j] * hypre_ParCompGridU(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ];
+			if (hypre_ParCompGridPColInd(compGrid_f)[j] >= 0)
+            hypre_ParCompGridU(compGrid_f)[i] += hypre_ParCompGridPData(compGrid_f)[j] * hypre_ParCompGridU(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ];
 		}
 	}
 	return 0;
@@ -246,13 +245,15 @@ FAC_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_c, HYPR
 		{
 			for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
 			{
-            #if DEBUG_FAC
-            if (hypre_ParCompGridPColInd(compGrid_f)[j] < 0) printf("Rank %d, P has -1 col index when restricting\n", myid);
-            else if (hypre_ParCompGridPColInd(compGrid_f)[j] >= hypre_ParCompGridNumNodes(compGrid_c)) printf("Rank %d, P col index out of bounds when restricting\n", myid);
-            #endif
-				if (hypre_ParCompGridCoarseResidualMarker(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] == 2)
-					hypre_ParCompGridF(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] += res*hypre_ParCompGridPData(compGrid_f)[j];
-			}
+            if (hypre_ParCompGridPColInd(compGrid_f)[j] >= 0)
+            {
+               #if DEBUG_FAC
+               if (hypre_ParCompGridPColInd(compGrid_f)[j] >= hypre_ParCompGridNumNodes(compGrid_c)) printf("Rank %d, P col index out of bounds when restricting\n", myid);
+               #endif
+   				if (hypre_ParCompGridCoarseResidualMarker(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] == 2)
+   					hypre_ParCompGridF(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] += res*hypre_ParCompGridPData(compGrid_f)[j];
+			   }
+         }
 		}
       // #if DUMP_INTERMEDIATE_SOLNS
       // fprintf(file, "%.14e\n", res);
@@ -327,8 +328,8 @@ FAC_Simple_Restrict( hypre_ParCompGrid *compGrid_f, hypre_ParCompGrid *compGrid_
       for (j = hypre_ParCompGridPRowPtr(compGrid_f)[i]; j < hypre_ParCompGridPRowPtr(compGrid_f)[i+1]; j++)
       {
          #if DEBUG_FAC
-         if (hypre_ParCompGridPColInd(compGrid_f)[j] < 0) printf("Rank %d, P has -1 col index when restricting\n", myid);
-         else if (hypre_ParCompGridPColInd(compGrid_f)[j] >= hypre_ParCompGridNumNodes(compGrid_c)) printf("Rank %d, P col index out of bounds when restricting\n", myid);
+         if (hypre_ParCompGridPColInd(compGrid_f)[j] < 0) printf("Rank %d, P has -1 col index when simple restricting\n", myid);
+         else if (hypre_ParCompGridPColInd(compGrid_f)[j] >= hypre_ParCompGridNumNodes(compGrid_c)) printf("Rank %d, P col index out of bounds when simple restricting\n", myid);
          #endif
          hypre_ParCompGridF(compGrid_c)[ hypre_ParCompGridPColInd(compGrid_f)[j] ] += res*hypre_ParCompGridPData(compGrid_f)[j];
       }

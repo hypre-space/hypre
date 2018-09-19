@@ -31,7 +31,8 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    HYPRE_Int **num_request_nodes, HYPRE_Int ***request_nodes,
    HYPRE_Int *num_send_procs, HYPRE_Int **send_procs, 
    HYPRE_Int num_neighboring_procs,
-   HYPRE_Int *send_proc_array_size
+   HYPRE_Int *send_proc_array_size,
+   HYPRE_Int max_starting_nodes_size
    , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int *communication_cost );
 
 HYPRE_Int
@@ -247,20 +248,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    }
    if (timers) hypre_EndTiming(timers[8]);
 
-   #if DEBUG_COMP_GRID == 2
-   for (level = 0; level < num_levels; level++)
-   {
-      sprintf(filename, "outputs/AMG_hierarchy/A_rank%d_level%d.txt", myid, level);
-      hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename);
-      sprintf(filename, "outputs/AMG_hierarchy/coarse_global_indices_rank%d_level%d.txt", myid, level);
-      hypre_ParCompGridCoarseGlobalIndicesDump( compGrid[level], filename);
-      // sprintf(filename, "outputs/AMG_hierarchy/P_rank%d_level%d.txt", myid, level);
-      // hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename);
-      // hypre_sprintf(filename, "outputs/CompGrids/initCompGridRank%dLevel%d.txt", myid, level);
-      // hypre_ParCompGridDebugPrint( compGrid[level], filename );
-   }
-   #endif
-
    // On each level, setup a long distance commPkg that has communication info for distance (eta + numGhostLayers)
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (timers) hypre_BeginTiming(timers[0]);
@@ -270,6 +257,20 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
       SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);
    }
    if (timers) hypre_EndTiming(timers[0]);
+
+   #if DEBUG_COMP_GRID == 2
+   for (level = 0; level < num_levels; level++)
+   {
+      sprintf(filename, "outputs/AMG_hierarchy/A_rank%d_level%d.txt", myid, level);
+      hypre_ParCompGridMatlabAMatrixDump( compGrid[level], filename);
+      sprintf(filename, "outputs/AMG_hierarchy/coarse_global_indices_rank%d_level%d.txt", myid, level);
+      hypre_ParCompGridCoarseGlobalIndicesDump( compGrid[level], filename);
+      sprintf(filename, "outputs/AMG_hierarchy/P_rank%d_level%d.txt", myid, level);
+      hypre_ParCompGridMatlabPMatrixDump( compGrid[level], filename);
+      // hypre_sprintf(filename, "outputs/CompGrids/initCompGridRank%dLevel%d.txt", myid, level);
+      // hypre_ParCompGridDebugPrint( compGrid[level], filename );
+   }
+   #endif
    
    /* Outer loop over levels:
    Start from coarsest level and work up to finest */
@@ -550,7 +551,9 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
          }
       }
       #if DEBUGGING_MESSAGES
-      hypre_printf("      Rank %d: done with level %d\n", myid, level);
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+      if (myid == 0) hypre_printf("All ranks: done with level %d\n", level);
+      hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
       #endif 
 
 
@@ -567,6 +570,12 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // Setup the ghost/real dof markers for the comp grids
    if (use_transition_level) hypre_ParCompGridSetupRealDofMarker(compGrid, transition_level+1, padding);
    else hypre_ParCompGridSetupRealDofMarker(compGrid, num_levels, padding);
+
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("All ranks: done with hypre_ParCompGridSetupRealDofMarker()\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif 
 
    #if DEBUG_COMP_GRID
    // Test whether comp grids have correct shape
@@ -593,8 +602,20 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (use_barriers) hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    if (timers) hypre_BeginTiming(timers[7]);
 
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("All ranks: done with FinalizeSendFlag()\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif 
+
    // Communicate data for A and all info for P
    CommunicateRemainingMatrixInfo(compGrid, compGridCommPkg);
+
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("All ranks: done with CommunicateRemainingMatrixInfo()\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif 
 
    if (timers) hypre_EndTiming(timers[7]);
 
@@ -604,10 +625,22 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    // Setup the local indices for P
    hypre_ParCompGridSetupLocalIndicesP(compGrid, num_levels, transition_level);
 
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("All ranks: done with hypre_ParCompGridSetupLocalIndicesP()\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif 
+
    if (timers) hypre_EndTiming(timers[5]);
 
    // Finalize the comp grid structures (convert matrices to CSR structure, etc.)
    hypre_ParCompGridFinalize(compGrid, num_levels, transition_level);
+
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("All ranks: done with hypre_ParCompGridFinalize()\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif 
 
    // Count up the bandwidth cost for subsequent residual communications
    if (communication_cost)
@@ -737,17 +770,19 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
       // Setup initial num_starting_nodes and starting_nodes (these are the starting nodes when searching for long distance neighbors) !!! I don't think I actually have a good upper bound on sizes here... how to properly allocate/reallocate these? !!!
       HYPRE_Int *num_starting_nodes = hypre_CTAlloc( HYPRE_Int, send_proc_array_size, HYPRE_MEMORY_HOST );
       HYPRE_Int **starting_nodes = hypre_CTAlloc( HYPRE_Int*, send_proc_array_size, HYPRE_MEMORY_HOST );
+      HYPRE_Int max_starting_nodes_size = 0;
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
          finish = hypre_ParCSRCommPkgSendMapStart(commPkg,i+1);
          search_proc_marker[i] = 1;
          num_starting_nodes[i] = finish - start;
+         max_starting_nodes_size += num_starting_nodes[i];
       }
       for (i = 0; i < num_sends; i++)
       {
          start = hypre_ParCSRCommPkgSendMapStart(commPkg,i);
-         starting_nodes[i] = hypre_CTAlloc( HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)), HYPRE_MEMORY_HOST );
+         starting_nodes[i] = hypre_CTAlloc( HYPRE_Int, max_starting_nodes_size, HYPRE_MEMORY_HOST );
          for (j = 0; j < num_starting_nodes[i]; j++)
          {
             starting_nodes[i][j] = hypre_ParCSRCommPkgSendMapElmt(commPkg, j + start );
@@ -768,7 +803,8 @@ SetupNearestProcessorNeighbors( hypre_ParCSRMatrix *A, hypre_ParCompGrid *compGr
             &(num_request_nodes), &(request_nodes),
             &num_sends, &(send_procs), 
             hypre_ParCSRCommPkgNumSends(commPkg),
-            &(send_proc_array_size)
+            &(send_proc_array_size),
+            max_starting_nodes_size
             , level, i, communication_cost); // Note that num_sends may change here
       }
 
@@ -892,7 +928,8 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
    HYPRE_Int **num_request_nodes, HYPRE_Int ***request_nodes,
    HYPRE_Int *num_send_procs, HYPRE_Int **send_procs, 
    HYPRE_Int num_neighboring_procs,
-   HYPRE_Int *send_proc_array_size
+   HYPRE_Int *send_proc_array_size,
+   HYPRE_Int max_starting_nodes_size
    , HYPRE_Int level, HYPRE_Int iteration, HYPRE_Int *communication_cost )
 {
    HYPRE_Int   myid;
@@ -1054,7 +1091,7 @@ FindNeighborProcessors( hypre_ParCompGrid *compGrid, hypre_ParCSRMatrix *A, HYPR
                   // Now
                   (*send_procs)[local_proc_index] = incoming_proc;
                   (*add_flag)[local_proc_index] = hypre_CTAlloc(HYPRE_Int, hypre_ParCSRMatrixNumRows(A), HYPRE_MEMORY_HOST);
-                  (*starting_nodes)[local_proc_index] = hypre_CTAlloc(HYPRE_Int, hypre_CSRMatrixNumCols(hypre_ParCSRMatrixOffd(A)), HYPRE_MEMORY_HOST);
+                  (*starting_nodes)[local_proc_index] = hypre_CTAlloc(HYPRE_Int, max_starting_nodes_size, HYPRE_MEMORY_HOST);
                   (*search_proc_marker)[local_proc_index] = 1;
                }
             }
@@ -1163,7 +1200,21 @@ FindTransitionLevel(hypre_ParAMGData *amg_data)
    HYPRE_Int i;
    HYPRE_Int num_levels = hypre_ParAMGDataNumLevels(amg_data);
    HYPRE_Int use_transition_level = hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data);
-   HYPRE_Int local_transition, global_transition;
+   HYPRE_Int local_transition = num_levels-1;
+   HYPRE_Int global_transition;
+
+
+   // Loop over levels, starting at the finest
+   // for (i = 0; i < num_levels; i++)
+   // {
+   //    HYPRE_Int num_sends_before = hypre_ParCSRCommPkgNumSends(hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[i]));
+   //    HYPRE_Int num_sends_after = hypre_ParCompGridCommPkgNumSends(hypre_ParAMGDataCompGridCommPkg(amg_data))[i];
+   //    if (num_sends_after > num_sends_before)
+   //    {
+   //       local_transition = i + use_transition_level - 1;
+   //       break;
+   //    }
+   // }
 
    // Loop over levels, starting at the coarsest
    for (i = num_levels - 1; i >= 0; i--)
