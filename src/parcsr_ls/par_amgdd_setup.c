@@ -17,7 +17,7 @@
 #include "par_amg.h"
 #include "par_csr_block_matrix.h"	
 
-#define DEBUG_COMP_GRID 0 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
+#define DEBUG_COMP_GRID 1 // if true, runs some tests, prints out what is stored in the comp grids for each processor to a file
 #define DEBUG_PROC_NEIGHBORS 0 // if true, dumps info on the add flag structures that determine nearest processor neighbors 
 #define DEBUGGING_MESSAGES 0 // if true, prints a bunch of messages to the screen to let you know where in the algorithm you are
 
@@ -634,7 +634,11 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (timers) hypre_EndTiming(timers[5]);
 
    // Finalize the comp grid structures (convert matrices to CSR structure, etc.)
-   hypre_ParCompGridFinalize(compGrid, num_levels, transition_level);
+   #if DEBUG_COMP_GRID
+   hypre_ParCompGridFinalize(compGrid, num_levels, transition_level, 1);
+   #else
+   hypre_ParCompGridFinalize(compGrid, num_levels, transition_level, 0);
+   #endif
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);

@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 0
+#define TEST_RES_COMM 1
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -173,7 +173,6 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
       {
          // Do FAC cycle
          hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
-         if (myid == 0) printf("did fac cycle %d\n", cycle_count);
 
          ++cycle_count;
          hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
@@ -264,7 +263,6 @@ ZeroInitialGuess( void *amg_vdata )
 
    HYPRE_Int level;
    for (level = 0; level < hypre_ParAMGDataNumLevels(amg_data); level++)
-   // for (level = 0; level < 1; level++)
    {
       hypre_ParCompGrid    *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++) hypre_ParCompGridU(compGrid)[i] = 0.0;

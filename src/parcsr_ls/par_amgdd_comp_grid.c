@@ -307,15 +307,16 @@ hypre_ParCompGridInitialize ( hypre_ParCompGrid *compGrid, hypre_ParVector *resi
 }
 
 HYPRE_Int
-hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level )
+hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level, HYPRE_Int debug )
 {
    HYPRE_Int delete_global_indices = 1;
    HYPRE_Int delete_old_matrices = 1;
 
-   #ifdef DEBUG_COMP_GRID
-   delete_old_matrices = 0;
-   delete_global_indices = 0;
-   #endif
+   if (debug)
+   {
+      delete_old_matrices = 0;
+      delete_global_indices = 0;
+   }
 
    HYPRE_Int *add_flag_fine = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[0]), HYPRE_MEMORY_HOST);
    HYPRE_Int *add_flag_coarse;
