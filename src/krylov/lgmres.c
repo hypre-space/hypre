@@ -847,7 +847,7 @@ hypre_LGMRESSolve(void  *lgmres_vdata,
    if (b_norm == 0.0)
       (lgmres_data -> rel_residual_norm) = r_norm;
 
-   if (iter >= max_iter && r_norm > epsilon && epsilon > 0) hypre_error(HYPRE_ERROR_CONV);
+   if (iter >= max_iter && r_norm > epsilon) hypre_error(HYPRE_ERROR_CONV);
    
 
    hypre_TFreeF(c,lgmres_functions); 
