@@ -54,6 +54,48 @@ PCG_Iterations = 4
 DSCG_Iterations = 3
 Final Relative Residual Norm = 1.289994e-10
 
+# Output file: solvers.out.12
+
+
+COGMRES Iterations = 7
+Final COGMRES Relative Residual Norm = 4.842561e-09
+
+# Output file: solvers.out.13
+
+
+COGMRES Iterations = 93
+Final COGMRES Relative Residual Norm = 8.225661e-09
+
+# Output file: solvers.out.14
+
+
+COGMRES Iterations = 93
+Final COGMRES Relative Residual Norm = 8.225661e-09
+
+# Output file: solvers.out.15
+
+
+COGMRES Iterations = 93
+Final COGMRES Relative Residual Norm = 8.225662e-09
+
+# Output file: solvers.out.16
+
+
+COGMRES Iterations = 93
+Final COGMRES Relative Residual Norm = 8.225662e-09
+
+# Output file: solvers.out.17
+index 19 value -2.653309e-11
+
+GMRES Iterations = 7
+Final GMRES Relative Residual Norm = 4.842561e-09
+
+# Output file: solvers.out.18
+index 19 value -7.497267e-11
+
+GMRES Iterations = 93
+Final GMRES Relative Residual Norm = 8.225661e-09
+
 # Output file: solvers.out.sysh
  Average Convergence Factor = 0.122031
 

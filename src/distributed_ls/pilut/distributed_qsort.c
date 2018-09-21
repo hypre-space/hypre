@@ -10,8 +10,11 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-
-
+#ifdef __cplusplus
+#define REGISTER 
+#else
+#define REGISTER register
+#endif
 
 /*
  * distributed_qsort.c:
@@ -47,12 +50,12 @@ static HYPRE_Int mthresh;		/* MTHRESHold in chars */
 void
 hypre_tex_qsort(char* base,HYPRE_Int n,HYPRE_Int size, HYPRE_Int (*compar) (char*,char*))
 {
-    register char *i;
-    register char *j;
-    register char *lo;
-    register char *hi;
-    register char *min;
-    register char c;
+    REGISTER char *i;
+    REGISTER char *j;
+    REGISTER char *lo;
+    REGISTER char *hi;
+    REGISTER char *min;
+    REGISTER char c;
     char *max;
 
     if (n <= 1)
@@ -129,12 +132,12 @@ hypre_tex_qsort(char* base,HYPRE_Int n,HYPRE_Int size, HYPRE_Int (*compar) (char
 
 static void qst(char *base, char *max)
 {
-    register char *i;
-    register char *j;
-    register char *jj;
-    register char *mid;
-    register HYPRE_Int ii;
-    register char c;
+    REGISTER char *i;
+    REGISTER char *j;
+    REGISTER char *jj;
+    REGISTER char *mid;
+    REGISTER HYPRE_Int ii;
+    REGISTER char c;
     char *tmp;
     HYPRE_Int lo;
     HYPRE_Int hi;

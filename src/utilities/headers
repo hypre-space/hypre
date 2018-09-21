@@ -54,7 +54,7 @@ cat caliper_instrumentation.h  >> $INTERNAL_HEADER
 cat hypre_nvtx.h               >> $INTERNAL_HEADER
 cat gpuErrorCheck.h            >> $INTERNAL_HEADER
 cat gpuMem.h                   >> $INTERNAL_HEADER
-
+cat hypre_reducesum.h          >> $INTERNAL_HEADER
 cat protos.h                   >> $INTERNAL_HEADER
 
 #===========================================================================

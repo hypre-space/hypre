@@ -359,11 +359,27 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
    hypre_SetIndex3(cindex, 0, 0, 0);
 
    compute_boxes = hypre_StructGridBoxes(hypre_StructMatrixGrid(A));
+   
+   HYPRE_Int     **data_indices = hypre_StructMatrixDataIndices(A);
+   HYPRE_Complex  *matrixA_data = hypre_StructMatrixData(A);
+   HYPRE_Int      *data_indices_d; /* On device */
+   hypre_Index    *stencil_shape_d;
+
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)) && (HYPRE_MEMORY_HOST_ACT != HYPRE_MEMORY_SHARED)
+   HYPRE_Int nboxes = hypre_BoxArraySize(compute_boxes);
+   data_indices_d  = hypre_TAlloc(HYPRE_Int,   stencil_size*nboxes, HYPRE_MEMORY_DEVICE);
+   stencil_shape_d = hypre_TAlloc(hypre_Index, stencil_size,        HYPRE_MEMORY_DEVICE);
+   hypre_TMemcpy(data_indices_d, data_indices[0], HYPRE_Int, stencil_size*nboxes,
+                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+   hypre_TMemcpy(stencil_shape_d, stencil_shape, hypre_Index, stencil_size, 
+                 HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST);
+#else
+   data_indices_d  = data_indices[0];
+   stencil_shape_d = stencil_shape;
+#endif
+
    hypre_ForBoxI(i, compute_boxes)
    {
-
-      hypre_MatrixIndexMove(A, stencil_size, i, ierr,3);
-     
       compute_box = hypre_BoxArrayBox(compute_boxes, i);
 
       A_dbox = hypre_BoxArrayBox(hypre_StructMatrixDataSpace(A), i);
@@ -377,30 +393,25 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       hypre_StructMapCoarseToFine(start, cindex, stridev, startv);
       hypre_BoxGetSize(compute_box, loop_size);
 
-#undef DEVICE_VAR
-#define DEVICE_VAR is_device_ptr(stencil_shape_d,vxp,vyp,vzp,data_A,indices_d)
+#define DEVICE_VAR is_device_ptr(stencil_shape_d,vxp,vyp,vzp,data_indices_d,matrixA_data)
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
                           A_dbox, start,  stride,  Ai,
                           v_dbox, startv, stridev, vi);
       {
          HYPRE_Real lambdax,lambday,lambdaz;
          HYPRE_Real *Ap;
-         HYPRE_Int si,Astenc;
-		  
+         HYPRE_Int si, Astenc;
+
          lambdax = 0.0;
          lambday = 0.0;
          lambdaz = 0.0;
 
-		 
          for (si = 0; si < stencil_size; si++)
          {
-            //Ap = hypre_StructMatrixBoxData(A, i, si);
-            //Ap = data_A + indices_d[si];
-            Ap = hypre_StructGetMatrixBoxData(A, i, si);
+            Ap = matrixA_data + data_indices_d[i*stencil_size+si];
+
             /* compute lambdax */
-            //Astenc = hypre_IndexD(stencil_shape[si], 0);
-            //Astenc = stencil_shape_d[si];
-            Astenc = hypre_StructGetIndexD(stencil_shape[si], 0,stencil_shape_d[si]);
+            Astenc = hypre_IndexD(stencil_shape_d[si], 0);
             if (Astenc == 0)
             {
                lambdax += Ap[Ai];
@@ -411,10 +422,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
             }
 
             /* compute lambday */
-            //Astenc = hypre_IndexD(stencil_shape[si], 1);
-	    //Astenc = stencil_shape_d[stencil_size+si];
-	    Astenc = hypre_StructGetIndexD(stencil_shape[si], 1,stencil_shape_d[stencil_size+si]);
-	    
+            Astenc = hypre_IndexD(stencil_shape_d[si], 1);
             if (Astenc == 0)
             {
                lambday += Ap[Ai];
@@ -425,9 +433,7 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
             }
 
             /* compute lambdaz */
-            //Astenc = hypre_IndexD(stencil_shape[si], 2);
-	    //Astenc = stencil_shape_d[2*stencil_size+si];
-	    Astenc = hypre_StructGetIndexD(stencil_shape[si], 2,stencil_shape_d[2*stencil_size+si]);
+            Astenc = hypre_IndexD(stencil_shape_d[si], 2);
             if (Astenc == 0)
             {
                lambdaz += Ap[Ai];
@@ -448,10 +454,12 @@ hypre_SparseMSGFilterSetup( hypre_StructMatrix *A,
       }
       hypre_BoxLoop2End(Ai, vi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
-
-      hypre_StructCleanIndexD();	  
    }
+
+#if (defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)) && (HYPRE_MEMORY_HOST_ACT != HYPRE_MEMORY_SHARED)
+   hypre_TFree(data_indices_d,  HYPRE_MEMORY_DEVICE);
+   hypre_TFree(stencil_shape_d, HYPRE_MEMORY_DEVICE);
+#endif
 
    return ierr;
 }
@@ -516,7 +524,6 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
       hypre_StructMapCoarseToFine(start, cindex, stridev, startv);
       hypre_BoxGetSize(compute_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(ep,vp)
       hypre_BoxLoop2Begin(hypre_StructVectorNDim(e), loop_size,
                           e_dbox, start,  stride,  ei,
@@ -526,7 +533,6 @@ hypre_SparseMSGFilter( hypre_StructVector *visit,
       }
       hypre_BoxLoop2End(ei, vi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
    }
 
    return ierr;

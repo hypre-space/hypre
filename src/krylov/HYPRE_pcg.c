@@ -361,9 +361,9 @@ HYPRE_PCGGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int HYPRE_PCGGetResidual( HYPRE_Solver   solver,
-                                void         **residual )
+                                void         *residual )
 {
    /* returns a pointer to the residual vector */
-   return hypre_PCGGetResidual( (void *) solver, residual );
+   return hypre_PCGGetResidual( (void *) solver, (void **) residual );
 }
 

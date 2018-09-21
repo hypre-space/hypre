@@ -24,6 +24,8 @@
  * Test driver to time new boxloops and compare to the old ones
  *--------------------------------------------------------------------------*/
  
+#define DEVICE_VAR 
+
 hypre_int
 main( hypre_int argc,
       char *argv[] )

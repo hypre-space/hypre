@@ -1,4 +1,4 @@
-#ifdef HYPRE_USE_GPU
+#ifdef HYPRE_USING_GPU
 #include <cuda_runtime_api.h>
 int VecScaleScalar(double *u, const double alpha,  int num_rows,cudaStream_t s);
 void VecCopy(double* tgt, const double* src, int size,cudaStream_t s);
