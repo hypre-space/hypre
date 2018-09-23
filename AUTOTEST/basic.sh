@@ -62,9 +62,23 @@ do
          opvar="eopts"; eset="yes"; shift
          ;;
       *)
-         eval $opvar=\"\$$opvar $1\"
-         shift
-         ;;
+         case $opvar in
+            copts)
+               copts="$copts $1"; shift
+               ;;
+            mopts)
+               mopts="$mopts $1"; shift
+               ;;
+            ropts)
+               ropts="$ropts $1"; shift
+               ;;
+            eopts)
+               eopts="$eopts $1"; shift
+               ;;
+            *)
+               (>&2 echo $opvar); shift
+         esac
+         #eval $opvar=\"\$$opvar $tmp\"
    esac
 done
 
@@ -76,7 +90,8 @@ mkdir -p $output_dir
 
 # Configure
 # NOTE: The use of 'eval' is needed to deal properly with nested quotes in argument lists
-eval ./test.sh configure.sh $src_dir $copts
+#eval ./test.sh configure.sh $src_dir $copts
+./test.sh configure.sh $src_dir $copts
 mv -f configure.??? $output_dir
 
 # Make

@@ -61,17 +61,18 @@ hypre_int pointerIsManaged(const void *ptr);
  */
 
 #define MAX_HGS_ELEMENTS 10
-struct hypre__global_struct{
-  hypre_int initd;
-  hypre_int device;
-  hypre_int device_count;
-  size_t memoryHWM;
-  cublasHandle_t cublas_handle;
-  cusparseHandle_t cusparse_handle;
-  cusparseMatDescr_t cusparse_mat_descr;
-  cudaStream_t streams[MAX_HGS_ELEMENTS];
-  nvtxDomainHandle_t nvtx_domain;
-  hypre_int concurrent_managed_access;
+struct hypre__global_struct
+{
+   hypre_int initd;
+   hypre_int device;
+   hypre_int device_count;
+   size_t memoryHWM;
+   cublasHandle_t cublas_handle;
+   cusparseHandle_t cusparse_handle;
+   cusparseMatDescr_t cusparse_mat_descr;
+   cudaStream_t streams[MAX_HGS_ELEMENTS];
+   nvtxDomainHandle_t nvtx_domain;
+   hypre_int concurrent_managed_access;
 };
 
 extern struct hypre__global_struct hypre__global_handle ;
@@ -108,8 +109,8 @@ size_t memsize(const void *ptr);
 
 
 #if defined(HYPRE_USING_DEVICE_OPENMP)
-HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
-			   const char *type1, const char *type2);
+HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num,
+                           const char *type1, const char *type2);
 
 HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num);
 

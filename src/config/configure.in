@@ -468,6 +468,12 @@ AS_HELP_STRING([--with-extra-CXXFLAGS=ARG],
 [EXTRA_CXXFLAGS=$withval]
 )
 
+AC_ARG_WITH(extra-BUILDFLAGS,
+AS_HELP_STRING([--with-extra-BUILDFLAGS=ARG],
+               [Define extra library build flag, where ARG is a space-separated
+                list (enclosed in quotes) of directories.]),
+[EXTRA_BUILDFLAGS=$withval]
+)
 
 AC_ARG_WITH(extra-incpath,
 AS_HELP_STRING([--with-extra-incpath=PATH],
@@ -1101,7 +1107,7 @@ then
       then
          AC_CHECK_PROGS(CC, [mpixlc-gpu mpiclang-gpu])
       fi
-      
+
       if test "$hypre_using_openmp" = "yes"
       then
          AC_CHECK_PROGS(CC, [mpxlc mpixlc_r mpixlc mpiicc mpigcc mpicc mpipgcc])
@@ -1516,7 +1522,7 @@ fi
 if [test "$hypre_using_cuda" = "yes" || test "$hypre_using_device_openmp" = "yes" || test "$hypre_using_um" = "yes"]
 then
    AC_CHECK_HEADERS(["${CUDA_HOME}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_HOME}])
-   
+
    if test "x$hypre_found_cuda" != "xyes"
    then
       AC_CHECK_HEADERS(["${CUDA_PATH}/include/cuda.h"], [hypre_found_cuda=yes; HYPRE_CUDA_PATH=${CUDA_PATH}])
@@ -1597,10 +1603,12 @@ then
       HYPRE_CUDA_SM=60
    fi
 
-   CUFLAGS+="-O2 -ccbin=$NVCCBIN -gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\" -expt-extended-lambda -dc --std=c++11 -Xcompiler -Wno-deprecated-register --x cu"
+   HYPRE_CUDA_GENCODE="-gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\""
+
+   CUFLAGS+="-O2 -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc --std=c++11 -Xcompiler -Wno-deprecated-register --x cu"
    CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
    CFLAGS=${CXXFLAGS}
-   LDFLAGS="-ccbin=$NVCCBIN -gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\" -Xcompiler \"${LDFLAGS}\""
+   LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
 fi
@@ -1696,6 +1704,11 @@ dnl                          LINK_F77="${F77} -brtl"
                                    SHARED_OPTIONS="-undefined error" ;;
                        *) SHARED_BUILD_FLAG="-shared" ;;
    esac
+   if [test "x$CXX" = "xnvcc" || test "x$CC" = "xnvcc"]
+   then
+      SHARED_BUILD_FLAG="${SHARED_BUILD_FLAG} ${HYPRE_CUDA_GENCODE}"
+   fi
+   SHARED_BUILD_FLAG="${SHARED_BUILD_FLAG} ${EXTRA_BUILDFLAGS}"
    FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
    CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"

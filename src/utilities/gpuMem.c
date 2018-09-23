@@ -22,7 +22,7 @@ HYPRE_Int hypre_exec_policy = HYPRE_MEMORY_DEVICE;
 hypre_int ggc(hypre_int id);
 
 /* Global struct that holds device,library handles etc */
-struct hypre__global_struct hypre__global_handle = { .initd=0, .device=0, .device_count=1, .memoryHWM=0};
+struct hypre__global_struct hypre__global_handle = {0, 0, 1, 0};
 
 /* Initialize GPU branch of Hypre AMG */
 /* use_device =-1 */
@@ -32,7 +32,7 @@ void hypre_GPUInit(hypre_int use_device)
    char pciBusId[80];
    hypre_int myid;
    hypre_int nDevices;
-   hypre_int device;
+   //hypre_int device;
 #if defined(TRACK_MEMORY_ALLOCATIONS)
    hypre_printf("\n\n\n WARNING :: TRACK_MEMORY_ALLOCATIONS IS ON \n\n");
 #endif /* TRACK_MEMORY_ALLOCATIONS */
@@ -47,7 +47,7 @@ void hypre_GPUInit(hypre_int use_device)
       nDevices = 1; /* DO NOT COMMENT ME OUT AGAIN! nDevices does NOT WORK !!!! */
       HYPRE_DEVICE_COUNT=nDevices;
 
-      /* TODO cannot use nDevices to check if mpibind is used, need to rewrite 
+      /* TODO cannot use nDevices to check if mpibind is used, need to rewrite
        * E.g., NP=5 on 2 nodes, nDevices=1,1,1,1,4 */
 
       if (use_device<0)
@@ -77,7 +77,7 @@ void hypre_GPUInit(hypre_int use_device)
             if (round_robin)
             {
                /* Round robin allocation of GPUs. Does not account for affinities */
-               HYPRE_DEVICE=myNodeid%nDevices; 
+               HYPRE_DEVICE=myNodeid%nDevices;
                hypre_CheckErrorDevice(cudaSetDevice(HYPRE_DEVICE));
                cudaDeviceGetPCIBusId ( pciBusId, 80, HYPRE_DEVICE);
                hypre_printf("WARNING:: Code running without mpibind\n");
@@ -132,7 +132,7 @@ void hypre_GPUInit(hypre_int use_device)
       cusparseErrchk(cusparseCreate(&(HYPRE_CUSPARSE_HANDLE)));
       cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,HYPRE_STREAM(4)));
       //cusparseErrchk(cusparseSetStream(HYPRE_CUSPARSE_HANDLE,0)); // Cusparse MxV happens in default stream
-      cusparseErrchk(cusparseCreateMatDescr(&(HYPRE_CUSPARSE_MAT_DESCR))); 
+      cusparseErrchk(cusparseCreateMatDescr(&(HYPRE_CUSPARSE_MAT_DESCR)));
       cusparseErrchk(cusparseSetMatType(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_MATRIX_TYPE_GENERAL));
       cusparseErrchk(cusparseSetMatIndexBase(HYPRE_CUSPARSE_MAT_DESCR,CUSPARSE_INDEX_BASE_ZERO));
 
@@ -202,7 +202,7 @@ void MemPrefetch(const void *ptr,hypre_int device,cudaStream_t stream){
      hypre_CheckErrorDevice(cudaStreamSynchronize(stream));
      POP_RANGE;
      return;
-  } 
+  }
   return;
 }
 
@@ -224,7 +224,7 @@ void MemPrefetchSized(const void *ptr,size_t size,hypre_int device,cudaStream_t 
     hypre_CheckErrorDevice(cudaMemPrefetchAsync(ptr,size,device,stream));
     POP_RANGE_DOMAIN(0);
     return;
-  } 
+  }
   return;
 }
 
@@ -349,8 +349,8 @@ void affs(hypre_int myid){
   hypre_int retval=sched_getaffinity(0, size,mask);
   if (!retval){
      for(i=0;i<NCPUS;i++){
-        if (CPU_ISSET(i,mask)) 
-           cpus[i]=1; 
+        if (CPU_ISSET(i,mask))
+           cpus[i]=1;
         else
            cpus[i]=0;
      }
@@ -378,7 +378,7 @@ hypre_int getcore(){
   const hypre_int NCPUS=160;
   cpu_set_t* mask = CPU_ALLOC(NCPUS);
   size_t size = CPU_ALLOC_SIZE(NCPUS);
-  hypre_int cpus[NCPUS],i;
+  hypre_int /*cpus[NCPUS],*/i;
   hypre_int retval=sched_getaffinity(0, size,mask);
   if (!retval){
     for(i=0;i<NCPUS;i+=20){
@@ -401,7 +401,7 @@ hypre_int getcore(){
     }
   }
   return 0;
-  CPU_FREE(mask);
+  //CPU_FREE(mask);
 
 }
 hypre_int getnuma(){
@@ -412,10 +412,10 @@ hypre_int getnuma(){
   /* HARDWIRED FOR 2 NUMA DOMAINS */
   if (!retval){
     hypre_int sum0=0,i;
-    for(i=0;i<NCPUS/2;i++) 
+    for(i=0;i<NCPUS/2;i++)
       if (CPU_ISSET(i,mask)) sum0++;
     hypre_int sum1=0;
-    for(i=NCPUS/2;i<NCPUS;i++) 
+    for(i=NCPUS/2;i<NCPUS;i++)
       if (CPU_ISSET(i,mask)) sum1++;
     CPU_FREE(mask);
     if (sum0>sum1) return 0;
@@ -434,8 +434,8 @@ hypre_int getnuma(){
     }
   }
   return 0;
-  CPU_FREE(mask);
-  
+  //CPU_FREE(mask);
+
 }
 hypre_int checkDeviceProps(){
   struct cudaDeviceProp prop;
@@ -446,7 +446,7 @@ hypre_int checkDeviceProps(){
 hypre_int pointerIsManaged(const void *ptr){
   struct cudaPointerAttributes ptr_att;
   if (cudaPointerGetAttributes(&ptr_att,ptr)!=cudaSuccess) {
-    cudaGetLastError(); 
+    cudaGetLastError();
     return 0;
   }
   return ptr_att.isManaged;
@@ -567,7 +567,7 @@ void printlist(node *head,hypre_int nc){
 #include <omp.h>
 
 /* num: number of bytes */
-HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num, 
+HYPRE_Int HYPRE_OMPOffload(HYPRE_Int device, void *ptr, size_t num,
                            const char *type1, const char *type2) {
    hypre_omp45_offload(device, ptr, char, 0, num, type1, type2);
 
@@ -585,7 +585,7 @@ HYPRE_Int HYPRE_OMPPtrIsMapped(void *p, HYPRE_Int device_num)
 
 /* OMP offloading switch */
 HYPRE_Int HYPRE_OMPOffloadOn()
-{ 
+{
    hypre__global_offload = 1;
    hypre__offload_device_num = omp_get_default_device();
    hypre__offload_host_num   = omp_get_initial_device();

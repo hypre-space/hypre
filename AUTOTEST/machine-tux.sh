@@ -24,7 +24,7 @@ case $1 in
 
    where: -h|-help   prints this usage information and exits
           {src_dir}  is the hypre source directory
-          
+
 
    This script runs a number of tests suitable for the tux machines.
 
