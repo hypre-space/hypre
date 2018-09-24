@@ -62,15 +62,20 @@ co=""
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-default
 
+eval ./test.sh configure.sh $src_dir $co
+eval ./test.sh make.sh      $src_dir $mo
 # Test linking for different languages (depends on previous compile test)
 link_opts="all++ all77"
 for opt in $link_opts
 do
    output_subdir=$output_dir/link$opt
    mkdir -p $output_subdir
+   cp -r configure.??? make.??? $output_subdir
    ./test.sh link.sh $src_dir $opt
    mv -f link.??? $output_subdir
 done
+rm -rf configure.??? make.???
+( cd $src_dir; make distclean )
 
 co="--without-MPI"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo

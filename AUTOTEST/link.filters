@@ -2,4 +2,3 @@ End of Compilation
 Compilation successful for file
 Additional optimization may be attained by recompiling and specifying MAXMEM option with a value greater than 8192.
 The device linker only supports static linking.  Any device code placed into a shared library by the qmkshrobj option will be inaccessible.
-
