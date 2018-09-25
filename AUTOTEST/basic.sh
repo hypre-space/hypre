@@ -62,23 +62,9 @@ do
          opvar="eopts"; eset="yes"; shift
          ;;
       *)
-         case $opvar in
-            copts)
-               copts="$copts $1"; shift
-               ;;
-            mopts)
-               mopts="$mopts $1"; shift
-               ;;
-            ropts)
-               ropts="$ropts $1"; shift
-               ;;
-            eopts)
-               eopts="$eopts $1"; shift
-               ;;
-            *)
-               (>&2 echo $opvar); shift
-         esac
-         #eval $opvar=\"\$$opvar $tmp\"
+         eval $opvar=\"\$$opvar $1\"
+         shift
+         ;;
    esac
 done
 
