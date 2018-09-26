@@ -64,12 +64,12 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
    alpha = -1.0;
    beta = 1.0;
    hypre_ParCSRMatrixMatvec(alpha, A, u, beta, f);
-   resid_nrm = sqrt(hypre_ParVectorInnerProd(f,f));
 
    // Setup convergence tolerance info
-   resid_nrm_init = resid_nrm;
    if (tol > 0.)
    {
+      resid_nrm = sqrt(hypre_ParVectorInnerProd(f,f));
+      resid_nrm_init = resid_nrm;
       if (0 == converge_type)
       {
          rhs_norm = sqrt(hypre_ParVectorInnerProd(hypre_ParAMGDataVtemp(amg_data), hypre_ParAMGDataVtemp(amg_data)));
@@ -101,10 +101,10 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
       if (error_code) test_failed = 1;
 
       // Calculate a new resiudal
-      hypre_ParVectorCopy(hypre_ParAMGDataVtemp(amg_data), f);
-      hypre_ParCSRMatrixMatvec(alpha, A, u, beta, f);
       if (tol > 0.)
       {
+         hypre_ParVectorCopy(hypre_ParAMGDataVtemp(amg_data), f);
+         hypre_ParCSRMatrixMatvec(alpha, A, u, beta, f);
          resid_nrm = sqrt(hypre_ParVectorInnerProd(f,f));
          if (0 == converge_type)
          {
@@ -135,8 +135,6 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
    return test_failed;
 }
 
-
-
 HYPRE_Int
 hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 {
@@ -160,32 +158,56 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
 	ZeroInitialGuess( amg_vdata );
 
    // Setup convergence tolerance info
-   HYPRE_Real resid_nrm;
-   if (fac_tol > 0.) resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+   HYPRE_Real resid_nrm = 1.;
+   if (fac_tol != 0.) resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
    HYPRE_Real resid_nrm_init = resid_nrm;
    HYPRE_Real relative_resid = 1.;
    HYPRE_Real conv_fact = 0;
    
 	// Do the cycles
-   // while ( (relative_resid >= fac_tol || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
-   while ( (conv_fact <= fac_tol || conv_fact >= 1.0 || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
+   if (fac_tol == 0.0)
    {
-      // Do FAC cycle
-		hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
-
-      // Check convergence and up the cycle count
-      if (fac_tol > 0.)
+      while ( cycle_count < max_fac_iter )
       {
-         resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
-         conv_fact = resid_nrm / (relative_resid * resid_nrm_init);
-         relative_resid = resid_nrm / resid_nrm_init;
+         // Do FAC cycle
+         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
+
+         ++cycle_count;
+         hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
       }
-      ++cycle_count;
-      hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
-	}
+   }
+   else if (fac_tol > 0)
+   {
+      while ( (relative_resid >= fac_tol || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
+      {
+         // Do FAC cycle
+   		hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
 
+         // Check convergence and up the cycle count
+         resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+         relative_resid = resid_nrm / resid_nrm_init;
 
+         ++cycle_count;
+         hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
+   	}
+   }
+   else if (fac_tol < 0)
+   {
+      fac_tol = -fac_tol;
+      while ( (conv_fact <= fac_tol || conv_fact >= 1.0 || cycle_count < min_fac_iter) && cycle_count < max_fac_iter )
+      {
+         // Do FAC cycle
+         hypre_BoomerAMGDD_FAC_Cycle( amg_vdata );
 
+         // Check convergence and up the cycle count
+         resid_nrm = GetCompositeResidual(hypre_ParAMGDataCompGrid(amg_data)[0]);
+         conv_fact = resid_nrm / resid_nrm_init;
+         resid_nrm_init = resid_nrm;
+         ++cycle_count;
+         hypre_ParAMGDataNumFACIterations(amg_data) = cycle_count;
+      }
+   }
+   
 	// Update fine grid solution
    AddSolution( amg_vdata );
 
@@ -235,19 +257,16 @@ ZeroInitialGuess( void *amg_vdata )
 	hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid );
 
 	hypre_ParAMGData	*amg_data = amg_vdata;
-   	hypre_ParCompGrid 	**compGrid = hypre_ParAMGDataCompGrid(amg_data);
-   	HYPRE_Int 			num_nodes;
-   	HYPRE_Int 			i, level;
-   	HYPRE_Int 			num_levels = hypre_ParAMGDataNumLevels(amg_data);
+   HYPRE_Int i;
 
-   	for (level = 0; level < num_levels; level++)
-   	{
-   		num_nodes = hypre_ParCompGridNumNodes(compGrid[level]);
-
-   		for (i = 0; i < num_nodes; i++) hypre_ParCompGridU(compGrid[level])[i] = 0.0;
-   	}
-
-   	return 0;
+   HYPRE_Int level;
+   for (level = 0; level < hypre_ParAMGDataNumLevels(amg_data); level++)
+   {
+      hypre_ParCompGrid    *compGrid = hypre_ParAMGDataCompGrid(amg_data)[level];
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid); i++) hypre_ParCompGridU(compGrid)[i] = 0.0;
+   }
+	
+	return 0;
 }
 
 HYPRE_Int 

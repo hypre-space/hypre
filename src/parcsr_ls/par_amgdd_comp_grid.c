@@ -307,18 +307,25 @@ hypre_ParCompGridInitialize ( hypre_ParCompGrid *compGrid, hypre_ParVector *resi
 }
 
 HYPRE_Int
-hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level )
+hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level, HYPRE_Int debug )
 {
-   HYPRE_Int delete_global_indices = 0;
-   HYPRE_Int delete_old_matrices = 0;
+   HYPRE_Int delete_global_indices = 1;
+   HYPRE_Int delete_old_matrices = 1;
+
+   if (debug)
+   {
+      delete_old_matrices = 0;
+      delete_global_indices = 0;
+   }
 
    HYPRE_Int *add_flag_fine = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[0]), HYPRE_MEMORY_HOST);
    HYPRE_Int *add_flag_coarse;
 
    HYPRE_Int i,j,k,cnt,level;
+
+   // Clean up memory for things we don't need anymore
    for (level = 0; level < transition_level; level++)
    {
-      // Clean up memory for things we don't need anymore
       if (hypre_ParCompGridGlobalIndices(compGrid[level]) && delete_global_indices)
       {
          hypre_TFree(hypre_ParCompGridGlobalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
@@ -334,7 +341,21 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
          hypre_TFree(hypre_ParCompGridCoarseLocalIndices(compGrid[level]), HYPRE_MEMORY_HOST);
          hypre_ParCompGridCoarseLocalIndices(compGrid[level]) = NULL;
       }
+   }
 
+
+   // // !!! Debug
+   // HYPRE_Int myid;
+   // hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // if (myid == 0) hypre_printf("     All ranks: done with clean up memory\n");
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+
+
+
+   // Switch representation of A to CSR
+   for (level = 0; level < transition_level; level++)
+   {
       // Count the number of nonzeros in A
       cnt = 0;
       for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++) cnt += hypre_ParCompMatrixRowSize( hypre_ParCompGridARows(compGrid[level])[i] );
@@ -357,8 +378,28 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
             cnt++;
          }
       }
-      hypre_ParCompGridARowPtr(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) ] = cnt;
+      hypre_ParCompGridARowPtr(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) ] = cnt;      // Clean up memory for the previous matrix representations
+      
+      if (delete_old_matrices)
+      {
+         for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
+         {
+            hypre_ParCompMatrixRowDestroy(hypre_ParCompGridARows(compGrid[level])[i]);
+         }
+         hypre_TFree(hypre_ParCompGridARows(compGrid[level]), HYPRE_MEMORY_HOST);
+         hypre_ParCompGridARows(compGrid[level]) = NULL;
+      }
+   }
+ 
+   // // !!! Debug
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // if (myid == 0) hypre_printf("     All ranks: done with A to CSR\n");
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
+
+   // Switch representation of P to CSR
+   for (level = 0; level < transition_level; level++)
+   {
       // If we have a P matrix
       if (hypre_ParCompGridPRows(compGrid[level]))
       {
@@ -385,22 +426,9 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
             }
          }
          hypre_ParCompGridPRowPtr(compGrid[level])[ hypre_ParCompGridNumNodes(compGrid[level]) ] = cnt;
-      }
 
-      // Clean up memory for the previous matrix representations
-      if (delete_old_matrices)
-      {
-         if (hypre_ParCompGridARows(compGrid[level]))
-         {
-            for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
-            {
-               hypre_ParCompMatrixRowDestroy(hypre_ParCompGridARows(compGrid[level])[i]);
-            }
-            hypre_TFree(hypre_ParCompGridARows(compGrid[level]), HYPRE_MEMORY_HOST);
-            hypre_ParCompGridARows(compGrid[level]) = NULL;
-         }
-
-         if (hypre_ParCompGridPRows(compGrid[level]))
+         // Clean up memory for the previous matrix representations
+         if (delete_old_matrices)
          {
             for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[level]); i++)
             {
@@ -410,8 +438,16 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
             hypre_ParCompGridPRows(compGrid[level]) = NULL;
          }
       }
+   }
 
-      // Setup the coarse residual marker for use in FAC cycles
+   // // !!! Debug
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // if (myid == 0) hypre_printf("     All ranks: done with P to CSR\n");
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+
+   // Setup the coarse residual marker for use in FAC cycles
+   for (level = 0; level < transition_level; level++)
+   {
       if (level != 0)
       {
          hypre_ParCompGridCoarseResidualMarker(compGrid[level]) = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[level]), HYPRE_MEMORY_HOST); // mark the coarse dofs as we restrict (or don't) to make sure they are all updated appropriately: 0 = nothing has happened yet, 1 = has incomplete residual info, 2 = restricted to from fine grid
@@ -428,7 +464,8 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
                {
                   for (k = hypre_ParCompGridPRowPtr(compGrid[level-1])[i]; k < hypre_ParCompGridPRowPtr(compGrid[level-1])[i+1]; k++)
                   {
-                     hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
+                     if (hypre_ParCompGridPColInd(compGrid[level-1])[k] >= 0)
+                        hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[k] ] = 1; // Mark coarse dofs that we don't want to restrict to from fine grid
                   }
                   break;
                }
@@ -441,15 +478,24 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
             // Loop over entries in P
             for (j = hypre_ParCompGridPRowPtr(compGrid[level-1])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level-1])[i+1]; j++)
             {
-               // Add contribution to restricted residual where appropriate
-               if (hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] != 1) 
+               if (hypre_ParCompGridPColInd(compGrid[level-1])[j] >= 0)
                {
-                  hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] = 2; // Mark coarse dofs that successfully recieve their value from restriction from the fine grid
+                  // Add contribution to restricted residual where appropriate
+                  if (hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] != 1) 
+                  {
+                     hypre_ParCompGridCoarseResidualMarker(compGrid[level])[ hypre_ParCompGridPColInd(compGrid[level-1])[j] ] = 2; // Mark coarse dofs that successfully recieve their value from restriction from the fine grid
+                  }
                }
             }
          }
       }
    }
+
+   // // !!! Debug
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // if (myid == 0) hypre_printf("     All ranks: done with coarse residual marker\n");
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+
 
    // Setup the coarse residual marker for use in FAC cycles
    if (transition_level != num_levels)

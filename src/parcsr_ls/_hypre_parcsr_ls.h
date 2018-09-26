@@ -299,6 +299,8 @@ typedef struct
    HYPRE_Int                 min_fac_iter;
    HYPRE_Int                 max_fac_iter;
    HYPRE_Real                fac_tol;
+   HYPRE_Int                 fac_relax_type;
+   HYPRE_Int                 fac_num_relax;
    HYPRE_Int                 padding;
    HYPRE_Int                 num_ghost_layers;
    HYPRE_Int                 use_transition_level;
@@ -365,8 +367,7 @@ typedef struct
    /* log info */
    HYPRE_Int      logging;
    HYPRE_Int      num_iterations;
-   HYPRE_Int      num_fac_iterations;\
-   HYPRE_Int      fac_relax_type;
+   HYPRE_Int      num_fac_iterations;
 #ifdef CUMNUMIT
    HYPRE_Int      cum_num_iterations;
 #endif
@@ -562,6 +563,8 @@ typedef struct
 #define hypre_ParAMGDataMinFACIter(amg_data) ((amg_data)->min_fac_iter)
 #define hypre_ParAMGDataMaxFACIter(amg_data) ((amg_data)->max_fac_iter)
 #define hypre_ParAMGDataFACTol(amg_data) ((amg_data)->fac_tol)
+#define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
+#define hypre_ParAMGDataFACNumRelax(amg_data) ((amg_data)->fac_num_relax)
 #define hypre_ParAMGDataAMGDDPadding(amg_data) ((amg_data)->padding)
 #define hypre_ParAMGDataAMGDDNumGhostLayers(amg_data) ((amg_data)->num_ghost_layers)
 #define hypre_ParAMGDataAMGDDUseTransitionLevel(amg_data) ((amg_data)->use_transition_level)
@@ -593,7 +596,6 @@ typedef struct
 #define hypre_ParAMGDataLogging(amg_data) ((amg_data)->logging)
 #define hypre_ParAMGDataNumIterations(amg_data) ((amg_data)->num_iterations)
 #define hypre_ParAMGDataNumFACIterations(amg_data) ((amg_data)->num_fac_iterations)
-#define hypre_ParAMGDataFACRelaxType(amg_data) ((amg_data)->fac_relax_type)
 #ifdef CUMNUMIT
 #define hypre_ParAMGDataCumNumIterations(amg_data) ((amg_data)->cum_num_iterations)
 #endif
@@ -968,8 +970,10 @@ HYPRE_Int HYPRE_BoomerAMGSetMaxFACIter ( HYPRE_Solver solver , HYPRE_Int max_fac
 HYPRE_Int HYPRE_BoomerAMGGetMaxFACIter ( HYPRE_Solver solver , HYPRE_Int *max_fac_iter );
 HYPRE_Int HYPRE_BoomerAMGSetFACTol ( HYPRE_Solver solver , HYPRE_Real fac_tol );
 HYPRE_Int HYPRE_BoomerAMGGetFACTol ( HYPRE_Solver solver , HYPRE_Real *fac_tol );
-HYPRE_Int HYPRE_BoomerAMGSetFACRelaxType ( HYPRE_Solver solver , HYPRE_Real fac_relax_type );
-HYPRE_Int HYPRE_BoomerAMGGetFACRelaxType ( HYPRE_Solver solver , HYPRE_Real *fac_relax_type );
+HYPRE_Int HYPRE_BoomerAMGSetFACRelaxType ( HYPRE_Solver solver , HYPRE_Int fac_relax_type );
+HYPRE_Int HYPRE_BoomerAMGGetFACRelaxType ( HYPRE_Solver solver , HYPRE_Int *fac_relax_type );
+HYPRE_Int HYPRE_BoomerAMGSetFACNumRelax ( HYPRE_Solver solver, HYPRE_Int fac_num_relax );
+HYPRE_Int HYPRE_BoomerAMGGetFACNumRelax ( HYPRE_Solver solver, HYPRE_Int *fac_num_relax );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int padding );
 HYPRE_Int HYPRE_BoomerAMGGetAMGDDPadding ( HYPRE_Solver solver , HYPRE_Int *padding );
 HYPRE_Int HYPRE_BoomerAMGSetAMGDDNumGhostLayers ( HYPRE_Solver solver , HYPRE_Int num_ghost_layers );
@@ -1413,8 +1417,10 @@ HYPRE_Int hypre_BoomerAMGSetMaxFACIter ( void *data , HYPRE_Int max_fac_iter );
 HYPRE_Int hypre_BoomerAMGGetMaxFACIter ( void *data , HYPRE_Int *max_fac_iter );
 HYPRE_Int hypre_BoomerAMGSetFACTol ( void *data , HYPRE_Real fac_tol );
 HYPRE_Int hypre_BoomerAMGGetFACTol ( void *data , HYPRE_Real *fac_tol );
-HYPRE_Int hypre_BoomerAMGSetFACRelaxType ( void *data , HYPRE_Real fac_relax_type );
-HYPRE_Int hypre_BoomerAMGGetFACRelaxType ( void *data , HYPRE_Real *fac_relax_type );
+HYPRE_Int hypre_BoomerAMGSetFACRelaxType ( void *data , HYPRE_Int fac_relax_type );
+HYPRE_Int hypre_BoomerAMGGetFACRelaxType ( void *data , HYPRE_Int *fac_relax_type );
+HYPRE_Int hypre_BoomerAMGSetFACNumRelax ( void *data, HYPRE_Int fac_num_relax );
+HYPRE_Int hypre_BoomerAMGGetFACNumRelax ( void *data, HYPRE_Int *fac_num_relax );
 HYPRE_Int hypre_BoomerAMGSetAMGDDPadding ( void *data , HYPRE_Int padding );
 HYPRE_Int hypre_BoomerAMGGetAMGDDPadding ( void *data , HYPRE_Int *padding );
 HYPRE_Int hypre_BoomerAMGSetAMGDDNumGhostLayers ( void *data , HYPRE_Int num_ghost_layers );
@@ -1934,7 +1940,7 @@ HYPRE_Int hypre_BoomerAMGDD_FAC_Cycle_timed( void *amg_vdata, HYPRE_Int time_par
 hypre_ParCompGrid *hypre_ParCompGridCreate ();
 HYPRE_Int hypre_ParCompGridDestroy ( hypre_ParCompGrid *compGrid );
 HYPRE_Int hypre_ParCompGridInitialize( hypre_ParCompGrid *compGrid, hypre_ParVector *residual, HYPRE_Int *CF_marker_array, HYPRE_Int coarseStart, hypre_ParCSRMatrix *A, hypre_ParCSRMatrix *P );
-HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level );
+HYPRE_Int hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int transition_level, HYPRE_Int debug );
 HYPRE_Int hypre_ParCompGridSetupRealDofMarker( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, HYPRE_Int padding );
 HYPRE_Int hypre_ParCompGridSetSize ( hypre_ParCompGrid *compGrid, HYPRE_Int size, HYPRE_Int need_coarse_info );
 HYPRE_Int hypre_ParCompGridSetSizeMatricesOnly ( hypre_ParCompGrid *compGrid, HYPRE_Int num_nodes, HYPRE_Int A_nnz, HYPRE_Int P_nnz );

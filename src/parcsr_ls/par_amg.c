@@ -76,6 +76,8 @@ hypre_BoomerAMGCreate()
    HYPRE_Int      max_iter;
    HYPRE_Int      min_fac_iter;
    HYPRE_Int      max_fac_iter;
+   HYPRE_Int      fac_relax_type;
+   HYPRE_Int      fac_num_relax;
    HYPRE_Int      cycle_type;    
  
    HYPRE_Int    converge_type;
@@ -201,6 +203,8 @@ hypre_BoomerAMGCreate()
    max_iter  = 20;
    min_fac_iter = 0;
    max_fac_iter = 20;
+   fac_relax_type = 1;
+   fac_num_relax = 1;
    cycle_type = 1;
    converge_type = 0;
    tol = 1.0e-7;
@@ -310,6 +314,8 @@ hypre_BoomerAMGCreate()
    hypre_BoomerAMGSetMaxIter(amg_data, max_iter);
    hypre_BoomerAMGSetMinFACIter(amg_data, min_fac_iter);
    hypre_BoomerAMGSetMaxFACIter(amg_data, max_fac_iter);
+   hypre_BoomerAMGSetFACRelaxType(amg_data, fac_relax_type);
+   hypre_BoomerAMGSetFACNumRelax(amg_data, fac_num_relax);
    hypre_BoomerAMGSetFACTol(amg_data, fac_tol);
    hypre_BoomerAMGSetCycleType(amg_data, cycle_type);
    hypre_BoomerAMGSetConvergeType(amg_data, converge_type);
@@ -1561,7 +1567,7 @@ hypre_BoomerAMGGetFACTol( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGSetFACRelaxType( void     *data,
-                        HYPRE_Real       fac_relax_type )
+                        HYPRE_Int       fac_relax_type )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
  
@@ -1578,7 +1584,7 @@ hypre_BoomerAMGSetFACRelaxType( void     *data,
 
 HYPRE_Int
 hypre_BoomerAMGGetFACRelaxType( void     *data,
-                        HYPRE_Real *     fac_relax_type )
+                        HYPRE_Int *     fac_relax_type )
 {
    hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
  
@@ -1589,6 +1595,41 @@ hypre_BoomerAMGGetFACRelaxType( void     *data,
    } 
 
    *fac_relax_type = hypre_ParAMGDataFACRelaxType(amg_data);
+
+   return hypre_error_flag;
+} 
+
+
+HYPRE_Int
+hypre_BoomerAMGSetFACNumRelax( void     *data,
+                        HYPRE_Int       fac_num_relax )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   hypre_ParAMGDataFACNumRelax(amg_data) = fac_num_relax;
+
+   return hypre_error_flag;
+} 
+
+HYPRE_Int
+hypre_BoomerAMGGetFACNumRelax( void     *data,
+                        HYPRE_Int *     fac_num_relax )
+{
+   hypre_ParAMGData  *amg_data = (hypre_ParAMGData*) data;
+ 
+   if (!amg_data)
+   {
+      hypre_error_in_arg(1);
+      return hypre_error_flag;
+   } 
+
+   *fac_num_relax = hypre_ParAMGDataFACNumRelax(amg_data);
 
    return hypre_error_flag;
 } 
