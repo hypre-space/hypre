@@ -343,6 +343,16 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
       }
    }
 
+
+   // // !!! Debug
+   // HYPRE_Int myid;
+   // hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // if (myid == 0) hypre_printf("     All ranks: done with clean up memory\n");
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+
+
+
    // Switch representation of A to CSR
    for (level = 0; level < transition_level; level++)
    {
@@ -381,6 +391,12 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
       }
    }
  
+   // // !!! Debug
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // if (myid == 0) hypre_printf("     All ranks: done with A to CSR\n");
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+
+
    // Switch representation of P to CSR
    for (level = 0; level < transition_level; level++)
    {
@@ -423,6 +439,11 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
          }
       }
    }
+
+   // // !!! Debug
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // if (myid == 0) hypre_printf("     All ranks: done with P to CSR\n");
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
 
    // Setup the coarse residual marker for use in FAC cycles
    for (level = 0; level < transition_level; level++)
@@ -469,6 +490,12 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
          }
       }
    }
+
+   // // !!! Debug
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   // if (myid == 0) hypre_printf("     All ranks: done with coarse residual marker\n");
+   // hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+
 
    // Setup the coarse residual marker for use in FAC cycles
    if (transition_level != num_levels)

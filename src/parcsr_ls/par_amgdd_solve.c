@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 1
+#define TEST_RES_COMM 0
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -134,8 +134,6 @@ hypre_BoomerAMGDDSolve( void *amg_vdata,
 
    return test_failed;
 }
-
-
 
 HYPRE_Int
 hypre_BoomerAMGDD_Cycle( void *amg_vdata )
