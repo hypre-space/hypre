@@ -10,8 +10,8 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 0
-#define DEBUGGING_MESSAGES 1
+#define TEST_RES_COMM 1
+#define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -391,7 +391,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   if (myid == 0) hypre_printf("About do coarse levels allgather on all ranks\n");
+   if (myid == 0) hypre_printf("About to do coarse levels allgather on all ranks\n");
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
@@ -400,15 +400,11 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    {
       residual_local = hypre_ParVectorLocalVector(F_array[transition_level]);
       residual_data = hypre_VectorData(residual_local);
-      HYPRE_Complex *transition_level_recv_buf = hypre_CTAlloc(HYPRE_Complex, num_procs*hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg), HYPRE_MEMORY_HOST);
-      hypre_MPI_Allgather(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, transition_level_recv_buf, hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
-      HYPRE_Int cnt = 0;
-      HYPRE_Int proc;
-      for (proc = 0; proc < num_procs; proc++)
-      {
-         HYPRE_Int buf_cnt = hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg)*proc;
-         for (i = 0; i < hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg)[proc]; i++) hypre_ParCompGridF(compGrid[transition_level])[cnt++] = transition_level_recv_buf[buf_cnt++];
-      }
+      HYPRE_Complex *transition_level_recv_buf = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(compGrid[transition_level]), HYPRE_MEMORY_HOST);
+      
+      hypre_MPI_Allgatherv(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, transition_level_recv_buf, hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
+
+      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[transition_level]); i++) hypre_ParCompGridF(compGrid[transition_level])[i] = transition_level_recv_buf[i];
    }
 
    #if DEBUGGING_MESSAGES

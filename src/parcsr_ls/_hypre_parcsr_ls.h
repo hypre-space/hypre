@@ -88,8 +88,8 @@ typedef struct
    // Info needed for subsequent psi_c residual communication
    HYPRE_Int         num_levels; // levels in the amg hierarchy
    HYPRE_Int         transition_level; // transition level used for adaptive AMG-RD (at this level and below, each proc owns the global grids)
-   HYPRE_Int         max_res_buffer_size;
-   HYPRE_Int         *res_num_recv_nodes;
+   HYPRE_Int         *transition_res_recv_sizes; // if using the transition level, these are the recv sizes for the Allgatherv
+   HYPRE_Int         *transition_res_recv_disps; // if useing the transition level, these are the recv displacements for the Allgatherv
    HYPRE_Int         *num_sends; // num procs to send to on each level
    HYPRE_Int         *num_recvs; // num procs to recv from on each level
 
@@ -115,8 +115,8 @@ typedef struct
 
  #define hypre_ParCompGridCommPkgNumLevels(compGridCommPkg)          ((compGridCommPkg) -> num_levels)
  #define hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg)          ((compGridCommPkg) -> transition_level)
- #define hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg)    ((compGridCommPkg) -> max_res_buffer_size)
- #define hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg)    ((compGridCommPkg) -> res_num_recv_nodes)
+ #define hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg)          ((compGridCommPkg) -> transition_res_recv_sizes)
+ #define hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg)          ((compGridCommPkg) -> transition_res_recv_disps)
  #define hypre_ParCompGridCommPkgNumSends(compGridCommPkg)           ((compGridCommPkg) -> num_sends)
  #define hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg)           ((compGridCommPkg) -> num_recvs)
  #define hypre_ParCompGridCommPkgSendProcs(compGridCommPkg)           ((compGridCommPkg) -> send_procs)

@@ -1459,8 +1459,8 @@ hypre_ParCompGridCommPkgCreate()
 
    hypre_ParCompGridCommPkgNumLevels(compGridCommPkg) = 0;
    hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg) = -1;
-   hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg) = 0;
-   hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg) = NULL;
+   hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg) = NULL;
+   hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgNumSends(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) = NULL;
@@ -1512,9 +1512,14 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
 
    HYPRE_Int         i, j, k;
 
-   if ( hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg) )
+   if ( hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg) )
    {
-      hypre_TFree(hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), HYPRE_MEMORY_HOST);
+   }
+
+   if ( hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg) )
+   {
+      hypre_TFree(hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
 
    if ( hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) )
