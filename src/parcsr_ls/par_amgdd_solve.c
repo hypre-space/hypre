@@ -279,7 +279,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   hypre_printf("Began residual communication on all ranks\n");
+   if (myid == 0) hypre_printf("Began residual communication on all ranks\n");
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
@@ -389,13 +389,19 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       }
    }
 
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("About do coarse levels allgather on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
+
    // Do Allgather of transition level 
    if (transition_level != num_levels)
    {
       residual_local = hypre_ParVectorLocalVector(F_array[transition_level]);
       residual_data = hypre_VectorData(residual_local);
       HYPRE_Complex *transition_level_recv_buf = hypre_CTAlloc(HYPRE_Complex, num_procs*hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg), HYPRE_MEMORY_HOST);
-      MPI_Allgather(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, transition_level_recv_buf, hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
+      hypre_MPI_Allgather(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, transition_level_recv_buf, hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
       HYPRE_Int cnt = 0;
       HYPRE_Int proc;
       for (proc = 0; proc < num_procs; proc++)
@@ -407,7 +413,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   hypre_printf("Entering looop over levels in residual communication on all ranks\n");
+   if (myid == 0) hypre_printf("Entering looop over levels in residual communication on all ranks\n");
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
@@ -487,7 +493,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
 
    #if DEBUGGING_MESSAGES
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
-   hypre_printf("Finished residual communication on all ranks\n");
+   if (myid == 0) hypre_printf("Finished residual communication on all ranks\n");
    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
