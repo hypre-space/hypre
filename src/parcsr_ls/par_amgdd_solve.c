@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #define TEST_RES_COMM 0
-#define DEBUGGING_MESSAGES 0
+#define DEBUGGING_MESSAGES 1
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -447,14 +447,14 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          }
 
          #if DEBUGGING_MESSAGES
-         hypre_printf("    Posted sends and recvs on level %d, rank %d\n", level, rank);
+         hypre_printf("    Posted sends and recvs on level %d, rank %d\n", level, myid);
          #endif
 
          // wait for buffers to be received
          hypre_MPI_Waitall( num_sends + num_recvs, requests, status );
 
          #if DEBUGGING_MESSAGES
-         hypre_printf("    Finished waiting on level %d, rank %d\n", level, rank);
+         hypre_printf("    Finished waiting on level %d, rank %d\n", level, myid);
          #endif
 
          // loop over received buffers
@@ -480,7 +480,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       }
 
       #if DEBUGGING_MESSAGES
-      hypre_printf("    Finished residual communication on level %d, rank %d\n", level, rank);
+      hypre_printf("    Finished residual communication on level %d, rank %d\n", level, myid);
       #endif
 
    }
