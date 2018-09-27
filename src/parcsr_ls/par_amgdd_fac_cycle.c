@@ -31,6 +31,12 @@ HYPRE_Int
 FAC_Relax( hypre_ParCompGrid *compGrid, HYPRE_Int type );
 
 HYPRE_Int
+FAC_Jacobi( hypre_ParCompGrid *compGrid );
+
+HYPRE_Int
+FAC_GaussSeidel( hypre_ParCompGrid *compGrid );
+
+HYPRE_Int
 hypre_BoomerAMGDD_FAC_Cycle( void *amg_vdata )
 {
 
