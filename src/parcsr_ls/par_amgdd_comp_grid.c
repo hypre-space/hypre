@@ -318,9 +318,6 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
       delete_global_indices = 0;
    }
 
-   HYPRE_Int *add_flag_fine = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[0]), HYPRE_MEMORY_HOST);
-   HYPRE_Int *add_flag_coarse;
-
    HYPRE_Int i,j,k,cnt,level;
 
    // Clean up memory for things we don't need anymore

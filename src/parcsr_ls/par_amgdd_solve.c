@@ -10,7 +10,7 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define TEST_RES_COMM 1
+#define TEST_RES_COMM 0
 #define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
@@ -400,11 +400,8 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    {
       residual_local = hypre_ParVectorLocalVector(F_array[transition_level]);
       residual_data = hypre_VectorData(residual_local);
-      HYPRE_Complex *transition_level_recv_buf = hypre_CTAlloc(HYPRE_Complex, hypre_ParCompGridNumNodes(compGrid[transition_level]), HYPRE_MEMORY_HOST);
       
-      hypre_MPI_Allgatherv(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, transition_level_recv_buf, hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
-
-      for (i = 0; i < hypre_ParCompGridNumNodes(compGrid[transition_level]); i++) hypre_ParCompGridF(compGrid[transition_level])[i] = transition_level_recv_buf[i];
+      hypre_MPI_Allgatherv(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, hypre_ParCompGridF(compGrid[transition_level]), hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
    }
 
    #if DEBUGGING_MESSAGES
