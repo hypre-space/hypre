@@ -18,7 +18,7 @@
 #endif
 #define MAX_DEPTH 7
 
-/* 2: the most explicit implementation, a function for each stencil size */ 
+/* 2: the most explicit implementation, a function for each stencil size */
 #define CC0_IMPLEMENTATION 2
 
 /*--------------------------------------------------------------------------
@@ -36,9 +36,9 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    hypre_Index          *stencil_shape;
    HYPRE_Int             stencil_size;
    HYPRE_Int             stencil_dim;
-                       
+
    HYPRE_Int             num_ghost[] = {1, 1, 1, 1, 1, 1};
-                       
+
    HYPRE_Int             i;
    HYPRE_Int             constant_coefficient;
 
@@ -79,7 +79,7 @@ hypre_PFMGCreateInterpOp( hypre_StructMatrix *A,
    }
 
    hypre_StructStencilDestroy(stencil);
- 
+
    return P;
 }
 
@@ -96,26 +96,26 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 {
    hypre_BoxArray        *compute_boxes;
    hypre_Box             *compute_box;
-                        
+
    hypre_Box             *A_dbox;
    hypre_Box             *P_dbox;
-                        
+
    HYPRE_Real            *Pp0, *Pp1;
    HYPRE_Int              constant_coefficient;
-                        
+
    hypre_StructStencil   *stencil;
    hypre_Index           *stencil_shape;
    HYPRE_Int              stencil_size;
    hypre_StructStencil   *P_stencil;
    hypre_Index           *P_stencil_shape;
-                        
+
    HYPRE_Int              Pstenc0, Pstenc1;
-                        
+
    hypre_Index            loop_size;
    hypre_Index            start;
    hypre_IndexRef         startc;
    hypre_Index            stridec;
-                        
+
    HYPRE_Int              i, si;
 
    HYPRE_Int              si0, si1;
@@ -167,7 +167,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          si1 = si;
       }
    }
-            
+
    hypre_SetIndex3(stridec, 1, 1, 1);
 
    /*----------------------------------------------------------
@@ -187,7 +187,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
 
       Pstenc0 = hypre_IndexD(P_stencil_shape[0], cdir);
       Pstenc1 = hypre_IndexD(P_stencil_shape[1], cdir);
- 
+
       startc  = hypre_BoxIMin(compute_box);
       hypre_StructMapCoarseToFine(startc, findex, stride, start);
 
@@ -216,7 +216,7 @@ hypre_PFMGSetupInterpOp( hypre_StructMatrix *A,
          hypre_PFMGSetupInterpOp_CC0
             ( i, A, A_dbox, cdir, stride, stridec, start, startc, loop_size,
               P_dbox, Pstenc0, Pstenc1, Pp0, Pp1, rap_type, si0, si1 );
-#else	
+#else
          switch (stencil_size)
          {
             case 5:
@@ -328,7 +328,7 @@ hypre_PFMGSetupInterpOp_CC0
       HYPRE_Int si, mrk0, mrk1, Astenc;
       HYPRE_Real center;
       HYPRE_Real *Ap;
-           
+
       center  = 0.0;
       Pp0[Pi] = 0.0;
       Pp1[Pi] = 0.0;
@@ -349,8 +349,8 @@ hypre_PFMGSetupInterpOp_CC0
             Astenc = hypre_IndexD(stencil_shape[si], cdir);
          }
 #else
-	 Ap     = matrixA_data + data_indices_boxi_d[si];
-	 Astenc = hypre_IndexD(stencil_shape_d[si], cdir);
+         Ap     = matrixA_data + data_indices_boxi_d[si];
+         Astenc = hypre_IndexD(stencil_shape_d[si], cdir);
 #endif
 
          if (Astenc == 0)
@@ -365,7 +365,7 @@ hypre_PFMGSetupInterpOp_CC0
          {
             Pp1[Pi] -= Ap[Ai];
          }
-         
+
          if (si == si0 && Ap[Ai] == 0.0)
          {
             mrk0++;
@@ -380,12 +380,12 @@ hypre_PFMGSetupInterpOp_CC0
       {
          //warning_cnt++;
          Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;  
+         Pp1[Pi] = 0.0;
       }
       else
       {
          Pp0[Pi] /= center;
-         Pp1[Pi] /= center;  
+         Pp1[Pi] /= center;
       }
 
       /*----------------------------------------------
@@ -497,7 +497,7 @@ hypre_PFMGSetupInterpOp_CC0
 #undef DEVICE_VAR
       }
    }
- 
+
    Ap0 = hypre_StructMatrixBoxData(A, i, si0);
    Ap1 = hypre_StructMatrixBoxData(A, i, si1);
 #define DEVICE_VAR is_device_ptr(center, Pp0, Pp1, Ap0, Ap1)
@@ -740,7 +740,7 @@ hypre_PFMGSetupInterpOp_CC2
       }
 
       si = diag_rank;
-      
+
       HYPRE_Real *Ap = hypre_StructMatrixBoxData(A, i, si);
 
 #define DEVICE_VAR is_device_ptr(Pp0,Pp1,Ap)
@@ -751,7 +751,7 @@ hypre_PFMGSetupInterpOp_CC2
          HYPRE_Int   mrk0,mrk1;
          HYPRE_Real  center;
          HYPRE_Real  p0val,p1val;
-         
+
          p0val = P0;
          p1val = P1;
          center = center_offd;
@@ -1025,16 +1025,16 @@ hypre_PFMGSetupInterpOp_CC0_SS9
 
       switch (cdir)
       {
-      case 0:
-	 center = a_cc[Ai] +  a_cs[Ai] +  a_cn[Ai];
-	 left   =-a_cw[Ai] - a_csw[Ai] - a_cnw[Ai];
-	 right  =-a_ce[Ai] - a_cse[Ai] - a_cne[Ai];
-	 break;
-      case 1:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai];
-	 left   =-a_cs[Ai] - a_csw[Ai] - a_cse[Ai];
-	 right  =-a_cn[Ai] - a_cnw[Ai] - a_cne[Ai];
-	 break;
+         case 0:
+            center = a_cc[Ai] +  a_cs[Ai] +  a_cn[Ai];
+            left   =-a_cw[Ai] - a_csw[Ai] - a_cnw[Ai];
+            right  =-a_ce[Ai] - a_cse[Ai] - a_cne[Ai];
+            break;
+         case 1:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai];
+            left   =-a_cs[Ai] - a_csw[Ai] - a_cse[Ai];
+            right  =-a_cn[Ai] - a_cnw[Ai] - a_cne[Ai];
+            break;
       };
 
       if (!center)
@@ -1045,26 +1045,26 @@ hypre_PFMGSetupInterpOp_CC0_SS9
       }
       else
       {
-	switch (Pstenc0)
-	{
-	case -1:
-	   Pp0[Pi] = left/center;
-	   Pp1[Pi] = right/center;
-	   break;
-	case 1:
-	   Pp0[Pi] = right/center;
-	   Pp1[Pi] = left/center;
-	   break;
-	};
-	/*
-	switch (Pstenc1)
-	{
-	case -1:
-	   Pp1[Pi] = left/center;break;
-	case 1:
-	   Pp1[Pi] = right/center;break;
-	};
-	*/
+         switch (Pstenc0)
+         {
+            case -1:
+               Pp0[Pi] = left/center;
+               Pp1[Pi] = right/center;
+               break;
+            case 1:
+               Pp0[Pi] = right/center;
+               Pp1[Pi] = left/center;
+               break;
+         };
+         /*
+            switch (Pstenc1)
+            {
+            case -1:
+            Pp1[Pi] = left/center;break;
+            case 1:
+            Pp1[Pi] = right/center;break;
+            };
+            */
       }
 
       if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
@@ -1149,21 +1149,21 @@ hypre_PFMGSetupInterpOp_CC0_SS7
 
       switch (cdir)
       {
-      case 0:
-	 center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai];
-	 left   =-a_cw[Ai];
-	 right  =-a_ce[Ai];
-	 break;
-      case 1:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] ;
-	 left   =-a_cs[Ai];
-	 right  =-a_cn[Ai];
-	 break;
-      case 2:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_cs[Ai] + a_cn[Ai] ;
-	 left   =-a_bc[Ai];
-	 right  =-a_ac[Ai];
-	 break;
+         case 0:
+            center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai];
+            left   =-a_cw[Ai];
+            right  =-a_ce[Ai];
+            break;
+         case 1:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] ;
+            left   =-a_cs[Ai];
+            right  =-a_cn[Ai];
+            break;
+         case 2:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_cs[Ai] + a_cn[Ai] ;
+            left   =-a_bc[Ai];
+            right  =-a_ac[Ai];
+            break;
       };
 
       if (!center)
@@ -1173,33 +1173,33 @@ hypre_PFMGSetupInterpOp_CC0_SS7
       }
       else
       {
-	switch (Pstenc0)
-	{
-	case -1:
-	   Pp0[Pi] = left/center;
-	   Pp1[Pi] = right/center;
-	   break;
-	case 1:
-	   Pp0[Pi] = right/center;
-	   Pp1[Pi] = left/center;
-	   break;
-	};
-	/*
-	switch (Pstenc1)
-	{
-	case -1:
-	   Pp1[Pi] = left/center;break;
-	case 1:
-	   Pp1[Pi] = right/center;break;
-	};
-	*/
+         switch (Pstenc0)
+         {
+            case -1:
+               Pp0[Pi] = left/center;
+               Pp1[Pi] = right/center;
+               break;
+            case 1:
+               Pp0[Pi] = right/center;
+               Pp1[Pi] = left/center;
+               break;
+         };
+         /*
+            switch (Pstenc1)
+            {
+            case -1:
+            Pp1[Pi] = left/center;break;
+            case 1:
+            Pp1[Pi] = right/center;break;
+            };
+            */
       }
 
       if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
       if (p1[Ai] == 0.0) Pp1[Pi] = 0.0;
 
       //printf("%d: %d, Pp0[%d] = %e, Pp1 = %e, %e, %e, %e, cc=%e, cw=%e, ce=%e, cs=%e, cn=%e, bc=%e, ac=%e \n",Ai,cdir, Pi,Pp0[Pi],Pp1[Pi],center, left, right,
-      //	     a_cc[Ai],a_cw[Ai],a_ce[Ai],a_cs[Ai],a_cn[Ai],a_bc[Ai],a_ac[Ai]);
+      //     a_cc[Ai],a_cw[Ai],a_ce[Ai],a_cs[Ai],a_cn[Ai],a_bc[Ai],a_ac[Ai]);
    }
    hypre_BoxLoop2End(Ai, Pi);
 #undef DEVICE_VAR
@@ -1322,7 +1322,7 @@ hypre_PFMGSetupInterpOp_CC0_SS15
 
    hypre_SetIndex3(index, 1, 1, 0);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-   
+
    if (a_csw)
    {
       if (a_as)
@@ -1345,8 +1345,8 @@ hypre_PFMGSetupInterpOp_CC0_SS15
    if (stencil_type15 == 0)
    {
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-            A_dbox, start, stride, Ai,
-            P_dbox, startc, stridec, Pi);
+                          A_dbox, start, stride, Ai,
+                          P_dbox, startc, stridec, Pi);
       {
          HYPRE_Real center, left, right;
 
@@ -1465,8 +1465,8 @@ hypre_PFMGSetupInterpOp_CC0_SS15
    else
    {
       hypre_BoxLoop2Begin(hypre_StructMatrixNDim(A), loop_size,
-            A_dbox, start, stride, Ai,
-            P_dbox, startc, stridec, Pi);
+                          A_dbox, start, stride, Ai,
+                          P_dbox, startc, stridec, Pi);
       {
          HYPRE_Real center, left, right;
 
@@ -1634,7 +1634,7 @@ hypre_PFMGSetupInterpOp_CC0_SS19
 
    hypre_SetIndex3(index, 0, 1,-1);
    a_bn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-   
+
    hypre_SetIndex3(index,-1,-1, 0);
    a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
 
@@ -1656,21 +1656,21 @@ hypre_PFMGSetupInterpOp_CC0_SS19
 
       switch (cdir)
       {
-      case 0:
-	 center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] + a_bn[Ai];
-	 left   =-a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai];
-	 right  =-a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai];
-	 break;
-      case 1:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai];
-	 left   =-a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai];
-	 right  =-a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai];
-	 break;
-      case 2:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
-	 left   =-a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai];
-	 right  =-a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai];
-	 break;
+         case 0:
+            center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] + a_bn[Ai];
+            left   =-a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai];
+            right  =-a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai];
+            break;
+         case 1:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai];
+            left   =-a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai];
+            right  =-a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai];
+            break;
+         case 2:
+            center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
+            left   =-a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai];
+            right  =-a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai];
+            break;
       };
 
       if (!center)
@@ -1680,26 +1680,26 @@ hypre_PFMGSetupInterpOp_CC0_SS19
       }
       else
       {
-	switch (Pstenc0)
-	{
-	case -1:
-	   Pp0[Pi] = left/center;
-	   Pp1[Pi] = right/center;
-	   break;
-	case 1:
-	   Pp0[Pi] = right/center;
-	   Pp1[Pi] = left/center;
-	   break;
-	};
-	/*
-	switch (Pstenc1)
-	{
-	case -1:
-	   Pp1[Pi] = left/center;break;
-	case 1:
-	   Pp1[Pi] = right/center;break;
-	};
-	*/
+         switch (Pstenc0)
+         {
+            case -1:
+               Pp0[Pi] = left/center;
+               Pp1[Pi] = right/center;
+               break;
+            case 1:
+               Pp0[Pi] = right/center;
+               Pp1[Pi] = left/center;
+               break;
+         };
+         /*
+            switch (Pstenc1)
+            {
+            case -1:
+            Pp1[Pi] = left/center;break;
+            case 1:
+            Pp1[Pi] = right/center;break;
+            };
+            */
       }
 
       if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;
@@ -1819,7 +1819,7 @@ hypre_PFMGSetupInterpOp_CC0_SS27
 
    hypre_SetIndex3(index, 0, 1,-1);
    a_bn = hypre_StructMatrixExtractPointerByIndex(A, i, index);
-   
+
    hypre_SetIndex3(index,-1,-1, 0);
    a_csw = hypre_StructMatrixExtractPointerByIndex(A, i, index);
 
@@ -1879,50 +1879,50 @@ hypre_PFMGSetupInterpOp_CC0_SS27
       switch (cdir)
       {
       case 0:
-	 center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] + a_bn[Ai];
-	 left   =-a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai] - a_asw[Ai] - a_anw[Ai] - a_bsw[Ai] - a_bnw[Ai];
-	 right  =-a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai] - a_ase[Ai] - a_ane[Ai] - a_bse[Ai] - a_bne[Ai];
-	 break;
+         center = a_cc[Ai] +  a_cs[Ai] + a_cn[Ai] + a_ac[Ai] + a_bc[Ai] + a_as[Ai] + a_an[Ai] + a_bs[Ai] + a_bn[Ai];
+         left   =-a_cw[Ai] - a_aw[Ai] - a_bw[Ai] - a_csw[Ai] - a_cnw[Ai] - a_asw[Ai] - a_anw[Ai] - a_bsw[Ai] - a_bnw[Ai];
+         right  =-a_ce[Ai] - a_ae[Ai] - a_be[Ai] - a_cse[Ai] - a_cne[Ai] - a_ase[Ai] - a_ane[Ai] - a_bse[Ai] - a_bne[Ai];
+         break;
       case 1:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai];
-	 left   =-a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai] - a_asw[Ai] - a_ase[Ai] - a_bsw[Ai] - a_bse[Ai];
-	 right  =-a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai] - a_anw[Ai] - a_ane[Ai] - a_bnw[Ai] - a_bne[Ai];
-	 break;
+         center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] + a_ac[Ai] + a_bc[Ai] + a_aw[Ai] + a_ae[Ai] + a_bw[Ai] + a_be[Ai];
+         left   =-a_cs[Ai] - a_as[Ai] - a_bs[Ai] - a_csw[Ai] - a_cse[Ai] - a_asw[Ai] - a_ase[Ai] - a_bsw[Ai] - a_bse[Ai];
+         right  =-a_cn[Ai] - a_an[Ai] - a_bn[Ai] - a_cnw[Ai] - a_cne[Ai] - a_anw[Ai] - a_ane[Ai] - a_bnw[Ai] - a_bne[Ai];
+         break;
       case 2:
-	 center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
-	 left   =-a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai] - a_bsw[Ai] - a_bse[Ai] - a_bnw[Ai] - a_bne[Ai];
-	 right  =-a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai] - a_asw[Ai] - a_ase[Ai] - a_anw[Ai] - a_ane[Ai];
-	 break;
+         center = a_cc[Ai] +  a_cw[Ai] +  a_ce[Ai] +  a_cs[Ai] + a_cn[Ai] + a_csw[Ai] + a_cse[Ai] + a_cnw[Ai] + a_cne[Ai];
+         left   =-a_bc[Ai] - a_bw[Ai] - a_be[Ai] - a_bs[Ai] - a_bn[Ai] - a_bsw[Ai] - a_bse[Ai] - a_bnw[Ai] - a_bne[Ai];
+         right  =-a_ac[Ai] - a_aw[Ai] - a_ae[Ai] - a_as[Ai] - a_an[Ai] - a_asw[Ai] - a_ase[Ai] - a_anw[Ai] - a_ane[Ai];
+         break;
       };
 
       if (!center)
       {
          //warning_cnt++;
          Pp0[Pi] = 0.0;
-         Pp1[Pi] = 0.0;  
+         Pp1[Pi] = 0.0;
       }
       else
       {
-	switch (Pstenc0)
-	{
-	case -1:
-	   Pp0[Pi] = left/center;
-	   Pp1[Pi] = right/center;
-	   break;
-	case 1:
-	   Pp0[Pi] = right/center;
-	   Pp1[Pi] = left/center;
-	   break;
-	};
-	/*
-	switch (Pstenc1)
-	{
-	case -1:
-	   Pp1[Pi] = left/center;break;
-	case 1:
-	   Pp1[Pi] = right/center;break;
-	};
-	*/
+         switch (Pstenc0)
+         {
+            case -1:
+               Pp0[Pi] = left/center;
+               Pp1[Pi] = right/center;
+               break;
+            case 1:
+               Pp0[Pi] = right/center;
+               Pp1[Pi] = left/center;
+               break;
+         };
+         /*
+            switch (Pstenc1)
+            {
+            case -1:
+            Pp1[Pi] = left/center;break;
+            case 1:
+            Pp1[Pi] = right/center;break;
+            };
+            */
       }
 
       if (p0[Ai] == 0.0) Pp0[Pi] = 0.0;

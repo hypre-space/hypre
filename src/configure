@@ -777,6 +777,7 @@ with_LD
 with_LDFLAGS
 with_extra_CFLAGS
 with_extra_CXXFLAGS
+with_extra_BUILDFLAGS
 with_extra_incpath
 with_extra_ldpath
 with_insure
@@ -1482,6 +1483,10 @@ Optional Packages:
                           directories.
   --with-extra-CXXFLAGS=ARG
                           Define extra C++ compile flag, where ARG is a
+                          space-separated list (enclosed in quotes) of
+                          directories.
+  --with-extra-BUILDFLAGS=ARG
+                          Define extra library build flag, where ARG is a
                           space-separated list (enclosed in quotes) of
                           directories.
   --with-extra-incpath=PATH
@@ -3009,6 +3014,13 @@ if test "${with_extra_CXXFLAGS+set}" = set; then :
 
 fi
 
+
+
+# Check whether --with-extra-BUILDFLAGS was given.
+if test "${with_extra_BUILDFLAGS+set}" = set; then :
+  withval=$with_extra_BUILDFLAGS; EXTRA_BUILDFLAGS=$withval
+
+fi
 
 
 
@@ -8257,10 +8269,12 @@ done
       HYPRE_CUDA_SM=60
    fi
 
-   CUFLAGS+="-O2 -ccbin=$NVCCBIN -gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\" -expt-extended-lambda -dc --std=c++11 -Xcompiler -Wno-deprecated-register --x cu"
+   HYPRE_CUDA_GENCODE="-gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\""
+
+   CUFLAGS+="-O2 -ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -expt-extended-lambda -dc --std=c++11 -Xcompiler -Wno-deprecated-register --x cu"
    CXXFLAGS="${CUFLAGS} -Xcompiler \"${CXXFLAGS}\""
    CFLAGS=${CXXFLAGS}
-   LDFLAGS="-ccbin=$NVCCBIN -gencode arch=compute_${HYPRE_CUDA_SM},\"code=sm_${HYPRE_CUDA_SM}\" -Xcompiler \"${LDFLAGS}\""
+   LDFLAGS="-ccbin=$NVCCBIN ${HYPRE_CUDA_GENCODE} -Xcompiler \"${LDFLAGS}\""
    HYPRE_CUDA_INCL="-I${HYPRE_CUDA_PATH}/include"
    HYPRE_CUDA_LIBS="-L${HYPRE_CUDA_PATH}/lib64 -lcusparse -lcudart -lcublas -lnvToolsExt"
 fi
@@ -8403,6 +8417,11 @@ then
                                    SHARED_OPTIONS="-undefined error" ;;
                        *) SHARED_BUILD_FLAG="-shared" ;;
    esac
+   if test "x$CXX" = "xnvcc" || test "x$CC" = "xnvcc"
+   then
+      SHARED_BUILD_FLAG="${SHARED_BUILD_FLAG} ${HYPRE_CUDA_GENCODE}"
+   fi
+   SHARED_BUILD_FLAG="${SHARED_BUILD_FLAG} ${EXTRA_BUILDFLAGS}"
    FFLAGS="${FFLAGS} ${SHARED_COMPILE_FLAG}"
    CFLAGS="${CFLAGS} ${SHARED_COMPILE_FLAG}"
    CXXFLAGS="${CXXFLAGS} ${SHARED_COMPILE_FLAG}"

@@ -26,11 +26,11 @@
    cdir = (cdir + 1) % 3;                                       \
    hypre_IndexD(out_index, cdir) = hypre_IndexD(in_index, 1);   \
    cdir = (cdir + 1) % 3;
- 
+
 /*--------------------------------------------------------------------------
  *  Sets up new coarse grid operator stucture.
  *--------------------------------------------------------------------------*/
- 
+
 hypre_StructMatrix *
 hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
                         hypre_StructMatrix *A,
@@ -54,10 +54,10 @@ hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
    HYPRE_Int              stencil_rank;
 
    RAP_stencil_dim = 3;
- 
+
    A_stencil = hypre_StructMatrixStencil(A);
    A_stencil_size = hypre_StructStencilSize(A_stencil);
- 
+
    /*-----------------------------------------------------------------------
     * Define RAP_stencil
     *-----------------------------------------------------------------------*/
@@ -162,7 +162,7 @@ hypre_PFMG3CreateRAPOp( hypre_StructMatrix *R,
  * Routines to build RAP. These routines are fairly general
  *  1) No assumptions about symmetry of A
  *  2) No assumption that R = transpose(P)
- *  3) 7, 19 or 27-point fine grid A 
+ *  3) 7, 19 or 27-point fine grid A
  *
  * I am, however, assuming that the c-to-c interpolation is the identity.
  *
@@ -360,14 +360,14 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
    HYPRE_Real           *rap_bc, *rap_bw, *rap_be, *rap_bs, *rap_bn;
    HYPRE_Real           *rap_csw, *rap_cse;
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
-                        
-   HYPRE_Int             zOffsetA; 
-   HYPRE_Int             zOffsetA_diag; 
-   HYPRE_Int             zOffsetA_offd; 
-   HYPRE_Int             xOffsetP; 
-   HYPRE_Int             yOffsetP; 
-   HYPRE_Int             zOffsetP; 
-                        
+
+   HYPRE_Int             zOffsetA;
+   HYPRE_Int             zOffsetA_diag;
+   HYPRE_Int             zOffsetA_offd;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
+   HYPRE_Int             zOffsetP;
+
    stridef = cstride;
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -388,8 +388,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -402,11 +402,11 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
    //RL PTROFFSET
    HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -419,10 +419,10 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
    //RL PTROFFSET
    HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -465,7 +465,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the lower triangular part (plus diagonal).
-    * 
+    *
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
@@ -504,7 +504,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
    hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -514,7 +514,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
@@ -573,23 +573,23 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
 
          iP1 = iP - zOffsetP - xOffsetP;
          rap_bw[iAc] = rb[iR-rbOffset] * a_cw[iAm1] * pa[iP1];
- 
-         iP1 = iP - zOffsetP; 
+
+         iP1 = iP - zOffsetP;
          rap_bc[iAc] =          a_bc[iA]   * pa[iP1]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_bc[iAm1];
- 
+
          iP1 = iP - zOffsetP + xOffsetP;
          rap_be[iAc] = rb[iR-rbOffset] * a_ce[iAm1] * pa[iP1];
- 
+
          iP1 = iP - zOffsetP + yOffsetP;
          rap_bn[iAc] = rb[iR-rbOffset] * a_cn[iAm1] * pa[iP1];
- 
+
          iP1 = iP - yOffsetP;
          rap_cs[iAc] =          a_cs[iA]
             +          rb[iR-rbOffset] * a_cs[iAm1] * pb[iP1-pbOffset]
             +          ra[iR] * a_cs[iAp1] * pa[iP1];
- 
+
          iP1 = iP - xOffsetP;
          rap_cw[iAc] =          a_cw[iA]
             +          rb[iR-rbOffset] * a_cw[iAm1] * pb[iP1-pbOffset]
@@ -598,7 +598,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
          rap_csw[iAc] = 0.0;
 
          rap_cse[iAc] = 0.0;
- 
+
          rap_cc[iAc] =          a_cc[iA]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pb[iP-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -629,7 +629,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
       a_bc_offdp1 = a_bc[iA_offdp1];
       a_ac_offd = a_ac[iA_offd];
       a_ac_offdm1 = a_ac[iA_offdm1];
-       
+
 #define DEVICE_VAR is_device_ptr(rap_bs,rb,pa,rap_bw,rap_bc,a_cc,rap_be,rap_bn,rap_cs,pb,ra,rap_cw,rap_csw,rap_cse,rap_cc)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
@@ -645,23 +645,23 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
 
          iP1 = iP - zOffsetP - xOffsetP;
          rap_bw[iAc] = rb[iR-rbOffset] * a_cw_offdm1 * pa[iP1];
- 
-         iP1 = iP - zOffsetP; 
+
+         iP1 = iP - zOffsetP;
          rap_bc[iAc] =          a_bc_offd   * pa[iP1]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_bc_offdm1;
 
          iP1 = iP - zOffsetP + xOffsetP;
          rap_be[iAc] = rb[iR-rbOffset] * a_ce_offdm1 * pa[iP1];
- 
+
          iP1 = iP - zOffsetP + yOffsetP;
          rap_bn[iAc] = rb[iR-rbOffset] * a_cn_offdm1 * pa[iP1];
- 
+
          iP1 = iP - yOffsetP;
          rap_cs[iAc] =          a_cs_offd
             +          rb[iR-rbOffset] * a_cs_offdm1 * pb[iP1-pbOffset]
             +          ra[iR] * a_cs_offdp1 * pa[iP1];
- 
+
          iP1 = iP - xOffsetP;
          rap_cw[iAc] =          a_cw_offd
             +          rb[iR-rbOffset] * a_cw_offdm1 * pb[iP1-pbOffset]
@@ -670,7 +670,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC0(
          rap_csw[iAc] = 0.0;
 
          rap_cse[iAc] = 0.0;
- 
+
          rap_cc[iAc] =          a_cc[iA]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pb[iP-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -726,12 +726,12 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
    HYPRE_Int             iAc;
    HYPRE_Int             iP, iP1;
    HYPRE_Int             iR;
-                        
-   HYPRE_Int             zOffsetA; 
-   HYPRE_Int             xOffsetP; 
-   HYPRE_Int             yOffsetP; 
-   HYPRE_Int             zOffsetP; 
-                        
+
+   HYPRE_Int             zOffsetA;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
+   HYPRE_Int             zOffsetP;
+
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
@@ -742,8 +742,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -757,8 +757,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -772,7 +772,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -814,7 +814,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the lower triangular part (plus diagonal).
-    * 
+    *
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
@@ -853,7 +853,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
    hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -863,13 +863,13 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = 0; 
+   zOffsetA = 0;
    zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -908,23 +908,23 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
 
    iP1 = iP - zOffsetP - xOffsetP;
    rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1];
- 
-   iP1 = iP - zOffsetP; 
+
+   iP1 = iP - zOffsetP;
    rap_bc[iAc] =          a_bc[iA]   * pa[iP1]
       +          rb[iR] * a_cc[iAm1] * pa[iP1]
       +          rb[iR] * a_bc[iAm1];
- 
+
    iP1 = iP - zOffsetP + xOffsetP;
    rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1];
- 
+
    iP1 = iP - zOffsetP + yOffsetP;
    rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1];
- 
+
    iP1 = iP - yOffsetP;
    rap_cs[iAc] =          a_cs[iA]
       +          rb[iR] * a_cs[iAm1] * pb[iP1]
       +          ra[iR] * a_cs[iAp1] * pa[iP1];
- 
+
    iP1 = iP - xOffsetP;
    rap_cw[iAc] =          a_cw[iA]
       +          rb[iR] * a_cw[iAm1] * pb[iP1]
@@ -933,7 +933,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS07_CC1(
    rap_csw[iAc] = 0.0;
 
    rap_cse[iAc] = 0.0;
- 
+
    rap_cc[iAc] =          a_cc[iA]
       +          rb[iR] * a_cc[iAm1] * pb[iP]
       +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -1011,14 +1011,14 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
    HYPRE_Real           *rap_bsw, *rap_bse, *rap_bnw, *rap_bne;
 
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
-            
-   HYPRE_Int             zOffsetA; 
-   HYPRE_Int             zOffsetA_diag; 
-   HYPRE_Int             zOffsetA_offd; 
-   HYPRE_Int             xOffsetP; 
-   HYPRE_Int             yOffsetP; 
-   HYPRE_Int             zOffsetP; 
-                        
+
+   HYPRE_Int             zOffsetA;
+   HYPRE_Int             zOffsetA_diag;
+   HYPRE_Int             zOffsetA_offd;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
+   HYPRE_Int             zOffsetP;
+
    stridef = cstride;
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -1039,8 +1039,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -1053,11 +1053,11 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
    //RL PTROFFSET
    HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -1070,10 +1070,10 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
    //RL PTROFFSET
    HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -1167,13 +1167,13 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
    hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-  
+
 
    /*-----------------------------------------------------------------
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the lower triangular part (plus diagonal).
-    * 
+    *
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
@@ -1212,7 +1212,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
    hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -1220,7 +1220,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point coarse grid operator:
     *
-    * A 27-point coarse grid operator is produced when the fine grid 
+    * A 27-point coarse grid operator is produced when the fine grid
     * stencil is 19 or 27 point.
     *
     * We build only the lower triangular part.
@@ -1249,7 +1249,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
@@ -1319,16 +1319,16 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
             +          rb[iR-rbOffset] * a_bw[iAm1]
             +                   a_bw[iA]   * pa[iP1];
 
-         iP1 = iP - zOffsetP; 
+         iP1 = iP - zOffsetP;
          rap_bc[iAc] =          a_bc[iA] * pa[iP1]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_bc[iAm1];
- 
+
          iP1 = iP - zOffsetP + xOffsetP;
          rap_be[iAc] = rb[iR-rbOffset] * a_ce[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_be[iAm1]
             +                   a_be[iA]   * pa[iP1];
- 
+
          iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
          rap_bnw[iAc] = rb[iR-rbOffset] * a_cnw[iAm1] * pa[iP1];
 
@@ -1336,10 +1336,10 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
          rap_bn[iAc] = rb[iR-rbOffset] * a_cn[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_bn[iAm1]
             +                   a_bn[iA]   * pa[iP1];
- 
+
          iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
          rap_bne[iAc] = rb[iR-rbOffset] * a_cne[iAm1] * pa[iP1];
-         
+
          iP1 = iP - yOffsetP - xOffsetP;
          rap_csw[iAc] =         a_csw[iA]
             +          rb[iR-rbOffset] * a_csw[iAm1] * pb[iP1-pbOffset]
@@ -1353,7 +1353,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
             +                   a_as[iA]   * pa[iP1]
             +          rb[iR-rbOffset] * a_as[iAm1]
             +          ra[iR] * a_bs[iAp1];
- 
+
          iP1 = iP - yOffsetP + xOffsetP;
          rap_cse[iAc] =          a_cse[iA]
             +          rb[iR-rbOffset] * a_cse[iAm1] * pb[iP1-pbOffset]
@@ -1367,7 +1367,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
             +                   a_aw[iA]   * pa[iP1]
             +          rb[iR-rbOffset] * a_aw[iAm1]
             +          ra[iR] * a_bw[iAp1];
- 
+
          rap_cc[iAc] =          a_cc[iA]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pb[iP-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -1447,7 +1447,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
             +          rb[iR-rbOffset] * a_bw_offdm1
             +                   a_bw_offd   * pa[iP1];
 
-         iP1 = iP - zOffsetP; 
+         iP1 = iP - zOffsetP;
          rap_bc[iAc] =          a_bc_offd * pa[iP1]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_bc_offdm1;
@@ -1456,7 +1456,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
          rap_be[iAc] = rb[iR-rbOffset] * a_ce_offdm1 * pa[iP1]
             +          rb[iR-rbOffset] * a_be_offdm1
             +                   a_be_offd   * pa[iP1];
- 
+
          iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
          rap_bnw[iAc] = rb[iR-rbOffset] * a_cnw_offdm1 * pa[iP1];
 
@@ -1464,7 +1464,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
          rap_bn[iAc] = rb[iR-rbOffset] * a_cn_offdm1 * pa[iP1]
             +          rb[iR-rbOffset] * a_bn_offdm1
             +                   a_bn_offd   * pa[iP1];
- 
+
          iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
          rap_bne[iAc] = rb[iR-rbOffset] * a_cne_offdm1 * pa[iP1];
 
@@ -1472,7 +1472,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
          rap_csw[iAc] =         a_csw_offd
             +          rb[iR-rbOffset] * a_csw_offdm1 * pb[iP1-pbOffset]
             +          ra[iR] * a_csw_offdp1 * pa[iP1-pbOffset];
-         
+
          iP1 = iP - yOffsetP;
          rap_cs[iAc] =          a_cs_offd
             +          rb[iR-rbOffset] * a_cs_offdm1 * pb[iP1-pbOffset]
@@ -1481,7 +1481,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
             +                   a_as_offd   * pa[iP1]
             +          rb[iR-rbOffset] * a_as_offdm1
             +          ra[iR] * a_bs_offdp1;
- 
+
          iP1 = iP - yOffsetP + xOffsetP;
          rap_cse[iAc] =          a_cse_offd
             +          rb[iR-rbOffset] * a_cse_offdm1 * pb[iP1-pbOffset]
@@ -1495,7 +1495,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC0(
             +                   a_aw_offd   * pa[iP1]
             +          rb[iR-rbOffset] * a_aw_offdm1
             +          ra[iR] * a_bw_offdp1;
- 
+
          rap_cc[iAc] =          a_cc[iA]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pb[iP-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -1555,12 +1555,12 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
    HYPRE_Int             iAc;
    HYPRE_Int             iP, iP1;
    HYPRE_Int             iR;
-                        
-   HYPRE_Int             zOffsetA; 
-   HYPRE_Int             xOffsetP; 
-   HYPRE_Int             yOffsetP; 
-   HYPRE_Int             zOffsetP; 
-                        
+
+   HYPRE_Int             zOffsetA;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
+   HYPRE_Int             zOffsetP;
+
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
@@ -1571,8 +1571,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -1586,8 +1586,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -1601,7 +1601,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -1700,7 +1700,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the lower triangular part (plus diagonal).
-    * 
+    *
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
@@ -1739,7 +1739,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
    hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -1747,7 +1747,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point coarse grid operator:
     *
-    * A 27-point coarse grid operator is produced when the fine grid 
+    * A 27-point coarse grid operator is produced when the fine grid
     * stencil is 19 or 27 point.
     *
     * We build only the lower triangular part.
@@ -1776,13 +1776,13 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = 0; 
+   zOffsetA = 0;
    zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -1832,17 +1832,17 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
    rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
       +          rb[iR] * a_bw[iAm1]
       +                   a_bw[iA]   * pa[iP1];
- 
-   iP1 = iP - zOffsetP; 
+
+   iP1 = iP - zOffsetP;
    rap_bc[iAc] =          a_bc[iA] * pa[iP1]
       +          rb[iR] * a_cc[iAm1] * pa[iP1]
       +          rb[iR] * a_bc[iAm1];
- 
+
    iP1 = iP - zOffsetP + xOffsetP;
    rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
       +          rb[iR] * a_be[iAm1]
       +                   a_be[iA]   * pa[iP1];
- 
+
    iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
    rap_bnw[iAc] = rb[iR] * a_cnw[iAm1] * pa[iP1];
 
@@ -1850,7 +1850,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
    rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1]
       +          rb[iR] * a_bn[iAm1]
       +                   a_bn[iA]   * pa[iP1];
- 
+
    iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
    rap_bne[iAc] = rb[iR] * a_cne[iAm1] * pa[iP1];
 
@@ -1867,7 +1867,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
       +                   a_as[iA]   * pa[iP1]
       +          rb[iR] * a_as[iAm1]
       +          ra[iR] * a_bs[iAp1];
- 
+
    iP1 = iP - yOffsetP + xOffsetP;
    rap_cse[iAc] =          a_cse[iA]
       +          rb[iR] * a_cse[iAm1] * pb[iP1]
@@ -1881,7 +1881,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS19_CC1(
       +                   a_aw[iA]   * pa[iP1]
       +          rb[iR] * a_aw[iAm1]
       +          ra[iR] * a_bw[iAp1];
- 
+
    rap_cc[iAc] =          a_cc[iA]
       +          rb[iR] * a_cc[iAm1] * pb[iP]
       +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -1967,14 +1967,14 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
 
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
 
-                        
-   HYPRE_Int             zOffsetA; 
-   HYPRE_Int             zOffsetA_diag; 
-   HYPRE_Int             zOffsetA_offd; 
-   HYPRE_Int             xOffsetP; 
-   HYPRE_Int             yOffsetP; 
-   HYPRE_Int             zOffsetP; 
-                        
+
+   HYPRE_Int             zOffsetA;
+   HYPRE_Int             zOffsetA_diag;
+   HYPRE_Int             zOffsetA_offd;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
+   HYPRE_Int             zOffsetP;
+
    stridef = cstride;
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -1995,8 +1995,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -2009,11 +2009,11 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
    //RL PTROFFSET:
    HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -2026,10 +2026,10 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
    //RL PTROFFSET:
    HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -2123,7 +2123,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
    hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-  
+
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point fine grid operator:
     *
@@ -2165,7 +2165,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the lower triangular part (plus diagonal).
-    * 
+    *
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
@@ -2204,7 +2204,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
    hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -2212,7 +2212,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point coarse grid operator:
     *
-    * A 27-point coarse grid operator is produced when the fine grid 
+    * A 27-point coarse grid operator is produced when the fine grid
     * stencil is 19 or 27 point.
     *
     * We build only the lower triangular part.
@@ -2241,7 +2241,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
@@ -2315,8 +2315,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
          rap_bw[iAc] = rb[iR-rbOffset] * a_cw[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_bw[iAm1]
             +                   a_bw[iA]   * pa[iP1];
- 
-         iP1 = iP - zOffsetP; 
+
+         iP1 = iP - zOffsetP;
          rap_bc[iAc] =          a_bc[iA]   * pa[iP1]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_bc[iAm1];
@@ -2325,7 +2325,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
          rap_be[iAc] = rb[iR-rbOffset] * a_ce[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_be[iAm1]
             +                   a_be[iA]   * pa[iP1];
- 
+
          iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
          rap_bnw[iAc] = rb[iR-rbOffset] * a_cnw[iAm1] * pa[iP1]
             +           rb[iR-rbOffset] * a_bnw[iAm1]
@@ -2335,7 +2335,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
          rap_bn[iAc] = rb[iR-rbOffset] * a_cn[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_bn[iAm1]
             +                   a_bn[iA]   * pa[iP1];
- 
+
          iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
          rap_bne[iAc] = rb[iR-rbOffset] * a_cne[iAm1] * pa[iP1]
             +           rb[iR-rbOffset] * a_bne[iAm1]
@@ -2349,7 +2349,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
             +                   a_asw[iA]   * pa[iP1]
             +          rb[iR-rbOffset] * a_asw[iAm1]
             +          ra[iR] * a_bsw[iAp1];
-         
+
          iP1 = iP - yOffsetP;
          rap_cs[iAc] =          a_cs[iA]
             +          rb[iR-rbOffset] * a_cs[iAm1] * pb[iP1-pbOffset]
@@ -2358,7 +2358,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
             +                   a_as[iA]   * pa[iP1]
             +          rb[iR-rbOffset] * a_as[iAm1]
             +          ra[iR] * a_bs[iAp1];
- 
+
          iP1 = iP - yOffsetP + xOffsetP;
          rap_cse[iAc] =          a_cse[iA]
             +          rb[iR-rbOffset] * a_cse[iAm1] * pb[iP1-pbOffset]
@@ -2472,17 +2472,17 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
          rap_bw[iAc] = rb[iR-rbOffset] * a_cw_offdm1 * pa[iP1]
             +          rb[iR-rbOffset] * a_bw_offdm1
             +                   a_bw_offd   * pa[iP1];
- 
-         iP1 = iP - zOffsetP; 
+
+         iP1 = iP - zOffsetP;
          rap_bc[iAc] =          a_bc_offd   * pa[iP1]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pa[iP1]
             +          rb[iR-rbOffset] * a_bc_offdm1;
-         
+
          iP1 = iP - zOffsetP + xOffsetP;
          rap_be[iAc] = rb[iR-rbOffset] * a_ce_offdm1 * pa[iP1]
             +          rb[iR-rbOffset] * a_be_offdm1
             +                   a_be_offd   * pa[iP1];
- 
+
          iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
          rap_bnw[iAc] = rb[iR-rbOffset] * a_cnw_offdm1 * pa[iP1]
             +           rb[iR-rbOffset] * a_bnw_offdm1
@@ -2492,12 +2492,12 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
          rap_bn[iAc] = rb[iR-rbOffset] * a_cn_offdm1 * pa[iP1]
             +          rb[iR-rbOffset] * a_bn_offdm1
             +                   a_bn_offd   * pa[iP1];
- 
+
          iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
          rap_bne[iAc] = rb[iR-rbOffset] * a_cne_offdm1 * pa[iP1]
             +           rb[iR-rbOffset] * a_bne_offdm1
             +                    a_bne_offd   * pa[iP1];
-         
+
          iP1 = iP - yOffsetP - xOffsetP;
          rap_csw[iAc] =          a_csw_offd
             +          rb[iR-rbOffset] * a_csw_offdm1 * pb[iP1-pbOffset]
@@ -2515,7 +2515,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
             +                   a_as_offd   * pa[iP1]
             +          rb[iR-rbOffset] * a_as_offdm1
             +          ra[iR] * a_bs_offdp1;
-         
+
          iP1 = iP - yOffsetP + xOffsetP;
          rap_cse[iAc] =          a_cse_offd
             +          rb[iR-rbOffset] * a_cse_offdm1 * pb[iP1-pbOffset]
@@ -2524,7 +2524,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
             +                   a_ase_offd   * pa[iP1]
             +          rb[iR-rbOffset] * a_ase_offdm1
             +          ra[iR] * a_bse_offdp1;
-                 
+
          iP1 = iP - xOffsetP;
          rap_cw[iAc] =          a_cw_offd
             +          rb[iR-rbOffset] * a_cw_offdm1 * pb[iP1-pbOffset]
@@ -2533,7 +2533,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC0(
             +                   a_aw_offd   * pa[iP1]
             +          rb[iR-rbOffset] * a_aw_offdm1
             +          ra[iR] * a_bw_offdp1;
- 
+
          rap_cc[iAc] =          a_cc[iA]
             +          rb[iR-rbOffset] * a_cc[iAm1] * pb[iP-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -2592,12 +2592,12 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
    HYPRE_Int             iAc;
    HYPRE_Int             iP, iP1;
    HYPRE_Int             iR;
-                        
-   HYPRE_Int             zOffsetA; 
-   HYPRE_Int             xOffsetP; 
-   HYPRE_Int             yOffsetP; 
-   HYPRE_Int             zOffsetP; 
-                        
+
+   HYPRE_Int             zOffsetA;
+   HYPRE_Int             xOffsetP;
+   HYPRE_Int             yOffsetP;
+   HYPRE_Int             zOffsetP;
+
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
@@ -2608,8 +2608,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -2623,8 +2623,8 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -2638,7 +2638,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -2732,7 +2732,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
    hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-  
+
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point fine grid operator:
     *
@@ -2774,7 +2774,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the lower triangular part (plus diagonal).
-    * 
+    *
     * rap_cc is pointer for center coefficient (etc.)
     *-----------------------------------------------------------------*/
 
@@ -2813,7 +2813,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
    hypre_SetIndex3(index_temp,-1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_csw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,-1,0);
    MapIndex(index_temp, cdir, index);
    rap_cse = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -2821,7 +2821,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point coarse grid operator:
     *
-    * A 27-point coarse grid operator is produced when the fine grid 
+    * A 27-point coarse grid operator is produced when the fine grid
     * stencil is 19 or 27 point.
     *
     * We build only the lower triangular part.
@@ -2850,13 +2850,13 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = 0; 
+   zOffsetA = 0;
    zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -2910,17 +2910,17 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
    rap_bw[iAc] = rb[iR] * a_cw[iAm1] * pa[iP1]
       +          rb[iR] * a_bw[iAm1]
       +                   a_bw[iA]   * pa[iP1];
- 
-   iP1 = iP - zOffsetP; 
+
+   iP1 = iP - zOffsetP;
    rap_bc[iAc] =          a_bc[iA]   * pa[iP1]
       +          rb[iR] * a_cc[iAm1] * pa[iP1]
       +          rb[iR] * a_bc[iAm1];
- 
+
    iP1 = iP - zOffsetP + xOffsetP;
    rap_be[iAc] = rb[iR] * a_ce[iAm1] * pa[iP1]
       +          rb[iR] * a_be[iAm1]
       +                   a_be[iA]   * pa[iP1];
- 
+
    iP1 = iP - zOffsetP + yOffsetP - xOffsetP;
    rap_bnw[iAc] = rb[iR] * a_cnw[iAm1] * pa[iP1]
       +           rb[iR] * a_bnw[iAm1]
@@ -2930,7 +2930,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
    rap_bn[iAc] = rb[iR] * a_cn[iAm1] * pa[iP1]
       +          rb[iR] * a_bn[iAm1]
       +                   a_bn[iA]   * pa[iP1];
- 
+
    iP1 = iP - zOffsetP + yOffsetP + xOffsetP;
    rap_bne[iAc] = rb[iR] * a_cne[iAm1] * pa[iP1]
       +           rb[iR] * a_bne[iAm1]
@@ -2953,7 +2953,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
       +                   a_as[iA]   * pa[iP1]
       +          rb[iR] * a_as[iAm1]
       +          ra[iR] * a_bs[iAp1];
- 
+
    iP1 = iP - yOffsetP + xOffsetP;
    rap_cse[iAc] =          a_cse[iA]
       +          rb[iR] * a_cse[iAm1] * pb[iP1]
@@ -2971,7 +2971,7 @@ hypre_PFMG3BuildRAPSym_onebox_FSS27_CC1(
       +                   a_aw[iA]   * pa[iP1]
       +          rb[iR] * a_aw[iAm1]
       +          ra[iR] * a_bw[iAp1];
- 
+
    rap_cc[iAc] =          a_cc[iA]
       +          rb[iR] * a_cc[iAm1] * pb[iP]
       +          ra[iR] * a_cc[iAp1] * pa[iP]
@@ -3168,12 +3168,12 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
 
    HYPRE_Int             zOffsetA;
-   HYPRE_Int             zOffsetA_diag; 
-   HYPRE_Int             zOffsetA_offd; 
+   HYPRE_Int             zOffsetA_diag;
+   HYPRE_Int             zOffsetA_offd;
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
    HYPRE_Int             zOffsetP;
-                 
+
    stridef = cstride;
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -3202,8 +3202,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -3216,11 +3216,11 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
    //RL PTROFFSET
    HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -3233,10 +3233,10 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
    //RL PTROFFSET
    HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -3274,7 +3274,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the upper triangular part (excluding diagonal).
-    * 
+    *
     * rap_ce is pointer for east coefficient in same plane (etc.)
     *-----------------------------------------------------------------*/
 
@@ -3309,7 +3309,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
    hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -3319,7 +3319,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
@@ -3362,7 +3362,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
 
    if ( constant_coefficient_A == 0 )
    {
-#define DEVICE_VAR is_device_ptr(rap_an,ra,a_cn,pb,rap_ae,a_ce,rap_ac,a_ac,a_cc,rap_aw,a_cw,rap_as,a_cs,rap_cn,rb,pa,rap_ce,rap_cnw,rap_cne)      
+#define DEVICE_VAR is_device_ptr(rap_an,ra,a_cn,pb,rap_ae,a_ce,rap_ac,a_ac,a_cc,rap_aw,a_cw,rap_as,a_cs,rap_cn,rb,pa,rap_ce,rap_cnw,rap_cne)
       hypre_BoxLoop4Begin(hypre_StructMatrixNDim(A), loop_size,
                           P_dbox, cstart, stridec, iP,
                           R_dbox, cstart, stridec, iR,
@@ -3371,36 +3371,36 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
       {
          HYPRE_Int iAm1 = iA - zOffsetA;
          HYPRE_Int iAp1 = iA + zOffsetA;
-           
+
          HYPRE_Int iP1 = iP + zOffsetP + yOffsetP;
          rap_an[iAc] = ra[iR] * a_cn[iAp1] * pb[iP1-pbOffset];
 
          iP1 = iP + zOffsetP + xOffsetP;
          rap_ae[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1-pbOffset];
-           
-         iP1 = iP + zOffsetP; 
+
+         iP1 = iP + zOffsetP;
          rap_ac[iAc] =          a_ac[iA]   * pb[iP1-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_ac[iAp1];
-           
+
          iP1 = iP + zOffsetP - xOffsetP;
          rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1-pbOffset];
-           
+
          iP1 = iP + zOffsetP - yOffsetP;
          rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1-pbOffset];
-           
+
          iP1 = iP + yOffsetP;
          rap_cn[iAc] =          a_cn[iA]
             +          rb[iR-rbOffset] * a_cn[iAm1] * pb[iP1-pbOffset]
             +          ra[iR] * a_cn[iAp1] * pa[iP1];
-           
+
          iP1 = iP + xOffsetP;
          rap_ce[iAc] =          a_ce[iA]
             +          rb[iR-rbOffset] * a_ce[iAm1] * pb[iP1-pbOffset]
             +          ra[iR] * a_ce[iAp1] * pa[iP1];
-           
+
          rap_cnw[iAc] = 0.0;
-           
+
          rap_cne[iAc] = 0.0;
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
@@ -3437,30 +3437,30 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC0(
 
          iP1 = iP + zOffsetP + xOffsetP;
          rap_ae[iAc] = ra[iR] * a_ce_offdp1 * pb[iP1-pbOffset];
- 
-         iP1 = iP + zOffsetP; 
+
+         iP1 = iP + zOffsetP;
          rap_ac[iAc] =          a_ac_offd   * pb[iP1-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_ac_offdp1;
- 
+
          iP1 = iP + zOffsetP - xOffsetP;
          rap_aw[iAc] = ra[iR] * a_cw_offdp1 * pb[iP1-pbOffset];
- 
+
          iP1 = iP + zOffsetP - yOffsetP;
          rap_as[iAc] = ra[iR] * a_cs_offdp1 * pb[iP1-pbOffset];
- 
+
          iP1 = iP + yOffsetP;
          rap_cn[iAc] =          a_cn_offd
             +          rb[iR-rbOffset] * a_cn_offdm1 * pb[iP1-pbOffset]
             +          ra[iR] * a_cn_offdp1 * pa[iP1];
- 
+
          iP1 = iP + xOffsetP;
          rap_ce[iAc] =          a_ce_offd
             +          rb[iR-rbOffset] * a_ce_offdm1 * pb[iP1-pbOffset]
             +          ra[iR] * a_ce_offdp1 * pa[iP1];
 
          rap_cnw[iAc] = 0.0;
- 
+
          rap_cne[iAc] = 0.0;
       }
       hypre_BoxLoop4End(iP, iR, iA, iAc);
@@ -3512,7 +3512,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
    HYPRE_Int             zOffsetP;
-                 
+
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
@@ -3523,8 +3523,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -3535,11 +3535,11 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -3550,10 +3550,10 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -3591,7 +3591,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the upper triangular part (excluding diagonal).
-    * 
+    *
     * rap_ce is pointer for east coefficient in same plane (etc.)
     *-----------------------------------------------------------------*/
 
@@ -3626,7 +3626,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
    hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -3636,13 +3636,13 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = 0; 
+   zOffsetA = 0;
    zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -3680,30 +3680,30 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS07_CC1(
 
    iP1 = iP + zOffsetP + xOffsetP;
    rap_ae[iAc] = ra[iR] * a_ce[iAp1] * pb[iP1];
- 
-   iP1 = iP + zOffsetP; 
+
+   iP1 = iP + zOffsetP;
    rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
       +          ra[iR] * a_cc[iAp1] * pb[iP1]
       +          ra[iR] * a_ac[iAp1];
- 
+
    iP1 = iP + zOffsetP - xOffsetP;
    rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1];
- 
+
    iP1 = iP + zOffsetP - yOffsetP;
    rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1];
- 
+
    iP1 = iP + yOffsetP;
    rap_cn[iAc] =          a_cn[iA]
       +          rb[iR] * a_cn[iAm1] * pb[iP1]
       +          ra[iR] * a_cn[iAp1] * pa[iP1];
- 
+
    iP1 = iP + xOffsetP;
    rap_ce[iAc] =          a_ce[iA]
       +          rb[iR] * a_ce[iAm1] * pb[iP1]
       +          ra[iR] * a_ce[iAp1] * pa[iP1];
 
    rap_cnw[iAc] = 0.0;
- 
+
    rap_cne[iAc] = 0.0;
 
 /*      }*/ /* end ForBoxI */
@@ -3769,12 +3769,12 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
    HYPRE_Real           *rap_asw, *rap_ase, *rap_anw, *rap_ane;
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
    HYPRE_Int             zOffsetA;
-   HYPRE_Int             zOffsetA_diag; 
-   HYPRE_Int             zOffsetA_offd; 
+   HYPRE_Int             zOffsetA_diag;
+   HYPRE_Int             zOffsetA_offd;
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
    HYPRE_Int             zOffsetP;
-                 
+
    stridef = cstride;
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -3803,8 +3803,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -3817,11 +3817,11 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
    //RL PTROFFSET
    HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -3834,10 +3834,10 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
    //RL PTROFFSET
    HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -3932,7 +3932,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the upper triangular part (excluding diagonal).
-    * 
+    *
     * rap_ce is pointer for east coefficient in same plane (etc.)
     *-----------------------------------------------------------------*/
 
@@ -3967,7 +3967,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
    hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -3975,7 +3975,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point coarse grid operator:
     *
-    * A 27-point coarse grid operator is produced when the fine grid 
+    * A 27-point coarse grid operator is produced when the fine grid
     * stencil is 19 or 27 point.
     *
     * We build only the upper triangular part.
@@ -4004,7 +4004,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
@@ -4075,11 +4075,11 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
             +          ra[iR] * a_ae[iAp1]
             +                   a_ae[iA]   * pb[iP1-pbOffset];
 
-         iP1 = iP + zOffsetP; 
+         iP1 = iP + zOffsetP;
          rap_ac[iAc] =          a_ac[iA]   * pb[iP1-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_ac[iAp1];
- 
+
          iP1 = iP + zOffsetP - xOffsetP;
          rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_aw[iAp1]
@@ -4092,7 +4092,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
          rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_as[iAp1]
             +                   a_as[iA]   * pb[iP1-pbOffset];
- 
+
          iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
          rap_asw[iAc] = ra[iR] * a_csw[iAp1] * pb[iP1-pbOffset];
 
@@ -4109,7 +4109,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
             +                   a_an[iA]   * pa[iP1]
             +          rb[iR-rbOffset] * a_an[iAm1]
             +          ra[iR] * a_bn[iAp1];
- 
+
          iP1 = iP + yOffsetP - xOffsetP;
          rap_cnw[iAc] =         a_cnw[iA]
             +          rb[iR-rbOffset] * a_cnw[iAm1] * pb[iP1-pbOffset]
@@ -4191,16 +4191,16 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC0(
             +          ra[iR] * a_ae_offdp1
             +                   a_ae_offd   * pb[iP1-pbOffset];
 
-         iP1 = iP + zOffsetP; 
+         iP1 = iP + zOffsetP;
          rap_ac[iAc] =          a_ac_offd   * pb[iP1-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_ac_offdp1;
- 
+
          iP1 = iP + zOffsetP - xOffsetP;
          rap_aw[iAc] = ra[iR] * a_cw_offdp1 * pb[iP1-pbOffset]
             +          ra[iR] * a_aw_offdp1
             +                   a_aw_offd   * pb[iP1-pbOffset];
- 
+
          iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
          rap_ase[iAc] = ra[iR] * a_cse_offdp1 * pb[iP1-pbOffset];
 
@@ -4292,7 +4292,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
    HYPRE_Int             zOffsetP;
-                 
+
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
@@ -4303,8 +4303,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -4315,11 +4315,11 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -4330,10 +4330,10 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
    MapIndex(index_temp, cdir, index);
 
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -4428,7 +4428,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the upper triangular part (excluding diagonal).
-    * 
+    *
     * rap_ce is pointer for east coefficient in same plane (etc.)
     *-----------------------------------------------------------------*/
 
@@ -4463,7 +4463,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
    hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -4471,7 +4471,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point coarse grid operator:
     *
-    * A 27-point coarse grid operator is produced when the fine grid 
+    * A 27-point coarse grid operator is produced when the fine grid
     * stencil is 19 or 27 point.
     *
     * We build only the upper triangular part.
@@ -4500,13 +4500,13 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = 0; 
+   zOffsetA = 0;
    zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -4557,16 +4557,16 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
       +          ra[iR] * a_ae[iAp1]
       +                   a_ae[iA]   * pb[iP1];
 
-   iP1 = iP + zOffsetP; 
+   iP1 = iP + zOffsetP;
    rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
       +          ra[iR] * a_cc[iAp1] * pb[iP1]
       +          ra[iR] * a_ac[iAp1];
- 
+
    iP1 = iP + zOffsetP - xOffsetP;
    rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
       +          ra[iR] * a_aw[iAp1]
       +                   a_aw[iA]   * pb[iP1];
- 
+
    iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
    rap_ase[iAc] = ra[iR] * a_cse[iAp1] * pb[iP1];
 
@@ -4574,7 +4574,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
    rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1]
       +          ra[iR] * a_as[iAp1]
       +                   a_as[iA]   * pb[iP1];
- 
+
    iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
    rap_asw[iAc] = ra[iR] * a_csw[iAp1] * pb[iP1];
 
@@ -4591,7 +4591,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS19_CC1(
       +                   a_an[iA]   * pa[iP1]
       +          rb[iR] * a_an[iAm1]
       +          ra[iR] * a_bn[iAp1];
- 
+
    iP1 = iP + yOffsetP - xOffsetP;
    rap_cnw[iAc] =         a_cnw[iA]
       +          rb[iR] * a_cnw[iAm1] * pb[iP1]
@@ -4677,14 +4677,14 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
    HYPRE_Real           *rap_asw, *rap_ase, *rap_anw, *rap_ane;
 
    HYPRE_Int             iA_offd, iA_offdm1, iA_offdp1;
-                 
+
    HYPRE_Int             zOffsetA;
-   HYPRE_Int             zOffsetA_diag; 
-   HYPRE_Int             zOffsetA_offd; 
+   HYPRE_Int             zOffsetA_diag;
+   HYPRE_Int             zOffsetA_offd;
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
    HYPRE_Int             zOffsetP;
-                 
+
    stridef = cstride;
    hypre_SetIndex3(stridec, 1, 1, 1);
 
@@ -4713,8 +4713,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -4727,11 +4727,11 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
    //RL PTROFFSET
    HYPRE_Int pbOffset = hypre_BoxOffsetDistance(P_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -4744,10 +4744,10 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
    rb = hypre_StructMatrixExtractPointerByIndex(R, fi, index);
    //RL PTROFFSET
    HYPRE_Int rbOffset = hypre_BoxOffsetDistance(R_dbox, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -4837,7 +4837,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
    hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-  
+
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point fine grid operator:
     *
@@ -4879,7 +4879,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the upper triangular part (excluding diagonal).
-    * 
+    *
     * rap_ce is pointer for east coefficient in same plane (etc.)
     *-----------------------------------------------------------------*/
 
@@ -4914,7 +4914,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
    hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -4922,7 +4922,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point coarse grid operator:
     *
-    * A 27-point coarse grid operator is produced when the fine grid 
+    * A 27-point coarse grid operator is produced when the fine grid
     * stencil is 19 or 27 point.
     *
     * We build only the upper triangular part.
@@ -4951,7 +4951,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
@@ -5026,11 +5026,11 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
             +          ra[iR] * a_ae[iAp1]
             +                   a_ae[iA]   * pb[iP1-pbOffset];
 
-         iP1 = iP + zOffsetP; 
+         iP1 = iP + zOffsetP;
          rap_ac[iAc] =          a_ac[iA]   * pb[iP1-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_ac[iAp1];
- 
+
          iP1 = iP + zOffsetP - xOffsetP;
          rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_aw[iAp1]
@@ -5045,7 +5045,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
          rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_as[iAp1]
             +                   a_as[iA]   * pb[iP1-pbOffset];
- 
+
          iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
          rap_asw[iAc] = ra[iR] * a_csw[iAp1] * pb[iP1-pbOffset]
             +           ra[iR] * a_asw[iAp1]
@@ -5060,7 +5060,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
             +                   a_ane[iA]   * pa[iP1]
             +          rb[iR-rbOffset] * a_ane[iAm1]
             +          ra[iR] * a_bne[iAp1];
-         
+
          iP1 = iP + yOffsetP;
          rap_cn[iAc] =          a_cn[iA]
             +          rb[iR-rbOffset] * a_cn[iAm1] * pb[iP1-pbOffset]
@@ -5069,7 +5069,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
             +                   a_an[iA]   * pa[iP1]
             +          rb[iR-rbOffset] * a_an[iAm1]
             +          ra[iR] * a_bn[iAp1];
- 
+
          iP1 = iP + yOffsetP - xOffsetP;
          rap_cnw[iAc] =         a_cnw[iA]
             +          rb[iR-rbOffset] * a_cnw[iAm1] * pb[iP1-pbOffset]
@@ -5173,7 +5173,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
             +          ra[iR] * a_ae_offdp1
             +                   a_ae_offd   * pb[iP1-pbOffset];
 
-         iP1 = iP + zOffsetP; 
+         iP1 = iP + zOffsetP;
          rap_ac[iAc] =          a_ac_offd   * pb[iP1-pbOffset]
             +          ra[iR] * a_cc[iAp1] * pb[iP1-pbOffset]
             +          ra[iR] * a_ac_offdp1;
@@ -5192,7 +5192,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC0(
          rap_as[iAc] = ra[iR] * a_cs_offdp1 * pb[iP1-pbOffset]
             +          ra[iR] * a_as_offdp1
             +                   a_as_offd   * pb[iP1-pbOffset];
- 
+
          iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
          rap_asw[iAc] = ra[iR] * a_csw_offdp1 * pb[iP1-pbOffset]
             +           ra[iR] * a_asw_offdp1
@@ -5284,12 +5284,12 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
    HYPRE_Int             iAc;
    HYPRE_Int             iP, iP1;
    HYPRE_Int             iR;
-                 
+
    HYPRE_Int             zOffsetA;
    HYPRE_Int             xOffsetP;
    HYPRE_Int             yOffsetP;
    HYPRE_Int             zOffsetP;
-                 
+
    cgrid = hypre_StructMatrixGrid(RAP);
    cgrid_boxes = hypre_StructGridBoxes(cgrid);
 
@@ -5300,8 +5300,8 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for interpolation operator:
-    * pa is pointer for weight for f-point above c-point 
-    * pb is pointer for weight for f-point below c-point 
+    * pa is pointer for weight for f-point above c-point
+    * pb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -5312,11 +5312,11 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
    MapIndex(index_temp, cdir, index);
 
    pb = hypre_StructMatrixExtractPointerByIndex(P, fi, index);
- 
+
    /*-----------------------------------------------------------------
     * Extract pointers for restriction operator:
-    * ra is pointer for weight for f-point above c-point 
-    * rb is pointer for weight for f-point below c-point 
+    * ra is pointer for weight for f-point above c-point
+    * rb is pointer for weight for f-point below c-point
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,-1);
@@ -5330,7 +5330,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
 
    /*-----------------------------------------------------------------
     * Extract pointers for 7-point fine grid operator:
-    * 
+    *
     * a_cc is pointer for center coefficient
     * a_cw is pointer for west coefficient in same plane
     * a_ce is pointer for east coefficient in same plane
@@ -5420,7 +5420,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
    hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    a_cne = hypre_StructMatrixExtractPointerByIndex(A, fi, index);
-  
+
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point fine grid operator:
     *
@@ -5462,7 +5462,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
     * Extract pointers for 19-point coarse grid operator:
     *
     * We build only the upper triangular part (excluding diagonal).
-    * 
+    *
     * rap_ce is pointer for east coefficient in same plane (etc.)
     *-----------------------------------------------------------------*/
 
@@ -5497,7 +5497,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
    hypre_SetIndex3(index_temp,-1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cnw = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
-         
+
    hypre_SetIndex3(index_temp,1,1,0);
    MapIndex(index_temp, cdir, index);
    rap_cne = hypre_StructMatrixExtractPointerByIndex(RAP, ci, index);
@@ -5505,7 +5505,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
    /*-----------------------------------------------------------------
     * Extract additional pointers for 27-point coarse grid operator:
     *
-    * A 27-point coarse grid operator is produced when the fine grid 
+    * A 27-point coarse grid operator is produced when the fine grid
     * stencil is 19 or 27 point.
     *
     * We build only the upper triangular part.
@@ -5534,13 +5534,13 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
     *
     * In the BoxLoop below I assume iA and iP refer to data associated
     * with the point which we are building the stencil for. The below
-    * Offsets are used in refering to data associated with other points. 
+    * Offsets are used in refering to data associated with other points.
     *-----------------------------------------------------------------*/
 
    hypre_SetIndex3(index_temp,0,0,1);
    MapIndex(index_temp, cdir, index);
 
-   zOffsetA = 0; 
+   zOffsetA = 0;
    zOffsetP = 0;
 
    hypre_SetIndex3(index_temp,0,1,0);
@@ -5595,16 +5595,16 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
       +          ra[iR] * a_ae[iAp1]
       +                   a_ae[iA]   * pb[iP1];
 
-   iP1 = iP + zOffsetP; 
+   iP1 = iP + zOffsetP;
    rap_ac[iAc] =          a_ac[iA]   * pb[iP1]
       +          ra[iR] * a_cc[iAp1] * pb[iP1]
       +          ra[iR] * a_ac[iAp1];
- 
+
    iP1 = iP + zOffsetP - xOffsetP;
    rap_aw[iAc] = ra[iR] * a_cw[iAp1] * pb[iP1]
       +          ra[iR] * a_aw[iAp1]
       +                   a_aw[iA]   * pb[iP1];
- 
+
    iP1 = iP + zOffsetP - yOffsetP + xOffsetP;
    rap_ase[iAc] = ra[iR] * a_cse[iAp1] * pb[iP1]
       +           ra[iR] * a_ase[iAp1]
@@ -5614,7 +5614,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
    rap_as[iAc] = ra[iR] * a_cs[iAp1] * pb[iP1]
       +          ra[iR] * a_as[iAp1]
       +                   a_as[iA]   * pb[iP1];
- 
+
    iP1 = iP + zOffsetP - yOffsetP - xOffsetP;
    rap_asw[iAc] = ra[iR] * a_csw[iAp1] * pb[iP1]
       +           ra[iR] * a_asw[iAp1]
@@ -5638,7 +5638,7 @@ hypre_PFMG3BuildRAPNoSym_onebox_FSS27_CC1(
       +                   a_an[iA]   * pa[iP1]
       +          rb[iR] * a_an[iAm1]
       +          ra[iR] * a_bn[iAp1];
- 
+
    iP1 = iP + yOffsetP - xOffsetP;
    rap_cnw[iAc] =         a_cnw[iA]
       +          rb[iR] * a_cnw[iAm1] * pb[iP1]
