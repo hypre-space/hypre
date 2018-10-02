@@ -1209,7 +1209,7 @@ FindTransitionLevel(hypre_ParAMGData *amg_data)
    HYPRE_Int global_transition;
 
 
-   // Loop over levels, starting at the finest
+   // Transition level is the level at which all processors must start communicating with an additional layer of processor neighbors ( + use_transition_level )
    // for (i = 0; i < num_levels; i++)
    // {
    //    HYPRE_Int num_sends_before = hypre_ParCSRCommPkgNumSends(hypre_ParCSRMatrixCommPkg(hypre_ParAMGDataAArray(amg_data)[i]));
@@ -1220,21 +1220,38 @@ FindTransitionLevel(hypre_ParAMGData *amg_data)
    //       break;
    //    }
    // }
+   // hypre_MPI_Allreduce(&local_transition, &global_transition, 1, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
 
-   // Loop over levels, starting at the coarsest
-   for (i = num_levels - 1; i >= 0; i--)
+   // Transition level is the coarsest level at which every processor owns a dof ( - use_transition_level )
+   if (use_transition_level > 0)
    {
-      // If this proc owns (use_transition_level) nodes on this level, note this level and leave the loop
-      if ( hypre_ParCSRMatrixNumRows( hypre_ParAMGDataAArray(amg_data)[i] ) )
+      for (i = num_levels - 1; i >= 0; i--)
       {
-         local_transition = i - use_transition_level + 1;
-         break;
+         // If this proc owns (use_transition_level) nodes on this level, note this level and leave the loop
+         if ( hypre_ParCSRMatrixNumRows( hypre_ParAMGDataAArray(amg_data)[i] ) )
+         {
+            local_transition = i - use_transition_level + 1;
+            break;
+         }
       }
+      hypre_MPI_Allreduce(&local_transition, &global_transition, 1, HYPRE_MPI_INT, MPI_MIN, hypre_MPI_COMM_WORLD);
    }
-
-   // Communicate to find the coarsest level on which all procs own at least one dof
-   hypre_MPI_Allreduce(&local_transition, &global_transition, 1, HYPRE_MPI_INT, MPI_MIN, hypre_MPI_COMM_WORLD);
-
+   
+   // Transition level is the finest level such that the global grid size stored is less than a quarter the size of the fine grid patch
+   if (use_transition_level < 0)
+   {
+      HYPRE_Int fine_grid_patch = hypre_ParCSRMatrixNumRows(hypre_ParAMGDataAArray(amg_data)[0]);
+      for (i = 0; i < num_levels; i++)
+      {
+         if ( hypre_ParCSRMatrixGlobalNumRows(hypre_ParAMGDataAArray(amg_data)[i]) < (fine_grid_patch/4) )
+         {
+            local_transition = i;
+            break;
+         }
+      }
+      hypre_MPI_Allreduce(&local_transition, &global_transition, 1, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
+   }
+   
    return global_transition;
 }
 

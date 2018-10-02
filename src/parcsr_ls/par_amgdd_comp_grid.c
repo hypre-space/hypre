@@ -805,9 +805,23 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
    HYPRE_Int                  i,j,level,global_index,first,last;
    hypre_ParCompMatrixRow     *row;
 
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   if (myid == 0) printf("transition_level = %d\n", transition_level);
+
    for (level = 0; level < transition_level-1; level++)
    {
       // Get first and last owned global indices on the next level (domain of P)
+      if (!hypre_ParCompGridGlobalIndices(compGrid[level+1]))
+      {
+         printf("Rank %d doesn't have global indices on level %d\n", myid, level+1);
+         char filename[256];
+         sprintf(filename, "outputs/CompGrids/rank%dLevel%dCompGrid.txt", myid, level);
+         hypre_ParCompGridDebugPrint( compGrid[level], filename );
+         sprintf(filename, "outputs/CompGrids/rank%dLevel%dCompGrid.txt", myid, level+1);
+         hypre_ParCompGridDebugPrint( compGrid[level+1], filename );
+
+      }
       first = hypre_ParCompGridGlobalIndices(compGrid[level+1])[0];
       if (hypre_ParCompGridNumOwnedNodes(compGrid[level+1])) last = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridNumOwnedNodes(compGrid[level+1]) - 1];
       else last = 0;
