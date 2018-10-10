@@ -41,12 +41,14 @@ typedef struct
   hypre_ParVector    *residual;
   HYPRE_Real    *rel_res_norms;
 
-  //hypre_ParCSRMatrix  **A_ff_array;
-  //hypre_ParVector    **F_fine_array;
-  //hypre_ParVector    **U_fine_array;
-  //HYPRE_Solver **aff_solver;
-  //HYPRE_Int   (*fine_grid_solver_setup)(void*,void*,void*,void*);
-  //HYPRE_Int   (*fine_grid_solver_solve)(void*,void*,void*,void*);
+  /*
+  hypre_ParCSRMatrix  **A_ff_array;
+  hypre_ParVector    **F_fine_array;
+  hypre_ParVector    **U_fine_array;
+  HYPRE_Solver **aff_solver;
+  HYPRE_Int   (*fine_grid_solver_setup)(void*,void*,void*,void*);
+  HYPRE_Int   (*fine_grid_solver_solve)(void*,void*,void*,void*);
+  */
 
   HYPRE_Real   max_row_sum;
   HYPRE_Int num_interp_sweeps;

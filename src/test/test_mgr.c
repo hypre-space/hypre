@@ -82,6 +82,7 @@ main( hypre_int argc,
   HYPRE_Int                 use_reserved_coarse_grid;
   HYPRE_Int                 build_block_cf_arg_index;
   HYPRE_Int                 solver_id;
+  HYPRE_Int                 print_solution = 0;
   HYPRE_Int                 poutdat;
   HYPRE_Int                 debug_flag;
   HYPRE_Int                 ierr = 0;
@@ -220,8 +221,8 @@ main( hypre_int argc,
   HYPRE_Int      post_interp_type  = 0; /* default value */
 
   /* mgr options */
-  HYPRE_Int mgr_bsize = 2;
-  HYPRE_Int mgr_nlevels = 1;
+  HYPRE_Int mgr_bsize = 3;
+  HYPRE_Int mgr_nlevels = 2;
   HYPRE_Int mgr_num_reserved_nodes = 0;
   HYPRE_Int mgr_non_c_to_f = 1;
   HYPRE_Int *mgr_frelax_method = NULL;
@@ -240,10 +241,10 @@ main( hypre_int argc,
   HYPRE_Int *mgr_interp_type = NULL;
   mgr_interp_type = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
   mgr_interp_type[0] = 2;
-  //mgr_interp_type[1] = 2;
+  mgr_interp_type[1] = 2;
   mgr_restrict_type = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
   mgr_restrict_type[0] = 0;
-  //mgr_restrict_type[1] = 0;
+  mgr_restrict_type[1] = 0;
 
   /* Set mgr options */
   /*
@@ -266,13 +267,13 @@ main( hypre_int argc,
   HYPRE_Int lv1[mgr_bsize];
   HYPRE_Int lv2[mgr_bsize];
   lv1[0] = 1;
-  //lv1[1] = 2;
-  //lv2[0] = 2;
+  lv1[1] = 2;
+  lv2[0] = 2;
   block_cindices[0] = &lv1;
-  //block_cindices[1] = &lv2;
+  block_cindices[1] = &lv2;
   HYPRE_Int block_num_coarse_indices[mgr_nlevels];
-  block_num_coarse_indices[0] = 1;
-  //block_num_coarse_indices[1] = 1;
+  block_num_coarse_indices[0] = 2;
+  block_num_coarse_indices[1] = 1;
 
   mgr_cindexes = &block_cindices;
   mgr_num_cindexes = &block_num_coarse_indices;
@@ -284,10 +285,10 @@ main( hypre_int argc,
 
   mgr_frelax_method = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
   mgr_frelax_method[0] = 1;
-  //mgr_frelax_method[1] = 0;
+  mgr_frelax_method[1] = 0;
 
   mgr_frelax_num_functions = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
-  mgr_frelax_num_functions[0] = 1;
+  mgr_frelax_num_functions[0] = 3;
 
   char* indexList = NULL;
   /* end mgr options */
@@ -345,6 +346,11 @@ main( hypre_int argc,
     {
       arg_index++;
       solver_id = atoi(argv[arg_index++]);
+    }
+    else if ( strcmp(argv[arg_index], "-print") == 0 )
+    {
+      arg_index++;
+      print_solution = atoi(argv[arg_index++]);
     }
     else if ( strcmp(argv[arg_index], "-rhsfromfile") == 0 )
     {
@@ -676,6 +682,11 @@ main( hypre_int argc,
     hypre_PrintTiming("Solve phase times", hypre_MPI_COMM_WORLD);
     hypre_FinalizeTiming(time_index);
     hypre_ClearTiming();
+
+    if (print_solution)
+    {
+      hypre_ParVectorPrintIJ(x, 1, "x.out");
+    }
 
     HYPRE_FlexGMRESGetNumIterations(pcg_solver, &num_iterations);
     HYPRE_FlexGMRESGetFinalRelativeResidualNorm(pcg_solver,&final_res_norm);

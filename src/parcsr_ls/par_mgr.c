@@ -331,6 +331,7 @@ hypre_MGRCreateFrelaxVcycleData()
   hypre_ParAMGDataNumLevels(vdata) = 0;
   hypre_ParAMGDataMaxLevels(vdata) = 10;
   hypre_ParAMGDataNumFunctions(vdata) = 1;
+  hypre_ParAMGDataSCommPkgSwitch(vdata) = 1.0;
 
   return (void *) vdata;
 }
