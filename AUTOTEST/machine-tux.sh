@@ -62,9 +62,10 @@ co=""
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic-default
 
+# Test linking for different languages
+co=""
 ./test.sh configure.sh $src_dir $co
 ./test.sh make.sh $src_dir $mo
-# Test linking for different languages (depends on previous compile test)
 link_opts="all++ all77"
 for opt in $link_opts
 do
