@@ -263,20 +263,18 @@ main( hypre_int argc,
   mgr_num_restrict_sweeps = 2;
   */
 
-  HYPRE_Int *block_cindices[mgr_nlevels];
-  HYPRE_Int lv1[mgr_bsize];
-  HYPRE_Int lv2[mgr_bsize];
+  mgr_cindexes = hypre_CTAlloc(HYPRE_Int*, mgr_nlevels, HYPRE_MEMORY_HOST);
+  HYPRE_Int *lv1 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
+  HYPRE_Int *lv2 = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
   lv1[0] = 1;
   lv1[1] = 2;
   lv2[0] = 2;
-  block_cindices[0] = &lv1;
-  block_cindices[1] = &lv2;
-  HYPRE_Int block_num_coarse_indices[mgr_nlevels];
-  block_num_coarse_indices[0] = 2;
-  block_num_coarse_indices[1] = 1;
+  mgr_cindexes[0] = lv1;
+  mgr_cindexes[1] = lv2;
+  mgr_num_cindexes = hypre_CTAlloc(HYPRE_Int, mgr_nlevels, HYPRE_MEMORY_HOST);
+  mgr_num_cindexes[0] = 2;
+  mgr_num_cindexes[1] = 1;
 
-  mgr_cindexes = &block_cindices;
-  mgr_num_cindexes = &block_num_coarse_indices;
   mgr_idx_array = hypre_CTAlloc(HYPRE_Int, mgr_bsize, HYPRE_MEMORY_HOST);
   //mgr_idx_array[0] = 0;
   //mgr_idx_array[1] = 55539;
@@ -634,6 +632,7 @@ main( hypre_int argc,
     HYPRE_BoomerAMGSetTol(amg_solver, 0.0);*/
     HYPRE_BoomerAMGSetRelaxOrder(amg_solver, 1);
     HYPRE_BoomerAMGSetMaxIter(amg_solver, 1);
+    HYPRE_BoomerAMGSetNumFunctions(amg_solver, 1);
     /*
     HYPRE_BoomerAMGSetSmoothType(amg_solver, 9);
     HYPRE_BoomerAMGSetEuLevel(amg_solver, 5);

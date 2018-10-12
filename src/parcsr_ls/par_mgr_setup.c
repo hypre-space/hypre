@@ -23,7 +23,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   MPI_Comm             comm = hypre_ParCSRMatrixComm(A);
   hypre_ParMGRData   *mgr_data = (hypre_ParMGRData*) mgr_vdata;
 
-  HYPRE_Int      cnt,i,j, begin_idx, end_idx, final_coarse_size, block_size, idx, row, **block_cf_marker;
+  HYPRE_Int      cnt,i,j, end_idx, final_coarse_size, block_size, idx, row, **block_cf_marker;
   HYPRE_Int      lev, num_coarsening_levs, last_level, num_c_levels, num_threads,nc,index_i,cflag;
   HYPRE_Int      set_c_points_method;
   HYPRE_Int      debug_flag = 0;
@@ -69,7 +69,6 @@ hypre_MGRSetup( void               *mgr_vdata,
   hypre_ParCSRMatrix  **RT_array = (mgr_data -> RT_array); 
   hypre_ParCSRMatrix  *RAP_ptr = NULL;
 
-  /*
   hypre_ParCSRMatrix  *A_ff_ptr = NULL;
   HYPRE_Solver **aff_solver = NULL;
   hypre_ParCSRMatrix  **A_ff_array = (mgr_data -> A_ff_array);
@@ -78,7 +77,6 @@ hypre_MGRSetup( void               *mgr_vdata,
 
   HYPRE_Int (*fine_grid_solver_setup)(void*,void*,void*,void*);
   HYPRE_Int (*fine_grid_solver_solve)(void*,void*,void*,void*);
-  */
 
   hypre_ParVector    **F_array = (mgr_data -> F_array);
   hypre_ParVector    **U_array = (mgr_data -> U_array);
@@ -483,7 +481,6 @@ hypre_MGRSetup( void               *mgr_vdata,
   if (U_array == NULL)
     U_array = hypre_CTAlloc(hypre_ParVector*,  max_num_coarse_levels+1, HYPRE_MEMORY_HOST);
 
-  /*
   if (A_ff_array)
   {
     for (j = 1; j < old_num_coarse_levels; j++)
@@ -501,10 +498,8 @@ hypre_MGRSetup( void               *mgr_vdata,
   fine_grid_solver_solve = (HYPRE_Int (*)(void*, void*, void*, void*)) hypre_BoomerAMGSolve;
   (mgr_data -> fine_grid_solver_setup) = fine_grid_solver_setup;
   (mgr_data -> fine_grid_solver_solve) = fine_grid_solver_solve;
-  */
 
   /* Set up solution and rhs arrays for Frelax */
-  /*
   if (F_fine_array != NULL || U_fine_array != NULL)
   {
     for (j = 1; j < old_num_coarse_levels+1; j++)
@@ -530,7 +525,6 @@ hypre_MGRSetup( void               *mgr_vdata,
     aff_solver = hypre_CTAlloc(HYPRE_Solver*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
   if (A_ff_array == NULL)
     A_ff_array = hypre_CTAlloc(hypre_ParCSRMatrix*, max_num_coarse_levels, HYPRE_MEMORY_HOST);
-  */
 
   /* set solution and rhs pointers */
   F_array[0] = f;
@@ -539,12 +533,10 @@ hypre_MGRSetup( void               *mgr_vdata,
   (mgr_data -> F_array) = F_array;
   (mgr_data -> U_array) = U_array;
 
-  /*
   (mgr_data -> F_fine_array) = F_fine_array;
   (mgr_data -> U_fine_array) = U_fine_array;
   (mgr_data -> aff_solver) = aff_solver;
   (mgr_data -> A_ff_array) = A_ff_array;
-  */
 
   /* begin coarsening loop */
   num_coarsening_levs = max_num_coarse_levels;
@@ -683,7 +675,6 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_BoomerAMGBuildCoarseOperator(RT, A_array[lev], P, &RAP_ptr);
     }
 
-    /*
     if (Frelax_method[lev] == 99)
     {
       hypre_MGRBuildAffNew(A_array[lev], CF_marker_array[lev], debug_flag, &A_ff_ptr);
@@ -708,11 +699,10 @@ hypre_MGRSetup( void               *mgr_vdata,
       hypre_BoomerAMGSetNumSweeps(aff_solver[lev], 1);
       hypre_BoomerAMGSetPrintLevel(aff_solver[lev], 1);
       hypre_BoomerAMGSetRelaxType(aff_solver[lev], 3);
-      HYPRE_BoomerAMGSetNumFunctions(aff_solver[lev], 3);
+      hypre_BoomerAMGSetNumFunctions(aff_solver[lev], 3);
 
       fine_grid_solver_setup(aff_solver[lev], A_ff_ptr, F_fine_array[lev+1], U_fine_array[lev+1]);
     }
-    */
 
     /* Update coarse level indexes for next levels */
     if (lev < num_coarsening_levs - 1) 
@@ -981,7 +971,6 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
   HYPRE_Int            indx, k, tms;
   HYPRE_Int            num_fine_points = 0;
   HYPRE_Int            num_functions = (FrelaxVcycleData[lev] -> num_functions);
-  hypre_ParCSRMatrix   *A_ff_ptr = NULL;
 
   hypre_MPI_Comm_size(comm, &num_procs);
   hypre_MPI_Comm_rank(comm,&my_id);
@@ -1092,15 +1081,12 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     if (CF_marker_array[lev][i] == smrk_local)
       num_fine_points++;
   }
-  //hypre_printf("My_ID = %d, Size of A_FF matrix: %d \n", my_id, num_fine_points);
+  hypre_printf("My_ID = %d, Size of A_FF matrix: %d \n", my_id, num_fine_points);
 
   if (num_functions > 1 && dof_func == NULL)
   {
     dof_func = hypre_CTAlloc(HYPRE_Int, num_fine_points, HYPRE_MEMORY_HOST);
     indx = 0;
-    k = num_functions - 1;
-    for (j = indx-1; j > -1; j--)
-      dof_func[j] = k--;
     tms = num_fine_points/num_functions;
     if (tms*num_functions+indx > num_fine_points) tms--;
     for (j=0; j < tms; j++)
@@ -1122,10 +1108,12 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 
     if (lev_local == 0) 
     {
+      if (my_id == 0) hypre_printf("Building strength matrix for A_uu\n");
       /* use the CF_marker from the outer MGR cycle to create the strength connection matrix */
       hypre_BoomerAMGCreateSFromCFMarker(A_array_local[lev_local], strong_threshold, max_row_sum, CF_marker_array[lev], 
                            num_functions, dof_func_array[lev_local], smrk_local, &S_local);
       //hypre_ParCSRMatrixPrintIJ(S_local,0,0,"S_mat");
+      if (my_id == 0) hypre_printf("Done building strength matrix for A_uu\n");
     } 
     else if (lev_local > 0) 
     {

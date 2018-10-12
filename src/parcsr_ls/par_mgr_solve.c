@@ -506,12 +506,10 @@ hypre_MGRCycle( void               *mgr_vdata,
   hypre_ParVector     	*Vtemp = (mgr_data -> Vtemp);
   hypre_ParVector     	*Ztemp = (mgr_data -> Ztemp);
 
-  /*
   hypre_ParVector      **U_fine_array = (mgr_data -> U_fine_array);
   hypre_ParVector      **F_fine_array = (mgr_data -> F_fine_array);
   HYPRE_Int      (*fine_grid_solver_solve)(void*, void*, void*, void*) = (mgr_data -> fine_grid_solver_solve);
   hypre_ParCSRMatrix   **A_ff_array = (mgr_data -> A_ff_array);
-  */
 
   HYPRE_Int            i, relax_points;
   HYPRE_Int           	num_coarse_levels = (mgr_data -> num_coarse_levels);
@@ -606,7 +604,6 @@ hypre_MGRCycle( void               *mgr_vdata,
         //convergence_factor_frelax = hypre_ParVectorInnerProd(Vtemp, Vtemp)/convergence_factor_frelax;
         //hypre_printf("F-relaxation V-cycle convergence factor: %5f\n", convergence_factor_frelax);
       } 
-      /*
       else if (Frelax_method[level] == 99)
       {
         hypre_ParVectorSetConstantValues(F_fine_array[coarse_grid], 0.0);
@@ -615,7 +612,6 @@ hypre_MGRCycle( void               *mgr_vdata,
         fine_grid_solver_solve((mgr_data -> aff_solver)[fine_grid], A_ff_array[fine_grid], F_fine_array[coarse_grid], U_fine_array[coarse_grid]);
         hypre_MGRAddVectorP(CF_marker[fine_grid], FMRK, 1.0, U_fine_array[coarse_grid], 1.0, &(U_array[fine_grid]));
       }
-      */
       else 
       {
         for (i=0; i<nsweeps; i++)

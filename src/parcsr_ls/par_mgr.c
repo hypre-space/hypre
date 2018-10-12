@@ -44,14 +44,12 @@ hypre_MGRCreate()
   (mgr_data -> CF_marker_array) = NULL;
   (mgr_data -> coarse_indices_lvls) = NULL;
 
-  /*
   (mgr_data -> A_ff_array) = NULL;
   (mgr_data -> F_fine_array) = NULL;
   (mgr_data -> U_fine_array) = NULL;
   (mgr_data -> aff_solver) = NULL;
   (mgr_data -> fine_grid_solver_setup) = NULL;
   (mgr_data -> fine_grid_solver_solve) = NULL;
-  */
 
   (mgr_data -> F_array) = NULL;
   (mgr_data -> U_array) = NULL;
@@ -224,6 +222,38 @@ hypre_MGRDestroy( void *data )
       if ((mgr_data -> A_array)[i])
         hypre_ParCSRMatrixDestroy((mgr_data -> A_array)[i]);
     }
+  }
+
+  /* AMG for Frelax */
+  if(mgr_data -> A_ff_array || mgr_data -> F_fine_array || mgr_data -> U_fine_array)
+  {
+    for (i=1; i < num_coarse_levels+1; i++) 
+    {    
+      if (mgr_data -> F_fine_array[i])
+        hypre_ParVectorDestroy((mgr_data -> F_fine_array)[i]);
+      if (mgr_data -> U_fine_array[i])
+        hypre_ParVectorDestroy((mgr_data -> U_fine_array)[i]);
+    }    
+    for (i=1; i < (num_coarse_levels); i++) {
+      if ((mgr_data -> A_ff_array)[i])
+        hypre_ParCSRMatrixDestroy((mgr_data -> A_ff_array)[i]);
+    }    
+    hypre_TFree(mgr_data -> F_fine_array, HYPRE_MEMORY_HOST);
+    (mgr_data -> F_fine_array) = NULL;
+    hypre_TFree(mgr_data -> U_fine_array, HYPRE_MEMORY_HOST);
+    (mgr_data -> U_fine_array) = NULL;
+    hypre_TFree(mgr_data -> A_ff_array, HYPRE_MEMORY_HOST);
+    (mgr_data -> A_ff_array) = NULL;
+  }
+
+  if(mgr_data -> aff_solver)
+  {
+    for (i=1; i < (num_coarse_levels); i++) {
+      if ((mgr_data -> aff_solver)[i])
+        hypre_BoomerAMGDestroy((mgr_data -> aff_solver)[i]);
+    }    
+    hypre_TFree(mgr_data -> aff_solver, HYPRE_MEMORY_HOST);
+    (mgr_data -> aff_solver) = NULL;
   }
 
   if((mgr_data -> F_array))
@@ -2787,7 +2817,7 @@ hypre_MGRBuildAffNew( hypre_ParCSRMatrix   *A,
   HYPRE_Int             *A_offd_i = hypre_CSRMatrixI(A_offd);
   HYPRE_Int             *A_offd_j = hypre_CSRMatrixJ(A_offd);
   HYPRE_Int              num_cols_A_offd = hypre_CSRMatrixNumCols(A_offd);
-  HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
+  //HYPRE_Int             *col_map_offd = hypre_ParCSRMatrixColMapOffd(A);
 
   HYPRE_Int            *coarse_dof_func_ptr = NULL;
   HYPRE_Int            *num_cpts_global = NULL;
