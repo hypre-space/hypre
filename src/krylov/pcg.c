@@ -103,6 +103,7 @@ hypre_PCGCreate( hypre_PCGFunctions *pcg_functions )
    (pcg_data -> recompute_residual_p) = 0;
    (pcg_data -> stop_crit)    = 0;
    (pcg_data -> converged)    = 0;
+   (pcg_data -> hybrid)       = 0;
    (pcg_data -> owns_matvec_data ) = 1;
    (pcg_data -> matvec_data)  = NULL;
    (pcg_data -> precond_data) = NULL;
@@ -280,6 +281,7 @@ hypre_PCGSolve( void *pcg_vdata,
    HYPRE_Int             recompute_residual = (pcg_data -> recompute_residual);
    HYPRE_Int             recompute_residual_p = (pcg_data -> recompute_residual_p);
    HYPRE_Int             stop_crit    = (pcg_data -> stop_crit);
+   HYPRE_Int            hybrid           = (pcg_data -> hybrid);
 /*
    HYPRE_Int             converged    = (pcg_data -> converged);
 */
@@ -717,7 +719,7 @@ hypre_PCGSolve( void *pcg_vdata,
    if ( print_level > 1 && my_id==0 )
       hypre_printf("\n\n");
 
-  if (i >= max_iter && (i_prod/bi_prod) >= eps && eps > 0) hypre_error(HYPRE_ERROR_CONV);
+  if (i >= max_iter && (i_prod/bi_prod) >= eps && eps > 0 && hybrid != -1) hypre_error(HYPRE_ERROR_CONV);
 
    (pcg_data -> num_iterations) = i;
    if (bi_prod > 0.0)
@@ -1109,6 +1111,17 @@ hypre_PCGGetLogging( void *pcg_vdata,
    hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
 
    *level = (pcg_data -> logging);
+
+   return hypre_error_flag;
+}
+
+HYPRE_Int
+hypre_PCGSetHybrid( void *pcg_vdata,
+                      HYPRE_Int   level)
+{
+   hypre_PCGData *pcg_data = (hypre_PCGData *)pcg_vdata;
+
+   (pcg_data -> hybrid) = level;
 
    return hypre_error_flag;
 }
