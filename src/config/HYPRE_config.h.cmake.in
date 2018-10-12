@@ -10,11 +10,11 @@
  * $Revision$
  ***********************************************************************EHEADER*/
 
-#define HYPRE_RELEASE_NAME @CMAKE_PROJECT_NAME@
-#define HYPRE_RELEASE_VERSION @HYPRE_VERSION@
-#define HYPRE_RELEASE_DATE @HYPRE_DATE@
-#define HYPRE_RELEASE_TIME @HYPRE_TIME@
-#define HYPRE_RELEASE_BUGS @HYPRE_BUGS@
+#define HYPRE_RELEASE_NAME    "@CMAKE_PROJECT_NAME@"
+#define HYPRE_RELEASE_VERSION "@HYPRE_VERSION@"
+#define HYPRE_RELEASE_DATE    "@HYPRE_DATE@"
+#define HYPRE_RELEASE_TIME    "@HYPRE_TIME@"
+#define HYPRE_RELEASE_BUGS    "@HYPRE_BUGS@"
 
 /* Use long long int for HYPRE_Int */
 #cmakedefine HYPRE_BIGINT
