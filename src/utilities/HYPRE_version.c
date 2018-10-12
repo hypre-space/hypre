@@ -82,26 +82,3 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
    return hypre_error_flag;
 }
 
-/*--------------------------------------------------------------------------
- *--------------------------------------------------------------------------*/
-
-HYPRE_Int
-HYPRE_BuildOpts( char **build_opts_ptr )
-{
-#if 0 /* TO DO */
-   HYPRE_Int  len = 30;
-   char      *build_opts;
-
-   /* compute string length */
-   len += strlen(HYPRE_BUILD_OPTIONS);
-
-   build_opts = hypre_CTAlloc(char, len, HYPRE_MEMORY_HOST);
-
-   hypre_sprintf(build_opts, "Build options: %s", HYPRE_BUILD_OPTIONS);
-
-   *build_opts_ptr = build_opts;
-#endif
-
-   return hypre_error_flag;
-}
-
