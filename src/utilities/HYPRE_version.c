@@ -50,7 +50,7 @@ HYPRE_VersionNumber( HYPRE_Int  *major_ptr,
 {
    HYPRE_Int  major, minor, patch, single;
    HYPRE_Int  nums[3], i, j;
-   char      *ptr = HYPRE_RELEASE_VERSION;
+   char      *ptr = (char *) HYPRE_RELEASE_VERSION;
    
    /* get major/minor/patch numbers */
    for (i = 0; i < 3; i++)
