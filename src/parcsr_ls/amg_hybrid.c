@@ -1666,6 +1666,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       hypre_PCGSetRelChange(pcg_solver, rel_change);
       hypre_PCGSetLogging(pcg_solver, logging);
       hypre_PCGSetPrintLevel(pcg_solver, sol_print_level);
+      hypre_PCGSetHybrid(pcg_solver,-1);
                                                                                                                                         
       pcg_precond = NULL;
      }
@@ -1720,6 +1721,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       hypre_GMRESSetRelChange(pcg_solver, rel_change);
       hypre_GMRESSetLogging(pcg_solver, logging);
       hypre_GMRESSetPrintLevel(pcg_solver, sol_print_level);
+      hypre_GMRESSetHybrid(pcg_solver,-1);
                                                                                                                                         
       pcg_precond = NULL;
      }
@@ -1770,6 +1772,7 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       hypre_BiCGSTABSetStopCrit(pcg_solver, stop_crit);
       hypre_BiCGSTABSetLogging(pcg_solver, logging);
       hypre_BiCGSTABSetPrintLevel(pcg_solver, sol_print_level);
+      hypre_BiCGSTABSetHybrid(pcg_solver,-1);
                                                                                                                                         
       pcg_precond = NULL;
      }
@@ -1819,16 +1822,19 @@ hypre_AMGHybridSolve( void               *AMGhybrid_vdata,
       {
          hypre_PCGSetMaxIter(pcg_solver, pcg_max_its);
          hypre_PCGSetConvergenceFactorTol(pcg_solver, 0.0);
+         hypre_PCGSetHybrid(pcg_solver, 0);
       }
       else if (solver_type == 2)
       {
          hypre_GMRESSetMaxIter(pcg_solver, pcg_max_its);
          hypre_GMRESSetConvergenceFactorTol(pcg_solver, 0.0);
+         hypre_GMRESSetHybrid(pcg_solver, 0);
       }
       else if (solver_type == 3)
       {
          hypre_BiCGSTABSetMaxIter(pcg_solver, pcg_max_its);
          hypre_BiCGSTABSetConvergenceFactorTol(pcg_solver, 0.0);
+         hypre_BiCGSTABSetHybrid(pcg_solver, 0);
       }
 
       /* Setup preconditioner */

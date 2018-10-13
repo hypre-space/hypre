@@ -123,6 +123,7 @@ typedef struct
    HYPRE_Int    recompute_residual_p;
    HYPRE_Int    stop_crit;
    HYPRE_Int    converged;
+   HYPRE_Int    hybrid;
 
    void    *A;
    void    *p;
