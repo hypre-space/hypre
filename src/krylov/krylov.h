@@ -1630,7 +1630,6 @@ extern "C" {
   HYPRE_Int HYPRE_PCGGetPrecond ( HYPRE_Solver solver , HYPRE_Solver *precond_data_ptr );
   HYPRE_Int HYPRE_PCGSetLogging ( HYPRE_Solver solver , HYPRE_Int level );
   HYPRE_Int HYPRE_PCGGetLogging ( HYPRE_Solver solver , HYPRE_Int *level );
-  HYPRE_Int HYPRE_PCGSetHybrid ( HYPRE_Solver solver , HYPRE_Int level );
   HYPRE_Int HYPRE_PCGSetPrintLevel ( HYPRE_Solver solver , HYPRE_Int level );
   HYPRE_Int HYPRE_PCGGetPrintLevel ( HYPRE_Solver solver , HYPRE_Int *level );
   HYPRE_Int HYPRE_PCGGetNumIterations ( HYPRE_Solver solver , HYPRE_Int *num_iterations );
@@ -1672,6 +1671,7 @@ extern "C" {
   HYPRE_Int hypre_PCGGetPrintLevel ( void *pcg_vdata , HYPRE_Int *level );
   HYPRE_Int hypre_PCGSetLogging ( void *pcg_vdata , HYPRE_Int level );
   HYPRE_Int hypre_PCGGetLogging ( void *pcg_vdata , HYPRE_Int *level );
+  HYPRE_Int hypre_PCGSetHybrid ( void *pcg_vdata , HYPRE_Int level );
   HYPRE_Int hypre_PCGGetNumIterations ( void *pcg_vdata , HYPRE_Int *num_iterations );
   HYPRE_Int hypre_PCGGetConverged ( void *pcg_vdata , HYPRE_Int *converged );
   HYPRE_Int hypre_PCGPrintLogging ( void *pcg_vdata , HYPRE_Int myid );
