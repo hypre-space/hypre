@@ -88,6 +88,7 @@ typedef struct
    HYPRE_Int      skip_real_r_check;
    HYPRE_Int      stop_crit;
    HYPRE_Int      converged;
+   HYPRE_Int      hybrid;
    HYPRE_Real   tol;
    HYPRE_Real   cf_tol;
    HYPRE_Real   a_tol;

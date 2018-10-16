@@ -134,6 +134,7 @@ extern "C" {
     HYPRE_Int      max_iter;
     HYPRE_Int      stop_crit;
     HYPRE_Int      converged;
+    HYPRE_Int      hybrid;
     HYPRE_Real   tol;
     HYPRE_Real   cf_tol;
     HYPRE_Real   rel_residual_norm;
@@ -163,6 +164,8 @@ extern "C" {
     char    *log_file_name;
 
   } hypre_BiCGSTABData;
+
+#define hypre_BiCGSTABDataHybrid(pcgdata)  ((pcgdata) -> hybrid)
 
 #ifdef __cplusplus
   extern "C" {
@@ -468,6 +471,7 @@ extern "C" {
     HYPRE_Int      skip_real_r_check;
     HYPRE_Int      stop_crit;
     HYPRE_Int      converged;
+    HYPRE_Int      hybrid;
     HYPRE_Real   tol;
     HYPRE_Real   cf_tol;
     HYPRE_Real   a_tol;
@@ -493,6 +497,8 @@ extern "C" {
     char    *log_file_name;
 
   } hypre_GMRESData;
+
+#define hypre_GMRESDataHybrid(pcgdata)  ((pcgdata) -> hybrid)
 
 #ifdef __cplusplus
   extern "C" {
@@ -1187,6 +1193,7 @@ extern "C" {
     HYPRE_Int      recompute_residual_p;
     HYPRE_Int      stop_crit;
     HYPRE_Int      converged;
+    HYPRE_Int      hybrid;
 
     void    *A;
     void    *p;
@@ -1212,6 +1219,7 @@ extern "C" {
   } hypre_PCGData;
 
 #define hypre_PCGDataOwnsMatvecData(pcgdata)  ((pcgdata) -> owns_matvec_data)
+#define hypre_PCGDataHybrid(pcgdata)  ((pcgdata) -> hybrid)
 
 #ifdef __cplusplus
   extern "C" {
@@ -1280,6 +1288,7 @@ extern "C" {
   HYPRE_Int hypre_BiCGSTABSetPrecond ( void *bicgstab_vdata , HYPRE_Int (*precond )(void*,void*,void*,void*), HYPRE_Int (*precond_setup )(void*,void*,void*,void*), void *precond_data );
   HYPRE_Int hypre_BiCGSTABGetPrecond ( void *bicgstab_vdata , HYPRE_Solver *precond_data_ptr );
   HYPRE_Int hypre_BiCGSTABSetLogging ( void *bicgstab_vdata , HYPRE_Int logging );
+  HYPRE_Int hypre_BiCGSTABSetHybrid ( void *bicgstab_vdata , HYPRE_Int logging );
   HYPRE_Int hypre_BiCGSTABSetPrintLevel ( void *bicgstab_vdata , HYPRE_Int print_level );
   HYPRE_Int hypre_BiCGSTABGetConverged ( void *bicgstab_vdata , HYPRE_Int *converged );
   HYPRE_Int hypre_BiCGSTABGetNumIterations ( void *bicgstab_vdata , HYPRE_Int *num_iterations );
@@ -1331,6 +1340,7 @@ extern "C" {
   HYPRE_Int hypre_GMRESGetPrintLevel ( void *gmres_vdata , HYPRE_Int *level );
   HYPRE_Int hypre_GMRESSetLogging ( void *gmres_vdata , HYPRE_Int level );
   HYPRE_Int hypre_GMRESGetLogging ( void *gmres_vdata , HYPRE_Int *level );
+  HYPRE_Int hypre_GMRESSetHybrid ( void *gmres_vdata , HYPRE_Int level );
   HYPRE_Int hypre_GMRESGetNumIterations ( void *gmres_vdata , HYPRE_Int *num_iterations );
   HYPRE_Int hypre_GMRESGetConverged ( void *gmres_vdata , HYPRE_Int *converged );
   HYPRE_Int hypre_GMRESGetFinalRelativeResidualNorm ( void *gmres_vdata , HYPRE_Real *relative_residual_norm );
@@ -1661,6 +1671,7 @@ extern "C" {
   HYPRE_Int hypre_PCGGetPrintLevel ( void *pcg_vdata , HYPRE_Int *level );
   HYPRE_Int hypre_PCGSetLogging ( void *pcg_vdata , HYPRE_Int level );
   HYPRE_Int hypre_PCGGetLogging ( void *pcg_vdata , HYPRE_Int *level );
+  HYPRE_Int hypre_PCGSetHybrid ( void *pcg_vdata , HYPRE_Int level );
   HYPRE_Int hypre_PCGGetNumIterations ( void *pcg_vdata , HYPRE_Int *num_iterations );
   HYPRE_Int hypre_PCGGetConverged ( void *pcg_vdata , HYPRE_Int *converged );
   HYPRE_Int hypre_PCGPrintLogging ( void *pcg_vdata , HYPRE_Int myid );
