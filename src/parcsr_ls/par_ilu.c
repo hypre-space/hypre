@@ -1411,6 +1411,33 @@ hypre_ILUGetPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
    return hypre_error_flag;
 }
 
+/*
+ * Get no permutation for block-jacobi case 
+ * A: parcer matrix
+ * perm: permutation array
+ * nLU: number of interial nodes
+ */
+HYPRE_Int
+hypre_ILUGetNoPerm(hypre_ParCSRMatrix *A, HYPRE_Int **perm, HYPRE_Int *nLU)
+{
+   /* get basic information of A */
+   HYPRE_Int            n = hypre_ParCSRMatrixNumRows(A);
+   HYPRE_Int            i;
+   HYPRE_Int            *temp_perm = hypre_TAlloc(HYPRE_Int, n, HYPRE_MEMORY_HOST);
+   
+   /* set perm array */
+   for( i = 0 ; i < n ; i ++ )
+   {
+      temp_perm[i] = i;
+   }
+
+   *nLU = n;
+   if((*perm) != NULL) hypre_TFree(*perm,HYPRE_MEMORY_HOST);
+   *perm = temp_perm;
+   
+   return hypre_error_flag;
+}
+
 /* Build the expanded matrix for RAS-1
  * A: input ParCSR matrix
  * E_i, E_j, E_data: information for external matrix

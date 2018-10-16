@@ -2837,13 +2837,15 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
         if (eu_bj)
         {
            HYPRE_ILUSetType(smoother[j],0);
-           HYPRE_ILUSetMaxIter(smoother[j],2);
+           HYPRE_ILUSetMaxIter(smoother[j],1);
         }
         else
         {
            HYPRE_ILUSetType(smoother[j],30);
            HYPRE_ILUSetMaxIter(smoother[j],1);
         }
+        HYPRE_ILUSetLogging(smoother[j],0);
+        HYPRE_ILUSetPrintLevel(smoother[j],0);
         HYPRE_ILUSetLevelOfFill(smoother[j],eu_level); 
         HYPRE_ILUSetup(smoother[j],
                           (HYPRE_ParCSRMatrix) A_array[j],

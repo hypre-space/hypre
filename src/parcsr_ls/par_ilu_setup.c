@@ -218,11 +218,14 @@ hypre_ILUSetup( void               *ilu_vdata,
    {
       switch(ilu_type)
       {
-         case 0: case 1: case 10: case 11: case 20: case 21: case 30: case 31: /* symmetric */
+         case 10: case 11: case 20: case 21: case 30: case 31: /* symmetric */
             hypre_ILUGetPerm(matA, &perm, &nLU);
             break;
          case 40: case 41:/* ddPQ */
             hypre_ILUGetPermddPQ(matA, &perm, &qperm, tol_ddPQ, &nLU, &nI);
+            break;
+	 case 0: case 1:
+	    hypre_ILUGetNoPerm(matA, &perm, &nLU);
             break;
          default:
             hypre_ILUGetPerm(matA, &perm, &nLU);
