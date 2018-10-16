@@ -6,4 +6,5 @@ void VecSet(double* tgt, int size, double value, cudaStream_t s);
 void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
+void BigToSmallCopy(hypre_int *tgt, const HYPRE_Int* src, hypre_int size, cudaStream_t s);
 #endif

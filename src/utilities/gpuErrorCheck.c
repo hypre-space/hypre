@@ -7,7 +7,11 @@ void CheckError(cudaError_t const err, const char* file, char const* const fun, 
 {
     if (err)
     {
+#if HYPRE_BIGINT
+      printf("CUDA Error Code[%d]: %s\n %s(%s) Line:%lld\n", err, cudaGetErrorString(err), file, fun, line);
+#else
       printf("CUDA Error Code[%d]: %s\n %s(%s) Line:%d\n", err, cudaGetErrorString(err), file, fun, line);
+#endif
       HYPRE_Int *p = NULL; *p = 1;
     }
 }

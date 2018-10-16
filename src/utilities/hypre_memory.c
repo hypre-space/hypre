@@ -213,9 +213,11 @@ hypre_UnifiedMalloc(size_t size, HYPRE_Int zeroinit)
    void *ptr = NULL;
 
 #if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+   size_t count = size + sizeof(size_t)*HYPRE_MEM_PAD_LEN;
    /* with UM, managed memory alloc */
    hypre_CheckErrorDevice( cudaMallocManaged(&ptr, size + sizeof(size_t)*HYPRE_MEM_PAD_LEN, 
                            CUDAMEMATTACHTYPE) );
+   hypre_CheckErrorDevice( cudaMemAdvise(ptr, count, cudaMemAdviseSetPreferredLocation, HYPRE_DEVICE) );
    size_t *sp = (size_t*) ptr;
    sp[0] = size;
    ptr = (void*) (&sp[HYPRE_MEM_PAD_LEN]);

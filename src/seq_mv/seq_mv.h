@@ -66,7 +66,10 @@ typedef struct
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
   HYPRE_Int mapped;
 #endif
-
+#ifdef HYPRE_BIGINT
+   hypre_int *i_short, *j_short;
+#endif
+   
 } hypre_CSRMatrix;
 
 /*--------------------------------------------------------------------------
@@ -252,7 +255,7 @@ void VecSet(double* tgt, int size, double value, cudaStream_t s);
 void VecScale(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void VecScaleSplit(double *u, double *v, double *l1_norm, int num_rows,cudaStream_t s);
 void CudaCompileFlagCheck();
-void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, hypre_int *send_map, hypre_int begin,hypre_int end,cudaStream_t s);
+void PackOnDevice(HYPRE_Complex *send_data,HYPRE_Complex *x_local_data, HYPRE_Int *send_map, HYPRE_Int begin, HYPRE_Int end,cudaStream_t s);
 #endif
 #endif
 
@@ -278,6 +281,7 @@ hypre_CSRMatrix *hypre_CSRMatrixClone ( hypre_CSRMatrix *A );
 hypre_CSRMatrix *hypre_CSRMatrixUnion ( hypre_CSRMatrix *A , hypre_CSRMatrix *B , HYPRE_Int *col_map_offd_A , HYPRE_Int *col_map_offd_B , HYPRE_Int **col_map_offd_C );
 #ifdef HYPRE_USING_UNIFIED_MEMORY
 void hypre_CSRMatrixPrefetchToDevice(hypre_CSRMatrix *A);
+void hypre_CSRMatrixPrefetchToDeviceBIGINT(hypre_CSRMatrix *A);
 void hypre_CSRMatrixPrefetchToHost(hypre_CSRMatrix *A);
 hypre_int hypre_CSRMatrixIsManaged(hypre_CSRMatrix *a);
 #endif
@@ -296,6 +300,7 @@ HYPRE_Int hypre_CSRMatrixMatvecT ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hy
 HYPRE_Int hypre_CSRMatrixMatvec_FF ( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *y , HYPRE_Int *CF_marker_x , HYPRE_Int *CF_marker_y , HYPRE_Int fpt );
 #ifdef HYPRE_USING_GPU
 HYPRE_Int hypre_CSRMatrixMatvecDevice( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
+HYPRE_Int hypre_CSRMatrixMatvecDeviceBIGINT( HYPRE_Complex alpha , hypre_CSRMatrix *A , hypre_Vector *x , HYPRE_Complex beta , hypre_Vector *b, hypre_Vector *y, HYPRE_Int offset );
 #endif
 /* genpart.c */
 HYPRE_Int hypre_GeneratePartitioning ( HYPRE_Int length , HYPRE_Int num_procs , HYPRE_Int **part_ptr );
