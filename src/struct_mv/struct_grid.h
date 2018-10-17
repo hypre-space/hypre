@@ -53,7 +53,7 @@ typedef struct hypre_StructGrid_struct
    HYPRE_Int            num_ghost[2*HYPRE_MAXDIM]; /* ghost layer size */  
 
    hypre_BoxManager    *boxman;
-#if defined(HYPRE_USE_CUDA) 
+#if defined(HYPRE_USING_CUDA) 
    HYPRE_Int            data_location;
 #endif
 } hypre_StructGrid;
@@ -86,7 +86,7 @@ typedef struct hypre_StructGrid_struct
 
 #define hypre_StructGridIDPeriod(grid) \
 hypre_BoxNeighborsIDPeriod(hypre_StructGridNeighbors(grid))
-#if defined(HYPRE_USE_CUDA) 
+#if defined(HYPRE_USING_CUDA) 
 #define hypre_StructGridDataLocation(grid)        ((grid) -> data_location)
 #endif
 /*--------------------------------------------------------------------------

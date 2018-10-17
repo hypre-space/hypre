@@ -171,7 +171,6 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                                                                            stencil_shape);
                            hypre_BoxGetSize(shift_ibox, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(ac_ptr)
                            hypre_BoxLoop1Begin(ndim, loop_size,
                                                ac_dbox, hypre_BoxIMin(shift_ibox),
@@ -181,7 +180,6 @@ hypre_FacZeroCFSten( hypre_SStructPMatrix *Af,
                            }
                            hypre_BoxLoop1End(iac);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
                         }   /* if ( hypre_BoxVolume(shift_ibox) ) */
 
                         hypre_BoxDestroy(shift_ibox);
@@ -396,7 +394,6 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
 
                         hypre_BoxGetSize(&intersect_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(a_ptr)
                         hypre_BoxLoop1Begin(ndim, loop_size,
                                             a_dbox, hypre_BoxIMin(&intersect_box),
@@ -406,7 +403,6 @@ hypre_FacZeroFCSten( hypre_SStructPMatrix  *A,
                         }
                         hypre_BoxLoop1End(ia);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
                      }  /* hypre_ForBoxI(fj, intersect_boxes) */
 

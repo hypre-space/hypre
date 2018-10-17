@@ -1,4 +1,10 @@
 #ifdef __cplusplus
+#define REGISTER 
+#else
+#define REGISTER register
+#endif
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -13,7 +19,7 @@ extern "C" {
 
 integer s_cmp(char *a0,const char *b0, ftnlen la, ftnlen lb)
 {
-register unsigned char *a, *aend, *b, *bend;
+REGISTER unsigned char *a, *aend, *b, *bend;
 a = (unsigned char *)a0;
 b = (unsigned char *)b0;
 aend = a + la;
@@ -52,7 +58,7 @@ return(0);
 
 integer s_copy(char *a,const char *b, ftnlen la, ftnlen lb)
 {
-register char *aend, *bend;
+REGISTER char *aend, *bend;
 
 aend = a + la;
 

@@ -31,7 +31,7 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_multivector-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_multivector-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -60,7 +60,7 @@ libHYPRE_multivector.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_multivector.so: ${OBJS}
+libHYPRE_multivector.so libHYPRE_multivector.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

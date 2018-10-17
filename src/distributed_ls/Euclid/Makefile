@@ -87,7 +87,7 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_Euclid-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_Euclid-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -114,7 +114,7 @@ libHYPRE_Euclid.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_Euclid.so: ${OBJS}
+libHYPRE_Euclid.so libHYPRE_Euclid.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

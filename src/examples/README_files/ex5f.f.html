@@ -405,7 +405,7 @@
 <a name="line398">398</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsCreate</font><font color="4444FF">(</font><font color="#2040a0">MPI_COMM_WORLD</font>, <font color="#2040a0">precond</font>,<font color="#2040a0">ierr</font><font color="4444FF">)</font>
 <a name="line399">399</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsSetParams</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">0.1d0</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
 <a name="line400">400</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsSetFilter</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">0.05d0</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
-<a name="line401">401</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsSetSym</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font><font color="4444FF">)</font>
+<a name="line401">401</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsSetSym</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">1</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
 <a name="line402">402</a>          <strong>call</strong> <font color="#2040a0">HYPRE_ParaSailsSetLogging</font><font color="4444FF">(</font><font color="#2040a0">precond</font>, <font color="#FF0000">3</font>, <font color="#2040a0">ierr</font><font color="4444FF">)</font>
 <a name="line403">403</a> 
 <a name="line404">404</a> <font color="#444444">c        set parsails as the pcg preconditioner</font>

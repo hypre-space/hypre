@@ -159,7 +159,7 @@ OBJSC = ${FILESC:.c=.o}
 OBJSCXX = ${FILESCXX:.cxx=.o}
 OBJS = ${OBJSC} ${OBJSCXX}
 
-SONAME = libHYPRE_FEI-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_FEI-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -211,7 +211,7 @@ libHYPRE_FEI.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_FEI.so: ${OBJS}
+libHYPRE_FEI.so libHYPRE_FEI.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@
