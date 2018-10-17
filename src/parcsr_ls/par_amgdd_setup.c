@@ -253,7 +253,6 @@ hypre_BoomerAMGDDSetup( void *amg_vdata,
    if (timers) hypre_BeginTiming(timers[0]);
    for (level = 0; level < transition_level; level++)
    {
-      // !!! For now, not counting bandwidth cost here !!!
       SetupNearestProcessorNeighbors(A_array[level], compGrid[level], compGridCommPkg, level, padding, num_ghost_layers, communication_cost);
    }
    if (timers) hypre_EndTiming(timers[0]);
@@ -1223,19 +1222,22 @@ FindTransitionLevel(hypre_ParAMGData *amg_data)
    // hypre_MPI_Allreduce(&local_transition, &global_transition, 1, HYPRE_MPI_INT, MPI_MAX, hypre_MPI_COMM_WORLD);
 
    // Transition level is the coarsest level at which every processor owns a dof ( - use_transition_level )
-   if (use_transition_level > 0)
-   {
-      for (i = num_levels - 1; i >= 0; i--)
-      {
-         // If this proc owns (use_transition_level) nodes on this level, note this level and leave the loop
-         if ( hypre_ParCSRMatrixNumRows( hypre_ParAMGDataAArray(amg_data)[i] ) )
-         {
-            local_transition = i - use_transition_level + 1;
-            break;
-         }
-      }
-      hypre_MPI_Allreduce(&local_transition, &global_transition, 1, HYPRE_MPI_INT, MPI_MIN, hypre_MPI_COMM_WORLD);
-   }
+   // if (use_transition_level > 0)
+   // {
+   //    for (i = num_levels - 1; i >= 0; i--)
+   //    {
+   //       // If this proc owns (use_transition_level) nodes on this level, note this level and leave the loop
+   //       if ( hypre_ParCSRMatrixNumRows( hypre_ParAMGDataAArray(amg_data)[i] ) )
+   //       {
+   //          local_transition = i - use_transition_level + 1;
+   //          break;
+   //       }
+   //    }
+   //    hypre_MPI_Allreduce(&local_transition, &global_transition, 1, HYPRE_MPI_INT, MPI_MIN, hypre_MPI_COMM_WORLD);
+   // }
+
+   // Transition level set as a prescribed level
+   if (use_transition_level > 0) global_transition = use_transition_level;
    
    // Transition level is the finest level such that the global grid size stored is less than a quarter the size of the fine grid patch
    if (use_transition_level < 0)

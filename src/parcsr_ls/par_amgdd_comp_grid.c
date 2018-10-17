@@ -807,7 +807,7 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
 
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   if (myid == 0) printf("transition_level = %d\n", transition_level);
+   // if (myid == 0) printf("transition_level = %d\n", transition_level);
 
    for (level = 0; level < transition_level-1; level++)
    {
