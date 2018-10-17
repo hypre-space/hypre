@@ -541,6 +541,10 @@ hypre_MGRCycle( void               *mgr_vdata,
       /* call coarse grid solver here */
       /* default is BoomerAMG */
       coarse_grid_solver_solve(cg_solver, RAP, F_array[level], U_array[level]);
+      HYPRE_Real convergence_factor_cg;
+      hypre_BoomerAMGGetRelResidualNorm(cg_solver, &convergence_factor_cg);
+      (mgr_data -> cg_convergence_factor) = convergence_factor_cg;
+      //hypre_printf("Coarse grid V-cycle convergence factor: %5f\n", convergence_factor_cg);
 
       // DEBUG: print the coarse system indicated by mgr_data ->print_coarse_system
       if(mgr_data -> print_coarse_system)
@@ -663,9 +667,17 @@ hypre_MGRCycle( void               *mgr_vdata,
     						beta, U_array[fine_grid]);
 
       /* post relaxation sweeps */
-      //for(i=0; i<nsweeps; i++)
-      //  Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
-      //			                 relax_type, relax_points, relax_weight, omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
+      /*
+      if (level == 2)
+      {
+        hypre_printf("Size of A: %d\n", hypre_ParCSRMatrixGlobalNumRows(A_array[fine_grid]));
+        for(i=0; i<nsweeps; i++)
+        {
+          Solve_err_flag = hypre_BoomerAMGRelax(A_array[fine_grid], F_array[fine_grid], CF_marker[fine_grid],
+        			                 relax_type, relax_points, relax_weight, omega, NULL, U_array[fine_grid], Vtemp, Ztemp);
+        }
+      }
+      */
 
       if (Solve_err_flag != 0)
         return(Solve_err_flag);

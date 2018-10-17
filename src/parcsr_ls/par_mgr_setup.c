@@ -87,7 +87,8 @@ hypre_MGRSetup( void               *mgr_vdata,
   HYPRE_Int   (*coarse_grid_solver_setup)(void*,void*,void*,void*) = (HYPRE_Int (*)(void*, void*, void*, void*)) (mgr_data -> coarse_grid_solver_setup);
   HYPRE_Int   (*coarse_grid_solver_solve)(void*,void*,void*,void*) = (HYPRE_Int (*)(void*, void*, void*, void*)) (mgr_data -> coarse_grid_solver_solve);
 
-  HYPRE_Int    global_smooth_type =  (mgr_data -> global_smooth_type);
+  HYPRE_Int    global_smooth_type = (mgr_data -> global_smooth_type);
+  HYPRE_Int    global_smooth_iters = (mgr_data -> global_smooth_iters);
 
   HYPRE_Int    reserved_coarse_size = (mgr_data -> reserved_coarse_size);
 
@@ -335,16 +336,19 @@ hypre_MGRSetup( void               *mgr_vdata,
     mgr_data -> n_block = n / block_size;
     mgr_data -> left_size = n - block_size*(mgr_data -> n_block);
   }
-  if (global_smooth_type == 0)
+  if (global_smooth_iters > 0)
   {
-    hypre_blockRelax_setup(A,block_size,reserved_coarse_size,&(mgr_data -> diaginv));
-  }
-  else if (global_smooth_type == 8)
-  {
-    HYPRE_EuclidCreate(comm, &(mgr_data -> global_smoother));
-    HYPRE_EuclidSetLevel(mgr_data -> global_smoother, 0);
-    HYPRE_EuclidSetBJ(mgr_data -> global_smoother, 1);
-    HYPRE_EuclidSetup(mgr_data -> global_smoother, A, f, u);
+    if (global_smooth_type == 0)
+    {
+      hypre_blockRelax_setup(A,block_size,reserved_coarse_size,&(mgr_data -> diaginv));
+    }
+    else if (global_smooth_type == 8)
+    {
+      HYPRE_EuclidCreate(comm, &(mgr_data -> global_smoother));
+      HYPRE_EuclidSetLevel(mgr_data -> global_smoother, 0);
+      HYPRE_EuclidSetBJ(mgr_data -> global_smoother, 1);
+      HYPRE_EuclidSetup(mgr_data -> global_smoother, A, f, u);
+    }
   }
 
 
@@ -870,7 +874,7 @@ hypre_MGRSetup( void               *mgr_vdata,
   (mgr_data -> FrelaxVcycleData) = FrelaxVcycleData;  
 
   /* loop over levels */
-  for (i=0; i < (mgr_data->max_num_coarse_levels); i++)
+  for (i=0; i < max_num_coarse_levels; i++)
   {
     if (Frelax_method[i] == 1) {
       FrelaxVcycleData[i] = (hypre_ParAMGData*) hypre_MGRCreateFrelaxVcycleData();
@@ -1081,7 +1085,7 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
     if (CF_marker_array[lev][i] == smrk_local)
       num_fine_points++;
   }
-  hypre_printf("My_ID = %d, Size of A_FF matrix: %d \n", my_id, num_fine_points);
+  //hypre_printf("My_ID = %d, Size of A_FF matrix: %d \n", my_id, num_fine_points);
 
   if (num_functions > 1 && dof_func == NULL)
   {
@@ -1108,12 +1112,10 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
 
     if (lev_local == 0) 
     {
-      if (my_id == 0) hypre_printf("Building strength matrix for A_uu\n");
       /* use the CF_marker from the outer MGR cycle to create the strength connection matrix */
       hypre_BoomerAMGCreateSFromCFMarker(A_array_local[lev_local], strong_threshold, max_row_sum, CF_marker_array[lev], 
                            num_functions, dof_func_array[lev_local], smrk_local, &S_local);
       //hypre_ParCSRMatrixPrintIJ(S_local,0,0,"S_mat");
-      if (my_id == 0) hypre_printf("Done building strength matrix for A_uu\n");
     } 
     else if (lev_local > 0) 
     {
@@ -1164,8 +1166,9 @@ hypre_MGRSetupFrelaxVcycleData( void *mgr_vdata,
       hypre_TFree(coarse_pnts_global_lvl, HYPRE_MEMORY_HOST);
       hypre_TFree(coarse_dof_func_lvl, HYPRE_MEMORY_HOST);
       hypre_TFree(col_offd_S_to_A, HYPRE_MEMORY_HOST);
+      hypre_TFree(CF_marker_local, HYPRE_MEMORY_HOST);
       // save the CF_marker pointers 
-      //CF_marker_array_local[lev_local] = CF_marker_array[lev];
+      //CF_marker_array_local[lev_local] = CF_marker_local;
 
       break;
     }

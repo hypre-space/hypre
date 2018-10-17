@@ -114,6 +114,8 @@ typedef struct
   /* how to set C points */
   HYPRE_Int   set_c_points_method;
 
+  HYPRE_Real  cg_convergence_factor;
+
 } hypre_ParMGRData;
 
 

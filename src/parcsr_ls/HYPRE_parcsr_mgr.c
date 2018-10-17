@@ -276,6 +276,16 @@ HYPRE_MGRSetPMaxElmts( HYPRE_Solver solver, HYPRE_Int P_max_elmts )
 }
 
 /*--------------------------------------------------------------------------
+ * HYPRE_MGRGetCoarseGridConvergenceFactor
+ *--------------------------------------------------------------------------*/
+HYPRE_Int
+HYPRE_MGRGetCoarseGridConvergenceFactor( HYPRE_Solver solver, HYPRE_Real *conv_factor )
+{
+   return hypre_MGRGetCoarseGridConvergenceFactor( solver, conv_factor );
+}
+
+
+/*--------------------------------------------------------------------------
  * HYPRE_MGRGetNumIterations
  *--------------------------------------------------------------------------*/
 HYPRE_Int

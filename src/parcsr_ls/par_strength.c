@@ -649,6 +649,8 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
 
    HYPRE_Int *S_temp_offd_j = NULL;
 
+   //hypre_printf("Done creating S and S_temp\n"); 
+
   if (num_cols_offd)
   {
     A_offd_data = hypre_CSRMatrixData(A_offd);
@@ -661,31 +663,17 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
 
 
     S_offd_j = hypre_CTAlloc(HYPRE_Int,  num_nonzeros_offd, HYPRE_MEMORY_HOST);
-/*
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
-#endif
-        for (i = 0; i < num_nonzeros_offd; i++)
-          S_offd_j[i] = 0;
-*/
 
     HYPRE_Int *col_map_offd_A = hypre_ParCSRMatrixColMapOffd(A);
-    //char col_map_name[256];
-    //sprintf(col_map_name, "col_map_offd_A.%05d",my_id);
-    //FILE* fout;
-    //fout = fopen(col_map_name,"w");
+
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel for private(i) HYPRE_SMP_SCHEDULE
 #endif
     for (i = 0; i < num_cols_offd; i++)
     {
       col_map_offd_S[i] = col_map_offd_A[i];
-      //fprintf(fout, "my_id = %d, col_map_offd[%d] = %d\n", my_id, i, col_map_offd_A[i]+1);
     }
-
-    //fclose(fout);
   }
-
 
   /*-------------------------------------------------------------------
     * Get the dof_func data for the off-processor columns
@@ -746,10 +734,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
   prefix_sum_workspace = hypre_TAlloc(HYPRE_Int,  2*(hypre_NumThreads() + 1), HYPRE_MEMORY_HOST);
 
   /* give S same nonzero structure as A */
-  char fname[256];
-  sprintf(fname,"S_debug.%05d", my_id);
-  FILE* fout;
-  fout = fopen(fname,"w");
 
 #ifdef HYPRE_USING_OPENMP
 #pragma omp parallel private(i,diag,row_scale,row_sum,jA,jS)
@@ -768,25 +752,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
          S_offd_i[i] = jS_offd;
       }
 
-      /*
-      for (jA = A_diag_i[i]; jA < A_diag_i[i+1]; jA++)
-      {
-        jj = A_diag_j[jA];
-        if (CF_marker[jj] == SMRK)
-        {
-          fprintf(fout, "%d %d %1.12e\n", i+1, jj+1, A_diag_data[jA]);
-        }
-      }
-      for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
-      {
-        jj = A_offd_j[jA];
-        if (CF_marker_offd[jj] == SMRK)
-        {
-          fprintf(fout, "%d %d %1.12e\n", i+1, S_col_map_offd[jj]+1, A_offd_data[jA]);
-        }
-      }
-      */
-
       diag = A_diag_data[A_diag_i[i]];
 
       /* compute scaling factor and row sum */
@@ -799,7 +764,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
             for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
             {
               jj = A_diag_j[jA];
-              //if (CF_marker[jj] == SMRK) jS_diag++;
               if ((CF_marker[jj] == SMRK) && (dof_func[i] == dof_func[jj]))
               {
                 row_scale = hypre_max(row_scale, A_diag_data[jA]);
@@ -809,7 +773,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
             for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
             {
               jj = A_offd_j[jA];
-              //if (CF_marker_offd[jj] == SMRK) jS_offd++;
               if ((CF_marker_offd[jj] == SMRK) && (dof_func[i] == dof_func_offd[jj]))
               {
                 row_scale = hypre_max(row_scale, A_offd_data[jA]);
@@ -822,7 +785,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
             for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
             {
               jj = A_diag_j[jA];
-              //if (CF_marker[jj] == SMRK) jS_diag++;
               if ((CF_marker[jj] == SMRK) && (dof_func[i] == dof_func[jj]))
               {
                 row_scale = hypre_min(row_scale, A_diag_data[jA]);
@@ -832,7 +794,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
             for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
             {
               jj = A_offd_j[jA];
-              //if (CF_marker_offd[jj] == SMRK) jS_offd++;
               if ((CF_marker_offd[jj] == SMRK) && (dof_func[i] == dof_func_offd[A_offd_j[jA]]))
               {
                 row_scale = hypre_min(row_scale, A_offd_data[jA]);
@@ -851,7 +812,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
             if (CF_marker[jj] == SMRK) {
               row_scale = hypre_max(row_scale, A_diag_data[jA]);
               row_sum += A_diag_data[jA];
-              //jS_diag++;
             }
           }
           for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
@@ -860,7 +820,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
             if (CF_marker_offd[jj] == SMRK) {
               row_scale = hypre_max(row_scale, A_offd_data[jA]);
               row_sum += A_offd_data[jA];
-              //jS_offd++;
             }
           }
         } /* diag < 0 */
@@ -872,7 +831,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
             if (CF_marker[jj] == SMRK) {
               row_scale = hypre_min(row_scale, A_diag_data[jA]);
               row_sum += A_diag_data[jA];
-              //jS_diag++;
             } 
           }
           for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
@@ -881,15 +839,12 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
             if (CF_marker_offd[jj] == SMRK) {
               row_scale = hypre_min(row_scale, A_offd_data[jA]);
               row_sum += A_offd_data[jA];
-              //jS_offd++;
             }
           }
         } /* diag >= 0*/
       } /* num_functions <=1 */
 
 
-      //jS_diag += A_diag_i[i + 1] - A_diag_i[i] - 1;
-      //jS_offd += A_offd_i[i + 1] - A_offd_i[i];
       /* compute row entries of S */
       S_temp_diag_j[A_diag_i[i]] = -1;
       if ((fabs(row_sum) > fabs(diag)*max_row_sum) && (max_row_sum < 1.0))
@@ -898,16 +853,12 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
          for (jA = A_diag_i[i]+1; jA < A_diag_i[i+1]; jA++)
          {
             S_temp_diag_j[jA] = -1;
-            //if (CF_marker[A_diag_j[jA]] == SMRK) jS_diag--;
          }
-         //jS_diag -= A_diag_i[i + 1] - (A_diag_i[i] + 1);
 
          for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
          {
             S_temp_offd_j[jA] = -1;
-            //if (CF_marker[A_offd_j[jA]] == SMRK) jS_offd--;
          }
-         //jS_offd -= A_offd_i[i + 1] - A_offd_i[i];
       }
       else
       {
@@ -924,13 +875,11 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
                     || (dof_func[i] != dof_func[jj]))
                 {
                   S_temp_diag_j[jA] = -1;
-                  //--jS_diag;
                 }
                 else
                 {
                   S_temp_diag_j[jA] = jj;
                   ++jS_diag;
-                  //fprintf(fout, "%d %d %1.12e\n", i, jj, A_diag_data[jA]);
                 }
               }
               else
@@ -947,14 +896,11 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
                     || (dof_func[i] != dof_func_offd[jj]))
                 {
                   S_temp_offd_j[jA] = -1;
-                  //--jS_offd;
-                  //fprintf(fout, "Offd weak %d %d %1.12e\n", i, jj, A_offd_data[jA]);
                 }
                 else
                 {
                   S_temp_offd_j[jA] = jj;
                   ++jS_offd;
-                  //fprintf(fout, "Offd strong %d %d %1.12e\n", i, jj, A_offd_data[jA]);
                 }
               }
               else
@@ -980,7 +926,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
                 {
                   S_temp_diag_j[jA] = jj;
                   ++jS_diag;
-                  //fprintf(fout, "%d %d %1.12e\n", i, jj, A_diag_data[jA]);
                 }              
               }
               else
@@ -997,14 +942,11 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
                     || (dof_func[i] != dof_func_offd[jj]))
                 {
                   S_temp_offd_j[jA] = -1;
-                  //--jS_offd;
-                  //fprintf(fout, "Offd weak %d %d %1.12e\n", i, jj, A_offd_data[jA]);
                 }
                 else
                 {
                   S_temp_offd_j[jA] = jj;
                   ++jS_offd;
-                  //fprintf(fout, "Offd strong %d %d %1.12e\n", i, jj, A_offd_data[jA]);
                 }
               }
               else
@@ -1025,13 +967,11 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
                 if (A_diag_data[jA] <= strength_threshold * row_scale)
                 {
                    S_temp_diag_j[jA] = -1;
-                   //--jS_diag;
                 }
                 else
                 {
                    S_temp_diag_j[jA] = jj;
                    ++jS_diag;
-                   //fprintf(fout, "%d %d %1.12e\n", i, jj, A_diag_data[jA]);
                 }
               } else {
                 S_temp_diag_j[jA] = -1;
@@ -1044,13 +984,11 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
                 if (A_offd_data[jA] <= strength_threshold * row_scale)
                 {
                    S_temp_offd_j[jA] = -1;
-                   //--jS_offd;
                 }
                 else
                 {
                    S_temp_offd_j[jA] = jj;
                    --jS_offd;
-                   //fprintf(fout, "Offd %d %d %1.12e\n", i, jj, A_offd_data[jA]);
                 }
               } else {
                 S_temp_offd_j[jA] = -1;
@@ -1066,13 +1004,11 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
                 if (A_diag_data[jA] >= strength_threshold * row_scale)
                 {
                    S_temp_diag_j[jA] = -1;
-                   //--jS_diag;
                 }
                 else
                 {
                    S_temp_diag_j[jA] = jj;
                    ++jS_diag;
-                   //fprintf(fout, "%d %d %1.12e\n", i, jj, A_diag_data[jA]);
                 }
               } else {
                 S_temp_diag_j[jA] = -1;
@@ -1085,13 +1021,11 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
                 if (A_offd_data[jA] >= strength_threshold * row_scale)
                 {
                    S_temp_offd_j[jA] = -1;
-                   //--jS_offd;
                 }
                 else
                 {
                    S_temp_offd_j[jA] = jj;
                    ++jS_offd;
-                   //fprintf(fout, "Offd %d %d %1.12e\n", i, jj, A_offd_data[jA]);
                 }
               } else {
                 S_temp_offd_j[jA] = -1;
@@ -1103,31 +1037,24 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
     } /* CF_marker == SMRK */
     else
     {
-      //S_temp_diag_j[A_diag_i[i]] = -1;
       S_diag_i[i] = jS_diag;
       if (num_cols_offd)
       {
          S_offd_i[i] = jS_offd;
       }
-      //jS_diag += A_diag_i[i + 1] - A_diag_i[i] - 1;
-      //jS_offd += A_offd_i[i + 1] - A_offd_i[i];
 
       for (jA = A_diag_i[i]; jA < A_diag_i[i+1]; jA++)
       {
         S_temp_diag_j[jA] = -1;
       }
-      //jS_diag -= A_diag_i[i + 1] - (A_diag_i[i] + 1);
 
       for (jA = A_offd_i[i]; jA < A_offd_i[i+1]; jA++)
       {
         S_temp_offd_j[jA] = -1;
       }
-      //jS_offd -= A_offd_i[i + 1] - A_offd_i[i];
     } /* CF_marker != SMRK */
-    //hypre_printf("my_id = %d, final jS_diag = %d, final jS_offd = %d\n", my_id, jS_diag, jS_offd);
   } /* for each variable */
 
-   fclose(fout);
    hypre_prefix_sum_pair(&jS_diag, S_diag_i + num_variables, &jS_offd, S_offd_i + num_variables, prefix_sum_workspace);
 
    /*--------------------------------------------------------------
@@ -1140,11 +1067,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
     * that builds interpolation would have to be modified first.
     *----------------------------------------------------------------*/
 
-    hypre_printf("my_id = %d, sum jS_diag = %d, sum jS_offd = %d\n", my_id, jS_diag, jS_offd);
-    //char fname[256];
-    //FILE *fout;
-    //sprintf(fname,"S_compress.%05d",my_id);
-    //fout = fopen(fname,"w");
     for (i = start; i < stop; i++)
     {
       S_diag_i[i] += jS_diag;
@@ -1156,7 +1078,6 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
         if (S_temp_diag_j[jA] > -1)
         {
           S_diag_j[jS]    = S_temp_diag_j[jA];
-          //fprintf(fout, "%d %d %d %d\n", i, jA, jS, S_temp_diag_j[jA]);
           jS++;
         }
       }
@@ -1167,12 +1088,10 @@ hypre_BoomerAMGCreateSFromCFMarker(hypre_ParCSRMatrix    *A,
         if (S_temp_offd_j[jA] > -1)
         {
           S_offd_j[jS]    = S_temp_offd_j[jA];
-          //fprintf(fout, "%d %d %d %d\n", i, jA, jS, S_temp_offd_j[jA]);
           jS++;
         }
       }
     } /* for each variable */
-    //fclose(fout);
 
   } /* omp parallel */
 

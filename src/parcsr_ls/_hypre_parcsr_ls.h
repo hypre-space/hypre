@@ -1702,6 +1702,7 @@ HYPRE_Int hypre_MGRSetTol( void *mgr_vdata, HYPRE_Real tol );
 // Accessor functions
 HYPRE_Int hypre_MGRGetNumIterations( void *mgr_vdata, HYPRE_Int *num_iterations );
 HYPRE_Int hypre_MGRGetFinalRelativeResidualNorm( void *mgr_vdata, HYPRE_Real *res_norm );
+HYPRE_Int hypre_MGRGetCoarseGridConvergenceFactor( void *mgr_data, HYPRE_Real *conv_factor );
 
 	
 #ifdef __cplusplus

@@ -3523,6 +3523,9 @@ HYPRE_MGRSetGlobalsmoothType( HYPRE_Solver solver, HYPRE_Int smooth_type );
 HYPRE_Int
 HYPRE_MGRGetNumIterations( HYPRE_Solver solver, HYPRE_Int *num_iterations );
 
+HYPRE_Int
+HYPRE_MGRGetCoarseGridConvergenceFactor (HYPRE_Solver solver, HYPRE_Real *conv_factor );
+
 /*--------------------------------------------------------------------------
  * HYPRE_MGRSetPMaxElmts
  *--------------------------------------------------------------------------*/
