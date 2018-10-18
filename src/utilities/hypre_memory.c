@@ -79,19 +79,15 @@ static inline HYPRE_Int hypre_RedefMemLocation(HYPRE_Int location)
 static inline void
 hypre_OutOfMemory(size_t size)
 {
-   hypre_printf("Out of memory trying to allocate %ld bytes\n", size);
+   hypre_error_w_msg(HYPRE_ERROR_MEMORY,"Out of memory trying to allocate too many bytes\n");
    fflush(stdout);
-   hypre_error(HYPRE_ERROR_MEMORY);
 }
 
 static inline void
 hypre_WrongMemoryLocation()
 {
-   hypre_printf("Wrong HYPRE MEMORY location: ",
-                "Only HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_SHARED, ",
-                "and HYPRE_MEMORY_HOST_PINNED are supported!\n");
+   hypre_error_w_msg(HYPRE_ERROR_MEMORY,"Wrong HYPRE MEMORY location: \n Only HYPRE_MEMORY_HOST, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_SHARED,\n and HYPRE_MEMORY_HOST_PINNED are supported!\n");
    fflush(stdout);
-   hypre_error(HYPRE_ERROR_MEMORY);
 }
 
 /*--------------------------------------------------------------------------
