@@ -36,17 +36,19 @@ extern "C" {
  * and is defined in `HYPRE_utilities.h'.
  *--------------------------------------------------------------------------*/
 
-#define MPI_Comm            hypre_MPI_Comm            
-#define MPI_Group           hypre_MPI_Group            
-#define MPI_Request         hypre_MPI_Request          
-#define MPI_Datatype        hypre_MPI_Datatype         
-#define MPI_Status          hypre_MPI_Status           
-#define MPI_Op              hypre_MPI_Op               
-#define MPI_Aint            hypre_MPI_Aint             
+#define MPI_Comm            hypre_MPI_Comm
+#define MPI_Group           hypre_MPI_Group
+#define MPI_Request         hypre_MPI_Request
+#define MPI_Datatype        hypre_MPI_Datatype
+#define MPI_Status          hypre_MPI_Status
+#define MPI_Op              hypre_MPI_Op
+#define MPI_Aint            hypre_MPI_Aint
+#define MPI_Info            hypre_MPI_Info
 
-#define MPI_COMM_WORLD      hypre_MPI_COMM_WORLD       
-#define MPI_COMM_NULL       hypre_MPI_COMM_NULL
-#define MPI_COMM_SELF       hypre_MPI_COMM_SELF
+#define MPI_COMM_WORLD       hypre_MPI_COMM_WORLD
+#define MPI_COMM_NULL        hypre_MPI_COMM_NULL
+#define MPI_COMM_SELF        hypre_MPI_COMM_SELF
+#define MPI_COMM_TYPE_SHARED hypre_MPI_COMM_TYPE_SHARED
 
 #define MPI_BOTTOM  	    hypre_MPI_BOTTOM
 
@@ -89,6 +91,7 @@ extern "C" {
 #define MPI_Comm_rank       hypre_MPI_Comm_rank        
 #define MPI_Comm_free       hypre_MPI_Comm_free        
 #define MPI_Comm_split      hypre_MPI_Comm_split        
+#define MPI_Comm_split_type hypre_MPI_Comm_split_type
 #define MPI_Group_incl      hypre_MPI_Group_incl       
 #define MPI_Group_free      hypre_MPI_Group_free        
 #define MPI_Address         hypre_MPI_Address        
@@ -129,6 +132,7 @@ extern "C" {
 #define MPI_Op_free         hypre_MPI_Op_free        
 #define MPI_Op_create       hypre_MPI_Op_create
 #define MPI_User_function   hypre_MPI_User_function
+#define MPI_Info_create     hypre_MPI_Info_create
 
 /*--------------------------------------------------------------------------
  * Types, etc.
@@ -146,12 +150,16 @@ typedef struct
    HYPRE_Int hypre_MPI_SOURCE;
    HYPRE_Int hypre_MPI_TAG;
 } hypre_MPI_Status;
+
 typedef HYPRE_Int  hypre_MPI_Op;
 typedef HYPRE_Int  hypre_MPI_Aint;
+typedef HYPRE_Int  hypre_MPI_Info;
 
-#define  hypre_MPI_COMM_SELF 1
-#define  hypre_MPI_COMM_WORLD 0
+#define  hypre_MPI_COMM_SELF   1
+#define  hypre_MPI_COMM_WORLD  0
 #define  hypre_MPI_COMM_NULL  -1
+
+#define  hypre_MPI_COMM_TYPE_SHARED 0
 
 #define  hypre_MPI_BOTTOM  0x0
 
@@ -191,12 +199,14 @@ typedef MPI_Datatype hypre_MPI_Datatype;
 typedef MPI_Status   hypre_MPI_Status;
 typedef MPI_Op       hypre_MPI_Op;
 typedef MPI_Aint     hypre_MPI_Aint;
+typedef MPI_Info     hypre_MPI_Info;
 typedef MPI_User_function    hypre_MPI_User_function;
 
-#define  hypre_MPI_COMM_WORLD MPI_COMM_WORLD
-#define  hypre_MPI_COMM_NULL  MPI_COMM_NULL
-#define  hypre_MPI_BOTTOM     MPI_BOTTOM
-#define  hypre_MPI_COMM_SELF  MPI_COMM_SELF
+#define  hypre_MPI_COMM_WORLD         MPI_COMM_WORLD
+#define  hypre_MPI_COMM_NULL          MPI_COMM_NULL
+#define  hypre_MPI_BOTTOM             MPI_BOTTOM
+#define  hypre_MPI_COMM_SELF          MPI_COMM_SELF
+#define  hypre_MPI_COMM_TYPE_SHARED   MPI_COMM_TYPE_SHARED 
 
 #define  hypre_MPI_FLOAT   MPI_FLOAT
 #define  hypre_MPI_DOUBLE  MPI_DOUBLE
@@ -290,6 +300,11 @@ HYPRE_Int hypre_MPI_Type_commit( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Type_free( hypre_MPI_Datatype *datatype );
 HYPRE_Int hypre_MPI_Op_free( hypre_MPI_Op *op );
 HYPRE_Int hypre_MPI_Op_create( hypre_MPI_User_function *function , hypre_int commute , hypre_MPI_Op *op );
+#if defined(HYPRE_USING_CUDA) || defined(HYPRE_USING_DEVICE_OPENMP)
+HYPRE_Int hypre_MPI_Comm_split_type(hypre_MPI_Comm comm, HYPRE_Int split_type, HYPRE_Int key, hypre_MPI_Info info, hypre_MPI_Comm *newcomm);
+HYPRE_Int hypre_MPI_Info_create(hypre_MPI_Info *info);
+HYPRE_Int hypre_MPI_Info_free( hypre_MPI_Info *info );
+#endif
 
 #ifdef __cplusplus
 }

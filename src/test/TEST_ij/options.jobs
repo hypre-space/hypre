@@ -61,7 +61,7 @@ mpirun -np 2  ./ij  -lobpcg -seed 1 -pcgitr 0 > options.out.pcgitr.0
 #default number of inner iterations (1)
 mpirun -np 2  ./ij  -lobpcg -seed 1           > options.out.pcgitr.1
 #-pcgitr 2 : two inner iterations
-mpirun -np 2  ./ij  -lobpcg -seed 1 -pcgitr 2 > options.out.pcgitr.2
+mpirun -np 2  ./ij  -lobpcg -seed 1 -pcgitr 2 -pcgtol 0 > options.out.pcgitr.2
 
 #default residual tolerance for inner iterations (0.01)
 mpirun -np 2  ./ij  -lobpcg -solver 2 -seed 1 -pcgitr 1000 > options.out.pcgtol.01

@@ -36,25 +36,25 @@ cat > $INTERNAL_HEADER <<@
 
 
 cat >> $INTERNAL_HEADER <<@
-#if defined(HYPRE_USE_RAJA)
+#if defined(HYPRE_USING_RAJA)
 @
 
 cat boxloop_raja.h                >> $INTERNAL_HEADER
 
 cat >> $INTERNAL_HEADER <<@
-#elif defined(HYPRE_USE_KOKKOS)
+#elif defined(HYPRE_USING_KOKKOS)
 @
 
 cat boxloop_kokkos.h              >> $INTERNAL_HEADER
 
 cat >> $INTERNAL_HEADER <<@
-#elif defined(HYPRE_USE_CUDA)
+#elif defined(HYPRE_USING_CUDA)
 @
 
 cat boxloop_cuda.h                >> $INTERNAL_HEADER
 
 cat >> $INTERNAL_HEADER <<@
-#elif defined(HYPRE_USE_OMP45)
+#elif defined(HYPRE_USING_DEVICE_OPENMP)
 @
 cat boxloop_omp45.h                >> $INTERNAL_HEADER
 

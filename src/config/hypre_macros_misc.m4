@@ -127,7 +127,7 @@ then
           LDFLAGS="$LDFLAGS -mp"
         fi
         ;;
-      cc|xlc|xlc_r|mpxlc|mpixlc|mpixlc_r|mpcc)
+      cc|xlc|xlc_r|mpxlc|mpixlc|mpixlc_r|mpixlc-gpu|mpcc)
         CFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CFLAGS="$CFLAGS -qsmp=omp"
@@ -146,7 +146,7 @@ fi
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
-      g++|gCC|mpig++|mpicxx|mpiCC)
+      g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -fopenmp"
@@ -164,7 +164,7 @@ then
           CXXFLAGS="$CXXFLAGS -mp"
         fi
         ;;
-      CC|cxx|xlC|xlC_r|mpxlC|mpixlcxx|mpixlcxx_r|mpCC)
+      CC|cxx|xlC|xlC_r|mpxlC|mpixlC|mpixlC-gpu|mpixlcxx|mpixlcxx_r|mpCC)
         CXXFLAGS="-O2"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -qsmp=omp"
@@ -266,7 +266,7 @@ fi
 if test "x${hypre_user_chose_cxxflags}" = "xno"
 then
    case "${CXX}" in
-      g++|gCC|mpig++|mpicxx|mpiCC)
+      g++|gCC|mpig++|mpicxx|mpic++|mpiCC)
         CXXFLAGS="-g -Wall"
         if test "$hypre_using_openmp" = "yes" ; then
           CXXFLAGS="$CXXFLAGS -fopenmp"

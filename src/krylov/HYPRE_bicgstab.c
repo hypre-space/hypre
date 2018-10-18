@@ -210,7 +210,7 @@ HYPRE_BiCGSTABGetFinalRelativeResidualNorm( HYPRE_Solver  solver,
 
 HYPRE_Int
 HYPRE_BiCGSTABGetResidual( HYPRE_Solver  solver,
-                            void             **residual  )
+                            void             *residual  )
 {
-   return( hypre_BiCGSTABGetResidual( (void *) solver, residual ) );
+   return( hypre_BiCGSTABGetResidual( (void *) solver, (void **) residual ) );
 }

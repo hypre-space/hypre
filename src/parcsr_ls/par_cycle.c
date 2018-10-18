@@ -447,7 +447,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                  }
                  else /* not CF - so use through AMS */
                  {
-#if defined(HYPRE_USE_GPU)|| defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
+#if defined(HYPRE_USING_GPU)|| defined(HYPRE_USING_OPENMP_OFFLOAD) || defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
 		   //printf("par_cycle.c 3 %d\n",level);
 		   hypre_ParCSRRelax(A_array[level], 
                                        Aux_F,

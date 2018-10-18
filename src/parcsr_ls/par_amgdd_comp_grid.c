@@ -318,9 +318,6 @@ hypre_ParCompGridFinalize( hypre_ParCompGrid **compGrid, HYPRE_Int num_levels, H
       delete_global_indices = 0;
    }
 
-   HYPRE_Int *add_flag_fine = hypre_CTAlloc(HYPRE_Int, hypre_ParCompGridNumNodes(compGrid[0]), HYPRE_MEMORY_HOST);
-   HYPRE_Int *add_flag_coarse;
-
    HYPRE_Int i,j,k,cnt,level;
 
    // Clean up memory for things we don't need anymore
@@ -808,9 +805,23 @@ HYPRE_Int hypre_ParCompGridSetupLocalIndicesP( hypre_ParCompGrid **compGrid, HYP
    HYPRE_Int                  i,j,level,global_index,first,last;
    hypre_ParCompMatrixRow     *row;
 
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+   // if (myid == 0) printf("transition_level = %d\n", transition_level);
+
    for (level = 0; level < transition_level-1; level++)
    {
       // Get first and last owned global indices on the next level (domain of P)
+      if (!hypre_ParCompGridGlobalIndices(compGrid[level+1]))
+      {
+         printf("Rank %d doesn't have global indices on level %d\n", myid, level+1);
+         char filename[256];
+         sprintf(filename, "outputs/CompGrids/rank%dLevel%dCompGrid.txt", myid, level);
+         hypre_ParCompGridDebugPrint( compGrid[level], filename );
+         sprintf(filename, "outputs/CompGrids/rank%dLevel%dCompGrid.txt", myid, level+1);
+         hypre_ParCompGridDebugPrint( compGrid[level+1], filename );
+
+      }
       first = hypre_ParCompGridGlobalIndices(compGrid[level+1])[0];
       if (hypre_ParCompGridNumOwnedNodes(compGrid[level+1])) last = hypre_ParCompGridGlobalIndices(compGrid[level+1])[hypre_ParCompGridNumOwnedNodes(compGrid[level+1]) - 1];
       else last = 0;
@@ -1459,8 +1470,8 @@ hypre_ParCompGridCommPkgCreate()
 
    hypre_ParCompGridCommPkgNumLevels(compGridCommPkg) = 0;
    hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg) = -1;
-   hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg) = 0;
-   hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg) = NULL;
+   hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg) = NULL;
+   hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgNumSends(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) = NULL;
@@ -1512,9 +1523,14 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
 
    HYPRE_Int         i, j, k;
 
-   if ( hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg) )
+   if ( hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg) )
    {
-      hypre_TFree(hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg), HYPRE_MEMORY_HOST);
+      hypre_TFree(hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), HYPRE_MEMORY_HOST);
+   }
+
+   if ( hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg) )
+   {
+      hypre_TFree(hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), HYPRE_MEMORY_HOST);
    }
 
    if ( hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) )

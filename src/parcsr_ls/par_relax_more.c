@@ -718,6 +718,7 @@ HYPRE_Int hypre_ParCSRRelax_CG( HYPRE_Solver solver,
 {
   
    HYPRE_PCGSetMaxIter(solver, num_its); /* max iterations */
+   HYPRE_PCGSetTol(solver, 0.0); /* max iterations */
    HYPRE_ParCSRPCGSolve(solver, (HYPRE_ParCSRMatrix)A, (HYPRE_ParVector)f, (HYPRE_ParVector)u);
 
 #if 0   

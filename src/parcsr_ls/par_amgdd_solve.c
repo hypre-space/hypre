@@ -11,6 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #define TEST_RES_COMM 0
+#define DEBUGGING_MESSAGES 0
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -277,7 +278,9 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
    #if DEBUGGING_MESSAGES
-   hypre_printf("Began residual communication on rank %d\n", myid);
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("Began residual communication on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
    MPI_Comm          comm;
@@ -386,21 +389,26 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       }
    }
 
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("About to do coarse levels allgather on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
+
    // Do Allgather of transition level 
    if (transition_level != num_levels)
    {
       residual_local = hypre_ParVectorLocalVector(F_array[transition_level]);
       residual_data = hypre_VectorData(residual_local);
-      HYPRE_Complex *transition_level_recv_buf = hypre_CTAlloc(HYPRE_Complex, num_procs*hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg), HYPRE_MEMORY_HOST);
-      MPI_Allgather(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, transition_level_recv_buf, hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
-      HYPRE_Int cnt = 0;
-      HYPRE_Int proc;
-      for (proc = 0; proc < num_procs; proc++)
-      {
-         HYPRE_Int buf_cnt = hypre_ParCompGridCommPkgMaxResidualBufferSize(compGridCommPkg)*proc;
-         for (i = 0; i < hypre_ParCompGridCommPkgResNumRecvNodes(compGridCommPkg)[proc]; i++) hypre_ParCompGridF(compGrid[transition_level])[cnt++] = transition_level_recv_buf[buf_cnt++];
-      }
+      
+      hypre_MPI_Allgatherv(residual_data, hypre_VectorSize(residual_local), HYPRE_MPI_COMPLEX, hypre_ParCompGridF(compGrid[transition_level]), hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg), hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg), HYPRE_MPI_COMPLEX, hypre_MPI_COMM_WORLD);
    }
+
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("Entering looop over levels in residual communication on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
 
    /* Outer loop over levels:
    Start from coarsest level and work up to finest */
@@ -437,8 +445,16 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
             hypre_MPI_Isend(send_buffer[i], send_buffer_size[level][i], HYPRE_MPI_COMPLEX, send_procs[level][i], 3, comm, &requests[request_counter++]);
          }
 
+         #if DEBUGGING_MESSAGES
+         hypre_printf("    Posted sends and recvs on level %d, rank %d\n", level, myid);
+         #endif
+
          // wait for buffers to be received
          hypre_MPI_Waitall( num_sends + num_recvs, requests, status );
+
+         #if DEBUGGING_MESSAGES
+         hypre_printf("    Finished waiting on level %d, rank %d\n", level, myid);
+         #endif
 
          // loop over received buffers
          for (i = 0; i < num_recvs; i++)
@@ -461,10 +477,17 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
          hypre_TFree(send_buffer, HYPRE_MEMORY_HOST);
          hypre_TFree(recv_buffer, HYPRE_MEMORY_HOST);
       }
+
+      #if DEBUGGING_MESSAGES
+      hypre_printf("    Finished residual communication on level %d, rank %d\n", level, myid);
+      #endif
+
    }
 
    #if DEBUGGING_MESSAGES
-   hypre_printf("Finished residual communication on rank %d\n", myid);
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("Finished residual communication on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
    #endif
 
    #if TEST_RES_COMM

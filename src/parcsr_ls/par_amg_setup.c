@@ -204,7 +204,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
    HYPRE_Int dslu_threshold = hypre_ParAMGDataDSLUThreshold(amg_data);
 #endif
 
-#ifdef HYPRE_USE_GPU
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
    if (!hypre_ParCSRMatrixIsManaged(A)){
      hypre_fprintf(stderr,"WARNING:: INVALID A in hypre_BoomerAMGSetup::Address %p\n",A);
      //exit(2);
@@ -2105,7 +2105,7 @@ hypre_BoomerAMGSetup( void               *amg_vdata,
                      hypre_Vector* Ztemp_local = hypre_ParVectorLocalVector(Ztemp);
                      hypre_TFree(hypre_VectorData(Ztemp_local), HYPRE_MEMORY_SHARED); 
                      hypre_VectorSize(Ztemp_local) = local_P_sz; 
-                     hypre_VectorData(Ztemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz, HYPRE_MEMORY_HOST);
+                     hypre_VectorData(Ztemp_local) = hypre_CTAlloc(HYPRE_Complex, local_P_sz, HYPRE_MEMORY_SHARED);
                   }
                   if (Ptemp)
                   {

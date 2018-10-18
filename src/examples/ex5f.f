@@ -398,7 +398,7 @@ c        Now set up the Parasails preconditioner and specify any parameters
          call HYPRE_ParaSailsCreate(MPI_COMM_WORLD, precond,ierr)
          call HYPRE_ParaSailsSetParams(precond, 0.1d0, 1, ierr)
          call HYPRE_ParaSailsSetFilter(precond, 0.05d0, ierr)
-         call HYPRE_ParaSailsSetSym(precond, 1)
+         call HYPRE_ParaSailsSetSym(precond, 1, ierr)
          call HYPRE_ParaSailsSetLogging(precond, 3, ierr)
 
 c        set parsails as the pcg preconditioner

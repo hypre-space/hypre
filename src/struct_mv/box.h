@@ -169,46 +169,6 @@ for (i = 0; i < hypre_BoxArrayArraySize(box_array_array); i++)
 /*--------------------------------------------------------------------------
  * BoxLoop macros:
  *--------------------------------------------------------------------------*/
-#if defined(HYPRE_MEMORY_GPU)|| defined(HYPRE_USE_OMP45)
-
-#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)\
-HYPRE_Int * indices_d;\
-HYPRE_Int indices_h[stencil_size];\
-HYPRE_Int * stencil_shape_d;\
-HYPRE_Int  stencil_shape_h[size*stencil_size];\
-HYPRE_Complex * data_A = hypre_StructMatrixData(A);\
-indices_d =  hypre_TAlloc(HYPRE_Int,  stencil_size, HYPRE_MEMORY_DEVICE);\
-stencil_shape_d =  hypre_TAlloc(HYPRE_Int,  size*stencil_size, HYPRE_MEMORY_DEVICE);\
-for (HYPRE_Int ii = 0; ii < stencil_size; ii++)\
-{\
-   HYPRE_Int jj = 0;\
-   indices_h[ii]       = hypre_StructMatrixDataIndices(A)[i][ii];\
-   if (size > 1) cdir = 0;\
-   stencil_shape_h[ii] = hypre_IndexD(stencil_shape[ii], cdir);\
-   for (jj = 1;jj < size;jj++)\
-      stencil_shape_h[jj*stencil_size+ii] = hypre_IndexD(stencil_shape[ii], jj);\
-}\
-hypre_TMemcpy( indices_d, indices_h, HYPRE_Int, stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );\
-hypre_TMemcpy( stencil_shape_d, stencil_shape_h, HYPRE_Int, size*stencil_size, HYPRE_MEMORY_DEVICE, HYPRE_MEMORY_HOST );
-
-#define hypre_StructGetMatrixBoxData(A, i, si)  (data_A + indices_d[si])
-
-#define hypre_StructGetIndexD(index,i,index_d) (index_d)
-
-#define hypre_StructCleanIndexD()\
- hypre_TFree(indices_d, HYPRE_MEMORY_DEVICE);\
- hypre_TFree(stencil_shape_d, HYPRE_MEMORY_DEVICE);
-
-
-#else
-
-#define hypre_MatrixIndexMove(A, stencil_size, i, cdir,size)
-#define hypre_StructGetMatrixBoxData(A, i, si) hypre_StructMatrixBoxData(A,i,si)
-#define hypre_StructGetIndexD(index,i,index_d) hypre_IndexD(index,i)
-#define hypre_StructCleanIndexD() {;}
-
-#endif
-  
 #define hypre_SerialBoxLoop0Begin(ndim, loop_size)\
 {\
    zypre_BoxLoopDeclare();\
@@ -292,12 +252,8 @@ hypre_TMemcpy( stencil_shape_d, stencil_shape_h, HYPRE_Int, size*stencil_size, H
    }\
 }
 
-#if defined (HYPRE_USE_RAJA) || defined(HYPRE_USE_KOKKOS)
-#define HYPRE_BOX_PRIVATE hypre__global_error
-#else
-#define HYPRE_BOX_PRIVATE ZYPRE_BOX_PRIVATE
-#endif
 #define ZYPRE_BOX_PRIVATE hypre__IN,hypre__JN,hypre__I,hypre__J,hypre__d,hypre__i
+#define HYPRE_BOX_PRIVATE ZYPRE_BOX_PRIVATE
 
 #define zypre_BoxLoopDeclare() \
 HYPRE_Int  hypre__tot, hypre__div, hypre__mod;\

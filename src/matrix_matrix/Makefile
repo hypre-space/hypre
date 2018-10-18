@@ -35,7 +35,7 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_MatrixMatrix-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_MatrixMatrix-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -64,7 +64,7 @@ libHYPRE_MatrixMatrix.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_MatrixMatrix.so: ${OBJS}
+libHYPRE_MatrixMatrix.so libHYPRE_MatrixMatrix.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

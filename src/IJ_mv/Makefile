@@ -53,7 +53,7 @@ FILES =\
 
 OBJS = ${FILES:.c=.o}
 
-SONAME = libHYPRE_IJ_mv-${HYPRE_RELEASE_VERSION}.so
+SONAME = libHYPRE_IJ_mv-${HYPRE_RELEASE_VERSION}${HYPRE_LIB_SUFFIX}
 
 ##################################################################
 # Targets
@@ -84,7 +84,7 @@ libHYPRE_IJ_mv.a: ${OBJS}
 	${AR} $@ ${OBJS}
 	${RANLIB} $@
 
-libHYPRE_IJ_mv.so: ${OBJS}
+libHYPRE_IJ_mv.so libHYPRE_IJ_mv.dylib: ${OBJS}
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${OBJS} ${SHARED_SET_SONAME}${SONAME}
 	ln -s ${SONAME} $@

@@ -70,7 +70,7 @@ hypre_StructVectorDestroy( hypre_StructVector *vector )
       {
          if (hypre_StructVectorDataAlloced(vector))
          {
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
 	    hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
 	    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
 	    {
@@ -199,7 +199,7 @@ hypre_StructVectorInitialize( hypre_StructVector *vector )
    HYPRE_Complex *data;
 
    hypre_StructVectorInitializeShell(vector);
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
    hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
@@ -382,7 +382,6 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
  
          hypre_BoxGetSize(int_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(datap,values)
          if (action > 0)
          {
@@ -415,7 +414,6 @@ hypre_StructVectorSetBoxValues( hypre_StructVector *vector,
             hypre_BoxLoop2End(datai, dvali);
          }
 #undef DEVICE_VAR
-#define DEVICE_VAR 
       }
    }
 
@@ -551,7 +549,6 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
  
          hypre_BoxGetSize(int_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(datap)
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                              data_box,data_start,data_stride,datai);
@@ -560,7 +557,6 @@ hypre_StructVectorClearBoxValues( hypre_StructVector *vector,
          }
          hypre_BoxLoop1End(datai);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
       }
    }
 
@@ -585,7 +581,6 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
    hypre_IndexD(imax, 0) = data_size;
    hypre_BoxSetExtents(box, imin, imax);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(data)
    hypre_BoxLoop1Begin(1, imax,
                        box, imin, imin, datai);
@@ -594,8 +589,7 @@ hypre_StructVectorClearAllValues( hypre_StructVector *vector )
    }
    hypre_BoxLoop1End(datai);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
-   
+
    hypre_BoxDestroy(box);
 
    return hypre_error_flag;
@@ -627,7 +621,7 @@ hypre_StructVectorSetDataSize(hypre_StructVector *vector,
 			      HYPRE_Int          *data_size,
 			      HYPRE_Int          *data_host_size)
 {
-#if defined(HYPRE_USE_CUDA)
+#if defined(HYPRE_USING_CUDA)
    hypre_StructGrid     *grid = hypre_StructVectorGrid(vector);
    if (hypre_StructGridDataLocation(grid) != HYPRE_MEMORY_HOST)
    {
@@ -694,7 +688,6 @@ hypre_StructVectorCopy( hypre_StructVector *x,
  
       hypre_BoxGetSize(box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(yp,xp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(x), loop_size,
                           x_data_box, start, unit_stride, vi);
@@ -703,7 +696,6 @@ hypre_StructVectorCopy( hypre_StructVector *x,
       }
       hypre_BoxLoop1End(vi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
    }
 
    return hypre_error_flag;
@@ -746,7 +738,6 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
  
       hypre_BoxGetSize(box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(vp)
       hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                           v_data_box, start, unit_stride, vi);
@@ -755,7 +746,6 @@ hypre_StructVectorSetConstantValues( hypre_StructVector *vector,
       }
       hypre_BoxLoop1End(vi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
    }
 
    return hypre_error_flag;
@@ -807,23 +797,14 @@ hypre_StructVectorSetFunctionValues( hypre_StructVector *vector,
       k = hypre_IndexD(start, 2);
       
       hypre_SerialBoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
-				v_data_box, start, unit_stride, vi);
-
-/* RDF: This won't work as written with threading on */
-       
-#if 0
-#ifdef HYPRE_USING_OPENMP
-#pragma omp parallel for private(HYPRE_BOX_PRIVATE ) HYPRE_SMP_SCHEDULE
-#endif
-#else
-#endif
+				v_data_box, start, unit_stride, vi)
       {
          vp[vi] = fcn(i, j, k);
          i++;
          j++;
          k++;
       }
-      hypre_SerialBoxLoop1End(vi);
+      hypre_SerialBoxLoop1End(vi)
    }
 
    return hypre_error_flag;
@@ -873,7 +854,6 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
 
          hypre_BoxGetSize(diff_box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(vp)
          hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                              v_data_box, start, unit_stride, vi);
@@ -882,7 +862,6 @@ hypre_StructVectorClearGhostValues( hypre_StructVector *vector )
          }
          hypre_BoxLoop1End(vi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
       }
    }
    hypre_BoxArrayDestroy(diff_boxes);
@@ -947,7 +926,6 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
             bbox       = hypre_BoxArrayBox(boundary_boxes, i2);
             hypre_BoxGetSize(bbox, loop_size);
             start = hypre_BoxIMin(bbox);
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(vp)
             hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                                 v_data_box, start, stride, vi);
@@ -956,7 +934,6 @@ hypre_StructVectorClearBoundGhostValues( hypre_StructVector *vector,
             }
             hypre_BoxLoop1End(vi);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
          }
          hypre_BoxArrayDestroy(boundary_boxes);
          hypre_BoxArrayDestroy(work_boxarray);
@@ -994,7 +971,6 @@ hypre_StructVectorScaleValues( hypre_StructVector *vector, HYPRE_Complex factor 
    data = hypre_StructVectorData(vector);
    hypre_BoxGetSize(box, loop_size);
 
-#undef DEVICE_VAR
 #define DEVICE_VAR is_device_ptr(data)
    hypre_BoxLoop1Begin(hypre_StructVectorNDim(vector), loop_size,
                        box, imin, imin, datai);
@@ -1003,7 +979,6 @@ hypre_StructVectorScaleValues( hypre_StructVector *vector, HYPRE_Complex factor 
    }
    hypre_BoxLoop1End(datai);
 #undef DEVICE_VAR
-#define DEVICE_VAR 
 
    hypre_BoxDestroy(box);
 
