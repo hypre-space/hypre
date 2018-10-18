@@ -1508,7 +1508,7 @@ HYPRE_Int hypre_BoomerAMGRefineInterp( hypre_ParCSRMatrix *A,
 
    HYPRE_Int i,j, k, pp;
 
-   printf(" hypre_BoomerAMGRefineInterp \n");
+   //printf(" hypre_BoomerAMGRefineInterp \n");
    hypre_CSRMatrix *A_diag = hypre_ParCSRMatrixDiag(A);
    HYPRE_Real      *A_diag_data = hypre_CSRMatrixData(A_diag);
    HYPRE_Int             *A_diag_i = hypre_CSRMatrixI(A_diag);

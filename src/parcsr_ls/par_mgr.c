@@ -457,8 +457,7 @@ hypre_MGRSetReservedCoarseNodes(void      *mgr_vdata,
 
    if (!mgr_data)
    {
-      hypre_printf("Warning! MGR object empty!\n");
-      hypre_error_in_arg(1);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"Warning! MGR object empty!\n");
       return hypre_error_flag;
    }
 
@@ -1778,8 +1777,9 @@ void hypre_blas_smat_inv_n4 (HYPRE_Real *a)
     const HYPRE_Real det = a11*M11 + a12*M21 + a13*M31 + a14*M41;
     HYPRE_Real det_inv;
 
-    if ( fabs(det) < 1e-22 ) {
-        hypre_printf("### WARNING: Matrix is nearly singular! det = %e\n", det);
+    //if ( fabs(det) < 1e-22 ) {
+        /* there should be no print statements that can't be turned off. Is this an error? */
+        //hypre_fprintf(stderr, "### WARNING: Matrix is nearly singular! det = %e\n", det);
         /*
          printf("##----------------------------------------------\n");
          printf("## %12.5e %12.5e %12.5e \n", a0, a1, a2);
@@ -1788,7 +1788,7 @@ void hypre_blas_smat_inv_n4 (HYPRE_Real *a)
          printf("##----------------------------------------------\n");
          getchar();
          */
-    }
+    //}
 
     det_inv = 1.0/det;
 
@@ -2697,7 +2697,7 @@ hypre_MGRGetCoarseGridMatrix( void *mgr_vdata, hypre_ParCSRMatrix **RAP )
    }
    if (mgr_data -> RAP == NULL)
    {
-      hypre_printf(" Coarse grid matrix is NULL. Please make sure MGRSetup() is called \n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC," Coarse grid matrix is NULL. Please make sure MGRSetup() is called \n");
       return hypre_error_flag;
    }
    *RAP = mgr_data->RAP;
@@ -2718,7 +2718,7 @@ hypre_MGRGetCoarseGridSolution( void *mgr_vdata, hypre_ParVector **sol )
    }
    if (mgr_data -> U_array == NULL)
    {
-      hypre_printf(" MGR solution array is NULL. Please make sure MGRSetup() and MGRSolve() are called \n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC," MGR solution array is NULL. Please make sure MGRSetup() and MGRSolve() are called \n");
       return hypre_error_flag;
    }
    *sol = mgr_data->U_array[mgr_data->num_coarse_levels];
@@ -2739,7 +2739,7 @@ hypre_MGRGetCoarseGridRHS( void *mgr_vdata, hypre_ParVector **rhs )
    }
    if (mgr_data -> F_array == NULL)
    {
-      hypre_printf(" MGR RHS array is NULL. Please make sure MGRSetup() and MGRSolve() are called \n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC," MGR RHS array is NULL. Please make sure MGRSetup() and MGRSolve() are called \n");
       return hypre_error_flag;
    }
    *rhs = mgr_data->F_array[mgr_data->num_coarse_levels];

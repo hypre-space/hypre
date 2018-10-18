@@ -808,7 +808,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
     POP_RANGE
   }
 
-  if (x==y) fprintf(stderr,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
+  if (x==y) hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR::x and y are the same pointer in hypre_CSRMatrixMatvecDevice\n");
 
   if (FirstCall){
     PUSH_RANGE("FIRST_CALL",4);
@@ -817,8 +817,8 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
 
     status= cusparseCreateMatDescr(&descr);
     if (status != CUSPARSE_STATUS_SUCCESS) {
-      printf("ERROR:: Matrix descriptor initialization failed\n");
-      exit(2);
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: Matrix descriptor initialization failed\n");
+      return hypre_error_flag;
     }
 
     cusparseSetMatType(descr,CUSPARSE_MATRIX_TYPE_GENERAL);
@@ -840,7 +840,7 @@ hypre_CSRMatrixMatvecDevice( HYPRE_Complex    alpha,
   hypre_SeqVectorPrefetchToDevice(x);
   hypre_SeqVectorPrefetchToDevice(y);
 
-  if (offset!=0) printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: %d \n",offset);
+  //if (offset!=0) hypre_printf("WARNING:: Offset is not zero in hypre_CSRMatrixMatvecDevice :: \n");
   cusparseErrchk(cusparseDcsrmv(handle ,
                  CUSPARSE_OPERATION_NON_TRANSPOSE,
                  A->num_rows-offset, A->num_cols, A->num_nonzeros,

@@ -47,7 +47,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 	/* pointers to mgr data */
 	HYPRE_Int  use_default_cgrid_solver = (mgr_data -> use_default_cgrid_solver);
 	HYPRE_Int  logging = (mgr_data -> logging);
-//	HYPRE_Int  print_level = (mgr_data -> print_level);
+	HYPRE_Int  print_level = (mgr_data -> print_level);
 	HYPRE_Int  relax_type = (mgr_data -> relax_type);
 	HYPRE_Int  relax_order = (mgr_data -> relax_order);
 	HYPRE_Int  interp_type = (mgr_data -> interp_type);
@@ -114,7 +114,7 @@ hypre_MGRSetup( void               *mgr_vdata,
         /* Trivial case: simply solve the coarse level problem */
 	if( block_size < 2 || (mgr_data -> max_num_coarse_levels) < 1)
 	{
-		if(my_id == 0)
+		if (my_id == 0 && print_level > 0)
 		{
 		   hypre_printf("Warning: Block size is < 2 or number of coarse levels is < 1. \n");
 		   hypre_printf("Solving scalar problem on fine grid using coarse level solver \n");
@@ -122,7 +122,7 @@ hypre_MGRSetup( void               *mgr_vdata,
 
 		if(use_default_cgrid_solver)
 		{
-			hypre_printf("No coarse grid solver provided. Using default AMG solver ... \n");
+			if (my_id == 0 && print_level > 0) hypre_printf("No coarse grid solver provided. Using default AMG solver ... \n");
 			/* create and set default solver parameters here */
 			/* create and initialize default_cg_solver */
 			default_cg_solver = (HYPRE_Solver) hypre_BoomerAMGCreate();
@@ -588,7 +588,7 @@ hypre_MGRSetup( void               *mgr_vdata,
    /* default is BoomerAMG */
    if(use_default_cgrid_solver)
    {
-      hypre_printf("No coarse grid solver provided. Using default AMG solver ... \n");
+      if (my_id==0) hypre_fprintf(stderr,"No coarse grid solver provided. Using default AMG solver ... \n");
       /* create and set default solver parameters here */
       default_cg_solver = (HYPRE_Solver) hypre_BoomerAMGCreate();
       hypre_BoomerAMGSetMaxIter ( default_cg_solver, 1 );
