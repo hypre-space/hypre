@@ -105,7 +105,7 @@ void hypre_GPUInit(hypre_int use_device)
          {
             /* No device found  */
             hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: NO GPUS found \n");
-            return hypre_error_flag;
+            exit(2);
          }
       }
       else
@@ -240,7 +240,7 @@ cublasHandle_t getCublasHandle(){
     if (stat!=CUBLAS_STATUS_SUCCESS) {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: CUBLAS Library initialization failed\n");
       handle=0;
-      return hypre_error_flag;
+      exit(2);
     }
     cublasErrchk(cublasSetStream(handle,HYPRE_STREAM(4)));
   } else return handle;
@@ -258,7 +258,7 @@ cusparseHandle_t getCusparseHandle(){
     if (status != CUSPARSE_STATUS_SUCCESS) {
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"ERROR:: CUSPARSE Library initialization failed\n");
       handle=0;
-      return hypre_error_flag;
+      exit(2);
     }
     cusparseErrchk(cusparseSetStream(handle,HYPRE_STREAM(4)));
   } else return handle;
@@ -397,7 +397,7 @@ hypre_int getcore(){
       hypre_error_w_msg(HYPRE_ERROR_GENERIC,"EINVAL:: NO VALID CPUS\n");
       break;
     default:
-      hypre_error_w_msg(HYPRE_ERROR_GENRIC," something else\n");
+      hypre_error_w_msg(HYPRE_ERROR_GENERIC," something else\n");
     }
   }
   return hypre_error_flag;
