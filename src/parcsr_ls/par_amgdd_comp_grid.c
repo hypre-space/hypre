@@ -1470,6 +1470,7 @@ hypre_ParCompGridCommPkgCreate()
 
    hypre_ParCompGridCommPkgNumLevels(compGridCommPkg) = 0;
    hypre_ParCompGridCommPkgTransitionLevel(compGridCommPkg) = -1;
+   hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgTransitionResRecvDisps(compGridCommPkg) = NULL;
    hypre_ParCompGridCommPkgNumSends(compGridCommPkg) = NULL;
@@ -1498,6 +1499,7 @@ hypre_ParCompGridCommPkgCreateAndAllocate(HYPRE_Int num_levels)
 
 
    hypre_ParCompGridCommPkgNumLevels(compGridCommPkg) = num_levels;
+   hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgNumSends(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int, num_levels, HYPRE_MEMORY_HOST);
    hypre_ParCompGridCommPkgSendProcs(compGridCommPkg) = hypre_CTAlloc(HYPRE_Int*, num_levels, HYPRE_MEMORY_HOST);
@@ -1522,6 +1524,11 @@ hypre_ParCompGridCommPkgDestroy( hypre_ParCompGridCommPkg *compGridCommPkg )
    hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
 
    HYPRE_Int         i, j, k;
+
+   if ( hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg) )
+   {
+      hypre_TFree(hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg), HYPRE_MEMORY_HOST);
+   }
 
    if ( hypre_ParCompGridCommPkgTransitionResRecvSizes(compGridCommPkg) )
    {
