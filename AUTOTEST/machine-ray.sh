@@ -56,8 +56,10 @@ co="--with-cuda --enable-unified-memory --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qs
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
 ./renametest.sh basic $output_dir/basic-cuda-um-struct-sstruct
 
-# CUDA with UM [shared library]
+# CUDA with UM [shared library, no run]
 co="--with-cuda --enable-unified-memory --enable-shared --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-cuda-um-shared
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
 #./renametest.sh basic $output_dir/basic-cuda-um-shared-ij
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
@@ -70,13 +72,16 @@ co="--with-device-openmp --enable-unified-memory --with-extra-CFLAGS=\\'-qmaxmem
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
 ./renametest.sh basic $output_dir/basic-deviceomp-um-struct-sstruct
 
-# OMP 4.5 with UM [shared library]
+# OMP 4.5 with UM [shared library, no run]
 co="--with-device-openmp --enable-unified-memory --enable-shared --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029:1500-030:1501-308\\'"
+./test.sh basic.sh $src_dir -co: $co -mo: $mo
+./renametest.sh basic $output_dir/basic-deviceomp-um-shared
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
 #./renametest.sh basic $output_dir/basic-deviceomp-um-shared-ij
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ross
 #./renametest.sh basic $output_dir/basic-deviceomp-um-shared-struct-sstruct
 
+# OMP 4.5 with UM [in debug mode]
 #co="--with-device-openmp --enable-unified-memory --enable-debug --with-extra-CFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\' --with-extra-CXXFLAGS=\\'-qmaxmem=-1 -qsuppress=1500-029\\'"
 #./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $roij
 #./renametest.sh basic $output_dir/basic-deviceomp-um-debug-ij
@@ -98,4 +103,5 @@ for errfile in $( find $output_dir ! -size 0 -name "*.err" )
 do
    echo $errfile >&2
 done
+
 
