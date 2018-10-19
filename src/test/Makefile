@@ -49,10 +49,15 @@ LAPACKLIBFLAGS = ${LAPACKLIBDIRS} ${LAPACKLIBS}
 BLASLIBFLAGS = ${BLASLIBDIRS} ${BLASLIBS}
 LIBFLAGS = ${LDFLAGS} ${LIBS}
 
+ifeq (${LINK_CC}, nvcc)
+   XLINK = -Xlinker=-rpath,${HYPRE_BUILD_DIR}/lib
+else
+   XLINK = -Wl,-rpath,${HYPRE_BUILD_DIR}/lib
+endif
+
 LFLAGS =\
- -L${HYPRE_BUILD_DIR}/lib\
- -lHYPRE\
- -Wl,-rpath,${HYPRE_BUILD_DIR}/lib\
+ -L${HYPRE_BUILD_DIR}/lib -lHYPRE\
+ ${XLINK}\
  ${DSUPERLU_LIBS}\
  ${SUPERLU_LIBS}\
  ${MPILIBFLAGS}\

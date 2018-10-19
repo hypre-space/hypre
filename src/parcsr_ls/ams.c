@@ -66,56 +66,57 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
    {
       if (relax_type == 1) /* l1-scaled Jacobi */
       {
-	 PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
-	 HYPRE_Int i, num_rows = hypre_ParCSRMatrixNumRows(A);
+         PUSH_RANGE_PAYLOAD("RELAX",4,sweep);
+         HYPRE_Int num_rows = hypre_ParCSRMatrixNumRows(A);
 #ifdef HYPRE_USING_UNIFIED_MEMORY
-	 if (sweep==0){
-	   hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(v));
-	   hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
-
-	 }
-
+         if (sweep==0)
+         {
+            hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(v));
+            hypre_SeqVectorPrefetchToDevice(hypre_ParVectorLocalVector(f));
+         }
 #endif
-	 //SyncVectorToHost(hypre_ParVectorLocalVector(v));
-	 //SyncVectorToHost(hypre_ParVectorLocalVector(f));
+         //SyncVectorToHost(hypre_ParVectorLocalVector(v));
+         //SyncVectorToHost(hypre_ParVectorLocalVector(f));
 #if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
-	 VecCopy(v_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(v)),HYPRE_STREAM(4));
+         VecCopy(v_data,f_data,hypre_VectorSize(hypre_ParVectorLocalVector(v)),HYPRE_STREAM(4));
 #else
-	 //printRC(hypre_ParVectorLocalVector(v),"Pre-COPY V");
-	 //printRC(hypre_ParVectorLocalVector(f),"Pre-COPY F");
+         //printRC(hypre_ParVectorLocalVector(v),"Pre-COPY V");
+         //printRC(hypre_ParVectorLocalVector(f),"Pre-COPY F");
          hypre_ParVectorCopy(f,v);
 #endif
 #ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
-	 SyncVectorToDevice(hypre_ParVectorLocalVector(v));
+         SyncVectorToDevice(hypre_ParVectorLocalVector(v));
 #endif
          hypre_ParCSRMatrixMatvec(-relax_weight, A, u, relax_weight, v);
 
-	 //SyncVectorToHost(hypre_ParVectorLocalVector(v));
-	 //SyncVectorToHost(hypre_ParVectorLocalVector(u));
-	 PUSH_RANGE_PAYLOAD("VECSCALE-RELAX",5,num_rows);
-#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY) 
-	 VecScale(u_data,v_data,l1_norms,num_rows,HYPRE_STREAM(4));
+         //SyncVectorToHost(hypre_ParVectorLocalVector(v));
+         //SyncVectorToHost(hypre_ParVectorLocalVector(u));
+         PUSH_RANGE_PAYLOAD("VECSCALE-RELAX",5,num_rows);
+#if defined(HYPRE_USING_GPU) && defined(HYPRE_USING_UNIFIED_MEMORY)
+         VecScale(u_data,v_data,l1_norms,num_rows,HYPRE_STREAM(4));
 #else
+         HYPRE_Int i;
          /* u += w D^{-1}(f - A u), where D_ii = ||A(i,:)||_1 */
 #if defined(HYPRE_USING_OPENMP_OFFLOAD)
-	 HYPRE_Int num_teams = (num_rows+num_rows%1024)/1024;
-	 //printf("AMS.C %d = %d \n",num_rows,num_teams*1024);
-	 //printf("Ptypes %d %d %d \n",PointerAttributes(u_data),PointerAttributes(v_data),PointerAttributes(l1_norms));
+         HYPRE_Int num_teams = (num_rows+num_rows%1024)/1024;
+         //printf("AMS.C %d = %d \n",num_rows,num_teams*1024);
+         //printf("Ptypes %d %d %d \n",PointerAttributes(u_data),PointerAttributes(v_data),PointerAttributes(l1_norms));
 #pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(1024) is_device_ptr(u_data,v_data,l1_norms)
 #elif defined(HYPRE_USING_MAPPED_OPENMP_OFFLOAD)
-	 HYPRE_Int num_teams = (num_rows+num_rows%1024)/1024;
+         HYPRE_Int num_teams = (num_rows+num_rows%1024)/1024;
 #pragma omp target teams  distribute  parallel for private(i) num_teams(num_teams) thread_limit(1024)
-
 #endif
          for (i = 0; i < num_rows; i++)
+         {
             u_data[i] += v_data[i] / l1_norms[i];
+         }
 #endif
-#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD	 
-	 UpdateDRC(hypre_ParVectorLocalVector(u));
+#ifdef HYPRE_USING_MAPPED_OPENMP_OFFLOAD
+         UpdateDRC(hypre_ParVectorLocalVector(u));
 #endif
-	 //printf("AMS.C DONE %d = %d \n",num_rows,num_teams*1024);
-	 POP_RANGE;
-	 POP_RANGE;
+         //printf("AMS.C DONE %d = %d \n",num_rows,num_teams*1024);
+         POP_RANGE;
+         POP_RANGE;
       }
       else if (relax_type == 2 || relax_type == 4) /* offd-l1-scaled block GS */
       {
@@ -156,7 +157,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
             }
 
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-            u_buf_data = hypre_TAlloc(HYPRE_Real, 
+            u_buf_data = hypre_TAlloc(HYPRE_Real,
                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
             for (i = 0; i < num_sends; i++)
@@ -303,7 +304,7 @@ HYPRE_Int hypre_ParCSRRelax(/* matrix to relax with */
             }
 
             num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-            u_buf_data = hypre_TAlloc(HYPRE_Real, 
+            u_buf_data = hypre_TAlloc(HYPRE_Real,
                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
             for (i = 0; i < num_sends; i++)
@@ -619,7 +620,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
          cf_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends))
-         int_buf_data = hypre_CTAlloc(HYPRE_Int, 
+         int_buf_data = hypre_CTAlloc(HYPRE_Int,
                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
@@ -748,7 +749,7 @@ HYPRE_Int hypre_ParCSRComputeL1Norms(hypre_ParCSRMatrix *A,
       {
          diag = A_diag_data[A_diag_I[i]];
          if (diag != 0.0) l1_norm[i] = diag;
-	 else l1_norm[i] = 1.0;
+         else l1_norm[i] = 1.0;
       }
       *l1_norm_ptr = l1_norm;
 
@@ -914,7 +915,7 @@ void * hypre_AMSCreate()
 
 HYPRE_Int hypre_AMSDestroy(void *solver)
 {
-	hypre_AMSData *ams_data = (hypre_AMSData *) solver;
+   hypre_AMSData *ams_data = (hypre_AMSData *) solver;
 
    if (!ams_data)
    {
@@ -3384,7 +3385,7 @@ HYPRE_Int hypre_ParCSRComputeL1NormsThreads(hypre_ParCSRMatrix *A,
          cf_marker_offd = hypre_CTAlloc(HYPRE_Int,  num_cols_offd, HYPRE_MEMORY_HOST);
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
       if (hypre_ParCSRCommPkgSendMapStart(comm_pkg, num_sends))
-         int_buf_data = hypre_CTAlloc(HYPRE_Int, 
+         int_buf_data = hypre_CTAlloc(HYPRE_Int,
                                       hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
       index = 0;
       for (i = 0; i < num_sends; i++)
@@ -3664,7 +3665,7 @@ HYPRE_Int  hypre_ParCSRRelaxThreads(hypre_ParCSRMatrix *A,
    if (num_procs > 1)
    {
       num_sends = hypre_ParCSRCommPkgNumSends(comm_pkg);
-      v_buf_data = hypre_CTAlloc(HYPRE_Real, 
+      v_buf_data = hypre_CTAlloc(HYPRE_Real,
                                  hypre_ParCSRCommPkgSendMapStart(comm_pkg,  num_sends), HYPRE_MEMORY_HOST);
 
       Vext_data = hypre_CTAlloc(HYPRE_Real, num_cols_offd, HYPRE_MEMORY_HOST);

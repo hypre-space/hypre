@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8.8)
 project (hypre)
 
 # The version number.
-set (HYPRE_VERSION 2.14.0)
-set (HYPRE_DATE    2018/03/16)
+set (HYPRE_VERSION 2.15.1)
+set (HYPRE_DATE    2018/10/19)
 set (HYPRE_TIME    00:00:00)
 set (HYPRE_BUGS    hypre-support@llnl.gov)
 set (HYPRE_SRCDIR  "${PROJECT_SOURCE_DIR}")
@@ -189,6 +189,7 @@ list (APPEND HYPRE_HEADERS
   utilities/fortran_matrix.h
 )
 list (APPEND HYPRE_SOURCES
+  utilities/HYPRE_version.c
   utilities/amg_linklist.c
   utilities/binsearch.c
   utilities/exchange_data.c

@@ -37,6 +37,7 @@ HEADERS =\
  _hypre_utilities.h
 
 FILES =\
+ HYPRE_version.c\
  amg_linklist.c\
  binsearch.c\
  exchange_data.c\

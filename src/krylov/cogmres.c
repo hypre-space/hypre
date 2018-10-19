@@ -830,7 +830,7 @@ hypre_COGMRESSolve(void  *cogmres_vdata,
    if (b_norm == 0.0)
       (cogmres_data -> rel_residual_norm) = r_norm;
 
-   if (iter >= max_iter && r_norm > epsilon) hypre_error(HYPRE_ERROR_CONV);
+   if (iter >= max_iter && r_norm > epsilon && epsilon > 0) hypre_error(HYPRE_ERROR_CONV);
 
    hypre_TFreeF(c,cogmres_functions); 
    hypre_TFreeF(s,cogmres_functions); 
