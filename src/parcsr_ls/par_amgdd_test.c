@@ -12,6 +12,7 @@
 
 #define MEASURE_TEST_COMP_RES 0
 #define DUMP_INTERMEDIATE_TEST_SOLNS 0
+#define DEBUGGING_MESSAGES 1
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -56,7 +57,13 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   HYPRE_Int myid, num_procs;
   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
   hypre_MPI_Comm_size(hypre_MPI_COMM_WORLD, &num_procs);
-  
+
+  #if DEBUGGING_MESSAGES
+  hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+  if (myid == 0) hypre_printf("Began AMG-DD test solve on all ranks\n");
+  hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+  #endif
+
   // Get AMG info
   hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
   hypre_ParVector  *U_comp = hypre_ParVectorCreate(hypre_MPI_COMM_WORLD, hypre_ParVectorGlobalSize(u), hypre_ParVectorPartitioning(u));
@@ -77,6 +84,15 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
   HYPRE_Int proc;
   for (proc = 0; proc < num_procs; proc++)
   {
+
+
+    #if DEBUGGING_MESSAGES
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    if (myid == 0) hypre_printf("About to set relax marker on all ranks for proc %d\n", proc);
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    #endif
+
+
     // Setup vectors on each level that dictate where relaxation should be suppressed
     HYPRE_Int level;
     hypre_ParVector  **relax_marker = hypre_CTAlloc(hypre_ParVector*, num_levels, HYPRE_MEMORY_HOST);
@@ -89,6 +105,15 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
       if (level < transition_level) SetRelaxMarker(hypre_ParAMGDataCompGrid(amg_data)[level], hypre_ParVectorLocalVector(relax_marker[level]), proc);
       else hypre_ParVectorSetConstantValues(relax_marker[level], 1.0);
     }
+
+
+    #if DEBUGGING_MESSAGES
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    if (myid == 0) hypre_printf("Done setting relax marker on all ranks for proc %d\n", proc);
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    #endif
+
+
 
     // Set the initial guess for the AMG solve to 0
     hypre_ParVectorSetConstantValues(U_comp,0);
@@ -109,6 +134,12 @@ hypre_BoomerAMGDDTestSolve( void               *amg_vdata,
       res_norm[i+1] = GetTestCompositeResidual(A, U_comp, res, hypre_ParVectorLocalVector(relax_marker[0]), proc);
       #endif
     }
+
+    #if DEBUGGING_MESSAGES
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    if (myid == 0) hypre_printf("Done with TestBoomerAMGSolve on all ranks for proc %d\n", proc);
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    #endif
 
     #if MEASURE_TEST_COMP_RES
     if (myid == 0)
@@ -255,6 +286,25 @@ TestBoomerAMGSolve( void               *amg_vdata,
 
    MPI_Comm          comm = hypre_ParCSRMatrixComm(A);   
 
+
+
+
+
+
+    #if DEBUGGING_MESSAGES
+   HYPRE_Int myid;
+   hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    if (myid == 0) hypre_printf("Inside TestBoomerAMGSolve on all ranks, comm = %d\n", comm);
+    if (myid == 0) hypre_printf("comm world = %d\n", hypre_MPI_COMM_WORLD);
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    #endif
+
+
+
+
+
+
    hypre_ParAMGData   *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    /* Data Structure variables */
@@ -312,6 +362,26 @@ TestBoomerAMGSolve( void               *amg_vdata,
    HYPRE_ANNOTATION_BEGIN("BoomerAMG.solve");
    hypre_MPI_Comm_size(comm, &num_procs);   
    hypre_MPI_Comm_rank(comm,&my_id);
+
+
+
+
+
+
+    #if DEBUGGING_MESSAGES
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    if (myid == 0) hypre_printf("Past the first comm size call\n");
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    #endif
+
+
+
+
+
+
+
+
+
 
    amg_print_level    = hypre_ParAMGDataPrintLevel(amg_data);
    amg_logging      = hypre_ParAMGDataLogging(amg_data);
@@ -608,6 +678,22 @@ TestBoomerAMGSolve( void               *amg_vdata,
    }
    HYPRE_ANNOTATION_END("BoomerAMG.solve");
    
+
+
+
+
+    #if DEBUGGING_MESSAGES
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    if (myid == 0) hypre_printf("Finished with TestBoomerAMGSolve on all ranks\n");
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    #endif
+
+
+
+
+
+
+
    return hypre_error_flag;
 }
 
@@ -622,6 +708,21 @@ TestBoomerAMGCycle( void              *amg_vdata,
                    hypre_ParVector  **relax_marker,
                    HYPRE_Int proc   )
 {
+
+
+
+
+    #if DEBUGGING_MESSAGES
+  HYPRE_Int myid;
+  hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    if (myid == 0) hypre_printf("Inside TestBoomerAMGCycle\n");
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    #endif
+
+
+
+
 
    char filename[256];
 
@@ -1416,6 +1517,14 @@ TestBoomerAMGCycle( void              *amg_vdata,
     smooth_type == 17 || smooth_type == 18 || smooth_type == 19 )
       hypre_ParVectorDestroy(Utemp);
   }
+
+
+
+    #if DEBUGGING_MESSAGES
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    if (myid == 0) hypre_printf("Finished with TestBoomerAMGCycle\n");
+    hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+    #endif
 
   return(Solve_err_flag);
 }

@@ -3031,7 +3031,7 @@ TestCompGrids2(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels)
    // Here we mark the locations where a restricted residual (rather than a residual just recalculated on the coarse grid) is REQUIRED (i.e. where is the coarse grid residual affected by fine grid relaxation)
    HYPRE_Int myid;
    hypre_MPI_Comm_rank(hypre_MPI_COMM_WORLD, &myid);
-   HYPRE_Int            level,i,j;
+   HYPRE_Int            level,i,j,k;
    HYPRE_Int test_failed = 0;
    for (level = 0; level < num_levels-1; level++)
    { 
@@ -3061,7 +3061,19 @@ TestCompGrids2(hypre_ParCompGrid **compGrid, HYPRE_Int num_levels)
             for (j = hypre_ParCompGridPRowPtr(compGrid[level])[i]; j < hypre_ParCompGridPRowPtr(compGrid[level])[i+1]; j++)
             {
                // Mark everything in the restriction range of dof
-               needs_restrict[ hypre_ParCompGridPColInd(compGrid[level])[j] ] = 1;
+               if (hypre_ParCompGridPColInd(compGrid[level])[j] < 0)
+               {
+                  // If negative P col index encountered, make sure this is disconnected through A on the coarse grid
+                  for (k = 0; k < hypre_ParCompGridNumNodes(compGrid[level+1]); k++)
+                  {
+                     if (hypre_ParCompGridGlobalIndices(compGrid[level+1])[k] == -hypre_ParCompGridPColInd(compGrid[level])[j]-1)
+                     {
+                        printf("Error: negative P column index points to a global index that is found in the next coarsest composite grid.\n");
+                        test_failed = 1;
+                     }
+                  }
+               }
+               else needs_restrict[ hypre_ParCompGridPColInd(compGrid[level])[j] ] = 1;
             }
          }
       }

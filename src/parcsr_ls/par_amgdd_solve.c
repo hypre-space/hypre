@@ -11,7 +11,7 @@
  ***********************************************************************EHEADER*/
 
 #define TEST_RES_COMM 1
-#define DEBUGGING_MESSAGES 0
+#define DEBUGGING_MESSAGES 1
 
 #include "_hypre_parcsr_ls.h"
 #include "par_amg.h"
@@ -151,6 +151,12 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    HYPRE_Int max_fac_iter = hypre_ParAMGDataMaxFACIter(amg_data);
    HYPRE_Real fac_tol = hypre_ParAMGDataFACTol(amg_data);
 
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("Began AMG-DD cycle on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
+
 	// Form residual and do residual communication
    HYPRE_Int test_failed = 0;
 	test_failed = hypre_BoomerAMGDDResidualCommunication( amg_vdata );
@@ -165,6 +171,12 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    HYPRE_Real relative_resid = 1.;
    HYPRE_Real conv_fact = 0;
    
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("About to do FAC cycles on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
+
 	// Do the cycles
    if (fac_tol == 0.0)
    {
@@ -211,6 +223,12 @@ hypre_BoomerAMGDD_Cycle( void *amg_vdata )
    
 	// Update fine grid solution
    AddSolution( amg_vdata );
+
+   #if DEBUGGING_MESSAGES
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   if (myid == 0) hypre_printf("Finished AMG-DD cycle on all ranks\n");
+   hypre_MPI_Barrier(hypre_MPI_COMM_WORLD);
+   #endif
 
 	return test_failed;
 }
@@ -419,7 +437,7 @@ hypre_BoomerAMGDDResidualCommunication( void *amg_vdata )
       num_sends = hypre_ParCompGridCommPkgNumSends(compGridCommPkg)[level];
       num_recvs = hypre_ParCompGridCommPkgNumRecvs(compGridCommPkg)[level];
 
-      if ( proc_last_index[level] >= proc_first_index[level] && num_sends ) // If there are any owned nodes on this level
+      if ( (proc_last_index[level] >= proc_first_index[level] && num_sends) || hypre_ParCompGridCommPkgUseAllgatherv(compGridCommPkg)[level] ) // If there are any owned nodes on this level
       {
 
          // allocate space for the buffers, buffer sizes, requests and status, psiComposite_send, psiComposite_recv, send and recv maps
