@@ -12,6 +12,15 @@
 
 include ../config/Makefile.config
 
+CINCLUDES = ${INCLUDES} ${MPIINCLUDE}
+
+C_COMPILE_FLAGS =\
+ -I..\
+ -I$(srcdir)\
+ -I$(srcdir)/..\
+ -I$(srcdir)/../utilities\
+ ${CINCLUDES}
+
 FEIHYPREFILES = ${HYPRE_FEI_HYPRE_FILES}
 FEMLIFILES = ${HYPRE_FEI_FEMLI_FILES}
 IJMVFILES = ${HYPRE_SRC_TOP_DIR}/IJ_mv/*.o
@@ -67,13 +76,17 @@ SOLIBS = ${MPILIBDIRS} ${MPILIBS} ${LAPACKLIBDIRS} ${LAPACKLIBS}\
 ##################################################################
 
 all: libHYPRE${HYPRE_LIB_SUFFIX}
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_BUILD_DIR)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_BUILD_DIR)/include
 	cp -fR libHYPRE* ${HYPRE_BUILD_DIR}/lib
 
 install: all
+	cp -fR $(srcdir)/HYPRE_*.h $(HYPRE_INC_INSTALL)/include
+	cp -fR $(srcdir)/_hypre_*.h $(HYPRE_INC_INSTALL)/include
 	cp -fR libHYPRE* ${HYPRE_LIB_INSTALL}
 
 clean:
-	rm -f *.o libHYPRE*
+	rm -f *.o libHYPRE* _hypre_buildinfo.h
 	rm -rf pchdir tca.map *inslog*
 
 distclean: clean
@@ -82,7 +95,7 @@ distclean: clean
 # Rules
 ##################################################################
 
-libHYPRE.a: ${FILES_HYPRE}
+libHYPRE.a: HYPRE_buildinfo.o
 	@echo  "Building libHYPRE ... "
 	${AR} $@ $(FEIHYPREFILES) $(FEMLIFILES) $(IJMVFILES)
 	${AR} $@ $(EUCLIDFILES)
@@ -101,9 +114,17 @@ libHYPRE.a: ${FILES_HYPRE}
 	${AR} $@ $(STRUCTLSFILES)
 	${AR} $@ $(STRUCTMVFILES)
 	${AR} $@ $(UTILITIESFILES) $(BLASFILES) $(LAPACKFILES)
+	${AR} $@ HYPRE_buildinfo.o
 	${RANLIB} $@
 
-libHYPRE.so libHYPRE.dylib: ${FILES_HYPRE}
+libHYPRE.so libHYPRE.dylib: HYPRE_buildinfo.o
 	@echo  "Building $@ ... "
 	${BUILD_CC_SHARED} -o ${SONAME} ${FILES_HYPRE} ${SOLIBS} ${SHARED_SET_SONAME}${SONAME} ${SHARED_OPTIONS} ${LDFLAGS}
 	ln -s ${SONAME} $@
+
+HYPRE_buildinfo.o: HYPRE_buildinfo.h _hypre_buildinfo.h
+
+_hypre_buildinfo.h: ${FILES_HYPRE}
+	buildinfo.sh > _hypre_buildinfo.h
+
+
