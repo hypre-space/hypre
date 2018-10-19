@@ -50,6 +50,21 @@ co=""
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo -ro: $ro
 ./renametest.sh basic $output_dir/basic-default
 
+# Test linking for different languages
+co=""
+./test.sh configure.sh $src_dir $co
+./test.sh make.sh $src_dir $mo
+link_opts="all++ all77"
+for opt in $link_opts
+do
+   output_subdir=$output_dir/link$opt
+   mkdir -p $output_subdir
+   ./test.sh link.sh $src_dir $opt
+   mv -f link.??? $output_subdir
+done
+rm -rf configure.??? make.???
+( cd $src_dir; make distclean )
+
 co="--enable-debug"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--enable-debug
@@ -61,16 +76,6 @@ co="--enable-bigint"
 co="--with-blas --with-lapack --with-blas-lib-dirs=/usr/lib64 --with-lapack-lib-dirs=/usr/lib64 --with-blas-libs=blas --with-lapack-libs=lapack"
 ./test.sh basic.sh $src_dir -co: $co -mo: $mo
 ./renametest.sh basic $output_dir/basic--with-blas
-
-# Test linking for different languages
-link_opts="all++ all77"
-for opt in $link_opts
-do
-   output_subdir=$output_dir/link$opt
-   mkdir -p $output_subdir
-   ./test.sh link.sh $src_dir $opt
-   mv -f link.??? $output_subdir
-done
 
 # Echo to stderr all nonempty error files in $output_dir
 for errfile in $( find $output_dir ! -size 0 -name "*.err" )

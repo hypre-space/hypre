@@ -15,6 +15,12 @@
 # recent release.
 #=============================================================================
 
+Version 2.15.1 released 2018/10/19
+
+- Added hypre version functions: HYPRE_Version(), HYPRE_VersionNumber()
+
+- Various bug fixes.
+
 Version 2.15.0 released 2018/09/21
 
 - Added new system interface routines to reduce copies and improve threading:
